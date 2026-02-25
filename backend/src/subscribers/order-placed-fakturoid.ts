@@ -1,0 +1,243 @@
+import { Modules } from "@medusajs/framework/utils"
+import { IOrderModuleService, ICustomerModuleService } from "@medusajs/framework/types"
+import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
+import { FAKTUROID_MODULE } from "../modules/fakturoid"
+import type FakturoidModuleService from "../modules/fakturoid/service"
+import {
+  getAccessToken,
+  searchSubject,
+  createSubject,
+  createInvoice,
+  markInvoicePaid,
+  mapCountryToLanguage,
+  getOSSMode,
+} from "../modules/fakturoid/api-client"
+
+/**
+ * Fakturoid Invoice Subscriber
+ *
+ * On every order.placed, if the order matches a Fakturoid config by project_id:
+ * 1. Get/create subject (customer) in Fakturoid
+ * 2. Create invoice with line items
+ * 3. Mark invoice as paid
+ * 4. Store invoice ID + URL on order & customer metadata
+ */
+export default async function orderPlacedFakturoidHandler({
+  event: { data },
+  container,
+}: SubscriberArgs<any>) {
+  try {
+    const orderService: IOrderModuleService = container.resolve(Modules.ORDER)
+    const fakturoidService = container.resolve(
+      FAKTUROID_MODULE
+    ) as unknown as FakturoidModuleService
+
+    // ── Retrieve order with relations ──
+    const order = await orderService.retrieveOrder(data.id, {
+      relations: ["items", "summary", "shipping_address"],
+    })
+
+    if (!order) {
+      console.warn("[Fakturoid] Order not found:", data.id)
+      return
+    }
+
+    // ── Match by project_id ──
+    const projectId = (order.metadata as any)?.project_id
+    if (!projectId) {
+      console.log("[Fakturoid] No project_id on order, skipping:", data.id)
+      return
+    }
+
+    const configs = await fakturoidService.listFakturoidConfigs({
+      project_id: projectId,
+    })
+
+    if (!configs.length || !(configs[0] as any).enabled) {
+      console.log(
+        `[Fakturoid] No active config for project "${projectId}", skipping`
+      )
+      return
+    }
+
+    const config = configs[0] as any
+
+    // ── Get shipping address ──
+    let shippingAddress: any = null
+    try {
+      if (order.shipping_address) {
+        shippingAddress = await (
+          orderService as any
+        ).orderAddressService_.retrieve(order.shipping_address.id)
+      }
+    } catch {
+      // Address not available
+    }
+
+    // ── Get/refresh access token ──
+    const tokenResult = await getAccessToken({
+      slug: config.slug,
+      client_id: config.client_id,
+      client_secret: config.client_secret,
+      user_agent_email: config.user_agent_email,
+      access_token: config.access_token,
+      token_expires_at: config.token_expires_at,
+    })
+
+    // Persist refreshed token
+    if (tokenResult.access_token !== config.access_token) {
+      await fakturoidService.updateFakturoidConfigs({
+        id: config.id,
+        access_token: tokenResult.access_token,
+        token_expires_at: tokenResult.expires_at,
+      })
+    }
+
+    const token = tokenResult.access_token
+    const creds = {
+      slug: config.slug,
+      client_id: config.client_id,
+      client_secret: config.client_secret,
+      user_agent_email: config.user_agent_email,
+    }
+
+    // ── Find or create Fakturoid subject ──
+    let subject = await searchSubject(creds, token, order.email || "")
+
+    if (!subject && order.email) {
+      const subjectData: any = {
+        name:
+          (order.metadata as any)?.company_name ||
+          [shippingAddress?.first_name, shippingAddress?.last_name]
+            .filter(Boolean)
+            .join(" ") ||
+          order.email,
+        email: order.email,
+      }
+
+      // Address
+      if (shippingAddress) {
+        if (shippingAddress.address_1) subjectData.street = shippingAddress.address_1
+        if (shippingAddress.city) subjectData.city = shippingAddress.city
+        if (shippingAddress.postal_code) subjectData.zip = shippingAddress.postal_code
+        if (shippingAddress.country_code)
+          subjectData.country = shippingAddress.country_code.toUpperCase()
+      }
+
+      // B2B info from metadata
+      if ((order.metadata as any)?.kvk_number) {
+        subjectData.registration_no = (order.metadata as any).kvk_number
+      }
+      if ((order.metadata as any)?.vat_number) {
+        subjectData.vat_no = (order.metadata as any).vat_number
+      }
+
+      subject = await createSubject(creds, token, subjectData)
+    }
+
+    if (!subject) {
+      console.error("[Fakturoid] Could not find or create subject for:", order.email)
+      return
+    }
+
+    // ── Build invoice lines ──
+    const items = order.items || []
+    const lines = items.map((item: any) => ({
+      name: item.title || item.product_title || "Item",
+      quantity: item.quantity || 1,
+      unit_price: item.unit_price || 0,
+      unit_name: "ks",
+    }))
+
+    if (!lines.length) {
+      console.warn("[Fakturoid] No line items for order:", data.id)
+      return
+    }
+
+    // ── Determine language & OSS ──
+    const countryCode =
+      shippingAddress?.country_code ||
+      (order.metadata as any)?.country_code ||
+      ""
+    const language = mapCountryToLanguage(
+      countryCode,
+      config.default_language || "en"
+    )
+    const oss = getOSSMode(countryCode)
+
+    // ── Create invoice ──
+    const invoice = await createInvoice(creds, token, {
+      subject_id: subject.id,
+      custom_id: order.id,
+      order_number: (order as any).display_id?.toString() || order.id,
+      currency: order.currency_code?.toUpperCase() || "EUR",
+      language,
+      oss,
+      vat_price_mode: "from_total_with_vat",
+      payment_method: "card",
+      lines,
+    })
+
+    console.log(
+      `[Fakturoid] Invoice ${invoice.number} created for order ${order.id}`
+    )
+
+    // ── Mark as paid ──
+    await markInvoicePaid(creds, token, invoice.id)
+    console.log(`[Fakturoid] Invoice ${invoice.number} marked as paid`)
+
+    // ── Update order metadata ──
+    try {
+      const existingMeta = (order.metadata as any) || {}
+      await (orderService as any).updateOrders(order.id, {
+        metadata: {
+          ...existingMeta,
+          fakturoid_invoice_id: invoice.id.toString(),
+          fakturoid_invoice_number: invoice.number,
+          fakturoid_invoice_url: invoice.public_html_url,
+        },
+      })
+    } catch (metaError: any) {
+      console.warn(
+        "[Fakturoid] Could not update order metadata:",
+        metaError.message
+      )
+    }
+
+    // ── Update customer metadata ──
+    try {
+      const customerId = (order as any).customer_id
+      if (customerId) {
+        const customerService: ICustomerModuleService = container.resolve(
+          Modules.CUSTOMER
+        )
+        const customer = await customerService.retrieveCustomer(customerId)
+        const existingCustomerMeta = (customer.metadata as any) || {}
+        await customerService.updateCustomers(customerId, {
+          metadata: {
+            ...existingCustomerMeta,
+            last_fakturoid_invoice_id: invoice.id.toString(),
+            last_fakturoid_invoice_url: invoice.public_html_url,
+            fakturoid_subject_id: subject.id.toString(),
+          },
+        })
+      }
+    } catch (custError: any) {
+      console.warn(
+        "[Fakturoid] Could not update customer metadata:",
+        custError.message
+      )
+    }
+
+    console.log(
+      `[Fakturoid] ✓ Complete: order=${order.id} invoice=${invoice.number} subject=${subject.id}`
+    )
+  } catch (error: any) {
+    // Never let invoicing errors crash the order flow
+    console.error("[Fakturoid] Error:", error.message)
+  }
+}
+
+export const config: SubscriberConfig = {
+  event: "order.placed",
+}

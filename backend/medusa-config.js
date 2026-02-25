@@ -63,6 +63,8 @@ const medusaConfig = {
     { resolve: "./src/modules/gateway-config" },
     { resolve: "./src/modules/meta-pixel" },
     { resolve: "./src/modules/analytics" },
+    { resolve: "./src/modules/fakturoid" },
+    { resolve: "./src/modules/quickbooks" },
     // ═══ Core modules ═══
     {
       key: Modules.FILE,
