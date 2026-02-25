@@ -52,6 +52,12 @@ export async function GET(
     generatePixelScript(config, pixelId)
   )
 
+  // Inject analytics tracking script before </body>
+  html = html.replace(
+    /<\/body>/i,
+    generateAnalyticsScript(config) + "\n</body>"
+  )
+
   // Rewrite internal .html links to clean URLs with correct base path
   html = rewriteLinks(html, basePath, config)
 
@@ -359,6 +365,168 @@ window.MetaTracker = (function() {
 MetaTracker.trackPageView();
 </script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1"/></noscript>`
+}
+
+function generateAnalyticsScript(config: ProjectConfig): string {
+  const projectSlug = config.slug
+  const apiBase = config.medusaUrl
+  const apiKey = config.publishableApiKey || ""
+
+  return `<script>
+/* ═══════════════════════════════════════════════════════════════════
+ * ANALYTICS TRACKER — Visitor tracking, sessions, heartbeat
+ * Project: ${projectSlug}
+ * ═══════════════════════════════════════════════════════════════════ */
+window.AnalyticsTracker = (function() {
+  var PROJECT_ID = '${projectSlug}';
+  var API_BASE = '${apiBase}';
+  var API_KEY = '${apiKey}';
+
+  /* ── Cookie/Storage helpers ─────────────────────────────── */
+  function getCookie(name) {
+    var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
+  }
+  function setCookie(name, value, days) {
+    var d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = name + '=' + encodeURIComponent(value) +
+      ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+  }
+
+  /* ── UUID v4 generator ──────────────────────────────────── */
+  function uuid() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
+  /* ── Visitor ID (2-year cookie) ─────────────────────────── */
+  var visitorId = getCookie('_an_vid');
+  if (!visitorId) {
+    visitorId = uuid();
+    setCookie('_an_vid', visitorId, 730);
+  }
+
+  /* ── Session ID (sessionStorage, 30-min timeout via cookie) */
+  var sessionId = sessionStorage.getItem('_an_sid');
+  var sessionCookie = getCookie('_an_sactive');
+  if (!sessionId || !sessionCookie) {
+    sessionId = uuid();
+    sessionStorage.setItem('_an_sid', sessionId);
+  }
+  setCookie('_an_sactive', '1', 0.02083); // 30 min
+
+  /* ── UTM capture ────────────────────────────────────────── */
+  var utmParams = {};
+  try {
+    var url = new URL(window.location.href);
+    ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(function(p) {
+      var v = url.searchParams.get(p);
+      if (v) { utmParams[p] = v; sessionStorage.setItem(p, v); }
+      else { var saved = sessionStorage.getItem(p); if (saved) utmParams[p] = saved; }
+    });
+    var fbclid = url.searchParams.get('fbclid');
+    if (fbclid) { utmParams.fbclid = fbclid; sessionStorage.setItem('fbclid', fbclid); }
+    else { var saved = sessionStorage.getItem('fbclid'); if (saved) utmParams.fbclid = saved; }
+  } catch(e) { /* ignore */ }
+
+  /* ── API helper ─────────────────────────────────────────── */
+  function sendToAPI(endpoint, data) {
+    try {
+      fetch(API_BASE + '/store/analytics/' + endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-publishable-api-key': API_KEY },
+        body: JSON.stringify(data),
+        keepalive: true
+      }).catch(function() {});
+    } catch(e) { /* never block UI */ }
+  }
+
+  /* ── Track Page View ────────────────────────────────────── */
+  var pageStartTime = Date.now();
+  var pvData = {
+    project_id: PROJECT_ID,
+    visitor_id: visitorId,
+    session_id: sessionId,
+    page_url: window.location.href,
+    page_path: window.location.pathname,
+    referrer: document.referrer || null,
+    fbc: getCookie('_fbc') || null,
+    fbp: getCookie('_fbp') || null
+  };
+  // Merge UTM params
+  for (var k in utmParams) { if (utmParams.hasOwnProperty(k)) pvData[k] = utmParams[k]; }
+  sendToAPI('pageview', pvData);
+  console.log('[Analytics] PageView tracked, session=' + sessionId.substring(0,8) + '...');
+
+  /* ── Scroll tracking ────────────────────────────────────── */
+  var maxScroll = 0;
+  window.addEventListener('scroll', function() {
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - window.innerHeight;
+    if (docHeight > 0) {
+      var pct = Math.round((scrollTop / docHeight) * 100);
+      if (pct > maxScroll) maxScroll = pct;
+    }
+  }, { passive: true });
+
+  /* ── Heartbeat (every 15s) ──────────────────────────────── */
+  var heartbeatInterval = setInterval(function() {
+    var elapsed = Math.round((Date.now() - pageStartTime) / 1000);
+    sendToAPI('heartbeat', {
+      session_id: sessionId,
+      time_on_page: elapsed,
+      scroll_depth: maxScroll
+    });
+    setCookie('_an_sactive', '1', 0.02083); // refresh session timeout
+  }, 15000);
+
+  /* ── Beacon on page unload ──────────────────────────────── */
+  window.addEventListener('pagehide', function() {
+    clearInterval(heartbeatInterval);
+    var elapsed = Math.round((Date.now() - pageStartTime) / 1000);
+    var data = JSON.stringify({
+      session_id: sessionId,
+      time_on_page: elapsed,
+      scroll_depth: maxScroll
+    });
+    try {
+      navigator.sendBeacon(
+        API_BASE + '/store/analytics/heartbeat',
+        new Blob([data], { type: 'application/json' })
+      );
+    } catch(e) { /* fallback: fire and forget */ }
+  });
+
+  /* ── Track Conversion Events ────────────────────────────── */
+  function trackEvent(eventType, eventData) {
+    sendToAPI('event', {
+      project_id: PROJECT_ID,
+      session_id: sessionId,
+      visitor_id: visitorId,
+      event_type: eventType,
+      event_data: eventData || {},
+      page_url: window.location.href
+    });
+    console.log('[Analytics] Event: ' + eventType);
+  }
+
+  /* ── Share IDs with MetaTracker ─────────────────────────── */
+  window.__analytics_visitor_id = visitorId;
+  window.__analytics_session_id = sessionId;
+
+  /* ── Public API ─────────────────────────────────────────── */
+  return {
+    trackEvent: trackEvent,
+    visitorId: visitorId,
+    sessionId: sessionId,
+    PROJECT_ID: PROJECT_ID
+  };
+})();
+</script>`
 }
 
 function rewriteLinks(html: string, basePath: string, config: ProjectConfig): string {

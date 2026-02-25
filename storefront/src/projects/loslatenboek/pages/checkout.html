@@ -2917,6 +2917,14 @@ body {
       }
     };
 
+    // ─── Analytics metadata ───
+    customerData.metadata = {};
+    if (window.AnalyticsTracker) {
+      customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
+      customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
+      customerData.metadata.project_id = window.AnalyticsTracker.PROJECT_ID || '';
+    }
+
     // ─── Firemní údaje (B2B) ───
     var isCompany = document.getElementById('company-checkbox').checked;
     if (isCompany) {
@@ -2927,8 +2935,7 @@ body {
       if (companyName) {
         customerData.shipping_address.company = companyName;
       }
-      // KVK + BTW → metadata (custom pole)
-      customerData.metadata = {};
+      // KVK + BTW → metadata (merge into existing metadata)
       if (kvkNumber) customerData.metadata.kvk_number = kvkNumber;
       if (vatNumber) customerData.metadata.vat_number = vatNumber;
       // Uložit do localStorage pro thank-you stránku
@@ -3088,6 +3095,16 @@ body {
         if (checkoutOrderBump) contentIds.push(PROJECT_CONFIG.upsellProduct.handle);
         MetaTracker.trackInitiateCheckout({
           content_ids: contentIds,
+          value: checkoutTotal,
+          currency: PROJECT_CONFIG.mainProduct.currency,
+          num_items: checkoutBundleQty + (checkoutOrderBump ? 1 : 0)
+        });
+      }
+
+      // Analytics: Track initiate_checkout event
+      if (window.AnalyticsTracker) {
+        window.AnalyticsTracker.trackEvent('initiate_checkout', {
+          cart_id: result.cartId,
           value: checkoutTotal,
           currency: PROJECT_CONFIG.mainProduct.currency,
           num_items: checkoutBundleQty + (checkoutOrderBump ? 1 : 0)
