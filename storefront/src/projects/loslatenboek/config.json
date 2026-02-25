@@ -5,25 +5,35 @@
   "locale": "nl",
   "defaultCountry": "NL",
   "salesChannelName": "Loslatenboek",
-  "medusaUrl": "",
-  "publishableApiKey": "",
+  "medusaUrl": "https://backend-staging-580e.up.railway.app",
+  "publishableApiKey": "pk_8a171d05139d2bda94abaa437087defb0c227c386f9267b112b899f53d1bf63b",
   "facebookPixelId": "",
+  "salesChannelId": "sc_01KJ9YMR04G3NVCKTB4VZ659XN",
+  "regionId": "reg_01KJ9YMS2SF9R3C01Y990D08KJ",
   "regions": {
-    "NL": "",
-    "BE": ""
+    "NL": "reg_01KJ9YMS2SF9R3C01Y990D08KJ",
+    "BE": "reg_01KJ9YMS2SF9R3C01Y990D08KJ"
   },
   "mainProduct": {
     "name": "Laat Los Wat Je Kapotmaakt",
     "handle": "laat-los-wat-je-kapotmaakt",
-    "variantId": "",
+    "productId": "prod_01KJ9YQH6Z0CMXCA6F4Y2BSDPA",
+    "variantId": "variant_01KJ9YQH8CA1DR2A77HNQ5AZTQ",
     "price": 35,
     "currency": "EUR",
-    "thumbnail": ""
+    "thumbnail": "",
+    "variants": {
+      "1": "variant_01KJ9YQH8CA1DR2A77HNQ5AZTQ",
+      "2": "variant_01KJ9YQH8CYMMV8GXNSRN783S8",
+      "3": "variant_01KJ9YQH8C8JS826N8P91A0888",
+      "4": "variant_01KJ9YQH8DRQQ1TEQ7PVS2Z88E"
+    }
   },
   "upsellProduct": {
     "name": "Het Leven Dat Je Verdient",
     "handle": "het-leven-dat-je-verdient",
-    "variantId": "",
+    "productId": "prod_01KJ9YR4JCXECKDHD3B0D9N4TY",
+    "variantId": "variant_01KJ9YR4K948VWEF7D4YNAQ7R0",
     "price": 23,
     "originalPrice": 36,
     "currency": "EUR"
