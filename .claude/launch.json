@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev"],
+      "port": 9000,
+      "cwd": "backend"
+    },
+    {
+      "name": "storefront",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev"],
+      "port": 8000,
+      "cwd": "storefront"
+    },
+    {
+      "name": "email-dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["email:dev"],
+      "port": 3002,
+      "cwd": "backend"
+    }
+  ]
+}

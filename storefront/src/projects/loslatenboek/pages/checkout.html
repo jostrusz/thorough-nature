@@ -1,0 +1,3307 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Afrekenen — Laat Los Wat Je Kapotmaakt</title>
+<meta name="robots" content="noindex, nofollow">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+<link rel="preload" href="https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2" as="font" type="font/woff2" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+
+<!-- Zadny externi SDK — Mollie i PayPal pouzivaji redirect-based flow -->
+
+<style>
+/* ─── FONTS ─── */
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+
+/* ─── DESIGN TOKENS — Velvet Dusk (shodné s hlavní stránkou) ─── */
+:root {
+  --bg: #FAF5F8;
+  --heading: #2D1B3D;
+  --cta: #C27BA0;
+  --section: #EDD9E5;
+  --body: #5A3D6B;
+  --highlight: #D9A4C0;
+  --dark: #1A1028;
+  --white: #FFFFFF;
+  --light: #F5EDF2;
+  --muted: #9B7AAD;
+  --cta-hover: #A8628A;
+  --accent: #D498B5;
+  --error: #C0392B;
+  --success: #27AE60;
+  --border: rgba(194,123,160,0.18);
+  --border-focus: var(--cta);
+  --shadow-sm: 0 1px 3px rgba(45,27,61,0.06);
+  --shadow-md: 0 4px 16px rgba(45,27,61,0.08);
+  --shadow-lg: 0 8px 32px rgba(45,27,61,0.12);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+/* ─── RESET ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+html, body { overflow-x: clip; max-width: 100vw; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--body);
+  min-height: 100vh;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ─── ANIMACE — fade-in pro sekce (Shopify styl) ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideDown {
+  from { opacity: 0; max-height: 0; transform: translateY(-8px); }
+  to { opacity: 1; max-height: 500px; transform: translateY(0); }
+}
+@keyframes checkmark {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-in {
+  animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+}
+.animate-in-delay-1 { animation-delay: 0.1s; }
+.animate-in-delay-2 { animation-delay: 0.2s; }
+.animate-in-delay-3 { animation-delay: 0.3s; }
+.animate-in-delay-4 { animation-delay: 0.4s; }
+
+/* ─── BREADCRUMB NAVIGACE (Shopify styl) ─── */
+.checkout-header {
+  text-align: center;
+  padding: 24px 16px 0;
+  animation: fadeIn 0.4s ease forwards;
+}
+.checkout-logo {
+  font-family: 'Recoleta', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--heading);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  display: inline-block;
+  transition: opacity 0.2s ease;
+}
+.checkout-logo:hover { opacity: 0.8; }
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-top: 16px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.breadcrumb-step {
+  color: var(--muted);
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.breadcrumb-step.active { color: var(--heading); font-weight: 600; }
+.breadcrumb-step.done { color: var(--cta); }
+.breadcrumb-step.done svg { animation: checkmark 0.3s ease forwards; }
+.breadcrumb-sep {
+  margin: 0 10px;
+  color: var(--muted);
+  opacity: 0.4;
+  font-size: 11px;
+}
+
+/* ─── LAYOUT ─── */
+.checkout-page {
+  padding: 24px 16px 60px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 36px;
+  align-items: start;
+  margin-top: 28px;
+}
+
+/* ─── FORMULÁŘOVÁ SEKCE (levá strana) ─── */
+.checkout-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Shopify-style sekce karty */
+.checkout-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  padding: 28px 28px 24px;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.checkout-card:first-of-type { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.checkout-card:last-of-type { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.checkout-card + .checkout-card { border-top: none; }
+.checkout-card:only-child { border-radius: var(--radius-lg); }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.section-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--cta);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+.section-number.done {
+  background: var(--success);
+}
+.section-title {
+  font-family: 'Recoleta', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--heading);
+}
+
+/* ─── FLOATING LABELS (Shopify styl) ─── */
+.form-group {
+  position: relative;
+  margin-bottom: 14px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.form-row .form-group { margin-bottom: 0; }
+.form-row + .form-group,
+.form-group + .form-row,
+.form-row + .form-row { margin-top: 14px; }
+
+.float-field {
+  position: relative;
+}
+.float-field input,
+.float-field select {
+  width: 100%;
+  padding: 22px 16px 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--heading);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 54px;
+}
+.float-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A3D6B' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+  cursor: pointer;
+}
+.float-field label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--muted);
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: left center;
+  background: transparent;
+  padding: 0;
+  z-index: 1;
+}
+/* Label plovoucí nahoru při focus nebo vyplněném poli */
+.float-field input:focus ~ label,
+.float-field input:not(:placeholder-shown) ~ label,
+.float-field select:focus ~ label,
+.float-field.has-value label {
+  top: 10px;
+  transform: translateY(0);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cta);
+}
+.float-field input:not(:focus):not(:placeholder-shown) ~ label,
+.float-field.has-value:not(:focus-within) label {
+  color: var(--muted);
+}
+/* Focus stav */
+.float-field input:focus,
+.float-field select:focus {
+  border-color: var(--cta);
+  box-shadow: 0 0 0 3px rgba(194,123,160,0.12);
+  background: var(--white);
+}
+/* Validace */
+.float-field input.valid {
+  border-color: var(--success);
+}
+.float-field input.valid ~ label {
+  color: var(--success);
+}
+.float-field input.invalid {
+  border-color: var(--error);
+  background: #FFF8F7;
+}
+.float-field input.invalid ~ label {
+  color: var(--error);
+}
+.float-field input::placeholder { color: transparent; }
+
+/* Inline validační ikony — fixní pozice v inputu (nereaguje na warning/error pod polem) */
+.validation-icon {
+  position: absolute;
+  right: 14px;
+  top: 25px;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.float-field input.valid ~ .validation-icon.check {
+  opacity: 1;
+  animation: checkmark 0.3s ease forwards;
+}
+.float-field input.invalid ~ .validation-icon.cross {
+  opacity: 1;
+}
+
+.field-error {
+  font-size: 12px;
+  color: var(--error);
+  margin-top: 4px;
+  padding-left: 2px;
+  display: none;
+  animation: fadeIn 0.2s ease;
+}
+.float-field input.invalid ~ .field-error { display: block; }
+
+/* ─── EMAIL SUGGESTION (překlep v doméně) ─── */
+.email-suggestion {
+  display: none;
+  font-size: 12px;
+  color: #E67E22;
+  margin-top: 4px;
+  padding: 6px 10px;
+  background: rgba(230, 126, 34, 0.08);
+  border: 1px solid rgba(230, 126, 34, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  animation: fadeIn 0.2s ease;
+}
+.email-suggestion:hover { background: rgba(230, 126, 34, 0.14); }
+.email-suggestion strong { color: #D35400; text-decoration: underline; text-underline-offset: 2px; }
+
+/* ─── PHONE FORMAT PREVIEW ─── */
+.phone-preview {
+  display: none;
+  font-size: 11px;
+  color: var(--success);
+  margin-top: 4px;
+  padding-left: 2px;
+  animation: fadeIn 0.2s ease;
+}
+
+/* ─── ADDRESS WARNING (chybí číslo domu) ─── */
+.field-warning {
+  font-size: 12px;
+  color: #E67E22;
+  margin-top: 4px;
+  padding: 5px 10px;
+  background: rgba(230, 126, 34, 0.07);
+  border-radius: 6px;
+  display: none;
+  animation: fadeIn 0.2s ease;
+}
+.field-warning svg {
+  width: 13px; height: 13px;
+  vertical-align: -2px; margin-right: 4px;
+}
+
+/* ─── FIREMNÍ POLE (B2B) ─── */
+.company-toggle {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 16px; padding: 12px 16px;
+  background: var(--light); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+}
+.company-toggle:hover { background: rgba(194,123,160,0.06); border-color: var(--cta); }
+.company-toggle input[type="checkbox"] {
+  width: 18px; height: 18px; accent-color: var(--cta);
+  cursor: pointer; flex-shrink: 0;
+}
+.company-toggle-label {
+  font-size: 14px; font-weight: 500; color: var(--heading);
+  display: flex; align-items: center; gap: 8px;
+}
+.company-toggle-label svg { width: 16px; height: 16px; color: var(--muted); flex-shrink: 0; }
+.company-fields {
+  max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease, margin-top 0.3s ease;
+  margin-top: 0;
+}
+.company-fields.is-open {
+  max-height: 300px; opacity: 1; margin-top: 12px;
+}
+.company-fields .float-field { margin-bottom: 8px; }
+.company-fields .float-field:last-child { margin-bottom: 0; }
+.company-kvk-label { display: none; }
+.company-kvk-label.active { display: inline; }
+
+/* ─── PROMO / KUPÓN ─── */
+.promo-section { margin-top: 16px; }
+.promo-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--cta); cursor: pointer;
+  font-weight: 500; border: none; background: none;
+  padding: 0; font-family: inherit;
+  transition: color 0.2s ease;
+}
+.promo-toggle:hover { color: var(--cta-hover); text-decoration: underline; }
+.promo-toggle svg { width: 14px; height: 14px; transition: transform 0.3s ease; }
+.promo-toggle.is-open svg { transform: rotate(90deg); }
+.promo-form {
+  max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease, margin-top 0.25s ease;
+  margin-top: 0;
+}
+.promo-form.is-open { max-height: 120px; opacity: 1; margin-top: 10px; }
+.promo-input-row {
+  display: flex; gap: 8px; align-items: stretch;
+}
+.promo-input {
+  flex: 1; padding: 10px 14px; border: 1.5px solid var(--border);
+  border-radius: var(--radius); font-size: 14px;
+  font-family: 'DM Mono', monospace; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--heading);
+  background: var(--white); transition: border-color 0.2s ease;
+  outline: none;
+}
+.promo-input:focus { border-color: var(--cta); }
+.promo-input::placeholder { text-transform: none; font-family: 'DM Sans', sans-serif; letter-spacing: normal; color: var(--muted); }
+.promo-apply-btn {
+  padding: 10px 20px; border: none; border-radius: var(--radius);
+  background: var(--heading); color: var(--white);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: inherit; white-space: nowrap;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.promo-apply-btn:hover { background: var(--dark); transform: scale(1.02); }
+.promo-apply-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.promo-message {
+  font-size: 12px; margin-top: 6px; display: none;
+  padding: 0 2px; animation: fadeIn 0.2s ease;
+}
+.promo-message.error { color: var(--error); display: block; }
+.promo-message.success { color: var(--success); display: block; }
+.promo-applied {
+  display: none; align-items: center; gap: 8px;
+  margin-top: 10px; padding: 8px 12px;
+  background: rgba(39, 174, 96, 0.06); border: 1px solid rgba(39, 174, 96, 0.2);
+  border-radius: var(--radius); font-size: 13px; color: var(--success);
+  animation: fadeIn 0.2s ease;
+}
+.promo-applied.is-visible { display: flex; }
+.promo-applied .promo-code-tag {
+  font-family: 'DM Mono', monospace; font-weight: 600;
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.promo-remove {
+  margin-left: auto; border: none; background: none;
+  color: var(--muted); cursor: pointer; font-size: 12px;
+  padding: 2px 6px; border-radius: 4px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+.promo-remove:hover { color: var(--error); background: rgba(192, 57, 43, 0.06); }
+
+/* ─── PLATEBNÍ METODY ─── */
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.payment-method {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.payment-method:hover {
+  border-color: var(--highlight);
+  box-shadow: var(--shadow-sm);
+}
+.payment-method.selected {
+  border-color: var(--cta);
+  background: rgba(194,123,160,0.04);
+  box-shadow: 0 0 0 3px rgba(194,123,160,0.1);
+}
+.payment-method input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+/* Custom radio */
+.pm-radio {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+  background: var(--white);
+}
+.payment-method.selected .pm-radio {
+  border-color: var(--cta);
+  border-width: 2px;
+}
+.pm-radio-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cta);
+  transform: scale(0);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.payment-method.selected .pm-radio-dot {
+  transform: scale(1);
+}
+/* Ikona */
+.pm-icon {
+  width: 46px;
+  height: 30px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+.pm-icon.ideal { background: #CC0066; }
+.pm-icon.bancontact { background: #005498; font-size: 8px; }
+.pm-icon.klarna { background: #FFB3C7; color: #0A0B09; font-size: 9px; font-weight: 800; }
+.pm-icon.paypal { background: #003087; font-size: 9px; }
+
+.pm-info { flex: 1; }
+.pm-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--heading);
+  line-height: 1.2;
+}
+.pm-desc {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+.pm-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--cta);
+  background: rgba(194,123,160,0.1);
+  padding: 3px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+#payment-errors {
+  font-size: 13px;
+  color: var(--error);
+  margin-top: 8px;
+  min-height: 20px;
+}
+
+/* ─── CTA TLAČÍTKO ─── */
+.checkout-btn-wrap {
+  padding: 24px 28px 28px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.checkout-btn {
+  width: 100%;
+  padding: 18px 32px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--white);
+  background: var(--cta);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 20px rgba(194,123,160,0.3);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+.checkout-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.5s ease;
+}
+.checkout-btn:hover::before { left: 100%; }
+.checkout-btn:hover {
+  background: var(--cta-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(194,123,160,0.4);
+}
+.checkout-btn:active { transform: translateY(0); }
+.checkout-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+.checkout-btn:disabled:hover { background: var(--cta); box-shadow: 0 4px 20px rgba(194,123,160,0.3); }
+.checkout-btn:disabled::before { display: none; }
+
+.checkout-btn .spinner {
+  display: none;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: var(--white);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+.checkout-btn.loading .spinner { display: inline-block; }
+.checkout-btn.loading .btn-text { opacity: 0.8; }
+
+.btn-subtext {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+/* ─── TRUST BADGES POD TLAČÍTKEM ─── */
+.checkout-trust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.checkout-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.checkout-trust-item svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.7; }
+
+/* ─── ORDER SUMMARY (pravá strana) ─── */
+.order-summary {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 28px 24px;
+  position: sticky;
+  top: 24px;
+  animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+  opacity: 0;
+}
+.summary-title {
+  font-family: 'Recoleta', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--heading);
+  margin-bottom: 20px;
+}
+.summary-product {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.summary-product-img {
+  width: 72px;
+  height: 96px;
+  background: var(--light);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.summary-product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Mini-boek mockup */
+.mini-book {
+  width: 50px;
+  height: 70px;
+  background: var(--bg);
+  border-radius: 2px 4px 4px 2px;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 7px 5px;
+  position: relative;
+}
+.mini-book::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 3px;
+  height: calc(100% - 6px);
+  background: linear-gradient(135deg, var(--heading), var(--cta));
+  border-radius: 2px 0 0 2px;
+}
+.mini-book-title {
+  font-family: 'Recoleta', serif;
+  font-size: 5.5px;
+  font-weight: 700;
+  color: var(--heading);
+  line-height: 1.15;
+  margin-left: 3px;
+}
+.mini-book-author {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 4px;
+  color: var(--muted);
+  margin-top: 3px;
+  margin-left: 3px;
+}
+
+.summary-product-info { flex: 1; }
+.summary-product-name {
+  font-family: 'Recoleta', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--heading);
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+.summary-product-author {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.summary-product-format {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.summary-product-price {
+  font-family: 'Recoleta', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cta);
+}
+.summary-bonus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  margin: 8px 0 0;
+  background: rgba(39, 174, 96, 0.08);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #27AE60;
+}
+.summary-bonus .bonus-icon { font-size: 14px; }
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: var(--body);
+  margin-bottom: 8px;
+}
+.summary-line.shipping { color: var(--success); font-weight: 600; }
+.summary-line.total {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--heading);
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 2px solid var(--border);
+  margin-bottom: 0;
+}
+.summary-line.total .price {
+  font-family: 'Recoleta', serif;
+  font-size: 22px;
+  color: var(--cta);
+}
+
+/* Garantie box */
+.guarantee-box {
+  margin-top: 18px;
+  padding: 14px;
+  background: rgba(194,123,160,0.06);
+  border-radius: var(--radius);
+  border: 1px solid rgba(194,123,160,0.12);
+  text-align: center;
+}
+.guarantee-box .icon { font-size: 22px; margin-bottom: 5px; }
+.guarantee-box .title {
+  font-family: 'Recoleta', serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--heading);
+  margin-bottom: 4px;
+}
+.guarantee-box .desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Social proof */
+.summary-social {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+.summary-social .stars {
+  color: #E8A040;
+  font-size: 13px;
+  margin-bottom: 2px;
+  letter-spacing: 1px;
+}
+.summary-social strong { color: var(--heading); }
+
+/* Payment icons in summary */
+.summary-payments {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.summary-payments .pay-icon {
+  width: 40px;
+  height: 26px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--body);
+  transition: all 0.2s ease;
+}
+.summary-payments .pay-icon:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.summary-payments .pay-icon.ideal { background: #CC0066; color: white; font-size: 7px; }
+.summary-payments .pay-icon.bancontact { background: #005498; color: white; font-size: 6px; }
+.summary-payments .pay-icon.klarna { background: #FFB3C7; color: #0A0B09; font-size: 7px; font-weight: 800; }
+.summary-payments .pay-icon.paypal { background: #003087; color: white; font-size: 7px; }
+
+/* ─── SECURE FOOTER ─── */
+.checkout-footer {
+  text-align: center;
+  padding: 28px 16px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.checkout-footer a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease;
+}
+.checkout-footer a:hover { color: var(--cta); }
+
+/* ─── MOBILE STICKY SUMMARY BAR ─── */
+.mobile-summary-bar {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  /* Luxusní glassmorphism efekt */
+  background: rgba(255,255,255,0.94);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(194,123,160,0.10);
+  border-top: none;
+  /* Horní hrany rovné (zarovnání s horní hranou telefonu), dolní zaoblené */
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 2px 16px rgba(45,27,61,0.05);
+  /* Smooth transitions pro shrink/expand */
+  transition: box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              border-radius 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              padding 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: box-shadow;
+  margin: 0 0 12px;
+}
+/* Label "Besteloverzicht" nad headerem */
+.msb-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  padding: 6px 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.msb-label svg { width: 12px; height: 12px; flex-shrink: 0; }
+.mobile-summary-bar.compact .msb-label {
+  max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; overflow: hidden;
+}
+/* --- Normální stav (nahoře) --- */
+.mobile-summary-bar .msb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  cursor: pointer;
+  gap: 10px;
+  transition: padding 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+/* Thumbnail produktu v baru */
+.msb-thumb {
+  width: 40px;
+  height: 54px;
+  border-radius: 5px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--light);
+  border: 1px solid var(--border);
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.msb-thumb img { width: 100%; height: 100%; object-fit: cover; }
+/* Info blok — název + detail */
+.msb-info {
+  flex: 1;
+  min-width: 0;
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.msb-title {
+  font-family: 'Recoleta', serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--heading);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: font-size 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.msb-subtitle {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.3;
+  margin-top: 1px;
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  max-height: 30px;
+  overflow: hidden;
+}
+/* Cena vpravo */
+.msb-price-col {
+  text-align: right;
+  flex-shrink: 0;
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.msb-price {
+  font-family: 'Recoleta', serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--heading);
+  transition: font-size 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.msb-items-label {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 1px;
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Chevron / expand icon */
+.msb-chevron {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--cta);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mobile-summary-bar.open .msb-chevron { transform: rotate(180deg); }
+
+/* --- Compact stav (po scrollu dolů) --- */
+.mobile-summary-bar.compact .msb-header {
+  padding: 8px 16px;
+}
+.mobile-summary-bar.compact .msb-thumb {
+  width: 28px;
+  height: 38px;
+  border-radius: 4px;
+}
+.mobile-summary-bar.compact .msb-title {
+  font-size: 11.5px;
+}
+.mobile-summary-bar.compact .msb-subtitle {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+}
+.mobile-summary-bar.compact .msb-price {
+  font-size: 14px;
+}
+.mobile-summary-bar.compact .msb-items-label {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+}
+.mobile-summary-bar.compact {
+  box-shadow: 0 4px 24px rgba(45,27,61,0.10);
+}
+
+/* --- Rozevřený content panel --- */
+.msb-content {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+              padding 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  padding: 0 20px;
+}
+.mobile-summary-bar.open .msb-content {
+  max-height: 500px;
+  opacity: 1;
+  padding: 0 20px 16px;
+}
+/* Řádky v rozevřeném panelu */
+.msb-divider {
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 12px;
+}
+.msb-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--body);
+  padding: 4px 0;
+}
+.msb-line.bump { color: var(--cta); font-weight: 500; }
+.msb-line.bump svg { flex-shrink: 0; }
+.msb-line .msb-line-label { display: flex; align-items: center; gap: 4px; }
+.msb-line.shipping .msb-line-val { color: var(--success); font-weight: 600; }
+.msb-line.total-line {
+  padding-top: 10px;
+  margin-top: 6px;
+  border-top: 1.5px solid var(--heading);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--heading);
+}
+.msb-line.total-line .msb-line-val {
+  font-family: 'Recoleta', serif;
+  font-size: 17px;
+}
+.msb-tax-note {
+  font-size: 10px;
+  color: #999;
+  text-align: right;
+  margin-top: 2px;
+}
+/* Malý GLS badge v baru */
+.msb-gls {
+  display: inline-block;
+  background: #003399;
+  color: #FFDC00;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-left: 3px;
+  letter-spacing: 0.5px;
+}
+
+/* ─── RESPONSIVE ─── */
+/* Menší notebooky / tablety na šířku — užší sidebar */
+@media (max-width: 1100px) and (min-width: 881px) {
+  .checkout-grid {
+    grid-template-columns: 1fr 300px;
+    gap: 24px;
+  }
+  .checkout-page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+@media (max-width: 880px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+  .order-summary {
+    position: static;
+    display: none;
+  }
+  .mobile-summary-bar {
+    display: block;
+  }
+  /* Checkout header — viditelný na mobile (bar je pod ním) */
+  .checkout-header {
+    padding-bottom: 8px;
+  }
+  .checkout-page {
+    padding-top: 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .checkout-page { padding: 16px 12px 48px; }
+  .checkout-card { padding: 22px 18px 20px; }
+  .checkout-btn-wrap { padding: 20px 18px 24px; }
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+  .form-row .form-group { margin-bottom: 14px; }
+  .form-row .form-group:last-child { margin-bottom: 0; }
+  .order-summary { padding: 22px 18px; }
+  .breadcrumb { font-size: 12px; }
+  .breadcrumb-sep { margin: 0 6px; }
+  .section-title { font-size: 16px; }
+  /* Fixed bar je už edge-to-edge */
+}
+
+/* ─── BUNDLE SELECTOR ─── */
+.bundle-section {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px 18px;
+  margin-bottom: 16px;
+}
+.bundle-section-title {
+  font-family: 'Recoleta', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--heading);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bundle-options { display: flex; flex-direction: column; gap: 8px; }
+.bundle-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1.5px solid rgba(194,123,160,0.15);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(.22,1,.36,1);
+  position: relative;
+  background: var(--white);
+}
+.bundle-option:hover { border-color: var(--highlight); background: var(--light); }
+.bundle-option.selected {
+  border-color: var(--cta);
+  background: linear-gradient(135deg, rgba(194,123,160,0.06), rgba(212,152,181,0.04));
+  box-shadow: 0 0 0 3px rgba(194,123,160,0.10);
+}
+.bundle-radio {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: border-color 0.2s ease;
+}
+.bundle-option.selected .bundle-radio { border-color: var(--cta); }
+.bundle-radio-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--cta); transform: scale(0);
+  transition: transform 0.2s cubic-bezier(.22,1,.36,1);
+}
+.bundle-option.selected .bundle-radio-dot { transform: scale(1); }
+.bundle-option input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+.bundle-info { flex: 1; display: flex; align-items: center; gap: 6px; min-width: 0; flex-wrap: nowrap; }
+.bundle-label { font-size: 15px; font-weight: 600; color: var(--heading); white-space: nowrap; flex-shrink: 0; }
+.bundle-badge {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--white);
+  background: linear-gradient(135deg, var(--cta), var(--accent));
+  padding: 2px 6px; border-radius: 5px; line-height: 1.5;
+  white-space: nowrap; flex-shrink: 0;
+}
+.bundle-pricing { text-align: right; flex-shrink: 0; }
+.bundle-price { font-size: 16px; font-weight: 700; color: var(--heading); }
+.bundle-per-unit { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.bundle-savings {
+  font-size: 11px; font-weight: 600; color: var(--success);
+  background: rgba(39,174,96,0.08); padding: 1px 6px; border-radius: 4px;
+  display: inline-block; margin-top: 2px;
+}
+
+/* ─── ORDER BUMP — accordion ─── */
+.order-bump {
+  background: linear-gradient(135deg, rgba(194,123,160,0.06), rgba(245,237,242,0.8));
+  border: 2px dashed var(--highlight);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  margin-bottom: 16px;
+  transition: all 0.3s cubic-bezier(.22,1,.36,1);
+  position: relative;
+  overflow: hidden;
+}
+.order-bump::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--cta), var(--accent), var(--cta));
+  background-size: 200% 100%;
+  animation: shimmer 3s ease infinite;
+}
+.order-bump:hover { border-color: var(--cta); }
+.order-bump.checked {
+  border-style: solid;
+  border-color: var(--cta);
+  background: linear-gradient(135deg, rgba(194,123,160,0.10), rgba(245,237,242,1));
+  box-shadow: 0 0 0 3px rgba(194,123,160,0.10);
+}
+
+/* Header — vždy viditelný: checkbox + thumbnail + info + expand */
+.order-bump-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+.order-bump-checkbox {
+  width: 22px; height: 22px; border-radius: 6px;
+  border: 2px solid var(--muted); background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.2s ease;
+}
+.order-bump.checked .order-bump-checkbox {
+  background: var(--cta); border-color: var(--cta);
+}
+.order-bump-checkbox svg { width: 14px; height: 14px; color: var(--white); opacity: 0; transition: opacity 0.2s ease; }
+.order-bump.checked .order-bump-checkbox svg { opacity: 1; }
+
+/* Thumbnail v headeru — malý obrázek obálky */
+.order-bump-thumb {
+  width: 44px; height: 60px; border-radius: 5px;
+  overflow: hidden; flex-shrink: 0;
+  background: var(--section);
+  box-shadow: 0 2px 8px rgba(45,27,61,0.12);
+}
+.order-bump-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.order-bump-header-text { flex: 1; min-width: 0; }
+.order-bump-top-row {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 3px;
+}
+.order-bump-tag {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--white);
+  background: linear-gradient(135deg, #E67E22, #F39C12);
+  padding: 2px 7px; border-radius: 4px; line-height: 1.5;
+}
+.order-bump-save-tag {
+  font-size: 9px; font-weight: 700; color: var(--white);
+  background: var(--success); padding: 2px 6px; border-radius: 4px;
+}
+.order-bump-title {
+  font-family: 'Recoleta', serif; font-size: 14px; font-weight: 600;
+  color: var(--heading); margin-bottom: 3px;
+}
+.order-bump-title em { color: var(--cta); font-style: italic; }
+.order-bump-prices-inline {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.order-bump-prices-inline .order-bump-old-price {
+  font-size: 13px; color: var(--muted); text-decoration: line-through;
+}
+.order-bump-prices-inline .order-bump-new-price {
+  font-size: 16px; font-weight: 700; color: var(--cta);
+}
+.order-bump-inline-save {
+  font-size: 10px; font-weight: 600; color: var(--success);
+  background: rgba(39,174,96,0.08); padding: 1px 6px; border-radius: 4px;
+}
+
+/* Expand/collapse button */
+.order-bump-expand {
+  border: 1.5px solid rgba(194,123,160,0.30); cursor: pointer;
+  padding: 7px 18px; border-radius: 20px;
+  display: flex; align-items: center; gap: 5px;
+  flex-shrink: 0; transition: all 0.3s ease;
+  color: var(--cta); background: rgba(194,123,160,0.12);
+  font-size: 13px; font-weight: 700; font-family: 'DM Sans', sans-serif;
+}
+.order-bump-expand:hover { background: rgba(194,123,160,0.22); border-color: var(--cta); transform: scale(1.03); }
+.expand-label { white-space: nowrap; }
+.order-bump-expand svg { transition: transform 0.3s cubic-bezier(.22,1,.36,1); }
+.order-bump-expand[aria-expanded="true"] svg { transform: rotate(180deg); }
+.order-bump-expand[aria-expanded="true"] .expand-label::after { content: none; }
+
+/* Accordion detail — skrytý defaultně */
+.order-bump-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(.22,1,.36,1), opacity 0.3s ease;
+  opacity: 0;
+}
+.order-bump-detail.open {
+  max-height: 1200px;
+  opacity: 1;
+}
+.order-bump-detail-inner {
+  padding: 0 18px 20px;
+  border-top: 1px solid rgba(194,123,160,0.12);
+  padding-top: 16px;
+}
+
+/* Boek detail top */
+.order-bump-detail-top {
+  display: flex; gap: 16px; margin-bottom: 16px;
+}
+.order-bump-img {
+  width: 90px; height: 124px; border-radius: 8px;
+  overflow: hidden; flex-shrink: 0;
+  background: var(--section);
+  box-shadow: 0 4px 16px rgba(45,27,61,0.12);
+}
+.order-bump-img img { width: 100%; height: 100%; object-fit: cover; }
+.order-bump-detail-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.order-bump-name { font-family: 'Recoleta', serif; font-size: 17px; font-weight: 600; color: var(--heading); margin-bottom: 2px; }
+.order-bump-author { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.order-bump-meta {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;
+  font-size: 11px; color: var(--body);
+}
+.order-bump-meta span {
+  background: var(--light); padding: 2px 8px; border-radius: 6px;
+  white-space: nowrap;
+}
+.order-bump-prices { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.order-bump-old-price {
+  font-size: 14px; color: var(--muted); text-decoration: line-through;
+}
+.order-bump-new-price {
+  font-size: 18px; font-weight: 700; color: var(--cta);
+}
+.order-bump-save {
+  font-size: 11px; font-weight: 600; color: var(--success);
+  background: rgba(39,174,96,0.08); padding: 2px 8px; border-radius: 4px;
+}
+
+/* Description */
+.order-bump-description { font-size: 13px; line-height: 1.7; color: var(--body); margin-bottom: 16px; }
+.order-bump-description p { margin-bottom: 6px; }
+.order-bump-description strong { color: var(--heading); }
+.ob-intro { font-size: 14px; line-height: 1.6; }
+
+/* 5 Pijlers grid */
+.ob-pillars {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;
+}
+.ob-pillars-title {
+  font-family: 'Recoleta', serif; font-size: 14px; font-weight: 600;
+  color: var(--heading); text-align: center; margin-bottom: 12px;
+}
+.ob-pillar-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.ob-pillar {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 10px; border-radius: 8px;
+  background: linear-gradient(135deg, rgba(194,123,160,0.04), rgba(245,237,242,0.6));
+  font-size: 12px; line-height: 1.45;
+}
+.ob-pillar:last-child { grid-column: 1 / -1; justify-self: center; max-width: 260px; }
+.ob-pillar-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.ob-pillar strong {
+  display: block; font-size: 11px; font-weight: 700;
+  color: var(--heading); letter-spacing: 0.04em; margin-bottom: 1px;
+}
+.ob-pillar span { color: var(--body); font-size: 11px; }
+
+/* Wat je bereikt */
+.ob-results {
+  margin-bottom: 14px;
+}
+.ob-results-title {
+  font-family: 'Recoleta', serif; font-size: 14px; font-weight: 600;
+  color: var(--heading); margin-bottom: 8px;
+}
+.ob-result-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 13px; line-height: 1.55; color: var(--body);
+  padding: 4px 0;
+}
+.ob-result-item svg { flex-shrink: 0; margin-top: 2px; }
+
+/* Combo highlight box */
+.ob-combo-box {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: linear-gradient(135deg, rgba(194,123,160,0.10), rgba(212,152,181,0.06));
+  border: 1px solid rgba(194,123,160,0.18);
+  border-radius: 10px; padding: 14px 16px; margin-bottom: 12px;
+}
+.ob-combo-icon { font-size: 24px; flex-shrink: 0; }
+.ob-combo-text {
+  font-size: 13px; line-height: 1.6; color: var(--heading);
+}
+.ob-combo-text strong { font-weight: 600; }
+.ob-combo-text em { color: var(--cta); font-style: italic; }
+
+/* Social proof review */
+.ob-social-proof {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 4px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.6); border-radius: 8px;
+  font-size: 12px; color: var(--body); font-style: italic;
+  line-height: 1.55;
+}
+.ob-social-proof span:first-child { font-size: 14px; font-style: normal; letter-spacing: 1px; }
+.ob-reviewer { font-style: normal; font-weight: 600; color: var(--heading); font-size: 11px; }
+
+/* ═══ PAYPAL EXPRESS CHECKOUT ═══ */
+.express-checkout {
+  margin-bottom: 8px;
+  text-align: center;
+}
+.express-checkout-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+.paypal-express-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 13px 24px;
+  background: #FFC439;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+.paypal-express-btn:hover {
+  filter: brightness(0.96);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+}
+.paypal-express-btn:active {
+  transform: scale(0.985);
+}
+.paypal-btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.2s ease;
+}
+.paypal-express-btn .paypal-logo {
+  height: 22px;
+  width: auto;
+}
+.paypal-express-btn .paypal-btn-text {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #003087;
+  letter-spacing: -0.01em;
+}
+.paypal-express-btn .paypal-spinner {
+  display: none;
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(0,48,135,0.15);
+  border-top-color: #003087;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  position: absolute;
+}
+.paypal-express-btn.loading .paypal-spinner { display: block; }
+.paypal-express-btn.loading .paypal-btn-content { opacity: 0.35; }
+.express-checkout-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 16px 0 8px;
+}
+.express-checkout-divider::before,
+.express-checkout-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.express-checkout-divider span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .bundle-section { padding: 18px 16px 14px; }
+  .bundle-option { padding: 10px 12px; gap: 10px; }
+  .bundle-label { font-size: 14px; }
+  .bundle-price { font-size: 15px; }
+  .order-bump-header { padding: 12px 12px; gap: 8px; }
+  .order-bump-thumb { width: 38px; height: 52px; }
+  .order-bump-title { font-size: 12px; }
+  .order-bump-prices-inline .order-bump-new-price { font-size: 14px; }
+  .order-bump-detail-inner { padding: 0 14px 16px; padding-top: 14px; }
+  .order-bump-detail-top { gap: 12px; }
+  .order-bump-img { width: 72px; height: 100px; }
+  .ob-pillar-grid { grid-template-columns: 1fr; }
+  .ob-pillar:last-child { max-width: none; }
+  .order-bump-expand { padding: 5px 14px; font-size: 11px; }
+  .bundle-badge { font-size: 8px; padding: 2px 5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+
+<!-- ═══ PROJEKT KONFIGURACE + FACEBOOK PIXEL ═══ -->
+<script src="js/project-config.js"></script>
+<script src="js/pixel.js"></script>
+</head>
+
+<body>
+
+<!-- ═══ HEADER + BREADCRUMB ═══ -->
+<div class="checkout-header">
+  <a href="/" class="checkout-logo">Laat Los Wat Je Kapotmaakt</a>
+  <div class="breadcrumb">
+    <span class="breadcrumb-step done">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+      Winkelwagen
+    </span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step active">Gegevens &amp; Betaling</span>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-step">Bevestiging</span>
+  </div>
+</div>
+
+<!-- ═══ MAIN CHECKOUT ═══ -->
+<div class="checkout-page">
+
+  <!-- ═══ MOBILE STICKY SUMMARY BAR (sticky, jen mobil/tablet ≤880px) ═══ -->
+  <div class="mobile-summary-bar" id="mobile-summary-bar">
+    <!-- Label -->
+    <div class="msb-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      Besteloverzicht
+    </div>
+    <!-- Header — vždy viditelný, klikací pro rozbalení -->
+    <div class="msb-header" id="msb-header">
+      <div class="msb-thumb" id="msb-thumb">
+        <!-- Obrázek produktu z Medusa admin -->
+      </div>
+      <div class="msb-info">
+        <div class="msb-title" id="msb-title">Laat Los Wat Je Kapotmaakt</div>
+        <div class="msb-subtitle" id="msb-subtitle">Paperback · 1× boek</div>
+      </div>
+      <div class="msb-price-col">
+        <div class="msb-price" id="msb-price">&euro;35,00</div>
+        <div class="msb-items-label" id="msb-items-label">Totaal</div>
+      </div>
+      <svg class="msb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <!-- Rozevírací panel s detailním přehledem košíku -->
+    <div class="msb-content" id="msb-content">
+      <div class="msb-divider"></div>
+      <!-- Hlavní produkt -->
+      <div class="msb-line" id="msb-product-line">
+        <span class="msb-line-label" id="msb-product-name">Laat Los Wat Je Kapotmaakt</span>
+        <span class="msb-line-val" id="msb-product-price">&euro;35,00</span>
+      </div>
+      <!-- Order bump (skrytý pokud není vybrán) -->
+      <div class="msb-line bump" id="msb-bump-line" style="display:none;">
+        <span class="msb-line-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Het Leven Dat Je Verdient
+        </span>
+        <span class="msb-line-val">&euro;23,00</span>
+      </div>
+      <!-- Mezisoučet -->
+      <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(194,123,160,0.18);">
+        <span class="msb-line-label">Subtotaal (excl. BTW)</span>
+        <span class="msb-line-val" id="msb-subtotal">&euro;32,11</span>
+      </div>
+      <!-- BTW -->
+      <div class="msb-line" id="msb-tax-line">
+        <span class="msb-line-label" id="msb-tax-label">BTW (9%)</span>
+        <span class="msb-line-val" id="msb-tax-val">&euro;2,89</span>
+      </div>
+      <!-- Verzending -->
+      <div class="msb-line shipping">
+        <span class="msb-line-label">Verzending <span class="msb-gls">GLS</span></span>
+        <span class="msb-line-val">Gratis</span>
+      </div>
+      <!-- Totaal -->
+      <div class="msb-line total-line">
+        <span class="msb-line-label">Totaal</span>
+        <span class="msb-line-val" id="msb-total">&euro;35,00</span>
+      </div>
+      <div class="msb-tax-note">Inclusief BTW</div>
+    </div>
+  </div>
+
+  <div class="checkout-grid">
+
+    <!-- ── LEVÁ STRANA: FORMULÁŘ ── -->
+    <div class="checkout-main">
+      <form id="checkout-form" novalidate>
+
+        <!-- ═══ PAYPAL EXPRESS CHECKOUT ═══ -->
+        <div class="express-checkout animate-in" id="express-checkout">
+          <div class="express-checkout-label">Snel afrekenen</div>
+          <button type="button" class="paypal-express-btn" id="paypal-express-btn">
+            <div class="paypal-btn-content">
+              <svg class="paypal-logo" viewBox="0 0 24 28" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.067 7.517c.2-1.267.001-2.128-.687-2.908C18.573 3.674 16.818 3 14.462 3H7.2c-.446 0-.826.324-.896.764L3.8 21.075c-.052.33.203.628.537.628h3.91l.982-6.234-.03.197c.07-.44.447-.764.893-.764h1.858c3.652 0 6.51-1.484 7.344-5.779.025-.127.046-.25.065-.371.247-1.574-.002-2.644-.843-3.615" fill="#27346A"/>
+                <path d="M20.067 7.517c.2-1.267.001-2.128-.687-2.908C18.573 3.674 16.818 3 14.462 3H7.2c-.446 0-.826.324-.896.764L3.8 21.075c-.052.33.203.628.537.628h3.91l.982-6.234-.03.197c.07-.44.447-.764.893-.764h1.858c3.652 0 6.51-1.484 7.344-5.779.025-.127.046-.25.065-.371" fill="#27346A" opacity=".7"/>
+                <path d="M10.021 7.663c.044-.278.217-.506.446-.618a.884.884 0 01.406-.1h5.16c.612 0 1.182.04 1.705.124.149.024.294.052.435.084.141.032.278.068.41.108.067.02.132.042.196.064.257.09.494.197.707.324.25-1.592-.002-2.676-.864-3.658C17.8 2.91 15.978 2.2 13.532 2.2h-7.39c-.456 0-.843.33-.914.78L2.686 21.48c-.054.337.207.642.548.642h3.99l1.002-6.353 1.795-8.106z" fill="#2790C3"/>
+                <path d="M20.067 7.517a8.232 8.232 0 01-.065.371c-.835 4.295-3.692 5.78-7.344 5.78H10.8c-.446 0-.823.323-.893.763l-.952 6.037-.27 1.709c-.045.29.178.55.47.55h3.306c.39 0 .722-.283.783-.668l.032-.168.621-3.938.04-.217c.06-.385.393-.668.783-.668h.493c3.194 0 5.694-1.297 6.425-5.05.305-1.568.147-2.878-.66-3.798a3.142 3.142 0 00-.902-.703" fill="#1F264F"/>
+              </svg>
+              <span class="paypal-btn-text">PayPal Express Checkout</span>
+            </div>
+            <span class="paypal-spinner"></span>
+          </button>
+          <div class="express-checkout-divider">
+            <span>of</span>
+          </div>
+        </div>
+
+        <!-- ═══ BUNDLE SELECTOR — nad formulářem ═══ -->
+        <div class="bundle-section animate-in" id="bundle-section">
+          <div class="bundle-section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            Kies je aantal
+          </div>
+          <div class="bundle-options" id="bundle-options">
+            <!-- Dynamicky generováno z JS -->
+          </div>
+        </div>
+
+        <!-- ═══ ORDER BUMP — accordion s detailem produktu ═══ -->
+        <div class="order-bump animate-in" id="order-bump">
+          <!-- Hlavička — obrázek + checkbox + info + šipka (vždy viditelné) -->
+          <div class="order-bump-header" id="order-bump-header">
+            <div class="order-bump-checkbox" id="order-bump-check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div class="order-bump-thumb" id="order-bump-thumb">
+              <!-- Obrázek z Medusa admin — malý thumbnail v headeru -->
+            </div>
+            <div class="order-bump-header-text">
+              <div class="order-bump-top-row">
+                <div class="order-bump-tag">Eenmalig aanbod</div>
+                <div class="order-bump-save-tag">-36%</div>
+              </div>
+              <div class="order-bump-title">Voeg <em>Het Leven Dat Je Verdient</em> toe</div>
+              <div class="order-bump-prices-inline">
+                <span class="order-bump-old-price" id="order-bump-old-price">&euro;36,00</span>
+                <span class="order-bump-new-price" id="order-bump-new-price">&euro;23,00</span>
+                <span class="order-bump-inline-save">Bespaar &euro;13</span>
+              </div>
+            </div>
+            <button type="button" class="order-bump-expand" id="order-bump-expand-btn" aria-expanded="false" aria-label="Meer informatie">
+              <span class="expand-label">Meer info</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+          </div>
+
+          <!-- Accordion detail — rozbalovací info o produktu -->
+          <div class="order-bump-detail" id="order-bump-detail">
+            <div class="order-bump-detail-inner">
+
+              <!-- Boek info + obrázek -->
+              <div class="order-bump-detail-top">
+                <div class="order-bump-img" id="order-bump-img">
+                  <!-- Obrázek z Medusa admin -->
+                </div>
+                <div class="order-bump-detail-info">
+                  <div class="order-bump-name" id="order-bump-name">Het Leven Dat Je Verdient</div>
+                  <div class="order-bump-author">Anna de Vries</div>
+                  <div class="order-bump-meta">
+                    <span>&#128214; 350 pagina&rsquo;s</span>
+                    <span>&#128197; 30-dagen plan</span>
+                    <span>&#11088; 4.9/5 sterren</span>
+                  </div>
+                  <div class="order-bump-prices">
+                    <span class="order-bump-old-price">&euro;36,00</span>
+                    <span class="order-bump-new-price">&euro;23,00</span>
+                    <span class="order-bump-save">Bespaar &euro;13</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Intro -->
+              <div class="order-bump-description">
+                <p class="ob-intro"><strong>Loslaten was stap &eacute;&eacute;n. Nu begint het &eacute;chte werk:</strong> het leven opbouwen dat bij j&oacute;&uacute; past.</p>
+                <p>Dit boek pakt de <strong>5 concrete gebieden</strong> aan die je leven vastzetten &mdash; in 30 dagen, stap voor stap. Geen vage affirmaties, maar een praktisch systeem.</p>
+              </div>
+
+              <!-- 5 Pijlers -->
+              <div class="ob-pillars">
+                <div class="ob-pillars-title">Het LIFE RESET&trade; Systeem &mdash; 5 Pijlers</div>
+                <div class="ob-pillar-grid">
+                  <div class="ob-pillar">
+                    <span class="ob-pillar-icon">&#128717;</span>
+                    <div><strong>SPULLEN</strong><span>Fysieke rommel opruimen die je energie vreet</span></div>
+                  </div>
+                  <div class="ob-pillar">
+                    <span class="ob-pillar-icon">&#127968;</span>
+                    <div><strong>RUIMTE</strong><span>Je huis inrichten als rustpunt, niet als stressbron</span></div>
+                  </div>
+                  <div class="ob-pillar">
+                    <span class="ob-pillar-icon">&#129309;</span>
+                    <div><strong>MENSEN</strong><span>Grenzen stellen zonder schuldgevoel</span></div>
+                  </div>
+                  <div class="ob-pillar">
+                    <span class="ob-pillar-icon">&#129504;</span>
+                    <div><strong>GEEST</strong><span>De 03:00-spiraal in je hoofd stoppen</span></div>
+                  </div>
+                  <div class="ob-pillar">
+                    <span class="ob-pillar-icon">&#9889;</span>
+                    <div><strong>ENERGIE</strong><span>Gewoontes resetten zodat je energie overhoudt voor jezelf</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Wat je bereikt -->
+              <div class="ob-results">
+                <div class="ob-results-title">Na 30 dagen zul je&hellip;</div>
+                <div class="ob-result-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Weer slapen zonder de 03:00-spiraal in je hoofd</span>
+                </div>
+                <div class="ob-result-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>&lsquo;Nee&rsquo; zeggen zonder schuldgevoel &mdash; voor het eerst in jaren</span>
+                </div>
+                <div class="ob-result-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Weten wie je bent als niemand iets van je nodig heeft</span>
+                </div>
+                <div class="ob-result-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Een huis dat rust geeft in plaats van stress</span>
+                </div>
+                <div class="ob-result-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Energie overhouden voor jezelf &mdash; niet alleen voor iedereen om je heen</span>
+                </div>
+              </div>
+
+              <!-- Highlight / CTA box -->
+              <div class="ob-combo-box">
+                <div class="ob-combo-icon">&#128218;</div>
+                <div class="ob-combo-text">
+                  <strong>Samen met <em>Laat Los Wat Je Kapotmaakt</em> heb je het complete pakket:</strong> eerst loslaten, dan opbouwen. 92% van de lezers voelt verschil binnen 14 dagen.
+                </div>
+              </div>
+
+              <!-- Social proof mini -->
+              <div class="ob-social-proof">
+                <span>&#11088;&#11088;&#11088;&#11088;&#11088;</span>
+                <span>&ldquo;Dit boek heeft mijn leven letterlijk veranderd. Binnen 2 weken voelde ik me lichter.&rdquo;</span>
+                <span class="ob-reviewer">&mdash; Marloes K., Amsterdam</span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ SEKCE 1: KONTAKT ═══ -->
+        <div class="checkout-card animate-in">
+          <div class="section-header">
+            <div class="section-number">1</div>
+            <h2 class="section-title">Contact</h2>
+          </div>
+
+          <div class="float-field form-group">
+            <input type="email" id="email" name="email" placeholder=" " required autocomplete="email">
+            <label for="email">E-mailadres</label>
+            <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+            <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <div class="field-error">Vul een geldig e-mailadres in</div>
+            <div class="email-suggestion" id="email-suggestion"></div>
+          </div>
+
+          <div class="float-field form-group" style="margin-bottom:0;">
+            <input type="tel" id="phone" name="phone" placeholder=" " required autocomplete="tel">
+            <label for="phone">Telefoonnummer</label>
+            <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+            <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <div class="field-error">Vul een geldig telefoonnummer in</div>
+            <div class="phone-preview" id="phone-preview"></div>
+          </div>
+
+        </div>
+
+        <!-- ═══ SEKCE 2: VERZENDADRES ═══ -->
+        <div class="checkout-card animate-in animate-in-delay-1">
+          <div class="section-header">
+            <div class="section-number">2</div>
+            <h2 class="section-title">Verzendadres</h2>
+          </div>
+
+          <!-- Land (první — Shopify styl) -->
+          <div class="float-field form-group has-value">
+            <select id="country" name="country" required autocomplete="country">
+              <option value="NL" selected>Nederland</option>
+              <option value="BE">Belgi&euml;</option>
+            </select>
+            <label for="country">Land / regio</label>
+          </div>
+
+          <!-- Jméno + Příjmení -->
+          <div class="form-row">
+            <div class="float-field form-group">
+              <input type="text" id="first_name" name="first_name" placeholder=" " required autocomplete="given-name">
+              <label for="first_name">Voornaam</label>
+              <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+              <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              <div class="field-error">Vul je voornaam in</div>
+            </div>
+            <div class="float-field form-group">
+              <input type="text" id="last_name" name="last_name" placeholder=" " required autocomplete="family-name">
+              <label for="last_name">Achternaam</label>
+              <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+              <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              <div class="field-error">Vul je achternaam in</div>
+            </div>
+          </div>
+
+          <!-- Adresa -->
+          <div class="float-field form-group">
+            <input type="text" id="address" name="address" placeholder=" " required autocomplete="street-address">
+            <label for="address">Straatnaam en huisnummer</label>
+            <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+            <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <div class="field-error">Vul je adres in</div>
+            <div class="field-warning" id="address-warning">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 9v4"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+              <span id="address-warning-text"></span>
+            </div>
+          </div>
+
+          <!-- Město + PSČ -->
+          <div class="form-row">
+            <div class="float-field form-group">
+              <input type="text" id="city" name="city" placeholder=" " required autocomplete="address-level2">
+              <label for="city">Stad</label>
+              <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+              <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              <div class="field-error">Vul je stad in</div>
+            </div>
+            <div class="float-field form-group">
+              <input type="text" id="postal_code" name="postal_code" placeholder=" " required autocomplete="postal-code">
+              <label for="postal_code">Postcode</label>
+              <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+              <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              <div class="field-error">Vul je postcode in</div>
+            </div>
+          </div>
+
+          <!-- Firemní pole (B2B) — pod adresou, nad dopravou -->
+          <label class="company-toggle" for="company-checkbox">
+            <input type="checkbox" id="company-checkbox">
+            <span class="company-toggle-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9h1"/><path d="M9 13h1"/><path d="M9 17h1"/></svg>
+              Ik bestel namens een bedrijf
+            </span>
+          </label>
+
+          <div class="company-fields" id="company-fields">
+            <div class="float-field form-group">
+              <input type="text" id="company_name" name="company_name" placeholder=" " autocomplete="organization">
+              <label for="company_name">Bedrijfsnaam</label>
+            </div>
+            <div class="float-field form-group">
+              <input type="text" id="kvk_number" name="kvk_number" placeholder=" ">
+              <label for="kvk_number">
+                <span class="company-kvk-label active" id="kvk-label-nl">KVK-nummer</span>
+                <span class="company-kvk-label" id="kvk-label-be">Ondernemingsnummer</span>
+              </label>
+            </div>
+            <div class="float-field form-group">
+              <input type="text" id="vat_number" name="vat_number" placeholder=" ">
+              <label for="vat_number">BTW-nummer (optioneel)</label>
+            </div>
+          </div>
+
+          <!-- GLS Gratis verzending info -->
+          <div id="shipping-info" style="display:flex;align-items:center;gap:10px;margin-top:16px;padding:12px 16px;background:#f0faf4;border:1px solid #b8e6c8;border-radius:10px;">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjE1Ij48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="flex-shrink:0;">
+            <div style="flex:1;">
+              <span style="font-weight:600;color:#1a1a2e;font-size:14px;">Gratis verzending</span>
+              <span style="color:#27AE60;font-weight:700;font-size:14px;margin-left:6px;">€0,00</span>
+              <div style="color:#666;font-size:12px;margin-top:2px;">Verzonden binnen 24 uur via GLS</div>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2.5" stroke-linecap="round" width="20" height="20"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+
+        </div>
+
+        <!-- ═══ PROMO KÓDY ═══ -->
+        <div class="checkout-card animate-in animate-in-delay-2" style="padding: 16px 20px;">
+          <div class="promo-section">
+            <button type="button" class="promo-toggle" id="promo-toggle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+              Heb je een kortingscode?
+            </button>
+            <div class="promo-form" id="promo-form">
+              <div class="promo-input-row">
+                <input type="text" class="promo-input" id="promo-input" placeholder="Voer je code in" maxlength="30" autocomplete="off">
+                <button type="button" class="promo-apply-btn" id="promo-apply-btn">Toepassen</button>
+              </div>
+              <div class="promo-message" id="promo-message"></div>
+            </div>
+            <div class="promo-applied" id="promo-applied">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><path d="M20 6L9 17l-5-5"/></svg>
+              <span>Korting: <span class="promo-code-tag" id="promo-code-tag"></span></span>
+              <button type="button" class="promo-remove" id="promo-remove">Verwijderen</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ SEKCE 3: BETAALMETHODE ═══ -->
+        <div class="checkout-card animate-in animate-in-delay-2" style="border-radius:0;">
+          <div class="section-header">
+            <div class="section-number">3</div>
+            <h2 class="section-title">Betaalmethode</h2>
+          </div>
+
+          <div class="payment-methods" id="payment-methods">
+
+            <!-- iDEAL -->
+            <label class="payment-method selected" data-method="ideal" data-provider="mollie">
+              <input type="radio" name="payment_method" value="ideal" checked>
+              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
+              <div class="pm-icon ideal">iDEAL</div>
+              <div class="pm-info">
+                <div class="pm-name">iDEAL</div>
+                <div class="pm-desc">Betaal direct via je eigen bank</div>
+              </div>
+              <span class="pm-badge">Populair</span>
+            </label>
+
+            <!-- Bancontact -->
+            <label class="payment-method" data-method="bancontact" data-provider="mollie" style="display:none">
+              <input type="radio" name="payment_method" value="bancontact">
+              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
+              <div class="pm-icon bancontact">Bancontact</div>
+              <div class="pm-info">
+                <div class="pm-name">Bancontact</div>
+                <div class="pm-desc">Belgisch betaalsysteem</div>
+              </div>
+            </label>
+
+            <!-- Klarna -->
+            <label class="payment-method" data-method="klarna" data-provider="klarna">
+              <input type="radio" name="payment_method" value="klarna">
+              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
+              <div class="pm-icon klarna">Klarna</div>
+              <div class="pm-info">
+                <div class="pm-name">Klarna</div>
+                <div class="pm-desc">Betaal later of in termijnen</div>
+              </div>
+            </label>
+
+            <!-- PayPal -->
+            <label class="payment-method" data-method="paypal" data-provider="paypal">
+              <input type="radio" name="payment_method" value="paypal">
+              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
+              <div class="pm-icon paypal">PayPal</div>
+              <div class="pm-info">
+                <div class="pm-name">PayPal</div>
+                <div class="pm-desc">Betaal met je PayPal-account</div>
+              </div>
+            </label>
+
+          </div>
+          <div id="payment-errors" role="alert"></div>
+        </div>
+
+        <!-- ═══ CTA TLAČÍTKO ═══ -->
+        <div class="checkout-btn-wrap animate-in animate-in-delay-3">
+          <button type="submit" class="checkout-btn" id="submit-btn">
+            <span class="spinner"></span>
+            <span class="btn-text">Bestelling afronden — &euro;35,00</span>
+          </button>
+          <p class="btn-subtext">Je wordt doorgestuurd naar een beveiligde betaalpagina.</p>
+
+          <!-- Trust badges -->
+          <div class="checkout-trust">
+            <div class="checkout-trust-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              SSL Beveiligd
+            </div>
+            <div class="checkout-trust-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Veilige betaling
+            </div>
+            <div class="checkout-trust-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+              30 dagen garantie
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- ── PRAVÁ STRANA: ORDER SUMMARY ── -->
+    <div class="order-summary">
+      <h2 class="summary-title">Jouw bestelling</h2>
+
+      <div class="summary-product" id="desktop-product">
+        <div class="summary-product-img" id="desktop-product-img">
+          <div class="mini-book">
+            <div class="mini-book-title">Laat Los Wat Je Kapotmaakt</div>
+            <div class="mini-book-author">Joris De Vries</div>
+          </div>
+        </div>
+        <div class="summary-product-info">
+          <div class="summary-product-name" id="desktop-product-name">Laat Los Wat Je Kapotmaakt</div>
+          <div class="summary-product-author">Joris De Vries</div>
+          <div class="summary-product-format">Paperback</div>
+          <div class="summary-product-price" id="desktop-product-price">&euro;35,00</div>
+        </div>
+      </div>
+
+      <!-- 2 gratis e-books bonus -->
+      <div class="summary-bonus">
+        <span class="bonus-icon">🎁</span>
+        <span class="bonus-text">+ 2 gratis e-books inbegrepen</span>
+      </div>
+
+      <!-- Order bump řádek v summary (skrytý dokud nezaškrtne) -->
+      <div class="summary-line" id="summary-order-bump" style="display:none;padding:8px 0;border-top:1px dashed rgba(194,123,160,0.2);">
+        <span style="font-size:13px;display:flex;align-items:center;gap:4px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Het Leven Dat Je Verdient
+        </span>
+        <span style="font-weight:600;color:var(--cta);">&euro;23,00</span>
+      </div>
+
+      <div class="summary-line" id="summary-subtotal">
+        <span>Subtotaal (excl. BTW)</span>
+        <span id="subtotal-value">&euro;32,11</span>
+      </div>
+      <div class="summary-line" id="summary-tax">
+        <span id="tax-label">BTW (9%)</span>
+        <span id="tax-value">&euro;2,89</span>
+      </div>
+      <div class="summary-line shipping" id="summary-shipping">
+        <span style="display:flex;align-items:center;gap:6px;">
+          Verzending
+          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="vertical-align:middle;border-radius:2px;">
+        </span>
+        <span style="color:#27AE60;font-weight:600;">Gratis</span>
+      </div>
+      <div class="summary-line total" id="summary-total">
+        <span>Totaal</span>
+        <span class="price" id="desktop-total-price">&euro;35,00</span>
+      </div>
+      <div id="summary-tax-note" style="font-size:11px;color:#888;text-align:right;margin-top:-8px;margin-bottom:8px;">
+        Inclusief BTW
+      </div>
+
+      <!-- Garantie -->
+      <div class="guarantee-box">
+        <div class="icon">🛡️</div>
+        <div class="title">100% Geld-Terug-Garantie</div>
+        <div class="desc">Niet tevreden? Binnen 30 dagen krijg je je volledige aankoopbedrag terug. Geen vragen, geen gedoe.</div>
+      </div>
+
+      <!-- Social proof -->
+      <div class="summary-social">
+        <div class="stars">★★★★★</div>
+        <strong>12.847+</strong> tevreden lezers
+      </div>
+
+      <!-- Payment icons -->
+      <div class="summary-payments">
+        <div class="pay-icon ideal">iDEAL</div>
+        <div class="pay-icon bancontact">BC</div>
+        <div class="pay-icon klarna">Klarna</div>
+        <div class="pay-icon paypal">PayPal</div>
+      </div>
+    </div>
+
+  </div><!-- /checkout-grid -->
+</div><!-- /checkout-page -->
+
+<!-- ═══ FOOTER ═══ -->
+<div class="checkout-footer">
+  &copy; 2026 Laat Los Wat Je Kapotmaakt · Joris De Vries<br>
+  <a href="/privacy">Privacybeleid</a> · <a href="/voorwaarden">Algemene voorwaarden</a>
+</div>
+
+<!-- ═══ JAVASCRIPT ═══ -->
+<script>
+(function() {
+  'use strict';
+
+  /* ─── CONFIGURATIE (z project-config.js) ─── */
+  var MEDUSA_URL = PROJECT_CONFIG.medusaUrl;
+  var VARIANT_ID = PROJECT_CONFIG.mainProduct.variantId;
+  // Dynamický region ID — mění se podle vybrané země
+  var currentRegionId = PROJECT_CONFIG.regions.NL; // Výchozí: NL
+
+  /* ─── STAV: Bundle + Order Bump ─── */
+  var selectedBundleQty = 1;       // Aktuálně vybraný počet knih (1-4)
+  var selectedBundlePrice = PROJECT_CONFIG.bundleOptions[0].price; // Cena za bundle
+  var orderBumpActive = false;      // Je order bump zaškrtnutý?
+
+  /* ─── FUNKCE PRO DYNAMICKÝ ORDER SUMMARY ─── */
+  // Formátování cen v EU stylu (€32,11)
+  function formatPrice(amount) {
+    if (amount === null || amount === undefined) return '€0,00';
+    var num = parseFloat(amount);
+    return '€' + num.toFixed(2).replace('.', ',');
+  }
+
+  // Daňové sazby per země (tax-inclusive)
+  var TAX_RATES = { NL: 9, BE: 6 };
+
+  // Získej aktuální celkovou cenu (bundle + order bump)
+  function getCurrentTotal() {
+    var total = selectedBundlePrice;
+    if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
+    return total;
+  }
+
+  // Přepočítej a zobraz CELÝ order summary (bundle, order bump, daně, totál)
+  function recalculateOrderSummary() {
+    var countryCode = document.getElementById('country') ? document.getElementById('country').value : 'NL';
+    var rate = TAX_RATES[countryCode] || TAX_RATES.NL;
+    var total = getCurrentTotal();
+    var subtotal = total / (1 + rate / 100);
+    var tax = total - subtotal;
+
+    // ─── DESKTOP SUMMARY ───
+    var subtotalVal = document.getElementById('subtotal-value');
+    if (subtotalVal) subtotalVal.textContent = formatPrice(subtotal);
+
+    var taxLabel = document.getElementById('tax-label');
+    var taxValue = document.getElementById('tax-value');
+    if (taxLabel) taxLabel.textContent = 'BTW (' + rate + '%)';
+    if (taxValue) taxValue.textContent = formatPrice(tax);
+
+    var totalEl = document.getElementById('desktop-total-price');
+    if (totalEl) totalEl.textContent = formatPrice(total);
+
+    var desktopPrice = document.getElementById('desktop-product-price');
+    if (desktopPrice) desktopPrice.textContent = formatPrice(selectedBundlePrice);
+
+    // Product naam — update met qty als bundle > 1
+    var bundle = PROJECT_CONFIG.bundleOptions.find(function(b) { return b.qty === selectedBundleQty; });
+    var productName = PROJECT_CONFIG.mainProduct.name;
+    if (selectedBundleQty > 1 && bundle) {
+      productName = selectedBundleQty + '× ' + PROJECT_CONFIG.mainProduct.name;
+    }
+    var desktopName = document.getElementById('desktop-product-name');
+    if (desktopName) desktopName.textContent = productName;
+
+    // Order bump řádek v desktop summary
+    var bumpSummary = document.getElementById('summary-order-bump');
+    if (bumpSummary) {
+      bumpSummary.style.display = orderBumpActive ? 'flex' : 'none';
+    }
+
+    // ─── MOBILE STICKY SUMMARY BAR ───
+    // Hlavní cena
+    var msbPrice = document.getElementById('msb-price');
+    if (msbPrice) msbPrice.textContent = formatPrice(total);
+
+    // Titulek v headeru
+    var msbTitle = document.getElementById('msb-title');
+    if (msbTitle) msbTitle.textContent = productName;
+
+    // Subtitle — popis co je v košíku
+    var msbSubtitle = document.getElementById('msb-subtitle');
+    if (msbSubtitle) {
+      var parts = ['Paperback · ' + selectedBundleQty + '× boek'];
+      if (orderBumpActive) parts.push('+ Het Leven');
+      msbSubtitle.textContent = parts.join(' ');
+    }
+
+    // Items label pod cenou
+    var msbItemsLabel = document.getElementById('msb-items-label');
+    if (msbItemsLabel) {
+      var itemCount = orderBumpActive ? 2 : 1;
+      msbItemsLabel.textContent = itemCount === 1 ? 'Totaal' : itemCount + ' items';
+    }
+
+    // Produkt v rozevřeném panelu
+    var msbProductName = document.getElementById('msb-product-name');
+    if (msbProductName) msbProductName.textContent = productName;
+    var msbProductPrice = document.getElementById('msb-product-price');
+    if (msbProductPrice) msbProductPrice.textContent = formatPrice(selectedBundlePrice);
+
+    // Order bump v rozevřeném panelu
+    var msbBumpLine = document.getElementById('msb-bump-line');
+    if (msbBumpLine) msbBumpLine.style.display = orderBumpActive ? 'flex' : 'none';
+
+    // Subtotaal, BTW, totaal v rozevřeném panelu
+    var msbSubtotal = document.getElementById('msb-subtotal');
+    if (msbSubtotal) msbSubtotal.textContent = formatPrice(subtotal);
+    var msbTaxLabel = document.getElementById('msb-tax-label');
+    if (msbTaxLabel) msbTaxLabel.textContent = 'BTW (' + rate + '%)';
+    var msbTaxVal = document.getElementById('msb-tax-val');
+    if (msbTaxVal) msbTaxVal.textContent = formatPrice(tax);
+    var msbTotal = document.getElementById('msb-total');
+    if (msbTotal) msbTotal.textContent = formatPrice(total);
+
+    // Aktualizuj celkovou proměnnou a tlačítko
+    currentTotalPrice = total;
+    updateButtonText();
+
+    // Aktualizuj PayPal Express cenu
+    var paypalPrice = document.getElementById('paypal-price');
+    if (paypalPrice) paypalPrice.textContent = '— ' + formatPrice(total);
+  }
+
+  // Starý alias pro zpětnou kompatibilitu
+  function updateTaxDisplay(countryCode) {
+    recalculateOrderSummary();
+  }
+
+  /* ─── BUNDLE OPTIONS — generování z konfigurace ─── */
+  function renderBundleOptions() {
+    var container = document.getElementById('bundle-options');
+    if (!container) return;
+    var html = '';
+    PROJECT_CONFIG.bundleOptions.forEach(function(opt, idx) {
+      var isSelected = (idx === 0); // Výchozí: první (1×)
+      var perUnit = (opt.price / opt.qty).toFixed(2).replace('.', ',');
+      html += '<label class="bundle-option' + (isSelected ? ' selected' : '') + '" data-qty="' + opt.qty + '" data-price="' + opt.price + '">';
+      html += '<input type="radio" name="bundle" value="' + opt.qty + '"' + (isSelected ? ' checked' : '') + '>';
+      html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
+      html += '<div class="bundle-info">';
+      html += '<span class="bundle-label">' + opt.label + '</span>';
+      if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
+      html += '</div>';
+      html += '<div class="bundle-pricing">';
+      html += '<div class="bundle-price">' + formatPrice(opt.price) + '</div>';
+      if (opt.qty > 1) html += '<div class="bundle-per-unit">€' + perUnit + ' per boek</div>';
+      if (opt.savings > 0) html += '<div class="bundle-savings">Bespaar ' + formatPrice(opt.savings) + '</div>';
+      html += '</div>';
+      html += '</label>';
+    });
+    container.innerHTML = html;
+
+    // Event listenery pro bundle opce
+    container.querySelectorAll('.bundle-option').forEach(function(option) {
+      option.addEventListener('click', function() {
+        // Deselektuj všechny
+        container.querySelectorAll('.bundle-option').forEach(function(o) { o.classList.remove('selected'); });
+        // Selektuj tuto
+        option.classList.add('selected');
+        option.querySelector('input').checked = true;
+        // Aktualizuj stav
+        selectedBundleQty = parseInt(option.getAttribute('data-qty'));
+        selectedBundlePrice = parseFloat(option.getAttribute('data-price'));
+        // Přepočítej celý souhrn
+        recalculateOrderSummary();
+      });
+    });
+  }
+
+  /* ─── ORDER BUMP — event handling (delegace) ─── */
+  // Čistá event delegace — žádné inline onclick
+  (function setupOrderBump() {
+    var header = document.getElementById('order-bump-header');
+    var expandBtn = document.getElementById('order-bump-expand-btn');
+    if (!header) return;
+
+    // Klik na EXPAND tlačítko → toggle accordion detail (NE checkbox)
+    if (expandBtn) {
+      expandBtn.addEventListener('click', function(e) {
+        e.stopPropagation(); // Zabraň propagaci na header
+        e.preventDefault();
+        var detail = document.getElementById('order-bump-detail');
+        if (!detail) return;
+        var isOpen = detail.classList.contains('open');
+        detail.classList.toggle('open', !isOpen);
+        expandBtn.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
+      });
+    }
+
+    // Klik na HEADER (mimo expand button) → toggle checkbox
+    header.addEventListener('click', function(e) {
+      // Pokud uživatel klikl na expand button, nic nedělej (řeší se výše)
+      if (e.target.closest('.order-bump-expand')) return;
+      orderBumpActive = !orderBumpActive;
+      var bumpEl = document.getElementById('order-bump');
+      if (bumpEl) bumpEl.classList.toggle('checked', orderBumpActive);
+      recalculateOrderSummary();
+    });
+  })();
+
+  /* ─── ORDER BUMP — načtení obrázku z Medusa admin ─── */
+  function loadOrderBumpImage() {
+    var thumbContainer = document.getElementById('order-bump-thumb');  // Malý v headeru
+    var imgContainer = document.getElementById('order-bump-img');      // Velký v detailu
+
+    // Zkus načíst obrázek z Medusa API
+    var upsellHandle = PROJECT_CONFIG.upsellProduct.handle;
+    if (upsellHandle) {
+      medusaFetch('/store/products?handle=' + upsellHandle, {
+        method: 'GET',
+        headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
+      }).then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      }).then(function(data) {
+        var product = data.products && data.products[0];
+        if (product && product.thumbnail) {
+          var imgTag = '<img src="' + product.thumbnail + '" alt="' + (product.title || 'Het Leven Dat Je Verdient') + '">';
+          if (thumbContainer) thumbContainer.innerHTML = imgTag;
+          if (imgContainer) imgContainer.innerHTML = imgTag;
+        }
+      }).catch(function() {
+        // Fallback — CSS placeholder zůstane
+      });
+    }
+  }
+
+  // Inicializace — vygeneruj bundle, zobraz daně, načti obrázek
+  renderBundleOptions();
+  recalculateOrderSummary();
+  loadOrderBumpImage();
+
+  // Aktualizuj order summary na základě cart dat z Medusa API
+  function updateOrderSummary(cart) {
+    if (!cart) return;
+    var item = (cart.items && cart.items.length > 0) ? cart.items[0] : null;
+
+    // --- Obrázek produktu ---
+    if (item && item.thumbnail) {
+      var imgHtml = '<img src="' + item.thumbnail + '" alt="' + (item.product_title || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
+      var desktopImg = document.getElementById('desktop-product-img');
+      if (desktopImg) desktopImg.innerHTML = imgHtml;
+      // Mobile sticky bar thumb
+      var msbThumb = document.getElementById('msb-thumb');
+      if (msbThumb) msbThumb.innerHTML = '<img src="' + item.thumbnail + '" alt="' + (item.product_title || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">';
+    }
+
+    // --- Název produktu ---
+    if (item && item.product_title) {
+      var desktopName = document.getElementById('desktop-product-name');
+      if (desktopName) desktopName.textContent = item.product_title;
+    }
+
+    // --- Ceny ---
+    var total = cart.total || 0;
+    var taxTotal = cart.tax_total || 0;
+    var subtotal = cart.subtotal || total;
+    var shippingTotal = cart.shipping_total || 0;
+    var isTaxInclusive = item ? item.is_tax_inclusive : false;
+
+    // Zjisti daňovou sazbu z poměru
+    var taxRate = 0;
+    if (subtotal > 0 && taxTotal > 0) {
+      if (isTaxInclusive) {
+        // tax_total / subtotal * 100 (subtotal je excl. BTW)
+        taxRate = Math.round(taxTotal / subtotal * 100);
+      } else {
+        taxRate = Math.round(taxTotal / (total - taxTotal) * 100);
+      }
+    }
+
+    // Cena za produkt (totaal) — desktop summary
+    var desktopPriceEl = document.getElementById('desktop-product-price');
+    if (desktopPriceEl) desktopPriceEl.textContent = formatPrice(total);
+
+    // Mobile sticky bar — totaal cena
+    var msbPriceEl = document.getElementById('msb-price');
+    if (msbPriceEl) msbPriceEl.textContent = formatPrice(total);
+
+    // Subtotaal (excl. BTW)
+    var subtotalEl = document.getElementById('summary-subtotal');
+    if (subtotalEl) {
+      subtotalEl.innerHTML = '<span>Subtotaal (excl. BTW)</span><span>' + formatPrice(subtotal) + '</span>';
+    }
+
+    // BTW řádek
+    var taxEl = document.getElementById('summary-tax');
+    if (taxEl && taxTotal > 0) {
+      taxEl.style.display = '';
+      taxEl.innerHTML = '<span>BTW (' + taxRate + '%)</span><span>' + formatPrice(taxTotal) + '</span>';
+    }
+
+    // Shipping
+    var shipEl = document.getElementById('summary-shipping');
+    if (shipEl) {
+      var shippingLabel = shippingTotal > 0 ? formatPrice(shippingTotal) : '<span style="color:#27AE60;font-weight:600;">Gratis</span>';
+      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Verzending <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="vertical-align:middle;border-radius:2px;"></span><span>' + shippingLabel + '</span>';
+    }
+
+    // Totaal
+    var totalEl = document.getElementById('desktop-total-price');
+    if (totalEl) totalEl.textContent = formatPrice(total);
+
+    // BTW poznámka
+    var taxNote = document.getElementById('summary-tax-note');
+    if (taxNote && isTaxInclusive && taxTotal > 0) {
+      taxNote.style.display = '';
+    }
+
+    // Button text update
+    var btnText = document.querySelector('.btn-text');
+    if (btnText) {
+      var labels = {
+        ideal: 'Betalen met iDEAL',
+        bancontact: 'Betalen met Bancontact',
+        klarna: 'Betalen met Klarna',
+        paypal: 'Betalen met PayPal'
+      };
+      btnText.textContent = (labels[selectedMethod] || 'Bestelling afronden') + ' — ' + formatPrice(total);
+    }
+  }
+
+  /* ─── MOBILE STICKY SUMMARY BAR — klik pro rozbalení + scroll shrink ─── */
+  (function setupMobileSummaryBar() {
+    var bar = document.getElementById('mobile-summary-bar');
+    var header = document.getElementById('msb-header');
+    if (!bar || !header) return;
+
+    // Klik na header → toggle rozbalení obsahu
+    header.addEventListener('click', function(e) {
+      e.preventDefault();
+      bar.classList.toggle('open');
+    });
+
+    // Scroll → compact/expand — sleduje směr scrollu
+    // Oprava vibrací: vyšší tolerance + cooldown po přepnutí
+    var scrollThreshold = 80;
+    var lastScrollY = 0;
+    var lastSwitchTime = 0;
+    var SWITCH_COOLDOWN = 300; // ms — minimální čas mezi compact/expand přepnutími
+    var ticking = false;
+
+    function onScroll() {
+      var currentY = window.scrollY || window.pageYOffset;
+      var now = Date.now();
+      var canSwitch = (now - lastSwitchTime) > SWITCH_COOLDOWN;
+
+      // Úplně nahoře — vždy plná velikost (bez cooldownu)
+      if (currentY <= 10) {
+        if (bar.classList.contains('compact')) {
+          bar.classList.remove('compact');
+          lastSwitchTime = now;
+        }
+        lastScrollY = currentY;
+        ticking = false;
+        return;
+      }
+
+      var delta = currentY - lastScrollY;
+      var pastThreshold = currentY > scrollThreshold;
+
+      // Vyšší tolerance (15px) zabrání mikro-pohybům
+      if (pastThreshold && delta > 15 && canSwitch && !bar.classList.contains('compact')) {
+        bar.classList.add('compact');
+        if (bar.classList.contains('open')) bar.classList.remove('open');
+        lastSwitchTime = now;
+      } else if (delta < -15 && canSwitch && bar.classList.contains('compact')) {
+        bar.classList.remove('compact');
+        lastSwitchTime = now;
+      }
+
+      lastScrollY = currentY;
+      ticking = false;
+    }
+
+    window.addEventListener('scroll', function() {
+      if (!ticking) {
+        window.requestAnimationFrame(onScroll);
+        ticking = true;
+      }
+    }, { passive: true });
+  })();
+
+  /* ─── PAYMENT METHOD SELECTIE ─── */
+  var paymentMethods = document.querySelectorAll('.payment-method');
+  var selectedMethod = 'ideal';
+  var selectedProvider = 'mollie';
+
+  paymentMethods.forEach(function(method) {
+    method.addEventListener('click', function() {
+      // Verwijder selected van alle
+      paymentMethods.forEach(function(m) { m.classList.remove('selected'); });
+      // Voeg selected toe aan geklikte
+      method.classList.add('selected');
+      // Sla op welke methode geselecteerd is
+      method.querySelector('input').checked = true;
+      selectedMethod = method.getAttribute('data-method');
+      selectedProvider = method.getAttribute('data-provider');
+
+      // Update knop tekst
+      updateButtonText();
+
+      // Verwijder eventuele foutmelding
+      document.getElementById('payment-errors').textContent = '';
+    });
+  });
+
+  // Aktuální celková cena (aktualizuje se dynamicky z recalculateOrderSummary)
+  var currentTotalPrice = getCurrentTotal();
+
+  function updateButtonText() {
+    var btnText = document.querySelector('.btn-text');
+    var labels = {
+      ideal: 'Betalen met iDEAL',
+      bancontact: 'Betalen met Bancontact',
+      klarna: 'Betalen met Klarna',
+      paypal: 'Betalen met PayPal'
+    };
+    btnText.textContent = (labels[selectedMethod] || 'Bestelling afronden') + ' — ' + formatPrice(currentTotalPrice);
+  }
+
+  // Initialiseer knop tekst
+  updateButtonText();
+
+  /* ─── FLOATING LABEL — select element needs has-value class ─── */
+  var selects = document.querySelectorAll('.float-field select');
+  selects.forEach(function(sel) {
+    sel.addEventListener('change', function() {
+      sel.closest('.float-field').classList.toggle('has-value', sel.value !== '');
+    });
+  });
+
+  /* ─── SMART EMAIL VALIDATIE — typfouten detectie ─── */
+  var COMMON_DOMAINS = {
+    'gmail.com': ['gmial.com','gmai.com','gmal.com','gamil.com','gmail.nl','gmail.co','gnail.com','gmaill.com','gmali.com','gmaik.com','gmail.con','gmail.cmo','gmeil.com','gemail.com'],
+    'hotmail.com': ['hotmai.com','hotmal.com','homail.com','hotmail.co','hotamil.com','hotmaill.com','hotmial.com','hotmail.con','hotmail.nl'],
+    'outlook.com': ['outlok.com','outllook.com','outook.com','outlook.co','outlool.com','outlouk.com'],
+    'yahoo.com': ['yaho.com','yahooo.com','yahoo.co','yaahoo.com','yhoo.com','yahoo.nl'],
+    'live.nl': ['live.nl.com','lve.nl','live.n','live.nll'],
+    'ziggo.nl': ['zigo.nl','ziggo.n','ziggo.nll','zigggo.nl'],
+    'kpnmail.nl': ['kpnmal.nl','kpnmail.n','kpnmai.nl','kpnmail.nll'],
+    'upcmail.nl': ['upcmal.nl','upcmail.n'],
+    'hetnet.nl': ['hetnet.n','henet.nl'],
+    'telenet.be': ['telenet.b','telnet.be','telenet.bee'],
+    'skynet.be': ['skynet.b','sknet.be'],
+    'proximus.be': ['proximus.b','proxmus.be'],
+    'icloud.com': ['iclod.com','icloud.co','icoud.com','icloud.con'],
+    'protonmail.com': ['protonmal.com','protonmail.co','protonmail.con'],
+  };
+  var TYPO_MAP = {};
+  Object.keys(COMMON_DOMAINS).forEach(function(correct) {
+    COMMON_DOMAINS[correct].forEach(function(typo) { TYPO_MAP[typo] = correct; });
+  });
+
+  function checkEmailTypo(email) {
+    var parts = email.split('@');
+    if (parts.length !== 2) return null;
+    var domain = parts[1].toLowerCase();
+    if (TYPO_MAP[domain]) return parts[0] + '@' + TYPO_MAP[domain];
+    return null;
+  }
+
+  var emailField = document.getElementById('email');
+  var emailSuggestion = document.getElementById('email-suggestion');
+  if (emailField && emailSuggestion) {
+    emailField.addEventListener('blur', function() {
+      var val = emailField.value.trim();
+      var suggestion = checkEmailTypo(val);
+      if (suggestion) {
+        emailSuggestion.innerHTML = 'Bedoelde je <strong>' + suggestion + '</strong>? Klik om te corrigeren.';
+        emailSuggestion.style.display = 'block';
+        emailSuggestion.onclick = function() {
+          emailField.value = suggestion;
+          emailSuggestion.style.display = 'none';
+          validateField(emailField);
+        };
+      } else {
+        emailSuggestion.style.display = 'none';
+      }
+    });
+    emailField.addEventListener('input', function() {
+      emailSuggestion.style.display = 'none';
+    });
+  }
+
+  /* ─── TELEFOONNUMMER FORMATTEREN — auto-prefix per land ─── */
+  var phoneField = document.getElementById('phone');
+  var phonePreview = document.getElementById('phone-preview');
+  var countrySelect = document.getElementById('country');
+  var COUNTRY_PHONE_PREFIX = { NL: '+31', BE: '+32' };
+
+  function formatPhoneNumber(raw, countryCode) {
+    var cleaned = raw.replace(/[\s\-\(\)\.]/g, '');
+    if (cleaned.startsWith('+')) return cleaned;
+    if (cleaned.startsWith('00')) return '+' + cleaned.substring(2);
+    if (cleaned.startsWith('0')) {
+      var prefix = COUNTRY_PHONE_PREFIX[countryCode] || '+31';
+      return prefix + cleaned.substring(1);
+    }
+    if (/^\d{7,}$/.test(cleaned)) {
+      return (COUNTRY_PHONE_PREFIX[countryCode] || '+31') + cleaned;
+    }
+    return cleaned;
+  }
+
+  if (phoneField && phonePreview) {
+    phoneField.addEventListener('blur', function() {
+      var raw = phoneField.value.trim();
+      if (!raw) { phonePreview.style.display = 'none'; return; }
+      var country = countrySelect ? countrySelect.value : 'NL';
+      var formatted = formatPhoneNumber(raw, country);
+      phoneField.value = formatted;
+      if (formatted !== raw) {
+        phonePreview.textContent = '\u2713 Opgeslagen als ' + formatted;
+        phonePreview.style.display = 'block';
+      } else {
+        phonePreview.style.display = 'none';
+      }
+      validateField(phoneField);
+    });
+    phoneField.addEventListener('input', function() {
+      phonePreview.style.display = 'none';
+    });
+  }
+
+  /* ─── ADRES VALIDATIE — straatnaam + huisnummer ─── */
+  var addressField = document.getElementById('address');
+  var addressWarning = document.getElementById('address-warning');
+  var addressWarningText = document.getElementById('address-warning-text');
+  if (addressField && addressWarning) {
+    addressField.addEventListener('blur', function() {
+      var val = addressField.value.trim();
+      if (!val || val.length < 3) { addressWarning.style.display = 'none'; return; }
+      var hasLetter = /[a-zA-Z\u00C0-\u024F]/.test(val);
+      var hasDigit = /\d/.test(val);
+      if (!hasDigit && hasLetter) {
+        addressWarningText.textContent = 'Vergeet niet je huisnummer toe te voegen';
+        addressWarning.style.display = 'block';
+      } else if (!hasLetter && hasDigit) {
+        addressWarningText.textContent = 'Vul ook je straatnaam in';
+        addressWarning.style.display = 'block';
+      } else {
+        addressWarning.style.display = 'none';
+      }
+    });
+    addressField.addEventListener('input', function() {
+      addressWarning.style.display = 'none';
+    });
+  }
+
+  /* ─── FIREMNÍ POLE (B2B) — toggle + label podle země ─── */
+  var companyCheckbox = document.getElementById('company-checkbox');
+  var companyFields = document.getElementById('company-fields');
+  var kvkLabelNL = document.getElementById('kvk-label-nl');
+  var kvkLabelBE = document.getElementById('kvk-label-be');
+
+  if (companyCheckbox && companyFields) {
+    companyCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        companyFields.classList.add('is-open');
+      } else {
+        companyFields.classList.remove('is-open');
+        // Vymazat pole při odškrtnutí
+        document.getElementById('company_name').value = '';
+        document.getElementById('kvk_number').value = '';
+        document.getElementById('vat_number').value = '';
+      }
+    });
+  }
+
+  // Label KVK/Ondernemingsnummer se mění podle země
+  function updateCompanyLabels() {
+    var country = document.getElementById('country').value;
+    if (kvkLabelNL && kvkLabelBE) {
+      kvkLabelNL.className = 'company-kvk-label' + (country === 'NL' ? ' active' : '');
+      kvkLabelBE.className = 'company-kvk-label' + (country === 'BE' ? ' active' : '');
+    }
+  }
+  document.getElementById('country').addEventListener('change', updateCompanyLabels);
+  updateCompanyLabels();
+
+  /* ─── INLINE VALIDATIE ─── */
+  var fields = document.querySelectorAll('#checkout-form input[required]');
+  fields.forEach(function(field) {
+    field.addEventListener('blur', function() {
+      validateField(field);
+    });
+    field.addEventListener('input', function() {
+      if (field.classList.contains('invalid')) {
+        field.classList.remove('invalid');
+      }
+    });
+  });
+
+  function validateField(field) {
+    var value = field.value.trim();
+    var isValid = false;
+
+    if (field.type === 'email') {
+      isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    } else if (field.type === 'tel') {
+      var stripped = value.replace(/[\s\-\(\)\.]/g, '');
+      isValid = /^[\+]?\d{8,}$/.test(stripped);
+    } else if (field.id === 'postal_code') {
+      isValid = value.length >= 4;
+    } else if (field.id === 'address') {
+      // Adresa musí obsahovat písmena I číslo (ulice + huisnummer) pro zelený check
+      var hasLetter = /[a-zA-Z\u00C0-\u024F]/.test(value);
+      var hasDigit = /\d/.test(value);
+      isValid = value.length >= 2 && hasLetter && hasDigit;
+    } else {
+      isValid = value.length >= 2;
+    }
+
+    field.classList.toggle('valid', isValid);
+    field.classList.toggle('invalid', !isValid && value.length > 0);
+    return isValid;
+  }
+
+  function validateAllFields() {
+    var allValid = true;
+    fields.forEach(function(field) {
+      if (!validateField(field)) {
+        allValid = false;
+      }
+    });
+    return allValid;
+  }
+
+  /* ─── HELPER: Medusa API call ─── */
+  function medusaFetch(path, options) {
+    options = options || {};
+    options.headers = Object.assign({
+      'Content-Type': 'application/json',
+      'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey,
+    }, options.headers || {});
+    return fetch(MEDUSA_URL + path, options).then(function(res) {
+      return res.json().then(function(data) {
+        if (!res.ok) throw new Error(data.message || 'API fout');
+        return data;
+      });
+    });
+  }
+
+  /* ─── OBRÁZEK PRODUKTU ─── */
+  if (PROJECT_CONFIG.mainProduct.thumbnail) {
+    var thumbUrl = MEDUSA_URL + PROJECT_CONFIG.mainProduct.thumbnail;
+    var imgHtml = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
+    var desktopImg = document.getElementById('desktop-product-img');
+    if (desktopImg) desktopImg.innerHTML = imgHtml;
+    // Obrázek v mobilním sticky baru
+    var msbThumb = document.getElementById('msb-thumb');
+    if (msbThumb) msbThumb.innerHTML = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">';
+  }
+
+  /* ─── PROMO KÓDY — toggle + apply + remove ─── */
+  var promoToggle = document.getElementById('promo-toggle');
+  var promoForm = document.getElementById('promo-form');
+  var promoInput = document.getElementById('promo-input');
+  var promoApplyBtn = document.getElementById('promo-apply-btn');
+  var promoMessage = document.getElementById('promo-message');
+  var promoApplied = document.getElementById('promo-applied');
+  var promoCodeTag = document.getElementById('promo-code-tag');
+  var promoRemove = document.getElementById('promo-remove');
+
+  // Stav: uložený promo kód (aplikuje se při submitu na cart)
+  var savedPromoCode = '';
+
+  if (promoToggle) {
+    promoToggle.addEventListener('click', function() {
+      var isOpen = promoForm.classList.contains('is-open');
+      if (isOpen) {
+        promoForm.classList.remove('is-open');
+        promoToggle.classList.remove('is-open');
+      } else {
+        promoForm.classList.add('is-open');
+        promoToggle.classList.add('is-open');
+        promoInput.focus();
+      }
+    });
+  }
+
+  if (promoApplyBtn) {
+    promoApplyBtn.addEventListener('click', function() {
+      var code = promoInput.value.trim().toUpperCase();
+      if (!code) {
+        promoMessage.textContent = 'Voer een kortingscode in.';
+        promoMessage.className = 'promo-message error';
+        return;
+      }
+      // Uložit kód (validace proběhne při submitu na Medusa API)
+      savedPromoCode = code;
+      // Zobrazit jako "připravený k aplikaci"
+      promoCodeTag.textContent = code;
+      promoApplied.classList.add('is-visible');
+      promoForm.classList.remove('is-open');
+      promoToggle.classList.remove('is-open');
+      promoToggle.style.display = 'none';
+      promoMessage.className = 'promo-message';
+      promoInput.value = '';
+    });
+  }
+
+  // Enter v input = klik na Toepassen
+  if (promoInput) {
+    promoInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        promoApplyBtn.click();
+      }
+    });
+  }
+
+  if (promoRemove) {
+    promoRemove.addEventListener('click', function() {
+      savedPromoCode = '';
+      promoApplied.classList.remove('is-visible');
+      promoToggle.style.display = '';
+      promoMessage.className = 'promo-message';
+    });
+  }
+
+  /* ─── FORMULIER SUBMIT ─── */
+  var form = document.getElementById('checkout-form');
+  var submitBtn = document.getElementById('submit-btn');
+  var errorEl = document.getElementById('payment-errors');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Valideer alle velden
+    if (!validateAllFields()) {
+      var firstError = form.querySelector('.invalid');
+      if (firstError) {
+        firstError.focus();
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    // Toon laadstatus
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+    errorEl.textContent = '';
+
+    /*
+     * ─── MEDUSA v2 CHECKOUT FLOW ───
+     *
+     * Kompletni flow s Medusa v2 API:
+     *
+     * 1. Maak cart aan (POST /store/carts)
+     * 2. Voeg product toe (POST /store/carts/{id}/line-items)
+     * 3. Update cart met klantgegevens (POST /store/carts/{id})
+     * 3b. Voeg shipping method toe (GET /store/shipping-options + POST /store/carts/{id}/shipping-methods)
+     * 4a. Maak payment collection (POST /store/payment-collections)
+     * 4b. Initialiseer payment session (POST /store/payment-collections/{id}/payment-sessions)
+     *    → Medusa roept initiatePayment aan op de geselecteerde provider
+     *    → Provider (Mollie/PayPal) retourneert checkout/approval URL
+     * 5. Redirect klant naar betaalpagina (Mollie of PayPal)
+     * 6. Na betaling keert klant terug → cart voltooien (POST /store/carts/{id}/complete)
+     *
+     * Hieronder staat de implementatie:
+     */
+
+    // Klantgegevens uit formulier
+    var customerData = {
+      email: document.getElementById('email').value.trim(),
+      shipping_address: {
+        first_name: document.getElementById('first_name').value.trim(),
+        last_name: document.getElementById('last_name').value.trim(),
+        address_1: document.getElementById('address').value.trim(),
+        city: document.getElementById('city').value.trim(),
+        postal_code: document.getElementById('postal_code').value.trim(),
+        country_code: document.getElementById('country').value.toLowerCase(),
+        phone: document.getElementById('phone').value.trim(),
+      }
+    };
+
+    // ─── Firemní údaje (B2B) ───
+    var isCompany = document.getElementById('company-checkbox').checked;
+    if (isCompany) {
+      var companyName = document.getElementById('company_name').value.trim();
+      var kvkNumber = document.getElementById('kvk_number').value.trim();
+      var vatNumber = document.getElementById('vat_number').value.trim();
+      // company → built-in Medusa pole v shipping_address
+      if (companyName) {
+        customerData.shipping_address.company = companyName;
+      }
+      // KVK + BTW → metadata (custom pole)
+      customerData.metadata = {};
+      if (kvkNumber) customerData.metadata.kvk_number = kvkNumber;
+      if (vatNumber) customerData.metadata.vat_number = vatNumber;
+      // Uložit do localStorage pro thank-you stránku
+      localStorage.setItem('medusa_company', JSON.stringify({
+        company_name: companyName,
+        kvk_number: kvkNumber,
+        vat_number: vatNumber
+      }));
+    } else {
+      localStorage.removeItem('medusa_company');
+    }
+
+    // ─── Bundle + Order Bump stav v momentě odeslání ───
+    var checkoutBundleQty = selectedBundleQty;
+    var checkoutBundlePrice = selectedBundlePrice;
+    var checkoutOrderBump = orderBumpActive;
+    var checkoutTotal = getCurrentTotal();
+
+    // Vypočítej unit_price pro bundle (v centech pro Medusa)
+    var unitPriceCents = Math.round((checkoutBundlePrice / checkoutBundleQty) * 100);
+
+    // Stap 1: Cart aanmaken
+    medusaFetch('/store/carts', {
+      method: 'POST',
+      body: JSON.stringify({ region_id: currentRegionId })
+    })
+    .then(function(res) {
+      var cartId = res.cart.id;
+
+      // Stap 2a: Hoofdproduct toevoegen (bundle qty + unit_price voor korting)
+      var lineItemBody = {
+        variant_id: VARIANT_ID,
+        quantity: checkoutBundleQty
+      };
+      // Použij unit_price pouze pokud je bundle sleva (qty > 1)
+      if (checkoutBundleQty > 1) {
+        lineItemBody.unit_price = unitPriceCents;
+      }
+
+      return medusaFetch('/store/carts/' + cartId + '/line-items', {
+        method: 'POST',
+        body: JSON.stringify(lineItemBody)
+      }).then(function() {
+        // Stap 2b: Order bump produkt toevoegen (pokud je zaškrtnutý)
+        if (checkoutOrderBump) {
+          return medusaFetch('/store/carts/' + cartId + '/line-items', {
+            method: 'POST',
+            body: JSON.stringify({
+              variant_id: PROJECT_CONFIG.upsellProduct.variantId,
+              quantity: 1,
+              unit_price: PROJECT_CONFIG.upsellProduct.price * 100 // €23 = 2300 centů
+            })
+          });
+        }
+      }).then(function() { return cartId; });
+    })
+    .then(function(cartId) {
+      // Stap 3: Cart updaten met klantgegevens
+      return medusaFetch('/store/carts/' + cartId, {
+        method: 'POST',
+        body: JSON.stringify(customerData)
+      }).then(function() { return cartId; });
+    })
+    .then(function(cartId) {
+      // Stap 3a: Promo kód aplikovat (pokud existuje)
+      if (savedPromoCode) {
+        return medusaFetch('/store/carts/' + cartId + '/promotions', {
+          method: 'POST',
+          body: JSON.stringify({ promo_codes: [savedPromoCode] })
+        }).then(function() {
+          console.log('Promo kód aplikován:', savedPromoCode);
+          return cartId;
+        }).catch(function(err) {
+          // Pokud promo kód selže — pokračovat bez slevy (non-blocking)
+          console.warn('Promo kód selhal:', err.message || err);
+          return cartId;
+        });
+      }
+      return cartId;
+    })
+    .then(function(cartId) {
+      // Stap 3b: Shipping method toevoegen
+      return medusaFetch('/store/shipping-options?cart_id=' + cartId, {
+        method: 'GET'
+      }).then(function(shipRes) {
+        var options = shipRes.shipping_options || [];
+        if (options.length === 0) {
+          throw new Error('Geen verzendopties beschikbaar');
+        }
+        return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
+          method: 'POST',
+          body: JSON.stringify({ option_id: options[0].id })
+        });
+      }).then(function() {
+        return medusaFetch('/store/carts/' + cartId, { method: 'GET' });
+      }).then(function(cartRes) {
+        updateOrderSummary(cartRes.cart);
+        return cartId;
+      });
+    })
+    .then(function(cartId) {
+      // Stap 4: Payment — Medusa v2 Payment Collections flow
+      var USE_TEST_MODE = true; // ← Přepni na false pro produkci
+
+      var providerId;
+      var sessionData = {};
+      if (USE_TEST_MODE) {
+        providerId = 'pp_system_default';
+      } else {
+        providerId = selectedProvider === 'mollie' ? 'pp_mollie_mollie' : 'pp_paypal_paypal';
+        if (selectedProvider === 'mollie') {
+          sessionData = { method: selectedMethod };
+        }
+      }
+
+      return medusaFetch('/store/payment-collections', {
+        method: 'POST',
+        body: JSON.stringify({ cart_id: cartId })
+      }).then(function(pcRes) {
+        var paymentCollectionId = pcRes.payment_collection.id;
+        var sessionBody = { provider_id: providerId };
+        if (Object.keys(sessionData).length > 0) {
+          sessionBody.data = sessionData;
+        }
+        return medusaFetch('/store/payment-collections/' + paymentCollectionId + '/payment-sessions', {
+          method: 'POST',
+          body: JSON.stringify(sessionBody)
+        });
+      }).then(function(sessionRes) {
+        return { cartId: cartId, paymentCollection: sessionRes.payment_collection, testMode: USE_TEST_MODE };
+      });
+    })
+    .then(function(result) {
+      // Uložit zákaznická data do localStorage
+      localStorage.setItem('medusa_cart_id', result.cartId);
+      localStorage.setItem('medusa_customer', JSON.stringify({
+        email: customerData.email,
+        first_name: customerData.shipping_address.first_name,
+        last_name: customerData.shipping_address.last_name,
+        address_1: customerData.shipping_address.address_1,
+        city: customerData.shipping_address.city,
+        postal_code: customerData.shipping_address.postal_code,
+        country_code: customerData.shipping_address.country_code,
+        phone: customerData.shipping_address.phone,
+      }));
+      localStorage.setItem('medusa_payment_provider', result.testMode ? 'pp_system_default' : (selectedProvider === 'mollie' ? 'pp_mollie_mollie' : 'pp_paypal_paypal'));
+
+      // Uložit bundle + order bump info pro thank-you stránku
+      localStorage.setItem('medusa_bundle_qty', checkoutBundleQty);
+      localStorage.setItem('medusa_bundle_price', checkoutBundlePrice);
+      localStorage.setItem('medusa_order_bump', checkoutOrderBump ? 'true' : 'false');
+      localStorage.setItem('medusa_checkout_total', checkoutTotal);
+
+      // FB Pixel: InitiateCheckout
+      if (typeof fbq !== 'undefined') {
+        var contentIds = [PROJECT_CONFIG.mainProduct.handle];
+        if (checkoutOrderBump) contentIds.push(PROJECT_CONFIG.upsellProduct.handle);
+        fbq('track', 'InitiateCheckout', {
+          content_ids: contentIds,
+          value: checkoutTotal,
+          currency: PROJECT_CONFIG.mainProduct.currency,
+          num_items: checkoutBundleQty + (checkoutOrderBump ? 1 : 0)
+        });
+      }
+
+      if (result.testMode) {
+        // TEST MÓD: rovnou dokončit objednávku (žádný redirect)
+        return medusaFetch('/store/carts/' + result.cartId + '/complete', {
+          method: 'POST'
+        }).then(function(completeRes) {
+          var order = completeRes.order || completeRes;
+          localStorage.setItem('medusa_order_id', order.id || '');
+          localStorage.setItem('medusa_order_display_id', order.display_id || '');
+
+          // ─── REDIRECT LOGIKA ───
+          // Pokud zákazník přidal order bump → SKIP upsell, rovnou na thank-you
+          // Pokud NEMÁ order bump → nabídni upsell
+          if (checkoutOrderBump) {
+            // Order bump aktivní = upsell produkt už je v objednávce
+            localStorage.setItem('medusa_upsell_purchased', 'true');
+            window.location.href = PROJECT_CONFIG.thankYouUrl;
+          } else {
+            window.location.href = PROJECT_CONFIG.upsellUrl;
+          }
+        });
+      } else {
+        // PRODUKCE: Redirect naar betaalpagina
+        var sessions = result.paymentCollection?.payment_sessions || [];
+        var lastSession = sessions[sessions.length - 1] || {};
+        var providerData = lastSession.data || {};
+        var redirectUrl = providerData.checkoutUrl || providerData.approvalUrl;
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+        } else {
+          throw new Error('Geen redirect URL ontvangen van betaalprovider');
+        }
+      }
+    })
+    .catch(function(err) {
+      // Toon foutmelding
+      errorEl.textContent = err.message || 'Er ging iets mis. Probeer het opnieuw.';
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+    });
+  });
+
+  /* ─── LAND SELECTIE — region + betaalmethoden ─── */
+  var countrySelect = document.getElementById('country');
+  countrySelect.addEventListener('change', function() {
+    var country = countrySelect.value;
+    var idealMethod = document.querySelector('[data-method="ideal"]');
+    var bancontactMethod = document.querySelector('[data-method="bancontact"]');
+
+    // Aktualizuj region ID podle vybrané země
+    currentRegionId = PROJECT_CONFIG.getRegionId(country);
+
+    // Přepočítej daně v order summary
+    updateTaxDisplay(country);
+
+    // Toon/verberg betaalmethoden op basis van land (bez auto-scrollu)
+    function selectPaymentMethod(methodEl) {
+      var scrollY = window.scrollY;
+      paymentMethods.forEach(function(m) { m.classList.remove('selected'); });
+      methodEl.classList.add('selected');
+      methodEl.querySelector('input').checked = true;
+      selectedMethod = methodEl.getAttribute('data-method');
+      selectedProvider = methodEl.getAttribute('data-provider');
+      updateButtonText();
+      window.scrollTo(0, scrollY);
+    }
+
+    if (country === 'NL') {
+      idealMethod.style.display = 'flex';
+      bancontactMethod.style.display = 'none';
+      if (selectedMethod === 'bancontact') selectPaymentMethod(idealMethod);
+    } else if (country === 'BE') {
+      idealMethod.style.display = 'none';
+      bancontactMethod.style.display = 'flex';
+      if (selectedMethod === 'ideal') selectPaymentMethod(bancontactMethod);
+    }
+  });
+
+  /* ─── ANIMACE — Intersection Observer pro fade-in ─── */
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.style.animationPlayState = 'running';
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.animate-in').forEach(function(el) {
+      el.style.animationPlayState = 'paused';
+      observer.observe(el);
+    });
+  }
+
+  /* ═══ PAYPAL EXPRESS CHECKOUT ═══ */
+  // PayPal Express — zákazník klikne, otevře se PayPal popup,
+  // PayPal vrátí adresu + email → vytvoříme cart + objednávku automaticky
+  (function initPayPalExpress() {
+    var paypalBtn = document.getElementById('paypal-express-btn');
+    if (!paypalBtn) return;
+
+    paypalBtn.addEventListener('click', function() {
+      // Zamezit dvojkliku
+      if (paypalBtn.classList.contains('loading')) return;
+      paypalBtn.classList.add('loading');
+
+      var total = getCurrentTotal();
+
+      // 1. Vytvoř Medusa cart
+      medusaFetch('/store/carts', {
+        method: 'POST',
+        body: JSON.stringify({ region_id: currentRegionId })
+      })
+      .then(function(resp) { return resp.cart || resp; })
+      .then(function(cart) {
+        var cartId = cart.id;
+
+        // 2. Přidej hlavní produkt (bundle qty)
+        var lineItemPromises = [];
+        lineItemPromises.push(
+          medusaFetch('/store/carts/' + cartId + '/line-items', {
+            method: 'POST',
+            body: JSON.stringify({
+              variant_id: VARIANT_ID,
+              quantity: selectedBundleQty
+            })
+          })
+        );
+
+        // 3. Přidej order bump pokud je aktivní
+        if (orderBumpActive && PROJECT_CONFIG.upsellProduct.variantId) {
+          lineItemPromises.push(
+            medusaFetch('/store/carts/' + cartId + '/line-items', {
+              method: 'POST',
+              body: JSON.stringify({
+                variant_id: PROJECT_CONFIG.upsellProduct.variantId,
+                quantity: 1
+              })
+            })
+          );
+        }
+
+        return Promise.all(lineItemPromises).then(function() { return cartId; });
+      })
+      .then(function(cartId) {
+        // 4. Aplikuj promo kód pokud existuje
+        if (typeof savedPromoCode !== 'undefined' && savedPromoCode) {
+          return medusaFetch('/store/carts/' + cartId + '/promotions', {
+            method: 'POST',
+            body: JSON.stringify({ promo_codes: [savedPromoCode] })
+          }).then(function() { return cartId; })
+            .catch(function() { return cartId; }); // non-blocking
+        }
+        return cartId;
+      })
+      .then(function(cartId) {
+        // 5. Inicializuj platební session (PayPal)
+        return medusaFetch('/store/carts/' + cartId + '/payment-sessions', {
+          method: 'POST',
+          body: JSON.stringify({
+            provider_id: PROJECT_CONFIG.paymentProviders.paypal || 'pp_paypal_paypal'
+          })
+        }).then(function() { return cartId; });
+      })
+      .then(function(cartId) {
+        // 6. Ulož cart ID pro pozdější použití
+        localStorage.setItem('medusa_cart_id', cartId);
+        localStorage.setItem('medusa_bundle_qty', selectedBundleQty);
+        localStorage.setItem('medusa_bundle_price', selectedBundlePrice);
+        if (orderBumpActive) {
+          localStorage.setItem('medusa_order_bump', 'true');
+        } else {
+          localStorage.removeItem('medusa_order_bump');
+        }
+
+        // 7. Přesměruj na PayPal checkout (Medusa/Mollie/PayPal redirect)
+        // Medusa vrátí redirect URL z payment session
+        return medusaFetch('/store/carts/' + cartId, { method: 'GET' });
+      })
+      .then(function(resp) {
+        var cart = resp.cart || resp;
+        // Najdi PayPal payment session a přesměruj
+        var paymentSession = null;
+        if (cart.payment_collection && cart.payment_collection.payment_sessions) {
+          paymentSession = cart.payment_collection.payment_sessions.find(function(ps) {
+            return ps.provider_id && ps.provider_id.indexOf('paypal') !== -1;
+          });
+        }
+
+        if (paymentSession && paymentSession.data && paymentSession.data.redirectUrl) {
+          window.location.href = paymentSession.data.redirectUrl;
+        } else {
+          // Fallback — zobraz chybu ale nech zákazníka pokračovat normálně
+          console.warn('PayPal redirect URL niet gevonden, probeer het standaard formulier.');
+          paypalBtn.classList.remove('loading');
+          alert('PayPal is momenteel niet beschikbaar. Gebruik het formulier hieronder om af te rekenen.');
+        }
+      })
+      .catch(function(err) {
+        console.error('PayPal Express fout:', err);
+        paypalBtn.classList.remove('loading');
+        alert('Er is een fout opgetreden. Gebruik het formulier hieronder om af te rekenen.');
+      });
+    });
+  })();
+
+})();
+</script>
+
+</body>
+</html>
