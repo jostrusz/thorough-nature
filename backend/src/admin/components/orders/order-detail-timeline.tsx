@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { formatCurrency } from "../../lib/format-currency"
 
 interface OrderDetailTimelineProps {
   order: any
@@ -186,7 +187,7 @@ export function OrderDetailTimeline({
         events.push({
           date: refund.created_at || payment.updated_at,
           label: `Refund processed`,
-          detail: `${formatCurrencyTimeline(Number(refund.amount) || 0, order.currency_code)} via ${provider}`,
+          detail: `${formatCurrency(Number(refund.amount) || 0, order.currency_code)} via ${provider}`,
           color: "#9E2B25",
           type: "status_change",
           icon: "refund",
@@ -435,12 +436,14 @@ export function OrderDetailTimeline({
 
   return (
     <div
+      className="od-card"
       style={{
         background: "#FFFFFF",
         border: "1px solid #E1E3E5",
         borderRadius: "10px",
         marginBottom: "16px",
         overflow: "hidden",
+        transition: "box-shadow 0.25s ease, transform 0.25s ease",
       }}
     >
       <div
@@ -611,8 +614,4 @@ export function OrderDetailTimeline({
   )
 }
 
-function formatCurrencyTimeline(amount: number, currency?: string) {
-  const c = (currency || "EUR").toUpperCase()
-  if (c === "EUR") return `\u20AC${amount.toFixed(2)}`
-  return `${amount.toFixed(2)} ${c}`
-}
+// formatCurrency imported from ../../lib/format-currency

@@ -6,14 +6,6 @@ interface OrderNotesCardProps {
   isLoading?: boolean
 }
 
-const sectionStyle: React.CSSProperties = {
-  background: "#FFFFFF",
-  border: "1px solid #E1E3E5",
-  borderRadius: "10px",
-  padding: "16px 20px",
-  marginBottom: "16px",
-}
-
 export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCardProps) {
   const [editing, setEditing] = useState(false)
   const currentNote = order?.metadata?.admin_note || ""
@@ -30,7 +22,17 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
   }
 
   return (
-    <div style={sectionStyle}>
+    <div
+      className="od-card"
+      style={{
+        background: "#FFFFFF",
+        border: "1px solid #E1E3E5",
+        borderRadius: "10px",
+        padding: "16px 20px",
+        marginBottom: "16px",
+        transition: "box-shadow 0.25s ease, transform 0.25s ease",
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -48,6 +50,7 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
               setNoteValue(currentNote)
               setEditing(true)
             }}
+            className="od-edit-btn"
             style={{
               background: "none",
               border: "none",
@@ -56,10 +59,9 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
               color: "#6D7175",
               display: "flex",
               alignItems: "center",
-              transition: "color 0.15s",
+              borderRadius: "4px",
+              transition: "all 0.15s ease",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#1A1A1A")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#6D7175")}
           >
             <svg
               width="16"
@@ -76,12 +78,13 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
       </div>
 
       {editing ? (
-        <div>
+        <div className="od-section-enter">
           <textarea
             value={noteValue}
             onChange={(e) => setNoteValue(e.target.value)}
             placeholder="Add a note..."
             rows={3}
+            className="od-input"
             style={{
               width: "100%",
               padding: "8px 12px",
@@ -92,6 +95,7 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
               resize: "vertical",
               boxSizing: "border-box",
               fontFamily: "inherit",
+              transition: "border-color 0.2s, box-shadow 0.2s",
             }}
             autoFocus
           />
@@ -105,6 +109,7 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
           >
             <button
               onClick={handleCancel}
+              className="od-btn"
               style={{
                 padding: "5px 12px",
                 borderRadius: "6px",
@@ -114,6 +119,7 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
                 border: "1px solid #E1E3E5",
                 background: "#FFFFFF",
                 color: "#1A1A1A",
+                transition: "all 0.15s ease",
               }}
             >
               Cancel
@@ -121,16 +127,18 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
             <button
               onClick={handleSave}
               disabled={isLoading}
+              className="od-btn-primary"
               style={{
                 padding: "5px 12px",
                 borderRadius: "6px",
                 fontSize: "12px",
                 fontWeight: 500,
-                cursor: "pointer",
+                cursor: isLoading ? "default" : "pointer",
                 border: "1px solid #008060",
                 background: "#008060",
                 color: "#FFFFFF",
                 opacity: isLoading ? 0.6 : 1,
+                transition: "all 0.15s ease",
               }}
             >
               {isLoading ? "Saving..." : "Save"}

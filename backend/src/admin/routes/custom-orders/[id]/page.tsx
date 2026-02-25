@@ -30,6 +30,144 @@ import { CancelOrderModal } from "../../../components/orders/cancel-order-modal"
 import { RefundModal } from "../../../components/orders/refund-modal"
 import { DuplicateOrderModal } from "../../../components/orders/duplicate-order-modal"
 
+// Global hover animation styles
+function OrderDetailStyles() {
+  return (
+    <style>{`
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+      /* Card hover — subtle lift + shadow */
+      .od-card {
+        transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease !important;
+      }
+      .od-card:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+        border-color: #D2D5D8 !important;
+        transform: translateY(-1px);
+      }
+
+      /* Buttons — smooth hover */
+      .od-btn {
+        transition: all 0.15s ease !important;
+      }
+      .od-btn:hover {
+        background: #F6F6F7 !important;
+        border-color: #C9CCCF !important;
+      }
+      .od-btn:active {
+        transform: scale(0.97);
+      }
+
+      /* Primary buttons */
+      .od-btn-primary {
+        transition: all 0.15s ease !important;
+      }
+      .od-btn-primary:hover {
+        filter: brightness(1.1);
+        box-shadow: 0 2px 8px rgba(0, 128, 96, 0.25);
+      }
+      .od-btn-primary:active {
+        transform: scale(0.97);
+      }
+
+      /* Links — smooth underline */
+      .od-link {
+        transition: color 0.15s ease !important;
+      }
+      .od-link:hover {
+        text-decoration: underline !important;
+        color: #1A5BA8 !important;
+      }
+
+      /* Edit pencil button */
+      .od-edit-btn {
+        transition: all 0.15s ease !important;
+      }
+      .od-edit-btn:hover {
+        color: #1A1A1A !important;
+        background: #F6F6F7 !important;
+      }
+
+      /* Input focus glow */
+      .od-input {
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+      }
+      .od-input:focus {
+        border-color: #008060 !important;
+        box-shadow: 0 0 0 3px rgba(0, 128, 96, 0.12) !important;
+        outline: none !important;
+      }
+      .od-input:hover:not(:focus) {
+        border-color: #C9CCCF !important;
+      }
+
+      /* Hoverable rows */
+      .od-row-hover {
+        transition: background 0.12s ease !important;
+        border-radius: 4px;
+        margin: 0 -4px;
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+      }
+      .od-row-hover:hover {
+        background: #F9FAFB !important;
+      }
+
+      /* Badges — subtle scale */
+      .od-badge {
+        transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+      }
+      .od-badge:hover {
+        transform: scale(1.04);
+      }
+
+      /* Dropdown items */
+      .od-dropdown-item {
+        transition: background 0.12s ease, padding-left 0.15s ease !important;
+      }
+      .od-dropdown-item:hover {
+        background: #F6F6F7 !important;
+        padding-left: 20px !important;
+      }
+
+      /* Thumbnail hover */
+      .od-thumbnail {
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+      }
+      .od-thumbnail:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Section dividers fade in */
+      .od-section-enter {
+        animation: fadeIn 0.3s ease;
+      }
+
+      /* Tooltip on hover */
+      .od-has-tooltip {
+        position: relative;
+      }
+      .od-has-tooltip:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: calc(100% + 6px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1A1A1A;
+        color: #FFFFFF;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        white-space: nowrap;
+        z-index: 50;
+        pointer-events: none;
+      }
+    `}</style>
+  )
+}
+
 // Simple loading spinner
 function LoadingSpinner() {
   return (
@@ -42,9 +180,7 @@ function LoadingSpinner() {
         borderRadius: "50%",
         animation: "spin 0.8s linear infinite",
       }}
-    >
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
+    />
   )
 }
 
@@ -297,6 +433,8 @@ const OrderDetailPage = () => {
 
   return (
     <div style={pageStyle}>
+      <OrderDetailStyles />
+
       {/* Header with Shopify-style actions */}
       <OrderDetailHeader
         order={order}

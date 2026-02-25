@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { formatCurrency } from "../../lib/format-currency"
 
 interface RefundModalProps {
   open: boolean
@@ -58,12 +59,6 @@ const btnBase: React.CSSProperties = {
   cursor: "pointer",
   border: "1px solid #E1E3E5",
   transition: "all 0.15s ease",
-}
-
-function formatCurrency(amount: number, currency: string) {
-  const c = currency.toUpperCase()
-  if (c === "EUR") return `\u20AC${amount.toFixed(2)}`
-  return `${amount.toFixed(2)} ${c}`
 }
 
 export function RefundModal({

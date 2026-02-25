@@ -15,22 +15,6 @@ interface OrderDetailHeaderProps {
   onFakturoidOpen: () => void
 }
 
-const btnStyle: React.CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "6px",
-  padding: "7px 14px",
-  borderRadius: "6px",
-  fontSize: "13px",
-  fontWeight: 500,
-  cursor: "pointer",
-  border: "1px solid #E1E3E5",
-  background: "#FFFFFF",
-  color: "#1A1A1A",
-  transition: "all 0.15s ease",
-  whiteSpace: "nowrap" as const,
-}
-
 function getPaymentStatus(order: any): string {
   if (order.payment_collections?.length) {
     const pc = order.payment_collections[0]
@@ -67,26 +51,42 @@ export function OrderDetailHeader({
     ;(window as any).__orderIdForStatusPage = order.id
   }
 
+  const btnStyle: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    padding: "7px 14px",
+    borderRadius: "6px",
+    fontSize: "13px",
+    fontWeight: 500,
+    cursor: "pointer",
+    border: "1px solid #E1E3E5",
+    background: "#FFFFFF",
+    color: "#1A1A1A",
+    transition: "all 0.15s ease",
+    whiteSpace: "nowrap" as const,
+  }
+
   return (
     <div style={{ marginBottom: "24px" }}>
       {/* Breadcrumb */}
       <button
         onClick={() => navigate("/custom-orders")}
+        className="od-btn"
         style={{
           display: "inline-flex",
           alignItems: "center",
           gap: "4px",
-          padding: "4px 0",
+          padding: "4px 8px",
           border: "none",
           background: "none",
           cursor: "pointer",
           fontSize: "13px",
           color: "#6D7175",
           marginBottom: "16px",
-          transition: "color 0.15s",
+          borderRadius: "4px",
+          transition: "all 0.15s ease",
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = "#1A1A1A")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "#6D7175")}
       >
         <svg
           width="16"
@@ -122,25 +122,23 @@ export function OrderDetailHeader({
           >
             #{order.display_id}
           </h1>
-          <PaymentBadge status={paymentStatus} />
-          <FulfillmentBadge fulfilled={hasFulfillments} />
+          <span className="od-badge"><PaymentBadge status={paymentStatus} /></span>
+          <span className="od-badge"><FulfillmentBadge fulfilled={hasFulfillments} /></span>
         </div>
 
         {/* Right: Action buttons */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <button
             onClick={onRefund}
+            className="od-btn"
             style={btnStyle}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#F9FAFB")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#FFFFFF")}
           >
             Refund
           </button>
           <button
             onClick={onEdit}
+            className="od-btn"
             style={btnStyle}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#F9FAFB")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#FFFFFF")}
           >
             Edit
           </button>
@@ -149,14 +147,13 @@ export function OrderDetailHeader({
           <div style={{ position: "relative" }}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="od-btn"
               style={{
                 ...btnStyle,
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "4px",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#F9FAFB")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "#FFFFFF")}
             >
               More actions
               <svg
@@ -166,6 +163,10 @@ export function OrderDetailHeader({
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
+                style={{
+                  transition: "transform 0.2s ease",
+                  transform: dropdownOpen ? "rotate(180deg)" : "rotate(0)",
+                }}
               >
                 <path d="M5 8l5 5 5-5" />
               </svg>

@@ -18,6 +18,7 @@ export function PaymentBadge({ status }: { status: string }) {
   const style = PAYMENT_STYLES[status] || PAYMENT_STYLES.pending
   return (
     <span
+      className="od-badge"
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -29,6 +30,8 @@ export function PaymentBadge({ status }: { status: string }) {
         whiteSpace: "nowrap",
         background: style.bg,
         color: style.text,
+        transition: "transform 0.15s ease, box-shadow 0.15s ease",
+        cursor: "default",
       }}
     >
       <span
@@ -64,6 +67,7 @@ export function DeliveryBadge({ status }: { status?: string }) {
   const style = DELIVERY_STYLES[status] || { bg: "#E4E5E7", text: "#44474A", dot: "#44474A", label: status }
   return (
     <span
+      className="od-badge"
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -75,6 +79,8 @@ export function DeliveryBadge({ status }: { status?: string }) {
         whiteSpace: "nowrap",
         background: style.bg,
         color: style.text,
+        transition: "transform 0.15s ease, box-shadow 0.15s ease",
+        cursor: "default",
       }}
     >
       <span
@@ -98,6 +104,7 @@ export function FulfillmentBadge({ fulfilled }: { fulfilled: boolean }) {
   if (fulfilled) {
     return (
       <span
+        className="od-badge"
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -109,6 +116,8 @@ export function FulfillmentBadge({ fulfilled }: { fulfilled: boolean }) {
           whiteSpace: "nowrap",
           background: "#E4E5E7",
           color: "#44474A",
+          transition: "transform 0.15s ease, box-shadow 0.15s ease",
+          cursor: "default",
         }}
       >
         <span
@@ -126,6 +135,7 @@ export function FulfillmentBadge({ fulfilled }: { fulfilled: boolean }) {
   }
   return (
     <span
+      className="od-badge"
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -137,6 +147,8 @@ export function FulfillmentBadge({ fulfilled }: { fulfilled: boolean }) {
         whiteSpace: "nowrap",
         background: "#FED3D1",
         color: "#9E2B25",
+        transition: "transform 0.15s ease, box-shadow 0.15s ease",
+        cursor: "default",
       }}
     >
       <span

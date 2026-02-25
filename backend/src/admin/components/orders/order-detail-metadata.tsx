@@ -15,6 +15,7 @@ const sectionStyle: React.CSSProperties = {
   borderRadius: "10px",
   padding: "20px",
   marginBottom: "16px",
+  transition: "box-shadow 0.25s ease, transform 0.25s ease",
 }
 
 const sectionTitleStyle: React.CSSProperties = {
@@ -40,8 +41,11 @@ const rowStyle: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  padding: "8px 0",
+  padding: "8px 4px",
   borderBottom: "1px solid #F1F1F1",
+  borderRadius: "4px",
+  margin: "0 -4px",
+  transition: "background 0.12s ease",
 }
 
 const labelStyle: React.CSSProperties = {
@@ -131,19 +135,19 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
     ""
 
   return (
-    <div style={sectionStyle}>
+    <div className="od-card" style={sectionStyle}>
       <div style={sectionTitleStyle}>Order Data</div>
 
       {/* ═══════════ FULFILLMENT ═══════════ */}
 
       {/* Book Sent */}
-      <div style={rowStyle}>
+      <div className="od-row-hover" style={rowStyle}>
         <span style={labelStyle}>Book Sent</span>
         <BookSentToggle sent={bookSent} onClick={handleBookSentToggle} />
       </div>
 
       {/* Tags */}
-      <div style={rowStyle}>
+      <div className="od-row-hover" style={rowStyle}>
         <span style={labelStyle}>Product Tag</span>
         <OrderTag
           tag={displayTag}
@@ -155,7 +159,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
       <div style={groupTitleStyle}>Payment</div>
 
       {/* Payment Gateway ID */}
-      <div style={rowStyle}>
+      <div className="od-row-hover" style={rowStyle}>
         <span style={labelStyle}>Payment ID</span>
         {gatewayPaymentId ? (
           <code style={codeStyle}>{gatewayPaymentId}</code>
@@ -168,7 +172,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
       <div style={groupTitleStyle}>BaseLinker</div>
 
       {/* BaseLinker Status */}
-      <div style={rowStyle}>
+      <div className="od-row-hover" style={rowStyle}>
         <span style={labelStyle}>Status</span>
         {deliveryStatus ? (
           <DeliveryBadge status={deliveryStatus} />
@@ -178,7 +182,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
       </div>
 
       {/* BaseLinker Order ID */}
-      <div style={rowStyle}>
+      <div className="od-row-hover" style={rowStyle}>
         <span style={labelStyle}>Order ID</span>
         <span style={valueStyle}>
           {baselinkerOrderId || <span style={dashStyle}>&mdash;</span>}
@@ -189,7 +193,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
       <div style={groupTitleStyle}>Fakturoid</div>
 
       {/* Fakturoid Invoice ID */}
-      <div style={rowStyle}>
+      <div className="od-row-hover" style={rowStyle}>
         <span style={labelStyle}>Invoice ID</span>
         {fakturoidInvoiceId ? (
           <code style={codeStyle}>{fakturoidInvoiceId}</code>
@@ -199,16 +203,15 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
       </div>
 
       {/* Fakturoid Invoice Link */}
-      <div style={rowStyle}>
+      <div className="od-row-hover" style={rowStyle}>
         <span style={labelStyle}>Invoice Link</span>
         {fakturoidInvoiceUrl ? (
           <a
             href={fakturoidInvoiceUrl}
             target="_blank"
             rel="noopener noreferrer"
+            className="od-link"
             style={linkStyle}
-            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
           >
             Open in Fakturoid &rarr;
           </a>
@@ -221,7 +224,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
       <div style={groupTitleStyle}>QuickBooks</div>
 
       {/* QuickBooks Invoice ID */}
-      <div style={rowStyle}>
+      <div className="od-row-hover" style={rowStyle}>
         <span style={labelStyle}>Invoice ID</span>
         {quickbooksInvoiceId ? (
           <code style={codeStyle}>{quickbooksInvoiceId}</code>
@@ -238,9 +241,8 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
             href={quickbooksInvoiceUrl}
             target="_blank"
             rel="noopener noreferrer"
+            className="od-link"
             style={linkStyle}
-            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
           >
             Open in QuickBooks &rarr;
           </a>

@@ -1,33 +1,12 @@
-import React from "react"
+import React, { useState, useEffect } from "react"
+import { toast } from "@medusajs/ui"
+import { useUpdateOrderDetails } from "../../hooks/use-order-actions"
+import { formatCurrency } from "../../lib/format-currency"
 
 interface OrderDetailCustomerProps {
   order: any
   orderCount?: number
   totalSpent?: number
-}
-
-const sectionStyle: React.CSSProperties = {
-  background: "#FFFFFF",
-  border: "1px solid #E1E3E5",
-  borderRadius: "10px",
-  padding: "16px 20px",
-  marginBottom: "16px",
-}
-
-const labelStyle: React.CSSProperties = {
-  fontSize: "12px",
-  fontWeight: 600,
-  color: "#6D7175",
-  textTransform: "uppercase",
-  letterSpacing: "0.5px",
-  marginBottom: "6px",
-  marginTop: "16px",
-}
-
-const valueStyle: React.CSSProperties = {
-  fontSize: "13px",
-  color: "#1A1A1A",
-  lineHeight: 1.5,
 }
 
 const FLAGS: Record<string, string> = {
@@ -42,6 +21,7 @@ const FLAGS: Record<string, string> = {
   HU: "\u{1F1ED}\u{1F1FA}",
   LU: "\u{1F1F1}\u{1F1FA}",
   DK: "\u{1F1E9}\u{1F1F0}",
+  EE: "\u{1F1EA}\u{1F1EA}",
 }
 
 const COUNTRY_NAMES: Record<string, string> = {
@@ -56,7 +36,12 @@ const COUNTRY_NAMES: Record<string, string> = {
   HU: "Hungary",
   LU: "Luxembourg",
   DK: "Denmark",
+  EE: "Estonia",
 }
+
+const COUNTRY_OPTIONS = Object.entries(COUNTRY_NAMES)
+  .map(([code, name]) => ({ code: code.toLowerCase(), name }))
+  .sort((a, b) => a.name.localeCompare(b.name))
 
 function buildMapUrl(addr: any): string {
   const parts = [
@@ -70,24 +55,224 @@ function buildMapUrl(addr: any): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parts.join(", "))}`
 }
 
-function renderAddress(addr: any) {
+// ═══════════════════════════════════════════
+// INLINE INPUT COMPONENT
+// ═══════════════════════════════════════════
+function InlineInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  type?: string
+}) {
+  return (
+    <div style={{ marginBottom: "10px" }}>
+      <label
+        style={{
+          display: "block",
+          fontSize: "11px",
+          fontWeight: 600,
+          color: "#6D7175",
+          textTransform: "uppercase",
+          letterSpacing: "0.3px",
+          marginBottom: "4px",
+        }}
+      >
+        {label}
+      </label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="od-input"
+        style={{
+          width: "100%",
+          padding: "7px 10px",
+          border: "1px solid #E1E3E5",
+          borderRadius: "6px",
+          fontSize: "13px",
+          color: "#1A1A1A",
+          outline: "none",
+          boxSizing: "border-box",
+          fontFamily: "inherit",
+          transition: "border-color 0.2s, box-shadow 0.2s",
+        }}
+      />
+    </div>
+  )
+}
+
+function InlineSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  options: { code: string; name: string }[]
+}) {
+  return (
+    <div style={{ marginBottom: "10px" }}>
+      <label
+        style={{
+          display: "block",
+          fontSize: "11px",
+          fontWeight: 600,
+          color: "#6D7175",
+          textTransform: "uppercase",
+          letterSpacing: "0.3px",
+          marginBottom: "4px",
+        }}
+      >
+        {label}
+      </label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="od-input"
+        style={{
+          width: "100%",
+          padding: "7px 10px",
+          border: "1px solid #E1E3E5",
+          borderRadius: "6px",
+          fontSize: "13px",
+          color: "#1A1A1A",
+          outline: "none",
+          boxSizing: "border-box",
+          fontFamily: "inherit",
+          background: "#FFFFFF",
+          transition: "border-color 0.2s, box-shadow 0.2s",
+          cursor: "pointer",
+        }}
+      >
+        <option value="">Select country</option>
+        {options.map((opt) => (
+          <option key={opt.code} value={opt.code}>
+            {opt.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════
+// EDIT / SAVE BUTTON BAR
+// ═══════════════════════════════════════════
+function EditSaveBar({
+  editing,
+  onEdit,
+  onSave,
+  onCancel,
+  isLoading,
+}: {
+  editing: boolean
+  onEdit: () => void
+  onSave: () => void
+  onCancel: () => void
+  isLoading?: boolean
+}) {
+  if (editing) {
+    return (
+      <div style={{ display: "flex", gap: "6px" }}>
+        <button
+          onClick={onCancel}
+          className="od-btn"
+          style={{
+            padding: "4px 10px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            fontWeight: 500,
+            cursor: "pointer",
+            border: "1px solid #E1E3E5",
+            background: "#FFFFFF",
+            color: "#1A1A1A",
+            transition: "all 0.15s ease",
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={onSave}
+          disabled={isLoading}
+          className="od-btn-primary"
+          style={{
+            padding: "4px 10px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            fontWeight: 500,
+            cursor: isLoading ? "default" : "pointer",
+            border: "1px solid #008060",
+            background: "#008060",
+            color: "#FFFFFF",
+            opacity: isLoading ? 0.6 : 1,
+            transition: "all 0.15s ease",
+          }}
+        >
+          {isLoading ? "Saving..." : "Save"}
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <button
+      onClick={onEdit}
+      className="od-edit-btn"
+      style={{
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        padding: "4px",
+        color: "#6D7175",
+        display: "flex",
+        alignItems: "center",
+        borderRadius: "4px",
+        transition: "all 0.15s ease",
+      }}
+      title="Edit"
+    >
+      <svg
+        width="15"
+        height="15"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        <path d="M13.586 3.586a2 2 0 112.828 2.828l-10 10L3 17.5l1.086-3.414 10-10z" />
+      </svg>
+    </button>
+  )
+}
+
+// ═══════════════════════════════════════════
+// ADDRESS DISPLAY (read-only)
+// ═══════════════════════════════════════════
+function AddressDisplay({ addr }: { addr: any }) {
   const countryCode = addr.country_code?.toUpperCase() || ""
   const flag = FLAGS[countryCode] || ""
   const countryName = COUNTRY_NAMES[countryCode] || countryCode
   const mapUrl = buildMapUrl(addr)
 
   return (
-    <div style={valueStyle}>
-      {addr.first_name || addr.last_name ? (
-        <div>
-          {[addr.first_name, addr.last_name].filter(Boolean).join(" ")}
-        </div>
-      ) : null}
+    <div style={{ fontSize: "13px", color: "#1A1A1A", lineHeight: 1.5 }}>
+      {(addr.first_name || addr.last_name) && (
+        <div>{[addr.first_name, addr.last_name].filter(Boolean).join(" ")}</div>
+      )}
+      {addr.company && <div style={{ color: "#6D7175" }}>{addr.company}</div>}
       {addr.address_1 && <div>{addr.address_1}</div>}
       {addr.address_2 && <div>{addr.address_2}</div>}
-      <div>
-        {[addr.postal_code, addr.city].filter(Boolean).join(" ")}
-      </div>
+      <div>{[addr.postal_code, addr.city].filter(Boolean).join(" ")}</div>
       {addr.province && <div>{addr.province}</div>}
       <div>
         {flag} {countryName}
@@ -99,34 +284,251 @@ function renderAddress(addr: any) {
         href={mapUrl}
         target="_blank"
         rel="noopener noreferrer"
+        className="od-link"
         style={{
-          display: "inline-block",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "4px",
           fontSize: "12px",
           color: "#2C6ECB",
           textDecoration: "none",
-          marginTop: "4px",
+          marginTop: "6px",
+          transition: "color 0.15s",
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-        onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
       >
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        >
+          <path d="M10 2C6.69 2 4 4.69 4 8c0 5.25 6 10 6 10s6-4.75 6-10c0-3.31-2.69-6-6-6z" />
+          <circle cx="10" cy="8" r="2" />
+        </svg>
         View map
       </a>
     </div>
   )
 }
 
+// ═══════════════════════════════════════════
+// ADDRESS FORM (editable)
+// ═══════════════════════════════════════════
+function AddressForm({
+  addr,
+  onChange,
+}: {
+  addr: Record<string, string>
+  onChange: (field: string, value: string) => void
+}) {
+  return (
+    <>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+        <InlineInput
+          label="First name"
+          value={addr.first_name || ""}
+          onChange={(v) => onChange("first_name", v)}
+        />
+        <InlineInput
+          label="Last name"
+          value={addr.last_name || ""}
+          onChange={(v) => onChange("last_name", v)}
+        />
+      </div>
+      <InlineInput
+        label="Company"
+        value={addr.company || ""}
+        onChange={(v) => onChange("company", v)}
+        placeholder="Optional"
+      />
+      <InlineInput
+        label="Address"
+        value={addr.address_1 || ""}
+        onChange={(v) => onChange("address_1", v)}
+      />
+      <InlineInput
+        label="Apartment, suite, etc."
+        value={addr.address_2 || ""}
+        onChange={(v) => onChange("address_2", v)}
+        placeholder="Optional"
+      />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+        <InlineInput
+          label="Postal code"
+          value={addr.postal_code || ""}
+          onChange={(v) => onChange("postal_code", v)}
+        />
+        <InlineInput
+          label="City"
+          value={addr.city || ""}
+          onChange={(v) => onChange("city", v)}
+        />
+      </div>
+      <InlineInput
+        label="Province / State"
+        value={addr.province || ""}
+        onChange={(v) => onChange("province", v)}
+        placeholder="Optional"
+      />
+      <InlineSelect
+        label="Country"
+        value={addr.country_code || ""}
+        options={COUNTRY_OPTIONS}
+        onChange={(v) => onChange("country_code", v)}
+      />
+      <InlineInput
+        label="Phone"
+        value={addr.phone || ""}
+        onChange={(v) => onChange("phone", v)}
+        type="tel"
+      />
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════
+// MAIN COMPONENT
+// ═══════════════════════════════════════════
 export function OrderDetailCustomer({
   order,
   orderCount,
   totalSpent,
 }: OrderDetailCustomerProps) {
+  const updateOrder = useUpdateOrderDetails()
   const addr = order.shipping_address
+  const billing = order.billing_address
   const name = addr
     ? [addr.first_name, addr.last_name].filter(Boolean).join(" ")
     : ""
 
+  // ── Edit states ──
+  const [editingContact, setEditingContact] = useState(false)
+  const [editingShipping, setEditingShipping] = useState(false)
+  const [editingBilling, setEditingBilling] = useState(false)
+
+  // ── Contact form ──
+  const [contactEmail, setContactEmail] = useState(order.email || "")
+  const [contactPhone, setContactPhone] = useState(addr?.phone || "")
+
+  // ── Shipping address form ──
+  const [shippingAddr, setShippingAddr] = useState<Record<string, string>>({})
+
+  // ── Billing address form ──
+  const [billingAddr, setBillingAddr] = useState<Record<string, string>>({})
+
+  // Sync form state when order changes
+  useEffect(() => {
+    setContactEmail(order.email || "")
+    setContactPhone(addr?.phone || "")
+  }, [order.email, addr?.phone])
+
+  // ── Helpers ──
+  function initShippingForm() {
+    setShippingAddr({
+      first_name: addr?.first_name || "",
+      last_name: addr?.last_name || "",
+      company: addr?.company || "",
+      address_1: addr?.address_1 || "",
+      address_2: addr?.address_2 || "",
+      postal_code: addr?.postal_code || "",
+      city: addr?.city || "",
+      province: addr?.province || "",
+      country_code: addr?.country_code || "",
+      phone: addr?.phone || "",
+    })
+  }
+
+  function initBillingForm() {
+    setBillingAddr({
+      first_name: billing?.first_name || "",
+      last_name: billing?.last_name || "",
+      company: billing?.company || "",
+      address_1: billing?.address_1 || "",
+      address_2: billing?.address_2 || "",
+      postal_code: billing?.postal_code || "",
+      city: billing?.city || "",
+      province: billing?.province || "",
+      country_code: billing?.country_code || "",
+      phone: billing?.phone || "",
+    })
+  }
+
+  // ── Save handlers ──
+  function handleSaveContact() {
+    updateOrder.mutate(
+      {
+        orderId: order.id,
+        email: contactEmail,
+        shipping_address: { ...addr, phone: contactPhone },
+      },
+      {
+        onSuccess: () => {
+          toast.success("Contact information updated")
+          setEditingContact(false)
+        },
+        onError: () => toast.error("Failed to update contact info"),
+      }
+    )
+  }
+
+  function handleSaveShipping() {
+    updateOrder.mutate(
+      {
+        orderId: order.id,
+        shipping_address: shippingAddr,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Shipping address updated")
+          setEditingShipping(false)
+        },
+        onError: () => toast.error("Failed to update shipping address"),
+      }
+    )
+  }
+
+  function handleSaveBilling() {
+    updateOrder.mutate(
+      {
+        orderId: order.id,
+        billing_address: billingAddr,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Billing address updated")
+          setEditingBilling(false)
+        },
+        onError: () => toast.error("Failed to update billing address"),
+      }
+    )
+  }
+
+  // ── Section label style ──
+  const sectionLabel: React.CSSProperties = {
+    fontSize: "12px",
+    fontWeight: 600,
+    color: "#6D7175",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    marginBottom: "6px",
+    marginTop: "16px",
+  }
+
   return (
-    <div style={sectionStyle}>
+    <div
+      className="od-card"
+      style={{
+        background: "#FFFFFF",
+        border: "1px solid #E1E3E5",
+        borderRadius: "10px",
+        padding: "16px 20px",
+        marginBottom: "16px",
+        transition: "box-shadow 0.2s ease, transform 0.2s ease",
+      }}
+    >
+      {/* Header */}
       <div
         style={{
           display: "flex",
@@ -144,50 +546,160 @@ export function OrderDetailCustomer({
       <div style={{ marginBottom: "2px" }}>
         <a
           href={order.customer_id ? `/app/customers/${order.customer_id}` : "#"}
+          className="od-link"
           style={{
             fontSize: "13px",
             fontWeight: 500,
             color: "#2C6ECB",
             textDecoration: "none",
+            transition: "color 0.15s",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-          onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
         >
           {name || "Unknown customer"}
         </a>
       </div>
 
-      {/* Order count */}
+      {/* Order count + Total spent */}
       {orderCount !== undefined && (
-        <div style={{ fontSize: "12px", color: "#008060", marginBottom: "8px" }}>
+        <div style={{ fontSize: "12px", color: "#008060", marginBottom: "2px" }}>
           {orderCount} {orderCount === 1 ? "order" : "orders"}
+          {totalSpent !== undefined && totalSpent > 0 && (
+            <span style={{ color: "#6D7175", marginLeft: "8px" }}>
+              {formatCurrency(totalSpent, order.currency_code)} spent
+            </span>
+          )}
         </div>
       )}
 
-      {/* Contact information */}
-      <div style={labelStyle}>Contact information</div>
-      {order.email && (
-        <div style={{ ...valueStyle, color: "#2C6ECB", marginBottom: "2px" }}>
-          {order.email}
-        </div>
-      )}
-      <div style={{ ...valueStyle, color: "#6D7175" }}>
-        {addr?.phone || "No phone number"}
+      {/* ═══════════ CONTACT INFORMATION ═══════════ */}
+      <div
+        style={{
+          ...sectionLabel,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span>Contact information</span>
+        <EditSaveBar
+          editing={editingContact}
+          onEdit={() => {
+            setContactEmail(order.email || "")
+            setContactPhone(addr?.phone || "")
+            setEditingContact(true)
+          }}
+          onSave={handleSaveContact}
+          onCancel={() => setEditingContact(false)}
+          isLoading={updateOrder.isPending}
+        />
       </div>
 
-      {/* Shipping Address */}
-      {addr && (
+      {editingContact ? (
+        <div>
+          <InlineInput
+            label="Email"
+            value={contactEmail}
+            onChange={setContactEmail}
+            type="email"
+          />
+          <InlineInput
+            label="Phone"
+            value={contactPhone}
+            onChange={setContactPhone}
+            type="tel"
+          />
+        </div>
+      ) : (
         <>
-          <div style={labelStyle}>Shipping address</div>
-          {renderAddress(addr)}
+          {order.email && (
+            <div
+              style={{
+                fontSize: "13px",
+                color: "#2C6ECB",
+                marginBottom: "2px",
+                padding: "2px 0",
+              }}
+            >
+              {order.email}
+            </div>
+          )}
+          <div style={{ fontSize: "13px", color: "#6D7175" }}>
+            {addr?.phone || "No phone number"}
+          </div>
         </>
       )}
 
-      {/* Billing Address */}
-      {order.billing_address && (
+      {/* ═══════════ SHIPPING ADDRESS ═══════════ */}
+      {addr && (
         <>
-          <div style={labelStyle}>Billing address</div>
-          {renderAddress(order.billing_address)}
+          <div
+            style={{
+              ...sectionLabel,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <span>Shipping address</span>
+            <EditSaveBar
+              editing={editingShipping}
+              onEdit={() => {
+                initShippingForm()
+                setEditingShipping(true)
+              }}
+              onSave={handleSaveShipping}
+              onCancel={() => setEditingShipping(false)}
+              isLoading={updateOrder.isPending}
+            />
+          </div>
+
+          {editingShipping ? (
+            <AddressForm
+              addr={shippingAddr}
+              onChange={(field, value) =>
+                setShippingAddr((prev) => ({ ...prev, [field]: value }))
+              }
+            />
+          ) : (
+            <AddressDisplay addr={addr} />
+          )}
+        </>
+      )}
+
+      {/* ═══════════ BILLING ADDRESS ═══════════ */}
+      {billing && (
+        <>
+          <div
+            style={{
+              ...sectionLabel,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <span>Billing address</span>
+            <EditSaveBar
+              editing={editingBilling}
+              onEdit={() => {
+                initBillingForm()
+                setEditingBilling(true)
+              }}
+              onSave={handleSaveBilling}
+              onCancel={() => setEditingBilling(false)}
+              isLoading={updateOrder.isPending}
+            />
+          </div>
+
+          {editingBilling ? (
+            <AddressForm
+              addr={billingAddr}
+              onChange={(field, value) =>
+                setBillingAddr((prev) => ({ ...prev, [field]: value }))
+              }
+            />
+          ) : (
+            <AddressDisplay addr={billing} />
+          )}
         </>
       )}
     </div>

@@ -135,6 +135,35 @@ export function useCreateFakturoidInvoice() {
 }
 
 // ═══════════════════════════════════════════
+// Update Order Details (address, email, etc.)
+// ═══════════════════════════════════════════
+export function useUpdateOrderDetails() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      orderId,
+      email,
+      shipping_address,
+      billing_address,
+    }: {
+      orderId: string
+      email?: string
+      shipping_address?: Record<string, any>
+      billing_address?: Record<string, any>
+    }) => {
+      return sdk.client.fetch(`/admin/custom-orders/${orderId}/update`, {
+        method: "POST",
+        body: { email, shipping_address, billing_address },
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["custom-order-detail"] })
+      queryClient.invalidateQueries({ queryKey: ["custom-orders-list"] })
+    },
+  })
+}
+
+// ═══════════════════════════════════════════
 // Customer Stats (order count + total spent)
 // ═══════════════════════════════════════════
 export function useCustomerStats(email: string | undefined) {

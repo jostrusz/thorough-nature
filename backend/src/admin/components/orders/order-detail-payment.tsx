@@ -1,14 +1,9 @@
 import React from "react"
 import { PaymentBadge } from "./order-badges"
+import { formatCurrency } from "../../lib/format-currency"
 
 interface OrderDetailPaymentProps {
   order: any
-}
-
-function formatCurrency(amount: number, currency?: string) {
-  const c = (currency || "EUR").toUpperCase()
-  if (c === "EUR") return `\u20AC${amount.toFixed(2)}`
-  return `${amount.toFixed(2)} ${c}`
 }
 
 function getPaymentStatus(order: any): string {
@@ -21,20 +16,15 @@ function getPaymentStatus(order: any): string {
   return "pending"
 }
 
-const sectionStyle: React.CSSProperties = {
-  background: "#FFFFFF",
-  border: "1px solid #E1E3E5",
-  borderRadius: "10px",
-  marginBottom: "16px",
-  overflow: "hidden",
-}
-
 const rowStyle: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  padding: "6px 0",
+  padding: "6px 4px",
   fontSize: "13px",
+  borderRadius: "4px",
+  margin: "0 -4px",
+  transition: "background 0.12s ease",
 }
 
 export function OrderDetailPayment({ order }: OrderDetailPaymentProps) {
@@ -71,7 +61,17 @@ export function OrderDetailPayment({ order }: OrderDetailPaymentProps) {
   )
 
   return (
-    <div style={sectionStyle}>
+    <div
+      className="od-card"
+      style={{
+        background: "#FFFFFF",
+        border: "1px solid #E1E3E5",
+        borderRadius: "10px",
+        marginBottom: "16px",
+        overflow: "hidden",
+        transition: "box-shadow 0.25s ease, transform 0.25s ease",
+      }}
+    >
       {/* Header with payment badge */}
       <div
         style={{
@@ -88,7 +88,7 @@ export function OrderDetailPayment({ order }: OrderDetailPaymentProps) {
       {/* Payment breakdown */}
       <div style={{ padding: "16px 20px" }}>
         {/* Subtotal */}
-        <div style={rowStyle}>
+        <div className="od-row-hover" style={rowStyle}>
           <span style={{ color: "#6D7175" }}>
             Subtotal
             <span style={{ marginLeft: "8px", color: "#8C9196" }}>
@@ -100,7 +100,7 @@ export function OrderDetailPayment({ order }: OrderDetailPaymentProps) {
 
         {/* Discount */}
         {discountTotal > 0 && (
-          <div style={rowStyle}>
+          <div className="od-row-hover" style={rowStyle}>
             <span style={{ color: "#6D7175" }}>
               Discount
               {discountCode && (
@@ -126,7 +126,7 @@ export function OrderDetailPayment({ order }: OrderDetailPaymentProps) {
         )}
 
         {/* Shipping */}
-        <div style={rowStyle}>
+        <div className="od-row-hover" style={rowStyle}>
           <span style={{ color: "#6D7175" }}>
             Shipping
             <span style={{ marginLeft: "8px", color: "#8C9196", fontSize: "12px" }}>
@@ -142,11 +142,11 @@ export function OrderDetailPayment({ order }: OrderDetailPaymentProps) {
 
         {/* Taxes */}
         {taxTotal > 0 && (
-          <div style={rowStyle}>
+          <div className="od-row-hover" style={rowStyle}>
             <span style={{ color: "#6D7175" }}>
               Taxes
               <span style={{ marginLeft: "8px", color: "#8C9196", fontSize: "12px" }}>
-                {order.metadata?.tax_rate || "BTW"} (Included)
+                {order.metadata?.tax_rate || "VAT"} (Included)
               </span>
             </span>
             <span style={{ color: "#1A1A1A" }}>
@@ -183,7 +183,7 @@ export function OrderDetailPayment({ order }: OrderDetailPaymentProps) {
             paddingTop: "8px",
           }}
         >
-          <div style={rowStyle}>
+          <div className="od-row-hover" style={rowStyle}>
             <span style={{ color: "#1A1A1A", fontWeight: 500 }}>
               {paymentStatus === "paid" || paymentStatus === "captured"
                 ? "Paid"
@@ -204,7 +204,6 @@ export function OrderDetailPayment({ order }: OrderDetailPaymentProps) {
               const provider = payment.provider_id
                 ? payment.provider_id.replace("pp_", "").replace(/_/g, " ")
                 : "Payment"
-              // Extract gateway Payment ID from payment.data (Stripe, Mollie, etc.)
               const gatewayId =
                 payment.data?.id ||
                 payment.data?.payment_intent ||
