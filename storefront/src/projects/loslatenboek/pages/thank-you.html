@@ -1053,21 +1053,35 @@ body { background: var(--bg); }
   }
 
   // ────────────────────────────────────────────────────
-  // 4. Facebook Pixel — Purchase event
+  // 4. Facebook Pixel + CAPI — Purchase event (deduplicated via MetaTracker)
   // ────────────────────────────────────────────────────
-  if (typeof fbq === 'function') {
-    var contentIds = [PROJECT_CONFIG.mainProduct.handle];
-    if (upsellPurchased || orderBumpActive) contentIds.push(PROJECT_CONFIG.upsellProduct.handle);
-    var numItems = bundleQty + ((upsellPurchased || orderBumpActive) ? 1 : 0);
-    fbq('track', 'Purchase', {
-      content_ids: contentIds,
+  if (typeof MetaTracker !== 'undefined') {
+    var purchaseContentIds = [PROJECT_CONFIG.mainProduct.handle];
+    if (upsellPurchased || orderBumpActive) purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
+    var purchaseNumItems = bundleQty + ((upsellPurchased || orderBumpActive) ? 1 : 0);
+
+    // Build user_data from customer info for maximum EMQ
+    var purchaseUserData = {};
+    if (customer) {
+      if (customer.email) purchaseUserData.em = customer.email;
+      if (customer.firstName) purchaseUserData.fn = customer.firstName;
+      if (customer.lastName) purchaseUserData.ln = customer.lastName;
+      if (customer.phone) purchaseUserData.ph = customer.phone;
+      if (customer.city) purchaseUserData.ct = customer.city;
+      if (customer.postalCode) purchaseUserData.zp = customer.postalCode;
+      if (customer.country) purchaseUserData.country = customer.country;
+      if (customer.region) purchaseUserData.st = customer.region;
+    }
+
+    MetaTracker.trackPurchase({
+      content_ids: purchaseContentIds,
+      contents: purchaseContentIds.map(function(id) { return { id: id, quantity: 1 }; }),
       value: totalPrice,
-      currency: 'EUR',
-      content_type: 'product',
-      order_id: orderId,
-      num_items: numItems
-    });
-    console.log('TY: FB Pixel Purchase event — €' + totalPrice + ' (' + numItems + ' items)');
+      currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
+      num_items: purchaseNumItems,
+      order_id: orderId
+    }, purchaseUserData);
+    console.log('TY: Purchase event (browser + CAPI) — €' + totalPrice + ' (' + purchaseNumItems + ' items)');
   }
 
   // ────────────────────────────────────────────────────

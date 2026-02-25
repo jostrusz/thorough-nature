@@ -3082,11 +3082,11 @@ body {
       localStorage.setItem('medusa_order_bump', checkoutOrderBump ? 'true' : 'false');
       localStorage.setItem('medusa_checkout_total', checkoutTotal);
 
-      // FB Pixel: InitiateCheckout
-      if (typeof fbq !== 'undefined') {
+      // FB Pixel + CAPI: InitiateCheckout (deduplicated via MetaTracker)
+      if (typeof MetaTracker !== 'undefined') {
         var contentIds = [PROJECT_CONFIG.mainProduct.handle];
         if (checkoutOrderBump) contentIds.push(PROJECT_CONFIG.upsellProduct.handle);
-        fbq('track', 'InitiateCheckout', {
+        MetaTracker.trackInitiateCheckout({
           content_ids: contentIds,
           value: checkoutTotal,
           currency: PROJECT_CONFIG.mainProduct.currency,

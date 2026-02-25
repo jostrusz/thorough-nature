@@ -61,6 +61,7 @@ const medusaConfig = {
     // ═══ Custom modules ═══
     { resolve: "./src/modules/billing-entity" },
     { resolve: "./src/modules/gateway-config" },
+    { resolve: "./src/modules/meta-pixel" },
     // ═══ Core modules ═══
     {
       key: Modules.FILE,
