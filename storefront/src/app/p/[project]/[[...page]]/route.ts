@@ -43,10 +43,13 @@ export async function GET(
     generateProjectConfigScript(config, basePath)
   )
 
+  // Fetch pixel_id dynamically from backend admin settings (source of truth)
+  const pixelId = await fetchPixelId(config)
+
   // Inject Facebook Pixel + CAPI tracking library (replace external script reference)
   html = html.replace(
     /<script\s+src=["']js\/pixel\.js["']\s*><\/script>/gi,
-    generatePixelScript(config)
+    generatePixelScript(config, pixelId)
   )
 
   // Rewrite internal .html links to clean URLs with correct base path
@@ -59,6 +62,40 @@ export async function GET(
       "Cache-Control": "public, max-age=60, s-maxage=300",
     },
   })
+}
+
+/**
+ * Fetch pixel_id from backend admin API (source of truth).
+ * Falls back to config.json facebookPixelId if backend is unreachable.
+ * Result is cached per-request (Next.js fetch cache handles dedup).
+ */
+async function fetchPixelId(config: ProjectConfig): Promise<string> {
+  try {
+    const url = `${config.medusaUrl}/store/meta-pixel-config/${config.slug}`
+    const res = await fetch(url, {
+      headers: {
+        "x-publishable-api-key": config.publishableApiKey || "",
+      },
+      next: { revalidate: 60 }, // Cache for 60s on server
+    })
+
+    if (res.ok) {
+      const data = await res.json()
+      if (data.enabled && data.pixel_id) {
+        return data.pixel_id
+      }
+      // Pixel disabled in admin — return empty to skip injection
+      if (data.enabled === false) {
+        return ""
+      }
+    }
+  } catch (e) {
+    // Backend unreachable — fall through to config.json
+    console.warn(`[Pixel] Failed to fetch pixel config from backend for ${config.slug}:`, e)
+  }
+
+  // Fallback: use static config.json value
+  return config.facebookPixelId || ""
 }
 
 function generateProjectConfigScript(config: ProjectConfig, basePath: string): string {
@@ -90,13 +127,12 @@ PROJECT_CONFIG.getRegionId = function(countryCode) {
 </script>`
 }
 
-function generatePixelScript(config: ProjectConfig): string {
-  if (!config.facebookPixelId) {
+function generatePixelScript(config: ProjectConfig, pixelId: string): string {
+  if (!pixelId) {
     return "<!-- Facebook Pixel: not configured -->"
   }
 
   // The pixel ID and project slug are embedded in the tracking library
-  const pixelId = config.facebookPixelId
   const projectSlug = config.slug
 
   return `<script>
