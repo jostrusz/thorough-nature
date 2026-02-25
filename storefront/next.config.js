@@ -49,7 +49,11 @@ const nextConfig = {
   },
   serverRuntimeConfig: {
     port: process.env.PORT || 3000
-  }
+  },
+  // Ensure project HTML files are available in production builds (Railway)
+  outputFileTracingIncludes: {
+    '/p/\\[project\\]/\\[\\[\\.\\.\\.page\\]\\]': ['./src/projects/**/*'],
+  },
 }
 
 module.exports = nextConfig

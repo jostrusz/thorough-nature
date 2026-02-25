@@ -6,6 +6,15 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
 const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "us"
 
+// MarketingHQ: Project domain mapping from env
+// Format: "loslatenboek.nl=loslatenboek,example.com=other-project"
+const PROJECT_DOMAINS: Record<string, string> = {}
+const domainMapping = process.env.PROJECT_DOMAIN_MAP || ""
+domainMapping.split(",").filter(Boolean).forEach((entry) => {
+  const [domain, slug] = entry.split("=")
+  if (domain && slug) PROJECT_DOMAINS[domain.trim()] = slug.trim()
+})
+
 const regionMapCache = {
   regionMap: new Map<string, HttpTypes.StoreRegion>(),
   regionMapUpdated: Date.now(),
@@ -88,6 +97,29 @@ async function getCountryCode(
  * Middleware to handle region selection and onboarding status.
  */
 export async function middleware(request: NextRequest) {
+  const hostname = request.headers.get("host") || ""
+  const cleanHost = hostname.split(":")[0].replace(/^www\./, "")
+  const pathname = request.nextUrl.pathname
+
+  // ─── MarketingHQ: Project domain routing ───
+  // If hostname matches a project domain, rewrite to /p/{slug}/...
+  const projectSlug = PROJECT_DOMAINS[cleanHost]
+  if (projectSlug) {
+    const projectPath = pathname === "/" ? "" : pathname.replace(/^\//, "")
+    const rewriteUrl = new URL(`/p/${projectSlug}/${projectPath}`, request.url)
+    rewriteUrl.search = request.nextUrl.search
+    const response = NextResponse.rewrite(rewriteUrl)
+    response.headers.set("x-project-domain", "true")
+    return response
+  }
+
+  // ─── MarketingHQ: /p/ path passthrough ───
+  // Let project route handler serve the HTML directly
+  if (pathname.startsWith("/p/")) {
+    return NextResponse.next()
+  }
+
+  // ─── Existing Medusa storefront logic ───
   const searchParams = request.nextUrl.searchParams
   const isOnboarding = searchParams.get("onboarding") === "true"
   const cartId = searchParams.get("cart_id")
