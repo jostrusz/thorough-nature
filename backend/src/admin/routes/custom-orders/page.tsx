@@ -15,7 +15,8 @@ import { useUpdateMetadata } from "../../hooks/use-update-metadata"
 // STYLES
 // ═══════════════════════════════════════════
 const dashboardStyle: React.CSSProperties = {
-  maxWidth: "100%",
+  width: "1400px",
+  maxWidth: "calc(100vw - 280px)",
   margin: "0 auto",
   padding: "24px 32px",
   fontFamily:

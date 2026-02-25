@@ -49,7 +49,8 @@ function LoadingSpinner() {
 }
 
 const pageStyle: React.CSSProperties = {
-  maxWidth: "100%",
+  width: "1000px",
+  maxWidth: "calc(100vw - 280px)",
   margin: "0 auto",
   padding: "24px 32px",
   fontFamily:
