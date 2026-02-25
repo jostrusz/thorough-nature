@@ -21,13 +21,7 @@
     "variantId": "variant_01KJ9YQH8CA1DR2A77HNQ5AZTQ",
     "price": 35,
     "currency": "EUR",
-    "thumbnail": "",
-    "variants": {
-      "1": "variant_01KJ9YQH8CA1DR2A77HNQ5AZTQ",
-      "2": "variant_01KJ9YQH8CYMMV8GXNSRN783S8",
-      "3": "variant_01KJ9YQH8C8JS826N8P91A0888",
-      "4": "variant_01KJ9YQH8DRQQ1TEQ7PVS2Z88E"
-    }
+    "thumbnail": ""
   },
   "upsellProduct": {
     "name": "Het Leven Dat Je Verdient",
