@@ -2,20 +2,15 @@ import React from "react"
 
 interface OrderDetailCustomerProps {
   order: any
+  orderCount?: number
+  totalSpent?: number
 }
 
 const sectionStyle: React.CSSProperties = {
   background: "#FFFFFF",
   border: "1px solid #E1E3E5",
   borderRadius: "10px",
-  padding: "20px",
-  marginBottom: "16px",
-}
-
-const sectionTitleStyle: React.CSSProperties = {
-  fontSize: "14px",
-  fontWeight: 600,
-  color: "#1A1A1A",
+  padding: "16px 20px",
   marginBottom: "16px",
 }
 
@@ -46,6 +41,7 @@ const FLAGS: Record<string, string> = {
   SE: "\u{1F1F8}\u{1F1EA}",
   HU: "\u{1F1ED}\u{1F1FA}",
   LU: "\u{1F1F1}\u{1F1FA}",
+  DK: "\u{1F1E9}\u{1F1F0}",
 }
 
 const COUNTRY_NAMES: Record<string, string> = {
@@ -62,49 +58,128 @@ const COUNTRY_NAMES: Record<string, string> = {
   DK: "Denmark",
 }
 
-export function OrderDetailCustomer({ order }: OrderDetailCustomerProps) {
+function buildMapUrl(addr: any): string {
+  const parts = [
+    addr.address_1,
+    addr.address_2,
+    addr.postal_code,
+    addr.city,
+    addr.province,
+    COUNTRY_NAMES[addr.country_code?.toUpperCase()] || addr.country_code,
+  ].filter(Boolean)
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parts.join(", "))}`
+}
+
+function renderAddress(addr: any) {
+  const countryCode = addr.country_code?.toUpperCase() || ""
+  const flag = FLAGS[countryCode] || ""
+  const countryName = COUNTRY_NAMES[countryCode] || countryCode
+  const mapUrl = buildMapUrl(addr)
+
+  return (
+    <div style={valueStyle}>
+      {addr.first_name || addr.last_name ? (
+        <div>
+          {[addr.first_name, addr.last_name].filter(Boolean).join(" ")}
+        </div>
+      ) : null}
+      {addr.address_1 && <div>{addr.address_1}</div>}
+      {addr.address_2 && <div>{addr.address_2}</div>}
+      <div>
+        {[addr.postal_code, addr.city].filter(Boolean).join(" ")}
+      </div>
+      {addr.province && <div>{addr.province}</div>}
+      <div>
+        {flag} {countryName}
+      </div>
+      {addr.phone && (
+        <div style={{ color: "#6D7175", marginTop: "4px" }}>{addr.phone}</div>
+      )}
+      <a
+        href={mapUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: "inline-block",
+          fontSize: "12px",
+          color: "#2C6ECB",
+          textDecoration: "none",
+          marginTop: "4px",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+        onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+      >
+        View map
+      </a>
+    </div>
+  )
+}
+
+export function OrderDetailCustomer({
+  order,
+  orderCount,
+  totalSpent,
+}: OrderDetailCustomerProps) {
   const addr = order.shipping_address
   const name = addr
     ? [addr.first_name, addr.last_name].filter(Boolean).join(" ")
     : ""
-  const countryCode = addr?.country_code?.toUpperCase() || ""
-  const flag = FLAGS[countryCode] || ""
-  const countryName = COUNTRY_NAMES[countryCode] || countryCode
 
   return (
     <div style={sectionStyle}>
-      <div style={sectionTitleStyle}>Customer</div>
-
-      {/* Name & Email */}
-      <div style={valueStyle}>
-        <strong>{name || "Unknown customer"}</strong>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: "4px",
+        }}
+      >
+        <span style={{ fontSize: "14px", fontWeight: 600, color: "#1A1A1A" }}>
+          Customer
+        </span>
       </div>
+
+      {/* Customer name as link */}
+      <div style={{ marginBottom: "2px" }}>
+        <a
+          href={order.customer_id ? `/app/customers/${order.customer_id}` : "#"}
+          style={{
+            fontSize: "13px",
+            fontWeight: 500,
+            color: "#2C6ECB",
+            textDecoration: "none",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+          onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+        >
+          {name || "Unknown customer"}
+        </a>
+      </div>
+
+      {/* Order count */}
+      {orderCount !== undefined && (
+        <div style={{ fontSize: "12px", color: "#008060", marginBottom: "8px" }}>
+          {orderCount} {orderCount === 1 ? "order" : "orders"}
+        </div>
+      )}
+
+      {/* Contact information */}
+      <div style={labelStyle}>Contact information</div>
       {order.email && (
-        <div style={{ ...valueStyle, color: "#2C6ECB", marginTop: "2px" }}>
+        <div style={{ ...valueStyle, color: "#2C6ECB", marginBottom: "2px" }}>
           {order.email}
         </div>
       )}
-      {addr?.phone && (
-        <div style={{ ...valueStyle, color: "#6D7175", marginTop: "2px" }}>
-          {addr.phone}
-        </div>
-      )}
+      <div style={{ ...valueStyle, color: "#6D7175" }}>
+        {addr?.phone || "No phone number"}
+      </div>
 
       {/* Shipping Address */}
       {addr && (
         <>
           <div style={labelStyle}>Shipping address</div>
-          <div style={valueStyle}>
-            {addr.address_1 && <div>{addr.address_1}</div>}
-            {addr.address_2 && <div>{addr.address_2}</div>}
-            <div>
-              {[addr.postal_code, addr.city].filter(Boolean).join(" ")}
-            </div>
-            {addr.province && <div>{addr.province}</div>}
-            <div>
-              {flag} {countryName}
-            </div>
-          </div>
+          {renderAddress(addr)}
         </>
       )}
 
@@ -112,24 +187,7 @@ export function OrderDetailCustomer({ order }: OrderDetailCustomerProps) {
       {order.billing_address && (
         <>
           <div style={labelStyle}>Billing address</div>
-          <div style={valueStyle}>
-            {order.billing_address.address_1 && (
-              <div>{order.billing_address.address_1}</div>
-            )}
-            <div>
-              {[
-                order.billing_address.postal_code,
-                order.billing_address.city,
-              ]
-                .filter(Boolean)
-                .join(" ")}
-            </div>
-            <div>
-              {FLAGS[order.billing_address.country_code?.toUpperCase()] || ""}{" "}
-              {COUNTRY_NAMES[order.billing_address.country_code?.toUpperCase()] ||
-                order.billing_address.country_code}
-            </div>
-          </div>
+          {renderAddress(order.billing_address)}
         </>
       )}
     </div>
