@@ -39,8 +39,8 @@ const TEST_ORDERS: TestOrder[] = [
     metadata: {
       book_sent: true,
       tags: "Laat los wat je kapotmaakt",
-      baselinker_status: "delivered",
-      baselinker_order_id: "BL-10001",
+      dextrum_status: "DELIVERED",
+      dextrum_order_code: "NL-10001",
     },
   },
   {
@@ -60,8 +60,8 @@ const TEST_ORDERS: TestOrder[] = [
     metadata: {
       book_sent: true,
       tags: "Laat los wat je kapotmaakt",
-      baselinker_status: "sent",
-      baselinker_order_id: "BL-10002",
+      dextrum_status: "DISPATCHED",
+      dextrum_order_code: "BE-10002",
     },
   },
   {
@@ -81,7 +81,7 @@ const TEST_ORDERS: TestOrder[] = [
     metadata: {
       book_sent: false,
       tags: "Lass los was dich kaputt macht",
-      baselinker_status: "processing",
+      dextrum_status: "PROCESSED",
     },
   },
   {
@@ -120,7 +120,7 @@ const TEST_ORDERS: TestOrder[] = [
     metadata: {
       book_sent: false,
       tags: "Odpusc to co cie niszczy",
-      baselinker_status: "imported",
+      dextrum_status: "IMPORTED",
     },
   },
   {
@@ -140,8 +140,8 @@ const TEST_ORDERS: TestOrder[] = [
     metadata: {
       book_sent: true,
       tags: "Slapp taget om det som forstor dig",
-      baselinker_status: "transit",
-      baselinker_order_id: "BL-10006",
+      dextrum_status: "IN_TRANSIT",
+      dextrum_order_code: "SE-10006",
     },
   },
   {
@@ -161,7 +161,7 @@ const TEST_ORDERS: TestOrder[] = [
     metadata: {
       book_sent: false,
       tags: "Laat los wat je kapotmaakt",
-      baselinker_status: "returned",
+      dextrum_status: "CANCELLED",
     },
   },
   {
@@ -182,8 +182,8 @@ const TEST_ORDERS: TestOrder[] = [
     metadata: {
       book_sent: true,
       tags: "Lass los was dich kaputt macht",
-      baselinker_status: "delivered",
-      baselinker_order_id: "BL-10008",
+      dextrum_status: "DELIVERED",
+      dextrum_order_code: "DE-10008",
     },
   },
   {
@@ -203,8 +203,8 @@ const TEST_ORDERS: TestOrder[] = [
     metadata: {
       book_sent: true,
       tags: "Kocici bible",
-      baselinker_status: "sent",
-      baselinker_order_id: "BL-10009",
+      dextrum_status: "DISPATCHED",
+      dextrum_order_code: "CZ-10009",
     },
   },
   {

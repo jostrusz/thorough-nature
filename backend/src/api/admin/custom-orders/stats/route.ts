@@ -61,7 +61,7 @@ export async function GET(
       }
 
       // In Transit
-      if (order.metadata?.baselinker_status === "transit") {
+      if (order.metadata?.dextrum_status === "IN_TRANSIT") {
         inTransit++
       }
     }

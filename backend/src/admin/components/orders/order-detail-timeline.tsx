@@ -13,7 +13,7 @@ interface TimelineEvent {
   detail?: string
   color: string
   type?: "event" | "comment" | "integration" | "status_change"
-  icon?: "order" | "payment" | "fulfillment" | "baselinker" | "dextrum" | "fakturoid" | "quickbooks" | "edit" | "cancel" | "refund" | "comment" | "email" | "archive"
+  icon?: "order" | "payment" | "fulfillment" | "dextrum" | "fakturoid" | "quickbooks" | "edit" | "cancel" | "refund" | "comment" | "email" | "archive"
 }
 
 // ═══════════════════════════════════════════
@@ -46,14 +46,6 @@ function EventIcon({ icon, color }: { icon?: string; color: string }) {
         <div style={{ ...style, background: "#DBEAFE" }}>
           <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#1E40AF" strokeWidth="2">
             <polyline points="4 10 8 14 16 6" />
-          </svg>
-        </div>
-      )
-    case "baselinker":
-      return (
-        <div style={{ ...style, background: "#E0E7FF" }}>
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#3730A3" strokeWidth="2">
-            <path d="M4 12l6-6 6 6M10 6v10" />
           </svg>
         </div>
       )

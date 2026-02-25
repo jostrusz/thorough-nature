@@ -110,7 +110,7 @@ export async function POST(
             o.currency_code?.toUpperCase() || "EUR",
             o.shipping_address?.country_code?.toUpperCase() || "",
             `"${o.metadata?.tags || ""}"`,
-            o.metadata?.baselinker_status || "",
+            o.metadata?.dextrum_status || "",
             o.metadata?.book_sent ? "Yes" : "No",
             items,
           ].join(",")

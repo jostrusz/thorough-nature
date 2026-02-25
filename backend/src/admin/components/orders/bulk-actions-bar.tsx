@@ -1,11 +1,10 @@
 import React from "react"
-import { toast } from "@medusajs/ui"
 
 interface BulkActionsBarProps {
   selectedCount: number
   onMarkFulfilled: () => void
   onAddTags: () => void
-  onSendToBaseLinker: () => void
+  onSendToDextrum: () => void
   onExport: () => void
 }
 
@@ -29,7 +28,7 @@ export function BulkActionsBar({
   selectedCount,
   onMarkFulfilled,
   onAddTags,
-  onSendToBaseLinker,
+  onSendToDextrum,
   onExport,
 }: BulkActionsBarProps) {
   if (selectedCount === 0) return null
@@ -62,14 +61,8 @@ export function BulkActionsBar({
       <button style={btnStyle} onClick={onAddTags}>
         Add Tags
       </button>
-      <button
-        style={btnStyle}
-        onClick={() => {
-          onSendToBaseLinker()
-          toast.info("BaseLinker integration coming soon")
-        }}
-      >
-        Send to BaseLinker
+      <button style={btnStyle} onClick={onSendToDextrum}>
+        Send to Dextrum WMS
       </button>
       <button style={btnStyle} onClick={onExport}>
         Export Selected

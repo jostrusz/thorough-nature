@@ -128,11 +128,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
       await dextrumService.updateDextrumOrderMaps(orderMap.id, updateData)
 
-      // 5. Also update Medusa order metadata
+      // 5. Also update Medusa order metadata + auto-fulfill on DISPATCHED
       try {
-        const { data: [order] } = await (req.scope.resolve("query") as any).graph({
+        const queryService = req.scope.resolve("query") as any
+        const { data: [order] } = await queryService.graph({
           entity: "order",
-          fields: ["id", "metadata"],
+          fields: ["id", "metadata", "items.*", "fulfillments.*"],
           filters: { id: orderMap.medusa_order_id },
         })
         if (order) {
@@ -158,6 +159,38 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
               dextrum_timeline: dextrumTimeline,
             },
           })
+
+          // Auto-fulfill on DISPATCHED — mark order as fulfilled with tracking
+          if (newStatus === "DISPATCHED") {
+            try {
+              const existingFulfillments = (order as any).fulfillments || []
+              const alreadyFulfilled = existingFulfillments.length > 0
+
+              if (!alreadyFulfilled) {
+                const fulfillmentModuleService = req.scope.resolve(Modules.FULFILLMENT) as any
+                const items = ((order as any).items || []).map((item: any) => ({
+                  id: item.id,
+                  quantity: item.quantity || 1,
+                }))
+
+                if (items.length > 0) {
+                  await orderModuleService.createFulfillment({
+                    order_id: orderMap.medusa_order_id,
+                    items,
+                    metadata: {
+                      tracking_number: updateData.tracking_number || null,
+                      tracking_url: updateData.tracking_url || null,
+                      carrier: updateData.carrier_name || null,
+                      source: "dextrum_wms",
+                    },
+                  })
+                  console.log(`[Webhook] Auto-fulfilled order ${orderMap.medusa_order_id} on DISPATCHED`)
+                }
+              }
+            } catch (fulfillErr: any) {
+              console.error(`[Webhook] Auto-fulfill failed for ${orderMap.medusa_order_id}:`, fulfillErr.message)
+            }
+          }
         }
       } catch (err: any) {
         console.error("Failed to update Medusa order metadata:", err.message)

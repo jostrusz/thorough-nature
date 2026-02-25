@@ -233,7 +233,7 @@ const CustomOrdersPage = () => {
       {
         action: "update_metadata",
         order_ids: Array.from(selectedOrders),
-        payload: { metadata: { baselinker_status: "processing" } },
+        payload: { metadata: { dextrum_status: "PROCESSED" } },
       },
       {
         onSuccess: () => {
@@ -251,8 +251,8 @@ const CustomOrdersPage = () => {
     toast.info("Tag management coming soon")
   }, [])
 
-  const handleSendToBaseLinker = useCallback(() => {
-    // Placeholder - will be implemented with BaseLinker integration
+  const handleSendToDextrum = useCallback(() => {
+    toast.info("Use order detail to send individual orders to Dextrum WMS")
   }, [])
 
   const orders = ordersData?.orders || []
@@ -352,7 +352,7 @@ const CustomOrdersPage = () => {
           selectedCount={selectedOrders.size}
           onMarkFulfilled={handleMarkFulfilled}
           onAddTags={handleAddTags}
-          onSendToBaseLinker={handleSendToBaseLinker}
+          onSendToDextrum={handleSendToDextrum}
           onExport={handleExport}
         />
 

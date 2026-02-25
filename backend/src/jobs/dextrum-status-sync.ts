@@ -67,15 +67,25 @@ export default async function dextrumStatusSync(container: MedusaContainer) {
 
         await dextrumService.updateDextrumOrderMaps(orderMap.id, updateData)
 
-        // Update Medusa order metadata
+        // Update Medusa order metadata + auto-fulfill on DISPATCHED
         try {
           const { data: [order] } = await query.graph({
             entity: "order",
-            fields: ["id", "metadata"],
+            fields: ["id", "metadata", "items.*", "fulfillments.*"],
             filters: { id: orderMap.medusa_order_id },
           })
           if (order) {
             const meta = (order as any).metadata || {}
+            const timelineEntry = {
+              type: "dextrum",
+              status: newStatus,
+              date: now,
+              detail: `Synced: ${newStatus}`,
+              tracking_number: updateData.tracking_number || meta.dextrum_tracking_number,
+            }
+            const dextrumTimeline = meta.dextrum_timeline || []
+            dextrumTimeline.push(timelineEntry)
+
             await orderModuleService.updateOrders(orderMap.medusa_order_id, {
               metadata: {
                 ...meta,
@@ -84,8 +94,37 @@ export default async function dextrumStatusSync(container: MedusaContainer) {
                 dextrum_tracking_number: updateData.tracking_number || meta.dextrum_tracking_number,
                 dextrum_tracking_url: updateData.tracking_url || meta.dextrum_tracking_url,
                 dextrum_carrier: updateData.carrier_name || meta.dextrum_carrier,
+                dextrum_timeline: dextrumTimeline,
               },
             })
+
+            // Auto-fulfill on DISPATCHED
+            if (newStatus === "DISPATCHED") {
+              try {
+                const existingFulfillments = (order as any).fulfillments || []
+                if (existingFulfillments.length === 0) {
+                  const items = ((order as any).items || []).map((item: any) => ({
+                    id: item.id,
+                    quantity: item.quantity || 1,
+                  }))
+                  if (items.length > 0) {
+                    await orderModuleService.createFulfillment({
+                      order_id: orderMap.medusa_order_id,
+                      items,
+                      metadata: {
+                        tracking_number: updateData.tracking_number || null,
+                        tracking_url: updateData.tracking_url || null,
+                        carrier: updateData.carrier_name || null,
+                        source: "dextrum_wms",
+                      },
+                    })
+                    console.log(`[Dextrum Sync] Auto-fulfilled order ${orderMap.medusa_order_id}`)
+                  }
+                }
+              } catch (fulfillErr: any) {
+                console.error(`[Dextrum Sync] Auto-fulfill failed for ${orderMap.medusa_order_id}:`, fulfillErr.message)
+              }
+            }
           }
         } catch (err: any) {
           console.error(`Failed to update metadata for order ${orderMap.medusa_order_id}:`, err.message)

@@ -85,8 +85,8 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
 
   const bookSent = metadata.book_sent === true || metadata.book_sent === "true"
   const tag = metadata.tags || ""
-  const deliveryStatus = metadata.baselinker_status || ""
-  const baselinkerOrderId = metadata.baselinker_order_id || ""
+  const deliveryStatus = metadata.dextrum_status || ""
+  const dextrumOrderCode = metadata.dextrum_order_code || ""
 
   // Fakturoid
   const fakturoidInvoiceId = metadata.fakturoid_invoice_id || ""
@@ -168,10 +168,10 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
         )}
       </div>
 
-      {/* ═══════════ BASELINKER ═══════════ */}
-      <div style={groupTitleStyle}>BaseLinker</div>
+      {/* ═══════════ DEXTRUM WMS ═══════════ */}
+      <div style={groupTitleStyle}>Dextrum WMS</div>
 
-      {/* BaseLinker Status */}
+      {/* Dextrum Status */}
       <div className="od-row-hover" style={rowStyle}>
         <span style={labelStyle}>Status</span>
         {deliveryStatus ? (
@@ -181,11 +181,11 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
         )}
       </div>
 
-      {/* BaseLinker Order ID */}
+      {/* Dextrum WMS Order Code */}
       <div className="od-row-hover" style={rowStyle}>
-        <span style={labelStyle}>Order ID</span>
+        <span style={labelStyle}>WMS Order</span>
         <span style={valueStyle}>
-          {baselinkerOrderId || <span style={dashStyle}>&mdash;</span>}
+          {dextrumOrderCode || <span style={dashStyle}>&mdash;</span>}
         </span>
       </div>
 
