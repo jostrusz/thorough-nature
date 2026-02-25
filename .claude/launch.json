@@ -10,8 +10,15 @@
     },
     {
       "name": "storefront",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 8000,
+      "cwd": "storefront"
+    },
+    {
+      "name": "storefront-only",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev", "-p", "8000"],
       "port": 8000,
       "cwd": "storefront"
     },
