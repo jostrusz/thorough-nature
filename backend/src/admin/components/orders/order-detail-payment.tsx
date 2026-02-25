@@ -197,30 +197,93 @@ export function OrderDetailPayment({ order }: OrderDetailPaymentProps) {
           </div>
         </div>
 
-        {/* Payment provider info */}
+        {/* Payment provider info + Payment IDs */}
         {payments.length > 0 && (
           <div style={{ marginTop: "8px" }}>
-            {payments.map((payment: any) => (
-              <div
-                key={payment.id}
-                style={{
-                  fontSize: "12px",
-                  color: "#8C9196",
-                  padding: "2px 0",
-                }}
-              >
-                {payment.provider_id
-                  ? payment.provider_id.replace("pp_", "").replace(/_/g, " ")
-                  : "Payment"}{" "}
-                \u2022{" "}
-                {new Date(payment.created_at).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
-              </div>
-            ))}
+            {payments.map((payment: any) => {
+              const provider = payment.provider_id
+                ? payment.provider_id.replace("pp_", "").replace(/_/g, " ")
+                : "Payment"
+              // Extract gateway Payment ID from payment.data (Stripe, Mollie, etc.)
+              const gatewayId =
+                payment.data?.id ||
+                payment.data?.payment_intent ||
+                payment.data?.payment_id ||
+                payment.data?.transaction_id ||
+                null
+
+              return (
+                <div key={payment.id}>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#8C9196",
+                      padding: "2px 0",
+                    }}
+                  >
+                    {provider} \u2022{" "}
+                    {new Date(payment.created_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </div>
+                  {/* Payment Gateway ID */}
+                  {gatewayId && (
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "#6D7175",
+                        padding: "2px 0",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      <span style={{ color: "#8C9196" }}>Payment ID:</span>
+                      <code
+                        style={{
+                          fontSize: "11px",
+                          background: "#F6F6F7",
+                          padding: "1px 6px",
+                          borderRadius: "4px",
+                          color: "#1A1A1A",
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        {gatewayId}
+                      </code>
+                    </div>
+                  )}
+                  {/* Medusa Payment ID */}
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#6D7175",
+                      padding: "2px 0",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <span style={{ color: "#8C9196" }}>Medusa ID:</span>
+                    <code
+                      style={{
+                        fontSize: "11px",
+                        background: "#F6F6F7",
+                        padding: "1px 6px",
+                        borderRadius: "4px",
+                        color: "#8C9196",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      {payment.id}
+                    </code>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>

@@ -11,7 +11,120 @@ interface TimelineEvent {
   label: string
   detail?: string
   color: string
-  type?: "event" | "comment"
+  type?: "event" | "comment" | "integration" | "status_change"
+  icon?: "order" | "payment" | "fulfillment" | "baselinker" | "fakturoid" | "quickbooks" | "edit" | "cancel" | "refund" | "comment" | "email" | "archive"
+}
+
+// ═══════════════════════════════════════════
+// ICON COMPONENTS
+// ═══════════════════════════════════════════
+
+function EventIcon({ icon, color }: { icon?: string; color: string }) {
+  const style: React.CSSProperties = {
+    width: "24px",
+    height: "24px",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  }
+
+  switch (icon) {
+    case "payment":
+      return (
+        <div style={{ ...style, background: "#AEE9D1" }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#0D5740" strokeWidth="2">
+            <rect x="2" y="4" width="16" height="12" rx="2" />
+            <path d="M2 9h16" />
+          </svg>
+        </div>
+      )
+    case "fulfillment":
+      return (
+        <div style={{ ...style, background: "#DBEAFE" }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#1E40AF" strokeWidth="2">
+            <polyline points="4 10 8 14 16 6" />
+          </svg>
+        </div>
+      )
+    case "baselinker":
+      return (
+        <div style={{ ...style, background: "#E0E7FF" }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#3730A3" strokeWidth="2">
+            <path d="M4 12l6-6 6 6M10 6v10" />
+          </svg>
+        </div>
+      )
+    case "fakturoid":
+      return (
+        <div style={{ ...style, background: "#D1FAE5" }}>
+          <span style={{ fontSize: "10px", fontWeight: 700, color: "#047857" }}>fa</span>
+        </div>
+      )
+    case "quickbooks":
+      return (
+        <div style={{ ...style, background: "#DBEAFE" }}>
+          <span style={{ fontSize: "10px", fontWeight: 700, color: "#1D4ED8" }}>QB</span>
+        </div>
+      )
+    case "cancel":
+      return (
+        <div style={{ ...style, background: "#FED3D1" }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#9E2B25" strokeWidth="2">
+            <line x1="5" y1="5" x2="15" y2="15" /><line x1="15" y1="5" x2="5" y2="15" />
+          </svg>
+        </div>
+      )
+    case "refund":
+      return (
+        <div style={{ ...style, background: "#FFD79D" }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#7A4F01" strokeWidth="2">
+            <path d="M4 10l4-4M4 10l4 4M4 10h12" />
+          </svg>
+        </div>
+      )
+    case "edit":
+      return (
+        <div style={{ ...style, background: "#F3F4F6" }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#6B7280" strokeWidth="1.5">
+            <path d="M13.586 3.586a2 2 0 112.828 2.828l-10 10L3 17.5l1.086-3.414 10-10z" />
+          </svg>
+        </div>
+      )
+    case "email":
+      return (
+        <div style={{ ...style, background: "#E0E7FF" }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#4338CA" strokeWidth="1.5">
+            <rect x="2" y="4" width="16" height="12" rx="2" /><path d="M2 4l8 6 8-6" />
+          </svg>
+        </div>
+      )
+    case "archive":
+      return (
+        <div style={{ ...style, background: "#F3F4F6" }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#6B7280" strokeWidth="1.5">
+            <rect x="2" y="3" width="16" height="4" rx="1" /><path d="M4 7v8a2 2 0 002 2h8a2 2 0 002-2V7M8 11h4" />
+          </svg>
+        </div>
+      )
+    case "comment":
+      return (
+        <div style={{ ...style, border: "2px solid #E1E3E5", background: "#FFFFFF", boxSizing: "border-box" }}>
+          <svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="#8C9196" strokeWidth="2">
+            <path d="M4 12l-2 4 4-2 10-10-2-2z" />
+          </svg>
+        </div>
+      )
+    default: // "order"
+      return (
+        <div style={{ ...style, background: color || "#AEE9D1" }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={color === "#AEE9D1" ? "#0D5740" : "#FFFFFF"} strokeWidth="2">
+            <circle cx="10" cy="10" r="3" fill="currentColor" />
+          </svg>
+        </div>
+      )
+  }
 }
 
 export function OrderDetailTimeline({
@@ -21,90 +134,236 @@ export function OrderDetailTimeline({
 }: OrderDetailTimelineProps) {
   const [commentText, setCommentText] = useState("")
 
-  // Build timeline events from order data
+  // ═══════════════════════════════════════════
+  // BUILD TIMELINE EVENTS
+  // ═══════════════════════════════════════════
   const events: TimelineEvent[] = []
 
-  // Created
+  // 1. Order created
   if (order.created_at) {
     events.push({
       date: order.created_at,
       label: "Order created",
-      color: "#008060",
+      detail: order.metadata?.source ? `from ${order.metadata.source}` : undefined,
+      color: "#AEE9D1",
       type: "event",
+      icon: "order",
     })
   }
 
-  // Payment
+  // 2. Payment captured / authorized
   const payments =
     order.payment_collections?.flatMap((pc: any) => pc.payments || []) || []
   for (const payment of payments) {
-    if (payment.captured_at || payment.created_at) {
+    const provider = payment.provider_id
+      ? payment.provider_id.replace("pp_", "").replace(/_/g, " ")
+      : "Payment provider"
+    const paymentGatewayId = payment.data?.id || payment.data?.payment_intent || payment.id
+
+    if (payment.captured_at) {
       events.push({
-        date: payment.captured_at || payment.created_at,
+        date: payment.captured_at,
         label: "Payment captured",
-        detail: payment.provider_id
-          ? `via ${payment.provider_id.replace("pp_", "").replace(/_/g, " ")}`
-          : undefined,
+        detail: `${provider}${paymentGatewayId ? ` \u2022 ID: ${paymentGatewayId}` : ""}`,
         color: "#0D5740",
         type: "event",
+        icon: "payment",
       })
+    } else if (payment.created_at) {
+      events.push({
+        date: payment.created_at,
+        label: "Payment authorized",
+        detail: `${provider}${paymentGatewayId ? ` \u2022 ID: ${paymentGatewayId}` : ""}`,
+        color: "#0D5740",
+        type: "event",
+        icon: "payment",
+      })
+    }
+
+    // Refund events
+    if (payment.refunds?.length) {
+      for (const refund of payment.refunds) {
+        events.push({
+          date: refund.created_at || payment.updated_at,
+          label: `Refund processed`,
+          detail: `${formatCurrencyTimeline(Number(refund.amount) || 0, order.currency_code)} via ${provider}`,
+          color: "#9E2B25",
+          type: "status_change",
+          icon: "refund",
+        })
+      }
     }
   }
 
-  // Fulfillments
+  // 3. Payment collection status changes
+  for (const pc of order.payment_collections || []) {
+    if (pc.status === "refunded") {
+      // Only add if we didn't already add a refund from payment refunds
+      if (!payments.some((p: any) => p.refunds?.length)) {
+        events.push({
+          date: pc.updated_at || pc.created_at,
+          label: "Payment refunded",
+          color: "#9E2B25",
+          type: "status_change",
+          icon: "refund",
+        })
+      }
+    }
+  }
+
+  // 4. Fulfillments
   const fulfillments = order.fulfillments || []
   for (const fulfillment of fulfillments) {
     if (fulfillment.created_at) {
       events.push({
         date: fulfillment.created_at,
-        label: "Fulfilled",
+        label: "Items fulfilled",
         detail: fulfillment.tracking_numbers?.length
           ? `Tracking: ${fulfillment.tracking_numbers.join(", ")}`
           : undefined,
         color: "#1E40AF",
         type: "event",
+        icon: "fulfillment",
+      })
+    }
+    if (fulfillment.shipped_at) {
+      events.push({
+        date: fulfillment.shipped_at,
+        label: "Shipment created",
+        detail: fulfillment.tracking_numbers?.length
+          ? `Tracking: ${fulfillment.tracking_numbers.join(", ")}`
+          : undefined,
+        color: "#1E40AF",
+        type: "event",
+        icon: "fulfillment",
+      })
+    }
+    if (fulfillment.delivered_at) {
+      events.push({
+        date: fulfillment.delivered_at,
+        label: "Marked as delivered",
+        color: "#0D5740",
+        type: "event",
+        icon: "fulfillment",
+      })
+    }
+    if (fulfillment.canceled_at) {
+      events.push({
+        date: fulfillment.canceled_at,
+        label: "Fulfillment canceled",
+        color: "#9E2B25",
+        type: "status_change",
+        icon: "cancel",
       })
     }
   }
 
-  // BaseLinker status changes (from metadata)
+  // 5. Order status changes
+  if (order.status === "canceled" && order.canceled_at) {
+    events.push({
+      date: order.canceled_at,
+      label: "Order canceled",
+      color: "#9E2B25",
+      type: "status_change",
+      icon: "cancel",
+    })
+  }
+  if (order.status === "archived") {
+    events.push({
+      date: order.updated_at || order.created_at,
+      label: "Order archived",
+      color: "#6B7280",
+      type: "status_change",
+      icon: "archive",
+    })
+  }
+
+  // 6. BaseLinker events
   if (order.metadata?.baselinker_status) {
     const statusLabels: Record<string, string> = {
-      imported: "Imported to BaseLinker",
-      processing: "Processing in warehouse",
-      sent: "Order sent",
-      transit: "In transit",
-      delivered: "Delivered",
-      returned: "Returned",
+      imported: "Sent to BaseLinker",
+      processing: "BaseLinker: Processing in warehouse",
+      sent: "BaseLinker: Order shipped",
+      transit: "BaseLinker: In transit",
+      delivered: "BaseLinker: Delivered",
+      returned: "BaseLinker: Returned",
     }
     events.push({
       date: order.metadata?.baselinker_import_date || order.updated_at || order.created_at,
-      label:
-        statusLabels[order.metadata.baselinker_status] ||
-        order.metadata.baselinker_status,
-      detail: "BaseLinker",
-      color:
-        order.metadata.baselinker_status === "delivered"
-          ? "#0D5740"
-          : order.metadata.baselinker_status === "returned"
-          ? "#9E2B25"
-          : "#3730A3",
-      type: "event",
+      label: statusLabels[order.metadata.baselinker_status] || `BaseLinker: ${order.metadata.baselinker_status}`,
+      detail: order.metadata.baselinker_order_id
+        ? `BaseLinker ID: ${order.metadata.baselinker_order_id}`
+        : undefined,
+      color: "#3730A3",
+      type: "integration",
+      icon: "baselinker",
     })
   }
 
-  // Fakturoid invoice created
+  // 7. Fakturoid events
   if (order.metadata?.fakturoid_invoice_id) {
     events.push({
       date: order.metadata?.fakturoid_created_at || order.updated_at || order.created_at,
-      label: "Fakturoid invoice created",
-      detail: order.metadata.fakturoid_invoice_id,
-      color: "#008060",
-      type: "event",
+      label: "Fakturoid: Invoice created",
+      detail: `Invoice #${order.metadata.fakturoid_invoice_id}`,
+      color: "#047857",
+      type: "integration",
+      icon: "fakturoid",
     })
   }
 
-  // Comments from metadata
+  // 8. QuickBooks events
+  if (order.metadata?.quickbooks_invoice_id) {
+    events.push({
+      date: order.metadata?.quickbooks_created_at || order.updated_at || order.created_at,
+      label: "QuickBooks: Invoice created",
+      detail: `Invoice #${order.metadata.quickbooks_invoice_id}`,
+      color: "#1D4ED8",
+      type: "integration",
+      icon: "quickbooks",
+    })
+  }
+
+  // 9. Book sent change
+  if (order.metadata?.book_sent === true || order.metadata?.book_sent === "true") {
+    events.push({
+      date: order.metadata?.book_sent_at || order.updated_at || order.created_at,
+      label: "Book marked as sent",
+      color: "#6B7280",
+      type: "status_change",
+      icon: "fulfillment",
+    })
+  }
+
+  // 10. Email notifications (from metadata log)
+  const emailLog: any[] = order.metadata?.email_log || []
+  for (const email of emailLog) {
+    events.push({
+      date: email.sent_at || email.created_at,
+      label: `Email sent: ${email.subject || email.type || "Notification"}`,
+      detail: `to ${email.to || order.email}`,
+      color: "#4338CA",
+      type: "event",
+      icon: "email",
+    })
+  }
+
+  // 11. Field change audit log (from metadata)
+  const auditLog: any[] = order.metadata?.audit_log || []
+  for (const entry of auditLog) {
+    events.push({
+      date: entry.changed_at || entry.created_at,
+      label: entry.label || `Field updated: ${entry.field}`,
+      detail: entry.detail || (entry.old_value !== undefined
+        ? `${entry.old_value} \u2192 ${entry.new_value}`
+        : `Set to: ${entry.new_value}`),
+      color: "#6B7280",
+      type: "status_change",
+      icon: "edit",
+    })
+  }
+
+  // 12. Staff comments
   const comments: any[] = order.metadata?.timeline_comments || []
   for (const comment of comments) {
     events.push({
@@ -113,6 +372,7 @@ export function OrderDetailTimeline({
       detail: comment.author || "Staff",
       color: "#6D7175",
       type: "comment",
+      icon: "comment",
     })
   }
 
@@ -125,26 +385,52 @@ export function OrderDetailTimeline({
     const d = new Date(iso)
     const now = new Date()
     const isToday = d.toDateString() === now.toDateString()
-    if (isToday) {
-      return `Today at ${d.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      })}`
-    }
-    return d.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
+    const yesterday = new Date(now)
+    yesterday.setDate(yesterday.getDate() - 1)
+    const isYesterday = d.toDateString() === yesterday.toDateString()
+
+    const time = d.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
     })
+
+    if (isToday) return `Today at ${time}`
+    if (isYesterday) return `Yesterday at ${time}`
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: d.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
+    }) + ` at ${time}`
   }
 
   const handlePostComment = () => {
     if (!commentText.trim() || !onAddComment) return
     onAddComment(commentText.trim())
     setCommentText("")
+  }
+
+  // Group events by date header
+  function getDateHeader(iso: string): string {
+    const d = new Date(iso)
+    const now = new Date()
+    if (d.toDateString() === now.toDateString()) return "Today"
+    const yesterday = new Date(now)
+    yesterday.setDate(yesterday.getDate() - 1)
+    if (d.toDateString() === yesterday.toDateString()) return "Yesterday"
+    return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+  }
+
+  // Build grouped events
+  const grouped: { header: string; events: (TimelineEvent & { index: number })[] }[] = []
+  let currentHeader = ""
+  for (let i = 0; i < events.length; i++) {
+    const header = getDateHeader(events[i].date)
+    if (header !== currentHeader) {
+      grouped.push({ header, events: [] })
+      currentHeader = header
+    }
+    grouped[grouped.length - 1].events.push({ ...events[i], index: i })
   }
 
   return (
@@ -171,14 +457,8 @@ export function OrderDetailTimeline({
 
       {/* Comment box */}
       {onAddComment && (
-        <div
-          style={{
-            padding: "16px 20px",
-            borderBottom: "1px solid #E1E3E5",
-          }}
-        >
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid #E1E3E5" }}>
           <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-            {/* User avatar */}
             <div
               style={{
                 width: "32px",
@@ -218,13 +498,7 @@ export function OrderDetailTimeline({
                 onBlur={(e) => (e.currentTarget.style.borderColor = "#E1E3E5")}
               />
               {commentText.trim() && (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    marginTop: "8px",
-                  }}
-                >
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "8px" }}>
                   <button
                     onClick={handlePostComment}
                     disabled={isAddingComment}
@@ -246,121 +520,99 @@ export function OrderDetailTimeline({
               )}
             </div>
           </div>
-          <div
-            style={{
-              fontSize: "12px",
-              color: "#8C9196",
-              marginTop: "8px",
-              textAlign: "center",
-            }}
-          >
+          <div style={{ fontSize: "12px", color: "#8C9196", marginTop: "8px", textAlign: "center" }}>
             Only you and other staff can see comments
           </div>
         </div>
       )}
 
-      {/* Timeline events */}
+      {/* Timeline events grouped by date */}
       <div style={{ padding: "16px 20px" }}>
         {events.length === 0 ? (
-          <p style={{ fontSize: "13px", color: "#8C9196" }}>
-            No timeline events
-          </p>
+          <p style={{ fontSize: "13px", color: "#8C9196" }}>No timeline events</p>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-            {events.map((event, i) => (
+          grouped.map((group, gi) => (
+            <div key={gi}>
+              {/* Date header */}
               <div
-                key={i}
                 style={{
-                  display: "flex",
-                  gap: "12px",
-                  paddingBottom: i < events.length - 1 ? "16px" : "0",
-                  position: "relative",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  color: "#8C9196",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  padding: gi > 0 ? "16px 0 8px" : "0 0 8px",
                 }}
               >
-                {/* Dot and line */}
+                {group.header}
+              </div>
+
+              {/* Events in this group */}
+              {group.events.map((event, i) => (
                 <div
+                  key={event.index}
                   style={{
                     display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
+                    gap: "12px",
+                    paddingBottom: i < group.events.length - 1 ? "12px" : "0",
                     position: "relative",
                   }}
                 >
-                  {event.type === "comment" ? (
-                    <div
-                      style={{
-                        width: "10px",
-                        height: "10px",
-                        borderRadius: "50%",
-                        border: "2px solid #E1E3E5",
-                        background: "#FFFFFF",
-                        flexShrink: 0,
-                        marginTop: "3px",
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        width: "10px",
-                        height: "10px",
-                        borderRadius: "50%",
-                        background: event.color,
-                        flexShrink: 0,
-                        marginTop: "3px",
-                      }}
-                    />
-                  )}
-                  {i < events.length - 1 && (
-                    <div
-                      style={{
-                        width: "2px",
-                        flex: 1,
-                        background: "#E1E3E5",
-                        marginTop: "4px",
-                      }}
-                    />
-                  )}
-                </div>
-
-                {/* Content */}
-                <div>
+                  {/* Icon + connector line */}
                   <div
                     style={{
-                      fontSize: "13px",
-                      fontWeight: event.type === "comment" ? 400 : 500,
-                      color: "#1A1A1A",
-                      fontStyle: event.type === "comment" ? "normal" : "normal",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      position: "relative",
                     }}
                   >
-                    {event.label}
+                    <EventIcon icon={event.icon} color={event.color} />
+                    {i < group.events.length - 1 && (
+                      <div
+                        style={{
+                          width: "2px",
+                          flex: 1,
+                          background: "#E1E3E5",
+                          marginTop: "4px",
+                          minHeight: "8px",
+                        }}
+                      />
+                    )}
                   </div>
-                  {event.detail && (
+
+                  {/* Content */}
+                  <div style={{ flex: 1, paddingTop: "2px" }}>
                     <div
                       style={{
-                        fontSize: "12px",
-                        color: "#6D7175",
-                        marginTop: "2px",
+                        fontSize: "13px",
+                        fontWeight: event.type === "comment" ? 400 : 500,
+                        color: "#1A1A1A",
                       }}
                     >
-                      {event.detail}
+                      {event.label}
                     </div>
-                  )}
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#8C9196",
-                      marginTop: "2px",
-                    }}
-                  >
-                    {formatDate(event.date)}
+                    {event.detail && (
+                      <div style={{ fontSize: "12px", color: "#6D7175", marginTop: "2px" }}>
+                        {event.detail}
+                      </div>
+                    )}
+                    <div style={{ fontSize: "12px", color: "#8C9196", marginTop: "2px" }}>
+                      {formatDate(event.date)}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ))
         )}
       </div>
     </div>
   )
+}
+
+function formatCurrencyTimeline(amount: number, currency?: string) {
+  const c = (currency || "EUR").toUpperCase()
+  if (c === "EUR") return `\u20AC${amount.toFixed(2)}`
+  return `${amount.toFixed(2)} ${c}`
 }

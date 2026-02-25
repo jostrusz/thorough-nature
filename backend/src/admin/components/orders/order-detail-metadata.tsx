@@ -24,11 +24,23 @@ const sectionTitleStyle: React.CSSProperties = {
   marginBottom: "16px",
 }
 
+const groupTitleStyle: React.CSSProperties = {
+  fontSize: "12px",
+  fontWeight: 600,
+  color: "#6D7175",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  marginBottom: "8px",
+  marginTop: "16px",
+  paddingTop: "12px",
+  borderTop: "1px solid #E1E3E5",
+}
+
 const rowStyle: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  padding: "10px 0",
+  padding: "8px 0",
   borderBottom: "1px solid #F1F1F1",
 }
 
@@ -36,6 +48,31 @@ const labelStyle: React.CSSProperties = {
   fontSize: "13px",
   fontWeight: 500,
   color: "#6D7175",
+}
+
+const valueStyle: React.CSSProperties = {
+  fontSize: "13px",
+  color: "#1A1A1A",
+}
+
+const linkStyle: React.CSSProperties = {
+  fontSize: "13px",
+  color: "#2C6ECB",
+  textDecoration: "none",
+}
+
+const codeStyle: React.CSSProperties = {
+  fontSize: "11px",
+  background: "#F6F6F7",
+  padding: "2px 6px",
+  borderRadius: "4px",
+  color: "#1A1A1A",
+  fontFamily: "monospace",
+}
+
+const dashStyle: React.CSSProperties = {
+  fontSize: "13px",
+  color: "#8C9196",
 }
 
 export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
@@ -46,12 +83,35 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
   const tag = metadata.tags || ""
   const deliveryStatus = metadata.baselinker_status || ""
   const baselinkerOrderId = metadata.baselinker_order_id || ""
+
+  // Fakturoid
   const fakturoidInvoiceId = metadata.fakturoid_invoice_id || ""
   const fakturoidInvoiceUrl = metadata.fakturoid_invoice_url || ""
 
+  // QuickBooks
+  const quickbooksInvoiceId = metadata.quickbooks_invoice_id || ""
+  const quickbooksInvoiceUrl = metadata.quickbooks_invoice_url || ""
+
+  // Payment gateway ID
+  const payments = (order.payment_collections || []).flatMap(
+    (pc: any) => pc.payments || []
+  )
+  const gatewayPaymentId =
+    payments[0]?.data?.id ||
+    payments[0]?.data?.payment_intent ||
+    payments[0]?.data?.payment_id ||
+    payments[0]?.data?.transaction_id ||
+    ""
+
   function handleBookSentToggle() {
     updateMetadata.mutate(
-      { orderId: order.id, metadata: { book_sent: !bookSent } },
+      {
+        orderId: order.id,
+        metadata: {
+          book_sent: !bookSent,
+          book_sent_at: !bookSent ? new Date().toISOString() : undefined,
+        },
+      },
       {
         onSuccess: () => {
           toast.success(`Book sent ${!bookSent ? "marked" : "unmarked"}`)
@@ -72,7 +132,9 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
 
   return (
     <div style={sectionStyle}>
-      <div style={sectionTitleStyle}>Custom Data</div>
+      <div style={sectionTitleStyle}>Order Data</div>
+
+      {/* ═══════════ FULFILLMENT ═══════════ */}
 
       {/* Book Sent */}
       <div style={rowStyle}>
@@ -89,85 +151,125 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
         />
       </div>
 
+      {/* ═══════════ PAYMENT ═══════════ */}
+      <div style={groupTitleStyle}>Payment</div>
+
+      {/* Payment Gateway ID */}
+      <div style={rowStyle}>
+        <span style={labelStyle}>Payment ID</span>
+        {gatewayPaymentId ? (
+          <code style={codeStyle}>{gatewayPaymentId}</code>
+        ) : (
+          <span style={dashStyle}>&mdash;</span>
+        )}
+      </div>
+
+      {/* ═══════════ BASELINKER ═══════════ */}
+      <div style={groupTitleStyle}>BaseLinker</div>
+
       {/* BaseLinker Status */}
       <div style={rowStyle}>
-        <span style={labelStyle}>BaseLinker Status</span>
+        <span style={labelStyle}>Status</span>
         {deliveryStatus ? (
           <DeliveryBadge status={deliveryStatus} />
         ) : (
-          <span style={{ fontSize: "13px", color: "#8C9196" }}>&mdash;</span>
+          <span style={dashStyle}>&mdash;</span>
         )}
       </div>
 
       {/* BaseLinker Order ID */}
       <div style={rowStyle}>
-        <span style={labelStyle}>BaseLinker Order ID</span>
-        <span style={{ fontSize: "13px", color: "#1A1A1A" }}>
-          {baselinkerOrderId || "\u2014"}
+        <span style={labelStyle}>Order ID</span>
+        <span style={valueStyle}>
+          {baselinkerOrderId || <span style={dashStyle}>&mdash;</span>}
         </span>
       </div>
 
-      {/* Fakturoid */}
-      <div style={{ ...rowStyle, borderBottom: "none" }}>
-        <span style={labelStyle}>Fakturoid Invoice</span>
+      {/* ═══════════ FAKTUROID ═══════════ */}
+      <div style={groupTitleStyle}>Fakturoid</div>
+
+      {/* Fakturoid Invoice ID */}
+      <div style={rowStyle}>
+        <span style={labelStyle}>Invoice ID</span>
         {fakturoidInvoiceId ? (
-          <a
-            href={fakturoidInvoiceUrl || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              fontSize: "13px",
-              color: "#2C6ECB",
-              textDecoration: "none",
-            }}
-          >
-            #{fakturoidInvoiceId}
-          </a>
+          <code style={codeStyle}>{fakturoidInvoiceId}</code>
         ) : (
-          <span style={{ fontSize: "13px", color: "#8C9196" }}>&mdash;</span>
+          <span style={dashStyle}>&mdash;</span>
         )}
       </div>
 
-      {/* Upsell info */}
+      {/* Fakturoid Invoice Link */}
+      <div style={rowStyle}>
+        <span style={labelStyle}>Invoice Link</span>
+        {fakturoidInvoiceUrl ? (
+          <a
+            href={fakturoidInvoiceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={linkStyle}
+            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+          >
+            Open in Fakturoid &rarr;
+          </a>
+        ) : (
+          <span style={dashStyle}>&mdash;</span>
+        )}
+      </div>
+
+      {/* ═══════════ QUICKBOOKS ═══════════ */}
+      <div style={groupTitleStyle}>QuickBooks</div>
+
+      {/* QuickBooks Invoice ID */}
+      <div style={rowStyle}>
+        <span style={labelStyle}>Invoice ID</span>
+        {quickbooksInvoiceId ? (
+          <code style={codeStyle}>{quickbooksInvoiceId}</code>
+        ) : (
+          <span style={dashStyle}>&mdash;</span>
+        )}
+      </div>
+
+      {/* QuickBooks Invoice Link */}
+      <div style={{ ...rowStyle, borderBottom: "none" }}>
+        <span style={labelStyle}>Invoice Link</span>
+        {quickbooksInvoiceUrl ? (
+          <a
+            href={quickbooksInvoiceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={linkStyle}
+            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+          >
+            Open in QuickBooks &rarr;
+          </a>
+        ) : (
+          <span style={dashStyle}>&mdash;</span>
+        )}
+      </div>
+
+      {/* ═══════════ UPSELL ═══════════ */}
       {metadata.upsell_accepted && (
         <>
-          <div
-            style={{
-              marginTop: "12px",
-              paddingTop: "12px",
-              borderTop: "1px solid #E1E3E5",
-            }}
-          >
-            <div
+          <div style={groupTitleStyle}>Upsell</div>
+          <div style={{ ...rowStyle, borderBottom: "none" }}>
+            <span style={labelStyle}>Upsell Accepted</span>
+            <span
               style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "3px 10px",
+                borderRadius: "12px",
                 fontSize: "12px",
                 fontWeight: 600,
-                color: "#6D7175",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-                marginBottom: "8px",
+                background: "#AEE9D1",
+                color: "#0D5740",
               }}
             >
-              Upsell
-            </div>
-            <div style={{ ...rowStyle, borderBottom: "none" }}>
-              <span style={labelStyle}>Upsell Accepted</span>
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "5px",
-                  padding: "3px 10px",
-                  borderRadius: "12px",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  background: "#AEE9D1",
-                  color: "#0D5740",
-                }}
-              >
-                Yes
-              </span>
-            </div>
+              Yes
+            </span>
           </div>
         </>
       )}
