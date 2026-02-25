@@ -65,6 +65,7 @@ const medusaConfig = {
     { resolve: "./src/modules/analytics" },
     { resolve: "./src/modules/fakturoid" },
     { resolve: "./src/modules/quickbooks" },
+    { resolve: "./src/modules/dextrum" },
     // ═══ Core modules ═══
     {
       key: Modules.FILE,

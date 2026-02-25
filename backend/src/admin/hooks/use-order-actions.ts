@@ -100,19 +100,20 @@ export function useDuplicateOrder() {
 }
 
 // ═══════════════════════════════════════════
-// Send to BaseLinker
+// Send to Dextrum (WMS)
 // ═══════════════════════════════════════════
-export function useSendToBaseLinker() {
+export function useSendToDextrum() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (orderId: string) => {
-      return sdk.client.fetch(`/admin/custom-orders/${orderId}/baselinker`, {
+      return sdk.client.fetch(`/admin/dextrum/orders/${orderId}/send`, {
         method: "POST",
       })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["custom-order-detail"] })
       queryClient.invalidateQueries({ queryKey: ["custom-orders-list"] })
+      queryClient.invalidateQueries({ queryKey: ["custom-order-stats"] })
     },
   })
 }

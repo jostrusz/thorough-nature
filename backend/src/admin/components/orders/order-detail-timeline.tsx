@@ -13,7 +13,7 @@ interface TimelineEvent {
   detail?: string
   color: string
   type?: "event" | "comment" | "integration" | "status_change"
-  icon?: "order" | "payment" | "fulfillment" | "baselinker" | "fakturoid" | "quickbooks" | "edit" | "cancel" | "refund" | "comment" | "email" | "archive"
+  icon?: "order" | "payment" | "fulfillment" | "baselinker" | "dextrum" | "fakturoid" | "quickbooks" | "edit" | "cancel" | "refund" | "comment" | "email" | "archive"
 }
 
 // ═══════════════════════════════════════════
@@ -54,6 +54,15 @@ function EventIcon({ icon, color }: { icon?: string; color: string }) {
         <div style={{ ...style, background: "#E0E7FF" }}>
           <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#3730A3" strokeWidth="2">
             <path d="M4 12l6-6 6 6M10 6v10" />
+          </svg>
+        </div>
+      )
+    case "dextrum":
+      return (
+        <div style={{ ...style, background: "#E0E7FF" }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#3730A3" strokeWidth="1.5">
+            <rect x="2" y="4" width="16" height="12" rx="2" />
+            <path d="M2 8h16M7 4v4M13 4v4" />
           </svg>
         </div>
       )
@@ -279,25 +288,43 @@ export function OrderDetailTimeline({
     })
   }
 
-  // 6. BaseLinker events
-  if (order.metadata?.baselinker_status) {
+  // 6b. Dextrum / WMS events
+  const dextrumTimeline: any[] = order.metadata?.dextrum_timeline || []
+  for (const entry of dextrumTimeline) {
     const statusLabels: Record<string, string> = {
-      imported: "Sent to BaseLinker",
-      processing: "BaseLinker: Processing in warehouse",
-      sent: "BaseLinker: Order shipped",
-      transit: "BaseLinker: In transit",
-      delivered: "BaseLinker: Delivered",
-      returned: "BaseLinker: Returned",
+      WAITING: "Dextrum: Order queued",
+      IMPORTED: "Dextrum: Sent to warehouse",
+      PROCESSED: "Dextrum: Order processed",
+      PACKED: "Dextrum: Package packed",
+      DISPATCHED: "Dextrum: Dispatched",
+      IN_TRANSIT: "Dextrum: In transit",
+      DELIVERED: "Dextrum: Delivered",
+      ALLOCATION_ISSUE: "Dextrum: Stock allocation issue",
+      PARTIALLY_PICKED: "Dextrum: Partially picked",
+      CANCELLED: "Dextrum: Cancelled",
+      FAILED: "Dextrum: Failed",
     }
     events.push({
-      date: order.metadata?.baselinker_import_date || order.updated_at || order.created_at,
-      label: statusLabels[order.metadata.baselinker_status] || `BaseLinker: ${order.metadata.baselinker_status}`,
-      detail: order.metadata.baselinker_order_id
-        ? `BaseLinker ID: ${order.metadata.baselinker_order_id}`
+      date: entry.date || order.updated_at || order.created_at,
+      label: statusLabels[entry.status] || `Dextrum: ${entry.status}`,
+      detail: entry.detail || (entry.tracking_number ? `Tracking: ${entry.tracking_number}` : undefined),
+      color: "#3730A3",
+      type: "integration",
+      icon: "dextrum",
+    })
+  }
+
+  // 6c. Dextrum initial status (if no timeline but has dextrum_status)
+  if (order.metadata?.dextrum_status && !dextrumTimeline.length) {
+    events.push({
+      date: order.metadata?.dextrum_sent_at || order.metadata?.dextrum_status_updated_at || order.updated_at || order.created_at,
+      label: `Dextrum: ${order.metadata.dextrum_status}`,
+      detail: order.metadata.dextrum_order_code
+        ? `WMS Order: ${order.metadata.dextrum_order_code}`
         : undefined,
       color: "#3730A3",
       type: "integration",
-      icon: "baselinker",
+      icon: "dextrum",
     })
   }
 

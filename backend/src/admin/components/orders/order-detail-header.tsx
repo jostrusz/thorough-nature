@@ -10,7 +10,7 @@ interface OrderDetailHeaderProps {
   onCancel: () => void
   onDuplicate: () => void
   onArchive: () => void
-  onSendToBaseLinker: () => void
+  onSendToDextrum: () => void
   onFakturoidCreate: () => void
   onFakturoidOpen: () => void
 }
@@ -32,7 +32,7 @@ export function OrderDetailHeader({
   onCancel,
   onDuplicate,
   onArchive,
-  onSendToBaseLinker,
+  onSendToDextrum,
   onFakturoidCreate,
   onFakturoidOpen,
 }: OrderDetailHeaderProps) {
@@ -44,7 +44,7 @@ export function OrderDetailHeader({
   const createdAt = new Date(order.created_at)
   const fakturoidInvoiceId = order.metadata?.fakturoid_invoice_id
   const fakturoidInvoiceUrl = order.metadata?.fakturoid_invoice_url
-  const baselinkerOrderId = order.metadata?.baselinker_order_id
+  const dextrumMystockId = order.metadata?.dextrum_mystock_id
 
   // Set the order ID for the status page link in dropdown
   if (typeof window !== "undefined") {
@@ -177,12 +177,12 @@ export function OrderDetailHeader({
               onDuplicate={onDuplicate}
               onCancel={onCancel}
               onArchive={onArchive}
-              onSendToBaseLinker={onSendToBaseLinker}
+              onSendToDextrum={onSendToDextrum}
               onFakturoidCreate={onFakturoidCreate}
               onFakturoidOpen={onFakturoidOpen}
               fakturoidInvoiceId={fakturoidInvoiceId}
               fakturoidInvoiceUrl={fakturoidInvoiceUrl}
-              baselinkerOrderId={baselinkerOrderId}
+              dextrumMystockId={dextrumMystockId}
             />
           </div>
         </div>

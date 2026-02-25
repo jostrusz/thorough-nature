@@ -49,15 +49,22 @@ export function PaymentBadge({ status }: { status: string }) {
 }
 
 // ═══════════════════════════════════════════
-// DELIVERY BADGE
+// DELIVERY BADGE — Updated for Dextrum statuses
 // ═══════════════════════════════════════════
 const DELIVERY_STYLES: Record<string, { bg: string; text: string; dot: string; label: string }> = {
-  imported: { bg: "#E0E7FF", text: "#3730A3", dot: "#3730A3", label: "Imported" },
-  processing: { bg: "#FEF3C7", text: "#92400E", dot: "#92400E", label: "Processing" },
-  sent: { bg: "#DBEAFE", text: "#1E40AF", dot: "#1E40AF", label: "Order sent" },
-  transit: { bg: "#A4E8F2", text: "#0E4F5C", dot: "#0E4F5C", label: "In transit" },
-  delivered: { bg: "#AEE9D1", text: "#0D5740", dot: "#0D5740", label: "Delivered" },
-  returned: { bg: "#FED3D1", text: "#9E2B25", dot: "#9E2B25", label: "Returned" },
+  // Dextrum delivery statuses (uppercase keys from metadata.dextrum_status)
+  NEW: { bg: "#DBEAFE", text: "#1E40AF", dot: "#1E40AF", label: "New" },
+  WAITING: { bg: "#FFD79D", text: "#7A4F01", dot: "#7A4F01", label: "Waiting" },
+  IMPORTED: { bg: "#E0E7FF", text: "#3730A3", dot: "#3730A3", label: "Imported" },
+  PROCESSED: { bg: "#FEF3C7", text: "#92400E", dot: "#92400E", label: "Processed" },
+  PACKED: { bg: "#A4E8F2", text: "#0E4F5C", dot: "#0E4F5C", label: "Packed" },
+  DISPATCHED: { bg: "#D1FAE5", text: "#047857", dot: "#047857", label: "Dispatched" },
+  IN_TRANSIT: { bg: "#A4E8F2", text: "#0E4F5C", dot: "#0E4F5C", label: "In Transit" },
+  DELIVERED: { bg: "#AEE9D1", text: "#0D5740", dot: "#0D5740", label: "Delivered" },
+  ALLOCATION_ISSUE: { bg: "#FED3D1", text: "#9E2B25", dot: "#9E2B25", label: "Stock Issue" },
+  PARTIALLY_PICKED: { bg: "#FFD79D", text: "#7A4F01", dot: "#7A4F01", label: "Partial Pick" },
+  CANCELLED: { bg: "#E4E5E7", text: "#44474A", dot: "#44474A", label: "Cancelled" },
+  FAILED: { bg: "#FED3D1", text: "#9E2B25", dot: "#9E2B25", label: "Failed" },
 }
 
 export function DeliveryBadge({ status }: { status?: string }) {

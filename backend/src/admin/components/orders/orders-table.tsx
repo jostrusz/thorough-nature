@@ -354,7 +354,7 @@ export function OrdersTable({
             const customerName = getCustomerName(order)
             const tag = getTag(order)
             const countryCode = order.shipping_address?.country_code
-            const deliveryStatus = order.metadata?.baselinker_status || ""
+            const deliveryStatus = order.metadata?.dextrum_status || ""
             const bookSent = order.metadata?.book_sent === true || order.metadata?.book_sent === "true"
             const itemCount = order.items?.length || 0
             const total = Number(order.total) || 0

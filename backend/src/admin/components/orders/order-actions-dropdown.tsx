@@ -6,12 +6,12 @@ interface OrderActionsDropdownProps {
   onDuplicate: () => void
   onCancel: () => void
   onArchive: () => void
-  onSendToBaseLinker: () => void
+  onSendToDextrum: () => void
   onFakturoidCreate: () => void
   onFakturoidOpen: () => void
   fakturoidInvoiceId?: string
   fakturoidInvoiceUrl?: string
-  baselinkerOrderId?: string
+  dextrumMystockId?: string
 }
 
 const itemStyle: React.CSSProperties = {
@@ -43,12 +43,12 @@ export function OrderActionsDropdown({
   onDuplicate,
   onCancel,
   onArchive,
-  onSendToBaseLinker,
+  onSendToDextrum,
   onFakturoidCreate,
   onFakturoidOpen,
   fakturoidInvoiceId,
   fakturoidInvoiceUrl,
-  baselinkerOrderId,
+  dextrumMystockId,
 }: OrderActionsDropdownProps) {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -165,17 +165,20 @@ export function OrderActionsDropdown({
 
       <div style={dividerStyle} />
 
-      {/* BaseLinker */}
-      <button
-        className="od-dropdown-item"
-        style={itemStyle}
-        onClick={() => { onSendToBaseLinker(); onClose() }}
-      >
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={iconColor} strokeWidth="1.5">
-          <path d="M4 12l6-6 6 6M10 6v10" />
-        </svg>
-        {baselinkerOrderId ? "View in BaseLinker" : "Send to BaseLinker"}
-      </button>
+      {/* Dextrum WMS */}
+      {!dextrumMystockId && (
+        <button
+          className="od-dropdown-item"
+          style={itemStyle}
+          onClick={() => { onSendToDextrum(); onClose() }}
+        >
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={iconColor} strokeWidth="1.5">
+            <rect x="2" y="4" width="16" height="12" rx="2" />
+            <path d="M2 8h16M7 4v4M13 4v4" />
+          </svg>
+          Send to Dextrum WMS
+        </button>
+      )}
     </div>
   )
 }

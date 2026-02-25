@@ -11,7 +11,7 @@ import {
   useCreateFulfillment,
   useRefundPayment,
   useDuplicateOrder,
-  useSendToBaseLinker,
+  useSendToDextrum,
   useCreateFakturoidInvoice,
   useCustomerStats,
 } from "../../../hooks/use-order-actions"
@@ -24,6 +24,7 @@ import { OrderDetailTimeline } from "../../../components/orders/order-detail-tim
 import { OrderDetailCustomer } from "../../../components/orders/order-detail-customer"
 import { OrderDetailMetadata } from "../../../components/orders/order-detail-metadata"
 import { OrderNotesCard } from "../../../components/orders/order-notes-card"
+import { DeliveryBadge } from "../../../components/orders/order-badges"
 
 // Modals
 import { CancelOrderModal } from "../../../components/orders/cancel-order-modal"
@@ -207,7 +208,7 @@ const OrderDetailPage = () => {
   const createFulfillment = useCreateFulfillment()
   const refundPayment = useRefundPayment()
   const duplicateOrder = useDuplicateOrder()
-  const sendToBaseLinker = useSendToBaseLinker()
+  const sendToDextrum = useSendToDextrum()
   const createFakturoidInvoice = useCreateFakturoidInvoice()
 
   // Customer stats
@@ -315,17 +316,17 @@ const OrderDetailPage = () => {
     }
   }, [id])
 
-  const handleSendToBaseLinker = useCallback(() => {
+  const handleSendToDextrum = useCallback(() => {
     if (!id) return
-    sendToBaseLinker.mutate(id, {
+    sendToDextrum.mutate(id, {
       onSuccess: () => {
-        toast.success("Order sent to BaseLinker")
+        toast.success("Order sent to Dextrum WMS")
       },
       onError: (err: any) => {
-        toast.error(err?.message || "Failed to send to BaseLinker")
+        toast.error(err?.message || "Failed to send to Dextrum")
       },
     })
-  }, [id, sendToBaseLinker])
+  }, [id, sendToDextrum])
 
   const handleFakturoidCreate = useCallback(() => {
     if (!id) return
@@ -443,7 +444,7 @@ const OrderDetailPage = () => {
         onCancel={() => setCancelModalOpen(true)}
         onDuplicate={() => setDuplicateModalOpen(true)}
         onArchive={handleArchive}
-        onSendToBaseLinker={handleSendToBaseLinker}
+        onSendToDextrum={handleSendToDextrum}
         onFakturoidCreate={handleFakturoidCreate}
         onFakturoidOpen={handleFakturoidOpen}
       />
@@ -485,6 +486,85 @@ const OrderDetailPage = () => {
             totalSpent={(customerStats as any)?.total_spent}
           />
           <OrderDetailMetadata order={order} />
+
+          {/* Dextrum WMS Info */}
+          {order.metadata?.dextrum_status && (
+            <div
+              className="od-card"
+              style={{
+                background: "#FFFFFF",
+                border: "1px solid #E1E3E5",
+                borderRadius: "10px",
+                marginBottom: "16px",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: "#1A1A1A",
+                  padding: "16px 20px",
+                  borderBottom: "1px solid #E1E3E5",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#3730A3" strokeWidth="1.5">
+                  <rect x="2" y="4" width="16" height="12" rx="2" />
+                  <path d="M2 8h16M7 4v4M13 4v4" />
+                </svg>
+                Dextrum — WMS
+              </div>
+              <div style={{ padding: "16px 20px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                  <span style={{ fontSize: "12px", color: "#6D7175" }}>Status</span>
+                  <DeliveryBadge status={order.metadata.dextrum_status} />
+                </div>
+                {order.metadata.dextrum_order_code && (
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <span style={{ fontSize: "12px", color: "#6D7175" }}>WMS Order</span>
+                    <span style={{ fontSize: "13px", fontWeight: 500 }}>{order.metadata.dextrum_order_code}</span>
+                  </div>
+                )}
+                {order.metadata.dextrum_tracking_number && (
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <span style={{ fontSize: "12px", color: "#6D7175" }}>Tracking</span>
+                    {order.metadata.dextrum_tracking_url ? (
+                      <a
+                        href={order.metadata.dextrum_tracking_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: "13px", color: "#2C6ECB", textDecoration: "none", fontWeight: 500 }}
+                        className="od-link"
+                      >
+                        {order.metadata.dextrum_tracking_number} &rarr;
+                      </a>
+                    ) : (
+                      <span style={{ fontSize: "13px", fontWeight: 500 }}>{order.metadata.dextrum_tracking_number}</span>
+                    )}
+                  </div>
+                )}
+                {order.metadata.dextrum_carrier && (
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <span style={{ fontSize: "12px", color: "#6D7175" }}>Carrier</span>
+                    <span style={{ fontSize: "13px", fontWeight: 500 }}>{order.metadata.dextrum_carrier}</span>
+                  </div>
+                )}
+                {order.metadata.dextrum_sent_at && (
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: "12px", color: "#6D7175" }}>Sent to WMS</span>
+                    <span style={{ fontSize: "12px", color: "#6D7175" }}>
+                      {new Date(order.metadata.dextrum_sent_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      {" at "}
+                      {new Date(order.metadata.dextrum_sent_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

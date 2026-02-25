@@ -60,14 +60,14 @@ export async function GET(
     let filteredOrders = orders
 
     if (deliveryStatus) {
-      if (deliveryStatus === "new") {
-        // New orders = no baselinker_status set
+      if (deliveryStatus === "new" || deliveryStatus === "NEW") {
+        // New orders = no dextrum_status set yet
         filteredOrders = filteredOrders.filter(
-          (o: any) => !o.metadata?.baselinker_status || o.metadata?.baselinker_status === ""
+          (o: any) => !o.metadata?.dextrum_status
         )
       } else {
         filteredOrders = filteredOrders.filter(
-          (o: any) => o.metadata?.baselinker_status === deliveryStatus
+          (o: any) => o.metadata?.dextrum_status === deliveryStatus
         )
       }
     }
