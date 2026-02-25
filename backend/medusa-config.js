@@ -58,6 +58,10 @@ const medusaConfig = {
     disable: SHOULD_DISABLE_ADMIN,
   },
   modules: [
+    // ═══ Custom modules ═══
+    { resolve: "./src/modules/billing-entity" },
+    { resolve: "./src/modules/gateway-config" },
+    // ═══ Core modules ═══
     {
       key: Modules.FILE,
       resolve: '@medusajs/file',

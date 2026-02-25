@@ -1,0 +1,117 @@
+import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { GATEWAY_CONFIG_MODULE } from "../../../modules/gateway-config"
+import type GatewayConfigModuleService from "../../../modules/gateway-config/service"
+import { BILLING_ENTITY_MODULE } from "../../../modules/billing-entity"
+import type BillingEntityModuleService from "../../../modules/billing-entity/service"
+
+/**
+ * GET /store/payment-options?sales_channel_id=xxx&currency=EUR
+ *
+ * Returns active payment gateways and their methods for the checkout,
+ * filtered by sales channel and currency. Also returns the billing entity
+ * (company) associated with the primary gateway.
+ *
+ * This endpoint is called by the storefront at checkout load to dynamically
+ * determine which payment methods to display with their icons.
+ */
+export async function GET(
+  req: MedusaRequest,
+  res: MedusaResponse
+): Promise<void> {
+  try {
+    const salesChannelId = req.query.sales_channel_id as string
+    const currency = ((req.query.currency as string) || "EUR").toUpperCase()
+
+    const gatewayService = req.scope.resolve(
+      GATEWAY_CONFIG_MODULE
+    ) as GatewayConfigModuleService
+    const billingEntityService = req.scope.resolve(
+      BILLING_ENTITY_MODULE
+    ) as BillingEntityModuleService
+
+    // Get all active gateways with their payment methods
+    const allGateways = await gatewayService.listGatewayConfigs(
+      { is_active: true },
+      {
+        relations: ["payment_methods"],
+        order: { priority: "ASC" },
+      }
+    )
+
+    // Filter by sales channel (if provided) and currency
+    const filteredGateways = allGateways.filter((gw: any) => {
+      // Check sales channel
+      if (salesChannelId && gw.sales_channel_ids) {
+        const scIds = Array.isArray(gw.sales_channel_ids)
+          ? gw.sales_channel_ids
+          : []
+        if (scIds.length > 0 && !scIds.includes(salesChannelId)) {
+          return false
+        }
+      }
+
+      // Check currency support
+      if (gw.supported_currencies) {
+        const currencies = Array.isArray(gw.supported_currencies)
+          ? gw.supported_currencies.map((c: string) => c.toUpperCase())
+          : []
+        if (currencies.length > 0 && !currencies.includes(currency)) {
+          return false
+        }
+      }
+
+      return true
+    })
+
+    // Build response with active payment methods only
+    const gateways = filteredGateways.map((gw: any) => {
+      const activeMethods = (gw.payment_methods || [])
+        .filter((m: any) => m.is_active)
+        .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+        .map((m: any) => ({
+          code: m.code,
+          display_name: m.display_name,
+          icon: m.icon,
+          available_countries: m.available_countries,
+          supported_currencies: m.supported_currencies,
+        }))
+
+      return {
+        provider: gw.provider,
+        display_name: gw.display_name,
+        priority: gw.priority,
+        methods: activeMethods,
+      }
+    })
+
+    // Get billing entity from primary gateway
+    let billingEntity = null
+    if (filteredGateways.length > 0 && filteredGateways[0].billing_entity_id) {
+      try {
+        const entity = await billingEntityService.retrieveBillingEntity(
+          filteredGateways[0].billing_entity_id
+        )
+        billingEntity = {
+          name: entity.name,
+          legal_name: entity.legal_name,
+          vat_id: entity.vat_id,
+          tax_id: entity.tax_id,
+          country_code: entity.country_code,
+          address: entity.address,
+          email: entity.email,
+        }
+      } catch {
+        // billing entity not found, continue without it
+      }
+    }
+
+    res.json({
+      gateways,
+      billing_entity: billingEntity,
+      currency,
+      sales_channel_id: salesChannelId || null,
+    })
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+}
