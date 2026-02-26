@@ -46,7 +46,7 @@ const SupportBoxDashboard = () => {
   const solvedCount = tickets.filter((t: any) => t.status === "solved").length
 
   return (
-    <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "32px" }}>
+    <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px" }}>
       <div style={{ display: "flex", gap: "24px" }}>
         {/* Left Panel - Inbox List */}
         <div style={{ width: "280px", flexShrink: 0 }}>
