@@ -314,6 +314,8 @@ function GatewaysTab() {
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [expandedGw, setExpandedGw] = useState<string | null>(null)
+  const [editingGw, setEditingGw] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<any>({})
 
   const [form, setForm] = useState({
     provider: "",
@@ -355,6 +357,32 @@ function GatewaysTab() {
       toast.success("Gateway deleted")
     },
   })
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Record<string, any> }) =>
+      sdk.client.fetch(`/admin/gateway-configs/${id}`, { method: "POST", body: data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gateway-configs"] })
+      toast.success("Gateway updated")
+      setEditingGw(null)
+    },
+    onError: () => toast.error("Failed to update gateway"),
+  })
+
+  const startEditing = (gw: any) => {
+    setEditingGw(gw.id)
+    setEditForm({
+      display_name: gw.display_name || "",
+      mode: gw.mode || "test",
+      priority: gw.priority || 1,
+      live_keys: gw.live_keys || { api_key: "", secret_key: "", webhook_secret: "" },
+      test_keys: gw.test_keys || { api_key: "", secret_key: "", webhook_secret: "" },
+    })
+  }
+
+  const handleUpdate = (gwId: string) => {
+    updateMutation.mutate({ id: gwId, data: editForm })
+  }
 
   const gateways = (gwData as any)?.gateway_configs || []
   const billingEntities = (beData as any)?.billing_entities || []
@@ -681,34 +709,112 @@ function GatewaysTab() {
                     </div>
                   </div>
 
-                  {/* API Keys (masked) */}
-                  <div style={{ marginBottom: "12px" }}>
-                    <span style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase" }}>API Keys ({gw.mode})</span>
-                    <div style={{ fontSize: "12px", color: "#6D7175", marginTop: "4px" }}>
-                      {gw.mode === "live" && gw.live_keys ? (
-                        Object.entries(gw.live_keys).map(([k, v]) => (
-                          <div key={k}><code style={{ fontFamily: "monospace", fontSize: "11px" }}>{k}: {v as string}</code></div>
-                        ))
-                      ) : gw.test_keys ? (
-                        Object.entries(gw.test_keys).map(([k, v]) => (
-                          <div key={k}><code style={{ fontFamily: "monospace", fontSize: "11px" }}>{k}: {v as string}</code></div>
-                        ))
-                      ) : (
-                        <span>No keys configured</span>
-                      )}
+                  {editingGw === gw.id ? (
+                    /* ═══ EDIT MODE ═══ */
+                    <div style={{ borderTop: "1px solid #E1E3E5", paddingTop: "12px" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "12px" }}>
+                        <div>
+                          <label style={{ fontSize: "10px", color: "#8C9196" }}>Display Name</label>
+                          <input className="bp-input" style={inputStyle} value={editForm.display_name} onChange={(e) => setEditForm({ ...editForm, display_name: e.target.value })} />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: "10px", color: "#8C9196" }}>Mode</label>
+                          <select className="bp-input" style={{ ...inputStyle, background: "#FFF" }} value={editForm.mode} onChange={(e) => setEditForm({ ...editForm, mode: e.target.value })}>
+                            <option value="test">Test</option>
+                            <option value="live">Live</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style={{ fontSize: "10px", color: "#8C9196" }}>Priority</label>
+                          <input className="bp-input" style={inputStyle} type="number" min={1} value={editForm.priority} onChange={(e) => setEditForm({ ...editForm, priority: parseInt(e.target.value) || 1 })} />
+                        </div>
+                      </div>
+                      <div style={{ marginBottom: "12px" }}>
+                        <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase", marginBottom: "6px", display: "block" }}>
+                          {editForm.mode === "live" ? "Live" : "Test"} API Keys
+                        </label>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
+                          <div>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>API Key</label>
+                            <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                              value={editForm.mode === "live" ? editForm.live_keys.api_key : editForm.test_keys.api_key}
+                              onChange={(e) => {
+                                const k = editForm.mode === "live" ? "live_keys" : "test_keys"
+                                setEditForm({ ...editForm, [k]: { ...editForm[k], api_key: e.target.value } })
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>Secret Key</label>
+                            <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                              value={editForm.mode === "live" ? editForm.live_keys.secret_key : editForm.test_keys.secret_key}
+                              onChange={(e) => {
+                                const k = editForm.mode === "live" ? "live_keys" : "test_keys"
+                                setEditForm({ ...editForm, [k]: { ...editForm[k], secret_key: e.target.value } })
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>Webhook Secret</label>
+                            <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                              value={editForm.mode === "live" ? editForm.live_keys.webhook_secret : editForm.test_keys.webhook_secret}
+                              onChange={(e) => {
+                                const k = editForm.mode === "live" ? "live_keys" : "test_keys"
+                                setEditForm({ ...editForm, [k]: { ...editForm[k], webhook_secret: e.target.value } })
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+                        <button onClick={() => setEditingGw(null)} className="bp-btn" style={{ padding: "5px 14px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#6D7175" }}>
+                          Cancel
+                        </button>
+                        <button onClick={() => handleUpdate(gw.id)} disabled={updateMutation.isPending} className="bp-btn-primary" style={{ padding: "5px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF" }}>
+                          {updateMutation.isPending ? "Saving..." : "Save Changes"}
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    /* ═══ VIEW MODE ═══ */
+                    <>
+                      {/* API Keys (masked) */}
+                      <div style={{ marginBottom: "12px" }}>
+                        <span style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase" }}>API Keys ({gw.mode})</span>
+                        <div style={{ fontSize: "12px", color: "#6D7175", marginTop: "4px" }}>
+                          {gw.mode === "live" && gw.live_keys ? (
+                            Object.entries(gw.live_keys).map(([k, v]) => (
+                              <div key={k}><code style={{ fontFamily: "monospace", fontSize: "11px" }}>{k}: {v as string}</code></div>
+                            ))
+                          ) : gw.test_keys ? (
+                            Object.entries(gw.test_keys).map(([k, v]) => (
+                              <div key={k}><code style={{ fontFamily: "monospace", fontSize: "11px" }}>{k}: {v as string}</code></div>
+                            ))
+                          ) : (
+                            <span>No keys configured</span>
+                          )}
+                        </div>
+                      </div>
 
-                  {/* Delete */}
-                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                    <button
-                      onClick={() => { if (confirm(`Delete ${gw.display_name}?`)) deleteMutation.mutate(gw.id) }}
-                      className="bp-btn"
-                      style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #FED3D1", background: "#FFF", color: "#D72C0D" }}
-                    >
-                      Delete Gateway
-                    </button>
-                  </div>
+                      {/* Actions */}
+                      <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+                        <button
+                          onClick={() => startEditing(gw)}
+                          className="bp-btn"
+                          style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #008060", background: "#FFF", color: "#008060" }}
+                        >
+                          Edit Gateway
+                        </button>
+                        <button
+                          onClick={() => { if (confirm(`Delete ${gw.display_name}?`)) deleteMutation.mutate(gw.id) }}
+                          className="bp-btn"
+                          style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #FED3D1", background: "#FFF", color: "#D72C0D" }}
+                        >
+                          Delete Gateway
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
