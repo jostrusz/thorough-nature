@@ -408,12 +408,13 @@ body {
 .foxentry-correction:hover { background: rgba(230, 126, 34, 0.14); }
 .foxentry-correction strong { color: #D35400; text-decoration: underline; text-underline-offset: 2px; }
 .foxentry-spinner {
-  position: absolute; right: 40px; top: 25px; transform: translateY(-50%);
-  width: 14px; height: 14px;
+  position: absolute; right: 14px; top: 25px; transform: translateY(-50%);
+  width: 16px; height: 16px;
   border: 2px solid #E1E3E5; border-top-color: var(--cta);
   border-radius: 50%;
   animation: foxSpin 0.6s linear infinite;
   display: none;
+  z-index: 2;
 }
 @keyframes foxSpin { to { transform: translateY(-50%) rotate(360deg); } }
 
@@ -2846,6 +2847,8 @@ body {
   var emailSuggestion = document.getElementById('email-suggestion');
   if (emailField && emailSuggestion) {
     emailField.addEventListener('blur', function() {
+      // Als Foxentry actief is, laat Foxentry de suggestie afhandelen
+      if (window.__foxentryPending && window.__foxentryPending['email']) return;
       var val = emailField.value.trim();
       var suggestion = checkEmailTypo(val);
       if (suggestion) {
@@ -3012,6 +3015,11 @@ body {
     }
 
     /* ─── Spinner helpers ─── */
+    // Terwijl Foxentry bezig is, verbergen we de check/cross iconen
+    // en blokkeren we de lokale validateField van het instellen van valid/invalid.
+    // Op window zodat validateField() (buiten deze IIFE) het kan lezen.
+    window.__foxentryPending = window.__foxentryPending || {};
+
     function showSpinner(field) {
       var fg = field.closest('.form-group') || field.parentNode;
       var sp = fg.querySelector('.foxentry-spinner');
@@ -3021,11 +3029,15 @@ body {
         fg.appendChild(sp);
       }
       sp.style.display = 'block';
+      // Markeer veld als "Foxentry bezig" — verberg bestaande check/cross
+      if (field.id) window.__foxentryPending[field.id] = true;
+      field.classList.remove('valid', 'invalid');
     }
     function hideSpinner(field) {
       var fg = field.closest('.form-group') || field.parentNode;
       var sp = fg.querySelector('.foxentry-spinner');
       if (sp) sp.style.display = 'none';
+      if (field.id) delete window.__foxentryPending[field.id];
     }
 
     /* ─── Dropdown helpers ─── */
@@ -3361,6 +3373,12 @@ body {
   });
 
   function validateField(field) {
+    // Als Foxentry bezig is met dit veld, sla lokale validatie over
+    // (Foxentry zet straks zelf valid/invalid na API-respons)
+    if (window.__foxentryPending && window.__foxentryPending[field.id]) {
+      return true; // Geef true terug zodat formuliersubmit niet blokkeert
+    }
+
     var value = field.value.trim();
     var isValid = false;
 
