@@ -2,16 +2,27 @@ import { MedusaService } from "@medusajs/framework/utils"
 import GatewayConfig from "./models/gateway-config"
 import PaymentMethodConfig from "./models/payment-method-config"
 
-class GatewayConfigModuleService extends MedusaService({
+const BaseService = MedusaService({
   GatewayConfig,
   PaymentMethodConfig,
-}) {
+})
+
+class GatewayConfigModuleService extends BaseService {
+  private __parentDeleteGatewayConfigs: any
+
+  constructor(...args: any[]) {
+    super(...args)
+    // Store the auto-generated delete before overriding
+    this.__parentDeleteGatewayConfigs = this.deleteGatewayConfigs
+    this.deleteGatewayConfigs = this.__deleteWithCascade as any
+  }
+
   /**
-   * Override delete to handle FK constraint:
+   * Custom delete that handles FK constraint:
    * PaymentMethodConfig → GatewayConfig has no ON DELETE CASCADE,
-   * so we need to delete child records first.
+   * so we delete child records first.
    */
-  async deleteGatewayConfigs(ids: string | string[]): Promise<void> {
+  private __deleteWithCascade = async (ids: string | string[]): Promise<void> => {
     const idArray = Array.isArray(ids) ? ids : [ids]
     for (const id of idArray) {
       const methods = await this.listPaymentMethodConfigs(
@@ -24,7 +35,7 @@ class GatewayConfigModuleService extends MedusaService({
         )
       }
     }
-    await super.deleteGatewayConfigs(idArray)
+    await this.__parentDeleteGatewayConfigs(idArray)
   }
 }
 
