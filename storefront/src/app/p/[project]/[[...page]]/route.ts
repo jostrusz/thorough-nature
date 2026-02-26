@@ -75,6 +75,13 @@ export async function GET(
   const isCustomDomain = request.headers.get("x-project-domain") === "true"
   const basePath = isCustomDomain ? "" : `/p/${projectSlug}`
 
+  // Inject <base> tag so relative URLs (style.css, images) resolve correctly
+  // Without this, /p/loslatenboek resolves "style.css" to /p/style.css instead of /p/loslatenboek/style.css
+  html = html.replace(
+    /<head([^>]*)>/i,
+    `<head$1><base href="${basePath}/">`
+  )
+
   // Inject PROJECT_CONFIG (replace external script reference)
   html = html.replace(
     /<script\s+src=["']js\/project-config\.js["']\s*><\/script>/gi,
