@@ -96,16 +96,52 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
   const quickbooksInvoiceId = metadata.quickbooks_invoice_id || ""
   const quickbooksInvoiceUrl = metadata.quickbooks_invoice_url || ""
 
-  // Payment gateway ID
+  // Payment info
   const payments = (order.payment_collections || []).flatMap(
     (pc: any) => pc.payments || []
   )
+  const payment = payments[0]
+
+  // Payment ID — Mollie stores as molliePaymentId/mollieOrderId, not as id
   const gatewayPaymentId =
-    payments[0]?.data?.id ||
-    payments[0]?.data?.payment_intent ||
-    payments[0]?.data?.payment_id ||
-    payments[0]?.data?.transaction_id ||
+    payment?.data?.molliePaymentId ||
+    payment?.data?.mollieOrderId ||
+    payment?.data?.id ||
+    payment?.data?.payment_intent ||
+    payment?.data?.payment_id ||
+    payment?.data?.transaction_id ||
+    metadata.molliePaymentId ||
+    metadata.mollieOrderId ||
     ""
+
+  // Payment Gateway name (e.g. "Mollie", "PayPal")
+  const providerRaw = payment?.provider_id || ""
+  const paymentGateway = providerRaw
+    ? providerRaw.replace(/^pp_/, "").replace(/_.*$/, "").replace(/^\w/, (c: string) => c.toUpperCase())
+    : ""
+
+  // Payment Method (e.g. "ideal", "bancontact", "creditcard")
+  const paymentMethodRaw =
+    payment?.data?.method ||
+    metadata.payment_method ||
+    ""
+  const PAYMENT_METHOD_LABELS: Record<string, string> = {
+    ideal: "iDEAL",
+    creditcard: "Credit Card",
+    bancontact: "Bancontact",
+    klarnapaylater: "Klarna",
+    klarna: "Klarna",
+    paypal: "PayPal",
+    applepay: "Apple Pay",
+    eps: "EPS",
+    giropay: "Giropay",
+    przelewy24: "Przelewy24",
+    sofort: "SOFORT",
+    belfius: "Belfius",
+    kbc: "KBC",
+    mybank: "MyBank",
+  }
+  const paymentMethodLabel = PAYMENT_METHOD_LABELS[paymentMethodRaw] || paymentMethodRaw || ""
 
   function handleBookSentToggle() {
     updateMetadata.mutate(
@@ -157,6 +193,26 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
 
       {/* ═══════════ PAYMENT ═══════════ */}
       <div style={groupTitleStyle}>Payment</div>
+
+      {/* Payment Gateway */}
+      <div className="od-row-hover" style={rowStyle}>
+        <span style={labelStyle}>Payment Gate</span>
+        {paymentGateway ? (
+          <span style={valueStyle}>{paymentGateway}</span>
+        ) : (
+          <span style={dashStyle}>&mdash;</span>
+        )}
+      </div>
+
+      {/* Payment Method */}
+      <div className="od-row-hover" style={rowStyle}>
+        <span style={labelStyle}>Payment Method</span>
+        {paymentMethodLabel ? (
+          <span style={valueStyle}>{paymentMethodLabel}</span>
+        ) : (
+          <span style={dashStyle}>&mdash;</span>
+        )}
+      </div>
 
       {/* Payment Gateway ID */}
       <div className="od-row-hover" style={rowStyle}>

@@ -7,11 +7,10 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/favicon.png" type="image/png">
 
-<!-- Prevent checkout flash on payment return — hide body BEFORE any rendering -->
+<!-- Prevent checkout flash on payment return — show branded preloader immediately -->
 <script>
 if (window.location.search.indexOf('payment_return=1') !== -1) {
-  document.documentElement.style.visibility = 'hidden';
-  document.documentElement.style.overflow = 'hidden';
+  document.write('<style>body{margin:0;padding:0}.payment-preloader{position:fixed;top:0;left:0;width:100%;height:100%;background:#f8f6f3;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;}.payment-preloader img{width:120px;height:auto;animation:ppPulse 1.4s ease-in-out infinite}.payment-preloader p{margin-top:24px;font-family:"DM Sans",sans-serif;font-size:16px;color:#333;}.payment-preloader .sub{margin-top:6px;font-size:13px;color:#999;}@keyframes ppPulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.08);opacity:1}}.checkout-form,.content,.order-summary{display:none!important}</style>');
 }
 </script>
 
@@ -3790,13 +3789,13 @@ body {
     var cartId = params.get('cart_id');
     if (!cartId) return;
 
-    // Show loading spinner (page was hidden by head script to prevent flash)
-    document.documentElement.style.visibility = 'visible';
-    document.documentElement.style.overflow = '';
-    document.body.style.background = '#f8f6f3';
-    var mainContent = document.querySelector('.checkout-form') || document.querySelector('.content');
-    if (mainContent) {
-      mainContent.innerHTML = '<div style="text-align:center;padding:80px 20px;"><div class="spinner" style="width:40px;height:40px;border:3px solid #eee;border-top:3px solid #333;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px;"></div><p style="font-size:18px;color:#333;">Betaling wordt verwerkt...</p><p style="font-size:14px;color:#888;">Even geduld alsjeblieft.</p></div>';
+    // Show branded preloader (injected by head script, hides checkout form)
+    // Add preloader element if not already present
+    if (!document.querySelector('.payment-preloader')) {
+      var preloaderDiv = document.createElement('div');
+      preloaderDiv.className = 'payment-preloader';
+      preloaderDiv.innerHTML = '<img src="/laat-los-logo-logo.png" alt="Laden..."><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+      document.body.insertBefore(preloaderDiv, document.body.firstChild);
     }
 
     // Complete the cart via Medusa
@@ -3817,8 +3816,9 @@ body {
       }
     }).catch(function(err) {
       console.error('[Payment Return] Cart completion failed:', err);
-      if (mainContent) {
-        mainContent.innerHTML = '<div style="text-align:center;padding:80px 20px;"><p style="font-size:18px;color:#C0392B;">Er ging iets mis bij het verwerken van je betaling.</p><p style="font-size:14px;color:#666;margin-top:10px;">' + (err.message || 'Probeer het opnieuw of neem contact met ons op.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;">Opnieuw proberen</a></div>';
+      var preloader = document.querySelector('.payment-preloader');
+      if (preloader) {
+        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Er ging iets mis bij het verwerken van je betaling.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Probeer het opnieuw of neem contact met ons op.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Opnieuw proberen</a></div>';
       }
     });
 

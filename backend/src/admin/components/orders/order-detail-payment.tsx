@@ -201,10 +201,20 @@ export function OrderDetailPayment({ order }: OrderDetailPaymentProps) {
         {payments.length > 0 && (
           <div style={{ marginTop: "8px" }}>
             {payments.map((payment: any) => {
-              const provider = payment.provider_id
-                ? payment.provider_id.replace("pp_", "").replace(/_/g, " ")
-                : "Payment"
+              const providerName = payment.provider_id
+                ? payment.provider_id.replace(/^pp_/, "").replace(/_.*$/, "").replace(/^\w/, (c: string) => c.toUpperCase())
+                : ""
+              const methodRaw = payment.data?.method || ""
+              const METHOD_LABELS: Record<string, string> = {
+                ideal: "iDEAL", creditcard: "Credit Card", bancontact: "Bancontact",
+                klarnapaylater: "Klarna", klarna: "Klarna", paypal: "PayPal",
+                applepay: "Apple Pay", eps: "EPS", przelewy24: "Przelewy24",
+              }
+              const methodLabel = METHOD_LABELS[methodRaw] || methodRaw || ""
+              const provider = [providerName, methodLabel].filter(Boolean).join(" — ") || "Payment"
               const gatewayId =
+                payment.data?.molliePaymentId ||
+                payment.data?.mollieOrderId ||
                 payment.data?.id ||
                 payment.data?.payment_intent ||
                 payment.data?.payment_id ||

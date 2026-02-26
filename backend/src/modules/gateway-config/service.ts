@@ -13,8 +13,13 @@ class GatewayConfigModuleService extends BaseService {
   constructor(...args: any[]) {
     super(...args)
     // Store the auto-generated delete before overriding
-    this.__parentDeleteGatewayConfigs = this.deleteGatewayConfigs
-    this.deleteGatewayConfigs = this.__deleteWithCascade as any
+    this.__parentDeleteGatewayConfigs = (this as any).deleteGatewayConfigs
+    // Override read-only property via Object.defineProperty
+    Object.defineProperty(this, "deleteGatewayConfigs", {
+      value: this.__deleteWithCascade,
+      writable: true,
+      configurable: true,
+    })
   }
 
   /**
