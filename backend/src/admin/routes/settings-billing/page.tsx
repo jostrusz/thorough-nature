@@ -152,17 +152,13 @@ function CompaniesTab() {
   const { data, isLoading } = useBillingEntities()
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({
-    name: "",
-    legal_name: "",
-    country_code: "",
-    tax_id: "",
-    vat_id: "",
-    registration_id: "",
-    email: "",
-    invoicing_system: "",
-    is_default: false,
-  })
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const emptyForm = {
+    name: "", legal_name: "", country_code: "", tax_id: "", vat_id: "",
+    registration_id: "", email: "", invoicing_system: "", is_default: false,
+  }
+  const [form, setForm] = useState(emptyForm)
+  const [editForm, setEditForm] = useState(emptyForm)
 
   const createMutation = useMutation({
     mutationFn: (data: Record<string, any>) =>
@@ -171,9 +167,20 @@ function CompaniesTab() {
       queryClient.invalidateQueries({ queryKey: ["billing-entities"] })
       toast.success("Company created")
       setShowForm(false)
-      setForm({ name: "", legal_name: "", country_code: "", tax_id: "", vat_id: "", registration_id: "", email: "", invoicing_system: "", is_default: false })
+      setForm(emptyForm)
     },
     onError: () => toast.error("Failed to create company"),
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Record<string, any> }) =>
+      sdk.client.fetch(`/admin/billing-entities/${id}`, { method: "POST", body: data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["billing-entities"] })
+      toast.success("Company updated")
+      setEditingId(null)
+    },
+    onError: () => toast.error("Failed to update company"),
   })
 
   const deleteMutation = useMutation({
@@ -185,18 +192,105 @@ function CompaniesTab() {
     },
   })
 
+  const setDefaultMutation = useMutation({
+    mutationFn: async (id: string) => {
+      // Unset all others first, then set the selected one
+      for (const e of entities) {
+        if (e.id !== id && e.is_default) {
+          await sdk.client.fetch(`/admin/billing-entities/${e.id}`, { method: "POST", body: { is_default: false } })
+        }
+      }
+      await sdk.client.fetch(`/admin/billing-entities/${id}`, { method: "POST", body: { is_default: true } })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["billing-entities"] })
+      toast.success("Default company updated")
+    },
+  })
+
   const entities = (data as any)?.billing_entities || []
 
-  const FLAGS: Record<string, string> = { cz: "\uD83C\uDDE8\uD83C\uDDFF", ee: "\uD83C\uDDEA\uD83C\uDDEA", nl: "\uD83C\uDDF3\uD83C\uDDF1", de: "\uD83C\uDDE9\uD83C\uDDEA", pl: "\uD83C\uDDF5\uD83C\uDDF1" }
+  const FLAGS: Record<string, string> = {
+    cz: "\uD83C\uDDE8\uD83C\uDDFF", ee: "\uD83C\uDDEA\uD83C\uDDEA", nl: "\uD83C\uDDF3\uD83C\uDDF1",
+    de: "\uD83C\uDDE9\uD83C\uDDEA", pl: "\uD83C\uDDF5\uD83C\uDDF1", sk: "\uD83C\uDDF8\uD83C\uDDF0",
+    be: "\uD83C\uDDE7\uD83C\uDDEA", at: "\uD83C\uDDE6\uD83C\uDDF9", se: "\uD83C\uDDF8\uD83C\uDDEA",
+  }
 
   const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "7px 10px",
-    border: "1px solid #E1E3E5",
-    borderRadius: "6px",
-    fontSize: "13px",
-    boxSizing: "border-box",
-    fontFamily: "inherit",
+    width: "100%", padding: "7px 10px", border: "1px solid #E1E3E5",
+    borderRadius: "6px", fontSize: "13px", boxSizing: "border-box", fontFamily: "inherit",
+  }
+  const lblStyle: React.CSSProperties = {
+    fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase", marginBottom: "4px", display: "block",
+  }
+
+  function startEditing(entity: any) {
+    setEditingId(entity.id)
+    setEditForm({
+      name: entity.name || "",
+      legal_name: entity.legal_name || "",
+      country_code: entity.country_code || "",
+      tax_id: entity.tax_id || "",
+      vat_id: entity.vat_id || "",
+      registration_id: entity.registration_id || "",
+      email: entity.email || "",
+      invoicing_system: entity.invoicing_system || "",
+      is_default: entity.is_default || false,
+    })
+  }
+
+  function renderForm(f: any, setF: (v: any) => void, isEdit = false) {
+    return (
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+        <div>
+          <label style={lblStyle}>Company Name *</label>
+          <input className="bp-input" style={inputStyle} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Performance Marketing Solution s.r.o." />
+        </div>
+        <div>
+          <label style={lblStyle}>Legal Name</label>
+          <input className="bp-input" style={inputStyle} value={f.legal_name} onChange={(e) => setF({ ...f, legal_name: e.target.value })} placeholder="Same as company name" />
+        </div>
+        <div>
+          <label style={lblStyle}>Country *</label>
+          <select className="bp-input" style={{ ...inputStyle, background: "#FFF" }} value={f.country_code} onChange={(e) => setF({ ...f, country_code: e.target.value })}>
+            <option value="">Select country</option>
+            <option value="cz">Czech Republic</option>
+            <option value="ee">Estonia</option>
+            <option value="nl">Netherlands</option>
+            <option value="de">Germany</option>
+            <option value="pl">Poland</option>
+            <option value="sk">Slovakia</option>
+            <option value="be">Belgium</option>
+            <option value="at">Austria</option>
+            <option value="se">Sweden</option>
+          </select>
+        </div>
+        <div>
+          <label style={lblStyle}>Email</label>
+          <input className="bp-input" style={inputStyle} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} type="email" placeholder="info@company.com" />
+        </div>
+        <div>
+          <label style={lblStyle}>Tax ID (Reg. No.)</label>
+          <input className="bp-input" style={inputStyle} value={f.tax_id} onChange={(e) => setF({ ...f, tax_id: e.target.value })} placeholder="06259928" />
+        </div>
+        <div>
+          <label style={lblStyle}>VAT ID</label>
+          <input className="bp-input" style={inputStyle} value={f.vat_id} onChange={(e) => setF({ ...f, vat_id: e.target.value })} placeholder="CZ06259928" />
+        </div>
+        <div>
+          <label style={lblStyle}>Invoicing System *</label>
+          <select className="bp-input" style={{ ...inputStyle, background: "#FFF" }} value={f.invoicing_system} onChange={(e) => setF({ ...f, invoicing_system: e.target.value })}>
+            <option value="">None</option>
+            <option value="fakturoid">Fakturoid</option>
+            <option value="quickbooks">QuickBooks</option>
+          </select>
+        </div>
+        <div>
+          <label style={lblStyle}>Registration ID</label>
+          <input className="bp-input" style={inputStyle} value={f.registration_id} onChange={(e) => setF({ ...f, registration_id: e.target.value })} placeholder="Optional" />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -204,7 +298,7 @@ function CompaniesTab() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
         <h2 style={{ fontSize: "16px", fontWeight: 600, margin: 0 }}>Companies (Billing Entities)</h2>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => { setShowForm(!showForm); setEditingId(null) }}
           className="bp-btn-primary"
           style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF" }}
         >
@@ -215,47 +309,7 @@ function CompaniesTab() {
       {/* Create form */}
       {showForm && (
         <div className="bp-card bp-section-enter" style={{ padding: "20px", marginBottom: "16px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-            <div>
-              <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase" }}>Company Name</label>
-              <input className="bp-input" style={inputStyle} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="EverChapter OU" />
-            </div>
-            <div>
-              <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase" }}>Legal Name</label>
-              <input className="bp-input" style={inputStyle} value={form.legal_name} onChange={(e) => setForm({ ...form, legal_name: e.target.value })} placeholder="EverChapter O\u00DC" />
-            </div>
-            <div>
-              <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase" }}>Country</label>
-              <select className="bp-input" style={{ ...inputStyle, background: "#FFF" }} value={form.country_code} onChange={(e) => setForm({ ...form, country_code: e.target.value })}>
-                <option value="">Select</option>
-                <option value="cz">Czech Republic</option>
-                <option value="ee">Estonia</option>
-                <option value="nl">Netherlands</option>
-                <option value="de">Germany</option>
-                <option value="pl">Poland</option>
-              </select>
-            </div>
-            <div>
-              <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase" }}>Tax ID (I\u010CO)</label>
-              <input className="bp-input" style={inputStyle} value={form.tax_id} onChange={(e) => setForm({ ...form, tax_id: e.target.value })} placeholder="12345678" />
-            </div>
-            <div>
-              <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase" }}>VAT ID (DI\u010C)</label>
-              <input className="bp-input" style={inputStyle} value={form.vat_id} onChange={(e) => setForm({ ...form, vat_id: e.target.value })} placeholder="CZ12345678" />
-            </div>
-            <div>
-              <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase" }}>Email</label>
-              <input className="bp-input" style={inputStyle} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} type="email" placeholder="info@company.com" />
-            </div>
-            <div>
-              <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase" }}>Invoicing System</label>
-              <select className="bp-input" style={{ ...inputStyle, background: "#FFF" }} value={form.invoicing_system} onChange={(e) => setForm({ ...form, invoicing_system: e.target.value })}>
-                <option value="">None</option>
-                <option value="fakturoid">Fakturoid</option>
-                <option value="quickbooks">QuickBooks</option>
-              </select>
-            </div>
-          </div>
+          {renderForm(form, setForm)}
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "16px" }}>
             <button
               onClick={() => createMutation.mutate(form)}
@@ -278,42 +332,85 @@ function CompaniesTab() {
           <p style={{ fontSize: "12px" }}>Add your billing entities to start configuring payment gateways</p>
         </div>
       ) : (
-        entities.map((entity: any) => (
-          <div key={entity.id} className="bp-card" style={{ padding: "16px 20px", marginBottom: "12px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ fontSize: "18px" }}>{FLAGS[entity.country_code] || "\uD83C\uDFF3\uFE0F"}</span>
-                  <span style={{ fontSize: "14px", fontWeight: 600, color: "#1A1A1A" }}>{entity.name}</span>
-                  {entity.is_default && (
-                    <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "10px", background: "#AEE9D1", color: "#0D5740", fontWeight: 600 }}>DEFAULT</span>
-                  )}
+        entities.map((entity: any) => {
+          const isEditing = editingId === entity.id
+          return (
+            <div key={entity.id} className="bp-card" style={{ padding: "16px 20px", marginBottom: "12px" }}>
+              {isEditing ? (
+                /* ═══ EDIT MODE ═══ */
+                <div className="bp-section-enter">
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                    <span style={{ fontSize: "18px" }}>{FLAGS[editForm.country_code] || "\uD83C\uDFF3\uFE0F"}</span>
+                    <span style={{ fontSize: "14px", fontWeight: 600, color: "#1A1A1A" }}>Editing: {entity.name}</span>
+                  </div>
+                  {renderForm(editForm, setEditForm, true)}
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "16px" }}>
+                    <button onClick={() => setEditingId(null)} className="bp-btn" style={{ padding: "5px 14px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#6D7175" }}>
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => updateMutation.mutate({ id: entity.id, data: editForm })}
+                      disabled={!editForm.name || updateMutation.isPending}
+                      className="bp-btn-primary"
+                      style={{ padding: "5px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF", opacity: !editForm.name ? 0.5 : 1 }}
+                    >
+                      {updateMutation.isPending ? "Saving..." : "Save Changes"}
+                    </button>
+                  </div>
                 </div>
-                <div style={{ fontSize: "12px", color: "#6D7175", marginTop: "4px" }}>
-                  {entity.tax_id && <span>I\u010CO: {entity.tax_id}</span>}
-                  {entity.vat_id && <span style={{ marginLeft: "12px" }}>DI\u010C: {entity.vat_id}</span>}
-                  {entity.email && <span style={{ marginLeft: "12px" }}>{entity.email}</span>}
-                  {entity.invoicing_system && (
-                    <span style={{ marginLeft: "12px", padding: "1px 8px", borderRadius: "10px", fontSize: "11px", fontWeight: 600, background: entity.invoicing_system === "fakturoid" ? "#DBEAFE" : "#E0E7FF", color: entity.invoicing_system === "fakturoid" ? "#1D4ED8" : "#4338CA" }}>
-                      {entity.invoicing_system === "fakturoid" ? "Fakturoid" : "QuickBooks"}
-                    </span>
-                  )}
+              ) : (
+                /* ═══ VIEW MODE ═══ */
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ fontSize: "18px" }}>{FLAGS[entity.country_code] || "\uD83C\uDFF3\uFE0F"}</span>
+                      <span style={{ fontSize: "14px", fontWeight: 600, color: "#1A1A1A" }}>{entity.name}</span>
+                      {entity.is_default && (
+                        <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "10px", background: "#AEE9D1", color: "#0D5740", fontWeight: 600 }}>DEFAULT</span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#6D7175", marginTop: "4px", display: "flex", flexWrap: "wrap", gap: "4px 12px", alignItems: "center" }}>
+                      {entity.tax_id && <span>Reg. No: {entity.tax_id}</span>}
+                      {entity.vat_id && <span>VAT: {entity.vat_id}</span>}
+                      {entity.email && <span>{entity.email}</span>}
+                      {entity.invoicing_system && (
+                        <span style={{ padding: "1px 8px", borderRadius: "10px", fontSize: "11px", fontWeight: 600, background: entity.invoicing_system === "fakturoid" ? "#DBEAFE" : "#E0E7FF", color: entity.invoicing_system === "fakturoid" ? "#1D4ED8" : "#4338CA" }}>
+                          {entity.invoicing_system === "fakturoid" ? "Fakturoid" : "QuickBooks"}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    {!entity.is_default && (
+                      <button
+                        onClick={() => setDefaultMutation.mutate(entity.id)}
+                        disabled={setDefaultMutation.isPending}
+                        className="bp-btn"
+                        style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #008060", background: "#FFF", color: "#008060" }}
+                      >
+                        Set Default
+                      </button>
+                    )}
+                    <button
+                      onClick={() => startEditing(entity)}
+                      className="bp-btn"
+                      style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A" }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => { if (confirm(`Delete ${entity.name}?`)) deleteMutation.mutate(entity.id) }}
+                      className="bp-btn"
+                      style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #FED3D1", background: "#FFF", color: "#D72C0D" }}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <button
-                onClick={() => {
-                  if (confirm(`Delete ${entity.name}?`)) {
-                    deleteMutation.mutate(entity.id)
-                  }
-                }}
-                className="bp-btn"
-                style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#D72C0D" }}
-              >
-                Delete
-              </button>
+              )}
             </div>
-          </div>
-        ))
+          )
+        })
       )}
     </div>
   )
