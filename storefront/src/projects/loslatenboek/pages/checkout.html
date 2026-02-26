@@ -3679,6 +3679,50 @@ body {
     });
   }
 
+  /* ─── PAYMENT RETURN HANDLER ───
+   * When customer returns from Mollie after paying,
+   * URL has ?payment_return=1&cart_id=xxx
+   * We complete the cart and redirect to upsell/thank-you.
+   */
+  (function() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('payment_return') !== '1') return;
+
+    var cartId = params.get('cart_id');
+    if (!cartId) return;
+
+    // Hide checkout form, show loading
+    var mainContent = document.querySelector('.checkout-form') || document.querySelector('.content');
+    if (mainContent) {
+      mainContent.innerHTML = '<div style="text-align:center;padding:80px 20px;"><div class="spinner" style="width:40px;height:40px;border:3px solid #eee;border-top:3px solid #333;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px;"></div><p style="font-size:18px;color:#333;">Betaling wordt verwerkt...</p><p style="font-size:14px;color:#888;">Even geduld alsjeblieft.</p></div>';
+    }
+
+    // Complete the cart via Medusa
+    medusaFetch('/store/carts/' + cartId + '/complete', {
+      method: 'POST'
+    }).then(function(res) {
+      var order = res.order || res;
+      localStorage.setItem('medusa_order_id', order.id || '');
+      localStorage.setItem('medusa_order_display_id', order.display_id || '');
+
+      // Redirect to upsell or thank-you
+      var orderBump = localStorage.getItem('medusa_order_bump') === 'true';
+      if (PROJECT_CONFIG.upsellEnabled === false || orderBump) {
+        if (orderBump) localStorage.setItem('medusa_upsell_purchased', 'true');
+        window.location.href = PROJECT_CONFIG.thankYouUrl;
+      } else {
+        window.location.href = PROJECT_CONFIG.upsellUrl;
+      }
+    }).catch(function(err) {
+      console.error('[Payment Return] Cart completion failed:', err);
+      if (mainContent) {
+        mainContent.innerHTML = '<div style="text-align:center;padding:80px 20px;"><p style="font-size:18px;color:#C0392B;">Er ging iets mis bij het verwerken van je betaling.</p><p style="font-size:14px;color:#666;margin-top:10px;">' + (err.message || 'Probeer het opnieuw of neem contact met ons op.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;">Opnieuw proberen</a></div>';
+      }
+    });
+
+    return; // Stop further checkout initialization
+  })();
+
   /* ─── OBRÁZEK PRODUKTU ─── */
   if (PROJECT_CONFIG.mainProduct.thumbnail) {
     var thumbUrl = PROJECT_CONFIG.mainProduct.thumbnail.indexOf('http') === 0 ? PROJECT_CONFIG.mainProduct.thumbnail : MEDUSA_URL + PROJECT_CONFIG.mainProduct.thumbnail;
@@ -4048,7 +4092,10 @@ body {
       } else {
         providerId = selectedProvider === 'mollie' ? 'pp_mollie_mollie' : 'pp_paypal_paypal';
         if (selectedProvider === 'mollie') {
-          sessionData = { method: selectedMethod };
+          sessionData = {
+            method: selectedMethod,
+            return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
+          };
         }
       }
 
