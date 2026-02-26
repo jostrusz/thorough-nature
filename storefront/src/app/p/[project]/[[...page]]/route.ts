@@ -3,6 +3,24 @@ import fs from "fs"
 import path from "path"
 import { getProjectBySlug, ProjectConfig } from "@lib/projects"
 
+// MIME types for static assets served from project pages folder
+const STATIC_MIME_TYPES: Record<string, string> = {
+  ".css": "text/css; charset=utf-8",
+  ".js": "application/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".ico": "image/x-icon",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+  ".eot": "application/vnd.ms-fontobject",
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ project: string; page?: string[] }> }
@@ -12,6 +30,26 @@ export async function GET(
   const config = getProjectBySlug(projectSlug)
   if (!config) {
     return new NextResponse("Project not found", { status: 404 })
+  }
+
+  // Check if this is a request for a static asset (CSS, JS, images, fonts)
+  const requestedPath = page?.join("/") || ""
+  const ext = path.extname(requestedPath).toLowerCase()
+  if (ext && ext !== ".html" && STATIC_MIME_TYPES[ext]) {
+    const assetPath = path.join(process.cwd(), "src", "projects", projectSlug, "pages", requestedPath)
+    // Prevent directory traversal
+    const pagesDir = path.join(process.cwd(), "src", "projects", projectSlug, "pages")
+    if (!path.resolve(assetPath).startsWith(pagesDir) || !fs.existsSync(assetPath)) {
+      return new NextResponse("Not found", { status: 404 })
+    }
+    const content = fs.readFileSync(assetPath)
+    return new NextResponse(content, {
+      status: 200,
+      headers: {
+        "Content-Type": STATIC_MIME_TYPES[ext],
+        "Cache-Control": "public, max-age=3600, s-maxage=86400",
+      },
+    })
   }
 
   // Resolve page name: /p/loslatenboek -> "", /p/loslatenboek/checkout -> "checkout"
