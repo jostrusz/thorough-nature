@@ -3467,9 +3467,15 @@ body {
         promoMessage.className = 'promo-message error';
         return;
       }
-      // Uložit kód (validace proběhne při submitu na Medusa API)
+      // Validate against admin-configured whitelist (case-insensitive)
+      var validCodes = (PROJECT_CONFIG.promoCodes || []).map(function(c) { return c.toUpperCase(); });
+      if (validCodes.length > 0 && validCodes.indexOf(code) === -1) {
+        promoMessage.textContent = 'Ongeldige kortingscode';
+        promoMessage.className = 'promo-message error';
+        return;
+      }
+      // Code is valid — save and show applied badge
       savedPromoCode = code;
-      // Zobrazit jako "připravený k aplikaci"
       promoCodeTag.textContent = code;
       promoApplied.classList.add('is-visible');
       promoForm.classList.remove('is-open');

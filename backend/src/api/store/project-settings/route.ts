@@ -32,6 +32,7 @@ export async function GET(
           order_bump_enabled: true,
           upsell_enabled: true,
           foxentry_api_key: null,
+          promo_codes: null,
         },
       })
       return
@@ -44,6 +45,7 @@ export async function GET(
         order_bump_enabled: s.order_bump_enabled,
         upsell_enabled: s.upsell_enabled,
         foxentry_api_key: s.foxentry_api_key || null,
+        promo_codes: s.promo_codes || null,
       },
     })
   } catch (error: any) {
@@ -54,6 +56,7 @@ export async function GET(
         order_bump_enabled: true,
         upsell_enabled: true,
         foxentry_api_key: null,
+        promo_codes: null,
       },
     })
   }

@@ -169,10 +169,13 @@ async function fetchProjectSettings(config: ProjectConfig): Promise<ProjectToggl
     if (res.ok) {
       const data = await res.json()
       if (data.project_setting) {
+        let promoCodes: string[] = []
+        try { promoCodes = JSON.parse(data.project_setting.promo_codes || "[]") } catch {}
         return {
           orderBumpEnabled: data.project_setting.order_bump_enabled !== false,
           upsellEnabled: data.project_setting.upsell_enabled !== false,
           foxentryApiKey: data.project_setting.foxentry_api_key || null,
+          promoCodes,
         }
       }
     }
@@ -181,13 +184,14 @@ async function fetchProjectSettings(config: ProjectConfig): Promise<ProjectToggl
   }
 
   // Defaults: everything enabled
-  return { orderBumpEnabled: true, upsellEnabled: true, foxentryApiKey: null }
+  return { orderBumpEnabled: true, upsellEnabled: true, foxentryApiKey: null, promoCodes: [] }
 }
 
 interface ProjectToggles {
   orderBumpEnabled: boolean
   upsellEnabled: boolean
   foxentryApiKey: string | null
+  promoCodes: string[]
 }
 
 function generateProjectConfigScript(
@@ -208,6 +212,7 @@ function generateProjectConfigScript(
     orderBumpEnabled: toggles.orderBumpEnabled,
     upsellEnabled: toggles.upsellEnabled,
     foxentryApiKey: toggles.foxentryApiKey,
+    promoCodes: toggles.promoCodes,
     // URLs with correct base path
     homeUrl: `${basePath}/`,
     checkoutUrl: `${basePath}/checkout`,

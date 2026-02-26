@@ -9,6 +9,8 @@ const ProjectSettings = model.define("project_settings", {
   upsell_enabled: model.boolean().default(true),
   // Foxentry API key for address/email/phone/company validation
   foxentry_api_key: model.text().nullable(),
+  // Promo codes whitelist — JSON array of uppercase codes, e.g. '["SUMMER10","WELCOME"]'
+  promo_codes: model.text().nullable(),
 })
 
 export default ProjectSettings
