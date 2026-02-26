@@ -1982,6 +1982,7 @@ body {
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             <div class="field-error">Vul een geldig e-mailadres in</div>
             <div class="email-suggestion" id="email-suggestion"></div>
+            <div class="foxentry-dropdown" id="foxentry-email-dropdown"></div>
           </div>
 
           <div class="float-field form-group" style="margin-bottom:0;">
@@ -3148,13 +3149,79 @@ body {
     }
 
     /* ════════════════════════════════════════
-     *  2. E-MAIL VALIDATIE (vervangt lokale typo-check)
+     *  2a. E-MAIL DOMAIN AUTOCOMPLETE (/email/search)
+     *  Toont dropdown met populaire domeinen na @ (debounce 250ms)
      * ════════════════════════════════════════ */
     var foxEmailField = document.getElementById('email');
     var foxEmailSuggestion = document.getElementById('email-suggestion');
+    var foxEmailDropdown = document.getElementById('foxentry-email-dropdown');
 
+    if (foxEmailField && foxEmailDropdown) {
+      foxEmailField.addEventListener('input', debounce(function() {
+        var val = foxEmailField.value.trim();
+        var atIdx = val.indexOf('@');
+        // Alleen zoeken als er een @ is + minstens 1 teken erna
+        if (atIdx === -1 || atIdx === val.length - 1) {
+          hideDropdown(foxEmailDropdown);
+          return;
+        }
+        var afterAt = val.substring(atIdx + 1);
+        // Stop met zoeken als domein al compleet lijkt (bevat een punt met tekst erna)
+        if (/\.\w{2,}$/.test(afterAt)) {
+          hideDropdown(foxEmailDropdown);
+          return;
+        }
+
+        foxentryFetch('/email/search', {
+          query: { email: val }
+        })
+        .then(function(resp) {
+          var fx = foxentryResult(resp);
+          var results = fx.results || [];
+          var items = [];
+          results.forEach(function(r) {
+            var d = r.data || r;
+            if (!d || !d.email) return;
+            items.push({
+              html: '<strong>' + d.email + '</strong>',
+              data: { email: d.email }
+            });
+          });
+          showDropdown(foxEmailDropdown, items, function(data) {
+            foxEmailField.value = data.email;
+            hideDropdown(foxEmailDropdown);
+            // Trigger float-label
+            var ff = foxEmailField.closest('.float-field');
+            if (ff) ff.classList.add('has-value');
+            // Valideer het geselecteerde email
+            foxEmailField.dispatchEvent(new Event('blur'));
+          });
+        })
+        .catch(function() {
+          hideDropdown(foxEmailDropdown);
+        });
+      }, 250));
+
+      // Sluit dropdown bij blur (met delay voor mousedown)
+      foxEmailField.addEventListener('blur', function() {
+        setTimeout(function() { hideDropdown(foxEmailDropdown); }, 200);
+      });
+      // Heropen bij focus als er items zijn
+      foxEmailField.addEventListener('focus', function() {
+        if (foxEmailDropdown.children.length > 0 && foxEmailField.value.indexOf('@') !== -1) {
+          var afterAt = foxEmailField.value.substring(foxEmailField.value.indexOf('@') + 1);
+          if (afterAt && !/\.\w{2,}$/.test(afterAt)) {
+            foxEmailDropdown.classList.add('is-open');
+          }
+        }
+      });
+    }
+
+    /* ════════════════════════════════════════
+     *  2b. E-MAIL VALIDATIE — basic + full proposal handling
+     *  Beslist op basis van proposal (niet alleen isValid)
+     * ════════════════════════════════════════ */
     if (foxEmailField) {
-      // Voeg Foxentry als extra blur listener toe (versterkt de bestaande lokale check)
       foxEmailField.addEventListener('blur', function() {
         var val = foxEmailField.value.trim();
         if (!val || val.indexOf('@') === -1) return;
@@ -3162,39 +3229,109 @@ body {
         showSpinner(foxEmailField);
         foxentryFetch('/email/validate', {
           query: { email: val },
-          options: { validationType: 'extended' }
+          options: { validationType: 'basic' }
         })
         .then(function(resp) {
           hideSpinner(foxEmailField);
           var fx = foxentryResult(resp);
           var proposal = fx.result.proposal || '';
-          var isValid = fx.result.isValid === true;
-          var isInvalidWithCorrection = proposal === 'invalidWithCorrection';
-          // Corrected email van Foxentry (bv. skjhajk@gmail → skjhajk@gmail.com)
           var correctedEmail = (fx.corrected && fx.corrected.data && fx.corrected.data.email) || null;
+          var suggestions = fx.suggestions || [];
 
-          // Foxentry correctie suggestie
-          if (correctedEmail && correctedEmail !== val) {
-            if (foxEmailSuggestion) {
-              foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + correctedEmail + '</strong>? Klik om te corrigeren.';
-              foxEmailSuggestion.style.display = 'block';
-              foxEmailSuggestion.onclick = function() {
-                foxEmailField.value = correctedEmail;
-                foxEmailSuggestion.style.display = 'none';
+          // Verberg eerdere suggestie
+          if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
+
+          switch (proposal) {
+            case 'valid':
+              // Email is OK
+              foxEmailField.classList.add('valid');
+              foxEmailField.classList.remove('invalid');
+              break;
+
+            case 'invalid':
+              // Email is fout, geen correctie beschikbaar
+              foxEmailField.classList.add('invalid');
+              foxEmailField.classList.remove('valid');
+              break;
+
+            case 'invalidWithCorrection':
+              // Fout maar Foxentry kent de correctie (bv. gamil.com → gmail.com)
+              foxEmailField.classList.add('invalid');
+              foxEmailField.classList.remove('valid');
+              if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
+                foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + correctedEmail + '</strong>? Klik om te corrigeren.';
+                foxEmailSuggestion.style.display = 'block';
+                foxEmailSuggestion.onclick = function() {
+                  foxEmailField.value = correctedEmail;
+                  foxEmailSuggestion.style.display = 'none';
+                  foxEmailField.classList.add('valid');
+                  foxEmailField.classList.remove('invalid');
+                };
+              }
+              break;
+
+            case 'invalidWithSuggestions':
+              // Fout, meerdere alternatieven beschikbaar
+              foxEmailField.classList.add('invalid');
+              foxEmailField.classList.remove('valid');
+              if (suggestions.length > 0 && foxEmailSuggestion) {
+                var sugHtml = 'Bedoelde je: ';
+                suggestions.forEach(function(s, idx) {
+                  var sEmail = (s.data && s.data.email) || '';
+                  if (!sEmail) return;
+                  if (idx > 0) sugHtml += ' of ';
+                  sugHtml += '<strong data-email="' + sEmail + '">' + sEmail + '</strong>';
+                });
+                sugHtml += '? Klik om te corrigeren.';
+                foxEmailSuggestion.innerHTML = sugHtml;
+                foxEmailSuggestion.style.display = 'block';
+                foxEmailSuggestion.onclick = function(e) {
+                  var target = e.target.closest('[data-email]');
+                  if (target) {
+                    foxEmailField.value = target.getAttribute('data-email');
+                    foxEmailSuggestion.style.display = 'none';
+                    foxEmailField.classList.add('valid');
+                    foxEmailField.classList.remove('invalid');
+                  }
+                };
+              } else if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
+                // Fallback naar corrected als suggestions leeg
+                foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + correctedEmail + '</strong>? Klik om te corrigeren.';
+                foxEmailSuggestion.style.display = 'block';
+                foxEmailSuggestion.onclick = function() {
+                  foxEmailField.value = correctedEmail;
+                  foxEmailSuggestion.style.display = 'none';
+                  foxEmailField.classList.add('valid');
+                  foxEmailField.classList.remove('invalid');
+                };
+              }
+              break;
+
+            case 'validWithSuggestion':
+              // Technisch geldig maar betere optie beschikbaar (bv. gmai.com → gmail.com)
+              foxEmailField.classList.add('valid');
+              foxEmailField.classList.remove('invalid');
+              var betterEmail = correctedEmail || (suggestions[0] && suggestions[0].data && suggestions[0].data.email) || null;
+              if (betterEmail && betterEmail !== val && foxEmailSuggestion) {
+                foxEmailSuggestion.innerHTML = 'Bedoelde je misschien <strong>' + betterEmail + '</strong>? Klik om te corrigeren.';
+                foxEmailSuggestion.style.display = 'block';
+                foxEmailSuggestion.onclick = function() {
+                  foxEmailField.value = betterEmail;
+                  foxEmailSuggestion.style.display = 'none';
+                };
+              }
+              break;
+
+            default:
+              // Onbekend proposal — val terug op isValid
+              if (fx.result.isValid === true) {
                 foxEmailField.classList.add('valid');
                 foxEmailField.classList.remove('invalid');
-              };
-            }
-            // Toon als invalid totdat gebruiker de correctie accepteert
-            foxEmailField.classList.add('invalid');
-            foxEmailField.classList.remove('valid');
-          } else if (isValid) {
-            foxEmailField.classList.add('valid');
-            foxEmailField.classList.remove('invalid');
-            if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
-          } else {
-            foxEmailField.classList.add('invalid');
-            foxEmailField.classList.remove('valid');
+              } else {
+                foxEmailField.classList.add('invalid');
+                foxEmailField.classList.remove('valid');
+              }
+              break;
           }
         })
         .catch(function() {
