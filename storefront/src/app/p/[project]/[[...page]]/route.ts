@@ -82,10 +82,13 @@ export async function GET(
     `<head$1><base href="${basePath}/">`
   )
 
+  // Fetch project settings (order bump / upsell toggles) from backend
+  const projectToggles = await fetchProjectSettings(config)
+
   // Inject PROJECT_CONFIG (replace external script reference)
   html = html.replace(
     /<script\s+src=["']js\/project-config\.js["']\s*><\/script>/gi,
-    generateProjectConfigScript(config, basePath)
+    generateProjectConfigScript(config, basePath, projectToggles)
   )
 
   // Fetch pixel_id dynamically from backend admin settings (source of truth)
@@ -149,7 +152,47 @@ async function fetchPixelId(config: ProjectConfig): Promise<string> {
   return config.facebookPixelId || ""
 }
 
-function generateProjectConfigScript(config: ProjectConfig, basePath: string): string {
+/**
+ * Fetch project settings (order bump / upsell toggles) from backend.
+ * Falls back to defaults (both enabled) if backend is unreachable.
+ */
+async function fetchProjectSettings(config: ProjectConfig): Promise<ProjectToggles> {
+  try {
+    const url = `${config.medusaUrl}/store/project-settings?project_id=${config.slug}`
+    const res = await fetch(url, {
+      headers: {
+        "x-publishable-api-key": config.publishableApiKey || "",
+      },
+      next: { revalidate: 30 }, // Cache for 30s on server
+    })
+
+    if (res.ok) {
+      const data = await res.json()
+      if (data.project_setting) {
+        return {
+          orderBumpEnabled: data.project_setting.order_bump_enabled !== false,
+          upsellEnabled: data.project_setting.upsell_enabled !== false,
+        }
+      }
+    }
+  } catch (e) {
+    console.warn(`[ProjectSettings] Failed to fetch for ${config.slug}:`, e)
+  }
+
+  // Defaults: everything enabled
+  return { orderBumpEnabled: true, upsellEnabled: true }
+}
+
+interface ProjectToggles {
+  orderBumpEnabled: boolean
+  upsellEnabled: boolean
+}
+
+function generateProjectConfigScript(
+  config: ProjectConfig,
+  basePath: string,
+  toggles: ProjectToggles
+): string {
   const projectConfig = {
     slug: config.slug,
     medusaUrl: config.medusaUrl,
@@ -159,6 +202,9 @@ function generateProjectConfigScript(config: ProjectConfig, basePath: string): s
     bundleOptions: config.bundleOptions,
     regions: config.regions,
     paymentProviders: config.paymentProviders,
+    // Feature toggles from admin
+    orderBumpEnabled: toggles.orderBumpEnabled,
+    upsellEnabled: toggles.upsellEnabled,
     // URLs with correct base path
     homeUrl: `${basePath}/`,
     checkoutUrl: `${basePath}/checkout`,
