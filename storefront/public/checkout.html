@@ -2901,7 +2901,7 @@ body {
     try {
       mollieInstance = Mollie(PROJECT_CONFIG.mollieProfileId, {
         locale: 'nl_NL',
-        testmode: true // TODO: Toggle to false for production
+        testmode: false
       });
 
       cardComponents.cardNumber = mollieInstance.createComponent('cardNumber');
