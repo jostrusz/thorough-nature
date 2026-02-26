@@ -34,7 +34,7 @@ export default async function orderPlacedFakturoidHandler({
 
     // ── Retrieve order with relations ──
     const order = await orderService.retrieveOrder(data.id, {
-      relations: ["items", "summary", "shipping_address"],
+      relations: ["items", "summary", "shipping_address", "billing_address"],
     })
 
     if (!order) {
@@ -74,6 +74,21 @@ export default async function orderPlacedFakturoidHandler({
       // Address not available
     }
 
+    // ── Get billing address (used for invoicing — falls back to shipping) ──
+    let billingAddress: any = null
+    try {
+      if ((order as any).billing_address) {
+        billingAddress = await (
+          orderService as any
+        ).orderAddressService_.retrieve((order as any).billing_address.id)
+      }
+    } catch {
+      // Billing address not available — will use shipping
+    }
+
+    // For invoicing: billing address takes priority, fallback to shipping
+    const invoiceAddress = billingAddress || shippingAddress
+
     // ── Get/refresh access token ──
     const tokenResult = await getAccessToken({
       slug: config.slug,
@@ -108,20 +123,20 @@ export default async function orderPlacedFakturoidHandler({
       const subjectData: any = {
         name:
           (order.metadata as any)?.company_name ||
-          [shippingAddress?.first_name, shippingAddress?.last_name]
+          [invoiceAddress?.first_name, invoiceAddress?.last_name]
             .filter(Boolean)
             .join(" ") ||
           order.email,
         email: order.email,
       }
 
-      // Address
-      if (shippingAddress) {
-        if (shippingAddress.address_1) subjectData.street = shippingAddress.address_1
-        if (shippingAddress.city) subjectData.city = shippingAddress.city
-        if (shippingAddress.postal_code) subjectData.zip = shippingAddress.postal_code
-        if (shippingAddress.country_code)
-          subjectData.country = shippingAddress.country_code.toUpperCase()
+      // Address — use billing (invoice) address for Fakturoid subject
+      if (invoiceAddress) {
+        if (invoiceAddress.address_1) subjectData.street = invoiceAddress.address_1
+        if (invoiceAddress.city) subjectData.city = invoiceAddress.city
+        if (invoiceAddress.postal_code) subjectData.zip = invoiceAddress.postal_code
+        if (invoiceAddress.country_code)
+          subjectData.country = invoiceAddress.country_code.toUpperCase()
       }
 
       // B2B info from metadata
@@ -154,8 +169,9 @@ export default async function orderPlacedFakturoidHandler({
       return
     }
 
-    // ── Determine language & OSS ──
+    // ── Determine language & OSS (based on billing/invoice country) ──
     const countryCode =
+      invoiceAddress?.country_code ||
       shippingAddress?.country_code ||
       (order.metadata as any)?.country_code ||
       ""

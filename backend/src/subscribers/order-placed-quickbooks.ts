@@ -35,7 +35,7 @@ export default async function orderPlacedQuickBooksHandler({
 
     // ── Retrieve order with relations ──
     const order = await orderService.retrieveOrder(data.id, {
-      relations: ["items", "summary", "shipping_address"],
+      relations: ["items", "summary", "shipping_address", "billing_address"],
     })
 
     if (!order) {
@@ -80,6 +80,21 @@ export default async function orderPlacedQuickBooksHandler({
     } catch {
       // Address not available
     }
+
+    // ── Get billing address (for invoicing — falls back to shipping) ──
+    let billingAddress: any = null
+    try {
+      if ((order as any).billing_address) {
+        billingAddress = await (
+          orderService as any
+        ).orderAddressService_.retrieve((order as any).billing_address.id)
+      }
+    } catch {
+      // Billing address not available
+    }
+
+    // For invoicing: billing address takes priority
+    const invoiceAddress = billingAddress || shippingAddress
 
     // ── Ensure valid token ──
     const creds = {
@@ -130,7 +145,7 @@ export default async function orderPlacedQuickBooksHandler({
     if (!customer && order.email) {
       const displayName =
         (order.metadata as any)?.company_name ||
-        [shippingAddress?.first_name, shippingAddress?.last_name]
+        [invoiceAddress?.first_name, invoiceAddress?.last_name]
           .filter(Boolean)
           .join(" ") ||
         order.email
@@ -140,20 +155,37 @@ export default async function orderPlacedQuickBooksHandler({
         PrimaryEmailAddr: { Address: order.email },
       }
 
-      // Address
-      if (shippingAddress) {
+      // BillAddr — use billing (invoice) address for QuickBooks customer
+      if (invoiceAddress) {
         customerData.BillAddr = {}
-        if (shippingAddress.address_1)
-          customerData.BillAddr.Line1 = shippingAddress.address_1
-        if (shippingAddress.city)
-          customerData.BillAddr.City = shippingAddress.city
-        if (shippingAddress.postal_code)
-          customerData.BillAddr.PostalCode = shippingAddress.postal_code
-        if (shippingAddress.country_code)
+        if (invoiceAddress.address_1)
+          customerData.BillAddr.Line1 = invoiceAddress.address_1
+        if (invoiceAddress.city)
+          customerData.BillAddr.City = invoiceAddress.city
+        if (invoiceAddress.postal_code)
+          customerData.BillAddr.PostalCode = invoiceAddress.postal_code
+        if (invoiceAddress.country_code)
           customerData.BillAddr.Country =
+            invoiceAddress.country_code.toUpperCase()
+        if (invoiceAddress.province)
+          customerData.BillAddr.CountrySubDivisionCode =
+            invoiceAddress.province
+      }
+
+      // ShipAddr — always use shipping address for delivery
+      if (shippingAddress) {
+        customerData.ShipAddr = {}
+        if (shippingAddress.address_1)
+          customerData.ShipAddr.Line1 = shippingAddress.address_1
+        if (shippingAddress.city)
+          customerData.ShipAddr.City = shippingAddress.city
+        if (shippingAddress.postal_code)
+          customerData.ShipAddr.PostalCode = shippingAddress.postal_code
+        if (shippingAddress.country_code)
+          customerData.ShipAddr.Country =
             shippingAddress.country_code.toUpperCase()
         if (shippingAddress.province)
-          customerData.BillAddr.CountrySubDivisionCode =
+          customerData.ShipAddr.CountrySubDivisionCode =
             shippingAddress.province
       }
 
@@ -219,6 +251,26 @@ export default async function orderPlacedQuickBooksHandler({
       PrivateNote: b2bParts.length
         ? b2bParts.join(" | ")
         : undefined,
+    }
+
+    // Add billing address to invoice
+    if (invoiceAddress) {
+      invoiceData.BillAddr = {
+        Line1: invoiceAddress.address_1 || "",
+        City: invoiceAddress.city || "",
+        PostalCode: invoiceAddress.postal_code || "",
+        Country: (invoiceAddress.country_code || "").toUpperCase(),
+      }
+    }
+
+    // Add shipping address to invoice
+    if (shippingAddress) {
+      invoiceData.ShipAddr = {
+        Line1: shippingAddress.address_1 || "",
+        City: shippingAddress.city || "",
+        PostalCode: shippingAddress.postal_code || "",
+        Country: (shippingAddress.country_code || "").toUpperCase(),
+      }
     }
 
     const invoice = await createInvoice(creds, token, invoiceData)
