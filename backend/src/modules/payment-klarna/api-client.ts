@@ -1,6 +1,6 @@
 // @ts-nocheck
 import axios, { AxiosInstance } from "axios"
-import { v4 as uuidv4 } from "uuid"
+import crypto from "crypto"
 
 export interface IKlarnaOrderLine {
   type?: string // "physical", "digital", "shipping_fee", "discount"
@@ -213,7 +213,7 @@ export class KlarnaApiClient {
     error?: string
   }> {
     try {
-      const key = idempotencyKey || uuidv4()
+      const key = idempotencyKey || crypto.randomUUID()
 
       const response = await this.client.post(
         `/ordermanagement/v1/orders/${orderId}/captures`,
@@ -289,7 +289,7 @@ export class KlarnaApiClient {
     error?: string
   }> {
     try {
-      const key = idempotencyKey || uuidv4()
+      const key = idempotencyKey || crypto.randomUUID()
 
       const response = await this.client.post(
         `/ordermanagement/v1/orders/${orderId}/refunds`,

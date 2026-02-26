@@ -9,7 +9,7 @@ import {
 import { Logger } from "@medusajs/framework/types"
 import { GATEWAY_CONFIG_MODULE } from "../gateway-config"
 import { KlarnaApiClient, IKlarnaOrderLine } from "./api-client"
-import { v4 as uuidv4 } from "uuid"
+import crypto from "crypto"
 
 export interface IKlarnaPaymentSessionData {
   sessionId?: string
@@ -362,7 +362,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
       }
 
       // Use UUID v4 for idempotency key to ensure safe retry
-      const idempotencyKey = uuidv4()
+      const idempotencyKey = crypto.randomUUID()
 
       const result = await client.captureOrder(
         klarnaOrderId,
@@ -415,7 +415,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
         description: `Refund ${(refundAmount / 100).toFixed(2)}`,
       }
 
-      const idempotencyKey = uuidv4()
+      const idempotencyKey = crypto.randomUUID()
 
       const result = await client.refundOrder(
         klarnaOrderId,
