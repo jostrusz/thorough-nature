@@ -3153,16 +3153,14 @@ body {
     .then(function(res) {
       var cartId = res.cart.id;
 
-      // Stap 2a: Hoofdproduct toevoegen (bundle qty)
-      // Medusa v2 Store API does not support unit_price — pricing comes from variant price
-      var lineItemBody = {
-        variant_id: VARIANT_ID,
-        quantity: checkoutBundleQty
-      };
-
-      return medusaFetch('/store/carts/' + cartId + '/line-items', {
+      // Stap 2a: Hoofdproduct toevoegen via bundle endpoint (custom pricing)
+      // Uses /store/carts/{id}/line-items-bundle which applies bundle discount server-side
+      return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
         method: 'POST',
-        body: JSON.stringify(lineItemBody)
+        body: JSON.stringify({
+          variant_id: VARIANT_ID,
+          quantity: checkoutBundleQty
+        })
       }).then(function() {
         // Stap 2b: Order bump produkt toevoegen (pokud je zaškrtnutý)
         if (checkoutOrderBump) {
