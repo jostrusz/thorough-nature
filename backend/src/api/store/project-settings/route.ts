@@ -22,9 +22,7 @@ export async function GET(
   const service = req.scope.resolve(PROJECT_SETTINGS_MODULE) as ProjectSettingsModuleService
 
   try {
-    const allSettings = await service.listProjectSettings({
-      filters: { project_id: projectId },
-    })
+    const allSettings = await service.listProjectSettings({ project_id: projectId })
 
     if (allSettings.length === 0) {
       // No settings configured — return defaults (everything enabled)
