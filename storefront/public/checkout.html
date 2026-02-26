@@ -2242,8 +2242,8 @@ body {
             </label>
 
             <!-- Klarna -->
-            <label class="payment-method" data-method="klarnapaylater" data-provider="mollie">
-              <input type="radio" name="payment_method" value="klarnapaylater">
+            <label class="payment-method" data-method="klarna" data-provider="mollie">
+              <input type="radio" name="payment_method" value="klarna">
               <div class="pm-radio"><div class="pm-radio-dot"></div></div>
               <img src="/icons/klarna.svg" alt="Klarna" class="pm-icon">
               <div class="pm-info">
@@ -2822,7 +2822,7 @@ body {
       var labels = {
         ideal: 'Betalen met iDEAL',
         bancontact: 'Betalen met Bancontact',
-        klarnapaylater: 'Betalen met Klarna',
+        klarna: 'Betalen met Klarna',
         paypal: 'Betalen met PayPal'
       };
       btnText.textContent = (labels[selectedMethod] || 'Bestelling afronden') + ' — ' + formatPrice(total);
@@ -2985,7 +2985,7 @@ body {
     var labels = {
       ideal: 'Betalen met iDEAL',
       bancontact: 'Betalen met Bancontact',
-      klarnapaylater: 'Betalen met Klarna',
+      klarna: 'Betalen met Klarna',
       creditcard: 'Betalen met Creditcard',
       paypal: 'Betalen met PayPal'
     };
