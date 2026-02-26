@@ -85,6 +85,12 @@ export const STRIPE_API_KEY = process.env.STRIPE_API_KEY;
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
 /**
+ * (optional) Mollie API key — fallback if not configured via admin gateway config
+ */
+export const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY;
+export const MOLLIE_TEST_MODE = process.env.MOLLIE_TEST_MODE !== 'false';
+
+/**
  * (optional) Meilisearch configuration
  */
 export const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;

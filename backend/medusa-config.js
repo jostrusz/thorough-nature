@@ -15,6 +15,8 @@ import {
   STORE_CORS,
   STRIPE_API_KEY,
   STRIPE_WEBHOOK_SECRET,
+  MOLLIE_API_KEY,
+  MOLLIE_TEST_MODE,
   WORKER_MODE,
   MINIO_ENDPOINT,
   MINIO_ACCESS_KEY,
@@ -149,6 +151,9 @@ const medusaConfig = {
           {
             resolve: './src/modules/payment-mollie',
             id: 'mollie',
+            options: {
+              ...(MOLLIE_API_KEY ? { apiKey: MOLLIE_API_KEY, testMode: MOLLIE_TEST_MODE } : {}),
+            },
           },
           ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{
             resolve: '@medusajs/payment-stripe',

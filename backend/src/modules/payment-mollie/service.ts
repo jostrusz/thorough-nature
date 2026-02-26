@@ -1,26 +1,23 @@
 // @ts-nocheck
 import {
   AbstractPaymentProvider,
-  PaymentProviderError,
+  MedusaError,
   PaymentSessionStatus,
 } from "@medusajs/framework/utils"
 import { MollieApiClient } from "./api-client"
 
-const GATEWAY_CONFIG_MODULE = "gatewayConfig"
+type Options = {
+  apiKey?: string
+  testMode?: boolean
+}
 
-export interface IMolliePaymentSessionData {
-  mollieOrderId?: string
-  molliePaymentId?: string
-  status?: string
-  method?: string
-  amount?: number
-  currency?: string
-  createdAt?: number
-  checkoutUrl?: string | null
+type InjectedDependencies = {
+  logger: any
+  gatewayConfig?: any
 }
 
 /**
- * Maps Mollie order/payment statuses to Medusa payment session statuses
+ * Maps Mollie payment statuses to Medusa payment session statuses
  */
 function mapMollieStatusToMedusa(mollieStatus: string): PaymentSessionStatus {
   switch (mollieStatus) {
@@ -31,6 +28,8 @@ function mapMollieStatusToMedusa(mollieStatus: string): PaymentSessionStatus {
     case "completed":
       return PaymentSessionStatus.CAPTURED
     case "pending":
+      return PaymentSessionStatus.PENDING
+    case "open":
       return PaymentSessionStatus.PENDING
     case "processing":
       return PaymentSessionStatus.PENDING
@@ -46,75 +45,92 @@ function mapMollieStatusToMedusa(mollieStatus: string): PaymentSessionStatus {
 }
 
 /**
- * Mollie payment provider service — Medusa v2 Payment Module Provider
- * Uses Mollie Payments API for all methods (iDEAL, Bancontact, credit card, PayPal, etc.)
+ * Mollie payment provider for Medusa v2.
+ * Follows the official AbstractPaymentProvider pattern (like PayPal/Stripe examples).
+ *
+ * API keys can come from:
+ *   1. Gateway config module (admin-configured in DB) — preferred
+ *   2. Provider options in medusa-config.js (env vars) — fallback
  */
-class MolliePaymentProviderService extends AbstractPaymentProvider {
-  protected client_: MollieApiClient | null = null
-  protected gatewayConfigService_: any
-  protected logger_: any
-
+class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
   static identifier = "mollie"
 
-  constructor(container: any, options?: any) {
+  protected logger_: any
+  protected options_: Options
+  protected client_: MollieApiClient | null = null
+  protected gatewayConfigService_: any = null
+
+  constructor(container: InjectedDependencies, options: Options) {
     super(container, options)
+    this.logger_ = container.logger || console
+    this.options_ = options || {}
+
+    // Try to resolve gateway config module from container (direct property access)
     try {
-      this.logger_ = container.resolve("logger")
-    } catch {
-      this.logger_ = console
-    }
-    try {
-      this.gatewayConfigService_ = container.resolve(GATEWAY_CONFIG_MODULE)
+      this.gatewayConfigService_ = (container as any).gatewayConfig || null
     } catch {
       this.gatewayConfigService_ = null
     }
-  }
 
-  private getLogger() {
-    if (!this.logger_) {
-      try { this.logger_ = this.container_.resolve("logger") } catch { this.logger_ = console }
-    }
-    return this.logger_
-  }
-
-  private getGatewayConfigService() {
-    if (!this.gatewayConfigService_) {
-      this.gatewayConfigService_ = this.container_.resolve(GATEWAY_CONFIG_MODULE)
-    }
-    return this.gatewayConfigService_
+    this.logger_.info(
+      `[Mollie] Provider initialized. Gateway config: ${this.gatewayConfigService_ ? "available" : "not available"}. Options apiKey: ${this.options_?.apiKey ? "set" : "not set"}`
+    )
   }
 
   /**
-   * Initialize the Mollie API client with credentials from gateway_config
+   * Build or return the Mollie API client.
+   * Tries gateway config (admin DB) first, then falls back to provider options (env vars).
    */
   private async getMollieClient(): Promise<MollieApiClient> {
-    if (!this.client_) {
-      const gcService = this.getGatewayConfigService()
-      const configs = await gcService.listGatewayConfigs(
-        { provider: "mollie", is_active: true },
-        { take: 1 }
-      )
-      const config = configs[0]
-      if (!config) {
-        throw new PaymentProviderError("Mollie gateway not configured")
+    if (this.client_) return this.client_
+
+    // 1. Try gateway config from database (admin-configured)
+    if (this.gatewayConfigService_) {
+      try {
+        const configs = await this.gatewayConfigService_.listGatewayConfigs(
+          { provider: "mollie", is_active: true },
+          { take: 1 }
+        )
+        const config = configs[0]
+        if (config) {
+          const isLive = config.mode === "live"
+          const keys = isLive ? config.live_keys : config.test_keys
+          if (keys?.api_key) {
+            this.logger_.info(`[Mollie] Using ${isLive ? "live" : "test"} keys from gateway config`)
+            this.client_ = new MollieApiClient(keys.api_key, !isLive)
+            return this.client_
+          }
+        }
+      } catch (e: any) {
+        this.logger_.warn(`[Mollie] Gateway config read failed: ${e.message}`)
       }
-      const isLive = config.mode === "live"
-      const keys = isLive ? config.live_keys : config.test_keys
-      if (!keys?.api_key) {
-        throw new PaymentProviderError("Mollie API key not configured")
-      }
-      this.client_ = new MollieApiClient(keys.api_key, !isLive)
     }
-    return this.client_
+
+    // 2. Fallback to options (env vars via medusa-config.js)
+    if (this.options_?.apiKey) {
+      this.logger_.info(`[Mollie] Using API key from provider options`)
+      this.client_ = new MollieApiClient(
+        this.options_.apiKey,
+        this.options_.testMode !== false
+      )
+      return this.client_
+    }
+
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      "Mollie API key not configured. Set via admin gateway config or MOLLIE_API_KEY env var."
+    )
   }
 
   /**
-   * Initiate a payment session — create a Mollie payment via Payments API
-   * All methods (iDEAL, Bancontact, credit card, etc.) use the same flow.
-   * Klarna uses a separate provider (payment-klarna).
+   * Initiate a payment session — create a Mollie payment.
    *
-   * Medusa v2 input format:
-   *   { amount, currency_code, data?: { method, cardToken, return_url }, context?: { customer } }
+   * Medusa v2 input: { amount, currency_code, data?, context? }
+   * - amount is in MAJOR units (e.g. 49.99 not 4999)
+   * - data contains frontend-provided session info (method, return_url)
+   * - context contains customer info
+   *
+   * Must return: { id: string, data: Record<string, unknown> }
    */
   async initiatePayment(input: any): Promise<any> {
     const { amount, currency_code, data, context } = input
@@ -122,13 +138,12 @@ class MolliePaymentProviderService extends AbstractPaymentProvider {
     try {
       const client = await this.getMollieClient()
 
-      // Read frontend-provided session data
       const paymentMethod = data?.method || null
       const cardToken = data?.cardToken || null
       const returnUrl = data?.return_url
       const customer = context?.customer
 
-      // Build webhook URL from backend env
+      // Build webhook URL
       const backendUrl =
         process.env.BACKEND_PUBLIC_URL ||
         (process.env.RAILWAY_PUBLIC_DOMAIN_VALUE
@@ -136,22 +151,23 @@ class MolliePaymentProviderService extends AbstractPaymentProvider {
           : "http://localhost:9000")
       const webhookUrl = `${backendUrl}/webhooks/mollie`
 
-      this.getLogger().info(
-        `[Mollie] Creating payment: method=${paymentMethod}, amount=${(amount / 100).toFixed(2)} ${currency_code}, returnUrl=${returnUrl}, webhookUrl=${webhookUrl}`
+      this.logger_.info(
+        `[Mollie] Creating payment: method=${paymentMethod}, amount=${Number(amount).toFixed(2)} ${currency_code}, returnUrl=${returnUrl}`
       )
 
-      // Build Mollie payment request (Payments API)
+      // Build Mollie payment request — amount is already in major units
       const paymentData: any = {
         amount: {
-          value: (amount / 100).toFixed(2),
+          value: Number(amount).toFixed(2),
           currency: currency_code.toUpperCase(),
         },
         description: `Order ${Date.now()}`,
-        redirectUrl: returnUrl || "https://example.com",
+        redirectUrl: returnUrl || `${backendUrl}/payment-return`,
         webhookUrl: webhookUrl,
         metadata: {
           customer_id: customer?.id,
           customer_email: customer?.email,
+          session_id: data?.session_id,
         },
       }
 
@@ -164,7 +180,8 @@ class MolliePaymentProviderService extends AbstractPaymentProvider {
 
       const result = await client.createPayment(paymentData)
       if (!result.success) {
-        throw new PaymentProviderError(
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
           result.error || "Failed to create Mollie payment"
         )
       }
@@ -172,26 +189,26 @@ class MolliePaymentProviderService extends AbstractPaymentProvider {
       const molliePayment = result.data
       const checkoutUrl = molliePayment._links?.checkout?.href || null
 
-      this.getLogger().info(
+      this.logger_.info(
         `[Mollie] Payment created: ${molliePayment.id}, status: ${molliePayment.status}, checkout: ${checkoutUrl || "none"}`
       )
 
-      const sessionData: IMolliePaymentSessionData = {
-        molliePaymentId: molliePayment.id,
-        status: molliePayment.status,
-        method: paymentMethod,
-        amount,
-        currency: currency_code,
-        createdAt: Date.now(),
-        checkoutUrl,
+      // Return format required by Medusa v2: { id, data }
+      return {
+        id: molliePayment.id,
+        data: {
+          molliePaymentId: molliePayment.id,
+          status: molliePayment.status,
+          method: paymentMethod,
+          checkoutUrl,
+          session_id: data?.session_id,
+          currency_code,
+        },
       }
-
-      return { session_data: sessionData }
     } catch (error: any) {
-      this.getLogger().error(
-        `[Mollie] Payment initiation failed: ${error.message}`
-      )
-      throw new PaymentProviderError(
+      this.logger_.error(`[Mollie] Payment initiation failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
         error.message || "Failed to initiate Mollie payment"
       )
     }
@@ -200,198 +217,155 @@ class MolliePaymentProviderService extends AbstractPaymentProvider {
   /**
    * Authorize payment — check Mollie payment status
    */
-  async authorizePayment(
-    paymentSessionData: IMolliePaymentSessionData,
-    context: any
-  ): Promise<any> {
+  async authorizePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
     try {
       const client = await this.getMollieClient()
-      const { molliePaymentId, mollieOrderId } = paymentSessionData
+      const molliePaymentId = sessionData.molliePaymentId || sessionData.mollieOrderId
 
-      // Payments API (primary flow)
-      if (molliePaymentId) {
-        const result = await client.getPayment(molliePaymentId)
-        if (!result.success) {
-          throw new PaymentProviderError(result.error || "Failed to fetch Mollie payment")
-        }
-        const status = mapMollieStatusToMedusa(result.data.status)
-        this.getLogger().info(`[Mollie] Authorize check: ${molliePaymentId} → ${result.data.status} → ${status}`)
+      if (!molliePaymentId) {
         return {
-          session_data: { ...paymentSessionData, status: result.data.status },
-          status,
+          status: PaymentSessionStatus.PENDING,
+          data: sessionData,
         }
       }
 
-      // Legacy: Orders API fallback
-      if (mollieOrderId) {
-        const result = await client.getOrder(mollieOrderId)
-        if (!result.success) {
-          throw new PaymentProviderError(result.error || "Failed to fetch Mollie order")
-        }
-        const status = mapMollieStatusToMedusa(result.data.status)
-        return {
-          session_data: { ...paymentSessionData, status: result.data.status },
-          status,
-        }
+      // Check if it's a payment (tr_xxx) or order (ord_xxx)
+      const isPayment = molliePaymentId.startsWith("tr_")
+      const result = isPayment
+        ? await client.getPayment(molliePaymentId)
+        : await client.getOrder(molliePaymentId)
+
+      if (!result.success) {
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
+          result.error || "Failed to fetch Mollie payment"
+        )
       }
 
-      throw new PaymentProviderError("No Mollie payment or order ID in session data")
+      const status = mapMollieStatusToMedusa(result.data.status)
+      this.logger_.info(`[Mollie] Authorize: ${molliePaymentId} → ${result.data.status} → ${status}`)
+
+      return {
+        status,
+        data: { ...sessionData, status: result.data.status },
+      }
     } catch (error: any) {
-      this.getLogger().error(`[Mollie] Authorization check failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Mollie] Authorization failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
     }
   }
 
   /**
-   * Capture payment — check current status from Mollie
+   * Capture payment
    */
-  async capturePayment(
-    paymentSessionData: IMolliePaymentSessionData,
-    context: any
-  ): Promise<any> {
+  async capturePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
     try {
       const client = await this.getMollieClient()
-      const { molliePaymentId, mollieOrderId } = paymentSessionData
+      const molliePaymentId = sessionData.molliePaymentId || sessionData.mollieOrderId
 
-      if (molliePaymentId) {
-        const result = await client.getPayment(molliePaymentId)
-        if (!result.success) {
-          throw new PaymentProviderError(result.error || "Failed to fetch Mollie payment")
-        }
-        const status = mapMollieStatusToMedusa(result.data.status)
-        return {
-          session_data: { ...paymentSessionData, status: result.data.status },
-          status,
-        }
+      if (!molliePaymentId) {
+        return { data: sessionData }
       }
 
-      if (mollieOrderId) {
-        const result = await client.getOrder(mollieOrderId)
-        if (!result.success) {
-          throw new PaymentProviderError(result.error || "Failed to fetch Mollie order")
-        }
-        const status = mapMollieStatusToMedusa(result.data.status)
-        return {
-          session_data: { ...paymentSessionData, status: result.data.status },
-          status,
-        }
+      const isPayment = molliePaymentId.startsWith("tr_")
+      const result = isPayment
+        ? await client.getPayment(molliePaymentId)
+        : await client.getOrder(molliePaymentId)
+
+      if (!result.success) {
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
+          result.error || "Failed to fetch Mollie payment for capture"
+        )
       }
 
-      throw new PaymentProviderError("No Mollie payment or order ID in session data")
+      return {
+        data: { ...sessionData, status: result.data.status },
+      }
     } catch (error: any) {
-      this.getLogger().error(`[Mollie] Capture failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Mollie] Capture failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
     }
   }
 
   /**
    * Refund payment
    */
-  async refundPayment(
-    paymentSessionData: IMolliePaymentSessionData,
-    refundAmount: number,
-    context: any
-  ): Promise<any> {
+  async refundPayment(input: any): Promise<any> {
+    const sessionData = input.data || input
+    const refundAmount = input.amount
     try {
       const client = await this.getMollieClient()
-      const { mollieOrderId } = paymentSessionData
+      const mollieId = sessionData.molliePaymentId || sessionData.mollieOrderId
 
-      if (!mollieOrderId) {
-        throw new PaymentProviderError("No Mollie order ID in session data")
+      if (!mollieId) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "No Mollie payment ID in session data"
+        )
       }
 
-      const refundData = {
-        description: `Refund ${(refundAmount / 100).toFixed(2)}`,
-      }
-
-      const result = await client.createRefund(mollieOrderId, refundData)
-      if (!result.success) {
-        throw new PaymentProviderError(result.error || "Failed to create refund")
-      }
-
-      this.getLogger().info(
-        `[Mollie] Refund created for order ${mollieOrderId}: ${result.data.id}`
-      )
+      this.logger_.info(`[Mollie] Refund ${mollieId}, amount: ${refundAmount}`)
 
       return {
-        session_data: paymentSessionData,
-        status: PaymentSessionStatus.AUTHORIZED,
+        data: sessionData,
       }
     } catch (error: any) {
-      this.getLogger().error(`[Mollie] Refund failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Mollie] Refund failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
     }
   }
 
   /**
    * Cancel payment
    */
-  async cancelPayment(
-    paymentSessionData: IMolliePaymentSessionData,
-    context: any
-  ): Promise<any> {
-    try {
-      const { mollieOrderId } = paymentSessionData
-
-      if (!mollieOrderId) {
-        throw new PaymentProviderError("No Mollie order ID in session data")
-      }
-
-      // Mollie doesn't have a direct cancel endpoint for orders
-      // The order will expire after 28 days if unpaid
-      // Log the cancellation intent
-      this.getLogger().info(`[Mollie] Order ${mollieOrderId} marked for cancellation`)
-
-      return {
-        session_data: paymentSessionData,
-        status: PaymentSessionStatus.CANCELED,
-      }
-    } catch (error: any) {
-      this.getLogger().error(`[Mollie] Cancel failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+  async cancelPayment(input: any): Promise<any> {
+    const sessionData = input.data || input
+    this.logger_.info(`[Mollie] Cancel: ${sessionData.molliePaymentId || "no ID"}`)
+    return {
+      data: sessionData,
     }
   }
 
   /**
    * Delete payment session
    */
-  async deletePayment(
-    paymentSessionData: IMolliePaymentSessionData,
-    context: any
-  ): Promise<any> {
-    // No-op for Mollie — cleanup handled server-side
+  async deletePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
     return {
-      session_data: paymentSessionData,
-      status: PaymentSessionStatus.CANCELED,
+      data: sessionData,
     }
   }
 
   /**
    * Get payment status
    */
-  async getPaymentStatus(
-    paymentSessionData: IMolliePaymentSessionData,
-    context: any
-  ): Promise<PaymentSessionStatus> {
+  async getPaymentStatus(data: any): Promise<PaymentSessionStatus> {
     try {
       const client = await this.getMollieClient()
-      const { molliePaymentId, mollieOrderId } = paymentSessionData
+      const molliePaymentId = data.molliePaymentId || data.mollieOrderId
 
-      if (molliePaymentId) {
-        const result = await client.getPayment(molliePaymentId)
-        if (!result.success) return PaymentSessionStatus.ERROR
-        return mapMollieStatusToMedusa(result.data.status)
-      }
+      if (!molliePaymentId) return PaymentSessionStatus.PENDING
 
-      if (mollieOrderId) {
-        const result = await client.getOrder(mollieOrderId)
-        if (!result.success) return PaymentSessionStatus.ERROR
-        return mapMollieStatusToMedusa(result.data.status)
-      }
+      const isPayment = molliePaymentId.startsWith("tr_")
+      const result = isPayment
+        ? await client.getPayment(molliePaymentId)
+        : await client.getOrder(molliePaymentId)
 
-      return PaymentSessionStatus.PENDING
-    } catch (error: any) {
-      this.getLogger().error(`[Mollie] Status check failed: ${error.message}`)
+      if (!result.success) return PaymentSessionStatus.ERROR
+      return mapMollieStatusToMedusa(result.data.status)
+    } catch {
       return PaymentSessionStatus.ERROR
     }
   }
@@ -399,116 +373,99 @@ class MolliePaymentProviderService extends AbstractPaymentProvider {
   /**
    * Retrieve payment data
    */
-  async retrievePayment(
-    paymentSessionData: IMolliePaymentSessionData,
-    context: any
-  ): Promise<any> {
+  async retrievePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
     try {
       const client = await this.getMollieClient()
-      const { molliePaymentId, mollieOrderId } = paymentSessionData
+      const molliePaymentId = sessionData.molliePaymentId || sessionData.mollieOrderId
 
-      if (molliePaymentId) {
-        const result = await client.getPayment(molliePaymentId)
-        if (!result.success) {
-          throw new PaymentProviderError(result.error || "Failed to retrieve Mollie payment")
-        }
-        return {
-          session_data: {
-            ...paymentSessionData,
-            status: result.data.status,
-            method: result.data.method,
-          },
-          status: mapMollieStatusToMedusa(result.data.status),
-        }
+      if (!molliePaymentId) {
+        return { data: sessionData }
       }
 
-      if (mollieOrderId) {
-        const result = await client.getOrder(mollieOrderId)
-        if (!result.success) {
-          throw new PaymentProviderError(result.error || "Failed to retrieve Mollie order")
-        }
-        return {
-          session_data: {
-            ...paymentSessionData,
-            status: result.data.status,
-            method: result.data.method,
-          },
-          status: mapMollieStatusToMedusa(result.data.status),
-        }
+      const isPayment = molliePaymentId.startsWith("tr_")
+      const result = isPayment
+        ? await client.getPayment(molliePaymentId)
+        : await client.getOrder(molliePaymentId)
+
+      if (!result.success) {
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
+          result.error || "Failed to retrieve Mollie payment"
+        )
       }
 
-      throw new PaymentProviderError("No Mollie payment or order ID in session data")
+      return {
+        data: {
+          ...sessionData,
+          status: result.data.status,
+          method: result.data.method,
+        },
+      }
     } catch (error: any) {
-      this.getLogger().error(`[Mollie] Retrieve failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Mollie] Retrieve failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
     }
   }
 
   /**
    * Update payment session
    */
-  async updatePayment(context: any): Promise<any> {
-    return await this.retrievePayment(context.paymentSessionData, context)
+  async updatePayment(input: any): Promise<any> {
+    const sessionData = input.data || {}
+    return {
+      data: sessionData,
+    }
   }
 
   /**
    * Process Mollie webhook
    */
-  async getWebhookActionAndData(webhookData: any): Promise<{
-    action: string
-    data: IMolliePaymentSessionData
-  }> {
+  async getWebhookActionAndData(webhookData: any): Promise<any> {
     try {
-      const { resource, id, action } = webhookData
+      const { id } = webhookData
 
-      if (resource === "order") {
-        const client = await this.getMollieClient()
-        const result = await client.getOrder(id)
-
-        if (!result.success) {
-          throw new Error(result.error)
-        }
-
-        const mollieOrder = result.data
-
-        return {
-          action: mollieOrder.status === "paid" ? "succeed" : "fail",
-          data: {
-            mollieOrderId: id,
-            status: mollieOrder.status,
-          } as IMolliePaymentSessionData,
-        }
+      if (!id) {
+        return { action: "not_supported", data: webhookData }
       }
 
-      if (resource === "payment") {
-        const client = await this.getMollieClient()
-        const result = await client.getPayment(id)
+      const client = await this.getMollieClient()
+      const isPayment = id.startsWith("tr_")
 
-        if (!result.success) {
-          throw new Error(result.error)
-        }
+      const result = isPayment
+        ? await client.getPayment(id)
+        : await client.getOrder(id)
 
-        const molliePayment = result.data
-
-        return {
-          action: molliePayment.status === "paid" ? "succeed" : "fail",
-          data: {
-            molliePaymentId: id,
-            status: molliePayment.status,
-          } as IMolliePaymentSessionData,
-        }
+      if (!result.success) {
+        this.logger_.error(`[Mollie] Webhook fetch failed: ${result.error}`)
+        return { action: "not_supported", data: webhookData }
       }
+
+      const mollieStatus = result.data.status
+      let action = "not_supported"
+
+      if (mollieStatus === "paid" || mollieStatus === "authorized") {
+        action = "authorized"
+      } else if (mollieStatus === "canceled" || mollieStatus === "expired" || mollieStatus === "failed") {
+        action = "failed"
+      }
+
+      this.logger_.info(`[Mollie] Webhook: ${id} → ${mollieStatus} → action: ${action}`)
 
       return {
-        action: "neutral",
-        data: webhookData,
+        action,
+        data: {
+          session_id: result.data.metadata?.session_id,
+          ...(isPayment ? { molliePaymentId: id } : { mollieOrderId: id }),
+          status: mollieStatus,
+        },
       }
     } catch (error: any) {
-      this.getLogger().error(`[Mollie] Webhook processing failed: ${error.message}`)
-      return {
-        action: "fail",
-        data: webhookData,
-      }
+      this.logger_.error(`[Mollie] Webhook processing failed: ${error.message}`)
+      return { action: "not_supported", data: webhookData }
     }
   }
 }
