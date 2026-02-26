@@ -66,6 +66,7 @@ const medusaConfig = {
     { resolve: "./src/modules/fakturoid" },
     { resolve: "./src/modules/quickbooks" },
     { resolve: "./src/modules/dextrum" },
+    { resolve: "./src/modules/supportbox" },
     // ═══ Payment provider modules ═══
     { resolve: "./src/modules/payment-mollie" },
     { resolve: "./src/modules/payment-comgate" },
