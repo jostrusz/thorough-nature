@@ -785,6 +785,7 @@ body {
   margin-bottom: 8px;
 }
 .summary-line.shipping { color: var(--success); font-weight: 600; }
+.summary-line.discount { color: #27AE60; font-weight: 600; }
 .summary-line.total {
   font-size: 16px;
   font-weight: 700;
@@ -1752,12 +1753,6 @@ body {
     <!-- ── LEVÁ STRANA: FORMULÁŘ ── -->
     <div class="checkout-main">
 
-      <!-- Secure checkout badge -->
-      <div class="secure-badge animate-in">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-        Veilig afrekenen — SSL-versleutelde verbinding
-      </div>
-
       <form id="checkout-form" novalidate>
 
         <!-- ═══ PAYPAL EXPRESS CHECKOUT ═══ -->
@@ -2210,6 +2205,10 @@ body {
         </span>
         <span style="color:#27AE60;font-weight:600;">Gratis</span>
       </div>
+      <div class="summary-line discount" id="summary-discount" style="display:none;">
+        <span style="display:flex;align-items:center;gap:6px;">Korting <span id="discount-code-label" style="font-size:11px;background:rgba(39,174,96,0.1);color:#27AE60;padding:1px 6px;border-radius:4px;font-weight:600;"></span></span>
+        <span id="discount-value" style="color:#27AE60;font-weight:600;"></span>
+      </div>
       <div class="summary-line total" id="summary-total">
         <span>Totaal</span>
         <span class="price" id="desktop-total-price">&euro;35,00</span>
@@ -2288,11 +2287,12 @@ body {
     Alle transacties worden beveiligd verwerkt via <strong>Mollie</strong> — een door DNB gereguleerde betaaldienstverlener.
   </div>
   <div class="checkout-footer-company">
-    <strong>Laat Los Wat Je Kapotmaakt</strong> is een uitgave van MarketingHQ s.r.o.<br>
-    Geregistreerd in Tsjechie · IČO: 21890820<br>
-    Wij distribueren vanuit ons Europees distributiecentrum via GLS naar Nederland en Belgie.<br>
-    Vragen of problemen? Neem contact op: <a href="mailto:devries@loslatenboek.nl"><strong>devries@loslatenboek.nl</strong></a><br>
-    Wij reageren binnen 24 uur en lossen elk probleem op.
+    <strong>Laat Los Wat Je Kapotmaakt</strong> is een uitgave van Performance Marketing Solution s.r.o.<br>
+    Rybná 716/24, Staré Město, 110 00 Praag, Tsjechië<br>
+    IČO: 06259928 · DIČ: CZ06259928<br>
+    Wij verzenden vanuit ons Europees distributiecentrum via GLS naar Nederland en België.<br>
+    Vragen of problemen? Neem gerust contact op: <a href="mailto:devries@loslatenboek.nl"><strong>devries@loslatenboek.nl</strong></a><br>
+    Wij reageren binnen 24 uur en lossen elk probleem persoonlijk op.
   </div>
   <div class="checkout-footer-links">
     &copy; 2026 Laat Los Wat Je Kapotmaakt · Joris De Vries<br>
@@ -2599,6 +2599,23 @@ body {
     if (shipEl) {
       var shippingLabel = shippingTotal > 0 ? formatPrice(shippingTotal) : '<span style="color:#27AE60;font-weight:600;">Gratis</span>';
       shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Verzending <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="vertical-align:middle;border-radius:2px;"></span><span>' + shippingLabel + '</span>';
+    }
+
+    // Korting (discount) — toon als promo kód is toegepast
+    var discountTotal = cart.discount_total || 0;
+    var discountEl = document.getElementById('summary-discount');
+    if (discountEl) {
+      if (discountTotal > 0) {
+        discountEl.style.display = '';
+        var discountCodeLabel = document.getElementById('discount-code-label');
+        if (discountCodeLabel && savedPromoCode) {
+          discountCodeLabel.textContent = savedPromoCode;
+        }
+        var discountValEl = document.getElementById('discount-value');
+        if (discountValEl) discountValEl.textContent = '-' + formatPrice(discountTotal);
+      } else {
+        discountEl.style.display = 'none';
+      }
     }
 
     // Totaal
@@ -3021,6 +3038,9 @@ body {
       promoApplied.classList.remove('is-visible');
       promoToggle.style.display = '';
       promoMessage.className = 'promo-message';
+      // Verberg korting regel in samenvatting
+      var discountEl = document.getElementById('summary-discount');
+      if (discountEl) discountEl.style.display = 'none';
     });
   }
 
@@ -3168,12 +3188,22 @@ body {
         return medusaFetch('/store/carts/' + cartId + '/promotions', {
           method: 'POST',
           body: JSON.stringify({ promo_codes: [savedPromoCode] })
-        }).then(function() {
+        }).then(function(promoRes) {
           console.log('Promo kód aplikován:', savedPromoCode);
+          // Aktualizuj order summary s discount daty
+          if (promoRes && promoRes.cart) {
+            updateOrderSummary(promoRes.cart);
+          }
           return cartId;
         }).catch(function(err) {
-          // Pokud promo kód selže — pokračovat bez slevy (non-blocking)
+          // Pokud promo kód selže — zobraz varování ale pokračuj
           console.warn('Promo kód selhal:', err.message || err);
+          var promoMsg = document.getElementById('promo-message');
+          if (promoMsg) {
+            promoMsg.textContent = 'Kortingscode niet geldig';
+            promoMsg.className = 'promo-message error';
+          }
+          savedPromoCode = '';
           return cartId;
         });
       }
