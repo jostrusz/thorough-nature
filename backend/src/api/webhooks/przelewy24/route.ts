@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { IPaymentModuleService } from "@medusajs/framework/types"
-import { PRZELEWY24_MODULE_NAME } from "@medusajs/payment-przelewy24"
+import { PRZELEWY24_MODULE_NAME } from "../../../modules/payment-przelewy24"
 import crypto from "crypto"
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {

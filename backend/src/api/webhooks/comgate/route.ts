@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { IPaymentModuleService } from "@medusajs/framework/types"
-import { COMGATE_MODULE_NAME } from "@medusajs/payment-comgate"
+import { COMGATE_MODULE_NAME } from "../../../modules/payment-comgate"
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {

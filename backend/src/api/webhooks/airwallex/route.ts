@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { IPaymentModuleService } from "@medusajs/framework/types"
-import { AIRWALLEX_MODULE_NAME } from "@medusajs/payment-airwallex"
+import { AIRWALLEX_MODULE_NAME } from "../../../modules/payment-airwallex"
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
