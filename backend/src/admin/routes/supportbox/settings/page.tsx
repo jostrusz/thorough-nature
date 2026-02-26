@@ -10,8 +10,10 @@ const SupportBoxSettingsPage = () => {
   const queryClient = useQueryClient()
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingConfig, setEditingConfig] = useState<any>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
-  const { data: configs = [] } = useQuery({
+  const { data: configs = [], error: listError } = useQuery({
     queryKey: ["supportbox-configs"],
     queryFn: async () => {
       const response = await sdk.client.fetch("/admin/supportbox/configs", { method: "GET" })
@@ -29,6 +31,12 @@ const SupportBoxSettingsPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["supportbox-configs"] })
       setIsFormOpen(false)
+      setErrorMessage(null)
+      setSuccessMessage("Email account added successfully!")
+      setTimeout(() => setSuccessMessage(null), 5000)
+    },
+    onError: (error: any) => {
+      setErrorMessage(error?.message || error?.body?.message || "Failed to create email account. Check the server logs.")
     },
   })
 
@@ -42,6 +50,12 @@ const SupportBoxSettingsPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["supportbox-configs"] })
       setEditingConfig(null)
+      setErrorMessage(null)
+      setSuccessMessage("Email account updated successfully!")
+      setTimeout(() => setSuccessMessage(null), 5000)
+    },
+    onError: (error: any) => {
+      setErrorMessage(error?.message || error?.body?.message || "Failed to update email account.")
     },
   })
 
@@ -53,6 +67,11 @@ const SupportBoxSettingsPage = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["supportbox-configs"] })
+      setSuccessMessage("Email account deleted.")
+      setTimeout(() => setSuccessMessage(null), 5000)
+    },
+    onError: (error: any) => {
+      setErrorMessage(error?.message || error?.body?.message || "Failed to delete email account.")
     },
   })
 
@@ -63,34 +82,89 @@ const SupportBoxSettingsPage = () => {
         <div>
           <Link to="/supportbox">
             <Button variant="secondary" size="small" style={{ marginBottom: "16px" }}>
-              ← Back to Dashboard
+              &larr; Back to Dashboard
             </Button>
           </Link>
           <Heading level="h1">SupportBox Settings</Heading>
         </div>
         {!isFormOpen && !editingConfig && (
-          <Button onClick={() => setIsFormOpen(true)}>Add Email Account</Button>
+          <Button onClick={() => { setIsFormOpen(true); setErrorMessage(null) }}>Add Email Account</Button>
         )}
       </div>
+
+      {/* Error message */}
+      {errorMessage && (
+        <div style={{
+          padding: "12px 16px",
+          marginBottom: "16px",
+          backgroundColor: "#FEE2E2",
+          border: "1px solid #FECACA",
+          borderRadius: "8px",
+          color: "#991B1B",
+          fontSize: "13px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}>
+          <span>{errorMessage}</span>
+          <button onClick={() => setErrorMessage(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#991B1B", fontWeight: "bold" }}>&times;</button>
+        </div>
+      )}
+
+      {/* Success message */}
+      {successMessage && (
+        <div style={{
+          padding: "12px 16px",
+          marginBottom: "16px",
+          backgroundColor: "#D1FAE5",
+          border: "1px solid #A7F3D0",
+          borderRadius: "8px",
+          color: "#065F46",
+          fontSize: "13px",
+        }}>
+          {successMessage}
+        </div>
+      )}
+
+      {/* List error */}
+      {listError && (
+        <div style={{
+          padding: "12px 16px",
+          marginBottom: "16px",
+          backgroundColor: "#FEF3C7",
+          border: "1px solid #FDE68A",
+          borderRadius: "8px",
+          color: "#92400E",
+          fontSize: "13px",
+        }}>
+          Failed to load configs: {(listError as any)?.message || "Unknown error"}. The database table may not exist yet — check Railway deploy logs.
+        </div>
+      )}
 
       {/* Form */}
       {(isFormOpen || editingConfig) && (
         <ConfigFormInline
           initialData={editingConfig}
           onSubmit={async (data) => {
-            if (editingConfig) {
-              await updateMutation.mutateAsync({ id: editingConfig.id, ...data })
-            } else {
-              await createMutation.mutateAsync(data)
+            setErrorMessage(null)
+            try {
+              if (editingConfig) {
+                await updateMutation.mutateAsync({ id: editingConfig.id, ...data })
+              } else {
+                await createMutation.mutateAsync(data)
+              }
+            } catch (err: any) {
+              // Error is handled by onError callback
             }
           }}
-          onCancel={() => { setIsFormOpen(false); setEditingConfig(null) }}
+          onCancel={() => { setIsFormOpen(false); setEditingConfig(null); setErrorMessage(null) }}
           isLoading={createMutation.isPending || updateMutation.isPending}
+          error={errorMessage}
         />
       )}
 
       {/* Config List */}
-      {configs.length === 0 ? (
+      {!listError && configs.length === 0 && !isFormOpen && !editingConfig ? (
         <Container>
           <div style={{ padding: "48px", textAlign: "center", color: "#6D7175" }}>
             No email accounts configured yet. Add one to get started.
@@ -109,7 +183,7 @@ const SupportBoxSettingsPage = () => {
                   </Badge>
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  <Button variant="secondary" size="small" onClick={() => setEditingConfig(config)}>Edit</Button>
+                  <Button variant="secondary" size="small" onClick={() => { setEditingConfig(config); setErrorMessage(null) }}>Edit</Button>
                   <Button
                     variant="secondary"
                     size="small"
@@ -136,11 +210,13 @@ function ConfigFormInline({
   onSubmit,
   onCancel,
   isLoading,
+  error,
 }: {
   initialData?: any
   onSubmit: (data: any) => Promise<void>
   onCancel: () => void
   isLoading: boolean
+  error?: string | null
 }) {
   const [formData, setFormData] = useState({
     email_address: initialData?.email_address || "",
@@ -193,7 +269,7 @@ function ConfigFormInline({
           </div>
           <div style={{ display: "flex", gap: "16px", paddingTop: "8px" }}>
             <Button type="submit" isLoading={isLoading}>{initialData ? "Update Account" : "Add Account"}</Button>
-            <Button variant="secondary" onClick={onCancel} disabled={isLoading}>Cancel</Button>
+            <Button variant="secondary" type="button" onClick={onCancel} disabled={isLoading}>Cancel</Button>
           </div>
         </form>
       </div>
