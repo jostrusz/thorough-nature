@@ -76,7 +76,7 @@ const SupportBoxSettingsPage = () => {
   })
 
   return (
-    <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "32px" }}>
+    <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px" }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
         <div>
