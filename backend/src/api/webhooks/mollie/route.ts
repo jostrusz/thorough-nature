@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { MollieApiClient } from "../../../modules/payment-mollie/api-client"
 
 const GATEWAY_CONFIG_MODULE = "gatewayConfig"
@@ -87,13 +88,54 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     // Try to find and update the Medusa order
     try {
       const orderModuleService = req.scope.resolve("orderModuleService")
-      const metadataKey = isPayment ? "metadata.molliePaymentId" : "metadata.mollieOrderId"
-      const orders = await orderModuleService.list({
-        filters: { [metadataKey]: mollieId },
-      })
+      let order = null
 
-      if (orders.length > 0) {
-        const order = orders[0]
+      // Strategy 1: Find order by metadata (set by order-placed subscriber)
+      try {
+        const metadataKey = isPayment ? "metadata.molliePaymentId" : "metadata.mollieOrderId"
+        const orders = await orderModuleService.list({
+          filters: { [metadataKey]: mollieId },
+        })
+        if (orders.length > 0) {
+          order = orders[0]
+          logger.info(`[Mollie Webhook] Found order ${order.id} via metadata`)
+        }
+      } catch (e: any) {
+        logger.warn(`[Mollie Webhook] Metadata search failed: ${e.message}`)
+      }
+
+      // Strategy 2: Find order via payment session data (fallback)
+      if (!order) {
+        try {
+          const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+          const { data: allOrders } = await query.graph({
+            entity: "order",
+            fields: [
+              "id", "metadata",
+              "payment_collections.*",
+              "payment_collections.payments.*",
+            ],
+            filters: {},
+            pagination: { order: { created_at: "DESC" }, skip: 0, take: 50 },
+          })
+
+          for (const o of allOrders || []) {
+            const payments = o.payment_collections?.flatMap((pc: any) => pc.payments || []) || []
+            for (const p of payments) {
+              if (p.data?.molliePaymentId === mollieId || p.data?.mollieOrderId === mollieId) {
+                order = o
+                logger.info(`[Mollie Webhook] Found order ${o.id} via payment session data (fallback)`)
+                break
+              }
+            }
+            if (order) break
+          }
+        } catch (e: any) {
+          logger.warn(`[Mollie Webhook] Payment session fallback search failed: ${e.message}`)
+        }
+      }
+
+      if (order) {
         const activityEntry = {
           timestamp: new Date().toISOString(),
           event: "status_update",
@@ -107,18 +149,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         }
 
         const existingLog = order.metadata?.payment_activity_log || []
-        await orderModuleService.updateOrders(
-          {
-            id: order.id,
-            metadata: {
-              ...order.metadata,
-              payment_activity_log: [...existingLog, activityEntry],
-              mollieStatus,
-              ...(isPayment ? { molliePaymentId: mollieId } : { mollieOrderId: mollieId }),
-            },
+        await orderModuleService.updateOrders(order.id, {
+          metadata: {
+            ...order.metadata,
+            payment_activity_log: [...existingLog, activityEntry],
+            mollieStatus,
+            ...(isPayment ? { molliePaymentId: mollieId } : { mollieOrderId: mollieId }),
           },
-          { transactionManager: req.scope.resolve("manager") }
-        )
+        })
         logger.info(`[Mollie Webhook] Order ${order.id} updated with status: ${medusaStatus}`)
       } else {
         logger.warn(`[Mollie Webhook] No Medusa order found for Mollie ID: ${mollieId}`)
