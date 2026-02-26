@@ -3572,7 +3572,7 @@ body {
 
   /* ─── OBRÁZEK PRODUKTU ─── */
   if (PROJECT_CONFIG.mainProduct.thumbnail) {
-    var thumbUrl = MEDUSA_URL + PROJECT_CONFIG.mainProduct.thumbnail;
+    var thumbUrl = PROJECT_CONFIG.mainProduct.thumbnail.indexOf('http') === 0 ? PROJECT_CONFIG.mainProduct.thumbnail : MEDUSA_URL + PROJECT_CONFIG.mainProduct.thumbnail;
     var imgHtml = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
     var desktopImg = document.getElementById('desktop-product-img');
     if (desktopImg) desktopImg.innerHTML = imgHtml;
