@@ -4090,13 +4090,13 @@ body {
       if (USE_TEST_MODE) {
         providerId = 'pp_system_default';
       } else {
-        providerId = selectedProvider === 'mollie' ? 'pp_mollie_mollie' : 'pp_paypal_paypal';
-        if (selectedProvider === 'mollie') {
-          sessionData = {
-            method: selectedMethod,
-            return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
-          };
-        }
+        // All payment methods (iDEAL, Bancontact, credit card, PayPal, Klarna)
+        // go through the Mollie payment provider
+        providerId = 'pp_mollie_mollie';
+        sessionData = {
+          method: selectedMethod,
+          return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
+        };
       }
 
       // For credit card: tokenize card data first via Mollie Components
@@ -4146,7 +4146,7 @@ body {
         country_code: customerData.shipping_address.country_code,
         phone: customerData.shipping_address.phone,
       }));
-      localStorage.setItem('medusa_payment_provider', result.testMode ? 'pp_system_default' : (selectedProvider === 'mollie' ? 'pp_mollie_mollie' : 'pp_paypal_paypal'));
+      localStorage.setItem('medusa_payment_provider', result.testMode ? 'pp_system_default' : 'pp_mollie_mollie');
 
       // Uložit bundle + order bump info pro thank-you stránku
       localStorage.setItem('medusa_bundle_qty', checkoutBundleQty);
@@ -4360,7 +4360,7 @@ body {
         return medusaFetch('/store/carts/' + cartId + '/payment-sessions', {
           method: 'POST',
           body: JSON.stringify({
-            provider_id: PROJECT_CONFIG.paymentProviders.paypal || 'pp_paypal_paypal'
+            provider_id: 'pp_mollie_mollie'
           })
         }).then(function() { return cartId; });
       })

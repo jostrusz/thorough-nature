@@ -1,5 +1,6 @@
 // @ts-nocheck
 import {
+  AbstractPaymentProvider,
   PaymentProviderError,
   PaymentSessionStatus,
 } from "@medusajs/framework/utils"
@@ -45,12 +46,10 @@ function mapMollieStatusToMedusa(mollieStatus: string): PaymentSessionStatus {
 }
 
 /**
- * Mollie payment provider service
- * Integrates with Mollie Orders API for orders with shipment tracking
- * Supports Klarna, iDEAL, cards, SEPA, and more
+ * Mollie payment provider service — Medusa v2 Payment Module Provider
+ * Uses Mollie Payments API for all methods (iDEAL, Bancontact, credit card, PayPal, etc.)
  */
-export class MolliePaymentProvider {
-  protected container_: any
+class MolliePaymentProviderService extends AbstractPaymentProvider {
   protected client_: MollieApiClient | null = null
   protected gatewayConfigService_: any
   protected logger_: any
@@ -58,7 +57,7 @@ export class MolliePaymentProvider {
   static identifier = "mollie"
 
   constructor(container: any, options?: any) {
-    this.container_ = container
+    super(container, options)
     try {
       this.logger_ = container.resolve("logger")
     } catch {
@@ -513,3 +512,5 @@ export class MolliePaymentProvider {
     }
   }
 }
+
+export default MolliePaymentProviderService

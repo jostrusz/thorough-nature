@@ -1,7 +1,28 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { IPaymentModuleService } from "@medusajs/framework/types"
-import { MOLLIE_MODULE_NAME } from "../../../modules/payment-mollie"
+import { MollieApiClient } from "../../../modules/payment-mollie/api-client"
+
+const GATEWAY_CONFIG_MODULE = "gatewayConfig"
+
+/**
+ * Build a Mollie API client from gateway_config settings.
+ * This avoids calling private methods on the payment provider.
+ */
+async function buildMollieClient(req: MedusaRequest): Promise<MollieApiClient> {
+  const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
+  const configs = await gcService.listGatewayConfigs(
+    { provider: "mollie", is_active: true },
+    { take: 1 }
+  )
+  const config = configs[0]
+  if (!config) throw new Error("Mollie gateway not configured")
+
+  const isLive = config.mode === "live"
+  const keys = isLive ? config.live_keys : config.test_keys
+  if (!keys?.api_key) throw new Error("Mollie API key not configured")
+
+  return new MollieApiClient(keys.api_key, !isLive)
+}
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
@@ -14,20 +35,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     const logger = req.scope.resolve("logger")
     logger.info(`[Mollie Webhook] Received webhook for ID: ${mollieId}`)
 
-    const paymentModuleService: IPaymentModuleService = req.scope.resolve(
-      "paymentModuleService"
-    )
-    const orderModuleService = req.scope.resolve("orderModuleService")
-
-    // Get the Mollie payment provider
-    const mollieProvider = paymentModuleService.getProvider(MOLLIE_MODULE_NAME)
-
-    if (!mollieProvider) {
-      logger.error("[Mollie Webhook] Provider not found")
-      return res.status(500).json({ error: "Provider not configured" })
-    }
-
-    const mollieClient = await mollieProvider.getMollieClient()
+    // Build Mollie client from gateway config
+    const mollieClient = await buildMollieClient(req)
 
     // Detect if this is a payment (tr_xxx) or order (ord_xxx) ID
     const isPayment = mollieId.startsWith("tr_")
@@ -56,19 +65,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     const medusaStatus = mapMollieStatusToMedusa(mollieStatus)
-
     logger.info(
       `[Mollie Webhook] ${isPayment ? "Payment" : "Order"} ${mollieId}: ${mollieStatus} → ${medusaStatus}`
     )
 
-    // Try to find the Medusa order with this Mollie ID in metadata
-    // (Note: the order might not exist yet if the cart hasn't been completed)
+    // Try to find and update the Medusa order
     try {
+      const orderModuleService = req.scope.resolve("orderModuleService")
       const metadataKey = isPayment ? "metadata.molliePaymentId" : "metadata.mollieOrderId"
       const orders = await orderModuleService.list({
-        filters: {
-          [metadataKey]: mollieId,
-        },
+        filters: { [metadataKey]: mollieId },
       })
 
       if (orders.length > 0) {
@@ -98,13 +104,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           },
           { transactionManager: req.scope.resolve("manager") }
         )
-
         logger.info(`[Mollie Webhook] Order ${order.id} updated with status: ${medusaStatus}`)
       } else {
-        logger.warn(`[Mollie Webhook] No Medusa order found for Mollie ID: ${mollieId} (cart might not be completed yet)`)
+        logger.warn(`[Mollie Webhook] No Medusa order found for Mollie ID: ${mollieId}`)
       }
     } catch (orderErr: any) {
-      // Order lookup/update failed — that's OK, log and return 200
       logger.warn(`[Mollie Webhook] Order update failed: ${orderErr.message}`)
     }
 

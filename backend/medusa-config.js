@@ -68,8 +68,7 @@ const medusaConfig = {
     { resolve: "./src/modules/dextrum" },
     { resolve: "./src/modules/supportbox" },
     { resolve: "./src/modules/project-settings" },
-    // ═══ Payment provider modules ═══
-    { resolve: "./src/modules/payment-mollie" },
+    // ═══ Payment provider modules (non-Mollie, standalone) ═══
     { resolve: "./src/modules/payment-comgate" },
     { resolve: "./src/modules/payment-przelewy24" },
     { resolve: "./src/modules/payment-klarna" },
@@ -142,22 +141,26 @@ const medusaConfig = {
         ]
       }
     }] : []),
-    ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{
-      key: Modules.PAYMENT,
-      resolve: '@medusajs/payment',
+    // ═══ Payment Module — always on, with Mollie + optional Stripe ═══
+    {
+      resolve: '@medusajs/medusa/payment',
       options: {
         providers: [
           {
+            resolve: './src/modules/payment-mollie',
+            id: 'mollie',
+          },
+          ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{
             resolve: '@medusajs/payment-stripe',
             id: 'stripe',
             options: {
               apiKey: STRIPE_API_KEY,
               webhookSecret: STRIPE_WEBHOOK_SECRET,
             },
-          },
+          }] : []),
         ],
       },
-    }] : [])
+    }
   ],
   plugins: [
   ...(MEILISEARCH_HOST && MEILISEARCH_ADMIN_KEY ? [{
