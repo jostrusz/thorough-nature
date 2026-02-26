@@ -7,6 +7,9 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/favicon.png" type="image/png">
 
+<!-- Mollie Components (credit card) -->
+<script src="https://js.mollie.com/v1/mollie.js"></script>
+
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2171,6 +2174,47 @@ body {
               </div>
             </label>
 
+            <!-- Creditcard (Mollie Components) -->
+            <label class="payment-method" data-method="creditcard" data-provider="mollie">
+              <input type="radio" name="payment_method" value="creditcard">
+              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
+              <svg class="pm-icon" width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0.5" y="0.5" width="31" height="23" rx="3.5" fill="#fff" stroke="#D9D9D9"/>
+                <rect x="2" y="5" width="28" height="4" fill="#2D3748"/>
+                <rect x="4" y="13" width="8" height="2" rx="1" fill="#CBD5E0"/>
+                <rect x="4" y="17" width="5" height="2" rx="1" fill="#CBD5E0"/>
+                <rect x="22" y="15" width="6" height="4" rx="2" fill="#ED8936"/>
+                <rect x="19" y="15" width="6" height="4" rx="2" fill="#E53E3E" opacity="0.8"/>
+              </svg>
+              <div class="pm-info">
+                <div class="pm-name">Creditcard</div>
+                <div class="pm-desc">Visa, Mastercard, American Express</div>
+              </div>
+            </label>
+
+            <!-- Mollie Components card fields (hidden unless creditcard selected) -->
+            <div id="mollie-card-fields" style="display:none; padding: 4px 16px 12px 48px; animation: fadeIn 0.3s ease;">
+              <div style="margin-bottom:10px;">
+                <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Kaartnummer</label>
+                <div id="card-number" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
+              </div>
+              <div style="display:flex;gap:12px;margin-bottom:10px;">
+                <div style="flex:1;">
+                  <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Vervaldatum</label>
+                  <div id="expiry-date" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
+                </div>
+                <div style="flex:1;">
+                  <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">CVC</label>
+                  <div id="verification-code" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
+                </div>
+              </div>
+              <div style="margin-bottom:6px;">
+                <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Naam op kaart</label>
+                <div id="card-holder" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
+              </div>
+              <div id="card-errors" style="font-size:12px;color:var(--error);margin-top:6px;min-height:16px;"></div>
+            </div>
+
             <!-- PayPal -->
             <label class="payment-method" data-method="paypal" data-provider="paypal">
               <input type="radio" name="payment_method" value="paypal">
@@ -2768,6 +2812,50 @@ body {
     }, { passive: true });
   })();
 
+  /* ─── MOLLIE COMPONENTS (Credit Card) ─── */
+  var mollieInstance = null;
+  var cardComponents = {};
+  var mollieCardToken = null;
+
+  function initMollieComponents() {
+    if (mollieInstance || !PROJECT_CONFIG.mollieProfileId) return;
+
+    try {
+      mollieInstance = Mollie(PROJECT_CONFIG.mollieProfileId, {
+        locale: 'nl_NL',
+        testmode: true // TODO: Toggle to false for production
+      });
+
+      cardComponents.cardNumber = mollieInstance.createComponent('cardNumber');
+      cardComponents.cardNumber.mount('#card-number');
+
+      cardComponents.cardHolder = mollieInstance.createComponent('cardHolder');
+      cardComponents.cardHolder.mount('#card-holder');
+
+      cardComponents.expiryDate = mollieInstance.createComponent('expiryDate');
+      cardComponents.expiryDate.mount('#expiry-date');
+
+      cardComponents.verificationCode = mollieInstance.createComponent('verificationCode');
+      cardComponents.verificationCode.mount('#verification-code');
+
+      // Error handling on each component
+      var cardErrorsEl = document.getElementById('card-errors');
+      Object.keys(cardComponents).forEach(function(key) {
+        cardComponents[key].addEventListener('change', function(event) {
+          if (event.error && event.touched) {
+            cardErrorsEl.textContent = event.error;
+          } else {
+            cardErrorsEl.textContent = '';
+          }
+        });
+      });
+
+      console.log('[Mollie Components] Initialized successfully');
+    } catch (e) {
+      console.error('[Mollie Components] Init failed:', e);
+    }
+  }
+
   /* ─── PAYMENT METHOD SELECTIE ─── */
   var paymentMethods = document.querySelectorAll('.payment-method');
   var selectedMethod = 'ideal';
@@ -2784,8 +2872,27 @@ body {
       selectedMethod = method.getAttribute('data-method');
       selectedProvider = method.getAttribute('data-provider');
 
+      // Show/hide Mollie Components card fields
+      var cardFields = document.getElementById('mollie-card-fields');
+      if (cardFields) {
+        if (selectedMethod === 'creditcard') {
+          cardFields.style.display = 'block';
+          initMollieComponents();
+        } else {
+          cardFields.style.display = 'none';
+        }
+      }
+
       // Update knop tekst
       updateButtonText();
+
+      // Update subtekst
+      var subtext = document.querySelector('.btn-subtext');
+      if (subtext) {
+        subtext.textContent = selectedMethod === 'creditcard'
+          ? 'Je kaartgegevens worden beveiligd verwerkt via Mollie.'
+          : 'Je wordt doorgestuurd naar een beveiligde betaalpagina.';
+      }
 
       // Verwijder eventuele foutmelding
       document.getElementById('payment-errors').textContent = '';
@@ -2801,6 +2908,7 @@ body {
       ideal: 'Betalen met iDEAL',
       bancontact: 'Betalen met Bancontact',
       klarna: 'Betalen met Klarna',
+      creditcard: 'Betalen met Creditcard',
       paypal: 'Betalen met PayPal'
     };
     btnText.textContent = (labels[selectedMethod] || 'Bestelling afronden') + ' — ' + formatPrice(currentTotalPrice);
@@ -3944,9 +4052,26 @@ body {
         }
       }
 
-      return medusaFetch('/store/payment-collections', {
-        method: 'POST',
-        body: JSON.stringify({ cart_id: cartId })
+      // For credit card: tokenize card data first via Mollie Components
+      var tokenPromise;
+      if (!USE_TEST_MODE && selectedMethod === 'creditcard' && mollieInstance) {
+        tokenPromise = mollieInstance.createToken().then(function(tokenResult) {
+          if (tokenResult.error) {
+            throw new Error(tokenResult.error.message || 'Creditcard verificatie mislukt');
+          }
+          sessionData.cardToken = tokenResult.token;
+          console.log('[Mollie Components] Token created');
+          return cartId;
+        });
+      } else {
+        tokenPromise = Promise.resolve(cartId);
+      }
+
+      return tokenPromise.then(function() {
+        return medusaFetch('/store/payment-collections', {
+          method: 'POST',
+          body: JSON.stringify({ cart_id: cartId })
+        });
       }).then(function(pcRes) {
         var paymentCollectionId = pcRes.payment_collection.id;
         var sessionBody = { provider_id: providerId };
@@ -4032,6 +4157,26 @@ body {
         var lastSession = sessions[sessions.length - 1] || {};
         var providerData = lastSession.data || {};
         var redirectUrl = providerData.checkoutUrl || providerData.approvalUrl;
+
+        // Credit card without 3DS: payment already completed, complete cart directly
+        if (!redirectUrl && selectedMethod === 'creditcard' && providerData.status === 'paid') {
+          return medusaFetch('/store/carts/' + result.cartId + '/complete', {
+            method: 'POST'
+          }).then(function(completeRes) {
+            var order = completeRes.order || completeRes;
+            localStorage.setItem('medusa_order_id', order.id || '');
+            localStorage.setItem('medusa_order_display_id', order.display_id || '');
+            if (PROJECT_CONFIG.upsellEnabled === false) {
+              window.location.href = PROJECT_CONFIG.thankYouUrl;
+            } else if (checkoutOrderBump) {
+              localStorage.setItem('medusa_upsell_purchased', 'true');
+              window.location.href = PROJECT_CONFIG.thankYouUrl;
+            } else {
+              window.location.href = PROJECT_CONFIG.upsellUrl;
+            }
+          });
+        }
+
         if (redirectUrl) {
           window.location.href = redirectUrl;
         } else {

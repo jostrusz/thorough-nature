@@ -23,11 +23,11 @@ export interface IMolliePaymentSessionData {
 function mapMollieStatusToMedusa(mollieStatus: string): PaymentSessionStatus {
   switch (mollieStatus) {
     case "paid":
-      return PaymentSessionStatus.AUTHORIZED
+      return PaymentSessionStatus.CAPTURED
     case "authorized":
       return PaymentSessionStatus.AUTHORIZED
     case "completed":
-      return PaymentSessionStatus.AUTHORIZED
+      return PaymentSessionStatus.CAPTURED
     case "pending":
       return PaymentSessionStatus.PENDING
     case "processing":
@@ -109,7 +109,9 @@ export class MolliePaymentProvider {
   }
 
   /**
-   * Initiate a payment session — create a Mollie order
+   * Initiate a payment session — create a Mollie order or payment
+   * Credit card with Mollie Components uses Payments API (token-based)
+   * All other methods use Orders API (redirect-based)
    */
   async initiatePayment(context: any): Promise<any> {
     const {
@@ -122,6 +124,67 @@ export class MolliePaymentProvider {
 
     try {
       const client = await this.getMollieClient()
+
+      // Check if this is a credit card payment with Mollie Components token
+      const cardToken = contextData?.data?.cardToken
+      const paymentMethod = contextData?.data?.method
+
+      if (paymentMethod === "creditcard" && cardToken) {
+        // ─── CREDIT CARD VIA MOLLIE COMPONENTS (Payments API) ───
+        const paymentData = {
+          amount: {
+            value: (amount / 100).toFixed(2),
+            currency: currency_code.toUpperCase(),
+          },
+          description: contextData?.statement_descriptor || `Order ${cart?.id || Date.now()}`,
+          redirectUrl: `${contextData?.return_url || "https://example.com"}/payment/success`,
+          webhookUrl: `${contextData?.webhook_url || "https://api.example.com"}/webhooks/mollie`,
+          method: "creditcard",
+          cardToken: cardToken,
+          metadata: {
+            medusa_order_id: cart?.id,
+            customer_id: customer?.id,
+          },
+        }
+
+        const result = await client.createPayment(paymentData)
+        if (!result.success) {
+          throw new PaymentProviderError(result.error || "Failed to create Mollie credit card payment")
+        }
+
+        const molliePayment = result.data
+        const checkoutUrl = molliePayment._links?.checkout?.href
+
+        this.getLogger().info(
+          `[Mollie] Credit card payment created: ${molliePayment.id}, status: ${molliePayment.status}, 3DS redirect: ${checkoutUrl || "none"}`
+        )
+
+        const sessionData: IMolliePaymentSessionData = {
+          molliePaymentId: molliePayment.id,
+          status: molliePayment.status,
+          method: "creditcard",
+          amount,
+          currency: currency_code,
+          createdAt: Date.now(),
+        }
+
+        // If payment is already paid (no 3DS), no redirect needed
+        if (molliePayment.status === "paid") {
+          return { session_data: sessionData }
+        }
+
+        // 3DS required — redirect customer
+        if (!checkoutUrl) {
+          throw new PaymentProviderError("Credit card requires 3DS but no checkout URL returned")
+        }
+
+        return {
+          session_data: sessionData,
+          redirect_url: checkoutUrl,
+        }
+      }
+
+      // ─── STANDARD FLOW: Orders API for iDEAL, Bancontact, Klarna, etc. ───
 
       // Build order lines from cart items
       const lines = (cart?.items || []).map((item: any) => ({
@@ -230,7 +293,20 @@ export class MolliePaymentProvider {
   ): Promise<any> {
     try {
       const client = await this.getMollieClient()
-      const { mollieOrderId } = paymentSessionData
+      const { mollieOrderId, molliePaymentId } = paymentSessionData
+
+      // Credit card via Payments API
+      if (molliePaymentId && !mollieOrderId) {
+        const result = await client.getPayment(molliePaymentId)
+        if (!result.success) {
+          throw new PaymentProviderError(result.error || "Failed to fetch Mollie payment")
+        }
+        const status = mapMollieStatusToMedusa(result.data.status)
+        return {
+          session_data: { ...paymentSessionData, status: result.data.status },
+          status,
+        }
+      }
 
       if (!mollieOrderId) {
         throw new PaymentProviderError("No Mollie order ID in session data")
@@ -268,7 +344,20 @@ export class MolliePaymentProvider {
   ): Promise<any> {
     try {
       const client = await this.getMollieClient()
-      const { mollieOrderId } = paymentSessionData
+      const { mollieOrderId, molliePaymentId } = paymentSessionData
+
+      // Credit card via Payments API
+      if (molliePaymentId && !mollieOrderId) {
+        const result = await client.getPayment(molliePaymentId)
+        if (!result.success) {
+          throw new PaymentProviderError(result.error || "Failed to fetch Mollie payment")
+        }
+        const status = mapMollieStatusToMedusa(result.data.status)
+        return {
+          session_data: { ...paymentSessionData, status: result.data.status },
+          status,
+        }
+      }
 
       if (!mollieOrderId) {
         throw new PaymentProviderError("No Mollie order ID in session data")
@@ -391,7 +480,14 @@ export class MolliePaymentProvider {
   ): Promise<PaymentSessionStatus> {
     try {
       const client = await this.getMollieClient()
-      const { mollieOrderId } = paymentSessionData
+      const { mollieOrderId, molliePaymentId } = paymentSessionData
+
+      // Credit card via Payments API
+      if (molliePaymentId && !mollieOrderId) {
+        const result = await client.getPayment(molliePaymentId)
+        if (!result.success) return PaymentSessionStatus.ERROR
+        return mapMollieStatusToMedusa(result.data.status)
+      }
 
       if (!mollieOrderId) {
         return PaymentSessionStatus.PENDING
@@ -419,7 +515,25 @@ export class MolliePaymentProvider {
   ): Promise<any> {
     try {
       const client = await this.getMollieClient()
-      const { mollieOrderId } = paymentSessionData
+      const { mollieOrderId, molliePaymentId } = paymentSessionData
+
+      // Credit card via Payments API
+      if (molliePaymentId && !mollieOrderId) {
+        const result = await client.getPayment(molliePaymentId)
+        if (!result.success) {
+          throw new PaymentProviderError(result.error || "Failed to retrieve Mollie payment")
+        }
+        const status = mapMollieStatusToMedusa(result.data.status)
+        return {
+          session_data: {
+            ...paymentSessionData,
+            molliePaymentId: result.data.id,
+            status: result.data.status,
+            method: result.data.method,
+          },
+          status,
+        }
+      }
 
       if (!mollieOrderId) {
         throw new PaymentProviderError("No Mollie order ID in session data")

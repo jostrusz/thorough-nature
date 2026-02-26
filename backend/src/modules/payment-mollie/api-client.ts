@@ -94,6 +94,7 @@ export interface IMolliePaymentData {
   redirectUrl: string
   webhookUrl: string
   method?: string
+  cardToken?: string
   customerId?: string
   mandateId?: string
   sequenceType?: string

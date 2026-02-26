@@ -204,6 +204,7 @@ function generateProjectConfigScript(
     bundleOptions: config.bundleOptions,
     regions: config.regions,
     paymentProviders: config.paymentProviders,
+    mollieProfileId: (config as any).mollieProfileId || null,
     // Feature toggles from admin
     orderBumpEnabled: toggles.orderBumpEnabled,
     upsellEnabled: toggles.upsellEnabled,
