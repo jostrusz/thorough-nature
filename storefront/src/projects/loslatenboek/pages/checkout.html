@@ -3592,8 +3592,10 @@ body {
   var promoCodeTag = document.getElementById('promo-code-tag');
   var promoRemove = document.getElementById('promo-remove');
 
-  // Stav: uložený promo kód (aplikuje se při submitu na cart)
+  // Stav: uložený promo kód + sdílený cart pro promo validaci
   var savedPromoCode = '';
+  var promoAppliedToCart = false;
+  var promoCartId = null; // Cart vytvořený při validaci promo kódu — sdílený se submitem
 
   if (promoToggle) {
     promoToggle.addEventListener('click', function() {
@@ -3609,9 +3611,6 @@ body {
     });
   }
 
-  // Stav: of promo al op de cart is toegepast (via Medusa API)
-  var promoAppliedToCart = false;
-
   if (promoApplyBtn) {
     promoApplyBtn.addEventListener('click', function() {
       var code = promoInput.value.trim().toUpperCase();
@@ -3620,16 +3619,65 @@ body {
         promoMessage.className = 'promo-message error';
         return;
       }
-      // Sla code op en toon badge — validatie gebeurt server-side via Medusa bij submit
-      savedPromoCode = code;
-      promoAppliedToCart = false;
-      promoCodeTag.textContent = code;
-      promoApplied.classList.add('is-visible');
-      promoForm.classList.remove('is-open');
-      promoToggle.classList.remove('is-open');
-      promoToggle.style.display = 'none';
+      // Disable button + loading
+      promoApplyBtn.disabled = true;
+      promoApplyBtn.textContent = 'Controleren...';
       promoMessage.className = 'promo-message';
-      promoInput.value = '';
+
+      // Stap 1: Cart aanmaken (als die nog niet bestaat)
+      var cartPromise;
+      if (promoCartId) {
+        cartPromise = Promise.resolve(promoCartId);
+      } else {
+        cartPromise = medusaFetch('/store/carts', {
+          method: 'POST',
+          body: JSON.stringify({ region_id: currentRegionId })
+        }).then(function(res) {
+          promoCartId = res.cart.id;
+          // Voeg hoofdproduct toe zodat Medusa promotions kan evalueren
+          return medusaFetch('/store/carts/' + promoCartId + '/line-items', {
+            method: 'POST',
+            body: JSON.stringify({ variant_id: VARIANT_ID, quantity: selectedBundleQty })
+          }).then(function() { return promoCartId; });
+        });
+      }
+
+      // Stap 2: Promo code toepassen via Medusa
+      cartPromise.then(function(cartId) {
+        return medusaFetch('/store/carts/' + cartId + '/promotions', {
+          method: 'POST',
+          body: JSON.stringify({ promo_codes: [code] })
+        });
+      })
+      .then(function(promoRes) {
+        // Succes — code is geldig
+        savedPromoCode = code;
+        promoAppliedToCart = true;
+        promoCodeTag.textContent = code;
+        promoApplied.classList.add('is-visible');
+        promoForm.classList.remove('is-open');
+        promoToggle.classList.remove('is-open');
+        promoToggle.style.display = 'none';
+        promoMessage.className = 'promo-message';
+        promoInput.value = '';
+        // Update order summary met korting
+        if (promoRes && promoRes.cart) {
+          updateOrderSummary(promoRes.cart);
+        }
+      })
+      .catch(function(err) {
+        // Fout — code is ongeldig
+        console.warn('Promo code geweigerd:', err.message || err);
+        promoMessage.textContent = 'Ongeldige kortingscode';
+        promoMessage.className = 'promo-message error';
+        savedPromoCode = '';
+        promoAppliedToCart = false;
+      })
+      .then(function() {
+        // Reset button
+        promoApplyBtn.disabled = false;
+        promoApplyBtn.textContent = 'Toepassen';
+      });
     });
   }
 
@@ -3651,6 +3699,15 @@ body {
       promoApplied.classList.remove('is-visible');
       promoToggle.style.display = '';
       promoMessage.className = 'promo-message';
+      // Verwijder promo van cart als die bestaat
+      if (promoCartId && removedCode) {
+        medusaFetch('/store/carts/' + promoCartId + '/promotions', {
+          method: 'DELETE',
+          body: JSON.stringify({ promo_codes: [removedCode] })
+        }).then(function(res) {
+          if (res && res.cart) updateOrderSummary(res.cart);
+        }).catch(function() {});
+      }
       // Verberg korting regel in samenvatting
       var discountEl = document.getElementById('summary-discount');
       if (discountEl) discountEl.style.display = 'none';
@@ -3753,14 +3810,37 @@ body {
     // Vypočítej unit_price pro bundle (v centech pro Medusa)
     var unitPriceCents = Math.round((checkoutBundlePrice / checkoutBundleQty) * 100);
 
-    // Stap 1: Cart aanmaken
-    medusaFetch('/store/carts', {
-      method: 'POST',
-      body: JSON.stringify({ region_id: currentRegionId })
-    })
-    .then(function(res) {
-      var cartId = res.cart.id;
+    // Stap 1: Cart aanmaken of hergebruiken (als promo code al een cart heeft aangemaakt)
+    var cartStep;
+    if (promoCartId) {
+      // Cart bestaat al (aangemaakt bij promo code validatie)
+      // Verwijder bestaande line items en voeg opnieuw toe (bundle/qty kan veranderd zijn)
+      cartStep = medusaFetch('/store/carts/' + promoCartId, { method: 'GET' })
+        .then(function(cartRes) {
+          var cart = cartRes.cart;
+          // Verwijder alle bestaande line items
+          var deletePromises = (cart.items || []).map(function(item) {
+            return medusaFetch('/store/carts/' + promoCartId + '/line-items/' + item.id, { method: 'DELETE' });
+          });
+          return Promise.all(deletePromises).then(function() { return promoCartId; });
+        })
+        .catch(function() {
+          // Cart ophalen mislukt — maak een nieuwe aan
+          promoCartId = null;
+          return medusaFetch('/store/carts', {
+            method: 'POST',
+            body: JSON.stringify({ region_id: currentRegionId })
+          }).then(function(res) { return res.cart.id; });
+        });
+    } else {
+      cartStep = medusaFetch('/store/carts', {
+        method: 'POST',
+        body: JSON.stringify({ region_id: currentRegionId })
+      }).then(function(res) { return res.cart.id; });
+    }
 
+    cartStep
+    .then(function(cartId) {
       // Stap 2a: Hoofdproduct toevoegen (bundle qty + unit_price voor korting)
       var lineItemBody = {
         variant_id: VARIANT_ID,
@@ -3796,8 +3876,8 @@ body {
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
-      // Stap 3a: Promo code toepassen via Medusa Promotions API
-      if (savedPromoCode && !promoAppliedToCart) {
+      // Stap 3a: Promo code toepassen via Medusa Promotions API (opnieuw als cart hergebruikt wordt)
+      if (savedPromoCode) {
         return medusaFetch('/store/carts/' + cartId + '/promotions', {
           method: 'POST',
           body: JSON.stringify({ promo_codes: [savedPromoCode] })
