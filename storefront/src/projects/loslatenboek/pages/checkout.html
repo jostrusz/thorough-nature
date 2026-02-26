@@ -856,32 +856,20 @@ body {
   margin-top: 14px;
   flex-wrap: wrap;
 }
-.summary-payments .pay-icon {
-  width: 40px;
-  height: 26px;
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 8px;
-  font-weight: 700;
-  color: var(--body);
-  transition: all 0.2s ease;
+.summary-payments img {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.summary-payments .pay-icon:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-.summary-payments .pay-icon.ideal { background: #CC0066; color: white; font-size: 7px; }
-.summary-payments .pay-icon.bancontact { background: #005498; color: white; font-size: 6px; }
-.summary-payments .pay-icon.klarna { background: #FFB3C7; color: #0A0B09; font-size: 7px; font-weight: 800; }
-.summary-payments .pay-icon.paypal { background: #003087; color: white; font-size: 7px; }
+.summary-payments img:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
 
 /* ─── SECURE FOOTER ─── */
 .checkout-footer {
   text-align: center;
-  padding: 28px 16px;
+  padding: 32px 16px 40px;
+  max-width: 640px;
+  margin: 0 auto;
   font-size: 12px;
   color: var(--muted);
+  line-height: 1.7;
 }
 .checkout-footer a {
   color: var(--muted);
@@ -890,6 +878,132 @@ body {
   transition: color 0.2s ease;
 }
 .checkout-footer a:hover { color: var(--cta); }
+.checkout-footer strong { color: var(--body); font-weight: 600; }
+.checkout-footer-trust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--body);
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  background: rgba(39,174,96,0.05);
+  border: 1px solid rgba(39,174,96,0.12);
+  border-radius: var(--radius);
+}
+.checkout-footer-trust svg { flex-shrink: 0; color: var(--success); }
+.checkout-footer-company {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 14px;
+  line-height: 1.8;
+}
+.checkout-footer-links {
+  font-size: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+/* ─── MINI REVIEWS IN SIDEBAR ─── */
+.summary-reviews {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.summary-review {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  background: var(--light);
+  border-radius: var(--radius);
+  border: 1px solid rgba(194,123,160,0.08);
+}
+.summary-review-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid rgba(194,123,160,0.15);
+}
+.summary-review-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.summary-review-content { flex: 1; min-width: 0; }
+.summary-review-stars {
+  font-size: 11px;
+  color: #E8A040;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+.summary-review-text {
+  font-size: 11px;
+  color: var(--body);
+  line-height: 1.5;
+  font-style: italic;
+}
+.summary-review-author {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 3px;
+  font-weight: 600;
+}
+
+/* ─── SECURE CHECKOUT BADGE (top) ─── */
+.secure-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  margin-bottom: 20px;
+  background: rgba(39,174,96,0.06);
+  border: 1px solid rgba(39,174,96,0.15);
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--success);
+}
+.secure-badge svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* ─── SHIPPING + DELIVERY INFO ─── */
+.summary-shipping-info {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: var(--light);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.summary-shipping-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--body);
+  line-height: 1.5;
+}
+.summary-shipping-row + .summary-shipping-row { margin-top: 6px; }
+.summary-shipping-row svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--cta); }
+.summary-shipping-row strong { color: var(--heading); font-weight: 600; }
+
+/* ─── RETURN POLICY LINK ─── */
+.summary-return-link {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 11px;
+}
+.summary-return-link a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease;
+}
+.summary-return-link a:hover { color: var(--cta); }
 
 /* ─── MOBILE STICKY SUMMARY BAR ─── */
 .mobile-summary-bar {
@@ -1646,6 +1760,13 @@ body {
 
     <!-- ── LEVÁ STRANA: FORMULÁŘ ── -->
     <div class="checkout-main">
+
+      <!-- Secure checkout badge -->
+      <div class="secure-badge animate-in">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Veilig afrekenen — SSL-versleutelde verbinding
+      </div>
+
       <form id="checkout-form" novalidate>
 
         <!-- ═══ PAYPAL EXPRESS CHECKOUT ═══ -->
@@ -2033,15 +2154,15 @@ body {
           <div class="checkout-trust">
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-              SSL Beveiligd
+              Beveiligd via Mollie
             </div>
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              Veilige betaling
+              30 dagen retourrecht
             </div>
             <div class="checkout-trust-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-              30 dagen garantie
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              Gratis verzending NL &amp; BE
             </div>
           </div>
         </div>
@@ -2113,18 +2234,56 @@ body {
         <div class="desc">Niet tevreden? Binnen 30 dagen krijg je je volledige aankoopbedrag terug. Geen vragen, geen gedoe.</div>
       </div>
 
-      <!-- Social proof -->
-      <div class="summary-social">
-        <div class="stars">★★★★★</div>
-        <strong>12.847+</strong> tevreden lezers
+      <!-- Shipping & Delivery info -->
+      <div class="summary-shipping-info">
+        <div class="summary-shipping-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          <span>Levering via <strong>GLS</strong> in <strong>4–7 werkdagen</strong> (NL &amp; BE)</span>
+        </div>
+        <div class="summary-shipping-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+          <span>Track &amp; trace per e-mail direct na verzending</span>
+        </div>
+        <div class="summary-shipping-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Vragen? <strong>devries@loslatenboek.nl</strong></span>
+        </div>
       </div>
 
-      <!-- Payment icons -->
+      <!-- Mini reviews -->
+      <div class="summary-reviews">
+        <div class="summary-review">
+          <div class="summary-review-avatar">
+            <img src="/images/review-sophie.jpg" alt="Sophie" loading="lazy">
+          </div>
+          <div class="summary-review-content">
+            <div class="summary-review-stars">★★★★★</div>
+            <div class="summary-review-text">"Binnen een week voelde ik me al lichter. Dit boek is een must-read."</div>
+            <div class="summary-review-author">Sophie V., Amsterdam</div>
+          </div>
+        </div>
+        <div class="summary-review">
+          <div class="summary-review-avatar">
+            <img src="/images/review-daan.jpg" alt="Daan" loading="lazy">
+          </div>
+          <div class="summary-review-content">
+            <div class="summary-review-stars">★★★★★</div>
+            <div class="summary-review-text">"Ik pieker al jaren. Dit boek gaf me eindelijk de tools om het los te laten."</div>
+            <div class="summary-review-author">Daan M., Rotterdam</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment icons (real SVGs) -->
       <div class="summary-payments">
-        <div class="pay-icon ideal">iDEAL</div>
-        <div class="pay-icon bancontact">BC</div>
-        <div class="pay-icon klarna">Klarna</div>
-        <div class="pay-icon paypal">PayPal</div>
+        <img src="/icons/ideal.svg" alt="iDEAL" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/klarna.svg" alt="Klarna" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/paypal.svg" alt="PayPal" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+      </div>
+
+      <!-- Return policy link -->
+      <div class="summary-return-link">
+        <a href="retourbeleid.html">Bekijk ons retourbeleid &rarr;</a>
       </div>
     </div>
 
@@ -2133,8 +2292,21 @@ body {
 
 <!-- ═══ FOOTER ═══ -->
 <div class="checkout-footer">
-  &copy; 2026 Laat Los Wat Je Kapotmaakt · Joris De Vries<br>
-  <a href="/privacy">Privacybeleid</a> · <a href="/voorwaarden">Algemene voorwaarden</a>
+  <div class="checkout-footer-trust">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Alle transacties worden beveiligd verwerkt via <strong>Mollie</strong> — een door DNB gereguleerde betaaldienstverlener.
+  </div>
+  <div class="checkout-footer-company">
+    <strong>Laat Los Wat Je Kapotmaakt</strong> is een uitgave van MarketingHQ s.r.o.<br>
+    Geregistreerd in Tsjechie · IČO: 21890820<br>
+    Wij distribueren vanuit ons Europees distributiecentrum via GLS naar Nederland en Belgie.<br>
+    Vragen of problemen? Neem contact op: <a href="mailto:devries@loslatenboek.nl"><strong>devries@loslatenboek.nl</strong></a><br>
+    Wij reageren binnen 24 uur en lossen elk probleem op.
+  </div>
+  <div class="checkout-footer-links">
+    &copy; 2026 Laat Los Wat Je Kapotmaakt · Joris De Vries<br>
+    <a href="voorwaarden.html">Algemene voorwaarden</a> · <a href="privacy.html">Privacybeleid</a> · <a href="retourbeleid.html">Retourbeleid</a> · <a href="verzending.html">Verzending &amp; Levering</a>
+  </div>
 </div>
 
 <!-- ═══ JAVASCRIPT ═══ -->
