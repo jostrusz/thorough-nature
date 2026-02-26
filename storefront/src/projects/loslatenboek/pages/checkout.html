@@ -3609,6 +3609,9 @@ body {
     });
   }
 
+  // Stav: of promo al op de cart is toegepast (via Medusa API)
+  var promoAppliedToCart = false;
+
   if (promoApplyBtn) {
     promoApplyBtn.addEventListener('click', function() {
       var code = promoInput.value.trim().toUpperCase();
@@ -3617,15 +3620,9 @@ body {
         promoMessage.className = 'promo-message error';
         return;
       }
-      // Validate against admin-configured whitelist (case-insensitive)
-      var validCodes = (PROJECT_CONFIG.promoCodes || []).map(function(c) { return c.toUpperCase(); });
-      if (validCodes.length > 0 && validCodes.indexOf(code) === -1) {
-        promoMessage.textContent = 'Ongeldige kortingscode';
-        promoMessage.className = 'promo-message error';
-        return;
-      }
-      // Code is valid — save and show applied badge
+      // Sla code op en toon badge — validatie gebeurt server-side via Medusa bij submit
       savedPromoCode = code;
+      promoAppliedToCart = false;
       promoCodeTag.textContent = code;
       promoApplied.classList.add('is-visible');
       promoForm.classList.remove('is-open');
@@ -3648,7 +3645,9 @@ body {
 
   if (promoRemove) {
     promoRemove.addEventListener('click', function() {
+      var removedCode = savedPromoCode;
       savedPromoCode = '';
+      promoAppliedToCart = false;
       promoApplied.classList.remove('is-visible');
       promoToggle.style.display = '';
       promoMessage.className = 'promo-message';
@@ -3797,27 +3796,34 @@ body {
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
-      // Stap 3a: Promo kód aplikovat (pokud existuje)
-      if (savedPromoCode) {
+      // Stap 3a: Promo code toepassen via Medusa Promotions API
+      if (savedPromoCode && !promoAppliedToCart) {
         return medusaFetch('/store/carts/' + cartId + '/promotions', {
           method: 'POST',
           body: JSON.stringify({ promo_codes: [savedPromoCode] })
         }).then(function(promoRes) {
-          console.log('Promo kód aplikován:', savedPromoCode);
-          // Aktualizuj order summary s discount daty
+          console.log('Promo code toegepast via Medusa:', savedPromoCode);
+          promoAppliedToCart = true;
           if (promoRes && promoRes.cart) {
             updateOrderSummary(promoRes.cart);
           }
           return cartId;
         }).catch(function(err) {
-          // Pokud promo kód selže — zobraz varování ale pokračuj
-          console.warn('Promo kód selhal:', err.message || err);
-          var promoMsg = document.getElementById('promo-message');
-          if (promoMsg) {
-            promoMsg.textContent = 'Kortingscode niet geldig';
-            promoMsg.className = 'promo-message error';
-          }
+          // Medusa weigert de code — toon fout, verberg badge, stop NIET de bestelling
+          console.warn('Promo code geweigerd door Medusa:', err.message || err);
           savedPromoCode = '';
+          promoAppliedToCart = false;
+          // Toon foutmelding
+          if (promoMessage) {
+            promoMessage.textContent = 'Ongeldige kortingscode';
+            promoMessage.className = 'promo-message error';
+          }
+          // Verberg badge, toon toggle weer
+          promoApplied.classList.remove('is-visible');
+          promoToggle.style.display = '';
+          // Verberg korting in samenvatting
+          var discountEl = document.getElementById('summary-discount');
+          if (discountEl) discountEl.style.display = 'none';
           return cartId;
         });
       }
@@ -4065,13 +4071,15 @@ body {
         return Promise.all(lineItemPromises).then(function() { return cartId; });
       })
       .then(function(cartId) {
-        // 4. Aplikuj promo kód pokud existuje
-        if (typeof savedPromoCode !== 'undefined' && savedPromoCode) {
+        // 4. Promo code toepassen (als nog niet toegepast via Medusa)
+        if (typeof savedPromoCode !== 'undefined' && savedPromoCode && !promoAppliedToCart) {
           return medusaFetch('/store/carts/' + cartId + '/promotions', {
             method: 'POST',
             body: JSON.stringify({ promo_codes: [savedPromoCode] })
-          }).then(function() { return cartId; })
-            .catch(function() { return cartId; }); // non-blocking
+          }).then(function() {
+            promoAppliedToCart = true;
+            return cartId;
+          }).catch(function() { return cartId; }); // non-blocking
         }
         return cartId;
       })

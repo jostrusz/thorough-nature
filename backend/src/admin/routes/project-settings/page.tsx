@@ -49,7 +49,6 @@ interface ProjectSettingsType {
   order_bump_enabled: boolean
   upsell_enabled: boolean
   foxentry_api_key: string | null
-  promo_codes: string | null
   created_at: string
   updated_at: string
 }
@@ -200,154 +199,6 @@ function FoxentryKeyInput({
           Cancel
         </button>
       )}
-    </div>
-  )
-}
-
-// ═══════════════════════════════════════════
-// PROMO CODES MANAGER
-// ═══════════════════════════════════════════
-
-function PromoCodesManager({
-  codesJson,
-  onSave,
-  disabled,
-}: {
-  codesJson: string | null
-  onSave: (json: string) => void
-  disabled?: boolean
-}) {
-  const [newCode, setNewCode] = useState("")
-
-  let codes: string[] = []
-  try {
-    codes = JSON.parse(codesJson || "[]")
-  } catch {
-    codes = []
-  }
-
-  const addCode = () => {
-    const trimmed = newCode.trim().toUpperCase()
-    if (!trimmed) return
-    if (codes.map((c) => c.toUpperCase()).includes(trimmed)) {
-      toast.error("Code already exists")
-      return
-    }
-    const updated = [...codes, trimmed]
-    onSave(JSON.stringify(updated))
-    setNewCode("")
-  }
-
-  const removeCode = (index: number) => {
-    const updated = codes.filter((_, i) => i !== index)
-    onSave(JSON.stringify(updated))
-  }
-
-  return (
-    <div>
-      {/* Code pills */}
-      {codes.length > 0 ? (
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "6px",
-            marginLeft: "28px",
-            marginBottom: "8px",
-          }}
-        >
-          {codes.map((code, i) => (
-            <span
-              key={i}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "4px 10px",
-                borderRadius: "6px",
-                background: "#F0EDFF",
-                color: "#3D2E7C",
-                fontSize: "12px",
-                fontWeight: 600,
-                fontFamily: "monospace",
-              }}
-            >
-              {code}
-              <button
-                onClick={() => removeCode(i)}
-                disabled={disabled}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  color: "#9E2B25",
-                  cursor: "pointer",
-                  padding: "0 2px",
-                  fontSize: "14px",
-                  lineHeight: 1,
-                  opacity: disabled ? 0.5 : 1,
-                }}
-              >
-                &times;
-              </button>
-            </span>
-          ))}
-        </div>
-      ) : (
-        <div
-          style={{
-            fontSize: "12px",
-            color: "#8C9196",
-            marginLeft: "28px",
-            marginBottom: "8px",
-            fontStyle: "italic",
-          }}
-        >
-          No promo codes configured. All codes will be accepted.
-        </div>
-      )}
-
-      {/* Add input */}
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "28px" }}>
-        <input
-          className="ps-input"
-          style={{
-            flex: 1,
-            padding: "6px 10px",
-            borderRadius: "6px",
-            border: "1px solid #E1E3E5",
-            fontSize: "12px",
-            fontFamily: "monospace",
-            color: "#1A1A1A",
-            textTransform: "uppercase",
-          }}
-          placeholder="Enter promo code..."
-          value={newCode}
-          onChange={(e) => setNewCode(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault()
-              addCode()
-            }
-          }}
-        />
-        <button
-          className="ps-btn-primary"
-          onClick={addCode}
-          disabled={disabled || !newCode.trim()}
-          style={{
-            padding: "5px 14px",
-            borderRadius: "6px",
-            fontSize: "11px",
-            fontWeight: 600,
-            border: "none",
-            background: "#635BFF",
-            color: "#FFF",
-            opacity: disabled || !newCode.trim() ? 0.5 : 1,
-          }}
-        >
-          Add
-        </button>
-      </div>
     </div>
   )
 }
@@ -802,24 +653,30 @@ const ProjectSettingsPage = () => {
                   <span style={{ fontSize: "14px", fontWeight: 600, color: "#1A1A1A" }}>
                     Promo Codes
                   </span>
-                  <span className={`ps-badge ${(() => { try { return JSON.parse(s.promo_codes || "[]").length > 0 } catch { return false } })() ? "ps-badge-on" : "ps-badge-off"}`}>
-                    {(() => { try { const c = JSON.parse(s.promo_codes || "[]"); return c.length > 0 ? `● ${c.length} code${c.length > 1 ? "s" : ""}` : "● None" } catch { return "● None" } })()}
-                  </span>
                 </div>
                 <div style={{ fontSize: "12px", color: "#8C9196", marginLeft: "28px", marginBottom: "4px" }}>
-                  Whitelist of valid promo codes. Only listed codes will be accepted at checkout (case-insensitive).
-                  If no codes are configured, all codes are accepted via Medusa promotions.
+                  Promo codes worden beheerd via Medusa Promotions. Checkout valideert codes automatisch via de Medusa API.
                 </div>
-                <PromoCodesManager
-                  codesJson={s.promo_codes}
-                  onSave={(json) =>
-                    toggleMutation.mutate({
-                      id: s.id,
-                      promo_codes: json,
-                    })
-                  }
-                  disabled={toggleMutation.isPending}
-                />
+                <div style={{ marginLeft: "28px" }}>
+                  <a
+                    href="/app/promotions"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "6px 14px",
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      background: "#F0EDFF",
+                      color: "#3D2E7C",
+                      textDecoration: "none",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    Promotions beheren →
+                  </a>
+                </div>
               </div>
             </div>
           ))}
