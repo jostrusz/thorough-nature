@@ -21,6 +21,8 @@ const BillingEntity = model.define("billing_entity", {
   website: model.text().nullable(),
   // Flags
   is_default: model.boolean().default(false),
+  // Invoicing system: "fakturoid" or "quickbooks"
+  invoicing_system: model.text().nullable(),
   // Flexible metadata
   metadata: model.json().nullable(),
 })

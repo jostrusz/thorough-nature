@@ -12,11 +12,13 @@ import {
   mapCountryToLanguage,
   getOSSMode,
 } from "../modules/fakturoid/api-client"
+import { resolveInvoicingSystem } from "./utils/resolve-invoicing-system"
 
 /**
  * Fakturoid Invoice Subscriber
  *
- * On every order.placed, if the order matches a Fakturoid config by project_id:
+ * On every order.placed, if the order's payment gateway billing entity
+ * uses Fakturoid as invoicing system:
  * 1. Get/create subject (customer) in Fakturoid
  * 2. Create invoice with line items
  * 3. Mark invoice as paid
@@ -31,6 +33,15 @@ export default async function orderPlacedFakturoidHandler({
     const fakturoidService = container.resolve(
       FAKTUROID_MODULE
     ) as unknown as FakturoidModuleService
+
+    // ── Route by billing entity invoicing system ──
+    const invoicingSystem = await resolveInvoicingSystem(container, data.id)
+    if (invoicingSystem && invoicingSystem !== "fakturoid") {
+      console.log(
+        `[Fakturoid] Order ${data.id} uses invoicing_system="${invoicingSystem}", skipping`
+      )
+      return
+    }
 
     // ── Retrieve order with relations ──
     const order = await orderService.retrieveOrder(data.id, {

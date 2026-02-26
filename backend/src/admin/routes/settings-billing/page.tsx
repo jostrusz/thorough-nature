@@ -160,6 +160,7 @@ function CompaniesTab() {
     vat_id: "",
     registration_id: "",
     email: "",
+    invoicing_system: "",
     is_default: false,
   })
 
@@ -170,7 +171,7 @@ function CompaniesTab() {
       queryClient.invalidateQueries({ queryKey: ["billing-entities"] })
       toast.success("Company created")
       setShowForm(false)
-      setForm({ name: "", legal_name: "", country_code: "", tax_id: "", vat_id: "", registration_id: "", email: "", is_default: false })
+      setForm({ name: "", legal_name: "", country_code: "", tax_id: "", vat_id: "", registration_id: "", email: "", invoicing_system: "", is_default: false })
     },
     onError: () => toast.error("Failed to create company"),
   })
@@ -246,6 +247,14 @@ function CompaniesTab() {
               <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase" }}>Email</label>
               <input className="bp-input" style={inputStyle} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} type="email" placeholder="info@company.com" />
             </div>
+            <div>
+              <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase" }}>Invoicing System</label>
+              <select className="bp-input" style={{ ...inputStyle, background: "#FFF" }} value={form.invoicing_system} onChange={(e) => setForm({ ...form, invoicing_system: e.target.value })}>
+                <option value="">None</option>
+                <option value="fakturoid">Fakturoid</option>
+                <option value="quickbooks">QuickBooks</option>
+              </select>
+            </div>
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "16px" }}>
             <button
@@ -284,6 +293,11 @@ function CompaniesTab() {
                   {entity.tax_id && <span>I\u010CO: {entity.tax_id}</span>}
                   {entity.vat_id && <span style={{ marginLeft: "12px" }}>DI\u010C: {entity.vat_id}</span>}
                   {entity.email && <span style={{ marginLeft: "12px" }}>{entity.email}</span>}
+                  {entity.invoicing_system && (
+                    <span style={{ marginLeft: "12px", padding: "1px 8px", borderRadius: "10px", fontSize: "11px", fontWeight: 600, background: entity.invoicing_system === "fakturoid" ? "#DBEAFE" : "#E0E7FF", color: entity.invoicing_system === "fakturoid" ? "#1D4ED8" : "#4338CA" }}>
+                      {entity.invoicing_system === "fakturoid" ? "Fakturoid" : "QuickBooks"}
+                    </span>
+                  )}
                 </div>
               </div>
               <button
@@ -373,15 +387,53 @@ function GatewaysTab() {
     setEditingGw(gw.id)
     setEditForm({
       display_name: gw.display_name || "",
+      billing_entity_id: gw.billing_entity_id || "",
       mode: gw.mode || "test",
       priority: gw.priority || 1,
       live_keys: gw.live_keys || { api_key: "", secret_key: "", webhook_secret: "" },
       test_keys: gw.test_keys || { api_key: "", secret_key: "", webhook_secret: "" },
+      selected_methods: (gw.payment_methods || [])
+        .filter((m: any) => m.is_active)
+        .map((m: any) => m.code),
     })
   }
 
-  const handleUpdate = (gwId: string) => {
-    updateMutation.mutate({ id: gwId, data: editForm })
+  const handleUpdate = async (gwId: string) => {
+    try {
+      // 1. Update gateway config fields (excluding selected_methods)
+      const { selected_methods, ...gatewayData } = editForm
+      await sdk.client.fetch(`/admin/gateway-configs/${gwId}`, {
+        method: "POST",
+        body: gatewayData,
+      })
+
+      // 2. Update payment methods via the methods endpoint
+      if (selected_methods && selected_methods.length > 0) {
+        const gw = gateways.find((g: any) => g.id === gwId)
+        const providerMethods = PAYMENT_METHODS_BY_PROVIDER[gw?.provider] || []
+        const methods = selected_methods.map((code: string, i: number) => {
+          const methodDef = providerMethods.find((m: any) => m.code === code)
+          return {
+            code,
+            display_name: methodDef?.name || code,
+            icon: methodDef?.icon || code,
+            is_active: true,
+            sort_order: i,
+          }
+        })
+
+        await sdk.client.fetch(`/admin/gateway-configs/${gwId}/methods`, {
+          method: "POST",
+          body: { methods },
+        })
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["gateway-configs"] })
+      toast.success("Gateway updated")
+      setEditingGw(null)
+    } catch {
+      toast.error("Failed to update gateway")
+    }
   }
 
   const gateways = (gwData as any)?.gateway_configs || []
@@ -712,10 +764,21 @@ function GatewaysTab() {
                   {editingGw === gw.id ? (
                     /* ═══ EDIT MODE ═══ */
                     <div style={{ borderTop: "1px solid #E1E3E5", paddingTop: "12px" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "12px" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
                         <div>
                           <label style={{ fontSize: "10px", color: "#8C9196" }}>Display Name</label>
                           <input className="bp-input" style={inputStyle} value={editForm.display_name} onChange={(e) => setEditForm({ ...editForm, display_name: e.target.value })} />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: "10px", color: "#8C9196" }}>Billing Company</label>
+                          <select className="bp-input" style={{ ...inputStyle, background: "#FFF" }} value={editForm.billing_entity_id || ""} onChange={(e) => setEditForm({ ...editForm, billing_entity_id: e.target.value || null })}>
+                            <option value="">None</option>
+                            {billingEntities.map((be: any) => (
+                              <option key={be.id} value={be.id}>
+                                {be.name}{be.invoicing_system ? ` (${be.invoicing_system})` : ""}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                         <div>
                           <label style={{ fontSize: "10px", color: "#8C9196" }}>Mode</label>
@@ -727,6 +790,47 @@ function GatewaysTab() {
                         <div>
                           <label style={{ fontSize: "10px", color: "#8C9196" }}>Priority</label>
                           <input className="bp-input" style={inputStyle} type="number" min={1} value={editForm.priority} onChange={(e) => setEditForm({ ...editForm, priority: parseInt(e.target.value) || 1 })} />
+                        </div>
+                      </div>
+
+                      {/* Payment Methods Selection */}
+                      <div style={{ marginBottom: "12px" }}>
+                        <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase", marginBottom: "8px", display: "block" }}>
+                          Payment Methods ({(editForm.selected_methods || []).length} selected)
+                        </label>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px" }}>
+                          {(PAYMENT_METHODS_BY_PROVIDER[gw.provider] || []).map((method: any) => {
+                            const selected = (editForm.selected_methods || []).includes(method.code)
+                            return (
+                              <button
+                                key={method.code}
+                                onClick={() => {
+                                  const current = editForm.selected_methods || []
+                                  setEditForm({
+                                    ...editForm,
+                                    selected_methods: selected
+                                      ? current.filter((x: string) => x !== method.code)
+                                      : [...current, method.code],
+                                  })
+                                }}
+                                className="bp-method-row"
+                                style={{
+                                  display: "flex", alignItems: "center", gap: "8px",
+                                  padding: "8px 10px",
+                                  border: selected ? "1.5px solid #008060" : "1px solid #E1E3E5",
+                                  borderRadius: "6px",
+                                  background: selected ? "#F0FFF8" : "#FFF",
+                                  cursor: "pointer", fontSize: "12px",
+                                  fontWeight: selected ? 600 : 400,
+                                  color: "#1A1A1A", textAlign: "left" as const,
+                                  transition: "all 0.15s ease",
+                                }}
+                              >
+                                <PaymentMethodIcon code={method.icon} size={20} />
+                                {method.name}
+                              </button>
+                            )
+                          })}
                         </div>
                       </div>
                       <div style={{ marginBottom: "12px" }}>

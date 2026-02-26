@@ -11,11 +11,13 @@ import {
   createPayment,
   getInvoiceWithLink,
 } from "../modules/quickbooks/api-client"
+import { resolveInvoicingSystem } from "./utils/resolve-invoicing-system"
 
 /**
  * QuickBooks Invoice Subscriber
  *
- * On every order.placed, if the order matches a QuickBooks config by project_id:
+ * On every order.placed, if the order's payment gateway billing entity
+ * uses QuickBooks as invoicing system:
  * 1. Ensure valid access token (auto-refresh if needed)
  * 2. Get/create customer in QuickBooks
  * 3. Create invoice with line items
@@ -32,6 +34,15 @@ export default async function orderPlacedQuickBooksHandler({
     const qbService = container.resolve(
       QUICKBOOKS_MODULE
     ) as unknown as QuickBooksModuleService
+
+    // ── Route by billing entity invoicing system ──
+    const invoicingSystem = await resolveInvoicingSystem(container, data.id)
+    if (invoicingSystem && invoicingSystem !== "quickbooks") {
+      console.log(
+        `[QuickBooks] Order ${data.id} uses invoicing_system="${invoicingSystem}", skipping`
+      )
+      return
+    }
 
     // ── Retrieve order with relations ──
     const order = await orderService.retrieveOrder(data.id, {

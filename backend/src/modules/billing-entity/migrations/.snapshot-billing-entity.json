@@ -133,6 +133,15 @@
           "default": "false",
           "mappedType": "boolean"
         },
+        "invoicing_system": {
+          "name": "invoicing_system",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
         "metadata": {
           "name": "metadata",
           "type": "jsonb",
