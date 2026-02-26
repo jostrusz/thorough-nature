@@ -48,6 +48,7 @@ interface ProjectSettingsType {
   project_id: string
   order_bump_enabled: boolean
   upsell_enabled: boolean
+  foxentry_api_key: string | null
   created_at: string
   updated_at: string
 }
@@ -72,6 +73,133 @@ function Toggle({
       disabled={disabled}
       style={{ opacity: disabled ? 0.5 : 1 }}
     />
+  )
+}
+
+// ═══════════════════════════════════════════
+// FOXENTRY KEY INPUT
+// ═══════════════════════════════════════════
+
+function FoxentryKeyInput({
+  currentKey,
+  onSave,
+  disabled,
+}: {
+  currentKey: string | null
+  onSave: (key: string) => void
+  disabled?: boolean
+}) {
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState("")
+
+  if (!editing && currentKey) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "28px" }}>
+        <code
+          style={{
+            flex: 1,
+            padding: "6px 10px",
+            borderRadius: "6px",
+            background: "#F6F6F7",
+            fontSize: "12px",
+            fontFamily: "monospace",
+            color: "#6D7175",
+          }}
+        >
+          {currentKey.slice(0, 8)}{"····"}{currentKey.slice(-4)}
+        </code>
+        <button
+          className="ps-btn"
+          onClick={() => { setEditing(true); setValue("") }}
+          style={{
+            padding: "5px 10px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            fontWeight: 500,
+            border: "1px solid #E1E3E5",
+            background: "#FFF",
+            color: "#6D7175",
+          }}
+        >
+          Change
+        </button>
+        <button
+          className="ps-btn"
+          onClick={() => onSave("")}
+          disabled={disabled}
+          style={{
+            padding: "5px 10px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            fontWeight: 500,
+            border: "1px solid #FED3D1",
+            background: "#FFF5F5",
+            color: "#9E2B25",
+          }}
+        >
+          Remove
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "28px" }}>
+      <input
+        className="ps-input"
+        style={{
+          flex: 1,
+          padding: "6px 10px",
+          borderRadius: "6px",
+          border: "1px solid #E1E3E5",
+          fontSize: "12px",
+          fontFamily: "monospace",
+          color: "#1A1A1A",
+        }}
+        placeholder="Enter Foxentry API key..."
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+      />
+      <button
+        className="ps-btn-primary"
+        onClick={() => {
+          if (value.trim()) {
+            onSave(value.trim())
+            setEditing(false)
+          }
+        }}
+        disabled={disabled || !value.trim()}
+        style={{
+          padding: "5px 14px",
+          borderRadius: "6px",
+          fontSize: "11px",
+          fontWeight: 600,
+          border: "none",
+          background: "#635BFF",
+          color: "#FFF",
+          opacity: disabled || !value.trim() ? 0.5 : 1,
+        }}
+      >
+        Save
+      </button>
+      {currentKey && (
+        <button
+          className="ps-btn"
+          onClick={() => setEditing(false)}
+          style={{
+            padding: "5px 10px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            fontWeight: 500,
+            border: "1px solid #E1E3E5",
+            background: "#FFF",
+            color: "#6D7175",
+          }}
+        >
+          Cancel
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -482,6 +610,36 @@ const ProjectSettingsPage = () => {
                     toggleMutation.mutate({
                       id: s.id,
                       upsell_enabled: !s.upsell_enabled,
+                    })
+                  }
+                  disabled={toggleMutation.isPending}
+                />
+              </div>
+
+              {/* ── Foxentry API Key ── */}
+              <div className="ps-setting-row" style={{ flexDirection: "column", alignItems: "stretch", gap: "8px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontSize: "16px" }}>🔍</span>
+                  <span style={{ fontSize: "14px", fontWeight: 600, color: "#1A1A1A" }}>
+                    Foxentry API Key
+                  </span>
+                  <span className={`ps-badge ${s.foxentry_api_key ? "ps-badge-on" : "ps-badge-off"}`}>
+                    {s.foxentry_api_key ? "● Connected" : "● Not set"}
+                  </span>
+                </div>
+                <div style={{ fontSize: "12px", color: "#8C9196", marginLeft: "28px", marginBottom: "4px" }}>
+                  Smart address autocomplete, email/phone validation, and company lookup (KVK/BTW).
+                  Powered by Foxentry AI. Get your key at{" "}
+                  <a href="https://app.foxentry.com" target="_blank" rel="noopener" style={{ color: "#635BFF" }}>
+                    app.foxentry.com
+                  </a>
+                </div>
+                <FoxentryKeyInput
+                  currentKey={s.foxentry_api_key}
+                  onSave={(key) =>
+                    toggleMutation.mutate({
+                      id: s.id,
+                      foxentry_api_key: key || null,
                     })
                   }
                   disabled={toggleMutation.isPending}

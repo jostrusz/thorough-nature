@@ -33,17 +33,19 @@ export async function GET(
           project_id: projectId,
           order_bump_enabled: true,
           upsell_enabled: true,
+          foxentry_api_key: null,
         },
       })
       return
     }
 
-    const s = allSettings[0]
+    const s = allSettings[0] as any
     res.json({
       project_setting: {
         project_id: s.project_id,
         order_bump_enabled: s.order_bump_enabled,
         upsell_enabled: s.upsell_enabled,
+        foxentry_api_key: s.foxentry_api_key || null,
       },
     })
   } catch (error: any) {
@@ -53,6 +55,7 @@ export async function GET(
         project_id: projectId,
         order_bump_enabled: true,
         upsell_enabled: true,
+        foxentry_api_key: null,
       },
     })
   }

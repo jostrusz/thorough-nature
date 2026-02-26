@@ -13,7 +13,7 @@ export async function GET(
   const service = req.scope.resolve(PROJECT_SETTINGS_MODULE) as ProjectSettingsModuleService
 
   try {
-    const settings = await service.retrieveProjectSetting(id)
+    const settings = await service.retrieveProjectSettings(id)
     res.json({ project_setting: settings })
   } catch (error: any) {
     res.status(404).json({ error: "Project settings not found" })

@@ -172,6 +172,7 @@ async function fetchProjectSettings(config: ProjectConfig): Promise<ProjectToggl
         return {
           orderBumpEnabled: data.project_setting.order_bump_enabled !== false,
           upsellEnabled: data.project_setting.upsell_enabled !== false,
+          foxentryApiKey: data.project_setting.foxentry_api_key || null,
         }
       }
     }
@@ -180,12 +181,13 @@ async function fetchProjectSettings(config: ProjectConfig): Promise<ProjectToggl
   }
 
   // Defaults: everything enabled
-  return { orderBumpEnabled: true, upsellEnabled: true }
+  return { orderBumpEnabled: true, upsellEnabled: true, foxentryApiKey: null }
 }
 
 interface ProjectToggles {
   orderBumpEnabled: boolean
   upsellEnabled: boolean
+  foxentryApiKey: string | null
 }
 
 function generateProjectConfigScript(
@@ -205,6 +207,7 @@ function generateProjectConfigScript(
     // Feature toggles from admin
     orderBumpEnabled: toggles.orderBumpEnabled,
     upsellEnabled: toggles.upsellEnabled,
+    foxentryApiKey: toggles.foxentryApiKey,
     // URLs with correct base path
     homeUrl: `${basePath}/`,
     checkoutUrl: `${basePath}/checkout`,
