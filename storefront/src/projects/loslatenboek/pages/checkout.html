@@ -2845,10 +2845,12 @@ body {
 
   var emailField = document.getElementById('email');
   var emailSuggestion = document.getElementById('email-suggestion');
-  if (emailField && emailSuggestion) {
+  // Foxentry flag — als key is ingesteld, worden email/phone uitsluitend door Foxentry gevalideerd
+  var hasFoxentryKey = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
+
+  if (emailField && emailSuggestion && !hasFoxentryKey) {
+    // Alleen lokale typo-check als Foxentry NIET actief is
     emailField.addEventListener('blur', function() {
-      // Als Foxentry actief is, laat Foxentry de suggestie afhandelen
-      if (window.__foxentryPending && window.__foxentryPending['email']) return;
       var val = emailField.value.trim();
       var suggestion = checkEmailTypo(val);
       if (suggestion) {
@@ -2895,6 +2897,11 @@ body {
       var country = countrySelect ? countrySelect.value : 'NL';
       var formatted = formatPhoneNumber(raw, country);
       phoneField.value = formatted;
+      if (hasFoxentryKey) {
+        // Foxentry handelt validatie + preview af, geen lokale feedback
+        phonePreview.style.display = 'none';
+        return;
+      }
       if (formatted !== raw) {
         phonePreview.textContent = '\u2713 Opgeslagen als ' + formatted;
         phonePreview.style.display = 'block';
@@ -3355,9 +3362,14 @@ body {
 
   function validateField(field) {
     // Als Foxentry bezig is met dit veld, sla lokale validatie over
-    // (Foxentry zet straks zelf valid/invalid na API-respons)
     if (window.__foxentryPending && window.__foxentryPending[field.id]) {
-      return true; // Geef true terug zodat formuliersubmit niet blokkeert
+      return true;
+    }
+    // Als Foxentry key actief is, email en telefoon worden UITSLUITEND door Foxentry gevalideerd
+    var _hasFox = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
+    if (_hasFox && (field.type === 'email' || field.type === 'tel')) {
+      // Behoud huidige valid/invalid status (gezet door Foxentry), niet overschrijven
+      return field.classList.contains('valid') || field.value.trim().length === 0;
     }
 
     var value = field.value.trim();
