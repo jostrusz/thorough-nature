@@ -531,19 +531,10 @@ body {
   width: 46px;
   height: 30px;
   border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  color: white;
   flex-shrink: 0;
-  letter-spacing: 0.02em;
+  object-fit: contain;
+  border: 1px solid rgba(194,123,160,0.12);
 }
-.pm-icon.ideal { background: #CC0066; }
-.pm-icon.bancontact { background: #005498; font-size: 8px; }
-.pm-icon.klarna { background: #FFB3C7; color: #0A0B09; font-size: 9px; font-weight: 800; }
-.pm-icon.paypal { background: #003087; font-size: 9px; }
 
 .pm-info { flex: 1; }
 .pm-name {
@@ -2097,7 +2088,7 @@ body {
             <label class="payment-method selected" data-method="ideal" data-provider="mollie">
               <input type="radio" name="payment_method" value="ideal" checked>
               <div class="pm-radio"><div class="pm-radio-dot"></div></div>
-              <div class="pm-icon ideal">iDEAL</div>
+              <img src="/icons/ideal.svg" alt="iDEAL" class="pm-icon">
               <div class="pm-info">
                 <div class="pm-name">iDEAL</div>
                 <div class="pm-desc">Betaal direct via je eigen bank</div>
@@ -2109,7 +2100,7 @@ body {
             <label class="payment-method" data-method="bancontact" data-provider="mollie" style="display:none">
               <input type="radio" name="payment_method" value="bancontact">
               <div class="pm-radio"><div class="pm-radio-dot"></div></div>
-              <div class="pm-icon bancontact">Bancontact</div>
+              <img src="/icons/bancontact.svg" alt="Bancontact" class="pm-icon">
               <div class="pm-info">
                 <div class="pm-name">Bancontact</div>
                 <div class="pm-desc">Belgisch betaalsysteem</div>
@@ -2120,7 +2111,7 @@ body {
             <label class="payment-method" data-method="klarna" data-provider="klarna">
               <input type="radio" name="payment_method" value="klarna">
               <div class="pm-radio"><div class="pm-radio-dot"></div></div>
-              <div class="pm-icon klarna">Klarna</div>
+              <img src="/icons/klarna.svg" alt="Klarna" class="pm-icon">
               <div class="pm-info">
                 <div class="pm-name">Klarna</div>
                 <div class="pm-desc">Betaal later of in termijnen</div>
@@ -2131,7 +2122,7 @@ body {
             <label class="payment-method" data-method="paypal" data-provider="paypal">
               <input type="radio" name="payment_method" value="paypal">
               <div class="pm-radio"><div class="pm-radio-dot"></div></div>
-              <div class="pm-icon paypal">PayPal</div>
+              <img src="/icons/paypal.svg" alt="PayPal" class="pm-icon">
               <div class="pm-info">
                 <div class="pm-name">PayPal</div>
                 <div class="pm-desc">Betaal met je PayPal-account</div>
