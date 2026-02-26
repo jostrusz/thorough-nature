@@ -3082,28 +3082,21 @@ body {
 
         showSpinner(addrField);
         foxentryFetch('/location/search', {
-          query: { input: query },
-          options: { resultsLimit: 6, dataScope: 'extended' }
+          query: { type: 'streetWithNumber', value: query },
+          options: { resultsLimit: 6 }
         })
         .then(function(resp) {
           hideSpinner(addrField);
           var fx = foxentryResult(resp);
-          var results = fx.results || fx.suggestions || [];
-          // Sommige responses geven resultaat als array in suggestions
-          if (results.length === 0 && fx.result && fx.result.data) {
-            results = [fx.result];
-          }
+          var results = fx.results || [];
 
           var items = [];
           results.forEach(function(r) {
             var d = r.data || r;
-            if (!d) return;
-            var street = d.street || '';
-            var number = d.number || d.streetNumber || '';
-            var streetNum = (street && number) ? street + ' ' + number : (d.streetWithNumber || street || '');
-            if (!streetNum) return;
-            var city = (d.city || '');
-            var zip = (d.zip || d.postalCode || '');
+            if (!d || !d.streetWithNumber) return;
+            var streetNum = d.streetWithNumber;
+            var city = d.city || '';
+            var zip = d.zip || '';
             items.push({
               html: '<strong>' + streetNum + '</strong><small>' + zip + ' ' + city + '</small>',
               data: { street: streetNum, city: city, zip: zip }
@@ -3157,14 +3150,15 @@ body {
         showSpinner(foxEmailField);
         foxentryFetch('/email/validate', {
           query: { email: val },
-          options: { validationType: 'extended', dataScope: 'basic' }
+          options: { validationType: 'extended' }
         })
         .then(function(resp) {
           hideSpinner(foxEmailField);
           var fx = foxentryResult(resp);
           var proposal = fx.result.proposal || '';
-          var isValid = fx.result.isValid !== false && proposal !== 'invalid';
-          // Corrected email van Foxentry
+          var isValid = fx.result.isValid === true;
+          var isInvalidWithCorrection = proposal === 'invalidWithCorrection';
+          // Corrected email van Foxentry (bv. skjhajk@gmail → skjhajk@gmail.com)
           var correctedEmail = (fx.corrected && fx.corrected.data && fx.corrected.data.email) || null;
 
           // Foxentry correctie suggestie
@@ -3175,28 +3169,18 @@ body {
               foxEmailSuggestion.onclick = function() {
                 foxEmailField.value = correctedEmail;
                 foxEmailSuggestion.style.display = 'none';
-                validateField(foxEmailField);
+                foxEmailField.classList.add('valid');
+                foxEmailField.classList.remove('invalid');
               };
             }
-          } else if (fx.suggestions.length > 0 && fx.suggestions[0].data && fx.suggestions[0].data.email) {
-            // Foxentry suggesties
-            var suggested = fx.suggestions[0].data.email;
-            if (suggested !== val && foxEmailSuggestion) {
-              foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + suggested + '</strong>? Klik om te corrigeren.';
-              foxEmailSuggestion.style.display = 'block';
-              foxEmailSuggestion.onclick = function() {
-                foxEmailField.value = suggested;
-                foxEmailSuggestion.style.display = 'none';
-                validateField(foxEmailField);
-              };
-            }
-          }
-
-          // Update validatie iconen
-          if (isValid) {
+            // Toon als invalid totdat gebruiker de correctie accepteert
+            foxEmailField.classList.add('invalid');
+            foxEmailField.classList.remove('valid');
+          } else if (isValid) {
             foxEmailField.classList.add('valid');
             foxEmailField.classList.remove('invalid');
-          } else if (val.length > 0) {
+            if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
+          } else {
             foxEmailField.classList.add('invalid');
             foxEmailField.classList.remove('valid');
           }
@@ -3235,27 +3219,27 @@ body {
         setTimeout(function() {
           var formattedVal = foxPhoneField.value.trim();
           showSpinner(foxPhoneField);
-          var country = (document.getElementById('country') || {}).value || 'NL';
           foxentryFetch('/phone/validate', {
-            query: { numberWithPrefix: formattedVal, country: country },
-            options: { formatNumber: 'international', dataScope: 'extended' }
+            query: { numberWithPrefix: formattedVal }
           })
           .then(function(resp) {
             hideSpinner(foxPhoneField);
             var fx = foxentryResult(resp);
-            var isValid = fx.result.isValid !== false;
-            // Corrected / formatted nummer
-            var corrected = fx.corrected && fx.corrected.data;
-            if (corrected && corrected.numberWithPrefix) {
-              foxPhoneField.value = corrected.numberWithPrefix;
-            } else if (corrected && corrected.number) {
-              foxPhoneField.value = corrected.number;
+            var isValid = fx.result.isValid === true;
+            // Gebruik geformatteerd nummer van Foxentry
+            var data = fx.result.data || {};
+            var fmt = data.format || {};
+            if (fmt.internationalFormatted) {
+              foxPhoneField.value = fmt.internationalFormatted;
+            } else if (data.numberWithPrefix) {
+              foxPhoneField.value = data.numberWithPrefix;
             }
 
             if (isValid) {
               foxPhoneField.classList.add('valid');
               foxPhoneField.classList.remove('invalid');
               if (foxPhonePreview) {
+                foxPhonePreview.style.color = '';
                 foxPhonePreview.textContent = '\u2713 Geldig telefoonnummer';
                 foxPhonePreview.style.display = 'block';
               }
@@ -3290,19 +3274,15 @@ body {
         var query = companyInput.value.trim();
         if (query.length < 2) { hideDropdown(companyDropdown); return; }
 
-        var country = (document.getElementById('country') || {}).value || 'NL';
         showSpinner(companyInput);
         foxentryFetch('/company/search', {
-          query: { name: query, country: country },
-          options: { resultsLimit: 6, dataScope: 'extended' }
+          query: { type: 'name', value: query },
+          options: { resultsLimit: 6 }
         })
         .then(function(resp) {
           hideSpinner(companyInput);
           var fx = foxentryResult(resp);
-          var results = fx.results || fx.suggestions || [];
-          if (results.length === 0 && fx.result && fx.result.data) {
-            results = [fx.result];
-          }
+          var results = fx.results || [];
 
           var items = [];
           results.forEach(function(r) {
@@ -3311,7 +3291,8 @@ body {
             var name = d.name || '';
             var regNo = d.registrationNumber || '';
             var vatNo = d.vatNumber || '';
-            var city = (d.address && d.address.city) || d.city || '';
+            var addr = d.address && d.address.data;
+            var city = (addr && addr.city) || '';
             items.push({
               html: '<strong>' + name + '</strong>' +
                     (regNo ? '<small>KVK: ' + regNo + '</small>' : '') +
