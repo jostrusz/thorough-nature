@@ -7,6 +7,14 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/favicon.png" type="image/png">
 
+<!-- Prevent checkout flash on payment return — hide body BEFORE any rendering -->
+<script>
+if (window.location.search.indexOf('payment_return=1') !== -1) {
+  document.documentElement.style.visibility = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
+}
+</script>
+
 <!-- Mollie Components (credit card) -->
 <script src="https://js.mollie.com/v1/mollie.js"></script>
 
@@ -455,6 +463,35 @@ body {
 .company-fields .float-field:last-child { margin-bottom: 0; }
 .company-kvk-label { display: none; }
 .company-kvk-label.active { display: inline; }
+
+/* ─── BILLING ADDRESS (anders dan verzendadres) ─── */
+.billing-toggle {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 16px; padding: 12px 16px;
+  background: rgba(194,123,160,0.04); border: 1px solid #e0e0e0; border-radius: 10px;
+  cursor: pointer; transition: all 0.25s ease;
+  user-select: none;
+}
+.billing-toggle:hover { background: rgba(194,123,160,0.06); border-color: var(--cta); }
+.billing-toggle input[type="checkbox"] {
+  width: 18px; height: 18px; accent-color: var(--cta);
+  cursor: pointer; flex-shrink: 0;
+}
+.billing-toggle-label {
+  font-size: 14px; font-weight: 500; color: var(--heading);
+  display: flex; align-items: center; gap: 8px;
+}
+.billing-toggle-label svg { width: 16px; height: 16px; color: var(--muted); flex-shrink: 0; }
+.billing-fields {
+  max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease, margin-top 0.3s ease;
+  margin-top: 0;
+}
+.billing-fields.is-open {
+  max-height: 500px; opacity: 1; margin-top: 12px;
+}
+.billing-fields .float-field { margin-bottom: 8px; }
+.billing-fields .float-field:last-child { margin-bottom: 0; }
 
 /* ─── PROMO / KUPÓN ─── */
 .promo-section { margin-top: 16px; }
@@ -2096,6 +2133,47 @@ body {
             </div>
           </div>
 
+          <!-- Factuuradres (billing address) — anders dan verzendadres -->
+          <label class="billing-toggle" for="billing-checkbox">
+            <input type="checkbox" id="billing-checkbox">
+            <span class="billing-toggle-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Mijn factuuradres is anders
+            </span>
+          </label>
+
+          <div class="billing-fields" id="billing-fields">
+            <div class="float-field form-group">
+              <input type="text" id="billing_first_name" name="billing_first_name" placeholder=" " autocomplete="billing given-name">
+              <label for="billing_first_name">Voornaam</label>
+            </div>
+            <div class="float-field form-group">
+              <input type="text" id="billing_last_name" name="billing_last_name" placeholder=" " autocomplete="billing family-name">
+              <label for="billing_last_name">Achternaam</label>
+            </div>
+            <div class="float-field form-group">
+              <input type="text" id="billing_address" name="billing_address" placeholder=" " autocomplete="billing address-line1">
+              <label for="billing_address">Straat en huisnummer</label>
+            </div>
+            <div class="form-row">
+              <div class="float-field form-group">
+                <input type="text" id="billing_city" name="billing_city" placeholder=" " autocomplete="billing address-level2">
+                <label for="billing_city">Stad</label>
+              </div>
+              <div class="float-field form-group">
+                <input type="text" id="billing_postal_code" name="billing_postal_code" placeholder=" " autocomplete="billing postal-code">
+                <label for="billing_postal_code">Postcode</label>
+              </div>
+            </div>
+            <div class="float-field form-group">
+              <select id="billing_country" name="billing_country" autocomplete="billing country" style="height:52px;">
+                <option value="NL">Nederland</option>
+                <option value="BE">Belgi&euml;</option>
+              </select>
+              <label for="billing_country" class="select-label">Land</label>
+            </div>
+          </div>
+
           <!-- GLS Gratis verzending info -->
           <div id="shipping-info" style="display:flex;align-items:center;gap:10px;margin-top:16px;padding:12px 16px;background:#f0faf4;border:1px solid #b8e6c8;border-radius:10px;">
             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjE1Ij48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="flex-shrink:0;">
@@ -2164,8 +2242,8 @@ body {
             </label>
 
             <!-- Klarna -->
-            <label class="payment-method" data-method="klarna" data-provider="klarna">
-              <input type="radio" name="payment_method" value="klarna">
+            <label class="payment-method" data-method="klarnapaylater" data-provider="mollie">
+              <input type="radio" name="payment_method" value="klarnapaylater">
               <div class="pm-radio"><div class="pm-radio-dot"></div></div>
               <img src="/icons/klarna.svg" alt="Klarna" class="pm-icon">
               <div class="pm-info">
@@ -2744,7 +2822,7 @@ body {
       var labels = {
         ideal: 'Betalen met iDEAL',
         bancontact: 'Betalen met Bancontact',
-        klarna: 'Betalen met Klarna',
+        klarnapaylater: 'Betalen met Klarna',
         paypal: 'Betalen met PayPal'
       };
       btnText.textContent = (labels[selectedMethod] || 'Bestelling afronden') + ' — ' + formatPrice(total);
@@ -2907,7 +2985,7 @@ body {
     var labels = {
       ideal: 'Betalen met iDEAL',
       bancontact: 'Betalen met Bancontact',
-      klarna: 'Betalen met Klarna',
+      klarnapaylater: 'Betalen met Klarna',
       creditcard: 'Betalen met Creditcard',
       paypal: 'Betalen met PayPal'
     };
@@ -3021,6 +3099,27 @@ body {
     });
     phoneField.addEventListener('input', function() {
       phonePreview.style.display = 'none';
+    });
+  }
+
+  /* ─── FACTUURADRES (BILLING) — toggle ─── */
+  var billingCheckbox = document.getElementById('billing-checkbox');
+  var billingFields = document.getElementById('billing-fields');
+
+  if (billingCheckbox && billingFields) {
+    billingCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        billingFields.classList.add('is-open');
+      } else {
+        billingFields.classList.remove('is-open');
+        // Vymazat pole při odškrtnutí
+        document.getElementById('billing_first_name').value = '';
+        document.getElementById('billing_last_name').value = '';
+        document.getElementById('billing_address').value = '';
+        document.getElementById('billing_city').value = '';
+        document.getElementById('billing_postal_code').value = '';
+        document.getElementById('billing_country').value = 'NL';
+      }
     });
   }
 
@@ -3691,7 +3790,10 @@ body {
     var cartId = params.get('cart_id');
     if (!cartId) return;
 
-    // Hide checkout form, show loading
+    // Show loading spinner (page was hidden by head script to prevent flash)
+    document.documentElement.style.visibility = 'visible';
+    document.documentElement.style.overflow = '';
+    document.body.style.background = '#f8f6f3';
     var mainContent = document.querySelector('.checkout-form') || document.querySelector('.content');
     if (mainContent) {
       mainContent.innerHTML = '<div style="text-align:center;padding:80px 20px;"><div class="spinner" style="width:40px;height:40px;border:3px solid #eee;border-top:3px solid #333;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px;"></div><p style="font-size:18px;color:#333;">Betaling wordt verwerkt...</p><p style="font-size:14px;color:#888;">Even geduld alsjeblieft.</p></div>';
@@ -3953,6 +4055,28 @@ body {
       localStorage.removeItem('medusa_company');
     }
 
+    // ─── Factuuradres (billing address) ───
+    var isBillingDifferent = document.getElementById('billing-checkbox').checked;
+    if (isBillingDifferent) {
+      // Gebruiker heeft een ander factuuradres opgegeven
+      customerData.billing_address = {
+        first_name: document.getElementById('billing_first_name').value.trim() || customerData.shipping_address.first_name,
+        last_name: document.getElementById('billing_last_name').value.trim() || customerData.shipping_address.last_name,
+        address_1: document.getElementById('billing_address').value.trim() || customerData.shipping_address.address_1,
+        city: document.getElementById('billing_city').value.trim() || customerData.shipping_address.city,
+        postal_code: document.getElementById('billing_postal_code').value.trim() || customerData.shipping_address.postal_code,
+        country_code: document.getElementById('billing_country').value.toLowerCase(),
+        phone: customerData.shipping_address.phone,
+      };
+      // B2B: company toevoegen aan billing address
+      if (isCompany && companyName) {
+        customerData.billing_address.company = companyName;
+      }
+    } else {
+      // Factuuradres = verzendadres (kopie)
+      customerData.billing_address = Object.assign({}, customerData.shipping_address);
+    }
+
     // ─── Bundle + Order Bump stav v momentě odeslání ───
     var checkoutBundleQty = selectedBundleQty;
     var checkoutBundlePrice = selectedBundlePrice;
@@ -4087,6 +4211,13 @@ body {
         sessionData = {
           method: selectedMethod,
           return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
+          // Pass addresses for Klarna (requires billing address via Mollie Orders API)
+          billing_address: customerData.billing_address,
+          shipping_address: customerData.shipping_address,
+          email: customerData.email,
+          // Pass amount info for Klarna order lines
+          amount: checkoutTotal,
+          currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
         };
       }
 

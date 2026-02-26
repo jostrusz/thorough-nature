@@ -9,19 +9,34 @@ const GATEWAY_CONFIG_MODULE = "gatewayConfig"
  * This avoids calling private methods on the payment provider.
  */
 async function buildMollieClient(req: MedusaRequest): Promise<MollieApiClient> {
-  const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
-  const configs = await gcService.listGatewayConfigs(
-    { provider: "mollie", is_active: true },
-    { take: 1 }
-  )
-  const config = configs[0]
-  if (!config) throw new Error("Mollie gateway not configured")
+  // 1. Try gateway config from database (admin-configured)
+  try {
+    const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
+    const configs = await gcService.listGatewayConfigs(
+      { provider: "mollie", is_active: true },
+      { take: 1 }
+    )
+    const config = configs[0]
+    if (config) {
+      const isLive = config.mode === "live"
+      const keys = isLive ? config.live_keys : config.test_keys
+      if (keys?.api_key) {
+        return new MollieApiClient(keys.api_key, !isLive)
+      }
+    }
+  } catch {
+    // Gateway config not available — try env var fallback
+  }
 
-  const isLive = config.mode === "live"
-  const keys = isLive ? config.live_keys : config.test_keys
-  if (!keys?.api_key) throw new Error("Mollie API key not configured")
+  // 2. Fallback to env var
+  if (process.env.MOLLIE_API_KEY) {
+    return new MollieApiClient(
+      process.env.MOLLIE_API_KEY,
+      process.env.MOLLIE_TEST_MODE !== "false"
+    )
+  }
 
-  return new MollieApiClient(keys.api_key, !isLive)
+  throw new Error("Mollie API key not configured (no gateway config or MOLLIE_API_KEY env)")
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {

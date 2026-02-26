@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Afrekenen — Laat Los Wat Je Kapotmaakt</title>
 <meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.png" type="image/png">
+
+<!-- Prevent checkout flash on payment return — hide body BEFORE any rendering -->
+<script>
+if (window.location.search.indexOf('payment_return=1') !== -1) {
+  document.documentElement.style.visibility = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
+}
+</script>
+
+<!-- Mollie Components (credit card) -->
+<script src="https://js.mollie.com/v1/mollie.js"></script>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -324,6 +336,8 @@ body {
   animation: fadeIn 0.2s ease;
 }
 .float-field input.invalid ~ .field-error { display: block; }
+/* Hide local error for Foxentry-managed fields — Foxentry shows its own feedback */
+.float-field input.foxentry-managed.invalid ~ .field-error { display: none; }
 
 /* ─── EMAIL SUGGESTION (překlep v doméně) ─── */
 .email-suggestion {
@@ -368,6 +382,56 @@ body {
   vertical-align: -2px; margin-right: 4px;
 }
 
+/* ─── FOXENTRY AUTOCOMPLETE DROPDOWN ─── */
+.foxentry-dropdown {
+  display: none;
+  position: absolute;
+  left: 0; right: 0; top: 100%;
+  z-index: 100;
+  background: #FFF;
+  border: 1px solid #E1E3E5;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  max-height: 220px;
+  overflow-y: auto;
+}
+.foxentry-dropdown.is-open { display: block; }
+.foxentry-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--body);
+  border-bottom: 1px solid #F6F6F7;
+  transition: background 0.1s;
+}
+.foxentry-item:last-child { border-bottom: none; }
+.foxentry-item:hover, .foxentry-item.is-active { background: #F5F3FF; }
+.foxentry-item strong { color: var(--heading); font-weight: 600; }
+.foxentry-item small { color: var(--muted); font-size: 11px; margin-left: 6px; }
+.foxentry-correction {
+  font-size: 12px;
+  color: #E67E22;
+  margin-top: 4px;
+  padding: 6px 10px;
+  background: rgba(230, 126, 34, 0.07);
+  border-radius: 6px;
+  display: none;
+  cursor: pointer;
+}
+.foxentry-correction:hover { background: rgba(230, 126, 34, 0.14); }
+.foxentry-correction strong { color: #D35400; text-decoration: underline; text-underline-offset: 2px; }
+.foxentry-spinner {
+  position: absolute; right: 14px; top: 25px; transform: translateY(-50%);
+  width: 16px; height: 16px;
+  border: 2px solid #E1E3E5; border-top-color: var(--cta);
+  border-radius: 50%;
+  animation: foxSpin 0.6s linear infinite;
+  display: none;
+  z-index: 2;
+}
+@keyframes foxSpin { to { transform: translateY(-50%) rotate(360deg); } }
+
 /* ─── FIREMNÍ POLE (B2B) ─── */
 .company-toggle {
   display: flex; align-items: center; gap: 10px;
@@ -399,6 +463,35 @@ body {
 .company-fields .float-field:last-child { margin-bottom: 0; }
 .company-kvk-label { display: none; }
 .company-kvk-label.active { display: inline; }
+
+/* ─── BILLING ADDRESS (anders dan verzendadres) ─── */
+.billing-toggle {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 16px; padding: 12px 16px;
+  background: rgba(194,123,160,0.04); border: 1px solid #e0e0e0; border-radius: 10px;
+  cursor: pointer; transition: all 0.25s ease;
+  user-select: none;
+}
+.billing-toggle:hover { background: rgba(194,123,160,0.06); border-color: var(--cta); }
+.billing-toggle input[type="checkbox"] {
+  width: 18px; height: 18px; accent-color: var(--cta);
+  cursor: pointer; flex-shrink: 0;
+}
+.billing-toggle-label {
+  font-size: 14px; font-weight: 500; color: var(--heading);
+  display: flex; align-items: center; gap: 8px;
+}
+.billing-toggle-label svg { width: 16px; height: 16px; color: var(--muted); flex-shrink: 0; }
+.billing-fields {
+  max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease, margin-top 0.3s ease;
+  margin-top: 0;
+}
+.billing-fields.is-open {
+  max-height: 500px; opacity: 1; margin-top: 12px;
+}
+.billing-fields .float-field { margin-bottom: 8px; }
+.billing-fields .float-field:last-child { margin-bottom: 0; }
 
 /* ─── PROMO / KUPÓN ─── */
 .promo-section { margin-top: 16px; }
@@ -682,10 +775,10 @@ body {
   margin-bottom: 14px;
 }
 .summary-product-img {
-  width: 72px;
-  height: 96px;
+  width: 100px;
+  height: 130px;
   background: var(--light);
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   overflow: hidden;
   flex-shrink: 0;
@@ -1930,6 +2023,7 @@ body {
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             <div class="field-error">Vul een geldig e-mailadres in</div>
             <div class="email-suggestion" id="email-suggestion"></div>
+            <div class="foxentry-dropdown" id="foxentry-email-dropdown"></div>
           </div>
 
           <div class="float-field form-group" style="margin-bottom:0;">
@@ -1988,6 +2082,8 @@ body {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 9v4"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
               <span id="address-warning-text"></span>
             </div>
+            <!-- Foxentry address autocomplete dropdown -->
+            <div class="foxentry-dropdown" id="foxentry-address-dropdown"></div>
           </div>
 
           <!-- Město + PSČ -->
@@ -2018,9 +2114,11 @@ body {
           </label>
 
           <div class="company-fields" id="company-fields">
-            <div class="float-field form-group">
+            <div class="float-field form-group" style="position:relative;">
               <input type="text" id="company_name" name="company_name" placeholder=" " autocomplete="organization">
               <label for="company_name">Bedrijfsnaam</label>
+              <!-- Foxentry company autocomplete dropdown -->
+              <div class="foxentry-dropdown" id="foxentry-company-dropdown"></div>
             </div>
             <div class="float-field form-group">
               <input type="text" id="kvk_number" name="kvk_number" placeholder=" ">
@@ -2032,6 +2130,47 @@ body {
             <div class="float-field form-group">
               <input type="text" id="vat_number" name="vat_number" placeholder=" ">
               <label for="vat_number">BTW-nummer (optioneel)</label>
+            </div>
+          </div>
+
+          <!-- Factuuradres (billing address) — anders dan verzendadres -->
+          <label class="billing-toggle" for="billing-checkbox">
+            <input type="checkbox" id="billing-checkbox">
+            <span class="billing-toggle-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Mijn factuuradres is anders
+            </span>
+          </label>
+
+          <div class="billing-fields" id="billing-fields">
+            <div class="float-field form-group">
+              <input type="text" id="billing_first_name" name="billing_first_name" placeholder=" " autocomplete="billing given-name">
+              <label for="billing_first_name">Voornaam</label>
+            </div>
+            <div class="float-field form-group">
+              <input type="text" id="billing_last_name" name="billing_last_name" placeholder=" " autocomplete="billing family-name">
+              <label for="billing_last_name">Achternaam</label>
+            </div>
+            <div class="float-field form-group">
+              <input type="text" id="billing_address" name="billing_address" placeholder=" " autocomplete="billing address-line1">
+              <label for="billing_address">Straat en huisnummer</label>
+            </div>
+            <div class="form-row">
+              <div class="float-field form-group">
+                <input type="text" id="billing_city" name="billing_city" placeholder=" " autocomplete="billing address-level2">
+                <label for="billing_city">Stad</label>
+              </div>
+              <div class="float-field form-group">
+                <input type="text" id="billing_postal_code" name="billing_postal_code" placeholder=" " autocomplete="billing postal-code">
+                <label for="billing_postal_code">Postcode</label>
+              </div>
+            </div>
+            <div class="float-field form-group">
+              <select id="billing_country" name="billing_country" autocomplete="billing country" style="height:52px;">
+                <option value="NL">Nederland</option>
+                <option value="BE">Belgi&euml;</option>
+              </select>
+              <label for="billing_country" class="select-label">Land</label>
             </div>
           </div>
 
@@ -2103,8 +2242,8 @@ body {
             </label>
 
             <!-- Klarna -->
-            <label class="payment-method" data-method="klarna" data-provider="klarna">
-              <input type="radio" name="payment_method" value="klarna">
+            <label class="payment-method" data-method="klarnapaylater" data-provider="mollie">
+              <input type="radio" name="payment_method" value="klarnapaylater">
               <div class="pm-radio"><div class="pm-radio-dot"></div></div>
               <img src="/icons/klarna.svg" alt="Klarna" class="pm-icon">
               <div class="pm-info">
@@ -2112,6 +2251,47 @@ body {
                 <div class="pm-desc">Betaal later of in termijnen</div>
               </div>
             </label>
+
+            <!-- Creditcard (Mollie Components) -->
+            <label class="payment-method" data-method="creditcard" data-provider="mollie">
+              <input type="radio" name="payment_method" value="creditcard">
+              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
+              <svg class="pm-icon" width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0.5" y="0.5" width="31" height="23" rx="3.5" fill="#fff" stroke="#D9D9D9"/>
+                <rect x="2" y="5" width="28" height="4" fill="#2D3748"/>
+                <rect x="4" y="13" width="8" height="2" rx="1" fill="#CBD5E0"/>
+                <rect x="4" y="17" width="5" height="2" rx="1" fill="#CBD5E0"/>
+                <rect x="22" y="15" width="6" height="4" rx="2" fill="#ED8936"/>
+                <rect x="19" y="15" width="6" height="4" rx="2" fill="#E53E3E" opacity="0.8"/>
+              </svg>
+              <div class="pm-info">
+                <div class="pm-name">Creditcard</div>
+                <div class="pm-desc">Visa, Mastercard, American Express</div>
+              </div>
+            </label>
+
+            <!-- Mollie Components card fields (hidden unless creditcard selected) -->
+            <div id="mollie-card-fields" style="display:none; padding: 4px 16px 12px 48px; animation: fadeIn 0.3s ease;">
+              <div style="margin-bottom:10px;">
+                <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Kaartnummer</label>
+                <div id="card-number" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
+              </div>
+              <div style="display:flex;gap:12px;margin-bottom:10px;">
+                <div style="flex:1;">
+                  <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Vervaldatum</label>
+                  <div id="expiry-date" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
+                </div>
+                <div style="flex:1;">
+                  <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">CVC</label>
+                  <div id="verification-code" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
+                </div>
+              </div>
+              <div style="margin-bottom:6px;">
+                <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Naam op kaart</label>
+                <div id="card-holder" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
+              </div>
+              <div id="card-errors" style="font-size:12px;color:var(--error);margin-top:6px;min-height:16px;"></div>
+            </div>
 
             <!-- PayPal -->
             <label class="payment-method" data-method="paypal" data-provider="paypal">
@@ -2642,7 +2822,7 @@ body {
       var labels = {
         ideal: 'Betalen met iDEAL',
         bancontact: 'Betalen met Bancontact',
-        klarna: 'Betalen met Klarna',
+        klarnapaylater: 'Betalen met Klarna',
         paypal: 'Betalen met PayPal'
       };
       btnText.textContent = (labels[selectedMethod] || 'Bestelling afronden') + ' — ' + formatPrice(total);
@@ -2710,6 +2890,50 @@ body {
     }, { passive: true });
   })();
 
+  /* ─── MOLLIE COMPONENTS (Credit Card) ─── */
+  var mollieInstance = null;
+  var cardComponents = {};
+  var mollieCardToken = null;
+
+  function initMollieComponents() {
+    if (mollieInstance || !PROJECT_CONFIG.mollieProfileId) return;
+
+    try {
+      mollieInstance = Mollie(PROJECT_CONFIG.mollieProfileId, {
+        locale: 'nl_NL',
+        testmode: true // TODO: Toggle to false for production
+      });
+
+      cardComponents.cardNumber = mollieInstance.createComponent('cardNumber');
+      cardComponents.cardNumber.mount('#card-number');
+
+      cardComponents.cardHolder = mollieInstance.createComponent('cardHolder');
+      cardComponents.cardHolder.mount('#card-holder');
+
+      cardComponents.expiryDate = mollieInstance.createComponent('expiryDate');
+      cardComponents.expiryDate.mount('#expiry-date');
+
+      cardComponents.verificationCode = mollieInstance.createComponent('verificationCode');
+      cardComponents.verificationCode.mount('#verification-code');
+
+      // Error handling on each component
+      var cardErrorsEl = document.getElementById('card-errors');
+      Object.keys(cardComponents).forEach(function(key) {
+        cardComponents[key].addEventListener('change', function(event) {
+          if (event.error && event.touched) {
+            cardErrorsEl.textContent = event.error;
+          } else {
+            cardErrorsEl.textContent = '';
+          }
+        });
+      });
+
+      console.log('[Mollie Components] Initialized successfully');
+    } catch (e) {
+      console.error('[Mollie Components] Init failed:', e);
+    }
+  }
+
   /* ─── PAYMENT METHOD SELECTIE ─── */
   var paymentMethods = document.querySelectorAll('.payment-method');
   var selectedMethod = 'ideal';
@@ -2726,8 +2950,27 @@ body {
       selectedMethod = method.getAttribute('data-method');
       selectedProvider = method.getAttribute('data-provider');
 
+      // Show/hide Mollie Components card fields
+      var cardFields = document.getElementById('mollie-card-fields');
+      if (cardFields) {
+        if (selectedMethod === 'creditcard') {
+          cardFields.style.display = 'block';
+          initMollieComponents();
+        } else {
+          cardFields.style.display = 'none';
+        }
+      }
+
       // Update knop tekst
       updateButtonText();
+
+      // Update subtekst
+      var subtext = document.querySelector('.btn-subtext');
+      if (subtext) {
+        subtext.textContent = selectedMethod === 'creditcard'
+          ? 'Je kaartgegevens worden beveiligd verwerkt via Mollie.'
+          : 'Je wordt doorgestuurd naar een beveiligde betaalpagina.';
+      }
 
       // Verwijder eventuele foutmelding
       document.getElementById('payment-errors').textContent = '';
@@ -2742,7 +2985,8 @@ body {
     var labels = {
       ideal: 'Betalen met iDEAL',
       bancontact: 'Betalen met Bancontact',
-      klarna: 'Betalen met Klarna',
+      klarnapaylater: 'Betalen met Klarna',
+      creditcard: 'Betalen met Creditcard',
       paypal: 'Betalen met PayPal'
     };
     btnText.textContent = (labels[selectedMethod] || 'Bestelling afronden') + ' — ' + formatPrice(currentTotalPrice);
@@ -2791,7 +3035,11 @@ body {
 
   var emailField = document.getElementById('email');
   var emailSuggestion = document.getElementById('email-suggestion');
-  if (emailField && emailSuggestion) {
+  // Foxentry flag — als key is ingesteld, worden email/phone uitsluitend door Foxentry gevalideerd
+  var hasFoxentryKey = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
+
+  if (emailField && emailSuggestion && !hasFoxentryKey) {
+    // Alleen lokale typo-check als Foxentry NIET actief is
     emailField.addEventListener('blur', function() {
       var val = emailField.value.trim();
       var suggestion = checkEmailTypo(val);
@@ -2834,6 +3082,8 @@ body {
 
   if (phoneField && phonePreview) {
     phoneField.addEventListener('blur', function() {
+      // Als Foxentry actief is, GEEN lokale formatting of validatie — alles via Foxentry
+      if (hasFoxentryKey) return;
       var raw = phoneField.value.trim();
       if (!raw) { phonePreview.style.display = 'none'; return; }
       var country = countrySelect ? countrySelect.value : 'NL';
@@ -2849,6 +3099,27 @@ body {
     });
     phoneField.addEventListener('input', function() {
       phonePreview.style.display = 'none';
+    });
+  }
+
+  /* ─── FACTUURADRES (BILLING) — toggle ─── */
+  var billingCheckbox = document.getElementById('billing-checkbox');
+  var billingFields = document.getElementById('billing-fields');
+
+  if (billingCheckbox && billingFields) {
+    billingCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        billingFields.classList.add('is-open');
+      } else {
+        billingFields.classList.remove('is-open');
+        // Vymazat pole při odškrtnutí
+        document.getElementById('billing_first_name').value = '';
+        document.getElementById('billing_last_name').value = '';
+        document.getElementById('billing_address').value = '';
+        document.getElementById('billing_city').value = '';
+        document.getElementById('billing_postal_code').value = '';
+        document.getElementById('billing_country').value = 'NL';
+      }
     });
   }
 
@@ -2908,6 +3179,531 @@ body {
   document.getElementById('country').addEventListener('change', updateCompanyLabels);
   updateCompanyLabels();
 
+  /* ═══════════════════════════════════════════════════════════════════
+   *  FOXENTRY SMART VALIDATIE — adres autocomplete, e-mail, telefoon, bedrijf
+   *  Alleen actief als PROJECT_CONFIG.foxentryApiKey is ingesteld.
+   *  Werkt samen met bestaande validateField / checkEmailTypo / formatPhoneNumber.
+   * ═══════════════════════════════════════════════════════════════════ */
+  (function() {
+    var FOXENTRY_KEY = (typeof PROJECT_CONFIG !== 'undefined' && PROJECT_CONFIG.foxentryApiKey) || null;
+    if (!FOXENTRY_KEY) return; // Geen key → alles blijft bij de lokale validatie
+
+    // Markeer email en telefoon velden als Foxentry-managed (verbergt lokale .field-error via CSS)
+    var _emailEl = document.getElementById('email');
+    var _phoneEl = document.getElementById('phone');
+    if (_emailEl) _emailEl.classList.add('foxentry-managed');
+    if (_phoneEl) _phoneEl.classList.add('foxentry-managed');
+
+    var API_BASE = 'https://api.foxentry.com';
+
+    /* ─── Helper: Foxentry API fetch ─── */
+    function foxentryFetch(endpoint, body) {
+      // Foxentry API v2: alles zit in "request" object, inclusief client
+      body.client = {
+        country: (document.getElementById('country') || {}).value || 'NL'
+      };
+      return fetch(API_BASE + endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + FOXENTRY_KEY,
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ request: body })
+      }).then(function(res) { return res.json(); });
+    }
+
+    /* ─── Response helper: navigeer naar result data ─── */
+    function foxentryResult(resp) {
+      // Foxentry antwoord: { response: { result: {...}, resultCorrected: {...}, suggestions: [...] } }
+      var r = resp.response || resp;
+      return {
+        result: r.result || {},
+        corrected: r.resultCorrected || null,
+        suggestions: r.suggestions || [],
+        results: r.results || [] // voor search endpoints
+      };
+    }
+
+    /* ─── Debounce utility ─── */
+    function debounce(fn, ms) {
+      var timer;
+      return function() {
+        var ctx = this, args = arguments;
+        clearTimeout(timer);
+        timer = setTimeout(function() { fn.apply(ctx, args); }, ms);
+      };
+    }
+
+    /* ─── Spinner helpers ─── */
+    // Terwijl Foxentry bezig is, verbergen we de check/cross iconen
+    // en blokkeren we de lokale validateField van het instellen van valid/invalid.
+    // Op window zodat validateField() (buiten deze IIFE) het kan lezen.
+    window.__foxentryPending = window.__foxentryPending || {};
+
+    function showSpinner(field) {
+      var fg = field.closest('.form-group') || field.parentNode;
+      var sp = fg.querySelector('.foxentry-spinner');
+      if (!sp) {
+        sp = document.createElement('div');
+        sp.className = 'foxentry-spinner';
+        fg.appendChild(sp);
+      }
+      sp.style.display = 'block';
+      // Markeer veld als "Foxentry bezig" — verberg bestaande check/cross
+      if (field.id) window.__foxentryPending[field.id] = true;
+      field.classList.remove('valid', 'invalid');
+    }
+    function hideSpinner(field) {
+      var fg = field.closest('.form-group') || field.parentNode;
+      var sp = fg.querySelector('.foxentry-spinner');
+      if (sp) sp.style.display = 'none';
+      if (field.id) delete window.__foxentryPending[field.id];
+    }
+
+    /* ─── Dropdown helpers ─── */
+    function showDropdown(dropdownEl, items, onSelect) {
+      dropdownEl.innerHTML = '';
+      if (!items || items.length === 0) {
+        dropdownEl.classList.remove('is-open');
+        return;
+      }
+      items.forEach(function(item, idx) {
+        var div = document.createElement('div');
+        div.className = 'foxentry-item';
+        div.innerHTML = item.html;
+        div.addEventListener('mousedown', function(e) {
+          e.preventDefault(); // Voorkom blur voordat select plaatsvindt
+          onSelect(item.data, idx);
+          dropdownEl.classList.remove('is-open');
+        });
+        dropdownEl.appendChild(div);
+      });
+      dropdownEl.classList.add('is-open');
+    }
+    function hideDropdown(dropdownEl) {
+      if (dropdownEl) dropdownEl.classList.remove('is-open');
+    }
+
+    /* ════════════════════════════════════════
+     *  1. ADRES AUTOCOMPLETE
+     * ════════════════════════════════════════ */
+    var addrField = document.getElementById('address');
+    var addrDropdown = document.getElementById('foxentry-address-dropdown');
+    var cityField = document.getElementById('city');
+    var postalField = document.getElementById('postal_code');
+
+    if (addrField && addrDropdown) {
+      var addrSelectedFromDropdown = false;
+
+      addrField.addEventListener('input', debounce(function() {
+        addrSelectedFromDropdown = false;
+        var query = addrField.value.trim();
+        if (query.length < 3) { hideDropdown(addrDropdown); return; }
+
+        showSpinner(addrField);
+        foxentryFetch('/location/search', {
+          query: { type: 'streetWithNumber', value: query },
+          options: { resultsLimit: 6 }
+        })
+        .then(function(resp) {
+          hideSpinner(addrField);
+          var fx = foxentryResult(resp);
+          var results = fx.results || [];
+
+          var items = [];
+          results.forEach(function(r) {
+            var d = r.data || r;
+            if (!d || !d.streetWithNumber) return;
+            var streetNum = d.streetWithNumber;
+            var city = d.city || '';
+            var zip = d.zip || '';
+            items.push({
+              html: '<strong>' + streetNum + '</strong><small>' + zip + ' ' + city + '</small>',
+              data: { street: streetNum, city: city, zip: zip }
+            });
+          });
+
+          showDropdown(addrDropdown, items, function(data) {
+            addrField.value = data.street;
+            if (cityField && data.city) cityField.value = data.city;
+            if (postalField && data.zip) postalField.value = data.zip;
+            addrSelectedFromDropdown = true;
+            // Trigger de float-label en validatie
+            [addrField, cityField, postalField].forEach(function(f) {
+              if (f && f.value) {
+                f.closest('.float-field').classList.add('has-value');
+                validateField(f);
+              }
+            });
+          });
+        })
+        .catch(function() {
+          hideSpinner(addrField);
+          hideDropdown(addrDropdown);
+        });
+      }, 300));
+
+      addrField.addEventListener('blur', function() {
+        // Sluit dropdown na korte delay (laat mousedown event eerst afhandelen)
+        setTimeout(function() { hideDropdown(addrDropdown); }, 200);
+      });
+      addrField.addEventListener('focus', function() {
+        // Heropen als er items zijn
+        if (addrDropdown.children.length > 0 && !addrSelectedFromDropdown) {
+          addrDropdown.classList.add('is-open');
+        }
+      });
+    }
+
+    /* ════════════════════════════════════════
+     *  2a. E-MAIL DOMAIN AUTOCOMPLETE (/email/search)
+     *  Toont dropdown met populaire domeinen na @ (debounce 250ms)
+     * ════════════════════════════════════════ */
+    var foxEmailField = document.getElementById('email');
+    var foxEmailSuggestion = document.getElementById('email-suggestion');
+    var foxEmailDropdown = document.getElementById('foxentry-email-dropdown');
+
+    if (foxEmailField && foxEmailDropdown) {
+      foxEmailField.addEventListener('input', debounce(function() {
+        var val = foxEmailField.value.trim();
+        var atIdx = val.indexOf('@');
+        // Alleen zoeken als er een @ is + minstens 1 teken erna
+        if (atIdx === -1 || atIdx === val.length - 1) {
+          hideDropdown(foxEmailDropdown);
+          return;
+        }
+        var afterAt = val.substring(atIdx + 1);
+        // Stop met zoeken als domein al compleet lijkt (bevat een punt met tekst erna)
+        if (/\.\w{2,}$/.test(afterAt)) {
+          hideDropdown(foxEmailDropdown);
+          return;
+        }
+
+        foxentryFetch('/email/search', {
+          query: { email: val }
+        })
+        .then(function(resp) {
+          var fx = foxentryResult(resp);
+          var results = fx.results || [];
+          var items = [];
+          results.forEach(function(r) {
+            var d = r.data || r;
+            if (!d || !d.email) return;
+            items.push({
+              html: '<strong>' + d.email + '</strong>',
+              data: { email: d.email }
+            });
+          });
+          showDropdown(foxEmailDropdown, items, function(data) {
+            foxEmailField.value = data.email;
+            hideDropdown(foxEmailDropdown);
+            // Trigger float-label
+            var ff = foxEmailField.closest('.float-field');
+            if (ff) ff.classList.add('has-value');
+            // Valideer het geselecteerde email
+            foxEmailField.dispatchEvent(new Event('blur'));
+          });
+        })
+        .catch(function() {
+          hideDropdown(foxEmailDropdown);
+        });
+      }, 250));
+
+      // Sluit dropdown bij blur (met delay voor mousedown)
+      foxEmailField.addEventListener('blur', function() {
+        setTimeout(function() { hideDropdown(foxEmailDropdown); }, 200);
+      });
+      // Heropen bij focus als er items zijn
+      foxEmailField.addEventListener('focus', function() {
+        if (foxEmailDropdown.children.length > 0 && foxEmailField.value.indexOf('@') !== -1) {
+          var afterAt = foxEmailField.value.substring(foxEmailField.value.indexOf('@') + 1);
+          if (afterAt && !/\.\w{2,}$/.test(afterAt)) {
+            foxEmailDropdown.classList.add('is-open');
+          }
+        }
+      });
+    }
+
+    /* ════════════════════════════════════════
+     *  2b. E-MAIL VALIDATIE — basic + full proposal handling
+     *  Beslist op basis van proposal (niet alleen isValid)
+     * ════════════════════════════════════════ */
+    if (foxEmailField) {
+      foxEmailField.addEventListener('blur', function() {
+        var val = foxEmailField.value.trim();
+        if (!val || val.indexOf('@') === -1) return;
+
+        showSpinner(foxEmailField);
+        foxentryFetch('/email/validate', {
+          query: { email: val },
+          options: { validationType: 'basic' }
+        })
+        .then(function(resp) {
+          hideSpinner(foxEmailField);
+          var fx = foxentryResult(resp);
+          var proposal = fx.result.proposal || '';
+          var correctedEmail = (fx.corrected && fx.corrected.data && fx.corrected.data.email) || null;
+          var suggestions = fx.suggestions || [];
+
+          // Verberg eerdere suggestie
+          if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
+
+          switch (proposal) {
+            case 'valid':
+              // Email is OK
+              foxEmailField.classList.add('valid');
+              foxEmailField.classList.remove('invalid');
+              break;
+
+            case 'invalid':
+              // Email is fout, geen correctie beschikbaar
+              foxEmailField.classList.add('invalid');
+              foxEmailField.classList.remove('valid');
+              break;
+
+            case 'invalidWithCorrection':
+              // Fout maar Foxentry kent de correctie (bv. gamil.com → gmail.com)
+              foxEmailField.classList.add('invalid');
+              foxEmailField.classList.remove('valid');
+              if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
+                foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + correctedEmail + '</strong>? Klik om te corrigeren.';
+                foxEmailSuggestion.style.display = 'block';
+                foxEmailSuggestion.onclick = function() {
+                  foxEmailField.value = correctedEmail;
+                  foxEmailSuggestion.style.display = 'none';
+                  foxEmailField.classList.add('valid');
+                  foxEmailField.classList.remove('invalid');
+                };
+              }
+              break;
+
+            case 'invalidWithSuggestions':
+              // Fout, meerdere alternatieven beschikbaar
+              foxEmailField.classList.add('invalid');
+              foxEmailField.classList.remove('valid');
+              if (suggestions.length > 0 && foxEmailSuggestion) {
+                var sugHtml = 'Bedoelde je: ';
+                suggestions.forEach(function(s, idx) {
+                  var sEmail = (s.data && s.data.email) || '';
+                  if (!sEmail) return;
+                  if (idx > 0) sugHtml += ' of ';
+                  sugHtml += '<strong data-email="' + sEmail + '">' + sEmail + '</strong>';
+                });
+                sugHtml += '? Klik om te corrigeren.';
+                foxEmailSuggestion.innerHTML = sugHtml;
+                foxEmailSuggestion.style.display = 'block';
+                foxEmailSuggestion.onclick = function(e) {
+                  var target = e.target.closest('[data-email]');
+                  if (target) {
+                    foxEmailField.value = target.getAttribute('data-email');
+                    foxEmailSuggestion.style.display = 'none';
+                    foxEmailField.classList.add('valid');
+                    foxEmailField.classList.remove('invalid');
+                  }
+                };
+              } else if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
+                // Fallback naar corrected als suggestions leeg
+                foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + correctedEmail + '</strong>? Klik om te corrigeren.';
+                foxEmailSuggestion.style.display = 'block';
+                foxEmailSuggestion.onclick = function() {
+                  foxEmailField.value = correctedEmail;
+                  foxEmailSuggestion.style.display = 'none';
+                  foxEmailField.classList.add('valid');
+                  foxEmailField.classList.remove('invalid');
+                };
+              }
+              break;
+
+            case 'validWithSuggestion':
+              // Technisch geldig maar betere optie beschikbaar (bv. gmai.com → gmail.com)
+              foxEmailField.classList.add('valid');
+              foxEmailField.classList.remove('invalid');
+              var betterEmail = correctedEmail || (suggestions[0] && suggestions[0].data && suggestions[0].data.email) || null;
+              if (betterEmail && betterEmail !== val && foxEmailSuggestion) {
+                foxEmailSuggestion.innerHTML = 'Bedoelde je misschien <strong>' + betterEmail + '</strong>? Klik om te corrigeren.';
+                foxEmailSuggestion.style.display = 'block';
+                foxEmailSuggestion.onclick = function() {
+                  foxEmailField.value = betterEmail;
+                  foxEmailSuggestion.style.display = 'none';
+                };
+              }
+              break;
+
+            default:
+              // Onbekend proposal — val terug op isValid
+              if (fx.result.isValid === true) {
+                foxEmailField.classList.add('valid');
+                foxEmailField.classList.remove('invalid');
+              } else {
+                foxEmailField.classList.add('invalid');
+                foxEmailField.classList.remove('valid');
+              }
+              break;
+          }
+        })
+        .catch(function() {
+          hideSpinner(foxEmailField);
+          // Fallback naar lokale validatie bij API error
+          var localSuggestion = checkEmailTypo(val);
+          if (localSuggestion && foxEmailSuggestion) {
+            foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + localSuggestion + '</strong>? Klik om te corrigeren.';
+            foxEmailSuggestion.style.display = 'block';
+            foxEmailSuggestion.onclick = function() {
+              foxEmailField.value = localSuggestion;
+              foxEmailSuggestion.style.display = 'none';
+              validateField(foxEmailField);
+            };
+          }
+          validateField(foxEmailField);
+        });
+      });
+    }
+
+    /* ════════════════════════════════════════
+     *  3. TELEFOON VALIDATIE (versterkt bestaande formatting)
+     * ════════════════════════════════════════ */
+    var foxPhoneField = document.getElementById('phone');
+    var foxPhonePreview = document.getElementById('phone-preview');
+
+    if (foxPhoneField) {
+      // Foxentry handelt ALLE telefoonvalidatie + formatting af
+      foxPhoneField.addEventListener('blur', function() {
+        var val = foxPhoneField.value.trim();
+        if (!val || val.length < 5) return;
+
+        // Voeg landprefix toe als die ontbreekt (bijv. 0612345678 → +31612345678)
+        var countryEl = document.getElementById('country');
+        var cc = countryEl ? countryEl.value : 'NL';
+        var prefixMap = { NL: '+31', BE: '+32' };
+        var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
+        if (!cleaned.startsWith('+') && !cleaned.startsWith('00')) {
+          if (cleaned.startsWith('0')) cleaned = (prefixMap[cc] || '+31') + cleaned.substring(1);
+          else if (/^\d{7,}$/.test(cleaned)) cleaned = (prefixMap[cc] || '+31') + cleaned;
+        } else if (cleaned.startsWith('00')) {
+          cleaned = '+' + cleaned.substring(2);
+        }
+
+        showSpinner(foxPhoneField);
+        foxentryFetch('/phone/validate', {
+          query: { numberWithPrefix: cleaned }
+        })
+          .then(function(resp) {
+            hideSpinner(foxPhoneField);
+            var fx = foxentryResult(resp);
+            var isValid = fx.result.isValid === true;
+            // Gebruik geformatteerd nummer van Foxentry
+            var data = fx.result.data || {};
+            var fmt = data.format || {};
+            if (fmt.internationalFormatted) {
+              foxPhoneField.value = fmt.internationalFormatted;
+            } else if (data.numberWithPrefix) {
+              foxPhoneField.value = data.numberWithPrefix;
+            }
+
+            if (isValid) {
+              foxPhoneField.classList.add('valid');
+              foxPhoneField.classList.remove('invalid');
+              if (foxPhonePreview) {
+                foxPhonePreview.style.color = '';
+                foxPhonePreview.textContent = '\u2713 Geldig telefoonnummer';
+                foxPhonePreview.style.display = 'block';
+              }
+            } else {
+              foxPhoneField.classList.add('invalid');
+              foxPhoneField.classList.remove('valid');
+              if (foxPhonePreview) {
+                foxPhonePreview.textContent = '\u2717 Controleer je telefoonnummer';
+                foxPhonePreview.style.display = 'block';
+                foxPhonePreview.style.color = 'var(--error)';
+              }
+            }
+          })
+          .catch(function() {
+            hideSpinner(foxPhoneField);
+          });
+      });
+    }
+
+    /* ════════════════════════════════════════
+     *  4. BEDRIJF AUTOCOMPLETE (KVK / Ondernemingsnummer)
+     * ════════════════════════════════════════ */
+    var companyInput = document.getElementById('company_name');
+    var companyDropdown = document.getElementById('foxentry-company-dropdown');
+    var kvkInput = document.getElementById('kvk_number');
+    var vatInput = document.getElementById('vat_number');
+
+    if (companyInput && companyDropdown) {
+      companyInput.addEventListener('input', debounce(function() {
+        var query = companyInput.value.trim();
+        if (query.length < 2) { hideDropdown(companyDropdown); return; }
+
+        showSpinner(companyInput);
+        foxentryFetch('/company/search', {
+          query: { type: 'name', value: query },
+          options: { resultsLimit: 6 }
+        })
+        .then(function(resp) {
+          hideSpinner(companyInput);
+          var fx = foxentryResult(resp);
+          var results = fx.results || [];
+
+          var items = [];
+          results.forEach(function(r) {
+            var d = r.data || r;
+            if (!d || !d.name) return;
+            var name = d.name || '';
+            var regNo = d.registrationNumber || '';
+            var vatNo = d.vatNumber || '';
+            var addr = d.address && d.address.data;
+            var city = (addr && addr.city) || '';
+            items.push({
+              html: '<strong>' + name + '</strong>' +
+                    (regNo ? '<small>KVK: ' + regNo + '</small>' : '') +
+                    (city ? '<small>' + city + '</small>' : ''),
+              data: { name: name, regNo: regNo, vatNo: vatNo, city: city }
+            });
+          });
+
+          showDropdown(companyDropdown, items, function(data) {
+            companyInput.value = data.name;
+            if (kvkInput && data.regNo) kvkInput.value = data.regNo;
+            if (vatInput && data.vatNo) vatInput.value = data.vatNo;
+            // Trigger float-labels
+            [companyInput, kvkInput, vatInput].forEach(function(f) {
+              if (f && f.value) {
+                var fl = f.closest('.float-field');
+                if (fl) fl.classList.add('has-value');
+              }
+            });
+          });
+        })
+        .catch(function() {
+          hideSpinner(companyInput);
+          hideDropdown(companyDropdown);
+        });
+      }, 300));
+
+      companyInput.addEventListener('blur', function() {
+        setTimeout(function() { hideDropdown(companyDropdown); }, 200);
+      });
+      companyInput.addEventListener('focus', function() {
+        if (companyDropdown.children.length > 0) {
+          companyDropdown.classList.add('is-open');
+        }
+      });
+    }
+
+    /* ─── Sluit alle dropdowns bij klik buiten ─── */
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.foxentry-dropdown') && !e.target.closest('.form-group')) {
+        hideDropdown(addrDropdown);
+        hideDropdown(companyDropdown);
+      }
+    });
+
+  })();
+
   /* ─── INLINE VALIDATIE ─── */
   var fields = document.querySelectorAll('#checkout-form input[required]');
   fields.forEach(function(field) {
@@ -2922,6 +3718,17 @@ body {
   });
 
   function validateField(field) {
+    // Als Foxentry bezig is met dit veld, sla lokale validatie over
+    if (window.__foxentryPending && window.__foxentryPending[field.id]) {
+      return true;
+    }
+    // Als Foxentry key actief is, email en telefoon worden UITSLUITEND door Foxentry gevalideerd
+    var _hasFox = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
+    if (_hasFox && (field.type === 'email' || field.type === 'tel')) {
+      // Behoud huidige valid/invalid status (gezet door Foxentry), niet overschrijven
+      return field.classList.contains('valid') || field.value.trim().length === 0;
+    }
+
     var value = field.value.trim();
     var isValid = false;
 
@@ -2971,9 +3778,56 @@ body {
     });
   }
 
+  /* ─── PAYMENT RETURN HANDLER ───
+   * When customer returns from Mollie after paying,
+   * URL has ?payment_return=1&cart_id=xxx
+   * We complete the cart and redirect to upsell/thank-you.
+   */
+  (function() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('payment_return') !== '1') return;
+
+    var cartId = params.get('cart_id');
+    if (!cartId) return;
+
+    // Show loading spinner (page was hidden by head script to prevent flash)
+    document.documentElement.style.visibility = 'visible';
+    document.documentElement.style.overflow = '';
+    document.body.style.background = '#f8f6f3';
+    var mainContent = document.querySelector('.checkout-form') || document.querySelector('.content');
+    if (mainContent) {
+      mainContent.innerHTML = '<div style="text-align:center;padding:80px 20px;"><div class="spinner" style="width:40px;height:40px;border:3px solid #eee;border-top:3px solid #333;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px;"></div><p style="font-size:18px;color:#333;">Betaling wordt verwerkt...</p><p style="font-size:14px;color:#888;">Even geduld alsjeblieft.</p></div>';
+    }
+
+    // Complete the cart via Medusa
+    medusaFetch('/store/carts/' + cartId + '/complete', {
+      method: 'POST'
+    }).then(function(res) {
+      var order = res.order || res;
+      localStorage.setItem('medusa_order_id', order.id || '');
+      localStorage.setItem('medusa_order_display_id', order.display_id || '');
+
+      // Redirect to upsell or thank-you
+      var orderBump = localStorage.getItem('medusa_order_bump') === 'true';
+      if (PROJECT_CONFIG.upsellEnabled === false || orderBump) {
+        if (orderBump) localStorage.setItem('medusa_upsell_purchased', 'true');
+        window.location.href = PROJECT_CONFIG.thankYouUrl;
+      } else {
+        window.location.href = PROJECT_CONFIG.upsellUrl;
+      }
+    }).catch(function(err) {
+      console.error('[Payment Return] Cart completion failed:', err);
+      if (mainContent) {
+        mainContent.innerHTML = '<div style="text-align:center;padding:80px 20px;"><p style="font-size:18px;color:#C0392B;">Er ging iets mis bij het verwerken van je betaling.</p><p style="font-size:14px;color:#666;margin-top:10px;">' + (err.message || 'Probeer het opnieuw of neem contact met ons op.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;">Opnieuw proberen</a></div>';
+      }
+    });
+
+    return; // Stop further checkout initialization
+  })();
+
   /* ─── OBRÁZEK PRODUKTU ─── */
   if (PROJECT_CONFIG.mainProduct.thumbnail) {
-    var thumbUrl = MEDUSA_URL + PROJECT_CONFIG.mainProduct.thumbnail;
+    var thumbUrl = PROJECT_CONFIG.mainProduct.thumbnail.indexOf('http') === 0 ? PROJECT_CONFIG.mainProduct.thumbnail : MEDUSA_URL + PROJECT_CONFIG.mainProduct.thumbnail;
     var imgHtml = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
     var desktopImg = document.getElementById('desktop-product-img');
     if (desktopImg) desktopImg.innerHTML = imgHtml;
@@ -2992,8 +3846,10 @@ body {
   var promoCodeTag = document.getElementById('promo-code-tag');
   var promoRemove = document.getElementById('promo-remove');
 
-  // Stav: uložený promo kód (aplikuje se při submitu na cart)
+  // Stav: uložený promo kód + sdílený cart pro promo validaci
   var savedPromoCode = '';
+  var promoAppliedToCart = false;
+  var promoCartId = null; // Cart vytvořený při validaci promo kódu — sdílený se submitem
 
   if (promoToggle) {
     promoToggle.addEventListener('click', function() {
@@ -3017,16 +3873,65 @@ body {
         promoMessage.className = 'promo-message error';
         return;
       }
-      // Uložit kód (validace proběhne při submitu na Medusa API)
-      savedPromoCode = code;
-      // Zobrazit jako "připravený k aplikaci"
-      promoCodeTag.textContent = code;
-      promoApplied.classList.add('is-visible');
-      promoForm.classList.remove('is-open');
-      promoToggle.classList.remove('is-open');
-      promoToggle.style.display = 'none';
+      // Disable button + loading
+      promoApplyBtn.disabled = true;
+      promoApplyBtn.textContent = 'Controleren...';
       promoMessage.className = 'promo-message';
-      promoInput.value = '';
+
+      // Stap 1: Cart aanmaken (als die nog niet bestaat)
+      var cartPromise;
+      if (promoCartId) {
+        cartPromise = Promise.resolve(promoCartId);
+      } else {
+        cartPromise = medusaFetch('/store/carts', {
+          method: 'POST',
+          body: JSON.stringify({ region_id: currentRegionId })
+        }).then(function(res) {
+          promoCartId = res.cart.id;
+          // Voeg hoofdproduct toe zodat Medusa promotions kan evalueren
+          return medusaFetch('/store/carts/' + promoCartId + '/line-items', {
+            method: 'POST',
+            body: JSON.stringify({ variant_id: VARIANT_ID, quantity: selectedBundleQty })
+          }).then(function() { return promoCartId; });
+        });
+      }
+
+      // Stap 2: Promo code toepassen via Medusa
+      cartPromise.then(function(cartId) {
+        return medusaFetch('/store/carts/' + cartId + '/promotions', {
+          method: 'POST',
+          body: JSON.stringify({ promo_codes: [code] })
+        });
+      })
+      .then(function(promoRes) {
+        // Succes — code is geldig
+        savedPromoCode = code;
+        promoAppliedToCart = true;
+        promoCodeTag.textContent = code;
+        promoApplied.classList.add('is-visible');
+        promoForm.classList.remove('is-open');
+        promoToggle.classList.remove('is-open');
+        promoToggle.style.display = 'none';
+        promoMessage.className = 'promo-message';
+        promoInput.value = '';
+        // Update order summary met korting
+        if (promoRes && promoRes.cart) {
+          updateOrderSummary(promoRes.cart);
+        }
+      })
+      .catch(function(err) {
+        // Fout — code is ongeldig
+        console.warn('Promo code geweigerd:', err.message || err);
+        promoMessage.textContent = 'Ongeldige kortingscode';
+        promoMessage.className = 'promo-message error';
+        savedPromoCode = '';
+        promoAppliedToCart = false;
+      })
+      .then(function() {
+        // Reset button
+        promoApplyBtn.disabled = false;
+        promoApplyBtn.textContent = 'Toepassen';
+      });
     });
   }
 
@@ -3042,10 +3947,21 @@ body {
 
   if (promoRemove) {
     promoRemove.addEventListener('click', function() {
+      var removedCode = savedPromoCode;
       savedPromoCode = '';
+      promoAppliedToCart = false;
       promoApplied.classList.remove('is-visible');
       promoToggle.style.display = '';
       promoMessage.className = 'promo-message';
+      // Verwijder promo van cart als die bestaat
+      if (promoCartId && removedCode) {
+        medusaFetch('/store/carts/' + promoCartId + '/promotions', {
+          method: 'DELETE',
+          body: JSON.stringify({ promo_codes: [removedCode] })
+        }).then(function(res) {
+          if (res && res.cart) updateOrderSummary(res.cart);
+        }).catch(function() {});
+      }
       // Verberg korting regel in samenvatting
       var discountEl = document.getElementById('summary-discount');
       if (discountEl) discountEl.style.display = 'none';
@@ -3139,20 +4055,65 @@ body {
       localStorage.removeItem('medusa_company');
     }
 
+    // ─── Factuuradres (billing address) ───
+    var isBillingDifferent = document.getElementById('billing-checkbox').checked;
+    if (isBillingDifferent) {
+      // Gebruiker heeft een ander factuuradres opgegeven
+      customerData.billing_address = {
+        first_name: document.getElementById('billing_first_name').value.trim() || customerData.shipping_address.first_name,
+        last_name: document.getElementById('billing_last_name').value.trim() || customerData.shipping_address.last_name,
+        address_1: document.getElementById('billing_address').value.trim() || customerData.shipping_address.address_1,
+        city: document.getElementById('billing_city').value.trim() || customerData.shipping_address.city,
+        postal_code: document.getElementById('billing_postal_code').value.trim() || customerData.shipping_address.postal_code,
+        country_code: document.getElementById('billing_country').value.toLowerCase(),
+        phone: customerData.shipping_address.phone,
+      };
+      // B2B: company toevoegen aan billing address
+      if (isCompany && companyName) {
+        customerData.billing_address.company = companyName;
+      }
+    } else {
+      // Factuuradres = verzendadres (kopie)
+      customerData.billing_address = Object.assign({}, customerData.shipping_address);
+    }
+
     // ─── Bundle + Order Bump stav v momentě odeslání ───
     var checkoutBundleQty = selectedBundleQty;
     var checkoutBundlePrice = selectedBundlePrice;
     var checkoutOrderBump = orderBumpActive;
     var checkoutTotal = getCurrentTotal();
 
-    // Stap 1: Cart aanmaken
-    medusaFetch('/store/carts', {
-      method: 'POST',
-      body: JSON.stringify({ region_id: currentRegionId })
-    })
-    .then(function(res) {
-      var cartId = res.cart.id;
+    // Stap 1: Cart aanmaken of hergebruiken (als promo code al een cart heeft aangemaakt)
+    var cartStep;
+    if (promoCartId) {
+      // Cart bestaat al (aangemaakt bij promo code validatie)
+      // Verwijder bestaande line items en voeg opnieuw toe (bundle/qty kan veranderd zijn)
+      cartStep = medusaFetch('/store/carts/' + promoCartId, { method: 'GET' })
+        .then(function(cartRes) {
+          var cart = cartRes.cart;
+          // Verwijder alle bestaande line items
+          var deletePromises = (cart.items || []).map(function(item) {
+            return medusaFetch('/store/carts/' + promoCartId + '/line-items/' + item.id, { method: 'DELETE' });
+          });
+          return Promise.all(deletePromises).then(function() { return promoCartId; });
+        })
+        .catch(function() {
+          // Cart ophalen mislukt — maak een nieuwe aan
+          promoCartId = null;
+          return medusaFetch('/store/carts', {
+            method: 'POST',
+            body: JSON.stringify({ region_id: currentRegionId })
+          }).then(function(res) { return res.cart.id; });
+        });
+    } else {
+      cartStep = medusaFetch('/store/carts', {
+        method: 'POST',
+        body: JSON.stringify({ region_id: currentRegionId })
+      }).then(function(res) { return res.cart.id; });
+    }
 
+    cartStep
+    .then(function(cartId) {
       // Stap 2a: Hoofdproduct toevoegen via bundle endpoint (custom pricing)
       // Uses /store/carts/{id}/line-items-bundle which applies bundle discount server-side
       return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
@@ -3182,27 +4143,34 @@ body {
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
-      // Stap 3a: Promo kód aplikovat (pokud existuje)
+      // Stap 3a: Promo code toepassen via Medusa Promotions API (opnieuw als cart hergebruikt wordt)
       if (savedPromoCode) {
         return medusaFetch('/store/carts/' + cartId + '/promotions', {
           method: 'POST',
           body: JSON.stringify({ promo_codes: [savedPromoCode] })
         }).then(function(promoRes) {
-          console.log('Promo kód aplikován:', savedPromoCode);
-          // Aktualizuj order summary s discount daty
+          console.log('Promo code toegepast via Medusa:', savedPromoCode);
+          promoAppliedToCart = true;
           if (promoRes && promoRes.cart) {
             updateOrderSummary(promoRes.cart);
           }
           return cartId;
         }).catch(function(err) {
-          // Pokud promo kód selže — zobraz varování ale pokračuj
-          console.warn('Promo kód selhal:', err.message || err);
-          var promoMsg = document.getElementById('promo-message');
-          if (promoMsg) {
-            promoMsg.textContent = 'Kortingscode niet geldig';
-            promoMsg.className = 'promo-message error';
-          }
+          // Medusa weigert de code — toon fout, verberg badge, stop NIET de bestelling
+          console.warn('Promo code geweigerd door Medusa:', err.message || err);
           savedPromoCode = '';
+          promoAppliedToCart = false;
+          // Toon foutmelding
+          if (promoMessage) {
+            promoMessage.textContent = 'Ongeldige kortingscode';
+            promoMessage.className = 'promo-message error';
+          }
+          // Verberg badge, toon toggle weer
+          promoApplied.classList.remove('is-visible');
+          promoToggle.style.display = '';
+          // Verberg korting in samenvatting
+          var discountEl = document.getElementById('summary-discount');
+          if (discountEl) discountEl.style.display = 'none';
           return cartId;
         });
       }
@@ -3230,22 +4198,49 @@ body {
     })
     .then(function(cartId) {
       // Stap 4: Payment — Medusa v2 Payment Collections flow
-      var USE_TEST_MODE = true; // ← Přepni na false pro produkci
+      var USE_TEST_MODE = false; // Mollie live integration
 
       var providerId;
       var sessionData = {};
       if (USE_TEST_MODE) {
         providerId = 'pp_system_default';
       } else {
-        providerId = selectedProvider === 'mollie' ? 'pp_mollie_mollie' : 'pp_paypal_paypal';
-        if (selectedProvider === 'mollie') {
-          sessionData = { method: selectedMethod };
-        }
+        // All payment methods (iDEAL, Bancontact, credit card, PayPal, Klarna)
+        // go through the Mollie payment provider
+        providerId = 'pp_mollie_mollie';
+        sessionData = {
+          method: selectedMethod,
+          return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
+          // Pass addresses for Klarna (requires billing address via Mollie Orders API)
+          billing_address: customerData.billing_address,
+          shipping_address: customerData.shipping_address,
+          email: customerData.email,
+          // Pass amount info for Klarna order lines
+          amount: checkoutTotal,
+          currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
+        };
       }
 
-      return medusaFetch('/store/payment-collections', {
-        method: 'POST',
-        body: JSON.stringify({ cart_id: cartId })
+      // For credit card: tokenize card data first via Mollie Components
+      var tokenPromise;
+      if (!USE_TEST_MODE && selectedMethod === 'creditcard' && mollieInstance) {
+        tokenPromise = mollieInstance.createToken().then(function(tokenResult) {
+          if (tokenResult.error) {
+            throw new Error(tokenResult.error.message || 'Creditcard verificatie mislukt');
+          }
+          sessionData.cardToken = tokenResult.token;
+          console.log('[Mollie Components] Token created');
+          return cartId;
+        });
+      } else {
+        tokenPromise = Promise.resolve(cartId);
+      }
+
+      return tokenPromise.then(function() {
+        return medusaFetch('/store/payment-collections', {
+          method: 'POST',
+          body: JSON.stringify({ cart_id: cartId })
+        });
       }).then(function(pcRes) {
         var paymentCollectionId = pcRes.payment_collection.id;
         var sessionBody = { provider_id: providerId };
@@ -3273,7 +4268,7 @@ body {
         country_code: customerData.shipping_address.country_code,
         phone: customerData.shipping_address.phone,
       }));
-      localStorage.setItem('medusa_payment_provider', result.testMode ? 'pp_system_default' : (selectedProvider === 'mollie' ? 'pp_mollie_mollie' : 'pp_paypal_paypal'));
+      localStorage.setItem('medusa_payment_provider', result.testMode ? 'pp_system_default' : 'pp_mollie_mollie');
 
       // Uložit bundle + order bump info pro thank-you stránku
       localStorage.setItem('medusa_bundle_qty', checkoutBundleQty);
@@ -3331,6 +4326,26 @@ body {
         var lastSession = sessions[sessions.length - 1] || {};
         var providerData = lastSession.data || {};
         var redirectUrl = providerData.checkoutUrl || providerData.approvalUrl;
+
+        // Credit card without 3DS: payment already completed, complete cart directly
+        if (!redirectUrl && selectedMethod === 'creditcard' && providerData.status === 'paid') {
+          return medusaFetch('/store/carts/' + result.cartId + '/complete', {
+            method: 'POST'
+          }).then(function(completeRes) {
+            var order = completeRes.order || completeRes;
+            localStorage.setItem('medusa_order_id', order.id || '');
+            localStorage.setItem('medusa_order_display_id', order.display_id || '');
+            if (PROJECT_CONFIG.upsellEnabled === false) {
+              window.location.href = PROJECT_CONFIG.thankYouUrl;
+            } else if (checkoutOrderBump) {
+              localStorage.setItem('medusa_upsell_purchased', 'true');
+              window.location.href = PROJECT_CONFIG.thankYouUrl;
+            } else {
+              window.location.href = PROJECT_CONFIG.upsellUrl;
+            }
+          });
+        }
+
         if (redirectUrl) {
           window.location.href = redirectUrl;
         } else {
@@ -3450,13 +4465,15 @@ body {
         return Promise.all(lineItemPromises).then(function() { return cartId; });
       })
       .then(function(cartId) {
-        // 4. Aplikuj promo kód pokud existuje
-        if (typeof savedPromoCode !== 'undefined' && savedPromoCode) {
+        // 4. Promo code toepassen (als nog niet toegepast via Medusa)
+        if (typeof savedPromoCode !== 'undefined' && savedPromoCode && !promoAppliedToCart) {
           return medusaFetch('/store/carts/' + cartId + '/promotions', {
             method: 'POST',
             body: JSON.stringify({ promo_codes: [savedPromoCode] })
-          }).then(function() { return cartId; })
-            .catch(function() { return cartId; }); // non-blocking
+          }).then(function() {
+            promoAppliedToCart = true;
+            return cartId;
+          }).catch(function() { return cartId; }); // non-blocking
         }
         return cartId;
       })
@@ -3465,7 +4482,7 @@ body {
         return medusaFetch('/store/carts/' + cartId + '/payment-sessions', {
           method: 'POST',
           body: JSON.stringify({
-            provider_id: PROJECT_CONFIG.paymentProviders.paypal || 'pp_paypal_paypal'
+            provider_id: 'pp_mollie_mollie'
           })
         }).then(function() { return cartId; });
       })

@@ -155,6 +155,84 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
         `[Mollie] Creating payment: method=${paymentMethod}, amount=${Number(amount).toFixed(2)} ${currency_code}, returnUrl=${returnUrl}`
       )
 
+      // ─── Klarna requires Mollie Orders API with billing address + order lines ───
+      const isKlarna = paymentMethod === "klarnapaylater" || paymentMethod === "klarnasliceit" || paymentMethod === "klarna"
+
+      if (isKlarna) {
+        // Build Mollie address from frontend-provided data
+        const billingAddr = data?.billing_address || data?.shipping_address || {}
+        const shippingAddr = data?.shipping_address || billingAddr
+        const email = data?.email || customer?.email || ""
+
+        const mollieAddress = (addr: any) => ({
+          givenName: addr.first_name || "",
+          familyName: addr.last_name || "",
+          email: email,
+          streetAndNumber: addr.address_1 || "",
+          postalCode: addr.postal_code || "",
+          city: addr.city || "",
+          country: (addr.country_code || "NL").toUpperCase(),
+          phone: addr.phone || "",
+          ...(addr.company ? { organizationName: addr.company } : {}),
+        })
+
+        const amountValue = Number(amount).toFixed(2)
+        const curr = currency_code.toUpperCase()
+
+        const orderData: any = {
+          amount: { value: amountValue, currency: curr },
+          orderNumber: `ORD-${Date.now()}`,
+          billingAddress: mollieAddress(billingAddr),
+          shippingAddress: mollieAddress(shippingAddr),
+          redirectUrl: returnUrl || `${backendUrl}/payment-return`,
+          webhookUrl: webhookUrl,
+          locale: "nl_NL",
+          method: paymentMethod,
+          metadata: {
+            customer_id: customer?.id,
+            customer_email: email,
+            session_id: data?.session_id,
+          },
+          lines: [{
+            type: "physical",
+            name: "Bestelling",
+            quantity: 1,
+            unitPrice: { value: amountValue, currency: curr },
+            totalAmount: { value: amountValue, currency: curr },
+            vatRate: "0.00",
+            vatAmount: { value: "0.00", currency: curr },
+          }],
+        }
+
+        const result = await client.createOrder(orderData)
+        if (!result.success) {
+          throw new MedusaError(
+            MedusaError.Types.UNEXPECTED_STATE,
+            result.error || "Failed to create Mollie order for Klarna"
+          )
+        }
+
+        const mollieOrder = result.data
+        const checkoutUrl = mollieOrder._links?.checkout?.href || null
+
+        this.logger_.info(
+          `[Mollie] Klarna order created: ${mollieOrder.id}, status: ${mollieOrder.status}, checkout: ${checkoutUrl || "none"}`
+        )
+
+        return {
+          id: mollieOrder.id,
+          data: {
+            mollieOrderId: mollieOrder.id,
+            status: mollieOrder.status,
+            method: paymentMethod,
+            checkoutUrl,
+            session_id: data?.session_id,
+            currency_code,
+          },
+        }
+      }
+
+      // ─── Standard payment methods (iDEAL, Bancontact, credit card, PayPal) ───
       // Build Mollie payment request — amount is already in major units
       const paymentData: any = {
         amount: {
