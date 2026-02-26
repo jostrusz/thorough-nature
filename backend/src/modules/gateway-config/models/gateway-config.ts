@@ -21,6 +21,8 @@ const GatewayConfig = model.define("gateway_config", {
   is_active: model.boolean().default(false),
   // Which sales channels this gateway applies to (JSON array of IDs)
   sales_channel_ids: model.json().nullable(),
+  // Statement descriptor (max 16 chars, A-Z 0-9 space dot hyphen)
+  statement_descriptor: model.text().nullable(),
   // Flexible metadata
   metadata: model.json().nullable(),
   // Payment methods (child relation)

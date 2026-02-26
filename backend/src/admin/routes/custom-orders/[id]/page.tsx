@@ -23,6 +23,7 @@ import { OrderDetailPayment } from "../../../components/orders/order-detail-paym
 import { OrderDetailTimeline } from "../../../components/orders/order-detail-timeline"
 import { OrderDetailCustomer } from "../../../components/orders/order-detail-customer"
 import { OrderDetailMetadata } from "../../../components/orders/order-detail-metadata"
+import { PaymentActivityLog } from "../../../components/orders/order-payment-activity"
 import { OrderNotesCard } from "../../../components/orders/order-notes-card"
 import { DeliveryBadge } from "../../../components/orders/order-badges"
 
@@ -212,7 +213,7 @@ const OrderDetailPage = () => {
   const createFakturoidInvoice = useCreateFakturoidInvoice()
 
   // Customer stats
-  const order = data?.order
+  const order = data?.order as any
   const { data: customerStats } = useCustomerStats(order?.email)
 
   // Modal states
@@ -466,6 +467,7 @@ const OrderDetailPage = () => {
             isLoading={createFulfillment.isPending}
           />
           <OrderDetailPayment order={order} />
+          <PaymentActivityLog order={order} />
           <OrderDetailTimeline
             order={order}
             onAddComment={handleAddComment}

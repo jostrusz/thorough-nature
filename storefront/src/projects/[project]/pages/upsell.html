@@ -1,0 +1,253 @@
+import { MedusaRequest, MedusaResponse } from "@medusajs/framework";
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
+
+export const POST = async (
+  req: MedusaRequest,
+  res: MedusaResponse
+) => {
+  try {
+    const { id } = req.params;
+    const { upsell_product_id, upsell_price } = req.body;
+
+    const queryModule = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+    const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER);
+
+    // Fetch order
+    const [orders] = await queryModule.graph({
+      entity: "orders",
+      fields: ["id", "metadata", "customer_id"],
+      filters: { id },
+    });
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    const order = orders[0];
+
+    // Verify upsell was actually completed
+    if (order.metadata?.upsell_status !== "completed") {
+      return res.status(400).json({
+        error: "Upsell payment not yet completed",
+      });
+    }
+
+    const upsellPaymentId = order.metadata?.upsell_payment_id;
+    const fakturoidInvoiceId = order.metadata?.fakturoid_invoice_id;
+    const quickbooksInvoiceId = order.metadata?.quickbooks_invoice_id;
+
+    // Handle Fakturoid invoice update
+    if (fakturoidInvoiceId) {
+      try {
+        const fakturoidClient = req.scope.resolve("fakturoidClient");
+
+        // Fetch current invoice
+        const invoice = await fakturoidClient.get(
+          `/accounts/${process.env.FAKTUROID_ACCOUNT_ID}/invoices/${fakturoidInvoiceId}.json`
+        );
+
+        // Add upsell line item
+        const lineItems = invoice.invoice.lines || [];
+        lineItems.push({
+          name: `Upsell Product: ${upsell_product_id}`,
+          quantity: 1,
+          unit_name: "ks",
+          unit_price: upsellPrice / 100, // Convert from cents
+        });
+
+        // Update invoice with new line item
+        await fakturoidClient.put(
+          `/accounts/${process.env.FAKTUROID_ACCOUNT_ID}/invoices/${fakturoidInvoiceId}.json`,
+          {
+            invoice: {
+              lines: lineItems,
+            },
+          }
+        );
+
+        logger.info("Fakturoid invoice line item added", {
+          order_id: id,
+          invoice_id: fakturoidInvoiceId,
+        });
+
+        // Record second payment
+        const paymentResponse = await fakturoidClient.post(
+          `/accounts/${process.env.FAKTUROID_ACCOUNT_ID}/invoices/${fakturoidInvoiceId}/payments.json`,
+          {
+            payment: {
+              paid_amount: upsellPrice / 100,
+              payment_type: determinePaymentType(order.metadata?.payment_provider),
+              memo: `Upsell payment: ${upsellPaymentId}`,
+            },
+          }
+        );
+
+        const paymentData = paymentResponse.payment || paymentResponse;
+
+        // Store both payment IDs in invoice note
+        const existingNote = invoice.invoice.note || "";
+        const updatedNote = `${existingNote}\n\nPayment 1: ${order.metadata?.payment_id}\nPayment 2 (Upsell): ${paymentData.id}`;
+
+        await fakturoidClient.put(
+          `/accounts/${process.env.FAKTUROID_ACCOUNT_ID}/invoices/${fakturoidInvoiceId}.json`,
+          {
+            invoice: {
+              note: updatedNote,
+            },
+          }
+        );
+
+        logger.info("Fakturoid upsell payment recorded", {
+          order_id: id,
+          invoice_id: fakturoidInvoiceId,
+          payment_id: paymentData.id,
+        });
+
+        order.metadata.fakturoid_upsell_payment_id = paymentData.id;
+      } catch (error) {
+        logger.error("Fakturoid upsell invoice update failed", {
+          order_id: id,
+          error: error.message,
+        });
+        return res.status(500).json({
+          error: "Failed to update Fakturoid invoice",
+          message: error.message,
+        });
+      }
+    }
+
+    // Handle QuickBooks invoice update
+    if (quickbooksInvoiceId) {
+      try {
+        const quickbooksClient = req.scope.resolve("quickbooksClient");
+
+        // Fetch current invoice
+        const invoice = await quickbooksClient.query(
+          `SELECT * FROM Invoice WHERE Id = '${quickbooksInvoiceId}'`
+        );
+
+        if (!invoice.QueryResponse.Invoice || invoice.QueryResponse.Invoice.length === 0) {
+          throw new Error("Invoice not found in QuickBooks");
+        }
+
+        const qbInvoice = invoice.QueryResponse.Invoice[0];
+
+        // Add upsell line item
+        const lineItems = qbInvoice.Line || [];
+        lineItems.push({
+          DetailType: "SalesItemLineDetail",
+          Description: `Upsell Product: ${upsell_product_id}`,
+          Amount: upsellPrice / 100,
+          SalesItemLineDetail: {
+            ItemRef: {
+              value: process.env.QB_UPSELL_ITEM_ID || "1",
+            },
+            Qty: 1,
+            UnitPrice: upsellPrice / 100,
+          },
+        });
+
+        // Update invoice
+        qbInvoice.Line = lineItems;
+        qbInvoice.SyncToken = (parseInt(qbInvoice.SyncToken) + 1).toString();
+
+        const updatedInvoice = await quickbooksClient.update("Invoice", qbInvoice);
+
+        logger.info("QuickBooks invoice updated", {
+          order_id: id,
+          invoice_id: quickbooksInvoiceId,
+        });
+
+        // Record payment via deposit
+        const depositPayload = {
+          Line: [
+            {
+              DetailType: "DepositLineDetail",
+              Amount: upsellPrice / 100,
+              DepositLineDetail: {
+                EntityRef: {
+                  value: qbInvoice.CustomerRef.value,
+                  type: "Customer",
+                },
+                AccountRef: {
+                  value: process.env.QB_DEPOSIT_ACCOUNT_ID,
+                },
+                PaymentMethodRef: {
+                  value: "1",
+                },
+              },
+            },
+          ],
+        };
+
+        const deposit = await quickbooksClient.create("Deposit", depositPayload);
+
+        logger.info("QuickBooks upsell payment recorded", {
+          order_id: id,
+          invoice_id: quickbooksInvoiceId,
+          deposit_id: deposit.Id,
+        });
+
+        order.metadata.quickbooks_upsell_deposit_id = deposit.Id;
+      } catch (error) {
+        logger.error("QuickBooks upsell invoice update failed", {
+          order_id: id,
+          error: error.message,
+        });
+        return res.status(500).json({
+          error: "Failed to update QuickBooks invoice",
+          message: error.message,
+        });
+      }
+    }
+
+    // Update order metadata with completion
+    order.metadata.upsell_invoice_updated = true;
+    order.metadata.upsell_invoice_updated_at = new Date().toISOString();
+
+    const orderService = req.scope.resolve("orderService");
+    await orderService.update(order.id, {
+      metadata: order.metadata,
+    });
+
+    logger.info("Upsell invoice processing completed", {
+      order_id: id,
+      fakturoid_invoice_id: fakturoidInvoiceId,
+      quickbooks_invoice_id: quickbooksInvoiceId,
+    });
+
+    return res.json({
+      success: true,
+      order_id: id,
+      fakturoid_updated: !!fakturoidInvoiceId,
+      quickbooks_updated: !!quickbooksInvoiceId,
+    });
+  } catch (error) {
+    const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER);
+    logger.error("Upsell invoice update error", error);
+    return res.status(500).json({
+      error: "Internal server error",
+      message: error.message,
+    });
+  }
+};
+
+// Helper to determine QuickBooks payment type
+function determinePaymentType(provider: string): string {
+  const paymentTypeMap: Record<string, string> = {
+    stripe: "Credit Card",
+    paypal: "PayPal",
+    apple_pay: "Digital Wallet",
+    google_pay: "Digital Wallet",
+    ideal: "Bank Transfer",
+    mollie_ideal: "Bank Transfer",
+    mollie_bancontact: "Bank Transfer",
+    sepa_direct_debit: "Bank Transfer",
+    przelewy24: "Online Banking",
+    klarna: "Payment Plan",
+    comgate: "Bank Transfer",
+    airwallex: "Card",
+  };
+
+  return paymentTypeMap[provider] || "Online Payment";
+}

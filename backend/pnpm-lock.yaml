@@ -56,6 +56,12 @@ importers:
       '@tanstack/react-query':
         specifier: 5.64.2
         version: 5.64.2(react@18.3.1)
+      axios:
+        specifier: ^1.13.5
+        version: 1.13.5
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       medusajs-launch-utils:
         specifier: 0.0.18
         version: 0.0.18
@@ -68,9 +74,15 @@ importers:
       resend:
         specifier: 4.0.1
         version: 4.0.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      stripe:
+        specifier: ^20.3.1
+        version: 20.3.1(@types/node@20.19.25)
       ulid:
         specifier: ^2.4.0
         version: 2.4.0
+      uuid:
+        specifier: ^13.0.0
+        version: 13.0.0
     devDependencies:
       '@medusajs/test-utils':
         specifier: 2.12.1
@@ -4403,6 +4415,9 @@ packages:
   axios@1.13.2:
     resolution: {integrity: sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==}
 
+  axios@1.13.5:
+    resolution: {integrity: sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==}
+
   babel-jest@29.7.0:
     resolution: {integrity: sha512-BrvGY3xZSwEcCzKvKsCi2GgHqDqsYkOP4/by5xCgIwGXQxIEh+8ew3gmrE1y7XRR6LHZIj6yLYnUi/mm2KXKBg==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -7280,6 +7295,15 @@ packages:
       '@types/node':
         optional: true
 
+  stripe@20.3.1:
+    resolution: {integrity: sha512-k990yOT5G5rhX3XluRPw5Y8RLdJDW4dzQ29wWT66piHrbnM2KyamJ1dKgPsw4HzGHRWjDiSSdcI2WdxQUPV3aQ==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@types/node': '>=16'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
   strnum@1.1.2:
     resolution: {integrity: sha512-vrN+B7DBIoTTZjnPNewwhx6cBA/H+IS7rfW68n7XxC1y7uoiGQBxaKzqucGUgavX15dJgiGztLJ8vxuEzwqBdA==}
 
@@ -7564,6 +7588,10 @@ packages:
   utils-merge@1.0.1:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
+
+  uuid@13.0.0:
+    resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
+    hasBin: true
 
   uuid@9.0.1:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
@@ -9869,7 +9897,7 @@ snapshots:
   '@medusajs/telemetry@2.12.1':
     dependencies:
       '@babel/runtime': 7.28.4
-      axios: 1.13.2
+      axios: 1.13.5
       axios-retry: 3.9.1
       boxen: 5.1.2
       ci-info: 3.9.0
@@ -9884,7 +9912,7 @@ snapshots:
     dependencies:
       '@medusajs/framework': 2.12.1(@medusajs/cli@2.12.1(@types/node@20.19.25))(@types/node@20.19.25)(ioredis@5.8.2)(vite@5.4.21(@types/node@20.19.25))
       '@types/express': 4.17.25
-      axios: 1.13.2
+      axios: 1.13.5
       express: 4.22.1
       get-port: 5.1.1
       ulid: 2.4.0
@@ -12661,7 +12689,7 @@ snapshots:
   '@sendgrid/client@8.1.6':
     dependencies:
       '@sendgrid/helpers': 8.0.0
-      axios: 1.13.2
+      axios: 1.13.5
     transitivePeerDependencies:
       - debug
 
@@ -13430,6 +13458,14 @@ snapshots:
       is-retry-allowed: 2.2.0
 
   axios@1.13.2:
+    dependencies:
+      follow-redirects: 1.15.11
+      form-data: 4.0.5
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
+  axios@1.13.5:
     dependencies:
       follow-redirects: 1.15.11
       form-data: 4.0.5
@@ -15469,7 +15505,7 @@ snapshots:
 
   medusajs-launch-utils@0.0.18:
     dependencies:
-      axios: 1.13.2
+      axios: 1.13.5
       dotenv: 10.0.0
       pg: 8.16.3
     transitivePeerDependencies:
@@ -16813,6 +16849,10 @@ snapshots:
     optionalDependencies:
       '@types/node': 20.19.25
 
+  stripe@20.3.1(@types/node@20.19.25):
+    optionalDependencies:
+      '@types/node': 20.19.25
+
   strnum@1.1.2: {}
 
   strnum@2.1.1: {}
@@ -17087,6 +17127,8 @@ snapshots:
       which-typed-array: 1.1.19
 
   utils-merge@1.0.1: {}
+
+  uuid@13.0.0: {}
 
   uuid@9.0.1: {}
 

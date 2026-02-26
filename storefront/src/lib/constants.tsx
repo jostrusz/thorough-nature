@@ -30,7 +30,27 @@ export const paymentInfoMap: Record<
     title: "Manual Payment",
     icon: <CreditCard />,
   },
-  // Add more payment providers here
+  // Custom payment gateways
+  pp_mollie_mollie: {
+    title: "Mollie",
+    icon: <CreditCard />,
+  },
+  pp_comgate_comgate: {
+    title: "Comgate",
+    icon: <CreditCard />,
+  },
+  pp_przelewy24_przelewy24: {
+    title: "Przelewy24",
+    icon: <CreditCard />,
+  },
+  pp_klarna_klarna: {
+    title: "Klarna",
+    icon: <CreditCard />,
+  },
+  pp_airwallex_airwallex: {
+    title: "Airwallex",
+    icon: <CreditCard />,
+  },
 }
 
 // This only checks if it is native stripe for card payments, it ignores the other stripe-based providers
@@ -42,6 +62,24 @@ export const isPaypal = (providerId?: string) => {
 }
 export const isManual = (providerId?: string) => {
   return providerId?.startsWith("pp_system_default")
+}
+export const isMollie = (providerId?: string) => {
+  return providerId?.startsWith("pp_mollie")
+}
+export const isComgate = (providerId?: string) => {
+  return providerId?.startsWith("pp_comgate")
+}
+export const isP24 = (providerId?: string) => {
+  return providerId?.startsWith("pp_przelewy24")
+}
+export const isKlarna = (providerId?: string) => {
+  return providerId?.startsWith("pp_klarna")
+}
+export const isAirwallex = (providerId?: string) => {
+  return providerId?.startsWith("pp_airwallex")
+}
+export const isRedirectPayment = (providerId?: string) => {
+  return isMollie(providerId) || isComgate(providerId) || isP24(providerId) || isKlarna(providerId)
 }
 
 // Add currencies that don't need to be divided by 100

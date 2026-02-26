@@ -860,7 +860,7 @@ const BillingSettingsPage = () => {
 }
 
 export const config = defineRouteConfig({
-  label: "Billing & Payments",
+  label: "Payment Gateways",
   icon: undefined,
 })
 

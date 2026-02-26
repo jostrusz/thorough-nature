@@ -112,6 +112,15 @@
           "nullable": true,
           "mappedType": "json"
         },
+        "statement_descriptor": {
+          "name": "statement_descriptor",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
         "metadata": {
           "name": "metadata",
           "type": "jsonb",
