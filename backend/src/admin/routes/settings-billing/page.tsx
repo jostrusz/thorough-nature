@@ -8,6 +8,7 @@ import {
   PAYMENT_METHODS_BY_PROVIDER,
   SUPPORTED_PROVIDERS,
   SUPPORTED_CURRENCIES,
+  type PaymentMethodDef,
 } from "../../components/billing/payment-method-icons"
 
 // ═══════════════════════════════════════════
@@ -438,6 +439,7 @@ function GatewaysTab() {
     live_keys: { api_key: "", secret_key: "", webhook_secret: "" },
     test_keys: { api_key: "", secret_key: "", webhook_secret: "" },
     selected_methods: [] as string[],
+    project_slugs: "",
   })
 
   const createMutation = useMutation({
@@ -492,30 +494,39 @@ function GatewaysTab() {
       selected_methods: (gw.payment_methods || [])
         .filter((m: any) => m.is_active)
         .map((m: any) => m.code),
+      project_slugs: (gw.project_slugs || []).join(", "),
     })
   }
 
   const handleUpdate = async (gwId: string) => {
     try {
-      // 1. Update gateway config fields (excluding selected_methods)
-      const { selected_methods, ...gatewayData } = editForm
+      // 1. Update gateway config fields (excluding selected_methods and project_slugs string)
+      const { selected_methods, project_slugs, ...gatewayData } = editForm
+
+      // Parse project_slugs from comma-separated string to JSON array
+      const slugsArray = project_slugs
+        ? (project_slugs as string).split(",").map((s: string) => s.trim()).filter(Boolean)
+        : []
+
       await sdk.client.fetch(`/admin/gateway-configs/${gwId}`, {
         method: "POST",
-        body: gatewayData,
+        body: { ...gatewayData, project_slugs: slugsArray.length > 0 ? slugsArray : null },
       })
 
       // 2. Update payment methods via the methods endpoint
       if (selected_methods && selected_methods.length > 0) {
         const gw = gateways.find((g: any) => g.id === gwId)
-        const providerMethods = PAYMENT_METHODS_BY_PROVIDER[gw?.provider] || []
+        const providerMethods: PaymentMethodDef[] = PAYMENT_METHODS_BY_PROVIDER[gw?.provider] || []
         const methods = selected_methods.map((code: string, i: number) => {
-          const methodDef = providerMethods.find((m: any) => m.code === code)
+          const methodDef = providerMethods.find((m) => m.code === code)
           return {
             code,
             display_name: methodDef?.name || code,
             icon: methodDef?.icon || code,
             is_active: true,
             sort_order: i,
+            available_countries: methodDef?.available_countries || [],
+            supported_currencies: methodDef?.supported_currencies || [],
           }
         })
 
@@ -557,8 +568,14 @@ function GatewaysTab() {
         is_active: true,
         sort_order: i,
         supported_currencies: form.supported_currencies,
+        available_countries: methodDef?.available_countries || [],
       }
     })
+
+    // Parse project_slugs from comma-separated string to JSON array
+    const slugsArray = form.project_slugs
+      ? form.project_slugs.split(",").map((s) => s.trim()).filter(Boolean)
+      : []
 
     createMutation.mutate({
       provider: form.provider,
@@ -571,6 +588,7 @@ function GatewaysTab() {
       live_keys: form.live_keys,
       test_keys: form.test_keys,
       payment_methods: methods,
+      project_slugs: slugsArray.length > 0 ? slugsArray : null,
     })
   }
 
@@ -647,6 +665,13 @@ function GatewaysTab() {
                 <option value="live">Live</option>
               </select>
             </div>
+          </div>
+
+          {/* Project Slugs */}
+          <div style={{ marginTop: "12px" }}>
+            <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase", marginBottom: "4px", display: "block" }}>Project Slugs</label>
+            <input className="bp-input" style={inputStyle} value={form.project_slugs} onChange={(e) => setForm({ ...form, project_slugs: e.target.value })} placeholder="loslatenboek, other-project (comma-separated, empty = all projects)" />
+            <span style={{ fontSize: "11px", color: "#8C9196", marginTop: "2px", display: "block" }}>Leave empty to make available for all projects</span>
           </div>
 
           {/* Currencies */}
@@ -805,6 +830,11 @@ function GatewaysTab() {
                             {"\u2022"} {activeMethods.length} method{activeMethods.length !== 1 ? "s" : ""}
                           </span>
                         )}
+                        {gw.project_slugs && gw.project_slugs.length > 0 && (
+                          <span style={{ marginLeft: "8px" }}>
+                            {"\u2022"} Projects: {gw.project_slugs.join(", ")}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -888,6 +918,13 @@ function GatewaysTab() {
                           <label style={{ fontSize: "10px", color: "#8C9196" }}>Priority</label>
                           <input className="bp-input" style={inputStyle} type="number" min={1} value={editForm.priority} onChange={(e) => setEditForm({ ...editForm, priority: parseInt(e.target.value) || 1 })} />
                         </div>
+                      </div>
+
+                      {/* Project Slugs */}
+                      <div style={{ marginBottom: "12px" }}>
+                        <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase", marginBottom: "4px", display: "block" }}>Project Slugs</label>
+                        <input className="bp-input" style={inputStyle} value={editForm.project_slugs || ""} onChange={(e) => setEditForm({ ...editForm, project_slugs: e.target.value })} placeholder="loslatenboek, other-project (comma-separated)" />
+                        <span style={{ fontSize: "11px", color: "#8C9196", marginTop: "2px", display: "block" }}>Leave empty to make available for all projects</span>
                       </div>
 
                       {/* Payment Methods Selection */}

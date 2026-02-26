@@ -23,6 +23,9 @@ const GatewayConfig = model.define("gateway_config", {
   sales_channel_ids: model.json().nullable(),
   // Statement descriptor (max 16 chars, A-Z 0-9 space dot hyphen)
   statement_descriptor: model.text().nullable(),
+  // Project slugs: which projects/checkouts this gateway applies to (JSON array: ["loslatenboek", "other-project"])
+  // Empty/null = available for all projects (fallback)
+  project_slugs: model.json().nullable(),
   // Flexible metadata
   metadata: model.json().nullable(),
   // Payment methods (child relation)

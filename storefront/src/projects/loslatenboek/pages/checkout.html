@@ -2216,93 +2216,38 @@ body {
           </div>
 
           <div class="payment-methods" id="payment-methods">
-
-            <!-- iDEAL -->
-            <label class="payment-method selected" data-method="ideal" data-provider="mollie">
-              <input type="radio" name="payment_method" value="ideal" checked>
-              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
-              <img src="/icons/ideal.svg" alt="iDEAL" class="pm-icon">
-              <div class="pm-info">
-                <div class="pm-name">iDEAL</div>
-                <div class="pm-desc">Betaal direct via je eigen bank</div>
-              </div>
-              <span class="pm-badge">Populair</span>
-            </label>
-
-            <!-- Bancontact -->
-            <label class="payment-method" data-method="bancontact" data-provider="mollie" style="display:none">
-              <input type="radio" name="payment_method" value="bancontact">
-              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
-              <img src="/icons/bancontact.svg" alt="Bancontact" class="pm-icon">
-              <div class="pm-info">
-                <div class="pm-name">Bancontact</div>
-                <div class="pm-desc">Belgisch betaalsysteem</div>
-              </div>
-            </label>
-
-            <!-- Klarna -->
-            <label class="payment-method" data-method="klarna" data-provider="mollie">
-              <input type="radio" name="payment_method" value="klarna">
-              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
-              <img src="/icons/klarna.svg" alt="Klarna" class="pm-icon">
-              <div class="pm-info">
-                <div class="pm-name">Klarna</div>
-                <div class="pm-desc">Betaal later of in termijnen</div>
-              </div>
-            </label>
-
-            <!-- Creditcard (Mollie Components) -->
-            <label class="payment-method" data-method="creditcard" data-provider="mollie">
-              <input type="radio" name="payment_method" value="creditcard">
-              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
-              <svg class="pm-icon" width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="0.5" y="0.5" width="31" height="23" rx="3.5" fill="#fff" stroke="#D9D9D9"/>
-                <rect x="2" y="5" width="28" height="4" fill="#2D3748"/>
-                <rect x="4" y="13" width="8" height="2" rx="1" fill="#CBD5E0"/>
-                <rect x="4" y="17" width="5" height="2" rx="1" fill="#CBD5E0"/>
-                <rect x="22" y="15" width="6" height="4" rx="2" fill="#ED8936"/>
-                <rect x="19" y="15" width="6" height="4" rx="2" fill="#E53E3E" opacity="0.8"/>
-              </svg>
-              <div class="pm-info">
-                <div class="pm-name">Creditcard</div>
-                <div class="pm-desc">Visa, Mastercard, American Express</div>
-              </div>
-            </label>
-
-            <!-- Mollie Components card fields (hidden unless creditcard selected) -->
-            <div id="mollie-card-fields" style="display:none; padding: 4px 16px 12px 48px; animation: fadeIn 0.3s ease;">
-              <div style="margin-bottom:10px;">
-                <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Kaartnummer</label>
-                <div id="card-number" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
-              </div>
-              <div style="display:flex;gap:12px;margin-bottom:10px;">
-                <div style="flex:1;">
-                  <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Vervaldatum</label>
-                  <div id="expiry-date" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
-                </div>
-                <div style="flex:1;">
-                  <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">CVC</label>
-                  <div id="verification-code" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
-                </div>
-              </div>
-              <div style="margin-bottom:6px;">
-                <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Naam op kaart</label>
-                <div id="card-holder" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
-              </div>
-              <div id="card-errors" style="font-size:12px;color:var(--error);margin-top:6px;min-height:16px;"></div>
+            <!-- Payment methods are loaded dynamically from admin settings -->
+            <div id="payment-methods-loading" style="text-align:center;padding:20px 0;color:var(--muted);font-size:13px;">
+              <div style="width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.6s linear infinite;margin:0 auto 8px;"></div>
+              Betaalmethoden laden...
             </div>
+            <div id="payment-methods-error" style="display:none;text-align:center;padding:20px 0;color:var(--error);font-size:13px;">
+              <p>Betaalmethoden konden niet geladen worden.</p>
+              <button onclick="loadPaymentMethods()" style="margin-top:8px;padding:6px 16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);cursor:pointer;font-size:13px;">Opnieuw proberen</button>
+            </div>
+          </div>
 
-            <!-- PayPal -->
-            <label class="payment-method" data-method="paypal" data-provider="paypal">
-              <input type="radio" name="payment_method" value="paypal">
-              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
-              <img src="/icons/paypal.svg" alt="PayPal" class="pm-icon">
-              <div class="pm-info">
-                <div class="pm-name">PayPal</div>
-                <div class="pm-desc">Betaal met je PayPal-account</div>
+          <!-- Mollie Components card fields (hidden, shown only when creditcard is active & selected) -->
+          <div id="mollie-card-fields" style="display:none; padding: 4px 16px 12px 48px; animation: fadeIn 0.3s ease;">
+            <div style="margin-bottom:10px;">
+              <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Kaartnummer</label>
+              <div id="card-number" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
+            </div>
+            <div style="display:flex;gap:12px;margin-bottom:10px;">
+              <div style="flex:1;">
+                <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Vervaldatum</label>
+                <div id="expiry-date" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
               </div>
-            </label>
-
+              <div style="flex:1;">
+                <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">CVC</label>
+                <div id="verification-code" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
+              </div>
+            </div>
+            <div style="margin-bottom:6px;">
+              <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Naam op kaart</label>
+              <div id="card-holder" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
+            </div>
+            <div id="card-errors" style="font-size:12px;color:var(--error);margin-top:6px;min-height:16px;"></div>
           </div>
           <div id="payment-errors" role="alert"></div>
         </div>
@@ -2933,66 +2878,286 @@ body {
     }
   }
 
-  /* ─── PAYMENT METHOD SELECTIE ─── */
-  var paymentMethods = document.querySelectorAll('.payment-method');
-  var selectedMethod = 'ideal';
-  var selectedProvider = 'mollie';
+  /* ─── DYNAMIC PAYMENT METHODS ─── */
+  var selectedMethod = '';
+  var selectedProvider = '';
+  var selectedProviderId = ''; // Full Medusa provider_id e.g. "pp_mollie_mollie"
+  var allPaymentOptions = []; // Flat list: [{ code, display_name, icon, provider, provider_id, available_countries, sort_order }]
+  var mollieComponentsInitialized = false;
 
-  paymentMethods.forEach(function(method) {
-    method.addEventListener('click', function() {
-      // Verwijder selected van alle
-      paymentMethods.forEach(function(m) { m.classList.remove('selected'); });
-      // Voeg selected toe aan geklikte
-      method.classList.add('selected');
-      // Sla op welke methode geselecteerd is
-      method.querySelector('input').checked = true;
-      selectedMethod = method.getAttribute('data-method');
-      selectedProvider = method.getAttribute('data-provider');
+  // Method descriptions (Dutch)
+  var METHOD_DESCRIPTIONS = {
+    ideal: 'Betaal direct via je eigen bank',
+    bancontact: 'Belgisch betaalsysteem',
+    klarna: 'Betaal later of in termijnen',
+    creditcard: 'Visa, Mastercard, American Express',
+    paypal: 'Betaal met je PayPal-account',
+    eps: 'Betaal via je Oostenrijkse bank',
+    przelewy24: 'Polski system platnosci',
+    blik: 'Szybka platnosc mobilna',
+    in3: 'Betaal in 3 termijnen',
+    belfius: 'Betaal via Belfius',
+    kbc: 'Betaal via KBC/CBC',
+    riverty: 'Achteraf betalen',
+    trustly: 'Online bankbetaling',
+    applepay: 'Betaal met Apple Pay',
+    googlepay: 'Betaal met Google Pay',
+    bank_transfer: 'Betaal via bankoverschrijving',
+    sepa_debit: 'SEPA automatische incasso',
+  };
 
-      // Show/hide Mollie Components card fields
-      var cardFields = document.getElementById('mollie-card-fields');
-      if (cardFields) {
-        if (selectedMethod === 'creditcard') {
-          cardFields.style.display = 'block';
-          initMollieComponents();
-        } else {
-          cardFields.style.display = 'none';
+  // SVG icons for common methods (fallback when no /icons/xxx.svg exists)
+  function getMethodIconHTML(code) {
+    if (code === 'creditcard') {
+      return '<svg class="pm-icon" width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0.5" y="0.5" width="31" height="23" rx="3.5" fill="#fff" stroke="#D9D9D9"/><rect x="2" y="5" width="28" height="4" fill="#2D3748"/><rect x="4" y="13" width="8" height="2" rx="1" fill="#CBD5E0"/><rect x="4" y="17" width="5" height="2" rx="1" fill="#CBD5E0"/><rect x="22" y="15" width="6" height="4" rx="2" fill="#ED8936"/><rect x="19" y="15" width="6" height="4" rx="2" fill="#E53E3E" opacity="0.8"/></svg>';
+    }
+    // For methods with known SVG icons
+    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps'];
+    if (iconMethods.indexOf(code) !== -1) {
+      return '<img src="/icons/' + code + '.svg" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
+    }
+    // Colored badge fallback
+    var badges = {
+      przelewy24: { bg: '#D13239', text: '#FFF', label: 'P24' },
+      blik: { bg: '#000', text: '#FFF', label: 'BLIK' },
+      in3: { bg: '#1A1A2E', text: '#FFF', label: 'in3' },
+      belfius: { bg: '#005DA6', text: '#FFF', label: 'BEL' },
+      kbc: { bg: '#003B6F', text: '#FFF', label: 'KBC' },
+      riverty: { bg: '#69B32D', text: '#FFF', label: 'RIV' },
+      trustly: { bg: '#0EE06E', text: '#FFF', label: 'TLY' },
+      bank_transfer: { bg: '#F6F6F7', text: '#1A1A1A', label: 'Bank' },
+      sepa_debit: { bg: '#2B4C9B', text: '#FFF', label: 'SEPA' },
+    };
+    var badge = badges[code];
+    if (badge) {
+      return '<div class="pm-icon" style="width:32px;height:24px;border-radius:4px;background:' + badge.bg + ';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:' + badge.text + ';border:1px solid #D9D9D9;flex-shrink:0;">' + badge.label + '</div>';
+    }
+    return '<div class="pm-icon" style="width:32px;height:24px;border-radius:4px;background:#F6F6F7;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#6D7175;border:1px solid #D9D9D9;flex-shrink:0;">' + code.slice(0,4).toUpperCase() + '</div>';
+  }
+
+  /**
+   * Fetch payment options from admin API
+   */
+  function loadPaymentMethods() {
+    var container = document.getElementById('payment-methods');
+    var loadingEl = document.getElementById('payment-methods-loading');
+    var errorEl = document.getElementById('payment-methods-error');
+
+    if (loadingEl) loadingEl.style.display = 'block';
+    if (errorEl) errorEl.style.display = 'none';
+
+    var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
+    var slug = PROJECT_CONFIG.slug || '';
+    var apiUrl = MEDUSA_URL + '/store/payment-options?currency=' + currency;
+    if (slug) apiUrl += '&project_slug=' + encodeURIComponent(slug);
+
+    fetch(apiUrl, {
+      headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (loadingEl) loadingEl.style.display = 'none';
+
+      // Flatten methods from all gateways into a single list
+      allPaymentOptions = [];
+      (data.gateways || []).forEach(function(gw) {
+        var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
+        (gw.methods || []).forEach(function(m) {
+          allPaymentOptions.push({
+            code: m.code,
+            display_name: m.display_name,
+            icon: m.icon || m.code,
+            provider: gw.provider,
+            provider_id: providerIdFull,
+            available_countries: m.available_countries || [],
+            supported_currencies: m.supported_currencies || [],
+            sort_order: m.sort_order || 0,
+          });
+        });
+      });
+
+      if (allPaymentOptions.length === 0) {
+        if (errorEl) {
+          errorEl.innerHTML = '<p>Geen betaalmethoden beschikbaar.</p>';
+          errorEl.style.display = 'block';
         }
+        return;
       }
 
-      // Update knop tekst
-      updateButtonText();
-
-      // Update subtekst
-      var subtext = document.querySelector('.btn-subtext');
-      if (subtext) {
-        subtext.textContent = selectedMethod === 'creditcard'
-          ? 'Je kaartgegevens worden beveiligd verwerkt via Mollie.'
-          : 'Je wordt doorgestuurd naar een beveiligde betaalpagina.';
-      }
-
-      // Verwijder eventuele foutmelding
-      document.getElementById('payment-errors').textContent = '';
+      // Render for current country
+      var countrySelect = document.getElementById('country');
+      var country = countrySelect ? countrySelect.value : 'NL';
+      renderPaymentMethods(country);
+    })
+    .catch(function(err) {
+      console.error('[PaymentOptions] Failed to load:', err);
+      if (loadingEl) loadingEl.style.display = 'none';
+      if (errorEl) errorEl.style.display = 'block';
     });
-  });
+  }
 
-  // Aktuální celková cena (aktualizuje se dynamicky z recalculateOrderSummary)
+  /**
+   * Render payment methods filtered by country
+   */
+  function renderPaymentMethods(countryCode) {
+    var container = document.getElementById('payment-methods');
+    var country = (countryCode || 'NL').toLowerCase();
+
+    // Filter methods by country availability
+    var methods = allPaymentOptions.filter(function(m) {
+      // Empty available_countries = global, show everywhere
+      if (!m.available_countries || m.available_countries.length === 0) return true;
+      return m.available_countries.indexOf(country) !== -1;
+    });
+
+    // Apple Pay: only show if device supports it
+    methods = methods.filter(function(m) {
+      if (m.code === 'applepay') {
+        return window.ApplePaySession && ApplePaySession.canMakePayments();
+      }
+      return true;
+    });
+
+    // Sort by sort_order
+    methods.sort(function(a, b) { return a.sort_order - b.sort_order; });
+
+    // Clear existing content (keep error/loading divs)
+    var loadingEl = document.getElementById('payment-methods-loading');
+    var errorEl = document.getElementById('payment-methods-error');
+
+    // Remove old dynamically rendered labels
+    var oldLabels = container.querySelectorAll('.payment-method');
+    oldLabels.forEach(function(el) { el.remove(); });
+
+    if (methods.length === 0) {
+      if (errorEl) {
+        errorEl.innerHTML = '<p>Geen betaalmethoden beschikbaar voor dit land.</p>';
+        errorEl.style.display = 'block';
+      }
+      return;
+    }
+    if (errorEl) errorEl.style.display = 'none';
+
+    // Check if creditcard is among active methods
+    var hasCreditCard = methods.some(function(m) { return m.code === 'creditcard'; });
+    var cardFieldsEl = document.getElementById('mollie-card-fields');
+
+    // Render each method
+    methods.forEach(function(m, index) {
+      var isFirst = index === 0;
+      var label = document.createElement('label');
+      label.className = 'payment-method' + (isFirst ? ' selected' : '');
+      label.setAttribute('data-method', m.code);
+      label.setAttribute('data-provider', m.provider);
+      label.setAttribute('data-provider-id', m.provider_id);
+
+      var isPopular = (m.code === 'ideal' && country === 'nl') || (m.code === 'bancontact' && country === 'be');
+
+      label.innerHTML =
+        '<input type="radio" name="payment_method" value="' + m.code + '"' + (isFirst ? ' checked' : '') + '>' +
+        '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
+        getMethodIconHTML(m.code) +
+        '<div class="pm-info">' +
+          '<div class="pm-name">' + m.display_name + '</div>' +
+          '<div class="pm-desc">' + (METHOD_DESCRIPTIONS[m.code] || '') + '</div>' +
+        '</div>' +
+        (isPopular ? '<span class="pm-badge">Populair</span>' : '');
+
+      container.appendChild(label);
+
+      // If this is creditcard, insert card fields right after it
+      if (m.code === 'creditcard' && cardFieldsEl) {
+        container.appendChild(cardFieldsEl);
+      }
+
+      // Set first as selected
+      if (isFirst) {
+        selectedMethod = m.code;
+        selectedProvider = m.provider;
+        selectedProviderId = m.provider_id;
+      }
+    });
+
+    // Handle credit card fields visibility
+    if (cardFieldsEl) {
+      if (!hasCreditCard) {
+        cardFieldsEl.style.display = 'none';
+      } else if (selectedMethod === 'creditcard') {
+        cardFieldsEl.style.display = 'block';
+        initMollieComponents();
+      } else {
+        cardFieldsEl.style.display = 'none';
+      }
+    }
+
+    // Bind click events on newly rendered methods
+    bindPaymentMethodEvents();
+
+    // Update button text
+    updateButtonText();
+  }
+
+  /**
+   * Bind click events on dynamically rendered payment methods
+   */
+  function bindPaymentMethodEvents() {
+    var methods = document.querySelectorAll('.payment-method');
+    methods.forEach(function(method) {
+      method.addEventListener('click', function() {
+        // Remove selected from all
+        methods.forEach(function(m) { m.classList.remove('selected'); });
+        // Add selected to clicked
+        method.classList.add('selected');
+        method.querySelector('input').checked = true;
+        selectedMethod = method.getAttribute('data-method');
+        selectedProvider = method.getAttribute('data-provider');
+        selectedProviderId = method.getAttribute('data-provider-id') || ('pp_' + selectedProvider + '_' + selectedProvider);
+
+        // Show/hide Mollie Components card fields
+        var cardFields = document.getElementById('mollie-card-fields');
+        if (cardFields) {
+          if (selectedMethod === 'creditcard') {
+            cardFields.style.display = 'block';
+            initMollieComponents();
+          } else {
+            cardFields.style.display = 'none';
+          }
+        }
+
+        // Update button text
+        updateButtonText();
+
+        // Update subtext
+        var subtext = document.querySelector('.btn-subtext');
+        if (subtext) {
+          subtext.textContent = selectedMethod === 'creditcard'
+            ? 'Je kaartgegevens worden beveiligd verwerkt via Mollie.'
+            : 'Je wordt doorgestuurd naar een beveiligde betaalpagina.';
+        }
+
+        // Clear payment errors
+        document.getElementById('payment-errors').textContent = '';
+      });
+    });
+  }
+
+  // Aktualni celkova cena (aktualizuje se dynamicky z recalculateOrderSummary)
   var currentTotalPrice = getCurrentTotal();
 
   function updateButtonText() {
     var btnText = document.querySelector('.btn-text');
-    var labels = {
-      ideal: 'Betalen met iDEAL',
-      bancontact: 'Betalen met Bancontact',
-      klarna: 'Betalen met Klarna',
-      creditcard: 'Betalen met Creditcard',
-      paypal: 'Betalen met PayPal'
-    };
-    btnText.textContent = (labels[selectedMethod] || 'Bestelling afronden') + ' — ' + formatPrice(currentTotalPrice);
+    if (!selectedMethod) {
+      btnText.textContent = 'Bestelling afronden — ' + formatPrice(currentTotalPrice);
+      return;
+    }
+    // Find display name from loaded options
+    var opt = allPaymentOptions.find(function(m) { return m.code === selectedMethod; });
+    var methodName = opt ? opt.display_name : selectedMethod;
+    btnText.textContent = 'Betalen met ' + methodName + ' — ' + formatPrice(currentTotalPrice);
   }
 
-  // Initialiseer knop tekst
-  updateButtonText();
+  // Load payment methods on page init
+  loadPaymentMethods();
 
   /* ─── FLOATING LABEL — select element needs has-value class ─── */
   var selects = document.querySelectorAll('.float-field select');
@@ -4205,9 +4370,8 @@ body {
       if (USE_TEST_MODE) {
         providerId = 'pp_system_default';
       } else {
-        // All payment methods (iDEAL, Bancontact, credit card, PayPal, Klarna)
-        // go through the Mollie payment provider
-        providerId = 'pp_mollie_mollie';
+        // Use dynamic provider_id from selected payment method
+        providerId = selectedProviderId || 'pp_mollie_mollie';
         sessionData = {
           method: selectedMethod,
           return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
@@ -4365,36 +4529,17 @@ body {
   var countrySelect = document.getElementById('country');
   countrySelect.addEventListener('change', function() {
     var country = countrySelect.value;
-    var idealMethod = document.querySelector('[data-method="ideal"]');
-    var bancontactMethod = document.querySelector('[data-method="bancontact"]');
 
-    // Aktualizuj region ID podle vybrané země
+    // Update region ID based on selected country
     currentRegionId = PROJECT_CONFIG.getRegionId(country);
 
-    // Přepočítej daně v order summary
+    // Recalculate taxes in order summary
     updateTaxDisplay(country);
 
-    // Toon/verberg betaalmethoden op basis van land (bez auto-scrollu)
-    function selectPaymentMethod(methodEl) {
-      var scrollY = window.scrollY;
-      paymentMethods.forEach(function(m) { m.classList.remove('selected'); });
-      methodEl.classList.add('selected');
-      methodEl.querySelector('input').checked = true;
-      selectedMethod = methodEl.getAttribute('data-method');
-      selectedProvider = methodEl.getAttribute('data-provider');
-      updateButtonText();
-      window.scrollTo(0, scrollY);
-    }
-
-    if (country === 'NL') {
-      idealMethod.style.display = 'flex';
-      bancontactMethod.style.display = 'none';
-      if (selectedMethod === 'bancontact') selectPaymentMethod(idealMethod);
-    } else if (country === 'BE') {
-      idealMethod.style.display = 'none';
-      bancontactMethod.style.display = 'flex';
-      if (selectedMethod === 'ideal') selectPaymentMethod(bancontactMethod);
-    }
+    // Re-render payment methods for the new country (preserves scroll position)
+    var scrollY = window.scrollY;
+    renderPaymentMethods(country);
+    window.scrollTo(0, scrollY);
   });
 
   /* ─── ANIMACE — Intersection Observer pro fade-in ─── */

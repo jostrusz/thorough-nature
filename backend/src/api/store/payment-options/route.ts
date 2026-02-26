@@ -5,11 +5,11 @@ import { BILLING_ENTITY_MODULE } from "../../../modules/billing-entity"
 import type BillingEntityModuleService from "../../../modules/billing-entity/service"
 
 /**
- * GET /store/payment-options?sales_channel_id=xxx&currency=EUR
+ * GET /store/payment-options?sales_channel_id=xxx&currency=EUR&project_slug=loslatenboek
  *
  * Returns active payment gateways and their methods for the checkout,
- * filtered by sales channel and currency. Also returns the billing entity
- * (company) associated with the primary gateway.
+ * filtered by sales channel, currency, and project slug.
+ * Also returns the billing entity (company) associated with the primary gateway.
  *
  * This endpoint is called by the storefront at checkout load to dynamically
  * determine which payment methods to display with their icons.
@@ -21,6 +21,7 @@ export async function GET(
   try {
     const salesChannelId = req.query.sales_channel_id as string
     const currency = ((req.query.currency as string) || "EUR").toUpperCase()
+    const projectSlug = req.query.project_slug as string
 
     const gatewayService = req.scope.resolve(
       GATEWAY_CONFIG_MODULE
@@ -38,7 +39,7 @@ export async function GET(
       }
     )
 
-    // Filter by sales channel (if provided) and currency
+    // Filter by sales channel, currency, and project slug
     const filteredGateways = allGateways.filter((gw: any) => {
       // Check sales channel
       if (salesChannelId && gw.sales_channel_ids) {
@@ -60,6 +61,15 @@ export async function GET(
         }
       }
 
+      // Check project slug: if gateway has project_slugs set, the slug must match
+      // Empty/null project_slugs = available for all projects (fallback)
+      if (projectSlug && gw.project_slugs) {
+        const slugs = Array.isArray(gw.project_slugs) ? gw.project_slugs : []
+        if (slugs.length > 0 && !slugs.includes(projectSlug)) {
+          return false
+        }
+      }
+
       return true
     })
 
@@ -72,6 +82,7 @@ export async function GET(
           code: m.code,
           display_name: m.display_name,
           icon: m.icon,
+          sort_order: m.sort_order || 0,
           available_countries: m.available_countries,
           supported_currencies: m.supported_currencies,
         }))
@@ -110,6 +121,7 @@ export async function GET(
       billing_entity: billingEntity,
       currency,
       sales_channel_id: salesChannelId || null,
+      project_slug: projectSlug || null,
     })
   } catch (error: any) {
     res.status(500).json({ error: error.message })
