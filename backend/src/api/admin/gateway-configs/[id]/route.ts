@@ -55,6 +55,8 @@ export async function POST(
 
 /**
  * DELETE /admin/gateway-configs/:id — Delete a gateway config
+ * Cascade-deletes child payment_method_config records first
+ * (FK has no ON DELETE CASCADE).
  */
 export async function DELETE(
   req: MedusaRequest,
@@ -66,6 +68,18 @@ export async function DELETE(
   ) as GatewayConfigModuleService
 
   try {
+    // 1. Delete child payment method configs first
+    const methods = await gatewayService.listPaymentMethodConfigs(
+      { gateway_id: id } as any,
+      { take: 1000 }
+    )
+
+    if (methods.length > 0) {
+      const methodIds = methods.map((m: any) => m.id)
+      await gatewayService.deletePaymentMethodConfigs(methodIds)
+    }
+
+    // 2. Now delete the gateway itself
     await gatewayService.deleteGatewayConfigs(id)
     res.json({ success: true, deleted: id })
   } catch (error: any) {
