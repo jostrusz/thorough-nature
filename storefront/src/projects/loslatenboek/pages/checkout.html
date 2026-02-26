@@ -4039,7 +4039,7 @@ body {
     })
     .then(function(cartId) {
       // Stap 4: Payment — Medusa v2 Payment Collections flow
-      var USE_TEST_MODE = true; // ← Přepni na false pro produkci
+      var USE_TEST_MODE = false; // Mollie live integration
 
       var providerId;
       var sessionData = {};
