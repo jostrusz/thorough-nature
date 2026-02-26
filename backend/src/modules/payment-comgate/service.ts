@@ -1,14 +1,11 @@
 // @ts-nocheck
 import {
-  AbstractPaymentProvider,
   PaymentProviderError,
   PaymentSessionStatus,
-  PaymentProviderSessionResponse,
-  RefundInput,
 } from "@medusajs/framework/utils"
-import { Logger } from "@medusajs/framework/types"
-import { GATEWAY_CONFIG_MODULE } from "../gateway-config"
 import { ComgateApiClient } from "./api-client"
+
+const GATEWAY_CONFIG_MODULE = "gatewayConfig"
 
 export interface IComgatePaymentSessionData {
   transId?: string
@@ -44,15 +41,40 @@ function mapComgateStatusToMedusa(comgateStatus: string): PaymentSessionStatus {
  * Integrates with Comgate payment redirect API for bank transfers and cards
  * Supports CZK, EUR, and other currencies
  */
-export class ComgatePaymentProvider extends AbstractPaymentProvider {
+export class ComgatePaymentProvider {
+  protected container_: any
   protected client_: ComgateApiClient | null = null
   protected gatewayConfigService_: any
-  protected logger_: Logger
+  protected logger_: any
 
-  constructor(container: any) {
-    super(container)
-    this.gatewayConfigService_ = container.resolve(GATEWAY_CONFIG_MODULE)
-    this.logger_ = container.resolve("logger")
+  static identifier = "comgate"
+
+  constructor(container: any, options?: any) {
+    this.container_ = container
+    try {
+      this.logger_ = container.resolve("logger")
+    } catch {
+      this.logger_ = console
+    }
+    try {
+      this.gatewayConfigService_ = container.resolve(GATEWAY_CONFIG_MODULE)
+    } catch {
+      this.gatewayConfigService_ = null
+    }
+  }
+
+  private getLogger() {
+    if (!this.logger_) {
+      try { this.logger_ = this.container_.resolve("logger") } catch { this.logger_ = console }
+    }
+    return this.logger_
+  }
+
+  private getGatewayConfigService() {
+    if (!this.gatewayConfigService_) {
+      this.gatewayConfigService_ = this.container_.resolve(GATEWAY_CONFIG_MODULE)
+    }
+    return this.gatewayConfigService_
   }
 
   /**
@@ -60,7 +82,8 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
    */
   private async getComgateClient(): Promise<ComgateApiClient> {
     if (!this.client_) {
-      const configs = await this.gatewayConfigService_.listGatewayConfigs(
+      const gcService = this.getGatewayConfigService()
+      const configs = await gcService.listGatewayConfigs(
         { provider: "comgate", is_active: true },
         { take: 1 }
       )
@@ -79,14 +102,9 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
   }
 
   /**
-   * Get identifier for the payment provider
-   */
-  static identifier = "comgate"
-
-  /**
    * Initiate a payment session — create Comgate payment with redirect URL
    */
-  async initiatePayment(context: any): Promise<PaymentProviderSessionResponse> {
+  async initiatePayment(context: any): Promise<any> {
     const {
       amount,
       currency_code,
@@ -97,7 +115,12 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
     try {
       const client = await this.getComgateClient()
-      const config = await this.gatewayConfigService_.retrieve("comgate")
+      const gcService = this.getGatewayConfigService()
+      const configs = await gcService.listGatewayConfigs(
+        { provider: "comgate", is_active: true },
+        { take: 1 }
+      )
+      const config = configs[0]
 
       // Use statement descriptor if provided, otherwise use order ID
       const descriptor = (
@@ -105,12 +128,12 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       ).substring(0, 16)
 
       const paymentParams = {
-        merchant: config.api_key,
+        merchant: config?.live_keys?.api_key || config?.test_keys?.api_key,
         price: amount, // already in cents
         curr: currency_code.toUpperCase(),
         label: descriptor,
         refId: cart?.id || `ref-${Date.now()}`,
-        secret: config.secret_key,
+        secret: config?.live_keys?.secret_key || config?.test_keys?.secret_key,
         email: customer?.email,
         country: customer?.billing_address?.country_code?.toUpperCase(),
         prepareOnly: true, // get transId + URL without redirect
@@ -125,7 +148,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         throw new PaymentProviderError("No payment redirect URL from Comgate")
       }
 
-      this.logger_.info(
+      this.getLogger().info(
         `[Comgate] Payment created: transId=${result.data.transId}, redirect=${result.data.redirectUrl}`
       )
 
@@ -139,7 +162,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         redirect_url: result.data.redirectUrl,
       }
     } catch (error: any) {
-      this.logger_.error(`[Comgate] Payment initiation failed: ${error.message}`)
+      this.getLogger().error(`[Comgate] Payment initiation failed: ${error.message}`)
       throw new PaymentProviderError(
         error.message || "Failed to initiate Comgate payment"
       )
@@ -152,20 +175,26 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
   async authorizePayment(
     paymentSessionData: IComgatePaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getComgateClient()
-      const config = await this.gatewayConfigService_.retrieve("comgate")
+      const gcService = this.getGatewayConfigService()
+      const configs = await gcService.listGatewayConfigs(
+        { provider: "comgate", is_active: true },
+        { take: 1 }
+      )
+      const config = configs[0]
       const { transId } = paymentSessionData
 
       if (!transId) {
         throw new PaymentProviderError("No Comgate transaction ID in session data")
       }
 
+      const keys = config?.mode === "live" ? config.live_keys : config.test_keys
       const result = await client.getStatus({
-        merchant: config.api_key,
+        merchant: keys?.api_key,
         transId,
-        secret: config.secret_key,
+        secret: keys?.secret_key,
       })
 
       if (!result.success) {
@@ -184,7 +213,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         status,
       }
     } catch (error: any) {
-      this.logger_.error(`[Comgate] Authorization check failed: ${error.message}`)
+      this.getLogger().error(`[Comgate] Authorization check failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -195,21 +224,27 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
   async capturePayment(
     paymentSessionData: IComgatePaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getComgateClient()
-      const config = await this.gatewayConfigService_.retrieve("comgate")
+      const gcService = this.getGatewayConfigService()
+      const configs = await gcService.listGatewayConfigs(
+        { provider: "comgate", is_active: true },
+        { take: 1 }
+      )
+      const config = configs[0]
       const { transId } = paymentSessionData
 
       if (!transId) {
         throw new PaymentProviderError("No Comgate transaction ID in session data")
       }
 
+      const keys = config?.mode === "live" ? config.live_keys : config.test_keys
       // Fetch current status
       const result = await client.getStatus({
-        merchant: config.api_key,
+        merchant: keys?.api_key,
         transId,
-        secret: config.secret_key,
+        secret: keys?.secret_key,
       })
 
       if (!result.success) {
@@ -227,7 +262,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         status,
       }
     } catch (error: any) {
-      this.logger_.error(`[Comgate] Capture failed: ${error.message}`)
+      this.getLogger().error(`[Comgate] Capture failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -239,28 +274,34 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
     paymentSessionData: IComgatePaymentSessionData,
     refundAmount: number,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getComgateClient()
-      const config = await this.gatewayConfigService_.retrieve("comgate")
+      const gcService = this.getGatewayConfigService()
+      const configs = await gcService.listGatewayConfigs(
+        { provider: "comgate", is_active: true },
+        { take: 1 }
+      )
+      const config = configs[0]
       const { transId } = paymentSessionData
 
       if (!transId) {
         throw new PaymentProviderError("No Comgate transaction ID in session data")
       }
 
+      const keys = config?.mode === "live" ? config.live_keys : config.test_keys
       const result = await client.createRefund({
-        merchant: config.api_key,
+        merchant: keys?.api_key,
         transId,
         amount: refundAmount, // in cents
-        secret: config.secret_key,
+        secret: keys?.secret_key,
       })
 
       if (!result.success) {
         throw new PaymentProviderError(result.error || "Failed to create refund")
       }
 
-      this.logger_.info(
+      this.getLogger().info(
         `[Comgate] Refund created for transId ${transId}: ${(refundAmount / 100).toFixed(2)}`
       )
 
@@ -269,7 +310,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         status: PaymentSessionStatus.AUTHORIZED,
       }
     } catch (error: any) {
-      this.logger_.error(`[Comgate] Refund failed: ${error.message}`)
+      this.getLogger().error(`[Comgate] Refund failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -280,9 +321,9 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
   async cancelPayment(
     paymentSessionData: IComgatePaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
-      this.logger_.info(
+      this.getLogger().info(
         `[Comgate] Transaction ${paymentSessionData.transId} marked for cancellation`
       )
 
@@ -291,7 +332,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         status: PaymentSessionStatus.CANCELED,
       }
     } catch (error: any) {
-      this.logger_.error(`[Comgate] Cancel failed: ${error.message}`)
+      this.getLogger().error(`[Comgate] Cancel failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -302,7 +343,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
   async deletePayment(
     paymentSessionData: IComgatePaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     // No-op for Comgate — cleanup handled server-side
     return {
       session_data: paymentSessionData,
@@ -319,17 +360,23 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
   ): Promise<PaymentSessionStatus> {
     try {
       const client = await this.getComgateClient()
-      const config = await this.gatewayConfigService_.retrieve("comgate")
+      const gcService = this.getGatewayConfigService()
+      const configs = await gcService.listGatewayConfigs(
+        { provider: "comgate", is_active: true },
+        { take: 1 }
+      )
+      const config = configs[0]
       const { transId } = paymentSessionData
 
       if (!transId) {
         return PaymentSessionStatus.PENDING
       }
 
+      const keys = config?.mode === "live" ? config.live_keys : config.test_keys
       const result = await client.getStatus({
-        merchant: config.api_key,
+        merchant: keys?.api_key,
         transId,
-        secret: config.secret_key,
+        secret: keys?.secret_key,
       })
 
       if (!result.success) {
@@ -338,7 +385,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
       return mapComgateStatusToMedusa(result.data?.status || "PENDING")
     } catch (error: any) {
-      this.logger_.error(`[Comgate] Status check failed: ${error.message}`)
+      this.getLogger().error(`[Comgate] Status check failed: ${error.message}`)
       return PaymentSessionStatus.ERROR
     }
   }
@@ -349,20 +396,26 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
   async retrievePayment(
     paymentSessionData: IComgatePaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getComgateClient()
-      const config = await this.gatewayConfigService_.retrieve("comgate")
+      const gcService = this.getGatewayConfigService()
+      const configs = await gcService.listGatewayConfigs(
+        { provider: "comgate", is_active: true },
+        { take: 1 }
+      )
+      const config = configs[0]
       const { transId } = paymentSessionData
 
       if (!transId) {
         throw new PaymentProviderError("No Comgate transaction ID in session data")
       }
 
+      const keys = config?.mode === "live" ? config.live_keys : config.test_keys
       const result = await client.getStatus({
-        merchant: config.api_key,
+        merchant: keys?.api_key,
         transId,
-        secret: config.secret_key,
+        secret: keys?.secret_key,
       })
 
       if (!result.success) {
@@ -381,7 +434,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         status,
       }
     } catch (error: any) {
-      this.logger_.error(`[Comgate] Retrieve failed: ${error.message}`)
+      this.getLogger().error(`[Comgate] Retrieve failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -389,7 +442,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
   /**
    * Update payment session
    */
-  async updatePayment(context: any): Promise<PaymentProviderSessionResponse> {
+  async updatePayment(context: any): Promise<any> {
     return await this.retrievePayment(context.paymentSessionData, context)
   }
 
@@ -411,12 +464,18 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       }
 
       const client = await this.getComgateClient()
-      const config = await this.gatewayConfigService_.retrieve("comgate")
+      const gcService = this.getGatewayConfigService()
+      const configs = await gcService.listGatewayConfigs(
+        { provider: "comgate", is_active: true },
+        { take: 1 }
+      )
+      const config = configs[0]
+      const keys = config?.mode === "live" ? config.live_keys : config.test_keys
 
       const result = await client.getStatus({
-        merchant: config.api_key,
+        merchant: keys?.api_key,
         transId,
-        secret: config.secret_key,
+        secret: keys?.secret_key,
       })
 
       if (!result.success) {
@@ -433,7 +492,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         } as IComgatePaymentSessionData,
       }
     } catch (error: any) {
-      this.logger_.error(`[Comgate] Webhook processing failed: ${error.message}`)
+      this.getLogger().error(`[Comgate] Webhook processing failed: ${error.message}`)
       return {
         action: "fail",
         data: webhookData,

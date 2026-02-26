@@ -1,14 +1,11 @@
 // @ts-nocheck
 import {
-  AbstractPaymentProvider,
   PaymentProviderError,
   PaymentSessionStatus,
-  PaymentProviderSessionResponse,
-  RefundInput,
 } from "@medusajs/framework/utils"
-import { Logger } from "@medusajs/framework/types"
-import { GATEWAY_CONFIG_MODULE } from "../gateway-config"
 import { MollieApiClient } from "./api-client"
+
+const GATEWAY_CONFIG_MODULE = "gatewayConfig"
 
 export interface IMolliePaymentSessionData {
   mollieOrderId?: string
@@ -51,15 +48,40 @@ function mapMollieStatusToMedusa(mollieStatus: string): PaymentSessionStatus {
  * Integrates with Mollie Orders API for orders with shipment tracking
  * Supports Klarna, iDEAL, cards, SEPA, and more
  */
-export class MolliePaymentProvider extends AbstractPaymentProvider {
+export class MolliePaymentProvider {
+  protected container_: any
   protected client_: MollieApiClient | null = null
   protected gatewayConfigService_: any
-  protected logger_: Logger
+  protected logger_: any
 
-  constructor(container: any) {
-    super(container)
-    this.gatewayConfigService_ = container.resolve(GATEWAY_CONFIG_MODULE)
-    this.logger_ = container.resolve("logger")
+  static identifier = "mollie"
+
+  constructor(container: any, options?: any) {
+    this.container_ = container
+    try {
+      this.logger_ = container.resolve("logger")
+    } catch {
+      this.logger_ = console
+    }
+    try {
+      this.gatewayConfigService_ = container.resolve(GATEWAY_CONFIG_MODULE)
+    } catch {
+      this.gatewayConfigService_ = null
+    }
+  }
+
+  private getLogger() {
+    if (!this.logger_) {
+      try { this.logger_ = this.container_.resolve("logger") } catch { this.logger_ = console }
+    }
+    return this.logger_
+  }
+
+  private getGatewayConfigService() {
+    if (!this.gatewayConfigService_) {
+      this.gatewayConfigService_ = this.container_.resolve(GATEWAY_CONFIG_MODULE)
+    }
+    return this.gatewayConfigService_
   }
 
   /**
@@ -67,7 +89,8 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
    */
   private async getMollieClient(): Promise<MollieApiClient> {
     if (!this.client_) {
-      const configs = await this.gatewayConfigService_.listGatewayConfigs(
+      const gcService = this.getGatewayConfigService()
+      const configs = await gcService.listGatewayConfigs(
         { provider: "mollie", is_active: true },
         { take: 1 }
       )
@@ -86,14 +109,9 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
   }
 
   /**
-   * Get identifier for the payment provider
-   */
-  static identifier = "mollie"
-
-  /**
    * Initiate a payment session — create a Mollie order
    */
-  async initiatePayment(context: any): Promise<PaymentProviderSessionResponse> {
+  async initiatePayment(context: any): Promise<any> {
     const {
       amount,
       currency_code,
@@ -181,7 +199,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
       }
 
       // Log payment activity
-      this.logger_.info(
+      this.getLogger().info(
         `[Mollie] Order created: ${mollieOrder.id}, redirect: ${checkoutUrl}`
       )
 
@@ -196,7 +214,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
         redirect_url: checkoutUrl,
       }
     } catch (error: any) {
-      this.logger_.error(`[Mollie] Payment initiation failed: ${error.message}`)
+      this.getLogger().error(`[Mollie] Payment initiation failed: ${error.message}`)
       throw new PaymentProviderError(
         error.message || "Failed to initiate Mollie payment"
       )
@@ -209,7 +227,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
   async authorizePayment(
     paymentSessionData: IMolliePaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getMollieClient()
       const { mollieOrderId } = paymentSessionData
@@ -235,7 +253,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
         status,
       }
     } catch (error: any) {
-      this.logger_.error(`[Mollie] Authorization check failed: ${error.message}`)
+      this.getLogger().error(`[Mollie] Authorization check failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -247,7 +265,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
   async capturePayment(
     paymentSessionData: IMolliePaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getMollieClient()
       const { mollieOrderId } = paymentSessionData
@@ -277,7 +295,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
         status,
       }
     } catch (error: any) {
-      this.logger_.error(`[Mollie] Capture failed: ${error.message}`)
+      this.getLogger().error(`[Mollie] Capture failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -289,7 +307,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
     paymentSessionData: IMolliePaymentSessionData,
     refundAmount: number,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getMollieClient()
       const { mollieOrderId } = paymentSessionData
@@ -307,7 +325,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
         throw new PaymentProviderError(result.error || "Failed to create refund")
       }
 
-      this.logger_.info(
+      this.getLogger().info(
         `[Mollie] Refund created for order ${mollieOrderId}: ${result.data.id}`
       )
 
@@ -316,7 +334,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
         status: PaymentSessionStatus.AUTHORIZED,
       }
     } catch (error: any) {
-      this.logger_.error(`[Mollie] Refund failed: ${error.message}`)
+      this.getLogger().error(`[Mollie] Refund failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -327,9 +345,8 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
   async cancelPayment(
     paymentSessionData: IMolliePaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
-      const client = await this.getMollieClient()
       const { mollieOrderId } = paymentSessionData
 
       if (!mollieOrderId) {
@@ -339,14 +356,14 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
       // Mollie doesn't have a direct cancel endpoint for orders
       // The order will expire after 28 days if unpaid
       // Log the cancellation intent
-      this.logger_.info(`[Mollie] Order ${mollieOrderId} marked for cancellation`)
+      this.getLogger().info(`[Mollie] Order ${mollieOrderId} marked for cancellation`)
 
       return {
         session_data: paymentSessionData,
         status: PaymentSessionStatus.CANCELED,
       }
     } catch (error: any) {
-      this.logger_.error(`[Mollie] Cancel failed: ${error.message}`)
+      this.getLogger().error(`[Mollie] Cancel failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -357,7 +374,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
   async deletePayment(
     paymentSessionData: IMolliePaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     // No-op for Mollie — cleanup handled server-side
     return {
       session_data: paymentSessionData,
@@ -388,7 +405,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
       const status = mapMollieStatusToMedusa(result.data.status)
       return status
     } catch (error: any) {
-      this.logger_.error(`[Mollie] Status check failed: ${error.message}`)
+      this.getLogger().error(`[Mollie] Status check failed: ${error.message}`)
       return PaymentSessionStatus.ERROR
     }
   }
@@ -399,7 +416,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
   async retrievePayment(
     paymentSessionData: IMolliePaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getMollieClient()
       const { mollieOrderId } = paymentSessionData
@@ -425,7 +442,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
         status,
       }
     } catch (error: any) {
-      this.logger_.error(`[Mollie] Retrieve failed: ${error.message}`)
+      this.getLogger().error(`[Mollie] Retrieve failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -433,7 +450,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
   /**
    * Update payment session
    */
-  async updatePayment(context: any): Promise<PaymentProviderSessionResponse> {
+  async updatePayment(context: any): Promise<any> {
     return await this.retrievePayment(context.paymentSessionData, context)
   }
 
@@ -490,7 +507,7 @@ export class MolliePaymentProvider extends AbstractPaymentProvider {
         data: webhookData,
       }
     } catch (error: any) {
-      this.logger_.error(`[Mollie] Webhook processing failed: ${error.message}`)
+      this.getLogger().error(`[Mollie] Webhook processing failed: ${error.message}`)
       return {
         action: "fail",
         data: webhookData,

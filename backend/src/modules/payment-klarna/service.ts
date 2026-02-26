@@ -1,15 +1,12 @@
 // @ts-nocheck
 import {
-  AbstractPaymentProvider,
   PaymentProviderError,
   PaymentSessionStatus,
-  PaymentProviderSessionResponse,
-  RefundInput,
 } from "@medusajs/framework/utils"
-import { Logger } from "@medusajs/framework/types"
-import { GATEWAY_CONFIG_MODULE } from "../gateway-config"
 import { KlarnaApiClient, IKlarnaOrderLine } from "./api-client"
 import crypto from "crypto"
+
+const GATEWAY_CONFIG_MODULE = "gatewayConfig"
 
 export interface IKlarnaPaymentSessionData {
   sessionId?: string
@@ -77,15 +74,40 @@ function buildOrderLines(
  * Authorization valid for 28 days
  * Frontend uses Klarna Payments widget with client_token
  */
-export class KlarnaPaymentProvider extends AbstractPaymentProvider {
+export class KlarnaPaymentProvider {
+  protected container_: any
   protected client_: KlarnaApiClient | null = null
   protected gatewayConfigService_: any
-  protected logger_: Logger
+  protected logger_: any
 
-  constructor(container: any) {
-    super(container)
-    this.gatewayConfigService_ = container.resolve(GATEWAY_CONFIG_MODULE)
-    this.logger_ = container.resolve("logger")
+  static identifier = "klarna"
+
+  constructor(container: any, options?: any) {
+    this.container_ = container
+    try {
+      this.logger_ = container.resolve("logger")
+    } catch {
+      this.logger_ = console
+    }
+    try {
+      this.gatewayConfigService_ = container.resolve(GATEWAY_CONFIG_MODULE)
+    } catch {
+      this.gatewayConfigService_ = null
+    }
+  }
+
+  private getLogger() {
+    if (!this.logger_) {
+      try { this.logger_ = this.container_.resolve("logger") } catch { this.logger_ = console }
+    }
+    return this.logger_
+  }
+
+  private getGatewayConfigService() {
+    if (!this.gatewayConfigService_) {
+      this.gatewayConfigService_ = this.container_.resolve(GATEWAY_CONFIG_MODULE)
+    }
+    return this.gatewayConfigService_
   }
 
   /**
@@ -93,7 +115,8 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
    */
   private async getKlarnaClient(): Promise<KlarnaApiClient> {
     if (!this.client_) {
-      const configs = await this.gatewayConfigService_.listGatewayConfigs(
+      const gcService = this.getGatewayConfigService()
+      const configs = await gcService.listGatewayConfigs(
         { provider: "klarna", is_active: true },
         { take: 1 }
       )
@@ -112,15 +135,10 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
   }
 
   /**
-   * Get identifier for the payment provider
-   */
-  static identifier = "klarna"
-
-  /**
    * Initiate a payment session — create Klarna session and return client_token
    * Frontend will use this token with Klarna Payments widget
    */
-  async initiatePayment(context: any): Promise<PaymentProviderSessionResponse> {
+  async initiatePayment(context: any): Promise<any> {
     const {
       amount,
       currency_code,
@@ -204,7 +222,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
         throw new PaymentProviderError("No client_token returned from Klarna")
       }
 
-      this.logger_.info(
+      this.getLogger().info(
         `[Klarna] Session created: sessionId=${result.data.session_id}, client_token available`
       )
 
@@ -221,7 +239,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
         client_token: result.data.client_token,
       }
     } catch (error: any) {
-      this.logger_.error(`[Klarna] Payment initiation failed: ${error.message}`)
+      this.getLogger().error(`[Klarna] Payment initiation failed: ${error.message}`)
       throw new PaymentProviderError(
         error.message || "Failed to initiate Klarna payment"
       )
@@ -235,7 +253,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
   async authorizePayment(
     paymentSessionData: IKlarnaPaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getKlarnaClient()
       const { sessionId, clientToken, authorizationToken, amount, currency } =
@@ -287,7 +305,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
 
       const status = mapKlarnaStatusToMedusa(result.data?.status || "AUTHORIZED")
 
-      this.logger_.info(
+      this.getLogger().info(
         `[Klarna] Order created: klarnaOrderId=${result.data.order_id}, status=${result.data.status}`
       )
 
@@ -300,7 +318,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
         status,
       }
     } catch (error: any) {
-      this.logger_.error(`[Klarna] Authorization failed: ${error.message}`)
+      this.getLogger().error(`[Klarna] Authorization failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -313,7 +331,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
   async capturePayment(
     paymentSessionData: IKlarnaPaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getKlarnaClient()
       const { klarnaOrderId, amount } = paymentSessionData
@@ -374,7 +392,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
         throw new PaymentProviderError(result.error || "Failed to capture order")
       }
 
-      this.logger_.info(
+      this.getLogger().info(
         `[Klarna] Order captured: klarnaOrderId=${klarnaOrderId}, captureId=${result.data.capture_id}`
       )
 
@@ -388,7 +406,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
         status: PaymentSessionStatus.CAPTURED,
       }
     } catch (error: any) {
-      this.logger_.error(`[Klarna] Capture failed: ${error.message}`)
+      this.getLogger().error(`[Klarna] Capture failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -400,7 +418,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
     paymentSessionData: IKlarnaPaymentSessionData,
     refundAmount: number,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getKlarnaClient()
       const { klarnaOrderId } = paymentSessionData
@@ -427,7 +445,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
         throw new PaymentProviderError(result.error || "Failed to create refund")
       }
 
-      this.logger_.info(
+      this.getLogger().info(
         `[Klarna] Refund created for order ${klarnaOrderId}: ${result.data.refund_id}`
       )
 
@@ -436,7 +454,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
         status: PaymentSessionStatus.AUTHORIZED,
       }
     } catch (error: any) {
-      this.logger_.error(`[Klarna] Refund failed: ${error.message}`)
+      this.getLogger().error(`[Klarna] Refund failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -447,7 +465,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
   async cancelPayment(
     paymentSessionData: IKlarnaPaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getKlarnaClient()
       const { klarnaOrderId } = paymentSessionData
@@ -457,7 +475,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
         await client.releaseAuthorization(klarnaOrderId)
       }
 
-      this.logger_.info(
+      this.getLogger().info(
         `[Klarna] Order ${klarnaOrderId} marked for cancellation`
       )
 
@@ -466,7 +484,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
         status: PaymentSessionStatus.CANCELED,
       }
     } catch (error: any) {
-      this.logger_.error(`[Klarna] Cancel failed: ${error.message}`)
+      this.getLogger().error(`[Klarna] Cancel failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -477,7 +495,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
   async deletePayment(
     paymentSessionData: IKlarnaPaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     // No-op for Klarna — cleanup handled server-side
     return {
       session_data: paymentSessionData,
@@ -507,7 +525,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
 
       return mapKlarnaStatusToMedusa(result.data?.status || "AUTHORIZED")
     } catch (error: any) {
-      this.logger_.error(`[Klarna] Status check failed: ${error.message}`)
+      this.getLogger().error(`[Klarna] Status check failed: ${error.message}`)
       return PaymentSessionStatus.ERROR
     }
   }
@@ -518,7 +536,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
   async retrievePayment(
     paymentSessionData: IKlarnaPaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getKlarnaClient()
       const { klarnaOrderId } = paymentSessionData
@@ -546,7 +564,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
         status,
       }
     } catch (error: any) {
-      this.logger_.error(`[Klarna] Retrieve failed: ${error.message}`)
+      this.getLogger().error(`[Klarna] Retrieve failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -554,7 +572,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
   /**
    * Update payment session
    */
-  async updatePayment(context: any): Promise<PaymentProviderSessionResponse> {
+  async updatePayment(context: any): Promise<any> {
     return await this.retrievePayment(context.paymentSessionData, context)
   }
 
@@ -608,7 +626,7 @@ export class KlarnaPaymentProvider extends AbstractPaymentProvider {
         } as IKlarnaPaymentSessionData,
       }
     } catch (error: any) {
-      this.logger_.error(`[Klarna] Webhook processing failed: ${error.message}`)
+      this.getLogger().error(`[Klarna] Webhook processing failed: ${error.message}`)
       return {
         action: "fail",
         data: webhookData,

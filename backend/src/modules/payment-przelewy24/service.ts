@@ -1,15 +1,12 @@
 // @ts-nocheck
 import {
-  AbstractPaymentProvider,
   PaymentProviderError,
   PaymentSessionStatus,
-  PaymentProviderSessionResponse,
-  RefundInput,
 } from "@medusajs/framework/utils"
-import { Logger } from "@medusajs/framework/types"
-import { GATEWAY_CONFIG_MODULE } from "../gateway-config"
 import { Przelewy24ApiClient } from "./api-client"
 import crypto from "crypto"
+
+const GATEWAY_CONFIG_MODULE = "gatewayConfig"
 
 export interface IP24PaymentSessionData {
   token?: string
@@ -51,15 +48,40 @@ function mapP24StatusToMedusa(p24Status: string): PaymentSessionStatus {
  * Supports PLN, EUR and other currencies
  * Flow: register transaction → redirect → customer pays → webhook verification
  */
-export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
+export class Przelewy24PaymentProvider {
+  protected container_: any
   protected client_: Przelewy24ApiClient | null = null
   protected gatewayConfigService_: any
-  protected logger_: Logger
+  protected logger_: any
 
-  constructor(container: any) {
-    super(container)
-    this.gatewayConfigService_ = container.resolve(GATEWAY_CONFIG_MODULE)
-    this.logger_ = container.resolve("logger")
+  static identifier = "przelewy24"
+
+  constructor(container: any, options?: any) {
+    this.container_ = container
+    try {
+      this.logger_ = container.resolve("logger")
+    } catch {
+      this.logger_ = console
+    }
+    try {
+      this.gatewayConfigService_ = container.resolve(GATEWAY_CONFIG_MODULE)
+    } catch {
+      this.gatewayConfigService_ = null
+    }
+  }
+
+  private getLogger() {
+    if (!this.logger_) {
+      try { this.logger_ = this.container_.resolve("logger") } catch { this.logger_ = console }
+    }
+    return this.logger_
+  }
+
+  private getGatewayConfigService() {
+    if (!this.gatewayConfigService_) {
+      this.gatewayConfigService_ = this.container_.resolve(GATEWAY_CONFIG_MODULE)
+    }
+    return this.gatewayConfigService_
   }
 
   /**
@@ -67,7 +89,8 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
    */
   private async getP24Client(): Promise<Przelewy24ApiClient> {
     if (!this.client_) {
-      const configs = await this.gatewayConfigService_.listGatewayConfigs(
+      const gcService = this.getGatewayConfigService()
+      const configs = await gcService.listGatewayConfigs(
         { provider: "przelewy24", is_active: true },
         { take: 1 }
       )
@@ -102,24 +125,33 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
   }
 
   /**
-   * Get identifier for the payment provider
+   * Helper to get active P24 config
    */
-  static identifier = "przelewy24"
+  private async getP24Config() {
+    const gcService = this.getGatewayConfigService()
+    const configs = await gcService.listGatewayConfigs(
+      { provider: "przelewy24", is_active: true },
+      { take: 1 }
+    )
+    return configs[0]
+  }
 
   /**
    * Initiate a payment session — register transaction with P24
    */
-  async initiatePayment(context: any): Promise<PaymentProviderSessionResponse> {
+  async initiatePayment(context: any): Promise<any> {
     const { amount, currency_code, customer, cart, context: contextData } =
       context
 
     try {
       const client = await this.getP24Client()
-      const config = await this.gatewayConfigService_.retrieve("przelewy24")
+      const config = await this.getP24Config()
+      const keys = config?.mode === "live" ? config.live_keys : config.test_keys
+      const meta = config?.metadata || {}
 
       const sessionId = cart?.id || `sess-${Date.now()}`
-      const merchantId = config.api_key
-      const posId = config.gateway_metadata.pos_id
+      const merchantId = keys?.api_key
+      const posId = meta.pos_id || keys?.api_key
 
       const registerParams = {
         merchantId,
@@ -132,7 +164,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         country: customer?.billing_address?.country_code?.toUpperCase() || "PL",
         urlReturn: `${contextData?.return_url || "https://example.com"}/payment/success`,
         urlStatus: `${contextData?.webhook_url || "https://api.example.com"}/webhooks/przelewy24`,
-        crc: config.api_key_2 || "",
+        crc: meta.crc || "",
       }
 
       const result = await client.registerTransaction(registerParams)
@@ -146,7 +178,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         throw new PaymentProviderError("No transaction URL returned from P24")
       }
 
-      this.logger_.info(
+      this.getLogger().info(
         `[Przelewy24] Transaction registered: sessionId=${sessionId}, redirect=${result.data.transactionUrl}`
       )
 
@@ -161,7 +193,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         redirect_url: result.data.transactionUrl,
       }
     } catch (error: any) {
-      this.logger_.error(`[Przelewy24] Payment initiation failed: ${error.message}`)
+      this.getLogger().error(`[Przelewy24] Payment initiation failed: ${error.message}`)
       throw new PaymentProviderError(
         error.message || "Failed to initiate Przelewy24 payment"
       )
@@ -174,10 +206,12 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
   async authorizePayment(
     paymentSessionData: IP24PaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getP24Client()
-      const config = await this.gatewayConfigService_.retrieve("przelewy24")
+      const config = await this.getP24Config()
+      const keys = config?.mode === "live" ? config.live_keys : config.test_keys
+      const meta = config?.metadata || {}
       const { sessionId, orderId, amount, currency } = paymentSessionData
 
       if (!sessionId || !orderId) {
@@ -187,13 +221,13 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
       }
 
       const verifyParams = {
-        merchantId: config.api_key,
-        posId: config.gateway_metadata.pos_id,
+        merchantId: keys?.api_key,
+        posId: meta.pos_id || keys?.api_key,
         sessionId,
         orderId,
         amount,
         currency,
-        crc: config.api_key_2 || "",
+        crc: meta.crc || "",
       }
 
       const result = await client.verifyTransaction(verifyParams)
@@ -215,7 +249,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         status,
       }
     } catch (error: any) {
-      this.logger_.error(`[Przelewy24] Authorization check failed: ${error.message}`)
+      this.getLogger().error(`[Przelewy24] Authorization check failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -226,7 +260,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
   async capturePayment(
     paymentSessionData: IP24PaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       // P24 auto-captures on successful payment
       // Return current status
@@ -239,7 +273,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         status,
       }
     } catch (error: any) {
-      this.logger_.error(`[Przelewy24] Capture failed: ${error.message}`)
+      this.getLogger().error(`[Przelewy24] Capture failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -251,10 +285,11 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
     paymentSessionData: IP24PaymentSessionData,
     refundAmount: number,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const client = await this.getP24Client()
-      const config = await this.gatewayConfigService_.retrieve("przelewy24")
+      const config = await this.getP24Config()
+      const meta = config?.metadata || {}
       const { sessionId, orderId } = paymentSessionData
 
       if (!orderId || !sessionId) {
@@ -273,7 +308,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
             description: `Refund ${(refundAmount / 100).toFixed(2)}`,
           },
         ],
-        urlStatus: `${config.gateway_metadata?.webhook_url || "https://api.example.com"}/webhooks/przelewy24`,
+        urlStatus: `${meta?.webhook_url || "https://api.example.com"}/webhooks/przelewy24`,
       }
 
       const result = await client.createRefund(refundParams)
@@ -281,7 +316,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         throw new PaymentProviderError(result.error || "Failed to create refund")
       }
 
-      this.logger_.info(
+      this.getLogger().info(
         `[Przelewy24] Refund created for orderId ${orderId}: ${(refundAmount / 100).toFixed(2)}`
       )
 
@@ -290,7 +325,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         status: PaymentSessionStatus.AUTHORIZED,
       }
     } catch (error: any) {
-      this.logger_.error(`[Przelewy24] Refund failed: ${error.message}`)
+      this.getLogger().error(`[Przelewy24] Refund failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -301,9 +336,9 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
   async cancelPayment(
     paymentSessionData: IP24PaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
-      this.logger_.info(
+      this.getLogger().info(
         `[Przelewy24] Transaction ${paymentSessionData.sessionId} marked for cancellation`
       )
 
@@ -312,7 +347,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         status: PaymentSessionStatus.CANCELED,
       }
     } catch (error: any) {
-      this.logger_.error(`[Przelewy24] Cancel failed: ${error.message}`)
+      this.getLogger().error(`[Przelewy24] Cancel failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -323,7 +358,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
   async deletePayment(
     paymentSessionData: IP24PaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     // No-op for P24 — cleanup handled server-side
     return {
       session_data: paymentSessionData,
@@ -342,7 +377,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
       const status = paymentSessionData.status || "pending"
       return mapP24StatusToMedusa(status)
     } catch (error: any) {
-      this.logger_.error(`[Przelewy24] Status check failed: ${error.message}`)
+      this.getLogger().error(`[Przelewy24] Status check failed: ${error.message}`)
       return PaymentSessionStatus.ERROR
     }
   }
@@ -353,7 +388,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
   async retrievePayment(
     paymentSessionData: IP24PaymentSessionData,
     context: any
-  ): Promise<PaymentProviderSessionResponse> {
+  ): Promise<any> {
     try {
       const status = mapP24StatusToMedusa(
         paymentSessionData.status || "pending"
@@ -364,7 +399,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         status,
       }
     } catch (error: any) {
-      this.logger_.error(`[Przelewy24] Retrieve failed: ${error.message}`)
+      this.getLogger().error(`[Przelewy24] Retrieve failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -372,7 +407,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
   /**
    * Update payment session
    */
-  async updatePayment(context: any): Promise<PaymentProviderSessionResponse> {
+  async updatePayment(context: any): Promise<any> {
     return await this.retrievePayment(context.paymentSessionData, context)
   }
 
@@ -403,18 +438,20 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         }
       }
 
-      const config = await this.gatewayConfigService_.retrieve("przelewy24")
+      const config = await this.getP24Config()
+      const keys = config?.mode === "live" ? config.live_keys : config.test_keys
+      const meta = config?.metadata || {}
 
       // Verify signature: sign should be SHA384 of sessionId|orderId|amount|currency|crc
       const expectedSign = crypto
         .createHash("sha384")
         .update(
-          `${sessionId}|${orderId}|${amount}|${currency}|${config.api_key_2 || ""}`
+          `${sessionId}|${orderId}|${amount}|${currency}|${meta.crc || ""}`
         )
         .digest("hex")
 
       if (sign !== expectedSign) {
-        this.logger_.warn(
+        this.getLogger().warn(
           `[Przelewy24] Invalid webhook signature for sessionId ${sessionId}`
         )
         return {
@@ -426,19 +463,19 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
       const client = await this.getP24Client()
 
       const verifyParams = {
-        merchantId: config.api_key,
+        merchantId: keys?.api_key,
         posId,
         sessionId,
         orderId,
         amount,
         currency,
-        crc: config.api_key_2 || "",
+        crc: meta.crc || "",
       }
 
       const result = await client.verifyTransaction(verifyParams)
 
       if (!result.success) {
-        this.logger_.warn(
+        this.getLogger().warn(
           `[Przelewy24] Verification failed for orderId ${orderId}: ${result.error}`
         )
         return {
@@ -460,7 +497,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         } as IP24PaymentSessionData,
       }
     } catch (error: any) {
-      this.logger_.error(`[Przelewy24] Webhook processing failed: ${error.message}`)
+      this.getLogger().error(`[Przelewy24] Webhook processing failed: ${error.message}`)
       return {
         action: "fail",
         data: webhookData,

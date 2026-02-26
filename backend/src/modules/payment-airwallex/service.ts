@@ -1,10 +1,8 @@
 // @ts-nocheck
 import {
-  AbstractPaymentProvider,
   PaymentProviderError,
   PaymentSessionStatus,
-} from "@medusajs/utils"
-import { Logger } from "@medusajs/framework/logger"
+} from "@medusajs/framework/utils"
 import { AirwallexApiClient } from "./api-client"
 
 /**
@@ -23,15 +21,29 @@ interface IAirwallexPaymentSessionData {
  * Airwallex Payment Provider for MedusaJS 2.0
  * Supports card payments (credit/debit) and various payment methods
  */
-export class AirwallexPaymentProvider extends AbstractPaymentProvider {
+export class AirwallexPaymentProvider {
   static identifier = "airwallex"
 
+  protected container_: any
+  protected options_: any
   private apiClient: AirwallexApiClient | null = null
-  private logger: Logger
+  private logger: any
 
-  constructor(container: any) {
-    super(container)
-    this.logger = container.logger
+  constructor(container: any, options?: any) {
+    this.container_ = container
+    this.options_ = options || {}
+    try {
+      this.logger = container.resolve("logger")
+    } catch {
+      this.logger = console
+    }
+  }
+
+  private getLogger() {
+    if (!this.logger) {
+      try { this.logger = this.container_.resolve("logger") } catch { this.logger = console }
+    }
+    return this.logger
   }
 
   /**
@@ -56,7 +68,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
       credentials.api_key,
       credentials.secret_key,
       isTest,
-      this.logger
+      this.getLogger()
     )
 
     // Initial login
@@ -131,7 +143,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
         metadata: paymentIntent.metadata,
       }
 
-      this.logger.info(
+      this.getLogger().info(
         `[Airwallex] Payment initiated for order ${merchant_order_id}, intent: ${paymentIntent.id}`
       )
 
@@ -140,7 +152,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
         status: this.mapAirwallexStatusToMedusa(paymentIntent.status),
       }
     } catch (error: any) {
-      this.logger.error(`[Airwallex] Initiate payment failed: ${error.message}`)
+      this.getLogger().error(`[Airwallex] Initiate payment failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -171,7 +183,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
         status: paymentIntent.status,
       }
 
-      this.logger.info(
+      this.getLogger().info(
         `[Airwallex] Payment authorized, intent: ${intentId}, status: ${paymentIntent.status}`
       )
 
@@ -180,7 +192,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
         status: this.mapAirwallexStatusToMedusa(paymentIntent.status),
       }
     } catch (error: any) {
-      this.logger.error(`[Airwallex] Authorize payment failed: ${error.message}`)
+      this.getLogger().error(`[Airwallex] Authorize payment failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -213,7 +225,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
         status: paymentIntent.status,
       }
 
-      this.logger.info(
+      this.getLogger().info(
         `[Airwallex] Payment captured, intent: ${intentId}, amount: ${amount}`
       )
 
@@ -222,7 +234,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
         status: this.mapAirwallexStatusToMedusa(paymentIntent.status),
       }
     } catch (error: any) {
-      this.logger.error(`[Airwallex] Capture payment failed: ${error.message}`)
+      this.getLogger().error(`[Airwallex] Capture payment failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -262,7 +274,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
         },
       }
 
-      this.logger.info(
+      this.getLogger().info(
         `[Airwallex] Refund created, intent: ${intentId}, refund: ${refund.id}, amount: ${refund.amount}`
       )
 
@@ -271,7 +283,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
         status: PaymentSessionStatus.AUTHORIZED,
       }
     } catch (error: any) {
-      this.logger.error(`[Airwallex] Refund payment failed: ${error.message}`)
+      this.getLogger().error(`[Airwallex] Refund payment failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -295,7 +307,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
         await client.cancelPaymentIntent(intentId)
       }
 
-      this.logger.info(`[Airwallex] Payment cancelled, intent: ${intentId}`)
+      this.getLogger().info(`[Airwallex] Payment cancelled, intent: ${intentId}`)
 
       return {
         session_data: {
@@ -305,7 +317,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
         status: PaymentSessionStatus.CANCELED,
       }
     } catch (error: any) {
-      this.logger.error(`[Airwallex] Cancel payment failed: ${error.message}`)
+      this.getLogger().error(`[Airwallex] Cancel payment failed: ${error.message}`)
       throw new PaymentProviderError(error.message)
     }
   }
@@ -349,7 +361,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
       const paymentIntent = await client.getPaymentIntent(intentId)
       return this.mapAirwallexStatusToMedusa(paymentIntent.status)
     } catch (error: any) {
-      this.logger.error(
+      this.getLogger().error(
         `[Airwallex] Get payment status failed: ${error.message}`
       )
       return PaymentSessionStatus.ERROR
@@ -392,7 +404,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
         status: this.mapAirwallexStatusToMedusa(paymentIntent.status),
       }
     } catch (error: any) {
-      this.logger.error(
+      this.getLogger().error(
         `[Airwallex] Retrieve payment failed: ${error.message}`
       )
       throw new PaymentProviderError(error.message)
@@ -454,7 +466,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
         metadata: paymentIntent.metadata,
       }
 
-      this.logger.info(
+      this.getLogger().info(
         `[Airwallex] Webhook processed: ${event_type}, intent: ${id}, action: ${action}`
       )
 
@@ -463,7 +475,7 @@ export class AirwallexPaymentProvider extends AbstractPaymentProvider {
         data: sessionData,
       }
     } catch (error: any) {
-      this.logger.error(
+      this.getLogger().error(
         `[Airwallex] Webhook processing failed: ${error.message}`
       )
       return {
