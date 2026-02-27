@@ -5087,14 +5087,28 @@ body {
               // Build return URL for redirect-based methods (iDEAL, Bancontact, BLIK, EPS)
               var awReturnUrl = window.location.origin + window.location.pathname + '?payment_return=1&cart_id=' + encodeURIComponent(result.cartId);
 
-              var dropIn = await window.AirwallexComponentsSDK.createElement('dropIn', {
+              // Map our method codes to Airwallex Drop-in method types
+              var awMethodMap = {
+                'creditcard': 'card', 'ideal': 'ideal', 'bancontact': 'bancontact',
+                'eps': 'eps', 'blik': 'blik', 'googlepay': 'googlepay',
+                'applepay': 'applepay', 'przelewy24': 'przelewy24',
+              };
+              var awMethod = providerData.method ? awMethodMap[providerData.method] : null;
+
+              var dropInOptions = {
                 intent_id: providerData.intentId,
                 client_secret: providerData.clientSecret,
                 currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
                 country_code: (countrySelect.value || 'NL').toUpperCase(),
                 autoCapture: true,
                 withBilling: false,
-              });
+              };
+              // Filter Drop-in to only show the selected method
+              if (awMethod) {
+                dropInOptions.methods = [awMethod];
+              }
+
+              var dropIn = await window.AirwallexComponentsSDK.createElement('dropIn', dropInOptions);
 
               dropIn.mount('airwallex-dropin-container');
 
