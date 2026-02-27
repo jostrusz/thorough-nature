@@ -123,13 +123,39 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       }
 
       const existingLog = order.metadata?.payment_activity_log || []
+      const updatedMetadata: any = {
+        ...order.metadata,
+        payment_activity_log: [...existingLog, activityEntry],
+        klarnaOrderId,
+        klarnaStatus: event_type,
+      }
+
+      // Mark as captured when Klarna confirms capture
+      if (event_type === "order.captured") {
+        updatedMetadata.payment_captured = true
+        updatedMetadata.klarna_captured_at = new Date().toISOString()
+      }
+
+      // Mark as expired when authorization expires (28 days)
+      if (event_type === "order.expired") {
+        updatedMetadata.klarna_expired = true
+        updatedMetadata.klarna_expired_at = new Date().toISOString()
+      }
+
+      // Mark as cancelled
+      if (event_type === "order.cancelled") {
+        updatedMetadata.klarna_cancelled = true
+        updatedMetadata.klarna_cancelled_at = new Date().toISOString()
+      }
+
+      // Mark refund complete
+      if (event_type === "order.refund.completed" || event_type === "order.refunded") {
+        updatedMetadata.klarna_refunded = true
+        updatedMetadata.klarna_refunded_at = new Date().toISOString()
+      }
+
       await orderModuleService.updateOrders(order.id, {
-        metadata: {
-          ...order.metadata,
-          payment_activity_log: [...existingLog, activityEntry],
-          klarnaOrderId,
-          klarnaStatus: event_type,
-        },
+        metadata: updatedMetadata,
       })
 
       logger.info(
