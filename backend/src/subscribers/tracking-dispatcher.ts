@@ -303,7 +303,7 @@ async function capturePayPal(
   })
 
   const currency = order.currency_code?.toUpperCase() || "EUR"
-  const amountValue = (Number(order.total) / 100).toFixed(2)
+  const amountValue = Number(order.total).toFixed(2)
 
   if (authorizationId) {
     const result = await client.captureAuthorization(authorizationId, {
@@ -376,8 +376,9 @@ async function captureKlarna(
   const client = new KlarnaApiClient(apiKey, secretKey, testMode)
 
   // Capture with shipping_info included (Klarna supports this natively)
+  // order.total is in major units (e.g. 99 = €99.00); Klarna needs minor units (cents)
   const result = await client.captureOrder(klarnaOrderId, {
-    captured_amount: order.total,
+    captured_amount: Math.round(Number(order.total) * 100),
     description: `Capture for order ${order.display_id || order.id}`,
     shipping_info: [
       {
