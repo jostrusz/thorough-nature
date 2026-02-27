@@ -14,9 +14,9 @@ export const POST = async (
     const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER);
 
     // Fetch order
-    const [orders] = await queryModule.graph({
-      entity: "orders",
-      fields: ["id", "metadata"],
+    const { data: orders } = await queryModule.graph({
+      entity: "order",
+      fields: ["id", "currency_code", "metadata"],
       filters: { id },
     });
 
@@ -28,6 +28,12 @@ export const POST = async (
     const order = orders[0];
     const upsellProvider = order.metadata?.upsell_provider;
     const upsellSessionId = order.metadata?.upsell_session_id;
+
+    // Idempotency: if upsell already completed, return success
+    if (order.metadata?.upsell_status === "completed" && order.metadata?.upsell_payment_id) {
+      logger.info("Upsell webhook: already processed (idempotent)", { order_id: id });
+      return res.json({ success: true, status: "completed", message: "Already processed" });
+    }
 
     let paymentStatus = "failed";
     let paymentId: string;
@@ -150,7 +156,7 @@ export const POST = async (
       payment_id: paymentId,
       provider: upsellProvider,
       amount: order.metadata?.upsell_amount || 0,
-      currency: "eur",
+      currency: (order.currency_code || "eur").toLowerCase(),
       status: paymentStatus,
       type: "upsell_webhook",
       metadata: {

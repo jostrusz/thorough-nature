@@ -15,9 +15,9 @@ export const POST = async (
     const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER);
 
     // Fetch order
-    const [orders] = await queryModule.graph({
-      entity: "orders",
-      fields: ["id", "customer_id", "email", "shipping_address", "metadata"],
+    const { data: orders } = await queryModule.graph({
+      entity: "order",
+      fields: ["id", "customer_id", "email", "currency_code", "shipping_address", "metadata"],
       filters: { id },
     });
 
@@ -26,6 +26,7 @@ export const POST = async (
     }
 
     const order = orders[0];
+    const orderCurrency = (order.currency_code || "EUR").toUpperCase();
 
     // Verify timer
     const upsellCreatedAt = order.metadata?.upsell_created_at;
@@ -58,7 +59,7 @@ export const POST = async (
         sessionData = await mollieClient.payments.create({
           amount: {
             value: (upsellAmount / 100).toFixed(2),
-            currency: "EUR",
+            currency: orderCurrency,
           },
           description: `Upsell: ${upsell_product_id}`,
           method: molliePaymentMethod,
@@ -84,7 +85,7 @@ export const POST = async (
           posId: process.env.P24_POS_ID,
           sessionId: `upsell-${order.id}-${Date.now()}`,
           amount: upsellAmount,
-          currency: "978", // EUR
+          currency: orderCurrency === "EUR" ? "978" : orderCurrency, // ISO 4217 numeric for EUR
           description: `Upsell: ${upsell_product_id}`,
           email: order.email,
           urlReturn: `${process.env.STOREFRONT_URL}/thank-you/${order.id}`,
@@ -100,7 +101,7 @@ export const POST = async (
 
         sessionData = await klarnaClient.ordersApi.createOrder({
           purchase_country: "DE",
-          purchase_currency: "EUR",
+          purchase_currency: orderCurrency,
           locale: "de-DE",
           order_amount: upsellAmount,
           order_lines: [
@@ -140,7 +141,7 @@ export const POST = async (
           merchant: process.env.COMGATE_MERCHANT,
           secret: process.env.COMGATE_SECRET,
           price: (upsellAmount / 100).toFixed(2),
-          curr: "EUR",
+          curr: orderCurrency,
           label: `Upsell: ${upsell_product_id}`,
           refId: `upsell-${order.id}`,
           email: order.email,
@@ -161,7 +162,7 @@ export const POST = async (
         sessionData = await airwallexClient.payments.create({
           request_id: `upsell-${order.id}-${Date.now()}`,
           amount: upsellAmount / 100,
-          currency: "EUR",
+          currency: orderCurrency,
           merchant_order_id: `upsell-${order.id}`,
           order: {
             products: [
@@ -214,7 +215,7 @@ export const POST = async (
       payment_id: sessionData.id || sessionData.transId || sessionData.order_id,
       provider: paymentProvider,
       amount: upsellAmount,
-      currency: "eur",
+      currency: orderCurrency.toLowerCase(),
       status: "pending",
       type: "upsell_session_created",
       metadata: {
