@@ -1,0 +1,371 @@
+// @ts-nocheck
+import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+
+const GATEWAY_CONFIG_MODULE = "gatewayConfig"
+
+/**
+ * PayPal webhook handler
+ *
+ * Event types:
+ * - CHECKOUT.ORDER.APPROVED — customer approved the payment
+ * - CHECKOUT.ORDER.COMPLETED — order completed
+ * - PAYMENT.AUTHORIZATION.CREATED — authorization created (29 days validity)
+ * - PAYMENT.AUTHORIZATION.VOIDED — authorization voided (expired or cancelled)
+ * - PAYMENT.CAPTURE.COMPLETED — payment captured successfully
+ * - PAYMENT.CAPTURE.DENIED — capture denied
+ * - PAYMENT.CAPTURE.PENDING — capture pending
+ * - PAYMENT.CAPTURE.REFUNDED — refund completed
+ * - PAYMENT.CAPTURE.REVERSED — payment reversed (dispute)
+ * - CUSTOMER.DISPUTE.CREATED — dispute opened
+ * - CUSTOMER.DISPUTE.RESOLVED — dispute resolved
+ *
+ * Always returns 200 OK to prevent PayPal retries.
+ */
+export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
+  try {
+    const event = req.body as any
+    const eventType = event.event_type
+    const resource = event.resource || {}
+
+    if (!eventType) {
+      return res.status(200).json({ received: true, error: "No event_type" })
+    }
+
+    const orderModuleService = req.scope.resolve("orderModuleService")
+    const logger = req.scope.resolve("logger")
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+
+    logger.info(
+      `[PayPal Webhook] Received event: ${eventType}, resource.id: ${resource.id}`
+    )
+
+    // ─── Verify webhook signature ───
+    let signatureVerified = false
+    try {
+      const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
+      const configs = await gcService.listGatewayConfigs(
+        { provider: "paypal", is_active: true },
+        { take: 1 }
+      )
+      const config = configs[0]
+      if (config) {
+        const isLive = config.mode === "live"
+        const keys = isLive ? config.live_keys : config.test_keys
+        const webhookId = keys?.webhook_id
+
+        if (webhookId && keys?.client_id && keys?.client_secret) {
+          const { PayPalApiClient } = await import(
+            "../../../modules/payment-paypal/api-client"
+          )
+          const client = new PayPalApiClient({
+            client_id: keys.client_id,
+            client_secret: keys.client_secret,
+            mode: isLive ? "live" : "test",
+          })
+
+          const reqHeaders: Record<string, string> = {}
+          for (const key of [
+            "paypal-auth-algo",
+            "paypal-cert-url",
+            "paypal-transmission-id",
+            "paypal-transmission-sig",
+            "paypal-transmission-time",
+          ]) {
+            reqHeaders[key] = (req.headers[key] as string) || ""
+          }
+
+          signatureVerified = await client.verifyWebhookSignature(
+            webhookId,
+            reqHeaders,
+            event
+          )
+          logger.info(
+            `[PayPal Webhook] Signature verification: ${signatureVerified ? "SUCCESS" : "FAILED"}`
+          )
+        } else {
+          logger.warn("[PayPal Webhook] No webhook_id configured — skipping signature verification")
+        }
+      }
+    } catch (e: any) {
+      logger.warn(`[PayPal Webhook] Signature verification error: ${e.message}`)
+    }
+
+    // Map event type to activity event and status
+    const mapping = mapPayPalEvent(eventType)
+
+    // ─── Find the Medusa order ───
+    // Extract PayPal Order ID from the event resource
+    let paypalOrderId: string | null = null
+
+    // Different events have the order ID in different places
+    if (resource.supplementary_data?.related_ids?.order_id) {
+      paypalOrderId = resource.supplementary_data.related_ids.order_id
+    } else if (
+      eventType.startsWith("CHECKOUT.ORDER") &&
+      resource.id
+    ) {
+      paypalOrderId = resource.id
+    }
+
+    // For capture/authorization events, the order ID might be in links
+    if (!paypalOrderId && resource.links) {
+      const orderLink = resource.links.find(
+        (l: any) => l.rel === "up" && l.href?.includes("/checkout/orders/")
+      )
+      if (orderLink) {
+        paypalOrderId = orderLink.href.split("/checkout/orders/")[1]?.split("/")?.[0]
+      }
+    }
+
+    let order = null
+
+    // Strategy 1: Search by paypalOrderId in metadata
+    if (paypalOrderId) {
+      try {
+        const { data: orders } = await query.graph({
+          entity: "order",
+          fields: ["id", "metadata", "total", "currency_code"],
+          filters: {},
+          pagination: { order: { created_at: "DESC" }, skip: 0, take: 100 },
+        })
+
+        for (const o of orders || []) {
+          if (
+            o.metadata?.paypalOrderId === paypalOrderId ||
+            o.metadata?.payment_paypal_order_id === paypalOrderId
+          ) {
+            order = o
+            logger.info(`[PayPal Webhook] Found order ${o.id} via metadata`)
+            break
+          }
+        }
+      } catch (e: any) {
+        logger.warn(`[PayPal Webhook] Metadata search failed: ${e.message}`)
+      }
+    }
+
+    // Strategy 2: Search by payment session data
+    if (!order) {
+      try {
+        const { data: orders } = await query.graph({
+          entity: "order",
+          fields: [
+            "id",
+            "metadata",
+            "total",
+            "currency_code",
+            "payment_collections.*",
+            "payment_collections.payments.*",
+          ],
+          filters: {},
+          pagination: { order: { created_at: "DESC" }, skip: 0, take: 50 },
+        })
+
+        for (const o of orders || []) {
+          const payments =
+            o.payment_collections?.flatMap((pc: any) => pc.payments || []) || []
+          for (const p of payments) {
+            if (
+              p.data?.paypalOrderId === paypalOrderId ||
+              p.data?.paypalOrderId === resource.id
+            ) {
+              order = o
+              logger.info(
+                `[PayPal Webhook] Found order ${o.id} via payment session data`
+              )
+              break
+            }
+          }
+          if (order) break
+        }
+      } catch (e: any) {
+        logger.warn(`[PayPal Webhook] Payment session search failed: ${e.message}`)
+      }
+    }
+
+    if (order) {
+      const activityEntry = {
+        timestamp: new Date().toISOString(),
+        event: mapping.activityEvent,
+        gateway: "paypal",
+        payment_method: "paypal",
+        status: mapping.activityStatus,
+        amount: resource.amount?.value || order.total || 0,
+        currency: resource.amount?.currency_code || order.currency_code,
+        transaction_id: resource.id || paypalOrderId,
+        error_message: mapping.isFailEvent
+          ? `PayPal event: ${eventType}`
+          : undefined,
+        detail: `PayPal event: ${eventType}`,
+      }
+
+      const existingLog = order.metadata?.payment_activity_log || []
+      const updatedMetadata: any = {
+        ...order.metadata,
+        payment_activity_log: [...existingLog, activityEntry],
+        paypalStatus: eventType,
+      }
+
+      if (paypalOrderId) {
+        updatedMetadata.paypalOrderId = paypalOrderId
+      }
+
+      // Mark as captured when PayPal confirms capture
+      if (eventType === "PAYMENT.CAPTURE.COMPLETED") {
+        updatedMetadata.payment_captured = true
+        updatedMetadata.payment_captured_at = new Date().toISOString()
+        updatedMetadata.payment_paypal_capture_id = resource.id
+      }
+
+      // Mark authorization voided (expired or cancelled)
+      if (eventType === "PAYMENT.AUTHORIZATION.VOIDED") {
+        updatedMetadata.paypal_authorization_voided = true
+        updatedMetadata.paypal_voided_at = new Date().toISOString()
+      }
+
+      // Mark refund
+      if (eventType === "PAYMENT.CAPTURE.REFUNDED") {
+        updatedMetadata.paypal_refunded = true
+        updatedMetadata.paypal_refunded_at = new Date().toISOString()
+      }
+
+      // Mark dispute
+      if (eventType === "CUSTOMER.DISPUTE.CREATED") {
+        updatedMetadata.paypal_dispute = true
+        updatedMetadata.paypal_dispute_id = resource.dispute_id || resource.id
+        updatedMetadata.paypal_dispute_at = new Date().toISOString()
+      }
+
+      // Mark dispute resolved
+      if (eventType === "CUSTOMER.DISPUTE.RESOLVED") {
+        updatedMetadata.paypal_dispute_resolved = true
+        updatedMetadata.paypal_dispute_resolved_at = new Date().toISOString()
+      }
+
+      // Mark payment reversed (chargeback)
+      if (eventType === "PAYMENT.CAPTURE.REVERSED") {
+        updatedMetadata.paypal_reversed = true
+        updatedMetadata.paypal_reversed_at = new Date().toISOString()
+      }
+
+      // Save authorization ID when created
+      if (eventType === "PAYMENT.AUTHORIZATION.CREATED") {
+        updatedMetadata.payment_paypal_authorization_id = resource.id
+      }
+
+      await orderModuleService.updateOrders(order.id, {
+        metadata: updatedMetadata,
+      })
+
+      logger.info(
+        `[PayPal Webhook] Order ${order.id} updated with event: ${eventType}`
+      )
+    } else {
+      logger.warn(
+        `[PayPal Webhook] No Medusa order found for PayPal event: ${eventType}, resource: ${resource.id}, orderId: ${paypalOrderId}`
+      )
+    }
+
+    return res.status(200).json({ received: true })
+  } catch (error: any) {
+    const logger = req.scope.resolve("logger")
+    logger.error(`[PayPal Webhook] Error: ${error.message}`)
+    // Always return 200 to prevent PayPal retries
+    return res.status(200).json({ received: true, error: error.message })
+  }
+}
+
+function mapPayPalEvent(eventType: string): {
+  activityEvent: string
+  activityStatus: string
+  isSuccessEvent: boolean
+  isFailEvent: boolean
+} {
+  switch (eventType) {
+    case "CHECKOUT.ORDER.APPROVED":
+      return {
+        activityEvent: "order_approved",
+        activityStatus: "pending",
+        isSuccessEvent: false,
+        isFailEvent: false,
+      }
+    case "CHECKOUT.ORDER.COMPLETED":
+      return {
+        activityEvent: "order_completed",
+        activityStatus: "success",
+        isSuccessEvent: true,
+        isFailEvent: false,
+      }
+    case "PAYMENT.AUTHORIZATION.CREATED":
+      return {
+        activityEvent: "authorization_created",
+        activityStatus: "success",
+        isSuccessEvent: true,
+        isFailEvent: false,
+      }
+    case "PAYMENT.AUTHORIZATION.VOIDED":
+      return {
+        activityEvent: "authorization_voided",
+        activityStatus: "failed",
+        isSuccessEvent: false,
+        isFailEvent: true,
+      }
+    case "PAYMENT.CAPTURE.COMPLETED":
+      return {
+        activityEvent: "capture",
+        activityStatus: "success",
+        isSuccessEvent: true,
+        isFailEvent: false,
+      }
+    case "PAYMENT.CAPTURE.DENIED":
+      return {
+        activityEvent: "capture_denied",
+        activityStatus: "failed",
+        isSuccessEvent: false,
+        isFailEvent: true,
+      }
+    case "PAYMENT.CAPTURE.PENDING":
+      return {
+        activityEvent: "capture_pending",
+        activityStatus: "pending",
+        isSuccessEvent: false,
+        isFailEvent: false,
+      }
+    case "PAYMENT.CAPTURE.REFUNDED":
+      return {
+        activityEvent: "refund",
+        activityStatus: "success",
+        isSuccessEvent: true,
+        isFailEvent: false,
+      }
+    case "PAYMENT.CAPTURE.REVERSED":
+      return {
+        activityEvent: "payment_reversed",
+        activityStatus: "failed",
+        isSuccessEvent: false,
+        isFailEvent: true,
+      }
+    case "CUSTOMER.DISPUTE.CREATED":
+      return {
+        activityEvent: "dispute_created",
+        activityStatus: "failed",
+        isSuccessEvent: false,
+        isFailEvent: true,
+      }
+    case "CUSTOMER.DISPUTE.RESOLVED":
+      return {
+        activityEvent: "dispute_resolved",
+        activityStatus: "success",
+        isSuccessEvent: true,
+        isFailEvent: false,
+      }
+    default:
+      return {
+        activityEvent: "status_update",
+        activityStatus: "pending",
+        isSuccessEvent: false,
+        isFailEvent: false,
+      }
+  }
+}
