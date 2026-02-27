@@ -148,8 +148,10 @@ export const POST = async (
       if (config) {
         const isLive = config.mode === "live"
         const keys = isLive ? config.live_keys : config.test_keys
-        clientId = keys?.client_id
-        clientSecret = keys?.client_secret
+        // Support both generic key names (api_key/secret_key from admin form)
+        // and PayPal-specific names (client_id/client_secret)
+        clientId = keys?.client_id || keys?.api_key
+        clientSecret = keys?.client_secret || keys?.secret_key
         mode = isLive ? "live" : "test"
       } else {
         clientId = process.env.PAYPAL_CLIENT_ID

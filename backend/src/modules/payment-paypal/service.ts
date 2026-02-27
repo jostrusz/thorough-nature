@@ -107,13 +107,17 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         if (config) {
           const isLive = config.mode === "live"
           const keys = isLive ? config.live_keys : config.test_keys
-          if (keys?.client_id && keys?.client_secret) {
+          // Support both generic key names (api_key/secret_key from admin form)
+          // and PayPal-specific names (client_id/client_secret)
+          const cfgClientId = keys?.client_id || keys?.api_key
+          const cfgClientSecret = keys?.client_secret || keys?.secret_key
+          if (cfgClientId && cfgClientSecret) {
             this.logger_.info(
               `[PayPal] Using ${isLive ? "live" : "sandbox"} keys from gateway config`
             )
             this.client_ = new PayPalApiClient({
-              client_id: keys.client_id,
-              client_secret: keys.client_secret,
+              client_id: cfgClientId,
+              client_secret: cfgClientSecret,
               mode: isLive ? "live" : "test",
             })
             return this.client_
@@ -164,7 +168,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         if (config) {
           const isLive = config.mode === "live"
           const keys = isLive ? config.live_keys : config.test_keys
-          return keys?.client_id || null
+          return keys?.client_id || keys?.api_key || null
         }
       } catch {
         // fall through
