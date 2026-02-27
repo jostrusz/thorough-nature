@@ -172,7 +172,7 @@ async function fetchProjectSettings(config: ProjectConfig): Promise<ProjectToggl
         return {
           orderBumpEnabled: data.project_setting.order_bump_enabled !== false,
           upsellEnabled: data.project_setting.upsell_enabled !== false,
-          foxentryApiKey: data.project_setting.foxentry_api_key || null,
+          foxentryApiKey: null, // DISABLED — re-enable when Foxentry credits are topped up: data.project_setting.foxentry_api_key || null,
         }
       }
     }
