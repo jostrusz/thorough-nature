@@ -96,23 +96,29 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
   protected logger_: any
   protected options_: Options
   protected client_: KlarnaApiClient | null = null
-  protected gatewayConfigService_: any = null
+  protected container_: any = null
 
   constructor(container: InjectedDependencies, options: Options) {
     super(container, options)
     this.logger_ = container.logger || console
     this.options_ = options || {}
-
-    // Try to resolve gateway config module from container (property injection)
-    try {
-      this.gatewayConfigService_ = (container as any).gatewayConfig || null
-    } catch {
-      this.gatewayConfigService_ = null
-    }
+    this.container_ = container
 
     this.logger_.info(
-      `[Klarna] Provider initialized. Gateway config: ${this.gatewayConfigService_ ? "available" : "not available"}. Options apiKey: ${this.options_?.apiKey ? "set" : "not set"}`
+      `[Klarna] Provider initialized. Options apiKey: ${this.options_?.apiKey ? "set" : "not set"}`
     )
+  }
+
+  /**
+   * Lazily resolve the gateway config service from the container.
+   * Avoids issues where the gateway config module isn't available at constructor time.
+   */
+  private getGatewayConfigService(): any {
+    try {
+      return (this.container_ as any)?.gatewayConfig || null
+    } catch {
+      return null
+    }
   }
 
   /**
@@ -125,9 +131,10 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       let isTestMode = true
 
       // Try gateway config first (admin-configured)
-      if (this.gatewayConfigService_) {
+      const gatewayConfigService = this.getGatewayConfigService()
+      if (gatewayConfigService) {
         try {
-          const configs = await this.gatewayConfigService_.listGatewayConfigs(
+          const configs = await gatewayConfigService.listGatewayConfigs(
             { provider: "klarna", is_active: true },
             { take: 1 }
           )

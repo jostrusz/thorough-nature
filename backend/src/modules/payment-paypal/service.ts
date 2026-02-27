@@ -70,23 +70,28 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
   protected logger_: any
   protected options_: Options
   protected client_: PayPalApiClient | null = null
-  protected gatewayConfigService_: any = null
+  protected container_: any = null
 
   constructor(container: InjectedDependencies, options: Options) {
     super(container, options)
     this.logger_ = container.logger || console
     this.options_ = options || {}
+    this.container_ = container
 
-    // Try to resolve gateway config module from container (property injection)
+    this.logger_.info(`[PayPal] Provider initialized.`)
+  }
+
+  /**
+   * Lazily resolve the gateway config service from the container.
+   * This avoids issues where the gateway config module isn't yet available
+   * at payment provider constructor time.
+   */
+  private getGatewayConfigService(): any {
     try {
-      this.gatewayConfigService_ = (container as any).gatewayConfig || null
+      return (this.container_ as any)?.gatewayConfig || null
     } catch {
-      this.gatewayConfigService_ = null
+      return null
     }
-
-    this.logger_.info(
-      `[PayPal] Provider initialized. Gateway config: ${this.gatewayConfigService_ ? "available" : "not available"}`
-    )
   }
 
   /**
@@ -97,9 +102,10 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
     if (this.client_) return this.client_
 
     // 1. Try gateway config from database (admin-configured)
-    if (this.gatewayConfigService_) {
+    const gatewayConfigService = this.getGatewayConfigService()
+    if (gatewayConfigService) {
       try {
-        const configs = await this.gatewayConfigService_.listGatewayConfigs(
+        const configs = await gatewayConfigService.listGatewayConfigs(
           { provider: "paypal", is_active: true },
           { take: 1 }
         )
@@ -158,9 +164,10 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
    * Returns from gateway config or env var.
    */
   private async getClientIdForFrontend(): Promise<string | null> {
-    if (this.gatewayConfigService_) {
+    const gatewayConfigService = this.getGatewayConfigService()
+    if (gatewayConfigService) {
       try {
-        const configs = await this.gatewayConfigService_.listGatewayConfigs(
+        const configs = await gatewayConfigService.listGatewayConfigs(
           { provider: "paypal", is_active: true },
           { take: 1 }
         )
