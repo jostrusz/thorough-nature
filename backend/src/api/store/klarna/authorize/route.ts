@@ -1,6 +1,6 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 
 /**
  * POST /store/klarna/authorize
@@ -8,6 +8,8 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
  * Called by the frontend after Klarna.Payments.authorize() returns an authorization_token.
  * Updates the payment session data with the token so that when cart.complete() calls
  * authorizePayment() on the Klarna provider, the token is available.
+ *
+ * Uses direct DB update to avoid Medusa entity validation issues with updatePaymentSession.
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   try {
@@ -41,58 +43,34 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       return res.status(400).json({ message: "No payment collection found for cart" })
     }
 
-    // Find the pending Klarna payment session
+    // Find the Klarna payment session (prefer pending, fall back to any)
     const sessions = cart.payment_collection.payment_sessions || []
-    const klarnaSession = sessions.find(
-      (s: any) => s.provider_id?.includes("klarna") && s.status === "pending"
-    )
+    const targetSession =
+      sessions.find((s: any) => s.provider_id?.includes("klarna") && s.status === "pending") ||
+      sessions.find((s: any) => s.provider_id?.includes("klarna"))
 
-    if (!klarnaSession) {
-      // Also try finding any klarna session regardless of status
-      const anyKlarnaSession = sessions.find(
-        (s: any) => s.provider_id?.includes("klarna")
-      )
-      if (!anyKlarnaSession) {
-        return res.status(400).json({ message: "No Klarna payment session found" })
-      }
-      // Use the found session even if not "pending"
-      logger.info(`[Klarna Authorize] Found Klarna session with status: ${anyKlarnaSession.status}`)
+    if (!targetSession) {
+      return res.status(400).json({ message: "No Klarna payment session found" })
     }
 
-    const targetSession = klarnaSession || sessions.find(
-      (s: any) => s.provider_id?.includes("klarna")
+    logger.info(
+      `[Klarna Authorize] Found session ${targetSession.id}, status=${targetSession.status}, adding authorizationToken`
     )
 
-    // Update the session data with the authorization token
-    // Use the Payment module service via Modules enum (correct Medusa v2 resolution)
-    const paymentModuleService = req.scope.resolve(Modules.PAYMENT) as any
-
+    // Build updated data with the authorization token
+    const existingData = targetSession.data || {}
     const updatedData = {
-      ...targetSession.data,
+      ...existingData,
       authorizationToken: authorization_token,
     }
 
-    // Try different update methods depending on Medusa version
-    if (typeof paymentModuleService.updatePaymentSession === "function") {
-      await paymentModuleService.updatePaymentSession({
-        id: targetSession.id,
-        data: updatedData,
-      })
-    } else if (typeof paymentModuleService.updatePaymentSessions === "function") {
-      await paymentModuleService.updatePaymentSessions({
-        id: targetSession.id,
-        data: updatedData,
-      })
-    } else {
-      // Direct update via query if module service methods aren't available
-      logger.warn("[Klarna Authorize] paymentModuleService update methods not found, trying direct approach")
-      // Use the remote link / direct DB approach
-      const pgConnection = req.scope.resolve(ContainerRegistrationKeys.PG_CONNECTION)
-      await pgConnection.raw(
-        `UPDATE payment_session SET data = $1::jsonb WHERE id = $2`,
-        [JSON.stringify(updatedData), targetSession.id]
-      )
-    }
+    // Direct DB update — avoids Medusa's entity validation that requires amount/currency
+    // We only update the data JSONB column, nothing else changes
+    const pgConnection = req.scope.resolve(ContainerRegistrationKeys.PG_CONNECTION)
+    await pgConnection.raw(
+      `UPDATE payment_session SET data = ?::jsonb, updated_at = NOW() WHERE id = ?`,
+      [JSON.stringify(updatedData), targetSession.id]
+    )
 
     logger.info(
       `[Klarna Authorize] Token saved for session ${targetSession.id}, cart ${cart_id}`
@@ -103,6 +81,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       message: "Authorization token saved to payment session",
     })
   } catch (error: any) {
+    const logger = req.scope.resolve("logger")
+    logger.error(`[Klarna Authorize] Error: ${error.message}`)
     console.error("[Klarna Authorize] Error:", error.message, error.stack)
     return res.status(500).json({
       message: error.message || "Failed to update payment session",
