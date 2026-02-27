@@ -4,6 +4,9 @@ import { CreditCard } from "@medusajs/icons"
 import Ideal from "@modules/common/icons/ideal"
 import Bancontact from "@modules/common/icons/bancontact"
 import PayPal from "@modules/common/icons/paypal"
+import Klarna from "@modules/common/icons/klarna"
+import ApplePay from "@modules/common/icons/applepay"
+import GooglePay from "@modules/common/icons/googlepay"
 
 /* Map of payment provider_id to their title and icon. Add in any payment providers you want to use. */
 export const paymentInfoMap: Record<
@@ -45,12 +48,41 @@ export const paymentInfoMap: Record<
   },
   pp_klarna_klarna: {
     title: "Klarna",
-    icon: <CreditCard />,
+    icon: <Klarna />,
   },
   pp_airwallex_airwallex: {
     title: "Airwallex",
     icon: <CreditCard />,
   },
+}
+
+/**
+ * Map of payment method codes to their display name and icon.
+ * Used for dynamic payment method rendering in checkout components.
+ */
+export const paymentMethodIconMap: Record<
+  string,
+  { title: string; icon: React.JSX.Element }
+> = {
+  creditcard: { title: "Credit Card", icon: <CreditCard /> },
+  ideal: { title: "iDEAL", icon: <Ideal /> },
+  bancontact: { title: "Bancontact", icon: <Bancontact /> },
+  klarna: { title: "Klarna", icon: <Klarna /> },
+  klarnapaylater: { title: "Klarna", icon: <Klarna /> },
+  klarnasliceit: { title: "Klarna", icon: <Klarna /> },
+  paypal: { title: "PayPal", icon: <PayPal /> },
+  applepay: { title: "Apple Pay", icon: <ApplePay /> },
+  googlepay: { title: "Google Pay", icon: <GooglePay /> },
+  eps: { title: "EPS", icon: <CreditCard /> },
+  blik: { title: "BLIK", icon: <CreditCard /> },
+  przelewy24: { title: "Przelewy24", icon: <CreditCard /> },
+  in3: { title: "in3", icon: <CreditCard /> },
+  belfius: { title: "Belfius", icon: <CreditCard /> },
+  kbc: { title: "KBC/CBC", icon: <CreditCard /> },
+  riverty: { title: "Riverty", icon: <CreditCard /> },
+  trustly: { title: "Trustly", icon: <CreditCard /> },
+  bank_transfer: { title: "Bank Transfer", icon: <CreditCard /> },
+  sepa_debit: { title: "SEPA Direct Debit", icon: <CreditCard /> },
 }
 
 // This only checks if it is native stripe for card payments, it ignores the other stripe-based providers
