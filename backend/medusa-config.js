@@ -27,6 +27,9 @@ import {
   PAYPAL_CLIENT_ID,
   PAYPAL_CLIENT_SECRET,
   PAYPAL_MODE,
+  PAYPAL_CLIENT_ID_EC,
+  PAYPAL_CLIENT_SECRET_EC,
+  PAYPAL_MODE_EC,
 } from 'lib/constants';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -170,6 +173,15 @@ const medusaConfig = {
               clientId: PAYPAL_CLIENT_ID,
               clientSecret: PAYPAL_CLIENT_SECRET,
               mode: PAYPAL_MODE,
+            },
+          }] : []),
+          ...(PAYPAL_CLIENT_ID_EC && PAYPAL_CLIENT_SECRET_EC ? [{
+            resolve: './src/modules/payment-paypal',
+            id: 'paypal-ec',
+            options: {
+              clientId: PAYPAL_CLIENT_ID_EC,
+              clientSecret: PAYPAL_CLIENT_SECRET_EC,
+              mode: PAYPAL_MODE_EC,
             },
           }] : []),
           ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{

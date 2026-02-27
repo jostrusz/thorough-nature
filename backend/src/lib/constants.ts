@@ -91,11 +91,19 @@ export const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY;
 export const MOLLIE_TEST_MODE = process.env.MOLLIE_TEST_MODE !== 'false';
 
 /**
- * (optional) PayPal credentials — required for PayPal payment provider
+ * (optional) PayPal credentials — one set per business/project
+ * Default (loslatenboek):
  */
 export const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 export const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 export const PAYPAL_MODE = process.env.PAYPAL_MODE || 'test';
+
+/**
+ * PayPal EverChapter account:
+ */
+export const PAYPAL_CLIENT_ID_EC = process.env.PAYPAL_CLIENT_ID_EC;
+export const PAYPAL_CLIENT_SECRET_EC = process.env.PAYPAL_CLIENT_SECRET_EC;
+export const PAYPAL_MODE_EC = process.env.PAYPAL_MODE_EC || 'test';
 
 /**
  * (optional) Meilisearch configuration
