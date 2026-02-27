@@ -66,6 +66,7 @@ export async function POST(
 
     res.status(201).json({ gateway_config: full })
   } catch (error: any) {
+    console.error("[Gateway Create Error]", error.message, error.stack)
     res.status(500).json({ error: error.message })
   }
 }

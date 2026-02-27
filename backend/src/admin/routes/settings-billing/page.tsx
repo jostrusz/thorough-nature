@@ -450,7 +450,11 @@ function GatewaysTab() {
       toast.success("Payment gateway created")
       setShowForm(false)
     },
-    onError: () => toast.error("Failed to create gateway"),
+    onError: (err: any) => {
+      const msg = err?.response?.data?.error || err?.message || "Unknown error"
+      toast.error(`Failed to create gateway: ${msg}`)
+      console.error("[Gateway Create Error]", err?.response?.data || err)
+    },
   })
 
   const toggleMutation = useMutation({
@@ -591,7 +595,7 @@ function GatewaysTab() {
       display_name: form.display_name,
       billing_entity_id: form.billing_entity_id || null,
       mode: form.mode,
-      priority: form.priority,
+      priority: Number(form.priority) || 1,
       supported_currencies: form.supported_currencies,
       is_active: false,
       live_keys: form.live_keys,
