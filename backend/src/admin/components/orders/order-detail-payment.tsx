@@ -217,6 +217,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
               const gatewayId =
                 payment.data?.molliePaymentId ||
                 payment.data?.mollieOrderId ||
+                payment.data?.paypalOrderId ||
                 payment.data?.id ||
                 payment.data?.payment_intent ||
                 payment.data?.payment_id ||
@@ -295,6 +296,131 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {/* PayPal capture button — shown when payment is authorized but not yet captured */}
+        {payments.some((p: any) =>
+          p.provider_id?.includes("paypal") &&
+          (p.data?.paypalOrderId || p.data?.authorizationId) &&
+          !order.metadata?.payment_captured
+        ) && (
+          <div
+            style={{
+              borderTop: "1px solid #E1E3E5",
+              marginTop: "12px",
+              paddingTop: "12px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "8px",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  background: "#FFF3CD",
+                  color: "#856404",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  padding: "2px 8px",
+                  borderRadius: "10px",
+                }}
+              >
+                ⓘ PayPal — Authorized (not yet captured)
+              </span>
+            </div>
+            <div
+              style={{
+                fontSize: "12px",
+                color: "#8C9196",
+                marginBottom: "8px",
+              }}
+            >
+              PayPal authorizations must be captured within 29 days.
+              Capture after shipping the order.
+            </div>
+            {onCapture && (
+              <button
+                onClick={onCapture}
+                disabled={isCapturing}
+                className="od-btn-primary"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 16px",
+                  background: "#0070BA",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: isCapturing ? "not-allowed" : "pointer",
+                  opacity: isCapturing ? 0.7 : 1,
+                }}
+              >
+                {isCapturing ? (
+                  <>
+                    <span
+                      style={{
+                        width: "14px",
+                        height: "14px",
+                        border: "2px solid rgba(255,255,255,0.3)",
+                        borderTopColor: "#fff",
+                        borderRadius: "50%",
+                        animation: "spin 0.8s linear infinite",
+                        display: "inline-block",
+                      }}
+                    />
+                    Capturing...
+                  </>
+                ) : (
+                  "💳 Capture PayPal Payment"
+                )}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* PayPal Order ID display */}
+        {payments.some((p: any) => p.data?.paypalOrderId) && (
+          <div style={{ marginTop: "8px" }}>
+            {payments
+              .filter((p: any) => p.data?.paypalOrderId)
+              .map((payment: any) => (
+                <div
+                  key={`paypal-${payment.id}`}
+                  style={{
+                    fontSize: "12px",
+                    color: "#6D7175",
+                    padding: "2px 0",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <span style={{ color: "#8C9196" }}>PayPal Order:</span>
+                  <code
+                    style={{
+                      fontSize: "11px",
+                      background: "#F6F6F7",
+                      padding: "1px 6px",
+                      borderRadius: "4px",
+                      color: "#1A1A1A",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    {payment.data.paypalOrderId}
+                  </code>
+                </div>
+              ))}
           </div>
         )}
 

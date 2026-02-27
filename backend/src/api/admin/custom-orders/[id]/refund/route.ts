@@ -8,7 +8,7 @@ const GATEWAY_CONFIG_MODULE = "gatewayConfig"
  * POST /admin/custom-orders/:id/refund
  *
  * Refunds a payment for the given order.
- * Works for all payment providers: Mollie, Klarna, Comgate, P24, Airwallex.
+ * Works for all payment providers: Mollie, Klarna, PayPal, Comgate, P24, Airwallex.
  *
  * Body: { amount: number (in cents), reason?: string }
  */
@@ -118,6 +118,65 @@ export const POST = async (
           refundId: result.data?.id,
           error: result.error,
         }
+      }
+    }
+    // PayPal refund
+    else if (providerId.includes("paypal")) {
+      const captureId =
+        paymentData.captureId ||
+        order.metadata?.payment_paypal_capture_id ||
+        paymentData.capture_id
+      if (!captureId) {
+        res.status(400).json({ error: "No PayPal capture ID found. Payment must be captured before refunding." })
+        return
+      }
+
+      const { PayPalApiClient } = await import(
+        "../../../../modules/payment-paypal/api-client"
+      )
+      const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
+      const configs = await gcService.listGatewayConfigs(
+        { provider: "paypal", is_active: true },
+        { take: 1 }
+      )
+      const config = configs[0]
+
+      let clientId: string | undefined
+      let clientSecret: string | undefined
+      let mode: "live" | "test" = "test"
+
+      if (config) {
+        const isLive = config.mode === "live"
+        const keys = isLive ? config.live_keys : config.test_keys
+        clientId = keys?.client_id
+        clientSecret = keys?.client_secret
+        mode = isLive ? "live" : "test"
+      } else {
+        clientId = process.env.PAYPAL_CLIENT_ID
+        clientSecret = process.env.PAYPAL_CLIENT_SECRET
+        mode = process.env.PAYPAL_MODE === "live" ? "live" : "test"
+      }
+
+      if (!clientId || !clientSecret) {
+        res.status(400).json({ error: "PayPal gateway not configured" })
+        return
+      }
+
+      const client = new PayPalApiClient({ client_id: clientId, client_secret: clientSecret, mode })
+
+      try {
+        // PayPal amounts are strings like "29.99", input amount is in cents
+        const amountValue = (amount / 100).toFixed(2)
+        const result = await client.refundCapture(captureId, {
+          amount: { currency_code: currency, value: amountValue },
+          note_to_payer: reason || "Refund",
+        })
+        refundResult = {
+          success: true,
+          refundId: result.id,
+        }
+      } catch (e: any) {
+        refundResult = { success: false, error: e.message }
       }
     }
     // Klarna refund

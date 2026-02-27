@@ -6,8 +6,9 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
  * POST /admin/custom-orders/:id/capture
  *
  * Captures a payment for the given order.
- * Works for all payment providers: Mollie, Klarna, Stripe, etc.
+ * Works for all payment providers: Mollie, Klarna, PayPal, Stripe, etc.
  *
+ * PayPal: captures authorization via PayPal Payments API
  * Klarna: calls Klarna Order Management API to capture the authorized order
  * Mollie: Mollie auto-captures most payments, but this endpoint can be used for orders API
  */
@@ -59,8 +60,69 @@ export const POST = async (
 
     let captureResult: any = null
 
+    // PayPal capture
+    if (providerId.includes("paypal") && (paymentData.authorizationId || paymentData.paypalOrderId)) {
+      const GATEWAY_CONFIG_MODULE = "gatewayConfig"
+      const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
+      const configs = await gcService.listGatewayConfigs(
+        { provider: "paypal", is_active: true },
+        { take: 1 }
+      )
+      const config = configs[0]
+
+      let clientId: string | undefined
+      let clientSecret: string | undefined
+      let mode: "live" | "test" = "test"
+
+      if (config) {
+        const isLive = config.mode === "live"
+        const keys = isLive ? config.live_keys : config.test_keys
+        clientId = keys?.client_id
+        clientSecret = keys?.client_secret
+        mode = isLive ? "live" : "test"
+      } else {
+        clientId = process.env.PAYPAL_CLIENT_ID
+        clientSecret = process.env.PAYPAL_CLIENT_SECRET
+        mode = process.env.PAYPAL_MODE === "live" ? "live" : "test"
+      }
+
+      if (!clientId || !clientSecret) {
+        res.status(400).json({ error: "PayPal gateway not configured" })
+        return
+      }
+
+      const { PayPalApiClient } = await import(
+        "../../../../modules/payment-paypal/api-client"
+      )
+      const client = new PayPalApiClient({ client_id: clientId, client_secret: clientSecret, mode })
+
+      const currency = order.currency_code?.toUpperCase() || "EUR"
+      const amountValue = Number(order.total).toFixed(2)
+
+      if (paymentData.authorizationId) {
+        // Capture the authorization
+        const result = await client.captureAuthorization(
+          paymentData.authorizationId,
+          { currency_code: currency, value: amountValue }
+        )
+        captureResult = {
+          provider: "paypal",
+          capture_id: result.id,
+          status: "captured",
+        }
+      } else if (paymentData.paypalOrderId) {
+        // Capture order directly (intent=CAPTURE fallback)
+        const result = await client.captureOrder(paymentData.paypalOrderId)
+        const captureId = result.purchase_units?.[0]?.payments?.captures?.[0]?.id
+        captureResult = {
+          provider: "paypal",
+          capture_id: captureId || result.id,
+          status: "captured",
+        }
+      }
+    }
     // Klarna capture
-    if (providerId.includes("klarna") && paymentData.klarnaOrderId) {
+    else if (providerId.includes("klarna") && paymentData.klarnaOrderId) {
       const GATEWAY_CONFIG_MODULE = "gatewayConfig"
       const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
       const configs = await gcService.listGatewayConfigs(
