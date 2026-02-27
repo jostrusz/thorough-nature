@@ -7,10 +7,10 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/favicon.png" type="image/png">
 
-<!-- Prevent checkout flash on payment return — show branded preloader immediately -->
+<!-- Prevent checkout flash on payment return — hide form immediately (CSS loaded in <style> below) -->
 <script>
 if (window.location.search.indexOf('payment_return=1') !== -1) {
-  document.write('<style>body{margin:0;padding:0}.payment-preloader{position:fixed;top:0;left:0;width:100%;height:100%;background:#f8f6f3;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;}.payment-preloader img{width:120px;height:auto;animation:ppPulse 1.4s ease-in-out infinite}.payment-preloader p{margin-top:24px;font-family:"DM Sans",sans-serif;font-size:16px;color:#333;}.payment-preloader .sub{margin-top:6px;font-size:13px;color:#999;}@keyframes ppPulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.08);opacity:1}}.checkout-form,.content,.order-summary{display:none!important}</style>');
+  document.write('<style>.checkout-form,.content,.order-summary{display:none!important}</style>');
 }
 </script>
 
@@ -33,6 +33,39 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+
+/* ─── PAYMENT PRELOADER (Mollie redirect + Klarna inline) ─── */
+.payment-preloader {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #f8f6f3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+.payment-preloader img {
+  width: 120px;
+  height: auto;
+  animation: ppPulse 1.4s ease-in-out infinite;
+}
+.payment-preloader p {
+  margin-top: 24px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 16px;
+  color: #333;
+}
+.payment-preloader .sub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #999;
+}
+@keyframes ppPulse {
+  0%, 100% { transform: scale(1); opacity: .85 }
+  50%       { transform: scale(1.08); opacity: 1 }
+}
 
 /* ─── DESIGN TOKENS — Velvet Dusk (shodné s hlavní stránkou) ─── */
 :root {
@@ -4949,7 +4982,14 @@ body {
                 console.log('[Klarna] Authorize response:', JSON.stringify(klarnaRes));
 
                 if (klarnaRes.approved && klarnaRes.authorization_token) {
-                  // Success! Send authorization token to backend
+                  // Success! Show preloader immediately — covers the gap while backend calls complete
+                  if (!document.querySelector('.payment-preloader')) {
+                    var kPreloader = document.createElement('div');
+                    kPreloader.className = 'payment-preloader';
+                    kPreloader.innerHTML = '<img src="/laat-los-logo-logo.png" alt="Laden..."><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+                    document.body.insertBefore(kPreloader, document.body.firstChild);
+                  }
+
                   console.log('[Klarna] Authorization approved, token:', klarnaRes.authorization_token.substring(0, 20) + '...');
 
                   medusaFetch('/store/klarna/authorize', {
@@ -4981,6 +5021,9 @@ body {
                     resolve();
                   })
                   .catch(function(err) {
+                    // Remove preloader on error so user sees the error message
+                    var errPreloader = document.querySelector('.payment-preloader');
+                    if (errPreloader) errPreloader.remove();
                     reject(err);
                   });
                 } else if (klarnaRes.show_form) {
