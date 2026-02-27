@@ -1,0 +1,528 @@
+// @ts-nocheck
+import {
+  AbstractPaymentProvider,
+  MedusaError,
+  PaymentSessionStatus,
+} from "@medusajs/framework/utils"
+import Stripe from "stripe"
+
+type Options = {
+  secretKey?: string
+  publishableKey?: string
+  webhookSecret?: string
+  testMode?: boolean
+}
+
+type InjectedDependencies = {
+  logger: any
+  gatewayConfig?: any
+}
+
+/**
+ * Maps checkout method codes to Stripe payment_method_types
+ */
+const METHOD_MAP: Record<string, string> = {
+  creditcard: "card",
+  ideal: "ideal",
+  bancontact: "bancontact",
+  klarna: "klarna",
+  eps: "eps",
+  przelewy24: "p24",
+  applepay: "card",
+  googlepay: "card",
+  revolut_pay: "revolut_pay",
+  sepa_debit: "sepa_debit",
+}
+
+/**
+ * Redirect-based methods that require server-side confirm
+ */
+const REDIRECT_METHODS = ["ideal", "bancontact", "klarna", "eps", "p24", "revolut_pay"]
+
+/**
+ * Maps Stripe PaymentIntent statuses to Medusa payment session statuses
+ */
+function mapStripeStatusToMedusa(stripeStatus: string): PaymentSessionStatus {
+  switch (stripeStatus) {
+    case "succeeded":
+      return PaymentSessionStatus.CAPTURED
+    case "requires_capture":
+      return PaymentSessionStatus.AUTHORIZED
+    case "requires_action":
+    case "requires_confirmation":
+      return PaymentSessionStatus.REQUIRES_MORE
+    case "requires_payment_method":
+      return PaymentSessionStatus.PENDING
+    case "processing":
+      return PaymentSessionStatus.PENDING
+    case "canceled":
+      return PaymentSessionStatus.CANCELED
+    default:
+      return PaymentSessionStatus.PENDING
+  }
+}
+
+/**
+ * Stripe Payment Provider for Medusa v2.
+ * Follows the AbstractPaymentProvider pattern (same as Mollie/Airwallex/Klarna/PayPal).
+ *
+ * Supports: Card, iDEAL, Bancontact, Klarna, Google Pay, Apple Pay, Revolut Pay, EPS, Przelewy24
+ * via Stripe Payment Intents API + Stripe.js Elements on frontend.
+ *
+ * Auto-capture is always on (capture_method: 'automatic').
+ *
+ * Credentials can come from:
+ *   1. Gateway config module (admin-configured in DB) — preferred
+ *   2. Provider options in medusa-config.js (env vars) — fallback
+ *
+ * Amounts: Medusa major units (49.99) → Stripe minor units (4999 cents)
+ */
+class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
+  static identifier = "stripe"
+
+  protected logger_: any
+  protected options_: Options
+  protected container_: any = null
+
+  constructor(container: InjectedDependencies, options: Options) {
+    super(container, options)
+    this.logger_ = container.logger || console
+    this.options_ = options || {}
+    this.container_ = container
+
+    this.logger_.info(
+      `[Stripe] Provider initialized. Options secretKey: ${this.options_?.secretKey ? "set" : "not set"}`
+    )
+  }
+
+  /**
+   * Lazily resolve the gateway config service from the container.
+   */
+  private getGatewayConfigService(): any {
+    try {
+      return this.container_.resolve("gatewayConfig")
+    } catch {
+      return null
+    }
+  }
+
+  /**
+   * Resolve Stripe credentials (secret key, publishable key, webhook secret).
+   * Tries gateway config (admin DB) first, then falls back to provider options (env vars).
+   * Returns fresh credentials each time (no caching) — supports multiple Stripe accounts.
+   */
+  private async resolveCredentials(): Promise<{
+    secretKey: string
+    publishableKey: string | null
+    webhookSecret: string | null
+    testMode: boolean
+  }> {
+    // 1. Try gateway config from database (admin-configured)
+    const gatewayConfigService = this.getGatewayConfigService()
+    if (gatewayConfigService) {
+      try {
+        const configs = await gatewayConfigService.listGatewayConfigs(
+          { provider: "stripe", is_active: true },
+          { take: 1 }
+        )
+        const config = configs[0]
+        if (config) {
+          const isLive = config.mode === "live"
+          const keys = isLive ? config.live_keys : config.test_keys
+          if (keys?.api_key) {
+            this.logger_.info(`[Stripe] Using ${isLive ? "live" : "test"} keys from gateway config`)
+            return {
+              secretKey: keys.api_key,
+              publishableKey: keys.publishable_key || null,
+              webhookSecret: keys.secret_key || null,
+              testMode: !isLive,
+            }
+          }
+        }
+      } catch (e: any) {
+        this.logger_.warn(`[Stripe] Gateway config read failed: ${e.message}`)
+      }
+    }
+
+    // 2. Fallback to options (env vars via medusa-config.js)
+    if (this.options_?.secretKey) {
+      this.logger_.info(`[Stripe] Using credentials from provider options`)
+      return {
+        secretKey: this.options_.secretKey,
+        publishableKey: this.options_.publishableKey || null,
+        webhookSecret: this.options_.webhookSecret || null,
+        testMode: this.options_.testMode !== false,
+      }
+    }
+
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      "Stripe credentials not configured. Set via admin gateway config or STRIPE_SECRET_KEY env var."
+    )
+  }
+
+  /**
+   * Create a fresh Stripe SDK instance from resolved credentials.
+   */
+  private async getStripeClient(): Promise<Stripe> {
+    const creds = await this.resolveCredentials()
+    return new Stripe(creds.secretKey, {
+      apiVersion: "2025-03-31.basil" as any,
+    })
+  }
+
+  /**
+   * Convert Medusa major unit amount to Stripe minor units (cents).
+   * e.g. 49.99 → 4999
+   */
+  private toMinorUnits(amount: number | string): number {
+    return Math.round(Number(amount) * 100)
+  }
+
+  /**
+   * Initiate a payment session — create a Stripe PaymentIntent.
+   *
+   * Medusa v2 input: { amount, currency_code, data?, context? }
+   * - amount is in MAJOR units (e.g. 49.99 = €49.99)
+   * - data contains frontend-provided session info (method, return_url, etc.)
+   * - context contains customer info
+   *
+   * Must return: { id: string, data: Record<string, unknown> }
+   */
+  async initiatePayment(input: any): Promise<any> {
+    const { amount, currency_code, data, context } = input
+
+    try {
+      const stripe = await this.getStripeClient()
+      const creds = await this.resolveCredentials()
+
+      const method = data?.method || "creditcard"
+      const returnUrl = data?.return_url
+      const customer = context?.customer
+
+      // Map checkout method to Stripe payment_method_types
+      const stripeMethodType = METHOD_MAP[method] || "card"
+      const paymentMethodTypes = [stripeMethodType]
+
+      // Some methods need additional types for fallback
+      if (stripeMethodType === "card") {
+        // Card already covers Apple Pay and Google Pay via Stripe.js
+      }
+
+      // Build webhook/return URLs
+      const backendUrl =
+        process.env.BACKEND_PUBLIC_URL ||
+        (process.env.RAILWAY_PUBLIC_DOMAIN_VALUE
+          ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN_VALUE}`
+          : "http://localhost:9000")
+
+      const minorAmount = this.toMinorUnits(amount)
+
+      this.logger_.info(
+        `[Stripe] Creating PaymentIntent: method=${method} (${stripeMethodType}), amount=${minorAmount} ${currency_code}`
+      )
+
+      // Build PaymentIntent params
+      const piParams: Stripe.PaymentIntentCreateParams = {
+        amount: minorAmount,
+        currency: currency_code.toLowerCase(),
+        payment_method_types: paymentMethodTypes,
+        capture_method: "automatic",
+        metadata: {
+          customer_id: customer?.id || "",
+          customer_email: customer?.email || data?.email || "",
+          session_id: data?.session_id || "",
+          method: method,
+        },
+      }
+
+      // For redirect methods, add return_url and confirm server-side
+      const isRedirectMethod = REDIRECT_METHODS.includes(stripeMethodType)
+
+      if (isRedirectMethod && returnUrl) {
+        piParams.confirm = true
+        piParams.payment_method_data = { type: stripeMethodType as any }
+        piParams.return_url = returnUrl
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create(piParams)
+
+      // Extract redirect URL for redirect-based methods
+      let checkoutUrl: string | null = null
+      if (isRedirectMethod && paymentIntent.next_action?.redirect_to_url?.url) {
+        checkoutUrl = paymentIntent.next_action.redirect_to_url.url
+      }
+
+      this.logger_.info(
+        `[Stripe] PaymentIntent created: ${paymentIntent.id}, status: ${paymentIntent.status}, redirect: ${checkoutUrl ? "yes" : "no"}`
+      )
+
+      return {
+        id: paymentIntent.id,
+        data: {
+          stripePaymentIntentId: paymentIntent.id,
+          clientSecret: paymentIntent.client_secret,
+          publishableKey: creds.publishableKey,
+          status: paymentIntent.status,
+          method: method,
+          checkoutUrl: checkoutUrl,
+          session_id: data?.session_id,
+          currency_code,
+        },
+      }
+    } catch (error: any) {
+      this.logger_.error(`[Stripe] Payment initiation failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message || "Failed to initiate Stripe payment"
+      )
+    }
+  }
+
+  /**
+   * Authorize payment — check Stripe PaymentIntent status
+   */
+  async authorizePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
+    try {
+      const stripe = await this.getStripeClient()
+      const piId = sessionData.stripePaymentIntentId
+
+      if (!piId) {
+        return {
+          status: PaymentSessionStatus.PENDING,
+          data: sessionData,
+        }
+      }
+
+      const paymentIntent = await stripe.paymentIntents.retrieve(piId)
+      const status = mapStripeStatusToMedusa(paymentIntent.status)
+
+      this.logger_.info(`[Stripe] Authorize: ${piId} → ${paymentIntent.status} → ${status}`)
+
+      return {
+        status,
+        data: {
+          ...sessionData,
+          status: paymentIntent.status,
+        },
+      }
+    } catch (error: any) {
+      this.logger_.error(`[Stripe] Authorization failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
+    }
+  }
+
+  /**
+   * Capture payment — auto-capture is always on, so just retrieve status.
+   */
+  async capturePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
+    try {
+      const stripe = await this.getStripeClient()
+      const piId = sessionData.stripePaymentIntentId
+
+      if (!piId) {
+        return { data: sessionData }
+      }
+
+      const paymentIntent = await stripe.paymentIntents.retrieve(piId)
+
+      this.logger_.info(`[Stripe] Capture check: ${piId}, status: ${paymentIntent.status}`)
+
+      return {
+        data: { ...sessionData, status: paymentIntent.status },
+      }
+    } catch (error: any) {
+      this.logger_.error(`[Stripe] Capture failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
+    }
+  }
+
+  /**
+   * Refund payment — amount is in major units, convert to minor for Stripe
+   */
+  async refundPayment(input: any): Promise<any> {
+    const sessionData = input.data || input
+    const refundAmount = input.amount
+    try {
+      const stripe = await this.getStripeClient()
+      const piId = sessionData.stripePaymentIntentId
+
+      if (!piId) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "No Stripe payment intent ID in session data"
+        )
+      }
+
+      const refundParams: Stripe.RefundCreateParams = {
+        payment_intent: piId,
+      }
+
+      // Only set amount if partial refund
+      if (refundAmount && refundAmount > 0) {
+        refundParams.amount = this.toMinorUnits(refundAmount)
+      }
+
+      const refund = await stripe.refunds.create(refundParams)
+
+      this.logger_.info(`[Stripe] Refund created: ${refund.id}, amount: ${refund.amount}, status: ${refund.status}`)
+
+      return {
+        data: {
+          ...sessionData,
+          refundId: refund.id,
+          refundStatus: refund.status,
+        },
+      }
+    } catch (error: any) {
+      this.logger_.error(`[Stripe] Refund failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
+    }
+  }
+
+  /**
+   * Cancel payment
+   */
+  async cancelPayment(input: any): Promise<any> {
+    const sessionData = input.data || input
+    try {
+      const stripe = await this.getStripeClient()
+      const piId = sessionData.stripePaymentIntentId
+
+      if (piId) {
+        await stripe.paymentIntents.cancel(piId)
+        this.logger_.info(`[Stripe] Canceled: ${piId}`)
+      }
+
+      return {
+        data: { ...sessionData, status: "canceled" },
+      }
+    } catch (error: any) {
+      this.logger_.error(`[Stripe] Cancel failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
+    }
+  }
+
+  /**
+   * Delete payment session
+   */
+  async deletePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
+    return {
+      data: sessionData,
+    }
+  }
+
+  /**
+   * Get payment status
+   */
+  async getPaymentStatus(data: any): Promise<PaymentSessionStatus> {
+    try {
+      const stripe = await this.getStripeClient()
+      const piId = data.stripePaymentIntentId
+
+      if (!piId) return PaymentSessionStatus.PENDING
+
+      const paymentIntent = await stripe.paymentIntents.retrieve(piId)
+      return mapStripeStatusToMedusa(paymentIntent.status)
+    } catch {
+      return PaymentSessionStatus.ERROR
+    }
+  }
+
+  /**
+   * Retrieve payment data
+   */
+  async retrievePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
+    try {
+      const stripe = await this.getStripeClient()
+      const piId = sessionData.stripePaymentIntentId
+
+      if (!piId) {
+        return { data: sessionData }
+      }
+
+      const paymentIntent = await stripe.paymentIntents.retrieve(piId)
+
+      return {
+        data: {
+          ...sessionData,
+          status: paymentIntent.status,
+          amount: paymentIntent.amount,
+          currency: paymentIntent.currency,
+        },
+      }
+    } catch (error: any) {
+      this.logger_.error(`[Stripe] Retrieve failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
+    }
+  }
+
+  /**
+   * Update payment session
+   */
+  async updatePayment(input: any): Promise<any> {
+    const sessionData = input.data || {}
+    return {
+      data: sessionData,
+    }
+  }
+
+  /**
+   * Process Stripe webhook events
+   */
+  async getWebhookActionAndData(webhookData: any): Promise<any> {
+    try {
+      const { type: eventType, data: eventData } = webhookData
+      const paymentIntent = eventData?.object
+
+      if (!paymentIntent?.id) {
+        return { action: "not_supported", data: webhookData }
+      }
+
+      let action = "not_supported"
+
+      if (eventType === "payment_intent.succeeded") {
+        action = "authorized"
+      } else if (eventType === "payment_intent.payment_failed") {
+        action = "failed"
+      } else if (eventType === "charge.refunded") {
+        action = "not_supported" // Refunds handled via admin
+      }
+
+      this.logger_.info(`[Stripe] Webhook: ${paymentIntent.id} → ${eventType} → action: ${action}`)
+
+      return {
+        action,
+        data: {
+          stripePaymentIntentId: paymentIntent.id,
+          status: paymentIntent.status,
+          session_id: paymentIntent.metadata?.session_id,
+        },
+      }
+    } catch (error: any) {
+      this.logger_.error(`[Stripe] Webhook processing failed: ${error.message}`)
+      return { action: "not_supported", data: webhookData }
+    }
+  }
+}
+
+export default StripePaymentProviderService

@@ -759,7 +759,7 @@ function GatewaysTab() {
             </label>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
               <div>
-                <label style={{ fontSize: "10px", color: "#8C9196" }}>{form.provider === "paypal" || form.provider === "airwallex" ? "Client ID" : "API Key"}</label>
+                <label style={{ fontSize: "10px", color: "#8C9196" }}>{form.provider === "paypal" || form.provider === "airwallex" ? "Client ID" : form.provider === "stripe" ? "Secret Key (sk_...)" : "API Key"}</label>
                 <input
                   className="bp-input"
                   style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
@@ -768,11 +768,11 @@ function GatewaysTab() {
                     const keys = form.mode === "live" ? "live_keys" : "test_keys"
                     setForm({ ...form, [keys]: { ...form[keys], api_key: e.target.value } })
                   }}
-                  placeholder={form.provider === "paypal" ? (form.mode === "live" ? "AeLj..." : "AeSb...") : form.provider === "airwallex" ? "TdKbaP15STeWzSwX..." : (form.mode === "live" ? "sk_live_..." : "sk_test_...")}
+                  placeholder={form.provider === "paypal" ? (form.mode === "live" ? "AeLj..." : "AeSb...") : form.provider === "airwallex" ? "TdKbaP15STeWzSwX..." : form.provider === "stripe" ? (form.mode === "live" ? "sk_live_..." : "sk_test_...") : (form.mode === "live" ? "live_..." : "test_...")}
                 />
               </div>
               <div>
-                <label style={{ fontSize: "10px", color: "#8C9196" }}>{form.provider === "paypal" ? "Client Secret" : form.provider === "airwallex" ? "API Key" : "Secret Key"}</label>
+                <label style={{ fontSize: "10px", color: "#8C9196" }}>{form.provider === "paypal" ? "Client Secret" : form.provider === "airwallex" ? "API Key" : form.provider === "stripe" ? "Webhook Secret (whsec_...)" : "Secret Key"}</label>
                 <input
                   className="bp-input"
                   style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
@@ -782,7 +782,7 @@ function GatewaysTab() {
                     const keys = form.mode === "live" ? "live_keys" : "test_keys"
                     setForm({ ...form, [keys]: { ...form[keys], secret_key: e.target.value } })
                   }}
-                  placeholder={form.provider === "paypal" ? "EKd8..." : form.provider === "airwallex" ? "e310add9dc32..." : "whsec_..."}
+                  placeholder={form.provider === "paypal" ? "EKd8..." : form.provider === "airwallex" ? "e310add9dc32..." : form.provider === "stripe" ? "whsec_..." : "whsec_..."}
                 />
               </div>
             </div>
@@ -798,6 +798,21 @@ function GatewaysTab() {
                     setForm({ ...form, [keys]: { ...form[keys], account_id: e.target.value } })
                   }}
                   placeholder="acct_xxxxxxxxxxxxxxxx"
+                />
+              </div>
+            )}
+            {form.provider === "stripe" && (
+              <div style={{ marginTop: "8px" }}>
+                <label style={{ fontSize: "10px", color: "#8C9196" }}>Publishable Key <span style={{ color: "#B0B7BF" }}>(Stripe Dashboard → API Keys → Publishable key)</span></label>
+                <input
+                  className="bp-input"
+                  style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                  value={form.mode === "live" ? (form.live_keys as any).publishable_key || "" : (form.test_keys as any).publishable_key || ""}
+                  onChange={(e) => {
+                    const keys = form.mode === "live" ? "live_keys" : "test_keys"
+                    setForm({ ...form, [keys]: { ...form[keys], publishable_key: e.target.value } })
+                  }}
+                  placeholder={form.mode === "live" ? "pk_live_..." : "pk_test_..."}
                 />
               </div>
             )}
@@ -1001,7 +1016,7 @@ function GatewaysTab() {
                         </label>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
                           <div>
-                            <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" || editForm.provider === "airwallex" ? "Client ID" : "API Key"}</label>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" || editForm.provider === "airwallex" ? "Client ID" : editForm.provider === "stripe" ? "Secret Key (sk_...)" : "API Key"}</label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? editForm.live_keys.api_key : editForm.test_keys.api_key}
                               onChange={(e) => {
@@ -1011,7 +1026,7 @@ function GatewaysTab() {
                             />
                           </div>
                           <div>
-                            <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" ? "Client Secret" : editForm.provider === "airwallex" ? "API Key" : "Secret Key"}</label>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" ? "Client Secret" : editForm.provider === "airwallex" ? "API Key" : editForm.provider === "stripe" ? "Webhook Secret (whsec_...)" : "Secret Key"}</label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? editForm.live_keys.secret_key : editForm.test_keys.secret_key}
                               onChange={(e) => {
@@ -1041,6 +1056,19 @@ function GatewaysTab() {
                                 setEditForm({ ...editForm, [k]: { ...editForm[k], account_id: e.target.value } })
                               }}
                               placeholder="acct_xxxxxxxxxxxxxxxx"
+                            />
+                          </div>
+                        )}
+                        {editForm.provider === "stripe" && (
+                          <div style={{ marginTop: "8px", gridColumn: "1 / -1" }}>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>Publishable Key <span style={{ color: "#B0B7BF" }}>(Stripe Dashboard → API Keys → Publishable key)</span></label>
+                            <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                              value={editForm.mode === "live" ? (editForm.live_keys as any).publishable_key || "" : (editForm.test_keys as any).publishable_key || ""}
+                              onChange={(e) => {
+                                const k = editForm.mode === "live" ? "live_keys" : "test_keys"
+                                setEditForm({ ...editForm, [k]: { ...editForm[k], publishable_key: e.target.value } })
+                              }}
+                              placeholder={editForm.mode === "live" ? "pk_live_..." : "pk_test_..."}
                             />
                           </div>
                         )}

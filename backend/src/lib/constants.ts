@@ -79,10 +79,12 @@ export const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 export const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || process.env.SENDGRID_FROM;
 
 /**
- * (optional) Stripe API key and webhook secret
+ * (optional) Stripe credentials — custom payment provider
  */
-export const STRIPE_API_KEY = process.env.STRIPE_API_KEY;
+export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY;
+export const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY;
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+export const STRIPE_TEST_MODE = process.env.STRIPE_TEST_MODE !== 'false';
 
 /**
  * (optional) Mollie API key — fallback if not configured via admin gateway config

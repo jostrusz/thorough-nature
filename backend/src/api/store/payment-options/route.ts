@@ -105,6 +105,7 @@ export async function GET(
               method.component = "stripe-elements"
               // Stripe uses publishable key
               method.client_key = keys?.publishable_key || null
+              method.testmode = gw.mode === "test"
             } else if (gw.provider === "airwallex") {
               method.component = "airwallex-dropin"
               method.client_key = keys?.client_id || null

@@ -145,6 +145,7 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "przelewy24", name: "Przelewy24", icon: "przelewy24", available_countries: ["pl"], supported_currencies: ["PLN", "EUR"] },
     { code: "applepay", name: "Apple Pay", icon: "applepay", available_countries: [], supported_currencies: [] },
     { code: "googlepay", name: "Google Pay", icon: "googlepay", available_countries: [], supported_currencies: [] },
+    { code: "revolut_pay", name: "Revolut Pay", icon: "revolut", available_countries: ["nl","be","de","at","fr","gb","ie","es","it","pt","fi","se","dk","no","pl","cz","ro","hu"], supported_currencies: ["EUR","GBP","PLN","RON","HUF","DKK","SEK","NOK","CZK"] },
   ],
   mollie: [
     { code: "creditcard", name: "Credit/Debit Card", icon: "card", available_countries: [], supported_currencies: [] },

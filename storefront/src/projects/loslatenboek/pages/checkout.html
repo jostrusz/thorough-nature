@@ -31,6 +31,9 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
 <!-- Airwallex Drop-in Element SDK -->
 <script src="https://static.airwallex.com/components/sdk/v1/index.js" async></script>
 
+<!-- Stripe.js SDK -->
+<script src="https://js.stripe.com/v3/" async></script>
+
 <style>
 /* ─── FONTS ─── */
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
@@ -3100,15 +3103,88 @@ body {
     }
   }
 
+  /**
+   * Init Stripe Split Card Elements — mounts individual card iframes into the same containers as Mollie/Airwallex
+   */
+  function initStripeCard() {
+    if (stripeCardReady) return;
+
+    // Wait for Stripe.js SDK
+    if (typeof window.Stripe === 'undefined') {
+      console.log('[Stripe Card] Waiting for SDK...');
+      setTimeout(initStripeCard, 300);
+      return;
+    }
+
+    try {
+      // Get publishable key from creditcard option
+      var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
+      var publishableKey = ccOption ? ccOption.client_key : null;
+
+      if (!publishableKey) {
+        console.error('[Stripe Card] No publishable key found');
+        return;
+      }
+
+      stripeInstance = window.Stripe(publishableKey);
+      var elements = stripeInstance.elements();
+
+      // Stripe Elements styling to match existing form look
+      var elementStyle = {
+        base: {
+          fontSize: '14px',
+          fontFamily: '"DM Sans", sans-serif',
+          color: '#1A1A1A',
+          '::placeholder': { color: '#A1A1AA' },
+        },
+        invalid: { color: '#DC2626' },
+      };
+
+      // Create split card elements
+      stripeElements.cardNumber = elements.create('cardNumber', { style: elementStyle, showIcon: true });
+      stripeElements.cardExpiry = elements.create('cardExpiry', { style: elementStyle });
+      stripeElements.cardCvc = elements.create('cardCvc', { style: elementStyle });
+
+      // Mount into same containers
+      stripeElements.cardNumber.mount('#card-number');
+      stripeElements.cardExpiry.mount('#expiry-date');
+      stripeElements.cardCvc.mount('#verification-code');
+
+      // For name field: replace with plain text input (same as Airwallex)
+      var holderDiv = document.getElementById('card-holder');
+      if (holderDiv) {
+        holderDiv.innerHTML = '<input type="text" id="stripe-card-name" placeholder="Naam op kaart" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
+      }
+
+      // Error handling
+      var cardErrorsEl = document.getElementById('card-errors');
+      stripeElements.cardNumber.on('change', function(event) {
+        if (event.error) {
+          cardErrorsEl.textContent = event.error.message;
+        } else {
+          cardErrorsEl.textContent = '';
+        }
+      });
+
+      stripeCardReady = true;
+      console.log('[Stripe Card] Split card elements mounted successfully');
+    } catch (e) {
+      console.error('[Stripe Card] Init failed:', e);
+    }
+  }
+
   /* ─── DYNAMIC PAYMENT METHODS ─── */
   var selectedMethod = '';
   var selectedProvider = '';
   var selectedProviderId = ''; // Full Medusa provider_id e.g. "pp_mollie_mollie"
   var allPaymentOptions = []; // Flat list: [{ code, display_name, icon, provider, provider_id, available_countries, sort_order }]
   var mollieComponentsInitialized = false;
-  var cardProvider = ''; // 'mollie' | 'airwallex' — detected from payment-options
+  var cardProvider = ''; // 'mollie' | 'airwallex' | 'stripe' — detected from payment-options
   var airwallexCardElements = {};
   var airwallexCardReady = false;
+  var stripeInstance = null;
+  var stripeElements = {};
+  var stripeCardReady = false;
 
   // Method descriptions (Dutch)
   var METHOD_DESCRIPTIONS = {
@@ -3506,6 +3582,8 @@ body {
               initMollieComponents();
             } else if (cardProvider === 'airwallex') {
               initAirwallexCard();
+            } else if (cardProvider === 'stripe') {
+              initStripeCard();
             }
           } else {
             cardFields.style.display = 'none';
@@ -4900,6 +4978,10 @@ body {
           // Airwallex: no tokenization needed — confirmPaymentIntent happens after session creation
           sessionData.method = 'creditcard';
           tokenPromise = Promise.resolve(cartId);
+        } else if (cardProvider === 'stripe') {
+          // Stripe: no tokenization needed — confirmCardPayment happens after session creation
+          sessionData.method = 'creditcard';
+          tokenPromise = Promise.resolve(cartId);
         } else {
           tokenPromise = Promise.resolve(cartId);
         }
@@ -5142,6 +5224,55 @@ body {
                 window.location.href = confirmResult.next_action.url;
                 return;
               }
+
+              // Payment succeeded — complete cart
+              var completeRes = await medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' });
+              var order = completeRes.order || completeRes;
+              localStorage.setItem('medusa_order_id', order.id || '');
+              localStorage.setItem('medusa_order_display_id', order.display_id || '');
+
+              if (PROJECT_CONFIG.upsellEnabled === false) {
+                window.location.href = PROJECT_CONFIG.thankYouUrl;
+              } else if (checkoutOrderBump) {
+                localStorage.setItem('medusa_upsell_purchased', 'true');
+                window.location.href = PROJECT_CONFIG.thankYouUrl;
+              } else {
+                window.location.href = PROJECT_CONFIG.upsellUrl;
+              }
+            } catch (err) {
+              throw new Error(err.message || 'Kaartbetaling mislukt');
+            }
+          })();
+        }
+
+        // ─── STRIPE CARD CONFIRM FLOW ───
+        // For credit cards on Stripe: confirm the payment intent using Stripe.js split card elements
+        if (selectedProviderId && selectedProviderId.indexOf('stripe') !== -1
+            && selectedMethod === 'creditcard' && providerData.stripePaymentIntentId && stripeCardReady) {
+          return (async function() {
+            try {
+              var nameInput = document.getElementById('stripe-card-name');
+              var cardName = nameInput ? nameInput.value : '';
+              var billingEmail = document.getElementById('email') ? document.getElementById('email').value : '';
+
+              var confirmResult = await stripeInstance.confirmCardPayment(
+                providerData.clientSecret,
+                {
+                  payment_method: {
+                    card: stripeElements.cardNumber,
+                    billing_details: {
+                      name: cardName || undefined,
+                      email: billingEmail || undefined,
+                    },
+                  },
+                }
+              );
+
+              if (confirmResult.error) {
+                throw new Error(confirmResult.error.message || 'Kaartbetaling mislukt');
+              }
+
+              console.log('[Stripe Card] Confirm result:', confirmResult.paymentIntent?.status);
 
               // Payment succeeded — complete cart
               var completeRes = await medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' });
