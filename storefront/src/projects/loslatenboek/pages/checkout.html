@@ -3384,7 +3384,10 @@ body {
           'Accept': 'application/json'
         },
         body: JSON.stringify({ request: body })
-      }).then(function(res) { return res.json(); });
+      }).then(function(res) {
+        if (!res.ok) throw new Error('Foxentry API error: ' + res.status);
+        return res.json();
+      });
     }
 
     /* ─── Response helper: navigeer naar result data ─── */
@@ -3793,8 +3796,30 @@ body {
               }
             }
           })
-          .catch(function() {
+          .catch(function(err) {
             hideSpinner(foxPhoneField);
+            // Foxentry failed (429 rate limit, network error, etc.)
+            // Fall back to local phone validation
+            console.warn('[Foxentry] Phone validation failed, using local fallback:', err.message || err);
+            var stripped = foxPhoneField.value.replace(/[\s\-\(\)\.]/g, '');
+            var localValid = /^[\+]?\d{8,}$/.test(stripped);
+            if (localValid) {
+              foxPhoneField.classList.add('valid');
+              foxPhoneField.classList.remove('invalid');
+              if (foxPhonePreview) {
+                foxPhonePreview.style.color = '';
+                foxPhonePreview.textContent = '';
+                foxPhonePreview.style.display = 'none';
+              }
+            } else {
+              foxPhoneField.classList.add('invalid');
+              foxPhoneField.classList.remove('valid');
+              if (foxPhonePreview) {
+                foxPhonePreview.textContent = '\u2717 Controleer je telefoonnummer';
+                foxPhonePreview.style.display = 'block';
+                foxPhonePreview.style.color = 'var(--error)';
+              }
+            }
           });
       });
     }
