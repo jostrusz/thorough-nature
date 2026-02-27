@@ -1,12 +1,22 @@
 // @ts-nocheck
 import {
-  PaymentProviderError,
+  AbstractPaymentProvider,
   PaymentSessionStatus,
+  MedusaError,
 } from "@medusajs/framework/utils"
 import { KlarnaApiClient, IKlarnaOrderLine } from "./api-client"
 import crypto from "crypto"
 
-const GATEWAY_CONFIG_MODULE = "gatewayConfig"
+type Options = {
+  apiKey?: string
+  secretKey?: string
+  testMode?: boolean
+}
+
+type InjectedDependencies = {
+  logger: any
+  gatewayConfig?: any
+}
 
 export interface IKlarnaPaymentSessionData {
   sessionId?: string
@@ -69,317 +79,342 @@ function buildOrderLines(
 }
 
 /**
- * Klarna payment provider service
- * Implements authorize → capture on shipment flow
- * Authorization valid for 28 days
- * Frontend uses Klarna Payments widget with client_token
+ * Klarna payment provider service for Medusa v2
+ * Extends AbstractPaymentProvider following the Mollie/Stripe pattern.
+ *
+ * Flow: initiatePayment → frontend widget authorize → authorizePayment → capturePayment
+ * Authorization valid for 28 days, capture after shipment.
+ * Frontend uses Klarna Payments SDK with client_token.
+ *
+ * API keys come from:
+ *   1. Gateway config module (admin-configured in DB) — preferred
+ *   2. Provider options in medusa-config.js (env vars) — fallback
  */
-export class KlarnaPaymentProvider {
-  protected container_: any
-  protected client_: KlarnaApiClient | null = null
-  protected gatewayConfigService_: any
-  protected logger_: any
-
+class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
   static identifier = "klarna"
 
-  constructor(container: any, options?: any) {
-    this.container_ = container
+  protected logger_: any
+  protected options_: Options
+  protected client_: KlarnaApiClient | null = null
+  protected gatewayConfigService_: any = null
+
+  constructor(container: InjectedDependencies, options: Options) {
+    super(container, options)
+    this.logger_ = container.logger || console
+    this.options_ = options || {}
+
+    // Try to resolve gateway config module from container (property injection)
     try {
-      this.logger_ = container.resolve("logger")
-    } catch {
-      this.logger_ = console
-    }
-    try {
-      this.gatewayConfigService_ = container.resolve(GATEWAY_CONFIG_MODULE)
+      this.gatewayConfigService_ = (container as any).gatewayConfig || null
     } catch {
       this.gatewayConfigService_ = null
     }
-  }
 
-  private getLogger() {
-    if (!this.logger_) {
-      try { this.logger_ = this.container_.resolve("logger") } catch { this.logger_ = console }
-    }
-    return this.logger_
-  }
-
-  private getGatewayConfigService() {
-    if (!this.gatewayConfigService_) {
-      this.gatewayConfigService_ = this.container_.resolve(GATEWAY_CONFIG_MODULE)
-    }
-    return this.gatewayConfigService_
+    this.logger_.info(
+      `[Klarna] Provider initialized. Gateway config: ${this.gatewayConfigService_ ? "available" : "not available"}. Options apiKey: ${this.options_?.apiKey ? "set" : "not set"}`
+    )
   }
 
   /**
-   * Initialize the Klarna API client with credentials from gateway_config
+   * Initialize the Klarna API client with credentials from gateway_config or options
    */
   private async getKlarnaClient(): Promise<KlarnaApiClient> {
     if (!this.client_) {
-      const gcService = this.getGatewayConfigService()
-      const configs = await gcService.listGatewayConfigs(
-        { provider: "klarna", is_active: true },
-        { take: 1 }
-      )
-      const config = configs[0]
-      if (!config) {
-        throw new PaymentProviderError("Klarna gateway not configured")
+      let apiKey: string | undefined
+      let secretKey: string | undefined
+      let isTestMode = true
+
+      // Try gateway config first (admin-configured)
+      if (this.gatewayConfigService_) {
+        try {
+          const configs = await this.gatewayConfigService_.listGatewayConfigs(
+            { provider: "klarna", is_active: true },
+            { take: 1 }
+          )
+          const config = configs[0]
+          if (config) {
+            const isLive = config.mode === "live"
+            const keys = isLive ? config.live_keys : config.test_keys
+            apiKey = keys?.api_key
+            secretKey = keys?.secret_key
+            isTestMode = !isLive
+            this.logger_.info(`[Klarna] Using gateway config: mode=${config.mode}`)
+          }
+        } catch (err) {
+          this.logger_.warn(`[Klarna] Failed to load gateway config: ${err.message}`)
+        }
       }
-      const isLive = config.mode === "live"
-      const keys = isLive ? config.live_keys : config.test_keys
-      if (!keys?.api_key || !keys?.secret_key) {
-        throw new PaymentProviderError("Klarna API credentials not configured")
+
+      // Fallback to provider options
+      if (!apiKey || !secretKey) {
+        apiKey = this.options_?.apiKey || process.env.KLARNA_API_KEY
+        secretKey = this.options_?.secretKey || process.env.KLARNA_SECRET_KEY
+        isTestMode = this.options_?.testMode !== false
       }
-      this.client_ = new KlarnaApiClient(keys.api_key, keys.secret_key, !isLive)
+
+      if (!apiKey || !secretKey) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "Klarna API credentials not configured. Set up in admin Payment Gateways or provide apiKey/secretKey in options."
+        )
+      }
+
+      this.client_ = new KlarnaApiClient(apiKey, secretKey, isTestMode)
     }
     return this.client_
   }
 
   /**
-   * Initiate a payment session — create Klarna session and return client_token
-   * Frontend will use this token with Klarna Payments widget
+   * Initiate a payment session — create Klarna session and return client_token.
+   * Frontend will use this token with Klarna Payments widget.
+   *
+   * Must return: { id: string, data: Record<string, unknown> }
    */
-  async initiatePayment(context: any): Promise<any> {
-    const {
-      amount,
-      currency_code,
-      customer,
-      cart,
-      context: contextData,
-    } = context
+  async initiatePayment(input: any): Promise<any> {
+    const { amount, currency_code, data, context } = input
 
     try {
       const client = await this.getKlarnaClient()
 
-      // Build order lines
+      const customer = context?.customer
+      const billingAddress = context?.billing_address || customer?.billing_address || {}
+      const shippingAddress = context?.shipping_address || billingAddress
+
+      // Build order lines from context items if available
+      const items = context?.extra?.items || context?.items || []
       const orderLines = buildOrderLines(
-        cart?.items || [],
+        items,
         currency_code,
-        contextData?.statement_descriptor
+        data?.statement_descriptor
       )
 
       // Add shipping as line item if applicable
-      if (cart?.shipping_total && cart.shipping_total > 0) {
+      const shippingTotal = context?.extra?.shipping_total || 0
+      if (shippingTotal > 0) {
         orderLines.push({
           type: "shipping_fee",
           name: "Shipping",
           quantity: 1,
-          unit_price: cart.shipping_total,
+          unit_price: shippingTotal,
           tax_rate: 0,
-          total_amount: cart.shipping_total,
+          total_amount: shippingTotal,
           total_tax_amount: 0,
         })
       }
 
-      // Build addresses
-      const billingAddress = customer?.billing_address || {}
-      const shippingAddress = cart?.shipping_address || billingAddress
+      // Build backend URL for webhooks
+      const backendUrl =
+        process.env.BACKEND_PUBLIC_URL ||
+        (process.env.RAILWAY_PUBLIC_DOMAIN_VALUE
+          ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN_VALUE}`
+          : "http://localhost:9000")
+
+      const returnUrl = data?.return_url || context?.extra?.return_url || backendUrl
 
       const sessionData = {
-        purchase_country: billingAddress.country_code?.toUpperCase() || "US",
-        purchase_currency: currency_code.toUpperCase(),
-        locale: contextData?.locale || "en_US",
+        purchase_country: billingAddress.country_code?.toUpperCase() || "NL",
+        purchase_currency: currency_code?.toUpperCase() || "EUR",
+        locale: data?.locale || "en-NL",
         order_amount: amount, // already in minor units (cents)
-        order_tax_amount: cart?.tax_total || 0,
-        order_lines: orderLines,
+        order_tax_amount: context?.extra?.tax_total || 0,
+        order_lines: orderLines.length > 0
+          ? orderLines
+          : [
+              {
+                type: "physical",
+                name: "Order",
+                quantity: 1,
+                unit_price: amount,
+                tax_rate: 0,
+                total_amount: amount,
+                total_tax_amount: 0,
+              },
+            ],
         merchant_urls: {
-          terms: `${contextData?.return_url || "https://example.com"}/terms`,
-          checkout: `${contextData?.return_url || "https://example.com"}/checkout`,
-          confirmation: `${contextData?.return_url || "https://example.com"}/confirmation`,
-          push: `${contextData?.webhook_url || "https://api.example.com"}/webhooks/klarna`,
+          terms: `${returnUrl}/terms`,
+          checkout: `${returnUrl}/checkout`,
+          confirmation: `${returnUrl}/order/confirmed`,
+          push: `${backendUrl}/webhooks/klarna`,
         },
-        billing_address: {
-          given_name: customer?.first_name || "John",
-          family_name: customer?.last_name || "Doe",
-          email: customer?.email || "customer@example.com",
-          phone: customer?.phone,
+        billing_address: billingAddress.given_name ? billingAddress : {
+          given_name: customer?.first_name || billingAddress.first_name || "Customer",
+          family_name: customer?.last_name || billingAddress.last_name || "",
+          email: customer?.email || context?.email || "customer@example.com",
+          phone: customer?.phone || billingAddress.phone || "",
           street_address: billingAddress.address_1 || "Street 1",
-          street_address2: billingAddress.address_2,
+          street_address2: billingAddress.address_2 || "",
           postal_code: billingAddress.postal_code || "00000",
           city: billingAddress.city || "City",
-          region: billingAddress.province,
-          country: billingAddress.country_code?.toUpperCase() || "US",
+          region: billingAddress.province || "",
+          country: billingAddress.country_code?.toUpperCase() || "NL",
         },
-        shipping_address: {
-          given_name: customer?.first_name || "John",
-          family_name: customer?.last_name || "Doe",
-          email: customer?.email || "customer@example.com",
-          phone: customer?.phone,
+        shipping_address: shippingAddress.given_name ? shippingAddress : {
+          given_name: customer?.first_name || shippingAddress.first_name || "Customer",
+          family_name: customer?.last_name || shippingAddress.last_name || "",
+          email: customer?.email || context?.email || "customer@example.com",
+          phone: customer?.phone || shippingAddress.phone || "",
           street_address: shippingAddress.address_1 || "Street 1",
-          street_address2: shippingAddress.address_2,
+          street_address2: shippingAddress.address_2 || "",
           postal_code: shippingAddress.postal_code || "00000",
           city: shippingAddress.city || "City",
-          region: shippingAddress.province,
-          country: shippingAddress.country_code?.toUpperCase() || "US",
+          region: shippingAddress.province || "",
+          country: shippingAddress.country_code?.toUpperCase() || "NL",
         },
       }
 
       const result = await client.createSession(sessionData)
       if (!result.success) {
-        throw new PaymentProviderError(result.error || "Failed to create Klarna session")
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
+          result.error || "Failed to create Klarna session"
+        )
       }
 
       if (!result.data?.client_token) {
-        throw new PaymentProviderError("No client_token returned from Klarna")
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
+          "No client_token returned from Klarna"
+        )
       }
 
-      this.getLogger().info(
+      this.logger_.info(
         `[Klarna] Session created: sessionId=${result.data.session_id}, client_token available`
       )
 
+      // Return format required by Medusa v2: { id, data }
       return {
-        session_data: {
+        id: result.data.session_id,
+        data: {
           sessionId: result.data.session_id,
           clientToken: result.data.client_token,
+          paymentMethodCategories: result.data.payment_method_categories,
           amount,
           currency: currency_code,
           createdAt: Date.now(),
-        } as IKlarnaPaymentSessionData,
-        // IMPORTANT: For Klarna, return client_token to frontend instead of redirect_url
-        // Frontend renders Klarna Payments widget with this token
-        client_token: result.data.client_token,
+        },
       }
     } catch (error: any) {
-      this.getLogger().error(`[Klarna] Payment initiation failed: ${error.message}`)
-      throw new PaymentProviderError(
+      this.logger_.error(`[Klarna] Payment initiation failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
         error.message || "Failed to initiate Klarna payment"
       )
     }
   }
 
   /**
-   * Authorize payment — after frontend authorization, create order with auth token
-   * This is called AFTER customer confirms in the Klarna widget
+   * Authorize payment — after frontend authorization, create order with auth token.
+   * This is called when cart.complete() triggers payment authorization.
+   * The authorizationToken must be in the session data (set by POST /store/klarna/authorize).
+   *
+   * Returns: { status, data }
    */
-  async authorizePayment(
-    paymentSessionData: IKlarnaPaymentSessionData,
-    context: any
-  ): Promise<any> {
+  async authorizePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
     try {
       const client = await this.getKlarnaClient()
       const { sessionId, clientToken, authorizationToken, amount, currency } =
-        paymentSessionData
+        sessionData
 
       if (!authorizationToken) {
-        // If no auth token yet, session is still pending
+        // If no auth token yet, customer needs to authorize via Klarna widget
+        this.logger_.info("[Klarna] No authorizationToken yet, returning REQUIRES_MORE")
         return {
-          session_data: paymentSessionData,
-          status: PaymentSessionStatus.PENDING,
+          status: PaymentSessionStatus.REQUIRES_MORE,
+          data: sessionData,
         }
       }
 
-      // Create order with authorization token (from frontend callback)
-      const { cart, context: contextData } = context
-
-      const orderLines = buildOrderLines(
-        cart?.items || [],
-        currency,
-        contextData?.statement_descriptor
-      )
-
-      if (cart?.shipping_total && cart.shipping_total > 0) {
-        orderLines.push({
-          type: "shipping_fee",
-          name: "Shipping",
+      // Build order data for Klarna createOrder
+      const orderLines = [
+        {
+          type: "physical",
+          name: "Order",
           quantity: 1,
-          unit_price: cart.shipping_total,
+          unit_price: amount,
           tax_rate: 0,
-          total_amount: cart.shipping_total,
+          total_amount: amount,
           total_tax_amount: 0,
-        })
-      }
+        },
+      ]
 
       const orderData = {
         authorization_token: authorizationToken,
         order_amount: amount,
-        order_tax_amount: cart?.tax_total || 0,
-        description: contextData?.statement_descriptor || "Order",
-        merchant_reference: cart?.id || `order-${Date.now()}`,
-        merchant_reference1: cart?.id,
+        order_tax_amount: 0,
+        description: "Order",
+        merchant_reference: `medusa-${Date.now()}`,
+        merchant_reference1: sessionId,
         order_lines: orderLines,
       }
 
       const result = await client.createOrder(orderData)
       if (!result.success) {
-        throw new PaymentProviderError(result.error || "Failed to create Klarna order")
+        this.logger_.error(`[Klarna] createOrder failed: ${result.error}`)
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
+          result.error || "Failed to create Klarna order"
+        )
       }
 
       const status = mapKlarnaStatusToMedusa(result.data?.status || "AUTHORIZED")
 
-      this.getLogger().info(
+      this.logger_.info(
         `[Klarna] Order created: klarnaOrderId=${result.data.order_id}, status=${result.data.status}`
       )
 
       return {
-        session_data: {
-          ...paymentSessionData,
+        status,
+        data: {
+          ...sessionData,
           klarnaOrderId: result.data.order_id,
+          klarnaFraudStatus: result.data.fraud_status,
           status: result.data.status,
         },
-        status,
       }
     } catch (error: any) {
-      this.getLogger().error(`[Klarna] Authorization failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Klarna] Authorization failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
     }
   }
 
   /**
-   * Capture payment — called AFTER shipment when tracking info is available
-   * Klarna authorization is valid for 28 days
-   * Use idempotency key to prevent duplicate captures
+   * Capture payment — called AFTER shipment when tracking info is available.
+   * Klarna authorization is valid for 28 days.
+   * Uses idempotency key to prevent duplicate captures.
    */
-  async capturePayment(
-    paymentSessionData: IKlarnaPaymentSessionData,
-    context: any
-  ): Promise<any> {
+  async capturePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
     try {
       const client = await this.getKlarnaClient()
-      const { klarnaOrderId, amount } = paymentSessionData
+      const { klarnaOrderId, amount } = sessionData
 
       if (!klarnaOrderId) {
-        throw new PaymentProviderError("No Klarna order ID in session data")
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "No Klarna order ID in session data"
+        )
       }
-
-      const { cart, context: contextData } = context
-
-      // Build order lines for capture
-      const orderLines = buildOrderLines(
-        cart?.items || [],
-        paymentSessionData.currency,
-        contextData?.statement_descriptor
-      )
-
-      if (cart?.shipping_total && cart.shipping_total > 0) {
-        orderLines.push({
-          type: "shipping_fee",
-          name: "Shipping",
-          quantity: 1,
-          unit_price: cart.shipping_total,
-          tax_rate: 0,
-          total_amount: cart.shipping_total,
-          total_tax_amount: 0,
-        })
-      }
-
-      // Extract shipping info from order metadata if available
-      const shippingInfo = contextData?.shipping_info || {}
 
       const captureData = {
         captured_amount: amount,
-        description: contextData?.statement_descriptor || "Capture",
-        order_lines: orderLines,
-        shipping_info: shippingInfo.tracking_number
-          ? [
-              {
-                shipping_company: shippingInfo.shipping_company,
-                tracking_number: shippingInfo.tracking_number,
-                tracking_uri: shippingInfo.tracking_uri,
-              },
-            ]
-          : undefined,
+        description: "Capture",
+        order_lines: [
+          {
+            type: "physical",
+            name: "Order",
+            quantity: 1,
+            unit_price: amount,
+            tax_rate: 0,
+            total_amount: amount,
+            total_tax_amount: 0,
+          },
+        ],
       }
 
-      // Use UUID v4 for idempotency key to ensure safe retry
       const idempotencyKey = crypto.randomUUID()
 
       const result = await client.captureOrder(
@@ -389,42 +424,47 @@ export class KlarnaPaymentProvider {
       )
 
       if (!result.success) {
-        throw new PaymentProviderError(result.error || "Failed to capture order")
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
+          result.error || "Failed to capture order"
+        )
       }
 
-      this.getLogger().info(
-        `[Klarna] Order captured: klarnaOrderId=${klarnaOrderId}, captureId=${result.data.capture_id}`
+      this.logger_.info(
+        `[Klarna] Order captured: klarnaOrderId=${klarnaOrderId}, captureId=${result.data?.capture_id}`
       )
 
       return {
-        session_data: {
-          ...paymentSessionData,
-          klarnaOrderId,
-          captureId: result.data.capture_id,
+        data: {
+          ...sessionData,
+          captureId: result.data?.capture_id,
           status: "CAPTURED",
         },
-        status: PaymentSessionStatus.CAPTURED,
       }
     } catch (error: any) {
-      this.getLogger().error(`[Klarna] Capture failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Klarna] Capture failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
     }
   }
 
   /**
    * Refund payment
    */
-  async refundPayment(
-    paymentSessionData: IKlarnaPaymentSessionData,
-    refundAmount: number,
-    context: any
-  ): Promise<any> {
+  async refundPayment(input: any): Promise<any> {
+    const sessionData = input.data || input
+    const refundAmount = input.amount || sessionData.amount
     try {
       const client = await this.getKlarnaClient()
-      const { klarnaOrderId } = paymentSessionData
+      const { klarnaOrderId } = sessionData
 
       if (!klarnaOrderId) {
-        throw new PaymentProviderError("No Klarna order ID in session data")
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "No Klarna order ID in session data"
+        )
       }
 
       const refundData = {
@@ -442,77 +482,75 @@ export class KlarnaPaymentProvider {
       )
 
       if (!result.success) {
-        throw new PaymentProviderError(result.error || "Failed to create refund")
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
+          result.error || "Failed to create refund"
+        )
       }
 
-      this.getLogger().info(
-        `[Klarna] Refund created for order ${klarnaOrderId}: ${result.data.refund_id}`
+      this.logger_.info(
+        `[Klarna] Refund created for order ${klarnaOrderId}: ${result.data?.refund_id}`
       )
 
       return {
-        session_data: paymentSessionData,
-        status: PaymentSessionStatus.AUTHORIZED,
+        data: {
+          ...sessionData,
+          refundId: result.data?.refund_id,
+        },
       }
     } catch (error: any) {
-      this.getLogger().error(`[Klarna] Refund failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Klarna] Refund failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
     }
   }
 
   /**
-   * Cancel payment
+   * Cancel payment — release remaining authorization
    */
-  async cancelPayment(
-    paymentSessionData: IKlarnaPaymentSessionData,
-    context: any
-  ): Promise<any> {
+  async cancelPayment(input: any): Promise<any> {
+    const sessionData = input.data || input
     try {
       const client = await this.getKlarnaClient()
-      const { klarnaOrderId } = paymentSessionData
+      const { klarnaOrderId } = sessionData
 
       if (klarnaOrderId) {
-        // Release remaining authorization if order exists
         await client.releaseAuthorization(klarnaOrderId)
+        this.logger_.info(`[Klarna] Authorization released for order ${klarnaOrderId}`)
       }
-
-      this.getLogger().info(
-        `[Klarna] Order ${klarnaOrderId} marked for cancellation`
-      )
 
       return {
-        session_data: paymentSessionData,
-        status: PaymentSessionStatus.CANCELED,
+        data: {
+          ...sessionData,
+          status: "CANCELLED",
+        },
       }
     } catch (error: any) {
-      this.getLogger().error(`[Klarna] Cancel failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Klarna] Cancel failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
     }
   }
 
   /**
-   * Delete payment session
+   * Delete payment session — no-op for Klarna
    */
-  async deletePayment(
-    paymentSessionData: IKlarnaPaymentSessionData,
-    context: any
-  ): Promise<any> {
-    // No-op for Klarna — cleanup handled server-side
-    return {
-      session_data: paymentSessionData,
-      status: PaymentSessionStatus.CANCELED,
-    }
+  async deletePayment(input: any): Promise<any> {
+    return { data: input.data || input }
   }
 
   /**
    * Get payment status
    */
-  async getPaymentStatus(
-    paymentSessionData: IKlarnaPaymentSessionData,
-    context: any
-  ): Promise<PaymentSessionStatus> {
+  async getPaymentStatus(input: any): Promise<PaymentSessionStatus> {
+    const sessionData = input.data || input
     try {
       const client = await this.getKlarnaClient()
-      const { klarnaOrderId } = paymentSessionData
+      const { klarnaOrderId } = sessionData
 
       if (!klarnaOrderId) {
         return PaymentSessionStatus.PENDING
@@ -525,7 +563,7 @@ export class KlarnaPaymentProvider {
 
       return mapKlarnaStatusToMedusa(result.data?.status || "AUTHORIZED")
     } catch (error: any) {
-      this.getLogger().error(`[Klarna] Status check failed: ${error.message}`)
+      this.logger_.error(`[Klarna] Status check failed: ${error.message}`)
       return PaymentSessionStatus.ERROR
     }
   }
@@ -533,80 +571,53 @@ export class KlarnaPaymentProvider {
   /**
    * Retrieve payment data
    */
-  async retrievePayment(
-    paymentSessionData: IKlarnaPaymentSessionData,
-    context: any
-  ): Promise<any> {
+  async retrievePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
     try {
       const client = await this.getKlarnaClient()
-      const { klarnaOrderId } = paymentSessionData
+      const { klarnaOrderId } = sessionData
 
       if (!klarnaOrderId) {
-        return {
-          session_data: paymentSessionData,
-          status: PaymentSessionStatus.PENDING,
-        }
+        return { data: sessionData }
       }
 
       const result = await client.getOrder(klarnaOrderId)
       if (!result.success) {
-        throw new PaymentProviderError(result.error || "Failed to retrieve order")
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
+          result.error || "Failed to retrieve order"
+        )
       }
 
-      const status = mapKlarnaStatusToMedusa(result.data?.status || "AUTHORIZED")
-
       return {
-        session_data: {
-          ...paymentSessionData,
+        data: {
+          ...sessionData,
           klarnaOrderId: result.data.order_id,
           status: result.data.status,
         },
-        status,
       }
     } catch (error: any) {
-      this.getLogger().error(`[Klarna] Retrieve failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Klarna] Retrieve failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
     }
   }
 
   /**
    * Update payment session
    */
-  async updatePayment(context: any): Promise<any> {
-    return await this.retrievePayment(context.paymentSessionData, context)
-  }
-
-  /**
-   * Validate Klarna API credentials by attempting to create a session
-   * Used by admin test-connection endpoint
-   */
-  async validateAuth(): Promise<{ success: boolean; error?: string }> {
-    try {
-      const client = await this.getKlarnaClient()
-      // Try fetching a non-existent order — if auth fails, we get 401/403
-      // If auth succeeds, we get 404 (order not found) — that's fine
-      const result = await client.getOrder("test-auth-check")
-      // If we get here with success: false and no auth error, credentials are valid
-      return { success: true }
-    } catch (error: any) {
-      // If the error is about the order not being found, credentials are valid
-      if (error.message?.includes("not found") || error.message?.includes("404")) {
-        return { success: true }
-      }
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      }
-    }
+  async updatePayment(input: any): Promise<any> {
+    return await this.retrievePayment(input)
   }
 
   /**
    * Process Klarna webhook
-   * Klarna sends notifications for authorization, capture, refund status changes
    */
   async getWebhookActionAndData(webhookData: any): Promise<{
     action: string
-    data: IKlarnaPaymentSessionData
+    data: Record<string, unknown>
   }> {
     try {
       const { order_id, event_type } = webhookData
@@ -647,10 +658,10 @@ export class KlarnaPaymentProvider {
         data: {
           klarnaOrderId: order_id,
           status,
-        } as IKlarnaPaymentSessionData,
+        },
       }
     } catch (error: any) {
-      this.getLogger().error(`[Klarna] Webhook processing failed: ${error.message}`)
+      this.logger_.error(`[Klarna] Webhook processing failed: ${error.message}`)
       return {
         action: "fail",
         data: webhookData,
@@ -658,3 +669,5 @@ export class KlarnaPaymentProvider {
     }
   }
 }
+
+export default KlarnaPaymentProviderService

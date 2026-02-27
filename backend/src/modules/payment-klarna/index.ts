@@ -1,8 +1,8 @@
-import { Module } from "@medusajs/framework/utils"
-import { KlarnaPaymentProvider } from "./service"
+import { ModuleProvider, Modules } from "@medusajs/framework/utils"
+import KlarnaPaymentProviderService from "./service"
 
-export const KLARNA_MODULE_NAME = "payment_klarna"
+export const KLARNA_PROVIDER_ID = "klarna"
 
-export default Module(KLARNA_MODULE_NAME, {
-  service: KlarnaPaymentProvider,
+export default ModuleProvider(Modules.PAYMENT, {
+  services: [KlarnaPaymentProviderService],
 })

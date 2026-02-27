@@ -70,11 +70,11 @@ const medusaConfig = {
     { resolve: "./src/modules/dextrum" },
     { resolve: "./src/modules/supportbox" },
     { resolve: "./src/modules/project-settings" },
-    // ═══ Payment provider modules (non-Mollie, standalone) ═══
+    // ═══ Payment provider modules (non-Medusa-payment, standalone) ═══
     { resolve: "./src/modules/payment-comgate" },
     { resolve: "./src/modules/payment-przelewy24" },
-    { resolve: "./src/modules/payment-klarna" },
     { resolve: "./src/modules/payment-airwallex" },
+    // NOTE: payment-klarna is now registered as a proper payment provider below
     // ═══ Core modules ═══
     {
       key: Modules.FILE,
@@ -154,6 +154,11 @@ const medusaConfig = {
             options: {
               ...(MOLLIE_API_KEY ? { apiKey: MOLLIE_API_KEY, testMode: MOLLIE_TEST_MODE } : {}),
             },
+          },
+          {
+            resolve: './src/modules/payment-klarna',
+            id: 'klarna',
+            options: {},
           },
           ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{
             resolve: '@medusajs/payment-stripe',
