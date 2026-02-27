@@ -67,6 +67,15 @@ function formatPayPalAmount(amount: number): string {
 class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
   static identifier = "paypal"
 
+  /** APM methods that use PayPal's redirect-to-bank flow (intent: CAPTURE, auto-capture) */
+  static APM_METHODS: Record<string, { country_code: string }> = {
+    ideal:      { country_code: "NL" },
+    bancontact: { country_code: "BE" },
+    blik:       { country_code: "PL" },
+    p24:        { country_code: "PL" },
+    eps:        { country_code: "AT" },
+  }
+
   protected logger_: any
   protected options_: Options
   protected client_: PayPalApiClient | null = null
@@ -211,32 +220,87 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
       const returnUrl = data?.return_url || `${backendUrl}/payment-return`
       const cancelUrl = data?.cancel_url || returnUrl
 
-      this.logger_.info(
-        `[PayPal] Creating order: amount=${totalValue} ${currency}`
-      )
+      const method = data?.method || ""
+      const apmConfig = PayPalPaymentProviderService.APM_METHODS[method]
+      const isAPM = !!apmConfig
 
-      const orderData: any = {
-        intent: "AUTHORIZE",
-        purchase_units: [
-          {
-            reference_id: context?.cart_id || `medusa-${Date.now()}`,
-            amount: {
-              currency_code: currency,
-              value: totalValue,
-            },
-          },
-        ],
-        payment_source: {
-          paypal: {
-            experience_context: {
-              payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
-              brand_name: process.env.STORE_NAME || "EverChapter",
-              user_action: "PAY_NOW",
-              return_url: returnUrl,
-              cancel_url: cancelUrl,
-            },
+      // Shared purchase_units
+      const purchaseUnits = [
+        {
+          reference_id: context?.cart_id || `medusa-${Date.now()}`,
+          amount: {
+            currency_code: currency,
+            value: totalValue,
           },
         },
+      ]
+
+      let orderData: any
+
+      if (isAPM) {
+        // ── APM Flow: CAPTURE + auto-capture on approval ──
+        const customerName = [
+          data?.billing_address?.first_name || data?.shipping_address?.first_name || "",
+          data?.billing_address?.last_name || data?.shipping_address?.last_name || "",
+        ].filter(Boolean).join(" ") || "Customer"
+
+        const countryCode = (
+          data?.billing_address?.country_code || apmConfig.country_code
+        ).toUpperCase()
+
+        const customerEmail = data?.email || ""
+
+        const apmPaymentSource: any = {
+          country_code: countryCode,
+          name: customerName,
+          experience_context: {
+            return_url: returnUrl,
+            cancel_url: cancelUrl,
+          },
+        }
+
+        // P24 requires email
+        if (method === "p24" && customerEmail) {
+          apmPaymentSource.email = customerEmail
+        }
+        // BLIK can optionally include email
+        if (method === "blik" && customerEmail) {
+          apmPaymentSource.email = customerEmail
+        }
+
+        orderData = {
+          intent: "CAPTURE",
+          processing_instruction: "ORDER_COMPLETE_ON_PAYMENT_APPROVAL",
+          purchase_units: purchaseUnits,
+          payment_source: {
+            [method]: apmPaymentSource,
+          },
+        }
+
+        this.logger_.info(
+          `[PayPal] Creating APM order: method=${method}, amount=${totalValue} ${currency}, country=${countryCode}`
+        )
+      } else {
+        // ── PayPal Wallet Flow: AUTHORIZE (existing behavior) ──
+        orderData = {
+          intent: "AUTHORIZE",
+          purchase_units: purchaseUnits,
+          payment_source: {
+            paypal: {
+              experience_context: {
+                payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
+                brand_name: process.env.STORE_NAME || "EverChapter",
+                user_action: "PAY_NOW",
+                return_url: returnUrl,
+                cancel_url: cancelUrl,
+              },
+            },
+          },
+        }
+
+        this.logger_.info(
+          `[PayPal] Creating wallet order: amount=${totalValue} ${currency}`
+        )
       }
 
       const result = await client.createOrder(orderData)
@@ -252,7 +316,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
       )
 
       // Return format required by Medusa v2: { id, data }
-      // approvalUrl is used by the checkout to redirect the customer to PayPal
+      // approvalUrl is used by the checkout to redirect the customer to PayPal/bank
       return {
         id: result.id,
         data: {
@@ -262,6 +326,8 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
           client_id: clientIdForFrontend,
           currency_code: currency,
           amount: totalValue,
+          isAPM,
+          method,
         },
       }
     } catch (error: any) {
@@ -366,6 +432,25 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
       const client = await this.getPayPalClient()
       const { paypalOrderId, authorizationId, currency_code, amount } =
         sessionData
+
+      // APM orders: already auto-captured via processing_instruction
+      if (sessionData.isAPM && paypalOrderId) {
+        const order = await client.getOrder(paypalOrderId)
+        const captures = order.purchase_units?.[0]?.payments?.captures || []
+        if (captures.length > 0 && captures[0].status === "COMPLETED") {
+          this.logger_.info(
+            `[PayPal] APM order already captured: orderId=${paypalOrderId}, captureId=${captures[0].id}`
+          )
+          return {
+            data: {
+              ...sessionData,
+              captureId: captures[0].id,
+              captureStatus: "COMPLETED",
+              status: "CAPTURED",
+            },
+          }
+        }
+      }
 
       if (authorizationId) {
         // Capture the authorization

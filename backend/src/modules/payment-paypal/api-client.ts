@@ -51,7 +51,35 @@ export interface IPayPalOrderData {
         cancel_url?: string
       }
     }
+    ideal?: {
+      country_code: string
+      name: string
+      experience_context?: { return_url?: string; cancel_url?: string }
+    }
+    bancontact?: {
+      country_code: string
+      name: string
+      experience_context?: { return_url?: string; cancel_url?: string }
+    }
+    blik?: {
+      country_code: string
+      name: string
+      email?: string
+      experience_context?: { return_url?: string; cancel_url?: string }
+    }
+    p24?: {
+      country_code: string
+      name: string
+      email: string
+      experience_context?: { return_url?: string; cancel_url?: string }
+    }
+    eps?: {
+      country_code: string
+      name: string
+      experience_context?: { return_url?: string; cancel_url?: string }
+    }
   }
+  processing_instruction?: string
 }
 
 /**

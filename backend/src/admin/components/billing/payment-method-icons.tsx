@@ -186,6 +186,11 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
   ],
   paypal: [
     { code: "paypal", name: "PayPal", icon: "paypal", available_countries: [], supported_currencies: [] },
+    { code: "ideal", name: "iDEAL", icon: "ideal", available_countries: ["nl"], supported_currencies: ["EUR"] },
+    { code: "bancontact", name: "Bancontact", icon: "bancontact", available_countries: ["be"], supported_currencies: ["EUR"] },
+    { code: "blik", name: "BLIK", icon: "blik", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    { code: "p24", name: "Przelewy24", icon: "przelewy24", available_countries: ["pl"], supported_currencies: ["PLN", "EUR"] },
+    { code: "eps", name: "EPS", icon: "eps", available_countries: ["at"], supported_currencies: ["EUR"] },
   ],
   klarna: [
     { code: "klarna", name: "Klarna Pay Now", icon: "klarna", available_countries: ["nl", "be", "de", "at", "fi", "fr", "it", "se", "es", "dk", "no", "gb", "ie", "pt", "pl", "cz"], supported_currencies: [] },
