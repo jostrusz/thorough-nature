@@ -117,7 +117,7 @@ export const POST = async (
       })
 
       const currency = order.currency_code?.toUpperCase() || "EUR"
-      const amountValue = (Number(order.total) / 100).toFixed(2)
+      const amountValue = Number(order.total).toFixed(2)
 
       let captureId: string
 
@@ -191,8 +191,9 @@ export const POST = async (
       const client = new KlarnaApiClient(apiKey, secretKey, !isLive)
 
       // Build capture data with optional shipping_info
+      // order.total is in major units (e.g. 99 = €99.00); Klarna needs minor units (cents)
       const captureData: any = {
-        captured_amount: order.total,
+        captured_amount: Math.round(Number(order.total) * 100),
         description: `Capture for order ${order.display_id || orderId}`,
       }
 
