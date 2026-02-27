@@ -343,6 +343,23 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
         }
       }
 
+      // Determine purchase_country from session data or context
+      const billingAddress = sessionData.billing_address || sessionData.billingAddress || {}
+      const shippingAddress = sessionData.shipping_address || sessionData.shippingAddress || {}
+      const purchaseCountry = (
+        billingAddress.country ||
+        billingAddress.country_code ||
+        shippingAddress.country ||
+        shippingAddress.country_code ||
+        sessionData.purchase_country ||
+        "NL"
+      ).toUpperCase()
+      const purchaseCurrency = (currency || sessionData.purchase_currency || "EUR").toUpperCase()
+
+      this.logger_.info(
+        `[Klarna] authorizePayment: amount=${amount}, currency=${purchaseCurrency}, country=${purchaseCountry}, authToken=${authorizationToken?.substring(0, 16)}...`
+      )
+
       // Build order data for Klarna createOrder
       const orderLines = [
         {
@@ -358,6 +375,8 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
 
       const orderData = {
         authorization_token: authorizationToken,
+        purchase_country: purchaseCountry,
+        purchase_currency: purchaseCurrency,
         order_amount: amount,
         order_tax_amount: 0,
         description: "Order",

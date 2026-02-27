@@ -53,6 +53,8 @@ export interface IKlarnaAddress {
 
 export interface IKlarnaOrderData {
   authorization_token: string
+  purchase_country: string // e.g. "NL"
+  purchase_currency: string // e.g. "EUR"
   order_amount: number // in minor units
   order_tax_amount: number
   description?: string
@@ -168,6 +170,8 @@ export class KlarnaApiClient {
     try {
       const authToken = orderData.authorization_token
       const payload = {
+        purchase_country: orderData.purchase_country,
+        purchase_currency: orderData.purchase_currency,
         order_amount: orderData.order_amount,
         order_tax_amount: orderData.order_tax_amount,
         description: orderData.description,
