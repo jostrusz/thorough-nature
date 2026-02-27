@@ -485,6 +485,7 @@ function GatewaysTab() {
   const startEditing = (gw: any) => {
     setEditingGw(gw.id)
     setEditForm({
+      provider: gw.provider,
       display_name: gw.display_name || "",
       billing_entity_id: gw.billing_entity_id || "",
       mode: gw.mode || "test",
@@ -495,13 +496,14 @@ function GatewaysTab() {
         .filter((m: any) => m.is_active)
         .map((m: any) => m.code),
       project_slugs: (gw.project_slugs || []).join(", "),
+      metadata: gw.metadata || {},
     })
   }
 
   const handleUpdate = async (gwId: string) => {
     try {
       // 1. Update gateway config fields (excluding selected_methods and project_slugs string)
-      const { selected_methods, project_slugs, ...gatewayData } = editForm
+      const { selected_methods, project_slugs, metadata, provider: _provider, ...gatewayData } = editForm
 
       // Parse project_slugs from comma-separated string to JSON array
       const slugsArray = project_slugs
@@ -510,7 +512,11 @@ function GatewaysTab() {
 
       await sdk.client.fetch(`/admin/gateway-configs/${gwId}`, {
         method: "POST",
-        body: { ...gatewayData, project_slugs: slugsArray.length > 0 ? slugsArray : null },
+        body: {
+          ...gatewayData,
+          project_slugs: slugsArray.length > 0 ? slugsArray : null,
+          metadata: metadata && Object.keys(metadata).length > 0 ? metadata : null,
+        },
       })
 
       // 2. Update payment methods via the methods endpoint
@@ -1004,6 +1010,20 @@ function GatewaysTab() {
                           </div>
                         </div>
                       </div>
+                      {/* Apple Pay Domain Verification (only for Mollie) */}
+                      {editForm.provider === "mollie" && (editForm.selected_methods || []).includes("applepay") && (
+                        <div style={{ marginBottom: "12px", padding: "10px", background: "#F6F6F7", borderRadius: "8px" }}>
+                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase" }}>Apple Pay Domain Verification</span>
+                          <p style={{ fontSize: "11px", color: "#8C9196", marginTop: "2px", marginBottom: "6px" }}>Paste the content from Mollie Dashboard → Apple Pay → Domain verification file</p>
+                          <textarea
+                            className="bp-input"
+                            style={{ ...inputStyle, minHeight: "60px", resize: "vertical", fontFamily: "monospace", fontSize: "11px" }}
+                            value={(editForm as any).metadata?.apple_pay_verification_file || ""}
+                            onChange={(e) => setEditForm({ ...editForm, metadata: { ...(editForm as any).metadata, apple_pay_verification_file: e.target.value } } as any)}
+                            placeholder="Paste Apple developer domain association file content here"
+                          />
+                        </div>
+                      )}
                       <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
                         <button onClick={() => setEditingGw(null)} className="bp-btn" style={{ padding: "5px 14px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#6D7175" }}>
                           Cancel
