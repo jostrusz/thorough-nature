@@ -30,7 +30,8 @@ function mapMollieStatusToMedusa(mollieStatus: string): PaymentSessionStatus {
     case "pending":
       return PaymentSessionStatus.PENDING
     case "open":
-      return PaymentSessionStatus.PENDING
+      // "open" means customer needs to complete action (3D Secure, bank redirect, etc.)
+      return PaymentSessionStatus.REQUIRES_MORE
     case "processing":
       return PaymentSessionStatus.PENDING
     case "expired":
@@ -324,9 +325,16 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
       const status = mapMollieStatusToMedusa(result.data.status)
       this.logger_.info(`[Mollie] Authorize: ${molliePaymentId} → ${result.data.status} → ${status}`)
 
+      // If payment is "open" (3D Secure / bank redirect pending), include checkoutUrl
+      const checkoutUrl = result.data._links?.checkout?.href || sessionData.checkoutUrl || null
+
       return {
         status,
-        data: { ...sessionData, status: result.data.status },
+        data: {
+          ...sessionData,
+          status: result.data.status,
+          ...(checkoutUrl && result.data.status === "open" ? { checkoutUrl } : {}),
+        },
       }
     } catch (error: any) {
       this.logger_.error(`[Mollie] Authorization failed: ${error.message}`)
@@ -525,10 +533,14 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
       const mollieStatus = result.data.status
       let action = "not_supported"
 
+      // paid/authorized = payment successful (including after 3D Secure completion)
       if (mollieStatus === "paid" || mollieStatus === "authorized") {
         action = "authorized"
       } else if (mollieStatus === "canceled" || mollieStatus === "expired" || mollieStatus === "failed") {
         action = "failed"
+      } else if (mollieStatus === "open") {
+        // Still waiting for customer action (3D Secure, bank redirect)
+        action = "not_supported"
       }
 
       this.logger_.info(`[Mollie] Webhook: ${id} → ${mollieStatus} → action: ${action}`)
