@@ -9,8 +9,9 @@ import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { isManual, isMollie, isPaypal, isStripe } from "@lib/constants"
+import { isManual, isMollie, isPaypal, isStripe, isKlarna } from "@lib/constants"
 import { useMollie } from "../payment-wrapper/mollie-wrapper"
+import { KlarnaPaymentButton } from "../klarna-payment-button"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -62,6 +63,14 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     case isMollie(paymentSession?.provider_id):
       return (
         <MolliePaymentButton
+          notReady={notReady}
+          cart={cart}
+          data-testid={dataTestId}
+        />
+      )
+    case isKlarna(paymentSession?.provider_id):
+      return (
+        <KlarnaPaymentButton
           notReady={notReady}
           cart={cart}
           data-testid={dataTestId}
