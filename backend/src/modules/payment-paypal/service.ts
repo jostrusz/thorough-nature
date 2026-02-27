@@ -74,6 +74,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
     blik:       { country_code: "PL" },
     p24:        { country_code: "PL" },
     eps:        { country_code: "AT" },
+    swish:      { country_code: "SE" },
   }
 
   protected logger_: any

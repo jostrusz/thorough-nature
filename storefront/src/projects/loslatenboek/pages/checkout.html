@@ -3207,6 +3207,8 @@ body {
     googlepay: 'Betaal met Google Pay',
     bank_transfer: 'Betaal via bankoverschrijving',
     sepa_debit: 'SEPA automatische incasso',
+    swish: 'Betaal met Swish (Zweden)',
+    revolut_pay: 'Betaal met Revolut',
   };
 
   // Klarna sub-method config: code → SDK payment_method_category + Dutch labels
@@ -3244,6 +3246,8 @@ body {
       trustly: { bg: '#0EE06E', text: '#FFF', label: 'TLY' },
       bank_transfer: { bg: '#F6F6F7', text: '#1A1A1A', label: 'Bank' },
       sepa_debit: { bg: '#2B4C9B', text: '#FFF', label: 'SEPA' },
+      swish: { bg: '#0046FF', text: '#FFF', label: 'Swish' },
+      revolut_pay: { bg: '#0075EB', text: '#FFF', label: 'REV' },
     };
     var badge = badges[code];
     if (badge) {

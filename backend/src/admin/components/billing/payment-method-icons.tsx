@@ -191,6 +191,7 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "blik", name: "BLIK", icon: "blik", available_countries: ["pl"], supported_currencies: ["PLN"] },
     { code: "p24", name: "Przelewy24", icon: "przelewy24", available_countries: ["pl"], supported_currencies: ["PLN", "EUR"] },
     { code: "eps", name: "EPS", icon: "eps", available_countries: ["at"], supported_currencies: ["EUR"] },
+    { code: "swish", name: "Swish", icon: "swish", available_countries: ["se"], supported_currencies: ["SEK"] },
   ],
   klarna: [
     { code: "klarna", name: "Klarna Pay Now", icon: "klarna", available_countries: ["nl", "be", "de", "at", "fi", "fr", "it", "se", "es", "dk", "no", "gb", "ie", "pt", "pl", "cz"], supported_currencies: [] },

@@ -78,6 +78,10 @@ export interface IPayPalOrderData {
       name: string
       experience_context?: { return_url?: string; cancel_url?: string }
     }
+    swish?: {
+      country_code: string
+      experience_context?: { return_url?: string; cancel_url?: string }
+    }
   }
   processing_instruction?: string
 }
