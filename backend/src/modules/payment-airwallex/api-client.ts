@@ -32,6 +32,11 @@ interface AirwallexPaymentIntentResponse {
   created_at: string
   updated_at: string
   metadata?: Record<string, any>
+  next_action?: {
+    type: string
+    url?: string
+    [key: string]: any
+  }
 }
 
 interface AirwallexConfirmRequest {

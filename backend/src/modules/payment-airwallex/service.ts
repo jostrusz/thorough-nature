@@ -208,6 +208,28 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
         }
       } catch {}
 
+      // Redirect-based methods: confirm intent server-side → get redirect URL
+      const REDIRECT_METHODS = ["ideal", "bancontact", "eps", "blik", "przelewy24"]
+      let checkoutUrl: string | null = null
+
+      if (method && REDIRECT_METHODS.includes(method) && returnUrl) {
+        try {
+          const confirmed = await client.confirmPaymentIntent(paymentIntent.id, {
+            payment_method: { type: method },
+            return_url: returnUrl,
+          })
+          checkoutUrl = confirmed.next_action?.url || null
+          this.logger_.info(
+            `[Airwallex] Redirect method ${method} confirmed: ${paymentIntent.id}, redirect: ${checkoutUrl ? "yes" : "no"}`
+          )
+        } catch (confirmErr: any) {
+          // Non-fatal: fall back to Drop-in on frontend
+          this.logger_.warn(
+            `[Airwallex] Server-side confirm for ${method} failed (will use Drop-in): ${confirmErr.message}`
+          )
+        }
+      }
+
       return {
         id: paymentIntent.id,
         data: {
@@ -220,6 +242,7 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
           method: method,
           environment: environment,
           return_url: returnUrl,
+          checkoutUrl: checkoutUrl,
           session_id: data?.session_id,
           currency_code,
         },
