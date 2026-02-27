@@ -10,7 +10,7 @@ import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
  * (molliePaymentId, klarnaOrderId, etc.). This subscriber copies them into order
  * metadata so webhooks can find the order later.
  *
- * Supported providers: Mollie, Klarna, Comgate, Przelewy24, Airwallex
+ * Supported providers: Mollie, Klarna, PayPal, Comgate, Przelewy24, Airwallex
  */
 export default async function orderPlacedPaymentMetadataHandler({
   event: { data },
@@ -73,6 +73,27 @@ export default async function orderPlacedPaymentMetadataHandler({
         break
       }
 
+      // PayPal
+      if (paymentData.paypalOrderId || (providerId.includes("paypal") && paymentData.id)) {
+        const paypalOrderId = paymentData.paypalOrderId || paymentData.orderID || paymentData.id
+        const paypalAuthId = paymentData.authorizationId
+        const paypalCaptureId = paymentData.captureId
+
+        if (paypalOrderId) {
+          newMetadata.paypalOrderId = paypalOrderId
+          newMetadata.payment_paypal_order_id = paypalOrderId
+        }
+        if (paypalAuthId) {
+          newMetadata.payment_paypal_authorization_id = paypalAuthId
+        }
+        if (paypalCaptureId) {
+          newMetadata.payment_paypal_capture_id = paypalCaptureId
+        }
+        newMetadata.payment_method = "paypal"
+        found = true
+        break
+      }
+
       // Comgate
       if (paymentData.comgateTransId) {
         newMetadata.comgateTransId = paymentData.comgateTransId
@@ -119,6 +140,7 @@ export default async function orderPlacedPaymentMetadataHandler({
       newMetadata.molliePaymentId ||
       newMetadata.mollieOrderId ||
       newMetadata.klarnaOrderId ||
+      newMetadata.paypalOrderId ||
       newMetadata.comgateTransId ||
       newMetadata.p24SessionId ||
       newMetadata.airwallexPaymentIntentId ||
