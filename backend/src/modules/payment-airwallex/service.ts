@@ -107,8 +107,8 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
           if (keys?.api_key && keys?.secret_key) {
             this.logger_.info(`[Airwallex] Using ${isLive ? "live" : "test"} keys from gateway config${keys.account_id ? `, account: ${keys.account_id}` : ""}`)
             this.client_ = new AirwallexApiClient(
-              keys.api_key,      // Client ID
-              keys.secret_key,   // API Key
+              keys.api_key,      // DB field "api_key" = Airwallex "Client ID"
+              keys.secret_key,   // DB field "secret_key" = Airwallex "API Key"
               !isLive,           // isTest
               this.logger_,
               keys.account_id    // Account ID for org-level keys (x-on-behalf-of)
