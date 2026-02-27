@@ -129,6 +129,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       let apiKey: string | undefined
       let secretKey: string | undefined
       let isTestMode = true
+      let source = "none"
 
       // Try gateway config first (admin-configured)
       const gatewayConfigService = this.getGatewayConfigService()
@@ -145,18 +146,25 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
             apiKey = keys?.api_key
             secretKey = keys?.secret_key
             isTestMode = !isLive
-            this.logger_.info(`[Klarna] Using gateway config: mode=${config.mode}`)
+            source = `gateway_config (mode=${config.mode}, hasApiKey=${!!apiKey}, hasSecret=${!!secretKey})`
+            this.logger_.info(`[Klarna] Using gateway config: mode=${config.mode}, apiKey=${apiKey ? apiKey.substring(0, 8) + '...' : 'EMPTY'}, secretKey=${secretKey ? secretKey.substring(0, 16) + '...' : 'EMPTY'}`)
+          } else {
+            this.logger_.info(`[Klarna] No gateway config found for klarna`)
           }
         } catch (err) {
           this.logger_.warn(`[Klarna] Failed to load gateway config: ${err.message}`)
         }
+      } else {
+        this.logger_.info(`[Klarna] Gateway config service not available`)
       }
 
-      // Fallback to provider options
+      // Fallback to provider options / env vars
       if (!apiKey || !secretKey) {
         apiKey = this.options_?.apiKey || process.env.KLARNA_API_KEY
         secretKey = this.options_?.secretKey || process.env.KLARNA_SECRET_KEY
         isTestMode = this.options_?.testMode !== false
+        source = `env/options (hasApiKey=${!!apiKey}, hasSecret=${!!secretKey}, testMode=${isTestMode})`
+        this.logger_.info(`[Klarna] Using env/options: apiKey=${apiKey ? apiKey.substring(0, 8) + '...' : 'EMPTY'}, secretKey=${secretKey ? secretKey.substring(0, 16) + '...' : 'EMPTY'}, testMode=${isTestMode}`)
       }
 
       if (!apiKey || !secretKey) {
@@ -165,6 +173,9 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
           "Klarna API credentials not configured. Set up in admin Payment Gateways or provide apiKey/secretKey in options."
         )
       }
+
+      const endpoint = isTestMode ? "api.playground.klarna.com" : "api.klarna.com"
+      this.logger_.info(`[Klarna] Creating client: endpoint=${endpoint}, source=${source}`)
 
       this.client_ = new KlarnaApiClient(apiKey, secretKey, isTestMode)
     }
