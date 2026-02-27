@@ -78,7 +78,7 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
    */
   private getGatewayConfigService(): any {
     try {
-      return (this.container_ as any)?.gatewayConfig || null
+      return this.container_.resolve("gatewayConfig")
     } catch {
       return null
     }
