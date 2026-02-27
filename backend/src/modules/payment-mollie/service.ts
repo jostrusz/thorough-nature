@@ -156,84 +156,7 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
         `[Mollie] Creating payment: method=${paymentMethod}, amount=${Number(amount).toFixed(2)} ${currency_code}, returnUrl=${returnUrl}`
       )
 
-      // ─── Klarna requires Mollie Orders API with billing address + order lines ───
-      const isKlarna = paymentMethod === "klarnapaylater" || paymentMethod === "klarnasliceit" || paymentMethod === "klarna"
-
-      if (isKlarna) {
-        // Build Mollie address from frontend-provided data
-        const billingAddr = data?.billing_address || data?.shipping_address || {}
-        const shippingAddr = data?.shipping_address || billingAddr
-        const email = data?.email || customer?.email || ""
-
-        const mollieAddress = (addr: any) => ({
-          givenName: addr.first_name || "",
-          familyName: addr.last_name || "",
-          email: email,
-          streetAndNumber: addr.address_1 || "",
-          postalCode: addr.postal_code || "",
-          city: addr.city || "",
-          country: (addr.country_code || "NL").toUpperCase(),
-          phone: addr.phone || "",
-          ...(addr.company ? { organizationName: addr.company } : {}),
-        })
-
-        const amountValue = Number(amount).toFixed(2)
-        const curr = currency_code.toUpperCase()
-
-        const orderData: any = {
-          amount: { value: amountValue, currency: curr },
-          orderNumber: `ORD-${Date.now()}`,
-          billingAddress: mollieAddress(billingAddr),
-          shippingAddress: mollieAddress(shippingAddr),
-          redirectUrl: returnUrl || `${backendUrl}/payment-return`,
-          webhookUrl: webhookUrl,
-          locale: "nl_NL",
-          method: paymentMethod,
-          metadata: {
-            customer_id: customer?.id,
-            customer_email: email,
-            session_id: data?.session_id,
-          },
-          lines: [{
-            type: "physical",
-            name: "Bestelling",
-            quantity: 1,
-            unitPrice: { value: amountValue, currency: curr },
-            totalAmount: { value: amountValue, currency: curr },
-            vatRate: "0.00",
-            vatAmount: { value: "0.00", currency: curr },
-          }],
-        }
-
-        const result = await client.createOrder(orderData)
-        if (!result.success) {
-          throw new MedusaError(
-            MedusaError.Types.UNEXPECTED_STATE,
-            result.error || "Failed to create Mollie order for Klarna"
-          )
-        }
-
-        const mollieOrder = result.data
-        const checkoutUrl = mollieOrder._links?.checkout?.href || null
-
-        this.logger_.info(
-          `[Mollie] Klarna order created: ${mollieOrder.id}, status: ${mollieOrder.status}, checkout: ${checkoutUrl || "none"}`
-        )
-
-        return {
-          id: mollieOrder.id,
-          data: {
-            mollieOrderId: mollieOrder.id,
-            status: mollieOrder.status,
-            method: paymentMethod,
-            checkoutUrl,
-            session_id: data?.session_id,
-            currency_code,
-          },
-        }
-      }
-
-      // ─── Standard payment methods (iDEAL, Bancontact, credit card, PayPal) ───
+      // ─── Standard payment methods (iDEAL, Bancontact, credit card, etc.) ───
       // Build Mollie payment request — amount is already in major units
       const paymentData: any = {
         amount: {
@@ -300,7 +223,7 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
     const sessionData = input.data || input
     try {
       const client = await this.getMollieClient()
-      const molliePaymentId = sessionData.molliePaymentId || sessionData.mollieOrderId
+      const molliePaymentId = sessionData.molliePaymentId
 
       if (!molliePaymentId) {
         return {
@@ -309,11 +232,7 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
         }
       }
 
-      // Check if it's a payment (tr_xxx) or order (ord_xxx)
-      const isPayment = molliePaymentId.startsWith("tr_")
-      const result = isPayment
-        ? await client.getPayment(molliePaymentId)
-        : await client.getOrder(molliePaymentId)
+      const result = await client.getPayment(molliePaymentId)
 
       if (!result.success) {
         throw new MedusaError(
@@ -352,16 +271,13 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
     const sessionData = input.data || input
     try {
       const client = await this.getMollieClient()
-      const molliePaymentId = sessionData.molliePaymentId || sessionData.mollieOrderId
+      const molliePaymentId = sessionData.molliePaymentId
 
       if (!molliePaymentId) {
         return { data: sessionData }
       }
 
-      const isPayment = molliePaymentId.startsWith("tr_")
-      const result = isPayment
-        ? await client.getPayment(molliePaymentId)
-        : await client.getOrder(molliePaymentId)
+      const result = await client.getPayment(molliePaymentId)
 
       if (!result.success) {
         throw new MedusaError(
@@ -390,16 +306,16 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
     const refundAmount = input.amount
     try {
       const client = await this.getMollieClient()
-      const mollieId = sessionData.molliePaymentId || sessionData.mollieOrderId
+      const molliePaymentId = sessionData.molliePaymentId
 
-      if (!mollieId) {
+      if (!molliePaymentId) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "No Mollie payment ID in session data"
         )
       }
 
-      this.logger_.info(`[Mollie] Refund ${mollieId}, amount: ${refundAmount}`)
+      this.logger_.info(`[Mollie] Refund ${molliePaymentId}, amount: ${refundAmount}`)
 
       return {
         data: sessionData,
@@ -440,14 +356,11 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
   async getPaymentStatus(data: any): Promise<PaymentSessionStatus> {
     try {
       const client = await this.getMollieClient()
-      const molliePaymentId = data.molliePaymentId || data.mollieOrderId
+      const molliePaymentId = data.molliePaymentId
 
       if (!molliePaymentId) return PaymentSessionStatus.PENDING
 
-      const isPayment = molliePaymentId.startsWith("tr_")
-      const result = isPayment
-        ? await client.getPayment(molliePaymentId)
-        : await client.getOrder(molliePaymentId)
+      const result = await client.getPayment(molliePaymentId)
 
       if (!result.success) return PaymentSessionStatus.ERROR
       return mapMollieStatusToMedusa(result.data.status)
@@ -463,16 +376,13 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
     const sessionData = input.data || input
     try {
       const client = await this.getMollieClient()
-      const molliePaymentId = sessionData.molliePaymentId || sessionData.mollieOrderId
+      const molliePaymentId = sessionData.molliePaymentId
 
       if (!molliePaymentId) {
         return { data: sessionData }
       }
 
-      const isPayment = molliePaymentId.startsWith("tr_")
-      const result = isPayment
-        ? await client.getPayment(molliePaymentId)
-        : await client.getOrder(molliePaymentId)
+      const result = await client.getPayment(molliePaymentId)
 
       if (!result.success) {
         throw new MedusaError(
@@ -519,11 +429,8 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
       }
 
       const client = await this.getMollieClient()
-      const isPayment = id.startsWith("tr_")
 
-      const result = isPayment
-        ? await client.getPayment(id)
-        : await client.getOrder(id)
+      const result = await client.getPayment(id)
 
       if (!result.success) {
         this.logger_.error(`[Mollie] Webhook fetch failed: ${result.error}`)
@@ -549,7 +456,7 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
         action,
         data: {
           session_id: result.data.metadata?.session_id,
-          ...(isPayment ? { molliePaymentId: id } : { mollieOrderId: id }),
+          molliePaymentId: id,
           status: mollieStatus,
         },
       }
