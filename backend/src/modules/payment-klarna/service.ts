@@ -54,6 +54,35 @@ function mapKlarnaStatusToMedusa(klarnaStatus: string): PaymentSessionStatus {
 }
 
 /**
+ * Maps billing country code to the correct Klarna locale.
+ * Klarna uses IETF BCP 47 format (e.g. "nl-NL", "de-DE").
+ * Affects language of the Klarna payment widget shown to the customer.
+ */
+const KLARNA_LOCALE_MAP: Record<string, string> = {
+  NL: "nl-NL",
+  BE: "nl-BE",
+  DE: "de-DE",
+  AT: "de-AT",
+  LU: "fr-LU",
+  CZ: "cs-CZ",
+  PL: "pl-PL",
+  SK: "sk-SK",
+  SE: "sv-SE",
+  FI: "fi-FI",
+  DK: "da-DK",
+  NO: "nb-NO",
+  FR: "fr-FR",
+  IT: "it-IT",
+  ES: "es-ES",
+  GB: "en-GB",
+  US: "en-US",
+}
+
+function getKlarnaLocale(countryCode: string, fallback = "en-US"): string {
+  return KLARNA_LOCALE_MAP[countryCode?.toUpperCase()] || fallback
+}
+
+/**
  * Convert amount from Medusa major units (EUR) to Klarna minor units (cents).
  * Medusa stores prices as major units: 35 = €35.00
  * Klarna expects minor units: 3500 = €35.00
@@ -264,10 +293,12 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       // Tax amount in minor units
       const taxTotalMinor = toMinorUnits(context?.extra?.tax_total || 0, currencyUpper)
 
+      const purchaseCountry = billingAddress.country_code?.toUpperCase() || "NL"
       const sessionData = {
-        purchase_country: billingAddress.country_code?.toUpperCase() || "NL",
+        purchase_country: purchaseCountry,
         purchase_currency: currencyUpper,
-        locale: data?.locale || "en-NL",
+        // Locale derived from billing country → correct language in Klarna widget
+        locale: data?.locale || getKlarnaLocale(purchaseCountry),
         order_amount: amountMinor,
         order_tax_amount: taxTotalMinor,
         order_lines: orderLines.length > 0
@@ -397,7 +428,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
 
       const purchaseCountry = storedSession.purchase_country || "NL"
       const purchaseCurrency = storedSession.purchase_currency || currency?.toUpperCase() || "EUR"
-      const locale = storedSession.locale || "en-NL"
+      const locale = storedSession.locale || getKlarnaLocale(purchaseCountry)
 
       // Fallback amount in minor units (storedSession already has minor units from initiatePayment)
       const fallbackAmountMinor = toMinorUnits(amount, purchaseCurrency)
