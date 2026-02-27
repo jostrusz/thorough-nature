@@ -124,12 +124,26 @@ async function testKlarnaConnection(credentials: Record<string, string>): Promis
 
 async function testAirwallexConnection(credentials: Record<string, string>): Promise<boolean> {
   try {
-    const response = await axios.post("https://api.airwallex.com/api/v1/authentication/login", {
-      api_key: credentials.api_key,
-    })
+    // Use demo URL for test keys, production for live
+    const isTest = credentials.is_test !== "false"
+    const baseUrl = isTest
+      ? "https://api-demo.airwallex.com"
+      : "https://api.airwallex.com"
+    const response = await axios.post(
+      `${baseUrl}/api/v1/authentication/login`,
+      {},
+      {
+        headers: {
+          "x-client-id": credentials.api_key,     // Client ID
+          "x-api-key": credentials.secret_key,     // API Key
+          "Content-Type": "application/json",
+        },
+        timeout: 10000,
+      }
+    )
     return response.status === 200 && !!response.data.token
   } catch {
-    throw new Error("Airwallex API key invalid")
+    throw new Error("Airwallex credentials invalid (Client ID or API Key)")
   }
 }
 

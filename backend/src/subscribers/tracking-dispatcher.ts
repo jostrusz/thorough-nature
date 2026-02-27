@@ -58,7 +58,7 @@ export default async function trackingDispatcherHandler({
     // ─── Step 1: Auto-capture if needed (PayPal / Klarna) ─────────────
     const alreadyCaptured = order.metadata?.payment_captured === true
 
-    if (!alreadyCaptured && (providerId === "paypal" || providerId === "klarna")) {
+    if (!alreadyCaptured && (providerId === "paypal" || providerId === "klarna" || providerId === "airwallex")) {
       logger.info(
         `[Tracking Dispatcher] Auto-capturing ${providerId} payment for order ${order.id}`
       )
@@ -130,6 +130,21 @@ export default async function trackingDispatcherHandler({
             `[Tracking Dispatcher] Order ${order.id} captured + tracking sent to Klarna`
           )
           return
+        } else if (providerId === "airwallex") {
+          const captureResult = await captureAirwallex(order, container, logger)
+          activityLog.push({
+            timestamp: new Date().toISOString(),
+            event: "capture",
+            gateway: "airwallex",
+            status: "success",
+            amount: order.total,
+            currency: order.currency_code,
+            capture_id: captureResult.captureId,
+            detail: "Auto-captured on shipment dispatch",
+          })
+          updatedMetadata.payment_captured = true
+          updatedMetadata.payment_captured_at = new Date().toISOString()
+          updatedMetadata.airwallexCaptureId = captureResult.captureId
         }
       } catch (captureError: any) {
         logger.error(
@@ -178,6 +193,13 @@ export default async function trackingDispatcherHandler({
         trackingSendResult.success = true
       } else if (providerId === "mollie") {
         await sendTrackingToMollie(order, trackingNumber, trackingCarrier)
+        trackingSendResult.success = true
+      } else if (providerId === "airwallex") {
+        // Airwallex does not have a native tracking API
+        // Tracking is stored in order metadata only
+        logger.info(
+          `[Tracking Dispatcher] Airwallex does not support tracking API, stored in metadata for order ${order.id}`
+        )
         trackingSendResult.success = true
       } else if (providerId === "klarna") {
         // Already captured + tracking sent, check if we need to add shipping info
@@ -398,6 +420,65 @@ async function captureKlarna(
     `[Tracking Dispatcher] Klarna order ${klarnaOrderId} captured with tracking: ${captureId}`
   )
   return { captureId }
+}
+
+// ─── Auto-Capture: Airwallex ──────────────────────────────────────────
+async function captureAirwallex(
+  order: any,
+  container: any,
+  logger: any
+): Promise<{ captureId: string }> {
+  const intentId = order.metadata?.airwallexPaymentIntentId || order.metadata?.intentId
+  if (!intentId) {
+    throw new Error("No Airwallex Payment Intent ID found")
+  }
+
+  // Get credentials from gateway config
+  let apiKey: string | undefined
+  let secretKey: string | undefined
+  let isTest = true
+
+  try {
+    const gcService = container.resolve("gatewayConfig")
+    const configs = await gcService.listGatewayConfigs(
+      { provider: "airwallex", is_active: true },
+      { take: 1 }
+    )
+    const config = configs[0]
+    if (config) {
+      const isLive = config.mode === "live"
+      const keys = isLive ? config.live_keys : config.test_keys
+      apiKey = keys?.api_key
+      secretKey = keys?.secret_key
+      isTest = !isLive
+    }
+  } catch {
+    // gatewayConfig not available
+  }
+
+  if (!apiKey) apiKey = process.env.AIRWALLEX_CLIENT_ID
+  if (!secretKey) secretKey = process.env.AIRWALLEX_API_KEY
+  if (process.env.AIRWALLEX_TEST_MODE === "false") isTest = false
+
+  if (!apiKey || !secretKey) {
+    throw new Error("Airwallex credentials not configured")
+  }
+
+  const { AirwallexApiClient } = await import(
+    "../modules/payment-airwallex/api-client"
+  )
+  const client = new AirwallexApiClient(apiKey, secretKey, isTest, logger)
+  await client.login()
+
+  // Airwallex uses major units (same as order.total, no conversion needed)
+  const result = await client.capturePaymentIntent(intentId, {
+    amount: Number(order.total),
+  })
+
+  logger.info(
+    `[Tracking Dispatcher] Airwallex intent ${intentId} captured: ${result.id}`
+  )
+  return { captureId: result.id }
 }
 
 // ─── Send Tracking: Stripe ─────────────────────────────────────────────

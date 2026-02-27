@@ -33,6 +33,9 @@ import {
   PAYPAL_CLIENT_ID_EC,
   PAYPAL_CLIENT_SECRET_EC,
   PAYPAL_MODE_EC,
+  AIRWALLEX_CLIENT_ID,
+  AIRWALLEX_API_KEY,
+  AIRWALLEX_TEST_MODE,
 } from 'lib/constants';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -82,8 +85,7 @@ const medusaConfig = {
     // ═══ Payment provider modules (non-Medusa-payment, standalone) ═══
     { resolve: "./src/modules/payment-comgate" },
     { resolve: "./src/modules/payment-przelewy24" },
-    { resolve: "./src/modules/payment-airwallex" },
-    // NOTE: payment-klarna is now registered as a proper payment provider below
+    // NOTE: payment-klarna & payment-airwallex are registered as proper payment providers below
     // ═══ Core modules ═══
     {
       key: Modules.FILE,
@@ -189,6 +191,15 @@ const medusaConfig = {
               clientId: PAYPAL_CLIENT_ID_EC,
               clientSecret: PAYPAL_CLIENT_SECRET_EC,
               mode: PAYPAL_MODE_EC,
+            },
+          }] : []),
+          ...(AIRWALLEX_CLIENT_ID && AIRWALLEX_API_KEY ? [{
+            resolve: './src/modules/payment-airwallex',
+            id: 'airwallex',
+            options: {
+              clientId: AIRWALLEX_CLIENT_ID,
+              apiKey: AIRWALLEX_API_KEY,
+              testMode: AIRWALLEX_TEST_MODE,
             },
           }] : []),
           ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{

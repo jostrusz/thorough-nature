@@ -1,369 +1,393 @@
 // @ts-nocheck
 import {
-  PaymentProviderError,
+  AbstractPaymentProvider,
+  MedusaError,
   PaymentSessionStatus,
 } from "@medusajs/framework/utils"
 import { AirwallexApiClient } from "./api-client"
 
-/**
- * Airwallex payment session data interface
- */
-interface IAirwallexPaymentSessionData {
-  intentId?: string
-  clientSecret?: string
-  status?: string
-  amount?: number
-  currency?: string
-  metadata?: Record<string, any>
+type Options = {
+  clientId?: string
+  apiKey?: string
+  testMode?: boolean
+}
+
+type InjectedDependencies = {
+  logger: any
+  gatewayConfig?: any
 }
 
 /**
- * Airwallex Payment Provider for MedusaJS 2.0
- * Supports card payments (credit/debit) and various payment methods
+ * Maps Airwallex payment intent statuses to Medusa payment session statuses
  */
-export class AirwallexPaymentProvider {
+function mapAirwallexStatusToMedusa(airwallexStatus: string): PaymentSessionStatus {
+  switch (airwallexStatus) {
+    case "REQUIRES_PAYMENT_METHOD":
+      return PaymentSessionStatus.PENDING
+    case "REQUIRES_CUSTOMER_ACTION":
+      return PaymentSessionStatus.REQUIRES_MORE
+    case "REQUIRES_CAPTURE":
+      return PaymentSessionStatus.AUTHORIZED
+    case "SUCCEEDED":
+      return PaymentSessionStatus.AUTHORIZED
+    case "CAPTURED":
+      return PaymentSessionStatus.CAPTURED
+    case "CANCELLED":
+      return PaymentSessionStatus.CANCELED
+    case "FAILED":
+      return PaymentSessionStatus.ERROR
+    default:
+      return PaymentSessionStatus.PENDING
+  }
+}
+
+/**
+ * Airwallex Payment Provider for Medusa v2.
+ * Follows the AbstractPaymentProvider pattern (same as Mollie/Klarna/PayPal).
+ *
+ * Supports: iDEAL, Bancontact, BLIK, Credit/Debit Card, Apple Pay, Google Pay, EPS
+ * via Airwallex Drop-in Element on frontend.
+ *
+ * Credentials can come from:
+ *   1. Gateway config module (admin-configured in DB) — preferred
+ *   2. Provider options in medusa-config.js (env vars) — fallback
+ *
+ * Amounts are in MAJOR units (100 = €100.00) — same as Medusa order.total.
+ */
+class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
   static identifier = "airwallex"
 
-  protected container_: any
-  protected options_: any
-  private apiClient: AirwallexApiClient | null = null
-  private logger: any
+  protected logger_: any
+  protected options_: Options
+  protected client_: AirwallexApiClient | null = null
+  protected container_: any = null
 
-  constructor(container: any, options?: any) {
-    this.container_ = container
+  constructor(container: InjectedDependencies, options: Options) {
+    super(container, options)
+    this.logger_ = container.logger || console
     this.options_ = options || {}
-    try {
-      this.logger = container.resolve("logger")
-    } catch {
-      this.logger = console
-    }
-  }
+    this.container_ = container
 
-  private getLogger() {
-    if (!this.logger) {
-      try { this.logger = this.container_.resolve("logger") } catch { this.logger = console }
-    }
-    return this.logger
+    this.logger_.info(
+      `[Airwallex] Provider initialized. Options clientId: ${this.options_?.clientId ? "set" : "not set"}`
+    )
   }
 
   /**
-   * Get or initialize Airwallex API client
+   * Lazily resolve the gateway config service from the container.
+   */
+  private getGatewayConfigService(): any {
+    try {
+      return this.container_.resolve("gatewayConfig")
+    } catch {
+      return null
+    }
+  }
+
+  /**
+   * Build or return the Airwallex API client.
+   * Tries gateway config (admin DB) first, then falls back to provider options (env vars).
    */
   private async getAirwallexClient(): Promise<AirwallexApiClient> {
-    if (this.apiClient) {
-      return this.apiClient
-    }
+    if (this.client_) return this.client_
 
-    const credentials = this.options_
-
-    if (!credentials?.api_key || !credentials?.secret_key) {
-      throw new PaymentProviderError(
-        "Missing Airwallex credentials: api_key (client_id) and secret_key (api_key) required"
-      )
-    }
-
-    const isTest = credentials?.is_test !== false // Default to test
-
-    this.apiClient = new AirwallexApiClient(
-      credentials.api_key,
-      credentials.secret_key,
-      isTest,
-      this.getLogger()
-    )
-
-    // Initial login
-    await this.apiClient.login()
-
-    return this.apiClient
-  }
-
-  /**
-   * Map Airwallex payment intent status to MedusaJS payment session status
-   */
-  private mapAirwallexStatusToMedusa(
-    airwallexStatus: string
-  ): PaymentSessionStatus {
-    const statusMap: Record<string, PaymentSessionStatus> = {
-      REQUIRES_PAYMENT_METHOD: PaymentSessionStatus.PENDING,
-      REQUIRES_CUSTOMER_ACTION: PaymentSessionStatus.REQUIRES_MORE,
-      REQUIRES_CAPTURE: PaymentSessionStatus.AUTHORIZED,
-      SUCCEEDED: PaymentSessionStatus.AUTHORIZED,
-      CAPTURED: PaymentSessionStatus.CAPTURED,
-      CANCELLED: PaymentSessionStatus.CANCELED,
-      FAILED: PaymentSessionStatus.ERROR,
-    }
-
-    return statusMap[airwallexStatus] || PaymentSessionStatus.PENDING
-  }
-
-  /**
-   * Initiate payment — create payment intent
-   * Returns client_secret for frontend to complete payment
-   */
-  async initiatePayment(
-    context: any
-  ): Promise<{
-    session_data: IAirwallexPaymentSessionData
-    status: PaymentSessionStatus
-  }> {
-    try {
-      const client = await this.getAirwallexClient()
-
-      const {
-        amount,
-        currency,
-        merchant_order_id,
-        descriptor,
-        return_url,
-        metadata,
-      } = context
-
-      if (!amount || !currency || !merchant_order_id) {
-        throw new PaymentProviderError(
-          "Missing required fields: amount, currency, merchant_order_id"
+    // 1. Try gateway config from database (admin-configured)
+    const gatewayConfigService = this.getGatewayConfigService()
+    if (gatewayConfigService) {
+      try {
+        const configs = await gatewayConfigService.listGatewayConfigs(
+          { provider: "airwallex", is_active: true },
+          { take: 1 }
         )
+        const config = configs[0]
+        if (config) {
+          const isLive = config.mode === "live"
+          const keys = isLive ? config.live_keys : config.test_keys
+          if (keys?.api_key && keys?.secret_key) {
+            this.logger_.info(`[Airwallex] Using ${isLive ? "live" : "test"} keys from gateway config`)
+            this.client_ = new AirwallexApiClient(
+              keys.api_key,      // Client ID
+              keys.secret_key,   // API Key
+              !isLive,           // isTest
+              this.logger_
+            )
+            await this.client_.login()
+            return this.client_
+          }
+        }
+      } catch (e: any) {
+        this.logger_.warn(`[Airwallex] Gateway config read failed: ${e.message}`)
       }
+    }
 
-      // Create payment intent
+    // 2. Fallback to options (env vars via medusa-config.js)
+    if (this.options_?.clientId && this.options_?.apiKey) {
+      this.logger_.info(`[Airwallex] Using credentials from provider options`)
+      this.client_ = new AirwallexApiClient(
+        this.options_.clientId,
+        this.options_.apiKey,
+        this.options_.testMode !== false,
+        this.logger_
+      )
+      await this.client_.login()
+      return this.client_
+    }
+
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      "Airwallex credentials not configured. Set via admin gateway config or AIRWALLEX_CLIENT_ID + AIRWALLEX_API_KEY env vars."
+    )
+  }
+
+  /**
+   * Initiate a payment session — create an Airwallex Payment Intent.
+   *
+   * Medusa v2 input: { amount, currency_code, data?, context? }
+   * - amount is in MAJOR units (e.g. 49.99 = €49.99)
+   * - data contains frontend-provided session info (method, return_url, etc.)
+   * - context contains customer info
+   *
+   * Must return: { id: string, data: Record<string, unknown> }
+   */
+  async initiatePayment(input: any): Promise<any> {
+    const { amount, currency_code, data, context } = input
+
+    try {
+      const client = await this.getAirwallexClient()
+
+      const returnUrl = data?.return_url
+      const method = data?.method || null
+      const customer = context?.customer
+
+      // Build webhook URL
+      const backendUrl =
+        process.env.BACKEND_PUBLIC_URL ||
+        (process.env.RAILWAY_PUBLIC_DOMAIN_VALUE
+          ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN_VALUE}`
+          : "http://localhost:9000")
+
+      const merchantOrderId = `medusa_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+
+      this.logger_.info(
+        `[Airwallex] Creating payment intent: method=${method}, amount=${Number(amount).toFixed(2)} ${currency_code}, returnUrl=${returnUrl}`
+      )
+
       const paymentIntent = await client.createPaymentIntent({
-        amount,
-        currency: currency.toUpperCase(),
-        merchant_order_id,
-        descriptor: descriptor?.substring(0, 22), // Max 22 chars
-        return_url,
-        metadata,
+        amount: Number(amount),
+        currency: currency_code.toUpperCase(),
+        merchant_order_id: merchantOrderId,
+        descriptor: "Medusa Order",
+        return_url: returnUrl,
+        metadata: {
+          customer_id: customer?.id,
+          customer_email: customer?.email || data?.email,
+          session_id: data?.session_id,
+          method: method,
+        },
       })
 
-      const sessionData: IAirwallexPaymentSessionData = {
-        intentId: paymentIntent.id,
-        clientSecret: paymentIntent.client_secret,
-        status: paymentIntent.status,
-        amount: paymentIntent.amount,
-        currency: paymentIntent.currency,
-        metadata: paymentIntent.metadata,
-      }
-
-      this.getLogger().info(
-        `[Airwallex] Payment initiated for order ${merchant_order_id}, intent: ${paymentIntent.id}`
+      this.logger_.info(
+        `[Airwallex] Payment intent created: ${paymentIntent.id}, status: ${paymentIntent.status}`
       )
 
+      // Determine environment for frontend SDK
+      const gatewayConfigService = this.getGatewayConfigService()
+      let environment = "demo"
+      if (gatewayConfigService) {
+        try {
+          const configs = await gatewayConfigService.listGatewayConfigs(
+            { provider: "airwallex", is_active: true },
+            { take: 1 }
+          )
+          if (configs[0]?.mode === "live") environment = "prod"
+        } catch {}
+      } else if (this.options_?.testMode === false) {
+        environment = "prod"
+      }
+
       return {
-        session_data: sessionData,
-        status: this.mapAirwallexStatusToMedusa(paymentIntent.status),
+        id: paymentIntent.id,
+        data: {
+          intentId: paymentIntent.id,
+          clientSecret: paymentIntent.client_secret,
+          status: paymentIntent.status,
+          amount: paymentIntent.amount,
+          currency: paymentIntent.currency,
+          method: method,
+          environment: environment,
+          return_url: returnUrl,
+          session_id: data?.session_id,
+          currency_code,
+        },
       }
     } catch (error: any) {
-      this.getLogger().error(`[Airwallex] Initiate payment failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Airwallex] Payment initiation failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message || "Failed to initiate Airwallex payment"
+      )
     }
   }
 
   /**
-   * Authorize payment — confirm payment intent status
+   * Authorize payment — check Airwallex payment intent status
    */
-  async authorizePayment(
-    paymentSessionData: IAirwallexPaymentSessionData,
-    context: any
-  ): Promise<{
-    session_data: IAirwallexPaymentSessionData
-    status: PaymentSessionStatus
-  }> {
+  async authorizePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
     try {
       const client = await this.getAirwallexClient()
-      const { intentId } = paymentSessionData
+      const intentId = sessionData.intentId
 
       if (!intentId) {
-        throw new PaymentProviderError("Missing payment intent ID")
+        return {
+          status: PaymentSessionStatus.PENDING,
+          data: sessionData,
+        }
       }
 
-      // Get current payment intent status
       const paymentIntent = await client.getPaymentIntent(intentId)
+      const status = mapAirwallexStatusToMedusa(paymentIntent.status)
 
-      const updatedData: IAirwallexPaymentSessionData = {
-        ...paymentSessionData,
-        status: paymentIntent.status,
-      }
-
-      this.getLogger().info(
-        `[Airwallex] Payment authorized, intent: ${intentId}, status: ${paymentIntent.status}`
-      )
+      this.logger_.info(`[Airwallex] Authorize: ${intentId} → ${paymentIntent.status} → ${status}`)
 
       return {
-        session_data: updatedData,
-        status: this.mapAirwallexStatusToMedusa(paymentIntent.status),
+        status,
+        data: {
+          ...sessionData,
+          status: paymentIntent.status,
+        },
       }
     } catch (error: any) {
-      this.getLogger().error(`[Airwallex] Authorize payment failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Airwallex] Authorization failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
     }
   }
 
   /**
-   * Capture payment — capture authorized amount
+   * Capture payment — capture the Airwallex payment intent
+   * Amount is in major units (same as order.total)
    */
-  async capturePayment(
-    paymentSessionData: IAirwallexPaymentSessionData,
-    context: any
-  ): Promise<{
-    session_data: IAirwallexPaymentSessionData
-    status: PaymentSessionStatus
-  }> {
+  async capturePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
     try {
       const client = await this.getAirwallexClient()
-      const { intentId, amount } = paymentSessionData
+      const intentId = sessionData.intentId
 
       if (!intentId) {
-        throw new PaymentProviderError("Missing payment intent ID")
+        return { data: sessionData }
       }
 
-      // Capture the payment intent
-      const paymentIntent = await client.capturePaymentIntent(intentId, {
-        amount,
+      const result = await client.capturePaymentIntent(intentId, {
+        amount: sessionData.amount,
       })
 
-      const updatedData: IAirwallexPaymentSessionData = {
-        ...paymentSessionData,
-        status: paymentIntent.status,
-      }
-
-      this.getLogger().info(
-        `[Airwallex] Payment captured, intent: ${intentId}, amount: ${amount}`
-      )
+      this.logger_.info(`[Airwallex] Captured: ${intentId}, status: ${result.status}`)
 
       return {
-        session_data: updatedData,
-        status: this.mapAirwallexStatusToMedusa(paymentIntent.status),
+        data: { ...sessionData, status: result.status },
       }
     } catch (error: any) {
-      this.getLogger().error(`[Airwallex] Capture payment failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Airwallex] Capture failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
     }
   }
 
   /**
    * Refund payment
    */
-  async refundPayment(
-    paymentSessionData: IAirwallexPaymentSessionData,
-    refundAmount: number,
-    context: any
-  ): Promise<{
-    session_data: IAirwallexPaymentSessionData
-    status: PaymentSessionStatus
-  }> {
+  async refundPayment(input: any): Promise<any> {
+    const sessionData = input.data || input
+    const refundAmount = input.amount
     try {
       const client = await this.getAirwallexClient()
-      const { intentId } = paymentSessionData
+      const intentId = sessionData.intentId
 
       if (!intentId) {
-        throw new PaymentProviderError("Missing payment intent ID")
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "No Airwallex payment intent ID in session data"
+        )
       }
 
-      // Create refund
       const refund = await client.createRefund({
         payment_intent_id: intentId,
         amount: refundAmount > 0 ? refundAmount : undefined,
-        reason: context?.reason || "Customer requested",
+        reason: "Customer requested refund",
       })
 
-      const updatedData: IAirwallexPaymentSessionData = {
-        ...paymentSessionData,
-        metadata: {
-          ...paymentSessionData.metadata,
+      this.logger_.info(`[Airwallex] Refund created: ${refund.id}, amount: ${refund.amount}`)
+
+      return {
+        data: {
+          ...sessionData,
           refundId: refund.id,
           refundStatus: refund.status,
         },
       }
-
-      this.getLogger().info(
-        `[Airwallex] Refund created, intent: ${intentId}, refund: ${refund.id}, amount: ${refund.amount}`
-      )
-
-      return {
-        session_data: updatedData,
-        status: PaymentSessionStatus.AUTHORIZED,
-      }
     } catch (error: any) {
-      this.getLogger().error(`[Airwallex] Refund payment failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Airwallex] Refund failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
     }
   }
 
   /**
    * Cancel payment
    */
-  async cancelPayment(
-    paymentSessionData: IAirwallexPaymentSessionData,
-    context: any
-  ): Promise<{
-    session_data: IAirwallexPaymentSessionData
-    status: PaymentSessionStatus
-  }> {
+  async cancelPayment(input: any): Promise<any> {
+    const sessionData = input.data || input
     try {
       const client = await this.getAirwallexClient()
-      const { intentId } = paymentSessionData
+      const intentId = sessionData.intentId
 
       if (intentId) {
-        // Cancel the payment intent
         await client.cancelPaymentIntent(intentId)
       }
 
-      this.getLogger().info(`[Airwallex] Payment cancelled, intent: ${intentId}`)
-
+      this.logger_.info(`[Airwallex] Cancel: ${intentId || "no ID"}`)
       return {
-        session_data: {
-          ...paymentSessionData,
-          status: "CANCELLED",
-        },
-        status: PaymentSessionStatus.CANCELED,
+        data: { ...sessionData, status: "CANCELLED" },
       }
     } catch (error: any) {
-      this.getLogger().error(`[Airwallex] Cancel payment failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      this.logger_.error(`[Airwallex] Cancel failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
+      )
     }
   }
 
   /**
    * Delete payment session
    */
-  async deletePayment(
-    paymentSessionData: IAirwallexPaymentSessionData,
-    context: any
-  ): Promise<{
-    session_data: IAirwallexPaymentSessionData
-    status: PaymentSessionStatus
-  }> {
-    // Cancel if not already cancelled
-    if (paymentSessionData.status !== "CANCELLED") {
-      return await this.cancelPayment(paymentSessionData, context)
-    }
-
+  async deletePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
     return {
-      session_data: paymentSessionData,
-      status: PaymentSessionStatus.CANCELED,
+      data: sessionData,
     }
   }
 
   /**
    * Get payment status
    */
-  async getPaymentStatus(
-    paymentSessionData: IAirwallexPaymentSessionData,
-    context: any
-  ): Promise<PaymentSessionStatus> {
+  async getPaymentStatus(data: any): Promise<PaymentSessionStatus> {
     try {
       const client = await this.getAirwallexClient()
-      const { intentId } = paymentSessionData
+      const intentId = data.intentId
 
-      if (!intentId) {
-        return PaymentSessionStatus.PENDING
-      }
+      if (!intentId) return PaymentSessionStatus.PENDING
 
       const paymentIntent = await client.getPaymentIntent(intentId)
-      return this.mapAirwallexStatusToMedusa(paymentIntent.status)
-    } catch (error: any) {
-      this.getLogger().error(
-        `[Airwallex] Get payment status failed: ${error.message}`
-      )
+      return mapAirwallexStatusToMedusa(paymentIntent.status)
+    } catch {
       return PaymentSessionStatus.ERROR
     }
   }
@@ -371,117 +395,88 @@ export class AirwallexPaymentProvider {
   /**
    * Retrieve payment data
    */
-  async retrievePayment(
-    paymentSessionData: IAirwallexPaymentSessionData,
-    context: any
-  ): Promise<{
-    session_data: IAirwallexPaymentSessionData
-    status: PaymentSessionStatus
-  }> {
+  async retrievePayment(input: any): Promise<any> {
+    const sessionData = input.data || input
     try {
       const client = await this.getAirwallexClient()
-      const { intentId } = paymentSessionData
+      const intentId = sessionData.intentId
 
       if (!intentId) {
-        return {
-          session_data: paymentSessionData,
-          status: PaymentSessionStatus.PENDING,
-        }
+        return { data: sessionData }
       }
 
       const paymentIntent = await client.getPaymentIntent(intentId)
 
-      const updatedData: IAirwallexPaymentSessionData = {
-        ...paymentSessionData,
-        status: paymentIntent.status,
-        amount: paymentIntent.amount,
-        currency: paymentIntent.currency,
-        metadata: paymentIntent.metadata,
-      }
-
       return {
-        session_data: updatedData,
-        status: this.mapAirwallexStatusToMedusa(paymentIntent.status),
+        data: {
+          ...sessionData,
+          status: paymentIntent.status,
+          amount: paymentIntent.amount,
+          currency: paymentIntent.currency,
+        },
       }
     } catch (error: any) {
-      this.getLogger().error(
-        `[Airwallex] Retrieve payment failed: ${error.message}`
+      this.logger_.error(`[Airwallex] Retrieve failed: ${error.message}`)
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        error.message
       )
-      throw new PaymentProviderError(error.message)
     }
   }
 
   /**
    * Update payment session
    */
-  async updatePayment(context: any): Promise<{
-    session_data: IAirwallexPaymentSessionData
-    status: PaymentSessionStatus
-  }> {
-    return await this.retrievePayment(context.paymentSessionData, context)
+  async updatePayment(input: any): Promise<any> {
+    const sessionData = input.data || {}
+    return {
+      data: sessionData,
+    }
   }
 
   /**
    * Process Airwallex webhook
-   * Airwallex sends notifications for payment status changes
    */
-  async getWebhookActionAndData(webhookData: any): Promise<{
-    action: string
-    data: IAirwallexPaymentSessionData
-  }> {
+  async getWebhookActionAndData(webhookData: any): Promise<any> {
     try {
       const { id, event_type, data: eventData } = webhookData
 
       if (!id) {
-        return {
-          action: "neutral",
-          data: webhookData as IAirwallexPaymentSessionData,
-        }
+        return { action: "not_supported", data: webhookData }
       }
 
       const client = await this.getAirwallexClient()
-
-      // Get updated payment intent status from Airwallex
       const paymentIntent = await client.getPaymentIntent(id)
 
-      let action = "neutral"
+      let action = "not_supported"
 
-      // Map webhook event to action
-      if (event_type === "payment_intent.succeeded") {
-        action = "succeed"
-      } else if (event_type === "payment_intent.requires_customer_action") {
-        action = "require_customer_action"
-      } else if (event_type === "payment_intent.failed") {
-        action = "fail"
-      } else if (event_type === "payment_intent.cancelled") {
-        action = "fail"
+      if (event_type === "payment_intent.succeeded" || paymentIntent.status === "SUCCEEDED") {
+        action = "authorized"
+      } else if (event_type === "payment_intent.requires_capture" || paymentIntent.status === "REQUIRES_CAPTURE") {
+        action = "authorized"
+      } else if (event_type === "payment_intent.failed" || paymentIntent.status === "FAILED") {
+        action = "failed"
+      } else if (event_type === "payment_intent.cancelled" || paymentIntent.status === "CANCELLED") {
+        action = "failed"
       }
 
-      const sessionData: IAirwallexPaymentSessionData = {
-        intentId: paymentIntent.id,
-        clientSecret: paymentIntent.client_secret,
-        status: paymentIntent.status,
-        amount: paymentIntent.amount,
-        currency: paymentIntent.currency,
-        metadata: paymentIntent.metadata,
-      }
-
-      this.getLogger().info(
-        `[Airwallex] Webhook processed: ${event_type}, intent: ${id}, action: ${action}`
-      )
+      this.logger_.info(`[Airwallex] Webhook: ${id} → ${paymentIntent.status} → action: ${action}`)
 
       return {
         action,
-        data: sessionData,
+        data: {
+          intentId: paymentIntent.id,
+          clientSecret: paymentIntent.client_secret,
+          status: paymentIntent.status,
+          amount: paymentIntent.amount,
+          currency: paymentIntent.currency,
+        },
       }
     } catch (error: any) {
-      this.getLogger().error(
-        `[Airwallex] Webhook processing failed: ${error.message}`
-      )
-      return {
-        action: "fail",
-        data: webhookData as IAirwallexPaymentSessionData,
-      }
+      this.logger_.error(`[Airwallex] Webhook processing failed: ${error.message}`)
+      return { action: "not_supported", data: webhookData }
     }
   }
 }
+
+export default AirwallexPaymentProviderService

@@ -120,12 +120,20 @@ export async function GET(
           return method
         })
 
-      return {
+      const gatewayResponse: any = {
         provider: gw.provider,
         display_name: gw.display_name,
         priority: gw.priority,
         methods: activeMethods,
       }
+
+      // Airwallex: include environment for Drop-in SDK initialization
+      if (gw.provider === "airwallex") {
+        gatewayResponse.component = "airwallex-dropin"
+        gatewayResponse.environment = gw.mode === "live" ? "prod" : "demo"
+      }
+
+      return gatewayResponse
     })
 
     // Get billing entity from primary gateway

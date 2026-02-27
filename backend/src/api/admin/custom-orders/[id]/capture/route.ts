@@ -239,6 +239,44 @@ export const POST = async (
         detail: "Mollie payments are auto-captured on paid status",
       }
     }
+    // Airwallex capture
+    else if (providerId.includes("airwallex") && paymentData.intentId) {
+      const GATEWAY_CONFIG_MODULE = "gatewayConfig"
+      const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
+      const configs = await gcService.listGatewayConfigs(
+        { provider: "airwallex", is_active: true },
+        { take: 1 }
+      )
+      const config = configs[0]
+      if (!config) {
+        res.status(400).json({ error: "Airwallex gateway not configured" })
+        return
+      }
+
+      const { AirwallexApiClient } = await import(
+        "../../../../modules/payment-airwallex/api-client"
+      )
+      const isLive = config.mode === "live"
+      const keys = isLive ? config.live_keys : config.test_keys
+      const client = new AirwallexApiClient(
+        keys.api_key,
+        keys.secret_key,
+        !isLive,
+        logger
+      )
+      await client.login()
+
+      // Airwallex uses major units (same as order.total, no conversion needed)
+      const result = await client.capturePaymentIntent(paymentData.intentId, {
+        amount: Number(order.total),
+      })
+
+      captureResult = {
+        provider: "airwallex",
+        capture_id: result.id,
+        status: "captured",
+      }
+    }
     // Stripe capture
     else if (providerId.includes("stripe") && paymentData.client_secret) {
       captureResult = {
@@ -287,6 +325,8 @@ export const POST = async (
         updatedMetadata.paypalCaptureId = captureResult.capture_id
       } else if (captureResult.provider === "klarna") {
         updatedMetadata.klarnaCaptureId = captureResult.capture_id
+      } else if (captureResult.provider === "airwallex") {
+        updatedMetadata.airwallexCaptureId = captureResult.capture_id
       }
     }
 

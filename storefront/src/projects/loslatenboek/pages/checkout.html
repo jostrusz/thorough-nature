@@ -28,6 +28,9 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
 <!-- Klarna Payments SDK (widget-based authorize flow) -->
 <script src="https://x.klarnacdn.net/kp/lib/v1/api.js" async></script>
 
+<!-- Airwallex Drop-in Element SDK -->
+<script src="https://static.airwallex.com/components/sdk/v1/index.js" async></script>
+
 <style>
 /* ─── FONTS ─── */
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
@@ -2402,6 +2405,9 @@ body {
             </div>
             <div id="card-errors" style="font-size:12px;color:var(--error);margin-top:6px;min-height:16px;"></div>
           </div>
+          <!-- Airwallex Drop-in container (hidden, shown only when Airwallex payment method selected) -->
+          <div id="airwallex-dropin-container" style="display:none; padding: 16px; animation: fadeIn 0.3s ease;"></div>
+
           <div id="payment-errors" role="alert"></div>
         </div>
 
@@ -5036,6 +5042,95 @@ body {
                 }
               }
             );
+          });
+        }
+
+        // ─── AIRWALLEX DROP-IN FLOW ───
+        // Airwallex uses Drop-in Element for card/Apple Pay/Google Pay (inline)
+        // and redirect for iDEAL/Bancontact/BLIK/EPS
+        if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1 && providerData.intentId) {
+          // For redirect-based methods, Airwallex service returns a redirect URL
+          if (redirectUrl) {
+            window.location.href = redirectUrl;
+            return;
+          }
+
+          // For inline methods (card, Apple Pay, Google Pay): mount Drop-in
+          return new Promise(function(resolve, reject) {
+            if (typeof Airwallex === 'undefined') {
+              reject(new Error('Airwallex SDK niet geladen. Probeer het opnieuw.'));
+              return;
+            }
+
+            try {
+              Airwallex.init({
+                env: providerData.environment || 'demo',
+                origin: window.location.origin,
+              });
+
+              var dropInContainer = document.getElementById('airwallex-dropin-container');
+              if (dropInContainer) {
+                dropInContainer.style.display = 'block';
+              }
+
+              // Hide submit button while Drop-in is active
+              submitBtn.style.display = 'none';
+
+              var dropIn = Airwallex.createElement('dropIn', {
+                intent_id: providerData.intentId,
+                client_secret: providerData.clientSecret,
+                currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
+                country_code: (countrySelect.value || 'NL').toUpperCase(),
+              });
+
+              dropIn.mount('airwallex-dropin-container');
+
+              window.addEventListener('onSuccess', function onAirwallexSuccess(event) {
+                window.removeEventListener('onSuccess', onAirwallexSuccess);
+                // Show preloader
+                if (!document.querySelector('.payment-preloader')) {
+                  var awPreloader = document.createElement('div');
+                  awPreloader.className = 'payment-preloader';
+                  awPreloader.innerHTML = '<img src="/laat-los-logo-logo.png" alt="Laden..."><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+                  document.body.insertBefore(awPreloader, document.body.firstChild);
+                }
+
+                // Complete the cart
+                medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' })
+                  .then(function(completeRes) {
+                    var order = completeRes.order || completeRes;
+                    localStorage.setItem('medusa_order_id', order.id || '');
+                    localStorage.setItem('medusa_order_display_id', order.display_id || '');
+                    if (PROJECT_CONFIG.upsellEnabled === false) {
+                      window.location.href = PROJECT_CONFIG.thankYouUrl;
+                    } else if (checkoutOrderBump) {
+                      localStorage.setItem('medusa_upsell_purchased', 'true');
+                      window.location.href = PROJECT_CONFIG.thankYouUrl;
+                    } else {
+                      window.location.href = PROJECT_CONFIG.upsellUrl;
+                    }
+                    resolve();
+                  })
+                  .catch(function(err) {
+                    var errPreloader = document.querySelector('.payment-preloader');
+                    if (errPreloader) errPreloader.remove();
+                    submitBtn.style.display = '';
+                    reject(err);
+                  });
+              });
+
+              window.addEventListener('onError', function onAirwallexError(event) {
+                window.removeEventListener('onError', onAirwallexError);
+                submitBtn.style.display = '';
+                reject(new Error(event.detail?.message || 'Airwallex betaling mislukt.'));
+              });
+
+              // Re-enable submit button to allow re-trying
+              submitBtn.classList.remove('loading');
+              submitBtn.disabled = false;
+            } catch (awErr) {
+              reject(new Error('Airwallex initialisatie mislukt: ' + awErr.message));
+            }
           });
         }
 

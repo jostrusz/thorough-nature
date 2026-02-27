@@ -113,6 +113,13 @@ export const PAYPAL_CLIENT_SECRET_EC = process.env.PAYPAL_CLIENT_SECRET_EC;
 export const PAYPAL_MODE_EC = process.env.PAYPAL_MODE_EC || 'test';
 
 /**
+ * (optional) Airwallex credentials — one set per business/account
+ */
+export const AIRWALLEX_CLIENT_ID = process.env.AIRWALLEX_CLIENT_ID;
+export const AIRWALLEX_API_KEY = process.env.AIRWALLEX_API_KEY;
+export const AIRWALLEX_TEST_MODE = process.env.AIRWALLEX_TEST_MODE !== 'false';
+
+/**
  * (optional) Meilisearch configuration
  */
 export const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;

@@ -41,7 +41,8 @@
   "mollieProfileId": "pfl_725YqVE5Fd",
   "paymentProviders": {
     "mollie": "pp_mollie_mollie",
-    "paypal": "pp_paypal_paypal"
+    "paypal": "pp_paypal_paypal",
+    "airwallex": "pp_airwallex_airwallex"
   },
   "pages": {
     "": "index.html",
