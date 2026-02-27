@@ -5056,23 +5056,24 @@ body {
           }
 
           // For inline methods (card, Apple Pay, Google Pay): mount Drop-in
+          // Uses AirwallexComponentsSDK (CDN global) — see https://github.com/airwallex/airwallex-payment-demo
           return new Promise(function(resolve, reject) {
-            // Wait for Airwallex SDK to load (async script)
-            function waitForAirwallex(attempts) {
-              if (typeof Airwallex !== 'undefined') return initAirwallex();
+            // Wait for SDK to load (async script)
+            function waitForSDK(attempts) {
+              if (typeof window.AirwallexComponentsSDK !== 'undefined') return initAirwallex();
               if (attempts <= 0) {
                 reject(new Error('Airwallex SDK niet geladen. Probeer het opnieuw.'));
                 return;
               }
-              setTimeout(function() { waitForAirwallex(attempts - 1); }, 300);
+              setTimeout(function() { waitForSDK(attempts - 1); }, 300);
             }
-            waitForAirwallex(20); // max 6 seconds
+            waitForSDK(20); // max 6 seconds
 
-            function initAirwallex() {
+            async function initAirwallex() {
             try {
-              Airwallex.init({
+              await window.AirwallexComponentsSDK.init({
                 env: providerData.environment || 'demo',
-                origin: window.location.origin,
+                enabledElements: ['payments'],
               });
 
               var dropInContainer = document.getElementById('airwallex-dropin-container');
@@ -5086,20 +5087,18 @@ body {
               // Build return URL for redirect-based methods (iDEAL, Bancontact, BLIK, EPS)
               var awReturnUrl = window.location.origin + window.location.pathname + '?payment_return=1&cart_id=' + encodeURIComponent(result.cartId);
 
-              var dropIn = Airwallex.createElement('dropIn', {
+              var dropIn = await window.AirwallexComponentsSDK.createElement('dropIn', {
                 intent_id: providerData.intentId,
                 client_secret: providerData.clientSecret,
                 currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
                 country_code: (countrySelect.value || 'NL').toUpperCase(),
                 autoCapture: true,
                 withBilling: false,
-                return_url: awReturnUrl,
               });
 
               dropIn.mount('airwallex-dropin-container');
 
-              window.addEventListener('onSuccess', function onAirwallexSuccess(event) {
-                window.removeEventListener('onSuccess', onAirwallexSuccess);
+              dropIn.on('success', function(event) {
                 // Show preloader
                 if (!document.querySelector('.payment-preloader')) {
                   var awPreloader = document.createElement('div');
@@ -5132,15 +5131,17 @@ body {
                   });
               });
 
-              window.addEventListener('onError', function onAirwallexError(event) {
-                window.removeEventListener('onError', onAirwallexError);
+              dropIn.on('error', function(event) {
+                var error = event.detail && event.detail.error ? event.detail.error : event.detail || {};
                 submitBtn.style.display = '';
-                reject(new Error(event.detail?.message || 'Airwallex betaling mislukt.'));
+                reject(new Error(error.message || 'Airwallex betaling mislukt.'));
               });
 
-              // Re-enable submit button to allow re-trying
-              submitBtn.classList.remove('loading');
-              submitBtn.disabled = false;
+              dropIn.on('ready', function() {
+                // Re-enable submit button to allow re-trying
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+              });
             } catch (awErr) {
               reject(new Error('Airwallex initialisatie mislukt: ' + awErr.message));
             }
