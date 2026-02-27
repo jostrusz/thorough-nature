@@ -300,6 +300,8 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       )
 
       // Return format required by Medusa v2: { id, data }
+      // IMPORTANT: Store ALL session creation data so authorizePayment can send
+      // matching data to createOrder (Klarna validates fields match between session and order)
       return {
         id: result.data.session_id,
         data: {
@@ -309,6 +311,17 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
           amount,
           currency: currency_code,
           createdAt: Date.now(),
+          // Store session creation data for createOrder matching
+          klarnaSessionData: {
+            purchase_country: sessionData.purchase_country,
+            purchase_currency: sessionData.purchase_currency,
+            locale: sessionData.locale,
+            order_amount: sessionData.order_amount,
+            order_tax_amount: sessionData.order_tax_amount,
+            order_lines: sessionData.order_lines,
+            billing_address: sessionData.billing_address,
+            shipping_address: sessionData.shipping_address,
+          },
         },
       }
     } catch (error: any) {
@@ -331,7 +344,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
     const sessionData = input.data || input
     try {
       const client = await this.getKlarnaClient()
-      const { sessionId, clientToken, authorizationToken, amount, currency } =
+      const { sessionId, clientToken, authorizationToken, amount, currency, klarnaSessionData } =
         sessionData
 
       if (!authorizationToken) {
@@ -343,25 +356,20 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
         }
       }
 
-      // Determine purchase_country from session data or context
-      const billingAddress = sessionData.billing_address || sessionData.billingAddress || {}
-      const shippingAddress = sessionData.shipping_address || sessionData.shippingAddress || {}
-      const purchaseCountry = (
-        billingAddress.country ||
-        billingAddress.country_code ||
-        shippingAddress.country ||
-        shippingAddress.country_code ||
-        sessionData.purchase_country ||
-        "NL"
-      ).toUpperCase()
-      const purchaseCurrency = (currency || sessionData.purchase_currency || "EUR").toUpperCase()
+      // Use stored klarnaSessionData from initiatePayment — this ensures createOrder
+      // data matches EXACTLY what was sent during session creation (Klarna validates this)
+      const storedSession = klarnaSessionData || {}
+
+      const purchaseCountry = storedSession.purchase_country || "NL"
+      const purchaseCurrency = storedSession.purchase_currency || currency?.toUpperCase() || "EUR"
+      const locale = storedSession.locale || "en-NL"
 
       this.logger_.info(
-        `[Klarna] authorizePayment: amount=${amount}, currency=${purchaseCurrency}, country=${purchaseCountry}, authToken=${authorizationToken?.substring(0, 16)}...`
+        `[Klarna] authorizePayment: amount=${amount}, currency=${purchaseCurrency}, country=${purchaseCountry}, locale=${locale}, hasStoredSession=${!!klarnaSessionData}, authToken=${authorizationToken?.substring(0, 16)}...`
       )
 
-      // Build order data for Klarna createOrder
-      const orderLines = [
+      // Use stored order_lines from session creation, or build a fallback
+      const orderLines = storedSession.order_lines || [
         {
           type: "physical",
           name: "Order",
@@ -373,17 +381,30 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
         },
       ]
 
-      const orderData = {
+      const orderData: any = {
         authorization_token: authorizationToken,
         purchase_country: purchaseCountry,
         purchase_currency: purchaseCurrency,
-        order_amount: amount,
-        order_tax_amount: 0,
+        locale: locale,
+        order_amount: storedSession.order_amount || amount,
+        order_tax_amount: storedSession.order_tax_amount || 0,
         description: "Order",
         merchant_reference: `medusa-${Date.now()}`,
         merchant_reference1: sessionId,
         order_lines: orderLines,
       }
+
+      // Include addresses from stored session — MUST match what was sent during createSession
+      if (storedSession.billing_address) {
+        orderData.billing_address = storedSession.billing_address
+      }
+      if (storedSession.shipping_address) {
+        orderData.shipping_address = storedSession.shipping_address
+      }
+
+      this.logger_.info(
+        `[Klarna] createOrder payload: country=${orderData.purchase_country}, currency=${orderData.purchase_currency}, locale=${orderData.locale}, hasBilling=${!!orderData.billing_address}, hasShipping=${!!orderData.shipping_address}, lines=${orderData.order_lines?.length}`
+      )
 
       const result = await client.createOrder(orderData)
       if (!result.success) {

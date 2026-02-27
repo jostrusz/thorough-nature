@@ -55,12 +55,15 @@ export interface IKlarnaOrderData {
   authorization_token: string
   purchase_country: string // e.g. "NL"
   purchase_currency: string // e.g. "EUR"
+  locale: string // e.g. "en-NL" — REQUIRED by Klarna
   order_amount: number // in minor units
   order_tax_amount: number
   description?: string
   merchant_reference?: string
   merchant_reference1?: string
   order_lines: IKlarnaOrderLine[]
+  billing_address?: IKlarnaAddress // Must match session data
+  shipping_address?: IKlarnaAddress // Must match session data
 }
 
 export interface IKlarnaCaptureData {
@@ -169,15 +172,23 @@ export class KlarnaApiClient {
   }> {
     try {
       const authToken = orderData.authorization_token
-      const payload = {
+      const payload: Record<string, any> = {
         purchase_country: orderData.purchase_country,
         purchase_currency: orderData.purchase_currency,
+        locale: orderData.locale,
         order_amount: orderData.order_amount,
         order_tax_amount: orderData.order_tax_amount,
         description: orderData.description,
         merchant_reference: orderData.merchant_reference,
         merchant_reference1: orderData.merchant_reference1,
         order_lines: orderData.order_lines,
+      }
+      // Include addresses if provided — must match what was sent during session creation
+      if (orderData.billing_address) {
+        payload.billing_address = orderData.billing_address
+      }
+      if (orderData.shipping_address) {
+        payload.shipping_address = orderData.shipping_address
       }
 
       const response = await this.client.post(
