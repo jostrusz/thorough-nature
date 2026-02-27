@@ -9,6 +9,8 @@ interface OrderDetailPaymentProps {
 }
 
 function getPaymentStatus(order: any): string {
+  // If metadata says captured, trust it (auto-capture or manual)
+  if (order.metadata?.payment_captured) return "paid"
   if (order.payment_collections?.length) {
     const pc = order.payment_collections[0]
     if (pc.status === "captured" || pc.status === "completed") return "paid"
@@ -16,6 +18,55 @@ function getPaymentStatus(order: any): string {
     return pc.status || "pending"
   }
   return "pending"
+}
+
+/** Detect the primary payment provider from payment data */
+function detectProvider(payments: any[]): {
+  name: string
+  isPayPal: boolean
+  isKlarna: boolean
+  isMollie: boolean
+  needsCapture: boolean
+  color: string
+  label: string
+} {
+  const payment = payments[0]
+  if (!payment) return { name: "unknown", isPayPal: false, isKlarna: false, isMollie: false, needsCapture: false, color: "#6D7175", label: "Payment" }
+
+  const pid = payment.provider_id || ""
+  const data = payment.data || {}
+
+  if (pid.includes("paypal")) {
+    return {
+      name: "paypal",
+      isPayPal: true,
+      isKlarna: false,
+      isMollie: false,
+      needsCapture: !!(data.paypalOrderId || data.authorizationId),
+      color: "#0070BA",
+      label: "PayPal",
+    }
+  }
+  if (pid.includes("klarna")) {
+    return {
+      name: "klarna",
+      isPayPal: false,
+      isKlarna: true,
+      isMollie: false,
+      needsCapture: !!data.klarnaOrderId,
+      color: "#FFB3C7",
+      label: "Klarna",
+    }
+  }
+  return {
+    name: "mollie",
+    isPayPal: false,
+    isKlarna: false,
+    isMollie: true,
+    needsCapture: false,
+    color: "#6D7175",
+    label: "Mollie",
+  }
 }
 
 const rowStyle: React.CSSProperties = {
@@ -27,6 +78,16 @@ const rowStyle: React.CSSProperties = {
   borderRadius: "4px",
   margin: "0 -4px",
   transition: "background 0.12s ease",
+}
+
+const TRACKING_URLS: Record<string, (n: string) => string> = {
+  dhl: (n) => `https://tracking.dhl.com/?shipmentid=${n}`,
+  "dhl-parcel": (n) => `https://www.dhlparcel.nl/nl/volg-je-pakket?tc=${n}`,
+  dpd: (n) => `https://tracking.dpd.de/parcelstatus?query=${n}`,
+  gls: (n) => `https://gls-group.eu/GROUP/en/parcel-tracking?match=${n}`,
+  postnl: (n) => `https://postnl.nl/tracktrace/?B=${n}`,
+  fedex: (n) => `https://tracking.fedex.com/tracking?tracknumbers=${n}`,
+  ups: (n) => `https://www.ups.com/track?tracknum=${n}`,
 }
 
 export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetailPaymentProps) {
@@ -41,19 +102,16 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
   const taxTotal = Number(order.tax_total) || 0
   const total = Number(order.total) || 0
 
-  // Get discount code if any
   const discountCode =
     order.discounts?.[0]?.code ||
     order.metadata?.discount_code ||
     (discountTotal > 0 ? "Discount" : "")
 
-  // Get shipping method name
   const shippingMethodName =
     order.shipping_methods?.[0]?.name ||
     order.shipping_methods?.[0]?.shipping_option_id ||
     "Shipping"
 
-  // Get total paid
   const payments = (order.payment_collections || []).flatMap(
     (pc: any) => pc.payments || []
   )
@@ -61,6 +119,21 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
     (sum: number, p: any) => sum + (Number(p.amount) || 0),
     0
   )
+
+  const provider = detectProvider(payments)
+  const isCaptured = order.metadata?.payment_captured === true
+  const showCaptureButton =
+    !isCaptured &&
+    (provider.isPayPal || provider.isKlarna) &&
+    provider.needsCapture
+
+  // Tracking info from Dextrum
+  const trackingNumber = order.metadata?.dextrum_tracking_number
+  const trackingCarrier = order.metadata?.dextrum_carrier || ""
+  const trackingUrlFn = TRACKING_URLS[trackingCarrier.toLowerCase()]
+  const trackingUrl = trackingNumber && trackingUrlFn
+    ? trackingUrlFn(trackingNumber)
+    : order.metadata?.dextrum_tracking_url || null
 
   return (
     <div
@@ -158,33 +231,15 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
         )}
 
         {/* Divider + Total */}
-        <div
-          style={{
-            borderTop: "1px solid #E1E3E5",
-            marginTop: "8px",
-            paddingTop: "8px",
-          }}
-        >
-          <div
-            style={{
-              ...rowStyle,
-              fontSize: "14px",
-              fontWeight: 600,
-            }}
-          >
+        <div style={{ borderTop: "1px solid #E1E3E5", marginTop: "8px", paddingTop: "8px" }}>
+          <div style={{ ...rowStyle, fontSize: "14px", fontWeight: 600 }}>
             <span style={{ color: "#1A1A1A" }}>Total</span>
             <span style={{ color: "#1A1A1A" }}>{formatCurrency(total, currency)}</span>
           </div>
         </div>
 
         {/* Paid amount */}
-        <div
-          style={{
-            borderTop: "1px solid #E1E3E5",
-            marginTop: "8px",
-            paddingTop: "8px",
-          }}
-        >
+        <div style={{ borderTop: "1px solid #E1E3E5", marginTop: "8px", paddingTop: "8px" }}>
           <div className="od-row-hover" style={rowStyle}>
             <span style={{ color: "#1A1A1A", fontWeight: 500 }}>
               {paymentStatus === "paid" || paymentStatus === "captured"
@@ -199,7 +254,67 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
           </div>
         </div>
 
-        {/* Payment provider info + Payment IDs */}
+        {/* ─── Order & Tracking Info ─── */}
+        <div style={{ borderTop: "1px solid #E1E3E5", marginTop: "8px", paddingTop: "8px" }}>
+          {/* Medusa Order ID */}
+          {order.display_id && (
+            <div className="od-row-hover" style={{ ...rowStyle, fontSize: "12px" }}>
+              <span style={{ color: "#8C9196" }}>Order ID</span>
+              <code
+                style={{
+                  fontSize: "12px",
+                  background: "#F6F6F7",
+                  padding: "1px 8px",
+                  borderRadius: "4px",
+                  color: "#1A1A1A",
+                  fontFamily: "monospace",
+                }}
+              >
+                #{order.display_id}
+              </code>
+            </div>
+          )}
+
+          {/* Tracking Number */}
+          {trackingNumber && (
+            <div className="od-row-hover" style={{ ...rowStyle, fontSize: "12px" }}>
+              <span style={{ color: "#8C9196" }}>Tracking Number</span>
+              <code
+                style={{
+                  fontSize: "12px",
+                  background: "#F6F6F7",
+                  padding: "1px 8px",
+                  borderRadius: "4px",
+                  color: "#1A1A1A",
+                  fontFamily: "monospace",
+                }}
+              >
+                {trackingNumber}
+              </code>
+            </div>
+          )}
+
+          {/* Tracking Link */}
+          {trackingUrl && (
+            <div className="od-row-hover" style={{ ...rowStyle, fontSize: "12px" }}>
+              <span style={{ color: "#8C9196" }}>Tracking Link</span>
+              <a
+                href={trackingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontSize: "12px",
+                  color: "#2563EB",
+                  textDecoration: "none",
+                }}
+              >
+                {trackingCarrier.toUpperCase() || "Track"} &rarr;
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* ─── Payment Provider Info ─── */}
         {payments.length > 0 && (
           <div style={{ marginTop: "8px" }}>
             {payments.map((payment: any) => {
@@ -213,11 +328,12 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                 applepay: "Apple Pay", eps: "EPS", przelewy24: "Przelewy24",
               }
               const methodLabel = METHOD_LABELS[methodRaw] || methodRaw || ""
-              const provider = [providerName, methodLabel].filter(Boolean).join(" — ") || "Payment"
+              const providerLabel = [providerName, methodLabel].filter(Boolean).join(" — ") || "Payment"
               const gatewayId =
                 payment.data?.molliePaymentId ||
                 payment.data?.mollieOrderId ||
                 payment.data?.paypalOrderId ||
+                payment.data?.klarnaOrderId ||
                 payment.data?.id ||
                 payment.data?.payment_intent ||
                 payment.data?.payment_id ||
@@ -229,16 +345,9 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
 
               return (
                 <div key={payment.id}>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#8C9196",
-                      padding: "2px 0",
-                    }}
-                  >
-                    {provider} &middot; {dateStr}
+                  <div style={{ fontSize: "12px", color: "#8C9196", padding: "2px 0" }}>
+                    {providerLabel} &middot; {dateStr}
                   </div>
-                  {/* Payment Gateway ID */}
                   {gatewayId && (
                     <div
                       style={{
@@ -271,12 +380,8 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
           </div>
         )}
 
-        {/* PayPal capture button — shown when payment is authorized but not yet captured */}
-        {payments.some((p: any) =>
-          p.provider_id?.includes("paypal") &&
-          (p.data?.paypalOrderId || p.data?.authorizationId) &&
-          !order.metadata?.payment_captured
-        ) && (
+        {/* ─── Universal Capture Button (PayPal / Klarna) ─── */}
+        {showCaptureButton && (
           <div
             style={{
               borderTop: "1px solid #E1E3E5",
@@ -284,14 +389,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
               paddingTop: "12px",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "8px",
-              }}
-            >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
               <span
                 style={{
                   display: "inline-flex",
@@ -305,18 +403,15 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                   borderRadius: "10px",
                 }}
               >
-                ⓘ PayPal — Authorized (not yet captured)
+                {provider.isPayPal
+                  ? "PayPal — Authorized (not yet captured)"
+                  : "Klarna — Authorized (not yet captured)"}
               </span>
             </div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#8C9196",
-                marginBottom: "8px",
-              }}
-            >
-              PayPal authorizations must be captured within 29 days.
-              Capture after shipping the order.
+            <div style={{ fontSize: "12px", color: "#8C9196", marginBottom: "8px" }}>
+              {provider.isPayPal
+                ? "PayPal authorizations must be captured within 29 days. Capture after shipping the order."
+                : "Klarna payments must be captured within 28 days of authorization. Capture after shipping the order."}
             </div>
             {onCapture && (
               <button
@@ -328,8 +423,8 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                   alignItems: "center",
                   gap: "6px",
                   padding: "8px 16px",
-                  background: "#0070BA",
-                  color: "#FFFFFF",
+                  background: provider.color,
+                  color: provider.isKlarna ? "#1A1A1A" : "#FFFFFF",
                   border: "none",
                   borderRadius: "6px",
                   fontSize: "13px",
@@ -345,7 +440,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                         width: "14px",
                         height: "14px",
                         border: "2px solid rgba(255,255,255,0.3)",
-                        borderTopColor: "#fff",
+                        borderTopColor: provider.isKlarna ? "#1A1A1A" : "#fff",
                         borderRadius: "50%",
                         animation: "spin 0.8s linear infinite",
                         display: "inline-block",
@@ -354,54 +449,15 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                     Capturing...
                   </>
                 ) : (
-                  "💳 Capture PayPal Payment"
+                  `Capture ${provider.label} Payment`
                 )}
               </button>
             )}
           </div>
         )}
 
-        {/* PayPal Order ID display */}
-        {payments.some((p: any) => p.data?.paypalOrderId) && (
-          <div style={{ marginTop: "8px" }}>
-            {payments
-              .filter((p: any) => p.data?.paypalOrderId)
-              .map((payment: any) => (
-                <div
-                  key={`paypal-${payment.id}`}
-                  style={{
-                    fontSize: "12px",
-                    color: "#6D7175",
-                    padding: "2px 0",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                  }}
-                >
-                  <span style={{ color: "#8C9196" }}>PayPal Order:</span>
-                  <code
-                    style={{
-                      fontSize: "11px",
-                      background: "#F6F6F7",
-                      padding: "1px 6px",
-                      borderRadius: "4px",
-                      color: "#1A1A1A",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    {payment.data.paypalOrderId}
-                  </code>
-                </div>
-              ))}
-          </div>
-        )}
-
-        {/* Klarna capture button — shown when payment is authorized but not yet captured */}
-        {payments.some((p: any) =>
-          p.provider_id?.includes("klarna") &&
-          p.data?.klarnaOrderId &&
-          !order.metadata?.payment_captured
-        ) && (
+        {/* Captured confirmation */}
+        {isCaptured && (provider.isPayPal || provider.isKlarna) && (
           <div
             style={{
               borderTop: "1px solid #E1E3E5",
@@ -409,115 +465,29 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
               paddingTop: "12px",
             }}
           >
-            <div
+            <span
               style={{
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
-                gap: "8px",
-                marginBottom: "8px",
+                gap: "4px",
+                background: "#D1FAE5",
+                color: "#065F46",
+                fontSize: "11px",
+                fontWeight: 600,
+                padding: "2px 8px",
+                borderRadius: "10px",
               }}
             >
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  background: "#FFF3CD",
-                  color: "#856404",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  padding: "2px 8px",
-                  borderRadius: "10px",
-                }}
-              >
-                ⓘ Klarna — Authorized (not yet captured)
-              </span>
-            </div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#8C9196",
-                marginBottom: "8px",
-              }}
-            >
-              Klarna payments must be captured within 28 days of authorization.
-              Capture after shipping the order.
-            </div>
-            {onCapture && (
-              <button
-                onClick={onCapture}
-                disabled={isCapturing}
-                className="od-btn-primary"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "8px 16px",
-                  background: "#008060",
-                  color: "#FFFFFF",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  cursor: isCapturing ? "not-allowed" : "pointer",
-                  opacity: isCapturing ? 0.7 : 1,
-                }}
-              >
-                {isCapturing ? (
-                  <>
-                    <span
-                      style={{
-                        width: "14px",
-                        height: "14px",
-                        border: "2px solid rgba(255,255,255,0.3)",
-                        borderTopColor: "#fff",
-                        borderRadius: "50%",
-                        animation: "spin 0.8s linear infinite",
-                        display: "inline-block",
-                      }}
-                    />
-                    Capturing...
-                  </>
-                ) : (
-                  "💳 Capture Payment"
-                )}
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Klarna Order ID display */}
-        {payments.some((p: any) => p.data?.klarnaOrderId) && (
-          <div style={{ marginTop: "8px" }}>
-            {payments
-              .filter((p: any) => p.data?.klarnaOrderId)
-              .map((payment: any) => (
-                <div
-                  key={`klarna-${payment.id}`}
-                  style={{
-                    fontSize: "12px",
-                    color: "#6D7175",
-                    padding: "2px 0",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                  }}
-                >
-                  <span style={{ color: "#8C9196" }}>Klarna Order:</span>
-                  <code
-                    style={{
-                      fontSize: "11px",
-                      background: "#F6F6F7",
-                      padding: "1px 6px",
-                      borderRadius: "4px",
-                      color: "#1A1A1A",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    {payment.data.klarnaOrderId}
-                  </code>
-                </div>
-              ))}
+              {provider.label} — Captured
+              {order.metadata?.payment_captured_at && (
+                <span style={{ fontWeight: 400, marginLeft: "4px" }}>
+                  {(() => {
+                    const d = new Date(order.metadata.payment_captured_at)
+                    return `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}.${d.getFullYear()}`
+                  })()}
+                </span>
+              )}
+            </span>
           </div>
         )}
       </div>

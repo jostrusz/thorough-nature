@@ -25,7 +25,8 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
 <link rel="preload" href="https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2" as="font" type="font/woff2" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 
-<!-- Zadny externi SDK — Mollie i PayPal pouzivaji redirect-based flow -->
+<!-- Klarna Payments SDK (widget-based authorize flow) -->
+<script src="https://x.klarnacdn.net/kp/lib/v1/api.js" async></script>
 
 <style>
 /* ─── FONTS ─── */
@@ -648,6 +649,125 @@ body {
   padding: 3px 8px;
   border-radius: 20px;
   white-space: nowrap;
+}
+
+/* Klarna grouped parent */
+.klarna-parent {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.klarna-parent:hover {
+  border-color: var(--highlight);
+  box-shadow: var(--shadow-sm);
+}
+.klarna-parent.expanded {
+  border-color: var(--cta);
+  background: rgba(194,123,160,0.04);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+}
+.klarna-parent .klarna-chevron {
+  margin-left: auto;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.klarna-parent.expanded .klarna-chevron {
+  transform: rotate(180deg);
+}
+.klarna-sub-methods {
+  display: none;
+  border: 1.5px solid var(--cta);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: rgba(194,123,160,0.02);
+  overflow: hidden;
+  margin-top: -8px;
+  margin-bottom: 0;
+}
+.klarna-sub-methods.open {
+  display: block;
+}
+.klarna-sub-method {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 12px 50px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  position: relative;
+}
+.klarna-sub-method:hover {
+  background: rgba(194,123,160,0.06);
+}
+.klarna-sub-method.selected {
+  background: rgba(194,123,160,0.08);
+}
+.klarna-sub-method + .klarna-sub-method {
+  border-top: 1px solid var(--border);
+}
+.klarna-sub-method input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.klarna-sub-radio {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+.klarna-sub-method.selected .klarna-sub-radio {
+  border-color: var(--cta);
+}
+.klarna-sub-radio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cta);
+  transform: scale(0);
+  transition: transform 0.2s ease;
+}
+.klarna-sub-method.selected .klarna-sub-radio-dot {
+  transform: scale(1);
+}
+.klarna-sub-info { flex: 1; }
+.klarna-sub-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--heading);
+}
+.klarna-sub-desc {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+/* Klarna widget container (inline authorize) */
+#klarna-widget-container {
+  display: none;
+  padding: 16px 16px 16px 50px;
+  border: 1.5px solid var(--cta);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: var(--white);
+  margin-top: -8px;
+}
+#klarna-widget-container.open {
+  display: block;
 }
 
 #payment-errors {
@@ -2894,7 +3014,9 @@ body {
   var METHOD_DESCRIPTIONS = {
     ideal: 'Betaal direct via je eigen bank',
     bancontact: 'Belgisch betaalsysteem',
-    klarna: 'Betaal later of in termijnen',
+    klarna: 'Betaal direct via Klarna',
+    klarna_later: 'Ontvang eerst, betaal later',
+    klarna_slice: 'Betaal in termijnen',
     creditcard: 'Visa, Mastercard, American Express',
     paypal: 'Betaal met je PayPal-account',
     eps: 'Betaal via je Oostenrijkse bank',
@@ -2910,6 +3032,20 @@ body {
     bank_transfer: 'Betaal via bankoverschrijving',
     sepa_debit: 'SEPA automatische incasso',
   };
+
+  // Klarna sub-method config: code → SDK payment_method_category + Dutch labels
+  var KLARNA_METHODS = {
+    klarna:       { category: 'pay_now',       label: 'Betaal direct',        desc: 'Betaal nu via Klarna' },
+    klarna_later: { category: 'pay_later',     label: 'Achteraf betalen',     desc: 'Ontvang eerst, betaal later' },
+    klarna_slice: { category: 'pay_over_time', label: 'Gespreid betalen',     desc: 'Betaal in termijnen' },
+  };
+  var KLARNA_CODES = Object.keys(KLARNA_METHODS);
+
+  // Klarna state
+  var klarnaClientToken = null;
+  var klarnaSessionId = null;
+  var klarnaSelectedCategory = null; // 'pay_now', 'pay_later', or 'pay_over_time'
+  var klarnaInitialized = false;
 
   // SVG icons for common methods (fallback when no /icons/xxx.svg exists)
   function getMethodIconHTML(code) {
@@ -3007,7 +3143,8 @@ body {
   }
 
   /**
-   * Render payment methods filtered by country
+   * Render payment methods filtered by country.
+   * Klarna methods (klarna, klarna_later, klarna_slice) are grouped under one parent.
    */
   function renderPaymentMethods(countryCode) {
     var container = document.getElementById('payment-methods');
@@ -3015,7 +3152,6 @@ body {
 
     // Filter methods by country availability
     var methods = allPaymentOptions.filter(function(m) {
-      // Empty available_countries = global, show everywhere
       if (!m.available_countries || m.available_countries.length === 0) return true;
       return m.available_countries.indexOf(country) !== -1;
     });
@@ -3031,15 +3167,28 @@ body {
     // Sort by sort_order
     methods.sort(function(a, b) { return a.sort_order - b.sort_order; });
 
+    // Separate Klarna methods from the rest
+    var klarnaMethods = methods.filter(function(m) { return KLARNA_CODES.indexOf(m.code) !== -1; });
+    var otherMethods = methods.filter(function(m) { return KLARNA_CODES.indexOf(m.code) === -1; });
+
     // Clear existing content (keep error/loading divs)
     var loadingEl = document.getElementById('payment-methods-loading');
     var errorEl = document.getElementById('payment-methods-error');
 
-    // Remove old dynamically rendered labels
-    var oldLabels = container.querySelectorAll('.payment-method');
+    // Remove old dynamically rendered elements
+    var oldLabels = container.querySelectorAll('.payment-method, .klarna-parent, .klarna-sub-methods');
     oldLabels.forEach(function(el) { el.remove(); });
 
-    if (methods.length === 0) {
+    // Reset Klarna state
+    klarnaClientToken = null;
+    klarnaSessionId = null;
+    klarnaSelectedCategory = null;
+    klarnaInitialized = false;
+
+    // Total methods = other + (klarna group counts as 1 if present)
+    var totalVisible = otherMethods.length + (klarnaMethods.length > 0 ? 1 : 0);
+
+    if (totalVisible === 0) {
       if (errorEl) {
         errorEl.innerHTML = '<p>Geen betaalmethoden beschikbaar voor dit land.</p>';
         errorEl.style.display = 'block';
@@ -3049,42 +3198,126 @@ body {
     if (errorEl) errorEl.style.display = 'none';
 
     // Check if creditcard is among active methods
-    var hasCreditCard = methods.some(function(m) { return m.code === 'creditcard'; });
+    var hasCreditCard = otherMethods.some(function(m) { return m.code === 'creditcard'; });
     var cardFieldsEl = document.getElementById('mollie-card-fields');
 
-    // Render each method
-    methods.forEach(function(m, index) {
-      var isFirst = index === 0;
-      var label = document.createElement('label');
-      label.className = 'payment-method' + (isFirst ? ' selected' : '');
-      label.setAttribute('data-method', m.code);
-      label.setAttribute('data-provider', m.provider);
-      label.setAttribute('data-provider-id', m.provider_id);
+    // Determine the first Klarna method's sort_order to interleave correctly
+    var klarnaInsertOrder = klarnaMethods.length > 0 ? klarnaMethods[0].sort_order : Infinity;
 
-      var isPopular = (m.code === 'ideal' && country === 'nl') || (m.code === 'bancontact' && country === 'be');
+    // Merge: build combined render list with a placeholder for klarna group
+    var renderList = [];
+    otherMethods.forEach(function(m) { renderList.push({ type: 'method', data: m }); });
+    if (klarnaMethods.length > 0) {
+      renderList.push({ type: 'klarna_group', data: klarnaMethods, sort_order: klarnaInsertOrder });
+    }
+    renderList.sort(function(a, b) {
+      var sa = a.type === 'klarna_group' ? a.sort_order : a.data.sort_order;
+      var sb = b.type === 'klarna_group' ? b.sort_order : b.data.sort_order;
+      return sa - sb;
+    });
 
-      label.innerHTML =
-        '<input type="radio" name="payment_method" value="' + m.code + '"' + (isFirst ? ' checked' : '') + '>' +
-        '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
-        getMethodIconHTML(m.code) +
-        '<div class="pm-info">' +
-          '<div class="pm-name">' + m.display_name + '</div>' +
-          '<div class="pm-desc">' + (METHOD_DESCRIPTIONS[m.code] || '') + '</div>' +
-        '</div>' +
-        (isPopular ? '<span class="pm-badge">Populair</span>' : '');
+    var isFirstSet = false;
 
-      container.appendChild(label);
+    renderList.forEach(function(item) {
+      if (item.type === 'klarna_group') {
+        // Render Klarna parent (expandable)
+        var isFirst = !isFirstSet;
+        var parent = document.createElement('div');
+        parent.className = 'klarna-parent' + (isFirst ? ' expanded' : '');
+        parent.setAttribute('data-klarna-parent', 'true');
+        parent.innerHTML =
+          '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
+          '<img src="/icons/klarna.svg" alt="Klarna" class="pm-icon" onerror="this.style.display=\'none\'">' +
+          '<div class="pm-info">' +
+            '<div class="pm-name">Klarna</div>' +
+            '<div class="pm-desc">Betaal direct, later of in termijnen</div>' +
+          '</div>' +
+          '<svg class="klarna-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-      // If this is creditcard, insert card fields right after it
-      if (m.code === 'creditcard' && cardFieldsEl) {
-        container.appendChild(cardFieldsEl);
-      }
+        container.appendChild(parent);
 
-      // Set first as selected
-      if (isFirst) {
-        selectedMethod = m.code;
-        selectedProvider = m.provider;
-        selectedProviderId = m.provider_id;
+        // Render Klarna sub-methods panel
+        var subPanel = document.createElement('div');
+        subPanel.className = 'klarna-sub-methods' + (isFirst ? ' open' : '');
+        subPanel.id = 'klarna-sub-methods';
+
+        // Store provider info from first klarna method (they all share same provider)
+        var klarnaProvider = item.data[0].provider;
+        var klarnaProviderId = item.data[0].provider_id;
+        subPanel.setAttribute('data-provider', klarnaProvider);
+        subPanel.setAttribute('data-provider-id', klarnaProviderId);
+
+        item.data.forEach(function(km, ki) {
+          var cfg = KLARNA_METHODS[km.code];
+          if (!cfg) return;
+          var isSubFirst = isFirst && ki === 0;
+          var sub = document.createElement('label');
+          sub.className = 'klarna-sub-method' + (isSubFirst ? ' selected' : '');
+          sub.setAttribute('data-method', km.code);
+          sub.setAttribute('data-klarna-category', cfg.category);
+          sub.setAttribute('data-provider', km.provider);
+          sub.setAttribute('data-provider-id', km.provider_id);
+          sub.innerHTML =
+            '<input type="radio" name="payment_method" value="' + km.code + '"' + (isSubFirst ? ' checked' : '') + '>' +
+            '<div class="klarna-sub-radio"><div class="klarna-sub-radio-dot"></div></div>' +
+            '<div class="klarna-sub-info">' +
+              '<div class="klarna-sub-name">' + cfg.label + '</div>' +
+              '<div class="klarna-sub-desc">' + cfg.desc + '</div>' +
+            '</div>';
+          subPanel.appendChild(sub);
+
+          if (isSubFirst) {
+            selectedMethod = km.code;
+            selectedProvider = km.provider;
+            selectedProviderId = km.provider_id;
+            klarnaSelectedCategory = cfg.category;
+            isFirstSet = true;
+          }
+        });
+
+        container.appendChild(subPanel);
+
+        // If first, also set parent radio dot visible
+        if (isFirst) {
+          parent.querySelector('.pm-radio-dot').style.transform = 'scale(1)';
+          parent.querySelector('.pm-radio').style.borderColor = 'var(--cta)';
+        }
+      } else {
+        // Regular payment method
+        var m = item.data;
+        var isFirst = !isFirstSet;
+        var label = document.createElement('label');
+        label.className = 'payment-method' + (isFirst ? ' selected' : '');
+        label.setAttribute('data-method', m.code);
+        label.setAttribute('data-provider', m.provider);
+        label.setAttribute('data-provider-id', m.provider_id);
+
+        var isPopular = (m.code === 'ideal' && country === 'nl') || (m.code === 'bancontact' && country === 'be');
+
+        label.innerHTML =
+          '<input type="radio" name="payment_method" value="' + m.code + '"' + (isFirst ? ' checked' : '') + '>' +
+          '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
+          getMethodIconHTML(m.code) +
+          '<div class="pm-info">' +
+            '<div class="pm-name">' + m.display_name + '</div>' +
+            '<div class="pm-desc">' + (METHOD_DESCRIPTIONS[m.code] || '') + '</div>' +
+          '</div>' +
+          (isPopular ? '<span class="pm-badge">Populair</span>' : '');
+
+        container.appendChild(label);
+
+        // If this is creditcard, insert card fields right after it
+        if (m.code === 'creditcard' && cardFieldsEl) {
+          container.appendChild(cardFieldsEl);
+        }
+
+        if (isFirst) {
+          selectedMethod = m.code;
+          selectedProvider = m.provider;
+          selectedProviderId = m.provider_id;
+          klarnaSelectedCategory = null;
+          isFirstSet = true;
+        }
       }
     });
 
@@ -3108,15 +3341,50 @@ body {
   }
 
   /**
-   * Bind click events on dynamically rendered payment methods
+   * Bind click events on dynamically rendered payment methods + Klarna group
    */
   function bindPaymentMethodEvents() {
-    var methods = document.querySelectorAll('.payment-method');
-    methods.forEach(function(method) {
+    var regularMethods = document.querySelectorAll('.payment-method');
+    var klarnaParent = document.querySelector('.klarna-parent');
+    var klarnaSubPanel = document.getElementById('klarna-sub-methods');
+    var klarnaSubMethods = document.querySelectorAll('.klarna-sub-method');
+
+    // Deselect all: regular methods + klarna
+    function deselectAll() {
+      regularMethods.forEach(function(m) { m.classList.remove('selected'); });
+      if (klarnaParent) {
+        klarnaParent.querySelector('.pm-radio-dot').style.transform = 'scale(0)';
+        klarnaParent.querySelector('.pm-radio').style.borderColor = 'var(--border)';
+      }
+      klarnaSubMethods.forEach(function(sm) { sm.classList.remove('selected'); });
+      klarnaSelectedCategory = null;
+    }
+
+    // Collapse klarna
+    function collapseKlarna() {
+      if (klarnaParent) klarnaParent.classList.remove('expanded');
+      if (klarnaSubPanel) klarnaSubPanel.classList.remove('open');
+    }
+
+    // Expand klarna
+    function expandKlarna() {
+      if (klarnaParent) klarnaParent.classList.add('expanded');
+      if (klarnaSubPanel) klarnaSubPanel.classList.add('open');
+    }
+
+    // Select klarna parent visuals (radio dot)
+    function selectKlarnaParent() {
+      if (klarnaParent) {
+        klarnaParent.querySelector('.pm-radio-dot').style.transform = 'scale(1)';
+        klarnaParent.querySelector('.pm-radio').style.borderColor = 'var(--cta)';
+      }
+    }
+
+    // Handle regular payment method click
+    regularMethods.forEach(function(method) {
       method.addEventListener('click', function() {
-        // Remove selected from all
-        methods.forEach(function(m) { m.classList.remove('selected'); });
-        // Add selected to clicked
+        deselectAll();
+        collapseKlarna();
         method.classList.add('selected');
         method.querySelector('input').checked = true;
         selectedMethod = method.getAttribute('data-method');
@@ -3134,21 +3402,100 @@ body {
           }
         }
 
-        // Update button text
         updateButtonText();
-
-        // Update subtext
-        var subtext = document.querySelector('.btn-subtext');
-        if (subtext) {
-          subtext.textContent = selectedMethod === 'creditcard'
-            ? 'Je kaartgegevens worden beveiligd verwerkt via Mollie.'
-            : 'Je wordt doorgestuurd naar een beveiligde betaalpagina.';
-        }
-
-        // Clear payment errors
+        updateSubtext();
         document.getElementById('payment-errors').textContent = '';
       });
     });
+
+    // Handle Klarna parent click → expand/collapse + select first sub-method
+    if (klarnaParent) {
+      klarnaParent.addEventListener('click', function() {
+        var isExpanded = klarnaParent.classList.contains('expanded');
+
+        if (isExpanded) {
+          // If already expanded AND already selected, just collapse
+          var isKlarnaSelected = KLARNA_CODES.indexOf(selectedMethod) !== -1;
+          if (!isKlarnaSelected) {
+            // Clicked to select Klarna — select first sub-method
+            deselectAll();
+            selectKlarnaParent();
+            var firstSub = klarnaSubMethods[0];
+            if (firstSub) {
+              firstSub.classList.add('selected');
+              firstSub.querySelector('input').checked = true;
+              selectedMethod = firstSub.getAttribute('data-method');
+              selectedProvider = firstSub.getAttribute('data-provider');
+              selectedProviderId = firstSub.getAttribute('data-provider-id');
+              klarnaSelectedCategory = firstSub.getAttribute('data-klarna-category');
+            }
+            // Hide credit card fields
+            var cardFields = document.getElementById('mollie-card-fields');
+            if (cardFields) cardFields.style.display = 'none';
+            updateButtonText();
+            updateSubtext();
+            document.getElementById('payment-errors').textContent = '';
+          } else {
+            // Already selected → toggle collapse
+            collapseKlarna();
+          }
+        } else {
+          // Expand and select first sub-method
+          deselectAll();
+          regularMethods.forEach(function(m) { m.classList.remove('selected'); });
+          expandKlarna();
+          selectKlarnaParent();
+          var firstSub = klarnaSubMethods[0];
+          if (firstSub) {
+            firstSub.classList.add('selected');
+            firstSub.querySelector('input').checked = true;
+            selectedMethod = firstSub.getAttribute('data-method');
+            selectedProvider = firstSub.getAttribute('data-provider');
+            selectedProviderId = firstSub.getAttribute('data-provider-id');
+            klarnaSelectedCategory = firstSub.getAttribute('data-klarna-category');
+          }
+          var cardFields = document.getElementById('mollie-card-fields');
+          if (cardFields) cardFields.style.display = 'none';
+          updateButtonText();
+          updateSubtext();
+          document.getElementById('payment-errors').textContent = '';
+        }
+      });
+    }
+
+    // Handle Klarna sub-method click
+    klarnaSubMethods.forEach(function(sub) {
+      sub.addEventListener('click', function(e) {
+        e.stopPropagation(); // Don't bubble to parent
+        deselectAll();
+        regularMethods.forEach(function(m) { m.classList.remove('selected'); });
+        selectKlarnaParent();
+        sub.classList.add('selected');
+        sub.querySelector('input').checked = true;
+        selectedMethod = sub.getAttribute('data-method');
+        selectedProvider = sub.getAttribute('data-provider');
+        selectedProviderId = sub.getAttribute('data-provider-id');
+        klarnaSelectedCategory = sub.getAttribute('data-klarna-category');
+
+        var cardFields = document.getElementById('mollie-card-fields');
+        if (cardFields) cardFields.style.display = 'none';
+        updateButtonText();
+        updateSubtext();
+        document.getElementById('payment-errors').textContent = '';
+      });
+    });
+  }
+
+  function updateSubtext() {
+    var subtext = document.querySelector('.btn-subtext');
+    if (!subtext) return;
+    if (selectedMethod === 'creditcard') {
+      subtext.textContent = 'Je kaartgegevens worden beveiligd verwerkt via Mollie.';
+    } else if (KLARNA_CODES.indexOf(selectedMethod) !== -1) {
+      subtext.textContent = 'Je wordt doorgestuurd naar Klarna om de betaling af te ronden.';
+    } else {
+      subtext.textContent = 'Je wordt doorgestuurd naar een beveiligde betaalpagina.';
+    }
   }
 
   // Aktualni celkova cena (aktualizuje se dynamicky z recalculateOrderSummary)
@@ -3160,9 +3507,15 @@ body {
       btnText.textContent = 'Bestelling afronden — ' + formatPrice(currentTotalPrice);
       return;
     }
-    // Find display name from loaded options
-    var opt = allPaymentOptions.find(function(m) { return m.code === selectedMethod; });
-    var methodName = opt ? opt.display_name : selectedMethod;
+    // For Klarna sub-methods, show "Klarna" as the name
+    var methodName;
+    if (KLARNA_CODES.indexOf(selectedMethod) !== -1) {
+      var cfg = KLARNA_METHODS[selectedMethod];
+      methodName = 'Klarna — ' + (cfg ? cfg.label : 'Klarna');
+    } else {
+      var opt = allPaymentOptions.find(function(m) { return m.code === selectedMethod; });
+      methodName = opt ? opt.display_name : selectedMethod;
+    }
     btnText.textContent = 'Betalen met ' + methodName + ' — ' + formatPrice(currentTotalPrice);
   }
 
@@ -4520,7 +4873,7 @@ body {
           }
         });
       } else {
-        // PRODUKCE: Redirect naar betaalpagina
+        // PRODUKCE: Redirect naar betaalpagina of Klarna SDK flow
         var sessions = result.paymentCollection?.payment_sessions || [];
         var lastSession = sessions[sessions.length - 1] || {};
         var providerData = lastSession.data || {};
@@ -4542,6 +4895,104 @@ body {
             } else {
               window.location.href = PROJECT_CONFIG.upsellUrl;
             }
+          });
+        }
+
+        // ─── KLARNA SDK FLOW ───
+        // Klarna uses widget-based authorization (not redirect).
+        // initiatePayment returns clientToken → SDK authorize → authorization_token → complete cart
+        if (KLARNA_CODES.indexOf(selectedMethod) !== -1 && providerData.clientToken) {
+          console.log('[Klarna] Starting SDK authorize flow, category:', klarnaSelectedCategory);
+          klarnaClientToken = providerData.clientToken;
+          klarnaSessionId = providerData.sessionId;
+
+          return new Promise(function(resolve, reject) {
+            // Initialize Klarna Payments SDK
+            if (typeof Klarna === 'undefined' || !Klarna.Payments) {
+              reject(new Error('Klarna Payments SDK niet geladen. Probeer het opnieuw.'));
+              return;
+            }
+
+            try {
+              Klarna.Payments.init({
+                client_token: klarnaClientToken,
+              });
+              console.log('[Klarna] SDK initialized with client_token');
+            } catch (initErr) {
+              reject(new Error('Klarna SDK initialisatie mislukt: ' + initErr.message));
+              return;
+            }
+
+            // Authorize with the selected payment_method_category
+            var authorizeData = {};
+
+            // Pass billing address for Klarna
+            var billingAddr = customerData.billing_address || customerData.shipping_address;
+            authorizeData.billing_address = {
+              given_name: billingAddr.first_name || '',
+              family_name: billingAddr.last_name || '',
+              email: customerData.email || '',
+              phone: billingAddr.phone || '',
+              street_address: billingAddr.address_1 || '',
+              postal_code: billingAddr.postal_code || '',
+              city: billingAddr.city || '',
+              country: (billingAddr.country_code || 'NL').toUpperCase(),
+            };
+
+            var category = klarnaSelectedCategory || 'pay_later';
+            console.log('[Klarna] Calling Klarna.Payments.authorize for category:', category);
+
+            Klarna.Payments.authorize(
+              { payment_method_category: category },
+              authorizeData,
+              function(klarnaRes) {
+                console.log('[Klarna] Authorize response:', JSON.stringify(klarnaRes));
+
+                if (klarnaRes.approved && klarnaRes.authorization_token) {
+                  // Success! Send authorization token to backend
+                  console.log('[Klarna] Authorization approved, token:', klarnaRes.authorization_token.substring(0, 20) + '...');
+
+                  medusaFetch('/store/klarna/authorize', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                      cart_id: result.cartId,
+                      authorization_token: klarnaRes.authorization_token,
+                    })
+                  })
+                  .then(function() {
+                    console.log('[Klarna] Token saved, completing cart...');
+                    // Complete the cart
+                    return medusaFetch('/store/carts/' + result.cartId + '/complete', {
+                      method: 'POST'
+                    });
+                  })
+                  .then(function(completeRes) {
+                    var order = completeRes.order || completeRes;
+                    localStorage.setItem('medusa_order_id', order.id || '');
+                    localStorage.setItem('medusa_order_display_id', order.display_id || '');
+                    if (PROJECT_CONFIG.upsellEnabled === false) {
+                      window.location.href = PROJECT_CONFIG.thankYouUrl;
+                    } else if (checkoutOrderBump) {
+                      localStorage.setItem('medusa_upsell_purchased', 'true');
+                      window.location.href = PROJECT_CONFIG.thankYouUrl;
+                    } else {
+                      window.location.href = PROJECT_CONFIG.upsellUrl;
+                    }
+                    resolve();
+                  })
+                  .catch(function(err) {
+                    reject(err);
+                  });
+                } else if (klarnaRes.show_form) {
+                  // Klarna needs more info — customer should retry
+                  reject(new Error('Klarna heeft meer informatie nodig. Controleer je gegevens en probeer het opnieuw.'));
+                } else {
+                  // Declined or cancelled
+                  var reason = klarnaRes.error ? klarnaRes.error.invalid_fields?.join(', ') : '';
+                  reject(new Error('Klarna betaling niet goedgekeurd.' + (reason ? ' Controleer: ' + reason : ' Probeer een andere betaalmethode.')));
+                }
+              }
+            );
           });
         }
 
