@@ -1,5 +1,6 @@
 // @ts-nocheck
 import axios, { AxiosInstance } from "axios"
+import crypto from "crypto"
 import { Logger } from "@medusajs/framework/logger"
 
 /**
@@ -189,6 +190,13 @@ export class AirwallexApiClient {
   }
 
   /**
+   * Generate a unique request_id (required by Airwallex for all POST requests)
+   */
+  private generateRequestId(): string {
+    return crypto.randomUUID()
+  }
+
+  /**
    * Ensure valid token before each request
    */
   private async ensureToken(): Promise<void> {
@@ -215,7 +223,7 @@ export class AirwallexApiClient {
     try {
       const response = await this.client.post<AirwallexPaymentIntentResponse>(
         "/api/v1/pa/payment_intents/create",
-        data,
+        { ...data, request_id: this.generateRequestId() },
         { headers: this.authHeaders() }
       )
 
@@ -242,7 +250,7 @@ export class AirwallexApiClient {
     try {
       const response = await this.client.post<AirwallexPaymentIntentResponse>(
         `/api/v1/pa/payment_intents/${intentId}/confirm`,
-        data,
+        { ...data, request_id: this.generateRequestId() },
         { headers: this.authHeaders() }
       )
 
@@ -293,7 +301,7 @@ export class AirwallexApiClient {
     try {
       const response = await this.client.post<AirwallexPaymentIntentResponse>(
         `/api/v1/pa/payment_intents/${intentId}/capture`,
-        data,
+        { ...data, request_id: this.generateRequestId() },
         { headers: this.authHeaders() }
       )
 
@@ -317,7 +325,7 @@ export class AirwallexApiClient {
     try {
       await this.client.post(
         `/api/v1/pa/payment_intents/${intentId}/cancel`,
-        {},
+        { request_id: this.generateRequestId() },
         { headers: this.authHeaders() }
       )
 
@@ -340,7 +348,7 @@ export class AirwallexApiClient {
     try {
       const response = await this.client.post<AirwallexRefundResponse>(
         "/api/v1/pa/refunds/create",
-        data,
+        { ...data, request_id: this.generateRequestId() },
         { headers: this.authHeaders() }
       )
 
