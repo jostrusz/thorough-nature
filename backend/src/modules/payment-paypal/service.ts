@@ -254,10 +254,6 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         const apmPaymentSource: any = {
           country_code: countryCode,
           name: customerName,
-          experience_context: {
-            return_url: returnUrl,
-            cancel_url: cancelUrl,
-          },
         }
 
         // P24 requires email
@@ -268,6 +264,10 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         if (method === "blik" && customerEmail) {
           apmPaymentSource.email = customerEmail
         }
+        // Swish does not use the name field
+        if (method === "swish") {
+          delete apmPaymentSource.name
+        }
 
         orderData = {
           intent: "CAPTURE",
@@ -275,6 +275,10 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
           purchase_units: purchaseUnits,
           payment_source: {
             [method]: apmPaymentSource,
+          },
+          application_context: {
+            return_url: returnUrl,
+            cancel_url: cancelUrl,
           },
         }
 
