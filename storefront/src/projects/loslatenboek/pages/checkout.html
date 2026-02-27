@@ -5057,11 +5057,18 @@ body {
 
           // For inline methods (card, Apple Pay, Google Pay): mount Drop-in
           return new Promise(function(resolve, reject) {
-            if (typeof Airwallex === 'undefined') {
-              reject(new Error('Airwallex SDK niet geladen. Probeer het opnieuw.'));
-              return;
+            // Wait for Airwallex SDK to load (async script)
+            function waitForAirwallex(attempts) {
+              if (typeof Airwallex !== 'undefined') return initAirwallex();
+              if (attempts <= 0) {
+                reject(new Error('Airwallex SDK niet geladen. Probeer het opnieuw.'));
+                return;
+              }
+              setTimeout(function() { waitForAirwallex(attempts - 1); }, 300);
             }
+            waitForAirwallex(20); // max 6 seconds
 
+            function initAirwallex() {
             try {
               Airwallex.init({
                 env: providerData.environment || 'demo',
@@ -5137,6 +5144,7 @@ body {
             } catch (awErr) {
               reject(new Error('Airwallex initialisatie mislukt: ' + awErr.message));
             }
+            } // end initAirwallex
           });
         }
 
