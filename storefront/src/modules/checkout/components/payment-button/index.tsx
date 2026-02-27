@@ -9,7 +9,8 @@ import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { isManual, isPaypal, isStripe } from "@lib/constants"
+import { isManual, isMollie, isPaypal, isStripe } from "@lib/constants"
+import { useMollie } from "../payment-wrapper/mollie-wrapper"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -53,6 +54,14 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     case isPaypal(paymentSession?.provider_id):
       return (
         <PayPalPaymentButton
+          notReady={notReady}
+          cart={cart}
+          data-testid={dataTestId}
+        />
+      )
+    case isMollie(paymentSession?.provider_id):
+      return (
+        <MolliePaymentButton
           notReady={notReady}
           cart={cart}
           data-testid={dataTestId}
@@ -293,6 +302,88 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
       <ErrorMessage
         error={errorMessage}
         data-testid="manual-payment-error-message"
+      />
+    </>
+  )
+}
+
+const MolliePaymentButton = ({
+  cart,
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  cart: HttpTypes.StoreCart
+  notReady: boolean
+  "data-testid"?: string
+}) => {
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  // Always call hook (React rules). Returns default if no MollieWrapper parent.
+  const { mollieInstance } = useMollie()
+
+  const session = cart.payment_collection?.payment_sessions?.find(
+    (s) => s.status === "pending"
+  )
+
+  const onPaymentCompleted = async () => {
+    await placeOrder()
+      .catch((err) => {
+        setErrorMessage(err.message)
+      })
+      .finally(() => {
+        setSubmitting(false)
+      })
+  }
+
+  const handlePayment = async () => {
+    setSubmitting(true)
+    setErrorMessage(null)
+
+    try {
+      const sessionData = session?.data as any
+      const isCreditCard = sessionData?.method === "creditcard"
+
+      if (isCreditCard && mollieInstance) {
+        // Tokenize credit card via Mollie Components
+        const tokenResult = await mollieInstance.createToken()
+        if (tokenResult.error) {
+          setErrorMessage(tokenResult.error.message || "Card verification failed")
+          setSubmitting(false)
+          return
+        }
+        // Token is stored internally by Mollie and used during payment creation
+      }
+
+      // Check for redirect URL in session data (iDEAL, Bancontact, Klarna, etc.)
+      const checkoutUrl = sessionData?.checkoutUrl || sessionData?.approvalUrl
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl
+        return
+      }
+
+      // For credit card without redirect (no 3DS) or already authorized
+      await onPaymentCompleted()
+    } catch (err: any) {
+      setErrorMessage(err.message || "Payment failed")
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <>
+      <Button
+        disabled={notReady}
+        onClick={handlePayment}
+        size="large"
+        isLoading={submitting}
+        data-testid={dataTestId}
+      >
+        Place order
+      </Button>
+      <ErrorMessage
+        error={errorMessage}
+        data-testid="mollie-payment-error-message"
       />
     </>
   )

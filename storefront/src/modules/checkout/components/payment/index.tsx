@@ -11,8 +11,9 @@ import { StripeCardElementOptions } from "@stripe/stripe-js"
 
 import Divider from "@modules/common/components/divider"
 import PaymentContainer from "@modules/checkout/components/payment-container"
-import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
-import { StripeContext } from "@modules/checkout/components/payment-wrapper"
+import { isStripe as isStripeFunc, isMollie as isMollieFunc, paymentInfoMap } from "@lib/constants"
+import { StripeContext, MollieCardContext } from "@modules/checkout/components/payment-wrapper"
+import MollieCardInput from "@modules/checkout/components/mollie-card-input"
 import { initiatePaymentSession } from "@lib/data/cart"
 
 const Payment = ({
@@ -42,6 +43,9 @@ const Payment = ({
 
   const isStripe = isStripeFunc(activeSession?.provider_id)
   const stripeReady = useContext(StripeContext)
+  const isMollieCreditCard = isMollieFunc(activeSession?.provider_id) &&
+    (activeSession?.data as any)?.method === "creditcard"
+  const mollieCardReady = useContext(MollieCardContext)
 
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
@@ -183,6 +187,18 @@ const Payment = ({
                   />
                 </div>
               )}
+              {isMollieCreditCard && mollieCardReady && (
+                <MollieCardInput
+                  onChange={(e) => {
+                    setCardBrand(e.brand
+                      ? e.brand.charAt(0).toUpperCase() + e.brand.slice(1)
+                      : null
+                    )
+                    setError(e.error || null)
+                    setCardComplete(e.complete)
+                  }}
+                />
+              )}
             </>
           )}
 
@@ -211,7 +227,7 @@ const Payment = ({
             onClick={handleSubmit}
             isLoading={isLoading}
             disabled={
-              (isStripe && !cardComplete) ||
+              ((isStripe || isMollieCreditCard) && !cardComplete) ||
               (!selectedPaymentMethod && !paidByGiftcard)
             }
             data-testid="submit-payment-button"
@@ -251,7 +267,7 @@ const Payment = ({
                     )}
                   </Container>
                   <Text>
-                    {isStripeFunc(selectedPaymentMethod) && cardBrand
+                    {(isStripeFunc(selectedPaymentMethod) || isMollieFunc(selectedPaymentMethod)) && cardBrand
                       ? cardBrand
                       : "Another step will appear"}
                   </Text>

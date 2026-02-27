@@ -533,6 +533,7 @@ function GatewaysTab() {
             sort_order: i,
             available_countries: methodDef?.available_countries || [],
             supported_currencies: methodDef?.supported_currencies || [],
+            config: code === "creditcard" ? { type: "embedded" } : null,
           }
         })
 
@@ -575,6 +576,8 @@ function GatewaysTab() {
         sort_order: i,
         supported_currencies: form.supported_currencies,
         available_countries: methodDef?.available_countries || [],
+        // Mark creditcard as embedded type for inline card fields
+        config: code === "creditcard" ? { type: "embedded" } : null,
       }
     })
 

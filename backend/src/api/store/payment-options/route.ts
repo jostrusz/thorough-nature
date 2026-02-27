@@ -75,17 +75,50 @@ export async function GET(
 
     // Build response with active payment methods only
     const gateways = filteredGateways.map((gw: any) => {
+      // Get the active API keys for this gateway
+      const keys = gw.mode === "live" ? gw.live_keys : gw.test_keys
+
       const activeMethods = (gw.payment_methods || [])
         .filter((m: any) => m.is_active)
         .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
-        .map((m: any) => ({
-          code: m.code,
-          display_name: m.display_name,
-          icon: m.icon,
-          sort_order: m.sort_order || 0,
-          available_countries: m.available_countries,
-          supported_currencies: m.supported_currencies,
-        }))
+        .map((m: any) => {
+          const method: any = {
+            code: m.code,
+            display_name: m.display_name,
+            icon: m.icon,
+            sort_order: m.sort_order || 0,
+            available_countries: m.available_countries,
+            supported_currencies: m.supported_currencies,
+          }
+
+          // For embedded payment methods (creditcard), include rendering config
+          if (m.code === "creditcard" || m.config?.type === "embedded") {
+            method.type = "embedded"
+
+            // Provider-specific client keys for card components
+            if (gw.provider === "mollie") {
+              method.component = "mollie-components"
+              // Mollie uses profile_id for Components initialization
+              method.profile_id = keys?.profile_id || null
+              method.testmode = gw.mode === "test"
+            } else if (gw.provider === "stripe") {
+              method.component = "stripe-elements"
+              // Stripe uses publishable key
+              method.client_key = keys?.publishable_key || null
+            } else if (gw.provider === "airwallex") {
+              method.component = "airwallex-dropin"
+              method.client_key = keys?.client_id || null
+              method.environment = gw.mode === "live" ? "prod" : "demo"
+            }
+
+            // Include any custom config from the method
+            if (m.config) {
+              method.config = m.config
+            }
+          }
+
+          return method
+        })
 
       return {
         provider: gw.provider,

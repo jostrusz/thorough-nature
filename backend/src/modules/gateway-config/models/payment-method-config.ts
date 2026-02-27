@@ -29,6 +29,9 @@ const PaymentMethodConfig = model.define("payment_method_config", {
   is_active: model.boolean().default(true),
   // Sort order (lower = first)
   sort_order: model.number().default(0),
+  // Method-specific configuration (JSON)
+  // For embedded methods like creditcard: { type: "embedded", component: "mollie-components" }
+  config: model.json().nullable(),
   // Parent gateway
   gateway: model.belongsTo(() => GatewayConfig, {
     mappedBy: "payment_methods",

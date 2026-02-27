@@ -2840,12 +2840,17 @@ body {
   var mollieCardToken = null;
 
   function initMollieComponents() {
-    if (mollieInstance || !PROJECT_CONFIG.mollieProfileId) return;
+    // Use dynamic profile_id from API response if available, fallback to PROJECT_CONFIG
+    var creditCardOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard' && m.profile_id; });
+    var profileId = (creditCardOption && creditCardOption.profile_id) || PROJECT_CONFIG.mollieProfileId;
+    var testmode = creditCardOption ? creditCardOption.testmode : false;
+
+    if (mollieInstance || !profileId) return;
 
     try {
-      mollieInstance = Mollie(PROJECT_CONFIG.mollieProfileId, {
+      mollieInstance = Mollie(profileId, {
         locale: 'nl_NL',
-        testmode: false
+        testmode: testmode
       });
 
       cardComponents.cardNumber = mollieInstance.createComponent('cardNumber');
@@ -2972,6 +2977,11 @@ body {
             available_countries: m.available_countries || [],
             supported_currencies: m.supported_currencies || [],
             sort_order: m.sort_order || 0,
+            // Embedded credit card config from API
+            type: m.type || null,
+            component: m.component || null,
+            profile_id: m.profile_id || null,
+            testmode: m.testmode || false,
           });
         });
       });
@@ -4432,7 +4442,7 @@ body {
         country_code: customerData.shipping_address.country_code,
         phone: customerData.shipping_address.phone,
       }));
-      localStorage.setItem('medusa_payment_provider', result.testMode ? 'pp_system_default' : 'pp_mollie_mollie');
+      localStorage.setItem('medusa_payment_provider', result.testMode ? 'pp_system_default' : (selectedProviderId || 'pp_mollie_mollie'));
 
       // Uložit bundle + order bump info pro thank-you stránku
       localStorage.setItem('medusa_bundle_qty', checkoutBundleQty);

@@ -275,6 +275,15 @@
           "default": "0",
           "mappedType": "integer"
         },
+        "config": {
+          "name": "config",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "json"
+        },
         "gateway_id": {
           "name": "gateway_id",
           "type": "text",
