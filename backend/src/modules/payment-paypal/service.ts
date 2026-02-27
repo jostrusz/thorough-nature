@@ -241,16 +241,24 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
 
       const result = await client.createOrder(orderData)
 
+      // Extract approval URL from PayPal response links
+      const approveLink = result.links?.find(
+        (l: any) => l.rel === "approve" || l.rel === "payer-action"
+      )
+      const approvalUrl = approveLink?.href || null
+
       this.logger_.info(
-        `[PayPal] Order created: ${result.id}, status: ${result.status}`
+        `[PayPal] Order created: ${result.id}, status: ${result.status}, approvalUrl: ${approvalUrl ? "yes" : "none"}`
       )
 
       // Return format required by Medusa v2: { id, data }
+      // approvalUrl is used by the checkout to redirect the customer to PayPal
       return {
         id: result.id,
         data: {
           paypalOrderId: result.id,
           status: result.status,
+          approvalUrl,
           client_id: clientIdForFrontend,
           currency_code: currency,
           amount: totalValue,
