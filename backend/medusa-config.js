@@ -23,7 +23,10 @@ import {
   MINIO_SECRET_KEY,
   MINIO_BUCKET,
   MEILISEARCH_HOST,
-  MEILISEARCH_ADMIN_KEY
+  MEILISEARCH_ADMIN_KEY,
+  PAYPAL_CLIENT_ID,
+  PAYPAL_CLIENT_SECRET,
+  PAYPAL_MODE,
 } from 'lib/constants';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -160,11 +163,15 @@ const medusaConfig = {
             id: 'klarna',
             options: {},
           },
-          {
+          ...(PAYPAL_CLIENT_ID && PAYPAL_CLIENT_SECRET ? [{
             resolve: './src/modules/payment-paypal',
             id: 'paypal',
-            options: {},
-          },
+            options: {
+              clientId: PAYPAL_CLIENT_ID,
+              clientSecret: PAYPAL_CLIENT_SECRET,
+              mode: PAYPAL_MODE,
+            },
+          }] : []),
           ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{
             resolve: '@medusajs/payment-stripe',
             id: 'stripe',

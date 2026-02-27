@@ -91,6 +91,13 @@ export const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY;
 export const MOLLIE_TEST_MODE = process.env.MOLLIE_TEST_MODE !== 'false';
 
 /**
+ * (optional) PayPal credentials — required for PayPal payment provider
+ */
+export const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
+export const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
+export const PAYPAL_MODE = process.env.PAYPAL_MODE || 'test';
+
+/**
  * (optional) Meilisearch configuration
  */
 export const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;
