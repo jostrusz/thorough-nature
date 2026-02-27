@@ -91,6 +91,13 @@ export const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY;
 export const MOLLIE_TEST_MODE = process.env.MOLLIE_TEST_MODE !== 'false';
 
 /**
+ * (optional) Klarna credentials — required for Klarna payment provider
+ */
+export const KLARNA_API_KEY = process.env.KLARNA_API_KEY;
+export const KLARNA_SECRET_KEY = process.env.KLARNA_SECRET_KEY;
+export const KLARNA_TEST_MODE = process.env.KLARNA_TEST_MODE !== 'false';
+
+/**
  * (optional) PayPal credentials — one set per business/project
  * Default (loslatenboek):
  */

@@ -24,6 +24,9 @@ import {
   MINIO_BUCKET,
   MEILISEARCH_HOST,
   MEILISEARCH_ADMIN_KEY,
+  KLARNA_API_KEY,
+  KLARNA_SECRET_KEY,
+  KLARNA_TEST_MODE,
   PAYPAL_CLIENT_ID,
   PAYPAL_CLIENT_SECRET,
   PAYPAL_MODE,
@@ -161,11 +164,15 @@ const medusaConfig = {
               ...(MOLLIE_API_KEY ? { apiKey: MOLLIE_API_KEY, testMode: MOLLIE_TEST_MODE } : {}),
             },
           },
-          {
+          ...(KLARNA_API_KEY && KLARNA_SECRET_KEY ? [{
             resolve: './src/modules/payment-klarna',
             id: 'klarna',
-            options: {},
-          },
+            options: {
+              apiKey: KLARNA_API_KEY,
+              secretKey: KLARNA_SECRET_KEY,
+              testMode: KLARNA_TEST_MODE,
+            },
+          }] : []),
           ...(PAYPAL_CLIENT_ID && PAYPAL_CLIENT_SECRET ? [{
             resolve: './src/modules/payment-paypal',
             id: 'paypal',
