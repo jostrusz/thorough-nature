@@ -224,6 +224,9 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                 payment.data?.transaction_id ||
                 null
 
+              const d = new Date(payment.created_at)
+              const dateStr = `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}.${d.getFullYear()}`
+
               return (
                 <div key={payment.id}>
                   <div
@@ -233,13 +236,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                       padding: "2px 0",
                     }}
                   >
-                    {provider} \u2022{" "}
-                    {new Date(payment.created_at).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}
+                    {provider} &middot; {dateStr}
                   </div>
                   {/* Payment Gateway ID */}
                   {gatewayId && (
@@ -268,31 +265,6 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                       </code>
                     </div>
                   )}
-                  {/* Medusa Payment ID */}
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#6D7175",
-                      padding: "2px 0",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                    }}
-                  >
-                    <span style={{ color: "#8C9196" }}>Medusa ID:</span>
-                    <code
-                      style={{
-                        fontSize: "11px",
-                        background: "#F6F6F7",
-                        padding: "1px 6px",
-                        borderRadius: "4px",
-                        color: "#8C9196",
-                        fontFamily: "monospace",
-                      }}
-                    >
-                      {payment.id}
-                    </code>
-                  </div>
                 </div>
               )
             })}

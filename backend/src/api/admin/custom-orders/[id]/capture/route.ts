@@ -8,8 +8,13 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
  * Captures a payment for the given order.
  * Works for all payment providers: Mollie, Klarna, PayPal, Stripe, etc.
  *
- * PayPal: captures authorization via PayPal Payments API
- * Klarna: calls Klarna Order Management API to capture the authorized order
+ * Optional body params for tracking (used when capturing with shipment info):
+ *   tracking_number: string
+ *   tracking_carrier: string
+ *   tracking_url: string
+ *
+ * PayPal: captures authorization via PayPal Payments API, then sends tracking
+ * Klarna: calls Klarna Order Management API to capture with shipping_info
  * Mollie: Mollie auto-captures most payments, but this endpoint can be used for orders API
  */
 export const POST = async (
@@ -22,11 +27,19 @@ export const POST = async (
     const orderModuleService = req.scope.resolve("orderModuleService")
     const logger = req.scope.resolve("logger")
 
+    // Optional tracking info from request body
+    const {
+      tracking_number: trackingNumber,
+      tracking_carrier: trackingCarrier,
+      tracking_url: trackingUrl,
+    } = (req.body || {}) as any
+
     // Fetch order with payments
     const { data: orders } = await query.graph({
       entity: "order",
       fields: [
         "id",
+        "display_id",
         "metadata",
         "total",
         "currency_code",
@@ -61,7 +74,10 @@ export const POST = async (
     let captureResult: any = null
 
     // PayPal capture
-    if (providerId.includes("paypal") && (paymentData.authorizationId || paymentData.paypalOrderId)) {
+    if (
+      providerId.includes("paypal") &&
+      (paymentData.authorizationId || paymentData.paypalOrderId)
+    ) {
       const GATEWAY_CONFIG_MODULE = "gatewayConfig"
       const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
       const configs = await gcService.listGatewayConfigs(
@@ -77,8 +93,6 @@ export const POST = async (
       if (config) {
         const isLive = config.mode === "live"
         const keys = isLive ? config.live_keys : config.test_keys
-        // Support both generic key names (api_key/secret_key from admin form)
-        // and PayPal-specific names (client_id/client_secret)
         clientId = keys?.client_id || keys?.api_key
         clientSecret = keys?.client_secret || keys?.secret_key
         mode = isLive ? "live" : "test"
@@ -96,10 +110,16 @@ export const POST = async (
       const { PayPalApiClient } = await import(
         "../../../../modules/payment-paypal/api-client"
       )
-      const client = new PayPalApiClient({ client_id: clientId, client_secret: clientSecret, mode })
+      const client = new PayPalApiClient({
+        client_id: clientId,
+        client_secret: clientSecret,
+        mode,
+      })
 
       const currency = order.currency_code?.toUpperCase() || "EUR"
-      const amountValue = Number(order.total).toFixed(2)
+      const amountValue = (Number(order.total) / 100).toFixed(2)
+
+      let captureId: string
 
       if (paymentData.authorizationId) {
         // Capture the authorization
@@ -107,19 +127,39 @@ export const POST = async (
           paymentData.authorizationId,
           { currency_code: currency, value: amountValue }
         )
-        captureResult = {
-          provider: "paypal",
-          capture_id: result.id,
-          status: "captured",
-        }
+        captureId = result.id
       } else if (paymentData.paypalOrderId) {
         // Capture order directly (intent=CAPTURE fallback)
         const result = await client.captureOrder(paymentData.paypalOrderId)
-        const captureId = result.purchase_units?.[0]?.payments?.captures?.[0]?.id
-        captureResult = {
-          provider: "paypal",
-          capture_id: captureId || result.id,
-          status: "captured",
+        captureId =
+          result.purchase_units?.[0]?.payments?.captures?.[0]?.id || result.id
+      }
+
+      captureResult = {
+        provider: "paypal",
+        capture_id: captureId,
+        status: "captured",
+      }
+
+      // Send tracking to PayPal if tracking info provided
+      if (trackingNumber && captureId && paymentData.paypalOrderId) {
+        try {
+          await client.addTracking(
+            paymentData.paypalOrderId,
+            captureId,
+            trackingNumber,
+            (trackingCarrier || "OTHER").toUpperCase(),
+            true
+          )
+          captureResult.tracking_sent = true
+          logger.info(
+            `[Capture] PayPal tracking sent: ${trackingNumber} for order ${orderId}`
+          )
+        } catch (trackErr: any) {
+          logger.error(
+            `[Capture] PayPal tracking failed: ${trackErr.message}`
+          )
+          captureResult.tracking_error = trackErr.message
         }
       }
     }
@@ -142,15 +182,40 @@ export const POST = async (
       )
       const isLive = config.mode === "live"
       const keys = isLive ? config.live_keys : config.test_keys
-      const client = new KlarnaApiClient(keys.api_key, keys.secret_key, !isLive)
 
-      const result = await client.captureOrder(paymentData.klarnaOrderId, {
+      let apiKey = keys?.api_key
+      let secretKey = keys?.secret_key
+      if (!apiKey) apiKey = process.env.KLARNA_API_KEY
+      if (!secretKey) secretKey = process.env.KLARNA_SECRET_KEY
+
+      const client = new KlarnaApiClient(apiKey, secretKey, !isLive)
+
+      // Build capture data with optional shipping_info
+      const captureData: any = {
         captured_amount: order.total,
-        description: `Capture for order ${orderId}`,
-      })
+        description: `Capture for order ${order.display_id || orderId}`,
+      }
+
+      // Include shipping_info in Klarna capture if tracking provided
+      if (trackingNumber) {
+        captureData.shipping_info = [
+          {
+            shipping_company: trackingCarrier || undefined,
+            tracking_number: trackingNumber,
+            tracking_uri: trackingUrl || undefined,
+          },
+        ]
+      }
+
+      const result = await client.captureOrder(
+        paymentData.klarnaOrderId,
+        captureData
+      )
 
       if (!result.success) {
-        res.status(400).json({ error: result.error || "Klarna capture failed" })
+        res
+          .status(400)
+          .json({ error: result.error || "Klarna capture failed" })
         return
       }
 
@@ -158,6 +223,7 @@ export const POST = async (
         provider: "klarna",
         capture_id: result.data?.capture_id,
         status: "captured",
+        tracking_sent: !!trackingNumber,
       }
     }
     // Mollie capture (for Orders API)
@@ -190,25 +256,41 @@ export const POST = async (
 
     // Update order metadata with capture info
     const existingLog = order.metadata?.payment_activity_log || []
+    const captureLogEntry: any = {
+      timestamp: new Date().toISOString(),
+      event: "capture",
+      gateway: captureResult.provider,
+      status: "success",
+      amount: order.total,
+      currency: order.currency_code,
+      capture_id: captureResult.capture_id,
+      detail: captureResult.detail || `Captured via ${captureResult.provider}`,
+    }
+
+    // Add tracking info to log if sent
+    if (captureResult.tracking_sent && trackingNumber) {
+      captureLogEntry.tracking_number = trackingNumber
+      captureLogEntry.tracking_carrier = trackingCarrier
+    }
+
+    const updatedMetadata: any = {
+      ...order.metadata,
+      payment_activity_log: [...existingLog, captureLogEntry],
+      payment_captured: true,
+      payment_captured_at: new Date().toISOString(),
+    }
+
+    // Store capture_id in metadata for later tracking use
+    if (captureResult.capture_id) {
+      if (captureResult.provider === "paypal") {
+        updatedMetadata.paypalCaptureId = captureResult.capture_id
+      } else if (captureResult.provider === "klarna") {
+        updatedMetadata.klarnaCaptureId = captureResult.capture_id
+      }
+    }
+
     await orderModuleService.updateOrders(orderId, {
-      metadata: {
-        ...order.metadata,
-        payment_activity_log: [
-          ...existingLog,
-          {
-            timestamp: new Date().toISOString(),
-            event: "capture",
-            gateway: captureResult.provider,
-            status: "success",
-            amount: order.total,
-            currency: order.currency_code,
-            capture_id: captureResult.capture_id,
-            detail: captureResult.detail || `Captured via ${captureResult.provider}`,
-          },
-        ],
-        payment_captured: true,
-        payment_captured_at: new Date().toISOString(),
-      },
+      metadata: updatedMetadata,
     })
 
     logger.info(

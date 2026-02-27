@@ -224,9 +224,22 @@ export class KlarnaApiClient {
           },
         }
       )
+
+      // Extract capture_id from Location header (Klarna returns 201 with Location)
+      let captureId: string | undefined
+      const locationHeader = response.headers?.location || response.headers?.Location
+      if (locationHeader) {
+        const match = locationHeader.match(/captures\/([^\/\s]+)/)
+        if (match) captureId = match[1]
+      }
+
       return {
         success: true,
-        data: response.data,
+        data: {
+          capture_id: captureId || response.data?.capture_id,
+          status: response.data?.status || "captured",
+          ...response.data,
+        },
       }
     } catch (error: any) {
       return {
