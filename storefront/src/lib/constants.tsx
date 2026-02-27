@@ -111,7 +111,8 @@ export const isAirwallex = (providerId?: string) => {
   return providerId?.startsWith("pp_airwallex")
 }
 export const isRedirectPayment = (providerId?: string) => {
-  return isMollie(providerId) || isComgate(providerId) || isP24(providerId) || isKlarna(providerId)
+  return isMollie(providerId) || isComgate(providerId) || isP24(providerId)
+  // Klarna is NOT a redirect method — it has its own widget flow (init → load → authorize)
 }
 
 // Add currencies that don't need to be divided by 100

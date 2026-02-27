@@ -7,7 +7,8 @@ import MollieWrapper from "./mollie-wrapper"
 import { PayPalScriptProvider } from "@paypal/react-paypal-js"
 import { createContext } from "react"
 import { HttpTypes } from "@medusajs/types"
-import { isMollie, isPaypal, isStripe } from "@lib/constants"
+import { isMollie, isPaypal, isStripe, isKlarna } from "@lib/constants"
+import { KlarnaWrapper } from "../klarna-wrapper"
 
 type WrapperProps = {
   cart: HttpTypes.StoreCart
@@ -82,6 +83,17 @@ const Wrapper: React.FC<WrapperProps> = ({ cart, children }) => {
         {children}
       </PayPalScriptProvider>
     )
+  }
+
+  if (isKlarna(paymentSession?.provider_id) && paymentSession) {
+    const clientToken = paymentSession?.data?.clientToken as string
+    if (clientToken) {
+      return (
+        <KlarnaWrapper clientToken={clientToken}>
+          {children}
+        </KlarnaWrapper>
+      )
+    }
   }
 
   return <div>{children}</div>
