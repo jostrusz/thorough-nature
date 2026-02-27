@@ -2383,8 +2383,8 @@ body {
             </div>
           </div>
 
-          <!-- Mollie Components card fields (hidden, shown only when creditcard is active & selected) -->
-          <div id="mollie-card-fields" style="display:none; padding: 4px 16px 12px 48px; animation: fadeIn 0.3s ease;">
+          <!-- Card fields (hidden, shown only when creditcard is active & selected) -->
+          <div id="card-fields" style="display:none; padding: 4px 16px 12px 48px; animation: fadeIn 0.3s ease;">
             <div style="margin-bottom:10px;">
               <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Kaartnummer</label>
               <div id="card-number" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
@@ -3042,12 +3042,73 @@ body {
     }
   }
 
+  /**
+   * Init Airwallex Split Card Elements — mounts individual card iframes into the same containers as Mollie
+   */
+  async function initAirwallexCard() {
+    if (airwallexCardReady) return;
+
+    // Wait for SDK
+    if (typeof window.AirwallexComponentsSDK === 'undefined') {
+      console.log('[Airwallex Card] Waiting for SDK...');
+      setTimeout(initAirwallexCard, 300);
+      return;
+    }
+
+    try {
+      // Get environment from creditcard option
+      var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
+      var env = (ccOption && ccOption.environment) || 'demo';
+
+      await window.AirwallexComponentsSDK.init({
+        env: env,
+        enabledElements: ['payments'],
+      });
+
+      // Create split card elements
+      airwallexCardElements.cardNumber = await window.AirwallexComponentsSDK.createElement('cardNumber');
+      airwallexCardElements.expiry = await window.AirwallexComponentsSDK.createElement('expiry');
+      airwallexCardElements.cvc = await window.AirwallexComponentsSDK.createElement('cvc');
+
+      // Mount into same containers as Mollie uses
+      airwallexCardElements.cardNumber.mount('card-number');
+      airwallexCardElements.expiry.mount('expiry-date');
+      airwallexCardElements.cvc.mount('verification-code');
+
+      // For name field: replace Mollie cardHolder component with plain text input
+      var holderDiv = document.getElementById('card-holder');
+      if (holderDiv) {
+        holderDiv.innerHTML = '<input type="text" id="aw-card-name" placeholder="Naam op kaart" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
+      }
+
+      // Error handling
+      var cardErrorsEl = document.getElementById('card-errors');
+      ['cardNumber', 'expiry', 'cvc'].forEach(function(key) {
+        airwallexCardElements[key].on('change', function(event) {
+          if (event.detail && event.detail.error) {
+            cardErrorsEl.textContent = event.detail.error.message || '';
+          } else {
+            cardErrorsEl.textContent = '';
+          }
+        });
+      });
+
+      airwallexCardReady = true;
+      console.log('[Airwallex Card] Split card elements mounted successfully');
+    } catch (e) {
+      console.error('[Airwallex Card] Init failed:', e);
+    }
+  }
+
   /* ─── DYNAMIC PAYMENT METHODS ─── */
   var selectedMethod = '';
   var selectedProvider = '';
   var selectedProviderId = ''; // Full Medusa provider_id e.g. "pp_mollie_mollie"
   var allPaymentOptions = []; // Flat list: [{ code, display_name, icon, provider, provider_id, available_countries, sort_order }]
   var mollieComponentsInitialized = false;
+  var cardProvider = ''; // 'mollie' | 'airwallex' — detected from payment-options
+  var airwallexCardElements = {};
+  var airwallexCardReady = false;
 
   // Method descriptions (Dutch)
   var METHOD_DESCRIPTIONS = {
@@ -3152,14 +3213,20 @@ body {
             available_countries: m.available_countries || [],
             supported_currencies: m.supported_currencies || [],
             sort_order: m.sort_order || 0,
-            // Embedded credit card config from API
+            // Embedded card/provider config from API
             type: m.type || null,
             component: m.component || null,
             profile_id: m.profile_id || null,
             testmode: m.testmode || false,
+            environment: m.environment || gw.environment || null,
           });
         });
       });
+
+      // Detect which provider handles credit cards
+      var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
+      cardProvider = ccOption ? ccOption.provider : '';
+      console.log('[CardForm] Card provider detected:', cardProvider || 'none');
 
       if (allPaymentOptions.length === 0) {
         if (errorEl) {
@@ -3238,7 +3305,7 @@ body {
 
     // Check if creditcard is among active methods
     var hasCreditCard = otherMethods.some(function(m) { return m.code === 'creditcard'; });
-    var cardFieldsEl = document.getElementById('mollie-card-fields');
+    var cardFieldsEl = document.getElementById('card-fields');
 
     // Determine the first Klarna method's sort_order to interleave correctly
     var klarnaInsertOrder = klarnaMethods.length > 0 ? klarnaMethods[0].sort_order : Infinity;
@@ -3430,12 +3497,16 @@ body {
         selectedProvider = method.getAttribute('data-provider');
         selectedProviderId = method.getAttribute('data-provider-id') || ('pp_' + selectedProvider + '_' + selectedProvider);
 
-        // Show/hide Mollie Components card fields
-        var cardFields = document.getElementById('mollie-card-fields');
+        // Show/hide card fields — init the right provider's card elements
+        var cardFields = document.getElementById('card-fields');
         if (cardFields) {
           if (selectedMethod === 'creditcard') {
             cardFields.style.display = 'block';
-            initMollieComponents();
+            if (cardProvider === 'mollie') {
+              initMollieComponents();
+            } else if (cardProvider === 'airwallex') {
+              initAirwallexCard();
+            }
           } else {
             cardFields.style.display = 'none';
           }
@@ -3469,7 +3540,7 @@ body {
               klarnaSelectedCategory = firstSub.getAttribute('data-klarna-category');
             }
             // Hide credit card fields
-            var cardFields = document.getElementById('mollie-card-fields');
+            var cardFields = document.getElementById('card-fields');
             if (cardFields) cardFields.style.display = 'none';
             updateButtonText();
             updateSubtext();
@@ -3493,7 +3564,7 @@ body {
             selectedProviderId = firstSub.getAttribute('data-provider-id');
             klarnaSelectedCategory = firstSub.getAttribute('data-klarna-category');
           }
-          var cardFields = document.getElementById('mollie-card-fields');
+          var cardFields = document.getElementById('card-fields');
           if (cardFields) cardFields.style.display = 'none';
           updateButtonText();
           updateSubtext();
@@ -3516,7 +3587,7 @@ body {
         selectedProviderId = sub.getAttribute('data-provider-id');
         klarnaSelectedCategory = sub.getAttribute('data-klarna-category');
 
-        var cardFields = document.getElementById('mollie-card-fields');
+        var cardFields = document.getElementById('card-fields');
         if (cardFields) cardFields.style.display = 'none';
         updateButtonText();
         updateSubtext();
@@ -4812,17 +4883,26 @@ body {
         };
       }
 
-      // For credit card: tokenize card data first via Mollie Components
+      // For credit card: tokenize card data (branched by provider)
       var tokenPromise;
-      if (!USE_TEST_MODE && selectedMethod === 'creditcard' && mollieInstance) {
-        tokenPromise = mollieInstance.createToken().then(function(tokenResult) {
-          if (tokenResult.error) {
-            throw new Error(tokenResult.error.message || 'Creditcard verificatie mislukt');
-          }
-          sessionData.cardToken = tokenResult.token;
-          console.log('[Mollie Components] Token created');
-          return cartId;
-        });
+      if (!USE_TEST_MODE && selectedMethod === 'creditcard') {
+        if (cardProvider === 'mollie' && mollieInstance) {
+          // Mollie: tokenize card → send token in session data
+          tokenPromise = mollieInstance.createToken().then(function(tokenResult) {
+            if (tokenResult.error) {
+              throw new Error(tokenResult.error.message || 'Creditcard verificatie mislukt');
+            }
+            sessionData.cardToken = tokenResult.token;
+            console.log('[Mollie Components] Token created');
+            return cartId;
+          });
+        } else if (cardProvider === 'airwallex') {
+          // Airwallex: no tokenization needed — confirmPaymentIntent happens after session creation
+          sessionData.method = 'creditcard';
+          tokenPromise = Promise.resolve(cartId);
+        } else {
+          tokenPromise = Promise.resolve(cartId);
+        }
       } else {
         tokenPromise = Promise.resolve(cartId);
       }
@@ -5045,8 +5125,46 @@ body {
           });
         }
 
+        // ─── AIRWALLEX CARD CONFIRM FLOW ───
+        // For credit cards on Airwallex: confirm the payment intent using split card elements
+        if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1
+            && selectedMethod === 'creditcard' && providerData.intentId && airwallexCardReady) {
+          return (async function() {
+            try {
+              var confirmResult = await airwallexCardElements.cardNumber.confirm({
+                client_secret: providerData.clientSecret,
+              });
+
+              console.log('[Airwallex Card] Confirm result:', confirmResult?.status);
+
+              // If 3DS redirect needed
+              if (confirmResult && confirmResult.next_action && confirmResult.next_action.url) {
+                window.location.href = confirmResult.next_action.url;
+                return;
+              }
+
+              // Payment succeeded — complete cart
+              var completeRes = await medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' });
+              var order = completeRes.order || completeRes;
+              localStorage.setItem('medusa_order_id', order.id || '');
+              localStorage.setItem('medusa_order_display_id', order.display_id || '');
+
+              if (PROJECT_CONFIG.upsellEnabled === false) {
+                window.location.href = PROJECT_CONFIG.thankYouUrl;
+              } else if (checkoutOrderBump) {
+                localStorage.setItem('medusa_upsell_purchased', 'true');
+                window.location.href = PROJECT_CONFIG.thankYouUrl;
+              } else {
+                window.location.href = PROJECT_CONFIG.upsellUrl;
+              }
+            } catch (err) {
+              throw new Error(err.message || 'Kaartbetaling mislukt');
+            }
+          })();
+        }
+
         // ─── AIRWALLEX DROP-IN FLOW ───
-        // Airwallex uses Drop-in Element for card/Apple Pay/Google Pay (inline)
+        // Airwallex uses Drop-in Element for non-card methods (Apple Pay, Google Pay etc.)
         // and redirect for iDEAL/Bancontact/BLIK/EPS
         if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1 && providerData.intentId) {
           // For redirect-based methods, Airwallex service returns a redirect URL
@@ -5055,7 +5173,7 @@ body {
             return;
           }
 
-          // For inline methods (card, Apple Pay, Google Pay): mount Drop-in
+          // For inline methods (Apple Pay, Google Pay): mount Drop-in
           // Uses AirwallexComponentsSDK (CDN global) — see https://github.com/airwallex/airwallex-payment-demo
           return new Promise(function(resolve, reject) {
             // Wait for SDK to load (async script)
