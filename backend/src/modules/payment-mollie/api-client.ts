@@ -290,6 +290,68 @@ export class MollieApiClient {
   }
 
   /**
+   * Refund a Mollie payment (Payments API - for tr_ IDs)
+   */
+  async refundPayment(
+    paymentId: string,
+    refundData: { amount: { value: string; currency: string }; description?: string }
+  ): Promise<{
+    success: boolean
+    data?: any
+    error?: string
+  }> {
+    try {
+      const response = await this.client.post(
+        `/payments/${paymentId}/refunds`,
+        refundData
+      )
+      return {
+        success: true,
+        data: response.data,
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error:
+          error.response?.data?.detail ||
+          error.response?.data?.message ||
+          error.message,
+      }
+    }
+  }
+
+  /**
+   * Refund a Mollie order (Orders API - for ord_ IDs)
+   */
+  async refundOrder(
+    orderId: string,
+    refundData: { amount?: { value: string; currency: string }; description?: string; lines?: any[] }
+  ): Promise<{
+    success: boolean
+    data?: any
+    error?: string
+  }> {
+    try {
+      const response = await this.client.post(
+        `/orders/${orderId}/refunds`,
+        refundData
+      )
+      return {
+        success: true,
+        data: response.data,
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error:
+          error.response?.data?.detail ||
+          error.response?.data?.message ||
+          error.message,
+      }
+    }
+  }
+
+  /**
    * List available payment methods
    */
   async listMethods(params?: IMollieMethodsParams): Promise<{

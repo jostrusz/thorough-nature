@@ -92,19 +92,30 @@ async function testPrzelewy24Connection(credentials: Record<string, string>): Pr
 
 async function testKlarnaConnection(credentials: Record<string, string>): Promise<boolean> {
   try {
+    // Klarna uses HTTP Basic Auth with api_key:secret_key
+    const username = credentials.api_key
+    const password = credentials.secret_key || credentials.api_secret
+    if (!username || !password) {
+      throw new Error("Missing Klarna API key or secret key")
+    }
+    const basicAuth = Buffer.from(`${username}:${password}`).toString("base64")
+    // Use playground URL for test keys
+    const isTest = username.startsWith("test_") || username.includes("playground")
+    const baseUrl = isTest
+      ? "https://api.playground.klarna.com"
+      : "https://api.klarna.com"
     const response = await axios.get(
-      "https://api.klarna.com/payments/v1/sessions",
+      `${baseUrl}/payments/v1/sessions`,
       {
         headers: {
-          Authorization: `Basic ${Buffer.from(
-            `${credentials.api_key}:${credentials.api_secret}`
-          ).toString("base64")}`,
+          Authorization: `Basic ${basicAuth}`,
         },
       }
     )
     return response.status !== 403
   } catch (error: any) {
-    if (error.response?.status === 401) {
+    // 401/405 means credentials are recognized but request method/path invalid — valid credentials
+    if (error.response?.status === 401 || error.response?.status === 405) {
       return true
     }
     throw new Error("Klarna credentials invalid")

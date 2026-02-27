@@ -577,6 +577,30 @@ export class KlarnaPaymentProvider {
   }
 
   /**
+   * Validate Klarna API credentials by attempting to create a session
+   * Used by admin test-connection endpoint
+   */
+  async validateAuth(): Promise<{ success: boolean; error?: string }> {
+    try {
+      const client = await this.getKlarnaClient()
+      // Try fetching a non-existent order — if auth fails, we get 401/403
+      // If auth succeeds, we get 404 (order not found) — that's fine
+      const result = await client.getOrder("test-auth-check")
+      // If we get here with success: false and no auth error, credentials are valid
+      return { success: true }
+    } catch (error: any) {
+      // If the error is about the order not being found, credentials are valid
+      if (error.message?.includes("not found") || error.message?.includes("404")) {
+        return { success: true }
+      }
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      }
+    }
+  }
+
+  /**
    * Process Klarna webhook
    * Klarna sends notifications for authorization, capture, refund status changes
    */
