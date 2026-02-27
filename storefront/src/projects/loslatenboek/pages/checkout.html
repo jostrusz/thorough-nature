@@ -2993,10 +2993,10 @@ body {
   var mollieCardToken = null;
 
   function initMollieComponents() {
-    // Use dynamic profile_id from API response if available, fallback to PROJECT_CONFIG
-    var creditCardOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard' && m.profile_id; });
+    // Use dynamic profile_id and testmode from API response if available, fallback to PROJECT_CONFIG
+    var creditCardOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
     var profileId = (creditCardOption && creditCardOption.profile_id) || PROJECT_CONFIG.mollieProfileId;
-    var testmode = creditCardOption ? creditCardOption.testmode : false;
+    var testmode = creditCardOption ? !!creditCardOption.testmode : false;
 
     if (mollieInstance || !profileId) return;
 
