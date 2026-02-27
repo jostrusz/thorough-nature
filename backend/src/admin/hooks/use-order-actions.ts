@@ -83,6 +83,25 @@ export function useRefundPayment() {
 }
 
 // ═══════════════════════════════════════════
+// Capture Payment (Klarna, etc. — authorize-capture model)
+// ═══════════════════════════════════════════
+export function useCapturePayment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      return sdk.client.fetch(`/admin/custom-orders/${orderId}/capture`, {
+        method: "POST",
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["custom-order-detail"] })
+      queryClient.invalidateQueries({ queryKey: ["custom-orders-list"] })
+      queryClient.invalidateQueries({ queryKey: ["custom-order-stats"] })
+    },
+  })
+}
+
+// ═══════════════════════════════════════════
 // Duplicate Order
 // ═══════════════════════════════════════════
 export function useDuplicateOrder() {

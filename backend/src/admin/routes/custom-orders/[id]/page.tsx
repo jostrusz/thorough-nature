@@ -10,6 +10,7 @@ import {
   useArchiveOrder,
   useCreateFulfillment,
   useRefundPayment,
+  useCapturePayment,
   useDuplicateOrder,
   useSendToDextrum,
   useCreateFakturoidInvoice,
@@ -208,6 +209,7 @@ const OrderDetailPage = () => {
   const archiveOrder = useArchiveOrder()
   const createFulfillment = useCreateFulfillment()
   const refundPayment = useRefundPayment()
+  const capturePayment = useCapturePayment()
   const duplicateOrder = useDuplicateOrder()
   const sendToDextrum = useSendToDextrum()
   const createFakturoidInvoice = useCreateFakturoidInvoice()
@@ -341,6 +343,18 @@ const OrderDetailPage = () => {
     })
   }, [id, createFakturoidInvoice])
 
+  const handleCapture = useCallback(() => {
+    if (!id) return
+    capturePayment.mutate(id, {
+      onSuccess: () => {
+        toast.success("Payment captured successfully")
+      },
+      onError: (err: any) => {
+        toast.error(err?.message || "Failed to capture payment")
+      },
+    })
+  }, [id, capturePayment])
+
   const handleFakturoidOpen = useCallback(() => {
     const url = order?.metadata?.fakturoid_invoice_url
     if (url) {
@@ -466,7 +480,11 @@ const OrderDetailPage = () => {
             onMarkAsFulfilled={handleFulfill}
             isLoading={createFulfillment.isPending}
           />
-          <OrderDetailPayment order={order} />
+          <OrderDetailPayment
+            order={order}
+            onCapture={handleCapture}
+            isCapturing={capturePayment.isPending}
+          />
           <PaymentActivityLog order={order} />
           <OrderDetailTimeline
             order={order}
