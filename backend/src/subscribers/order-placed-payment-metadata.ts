@@ -51,12 +51,14 @@ export default async function orderPlacedPaymentMetadataHandler({
       if (paymentData.molliePaymentId) {
         newMetadata.molliePaymentId = paymentData.molliePaymentId
         newMetadata.payment_method = paymentData.method || null
+        newMetadata.payment_provider = "mollie"
         found = true
         break
       }
       if (paymentData.mollieOrderId) {
         newMetadata.mollieOrderId = paymentData.mollieOrderId
         newMetadata.payment_method = paymentData.method || null
+        newMetadata.payment_provider = "mollie"
         found = true
         break
       }
@@ -69,6 +71,7 @@ export default async function orderPlacedPaymentMetadataHandler({
           newMetadata.payment_klarna_session_id = paymentData.sessionId
         }
         newMetadata.payment_method = "klarna"
+        newMetadata.payment_provider = "klarna"
         found = true
         break
       }
@@ -90,6 +93,7 @@ export default async function orderPlacedPaymentMetadataHandler({
           newMetadata.payment_paypal_capture_id = paypalCaptureId
         }
         newMetadata.payment_method = "paypal"
+        newMetadata.payment_provider = "paypal"
         found = true
         break
       }
@@ -112,9 +116,10 @@ export default async function orderPlacedPaymentMetadataHandler({
       }
 
       // Airwallex
-      if (paymentData.airwallexPaymentIntentId) {
-        newMetadata.airwallexPaymentIntentId = paymentData.airwallexPaymentIntentId
+      if (paymentData.airwallexPaymentIntentId || (providerId.includes("airwallex") && paymentData.intentId)) {
+        newMetadata.airwallexPaymentIntentId = paymentData.airwallexPaymentIntentId || paymentData.intentId
         newMetadata.payment_method = paymentData.method || "airwallex"
+        newMetadata.payment_provider = "airwallex"
         found = true
         break
       }

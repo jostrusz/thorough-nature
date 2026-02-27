@@ -66,6 +66,7 @@ export class AirwallexApiClient {
   private baseUrl: string
   private clientId: string
   private apiKey: string
+  private accountId: string | null = null
   private bearerToken: string | null = null
   private tokenExpiresAt: Date | null = null
   private logger: Logger
@@ -76,10 +77,12 @@ export class AirwallexApiClient {
     clientId: string,
     apiKey: string,
     isTest: boolean = true,
-    logger: Logger
+    logger: Logger,
+    accountId?: string
   ) {
     this.clientId = clientId
     this.apiKey = apiKey
+    this.accountId = accountId || null
     this.logger = logger
     this.baseUrl = isTest
       ? "https://api-demo.airwallex.com"
@@ -170,6 +173,22 @@ export class AirwallexApiClient {
   }
 
   /**
+   * Build authorization headers including x-on-behalf-of for org-level keys
+   */
+  private authHeaders(contentType = true): Record<string, string> {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${this.bearerToken}`,
+    }
+    if (contentType) {
+      headers["Content-Type"] = "application/json"
+    }
+    if (this.accountId) {
+      headers["x-on-behalf-of"] = this.accountId
+    }
+    return headers
+  }
+
+  /**
    * Ensure valid token before each request
    */
   private async ensureToken(): Promise<void> {
@@ -197,12 +216,7 @@ export class AirwallexApiClient {
       const response = await this.client.post<AirwallexPaymentIntentResponse>(
         "/api/v1/pa/payment_intents/create",
         data,
-        {
-          headers: {
-            Authorization: `Bearer ${this.bearerToken}`,
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: this.authHeaders() }
       )
 
       this.logger.info(
@@ -229,12 +243,7 @@ export class AirwallexApiClient {
       const response = await this.client.post<AirwallexPaymentIntentResponse>(
         `/api/v1/pa/payment_intents/${intentId}/confirm`,
         data,
-        {
-          headers: {
-            Authorization: `Bearer ${this.bearerToken}`,
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: this.authHeaders() }
       )
 
       this.logger.info(
@@ -259,11 +268,7 @@ export class AirwallexApiClient {
     try {
       const response = await this.client.get<AirwallexPaymentIntentResponse>(
         `/api/v1/pa/payment_intents/${intentId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.bearerToken}`,
-          },
-        }
+        { headers: this.authHeaders(false) }
       )
 
       return response.data
@@ -289,12 +294,7 @@ export class AirwallexApiClient {
       const response = await this.client.post<AirwallexPaymentIntentResponse>(
         `/api/v1/pa/payment_intents/${intentId}/capture`,
         data,
-        {
-          headers: {
-            Authorization: `Bearer ${this.bearerToken}`,
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: this.authHeaders() }
       )
 
       this.logger.info(
@@ -318,12 +318,7 @@ export class AirwallexApiClient {
       await this.client.post(
         `/api/v1/pa/payment_intents/${intentId}/cancel`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${this.bearerToken}`,
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: this.authHeaders() }
       )
 
       this.logger.info(`[Airwallex] Payment intent cancelled: ${intentId}`)
@@ -346,12 +341,7 @@ export class AirwallexApiClient {
       const response = await this.client.post<AirwallexRefundResponse>(
         "/api/v1/pa/refunds/create",
         data,
-        {
-          headers: {
-            Authorization: `Bearer ${this.bearerToken}`,
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: this.authHeaders() }
       )
 
       this.logger.info(
@@ -374,11 +364,7 @@ export class AirwallexApiClient {
     try {
       const response = await this.client.get<AirwallexRefundResponse>(
         `/api/v1/pa/refunds/${refundId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.bearerToken}`,
-          },
-        }
+        { headers: this.authHeaders(false) }
       )
 
       return response.data

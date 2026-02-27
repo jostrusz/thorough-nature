@@ -5076,11 +5076,17 @@ body {
               // Hide submit button while Drop-in is active
               submitBtn.style.display = 'none';
 
+              // Build return URL for redirect-based methods (iDEAL, Bancontact, BLIK, EPS)
+              var awReturnUrl = window.location.origin + window.location.pathname + '?payment_return=1&cart_id=' + encodeURIComponent(result.cartId);
+
               var dropIn = Airwallex.createElement('dropIn', {
                 intent_id: providerData.intentId,
                 client_secret: providerData.clientSecret,
                 currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
                 country_code: (countrySelect.value || 'NL').toUpperCase(),
+                autoCapture: true,
+                withBilling: false,
+                return_url: awReturnUrl,
               });
 
               dropIn.mount('airwallex-dropin-container');
@@ -5136,6 +5142,9 @@ body {
 
         if (redirectUrl) {
           window.location.href = redirectUrl;
+        } else if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1) {
+          // Airwallex without intentId — payment session not created properly
+          throw new Error('Airwallex betalingssessie niet correct aangemaakt. Probeer het opnieuw.');
         } else {
           throw new Error('Geen redirect URL ontvangen van betaalprovider');
         }

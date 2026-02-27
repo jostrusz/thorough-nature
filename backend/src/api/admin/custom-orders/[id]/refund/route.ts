@@ -275,7 +275,7 @@ export const POST = async (
     }
     // Airwallex refund
     else if (providerId.includes("airwallex")) {
-      const intentId = paymentData.airwallexPaymentIntentId
+      const intentId = paymentData.airwallexPaymentIntentId || paymentData.intentId
       if (!intentId) {
         res.status(400).json({ error: "No Airwallex payment intent ID found" })
         return
@@ -298,12 +298,23 @@ export const POST = async (
       const isLive = config.mode === "live"
       const keys = isLive ? config.live_keys : config.test_keys
       try {
-        const client = new AirwallexApiClient(keys.api_key, keys.client_id, !isLive)
-        const result = await client.refund(intentId, amount / 100, reason)
+        const client = new AirwallexApiClient(
+          keys.api_key,      // Client ID
+          keys.secret_key,   // API Key
+          !isLive,
+          logger,
+          keys.account_id    // Account ID for org-level keys
+        )
+        await client.login()
+        // Airwallex uses major units (same as Medusa) — no conversion needed
+        const result = await client.createRefund({
+          payment_intent_id: intentId,
+          amount: amount > 0 ? amount : undefined,
+          reason: reason || "Customer requested refund",
+        })
         refundResult = {
-          success: result.success !== false,
-          refundId: result.data?.id,
-          error: result.error,
+          success: true,
+          refundId: result.id,
         }
       } catch (e: any) {
         refundResult = { success: false, error: e.message }

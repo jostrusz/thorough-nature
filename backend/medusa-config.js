@@ -35,6 +35,7 @@ import {
   PAYPAL_MODE_EC,
   AIRWALLEX_CLIENT_ID,
   AIRWALLEX_API_KEY,
+  AIRWALLEX_ACCOUNT_ID,
   AIRWALLEX_TEST_MODE,
 } from 'lib/constants';
 
@@ -200,6 +201,7 @@ const medusaConfig = {
               clientId: AIRWALLEX_CLIENT_ID,
               apiKey: AIRWALLEX_API_KEY,
               testMode: AIRWALLEX_TEST_MODE,
+              accountId: AIRWALLEX_ACCOUNT_ID,
             },
           }] : []),
           ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{

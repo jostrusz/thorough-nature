@@ -141,8 +141,28 @@ async function testAirwallexConnection(credentials: Record<string, string>): Pro
         timeout: 10000,
       }
     )
-    return response.status === 200 && !!response.data.token
-  } catch {
+    if (!(response.status === 200 && response.data.token)) {
+      return false
+    }
+
+    // If account_id is provided (org-level keys), verify we can access the account
+    if (credentials.account_id) {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${response.data.token}`,
+        "x-on-behalf-of": credentials.account_id,
+      }
+      await axios.get(`${baseUrl}/api/v1/pa/payment_methods/list`, {
+        headers,
+        timeout: 10000,
+      })
+    }
+
+    return true
+  } catch (err: any) {
+    const detail = err.response?.data?.message || err.message || ""
+    if (detail.includes("Insufficient permissions")) {
+      throw new Error("Airwallex: login OK but insufficient permissions. For org-level keys, provide the Account ID.")
+    }
     throw new Error("Airwallex credentials invalid (Client ID or API Key)")
   }
 }

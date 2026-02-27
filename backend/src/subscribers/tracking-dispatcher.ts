@@ -58,13 +58,13 @@ export default async function trackingDispatcherHandler({
     // ─── Step 1: Auto-capture if needed (PayPal / Klarna) ─────────────
     const alreadyCaptured = order.metadata?.payment_captured === true
 
-    if (!alreadyCaptured && (providerId === "paypal" || providerId === "klarna" || providerId === "airwallex")) {
+    if (!alreadyCaptured && (providerId === "paypal" || providerId.includes("paypal") || providerId === "klarna" || providerId.includes("klarna") || providerId === "airwallex" || providerId.includes("airwallex"))) {
       logger.info(
         `[Tracking Dispatcher] Auto-capturing ${providerId} payment for order ${order.id}`
       )
 
       try {
-        if (providerId === "paypal") {
+        if (providerId === "paypal" || providerId.includes("paypal")) {
           const captureResult = await capturePayPal(order, container, logger)
           activityLog.push({
             timestamp: new Date().toISOString(),
@@ -79,7 +79,7 @@ export default async function trackingDispatcherHandler({
           updatedMetadata.payment_captured = true
           updatedMetadata.payment_captured_at = new Date().toISOString()
           updatedMetadata.paypalCaptureId = captureResult.captureId
-        } else if (providerId === "klarna") {
+        } else if (providerId === "klarna" || providerId.includes("klarna")) {
           // Klarna: capture with shipping_info included
           const captureResult = await captureKlarna(
             order,
@@ -130,7 +130,7 @@ export default async function trackingDispatcherHandler({
             `[Tracking Dispatcher] Order ${order.id} captured + tracking sent to Klarna`
           )
           return
-        } else if (providerId === "airwallex") {
+        } else if (providerId === "airwallex" || providerId.includes("airwallex")) {
           const captureResult = await captureAirwallex(order, container, logger)
           activityLog.push({
             timestamp: new Date().toISOString(),
@@ -175,10 +175,10 @@ export default async function trackingDispatcherHandler({
     }
 
     try {
-      if (providerId === "stripe") {
+      if (providerId === "stripe" || providerId.includes("stripe")) {
         await sendTrackingToStripe(order, trackingNumber, trackingCarrier)
         trackingSendResult.success = true
-      } else if (providerId === "paypal") {
+      } else if (providerId === "paypal" || providerId.includes("paypal")) {
         // Use capture_id from either the auto-capture or existing metadata
         const captureId =
           updatedMetadata.paypalCaptureId || order.metadata?.paypalCaptureId
@@ -191,17 +191,17 @@ export default async function trackingDispatcherHandler({
           logger
         )
         trackingSendResult.success = true
-      } else if (providerId === "mollie") {
+      } else if (providerId === "mollie" || providerId.includes("mollie")) {
         await sendTrackingToMollie(order, trackingNumber, trackingCarrier)
         trackingSendResult.success = true
-      } else if (providerId === "airwallex") {
+      } else if (providerId === "airwallex" || providerId.includes("airwallex")) {
         // Airwallex does not have a native tracking API
         // Tracking is stored in order metadata only
         logger.info(
           `[Tracking Dispatcher] Airwallex does not support tracking API, stored in metadata for order ${order.id}`
         )
         trackingSendResult.success = true
-      } else if (providerId === "klarna") {
+      } else if (providerId === "klarna" || providerId.includes("klarna")) {
         // Already captured + tracking sent, check if we need to add shipping info
         const captureId =
           updatedMetadata.klarnaCaptureId || order.metadata?.klarnaCaptureId
@@ -467,7 +467,19 @@ async function captureAirwallex(
   const { AirwallexApiClient } = await import(
     "../modules/payment-airwallex/api-client"
   )
-  const client = new AirwallexApiClient(apiKey, secretKey, isTest, logger)
+  // Resolve account_id for org-level keys
+  let accountId: string | undefined
+  try {
+    const gcService2 = container.resolve("gatewayConfig")
+    const configs2 = await gcService2.listGatewayConfigs(
+      { provider: "airwallex", is_active: true },
+      { take: 1 }
+    )
+    const k = configs2[0]?.mode === "live" ? configs2[0]?.live_keys : configs2[0]?.test_keys
+    accountId = k?.account_id
+  } catch {}
+
+  const client = new AirwallexApiClient(apiKey, secretKey, isTest, logger, accountId)
   await client.login()
 
   // Airwallex uses major units (same as order.total, no conversion needed)

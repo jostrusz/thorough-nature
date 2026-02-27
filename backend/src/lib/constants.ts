@@ -117,6 +117,7 @@ export const PAYPAL_MODE_EC = process.env.PAYPAL_MODE_EC || 'test';
  */
 export const AIRWALLEX_CLIENT_ID = process.env.AIRWALLEX_CLIENT_ID;
 export const AIRWALLEX_API_KEY = process.env.AIRWALLEX_API_KEY;
+export const AIRWALLEX_ACCOUNT_ID = process.env.AIRWALLEX_ACCOUNT_ID;
 export const AIRWALLEX_TEST_MODE = process.env.AIRWALLEX_TEST_MODE !== 'false';
 
 /**

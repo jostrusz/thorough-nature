@@ -10,6 +10,7 @@ type Options = {
   clientId?: string
   apiKey?: string
   testMode?: boolean
+  accountId?: string
 }
 
 type InjectedDependencies = {
@@ -29,7 +30,7 @@ function mapAirwallexStatusToMedusa(airwallexStatus: string): PaymentSessionStat
     case "REQUIRES_CAPTURE":
       return PaymentSessionStatus.AUTHORIZED
     case "SUCCEEDED":
-      return PaymentSessionStatus.AUTHORIZED
+      return PaymentSessionStatus.CAPTURED
     case "CAPTURED":
       return PaymentSessionStatus.CAPTURED
     case "CANCELLED":
@@ -104,12 +105,13 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
           const isLive = config.mode === "live"
           const keys = isLive ? config.live_keys : config.test_keys
           if (keys?.api_key && keys?.secret_key) {
-            this.logger_.info(`[Airwallex] Using ${isLive ? "live" : "test"} keys from gateway config`)
+            this.logger_.info(`[Airwallex] Using ${isLive ? "live" : "test"} keys from gateway config${keys.account_id ? `, account: ${keys.account_id}` : ""}`)
             this.client_ = new AirwallexApiClient(
               keys.api_key,      // Client ID
               keys.secret_key,   // API Key
               !isLive,           // isTest
-              this.logger_
+              this.logger_,
+              keys.account_id    // Account ID for org-level keys (x-on-behalf-of)
             )
             await this.client_.login()
             return this.client_
@@ -127,7 +129,8 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
         this.options_.clientId,
         this.options_.apiKey,
         this.options_.testMode !== false,
-        this.logger_
+        this.logger_,
+        this.options_.accountId
       )
       await this.client_.login()
       return this.client_
@@ -190,25 +193,26 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
         `[Airwallex] Payment intent created: ${paymentIntent.id}, status: ${paymentIntent.status}`
       )
 
-      // Determine environment for frontend SDK
-      const gatewayConfigService = this.getGatewayConfigService()
+      // Determine environment for frontend SDK based on the client's baseUrl
       let environment = "demo"
-      if (gatewayConfigService) {
-        try {
+      try {
+        const gatewayConfigService = this.getGatewayConfigService()
+        if (gatewayConfigService) {
           const configs = await gatewayConfigService.listGatewayConfigs(
             { provider: "airwallex", is_active: true },
             { take: 1 }
           )
           if (configs[0]?.mode === "live") environment = "prod"
-        } catch {}
-      } else if (this.options_?.testMode === false) {
-        environment = "prod"
-      }
+        } else if (this.options_?.testMode === false) {
+          environment = "prod"
+        }
+      } catch {}
 
       return {
         id: paymentIntent.id,
         data: {
           intentId: paymentIntent.id,
+          airwallexPaymentIntentId: paymentIntent.id,
           clientSecret: paymentIntent.client_secret,
           status: paymentIntent.status,
           amount: paymentIntent.amount,
@@ -439,14 +443,16 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
    */
   async getWebhookActionAndData(webhookData: any): Promise<any> {
     try {
-      const { id, event_type, data: eventData } = webhookData
+      const { name: event_type, data: eventData } = webhookData
+      // Airwallex webhook: data contains the object directly (or nested in data.object)
+      const intentId = eventData?.object?.id || eventData?.id
 
-      if (!id) {
+      if (!intentId) {
         return { action: "not_supported", data: webhookData }
       }
 
       const client = await this.getAirwallexClient()
-      const paymentIntent = await client.getPaymentIntent(id)
+      const paymentIntent = await client.getPaymentIntent(intentId)
 
       let action = "not_supported"
 
@@ -460,12 +466,13 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
         action = "failed"
       }
 
-      this.logger_.info(`[Airwallex] Webhook: ${id} → ${paymentIntent.status} → action: ${action}`)
+      this.logger_.info(`[Airwallex] Webhook: ${intentId} → ${paymentIntent.status} → action: ${action}`)
 
       return {
         action,
         data: {
           intentId: paymentIntent.id,
+          airwallexPaymentIntentId: paymentIntent.id,
           clientSecret: paymentIntent.client_secret,
           status: paymentIntent.status,
           amount: paymentIntent.amount,

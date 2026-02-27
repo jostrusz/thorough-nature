@@ -786,6 +786,21 @@ function GatewaysTab() {
                 />
               </div>
             </div>
+            {form.provider === "airwallex" && (
+              <div style={{ marginTop: "8px" }}>
+                <label style={{ fontSize: "10px", color: "#8C9196" }}>Account ID <span style={{ color: "#B0B7BF" }}>(required for org-level API keys)</span></label>
+                <input
+                  className="bp-input"
+                  style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                  value={form.mode === "live" ? (form.live_keys as any).account_id || "" : (form.test_keys as any).account_id || ""}
+                  onChange={(e) => {
+                    const keys = form.mode === "live" ? "live_keys" : "test_keys"
+                    setForm({ ...form, [keys]: { ...form[keys], account_id: e.target.value } })
+                  }}
+                  placeholder="acct_xxxxxxxxxxxxxxxx"
+                />
+              </div>
+            )}
           </div>
 
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "16px" }}>
@@ -1016,6 +1031,19 @@ function GatewaysTab() {
                             />
                           </div>
                         </div>
+                        {editForm.provider === "airwallex" && (
+                          <div style={{ marginTop: "8px", gridColumn: "1 / -1" }}>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>Account ID <span style={{ color: "#B0B7BF" }}>(required for org-level API keys)</span></label>
+                            <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                              value={editForm.mode === "live" ? (editForm.live_keys as any).account_id || "" : (editForm.test_keys as any).account_id || ""}
+                              onChange={(e) => {
+                                const k = editForm.mode === "live" ? "live_keys" : "test_keys"
+                                setEditForm({ ...editForm, [k]: { ...editForm[k], account_id: e.target.value } })
+                              }}
+                              placeholder="acct_xxxxxxxxxxxxxxxx"
+                            />
+                          </div>
+                        )}
                       </div>
                       {/* Apple Pay Domain Verification (only for Mollie) */}
                       {editForm.provider === "mollie" && (editForm.selected_methods || []).includes("applepay") && (
