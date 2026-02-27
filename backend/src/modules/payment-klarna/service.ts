@@ -54,28 +54,51 @@ function mapKlarnaStatusToMedusa(klarnaStatus: string): PaymentSessionStatus {
 }
 
 /**
+ * Convert amount from Medusa major units (EUR) to Klarna minor units (cents).
+ * Medusa stores prices as major units: 35 = €35.00
+ * Klarna expects minor units: 3500 = €35.00
+ *
+ * Zero-decimal currencies (JPY, KRW, etc.) are returned as-is.
+ */
+const ZERO_DECIMAL_CURRENCIES = new Set([
+  "JPY", "KRW", "VND", "CLP", "PYG", "GNF", "BIF", "DJF", "RWF", "UGX",
+  "XOF", "XAF", "XPF", "MGA", "KMF",
+])
+
+function toMinorUnits(amount: number, currency: string): number {
+  if (ZERO_DECIMAL_CURRENCIES.has(currency?.toUpperCase())) {
+    return Math.round(amount)
+  }
+  return Math.round(amount * 100)
+}
+
+/**
  * Build Klarna order lines from cart items
+ * Converts item prices from Medusa major units to Klarna minor units (cents)
  */
 function buildOrderLines(
   items: any[],
   currency: string,
   statementDescriptor?: string
 ): IKlarnaOrderLine[] {
-  return items.map((item) => ({
-    type: "physical",
-    reference: item.id || item.sku,
-    name: (statementDescriptor || item.title || "Product").substring(0, 255),
-    quantity: item.quantity,
-    quantity_unit: "pcs",
-    unit_price: item.unit_price || 0, // already in minor units
-    tax_rate: item.metadata?.tax_rate
-      ? parseInt(item.metadata.tax_rate) * 100
-      : 2500, // convert to basis points (e.g., 25.00 -> 2500)
-    total_amount: (item.unit_price || 0) * item.quantity,
-    total_tax_amount: item.metadata?.tax_amount
-      ? (item.metadata.tax_amount * item.quantity) / 100
-      : 0,
-  }))
+  return items.map((item) => {
+    const unitPriceMinor = toMinorUnits(item.unit_price || 0, currency)
+    return {
+      type: "physical",
+      reference: item.id || item.sku,
+      name: (statementDescriptor || item.title || "Product").substring(0, 255),
+      quantity: item.quantity,
+      quantity_unit: "pcs",
+      unit_price: unitPriceMinor,
+      tax_rate: item.metadata?.tax_rate
+        ? parseInt(item.metadata.tax_rate) * 100
+        : 0, // default 0% tax — will be set correctly when tax module is configured
+      total_amount: unitPriceMinor * item.quantity,
+      total_tax_amount: item.metadata?.tax_amount
+        ? toMinorUnits(item.metadata.tax_amount * item.quantity, currency)
+        : 0,
+    }
+  })
 }
 
 /**
@@ -193,29 +216,38 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
 
     try {
       const client = await this.getKlarnaClient()
+      const currencyUpper = (currency_code || "EUR").toUpperCase()
+
+      // Convert Medusa amount (major units: 99 = €99.00) to Klarna minor units (9900 = €99.00)
+      const amountMinor = toMinorUnits(amount, currencyUpper)
+
+      this.logger_.info(
+        `[Klarna] initiatePayment: medusa amount=${amount}, converted to minor units=${amountMinor}, currency=${currencyUpper}`
+      )
 
       const customer = context?.customer
       const billingAddress = context?.billing_address || customer?.billing_address || {}
       const shippingAddress = context?.shipping_address || billingAddress
 
-      // Build order lines from context items if available
+      // Build order lines from context items if available (buildOrderLines converts to minor units)
       const items = context?.extra?.items || context?.items || []
       const orderLines = buildOrderLines(
         items,
-        currency_code,
+        currencyUpper,
         data?.statement_descriptor
       )
 
-      // Add shipping as line item if applicable
+      // Add shipping as line item if applicable (convert to minor units)
       const shippingTotal = context?.extra?.shipping_total || 0
       if (shippingTotal > 0) {
+        const shippingMinor = toMinorUnits(shippingTotal, currencyUpper)
         orderLines.push({
           type: "shipping_fee",
           name: "Shipping",
           quantity: 1,
-          unit_price: shippingTotal,
+          unit_price: shippingMinor,
           tax_rate: 0,
-          total_amount: shippingTotal,
+          total_amount: shippingMinor,
           total_tax_amount: 0,
         })
       }
@@ -229,12 +261,15 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
 
       const returnUrl = data?.return_url || context?.extra?.return_url || backendUrl
 
+      // Tax amount in minor units
+      const taxTotalMinor = toMinorUnits(context?.extra?.tax_total || 0, currencyUpper)
+
       const sessionData = {
         purchase_country: billingAddress.country_code?.toUpperCase() || "NL",
-        purchase_currency: currency_code?.toUpperCase() || "EUR",
+        purchase_currency: currencyUpper,
         locale: data?.locale || "en-NL",
-        order_amount: amount, // already in minor units (cents)
-        order_tax_amount: context?.extra?.tax_total || 0,
+        order_amount: amountMinor,
+        order_tax_amount: taxTotalMinor,
         order_lines: orderLines.length > 0
           ? orderLines
           : [
@@ -242,9 +277,9 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
                 type: "physical",
                 name: "Order",
                 quantity: 1,
-                unit_price: amount,
+                unit_price: amountMinor,
                 tax_rate: 0,
-                total_amount: amount,
+                total_amount: amountMinor,
                 total_tax_amount: 0,
               },
             ],
@@ -364,19 +399,22 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       const purchaseCurrency = storedSession.purchase_currency || currency?.toUpperCase() || "EUR"
       const locale = storedSession.locale || "en-NL"
 
+      // Fallback amount in minor units (storedSession already has minor units from initiatePayment)
+      const fallbackAmountMinor = toMinorUnits(amount, purchaseCurrency)
+
       this.logger_.info(
-        `[Klarna] authorizePayment: amount=${amount}, currency=${purchaseCurrency}, country=${purchaseCountry}, locale=${locale}, hasStoredSession=${!!klarnaSessionData}, authToken=${authorizationToken?.substring(0, 16)}...`
+        `[Klarna] authorizePayment: medusaAmount=${amount}, fallbackMinor=${fallbackAmountMinor}, currency=${purchaseCurrency}, country=${purchaseCountry}, locale=${locale}, hasStoredSession=${!!klarnaSessionData}, authToken=${authorizationToken?.substring(0, 16)}...`
       )
 
-      // Use stored order_lines from session creation, or build a fallback
+      // Use stored order_lines from session creation (already in minor units), or build a fallback
       const orderLines = storedSession.order_lines || [
         {
           type: "physical",
           name: "Order",
           quantity: 1,
-          unit_price: amount,
+          unit_price: fallbackAmountMinor,
           tax_rate: 0,
-          total_amount: amount,
+          total_amount: fallbackAmountMinor,
           total_tax_amount: 0,
         },
       ]
@@ -386,7 +424,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
         purchase_country: purchaseCountry,
         purchase_currency: purchaseCurrency,
         locale: locale,
-        order_amount: storedSession.order_amount || amount,
+        order_amount: storedSession.order_amount || fallbackAmountMinor,
         order_tax_amount: storedSession.order_tax_amount || 0,
         description: "Order",
         merchant_reference: `medusa-${Date.now()}`,
@@ -448,7 +486,8 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
     const sessionData = input.data || input
     try {
       const client = await this.getKlarnaClient()
-      const { klarnaOrderId, amount } = sessionData
+      const { klarnaOrderId, amount, currency } = sessionData
+      const currencyUpper = (currency || "EUR").toUpperCase()
 
       if (!klarnaOrderId) {
         throw new MedusaError(
@@ -457,17 +496,24 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
         )
       }
 
+      // Convert Medusa amount (major units) to Klarna minor units (cents)
+      const amountMinor = toMinorUnits(amount, currencyUpper)
+
+      this.logger_.info(
+        `[Klarna] capturePayment: medusa amount=${amount}, minor units=${amountMinor}, currency=${currencyUpper}`
+      )
+
       const captureData = {
-        captured_amount: amount,
+        captured_amount: amountMinor,
         description: "Capture",
         order_lines: [
           {
             type: "physical",
             name: "Order",
             quantity: 1,
-            unit_price: amount,
+            unit_price: amountMinor,
             tax_rate: 0,
-            total_amount: amount,
+            total_amount: amountMinor,
             total_tax_amount: 0,
           },
         ],
@@ -514,6 +560,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
   async refundPayment(input: any): Promise<any> {
     const sessionData = input.data || input
     const refundAmount = input.amount || sessionData.amount
+    const currencyUpper = (sessionData.currency || "EUR").toUpperCase()
     try {
       const client = await this.getKlarnaClient()
       const { klarnaOrderId } = sessionData
@@ -525,10 +572,17 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
         )
       }
 
+      // Convert Medusa amount (major units) to Klarna minor units (cents)
+      const refundAmountMinor = toMinorUnits(refundAmount, currencyUpper)
+
+      this.logger_.info(
+        `[Klarna] refundPayment: medusa amount=${refundAmount}, minor units=${refundAmountMinor}, currency=${currencyUpper}`
+      )
+
       const refundData = {
-        refunded_amount: refundAmount,
+        refunded_amount: refundAmountMinor,
         reason: "customer_request",
-        description: `Refund ${(refundAmount / 100).toFixed(2)}`,
+        description: `Refund €${refundAmount.toFixed ? refundAmount.toFixed(2) : refundAmount}`,
       }
 
       const idempotencyKey = crypto.randomUUID()
