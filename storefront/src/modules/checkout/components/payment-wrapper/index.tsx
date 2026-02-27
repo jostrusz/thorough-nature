@@ -66,15 +66,16 @@ const Wrapper: React.FC<WrapperProps> = ({ cart, children }) => {
     )
   }
 
-  if (
-    isPaypal(paymentSession?.provider_id) &&
-    paypalClientId !== undefined &&
-    cart
-  ) {
+  if (isPaypal(paymentSession?.provider_id) && cart) {
+    // Get client_id from payment session data (gateway_config) with env var fallback
+    const clientId =
+      (paymentSession?.data?.client_id as string) ||
+      paypalClientId ||
+      "test"
     return (
       <PayPalScriptProvider
         options={{
-          "client-id": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
+          "client-id": clientId,
           currency: cart?.currency_code.toUpperCase(),
           intent: "authorize",
           components: "buttons",
