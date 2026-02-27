@@ -160,6 +160,11 @@ const medusaConfig = {
             id: 'klarna',
             options: {},
           },
+          {
+            resolve: './src/modules/payment-paypal',
+            id: 'paypal',
+            options: {},
+          },
           ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{
             resolve: '@medusajs/payment-stripe',
             id: 'stripe',
