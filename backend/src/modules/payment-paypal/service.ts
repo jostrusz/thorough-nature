@@ -301,8 +301,23 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         this.logger_.info(
           `[PayPal] Creating APM order: method=${method}, amount=${totalValue} ${currency}, country=${countryCode}`
         )
+      } else if (data?.express) {
+        // ── Express Checkout (SDK Buttons popup flow) ──
+        // Do NOT include payment_source — the JS SDK Buttons handle it.
+        // Including payment_source.paypal with return_url forces redirect mode,
+        // which causes the popup to immediately close.
+        // Use CAPTURE intent for immediate payment.
+        orderData = {
+          intent: "CAPTURE",
+          purchase_units: purchaseUnits,
+        }
+
+        this.logger_.info(
+          `[PayPal] Creating express order (SDK Buttons): amount=${totalValue} ${currency}`
+        )
       } else {
-        // ── PayPal Wallet Flow: AUTHORIZE (existing behavior) ──
+        // ── PayPal Wallet Redirect Flow: AUTHORIZE ──
+        // Used when redirecting to PayPal hosted page (non-SDK flow)
         orderData = {
           intent: "AUTHORIZE",
           purchase_units: purchaseUnits,
@@ -320,7 +335,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         }
 
         this.logger_.info(
-          `[PayPal] Creating wallet order: amount=${totalValue} ${currency}`
+          `[PayPal] Creating wallet redirect order: amount=${totalValue} ${currency}`
         )
       }
 
@@ -467,13 +482,14 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
       const { paypalOrderId, authorizationId, currency_code, amount } =
         sessionData
 
-      // APM or Card orders: may already be auto-captured
-      if ((sessionData.isAPM || sessionData.isCard) && paypalOrderId) {
+      // Check if order is already captured (APM, Card, or Express orders may auto-capture)
+      if (paypalOrderId) {
         const order = await client.getOrder(paypalOrderId)
         const captures = order.purchase_units?.[0]?.payments?.captures || []
         if (captures.length > 0 && captures[0].status === "COMPLETED") {
+          const flowType = sessionData.isCard ? 'Card' : sessionData.isAPM ? 'APM' : 'Express'
           this.logger_.info(
-            `[PayPal] ${sessionData.isCard ? 'Card' : 'APM'} order already captured: orderId=${paypalOrderId}, captureId=${captures[0].id}`
+            `[PayPal] ${flowType} order already captured: orderId=${paypalOrderId}, captureId=${captures[0].id}`
           )
           return {
             data: {

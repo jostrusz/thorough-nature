@@ -3740,6 +3740,7 @@ body {
               console.log('[Express PayPal] Cart created:', cartId, '→ creating payment session with provider:', method.provider_id);
               return createExpressPaymentSession(cartId, method.provider_id, {
                 method: 'paypal',
+                express: true,  // SDK Buttons popup flow — backend must NOT include payment_source
                 return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
               });
             })
@@ -3768,17 +3769,22 @@ body {
 
         onApprove: function(data, actions) {
           showExpressPreloader();
+          console.log('[Express PayPal] onApprove — orderId:', data.orderID);
 
-          // Get payer details from PayPal
-          var getDetails;
-          if (actions && actions.order && typeof actions.order.get === 'function') {
-            getDetails = actions.order.get();
+          // Step 1: Capture the payment client-side (CAPTURE intent order)
+          var capturePromise;
+          if (actions && actions.order && typeof actions.order.capture === 'function') {
+            capturePromise = actions.order.capture();
           } else {
-            getDetails = Promise.resolve({});
+            // Fallback: just get order details
+            capturePromise = (actions && actions.order && typeof actions.order.get === 'function')
+              ? actions.order.get()
+              : Promise.resolve({});
           }
 
-          return getDetails
+          return capturePromise
             .then(function(details) {
+              console.log('[Express PayPal] Captured/details:', details.status, '— payer:', details.payer && details.payer.email_address);
               var payer = details.payer || {};
               var shipping = {};
               if (details.purchase_units && details.purchase_units[0]) {
