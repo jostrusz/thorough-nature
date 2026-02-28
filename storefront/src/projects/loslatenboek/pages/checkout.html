@@ -3214,9 +3214,10 @@ body {
       var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
 
       // Build SDK URL — intent=capture must match backend order intent
+      // Note: do NOT include disable-funding param — it's for Buttons component only and breaks CardFields
       var sdkUrl = sdkBase + '?client-id=' + encodeURIComponent(paypalClientId)
         + '&components=card-fields&currency=' + currency
-        + '&intent=capture&disable-funding=paylater,credit';
+        + '&intent=capture';
 
       console.log('[PayPal Card] Full SDK URL:', sdkUrl);
 
@@ -3262,16 +3263,24 @@ body {
     try {
       var cardErrorsEl = document.getElementById('card-errors');
 
+      // Ensure card-fields container is visible before mounting (zoid needs visible containers)
+      var cardFieldsEl = document.getElementById('card-fields');
+      if (cardFieldsEl) cardFieldsEl.style.display = 'block';
+
+      console.log('[PayPal Card] Creating CardFields instance...');
+
       // Create CardFields instance
+      // IMPORTANT: createOrder is called at submit time (not during init), but must return a valid Promise
       paypalCardFieldsInstance = window.paypal.CardFields({
         createOrder: function() {
-          // Order is already created by the backend — return the order ID stored during submit
-          // This will be set right before cardFields.submit() is called
-          return window._paypalCardOrderId || '';
+          console.log('[PayPal Card] createOrder called, orderId:', window._paypalCardOrderId);
+          if (!window._paypalCardOrderId) {
+            return Promise.reject(new Error('No PayPal order ID available'));
+          }
+          return Promise.resolve(window._paypalCardOrderId);
         },
         onApprove: function(data) {
           console.log('[PayPal Card] Payment approved:', data.orderID);
-          // Resolve the promise set during submit
           if (window._paypalCardResolve) {
             window._paypalCardResolve(data);
           }
@@ -3295,26 +3304,45 @@ body {
         },
       });
 
-      // Check if card fields are eligible (PayPal account must have Advanced Card Payments enabled)
+      console.log('[PayPal Card] CardFields instance created, checking eligibility...');
+
+      // Check if card fields are eligible
       if (paypalCardFieldsInstance.isEligible()) {
-        // Mount individual fields into our existing containers
-        var numberField = paypalCardFieldsInstance.NumberField();
-        numberField.render('#card-number');
+        console.log('[PayPal Card] CardFields is eligible, mounting fields sequentially...');
 
-        var expiryField = paypalCardFieldsInstance.ExpiryField();
-        expiryField.render('#expiry-date');
+        // Clear any previous content in containers before mounting
+        ['card-number', 'expiry-date', 'verification-code'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.innerHTML = '';
+        });
 
-        var cvvField = paypalCardFieldsInstance.CVVField();
-        cvvField.render('#verification-code');
+        // Mount fields sequentially using Promise chain — each render() returns a Promise
+        // Rendering must complete before the next field starts to avoid zoid conflicts
+        paypalCardFieldsInstance.NumberField().render('#card-number')
+          .then(function() {
+            console.log('[PayPal Card] NumberField mounted');
+            return paypalCardFieldsInstance.ExpiryField().render('#expiry-date');
+          })
+          .then(function() {
+            console.log('[PayPal Card] ExpiryField mounted');
+            return paypalCardFieldsInstance.CVVField().render('#verification-code');
+          })
+          .then(function() {
+            console.log('[PayPal Card] CVVField mounted');
 
-        // For name field: replace with plain text input (same as Airwallex/Stripe)
-        var holderDiv = document.getElementById('card-holder');
-        if (holderDiv) {
-          holderDiv.innerHTML = '<input type="text" id="paypal-card-name" placeholder="Naam op kaart" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
-        }
+            // For name field: replace with plain text input (PayPal doesn't have a NameField)
+            var holderDiv = document.getElementById('card-holder');
+            if (holderDiv) {
+              holderDiv.innerHTML = '<input type="text" id="paypal-card-name" placeholder="Naam op kaart" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
+            }
 
-        paypalCardReady = true;
-        console.log('[PayPal Card] Card fields mounted successfully');
+            paypalCardReady = true;
+            console.log('[PayPal Card] All card fields mounted successfully');
+          })
+          .catch(function(err) {
+            console.error('[PayPal Card] Field render failed:', err);
+            if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetaling kon niet geladen worden. Probeer de pagina te vernieuwen.';
+          });
       } else {
         console.warn('[PayPal Card] CardFields not eligible — Advanced Card Payments may not be enabled on this PayPal account');
         if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetalingen zijn niet beschikbaar via PayPal. Neem contact op met de winkel.';
