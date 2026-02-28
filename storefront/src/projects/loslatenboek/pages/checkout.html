@@ -1823,23 +1823,44 @@ body {
 /* PayPal SDK renders its own button in this container */
 .express-paypal-sdk-container {
   min-height: 48px;
-  border-radius: 6px;
+  border-radius: 25px;
   overflow: hidden;
 }
-/* Google Pay button container — Google Pay JS API renders its own button */
+/* Google Pay button container — custom styled pill button */
 #express-googlepay-container {
-  border-radius: 6px;
+  border-radius: 25px;
   overflow: hidden;
   min-height: 48px;
+  background: #2c2e2d;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
+}
+#express-googlepay-container:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+#express-googlepay-container:active {
+  transform: scale(0.985);
 }
 #express-googlepay-container button {
-  border-radius: 6px !important;
+  border-radius: 25px !important;
   min-height: 48px;
+  background: #2c2e2d !important;
 }
 /* Apple Pay native button container */
 #express-applepay-container {
   min-height: 48px;
   width: 100%;
+  border-radius: 25px;
+  overflow: hidden;
+  transition: filter 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
+}
+#express-applepay-container:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+#express-applepay-container:active {
+  transform: scale(0.985);
 }
 /* Native Safari Apple Pay button — uses -webkit-appearance */
 .express-applepay-native-btn {
@@ -1850,9 +1871,10 @@ body {
   width: 100%;
   height: 48px;
   border: none;
-  border-radius: 6px;
+  border-radius: 25px;
   cursor: pointer;
   padding: 0;
+  background: #2c2e2d;
 }
 /* Generic express button (Google Pay, Apple Pay, redirect-based PayPal) */
 .express-btn {
@@ -1862,7 +1884,7 @@ body {
   width: 100%;
   padding: 0;
   border: none;
-  border-radius: 6px;
+  border-radius: 25px;
   cursor: pointer;
   transition: filter 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
   position: relative;
@@ -1872,7 +1894,7 @@ body {
   height: 48px;
 }
 .express-btn:hover {
-  filter: brightness(0.94);
+  filter: brightness(1.15);
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 .express-btn:active {
@@ -1887,15 +1909,14 @@ body {
   color: #003087;
 }
 .express-btn--googlepay {
-  background: #000;
+  background: #2c2e2d;
   color: #fff;
-  border: 1px solid #747775;
 }
 .express-btn--applepay {
-  background: #000;
+  background: #2c2e2d;
   color: #fff;
 }
-/* Native Apple Pay button on Safari */
+/* Native Apple Pay button on Safari — redirect fallback */
 @supports (-webkit-appearance: -apple-pay-button) {
   .express-btn--applepay {
     -webkit-appearance: -apple-pay-button;
@@ -1903,7 +1924,7 @@ body {
     -apple-pay-button-style: black;
     height: 48px;
     padding: 0;
-    border-radius: 6px;
+    border-radius: 25px;
   }
   .express-btn--applepay .express-btn-content { display: none; }
   .express-btn--applepay .express-spinner { display: none; }
