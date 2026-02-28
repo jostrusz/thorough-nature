@@ -3716,27 +3716,23 @@ body {
         if (m.express_config && m.express_config.sdk === 'paypal') {
           // Google Pay via PayPal SDK (native Google Pay button)
           renderGooglePayExpressNative(container, m);
-        } else if (m.express_config && m.express_config.sdk === 'redirect') {
-          // Redirect-based Google Pay (Mollie, Comgate)
+        } else {
+          // Redirect-based Google Pay (Mollie, Comgate, Airwallex, etc.)
           renderExpressRedirectButton(container, m, {
             className: 'express-btn--googlepay',
             logo: '<img src="/icons/googlepay-mark.svg" alt="Google Pay" class="express-logo">',
           });
-        } else {
-          console.log('[Express] Skipping googlepay for ' + m.provider + ' (sdk=' + (m.express_config && m.express_config.sdk) + ')');
         }
       } else if (m.code === 'applepay') {
         if (m.express_config && m.express_config.sdk === 'paypal') {
           // Apple Pay via PayPal SDK (native Apple Pay button)
           renderApplePayExpressNative(container, m);
-        } else if (m.express_config && m.express_config.sdk === 'redirect') {
-          // Redirect-based Apple Pay (Mollie, Comgate)
+        } else {
+          // Redirect-based Apple Pay (Mollie, Comgate, Airwallex, etc.)
           renderExpressRedirectButton(container, m, {
             className: 'express-btn--applepay',
             logo: '<img src="/icons/applepay-mark.svg" alt="Apple Pay" class="express-logo">',
           });
-        } else {
-          console.log('[Express] Skipping applepay for ' + m.provider + ' (sdk=' + (m.express_config && m.express_config.sdk) + ')');
         }
       }
     });
