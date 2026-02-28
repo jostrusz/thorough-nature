@@ -3723,7 +3723,8 @@ body {
     var section = document.getElementById('express-checkout');
     if (!topRow || !bottomRow || !section) return;
 
-    container.innerHTML = '';
+    topRow.innerHTML = '';
+    bottomRow.innerHTML = '';
 
     // Collect express-capable methods
     var expressMethods = allPaymentOptions.filter(function(m) {
