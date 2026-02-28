@@ -3178,29 +3178,25 @@ body {
    * PayPal Advanced Card Payments: PCI-compliant hosted fields (like Stripe Elements)
    */
   function initPayPalCard() {
-    if (paypalCardReady || paypalCardMounting) return;
+    // Triple guard: already ready, already mounting, or SDK already loading
+    if (paypalCardReady || paypalCardMounting || paypalSdkLoading) return;
 
     var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
     var rawClientKey = ccOption ? ccOption.client_key : null;
-
-    // Trim whitespace — common issue when copy-pasting from PayPal Dashboard
     paypalClientId = (typeof rawClientKey === 'string') ? rawClientKey.trim() : null;
     var isTestMode = ccOption ? !!ccOption.testmode : false;
 
-    if (!paypalClientId) {
-      console.error('[PayPal Card] No client_id found. Check that PayPal gateway has creditcard method enabled and client_id is set in API keys.');
-      return;
-    }
-
-    if (paypalClientId.length < 20) {
-      console.error('[PayPal Card] Client ID too short (' + paypalClientId.length + ' chars). Expected 50+ chars.');
+    if (!paypalClientId || paypalClientId.length < 20) {
+      console.error('[PayPal Card] Invalid client_id (' + (paypalClientId ? paypalClientId.length : 0) + ' chars)');
       return;
     }
 
     console.log('[PayPal Card] Init — client_id: "' + paypalClientId.substring(0, 8) + '..." (' + paypalClientId.length + ' chars), mode: ' + (isTestMode ? 'sandbox' : 'live'));
 
-    // Load PayPal JS SDK dynamically if not already loaded
     if (typeof window.paypal === 'undefined') {
+      // Lock SDK loading to prevent double script insertion
+      paypalSdkLoading = true;
+
       var sdkBase = isTestMode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
       var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
       var sdkUrl = sdkBase + '?client-id=' + encodeURIComponent(paypalClientId)
@@ -3219,11 +3215,8 @@ body {
       };
 
       script.onerror = function() {
+        paypalSdkLoading = false;
         console.error('[PayPal Card] SDK failed to load');
-        console.error('[PayPal Card] Troubleshooting:');
-        console.error('  1. Verify Client ID in admin (starts with "A", ~80 chars)');
-        console.error('  2. Ensure Advanced Credit and Debit Card Payments is enabled');
-        console.error('  3. Client ID must match ' + (isTestMode ? 'SANDBOX' : 'LIVE') + ' environment');
         var cardErrorsEl = document.getElementById('card-errors');
         if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetaling kon niet geladen worden. Controleer de PayPal Client ID.';
       };
@@ -3258,6 +3251,10 @@ body {
         try { paypalCardFieldsInstance.close(); } catch(e) {}
         paypalCardFieldsInstance = null;
       }
+
+      // Remove any leftover single-container from previous approach
+      var oldContainer = document.getElementById('paypal-card-container');
+      if (oldContainer) oldContainer.remove();
 
       paypalCardFieldsInstance = window.paypal.CardFields({
         createOrder: function() {
@@ -3298,54 +3295,40 @@ body {
         return;
       }
 
-      // Hide our individual field containers — PayPal renders all fields in one iframe
-      var cardNumberEl = document.getElementById('card-number');
-      var expiryEl = document.getElementById('expiry-date');
-      var verificationEl = document.getElementById('verification-code');
-      var holderEl = document.getElementById('card-holder');
-      if (cardNumberEl) cardNumberEl.style.display = 'none';
-      if (expiryEl) expiryEl.style.display = 'none';
-      if (verificationEl) verificationEl.style.display = 'none';
-      if (holderEl) holderEl.style.display = 'none';
-      var labels = document.querySelectorAll('#card-fields .card-field-label');
-      labels.forEach(function(l) { l.style.display = 'none'; });
+      // Individual field rendering — same layout as Mollie/Stripe/Airwallex
+      // Each field renders into its own container as a separate iframe
+      var numberField = paypalCardFieldsInstance.NumberField();
+      var expiryField = paypalCardFieldsInstance.ExpiryField();
+      var cvvField    = paypalCardFieldsInstance.CVVField();
+      var nameField   = paypalCardFieldsInstance.NameField();
 
-      // Create/reuse PayPal card container
-      var paypalContainer = document.getElementById('paypal-card-container');
-      if (!paypalContainer) {
-        paypalContainer = document.createElement('div');
-        paypalContainer.id = 'paypal-card-container';
-        paypalContainer.style.cssText = 'min-height:200px;';
-        var cardFieldsEl = document.getElementById('card-fields');
-        if (cardFieldsEl) {
-          cardFieldsEl.insertBefore(paypalContainer, cardFieldsEl.firstChild);
-        }
-      } else {
-        // Clear previous content
-        paypalContainer.innerHTML = '';
-      }
+      console.log('[PayPal Card] Rendering individual fields...');
 
-      // Render PayPal's complete card form
-      paypalCardFieldsInstance.render(paypalContainer)
+      // Render all 4 fields sequentially to avoid zoid race conditions
+      numberField.render('#card-number')
+        .then(function() {
+          console.log('[PayPal Card] NumberField rendered');
+          return expiryField.render('#expiry-date');
+        })
+        .then(function() {
+          console.log('[PayPal Card] ExpiryField rendered');
+          return cvvField.render('#verification-code');
+        })
+        .then(function() {
+          console.log('[PayPal Card] CVVField rendered');
+          return nameField.render('#card-holder');
+        })
         .then(function() {
           paypalCardReady = true;
           paypalCardMounting = false;
-          console.log('[PayPal Card] Card form rendered successfully');
+          console.log('[PayPal Card] All fields rendered successfully');
         })
         .catch(function(err) {
-          console.error('[PayPal Card] Render failed:', err.message || err);
+          console.error('[PayPal Card] Field render failed:', err.message || err);
           paypalCardMounting = false;
           paypalCardFieldsInstance = null;
 
           if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetaling niet beschikbaar. Neem contact op met de beheerder.';
-
-          // Restore hidden fields
-          if (cardNumberEl) cardNumberEl.style.display = '';
-          if (expiryEl) expiryEl.style.display = '';
-          if (verificationEl) verificationEl.style.display = '';
-          if (holderEl) holderEl.style.display = '';
-          labels.forEach(function(l) { l.style.display = ''; });
-          if (paypalContainer) paypalContainer.remove();
         });
 
     } catch (e) {
@@ -3370,6 +3353,7 @@ body {
   var paypalCardFieldsInstance = null;
   var paypalCardReady = false;
   var paypalCardMounting = false; // Mutex: prevents concurrent mount attempts
+  var paypalSdkLoading = false;  // Mutex: prevents double SDK script loading
   var paypalClientId = null;
 
   // Method descriptions (Dutch)
@@ -5713,7 +5697,7 @@ body {
                     postalCode: customerData.billing_address?.postal_code || customerData.shipping_address?.postal_code || '',
                     countryCode: (customerData.billing_address?.country_code || customerData.shipping_address?.country_code || 'NL').toUpperCase(),
                   },
-                  cardholderName: document.getElementById('paypal-card-name') ? document.getElementById('paypal-card-name').value : '',
+                  // cardholderName is captured automatically by PayPal NameField rendered in #card-holder
                 }).catch(function(submitErr) {
                   reject(submitErr);
                 });
