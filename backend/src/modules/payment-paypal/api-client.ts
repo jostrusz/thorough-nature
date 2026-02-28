@@ -172,11 +172,25 @@ export class PayPalApiClient {
   }
 
   /**
+   * Generate a unique request ID for PayPal idempotency.
+   * Required when payment_source is included in create order request.
+   */
+  private generateRequestId(): string {
+    return "pp-" + Date.now() + "-" + Math.random().toString(36).substring(2, 10)
+  }
+
+  /**
    * Create a PayPal order (checkout)
    * POST /v2/checkout/orders
+   *
+   * PayPal-Request-Id header is REQUIRED when payment_source is present
+   * (APM methods like iDEAL, Bancontact, etc.)
    */
   async createOrder(data: IPayPalOrderData): Promise<any> {
-    const headers = await this.authHeaders()
+    const headers: Record<string, string> = {
+      ...(await this.authHeaders()),
+      "PayPal-Request-Id": this.generateRequestId(),
+    }
     const response = await this.httpClient.post(
       "/v2/checkout/orders",
       data,
