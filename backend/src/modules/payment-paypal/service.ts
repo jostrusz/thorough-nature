@@ -204,6 +204,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
   async initiatePayment(input: any): Promise<any> {
     const { amount, currency_code, data, context } = input
 
+    let orderData: any
     try {
       const client = await this.getPayPalClient()
       const clientIdForFrontend = await this.getClientIdForFrontend()
@@ -236,8 +237,6 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         },
       ]
 
-      let orderData: any
-
       if (isAPM) {
         // ── APM Flow: CAPTURE + auto-capture on approval ──
         const customerName = [
@@ -269,16 +268,19 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
           delete apmPaymentSource.name
         }
 
+        // APMs require experience_context INSIDE the payment_source (not top-level application_context)
+        apmPaymentSource.experience_context = {
+          payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
+          return_url: returnUrl,
+          cancel_url: cancelUrl,
+        }
+
         orderData = {
           intent: "CAPTURE",
           processing_instruction: "ORDER_COMPLETE_ON_PAYMENT_APPROVAL",
           purchase_units: purchaseUnits,
           payment_source: {
             [method]: apmPaymentSource,
-          },
-          application_context: {
-            return_url: returnUrl,
-            cancel_url: cancelUrl,
           },
         }
 
@@ -336,12 +338,24 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         },
       }
     } catch (error: any) {
+      const paypalError = error.response?.data
+      const errorMsg = paypalError?.message || error.message
+      const errorDetails = paypalError?.details
+        ? JSON.stringify(paypalError.details)
+        : "no details"
+      const debugId = paypalError?.debug_id || "none"
+
       this.logger_.error(
-        `[PayPal] Payment initiation failed: ${error.response?.data?.message || error.message}`
+        `[PayPal] Payment initiation failed: ${errorMsg} | debug_id=${debugId} | details=${errorDetails}`
       )
+      // Log the full request payload for debugging
+      this.logger_.error(
+        `[PayPal] Request payload was: ${JSON.stringify(orderData || {})}`
+      )
+
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
-        error.response?.data?.message || error.message || "Failed to create PayPal order"
+        errorMsg || "Failed to create PayPal order"
       )
     }
   }
