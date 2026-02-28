@@ -3192,29 +3192,77 @@ body {
 
     // Load PayPal JS SDK dynamically if not already loaded
     if (typeof window.paypal === 'undefined') {
-      // Use sandbox URL for test mode, live URL for production
       var sdkBase = isTestMode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
       var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
-      var sdkUrl = sdkBase + '?client-id=' + encodeURIComponent(paypalClientId) + '&components=card-fields&currency=' + currency;
-      console.log('[PayPal Card] Loading SDK: mode=' + (isTestMode ? 'sandbox' : 'live') + ', client_id=' + paypalClientId.substring(0, 8) + '..., url=' + sdkUrl);
-      var script = document.createElement('script');
-      script.src = sdkUrl;
-      script.async = true;
-      script.onload = function() {
-        console.log('[PayPal Card] SDK loaded successfully');
-        mountPayPalCardFields();
-      };
-      script.onerror = function() {
-        console.error('[PayPal Card] SDK failed to load (HTTP 400). This usually means Advanced Card Payments is not enabled on this PayPal account.');
-        console.error('[PayPal Card] URL was:', sdkUrl);
-        console.error('[PayPal Card] To fix: Go to PayPal Developer Dashboard → Your App → Features → Enable "Advanced Credit and Debit Card Payments"');
-        var cardErrorsEl = document.getElementById('card-errors');
-        if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetaling niet beschikbaar. Advanced Card Payments moet ingeschakeld worden op het PayPal-account.';
-        // Hide empty card fields so user doesn't see broken form
-        var cardFieldsEl = document.getElementById('card-fields');
-        if (cardFieldsEl) cardFieldsEl.style.display = 'none';
-      };
-      document.head.appendChild(script);
+      var paypalRetryCount = 0;
+
+      // SDK URLs to try in order — different parameter combinations
+      var urls = [
+        // Attempt 1: full params — intent=capture must match backend order intent
+        sdkBase + '?client-id=' + encodeURIComponent(paypalClientId)
+          + '&components=card-fields&currency=' + currency
+          + '&intent=capture&disable-funding=paylater,credit'
+          + (isTestMode ? '&buyer-country=NL' : ''),
+        // Attempt 2: minimal params — only required ones
+        sdkBase + '?client-id=' + encodeURIComponent(paypalClientId)
+          + '&components=card-fields&currency=' + currency,
+        // Attempt 3: include buttons component (some setups require both)
+        sdkBase + '?client-id=' + encodeURIComponent(paypalClientId)
+          + '&components=buttons,card-fields&currency=' + currency
+      ];
+
+      console.log('[PayPal Card] Mode=' + (isTestMode ? 'sandbox' : 'live')
+        + ', client_id=' + paypalClientId.substring(0, 8) + '...');
+
+      function loadPayPalScript(url, attempt) {
+        console.log('[PayPal Card] Attempt ' + attempt + '/' + urls.length + ': ' + url);
+        var script = document.createElement('script');
+        script.src = url;
+        script.async = true;
+        script.setAttribute('data-sdk-integration-source', 'custom');
+
+        script.onload = function() {
+          console.log('[PayPal Card] SDK loaded on attempt ' + attempt);
+          mountPayPalCardFields();
+        };
+
+        script.onerror = function() {
+          console.error('[PayPal Card] Attempt ' + attempt + ' failed for: ' + url);
+          // Try to get HTTP status from Performance API (Chrome 109+)
+          if (window.performance && window.performance.getEntriesByType) {
+            var resources = window.performance.getEntriesByType('resource');
+            resources.filter(function(r) {
+              return r.name.indexOf('paypal.com/sdk/js') !== -1;
+            }).forEach(function(r) {
+              console.error('[PayPal Card] Resource status:', r.responseStatus || 'unknown',
+                'duration:', Math.round(r.duration) + 'ms');
+            });
+          }
+          // Remove failed script to avoid conflicts on retry
+          script.remove();
+
+          // Try next URL?
+          paypalRetryCount++;
+          if (paypalRetryCount < urls.length) {
+            console.warn('[PayPal Card] Retrying with different parameters...');
+            loadPayPalScript(urls[paypalRetryCount], paypalRetryCount + 1);
+          } else {
+            // All attempts exhausted
+            console.error('[PayPal Card] All ' + urls.length + ' attempts failed. Troubleshooting:');
+            console.error('  1. PayPal Developer Dashboard → App → Features → "Advanced Credit and Debit Card Payments" must be ENABLED');
+            console.error('  2. After enabling, wait up to 24 hours for propagation');
+            console.error('  3. Verify client ID matches ' + (isTestMode ? 'SANDBOX' : 'LIVE') + ' environment');
+            console.error('  4. Verify currency ' + currency + ' is supported for card payments');
+            var cardErrorsEl = document.getElementById('card-errors');
+            if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetaling niet beschikbaar. Controleer of Advanced Card Payments is ingeschakeld op het PayPal-account.';
+            var cardFieldsEl = document.getElementById('card-fields');
+            if (cardFieldsEl) cardFieldsEl.style.display = 'none';
+          }
+        };
+        document.head.appendChild(script);
+      }
+
+      loadPayPalScript(urls[0], 1);
     } else {
       mountPayPalCardFields();
     }
