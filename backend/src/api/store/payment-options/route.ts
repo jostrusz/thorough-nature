@@ -112,8 +112,9 @@ export async function GET(
               method.environment = gw.mode === "live" ? "prod" : "demo"
             } else if (gw.provider === "paypal") {
               method.component = "paypal-card-fields"
-              // PayPal uses client_id for JS SDK initialization
-              method.client_key = keys?.client_id || keys?.api_key || null
+              // PayPal uses client_id for JS SDK initialization — trim to avoid whitespace from copy-paste
+              const rawPaypalKey = keys?.client_id || keys?.api_key || null
+              method.client_key = typeof rawPaypalKey === "string" ? rawPaypalKey.trim() : null
               method.testmode = gw.mode === "test"
             }
 
