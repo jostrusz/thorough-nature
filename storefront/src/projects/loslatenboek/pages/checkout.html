@@ -4881,16 +4881,17 @@ body {
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
-      // Stap 3: Cart updaten met klantgegevens
+      // Stap 3: Cart updaten met klantgegevens (must complete before shipping)
       return medusaFetch('/store/carts/' + cartId, {
         method: 'POST',
         body: JSON.stringify(customerData)
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
-      // Stap 3a: Promo code toepassen via Medusa Promotions API (opnieuw als cart hergebruikt wordt)
+      // Stap 3a+3b: Promo code + Shipping method IN PARALLEL (saves ~400ms)
+      var promoPromise;
       if (savedPromoCode) {
-        return medusaFetch('/store/carts/' + cartId + '/promotions', {
+        promoPromise = medusaFetch('/store/carts/' + cartId + '/promotions', {
           method: 'POST',
           body: JSON.stringify({ promo_codes: [savedPromoCode] })
         }).then(function(promoRes) {
@@ -4899,31 +4900,24 @@ body {
           if (promoRes && promoRes.cart) {
             updateOrderSummary(promoRes.cart);
           }
-          return cartId;
         }).catch(function(err) {
-          // Medusa weigert de code — toon fout, verberg badge, stop NIET de bestelling
           console.warn('Promo code geweigerd door Medusa:', err.message || err);
           savedPromoCode = '';
           promoAppliedToCart = false;
-          // Toon foutmelding
           if (promoMessage) {
             promoMessage.textContent = 'Ongeldige kortingscode';
             promoMessage.className = 'promo-message error';
           }
-          // Verberg badge, toon toggle weer
           promoApplied.classList.remove('is-visible');
           promoToggle.style.display = '';
-          // Verberg korting in samenvatting
           var discountEl = document.getElementById('summary-discount');
           if (discountEl) discountEl.style.display = 'none';
-          return cartId;
         });
+      } else {
+        promoPromise = Promise.resolve();
       }
-      return cartId;
-    })
-    .then(function(cartId) {
-      // Stap 3b: Shipping method toevoegen
-      return medusaFetch('/store/shipping-options?cart_id=' + cartId, {
+
+      var shippingPromise = medusaFetch('/store/shipping-options?cart_id=' + cartId, {
         method: 'GET'
       }).then(function(shipRes) {
         var options = shipRes.shipping_options || [];
@@ -4934,10 +4928,10 @@ body {
           method: 'POST',
           body: JSON.stringify({ option_id: options[0].id })
         });
-      }).then(function() {
-        return medusaFetch('/store/carts/' + cartId, { method: 'GET' });
-      }).then(function(cartRes) {
-        updateOrderSummary(cartRes.cart);
+      });
+
+      // Run promo + shipping in parallel, then continue
+      return Promise.all([promoPromise, shippingPromise]).then(function() {
         return cartId;
       });
     })
