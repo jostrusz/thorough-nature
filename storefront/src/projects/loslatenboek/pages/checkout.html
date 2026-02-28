@@ -3279,9 +3279,16 @@ body {
             'font-size': '14px',
             'font-family': '"DM Sans", sans-serif',
             'color': '#1A1A1A',
+            'padding': '0 12px',
+          },
+          'input:focus': {
+            'color': '#1A1A1A',
           },
           '.invalid': {
             'color': '#DC2626',
+          },
+          'body': {
+            'padding': '0',
           },
         },
       });
@@ -3296,11 +3303,25 @@ body {
       }
 
       // Individual field rendering — same layout as Mollie/Stripe/Airwallex
-      // Each field renders into its own container as a separate iframe
       var numberField = paypalCardFieldsInstance.NumberField();
       var expiryField = paypalCardFieldsInstance.ExpiryField();
       var cvvField    = paypalCardFieldsInstance.CVVField();
       var nameField   = paypalCardFieldsInstance.NameField();
+
+      // Strip our container styling — PayPal iframe becomes the visible input
+      // (our containers have border/padding/background that creates a "double frame")
+      var fieldIds = ['card-number', 'expiry-date', 'verification-code', 'card-holder'];
+      fieldIds.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+          el.style.border = 'none';
+          el.style.padding = '0';
+          el.style.background = 'transparent';
+          el.style.height = 'auto';
+          el.style.minHeight = '42px';
+          el.style.display = 'block';
+        }
+      });
 
       console.log('[PayPal Card] Rendering individual fields...');
 
@@ -3327,6 +3348,19 @@ body {
           console.error('[PayPal Card] Field render failed:', err.message || err);
           paypalCardMounting = false;
           paypalCardFieldsInstance = null;
+
+          // Restore container styling on failure
+          fieldIds.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) {
+              el.style.border = '1.5px solid var(--border)';
+              el.style.padding = '0 12px';
+              el.style.background = 'var(--white)';
+              el.style.height = '42px';
+              el.style.display = 'flex';
+              el.style.alignItems = 'center';
+            }
+          });
 
           if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetaling niet beschikbaar. Neem contact op met de beheerder.';
         });
