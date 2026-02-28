@@ -3196,7 +3196,7 @@ body {
       var sdkBase = isTestMode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
       var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
       var sdkUrl = sdkBase + '?client-id=' + encodeURIComponent(paypalClientId) + '&components=card-fields&currency=' + currency;
-      console.log('[PayPal Card] Loading PayPal JS SDK (' + (isTestMode ? 'sandbox' : 'live') + ')...');
+      console.log('[PayPal Card] Loading SDK: mode=' + (isTestMode ? 'sandbox' : 'live') + ', client_id=' + paypalClientId.substring(0, 8) + '..., url=' + sdkUrl);
       var script = document.createElement('script');
       script.src = sdkUrl;
       script.async = true;
@@ -3205,9 +3205,14 @@ body {
         mountPayPalCardFields();
       };
       script.onerror = function() {
-        console.error('[PayPal Card] Failed to load SDK from:', sdkUrl);
+        console.error('[PayPal Card] SDK failed to load (HTTP 400). This usually means Advanced Card Payments is not enabled on this PayPal account.');
+        console.error('[PayPal Card] URL was:', sdkUrl);
+        console.error('[PayPal Card] To fix: Go to PayPal Developer Dashboard → Your App → Features → Enable "Advanced Credit and Debit Card Payments"');
         var cardErrorsEl = document.getElementById('card-errors');
-        if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetaling kon niet geladen worden. Probeer de pagina te vernieuwen.';
+        if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetaling niet beschikbaar. Advanced Card Payments moet ingeschakeld worden op het PayPal-account.';
+        // Hide empty card fields so user doesn't see broken form
+        var cardFieldsEl = document.getElementById('card-fields');
+        if (cardFieldsEl) cardFieldsEl.style.display = 'none';
       };
       document.head.appendChild(script);
     } else {
