@@ -1814,11 +1814,15 @@ body {
   letter-spacing: 0.1em;
   margin-bottom: 10px;
 }
-/* Express buttons container */
+/* Express buttons container — horizontal row, equal width */
 .express-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  gap: 8px;
+}
+.express-buttons > * {
+  flex: 1;
+  min-width: 0;
 }
 /* PayPal SDK renders its own button in this container */
 .express-paypal-sdk-container {
@@ -1853,13 +1857,12 @@ body {
   transform: scale(0.985);
 }
 .express-googlepay-btn svg {
-  height: 26px;
+  height: 22px;
   width: auto;
 }
 /* Apple Pay native button container */
 #express-applepay-container {
   min-height: 48px;
-  width: 100%;
   border-radius: 25px;
   overflow: hidden;
   transition: filter 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
@@ -1962,7 +1965,7 @@ body {
 }
 .express-btn.loading .express-spinner { display: block; }
 .express-btn img.express-logo {
-  height: 26px;
+  height: 22px;
   width: auto;
 }
 .express-checkout-divider {
