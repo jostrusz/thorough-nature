@@ -3494,12 +3494,14 @@ body {
     var isOrderBump = orderBumpActive;
     var promoCode = savedPromoCode;
 
+    console.log('[Express Cart] Creating cart — region:', currentRegionId, 'bundleQty:', bundleQty, 'variantId:', VARIANT_ID);
     return medusaFetch('/store/carts', {
       method: 'POST',
       body: JSON.stringify({ region_id: currentRegionId })
     })
     .then(function(res) {
       var cartId = (res.cart || res).id;
+      console.log('[Express Cart] Cart created:', cartId, '→ adding line items');
 
       // Add main product via bundle endpoint (applies server-side pricing)
       return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
@@ -3551,11 +3553,13 @@ body {
    * Returns Promise<sessionData> (the payment session's .data object).
    */
   function createExpressPaymentSession(cartId, providerId, sessionData) {
+    console.log('[Express Session] Creating payment collection for cart:', cartId);
     return medusaFetch('/store/payment-collections', {
       method: 'POST',
       body: JSON.stringify({ cart_id: cartId })
     }).then(function(pcRes) {
       var pcId = pcRes.payment_collection.id;
+      console.log('[Express Session] Payment collection created:', pcId, '→ creating session with provider:', providerId);
       var body = { provider_id: providerId };
       if (sessionData) body.data = sessionData;
       return medusaFetch('/store/payment-collections/' + pcId + '/payment-sessions', {
@@ -3564,7 +3568,9 @@ body {
       });
     }).then(function(sessionRes) {
       var sessions = sessionRes.payment_collection.payment_sessions || [];
-      return sessions.length > 0 ? sessions[sessions.length - 1].data : null;
+      var lastSession = sessions.length > 0 ? sessions[sessions.length - 1] : null;
+      console.log('[Express Session] Session created — id:', lastSession && lastSession.id, 'data:', JSON.stringify(lastSession && lastSession.data));
+      return lastSession ? lastSession.data : null;
     });
   }
 
@@ -3727,15 +3733,18 @@ body {
         },
 
         createOrder: function() {
+          console.log('[Express PayPal] createOrder started — bundleQty:', selectedBundleQty, 'variantId:', VARIANT_ID, 'regionId:', currentRegionId);
           return createExpressCart()
             .then(function(cartId) {
               expressCartId = cartId;
+              console.log('[Express PayPal] Cart created:', cartId, '→ creating payment session with provider:', method.provider_id);
               return createExpressPaymentSession(cartId, method.provider_id, {
                 method: 'paypal',
                 return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
               });
             })
             .then(function(sessionData) {
+              console.log('[Express PayPal] Payment session data:', JSON.stringify(sessionData));
               // Extract PayPal order ID from session data
               var orderId = sessionData && (sessionData.id || sessionData.orderID || sessionData.order_id);
               if (!orderId) {
@@ -3744,6 +3753,10 @@ body {
               }
               console.log('[Express PayPal] Order created:', orderId);
               return orderId;
+            })
+            .catch(function(err) {
+              console.error('[Express PayPal] createOrder FAILED:', err.message || err);
+              throw err;
             });
         },
 
