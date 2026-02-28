@@ -3588,12 +3588,21 @@ body {
       localStorage.removeItem('medusa_order_bump');
     }
 
+    console.log('[Express] Completing cart:', cartId);
     return medusaFetch('/store/carts/' + cartId + '/complete', {
       method: 'POST'
     }).then(function(completeRes) {
       var order = completeRes.order || completeRes;
+      console.log('[Express] Order completed:', order.id, 'display_id:', order.display_id);
+
       localStorage.setItem('medusa_order_id', order.id || '');
       localStorage.setItem('medusa_order_display_id', order.display_id || '');
+
+      // Cleanup abandoned checkout recovery data (same as regular flow)
+      localStorage.removeItem('checkout_draft');
+      localStorage.removeItem('background_cart_id');
+
+      // Redirect to upsell or thank-you page
       if (PROJECT_CONFIG.upsellEnabled === false) {
         window.location.href = PROJECT_CONFIG.thankYouUrl;
       } else if (orderBumpActive) {
@@ -3601,6 +3610,16 @@ body {
         window.location.href = PROJECT_CONFIG.thankYouUrl;
       } else {
         window.location.href = PROJECT_CONFIG.upsellUrl;
+      }
+    }).catch(function(err) {
+      console.error('[Express] Cart completion failed:', err);
+      // Show error in preloader (same UX as regular flow)
+      var preloader = document.querySelector('.payment-preloader');
+      if (preloader) {
+        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Er ging iets mis bij het verwerken van je betaling.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Probeer het opnieuw of neem contact met ons op.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Opnieuw proberen</a></div>';
+      } else {
+        hideExpressPreloader();
+        alert('Er is een fout opgetreden. Probeer het opnieuw.');
       }
     });
   }
@@ -3831,9 +3850,14 @@ body {
               return handleExpressOrderComplete(expressCartId);
             })
             .catch(function(err) {
-              hideExpressPreloader();
               console.error('[Express PayPal] Completion error:', err);
-              alert('Er is een fout opgetreden bij het afronden van je PayPal-betaling. Probeer het opnieuw of gebruik het formulier hieronder.');
+              var preloader = document.querySelector('.payment-preloader');
+              if (preloader) {
+                preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Er ging iets mis bij het verwerken van je PayPal-betaling.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Probeer het opnieuw of gebruik het formulier hieronder.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Opnieuw proberen</a></div>';
+              } else {
+                hideExpressPreloader();
+                alert('Er is een fout opgetreden bij het afronden van je PayPal-betaling.');
+              }
             });
         },
 
