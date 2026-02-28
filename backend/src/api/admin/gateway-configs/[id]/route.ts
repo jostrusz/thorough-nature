@@ -26,6 +26,11 @@ export async function GET(
 
 /**
  * POST /admin/gateway-configs/:id — Update a gateway config
+ *
+ * Key protection: If live_keys or test_keys contain masked values
+ * (e.g. "AS0n****g0VS"), those individual key fields are stripped
+ * and the existing database values are preserved. This prevents
+ * accidentally overwriting real API keys with masked placeholders.
  */
 export async function POST(
   req: MedusaRequest,
@@ -38,6 +43,28 @@ export async function POST(
 
   try {
     const data = req.body as Record<string, any>
+
+    // Protect against saving masked keys back to the database.
+    // The admin list endpoint masks keys for display (e.g. "AS0n****g0VS").
+    // If those masked values are sent back in an update, we must preserve
+    // the original unmasked values from the database.
+    if (data.live_keys || data.test_keys) {
+      const existing = await gatewayService.retrieveGatewayConfig(id)
+
+      if (data.live_keys && typeof data.live_keys === "object") {
+        data.live_keys = stripMaskedKeys(
+          data.live_keys,
+          existing.live_keys || {}
+        )
+      }
+      if (data.test_keys && typeof data.test_keys === "object") {
+        data.test_keys = stripMaskedKeys(
+          data.test_keys,
+          existing.test_keys || {}
+        )
+      }
+    }
+
     const gateway = await gatewayService.updateGatewayConfigs({
       id,
       ...data,
@@ -85,4 +112,30 @@ export async function DELETE(
   } catch (error: any) {
     res.status(500).json({ error: error.message })
   }
+}
+
+/**
+ * Strip masked key values and replace them with existing (unmasked) database values.
+ * A key is considered "masked" if it contains "****".
+ * - If the incoming value is masked → use existing DB value
+ * - If the incoming value is new/unmasked → use the new value
+ * - Keys that don't exist in incoming data are not touched
+ */
+function stripMaskedKeys(
+  incoming: Record<string, any>,
+  existing: Record<string, any>
+): Record<string, any> {
+  const result: Record<string, any> = { ...incoming }
+  for (const [key, value] of Object.entries(result)) {
+    if (typeof value === "string" && value.includes("****")) {
+      // Masked value — preserve the original from the database
+      if (existing[key] !== undefined) {
+        result[key] = existing[key]
+      } else {
+        // No existing value and the incoming is masked — remove it entirely
+        delete result[key]
+      }
+    }
+  }
+  return result
 }

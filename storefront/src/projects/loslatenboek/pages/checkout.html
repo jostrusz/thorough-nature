@@ -3242,8 +3242,8 @@ body {
     paypalClientId = (typeof rawClientKey === 'string') ? rawClientKey.trim() : null;
     var isTestMode = !!ccOption.testmode;
 
-    if (!paypalClientId || paypalClientId.length < 20) {
-      console.error('[PayPal Card] Invalid client_id');
+    if (!paypalClientId || paypalClientId.indexOf('****') !== -1 || paypalClientId.length < 20) {
+      console.error('[PayPal Card] Invalid or masked client_id (length=' + (paypalClientId ? paypalClientId.length : 0) + '). Re-enter the PayPal client_id in admin.');
       return;
     }
 
@@ -3703,8 +3703,9 @@ body {
     var clientId = method.express_config.client_id;
     var isTestMode = method.express_config.testmode;
 
-    if (!clientId) {
-      console.error('[Express PayPal] No client_id configured');
+    if (!clientId || clientId.indexOf('****') !== -1 || clientId.length < 20) {
+      console.error('[Express PayPal] Invalid or missing client_id (length=' + (clientId ? clientId.length : 0) + '). Re-enter the PayPal client_id in admin.');
+      container.removeChild(wrapper);
       return;
     }
 

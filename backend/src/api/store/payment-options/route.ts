@@ -99,9 +99,14 @@ export async function GET(
 
             if (gw.provider === "paypal") {
               const rawKey = keys?.client_id || keys?.api_key || null
+              // Skip masked keys (e.g. "AS0n****g0VS") — they won't work with the SDK
+              const cleanKey =
+                typeof rawKey === "string" && !rawKey.includes("****")
+                  ? rawKey.trim()
+                  : null
               method.express_config = {
                 sdk: "paypal",
-                client_id: typeof rawKey === "string" ? rawKey.trim() : null,
+                client_id: cleanKey,
                 testmode: gw.mode === "test",
               }
             } else if (gw.provider === "stripe") {
@@ -147,8 +152,12 @@ export async function GET(
             } else if (gw.provider === "paypal") {
               method.component = "paypal-card-fields"
               // PayPal uses client_id for JS SDK initialization — trim to avoid whitespace from copy-paste
+              // Skip masked keys (e.g. "AS0n****g0VS") — they won't work with the SDK
               const rawPaypalKey = keys?.client_id || keys?.api_key || null
-              method.client_key = typeof rawPaypalKey === "string" ? rawPaypalKey.trim() : null
+              method.client_key =
+                typeof rawPaypalKey === "string" && !rawPaypalKey.includes("****")
+                  ? rawPaypalKey.trim()
+                  : null
               method.testmode = gw.mode === "test"
             }
 
