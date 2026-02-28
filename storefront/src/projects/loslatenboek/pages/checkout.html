@@ -1818,12 +1818,12 @@ body {
 .express-buttons {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 /* PayPal SDK renders its own button in this container */
 .express-paypal-sdk-container {
-  min-height: 45px;
-  border-radius: 25px;
+  min-height: 48px;
+  border-radius: 6px;
   overflow: hidden;
 }
 /* Generic express button (Google Pay, Apple Pay, redirect-based PayPal) */
@@ -1832,20 +1832,20 @@ body {
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 13px 24px;
+  padding: 0;
   border: none;
-  border-radius: 25px;
+  border-radius: 6px;
   cursor: pointer;
   transition: filter 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
   position: relative;
-  font-family: 'DM Sans', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'DM Sans', sans-serif;
   font-size: 16px;
   font-weight: 600;
-  min-height: 48px;
+  height: 48px;
 }
 .express-btn:hover {
-  filter: brightness(0.96);
-  box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+  filter: brightness(0.94);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 .express-btn:active {
   transform: scale(0.985);
@@ -1861,15 +1861,24 @@ body {
 .express-btn--googlepay {
   background: #000;
   color: #fff;
+  border: 1px solid #747775;
 }
 .express-btn--applepay {
   background: #000;
   color: #fff;
-  -webkit-appearance: -apple-pay-button;
 }
+/* Native Apple Pay button on Safari */
 @supports (-webkit-appearance: -apple-pay-button) {
-  .express-btn--applepay { -webkit-apple-pay-button-type: plain; min-height: 48px; padding: 0; }
+  .express-btn--applepay {
+    -webkit-appearance: -apple-pay-button;
+    -apple-pay-button-type: plain;
+    -apple-pay-button-style: black;
+    height: 48px;
+    padding: 0;
+    border-radius: 6px;
+  }
   .express-btn--applepay .express-btn-content { display: none; }
+  .express-btn--applepay .express-spinner { display: none; }
 }
 .express-btn-content {
   display: flex;
@@ -1889,9 +1898,13 @@ body {
   animation: spin 0.7s linear infinite;
   position: absolute;
 }
+.express-btn--paypal .express-spinner {
+  border: 2.5px solid rgba(0,48,135,0.15);
+  border-top-color: #003087;
+}
 .express-btn.loading .express-spinner { display: block; }
 .express-btn img.express-logo {
-  height: 22px;
+  height: 26px;
   width: auto;
 }
 .express-checkout-divider {
@@ -3446,7 +3459,7 @@ body {
       + '&currency=' + currency
       + '&locale=nl_NL';
 
-    console.log('[PayPal SDK] Loading components:', components.join(','));
+    console.log('[PayPal SDK] Loading URL:', sdkUrl);
 
     _paypalSdkPromise = new Promise(function(resolve, reject) {
       var script = document.createElement('script');
@@ -3457,9 +3470,9 @@ body {
         console.log('[PayPal SDK] Loaded successfully');
         resolve();
       };
-      script.onerror = function() {
+      script.onerror = function(e) {
         _paypalSdkPromise = null;
-        console.error('[PayPal SDK] Failed to load');
+        console.error('[PayPal SDK] Failed to load URL:', sdkUrl, 'Error:', e);
         reject(new Error('PayPal SDK failed to load'));
       };
       document.head.appendChild(script);
@@ -3644,7 +3657,7 @@ body {
           // Redirect-based PayPal (Mollie, Comgate, etc.)
           renderExpressRedirectButton(container, m, {
             className: 'express-btn--paypal',
-            logo: '<img src="/icons/paypal.svg" alt="PayPal" class="express-logo" onerror="this.outerHTML=\'<span>PayPal</span>\'">',
+            logo: '<img src="/icons/paypal-mark.svg" alt="PayPal" class="express-logo">',
           });
         }
       } else if (m.code === 'googlepay') {
@@ -3653,7 +3666,7 @@ body {
         if (m.express_config && m.express_config.sdk === 'redirect') {
           renderExpressRedirectButton(container, m, {
             className: 'express-btn--googlepay',
-            logo: '<img src="/icons/googlepay.svg" alt="Google Pay" class="express-logo" onerror="this.outerHTML=\'<span>Google Pay</span>\'">',
+            logo: '<img src="/icons/googlepay-mark.svg" alt="Google Pay" class="express-logo">',
           });
         } else {
           console.log('[Express] Skipping googlepay for ' + m.provider + ' (needs client-side SDK)');
@@ -3663,7 +3676,7 @@ body {
         if (m.express_config && m.express_config.sdk === 'redirect') {
           renderExpressRedirectButton(container, m, {
             className: 'express-btn--applepay',
-            logo: '<img src="/icons/applepay.svg" alt="Apple Pay" class="express-logo" onerror="this.outerHTML=\'<span>Apple Pay</span>\'">',
+            logo: '<img src="/icons/applepay-mark.svg" alt="Apple Pay" class="express-logo">',
           });
         } else {
           console.log('[Express] Skipping applepay for ' + m.provider + ' (needs client-side SDK)');
