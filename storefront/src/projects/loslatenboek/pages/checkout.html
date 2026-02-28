@@ -1826,6 +1826,20 @@ body {
   border-radius: 6px;
   overflow: hidden;
 }
+/* Google Pay button container — Google Pay JS API renders its own button */
+#express-googlepay-container {
+  border-radius: 6px;
+  overflow: hidden;
+  min-height: 48px;
+}
+#express-googlepay-container button {
+  border-radius: 6px !important;
+  min-height: 48px;
+}
+/* Apple Pay native button container */
+#express-applepay-container {
+  min-height: 48px;
+}
 /* Generic express button (Google Pay, Apple Pay, redirect-based PayPal) */
 .express-btn {
   display: flex;
@@ -3656,6 +3670,19 @@ body {
       return m.express === true;
     });
 
+    // De-duplicate: if the same method code exists from multiple providers,
+    // prefer sdk='paypal' (native SDK) over 'redirect' or other SDKs
+    var sdkPriority = { paypal: 0, stripe: 1, redirect: 2, airwallex: 3 };
+    var deduped = {};
+    expressMethods.forEach(function(m) {
+      var sdk = m.express_config && m.express_config.sdk || 'redirect';
+      var existing = deduped[m.code];
+      if (!existing || (sdkPriority[sdk] || 99) < (sdkPriority[existing.express_config && existing.express_config.sdk || 'redirect'] || 99)) {
+        deduped[m.code] = m;
+      }
+    });
+    expressMethods = Object.keys(deduped).map(function(k) { return deduped[k]; });
+
     // Apple Pay: device check
     expressMethods = expressMethods.filter(function(m) {
       if (m.code === 'applepay') {
@@ -3686,25 +3713,30 @@ body {
           });
         }
       } else if (m.code === 'googlepay') {
-        // Only redirect-based providers (Mollie, Comgate) support hosted Google Pay
-        // Airwallex/Stripe need client-side SDK — not yet implemented for express
-        if (m.express_config && m.express_config.sdk === 'redirect') {
+        if (m.express_config && m.express_config.sdk === 'paypal') {
+          // Google Pay via PayPal SDK (native Google Pay button)
+          renderGooglePayExpressNative(container, m);
+        } else if (m.express_config && m.express_config.sdk === 'redirect') {
+          // Redirect-based Google Pay (Mollie, Comgate)
           renderExpressRedirectButton(container, m, {
             className: 'express-btn--googlepay',
             logo: '<img src="/icons/googlepay-mark.svg" alt="Google Pay" class="express-logo">',
           });
         } else {
-          console.log('[Express] Skipping googlepay for ' + m.provider + ' (needs client-side SDK)');
+          console.log('[Express] Skipping googlepay for ' + m.provider + ' (sdk=' + (m.express_config && m.express_config.sdk) + ')');
         }
       } else if (m.code === 'applepay') {
-        // Same as Google Pay — only redirect-based providers
-        if (m.express_config && m.express_config.sdk === 'redirect') {
+        if (m.express_config && m.express_config.sdk === 'paypal') {
+          // Apple Pay via PayPal SDK (native Apple Pay button)
+          renderApplePayExpressNative(container, m);
+        } else if (m.express_config && m.express_config.sdk === 'redirect') {
+          // Redirect-based Apple Pay (Mollie, Comgate)
           renderExpressRedirectButton(container, m, {
             className: 'express-btn--applepay',
             logo: '<img src="/icons/applepay-mark.svg" alt="Apple Pay" class="express-logo">',
           });
         } else {
-          console.log('[Express] Skipping applepay for ' + m.provider + ' (needs client-side SDK)');
+          console.log('[Express] Skipping applepay for ' + m.provider + ' (sdk=' + (m.express_config && m.express_config.sdk) + ')');
         }
       }
     });
@@ -3921,6 +3953,377 @@ body {
           console.error('[Express ' + method.code + '] Error:', err);
           alert('Er is een fout opgetreden. Probeer het opnieuw of gebruik het formulier hieronder.');
         });
+    });
+  }
+
+  /**
+   * Load Google Pay JS API (pay.google.com) — returns Promise.
+   */
+  var _googlePayJsPromise = null;
+  function ensureGooglePayJsLoaded() {
+    if (window.google && window.google.payments) return Promise.resolve();
+    if (_googlePayJsPromise) return _googlePayJsPromise;
+    _googlePayJsPromise = new Promise(function(resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://pay.google.com/gp/p/js/pay.js';
+      s.async = true;
+      s.onload = resolve;
+      s.onerror = function() { _googlePayJsPromise = null; reject(new Error('Google Pay JS failed to load')); };
+      document.head.appendChild(s);
+    });
+    return _googlePayJsPromise;
+  }
+
+  /**
+   * Render Google Pay express button via PayPal SDK + Google Pay JS API.
+   * Flow: paypal.Googlepay().config() → isReadyToPay → render button →
+   *       click → create order → loadPaymentData → confirmOrder → capture
+   */
+  function renderGooglePayExpressNative(container, method) {
+    var wrapper = document.createElement('div');
+    wrapper.id = 'express-googlepay-container';
+    wrapper.style.minHeight = '48px';
+    container.appendChild(wrapper);
+
+    var clientId = method.express_config.client_id;
+    var isTestMode = method.express_config.testmode;
+
+    if (!clientId || clientId.length < 20) {
+      console.error('[Express Google Pay] No valid PayPal client_id');
+      container.removeChild(wrapper);
+      return;
+    }
+
+    // Load both PayPal SDK (with googlepay component) and Google Pay JS API
+    ensurePayPalSdkLoaded(clientId, isTestMode, function() {
+      if (!window.paypal || !window.paypal.Googlepay) {
+        console.error('[Express Google Pay] Googlepay component not available in PayPal SDK');
+        container.removeChild(wrapper);
+        return;
+      }
+
+      ensureGooglePayJsLoaded().then(function() {
+        var googlepay = paypal.Googlepay();
+
+        // Get PayPal Google Pay config (merchant info, allowed payment methods)
+        googlepay.config().then(function(googlePayConfig) {
+          console.log('[Express Google Pay] Config received, checking eligibility...');
+
+          var paymentsClient = new google.payments.api.PaymentsClient({
+            environment: isTestMode ? 'TEST' : 'PRODUCTION',
+            paymentDataCallbacks: {
+              onPaymentAuthorized: onPaymentAuthorized
+            }
+          });
+
+          // Check if Google Pay is available on this device/browser
+          paymentsClient.isReadyToPay({
+            apiVersion: 2,
+            apiVersionMinor: 0,
+            allowedPaymentMethods: googlePayConfig.allowedPaymentMethods
+          }).then(function(response) {
+            if (!response.result) {
+              console.log('[Express Google Pay] Not available on this device');
+              container.removeChild(wrapper);
+              return;
+            }
+
+            console.log('[Express Google Pay] Available — rendering button');
+
+            // Create and mount the Google Pay button
+            var gpButton = paymentsClient.createButton({
+              onClick: onGooglePayClicked,
+              buttonColor: 'black',
+              buttonType: 'pay',
+              buttonSizeMode: 'fill',
+              buttonLocale: 'nl',
+              allowedPaymentMethods: googlePayConfig.allowedPaymentMethods
+            });
+            wrapper.appendChild(gpButton);
+            // Style the wrapper to match express button height
+            wrapper.style.minHeight = '0';
+            var gpIframe = wrapper.querySelector('div');
+            if (gpIframe) gpIframe.style.borderRadius = '6px';
+
+          }).catch(function(err) {
+            console.error('[Express Google Pay] isReadyToPay error:', err);
+            container.removeChild(wrapper);
+          });
+
+          var expressCartId = null;
+          var expressOrderId = null;
+
+          function onGooglePayClicked() {
+            console.log('[Express Google Pay] Button clicked — creating cart + order');
+
+            createExpressCart().then(function(cartId) {
+              expressCartId = cartId;
+              return createExpressPaymentSession(cartId, method.provider_id, {
+                method: 'paypal',  // PayPal order for Google Pay
+                express: true,
+              });
+            }).then(function(sessionData) {
+              expressOrderId = sessionData.paypalOrderId || sessionData.id;
+              console.log('[Express Google Pay] PayPal order:', expressOrderId);
+
+              var totalPrice = sessionData.amount || '35.00';
+              var currencyCode = sessionData.currency_code || 'EUR';
+
+              var paymentDataRequest = {
+                apiVersion: 2,
+                apiVersionMinor: 0,
+                allowedPaymentMethods: googlePayConfig.allowedPaymentMethods,
+                transactionInfo: {
+                  currencyCode: currencyCode,
+                  totalPriceStatus: 'FINAL',
+                  totalPrice: totalPrice,
+                },
+                merchantInfo: googlePayConfig.merchantInfo,
+                callbackIntents: ['PAYMENT_AUTHORIZATION'],
+              };
+
+              return paymentsClient.loadPaymentData(paymentDataRequest);
+            }).catch(function(err) {
+              if (err.statusCode === 'CANCELED') {
+                console.log('[Express Google Pay] Cancelled by user');
+                return;
+              }
+              console.error('[Express Google Pay] Error:', err);
+            });
+          }
+
+          function onPaymentAuthorized(paymentData) {
+            return new Promise(function(resolve) {
+              showExpressPreloader();
+              console.log('[Express Google Pay] Payment authorized — confirming with PayPal');
+
+              googlepay.confirmOrder({
+                orderId: expressOrderId,
+                paymentMethodData: paymentData.paymentMethodData,
+              }).then(function(confirmResult) {
+                console.log('[Express Google Pay] Confirmed:', confirmResult.status);
+
+                if (confirmResult.status === 'PAYER_ACTION_REQUIRED') {
+                  // 3DS required — PayPal SDK handles it
+                  console.log('[Express Google Pay] 3DS required');
+                  // TODO: handle 3DS if needed
+                }
+
+                // Extract payer info from Google Pay paymentData
+                var contact = paymentData.shippingAddress || {};
+                var email = paymentData.email || '';
+
+                var customerData = {
+                  email: email,
+                  shipping_address: {
+                    first_name: (contact.name || '').split(' ')[0] || '',
+                    last_name: (contact.name || '').split(' ').slice(1).join(' ') || '',
+                    address_1: contact.address1 || '',
+                    city: contact.locality || '',
+                    postal_code: contact.postalCode || '',
+                    country_code: (contact.countryCode || 'NL').toLowerCase(),
+                    phone: contact.phoneNumber || '',
+                  }
+                };
+                customerData.billing_address = Object.assign({}, customerData.shipping_address);
+
+                localStorage.setItem('medusa_customer', JSON.stringify({
+                  email: email,
+                  first_name: customerData.shipping_address.first_name,
+                  last_name: customerData.shipping_address.last_name,
+                }));
+
+                // Update cart → add shipping → complete
+                return medusaFetch('/store/carts/' + expressCartId, {
+                  method: 'POST',
+                  body: JSON.stringify(customerData)
+                }).then(function() {
+                  return addShippingToCart(expressCartId);
+                }).then(function() {
+                  resolve({ transactionState: 'SUCCESS' });
+                  return handleExpressOrderComplete(expressCartId);
+                });
+              }).catch(function(err) {
+                console.error('[Express Google Pay] confirmOrder error:', err);
+                hideExpressPreloader();
+                resolve({
+                  transactionState: 'ERROR',
+                  error: { intent: 'PAYMENT_AUTHORIZATION', message: err.message }
+                });
+              });
+            });
+          }
+
+        }).catch(function(err) {
+          console.error('[Express Google Pay] config() error:', err);
+          container.removeChild(wrapper);
+        });
+      }).catch(function(err) {
+        console.error('[Express Google Pay] Failed to load Google Pay JS:', err);
+        container.removeChild(wrapper);
+      });
+    });
+  }
+
+  /**
+   * Render Apple Pay express button via PayPal SDK + ApplePaySession.
+   * Flow: paypal.Applepay().config() → check isEligible → show button →
+   *       click → ApplePaySession → validateMerchant → onpaymentauthorized →
+   *       confirmOrder → capture
+   */
+  function renderApplePayExpressNative(container, method) {
+    // Double-check Apple Pay is available
+    if (!window.ApplePaySession || !ApplePaySession.canMakePayments()) {
+      console.log('[Express Apple Pay] Not available on this device');
+      return;
+    }
+
+    var wrapper = document.createElement('div');
+    wrapper.id = 'express-applepay-container';
+    container.appendChild(wrapper);
+
+    var clientId = method.express_config.client_id;
+    var isTestMode = method.express_config.testmode;
+
+    if (!clientId || clientId.length < 20) {
+      console.error('[Express Apple Pay] No valid PayPal client_id');
+      container.removeChild(wrapper);
+      return;
+    }
+
+    ensurePayPalSdkLoaded(clientId, isTestMode, function() {
+      if (!window.paypal || !window.paypal.Applepay) {
+        console.error('[Express Apple Pay] Applepay component not available in PayPal SDK');
+        container.removeChild(wrapper);
+        return;
+      }
+
+      var applepay = paypal.Applepay();
+
+      applepay.config().then(function(applepayConfig) {
+        if (!applepayConfig.isEligible) {
+          console.log('[Express Apple Pay] Not eligible');
+          container.removeChild(wrapper);
+          return;
+        }
+
+        console.log('[Express Apple Pay] Eligible — rendering button');
+
+        // Create native Apple Pay button
+        wrapper.innerHTML = '<apple-pay-button id="express-applepay-btn" buttonstyle="black" type="pay" locale="nl" style="--apple-pay-button-width:100%;--apple-pay-button-height:48px;--apple-pay-button-border-radius:6px;cursor:pointer;"></apple-pay-button>';
+
+        var apBtn = document.getElementById('express-applepay-btn');
+        if (!apBtn) return;
+
+        apBtn.addEventListener('click', function() {
+          console.log('[Express Apple Pay] Button clicked — starting session');
+
+          // Create Apple Pay payment request
+          var paymentRequest = {
+            countryCode: applepayConfig.countryCode || 'NL',
+            merchantCapabilities: applepayConfig.merchantCapabilities || ['supports3DS'],
+            supportedNetworks: applepayConfig.supportedNetworks || ['visa', 'masterCard', 'amex'],
+            currencyCode: 'EUR',
+            requiredShippingContactFields: ['name', 'email', 'postalAddress'],
+            requiredBillingContactFields: ['postalAddress'],
+            total: {
+              label: PROJECT_CONFIG.name || 'Bestelling',
+              type: 'final',
+              amount: String(selectedBundlePrice || 35),
+            }
+          };
+
+          var session = new ApplePaySession(4, paymentRequest);
+          var expressCartId = null;
+          var expressOrderId = null;
+
+          session.onvalidatemerchant = function(event) {
+            console.log('[Express Apple Pay] Validating merchant:', event.validationURL);
+            applepay.validateMerchant({
+              validationUrl: event.validationURL,
+              displayName: PROJECT_CONFIG.name || 'Loslatenboek',
+            }).then(function(result) {
+              session.completeMerchantValidation(result.merchantSession);
+            }).catch(function(err) {
+              console.error('[Express Apple Pay] Merchant validation failed:', err);
+              session.abort();
+            });
+          };
+
+          session.onpaymentauthorized = function(event) {
+            console.log('[Express Apple Pay] Payment authorized');
+            showExpressPreloader();
+
+            // Create cart + PayPal order
+            createExpressCart().then(function(cartId) {
+              expressCartId = cartId;
+              return createExpressPaymentSession(cartId, method.provider_id, {
+                method: 'paypal',  // PayPal order for Apple Pay
+                express: true,
+              });
+            }).then(function(sessionData) {
+              expressOrderId = sessionData.paypalOrderId || sessionData.id;
+              console.log('[Express Apple Pay] PayPal order:', expressOrderId);
+
+              // Confirm with PayPal using Apple Pay token
+              return applepay.confirmOrder({
+                orderId: expressOrderId,
+                token: event.payment.token,
+                billingContact: event.payment.billingContact,
+              });
+            }).then(function(confirmResult) {
+              console.log('[Express Apple Pay] Confirmed:', confirmResult.status);
+
+              session.completePayment(ApplePaySession.STATUS_SUCCESS);
+
+              // Extract customer data from Apple Pay
+              var shipping = event.payment.shippingContact || {};
+              var customerData = {
+                email: shipping.emailAddress || '',
+                shipping_address: {
+                  first_name: shipping.givenName || '',
+                  last_name: shipping.familyName || '',
+                  address_1: (shipping.addressLines || [])[0] || '',
+                  city: shipping.locality || '',
+                  postal_code: shipping.postalCode || '',
+                  country_code: (shipping.countryCode || 'NL').toLowerCase(),
+                  phone: shipping.phoneNumber || '',
+                }
+              };
+              customerData.billing_address = Object.assign({}, customerData.shipping_address);
+
+              localStorage.setItem('medusa_customer', JSON.stringify({
+                email: customerData.email,
+                first_name: customerData.shipping_address.first_name,
+                last_name: customerData.shipping_address.last_name,
+              }));
+
+              return medusaFetch('/store/carts/' + expressCartId, {
+                method: 'POST',
+                body: JSON.stringify(customerData)
+              }).then(function() {
+                return addShippingToCart(expressCartId);
+              }).then(function() {
+                return handleExpressOrderComplete(expressCartId);
+              });
+            }).catch(function(err) {
+              console.error('[Express Apple Pay] Error:', err);
+              session.completePayment(ApplePaySession.STATUS_FAILURE);
+              hideExpressPreloader();
+            });
+          };
+
+          session.oncancel = function() {
+            console.log('[Express Apple Pay] Cancelled by user');
+          };
+
+          session.begin();
+        });
+
+      }).catch(function(err) {
+        console.error('[Express Apple Pay] config() error:', err);
+        container.removeChild(wrapper);
+      });
     });
   }
 
