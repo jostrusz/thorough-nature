@@ -1912,18 +1912,11 @@ body {
 }
 
 /* ─── PAYPAL CARD FIELDS — match our form design ─── */
-#card-number .card-fields-container iframe,
-#expiry-date .card-fields-container iframe,
-#verification-code .card-fields-container iframe,
-#card-holder .card-fields-container iframe,
-#card-number > div iframe,
-#expiry-date > div iframe,
-#verification-code > div iframe,
-#card-holder > div iframe,
-#card-number iframe,
-#expiry-date iframe,
-#verification-code iframe,
-#card-holder iframe {
+/* Scoped to .paypal-provider so it doesn't affect Mollie/Stripe/Airwallex */
+.paypal-provider #card-number iframe,
+.paypal-provider #expiry-date iframe,
+.paypal-provider #verification-code iframe,
+.paypal-provider #card-holder iframe {
   border: 1.5px solid rgba(194,123,160,0.18) !important;
   border-radius: 8px !important;
   height: 42px !important;
@@ -1932,10 +1925,10 @@ body {
   box-sizing: border-box !important;
   transition: border-color 0.2s ease !important;
 }
-#card-number iframe:hover,
-#expiry-date iframe:hover,
-#verification-code iframe:hover,
-#card-holder iframe:hover {
+.paypal-provider #card-number iframe:hover,
+.paypal-provider #expiry-date iframe:hover,
+.paypal-provider #verification-code iframe:hover,
+.paypal-provider #card-holder iframe:hover {
   border-color: rgba(194,123,160,0.35) !important;
 }
 </style>
@@ -3337,6 +3330,10 @@ body {
       var cvvField    = paypalCardFieldsInstance.CVVField();
       var nameField   = paypalCardFieldsInstance.NameField();
 
+      // Add .paypal-provider class to scope PayPal-specific CSS
+      var cardFieldsWrapper = document.getElementById('card-fields');
+      if (cardFieldsWrapper) cardFieldsWrapper.classList.add('paypal-provider');
+
       // Strip our container styling — PayPal iframe becomes the visible input
       // (our containers have border/padding/background that creates a "double frame")
       var fieldIds = ['card-number', 'expiry-date', 'verification-code', 'card-holder'];
@@ -3378,7 +3375,8 @@ body {
           paypalCardMounting = false;
           paypalCardFieldsInstance = null;
 
-          // Restore container styling on failure
+          // Restore container styling + remove PayPal class on failure
+          if (cardFieldsWrapper) cardFieldsWrapper.classList.remove('paypal-provider');
           fieldIds.forEach(function(id) {
             var el = document.getElementById(id);
             if (el) {
