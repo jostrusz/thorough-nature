@@ -4522,6 +4522,170 @@ body {
     });
   }
 
+  /* ─── ABANDONED CHECKOUT RECOVERY: localStorage auto-save/restore + background cart ─── */
+  var backgroundCartId = localStorage.getItem('background_cart_id') || null;
+  var backgroundCartUpdating = false;
+
+  // Debounce helper
+  function debounce(fn, delay) {
+    var timer;
+    return function() {
+      var ctx = this, args = arguments;
+      clearTimeout(timer);
+      timer = setTimeout(function() { fn.apply(ctx, args); }, delay);
+    };
+  }
+
+  // Save all form fields to localStorage
+  function saveFormToStorage() {
+    var draft = {
+      email: (document.getElementById('email') || {}).value || '',
+      phone: (document.getElementById('phone') || {}).value || '',
+      first_name: (document.getElementById('first_name') || {}).value || '',
+      last_name: (document.getElementById('last_name') || {}).value || '',
+      address: (document.getElementById('address') || {}).value || '',
+      city: (document.getElementById('city') || {}).value || '',
+      postal_code: (document.getElementById('postal_code') || {}).value || '',
+      country: (document.getElementById('country') || {}).value || '',
+      company_name: (document.getElementById('company_name') || {}).value || '',
+      kvk_number: (document.getElementById('kvk_number') || {}).value || '',
+      vat_number: (document.getElementById('vat_number') || {}).value || '',
+      timestamp: Date.now()
+    };
+    localStorage.setItem('checkout_draft', JSON.stringify(draft));
+  }
+
+  // Restore form fields from localStorage
+  function restoreFormFromStorage() {
+    try {
+      var raw = localStorage.getItem('checkout_draft');
+      if (!raw) return;
+      var draft = JSON.parse(raw);
+      // Discard if older than 7 days
+      if (draft.timestamp && (Date.now() - draft.timestamp) > 7 * 24 * 60 * 60 * 1000) {
+        localStorage.removeItem('checkout_draft');
+        return;
+      }
+      var fields = ['email', 'phone', 'first_name', 'last_name', 'address', 'city', 'postal_code', 'country', 'company_name', 'kvk_number', 'vat_number'];
+      fields.forEach(function(f) {
+        var el = document.getElementById(f);
+        if (el && draft[f] && !el.value) {
+          el.value = draft[f];
+          // Trigger visual validation state
+          if (el.value) el.classList.add('has-value');
+        }
+      });
+      console.log('[Checkout Recovery] Form restored from localStorage');
+    } catch (e) {
+      console.warn('[Checkout Recovery] Restore failed:', e);
+    }
+  }
+
+  // Create background cart on server after email is entered
+  function createBackgroundCart() {
+    var emailEl = document.getElementById('email');
+    if (!emailEl || !emailEl.value || emailEl.value.indexOf('@') === -1) return;
+    if (backgroundCartId) return; // Already created
+    if (promoCartId) { backgroundCartId = promoCartId; return; } // Reuse promo cart
+
+    medusaFetch('/store/carts', {
+      method: 'POST',
+      body: JSON.stringify({ region_id: currentRegionId })
+    }).then(function(res) {
+      backgroundCartId = res.cart.id;
+      localStorage.setItem('background_cart_id', backgroundCartId);
+      console.log('[Checkout Recovery] Background cart created:', backgroundCartId);
+
+      // Add the main product
+      return medusaFetch('/store/carts/' + backgroundCartId + '/line-items-bundle', {
+        method: 'POST',
+        body: JSON.stringify({ variant_id: VARIANT_ID, quantity: selectedBundleQty })
+      });
+    }).then(function() {
+      // Update with email + abandoned checkout metadata
+      return medusaFetch('/store/carts/' + backgroundCartId, {
+        method: 'POST',
+        body: JSON.stringify({
+          email: emailEl.value,
+          metadata: {
+            abandoned_checkout: true,
+            abandoned_at: new Date().toISOString(),
+            checkout_url: window.location.href.split('?')[0],
+            project_id: PROJECT_CONFIG.projectId || 'loslatenboek'
+          }
+        })
+      });
+    }).then(function() {
+      console.log('[Checkout Recovery] Background cart updated with email');
+    }).catch(function(err) {
+      console.warn('[Checkout Recovery] Background cart creation failed:', err.message);
+      backgroundCartId = null;
+      localStorage.removeItem('background_cart_id');
+    });
+  }
+
+  // Update background cart with latest customer data (debounced)
+  var updateBackgroundCart = debounce(function() {
+    if (!backgroundCartId || backgroundCartUpdating) return;
+    var emailEl = document.getElementById('email');
+    if (!emailEl || !emailEl.value) return;
+
+    var updateData = { email: emailEl.value };
+    var fn = document.getElementById('first_name');
+    var ln = document.getElementById('last_name');
+    var addr = document.getElementById('address');
+    var ct = document.getElementById('city');
+    var pc = document.getElementById('postal_code');
+    var co = document.getElementById('country');
+    var ph = document.getElementById('phone');
+
+    if (fn && fn.value && ln && ln.value) {
+      updateData.shipping_address = {
+        first_name: fn.value,
+        last_name: ln.value,
+        address_1: (addr && addr.value) || '',
+        city: (ct && ct.value) || '',
+        postal_code: (pc && pc.value) || '',
+        country_code: (co && co.value) || 'nl',
+        phone: (ph && ph.value) || ''
+      };
+    }
+
+    backgroundCartUpdating = true;
+    medusaFetch('/store/carts/' + backgroundCartId, {
+      method: 'POST',
+      body: JSON.stringify(updateData)
+    }).then(function() {
+      backgroundCartUpdating = false;
+    }).catch(function() {
+      backgroundCartUpdating = false;
+    });
+  }, 3000);
+
+  // Attach event listeners for auto-save
+  var debouncedSave = debounce(saveFormToStorage, 500);
+  ['email', 'phone', 'first_name', 'last_name', 'address', 'city', 'postal_code', 'company_name', 'kvk_number', 'vat_number'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', debouncedSave);
+      el.addEventListener('input', updateBackgroundCart);
+    }
+  });
+  // Country is a select, use change event
+  var countryEl = document.getElementById('country');
+  if (countryEl) {
+    countryEl.addEventListener('change', function() { saveFormToStorage(); updateBackgroundCart(); });
+  }
+
+  // Trigger background cart creation on email blur
+  var emailField = document.getElementById('email');
+  if (emailField) {
+    emailField.addEventListener('blur', createBackgroundCart);
+  }
+
+  // Restore form on page load
+  restoreFormFromStorage();
+
   /* ─── PAYMENT RETURN HANDLER ───
    * When customer returns from Mollie after paying,
    * URL has ?payment_return=1&cart_id=xxx
@@ -4550,6 +4714,9 @@ body {
       var order = res.order || res;
       localStorage.setItem('medusa_order_id', order.id || '');
       localStorage.setItem('medusa_order_display_id', order.display_id || '');
+      // Cleanup abandoned checkout recovery data
+      localStorage.removeItem('checkout_draft');
+      localStorage.removeItem('background_cart_id');
 
       // Redirect to upsell or thank-you
       var orderBump = localStorage.getItem('medusa_order_bump') === 'true';
@@ -4828,22 +4995,25 @@ body {
     var checkoutOrderBump = orderBumpActive;
     var checkoutTotal = getCurrentTotal();
 
-    // Stap 1: Cart aanmaken of hergebruiken (als promo code al een cart heeft aangemaakt)
+    // Stap 1: Cart aanmaken of hergebruiken (promo cart → background cart → nieuw)
+    var reuseCartId = promoCartId || backgroundCartId;
     var cartStep;
-    if (promoCartId) {
-      // Cart bestaat al (aangemaakt bij promo code validatie)
+    if (reuseCartId) {
+      // Cart bestaat al (promo code validatie of background cart recovery)
       // Verwijder bestaande line items en voeg opnieuw toe (bundle/qty kan veranderd zijn)
-      cartStep = medusaFetch('/store/carts/' + promoCartId, { method: 'GET' })
+      cartStep = medusaFetch('/store/carts/' + reuseCartId, { method: 'GET' })
         .then(function(cartRes) {
           var cart = cartRes.cart;
           // Verwijder alle bestaande line items
           var deletePromises = (cart.items || []).map(function(item) {
-            return medusaFetch('/store/carts/' + promoCartId + '/line-items/' + item.id, { method: 'DELETE' });
+            return medusaFetch('/store/carts/' + reuseCartId + '/line-items/' + item.id, { method: 'DELETE' });
           });
-          return Promise.all(deletePromises).then(function() { return promoCartId; });
+          return Promise.all(deletePromises).then(function() { return reuseCartId; });
         })
         .catch(function() {
           // Cart ophalen mislukt — maak een nieuwe aan
+          reuseCartId = null;
+          backgroundCartId = null;
           promoCartId = null;
           return medusaFetch('/store/carts', {
             method: 'POST',
