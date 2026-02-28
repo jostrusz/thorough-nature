@@ -498,6 +498,7 @@ function GatewaysTab() {
       test_keys: gw.test_keys || { api_key: "", secret_key: "", webhook_secret: "" },
       selected_methods: (gw.payment_methods || [])
         .filter((m: any) => m.is_active)
+        .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
         .map((m: any) => m.code),
       project_slugs: (gw.project_slugs || []).join(", "),
       metadata: gw.metadata || {},
@@ -749,6 +750,25 @@ function GatewaysTab() {
                   )
                 })}
               </div>
+
+              {/* Reorder selected methods */}
+              {form.selected_methods.length > 1 && (
+                <div style={{ marginTop: "10px" }}>
+                  <label style={{ fontSize: "10px", color: "#8C9196", marginBottom: "4px", display: "block" }}>Display order (drag to reorder)</label>
+                  {form.selected_methods.map((code: string, idx: number) => {
+                    const methodDef = availableMethods.find((m: any) => m.code === code)
+                    return (
+                      <div key={code} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "5px 8px", background: idx % 2 === 0 ? "#FAFAFA" : "#FFF", borderRadius: "4px", marginBottom: "2px" }}>
+                        <span style={{ fontSize: "11px", color: "#8C9196", minWidth: "18px" }}>{idx + 1}.</span>
+                        <PaymentMethodIcon code={methodDef?.icon || code} size={16} />
+                        <span style={{ fontSize: "12px", flex: 1 }}>{methodDef?.name || code}</span>
+                        <button disabled={idx === 0} onClick={() => { const arr = [...form.selected_methods]; [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]]; setForm({ ...form, selected_methods: arr }); }} style={{ border: "none", background: "none", cursor: idx === 0 ? "default" : "pointer", opacity: idx === 0 ? 0.3 : 1, fontSize: "14px", padding: "2px 4px" }}>▲</button>
+                        <button disabled={idx === form.selected_methods.length - 1} onClick={() => { const arr = [...form.selected_methods]; [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]]; setForm({ ...form, selected_methods: arr }); }} style={{ border: "none", background: "none", cursor: idx === form.selected_methods.length - 1 ? "default" : "pointer", opacity: idx === form.selected_methods.length - 1 ? 0.3 : 1, fontSize: "14px", padding: "2px 4px" }}>▼</button>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
 
@@ -1009,6 +1029,26 @@ function GatewaysTab() {
                             )
                           })}
                         </div>
+
+                        {/* Reorder selected methods */}
+                        {(editForm.selected_methods || []).length > 1 && (
+                          <div style={{ marginTop: "10px" }}>
+                            <label style={{ fontSize: "10px", color: "#8C9196", marginBottom: "4px", display: "block" }}>Display order (use arrows to reorder)</label>
+                            {(editForm.selected_methods || []).map((code: string, idx: number) => {
+                              const editProviderMethods: PaymentMethodDef[] = PAYMENT_METHODS_BY_PROVIDER[gw.provider] || []
+                              const methodDef = editProviderMethods.find((m: any) => m.code === code)
+                              return (
+                                <div key={code} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "5px 8px", background: idx % 2 === 0 ? "#FAFAFA" : "#FFF", borderRadius: "4px", marginBottom: "2px" }}>
+                                  <span style={{ fontSize: "11px", color: "#8C9196", minWidth: "18px" }}>{idx + 1}.</span>
+                                  <PaymentMethodIcon code={methodDef?.icon || code} size={16} />
+                                  <span style={{ fontSize: "12px", flex: 1 }}>{methodDef?.name || code}</span>
+                                  <button disabled={idx === 0} onClick={() => { const arr = [...(editForm.selected_methods || [])]; [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]]; setEditForm({ ...editForm, selected_methods: arr }); }} style={{ border: "none", background: "none", cursor: idx === 0 ? "default" : "pointer", opacity: idx === 0 ? 0.3 : 1, fontSize: "14px", padding: "2px 4px" }}>▲</button>
+                                  <button disabled={idx === (editForm.selected_methods || []).length - 1} onClick={() => { const arr = [...(editForm.selected_methods || [])]; [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]]; setEditForm({ ...editForm, selected_methods: arr }); }} style={{ border: "none", background: "none", cursor: idx === (editForm.selected_methods || []).length - 1 ? "default" : "pointer", opacity: idx === (editForm.selected_methods || []).length - 1 ? 0.3 : 1, fontSize: "14px", padding: "2px 4px" }}>▼</button>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
                       </div>
                       <div style={{ marginBottom: "12px" }}>
                         <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase", marginBottom: "6px", display: "block" }}>
