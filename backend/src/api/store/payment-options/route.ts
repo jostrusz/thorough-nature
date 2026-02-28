@@ -110,6 +110,11 @@ export async function GET(
               method.component = "airwallex-dropin"
               method.client_key = keys?.client_id || null
               method.environment = gw.mode === "live" ? "prod" : "demo"
+            } else if (gw.provider === "paypal") {
+              method.component = "paypal-card-fields"
+              // PayPal uses client_id for JS SDK initialization
+              method.client_key = keys?.client_id || keys?.api_key || null
+              method.testmode = gw.mode === "test"
             }
 
             // Include any custom config from the method

@@ -237,7 +237,21 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         },
       ]
 
-      if (isAPM) {
+      const isCard = method === "creditcard"
+
+      if (isCard) {
+        // ── Card Flow: CAPTURE intent, frontend uses PayPal CardFields SDK ──
+        // Create order WITHOUT payment_source — the JS SDK CardFields.submit()
+        // attaches card details and handles 3DS client-side
+        orderData = {
+          intent: "CAPTURE",
+          purchase_units: purchaseUnits,
+        }
+
+        this.logger_.info(
+          `[PayPal] Creating card order: amount=${totalValue} ${currency}`
+        )
+      } else if (isAPM) {
         // ── APM Flow: CAPTURE + auto-capture on approval ──
         const customerName = [
           data?.billing_address?.first_name || data?.shipping_address?.first_name || "",
@@ -334,6 +348,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
           currency_code: currency,
           amount: totalValue,
           isAPM,
+          isCard,
           method,
         },
       }
@@ -452,13 +467,13 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
       const { paypalOrderId, authorizationId, currency_code, amount } =
         sessionData
 
-      // APM orders: already auto-captured via processing_instruction
-      if (sessionData.isAPM && paypalOrderId) {
+      // APM or Card orders: may already be auto-captured
+      if ((sessionData.isAPM || sessionData.isCard) && paypalOrderId) {
         const order = await client.getOrder(paypalOrderId)
         const captures = order.purchase_units?.[0]?.payments?.captures || []
         if (captures.length > 0 && captures[0].status === "COMPLETED") {
           this.logger_.info(
-            `[PayPal] APM order already captured: orderId=${paypalOrderId}, captureId=${captures[0].id}`
+            `[PayPal] ${sessionData.isCard ? 'Card' : 'APM'} order already captured: orderId=${paypalOrderId}, captureId=${captures[0].id}`
           )
           return {
             data: {

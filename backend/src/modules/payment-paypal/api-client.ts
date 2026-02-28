@@ -106,6 +106,13 @@ export interface IPayPalOrderData {
         cancel_url?: string
       }
     }
+    card?: {
+      experience_context?: {
+        payment_method_preference?: string
+        return_url?: string
+        cancel_url?: string
+      }
+    }
   }
   processing_instruction?: string
 }

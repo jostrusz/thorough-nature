@@ -3173,18 +3173,130 @@ body {
     }
   }
 
+  /**
+   * Init PayPal Card Fields — uses PayPal JS SDK CardFields to mount hosted card inputs
+   * PayPal Advanced Card Payments: PCI-compliant hosted fields (like Stripe Elements)
+   */
+  function initPayPalCard() {
+    if (paypalCardReady) return;
+
+    // Get client_id from creditcard option
+    var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
+    paypalClientId = ccOption ? ccOption.client_key : null;
+
+    if (!paypalClientId) {
+      console.error('[PayPal Card] No client_id found');
+      return;
+    }
+
+    // Load PayPal JS SDK dynamically if not already loaded
+    if (typeof window.paypal === 'undefined') {
+      console.log('[PayPal Card] Loading PayPal JS SDK...');
+      var script = document.createElement('script');
+      script.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(paypalClientId) + '&components=card-fields&currency=EUR';
+      script.async = true;
+      script.onload = function() {
+        console.log('[PayPal Card] SDK loaded');
+        mountPayPalCardFields();
+      };
+      script.onerror = function() {
+        console.error('[PayPal Card] Failed to load SDK');
+      };
+      document.head.appendChild(script);
+    } else {
+      mountPayPalCardFields();
+    }
+  }
+
+  function mountPayPalCardFields() {
+    if (paypalCardReady || typeof window.paypal === 'undefined' || !window.paypal.CardFields) {
+      if (typeof window.paypal !== 'undefined' && !window.paypal.CardFields) {
+        console.log('[PayPal Card] CardFields not available, retrying...');
+        setTimeout(mountPayPalCardFields, 300);
+      }
+      return;
+    }
+
+    try {
+      var cardErrorsEl = document.getElementById('card-errors');
+
+      // Create CardFields instance
+      paypalCardFieldsInstance = window.paypal.CardFields({
+        createOrder: function() {
+          // Order is already created by the backend — return the order ID stored during submit
+          // This will be set right before cardFields.submit() is called
+          return window._paypalCardOrderId || '';
+        },
+        onApprove: function(data) {
+          console.log('[PayPal Card] Payment approved:', data.orderID);
+          // Resolve the promise set during submit
+          if (window._paypalCardResolve) {
+            window._paypalCardResolve(data);
+          }
+        },
+        onError: function(err) {
+          console.error('[PayPal Card] Payment error:', err);
+          if (cardErrorsEl) cardErrorsEl.textContent = err.message || 'Kaartbetaling mislukt';
+          if (window._paypalCardReject) {
+            window._paypalCardReject(err);
+          }
+        },
+        style: {
+          'input': {
+            'font-size': '14px',
+            'font-family': '"DM Sans", sans-serif',
+            'color': '#1A1A1A',
+          },
+          '.invalid': {
+            'color': '#DC2626',
+          },
+        },
+      });
+
+      // Check if card fields are eligible (PayPal account must have Advanced Card Payments enabled)
+      if (paypalCardFieldsInstance.isEligible()) {
+        // Mount individual fields into our existing containers
+        var numberField = paypalCardFieldsInstance.NumberField();
+        numberField.render('#card-number');
+
+        var expiryField = paypalCardFieldsInstance.ExpiryField();
+        expiryField.render('#expiry-date');
+
+        var cvvField = paypalCardFieldsInstance.CVVField();
+        cvvField.render('#verification-code');
+
+        // For name field: replace with plain text input (same as Airwallex/Stripe)
+        var holderDiv = document.getElementById('card-holder');
+        if (holderDiv) {
+          holderDiv.innerHTML = '<input type="text" id="paypal-card-name" placeholder="Naam op kaart" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
+        }
+
+        paypalCardReady = true;
+        console.log('[PayPal Card] Card fields mounted successfully');
+      } else {
+        console.warn('[PayPal Card] CardFields not eligible — Advanced Card Payments may not be enabled on this PayPal account');
+        if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetalingen zijn niet beschikbaar via PayPal. Neem contact op met de winkel.';
+      }
+    } catch (e) {
+      console.error('[PayPal Card] Init failed:', e);
+    }
+  }
+
   /* ─── DYNAMIC PAYMENT METHODS ─── */
   var selectedMethod = '';
   var selectedProvider = '';
   var selectedProviderId = ''; // Full Medusa provider_id e.g. "pp_mollie_mollie"
   var allPaymentOptions = []; // Flat list: [{ code, display_name, icon, provider, provider_id, available_countries, sort_order }]
   var mollieComponentsInitialized = false;
-  var cardProvider = ''; // 'mollie' | 'airwallex' | 'stripe' — detected from payment-options
+  var cardProvider = ''; // 'mollie' | 'airwallex' | 'stripe' | 'paypal' — detected from payment-options
   var airwallexCardElements = {};
   var airwallexCardReady = false;
   var stripeInstance = null;
   var stripeElements = {};
   var stripeCardReady = false;
+  var paypalCardFieldsInstance = null;
+  var paypalCardReady = false;
+  var paypalClientId = null;
 
   // Method descriptions (Dutch)
   var METHOD_DESCRIPTIONS = {
@@ -3297,6 +3409,7 @@ body {
             type: m.type || null,
             component: m.component || null,
             profile_id: m.profile_id || null,
+            client_key: m.client_key || null,
             testmode: m.testmode || false,
             environment: m.environment || gw.environment || null,
           });
@@ -3588,6 +3701,8 @@ body {
               initAirwallexCard();
             } else if (cardProvider === 'stripe') {
               initStripeCard();
+            } else if (cardProvider === 'paypal') {
+              initPayPalCard();
             }
           } else {
             cardFields.style.display = 'none';
@@ -5156,6 +5271,10 @@ body {
           // Stripe: no tokenization needed — confirmCardPayment happens after session creation
           sessionData.method = 'creditcard';
           tokenPromise = Promise.resolve(cartId);
+        } else if (cardProvider === 'paypal') {
+          // PayPal: no tokenization needed — CardFields.submit() happens after order creation
+          sessionData.method = 'creditcard';
+          tokenPromise = Promise.resolve(cartId);
         } else {
           tokenPromise = Promise.resolve(cartId);
         }
@@ -5464,6 +5583,72 @@ body {
               }
             } catch (err) {
               throw new Error(err.message || 'Kaartbetaling mislukt');
+            }
+          })();
+        }
+
+        // ─── PAYPAL CARD CONFIRM FLOW ───
+        // For credit cards on PayPal: submit card data via PayPal CardFields SDK, then capture
+        if (selectedProviderId && selectedProviderId.indexOf('paypal') !== -1
+            && selectedMethod === 'creditcard' && providerData.paypalOrderId && paypalCardReady) {
+          return (async function() {
+            try {
+              // Set the order ID so the CardFields createOrder callback can return it
+              window._paypalCardOrderId = providerData.paypalOrderId;
+
+              console.log('[PayPal Card] Submitting card fields for order:', providerData.paypalOrderId);
+
+              // Create a promise that will be resolved by the onApprove/onError callbacks
+              var cardResult = await new Promise(function(resolve, reject) {
+                window._paypalCardResolve = resolve;
+                window._paypalCardReject = reject;
+
+                // Submit the card fields — this triggers 3DS if needed
+                paypalCardFieldsInstance.submit({
+                  billingAddress: {
+                    addressLine1: customerData.billing_address?.address_1 || customerData.shipping_address?.address_1 || '',
+                    adminArea2: customerData.billing_address?.city || customerData.shipping_address?.city || '',
+                    postalCode: customerData.billing_address?.postal_code || customerData.shipping_address?.postal_code || '',
+                    countryCode: (customerData.billing_address?.country_code || customerData.shipping_address?.country_code || 'NL').toUpperCase(),
+                  },
+                  cardholderName: document.getElementById('paypal-card-name') ? document.getElementById('paypal-card-name').value : '',
+                }).catch(function(submitErr) {
+                  reject(submitErr);
+                });
+              });
+
+              console.log('[PayPal Card] Card approved, orderID:', cardResult.orderID);
+
+              // Show preloader
+              if (!document.querySelector('.payment-preloader')) {
+                var ppPreloader = document.createElement('div');
+                ppPreloader.className = 'payment-preloader';
+                ppPreloader.innerHTML = '<img src="/laat-los-logo-logo.png" alt="Laden..."><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+                document.body.insertBefore(ppPreloader, document.body.firstChild);
+              }
+
+              // Payment succeeded — complete cart
+              var completeRes = await medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' });
+              var order = completeRes.order || completeRes;
+              localStorage.setItem('medusa_order_id', order.id || '');
+              localStorage.setItem('medusa_order_display_id', order.display_id || '');
+
+              if (PROJECT_CONFIG.upsellEnabled === false) {
+                window.location.href = PROJECT_CONFIG.thankYouUrl;
+              } else if (checkoutOrderBump) {
+                localStorage.setItem('medusa_upsell_purchased', 'true');
+                window.location.href = PROJECT_CONFIG.thankYouUrl;
+              } else {
+                window.location.href = PROJECT_CONFIG.upsellUrl;
+              }
+            } catch (err) {
+              // Clean up
+              window._paypalCardOrderId = null;
+              window._paypalCardResolve = null;
+              window._paypalCardReject = null;
+              var errPreloader = document.querySelector('.payment-preloader');
+              if (errPreloader) errPreloader.remove();
+              throw new Error(err.message || 'Kaartbetaling via PayPal mislukt');
             }
           })();
         }
