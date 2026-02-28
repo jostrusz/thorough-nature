@@ -1910,6 +1910,34 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ─── PAYPAL CARD FIELDS — match our form design ─── */
+#card-number .card-fields-container iframe,
+#expiry-date .card-fields-container iframe,
+#verification-code .card-fields-container iframe,
+#card-holder .card-fields-container iframe,
+#card-number > div iframe,
+#expiry-date > div iframe,
+#verification-code > div iframe,
+#card-holder > div iframe,
+#card-number iframe,
+#expiry-date iframe,
+#verification-code iframe,
+#card-holder iframe {
+  border: 1.5px solid rgba(194,123,160,0.18) !important;
+  border-radius: 8px !important;
+  height: 42px !important;
+  background: #FFFFFF !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  transition: border-color 0.2s ease !important;
+}
+#card-number iframe:hover,
+#expiry-date iframe:hover,
+#verification-code iframe:hover,
+#card-holder iframe:hover {
+  border-color: rgba(194,123,160,0.35) !important;
+}
 </style>
 
 <!-- ═══ PROJEKT KONFIGURACE + FACEBOOK PIXEL ═══ -->
@@ -3200,7 +3228,8 @@ body {
       var sdkBase = isTestMode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
       var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
       var sdkUrl = sdkBase + '?client-id=' + encodeURIComponent(paypalClientId)
-        + '&components=card-fields&currency=' + currency;
+        + '&components=card-fields&currency=' + currency
+        + '&locale=nl_NL';
 
       console.log('[PayPal Card] Loading SDK:', sdkUrl);
 
