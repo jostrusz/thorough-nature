@@ -1814,56 +1814,86 @@ body {
   letter-spacing: 0.1em;
   margin-bottom: 10px;
 }
-.paypal-express-btn {
+/* Express buttons container */
+.express-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* PayPal SDK renders its own button in this container */
+.express-paypal-sdk-container {
+  min-height: 45px;
+  border-radius: 25px;
+  overflow: hidden;
+}
+/* Generic express button (Google Pay, Apple Pay, redirect-based PayPal) */
+.express-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   padding: 13px 24px;
-  background: #FFC439;
   border: none;
   border-radius: 25px;
   cursor: pointer;
   transition: filter 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
   position: relative;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  min-height: 48px;
 }
-.paypal-express-btn:hover {
+.express-btn:hover {
   filter: brightness(0.96);
   box-shadow: 0 3px 12px rgba(0,0,0,0.12);
 }
-.paypal-express-btn:active {
+.express-btn:active {
   transform: scale(0.985);
 }
-.paypal-btn-content {
+.express-btn.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+.express-btn--paypal {
+  background: #FFC439;
+  color: #003087;
+}
+.express-btn--googlepay {
+  background: #000;
+  color: #fff;
+}
+.express-btn--applepay {
+  background: #000;
+  color: #fff;
+  -webkit-appearance: -apple-pay-button;
+}
+@supports (-webkit-appearance: -apple-pay-button) {
+  .express-btn--applepay { -webkit-apple-pay-button-type: plain; min-height: 48px; padding: 0; }
+  .express-btn--applepay .express-btn-content { display: none; }
+}
+.express-btn-content {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   transition: opacity 0.2s ease;
 }
-.paypal-express-btn .paypal-logo {
-  height: 22px;
-  width: auto;
-}
-.paypal-express-btn .paypal-btn-text {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  color: #003087;
-  letter-spacing: -0.01em;
-}
-.paypal-express-btn .paypal-spinner {
+.express-btn.loading .express-btn-content { opacity: 0.35; }
+.express-btn .express-spinner {
   display: none;
   width: 20px;
   height: 20px;
-  border: 2.5px solid rgba(0,48,135,0.15);
-  border-top-color: #003087;
+  border: 2.5px solid rgba(255,255,255,0.25);
+  border-top-color: currentColor;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   position: absolute;
 }
-.paypal-express-btn.loading .paypal-spinner { display: block; }
-.paypal-express-btn.loading .paypal-btn-content { opacity: 0.35; }
+.express-btn.loading .express-spinner { display: block; }
+.express-btn img.express-logo {
+  height: 22px;
+  width: auto;
+}
 .express-checkout-divider {
   display: flex;
   align-items: center;
@@ -2027,21 +2057,12 @@ body {
 
       <form id="checkout-form" novalidate>
 
-        <!-- ═══ PAYPAL EXPRESS CHECKOUT ═══ -->
-        <div class="express-checkout animate-in" id="express-checkout">
+        <!-- ═══ EXPRESS CHECKOUT (dynamic — PayPal, Google Pay, Apple Pay) ═══ -->
+        <div class="express-checkout animate-in" id="express-checkout" style="display:none;">
           <div class="express-checkout-label">Snel afrekenen</div>
-          <button type="button" class="paypal-express-btn" id="paypal-express-btn">
-            <div class="paypal-btn-content">
-              <svg class="paypal-logo" viewBox="0 0 24 28" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20.067 7.517c.2-1.267.001-2.128-.687-2.908C18.573 3.674 16.818 3 14.462 3H7.2c-.446 0-.826.324-.896.764L3.8 21.075c-.052.33.203.628.537.628h3.91l.982-6.234-.03.197c.07-.44.447-.764.893-.764h1.858c3.652 0 6.51-1.484 7.344-5.779.025-.127.046-.25.065-.371.247-1.574-.002-2.644-.843-3.615" fill="#27346A"/>
-                <path d="M20.067 7.517c.2-1.267.001-2.128-.687-2.908C18.573 3.674 16.818 3 14.462 3H7.2c-.446 0-.826.324-.896.764L3.8 21.075c-.052.33.203.628.537.628h3.91l.982-6.234-.03.197c.07-.44.447-.764.893-.764h1.858c3.652 0 6.51-1.484 7.344-5.779.025-.127.046-.25.065-.371" fill="#27346A" opacity=".7"/>
-                <path d="M10.021 7.663c.044-.278.217-.506.446-.618a.884.884 0 01.406-.1h5.16c.612 0 1.182.04 1.705.124.149.024.294.052.435.084.141.032.278.068.41.108.067.02.132.042.196.064.257.09.494.197.707.324.25-1.592-.002-2.676-.864-3.658C17.8 2.91 15.978 2.2 13.532 2.2h-7.39c-.456 0-.843.33-.914.78L2.686 21.48c-.054.337.207.642.548.642h3.99l1.002-6.353 1.795-8.106z" fill="#2790C3"/>
-                <path d="M20.067 7.517a8.232 8.232 0 01-.065.371c-.835 4.295-3.692 5.78-7.344 5.78H10.8c-.446 0-.823.323-.893.763l-.952 6.037-.27 1.709c-.045.29.178.55.47.55h3.306c.39 0 .722-.283.783-.668l.032-.168.621-3.938.04-.217c.06-.385.393-.668.783-.668h.493c3.194 0 5.694-1.297 6.425-5.05.305-1.568.147-2.878-.66-3.798a3.142 3.142 0 00-.902-.703" fill="#1F264F"/>
-              </svg>
-              <span class="paypal-btn-text">PayPal Express Checkout</span>
-            </div>
-            <span class="paypal-spinner"></span>
-          </button>
+          <div class="express-buttons" id="express-buttons">
+            <!-- Dynamically populated by initExpressCheckout() -->
+          </div>
           <div class="express-checkout-divider">
             <span>of</span>
           </div>
@@ -3199,53 +3220,26 @@ body {
    * PayPal Advanced Card Payments: PCI-compliant hosted fields (like Stripe Elements)
    */
   function initPayPalCard() {
-    // Triple guard: already ready, already mounting, or SDK already loading
-    if (paypalCardReady || paypalCardMounting || paypalSdkLoading) return;
+    if (paypalCardReady || paypalCardMounting) return;
 
-    var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
-    var rawClientKey = ccOption ? ccOption.client_key : null;
+    var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard' && m.provider === 'paypal'; });
+    if (!ccOption) return;
+
+    var rawClientKey = ccOption.client_key;
     paypalClientId = (typeof rawClientKey === 'string') ? rawClientKey.trim() : null;
-    var isTestMode = ccOption ? !!ccOption.testmode : false;
+    var isTestMode = !!ccOption.testmode;
 
     if (!paypalClientId || paypalClientId.length < 20) {
-      console.error('[PayPal Card] Invalid client_id (' + (paypalClientId ? paypalClientId.length : 0) + ' chars)');
+      console.error('[PayPal Card] Invalid client_id');
       return;
     }
 
-    console.log('[PayPal Card] Init — client_id: "' + paypalClientId.substring(0, 8) + '..." (' + paypalClientId.length + ' chars), mode: ' + (isTestMode ? 'sandbox' : 'live'));
+    console.log('[PayPal Card] Init — client_id: "' + paypalClientId.substring(0, 8) + '...", mode: ' + (isTestMode ? 'sandbox' : 'live'));
 
-    if (typeof window.paypal === 'undefined') {
-      // Lock SDK loading to prevent double script insertion
-      paypalSdkLoading = true;
-
-      var sdkBase = isTestMode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
-      var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
-      var sdkUrl = sdkBase + '?client-id=' + encodeURIComponent(paypalClientId)
-        + '&components=card-fields&currency=' + currency
-        + '&locale=nl_NL';
-
-      console.log('[PayPal Card] Loading SDK:', sdkUrl);
-
-      var script = document.createElement('script');
-      script.src = sdkUrl;
-      script.async = true;
-      script.setAttribute('data-sdk-integration-source', 'custom');
-
-      script.onload = function() {
-        console.log('[PayPal Card] SDK loaded');
-        mountPayPalCardFields();
-      };
-
-      script.onerror = function() {
-        paypalSdkLoading = false;
-        console.error('[PayPal Card] SDK failed to load');
-        var cardErrorsEl = document.getElementById('card-errors');
-        if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetaling kon niet geladen worden. Controleer de PayPal Client ID.';
-      };
-      document.head.appendChild(script);
-    } else {
+    // Use centralized SDK loader (loads ALL PayPal components at once)
+    ensurePayPalSdkLoaded(paypalClientId, isTestMode, function() {
       mountPayPalCardFields();
-    }
+    });
   }
 
   function mountPayPalCardFields() {
@@ -3413,9 +3407,443 @@ body {
   var stripeCardReady = false;
   var paypalCardFieldsInstance = null;
   var paypalCardReady = false;
-  var paypalCardMounting = false; // Mutex: prevents concurrent mount attempts
-  var paypalSdkLoading = false;  // Mutex: prevents double SDK script loading
+  var paypalCardMounting = false;
   var paypalClientId = null;
+  var _paypalSdkPromise = null; // Centralized PayPal SDK loading promise
+  var expressMethodsList = [];  // Express methods from API
+
+  /* ─── CENTRALIZED PAYPAL SDK LOADER ─── */
+  // PayPal SDK can only be loaded ONCE. This function ensures all needed
+  // components (card-fields, buttons, googlepay, applepay) are loaded together.
+  function getPayPalSdkComponents() {
+    var components = [];
+    var hasCard = false, hasButtons = false, hasGPay = false, hasAPay = false;
+    allPaymentOptions.forEach(function(m) {
+      if (m.provider !== 'paypal') return;
+      if (m.code === 'creditcard') hasCard = true;
+      if (m.code === 'paypal') hasButtons = true;
+      if (m.code === 'googlepay') hasGPay = true;
+      if (m.code === 'applepay') hasAPay = true;
+    });
+    if (hasCard) components.push('card-fields');
+    if (hasButtons) components.push('buttons');
+    if (hasGPay) components.push('googlepay');
+    if (hasAPay) components.push('applepay');
+    return components;
+  }
+
+  function ensurePayPalSdkLoaded(clientId, isTestMode, callback) {
+    if (window.paypal) { callback(); return; }
+    if (_paypalSdkPromise) { _paypalSdkPromise.then(callback); return; }
+
+    var components = getPayPalSdkComponents();
+    if (components.length === 0) components = ['buttons'];
+
+    var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
+    var sdkBase = isTestMode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
+    var sdkUrl = sdkBase + '?client-id=' + encodeURIComponent(clientId.trim())
+      + '&components=' + components.join(',')
+      + '&currency=' + currency
+      + '&locale=nl_NL';
+
+    console.log('[PayPal SDK] Loading components:', components.join(','));
+
+    _paypalSdkPromise = new Promise(function(resolve, reject) {
+      var script = document.createElement('script');
+      script.src = sdkUrl;
+      script.async = true;
+      script.setAttribute('data-sdk-integration-source', 'custom');
+      script.onload = function() {
+        console.log('[PayPal SDK] Loaded successfully');
+        resolve();
+      };
+      script.onerror = function() {
+        _paypalSdkPromise = null;
+        console.error('[PayPal SDK] Failed to load');
+        reject(new Error('PayPal SDK failed to load'));
+      };
+      document.head.appendChild(script);
+    });
+
+    _paypalSdkPromise.then(callback).catch(function(err) {
+      console.error('[PayPal SDK]', err.message);
+    });
+  }
+
+  /* ─── EXPRESS CHECKOUT: Shared utilities ─── */
+
+  /**
+   * Create a fresh cart with current bundle + order bump + promo.
+   * Returns a Promise that resolves to the cartId.
+   */
+  function createExpressCart() {
+    var bundleQty = selectedBundleQty;
+    var isOrderBump = orderBumpActive;
+    var promoCode = savedPromoCode;
+
+    return medusaFetch('/store/carts', {
+      method: 'POST',
+      body: JSON.stringify({ region_id: currentRegionId })
+    })
+    .then(function(res) {
+      var cartId = (res.cart || res).id;
+
+      // Add main product via bundle endpoint (applies server-side pricing)
+      return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
+        method: 'POST',
+        body: JSON.stringify({ variant_id: VARIANT_ID, quantity: bundleQty })
+      }).then(function() {
+        // Add order bump if active
+        if (isOrderBump && PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.variantId) {
+          return medusaFetch('/store/carts/' + cartId + '/line-items', {
+            method: 'POST',
+            body: JSON.stringify({
+              variant_id: PROJECT_CONFIG.upsellProduct.variantId,
+              quantity: 1
+            })
+          });
+        }
+      }).then(function() {
+        // Apply promo code if set
+        if (promoCode) {
+          return medusaFetch('/store/carts/' + cartId + '/promotions', {
+            method: 'POST',
+            body: JSON.stringify({ promo_codes: [promoCode] })
+          }).catch(function() {}); // non-blocking
+        }
+      }).then(function() {
+        return cartId;
+      });
+    });
+  }
+
+  /**
+   * Add the first available shipping method to a cart.
+   */
+  function addShippingToCart(cartId) {
+    return medusaFetch('/store/shipping-options?cart_id=' + cartId, {
+      method: 'GET'
+    }).then(function(shipRes) {
+      var options = shipRes.shipping_options || [];
+      if (options.length === 0) throw new Error('Geen verzendopties beschikbaar');
+      return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
+        method: 'POST',
+        body: JSON.stringify({ option_id: options[0].id })
+      });
+    });
+  }
+
+  /**
+   * Create a payment collection + payment session for a cart.
+   * Returns Promise<sessionData> (the payment session's .data object).
+   */
+  function createExpressPaymentSession(cartId, providerId, sessionData) {
+    return medusaFetch('/store/payment-collections', {
+      method: 'POST',
+      body: JSON.stringify({ cart_id: cartId })
+    }).then(function(pcRes) {
+      var pcId = pcRes.payment_collection.id;
+      var body = { provider_id: providerId };
+      if (sessionData) body.data = sessionData;
+      return medusaFetch('/store/payment-collections/' + pcId + '/payment-sessions', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      });
+    }).then(function(sessionRes) {
+      var sessions = sessionRes.payment_collection.payment_sessions || [];
+      return sessions.length > 0 ? sessions[sessions.length - 1].data : null;
+    });
+  }
+
+  /**
+   * Complete an express cart and redirect to thank-you / upsell.
+   */
+  function handleExpressOrderComplete(cartId) {
+    // Persist state for thank-you page
+    localStorage.setItem('medusa_cart_id', cartId);
+    localStorage.setItem('medusa_bundle_qty', selectedBundleQty);
+    localStorage.setItem('medusa_bundle_price', selectedBundlePrice);
+    if (orderBumpActive) {
+      localStorage.setItem('medusa_order_bump', 'true');
+    } else {
+      localStorage.removeItem('medusa_order_bump');
+    }
+
+    return medusaFetch('/store/carts/' + cartId + '/complete', {
+      method: 'POST'
+    }).then(function(completeRes) {
+      var order = completeRes.order || completeRes;
+      localStorage.setItem('medusa_order_id', order.id || '');
+      localStorage.setItem('medusa_order_display_id', order.display_id || '');
+      if (PROJECT_CONFIG.upsellEnabled === false) {
+        window.location.href = PROJECT_CONFIG.thankYouUrl;
+      } else if (orderBumpActive) {
+        localStorage.setItem('medusa_upsell_purchased', 'true');
+        window.location.href = PROJECT_CONFIG.thankYouUrl;
+      } else {
+        window.location.href = PROJECT_CONFIG.upsellUrl;
+      }
+    });
+  }
+
+  /** Show fullscreen payment preloader */
+  function showExpressPreloader() {
+    if (document.querySelector('.payment-preloader')) return;
+    var el = document.createElement('div');
+    el.className = 'payment-preloader';
+    el.innerHTML = '<img src="/laat-los-logo-logo.png" alt="Laden..."><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+    document.body.insertBefore(el, document.body.firstChild);
+  }
+  function hideExpressPreloader() {
+    var el = document.querySelector('.payment-preloader');
+    if (el) el.remove();
+  }
+
+  /* ─── EXPRESS CHECKOUT: Initialisation & button renderers ─── */
+
+  /**
+   * Scan allPaymentOptions for express-capable methods and render
+   * the correct button for each (PayPal SDK Buttons, redirect, etc.).
+   * Called after renderPaymentMethods() in loadPaymentMethods().
+   */
+  function initExpressCheckout() {
+    var container = document.getElementById('express-buttons');
+    var section = document.getElementById('express-checkout');
+    if (!container || !section) return;
+
+    container.innerHTML = '';
+
+    // Collect express-capable methods
+    var expressMethods = allPaymentOptions.filter(function(m) {
+      return m.express === true;
+    });
+
+    // Apple Pay: device check
+    expressMethods = expressMethods.filter(function(m) {
+      if (m.code === 'applepay') {
+        return window.ApplePaySession && ApplePaySession.canMakePayments();
+      }
+      return true;
+    });
+
+    if (expressMethods.length === 0) {
+      section.style.display = 'none';
+      return;
+    }
+
+    console.log('[Express] Found ' + expressMethods.length + ' express methods:',
+      expressMethods.map(function(m) { return m.code + '(' + m.provider + ')'; }).join(', '));
+
+    section.style.display = '';
+
+    expressMethods.forEach(function(m) {
+      if (m.code === 'paypal') {
+        if (m.express_config && m.express_config.sdk === 'paypal') {
+          renderPayPalExpressNative(container, m);
+        } else {
+          // Redirect-based PayPal (Mollie, Comgate, etc.)
+          renderExpressRedirectButton(container, m, {
+            className: 'express-btn--paypal',
+            logo: '<img src="/icons/paypal.svg" alt="PayPal" class="express-logo" onerror="this.outerHTML=\'<span>PayPal</span>\'">',
+          });
+        }
+      } else if (m.code === 'googlepay') {
+        renderExpressRedirectButton(container, m, {
+          className: 'express-btn--googlepay',
+          logo: '<img src="/icons/googlepay.svg" alt="Google Pay" class="express-logo" onerror="this.outerHTML=\'<span>Google Pay</span>\'">',
+        });
+      } else if (m.code === 'applepay') {
+        renderExpressRedirectButton(container, m, {
+          className: 'express-btn--applepay',
+          logo: '<img src="/icons/applepay.svg" alt="Apple Pay" class="express-logo" onerror="this.outerHTML=\'<span>Apple Pay</span>\'">',
+        });
+      }
+    });
+  }
+
+  /**
+   * Render native PayPal Express button via PayPal JS SDK Buttons API.
+   * The SDK renders its own styled button; createOrder/onApprove handle the flow.
+   */
+  function renderPayPalExpressNative(container, method) {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'express-paypal-sdk-container';
+    wrapper.id = 'express-paypal-buttons';
+    container.appendChild(wrapper);
+
+    var clientId = method.express_config.client_id;
+    var isTestMode = method.express_config.testmode;
+
+    if (!clientId) {
+      console.error('[Express PayPal] No client_id configured');
+      return;
+    }
+
+    ensurePayPalSdkLoaded(clientId, isTestMode, function() {
+      if (!window.paypal || !window.paypal.Buttons) {
+        console.error('[Express PayPal] Buttons component not available in SDK');
+        return;
+      }
+
+      var expressCartId = null;
+
+      paypal.Buttons({
+        style: {
+          layout: 'vertical',
+          color: 'gold',
+          shape: 'pill',
+          label: 'paypal',
+          height: 48,
+        },
+
+        createOrder: function() {
+          return createExpressCart()
+            .then(function(cartId) {
+              expressCartId = cartId;
+              return createExpressPaymentSession(cartId, method.provider_id, {
+                method: 'paypal',
+                return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
+              });
+            })
+            .then(function(sessionData) {
+              // Extract PayPal order ID from session data
+              var orderId = sessionData && (sessionData.id || sessionData.orderID || sessionData.order_id);
+              if (!orderId) {
+                console.error('[Express PayPal] No order ID in session data:', JSON.stringify(sessionData));
+                throw new Error('PayPal order ID niet ontvangen van server');
+              }
+              console.log('[Express PayPal] Order created:', orderId);
+              return orderId;
+            });
+        },
+
+        onApprove: function(data, actions) {
+          showExpressPreloader();
+
+          // Get payer details from PayPal
+          var getDetails;
+          if (actions && actions.order && typeof actions.order.get === 'function') {
+            getDetails = actions.order.get();
+          } else {
+            getDetails = Promise.resolve({});
+          }
+
+          return getDetails
+            .then(function(details) {
+              var payer = details.payer || {};
+              var shipping = {};
+              if (details.purchase_units && details.purchase_units[0]) {
+                shipping = details.purchase_units[0].shipping || {};
+              }
+              var address = shipping.address || {};
+              var payerName = payer.name || {};
+              var shippingFullName = (shipping.name && shipping.name.full_name) || '';
+
+              var firstName = payerName.given_name || shippingFullName.split(' ')[0] || '';
+              var lastName = payerName.surname || shippingFullName.split(' ').slice(1).join(' ') || '';
+
+              var customerData = {
+                email: payer.email_address || '',
+                shipping_address: {
+                  first_name: firstName,
+                  last_name: lastName,
+                  address_1: address.address_line_1 || '',
+                  city: address.admin_area_2 || '',
+                  postal_code: address.postal_code || '',
+                  country_code: (address.country_code || 'NL').toLowerCase(),
+                  phone: (payer.phone && payer.phone.phone_number && payer.phone.phone_number.national_number) || '',
+                }
+              };
+              customerData.billing_address = Object.assign({}, customerData.shipping_address);
+
+              // Save customer info for thank-you page
+              localStorage.setItem('medusa_customer', JSON.stringify({
+                email: customerData.email,
+                first_name: firstName,
+                last_name: lastName,
+              }));
+
+              // Update Medusa cart with PayPal payer data
+              return medusaFetch('/store/carts/' + expressCartId, {
+                method: 'POST',
+                body: JSON.stringify(customerData)
+              });
+            })
+            .then(function() {
+              return addShippingToCart(expressCartId);
+            })
+            .then(function() {
+              return handleExpressOrderComplete(expressCartId);
+            })
+            .catch(function(err) {
+              hideExpressPreloader();
+              console.error('[Express PayPal] Completion error:', err);
+              alert('Er is een fout opgetreden bij het afronden van je PayPal-betaling. Probeer het opnieuw of gebruik het formulier hieronder.');
+            });
+        },
+
+        onError: function(err) {
+          hideExpressPreloader();
+          console.error('[Express PayPal] SDK error:', err);
+        },
+
+        onCancel: function() {
+          console.log('[Express PayPal] Payment cancelled by user');
+        }
+
+      }).render('#express-paypal-buttons').catch(function(err) {
+        console.error('[Express PayPal] Button render failed:', err);
+      });
+    });
+  }
+
+  /**
+   * Render a redirect-based express button (for providers without client-side SDK).
+   * Creates cart → payment session → redirects to provider's hosted page.
+   */
+  function renderExpressRedirectButton(container, method, opts) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'express-btn ' + opts.className;
+    btn.innerHTML = '<div class="express-btn-content">' + opts.logo + '</div><div class="express-spinner"></div>';
+    container.appendChild(btn);
+
+    btn.addEventListener('click', function() {
+      if (btn.classList.contains('loading')) return;
+      btn.classList.add('loading');
+
+      createExpressCart()
+        .then(function(cartId) {
+          // Persist for payment return handler
+          localStorage.setItem('medusa_cart_id', cartId);
+          localStorage.setItem('medusa_bundle_qty', selectedBundleQty);
+          localStorage.setItem('medusa_bundle_price', selectedBundlePrice);
+          if (orderBumpActive) {
+            localStorage.setItem('medusa_order_bump', 'true');
+          } else {
+            localStorage.removeItem('medusa_order_bump');
+          }
+
+          return createExpressPaymentSession(cartId, method.provider_id, {
+            method: method.code,
+            return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
+          });
+        })
+        .then(function(sessionData) {
+          var redirectUrl = sessionData && (sessionData.redirectUrl || sessionData.checkout_url || sessionData.url || sessionData._links && sessionData._links.checkout && sessionData._links.checkout.href);
+          if (redirectUrl) {
+            window.location.href = redirectUrl;
+          } else {
+            throw new Error('Geen redirect URL ontvangen van betaalprovider');
+          }
+        })
+        .catch(function(err) {
+          btn.classList.remove('loading');
+          console.error('[Express ' + method.code + '] Error:', err);
+          alert('Er is een fout opgetreden. Probeer het opnieuw of gebruik het formulier hieronder.');
+        });
+    });
+  }
 
   // Method descriptions (Dutch)
   var METHOD_DESCRIPTIONS = {
@@ -3519,7 +3947,7 @@ body {
             display_name: m.display_name,
             icon: m.icon || m.code,
             provider: gw.provider,
-            provider_id: providerIdFull,
+            provider_id: m.provider_id || providerIdFull,
             available_countries: m.available_countries || [],
             supported_currencies: m.supported_currencies || [],
             sort_order: m.sort_order || 0,
@@ -3530,6 +3958,9 @@ body {
             client_key: m.client_key || null,
             testmode: m.testmode || false,
             environment: m.environment || gw.environment || null,
+            // Express checkout config
+            express: m.express || false,
+            express_config: m.express_config || null,
           });
         });
       });
@@ -3551,6 +3982,7 @@ body {
       var countrySelect = document.getElementById('country');
       var country = countrySelect ? countrySelect.value : 'NL';
       renderPaymentMethods(country);
+      initExpressCheckout();
     })
     .catch(function(err) {
       console.error('[PaymentOptions] Failed to load:', err);
@@ -5971,118 +6403,8 @@ body {
   }
 
   /* ═══ PAYPAL EXPRESS CHECKOUT ═══ */
-  // PayPal Express — zákazník klikne, otevře se PayPal popup,
-  // PayPal vrátí adresu + email → vytvoříme cart + objednávku automaticky
-  (function initPayPalExpress() {
-    var paypalBtn = document.getElementById('paypal-express-btn');
-    if (!paypalBtn) return;
-
-    paypalBtn.addEventListener('click', function() {
-      // Zamezit dvojkliku
-      if (paypalBtn.classList.contains('loading')) return;
-      paypalBtn.classList.add('loading');
-
-      var total = getCurrentTotal();
-
-      // 1. Vytvoř Medusa cart
-      medusaFetch('/store/carts', {
-        method: 'POST',
-        body: JSON.stringify({ region_id: currentRegionId })
-      })
-      .then(function(resp) { return resp.cart || resp; })
-      .then(function(cart) {
-        var cartId = cart.id;
-
-        // 2. Přidej hlavní produkt (bundle qty)
-        var lineItemPromises = [];
-        lineItemPromises.push(
-          medusaFetch('/store/carts/' + cartId + '/line-items', {
-            method: 'POST',
-            body: JSON.stringify({
-              variant_id: VARIANT_ID,
-              quantity: selectedBundleQty
-            })
-          })
-        );
-
-        // 3. Přidej order bump pokud je aktivní
-        if (orderBumpActive && PROJECT_CONFIG.upsellProduct.variantId) {
-          lineItemPromises.push(
-            medusaFetch('/store/carts/' + cartId + '/line-items', {
-              method: 'POST',
-              body: JSON.stringify({
-                variant_id: PROJECT_CONFIG.upsellProduct.variantId,
-                quantity: 1
-              })
-            })
-          );
-        }
-
-        return Promise.all(lineItemPromises).then(function() { return cartId; });
-      })
-      .then(function(cartId) {
-        // 4. Promo code toepassen (als nog niet toegepast via Medusa)
-        if (typeof savedPromoCode !== 'undefined' && savedPromoCode && !promoAppliedToCart) {
-          return medusaFetch('/store/carts/' + cartId + '/promotions', {
-            method: 'POST',
-            body: JSON.stringify({ promo_codes: [savedPromoCode] })
-          }).then(function() {
-            promoAppliedToCart = true;
-            return cartId;
-          }).catch(function() { return cartId; }); // non-blocking
-        }
-        return cartId;
-      })
-      .then(function(cartId) {
-        // 5. Inicializuj platební session (PayPal)
-        return medusaFetch('/store/carts/' + cartId + '/payment-sessions', {
-          method: 'POST',
-          body: JSON.stringify({
-            provider_id: 'pp_mollie_mollie'
-          })
-        }).then(function() { return cartId; });
-      })
-      .then(function(cartId) {
-        // 6. Ulož cart ID pro pozdější použití
-        localStorage.setItem('medusa_cart_id', cartId);
-        localStorage.setItem('medusa_bundle_qty', selectedBundleQty);
-        localStorage.setItem('medusa_bundle_price', selectedBundlePrice);
-        if (orderBumpActive) {
-          localStorage.setItem('medusa_order_bump', 'true');
-        } else {
-          localStorage.removeItem('medusa_order_bump');
-        }
-
-        // 7. Přesměruj na PayPal checkout (Medusa/Mollie/PayPal redirect)
-        // Medusa vrátí redirect URL z payment session
-        return medusaFetch('/store/carts/' + cartId, { method: 'GET' });
-      })
-      .then(function(resp) {
-        var cart = resp.cart || resp;
-        // Najdi PayPal payment session a přesměruj
-        var paymentSession = null;
-        if (cart.payment_collection && cart.payment_collection.payment_sessions) {
-          paymentSession = cart.payment_collection.payment_sessions.find(function(ps) {
-            return ps.provider_id && ps.provider_id.indexOf('paypal') !== -1;
-          });
-        }
-
-        if (paymentSession && paymentSession.data && paymentSession.data.redirectUrl) {
-          window.location.href = paymentSession.data.redirectUrl;
-        } else {
-          // Fallback — zobraz chybu ale nech zákazníka pokračovat normálně
-          console.warn('PayPal redirect URL niet gevonden, probeer het standaard formulier.');
-          paypalBtn.classList.remove('loading');
-          alert('PayPal is momenteel niet beschikbaar. Gebruik het formulier hieronder om af te rekenen.');
-        }
-      })
-      .catch(function(err) {
-        console.error('PayPal Express fout:', err);
-        paypalBtn.classList.remove('loading');
-        alert('Er is een fout opgetreden. Gebruik het formulier hieronder om af te rekenen.');
-      });
-    });
-  })();
+  // Legacy static PayPal Express removed — replaced by dynamic initExpressCheckout()
+  // which renders PayPal SDK Buttons, Google Pay, Apple Pay based on active gateways.
 
 })();
 </script>

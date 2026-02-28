@@ -91,6 +91,40 @@ export async function GET(
             supported_currencies: m.supported_currencies,
           }
 
+          // Express checkout methods (PayPal, Google Pay, Apple Pay)
+          const EXPRESS_CODES = ["paypal", "googlepay", "applepay"]
+          if (EXPRESS_CODES.includes(m.code)) {
+            method.express = true
+            method.provider_id = `pp_${gw.provider}_${gw.provider}`
+
+            if (gw.provider === "paypal") {
+              const rawKey = keys?.client_id || keys?.api_key || null
+              method.express_config = {
+                sdk: "paypal",
+                client_id: typeof rawKey === "string" ? rawKey.trim() : null,
+                testmode: gw.mode === "test",
+              }
+            } else if (gw.provider === "stripe") {
+              method.express_config = {
+                sdk: "stripe",
+                publishable_key: keys?.publishable_key || null,
+                testmode: gw.mode === "test",
+              }
+            } else if (gw.provider === "airwallex") {
+              method.express_config = {
+                sdk: "airwallex",
+                client_id: keys?.client_id || null,
+                environment: gw.mode === "live" ? "prod" : "demo",
+              }
+            } else {
+              // Mollie, Comgate, etc. — redirect-based
+              method.express_config = {
+                sdk: "redirect",
+                testmode: gw.mode === "test",
+              }
+            }
+          }
+
           // For embedded payment methods (creditcard), include rendering config
           if (m.code === "creditcard" || m.config?.type === "embedded") {
             method.type = "embedded"
