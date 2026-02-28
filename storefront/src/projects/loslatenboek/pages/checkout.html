@@ -3180,9 +3180,10 @@ body {
   function initPayPalCard() {
     if (paypalCardReady) return;
 
-    // Get client_id from creditcard option
+    // Get client_id and testmode from creditcard option
     var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
     paypalClientId = ccOption ? ccOption.client_key : null;
+    var isTestMode = ccOption ? !!ccOption.testmode : false;
 
     if (!paypalClientId) {
       console.error('[PayPal Card] No client_id found');
@@ -3191,16 +3192,22 @@ body {
 
     // Load PayPal JS SDK dynamically if not already loaded
     if (typeof window.paypal === 'undefined') {
-      console.log('[PayPal Card] Loading PayPal JS SDK...');
+      // Use sandbox URL for test mode, live URL for production
+      var sdkBase = isTestMode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
+      var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
+      var sdkUrl = sdkBase + '?client-id=' + encodeURIComponent(paypalClientId) + '&components=card-fields&currency=' + currency;
+      console.log('[PayPal Card] Loading PayPal JS SDK (' + (isTestMode ? 'sandbox' : 'live') + ')...');
       var script = document.createElement('script');
-      script.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(paypalClientId) + '&components=card-fields&currency=EUR';
+      script.src = sdkUrl;
       script.async = true;
       script.onload = function() {
-        console.log('[PayPal Card] SDK loaded');
+        console.log('[PayPal Card] SDK loaded successfully');
         mountPayPalCardFields();
       };
       script.onerror = function() {
-        console.error('[PayPal Card] Failed to load SDK');
+        console.error('[PayPal Card] Failed to load SDK from:', sdkUrl);
+        var cardErrorsEl = document.getElementById('card-errors');
+        if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetaling kon niet geladen worden. Probeer de pagina te vernieuwen.';
       };
       document.head.appendChild(script);
     } else {
