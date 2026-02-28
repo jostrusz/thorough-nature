@@ -816,6 +816,19 @@ body {
   min-height: 20px;
 }
 
+/* ─── SUBMIT VALIDATION MESSAGE ─── */
+.submit-validation-msg {
+  color: var(--error);
+  font-size: 13px;
+  text-align: center;
+  margin-top: 10px;
+  padding: 10px 16px;
+  background: #FFF5F5;
+  border: 1px solid #FECACA;
+  border-radius: var(--radius);
+  animation: fadeIn 0.3s ease;
+}
+
 /* ─── CTA TLAČÍTKO ─── */
 .checkout-btn-wrap {
   padding: 24px 28px 28px;
@@ -2548,6 +2561,7 @@ body {
             <span class="spinner"></span>
             <span class="btn-text">Bestelling afronden — &euro;35,00</span>
           </button>
+          <div id="submit-validation-msg" class="submit-validation-msg" style="display:none;"></div>
           <p class="btn-subtext">Je wordt doorgestuurd naar een beveiligde betaalpagina.</p>
 
           <!-- Trust badges -->
@@ -5693,6 +5707,19 @@ body {
 
   /* ─── INLINE VALIDATIE ─── */
   var fields = document.querySelectorAll('#checkout-form input[required]');
+  var submitValidationMsg = document.getElementById('submit-validation-msg');
+
+  // Field label lookup for error messages
+  var fieldLabels = {
+    email: 'E-mailadres',
+    phone: 'Telefoonnummer',
+    first_name: 'Voornaam',
+    last_name: 'Achternaam',
+    address: 'Straatnaam en huisnummer',
+    city: 'Stad',
+    postal_code: 'Postcode'
+  };
+
   fields.forEach(function(field) {
     field.addEventListener('blur', function() {
       validateField(field);
@@ -5701,10 +5728,15 @@ body {
       if (field.classList.contains('invalid')) {
         field.classList.remove('invalid');
       }
+      // Hide submit error when user starts correcting
+      if (submitValidationMsg && submitValidationMsg.style.display !== 'none') {
+        submitValidationMsg.style.display = 'none';
+      }
     });
   });
 
-  function validateField(field) {
+  // onSubmit: also mark EMPTY required fields, not just incorrect ones
+  function validateField(field, markEmpty) {
     // Als Foxentry bezig is met dit veld, sla lokale validatie over
     if (window.__foxentryPending && window.__foxentryPending[field.id]) {
       return true;
@@ -5712,6 +5744,12 @@ body {
     // Als Foxentry key actief is, email en telefoon worden UITSLUITEND door Foxentry gevalideerd
     var _hasFox = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
     if (_hasFox && (field.type === 'email' || field.type === 'tel')) {
+      // Bij submit: als veld leeg is, markeer als invalid
+      if (markEmpty && field.value.trim().length === 0) {
+        field.classList.add('invalid');
+        field.classList.remove('valid');
+        return false;
+      }
       // Behoud huidige valid/invalid status (gezet door Foxentry), niet overschrijven
       return field.classList.contains('valid') || field.value.trim().length === 0;
     }
@@ -5736,17 +5774,30 @@ body {
     }
 
     field.classList.toggle('valid', isValid);
-    field.classList.toggle('invalid', !isValid && value.length > 0);
+    // Mark empty fields as invalid only on submit (markEmpty=true)
+    field.classList.toggle('invalid', !isValid && (value.length > 0 || !!markEmpty));
     return isValid;
   }
 
   function validateAllFields() {
     var allValid = true;
+    var missingFields = [];
     fields.forEach(function(field) {
-      if (!validateField(field)) {
+      if (!validateField(field, true)) {
         allValid = false;
+        var label = fieldLabels[field.id] || field.id;
+        missingFields.push(label);
       }
     });
+
+    // Show/hide submit validation message
+    if (!allValid && submitValidationMsg) {
+      submitValidationMsg.textContent = 'Controleer de volgende velden: ' + missingFields.join(', ');
+      submitValidationMsg.style.display = '';
+    } else if (submitValidationMsg) {
+      submitValidationMsg.style.display = 'none';
+    }
+
     return allValid;
   }
 
