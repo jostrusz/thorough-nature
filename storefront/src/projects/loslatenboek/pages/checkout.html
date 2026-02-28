@@ -4048,8 +4048,15 @@ body {
 
           var expressCartId = null;
           var expressOrderId = null;
+          var gpayBusy = false;
 
           function onGooglePayClicked() {
+            // Prevent double-click — Google Pay sheet is already open
+            if (gpayBusy) {
+              console.log('[Express Google Pay] Already in progress, ignoring click');
+              return;
+            }
+            gpayBusy = true;
             console.log('[Express Google Pay] Button clicked — creating cart + order');
 
             createExpressCart().then(function(cartId) {
@@ -4080,11 +4087,14 @@ body {
 
               return paymentsClient.loadPaymentData(paymentDataRequest);
             }).catch(function(err) {
-              if (err.statusCode === 'CANCELED') {
+              // Google Pay cancellation can look different across browsers
+              if (err.statusCode === 'CANCELED' || (err && err.message && err.message.indexOf('cancel') !== -1)) {
                 console.log('[Express Google Pay] Cancelled by user');
                 return;
               }
-              console.error('[Express Google Pay] Error:', err);
+              console.error('[Express Google Pay] Error:', err, JSON.stringify(err));
+            }).then(function() {
+              gpayBusy = false;
             });
           }
 
