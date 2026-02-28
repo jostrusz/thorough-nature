@@ -1831,21 +1831,30 @@ body {
   border-radius: 25px;
   overflow: hidden;
   min-height: 48px;
+}
+.express-googlepay-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: 25px;
   background: #2c2e2d;
   cursor: pointer;
+  padding: 0;
   transition: filter 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
 }
-#express-googlepay-container:hover {
+.express-googlepay-btn:hover {
   filter: brightness(1.15);
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-#express-googlepay-container:active {
+.express-googlepay-btn:active {
   transform: scale(0.985);
 }
-#express-googlepay-container button {
-  border-radius: 25px !important;
-  min-height: 48px;
-  background: #2c2e2d !important;
+.express-googlepay-btn svg {
+  height: 26px;
+  width: auto;
 }
 /* Apple Pay native button container */
 #express-applepay-container {
@@ -4064,20 +4073,23 @@ body {
 
             console.log('[Express Google Pay] Available — rendering button');
 
-            // Create and mount the Google Pay button
-            var gpButton = paymentsClient.createButton({
-              onClick: onGooglePayClicked,
-              buttonColor: 'black',
-              buttonType: 'pay',
-              buttonSizeMode: 'fill',
-              buttonLocale: 'nl',
-              allowedPaymentMethods: googlePayConfig.allowedPaymentMethods
-            });
-            wrapper.appendChild(gpButton);
-            // Style the wrapper to match express button height
+            // Custom Google Pay button with inline SVG logo for full styling control
+            var gpBtn = document.createElement('button');
+            gpBtn.type = 'button';
+            gpBtn.className = 'express-googlepay-btn';
+            gpBtn.innerHTML = '<svg height="26" viewBox="0 0 120 48" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+              '<path d="M57.2 24.8V32H54.5V12H62C63.7 12 65.2 12.6 66.4 13.7C67.6 14.8 68.3 16.2 68.3 17.9C68.3 19.6 67.6 21 66.4 22.1C65.2 23.2 63.8 23.7 62 23.7H57.2V24.8ZM57.2 14.5V21.3H62.1C63.1 21.3 64 20.9 64.7 20.3C65.4 19.6 65.8 18.8 65.8 17.9C65.8 17 65.4 16.2 64.7 15.5C64 14.8 63.1 14.5 62.1 14.5H57.2Z" fill="white"/>' +
+              '<path d="M74.5 18.1C76.7 18.1 78.4 18.7 79.7 19.9C81 21.1 81.6 22.7 81.6 24.7V32H79V30C78.2 31.5 76.7 32.3 74.6 32.3C72.8 32.3 71.3 31.8 70.2 30.8C69.1 29.8 68.5 28.5 68.5 27.1C68.5 25.6 69.1 24.4 70.2 23.4C71.3 22.5 72.9 22 74.9 22H78.9V24.5C78.9 23.4 78.5 22.5 77.6 21.8C76.7 21.1 75.7 20.7 74.5 20.7C73.5 20.7 72.7 20.9 72.1 21.4C71.4 21.9 71.1 22.5 71.1 23.3C71.1 23.9 71.4 24.5 71.9 24.9C72.4 25.3 73.2 25.6 74.2 25.7L77 26.1C78.9 26.4 80.3 27 81.2 27.9C82.1 28.8 82.5 29.9 82.5 31.3" fill="white"/>' +
+              '<path d="M74.8 30.1C75.9 30.1 76.9 29.7 77.7 29C78.5 28.3 78.9 27.3 78.9 26.1V25H75.3C73.2 25 72.1 25.8 72.1 27.2C72.1 27.9 72.4 28.5 72.9 29C73.4 29.5 74.1 30.1 74.8 30.1Z" fill="white"/>' +
+              '<path d="M87.6 37.1L89.5 32.5L84.2 18.4H87.1L91.1 29L95.2 18.4H98L90.5 37.1H87.6Z" fill="white"/>' +
+              '<path d="M45.6 24C45.6 23.2 45.5 22.5 45.4 21.7H33.9V25.9H40.5C40.2 27.4 39.4 28.7 38.1 29.6V32.5H42C44.2 30.5 45.6 27.5 45.6 24Z" fill="#4285F4"/>' +
+              '<path d="M33.9 35.3C36.7 35.3 39.1 34.3 42 32.5L38.1 29.6C37 30.4 35.6 30.8 33.9 30.8C31.2 30.8 28.9 28.8 28 26.2H24V29.2C26 33.3 29.7 35.3 33.9 35.3Z" fill="#34A853"/>' +
+              '<path d="M28 26.2C27.7 25.4 27.5 24.5 27.5 23.6C27.5 22.7 27.7 21.8 28 21V18H24C23 19.9 22.5 21.8 22.5 23.6C22.5 25.5 23 27.3 24 29.2L28 26.2Z" fill="#FBBC04"/>' +
+              '<path d="M33.9 16.5C35.7 16.5 37.4 17.1 38.7 18.4L42.1 15C39.8 12.9 36.9 11.8 33.9 11.8C29.7 11.8 26 14 24 18L28 21C28.9 18.4 31.2 16.5 33.9 16.5Z" fill="#EA4335"/>' +
+              '</svg>';
+            gpBtn.addEventListener('click', onGooglePayClicked);
+            wrapper.appendChild(gpBtn);
             wrapper.style.minHeight = '0';
-            var gpIframe = wrapper.querySelector('div');
-            if (gpIframe) gpIframe.style.borderRadius = '6px';
 
           }).catch(function(err) {
             console.error('[Express Google Pay] isReadyToPay error:', err);
