@@ -3746,7 +3746,13 @@ body {
             .then(function(sessionData) {
               console.log('[Express PayPal] Payment session data:', JSON.stringify(sessionData));
               // Extract PayPal order ID from session data
-              var orderId = sessionData && (sessionData.id || sessionData.orderID || sessionData.order_id);
+              // Backend returns it as "paypalOrderId", but also check other common key names
+              var orderId = sessionData && (
+                sessionData.paypalOrderId ||
+                sessionData.id ||
+                sessionData.orderID ||
+                sessionData.order_id
+              );
               if (!orderId) {
                 console.error('[Express PayPal] No order ID in session data:', JSON.stringify(sessionData));
                 throw new Error('PayPal order ID niet ontvangen van server');
