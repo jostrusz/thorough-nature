@@ -3440,8 +3440,8 @@ body {
     if (components.length === 0) components = ['buttons'];
 
     var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
-    var sdkBase = isTestMode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
-    var sdkUrl = sdkBase + '?client-id=' + encodeURIComponent(clientId.trim())
+    // PayPal SDK always uses the same domain — sandbox/live is determined by client_id
+    var sdkUrl = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(clientId.trim())
       + '&components=' + components.join(',')
       + '&currency=' + currency
       + '&locale=nl_NL';
@@ -3648,17 +3648,33 @@ body {
           });
         }
       } else if (m.code === 'googlepay') {
-        renderExpressRedirectButton(container, m, {
-          className: 'express-btn--googlepay',
-          logo: '<img src="/icons/googlepay.svg" alt="Google Pay" class="express-logo" onerror="this.outerHTML=\'<span>Google Pay</span>\'">',
-        });
+        // Only redirect-based providers (Mollie, Comgate) support hosted Google Pay
+        // Airwallex/Stripe need client-side SDK — not yet implemented for express
+        if (m.express_config && m.express_config.sdk === 'redirect') {
+          renderExpressRedirectButton(container, m, {
+            className: 'express-btn--googlepay',
+            logo: '<img src="/icons/googlepay.svg" alt="Google Pay" class="express-logo" onerror="this.outerHTML=\'<span>Google Pay</span>\'">',
+          });
+        } else {
+          console.log('[Express] Skipping googlepay for ' + m.provider + ' (needs client-side SDK)');
+        }
       } else if (m.code === 'applepay') {
-        renderExpressRedirectButton(container, m, {
-          className: 'express-btn--applepay',
-          logo: '<img src="/icons/applepay.svg" alt="Apple Pay" class="express-logo" onerror="this.outerHTML=\'<span>Apple Pay</span>\'">',
-        });
+        // Same as Google Pay — only redirect-based providers
+        if (m.express_config && m.express_config.sdk === 'redirect') {
+          renderExpressRedirectButton(container, m, {
+            className: 'express-btn--applepay',
+            logo: '<img src="/icons/applepay.svg" alt="Apple Pay" class="express-logo" onerror="this.outerHTML=\'<span>Apple Pay</span>\'">',
+          });
+        } else {
+          console.log('[Express] Skipping applepay for ' + m.provider + ' (needs client-side SDK)');
+        }
       }
     });
+
+    // If nothing was actually rendered (all skipped), hide section
+    if (container.children.length === 0) {
+      section.style.display = 'none';
+    }
   }
 
   /**
