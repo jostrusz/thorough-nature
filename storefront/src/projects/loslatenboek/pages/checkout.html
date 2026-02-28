@@ -1841,14 +1841,18 @@ body {
   min-height: 48px;
   width: 100%;
 }
-#express-applepay-container apple-pay-button {
+/* Native Safari Apple Pay button — uses -webkit-appearance */
+.express-applepay-native-btn {
+  -webkit-appearance: -apple-pay-button;
+  -apple-pay-button-type: pay;
+  -apple-pay-button-style: black;
   display: block;
   width: 100%;
   height: 48px;
-  --apple-pay-button-width: 100%;
-  --apple-pay-button-height: 48px;
-  --apple-pay-button-border-radius: 6px;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
+  padding: 0;
 }
 /* Generic express button (Google Pay, Apple Pay, redirect-based PayPal) */
 .express-btn {
@@ -4228,10 +4232,12 @@ body {
 
         console.log('[Express Apple Pay] Eligible — rendering button');
 
-        // Create native Apple Pay button
-        wrapper.innerHTML = '<apple-pay-button id="express-applepay-btn" buttonstyle="black" type="pay" locale="nl" style="display:block;width:100%;height:48px;--apple-pay-button-width:100%;--apple-pay-button-height:48px;--apple-pay-button-border-radius:6px;cursor:pointer;"></apple-pay-button>';
-
-        var apBtn = document.getElementById('express-applepay-btn');
+        // Create Apple Pay button using native Safari CSS (-webkit-appearance)
+        var apBtn = document.createElement('button');
+        apBtn.id = 'express-applepay-btn';
+        apBtn.type = 'button';
+        apBtn.className = 'express-applepay-native-btn';
+        wrapper.appendChild(apBtn);
         if (!apBtn) return;
 
         apBtn.addEventListener('click', function() {
