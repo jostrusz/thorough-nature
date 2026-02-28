@@ -101,6 +101,11 @@ export async function middleware(request: NextRequest) {
   const cleanHost = hostname.split(":")[0].replace(/^www\./, "")
   const pathname = request.nextUrl.pathname
 
+  // ─── Static / well-known paths — skip middleware entirely ───
+  if (pathname.startsWith("/.well-known")) {
+    return NextResponse.next()
+  }
+
   // ─── MarketingHQ: Project domain routing ───
   // If hostname matches a project domain, rewrite to /p/{slug}/...
   const projectSlug = PROJECT_DOMAINS[cleanHost]
