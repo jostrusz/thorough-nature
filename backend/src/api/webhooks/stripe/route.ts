@@ -12,6 +12,7 @@ import Stripe from "stripe"
  * - payment_intent.succeeded
  * - payment_intent.payment_failed
  * - charge.refunded
+ * - checkout.session.completed
  */
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
@@ -71,9 +72,21 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     logger.info(`[Stripe Webhook] Received event: ${event.type}, id: ${event.id}`)
 
-    // Process only payment-related events
-    const paymentIntent = event.data.object as any
-    const paymentIntentId = paymentIntent?.id
+    // For checkout.session.completed, resolve PaymentIntent from session
+    let paymentIntentId: string | null = null
+
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object as any
+      paymentIntentId = session.payment_intent as string || null
+      logger.info(`[Stripe Webhook] Checkout Session completed: ${session.id}, PI: ${paymentIntentId}`)
+      if (!paymentIntentId) {
+        return res.status(200).json({ received: true })
+      }
+    } else {
+      // Process payment_intent / charge events
+      const paymentIntent = event.data.object as any
+      paymentIntentId = paymentIntent?.id
+    }
 
     if (!paymentIntentId) {
       return res.status(200).json({ received: true })
@@ -144,6 +157,7 @@ function mapStripeEventToActivity(eventType: string): string {
     "payment_intent.succeeded": "capture",
     "payment_intent.payment_failed": "payment_failed",
     "charge.refunded": "refund",
+    "checkout.session.completed": "capture",
   }
   return eventMap[eventType] || "status_update"
 }

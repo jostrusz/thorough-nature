@@ -125,8 +125,11 @@ export default async function orderPlacedPaymentMetadataHandler({
       }
 
       // Stripe
-      if (paymentData.stripePaymentIntentId || (providerId.includes("stripe") && paymentData.id)) {
+      if (paymentData.stripePaymentIntentId || paymentData.stripeCheckoutSessionId || (providerId.includes("stripe") && paymentData.id)) {
         newMetadata.stripePaymentIntentId = paymentData.stripePaymentIntentId || paymentData.id
+        if (paymentData.stripeCheckoutSessionId) {
+          newMetadata.stripeCheckoutSessionId = paymentData.stripeCheckoutSessionId
+        }
         newMetadata.payment_method = paymentData.method || "card"
         newMetadata.payment_provider = "stripe"
         found = true

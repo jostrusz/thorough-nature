@@ -204,25 +204,68 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
       const stripeMethodType = METHOD_MAP[method] || "card"
       const paymentMethodTypes = [stripeMethodType]
 
-      // Some methods need additional types for fallback
-      if (stripeMethodType === "card") {
-        // Card already covers Apple Pay and Google Pay via Stripe.js
+      const minorAmount = this.toMinorUnits(amount)
+      const customerEmail = customer?.email || data?.email || ""
+
+      // ─── CARD PAYMENTS: Use Stripe Checkout Session (hosted page) ───
+      // Customer is redirected to Stripe's hosted checkout page instead of inline card fields
+      if (stripeMethodType === "card" && returnUrl) {
+        this.logger_.info(
+          `[Stripe] Creating Checkout Session: method=${method}, amount=${minorAmount} ${currency_code}`
+        )
+
+        const sessionParams: Stripe.Checkout.SessionCreateParams = {
+          mode: "payment",
+          payment_method_types: paymentMethodTypes,
+          line_items: [{
+            price_data: {
+              currency: currency_code.toLowerCase(),
+              unit_amount: minorAmount,
+              product_data: {
+                name: data?.product_name || "Order Payment",
+              },
+            },
+            quantity: 1,
+          }],
+          success_url: returnUrl,
+          cancel_url: returnUrl.split("?")[0] || returnUrl,
+          metadata: {
+            customer_id: customer?.id || "",
+            customer_email: customerEmail,
+            session_id: data?.session_id || "",
+            method: method,
+          },
+        }
+
+        if (customerEmail) {
+          sessionParams.customer_email = customerEmail
+        }
+
+        const session = await stripe.checkout.sessions.create(sessionParams)
+
+        this.logger_.info(
+          `[Stripe] Checkout Session created: ${session.id}, payment_intent: ${session.payment_intent}, url: ${session.url ? "yes" : "no"}`
+        )
+
+        return {
+          id: session.id,
+          data: {
+            stripeCheckoutSessionId: session.id,
+            stripePaymentIntentId: session.payment_intent as string || null,
+            checkoutUrl: session.url,
+            status: session.status,
+            method: method,
+            session_id: data?.session_id,
+            currency_code,
+          },
+        }
       }
 
-      // Build webhook/return URLs
-      const backendUrl =
-        process.env.BACKEND_PUBLIC_URL ||
-        (process.env.RAILWAY_PUBLIC_DOMAIN_VALUE
-          ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN_VALUE}`
-          : "http://localhost:9000")
-
-      const minorAmount = this.toMinorUnits(amount)
-
+      // ─── REDIRECT METHODS: Use PaymentIntent with server-side confirm ───
       this.logger_.info(
         `[Stripe] Creating PaymentIntent: method=${method} (${stripeMethodType}), amount=${minorAmount} ${currency_code}`
       )
 
-      // Build PaymentIntent params
       const piParams: Stripe.PaymentIntentCreateParams = {
         amount: minorAmount,
         currency: currency_code.toLowerCase(),
@@ -230,7 +273,7 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
         capture_method: "automatic",
         metadata: {
           customer_id: customer?.id || "",
-          customer_email: customer?.email || data?.email || "",
+          customer_email: customerEmail,
           session_id: data?.session_id || "",
           method: method,
         },
@@ -286,6 +329,16 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
     const sessionData = input.data || input
     try {
       const stripe = await this.getStripeClient()
+
+      // If we used Checkout Session, resolve the PaymentIntent from it
+      if (sessionData.stripeCheckoutSessionId && !sessionData.stripePaymentIntentId) {
+        const session = await stripe.checkout.sessions.retrieve(sessionData.stripeCheckoutSessionId)
+        if (session.payment_intent) {
+          sessionData.stripePaymentIntentId = session.payment_intent as string
+        }
+        this.logger_.info(`[Stripe] Authorize: Resolved PI ${sessionData.stripePaymentIntentId} from Checkout Session ${sessionData.stripeCheckoutSessionId}`)
+      }
+
       const piId = sessionData.stripePaymentIntentId
 
       if (!piId) {
@@ -304,6 +357,7 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
         status,
         data: {
           ...sessionData,
+          stripePaymentIntentId: piId,
           status: paymentIntent.status,
         },
       }
