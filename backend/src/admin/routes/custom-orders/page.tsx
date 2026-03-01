@@ -26,36 +26,33 @@ const dashboardStyle: React.CSSProperties = {
 }
 
 /**
- * Hook that walks up the DOM from a ref and sets background + removes
- * max-width constraints on all ancestor elements up to <body>.
- * Cleans up on unmount.
+ * Hook that walks up the DOM from a ref and sets background on ancestor elements.
+ * Width overrides are handled via the injected <style> tag in DashboardStyles
+ * because Medusa admin's CSS classes resist inline style overrides.
  */
 function useFullPageBackground(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
 
-    const originals: { el: HTMLElement; bg: string; maxWidth: string; width: string }[] = []
+    // Tag the dashboard element so CSS selectors can target its ancestors
+    el.setAttribute("data-custom-dashboard", "true")
+
+    const originals: { el: HTMLElement; bg: string }[] = []
     let node: HTMLElement | null = el.parentElement
 
     while (node && node !== document.documentElement) {
-      originals.push({
-        el: node,
-        bg: node.style.background,
-        maxWidth: node.style.maxWidth,
-        width: node.style.width,
-      })
+      originals.push({ el: node, bg: node.style.background })
       node.style.setProperty("background", BG_COLOR, "important")
-      node.style.setProperty("max-width", "100%", "important")
-      node.style.setProperty("width", "100%", "important")
+      // Mark each ancestor for CSS targeting
+      node.setAttribute("data-dashboard-ancestor", "true")
       node = node.parentElement
     }
 
     return () => {
-      originals.forEach(({ el: n, bg, maxWidth, width }) => {
+      originals.forEach(({ el: n, bg }) => {
         n.style.background = bg
-        n.style.maxWidth = maxWidth
-        n.style.width = width
+        n.removeAttribute("data-dashboard-ancestor")
       })
     }
   }, [ref])
@@ -167,6 +164,23 @@ const paginationInfoStyle: React.CSSProperties = {
 function DashboardStyles() {
   return (
     <style>{`
+      /* ═══ FORCE FULL WIDTH on Medusa admin layout containers ═══ */
+      /* Target every ancestor element marked by useFullPageBackground */
+      [data-dashboard-ancestor] {
+        max-width: 100% !important;
+        width: 100% !important;
+        flex: 1 1 100% !important;
+      }
+
+      /* Also target common Medusa admin layout structure elements */
+      main [data-dashboard-ancestor],
+      div[data-dashboard-ancestor],
+      section[data-dashboard-ancestor] {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
       /* Card hover — premium lift + glow */
       .dash-stat-card {
         transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
