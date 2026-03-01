@@ -326,13 +326,19 @@ export async function DELETE(
       }
     }
 
-    // ── Always clear invoice metadata from order ──
+    // ── Always clear invoice + credit note metadata from order ──
     const cleanedMeta = { ...metadata }
+    // Invoice fields
     delete cleanedMeta.fakturoid_invoice_id
     delete cleanedMeta.fakturoid_internal_id
     delete cleanedMeta.fakturoid_invoice_number
     delete cleanedMeta.fakturoid_invoice_url
     delete cleanedMeta.fakturoid_created_at
+    // Credit note fields (linked to the deleted invoice)
+    delete cleanedMeta.fakturoid_credit_note_id
+    delete cleanedMeta.fakturoid_credit_note_internal_id
+    delete cleanedMeta.fakturoid_credit_note_url
+    delete cleanedMeta.fakturoid_credit_note_created_at
 
     await orderModuleService.updateOrders(id, {
       metadata: cleanedMeta,
