@@ -10,7 +10,7 @@ import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
  * (molliePaymentId, klarnaOrderId, etc.). This subscriber copies them into order
  * metadata so webhooks can find the order later.
  *
- * Supported providers: Mollie, Klarna, PayPal, Comgate, Przelewy24, Airwallex
+ * Supported providers: Mollie, Klarna, PayPal, Comgate, Przelewy24, Airwallex, Stripe
  */
 export default async function orderPlacedPaymentMetadataHandler({
   event: { data },
@@ -124,6 +124,15 @@ export default async function orderPlacedPaymentMetadataHandler({
         break
       }
 
+      // Stripe
+      if (paymentData.stripePaymentIntentId || (providerId.includes("stripe") && paymentData.id)) {
+        newMetadata.stripePaymentIntentId = paymentData.stripePaymentIntentId || paymentData.id
+        newMetadata.payment_method = paymentData.method || "card"
+        newMetadata.payment_provider = "stripe"
+        found = true
+        break
+      }
+
       // Generic: detect provider from provider_id
       if (providerId.includes("klarna") && paymentData.sessionId) {
         newMetadata.klarnaOrderId = paymentData.klarnaOrderId || null
@@ -149,6 +158,7 @@ export default async function orderPlacedPaymentMetadataHandler({
       newMetadata.comgateTransId ||
       newMetadata.p24SessionId ||
       newMetadata.airwallexPaymentIntentId ||
+      newMetadata.stripePaymentIntentId ||
       "n/a"
 
     console.log(

@@ -368,6 +368,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                 payment.data?.mollieOrderId ||
                 payment.data?.paypalOrderId ||
                 payment.data?.klarnaOrderId ||
+                payment.data?.stripePaymentIntentId ||
                 payment.data?.id ||
                 payment.data?.payment_intent ||
                 payment.data?.payment_id ||
