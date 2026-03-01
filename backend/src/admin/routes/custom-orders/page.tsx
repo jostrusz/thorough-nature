@@ -26,33 +26,48 @@ const dashboardStyle: React.CSSProperties = {
 }
 
 /**
- * Hook that walks up the DOM from a ref and sets background on ancestor elements.
- * Width overrides are handled via the injected <style> tag in DashboardStyles
- * because Medusa admin's CSS classes resist inline style overrides.
+ * Hook that walks up the DOM, sets background, and forces width on ancestors.
+ * Uses both inline styles AND injects a <style> tag with element-specific IDs
+ * to guarantee overriding Medusa admin's layout constraints.
  */
 function useFullPageBackground(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
 
-    // Tag the dashboard element so CSS selectors can target its ancestors
-    el.setAttribute("data-custom-dashboard", "true")
-
     const originals: { el: HTMLElement; bg: string }[] = []
     let node: HTMLElement | null = el.parentElement
+    let depth = 0
+
+    // DEBUG: log each ancestor's constraints so we can see what's blocking
+    console.log("[Dashboard Width Debug] Starting ancestor walk...")
 
     while (node && node !== document.documentElement) {
+      const computed = window.getComputedStyle(node)
+      console.log(
+        `[Dashboard Width Debug] depth=${depth}`,
+        `tag=${node.tagName}`,
+        `class="${node.className}"`,
+        `maxWidth=${computed.maxWidth}`,
+        `width=${computed.width}`,
+        `display=${computed.display}`,
+        `flex=${computed.flex}`,
+        `gridTemplateColumns=${computed.gridTemplateColumns}`
+      )
+
       originals.push({ el: node, bg: node.style.background })
       node.style.setProperty("background", BG_COLOR, "important")
-      // Mark each ancestor for CSS targeting
-      node.setAttribute("data-dashboard-ancestor", "true")
+      node.style.setProperty("max-width", "none", "important")
+      node.style.setProperty("width", "100%", "important")
       node = node.parentElement
+      depth++
     }
 
     return () => {
       originals.forEach(({ el: n, bg }) => {
         n.style.background = bg
-        n.removeAttribute("data-dashboard-ancestor")
+        n.style.removeProperty("max-width")
+        n.style.removeProperty("width")
       })
     }
   }, [ref])
@@ -165,20 +180,22 @@ function DashboardStyles() {
   return (
     <style>{`
       /* ═══ FORCE FULL WIDTH on Medusa admin layout containers ═══ */
-      /* Target every ancestor element marked by useFullPageBackground */
-      [data-dashboard-ancestor] {
-        max-width: 100% !important;
+      /* Nuclear approach: target main and ALL nested divs up to 6 levels deep */
+      main,
+      main > div,
+      main > div > div,
+      main > div > div > div,
+      main > div > div > div > div,
+      main > div > div > div > div > div,
+      main > div > div > div > div > div > div {
+        max-width: none !important;
         width: 100% !important;
-        flex: 1 1 100% !important;
       }
-
-      /* Also target common Medusa admin layout structure elements */
-      main [data-dashboard-ancestor],
-      div[data-dashboard-ancestor],
-      section[data-dashboard-ancestor] {
-        max-width: 100% !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
+      /* Also override any flex/grid constraints on the content area */
+      main > div,
+      main > div > div {
+        flex: 1 1 100% !important;
+        min-width: 0 !important;
       }
 
       /* Card hover — premium lift + glow */
