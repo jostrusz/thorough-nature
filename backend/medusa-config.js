@@ -85,6 +85,7 @@ const medusaConfig = {
     { resolve: "./src/modules/dextrum" },
     { resolve: "./src/modules/supportbox" },
     { resolve: "./src/modules/project-settings" },
+    { resolve: "./src/modules/resend-config" },
     // ═══ Payment provider modules (non-Medusa-payment, standalone) ═══
     { resolve: "./src/modules/payment-comgate" },
     { resolve: "./src/modules/payment-przelewy24" },
