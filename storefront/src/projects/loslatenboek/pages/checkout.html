@@ -4844,14 +4844,13 @@ body {
         // Show/hide card fields — init the right provider's card elements
         var cardFields = document.getElementById('card-fields');
         if (cardFields) {
-          if (selectedMethod === 'creditcard') {
+          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe') {
+            // Stripe uses hosted checkout (redirect), no inline card fields
             cardFields.style.display = 'block';
             if (cardProvider === 'mollie') {
               initMollieComponents();
             } else if (cardProvider === 'airwallex') {
               initAirwallexCard();
-            } else if (cardProvider === 'stripe') {
-              initStripeCard();
             } else if (cardProvider === 'paypal') {
               initPayPalCard();
             }
