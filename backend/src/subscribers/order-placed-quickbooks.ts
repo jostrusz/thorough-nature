@@ -254,7 +254,12 @@ export default async function orderPlacedQuickBooksHandler({
     const invoiceData: any = {
       CustomerRef: { value: customer.Id },
       Line: lines,
-      DocNumber: (order as any).metadata?.custom_order_number || (order as any).display_id?.toString() || undefined,
+      DocNumber: (order as any).metadata?.custom_order_number || (() => {
+        const cc = (invoiceAddress?.country_code || (order as any).shipping_address?.country_code || "XX").toUpperCase()
+        const yr = new Date().getFullYear()
+        const did = (order as any).display_id
+        return did ? `${cc}${yr}-${did}` : undefined
+      })(),
       CurrencyRef: order.currency_code
         ? { value: order.currency_code.toUpperCase() }
         : undefined,

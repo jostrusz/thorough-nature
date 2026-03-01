@@ -200,7 +200,12 @@ export async function POST(
     const invoiceData: any = {
       CustomerRef: { value: customer.Id },
       Line: lines,
-      DocNumber: order.metadata?.custom_order_number || order.display_id?.toString() || undefined,
+      DocNumber: order.metadata?.custom_order_number || (() => {
+        const cc = (invoiceAddress?.country_code || order.metadata?.country_code || "XX").toUpperCase()
+        const yr = new Date().getFullYear()
+        const did = order.display_id
+        return did ? `${cc}${yr}-${did}` : undefined
+      })(),
       CurrencyRef: order.currency_code
         ? { value: order.currency_code.toUpperCase() }
         : undefined,

@@ -212,7 +212,13 @@ export async function POST(
     const invoice = await createInvoice(creds, token, {
       subject_id: subject.id,
       custom_id: gatewayPaymentId || order.id,
-      order_number: order.metadata?.custom_order_number || order.display_id?.toString() || order.id,
+      order_number: order.metadata?.custom_order_number || (() => {
+        // Compute custom order number inline as fallback
+        const cc = (invoiceAddress?.country_code || order.metadata?.country_code || "XX").toUpperCase()
+        const yr = new Date().getFullYear()
+        const did = order.display_id
+        return did ? `${cc}${yr}-${did}` : order.id
+      })(),
       currency: order.currency_code?.toUpperCase() || "EUR",
       language,
       oss,

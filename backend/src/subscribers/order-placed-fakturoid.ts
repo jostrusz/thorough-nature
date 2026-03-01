@@ -275,7 +275,13 @@ export default async function orderPlacedFakturoidHandler({
     const invoice = await createInvoice(creds, token, {
       subject_id: subject.id,
       custom_id: gatewayPaymentId || order.id,
-      order_number: (order as any).metadata?.custom_order_number || (order as any).display_id?.toString() || order.id,
+      order_number: (order as any).metadata?.custom_order_number || (() => {
+        // Compute custom order number inline (race condition: custom-number subscriber may not have run yet)
+        const cc = (shippingAddress?.country_code || (order as any).shipping_address?.country_code || "XX").toUpperCase()
+        const yr = new Date().getFullYear()
+        const did = (order as any).display_id
+        return did ? `${cc}${yr}-${did}` : order.id
+      })(),
       currency: order.currency_code?.toUpperCase() || "EUR",
       language,
       oss,
