@@ -177,6 +177,74 @@ function OrderDetailStyles() {
         z-index: 50;
         pointer-events: none;
       }
+
+      /* Enhanced card hover — glassmorphism inspired */
+      .od-card {
+        backdrop-filter: blur(0px);
+      }
+      .od-card:hover {
+        box-shadow: 0 8px 32px rgba(108, 92, 231, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+      }
+
+      /* Smooth row highlight with left accent */
+      .od-row-hover::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: transparent;
+        border-radius: 2px;
+        transition: background 0.2s ease;
+      }
+      .od-row-hover {
+        position: relative;
+      }
+      .od-row-hover:hover::before {
+        background: #6C5CE7;
+      }
+
+      /* Button ripple effect */
+      .od-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(108, 92, 231, 0.1);
+        transition: width 0.3s ease, height 0.3s ease, top 0.3s ease, left 0.3s ease;
+      }
+      .od-btn {
+        position: relative;
+        overflow: hidden;
+      }
+      .od-btn:active::after {
+        width: 200%;
+        height: 200%;
+        top: -50%;
+        left: -50%;
+      }
+
+      /* Health bar segment hover */
+      .od-health-segment {
+        transition: transform 0.2s ease, filter 0.2s ease !important;
+      }
+      .od-health-segment:hover {
+        transform: scaleY(1.3);
+        filter: brightness(1.1);
+      }
+
+      /* Smooth entrance */
+      @keyframes odSlideIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .od-section-animate {
+        animation: odSlideIn 0.35s ease;
+      }
     `}</style>
   )
 }
@@ -567,7 +635,7 @@ const OrderDetailPage = () => {
   const maxRefundable = totalPaid || Number(order.total) || 0
 
   return (
-    <div style={pageStyle}>
+    <div style={pageStyle} className="od-section-animate">
       <OrderDetailStyles />
 
       {/* Header with Shopify-style actions */}

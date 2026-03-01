@@ -125,6 +125,102 @@ const paginationInfoStyle: React.CSSProperties = {
 }
 
 // ═══════════════════════════════════════════
+// DASHBOARD HOVER STYLES
+// ═══════════════════════════════════════════
+function DashboardStyles() {
+  return (
+    <style>{`
+      /* Card hover — lift + glow */
+      .dash-stat-card {
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+      }
+      .dash-stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(108, 92, 231, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+        border-color: rgba(108, 92, 231, 0.2) !important;
+      }
+
+      /* Main table card */
+      .dash-main-card {
+        transition: box-shadow 0.3s ease !important;
+      }
+
+      /* Table row hover */
+      .dash-table-row {
+        transition: background 0.15s ease, transform 0.15s ease !important;
+      }
+      .dash-table-row:hover {
+        background: #F8F9FC !important;
+        transform: scale(1.002);
+      }
+
+      /* Button hover — glow effect */
+      .dash-btn {
+        transition: all 0.2s ease !important;
+      }
+      .dash-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+      .dash-btn:active {
+        transform: translateY(0) scale(0.98);
+      }
+
+      /* Primary button hover — accent glow */
+      .dash-btn-primary {
+        transition: all 0.2s ease !important;
+      }
+      .dash-btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(108, 92, 231, 0.35);
+      }
+      .dash-btn-primary:active {
+        transform: translateY(0) scale(0.98);
+      }
+
+      /* Search box focus */
+      .dash-search:focus-within {
+        border-color: rgba(108, 92, 231, 0.4) !important;
+        box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.08) !important;
+      }
+
+      /* Tab hover */
+      .dash-tab {
+        transition: all 0.2s ease !important;
+      }
+      .dash-tab:hover {
+        background: rgba(108, 92, 231, 0.06) !important;
+      }
+
+      /* Pagination button hover */
+      .dash-page-btn {
+        transition: all 0.15s ease !important;
+      }
+      .dash-page-btn:hover:not(:disabled) {
+        background: #F8F9FC !important;
+        border-color: rgba(108, 92, 231, 0.3) !important;
+        transform: scale(1.05);
+      }
+
+      /* Badge pulse for new items */
+      @keyframes subtlePulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+      }
+
+      /* Smooth page entrance */
+      @keyframes dashFadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .dash-animate-in {
+        animation: dashFadeIn 0.4s ease;
+      }
+    `}</style>
+  )
+}
+
+// ═══════════════════════════════════════════
 // PAGE SIZE
 // ═══════════════════════════════════════════
 const PAGE_SIZE = 20
@@ -257,7 +353,8 @@ const CustomOrdersPage = () => {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
   return (
-    <div style={dashboardStyle}>
+    <div style={dashboardStyle} className="dash-animate-in">
+      <DashboardStyles />
       {/* Page Header */}
       <div style={headerStyle}>
         <h1 style={h1Style}>
@@ -266,6 +363,7 @@ const CustomOrdersPage = () => {
         </h1>
         <div style={{ display: "flex", gap: "8px" }}>
           <button
+            className="dash-btn"
             style={btnOutline}
             onClick={() => {
               bulkActions.mutate(
@@ -300,7 +398,7 @@ const CustomOrdersPage = () => {
             </svg>
             Export
           </button>
-          <button style={btnPrimary}>
+          <button className="dash-btn-primary" style={btnPrimary}>
             <svg
               width="15"
               height="15"
@@ -328,7 +426,7 @@ const CustomOrdersPage = () => {
       />
 
       {/* Main Card */}
-      <div style={mainCardStyle}>
+      <div className="dash-main-card" style={mainCardStyle}>
         {/* Tabs */}
         <OrderTabs
           activeTab={activeTab}
@@ -338,7 +436,7 @@ const CustomOrdersPage = () => {
 
         {/* Toolbar */}
         <div style={toolbarStyle}>
-          <div style={searchBoxStyle}>
+          <div className="dash-search" style={searchBoxStyle}>
             <svg
               width="16"
               height="16"
@@ -392,6 +490,7 @@ const CustomOrdersPage = () => {
           </span>
           <div style={{ display: "flex", gap: "4px", marginLeft: "16px" }}>
             <button
+              className="dash-page-btn"
               style={pageBtnStyle}
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
@@ -403,6 +502,7 @@ const CustomOrdersPage = () => {
               return (
                 <button
                   key={i}
+                  className="dash-page-btn"
                   style={page === pageNum ? pageBtnActiveStyle : pageBtnStyle}
                   onClick={() => setPage(pageNum)}
                 >
@@ -411,6 +511,7 @@ const CustomOrdersPage = () => {
               )
             })}
             <button
+              className="dash-page-btn"
               style={pageBtnStyle}
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
