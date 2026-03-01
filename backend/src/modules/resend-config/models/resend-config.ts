@@ -8,7 +8,7 @@ const ResendConfig = model.define("resend_config", {
   from_email: model.text(),
   from_name: model.text().nullable(),
   reply_to: model.text().nullable(),
-  use_for: model.json().default(["all"]),
+  use_for: model.json().nullable(),
   enabled: model.boolean().default(true),
   metadata: model.json().nullable(),
 })

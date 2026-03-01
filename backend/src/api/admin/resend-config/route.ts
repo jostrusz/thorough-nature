@@ -26,6 +26,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       return
     }
 
+    if (!data.use_for) data.use_for = ["all"]
     const config = await service.createResendConfigs(data)
     res.status(201).json({ resend_config: config })
   } catch (error: any) {
