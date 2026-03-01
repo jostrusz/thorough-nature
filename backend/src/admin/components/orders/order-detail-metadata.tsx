@@ -104,16 +104,25 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
   )
   const payment = payments[0]
 
-  // Payment ID — Mollie stores as molliePaymentId/mollieOrderId, not as id
+  // Payment ID — each gateway stores it differently
   const gatewayPaymentId =
+    // Direct from payment data
     payment?.data?.molliePaymentId ||
     payment?.data?.mollieOrderId ||
-    payment?.data?.id ||
+    payment?.data?.stripePaymentIntentId ||
     payment?.data?.payment_intent ||
+    payment?.data?.id ||
     payment?.data?.payment_id ||
     payment?.data?.transaction_id ||
+    // From order metadata (set by order-placed-payment-metadata subscriber)
+    metadata.stripePaymentIntentId ||
     metadata.molliePaymentId ||
     metadata.mollieOrderId ||
+    metadata.paypalOrderId ||
+    metadata.klarnaOrderId ||
+    metadata.comgateTransId ||
+    metadata.p24SessionId ||
+    metadata.airwallexPaymentIntentId ||
     ""
 
   // Payment Gateway name (e.g. "Mollie", "PayPal")

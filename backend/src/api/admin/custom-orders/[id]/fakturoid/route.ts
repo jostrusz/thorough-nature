@@ -147,15 +147,29 @@ export async function POST(
     const payments =
       order.payment_collections?.flatMap((pc: any) => pc.payments || []) || []
     const firstPayment = payments[0]
+    const existingMeta = order.metadata || {}
     let gatewayPaymentId = ""
     if (firstPayment?.data) {
       gatewayPaymentId =
         firstPayment.data.molliePaymentId ||
         firstPayment.data.mollieOrderId ||
+        firstPayment.data.stripePaymentIntentId ||
         firstPayment.data.payment_intent ||
         firstPayment.data.id ||
         firstPayment.data.payment_id ||
         firstPayment.data.transaction_id ||
+        ""
+    }
+    // Fallback: check order metadata (set by payment-metadata subscriber)
+    if (!gatewayPaymentId) {
+      gatewayPaymentId =
+        existingMeta.stripePaymentIntentId ||
+        existingMeta.molliePaymentId ||
+        existingMeta.mollieOrderId ||
+        existingMeta.paypalOrderId ||
+        existingMeta.klarnaOrderId ||
+        existingMeta.comgateTransId ||
+        existingMeta.airwallexPaymentIntentId ||
         ""
     }
 
@@ -211,7 +225,6 @@ export async function POST(
     })
 
     // ── Update order metadata ──
-    const existingMeta = order.metadata || {}
     await orderModuleService.updateOrders(id, {
       metadata: {
         ...existingMeta,
