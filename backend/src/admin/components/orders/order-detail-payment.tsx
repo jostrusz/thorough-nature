@@ -28,6 +28,7 @@ function getPaymentStatus(order: any): string {
     if (pc.status === "refunded") return "refunded"
     return pc.status || "pending"
   }
+  if (order.metadata?.copied_payment_status) return order.metadata.copied_payment_status
   return "pending"
 }
 

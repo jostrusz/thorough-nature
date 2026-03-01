@@ -64,6 +64,7 @@ function getPaymentStatus(order: any): string {
     if (pc.status === "authorized") return "authorized"
     return pc.status || "pending"
   }
+  if (order.metadata?.copied_payment_status) return order.metadata.copied_payment_status
   return "pending"
 }
 

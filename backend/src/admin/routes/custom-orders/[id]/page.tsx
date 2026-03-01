@@ -787,7 +787,13 @@ const OrderDetailPage = () => {
           <OrderFulfillmentCard
             order={order}
             onMarkAsFulfilled={handleFulfill}
+            onSendToDextrum={handleSendToDextrum}
+            onFakturoidCreate={handleFakturoidCreate}
+            onQBCreate={handleQBCreate}
             isLoading={createFulfillment.isPending}
+            isDextrumLoading={sendToDextrum.isPending}
+            isFakturoidLoading={createFakturoidInvoice.isPending}
+            isQBLoading={createQBInvoice.isPending}
           />
           <OrderDetailPayment
             order={order}

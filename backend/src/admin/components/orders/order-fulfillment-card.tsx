@@ -14,13 +14,25 @@ import {
 interface OrderFulfillmentCardProps {
   order: any
   onMarkAsFulfilled: () => void
+  onSendToDextrum: () => void
+  onFakturoidCreate: () => void
+  onQBCreate: () => void
   isLoading?: boolean
+  isDextrumLoading?: boolean
+  isFakturoidLoading?: boolean
+  isQBLoading?: boolean
 }
 
 export function OrderFulfillmentCard({
   order,
   onMarkAsFulfilled,
+  onSendToDextrum,
+  onFakturoidCreate,
+  onQBCreate,
   isLoading,
+  isDextrumLoading,
+  isFakturoidLoading,
+  isQBLoading,
 }: OrderFulfillmentCardProps) {
   const items = order.items || []
   const currency = order.currency_code
@@ -29,6 +41,9 @@ export function OrderFulfillmentCard({
     order.shipping_methods?.[0]?.name ||
     order.shipping_methods?.[0]?.shipping_option_id ||
     ""
+  const hasDextrum = !!order.metadata?.dextrum_order_code
+  const hasFakturoid = !!order.metadata?.fakturoid_invoice_id
+  const hasQB = !!order.metadata?.quickbooks_invoice_id
 
   return (
     <div
@@ -183,16 +198,48 @@ export function OrderFulfillmentCard({
         })}
       </div>
 
-      {/* Mark as fulfilled button */}
+      {/* Action buttons */}
       {!hasFulfillments && (
         <div
           style={{
             display: "flex",
             justifyContent: "flex-end",
+            gap: "8px",
+            flexWrap: "wrap",
             padding: "12px 20px",
             borderTop: `1px solid ${colors.border}`,
           }}
         >
+          {/* Send to Dextrum WMS */}
+          {!hasDextrum && (
+            <button
+              onClick={onSendToDextrum}
+              disabled={isDextrumLoading}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "7px 14px",
+                borderRadius: radii.xs,
+                fontSize: "12px",
+                fontWeight: 500,
+                cursor: isDextrumLoading ? "default" : "pointer",
+                opacity: isDextrumLoading ? 0.6 : 1,
+                border: `1px solid ${colors.border}`,
+                background: "#FFFFFF",
+                color: colors.text,
+                transition: "all 0.15s ease",
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="2" y="4" width="16" height="12" rx="2" />
+                <path d="M2 8h16M7 4v4M13 4v4" />
+              </svg>
+              {isDextrumLoading ? "Sending..." : "Send to Dextrum"}
+            </button>
+          )}
+
+          {/* Mark as fulfilled */}
           <button
             onClick={onMarkAsFulfilled}
             disabled={isLoading}
@@ -214,6 +261,69 @@ export function OrderFulfillmentCard({
             </svg>
             {isLoading ? "Fulfilling..." : "Mark as fulfilled"}
           </button>
+        </div>
+      )}
+
+      {/* Invoice action buttons */}
+      {(!hasFakturoid || !hasQB) && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "8px",
+            flexWrap: "wrap",
+            padding: "10px 20px",
+            borderTop: `1px solid ${colors.border}`,
+          }}
+        >
+          {!hasFakturoid && (
+            <button
+              onClick={onFakturoidCreate}
+              disabled={isFakturoidLoading}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "6px 12px",
+                borderRadius: radii.xs,
+                fontSize: "12px",
+                fontWeight: 600,
+                cursor: isFakturoidLoading ? "default" : "pointer",
+                opacity: isFakturoidLoading ? 0.6 : 1,
+                border: `1px solid ${colors.border}`,
+                background: "#FFFFFF",
+                color: "#008060",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <span style={{ fontSize: "11px", fontWeight: 700 }}>fa</span>
+              {isFakturoidLoading ? "Creating..." : "Send to Fakturoid"}
+            </button>
+          )}
+          {!hasQB && (
+            <button
+              onClick={onQBCreate}
+              disabled={isQBLoading}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "6px 12px",
+                borderRadius: radii.xs,
+                fontSize: "12px",
+                fontWeight: 600,
+                cursor: isQBLoading ? "default" : "pointer",
+                opacity: isQBLoading ? 0.6 : 1,
+                border: `1px solid ${colors.border}`,
+                background: "#FFFFFF",
+                color: "#2CA01C",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <span style={{ fontSize: "11px", fontWeight: 700 }}>qb</span>
+              {isQBLoading ? "Creating..." : "Send to QuickBooks"}
+            </button>
+          )}
         </div>
       )}
 

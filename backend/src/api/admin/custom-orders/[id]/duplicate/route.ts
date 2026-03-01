@@ -27,6 +27,8 @@ export async function POST(
         "shipping_address.*",
         "billing_address.*",
         "shipping_methods.*",
+        "payment_collections.*",
+        "payment_collections.payments.*",
       ],
       filters: { id },
     })
@@ -37,6 +39,16 @@ export async function POST(
     }
 
     const src = sourceOrder as any
+
+    // Derive source order's payment status
+    let sourcePaymentStatus = "pending"
+    if (src.payment_collections?.length) {
+      const pc = src.payment_collections[0]
+      if (pc.status === "captured" || pc.status === "completed") sourcePaymentStatus = "paid"
+      else if (pc.status === "refunded") sourcePaymentStatus = "refunded"
+      else if (pc.status === "authorized") sourcePaymentStatus = "authorized"
+      else sourcePaymentStatus = pc.status || "pending"
+    }
 
     // Build items array for new order
     const items = (src.items || []).map((item: any) => ({
@@ -97,6 +109,7 @@ export async function POST(
         ...(src.metadata || {}),
         duplicated_from: id,
         duplicated_from_display_id: src.display_id,
+        copied_payment_status: sourcePaymentStatus,
         dextrum_status: undefined,
         dextrum_order_code: undefined,
         dextrum_tracking_number: undefined,
