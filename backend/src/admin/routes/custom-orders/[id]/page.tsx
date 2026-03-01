@@ -373,14 +373,19 @@ function OrderHealthBar({ order }: { order: any }) {
   )
 }
 
+const pageWrapperStyle: React.CSSProperties = {
+  background: "#f4f5fa",
+  minHeight: "100vh",
+  margin: "-1px -24px",
+  padding: "1px 24px",
+}
+
 const pageStyle: React.CSSProperties = {
   width: "1000px",
-  maxWidth: "calc(100vw - 280px)",
+  maxWidth: "100%",
   margin: "0 auto",
   padding: "24px 32px",
   fontFamily: fontStack,
-  background: colors.bg,
-  minHeight: "100vh",
 }
 
 const OrderDetailPage = () => {
@@ -594,32 +599,36 @@ const OrderDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "80px 20px",
-        }}
-      >
-        <LoadingSpinner />
+      <div style={pageWrapperStyle}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "80px 20px",
+          }}
+        >
+          <LoadingSpinner />
+        </div>
       </div>
     )
   }
 
   if (error || !order) {
     return (
-      <div style={pageStyle}>
-        <div
-          style={{
-            textAlign: "center",
-            padding: "60px 20px",
-            color: colors.textMuted,
-          }}
-        >
-          <p style={{ fontSize: "14px" }}>
-            {error ? `Error: ${(error as Error).message}` : "Order not found"}
-          </p>
+      <div style={pageWrapperStyle}>
+        <div style={pageStyle}>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "60px 20px",
+              color: colors.textMuted,
+            }}
+          >
+            <p style={{ fontSize: "14px" }}>
+              {error ? `Error: ${(error as Error).message}` : "Order not found"}
+            </p>
+          </div>
         </div>
       </div>
     )
@@ -635,6 +644,7 @@ const OrderDetailPage = () => {
   const maxRefundable = totalPaid || Number(order.total) || 0
 
   return (
+    <div style={pageWrapperStyle}>
     <div style={pageStyle} className="od-section-animate">
       <OrderDetailStyles />
 
@@ -792,6 +802,7 @@ const OrderDetailPage = () => {
         isLoading={duplicateOrder.isPending}
         orderDisplayId={order.display_id}
       />
+    </div>
     </div>
   )
 }

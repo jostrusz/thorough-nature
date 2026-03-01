@@ -16,13 +16,18 @@ import { colors, radii, shadows, fontStack, cardStyle as tokenCardStyle, btnOutl
 // ═══════════════════════════════════════════
 // STYLES
 // ═══════════════════════════════════════════
+const dashboardWrapperStyle: React.CSSProperties = {
+  background: "#f4f5fa",
+  minHeight: "100vh",
+  margin: "-1px -24px",
+  padding: "1px 24px",
+}
+
 const dashboardStyle: React.CSSProperties = {
   maxWidth: "1400px",
   margin: "0 auto",
   padding: "32px 48px",
   fontFamily: fontStack,
-  background: colors.bg,
-  minHeight: "100vh",
 }
 
 const headerStyle: React.CSSProperties = {
@@ -391,6 +396,7 @@ const CustomOrdersPage = () => {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
   return (
+    <div style={dashboardWrapperStyle}>
     <div style={dashboardStyle} className="dash-animate-in">
       <DashboardStyles />
 
@@ -566,6 +572,7 @@ const CustomOrdersPage = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   )
 }
