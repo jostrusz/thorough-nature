@@ -241,8 +241,9 @@ export async function markInvoicePaid(
   const payload: Record<string, any> = { paid_on: today }
 
   // Include gateway payment ID in the variable_symbol field of the payment
+  // Fakturoid variable_symbol max 10 chars — truncate if needed
   if (options?.gatewayPaymentId) {
-    payload.variable_symbol = options.gatewayPaymentId
+    payload.variable_symbol = options.gatewayPaymentId.slice(0, 10)
   }
 
   const res = await fetch(url, {
