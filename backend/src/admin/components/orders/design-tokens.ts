@@ -97,6 +97,38 @@ export function getPaymentIconUrl(order: any): string {
   if (providerId.includes("klarna")) return `${ICON_BASE}/apm/klarna.svg`
   if (providerId.includes("paypal")) return `${ICON_BASE}/apm/paypal.svg`
 
+  // Stripe — map method to specific icon
+  if (providerId.includes("stripe")) {
+    const map: Record<string, string> = {
+      card: "cards/visa.svg",
+      creditcard: "cards/visa.svg",
+      ideal: "apm/ideal.svg",
+      bancontact: "apm/bancontact.svg",
+      klarna: "apm/klarna.svg",
+      eps: "apm/eps.svg",
+      p24: "apm/przelewy24.svg",
+      sepa_debit: "apm/sepa.svg",
+      applepay: "wallets/apple-pay.svg",
+      googlepay: "wallets/google-pay.svg",
+      revolut_pay: "apm/revolut.svg",
+    }
+    return `${ICON_BASE}/${map[method] || "cards/visa.svg"}`
+  }
+
+  // Airwallex — map method to specific icon
+  if (providerId.includes("airwallex")) {
+    const map: Record<string, string> = {
+      card: "cards/visa.svg",
+      creditcard: "cards/visa.svg",
+      ideal: "apm/ideal.svg",
+      bancontact: "apm/bancontact.svg",
+      applepay: "wallets/apple-pay.svg",
+      googlepay: "wallets/google-pay.svg",
+    }
+    return `${ICON_BASE}/${map[method] || "cards/visa.svg"}`
+  }
+
+  // Mollie — map method to specific icon
   if (providerId.includes("mollie")) {
     const map: Record<string, string> = {
       ideal: "apm/ideal.svg",
@@ -114,6 +146,8 @@ export function getPaymentIconUrl(order: any): string {
 export function getPaymentFallback(order: any): { letter: string; bg: string; color: string } {
   const payments = order.payment_collections?.flatMap((pc: any) => pc.payments || []) || []
   const providerId = payments[0]?.provider_id || ""
+  if (providerId.includes("stripe")) return { letter: "S", bg: "#635BFF", color: "#fff" }
+  if (providerId.includes("airwallex")) return { letter: "AW", bg: "#FF5100", color: "#fff" }
   if (providerId.includes("comgate")) return { letter: "C", bg: "#444", color: "#fff" }
   if (providerId.includes("przelewy") || providerId.includes("p24")) return { letter: "P24", bg: "#D40E2F", color: "#fff" }
   return { letter: "?", bg: colors.textMuted, color: "#fff" }
@@ -129,6 +163,35 @@ export function getPaymentMethodName(order: any): string {
   if (providerId.includes("paypal")) return "PayPal"
   if (providerId.includes("comgate")) return "Comgate"
   if (providerId.includes("przelewy") || providerId.includes("p24")) return "Przelewy24"
+
+  if (providerId.includes("stripe")) {
+    const names: Record<string, string> = {
+      card: "Credit Card",
+      creditcard: "Credit Card",
+      ideal: "iDEAL",
+      bancontact: "Bancontact",
+      klarna: "Klarna",
+      eps: "EPS",
+      p24: "Przelewy24",
+      sepa_debit: "SEPA Direct Debit",
+      applepay: "Apple Pay",
+      googlepay: "Google Pay",
+      revolut_pay: "Revolut Pay",
+    }
+    return names[method] || "Stripe"
+  }
+
+  if (providerId.includes("airwallex")) {
+    const names: Record<string, string> = {
+      card: "Credit Card",
+      creditcard: "Credit Card",
+      ideal: "iDEAL",
+      bancontact: "Bancontact",
+      applepay: "Apple Pay",
+      googlepay: "Google Pay",
+    }
+    return names[method] || "Airwallex"
+  }
 
   if (providerId.includes("mollie")) {
     const names: Record<string, string> = {
