@@ -2,6 +2,8 @@ import { Metadata } from "next"
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+const PUBLISHABLE_KEY =
+  process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
 
 export const metadata: Metadata = {
   title: "Download je e-books — Laat Los Wat Je Kapotmaakt",
@@ -29,8 +31,14 @@ async function getDownloadData(
   token: string
 ): Promise<{ data: DownloadData | null; error: string | null; expired: boolean }> {
   try {
+    const headers: Record<string, string> = {}
+    if (PUBLISHABLE_KEY) {
+      headers["x-publishable-api-key"] = PUBLISHABLE_KEY
+    }
+
     const res = await fetch(`${BACKEND_URL}/store/download/${token}`, {
       cache: "no-store",
+      headers,
     })
 
     if (res.status === 410) {
@@ -43,22 +51,30 @@ async function getDownloadData(
     }
 
     if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      console.error("[Download page] Backend error:", res.status, body)
       return { data: null, error: "Er is iets misgegaan", expired: false }
     }
 
     const data = await res.json()
     return { data, error: null, expired: false }
-  } catch {
-    return { data: null, error: "Kan geen verbinding maken met de server", expired: false }
+  } catch (err) {
+    console.error("[Download page] Fetch error:", err)
+    return {
+      data: null,
+      error: "Kan geen verbinding maken met de server",
+      expired: false,
+    }
   }
 }
 
 export default async function DownloadPage({
   params,
 }: {
-  params: { token: string }
+  params: Promise<{ token: string }>
 }) {
-  const { data, error, expired } = await getDownloadData(params.token)
+  const { token } = await params
+  const { data, error, expired } = await getDownloadData(token)
 
   const expiryDate = data?.download?.expires_at
     ? new Date(data.download.expires_at).toLocaleDateString("nl-NL", {
@@ -75,7 +91,11 @@ export default async function DownloadPage({
         <div style={styles.header}>
           <p style={styles.brandLabel}>LAAT LOS WAT JE KAPOTMAAKT</p>
           <h1 style={styles.headerTitle}>
-            {error ? (expired ? "Link verlopen" : "Oeps...") : "Je e-books staan klaar"}
+            {error
+              ? expired
+                ? "Link verlopen"
+                : "Oeps..."
+              : "Je e-books staan klaar"}
           </h1>
         </div>
 
@@ -86,14 +106,15 @@ export default async function DownloadPage({
           ) : (
             <>
               <p style={styles.intro}>
-                Hoi! Klik op de downloadknoppen hieronder om je e-books op te slaan.
+                Hoi! Klik op de downloadknoppen hieronder om je e-books op te
+                slaan.
               </p>
 
               {/* File cards */}
               {data!.download.files.map((file, index) => (
                 <div key={index} style={styles.fileCard}>
                   <div style={styles.fileIcon}>
-                    {index === 0 ? "📕" : "📓"}
+                    {index === 0 ? "\u{1F4D5}" : "\u{1F4D3}"}
                   </div>
                   <div style={styles.fileInfo}>
                     <p style={styles.fileTitle}>{file.title}</p>
@@ -104,7 +125,8 @@ export default async function DownloadPage({
                   <a
                     href={file.download_url}
                     style={styles.downloadButton}
-                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     Download &darr;
                   </a>
@@ -167,7 +189,7 @@ function ErrorState({
   return (
     <div style={{ textAlign: "center" as const, padding: "40px 0" }}>
       <p style={{ fontSize: "48px", marginBottom: "16px" }}>
-        {expired ? "⏳" : "❌"}
+        {expired ? "\u23F3" : "\u274C"}
       </p>
       <p
         style={{
@@ -232,7 +254,6 @@ const styles: Record<string, React.CSSProperties> = {
     letterSpacing: "3px",
     textTransform: "uppercase" as const,
     color: "#C27BA0",
-    marginBottom: "10px",
     margin: "0 0 10px 0",
   },
   headerTitle: {
@@ -251,7 +272,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "15px",
     color: "#5A3D6B",
     lineHeight: "1.6",
-    marginBottom: "28px",
     margin: "0 0 28px 0",
   },
   fileCard: {
