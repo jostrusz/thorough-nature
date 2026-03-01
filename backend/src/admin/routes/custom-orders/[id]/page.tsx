@@ -508,20 +508,29 @@ const OrderDetailPage = () => {
 
   const handleRefund = useCallback(
     (amount: number, note: string) => {
-      if (!order) return
-      const payments =
-        order.payment_collections?.flatMap((pc: any) => pc.payments || []) || []
-      const paymentId = payments[0]?.id
-      if (!paymentId) {
-        toast.error("No payment found to refund")
-        return
-      }
+      if (!order || !id) return
       refundPayment.mutate(
-        { paymentId, amount, note },
+        { orderId: id, amount, note },
         {
           onSuccess: () => {
-            toast.success("Refund processed")
+            toast.success("Refund processed via payment gateway")
             setRefundModalOpen(false)
+
+            // Auto-create Fakturoid credit note if invoice exists
+            if (order.metadata?.fakturoid_invoice_id && !order.metadata?.fakturoid_credit_note_id) {
+              createFakturoidCreditNote.mutate(id, {
+                onSuccess: () => toast.success("Fakturoid credit note created"),
+                onError: (e: any) => toast.error(`Fakturoid credit note failed: ${e?.message || "unknown error"}`),
+              })
+            }
+
+            // Auto-create QuickBooks credit memo if invoice exists
+            if (order.metadata?.quickbooks_invoice_id && !order.metadata?.quickbooks_credit_memo_id) {
+              createQBCreditMemo.mutate(id, {
+                onSuccess: () => toast.success("QuickBooks credit memo created"),
+                onError: (e: any) => toast.error(`QuickBooks credit memo failed: ${e?.message || "unknown error"}`),
+              })
+            }
           },
           onError: (err: any) => {
             toast.error(err?.message || "Failed to process refund")
@@ -529,7 +538,7 @@ const OrderDetailPage = () => {
         }
       )
     },
-    [order, refundPayment]
+    [id, order, refundPayment, createFakturoidCreditNote, createQBCreditMemo]
   )
 
   const handleDuplicate = useCallback(() => {

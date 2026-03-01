@@ -64,15 +64,19 @@ export function useRefundPayment() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({
-      paymentId,
+      orderId,
       amount,
       note,
     }: {
-      paymentId: string
+      orderId: string
       amount: number
       note?: string
     }) => {
-      return sdk.admin.payment.refund(paymentId, { amount, note })
+      const resp = await sdk.client.fetch(`/admin/custom-orders/${orderId}/refund`, {
+        method: "POST",
+        body: { amount, reason: note },
+      })
+      return resp as any
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["custom-order-detail"] })

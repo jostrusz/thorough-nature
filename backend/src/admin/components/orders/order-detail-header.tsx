@@ -23,6 +23,16 @@ interface OrderDetailHeaderProps {
 }
 
 function getPaymentStatus(order: any): string {
+  // Check metadata refund log first (custom refund route sets this)
+  const refundLog = order.metadata?.payment_refund_log
+  if (Array.isArray(refundLog) && refundLog.length > 0) {
+    // Calculate total refunded
+    const totalRefunded = refundLog.reduce((sum: number, r: any) => sum + (Number(r.amount) || 0), 0)
+    const totalPaid = Number(order.total) || 0
+    if (totalRefunded >= totalPaid) return "refunded"
+    return "partially_refunded"
+  }
+
   if (order.payment_collections?.length) {
     const pc = order.payment_collections[0]
     if (pc.status === "captured" || pc.status === "completed") return "paid"
@@ -54,6 +64,7 @@ export function OrderDetailHeader({
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
   const paymentStatus = getPaymentStatus(order)
+  const isRefunded = paymentStatus === "refunded" || paymentStatus === "partially_refunded"
   const hasFulfillments = order.fulfillments && order.fulfillments.length > 0
   const createdAt = new Date(order.created_at)
   const fakturoidInvoiceId = order.metadata?.fakturoid_invoice_id
@@ -143,13 +154,15 @@ export function OrderDetailHeader({
 
         {/* Right: Action buttons */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <button
-            onClick={onRefund}
-            className="od-btn"
-            style={actionBtnStyle}
-          >
-            Refund
-          </button>
+          {!isRefunded && (
+            <button
+              onClick={onRefund}
+              className="od-btn"
+              style={actionBtnStyle}
+            >
+              Refund
+            </button>
+          )}
           <button
             onClick={onEdit}
             className="od-btn"
