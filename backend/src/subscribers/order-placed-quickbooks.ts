@@ -254,7 +254,7 @@ export default async function orderPlacedQuickBooksHandler({
     const invoiceData: any = {
       CustomerRef: { value: customer.Id },
       Line: lines,
-      DocNumber: (order as any).display_id?.toString() || undefined,
+      DocNumber: (order as any).metadata?.custom_order_number || (order as any).display_id?.toString() || undefined,
       CurrencyRef: order.currency_code
         ? { value: order.currency_code.toUpperCase() }
         : undefined,

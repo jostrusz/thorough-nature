@@ -75,7 +75,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
 }) => {
   const currency = order.currency_code || 'eur'
   const items = order.items || []
-  const displayId = order.display_id || order.id
+  const displayId = order.metadata?.custom_order_number || order.display_id || order.id
   const orderDate = formatDate(order.created_at)
 
   // Calculate totals

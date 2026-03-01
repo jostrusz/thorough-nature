@@ -91,7 +91,7 @@ export default async function orderPlacedHandler({
     console.warn('[OrderPlaced] Could not detect payment method:', payErr.message)
   }
 
-  const displayId = (order as any).display_id || order.id
+  const displayId = (order as any).metadata?.custom_order_number || (order as any).display_id || order.id
 
   // Resolve billing entity for footer
   let billingEntity: any = null

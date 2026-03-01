@@ -92,6 +92,20 @@ export async function POST(
         }
       : undefined
 
+    // Compute custom_order_number for the duplicate
+    const srcCustomNumber = src.metadata?.custom_order_number || `#${src.display_id}`
+    let newCustomNumber: string
+    if (src.metadata?.duplicated_from) {
+      // Source is itself a duplicate — increment the suffix (-2 → -3, -3 → -4)
+      const suffixMatch = srcCustomNumber.match(/-(\d+)$/)
+      const basePart = srcCustomNumber.replace(/-\d+$/, "")
+      const nextSuffix = suffixMatch ? parseInt(suffixMatch[1], 10) + 1 : 2
+      newCustomNumber = `${basePart}-${nextSuffix}`
+    } else {
+      // Source is an original order — append -2
+      newCustomNumber = `${srcCustomNumber}-2`
+    }
+
     // Build shipping methods
     const shippingMethods = (src.shipping_methods || []).map((m: any) => ({
       name: m.name || "Shipping",
@@ -113,6 +127,7 @@ export async function POST(
         ...(src.metadata || {}),
         duplicated_from: id,
         duplicated_from_display_id: src.display_id,
+        custom_order_number: newCustomNumber,
         copied_payment_status: sourcePaymentStatus,
         dextrum_status: undefined,
         dextrum_order_code: undefined,
@@ -123,6 +138,10 @@ export async function POST(
         dextrum_timeline: undefined,
         fakturoid_invoice_id: undefined,
         fakturoid_invoice_url: undefined,
+        fakturoid_credit_note_id: undefined,
+        quickbooks_invoice_id: undefined,
+        quickbooks_invoice_url: undefined,
+        quickbooks_credit_memo_id: undefined,
       },
     })
 

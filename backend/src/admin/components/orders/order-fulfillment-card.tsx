@@ -248,7 +248,7 @@ export function OrderFulfillmentCard({
             alignItems: "center",
             gap: "8px",
             padding: "12px 20px",
-            fontSize: "13px",
+            fontSize: "14px",
             color: colors.textSec,
             borderBottom: `1px solid ${colors.border}`,
           }}
@@ -337,7 +337,7 @@ export function OrderFulfillmentCard({
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     fontWeight: 600,
                     color: colors.accent,
                     textDecoration: "none",
@@ -361,12 +361,12 @@ export function OrderFulfillmentCard({
 
               {/* Quantity x Price = Total */}
               <div style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                <div style={{ fontSize: "13px", color: colors.text }}>
+                <div style={{ fontSize: "14px", color: colors.text }}>
                   {formatCurrency(unitPrice, currency)} &times; {quantity}
                 </div>
                 <div
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     fontWeight: 600,
                     color: colors.text,
                     marginTop: "2px",
@@ -465,12 +465,12 @@ export function OrderFulfillmentCard({
             <div
               key={ful.id}
               style={{
-                fontSize: "13px",
+                fontSize: "14px",
                 color: colors.textSec,
                 padding: "4px 0",
               }}
             >
-              <span style={{ fontWeight: 500, color: colors.text }}>Fulfilled</span>
+              <span style={{ fontWeight: 600, color: colors.text }}>Fulfilled</span>
               {" on "}
               {new Date(ful.created_at).toLocaleDateString("en-US", {
                 month: "short",

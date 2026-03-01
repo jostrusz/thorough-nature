@@ -6,7 +6,7 @@ import { CountryFlag } from "./country-flag"
 import { OrderTag } from "./order-tag"
 import { useUpdateMetadata } from "../../hooks/use-update-metadata"
 import { toast } from "@medusajs/ui"
-import { colors, radii, shadows, getPaymentIconUrl, getPaymentFallback } from "./design-tokens"
+import { colors, radii, shadows, getPaymentIconUrl, getPaymentFallback, getOrderDisplayNumber } from "./design-tokens"
 
 interface OrdersTableProps {
   orders: any[]
@@ -248,7 +248,7 @@ export function OrdersTable({
       { orderId: order.id, metadata: { book_sent: !currentValue } },
       {
         onSuccess: () => {
-          toast.success(`Book sent ${!currentValue ? "marked" : "unmarked"} for #${order.display_id}`)
+          toast.success(`Book sent ${!currentValue ? "marked" : "unmarked"} for ${getOrderDisplayNumber(order)}`)
         },
         onError: () => {
           toast.error("Failed to update book sent status")
@@ -412,7 +412,7 @@ export function OrdersTable({
                       cursor: "pointer",
                     }}
                   >
-                    #{order.display_id}
+                    {getOrderDisplayNumber(order)}
                   </span>
                 </td>
 

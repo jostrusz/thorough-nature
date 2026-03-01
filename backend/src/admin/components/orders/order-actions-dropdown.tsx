@@ -41,6 +41,7 @@ const itemStyle: React.CSSProperties = {
   borderRadius: "6px",
   margin: "0 4px",
   width: "calc(100% - 8px)",
+  whiteSpace: "nowrap",
 }
 
 const dividerStyle: React.CSSProperties = {

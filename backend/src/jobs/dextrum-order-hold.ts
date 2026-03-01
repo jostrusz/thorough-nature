@@ -104,7 +104,13 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           productName: item.variant?.product?.title || item.title || "",
         }))
 
-        // 6. Send to mySTOCK
+        // 6. Safety: skip if already sent (e.g., by manual send route)
+        if (orderMap.mystock_order_id) {
+          console.log(`[Dextrum Hold] Order ${orderCode} already sent (${orderMap.mystock_order_id}), skipping`)
+          continue
+        }
+
+        // 7. Send to mySTOCK
         const wmsResult = await client.createOrder({
           orderCode,
           operatingUnitId: config.metadata?.operating_units?.[(order as any).metadata?.project_code] || config.partner_id || "",

@@ -56,7 +56,7 @@ export const cardHeaderStyle: React.CSSProperties = {
   justifyContent: "space-between",
   padding: "16px 20px",
   borderBottom: `1px solid ${colors.border}`,
-  fontSize: "14px",
+  fontSize: "15px",
   fontWeight: 600,
   color: colors.text,
 }
@@ -205,4 +205,11 @@ export function getPaymentMethodName(order: any): string {
   }
 
   return "Payment"
+}
+
+// ═══ Order Display Number ═══
+
+/** Get the display-friendly order number (country-prefixed or fallback to #display_id) */
+export function getOrderDisplayNumber(order: any): string {
+  return order.metadata?.custom_order_number || `#${order.display_id}`
 }

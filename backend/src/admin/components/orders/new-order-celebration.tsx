@@ -10,6 +10,7 @@ interface NewOrderCelebrationProps {
     total?: number
     currency_code?: string
     shipping_address?: { first_name?: string; last_name?: string }
+    metadata?: { custom_order_number?: string }
   } | null
   onDismiss: () => void
 }
@@ -316,7 +317,7 @@ export function NewOrderCelebration({
       <div style={bannerStyle}>
         <div style={headerRowStyle}>
           <span style={titleStyle}>
-            New order received! {"\uD83C\uDF89"} #{order.display_id}
+            New order received! {"\uD83C\uDF89"} {order.metadata?.custom_order_number || `#${order.display_id}`}
           </span>
           <button
             style={closeButtonStyle}

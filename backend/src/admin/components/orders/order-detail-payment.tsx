@@ -11,6 +11,7 @@ import {
   getPaymentIconUrl,
   getPaymentFallback,
   getPaymentMethodName,
+  getOrderDisplayNumber,
 } from "./design-tokens"
 
 interface OrderDetailPaymentProps {
@@ -85,8 +86,8 @@ const rowStyle: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  padding: "6px 4px",
-  fontSize: "13px",
+  padding: "7px 4px",
+  fontSize: "14px",
   borderRadius: "4px",
   margin: "0 -4px",
   transition: "background 0.12s ease",
@@ -267,7 +268,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
 
         {/* Divider + Total */}
         <div style={{ borderTop: `1px solid ${colors.border}`, marginTop: "8px", paddingTop: "8px" }}>
-          <div style={{ ...rowStyle, fontSize: "14px", fontWeight: 600 }}>
+          <div style={{ ...rowStyle, fontSize: "15px", fontWeight: 700 }}>
             <span style={{ color: colors.text }}>Total</span>
             <span style={{ color: colors.text }}>{formatCurrency(total, currency)}</span>
           </div>
@@ -305,7 +306,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                   fontFamily: "monospace",
                 }}
               >
-                #{order.display_id}
+                {getOrderDisplayNumber(order)}
               </code>
             </div>
           )}

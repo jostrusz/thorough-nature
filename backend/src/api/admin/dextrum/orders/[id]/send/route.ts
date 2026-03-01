@@ -47,13 +47,26 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const prefix = prefixMap[countryCode] || countryCode
     const orderCode = `${prefix}-${(order as any).display_id}`
 
-    // 5. Check if already sent
+    // 5a. Check if this Medusa order was already sent
     const existing = await dextrumService.listDextrumOrderMaps(
       { medusa_order_id: medusaOrderId },
       { take: 1 }
     )
     if (existing[0]?.mystock_order_id) {
       res.status(400).json({ error: "Order already sent to WMS", dextrum_order: existing[0] })
+      return
+    }
+
+    // 5b. Check if this order code was already sent (prevents duplicates from different Medusa orders)
+    const existingByCode = await dextrumService.listDextrumOrderMaps(
+      { mystock_order_code: orderCode },
+      { take: 1 }
+    )
+    if (existingByCode[0]?.mystock_order_id) {
+      res.status(400).json({
+        error: `Order code ${orderCode} was already sent to WMS`,
+        dextrum_order: existingByCode[0],
+      })
       return
     }
 

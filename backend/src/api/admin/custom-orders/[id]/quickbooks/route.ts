@@ -200,7 +200,7 @@ export async function POST(
     const invoiceData: any = {
       CustomerRef: { value: customer.Id },
       Line: lines,
-      DocNumber: order.display_id?.toString() || undefined,
+      DocNumber: order.metadata?.custom_order_number || order.display_id?.toString() || undefined,
       CurrencyRef: order.currency_code
         ? { value: order.currency_code.toUpperCase() }
         : undefined,

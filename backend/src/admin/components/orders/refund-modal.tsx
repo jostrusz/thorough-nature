@@ -93,7 +93,7 @@ export function RefundModal({
             margin: "0 0 16px",
           }}
         >
-          Refund order #{order?.display_id}
+          Refund order {order?.metadata?.custom_order_number || `#${order?.display_id}`}
         </h3>
 
         <div

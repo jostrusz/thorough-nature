@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { PaymentBadge, FulfillmentBadge } from "./order-badges"
 import { OrderActionsDropdown } from "./order-actions-dropdown"
-import { colors, radii, fontStack, btnOutline, shadows } from "./design-tokens"
+import { colors, radii, fontStack, btnOutline, shadows, getOrderDisplayNumber } from "./design-tokens"
 
 interface OrderDetailHeaderProps {
   order: any
@@ -128,15 +128,14 @@ export function OrderDetailHeader({
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
           <h1
             style={{
-              fontSize: "20px",
+              fontSize: "22px",
               fontWeight: 600,
               color: colors.text,
               fontFamily: fontStack,
               margin: 0,
             }}
           >
-            <span style={{ color: colors.accent }}>#</span>
-            <span style={{ color: colors.accent }}>{order.display_id}</span>
+            <span style={{ color: colors.accent }}>{getOrderDisplayNumber(order)}</span>
           </h1>
           <span className="od-badge"><PaymentBadge status={paymentStatus} /></span>
           <span className="od-badge"><FulfillmentBadge fulfilled={hasFulfillments} /></span>
@@ -217,7 +216,7 @@ export function OrderDetailHeader({
       {/* Date subtitle */}
       <p
         style={{
-          fontSize: "13px",
+          fontSize: "14px",
           fontFamily: fontStack,
           color: colors.textSec,
           margin: 0,

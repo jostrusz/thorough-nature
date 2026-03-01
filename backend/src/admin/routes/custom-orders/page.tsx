@@ -333,6 +333,7 @@ const CustomOrdersPage = () => {
         total: newestOrder.total,
         currency_code: newestOrder.currency_code,
         shipping_address: newestOrder.shipping_address,
+        metadata: newestOrder.metadata,
       })
     }
 

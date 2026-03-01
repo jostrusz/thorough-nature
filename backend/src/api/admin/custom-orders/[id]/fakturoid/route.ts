@@ -212,7 +212,7 @@ export async function POST(
     const invoice = await createInvoice(creds, token, {
       subject_id: subject.id,
       custom_id: gatewayPaymentId || order.id,
-      order_number: order.display_id?.toString() || order.id,
+      order_number: order.metadata?.custom_order_number || order.display_id?.toString() || order.id,
       currency: order.currency_code?.toUpperCase() || "EUR",
       language,
       oss,

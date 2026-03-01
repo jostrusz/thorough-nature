@@ -19,10 +19,10 @@ const sectionStyle: React.CSSProperties = {
 }
 
 const sectionTitleStyle: React.CSSProperties = {
-  fontSize: "14px",
+  fontSize: "15px",
   fontWeight: 600,
   color: "#1A1A1A",
-  marginBottom: "16px",
+  marginBottom: "18px",
 }
 
 export function OrderDetailItems({ order }: OrderDetailItemsProps) {
@@ -34,9 +34,9 @@ export function OrderDetailItems({ order }: OrderDetailItemsProps) {
       <div style={sectionTitleStyle}>Items</div>
 
       {items.length === 0 ? (
-        <p style={{ fontSize: "13px", color: "#8C9196" }}>No items</p>
+        <p style={{ fontSize: "14px", color: "#8C9196" }}>No items</p>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           {items.map((item: any) => {
             const productTitle =
               item.variant?.product?.title || item.title || "Unknown product"
@@ -93,7 +93,7 @@ export function OrderDetailItems({ order }: OrderDetailItemsProps) {
                 <div style={{ flex: 1 }}>
                   <div
                     style={{
-                      fontSize: "13px",
+                      fontSize: "14px",
                       fontWeight: 600,
                       color: "#1A1A1A",
                     }}
@@ -113,9 +113,9 @@ export function OrderDetailItems({ order }: OrderDetailItemsProps) {
                   )}
                   <div
                     style={{
-                      fontSize: "12px",
+                      fontSize: "13px",
                       color: "#6D7175",
-                      marginTop: "2px",
+                      marginTop: "3px",
                     }}
                   >
                     {quantity}&times; {formatCurrency(unitPrice, currency)}
@@ -125,7 +125,7 @@ export function OrderDetailItems({ order }: OrderDetailItemsProps) {
                 {/* Total */}
                 <div
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     fontWeight: 600,
                     color: "#1A1A1A",
                   }}
@@ -150,8 +150,8 @@ export function OrderDetailItems({ order }: OrderDetailItemsProps) {
           style={{
             display: "flex",
             justifyContent: "space-between",
-            marginBottom: "6px",
-            fontSize: "13px",
+            marginBottom: "8px",
+            fontSize: "14px",
             color: "#6D7175",
           }}
         >
@@ -162,8 +162,8 @@ export function OrderDetailItems({ order }: OrderDetailItemsProps) {
           style={{
             display: "flex",
             justifyContent: "space-between",
-            marginBottom: "6px",
-            fontSize: "13px",
+            marginBottom: "8px",
+            fontSize: "14px",
             color: "#6D7175",
           }}
         >
@@ -177,8 +177,8 @@ export function OrderDetailItems({ order }: OrderDetailItemsProps) {
             style={{
               display: "flex",
               justifyContent: "space-between",
-              marginBottom: "6px",
-              fontSize: "13px",
+              marginBottom: "8px",
+              fontSize: "14px",
               color: "#6D7175",
             }}
           >
@@ -192,11 +192,11 @@ export function OrderDetailItems({ order }: OrderDetailItemsProps) {
           style={{
             display: "flex",
             justifyContent: "space-between",
-            fontSize: "14px",
-            fontWeight: 600,
+            fontSize: "15px",
+            fontWeight: 700,
             color: "#1A1A1A",
-            marginTop: "8px",
-            paddingTop: "8px",
+            marginTop: "10px",
+            paddingTop: "10px",
             borderTop: "1px solid #E1E3E5",
           }}
         >

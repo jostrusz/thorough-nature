@@ -275,7 +275,7 @@ export default async function orderPlacedFakturoidHandler({
     const invoice = await createInvoice(creds, token, {
       subject_id: subject.id,
       custom_id: gatewayPaymentId || order.id,
-      order_number: (order as any).display_id?.toString() || order.id,
+      order_number: (order as any).metadata?.custom_order_number || (order as any).display_id?.toString() || order.id,
       currency: order.currency_code?.toUpperCase() || "EUR",
       language,
       oss,

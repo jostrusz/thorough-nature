@@ -103,7 +103,7 @@ export default async function orderFulfillmentCreatedHandler({
       console.warn('[ShipmentNotification] Could not resolve billing entity:', err.message)
     }
 
-    const displayId = (order as any).display_id || order.id
+    const displayId = (order as any).metadata?.custom_order_number || (order as any).display_id || order.id
 
     await notificationModuleService.createNotifications({
       to: order.email,
