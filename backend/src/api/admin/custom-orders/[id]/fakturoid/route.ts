@@ -182,10 +182,12 @@ export async function POST(
         unit_price: item.unit_price || 0,
         unit_name: "ks",
       }
-      // Extract VAT rate from Medusa tax lines (rate is decimal: 0.21 = 21%)
+      // Extract VAT rate from Medusa tax lines
+      // Rate may be whole number (9 = 9%) or decimal (0.09 = 9%)
       const taxLine = item.tax_lines?.[0]
       if (taxLine?.rate != null) {
-        line.vat_rate = Math.round(taxLine.rate * 100)
+        const rate = Number(taxLine.rate)
+        line.vat_rate = rate >= 1 ? Math.round(rate) : Math.round(rate * 100)
       }
       return line
     })

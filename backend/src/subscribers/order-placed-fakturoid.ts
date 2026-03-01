@@ -210,7 +210,9 @@ export default async function orderPlacedFakturoidHandler({
       const taxItems = taxData?.[0]?.items || []
       for (const ti of taxItems) {
         if (ti.tax_lines?.[0]?.rate != null) {
-          itemTaxMap[ti.id] = Math.round(ti.tax_lines[0].rate * 100)
+          const rate = Number(ti.tax_lines[0].rate)
+          // Medusa may store rate as whole number (9 = 9%) or decimal (0.09 = 9%)
+          itemTaxMap[ti.id] = rate >= 1 ? Math.round(rate) : Math.round(rate * 100)
         }
       }
     } catch (taxErr: any) {
