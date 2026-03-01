@@ -320,6 +320,55 @@ export const POST = async (
         refundResult = { success: false, error: e.message }
       }
     }
+    // Stripe refund
+    else if (providerId.includes("stripe")) {
+      const piId =
+        paymentData.stripePaymentIntentId ||
+        paymentData.payment_intent ||
+        order.metadata?.stripePaymentIntentId
+      if (!piId) {
+        res.status(400).json({ error: "No Stripe payment intent ID found" })
+        return
+      }
+
+      try {
+        const Stripe = (await import("stripe")).default
+        const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
+        let secretKey: string | undefined
+
+        const configs = await gcService.listGatewayConfigs(
+          { provider: "stripe", is_active: true },
+          { take: 1 }
+        )
+        const config = configs[0]
+        if (config) {
+          const isLive = config.mode === "live"
+          const keys = isLive ? config.live_keys : config.test_keys
+          secretKey = keys?.api_key
+        }
+        if (!secretKey) {
+          secretKey = process.env.STRIPE_SECRET_KEY
+        }
+        if (!secretKey) {
+          res.status(400).json({ error: "Stripe gateway not configured" })
+          return
+        }
+
+        const stripe = new Stripe(secretKey)
+        // Input amount is in cents (minor units) — Stripe also uses cents
+        const refund = await stripe.refunds.create({
+          payment_intent: piId,
+          amount: amount > 0 ? amount : undefined,
+          reason: "requested_by_customer",
+        })
+        refundResult = {
+          success: true,
+          refundId: refund.id,
+        }
+      } catch (e: any) {
+        refundResult = { success: false, error: e.message }
+      }
+    }
 
     if (!refundResult.success) {
       res.status(400).json({ error: refundResult.error || "Refund failed" })
