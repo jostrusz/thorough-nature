@@ -3145,7 +3145,7 @@ body {
 
   function initMollieComponents() {
     // Use dynamic profile_id and testmode from API response if available, fallback to PROJECT_CONFIG
-    var creditCardOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
+    var creditCardOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard' && m.provider === 'mollie'; });
     var profileId = (creditCardOption && creditCardOption.profile_id) || PROJECT_CONFIG.mollieProfileId;
     var testmode = creditCardOption ? !!creditCardOption.testmode : false;
 
@@ -3202,7 +3202,7 @@ body {
 
     try {
       // Get environment from creditcard option
-      var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
+      var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard' && m.provider === 'airwallex'; });
       var env = (ccOption && ccOption.environment) || 'demo';
 
       await window.AirwallexComponentsSDK.init({
@@ -3259,8 +3259,8 @@ body {
     }
 
     try {
-      // Get publishable key from creditcard option
-      var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
+      // Get publishable key from creditcard option (filter by Stripe provider)
+      var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard' && m.provider === 'stripe'; });
       var publishableKey = ccOption ? ccOption.client_key : null;
 
       if (!publishableKey) {
