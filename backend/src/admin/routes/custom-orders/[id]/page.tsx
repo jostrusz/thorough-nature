@@ -24,6 +24,7 @@ import {
   useDuplicateOrder,
   useSendToDextrum,
   useCreateFakturoidInvoice,
+  useDeleteFakturoidInvoice,
   useCustomerStats,
 } from "../../../hooks/use-order-actions"
 
@@ -428,6 +429,7 @@ const OrderDetailPage = () => {
   const duplicateOrder = useDuplicateOrder()
   const sendToDextrum = useSendToDextrum()
   const createFakturoidInvoice = useCreateFakturoidInvoice()
+  const deleteFakturoidInvoice = useDeleteFakturoidInvoice()
 
   // Customer stats
   const order = data?.order as any
@@ -558,6 +560,19 @@ const OrderDetailPage = () => {
     })
   }, [id, createFakturoidInvoice])
 
+  const handleFakturoidDelete = useCallback(() => {
+    if (!id) return
+    if (!window.confirm("Are you sure you want to delete this invoice from Fakturoid?")) return
+    deleteFakturoidInvoice.mutate(id, {
+      onSuccess: () => {
+        toast.success("Fakturoid invoice deleted")
+      },
+      onError: (err: any) => {
+        toast.error(err?.message || "Failed to delete invoice")
+      },
+    })
+  }, [id, deleteFakturoidInvoice])
+
   const handleCapture = useCallback(() => {
     if (!id) return
     capturePayment.mutate(id, {
@@ -679,6 +694,7 @@ const OrderDetailPage = () => {
         onSendToDextrum={handleSendToDextrum}
         onFakturoidCreate={handleFakturoidCreate}
         onFakturoidOpen={handleFakturoidOpen}
+        onFakturoidDelete={handleFakturoidDelete}
       />
 
       {/* Health Bar — order progress */}

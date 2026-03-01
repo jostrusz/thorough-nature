@@ -155,6 +155,23 @@ export function useCreateFakturoidInvoice() {
 }
 
 // ═══════════════════════════════════════════
+// Delete Fakturoid Invoice
+// ═══════════════════════════════════════════
+export function useDeleteFakturoidInvoice() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      return sdk.client.fetch(`/admin/custom-orders/${orderId}/fakturoid`, {
+        method: "DELETE",
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["custom-order-detail"] })
+    },
+  })
+}
+
+// ═══════════════════════════════════════════
 // Update Order Details (address, email, etc.)
 // ═══════════════════════════════════════════
 export function useUpdateOrderDetails() {

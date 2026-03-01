@@ -14,6 +14,7 @@ interface OrderDetailHeaderProps {
   onSendToDextrum: () => void
   onFakturoidCreate: () => void
   onFakturoidOpen: () => void
+  onFakturoidDelete: () => void
 }
 
 function getPaymentStatus(order: any): string {
@@ -36,6 +37,7 @@ export function OrderDetailHeader({
   onSendToDextrum,
   onFakturoidCreate,
   onFakturoidOpen,
+  onFakturoidDelete,
 }: OrderDetailHeaderProps) {
   const navigate = useNavigate()
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -176,6 +178,7 @@ export function OrderDetailHeader({
               onSendToDextrum={onSendToDextrum}
               onFakturoidCreate={onFakturoidCreate}
               onFakturoidOpen={onFakturoidOpen}
+              onFakturoidDelete={onFakturoidDelete}
               fakturoidInvoiceId={fakturoidInvoiceId}
               fakturoidInvoiceUrl={fakturoidInvoiceUrl}
               dextrumMystockId={dextrumMystockId}

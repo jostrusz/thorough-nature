@@ -9,6 +9,7 @@ interface OrderActionsDropdownProps {
   onSendToDextrum: () => void
   onFakturoidCreate: () => void
   onFakturoidOpen: () => void
+  onFakturoidDelete: () => void
   fakturoidInvoiceId?: string
   fakturoidInvoiceUrl?: string
   dextrumMystockId?: string
@@ -46,6 +47,7 @@ export function OrderActionsDropdown({
   onSendToDextrum,
   onFakturoidCreate,
   onFakturoidOpen,
+  onFakturoidDelete,
   fakturoidInvoiceId,
   fakturoidInvoiceUrl,
   dextrumMystockId,
@@ -144,14 +146,28 @@ export function OrderActionsDropdown({
 
       {/* Fakturoid */}
       {fakturoidInvoiceId ? (
-        <button
-          className="od-dropdown-item"
-          style={itemStyle}
-          onClick={() => { onFakturoidOpen(); onClose() }}
-        >
-          <span style={{ fontSize: "14px", width: "16px", textAlign: "center", color: "#008060", fontWeight: 700 }}>fa</span>
-          Fakturoid: Open invoice
-        </button>
+        <>
+          <button
+            className="od-dropdown-item"
+            style={itemStyle}
+            onClick={() => { onFakturoidOpen(); onClose() }}
+          >
+            <span style={{ fontSize: "14px", width: "16px", textAlign: "center", color: "#008060", fontWeight: 700 }}>fa</span>
+            Fakturoid: Open invoice
+          </button>
+          <button
+            className="od-dropdown-item"
+            style={{ ...itemStyle, color: "#D72C0D" }}
+            onClick={() => { onFakturoidDelete(); onClose() }}
+          >
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#D72C0D" strokeWidth="1.5">
+              <path d="M5 6h10M8 6V4h4v2M6 6v10a1 1 0 001 1h6a1 1 0 001-1V6" />
+              <line x1="9" y1="9" x2="9" y2="14" />
+              <line x1="11" y1="9" x2="11" y2="14" />
+            </svg>
+            Fakturoid: Delete invoice
+          </button>
+        </>
       ) : (
         <button
           className="od-dropdown-item"

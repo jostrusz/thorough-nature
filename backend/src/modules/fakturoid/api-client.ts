@@ -249,6 +249,46 @@ export async function markInvoicePaid(
   }
 }
 
+/**
+ * Delete an invoice from Fakturoid.
+ * Only non-sent (draft/open) invoices can be deleted via API.
+ */
+export async function deleteInvoice(
+  creds: FakturoidCredentials,
+  token: string,
+  invoiceId: number
+): Promise<void> {
+  const url = `${accountUrl(creds.slug)}/invoices/${invoiceId}.json`
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: headers(token, creds.user_agent_email),
+  })
+
+  // 204 = success, 404 = already gone (both OK)
+  if (!res.ok && res.status !== 204 && res.status !== 404) {
+    const text = await res.text()
+    throw new Error(`Fakturoid delete invoice failed (${res.status}): ${text}`)
+  }
+}
+
+/**
+ * Retrieve a single invoice by ID.
+ */
+export async function getInvoice(
+  creds: FakturoidCredentials,
+  token: string,
+  invoiceId: number
+): Promise<FakturoidInvoice | null> {
+  const url = `${accountUrl(creds.slug)}/invoices/${invoiceId}.json`
+  const res = await fetch(url, {
+    method: "GET",
+    headers: headers(token, creds.user_agent_email),
+  })
+
+  if (!res.ok) return null
+  return await res.json()
+}
+
 // ═══════════════════════════════════════════
 // MAPPING HELPERS
 // ═══════════════════════════════════════════

@@ -1,4 +1,4 @@
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { IOrderModuleService, ICustomerModuleService } from "@medusajs/framework/types"
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
 import { FAKTUROID_MODULE } from "../modules/fakturoid"
@@ -166,6 +166,37 @@ export default async function orderPlacedFakturoidHandler({
       return
     }
 
+    // ── Get payment gateway ID for invoice custom_id ──
+    let gatewayPaymentId = ""
+    try {
+      const queryService = container.resolve(ContainerRegistrationKeys.QUERY)
+      const { data: orderPaymentData } = await queryService.graph({
+        entity: "order",
+        fields: [
+          "payment_collections.payments.provider_id",
+          "payment_collections.payments.data",
+        ],
+        filters: { id: data.id },
+      })
+      const paymentsList =
+        orderPaymentData?.[0]?.payment_collections?.flatMap(
+          (pc: any) => pc.payments || []
+        ) || []
+      const firstPayment = paymentsList[0]
+      if (firstPayment?.data) {
+        gatewayPaymentId =
+          firstPayment.data.molliePaymentId ||
+          firstPayment.data.mollieOrderId ||
+          firstPayment.data.payment_intent ||
+          firstPayment.data.id ||
+          firstPayment.data.payment_id ||
+          firstPayment.data.transaction_id ||
+          ""
+      }
+    } catch (payErr: any) {
+      console.warn("[Fakturoid] Could not extract payment ID:", payErr.message)
+    }
+
     // ── Build invoice lines ──
     const items = order.items || []
     const lines = items.map((item: any) => ({
@@ -195,7 +226,7 @@ export default async function orderPlacedFakturoidHandler({
     // ── Create invoice ──
     const invoice = await createInvoice(creds, token, {
       subject_id: subject.id,
-      custom_id: order.id,
+      custom_id: gatewayPaymentId || order.id,
       order_number: (order as any).display_id?.toString() || order.id,
       currency: order.currency_code?.toUpperCase() || "EUR",
       language,
@@ -214,12 +245,15 @@ export default async function orderPlacedFakturoidHandler({
     console.log(`[Fakturoid] Invoice ${invoice.number} marked as paid`)
 
     // ── Update order metadata ──
+    // fakturoid_invoice_id = variable symbol (display field)
+    // fakturoid_internal_id = numeric Fakturoid ID (for API operations)
     try {
       const existingMeta = (order.metadata as any) || {}
       await (orderService as any).updateOrders(order.id, {
         metadata: {
           ...existingMeta,
-          fakturoid_invoice_id: invoice.id.toString(),
+          fakturoid_invoice_id: invoice.number,
+          fakturoid_internal_id: invoice.id.toString(),
           fakturoid_invoice_number: invoice.number,
           fakturoid_invoice_url: invoice.public_html_url,
         },
@@ -243,7 +277,7 @@ export default async function orderPlacedFakturoidHandler({
         await customerService.updateCustomers(customerId, {
           metadata: {
             ...existingCustomerMeta,
-            last_fakturoid_invoice_id: invoice.id.toString(),
+            last_fakturoid_invoice_id: invoice.number,
             last_fakturoid_invoice_url: invoice.public_html_url,
             fakturoid_subject_id: subject.id.toString(),
           },
