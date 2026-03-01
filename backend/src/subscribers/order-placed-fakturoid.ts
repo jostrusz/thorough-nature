@@ -187,6 +187,7 @@ export default async function orderPlacedFakturoidHandler({
         gatewayPaymentId =
           firstPayment.data.molliePaymentId ||
           firstPayment.data.mollieOrderId ||
+          firstPayment.data.stripePaymentIntentId ||
           firstPayment.data.payment_intent ||
           firstPayment.data.id ||
           firstPayment.data.payment_id ||
@@ -195,6 +196,19 @@ export default async function orderPlacedFakturoidHandler({
       }
     } catch (payErr: any) {
       console.warn("[Fakturoid] Could not extract payment ID:", payErr.message)
+    }
+    // Fallback: check order metadata (set by payment-metadata subscriber)
+    if (!gatewayPaymentId) {
+      const meta = (order.metadata as any) || {}
+      gatewayPaymentId =
+        meta.stripePaymentIntentId ||
+        meta.molliePaymentId ||
+        meta.mollieOrderId ||
+        meta.paypalOrderId ||
+        meta.klarnaOrderId ||
+        meta.comgateTransId ||
+        meta.airwallexPaymentIntentId ||
+        ""
     }
 
     // ── Fetch tax lines per item via query.graph ──
@@ -266,7 +280,7 @@ export default async function orderPlacedFakturoidHandler({
     })
 
     console.log(
-      `[Fakturoid] Invoice ${invoice.number} created for order ${order.id}`
+      `[Fakturoid] Invoice ${invoice.number} created for order ${order.id} (custom_id=${gatewayPaymentId || order.id})`
     )
 
     // ── Mark as paid (include gateway payment ID in payment record) ──
