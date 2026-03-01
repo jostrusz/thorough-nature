@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react"
+import React, { useState, useCallback, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@medusajs/ui"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
@@ -423,6 +423,13 @@ const ResendPage = () => {
   const [newDomain, setNewDomain] = useState("")
   const [expandedDomainId, setExpandedDomainId] = useState<string | null>(null)
   const [domainDetail, setDomainDetail] = useState<ResendDomain | null>(null)
+
+  // Auto-select first config for domain section
+  useEffect(() => {
+    if (!selectedConfigId && configs.length > 0) {
+      setSelectedConfigId(configs[0].id)
+    }
+  }, [configs, selectedConfigId])
 
   const { data: domainsData, isLoading: domainsLoading } =
     useResendDomains(selectedConfigId)
