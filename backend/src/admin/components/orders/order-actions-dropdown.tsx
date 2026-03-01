@@ -11,9 +11,16 @@ interface OrderActionsDropdownProps {
   onFakturoidOpen: () => void
   onFakturoidDelete: () => void
   onFakturoidCreditNote: () => void
+  onQBCreate: () => void
+  onQBOpen: () => void
+  onQBDelete: () => void
+  onQBCreditMemo: () => void
   fakturoidInvoiceId?: string
   fakturoidInvoiceUrl?: string
   fakturoidCreditNoteId?: string
+  qbInvoiceId?: string
+  qbInvoiceUrl?: string
+  qbCreditMemoId?: string
   dextrumMystockId?: string
 }
 
@@ -51,9 +58,16 @@ export function OrderActionsDropdown({
   onFakturoidOpen,
   onFakturoidDelete,
   onFakturoidCreditNote,
+  onQBCreate,
+  onQBOpen,
+  onQBDelete,
+  onQBCreditMemo,
   fakturoidInvoiceId,
   fakturoidInvoiceUrl,
   fakturoidCreditNoteId,
+  qbInvoiceId,
+  qbInvoiceUrl,
+  qbCreditMemoId,
   dextrumMystockId,
 }: OrderActionsDropdownProps) {
   const ref = useRef<HTMLDivElement>(null)
@@ -193,6 +207,56 @@ export function OrderActionsDropdown({
         >
           <span style={{ fontSize: "14px", width: "16px", textAlign: "center", color: "#6D7175", fontWeight: 700 }}>fa</span>
           Fakturoid: Create invoice
+        </button>
+      )}
+
+      <div style={dividerStyle} />
+
+      {/* QuickBooks */}
+      {qbInvoiceId ? (
+        <>
+          <button
+            className="od-dropdown-item"
+            style={itemStyle}
+            onClick={() => { onQBOpen(); onClose() }}
+          >
+            <span style={{ fontSize: "12px", width: "16px", textAlign: "center", color: "#2CA01C", fontWeight: 700 }}>qb</span>
+            QuickBooks: Open invoice
+          </button>
+          {!qbCreditMemoId && (
+            <button
+              className="od-dropdown-item"
+              style={itemStyle}
+              onClick={() => { onQBCreditMemo(); onClose() }}
+            >
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#B98900" strokeWidth="1.5">
+                <path d="M4 4h12v12H4z" />
+                <path d="M7 10h6M10 7v6" />
+              </svg>
+              <span style={{ color: "#B98900" }}>QuickBooks: Create credit memo</span>
+            </button>
+          )}
+          <button
+            className="od-dropdown-item"
+            style={{ ...itemStyle, color: "#D72C0D" }}
+            onClick={() => { onQBDelete(); onClose() }}
+          >
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#D72C0D" strokeWidth="1.5">
+              <path d="M5 6h10M8 6V4h4v2M6 6v10a1 1 0 001 1h6a1 1 0 001-1V6" />
+              <line x1="9" y1="9" x2="9" y2="14" />
+              <line x1="11" y1="9" x2="11" y2="14" />
+            </svg>
+            QuickBooks: Delete invoice
+          </button>
+        </>
+      ) : (
+        <button
+          className="od-dropdown-item"
+          style={itemStyle}
+          onClick={() => { onQBCreate(); onClose() }}
+        >
+          <span style={{ fontSize: "12px", width: "16px", textAlign: "center", color: "#6D7175", fontWeight: 700 }}>qb</span>
+          QuickBooks: Create invoice
         </button>
       )}
 

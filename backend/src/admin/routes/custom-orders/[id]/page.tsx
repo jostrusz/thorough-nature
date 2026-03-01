@@ -26,6 +26,9 @@ import {
   useCreateFakturoidInvoice,
   useDeleteFakturoidInvoice,
   useCreateFakturoidCreditNote,
+  useCreateQBInvoice,
+  useDeleteQBInvoice,
+  useCreateQBCreditMemo,
   useCustomerStats,
 } from "../../../hooks/use-order-actions"
 
@@ -432,6 +435,9 @@ const OrderDetailPage = () => {
   const createFakturoidInvoice = useCreateFakturoidInvoice()
   const deleteFakturoidInvoice = useDeleteFakturoidInvoice()
   const createFakturoidCreditNote = useCreateFakturoidCreditNote()
+  const createQBInvoice = useCreateQBInvoice()
+  const deleteQBInvoice = useDeleteQBInvoice()
+  const createQBCreditMemo = useCreateQBCreditMemo()
 
   // Customer stats
   const order = data?.order as any
@@ -607,6 +613,53 @@ const OrderDetailPage = () => {
     }
   }, [order])
 
+  // ── QuickBooks handlers ──
+
+  const handleQBCreate = useCallback(() => {
+    if (!id) return
+    createQBInvoice.mutate(id, {
+      onSuccess: () => {
+        toast.success("QuickBooks invoice created")
+      },
+      onError: (err: any) => {
+        toast.error(err?.message || "Failed to create QuickBooks invoice")
+      },
+    })
+  }, [id, createQBInvoice])
+
+  const handleQBDelete = useCallback(() => {
+    if (!id) return
+    if (!window.confirm("Are you sure you want to void/delete this invoice from QuickBooks?")) return
+    deleteQBInvoice.mutate(id, {
+      onSuccess: () => {
+        toast.success("QuickBooks invoice deleted")
+      },
+      onError: (err: any) => {
+        toast.error(err?.message || "Failed to delete QuickBooks invoice")
+      },
+    })
+  }, [id, deleteQBInvoice])
+
+  const handleQBCreditMemo = useCallback(() => {
+    if (!id) return
+    if (!window.confirm("Create a credit memo for this QuickBooks invoice?")) return
+    createQBCreditMemo.mutate(id, {
+      onSuccess: () => {
+        toast.success("Credit memo created in QuickBooks")
+      },
+      onError: (err: any) => {
+        toast.error(err?.message || "Failed to create credit memo")
+      },
+    })
+  }, [id, createQBCreditMemo])
+
+  const handleQBOpen = useCallback(() => {
+    const url = order?.metadata?.quickbooks_invoice_url
+    if (url) {
+      window.open(url, "_blank")
+    }
+  }, [order])
+
   const handleUpdateNote = useCallback(
     (note: string) => {
       if (!id) return
@@ -711,6 +764,10 @@ const OrderDetailPage = () => {
         onFakturoidOpen={handleFakturoidOpen}
         onFakturoidDelete={handleFakturoidDelete}
         onFakturoidCreditNote={handleFakturoidCreditNote}
+        onQBCreate={handleQBCreate}
+        onQBOpen={handleQBOpen}
+        onQBDelete={handleQBDelete}
+        onQBCreditMemo={handleQBCreditMemo}
       />
 
       {/* Health Bar — order progress */}

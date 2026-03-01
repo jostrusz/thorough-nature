@@ -16,6 +16,10 @@ interface OrderDetailHeaderProps {
   onFakturoidOpen: () => void
   onFakturoidDelete: () => void
   onFakturoidCreditNote: () => void
+  onQBCreate: () => void
+  onQBOpen: () => void
+  onQBDelete: () => void
+  onQBCreditMemo: () => void
 }
 
 function getPaymentStatus(order: any): string {
@@ -40,6 +44,10 @@ export function OrderDetailHeader({
   onFakturoidOpen,
   onFakturoidDelete,
   onFakturoidCreditNote,
+  onQBCreate,
+  onQBOpen,
+  onQBDelete,
+  onQBCreditMemo,
 }: OrderDetailHeaderProps) {
   const navigate = useNavigate()
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -50,6 +58,9 @@ export function OrderDetailHeader({
   const fakturoidInvoiceId = order.metadata?.fakturoid_invoice_id
   const fakturoidInvoiceUrl = order.metadata?.fakturoid_invoice_url
   const fakturoidCreditNoteId = order.metadata?.fakturoid_credit_note_id
+  const qbInvoiceId = order.metadata?.quickbooks_invoice_id
+  const qbInvoiceUrl = order.metadata?.quickbooks_invoice_url
+  const qbCreditMemoId = order.metadata?.quickbooks_credit_memo_id
   const dextrumMystockId = order.metadata?.dextrum_mystock_id
 
   // Set the order ID for the status page link in dropdown
@@ -183,9 +194,16 @@ export function OrderDetailHeader({
               onFakturoidOpen={onFakturoidOpen}
               onFakturoidDelete={onFakturoidDelete}
               onFakturoidCreditNote={onFakturoidCreditNote}
+              onQBCreate={onQBCreate}
+              onQBOpen={onQBOpen}
+              onQBDelete={onQBDelete}
+              onQBCreditMemo={onQBCreditMemo}
               fakturoidInvoiceId={fakturoidInvoiceId}
               fakturoidInvoiceUrl={fakturoidInvoiceUrl}
               fakturoidCreditNoteId={fakturoidCreditNoteId}
+              qbInvoiceId={qbInvoiceId}
+              qbInvoiceUrl={qbInvoiceUrl}
+              qbCreditMemoId={qbCreditMemoId}
               dextrumMystockId={dextrumMystockId}
             />
           </div>

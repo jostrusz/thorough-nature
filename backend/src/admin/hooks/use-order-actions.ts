@@ -189,6 +189,57 @@ export function useDeleteFakturoidInvoice() {
 }
 
 // ═══════════════════════════════════════════
+// Create QuickBooks Invoice
+// ═══════════════════════════════════════════
+export function useCreateQBInvoice() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      return sdk.client.fetch(`/admin/custom-orders/${orderId}/quickbooks`, {
+        method: "POST",
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["custom-order-detail"] })
+    },
+  })
+}
+
+// ═══════════════════════════════════════════
+// Delete QuickBooks Invoice
+// ═══════════════════════════════════════════
+export function useDeleteQBInvoice() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      return sdk.client.fetch(`/admin/custom-orders/${orderId}/quickbooks`, {
+        method: "DELETE",
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["custom-order-detail"] })
+    },
+  })
+}
+
+// ═══════════════════════════════════════════
+// Create QuickBooks Credit Memo
+// ═══════════════════════════════════════════
+export function useCreateQBCreditMemo() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      return sdk.client.fetch(`/admin/custom-orders/${orderId}/quickbooks-credit`, {
+        method: "POST",
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["custom-order-detail"] })
+    },
+  })
+}
+
+// ═══════════════════════════════════════════
 // Update Order Details (address, email, etc.)
 // ═══════════════════════════════════════════
 export function useUpdateOrderDetails() {

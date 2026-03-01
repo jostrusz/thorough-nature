@@ -43,6 +43,15 @@ export interface QBOInvoice {
   TotalAmt: number
   Balance: number
   InvoiceLink?: string
+  SyncToken?: string
+  CustomerRef?: { value: string }
+}
+
+export interface QBOCreditMemo {
+  Id: string
+  DocNumber?: string
+  TotalAmt: number
+  SyncToken?: string
 }
 
 export interface QBOPayment {
@@ -381,4 +390,162 @@ export async function getInvoiceWithLink(
     invoice: result.Invoice,
     link: result.Invoice?.InvoiceLink || null,
   }
+}
+
+// ═══════════════════════════════════════════
+// INVOICE MANAGEMENT (get, void, delete)
+// ═══════════════════════════════════════════
+
+/**
+ * Get invoice by ID (needed for SyncToken to void/delete).
+ */
+export async function getInvoice(
+  creds: QBOCredentials,
+  token: string,
+  invoiceId: string
+): Promise<QBOInvoice | null> {
+  const url = `${getBaseUrl(creds.environment)}/v3/company/${creds.realm_id}/invoice/${invoiceId}?minorversion=${MINOR_VERSION}`
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: authHeaders(token),
+  })
+
+  if (!res.ok) return null
+
+  const result = await res.json()
+  return result.Invoice || null
+}
+
+/**
+ * Void an invoice (works on paid invoices too — QBO equivalent of "cancel").
+ * POST /v3/company/{realmId}/invoice?operation=void
+ */
+export async function voidInvoice(
+  creds: QBOCredentials,
+  token: string,
+  invoice: { Id: string; SyncToken: string }
+): Promise<boolean> {
+  const url = `${getBaseUrl(creds.environment)}/v3/company/${creds.realm_id}/invoice?operation=void&minorversion=${MINOR_VERSION}`
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify({
+      Id: invoice.Id,
+      SyncToken: invoice.SyncToken,
+      sparse: true,
+    }),
+  })
+
+  return res.ok
+}
+
+/**
+ * Delete an invoice (only works on draft/voided invoices).
+ * POST /v3/company/{realmId}/invoice?operation=delete
+ */
+export async function deleteInvoice(
+  creds: QBOCredentials,
+  token: string,
+  invoice: { Id: string; SyncToken: string }
+): Promise<boolean> {
+  const url = `${getBaseUrl(creds.environment)}/v3/company/${creds.realm_id}/invoice?operation=delete&minorversion=${MINOR_VERSION}`
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify({
+      Id: invoice.Id,
+      SyncToken: invoice.SyncToken,
+    }),
+  })
+
+  return res.ok
+}
+
+// ═══════════════════════════════════════════
+// CREDIT MEMO
+// ═══════════════════════════════════════════
+
+/**
+ * Create a credit memo (refund document in QuickBooks).
+ */
+export async function createCreditMemo(
+  creds: QBOCredentials,
+  token: string,
+  data: {
+    CustomerRef: { value: string }
+    Line: Array<{
+      Amount: number
+      Description?: string
+      DetailType: "SalesItemLineDetail"
+      SalesItemLineDetail: {
+        ItemRef: { value: string; name?: string }
+        Qty?: number
+        UnitPrice?: number
+      }
+    }>
+    DocNumber?: string
+    CurrencyRef?: { value: string }
+    PrivateNote?: string
+  }
+): Promise<QBOCreditMemo> {
+  const res = await fetch(apiUrl(creds, "creditmemo"), {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify(data),
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`QBO create credit memo failed (${res.status}): ${text}`)
+  }
+
+  const result = await res.json()
+  return result.CreditMemo
+}
+
+/**
+ * Get credit memo by ID.
+ */
+export async function getCreditMemo(
+  creds: QBOCredentials,
+  token: string,
+  creditMemoId: string
+): Promise<QBOCreditMemo | null> {
+  const url = `${getBaseUrl(creds.environment)}/v3/company/${creds.realm_id}/creditmemo/${creditMemoId}?minorversion=${MINOR_VERSION}`
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: authHeaders(token),
+  })
+
+  if (!res.ok) return null
+
+  const result = await res.json()
+  return result.CreditMemo || null
+}
+
+/**
+ * Delete a credit memo.
+ * POST /v3/company/{realmId}/creditmemo?operation=delete
+ */
+export async function deleteCreditMemo(
+  creds: QBOCredentials,
+  token: string,
+  creditMemo: { Id: string; SyncToken: string }
+): Promise<boolean> {
+  const url = `${getBaseUrl(creds.environment)}/v3/company/${creds.realm_id}/creditmemo?operation=delete&minorversion=${MINOR_VERSION}`
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify({
+      Id: creditMemo.Id,
+      SyncToken: creditMemo.SyncToken,
+    }),
+  })
+
+  return res.ok
 }

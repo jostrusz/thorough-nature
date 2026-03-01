@@ -325,7 +325,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
       </div>
 
       {/* QuickBooks Invoice Link */}
-      <div style={{ ...rowStyle, borderBottom: "none" }}>
+      <div className="od-row-hover" style={rowStyle}>
         <span style={labelStyle}>Invoice Link</span>
         {quickbooksInvoiceUrl ? (
           <a
@@ -341,6 +341,30 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
           <span style={dashStyle}>&mdash;</span>
         )}
       </div>
+
+      {/* QuickBooks Credit Memo */}
+      {metadata.quickbooks_credit_memo_id && (
+        <>
+          <div className="od-row-hover" style={rowStyle}>
+            <span style={labelStyle}>Credit Memo</span>
+            <code style={codeStyle}>{metadata.quickbooks_credit_memo_id}</code>
+          </div>
+          {metadata.quickbooks_credit_memo_url && (
+            <div className="od-row-hover" style={rowStyle}>
+              <span style={labelStyle}>Credit Memo Link</span>
+              <a
+                href={metadata.quickbooks_credit_memo_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="od-link"
+                style={linkStyle}
+              >
+                Open credit memo &rarr;
+              </a>
+            </div>
+          )}
+        </>
+      )}
 
       {/* ═══════════ UPSELL ═══════════ */}
       {metadata.upsell_accepted && (
