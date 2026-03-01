@@ -356,7 +356,20 @@ export function OrdersTable({
             const customerName = getCustomerName(order)
             const tag = getTag(order)
             const countryCode = order.shipping_address?.country_code
-            const deliveryStatus = order.metadata?.dextrum_status || ""
+            const deliveryStatus = order.metadata?.dextrum_status || (() => {
+              const fulfillments = order.fulfillments || []
+              const itemCount2 = order.items?.length || 0
+              if (fulfillments.length === 0) return "unfulfilled"
+              // Check if all items are fulfilled
+              const fulfilledItemIds = new Set<string>()
+              fulfillments.forEach((f: any) => {
+                (f.items || []).forEach((fi: any) => {
+                  fulfilledItemIds.add(fi.line_item_id)
+                })
+              })
+              if (itemCount2 > 0 && fulfilledItemIds.size < itemCount2) return "partially_fulfilled"
+              return "fulfilled"
+            })()
             const bookSent = order.metadata?.book_sent === true || order.metadata?.book_sent === "true"
             const itemCount = order.items?.length || 0
             const total = Number(order.total) || 0

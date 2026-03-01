@@ -59,6 +59,11 @@ export function PaymentBadge({ status }: { status: string }) {
 // DELIVERY BADGE — Updated for Dextrum statuses
 // ═══════════════════════════════════════════
 const DELIVERY_STYLES: Record<string, { bg: string; text: string; dot: string; label: string }> = {
+  // Medusa fulfillment statuses (fallback when no Dextrum status)
+  unfulfilled:       { bg: "rgba(212,160,23,0.08)",  text: "#D4A017", dot: "#D4A017", label: "Unfulfilled" },
+  fulfilled:         { bg: "rgba(0,179,122,0.08)",   text: "#00B37A", dot: "#00B37A", label: "Fulfilled" },
+  partially_fulfilled: { bg: "rgba(59,130,246,0.07)", text: "#3B82F6", dot: "#3B82F6", label: "Partial" },
+
   // Dextrum delivery statuses (uppercase keys from metadata.dextrum_status)
   NEW:               { bg: "rgba(212,160,23,0.08)",  text: "#D4A017", dot: "#D4A017", label: "New" },
   WAITING:           { bg: "rgba(212,160,23,0.08)",  text: "#D4A017", dot: "#D4A017", label: "Waiting" },
