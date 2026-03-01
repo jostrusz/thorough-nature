@@ -273,6 +273,72 @@ function EditSaveBar({
 }
 
 // ═══════════════════════════════════════════
+// COPY LINE (text + copy icon on hover)
+// ═══════════════════════════════════════════
+function CopyLine({
+  text,
+  style: extraStyle,
+}: {
+  text: string
+  style?: React.CSSProperties
+}) {
+  const [copied, setCopied] = useState(false)
+  const [hovered, setHovered] = useState(false)
+
+  function handleCopy(e: React.MouseEvent) {
+    e.stopPropagation()
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  }
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "6px",
+        padding: "1px 0",
+        ...extraStyle,
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <span style={{ flex: 1, minWidth: 0 }}>{text}</span>
+      <button
+        onClick={handleCopy}
+        title={copied ? "Copied!" : "Copy"}
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: "2px",
+          color: copied ? colors.green : colors.textSec,
+          opacity: hovered || copied ? 1 : 0,
+          transition: "opacity 0.15s, color 0.15s",
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        {copied ? (
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M5 10l3 3 7-7" />
+          </svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="7" y="7" width="10" height="10" rx="2" />
+            <path d="M13 7V5a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2" />
+          </svg>
+        )}
+      </button>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════
 // ADDRESS DISPLAY (read-only)
 // ═══════════════════════════════════════════
 function AddressDisplay({ addr }: { addr: any }) {
@@ -284,18 +350,16 @@ function AddressDisplay({ addr }: { addr: any }) {
   return (
     <div style={{ fontSize: "13px", color: colors.text, lineHeight: 1.5 }}>
       {(addr.first_name || addr.last_name) && (
-        <div>{[addr.first_name, addr.last_name].filter(Boolean).join(" ")}</div>
+        <CopyLine text={[addr.first_name, addr.last_name].filter(Boolean).join(" ")} />
       )}
-      {addr.company && <div style={{ color: colors.textSec }}>{addr.company}</div>}
-      {addr.address_1 && <div>{addr.address_1}</div>}
-      {addr.address_2 && <div>{addr.address_2}</div>}
-      <div>{[addr.postal_code, addr.city].filter(Boolean).join(" ")}</div>
-      {addr.province && <div>{addr.province}</div>}
-      <div>
-        {flag} {countryName}
-      </div>
+      {addr.company && <CopyLine text={addr.company} style={{ color: colors.textSec }} />}
+      {addr.address_1 && <CopyLine text={addr.address_1} />}
+      {addr.address_2 && <CopyLine text={addr.address_2} />}
+      <CopyLine text={[addr.postal_code, addr.city].filter(Boolean).join(" ")} />
+      {addr.province && <CopyLine text={addr.province} />}
+      <CopyLine text={`${flag} ${countryName}`} />
       {addr.phone && (
-        <div style={{ color: colors.textSec, marginTop: "4px" }}>{addr.phone}</div>
+        <CopyLine text={addr.phone} style={{ color: colors.textSec, marginTop: "4px" }} />
       )}
       <a
         href={mapUrl}
