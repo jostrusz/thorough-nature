@@ -24,6 +24,8 @@ export async function POST(
         "items.*",
         "items.variant_id",
         "items.variant.*",
+        "items.tax_lines.*",
+        "items.is_tax_inclusive",
         "shipping_address.*",
         "billing_address.*",
         "shipping_methods.*",
@@ -50,12 +52,14 @@ export async function POST(
       else sourcePaymentStatus = pc.status || "pending"
     }
 
-    // Build items array for new order
-    const items = (src.items || []).map((item: any) => ({
+    // Build items array for new order (preserve tax-inclusive flag)
+    const sourceItems = src.items || []
+    const items = sourceItems.map((item: any) => ({
       title: item.title || item.variant?.product?.title || "Unknown",
       variant_id: item.variant_id,
       quantity: item.quantity || 1,
       unit_price: Number(item.unit_price) || 0,
+      is_tax_inclusive: item.is_tax_inclusive ?? false,
     }))
 
     // Build shipping address
@@ -121,6 +125,43 @@ export async function POST(
         fakturoid_invoice_url: undefined,
       },
     })
+
+    // Copy tax lines from source items to new order items
+    try {
+      // Fetch the newly created order's items to get their IDs
+      const { data: [freshOrder] } = await query.graph({
+        entity: "order",
+        fields: ["items.id", "items.title"],
+        filters: { id: (newOrder as any).id },
+      })
+      const newItems = (freshOrder as any)?.items || []
+
+      // Build tax lines: match source items to new items by index
+      const taxLinesToCreate: any[] = []
+      sourceItems.forEach((srcItem: any, idx: number) => {
+        const newItem = newItems[idx]
+        if (!newItem || !srcItem.tax_lines?.length) return
+        for (const tl of srcItem.tax_lines) {
+          taxLinesToCreate.push({
+            item_id: newItem.id,
+            code: tl.code || "default",
+            rate: Number(tl.rate) || 0,
+            description: tl.description || undefined,
+            provider_id: tl.provider_id || undefined,
+          })
+        }
+      })
+
+      if (taxLinesToCreate.length > 0) {
+        await orderModuleService.createOrderLineItemTaxLines(
+          (newOrder as any).id,
+          taxLinesToCreate
+        )
+      }
+    } catch (taxErr: any) {
+      console.warn("[Duplicate] Could not copy tax lines:", taxErr.message)
+      // Non-fatal: order is still created, just without tax lines
+    }
 
     res.json({
       success: true,

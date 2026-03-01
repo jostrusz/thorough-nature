@@ -378,7 +378,7 @@ function OrderHealthBar({ order }: { order: any }) {
   )
 }
 
-const BG_COLOR = "#f4f5fa"
+const BG_COLOR = "#fafafa"
 
 const pageStyle: React.CSSProperties = {
   width: "1000px",

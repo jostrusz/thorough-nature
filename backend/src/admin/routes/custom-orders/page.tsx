@@ -16,7 +16,7 @@ import { colors, radii, shadows, fontStack, cardStyle as tokenCardStyle, btnOutl
 // ═══════════════════════════════════════════
 // STYLES
 // ═══════════════════════════════════════════
-const BG_COLOR = "#f4f5fa"
+const BG_COLOR = "#fafafa"
 
 const dashboardStyle: React.CSSProperties = {
   maxWidth: "1400px",
@@ -157,14 +157,17 @@ const paginationInfoStyle: React.CSSProperties = {
 function DashboardStyles() {
   return (
     <style>{`
-      /* Card hover — lift + glow */
+      /* Card hover — premium lift + glow */
       .dash-stat-card {
-        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
       }
       .dash-stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 30px rgba(108, 92, 231, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
-        border-color: rgba(108, 92, 231, 0.2) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07), 0 2px 8px rgba(0, 0, 0, 0.04);
+        border-color: rgba(0, 0, 0, 0.12) !important;
+      }
+      .dash-stat-card:active {
+        transform: translateY(0) scale(0.99);
       }
 
       /* Main table card */
@@ -174,59 +177,73 @@ function DashboardStyles() {
 
       /* Table row hover */
       .dash-table-row {
-        transition: background 0.15s ease, transform 0.15s ease !important;
+        transition: background 0.15s ease !important;
       }
       .dash-table-row:hover {
-        background: #F8F9FC !important;
-        transform: scale(1.002);
+        background: #F8F9FB !important;
       }
 
-      /* Button hover — glow effect */
+      /* Button hover — premium spring */
       .dash-btn {
-        transition: all 0.2s ease !important;
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        background: linear-gradient(135deg, #FFFFFF 0%, #FAFBFF 100%);
       }
       .dash-btn:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 0 3px rgba(108, 92, 231, 0.08);
+        border-color: rgba(108, 92, 231, 0.25) !important;
       }
       .dash-btn:active {
-        transform: translateY(0) scale(0.98);
+        transform: translateY(1px) scale(0.97);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
       }
 
       /* Primary button hover — accent glow */
       .dash-btn-primary {
-        transition: all 0.2s ease !important;
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
       }
       .dash-btn-primary:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 16px rgba(108, 92, 231, 0.35);
+        box-shadow: 0 6px 20px rgba(108, 92, 231, 0.35), 0 0 0 3px rgba(108, 92, 231, 0.12);
       }
       .dash-btn-primary:active {
-        transform: translateY(0) scale(0.98);
+        transform: translateY(1px) scale(0.97);
+        box-shadow: 0 1px 4px rgba(108, 92, 231, 0.3);
       }
 
       /* Search box focus */
+      .dash-search {
+        transition: all 0.2s ease !important;
+      }
       .dash-search:focus-within {
-        border-color: rgba(108, 92, 231, 0.4) !important;
+        border-color: rgba(108, 92, 231, 0.35) !important;
         box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.08) !important;
       }
 
       /* Tab hover */
       .dash-tab {
-        transition: all 0.2s ease !important;
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
       }
       .dash-tab:hover {
-        background: rgba(108, 92, 231, 0.06) !important;
+        background: rgba(0, 0, 0, 0.04) !important;
+        transform: translateY(-1px);
+      }
+      .dash-tab:active {
+        transform: scale(0.97);
       }
 
       /* Pagination button hover */
       .dash-page-btn {
-        transition: all 0.15s ease !important;
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
       }
       .dash-page-btn:hover:not(:disabled) {
-        background: #F8F9FC !important;
-        border-color: rgba(108, 92, 231, 0.3) !important;
-        transform: scale(1.05);
+        background: #F8F9FB !important;
+        border-color: rgba(0, 0, 0, 0.14) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      }
+      .dash-page-btn:active:not(:disabled) {
+        transform: translateY(1px) scale(0.95);
       }
 
       /* Badge pulse for new items */

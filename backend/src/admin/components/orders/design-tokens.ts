@@ -3,7 +3,7 @@ import type React from "react"
 // ═══ Design Tokens 2026 ═══
 
 export const colors = {
-  bg: "#f4f5fa",
+  bg: "#fafafa",
   bgCard: "#FFFFFF",
   bgHover: "#F8F9FC",
   border: "rgba(0,0,0,0.07)",
