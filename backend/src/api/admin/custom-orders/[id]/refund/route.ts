@@ -1,6 +1,6 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 
 const GATEWAY_CONFIG_MODULE = "gatewayConfig"
 
@@ -26,7 +26,7 @@ export const POST = async (
     }
 
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
-    const orderModuleService = req.scope.resolve("orderModuleService")
+    const orderModuleService = req.scope.resolve(Modules.ORDER) as any
     const logger = req.scope.resolve("logger")
 
     // Fetch order with payments

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react"
+import React, { useRef } from "react"
 
 interface OrderActionsDropdownProps {
   open: boolean
@@ -76,16 +76,8 @@ export function OrderActionsDropdown({
 }: OrderActionsDropdownProps) {
   const ref = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!open) return
-    const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        onClose()
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [open, onClose])
+  // Click-outside is now handled by the parent (order-detail-header)
+  // to avoid race condition between close and toggle
 
   if (!open) return null
 

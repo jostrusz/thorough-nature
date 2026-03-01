@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { PaymentBadge, FulfillmentBadge } from "./order-badges"
 import { OrderActionsDropdown } from "./order-actions-dropdown"
@@ -62,6 +62,19 @@ export function OrderDetailHeader({
 }: OrderDetailHeaderProps) {
   const navigate = useNavigate()
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownContainerRef = useRef<HTMLDivElement>(null)
+
+  // Click-outside handler at the container level (covers both button + dropdown)
+  useEffect(() => {
+    if (!dropdownOpen) return
+    const handler = (e: MouseEvent) => {
+      if (dropdownContainerRef.current && !dropdownContainerRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [dropdownOpen])
 
   const paymentStatus = getPaymentStatus(order)
   const isRefunded = paymentStatus === "refunded" || paymentStatus === "partially_refunded"
@@ -172,7 +185,7 @@ export function OrderDetailHeader({
           </button>
 
           {/* More actions dropdown */}
-          <div style={{ position: "relative" }}>
+          <div ref={dropdownContainerRef} style={{ position: "relative" }}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="od-btn"
