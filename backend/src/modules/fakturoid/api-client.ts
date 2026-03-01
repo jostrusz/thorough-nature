@@ -98,6 +98,7 @@ export async function getAccessToken(
     headers: {
       Authorization: `Basic ${basicAuth}`,
       "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
       "User-Agent": `MarketingHQ (${creds.user_agent_email})`,
     },
     body: "grant_type=client_credentials",
