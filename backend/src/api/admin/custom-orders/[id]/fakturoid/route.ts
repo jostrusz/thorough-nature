@@ -196,8 +196,10 @@ export async function POST(
       lines,
     })
 
-    // ── Mark as paid ──
-    await markInvoicePaid(creds, token, invoice.id)
+    // ── Mark as paid (include gateway payment ID in payment record) ──
+    await markInvoicePaid(creds, token, invoice.id, {
+      gatewayPaymentId: gatewayPaymentId || undefined,
+    })
 
     // ── Update order metadata ──
     const existingMeta = order.metadata || {}

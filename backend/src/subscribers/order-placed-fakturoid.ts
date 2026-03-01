@@ -240,8 +240,10 @@ export default async function orderPlacedFakturoidHandler({
       `[Fakturoid] Invoice ${invoice.number} created for order ${order.id}`
     )
 
-    // ── Mark as paid ──
-    await markInvoicePaid(creds, token, invoice.id)
+    // ── Mark as paid (include gateway payment ID in payment record) ──
+    await markInvoicePaid(creds, token, invoice.id, {
+      gatewayPaymentId: gatewayPaymentId || undefined,
+    })
     console.log(`[Fakturoid] Invoice ${invoice.number} marked as paid`)
 
     // ── Update order metadata ──

@@ -225,19 +225,28 @@ export async function createInvoice(
 
 /**
  * Mark an invoice as paid (full payment today).
+ * Optionally include gateway payment ID in the payment note.
  */
 export async function markInvoicePaid(
   creds: FakturoidCredentials,
   token: string,
-  invoiceId: number
+  invoiceId: number,
+  options?: { gatewayPaymentId?: string }
 ): Promise<void> {
   const url = `${accountUrl(creds.slug)}/invoices/${invoiceId}/payments.json`
   const today = new Date().toISOString().split("T")[0]
 
+  const payload: Record<string, any> = { paid_on: today }
+
+  // Include gateway payment ID in the variable_symbol field of the payment
+  if (options?.gatewayPaymentId) {
+    payload.variable_symbol = options.gatewayPaymentId
+  }
+
   const res = await fetch(url, {
     method: "POST",
     headers: headers(token, creds.user_agent_email),
-    body: JSON.stringify({ paid_on: today }),
+    body: JSON.stringify(payload),
   })
 
   // 403 = already paid (ignore gracefully)
