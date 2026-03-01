@@ -1,23 +1,24 @@
 import React from "react"
 
-const FLAGS: Record<string, string> = {
-  NL: "\u{1F1F3}\u{1F1F1}",
-  BE: "\u{1F1E7}\u{1F1EA}",
-  DE: "\u{1F1E9}\u{1F1EA}",
-  AT: "\u{1F1E6}\u{1F1F9}",
-  PL: "\u{1F1F5}\u{1F1F1}",
-  CZ: "\u{1F1E8}\u{1F1FF}",
-  SK: "\u{1F1F8}\u{1F1F0}",
-  SE: "\u{1F1F8}\u{1F1EA}",
-  HU: "\u{1F1ED}\u{1F1FA}",
-  LU: "\u{1F1F1}\u{1F1FA}",
-  DK: "\u{1F1E9}\u{1F1F0}",
+/**
+ * Convert any ISO 3166-1 alpha-2 country code to its flag emoji.
+ * Works by mapping each letter to a Unicode Regional Indicator Symbol.
+ * E.g. "NL" → 🇳🇱, "CZ" → 🇨🇿, "FR" → 🇫🇷
+ */
+function countryCodeToFlag(code: string): string {
+  const upper = code.toUpperCase()
+  if (upper.length !== 2) return ""
+  const offset = 0x1f1e6 - 65 // 'A' = 65, Regional Indicator A = 0x1F1E6
+  return String.fromCodePoint(
+    upper.charCodeAt(0) + offset,
+    upper.charCodeAt(1) + offset
+  )
 }
 
 export function CountryFlag({ code }: { code?: string }) {
   if (!code) return <span style={{ color: "#8C9196", fontSize: "12px" }}>&mdash;</span>
   const upper = code.toUpperCase()
-  const flag = FLAGS[upper] || ""
+  const flag = countryCodeToFlag(upper)
   return (
     <span
       style={{
