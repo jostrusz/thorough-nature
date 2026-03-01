@@ -45,7 +45,7 @@ export default async function orderPlacedFakturoidHandler({
 
     // ── Retrieve order with relations ──
     const order = await orderService.retrieveOrder(data.id, {
-      relations: ["items", "items.tax_lines", "summary", "shipping_address", "billing_address"],
+      relations: ["items", "summary", "shipping_address", "billing_address"],
     })
 
     if (!order) {
@@ -197,6 +197,26 @@ export default async function orderPlacedFakturoidHandler({
       console.warn("[Fakturoid] Could not extract payment ID:", payErr.message)
     }
 
+    // ── Fetch tax lines per item via query.graph ──
+    // (retrieveOrder doesn't support nested items.tax_lines relation)
+    let itemTaxMap: Record<string, number> = {}
+    try {
+      const queryService = container.resolve(ContainerRegistrationKeys.QUERY)
+      const { data: taxData } = await queryService.graph({
+        entity: "order",
+        fields: ["items.id", "items.tax_lines.*"],
+        filters: { id: data.id },
+      })
+      const taxItems = taxData?.[0]?.items || []
+      for (const ti of taxItems) {
+        if (ti.tax_lines?.[0]?.rate != null) {
+          itemTaxMap[ti.id] = Math.round(ti.tax_lines[0].rate * 100)
+        }
+      }
+    } catch (taxErr: any) {
+      console.warn("[Fakturoid] Could not fetch tax lines:", taxErr.message)
+    }
+
     // ── Build invoice lines (with VAT rate from Medusa tax lines) ──
     const items = order.items || []
     const lines = items.map((item: any) => {
@@ -206,10 +226,9 @@ export default async function orderPlacedFakturoidHandler({
         unit_price: item.unit_price || 0,
         unit_name: "ks",
       }
-      // Extract VAT rate from Medusa tax lines (rate is decimal: 0.21 = 21%)
-      const taxLine = item.tax_lines?.[0]
-      if (taxLine?.rate != null) {
-        line.vat_rate = Math.round(taxLine.rate * 100)
+      // VAT rate from tax lines map (e.g. 21, 6, 19)
+      if (itemTaxMap[item.id] != null) {
+        line.vat_rate = itemTaxMap[item.id]
       }
       return line
     })
