@@ -206,16 +206,16 @@ const medusaConfig = {
               accountId: AIRWALLEX_ACCOUNT_ID,
             },
           }] : []),
-          ...(STRIPE_SECRET_KEY ? [{
+          {
             resolve: './src/modules/payment-stripe',
             id: 'stripe',
             options: {
-              secretKey: STRIPE_SECRET_KEY,
-              publishableKey: STRIPE_PUBLISHABLE_KEY,
-              webhookSecret: STRIPE_WEBHOOK_SECRET,
+              secretKey: STRIPE_SECRET_KEY || '',
+              publishableKey: STRIPE_PUBLISHABLE_KEY || '',
+              webhookSecret: STRIPE_WEBHOOK_SECRET || '',
               testMode: STRIPE_TEST_MODE,
             },
-          }] : []),
+          },
         ],
       },
     }
