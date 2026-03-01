@@ -9,15 +9,15 @@ import crypto from 'crypto'
 // Hardcoded ebook files for Loslatenboek — these are the MinIO keys
 const EBOOK_FILES = [
   {
-    key: "ebooks/laat-los-wat-je-kapotmaakt.pdf",
-    title: "Laat Los Wat Je Kapotmaakt",
+    key: "e-books/De Overthinking Oplossing.pdf",
+    title: "De Overthinking Oplossing",
     description: "E-book (PDF)",
     size: "2.4 MB",
   },
   {
-    key: "ebooks/werkboek-oefeningen-voor-loslaten.pdf",
-    title: "Werkboek: Oefeningen voor Loslaten",
-    description: "Werkboek (PDF)",
+    key: "e-books/Liefde zonder Onzin.pdf",
+    title: "Liefde zonder Onzin",
+    description: "E-book (PDF)",
     size: "1.8 MB",
   },
 ]
