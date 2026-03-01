@@ -155,18 +155,6 @@ export function OrderDetailItems({ order }: OrderDetailItemsProps) {
             color: "#6D7175",
           }}
         >
-          <span>Subtotal</span>
-          <span>{formatCurrency(Number(order.subtotal) || 0, currency)}</span>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: "8px",
-            fontSize: "14px",
-            color: "#6D7175",
-          }}
-        >
           <span>Shipping</span>
           <span>
             {formatCurrency(Number(order.shipping_total) || 0, currency)}

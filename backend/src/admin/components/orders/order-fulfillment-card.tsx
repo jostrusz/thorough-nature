@@ -16,17 +16,19 @@ interface OrderFulfillmentCardProps {
   onSendToDextrum: () => void
   onFakturoidCreate: () => void
   onQBCreate: () => void
+  onResendEbooks: () => void
   isLoading?: boolean
   isDextrumLoading?: boolean
   isFakturoidLoading?: boolean
   isQBLoading?: boolean
+  isEbookLoading?: boolean
 }
 
 // ═══════════════════════════════════════════
 // PREMIUM BUTTON COMPONENT
 // ═══════════════════════════════════════════
 
-type BtnVariant = "primary" | "secondary" | "fakturoid" | "quickbooks"
+type BtnVariant = "primary" | "secondary" | "fakturoid" | "quickbooks" | "ebook"
 
 interface PremiumBtnProps {
   variant: BtnVariant
@@ -95,6 +97,17 @@ const variantStyles: Record<
     shadowHover: "0 4px 12px rgba(44,160,28,0.15), 0 2px 4px rgba(44,160,28,0.08)",
     shadowActive: "0 1px 2px rgba(44,160,28,0.12)",
     glow: "0 0 0 3px rgba(44,160,28,0.1)",
+  },
+  ebook: {
+    bg: "linear-gradient(135deg, #FFFFFF 0%, #F0F0FF 100%)",
+    bgHover: "linear-gradient(135deg, #F0F0FF 0%, #E8E6FF 100%)",
+    color: "#5A4BD1",
+    border: "rgba(108,92,231,0.15)",
+    borderHover: "rgba(108,92,231,0.35)",
+    shadow: "0 1px 3px rgba(108,92,231,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+    shadowHover: "0 4px 12px rgba(108,92,231,0.15), 0 2px 4px rgba(108,92,231,0.08)",
+    shadowActive: "0 1px 2px rgba(108,92,231,0.12)",
+    glow: "0 0 0 3px rgba(108,92,231,0.1)",
   },
 }
 
@@ -199,10 +212,12 @@ export function OrderFulfillmentCard({
   onSendToDextrum,
   onFakturoidCreate,
   onQBCreate,
+  onResendEbooks,
   isLoading,
   isDextrumLoading,
   isFakturoidLoading,
   isQBLoading,
+  isEbookLoading,
 }: OrderFulfillmentCardProps) {
   const items = order.items || []
   const currency = order.currency_code
@@ -239,34 +254,6 @@ export function OrderFulfillmentCard({
       <div style={cardHeaderStyle}>
         <FulfillmentBadge fulfilled={hasFulfillments} />
       </div>
-
-      {/* Shipping method */}
-      {shippingMethod && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "12px 20px",
-            fontSize: "14px",
-            color: colors.textSec,
-            borderBottom: `1px solid ${colors.border}`,
-          }}
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 20 20"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <rect x="1" y="6" width="12" height="9" rx="1" />
-            <path d="M13 9h4l2 3v3h-6V9zM4 18a2 2 0 104 0M14 18a2 2 0 104 0" />
-          </svg>
-          {shippingMethod}
-        </div>
-      )}
 
       {/* Items list */}
       <div style={{ padding: "12px 20px" }}>
@@ -380,6 +367,80 @@ export function OrderFulfillmentCard({
         })}
       </div>
 
+      {/* Shipping method — modern badge below items */}
+      {shippingMethod && (() => {
+        const isFree = !order.shipping_methods?.[0]?.amount || Number(order.shipping_methods[0].amount) === 0
+        const methodLower = shippingMethod.toLowerCase()
+        const isGLS = methodLower.includes("gls")
+        const isDHL = methodLower.includes("dhl")
+        const isDPD = methodLower.includes("dpd")
+        const providerName = isGLS ? "GLS" : isDHL ? "DHL" : isDPD ? "DPD" : ""
+        const shippingLabel = isFree
+          ? `Free shipping${providerName ? ` by ${providerName}` : ""}`
+          : `Shipping${providerName ? ` by ${providerName}` : ""}`
+        const shippingPrice = !isFree
+          ? formatCurrency(Number(order.shipping_methods[0].amount) || 0, currency)
+          : null
+
+        return (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "10px 20px",
+              borderTop: `1px solid ${colors.border}`,
+            }}
+          >
+            {/* GLS icon */}
+            {isGLS && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "28px",
+                  height: "20px",
+                  borderRadius: "4px",
+                  background: "linear-gradient(135deg, #FDB813 0%, #F5A623 100%)",
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ fontSize: "8px", fontWeight: 800, color: "#1A3B6B", letterSpacing: "0.03em" }}>GLS</span>
+              </div>
+            )}
+            {/* Truck icon for non-GLS */}
+            {!isGLS && (
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={colors.textMuted} strokeWidth="1.5">
+                <rect x="1" y="6" width="12" height="9" rx="1" />
+                <path d="M13 9h4l2 3v3h-6V9zM4 18a2 2 0 104 0M14 18a2 2 0 104 0" />
+              </svg>
+            )}
+            <span style={{ fontSize: "13px", fontWeight: 500, color: colors.textSec }}>
+              {shippingLabel}
+            </span>
+            {shippingPrice && (
+              <span style={{ fontSize: "13px", fontWeight: 600, color: colors.text, marginLeft: "auto" }}>
+                {shippingPrice}
+              </span>
+            )}
+            {isFree && (
+              <span style={{
+                fontSize: "11px",
+                fontWeight: 600,
+                color: "#008060",
+                background: "rgba(0,128,96,0.08)",
+                padding: "2px 8px",
+                borderRadius: "4px",
+                marginLeft: "auto",
+              }}>
+                FREE
+              </span>
+            )}
+          </div>
+        )
+      })()}
+
       {/* Action buttons — premium row */}
       {!hasFulfillments && (
         <div
@@ -420,30 +481,39 @@ export function OrderFulfillmentCard({
         </div>
       )}
 
-      {/* Invoice action buttons — premium row */}
-      {(!hasFakturoid || !hasQB) && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            gap: "10px",
-            flexWrap: "wrap",
-            padding: "12px 20px",
-            borderTop: `1px solid ${colors.border}`,
-          }}
-        >
-          {!hasFakturoid && (
-            <PremiumBtn
-              variant="fakturoid"
-              onClick={onFakturoidCreate}
-              disabled={isFakturoidLoading}
-              loading={isFakturoidLoading}
-              label="Send to Fakturoid"
-              loadingLabel="Creating..."
-              icon={<span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "-0.02em" }}>fa</span>}
-            />
-          )}
+      {/* Invoice & ebook action buttons — premium row */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          gap: "10px",
+          flexWrap: "wrap",
+          padding: "12px 20px",
+          borderTop: `1px solid ${colors.border}`,
+        }}
+      >
+        {/* Send E-books */}
+        <PremiumBtn
+          variant="ebook"
+          onClick={onResendEbooks}
+          disabled={isEbookLoading}
+          loading={isEbookLoading}
+          label="Send E-books"
+          loadingLabel="Sending..."
+          icon={<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2 3h6a2 2 0 012 2v12l-1-1H2V3zM18 3h-6a2 2 0 00-2 2v12l1-1h7V3z" /></svg>}
+        />
+        {!hasFakturoid && (
+          <PremiumBtn
+            variant="fakturoid"
+            onClick={onFakturoidCreate}
+            disabled={isFakturoidLoading}
+            loading={isFakturoidLoading}
+            label="Send to Fakturoid"
+            loadingLabel="Creating..."
+            icon={<span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "-0.02em" }}>fa</span>}
+          />
+        )}
           {!hasQB && (
             <PremiumBtn
               variant="quickbooks"
@@ -455,8 +525,7 @@ export function OrderFulfillmentCard({
               icon={<span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "-0.02em" }}>qb</span>}
             />
           )}
-        </div>
-      )}
+      </div>
 
       {/* Fulfilled info */}
       {hasFulfillments && (

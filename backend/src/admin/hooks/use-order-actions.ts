@@ -271,6 +271,19 @@ export function useUpdateOrderDetails() {
 // ═══════════════════════════════════════════
 // Customer Stats (order count + total spent)
 // ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// Resend E-books
+// ═══════════════════════════════════════════
+export function useResendEbooks() {
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      return sdk.client.fetch(`/admin/custom-orders/${orderId}/resend-ebooks`, {
+        method: "POST",
+      })
+    },
+  })
+}
+
 export function useCustomerStats(email: string | undefined) {
   return useQuery({
     queryKey: ["customer-stats", email],
