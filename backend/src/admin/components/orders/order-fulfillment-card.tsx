@@ -54,6 +54,20 @@ const variantStyles: Record<
     glow: string
   }
 > = {
+  // ── TOP ROW: purple gradient flow (left → right) ──
+  // secondary = left (lightest purple)
+  secondary: {
+    bg: "linear-gradient(135deg, #FAFAFF 0%, #F3F0FF 100%)",
+    bgHover: "linear-gradient(135deg, #F3F0FF 0%, #EBE6FF 100%)",
+    color: "#6C5CE7",
+    border: "rgba(108,92,231,0.12)",
+    borderHover: "rgba(108,92,231,0.28)",
+    shadow: "0 1px 3px rgba(108,92,231,0.06), 0 1px 2px rgba(0,0,0,0.03)",
+    shadowHover: "0 4px 12px rgba(108,92,231,0.12), 0 2px 4px rgba(108,92,231,0.06)",
+    shadowActive: "0 1px 2px rgba(108,92,231,0.1)",
+    glow: "0 0 0 3px rgba(108,92,231,0.08)",
+  },
+  // primary = right (strongest purple)
   primary: {
     bg: "linear-gradient(135deg, #7C6CF0 0%, #6C5CE7 50%, #5A4BD1 100%)",
     bgHover: "linear-gradient(135deg, #8B7DF5 0%, #7C6CF0 50%, #6C5CE7 100%)",
@@ -65,49 +79,42 @@ const variantStyles: Record<
     shadowActive: "0 1px 4px rgba(108,92,231,0.3)",
     glow: "0 0 0 3px rgba(108,92,231,0.15)",
   },
-  secondary: {
-    bg: "linear-gradient(135deg, #FFFFFF 0%, #FAFAFA 100%)",
-    bgHover: "linear-gradient(135deg, #FAFAFA 0%, #F3F4F6 100%)",
-    color: colors.text,
-    border: "rgba(0,0,0,0.10)",
-    borderHover: "rgba(0,0,0,0.20)",
-    shadow: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
-    shadowHover: "0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)",
-    shadowActive: "0 1px 2px rgba(0,0,0,0.08)",
-    glow: "0 0 0 3px rgba(0,0,0,0.04)",
-  },
-  fakturoid: {
-    bg: "linear-gradient(135deg, #FFFFFF 0%, #F0FFF8 100%)",
-    bgHover: "linear-gradient(135deg, #F0FFF8 0%, #E0F7EC 100%)",
-    color: "#008060",
-    border: "rgba(0,128,96,0.15)",
-    borderHover: "rgba(0,128,96,0.35)",
-    shadow: "0 1px 3px rgba(0,128,96,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-    shadowHover: "0 4px 12px rgba(0,128,96,0.15), 0 2px 4px rgba(0,128,96,0.08)",
-    shadowActive: "0 1px 2px rgba(0,128,96,0.12)",
-    glow: "0 0 0 3px rgba(0,128,96,0.1)",
-  },
-  quickbooks: {
-    bg: "linear-gradient(135deg, #FFFFFF 0%, #F0FFF0 100%)",
-    bgHover: "linear-gradient(135deg, #F0FFF0 0%, #E0F7E0 100%)",
-    color: "#2CA01C",
-    border: "rgba(44,160,28,0.15)",
-    borderHover: "rgba(44,160,28,0.35)",
-    shadow: "0 1px 3px rgba(44,160,28,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-    shadowHover: "0 4px 12px rgba(44,160,28,0.15), 0 2px 4px rgba(44,160,28,0.08)",
-    shadowActive: "0 1px 2px rgba(44,160,28,0.12)",
-    glow: "0 0 0 3px rgba(44,160,28,0.1)",
-  },
+  // ── BOTTOM ROW: green gradient flow (left → right, 3 buttons) ──
+  // ebook = left (lightest green)
   ebook: {
-    bg: "linear-gradient(135deg, #FFFFFF 0%, #F0F0FF 100%)",
-    bgHover: "linear-gradient(135deg, #F0F0FF 0%, #E8E6FF 100%)",
-    color: "#5A4BD1",
-    border: "rgba(108,92,231,0.15)",
-    borderHover: "rgba(108,92,231,0.35)",
-    shadow: "0 1px 3px rgba(108,92,231,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-    shadowHover: "0 4px 12px rgba(108,92,231,0.15), 0 2px 4px rgba(108,92,231,0.08)",
-    shadowActive: "0 1px 2px rgba(108,92,231,0.12)",
-    glow: "0 0 0 3px rgba(108,92,231,0.1)",
+    bg: "linear-gradient(135deg, #FCFFFC 0%, #F2FAF2 100%)",
+    bgHover: "linear-gradient(135deg, #F2FAF2 0%, #E8F5E8 100%)",
+    color: "#3DAA35",
+    border: "rgba(44,160,28,0.10)",
+    borderHover: "rgba(44,160,28,0.25)",
+    shadow: "0 1px 3px rgba(44,160,28,0.05), 0 1px 2px rgba(0,0,0,0.03)",
+    shadowHover: "0 4px 12px rgba(44,160,28,0.10), 0 2px 4px rgba(44,160,28,0.05)",
+    shadowActive: "0 1px 2px rgba(44,160,28,0.08)",
+    glow: "0 0 0 3px rgba(44,160,28,0.06)",
+  },
+  // fakturoid = middle (medium green)
+  fakturoid: {
+    bg: "linear-gradient(135deg, #F2FAF2 0%, #E0F5E0 100%)",
+    bgHover: "linear-gradient(135deg, #E8F5E8 0%, #D4EED4 100%)",
+    color: "#1E8A1E",
+    border: "rgba(30,138,30,0.15)",
+    borderHover: "rgba(30,138,30,0.32)",
+    shadow: "0 1px 3px rgba(30,138,30,0.08), 0 1px 2px rgba(0,0,0,0.03)",
+    shadowHover: "0 4px 12px rgba(30,138,30,0.14), 0 2px 4px rgba(30,138,30,0.07)",
+    shadowActive: "0 1px 2px rgba(30,138,30,0.12)",
+    glow: "0 0 0 3px rgba(30,138,30,0.08)",
+  },
+  // quickbooks = right (strongest green)
+  quickbooks: {
+    bg: "linear-gradient(135deg, #E0F5E0 0%, #C8E8C8 100%)",
+    bgHover: "linear-gradient(135deg, #D4EED4 0%, #B8E0B8 100%)",
+    color: "#0D6E0D",
+    border: "rgba(13,110,13,0.20)",
+    borderHover: "rgba(13,110,13,0.38)",
+    shadow: "0 1px 4px rgba(13,110,13,0.10), 0 1px 2px rgba(0,0,0,0.04)",
+    shadowHover: "0 4px 14px rgba(13,110,13,0.18), 0 2px 4px rgba(13,110,13,0.09)",
+    shadowActive: "0 1px 2px rgba(13,110,13,0.14)",
+    glow: "0 0 0 3px rgba(13,110,13,0.10)",
   },
 }
 
