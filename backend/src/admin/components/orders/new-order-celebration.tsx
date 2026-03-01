@@ -26,7 +26,7 @@ const CONFETTI_COLORS = [
   colors.orange,
 ]
 
-const CONFETTI_COUNT = 28
+const CONFETTI_COUNT = 24
 
 interface ConfettiPiece {
   id: number
@@ -34,28 +34,18 @@ interface ConfettiPiece {
   left: number
   delay: number
   duration: number
-  rotation: number
-  drift: number
   size: number
-  shape: "rect" | "circle" | "dot"
 }
 
 function generateConfetti(): ConfettiPiece[] {
-  return Array.from({ length: CONFETTI_COUNT }, (_, i) => {
-    const r = Math.random()
-    const shape: ConfettiPiece["shape"] = r < 0.4 ? "dot" : r < 0.7 ? "circle" : "rect"
-    return {
-      id: i,
-      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-      left: 15 + Math.random() * 70, // concentrate in center 70% of screen
-      delay: Math.random() * 0.4,
-      duration: 1.5 + Math.random() * 1.5,
-      rotation: Math.random() * 360 - 180,
-      drift: Math.random() * 60 - 30,
-      size: shape === "dot" ? 4 + Math.random() * 3 : 5 + Math.random() * 4,
-      shape,
-    }
-  })
+  return Array.from({ length: CONFETTI_COUNT }, (_, i) => ({
+    id: i,
+    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+    left: 20 + Math.random() * 60,
+    delay: Math.random() * 0.5,
+    duration: 1.2 + Math.random() * 0.8,
+    size: 3 + Math.random() * 3,
+  }))
 }
 
 // ═══ Sound ═══
@@ -118,14 +108,11 @@ function ensureKeyframes() {
   style.textContent = `
     @keyframes confetti-fall {
       0% {
-        transform: translateY(-10px) translateX(0px) rotate(0deg) scale(1);
-        opacity: 1;
-      }
-      60% {
+        transform: translateY(0);
         opacity: 0.9;
       }
       100% {
-        transform: translateY(350px) translateX(var(--drift)) rotate(var(--rotation)) scale(0.6);
+        transform: translateY(120px);
         opacity: 0;
       }
     }
@@ -222,7 +209,7 @@ export function NewOrderCelebration({
     top: 0,
     left: 0,
     width: "100vw",
-    height: "100vh",
+    height: "180px",
     pointerEvents: "none",
     zIndex: 9998,
     overflow: "hidden",
@@ -295,29 +282,22 @@ export function NewOrderCelebration({
     <>
       {/* Confetti layer */}
       <div style={confettiContainerStyle}>
-        {confettiPieces.map((piece) => {
-          const w = piece.shape === "rect" ? piece.size : piece.shape === "dot" ? piece.size * 0.7 : piece.size * 0.8
-          const h = piece.shape === "rect" ? piece.size * 0.5 : piece.shape === "dot" ? piece.size * 0.7 : piece.size * 0.8
-          const br = piece.shape === "rect" ? "2px" : "50%"
-          return (
-            <div
-              key={piece.id}
-              style={{
-                position: "absolute",
-                top: -10,
-                left: `${piece.left}%`,
-                width: w,
-                height: h,
-                backgroundColor: piece.color,
-                borderRadius: br,
-                animation: `confetti-fall ${piece.duration}s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${piece.delay}s forwards`,
-                ["--drift" as any]: `${piece.drift}px`,
-                ["--rotation" as any]: `${piece.rotation}deg`,
-                opacity: 0,
-              }}
-            />
-          )
-        })}
+        {confettiPieces.map((piece) => (
+          <div
+            key={piece.id}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: `${piece.left}%`,
+              width: piece.size,
+              height: piece.size,
+              backgroundColor: piece.color,
+              borderRadius: "50%",
+              animation: `confetti-fall ${piece.duration}s ease-out ${piece.delay}s forwards`,
+              opacity: 0,
+            }}
+          />
+        ))}
       </div>
 
       {/* Banner */}
