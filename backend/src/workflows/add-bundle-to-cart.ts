@@ -17,15 +17,19 @@ import {
  * Bundle pricing map: variant_id → { qty → total price in major units }
  * This is the server-side source of truth for bundle discounts.
  *
+ * IMPORTANT: These prices are TAX-INCLUSIVE (final customer price).
+ * The workflow sets is_tax_inclusive=true on line items so Medusa
+ * extracts tax from within the price instead of adding it on top.
+ *
  * To add a new project's bundle pricing, add a new entry here keyed by variant_id.
  */
 const BUNDLE_PRICING: Record<string, Record<number, number>> = {
   // Loslatenboek — "Laat Los Wat Je Kapotmaakt"
   "variant_01KJ9YQH8CA1DR2A77HNQ5AZTQ": {
-    1: 35,    // €35.00
-    2: 59,    // €59.00 (save €11)
-    3: 79,    // €79.00 (save €26)
-    4: 99,    // €99.00 (save €41)
+    1: 35,    // €35.00 incl. tax
+    2: 59,    // €59.00 incl. tax (save €11)
+    3: 79,    // €79.00 incl. tax (save €26)
+    4: 99,    // €99.00 incl. tax (save €41)
   },
 }
 
@@ -60,35 +64,25 @@ const calculateBundlePriceStep = createStep(
 /**
  * Workflow: Add bundle items to cart with custom pricing
  *
- * 1. Fetch cart region to get is_tax_inclusive flag
- * 2. Calculate bundle unit price
- * 3. Prepare item data (with unit_price + is_tax_inclusive when applicable)
- * 4. Acquire lock on cart
- * 5. Add items via addToCartWorkflow
- * 6. Refetch cart
- * 7. Release lock
+ * 1. Calculate bundle unit price
+ * 2. Prepare item data (with unit_price + is_tax_inclusive)
+ * 3. Acquire lock on cart
+ * 4. Add items via addToCartWorkflow
+ * 5. Refetch cart
+ * 6. Release lock
  */
 export const addBundleToCartWorkflow = createWorkflow(
   "add-bundle-to-cart",
   function (input: AddBundleToCartInput) {
-    // Step 1: Fetch the cart's region to check is_tax_inclusive
-    // When overriding unit_price, Medusa needs explicit is_tax_inclusive flag
-    // otherwise it treats the price as tax-exclusive and adds tax on top
-    const { data: cartData } = useQueryGraphStep({
-      entity: "cart",
-      filters: { id: input.cart_id },
-      fields: ["id", "region.is_tax_inclusive"],
-    }).config({ name: "fetch-cart-region" })
-
-    // Step 2: Calculate the bundle unit price
+    // Step 1: Calculate the bundle unit price
     const bundleUnitPrice = calculateBundlePriceStep({
       variant_id: input.variant_id,
       quantity: input.quantity,
     })
 
-    // Step 3: Prepare item data with optional unit_price + is_tax_inclusive
+    // Step 2: Prepare item data with optional unit_price + is_tax_inclusive
     const itemToAdd = transform(
-      { input, bundleUnitPrice, cart: cartData },
+      { input, bundleUnitPrice },
       (data) => {
         const item: any = {
           variant_id: data.input.variant_id,
@@ -96,27 +90,25 @@ export const addBundleToCartWorkflow = createWorkflow(
         }
         if (data.bundleUnitPrice !== null) {
           item.unit_price = data.bundleUnitPrice
-          // When overriding unit_price, explicitly tell Medusa whether
-          // this price includes tax (from the cart's region setting).
-          // Without this, Medusa treats custom unit_price as tax-exclusive
-          // and adds tax on top (e.g. €35 → €37.10 instead of €35 incl. tax).
-          const region = data.cart?.[0]?.region
-          if (region?.is_tax_inclusive) {
-            item.is_tax_inclusive = true
-          }
+          // Bundle prices in BUNDLE_PRICING are tax-inclusive (final customer price).
+          // Without this flag, Medusa treats custom unit_price as tax-exclusive
+          // and adds tax on top (e.g. €99 → €107.91 instead of €99 incl. tax).
+          // Note: region.is_tax_inclusive is stored via PricePreference model,
+          // not directly on the region entity, so we can't query it via graph.
+          item.is_tax_inclusive = true
         }
         return [item]
       }
     )
 
-    // Step 4: Acquire lock on cart
+    // Step 3: Acquire lock on cart
     acquireLockStep({
       key: input.cart_id,
       timeout: 2,
       ttl: 10,
     })
 
-    // Step 5: Add to cart (uses unit_price + is_tax_inclusive if provided)
+    // Step 4: Add to cart (uses unit_price + is_tax_inclusive if provided)
     addToCartWorkflow.runAsStep({
       input: {
         cart_id: input.cart_id,
@@ -124,14 +116,14 @@ export const addBundleToCartWorkflow = createWorkflow(
       },
     })
 
-    // Step 6: Refetch the updated cart
+    // Step 5: Refetch the updated cart
     const { data: updatedCarts } = useQueryGraphStep({
       entity: "cart",
       filters: { id: input.cart_id },
       fields: ["id", "items.*"],
     }).config({ name: "refetch-cart" })
 
-    // Step 7: Release the lock
+    // Step 6: Release the lock
     releaseLockStep({
       key: input.cart_id,
     })
