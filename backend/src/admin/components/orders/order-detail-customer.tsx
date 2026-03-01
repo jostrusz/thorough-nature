@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { toast } from "@medusajs/ui"
 import { useUpdateOrderDetails } from "../../hooks/use-order-actions"
 import { formatCurrency } from "../../lib/format-currency"
+import { colors, shadows, radii, cardStyle, fontStack, btnOutline, btnPrimary } from "./design-tokens"
 
 interface OrderDetailCustomerProps {
   order: any
@@ -78,7 +79,7 @@ function InlineInput({
           display: "block",
           fontSize: "11px",
           fontWeight: 600,
-          color: "#6D7175",
+          color: colors.textSec,
           textTransform: "uppercase",
           letterSpacing: "0.3px",
           marginBottom: "4px",
@@ -95,14 +96,22 @@ function InlineInput({
         style={{
           width: "100%",
           padding: "7px 10px",
-          border: "1px solid #E1E3E5",
-          borderRadius: "6px",
+          border: `1px solid ${colors.border}`,
+          borderRadius: radii.xs,
           fontSize: "13px",
-          color: "#1A1A1A",
+          color: colors.text,
           outline: "none",
           boxSizing: "border-box",
-          fontFamily: "inherit",
+          fontFamily: fontStack,
           transition: "border-color 0.2s, box-shadow 0.2s",
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = colors.accent
+          e.currentTarget.style.boxShadow = "0 0 0 3px rgba(108,92,231,0.12)"
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = colors.border
+          e.currentTarget.style.boxShadow = "none"
         }}
       />
     </div>
@@ -127,7 +136,7 @@ function InlineSelect({
           display: "block",
           fontSize: "11px",
           fontWeight: 600,
-          color: "#6D7175",
+          color: colors.textSec,
           textTransform: "uppercase",
           letterSpacing: "0.3px",
           marginBottom: "4px",
@@ -142,16 +151,24 @@ function InlineSelect({
         style={{
           width: "100%",
           padding: "7px 10px",
-          border: "1px solid #E1E3E5",
-          borderRadius: "6px",
+          border: `1px solid ${colors.border}`,
+          borderRadius: radii.xs,
           fontSize: "13px",
-          color: "#1A1A1A",
+          color: colors.text,
           outline: "none",
           boxSizing: "border-box",
-          fontFamily: "inherit",
-          background: "#FFFFFF",
+          fontFamily: fontStack,
+          background: colors.bgCard,
           transition: "border-color 0.2s, box-shadow 0.2s",
           cursor: "pointer",
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = colors.accent
+          e.currentTarget.style.boxShadow = "0 0 0 3px rgba(108,92,231,0.12)"
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = colors.border
+          e.currentTarget.style.boxShadow = "none"
         }}
       >
         <option value="">Select country</option>
@@ -189,13 +206,13 @@ function EditSaveBar({
           className="od-btn"
           style={{
             padding: "4px 10px",
-            borderRadius: "6px",
+            borderRadius: radii.xs,
             fontSize: "11px",
             fontWeight: 500,
             cursor: "pointer",
-            border: "1px solid #E1E3E5",
-            background: "#FFFFFF",
-            color: "#1A1A1A",
+            border: `1px solid ${colors.border}`,
+            background: colors.bgCard,
+            color: colors.textSec,
             transition: "all 0.15s ease",
           }}
         >
@@ -207,12 +224,12 @@ function EditSaveBar({
           className="od-btn-primary"
           style={{
             padding: "4px 10px",
-            borderRadius: "6px",
+            borderRadius: radii.xs,
             fontSize: "11px",
             fontWeight: 500,
             cursor: isLoading ? "default" : "pointer",
-            border: "1px solid #008060",
-            background: "#008060",
+            border: `1px solid ${colors.accent}`,
+            background: colors.accent,
             color: "#FFFFFF",
             opacity: isLoading ? 0.6 : 1,
             transition: "all 0.15s ease",
@@ -233,7 +250,7 @@ function EditSaveBar({
         border: "none",
         cursor: "pointer",
         padding: "4px",
-        color: "#6D7175",
+        color: colors.textSec,
         display: "flex",
         alignItems: "center",
         borderRadius: "4px",
@@ -265,11 +282,11 @@ function AddressDisplay({ addr }: { addr: any }) {
   const mapUrl = buildMapUrl(addr)
 
   return (
-    <div style={{ fontSize: "13px", color: "#1A1A1A", lineHeight: 1.5 }}>
+    <div style={{ fontSize: "13px", color: colors.text, lineHeight: 1.5 }}>
       {(addr.first_name || addr.last_name) && (
         <div>{[addr.first_name, addr.last_name].filter(Boolean).join(" ")}</div>
       )}
-      {addr.company && <div style={{ color: "#6D7175" }}>{addr.company}</div>}
+      {addr.company && <div style={{ color: colors.textSec }}>{addr.company}</div>}
       {addr.address_1 && <div>{addr.address_1}</div>}
       {addr.address_2 && <div>{addr.address_2}</div>}
       <div>{[addr.postal_code, addr.city].filter(Boolean).join(" ")}</div>
@@ -278,7 +295,7 @@ function AddressDisplay({ addr }: { addr: any }) {
         {flag} {countryName}
       </div>
       {addr.phone && (
-        <div style={{ color: "#6D7175", marginTop: "4px" }}>{addr.phone}</div>
+        <div style={{ color: colors.textSec, marginTop: "4px" }}>{addr.phone}</div>
       )}
       <a
         href={mapUrl}
@@ -290,7 +307,7 @@ function AddressDisplay({ addr }: { addr: any }) {
           alignItems: "center",
           gap: "4px",
           fontSize: "12px",
-          color: "#2C6ECB",
+          color: colors.accent,
           textDecoration: "none",
           marginTop: "6px",
           transition: "color 0.15s",
@@ -509,7 +526,7 @@ export function OrderDetailCustomer({
   const sectionLabel: React.CSSProperties = {
     fontSize: "12px",
     fontWeight: 600,
-    color: "#6D7175",
+    color: colors.textSec,
     textTransform: "uppercase",
     letterSpacing: "0.5px",
     marginBottom: "6px",
@@ -520,12 +537,8 @@ export function OrderDetailCustomer({
     <div
       className="od-card"
       style={{
-        background: "#FFFFFF",
-        border: "1px solid #E1E3E5",
-        borderRadius: "10px",
+        ...cardStyle,
         padding: "16px 20px",
-        marginBottom: "16px",
-        transition: "box-shadow 0.2s ease, transform 0.2s ease",
       }}
     >
       {/* Header */}
@@ -537,7 +550,7 @@ export function OrderDetailCustomer({
           marginBottom: "4px",
         }}
       >
-        <span style={{ fontSize: "14px", fontWeight: 600, color: "#1A1A1A" }}>
+        <span style={{ fontSize: "14px", fontWeight: 600, color: colors.text }}>
           Customer
         </span>
       </div>
@@ -550,7 +563,7 @@ export function OrderDetailCustomer({
           style={{
             fontSize: "13px",
             fontWeight: 500,
-            color: "#2C6ECB",
+            color: colors.accent,
             textDecoration: "none",
             transition: "color 0.15s",
           }}
@@ -561,10 +574,10 @@ export function OrderDetailCustomer({
 
       {/* Order count + Total spent */}
       {orderCount !== undefined && (
-        <div style={{ fontSize: "12px", color: "#008060", marginBottom: "2px" }}>
+        <div style={{ fontSize: "12px", color: colors.green, marginBottom: "2px" }}>
           {orderCount} {orderCount === 1 ? "order" : "orders"}
           {totalSpent !== undefined && totalSpent > 0 && (
-            <span style={{ color: "#6D7175", marginLeft: "8px" }}>
+            <span style={{ color: colors.textSec, marginLeft: "8px" }}>
               {formatCurrency(totalSpent, order.currency_code)} spent
             </span>
           )}
@@ -615,7 +628,7 @@ export function OrderDetailCustomer({
             <div
               style={{
                 fontSize: "13px",
-                color: "#2C6ECB",
+                color: colors.accent,
                 marginBottom: "2px",
                 padding: "2px 0",
               }}
@@ -623,7 +636,7 @@ export function OrderDetailCustomer({
               {order.email}
             </div>
           )}
-          <div style={{ fontSize: "13px", color: "#6D7175" }}>
+          <div style={{ fontSize: "13px", color: colors.textSec }}>
             {addr?.phone || "No phone number"}
           </div>
         </>
