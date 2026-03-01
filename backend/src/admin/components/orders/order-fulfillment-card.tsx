@@ -367,17 +367,13 @@ export function OrderFulfillmentCard({
         })}
       </div>
 
-      {/* Shipping method — modern badge below items */}
+      {/* Shipping method — matching checkout style */}
       {shippingMethod && (() => {
         const isFree = !order.shipping_methods?.[0]?.amount || Number(order.shipping_methods[0].amount) === 0
         const methodLower = shippingMethod.toLowerCase()
         const isGLS = methodLower.includes("gls")
         const isDHL = methodLower.includes("dhl")
         const isDPD = methodLower.includes("dpd")
-        const providerName = isGLS ? "GLS" : isDHL ? "DHL" : isDPD ? "DPD" : ""
-        const shippingLabel = isFree
-          ? `Free shipping${providerName ? ` by ${providerName}` : ""}`
-          : `Shipping${providerName ? ` by ${providerName}` : ""}`
         const shippingPrice = !isFree
           ? formatCurrency(Number(order.shipping_methods[0].amount) || 0, currency)
           : null
@@ -388,53 +384,70 @@ export function OrderFulfillmentCard({
               display: "flex",
               alignItems: "center",
               gap: "10px",
-              padding: "10px 20px",
+              padding: "12px 20px",
               borderTop: `1px solid ${colors.border}`,
+              background: isFree ? "#f0faf4" : "transparent",
             }}
           >
-            {/* GLS icon */}
+            {/* GLS badge — real branding: dark blue bg, yellow text */}
             {isGLS && (
               <div
                 style={{
-                  display: "flex",
+                  display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  width: "28px",
-                  height: "20px",
-                  borderRadius: "4px",
-                  background: "linear-gradient(135deg, #FDB813 0%, #F5A623 100%)",
+                  padding: "3px 8px",
+                  borderRadius: "3px",
+                  background: "#003399",
                   flexShrink: 0,
                 }}
               >
-                <span style={{ fontSize: "8px", fontWeight: 800, color: "#1A3B6B", letterSpacing: "0.03em" }}>GLS</span>
+                <span style={{ fontSize: "10px", fontWeight: 700, color: "#FFDC00", letterSpacing: "0.04em", lineHeight: 1 }}>GLS</span>
               </div>
             )}
-            {/* Truck icon for non-GLS */}
-            {!isGLS && (
+            {/* DHL/DPD/other carrier badge */}
+            {!isGLS && (isDHL || isDPD) && (
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "3px 8px",
+                  borderRadius: "3px",
+                  background: isDHL ? "#FFCC00" : "#DC0032",
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ fontSize: "10px", fontWeight: 700, color: isDHL ? "#D40511" : "#fff", letterSpacing: "0.04em", lineHeight: 1 }}>{isDHL ? "DHL" : "DPD"}</span>
+              </div>
+            )}
+            {/* Truck icon for unknown carriers */}
+            {!isGLS && !isDHL && !isDPD && (
               <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={colors.textMuted} strokeWidth="1.5">
                 <rect x="1" y="6" width="12" height="9" rx="1" />
                 <path d="M13 9h4l2 3v3h-6V9zM4 18a2 2 0 104 0M14 18a2 2 0 104 0" />
               </svg>
             )}
-            <span style={{ fontSize: "13px", fontWeight: 500, color: colors.textSec }}>
-              {shippingLabel}
-            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ fontSize: "13px", fontWeight: 600, color: colors.text }}>
+                {isFree ? "Gratis verzending" : "Verzending"}
+              </span>
+              <div style={{ fontSize: "11px", color: colors.textMuted, marginTop: "1px" }}>
+                Verzonden binnen 24 uur via {isGLS ? "GLS" : isDHL ? "DHL" : isDPD ? "DPD" : "koerier"}
+              </div>
+            </div>
             {shippingPrice && (
-              <span style={{ fontSize: "13px", fontWeight: 600, color: colors.text, marginLeft: "auto" }}>
+              <span style={{ fontSize: "13px", fontWeight: 600, color: colors.text }}>
                 {shippingPrice}
               </span>
             )}
             {isFree && (
               <span style={{
-                fontSize: "11px",
+                fontSize: "12px",
                 fontWeight: 600,
-                color: "#008060",
-                background: "rgba(0,128,96,0.08)",
-                padding: "2px 8px",
-                borderRadius: "4px",
-                marginLeft: "auto",
+                color: "#27AE60",
               }}>
-                FREE
+                Gratis
               </span>
             )}
           </div>
