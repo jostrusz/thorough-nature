@@ -26,26 +26,36 @@ const dashboardStyle: React.CSSProperties = {
 }
 
 /**
- * Hook that walks up the DOM from a ref and sets background on all
- * ancestor elements up to <body>. Cleans up on unmount.
+ * Hook that walks up the DOM from a ref and sets background + removes
+ * max-width constraints on all ancestor elements up to <body>.
+ * Cleans up on unmount.
  */
 function useFullPageBackground(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
 
-    const originals: { el: HTMLElement; bg: string }[] = []
+    const originals: { el: HTMLElement; bg: string; maxWidth: string; width: string }[] = []
     let node: HTMLElement | null = el.parentElement
 
     while (node && node !== document.documentElement) {
-      originals.push({ el: node, bg: node.style.background })
+      originals.push({
+        el: node,
+        bg: node.style.background,
+        maxWidth: node.style.maxWidth,
+        width: node.style.width,
+      })
       node.style.background = BG_COLOR
+      node.style.maxWidth = "100%"
+      node.style.width = "100%"
       node = node.parentElement
     }
 
     return () => {
-      originals.forEach(({ el: n, bg }) => {
+      originals.forEach(({ el: n, bg, maxWidth, width }) => {
         n.style.background = bg
+        n.style.maxWidth = maxWidth
+        n.style.width = width
       })
     }
   }, [ref])
