@@ -4762,8 +4762,8 @@ body {
       if (!hasCreditCard) {
         cardFieldsEl.style.display = 'none';
       } else if (selectedMethod === 'creditcard') {
-        // Stripe uses hosted checkout (redirect), no inline card fields needed
-        if (cardProvider === 'stripe') {
+        // Stripe and PayPal use hosted checkout (redirect), no inline card fields needed
+        if (cardProvider === 'stripe' || cardProvider === 'paypal') {
           cardFieldsEl.style.display = 'none';
         } else {
           cardFieldsEl.style.display = 'block';
@@ -4772,8 +4772,6 @@ body {
             initMollieComponents();
           } else if (cardProvider === 'airwallex') {
             initAirwallexCard();
-          } else if (cardProvider === 'paypal') {
-            initPayPalCard();
           } else {
             initMollieComponents(); // fallback
           }
@@ -4844,15 +4842,13 @@ body {
         // Show/hide card fields — init the right provider's card elements
         var cardFields = document.getElementById('card-fields');
         if (cardFields) {
-          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe') {
-            // Stripe uses hosted checkout (redirect), no inline card fields
+          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal') {
+            // Stripe and PayPal use hosted checkout (redirect), no inline card fields
             cardFields.style.display = 'block';
             if (cardProvider === 'mollie') {
               initMollieComponents();
             } else if (cardProvider === 'airwallex') {
               initAirwallexCard();
-            } else if (cardProvider === 'paypal') {
-              initPayPalCard();
             }
           } else {
             cardFields.style.display = 'none';
@@ -6747,71 +6743,10 @@ body {
         // Stripe card payments redirect to Stripe's hosted checkout page via checkoutUrl
         // (handled by the generic redirect logic below — providerData.checkoutUrl)
 
-        // ─── PAYPAL CARD CONFIRM FLOW ───
-        // For credit cards on PayPal: submit card data via PayPal CardFields SDK, then capture
-        if (selectedProviderId && selectedProviderId.indexOf('paypal') !== -1
-            && selectedMethod === 'creditcard' && providerData.paypalOrderId && paypalCardReady) {
-          return (async function() {
-            try {
-              // Set the order ID so the CardFields createOrder callback can return it
-              window._paypalCardOrderId = providerData.paypalOrderId;
-
-              console.log('[PayPal Card] Submitting card fields for order:', providerData.paypalOrderId);
-
-              // Create a promise that will be resolved by the onApprove/onError callbacks
-              var cardResult = await new Promise(function(resolve, reject) {
-                window._paypalCardResolve = resolve;
-                window._paypalCardReject = reject;
-
-                // Submit the card fields — this triggers 3DS if needed
-                paypalCardFieldsInstance.submit({
-                  billingAddress: {
-                    addressLine1: customerData.billing_address?.address_1 || customerData.shipping_address?.address_1 || '',
-                    adminArea2: customerData.billing_address?.city || customerData.shipping_address?.city || '',
-                    postalCode: customerData.billing_address?.postal_code || customerData.shipping_address?.postal_code || '',
-                    countryCode: (customerData.billing_address?.country_code || customerData.shipping_address?.country_code || 'NL').toUpperCase(),
-                  },
-                  // cardholderName is captured automatically by PayPal NameField rendered in #card-holder
-                }).catch(function(submitErr) {
-                  reject(submitErr);
-                });
-              });
-
-              console.log('[PayPal Card] Card approved, orderID:', cardResult.orderID);
-
-              // Show preloader
-              if (!document.querySelector('.payment-preloader')) {
-                var ppPreloader = document.createElement('div');
-                ppPreloader.className = 'payment-preloader';
-                ppPreloader.innerHTML = '<img src="/laat-los-logo-logo.png" alt="Laden..."><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
-                document.body.insertBefore(ppPreloader, document.body.firstChild);
-              }
-
-              // Payment succeeded — complete cart
-              var completeRes = await medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' });
-              var order = completeRes.order || completeRes;
-              localStorage.setItem('medusa_order_id', order.id || '');
-              localStorage.setItem('medusa_order_display_id', order.display_id || '');
-
-              if (PROJECT_CONFIG.upsellEnabled === false) {
-                window.location.href = PROJECT_CONFIG.thankYouUrl;
-              } else if (checkoutOrderBump) {
-                localStorage.setItem('medusa_upsell_purchased', 'true');
-                window.location.href = PROJECT_CONFIG.thankYouUrl;
-              } else {
-                window.location.href = PROJECT_CONFIG.upsellUrl;
-              }
-            } catch (err) {
-              // Clean up
-              window._paypalCardOrderId = null;
-              window._paypalCardResolve = null;
-              window._paypalCardReject = null;
-              var errPreloader = document.querySelector('.payment-preloader');
-              if (errPreloader) errPreloader.remove();
-              throw new Error(err.message || 'Kaartbetaling via PayPal mislukt');
-            }
-          })();
-        }
+        // ─── PAYPAL CARD: uses hosted PayPal page (redirect) ───
+        // PayPal card payments redirect to PayPal's hosted checkout page via approvalUrl.
+        // On the hosted page, guests see "Pay with Debit or Credit Card".
+        // (handled by the generic redirect logic below — providerData.approvalUrl)
 
         // ─── AIRWALLEX DROP-IN FLOW ───
         // Airwallex uses Drop-in Element for non-card methods (Apple Pay, Google Pay etc.)

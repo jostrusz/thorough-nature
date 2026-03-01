@@ -28,6 +28,18 @@
       "runtimeArgs": ["email:dev"],
       "port": 3002,
       "cwd": "backend"
+    },
+    {
+      "name": "dashboard-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["http-server", ".", "-p", "8080", "-c-1"],
+      "port": 8080
+    },
+    {
+      "name": "loslatenboek",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["http-server", "storefront/public", "-p", "8090", "-c-1"],
+      "port": 8090
     }
   ]
 }

@@ -240,16 +240,31 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
       const isCard = method === "creditcard"
 
       if (isCard) {
-        // ── Card Flow: CAPTURE intent, frontend uses PayPal CardFields SDK ──
-        // Create order WITHOUT payment_source — the JS SDK CardFields.submit()
-        // attaches card details and handles 3DS client-side
+        // ── Card Flow: Redirect to PayPal hosted page ──
+        // Create order WITH payment_source.paypal + experience_context so PayPal
+        // returns an approvalUrl. On the hosted page guests see "Pay with Debit
+        // or Credit Card" alongside the PayPal wallet option.
+        // Uses CAPTURE intent with ORDER_COMPLETE_ON_PAYMENT_APPROVAL so the
+        // payment is captured automatically when the customer approves.
         orderData = {
           intent: "CAPTURE",
+          processing_instruction: "ORDER_COMPLETE_ON_PAYMENT_APPROVAL",
           purchase_units: purchaseUnits,
+          payment_source: {
+            paypal: {
+              experience_context: {
+                payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
+                brand_name: process.env.STORE_NAME || "EverChapter",
+                user_action: "PAY_NOW",
+                return_url: returnUrl,
+                cancel_url: cancelUrl,
+              },
+            },
+          },
         }
 
         this.logger_.info(
-          `[PayPal] Creating card order: amount=${totalValue} ${currency}`
+          `[PayPal] Creating card redirect order: amount=${totalValue} ${currency}`
         )
       } else if (isAPM) {
         // ── APM Flow: CAPTURE + auto-capture on approval ──
