@@ -260,24 +260,34 @@ export async function markInvoicePaid(
 
 /**
  * Delete an invoice from Fakturoid.
- * Only non-sent (draft/open) invoices can be deleted via API.
+ * Note: Paid/sent invoices may return 403/422 — caller should handle gracefully.
  */
 export async function deleteInvoice(
   creds: FakturoidCredentials,
   token: string,
   invoiceId: number
-): Promise<void> {
+): Promise<{ deleted: boolean; status: number }> {
   const url = `${accountUrl(creds.slug)}/invoices/${invoiceId}.json`
   const res = await fetch(url, {
     method: "DELETE",
     headers: headers(token, creds.user_agent_email),
   })
 
-  // 204 = success, 404 = already gone (both OK)
-  if (!res.ok && res.status !== 204 && res.status !== 404) {
-    const text = await res.text()
-    throw new Error(`Fakturoid delete invoice failed (${res.status}): ${text}`)
+  // 204/200 = success, 404 = already gone
+  if (res.ok || res.status === 204 || res.status === 404) {
+    return { deleted: true, status: res.status }
   }
+
+  // 403/422 = paid or locked invoice — not deletable but not a crash
+  if (res.status === 403 || res.status === 422) {
+    console.warn(
+      `[Fakturoid] Invoice ${invoiceId} cannot be deleted (${res.status}) — likely paid/sent`
+    )
+    return { deleted: false, status: res.status }
+  }
+
+  const text = await res.text()
+  throw new Error(`Fakturoid delete invoice failed (${res.status}): ${text}`)
 }
 
 /**

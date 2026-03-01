@@ -264,7 +264,8 @@ export async function DELETE(
     }
 
     const metadata = order.metadata || {}
-    const internalId = metadata.fakturoid_internal_id
+    // Support both new format (fakturoid_internal_id) and old format (fakturoid_invoice_id was numeric)
+    const internalId = metadata.fakturoid_internal_id || metadata.fakturoid_invoice_id
     const projectId = metadata.project_id
 
     if (!internalId) {
@@ -272,58 +273,60 @@ export async function DELETE(
       return
     }
 
-    // ── Find Fakturoid config ──
-    if (!projectId) {
-      res.status(400).json({ error: "Order has no project_id in metadata" })
-      return
+    // ── Try to delete from Fakturoid API (best-effort) ──
+    let deletedFromFakturoid = false
+    const projectConfigFound = !!projectId
+
+    if (projectConfigFound) {
+      try {
+        const configs = await (fakturoidService as any).listFakturoidConfigs({
+          project_id: projectId,
+        })
+
+        if (configs.length) {
+          const config = configs[0] as any
+
+          const tokenResult = await getAccessToken({
+            slug: config.slug,
+            client_id: config.client_id,
+            client_secret: config.client_secret,
+            user_agent_email: config.user_agent_email,
+            access_token: config.access_token,
+            token_expires_at: config.token_expires_at,
+          })
+
+          if (tokenResult.access_token !== config.access_token) {
+            await (fakturoidService as any).updateFakturoidConfigs({
+              id: config.id,
+              access_token: tokenResult.access_token,
+              token_expires_at: tokenResult.expires_at,
+            })
+          }
+
+          const creds = {
+            slug: config.slug,
+            client_id: config.client_id,
+            client_secret: config.client_secret,
+            user_agent_email: config.user_agent_email,
+          }
+
+          await deleteInvoice(creds, tokenResult.access_token, Number(internalId))
+          deletedFromFakturoid = true
+
+          console.log(
+            `[Fakturoid] Invoice ${internalId} deleted from Fakturoid for order ${id}`
+          )
+        }
+      } catch (apiError: any) {
+        // Fakturoid may refuse to delete paid/sent invoices — that's OK
+        // We still clear the metadata so user can recreate
+        console.warn(
+          `[Fakturoid] Could not delete invoice ${internalId} from Fakturoid API: ${apiError.message}. Clearing metadata anyway.`
+        )
+      }
     }
 
-    const configs = await (fakturoidService as any).listFakturoidConfigs({
-      project_id: projectId,
-    })
-
-    if (!configs.length) {
-      res.status(400).json({
-        error: `No Fakturoid config found for project "${projectId}"`,
-      })
-      return
-    }
-
-    const config = configs[0] as any
-
-    // ── Get access token ──
-    const tokenResult = await getAccessToken({
-      slug: config.slug,
-      client_id: config.client_id,
-      client_secret: config.client_secret,
-      user_agent_email: config.user_agent_email,
-      access_token: config.access_token,
-      token_expires_at: config.token_expires_at,
-    })
-
-    if (tokenResult.access_token !== config.access_token) {
-      await (fakturoidService as any).updateFakturoidConfigs({
-        id: config.id,
-        access_token: tokenResult.access_token,
-        token_expires_at: tokenResult.expires_at,
-      })
-    }
-
-    const creds = {
-      slug: config.slug,
-      client_id: config.client_id,
-      client_secret: config.client_secret,
-      user_agent_email: config.user_agent_email,
-    }
-
-    // ── Delete invoice from Fakturoid ──
-    await deleteInvoice(creds, tokenResult.access_token, Number(internalId))
-
-    console.log(
-      `[Fakturoid] Invoice ${internalId} deleted for order ${id}`
-    )
-
-    // ── Clear invoice metadata from order ──
+    // ── Always clear invoice metadata from order ──
     const cleanedMeta = { ...metadata }
     delete cleanedMeta.fakturoid_invoice_id
     delete cleanedMeta.fakturoid_internal_id
@@ -337,7 +340,10 @@ export async function DELETE(
 
     res.json({
       success: true,
-      message: "Invoice deleted from Fakturoid",
+      deleted_from_fakturoid: deletedFromFakturoid,
+      message: deletedFromFakturoid
+        ? "Invoice deleted from Fakturoid and metadata cleared"
+        : "Invoice metadata cleared (Fakturoid API deletion skipped or failed)",
       order_id: id,
     })
   } catch (error: any) {
