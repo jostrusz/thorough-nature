@@ -687,23 +687,15 @@ export function OrderDetailCustomer({
           />
         </div>
       ) : (
-        <>
+        <div style={{ fontSize: "13px", color: colors.text, lineHeight: 1.5 }}>
           {order.email && (
-            <div
-              style={{
-                fontSize: "13px",
-                color: colors.accent,
-                marginBottom: "2px",
-                padding: "2px 0",
-              }}
-            >
-              {order.email}
-            </div>
+            <CopyLine text={order.email} style={{ color: colors.accent }} />
           )}
-          <div style={{ fontSize: "13px", color: colors.textSec }}>
-            {addr?.phone || "No phone number"}
-          </div>
-        </>
+          <CopyLine
+            text={addr?.phone || "No phone number"}
+            style={{ color: addr?.phone ? colors.textSec : colors.textMuted }}
+          />
+        </div>
       )}
 
       {/* ═══════════ SHIPPING ADDRESS ═══════════ */}
