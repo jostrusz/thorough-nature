@@ -7,6 +7,7 @@ import {
   getAccessToken,
   searchSubject,
   createSubject,
+  updateSubject,
   createInvoice,
   markInvoicePaid,
   mapCountryToLanguage,
@@ -130,34 +131,38 @@ export default async function orderPlacedFakturoidHandler({
     // ── Find or create Fakturoid subject ──
     let subject = await searchSubject(creds, token, order.email || "")
 
-    if (!subject && order.email) {
-      const subjectData: any = {
-        name:
-          (order.metadata as any)?.company_name ||
-          [invoiceAddress?.first_name, invoiceAddress?.last_name]
-            .filter(Boolean)
-            .join(" ") ||
-          order.email,
-        email: order.email,
-      }
+    // Build subject data from current order
+    const subjectData: any = {
+      name:
+        (order.metadata as any)?.company_name ||
+        [invoiceAddress?.first_name, invoiceAddress?.last_name]
+          .filter(Boolean)
+          .join(" ") ||
+        order.email,
+      email: order.email,
+    }
 
-      // Address — use billing (invoice) address for Fakturoid subject
-      if (invoiceAddress) {
-        if (invoiceAddress.address_1) subjectData.street = invoiceAddress.address_1
-        if (invoiceAddress.city) subjectData.city = invoiceAddress.city
-        if (invoiceAddress.postal_code) subjectData.zip = invoiceAddress.postal_code
-        if (invoiceAddress.country_code)
-          subjectData.country = invoiceAddress.country_code.toUpperCase()
-      }
+    // Address — use billing (invoice) address for Fakturoid subject
+    if (invoiceAddress) {
+      if (invoiceAddress.address_1) subjectData.street = invoiceAddress.address_1
+      if (invoiceAddress.city) subjectData.city = invoiceAddress.city
+      if (invoiceAddress.postal_code) subjectData.zip = invoiceAddress.postal_code
+      if (invoiceAddress.country_code)
+        subjectData.country = invoiceAddress.country_code.toUpperCase()
+    }
 
-      // B2B info from metadata
-      if ((order.metadata as any)?.kvk_number) {
-        subjectData.registration_no = (order.metadata as any).kvk_number
-      }
-      if ((order.metadata as any)?.vat_number) {
-        subjectData.vat_no = (order.metadata as any).vat_number
-      }
+    // B2B info from metadata
+    if ((order.metadata as any)?.kvk_number) {
+      subjectData.registration_no = (order.metadata as any).kvk_number
+    }
+    if ((order.metadata as any)?.vat_number) {
+      subjectData.vat_no = (order.metadata as any).vat_number
+    }
 
+    if (subject) {
+      // Update existing subject with current order data
+      subject = await updateSubject(creds, token, subject.id, subjectData)
+    } else if (order.email) {
       subject = await createSubject(creds, token, subjectData)
     }
 

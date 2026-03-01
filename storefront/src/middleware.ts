@@ -106,6 +106,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // ─── Digital download page — no country code needed ───
+  if (pathname.startsWith("/download/")) {
+    return NextResponse.next()
+  }
+
   // ─── MarketingHQ: Project domain routing ───
   // If hostname matches a project domain, rewrite to /p/{slug}/...
   const projectSlug = PROJECT_DOMAINS[cleanHost]

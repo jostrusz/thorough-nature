@@ -198,6 +198,39 @@ export async function createSubject(
   return await res.json()
 }
 
+/**
+ * Update an existing subject in Fakturoid.
+ */
+export async function updateSubject(
+  creds: FakturoidCredentials,
+  token: string,
+  subjectId: number,
+  subject: {
+    name?: string
+    email?: string
+    street?: string
+    city?: string
+    zip?: string
+    country?: string
+    registration_no?: string
+    vat_no?: string
+  }
+): Promise<FakturoidSubject> {
+  const url = `${accountUrl(creds.slug)}/subjects/${subjectId}.json`
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: headers(token, creds.user_agent_email),
+    body: JSON.stringify(subject),
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Fakturoid update subject failed (${res.status}): ${text}`)
+  }
+
+  return await res.json()
+}
+
 // ═══════════════════════════════════════════
 // INVOICES
 // ═══════════════════════════════════════════
