@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="nl" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Bevestiging van je bestelling</title>
+  <!--[if mso]>
+  <style type="text/css">
+    body, table, td { font-family: Arial, Helvetica, sans-serif !important; }
+  </style>
+  <![endif]-->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    /* Reset */
+    body, p, h1, h2, h3 { margin: 0; padding: 0; }
+    body { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    img { border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      .email-bg { background-color: #1a1028 !important; }
+      .email-container { background-color: #2D1B3D !important; }
+      .content-text { color: #f0e6f6 !important; }
+      .secondary-text { color: #c4a8d4 !important; }
+      .info-box { background-color: #3a2450 !important; }
+      .footer-area { background-color: #1a1028 !important; }
+    }
+
+    /* Mobile */
+    @media only screen and (max-width: 600px) {
+      .email-container { width: 100% !important; }
+      .content-padding { padding: 24px 20px !important; }
+      .header-padding { padding: 28px 20px !important; }
+      .items-table td, .items-table th { padding: 10px 4px !important; font-size: 14px !important; }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #FAF5F8; font-family: 'Inter', Arial, Helvetica, sans-serif;">
+
+<!-- Email background wrapper -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="email-bg" style="background-color: #FAF5F8;">
+  <tr>
+    <td align="center" style="padding: 32px 16px;">
+
+      <!-- Main container -->
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="email-container" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 16px rgba(45, 27, 61, 0.08);">
+
+        <!-- HEADER -->
+        <tr>
+          <td class="header-padding" style="background: linear-gradient(135deg, #2D1B3D 0%, #1A1028 100%); padding: 36px 40px; text-align: center;">
+            <!-- Logo / Brand name -->
+            <p style="font-family: 'Inter', Arial, sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: #C27BA0; margin-bottom: 10px;">Laat Los Wat Je Kapotmaakt</p>
+            <h1 style="font-family: 'Inter', Arial, sans-serif; font-size: 22px; font-weight: 700; color: #ffffff; margin: 0; line-height: 1.3;">Bedankt voor je bestelling</h1>
+          </td>
+        </tr>
+
+        <!-- CONTENT -->
+        <tr>
+          <td class="content-padding" style="padding: 36px 40px;">
+
+            <!-- Greeting -->
+            <p class="content-text" style="font-family: 'Inter', Arial, sans-serif; font-size: 16px; color: #1A1A1A; line-height: 1.6; margin-bottom: 8px;">
+              Hoi {{first_name}},
+            </p>
+            <p class="secondary-text" style="font-family: 'Inter', Arial, sans-serif; font-size: 15px; color: #5A3D6B; line-height: 1.6; margin-bottom: 28px;">
+              Wat fijn dat je de stap hebt gezet! Je bestelling is ontvangen en we gaan er meteen mee aan de slag. Hieronder vind je alles op een rijtje.
+            </p>
+
+            <!-- Order info box -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="info-box" style="background-color: #FAF5F8; border-radius: 10px; border: 1px solid #EDD9E5; margin-bottom: 28px;">
+              <tr>
+                <td style="padding: 20px 24px;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="font-family: 'Inter', Arial, sans-serif; font-size: 13px; color: #5A3D6B; padding-bottom: 6px;">
+                        <strong style="color: #2D1B3D;">Bestelling:</strong> &nbsp; #{{display_id}}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="font-family: 'Inter', Arial, sans-serif; font-size: 13px; color: #5A3D6B; padding-bottom: 6px;">
+                        <strong style="color: #2D1B3D;">Datum:</strong> &nbsp; {{order_date}}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="font-family: 'Inter', Arial, sans-serif; font-size: 13px; color: #5A3D6B;">
+                        <strong style="color: #2D1B3D;">Status:</strong> &nbsp;
+                        <span style="display: inline-block; background-color: #e8f5e9; color: #2e7d32; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;">Bevestigd</span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Items header -->
+            <p style="font-family: 'Inter', Arial, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: #9B7AAD; margin-bottom: 12px;">Je bestelling</p>
+
+            <!-- Items table -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="items-table" style="margin-bottom: 20px;">
+              <!-- Item row (repeated via template) -->
+              {{items_html}}
+              <!-- Subtotal line -->
+              <tr>
+                <td colspan="3" style="padding-top: 16px; border-top: 2px solid #EDD9E5;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                    {{subtotal_html}}
+                    {{shipping_cost_html}}
+                    <tr>
+                      <td style="font-family: 'Inter', Arial, sans-serif; font-size: 18px; font-weight: 700; color: #2D1B3D; padding-top: 8px;">Totaal</td>
+                      <td align="right" style="font-family: 'Inter', Arial, sans-serif; font-size: 18px; font-weight: 700; color: #2D1B3D; padding-top: 8px;">{{total}}</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Shipping address -->
+            {{shipping_address_html}}
+
+            <!-- Divider -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr><td style="padding: 24px 0; border-bottom: 1px solid #EDD9E5;"></td></tr>
+            </table>
+
+            <!-- What happens next -->
+            <p style="font-family: 'Inter', Arial, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: #9B7AAD; margin-top: 24px; margin-bottom: 16px;">Wat gebeurt er nu?</p>
+
+            <!-- Step 1 -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 14px;">
+              <tr>
+                <td width="36" valign="top">
+                  <div style="width: 28px; height: 28px; background-color: #C27BA0; border-radius: 50%; text-align: center; line-height: 28px; font-family: 'Inter', Arial, sans-serif; font-size: 13px; font-weight: 700; color: #ffffff;">1</div>
+                </td>
+                <td style="font-family: 'Inter', Arial, sans-serif; font-size: 14px; color: #5A3D6B; line-height: 1.5; padding-left: 8px;">
+                  <strong style="color: #2D1B3D;">Bestelling verwerkt</strong><br>
+                  We maken je bestelling klaar voor verzending.
+                </td>
+              </tr>
+            </table>
+            <!-- Step 2 -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 14px;">
+              <tr>
+                <td width="36" valign="top">
+                  <div style="width: 28px; height: 28px; background-color: #D498B5; border-radius: 50%; text-align: center; line-height: 28px; font-family: 'Inter', Arial, sans-serif; font-size: 13px; font-weight: 700; color: #ffffff;">2</div>
+                </td>
+                <td style="font-family: 'Inter', Arial, sans-serif; font-size: 14px; color: #5A3D6B; line-height: 1.5; padding-left: 8px;">
+                  <strong style="color: #2D1B3D;">Verzonden</strong><br>
+                  Je ontvangt een e-mail met je track &amp; trace code.
+                </td>
+              </tr>
+            </table>
+            <!-- Step 3 -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 8px;">
+              <tr>
+                <td width="36" valign="top">
+                  <div style="width: 28px; height: 28px; background-color: #EDD9E5; border-radius: 50%; text-align: center; line-height: 28px; font-family: 'Inter', Arial, sans-serif; font-size: 13px; font-weight: 700; color: #2D1B3D;">3</div>
+                </td>
+                <td style="font-family: 'Inter', Arial, sans-serif; font-size: 14px; color: #5A3D6B; line-height: 1.5; padding-left: 8px;">
+                  <strong style="color: #2D1B3D;">Bezorgd</strong><br>
+                  Binnen 2-4 werkdagen heb je jouw boek in huis.
+                </td>
+              </tr>
+            </table>
+
+          </td>
+        </tr>
+
+        <!-- HELP SECTION -->
+        <tr>
+          <td style="padding: 0 40px 36px 40px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="info-box" style="background-color: #FAF5F8; border-radius: 10px; border: 1px solid #EDD9E5;">
+              <tr>
+                <td style="padding: 20px 24px; text-align: center;">
+                  <p style="font-family: 'Inter', Arial, sans-serif; font-size: 14px; color: #5A3D6B; line-height: 1.6; margin: 0;">
+                    Vragen over je bestelling? Stuur een mailtje naar <a href="mailto:devries@loslatenboek.nl" style="color: #C27BA0; text-decoration: underline;">devries@loslatenboek.nl</a> &mdash; we helpen je graag.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- SIGNATURE -->
+        <tr>
+          <td style="padding: 0 40px 28px 40px;">
+            <p style="font-family: 'Inter', Arial, sans-serif; font-size: 14px; color: #5A3D6B; margin-bottom: 4px;">
+              Warme groet,
+            </p>
+            <p style="font-family: 'Inter', Arial, sans-serif; font-size: 14px; font-weight: 700; color: #2D1B3D; margin-bottom: 2px;">
+              Joris de Vries
+            </p>
+            <p style="font-family: 'Inter', Arial, sans-serif; font-size: 12px; color: #9B7AAD;">
+              <a href="mailto:devries@loslatenboek.nl" style="color: #C27BA0; text-decoration: none;">devries@loslatenboek.nl</a>
+            </p>
+          </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+          <td class="footer-area" style="background-color: #2D1B3D; padding: 28px 40px; text-align: center;">
+            <p style="font-family: 'Inter', Arial, sans-serif; font-size: 12px; color: #C27BA0; margin-bottom: 8px;">Laat Los Wat Je Kapotmaakt &mdash; tijdomloslaten.nl</p>
+            <p style="font-family: 'Inter', Arial, sans-serif; font-size: 11px; color: #7a6189; line-height: 1.5; margin: 0;">
+              EverChapter O&Uuml; &bull; Tallinn, Estonia<br>
+              Je ontvangt deze e-mail omdat je een bestelling hebt geplaatst.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+      <!-- End main container -->
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

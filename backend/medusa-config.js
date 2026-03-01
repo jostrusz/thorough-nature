@@ -86,6 +86,7 @@ const medusaConfig = {
     { resolve: "./src/modules/supportbox" },
     { resolve: "./src/modules/project-settings" },
     { resolve: "./src/modules/resend-config" },
+    { resolve: "./src/modules/digital-download" },
     // ═══ Payment provider modules (non-Medusa-payment, standalone) ═══
     { resolve: "./src/modules/payment-comgate" },
     { resolve: "./src/modules/payment-przelewy24" },
