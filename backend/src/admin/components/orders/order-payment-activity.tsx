@@ -1,5 +1,6 @@
 import React from "react"
 import { CheckCircleSolid, XCircleSolid, ArrowUpRightOnBox, ExclamationCircle } from "@medusajs/icons"
+import { colors, shadows, radii, cardStyle, cardHeaderStyle, fontStack } from "./design-tokens"
 
 interface PaymentActivityEntry {
   timestamp: string
@@ -50,11 +51,11 @@ export const PaymentActivityLog: React.FC<OrderPaymentActivityProps> = ({
 
   if (!activityLog || activityLog.length === 0) {
     return (
-      <div style={{ borderRadius: 10, border: "1px solid #E1E3E5", background: "#fff", padding: 24 }}>
-        <h3 style={{ marginBottom: 16, fontSize: 16, fontWeight: 600, color: "#111" }}>
+      <div style={{ ...cardStyle, padding: 24 }}>
+        <h3 style={{ ...cardHeaderStyle, padding: 0, borderBottom: "none", marginBottom: 16, fontSize: 16 }}>
           Payment Activity
         </h3>
-        <p style={{ fontSize: 14, color: "#6b7280" }}>No payment activity recorded.</p>
+        <p style={{ fontSize: 14, color: colors.textSec, fontFamily: fontStack }}>No payment activity recorded.</p>
       </div>
     )
   }
@@ -64,8 +65,8 @@ export const PaymentActivityLog: React.FC<OrderPaymentActivityProps> = ({
   )
 
   return (
-    <div style={{ borderRadius: 10, border: "1px solid #E1E3E5", background: "#fff", padding: 24 }}>
-      <h3 style={{ marginBottom: 24, fontSize: 16, fontWeight: 600, color: "#111" }}>
+    <div style={{ ...cardStyle, padding: 24 }}>
+      <h3 style={{ ...cardHeaderStyle, padding: 0, borderBottom: "none", marginBottom: 24, fontSize: 16 }}>
         Payment Activity
       </h3>
 
@@ -106,22 +107,22 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
 
   const getStatusIcon = () => {
     if (entry.event === "tracking_sent") {
-      return <ArrowUpRightOnBox style={{ width: 16, height: 16, color: "#2563eb" }} />
+      return <ArrowUpRightOnBox style={{ width: 16, height: 16, color: colors.blue }} />
     }
     if (entry.status === "success") {
-      return <CheckCircleSolid style={{ width: 16, height: 16, color: "#16a34a" }} />
+      return <CheckCircleSolid style={{ width: 16, height: 16, color: colors.green }} />
     }
     if (entry.status === "error") {
-      return <XCircleSolid style={{ width: 16, height: 16, color: "#dc2626" }} />
+      return <XCircleSolid style={{ width: 16, height: 16, color: colors.red }} />
     }
-    return <ExclamationCircle style={{ width: 16, height: 16, color: "#ca8a04" }} />
+    return <ExclamationCircle style={{ width: 16, height: 16, color: colors.yellow }} />
   }
 
   const getStatusBg = () => {
-    if (entry.event === "tracking_sent") return "#dbeafe"
-    if (entry.status === "success") return "#dcfce7"
-    if (entry.status === "error") return "#fee2e2"
-    return "#fef9c3"
+    if (entry.event === "tracking_sent") return colors.blueBg
+    if (entry.status === "success") return colors.greenBg
+    if (entry.status === "error") return colors.redBg
+    return colors.yellowBg
   }
 
   return (
@@ -134,7 +135,7 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
           top: 40,
           height: "calc(100% - 40px)",
           width: 2,
-          background: "#E1E3E5",
+          background: colors.border,
         }} />
       )}
 
@@ -157,24 +158,26 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
       <div style={{ flexGrow: 1, paddingTop: 4 }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
           <div>
-            <p style={{ fontSize: 12, color: "#6b7280" }}>{formattedTime}</p>
-            <p style={{ fontSize: 14, fontWeight: 500, color: "#111", marginTop: 4 }}>{eventLabel}</p>
+            <p style={{ fontSize: 12, color: colors.textMuted, fontFamily: fontStack }}>{formattedTime}</p>
+            <p style={{ fontSize: 14, fontWeight: 500, color: colors.text, marginTop: 4, fontFamily: fontStack }}>{eventLabel}</p>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{
               display: "inline-block",
               borderRadius: 9999,
-              border: "1px solid #d1d5db",
+              border: `1px solid ${colors.border}`,
               padding: "2px 12px",
               fontSize: 12,
               fontWeight: 500,
+              color: colors.textSec,
+              fontFamily: fontStack,
             }}>
               {gatewayLabel}
             </span>
 
             {entry.amount && entry.currency && (
-              <span style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: colors.text, fontFamily: fontStack }}>
                 {formatCurrency(entry.amount, entry.currency)}
               </span>
             )}
@@ -182,36 +185,36 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
         </div>
 
         {/* Details section */}
-        <div style={{ marginTop: 12, fontSize: 12 }}>
+        <div style={{ marginTop: 12, fontSize: 12, fontFamily: fontStack }}>
           {entry.payment_method && (
-            <p style={{ color: "#4b5563" }}>
+            <p style={{ color: colors.textSec }}>
               <span style={{ fontWeight: 500 }}>Method:</span> {entry.payment_method}
             </p>
           )}
 
           {entry.transaction_id && (
-            <p style={{ color: "#4b5563", wordBreak: "break-all" }}>
+            <p style={{ color: colors.textSec, wordBreak: "break-all" }}>
               <span style={{ fontWeight: 500 }}>Transaction ID:</span>{" "}
-              <code style={{ background: "#f3f4f6", padding: "1px 4px", borderRadius: 4, fontFamily: "monospace" }}>
+              <code style={{ background: colors.bgHover, padding: "1px 4px", borderRadius: 4, fontFamily: "monospace" }}>
                 {entry.transaction_id}
               </code>
             </p>
           )}
 
           {entry.tracking_number && (
-            <p style={{ color: "#4b5563" }}>
+            <p style={{ color: colors.textSec }}>
               <span style={{ fontWeight: 500 }}>Tracking:</span> {entry.tracking_number}{" "}
               {entry.tracking_carrier && `(${entry.tracking_carrier})`}
             </p>
           )}
 
           {entry.error_message && (
-            <div style={{ marginTop: 8, borderRadius: 6, background: "#fef2f2", padding: 8 }}>
-              <p style={{ color: "#b91c1c" }}>
+            <div style={{ marginTop: 8, borderRadius: radii.xs, background: colors.redBg, padding: 8 }}>
+              <p style={{ color: colors.red }}>
                 <span style={{ fontWeight: 500 }}>Error:</span> {entry.error_message}
               </p>
               {entry.error_code && (
-                <p style={{ fontSize: 11, color: "#dc2626", marginTop: 4 }}>
+                <p style={{ fontSize: 11, color: colors.red, marginTop: 4 }}>
                   Code: {entry.error_code}
                 </p>
               )}
@@ -219,7 +222,7 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
           )}
 
           {entry.detail && !entry.error_message && (
-            <p style={{ color: "#4b5563", fontStyle: "italic" }}>{entry.detail}</p>
+            <p style={{ color: colors.textSec, fontStyle: "italic" }}>{entry.detail}</p>
           )}
         </div>
       </div>

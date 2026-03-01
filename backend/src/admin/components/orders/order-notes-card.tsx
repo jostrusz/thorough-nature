@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { colors, shadows, radii, cardStyle, fontStack, btnOutline, btnPrimary } from "./design-tokens"
 
 interface OrderNotesCardProps {
   order: any
@@ -25,11 +26,8 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
     <div
       className="od-card"
       style={{
-        background: "#FFFFFF",
-        border: "1px solid #E1E3E5",
-        borderRadius: "10px",
+        ...cardStyle,
         padding: "16px 20px",
-        marginBottom: "16px",
         transition: "box-shadow 0.25s ease, transform 0.25s ease",
       }}
     >
@@ -41,7 +39,7 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
           marginBottom: "12px",
         }}
       >
-        <span style={{ fontSize: "14px", fontWeight: 600, color: "#1A1A1A" }}>
+        <span style={{ fontSize: "14px", fontWeight: 600, color: colors.text, fontFamily: fontStack }}>
           Notes
         </span>
         {!editing && (
@@ -56,11 +54,17 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
               border: "none",
               cursor: "pointer",
               padding: "4px",
-              color: "#6D7175",
+              color: colors.textSec,
               display: "flex",
               alignItems: "center",
               borderRadius: "4px",
               transition: "all 0.15s ease",
+            }}
+            onMouseEnter={(e) => {
+              ;(e.currentTarget as HTMLButtonElement).style.color = colors.textMuted
+            }}
+            onMouseLeave={(e) => {
+              ;(e.currentTarget as HTMLButtonElement).style.color = colors.textSec
             }}
           >
             <svg
@@ -88,14 +92,22 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
             style={{
               width: "100%",
               padding: "8px 12px",
-              border: "1px solid #E1E3E5",
-              borderRadius: "6px",
+              border: `1px solid ${colors.border}`,
+              borderRadius: radii.xs,
               fontSize: "13px",
               outline: "none",
               resize: "vertical",
               boxSizing: "border-box",
-              fontFamily: "inherit",
+              fontFamily: fontStack,
               transition: "border-color 0.2s, box-shadow 0.2s",
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = colors.accent
+              e.currentTarget.style.boxShadow = "0 0 0 3px rgba(108,92,231,0.12)"
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = colors.border
+              e.currentTarget.style.boxShadow = "none"
             }}
             autoFocus
           />
@@ -112,13 +124,14 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
               className="od-btn"
               style={{
                 padding: "5px 12px",
-                borderRadius: "6px",
+                borderRadius: radii.xs,
                 fontSize: "12px",
                 fontWeight: 500,
                 cursor: "pointer",
-                border: "1px solid #E1E3E5",
-                background: "#FFFFFF",
-                color: "#1A1A1A",
+                border: `1px solid ${colors.border}`,
+                background: colors.bgCard,
+                color: colors.text,
+                fontFamily: fontStack,
                 transition: "all 0.15s ease",
               }}
             >
@@ -130,13 +143,14 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
               className="od-btn-primary"
               style={{
                 padding: "5px 12px",
-                borderRadius: "6px",
+                borderRadius: radii.xs,
                 fontSize: "12px",
                 fontWeight: 500,
                 cursor: isLoading ? "default" : "pointer",
-                border: "1px solid #008060",
-                background: "#008060",
+                border: `1px solid ${colors.accent}`,
+                background: colors.accent,
                 color: "#FFFFFF",
+                fontFamily: fontStack,
                 opacity: isLoading ? 0.6 : 1,
                 transition: "all 0.15s ease",
               }}
@@ -149,10 +163,11 @@ export function OrderNotesCard({ order, onUpdateNote, isLoading }: OrderNotesCar
         <p
           style={{
             fontSize: "13px",
-            color: currentNote ? "#1A1A1A" : "#8C9196",
+            color: currentNote ? colors.text : colors.textMuted,
             lineHeight: 1.5,
             margin: 0,
             whiteSpace: "pre-wrap",
+            fontFamily: fontStack,
           }}
         >
           {currentNote || "No notes from customer"}
