@@ -16,18 +16,39 @@ import { colors, radii, shadows, fontStack, cardStyle as tokenCardStyle, btnOutl
 // ═══════════════════════════════════════════
 // STYLES
 // ═══════════════════════════════════════════
-const dashboardWrapperStyle: React.CSSProperties = {
-  background: "#f4f5fa",
-  minHeight: "100vh",
-  margin: "-1px -24px",
-  padding: "1px 24px",
-}
+const BG_COLOR = "#f4f5fa"
 
 const dashboardStyle: React.CSSProperties = {
   maxWidth: "1400px",
   margin: "0 auto",
   padding: "32px 48px",
   fontFamily: fontStack,
+}
+
+/**
+ * Hook that walks up the DOM from a ref and sets background on all
+ * ancestor elements up to <body>. Cleans up on unmount.
+ */
+function useFullPageBackground(ref: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const originals: { el: HTMLElement; bg: string }[] = []
+    let node: HTMLElement | null = el.parentElement
+
+    while (node && node !== document.documentElement) {
+      originals.push({ el: node, bg: node.style.background })
+      node.style.background = BG_COLOR
+      node = node.parentElement
+    }
+
+    return () => {
+      originals.forEach(({ el: n, bg }) => {
+        n.style.background = bg
+      })
+    }
+  }, [ref])
 }
 
 const headerStyle: React.CSSProperties = {
@@ -235,6 +256,9 @@ const PAGE_SIZE = 20
 // MAIN COMPONENT
 // ═══════════════════════════════════════════
 const CustomOrdersPage = () => {
+  const pageRef = useRef<HTMLDivElement>(null)
+  useFullPageBackground(pageRef)
+
   // State
   const [activeTab, setActiveTab] = useState("all")
   const [searchValue, setSearchValue] = useState("")
@@ -396,8 +420,7 @@ const CustomOrdersPage = () => {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
   return (
-    <div style={dashboardWrapperStyle}>
-    <div style={dashboardStyle} className="dash-animate-in">
+    <div ref={pageRef} style={dashboardStyle} className="dash-animate-in">
       <DashboardStyles />
 
       {/* New Order Celebration */}
@@ -572,7 +595,6 @@ const CustomOrdersPage = () => {
           </div>
         </div>
       </div>
-    </div>
     </div>
   )
 }

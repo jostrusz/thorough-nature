@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react"
+import React, { useState, useCallback, useEffect, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { toast } from "@medusajs/ui"
 
@@ -373,12 +373,7 @@ function OrderHealthBar({ order }: { order: any }) {
   )
 }
 
-const pageWrapperStyle: React.CSSProperties = {
-  background: "#f4f5fa",
-  minHeight: "100vh",
-  margin: "-1px -24px",
-  padding: "1px 24px",
-}
+const BG_COLOR = "#f4f5fa"
 
 const pageStyle: React.CSSProperties = {
   width: "1000px",
@@ -388,9 +383,37 @@ const pageStyle: React.CSSProperties = {
   fontFamily: fontStack,
 }
 
+/**
+ * Hook that walks up the DOM from a ref and sets background on all
+ * ancestor elements up to <body>. Cleans up on unmount.
+ */
+function useFullPageBackground(ref: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const originals: { el: HTMLElement; bg: string }[] = []
+    let node: HTMLElement | null = el.parentElement
+
+    while (node && node !== document.documentElement) {
+      originals.push({ el: node, bg: node.style.background })
+      node.style.background = BG_COLOR
+      node = node.parentElement
+    }
+
+    return () => {
+      originals.forEach(({ el: n, bg }) => {
+        n.style.background = bg
+      })
+    }
+  }, [ref])
+}
+
 const OrderDetailPage = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const pageRef = useRef<HTMLDivElement>(null)
+  useFullPageBackground(pageRef)
 
   // Data hooks
   const { data, isLoading, error } = useOrderDetail(id)
@@ -599,7 +622,7 @@ const OrderDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div style={pageWrapperStyle}>
+      <div ref={pageRef}>
         <div
           style={{
             display: "flex",
@@ -616,19 +639,17 @@ const OrderDetailPage = () => {
 
   if (error || !order) {
     return (
-      <div style={pageWrapperStyle}>
-        <div style={pageStyle}>
-          <div
-            style={{
-              textAlign: "center",
-              padding: "60px 20px",
-              color: colors.textMuted,
-            }}
-          >
-            <p style={{ fontSize: "14px" }}>
-              {error ? `Error: ${(error as Error).message}` : "Order not found"}
-            </p>
-          </div>
+      <div ref={pageRef} style={pageStyle}>
+        <div
+          style={{
+            textAlign: "center",
+            padding: "60px 20px",
+            color: colors.textMuted,
+          }}
+        >
+          <p style={{ fontSize: "14px" }}>
+            {error ? `Error: ${(error as Error).message}` : "Order not found"}
+          </p>
         </div>
       </div>
     )
@@ -644,8 +665,7 @@ const OrderDetailPage = () => {
   const maxRefundable = totalPaid || Number(order.total) || 0
 
   return (
-    <div style={pageWrapperStyle}>
-    <div style={pageStyle} className="od-section-animate">
+    <div ref={pageRef} style={pageStyle} className="od-section-animate">
       <OrderDetailStyles />
 
       {/* Header with Shopify-style actions */}
@@ -802,7 +822,6 @@ const OrderDetailPage = () => {
         isLoading={duplicateOrder.isPending}
         orderDisplayId={order.display_id}
       />
-    </div>
     </div>
   )
 }
