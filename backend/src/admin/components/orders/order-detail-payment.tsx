@@ -1,6 +1,17 @@
 import React from "react"
 import { PaymentBadge } from "./order-badges"
 import { formatCurrency } from "../../lib/format-currency"
+import {
+  colors,
+  shadows,
+  radii,
+  cardStyle,
+  cardHeaderStyle,
+  fontStack,
+  getPaymentIconUrl,
+  getPaymentFallback,
+  getPaymentMethodName,
+} from "./design-tokens"
 
 interface OrderDetailPaymentProps {
   order: any
@@ -135,58 +146,81 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
     ? trackingUrlFn(trackingNumber)
     : order.metadata?.dextrum_tracking_url || null
 
+  // Payment method icon
+  const paymentIconUrl = getPaymentIconUrl(order)
+  const paymentFallback = getPaymentFallback(order)
+  const paymentMethodName = getPaymentMethodName(order)
+
   return (
     <div
       className="od-card"
-      style={{
-        background: "#FFFFFF",
-        border: "1px solid #E1E3E5",
-        borderRadius: "10px",
-        marginBottom: "16px",
-        overflow: "hidden",
-        transition: "box-shadow 0.25s ease, transform 0.25s ease",
-      }}
+      style={cardStyle}
     >
-      {/* Header with payment badge */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: "16px 20px",
-          borderBottom: "1px solid #E1E3E5",
-        }}
-      >
-        <PaymentBadge status={paymentStatus} />
+      {/* Header with payment badge and payment method icon */}
+      <div style={cardHeaderStyle}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <PaymentBadge status={paymentStatus} />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {paymentIconUrl ? (
+            <img
+              src={paymentIconUrl}
+              alt={paymentMethodName}
+              style={{ width: "24px", height: "24px", objectFit: "contain" }}
+            />
+          ) : (
+            <span
+              style={{
+                width: "24px",
+                height: "24px",
+                borderRadius: "50%",
+                background: paymentFallback.bg,
+                color: paymentFallback.color,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "10px",
+                fontWeight: 700,
+                fontFamily: fontStack,
+                lineHeight: 1,
+              }}
+            >
+              {paymentFallback.letter}
+            </span>
+          )}
+          <span style={{ fontSize: "13px", fontWeight: 500, color: colors.textSec }}>
+            {paymentMethodName}
+          </span>
+        </div>
       </div>
 
       {/* Payment breakdown */}
       <div style={{ padding: "16px 20px" }}>
         {/* Subtotal */}
         <div className="od-row-hover" style={rowStyle}>
-          <span style={{ color: "#6D7175" }}>
+          <span style={{ color: colors.textSec }}>
             Subtotal
-            <span style={{ marginLeft: "8px", color: "#8C9196" }}>
+            <span style={{ marginLeft: "8px", color: colors.textMuted }}>
               {itemCount} {itemCount === 1 ? "item" : "items"}
             </span>
           </span>
-          <span style={{ color: "#1A1A1A" }}>{formatCurrency(subtotal, currency)}</span>
+          <span style={{ color: colors.text }}>{formatCurrency(subtotal, currency)}</span>
         </div>
 
         {/* Discount */}
         {discountTotal > 0 && (
           <div className="od-row-hover" style={rowStyle}>
-            <span style={{ color: "#6D7175" }}>
+            <span style={{ color: colors.textSec }}>
               Discount
               {discountCode && (
                 <span
                   style={{
                     marginLeft: "8px",
                     fontSize: "12px",
-                    background: "#F6F6F7",
+                    background: colors.accentBg,
                     padding: "1px 6px",
                     borderRadius: "4px",
-                    color: "#6D7175",
+                    color: colors.accent,
                     textTransform: "uppercase",
                   }}
                 >
@@ -194,7 +228,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                 </span>
               )}
             </span>
-            <span style={{ color: "#1A1A1A" }}>
+            <span style={{ color: colors.text }}>
               -{formatCurrency(discountTotal, currency)}
             </span>
           </div>
@@ -202,13 +236,13 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
 
         {/* Shipping */}
         <div className="od-row-hover" style={rowStyle}>
-          <span style={{ color: "#6D7175" }}>
+          <span style={{ color: colors.textSec }}>
             Shipping
-            <span style={{ marginLeft: "8px", color: "#8C9196", fontSize: "12px" }}>
+            <span style={{ marginLeft: "8px", color: colors.textMuted, fontSize: "12px" }}>
               {shippingMethodName}
             </span>
           </span>
-          <span style={{ color: "#1A1A1A" }}>
+          <span style={{ color: colors.text }}>
             {shippingTotal === 0
               ? formatCurrency(0, currency)
               : formatCurrency(shippingTotal, currency)}
@@ -218,55 +252,55 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
         {/* Taxes */}
         {taxTotal > 0 && (
           <div className="od-row-hover" style={rowStyle}>
-            <span style={{ color: "#6D7175" }}>
+            <span style={{ color: colors.textSec }}>
               Taxes
-              <span style={{ marginLeft: "8px", color: "#8C9196", fontSize: "12px" }}>
+              <span style={{ marginLeft: "8px", color: colors.textMuted, fontSize: "12px" }}>
                 {order.metadata?.tax_rate || "VAT"} (Included)
               </span>
             </span>
-            <span style={{ color: "#1A1A1A" }}>
+            <span style={{ color: colors.text }}>
               {formatCurrency(taxTotal, currency)}
             </span>
           </div>
         )}
 
         {/* Divider + Total */}
-        <div style={{ borderTop: "1px solid #E1E3E5", marginTop: "8px", paddingTop: "8px" }}>
+        <div style={{ borderTop: `1px solid ${colors.border}`, marginTop: "8px", paddingTop: "8px" }}>
           <div style={{ ...rowStyle, fontSize: "14px", fontWeight: 600 }}>
-            <span style={{ color: "#1A1A1A" }}>Total</span>
-            <span style={{ color: "#1A1A1A" }}>{formatCurrency(total, currency)}</span>
+            <span style={{ color: colors.text }}>Total</span>
+            <span style={{ color: colors.text }}>{formatCurrency(total, currency)}</span>
           </div>
         </div>
 
         {/* Paid amount */}
-        <div style={{ borderTop: "1px solid #E1E3E5", marginTop: "8px", paddingTop: "8px" }}>
+        <div style={{ borderTop: `1px solid ${colors.border}`, marginTop: "8px", paddingTop: "8px" }}>
           <div className="od-row-hover" style={rowStyle}>
-            <span style={{ color: "#1A1A1A", fontWeight: 500 }}>
+            <span style={{ color: colors.text, fontWeight: 500 }}>
               {paymentStatus === "paid" || paymentStatus === "captured"
                 ? "Paid"
                 : paymentStatus === "refunded"
                 ? "Refunded"
                 : "Pending"}
             </span>
-            <span style={{ color: "#1A1A1A", fontWeight: 500 }}>
+            <span style={{ color: colors.text, fontWeight: 500 }}>
               {formatCurrency(totalPaid || total, currency)}
             </span>
           </div>
         </div>
 
         {/* ─── Order & Tracking Info ─── */}
-        <div style={{ borderTop: "1px solid #E1E3E5", marginTop: "8px", paddingTop: "8px" }}>
+        <div style={{ borderTop: `1px solid ${colors.border}`, marginTop: "8px", paddingTop: "8px" }}>
           {/* Medusa Order ID */}
           {order.display_id && (
             <div className="od-row-hover" style={{ ...rowStyle, fontSize: "12px" }}>
-              <span style={{ color: "#8C9196" }}>Order ID</span>
+              <span style={{ color: colors.textMuted }}>Order ID</span>
               <code
                 style={{
                   fontSize: "12px",
-                  background: "#F6F6F7",
+                  background: colors.bgHover,
                   padding: "1px 8px",
                   borderRadius: "4px",
-                  color: "#1A1A1A",
+                  color: colors.text,
                   fontFamily: "monospace",
                 }}
               >
@@ -278,14 +312,14 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
           {/* Tracking Number */}
           {trackingNumber && (
             <div className="od-row-hover" style={{ ...rowStyle, fontSize: "12px" }}>
-              <span style={{ color: "#8C9196" }}>Tracking Number</span>
+              <span style={{ color: colors.textMuted }}>Tracking Number</span>
               <code
                 style={{
                   fontSize: "12px",
-                  background: "#F6F6F7",
+                  background: colors.bgHover,
                   padding: "1px 8px",
                   borderRadius: "4px",
-                  color: "#1A1A1A",
+                  color: colors.text,
                   fontFamily: "monospace",
                 }}
               >
@@ -297,14 +331,14 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
           {/* Tracking Link */}
           {trackingUrl && (
             <div className="od-row-hover" style={{ ...rowStyle, fontSize: "12px" }}>
-              <span style={{ color: "#8C9196" }}>Tracking Link</span>
+              <span style={{ color: colors.textMuted }}>Tracking Link</span>
               <a
                 href={trackingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
                   fontSize: "12px",
-                  color: "#2563EB",
+                  color: colors.accent,
                   textDecoration: "none",
                 }}
               >
@@ -345,28 +379,28 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
 
               return (
                 <div key={payment.id}>
-                  <div style={{ fontSize: "12px", color: "#8C9196", padding: "2px 0" }}>
+                  <div style={{ fontSize: "12px", color: colors.textMuted, padding: "2px 0" }}>
                     {providerLabel} &middot; {dateStr}
                   </div>
                   {gatewayId && (
                     <div
                       style={{
                         fontSize: "12px",
-                        color: "#6D7175",
+                        color: colors.textSec,
                         padding: "2px 0",
                         display: "flex",
                         alignItems: "center",
                         gap: "4px",
                       }}
                     >
-                      <span style={{ color: "#8C9196" }}>Payment ID:</span>
+                      <span style={{ color: colors.textMuted }}>Payment ID:</span>
                       <code
                         style={{
                           fontSize: "11px",
-                          background: "#F6F6F7",
+                          background: colors.bgHover,
                           padding: "1px 6px",
                           borderRadius: "4px",
-                          color: "#1A1A1A",
+                          color: colors.text,
                           fontFamily: "monospace",
                         }}
                       >
@@ -384,7 +418,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
         {showCaptureButton && (
           <div
             style={{
-              borderTop: "1px solid #E1E3E5",
+              borderTop: `1px solid ${colors.border}`,
               marginTop: "12px",
               paddingTop: "12px",
             }}
@@ -395,8 +429,8 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "4px",
-                  background: "#FFF3CD",
-                  color: "#856404",
+                  background: colors.yellowBg,
+                  color: colors.yellow,
                   fontSize: "11px",
                   fontWeight: 600,
                   padding: "2px 8px",
@@ -408,7 +442,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                   : "Klarna — Authorized (not yet captured)"}
               </span>
             </div>
-            <div style={{ fontSize: "12px", color: "#8C9196", marginBottom: "8px" }}>
+            <div style={{ fontSize: "12px", color: colors.textMuted, marginBottom: "8px" }}>
               {provider.isPayPal
                 ? "PayPal authorizations must be captured within 29 days. Capture after shipping the order."
                 : "Klarna payments must be captured within 28 days of authorization. Capture after shipping the order."}
@@ -423,14 +457,15 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                   alignItems: "center",
                   gap: "6px",
                   padding: "8px 16px",
-                  background: provider.color,
-                  color: provider.isKlarna ? "#1A1A1A" : "#FFFFFF",
+                  background: colors.accent,
+                  color: "#FFFFFF",
                   border: "none",
                   borderRadius: "6px",
                   fontSize: "13px",
                   fontWeight: 600,
                   cursor: isCapturing ? "not-allowed" : "pointer",
                   opacity: isCapturing ? 0.7 : 1,
+                  boxShadow: shadows.btn,
                 }}
               >
                 {isCapturing ? (
@@ -440,7 +475,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                         width: "14px",
                         height: "14px",
                         border: "2px solid rgba(255,255,255,0.3)",
-                        borderTopColor: provider.isKlarna ? "#1A1A1A" : "#fff",
+                        borderTopColor: "#fff",
                         borderRadius: "50%",
                         animation: "spin 0.8s linear infinite",
                         display: "inline-block",
@@ -460,7 +495,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
         {isCaptured && (provider.isPayPal || provider.isKlarna) && (
           <div
             style={{
-              borderTop: "1px solid #E1E3E5",
+              borderTop: `1px solid ${colors.border}`,
               marginTop: "12px",
               paddingTop: "12px",
             }}
@@ -470,8 +505,8 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "4px",
-                background: "#D1FAE5",
-                color: "#065F46",
+                background: colors.greenBg,
+                color: colors.green,
                 fontSize: "11px",
                 fontWeight: 600,
                 padding: "2px 8px",

@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { PaymentBadge, FulfillmentBadge } from "./order-badges"
 import { OrderActionsDropdown } from "./order-actions-dropdown"
+import { colors, radii, fontStack, btnOutline, shadows } from "./design-tokens"
 
 interface OrderDetailHeaderProps {
   order: any
@@ -51,19 +52,11 @@ export function OrderDetailHeader({
     ;(window as any).__orderIdForStatusPage = order.id
   }
 
-  const btnStyle: React.CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "6px",
-    padding: "7px 14px",
-    borderRadius: "6px",
-    fontSize: "13px",
-    fontWeight: 500,
-    cursor: "pointer",
-    border: "1px solid #E1E3E5",
-    background: "#FFFFFF",
-    color: "#1A1A1A",
-    transition: "all 0.15s ease",
+  const actionBtnStyle: React.CSSProperties = {
+    ...btnOutline,
+    border: `1px solid ${colors.border}`,
+    color: colors.textSec,
+    background: colors.bgCard,
     whiteSpace: "nowrap" as const,
   }
 
@@ -82,9 +75,10 @@ export function OrderDetailHeader({
           background: "none",
           cursor: "pointer",
           fontSize: "13px",
-          color: "#6D7175",
+          fontFamily: fontStack,
+          color: colors.textSec,
           marginBottom: "16px",
-          borderRadius: "4px",
+          borderRadius: radii.xs,
           transition: "all 0.15s ease",
         }}
       >
@@ -116,11 +110,13 @@ export function OrderDetailHeader({
             style={{
               fontSize: "20px",
               fontWeight: 600,
-              color: "#1A1A1A",
+              color: colors.text,
+              fontFamily: fontStack,
               margin: 0,
             }}
           >
-            #{order.display_id}
+            <span style={{ color: colors.accent }}>#</span>
+            <span style={{ color: colors.accent }}>{order.display_id}</span>
           </h1>
           <span className="od-badge"><PaymentBadge status={paymentStatus} /></span>
           <span className="od-badge"><FulfillmentBadge fulfilled={hasFulfillments} /></span>
@@ -131,14 +127,14 @@ export function OrderDetailHeader({
           <button
             onClick={onRefund}
             className="od-btn"
-            style={btnStyle}
+            style={actionBtnStyle}
           >
             Refund
           </button>
           <button
             onClick={onEdit}
             className="od-btn"
-            style={btnStyle}
+            style={actionBtnStyle}
           >
             Edit
           </button>
@@ -149,7 +145,7 @@ export function OrderDetailHeader({
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="od-btn"
               style={{
-                ...btnStyle,
+                ...actionBtnStyle,
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "4px",
@@ -192,7 +188,8 @@ export function OrderDetailHeader({
       <p
         style={{
           fontSize: "13px",
-          color: "#6D7175",
+          fontFamily: fontStack,
+          color: colors.textSec,
           margin: 0,
         }}
       >
@@ -208,7 +205,7 @@ export function OrderDetailHeader({
           hour12: true,
         })}
         {order.metadata?.source && (
-          <span style={{ color: "#8C9196" }}> from {order.metadata.source}</span>
+          <span style={{ color: colors.textMuted }}> from {order.metadata.source}</span>
         )}
       </p>
     </div>

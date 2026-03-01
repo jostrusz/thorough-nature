@@ -10,17 +10,18 @@ import { useOrderStats } from "../../hooks/use-order-stats"
 import { useOrdersList } from "../../hooks/use-orders-list"
 import { useBulkActions } from "../../hooks/use-bulk-actions"
 import { useUpdateMetadata } from "../../hooks/use-update-metadata"
+import { colors, radii, shadows, fontStack, cardStyle as tokenCardStyle, btnOutline, btnPrimary } from "../../components/orders/design-tokens"
 
 // ═══════════════════════════════════════════
 // STYLES
 // ═══════════════════════════════════════════
 const dashboardStyle: React.CSSProperties = {
-  width: "1400px",
-  maxWidth: "calc(100vw - 280px)",
+  maxWidth: "1400px",
   margin: "0 auto",
-  padding: "24px 32px",
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif",
+  padding: "32px 48px",
+  fontFamily: fontStack,
+  background: colors.bg,
+  minHeight: "100vh",
 }
 
 const headerStyle: React.CSSProperties = {
@@ -31,47 +32,38 @@ const headerStyle: React.CSSProperties = {
 }
 
 const h1Style: React.CSSProperties = {
-  fontSize: "20px",
-  fontWeight: 600,
-  color: "#1A1A1A",
-}
-
-const btnStyle: React.CSSProperties = {
-  display: "inline-flex",
+  fontSize: "24px",
+  fontWeight: 700,
+  letterSpacing: "-0.5px",
+  color: colors.text,
+  display: "flex",
   alignItems: "center",
-  gap: "6px",
-  padding: "7px 14px",
+  gap: "10px",
+}
+
+const countBadgeStyle: React.CSSProperties = {
+  background: colors.accentBg,
+  color: colors.accent,
   borderRadius: "6px",
-  fontSize: "13px",
-  fontWeight: 500,
-  cursor: "pointer",
-  border: "1px solid #E1E3E5",
-  background: "#FFFFFF",
-  color: "#1A1A1A",
-  transition: "all 0.15s ease",
-  whiteSpace: "nowrap",
+  fontSize: "12px",
+  fontWeight: 600,
+  padding: "2px 8px",
 }
 
-const btnPrimaryStyle: React.CSSProperties = {
-  ...btnStyle,
-  background: "#008060",
-  color: "#fff",
-  borderColor: "#008060",
-}
-
-const cardStyle: React.CSSProperties = {
-  background: "#FFFFFF",
-  border: "1px solid #E1E3E5",
-  borderRadius: "10px",
+const mainCardStyle: React.CSSProperties = {
+  background: colors.bgCard,
+  border: `1px solid ${colors.border}`,
+  borderRadius: radii.card,
   overflow: "hidden",
+  boxShadow: shadows.card,
 }
 
 const toolbarStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
-  gap: "10px",
-  padding: "12px 16px",
-  borderBottom: "1px solid #E1E3E5",
+  gap: "12px",
+  padding: "12px 20px",
+  borderBottom: `1px solid ${colors.border}`,
 }
 
 const searchBoxStyle: React.CSSProperties = {
@@ -79,31 +71,28 @@ const searchBoxStyle: React.CSSProperties = {
   alignItems: "center",
   gap: "8px",
   flex: 1,
-  maxWidth: "400px",
-  background: "#F6F6F7",
-  border: "1px solid #E1E3E5",
-  borderRadius: "6px",
-  padding: "7px 12px",
-  transition: "all 0.2s ease",
+  background: colors.bg,
+  borderRadius: radii.xs,
+  padding: "8px 12px",
+  border: `1px solid ${colors.border}`,
 }
 
 const searchInputStyle: React.CSSProperties = {
   border: "none",
   background: "transparent",
   outline: "none",
+  flex: 1,
   fontSize: "13px",
-  color: "#1A1A1A",
-  width: "100%",
+  color: colors.text,
 }
 
 const paginationStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
-  justifyContent: "space-between",
-  padding: "12px 16px",
-  borderTop: "1px solid #E1E3E5",
-  fontSize: "13px",
-  color: "#6D7175",
+  justifyContent: "center",
+  gap: "4px",
+  padding: "16px 20px",
+  borderTop: `1px solid ${colors.border}`,
 }
 
 const pageBtnStyle: React.CSSProperties = {
@@ -112,19 +101,27 @@ const pageBtnStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  border: "1px solid #E1E3E5",
-  borderRadius: "6px",
-  background: "#FFFFFF",
+  borderRadius: radii.xs,
+  border: `1px solid ${colors.border}`,
+  background: colors.bgCard,
+  color: colors.textSec,
+  fontSize: "13px",
+  fontWeight: 500,
   cursor: "pointer",
   transition: "all 0.15s",
-  fontSize: "13px",
 }
 
 const pageBtnActiveStyle: React.CSSProperties = {
   ...pageBtnStyle,
-  background: "#1A1A1A",
+  background: colors.accent,
   color: "#fff",
-  borderColor: "#1A1A1A",
+  borderColor: colors.accent,
+  fontWeight: 600,
+}
+
+const paginationInfoStyle: React.CSSProperties = {
+  fontSize: "13px",
+  color: colors.textMuted,
 }
 
 // ═══════════════════════════════════════════
@@ -263,10 +260,13 @@ const CustomOrdersPage = () => {
     <div style={dashboardStyle}>
       {/* Page Header */}
       <div style={headerStyle}>
-        <h1 style={h1Style}>Orders</h1>
+        <h1 style={h1Style}>
+          Orders
+          <span style={countBadgeStyle}>{totalCount}</span>
+        </h1>
         <div style={{ display: "flex", gap: "8px" }}>
           <button
-            style={btnStyle}
+            style={btnOutline}
             onClick={() => {
               bulkActions.mutate(
                 {
@@ -300,6 +300,19 @@ const CustomOrdersPage = () => {
             </svg>
             Export
           </button>
+          <button style={btnPrimary}>
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path d="M10 4v12M4 10h12" />
+            </svg>
+            Create Order
+          </button>
         </div>
       </div>
 
@@ -315,7 +328,7 @@ const CustomOrdersPage = () => {
       />
 
       {/* Main Card */}
-      <div style={cardStyle}>
+      <div style={mainCardStyle}>
         {/* Tabs */}
         <OrderTabs
           activeTab={activeTab}
@@ -331,7 +344,7 @@ const CustomOrdersPage = () => {
               height="16"
               viewBox="0 0 20 20"
               fill="none"
-              stroke="#8C9196"
+              stroke={colors.textMuted}
               strokeWidth="1.8"
             >
               <circle cx="8.5" cy="8.5" r="5.5" />
@@ -369,7 +382,7 @@ const CustomOrdersPage = () => {
 
         {/* Pagination */}
         <div style={paginationStyle}>
-          <span>
+          <span style={paginationInfoStyle}>
             {orders.length > 0
               ? `Showing ${page * PAGE_SIZE + 1}-${Math.min(
                   (page + 1) * PAGE_SIZE,
@@ -377,7 +390,7 @@ const CustomOrdersPage = () => {
                 )} of ${totalCount} orders`
               : "0 orders"}
           </span>
-          <div style={{ display: "flex", gap: "4px" }}>
+          <div style={{ display: "flex", gap: "4px", marginLeft: "16px" }}>
             <button
               style={pageBtnStyle}
               onClick={() => setPage((p) => Math.max(0, p - 1))}

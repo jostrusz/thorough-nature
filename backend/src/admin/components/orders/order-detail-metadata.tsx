@@ -4,15 +4,17 @@ import { BookSentToggle } from "./book-sent-toggle"
 import { DeliveryBadge } from "./order-badges"
 import { OrderTag } from "./order-tag"
 import { useUpdateMetadata } from "../../hooks/use-update-metadata"
+import { colors, shadows, radii, cardStyle, cardHeaderStyle, fontStack } from "./design-tokens"
 
 interface OrderDetailMetadataProps {
   order: any
 }
 
 const sectionStyle: React.CSSProperties = {
-  background: "#FFFFFF",
-  border: "1px solid #E1E3E5",
-  borderRadius: "10px",
+  background: colors.bgCard,
+  border: `1px solid ${colors.border}`,
+  borderRadius: radii.card,
+  boxShadow: shadows.card,
   padding: "20px",
   marginBottom: "16px",
   transition: "box-shadow 0.25s ease, transform 0.25s ease",
@@ -21,20 +23,20 @@ const sectionStyle: React.CSSProperties = {
 const sectionTitleStyle: React.CSSProperties = {
   fontSize: "14px",
   fontWeight: 600,
-  color: "#1A1A1A",
+  color: colors.text,
   marginBottom: "16px",
 }
 
 const groupTitleStyle: React.CSSProperties = {
   fontSize: "12px",
   fontWeight: 600,
-  color: "#6D7175",
+  color: colors.textSec,
   textTransform: "uppercase",
   letterSpacing: "0.5px",
   marginBottom: "8px",
   marginTop: "16px",
   paddingTop: "12px",
-  borderTop: "1px solid #E1E3E5",
+  borderTop: `1px solid ${colors.border}`,
 }
 
 const rowStyle: React.CSSProperties = {
@@ -42,7 +44,7 @@ const rowStyle: React.CSSProperties = {
   justifyContent: "space-between",
   alignItems: "center",
   padding: "8px 4px",
-  borderBottom: "1px solid #F1F1F1",
+  borderBottom: `1px solid ${colors.bgHover}`,
   borderRadius: "4px",
   margin: "0 -4px",
   transition: "background 0.12s ease",
@@ -51,32 +53,32 @@ const rowStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   fontSize: "13px",
   fontWeight: 500,
-  color: "#6D7175",
+  color: colors.textSec,
 }
 
 const valueStyle: React.CSSProperties = {
   fontSize: "13px",
-  color: "#1A1A1A",
+  color: colors.text,
 }
 
 const linkStyle: React.CSSProperties = {
   fontSize: "13px",
-  color: "#2C6ECB",
+  color: colors.accent,
   textDecoration: "none",
 }
 
 const codeStyle: React.CSSProperties = {
   fontSize: "11px",
-  background: "#F6F6F7",
+  background: colors.bgHover,
   padding: "2px 6px",
   borderRadius: "4px",
-  color: "#1A1A1A",
+  color: colors.text,
   fontFamily: "monospace",
 }
 
 const dashStyle: React.CSSProperties = {
   fontSize: "13px",
-  color: "#8C9196",
+  color: colors.textMuted,
 }
 
 export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
@@ -322,8 +324,8 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
                 borderRadius: "12px",
                 fontSize: "12px",
                 fontWeight: 600,
-                background: "#AEE9D1",
-                color: "#0D5740",
+                background: colors.greenBg,
+                color: colors.green,
               }}
             >
               Yes

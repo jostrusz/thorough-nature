@@ -1,17 +1,41 @@
 import React from "react"
+import { colors } from "./design-tokens"
+
+// ═══════════════════════════════════════════
+// SHARED BADGE STYLES
+// ═══════════════════════════════════════════
+const badgeBase: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "6px",
+  padding: "4px 10px",
+  borderRadius: "6px",
+  fontSize: "12px",
+  fontWeight: 600,
+  whiteSpace: "nowrap",
+}
+
+const dotStyle = (color: string): React.CSSProperties => ({
+  width: "6px",
+  height: "6px",
+  borderRadius: "50%",
+  background: color,
+  flexShrink: 0,
+})
 
 // ═══════════════════════════════════════════
 // PAYMENT BADGE
 // ═══════════════════════════════════════════
 const PAYMENT_STYLES: Record<string, { bg: string; text: string; dot: string; label: string }> = {
-  paid: { bg: "#AEE9D1", text: "#0D5740", dot: "#0D5740", label: "Paid" },
-  captured: { bg: "#AEE9D1", text: "#0D5740", dot: "#0D5740", label: "Paid" },
-  pending: { bg: "#FFD79D", text: "#7A4F01", dot: "#7A4F01", label: "Payment pending" },
-  authorized: { bg: "#FFD79D", text: "#7A4F01", dot: "#7A4F01", label: "Authorized" },
-  requires_action: { bg: "#FFD79D", text: "#7A4F01", dot: "#7A4F01", label: "Requires action" },
-  refunded: { bg: "#E4E5E7", text: "#44474A", dot: "#44474A", label: "Refunded" },
-  partially_refunded: { bg: "#F0E0FF", text: "#6B21A8", dot: "#6B21A8", label: "Partially refunded" },
-  canceled: { bg: "#E4E5E7", text: "#44474A", dot: "#44474A", label: "Canceled" },
+  paid:                { bg: "rgba(0,179,122,0.08)",  text: "#00B37A", dot: "#00B37A", label: "Paid" },
+  pending:             { bg: "rgba(212,160,23,0.08)", text: "#D4A017", dot: "#D4A017", label: "Pending" },
+  authorized:          { bg: "rgba(59,130,246,0.07)", text: "#3B82F6", dot: "#3B82F6", label: "Authorized" },
+  requires_action:     { bg: "rgba(212,160,23,0.08)", text: "#D4A017", dot: "#D4A017", label: "Requires action" },
+  refunded:            { bg: "rgba(0,0,0,0.04)",      text: "#6B7185", dot: "#6B7185", label: "Refunded" },
+  partially_refunded:  { bg: "rgba(0,0,0,0.04)",      text: "#6B7185", dot: "#6B7185", label: "Part. Refunded" },
+  canceled:            { bg: "rgba(231,76,60,0.07)",  text: "#E74C3C", dot: "#E74C3C", label: "Canceled" },
+  failed:              { bg: "rgba(231,76,60,0.07)",  text: "#E74C3C", dot: "#E74C3C", label: "Failed" },
+  captured:            { bg: "rgba(0,179,122,0.08)",  text: "#00B37A", dot: "#00B37A", label: "Captured" },
 }
 
 export function PaymentBadge({ status }: { status: string }) {
@@ -20,29 +44,12 @@ export function PaymentBadge({ status }: { status: string }) {
     <span
       className="od-badge"
       style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "5px",
-        padding: "3px 10px",
-        borderRadius: "12px",
-        fontSize: "12px",
-        fontWeight: 600,
-        whiteSpace: "nowrap",
+        ...badgeBase,
         background: style.bg,
         color: style.text,
-        transition: "transform 0.15s ease, box-shadow 0.15s ease",
-        cursor: "default",
       }}
     >
-      <span
-        style={{
-          width: "7px",
-          height: "7px",
-          borderRadius: "50%",
-          background: style.dot,
-          flexShrink: 0,
-        }}
-      />
+      <span style={dotStyle(style.dot)} />
       {style.label}
     </span>
   )
@@ -53,52 +60,35 @@ export function PaymentBadge({ status }: { status: string }) {
 // ═══════════════════════════════════════════
 const DELIVERY_STYLES: Record<string, { bg: string; text: string; dot: string; label: string }> = {
   // Dextrum delivery statuses (uppercase keys from metadata.dextrum_status)
-  NEW: { bg: "#DBEAFE", text: "#1E40AF", dot: "#1E40AF", label: "New" },
-  WAITING: { bg: "#FFD79D", text: "#7A4F01", dot: "#7A4F01", label: "Waiting" },
-  IMPORTED: { bg: "#E0E7FF", text: "#3730A3", dot: "#3730A3", label: "Imported" },
-  PROCESSED: { bg: "#FEF3C7", text: "#92400E", dot: "#92400E", label: "Processed" },
-  PACKED: { bg: "#A4E8F2", text: "#0E4F5C", dot: "#0E4F5C", label: "Packed" },
-  DISPATCHED: { bg: "#D1FAE5", text: "#047857", dot: "#047857", label: "Dispatched" },
-  IN_TRANSIT: { bg: "#A4E8F2", text: "#0E4F5C", dot: "#0E4F5C", label: "In Transit" },
-  DELIVERED: { bg: "#AEE9D1", text: "#0D5740", dot: "#0D5740", label: "Delivered" },
-  ALLOCATION_ISSUE: { bg: "#FED3D1", text: "#9E2B25", dot: "#9E2B25", label: "Stock Issue" },
-  PARTIALLY_PICKED: { bg: "#FFD79D", text: "#7A4F01", dot: "#7A4F01", label: "Partial Pick" },
-  CANCELLED: { bg: "#E4E5E7", text: "#44474A", dot: "#44474A", label: "Cancelled" },
-  FAILED: { bg: "#FED3D1", text: "#9E2B25", dot: "#9E2B25", label: "Failed" },
+  NEW:               { bg: "rgba(212,160,23,0.08)",  text: "#D4A017", dot: "#D4A017", label: "New" },
+  WAITING:           { bg: "rgba(212,160,23,0.08)",  text: "#D4A017", dot: "#D4A017", label: "Waiting" },
+  IMPORTED:          { bg: "rgba(59,130,246,0.07)",  text: "#3B82F6", dot: "#3B82F6", label: "Imported" },
+  PROCESSED:         { bg: "rgba(59,130,246,0.07)",  text: "#3B82F6", dot: "#3B82F6", label: "Processed" },
+  PACKED:            { bg: "rgba(108,92,231,0.08)",  text: "#6C5CE7", dot: "#6C5CE7", label: "Packed" },
+  DISPATCHED:        { bg: "rgba(59,130,246,0.07)",  text: "#3B82F6", dot: "#3B82F6", label: "Dispatched" },
+  IN_TRANSIT:        { bg: "rgba(59,130,246,0.07)",  text: "#3B82F6", dot: "#3B82F6", label: "In Transit" },
+  DELIVERED:         { bg: "rgba(0,179,122,0.08)",   text: "#00B37A", dot: "#00B37A", label: "Delivered" },
+  ALLOCATION_ISSUE:  { bg: "rgba(231,76,60,0.07)",   text: "#E74C3C", dot: "#E74C3C", label: "Stock Issue" },
+  PARTIALLY_PICKED:  { bg: "rgba(212,160,23,0.08)",  text: "#D4A017", dot: "#D4A017", label: "Partial Pick" },
+  CANCELLED:         { bg: "rgba(0,0,0,0.04)",       text: "#6B7185", dot: "#6B7185", label: "Cancelled" },
+  FAILED:            { bg: "rgba(231,76,60,0.07)",   text: "#E74C3C", dot: "#E74C3C", label: "Failed" },
 }
 
 export function DeliveryBadge({ status }: { status?: string }) {
   if (!status) {
-    return <span style={{ color: "#8C9196", fontSize: "12px" }}>&mdash;</span>
+    return <span style={{ color: colors.textMuted, fontSize: "12px" }}>&mdash;</span>
   }
-  const style = DELIVERY_STYLES[status] || { bg: "#E4E5E7", text: "#44474A", dot: "#44474A", label: status }
+  const style = DELIVERY_STYLES[status] || { bg: "rgba(0,0,0,0.04)", text: "#6B7185", dot: "#6B7185", label: status }
   return (
     <span
       className="od-badge"
       style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "5px",
-        padding: "3px 10px",
-        borderRadius: "12px",
-        fontSize: "12px",
-        fontWeight: 600,
-        whiteSpace: "nowrap",
+        ...badgeBase,
         background: style.bg,
         color: style.text,
-        transition: "transform 0.15s ease, box-shadow 0.15s ease",
-        cursor: "default",
       }}
     >
-      <span
-        style={{
-          width: "7px",
-          height: "7px",
-          borderRadius: "50%",
-          background: style.dot,
-          flexShrink: 0,
-        }}
-      />
+      <span style={dotStyle(style.dot)} />
       {style.label}
     </span>
   )
@@ -113,29 +103,12 @@ export function FulfillmentBadge({ fulfilled }: { fulfilled: boolean }) {
       <span
         className="od-badge"
         style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "5px",
-          padding: "3px 10px",
-          borderRadius: "12px",
-          fontSize: "12px",
-          fontWeight: 600,
-          whiteSpace: "nowrap",
-          background: "#E4E5E7",
-          color: "#44474A",
-          transition: "transform 0.15s ease, box-shadow 0.15s ease",
-          cursor: "default",
+          ...badgeBase,
+          background: colors.greenBg,
+          color: colors.green,
         }}
       >
-        <span
-          style={{
-            width: "7px",
-            height: "7px",
-            borderRadius: "50%",
-            background: "#44474A",
-            flexShrink: 0,
-          }}
-        />
+        <span style={dotStyle(colors.green)} />
         Fulfilled
       </span>
     )
@@ -144,29 +117,12 @@ export function FulfillmentBadge({ fulfilled }: { fulfilled: boolean }) {
     <span
       className="od-badge"
       style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "5px",
-        padding: "3px 10px",
-        borderRadius: "12px",
-        fontSize: "12px",
-        fontWeight: 600,
-        whiteSpace: "nowrap",
-        background: "#FED3D1",
-        color: "#9E2B25",
-        transition: "transform 0.15s ease, box-shadow 0.15s ease",
-        cursor: "default",
+        ...badgeBase,
+        background: colors.orangeBg,
+        color: colors.orange,
       }}
     >
-      <span
-        style={{
-          width: "7px",
-          height: "7px",
-          borderRadius: "50%",
-          background: "#9E2B25",
-          flexShrink: 0,
-        }}
-      />
+      <span style={dotStyle(colors.orange)} />
       Unfulfilled
     </span>
   )

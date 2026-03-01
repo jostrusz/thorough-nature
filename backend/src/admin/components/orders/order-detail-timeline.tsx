@@ -1,5 +1,6 @@
 import React, { useState } from "react"
 import { formatCurrency } from "../../lib/format-currency"
+import { colors, shadows, radii, cardStyle, cardHeaderStyle, fontStack } from "./design-tokens"
 
 interface OrderDetailTimelineProps {
   order: any
@@ -34,8 +35,8 @@ function EventIcon({ icon, color }: { icon?: string; color: string }) {
   switch (icon) {
     case "payment":
       return (
-        <div style={{ ...style, background: "#AEE9D1" }}>
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#0D5740" strokeWidth="2">
+        <div style={{ ...style, background: colors.greenBg }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={colors.green} strokeWidth="2">
             <rect x="2" y="4" width="16" height="12" rx="2" />
             <path d="M2 9h16" />
           </svg>
@@ -43,16 +44,16 @@ function EventIcon({ icon, color }: { icon?: string; color: string }) {
       )
     case "fulfillment":
       return (
-        <div style={{ ...style, background: "#DBEAFE" }}>
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#1E40AF" strokeWidth="2">
+        <div style={{ ...style, background: colors.blueBg }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={colors.blue} strokeWidth="2">
             <polyline points="4 10 8 14 16 6" />
           </svg>
         </div>
       )
     case "dextrum":
       return (
-        <div style={{ ...style, background: "#E0E7FF" }}>
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#3730A3" strokeWidth="1.5">
+        <div style={{ ...style, background: colors.accentBg }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={colors.accent} strokeWidth="1.5">
             <rect x="2" y="4" width="16" height="12" rx="2" />
             <path d="M2 8h16M7 4v4M13 4v4" />
           </svg>
@@ -60,68 +61,68 @@ function EventIcon({ icon, color }: { icon?: string; color: string }) {
       )
     case "fakturoid":
       return (
-        <div style={{ ...style, background: "#D1FAE5" }}>
-          <span style={{ fontSize: "10px", fontWeight: 700, color: "#047857" }}>fa</span>
+        <div style={{ ...style, background: colors.greenBg }}>
+          <span style={{ fontSize: "10px", fontWeight: 700, color: colors.green }}>fa</span>
         </div>
       )
     case "quickbooks":
       return (
-        <div style={{ ...style, background: "#DBEAFE" }}>
-          <span style={{ fontSize: "10px", fontWeight: 700, color: "#1D4ED8" }}>QB</span>
+        <div style={{ ...style, background: colors.blueBg }}>
+          <span style={{ fontSize: "10px", fontWeight: 700, color: colors.blue }}>QB</span>
         </div>
       )
     case "cancel":
       return (
-        <div style={{ ...style, background: "#FED3D1" }}>
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#9E2B25" strokeWidth="2">
+        <div style={{ ...style, background: colors.redBg }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={colors.red} strokeWidth="2">
             <line x1="5" y1="5" x2="15" y2="15" /><line x1="15" y1="5" x2="5" y2="15" />
           </svg>
         </div>
       )
     case "refund":
       return (
-        <div style={{ ...style, background: "#FFD79D" }}>
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#7A4F01" strokeWidth="2">
+        <div style={{ ...style, background: colors.yellowBg }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={colors.yellow} strokeWidth="2">
             <path d="M4 10l4-4M4 10l4 4M4 10h12" />
           </svg>
         </div>
       )
     case "edit":
       return (
-        <div style={{ ...style, background: "#F3F4F6" }}>
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#6B7280" strokeWidth="1.5">
+        <div style={{ ...style, background: colors.bgHover }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={colors.textSec} strokeWidth="1.5">
             <path d="M13.586 3.586a2 2 0 112.828 2.828l-10 10L3 17.5l1.086-3.414 10-10z" />
           </svg>
         </div>
       )
     case "email":
       return (
-        <div style={{ ...style, background: "#E0E7FF" }}>
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#4338CA" strokeWidth="1.5">
+        <div style={{ ...style, background: colors.accentBg }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={colors.accent} strokeWidth="1.5">
             <rect x="2" y="4" width="16" height="12" rx="2" /><path d="M2 4l8 6 8-6" />
           </svg>
         </div>
       )
     case "archive":
       return (
-        <div style={{ ...style, background: "#F3F4F6" }}>
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#6B7280" strokeWidth="1.5">
+        <div style={{ ...style, background: colors.bgHover }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={colors.textSec} strokeWidth="1.5">
             <rect x="2" y="3" width="16" height="4" rx="1" /><path d="M4 7v8a2 2 0 002 2h8a2 2 0 002-2V7M8 11h4" />
           </svg>
         </div>
       )
     case "comment":
       return (
-        <div style={{ ...style, border: "2px solid #E1E3E5", background: "#FFFFFF", boxSizing: "border-box" }}>
-          <svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="#8C9196" strokeWidth="2">
+        <div style={{ ...style, border: `2px solid ${colors.border}`, background: colors.bgCard, boxSizing: "border-box" }}>
+          <svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke={colors.textMuted} strokeWidth="2">
             <path d="M4 12l-2 4 4-2 10-10-2-2z" />
           </svg>
         </div>
       )
     default: // "order"
       return (
-        <div style={{ ...style, background: color || "#AEE9D1" }}>
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={color === "#AEE9D1" ? "#0D5740" : "#FFFFFF"} strokeWidth="2">
+        <div style={{ ...style, background: colors.greenBg }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={colors.green} strokeWidth="2">
             <circle cx="10" cy="10" r="3" fill="currentColor" />
           </svg>
         </div>
@@ -464,37 +465,22 @@ export function OrderDetailTimeline({
   return (
     <div
       className="od-card"
-      style={{
-        background: "#FFFFFF",
-        border: "1px solid #E1E3E5",
-        borderRadius: "10px",
-        marginBottom: "16px",
-        overflow: "hidden",
-        transition: "box-shadow 0.25s ease, transform 0.25s ease",
-      }}
+      style={cardStyle}
     >
-      <div
-        style={{
-          fontSize: "14px",
-          fontWeight: 600,
-          color: "#1A1A1A",
-          padding: "16px 20px",
-          borderBottom: "1px solid #E1E3E5",
-        }}
-      >
+      <div style={cardHeaderStyle}>
         Timeline
       </div>
 
       {/* Comment box */}
       {onAddComment && (
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid #E1E3E5" }}>
+        <div style={{ padding: "16px 20px", borderBottom: `1px solid ${colors.border}` }}>
           <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
             <div
               style={{
                 width: "32px",
                 height: "32px",
                 borderRadius: "50%",
-                background: "#008060",
+                background: colors.accent,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -515,17 +501,17 @@ export function OrderDetailTimeline({
                 style={{
                   width: "100%",
                   padding: "8px 12px",
-                  border: "1px solid #E1E3E5",
+                  border: `1px solid ${colors.border}`,
                   borderRadius: "8px",
                   fontSize: "13px",
                   outline: "none",
                   resize: "vertical",
                   boxSizing: "border-box",
-                  fontFamily: "inherit",
+                  fontFamily: fontStack,
                   transition: "border-color 0.15s",
                 }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = "#008060")}
-                onBlur={(e) => (e.currentTarget.style.borderColor = "#E1E3E5")}
+                onFocus={(e) => (e.currentTarget.style.borderColor = colors.accent)}
+                onBlur={(e) => (e.currentTarget.style.borderColor = colors.border)}
               />
               {commentText.trim() && (
                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "8px" }}>
@@ -538,7 +524,7 @@ export function OrderDetailTimeline({
                       fontSize: "13px",
                       fontWeight: 500,
                       cursor: "pointer",
-                      background: "#1A1A1A",
+                      background: colors.accent,
                       color: "#FFFFFF",
                       border: "none",
                       opacity: isAddingComment ? 0.6 : 1,
@@ -550,7 +536,7 @@ export function OrderDetailTimeline({
               )}
             </div>
           </div>
-          <div style={{ fontSize: "12px", color: "#8C9196", marginTop: "8px", textAlign: "center" }}>
+          <div style={{ fontSize: "12px", color: colors.textMuted, marginTop: "8px", textAlign: "center" }}>
             Only you and other staff can see comments
           </div>
         </div>
@@ -559,7 +545,7 @@ export function OrderDetailTimeline({
       {/* Timeline events grouped by date */}
       <div style={{ padding: "16px 20px" }}>
         {events.length === 0 ? (
-          <p style={{ fontSize: "13px", color: "#8C9196" }}>No timeline events</p>
+          <p style={{ fontSize: "13px", color: colors.textMuted }}>No timeline events</p>
         ) : (
           grouped.map((group, gi) => (
             <div key={gi}>
@@ -568,7 +554,7 @@ export function OrderDetailTimeline({
                 style={{
                   fontSize: "12px",
                   fontWeight: 600,
-                  color: "#8C9196",
+                  color: colors.textMuted,
                   textTransform: "uppercase",
                   letterSpacing: "0.5px",
                   padding: gi > 0 ? "16px 0 8px" : "0 0 8px",
@@ -603,7 +589,7 @@ export function OrderDetailTimeline({
                         style={{
                           width: "2px",
                           flex: 1,
-                          background: "#E1E3E5",
+                          background: colors.border,
                           marginTop: "4px",
                           minHeight: "8px",
                         }}
@@ -617,17 +603,17 @@ export function OrderDetailTimeline({
                       style={{
                         fontSize: "13px",
                         fontWeight: event.type === "comment" ? 400 : 500,
-                        color: "#1A1A1A",
+                        color: colors.text,
                       }}
                     >
                       {event.label}
                     </div>
                     {event.detail && (
-                      <div style={{ fontSize: "12px", color: "#6D7175", marginTop: "2px" }}>
+                      <div style={{ fontSize: "12px", color: colors.textSec, marginTop: "2px" }}>
                         {event.detail}
                       </div>
                     )}
-                    <div style={{ fontSize: "12px", color: "#8C9196", marginTop: "2px" }}>
+                    <div style={{ fontSize: "12px", color: colors.textMuted, marginTop: "2px" }}>
                       {formatDate(event.date)}
                     </div>
                   </div>

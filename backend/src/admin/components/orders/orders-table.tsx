@@ -6,6 +6,7 @@ import { CountryFlag } from "./country-flag"
 import { OrderTag } from "./order-tag"
 import { useUpdateMetadata } from "../../hooks/use-update-metadata"
 import { toast } from "@medusajs/ui"
+import { colors, radii, shadows, getPaymentIconUrl, getPaymentFallback } from "./design-tokens"
 
 interface OrdersTableProps {
   orders: any[]
@@ -95,27 +96,24 @@ function getTag(order: any): string {
 // ═══════════════════════════════════════════
 const thStyle: React.CSSProperties = {
   textAlign: "left",
-  padding: "10px 12px",
-  fontSize: "12px",
+  padding: "11px 20px",
+  fontSize: "11px",
   fontWeight: 600,
-  color: "#6D7175",
-  borderBottom: "1px solid #E1E3E5",
-  whiteSpace: "nowrap",
+  color: "#9CA3B8",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  borderBottom: "1px solid rgba(0,0,0,0.07)",
+  background: "#F5F6FA",
   userSelect: "none",
   cursor: "pointer",
-  transition: "color 0.15s",
-  background: "#FFFFFF",
-  position: "sticky",
-  top: 0,
-  zIndex: 2,
+  whiteSpace: "nowrap",
 }
 
 const tdStyle: React.CSSProperties = {
-  padding: "12px",
+  padding: "14px 20px",
   fontSize: "13px",
-  borderBottom: "1px solid #F1F1F1",
+  borderBottom: "1px solid rgba(0,0,0,0.04)",
   verticalAlign: "middle",
-  whiteSpace: "nowrap",
 }
 
 // ═══════════════════════════════════════════
@@ -126,19 +124,18 @@ function SkeletonRows() {
     <>
       {Array.from({ length: 8 }).map((_, i) => (
         <tr key={i}>
-          <td style={{ ...tdStyle, width: "40px", textAlign: "center" }}>
+          <td style={{ ...tdStyle, width: "36px", textAlign: "center" }}>
             <div style={{ width: "18px", height: "18px", borderRadius: "4px", background: "#EBEBEB", margin: "0 auto" }} />
           </td>
           <td style={tdStyle}><div style={{ width: "60px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "130px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "140px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "60px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={{ ...tdStyle, textAlign: "center" }}><div style={{ width: "18px", height: "18px", borderRadius: "50%", background: "#EBEBEB", margin: "0 auto" }} /></td>
+          <td style={tdStyle}><div style={{ width: "160px", height: "32px", borderRadius: "6px", background: "#EBEBEB" }} /></td>
           <td style={tdStyle}><div style={{ width: "70px", height: "22px", borderRadius: "12px", background: "#EBEBEB" }} /></td>
           <td style={tdStyle}><div style={{ width: "70px", height: "22px", borderRadius: "12px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "50px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "120px", height: "22px", borderRadius: "6px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "50px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "40px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "70px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "40px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "100px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "20px", height: "20px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
         </tr>
       ))}
     </>
@@ -160,8 +157,8 @@ function Checkbox({
   let bg = "#fff"
   let border = "#C9CCCF"
   if (checked || indeterminate) {
-    bg = "#008060"
-    border = "#008060"
+    bg = colors.accent
+    border = colors.accent
   }
 
   return (
@@ -199,6 +196,14 @@ function Checkbox({
     </div>
   )
 }
+
+// ═══════════════════════════════════════════
+// INLINE STYLES FOR ROW HOVER (actions visibility)
+// ═══════════════════════════════════════════
+const rowHoverStyles = `
+  .orders-table-row .row-actions { opacity: 0; transition: opacity 0.15s ease; }
+  .orders-table-row:hover .row-actions { opacity: 1; }
+`
 
 // ═══════════════════════════════════════════
 // MAIN COMPONENT
@@ -254,7 +259,7 @@ export function OrdersTable({
   function renderSortIcon(field: string) {
     if (sortField !== field) return <span style={{ opacity: 0, marginLeft: "4px", fontSize: "10px" }}>{"\u25BC"}</span>
     return (
-      <span style={{ marginLeft: "4px", fontSize: "10px" }}>
+      <span style={{ marginLeft: "4px", fontSize: "10px", color: colors.accent }}>
         {sortDir === "DESC" ? "\u25BC" : "\u25B2"}
       </span>
     )
@@ -266,17 +271,16 @@ export function OrdersTable({
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr>
-              <th style={{ ...thStyle, width: "40px", textAlign: "center", cursor: "default" }}></th>
+              <th style={{ ...thStyle, width: "36px", textAlign: "center", cursor: "default" }}></th>
               <th style={thStyle}>Order</th>
-              <th style={thStyle}>Date</th>
               <th style={thStyle}>Customer</th>
-              <th style={thStyle}>Total</th>
-              <th style={{ ...thStyle, textAlign: "center", cursor: "default" }}>Book sent</th>
               <th style={thStyle}>Payment</th>
-              <th style={thStyle}>Delivery</th>
+              <th style={thStyle}>Fulfillment</th>
               <th style={thStyle}>Items</th>
-              <th style={thStyle}>Tags</th>
+              <th style={thStyle}>Total</th>
               <th style={thStyle}>Country</th>
+              <th style={thStyle}>Date</th>
+              <th style={{ ...thStyle, width: "48px", cursor: "default" }}></th>
             </tr>
           </thead>
           <tbody>
@@ -292,8 +296,8 @@ export function OrdersTable({
       <div
         style={{
           textAlign: "center",
-          padding: "60px 20px",
-          color: "#8C9196",
+          padding: "80px 20px",
+          color: colors.textMuted,
         }}
       >
         <svg
@@ -303,22 +307,23 @@ export function OrdersTable({
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          style={{ marginBottom: "12px", opacity: 0.4 }}
+          style={{ marginBottom: "16px", opacity: 0.35 }}
         >
           <rect x="6" y="10" width="36" height="28" rx="3" />
           <path d="M6 18h36M18 10v8" />
         </svg>
-        <p style={{ fontSize: "14px" }}>No orders match your filters</p>
+        <p style={{ fontSize: "14px", fontWeight: 500, color: colors.textMuted }}>No orders found</p>
       </div>
     )
   }
 
   return (
     <div style={{ overflowX: "auto" }}>
+      <style>{rowHoverStyles}</style>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
-            <th style={{ ...thStyle, width: "40px", textAlign: "center", cursor: "default" }}>
+            <th style={{ ...thStyle, width: "36px", textAlign: "center", cursor: "default" }}>
               <Checkbox
                 checked={allSelected}
                 indeterminate={someSelected && !allSelected}
@@ -328,23 +333,20 @@ export function OrdersTable({
             <th style={thStyle} onClick={() => onSort("display_id")}>
               Order {renderSortIcon("display_id")}
             </th>
-            <th style={thStyle} onClick={() => onSort("created_at")}>
-              Date {renderSortIcon("created_at")}
-            </th>
             <th style={thStyle} onClick={() => onSort("customer")}>
               Customer {renderSortIcon("customer")}
             </th>
+            <th style={{ ...thStyle, cursor: "default" }}>Payment</th>
+            <th style={{ ...thStyle, cursor: "default" }}>Fulfillment</th>
+            <th style={{ ...thStyle, cursor: "default" }}>Items</th>
             <th style={thStyle} onClick={() => onSort("total")}>
               Total {renderSortIcon("total")}
             </th>
-            <th style={{ ...thStyle, textAlign: "center", cursor: "default" }}>
-              Book sent
+            <th style={{ ...thStyle, cursor: "default" }}>Country</th>
+            <th style={thStyle} onClick={() => onSort("created_at")}>
+              Date {renderSortIcon("created_at")}
             </th>
-            <th style={thStyle}>Payment</th>
-            <th style={thStyle}>Delivery</th>
-            <th style={thStyle}>Items</th>
-            <th style={thStyle}>Tags</th>
-            <th style={thStyle}>Country</th>
+            <th style={{ ...thStyle, width: "48px", cursor: "default" }}></th>
           </tr>
         </thead>
         <tbody>
@@ -362,20 +364,23 @@ export function OrdersTable({
             return (
               <tr
                 key={order.id}
+                className="orders-table-row"
                 style={{
-                  background: isSelected ? "#F2F7FE" : "transparent",
+                  background: isSelected ? "rgba(108,92,231,0.04)" : "transparent",
                   transition: "background 0.12s ease",
                   cursor: "pointer",
                 }}
                 onMouseEnter={(e) => {
-                  if (!isSelected) e.currentTarget.style.background = "#F9FAFB"
+                  if (!isSelected) e.currentTarget.style.background = "#F8F9FC"
                 }}
                 onMouseLeave={(e) => {
                   if (!isSelected) e.currentTarget.style.background = "transparent"
                 }}
+                onClick={() => navigate(`/custom-orders/${order.id}`)}
               >
+                {/* 1. Checkbox */}
                 <td
-                  style={{ ...tdStyle, width: "40px", textAlign: "center" }}
+                  style={{ ...tdStyle, width: "36px", textAlign: "center" }}
                   onClick={(e) => {
                     e.stopPropagation()
                     toggleOrder(order.id)
@@ -383,79 +388,123 @@ export function OrdersTable({
                 >
                   <Checkbox checked={isSelected} onClick={() => toggleOrder(order.id)} />
                 </td>
-                <td
-                  style={tdStyle}
-                  onClick={() => navigate(`/custom-orders/${order.id}`)}
-                >
+
+                {/* 2. Order */}
+                <td style={tdStyle}>
                   <span
                     style={{
-                      color: "#2C6ECB",
+                      color: colors.accent,
                       fontWeight: 600,
                       cursor: "pointer",
-                      textDecoration: "none",
                     }}
                   >
                     #{order.display_id}
                   </span>
                 </td>
-                <td
-                  style={tdStyle}
-                  onClick={() => navigate(`/custom-orders/${order.id}`)}
-                >
-                  <span style={{ color: "#1A1A1A" }}>{formatDate(order.created_at)}</span>
+
+                {/* 3. Customer (with payment method icon) */}
+                <td style={tdStyle}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    {(() => {
+                      const iconUrl = getPaymentIconUrl(order)
+                      if (iconUrl) {
+                        return (
+                          <div style={{
+                            width: "32px", height: "32px", borderRadius: "8px",
+                            background: "#f0f1f5", padding: "4px",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            flexShrink: 0, overflow: "hidden",
+                          }}>
+                            <img src={iconUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                          </div>
+                        )
+                      }
+                      const fb = getPaymentFallback(order)
+                      return (
+                        <div style={{
+                          width: "32px", height: "32px", borderRadius: "8px",
+                          background: fb.bg, color: fb.color,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          flexShrink: 0, fontSize: "10px", fontWeight: 700,
+                        }}>
+                          {fb.letter}
+                        </div>
+                      )
+                    })()}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 500, fontSize: "13px", color: colors.text }}>
+                        {customerName}
+                      </div>
+                      <div style={{ fontSize: "11px", color: colors.textMuted, marginTop: "1px" }}>
+                        {order.email}
+                      </div>
+                    </div>
+                  </div>
                 </td>
-                <td
-                  style={tdStyle}
-                  onClick={() => navigate(`/custom-orders/${order.id}`)}
-                >
-                  {customerName}
-                </td>
-                <td
-                  style={tdStyle}
-                  onClick={() => navigate(`/custom-orders/${order.id}`)}
-                >
-                  <strong>{formatCurrency(total, order.currency_code)}</strong>
-                </td>
-                <td
-                  style={{ ...tdStyle, textAlign: "center" }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <BookSentToggle
-                    sent={bookSent}
-                    onClick={() => handleBookSentToggle(order)}
-                  />
-                </td>
-                <td
-                  style={tdStyle}
-                  onClick={() => navigate(`/custom-orders/${order.id}`)}
-                >
+
+                {/* 4. Payment */}
+                <td style={tdStyle}>
                   <PaymentBadge status={paymentStatus} />
                 </td>
-                <td
-                  style={tdStyle}
-                  onClick={() => navigate(`/custom-orders/${order.id}`)}
-                >
+
+                {/* 5. Fulfillment */}
+                <td style={tdStyle}>
                   <DeliveryBadge status={deliveryStatus} />
                 </td>
-                <td
-                  style={tdStyle}
-                  onClick={() => navigate(`/custom-orders/${order.id}`)}
-                >
-                  <span style={{ color: "#6D7175" }}>
+
+                {/* 6. Items */}
+                <td style={tdStyle}>
+                  <span style={{ color: colors.textMuted }}>
                     {itemCount} item{itemCount !== 1 ? "s" : ""}
                   </span>
                 </td>
-                <td
-                  style={tdStyle}
-                  onClick={() => navigate(`/custom-orders/${order.id}`)}
-                >
-                  <OrderTag tag={tag} countryCode={countryCode} />
+
+                {/* 7. Total */}
+                <td style={tdStyle}>
+                  <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums", color: colors.text }}>
+                    {formatCurrency(total, order.currency_code)}
+                  </span>
                 </td>
-                <td
-                  style={tdStyle}
-                  onClick={() => navigate(`/custom-orders/${order.id}`)}
-                >
+
+                {/* 8. Country */}
+                <td style={tdStyle}>
                   <CountryFlag code={countryCode} />
+                </td>
+
+                {/* 9. Date */}
+                <td style={tdStyle}>
+                  <span style={{ color: colors.textMuted, whiteSpace: "nowrap" }}>
+                    {formatDate(order.created_at)}
+                  </span>
+                </td>
+
+                {/* 10. Actions (three dots) */}
+                <td
+                  style={{ ...tdStyle, width: "48px", textAlign: "center" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div
+                    className="row-actions"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      transition: "background 0.15s",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.05)" }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent" }}
+                    onClick={() => navigate(`/custom-orders/${order.id}`)}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill={colors.textSec}>
+                      <circle cx="8" cy="3" r="1.5" />
+                      <circle cx="8" cy="8" r="1.5" />
+                      <circle cx="8" cy="13" r="1.5" />
+                    </svg>
+                  </div>
                 </td>
               </tr>
             )

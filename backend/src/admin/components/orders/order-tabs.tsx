@@ -1,4 +1,5 @@
 import React from "react"
+import { colors, radii, shadows } from "./design-tokens"
 
 export interface TabDef {
   id: string
@@ -37,13 +38,12 @@ export function OrderTabs({ activeTab, onTabChange, tabCounts }: OrderTabsProps)
   return (
     <div
       style={{
+        background: "rgba(0,0,0,0.03)",
+        borderRadius: "8px",
+        padding: "3px",
         display: "flex",
-        alignItems: "center",
-        gap: 0,
-        padding: "0 16px",
-        borderBottom: "1px solid #E1E3E5",
+        gap: "2px",
         overflowX: "auto",
-        scrollbarWidth: "none",
       }}
     >
       {TABS.map((tab) => {
@@ -54,14 +54,20 @@ export function OrderTabs({ activeTab, onTabChange, tabCounts }: OrderTabsProps)
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             style={{
-              padding: "12px 14px",
+              padding: "7px 14px",
+              borderRadius: "6px",
               fontSize: "13px",
               fontWeight: isActive ? 600 : 500,
-              color: isActive ? "#1A1A1A" : "#6D7175",
+              color: isActive ? "#1A1D2E" : "#6B7185",
               cursor: "pointer",
-              borderBottom: isActive ? "2px solid #1A1A1A" : "2px solid transparent",
+              border: "none",
+              background: isActive ? "#FFFFFF" : "transparent",
               whiteSpace: "nowrap",
-              transition: "all 0.2s ease",
+              transition: "all 0.15s",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              boxShadow: isActive ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
               userSelect: "none",
             }}
           >
@@ -69,18 +75,14 @@ export function OrderTabs({ activeTab, onTabChange, tabCounts }: OrderTabsProps)
             {count !== undefined && (
               <span
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  minWidth: "20px",
-                  height: "20px",
-                  padding: "0 6px",
-                  borderRadius: "10px",
-                  background: isActive ? "#1A1A1A" : "#F1F1F1",
-                  color: isActive ? "#fff" : "#6D7175",
                   fontSize: "11px",
                   fontWeight: 600,
-                  marginLeft: "6px",
+                  padding: "1px 7px",
+                  borderRadius: "10px",
+                  minWidth: "20px",
+                  textAlign: "center",
+                  background: isActive ? "rgba(108,92,231,0.08)" : "rgba(0,0,0,0.04)",
+                  color: isActive ? "#6C5CE7" : "#9CA3B8",
                 }}
               >
                 {count}

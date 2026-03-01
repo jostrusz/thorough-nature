@@ -1,6 +1,15 @@
 import React from "react"
 import { FulfillmentBadge } from "./order-badges"
 import { formatCurrency } from "../../lib/format-currency"
+import {
+  colors,
+  shadows,
+  radii,
+  cardStyle,
+  cardHeaderStyle,
+  btnPrimary,
+  fontStack,
+} from "./design-tokens"
 
 interface OrderFulfillmentCardProps {
   order: any
@@ -23,26 +32,14 @@ export function OrderFulfillmentCard({
 
   return (
     <div
-      className="od-card"
       style={{
-        background: "#FFFFFF",
-        border: "1px solid #E1E3E5",
-        borderRadius: "10px",
-        marginBottom: "16px",
-        overflow: "hidden",
+        ...cardStyle,
+        fontFamily: fontStack,
         transition: "box-shadow 0.25s ease, transform 0.25s ease",
       }}
     >
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "16px 20px",
-          borderBottom: "1px solid #E1E3E5",
-        }}
-      >
+      <div style={cardHeaderStyle}>
         <FulfillmentBadge fulfilled={hasFulfillments} />
       </div>
 
@@ -55,8 +52,8 @@ export function OrderFulfillmentCard({
             gap: "8px",
             padding: "12px 20px",
             fontSize: "13px",
-            color: "#6D7175",
-            borderBottom: "1px solid #F1F1F1",
+            color: colors.textSec,
+            borderBottom: `1px solid ${colors.border}`,
           }}
         >
           <svg
@@ -89,16 +86,21 @@ export function OrderFulfillmentCard({
           return (
             <div
               key={item.id}
-              className="od-row-hover"
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "12px",
                 padding: "10px 4px",
-                borderBottom: "1px solid #F1F1F1",
-                borderRadius: "6px",
+                borderBottom: `1px solid ${colors.border}`,
+                borderRadius: radii.xs,
                 margin: "0 -4px",
                 transition: "background 0.12s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = colors.bgHover
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent"
               }}
             >
               {/* Thumbnail */}
@@ -106,13 +108,12 @@ export function OrderFulfillmentCard({
                 <img
                   src={thumbnail}
                   alt={productTitle}
-                  className="od-thumbnail"
                   style={{
                     width: "48px",
                     height: "48px",
-                    borderRadius: "6px",
+                    borderRadius: radii.xs,
                     objectFit: "cover",
-                    border: "1px solid #E1E3E5",
+                    border: `1px solid ${colors.border}`,
                     transition: "transform 0.2s ease, box-shadow 0.2s ease",
                   }}
                 />
@@ -121,14 +122,14 @@ export function OrderFulfillmentCard({
                   style={{
                     width: "48px",
                     height: "48px",
-                    borderRadius: "6px",
-                    background: "#F6F6F7",
+                    borderRadius: radii.xs,
+                    background: colors.bgHover,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: "20px",
-                    color: "#8C9196",
-                    border: "1px solid #E1E3E5",
+                    color: colors.textMuted,
+                    border: `1px solid ${colors.border}`,
                   }}
                 >
                   {"\uD83D\uDCD6"}
@@ -138,11 +139,10 @@ export function OrderFulfillmentCard({
               {/* Info */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
-                  className="od-link"
                   style={{
                     fontSize: "13px",
                     fontWeight: 600,
-                    color: "#2C6ECB",
+                    color: colors.accent,
                     textDecoration: "none",
                     cursor: "pointer",
                     transition: "color 0.15s ease",
@@ -151,12 +151,12 @@ export function OrderFulfillmentCard({
                   {productTitle}
                 </div>
                 {variantTitle && variantTitle !== "default" && (
-                  <div style={{ fontSize: "12px", color: "#6D7175", marginTop: "2px" }}>
+                  <div style={{ fontSize: "12px", color: colors.textSec, marginTop: "2px" }}>
                     {variantTitle}
                   </div>
                 )}
                 {sku && (
-                  <div style={{ fontSize: "12px", color: "#8C9196", marginTop: "1px" }}>
+                  <div style={{ fontSize: "12px", color: colors.textMuted, marginTop: "1px" }}>
                     SKU: {sku}
                   </div>
                 )}
@@ -164,14 +164,14 @@ export function OrderFulfillmentCard({
 
               {/* Quantity x Price = Total */}
               <div style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                <div style={{ fontSize: "13px", color: "#1A1A1A" }}>
+                <div style={{ fontSize: "13px", color: colors.text }}>
                   {formatCurrency(unitPrice, currency)} &times; {quantity}
                 </div>
                 <div
                   style={{
                     fontSize: "13px",
                     fontWeight: 600,
-                    color: "#1A1A1A",
+                    color: colors.text,
                     marginTop: "2px",
                   }}
                 >
@@ -190,26 +190,15 @@ export function OrderFulfillmentCard({
             display: "flex",
             justifyContent: "flex-end",
             padding: "12px 20px",
-            borderTop: "1px solid #E1E3E5",
+            borderTop: `1px solid ${colors.border}`,
           }}
         >
           <button
             onClick={onMarkAsFulfilled}
             disabled={isLoading}
-            className="od-btn-primary"
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "8px 16px",
-              borderRadius: "6px",
-              fontSize: "13px",
-              fontWeight: 500,
+              ...btnPrimary,
               cursor: isLoading ? "default" : "pointer",
-              background: "#008060",
-              color: "#FFFFFF",
-              border: "1px solid #008060",
-              transition: "all 0.15s ease",
               opacity: isLoading ? 0.6 : 1,
             }}
           >
@@ -230,17 +219,17 @@ export function OrderFulfillmentCard({
 
       {/* Fulfilled info */}
       {hasFulfillments && (
-        <div style={{ padding: "12px 20px", borderTop: "1px solid #E1E3E5" }}>
+        <div style={{ padding: "12px 20px", borderTop: `1px solid ${colors.border}` }}>
           {order.fulfillments.map((ful: any) => (
             <div
               key={ful.id}
               style={{
                 fontSize: "13px",
-                color: "#6D7175",
+                color: colors.textSec,
                 padding: "4px 0",
               }}
             >
-              <span style={{ fontWeight: 500, color: "#1A1A1A" }}>Fulfilled</span>
+              <span style={{ fontWeight: 500, color: colors.text }}>Fulfilled</span>
               {" on "}
               {new Date(ful.created_at).toLocaleDateString("en-US", {
                 month: "short",

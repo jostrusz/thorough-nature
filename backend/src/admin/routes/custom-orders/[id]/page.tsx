@@ -2,6 +2,16 @@ import React, { useState, useCallback } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { toast } from "@medusajs/ui"
 
+// Design tokens
+import {
+  colors,
+  shadows,
+  radii,
+  fontStack,
+  cardStyle,
+  cardHeaderStyle,
+} from "../../../components/orders/design-tokens"
+
 // Hooks
 import { useOrderDetail } from "../../../hooks/use-order-detail"
 import { useUpdateMetadata } from "../../../hooks/use-update-metadata"
@@ -46,7 +56,7 @@ function OrderDetailStyles() {
       }
       .od-card:hover {
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
-        border-color: #D2D5D8 !important;
+        border-color: ${colors.borderActive} !important;
         transform: translateY(-1px);
       }
 
@@ -55,8 +65,8 @@ function OrderDetailStyles() {
         transition: all 0.15s ease !important;
       }
       .od-btn:hover {
-        background: #F6F6F7 !important;
-        border-color: #C9CCCF !important;
+        background: ${colors.bgHover} !important;
+        border-color: ${colors.borderActive} !important;
       }
       .od-btn:active {
         transform: scale(0.97);
@@ -68,7 +78,7 @@ function OrderDetailStyles() {
       }
       .od-btn-primary:hover {
         filter: brightness(1.1);
-        box-shadow: 0 2px 8px rgba(0, 128, 96, 0.25);
+        box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
       }
       .od-btn-primary:active {
         transform: scale(0.97);
@@ -80,7 +90,7 @@ function OrderDetailStyles() {
       }
       .od-link:hover {
         text-decoration: underline !important;
-        color: #1A5BA8 !important;
+        color: ${colors.accent} !important;
       }
 
       /* Edit pencil button */
@@ -88,8 +98,8 @@ function OrderDetailStyles() {
         transition: all 0.15s ease !important;
       }
       .od-edit-btn:hover {
-        color: #1A1A1A !important;
-        background: #F6F6F7 !important;
+        color: ${colors.text} !important;
+        background: ${colors.bgHover} !important;
       }
 
       /* Input focus glow */
@@ -97,12 +107,12 @@ function OrderDetailStyles() {
         transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
       }
       .od-input:focus {
-        border-color: #008060 !important;
-        box-shadow: 0 0 0 3px rgba(0, 128, 96, 0.12) !important;
+        border-color: ${colors.accent} !important;
+        box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12) !important;
         outline: none !important;
       }
       .od-input:hover:not(:focus) {
-        border-color: #C9CCCF !important;
+        border-color: ${colors.borderActive} !important;
       }
 
       /* Hoverable rows */
@@ -114,7 +124,7 @@ function OrderDetailStyles() {
         padding-right: 4px !important;
       }
       .od-row-hover:hover {
-        background: #F9FAFB !important;
+        background: ${colors.bgHover} !important;
       }
 
       /* Badges — subtle scale */
@@ -130,7 +140,7 @@ function OrderDetailStyles() {
         transition: background 0.12s ease, padding-left 0.15s ease !important;
       }
       .od-dropdown-item:hover {
-        background: #F6F6F7 !important;
+        background: ${colors.bgHover} !important;
         padding-left: 20px !important;
       }
 
@@ -158,7 +168,7 @@ function OrderDetailStyles() {
         bottom: calc(100% + 6px);
         left: 50%;
         transform: translateX(-50%);
-        background: #1A1A1A;
+        background: ${colors.text};
         color: #FFFFFF;
         padding: 4px 8px;
         border-radius: 4px;
@@ -178,12 +188,120 @@ function LoadingSpinner() {
       style={{
         width: "24px",
         height: "24px",
-        border: "3px solid #E1E3E5",
-        borderTopColor: "#008060",
+        border: `3px solid ${colors.border}`,
+        borderTopColor: colors.accent,
         borderRadius: "50%",
         animation: "spin 0.8s linear infinite",
       }}
     />
+  )
+}
+
+// ═══ Health Bar ═══
+// Shows order progress: Created → Paid → Fulfilled → Shipped → Delivered
+
+function getOrderHealthStep(order: any): number {
+  // 0=Created, 1=Paid, 2=Fulfilled, 3=Shipped, 4=Delivered
+  const dextrumStatus = order.metadata?.dextrum_status?.toLowerCase?.() || ""
+  const fulfillmentStatus = (order.fulfillment_status || "").toLowerCase()
+  const paymentStatus = (order.payment_status || "").toLowerCase()
+
+  if (dextrumStatus === "delivered" || dextrumStatus === "completed") return 4
+  if (
+    dextrumStatus === "shipped" ||
+    dextrumStatus === "in_transit" ||
+    order.metadata?.dextrum_tracking_number
+  )
+    return 3
+  if (
+    fulfillmentStatus === "fulfilled" ||
+    fulfillmentStatus === "shipped" ||
+    fulfillmentStatus === "partially_fulfilled"
+  )
+    return 2
+  if (
+    paymentStatus === "captured" ||
+    paymentStatus === "paid" ||
+    paymentStatus === "partially_refunded"
+  )
+    return 1
+  return 0
+}
+
+const HEALTH_STEPS = ["Created", "Paid", "Fulfilled", "Shipped", "Delivered"]
+
+function OrderHealthBar({ order }: { order: any }) {
+  const currentStep = getOrderHealthStep(order)
+
+  return (
+    <div
+      style={{
+        background: colors.bgCard,
+        border: `1px solid ${colors.border}`,
+        borderRadius: radii.card,
+        boxShadow: shadows.card,
+        marginBottom: "20px",
+        padding: "16px 20px",
+        overflow: "hidden",
+      }}
+    >
+      {/* Bar segments */}
+      <div style={{ display: "flex", gap: "4px", marginBottom: "10px" }}>
+        {HEALTH_STEPS.map((_, idx) => {
+          let segColor: string
+          if (idx < currentStep) {
+            segColor = colors.green
+          } else if (idx === currentStep) {
+            segColor = colors.accent
+          } else {
+            segColor = colors.border
+          }
+          return (
+            <div
+              key={idx}
+              style={{
+                flex: 1,
+                height: "6px",
+                borderRadius: "3px",
+                background: segColor,
+                transition: "background 0.3s ease",
+              }}
+            />
+          )
+        })}
+      </div>
+      {/* Labels */}
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        {HEALTH_STEPS.map((label, idx) => {
+          let labelColor: string
+          let labelWeight: number
+          if (idx < currentStep) {
+            labelColor = colors.green
+            labelWeight = 500
+          } else if (idx === currentStep) {
+            labelColor = colors.accent
+            labelWeight = 600
+          } else {
+            labelColor = colors.textMuted
+            labelWeight = 400
+          }
+          return (
+            <span
+              key={idx}
+              style={{
+                fontSize: "11px",
+                fontWeight: labelWeight,
+                color: labelColor,
+                textAlign: "center",
+                flex: 1,
+              }}
+            >
+              {label}
+            </span>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
@@ -192,8 +310,9 @@ const pageStyle: React.CSSProperties = {
   maxWidth: "calc(100vw - 280px)",
   margin: "0 auto",
   padding: "24px 32px",
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif",
+  fontFamily: fontStack,
+  background: colors.bg,
+  minHeight: "100vh",
 }
 
 const OrderDetailPage = () => {
@@ -427,7 +546,7 @@ const OrderDetailPage = () => {
           style={{
             textAlign: "center",
             padding: "60px 20px",
-            color: "#8C9196",
+            color: colors.textMuted,
           }}
         >
           <p style={{ fontSize: "14px" }}>
@@ -464,12 +583,15 @@ const OrderDetailPage = () => {
         onFakturoidOpen={handleFakturoidOpen}
       />
 
+      {/* Health Bar — order progress */}
+      <OrderHealthBar order={order} />
+
       {/* Two-column layout */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 340px",
-          gap: "20px",
+          gap: "24px",
           alignItems: "start",
         }}
       >
@@ -511,71 +633,61 @@ const OrderDetailPage = () => {
           {order.metadata?.dextrum_status && (
             <div
               className="od-card"
-              style={{
-                background: "#FFFFFF",
-                border: "1px solid #E1E3E5",
-                borderRadius: "10px",
-                marginBottom: "16px",
-                overflow: "hidden",
-              }}
+              style={cardStyle}
             >
               <div
                 style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1A1A1A",
-                  padding: "16px 20px",
-                  borderBottom: "1px solid #E1E3E5",
-                  display: "flex",
-                  alignItems: "center",
+                  ...cardHeaderStyle,
                   gap: "8px",
                 }}
               >
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#3730A3" strokeWidth="1.5">
-                  <rect x="2" y="4" width="16" height="12" rx="2" />
-                  <path d="M2 8h16M7 4v4M13 4v4" />
-                </svg>
-                Dextrum — WMS
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={colors.accent} strokeWidth="1.5">
+                    <rect x="2" y="4" width="16" height="12" rx="2" />
+                    <path d="M2 8h16M7 4v4M13 4v4" />
+                  </svg>
+                  Dextrum — WMS
+                </div>
               </div>
               <div style={{ padding: "16px 20px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                  <span style={{ fontSize: "12px", color: "#6D7175" }}>Status</span>
+                  <span style={{ fontSize: "12px", color: colors.textSec }}>Status</span>
                   <DeliveryBadge status={order.metadata.dextrum_status} />
                 </div>
                 {order.metadata.dextrum_order_code && (
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                    <span style={{ fontSize: "12px", color: "#6D7175" }}>WMS Order</span>
-                    <span style={{ fontSize: "13px", fontWeight: 500 }}>{order.metadata.dextrum_order_code}</span>
+                    <span style={{ fontSize: "12px", color: colors.textSec }}>WMS Order</span>
+                    <span style={{ fontSize: "13px", fontWeight: 500, color: colors.text }}>{order.metadata.dextrum_order_code}</span>
                   </div>
                 )}
                 {order.metadata.dextrum_tracking_number && (
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                    <span style={{ fontSize: "12px", color: "#6D7175" }}>Tracking</span>
+                    <span style={{ fontSize: "12px", color: colors.textSec }}>Tracking</span>
                     {order.metadata.dextrum_tracking_url ? (
                       <a
                         href={order.metadata.dextrum_tracking_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ fontSize: "13px", color: "#2C6ECB", textDecoration: "none", fontWeight: 500 }}
+                        style={{ fontSize: "13px", color: colors.accent, textDecoration: "none", fontWeight: 500 }}
                         className="od-link"
                       >
                         {order.metadata.dextrum_tracking_number} &rarr;
                       </a>
                     ) : (
-                      <span style={{ fontSize: "13px", fontWeight: 500 }}>{order.metadata.dextrum_tracking_number}</span>
+                      <span style={{ fontSize: "13px", fontWeight: 500, color: colors.text }}>{order.metadata.dextrum_tracking_number}</span>
                     )}
                   </div>
                 )}
                 {order.metadata.dextrum_carrier && (
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                    <span style={{ fontSize: "12px", color: "#6D7175" }}>Carrier</span>
-                    <span style={{ fontSize: "13px", fontWeight: 500 }}>{order.metadata.dextrum_carrier}</span>
+                    <span style={{ fontSize: "12px", color: colors.textSec }}>Carrier</span>
+                    <span style={{ fontSize: "13px", fontWeight: 500, color: colors.text }}>{order.metadata.dextrum_carrier}</span>
                   </div>
                 )}
                 {order.metadata.dextrum_sent_at && (
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: "12px", color: "#6D7175" }}>Sent to WMS</span>
-                    <span style={{ fontSize: "12px", color: "#6D7175" }}>
+                    <span style={{ fontSize: "12px", color: colors.textSec }}>Sent to WMS</span>
+                    <span style={{ fontSize: "12px", color: colors.textSec }}>
                       {new Date(order.metadata.dextrum_sent_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                       {" at "}
                       {new Date(order.metadata.dextrum_sent_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
