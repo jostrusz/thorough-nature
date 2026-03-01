@@ -142,11 +142,10 @@ function OrderDetailStyles() {
 
       /* Dropdown items */
       .od-dropdown-item {
-        transition: background 0.12s ease, padding-left 0.15s ease !important;
+        transition: background 0.15s ease !important;
       }
       .od-dropdown-item:hover {
         background: ${colors.bgHover} !important;
-        padding-left: 20px !important;
       }
 
       /* Thumbnail hover */
@@ -322,12 +321,12 @@ function OrderHealthBar({ order }: { order: any }) {
       <div style={{ display: "flex", gap: "4px", marginBottom: "10px" }}>
         {HEALTH_STEPS.map((_, idx) => {
           let segColor: string
-          if (idx < currentStep) {
-            segColor = colors.green
-          } else if (idx === currentStep) {
-            segColor = colors.accent
+          if (currentStep === 0) {
+            // Created only — purple for the first segment
+            segColor = idx === 0 ? colors.accent : colors.border
           } else {
-            segColor = colors.border
+            // Paid and beyond — all completed steps are green
+            segColor = idx <= currentStep ? colors.green : colors.border
           }
           return (
             <div
@@ -348,15 +347,24 @@ function OrderHealthBar({ order }: { order: any }) {
         {HEALTH_STEPS.map((label, idx) => {
           let labelColor: string
           let labelWeight: number
-          if (idx < currentStep) {
-            labelColor = colors.green
-            labelWeight = 500
-          } else if (idx === currentStep) {
-            labelColor = colors.accent
-            labelWeight = 600
+          if (currentStep === 0) {
+            // Created only — purple label for Created
+            if (idx === 0) {
+              labelColor = colors.accent
+              labelWeight = 600
+            } else {
+              labelColor = colors.textMuted
+              labelWeight = 400
+            }
           } else {
-            labelColor = colors.textMuted
-            labelWeight = 400
+            // Paid and beyond — green for completed, muted for rest
+            if (idx <= currentStep) {
+              labelColor = colors.green
+              labelWeight = idx === currentStep ? 600 : 500
+            } else {
+              labelColor = colors.textMuted
+              labelWeight = 400
+            }
           }
           return (
             <span

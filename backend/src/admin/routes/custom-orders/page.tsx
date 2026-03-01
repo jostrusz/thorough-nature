@@ -19,9 +19,9 @@ import { colors, radii, shadows, fontStack, cardStyle as tokenCardStyle, btnOutl
 const BG_COLOR = "#fafafa"
 
 const dashboardStyle: React.CSSProperties = {
-  maxWidth: "1400px",
+  maxWidth: "1600px",
   margin: "0 auto",
-  padding: "32px 48px",
+  padding: "20px 48px 32px",
   fontFamily: fontStack,
 }
 
@@ -259,6 +259,31 @@ function DashboardStyles() {
       }
       .dash-animate-in {
         animation: dashFadeIn 0.4s ease;
+      }
+
+      /* Hide Medusa admin notification bar / header above the dashboard */
+      .dash-animate-in {
+        margin-top: -12px;
+      }
+
+      /* Responsive: smaller screens get tighter padding */
+      @media (max-width: 1400px) {
+        .dash-animate-in {
+          padding-left: 32px !important;
+          padding-right: 32px !important;
+        }
+      }
+      @media (max-width: 1100px) {
+        .dash-animate-in {
+          padding-left: 20px !important;
+          padding-right: 20px !important;
+        }
+      }
+      @media (max-width: 768px) {
+        .dash-animate-in {
+          padding-left: 12px !important;
+          padding-right: 12px !important;
+        }
       }
     `}</style>
   )
