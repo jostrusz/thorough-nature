@@ -40,6 +40,7 @@ export async function POST(
         "currency_code",
         "metadata",
         "items.*",
+        "items.tax_lines.*",
         "shipping_address.*",
         "billing_address.*",
       ],
@@ -114,14 +115,22 @@ export async function POST(
       return
     }
 
-    // ── Build credit note lines (negative amounts from order items) ──
+    // ── Build credit note lines (negative amounts from order items, with VAT rate) ──
     const items = order.items || []
-    const lines = items.map((item: any) => ({
-      name: item.title || item.product_title || "Item",
-      quantity: item.quantity || 1,
-      unit_price: -(item.unit_price || 0),
-      unit_name: "ks",
-    }))
+    const lines = items.map((item: any) => {
+      const line: any = {
+        name: item.title || item.product_title || "Item",
+        quantity: item.quantity || 1,
+        unit_price: -(item.unit_price || 0),
+        unit_name: "ks",
+      }
+      // Extract VAT rate from Medusa tax lines (rate is decimal: 0.21 = 21%)
+      const taxLine = item.tax_lines?.[0]
+      if (taxLine?.rate != null) {
+        line.vat_rate = Math.round(taxLine.rate * 100)
+      }
+      return line
+    })
 
     if (!lines.length) {
       res.status(400).json({ error: "Order has no line items for credit note" })

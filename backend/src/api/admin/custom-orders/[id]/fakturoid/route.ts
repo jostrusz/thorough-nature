@@ -41,6 +41,7 @@ export async function POST(
         "currency_code",
         "metadata",
         "items.*",
+        "items.tax_lines.*",
         "shipping_address.*",
         "billing_address.*",
         "payment_collections.payments.provider_id",
@@ -158,14 +159,22 @@ export async function POST(
         ""
     }
 
-    // ── Build invoice lines ──
+    // ── Build invoice lines (with VAT rate from Medusa tax lines) ──
     const items = order.items || []
-    const lines = items.map((item: any) => ({
-      name: item.title || item.product_title || "Item",
-      quantity: item.quantity || 1,
-      unit_price: item.unit_price || 0,
-      unit_name: "ks",
-    }))
+    const lines = items.map((item: any) => {
+      const line: any = {
+        name: item.title || item.product_title || "Item",
+        quantity: item.quantity || 1,
+        unit_price: item.unit_price || 0,
+        unit_name: "ks",
+      }
+      // Extract VAT rate from Medusa tax lines (rate is decimal: 0.21 = 21%)
+      const taxLine = item.tax_lines?.[0]
+      if (taxLine?.rate != null) {
+        line.vat_rate = Math.round(taxLine.rate * 100)
+      }
+      return line
+    })
 
     if (!lines.length) {
       res.status(400).json({ error: "Order has no line items" })
@@ -274,7 +283,10 @@ export async function DELETE(
     }
 
     // ── Try to delete from Fakturoid API (best-effort) ──
+    // Order matters: credit note must be deleted BEFORE the invoice
+    // (Fakturoid refuses to delete an invoice that has linked corrections)
     let deletedFromFakturoid = false
+    const creditNoteInternalId = metadata.fakturoid_credit_note_internal_id || metadata.fakturoid_credit_note_id
     const projectConfigFound = !!projectId
 
     if (projectConfigFound) {
@@ -310,11 +322,26 @@ export async function DELETE(
             user_agent_email: config.user_agent_email,
           }
 
-          await deleteInvoice(creds, tokenResult.access_token, Number(internalId))
-          deletedFromFakturoid = true
+          // Step 1: Delete credit note first (if exists)
+          if (creditNoteInternalId) {
+            try {
+              const cnResult = await deleteInvoice(creds, tokenResult.access_token, Number(creditNoteInternalId))
+              console.log(
+                `[Fakturoid] Credit note ${creditNoteInternalId} ${cnResult.deleted ? "deleted" : "could not be deleted"} for order ${id}`
+              )
+            } catch (cnError: any) {
+              console.warn(
+                `[Fakturoid] Could not delete credit note ${creditNoteInternalId}: ${cnError.message}`
+              )
+            }
+          }
+
+          // Step 2: Delete the invoice
+          const result = await deleteInvoice(creds, tokenResult.access_token, Number(internalId))
+          deletedFromFakturoid = result.deleted
 
           console.log(
-            `[Fakturoid] Invoice ${internalId} deleted from Fakturoid for order ${id}`
+            `[Fakturoid] Invoice ${internalId} ${result.deleted ? "deleted" : `not deleted (${result.status})`} for order ${id}`
           )
         }
       } catch (apiError: any) {

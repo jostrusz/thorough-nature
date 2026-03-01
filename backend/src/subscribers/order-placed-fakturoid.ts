@@ -45,7 +45,7 @@ export default async function orderPlacedFakturoidHandler({
 
     // ── Retrieve order with relations ──
     const order = await orderService.retrieveOrder(data.id, {
-      relations: ["items", "summary", "shipping_address", "billing_address"],
+      relations: ["items", "items.tax_lines", "summary", "shipping_address", "billing_address"],
     })
 
     if (!order) {
@@ -197,14 +197,22 @@ export default async function orderPlacedFakturoidHandler({
       console.warn("[Fakturoid] Could not extract payment ID:", payErr.message)
     }
 
-    // ── Build invoice lines ──
+    // ── Build invoice lines (with VAT rate from Medusa tax lines) ──
     const items = order.items || []
-    const lines = items.map((item: any) => ({
-      name: item.title || item.product_title || "Item",
-      quantity: item.quantity || 1,
-      unit_price: item.unit_price || 0,
-      unit_name: "ks",
-    }))
+    const lines = items.map((item: any) => {
+      const line: any = {
+        name: item.title || item.product_title || "Item",
+        quantity: item.quantity || 1,
+        unit_price: item.unit_price || 0,
+        unit_name: "ks",
+      }
+      // Extract VAT rate from Medusa tax lines (rate is decimal: 0.21 = 21%)
+      const taxLine = item.tax_lines?.[0]
+      if (taxLine?.rate != null) {
+        line.vat_rate = Math.round(taxLine.rate * 100)
+      }
+      return line
+    })
 
     if (!lines.length) {
       console.warn("[Fakturoid] No line items for order:", data.id)
