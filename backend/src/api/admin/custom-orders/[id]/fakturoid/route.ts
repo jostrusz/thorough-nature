@@ -369,21 +369,24 @@ export async function DELETE(
     }
 
     // ── Always clear invoice + credit note metadata from order ──
-    const cleanedMeta = { ...metadata }
-    // Invoice fields
-    delete cleanedMeta.fakturoid_invoice_id
-    delete cleanedMeta.fakturoid_internal_id
-    delete cleanedMeta.fakturoid_invoice_number
-    delete cleanedMeta.fakturoid_invoice_url
-    delete cleanedMeta.fakturoid_created_at
-    // Credit note fields (linked to the deleted invoice)
-    delete cleanedMeta.fakturoid_credit_note_id
-    delete cleanedMeta.fakturoid_credit_note_internal_id
-    delete cleanedMeta.fakturoid_credit_note_url
-    delete cleanedMeta.fakturoid_credit_note_created_at
-
+    // Use explicit null values instead of delete — Medusa merges metadata,
+    // so deleted keys would be ignored and old values would persist.
+    // Setting to null ensures the keys are actually cleared in the DB.
     await orderModuleService.updateOrders(id, {
-      metadata: cleanedMeta,
+      metadata: {
+        ...metadata,
+        // Invoice fields → null
+        fakturoid_invoice_id: null,
+        fakturoid_internal_id: null,
+        fakturoid_invoice_number: null,
+        fakturoid_invoice_url: null,
+        fakturoid_created_at: null,
+        // Credit note fields → null
+        fakturoid_credit_note_id: null,
+        fakturoid_credit_note_internal_id: null,
+        fakturoid_credit_note_url: null,
+        fakturoid_credit_note_created_at: null,
+      },
     })
 
     res.json({
