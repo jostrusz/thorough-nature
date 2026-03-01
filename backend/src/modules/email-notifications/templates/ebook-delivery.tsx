@@ -8,6 +8,7 @@ export interface EbookDeliveryTemplateProps {
   firstName: string
   downloadUrl: string
   expiresAt: string
+  billingEntity?: any
   preview?: string
 }
 
@@ -18,7 +19,7 @@ export const isEbookDeliveryData = (data: any): data is EbookDeliveryTemplatePro
 
 export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
   PreviewProps: EbookDeliveryTemplateProps
-} = ({ firstName, downloadUrl, expiresAt, preview = 'Je e-books staan klaar!' }) => {
+} = ({ firstName, downloadUrl, expiresAt, billingEntity, preview = 'Je e-books staan klaar!' }) => {
   const expiryDate = new Date(expiresAt).toLocaleDateString('nl-NL', {
     day: 'numeric',
     month: 'long',
@@ -265,7 +266,17 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
             lineHeight: '1.6',
             margin: '0',
           }}>
-            EverChapter OÜ • Tallinn, Estonia
+            {billingEntity?.legal_name || 'EverChapter OÜ'}
+            {' '}&bull;{' '}
+            {billingEntity?.address
+              ? `${billingEntity.address.address_1 || ''}, ${billingEntity.address.postal_code || ''} ${billingEntity.address.city || ''}`
+              : 'Tallinn, Estonia'}
+            {billingEntity?.registration_id && (
+              <>
+                <br />
+                Reg. nr: {billingEntity.registration_id}
+              </>
+            )}
             <br />
             Je ontvangt deze e-mail omdat je een bestelling hebt geplaatst.
           </Text>

@@ -2,18 +2,19 @@ import { Text, Section, Hr, Link } from '@react-email/components'
 import * as React from 'react'
 import { Base } from './base'
 
-export const ORDER_PLACED = 'order-placed'
+export const SHIPMENT_NOTIFICATION = 'shipment-notification'
 
-export interface OrderPlacedTemplateProps {
+export interface ShipmentNotificationTemplateProps {
   order: any
   shippingAddress: any
-  billingAddress?: any
-  paymentMethod?: string
+  trackingNumber?: string
+  trackingUrl?: string
+  trackingCompany?: string
   billingEntity?: any
   preview?: string
 }
 
-export const isOrderPlacedTemplateData = (data: any): data is OrderPlacedTemplateProps =>
+export const isShipmentNotificationData = (data: any): data is ShipmentNotificationTemplateProps =>
   typeof data.order === 'object' && typeof data.shippingAddress === 'object'
 
 const font = "'Inter', Arial, sans-serif"
@@ -26,20 +27,6 @@ function formatPrice(amount: number, currencyCode: string): string {
     }).format(amount)
   } catch {
     return `\u20AC${(amount || 0).toFixed(2).replace('.', ',')}`
-  }
-}
-
-function formatDate(dateStr: string): string {
-  try {
-    return new Date(dateStr).toLocaleDateString('nl-NL', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  } catch {
-    return dateStr
   }
 }
 
@@ -63,31 +50,20 @@ function formatCountry(code: string): string {
   return map[(code || '').toLowerCase()] || (code || '').toUpperCase()
 }
 
-export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
+export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplateProps> & {
   PreviewProps: any
 } = ({
   order,
   shippingAddress,
-  billingAddress,
-  paymentMethod,
+  trackingNumber,
+  trackingUrl,
+  trackingCompany,
   billingEntity,
-  preview = 'Bedankt voor je bestelling!',
+  preview = 'Je bestelling is verzonden!',
 }) => {
   const currency = order.currency_code || 'eur'
   const items = order.items || []
   const displayId = order.display_id || order.id
-  const orderDate = formatDate(order.created_at)
-
-  // Calculate totals
-  const subtotal = items.reduce(
-    (sum: number, item: any) => sum + (item.unit_price || 0) * (item.quantity || 1),
-    0
-  )
-  const shippingTotal = order.summary?.raw_shipping_total?.value ?? order.summary?.shipping_total ?? 0
-  const taxTotal = order.summary?.raw_tax_total?.value ?? order.summary?.tax_total ?? 0
-  const total = order.summary?.raw_current_order_total?.value ?? order.summary?.current_order_total ?? subtotal + shippingTotal
-
-  const invoiceAddress = billingAddress || shippingAddress
 
   return (
     <Base preview={preview}>
@@ -112,6 +88,12 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             Laat Los Wat Je Kapotmaakt
           </Text>
           <Text style={{
+            fontSize: '36px',
+            marginBottom: '8px',
+          }}>
+            📦
+          </Text>
+          <Text style={{
             fontFamily: font,
             fontSize: '24px',
             fontWeight: 700,
@@ -119,7 +101,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             margin: '0',
             lineHeight: '1.3',
           }}>
-            Bedankt voor je bestelling!
+            Je bestelling is verzonden!
           </Text>
           <Text style={{
             fontFamily: font,
@@ -127,7 +109,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             color: '#9B7AAD',
             margin: '8px 0 0',
           }}>
-            Bestelling #{displayId} &bull; {orderDate}
+            Bestelling #{displayId}
           </Text>
         </div>
 
@@ -149,63 +131,105 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             lineHeight: '1.6',
             marginBottom: '0',
           }}>
-            Wat fijn dat je de stap hebt gezet! Je bestelling is ontvangen en we gaan er meteen mee aan de slag. Hieronder vind je alles op een rijtje.
+            Goed nieuws! Je bestelling is ingepakt en onderweg naar je. Hieronder vind je de details van je verzending.
           </Text>
         </div>
 
-        {/* ORDER SUMMARY BOX */}
-        <div style={{ padding: '24px 40px' }}>
-          <div style={{
-            backgroundColor: '#FAF5F8',
-            borderRadius: '10px',
-            border: '1px solid #EDD9E5',
-            padding: '20px 24px',
-          }}>
-            <div style={{ marginBottom: '8px' }}>
+        {/* TRACKING INFO */}
+        {(trackingNumber || trackingUrl) && (
+          <div style={{ padding: '24px 40px 0 40px' }}>
+            <div style={{
+              backgroundColor: '#E8F5E9',
+              borderRadius: '10px',
+              border: '1px solid #A5D6A7',
+              padding: '20px 24px',
+              textAlign: 'center' as const,
+            }}>
               <Text style={{
                 fontFamily: font,
-                fontSize: '13px',
-                color: '#5A3D6B',
-                margin: '0',
+                fontSize: '11px',
+                fontWeight: 600,
+                textTransform: 'uppercase' as const,
+                letterSpacing: '1.5px',
+                color: '#2E7D32',
+                marginBottom: '12px',
               }}>
-                <strong style={{ color: '#2D1B3D' }}>Bestelling:</strong> &nbsp; #{displayId}
-                &nbsp;&nbsp;
-                <span style={{
-                  backgroundColor: '#e8f5e9',
-                  color: '#2e7d32',
-                  padding: '3px 10px',
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  fontFamily: font,
-                }}>
-                  Bevestigd
-                </span>
+                Track &amp; Trace
               </Text>
+              {trackingCompany && (
+                <Text style={{
+                  fontFamily: font,
+                  fontSize: '13px',
+                  color: '#5A3D6B',
+                  marginBottom: '8px',
+                }}>
+                  Vervoerder: <strong style={{ color: '#2D1B3D' }}>{trackingCompany}</strong>
+                </Text>
+              )}
+              {trackingNumber && (
+                <Text style={{
+                  fontFamily: font,
+                  fontSize: '13px',
+                  color: '#5A3D6B',
+                  marginBottom: trackingUrl ? '14px' : '0',
+                }}>
+                  Trackingnummer: <strong style={{ color: '#2D1B3D' }}>{trackingNumber}</strong>
+                </Text>
+              )}
+              {trackingUrl && (
+                <Link
+                  href={trackingUrl}
+                  style={{
+                    backgroundColor: '#C27BA0',
+                    color: '#ffffff',
+                    fontFamily: font,
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    padding: '12px 32px',
+                    borderRadius: '8px',
+                    display: 'inline-block',
+                  }}
+                >
+                  Volg je pakket →
+                </Link>
+              )}
             </div>
+          </div>
+        )}
+
+        {/* DELIVERY ESTIMATE */}
+        <div style={{ padding: '16px 40px 0 40px' }}>
+          <div style={{
+            backgroundColor: '#FFF8E1',
+            borderRadius: '8px',
+            border: '1px solid #FFE082',
+            padding: '14px 20px',
+            textAlign: 'center' as const,
+          }}>
             <Text style={{
               fontFamily: font,
               fontSize: '13px',
-              color: '#5A3D6B',
-              margin: '0 0 6px',
+              color: '#795548',
+              margin: '0',
+              lineHeight: '1.5',
             }}>
-              <strong style={{ color: '#2D1B3D' }}>Datum:</strong> &nbsp; {orderDate}
+              🚚 &nbsp; <strong>Verwachte levering:</strong> 4–7 werkdagen
             </Text>
-            {paymentMethod && (
-              <Text style={{
-                fontFamily: font,
-                fontSize: '13px',
-                color: '#5A3D6B',
-                margin: '0',
-              }}>
-                <strong style={{ color: '#2D1B3D' }}>Betaalmethode:</strong> &nbsp; {paymentMethod}
-              </Text>
-            )}
+            <Text style={{
+              fontFamily: font,
+              fontSize: '12px',
+              color: '#9e9e9e',
+              margin: '6px 0 0',
+              lineHeight: '1.5',
+            }}>
+              Onze boeken worden verzonden vanuit ons centrale magazijn in Tsjechië.
+            </Text>
           </div>
         </div>
 
         {/* ITEMS */}
-        <div style={{ padding: '0 40px' }}>
+        <div style={{ padding: '24px 40px 0 40px' }}>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
@@ -215,7 +239,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             color: '#9B7AAD',
             marginBottom: '14px',
           }}>
-            Je bestelling
+            Verzonden items
           </Text>
 
           {items.map((item: any) => (
@@ -293,151 +317,43 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
               </table>
             </div>
           ))}
-
-          {/* Totals */}
-          <div style={{ marginTop: '16px', borderTop: '2px solid #EDD9E5', paddingTop: '14px' }}>
-            <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>
-              <tbody>
-                <tr>
-                  <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', padding: '4px 0' }}>Subtotaal</td>
-                  <td align="right" style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', padding: '4px 0' }}>{formatPrice(subtotal, currency)}</td>
-                </tr>
-                <tr>
-                  <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', padding: '4px 0' }}>Verzendkosten</td>
-                  <td align="right" style={{ fontFamily: font, fontSize: '14px', color: shippingTotal > 0 ? '#5A3D6B' : '#2e7d32', padding: '4px 0' }}>
-                    {shippingTotal > 0 ? formatPrice(shippingTotal, currency) : 'Gratis'}
-                  </td>
-                </tr>
-                {taxTotal > 0 && (
-                  <tr>
-                    <td style={{ fontFamily: font, fontSize: '12px', color: '#9B7AAD', padding: '4px 0' }}>Waarvan BTW</td>
-                    <td align="right" style={{ fontFamily: font, fontSize: '12px', color: '#9B7AAD', padding: '4px 0' }}>{formatPrice(taxTotal, currency)}</td>
-                  </tr>
-                )}
-                <tr>
-                  <td style={{ fontFamily: font, fontSize: '18px', fontWeight: 700, color: '#2D1B3D', padding: '12px 0 0', borderTop: '1px solid #EDD9E5' }}>Totaal</td>
-                  <td align="right" style={{ fontFamily: font, fontSize: '18px', fontWeight: 700, color: '#2D1B3D', padding: '12px 0 0', borderTop: '1px solid #EDD9E5' }}>{formatPrice(total, currency)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
         </div>
 
-        {/* E-BOOK NOTICE */}
+        {/* SHIPPING ADDRESS */}
         <div style={{ padding: '24px 40px 0 40px' }}>
+          <Text style={{
+            fontFamily: font,
+            fontSize: '11px',
+            fontWeight: 600,
+            textTransform: 'uppercase' as const,
+            letterSpacing: '1.5px',
+            color: '#9B7AAD',
+            marginBottom: '10px',
+          }}>
+            Bezorgadres
+          </Text>
           <div style={{
-            backgroundColor: '#E8F5E9',
-            borderRadius: '8px',
-            border: '1px solid #A5D6A7',
-            padding: '14px 20px',
-            textAlign: 'center' as const,
+            backgroundColor: '#FAF5F8',
+            borderRadius: '10px',
+            border: '1px solid #EDD9E5',
+            padding: '16px 20px',
           }}>
             <Text style={{
               fontFamily: font,
-              fontSize: '13px',
-              color: '#2E7D32',
+              fontSize: '14px',
+              color: '#5A3D6B',
+              lineHeight: '1.6',
               margin: '0',
-              lineHeight: '1.5',
             }}>
-              📖 &nbsp; <strong>Je e-book is onderweg!</strong> Je ontvangt binnen enkele minuten een aparte e-mail met de download-link.
+              {shippingAddress?.first_name} {shippingAddress?.last_name}
+              <br />
+              {shippingAddress?.address_1}
+              <br />
+              {shippingAddress?.postal_code} {shippingAddress?.city}
+              <br />
+              {formatCountry(shippingAddress?.country_code)}
             </Text>
           </div>
-        </div>
-
-        {/* DELIVERY ESTIMATE */}
-        <div style={{ padding: '16px 40px 0 40px' }}>
-          <div style={{
-            backgroundColor: '#FFF8E1',
-            borderRadius: '8px',
-            border: '1px solid #FFE082',
-            padding: '14px 20px',
-            textAlign: 'center' as const,
-          }}>
-            <Text style={{
-              fontFamily: font,
-              fontSize: '13px',
-              color: '#795548',
-              margin: '0',
-              lineHeight: '1.5',
-            }}>
-              📦 &nbsp; <strong>Verwachte levering:</strong> 4–7 werkdagen
-            </Text>
-            <Text style={{
-              fontFamily: font,
-              fontSize: '12px',
-              color: '#9e9e9e',
-              margin: '6px 0 0',
-              lineHeight: '1.5',
-            }}>
-              Onze boeken worden verzonden vanuit ons centrale magazijn in Tsjechië, van waaruit we heel Europa bedienen.
-            </Text>
-          </div>
-        </div>
-
-        {/* ADDRESSES */}
-        <div style={{ padding: '28px 40px 0 40px' }}>
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>
-            <tbody>
-              <tr>
-                <td width="50%" valign="top" style={{ paddingRight: '12px' }}>
-                  <Text style={{
-                    fontFamily: font,
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    textTransform: 'uppercase' as const,
-                    letterSpacing: '1.5px',
-                    color: '#9B7AAD',
-                    marginBottom: '10px',
-                  }}>
-                    Bezorgadres
-                  </Text>
-                  <Text style={{
-                    fontFamily: font,
-                    fontSize: '14px',
-                    color: '#5A3D6B',
-                    lineHeight: '1.6',
-                    margin: '0',
-                  }}>
-                    {shippingAddress?.first_name} {shippingAddress?.last_name}
-                    <br />
-                    {shippingAddress?.address_1}
-                    <br />
-                    {shippingAddress?.postal_code} {shippingAddress?.city}
-                    <br />
-                    {formatCountry(shippingAddress?.country_code)}
-                  </Text>
-                </td>
-                <td width="50%" valign="top" style={{ paddingLeft: '12px' }}>
-                  <Text style={{
-                    fontFamily: font,
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    textTransform: 'uppercase' as const,
-                    letterSpacing: '1.5px',
-                    color: '#9B7AAD',
-                    marginBottom: '10px',
-                  }}>
-                    Factuuradres
-                  </Text>
-                  <Text style={{
-                    fontFamily: font,
-                    fontSize: '14px',
-                    color: '#5A3D6B',
-                    lineHeight: '1.6',
-                    margin: '0',
-                  }}>
-                    {invoiceAddress?.first_name} {invoiceAddress?.last_name}
-                    <br />
-                    {invoiceAddress?.address_1}
-                    <br />
-                    {invoiceAddress?.postal_code} {invoiceAddress?.city}
-                    <br />
-                    {formatCountry(invoiceAddress?.country_code)}
-                  </Text>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
 
         <Hr style={{ borderColor: '#EDD9E5', margin: '24px 40px 0 40px' }} />
@@ -453,8 +369,34 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             color: '#9B7AAD',
             marginBottom: '16px',
           }}>
-            Wat gebeurt er nu?
+            Wat kun je verwachten?
           </Text>
+
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '14px' }}>
+            <tbody>
+              <tr>
+                <td width="36" valign="top">
+                  <div style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#2e7d32',
+                    borderRadius: '50%',
+                    textAlign: 'center' as const,
+                    lineHeight: '28px',
+                    fontFamily: font,
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                  }}>✓</div>
+                </td>
+                <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
+                  <strong style={{ color: '#2D1B3D' }}>Verzonden</strong>
+                  <br />
+                  Je bestelling is ingepakt en verzonden vanuit ons magazijn.
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
           <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '14px' }}>
             <tbody>
@@ -471,38 +413,12 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                     fontSize: '13px',
                     fontWeight: 700,
                     color: '#ffffff',
-                  }}>1</div>
-                </td>
-                <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
-                  <strong style={{ color: '#2D1B3D' }}>Bestelling verwerkt</strong>
-                  <br />
-                  We maken je bestelling klaar voor verzending.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '14px' }}>
-            <tbody>
-              <tr>
-                <td width="36" valign="top">
-                  <div style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#D498B5',
-                    borderRadius: '50%',
-                    textAlign: 'center' as const,
-                    lineHeight: '28px',
-                    fontFamily: font,
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    color: '#ffffff',
                   }}>2</div>
                 </td>
                 <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
-                  <strong style={{ color: '#2D1B3D' }}>Verzonden</strong>
+                  <strong style={{ color: '#2D1B3D' }}>Onderweg</strong>
                   <br />
-                  Zodra je pakket is verzonden, ontvang je direct een e-mail met je track &amp; trace code.
+                  De vervoerder brengt je pakket naar het opgegeven adres.
                 </td>
               </tr>
             </tbody>
@@ -528,7 +444,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                 <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#2D1B3D' }}>Bezorgd</strong>
                   <br />
-                  Binnen 4–7 werkdagen heb je jouw boek in huis.
+                  Binnen 4–7 werkdagen heb je jouw boek in huis!
                 </td>
               </tr>
             </tbody>
@@ -551,7 +467,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Vragen over je bestelling? Stuur een mailtje naar
+              Vragen over je verzending? Stuur een mailtje naar
               <br />
               <Link href="mailto:devries@loslatenboek.nl" style={{ color: '#C27BA0', textDecoration: 'underline', fontWeight: 600 }}>
                 devries@loslatenboek.nl
@@ -568,7 +484,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             color: '#5A3D6B',
             marginBottom: '4px',
           }}>
-            Warme groet,
+            Fijn weekend en veel leesplezier!
           </Text>
           <Text style={{
             fontFamily: font,
@@ -610,12 +526,12 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             fontSize: '11px',
             color: '#7a6189',
             lineHeight: '1.6',
-            marginBottom: '8px',
+            margin: '0',
           }}>
             {billingEntity?.legal_name || 'EverChapter OÜ'}
             {' '}&bull;{' '}
             {billingEntity?.address
-              ? `${billingEntity.address.address_1 || ''}, ${billingEntity.address.postal_code || ''} ${billingEntity.address.city || ''}${billingEntity.address.district ? ', ' + billingEntity.address.district : ''}`
+              ? `${billingEntity.address.address_1 || ''}, ${billingEntity.address.postal_code || ''} ${billingEntity.address.city || ''}`
               : 'Tallinn, Estonia'}
             {billingEntity?.registration_id && (
               <>
@@ -623,20 +539,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                 Reg. nr: {billingEntity.registration_id}
               </>
             )}
-            {!billingEntity && (
-              <>
-                <br />
-                Reg. nr: 16938029
-              </>
-            )}
-          </Text>
-          <Text style={{
-            fontFamily: font,
-            fontSize: '11px',
-            color: '#7a6189',
-            lineHeight: '1.5',
-            margin: '0',
-          }}>
+            <br />
             Je ontvangt deze e-mail omdat je een bestelling hebt geplaatst.
           </Text>
         </div>
@@ -645,7 +548,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   )
 }
 
-OrderPlacedTemplate.PreviewProps = {
+ShipmentNotificationTemplate.PreviewProps = {
   order: {
     id: 'test-order-id',
     display_id: '1047',
@@ -662,21 +565,7 @@ OrderPlacedTemplate.PreviewProps = {
         unit_price: 24.95,
         thumbnail: null,
       },
-      {
-        id: 'item-2',
-        title: 'Werkboek: Oefeningen voor Loslaten',
-        product_title: 'Werkboek: Oefeningen voor Loslaten',
-        variant_title: 'Paperback',
-        quantity: 1,
-        unit_price: 14.95,
-        thumbnail: null,
-      },
     ],
-    summary: {
-      raw_current_order_total: { value: 44.85 },
-      raw_shipping_total: { value: 4.95 },
-      raw_tax_total: { value: 7.78 },
-    },
   },
   shippingAddress: {
     first_name: 'Emma',
@@ -686,15 +575,9 @@ OrderPlacedTemplate.PreviewProps = {
     postal_code: '1016 GC',
     country_code: 'nl',
   },
-  billingAddress: {
-    first_name: 'Emma',
-    last_name: 'van der Berg',
-    address_1: 'Keizersgracht 412',
-    city: 'Amsterdam',
-    postal_code: '1016 GC',
-    country_code: 'nl',
-  },
-  paymentMethod: 'iDEAL (ING Bank)',
+  trackingNumber: 'CZ1234567890',
+  trackingUrl: 'https://tracking.example.com/CZ1234567890',
+  trackingCompany: 'Zásilkovna',
 } as any
 
-export default OrderPlacedTemplate
+export default ShipmentNotificationTemplate

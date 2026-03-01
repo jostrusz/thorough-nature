@@ -4,6 +4,7 @@ import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
 import { DIGITAL_DOWNLOAD_MODULE } from '../modules/digital-download'
 import type DigitalDownloadModuleService from '../modules/digital-download/service'
+import { resolveBillingEntity } from './utils/resolve-billing-entity'
 import crypto from 'crypto'
 
 // Hardcoded ebook files for Loslatenboek — these are the MinIO keys
@@ -66,6 +67,14 @@ export default async function orderPlacedDigitalDownloadHandler({
     )
     const firstName = shippingAddress?.first_name || 'daar'
 
+    // Resolve billing entity for footer
+    let billingEntity: any = null
+    try {
+      billingEntity = await resolveBillingEntity(container, data.id)
+    } catch (err: any) {
+      console.warn('[digital-download] Could not resolve billing entity:', err.message)
+    }
+
     // Send ebook delivery email
     await notificationModuleService.createNotifications({
       to: order.email,
@@ -79,6 +88,7 @@ export default async function orderPlacedDigitalDownloadHandler({
         firstName,
         downloadUrl,
         expiresAt: expiresAt.toISOString(),
+        billingEntity,
       },
     })
 

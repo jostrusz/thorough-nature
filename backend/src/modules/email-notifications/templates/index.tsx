@@ -4,12 +4,14 @@ import { InviteUserEmail, INVITE_USER, isInviteUserData } from './invite-user'
 import { OrderPlacedTemplate, ORDER_PLACED, isOrderPlacedTemplateData } from './order-placed'
 import { AbandonedCheckoutTemplate, ABANDONED_CHECKOUT, isAbandonedCheckoutData } from './abandoned-checkout'
 import { EbookDeliveryTemplate, EBOOK_DELIVERY, isEbookDeliveryData } from './ebook-delivery'
+import { ShipmentNotificationTemplate, SHIPMENT_NOTIFICATION, isShipmentNotificationData } from './shipment-notification'
 
 export const EmailTemplates = {
   INVITE_USER,
   ORDER_PLACED,
   ABANDONED_CHECKOUT,
   EBOOK_DELIVERY,
+  SHIPMENT_NOTIFICATION,
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -52,6 +54,15 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <EbookDeliveryTemplate {...data} />
 
+    case EmailTemplates.SHIPMENT_NOTIFICATION:
+      if (!isShipmentNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.SHIPMENT_NOTIFICATION}"`
+        )
+      }
+      return <ShipmentNotificationTemplate {...data} />
+
     default:
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
@@ -60,4 +71,4 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
   }
 }
 
-export { InviteUserEmail, OrderPlacedTemplate, AbandonedCheckoutTemplate, EbookDeliveryTemplate }
+export { InviteUserEmail, OrderPlacedTemplate, AbandonedCheckoutTemplate, EbookDeliveryTemplate, ShipmentNotificationTemplate }

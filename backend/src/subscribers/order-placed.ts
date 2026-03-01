@@ -2,6 +2,7 @@ import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
+import { resolveBillingEntity } from './utils/resolve-billing-entity'
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -92,6 +93,14 @@ export default async function orderPlacedHandler({
 
   const displayId = (order as any).display_id || order.id
 
+  // Resolve billing entity for footer
+  let billingEntity: any = null
+  try {
+    billingEntity = await resolveBillingEntity(container, data.id)
+  } catch (err: any) {
+    console.warn('[OrderPlaced] Could not resolve billing entity:', err.message)
+  }
+
   try {
     await notificationModuleService.createNotifications({
       to: order.email,
@@ -106,6 +115,7 @@ export default async function orderPlacedHandler({
         shippingAddress,
         billingAddress,
         paymentMethod,
+        billingEntity,
         preview: 'Bedankt voor je bestelling!',
       },
     })
