@@ -45,9 +45,9 @@ function useFullPageBackground(ref: React.RefObject<HTMLDivElement | null>) {
         maxWidth: node.style.maxWidth,
         width: node.style.width,
       })
-      node.style.background = BG_COLOR
-      node.style.maxWidth = "100%"
-      node.style.width = "100%"
+      node.style.setProperty("background", BG_COLOR, "important")
+      node.style.setProperty("max-width", "100%", "important")
+      node.style.setProperty("width", "100%", "important")
       node = node.parentElement
     }
 
