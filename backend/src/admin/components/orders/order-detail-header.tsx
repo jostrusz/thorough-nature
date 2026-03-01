@@ -15,6 +15,7 @@ interface OrderDetailHeaderProps {
   onFakturoidCreate: () => void
   onFakturoidOpen: () => void
   onFakturoidDelete: () => void
+  onFakturoidCreditNote: () => void
 }
 
 function getPaymentStatus(order: any): string {
@@ -38,6 +39,7 @@ export function OrderDetailHeader({
   onFakturoidCreate,
   onFakturoidOpen,
   onFakturoidDelete,
+  onFakturoidCreditNote,
 }: OrderDetailHeaderProps) {
   const navigate = useNavigate()
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -47,6 +49,7 @@ export function OrderDetailHeader({
   const createdAt = new Date(order.created_at)
   const fakturoidInvoiceId = order.metadata?.fakturoid_invoice_id
   const fakturoidInvoiceUrl = order.metadata?.fakturoid_invoice_url
+  const fakturoidCreditNoteId = order.metadata?.fakturoid_credit_note_id
   const dextrumMystockId = order.metadata?.dextrum_mystock_id
 
   // Set the order ID for the status page link in dropdown
@@ -179,8 +182,10 @@ export function OrderDetailHeader({
               onFakturoidCreate={onFakturoidCreate}
               onFakturoidOpen={onFakturoidOpen}
               onFakturoidDelete={onFakturoidDelete}
+              onFakturoidCreditNote={onFakturoidCreditNote}
               fakturoidInvoiceId={fakturoidInvoiceId}
               fakturoidInvoiceUrl={fakturoidInvoiceUrl}
+              fakturoidCreditNoteId={fakturoidCreditNoteId}
               dextrumMystockId={dextrumMystockId}
             />
           </div>

@@ -25,6 +25,7 @@ import {
   useSendToDextrum,
   useCreateFakturoidInvoice,
   useDeleteFakturoidInvoice,
+  useCreateFakturoidCreditNote,
   useCustomerStats,
 } from "../../../hooks/use-order-actions"
 
@@ -430,6 +431,7 @@ const OrderDetailPage = () => {
   const sendToDextrum = useSendToDextrum()
   const createFakturoidInvoice = useCreateFakturoidInvoice()
   const deleteFakturoidInvoice = useDeleteFakturoidInvoice()
+  const createFakturoidCreditNote = useCreateFakturoidCreditNote()
 
   // Customer stats
   const order = data?.order as any
@@ -573,6 +575,19 @@ const OrderDetailPage = () => {
     })
   }, [id, deleteFakturoidInvoice])
 
+  const handleFakturoidCreditNote = useCallback(() => {
+    if (!id) return
+    if (!window.confirm("Create a credit note (opravny danovy doklad) for this invoice?")) return
+    createFakturoidCreditNote.mutate(id, {
+      onSuccess: () => {
+        toast.success("Credit note created in Fakturoid")
+      },
+      onError: (err: any) => {
+        toast.error(err?.message || "Failed to create credit note")
+      },
+    })
+  }, [id, createFakturoidCreditNote])
+
   const handleCapture = useCallback(() => {
     if (!id) return
     capturePayment.mutate(id, {
@@ -695,6 +710,7 @@ const OrderDetailPage = () => {
         onFakturoidCreate={handleFakturoidCreate}
         onFakturoidOpen={handleFakturoidOpen}
         onFakturoidDelete={handleFakturoidDelete}
+        onFakturoidCreditNote={handleFakturoidCreditNote}
       />
 
       {/* Health Bar — order progress */}

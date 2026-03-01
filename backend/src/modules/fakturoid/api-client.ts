@@ -42,6 +42,8 @@ export interface FakturoidInvoiceLine {
 
 export interface FakturoidInvoicePayload {
   subject_id: number
+  document_type?: string
+  correction_id?: number
   custom_id?: string
   order_number?: string
   currency?: string
@@ -305,6 +307,35 @@ export async function getInvoice(
   })
 
   if (!res.ok) return null
+  return await res.json()
+}
+
+/**
+ * Create a credit note (opravny danovy doklad / dobropis) linked to an original invoice.
+ * Lines should have NEGATIVE unit_price values.
+ */
+export async function createCreditNote(
+  creds: FakturoidCredentials,
+  token: string,
+  payload: FakturoidInvoicePayload & { correction_id: number }
+): Promise<FakturoidInvoice> {
+  const url = `${accountUrl(creds.slug)}/invoices.json`
+  const body = {
+    ...payload,
+    document_type: "correction",
+  }
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: headers(token, creds.user_agent_email),
+    body: JSON.stringify(body),
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Fakturoid create credit note failed (${res.status}): ${text}`)
+  }
+
   return await res.json()
 }
 

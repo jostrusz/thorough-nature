@@ -155,6 +155,23 @@ export function useCreateFakturoidInvoice() {
 }
 
 // ═══════════════════════════════════════════
+// Create Fakturoid Credit Note
+// ═══════════════════════════════════════════
+export function useCreateFakturoidCreditNote() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      return sdk.client.fetch(`/admin/custom-orders/${orderId}/fakturoid-credit`, {
+        method: "POST",
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["custom-order-detail"] })
+    },
+  })
+}
+
+// ═══════════════════════════════════════════
 // Delete Fakturoid Invoice
 // ═══════════════════════════════════════════
 export function useDeleteFakturoidInvoice() {

@@ -10,8 +10,10 @@ interface OrderActionsDropdownProps {
   onFakturoidCreate: () => void
   onFakturoidOpen: () => void
   onFakturoidDelete: () => void
+  onFakturoidCreditNote: () => void
   fakturoidInvoiceId?: string
   fakturoidInvoiceUrl?: string
+  fakturoidCreditNoteId?: string
   dextrumMystockId?: string
 }
 
@@ -48,8 +50,10 @@ export function OrderActionsDropdown({
   onFakturoidCreate,
   onFakturoidOpen,
   onFakturoidDelete,
+  onFakturoidCreditNote,
   fakturoidInvoiceId,
   fakturoidInvoiceUrl,
+  fakturoidCreditNoteId,
   dextrumMystockId,
 }: OrderActionsDropdownProps) {
   const ref = useRef<HTMLDivElement>(null)
@@ -155,6 +159,19 @@ export function OrderActionsDropdown({
             <span style={{ fontSize: "14px", width: "16px", textAlign: "center", color: "#008060", fontWeight: 700 }}>fa</span>
             Fakturoid: Open invoice
           </button>
+          {!fakturoidCreditNoteId && (
+            <button
+              className="od-dropdown-item"
+              style={itemStyle}
+              onClick={() => { onFakturoidCreditNote(); onClose() }}
+            >
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#B98900" strokeWidth="1.5">
+                <path d="M4 4h12v12H4z" />
+                <path d="M7 10h6M10 7v6" />
+              </svg>
+              <span style={{ color: "#B98900" }}>Fakturoid: Create credit note</span>
+            </button>
+          )}
           <button
             className="od-dropdown-item"
             style={{ ...itemStyle, color: "#D72C0D" }}

@@ -278,6 +278,30 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
         )}
       </div>
 
+      {/* Fakturoid Credit Note */}
+      {metadata.fakturoid_credit_note_id && (
+        <>
+          <div className="od-row-hover" style={rowStyle}>
+            <span style={labelStyle}>Credit Note</span>
+            <code style={codeStyle}>{metadata.fakturoid_credit_note_id}</code>
+          </div>
+          {metadata.fakturoid_credit_note_url && (
+            <div className="od-row-hover" style={rowStyle}>
+              <span style={labelStyle}>Credit Note Link</span>
+              <a
+                href={metadata.fakturoid_credit_note_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="od-link"
+                style={linkStyle}
+              >
+                Open credit note &rarr;
+              </a>
+            </div>
+          )}
+        </>
+      )}
+
       {/* ═══════════ QUICKBOOKS ═══════════ */}
       <div style={groupTitleStyle}>QuickBooks</div>
 
