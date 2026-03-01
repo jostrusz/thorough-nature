@@ -19,6 +19,7 @@ export function useOrderStats() {
       )
       return response
     },
-    refetchInterval: 60000, // Refetch every 60 seconds
+    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchIntervalInBackground: false,
   })
 }

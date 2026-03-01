@@ -41,5 +41,7 @@ export function useOrdersList(params: OrdersListParams) {
       return response
     },
     placeholderData: keepPreviousData,
+    refetchInterval: 10000,
+    refetchIntervalInBackground: false,
   })
 }

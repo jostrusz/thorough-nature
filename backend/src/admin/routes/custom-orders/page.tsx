@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react"
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { ShoppingBag } from "@medusajs/icons"
 import { toast } from "@medusajs/ui"
@@ -6,6 +6,7 @@ import { StatCards } from "../../components/orders/stat-cards"
 import { OrderTabs, TABS } from "../../components/orders/order-tabs"
 import { OrdersTable } from "../../components/orders/orders-table"
 import { BulkActionsBar } from "../../components/orders/bulk-actions-bar"
+import { NewOrderCelebration } from "../../components/orders/new-order-celebration"
 import { useOrderStats } from "../../hooks/use-order-stats"
 import { useOrdersList } from "../../hooks/use-orders-list"
 import { useBulkActions } from "../../hooks/use-bulk-actions"
@@ -237,6 +238,11 @@ const CustomOrdersPage = () => {
   const [sortDir, setSortDir] = useState("DESC")
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set())
 
+  // New order celebration state
+  const [celebrationOrder, setCelebrationOrder] = useState<any>(null)
+  const lastKnownOrderId = useRef<string | number | null>(null)
+  const isInitialLoad = useRef(true)
+
   // Build query params from active tab
   const activeTabDef = TABS.find((t) => t.id === activeTab)
   const queryParams = useMemo(
@@ -258,6 +264,38 @@ const CustomOrdersPage = () => {
   const { data: ordersData, isLoading: ordersLoading } = useOrdersList(queryParams)
   const bulkActions = useBulkActions()
   const updateMetadata = useUpdateMetadata()
+
+  // Detect new orders (from polling) and trigger celebration
+  useEffect(() => {
+    if (!ordersData?.orders?.length) return
+
+    const newestOrder = ordersData.orders[0]
+    const newestId = newestOrder.display_id
+
+    // On first load, just store the ID — don't celebrate
+    if (isInitialLoad.current) {
+      lastKnownOrderId.current = newestId
+      isInitialLoad.current = false
+      return
+    }
+
+    // If we have a new order that's different from what we last saw
+    if (lastKnownOrderId.current !== null && newestId !== lastKnownOrderId.current) {
+      setCelebrationOrder({
+        display_id: newestOrder.display_id,
+        email: newestOrder.email,
+        total: newestOrder.total,
+        currency_code: newestOrder.currency_code,
+        shipping_address: newestOrder.shipping_address,
+      })
+    }
+
+    lastKnownOrderId.current = newestId
+  }, [ordersData])
+
+  const handleDismissCelebration = useCallback(() => {
+    setCelebrationOrder(null)
+  }, [])
 
   // Tab counts — we compute from a separate "all" query for the count
   // For simplicity, we'll show counts only for the active tab
@@ -355,6 +393,13 @@ const CustomOrdersPage = () => {
   return (
     <div style={dashboardStyle} className="dash-animate-in">
       <DashboardStyles />
+
+      {/* New Order Celebration */}
+      <NewOrderCelebration
+        order={celebrationOrder}
+        onDismiss={handleDismissCelebration}
+      />
+
       {/* Page Header */}
       <div style={headerStyle}>
         <h1 style={h1Style}>
