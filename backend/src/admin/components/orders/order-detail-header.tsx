@@ -71,10 +71,13 @@ export function OrderDetailHeader({
 
   const actionBtnStyle: React.CSSProperties = {
     ...btnOutline,
-    border: `1px solid ${colors.border}`,
+    border: `1px solid rgba(0,0,0,0.10)`,
     color: colors.textSec,
-    background: colors.bgCard,
+    background: "linear-gradient(135deg, #FFFFFF 0%, #FAFBFF 100%)",
     whiteSpace: "nowrap" as const,
+    boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
+    transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    fontWeight: 600,
   }
 
   return (

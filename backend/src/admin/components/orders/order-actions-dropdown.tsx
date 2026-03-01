@@ -30,13 +30,17 @@ const itemStyle: React.CSSProperties = {
   gap: "10px",
   padding: "10px 16px",
   fontSize: "13px",
+  fontWeight: 500,
   color: "#1A1A1A",
   cursor: "pointer",
   border: "none",
   background: "none",
   width: "100%",
   textAlign: "left",
-  transition: "background 0.12s ease, padding-left 0.15s ease",
+  transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+  borderRadius: "6px",
+  margin: "0 4px",
+  width: "calc(100% - 8px)",
 }
 
 const dividerStyle: React.CSSProperties = {
@@ -95,10 +99,11 @@ export function OrderActionsDropdown({
         right: 0,
         marginTop: "4px",
         background: "#FFFFFF",
-        border: "1px solid #E1E3E5",
-        borderRadius: "10px",
-        boxShadow: "0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
+        border: "1px solid rgba(0,0,0,0.08)",
+        borderRadius: "12px",
+        boxShadow: "0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.02)",
         minWidth: "240px",
+        padding: "4px 0",
         zIndex: 100,
         overflow: "hidden",
       }}
