@@ -45,7 +45,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- Stylesheet -->
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=32">
 
 <!-- JSON-LD Structured Data: Product -->
 <script type="application/ld+json">
@@ -109,26 +109,39 @@
 <nav class="navbar" id="navbar">
  <div class="navbar-inner">
   <a href="#" class="navbar-logo"><img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" alt="De Hondenbijbel" width="160" height="40"></a>
-  <div class="navbar-links" id="navLinks">
+  <div class="navbar-links">
    <a href="#reviews">Reviews</a>
    <a href="#bonuses">Bonussen</a>
    <a href="#faq">FAQ</a>
-   <a href="#bestel" class="navbar-cta">🐕 Bestel Nu</a>
+   <a href="#bestel" class="navbar-cta">Bestel Nu &rarr;</a>
   </div>
-  <button class="navbar-hamburger" id="navToggle" aria-label="Menu"><span></span><span></span><span></span></button>
+  <button class="navbar-hamburger" id="navToggle" onclick="toggleMobileMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
  </div>
 </nav>
+<div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
+<div class="nav-mobile-menu">
+ <a href="#reviews" onclick="toggleMobileMenu()">Reviews</a>
+ <a href="#bonuses" onclick="toggleMobileMenu()">Bonussen</a>
+ <a href="#faq" onclick="toggleMobileMenu()">FAQ</a>
+ <a href="#bestel" class="nav-cta-mobile" onclick="toggleMobileMenu()">Bestel Nu &rarr;</a>
+</div>
 
 <!-- ═══ HERO ═══ -->
 <section class="hero-section" id="hero">
+ <div class="hero-eyebrow-wrap">
+  <p class="hero-eyebrow">🔥 <span class="hl">Luistert je hond</span> <span class="hl-purple">niet meer?</span></p>
+ </div>
  <div class="hero-inner">
   <div class="hero-text">
-   <p class="hero-eyebrow">🔥 <span class="hl">Luistert je hond</span> <span class="hl-purple">niet meer?</span></p>
-   <h1>Ontdek de <span class="hl">wetenschappelijk onderbouwde methode</span> — uitgelegd voor gewone hondeneigenaren — om een &bdquo;<span class="hl">onhandelbare</span>&rdquo; hond opnieuw te leren luisteren, z&oacute;nder schreeuwen, strijd of miscommunicatie. Leer praten met je hond in <span class="hl-purple"><em><u>zijn natuurlijke taal</u></em></span>!</h1>
-   <p class="hero-body">Als je moe bent van het omgaan met een hond die je <em>niet begrijpt en niet luistert</em> — van <u>dagelijkse frustratie</u> tijdens wandelingen, <em>schuldgevoel</em> omdat je bang bent dat jij iets verkeerd doet, of <strong>chaos</strong> die je gezin uitput — dan geeft dit boek je de <strong><u>tools, inzichten</u></strong> en vooral de <em>rust</em> waar je al zo lang naar verlangt.</p>
+   <h1>Ontdek de <span class="fialovy-highlight"><strong><em>wetenschappelijk onderbouwde methode</em></strong></span> — uitgelegd voor gewone hondeneigenaren — om een „<span class="zluty-highlight">onhandelbare</span>" hond opnieuw te leren luisteren, zónder schreeuwen, strijd of miscommunicatie. Leer praten met je hond in <span class="fialovy-highlight"><strong><u>zíjn natuurlijke taal!</u></strong></span></h1>
+   <p class="hero-body">Als je moe bent van het omgaan met een hond die je <strong><em>niet begrijpt en niet luistert</em></strong> — van <u>dagelijkse frustratie</u> tijdens wandelingen, <em>schuldgevoel</em> omdat je bang bent dat jij iets verkeerd doet, of <strong>chaos</strong> die je gezin uitput — dan geeft dit boek je de <strong><u>tools, inzichten</u></strong> en vooral de <strong><em>rust</em></strong> waar je al zo lang naar verlangt.</p>
    <a href="#bestel" class="btn-cta" id="heroCta">Ja, ik wil deze speciale bundel kopen →</a>
-   <div class="payment-row left" style="margin-top:16px">
-    <img src="/dehondenbijbel/images/payment-icons.webp" alt="iDEAL, Bancontact, Klarna, PayPal, Mastercard, Visa, Apple Pay, Google Pay" class="pay-icon" style="height:28px">
+   <div class="payment-row left" style="margin-top:10px;">
+    <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" width="40" height="32">
+    <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" width="40" height="32">
+    <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="40" height="32">
+    <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="40" height="32">
+    <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="40" height="32">
    </div>
   </div>
   <div class="hero-book-wrap">
@@ -171,116 +184,125 @@
 <!-- ═══ 8 REASONS SECTION ═══ -->
 <section class="section reasons-section" id="redenen">
  <div class="section-inner">
-  <p class="reasons-intro anim">Als je het gevoel hebt dat je een <em>slecht baasje</em> bent en dat je de opvoeding van je hond <span class="hl-purple-bg"><strong><em>beter had moeten aanpakken</em></strong></span> – dan krijg je nu een tweede kans. Hier zijn 8 redenen waarom dit boek <strong><em>je leven kan veranderen</em></strong> en een einde maakt aan de <span class="hl-purple-bg">frustratie</span>, de <em>schaamte</em> en de <span class="hl-purple-bg"><strong><em>dagelijkse chaos</em></strong></span>.</p>
-  <img src="/dehondenbijbel/images/de-hondenbijbel-lifestyle.jpg" alt="Hond aan de lijn tijdens wandeling" style="width:100%;max-width:560px;margin:0 auto 40px;display:block;border-radius:12px" class="anim">
+  <h2 class="reasons-intro anim">Als je het gevoel hebt dat je een <em>slecht baasje</em> bent en dat je de opvoeding van je hond <span class="zluty-highlight"><strong><em>beter had moeten aanpakken</em></strong></span> – dan krijg je nu een tweede kans. Hier zijn 8 redenen waarom dit boek <span class="fialovy-highlight"><strong><em>je leven kan veranderen</em></strong></span> en een einde maakt aan de <span class="zluty-highlight">frustratie</span>, de <em>schaamte</em> en de <span class="zluty-highlight"><strong><em>dagelijkse chaos</em></strong></span>.</h2>
+  <div class="reasons-video anim">
+   <script src="https://fast.wistia.com/player.js" async></script>
+   <script src="https://fast.wistia.com/embed/xlsld3scyy.js" async type="module"></script>
+   <style>wistia-player[media-id='xlsld3scyy']:not(:defined) { background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/xlsld3scyy/swatch'); display: block; filter: blur(5px); padding-top:66.67%; }</style>
+   <wistia-player media-id="xlsld3scyy" aspect="1.5"></wistia-player>
+  </div>
  </div>
- <div class="reasons-list section-inner">
-  <div class="reason-item anim"><span class="reason-icon">🦮</span><div class="reason-content"><p>Je doorbreekt het <strong>eindeloze getrek aan de lijn</strong> dat elke wandeling tot een gevecht maakt. <strong>Geen pijnlijke armen meer</strong>, geen uitputting na een simpel blokje om. <u><strong>Hier begint ontspannen wandelen</strong></u>.</p></div></div>
-  <div class="reason-item anim"><span class="reason-icon">🔇</span><div class="reason-content"><p>Je krijgt een compleet systeem om <strong>blaffen, springen en chaos in huis</strong> aan te pakken. Zelfs als je denkt: &ldquo;Ik heb alles al geprobeerd.&rdquo; <em>Precies daarvoor is dit boek geschreven.</em></p></div></div>
-  <div class="reason-item anim"><span class="reason-icon">💬</span><div class="reason-content"><p>Je stopt met het gevoel dat je een <strong>slecht baasje</strong> bent. Dit boek is <strong>geschreven in gewone taal</strong> – geen vakjargon, geen ingewikkelde theorie&euml;n. Gewoon heldere uitleg die je meteen kunt toepassen. <u><strong>Eindelijk een boek dat je &eacute;cht begrijpt</strong></u>.</p></div></div>
-  <div class="reason-item anim"><span class="reason-icon">🧭</span><div class="reason-content"><p>Je krijgt <strong><u>&eacute;&eacute;n helder plan in plaats van honderd tegenstrijdige tips</u></strong>. Geen verwarrende YouTube-video&rsquo;s of verouderde dominantie-methodes. Alleen duidelijke stappen die werken – <strong>ook als je hond &ldquo;koppig&rdquo; lijkt</strong>.</p></div></div>
-  <div class="reason-item anim"><span class="reason-icon">🌳</span><div class="reason-content"><p>Je hond luistert <strong>niet alleen thuis, maar ook buiten</strong>. Zodra je de deur uit gaat, lijkt hij nu een andere hond? De Hondenbijbel leert je hoe je <strong><u>training omzet naar de echte wereld</u></strong> – op straat, in het park, overal.</p></div></div>
-  <div class="reason-item anim"><span class="reason-icon">🎁</span><div class="reason-content"><p>Je ontvangt <strong>3 waardevolle bonus e-books</strong> (totale waarde: &euro;66) die je nergens apart kunt kopen: <strong>&ldquo;Langlevendheid begint in de voerbak&rdquo;</strong> – ontdek hoe voeding het gedrag &eacute;n de gezondheid van je hond be&iuml;nvloedt. <strong>&ldquo;Waarom Doet Hij Dat? – 100 Hondenproblemen&rdquo;</strong> – eindelijk begrijp je waarom je hond doet wat hij doet. <strong>&ldquo;Top 20 Spelletjes die je hond &eacute;cht moe maken&rdquo;</strong> – leer spelletjes die je hond mentaal uitputten, zodat hij thuis rustig is. <em>Alle drie gratis bij je bestelling.</em></p></div></div>
-  <div class="reason-item anim"><span class="reason-icon">👨‍👩‍👧</span><div class="reason-content"><p>Je krijgt een systeem dat <strong>het hele gezin kan volgen</strong>. Geen ruzie meer over wie te streng of te soft is. <u><strong>E&eacute;n aanpak, duidelijk voor iedereen</strong></u> – ook voor je partner en kinderen.</p></div></div>
-  <div class="reason-item anim"><span class="reason-icon">🤝</span><div class="reason-content"><p>Je bouwt eindelijk de band die je altijd wilde: <strong>echte maatjes</strong>. Niet baas en hond, maar <strong><u>twee partners die elkaar begrijpen</u></strong>. Blije hond, blije baas – dat is waar het om draait.</p></div></div>
-  <div class="reason-item anim"><span class="reason-icon">🚚</span><div class="reason-content"><p><strong>Wij betalen de verzendkosten voor jou – helemaal gratis.</strong> Jij betaalt alleen &euro;35 voor het complete pakket: het boek + 3 e-books. <u><strong>Geen verborgen kosten, geen verrassingen</strong></u>.</p></div></div>
-  <div class="reason-item anim"><span class="reason-icon">🛡️</span><div class="reason-content"><p><strong>Uitgebreide 30 dagen geld-terug-garantie</strong> – geen standaard 14 dagen, maar een volle maand om te ontdekken of dit voor jou werkt. Zie je geen verbetering? <u><strong>Elke cent terug, zonder vragen, zonder gedoe</strong></u>.</p></div></div>
-  <div class="reason-item anim"><span class="reason-icon">🏆</span><div class="reason-content"><p>Je krijgt eindelijk rust – thuis &eacute;n onderweg. <strong>Minder stress, minder schaamte, minder &ldquo;sorry&rdquo; zeggen</strong>. En meer <strong><u>trots, harmonie en echte verbinding met je hond</u></strong>. Dit is geen boek – dit is <strong>een complete opleiding voor hondenbaasjes</strong>, voor de prijs van een etentje.</p></div></div>
+ <div class="benefits-list section-inner">
+  <div class="benefit-item anim"><div class="benefit-icon">🦮</div><p>Je doorbreekt het <strong>eindeloze getrek aan de lijn</strong> dat elke wandeling tot een gevecht maakt. <strong>Geen pijnlijke armen meer</strong>, geen uitputting na een simpel blokje om. <strong><u>Hier begint ontspannen wandelen</u></strong>.</p></div>
+  <div class="benefit-item anim"><div class="benefit-icon">🔇</div><p>Je krijgt een compleet systeem om <strong>blaffen, springen en chaos in huis</strong> aan te pakken. Zelfs als je denkt: &ldquo;Ik heb alles al geprobeerd.&rdquo; <em>Precies daarvoor is dit boek geschreven</em>.</p></div>
+  <div class="benefit-item anim"><div class="benefit-icon">💬</div><p>Je stopt met het gevoel dat je een <strong>slecht baasje</strong> bent. Dit boek is <strong>geschreven in gewone taal</strong> – geen vakjargon, geen ingewikkelde theorie&euml;n. Gewoon heldere uitleg die je meteen kunt toepassen. <strong><u>Eindelijk een boek dat je &eacute;cht begrijpt</u></strong>.</p></div>
+  <div class="benefit-item anim"><div class="benefit-icon">🧭</div><p>Je krijgt <strong><u>&eacute;&eacute;n helder plan in plaats van honderd tegenstrijdige tips</u></strong>. Geen verwarrende YouTube-video&rsquo;s of verouderde dominantie-methodes. Alleen duidelijke stappen die werken – <strong>ook als je hond &ldquo;koppig&rdquo; lijkt</strong>.</p></div>
+  <div class="benefit-item anim"><div class="benefit-icon">🌳</div><p>Je hond luistert <strong>niet alleen thuis, maar ook buiten</strong>. Zodra je de deur uit gaat, lijkt hij nu een andere hond? De Hondenbijbel leert je hoe je <strong><u>training omzet naar de echte wereld</u></strong> – op straat, in het park, overal.</p></div>
+  <div class="benefit-item anim"><div class="benefit-icon">🎁</div><p>Je ontvangt <strong>3 waardevolle bonus e-books</strong> (totale waarde: &euro;66) die je nergens apart kunt kopen: <strong>&ldquo;Langlevendheid begint in de voerbak&rdquo;</strong> – ontdek hoe voeding het gedrag &eacute;n de gezondheid van je hond be&iuml;nvloedt. <strong>&ldquo;Waarom Doet Hij Dat? – 100 Hondenproblemen&rdquo;</strong> – eindelijk begrijp je waarom je hond doet wat hij doet. <strong>&ldquo;Top 20 Spelletjes die je hond &eacute;cht moe maken&rdquo;</strong> – leer spelletjes die je hond mentaal uitputten, zodat hij thuis rustig is. <em>Alle drie gratis bij je bestelling</em>.</p></div>
+  <div class="benefit-item anim"><div class="benefit-icon">👨‍👩‍👧</div><p>Je krijgt een systeem dat <strong>het hele gezin kan volgen</strong>. Geen ruzie meer over wie te streng of te soft is. <strong><u>E&eacute;n aanpak, duidelijk voor iedereen</u></strong> – ook voor je partner en kinderen.</p></div>
+  <div class="benefit-item anim"><div class="benefit-icon">🤝</div><p>Je bouwt eindelijk de band die je altijd wilde: <strong>echte maatjes</strong>. Niet baas en hond, maar <strong><u>twee partners die elkaar begrijpen</u></strong>. Blije hond, blije baas – dat is waar het om draait.</p></div>
+  <div class="benefit-item anim"><div class="benefit-icon">🚚</div><p><strong>Wij betalen de verzendkosten voor jou – helemaal gratis</strong>. Jij betaalt alleen &euro;35 voor het complete pakket: het boek + 3 e-books. <strong><u>Geen verborgen kosten, geen verrassingen</u></strong>.</p></div>
+  <div class="benefit-item anim"><div class="benefit-icon">🛡️</div><p><strong>Uitgebreide 30 dagen geld-terug-garantie</strong> – geen standaard 14 dagen, maar een volle maand om te ontdekken of dit voor jou werkt. Zie je geen verbetering? <strong><u>Elke cent terug, zonder vragen, zonder gedoe</u></strong>.</p></div>
+  <div class="benefit-item anim"><div class="benefit-icon">🏆</div><p>Je krijgt eindelijk rust – thuis &eacute;n onderweg. <strong>Minder stress, minder schaamte, minder &ldquo;sorry&rdquo; zeggen</strong>. En meer <strong><u>trots, harmonie en echte verbinding met je hond</u></strong>. Dit is geen boek – dit is <strong>een complete opleiding voor hondenbaasjes</strong>, voor de prijs van een etentje.</p></div>
  </div>
  <div class="cta-section anim">
-  <a href="#bestel" class="btn-cta">Krijg nu jouw exemplaar →</a>
+  <a href="#bestel" class="btn-cta">Krijg nu jouw exemplaar &rarr;</a>
   <div class="payment-row" style="margin-top:16px">
-   <img src="/dehondenbijbel/images/payment-icons.webp" alt="Betaalmethoden" class="pay-icon" style="height:28px">
+   <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" width="40" height="32">
+   <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" width="40" height="32">
+   <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="40" height="32">
+   <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="40" height="32">
+   <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="40" height="32">
   </div>
  </div>
 </section>
 
-<!-- ═══ OFFER BANNER ═══ -->
-<section class="section offer-banner" id="aanbieding">
- <div class="section-wide">
-  <h2 class="anim">⏰ <span class="hl"><em>Tijdelijke aanbieding – alleen zolang de voorraad strekt!</em></span> Bestel nu <em>&ldquo;De Hondenbijbel&rdquo;</em> 📖 met alle gratis bonussen 🎁 voor slechts <span class="hl">&euro;35</span> 💰 in plaats van <s>&euro;97</s> ⚠️</h2>
- </div>
-</section>
-
-<!-- ═══ STORY SECTION — Two Column ═══ -->
+<!-- ═══ STORY SECTION ═══ -->
 <section class="section story-section" id="verhaal">
- <div class="story-grid">
-  <div class="story-images anim">
-   <img src="/dehondenbijbel/images/de-hondenbijbel-bestellen-pichi.jpg" alt="Stapel De Hondenbijbel boeken" loading="lazy">
-   <img src="/dehondenbijbel/images/de-hondenbijbel-lifestyle.jpg" alt="Lezer met De Hondenbijbel" loading="lazy">
-  </div>
-  <div class="story-text-card anim">
-   <h2>Dit boek kan precies datgene zijn wat je <span class="hl-purple-bg"><em>tot nu toe in de opvoeding van je hond hebt gemist</em></span> 🐕</h2>
-   <p>Misschien heb je al zoveel geprobeerd. Cursussen waar ze &ldquo;dominantie&rdquo; predikten, maar je hond werd alleen maar <em>banger of koppiger</em>. YouTube-tips die tegenstrijdig waren en in de praktijk <strong>niets veranderden</strong>. Trainers die zeiden dat jij strenger moest zijn – terwijl je voelde dat dat niet klopte. En toch ben je hier – omdat je vanbinnen weet dat er een <strong>andere manier</strong> moet zijn. Een manier die &eacute;cht werkt. Die gebaseerd is op hoe honden <strong>werkelijk denken en leren</strong>. Niet op verouderde mythen of dominantie-onzin.</p>
-   <p>📘 <strong>De Hondenbijbel</strong> is de eerste en enige Nederlandstalige gids die <strong>hondenpsychologie vertaalt naar de praktijk</strong> – geschreven voor gewone baasjes, niet voor experts. Geen vakjargon, geen ingewikkelde theorie&euml;n. Gewoon heldere taal die je meteen begrijpt. Je leert eindelijk <em>waarom</em> je hond doet wat hij doet. En nog belangrijker: <strong>hoe je met hem communiceert</strong> op een manier die hij van nature begrijpt.</p>
-   <p>Dit is waarom traditionele methodes bij jou niet werkten:</p>
-   <ul>
-    <li>Ze negeerden <strong>hoe het hondenbrein &eacute;cht werkt</strong> – en dwongen je hond tot gehoorzaamheid in plaats van samenwerking</li>
-    <li>Ze losten <strong>alleen de symptomen</strong> op (blaffen, trekken, springen) zonder de onderliggende oorzaak aan te pakken</li>
-    <li>Ze gaven je <strong>losse tips zonder samenhangend systeem</strong> – waardoor je hond verward raakte en jij gefrustreerd</li>
-    <li>Ze werkten alleen op het trainingsveld – maar <strong>buiten op straat was alles vergeten</strong></li>
-   </ul>
-  </div>
- </div>
-</section>
+ <div class="story-inner">
+  <h2 class="story-heading anim">⏰ <span class="hl"><em>Tijdelijke aanbieding – alleen zolang de voorraad strekt!</em></span> Bestel nu <strong><em>&ldquo;De Hondenbijbel&rdquo;</em></strong> 📖 met alle <strong>gratis bonussen</strong> 🎁 voor slechts <span class="hl">&euro;35</span> 💰 in plaats van <strong><s>&euro;97</s></strong> ⚠️</h2>
 
-<!-- ═══ WHAT YOU LEARN ═══ -->
-<section class="section" style="background:var(--white);padding-top:0">
- <div class="section-inner">
-  <p class="anim" style="font-size:17px;line-height:1.8;margin-bottom:20px">De Hondenbijbel pakt het <strong>fundamenteel anders</strong> aan. Gebaseerd op de nieuwste inzichten uit gedragswetenschap en hondenpsychologie leer je:</p>
-  <ul class="arrow-stories anim">
-   <li class="arrow-story"><span class="arrow">→</span><span><strong>De taal van je hond te begrijpen</strong> – zodat je weet wat hij je probeert te vertellen voordat het probleem escaleert</span></li>
-   <li class="arrow-story"><span class="arrow">→</span><span><strong>Waarom je hond &ldquo;ongehoorzaam&rdquo; lijkt</strong> – en hoe je zijn natuurlijke instincten gebruikt in plaats van ertegen te vechten</span></li>
-   <li class="arrow-story"><span class="arrow">→</span><span><strong>Het 4-pijler systeem</strong> dat wandelingen, thuisregels, mentale stimulatie &eacute;n voeding combineert tot &eacute;&eacute;n samenhangend geheel</span></li>
-   <li class="arrow-story"><span class="arrow">→</span><span><strong>Hoe je training omzet naar de echte wereld</strong> – zodat je hond ook buiten luistert, niet alleen thuis</span></li>
-  </ul>
-  <p class="anim" style="font-size:17px;line-height:1.8;margin-bottom:20px">Geen vage theorie&euml;n. Geen onmogelijke oefeningen. Alleen <em>wetenschappelijk onderbouwde methodes</em>, uitgelegd in <strong>gewone mensentaal</strong> – zodat je ze vandaag nog kunt toepassen. En het mooiste? Het hele gezin kan dit systeem volgen – <strong>&eacute;&eacute;n aanpak, duidelijk voor iedereen</strong>.</p>
- </div>
-</section>
+  <div class="story-grid">
+   <!-- LEFT COLUMN: Images + Benefit Cards -->
+   <div class="story-images">
+    <img src="https://assets.lightfunnels.com/cdn-cgi/image/width=3840,quality=80,format=auto/https://assets.lightfunnels.com/account-85759/images_library/55056155-48fd-477f-a30e-9f88bdbfaf17.de%20hondenbijebl.jpg" alt="De Hondenbijbel boekenpakket" class="anim" loading="lazy">
+    <img src="https://assets.lightfunnels.com/account-85759/images_library/be44ad84-ae72-41df-9ddd-31f0ead2e188.de%20hondenbijbel.webp" alt="De Hondenbijbel inhoud" class="anim" loading="lazy">
 
-<!-- ═══ WHAT YOU GET — Colored Bars ═══ -->
-<section class="what-you-get" id="watjekrijgt">
- <h3 class="anim" style="text-align:center;margin-bottom:24px">💛 En dat is nog steeds niet alles wat je vandaag krijgt:</h3>
- <div class="get-items">
-  <div class="get-item purple anim"><span class="get-item-icon">📖</span><p>Je ontvangt het <strong>fysieke boek &ldquo;De Hondenbijbel&rdquo;</strong> (270+ pagina&rsquo;s) – het complete 4-pijler systeem voor een rustige, gehoorzame hond</p></div>
-  <div class="get-item yellow anim"><span class="get-item-icon">🎁</span><p>Je ontvangt <strong>3 bonus e-books</strong> in je e-mail: &ldquo;Langlevendheid begint in de voerbak&rdquo; + &ldquo;Waarom Doet Hij Dat? – 100 Hondenproblemen&rdquo; + &ldquo;Top 20 Spelletjes die je hond &eacute;cht moe maken&rdquo; (totale waarde: &euro;66)</p></div>
-  <div class="get-item green anim"><span class="get-item-icon">🚚</span><p>Je betaalt <strong>geen euro voor verzending</strong> – daar zorgen wij voor</p></div>
-  <div class="get-item red anim"><span class="get-item-icon">🛡️</span><p>Je krijgt een <strong>uitgebreide 30 dagen geld-terug-garantie</strong> – zie je geen verbetering? Elke cent terug, zonder vragen, zonder gedoe</p></div>
-  <div class="get-item blue anim"><span class="get-item-icon">💰</span><p>Je betaalt slechts <strong>&euro;35 in plaats van &euro;97</strong> – bespaar vandaag meer dan 60%</p></div>
-  <div class="get-item purple anim"><span class="get-item-icon">⚡</span><p>We verzenden <strong>binnen 24 uur</strong> naar Nederland 🇳🇱 en Belgi&euml; 🇧🇪</p></div>
-  <div class="get-item green anim"><span class="get-item-icon">🤝</span><p>Word eindelijk <strong>echte maatjes</strong> met je hond – blije hond, blije baas</p></div>
- </div>
-</section>
+    <div class="benefits-container anim">
+     <div class="benefit-card benefit-card-purple"><div class="benefit-icon">📖</div><div class="benefit-text">Je ontvangt het <strong>fysieke boek &ldquo;De Hondenbijbel&rdquo;</strong> (270+ pagina&rsquo;s) – het complete 4-pijler systeem voor een rustige, gehoorzame hond</div></div>
+     <div class="benefit-card benefit-card-teal"><div class="benefit-icon">🎁</div><div class="benefit-text">Je ontvangt <strong>3 bonus e-books</strong> in je e-mail: &ldquo;Langlevendheid begint in de voerbak&rdquo; + &ldquo;Waarom Doet Hij Dat? – 100 Hondenproblemen&rdquo; + &ldquo;Top 20 Spelletjes die je hond &eacute;cht moe maken&rdquo; (totale waarde: &euro;66)</div></div>
+     <div class="benefit-card benefit-card-coral"><div class="benefit-icon">🚚</div><div class="benefit-text">Je betaalt <strong>geen euro voor verzending</strong> – daar zorgen wij voor</div></div>
+     <div class="benefit-card benefit-card-yellow"><div class="benefit-icon">🛡️</div><div class="benefit-text">Je krijgt een <strong>uitgebreide 30 dagen geld-terug-garantie</strong> – zie je geen verbetering? Elke cent terug, zonder vragen, zonder gedoe</div></div>
+     <div class="benefit-card benefit-card-green"><div class="benefit-icon">💰</div><div class="benefit-text">Je betaalt slechts <strong>&euro;35 in plaats van &euro;97</strong> – bespaar vandaag meer dan 60%</div></div>
+     <div class="benefit-card benefit-card-blue"><div class="benefit-icon">⚡</div><div class="benefit-text">We verzenden <strong>binnen 24 uur</strong> naar Nederland 🇳🇱 en Belgi&euml; 🇧🇪</div></div>
+     <div class="benefit-card benefit-card-lavender"><div class="benefit-icon">🤝</div><div class="benefit-text">Word eindelijk <strong>echte maatjes</strong> met je hond – blije hond, blije baas</div></div>
+    </div>
+   </div>
 
-<!-- ═══ PRICE BOX ═══ -->
-<section class="section" style="background:var(--white)">
- <div class="price-box anim">
-  <p class="total-label">Totale waarde van dit pakket: <s>&euro;97</s></p>
-  <p class="total-value">Vandaag alleen: &euro;35</p>
-  <p class="urgency-note">⏰ Tijdelijke aanbieding – alleen zolang de voorraad strekt!</p>
- </div>
-</section>
+   <!-- RIGHT COLUMN: Text + CTA + Guarantee -->
+   <div class="story-text">
 
-<!-- ═══ CTA — Word eindelijk ═══ -->
-<section class="section" style="background:var(--white);text-align:center" id="bestel">
- <div class="section-inner">
-  <h2 class="anim" style="margin-bottom:20px">✨ Word eindelijk de baasje die je altijd wilde zijn.</h2>
-  <p class="anim" style="font-size:17px;line-height:1.8;margin-bottom:24px">Klik op de knop hieronder en bestel je exemplaar nog vandaag. Dit is het moment waarop je stopt met <strong>tegen</strong> je hond te werken – en begint <strong>met</strong> hem samen te werken. Op een manier die hij begrijpt. Geen &ldquo;baas en hond&rdquo;, maar <strong>echte maatjes</strong> die elkaar begrijpen. Blije hond, blije baas – dat is waar het om draait. 🐾</p>
-  <p class="anim" style="font-size:17px;line-height:1.8;margin-bottom:28px">Je hoeft nooit meer te denken: &ldquo;Kan ik dit wel aan?&rdquo; of &ldquo;Ben ik wel een goed baasje?&rdquo; Met De Hondenbijbel krijg je eindelijk <strong>rust, vertrouwen en echte verbinding</strong> met je hond.</p>
-  <a href="#bestel" class="btn-cta anim">Bestel nu het fysieke boek →</a>
-  <div class="payment-row anim" style="margin-top:16px">
-   <img src="/dehondenbijbel/images/payment-icons.webp" alt="Betaalmethoden" class="pay-icon" style="height:28px">
-  </div>
- </div>
-</section>
+    <h3 class="story-text-h3 anim">Je hebt alles geprobeerd — cursussen, trainers, YouTube-tips. <strong>Niets werkte &eacute;cht.</strong> Omdat ze alleen <em>symptomen</em> aanpakten, niet de <strong><u>kern van het probleem</u></strong>.</h3>
 
-<!-- ═══ GUARANTEE ═══ -->
-<section style="background:var(--white);padding:0 24px 60px">
- <div class="guarantee-box anim">
-  <img src="/dehondenbijbel/images/money-back.png" alt="30 dagen geld-terug-garantie" class="guarantee-icon">
-  <div>
-   <h3>Verlengde Geld-Terug-Garantie</h3>
-   <p><strong>30 dagen in plaats van 14 dagen</strong> – niet tevreden met het boek? Je hebt volledige 30 dagen om het te retourneren en je geld terug te ontvangen.</p>
+    <div class="story-divider"></div>
+
+    <p class="beznytext anim">📘 <strong>De Hondenbijbel</strong> is de eerste Nederlandstalige gids die <strong>hondenpsychologie vertaalt naar de praktijk</strong> — geschreven in gewone taal, niet voor experts. Je leert eindelijk <em>waarom</em> je hond doet wat hij doet &eacute;n <strong>hoe je met hem communiceert</strong> in zijn eigen taal.</p>
+
+    <p class="beznytext beznytext-accent anim">⚡ Waarom traditionele methodes faalden:</p>
+    <ul class="beznytext-list anim">
+     <li>Ze negeerden <strong>hoe het hondenbrein werkt</strong> — dwang in plaats van samenwerking</li>
+     <li>Ze losten <strong>alleen symptomen</strong> op, niet de onderliggende oorzaak</li>
+     <li><strong>Losse tips zonder systeem</strong> — verwarring voor je hond, frustratie voor jou</li>
+    </ul>
+
+    <p class="beznytext beznytext-accent anim">✅ Wat je w&eacute;l leert met De Hondenbijbel:</p>
+    <ul class="beznytext-list anim">
+     <li><strong>De taal van je hond begrijpen</strong> — voordat problemen escaleren</li>
+     <li><strong>Het 4-pijler systeem</strong> — wandelingen, thuisregels, mentale stimulatie &amp; voeding in &eacute;&eacute;n plan</li>
+     <li><strong>Training die ook buiten werkt</strong> — niet alleen thuis, maar op straat en in het park</li>
+    </ul>
+
+    <div class="story-divider"></div>
+
+    <h4 class="H4nadpis anim">💛 Dit krijg je vandaag allemaal:</h4>
+    <ul class="beznytext-list anim">
+     <li><strong>De Hondenbijbel (270+ pagina&rsquo;s)</strong> — het complete systeem voor een rustige, gehoorzame hond</li>
+     <li><strong>Bonus #1:</strong> &ldquo;Langlevendheid begint in de voerbak&rdquo; (waarde: &euro;22)</li>
+     <li><strong>Bonus #2:</strong> &ldquo;Waarom Doet Hij Dat? – 100 Hondenproblemen&rdquo; (waarde: &euro;22)</li>
+     <li><strong>Bonus #3:</strong> &ldquo;Top 20 Spelletjes die je hond moe maken&rdquo; (waarde: &euro;22)</li>
+     <li><strong>Gratis verzending</strong> — wij betalen de verzendkosten</li>
+     <li><strong>30 dagen geld-terug-garantie</strong> — geen risico, elke cent terug</li>
+    </ul>
+
+    <p class="beznytext price-highlight-box anim">
+     <strong>Totale waarde: &euro;97</strong><br>
+     <span style="font-size:26px;color:var(--purple);font-weight:800">Vandaag alleen: &euro;35</span><br>
+     <em>Je bespaart meer dan 60%</em>
+    </p>
+
+    <p class="beznytext beznytext-closing anim">🐾 Stop met <em>tegen</em> je hond werken — begin <strong>met</strong> hem samen te werken. <strong>Echte maatjes</strong> die elkaar begrijpen. Blije hond, blije baas.</p>
+
+    <div class="cta-section anim" id="bestel">
+     <a href="#bestel" class="btn-cta">Bestel nu het fysieke boek &rarr;</a>
+     <div class="payment-row" style="margin-top:16px">
+      <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" width="40" height="32">
+      <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" width="40" height="32">
+      <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="40" height="32">
+      <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="40" height="32">
+      <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="40" height="32">
+     </div>
+    </div>
+
+    <div class="guarantee-banner anim">
+     <div class="guarantee-icon">
+      <img src="https://assets.lightfunnels.com/account-85759/images_library/0b14933b-49cd-4962-bd9e-027a88c8f01f.mney-back.png" alt="Geld-terug-garantie">
+     </div>
+     <div class="guarantee-content">
+      <h3 class="guarantee-title">Verlengde Geld-Terug-Garantie</h3>
+      <p class="guarantee-text"><strong>30 dagen in plaats van 14 dagen</strong> – niet tevreden? Elke cent terug, zonder vragen.</p>
+     </div>
+    </div>
+   </div>
   </div>
  </div>
 </section>
@@ -723,10 +745,32 @@
 
 <!-- ═══ JAVASCRIPT ═══ -->
 <script>
-// Mobile nav toggle
-const navToggle = document.getElementById('navToggle');
-const navLinks = document.getElementById('navLinks');
-navToggle?.addEventListener('click', () => navLinks.classList.toggle('open'));
+// Mobile menu toggle
+function toggleMobileMenu() {
+ document.getElementById('navToggle').classList.toggle('open');
+ document.querySelector('.nav-mobile-menu').classList.toggle('open');
+ document.querySelector('.nav-mobile-overlay').classList.toggle('open');
+}
+
+// Scroll-aware navbar — hide on scroll down, show on scroll up
+(function() {
+ const nav = document.getElementById('navbar');
+ let lastY = 0;
+ window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  if (y > 80 && y > lastY) {
+   nav.classList.add('nav-hidden');
+  } else {
+   nav.classList.remove('nav-hidden');
+  }
+  if (y > 50) {
+   nav.classList.add('nav-scrolled');
+  } else {
+   nav.classList.remove('nav-scrolled');
+  }
+  lastY = y;
+ });
+})();
 
 // FAQ accordion
 document.querySelectorAll('.faq-question').forEach(btn => {
