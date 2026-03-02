@@ -1363,7 +1363,7 @@ window.addEventListener('load', function() {
     observer1.unobserve(entry.target);
    }
   });
- }, { threshold: 0.1 });
+ }, { threshold: 0, rootMargin: '200px 0px' });
  els.forEach(function(el) { observer1.observe(el); });
 
  // Nové .reveal třídy pro plynulé animace sekcí
@@ -1375,7 +1375,7 @@ window.addEventListener('load', function() {
     observer2.unobserve(entry.target);
    }
   });
- }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+ }, { threshold: 0, rootMargin: '200px 0px' });
  revealEls.forEach(function(el) { observer2.observe(el); });
 })();
 </script>
