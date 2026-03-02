@@ -1103,4 +1103,5 @@ export default AnalyticsPage
 
 export const config = defineRouteConfig({
   label: "Analytics",
+  rank: 4,
 })

@@ -1065,4 +1065,5 @@ export default QuickBooksPage
 
 export const config = defineRouteConfig({
   label: "QuickBooks",
+  rank: 6,
 })

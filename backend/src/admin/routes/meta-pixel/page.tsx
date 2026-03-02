@@ -709,4 +709,5 @@ export default MetaPixelPage
 
 export const config = defineRouteConfig({
   label: "Meta Pixel",
+  rank: 8,
 })

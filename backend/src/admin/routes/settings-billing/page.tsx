@@ -1329,6 +1329,7 @@ const BillingSettingsPage = () => {
 export const config = defineRouteConfig({
   label: "Payment Gateways",
   icon: undefined,
+  rank: 9,
 })
 
 export default BillingSettingsPage

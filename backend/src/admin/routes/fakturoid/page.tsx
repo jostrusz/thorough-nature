@@ -1008,4 +1008,5 @@ export default FakturoidPage
 
 export const config = defineRouteConfig({
   label: "Fakturoid",
+  rank: 5,
 })

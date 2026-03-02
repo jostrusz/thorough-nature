@@ -686,6 +686,7 @@ const CustomOrdersPage = () => {
 export const config = defineRouteConfig({
   label: "Orders HQ",
   icon: ShoppingBag,
+  rank: 1,
 })
 
 export default CustomOrdersPage

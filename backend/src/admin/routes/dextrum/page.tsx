@@ -279,6 +279,7 @@ const DextrumPage = () => {
 export const config = defineRouteConfig({
   label: "Dextrum",
   icon: BuildingStorefront,
+  rank: 3,
 })
 
 export default DextrumPage

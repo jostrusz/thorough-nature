@@ -1683,4 +1683,5 @@ export default ResendPage
 
 export const config = defineRouteConfig({
   label: "Resend",
+  rank: 2,
 })

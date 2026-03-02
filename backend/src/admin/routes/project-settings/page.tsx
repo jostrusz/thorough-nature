@@ -690,4 +690,5 @@ export default ProjectSettingsPage
 
 export const config = defineRouteConfig({
   label: "Project Settings",
+  rank: 10,
 })

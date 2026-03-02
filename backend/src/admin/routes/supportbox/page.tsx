@@ -217,6 +217,7 @@ const SupportBoxDashboard = () => {
 export const config = defineRouteConfig({
   label: "SupportBox",
   icon: ChatBubbleLeftRight,
+  rank: 7,
 })
 
 export default SupportBoxDashboard
