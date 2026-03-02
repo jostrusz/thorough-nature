@@ -71,6 +71,12 @@ export const POST = async (
       error: "Refund not supported for this provider",
     }
 
+    // ── Amount note: `amount` from frontend is in MAJOR units (e.g. 79 = €79.00) ──
+    // Each gateway needs conversion:
+    //   Mollie/PayPal:    string major units → "79.00"
+    //   Stripe/Comgate/Klarna: minor units (cents) → 7900
+    //   Airwallex:        major units → 79
+
     // Mollie refund
     if (providerId.includes("mollie")) {
       const mollieId = paymentData.molliePaymentId || paymentData.mollieOrderId
@@ -97,10 +103,13 @@ export const POST = async (
       const keys = isLive ? config.live_keys : config.test_keys
       const client = new MollieApiClient(keys.api_key, !isLive)
 
+      // Mollie expects amount as string in major units: "79.00"
+      const mollieAmount = { value: amount.toFixed(2), currency }
+
       const isPayment = mollieId.startsWith("tr_")
       if (isPayment) {
         const result = await client.refundPayment(mollieId, {
-          amount: { value: (amount / 100).toFixed(2), currency },
+          amount: mollieAmount,
           description: reason || "Refund",
         })
         refundResult = {
@@ -110,7 +119,7 @@ export const POST = async (
         }
       } else {
         const result = await client.refundOrder(mollieId, {
-          amount: { value: (amount / 100).toFixed(2), currency },
+          amount: mollieAmount,
           description: reason || "Refund",
         })
         refundResult = {
@@ -167,8 +176,8 @@ export const POST = async (
       const client = new PayPalApiClient({ client_id: clientId, client_secret: clientSecret, mode })
 
       try {
-        // PayPal amounts are strings like "29.99", input amount is in cents
-        const amountValue = (amount / 100).toFixed(2)
+        // PayPal expects amount as string in major units: "79.00"
+        const amountValue = amount.toFixed(2)
         const result = await client.refundCapture(captureId, {
           amount: { currency_code: currency, value: amountValue },
           note_to_payer: reason || "Refund",
@@ -207,8 +216,9 @@ export const POST = async (
       const keys = isLive ? config.live_keys : config.test_keys
       const client = new KlarnaApiClient(keys.api_key, keys.secret_key, !isLive)
 
+      // Klarna expects amount in minor units (cents): 79 EUR → 7900
       const result = await client.refundOrder(klarnaOrderId, {
-        refunded_amount: amount,
+        refunded_amount: Math.round(amount * 100),
         description: reason || "Refund",
       })
       refundResult = {
@@ -248,7 +258,8 @@ export const POST = async (
       )
 
       try {
-        const result = await client.refund(transId, amount / 100, currency)
+        // Comgate expects amount in minor units (cents): 79 EUR → 7900
+        const result = await client.refund(transId, Math.round(amount * 100), currency)
         refundResult = {
           success: result.success !== false,
           refundId: result.data?.refund_id || transId,
@@ -355,10 +366,10 @@ export const POST = async (
         }
 
         const stripe = new Stripe(secretKey)
-        // Input amount is in cents (minor units) — Stripe also uses cents
+        // Stripe expects amount in minor units (cents): 79 EUR → 7900
         const refund = await stripe.refunds.create({
           payment_intent: piId,
-          amount: amount > 0 ? amount : undefined,
+          amount: amount > 0 ? Math.round(amount * 100) : undefined,
           reason: "requested_by_customer",
         })
         refundResult = {

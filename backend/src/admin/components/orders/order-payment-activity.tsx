@@ -368,11 +368,10 @@ function formatEventLabel(event: string): string {
 }
 
 function formatCurrency(amount: number, currency: string): string {
-  // Amounts might come as cents (int) or as euros (decimal string like "0.01")
-  // If amount > 100, likely in cents; if < 1, likely already in major units
-  const value = amount >= 100 ? amount / 100 : amount
+  // All amounts in the activity log are stored in major units (e.g. 79 = €79.00)
+  // Payment amounts from Medusa are also in major units (decimal)
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: currency.toUpperCase(),
-  }).format(value)
+  }).format(amount)
 }
