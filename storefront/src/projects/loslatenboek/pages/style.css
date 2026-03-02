@@ -506,8 +506,8 @@ h2 { font-size: 38px; }
  margin: 0 auto 48px; max-width: 680px; border-radius: 16px;
  overflow: hidden;
 }
-.redenen-video wistia-player {
- display: block; width: 100%;
+.redenen-video video {
+ display: block; width: 100%; height: auto; border-radius: 16px; object-fit: cover; aspect-ratio: 3 / 2;
 }
 
 /* 9 benefitů — seznam s šipkami */
@@ -834,6 +834,12 @@ h2 { font-size: 38px; }
  max-width: 520px;
  border-radius: 12px;
  overflow: hidden;
+}
+.verhaal .verhaal-video video {
+ display: block; width: 100%; height: auto; border-radius: 12px; object-fit: cover; aspect-ratio: 3 / 2;
+}
+.verhaal .verhaal-video.verhaal-video--wide video {
+ aspect-ratio: 16 / 9;
 }
 .verhaal .verhaal-image {
  display: block;
@@ -1319,10 +1325,8 @@ h2 { font-size: 38px; }
  border-radius: 12px;
  overflow: hidden;
 }
-.waarom-video wistia-player {
- display: block;
- width: 100%;
- aspect-ratio: 16 / 9;
+.waarom-video video {
+ display: block; width: 100%; height: auto; border-radius: 12px; object-fit: cover; aspect-ratio: 16 / 9;
 }
 .waarom-guarantee {
  font-family: 'DM Sans', sans-serif;
