@@ -274,7 +274,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
           </div>
         </div>
 
-        {/* Paid amount */}
+        {/* Paid amount — kept as summary line */}
         <div style={{ borderTop: `1px solid ${colors.border}`, marginTop: "8px", paddingTop: "8px" }}>
           <div className="od-row-hover" style={rowStyle}>
             <span style={{ color: colors.text, fontWeight: 500 }}>
@@ -350,72 +350,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
           )}
         </div>
 
-        {/* ─── Payment Provider Info ─── */}
-        {payments.length > 0 && (
-          <div style={{ marginTop: "8px" }}>
-            {payments.map((payment: any) => {
-              const providerName = payment.provider_id
-                ? payment.provider_id.replace(/^pp_/, "").replace(/_.*$/, "").replace(/^\w/, (c: string) => c.toUpperCase())
-                : ""
-              const methodRaw = payment.data?.method || ""
-              const METHOD_LABELS: Record<string, string> = {
-                ideal: "iDEAL", creditcard: "Credit Card", bancontact: "Bancontact",
-                klarnapaylater: "Klarna", klarna: "Klarna", paypal: "PayPal",
-                applepay: "Apple Pay", eps: "EPS", przelewy24: "Przelewy24",
-              }
-              const methodLabel = METHOD_LABELS[methodRaw] || methodRaw || ""
-              const providerLabel = [providerName, methodLabel].filter(Boolean).join(" — ") || "Payment"
-              const gatewayId =
-                payment.data?.molliePaymentId ||
-                payment.data?.mollieOrderId ||
-                payment.data?.paypalOrderId ||
-                payment.data?.klarnaOrderId ||
-                payment.data?.stripePaymentIntentId ||
-                payment.data?.id ||
-                payment.data?.payment_intent ||
-                payment.data?.payment_id ||
-                payment.data?.transaction_id ||
-                null
-
-              const d = new Date(payment.created_at)
-              const dateStr = `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}.${d.getFullYear()}`
-
-              return (
-                <div key={payment.id}>
-                  <div style={{ fontSize: "12px", color: colors.textMuted, padding: "2px 0" }}>
-                    {providerLabel} &middot; {dateStr}
-                  </div>
-                  {gatewayId && (
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: colors.textSec,
-                        padding: "2px 0",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                      }}
-                    >
-                      <span style={{ color: colors.textMuted }}>Payment ID:</span>
-                      <code
-                        style={{
-                          fontSize: "11px",
-                          background: colors.bgHover,
-                          padding: "1px 6px",
-                          borderRadius: "4px",
-                          color: colors.text,
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        {gatewayId}
-                      </code>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )}
+        {/* Payment provider info moved to Payment Activity section */}
 
         {/* ─── Universal Capture Button (PayPal / Klarna) ─── */}
         {showCaptureButton && (

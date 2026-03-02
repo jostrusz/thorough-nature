@@ -11,6 +11,7 @@ interface PaymentActivityEntry {
   amount?: number
   currency?: string
   transaction_id?: string
+  refund_id?: string
   error_message?: string
   error_code?: string
   tracking_sent?: boolean
@@ -23,16 +24,6 @@ interface OrderPaymentActivityProps {
   order: any
 }
 
-const GATEWAY_COLORS: Record<string, string> = {
-  stripe: "pa-bg-blue pa-text-blue pa-border-blue",
-  paypal: "pa-bg-indigo pa-text-indigo pa-border-indigo",
-  mollie: "pa-bg-cyan pa-text-cyan pa-border-cyan",
-  klarna: "pa-bg-pink pa-text-pink pa-border-pink",
-  comgate: "pa-bg-orange pa-text-orange pa-border-orange",
-  przelewy24: "pa-bg-green pa-text-green pa-border-green",
-  airwallex: "pa-bg-purple pa-text-purple pa-border-purple",
-}
-
 const GATEWAY_DISPLAY_NAMES: Record<string, string> = {
   stripe: "Stripe",
   paypal: "PayPal",
@@ -41,6 +32,100 @@ const GATEWAY_DISPLAY_NAMES: Record<string, string> = {
   comgate: "Comgate",
   przelewy24: "Przelewy24",
   airwallex: "Airwallex",
+  p24: "Przelewy24",
+}
+
+const METHOD_LABELS: Record<string, string> = {
+  ideal: "iDEAL",
+  creditcard: "Credit Card",
+  bancontact: "Bancontact",
+  klarnapaylater: "Klarna",
+  klarna: "Klarna",
+  paypal: "PayPal",
+  applepay: "Apple Pay",
+  googlepay: "Google Pay",
+  eps: "EPS",
+  przelewy24: "Przelewy24",
+  p24: "Przelewy24",
+  sepa_debit: "SEPA Direct Debit",
+  revolut_pay: "Revolut Pay",
+  card: "Card",
+}
+
+/**
+ * Extract gateway name from provider_id like "pp_stripe_stripe" → "stripe"
+ */
+function extractGatewayName(providerId: string): string {
+  return (providerId || "")
+    .replace(/^pp_/, "")
+    .split("_")[0]
+    .toLowerCase()
+}
+
+/**
+ * Extract payment method label from payment data
+ */
+function extractPaymentMethod(payment: any): string {
+  const data = payment?.data || {}
+  const raw =
+    data.method ||
+    data.payment_method ||
+    data.resource?.method ||
+    ""
+  return METHOD_LABELS[raw] || raw || ""
+}
+
+/**
+ * Extract gateway payment ID from payment data
+ */
+function extractGatewayPaymentId(payment: any): string {
+  const data = payment?.data || {}
+  return (
+    data.molliePaymentId ||
+    data.mollieOrderId ||
+    data.stripePaymentIntentId ||
+    data.stripeCheckoutSessionId ||
+    data.paypalOrderId ||
+    data.klarnaOrderId ||
+    data.comgateTransId ||
+    data.airwallexPaymentIntentId ||
+    data.payment_intent ||
+    data.id ||
+    data.payment_id ||
+    data.transaction_id ||
+    ""
+  )
+}
+
+/**
+ * Build a synthetic "Payment Received" entry from the order's payment collections.
+ * This ensures the initial payment is always visible in the activity log,
+ * even if no explicit payment_activity_log entry was recorded.
+ */
+function buildReceivedEntry(order: any): PaymentActivityEntry | null {
+  const payments = (order.payment_collections || []).flatMap(
+    (pc: any) => pc.payments || []
+  )
+  if (!payments.length) return null
+
+  const payment = payments[0]
+  const gateway = extractGatewayName(payment.provider_id || "")
+  const method = extractPaymentMethod(payment)
+  const gatewayPaymentId = extractGatewayPaymentId(payment)
+  const amount = Number(payment.amount) || Number(order.total) || 0
+  const currency = order.currency_code || "eur"
+
+  return {
+    timestamp: payment.created_at || payment.captured_at || order.created_at,
+    event: "received",
+    gateway,
+    payment_method: method,
+    status: "success",
+    amount,
+    currency,
+    transaction_id: gatewayPaymentId,
+    detail: "Payment received",
+  }
 }
 
 export const PaymentActivityLog: React.FC<OrderPaymentActivityProps> = ({
@@ -49,7 +134,19 @@ export const PaymentActivityLog: React.FC<OrderPaymentActivityProps> = ({
   const activityLog = (order.metadata?.payment_activity_log ||
     []) as PaymentActivityEntry[]
 
-  if (!activityLog || activityLog.length === 0) {
+  // Build synthetic "received" entry from payment data
+  const receivedEntry = buildReceivedEntry(order)
+
+  // Combine: activity log + synthetic received entry (if not already in log)
+  const hasReceivedInLog = activityLog.some(
+    (e) => e.event === "received" || e.event === "capture" || e.event === "authorization"
+  )
+  const combinedLog: PaymentActivityEntry[] = [
+    ...activityLog,
+    ...(!hasReceivedInLog && receivedEntry ? [receivedEntry] : []),
+  ]
+
+  if (combinedLog.length === 0) {
     return (
       <div style={{ ...cardStyle, padding: 24 }}>
         <h3 style={{ ...cardHeaderStyle, padding: 0, borderBottom: "none", marginBottom: 16, fontSize: 16 }}>
@@ -60,7 +157,7 @@ export const PaymentActivityLog: React.FC<OrderPaymentActivityProps> = ({
     )
   }
 
-  const sortedLog = [...activityLog].sort(
+  const sortedLog = [...combinedLog].sort(
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   )
 
@@ -102,7 +199,10 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
     second: "2-digit",
   })
 
-  const gatewayLabel = GATEWAY_DISPLAY_NAMES[entry.gateway] || entry.gateway
+  const gatewayLabel = GATEWAY_DISPLAY_NAMES[entry.gateway] || entry.gateway || ""
+  const methodLabel = entry.payment_method
+    ? METHOD_LABELS[entry.payment_method] || entry.payment_method
+    : ""
   const eventLabel = formatEventLabel(entry.event)
 
   const getStatusIcon = () => {
@@ -124,6 +224,10 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
     if (entry.status === "error") return colors.redBg
     return colors.yellowBg
   }
+
+  // Amount display — handle both number and string formats
+  const amountNum = entry.amount ? Number(entry.amount) : 0
+  const hasCurrency = !!(entry.currency && amountNum > 0)
 
   return (
     <div style={{ position: "relative", display: "flex", gap: 16, paddingBottom: isLast ? 0 : 24 }}>
@@ -162,67 +266,86 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
             <p style={{ fontSize: 14, fontWeight: 500, color: colors.text, marginTop: 4, fontFamily: fontStack }}>{eventLabel}</p>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{
-              display: "inline-block",
-              borderRadius: 9999,
-              border: `1px solid ${colors.border}`,
-              padding: "2px 12px",
-              fontSize: 12,
-              fontWeight: 500,
-              color: colors.textSec,
-              fontFamily: fontStack,
-            }}>
-              {gatewayLabel}
-            </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            {/* Gateway pill */}
+            {gatewayLabel && (
+              <span style={{
+                display: "inline-block",
+                borderRadius: 9999,
+                border: `1px solid ${colors.border}`,
+                padding: "2px 12px",
+                fontSize: 12,
+                fontWeight: 500,
+                color: colors.textSec,
+                fontFamily: fontStack,
+              }}>
+                {gatewayLabel}
+              </span>
+            )}
 
-            {entry.amount && entry.currency && (
+            {/* Amount */}
+            {hasCurrency && (
               <span style={{ fontSize: 14, fontWeight: 600, color: colors.text, fontFamily: fontStack }}>
-                {formatCurrency(entry.amount, entry.currency)}
+                {formatCurrency(amountNum, entry.currency!)}
               </span>
             )}
           </div>
         </div>
 
         {/* Details section */}
-        <div style={{ marginTop: 12, fontSize: 12, fontFamily: fontStack }}>
-          {entry.payment_method && (
-            <p style={{ color: colors.textSec }}>
-              <span style={{ fontWeight: 500 }}>Method:</span> {entry.payment_method}
+        <div style={{ marginTop: 8, fontSize: 12, fontFamily: fontStack, display: "flex", flexDirection: "column", gap: 3 }}>
+          {/* Payment method */}
+          {methodLabel && (
+            <p style={{ color: colors.textSec, margin: 0 }}>
+              <span style={{ fontWeight: 500 }}>Method:</span> {methodLabel}
             </p>
           )}
 
+          {/* Payment ID (transaction_id) */}
           {entry.transaction_id && (
-            <p style={{ color: colors.textSec, wordBreak: "break-all" }}>
-              <span style={{ fontWeight: 500 }}>Transaction ID:</span>{" "}
-              <code style={{ background: colors.bgHover, padding: "1px 4px", borderRadius: 4, fontFamily: "monospace" }}>
+            <p style={{ color: colors.textSec, wordBreak: "break-all", margin: 0 }}>
+              <span style={{ fontWeight: 500 }}>Payment ID:</span>{" "}
+              <code style={{ background: colors.bgHover, padding: "1px 4px", borderRadius: 4, fontFamily: "monospace", fontSize: 11 }}>
                 {entry.transaction_id}
               </code>
             </p>
           )}
 
+          {/* Refund ID */}
+          {entry.refund_id && (
+            <p style={{ color: colors.textSec, wordBreak: "break-all", margin: 0 }}>
+              <span style={{ fontWeight: 500 }}>Refund ID:</span>{" "}
+              <code style={{ background: colors.bgHover, padding: "1px 4px", borderRadius: 4, fontFamily: "monospace", fontSize: 11 }}>
+                {entry.refund_id}
+              </code>
+            </p>
+          )}
+
+          {/* Tracking info */}
           {entry.tracking_number && (
-            <p style={{ color: colors.textSec }}>
+            <p style={{ color: colors.textSec, margin: 0 }}>
               <span style={{ fontWeight: 500 }}>Tracking:</span> {entry.tracking_number}{" "}
               {entry.tracking_carrier && `(${entry.tracking_carrier})`}
             </p>
           )}
 
+          {/* Error */}
           {entry.error_message && (
-            <div style={{ marginTop: 8, borderRadius: radii.xs, background: colors.redBg, padding: 8 }}>
-              <p style={{ color: colors.red }}>
+            <div style={{ marginTop: 6, borderRadius: radii.xs, background: colors.redBg, padding: 8 }}>
+              <p style={{ color: colors.red, margin: 0 }}>
                 <span style={{ fontWeight: 500 }}>Error:</span> {entry.error_message}
               </p>
               {entry.error_code && (
-                <p style={{ fontSize: 11, color: colors.red, marginTop: 4 }}>
+                <p style={{ fontSize: 11, color: colors.red, marginTop: 4, margin: 0 }}>
                   Code: {entry.error_code}
                 </p>
               )}
             </div>
           )}
 
+          {/* Detail text */}
           {entry.detail && !entry.error_message && (
-            <p style={{ color: colors.textSec, fontStyle: "italic" }}>{entry.detail}</p>
+            <p style={{ color: colors.textSec, fontStyle: "italic", margin: 0 }}>{entry.detail}</p>
           )}
         </div>
       </div>
@@ -232,6 +355,7 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
 
 function formatEventLabel(event: string): string {
   const labelMap: Record<string, string> = {
+    received: "Payment Received",
     initiate: "Payment Initiated",
     authorization: "Payment Authorized",
     capture: "Payment Captured",
@@ -244,8 +368,11 @@ function formatEventLabel(event: string): string {
 }
 
 function formatCurrency(amount: number, currency: string): string {
+  // Amounts might come as cents (int) or as euros (decimal string like "0.01")
+  // If amount > 100, likely in cents; if < 1, likely already in major units
+  const value = amount >= 100 ? amount / 100 : amount
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: currency.toUpperCase(),
-  }).format(amount / 100)
+  }).format(value)
 }
