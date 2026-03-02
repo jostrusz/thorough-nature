@@ -3,6 +3,7 @@ import { INotificationModuleService, IOrderModuleService } from '@medusajs/frame
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
 import { resolveBillingEntity } from './utils/resolve-billing-entity'
+import { logEmailActivity } from '../utils/email-logger'
 
 export default async function orderFulfillmentCreatedHandler({
   event: { data },
@@ -105,6 +106,7 @@ export default async function orderFulfillmentCreatedHandler({
 
     const displayId = (order as any).metadata?.custom_order_number || (order as any).display_id || order.id
 
+    const emailSubject = `Je bestelling #${displayId} is verzonden! 📦`
     await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
@@ -112,7 +114,7 @@ export default async function orderFulfillmentCreatedHandler({
       data: {
         emailOptions: {
           replyTo: 'devries@loslatenboek.nl',
-          subject: `Je bestelling #${displayId} is verzonden! 📦`,
+          subject: emailSubject,
         },
         order,
         shippingAddress,
@@ -124,9 +126,23 @@ export default async function orderFulfillmentCreatedHandler({
       },
     })
 
+    await logEmailActivity(orderModuleService, orderId, {
+      template: "shipment_notification",
+      subject: emailSubject,
+      to: order.email,
+      status: "sent",
+    }).catch((err) => console.warn('[ShipmentNotification] Could not log email activity:', err.message))
+
     console.log(`[ShipmentNotification] Sent shipment email for order ${orderId} (fulfillment ${fulfillmentId})`)
   } catch (error: any) {
     console.error('[ShipmentNotification] Error sending shipment notification:', error.message)
+    await logEmailActivity(orderModuleService, data.order_id, {
+      template: "shipment_notification",
+      subject: `Shipment notification`,
+      to: "",
+      status: "failed",
+      error_message: error.message,
+    }).catch(() => {})
   }
 }
 

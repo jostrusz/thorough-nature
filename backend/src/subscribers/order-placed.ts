@@ -3,6 +3,7 @@ import { INotificationModuleService, IOrderModuleService } from '@medusajs/frame
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
 import { resolveBillingEntity } from './utils/resolve-billing-entity'
+import { logEmailActivity } from '../utils/email-logger'
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -101,6 +102,7 @@ export default async function orderPlacedHandler({
     console.warn('[OrderPlaced] Could not resolve billing entity:', err.message)
   }
 
+  const emailSubject = `Bedankt voor je bestelling! #${displayId}`
   try {
     await notificationModuleService.createNotifications({
       to: order.email,
@@ -109,7 +111,7 @@ export default async function orderPlacedHandler({
       data: {
         emailOptions: {
           replyTo: 'devries@loslatenboek.nl',
-          subject: `Bedankt voor je bestelling! #${displayId}`,
+          subject: emailSubject,
         },
         order,
         shippingAddress,
@@ -119,8 +121,22 @@ export default async function orderPlacedHandler({
         preview: 'Bedankt voor je bestelling!',
       },
     })
-  } catch (error) {
+
+    await logEmailActivity(orderModuleService, data.id, {
+      template: "order_confirmation",
+      subject: emailSubject,
+      to: order.email,
+      status: "sent",
+    }).catch((err) => console.warn('[OrderPlaced] Could not log email activity:', err.message))
+  } catch (error: any) {
     console.error('Error sending order confirmation notification:', error)
+    await logEmailActivity(orderModuleService, data.id, {
+      template: "order_confirmation",
+      subject: emailSubject,
+      to: order.email,
+      status: "failed",
+      error_message: error.message,
+    }).catch(() => {})
   }
 }
 

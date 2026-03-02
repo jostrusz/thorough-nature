@@ -5,6 +5,7 @@ import { EmailTemplates } from '../modules/email-notifications/templates'
 import { DIGITAL_DOWNLOAD_MODULE } from '../modules/digital-download'
 import type DigitalDownloadModuleService from '../modules/digital-download/service'
 import { resolveBillingEntity } from './utils/resolve-billing-entity'
+import { logEmailActivity } from '../utils/email-logger'
 import crypto from 'crypto'
 
 // Hardcoded ebook files for Loslatenboek — these are the MinIO keys
@@ -76,6 +77,7 @@ export default async function orderPlacedDigitalDownloadHandler({
     }
 
     // Send ebook delivery email
+    const emailSubject = 'Je e-books staan klaar! 📖'
     await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
@@ -83,7 +85,7 @@ export default async function orderPlacedDigitalDownloadHandler({
       data: {
         emailOptions: {
           replyTo: 'devries@loslatenboek.nl',
-          subject: 'Je e-books staan klaar! 📖',
+          subject: emailSubject,
         },
         firstName,
         downloadUrl,
@@ -92,9 +94,23 @@ export default async function orderPlacedDigitalDownloadHandler({
       },
     })
 
+    await logEmailActivity(orderModuleService, data.id, {
+      template: "ebook_delivery",
+      subject: emailSubject,
+      to: order.email,
+      status: "sent",
+    }).catch((err) => console.warn('[digital-download] Could not log email activity:', err.message))
+
     console.log(`[digital-download] Created download token ${token} for order ${order.id}`)
-  } catch (error) {
+  } catch (error: any) {
     console.error('[digital-download] Error creating digital download:', error)
+    await logEmailActivity(orderModuleService, data.id, {
+      template: "ebook_delivery",
+      subject: "E-book delivery",
+      to: "",
+      status: "failed",
+      error_message: error.message,
+    }).catch(() => {})
   }
 }
 

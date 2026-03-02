@@ -2,6 +2,32 @@ import React from "react"
 import { CheckCircleSolid, XCircleSolid, ArrowUpRightOnBox, ExclamationCircle } from "@medusajs/icons"
 import { colors, shadows, radii, cardStyle, cardHeaderStyle, fontStack } from "./design-tokens"
 
+// ── Shared timeline entry (payment + email events merged) ──
+
+interface TimelineEntry {
+  timestamp: string
+  type: "payment" | "email"
+  // Payment fields
+  event?: string
+  gateway?: string
+  payment_method?: string
+  status: "success" | "error" | "pending" | "sent" | "failed"
+  amount?: number
+  currency?: string
+  transaction_id?: string
+  refund_id?: string
+  error_message?: string
+  error_code?: string
+  tracking_sent?: boolean
+  tracking_number?: string
+  tracking_carrier?: string
+  detail?: string
+  // Email fields
+  template?: string
+  subject?: string
+  to?: string
+}
+
 interface PaymentActivityEntry {
   timestamp: string
   event: string
@@ -18,6 +44,15 @@ interface PaymentActivityEntry {
   tracking_number?: string
   tracking_carrier?: string
   detail?: string
+}
+
+interface EmailActivityEntry {
+  timestamp: string
+  template: string
+  subject: string
+  to: string
+  status: "sent" | "failed"
+  error_message?: string
 }
 
 interface OrderPaymentActivityProps {
@@ -50,6 +85,15 @@ const METHOD_LABELS: Record<string, string> = {
   sepa_debit: "SEPA Direct Debit",
   revolut_pay: "Revolut Pay",
   card: "Card",
+}
+
+const EMAIL_TEMPLATE_LABELS: Record<string, string> = {
+  order_confirmation: "Order Confirmation",
+  shipment_notification: "Shipment Notification",
+  ebook_delivery: "E-book Delivery",
+  ebook_delivery_resend: "E-book Delivery (Resent)",
+  abandoned_checkout: "Abandoned Checkout Reminder",
+  invite_user: "User Invitation",
 }
 
 /**
@@ -99,8 +143,6 @@ function extractGatewayPaymentId(payment: any): string {
 
 /**
  * Build a synthetic "Payment Received" entry from the order's payment collections.
- * This ensures the initial payment is always visible in the activity log,
- * even if no explicit payment_activity_log entry was recorded.
  */
 function buildReceivedEntry(order: any): PaymentActivityEntry | null {
   const payments = (order.payment_collections || []).flatMap(
@@ -131,48 +173,56 @@ function buildReceivedEntry(order: any): PaymentActivityEntry | null {
 export const PaymentActivityLog: React.FC<OrderPaymentActivityProps> = ({
   order,
 }) => {
-  const activityLog = (order.metadata?.payment_activity_log ||
+  const paymentLog = (order.metadata?.payment_activity_log ||
     []) as PaymentActivityEntry[]
+  const emailLog = (order.metadata?.email_activity_log ||
+    []) as EmailActivityEntry[]
 
   // Build synthetic "received" entry from payment data
   const receivedEntry = buildReceivedEntry(order)
 
-  // Combine: activity log + synthetic received entry (if not already in log)
-  const hasReceivedInLog = activityLog.some(
+  // Combine: payment log + synthetic received entry (if not already in log)
+  const hasReceivedInLog = paymentLog.some(
     (e) => e.event === "received" || e.event === "capture" || e.event === "authorization"
   )
-  const combinedLog: PaymentActivityEntry[] = [
-    ...activityLog,
+  const allPaymentEntries: PaymentActivityEntry[] = [
+    ...paymentLog,
     ...(!hasReceivedInLog && receivedEntry ? [receivedEntry] : []),
   ]
 
-  if (combinedLog.length === 0) {
+  // Merge payment + email entries into unified timeline
+  const timeline: TimelineEntry[] = [
+    ...allPaymentEntries.map((e): TimelineEntry => ({ ...e, type: "payment" })),
+    ...emailLog.map((e): TimelineEntry => ({ ...e, type: "email" })),
+  ]
+
+  if (timeline.length === 0) {
     return (
       <div style={{ ...cardStyle, padding: 24 }}>
         <h3 style={{ ...cardHeaderStyle, padding: 0, borderBottom: "none", marginBottom: 16, fontSize: 16 }}>
-          Payment Activity
+          Order Activity
         </h3>
-        <p style={{ fontSize: 14, color: colors.textSec, fontFamily: fontStack }}>No payment activity recorded.</p>
+        <p style={{ fontSize: 14, color: colors.textSec, fontFamily: fontStack }}>No activity recorded.</p>
       </div>
     )
   }
 
-  const sortedLog = [...combinedLog].sort(
+  const sortedTimeline = [...timeline].sort(
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   )
 
   return (
     <div style={{ ...cardStyle, padding: 24 }}>
       <h3 style={{ ...cardHeaderStyle, padding: 0, borderBottom: "none", marginBottom: 24, fontSize: 16 }}>
-        Payment Activity
+        Order Activity
       </h3>
 
       <div>
-        {sortedLog.map((entry, index) => (
-          <PaymentActivityEntryRow
-            key={`${entry.timestamp}-${index}`}
+        {sortedTimeline.map((entry, index) => (
+          <ActivityEntryRow
+            key={`${entry.timestamp}-${entry.type}-${index}`}
             entry={entry}
-            isLast={index === sortedLog.length - 1}
+            isLast={index === sortedTimeline.length - 1}
           />
         ))}
       </div>
@@ -180,12 +230,31 @@ export const PaymentActivityLog: React.FC<OrderPaymentActivityProps> = ({
   )
 }
 
-interface PaymentActivityEntryProps {
-  entry: PaymentActivityEntry
+interface ActivityEntryProps {
+  entry: TimelineEntry
   isLast: boolean
 }
 
-const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
+// ── Email icon (envelope SVG) ──
+const EmailIcon: React.FC<{ color: string }> = ({ color }) => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M2 4C2 3.44772 2.44772 3 3 3H13C13.5523 3 14 3.44772 14 4V12C14 12.5523 13.5523 13 13 13H3C2.44772 13 2 12.5523 2 12V4Z"
+      stroke={color}
+      strokeWidth="1.5"
+      fill="none"
+    />
+    <path
+      d="M2 4L8 9L14 4"
+      stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+)
+
+const ActivityEntryRow: React.FC<ActivityEntryProps> = ({
   entry,
   isLast,
 }) => {
@@ -199,33 +268,47 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
     second: "2-digit",
   })
 
-  const gatewayLabel = GATEWAY_DISPLAY_NAMES[entry.gateway] || entry.gateway || ""
-  const methodLabel = entry.payment_method
+  const isEmail = entry.type === "email"
+
+  // ── Determine label, icon, colors ──
+  let eventLabel = ""
+  let statusIcon: React.ReactNode
+  let statusBg = ""
+
+  if (isEmail) {
+    const templateLabel = EMAIL_TEMPLATE_LABELS[entry.template || ""] || entry.template || "Email"
+    eventLabel = entry.status === "failed" ? `${templateLabel} — Failed` : `${templateLabel} Sent`
+    const isOk = entry.status === "sent"
+    statusBg = isOk ? "#EBF5FF" : colors.redBg
+    const iconColor = isOk ? "#3B82F6" : colors.red
+    statusIcon = isOk
+      ? <EmailIcon color={iconColor} />
+      : <XCircleSolid style={{ width: 16, height: 16, color: colors.red }} />
+  } else {
+    eventLabel = formatEventLabel(entry.event || "")
+    if (entry.event === "tracking_sent") {
+      statusIcon = <ArrowUpRightOnBox style={{ width: 16, height: 16, color: colors.blue }} />
+      statusBg = colors.blueBg
+    } else if (entry.status === "success" || entry.status === "sent") {
+      statusIcon = <CheckCircleSolid style={{ width: 16, height: 16, color: colors.green }} />
+      statusBg = colors.greenBg
+    } else if (entry.status === "error" || entry.status === "failed") {
+      statusIcon = <XCircleSolid style={{ width: 16, height: 16, color: colors.red }} />
+      statusBg = colors.redBg
+    } else {
+      statusIcon = <ExclamationCircle style={{ width: 16, height: 16, color: colors.yellow }} />
+      statusBg = colors.yellowBg
+    }
+  }
+
+  const gatewayLabel = !isEmail
+    ? GATEWAY_DISPLAY_NAMES[entry.gateway || ""] || entry.gateway || ""
+    : ""
+  const methodLabel = !isEmail && entry.payment_method
     ? METHOD_LABELS[entry.payment_method] || entry.payment_method
     : ""
-  const eventLabel = formatEventLabel(entry.event)
 
-  const getStatusIcon = () => {
-    if (entry.event === "tracking_sent") {
-      return <ArrowUpRightOnBox style={{ width: 16, height: 16, color: colors.blue }} />
-    }
-    if (entry.status === "success") {
-      return <CheckCircleSolid style={{ width: 16, height: 16, color: colors.green }} />
-    }
-    if (entry.status === "error") {
-      return <XCircleSolid style={{ width: 16, height: 16, color: colors.red }} />
-    }
-    return <ExclamationCircle style={{ width: 16, height: 16, color: colors.yellow }} />
-  }
-
-  const getStatusBg = () => {
-    if (entry.event === "tracking_sent") return colors.blueBg
-    if (entry.status === "success") return colors.greenBg
-    if (entry.status === "error") return colors.redBg
-    return colors.yellowBg
-  }
-
-  // Amount display — handle both number and string formats
+  // Amount display
   const amountNum = entry.amount ? Number(entry.amount) : 0
   const hasCurrency = !!(entry.currency && amountNum > 0)
 
@@ -252,9 +335,9 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
           alignItems: "center",
           justifyContent: "center",
           borderRadius: "50%",
-          background: getStatusBg(),
+          background: statusBg,
         }}>
-          {getStatusIcon()}
+          {statusIcon}
         </div>
       </div>
 
@@ -267,6 +350,23 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            {/* Email pill */}
+            {isEmail && (
+              <span style={{
+                display: "inline-block",
+                borderRadius: 9999,
+                border: `1px solid ${colors.border}`,
+                padding: "2px 12px",
+                fontSize: 12,
+                fontWeight: 500,
+                color: "#3B82F6",
+                background: "#EBF5FF",
+                fontFamily: fontStack,
+              }}>
+                Email
+              </span>
+            )}
+
             {/* Gateway pill */}
             {gatewayLabel && (
               <span style={{
@@ -294,15 +394,29 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
 
         {/* Details section */}
         <div style={{ marginTop: 8, fontSize: 12, fontFamily: fontStack, display: "flex", flexDirection: "column", gap: 3 }}>
+          {/* Email details */}
+          {isEmail && (
+            <>
+              <p style={{ color: colors.textSec, margin: 0 }}>
+                <span style={{ fontWeight: 500 }}>To:</span> {entry.to}
+              </p>
+              {entry.subject && (
+                <p style={{ color: colors.textSec, margin: 0 }}>
+                  <span style={{ fontWeight: 500 }}>Subject:</span> {entry.subject}
+                </p>
+              )}
+            </>
+          )}
+
           {/* Payment method */}
-          {methodLabel && (
+          {!isEmail && methodLabel && (
             <p style={{ color: colors.textSec, margin: 0 }}>
               <span style={{ fontWeight: 500 }}>Method:</span> {methodLabel}
             </p>
           )}
 
           {/* Payment ID (transaction_id) */}
-          {entry.transaction_id && (
+          {!isEmail && entry.transaction_id && (
             <p style={{ color: colors.textSec, wordBreak: "break-all", margin: 0 }}>
               <span style={{ fontWeight: 500 }}>Payment ID:</span>{" "}
               <code style={{ background: colors.bgHover, padding: "1px 4px", borderRadius: 4, fontFamily: "monospace", fontSize: 11 }}>
@@ -344,7 +458,7 @@ const PaymentActivityEntryRow: React.FC<PaymentActivityEntryProps> = ({
           )}
 
           {/* Detail text */}
-          {entry.detail && !entry.error_message && (
+          {!isEmail && entry.detail && !entry.error_message && (
             <p style={{ color: colors.textSec, fontStyle: "italic", margin: 0 }}>{entry.detail}</p>
           )}
         </div>
@@ -369,7 +483,6 @@ function formatEventLabel(event: string): string {
 
 function formatCurrency(amount: number, currency: string): string {
   // All amounts in the activity log are stored in major units (e.g. 79 = €79.00)
-  // Payment amounts from Medusa are also in major units (decimal)
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: currency.toUpperCase(),
