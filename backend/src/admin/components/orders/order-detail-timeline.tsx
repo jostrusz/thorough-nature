@@ -364,7 +364,7 @@ export function OrderDetailTimeline({
     })
   }
 
-  // 10. Email notifications (from metadata log)
+  // 10. Email notifications (from metadata log — both old and new format)
   const emailLog: any[] = order.metadata?.email_log || []
   for (const email of emailLog) {
     events.push({
@@ -374,6 +374,30 @@ export function OrderDetailTimeline({
       color: "#4338CA",
       type: "event",
       icon: "email",
+    })
+  }
+
+  // 10b. Email activity log (new format from email-logger utility)
+  const emailActivityLog: any[] = order.metadata?.email_activity_log || []
+  const EMAIL_TEMPLATE_LABELS: Record<string, string> = {
+    order_confirmation: "Order Confirmation",
+    shipment_notification: "Shipment Notification",
+    ebook_delivery: "E-book Delivery",
+    ebook_delivery_resend: "E-book Delivery (Resent)",
+    abandoned_checkout: "Abandoned Checkout Reminder",
+  }
+  for (const entry of emailActivityLog) {
+    const templateLabel = EMAIL_TEMPLATE_LABELS[entry.template] || entry.template || "Email"
+    const isFailed = entry.status === "failed"
+    events.push({
+      date: entry.timestamp,
+      label: isFailed ? `Email failed: ${templateLabel}` : `Email sent: ${templateLabel}`,
+      detail: isFailed
+        ? entry.error_message || "Sending failed"
+        : `to ${entry.to || order.email}${entry.subject ? ` · "${entry.subject}"` : ""}`,
+      color: isFailed ? "#9E2B25" : "#4338CA",
+      type: "event",
+      icon: isFailed ? "cancel" : "email",
     })
   }
 
