@@ -45,7 +45,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- Stylesheet -->
-<link rel="stylesheet" href="style.css?v=47">
+<link rel="stylesheet" href="style.css?v=49">
 
 <!-- JSON-LD Structured Data: Product -->
 <script type="application/ld+json">
@@ -105,14 +105,24 @@
 </head>
 <body>
 
+<!-- ═══ PRELOADER ═══ -->
+<div class="preloader" id="preloader">
+ <div class="preloader-logo-wrap">
+  <img src="/dehondenbijbel/images/preloader.png" alt="De Hondenbijbel" class="preloader-logo">
+  <div class="preloader-shine"></div>
+ </div>
+</div>
+
 <!-- ═══ NAVBAR ═══ -->
 <nav class="navbar" id="navbar">
  <div class="navbar-inner">
   <a href="#" class="navbar-logo"><img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" alt="De Hondenbijbel" width="160" height="40"></a>
   <div class="navbar-links">
-   <a href="#reviews">Reviews</a>
-   <a href="#bonuses">Bonussen</a>
-   <a href="#faq">FAQ</a>
+   <a href="verzending">Verzending &amp; Levering</a>
+   <a href="retourbeleid">Retour &amp; Garantie</a>
+   <a href="voorwaarden">Algemene Voorwaarden</a>
+   <a href="privacy">Privacybeleid</a>
+   <a href="contact">Klantenservice</a>
    <a href="checkout" class="navbar-cta">Bestel Nu &rarr;</a>
   </div>
   <button class="navbar-hamburger" id="navToggle" onclick="toggleMobileMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -120,17 +130,12 @@
 </nav>
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
- <a href="#reviews" onclick="toggleMobileMenu()">Reviews</a>
- <a href="#bonuses" onclick="toggleMobileMenu()">Bonussen</a>
- <a href="#faq" onclick="toggleMobileMenu()">FAQ</a>
+ <a href="verzending" onclick="toggleMobileMenu()">Verzending &amp; Levering</a>
+ <a href="retourbeleid" onclick="toggleMobileMenu()">Retour &amp; Garantie</a>
+ <a href="voorwaarden" onclick="toggleMobileMenu()">Algemene Voorwaarden</a>
+ <a href="privacy" onclick="toggleMobileMenu()">Privacybeleid</a>
+ <a href="contact" onclick="toggleMobileMenu()">Klantenservice</a>
  <a href="checkout" class="nav-cta-mobile" onclick="toggleMobileMenu()">Bestel Nu &rarr;</a>
- <div class="nav-mobile-legal">
-  <a href="voorwaarden" onclick="toggleMobileMenu()">Voorwaarden</a>
-  <a href="verzending" onclick="toggleMobileMenu()">Verzending</a>
-  <a href="retourbeleid" onclick="toggleMobileMenu()">Retourbeleid</a>
-  <a href="privacy" onclick="toggleMobileMenu()">Privacy</a>
-  <a href="contact" onclick="toggleMobileMenu()">Contact</a>
- </div>
 </div>
 
 <!-- ═══ HERO ═══ -->
@@ -331,8 +336,9 @@
  <div class="carousel-dots" id="pageDots"></div>
 </section>
 
-<!-- ═══ VIDEO NARRATIVE ═══ -->
-<section class="section narrative-section">
+<!-- ═══ VIDEO NARRATIVE + EMOTIONAL NARRATIVE (continuous gradient) ═══ -->
+<div class="narrative-flow">
+<section class="section narrative-section narrative-video-part" style="padding-bottom:32px">
  <div class="section-inner" style="max-width:600px">
   <div class="anim" style="border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.12)">
    <script src="https://fast.wistia.com/player.js" async></script>
@@ -343,8 +349,7 @@
  </div>
 </section>
 
-<!-- ═══ EMOTIONAL NARRATIVE ═══ -->
-<section class="section narrative-section">
+<section class="section narrative-section narrative-text-part" style="padding-top:32px">
  <div class="section-inner" style="max-width:520px">
   <div class="bezny-text">
    <p class="anim">Als je <strong>moe bent van het vechten met je eigen hond</strong>&hellip;</p>
@@ -364,6 +369,7 @@
   </div>
  </div>
 </section>
+</div><!-- /narrative-flow -->
 
 <!-- ═══ LIFESTYLE IMAGE ═══ -->
 <section style="background:var(--white);padding:40px 24px">
@@ -408,8 +414,9 @@
  </div>
 </section>
 
-<!-- ═══ SECOND VIDEO ═══ -->
-<section style="background:var(--white);padding:40px 24px">
+<!-- ═══ SECOND VIDEO + SOCIAL PROOF (purple gradient flow) ═══ -->
+<div class="purple-flow">
+<section class="section purple-video-part" style="padding-bottom:32px">
  <div style="max-width:600px;margin:0 auto">
   <div class="anim" style="border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.12)">
    <script src="https://fast.wistia.com/embed/ielsvqbwc8.js" async type="module"></script>
@@ -419,8 +426,7 @@
  </div>
 </section>
 
-<!-- ═══ SOCIAL PROOF STORIES ═══ -->
-<section class="section narrative-section">
+<section class="section narrative-section purple-text-part" style="padding-top:32px">
  <div class="section-inner" style="max-width:520px">
   <div class="bezny-text">
    <p class="anim">Die van hun &eacute;n die van mij. <strong>Mensen die al jaren vochten met hun hond</strong>, begonnen ineens weer <strong><u>ontspannen te wandelen</u></strong>.</p>
@@ -461,6 +467,7 @@
   </div>
  </div>
 </section>
+</div><!-- /purple-flow -->
 
 <!-- ═══ SOCIAL PROOF STATS ═══ -->
 <section class="section" style="background:var(--white)">
@@ -672,7 +679,11 @@
    <div style="text-align:center;margin-top:32px">
     <a href="checkout" class="btn-cta">Bestel het fysieke boek →</a>
     <div class="payment-row" style="margin-top:16px">
-     <img src="/dehondenbijbel/images/payment-icons.webp" alt="Betaalmethoden" class="pay-icon" style="height:28px">
+     <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" width="36" height="28">
+     <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" width="36" height="28">
+     <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="36" height="28">
+     <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="36" height="28">
+     <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="36" height="28">
     </div>
    </div>
    <div class="shipping-box" style="margin-top:24px">
@@ -942,6 +953,19 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); navLinks?.classList.remove('open'); }
  });
 });
+
+// Preloader — fade out when page loads
+window.addEventListener('load', () => {
+ const preloader = document.getElementById('preloader');
+ if (preloader) {
+  setTimeout(() => {
+   preloader.style.opacity = '0';
+   setTimeout(() => { preloader.style.display = 'none'; }, 500);
+  }, 800);
+ }
+});
+
+
 </script>
 </body>
 </html>
