@@ -581,7 +581,7 @@ h2 { font-size: 38px; }
 /* Levý sloupec — obrázek + benefit karty */
 .offer-left {}
 .offer-book-img {
- width: 100%; border-radius: 20px; margin-bottom: 24px;
+ width: 100%; height: auto; border-radius: 20px; margin-bottom: 24px;
  transition: transform 0.4s ease;
 }
 .offer-book-img:hover {
@@ -845,6 +845,8 @@ h2 { font-size: 38px; }
 .verhaal .verhaal-image {
  display: block;
  max-width: 520px;
+ width: 100%;
+ height: auto;
  margin: 40px auto;
  border-radius: 12px;
  box-shadow: 0 8px 32px rgba(74, 26, 46, 0.12);
@@ -912,6 +914,7 @@ h2 { font-size: 38px; }
  display: block;
  max-width: 560px;
  width: 100%;
+ height: auto;
  margin: 40px auto;
  border-radius: 12px;
  box-shadow: 0 8px 32px rgba(74, 26, 46, 0.12);
@@ -991,6 +994,7 @@ h2 { font-size: 38px; }
  display: block;
  max-width: 520px;
  width: 100%;
+ height: auto;
  margin: 0 auto 40px;
  border-radius: 12px;
  box-shadow: 0 8px 32px rgba(74, 26, 46, 0.12);
@@ -1099,6 +1103,7 @@ h2 { font-size: 38px; }
 }
 .final-cta-images img {
  width: 100%;
+ height: auto;
  border-radius: 12px;
 }
 .final-cta-text h3 {
@@ -1573,6 +1578,7 @@ h2 { font-size: 38px; }
  display: block;
  max-width: 420px;
  width: 100%;
+ height: auto;
  margin: 0 auto 40px;
 }
 .final-offer-text {
