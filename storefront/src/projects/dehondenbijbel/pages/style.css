@@ -528,6 +528,14 @@ h3 { font-size: clamp(20px,3vw,24px); font-weight: 600; }
 .urgency-text-box strong { color: var(--dark); }
 .urgency-text-box u { text-decoration: underline; }
 
+/* ═══ STORIES LIST (inline arrow items) ═══ */
+.stories-list { font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.6; color: var(--dark); margin: 24px 0; }
+.story-item { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+.story-item .arrow { font-size: 18px; font-weight: 700; color: var(--purple); flex-shrink: 0; margin-top: 2px; }
+.story-item p { margin: 0; font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.6; color: var(--dark); }
+.story-item p strong { color: var(--dark); }
+.story-item p u { text-decoration-color: var(--purple); text-underline-offset: 3px; }
+
 /* ═══ ARROW STORIES (Social Proof) ═══ */
 .arrow-stories { display: flex; flex-direction: column; gap: 20px; margin: 32px 0; }
 .arrow-story {
