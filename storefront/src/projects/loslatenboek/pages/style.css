@@ -1787,8 +1787,15 @@ h2 { font-size: 38px; }
 
 /* ═══ RESPONSIVITA ═══ */
 @media (max-width: 768px) {
- .hero { flex-direction: column; text-align: center; gap: 32px; }
- .hero-left { min-width: 0; }
+ .hero-section { padding-top: 40px; padding-bottom: 48px; }
+ .hero { flex-direction: column; text-align: center; gap: 24px; }
+ .hero-left { display: contents; }
+ .hero-left .eyebrow { order: 1; }
+ .hero-left h1 { order: 2; }
+ .hero-right { order: 3; }
+ .hero-left .body-text { order: 4; }
+ .hero-left .hero-buttons { order: 5; }
+ .hero-left .payment-row { order: 6; }
  h1 { font-size: 26px; }
  .hero-right img { width: 300px !important; }
  .payment-row { justify-content: center; }
