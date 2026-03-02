@@ -13,7 +13,7 @@ import {
   mapCountryToLanguage,
   getOSSMode,
 } from "../modules/fakturoid/api-client"
-import { resolveInvoicingSystem } from "./utils/resolve-invoicing-system"
+import { resolveInvoicingSystem } from "../utils/resolve-invoicing-system"
 
 /**
  * Fakturoid Invoice Subscriber

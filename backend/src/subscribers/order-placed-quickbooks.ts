@@ -11,7 +11,7 @@ import {
   createPayment,
   getInvoiceWithLink,
 } from "../modules/quickbooks/api-client"
-import { resolveInvoicingSystem } from "./utils/resolve-invoicing-system"
+import { resolveInvoicingSystem } from "../utils/resolve-invoicing-system"
 
 /**
  * QuickBooks Invoice Subscriber

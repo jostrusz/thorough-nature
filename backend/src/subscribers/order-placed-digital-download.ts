@@ -4,7 +4,7 @@ import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
 import { DIGITAL_DOWNLOAD_MODULE } from '../modules/digital-download'
 import type DigitalDownloadModuleService from '../modules/digital-download/service'
-import { resolveBillingEntity } from './utils/resolve-billing-entity'
+import { resolveBillingEntity } from '../utils/resolve-billing-entity'
 import { logEmailActivity } from '../utils/email-logger'
 import crypto from 'crypto'
 

@@ -3,7 +3,7 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { DIGITAL_DOWNLOAD_MODULE } from "../../../../../modules/digital-download"
 import type DigitalDownloadModuleService from "../../../../../modules/digital-download/service"
 import { EmailTemplates } from "../../../../../modules/email-notifications/templates"
-import { resolveBillingEntity } from "../../../../../subscribers/utils/resolve-billing-entity"
+import { resolveBillingEntity } from "../../../../../utils/resolve-billing-entity"
 import { logEmailActivity } from "../../../../../utils/email-logger"
 import crypto from "crypto"
 
