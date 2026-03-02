@@ -894,6 +894,82 @@ h3 { font-size: clamp(20px,3vw,24px); font-weight: 600; }
  .pages-slide { flex: 0 0 calc(50% - 8px); }
 }
 
+/* ═══ H2 WITH HIGHLIGHT ═══ */
+h2.h2, .h2 {
+ font-family: var(--font-heading);
+ font-size: 32px;
+ line-height: 1.4;
+ font-weight: 700;
+ color: var(--dark);
+ text-align: center;
+ margin: 0 0 24px;
+}
+.h2 .highlight, h2.h2 .highlight, h2 .highlight {
+ background: linear-gradient(135deg, #E8EAF6 0%, #C5CAE9 100%);
+ padding: 2px 6px;
+ border-radius: 4px;
+ font-weight: 900;
+ color: #4A148C;
+ font-style: italic;
+}
+
+/* ═══ DIFFERENCES LIST ═══ */
+.differences-list { margin-top: 20px; }
+.differences-list .list-item { display: flex; gap: 12px; margin-bottom: 20px; align-items: flex-start; }
+.differences-list .arrow { font-size: 18px; font-weight: 700; color: #4A148C; flex-shrink: 0; margin-top: 2px; }
+.differences-list .list-item p { margin: 0; font-family: var(--font-heading); font-size: 16px; line-height: 1.6; color: var(--dark); }
+
+/* ═══ CTA BANNERS ═══ */
+.cta-banner {
+ display: flex;
+ align-items: center;
+ gap: 24px;
+ padding: 32px 36px;
+ margin-bottom: 20px;
+ border-radius: 16px;
+ border: 3px solid #000;
+ transition: transform 0.3s ease, box-shadow 0.3s ease;
+ position: relative;
+}
+.cta-banner:hover {
+ transform: translateX(8px);
+ box-shadow: -8px 8px 0px #000;
+}
+.cta-banner::before {
+ content: '';
+ position: absolute;
+ left: 0; top: 0; bottom: 0;
+ width: 6px;
+ border-radius: 16px 0 0 16px;
+}
+.cta-banner-dark { background: #1a1a1a; }
+.cta-banner-dark::before { background: #ffd97d; }
+.cta-banner-red { background: #2d0a0a; }
+.cta-banner-red::before { background: #ff4444; }
+.cta-banner-purple { background: #2a1a3d; }
+.cta-banner-purple::before { background: #9b7fd8; }
+.cta-icon { font-size: 56px; flex-shrink: 0; }
+.cta-question {
+ font-family: var(--font-heading);
+ font-size: 24px;
+ font-weight: 800;
+ line-height: 1.3;
+ margin: 0 0 8px;
+ color: #FFF;
+}
+.cta-subtext {
+ font-family: var(--font-heading);
+ font-size: 16px;
+ font-weight: 400;
+ line-height: 1.6;
+ margin: 0;
+ color: #FFF;
+}
+
+@media (max-width: 768px) {
+ .cta-banner { flex-direction: column; text-align: center; padding: 24px 28px; }
+}
+
 @media (max-width: 480px) {
  .hero-section { padding: 24px 16px 0; }
  .btn-cta { font-size: 16px; padding: 16px 24px; }
@@ -903,4 +979,10 @@ h3 { font-size: clamp(20px,3vw,24px); font-weight: 600; }
  .bezny-text, .bezny-text p { font-size: 15px; line-height: 1.5; }
  .situation-item p, .method-item p, .list-item p { font-size: 15px; line-height: 1.5; }
  .highlight-heading .highlight { padding: 1px 4px; }
+ h2.h2, .h2 { font-size: 28px; line-height: 1.35; }
+ .h2 .highlight, h2.h2 .highlight, h2 .highlight { padding: 1px 4px; }
+ .cta-question { font-size: 20px; }
+ .cta-subtext { font-size: 15px; line-height: 1.4; }
+ .cta-icon { font-size: 48px; }
+ .differences-list .list-item p { font-size: 15px; line-height: 1.5; }
 }
