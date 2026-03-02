@@ -569,7 +569,85 @@ h3 { font-size: clamp(20px,3vw,24px); font-weight: 600; }
 }
 .stat-banner h2 { font-size: clamp(22px,3.5vw,32px); margin-bottom: 8px; }
 
-/* ═══ REVIEWS ═══ */
+/* ═══ HIGHLIGHT HEADING ═══ */
+.highlight-heading .highlight {
+ background: linear-gradient(135deg, #E8EAF6 0%, #C5CAE9 100%);
+ padding: 2px 6px; border-radius: 4px; font-weight: 900;
+ color: var(--purple-dark); font-style: italic;
+}
+
+/* ═══ BEZNY TEXT ═══ */
+.bezny-text { font-family: var(--font-heading); font-size: 16px; font-weight: 400; line-height: 1.6; color: var(--dark); }
+.bezny-text p { font-family: var(--font-heading); font-size: 16px; font-weight: 400; line-height: 1.6; color: var(--dark); margin-bottom: 16px; }
+.bezny-text strong { color: var(--dark); }
+.bezny-text em { color: var(--purple); font-style: italic; }
+.bezny-text u { text-decoration: underline; }
+
+/* ═══ SITUATIONS LIST ═══ */
+.situations-list { font-family: var(--font-heading); font-size: 16px; line-height: 1.6; color: var(--dark); margin: 16px 0; }
+.situation-item { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+.situation-item .arrow { font-size: 18px; font-weight: 700; color: var(--purple); flex-shrink: 0; margin-top: 2px; }
+.situation-item p { margin: 0; font-family: var(--font-heading); font-size: 16px; line-height: 1.6; color: var(--dark); }
+
+/* ═══ METHODS LIST ═══ */
+.methods-list { font-family: var(--font-heading); font-size: 16px; line-height: 1.6; color: var(--dark); margin: 0 0 16px; }
+.method-item { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+.method-item .arrow { font-size: 18px; font-weight: 700; color: var(--purple); flex-shrink: 0; margin-top: 2px; }
+.method-item p { margin: 0; font-family: var(--font-heading); font-size: 16px; line-height: 1.6; color: var(--dark); }
+
+/* ═══ QUALIFICATIONS & SOLUTIONS LISTS ═══ */
+.qualifications-list, .solutions-list { font-family: var(--font-heading); font-size: 16px; line-height: 1.6; color: var(--dark); margin: 16px 0; }
+.list-item { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+.list-item .arrow { font-size: 18px; font-weight: 700; color: var(--purple); flex-shrink: 0; margin-top: 2px; }
+.list-item p { margin: 0; font-family: var(--font-heading); font-size: 16px; line-height: 1.6; color: var(--dark); }
+
+/* ═══ REVIEWS SLIDER ═══ */
+.reviews-slider-wrap {
+ position: relative; max-width: 1100px; margin: 0 auto; overflow: hidden;
+}
+.reviews-slider-track {
+ display: flex; gap: 24px;
+ animation: reviewSlide 25s linear infinite; width: max-content;
+}
+.reviews-slider-track:hover { animation-play-state: paused; }
+@keyframes reviewSlide {
+ 0% { transform: translateX(0); }
+ 100% { transform: translateX(-50%); }
+}
+.review-photo-card {
+ flex-shrink: 0; width: 220px; height: 280px; border-radius: 20px;
+ overflow: hidden; position: relative;
+ box-shadow: 0 8px 32px rgba(74,20,140,0.1);
+ transition: all 0.4s cubic-bezier(.4,0,.2,1);
+ border: 3px solid transparent;
+ background-image: linear-gradient(var(--white), var(--white)), linear-gradient(135deg, var(--purple-medium), var(--purple));
+ background-origin: border-box; background-clip: content-box, border-box;
+}
+.review-photo-card:hover {
+ transform: translateY(-8px) scale(1.03);
+ box-shadow: 0 20px 48px rgba(74,20,140,0.18);
+}
+.review-photo-card img {
+ width: 100%; height: 100%; object-fit: cover; display: block; aspect-ratio: 220/280;
+}
+.photo-overlay {
+ position: absolute; bottom: 0; left: 0; right: 0; padding: 16px;
+ background: linear-gradient(transparent, rgba(45,27,61,0.8)); color: white;
+}
+.photo-name { font-family: var(--font-heading); font-size: 14px; font-weight: 700; margin: 0; }
+.photo-stars { font-size: 12px; letter-spacing: 1px; }
+.reviews-rating-bar {
+ text-align: center; margin-top: 40px; font-family: var(--font-heading); color: var(--body-text);
+}
+.rating-big { font-size: 48px; font-weight: 800; color: var(--purple); }
+.rating-stars { display: block; font-size: 24px; margin: 8px 0; }
+.rating-count { font-size: 15px; color: var(--gray); }
+
+/* ═══ AUTEUR PHOTO SINGLE ═══ */
+.auteur-photo-single { max-width: 400px; margin: 0 auto 40px; }
+.auteur-photo-single img { width: 100%; border-radius: var(--radius-sm); box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+
+/* ═══ REVIEWS (OLD — kept for backwards compat) ═══ */
 .reviews-section { background: var(--white); }
 .reviews-heading { text-align: center; margin-bottom: 48px; }
 .reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto; }
@@ -800,8 +878,11 @@ h3 { font-size: clamp(20px,3vw,24px); font-weight: 600; }
  .guarantee-box { flex-direction: column; text-align: center; }
  .shipping-box { flex-direction: column; text-align: center; }
  .reviews-grid { grid-template-columns: 1fr; }
+ .review-photo-card { width: 180px; height: 230px; }
+ .reviews-slider-track { gap: 16px; }
  .auteur-photos { flex-direction: column; align-items: center; }
  .auteur-photo-wrap { transform: none !important; margin-left: 0 !important; }
+ .auteur-photo-single { max-width: 300px; }
  .urgency-box { flex-direction: column; text-align: center; }
  .footer-inner { flex-direction: column; align-items: center; text-align: center; }
  .footer-links { justify-content: center; }
@@ -816,4 +897,7 @@ h3 { font-size: clamp(20px,3vw,24px); font-weight: 600; }
  .pages-slide { flex: 0 0 calc(80% - 8px); }
  .situation-card { flex: 0 0 calc(90% - 10px); }
  .carousel-arrow { width: 40px; height: 40px; font-size: 16px; }
+ .bezny-text, .bezny-text p { font-size: 15px; line-height: 1.5; }
+ .situation-item p, .method-item p, .list-item p { font-size: 15px; line-height: 1.5; }
+ .highlight-heading .highlight { padding: 1px 4px; }
 }
