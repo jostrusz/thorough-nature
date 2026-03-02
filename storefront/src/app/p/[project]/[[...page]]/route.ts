@@ -43,11 +43,16 @@ export async function GET(
       return new NextResponse("Not found", { status: 404 })
     }
     const content = fs.readFileSync(assetPath)
+    // Fonts are immutable — cache for 1 year; other assets for 1 day
+    const isFont = [".woff", ".woff2", ".ttf", ".eot"].includes(ext)
+    const cacheControl = isFont
+      ? "public, max-age=31536000, immutable"
+      : "public, max-age=86400, s-maxage=604800"
     return new NextResponse(content, {
       status: 200,
       headers: {
         "Content-Type": STATIC_MIME_TYPES[ext],
-        "Cache-Control": "public, max-age=3600, s-maxage=86400",
+        "Cache-Control": cacheControl,
       },
     })
   }
