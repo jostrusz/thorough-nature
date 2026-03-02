@@ -2,6 +2,11 @@
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: optional; }
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+/* DM Sans — self-hosted (variable font, latin + latin-ext) */
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
 /* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
 :root {
@@ -37,7 +42,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  opacity: 0; visibility: hidden; pointer-events: none;
 }
 .preloader-logo {
- width: 120px; height: auto;
+ width: 120px; height: 110px;
+ aspect-ratio: 300 / 276;
  animation: preloaderPulse 1.4s ease-in-out infinite;
 }
 @keyframes preloaderPulse {
@@ -82,7 +88,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .nav-logo img {
  height: 40px;
- width: auto;
+ width: 150px;
+ aspect-ratio: 600 / 160;
 }
 .nav-logo-text {
  font-family: 'Recoleta', serif;
@@ -1499,6 +1506,7 @@ h2 { font-size: 38px; }
  height: 100%;
  object-fit: cover;
  display: block;
+ aspect-ratio: 220 / 280;
 }
 .review-photo-card .photo-overlay {
  position: absolute;
@@ -1705,7 +1713,8 @@ h2 { font-size: 38px; }
 }
 .footer-logo {
  height: 56px;
- width: auto;
+ width: 210px;
+ aspect-ratio: 600 / 160;
 }
 .footer-brand-text {
  font-family: 'Recoleta', serif;
