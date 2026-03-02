@@ -23,7 +23,7 @@
  --light-gray: #F9FAFB;
  --white: #FFFFFF;
  --success: #16A34A;
- --font-heading: 'Bricolage Grotesque', sans-serif;
+ --font-heading: 'Inter', sans-serif;
  --font-body: 'Cabin', sans-serif;
  --radius: 16px;
  --radius-sm: 12px;
@@ -42,7 +42,8 @@ ul, ol { list-style: none; }
 
 /* ═══ TYPOGRAPHY ═══ */
 h1,h2,h3,h4 { font-family: var(--font-heading); line-height: 1.2; color: var(--dark); }
-h1 { font-size: clamp(32px,5vw,52px); font-weight: 800; }
+h1 { font-size: clamp(28px,5vw,52px); font-weight: 800; }
+.hero-text h1 { font-size: 34px; }
 h2 { font-size: clamp(26px,4vw,38px); font-weight: 700; }
 h3 { font-size: clamp(20px,3vw,24px); font-weight: 600; }
 .hl { background: var(--yellow-hl); padding: 2px 8px; border-radius: 4px; }
@@ -67,7 +68,7 @@ h3 { font-size: clamp(20px,3vw,24px); font-weight: 600; }
 .navbar-links a:hover { color: var(--purple); }
 .navbar-cta {
  font-family: var(--font-heading); font-weight: 700; font-size: 14px;
- color: var(--white); background: linear-gradient(135deg, #E87E04, #BF5B21);
+ color: var(--white); background: linear-gradient(135deg, var(--purple-medium), var(--purple));
  border-radius: var(--radius-btn); padding: 10px 24px; transition: all 0.3s;
 }
 .navbar-cta:hover { filter: brightness(1.1); transform: translateY(-1px); }
@@ -88,7 +89,7 @@ h3 { font-size: clamp(20px,3vw,24px); font-weight: 600; }
 }
 .hero-eyebrow .hl { background: var(--yellow-hl); color: var(--cta); }
 .hero-eyebrow .hl-purple { color: var(--purple); background: var(--purple-light); padding: 2px 8px; border-radius: 4px; }
-.hero-section h1 { color: var(--dark); margin-bottom: 20px; font-size: clamp(28px,4vw,44px); }
+.hero-section h1 { color: var(--dark); margin-bottom: 20px; font-size: 34px; line-height: 1.25; }
 .hero-section h1 .hl { background: var(--yellow-hl); }
 .hero-section h1 .hl-purple { color: var(--purple); font-style: italic; background: none; }
 .hero-body {
