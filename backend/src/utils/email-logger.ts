@@ -27,7 +27,7 @@ export async function logEmailActivity(
 
   while (retries < maxRetries) {
     try {
-      const order = await orderService.retrieve(orderId, {
+      const order = await orderService.retrieveOrder(orderId, {
         select: ["id", "metadata"],
       })
 
@@ -40,7 +40,7 @@ export async function logEmailActivity(
         timestamp: new Date().toISOString(),
       })
 
-      await orderService.update(orderId, {
+      await orderService.updateOrders(orderId, {
         metadata: {
           ...currentMetadata,
           email_activity_log: emailLog,
