@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Afrekenen — Laat Los Wat Je Kapotmaakt</title>
+<title>Afrekenen — De Hondenbijbel</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="/laat-los-logo-logo.png" type="image/png">
+<link rel="icon" href="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" type="image/png">
 
 <!-- Prevent checkout flash on payment return — hide form immediately (CSS loaded in <style> below) -->
 <script>
@@ -17,10 +17,10 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
 <!-- Mollie Components (credit card) -->
 <script src="https://js.mollie.com/v1/mollie.js"></script>
 
-<!-- Fonts -->
-<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-<link rel="preload" href="https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2" as="font" type="font/woff2" crossorigin>
+<!-- Google Fonts: Inter + Cabin -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- Klarna Payments SDK (widget-based authorize flow) -->
 <script src="https://x.klarnacdn.net/kp/lib/v1/api.js" async></script>
@@ -32,21 +32,14 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
 <script src="https://js.stripe.com/v3/" async></script>
 
 <style>
-/* ─── FONTS ─── */
-@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
-@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* ─── FONTS — loaded via Google Fonts (Inter + Cabin) ─── */
 
 /* ─── PAYMENT PRELOADER (Mollie redirect + Klarna inline) ─── */
 .payment-preloader {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: #f8f6f3;
+  background: #FFFFFF;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -74,27 +67,27 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
   50%       { transform: scale(1.08); opacity: 1 }
 }
 
-/* ─── DESIGN TOKENS — Velvet Dusk (shodné s hlavní stránkou) ─── */
+/* ─── DESIGN TOKENS — De Hondenbijbel (consistent with landing page) ─── */
 :root {
-  --bg: #FAF5F8;
-  --heading: #2D1B3D;
-  --cta: #C27BA0;
-  --section: #EDD9E5;
-  --body: #5A3D6B;
-  --highlight: #D9A4C0;
-  --dark: #1A1028;
+  --bg: #FFFAF5;
+  --heading: #1A1A1A;
+  --cta: #DC3522;
+  --section: #F3E8FF;
+  --body: #374151;
+  --highlight: #C4B5FD;
+  --dark: #1A1A1A;
   --white: #FFFFFF;
-  --light: #F5EDF2;
-  --muted: #9B7AAD;
-  --cta-hover: #A8628A;
-  --accent: #D498B5;
+  --light: #F9FAFB;
+  --muted: #6B7280;
+  --cta-hover: #C62E1C;
+  --accent: #6B21A8;
   --error: #C0392B;
   --success: #27AE60;
-  --border: rgba(194,123,160,0.18);
-  --border-focus: var(--cta);
-  --shadow-sm: 0 1px 3px rgba(45,27,61,0.06);
-  --shadow-md: 0 4px 16px rgba(45,27,61,0.08);
-  --shadow-lg: 0 8px 32px rgba(45,27,61,0.12);
+  --border: rgba(107,33,168,0.12);
+  --border-focus: var(--accent);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
   --radius: 8px;
   --radius-lg: 12px;
 }
@@ -104,7 +97,7 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
 html { scroll-behavior: smooth; }
 html, body { overflow-x: clip; max-width: 100vw; }
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Cabin', sans-serif;
   background: var(--bg);
   color: var(--body);
   min-height: 100vh;
@@ -153,7 +146,7 @@ body {
   animation: fadeIn 0.4s ease forwards;
 }
 .checkout-logo {
-  font-family: 'Recoleta', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 22px;
   font-weight: 700;
   color: var(--heading);
@@ -247,7 +240,7 @@ body {
   background: var(--success);
 }
 .section-title {
-  font-family: 'Recoleta', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 18px;
   font-weight: 600;
   color: var(--heading);
@@ -275,7 +268,7 @@ body {
 .float-field select {
   width: 100%;
   padding: 22px 16px 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Cabin', sans-serif;
   font-size: 15px;
   font-weight: 400;
   color: var(--heading);
@@ -329,7 +322,7 @@ body {
 .float-field input:focus,
 .float-field select:focus {
   border-color: var(--cta);
-  box-shadow: 0 0 0 3px rgba(194,123,160,0.12);
+  box-shadow: 0 0 0 3px rgba(107,33,168,0.12);
   background: var(--white);
 }
 /* Validace */
@@ -446,7 +439,7 @@ body {
   transition: background 0.1s;
 }
 .foxentry-item:last-child { border-bottom: none; }
-.foxentry-item:hover, .foxentry-item.is-active { background: #F5F3FF; }
+.foxentry-item:hover, .foxentry-item.is-active { background: #FAF5FF; }
 .foxentry-item strong { color: var(--heading); font-weight: 600; }
 .foxentry-item small { color: var(--muted); font-size: 11px; margin-left: 6px; }
 .foxentry-correction {
@@ -481,7 +474,7 @@ body {
   transition: background 0.2s ease, border-color 0.2s ease;
   user-select: none;
 }
-.company-toggle:hover { background: rgba(194,123,160,0.06); border-color: var(--cta); }
+.company-toggle:hover { background: rgba(107,33,168,0.06); border-color: var(--cta); }
 .company-toggle input[type="checkbox"] {
   width: 18px; height: 18px; accent-color: var(--cta);
   cursor: pointer; flex-shrink: 0;
@@ -508,11 +501,11 @@ body {
 .billing-toggle {
   display: flex; align-items: center; gap: 10px;
   margin-top: 16px; padding: 12px 16px;
-  background: rgba(194,123,160,0.04); border: 1px solid #e0e0e0; border-radius: 10px;
+  background: rgba(107,33,168,0.04); border: 1px solid #e0e0e0; border-radius: 10px;
   cursor: pointer; transition: all 0.25s ease;
   user-select: none;
 }
-.billing-toggle:hover { background: rgba(194,123,160,0.06); border-color: var(--cta); }
+.billing-toggle:hover { background: rgba(107,33,168,0.06); border-color: var(--cta); }
 .billing-toggle input[type="checkbox"] {
   width: 18px; height: 18px; accent-color: var(--cta);
   cursor: pointer; flex-shrink: 0;
@@ -563,7 +556,7 @@ body {
   outline: none;
 }
 .promo-input:focus { border-color: var(--cta); }
-.promo-input::placeholder { text-transform: none; font-family: 'DM Sans', sans-serif; letter-spacing: normal; color: var(--muted); }
+.promo-input::placeholder { text-transform: none; font-family: 'Cabin', sans-serif; letter-spacing: normal; color: var(--muted); }
 .promo-apply-btn {
   padding: 10px 20px; border: none; border-radius: var(--radius);
   background: var(--heading); color: var(--white);
@@ -623,8 +616,8 @@ body {
 }
 .payment-method.selected {
   border-color: var(--cta);
-  background: rgba(194,123,160,0.04);
-  box-shadow: 0 0 0 3px rgba(194,123,160,0.1);
+  background: rgba(107,33,168,0.04);
+  box-shadow: 0 0 0 3px rgba(107,33,168,0.1);
 }
 .payment-method input[type="radio"] {
   position: absolute;
@@ -666,7 +659,7 @@ body {
   border-radius: 5px;
   flex-shrink: 0;
   object-fit: contain;
-  border: 1px solid rgba(194,123,160,0.12);
+  border: 1px solid rgba(107,33,168,0.12);
 }
 
 .pm-info { flex: 1; }
@@ -685,7 +678,7 @@ body {
   font-size: 10px;
   font-weight: 700;
   color: var(--cta);
-  background: rgba(194,123,160,0.1);
+  background: rgba(107,33,168,0.1);
   padding: 3px 8px;
   border-radius: 20px;
   white-space: nowrap;
@@ -710,7 +703,7 @@ body {
 }
 .klarna-parent.expanded {
   border-color: var(--cta);
-  background: rgba(194,123,160,0.04);
+  background: rgba(107,33,168,0.04);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   border-bottom-color: transparent;
@@ -729,7 +722,7 @@ body {
   border: 1.5px solid var(--cta);
   border-top: none;
   border-radius: 0 0 var(--radius) var(--radius);
-  background: rgba(194,123,160,0.02);
+  background: rgba(107,33,168,0.02);
   overflow: hidden;
   margin-top: -8px;
   margin-bottom: 0;
@@ -747,10 +740,10 @@ body {
   position: relative;
 }
 .klarna-sub-method:hover {
-  background: rgba(194,123,160,0.06);
+  background: rgba(107,33,168,0.06);
 }
 .klarna-sub-method.selected {
-  background: rgba(194,123,160,0.08);
+  background: rgba(107,33,168,0.08);
 }
 .klarna-sub-method + .klarna-sub-method {
   border-top: 1px solid var(--border);
@@ -841,7 +834,7 @@ body {
 .checkout-btn {
   width: 100%;
   padding: 18px 32px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Cabin', sans-serif;
   font-size: 16px;
   font-weight: 700;
   color: var(--white);
@@ -850,7 +843,7 @@ body {
   border-radius: var(--radius);
   cursor: pointer;
   letter-spacing: 0.02em;
-  box-shadow: 0 4px 20px rgba(194,123,160,0.3);
+  box-shadow: 0 4px 20px rgba(107,33,168,0.3);
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
   overflow: hidden;
@@ -869,7 +862,7 @@ body {
 .checkout-btn:hover {
   background: var(--cta-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(194,123,160,0.4);
+  box-shadow: 0 8px 28px rgba(107,33,168,0.4);
 }
 .checkout-btn:active { transform: translateY(0); }
 .checkout-btn:disabled {
@@ -877,7 +870,7 @@ body {
   cursor: not-allowed;
   transform: none !important;
 }
-.checkout-btn:disabled:hover { background: var(--cta); box-shadow: 0 4px 20px rgba(194,123,160,0.3); }
+.checkout-btn:disabled:hover { background: var(--cta); box-shadow: 0 4px 20px rgba(107,33,168,0.3); }
 .checkout-btn:disabled::before { display: none; }
 
 .checkout-btn .spinner {
@@ -932,7 +925,7 @@ body {
   opacity: 0;
 }
 .summary-title {
-  font-family: 'Recoleta', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 18px;
   font-weight: 600;
   color: var(--heading);
@@ -987,7 +980,7 @@ body {
   border-radius: 2px 0 0 2px;
 }
 .mini-book-title {
-  font-family: 'Recoleta', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 5.5px;
   font-weight: 700;
   color: var(--heading);
@@ -995,7 +988,7 @@ body {
   margin-left: 3px;
 }
 .mini-book-author {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Cabin', sans-serif;
   font-size: 4px;
   color: var(--muted);
   margin-top: 3px;
@@ -1004,7 +997,7 @@ body {
 
 .summary-product-info { flex: 1; }
 .summary-product-name {
-  font-family: 'Recoleta', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 15px;
   font-weight: 600;
   color: var(--heading);
@@ -1022,7 +1015,7 @@ body {
   margin-bottom: 6px;
 }
 .summary-product-price {
-  font-family: 'Recoleta', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: var(--cta);
@@ -1061,7 +1054,7 @@ body {
   margin-bottom: 0;
 }
 .summary-line.total .price {
-  font-family: 'Recoleta', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 22px;
   color: var(--cta);
 }
@@ -1070,14 +1063,14 @@ body {
 .guarantee-box {
   margin-top: 18px;
   padding: 14px;
-  background: rgba(194,123,160,0.06);
+  background: rgba(107,33,168,0.06);
   border-radius: var(--radius);
-  border: 1px solid rgba(194,123,160,0.12);
+  border: 1px solid rgba(107,33,168,0.12);
   text-align: center;
 }
 .guarantee-box .icon { font-size: 22px; margin-bottom: 5px; }
 .guarantee-box .title {
-  font-family: 'Recoleta', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 600;
   color: var(--heading);
@@ -1176,7 +1169,7 @@ body {
   padding: 10px 12px;
   background: var(--light);
   border-radius: var(--radius);
-  border: 1px solid rgba(194,123,160,0.08);
+  border: 1px solid rgba(107,33,168,0.08);
 }
 .summary-review-avatar {
   width: 36px;
@@ -1184,7 +1177,7 @@ body {
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  border: 2px solid rgba(194,123,160,0.15);
+  border: 2px solid rgba(107,33,168,0.15);
 }
 .summary-review-avatar img {
   width: 100%;
@@ -1272,11 +1265,11 @@ body {
   background: rgba(255,255,255,0.94);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
   backdrop-filter: blur(20px) saturate(1.4);
-  border: 1px solid rgba(194,123,160,0.10);
+  border: 1px solid rgba(107,33,168,0.10);
   border-top: none;
   /* Horní hrany rovné (zarovnání s horní hranou telefonu), dolní zaoblené */
   border-radius: 0 0 16px 16px;
-  box-shadow: 0 2px 16px rgba(45,27,61,0.05);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
   /* Smooth transitions pro shrink/expand */
   transition: box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
               border-radius 0.5s cubic-bezier(0.22, 1, 0.36, 1),
@@ -1331,7 +1324,7 @@ body {
   transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .msb-title {
-  font-family: 'Recoleta', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 600;
   color: var(--heading);
@@ -1357,7 +1350,7 @@ body {
   transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .msb-price {
-  font-family: 'Recoleta', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 17px;
   font-weight: 700;
   color: var(--heading);
@@ -1405,7 +1398,7 @@ body {
   margin-top: 0;
 }
 .mobile-summary-bar.compact {
-  box-shadow: 0 4px 24px rgba(45,27,61,0.10);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
 }
 
 /* --- Rozevřený content panel --- */
@@ -1450,7 +1443,7 @@ body {
   color: var(--heading);
 }
 .msb-line.total-line .msb-line-val {
-  font-family: 'Recoleta', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 17px;
 }
 .msb-tax-note {
@@ -1528,7 +1521,7 @@ body {
   margin-bottom: 16px;
 }
 .bundle-section-title {
-  font-family: 'Recoleta', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 17px;
   font-weight: 600;
   color: var(--heading);
@@ -1543,7 +1536,7 @@ body {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border: 1.5px solid rgba(194,123,160,0.15);
+  border: 1.5px solid rgba(107,33,168,0.15);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(.22,1,.36,1);
@@ -1553,8 +1546,8 @@ body {
 .bundle-option:hover { border-color: var(--highlight); background: var(--light); }
 .bundle-option.selected {
   border-color: var(--cta);
-  background: linear-gradient(135deg, rgba(194,123,160,0.06), rgba(212,152,181,0.04));
-  box-shadow: 0 0 0 3px rgba(194,123,160,0.10);
+  background: linear-gradient(135deg, rgba(107,33,168,0.06), rgba(212,152,181,0.04));
+  box-shadow: 0 0 0 3px rgba(107,33,168,0.10);
 }
 .bundle-radio {
   width: 20px; height: 20px; border-radius: 50%;
@@ -1590,7 +1583,7 @@ body {
 
 /* ─── ORDER BUMP — accordion ─── */
 .order-bump {
-  background: linear-gradient(135deg, rgba(194,123,160,0.06), rgba(245,237,242,0.8));
+  background: linear-gradient(135deg, rgba(107,33,168,0.06), rgba(245,237,242,0.8));
   border: 2px dashed var(--highlight);
   border-radius: var(--radius-lg);
   padding: 0;
@@ -1610,8 +1603,8 @@ body {
 .order-bump.checked {
   border-style: solid;
   border-color: var(--cta);
-  background: linear-gradient(135deg, rgba(194,123,160,0.10), rgba(245,237,242,1));
-  box-shadow: 0 0 0 3px rgba(194,123,160,0.10);
+  background: linear-gradient(135deg, rgba(107,33,168,0.10), rgba(245,237,242,1));
+  box-shadow: 0 0 0 3px rgba(107,33,168,0.10);
 }
 
 /* Header — vždy viditelný: checkbox + thumbnail + info + expand */
@@ -1638,7 +1631,7 @@ body {
   width: 44px; height: 60px; border-radius: 5px;
   overflow: hidden; flex-shrink: 0;
   background: var(--section);
-  box-shadow: 0 2px 8px rgba(45,27,61,0.12);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 .order-bump-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -1657,7 +1650,7 @@ body {
   background: var(--success); padding: 2px 6px; border-radius: 4px;
 }
 .order-bump-title {
-  font-family: 'Recoleta', serif; font-size: 14px; font-weight: 600;
+  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
   color: var(--heading); margin-bottom: 3px;
 }
 .order-bump-title em { color: var(--cta); font-style: italic; }
@@ -1677,14 +1670,14 @@ body {
 
 /* Expand/collapse button */
 .order-bump-expand {
-  border: 1.5px solid rgba(194,123,160,0.30); cursor: pointer;
+  border: 1.5px solid rgba(107,33,168,0.30); cursor: pointer;
   padding: 7px 18px; border-radius: 20px;
   display: flex; align-items: center; gap: 5px;
   flex-shrink: 0; transition: all 0.3s ease;
-  color: var(--cta); background: rgba(194,123,160,0.12);
-  font-size: 13px; font-weight: 700; font-family: 'DM Sans', sans-serif;
+  color: var(--cta); background: rgba(107,33,168,0.12);
+  font-size: 13px; font-weight: 700; font-family: 'Cabin', sans-serif;
 }
-.order-bump-expand:hover { background: rgba(194,123,160,0.22); border-color: var(--cta); transform: scale(1.03); }
+.order-bump-expand:hover { background: rgba(107,33,168,0.22); border-color: var(--cta); transform: scale(1.03); }
 .expand-label { white-space: nowrap; }
 .order-bump-expand svg { transition: transform 0.3s cubic-bezier(.22,1,.36,1); }
 .order-bump-expand[aria-expanded="true"] svg { transform: rotate(180deg); }
@@ -1703,7 +1696,7 @@ body {
 }
 .order-bump-detail-inner {
   padding: 0 18px 20px;
-  border-top: 1px solid rgba(194,123,160,0.12);
+  border-top: 1px solid rgba(107,33,168,0.12);
   padding-top: 16px;
 }
 
@@ -1715,11 +1708,11 @@ body {
   width: 90px; height: 124px; border-radius: 8px;
   overflow: hidden; flex-shrink: 0;
   background: var(--section);
-  box-shadow: 0 4px 16px rgba(45,27,61,0.12);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
 }
 .order-bump-img img { width: 100%; height: 100%; object-fit: cover; }
 .order-bump-detail-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-.order-bump-name { font-family: 'Recoleta', serif; font-size: 17px; font-weight: 600; color: var(--heading); margin-bottom: 2px; }
+.order-bump-name { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 600; color: var(--heading); margin-bottom: 2px; }
 .order-bump-author { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
 .order-bump-meta {
   display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;
@@ -1753,7 +1746,7 @@ body {
   border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;
 }
 .ob-pillars-title {
-  font-family: 'Recoleta', serif; font-size: 14px; font-weight: 600;
+  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
   color: var(--heading); text-align: center; margin-bottom: 12px;
 }
 .ob-pillar-grid {
@@ -1763,7 +1756,7 @@ body {
 .ob-pillar {
   display: flex; align-items: flex-start; gap: 8px;
   padding: 8px 10px; border-radius: 8px;
-  background: linear-gradient(135deg, rgba(194,123,160,0.04), rgba(245,237,242,0.6));
+  background: linear-gradient(135deg, rgba(107,33,168,0.04), rgba(245,237,242,0.6));
   font-size: 12px; line-height: 1.45;
 }
 .ob-pillar:last-child { grid-column: 1 / -1; justify-self: center; max-width: 260px; }
@@ -1779,7 +1772,7 @@ body {
   margin-bottom: 14px;
 }
 .ob-results-title {
-  font-family: 'Recoleta', serif; font-size: 14px; font-weight: 600;
+  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
   color: var(--heading); margin-bottom: 8px;
 }
 .ob-result-item {
@@ -1792,8 +1785,8 @@ body {
 /* Combo highlight box */
 .ob-combo-box {
   display: flex; gap: 12px; align-items: flex-start;
-  background: linear-gradient(135deg, rgba(194,123,160,0.10), rgba(212,152,181,0.06));
-  border: 1px solid rgba(194,123,160,0.18);
+  background: linear-gradient(135deg, rgba(107,33,168,0.10), rgba(212,152,181,0.06));
+  border: 1px solid rgba(107,33,168,0.18);
   border-radius: 10px; padding: 14px 16px; margin-bottom: 12px;
 }
 .ob-combo-icon { font-size: 24px; flex-shrink: 0; }
@@ -1923,7 +1916,7 @@ body {
   cursor: pointer;
   transition: filter 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
   position: relative;
-  font-family: -apple-system, BlinkMacSystemFont, 'DM Sans', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Cabin', sans-serif;
   font-size: 16px;
   font-weight: 600;
   height: 48px;
@@ -2059,7 +2052,7 @@ body {
 .paypal-provider #expiry-date iframe,
 .paypal-provider #verification-code iframe,
 .paypal-provider #card-holder iframe {
-  border: 1.5px solid rgba(194,123,160,0.18) !important;
+  border: 1.5px solid rgba(107,33,168,0.18) !important;
   border-radius: 8px !important;
   height: 42px !important;
   background: #FFFFFF !important;
@@ -2071,7 +2064,7 @@ body {
 .paypal-provider #expiry-date iframe:hover,
 .paypal-provider #verification-code iframe:hover,
 .paypal-provider #card-holder iframe:hover {
-  border-color: rgba(194,123,160,0.35) !important;
+  border-color: rgba(107,33,168,0.35) !important;
 }
 </style>
 
@@ -2084,7 +2077,7 @@ body {
 
 <!-- ═══ HEADER + BREADCRUMB ═══ -->
 <div class="checkout-header">
-  <a href="/" class="checkout-logo">Laat Los Wat Je Kapotmaakt</a>
+  <a href="/" class="checkout-logo">De Hondenbijbel</a>
   <div class="breadcrumb">
     <span class="breadcrumb-step done">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
@@ -2113,7 +2106,7 @@ body {
         <!-- Obrázek produktu z Medusa admin -->
       </div>
       <div class="msb-info">
-        <div class="msb-title" id="msb-title">Laat Los Wat Je Kapotmaakt</div>
+        <div class="msb-title" id="msb-title">De Hondenbijbel</div>
         <div class="msb-subtitle" id="msb-subtitle">Paperback · 1× boek</div>
       </div>
       <div class="msb-price-col">
@@ -2127,7 +2120,7 @@ body {
       <div class="msb-divider"></div>
       <!-- Hlavní produkt -->
       <div class="msb-line" id="msb-product-line">
-        <span class="msb-line-label" id="msb-product-name">Laat Los Wat Je Kapotmaakt</span>
+        <span class="msb-line-label" id="msb-product-name">De Hondenbijbel</span>
         <span class="msb-line-val" id="msb-product-price">&euro;35,00</span>
       </div>
       <!-- Order bump (skrytý pokud není vybrán) -->
@@ -2139,7 +2132,7 @@ body {
         <span class="msb-line-val">&euro;23,00</span>
       </div>
       <!-- Mezisoučet -->
-      <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(194,123,160,0.18);">
+      <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(107,33,168,0.18);">
         <span class="msb-line-label">Subtotaal (excl. BTW)</span>
         <span class="msb-line-val" id="msb-subtotal">&euro;32,11</span>
       </div>
@@ -2309,7 +2302,7 @@ body {
               <div class="ob-combo-box">
                 <div class="ob-combo-icon">&#128218;</div>
                 <div class="ob-combo-text">
-                  <strong>Samen met <em>Laat Los Wat Je Kapotmaakt</em> heb je het complete pakket:</strong> eerst loslaten, dan opbouwen. 92% van de lezers voelt verschil binnen 14 dagen.
+                  <strong>Samen met <em>De Hondenbijbel</em> heb je het complete pakket:</strong> alles wat je nodig hebt voor een gehoorzame, gelukkige hond. 92% van de lezers ziet verschil binnen 14 dagen.
                 </div>
               </div>
 
@@ -2607,13 +2600,13 @@ body {
       <div class="summary-product" id="desktop-product">
         <div class="summary-product-img" id="desktop-product-img">
           <div class="mini-book">
-            <div class="mini-book-title">Laat Los Wat Je Kapotmaakt</div>
-            <div class="mini-book-author">Joris De Vries</div>
+            <div class="mini-book-title">De Hondenbijbel</div>
+            <div class="mini-book-author">Lars Vermeulen</div>
           </div>
         </div>
         <div class="summary-product-info">
-          <div class="summary-product-name" id="desktop-product-name">Laat Los Wat Je Kapotmaakt</div>
-          <div class="summary-product-author">Joris De Vries</div>
+          <div class="summary-product-name" id="desktop-product-name">De Hondenbijbel</div>
+          <div class="summary-product-author">Lars Vermeulen</div>
           <div class="summary-product-format">Paperback</div>
           <div class="summary-product-price" id="desktop-product-price">&euro;35,00</div>
         </div>
@@ -2626,7 +2619,7 @@ body {
       </div>
 
       <!-- Order bump řádek v summary (skrytý dokud nezaškrtne) -->
-      <div class="summary-line" id="summary-order-bump" style="display:none;padding:8px 0;border-top:1px dashed rgba(194,123,160,0.2);">
+      <div class="summary-line" id="summary-order-bump" style="display:none;padding:8px 0;border-top:1px dashed rgba(107,33,168,0.2);">
         <span style="font-size:13px;display:flex;align-items:center;gap:4px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
           Het Leven Dat Je Verdient
@@ -2657,7 +2650,7 @@ body {
         <span>Totaal</span>
         <span class="price" id="desktop-total-price">&euro;35,00</span>
       </div>
-      <div id="summary-tax-note" style="font-size:11px;color:#888;text-align:right;margin-top:-8px;margin-bottom:8px;">
+      <div id="summary-tax-note" style="font-size:11px;color:#888;text-align:right;margin-top:4px;margin-bottom:8px;">
         Inclusief BTW
       </div>
 
@@ -2680,7 +2673,7 @@ body {
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Vragen? <strong>devries@loslatenboek.nl</strong></span>
+          <span>Vragen? <strong>support@dehondenbijbel.nl</strong></span>
         </div>
       </div>
 
@@ -2710,9 +2703,9 @@ body {
 
       <!-- Payment icons (real SVGs) -->
       <div class="summary-payments">
-        <img src="/icons/ideal.svg" alt="iDEAL" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
-        <img src="/icons/klarna.svg" alt="Klarna" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
-        <img src="/icons/paypal.svg" alt="PayPal" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/ideal.svg" alt="iDEAL" width="40" height="26" style="border-radius:4px;border:1px solid rgba(107,33,168,0.12);">
+        <img src="/icons/klarna.svg" alt="Klarna" width="40" height="26" style="border-radius:4px;border:1px solid rgba(107,33,168,0.12);">
+        <img src="/icons/paypal.svg" alt="PayPal" width="40" height="26" style="border-radius:4px;border:1px solid rgba(107,33,168,0.12);">
       </div>
 
       <!-- Return policy link -->
@@ -2731,15 +2724,15 @@ body {
     Alle transacties worden beveiligd verwerkt via <strong>Mollie</strong> — een door DNB gereguleerde betaaldienstverlener.
   </div>
   <div class="checkout-footer-company">
-    <strong>Laat Los Wat Je Kapotmaakt</strong> is een uitgave van Performance Marketing Solution s.r.o.<br>
+    <strong>De Hondenbijbel</strong> is een uitgave van Performance Marketing Solution s.r.o.<br>
     Rybná 716/24, Staré Město, 110 00 Praag, Tsjechië<br>
-    IČO: 06259928 · DIČ: CZ06259928<br>
+    KvK-nummer: 06259928 · BTW-nummer: CZ06259928<br>
     Wij verzenden vanuit ons Europees distributiecentrum via GLS naar Nederland en België.<br>
-    Vragen of problemen? Neem gerust contact op: <a href="mailto:devries@loslatenboek.nl"><strong>devries@loslatenboek.nl</strong></a><br>
+    Vragen of problemen? Neem gerust contact op: <a href="mailto:support@dehondenbijbel.nl"><strong>support@dehondenbijbel.nl</strong></a><br>
     Wij reageren binnen 24 uur en lossen elk probleem persoonlijk op.
   </div>
   <div class="checkout-footer-links">
-    &copy; 2026 Laat Los Wat Je Kapotmaakt · Joris De Vries<br>
+    &copy; 2026 De Hondenbijbel · Lars Vermeulen<br>
     <a href="voorwaarden.html">Algemene voorwaarden</a> · <a href="privacy.html">Privacybeleid</a> · <a href="retourbeleid.html">Retourbeleid</a> · <a href="verzending.html">Verzending &amp; Levering</a>
   </div>
 </div>
@@ -3741,7 +3734,7 @@ body {
     if (document.querySelector('.payment-preloader')) return;
     var el = document.createElement('div');
     el.className = 'payment-preloader';
-    el.innerHTML = '<img src="/laat-los-logo-logo.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+    el.innerHTML = '<img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
     document.body.insertBefore(el, document.body.firstChild);
   }
   function hideExpressPreloader() {
@@ -4347,7 +4340,7 @@ body {
             console.log('[Express Apple Pay] Validating merchant:', event.validationURL);
             applepay.validateMerchant({
               validationUrl: event.validationURL,
-              displayName: PROJECT_CONFIG.name || 'Loslatenboek',
+              displayName: PROJECT_CONFIG.name || 'De Hondenbijbel',
             }).then(function(result) {
               session.completeMerchantValidation(result.merchantSession);
             }).catch(function(err) {
@@ -5928,7 +5921,7 @@ body {
             abandoned_checkout: true,
             abandoned_at: new Date().toISOString(),
             checkout_url: window.location.href.split('?')[0],
-            project_id: PROJECT_CONFIG.projectId || 'loslatenboek'
+            project_id: PROJECT_CONFIG.projectId || 'dehondenbijbel'
           }
         })
       });
@@ -6020,7 +6013,7 @@ body {
     if (!document.querySelector('.payment-preloader')) {
       var preloaderDiv = document.createElement('div');
       preloaderDiv.className = 'payment-preloader';
-      preloaderDiv.innerHTML = '<img src="/laat-los-logo-logo.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+      preloaderDiv.innerHTML = '<img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
       document.body.insertBefore(preloaderDiv, document.body.firstChild);
     }
 
@@ -6649,7 +6642,7 @@ body {
                   if (!document.querySelector('.payment-preloader')) {
                     var kPreloader = document.createElement('div');
                     kPreloader.className = 'payment-preloader';
-                    kPreloader.innerHTML = '<img src="/laat-los-logo-logo.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+                    kPreloader.innerHTML = '<img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
                     document.body.insertBefore(kPreloader, document.body.firstChild);
                   }
 
@@ -6821,7 +6814,7 @@ body {
                 if (!document.querySelector('.payment-preloader')) {
                   var awPreloader = document.createElement('div');
                   awPreloader.className = 'payment-preloader';
-                  awPreloader.innerHTML = '<img src="/laat-los-logo-logo.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+                  awPreloader.innerHTML = '<img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
                   document.body.insertBefore(awPreloader, document.body.firstChild);
                 }
 

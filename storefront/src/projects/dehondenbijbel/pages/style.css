@@ -141,8 +141,21 @@ h3 { font-size: 22px; font-weight: 700; line-height: 1.3; }
  padding: 14px 0; border-bottom: 1px solid var(--purple-faint);
  display: block; transition: color 0.2s;
 }
-.nav-mobile-menu a:last-child { border-bottom: none; }
+.nav-mobile-menu > a:last-of-type { border-bottom: none; }
 .nav-mobile-menu a:hover { color: var(--dark); }
+/* Legal links section in mobile menu */
+.nav-mobile-legal {
+ margin-top: 20px; padding-top: 16px;
+ border-top: 1px solid var(--purple-faint);
+ display: flex; flex-wrap: wrap; gap: 0 16px;
+}
+.nav-mobile-legal a {
+ font-family: 'Cabin', sans-serif; font-size: 13px; font-weight: 500;
+ color: var(--muted); padding: 8px 0; border-bottom: 1px solid var(--purple-faint);
+ display: block; width: 100%;
+}
+.nav-mobile-legal a:last-child { border-bottom: none; }
+.nav-mobile-legal a:hover { color: var(--purple); }
 .nav-mobile-menu .nav-cta-mobile {
  display: inline-block; font-weight: 700;
  color: var(--white); background: var(--cta);
@@ -230,7 +243,7 @@ h3 { font-size: 22px; font-weight: 700; line-height: 1.3; }
 }
 
 /* ═══ TRUST BAR ═══ */
-.trust-bar { padding: 24px 24px; background: #FFFCF7; }
+.trust-bar { padding: 24px 24px; background: transparent; }
 .trust-bar-inner {
  max-width: 1200px; margin: 0 auto;
  background: linear-gradient(135deg, #FBBF24, #F59E0B);

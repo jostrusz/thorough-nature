@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bedankt voor je bestelling!</title>
-  <link rel="icon" href="/laat-los-logo-logo.png" type="image/png">
+  <link rel="icon" href="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" type="image/png">
 
   <!-- Sdílená konfigurace projektu -->
   <script src="js/project-config.js"></script>
@@ -12,31 +12,27 @@
   <script src="js/pixel.js"></script>
 
 <!-- ═══════════════════════════════════════════════════════════
-     BEDANKPAGINA — Velvet Dusk Design
+     BEDANKPAGINA — De Hondenbijbel Design
      Objednávkový souhrn + kontrola adresy + edit formulář
      ═══════════════════════════════════════════════════════════ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* DM Sans — self-hosted */
-@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; }
-@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
-
-/* ══ Velvet Dusk barvy ══ */
+/* ══ De Hondenbijbel Design System ══ */
 :root {
-  --bg: #FAF5F8;
-  --heading: #2D1B3D;
-  --cta: #C27BA0;
-  --section: #EDD9E5;
-  --body: #5A3D6B;
-  --highlight: #D9A4C0;
-  --dark: #1A1028;
+  --bg: #FFFFFF;
+  --heading: #1A1A1A;
+  --cta: #DC3522;
+  --section: #F3E8FF;
+  --body: #374151;
+  --highlight: #C4B5FD;
+  --dark: #1A1A1A;
   --white: #FFFFFF;
-  --light: #F5EDF2;
-  --muted: #9B7AAD;
-  --cta-hover: #A8628A;
-  --accent: #D498B5;
+  --light: #F9FAFB;
+  --muted: #6B7280;
+  --cta-hover: #C62E1C;
+  --accent: #6B21A8;
   --success: #27AE60;
   --warning: #E67E22;
   --error: #E74C3C;
@@ -46,7 +42,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); }
 .ty-page {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Cabin', sans-serif;
   color: var(--body);
   max-width: 720px;
   margin: 0 auto;
@@ -74,7 +70,7 @@ body { background: var(--bg); }
   background: linear-gradient(135deg, var(--cta), var(--accent));
   display: flex; align-items: center; justify-content: center;
   animation: ty-pop 0.6s cubic-bezier(.16,1,.3,1) 0.3s both;
-  box-shadow: 0 8px 32px rgba(194,123,160,0.3);
+  box-shadow: 0 8px 32px rgba(107,33,168,0.3);
 }
 .ty-check-circle svg { width: 36px; height: 36px; color: #fff; stroke-dasharray: 50; stroke-dashoffset: 50; animation: ty-draw 0.8s ease 0.7s forwards; }
 @keyframes ty-pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
@@ -86,7 +82,7 @@ body { background: var(--bg); }
   background: rgba(39,174,96,0.08); padding: 6px 14px; border-radius: 8px;
 }
 .ty-title {
-  font-family: 'Recoleta', serif; font-weight: 600;
+  font-family: 'Inter', sans-serif; font-weight: 600;
   font-size: 34px; line-height: 1.18; color: var(--heading); margin-bottom: 12px;
 }
 .ty-title .accent { font-style: italic; color: var(--cta); }
@@ -116,9 +112,9 @@ body { background: var(--bg); }
 
 /* ══ 3. Customer details card ══ */
 .ty-details-card {
-  background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
   border-radius: 20px; padding: 28px 32px; margin-bottom: 24px;
-  box-shadow: 0 2px 12px rgba(45,27,61,0.04);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
 .ty-details-header {
   display: flex; justify-content: space-between; align-items: center;
@@ -126,7 +122,7 @@ body { background: var(--bg); }
   border-bottom: 1.5px solid var(--light);
 }
 .ty-details-title {
-  font-family: 'Recoleta', serif; font-weight: 600;
+  font-family: 'Inter', sans-serif; font-weight: 600;
   font-size: 18px; color: var(--heading);
   display: flex; align-items: center; gap: 8px;
 }
@@ -161,10 +157,10 @@ body { background: var(--bg); }
 .ty-edit-form-inner {
   background: var(--white); border: 2px solid var(--cta);
   border-radius: 20px; padding: 28px 32px;
-  box-shadow: 0 4px 24px rgba(194,123,160,0.12);
+  box-shadow: 0 4px 24px rgba(107,33,168,0.12);
 }
 .ty-edit-form-title {
-  font-family: 'Recoleta', serif; font-weight: 600;
+  font-family: 'Inter', sans-serif; font-weight: 600;
   font-size: 18px; color: var(--heading); margin-bottom: 20px;
   display: flex; align-items: center; gap: 8px;
 }
@@ -176,10 +172,10 @@ body { background: var(--bg); }
 .ty-float-field input {
   width: 100%; height: 54px;
   padding: 22px 16px 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Cabin', sans-serif;
   font-size: 15px; font-weight: 400;
   color: var(--heading); background: var(--white);
-  border: 1px solid rgba(45,27,61,0.18);
+  border: 1px solid rgba(0,0,0,0.18);
   border-radius: 10px; outline: none;
   -webkit-appearance: none; appearance: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -206,7 +202,7 @@ body { background: var(--bg); }
 /* Focus stav */
 .ty-float-field input:focus {
   border-color: var(--cta);
-  box-shadow: 0 0 0 3px rgba(194,123,160,0.12);
+  box-shadow: 0 0 0 3px rgba(107,33,168,0.12);
   background: var(--white);
 }
 .ty-form-actions {
@@ -215,22 +211,22 @@ body { background: var(--bg); }
 .ty-form-save {
   flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   background: var(--cta); color: var(--white);
-  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
+  font-family: 'Cabin', sans-serif; font-size: 15px; font-weight: 700;
   padding: 14px 24px; border-radius: 12px; border: none;
   cursor: pointer; transition: all 0.3s cubic-bezier(.16,1,.3,1);
-  box-shadow: 0 3px 12px rgba(194,123,160,0.25);
+  box-shadow: 0 3px 12px rgba(107,33,168,0.25);
 }
-.ty-form-save:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(194,123,160,0.35); }
-.ty-form-save:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(194,123,160,0.2); }
+.ty-form-save:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(107,33,168,0.35); }
+.ty-form-save:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(107,33,168,0.2); }
 .ty-form-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 .ty-form-cancel {
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--light); color: var(--body);
-  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
-  padding: 14px 20px; border-radius: 12px; border: 1.5px solid rgba(45,27,61,0.1);
+  font-family: 'Cabin', sans-serif; font-size: 14px; font-weight: 600;
+  padding: 14px 20px; border-radius: 12px; border: 1.5px solid rgba(0,0,0,0.1);
   cursor: pointer; transition: all 0.3s cubic-bezier(.16,1,.3,1);
 }
-.ty-form-cancel:hover { background: rgba(45,27,61,0.06); transform: translateY(-1px); }
+.ty-form-cancel:hover { background: rgba(0,0,0,0.06); transform: translateY(-1px); }
 
 /* Feedback zprávy */
 .ty-feedback {
@@ -249,9 +245,9 @@ body { background: var(--bg); }
 
 /* ══ 5. Order summary ══ */
 .ty-order-box {
-  background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
   border-radius: 20px; padding: 28px 32px; margin-bottom: 28px;
-  box-shadow: 0 2px 12px rgba(45,27,61,0.04);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
 .ty-order-label {
   font-size: 13px; font-weight: 700; text-transform: uppercase;
@@ -264,9 +260,9 @@ body { background: var(--bg); }
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; font-size: 20px;
 }
-.ty-order-icon.book { background: rgba(194,123,160,0.12); }
+.ty-order-icon.book { background: rgba(107,33,168,0.12); }
 .ty-order-icon.ebook { background: rgba(212,152,181,0.15); }
-.ty-order-icon.ship { background: rgba(45,27,61,0.06); }
+.ty-order-icon.ship { background: rgba(0,0,0,0.06); }
 .ty-order-name { font-size: 15px; font-weight: 600; color: var(--heading); }
 .ty-order-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .ty-order-total {
@@ -274,18 +270,18 @@ body { background: var(--bg); }
   margin-top: 16px; padding-top: 16px;
   border-top: 2px solid var(--light);
 }
-.ty-order-total-label { font-family: 'Recoleta', serif; font-size: 17px; font-weight: 600; color: var(--heading); }
-.ty-order-total-price { font-family: 'Recoleta', serif; font-size: 28px; font-weight: 700; color: var(--cta); }
+.ty-order-total-label { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 600; color: var(--heading); }
+.ty-order-total-price { font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 700; color: var(--cta); }
 
 /* ══ 5b. Support contact box ══ */
 .ty-support {
-  background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
   border-radius: 20px; padding: 26px 28px; margin-bottom: 28px;
   display: flex; align-items: center; gap: 20px;
-  box-shadow: 0 2px 12px rgba(45,27,61,0.04);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
   transition: all 0.35s cubic-bezier(.16,1,.3,1);
 }
-.ty-support:hover { border-color: var(--highlight); box-shadow: 0 8px 32px rgba(45,27,61,0.08); transform: translateY(-2px); }
+.ty-support:hover { border-color: var(--highlight); box-shadow: 0 8px 32px rgba(0,0,0,0.08); transform: translateY(-2px); }
 .ty-support-icon {
   width: 54px; height: 54px; border-radius: 16px;
   background: linear-gradient(135deg, var(--section), var(--light));
@@ -300,11 +296,11 @@ body { background: var(--bg); }
 .ty-support-btn {
   display: inline-flex; align-items: center; gap: 8px;
   background: var(--cta); color: var(--white);
-  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+  font-family: 'Cabin', sans-serif; font-size: 14px; font-weight: 700;
   padding: 13px 24px; border-radius: 12px; border: none;
   cursor: pointer; text-decoration: none;
   transition: all 0.35s cubic-bezier(.16,1,.3,1); flex-shrink: 0;
-  box-shadow: 0 3px 12px rgba(194,123,160,0.25);
+  box-shadow: 0 3px 12px rgba(107,33,168,0.25);
   position: relative; overflow: hidden;
 }
 .ty-support-btn::after {
@@ -313,8 +309,8 @@ body { background: var(--bg); }
   opacity: 0; transition: opacity 0.3s ease;
 }
 .ty-support-btn:hover::after { opacity: 1; }
-.ty-support-btn:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(194,123,160,0.35); }
-.ty-support-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(194,123,160,0.2); }
+.ty-support-btn:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(107,33,168,0.35); }
+.ty-support-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(107,33,168,0.2); }
 @media (max-width: 600px) {
   .ty-support { flex-direction: column; text-align: center; padding: 24px 20px; }
   .ty-support-btn { width: 100%; justify-content: center; }
@@ -323,16 +319,16 @@ body { background: var(--bg); }
 /* ══ 6. What happens now — 3 steps ══ */
 .ty-steps { margin-bottom: 32px; }
 .ty-steps-title {
-  font-family: 'Recoleta', serif; font-size: 24px;
+  font-family: 'Inter', sans-serif; font-size: 24px;
   font-weight: 600; color: var(--heading); margin-bottom: 20px; text-align: center;
 }
 .ty-steps-grid { display: flex; gap: 16px; }
 .ty-step {
-  flex: 1; background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  flex: 1; background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
   border-radius: 18px; padding: 24px 20px; text-align: center;
   transition: transform 0.4s cubic-bezier(.16,1,.3,1), box-shadow 0.4s ease;
 }
-.ty-step:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(45,27,61,0.1); }
+.ty-step:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(0,0,0,0.1); }
 .ty-step-num {
   width: 36px; height: 36px; border-radius: 50%;
   background: linear-gradient(135deg, var(--cta), var(--accent));
@@ -347,16 +343,16 @@ body { background: var(--bg); }
 /* ══ 7. Social proof ══ */
 .ty-reviews { margin-bottom: 32px; }
 .ty-reviews-title {
-  font-family: 'Recoleta', serif; font-size: 22px;
+  font-family: 'Inter', sans-serif; font-size: 22px;
   font-weight: 600; color: var(--heading); margin-bottom: 16px; text-align: center;
 }
 .ty-review-cards { display: flex; gap: 16px; }
 .ty-review {
-  flex: 1; background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  flex: 1; background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
   border-radius: 16px; padding: 22px;
   transition: transform 0.35s cubic-bezier(.16,1,.3,1), box-shadow 0.35s ease;
 }
-.ty-review:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(45,27,61,0.08); }
+.ty-review:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,0.08); }
 .ty-review-stars { color: var(--cta); font-size: 14px; letter-spacing: 2px; margin-bottom: 10px; }
 .ty-review-text { font-size: 14px; color: var(--body); line-height: 1.6; font-style: italic; margin-bottom: 12px; }
 .ty-review-author { font-size: 13px; font-weight: 600; color: var(--heading); }
@@ -366,10 +362,10 @@ body { background: var(--bg); }
 .ty-share {
   text-align: center; background: var(--light);
   border-radius: 20px; padding: 32px; margin-bottom: 32px;
-  border: 1px solid rgba(45,27,61,0.04);
+  border: 1px solid rgba(0,0,0,0.04);
 }
 .ty-share-title {
-  font-family: 'Recoleta', serif; font-size: 22px;
+  font-family: 'Inter', sans-serif; font-size: 22px;
   font-weight: 600; color: var(--heading); margin-bottom: 8px;
 }
 .ty-share-desc { font-size: 15px; color: var(--body); margin-bottom: 20px; line-height: 1.55; }
@@ -561,7 +557,7 @@ body { background: var(--bg); }
       </div>
       <!-- Firemní pole (B2B) -->
       <div id="ty-edit-company-section" style="display:none; margin-top:4px;">
-        <div style="font-size:12px;font-weight:600;color:#9B7AAD;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Bedrijfsgegevens</div>
+        <div style="font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Bedrijfsgegevens</div>
         <div class="ty-form-row">
           <div class="ty-form-group ty-float-field full">
             <input type="text" id="edit-company" placeholder=" ">
@@ -603,7 +599,7 @@ body { background: var(--bg); }
       <div class="ty-order-item">
         <div class="ty-order-icon book">&#x1F4D6;</div>
         <div>
-          <div class="ty-order-name">Laat Los Wat Je Kapotmaakt</div>
+          <div class="ty-order-name">De Hondenbijbel</div>
           <div class="ty-order-desc">Fysiek boek &mdash; 270 pagina's &mdash; wordt bezorgd</div>
         </div>
       </div>
@@ -644,7 +640,7 @@ body { background: var(--bg); }
       <div class="ty-support-title">Vragen of problemen?</div>
       <div class="ty-support-desc">Heb je een fout ontdekt, een vraag over je bestelling of loop je ergens tegenaan? Neem gerust contact met ons op &mdash; we helpen je met alle plezier!</div>
     </div>
-    <a href="mailto:devries@loslatenboek.nl?subject=Vraag%20over%20bestelling%20%23&body=Hallo%2C%0A%0AIk%20heb%20een%20vraag%20over%20mijn%20bestelling.%0A%0ABestelnummer%3A%20%0A%0AMijn%20vraag%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Stuur ons een e-mail</a>
+    <a href="mailto:support@dehondenbijbel.nl?subject=Vraag%20over%20bestelling%20%23&body=Hallo%2C%0A%0AIk%20heb%20een%20vraag%20over%20mijn%20bestelling.%0A%0ABestelnummer%3A%20%0A%0AMijn%20vraag%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Stuur ons een e-mail</a>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -668,7 +664,7 @@ body { background: var(--bg); }
       <div class="ty-step">
         <div class="ty-step-num">3</div>
         <div class="ty-step-icon">&#x1F680;</div>
-        <div class="ty-step-title">Begin met loslaten</div>
+        <div class="ty-step-title">Begin met trainen</div>
         <div class="ty-step-desc">Begin vandaag al met de e-books. Zodra je boek arriveert, start je met de oefeningen.</div>
       </div>
     </div>
@@ -700,17 +696,17 @@ body { background: var(--bg); }
        ═══════════════════════════════════════ -->
   <div class="ty-share ty-reveal ty-d6">
     <div class="ty-share-title">Ken je iemand die dit ook nodig heeft?</div>
-    <div class="ty-share-desc">Deel deze pagina met een vriendin en help haar ook aan een frisse start.</div>
+    <div class="ty-share-desc">Ken je iemand met een hond? Deel dit boek en help ook hun hond gelukkiger te maken.</div>
     <div class="ty-share-buttons">
-      <a href="https://wa.me/?text=Ik%20heb%20net%20Laat%20Los%20Wat%20Je%20Kapotmaakt%20besteld%20en%20ik%20denk%20dat%20jij%20het%20ook%20nodig%20hebt%20%F0%9F%92%9B" target="_blank" class="ty-share-btn wa">
+      <a href="https://wa.me/?text=Ik%20heb%20net%20De%20Hondenbijbel%20besteld%20en%20ik%20denk%20dat%20jij%20het%20ook%20nodig%20hebt%20%F0%9F%90%B6" target="_blank" class="ty-share-btn wa">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.67-1.413A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.312-.727-5.994-1.96l-.418-.312-2.774.84.893-2.89-.338-.44A9.958 9.958 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
         WhatsApp
       </a>
-      <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Ftijdomloslaten.nl" target="_blank" class="ty-share-btn fb">
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdehondenbijbel.nl" target="_blank" class="ty-share-btn fb">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
         Facebook
       </a>
-      <a href="mailto:?subject=Dit%20boek%20moet%20je%20lezen&body=Ik%20heb%20net%20Laat%20Los%20Wat%20Je%20Kapotmaakt%20besteld" class="ty-share-btn mail">
+      <a href="mailto:?subject=Dit%20boek%20moet%20je%20lezen&body=Ik%20heb%20net%20De%20Hondenbijbel%20besteld" class="ty-share-btn mail">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
         E-mail
       </a>
@@ -780,7 +776,7 @@ body { background: var(--bg); }
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
     var subject = encodeURIComponent('Vraag over bestelling #' + orderNum);
     var body = encodeURIComponent('Hallo,\n\nIk heb een vraag over mijn bestelling.\n\nBestelnummer: #' + orderNum + '\n\nMijn vraag: ');
-    mailtoEl.href = 'mailto:devries@loslatenboek.nl?subject=' + subject + '&body=' + body;
+    mailtoEl.href = 'mailto:support@dehondenbijbel.nl?subject=' + subject + '&body=' + body;
   }
 
   // 2d. Celková cena — bere v potaz bundle, order bump a upsell
@@ -808,7 +804,7 @@ body { background: var(--bg); }
   if (orderItemsEl && bundleQty > 1) {
     var mainItemName = orderItemsEl.querySelector('.ty-order-name');
     if (mainItemName) {
-      mainItemName.textContent = bundleQty + '\u00D7 Laat Los Wat Je Kapotmaakt';
+      mainItemName.textContent = bundleQty + '\u00D7 De Hondenbijbel';
     }
     var mainItemDesc = orderItemsEl.querySelector('.ty-order-desc');
     if (mainItemDesc) {
@@ -1111,7 +1107,7 @@ body { background: var(--bg); }
   // ────────────────────────────────────────────────────
   var confettiEl = document.getElementById('ty-confetti');
   if (confettiEl && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    var colors = ['#C27BA0','#D498B5','#2D1B3D','#EDD9E5','#5A3D6B','#D9A4C0','#fff'];
+    var colors = ['#6B21A8','#C4B5FD','#1A1A1A','#F3E8FF','#374151','#A78BFA','#fff'];
     var shapes = ['circle','square','triangle'];
     for (var i = 0; i < 60; i++) {
       var piece = document.createElement('div');
