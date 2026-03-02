@@ -18,6 +18,8 @@ export const isShipmentNotificationData = (data: any): data is ShipmentNotificat
   typeof data.order === 'object' && typeof data.shippingAddress === 'object'
 
 const font = "'Inter', Arial, sans-serif"
+const pad = '24px'
+const padLR = `0 ${pad}`
 
 function formatPrice(amount: number, currencyCode: string): string {
   try {
@@ -72,24 +74,23 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
         <div style={{
           backgroundColor: '#2D1B3D',
           background: 'linear-gradient(135deg, #2D1B3D 0%, #1A1028 100%)',
-          padding: '36px 40px',
+          padding: '32px 24px',
           textAlign: 'center' as const,
-          borderRadius: '12px 12px 0 0',
         }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '12px',
+            fontSize: '11px',
             fontWeight: 500,
             letterSpacing: '3px',
             textTransform: 'uppercase' as const,
             color: '#C27BA0',
-            marginBottom: '10px',
+            marginBottom: '8px',
           }}>
             Laat Los Wat Je Kapotmaakt
           </Text>
           <Text style={{
-            fontSize: '36px',
-            marginBottom: '8px',
+            fontSize: '32px',
+            marginBottom: '6px',
           }}>
             📦
           </Text>
@@ -107,20 +108,20 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
             fontFamily: font,
             fontSize: '13px',
             color: '#9B7AAD',
-            margin: '8px 0 0',
+            margin: '6px 0 0',
           }}>
             Bestelling #{displayId}
           </Text>
         </div>
 
         {/* GREETING */}
-        <div style={{ padding: '36px 40px 0 40px' }}>
+        <div style={{ padding: `28px ${pad} 0 ${pad}` }}>
           <Text style={{
             fontFamily: font,
             fontSize: '15px',
             color: '#5A3D6B',
             lineHeight: '1.6',
-            marginBottom: '8px',
+            marginBottom: '6px',
           }}>
             Hoi {shippingAddress?.first_name || 'daar'},
           </Text>
@@ -137,12 +138,12 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
 
         {/* TRACKING INFO */}
         {(trackingNumber || trackingUrl) && (
-          <div style={{ padding: '24px 40px 0 40px' }}>
+          <div style={{ padding: `20px ${pad} 0 ${pad}` }}>
             <div style={{
               backgroundColor: '#E8F5E9',
               borderRadius: '10px',
               border: '1px solid #A5D6A7',
-              padding: '20px 24px',
+              padding: '18px 20px',
               textAlign: 'center' as const,
             }}>
               <Text style={{
@@ -152,7 +153,7 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
                 textTransform: 'uppercase' as const,
                 letterSpacing: '1.5px',
                 color: '#2E7D32',
-                marginBottom: '12px',
+                marginBottom: '10px',
               }}>
                 Track &amp; Trace
               </Text>
@@ -161,7 +162,7 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
                   fontFamily: font,
                   fontSize: '13px',
                   color: '#5A3D6B',
-                  marginBottom: '8px',
+                  marginBottom: '6px',
                 }}>
                   Vervoerder: <strong style={{ color: '#2D1B3D' }}>{trackingCompany}</strong>
                 </Text>
@@ -171,7 +172,7 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
                   fontFamily: font,
                   fontSize: '13px',
                   color: '#5A3D6B',
-                  marginBottom: trackingUrl ? '14px' : '0',
+                  marginBottom: trackingUrl ? '12px' : '0',
                 }}>
                   Trackingnummer: <strong style={{ color: '#2D1B3D' }}>{trackingNumber}</strong>
                 </Text>
@@ -199,12 +200,12 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
         )}
 
         {/* DELIVERY ESTIMATE */}
-        <div style={{ padding: '16px 40px 0 40px' }}>
+        <div style={{ padding: `12px ${pad} 0 ${pad}` }}>
           <div style={{
             backgroundColor: '#FFF8E1',
             borderRadius: '8px',
             border: '1px solid #FFE082',
-            padding: '14px 20px',
+            padding: '12px 16px',
             textAlign: 'center' as const,
           }}>
             <Text style={{
@@ -220,7 +221,7 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
               fontFamily: font,
               fontSize: '12px',
               color: '#9e9e9e',
-              margin: '6px 0 0',
+              margin: '4px 0 0',
               lineHeight: '1.5',
             }}>
               Onze boeken worden verzonden vanuit ons centrale magazijn in Tsjechië.
@@ -229,7 +230,7 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
         </div>
 
         {/* ITEMS */}
-        <div style={{ padding: '24px 40px 0 40px' }}>
+        <div style={{ padding: `20px ${pad} 0 ${pad}` }}>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
@@ -237,45 +238,45 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
             textTransform: 'uppercase' as const,
             letterSpacing: '1.5px',
             color: '#9B7AAD',
-            marginBottom: '14px',
+            marginBottom: '12px',
           }}>
             Verzonden items
           </Text>
 
           {items.map((item: any) => (
             <div key={item.id} style={{
-              marginBottom: '12px',
+              marginBottom: '10px',
               backgroundColor: '#FAF5F8',
               borderRadius: '8px',
               border: '1px solid #EDD9E5',
-              padding: '14px 16px',
+              padding: '12px 14px',
             }}>
               <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>
                 <tbody>
                   <tr>
-                    <td width="56" valign="top" style={{ paddingRight: '14px' }}>
+                    <td width="52" valign="top" style={{ paddingRight: '12px' }}>
                       {item.thumbnail ? (
                         <img
                           src={item.thumbnail}
                           alt={item.title || item.product_title}
-                          width="56"
-                          height="74"
+                          width="52"
+                          height="68"
                           style={{
-                            width: '56px',
-                            height: '74px',
+                            width: '52px',
+                            height: '68px',
                             objectFit: 'cover' as const,
                             borderRadius: '6px',
                           }}
                         />
                       ) : (
                         <div style={{
-                          width: '56px',
-                          height: '74px',
+                          width: '52px',
+                          height: '68px',
                           background: 'linear-gradient(135deg, #2D1B3D, #5A3D6B)',
                           borderRadius: '6px',
                           textAlign: 'center' as const,
-                          lineHeight: '74px',
-                          fontSize: '28px',
+                          lineHeight: '68px',
+                          fontSize: '24px',
                         }}>
                           📕
                         </div>
@@ -284,7 +285,7 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
                     <td valign="top">
                       <Text style={{
                         fontFamily: font,
-                        fontSize: '15px',
+                        fontSize: '14px',
                         fontWeight: 600,
                         color: '#2D1B3D',
                         margin: '0 0 2px',
@@ -301,10 +302,10 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
                         {item.variant_title ? `${item.variant_title} \u2022 ` : ''}Aantal: {item.quantity || 1}
                       </Text>
                     </td>
-                    <td width="80" align="right" valign="top">
+                    <td width="70" align="right" valign="top">
                       <Text style={{
                         fontFamily: font,
-                        fontSize: '15px',
+                        fontSize: '14px',
                         fontWeight: 700,
                         color: '#2D1B3D',
                         margin: '0',
@@ -320,7 +321,7 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
         </div>
 
         {/* SHIPPING ADDRESS */}
-        <div style={{ padding: '24px 40px 0 40px' }}>
+        <div style={{ padding: `20px ${pad} 0 ${pad}` }}>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
@@ -328,7 +329,7 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
             textTransform: 'uppercase' as const,
             letterSpacing: '1.5px',
             color: '#9B7AAD',
-            marginBottom: '10px',
+            marginBottom: '8px',
           }}>
             Bezorgadres
           </Text>
@@ -336,11 +337,11 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
             backgroundColor: '#FAF5F8',
             borderRadius: '10px',
             border: '1px solid #EDD9E5',
-            padding: '16px 20px',
+            padding: '14px 18px',
           }}>
             <Text style={{
               fontFamily: font,
-              fontSize: '14px',
+              fontSize: '13px',
               color: '#5A3D6B',
               lineHeight: '1.6',
               margin: '0',
@@ -356,10 +357,10 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
           </div>
         </div>
 
-        <Hr style={{ borderColor: '#EDD9E5', margin: '24px 40px 0 40px' }} />
+        <Hr style={{ borderColor: '#EDD9E5', margin: `20px ${pad} 0 ${pad}` }} />
 
         {/* WHAT HAPPENS NEXT */}
-        <div style={{ padding: '24px 40px 0 40px' }}>
+        <div style={{ padding: `20px ${pad} 0 ${pad}` }}>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
@@ -367,29 +368,29 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
             textTransform: 'uppercase' as const,
             letterSpacing: '1.5px',
             color: '#9B7AAD',
-            marginBottom: '16px',
+            marginBottom: '14px',
           }}>
             Wat kun je verwachten?
           </Text>
 
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '14px' }}>
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '12px' }}>
             <tbody>
               <tr>
-                <td width="36" valign="top">
+                <td width="34" valign="top">
                   <div style={{
-                    width: '28px',
-                    height: '28px',
+                    width: '26px',
+                    height: '26px',
                     backgroundColor: '#2e7d32',
                     borderRadius: '50%',
                     textAlign: 'center' as const,
-                    lineHeight: '28px',
+                    lineHeight: '26px',
                     fontFamily: font,
-                    fontSize: '13px',
+                    fontSize: '12px',
                     fontWeight: 700,
                     color: '#ffffff',
                   }}>✓</div>
                 </td>
-                <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
+                <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#2D1B3D' }}>Verzonden</strong>
                   <br />
                   Je bestelling is ingepakt en verzonden vanuit ons magazijn.
@@ -398,24 +399,24 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
             </tbody>
           </table>
 
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '14px' }}>
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '12px' }}>
             <tbody>
               <tr>
-                <td width="36" valign="top">
+                <td width="34" valign="top">
                   <div style={{
-                    width: '28px',
-                    height: '28px',
+                    width: '26px',
+                    height: '26px',
                     backgroundColor: '#C27BA0',
                     borderRadius: '50%',
                     textAlign: 'center' as const,
-                    lineHeight: '28px',
+                    lineHeight: '26px',
                     fontFamily: font,
-                    fontSize: '13px',
+                    fontSize: '12px',
                     fontWeight: 700,
                     color: '#ffffff',
                   }}>2</div>
                 </td>
-                <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
+                <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#2D1B3D' }}>Onderweg</strong>
                   <br />
                   De vervoerder brengt je pakket naar het opgegeven adres.
@@ -424,24 +425,24 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
             </tbody>
           </table>
 
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '8px' }}>
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '6px' }}>
             <tbody>
               <tr>
-                <td width="36" valign="top">
+                <td width="34" valign="top">
                   <div style={{
-                    width: '28px',
-                    height: '28px',
+                    width: '26px',
+                    height: '26px',
                     backgroundColor: '#EDD9E5',
                     borderRadius: '50%',
                     textAlign: 'center' as const,
-                    lineHeight: '28px',
+                    lineHeight: '26px',
                     fontFamily: font,
-                    fontSize: '13px',
+                    fontSize: '12px',
                     fontWeight: 700,
                     color: '#2D1B3D',
                   }}>3</div>
                 </td>
-                <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
+                <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#2D1B3D' }}>Bezorgd</strong>
                   <br />
                   Binnen 4–7 werkdagen heb je jouw boek in huis!
@@ -452,17 +453,17 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
         </div>
 
         {/* HELP SECTION */}
-        <div style={{ padding: '28px 40px 0 40px' }}>
+        <div style={{ padding: `24px ${pad} 0 ${pad}` }}>
           <div style={{
             backgroundColor: '#FAF5F8',
             borderRadius: '10px',
             border: '1px solid #EDD9E5',
-            padding: '20px 24px',
+            padding: '16px 20px',
             textAlign: 'center' as const,
           }}>
             <Text style={{
               fontFamily: font,
-              fontSize: '14px',
+              fontSize: '13px',
               color: '#5A3D6B',
               lineHeight: '1.6',
               margin: '0',
@@ -477,7 +478,7 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
         </div>
 
         {/* SIGNATURE */}
-        <div style={{ padding: '24px 40px 28px 40px' }}>
+        <div style={{ padding: `20px ${pad} 24px ${pad}` }}>
           <Text style={{
             fontFamily: font,
             fontSize: '14px',
@@ -509,15 +510,14 @@ export const ShipmentNotificationTemplate: React.FC<ShipmentNotificationTemplate
         {/* FOOTER */}
         <div style={{
           backgroundColor: '#2D1B3D',
-          padding: '28px 40px',
+          padding: '24px 24px',
           textAlign: 'center' as const,
-          borderRadius: '0 0 12px 12px',
         }}>
           <Text style={{
             fontFamily: font,
             fontSize: '12px',
             color: '#C27BA0',
-            marginBottom: '8px',
+            marginBottom: '6px',
           }}>
             Laat Los Wat Je Kapotmaakt
           </Text>

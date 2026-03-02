@@ -17,6 +17,8 @@ export const isOrderPlacedTemplateData = (data: any): data is OrderPlacedTemplat
   typeof data.order === 'object' && typeof data.shippingAddress === 'object'
 
 const font = "'Inter', Arial, sans-serif"
+const pad = '24px' // consistent side padding
+const padLR = `0 ${pad}`
 
 function formatPrice(amount: number, currencyCode: string): string {
   try {
@@ -92,22 +94,21 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   return (
     <Base preview={preview}>
       <Section>
-        {/* HEADER */}
+        {/* HEADER — edge-to-edge, no border-radius (container handles it) */}
         <div style={{
           backgroundColor: '#2D1B3D',
           background: 'linear-gradient(135deg, #2D1B3D 0%, #1A1028 100%)',
-          padding: '36px 40px',
+          padding: '32px 24px',
           textAlign: 'center' as const,
-          borderRadius: '12px 12px 0 0',
         }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '12px',
+            fontSize: '11px',
             fontWeight: 500,
             letterSpacing: '3px',
             textTransform: 'uppercase' as const,
             color: '#C27BA0',
-            marginBottom: '10px',
+            marginBottom: '8px',
           }}>
             Laat Los Wat Je Kapotmaakt
           </Text>
@@ -125,20 +126,20 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             fontFamily: font,
             fontSize: '13px',
             color: '#9B7AAD',
-            margin: '8px 0 0',
+            margin: '6px 0 0',
           }}>
             Bestelling #{displayId} &bull; {orderDate}
           </Text>
         </div>
 
         {/* GREETING */}
-        <div style={{ padding: '36px 40px 0 40px' }}>
+        <div style={{ padding: `28px ${pad} 0 ${pad}` }}>
           <Text style={{
             fontFamily: font,
             fontSize: '15px',
             color: '#5A3D6B',
             lineHeight: '1.6',
-            marginBottom: '8px',
+            marginBottom: '6px',
           }}>
             Hoi {shippingAddress?.first_name || 'daar'},
           </Text>
@@ -154,14 +155,14 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
         </div>
 
         {/* ORDER SUMMARY BOX */}
-        <div style={{ padding: '24px 40px' }}>
+        <div style={{ padding: `20px ${pad}` }}>
           <div style={{
             backgroundColor: '#FAF5F8',
             borderRadius: '10px',
             border: '1px solid #EDD9E5',
-            padding: '20px 24px',
+            padding: '16px 20px',
           }}>
-            <div style={{ marginBottom: '8px' }}>
+            <div style={{ marginBottom: '6px' }}>
               <Text style={{
                 fontFamily: font,
                 fontSize: '13px',
@@ -173,9 +174,9 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                 <span style={{
                   backgroundColor: '#e8f5e9',
                   color: '#2e7d32',
-                  padding: '3px 10px',
+                  padding: '2px 8px',
                   borderRadius: '4px',
-                  fontSize: '12px',
+                  fontSize: '11px',
                   fontWeight: 600,
                   fontFamily: font,
                 }}>
@@ -187,7 +188,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
               fontFamily: font,
               fontSize: '13px',
               color: '#5A3D6B',
-              margin: '0 0 6px',
+              margin: '0 0 4px',
             }}>
               <strong style={{ color: '#2D1B3D' }}>Datum:</strong> &nbsp; {orderDate}
             </Text>
@@ -205,7 +206,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
         </div>
 
         {/* ITEMS */}
-        <div style={{ padding: '0 40px' }}>
+        <div style={{ padding: padLR }}>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
@@ -213,45 +214,45 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             textTransform: 'uppercase' as const,
             letterSpacing: '1.5px',
             color: '#9B7AAD',
-            marginBottom: '14px',
+            marginBottom: '12px',
           }}>
             Je bestelling
           </Text>
 
           {items.map((item: any) => (
             <div key={item.id} style={{
-              marginBottom: '12px',
+              marginBottom: '10px',
               backgroundColor: '#FAF5F8',
               borderRadius: '8px',
               border: '1px solid #EDD9E5',
-              padding: '14px 16px',
+              padding: '12px 14px',
             }}>
               <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>
                 <tbody>
                   <tr>
-                    <td width="56" valign="top" style={{ paddingRight: '14px' }}>
+                    <td width="52" valign="top" style={{ paddingRight: '12px' }}>
                       {item.thumbnail ? (
                         <img
                           src={item.thumbnail}
                           alt={item.title || item.product_title}
-                          width="56"
-                          height="74"
+                          width="52"
+                          height="68"
                           style={{
-                            width: '56px',
-                            height: '74px',
+                            width: '52px',
+                            height: '68px',
                             objectFit: 'cover' as const,
                             borderRadius: '6px',
                           }}
                         />
                       ) : (
                         <div style={{
-                          width: '56px',
-                          height: '74px',
+                          width: '52px',
+                          height: '68px',
                           background: 'linear-gradient(135deg, #2D1B3D, #5A3D6B)',
                           borderRadius: '6px',
                           textAlign: 'center' as const,
-                          lineHeight: '74px',
-                          fontSize: '28px',
+                          lineHeight: '68px',
+                          fontSize: '24px',
                         }}>
                           📕
                         </div>
@@ -260,7 +261,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                     <td valign="top">
                       <Text style={{
                         fontFamily: font,
-                        fontSize: '15px',
+                        fontSize: '14px',
                         fontWeight: 600,
                         color: '#2D1B3D',
                         margin: '0 0 2px',
@@ -277,10 +278,10 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                         {item.variant_title ? `${item.variant_title} \u2022 ` : ''}Aantal: {item.quantity || 1}
                       </Text>
                     </td>
-                    <td width="80" align="right" valign="top">
+                    <td width="70" align="right" valign="top">
                       <Text style={{
                         fontFamily: font,
-                        fontSize: '15px',
+                        fontSize: '14px',
                         fontWeight: 700,
                         color: '#2D1B3D',
                         margin: '0',
@@ -295,28 +296,28 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
           ))}
 
           {/* Totals */}
-          <div style={{ marginTop: '16px', borderTop: '2px solid #EDD9E5', paddingTop: '14px' }}>
+          <div style={{ marginTop: '14px', borderTop: '2px solid #EDD9E5', paddingTop: '12px' }}>
             <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>
               <tbody>
                 <tr>
-                  <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', padding: '4px 0' }}>Subtotaal</td>
-                  <td align="right" style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', padding: '4px 0' }}>{formatPrice(subtotal, currency)}</td>
+                  <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', padding: '3px 0' }}>Subtotaal</td>
+                  <td align="right" style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', padding: '3px 0' }}>{formatPrice(subtotal, currency)}</td>
                 </tr>
                 <tr>
-                  <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', padding: '4px 0' }}>Verzendkosten</td>
-                  <td align="right" style={{ fontFamily: font, fontSize: '14px', color: shippingTotal > 0 ? '#5A3D6B' : '#2e7d32', padding: '4px 0' }}>
+                  <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', padding: '3px 0' }}>Verzendkosten</td>
+                  <td align="right" style={{ fontFamily: font, fontSize: '13px', color: shippingTotal > 0 ? '#5A3D6B' : '#2e7d32', padding: '3px 0' }}>
                     {shippingTotal > 0 ? formatPrice(shippingTotal, currency) : 'Gratis'}
                   </td>
                 </tr>
                 {taxTotal > 0 && (
                   <tr>
-                    <td style={{ fontFamily: font, fontSize: '12px', color: '#9B7AAD', padding: '4px 0' }}>Waarvan BTW</td>
-                    <td align="right" style={{ fontFamily: font, fontSize: '12px', color: '#9B7AAD', padding: '4px 0' }}>{formatPrice(taxTotal, currency)}</td>
+                    <td style={{ fontFamily: font, fontSize: '12px', color: '#9B7AAD', padding: '3px 0' }}>Waarvan BTW</td>
+                    <td align="right" style={{ fontFamily: font, fontSize: '12px', color: '#9B7AAD', padding: '3px 0' }}>{formatPrice(taxTotal, currency)}</td>
                   </tr>
                 )}
                 <tr>
-                  <td style={{ fontFamily: font, fontSize: '18px', fontWeight: 700, color: '#2D1B3D', padding: '12px 0 0', borderTop: '1px solid #EDD9E5' }}>Totaal</td>
-                  <td align="right" style={{ fontFamily: font, fontSize: '18px', fontWeight: 700, color: '#2D1B3D', padding: '12px 0 0', borderTop: '1px solid #EDD9E5' }}>{formatPrice(total, currency)}</td>
+                  <td style={{ fontFamily: font, fontSize: '17px', fontWeight: 700, color: '#2D1B3D', padding: '10px 0 0', borderTop: '1px solid #EDD9E5' }}>Totaal</td>
+                  <td align="right" style={{ fontFamily: font, fontSize: '17px', fontWeight: 700, color: '#2D1B3D', padding: '10px 0 0', borderTop: '1px solid #EDD9E5' }}>{formatPrice(total, currency)}</td>
                 </tr>
               </tbody>
             </table>
@@ -324,12 +325,12 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
         </div>
 
         {/* E-BOOK NOTICE */}
-        <div style={{ padding: '24px 40px 0 40px' }}>
+        <div style={{ padding: `20px ${pad} 0 ${pad}` }}>
           <div style={{
             backgroundColor: '#E8F5E9',
             borderRadius: '8px',
             border: '1px solid #A5D6A7',
-            padding: '14px 20px',
+            padding: '12px 16px',
             textAlign: 'center' as const,
           }}>
             <Text style={{
@@ -345,12 +346,12 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
         </div>
 
         {/* DELIVERY ESTIMATE */}
-        <div style={{ padding: '16px 40px 0 40px' }}>
+        <div style={{ padding: `12px ${pad} 0 ${pad}` }}>
           <div style={{
             backgroundColor: '#FFF8E1',
             borderRadius: '8px',
             border: '1px solid #FFE082',
-            padding: '14px 20px',
+            padding: '12px 16px',
             textAlign: 'center' as const,
           }}>
             <Text style={{
@@ -366,7 +367,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
               fontFamily: font,
               fontSize: '12px',
               color: '#9e9e9e',
-              margin: '6px 0 0',
+              margin: '4px 0 0',
               lineHeight: '1.5',
             }}>
               Onze boeken worden verzonden vanuit ons centrale magazijn in Tsjechië, van waaruit we heel Europa bedienen.
@@ -375,11 +376,11 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
         </div>
 
         {/* ADDRESSES */}
-        <div style={{ padding: '28px 40px 0 40px' }}>
+        <div style={{ padding: `24px ${pad} 0 ${pad}` }}>
           <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>
             <tbody>
               <tr>
-                <td width="50%" valign="top" style={{ paddingRight: '12px' }}>
+                <td width="50%" valign="top" style={{ paddingRight: '10px' }}>
                   <Text style={{
                     fontFamily: font,
                     fontSize: '11px',
@@ -387,13 +388,13 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                     textTransform: 'uppercase' as const,
                     letterSpacing: '1.5px',
                     color: '#9B7AAD',
-                    marginBottom: '10px',
+                    marginBottom: '8px',
                   }}>
                     Bezorgadres
                   </Text>
                   <Text style={{
                     fontFamily: font,
-                    fontSize: '14px',
+                    fontSize: '13px',
                     color: '#5A3D6B',
                     lineHeight: '1.6',
                     margin: '0',
@@ -407,7 +408,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                     {formatCountry(shippingAddress?.country_code)}
                   </Text>
                 </td>
-                <td width="50%" valign="top" style={{ paddingLeft: '12px' }}>
+                <td width="50%" valign="top" style={{ paddingLeft: '10px' }}>
                   <Text style={{
                     fontFamily: font,
                     fontSize: '11px',
@@ -415,13 +416,13 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                     textTransform: 'uppercase' as const,
                     letterSpacing: '1.5px',
                     color: '#9B7AAD',
-                    marginBottom: '10px',
+                    marginBottom: '8px',
                   }}>
                     Factuuradres
                   </Text>
                   <Text style={{
                     fontFamily: font,
-                    fontSize: '14px',
+                    fontSize: '13px',
                     color: '#5A3D6B',
                     lineHeight: '1.6',
                     margin: '0',
@@ -440,10 +441,10 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
           </table>
         </div>
 
-        <Hr style={{ borderColor: '#EDD9E5', margin: '24px 40px 0 40px' }} />
+        <Hr style={{ borderColor: '#EDD9E5', margin: `20px ${pad} 0 ${pad}` }} />
 
         {/* WHAT HAPPENS NEXT */}
-        <div style={{ padding: '24px 40px 0 40px' }}>
+        <div style={{ padding: `20px ${pad} 0 ${pad}` }}>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
@@ -451,29 +452,29 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             textTransform: 'uppercase' as const,
             letterSpacing: '1.5px',
             color: '#9B7AAD',
-            marginBottom: '16px',
+            marginBottom: '14px',
           }}>
             Wat gebeurt er nu?
           </Text>
 
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '14px' }}>
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '12px' }}>
             <tbody>
               <tr>
-                <td width="36" valign="top">
+                <td width="34" valign="top">
                   <div style={{
-                    width: '28px',
-                    height: '28px',
+                    width: '26px',
+                    height: '26px',
                     backgroundColor: '#C27BA0',
                     borderRadius: '50%',
                     textAlign: 'center' as const,
-                    lineHeight: '28px',
+                    lineHeight: '26px',
                     fontFamily: font,
-                    fontSize: '13px',
+                    fontSize: '12px',
                     fontWeight: 700,
                     color: '#ffffff',
                   }}>1</div>
                 </td>
-                <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
+                <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#2D1B3D' }}>Bestelling verwerkt</strong>
                   <br />
                   We maken je bestelling klaar voor verzending.
@@ -482,24 +483,24 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             </tbody>
           </table>
 
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '14px' }}>
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '12px' }}>
             <tbody>
               <tr>
-                <td width="36" valign="top">
+                <td width="34" valign="top">
                   <div style={{
-                    width: '28px',
-                    height: '28px',
+                    width: '26px',
+                    height: '26px',
                     backgroundColor: '#D498B5',
                     borderRadius: '50%',
                     textAlign: 'center' as const,
-                    lineHeight: '28px',
+                    lineHeight: '26px',
                     fontFamily: font,
-                    fontSize: '13px',
+                    fontSize: '12px',
                     fontWeight: 700,
                     color: '#ffffff',
                   }}>2</div>
                 </td>
-                <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
+                <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#2D1B3D' }}>Verzonden</strong>
                   <br />
                   Zodra je pakket is verzonden, ontvang je direct een e-mail met je track &amp; trace code.
@@ -508,24 +509,24 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             </tbody>
           </table>
 
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '8px' }}>
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '6px' }}>
             <tbody>
               <tr>
-                <td width="36" valign="top">
+                <td width="34" valign="top">
                   <div style={{
-                    width: '28px',
-                    height: '28px',
+                    width: '26px',
+                    height: '26px',
                     backgroundColor: '#EDD9E5',
                     borderRadius: '50%',
                     textAlign: 'center' as const,
-                    lineHeight: '28px',
+                    lineHeight: '26px',
                     fontFamily: font,
-                    fontSize: '13px',
+                    fontSize: '12px',
                     fontWeight: 700,
                     color: '#2D1B3D',
                   }}>3</div>
                 </td>
-                <td style={{ fontFamily: font, fontSize: '14px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
+                <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#2D1B3D' }}>Bezorgd</strong>
                   <br />
                   Binnen 4–7 werkdagen heb je jouw boek in huis.
@@ -536,17 +537,17 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
         </div>
 
         {/* HELP SECTION */}
-        <div style={{ padding: '28px 40px 0 40px' }}>
+        <div style={{ padding: `24px ${pad} 0 ${pad}` }}>
           <div style={{
             backgroundColor: '#FAF5F8',
             borderRadius: '10px',
             border: '1px solid #EDD9E5',
-            padding: '20px 24px',
+            padding: '16px 20px',
             textAlign: 'center' as const,
           }}>
             <Text style={{
               fontFamily: font,
-              fontSize: '14px',
+              fontSize: '13px',
               color: '#5A3D6B',
               lineHeight: '1.6',
               margin: '0',
@@ -561,7 +562,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
         </div>
 
         {/* SIGNATURE */}
-        <div style={{ padding: '24px 40px 28px 40px' }}>
+        <div style={{ padding: `20px ${pad} 24px ${pad}` }}>
           <Text style={{
             fontFamily: font,
             fontSize: '14px',
@@ -590,18 +591,17 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
           </Text>
         </div>
 
-        {/* FOOTER */}
+        {/* FOOTER — edge-to-edge, no border-radius (container handles it) */}
         <div style={{
           backgroundColor: '#2D1B3D',
-          padding: '28px 40px',
+          padding: '24px 24px',
           textAlign: 'center' as const,
-          borderRadius: '0 0 12px 12px',
         }}>
           <Text style={{
             fontFamily: font,
             fontSize: '12px',
             color: '#C27BA0',
-            marginBottom: '8px',
+            marginBottom: '6px',
           }}>
             Laat Los Wat Je Kapotmaakt
           </Text>
@@ -610,7 +610,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             fontSize: '11px',
             color: '#7a6189',
             lineHeight: '1.6',
-            marginBottom: '8px',
+            marginBottom: '6px',
           }}>
             {billingEntity?.legal_name || 'EverChapter OÜ'}
             {' '}&bull;{' '}

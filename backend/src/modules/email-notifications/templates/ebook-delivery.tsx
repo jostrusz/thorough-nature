@@ -17,6 +17,9 @@ export const isEbookDeliveryData = (data: any): data is EbookDeliveryTemplatePro
   typeof data.downloadUrl === 'string' &&
   typeof data.expiresAt === 'string'
 
+const font = "'Inter', Arial, sans-serif"
+const pad = '24px'
+
 export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
   PreviewProps: EbookDeliveryTemplateProps
 } = ({ firstName, downloadUrl, expiresAt, billingEntity, preview = 'Je e-books staan klaar!' }) => {
@@ -33,30 +36,28 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
         <div style={{
           backgroundColor: '#2D1B3D',
           background: 'linear-gradient(135deg, #2D1B3D 0%, #1A1028 100%)',
-          padding: '36px 40px',
+          padding: '32px 24px',
           textAlign: 'center' as const,
-          borderRadius: '12px 12px 0 0',
-          marginBottom: '0',
         }}>
           <Text style={{
-            fontFamily: "'Inter', Arial, sans-serif",
-            fontSize: '12px',
+            fontFamily: font,
+            fontSize: '11px',
             fontWeight: 500,
             letterSpacing: '3px',
             textTransform: 'uppercase' as const,
             color: '#C27BA0',
-            marginBottom: '10px',
+            marginBottom: '8px',
           }}>
             Laat Los Wat Je Kapotmaakt
           </Text>
           <Text style={{
-            fontSize: '36px',
-            marginBottom: '8px',
+            fontSize: '32px',
+            marginBottom: '6px',
           }}>
             📖
           </Text>
           <Text style={{
-            fontFamily: "'Inter', Arial, sans-serif",
+            fontFamily: font,
             fontSize: '22px',
             fontWeight: 700,
             color: '#ffffff',
@@ -68,35 +69,35 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
         </div>
 
         {/* Body */}
-        <div style={{ padding: '36px 20px' }}>
+        <div style={{ padding: `28px ${pad}` }}>
           <Text style={{
-            fontFamily: "'Inter', Arial, sans-serif",
+            fontFamily: font,
             fontSize: '15px',
             color: '#5A3D6B',
             lineHeight: '1.6',
-            marginBottom: '8px',
+            marginBottom: '6px',
           }}>
             Hoi {firstName},
           </Text>
 
           <Text style={{
-            fontFamily: "'Inter', Arial, sans-serif",
+            fontFamily: font,
             fontSize: '15px',
             color: '#5A3D6B',
             lineHeight: '1.6',
-            marginBottom: '28px',
+            marginBottom: '24px',
           }}>
             Super dat je erbij bent! Je digitale exemplaren zijn klaar om te lezen. Klik op de knop hieronder om je e-books te downloaden.
           </Text>
 
           {/* CTA Button */}
-          <div style={{ textAlign: 'center' as const, marginBottom: '28px' }}>
+          <div style={{ textAlign: 'center' as const, marginBottom: '24px' }}>
             <Button
               href={downloadUrl}
               style={{
                 backgroundColor: '#C27BA0',
                 color: '#ffffff',
-                fontFamily: "'Inter', Arial, sans-serif",
+                fontFamily: font,
                 fontSize: '16px',
                 fontWeight: 600,
                 textDecoration: 'none',
@@ -113,13 +114,13 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
           <div style={{
             backgroundColor: '#FFF8E1',
             borderRadius: '8px',
-            padding: '14px 20px',
+            padding: '12px 16px',
             textAlign: 'center' as const,
             border: '1px solid #FFE082',
-            marginBottom: '28px',
+            marginBottom: '24px',
           }}>
             <Text style={{
-              fontFamily: "'Inter', Arial, sans-serif",
+              fontFamily: font,
               fontSize: '13px',
               color: '#795548',
               margin: '0',
@@ -135,14 +136,14 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
             backgroundColor: '#FAF5F8',
             borderRadius: '10px',
             border: '1px solid #EDD9E5',
-            padding: '20px 24px',
+            padding: '16px 20px',
             textAlign: 'center' as const,
-            marginTop: '24px',
-            marginBottom: '24px',
+            marginTop: '20px',
+            marginBottom: '20px',
           }}>
             <Text style={{
-              fontFamily: "'Inter', Arial, sans-serif",
-              fontSize: '14px',
+              fontFamily: font,
+              fontSize: '13px',
               color: '#5A3D6B',
               lineHeight: '1.6',
               margin: '0',
@@ -153,41 +154,41 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
 
           {/* Reading tips */}
           <Text style={{
-            fontFamily: "'Inter', Arial, sans-serif",
+            fontFamily: font,
             fontSize: '11px',
             fontWeight: 600,
             textTransform: 'uppercase' as const,
             letterSpacing: '1.5px',
             color: '#9B7AAD',
-            marginBottom: '16px',
+            marginBottom: '14px',
           }}>
             Leestips
           </Text>
 
           <Text style={{
-            fontFamily: "'Inter', Arial, sans-serif",
-            fontSize: '14px',
+            fontFamily: font,
+            fontSize: '13px',
             color: '#5A3D6B',
             lineHeight: '1.5',
-            marginBottom: '10px',
+            marginBottom: '8px',
           }}>
             ❤️ <strong style={{ color: '#2D1B3D' }}>Neem je tijd</strong> — Lees het boek op je eigen tempo. Elk hoofdstuk bouwt voort op het vorige.
           </Text>
           <Text style={{
-            fontFamily: "'Inter', Arial, sans-serif",
-            fontSize: '14px',
+            fontFamily: font,
+            fontSize: '13px',
             color: '#5A3D6B',
             lineHeight: '1.5',
-            marginBottom: '10px',
+            marginBottom: '8px',
           }}>
             ✍️ <strong style={{ color: '#2D1B3D' }}>Maak aantekeningen</strong> — De oefeningen werken het beste als je ze echt uitvoert.
           </Text>
           <Text style={{
-            fontFamily: "'Inter', Arial, sans-serif",
-            fontSize: '14px',
+            fontFamily: font,
+            fontSize: '13px',
             color: '#5A3D6B',
             lineHeight: '1.5',
-            marginBottom: '20px',
+            marginBottom: '18px',
           }}>
             🌱 <strong style={{ color: '#2D1B3D' }}>Wees geduldig met jezelf</strong> — Verandering kost tijd. Elke kleine stap telt.
           </Text>
@@ -197,13 +198,13 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
             backgroundColor: '#FAF5F8',
             borderRadius: '10px',
             border: '1px solid #EDD9E5',
-            padding: '20px 24px',
+            padding: '16px 20px',
             textAlign: 'center' as const,
-            marginBottom: '24px',
+            marginBottom: '20px',
           }}>
             <Text style={{
-              fontFamily: "'Inter', Arial, sans-serif",
-              fontSize: '14px',
+              fontFamily: font,
+              fontSize: '13px',
               color: '#5A3D6B',
               lineHeight: '1.6',
               margin: '0',
@@ -217,7 +218,7 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
 
           {/* Signature */}
           <Text style={{
-            fontFamily: "'Inter', Arial, sans-serif",
+            fontFamily: font,
             fontSize: '14px',
             color: '#5A3D6B',
             marginBottom: '4px',
@@ -225,7 +226,7 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
             Veel leesplezier!
           </Text>
           <Text style={{
-            fontFamily: "'Inter', Arial, sans-serif",
+            fontFamily: font,
             fontSize: '14px',
             fontWeight: 700,
             color: '#2D1B3D',
@@ -234,7 +235,7 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
             Joris de Vries
           </Text>
           <Text style={{
-            fontFamily: "'Inter', Arial, sans-serif",
+            fontFamily: font,
             fontSize: '12px',
             color: '#9B7AAD',
           }}>
@@ -247,20 +248,19 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
         {/* Footer */}
         <div style={{
           backgroundColor: '#2D1B3D',
-          padding: '28px 40px',
+          padding: '24px 24px',
           textAlign: 'center' as const,
-          borderRadius: '0 0 12px 12px',
         }}>
           <Text style={{
-            fontFamily: "'Inter', Arial, sans-serif",
+            fontFamily: font,
             fontSize: '12px',
             color: '#C27BA0',
-            marginBottom: '8px',
+            marginBottom: '6px',
           }}>
             Laat Los Wat Je Kapotmaakt
           </Text>
           <Text style={{
-            fontFamily: "'Inter', Arial, sans-serif",
+            fontFamily: font,
             fontSize: '11px',
             color: '#7a6189',
             lineHeight: '1.6',
