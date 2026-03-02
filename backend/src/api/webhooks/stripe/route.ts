@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Modules } from "@medusajs/framework/utils"
 import Stripe from "stripe"
 
 /**
@@ -93,7 +94,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     // Find the order with this Stripe payment intent ID
-    const orderModuleService = req.scope.resolve("orderModuleService")
+    const orderModuleService = req.scope.resolve(Modules.ORDER)
     let order = null
 
     try {

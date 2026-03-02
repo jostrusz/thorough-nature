@@ -26,7 +26,7 @@ const CONFETTI_COLORS = [
   colors.orange,
 ]
 
-const CONFETTI_COUNT = 24
+const CONFETTI_COUNT = 40
 
 interface ConfettiPiece {
   id: number
@@ -34,17 +34,25 @@ interface ConfettiPiece {
   left: number
   delay: number
   duration: number
-  size: number
+  width: number
+  height: number
+  rotation: number
+  swayAmount: number
+  shape: "rect" | "circle"
 }
 
 function generateConfetti(): ConfettiPiece[] {
   return Array.from({ length: CONFETTI_COUNT }, (_, i) => ({
     id: i,
     color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-    left: 20 + Math.random() * 60,
-    delay: Math.random() * 0.5,
-    duration: 1.2 + Math.random() * 0.8,
-    size: 3 + Math.random() * 3,
+    left: 5 + Math.random() * 90,
+    delay: Math.random() * 0.8,
+    duration: 2 + Math.random() * 1.5,
+    width: 6 + Math.random() * 5,
+    height: Math.random() > 0.5 ? 10 + Math.random() * 6 : 6 + Math.random() * 4,
+    rotation: Math.random() * 360,
+    swayAmount: 15 + Math.random() * 30,
+    shape: Math.random() > 0.3 ? "rect" : "circle",
   }))
 }
 
@@ -108,11 +116,17 @@ function ensureKeyframes() {
   style.textContent = `
     @keyframes confetti-fall {
       0% {
-        transform: translateY(0);
-        opacity: 0.9;
+        transform: translateY(-10px) rotate(0deg) translateX(0px);
+        opacity: 1;
+      }
+      25% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.8;
       }
       100% {
-        transform: translateY(120px);
+        transform: translateY(calc(100vh + 20px)) rotate(720deg) translateX(var(--sway, 20px));
         opacity: 0;
       }
     }
@@ -209,7 +223,7 @@ export function NewOrderCelebration({
     top: 0,
     left: 0,
     width: "100vw",
-    height: "180px",
+    height: "100vh",
     pointerEvents: "none",
     zIndex: 9998,
     overflow: "hidden",
@@ -221,7 +235,7 @@ export function NewOrderCelebration({
     left: "50%",
     transform: "translateX(-50%)",
     zIndex: 9999,
-    maxWidth: 480,
+    maxWidth: 300,
     width: "90%",
     background: `linear-gradient(135deg, ${colors.accent} 0%, #8B7CF7 100%)`,
     color: "#fff",
@@ -287,14 +301,16 @@ export function NewOrderCelebration({
             key={piece.id}
             style={{
               position: "absolute",
-              top: 0,
+              top: -20,
               left: `${piece.left}%`,
-              width: piece.size,
-              height: piece.size,
+              width: piece.width,
+              height: piece.height,
               backgroundColor: piece.color,
-              borderRadius: "50%",
-              animation: `confetti-fall ${piece.duration}s ease-out ${piece.delay}s forwards`,
+              borderRadius: piece.shape === "circle" ? "50%" : "2px",
+              transform: `rotate(${piece.rotation}deg)`,
+              animation: `confetti-fall ${piece.duration}s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${piece.delay}s forwards`,
               opacity: 0,
+              ["--sway" as any]: `${piece.swayAmount * (piece.id % 2 === 0 ? 1 : -1)}px`,
             }}
           />
         ))}
