@@ -582,6 +582,9 @@ h3 { font-size: clamp(20px,3vw,24px); font-weight: 600; }
 .bezny-text strong { color: var(--dark); }
 .bezny-text em { color: var(--purple); font-style: italic; }
 .bezny-text u { text-decoration: underline; }
+.bezny-text ul { margin: 0 0 16px; padding-left: 0; list-style: none; }
+.bezny-text li { margin-bottom: 12px; padding-left: 28px; position: relative; font-family: var(--font-heading); font-size: 16px; line-height: 1.6; color: var(--dark); }
+.bezny-text li::before { content: '→'; position: absolute; left: 0; color: var(--purple); font-weight: 700; font-size: 18px; }
 
 /* ═══ SITUATIONS LIST ═══ */
 .situations-list { font-family: var(--font-heading); font-size: 16px; line-height: 1.6; color: var(--dark); margin: 16px 0; }
@@ -597,7 +600,7 @@ h3 { font-size: clamp(20px,3vw,24px); font-weight: 600; }
 
 /* ═══ QUALIFICATIONS & SOLUTIONS LISTS ═══ */
 .qualifications-list, .solutions-list { font-family: var(--font-heading); font-size: 16px; line-height: 1.6; color: var(--dark); margin: 16px 0; }
-.list-item { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+.list-item { display: flex; gap: 12px; margin-bottom: 8px; align-items: flex-start; }
 .list-item .arrow { font-size: 18px; font-weight: 700; color: var(--purple); flex-shrink: 0; margin-top: 2px; }
 .list-item p { margin: 0; font-family: var(--font-heading); font-size: 16px; line-height: 1.6; color: var(--dark); }
 
@@ -644,7 +647,7 @@ h3 { font-size: clamp(20px,3vw,24px); font-weight: 600; }
 .rating-count { font-size: 15px; color: var(--gray); }
 
 /* ═══ AUTEUR PHOTO SINGLE ═══ */
-.auteur-photo-single { max-width: 400px; margin: 0 auto 40px; }
+.auteur-photo-single { max-width: 600px; margin: 0 auto 40px; }
 .auteur-photo-single img { width: 100%; border-radius: var(--radius-sm); box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
 
 /* ═══ REVIEWS (OLD — kept for backwards compat) ═══ */
