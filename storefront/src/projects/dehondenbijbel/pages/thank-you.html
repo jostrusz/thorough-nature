@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bedankt voor je bestelling!</title>
+  <link rel="icon" href="/laat-los-logo-logo.png" type="image/png">
+
+  <!-- Sdílená konfigurace projektu -->
+  <script src="js/project-config.js"></script>
+  <!-- Facebook Pixel -->
+  <script src="js/pixel.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     BEDANKPAGINA — Velvet Dusk Design
+     Objednávkový souhrn + kontrola adresy + edit formulář
+     ═══════════════════════════════════════════════════════════ -->
+<style>
+/* DM Sans — self-hosted */
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+
+/* ══ Velvet Dusk barvy ══ */
+:root {
+  --bg: #FAF5F8;
+  --heading: #2D1B3D;
+  --cta: #C27BA0;
+  --section: #EDD9E5;
+  --body: #5A3D6B;
+  --highlight: #D9A4C0;
+  --dark: #1A1028;
+  --white: #FFFFFF;
+  --light: #F5EDF2;
+  --muted: #9B7AAD;
+  --cta-hover: #A8628A;
+  --accent: #D498B5;
+  --success: #27AE60;
+  --warning: #E67E22;
+  --error: #E74C3C;
+}
+
+/* ══ Reset & Base ══ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); }
+.ty-page {
+  font-family: 'DM Sans', sans-serif;
+  color: var(--body);
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+/* ══ Scroll-reveal ══ */
+.ty-reveal {
+  opacity: 1; transform: translateY(0);
+  transition: opacity 0.7s cubic-bezier(.16,1,.3,1), transform 0.7s cubic-bezier(.16,1,.3,1);
+}
+.js-reveal-ready .ty-reveal { opacity: 0; transform: translateY(24px); }
+.js-reveal-ready .ty-reveal.is-visible { opacity: 1; transform: translateY(0); }
+.ty-d1 { transition-delay: 0.06s; }
+.ty-d2 { transition-delay: 0.12s; }
+.ty-d3 { transition-delay: 0.18s; }
+.ty-d4 { transition-delay: 0.24s; }
+.ty-d5 { transition-delay: 0.30s; }
+.ty-d6 { transition-delay: 0.36s; }
+
+/* ══ 1. Hero ══ */
+.ty-hero { text-align: center; margin-bottom: 36px; }
+.ty-check-circle {
+  width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 24px;
+  background: linear-gradient(135deg, var(--cta), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  animation: ty-pop 0.6s cubic-bezier(.16,1,.3,1) 0.3s both;
+  box-shadow: 0 8px 32px rgba(194,123,160,0.3);
+}
+.ty-check-circle svg { width: 36px; height: 36px; color: #fff; stroke-dasharray: 50; stroke-dashoffset: 50; animation: ty-draw 0.8s ease 0.7s forwards; }
+@keyframes ty-pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+@keyframes ty-draw { to { stroke-dashoffset: 0; } }
+.ty-eyebrow {
+  font-size: 13px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.16em; color: var(--success); margin-bottom: 12px;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(39,174,96,0.08); padding: 6px 14px; border-radius: 8px;
+}
+.ty-title {
+  font-family: 'Recoleta', serif; font-weight: 600;
+  font-size: 34px; line-height: 1.18; color: var(--heading); margin-bottom: 12px;
+}
+.ty-title .accent { font-style: italic; color: var(--cta); }
+.ty-subtitle { font-size: 17px; color: var(--body); line-height: 1.65; max-width: 560px; margin: 0 auto; }
+.ty-subtitle strong { color: var(--heading); font-weight: 600; }
+
+/* ══ 2. Address verification alert ══ */
+.ty-address-alert {
+  background: linear-gradient(135deg, #FFF3E0, #FFF8E1);
+  border: 2px solid #FFB74D;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.ty-address-alert-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: #FF9800; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 20px;
+}
+.ty-address-alert-text { flex: 1; }
+.ty-address-alert-title {
+  font-weight: 700; color: #E65100; font-size: 15px; margin-bottom: 4px;
+}
+.ty-address-alert-desc { font-size: 14px; color: #6D4C41; line-height: 1.5; }
+
+/* ══ 3. Customer details card ══ */
+.ty-details-card {
+  background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  border-radius: 20px; padding: 28px 32px; margin-bottom: 24px;
+  box-shadow: 0 2px 12px rgba(45,27,61,0.04);
+}
+.ty-details-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; padding-bottom: 14px;
+  border-bottom: 1.5px solid var(--light);
+}
+.ty-details-title {
+  font-family: 'Recoleta', serif; font-weight: 600;
+  font-size: 18px; color: var(--heading);
+  display: flex; align-items: center; gap: 8px;
+}
+.ty-edit-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--light); color: var(--cta);
+  font-size: 13px; font-weight: 600;
+  padding: 8px 16px; border-radius: 10px; border: 1.5px solid var(--highlight);
+  cursor: pointer; transition: all 0.3s ease;
+}
+.ty-edit-btn:hover { background: var(--cta); color: var(--white); border-color: var(--cta); }
+.ty-edit-btn svg { width: 14px; height: 14px; }
+
+.ty-details-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.ty-detail-item { }
+.ty-detail-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px;
+}
+.ty-detail-value { font-size: 15px; font-weight: 500; color: var(--heading); line-height: 1.45; }
+.ty-detail-full { grid-column: 1 / -1; }
+
+/* ══ 4. Edit form (skrytý) ══ */
+.ty-edit-form { display: none; margin-bottom: 24px; }
+.ty-edit-form.is-open { display: block; animation: ty-slideDown 0.35s cubic-bezier(.16,1,.3,1); }
+@keyframes ty-slideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ty-edit-form-inner {
+  background: var(--white); border: 2px solid var(--cta);
+  border-radius: 20px; padding: 28px 32px;
+  box-shadow: 0 4px 24px rgba(194,123,160,0.12);
+}
+.ty-edit-form-title {
+  font-family: 'Recoleta', serif; font-weight: 600;
+  font-size: 18px; color: var(--heading); margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ty-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 0; }
+.ty-form-group { position: relative; margin-bottom: 14px; }
+.ty-form-group.full { grid-column: 1 / -1; }
+/* Shopify floating label styl */
+.ty-float-field { position: relative; }
+.ty-float-field input {
+  width: 100%; height: 54px;
+  padding: 22px 16px 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 400;
+  color: var(--heading); background: var(--white);
+  border: 1px solid rgba(45,27,61,0.18);
+  border-radius: 10px; outline: none;
+  -webkit-appearance: none; appearance: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.ty-float-field label {
+  position: absolute; left: 16px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px; font-weight: 400; color: var(--muted);
+  pointer-events: none; z-index: 1;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: left center;
+  background: transparent; padding: 0;
+}
+/* Label plovoucí nahoru */
+.ty-float-field input:focus ~ label,
+.ty-float-field input:not(:placeholder-shown) ~ label {
+  top: 10px; transform: translateY(0);
+  font-size: 11px; font-weight: 600; color: var(--cta);
+}
+.ty-float-field input:not(:focus):not(:placeholder-shown) ~ label {
+  color: var(--muted);
+}
+.ty-float-field input::placeholder { color: transparent; }
+/* Focus stav */
+.ty-float-field input:focus {
+  border-color: var(--cta);
+  box-shadow: 0 0 0 3px rgba(194,123,160,0.12);
+  background: var(--white);
+}
+.ty-form-actions {
+  display: flex; gap: 12px; margin-top: 8px;
+}
+.ty-form-save {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--cta); color: var(--white);
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
+  padding: 14px 24px; border-radius: 12px; border: none;
+  cursor: pointer; transition: all 0.3s cubic-bezier(.16,1,.3,1);
+  box-shadow: 0 3px 12px rgba(194,123,160,0.25);
+}
+.ty-form-save:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(194,123,160,0.35); }
+.ty-form-save:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(194,123,160,0.2); }
+.ty-form-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+.ty-form-cancel {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--light); color: var(--body);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+  padding: 14px 20px; border-radius: 12px; border: 1.5px solid rgba(45,27,61,0.1);
+  cursor: pointer; transition: all 0.3s cubic-bezier(.16,1,.3,1);
+}
+.ty-form-cancel:hover { background: rgba(45,27,61,0.06); transform: translateY(-1px); }
+
+/* Feedback zprávy */
+.ty-feedback {
+  display: none; padding: 14px 18px; border-radius: 12px;
+  margin-bottom: 24px; font-size: 14px; font-weight: 500;
+  align-items: center; gap: 10px;
+}
+.ty-feedback.is-visible { display: flex; }
+.ty-feedback.success { background: rgba(39,174,96,0.08); border: 1.5px solid rgba(39,174,96,0.3); color: #1B7A3D; }
+.ty-feedback.error { background: rgba(231,76,60,0.08); border: 1.5px solid rgba(231,76,60,0.3); color: #C0392B; }
+.ty-feedback svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* Spinner */
+.btn-spinner { display: inline-block; width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══ 5. Order summary ══ */
+.ty-order-box {
+  background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  border-radius: 20px; padding: 28px 32px; margin-bottom: 28px;
+  box-shadow: 0 2px 12px rgba(45,27,61,0.04);
+}
+.ty-order-label {
+  font-size: 13px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--muted); margin-bottom: 16px;
+}
+.ty-order-items { display: flex; flex-direction: column; gap: 12px; }
+.ty-order-item { display: flex; align-items: center; gap: 14px; padding: 10px; border-radius: 12px; }
+.ty-order-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 20px;
+}
+.ty-order-icon.book { background: rgba(194,123,160,0.12); }
+.ty-order-icon.ebook { background: rgba(212,152,181,0.15); }
+.ty-order-icon.ship { background: rgba(45,27,61,0.06); }
+.ty-order-name { font-size: 15px; font-weight: 600; color: var(--heading); }
+.ty-order-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.ty-order-total {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-top: 16px; padding-top: 16px;
+  border-top: 2px solid var(--light);
+}
+.ty-order-total-label { font-family: 'Recoleta', serif; font-size: 17px; font-weight: 600; color: var(--heading); }
+.ty-order-total-price { font-family: 'Recoleta', serif; font-size: 28px; font-weight: 700; color: var(--cta); }
+
+/* ══ 5b. Support contact box ══ */
+.ty-support {
+  background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  border-radius: 20px; padding: 26px 28px; margin-bottom: 28px;
+  display: flex; align-items: center; gap: 20px;
+  box-shadow: 0 2px 12px rgba(45,27,61,0.04);
+  transition: all 0.35s cubic-bezier(.16,1,.3,1);
+}
+.ty-support:hover { border-color: var(--highlight); box-shadow: 0 8px 32px rgba(45,27,61,0.08); transform: translateY(-2px); }
+.ty-support-icon {
+  width: 54px; height: 54px; border-radius: 16px;
+  background: linear-gradient(135deg, var(--section), var(--light));
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 24px;
+  transition: transform 0.35s cubic-bezier(.16,1,.3,1);
+}
+.ty-support:hover .ty-support-icon { transform: scale(1.08) rotate(-3deg); }
+.ty-support-text { flex: 1; }
+.ty-support-title { font-weight: 700; font-size: 16px; color: var(--heading); margin-bottom: 4px; }
+.ty-support-desc { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+.ty-support-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--cta); color: var(--white);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+  padding: 13px 24px; border-radius: 12px; border: none;
+  cursor: pointer; text-decoration: none;
+  transition: all 0.35s cubic-bezier(.16,1,.3,1); flex-shrink: 0;
+  box-shadow: 0 3px 12px rgba(194,123,160,0.25);
+  position: relative; overflow: hidden;
+}
+.ty-support-btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.ty-support-btn:hover::after { opacity: 1; }
+.ty-support-btn:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(194,123,160,0.35); }
+.ty-support-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(194,123,160,0.2); }
+@media (max-width: 600px) {
+  .ty-support { flex-direction: column; text-align: center; padding: 24px 20px; }
+  .ty-support-btn { width: 100%; justify-content: center; }
+}
+
+/* ══ 6. What happens now — 3 steps ══ */
+.ty-steps { margin-bottom: 32px; }
+.ty-steps-title {
+  font-family: 'Recoleta', serif; font-size: 24px;
+  font-weight: 600; color: var(--heading); margin-bottom: 20px; text-align: center;
+}
+.ty-steps-grid { display: flex; gap: 16px; }
+.ty-step {
+  flex: 1; background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  border-radius: 18px; padding: 24px 20px; text-align: center;
+  transition: transform 0.4s cubic-bezier(.16,1,.3,1), box-shadow 0.4s ease;
+}
+.ty-step:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(45,27,61,0.1); }
+.ty-step-num {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--cta), var(--accent));
+  color: #fff; font-weight: 700; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 12px;
+}
+.ty-step-icon { font-size: 28px; margin-bottom: 10px; }
+.ty-step-title { font-size: 15px; font-weight: 700; color: var(--heading); margin-bottom: 6px; }
+.ty-step-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+/* ══ 7. Social proof ══ */
+.ty-reviews { margin-bottom: 32px; }
+.ty-reviews-title {
+  font-family: 'Recoleta', serif; font-size: 22px;
+  font-weight: 600; color: var(--heading); margin-bottom: 16px; text-align: center;
+}
+.ty-review-cards { display: flex; gap: 16px; }
+.ty-review {
+  flex: 1; background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  border-radius: 16px; padding: 22px;
+  transition: transform 0.35s cubic-bezier(.16,1,.3,1), box-shadow 0.35s ease;
+}
+.ty-review:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(45,27,61,0.08); }
+.ty-review-stars { color: var(--cta); font-size: 14px; letter-spacing: 2px; margin-bottom: 10px; }
+.ty-review-text { font-size: 14px; color: var(--body); line-height: 1.6; font-style: italic; margin-bottom: 12px; }
+.ty-review-author { font-size: 13px; font-weight: 600; color: var(--heading); }
+.ty-review-loc { font-size: 12px; color: var(--muted); }
+
+/* ══ 8. Share ══ */
+.ty-share {
+  text-align: center; background: var(--light);
+  border-radius: 20px; padding: 32px; margin-bottom: 32px;
+  border: 1px solid rgba(45,27,61,0.04);
+}
+.ty-share-title {
+  font-family: 'Recoleta', serif; font-size: 22px;
+  font-weight: 600; color: var(--heading); margin-bottom: 8px;
+}
+.ty-share-desc { font-size: 15px; color: var(--body); margin-bottom: 20px; line-height: 1.55; }
+.ty-share-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.ty-share-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 26px; border-radius: 14px; font-size: 15px;
+  font-weight: 600; border: none; cursor: pointer;
+  text-decoration: none; position: relative; overflow: hidden;
+  transition: transform 0.35s cubic-bezier(.16,1,.3,1), box-shadow 0.35s ease;
+}
+.ty-share-btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.ty-share-btn:hover::after { opacity: 1; }
+.ty-share-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.15); }
+.ty-share-btn:active { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.ty-share-btn.wa { background: #25D366; color: #fff; }
+.ty-share-btn.wa:hover { box-shadow: 0 8px 28px rgba(37,211,102,0.3); }
+.ty-share-btn.fb { background: #1877F2; color: #fff; }
+.ty-share-btn.fb:hover { box-shadow: 0 8px 28px rgba(24,119,242,0.3); }
+.ty-share-btn.mail { background: var(--dark); color: #fff; }
+.ty-share-btn.mail:hover { box-shadow: 0 8px 28px rgba(26,16,40,0.3); }
+.ty-share-btn svg { width: 18px; height: 18px; position: relative; z-index: 1; }
+.ty-share-btn span { position: relative; z-index: 1; }
+
+/* ══ Confetti ══ */
+.ty-confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; overflow: hidden; }
+.ty-confetti-piece {
+  position: absolute; width: 10px; height: 10px; top: -20px;
+  opacity: 0; animation: ty-fall 3.5s ease-in forwards;
+}
+@keyframes ty-fall {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.3); }
+}
+
+/* ══ Responsive ══ */
+@media (prefers-reduced-motion: reduce) {
+  .ty-reveal { opacity: 1; transform: none; transition: none; }
+  .ty-check-circle { animation: none; }
+  .ty-check-circle svg { animation: none; stroke-dashoffset: 0; }
+  .ty-confetti { display: none; }
+}
+@media (max-width: 600px) {
+  .ty-page { padding: 28px 16px 40px; }
+  .ty-title { font-size: 26px; }
+  .ty-subtitle { font-size: 15px; }
+  .ty-steps-grid { flex-direction: column; }
+  .ty-review-cards { flex-direction: column; }
+  .ty-order-box { padding: 22px 20px; }
+  .ty-details-card { padding: 22px 20px; }
+  .ty-details-grid { grid-template-columns: 1fr; }
+  .ty-details-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .ty-edit-form-inner { padding: 22px 20px; }
+  .ty-form-row { grid-template-columns: 1fr; }
+  .ty-form-actions { flex-direction: column; }
+  .ty-check-circle { width: 64px; height: 64px; }
+  .ty-check-circle svg { width: 28px; height: 28px; }
+  .ty-share-buttons { flex-direction: column; align-items: center; }
+  .ty-share-btn { width: 100%; justify-content: center; }
+  .ty-address-alert { flex-direction: column; gap: 10px; }
+}
+@media (max-width: 380px) {
+  .ty-title { font-size: 23px; }
+  .ty-order-total-price { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Confetti burst -->
+<div class="ty-confetti" id="ty-confetti"></div>
+
+<div class="ty-page">
+
+  <!-- ═══════════════════════════════════════
+       1. HERO — bevestiging
+       ═══════════════════════════════════════ -->
+  <div class="ty-hero ty-reveal">
+    <div class="ty-check-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="ty-eyebrow">&#x2705; Bestelling bevestigd</div>
+    <h1 class="ty-title" id="ty-main-title">Bedankt voor je <span class="accent">bestelling!</span></h1>
+    <p class="ty-subtitle">Je bestelling is succesvol afgerond. We gaan je pakket zo snel mogelijk klaarmaken en versturen.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       2. ADDRESS VERIFICATION ALERT
+       ═══════════════════════════════════════ -->
+  <div class="ty-address-alert ty-reveal ty-d1">
+    <div class="ty-address-alert-icon">&#x26A0;&#xFE0F;</div>
+    <div class="ty-address-alert-text">
+      <div class="ty-address-alert-title">Controleer je bezorggegevens</div>
+      <div class="ty-address-alert-desc">We willen je bestelling zo snel mogelijk versturen. Controleer hieronder of je <strong>adres</strong>, <strong>e-mailadres</strong> en <strong>telefoonnummer</strong> kloppen.</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       3. CUSTOMER DETAILS CARD
+       ═══════════════════════════════════════ -->
+  <div class="ty-details-card ty-reveal ty-d2" id="ty-details-card">
+    <div class="ty-details-header">
+      <div class="ty-details-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Jouw gegevens
+      </div>
+      <button class="ty-edit-btn" id="ty-edit-toggle" onclick="toggleEditForm()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Gegevens wijzigen
+      </button>
+    </div>
+    <div class="ty-details-grid" id="ty-details-grid">
+      <div class="ty-detail-item">
+        <div class="ty-detail-label">Voornaam</div>
+        <div class="ty-detail-value" id="ty-show-firstname">—</div>
+      </div>
+      <div class="ty-detail-item">
+        <div class="ty-detail-label">Achternaam</div>
+        <div class="ty-detail-value" id="ty-show-lastname">—</div>
+      </div>
+      <div class="ty-detail-item">
+        <div class="ty-detail-label">E-mailadres</div>
+        <div class="ty-detail-value" id="ty-show-email">—</div>
+      </div>
+      <div class="ty-detail-item">
+        <div class="ty-detail-label">Telefoonnummer</div>
+        <div class="ty-detail-value" id="ty-show-phone">—</div>
+      </div>
+      <div class="ty-detail-item ty-detail-full">
+        <div class="ty-detail-label">Bezorgadres</div>
+        <div class="ty-detail-value" id="ty-show-address">—</div>
+      </div>
+      <div class="ty-detail-item ty-detail-full" id="ty-company-row" style="display:none;">
+        <div class="ty-detail-label">Bedrijfsgegevens</div>
+        <div class="ty-detail-value" id="ty-show-company">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       4. EDIT FORM (standaard verborgen)
+       ═══════════════════════════════════════ -->
+  <div class="ty-edit-form" id="ty-edit-form">
+    <div class="ty-edit-form-inner">
+      <div class="ty-edit-form-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Gegevens aanpassen
+      </div>
+      <div class="ty-form-row">
+        <div class="ty-form-group ty-float-field">
+          <input type="text" id="edit-firstname" placeholder=" ">
+          <label for="edit-firstname">Voornaam</label>
+        </div>
+        <div class="ty-form-group ty-float-field">
+          <input type="text" id="edit-lastname" placeholder=" ">
+          <label for="edit-lastname">Achternaam</label>
+        </div>
+      </div>
+      <div class="ty-form-row">
+        <div class="ty-form-group ty-float-field">
+          <input type="email" id="edit-email" placeholder=" ">
+          <label for="edit-email">E-mailadres</label>
+        </div>
+        <div class="ty-form-group ty-float-field">
+          <input type="tel" id="edit-phone" placeholder=" ">
+          <label for="edit-phone">Telefoonnummer</label>
+        </div>
+      </div>
+      <div class="ty-form-row">
+        <div class="ty-form-group ty-float-field full">
+          <input type="text" id="edit-address" placeholder=" ">
+          <label for="edit-address">Straat + huisnummer</label>
+        </div>
+      </div>
+      <div class="ty-form-row">
+        <div class="ty-form-group ty-float-field">
+          <input type="text" id="edit-postal" placeholder=" ">
+          <label for="edit-postal">Postcode</label>
+        </div>
+        <div class="ty-form-group ty-float-field">
+          <input type="text" id="edit-city" placeholder=" ">
+          <label for="edit-city">Stad</label>
+        </div>
+      </div>
+      <!-- Firemní pole (B2B) -->
+      <div id="ty-edit-company-section" style="display:none; margin-top:4px;">
+        <div style="font-size:12px;font-weight:600;color:#9B7AAD;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Bedrijfsgegevens</div>
+        <div class="ty-form-row">
+          <div class="ty-form-group ty-float-field full">
+            <input type="text" id="edit-company" placeholder=" ">
+            <label for="edit-company">Bedrijfsnaam</label>
+          </div>
+        </div>
+        <div class="ty-form-row">
+          <div class="ty-form-group ty-float-field">
+            <input type="text" id="edit-kvk" placeholder=" ">
+            <label for="edit-kvk">KVK / Ondernemingsnr.</label>
+          </div>
+          <div class="ty-form-group ty-float-field">
+            <input type="text" id="edit-vat" placeholder=" ">
+            <label for="edit-vat">BTW-nummer</label>
+          </div>
+        </div>
+      </div>
+      <div class="ty-form-actions">
+        <button class="ty-form-save" id="ty-save-btn" onclick="saveDetails()">
+          Opslaan
+        </button>
+        <button class="ty-form-cancel" onclick="toggleEditForm()">Annuleren</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback bericht (na opslaan) -->
+  <div class="ty-feedback" id="ty-feedback">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="ty-feedback-text"></span>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       5. ORDER SUMMARY
+       ═══════════════════════════════════════ -->
+  <div class="ty-order-box ty-reveal ty-d3">
+    <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Jouw bestelling</div>
+    <div class="ty-order-items" id="ty-order-items">
+      <div class="ty-order-item">
+        <div class="ty-order-icon book">&#x1F4D6;</div>
+        <div>
+          <div class="ty-order-name">Laat Los Wat Je Kapotmaakt</div>
+          <div class="ty-order-desc">Fysiek boek &mdash; 270 pagina's &mdash; wordt bezorgd</div>
+        </div>
+      </div>
+      <div class="ty-order-item">
+        <div class="ty-order-icon ebook">&#x1F4F1;</div>
+        <div>
+          <div class="ty-order-name">De Stilte Binnenin</div>
+          <div class="ty-order-desc">E-book Meditatie &mdash; check je inbox</div>
+        </div>
+      </div>
+      <div class="ty-order-item">
+        <div class="ty-order-icon ebook">&#x1F4F1;</div>
+        <div>
+          <div class="ty-order-name">Emotionele Detox in 7 Dagen</div>
+          <div class="ty-order-desc">E-book Emoties &mdash; check je inbox</div>
+        </div>
+      </div>
+      <div class="ty-order-item">
+        <div class="ty-order-icon ship">&#x1F69A;</div>
+        <div>
+          <div class="ty-order-name">Gratis verzending</div>
+          <div class="ty-order-desc">Binnen 3-5 werkdagen bezorgd</div>
+        </div>
+      </div>
+    </div>
+    <div class="ty-order-total">
+      <span class="ty-order-total-label">Betaald</span>
+      <span class="ty-order-total-price" id="ty-total-price">&euro; 35</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       5b. SUPPORT CONTACT
+       ═══════════════════════════════════════ -->
+  <div class="ty-support ty-reveal ty-d4">
+    <div class="ty-support-icon">&#x1F4E9;</div>
+    <div class="ty-support-text">
+      <div class="ty-support-title">Vragen of problemen?</div>
+      <div class="ty-support-desc">Heb je een fout ontdekt, een vraag over je bestelling of loop je ergens tegenaan? Neem gerust contact met ons op &mdash; we helpen je met alle plezier!</div>
+    </div>
+    <a href="mailto:devries@loslatenboek.nl?subject=Vraag%20over%20bestelling%20%23&body=Hallo%2C%0A%0AIk%20heb%20een%20vraag%20over%20mijn%20bestelling.%0A%0ABestelnummer%3A%20%0A%0AMijn%20vraag%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Stuur ons een e-mail</a>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       6. WHAT HAPPENS NOW — 3 stappen
+       ═══════════════════════════════════════ -->
+  <div class="ty-steps ty-reveal ty-d5">
+    <div class="ty-steps-title">Wat gebeurt er nu?</div>
+    <div class="ty-steps-grid">
+      <div class="ty-step">
+        <div class="ty-step-num">1</div>
+        <div class="ty-step-icon">&#x1F4E7;</div>
+        <div class="ty-step-title">Check je inbox</div>
+        <div class="ty-step-desc">Je ontvangt binnen 2 minuten een bevestigingsmail met je twee gratis e-books als download.</div>
+      </div>
+      <div class="ty-step">
+        <div class="ty-step-num">2</div>
+        <div class="ty-step-icon">&#x1F4E6;</div>
+        <div class="ty-step-title">Boek onderweg</div>
+        <div class="ty-step-desc">Je fysieke boek wordt binnen 24 uur verzonden. Je ontvangt een track &amp; trace link per e-mail.</div>
+      </div>
+      <div class="ty-step">
+        <div class="ty-step-num">3</div>
+        <div class="ty-step-icon">&#x1F680;</div>
+        <div class="ty-step-title">Begin met loslaten</div>
+        <div class="ty-step-desc">Begin vandaag al met de e-books. Zodra je boek arriveert, start je met de oefeningen.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       7. SOCIAL PROOF
+       ═══════════════════════════════════════ -->
+  <div class="ty-reviews ty-reveal ty-d5">
+    <div class="ty-reviews-title">Zij gingen je voor</div>
+    <div class="ty-review-cards">
+      <div class="ty-review">
+        <div class="ty-review-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
+        <div class="ty-review-text">&ldquo;Al jaren droeg ik spanning in mijn borst mee. Dit boek liet me zien dat het onverwerkt schuldgevoel was. Na 3 weken voelde ik letterlijk hoe het wegsmolt.&rdquo;</div>
+        <div class="ty-review-author">Marieke V.</div>
+        <div class="ty-review-loc">Amsterdam</div>
+      </div>
+      <div class="ty-review">
+        <div class="ty-review-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
+        <div class="ty-review-text">&ldquo;Ik sliep voor het eerst in jaren door. De oefeningen zijn zo concreet &mdash; geen zweverig gedoe maar &eacute;chte stappen. Mijn kinderen merkten het verschil al na een week.&rdquo;</div>
+        <div class="ty-review-author">Linda K.</div>
+        <div class="ty-review-loc">Rotterdam</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       8. SHARE
+       ═══════════════════════════════════════ -->
+  <div class="ty-share ty-reveal ty-d6">
+    <div class="ty-share-title">Ken je iemand die dit ook nodig heeft?</div>
+    <div class="ty-share-desc">Deel deze pagina met een vriendin en help haar ook aan een frisse start.</div>
+    <div class="ty-share-buttons">
+      <a href="https://wa.me/?text=Ik%20heb%20net%20Laat%20Los%20Wat%20Je%20Kapotmaakt%20besteld%20en%20ik%20denk%20dat%20jij%20het%20ook%20nodig%20hebt%20%F0%9F%92%9B" target="_blank" class="ty-share-btn wa">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.67-1.413A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.312-.727-5.994-1.96l-.418-.312-2.774.84.893-2.89-.338-.44A9.958 9.958 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+        WhatsApp
+      </a>
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Ftijdomloslaten.nl" target="_blank" class="ty-share-btn fb">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        Facebook
+      </a>
+      <a href="mailto:?subject=Dit%20boek%20moet%20je%20lezen&body=Ik%20heb%20net%20Laat%20Los%20Wat%20Je%20Kapotmaakt%20besteld" class="ty-share-btn mail">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
+        E-mail
+      </a>
+    </div>
+  </div>
+
+
+</div>
+
+<!-- ══ JS: Data z objednávky, edit formulář, FB Pixel, Confetti, Scroll reveal ══ -->
+<script>
+(function(){
+  // ────────────────────────────────────────────────────
+  // 1. Načtení dat z localStorage
+  // ────────────────────────────────────────────────────
+  var orderId = localStorage.getItem('medusa_order_id') || '';
+  var displayId = localStorage.getItem('medusa_order_display_id') || '';
+  var customerStr = localStorage.getItem('medusa_customer');
+  var upsellPurchased = localStorage.getItem('medusa_upsell_purchased') === 'true';
+
+  // Bundle + Order bump data z checkoutu
+  var bundleQty = parseInt(localStorage.getItem('medusa_bundle_qty') || '1');
+  var bundlePrice = parseFloat(localStorage.getItem('medusa_bundle_price') || PROJECT_CONFIG.mainProduct.price);
+  var orderBumpActive = localStorage.getItem('medusa_order_bump') === 'true';
+  var checkoutTotal = parseFloat(localStorage.getItem('medusa_checkout_total') || '0');
+
+  var customer = null;
+  if (customerStr) {
+    try { customer = JSON.parse(customerStr); } catch(e) { console.warn('TY: Nelze parsovat zákaznická data'); }
+  }
+
+  // Firemní údaje (B2B)
+  var companyStr = localStorage.getItem('medusa_company');
+  var companyData = null;
+  if (companyStr) {
+    try { companyData = JSON.parse(companyStr); } catch(e) { console.warn('TY: Nelze parsovat firemní data'); }
+  }
+
+  // Mapování country kódů na názvy
+  var countryNames = {
+    NL: 'Nederland', BE: 'België', LU: 'Luxemburg',
+    DE: 'Duitsland', AT: 'Oostenrijk', CZ: 'Tsjechië',
+  };
+
+  // ────────────────────────────────────────────────────
+  // 2. Vyplnění dynamických dat
+  // ────────────────────────────────────────────────────
+
+  // 2a. Personalizovaný heading
+  var titleEl = document.getElementById('ty-main-title');
+  if (titleEl && customer && customer.first_name) {
+    titleEl.innerHTML = 'Bedankt, <span class="accent">' + customer.first_name + '!</span>';
+  }
+
+  // 2b. Objednávkové číslo
+  var orderLabelEl = document.getElementById('ty-order-label');
+  if (orderLabelEl && displayId) {
+    orderLabelEl.textContent = '\uD83D\uDCE6 Bestelling #' + displayId;
+  } else if (orderLabelEl && orderId) {
+    var shortId = orderId.replace('order_', '').substring(0, 8).toUpperCase();
+    orderLabelEl.textContent = '\uD83D\uDCE6 Bestelling #' + shortId;
+  }
+
+  // 2c. Mailto link — doplň číslo objednávky
+  var mailtoEl = document.getElementById('ty-support-mailto');
+  if (mailtoEl) {
+    var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
+    var subject = encodeURIComponent('Vraag over bestelling #' + orderNum);
+    var body = encodeURIComponent('Hallo,\n\nIk heb een vraag over mijn bestelling.\n\nBestelnummer: #' + orderNum + '\n\nMijn vraag: ');
+    mailtoEl.href = 'mailto:devries@loslatenboek.nl?subject=' + subject + '&body=' + body;
+  }
+
+  // 2d. Celková cena — bere v potaz bundle, order bump a upsell
+  var totalPrice;
+  if (checkoutTotal > 0) {
+    // Máme uloženou celkovou cenu z checkoutu
+    totalPrice = checkoutTotal;
+    // Pokud upsell byl přidán po checkoutu (ne přes order bump), přičti ho
+    if (upsellPurchased && !orderBumpActive) {
+      totalPrice += PROJECT_CONFIG.upsellProduct.price;
+    }
+  } else {
+    // Fallback — starý výpočet
+    var mainPrice = PROJECT_CONFIG.mainProduct.price;
+    var upsellPrice = PROJECT_CONFIG.upsellProduct.price;
+    totalPrice = upsellPurchased ? (mainPrice + upsellPrice) : mainPrice;
+  }
+  var totalPriceEl = document.getElementById('ty-total-price');
+  if (totalPriceEl) {
+    totalPriceEl.textContent = '\u20AC ' + totalPrice.toFixed(0).replace('.', ',');
+  }
+
+  // 2e. Aktualizuj hlavní položku s bundle qty
+  var orderItemsEl = document.getElementById('ty-order-items');
+  if (orderItemsEl && bundleQty > 1) {
+    var mainItemName = orderItemsEl.querySelector('.ty-order-name');
+    if (mainItemName) {
+      mainItemName.textContent = bundleQty + '\u00D7 Laat Los Wat Je Kapotmaakt';
+    }
+    var mainItemDesc = orderItemsEl.querySelector('.ty-order-desc');
+    if (mainItemDesc) {
+      mainItemDesc.textContent = bundleQty + '\u00D7 fysiek boek \u2014 wordt bezorgd';
+    }
+  }
+
+  // 2f. Přidej upsell/order bump produkt do seznamu pokud byl zakoupen
+  if (upsellPurchased || orderBumpActive) {
+    if (orderItemsEl) {
+      var extraLabel = orderBumpActive ? 'Fysiek boek \u2014 toegevoegd bij bestelling' : 'Fysiek boek \u2014 upsell bestelling';
+      var upsellItemHtml = '<div class="ty-order-item">' +
+        '<div class="ty-order-icon book">\uD83D\uDCD6</div>' +
+        '<div>' +
+          '<div class="ty-order-name">Het Leven Dat Je Verdient</div>' +
+          '<div class="ty-order-desc">' + extraLabel + '</div>' +
+        '</div>' +
+      '</div>';
+      var items = orderItemsEl.querySelectorAll('.ty-order-item');
+      var lastItem = items[items.length - 1];
+      if (lastItem) lastItem.insertAdjacentHTML('beforebegin', upsellItemHtml);
+    }
+  }
+
+  // 2e. Vyplnění zákaznických údajů
+  function updateDetailsDisplay() {
+    if (!customer) return;
+    var el = function(id) { return document.getElementById(id); };
+    if (el('ty-show-firstname')) el('ty-show-firstname').textContent = customer.first_name || '—';
+    if (el('ty-show-lastname')) el('ty-show-lastname').textContent = customer.last_name || '—';
+    if (el('ty-show-email')) el('ty-show-email').textContent = customer.email || '—';
+    if (el('ty-show-phone')) el('ty-show-phone').textContent = customer.phone || '—';
+    if (el('ty-show-address')) {
+      var parts = [];
+      if (customer.address_1) parts.push(customer.address_1);
+      var line2 = [];
+      if (customer.postal_code) line2.push(customer.postal_code);
+      if (customer.city) line2.push(customer.city);
+      if (line2.length) parts.push(line2.join(' '));
+      var cc = (customer.country_code || '').toUpperCase();
+      if (cc && countryNames[cc]) parts.push(countryNames[cc]);
+      else if (cc) parts.push(cc);
+      el('ty-show-address').innerHTML = parts.join('<br>');
+    }
+    // Firemní údaje (B2B)
+    if (companyData && companyData.company_name) {
+      var companyRow = el('ty-company-row');
+      var companyVal = el('ty-show-company');
+      if (companyRow && companyVal) {
+        companyRow.style.display = '';
+        var cParts = [companyData.company_name];
+        if (companyData.kvk_number) cParts.push('KVK: ' + companyData.kvk_number);
+        if (companyData.vat_number) cParts.push('BTW: ' + companyData.vat_number);
+        companyVal.innerHTML = cParts.join('<br>');
+      }
+      // Ukaž company sekci v edit formuláři
+      var editCompSection = el('ty-edit-company-section');
+      if (editCompSection) editCompSection.style.display = '';
+    }
+  }
+  updateDetailsDisplay();
+
+  // ────────────────────────────────────────────────────
+  // 3. Edit formulář — toggle + save
+  // ────────────────────────────────────────────────────
+  window.toggleEditForm = function() {
+    var form = document.getElementById('ty-edit-form');
+    var card = document.getElementById('ty-details-card');
+    var isOpen = form.classList.contains('is-open');
+
+    if (isOpen) {
+      // Zavři formulář, ukaž kartu
+      form.classList.remove('is-open');
+      card.style.display = '';
+    } else {
+      // Otevři formulář, skryj kartu, předvyplň pole
+      card.style.display = 'none';
+      form.classList.add('is-open');
+      if (customer) {
+        document.getElementById('edit-firstname').value = customer.first_name || '';
+        document.getElementById('edit-lastname').value = customer.last_name || '';
+        document.getElementById('edit-email').value = customer.email || '';
+        document.getElementById('edit-phone').value = customer.phone || '';
+        document.getElementById('edit-address').value = customer.address_1 || '';
+        document.getElementById('edit-postal').value = customer.postal_code || '';
+        document.getElementById('edit-city').value = customer.city || '';
+      }
+      // Firemní pole předvyplnit
+      if (companyData && companyData.company_name) {
+        var ec = document.getElementById('edit-company');
+        var ek = document.getElementById('edit-kvk');
+        var ev = document.getElementById('edit-vat');
+        if (ec) ec.value = companyData.company_name || '';
+        if (ek) ek.value = companyData.kvk_number || '';
+        if (ev) ev.value = companyData.vat_number || '';
+      }
+      // Scroll k formuláři
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  window.saveDetails = function() {
+    var btn = document.getElementById('ty-save-btn');
+    var feedback = document.getElementById('ty-feedback');
+    var feedbackText = document.getElementById('ty-feedback-text');
+
+    // Načti hodnoty z formuláře
+    var newData = {
+      first_name: document.getElementById('edit-firstname').value.trim(),
+      last_name: document.getElementById('edit-lastname').value.trim(),
+      email: document.getElementById('edit-email').value.trim(),
+      phone: document.getElementById('edit-phone').value.trim(),
+      address_1: document.getElementById('edit-address').value.trim(),
+      postal_code: document.getElementById('edit-postal').value.trim(),
+      city: document.getElementById('edit-city').value.trim(),
+    };
+
+    // Validace — alespoň email a jméno
+    if (!newData.email || !newData.first_name) {
+      showFeedback('Vul ten minste je voornaam en e-mailadres in.', 'error');
+      return;
+    }
+
+    // Loading stav
+    btn.disabled = true;
+    btn.innerHTML = '<span class="btn-spinner"></span> Opslaan...';
+
+    // Aktualizuj lokální data ihned (pro lepší UX)
+    customer = {
+      email: newData.email,
+      first_name: newData.first_name,
+      last_name: newData.last_name,
+      phone: newData.phone,
+      address_1: newData.address_1,
+      city: newData.city,
+      postal_code: newData.postal_code,
+      country_code: customer ? customer.country_code : 'NL',
+    };
+
+    // Aktualizuj localStorage
+    localStorage.setItem('medusa_customer', JSON.stringify(customer));
+
+    // Firemní údaje aktualizovat
+    var ecEl = document.getElementById('edit-company');
+    if (ecEl) {
+      var cName = ecEl.value.trim();
+      var cKvk = (document.getElementById('edit-kvk') || {}).value || '';
+      var cVat = (document.getElementById('edit-vat') || {}).value || '';
+      if (cName) {
+        companyData = { company_name: cName, kvk_number: cKvk.trim(), vat_number: cVat.trim() };
+        localStorage.setItem('medusa_company', JSON.stringify(companyData));
+      }
+    }
+
+    // Aktualizuj zobrazení na stránce
+    updateDetailsDisplay();
+
+    // Pokud nemáme order ID, přeskočíme API volání (preview/test mód)
+    if (!orderId) {
+      console.log('TY: Žádné order ID — ukládám pouze lokálně');
+      finishSave(true);
+      return;
+    }
+
+    // Volání Medusa API — aktualizace objednávky
+    var apiUrl = PROJECT_CONFIG.medusaUrl + '/store/custom/orders/' + orderId + '/update-details';
+    var headers = {
+      'Content-Type': 'application/json',
+      'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey,
+    };
+
+    // Sestav API payload
+    var apiPayload = {
+      email: newData.email,
+      shipping_address: {
+        first_name: newData.first_name,
+        last_name: newData.last_name,
+        phone: newData.phone,
+        address_1: newData.address_1,
+        city: newData.city,
+        postal_code: newData.postal_code,
+      }
+    };
+    // Přidej firemní údaje pokud existují
+    if (companyData && companyData.company_name) {
+      apiPayload.shipping_address.company = companyData.company_name;
+      apiPayload.metadata = {};
+      if (companyData.kvk_number) apiPayload.metadata.kvk_number = companyData.kvk_number;
+      if (companyData.vat_number) apiPayload.metadata.vat_number = companyData.vat_number;
+    }
+
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(apiPayload)
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success) {
+        console.log('TY: Objednávka aktualizována v Meduse');
+        finishSave(true);
+      } else {
+        console.warn('TY: API vrátilo chybu:', data.message);
+        // Data jsou uložená lokálně, ale API selhalo
+        finishSave(true, 'Gegevens lokaal opgeslagen. Neem contact op als het probleem aanhoudt.');
+      }
+    })
+    .catch(function(err) {
+      console.error('TY: Chyba při API volání:', err);
+      // Lokální data jsou uložená, API nedostupné
+      finishSave(true, 'Gegevens lokaal opgeslagen. De server is momenteel niet bereikbaar.');
+    });
+  };
+
+  function finishSave(success, customMessage) {
+    var btn = document.getElementById('ty-save-btn');
+    btn.disabled = false;
+    btn.innerHTML = 'Opslaan';
+
+    // Zavři formulář, ukaž kartu
+    document.getElementById('ty-edit-form').classList.remove('is-open');
+    document.getElementById('ty-details-card').style.display = '';
+
+    // Ukáž feedback
+    if (success) {
+      showFeedback(customMessage || 'Je gegevens zijn bijgewerkt! We sturen je pakket naar het juiste adres.', 'success');
+    } else {
+      showFeedback(customMessage || 'Er ging iets mis. Probeer het opnieuw.', 'error');
+    }
+  }
+
+  function showFeedback(message, type) {
+    var feedback = document.getElementById('ty-feedback');
+    var feedbackText = document.getElementById('ty-feedback-text');
+    feedbackText.textContent = message;
+    feedback.className = 'ty-feedback is-visible ' + type;
+
+    // Scroll k feedbacku
+    feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Auto-skryj po 8 sekundách
+    setTimeout(function() {
+      feedback.classList.remove('is-visible');
+    }, 8000);
+  }
+
+  // ────────────────────────────────────────────────────
+  // 4. Facebook Pixel + CAPI — Purchase event (deduplicated via MetaTracker)
+  // ────────────────────────────────────────────────────
+  if (typeof MetaTracker !== 'undefined') {
+    var purchaseContentIds = [PROJECT_CONFIG.mainProduct.handle];
+    if (upsellPurchased || orderBumpActive) purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
+    var purchaseNumItems = bundleQty + ((upsellPurchased || orderBumpActive) ? 1 : 0);
+
+    // Build user_data from customer info for maximum EMQ
+    var purchaseUserData = {};
+    if (customer) {
+      if (customer.email) purchaseUserData.em = customer.email;
+      if (customer.firstName) purchaseUserData.fn = customer.firstName;
+      if (customer.lastName) purchaseUserData.ln = customer.lastName;
+      if (customer.phone) purchaseUserData.ph = customer.phone;
+      if (customer.city) purchaseUserData.ct = customer.city;
+      if (customer.postalCode) purchaseUserData.zp = customer.postalCode;
+      if (customer.country) purchaseUserData.country = customer.country;
+      if (customer.region) purchaseUserData.st = customer.region;
+    }
+
+    MetaTracker.trackPurchase({
+      content_ids: purchaseContentIds,
+      contents: purchaseContentIds.map(function(id) { return { id: id, quantity: 1 }; }),
+      value: totalPrice,
+      currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
+      num_items: purchaseNumItems,
+      order_id: orderId
+    }, purchaseUserData);
+    console.log('TY: Purchase event (browser + CAPI) — €' + totalPrice + ' (' + purchaseNumItems + ' items)');
+  }
+
+  // ────────────────────────────────────────────────────
+  // 5. Vyčisti localStorage — odloženo na 5 minut (aby zákazník stihl upravit údaje)
+  // ────────────────────────────────────────────────────
+  setTimeout(function() {
+    localStorage.removeItem('medusa_cart_id');
+    localStorage.removeItem('medusa_customer');
+    localStorage.removeItem('medusa_payment_provider');
+    localStorage.removeItem('medusa_order_id');
+    localStorage.removeItem('medusa_order_display_id');
+    localStorage.removeItem('medusa_is_upsell');
+    localStorage.removeItem('medusa_upsell_purchased');
+    localStorage.removeItem('medusa_upsell_order_id');
+    localStorage.removeItem('medusa_bundle_qty');
+    localStorage.removeItem('medusa_bundle_price');
+    localStorage.removeItem('medusa_order_bump');
+    localStorage.removeItem('medusa_checkout_total');
+    console.log('TY: localStorage vyčištěn (po 5 min)');
+  }, 5 * 60 * 1000);
+
+  // ────────────────────────────────────────────────────
+  // 6. Confetti
+  // ────────────────────────────────────────────────────
+  var confettiEl = document.getElementById('ty-confetti');
+  if (confettiEl && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var colors = ['#C27BA0','#D498B5','#2D1B3D','#EDD9E5','#5A3D6B','#D9A4C0','#fff'];
+    var shapes = ['circle','square','triangle'];
+    for (var i = 0; i < 60; i++) {
+      var piece = document.createElement('div');
+      piece.className = 'ty-confetti-piece';
+      var c = colors[Math.floor(Math.random()*colors.length)];
+      var s = shapes[Math.floor(Math.random()*shapes.length)];
+      var size = 6 + Math.random()*10;
+      piece.style.left = Math.random()*100 + '%';
+      piece.style.width = size + 'px';
+      piece.style.height = size + 'px';
+      piece.style.animationDelay = (Math.random()*1.5) + 's';
+      piece.style.animationDuration = (2.5 + Math.random()*2) + 's';
+      if (s === 'circle') { piece.style.borderRadius = '50%'; piece.style.background = c; }
+      else if (s === 'square') { piece.style.background = c; piece.style.borderRadius = '2px'; }
+      else { piece.style.width = '0'; piece.style.height = '0'; piece.style.borderLeft = size/2+'px solid transparent'; piece.style.borderRight = size/2+'px solid transparent'; piece.style.borderBottom = size+'px solid '+c; piece.style.background = 'none'; }
+      confettiEl.appendChild(piece);
+    }
+    setTimeout(function(){ confettiEl.remove(); }, 5000);
+  }
+
+  // ────────────────────────────────────────────────────
+  // 7. Scroll reveal
+  // ────────────────────────────────────────────────────
+  if ('IntersectionObserver' in window) {
+    var wrapper = document.querySelector('.ty-page');
+    if (wrapper) wrapper.classList.add('js-reveal-ready');
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { e.target.classList.add('is-visible'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.ty-reveal').forEach(function(el){ obs.observe(el); });
+  } else {
+    document.querySelectorAll('.ty-reveal').forEach(function(el){ el.classList.add('is-visible'); });
+  }
+})();
+</script>
+
+</body>
+</html>

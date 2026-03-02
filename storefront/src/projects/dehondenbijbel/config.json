@@ -1,0 +1,55 @@
+{
+  "slug": "dehondenbijbel",
+  "name": "De Hondenbijbel",
+  "domain": "dehondenbijbel.nl",
+  "locale": "nl",
+  "defaultCountry": "NL",
+  "salesChannelName": "Dehondenbijbel",
+  "medusaUrl": "https://backend-staging-580e.up.railway.app",
+  "publishableApiKey": "",
+  "facebookPixelId": "",
+  "salesChannelId": "",
+  "regionId": "",
+  "regions": {
+    "NL": "",
+    "BE": ""
+  },
+  "mainProduct": {
+    "name": "De Hondenbijbel",
+    "handle": "de-hondenbijbel",
+    "productId": "",
+    "variantId": "",
+    "price": 0,
+    "currency": "EUR",
+    "thumbnail": ""
+  },
+  "upsellProduct": {
+    "name": "",
+    "handle": "",
+    "productId": "",
+    "variantId": "",
+    "price": 0,
+    "originalPrice": 0,
+    "currency": "EUR"
+  },
+  "bundleOptions": [
+    { "qty": 1, "price": 0, "label": "1 boek", "save": 0 }
+  ],
+  "mollieProfileId": "",
+  "paymentProviders": {
+    "mollie": "pp_mollie_mollie",
+    "paypal": "pp_paypal_paypal",
+    "airwallex": "pp_airwallex_airwallex"
+  },
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "upsell": "upsell.html",
+    "thank-you": "thank-you.html",
+    "contact": "contact.html",
+    "privacy": "privacy.html",
+    "voorwaarden": "voorwaarden.html",
+    "verzending": "verzending.html",
+    "retourbeleid": "retourbeleid.html"
+  }
+}
