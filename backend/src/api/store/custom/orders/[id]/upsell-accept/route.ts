@@ -40,12 +40,14 @@ export async function POST(
       unit_price,
       compare_at_unit_price,
       upsell_cart_id,
+      upsell_payment_id: frontendPaymentId,
     } = req.body as {
       variant_id: string
       quantity?: number
       unit_price?: number
       compare_at_unit_price?: number
       upsell_cart_id?: string
+      upsell_payment_id?: string
     }
 
     if (!variant_id) {
@@ -86,14 +88,18 @@ export async function POST(
       (orders[0].items || []).map((i: any) => i.id)
     )
 
-    console.log(`[Upsell] Starting upsell-accept for order ${orderId}, variant ${variant_id}, unit_price ${unit_price}, upsell_cart_id: ${upsell_cart_id || "NONE"}`)
+    console.log(`[Upsell] Starting upsell-accept for order ${orderId}, variant ${variant_id}, unit_price ${unit_price}, upsell_cart_id: ${upsell_cart_id || "NONE"}, frontend_payment_id: ${frontendPaymentId || "NONE"}`)
 
-    // ── 2. Extract payment ID from upsell cart ──────────────────
-    //    query.graph does NOT hydrate JSONB "data" columns properly,
-    //    so we use the Payment Module service directly for reliable access.
-    let externalPaymentId: string | null = null
+    // ── 2. Extract payment ID ─────────────────────────────────
+    //    Priority 1: Frontend sends payment ID from gateway return URL
+    //      (Stripe adds ?payment_intent=pi_xxx to return URL)
+    //    Priority 2: Extract from upsell cart's payment module data
+    //    Priority 3: Fallback to Medusa payment ID
+    let externalPaymentId: string | null = frontendPaymentId || null
 
-    if (upsell_cart_id) {
+    if (externalPaymentId) {
+      console.log(`[Upsell] Using frontend-provided payment ID: ${externalPaymentId}`)
+    } else if (upsell_cart_id) {
       try {
         // Step 2a: Get the cart's payment_collection ID via query.graph
         const { data: carts } = await query.graph({

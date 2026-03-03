@@ -1018,6 +1018,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
     showPreloader('Upsell betaling wordt verwerkt...', 'Even geduld, we voegen het boek toe aan je bestelling.');
 
+    // Extract payment gateway return params from URL
+    // Stripe adds: ?payment_intent=pi_xxx&redirect_status=succeeded
+    // Mollie adds: nothing extra (uses webhooks)
+    // Airwallex adds: ?paymentIntentId=int_xxx
+    var gatewayPaymentId = params.get('payment_intent')       // Stripe/iDEAL
+                        || params.get('paymentIntentId')      // Airwallex
+                        || params.get('id')                   // Mollie (sometimes)
+                        || null;
+    console.log('Upsell: Gateway payment ID from URL:', gatewayPaymentId);
+
     // Add the upsell item to the ORIGINAL order via Order Edit
     // The backend verifies payment from the upsell cart (no cart completion = no second order)
     var originalOrderId = localStorage.getItem('medusa_order_id');
@@ -1039,6 +1049,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
         unit_price: PROJECT_CONFIG.upsellProduct.price,
         compare_at_unit_price: PROJECT_CONFIG.upsellProduct.originalPrice,
         upsell_cart_id: upsellCartId,
+        upsell_payment_id: gatewayPaymentId,
       }),
     })
     .then(function(r) { return r.json(); })
