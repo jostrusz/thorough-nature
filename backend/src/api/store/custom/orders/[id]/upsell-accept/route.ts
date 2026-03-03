@@ -16,13 +16,13 @@ import {
  * We do NOT complete that cart (to avoid creating a second order).
  *
  * Flow:
- * 1. Verify payment on upsell cart (extract external payment ID)
- * 2. Begin order edit
- * 3. Add upsell item (tax-inclusive)
- * 4. Request + confirm order edit
- * 5. Fix is_tax_inclusive on the new line item
- * 6. Mark new payment collection as paid
- * 7. Update order metadata (upsell_accepted, upsell_payment_id, etc.)
+ * 1. Verify order exists + idempotency check
+ * 2. Extract external payment ID from upsell cart's payment collection
+ * 3. Ensure region PricePreference is tax-inclusive (NL/BE VAT)
+ * 4-7. Order edit: begin → add item → request → confirm
+ * 8. Fix is_tax_inclusive on the new line item (safety net)
+ * 9. Mark new payment collection as paid
+ * 10. Update order metadata (upsell_accepted, upsell_payment_id, upsell_log)
  */
 export async function POST(
   req: MedusaRequest,
@@ -54,7 +54,7 @@ export async function POST(
     // ── 1. Verify order exists ──────────────────────────────────
     const { data: orders } = await query.graph({
       entity: "order",
-      fields: ["id", "metadata", "items.id", "items.variant_id"],
+      fields: ["id", "metadata", "region_id", "items.id", "items.variant_id"],
       filters: { id: orderId },
     })
 
@@ -129,13 +129,43 @@ export async function POST(
       }
     }
 
-    // ── 3. ORDER EDIT: Begin ────────────────────────────────────
+    // ── 3. Ensure region PricePreference is tax-inclusive ───────
+    //    NL/BE consumer prices include VAT. This ensures the order edit
+    //    treats the upsell price as tax-inclusive (no extra tax on top).
+    const regionId = (orders[0] as any).region_id
+    if (regionId) {
+      try {
+        const pricingModule = req.scope.resolve(Modules.PRICING) as any
+        const existing = await pricingModule.listPricePreferences({
+          attribute: "region_id",
+          value: regionId,
+        })
+
+        if (existing.length === 0) {
+          await pricingModule.createPricePreferences({
+            attribute: "region_id",
+            value: regionId,
+            is_tax_inclusive: true,
+          })
+          console.log(`[Upsell] Created tax-inclusive PricePreference for region ${regionId}`)
+        } else if (!(existing[0] as any).is_tax_inclusive) {
+          await pricingModule.updatePricePreferences(existing[0].id, {
+            is_tax_inclusive: true,
+          })
+          console.log(`[Upsell] Updated PricePreference to tax-inclusive for region ${regionId}`)
+        }
+      } catch (ppErr: any) {
+        console.warn(`[Upsell] Could not set PricePreference:`, ppErr.message)
+      }
+    }
+
+    // ── 4. ORDER EDIT: Begin ────────────────────────────────────
     console.log(`[Upsell] Beginning order edit for ${orderId}`)
     await beginOrderEditOrderWorkflow(req.scope).run({
       input: { order_id: orderId },
     })
 
-    // ── 4. ORDER EDIT: Add upsell item ──────────────────────────
+    // ── 5. ORDER EDIT: Add upsell item ──────────────────────────
     const item = {
       variant_id,
       quantity: quantity || 1,
@@ -151,13 +181,13 @@ export async function POST(
       },
     })
 
-    // ── 5. ORDER EDIT: Request ──────────────────────────────────
+    // ── 6. ORDER EDIT: Request ──────────────────────────────────
     console.log(`[Upsell] Requesting order edit for ${orderId}`)
     await requestOrderEditRequestWorkflow(req.scope).run({
       input: { order_id: orderId },
     })
 
-    // ── 6. ORDER EDIT: Confirm ──────────────────────────────────
+    // ── 7. ORDER EDIT: Confirm ──────────────────────────────────
     console.log(`[Upsell] Confirming order edit for ${orderId}`)
     await confirmOrderEditRequestWorkflow(req.scope).run({
       input: {
@@ -166,7 +196,7 @@ export async function POST(
       },
     })
 
-    // ── 7. Fix is_tax_inclusive on the new line item ────────────
+    // ── 8. Fix is_tax_inclusive on the new line item ────────────
     const orderModuleService = req.scope.resolve(Modules.ORDER) as any
 
     try {
@@ -195,7 +225,7 @@ export async function POST(
       console.warn(`[Upsell] Could not update is_tax_inclusive:`, taxErr.message)
     }
 
-    // ── 8. Mark new payment collection as paid ──────────────────
+    // ── 9. Mark new payment collection as paid ──────────────────
     try {
       const { data: paymentCollections } = await query.graph({
         entity: "order_payment_collection",
@@ -220,7 +250,7 @@ export async function POST(
       console.warn(`[Upsell] Could not mark payment collection as paid:`, pcErr.message)
     }
 
-    // ── 9. Update order metadata ────────────────────────────────
+    // ── 10. Update order metadata ───────────────────────────────
     const now = new Date().toISOString()
     const metadata: Record<string, unknown> = {
       ...existingMeta,
