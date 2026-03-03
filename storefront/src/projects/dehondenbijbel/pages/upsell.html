@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stap 2 — Speciaal Aanbod Alleen Voor Jou</title>
-<link rel="icon" href="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" type="image/png">
+<link rel="icon" href="/dehondenbijbel/images/preloader.webp" type="image/webp">
 
 <!-- Hide upsell content on payment return — show preloader instead -->
 <script>
@@ -977,7 +977,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     if (!document.querySelector('.payment-preloader')) {
       var div = document.createElement('div');
       div.className = 'payment-preloader';
-      div.innerHTML = '<img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" alt="Laden..." width="100">'
+      div.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="100">'
         + '<p>' + (message || 'Betaling wordt verwerkt...') + '</p>'
         + '<p class="sub">' + (sub || 'Even geduld alsjeblieft.') + '</p>';
       document.body.insertBefore(div, document.body.firstChild);

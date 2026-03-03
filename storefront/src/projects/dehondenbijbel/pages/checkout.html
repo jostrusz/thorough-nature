@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Afrekenen — De Hondenbijbel</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" type="image/png">
+<link rel="icon" href="/dehondenbijbel/images/preloader.webp" type="image/webp">
 
 <!-- Prevent checkout flash on payment return — hide form immediately (CSS loaded in <style> below) -->
 <script>
@@ -3784,7 +3784,7 @@ body {
     if (document.querySelector('.payment-preloader')) return;
     var el = document.createElement('div');
     el.className = 'payment-preloader';
-    el.innerHTML = '<img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+    el.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
     document.body.insertBefore(el, document.body.firstChild);
   }
   function hideExpressPreloader() {
@@ -6063,7 +6063,7 @@ body {
     if (!document.querySelector('.payment-preloader')) {
       var preloaderDiv = document.createElement('div');
       preloaderDiv.className = 'payment-preloader';
-      preloaderDiv.innerHTML = '<img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+      preloaderDiv.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
       document.body.insertBefore(preloaderDiv, document.body.firstChild);
     }
 
@@ -6715,7 +6715,7 @@ body {
                   if (!document.querySelector('.payment-preloader')) {
                     var kPreloader = document.createElement('div');
                     kPreloader.className = 'payment-preloader';
-                    kPreloader.innerHTML = '<img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+                    kPreloader.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
                     document.body.insertBefore(kPreloader, document.body.firstChild);
                   }
 
@@ -6887,7 +6887,7 @@ body {
                 if (!document.querySelector('.payment-preloader')) {
                   var awPreloader = document.createElement('div');
                   awPreloader.className = 'payment-preloader';
-                  awPreloader.innerHTML = '<img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+                  awPreloader.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
                   document.body.insertBefore(awPreloader, document.body.firstChild);
                 }
 
