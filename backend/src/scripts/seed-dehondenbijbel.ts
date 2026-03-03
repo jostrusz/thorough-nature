@@ -7,12 +7,10 @@ import {
 import {
   createInventoryLevelsWorkflow,
   createProductsWorkflow,
-  createRegionsWorkflow,
   createSalesChannelsWorkflow,
   createShippingOptionsWorkflow,
   createShippingProfilesWorkflow,
   createStockLocationsWorkflow,
-  createTaxRegionsWorkflow,
   linkSalesChannelsToApiKeyWorkflow,
   linkSalesChannelsToStockLocationWorkflow,
 } from "@medusajs/medusa/core-flows"
@@ -22,65 +20,57 @@ export default async function seedDehondenbijbel({ container }: ExecArgs) {
   const link = container.resolve(ContainerRegistrationKeys.LINK)
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const fulfillmentModuleService = container.resolve(Modules.FULFILLMENT)
+  const salesChannelModuleService = container.resolve(Modules.SALES_CHANNEL)
+  const regionModuleService = container.resolve(Modules.REGION)
   const apiKeyModuleService = container.resolve(Modules.API_KEY)
 
   const countries = ["nl", "be"]
 
-  // ─── 1. SALES CHANNEL ───
-  logger.info("[Dehondenbijbel] Creating sales channel...")
-  const { result: salesChannelResult } = await createSalesChannelsWorkflow(
-    container
-  ).run({
-    input: {
-      salesChannelsData: [{ name: "Dehondenbijbel" }],
-    },
+  // ─── 1. SALES CHANNEL (reuse if already exists) ───
+  logger.info("[Dehondenbijbel] Setting up sales channel...")
+  const existingSalesChannels = await salesChannelModuleService.listSalesChannels({
+    name: "Dehondenbijbel",
   })
-  const salesChannel = salesChannelResult[0]
-
-  // ─── 2. LINK TO EXISTING API KEY ───
-  const apiKeys = await apiKeyModuleService.listApiKeys({ title: "Webshop" })
-  if (apiKeys.length) {
-    await linkSalesChannelsToApiKeyWorkflow(container).run({
-      input: { id: apiKeys[0].id, add: [salesChannel.id] },
+  let salesChannel: any
+  if (existingSalesChannels.length) {
+    salesChannel = existingSalesChannels[0]
+    logger.info(`[Dehondenbijbel] Reusing existing sales channel: ${salesChannel.id}`)
+  } else {
+    const { result: salesChannelResult } = await createSalesChannelsWorkflow(
+      container
+    ).run({
+      input: {
+        salesChannelsData: [{ name: "Dehondenbijbel" }],
+      },
     })
-    logger.info("[Dehondenbijbel] Linked sales channel to API key")
-  }
+    salesChannel = salesChannelResult[0]
+    logger.info(`[Dehondenbijbel] Created sales channel: ${salesChannel.id}`)
 
-  // ─── 3. REGION (NL + BE) ───
-  logger.info("[Dehondenbijbel] Creating region...")
-  const { result: regionResult } = await createRegionsWorkflow(container).run({
-    input: {
-      regions: [
-        {
-          name: "Benelux (Dehondenbijbel)",
-          currency_code: "eur",
-          countries,
-          payment_providers: ["pp_system_default"],
-        },
-      ],
-    },
-  })
-  const region = regionResult[0]
-
-  // ─── 4. TAX REGIONS ───
-  logger.info("[Dehondenbijbel] Creating tax regions...")
-  try {
-    await createTaxRegionsWorkflow(container).run({
-      input: countries.map((country_code) => ({
-        country_code,
-        provider_id: "tp_system",
-      })),
-    })
-  } catch (e: any) {
-    // Tax regions for NL/BE may already exist from Loslatenboek seed
-    if (e.message?.includes("already exists") || e.message?.includes("unique")) {
-      logger.info("[Dehondenbijbel] Tax regions already exist, skipping...")
-    } else {
-      throw e
+    // Link to existing API key
+    const apiKeys = await apiKeyModuleService.listApiKeys({ title: "Webshop" })
+    if (apiKeys.length) {
+      await linkSalesChannelsToApiKeyWorkflow(container).run({
+        input: { id: apiKeys[0].id, add: [salesChannel.id] },
+      })
+      logger.info("[Dehondenbijbel] Linked sales channel to API key")
     }
   }
 
-  // ─── 5. STOCK LOCATION ───
+  // ─── 2. REGION (reuse existing — countries can only belong to one region) ───
+  logger.info("[Dehondenbijbel] Finding existing region...")
+  const existingRegions = await regionModuleService.listRegions({}, {
+    relations: ["countries"],
+  })
+  // Find the region that contains NL
+  const region = existingRegions.find((r: any) =>
+    r.countries?.some((c: any) => c.iso_2 === "nl")
+  )
+  if (!region) {
+    throw new Error("No region found with NL country. Run seed-loslatenboek first.")
+  }
+  logger.info(`[Dehondenbijbel] Reusing region: ${region.id} (${region.name})`)
+
+  // ─── 3. STOCK LOCATION ───
   logger.info("[Dehondenbijbel] Creating stock location...")
   const { result: stockLocationResult } = await createStockLocationsWorkflow(
     container
@@ -105,7 +95,7 @@ export default async function seedDehondenbijbel({ container }: ExecArgs) {
     [Modules.FULFILLMENT]: { fulfillment_provider_id: "manual_manual" },
   })
 
-  // ─── 6. FULFILLMENT (Free Shipping) ───
+  // ─── 4. FULFILLMENT (Free Shipping) ───
   logger.info("[Dehondenbijbel] Creating fulfillment...")
   const shippingProfiles = await fulfillmentModuleService.listShippingProfiles({
     type: "default",
@@ -166,7 +156,7 @@ export default async function seedDehondenbijbel({ container }: ExecArgs) {
     input: { id: stockLocation.id, add: [salesChannel.id] },
   })
 
-  // ─── 7. PRODUCTS ───
+  // ─── 5. PRODUCTS ───
   logger.info("[Dehondenbijbel] Creating products...")
   const { result: productResult } = await createProductsWorkflow(container).run({
     input: {
@@ -215,7 +205,7 @@ export default async function seedDehondenbijbel({ container }: ExecArgs) {
     },
   })
 
-  // ─── 8. INVENTORY LEVELS ───
+  // ─── 6. INVENTORY LEVELS ───
   logger.info("[Dehondenbijbel] Setting inventory levels...")
   const { data: inventoryItems } = await query.graph({
     entity: "inventory_item",
@@ -237,7 +227,7 @@ export default async function seedDehondenbijbel({ container }: ExecArgs) {
     })
   }
 
-  // ─── 9. LOG IDs ───
+  // ─── 7. LOG IDs ───
   logger.info("═══════════════════════════════════════════")
   logger.info("[Dehondenbijbel] SETUP COMPLETE!")
   logger.info(`Sales Channel ID: ${salesChannel.id}`)

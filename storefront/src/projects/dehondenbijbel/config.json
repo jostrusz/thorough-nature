@@ -6,34 +6,37 @@
   "defaultCountry": "NL",
   "salesChannelName": "Dehondenbijbel",
   "medusaUrl": "https://backend-staging-580e.up.railway.app",
-  "publishableApiKey": "",
+  "publishableApiKey": "pk_b5a627a44d83f46f0990ab920b351c498ad1781f7e9b723a68b701aa7852b227",
   "facebookPixelId": "",
-  "salesChannelId": "",
-  "regionId": "",
+  "salesChannelId": "sc_01KJSENKGPV7GA0CYAT1JVN4W5",
+  "regionId": "reg_01KJ9YMS2SF9R3C01Y990D08KJ",
   "regions": {
-    "NL": "",
-    "BE": ""
+    "NL": "reg_01KJ9YMS2SF9R3C01Y990D08KJ",
+    "BE": "reg_01KJ9YMS2SF9R3C01Y990D08KJ"
   },
   "mainProduct": {
     "name": "De Hondenbijbel",
     "handle": "de-hondenbijbel",
-    "productId": "",
-    "variantId": "",
-    "price": 0,
+    "productId": "prod_01KJSESAW3S9D80WZWJ8BTGG4C",
+    "variantId": "variant_01KJSESHRDZRD8SP0W1EV3YBZE",
+    "price": 35,
     "currency": "EUR",
     "thumbnail": ""
   },
   "upsellProduct": {
-    "name": "",
-    "handle": "",
-    "productId": "",
-    "variantId": "",
-    "price": 0,
-    "originalPrice": 0,
+    "name": "Laat Los Wat Je Kapotmaakt",
+    "handle": "laat-los-wat-je-kapotmaakt-dh",
+    "productId": "prod_01KJSESAW35QRCKMB8TCKNRBSY",
+    "variantId": "variant_01KJSESHRDFQMXT0V0HDQZ9NXG",
+    "price": 25,
+    "originalPrice": 35,
     "currency": "EUR"
   },
   "bundleOptions": [
-    { "qty": 1, "price": 0, "label": "1 boek", "save": 0 }
+    { "qty": 1, "price": 35, "label": "1 boek", "save": 0 },
+    { "qty": 2, "price": 59, "label": "2 boeken", "save": 11 },
+    { "qty": 3, "price": 79, "label": "3 boeken", "save": 26 },
+    { "qty": 4, "price": 99, "label": "4 boeken", "save": 41 }
   ],
   "mollieProfileId": "",
   "paymentProviders": {
