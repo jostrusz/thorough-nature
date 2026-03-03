@@ -999,6 +999,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   // ═══════════════════════════════════════════════
   // ROUTE A: UPSELL PAYMENT RETURN (from payment gateway)
   // URL: ?upsell_return=1&upsell_cart_id=xxx
+  //
+  // IMPORTANT: We do NOT complete the upsell cart here.
+  // Completing it would create a second order in admin.
+  // Instead, we pass the cart ID to the backend which:
+  //   - Extracts the payment ID from the cart
+  //   - Adds the upsell item to the ORIGINAL order via Order Edit
+  //   - Marks the payment as captured
+  //   - Stores upsell_payment_id in order metadata
   // ═══════════════════════════════════════════════
   var params = new URLSearchParams(window.location.search);
   if (params.get('upsell_return') === '1') {
@@ -1010,44 +1018,38 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
     showPreloader('Upsell betaling wordt verwerkt...', 'Even geduld, we voegen het boek toe aan je bestelling.');
 
-    // Complete the upsell cart (Mollie payment is done)
-    medusaFetch('/store/carts/' + upsellCartId + '/complete', {
-      method: 'POST'
-    })
-    .then(function(res) {
-      if (res.type === 'order' || (res.order && res.order.id)) {
-        console.log('Upsell: Upsell cart completed, order:', (res.order || {}).id);
-      }
+    // Add the upsell item to the ORIGINAL order via Order Edit
+    // The backend verifies payment from the upsell cart (no cart completion = no second order)
+    var originalOrderId = localStorage.getItem('medusa_order_id');
+    if (!originalOrderId) {
+      console.warn('Upsell: No original order ID, redirecting to thank-you');
+      window.location.href = PROJECT_CONFIG.thankYouUrl;
+      return;
+    }
 
-      // Now add the upsell item to the ORIGINAL order via Order Edit
-      var originalOrderId = localStorage.getItem('medusa_order_id');
-      if (originalOrderId) {
-        return fetch(MEDUSA_URL + '/store/custom/orders/' + originalOrderId + '/upsell-accept', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey,
-          },
-          body: JSON.stringify({
-            variant_id: PROJECT_CONFIG.upsellProduct.variantId,
-            quantity: 1,
-            unit_price: PROJECT_CONFIG.upsellProduct.price,
-            compare_at_unit_price: PROJECT_CONFIG.upsellProduct.originalPrice,
-          }),
-        }).then(function(r) { return r.json(); })
-          .then(function(result) {
-            console.log('Upsell: Order edit result:', result);
-            return result;
-          })
-          .catch(function(err) {
-            console.warn('Upsell: Order edit failed (non-critical):', err.message || err);
-            return {};
-          });
-      }
+    fetch(MEDUSA_URL + '/store/custom/orders/' + originalOrderId + '/upsell-accept', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey,
+      },
+      body: JSON.stringify({
+        variant_id: PROJECT_CONFIG.upsellProduct.variantId,
+        quantity: 1,
+        unit_price: PROJECT_CONFIG.upsellProduct.price,
+        compare_at_unit_price: PROJECT_CONFIG.upsellProduct.originalPrice,
+        upsell_cart_id: upsellCartId,
+      }),
     })
-    .then(function() {
+    .then(function(r) { return r.json(); })
+    .then(function(result) {
+      console.log('Upsell: Order edit result:', result);
+
       // Mark upsell as purchased
       localStorage.setItem('medusa_upsell_purchased', 'true');
+      if (result.upsell_payment_id) {
+        localStorage.setItem('medusa_upsell_payment_id', result.upsell_payment_id);
+      }
       // Clean up
       localStorage.removeItem('medusa_upsell_cart_id');
       localStorage.removeItem('medusa_cart_id');
