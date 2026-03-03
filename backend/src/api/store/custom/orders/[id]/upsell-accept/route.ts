@@ -235,8 +235,8 @@ export async function POST(
 
       for (const opc of paymentCollections) {
         const pc = (opc as any).payment_collection
-        if (pc && pc.status !== "captured" && pc.status !== "canceled") {
-          console.log(`[Upsell] Marking payment collection ${pc.id} as paid`)
+        if (pc && pc.status === "not_paid") {
+          console.log(`[Upsell] Marking payment collection ${pc.id} as paid (status: ${pc.status})`)
           await markPaymentCollectionAsPaid(req.scope).run({
             input: {
               payment_collection_id: pc.id,
