@@ -42,6 +42,7 @@ export async function GET(
         "items.variant.*",
         "items.variant.product.*",
         "shipping_address.*",
+        "billing_address.*",
         "fulfillments.*",
         "payment_collections.*",
         "payment_collections.payments.*",

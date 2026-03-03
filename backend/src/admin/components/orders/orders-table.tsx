@@ -331,7 +331,7 @@ export function OrdersTable({
                 onClick={toggleSelectAll}
               />
             </th>
-            <th style={thStyle} onClick={() => onSort("display_id")}>
+            <th style={{ ...thStyle, minWidth: "120px", whiteSpace: "nowrap" }} onClick={() => onSort("display_id")}>
               Order {renderSortIcon("display_id")}
             </th>
             <th style={thStyle} onClick={() => onSort("customer")}>
@@ -357,6 +357,16 @@ export function OrdersTable({
             const customerName = getCustomerName(order)
             const tag = getTag(order)
             const countryCode = order.shipping_address?.country_code
+              || order.billing_address?.country_code
+              || (() => {
+                // Fallback: extract from custom_order_number "NL2026-75" → "nl"
+                const num = order.metadata?.custom_order_number
+                if (num && typeof num === "string") {
+                  const m = num.match(/^([A-Za-z]{2})\d/)
+                  if (m) return m[1].toLowerCase()
+                }
+                return undefined
+              })()
             const deliveryStatus = order.metadata?.dextrum_status || (() => {
               const fulfillments = order.fulfillments || []
               const itemCount2 = order.items?.length || 0
@@ -410,6 +420,7 @@ export function OrdersTable({
                       color: colors.accent,
                       fontWeight: 600,
                       cursor: "pointer",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     {getOrderDisplayNumber(order)}
