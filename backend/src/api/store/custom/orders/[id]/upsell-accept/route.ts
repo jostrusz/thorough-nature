@@ -89,67 +89,92 @@ export async function POST(
     console.log(`[Upsell] Starting upsell-accept for order ${orderId}, variant ${variant_id}, unit_price ${unit_price}, upsell_cart_id: ${upsell_cart_id || "NONE"}`)
 
     // ── 2. Extract payment ID from upsell cart ──────────────────
+    //    query.graph does NOT hydrate JSONB "data" columns properly,
+    //    so we use the Payment Module service directly for reliable access.
     let externalPaymentId: string | null = null
 
     if (upsell_cart_id) {
       try {
+        // Step 2a: Get the cart's payment_collection ID via query.graph
         const { data: carts } = await query.graph({
           entity: "cart",
-          fields: [
-            "id",
-            "payment_collection.id",
-            "payment_collection.status",
-            "payment_collection.payments.id",
-            "payment_collection.payments.provider_id",
-            "payment_collection.payments.data",
-            "payment_collection.payments.captured_at",
-            "payment_collection.payment_sessions.id",
-            "payment_collection.payment_sessions.provider_id",
-            "payment_collection.payment_sessions.data",
-            "payment_collection.payment_sessions.status",
-          ],
+          fields: ["id", "payment_collection.id", "payment_collection.status"],
           filters: { id: upsell_cart_id },
         })
 
         console.log(`[Upsell] Cart query returned ${carts.length} cart(s)`)
 
         if (carts.length && (carts[0] as any).payment_collection) {
-          const pc = (carts[0] as any).payment_collection
-          const payments = pc.payments || []
-          const sessions = pc.payment_sessions || []
+          const pcId = (carts[0] as any).payment_collection.id
+          const pcStatus = (carts[0] as any).payment_collection.status
+          console.log(`[Upsell] Cart ${upsell_cart_id}: PC id=${pcId}, status=${pcStatus}`)
 
-          console.log(
-            `[Upsell] Cart ${upsell_cart_id}: PC status=${pc.status}, ` +
-            `${payments.length} payment(s), ${sessions.length} session(s)`
-          )
+          // Step 2b: Use Payment Module directly to get sessions + payments with JSONB data
+          const paymentModule = req.scope.resolve(Modules.PAYMENT) as any
 
-          // Try to extract from payments first
-          for (const payment of payments) {
-            console.log(
-              `[Upsell] Payment ${payment.id}: provider=${payment.provider_id}, ` +
-              `data.id=${payment.data?.id || "N/A"}, captured=${payment.captured_at || "N/A"}`
+          // Try payment sessions first (always exist after initialization)
+          try {
+            const sessions = await paymentModule.listPaymentSessions(
+              { payment_collection_id: pcId },
+              { relations: [] }
             )
-            if (payment.data && payment.data.id) {
-              externalPaymentId = String(payment.data.id)
-              break
-            }
-            // Fallback: use Medusa payment ID
-            if (!externalPaymentId && payment.id) {
-              externalPaymentId = payment.id
-            }
-          }
+            console.log(`[Upsell] Payment module: ${sessions.length} session(s)`)
 
-          // If no payment ID from payments, try payment sessions
-          if (!externalPaymentId) {
             for (const session of sessions) {
+              const dataStr = JSON.stringify(session.data)
               console.log(
                 `[Upsell] Session ${session.id}: provider=${session.provider_id}, ` +
-                `status=${session.status}, data.id=${session.data?.id || "N/A"}`
+                `status=${session.status}, data=${dataStr?.substring(0, 200)}`
               )
-              if (session.data && session.data.id) {
+
+              // Stripe: data.id = "pi_xxx"
+              // Mollie: data.id = "tr_xxx"
+              // Airwallex: data.id = "int_xxx"
+              if (session.data?.id) {
                 externalPaymentId = String(session.data.id)
+                console.log(`[Upsell] Found payment ID from session.data.id: ${externalPaymentId}`)
                 break
               }
+              // Some providers might store under different keys
+              if (session.data?.payment_intent) {
+                externalPaymentId = String(session.data.payment_intent)
+                console.log(`[Upsell] Found payment ID from session.data.payment_intent: ${externalPaymentId}`)
+                break
+              }
+            }
+          } catch (sessErr: any) {
+            console.warn(`[Upsell] listPaymentSessions error:`, sessErr.message)
+          }
+
+          // If no ID from sessions, try payments
+          if (!externalPaymentId) {
+            try {
+              const payments = await paymentModule.listPayments(
+                { payment_collection_id: pcId },
+                { relations: [] }
+              )
+              console.log(`[Upsell] Payment module: ${payments.length} payment(s)`)
+
+              for (const payment of payments) {
+                const dataStr = JSON.stringify(payment.data)
+                console.log(
+                  `[Upsell] Payment ${payment.id}: provider=${payment.provider_id}, ` +
+                  `data=${dataStr?.substring(0, 200)}`
+                )
+
+                if (payment.data?.id) {
+                  externalPaymentId = String(payment.data.id)
+                  console.log(`[Upsell] Found payment ID from payment.data.id: ${externalPaymentId}`)
+                  break
+                }
+                // Fallback: use Medusa payment ID
+                if (!externalPaymentId && payment.id) {
+                  externalPaymentId = payment.id
+                  console.log(`[Upsell] Using Medusa payment ID as fallback: ${externalPaymentId}`)
+                }
+              }
+            } catch (payErr: any) {
+              console.warn(`[Upsell] listPayments error:`, payErr.message)
             }
           }
 
@@ -215,40 +240,9 @@ export async function POST(
       },
     })
 
-    // ── 5.5. Fix is_tax_inclusive on new line item BEFORE request ─
-    //    CRITICAL: The payment collection amount is calculated during
-    //    requestOrderEditRequestWorkflow based on is_tax_inclusive.
-    //    If the item was created with is_tax_inclusive=false (default),
-    //    tax will be ADDED ON TOP of the price, inflating the payment.
-    //    We must fix this BEFORE the request step.
-    try {
-      const { data: editOrders } = await query.graph({
-        entity: "order",
-        fields: ["id", "items.id", "items.variant_id", "items.is_tax_inclusive"],
-        filters: { id: orderId },
-      })
-
-      if (editOrders.length) {
-        const newItems = (editOrders[0].items || []).filter(
-          (i: any) => !existingItemIds.has(i.id)
-        )
-
-        console.log(`[Upsell] Step 5.5: Found ${newItems.length} new item(s) to fix is_tax_inclusive`)
-
-        for (const newItem of newItems) {
-          if (!newItem.is_tax_inclusive) {
-            console.log(`[Upsell] Setting is_tax_inclusive=true on item ${newItem.id} (was ${newItem.is_tax_inclusive})`)
-            await orderModuleService.updateOrderLineItems(newItem.id, {
-              is_tax_inclusive: true,
-            })
-          } else {
-            console.log(`[Upsell] Item ${newItem.id} already has is_tax_inclusive=true`)
-          }
-        }
-      }
-    } catch (taxErr: any) {
-      console.warn(`[Upsell] Step 5.5: Could not fix is_tax_inclusive pre-request:`, taxErr.message)
-    }
+    // NOTE: Step 5.5 removed — items in an active order edit are in a new
+    // version and NOT queryable via order.items. The is_tax_inclusive:true
+    // is passed directly in the item object above (Step 5), which works.
 
     // ── 6. ORDER EDIT: Request ──────────────────────────────────
     console.log(`[Upsell] Step 6: Requesting order edit for ${orderId}`)
