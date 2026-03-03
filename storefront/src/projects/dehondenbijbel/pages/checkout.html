@@ -2948,21 +2948,17 @@ body {
     // Zkus načíst obrázek z Medusa API
     var upsellHandle = PROJECT_CONFIG.upsellProduct.handle;
     if (upsellHandle) {
-      medusaFetch('/store/products?handle=' + upsellHandle, {
-        method: 'GET',
-        headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
-      }).then(function(res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      }).then(function(data) {
+      medusaFetch('/store/products?handle=' + upsellHandle)
+      .then(function(data) {
         var product = data.products && data.products[0];
         if (product && product.thumbnail) {
-          var imgTag = '<img src="' + product.thumbnail + '" alt="' + (product.title || 'Het Leven Dat Je Verdient') + '">';
+          var thumbUrl = product.thumbnail.indexOf('http') === 0 ? product.thumbnail : MEDUSA_URL + product.thumbnail;
+          var imgTag = '<img src="' + thumbUrl + '" alt="' + (product.title || 'Laat Los Wat Je Kapotmaakt') + '" style="width:100%;height:100%;object-fit:cover;">';
           if (thumbContainer) thumbContainer.innerHTML = imgTag;
           if (imgContainer) imgContainer.innerHTML = imgTag;
         }
-      }).catch(function() {
-        // Fallback — CSS placeholder zůstane
+      }).catch(function(err) {
+        console.warn('Order bump image laden mislukt:', err);
       });
     }
   }
@@ -6097,18 +6093,15 @@ body {
   (function loadMainProductImage() {
     var handle = PROJECT_CONFIG.mainProduct.handle;
     if (!handle) return;
-    medusaFetch('/store/products?handle=' + handle, {
-      method: 'GET',
-      headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
-    }).then(function(res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    }).then(function(data) {
+    medusaFetch('/store/products?handle=' + handle)
+    .then(function(data) {
       var product = data.products && data.products[0];
       if (product && product.thumbnail) {
         setProductThumbnail(product.thumbnail);
       }
-    }).catch(function() { /* fallback zůstane */ });
+    }).catch(function(err) {
+      console.warn('Product thumbnail laden mislukt:', err);
+    });
   })();
 
   /* ─── PROMO KÓDY — toggle + apply + remove ─── */
