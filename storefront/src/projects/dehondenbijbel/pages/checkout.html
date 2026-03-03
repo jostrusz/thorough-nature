@@ -955,9 +955,7 @@ body {
 .summary-product-img img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+  object-fit: contain;
 }
 /* Mini-boek mockup */
 .mini-book {
@@ -1319,7 +1317,7 @@ body {
   border: 1px solid var(--border);
   transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.msb-thumb img { width: 100%; height: 100%; object-fit: cover; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+.msb-thumb img { width: 100%; height: 100%; object-fit: contain; }
 /* Info blok — název + detail */
 .msb-info {
   flex: 1;
@@ -1636,7 +1634,7 @@ body {
   background: var(--section);
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
-.order-bump-thumb img { width: 100%; height: 100%; object-fit: cover; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+.order-bump-thumb img { width: 100%; height: 100%; object-fit: contain; }
 
 .order-bump-header-text { flex: 1; min-width: 0; }
 .order-bump-top-row {
@@ -1713,7 +1711,7 @@ body {
   background: var(--section);
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
 }
-.order-bump-img img { width: 100%; height: 100%; object-fit: cover; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+.order-bump-img img { width: 100%; height: 100%; object-fit: contain; }
 .order-bump-detail-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 .order-bump-name { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 600; color: var(--heading); margin-bottom: 2px; }
 .order-bump-author { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
