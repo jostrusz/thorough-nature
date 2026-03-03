@@ -6048,16 +6048,38 @@ body {
     return; // Stop further checkout initialization
   })();
 
-  /* ─── OBRÁZEK PRODUKTU ─── */
-  if (PROJECT_CONFIG.mainProduct.thumbnail) {
-    var thumbUrl = PROJECT_CONFIG.mainProduct.thumbnail.indexOf('http') === 0 ? PROJECT_CONFIG.mainProduct.thumbnail : MEDUSA_URL + PROJECT_CONFIG.mainProduct.thumbnail;
-    var imgHtml = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
+  /* ─── OBRÁZEK PRODUKTU — fetch z Medusa admin ─── */
+  function setProductThumbnail(url) {
+    if (!url) return;
+    var thumbUrl = url.indexOf('http') === 0 ? url : MEDUSA_URL + url;
     var desktopImg = document.getElementById('desktop-product-img');
-    if (desktopImg) desktopImg.innerHTML = imgHtml;
-    // Obrázek v mobilním sticky baru
+    if (desktopImg) desktopImg.innerHTML = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
     var msbThumb = document.getElementById('msb-thumb');
     if (msbThumb) msbThumb.innerHTML = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">';
   }
+
+  // 1. Pokud je thumbnail v config.json, použij ho hned jako fallback
+  if (PROJECT_CONFIG.mainProduct.thumbnail) {
+    setProductThumbnail(PROJECT_CONFIG.mainProduct.thumbnail);
+  }
+
+  // 2. Vždy fetchni aktuální thumbnail z Medusa admin (přepíše fallback)
+  (function loadMainProductImage() {
+    var handle = PROJECT_CONFIG.mainProduct.handle;
+    if (!handle) return;
+    medusaFetch('/store/products?handle=' + handle, {
+      method: 'GET',
+      headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
+    }).then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }).then(function(data) {
+      var product = data.products && data.products[0];
+      if (product && product.thumbnail) {
+        setProductThumbnail(product.thumbnail);
+      }
+    }).catch(function() { /* fallback zůstane */ });
+  })();
 
   /* ─── PROMO KÓDY — toggle + apply + remove ─── */
   var promoToggle = document.getElementById('promo-toggle');
