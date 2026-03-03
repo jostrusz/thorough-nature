@@ -11,7 +11,6 @@ import {
   createShippingOptionsWorkflow,
   createShippingProfilesWorkflow,
   createStockLocationsWorkflow,
-  linkSalesChannelsToApiKeyWorkflow,
   linkSalesChannelsToStockLocationWorkflow,
 } from "@medusajs/medusa/core-flows"
 
@@ -46,14 +45,17 @@ export default async function seedDehondenbijbel({ container }: ExecArgs) {
     salesChannel = salesChannelResult[0]
     logger.info(`[Dehondenbijbel] Created sales channel: ${salesChannel.id}`)
 
-    // Link to existing API key
-    const apiKeys = await apiKeyModuleService.listApiKeys({ title: "Webshop" })
-    if (apiKeys.length) {
-      await linkSalesChannelsToApiKeyWorkflow(container).run({
-        input: { id: apiKeys[0].id, add: [salesChannel.id] },
-      })
-      logger.info("[Dehondenbijbel] Linked sales channel to API key")
-    }
+    // Create a dedicated publishable API key for Dehondenbijbel
+    const newKey = await apiKeyModuleService.createApiKeys({
+      title: "Dehondenbijbel",
+      type: "publishable",
+      created_by: "seed-script",
+    })
+    await link.create({
+      [Modules.API_KEY]: { publishable_key_id: newKey.id },
+      [Modules.SALES_CHANNEL]: { sales_channel_id: salesChannel.id },
+    })
+    logger.info(`[Dehondenbijbel] Created API key: ${newKey.token}`)
   }
 
   // ─── 2. REGION (reuse existing — countries can only belong to one region) ───
