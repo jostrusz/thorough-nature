@@ -956,6 +956,8 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 /* Mini-boek mockup */
 .mini-book {
@@ -1317,7 +1319,7 @@ body {
   border: 1px solid var(--border);
   transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.msb-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.msb-thumb img { width: 100%; height: 100%; object-fit: cover; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
 /* Info blok — název + detail */
 .msb-info {
   flex: 1;
@@ -1634,7 +1636,7 @@ body {
   background: var(--section);
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
-.order-bump-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.order-bump-thumb img { width: 100%; height: 100%; object-fit: cover; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
 
 .order-bump-header-text { flex: 1; min-width: 0; }
 .order-bump-top-row {
@@ -1711,7 +1713,7 @@ body {
   background: var(--section);
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
 }
-.order-bump-img img { width: 100%; height: 100%; object-fit: cover; }
+.order-bump-img img { width: 100%; height: 100%; object-fit: cover; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
 .order-bump-detail-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 .order-bump-name { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 600; color: var(--heading); margin-bottom: 2px; }
 .order-bump-author { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
@@ -2940,23 +2942,27 @@ body {
     });
   })();
 
-  /* ─── ORDER BUMP — načtení obrázku z Medusa admin ─── */
+  /* ─── ORDER BUMP — načtení obrázku z Medusa admin (plná kvalita) ─── */
   function loadOrderBumpImage() {
     var thumbContainer = document.getElementById('order-bump-thumb');  // Malý v headeru
     var imgContainer = document.getElementById('order-bump-img');      // Velký v detailu
 
-    // Zkus načíst obrázek z Medusa API
+    // Načti plný obrázek z Medusa API (ne thumbnail — ten je nízké kvality)
     var upsellHandle = PROJECT_CONFIG.upsellProduct.handle;
     if (upsellHandle) {
-      medusaFetch('/store/products?handle=' + upsellHandle)
+      medusaFetch('/store/products?handle=' + upsellHandle + '&fields=thumbnail,images')
       .then(function(data) {
         var product = data.products && data.products[0];
-        if (product && product.thumbnail) {
-          var thumbUrl = product.thumbnail.indexOf('http') === 0 ? product.thumbnail : MEDUSA_URL + product.thumbnail;
-          var imgTag = '<img src="' + thumbUrl + '" alt="' + (product.title || 'Laat Los Wat Je Kapotmaakt') + '" style="width:100%;height:100%;object-fit:cover;">';
-          if (thumbContainer) thumbContainer.innerHTML = imgTag;
-          if (imgContainer) imgContainer.innerHTML = imgTag;
-        }
+        if (!product) return;
+        // Preferuj plný obrázek pro ostrost
+        var imgUrl = (product.images && product.images.length > 0 && product.images[0].url)
+          ? product.images[0].url
+          : product.thumbnail;
+        if (!imgUrl) return;
+        var fullUrl = imgUrl.indexOf('http') === 0 ? imgUrl : MEDUSA_URL + imgUrl;
+        var imgTag = '<img src="' + fullUrl + '" alt="' + (product.title || 'Laat Los Wat Je Kapotmaakt') + '" style="width:100%;height:100%;object-fit:cover;">';
+        if (thumbContainer) thumbContainer.innerHTML = imgTag;
+        if (imgContainer) imgContainer.innerHTML = imgTag;
       }).catch(function(err) {
         console.warn('Order bump image laden mislukt:', err);
       });
@@ -6106,16 +6112,19 @@ body {
     setProductThumbnail(PROJECT_CONFIG.mainProduct.thumbnail);
   }
 
-  // 2. Vždy fetchni aktuální thumbnail z Medusa admin (přepíše fallback)
+  // 2. Vždy fetchni aktuální obrázek z Medusa admin (plná kvalita, přepíše fallback)
   (function loadMainProductImage() {
     var handle = PROJECT_CONFIG.mainProduct.handle;
     if (!handle) return;
-    medusaFetch('/store/products?handle=' + handle)
+    medusaFetch('/store/products?handle=' + handle + '&fields=thumbnail,images')
     .then(function(data) {
       var product = data.products && data.products[0];
-      if (product && product.thumbnail) {
-        setProductThumbnail(product.thumbnail);
-      }
+      if (!product) return;
+      // Preferuj plný obrázek (images[0]) pro ostrost, fallback na thumbnail
+      var imgUrl = (product.images && product.images.length > 0 && product.images[0].url)
+        ? product.images[0].url
+        : product.thumbnail;
+      if (imgUrl) setProductThumbnail(imgUrl);
     }).catch(function(err) {
       console.warn('Product thumbnail laden mislukt:', err);
     });
