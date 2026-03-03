@@ -31,6 +31,13 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 79,    // €79.00 incl. tax (save €26)
     4: 99,    // €99.00 incl. tax (save €41)
   },
+  // Dehondenbijbel — "De Hondenbijbel"
+  "variant_01KJSESHRDZRD8SP0W1EV3YBZE": {
+    1: 35,    // €35.00 incl. tax
+    2: 59,    // €59.00 incl. tax (save €11)
+    3: 79,    // €79.00 incl. tax (save €26)
+    4: 99,    // €99.00 incl. tax (save €41)
+  },
 }
 
 type AddBundleToCartInput = {
