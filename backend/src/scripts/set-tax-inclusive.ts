@@ -12,7 +12,7 @@ import { Modules } from "@medusajs/framework/utils"
 export default async function setTaxInclusive({
   container,
 }: ExecArgs) {
-  const logger = container.resolve(Modules.LOGGER)
+  const logger = container.resolve("logger")
   const pricingModule = container.resolve(Modules.PRICING)
   const regionModule = container.resolve(Modules.REGION)
 

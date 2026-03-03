@@ -72,15 +72,11 @@ export async function POST(
     })
 
     // 2. Add upsell item with custom price
-    const item: Record<string, any> = {
+    const item = {
       variant_id,
       quantity: quantity || 1,
-    }
-    if (unit_price !== undefined) {
-      item.unit_price = unit_price
-    }
-    if (compare_at_unit_price !== undefined) {
-      item.compare_at_unit_price = compare_at_unit_price
+      ...(unit_price !== undefined && { unit_price }),
+      ...(compare_at_unit_price !== undefined && { compare_at_unit_price }),
     }
 
     console.log(`[Upsell] Adding item to order edit:`, item)
