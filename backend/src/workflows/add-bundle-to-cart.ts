@@ -38,6 +38,10 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 79,    // €79.00 incl. tax (save €26)
     4: 99,    // €99.00 incl. tax (save €41)
   },
+  // DH Upsell — "Laat Los Wat Je Kapotmaakt (DH Upsell)"
+  "variant_01KJSESHRDFQMXT0V0HDQZ9NXG": {
+    1: 25,    // €25.00 incl. tax (upsell price, original €35)
+  },
 }
 
 type AddBundleToCartInput = {

@@ -997,7 +997,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   }
 
   // ═══════════════════════════════════════════════
-  // ROUTE A: UPSELL PAYMENT RETURN (from Mollie)
+  // ROUTE A: UPSELL PAYMENT RETURN (from payment gateway)
   // URL: ?upsell_return=1&upsell_cart_id=xxx
   // ═══════════════════════════════════════════════
   var params = new URLSearchParams(window.location.search);
@@ -1019,7 +1019,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
         console.log('Upsell: Upsell cart completed, order:', (res.order || {}).id);
       }
 
-      // Now also add the upsell item to the ORIGINAL order
+      // Now add the upsell item to the ORIGINAL order via Order Edit
       var originalOrderId = localStorage.getItem('medusa_order_id');
       if (originalOrderId) {
         return fetch(MEDUSA_URL + '/store/custom/orders/' + originalOrderId + '/upsell-accept', {
@@ -1035,7 +1035,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
             compare_at_unit_price: PROJECT_CONFIG.upsellProduct.originalPrice,
           }),
         }).then(function(r) { return r.json(); })
-          .catch(function() { return {}; }); // Non-critical: continue even if merge fails
+          .then(function(result) {
+            console.log('Upsell: Order edit result:', result);
+            return result;
+          })
+          .catch(function(err) {
+            console.warn('Upsell: Order edit failed (non-critical):', err.message || err);
+            return {};
+          });
       }
     })
     .then(function() {
@@ -1143,7 +1150,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   var btnYesAll = document.querySelectorAll('.btn-upsell');
   var btnNoAll = document.querySelectorAll('.btn-skip');
 
-  // ─── UPSELL ACCEPT: Create cart → Mollie payment → redirect ───
+  // ─── UPSELL ACCEPT: Create cart → payment gateway → redirect ───
   function handleUpsellAccept(e) {
     if (e) e.preventDefault();
 
@@ -1157,11 +1164,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     // Get stored checkout data
     var customerRaw = localStorage.getItem('medusa_customer');
     var customer = customerRaw ? JSON.parse(customerRaw) : {};
-    var paymentProvider = localStorage.getItem('medusa_payment_provider') || 'pp_mollie_mollie';
+    var paymentProvider = localStorage.getItem('medusa_payment_provider') || '';
     var paymentMethod = localStorage.getItem('medusa_payment_method') || '';
     var regionId = PROJECT_CONFIG.regionId;
 
-    // Build return URL for Mollie
+    // Build return URL for payment gateway
     var baseUrl = window.location.href.split('?')[0];
     var upsellReturnUrl; // will be set after cart creation
 
@@ -1178,8 +1185,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
       localStorage.setItem('medusa_upsell_cart_id', upsellCartId);
       console.log('Upsell: Cart created:', upsellCartId);
 
-      // Step 2: Add upsell product
-      return medusaFetch('/store/carts/' + upsellCartId + '/line-items', {
+      // Step 2: Add upsell product via bundle route (tax-inclusive pricing)
+      return medusaFetch('/store/carts/' + upsellCartId + '/line-items-bundle', {
         method: 'POST',
         body: JSON.stringify({
           variant_id: PROJECT_CONFIG.upsellProduct.variantId,
@@ -1235,7 +1242,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
       }).then(function(pcRes) {
         var paymentCollectionId = pcRes.payment_collection.id;
 
-        // Step 6: Create payment session with same provider + method
+        // Step 6: Create payment session with SAME provider + method from checkout
         var sessionBody = {
           provider_id: paymentProvider,
           data: {
@@ -1244,7 +1251,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
           }
         };
 
-        // Pass customer data for Klarna/Mollie Orders API
+        // Pass customer data for payment gateways that need it (Klarna, etc.)
         if (customer.email) {
           sessionBody.data.email = customer.email;
           if (customer.first_name) {
@@ -1270,19 +1277,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
       });
     })
     .then(function(paymentCollection) {
-      // Step 7: Get Mollie redirect URL and redirect
+      // Step 7: Get redirect URL from payment gateway and redirect
       var sessions = paymentCollection.payment_sessions || [];
       var lastSession = sessions[sessions.length - 1] || {};
       var providerData = lastSession.data || {};
-      var redirectUrl = providerData.checkoutUrl || providerData.approvalUrl;
+      // Different gateways use different redirect URL keys
+      var redirectUrl = providerData.checkoutUrl || providerData.approvalUrl || providerData.url;
 
       if (redirectUrl) {
-        console.log('Upsell: Redirecting to payment page:', redirectUrl);
+        console.log('Upsell: Redirecting to payment gateway:', redirectUrl);
         window.location.href = redirectUrl;
       } else {
         // No redirect needed (e.g., already paid) — complete directly
         console.log('Upsell: No redirect URL, completing directly');
-        var upsellCartId = localStorage.getItem('medusa_upsell_cart_id');
         window.location.href = upsellReturnUrl;
       }
     })
