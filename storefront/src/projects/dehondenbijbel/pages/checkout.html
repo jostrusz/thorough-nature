@@ -2126,11 +2126,11 @@ body {
       </div>
       <!-- Order bump (skrytý pokud není vybrán) -->
       <div class="msb-line bump" id="msb-bump-line" style="display:none;">
-        <span class="msb-line-label">
+        <span class="msb-line-label" id="msb-bump-name">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Het Leven Dat Je Verdient
+          Laat Los Wat Je Kapotmaakt
         </span>
-        <span class="msb-line-val">&euro;23,00</span>
+        <span class="msb-line-val" id="msb-bump-price">&euro;25,00</span>
       </div>
       <!-- Mezisoučet -->
       <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(107,33,168,0.18);">
@@ -2621,11 +2621,11 @@ body {
 
       <!-- Order bump řádek v summary (skrytý dokud nezaškrtne) -->
       <div class="summary-line" id="summary-order-bump" style="display:none;padding:8px 0;border-top:1px dashed rgba(107,33,168,0.2);">
-        <span style="font-size:13px;display:flex;align-items:center;gap:4px;">
+        <span id="summary-bump-name" style="font-size:13px;display:flex;align-items:center;gap:4px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Het Leven Dat Je Verdient
+          Laat Los Wat Je Kapotmaakt
         </span>
-        <span style="font-weight:600;color:var(--cta);">&euro;23,00</span>
+        <span id="summary-bump-price" style="font-weight:600;color:var(--cta);">&euro;25,00</span>
       </div>
 
       <div class="summary-line" id="summary-subtotal">
@@ -2823,7 +2823,7 @@ body {
     var msbSubtitle = document.getElementById('msb-subtitle');
     if (msbSubtitle) {
       var parts = ['Paperback · ' + selectedBundleQty + '× boek'];
-      if (orderBumpActive) parts.push('+ Het Leven');
+      if (orderBumpActive) parts.push('+ Laat Los');
       msbSubtitle.textContent = parts.join(' ');
     }
 
@@ -2991,6 +2991,23 @@ body {
     if (detailNew) detailNew.innerHTML = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
     var detailSave = document.getElementById('order-bump-detail-save');
     if (detailSave) detailSave.innerHTML = 'Bespaar &euro;' + saveAmt.toFixed(0);
+
+    // Summary + Mobile sticky bar — aktualizuj název a cenu
+    var priceStr = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
+    var summaryBumpName = document.getElementById('summary-bump-name');
+    if (summaryBumpName) {
+      var svgHtml = summaryBumpName.querySelector('svg') ? summaryBumpName.querySelector('svg').outerHTML + ' ' : '';
+      summaryBumpName.innerHTML = svgHtml + up.name;
+    }
+    var summaryBumpPrice = document.getElementById('summary-bump-price');
+    if (summaryBumpPrice) summaryBumpPrice.innerHTML = priceStr;
+    var msbBumpName = document.getElementById('msb-bump-name');
+    if (msbBumpName) {
+      var msbSvg = msbBumpName.querySelector('svg') ? msbBumpName.querySelector('svg').outerHTML + ' ' : '';
+      msbBumpName.innerHTML = msbSvg + up.name;
+    }
+    var msbBumpPrice = document.getElementById('msb-bump-price');
+    if (msbBumpPrice) msbBumpPrice.innerHTML = priceStr;
   })();
 
   // Inicializace — vygeneruj bundle, zobraz daně, načti obrázek
