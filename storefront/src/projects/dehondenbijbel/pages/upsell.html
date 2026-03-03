@@ -10,47 +10,47 @@
 <script src="js/project-config.js"></script>
 <script src="js/pixel.js"></script>
 <style>
-/* Inter + Cabin — matching DH checkout */
-@font-face { font-family: 'Inter'; src: url(/fonts/inter-variable.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Cabin'; src: url(/fonts/cabin-variable.woff2) format('woff2'); font-weight: 400 700; font-style: normal; font-display: swap; }
+/* DM Sans — self-hosted */
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
 
-/* ─── DESIGN TOKENS — De Hondenbijbel Warm ─── */
+/* ─── DESIGN TOKENS — Velvet Dusk ─── */
 :root {
-  --bg: #FDFBF7;
-  --heading: #1A1A2E;
-  --cta: #D4763C;
-  --cta-hover: #BE6530;
-  --section: #F3EDE4;
-  --body: #3D3D4E;
-  --highlight: #E8A040;
-  --dark: #1A1A2E;
+  --bg: #FAF5F8;
+  --heading: #2D1B3D;
+  --cta: #C27BA0;
+  --section: #EDD9E5;
+  --body: #5A3D6B;
+  --highlight: #D9A4C0;
+  --dark: #1A1028;
   --white: #FFFFFF;
-  --light: #FAF6F0;
-  --muted: #7A7A8C;
-  --accent: #C27BA0;
+  --light: #F5EDF2;
+  --muted: #9B7AAD;
+  --cta-hover: #A8628A;
+  --accent: #D498B5;
   --success: #27AE60;
   --urgency: #C0392B;
-  --purple: #6B4C8F;
-  --purple-light: #F3E8FF;
-  --border: #E8E0D4;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
 
 /* ─── ANIMATIONS ─── */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(24px); }
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.04); }
+  50% { transform: scale(1.05); }
 }
 @keyframes glow {
-  0%, 100% { box-shadow: 0 6px 24px rgba(212,118,60,0.25); }
-  50% { box-shadow: 0 8px 40px rgba(212,118,60,0.45); }
+  0%, 100% { box-shadow: 0 6px 24px rgba(194,123,160,0.27); }
+  50% { box-shadow: 0 8px 40px rgba(194,123,160,0.5); }
 }
 @keyframes shimmer {
   0% { background-position: -200% center; }
@@ -64,7 +64,11 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes scissorCut {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
 
 .anim { opacity: 0; animation: fadeInUp 0.7s ease forwards; }
 .d1 { animation-delay: 0.1s; }
@@ -80,7 +84,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 /* ─── STEP INDICATOR BAR ─── */
 .step-bar {
   background: var(--white);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--section);
   padding: 14px 20px;
   animation: slideDown 0.5s ease;
 }
@@ -118,21 +122,21 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
   flex-shrink: 0; transition: all 0.3s;
 }
 .step-sep {
-  width: 28px; height: 2px; background: var(--border);
+  width: 28px; height: 2px; background: var(--section);
   margin: 0 8px; flex-shrink: 0;
 }
 .step.done ~ .step-sep { background: var(--success); }
 
 /* ─── URGENCY TIMER ─── */
 .timer-bar {
-  background: linear-gradient(135deg, var(--dark), #2D1B3D);
+  background: linear-gradient(135deg, var(--dark), var(--heading));
   color: var(--white); text-align: center; padding: 12px 20px;
   font-size: 14px; font-weight: 500; letter-spacing: 0.02em;
   position: sticky; top: 0; z-index: 100;
 }
 .timer-bar strong { color: var(--highlight); }
 .timer-digits {
-  display: inline-flex; gap: 2px; font-family: 'Inter', sans-serif;
+  display: inline-flex; gap: 2px; font-family: 'DM Sans', sans-serif;
   font-weight: 700; font-size: 18px; color: var(--white);
   background: rgba(255,255,255,0.12); padding: 4px 12px; border-radius: 6px;
   margin-left: 8px; animation: countdownPulse 2s ease-in-out infinite;
@@ -156,32 +160,31 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
   margin-bottom: 20px;
 }
 .decision-hero h1 {
-  font-family: 'Inter', sans-serif;
-  font-weight: 800;
-  font-size: 28px;
+  font-family: 'Recoleta', serif;
+  font-weight: 600;
+  font-size: 30px;
   color: var(--heading);
-  line-height: 1.25;
+  line-height: 1.2;
   margin-bottom: 16px;
   letter-spacing: -0.02em;
 }
-.decision-hero h1 .hl {
-  background: linear-gradient(180deg, transparent 60%, rgba(232,160,64,0.25) 60%);
-  padding: 0 2px;
+.decision-hero h1 .dots {
+  color: var(--cta);
+  animation: countdownPulse 1.5s ease-in-out infinite;
 }
 .decision-hero .subtitle {
-  font-size: 16px; color: var(--body); line-height: 1.7;
+  font-size: 16px; color: var(--body); line-height: 1.65;
   max-width: 540px; margin: 0 auto;
 }
 .decision-hero .choose-instruction {
-  margin-top: 16px;
+  margin-top: 14px;
   font-size: 15px;
   font-weight: 600;
   color: var(--heading);
   background: var(--light);
   display: inline-block;
-  padding: 10px 22px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
+  padding: 8px 20px;
+  border-radius: 8px;
 }
 
 /* ─── PRODUCT IMAGE ─── */
@@ -194,101 +197,113 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 }
 .product-image-wrap {
   position: relative;
-  width: 180px;
+  width: 200px;
 }
 .product-image-wrap img {
   width: 100%;
   height: auto;
-  border-radius: 8px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+  border-radius: 4px;
+  filter: drop-shadow(0 8px 30px rgba(0,0,0,0.15));
 }
 .product-badge {
-  position: absolute; top: -10px; right: -14px;
+  position: absolute; top: -12px; right: -16px;
   background: var(--cta); color: var(--white);
-  font-family: 'Inter', sans-serif;
   font-size: 12px; font-weight: 700; padding: 6px 14px;
   border-radius: 20px; letter-spacing: 0.03em;
-  box-shadow: 0 4px 12px rgba(212,118,60,0.3);
+  box-shadow: 0 4px 12px rgba(194,123,160,0.3);
 }
 
-/* ─── PRICE CARD (coupon style) ─── */
-.price-card {
+/* ─── COUPON CARD ─── */
+.coupon-card {
   background: var(--white);
-  border: 2px solid var(--cta);
+  border: 2px dashed var(--cta);
   border-radius: 14px;
-  padding: 24px;
+  display: flex;
   margin: 24px 0;
-  text-align: center;
+  overflow: hidden;
   position: relative;
 }
-.price-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-  background: linear-gradient(90deg, var(--cta), var(--highlight), var(--cta));
-  background-size: 200% auto; animation: shimmer 3s linear infinite;
-  border-radius: 12px 12px 0 0;
+.coupon-card::before,
+.coupon-card::after {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  background: var(--bg);
+  border-radius: 50%;
+  top: 50%; transform: translateY(-50%);
+  z-index: 2;
 }
-.price-label {
-  font-size: 12px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.12em; color: var(--cta); margin-bottom: 12px;
+.coupon-card::before { left: -11px; }
+.coupon-card::after { right: -11px; }
+.coupon-left {
+  background: linear-gradient(135deg, var(--cta), var(--cta-hover));
+  color: var(--white);
+  padding: 20px 24px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-width: 160px; text-align: center;
 }
-.price-row {
-  display: flex; align-items: center; justify-content: center; gap: 16px;
-  margin: 8px 0 12px;
+.coupon-badge {
+  font-size: 9px; font-weight: 800;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  opacity: 0.8; margin-bottom: 6px;
 }
-.price-old {
-  font-size: 24px; color: var(--muted);
-  text-decoration: line-through; font-weight: 500;
+.coupon-code {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 700;
+  background: rgba(255,255,255,0.2);
+  padding: 5px 12px; border-radius: 6px;
+  letter-spacing: 0.08em; margin-bottom: 8px;
 }
-.price-new {
-  font-family: 'Inter', sans-serif;
-  font-size: 42px; font-weight: 800; color: var(--cta);
-  letter-spacing: -0.02em;
+.coupon-value {
+  font-family: 'Recoleta', serif;
+  font-size: 22px; font-weight: 700;
 }
-.price-save {
-  background: rgba(39,174,96,0.1); color: var(--success);
-  font-size: 13px; font-weight: 700; padding: 5px 14px;
-  border-radius: 20px;
+.coupon-scissors {
+  font-size: 16px; margin-top: 6px;
+  animation: scissorCut 1.5s ease-in-out infinite;
 }
-.price-note {
-  font-size: 13px; color: var(--muted); margin-top: 4px;
+.coupon-right {
+  padding: 20px 24px;
+  flex: 1;
+}
+.coupon-applied {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600;
+  color: var(--success); margin-bottom: 14px;
+}
+.cpb-row {
+  display: flex; justify-content: space-between;
+  font-size: 14px; padding: 4px 0; color: var(--body);
+}
+.cpb-discount { color: var(--cta); font-weight: 600; }
+.cpb-total {
+  border-top: 2px solid var(--section);
+  padding-top: 8px; margin-top: 4px;
+  font-weight: 800; font-size: 18px; color: var(--heading);
 }
 
 /* ─── 5 PIJLERS GRID ─── */
-.pillar-section-title {
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 22px;
-  color: var(--heading);
-  text-align: center;
-  margin-bottom: 4px;
-}
-.pillar-section-sub {
-  text-align: center;
-  font-size: 14px;
-  color: var(--muted);
-  margin-bottom: 16px;
-}
 .pillar-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 10px; margin: 16px 0;
 }
 .pillar {
-  background: var(--light); border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px 8px; text-align: center;
+  background: var(--light); border-radius: 10px;
+  padding: 14px 8px; text-align: center;
   font-size: 12px; line-height: 1.4; color: var(--body);
 }
 .pillar strong {
   display: block; font-size: 10px; letter-spacing: 0.08em;
   color: var(--heading); margin: 6px 0 2px;
 }
-.pillar-icon { font-size: 24px; }
+.pillar-icon { font-size: 22px; }
 
 /* ─── CTA BUTTON ─── */
 .cta-block { text-align: center; padding: 24px 0; }
 .btn-upsell {
-  font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 700;
+  font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700;
   color: var(--white); background: var(--cta); border: none;
   padding: 20px 48px; border-radius: 12px; cursor: pointer;
   letter-spacing: 0.02em; display: inline-block; text-decoration: none;
@@ -304,7 +319,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 .btn-upsell:hover::after { width: 400px; height: 400px; }
 .btn-upsell:hover {
   background: var(--cta-hover); transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(212,118,60,0.4);
+  box-shadow: 0 12px 40px rgba(194,123,160,0.45);
 }
 .btn-upsell .btn-sub {
   display: block; font-size: 12px; font-weight: 500; opacity: 0.85; margin-top: 4px;
@@ -314,6 +329,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
   border-top-color: var(--white); border-radius: 50%; animation: spin 0.6s linear infinite;
   vertical-align: middle; margin-right: 8px;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .btn-skip {
   display: block; text-align: center; margin-top: 16px;
@@ -335,26 +351,25 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 .benefit-list { list-style: none; padding: 0; margin: 20px 0; text-align: left; }
 .benefit-list li {
   display: flex; align-items: flex-start; gap: 12px;
-  padding: 10px 0; border-bottom: 1px solid var(--border);
-  font-size: 15px; line-height: 1.65;
+  padding: 10px 0; border-bottom: 1px solid rgba(194,123,160,0.12);
+  font-size: 15px; line-height: 1.6;
 }
 .benefit-list li:last-child { border-bottom: none; }
 .benefit-list .check {
   flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
-  background: rgba(212,118,60,0.1); display: flex; align-items: center;
+  background: rgba(194,123,160,0.1); display: flex; align-items: center;
   justify-content: center; margin-top: 2px;
 }
 .benefit-list .check svg { width: 12px; height: 12px; }
 
 /* ─── TESTIMONIAL ─── */
 .testi-card {
-  background: var(--light); border: 1px solid var(--border);
-  border-radius: 16px; padding: 28px;
+  background: var(--light); border-radius: 16px; padding: 28px;
   margin: 24px 0; position: relative;
 }
 .testi-card::before {
   content: '\201C'; position: absolute; top: 12px; left: 20px;
-  font-size: 48px; color: var(--highlight); opacity: 0.3;
+  font-size: 48px; color: var(--highlight); opacity: 0.4;
   font-family: Georgia, serif; line-height: 1;
 }
 .testi-text { font-size: 15px; line-height: 1.7; font-style: italic; color: var(--body); padding-left: 8px; }
@@ -364,7 +379,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 /* ─── BEFORE/AFTER GRID ─── */
 .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
 .ba-card { background: var(--white); border-radius: 12px; padding: 20px; }
-.ba-card.before { border: 1px solid var(--border); }
+.ba-card.before { border: 1px solid rgba(194,123,160,0.15); }
 .ba-card.after { border: 2px solid var(--cta); }
 .ba-label {
   font-size: 10px; font-weight: 700; text-transform: uppercase;
@@ -374,13 +389,13 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 .ba-card.after .ba-label { color: var(--cta); }
 .ba-card ul { list-style: none; padding: 0; }
 .ba-card li { font-size: 13px; line-height: 1.55; padding: 3px 0; color: var(--body); }
-.ba-card.before li::before { content: '\2715 '; color: var(--muted); font-size: 11px; }
-.ba-card.after li::before { content: '\2713 '; color: var(--success); font-weight: 700; }
+.ba-card.before li::before { content: '✕ '; color: var(--muted); font-size: 11px; }
+.ba-card.after li::before { content: '✓ '; color: var(--success); font-weight: 700; }
 
 /* ─── BONUS E-BOOKS ─── */
 .bonus-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0; }
 .bonus-card {
-  background: var(--white); border: 1px solid var(--border);
+  background: var(--white); border: 1px solid var(--section);
   border-radius: 12px; padding: 16px; position: relative; text-align: center;
 }
 .bonus-card .bonus-badge {
@@ -390,80 +405,65 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
   border-radius: 12px; white-space: nowrap;
 }
 .bonus-card .bonus-img {
-  width: 64px; height: auto; margin: 8px auto 8px;
+  width: 60px; height: auto; margin: 8px auto;
   display: block; border-radius: 4px;
 }
-.bonus-card h4 { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; color: var(--heading); margin-bottom: 4px; line-height: 1.3; }
+.bonus-card h4 { font-family: 'Recoleta', serif; font-size: 13px; color: var(--heading); margin-bottom: 4px; line-height: 1.3; }
 .bonus-card p { font-size: 11px; line-height: 1.5; color: var(--body); }
 
-/* ─── VALUE STACK ─── */
+/* ─── PRICING CARD ─── */
+.pricing-card {
+  background: var(--white); border: 2px solid var(--section);
+  border-radius: 16px; padding: 32px; text-align: center;
+  margin: 24px 0; position: relative; overflow: hidden;
+}
+.pricing-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--cta), var(--highlight), var(--cta));
+  background-size: 200% auto; animation: shimmer 3s linear infinite;
+}
 .stack-item {
   display: flex; align-items: center; gap: 16px;
-  padding: 14px 0; border-bottom: 1px solid var(--border);
+  padding: 14px 0; border-bottom: 1px solid rgba(194,123,160,0.12);
 }
 .stack-item:last-child { border-bottom: none; }
 .stack-icon {
   flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px;
-  background: rgba(212,118,60,0.08); display: flex; align-items: center;
+  background: rgba(194,123,160,0.1); display: flex; align-items: center;
   justify-content: center;
 }
 .stack-label { font-size: 14px; line-height: 1.5; }
 .stack-label strong { color: var(--heading); }
 .stack-value { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--muted); text-decoration: line-through; white-space: nowrap; }
+.price-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 16px 0; }
+.price-old { font-size: 24px; color: var(--muted); text-decoration: line-through; font-weight: 500; }
+.price-new { font-size: 42px; font-weight: 800; color: var(--cta); letter-spacing: -0.02em; }
+.price-save { background: rgba(194,123,160,0.1); color: var(--cta); font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+.price-coupon-ref {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--cta); font-weight: 600;
+  background: rgba(194,123,160,0.06); padding: 4px 12px;
+  border-radius: 6px; border: 1px dashed var(--highlight);
+  margin-top: 6px;
+}
 
 /* ─── GUARANTEE ─── */
 .guarantee-box {
   display: flex; align-items: center; gap: 20px; background: var(--white);
-  border: 2px solid rgba(39,174,96,0.2); border-radius: 14px;
+  border: 2px solid rgba(194,123,160,0.2); border-radius: 14px;
   padding: 24px; margin: 28px 0;
 }
 .guarantee-icon {
   flex-shrink: 0; width: 56px; height: 56px; border-radius: 50%;
-  background: rgba(39,174,96,0.08); display: flex; align-items: center;
+  background: rgba(39,174,96,0.1); display: flex; align-items: center;
   justify-content: center;
 }
 .guarantee-text { font-size: 14px; line-height: 1.65; }
 .guarantee-text strong { color: var(--heading); }
 
-/* ─── WHY TOGETHER ─── */
-.combo-grid {
-  display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px;
-  align-items: center; margin: 16px 0;
-}
-.combo-card {
-  background: var(--light); border: 1px solid var(--border);
-  border-radius: 12px; padding: 20px; text-align: center;
-}
-.combo-plus {
-  font-size: 28px; font-weight: 800; color: var(--cta);
-}
-.combo-card .combo-icon { font-size: 28px; margin-bottom: 8px; }
-.combo-card .combo-title {
-  font-family: 'Inter', sans-serif;
-  font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 6px;
-}
-.combo-card .combo-desc { font-size: 13px; color: var(--body); line-height: 1.5; }
-
-/* ─── AUTHOR CARD ─── */
-.author-card {
-  display: flex; gap: 20px; align-items: flex-start;
-  background: var(--light); border: 1px solid var(--border);
-  border-radius: 14px; padding: 24px;
-  margin: 24px 0;
-}
-.author-avatar {
-  width: 60px; height: 60px; border-radius: 50%;
-  overflow: hidden; flex-shrink: 0;
-}
-.author-avatar img {
-  width: 100%; height: 100%; object-fit: cover;
-}
-.author-info h4 { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: var(--heading); margin-bottom: 6px; }
-.author-info p { font-size: 14px; line-height: 1.6; color: var(--body); }
-
 /* ─── FAQ ─── */
 .faq-section { padding: 24px 0; }
-.faq-item { border-bottom: 1px solid var(--border); }
+.faq-item { border-bottom: 1px solid rgba(194,123,160,0.15); }
 .faq-q {
   display: flex; justify-content: space-between; align-items: center;
   padding: 16px 0; cursor: pointer; font-size: 15px; font-weight: 600;
@@ -481,21 +481,32 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 /* ─── DIVIDER ─── */
 .divider { width: 60px; height: 3px; background: var(--highlight); border-radius: 2px; margin: 24px auto; }
 
-/* ─── TRUST ICONS ─── */
-.trust-row {
-  display: flex; align-items: center; justify-content: center;
-  gap: 18px; flex-wrap: wrap; margin-top: 14px;
+/* ─── AUTHOR CARD ─── */
+.author-card {
+  display: flex; gap: 20px; align-items: flex-start;
+  background: var(--light); border-radius: 14px; padding: 24px;
+  margin: 24px 0;
 }
-.trust-item {
-  font-size: 11px; color: var(--muted);
-  display: flex; align-items: center; gap: 4px;
+.author-avatar {
+  width: 60px; height: 60px; border-radius: 50%;
+  overflow: hidden; flex-shrink: 0;
 }
+.author-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.author-info h4 { font-family: 'Recoleta', serif; font-size: 16px; color: var(--heading); margin-bottom: 6px; }
+.author-info p { font-size: 14px; line-height: 1.6; color: var(--body); }
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 600px) {
-  .decision-hero h1 { font-size: 22px; }
+  .decision-hero h1 { font-size: 24px; }
+  .coupon-card { flex-direction: column; }
+  .coupon-left { min-width: auto; padding: 16px; flex-direction: row; gap: 12px; align-items: center; }
+  .coupon-value { font-size: 18px; }
+  .coupon-scissors { display: none; }
+  .coupon-badge { margin-bottom: 0; }
+  .coupon-code { margin-bottom: 0; }
   .pillar-grid { grid-template-columns: repeat(3, 1fr); }
   .price-new { font-size: 36px; }
+  .pricing-card { padding: 24px 18px; }
   .guarantee-box { flex-direction: column; text-align: center; }
   .btn-upsell { font-size: 16px; padding: 18px 32px; }
   .ba-grid { grid-template-columns: 1fr; }
@@ -504,9 +515,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
   .step { font-size: 11px; }
   .step-label { display: none; }
   .step-label-short { display: inline; }
-  .combo-grid { grid-template-columns: 1fr; }
-  .combo-plus { transform: rotate(90deg); }
-  .product-image-wrap { width: 150px; }
+  .product-image-wrap { width: 160px; }
 }
 @media (min-width: 601px) {
   .step-label-short { display: none; }
@@ -552,47 +561,56 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
     Je bestelling is bevestigd!
   </div>
 
-  <h1>Wacht &mdash; voordat we je pakket versturen...</h1>
+  <h1>Wacht &mdash; voordat we je pakket versturen<span class="dots">...</span></h1>
 
   <p class="subtitle">
-    Je hebt zojuist <strong>De Hondenbijbel</strong> besteld &mdash; top keuze! &#128054;<br>
+    Je hebt zojuist <strong>De Hondenbijbel</strong> besteld &mdash; top keuze! &#128054;
     Omdat je nu klant bent, heb je <strong>eenmalig</strong> toegang tot een
-    aanbieding die <em>niet</em> op onze website staat.
+    speciale aanbieding die niet op onze website staat.
   </p>
 
   <div class="choose-instruction">
-    &#9660; Lees het aanbod en kies: <strong>toevoegen</strong> of <strong>overslaan</strong>
+    &#9660; Lees onderstaand aanbod en kies: <strong>toevoegen</strong> of <strong>overslaan</strong>
   </div>
 </section>
 
-<!-- ═══════ PRODUCT SHOWCASE ═══════ -->
-<div class="product-showcase anim d2">
+<!-- ═══════ PRODUCT IMAGE ═══════ -->
+<div class="product-showcase anim d2" style="display: flex; align-items: center; justify-content: center; padding: 24px 0;">
   <div class="product-image-wrap">
-    <img id="upsell-product-img" src="/dehondenbijbel/images/De-Hondenbijbel-cover.webp" alt="Laat Los Wat Je Kapotmaakt" loading="eager">
+    <img id="upsell-product-img" src="/Laat-los-wat-je-kapotmaakt-book-pichi.webp" alt="Laat Los Wat Je Kapotmaakt &mdash; boek door Joris de Vries" loading="eager" style="width: 100%; height: auto; border-radius: 4px; filter: drop-shadow(0 8px 30px rgba(0,0,0,0.15));">
     <div class="product-badge">&minus;&euro;10</div>
   </div>
 </div>
 
-<!-- ═══════ PRICE CARD ═══════ -->
-<div class="price-card anim d2">
-  <div class="price-label">Eenmalige aanbieding &mdash; exclusief voor klanten</div>
-  <div style="font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 700; color: var(--heading); margin-bottom: 8px;">
-    Laat Los Wat Je Kapotmaakt
+<!-- ═══════ COUPON CARD ═══════ -->
+<div class="coupon-card anim d2">
+  <div class="coupon-left">
+    <div>
+      <div class="coupon-badge">KORTINGSBON</div>
+      <div class="coupon-code">HONDEN-VIP</div>
+    </div>
+    <div>
+      <div class="coupon-value">&minus;&euro;10</div>
+      <div class="coupon-scissors">&#9986;</div>
+    </div>
   </div>
-  <div class="price-row">
-    <span class="price-old">&euro;35</span>
-    <span class="price-new">&euro;25</span>
-    <span class="price-save">Bespaar &euro;10</span>
+  <div class="coupon-right">
+    <div class="coupon-applied">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Automatisch toegepast op je bestelling
+    </div>
+    <div class="cpb-row"><span>Originele prijs boek</span><span>&euro;35</span></div>
+    <div class="cpb-row cpb-discount"><span>Kortingsbon HONDEN-VIP</span><span>&minus;&euro;10</span></div>
+    <div class="cpb-row cpb-total"><span>Jouw exclusieve prijs</span><span>&euro;25</span></div>
   </div>
-  <div class="price-note">Korting wordt automatisch toegepast &mdash; alleen op deze pagina</div>
 </div>
 
 <!-- ═══════ 5 PIJLERS ═══════ -->
 <div class="anim d3" style="padding: 8px 0 16px;">
-  <h2 class="pillar-section-title">
-    5 Pijlers Die Je Leven Veranderen
+  <h2 style="font-family: 'Recoleta', serif; font-weight: 600; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 4px;">
+    De 5 Pijlers van Loslaten
   </h2>
-  <p class="pillar-section-sub">Stap voor stap &mdash; van chaos naar rust</p>
+  <p style="text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 16px;">5 pijlers &mdash; stap voor stap &mdash; van chaos naar rust</p>
 
   <div class="pillar-grid">
     <div class="pillar"><span class="pillar-icon">&#129504;</span><strong>PIEKEREN</strong>Stop de 03:00 spiraal</div>
@@ -614,7 +632,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 <div class="cta-block anim d3" id="first-cta">
   <a href="#" class="btn-upsell" id="btn-yes" onclick="return false;">
     JA! Voeg toe voor slechts &euro;25 &rarr;
-    <span class="btn-sub">Je betaalt &euro;25 i.p.v. &euro;35 &mdash; wordt bij je bestelling gevoegd</span>
+    <span class="btn-sub">Je betaalt alleen &euro;25 i.p.v. &euro;35 &mdash; korting is al toegepast</span>
   </a>
   <a class="btn-skip" id="btn-no" href="#">Nee bedankt, stuur alleen mijn Hondenbijbel</a>
 </div>
@@ -623,68 +641,68 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
 <!-- ═══════ THE PITCH ═══════ -->
 <div class="anim d4" style="padding: 16px 0;">
-  <h2 style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 16px; line-height: 1.35;">
+  <h2 style="font-family: 'Recoleta', serif; font-weight: 600; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 16px;">
     Je geeft alles voor je hond.<br>
-    <span style="color: var(--cta);">Maar wie zorgt er voor <em>jou</em>?</span>
+    <span style="font-style: italic; color: var(--cta);">Maar wie zorgt er voor jou?</span>
   </h2>
 
-  <p style="font-size: 16px; line-height: 1.75; color: var(--body); max-width: 560px; margin: 0 auto;">
+  <p style="font-size: 16px; line-height: 1.75; color: var(--body);">
     Als hondenliefhebber geef je altijd. Aan je hond, je gezin, je werk. Maar vanbinnen
     loop je op je laatste benen. De <strong>piekerende gedachten om 03:00</strong>. Het schuldgevoel
     als je iets voor jezelf doet. De woede die je probeert weg te drukken.
   </p>
-  <p style="font-size: 16px; line-height: 1.75; color: var(--body); max-width: 560px; margin: 16px auto 0;">
-    Dit boek pakt de <strong>5 dingen</strong> aan die je leven vastzetten &mdash; piekeren, loslaten,
-    vergeven, woede en rust. Geen vage theorie. <strong>Concrete stappen.</strong> Zodat jij weer de
-    baas bent over je eigen hoofd.
+  <p style="font-size: 16px; line-height: 1.75; color: var(--body); margin-top: 12px;">
+    Dit boek pakt de <strong>5 concrete dingen</strong> aan die je leven vastzetten &mdash;
+    piekeren, loslaten, vergeven, woede en rust. Geen vage theorie. <strong>Concrete stappen.</strong>
+    Zodat jij weer de baas bent over je eigen hoofd.
   </p>
 
-  <ul class="benefit-list" style="margin-top: 20px; max-width: 560px; margin-left: auto; margin-right: auto;">
+  <ul class="benefit-list" style="margin-top: 16px;">
     <li>
-      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#D4763C" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div>Weer slapen zonder de 03:00-spiraal in je hoofd</div>
     </li>
     <li>
-      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#D4763C" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div>&lsquo;Nee&rsquo; zeggen zonder schuldgevoel &mdash; voor het eerst in jaren</div>
     </li>
     <li>
-      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#D4763C" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div>Onderdrukte woede omzetten in kracht &mdash; rustig en beheerst</div>
     </li>
     <li>
-      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#D4763C" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div>Vergeven wat je al jaren met je meedraagt &mdash; en jezelf bevrijden</div>
     </li>
     <li>
-      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#D4763C" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div>Innerlijke rust vinden &mdash; zelfs als het leven chaotisch is</div>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div>Energie overhouden voor jezelf &mdash; niet alleen voor iedereen om je heen</div>
     </li>
   </ul>
 </div>
 
 <!-- ═══════ BEFORE / AFTER ═══════ -->
 <div class="anim d4">
-  <h3 style="font-family: 'Inter', sans-serif; font-size: 19px; font-weight: 700; color: var(--heading); text-align: center; margin-bottom: 14px;">
-    Dezelfde persoon. <span style="color: var(--cta);">Een compleet ander gevoel.</span>
+  <h3 style="font-family: 'Recoleta', serif; font-size: 19px; color: var(--heading); text-align: center; margin-bottom: 14px;">
+    Dezelfde persoon. <span style="font-style: italic; color: var(--cta);">Een compleet ander leven.</span>
   </h3>
   <div class="ba-grid">
     <div class="ba-card before">
-      <div class="ba-label">&#128532; Hoe het nu voelt</div>
+      <div class="ba-label">&#128532; Hoe ze zich voelden</div>
       <ul>
         <li>Ik lig &rsquo;s nachts wakker van mijn gedachten</li>
-        <li>Ik zeg altijd ja &mdash; ook als ik nee bedoel</li>
-        <li>Ik draag boosheid mee die ik niet kwijt kan</li>
-        <li>Ik voel me schuldig als ik iets voor mezelf doe</li>
+        <li>Ik doe alles &mdash; het is nooit genoeg</li>
+        <li>Ik kan geen NEE zeggen</li>
+        <li>Ik voel me schuldig als ik iets voor mezelf wil</li>
       </ul>
     </div>
     <div class="ba-card after">
-      <div class="ba-label">&#10024; Na het lezen</div>
+      <div class="ba-label">&#10024; Hoe ze zich nu voelen</div>
       <ul>
-        <li>Ik slaap rustig &mdash; mijn hoofd is stil</li>
-        <li>Ik zeg NEE zonder schuldgevoel</li>
-        <li>Ik heb losgelaten wat me kapotmaakte</li>
-        <li>Ik neem tijd voor mezelf &mdash; zonder excuus</li>
+        <li>&rsquo;s Ochtends kijk ik uit naar mijn dag</li>
+        <li>Ik zeg NEE &mdash; de wereld is niet ingestort</li>
+        <li>Ik neem tijd voor mezelf. Zonder schuldgevoel</li>
+        <li>Het is rustig thuis. En in mijn hoofd ook.</li>
       </ul>
     </div>
   </div>
@@ -703,43 +721,42 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
 <!-- ═══════ WAAROM SAMEN ═══════ -->
 <div class="anim d5" style="padding: 20px 0;">
-  <h2 style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 16px; line-height: 1.35;">
-    Waarom werken deze twee boeken <span style="color: var(--cta);">samen</span> zo goed?
+  <h2 style="font-family: 'Recoleta', serif; font-weight: 600; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 16px;">
+    Waarom werken deze twee boeken <span style="font-style: italic; color: var(--cta);">samen</span> zo goed?
   </h2>
-  <div class="combo-grid">
-    <div class="combo-card">
-      <div class="combo-icon">&#128054;</div>
-      <div class="combo-title">De Hondenbijbel</div>
-      <div class="combo-desc">Zorgt voor je <strong>hond</strong> &mdash; opvoeding, gezondheid, band versterken</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+    <div style="background: var(--light); border-radius: 12px; padding: 20px; text-align: center;">
+      <div style="font-size: 28px; margin-bottom: 8px;">&#128054;</div>
+      <div style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 6px;">De Hondenbijbel</div>
+      <div style="font-size: 13px; color: var(--body); line-height: 1.55;">Zorgt voor je <strong>hond</strong> &mdash; opvoeding, gezondheid, band versterken</div>
     </div>
-    <div class="combo-plus">+</div>
-    <div class="combo-card">
-      <div class="combo-icon">&#129504;</div>
-      <div class="combo-title">Laat Los Wat Je Kapotmaakt</div>
-      <div class="combo-desc">Zorgt voor <strong>jou</strong> &mdash; rust, loslaten, innerlijke kracht</div>
+    <div style="background: var(--light); border-radius: 12px; padding: 20px; text-align: center;">
+      <div style="font-size: 28px; margin-bottom: 8px;">&#129504;</div>
+      <div style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 6px;">Laat Los Wat Je Kapotmaakt</div>
+      <div style="font-size: 13px; color: var(--body); line-height: 1.55;">Zorgt voor <strong>jou</strong> &mdash; rust, loslaten, innerlijke kracht</div>
     </div>
   </div>
-  <p style="font-size: 15px; line-height: 1.7; color: var(--body); text-align: center; max-width: 520px; margin: 12px auto 0;">
+  <p style="font-size: 15px; line-height: 1.7; color: var(--body); text-align: center; max-width: 500px; margin: 0 auto;">
     Hond + baasje. Samen gelukkiger. Lezers die beide boeken lezen merken het overal &mdash;
-    meer geduld, minder stress, een <strong>sterkere band</strong> met hun hond. &#129505;
+    meer geduld, meer rust, meer energie. Een <strong>sterkere band</strong> met je hond begint bij een sterkere band met jezelf. &#129505;
   </p>
 </div>
 
 <!-- ═══════ OVER DE AUTEUR ═══════ -->
 <div class="author-card anim d5">
   <div class="author-avatar">
-    <img src="/dehondenbijbel/images/lars-vermeulen-dehondenbijbel.webp" alt="Lars Vermeulen">
+    <img src="/images/joris-author.webp" alt="Joris de Vries">
   </div>
   <div class="author-info">
-    <h4>Lars Vermeulen</h4>
-    <p>Hondentrainer, auteur en zelf jarenlang vastgelopen in piekeren en woede. Na zijn eigen doorbraak schreef hij <strong>Laat Los Wat Je Kapotmaakt</strong> &mdash; een praktisch boek voor iedereen die klaar is met rondjes draaien in hun hoofd.</p>
-    <p style="margin-top: 6px; font-style: italic; font-size: 13px; color: var(--muted);">&ldquo;Een gelukkige hond begint bij een gelukkig baasje.&rdquo;</p>
+    <h4>Joris de Vries</h4>
+    <p>Coach, auteur en zelf jarenlang vastgelopen in piekeren, woede en schuldgevoel. Na meer dan 12 jaar ervaring met mensen in crisis schreef hij <strong>Laat Los Wat Je Kapotmaakt</strong> &mdash; een praktisch boek met concrete stappen voor iedereen die klaar is met rondjes draaien in hun hoofd.</p>
+    <p style="margin-top: 6px; font-style: italic; font-size: 13px; color: var(--muted);">&ldquo;Ik was precies waar jij nu bent. En ik heb de weg terug gevonden.&rdquo;</p>
   </div>
 </div>
 
 <!-- ═══════ BONUS E-BOOKS ═══════ -->
 <div class="anim d5">
-  <h3 style="font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 700; color: var(--heading); text-align: center; margin-bottom: 14px;">
+  <h3 style="font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); text-align: center; margin-bottom: 14px;">
     &#10022; 3 bonus e-books &mdash; gratis erbij
   </h3>
   <div class="bonus-grid">
@@ -753,7 +770,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
       <div class="bonus-badge">GRATIS</div>
       <img class="bonus-img" src="/dehondenbijbel/images/bonus-langleveiheid-pichi.webp" alt="Lang Leven &amp; Veiligheid" loading="lazy">
       <h4>Lang Leven &amp; Veiligheid</h4>
-      <p>Alles over gezondheid, voeding en veiligheid van je hond.</p>
+      <p>Alles over gezondheid, voeding en veiligheid.</p>
     </div>
     <div class="bonus-card">
       <div class="bonus-badge">GRATIS</div>
@@ -765,35 +782,35 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 </div>
 
 <!-- ═══════ PRICING CARD MET VALUE STACK ═══════ -->
-<div class="price-card anim d5" style="margin-top: 32px;">
-  <div class="price-label">Exclusief voor jou &mdash; alleen nu</div>
+<div class="pricing-card anim d5">
+  <div style="font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Exclusief voor jou &mdash; alleen nu</div>
 
   <!-- Value Stack -->
-  <div style="padding: 16px 0; text-align: left;">
+  <div style="padding: 16px 0;">
     <div class="stack-item">
       <div class="stack-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4763C" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       </div>
       <div class="stack-label"><strong>Gedrukt boek</strong> &mdash; Laat Los Wat Je Kapotmaakt</div>
       <div class="stack-value">&euro;35</div>
     </div>
     <div class="stack-item">
       <div class="stack-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4763C" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       </div>
       <div class="stack-label"><strong>3 bonus e-books</strong> &mdash; hondenproblemen, gezondheid, rassen</div>
       <div class="stack-value">&euro;53,97</div>
     </div>
     <div class="stack-item">
       <div class="stack-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4763C" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><polygon points="23 7 16 12 16 2 23 7"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><polygon points="23 7 16 12 16 2 23 7"/></svg>
       </div>
       <div class="stack-label"><strong>Gratis verzending</strong> &mdash; wordt samen met je Hondenbijbel bezorgd</div>
       <div class="stack-value">&euro;6,95</div>
     </div>
   </div>
 
-  <div style="height: 1px; background: var(--border); margin: 4px 0 16px;"></div>
+  <div style="height: 1px; background: var(--section); margin: 4px 0 16px;"></div>
 
   <div style="font-size: 14px; color: var(--muted); margin-bottom: 4px;">Totale waarde: <span style="text-decoration: line-through;">&euro;95,92</span></div>
   <div class="price-row">
@@ -801,7 +818,10 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
     <span class="price-new">&euro;25</span>
     <span class="price-save">Bespaar &euro;10</span>
   </div>
-  <div class="price-note">
+  <div class="price-coupon-ref">
+    &#9986; Kortingsbon <strong>HONDEN-VIP</strong> toegepast
+  </div>
+  <div style="font-size: 13px; color: var(--muted); margin-top: 8px;">
     Minder dan &euro;0,84 per dag &mdash; goedkoper dan &eacute;&eacute;n kopje koffie voor 30 dagen
   </div>
 
@@ -812,16 +832,16 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
     </a>
   </div>
 
-  <div class="trust-row">
-    <span class="trust-item">
+  <div style="margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
+    <span style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       Veilige betaling
     </span>
-    <span class="trust-item">
+    <span style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       30 dagen garantie
     </span>
-    <span class="trust-item">
+    <span style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
       Gratis verzending
     </span>
@@ -851,17 +871,24 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-      Waar gaat dit boek precies over?
+      Waar gaat Laat Los Wat Je Kapotmaakt over?
       <span class="arrow">&#9662;</span>
     </div>
-    <div class="faq-a"><strong>Laat Los Wat Je Kapotmaakt</strong> helpt je om te stoppen met piekeren, los te laten wat je vasthoudt, te vergeven, woede om te zetten in kracht en innerlijke rust te vinden. Praktische stappen, geen vage theorie.</div>
+    <div class="faq-a">Dit boek helpt je om te stoppen met piekeren, los te laten wat je vasthoudt, te vergeven, woede om te zetten in kracht en innerlijke rust te vinden. Praktische stappen, geen vage theorie. Geschreven door Joris de Vries.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      Hoe werkt de kortingsbon HONDEN-VIP?
+      <span class="arrow">&#9662;</span>
+    </div>
+    <div class="faq-a">De kortingsbon wordt automatisch toegepast. De normale prijs is &euro;35 &mdash; met de bon betaal je slechts &euro;25. Dit is een eenmalig aanbod dat alleen geldt direct na je bestelling.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
       Kan ik het boek ook later bestellen?
       <span class="arrow">&#9662;</span>
     </div>
-    <div class="faq-a">Ja, maar dan betaal je de normale prijs van &euro;35 op onze website. De &euro;10 korting is alleen beschikbaar op deze pagina, direct na je bestelling.</div>
+    <div class="faq-a">Ja, maar dan betaal je de normale prijs van &euro;35 op onze website. De &euro;10 korting via HONDEN-VIP is alleen beschikbaar op deze pagina, direct na je bestelling.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
@@ -876,7 +903,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 <div style="text-align: center; padding: 20px 0 16px;" class="anim d6">
   <a href="#" class="btn-upsell" onclick="return false;">
     JA! Voeg toe voor slechts &euro;25 &rarr;
-    <span class="btn-sub">E&eacute;n klik &mdash; wordt samen met je Hondenbijbel bezorgd</span>
+    <span class="btn-sub">E&eacute;n klik &mdash; korting HONDEN-VIP is al toegepast</span>
   </a>
   <a class="btn-skip" href="#">Nee bedankt, ga door naar mijn bestelling</a>
 </div>
@@ -902,52 +929,6 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
     el.textContent = m + ':' + s;
   }
   setInterval(tick, 1000);
-})();
-</script>
-
-<!-- ═══════ LOAD UPSELL PRODUCT IMAGE FROM MEDUSA ═══════ -->
-<script>
-(function() {
-  'use strict';
-  var MEDUSA_URL = PROJECT_CONFIG.medusaUrl;
-
-  function medusaFetch(path, options) {
-    options = options || {};
-    options.headers = Object.assign({
-      'Content-Type': 'application/json',
-      'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey,
-    }, options.headers || {});
-    return fetch(MEDUSA_URL + path, options).then(function(res) {
-      return res.json().then(function(data) {
-        if (!res.ok) throw new Error(data.message || 'API fout');
-        return data;
-      });
-    });
-  }
-
-  // Load upsell product image from Medusa
-  var upsellHandle = PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.handle;
-  if (upsellHandle) {
-    medusaFetch('/store/products?handle=' + upsellHandle + '&fields=thumbnail,images')
-    .then(function(data) {
-      var product = data.products && data.products[0];
-      if (!product) return;
-      var imgUrl = (product.images && product.images.length > 0 && product.images[0].url)
-        ? product.images[0].url
-        : product.thumbnail;
-      if (imgUrl) {
-        var fullUrl = imgUrl.indexOf('http') === 0 ? imgUrl : MEDUSA_URL + imgUrl;
-        var imgEl = document.getElementById('upsell-product-img');
-        if (imgEl) {
-          imgEl.src = fullUrl;
-          imgEl.alt = PROJECT_CONFIG.upsellProduct.name || 'Laat Los Wat Je Kapotmaakt';
-        }
-      }
-    })
-    .catch(function(err) {
-      console.warn('Upsell product image laden mislukt:', err);
-    });
-  }
 })();
 </script>
 
@@ -977,11 +958,13 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
   var cartId = localStorage.getItem('medusa_cart_id');
 
   if (!cartId) {
+    // No cart — customer came directly, redirect to thank-you
     console.warn('Upsell: No cart_id in localStorage, redirecting to thank-you');
     window.location.href = PROJECT_CONFIG.thankYouUrl;
     return;
   }
 
+  // Complete order (complete cart)
   var maxAttempts = 5;
   var attempt = 0;
 
@@ -994,11 +977,12 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
     })
     .then(function(res) {
       if (res.type === 'order') {
+        // Order successfully completed
         console.log('Upsell: Order completed!', res.order.id);
         localStorage.setItem('medusa_order_id', res.order.id);
         localStorage.setItem('medusa_order_display_id', res.order.display_id || '');
 
-        // FB Pixel + CAPI: Purchase event for main product
+        // FB Pixel + CAPI: Purchase event for main product (deduplicated)
         if (typeof MetaTracker !== 'undefined') {
           MetaTracker.trackPurchase({
             content_ids: [PROJECT_CONFIG.mainProduct.handle],
@@ -1007,7 +991,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
           });
         }
 
-        // FB Pixel + CAPI: ViewContent for upsell page
+        // FB Pixel + CAPI: ViewContent for upsell page (deduplicated)
         if (typeof MetaTracker !== 'undefined') {
           MetaTracker.trackViewContent({
             content_ids: [PROJECT_CONFIG.upsellProduct.handle],
@@ -1019,6 +1003,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
         return true;
       } else if (res.type === 'cart') {
+        // Payment not confirmed yet — retry
         if (attempt < maxAttempts) {
           console.log('Upsell: Payment not confirmed yet, retrying in 2s...');
           return new Promise(function(resolve) {
@@ -1067,6 +1052,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
       btn.innerHTML = '<span class="btn-spinner"></span> Bezig met verwerken...';
     });
 
+    // Get order_id from localStorage (saved by checkout after cart completion)
     var orderId = localStorage.getItem('medusa_order_id');
     if (!orderId) {
       console.error('Upsell: No order_id in localStorage');
@@ -1076,10 +1062,16 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
     console.log('Upsell: Adding upsell product to order', orderId);
 
+    // === Order Edit flow ===
+    // Call custom API route that edits the existing order and adds the upsell product.
+    // In admin dashboard you'll see one order with two items.
+
     var upsellData = {
       variant_id: PROJECT_CONFIG.upsellProduct.variantId,
       quantity: 1,
+      // Discounted price
       unit_price: PROJECT_CONFIG.upsellProduct.price,
+      // Original price for compare
       compare_at_unit_price: PROJECT_CONFIG.upsellProduct.originalPrice,
     };
 
@@ -1097,9 +1089,10 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
     .then(function(data) {
       if (data.success) {
         console.log('Upsell: Product successfully added to order', orderId);
+        // Mark upsell as purchased (for thank-you page)
         localStorage.setItem('medusa_upsell_purchased', 'true');
 
-        // FB Pixel + CAPI: Purchase event for upsell
+        // FB Pixel + CAPI: Purchase event for upsell (deduplicated)
         if (typeof MetaTracker !== 'undefined') {
           MetaTracker.trackPurchase({
             content_ids: [PROJECT_CONFIG.upsellProduct.handle],
@@ -1109,6 +1102,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
           });
         }
 
+        // Redirect to thank-you
         window.location.href = PROJECT_CONFIG.thankYouUrl;
       } else {
         throw new Error(data.message || 'Order edit failed');
@@ -1116,13 +1110,16 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
     })
     .catch(function(err) {
       console.error('Upsell: Error adding to order:', err.message);
+      // On error, redirect to thank-you (order without upsell)
       window.location.href = PROJECT_CONFIG.thankYouUrl;
     });
   }
 
   function handleUpsellDecline(e) {
     if (e) e.preventDefault();
+    // Clear cart_id (order is done)
     localStorage.removeItem('medusa_cart_id');
+    // Redirect to thank-you
     window.location.href = PROJECT_CONFIG.thankYouUrl;
   }
 
