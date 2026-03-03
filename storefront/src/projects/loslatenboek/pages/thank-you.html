@@ -819,11 +819,12 @@ body { background: var(--bg); }
   // 2f. Přidej upsell/order bump produkt do seznamu pokud byl zakoupen
   if (upsellPurchased || orderBumpActive) {
     if (orderItemsEl) {
+      var upsellName = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.name) || 'Upsell Product';
       var extraLabel = orderBumpActive ? 'Fysiek boek \u2014 toegevoegd bij bestelling' : 'Fysiek boek \u2014 upsell bestelling';
       var upsellItemHtml = '<div class="ty-order-item">' +
         '<div class="ty-order-icon book">\uD83D\uDCD6</div>' +
         '<div>' +
-          '<div class="ty-order-name">Het Leven Dat Je Verdient</div>' +
+          '<div class="ty-order-name">' + upsellName + '</div>' +
           '<div class="ty-order-desc">' + extraLabel + '</div>' +
         '</div>' +
       '</div>';

@@ -211,5 +211,23 @@ export function getPaymentMethodName(order: any): string {
 
 /** Get the display-friendly order number (country-prefixed or fallback to #display_id) */
 export function getOrderDisplayNumber(order: any): string {
-  return order.metadata?.custom_order_number || `#${order.display_id}`
+  if (order.metadata?.custom_order_number) {
+    return order.metadata.custom_order_number
+  }
+
+  // Fallback: generate the format from available data
+  // (subscriber may have failed or not run yet)
+  const cc = (
+    order.shipping_address?.country_code ||
+    order.billing_address?.country_code ||
+    ""
+  ).toUpperCase()
+  if (cc && order.display_id) {
+    const year = order.created_at
+      ? new Date(order.created_at).getFullYear()
+      : new Date().getFullYear()
+    return `${cc}${year}-${order.display_id}`
+  }
+
+  return `#${order.display_id}`
 }

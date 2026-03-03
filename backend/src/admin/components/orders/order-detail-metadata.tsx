@@ -370,7 +370,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
       {metadata.upsell_accepted && (
         <>
           <div style={groupTitleStyle}>Upsell</div>
-          <div style={{ ...rowStyle, borderBottom: "none" }}>
+          <div style={rowStyle}>
             <span style={labelStyle}>Upsell Accepted</span>
             <span
               style={{
@@ -388,6 +388,29 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
               Yes
             </span>
           </div>
+          {metadata.upsell_payment_id && (
+            <div style={rowStyle}>
+              <span style={labelStyle}>Upsell Payment ID</span>
+              <span style={valueStyle}>{String(metadata.upsell_payment_id)}</span>
+            </div>
+          )}
+          {metadata.upsell_accepted_at && (
+            <div style={{ ...rowStyle, borderBottom: "none" }}>
+              <span style={labelStyle}>Accepted At</span>
+              <span style={valueStyle}>
+                {new Date(String(metadata.upsell_accepted_at)).toLocaleString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
+          )}
+          {!metadata.upsell_payment_id && !metadata.upsell_accepted_at && (
+            <div style={{ height: 0 }} />
+          )}
         </>
       )}
     </div>

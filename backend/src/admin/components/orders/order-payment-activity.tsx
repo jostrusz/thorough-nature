@@ -68,6 +68,7 @@ const GATEWAY_DISPLAY_NAMES: Record<string, string> = {
   przelewy24: "Przelewy24",
   airwallex: "Airwallex",
   p24: "Przelewy24",
+  upsell: "Upsell",
 }
 
 const METHOD_LABELS: Record<string, string> = {
@@ -190,9 +191,26 @@ export const PaymentActivityLog: React.FC<OrderPaymentActivityProps> = ({
     ...(!hasReceivedInLog && receivedEntry ? [receivedEntry] : []),
   ]
 
-  // Merge payment + email entries into unified timeline
+  // Build upsell log entries from metadata.upsell_log
+  const upsellLog = (order.metadata?.upsell_log || []) as Array<{
+    event: string
+    timestamp: string
+    message?: string
+    payment_id?: string
+  }>
+  const upsellEntries: PaymentActivityEntry[] = upsellLog.map((e) => ({
+    timestamp: e.timestamp,
+    event: e.event,
+    gateway: "upsell",
+    status: "success" as const,
+    transaction_id: e.payment_id,
+    detail: e.message,
+  }))
+
+  // Merge payment + upsell + email entries into unified timeline
   const timeline: TimelineEntry[] = [
     ...allPaymentEntries.map((e): TimelineEntry => ({ ...e, type: "payment" })),
+    ...upsellEntries.map((e): TimelineEntry => ({ ...e, type: "payment" })),
     ...emailLog.map((e): TimelineEntry => ({ ...e, type: "email" })),
   ]
 
@@ -477,6 +495,8 @@ function formatEventLabel(event: string): string {
     cancellation: "Payment Cancelled",
     status_update: "Status Updated",
     tracking_sent: "Tracking Information Sent",
+    upsell_accepted: "Upsell Accepted",
+    upsell_payment_captured: "Upsell Payment Captured",
   }
   return labelMap[event] || event
 }
