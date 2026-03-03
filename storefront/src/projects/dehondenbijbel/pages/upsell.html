@@ -6,6 +6,13 @@
 <title>Stap 2 — Speciaal Aanbod Alleen Voor Jou</title>
 <link rel="icon" href="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" type="image/png">
 
+<!-- Hide upsell content on payment return — show preloader instead -->
+<script>
+if (window.location.search.indexOf('upsell_return=1') !== -1) {
+  document.write('<style>.page-wrap,.step-bar,.timer-bar{display:none!important}</style>');
+}
+</script>
+
 <!-- Projekt konfigurace + FB Pixel -->
 <script src="js/project-config.js"></script>
 <script src="js/pixel.js"></script>
@@ -475,6 +482,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; font-size: 14px; line-height: 1.7; color: var(--body); }
 .faq-a.open { max-height: 300px; padding-bottom: 16px; }
 
+/* ─── PAYMENT PRELOADER ─── */
+.payment-preloader {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg); z-index: 9999;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; padding: 20px;
+}
+.payment-preloader img { width: 100px; margin-bottom: 24px; animation: pulse 2s ease-in-out infinite; }
+.payment-preloader p { font-family: 'DM Sans', sans-serif; font-size: 18px; color: var(--heading); font-weight: 600; }
+.payment-preloader .sub { font-size: 14px; color: var(--muted); font-weight: 400; margin-top: 8px; }
+
 /* ─── FOOTER ─── */
 .upsell-footer { text-align: center; padding: 32px 0 48px; font-size: 12px; color: var(--muted); }
 
@@ -932,7 +950,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 })();
 </script>
 
-<!-- ═══════ UPSELL LOGIKA — complete order + upsell purchase ═══════ -->
+<!-- ═══════ UPSELL LOGIKA — Mollie payment flow ═══════ -->
 <script>
 (function() {
   'use strict';
@@ -954,17 +972,118 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     });
   }
 
-  // ─── STEP 1: Complete original order after payment ───
+  // Helper: Show preloader
+  function showPreloader(message, sub) {
+    if (!document.querySelector('.payment-preloader')) {
+      var div = document.createElement('div');
+      div.className = 'payment-preloader';
+      div.innerHTML = '<img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" alt="Laden..." width="100">'
+        + '<p>' + (message || 'Betaling wordt verwerkt...') + '</p>'
+        + '<p class="sub">' + (sub || 'Even geduld alsjeblieft.') + '</p>';
+      document.body.insertBefore(div, document.body.firstChild);
+    }
+  }
+
+  // Helper: Show error on preloader
+  function showPreloaderError(message) {
+    var preloader = document.querySelector('.payment-preloader');
+    if (preloader) {
+      preloader.innerHTML = '<div style="text-align:center;padding:20px;">'
+        + '<p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Er ging iets mis.</p>'
+        + '<p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (message || 'Probeer het opnieuw.') + '</p>'
+        + '<a href="' + PROJECT_CONFIG.thankYouUrl + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#2D1B3D;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Ga naar je bestelling</a>'
+        + '</div>';
+    }
+  }
+
+  // ═══════════════════════════════════════════════
+  // ROUTE A: UPSELL PAYMENT RETURN (from Mollie)
+  // URL: ?upsell_return=1&upsell_cart_id=xxx
+  // ═══════════════════════════════════════════════
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('upsell_return') === '1') {
+    var upsellCartId = params.get('upsell_cart_id');
+    if (!upsellCartId) {
+      window.location.href = PROJECT_CONFIG.thankYouUrl;
+      return;
+    }
+
+    showPreloader('Upsell betaling wordt verwerkt...', 'Even geduld, we voegen het boek toe aan je bestelling.');
+
+    // Complete the upsell cart (Mollie payment is done)
+    medusaFetch('/store/carts/' + upsellCartId + '/complete', {
+      method: 'POST'
+    })
+    .then(function(res) {
+      if (res.type === 'order' || (res.order && res.order.id)) {
+        console.log('Upsell: Upsell cart completed, order:', (res.order || {}).id);
+      }
+
+      // Now also add the upsell item to the ORIGINAL order
+      var originalOrderId = localStorage.getItem('medusa_order_id');
+      if (originalOrderId) {
+        return fetch(MEDUSA_URL + '/store/custom/orders/' + originalOrderId + '/upsell-accept', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey,
+          },
+          body: JSON.stringify({
+            variant_id: PROJECT_CONFIG.upsellProduct.variantId,
+            quantity: 1,
+            unit_price: PROJECT_CONFIG.upsellProduct.price,
+            compare_at_unit_price: PROJECT_CONFIG.upsellProduct.originalPrice,
+          }),
+        }).then(function(r) { return r.json(); })
+          .catch(function() { return {}; }); // Non-critical: continue even if merge fails
+      }
+    })
+    .then(function() {
+      // Mark upsell as purchased
+      localStorage.setItem('medusa_upsell_purchased', 'true');
+      // Clean up
+      localStorage.removeItem('medusa_upsell_cart_id');
+      localStorage.removeItem('medusa_cart_id');
+
+      // FB Pixel: Purchase event for upsell
+      if (typeof MetaTracker !== 'undefined') {
+        MetaTracker.trackPurchase({
+          content_ids: [PROJECT_CONFIG.upsellProduct.handle],
+          content_name: PROJECT_CONFIG.upsellProduct.name,
+          value: PROJECT_CONFIG.upsellProduct.price,
+          currency: PROJECT_CONFIG.upsellProduct.currency
+        });
+      }
+
+      // Redirect to thank-you
+      window.location.href = PROJECT_CONFIG.thankYouUrl;
+    })
+    .catch(function(err) {
+      console.error('Upsell: Payment return error:', err.message);
+      // Even on error, the original order is fine — just go to thank-you
+      showPreloaderError('De betaling kon niet worden verwerkt. Je oorspronkelijke bestelling is veilig.');
+      setTimeout(function() {
+        window.location.href = PROJECT_CONFIG.thankYouUrl;
+      }, 3000);
+    });
+
+    return; // Stop — don't run the normal upsell page logic
+  }
+
+  // ═══════════════════════════════════════════════
+  // ROUTE B: NORMAL UPSELL PAGE (after checkout)
+  // Complete original order, show upsell offer
+  // ═══════════════════════════════════════════════
+
   var cartId = localStorage.getItem('medusa_cart_id');
 
   if (!cartId) {
-    // No cart — customer came directly, redirect to thank-you
     console.warn('Upsell: No cart_id in localStorage, redirecting to thank-you');
     window.location.href = PROJECT_CONFIG.thankYouUrl;
     return;
   }
 
-  // Complete order (complete cart)
+  // ─── STEP 1: Complete original order ───
   var maxAttempts = 5;
   var attempt = 0;
 
@@ -977,22 +1096,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     })
     .then(function(res) {
       if (res.type === 'order') {
-        // Order successfully completed
         console.log('Upsell: Order completed!', res.order.id);
         localStorage.setItem('medusa_order_id', res.order.id);
         localStorage.setItem('medusa_order_display_id', res.order.display_id || '');
 
-        // FB Pixel + CAPI: Purchase event for main product (deduplicated)
+        // FB Pixel: Purchase event for main product
         if (typeof MetaTracker !== 'undefined') {
           MetaTracker.trackPurchase({
             content_ids: [PROJECT_CONFIG.mainProduct.handle],
             value: PROJECT_CONFIG.mainProduct.price,
             currency: PROJECT_CONFIG.mainProduct.currency
           });
-        }
-
-        // FB Pixel + CAPI: ViewContent for upsell page (deduplicated)
-        if (typeof MetaTracker !== 'undefined') {
           MetaTracker.trackViewContent({
             content_ids: [PROJECT_CONFIG.upsellProduct.handle],
             content_name: PROJECT_CONFIG.upsellProduct.name,
@@ -1000,136 +1114,210 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
             currency: PROJECT_CONFIG.upsellProduct.currency
           });
         }
-
         return true;
       } else if (res.type === 'cart') {
-        // Payment not confirmed yet — retry
         if (attempt < maxAttempts) {
           console.log('Upsell: Payment not confirmed yet, retrying in 2s...');
           return new Promise(function(resolve) {
-            setTimeout(function() {
-              resolve(completeOriginalOrder());
-            }, 2000);
+            setTimeout(function() { resolve(completeOriginalOrder()); }, 2000);
           });
-        } else {
-          console.error('Upsell: Payment not confirmed after ' + maxAttempts + ' attempts');
-          return false;
         }
+        return false;
       }
     })
     .catch(function(err) {
       console.error('Upsell: Error completing order:', err.message);
-      if (err.message && err.message.includes('completed')) {
-        return true;
-      }
+      if (err.message && err.message.includes('completed')) return true;
       if (attempt < maxAttempts) {
         return new Promise(function(resolve) {
-          setTimeout(function() {
-            resolve(completeOriginalOrder());
-          }, 2000);
+          setTimeout(function() { resolve(completeOriginalOrder()); }, 2000);
         });
       }
       return false;
     });
   }
 
-  // Start order completion
   completeOriginalOrder();
 
-  // ─── STEP 2: Wire up "YES" buttons (upsell purchase) ───
-  var btnYes = document.getElementById('btn-yes');
-  var btnYesBottom = document.querySelectorAll('.btn-upsell');
-  var btnNo = document.getElementById('btn-no');
-  var btnNoBottom = document.querySelectorAll('.btn-skip');
+  // ─── STEP 2: Wire up buttons ───
+  var btnYesAll = document.querySelectorAll('.btn-upsell');
+  var btnNoAll = document.querySelectorAll('.btn-skip');
 
+  // ─── UPSELL ACCEPT: Create cart → Mollie payment → redirect ───
   function handleUpsellAccept(e) {
     if (e) e.preventDefault();
 
-    // Disable buttons — show loading state
-    btnYesBottom.forEach(function(btn) {
+    // Disable all CTA buttons
+    btnYesAll.forEach(function(btn) {
       btn.style.opacity = '0.7';
       btn.style.pointerEvents = 'none';
       btn.innerHTML = '<span class="btn-spinner"></span> Bezig met verwerken...';
     });
 
-    // Get order_id from localStorage (saved by checkout after cart completion)
-    var orderId = localStorage.getItem('medusa_order_id');
-    if (!orderId) {
-      console.error('Upsell: No order_id in localStorage');
-      window.location.href = PROJECT_CONFIG.thankYouUrl;
-      return;
-    }
+    // Get stored checkout data
+    var customerRaw = localStorage.getItem('medusa_customer');
+    var customer = customerRaw ? JSON.parse(customerRaw) : {};
+    var paymentProvider = localStorage.getItem('medusa_payment_provider') || 'pp_mollie_mollie';
+    var paymentMethod = localStorage.getItem('medusa_payment_method') || '';
+    var regionId = PROJECT_CONFIG.regionId;
 
-    console.log('Upsell: Adding upsell product to order', orderId);
+    // Build return URL for Mollie
+    var baseUrl = window.location.href.split('?')[0];
+    var upsellReturnUrl; // will be set after cart creation
 
-    // === Order Edit flow ===
-    // Call custom API route that edits the existing order and adds the upsell product.
-    // In admin dashboard you'll see one order with two items.
+    console.log('Upsell: Starting payment flow, provider:', paymentProvider, 'method:', paymentMethod);
 
-    var upsellData = {
-      variant_id: PROJECT_CONFIG.upsellProduct.variantId,
-      quantity: 1,
-      // Discounted price
-      unit_price: PROJECT_CONFIG.upsellProduct.price,
-      // Original price for compare
-      compare_at_unit_price: PROJECT_CONFIG.upsellProduct.originalPrice,
-    };
-
-    fetch(PROJECT_CONFIG.medusaUrl + '/store/custom/orders/' + orderId + '/upsell-accept', {
+    // Step 1: Create cart
+    medusaFetch('/store/carts', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey,
-      },
-      body: JSON.stringify(upsellData),
+      body: JSON.stringify({ region_id: regionId })
     })
-    .then(function(response) {
-      return response.json();
-    })
-    .then(function(data) {
-      if (data.success) {
-        console.log('Upsell: Product successfully added to order', orderId);
-        // Mark upsell as purchased (for thank-you page)
-        localStorage.setItem('medusa_upsell_purchased', 'true');
+    .then(function(res) {
+      var upsellCartId = res.cart.id;
+      upsellReturnUrl = baseUrl + '?upsell_return=1&upsell_cart_id=' + upsellCartId;
+      localStorage.setItem('medusa_upsell_cart_id', upsellCartId);
+      console.log('Upsell: Cart created:', upsellCartId);
 
-        // FB Pixel + CAPI: Purchase event for upsell (deduplicated)
-        if (typeof MetaTracker !== 'undefined') {
-          MetaTracker.trackPurchase({
-            content_ids: [PROJECT_CONFIG.upsellProduct.handle],
-            content_name: PROJECT_CONFIG.upsellProduct.name,
-            value: PROJECT_CONFIG.upsellProduct.price,
-            currency: PROJECT_CONFIG.upsellProduct.currency
+      // Step 2: Add upsell product
+      return medusaFetch('/store/carts/' + upsellCartId + '/line-items', {
+        method: 'POST',
+        body: JSON.stringify({
+          variant_id: PROJECT_CONFIG.upsellProduct.variantId,
+          quantity: 1
+        })
+      }).then(function() { return upsellCartId; });
+    })
+    .then(function(upsellCartId) {
+      // Step 3: Update cart with customer data
+      var updateData = {
+        email: customer.email || ''
+      };
+
+      // Set shipping + billing address from original checkout
+      if (customer.first_name) {
+        var addr = {
+          first_name: customer.first_name,
+          last_name: customer.last_name || '',
+          address_1: customer.address_1 || '',
+          city: customer.city || '',
+          postal_code: customer.postal_code || '',
+          country_code: customer.country_code || 'nl',
+          phone: customer.phone || '',
+        };
+        updateData.shipping_address = addr;
+        updateData.billing_address = addr;
+      }
+
+      return medusaFetch('/store/carts/' + upsellCartId, {
+        method: 'POST',
+        body: JSON.stringify(updateData)
+      }).then(function() { return upsellCartId; });
+    })
+    .then(function(upsellCartId) {
+      // Step 4: Add shipping method
+      return medusaFetch('/store/shipping-options?cart_id=' + upsellCartId, {
+        method: 'GET'
+      }).then(function(shipRes) {
+        var options = shipRes.shipping_options || [];
+        if (options.length > 0) {
+          return medusaFetch('/store/carts/' + upsellCartId + '/shipping-methods', {
+            method: 'POST',
+            body: JSON.stringify({ option_id: options[0].id })
           });
         }
+      }).then(function() { return upsellCartId; });
+    })
+    .then(function(upsellCartId) {
+      // Step 5: Create payment collection
+      return medusaFetch('/store/payment-collections', {
+        method: 'POST',
+        body: JSON.stringify({ cart_id: upsellCartId })
+      }).then(function(pcRes) {
+        var paymentCollectionId = pcRes.payment_collection.id;
 
-        // Redirect to thank-you
-        window.location.href = PROJECT_CONFIG.thankYouUrl;
+        // Step 6: Create payment session with same provider + method
+        var sessionBody = {
+          provider_id: paymentProvider,
+          data: {
+            method: paymentMethod,
+            return_url: upsellReturnUrl,
+          }
+        };
+
+        // Pass customer data for Klarna/Mollie Orders API
+        if (customer.email) {
+          sessionBody.data.email = customer.email;
+          if (customer.first_name) {
+            sessionBody.data.billing_address = {
+              first_name: customer.first_name,
+              last_name: customer.last_name || '',
+              address_1: customer.address_1 || '',
+              city: customer.city || '',
+              postal_code: customer.postal_code || '',
+              country_code: (customer.country_code || 'nl').toUpperCase(),
+              phone: customer.phone || '',
+            };
+            sessionBody.data.shipping_address = sessionBody.data.billing_address;
+          }
+        }
+
+        return medusaFetch('/store/payment-collections/' + paymentCollectionId + '/payment-sessions', {
+          method: 'POST',
+          body: JSON.stringify(sessionBody)
+        });
+      }).then(function(sessionRes) {
+        return sessionRes.payment_collection;
+      });
+    })
+    .then(function(paymentCollection) {
+      // Step 7: Get Mollie redirect URL and redirect
+      var sessions = paymentCollection.payment_sessions || [];
+      var lastSession = sessions[sessions.length - 1] || {};
+      var providerData = lastSession.data || {};
+      var redirectUrl = providerData.checkoutUrl || providerData.approvalUrl;
+
+      if (redirectUrl) {
+        console.log('Upsell: Redirecting to payment page:', redirectUrl);
+        window.location.href = redirectUrl;
       } else {
-        throw new Error(data.message || 'Order edit failed');
+        // No redirect needed (e.g., already paid) — complete directly
+        console.log('Upsell: No redirect URL, completing directly');
+        var upsellCartId = localStorage.getItem('medusa_upsell_cart_id');
+        window.location.href = upsellReturnUrl;
       }
     })
     .catch(function(err) {
-      console.error('Upsell: Error adding to order:', err.message);
-      // On error, redirect to thank-you (order without upsell)
-      window.location.href = PROJECT_CONFIG.thankYouUrl;
+      console.error('Upsell: Payment flow error:', err.message);
+      // Re-enable buttons
+      btnYesAll.forEach(function(btn) {
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+        btn.innerHTML = 'JA! Voeg toe voor slechts &euro;25 &rarr;<span class="btn-sub">Probeer het opnieuw</span>';
+      });
+      // Show error
+      var errorDiv = document.createElement('div');
+      errorDiv.style.cssText = 'text-align:center;padding:12px;margin-top:10px;background:rgba(192,57,43,0.1);border-radius:8px;color:#C0392B;font-size:14px;';
+      errorDiv.textContent = 'Er ging iets mis: ' + (err.message || 'Probeer het opnieuw.');
+      var firstCta = document.getElementById('first-cta');
+      if (firstCta && !firstCta.querySelector('.upsell-error')) {
+        errorDiv.className = 'upsell-error';
+        firstCta.appendChild(errorDiv);
+      }
     });
   }
 
+  // ─── UPSELL DECLINE: Clean up and go to thank-you ───
   function handleUpsellDecline(e) {
     if (e) e.preventDefault();
-    // Clear cart_id (order is done)
     localStorage.removeItem('medusa_cart_id');
-    // Redirect to thank-you
     window.location.href = PROJECT_CONFIG.thankYouUrl;
   }
 
-  // Wire up all "YES" buttons
-  btnYesBottom.forEach(function(btn) {
+  // Wire up all buttons
+  btnYesAll.forEach(function(btn) {
     btn.addEventListener('click', handleUpsellAccept);
   });
-
-  // Wire up all "NO" buttons
-  btnNoBottom.forEach(function(btn) {
+  btnNoAll.forEach(function(btn) {
     btn.addEventListener('click', handleUpsellDecline);
   });
 

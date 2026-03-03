@@ -6582,6 +6582,7 @@ body {
         phone: customerData.shipping_address.phone,
       }));
       localStorage.setItem('medusa_payment_provider', result.testMode ? 'pp_system_default' : (selectedProviderId || 'pp_mollie_mollie'));
+      localStorage.setItem('medusa_payment_method', selectedMethod || '');
 
       // Uložit bundle + order bump info pro thank-you stránku
       localStorage.setItem('medusa_bundle_qty', checkoutBundleQty);
