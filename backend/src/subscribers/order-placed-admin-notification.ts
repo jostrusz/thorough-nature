@@ -14,6 +14,9 @@ import { EmailTemplates } from '../modules/email-notifications/templates'
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'jaroslav@ostruszka.com'
 const TOTAL_VARIANTS = 10
 
+/** Wait for other subscribers (custom number, payment metadata) to finish first */
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
 export default async function orderPlacedAdminNotificationHandler({
   event: { data },
   container,
@@ -21,6 +24,11 @@ export default async function orderPlacedAdminNotificationHandler({
   const logger = container.resolve('logger') as any
 
   try {
+    // Delay 3s to let other subscribers (custom order number, payment metadata)
+    // finish writing to order metadata first. This ensures we have the full
+    // custom_order_number (e.g. NL2026-84) instead of just display_id (84).
+    await sleep(3000)
+
     const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
     const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
 
