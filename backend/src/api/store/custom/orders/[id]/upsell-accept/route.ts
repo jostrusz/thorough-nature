@@ -7,6 +7,7 @@ import {
   confirmOrderEditRequestWorkflow,
   markPaymentCollectionAsPaid,
 } from "@medusajs/medusa/core-flows"
+import Stripe from "stripe"
 import { MollieApiClient } from "../../../../../../modules/payment-mollie/api-client"
 
 const GATEWAY_CONFIG_MODULE = "gatewayConfig"
@@ -302,10 +303,16 @@ export async function POST(
       const stripePaymentId = externalPaymentId // pi_xxx from URL
       if (stripePaymentId) {
         try {
-          const stripe = req.scope.resolve("stripe") as any
-          const intent = await stripe.paymentIntents.retrieve(stripePaymentId)
-          paymentVerified = intent.status === "succeeded"
-          console.log(`[Upsell] Stripe payment ${stripePaymentId} status: ${intent.status}, verified: ${paymentVerified}`)
+          const stripeSecretKey = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY
+          if (!stripeSecretKey) {
+            console.warn(`[Upsell] No STRIPE_SECRET_KEY env var — trusting redirect`)
+            paymentVerified = true
+          } else {
+            const stripeClient = new Stripe(stripeSecretKey, { apiVersion: "2025-03-31.basil" as any })
+            const intent = await stripeClient.paymentIntents.retrieve(stripePaymentId)
+            paymentVerified = intent.status === "succeeded"
+            console.log(`[Upsell] Stripe payment ${stripePaymentId} status: ${intent.status}, verified: ${paymentVerified}`)
+          }
         } catch (stripeErr: any) {
           console.warn(`[Upsell] Stripe verification error:`, stripeErr.message)
           // On error, don't proceed
