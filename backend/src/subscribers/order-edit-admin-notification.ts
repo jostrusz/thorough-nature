@@ -11,7 +11,7 @@ import { EmailTemplates } from '../modules/email-notifications/templates'
  * Randomly selects one of 10 themed variants.
  */
 
-const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'jaroslav@ostruszka.com'
+const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'jaroslavostruszka@gmail.com'
 const TOTAL_VARIANTS = 10
 
 export default async function orderEditAdminNotificationHandler({

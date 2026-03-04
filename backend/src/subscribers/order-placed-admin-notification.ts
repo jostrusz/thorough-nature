@@ -11,7 +11,7 @@ import { EmailTemplates } from '../modules/email-notifications/templates'
  * Works for ALL projects (Loslatenboek, De Hondenbijbel, etc.)
  */
 
-const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'jaroslav@ostruszka.com'
+const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'jaroslavostruszka@gmail.com'
 const TOTAL_VARIANTS = 10
 
 /** Wait for other subscribers (custom number, payment metadata) to finish first */
