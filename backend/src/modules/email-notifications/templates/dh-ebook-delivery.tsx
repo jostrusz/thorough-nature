@@ -17,24 +17,34 @@ export const isDhEbookDeliveryData = (data: any): data is DhEbookDeliveryTemplat
   typeof data.downloadUrl === 'string' &&
   typeof data.expiresAt === 'string'
 
-const font = "'Inter', Arial, sans-serif"
-const pad = '24px'
+const font = "'Inter', 'Segoe UI', Arial, sans-serif"
+const pad = '28px'
 
-// DH Brand colors
+// DH Brand colors — warm orange palette (matches dh-order-placed)
 const colors = {
-  headerBg: '#4C1D95',
-  headerGradient: 'linear-gradient(135deg, #4C1D95 0%, #2E1065 100%)',
-  accent: '#7C3AED',
-  accentLight: '#A78BFA',
-  accentMuted: '#8B5CF6',
-  textDark: '#1F2937',
-  textBody: '#374151',
-  textMuted: '#6B7280',
-  boxBg: '#FAF5FF',
-  boxBorder: '#E9D5FF',
-  footerBg: '#1E1B4B',
-  amberLight: '#FEF3C7',
+  headerBg: '#EA580C',
+  headerGradient: 'linear-gradient(135deg, #F97316 0%, #EA580C 50%, #C2410C 100%)',
+  accent: '#EA580C',
+  accentLight: '#FDBA74',
+  accentSoft: '#FFF7ED',
+  accentMuted: '#FB923C',
+  textDark: '#18181B',
+  textBody: '#3F3F46',
+  textMuted: '#71717A',
+  textLight: '#A1A1AA',
+  boxBg: '#FAFAFA',
+  boxBorder: '#E4E4E7',
+  cardBg: '#FFFFFF',
+  footerBg: '#18181B',
+  footerText: '#A1A1AA',
+  footerAccent: '#FB923C',
+  greenBg: '#F0FDF4',
+  greenBorder: '#BBF7D0',
+  greenText: '#166534',
+  amberBg: '#FFFBEB',
   amberBorder: '#FDE68A',
+  amberText: '#92400E',
+  divider: '#E4E4E7',
 }
 
 export const DhEbookDeliveryTemplate: React.FC<DhEbookDeliveryTemplateProps> & {
@@ -46,215 +56,241 @@ export const DhEbookDeliveryTemplate: React.FC<DhEbookDeliveryTemplateProps> & {
     year: 'numeric',
   })
 
+  // Billing entity info — pulled from admin
+  const entityName = billingEntity?.legal_name || 'EverChapter OÜ'
+  const entityAddress = billingEntity?.address
+    ? `${billingEntity.address.city || 'Tallinn'}, ${billingEntity.address.district || billingEntity.address.country_code?.toUpperCase() || 'Estonia'}`
+    : 'Tallinn, Estonia'
+  const entityRegId = billingEntity?.registration_id || '16938029'
+
   return (
     <Base preview={preview}>
       <Section>
-        {/* Header */}
+        {/* ====== HEADER ====== */}
         <div style={{
           backgroundColor: colors.headerBg,
           background: colors.headerGradient,
-          padding: '32px 24px',
+          padding: '40px 28px 36px',
           textAlign: 'center' as const,
         }}>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
-            fontWeight: 500,
+            fontWeight: 600,
             letterSpacing: '3px',
             textTransform: 'uppercase' as const,
-            color: colors.accentLight,
-            marginBottom: '8px',
+            color: 'rgba(255,255,255,0.75)',
+            margin: '0 0 10px 0',
           }}>
             De Hondenbijbel
           </Text>
           <Text style={{
-            fontSize: '32px',
-            marginBottom: '6px',
-          }}>
-            📖
-          </Text>
-          <Text style={{
             fontFamily: font,
-            fontSize: '22px',
-            fontWeight: 700,
+            fontSize: '26px',
+            fontWeight: 800,
             color: '#ffffff',
-            margin: '0',
-            lineHeight: '1.3',
+            margin: '0 0 4px 0',
+            lineHeight: '1.2',
+            letterSpacing: '-0.02em',
           }}>
             Je e-book staat klaar!
           </Text>
+          <Text style={{
+            fontFamily: font,
+            fontSize: '13px',
+            color: 'rgba(255,255,255,0.7)',
+            margin: '0',
+          }}>
+            Download je digitale exemplaar
+          </Text>
         </div>
 
-        {/* Body */}
-        <div style={{ padding: `28px ${pad}` }}>
+        {/* ====== GREETING ====== */}
+        <div style={{ padding: `28px ${pad} 0` }}>
           <Text style={{
             fontFamily: font,
             fontSize: '15px',
             color: colors.textBody,
-            lineHeight: '1.6',
-            marginBottom: '6px',
+            lineHeight: '1.7',
+            margin: '0',
           }}>
             Hoi {firstName},
           </Text>
-
           <Text style={{
             fontFamily: font,
             fontSize: '15px',
             color: colors.textBody,
-            lineHeight: '1.6',
-            marginBottom: '24px',
+            lineHeight: '1.7',
+            margin: '8px 0 0',
           }}>
             Geweldig dat je De Hondenbijbel hebt aangeschaft! Je digitale exemplaar is klaar om te lezen. Klik op de knop hieronder om je e-book te downloaden.
           </Text>
+        </div>
 
-          {/* CTA Button */}
-          <div style={{ textAlign: 'center' as const, marginBottom: '24px' }}>
-            <Button
-              href={downloadUrl}
-              style={{
-                backgroundColor: colors.accent,
-                color: '#ffffff',
-                fontFamily: font,
-                fontSize: '16px',
-                fontWeight: 600,
-                textDecoration: 'none',
-                padding: '14px 48px',
-                borderRadius: '8px',
-                display: 'inline-block',
-              }}
-            >
-              Download je e-book →
-            </Button>
-          </div>
+        {/* ====== CTA BUTTON ====== */}
+        <div style={{ padding: `24px ${pad} 0`, textAlign: 'center' as const }}>
+          <Button
+            href={downloadUrl}
+            style={{
+              backgroundColor: colors.accent,
+              color: '#ffffff',
+              fontFamily: font,
+              fontSize: '16px',
+              fontWeight: 700,
+              textDecoration: 'none',
+              padding: '14px 48px',
+              borderRadius: '10px',
+              display: 'inline-block',
+            }}
+          >
+            Download je e-book &#8594;
+          </Button>
+        </div>
 
-          {/* Link expiry notice */}
+        {/* ====== LINK EXPIRY NOTICE ====== */}
+        <div style={{ padding: `16px ${pad} 0` }}>
           <div style={{
-            backgroundColor: colors.amberLight,
-            borderRadius: '8px',
-            padding: '12px 16px',
+            backgroundColor: colors.amberBg,
+            borderRadius: '12px',
+            padding: '14px 18px',
             textAlign: 'center' as const,
             border: `1px solid ${colors.amberBorder}`,
-            marginBottom: '24px',
           }}>
             <Text style={{
               fontFamily: font,
               fontSize: '13px',
-              color: '#795548',
+              color: colors.amberText,
               margin: '0',
+              lineHeight: '1.6',
             }}>
-              ⏳ Deze download-link is geldig tot <strong>{expiryDate}</strong>. Sla het bestand op na het downloaden.
+              &#9203; Deze download-link is geldig tot <strong>{expiryDate}</strong>. Sla het bestand op na het downloaden.
             </Text>
           </div>
+        </div>
 
-          <Hr style={{ borderColor: colors.boxBorder, margin: '4px 0' }} />
+        <Hr style={{ borderColor: colors.divider, margin: `20px ${pad}` }} />
 
-          {/* Physical book note */}
+        {/* ====== PHYSICAL BOOK NOTE ====== */}
+        <div style={{ padding: `0 ${pad}` }}>
           <div style={{
             backgroundColor: colors.boxBg,
-            borderRadius: '10px',
+            borderRadius: '12px',
             border: `1px solid ${colors.boxBorder}`,
             padding: '16px 20px',
             textAlign: 'center' as const,
-            marginTop: '20px',
-            marginBottom: '20px',
           }}>
             <Text style={{
               fontFamily: font,
-              fontSize: '13px',
+              fontSize: '14px',
               color: colors.textBody,
               lineHeight: '1.6',
               margin: '0',
             }}>
-              📦 Je fysieke boek is onderweg en wordt binnen <strong>4–7 werkdagen</strong> bezorgd. Je ontvangt apart een track &amp; trace code.
+              &#128230; Je fysieke boek is onderweg en wordt binnen <strong>4–7 werkdagen</strong> bezorgd. Je ontvangt apart een track &amp; trace code.
             </Text>
           </div>
+        </div>
 
-          {/* Training tips */}
+        {/* ====== TRAINING TIPS ====== */}
+        <div style={{ padding: `24px ${pad} 0` }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '11px',
-            fontWeight: 600,
+            fontSize: '12px',
+            fontWeight: 700,
             textTransform: 'uppercase' as const,
-            letterSpacing: '1.5px',
-            color: colors.accentMuted,
-            marginBottom: '14px',
+            letterSpacing: '1px',
+            color: colors.accent,
+            marginBottom: '16px',
           }}>
             Trainingstips
           </Text>
 
-          <Text style={{
-            fontFamily: font,
-            fontSize: '13px',
-            color: colors.textBody,
-            lineHeight: '1.5',
-            marginBottom: '8px',
-          }}>
-            🐕 <strong style={{ color: colors.textDark }}>Begin rustig</strong> — Start met korte trainingssessies van 5–10 minuten. Honden leren het best in kleine stapjes.
-          </Text>
-          <Text style={{
-            fontFamily: font,
-            fontSize: '13px',
-            color: colors.textBody,
-            lineHeight: '1.5',
-            marginBottom: '8px',
-          }}>
-            🦴 <strong style={{ color: colors.textDark }}>Wees consistent</strong> — Gebruik altijd dezelfde commando's en beloon gewenst gedrag direct.
-          </Text>
-          <Text style={{
-            fontFamily: font,
-            fontSize: '13px',
-            color: colors.textBody,
-            lineHeight: '1.5',
-            marginBottom: '18px',
-          }}>
-            ❤️ <strong style={{ color: colors.textDark }}>Geduld is alles</strong> — Elke hond leert in zijn eigen tempo. Vier de kleine overwinningen!
-          </Text>
-
-          {/* Help */}
           <div style={{
-            backgroundColor: colors.boxBg,
-            borderRadius: '10px',
-            border: `1px solid ${colors.boxBorder}`,
-            padding: '16px 20px',
-            textAlign: 'center' as const,
-            marginBottom: '20px',
+            backgroundColor: colors.accentSoft,
+            borderRadius: '12px',
+            border: '1px solid #FED7AA',
+            padding: '18px 20px',
+            marginBottom: '10px',
           }}>
             <Text style={{
               fontFamily: font,
-              fontSize: '13px',
+              fontSize: '14px',
+              color: colors.textBody,
+              lineHeight: '1.6',
+              margin: '0 0 12px',
+            }}>
+              &#128021; <strong style={{ color: colors.textDark }}>Begin rustig</strong> — Start met korte trainingssessies van 5–10 minuten. Honden leren het best in kleine stapjes.
+            </Text>
+            <Text style={{
+              fontFamily: font,
+              fontSize: '14px',
+              color: colors.textBody,
+              lineHeight: '1.6',
+              margin: '0 0 12px',
+            }}>
+              &#129460; <strong style={{ color: colors.textDark }}>Wees consistent</strong> — Gebruik altijd dezelfde commando's en beloon gewenst gedrag direct.
+            </Text>
+            <Text style={{
+              fontFamily: font,
+              fontSize: '14px',
               color: colors.textBody,
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Problemen met de download? Stuur een mailtje naar{' '}
-              <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'underline' }}>
+              &#10084;&#65039; <strong style={{ color: colors.textDark }}>Geduld is alles</strong> — Elke hond leert in zijn eigen tempo. Vier de kleine overwinningen!
+            </Text>
+          </div>
+        </div>
+
+        {/* ====== HELP SECTION ====== */}
+        <div style={{ padding: `20px ${pad} 0` }}>
+          <div style={{
+            backgroundColor: colors.boxBg,
+            borderRadius: '12px',
+            border: `1px solid ${colors.boxBorder}`,
+            padding: '16px 20px',
+            textAlign: 'center' as const,
+          }}>
+            <Text style={{
+              fontFamily: font,
+              fontSize: '14px',
+              color: colors.textBody,
+              lineHeight: '1.6',
+              margin: '0',
+            }}>
+              Problemen met de download?
+              <br />
+              <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
                 support@dehondenbijbel.nl
               </Link>
             </Text>
           </div>
+        </div>
 
-          {/* Signature */}
+        {/* ====== SIGNATURE ====== */}
+        <div style={{ padding: `24px ${pad} 28px` }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '14px',
+            fontSize: '15px',
             color: colors.textBody,
-            marginBottom: '4px',
+            margin: '0 0 4px',
           }}>
             Veel succes met de training!
           </Text>
           <Text style={{
             fontFamily: font,
-            fontSize: '14px',
+            fontSize: '15px',
             fontWeight: 700,
             color: colors.textDark,
-            marginBottom: '2px',
+            margin: '0 0 2px',
           }}>
             Lars Vermeulen
           </Text>
           <Text style={{
             fontFamily: font,
-            fontSize: '12px',
+            fontSize: '13px',
             color: colors.textMuted,
+            margin: '0',
           }}>
             <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'none' }}>
               support@dehondenbijbel.nl
@@ -262,39 +298,40 @@ export const DhEbookDeliveryTemplate: React.FC<DhEbookDeliveryTemplateProps> & {
           </Text>
         </div>
 
-        {/* Footer */}
+        {/* ====== FOOTER ====== */}
         <div style={{
           backgroundColor: colors.footerBg,
-          padding: '24px 24px',
+          padding: '28px 28px',
           textAlign: 'center' as const,
         }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '12px',
-            color: colors.accentLight,
-            marginBottom: '6px',
+            fontSize: '13px',
+            fontWeight: 700,
+            color: colors.footerAccent,
+            margin: '0 0 8px',
+            letterSpacing: '0.5px',
           }}>
             De Hondenbijbel
           </Text>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
-            color: '#6366F1',
-            lineHeight: '1.6',
+            color: colors.footerText,
+            lineHeight: '1.7',
+            margin: '0 0 8px',
+          }}>
+            {entityName} &bull; {entityAddress}
+            <br />
+            Reg. nr: {entityRegId}
+          </Text>
+          <Text style={{
+            fontFamily: font,
+            fontSize: '11px',
+            color: '#71717A',
+            lineHeight: '1.5',
             margin: '0',
           }}>
-            {billingEntity?.legal_name || 'EverChapter OÜ'}
-            {' '}&bull;{' '}
-            {billingEntity?.address
-              ? `${billingEntity.address.address_1 || ''}, ${billingEntity.address.postal_code || ''} ${billingEntity.address.city || ''}`
-              : 'Tallinn, Estonia'}
-            {billingEntity?.registration_id && (
-              <>
-                <br />
-                Reg. nr: {billingEntity.registration_id}
-              </>
-            )}
-            <br />
             Je ontvangt deze e-mail omdat je een bestelling hebt geplaatst bij dehondenbijbel.nl.
           </Text>
         </div>
@@ -307,6 +344,11 @@ DhEbookDeliveryTemplate.PreviewProps = {
   firstName: 'Jan',
   downloadUrl: 'https://dehondenbijbel.nl/download/abc123-test-token',
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+  billingEntity: {
+    legal_name: 'EverChapter OÜ',
+    registration_id: '16938029',
+    address: { city: 'Tallinn', district: 'Estonia' },
+  },
 } as DhEbookDeliveryTemplateProps
 
 export default DhEbookDeliveryTemplate
