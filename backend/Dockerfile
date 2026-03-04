@@ -16,7 +16,10 @@ COPY . .
 
 # Build medusa (backend + admin dashboard)
 # Dummy env vars needed for config to load during build (not used for actual connections)
-RUN DATABASE_URL=postgres://dummy:dummy@localhost:5432/dummy npx medusa build
+RUN DATABASE_URL=postgres://dummy:dummy@localhost/dummy \
+    JWT_SECRET=build-placeholder \
+    COOKIE_SECRET=build-placeholder \
+    npx medusa build
 
 EXPOSE 9000
 
