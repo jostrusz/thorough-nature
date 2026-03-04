@@ -7,6 +7,48 @@ import {
   confirmOrderEditRequestWorkflow,
   markPaymentCollectionAsPaid,
 } from "@medusajs/medusa/core-flows"
+import { MollieApiClient } from "../../../../../../modules/payment-mollie/api-client"
+
+const GATEWAY_CONFIG_MODULE = "gatewayConfig"
+
+/** Small helper — non-blocking sleep */
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+/**
+ * Build a Mollie API client (same pattern as /api/webhooks/mollie/route.ts).
+ * 1. Try gateway config from database (admin-configured)
+ * 2. Fallback to MOLLIE_API_KEY env var
+ */
+async function buildMollieClient(req: MedusaRequest): Promise<MollieApiClient> {
+  try {
+    const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE) as any
+    const configs = await gcService.listGatewayConfigs(
+      { provider: "mollie", is_active: true },
+      { take: 1 }
+    )
+    const config = configs[0]
+    if (config) {
+      const isLive = config.mode === "live"
+      const keys = isLive ? config.live_keys : config.test_keys
+      if (keys?.api_key) {
+        return new MollieApiClient(keys.api_key, !isLive)
+      }
+    }
+  } catch {
+    // Gateway config not available — try env var fallback
+  }
+
+  if (process.env.MOLLIE_API_KEY) {
+    return new MollieApiClient(
+      process.env.MOLLIE_API_KEY,
+      process.env.MOLLIE_TEST_MODE !== "false"
+    )
+  }
+
+  throw new Error("Mollie API key not configured")
+}
 
 /**
  * POST /store/custom/orders/:id/upsell-accept
@@ -15,14 +57,17 @@ import {
  * The customer has already paid via a separate upsell cart + payment flow.
  * We do NOT complete that cart (to avoid creating a second order).
  *
+ * IMPORTANT: Before adding the item, we verify the payment was actually
+ * completed with the payment provider. If not paid, we return success: false
+ * and the frontend redirects to thank-you without the upsell item.
+ *
  * Flow:
  * 1. Verify order exists + idempotency check
  * 2. Extract external payment ID from upsell cart's payment collection
+ * 2.5. VERIFY payment was actually completed with the provider
  * 3. Ensure region PricePreference is tax-inclusive (NL/BE VAT)
  * 4. ORDER EDIT: Begin
  * 5. ORDER EDIT: Add item
- * 5.5. Fix is_tax_inclusive on new line item BEFORE request
- *      (critical: this affects payment collection amount calculation)
  * 6. ORDER EDIT: Request (calculates payment diff with correct tax)
  * 7. ORDER EDIT: Confirm
  * 8. Mark new payment collection as paid
@@ -90,18 +135,21 @@ export async function POST(
 
     console.log(`[Upsell] Starting upsell-accept for order ${orderId}, variant ${variant_id}, unit_price ${unit_price}, upsell_cart_id: ${upsell_cart_id || "NONE"}, frontend_payment_id: ${frontendPaymentId || "NONE"}`)
 
-    // ── 2. Extract payment ID ─────────────────────────────────
+    // ── 2. Extract payment ID + session info ─────────────────────
     //    Priority 1: Frontend sends payment ID from gateway return URL
     //      (Stripe adds ?payment_intent=pi_xxx to return URL)
     //    Priority 2: Extract from upsell cart's payment module data
     //    Priority 3: Fallback to Medusa payment ID
     let externalPaymentId: string | null = frontendPaymentId || null
+    let upsellPaymentSession: any = null // Store for verification in Step 2.5
 
     if (externalPaymentId) {
       console.log(`[Upsell] Using frontend-provided payment ID: ${externalPaymentId}`)
-    } else if (upsell_cart_id) {
+    }
+
+    // Always try to get the payment session from the cart (needed for Step 2.5 verification)
+    if (upsell_cart_id) {
       try {
-        // Step 2a: Get the cart's payment_collection ID via query.graph
         const { data: carts } = await query.graph({
           entity: "cart",
           fields: ["id", "payment_collection.id", "payment_collection.status"],
@@ -115,10 +163,9 @@ export async function POST(
           const pcStatus = (carts[0] as any).payment_collection.status
           console.log(`[Upsell] Cart ${upsell_cart_id}: PC id=${pcId}, status=${pcStatus}`)
 
-          // Step 2b: Use Payment Module directly to get sessions + payments with JSONB data
           const paymentModule = req.scope.resolve(Modules.PAYMENT) as any
 
-          // Try payment sessions first (always exist after initialization)
+          // Get payment sessions (always exist after initialization)
           try {
             const sessions = await paymentModule.listPaymentSessions(
               { payment_collection_id: pcId },
@@ -133,19 +180,23 @@ export async function POST(
                 `status=${session.status}, data=${dataStr?.substring(0, 200)}`
               )
 
-              // Stripe: data.id = "pi_xxx"
-              // Mollie: data.id = "tr_xxx"
-              // Airwallex: data.id = "int_xxx"
-              if (session.data?.id) {
-                externalPaymentId = String(session.data.id)
-                console.log(`[Upsell] Found payment ID from session.data.id: ${externalPaymentId}`)
-                break
+              // Store the first session for verification in Step 2.5
+              if (!upsellPaymentSession) {
+                upsellPaymentSession = session
               }
-              // Some providers might store under different keys
-              if (session.data?.payment_intent) {
-                externalPaymentId = String(session.data.payment_intent)
-                console.log(`[Upsell] Found payment ID from session.data.payment_intent: ${externalPaymentId}`)
-                break
+
+              // Extract external payment ID if not already set
+              if (!externalPaymentId) {
+                if (session.data?.id) {
+                  externalPaymentId = String(session.data.id)
+                  console.log(`[Upsell] Found payment ID from session.data.id: ${externalPaymentId}`)
+                  break
+                }
+                if (session.data?.payment_intent) {
+                  externalPaymentId = String(session.data.payment_intent)
+                  console.log(`[Upsell] Found payment ID from session.data.payment_intent: ${externalPaymentId}`)
+                  break
+                }
               }
             }
           } catch (sessErr: any) {
@@ -173,7 +224,6 @@ export async function POST(
                   console.log(`[Upsell] Found payment ID from payment.data.id: ${externalPaymentId}`)
                   break
                 }
-                // Fallback: use Medusa payment ID
                 if (!externalPaymentId && payment.id) {
                   externalPaymentId = payment.id
                   console.log(`[Upsell] Using Medusa payment ID as fallback: ${externalPaymentId}`)
@@ -194,6 +244,101 @@ export async function POST(
     } else {
       console.warn(`[Upsell] No upsell_cart_id provided — cannot extract payment ID`)
     }
+
+    // ── 2.5. Verify payment was actually completed ──────────────
+    //    Prevents adding upsell item when customer abandoned payment
+    //    or payment failed at the gateway.
+    let paymentVerified = false
+    let verificationProvider = "unknown"
+
+    const providerId = upsellPaymentSession?.provider_id || ""
+    const molliePaymentId = externalPaymentId || upsellPaymentSession?.data?.id
+
+    if (providerId.startsWith("pp_mollie")) {
+      // ── MOLLIE: Check payment status via API (with retry) ──
+      verificationProvider = "mollie"
+      if (molliePaymentId) {
+        try {
+          const mollieClient = await buildMollieClient(req)
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            console.log(`[Upsell] Mollie verification attempt ${attempt}/3 for ${molliePaymentId}`)
+            const result = await mollieClient.getPayment(String(molliePaymentId))
+
+            if (result.success && result.data?.status === "paid") {
+              paymentVerified = true
+              console.log(`[Upsell] ✅ Mollie payment ${molliePaymentId} verified as PAID`)
+              break
+            }
+
+            const mollieStatus = result.data?.status || "unknown"
+            console.log(`[Upsell] Mollie payment ${molliePaymentId} status: ${mollieStatus}`)
+
+            // If explicitly failed/expired/canceled — don't retry
+            if (
+              mollieStatus === "failed" ||
+              mollieStatus === "expired" ||
+              mollieStatus === "canceled"
+            ) {
+              console.log(`[Upsell] Mollie payment terminal status: ${mollieStatus} — not retrying`)
+              break
+            }
+
+            // Status is "open" or "pending" — wait and retry
+            if (attempt < 3) {
+              await sleep(2000)
+            }
+          }
+        } catch (mollieErr: any) {
+          console.warn(`[Upsell] Mollie verification error:`, mollieErr.message)
+          // On verification error, don't proceed (safe default)
+        }
+      } else {
+        console.warn(`[Upsell] No Mollie payment ID to verify`)
+      }
+
+    } else if (providerId.includes("stripe")) {
+      // ── STRIPE: Check payment intent status ──
+      verificationProvider = "stripe"
+      const stripePaymentId = externalPaymentId // pi_xxx from URL
+      if (stripePaymentId) {
+        try {
+          const stripe = req.scope.resolve("stripe") as any
+          const intent = await stripe.paymentIntents.retrieve(stripePaymentId)
+          paymentVerified = intent.status === "succeeded"
+          console.log(`[Upsell] Stripe payment ${stripePaymentId} status: ${intent.status}, verified: ${paymentVerified}`)
+        } catch (stripeErr: any) {
+          console.warn(`[Upsell] Stripe verification error:`, stripeErr.message)
+          // On error, don't proceed
+        }
+      } else {
+        console.warn(`[Upsell] No Stripe payment ID to verify`)
+      }
+
+    } else if (providerId) {
+      // ── OTHER PROVIDERS (PayPal, Airwallex, Klarna, etc.) ──
+      // These providers only redirect to return URL on successful payment
+      // (cancel/failure goes to a different URL or doesn't redirect)
+      // Trust the redirect as payment confirmation
+      verificationProvider = providerId
+      paymentVerified = true
+      console.log(`[Upsell] Provider ${providerId}: trusting redirect as payment confirmation`)
+
+    } else {
+      // No provider detected — cannot verify
+      console.warn(`[Upsell] No payment provider detected — cannot verify payment`)
+    }
+
+    if (!paymentVerified) {
+      console.log(`[Upsell] ❌ Payment NOT verified for order ${orderId} (provider: ${verificationProvider}) — skipping order edit`)
+      res.json({
+        success: false,
+        payment_status: "not_paid",
+        message: "Payment not completed or still pending",
+      })
+      return
+    }
+
+    console.log(`[Upsell] ✅ Payment verified via ${verificationProvider} — proceeding with order edit`)
 
     // ── 3. Ensure region PricePreference is tax-inclusive ───────
     const regionId = (orders[0] as any).region_id
@@ -371,7 +516,7 @@ export async function POST(
       {
         event: "upsell_accepted",
         timestamp: now,
-        message: "Customer accepted upsell offer",
+        message: `Customer accepted upsell offer (verified via ${verificationProvider})`,
       },
       ...(externalPaymentId
         ? [
