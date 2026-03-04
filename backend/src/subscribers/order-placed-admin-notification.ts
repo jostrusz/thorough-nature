@@ -101,10 +101,7 @@ export default async function orderPlacedAdminNotificationHandler({
       totalFormatted = `€${total.toFixed(2)}`
     }
 
-    const variantEmojis = ['💰', '🚀', '🧘', '🏆', '🌍', '🐺', '💎', '👑', '🏧', '😤']
-    const emoji = variantEmojis[variantIndex] || '💰'
-
-    const emailSubject = `${emoji} New order! ${displayId} — ${totalFormatted}`
+    const emailSubject = `💰 New order! ${displayId} — ${totalFormatted}`
 
     await notificationModuleService.createNotifications({
       to: ADMIN_EMAIL,

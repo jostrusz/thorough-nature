@@ -534,11 +534,11 @@ export const AdminOrderNotificationTemplate: React.FC<AdminOrderNotificationProp
   const message = pickMessage(messages, order.id || 'default')
 
   const adminUrl = process.env.MEDUSA_ADMIN_URL || process.env.MEDUSA_BACKEND_URL || 'https://backend-staging-580e.up.railway.app'
-  const orderUrl = `${adminUrl}/app/orders/${order.id}`
+  const orderUrl = `${adminUrl}/app/custom-orders/${order.id}`
 
   const defaultPreview = isUpsell
-    ? `${v.emoji} Upsell hit! ${displayId} — ${formatPrice(total, currency)}`
-    : `${v.emoji} New order! ${displayId} — ${formatPrice(total, currency)}`
+    ? `Upsell hit! ${displayId} — ${formatPrice(total, currency)}`
+    : `New order! ${displayId} — ${formatPrice(total, currency)}`
 
   const displayItems = addedItems && addedItems.length > 0 ? addedItems : items
 
