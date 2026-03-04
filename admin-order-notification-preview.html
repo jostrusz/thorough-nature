@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Order Notification — 10 Design Variants Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F0F0F5;font-family:'Inter','Segoe UI',Arial,sans-serif;padding:40px 20px}
+.page-header{text-align:center;margin-bottom:60px}
+.page-header h1{font-size:36px;font-weight:900;color:#111}
+.page-header p{font-size:16px;color:#666;margin-top:8px}
+.variant-section{margin-bottom:80px}
+.variant-title-wrap{text-align:center;margin-bottom:30px}
+.variant-title{font-size:22px;font-weight:800;color:#1E293B;padding:16px 32px;background:#fff;border-radius:12px;display:inline-block;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.variant-pair{display:flex;gap:30px;justify-content:center;flex-wrap:wrap}
+.email-wrapper{flex:0 0 600px;max-width:600px}
+.email-label{text-align:center;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#64748B;margin-bottom:12px}
+.eml{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)}
+@media(max-width:1300px){.variant-pair{flex-direction:column;align-items:center}}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+<h1>Admin Order Notification Emails</h1>
+<p>10 Design Variants — New Order + Upsell Added versions</p>
+</div>
+
+<div id="app"></div>
+
+<script>
+const variants = [
+  {
+    name: "Money Printer 💰", num: 1,
+    headerBg: "linear-gradient(135deg, #0F172A 0%, #1E293B 100%)",
+    accentColor: "#F59E0B", headerTextColor: "#F59E0B", subtitleColor: "#94A3B8",
+    badgeBg: "rgba(245,158,11,0.15)", badgeColor: "#F59E0B",
+    statsBg: "#1E293B", statsColor: "#F59E0B", statsLabelColor: "#94A3B8",
+    msgBg: "#FFFBEB", msgBorder: "#F59E0B", msgColor: "#92400E",
+    btnBg: "#F59E0B", btnColor: "#0F172A",
+    footerBg: "#0F172A", footerNameColor: "#F59E0B", footerClosingColor: "#64748B", footerMetaColor: "#475569",
+    emoji: "💰",
+    order: { title: "KA-CHING!", subtitle: "The money printer just went BRRR", badge: "✨ New Order",
+      msg: "💬 Money printer goes BRRRR. Another sale, another life changed. You're literally printing money while building something meaningful. 🔥" },
+    upsell: { title: "DOUBLE DIP!", subtitle: "Customer came back for seconds", badge: "⚡ Upsell Added",
+      msg: "💬 Double dip activated! The customer loved it so much they came back for more. Your product is literally irresistible. 💰" },
+    closing: "Keep printing. The machine never stops. 💰"
+  },
+  {
+    name: "Rocket Launch 🚀", num: 2,
+    headerBg: "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)",
+    accentColor: "#fff", headerTextColor: "#fff", subtitleColor: "rgba(255,255,255,0.8)",
+    badgeBg: "rgba(255,255,255,0.2)", badgeColor: "#fff",
+    statsBg: "linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)", statsColor: "#fff", statsLabelColor: "rgba(255,255,255,0.7)",
+    msgBg: "#EEF2FF", msgBorder: "#818CF8", msgColor: "#3730A3",
+    btnBg: "linear-gradient(135deg, #3B82F6, #8B5CF6)", btnColor: "#fff",
+    footerBg: "linear-gradient(135deg, #1E3A8A 0%, #5B21B6 100%)", footerNameColor: "#fff", footerClosingColor: "rgba(255,255,255,0.7)", footerMetaColor: "rgba(255,255,255,0.5)",
+    emoji: "🚀",
+    order: { title: "LIFTOFF!", subtitle: "Houston, we have revenue", badge: "✨ New Order",
+      msg: "💬 Houston, we have REVENUE! 🚀 Another successful launch. You're not just building a business — you're building a freaking rocket ship to financial freedom." },
+    upsell: { title: "STAGE 2 IGNITION!", subtitle: "The booster just kicked in", badge: "⚡ Upsell Added",
+      msg: "💬 Stage 2 IGNITION! Upsell locked and loaded. The customer just added boosters to their order. More altitude, more revenue! 🔥" },
+    closing: "Keep launching. The sky is NOT the limit. 🚀"
+  },
+  {
+    name: "Zen Master 🧘", num: 3,
+    headerBg: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
+    accentColor: "#fff", headerTextColor: "#fff", subtitleColor: "rgba(255,255,255,0.85)",
+    badgeBg: "rgba(255,255,255,0.2)", badgeColor: "#fff",
+    statsBg: "#065F46", statsColor: "#A7F3D0", statsLabelColor: "rgba(255,255,255,0.6)",
+    msgBg: "#ECFDF5", msgBorder: "#10B981", msgColor: "#065F46",
+    btnBg: "#10B981", btnColor: "#fff",
+    footerBg: "#064E3B", footerNameColor: "#A7F3D0", footerClosingColor: "rgba(255,255,255,0.6)", footerMetaColor: "rgba(255,255,255,0.4)",
+    emoji: "🧘",
+    order: { title: "FLOW STATE", subtitle: "Quiet power. Consistent results.", badge: "✨ New Order",
+      msg: "💬 Quiet power. Consistent results. This is mastery. 🧘 You don't chase — you attract. And another soul just found exactly what they needed." },
+    upsell: { title: "BONUS FLOW", subtitle: "The customer felt it too", badge: "⚡ Upsell Added",
+      msg: "💬 Effortless expansion. The customer wanted more — because your product radiates value like a calm, unstoppable force. 🍃" },
+    closing: "Breathe. Build. Repeat. The path is clear. 🧘"
+  },
+  {
+    name: "Champion 🏆", num: 4,
+    headerBg: "linear-gradient(135deg, #EA580C 0%, #DC2626 100%)",
+    accentColor: "#fff", headerTextColor: "#fff", subtitleColor: "rgba(255,255,255,0.85)",
+    badgeBg: "rgba(255,255,255,0.2)", badgeColor: "#fff",
+    statsBg: "linear-gradient(135deg, #C2410C 0%, #B91C1C 100%)", statsColor: "#FED7AA", statsLabelColor: "rgba(255,255,255,0.65)",
+    msgBg: "#FFF7ED", msgBorder: "#EA580C", msgColor: "#9A3412",
+    btnBg: "linear-gradient(135deg, #EA580C, #DC2626)", btnColor: "#fff",
+    footerBg: "linear-gradient(135deg, #7C2D12 0%, #991B1B 100%)", footerNameColor: "#FED7AA", footerClosingColor: "rgba(255,255,255,0.65)", footerMetaColor: "rgba(255,255,255,0.45)",
+    emoji: "🏆",
+    order: { title: "ANOTHER W!", subtitle: "Winners win. That's what they do.", badge: "✨ New Order",
+      msg: "💬 Winners WIN. That's literally all they do. And you just did it AGAIN. 🏆 The scoreboard doesn't lie — you're putting up legendary numbers." },
+    upsell: { title: "COMBO KILL!", subtitle: "Upsell secured — clutch play!", badge: "⚡ Upsell Added",
+      msg: "💬 DOUBLE KILL! Upsell secured! 🔥 You just combo'd that customer. First the product, now the upsell. Flawless victory." },
+    closing: "Keep winning. Champions never settle. 🏆"
+  },
+  {
+    name: "Impact Maker 🌍", num: 5,
+    headerBg: "linear-gradient(135deg, #D97706 0%, #92400E 100%)",
+    accentColor: "#fff", headerTextColor: "#fff", subtitleColor: "rgba(255,255,255,0.85)",
+    badgeBg: "rgba(255,255,255,0.2)", badgeColor: "#fff",
+    statsBg: "#78350F", statsColor: "#FDE68A", statsLabelColor: "rgba(255,255,255,0.6)",
+    msgBg: "#FFFBEB", msgBorder: "#D97706", msgColor: "#78350F",
+    btnBg: "#D97706", btnColor: "#fff",
+    footerBg: "#451A03", footerNameColor: "#FDE68A", footerClosingColor: "rgba(255,255,255,0.6)", footerMetaColor: "rgba(255,255,255,0.4)",
+    emoji: "🌍",
+    order: { title: "IMPACT MADE", subtitle: "One more life you've touched today", badge: "✨ New Order",
+      msg: "💬 One more person you've helped today. 🌍 This isn't just commerce — it's your legacy. Every order is a life you're touching, a mind you're opening." },
+    upsell: { title: "DEEPER IMPACT", subtitle: "More value, more transformation", badge: "⚡ Upsell Added",
+      msg: "💬 They loved it so much they got more. 🌍 That's REAL impact — when people want to go deeper into what you've created. Beautiful." },
+    closing: "Keep making impact. The world needs what you build. 🌍"
+  },
+  {
+    name: "Wolf of Wall Street 🐺", num: 6,
+    headerBg: "linear-gradient(135deg, #111827 0%, #1F2937 100%)",
+    accentColor: "#059669", headerTextColor: "#34D399", subtitleColor: "#9CA3AF",
+    badgeBg: "rgba(5,150,105,0.15)", badgeColor: "#34D399",
+    statsBg: "#111827", statsColor: "#34D399", statsLabelColor: "#6B7280",
+    msgBg: "#ECFDF5", msgBorder: "#059669", msgColor: "#065F46",
+    btnBg: "#059669", btnColor: "#fff",
+    footerBg: "#111827", footerNameColor: "#34D399", footerClosingColor: "#6B7280", footerMetaColor: "#4B5563",
+    emoji: "🐺",
+    order: { title: "WOLF MODE", subtitle: "The wolf always eats", badge: "✨ New Order",
+      msg: "💬 The wolf doesn't lose sleep over the opinion of sheep. 🐺 You're out here HUNTING while they're out here scrolling. Another kill secured." },
+    upsell: { title: "HUNGRY WOLF", subtitle: "The wolf smelled opportunity", badge: "⚡ Upsell Added",
+      msg: "💬 The hungry wolf ALWAYS eats more. 🐺 Upsell secured. Your customer couldn't say no because your product is pure adrenaline." },
+    closing: "Stay hungry. The wolf never stops hunting. 🐺"
+  },
+  {
+    name: "Diamond Hands 💎", num: 7,
+    headerBg: "linear-gradient(135deg, #06B6D4 0%, #0C4A6E 100%)",
+    accentColor: "#fff", headerTextColor: "#fff", subtitleColor: "rgba(255,255,255,0.8)",
+    badgeBg: "rgba(255,255,255,0.2)", badgeColor: "#fff",
+    statsBg: "#0C4A6E", statsColor: "#67E8F9", statsLabelColor: "rgba(255,255,255,0.6)",
+    msgBg: "#ECFEFF", msgBorder: "#06B6D4", msgColor: "#164E63",
+    btnBg: "linear-gradient(135deg, #06B6D4, #0891B2)", btnColor: "#fff",
+    footerBg: "#0C4A6E", footerNameColor: "#67E8F9", footerClosingColor: "rgba(255,255,255,0.6)", footerMetaColor: "rgba(255,255,255,0.4)",
+    emoji: "💎",
+    order: { title: "DIAMOND HANDS", subtitle: "HODL the vision. The market rewards conviction.", badge: "✨ New Order",
+      msg: "💬 HODL the vision. 💎 The market ALWAYS rewards conviction. Paper hands quit at the first dip — you held through everything and look at you now. PRINTING." },
+    upsell: { title: "POSITION INCREASED", subtitle: "Customer went all in", badge: "⚡ Upsell Added",
+      msg: "💬 💎 HANDS NEVER FOLD. Customer increased their position! They're bullish on your product and honestly? So is the entire market. TO THE MOON! 🌙" },
+    closing: "💎🙌 Diamond hands always win. HODL forever."
+  },
+  {
+    name: "Empire Builder 👑", num: 8,
+    headerBg: "linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)",
+    accentColor: "#FDE68A", headerTextColor: "#FDE68A", subtitleColor: "rgba(255,255,255,0.8)",
+    badgeBg: "rgba(253,230,138,0.2)", badgeColor: "#FDE68A",
+    statsBg: "#4C1D95", statsColor: "#FDE68A", statsLabelColor: "rgba(255,255,255,0.6)",
+    msgBg: "#FAF5FF", msgBorder: "#7C3AED", msgColor: "#4C1D95",
+    btnBg: "linear-gradient(135deg, #7C3AED, #6D28D9)", btnColor: "#fff",
+    footerBg: "#3B0764", footerNameColor: "#FDE68A", footerClosingColor: "rgba(255,255,255,0.6)", footerMetaColor: "rgba(255,255,255,0.4)",
+    emoji: "👑",
+    order: { title: "EMPIRE GROWS", subtitle: "Another brick in the castle wall", badge: "✨ New Order",
+      msg: "💬 Rome wasn't built in a day — but they were laying bricks every single hour. 👑 This order is another brick in YOUR empire. And it's looking magnificent." },
+    upsell: { title: "TERRITORY ACQUIRED", subtitle: "The kingdom expands", badge: "⚡ Upsell Added",
+      msg: "💬 New territory ACQUIRED! 👑 The kingdom expands. Your subject loved the product so much, they pledged more tribute. Long live the king!" },
+    closing: "Long live the king. The empire is forever. 👑"
+  },
+  {
+    name: "Cash Machine 🏧", num: 9,
+    headerBg: "linear-gradient(135deg, #0A0A1A 0%, #111827 100%)",
+    accentColor: "#22C55E", headerTextColor: "#22C55E", subtitleColor: "#6B7280",
+    badgeBg: "rgba(34,197,94,0.15)", badgeColor: "#22C55E",
+    statsBg: "#0A0A1A", statsColor: "#22C55E", statsLabelColor: "#6B7280",
+    msgBg: "#F0FDF4", msgBorder: "#22C55E", msgColor: "#14532D",
+    btnBg: "#22C55E", btnColor: "#0A0A1A",
+    footerBg: "#0A0A1A", footerNameColor: "#22C55E", footerClosingColor: "#6B7280", footerMetaColor: "#4B5563",
+    emoji: "🏧",
+    order: { title: "CASH SECURED", subtitle: "The machine keeps printing", badge: "✨ New Order",
+      msg: "💬 The algorithm is YOU. 🏧 And it just printed another sale. Insert traffic → output cash. Your conversion machine is running at peak performance." },
+    upsell: { title: "BONUS ROUND", subtitle: "Extra cash dispensed", badge: "⚡ Upsell Added",
+      msg: "💬 BONUS ROUND! 🏧 Extra cash dispensed. The machine doesn't just work — it OVERPERFORMS. Insert one customer, extract maximum value." },
+    closing: "The machine never sleeps. Neither does the money. 🏧"
+  },
+  {
+    name: "Sigma Grindset 😤", num: 10,
+    headerBg: "linear-gradient(135deg, #334155 0%, #1E293B 100%)",
+    accentColor: "#EF4444", headerTextColor: "#EF4444", subtitleColor: "#94A3B8",
+    badgeBg: "rgba(239,68,68,0.15)", badgeColor: "#EF4444",
+    statsBg: "#1E293B", statsColor: "#EF4444", statsLabelColor: "#64748B",
+    msgBg: "#FEF2F2", msgBorder: "#EF4444", msgColor: "#7F1D1D",
+    btnBg: "#EF4444", btnColor: "#fff",
+    footerBg: "#1E293B", footerNameColor: "#EF4444", footerClosingColor: "#64748B", footerMetaColor: "#475569",
+    emoji: "😤",
+    order: { title: "SIGMA SALE", subtitle: "Average people scroll. Sigmas ship.", badge: "✨ New Order",
+      msg: "💬 Average people scroll TikTok. Sigmas SHIP product. 😤 You just shipped another order while they were watching reels about 'passive income'. YOU are the passive income." },
+    upsell: { title: "SIGMA UPSELL", subtitle: "Double extraction. Peak efficiency.", badge: "⚡ Upsell Added",
+      msg: "💬 Sigma doesn't stop at ONE sale. 😤 Upsell: SECURED. While betas leave money on the table, you extract maximum value. It's called efficiency." },
+    closing: "Grind never stops. Sigma mentality forever. 😤"
+  }
+];
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderEmail(v, type) {
+  const d = type === 'order' ? v.order : v.upsell;
+  return `
+<div class="eml">
+  <!-- HEADER -->
+  <div style="background:${v.headerBg};padding:40px 30px 30px;text-align:center;">
+    <div style="font-size:48px;margin-bottom:8px;">${v.emoji}</div>
+    <div style="font-size:30px;font-weight:900;color:${v.headerTextColor};letter-spacing:1.5px;line-height:1.2;">${esc(d.title)}</div>
+    <div style="font-size:14px;color:${v.subtitleColor};margin-top:8px;">${esc(d.subtitle)}</div>
+    <div style="display:inline-block;background:${v.badgeBg};color:${v.badgeColor};font-size:12px;font-weight:700;padding:6px 16px;border-radius:20px;margin-top:14px;">${esc(d.badge)}</div>
+    <div style="color:${v.subtitleColor};font-size:13px;margin-top:12px;opacity:0.7;">Order #NL2026-2084 &middot; 4 March 2026</div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div style="display:flex;background:${v.statsBg};padding:20px 30px;justify-content:center;gap:40px;">
+    <div style="text-align:center;"><div style="font-size:24px;font-weight:800;color:${v.statsColor};">&euro;84.00</div><div style="font-size:11px;color:${v.statsLabelColor};margin-top:2px;">Revenue</div></div>
+    <div style="text-align:center;"><div style="font-size:24px;font-weight:800;color:${v.statsColor};">3</div><div style="font-size:11px;color:${v.statsLabelColor};margin-top:2px;">Items</div></div>
+    <div style="text-align:center;"><div style="font-size:24px;font-weight:800;color:${v.statsColor};">🇳🇱</div><div style="font-size:11px;color:${v.statsLabelColor};margin-top:2px;">NL</div></div>
+  </div>
+
+  <!-- MOTIVATIONAL MESSAGE -->
+  <div style="padding:24px 30px;">
+    <div style="background:${v.msgBg};border-left:4px solid ${v.msgBorder};padding:16px 20px;border-radius:0 8px 8px 0;font-size:14px;color:${v.msgColor};line-height:1.6;">
+      ${esc(d.msg)}
+    </div>
+  </div>
+
+  <!-- ORDER DETAILS -->
+  <div style="padding:0 30px 24px;">
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94A3B8;margin-bottom:12px;">Order Details</div>
+    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;"><span style="color:#64748B;">Project</span><span style="font-weight:600;color:#0F172A;">De Hondenbijbel</span></div>
+    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;"><span style="color:#64748B;">Customer</span><span style="font-weight:600;color:#0F172A;">Jan de Groot</span></div>
+    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;"><span style="color:#64748B;">Email</span><span style="font-weight:600;color:#0F172A;">jan@voorbeeld.nl</span></div>
+    <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:14px;"><span style="color:#64748B;">Payment</span><span style="font-weight:600;color:#0F172A;">iDEAL</span></div>
+  </div>
+
+  <!-- ORDER ITEMS -->
+  <div style="padding:0 30px 24px;">
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94A3B8;margin-bottom:12px;">📦 Order Items</div>
+    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;"><span style="color:#334155;">De Hondenbijbel (Hardcover + E-book) &times; 2</span><span style="font-weight:600;color:#0F172A;">&euro;59.00</span></div>
+    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;"><span style="color:#334155;">Laat Los (DH Upsell) &times; 1</span><span style="font-weight:600;color:#0F172A;">&euro;25.00</span></div>
+    <div style="margin-top:12px;padding-top:12px;border-top:2px solid #E2E8F0;">
+      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;"><span style="color:#64748B;">Subtotal</span><span style="color:#334155;">&euro;84.00</span></div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;"><span style="color:#64748B;">Shipping</span><span style="color:#10B981;font-weight:600;">FREE</span></div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;"><span style="color:#64748B;">Incl. VAT</span><span style="color:#334155;">&euro;14.57</span></div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0 0;font-size:18px;font-weight:800;border-top:2px solid #0F172A;margin-top:8px;"><span style="color:#0F172A;">TOTAL</span><span style="color:#0F172A;">&euro;84.00</span></div>
+    </div>
+  </div>
+
+  <!-- SHIPPING ADDRESS -->
+  <div style="padding:0 30px 24px;">
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94A3B8;margin-bottom:12px;">📍 Shipping Address</div>
+    <div style="font-size:14px;color:#334155;line-height:1.7;">Jan de Groot<br>Prinsengracht 263<br>1016 GV Amsterdam<br>🇳🇱 NL</div>
+  </div>
+
+  <!-- CTA BUTTON -->
+  <div style="padding:0 30px 28px;text-align:center;">
+    <a href="#" style="display:inline-block;background:${v.btnBg};color:${v.btnColor};font-weight:700;font-size:14px;padding:14px 40px;border-radius:8px;text-decoration:none;letter-spacing:0.3px;">View Order in Admin &rarr;</a>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="background:${v.footerBg};padding:20px 30px;text-align:center;">
+    <div style="font-size:13px;color:${v.footerNameColor};font-weight:600;">${esc(v.name)}</div>
+    <div style="font-size:12px;color:${v.footerClosingColor};margin-top:4px;">${esc(v.closing)}</div>
+    <div style="font-size:11px;color:${v.footerMetaColor};margin-top:8px;">Admin notification &middot; De Hondenbijbel &middot; #NL2026-2084</div>
+  </div>
+</div>`;
+}
+
+const app = document.getElementById('app');
+let html = '';
+
+variants.forEach(v => {
+  html += `
+<div class="variant-section">
+  <div class="variant-title-wrap"><div class="variant-title">Variant ${v.num}: ${esc(v.name)}</div></div>
+  <div class="variant-pair">
+    <div class="email-wrapper">
+      <div class="email-label">New Order</div>
+      ${renderEmail(v, 'order')}
+    </div>
+    <div class="email-wrapper">
+      <div class="email-label">Upsell Added</div>
+      ${renderEmail(v, 'upsell')}
+    </div>
+  </div>
+</div>`;
+});
+
+app.innerHTML = html;
+</script>
+
+</body>
+</html>

@@ -10,6 +10,8 @@ import { DhOrderPlacedTemplate, DH_ORDER_PLACED, isDhOrderPlacedTemplateData } f
 import { DhAbandonedCheckoutTemplate, DH_ABANDONED_CHECKOUT, isDhAbandonedCheckoutData } from './dh-abandoned-checkout'
 import { DhEbookDeliveryTemplate, DH_EBOOK_DELIVERY, isDhEbookDeliveryData } from './dh-ebook-delivery'
 import { DhShipmentNotificationTemplate, DH_SHIPMENT_NOTIFICATION, isDhShipmentNotificationData } from './dh-shipment-notification'
+// Admin notification
+import { AdminOrderNotificationTemplate, ADMIN_ORDER_NOTIFICATION, isAdminOrderNotificationData } from './admin-order-notification'
 
 export const EmailTemplates = {
   INVITE_USER,
@@ -23,6 +25,8 @@ export const EmailTemplates = {
   DH_ABANDONED_CHECKOUT,
   DH_EBOOK_DELIVERY,
   DH_SHIPMENT_NOTIFICATION,
+  // Admin notifications
+  ADMIN_ORDER_NOTIFICATION,
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -129,6 +133,16 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <DhShipmentNotificationTemplate {...data} />
 
+    // ── Admin notification ───────────────────────────────────
+    case EmailTemplates.ADMIN_ORDER_NOTIFICATION:
+      if (!isAdminOrderNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ADMIN_ORDER_NOTIFICATION}"`
+        )
+      }
+      return <AdminOrderNotificationTemplate {...data} />
+
     default:
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
@@ -149,4 +163,6 @@ export {
   DhAbandonedCheckoutTemplate,
   DhEbookDeliveryTemplate,
   DhShipmentNotificationTemplate,
+  // Admin notification
+  AdminOrderNotificationTemplate,
 }
