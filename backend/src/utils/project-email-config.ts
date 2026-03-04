@@ -8,14 +8,17 @@ export interface ProjectEmailConfig {
   replyTo: string
   /** "From" display name (used in subject prefix if needed) */
   fromName: string
+  /** Full "from" header, e.g. "Brand <email@domain.com>" — overrides global RESEND_FROM_EMAIL */
+  fromEmail?: string
   /** Project identifier for template resolution */
   project: string
 }
 
 const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
   dehondenbijbel: {
-    replyTo: 'support@dehondenbijbel.nl',
+    replyTo: 'support@travelbible.nl',
     fromName: 'De Hondenbijbel',
+    fromEmail: 'De Hondenbijbel <support@travelbible.nl>',
     project: 'dehondenbijbel',
   },
   loslatenboek: {

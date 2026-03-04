@@ -4,7 +4,7 @@ import type DigitalDownloadModuleService from "../../../../modules/digital-downl
 
 // Project-specific contact emails
 const PROJECT_SUPPORT_EMAILS: Record<string, string> = {
-  dehondenbijbel: "support@dehondenbijbel.nl",
+  dehondenbijbel: "support@travelbible.nl",
   loslatenboek: "devries@loslatenboek.nl",
 }
 

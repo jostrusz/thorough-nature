@@ -165,7 +165,7 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
             color: 'rgba(255,255,255,0.7)',
             margin: '0',
           }}>
-            Bestelling #{displayId} &bull; {orderDate}
+            Bestelling {displayId} &bull; {orderDate}
           </Text>
         </div>
 
@@ -224,7 +224,7 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
               <tbody>
                 <tr>
                   <td style={{ fontFamily: font, fontSize: '13px', color: colors.textMuted, padding: '3px 0' }}>Bestelling</td>
-                  <td align="right" style={{ fontFamily: font, fontSize: '13px', fontWeight: 600, color: colors.textDark, padding: '3px 0' }}>#{displayId}</td>
+                  <td align="right" style={{ fontFamily: font, fontSize: '13px', fontWeight: 600, color: colors.textDark, padding: '3px 0' }}>{displayId}</td>
                 </tr>
                 <tr>
                   <td style={{ fontFamily: font, fontSize: '13px', color: colors.textMuted, padding: '3px 0' }}>Datum</td>
@@ -606,8 +606,8 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
             }}>
               Vragen over je bestelling?
               <br />
-              <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                support@dehondenbijbel.nl
+              <Link href="mailto:support@travelbible.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                support@travelbible.nl
               </Link>
             </Text>
           </div>
@@ -638,8 +638,8 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'none' }}>
-              support@dehondenbijbel.nl
+            <Link href="mailto:support@travelbible.nl" style={{ color: colors.accent, textDecoration: 'none' }}>
+              support@travelbible.nl
             </Link>
           </Text>
         </div>
@@ -691,6 +691,7 @@ DhOrderPlacedTemplate.PreviewProps = {
   order: {
     id: 'test-order-id',
     display_id: '2047',
+    metadata: { custom_order_number: 'NL2026-2047' },
     created_at: new Date().toISOString(),
     email: 'jan@voorbeeld.nl',
     currency_code: 'eur',

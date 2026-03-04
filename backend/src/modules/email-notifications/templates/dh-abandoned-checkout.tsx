@@ -191,8 +191,8 @@ export const DhAbandonedCheckoutTemplate: React.FC<DhAbandonedCheckoutTemplatePr
             margin: '0',
           }}>
             Vragen? Neem contact op via{' '}
-            <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 600 }}>
-              support@dehondenbijbel.nl
+            <Link href="mailto:support@travelbible.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 600 }}>
+              support@travelbible.nl
             </Link>
           </Text>
         </div>

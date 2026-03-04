@@ -107,12 +107,13 @@ export default async function orderPlacedHandler({
   const projectConfig = getProjectEmailConfig(order)
   const templateKey = resolveTemplateKey(EmailTemplates.ORDER_PLACED, projectConfig.project)
 
-  const emailSubject = `Bedankt voor je bestelling! #${displayId}`
+  const emailSubject = `Bedankt voor je bestelling! ${displayId}`
   try {
     await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
       template: templateKey,
+      ...(projectConfig.fromEmail ? { from: projectConfig.fromEmail } : {}),
       data: {
         emailOptions: {
           replyTo: projectConfig.replyTo,

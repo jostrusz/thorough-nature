@@ -111,11 +111,12 @@ export default async function orderFulfillmentCreatedHandler({
     const projectConfig = getProjectEmailConfig(order)
     const templateKey = resolveTemplateKey(EmailTemplates.SHIPMENT_NOTIFICATION, projectConfig.project)
 
-    const emailSubject = `Je bestelling #${displayId} is verzonden! 📦`
+    const emailSubject = `Je bestelling ${displayId} is verzonden! 📦`
     await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
       template: templateKey,
+      ...(projectConfig.fromEmail ? { from: projectConfig.fromEmail } : {}),
       data: {
         emailOptions: {
           replyTo: projectConfig.replyTo,

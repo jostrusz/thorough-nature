@@ -53,7 +53,7 @@ const DEFAULT_EBOOK_FILES = EBOOK_FILES_BY_PROJECT.loslatenboek
 // Storefront URLs per project
 const STOREFRONT_URLS: Record<string, string> = {
   loslatenboek: process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_BASE_URL || "https://tijdomloslaten.nl",
-  dehondenbijbel: process.env.DH_STOREFRONT_URL || "https://dehondenbijbel.nl",
+  dehondenbijbel: process.env.DH_STOREFRONT_URL || "https://storefront-staging-4128.up.railway.app",
 }
 
 export default async function orderPlacedDigitalDownloadHandler({
@@ -127,6 +127,7 @@ export default async function orderPlacedDigitalDownloadHandler({
       to: order.email,
       channel: 'email',
       template: templateKey,
+      ...(projectConfig.fromEmail ? { from: projectConfig.fromEmail } : {}),
       data: {
         emailOptions: {
           replyTo: projectConfig.replyTo,

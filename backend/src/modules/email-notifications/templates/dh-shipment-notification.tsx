@@ -128,7 +128,7 @@ export const DhShipmentNotificationTemplate: React.FC<DhShipmentNotificationTemp
             color: 'rgba(255,255,255,0.7)',
             margin: '0',
           }}>
-            Bestelling #{displayId}
+            Bestelling {displayId}
           </Text>
         </div>
 
@@ -514,8 +514,8 @@ export const DhShipmentNotificationTemplate: React.FC<DhShipmentNotificationTemp
             }}>
               Vragen over je verzending?
               <br />
-              <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                support@dehondenbijbel.nl
+              <Link href="mailto:support@travelbible.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                support@travelbible.nl
               </Link>
             </Text>
           </div>
@@ -546,8 +546,8 @@ export const DhShipmentNotificationTemplate: React.FC<DhShipmentNotificationTemp
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'none' }}>
-              support@dehondenbijbel.nl
+            <Link href="mailto:support@travelbible.nl" style={{ color: colors.accent, textDecoration: 'none' }}>
+              support@travelbible.nl
             </Link>
           </Text>
         </div>
@@ -598,6 +598,7 @@ DhShipmentNotificationTemplate.PreviewProps = {
   order: {
     id: 'test-order-id',
     display_id: '2047',
+    metadata: { custom_order_number: 'NL2026-2047' },
     created_at: new Date().toISOString(),
     email: 'jan@voorbeeld.nl',
     currency_code: 'eur',

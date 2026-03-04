@@ -75,7 +75,7 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
       // Detect project from cart metadata
       const projectId = meta.project_id || "loslatenboek"
       const projectReplyTo = projectId === "dehondenbijbel"
-        ? "support@dehondenbijbel.nl"
+        ? "support@travelbible.nl"
         : "devries@loslatenboek.nl"
 
       // Extract customer name from shipping address
