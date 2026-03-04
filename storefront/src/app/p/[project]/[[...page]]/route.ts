@@ -69,6 +69,11 @@ export async function GET(
   // Look up the HTML filename
   const htmlFile = config.pages[pageName]
   if (!htmlFile) {
+    // Fallback: check for advertorial page in database
+    const advertorial = await fetchAdvertorial(config, pageName)
+    if (advertorial) {
+      return serveAdvertorial(request, config, advertorial)
+    }
     return new NextResponse("Page not found", { status: 404 })
   }
 
@@ -196,6 +201,159 @@ interface ProjectToggles {
   orderBumpEnabled: boolean
   upsellEnabled: boolean
   foxentryApiKey: string | null
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ * ADVERTORIAL PAGE HELPERS
+ * Fetch advertorial pages from the database and serve them with
+ * Facebook Pixel + Analytics injection.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+interface AdvertorialPage {
+  id: string
+  title: string
+  slug: string
+  html_content: string
+  meta_title: string | null
+  meta_description: string | null
+  og_image_url: string | null
+  facebook_pixel_id: string | null
+}
+
+/**
+ * Fetch a published advertorial page from the Medusa backend.
+ * Returns the page data or null if not found / draft.
+ * Cached for 60s via Next.js fetch cache.
+ */
+async function fetchAdvertorial(
+  config: ProjectConfig,
+  slug: string
+): Promise<AdvertorialPage | null> {
+  // Skip slugs that clearly aren't advertorials (contain dots = file extensions)
+  if (slug.includes(".")) return null
+
+  try {
+    const url = `${config.medusaUrl}/store/advertorials/${encodeURIComponent(slug)}?project_id=${config.slug}`
+    const res = await fetch(url, {
+      headers: {
+        "x-publishable-api-key": config.publishableApiKey || "",
+      },
+      next: { revalidate: 60 }, // Cache for 60s on server
+    })
+
+    if (!res.ok) return null
+
+    const data = await res.json()
+    if (data.found && data.page) {
+      return data.page as AdvertorialPage
+    }
+  } catch (e) {
+    console.warn(`[Advertorial] Failed to fetch "${slug}" for ${config.slug}:`, e)
+  }
+
+  return null
+}
+
+/**
+ * Serve an advertorial page as a full HTML response with:
+ * - Facebook Pixel injection (advertorial override or project default)
+ * - Analytics tracker injection
+ * - SEO meta tags injection (title, description, og:image)
+ */
+async function serveAdvertorial(
+  request: NextRequest,
+  config: ProjectConfig,
+  advertorial: AdvertorialPage
+): Promise<NextResponse> {
+  let html = advertorial.html_content
+
+  // --- 1. Determine Facebook Pixel ID ---
+  // Use advertorial-specific pixel if set, otherwise fall back to project default
+  let pixelId = advertorial.facebook_pixel_id || ""
+  if (!pixelId) {
+    pixelId = await fetchPixelId(config)
+  }
+
+  // --- 2. Inject SEO meta tags into <head> ---
+  const metaTags = buildMetaTags(advertorial)
+  if (metaTags) {
+    if (/<head[^>]*>/i.test(html)) {
+      html = html.replace(/<head([^>]*)>/i, `<head$1>${metaTags}`)
+    } else if (/<html[^>]*>/i.test(html)) {
+      // No <head> tag — inject one
+      html = html.replace(/<html([^>]*)>/i, `<html$1><head>${metaTags}</head>`)
+    } else {
+      // Bare HTML — prepend
+      html = `<head>${metaTags}</head>${html}`
+    }
+  }
+
+  // --- 3. Inject Facebook Pixel script ---
+  const pixelScript = generatePixelScript(config, pixelId)
+  if (/<head[^>]*>/i.test(html)) {
+    // Inject at end of <head> (before </head>)
+    html = html.replace(/<\/head>/i, `${pixelScript}\n</head>`)
+  } else {
+    // Prepend pixel script
+    html = `${pixelScript}\n${html}`
+  }
+
+  // --- 4. Inject Analytics tracker before </body> ---
+  const analyticsScript = generateAnalyticsScript(config)
+  if (/<\/body>/i.test(html)) {
+    html = html.replace(/<\/body>/i, `${analyticsScript}\n</body>`)
+  } else {
+    // No </body> — append
+    html = `${html}\n${analyticsScript}`
+  }
+
+  return new NextResponse(html, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "public, max-age=60, s-maxage=300",
+    },
+  })
+}
+
+/**
+ * Build SEO meta tags HTML string from advertorial page data.
+ */
+function buildMetaTags(advertorial: AdvertorialPage): string {
+  const tags: string[] = []
+
+  if (advertorial.meta_title) {
+    tags.push(`<title>${escapeHtml(advertorial.meta_title)}</title>`)
+    tags.push(`<meta property="og:title" content="${escapeHtml(advertorial.meta_title)}" />`)
+  } else if (advertorial.title) {
+    tags.push(`<title>${escapeHtml(advertorial.title)}</title>`)
+    tags.push(`<meta property="og:title" content="${escapeHtml(advertorial.title)}" />`)
+  }
+
+  if (advertorial.meta_description) {
+    tags.push(`<meta name="description" content="${escapeHtml(advertorial.meta_description)}" />`)
+    tags.push(`<meta property="og:description" content="${escapeHtml(advertorial.meta_description)}" />`)
+  }
+
+  if (advertorial.og_image_url) {
+    tags.push(`<meta property="og:image" content="${escapeHtml(advertorial.og_image_url)}" />`)
+  }
+
+  tags.push(`<meta property="og:type" content="article" />`)
+
+  return tags.join("\n")
+}
+
+/**
+ * Escape special HTML characters for safe insertion into attributes/content.
+ */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
 }
 
 function generateProjectConfigScript(
