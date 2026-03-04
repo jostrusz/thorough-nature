@@ -2,12 +2,12 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { ShoppingBag } from "@medusajs/icons"
 import { toast } from "@medusajs/ui"
-import { StatCards } from "../../components/orders/stat-cards"
+import { ProfitabilitySection } from "../../components/orders/profitability-section"
 import { OrderTabs, TABS } from "../../components/orders/order-tabs"
 import { OrdersTable } from "../../components/orders/orders-table"
 import { BulkActionsBar } from "../../components/orders/bulk-actions-bar"
 import { NewOrderCelebration } from "../../components/orders/new-order-celebration"
-import { useOrderStats } from "../../hooks/use-order-stats"
+// useOrderStats removed — replaced by ProfitabilitySection
 import { useOrdersList } from "../../hooks/use-orders-list"
 import { useBulkActions } from "../../hooks/use-bulk-actions"
 import { useUpdateMetadata } from "../../hooks/use-update-metadata"
@@ -372,7 +372,6 @@ const CustomOrdersPage = () => {
   )
 
   // Data hooks
-  const { data: stats, isLoading: statsLoading } = useOrderStats()
   const { data: ordersData, isLoading: ordersLoading } = useOrdersList(queryParams)
   const bulkActions = useBulkActions()
   const updateMetadata = useUpdateMetadata()
@@ -572,16 +571,8 @@ const CustomOrdersPage = () => {
         </div>
       </div>
 
-      {/* Stat Cards */}
-      <StatCards
-        ordersToday={stats?.ordersToday ?? 0}
-        revenueToday={stats?.revenueToday ?? 0}
-        ordersYesterday={stats?.ordersYesterday ?? 0}
-        revenueYesterday={stats?.revenueYesterday ?? 0}
-        unfulfilled={stats?.unfulfilled ?? 0}
-        inTransit={stats?.inTransit ?? 0}
-        isLoading={statsLoading}
-      />
+      {/* Profitability Section */}
+      <ProfitabilitySection />
 
       {/* Main Card */}
       <div className="dash-main-card" style={mainCardStyle}>
