@@ -26,13 +26,24 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
     },
   ],
   dehondenbijbel: [
-    // TODO: Add De Hondenbijbel e-book files when ready
-    // {
-    //   key: "e-books/De-Hondenbijbel.pdf",
-    //   title: "De Hondenbijbel",
-    //   description: "E-book (PDF)",
-    //   size: "TBD",
-    // },
+    {
+      key: "e-books/Langlevendheid begint in de voerbak.pdf",
+      title: "Langlevendheid begint in de voerbak",
+      description: "E-book (PDF)",
+      size: "3.7 MB",
+    },
+    {
+      key: "e-books/TOP 20 spelletjes.pdf",
+      title: "TOP 20 spelletjes",
+      description: "E-book (PDF)",
+      size: "798 KB",
+    },
+    {
+      key: "e-books/Waroom Doet Hij Dat.pdf",
+      title: "Waroom Doet Hij Dat",
+      description: "E-book (PDF)",
+      size: "4.0 MB",
+    },
   ],
 }
 
