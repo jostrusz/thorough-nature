@@ -3620,9 +3620,9 @@ body {
         method: 'POST',
         body: JSON.stringify({ variant_id: VARIANT_ID, quantity: bundleQty })
       }).then(function() {
-        // Add order bump if active
+        // Add order bump if active (uses bundle endpoint for tax-inclusive pricing + discounted price)
         if (isOrderBump && PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.variantId) {
-          return medusaFetch('/store/carts/' + cartId + '/line-items', {
+          return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
             method: 'POST',
             body: JSON.stringify({
               variant_id: PROJECT_CONFIG.upsellProduct.variantId,
@@ -6355,9 +6355,9 @@ body {
           quantity: checkoutBundleQty
         })
       }).then(function() {
-        // Stap 2b: Order bump produkt toevoegen (pokud je zaškrtnutý)
+        // Stap 2b: Order bump produkt toevoegen (bundle endpoint = tax-inclusive + discounted price)
         if (checkoutOrderBump) {
-          return medusaFetch('/store/carts/' + cartId + '/line-items', {
+          return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
             method: 'POST',
             body: JSON.stringify({
               variant_id: PROJECT_CONFIG.upsellProduct.variantId,

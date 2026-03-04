@@ -42,6 +42,10 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
   "variant_01KJSESHRDFQMXT0V0HDQZ9NXG": {
     1: 25,    // €25.00 incl. tax (upsell price, original €35)
   },
+  // Loslatenboek Upsell — "Het Leven Dat Je Verdient"
+  "variant_01KJ9YR4K948VWEF7D4YNAQ7R0": {
+    1: 23,    // €23.00 incl. tax (upsell price, original €36)
+  },
 }
 
 type AddBundleToCartInput = {
