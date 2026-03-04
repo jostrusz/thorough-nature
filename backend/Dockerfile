@@ -15,7 +15,8 @@ RUN corepack prepare --activate && pnpm install --frozen-lockfile
 COPY . .
 
 # Build medusa (backend + admin dashboard)
-RUN npx medusa build
+# Dummy env vars needed for config to load during build (not used for actual connections)
+RUN DATABASE_URL=postgres://dummy:dummy@localhost:5432/dummy npx medusa build
 
 EXPOSE 9000
 
