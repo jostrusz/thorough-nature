@@ -21,10 +21,8 @@ RUN DATABASE_URL=postgres://dummy:dummy@localhost/dummy \
     COOKIE_SECRET=build-placeholder \
     npx medusa build
 
-# Railway assigns PORT dynamically — Medusa must listen on it
 ENV PORT=9000
 EXPOSE 9000
 
-# Start: run migrations then start server
-# Use exec so medusa gets PID 1 and receives signals properly
-CMD ["sh", "-c", "npx medusa db:migrate && exec npx medusa start"]
+# Start server directly (migration via Railway Pre-deploy Command)
+CMD ["npx", "medusa", "start"]
