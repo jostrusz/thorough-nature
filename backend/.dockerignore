@@ -1,0 +1,8 @@
+node_modules
+.git
+.env
+.DS_Store
+.idea
+coverage
+yarn-error.log
+medusa-db.sql
