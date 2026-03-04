@@ -1342,4 +1342,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     window.location.href = PROJECT_CONFIG.thankYouUrl;
   }
 
-  // Wire up all 
+  // Wire up all buttons
+  btnYesAll.forEach(function(btn) {
+    btn.addEventListener('click', handleUpsellAccept);
+  });
+  btnNoAll.forEach(function(btn) {
+    btn.addEventListener('click', handleUpsellDecline);
+  });
+
+})();
+</script>
+
+</body>
+</html> 
