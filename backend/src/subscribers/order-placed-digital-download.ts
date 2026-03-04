@@ -1,31 +1,49 @@
 import { Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
-import { EmailTemplates } from '../modules/email-notifications/templates'
+import { EmailTemplates, resolveTemplateKey } from '../modules/email-notifications/templates'
 import { DIGITAL_DOWNLOAD_MODULE } from '../modules/digital-download'
 import type DigitalDownloadModuleService from '../modules/digital-download/service'
 import { resolveBillingEntity } from '../utils/resolve-billing-entity'
 import { logEmailActivity } from '../utils/email-logger'
+import { getProjectEmailConfig } from '../utils/project-email-config'
 import crypto from 'crypto'
 
-// Hardcoded ebook files for Loslatenboek — these are the MinIO keys
-const EBOOK_FILES = [
-  {
-    key: "e-books/De Overthinking Oplossing.pdf",
-    title: "De Overthinking Oplossing",
-    description: "E-book (PDF)",
-    size: "2.4 MB",
-  },
-  {
-    key: "e-books/Liefde zonder Onzin.pdf",
-    title: "Liefde zonder Onzin",
-    description: "E-book (PDF)",
-    size: "1.8 MB",
-  },
-]
+// Ebook files per project — these are the MinIO keys
+const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string; description: string; size: string }>> = {
+  loslatenboek: [
+    {
+      key: "e-books/De Overthinking Oplossing.pdf",
+      title: "De Overthinking Oplossing",
+      description: "E-book (PDF)",
+      size: "2.4 MB",
+    },
+    {
+      key: "e-books/Liefde zonder Onzin.pdf",
+      title: "Liefde zonder Onzin",
+      description: "E-book (PDF)",
+      size: "1.8 MB",
+    },
+  ],
+  dehondenbijbel: [
+    // TODO: Add De Hondenbijbel e-book files when ready
+    // {
+    //   key: "e-books/De-Hondenbijbel.pdf",
+    //   title: "De Hondenbijbel",
+    //   description: "E-book (PDF)",
+    //   size: "TBD",
+    // },
+  ],
+}
 
-// Base URL for the download page on the storefront
-const STOREFRONT_URL = process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_BASE_URL || "https://tijdomloslaten.nl"
+// Fallback for unknown projects
+const DEFAULT_EBOOK_FILES = EBOOK_FILES_BY_PROJECT.loslatenboek
+
+// Storefront URLs per project
+const STOREFRONT_URLS: Record<string, string> = {
+  loslatenboek: process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_BASE_URL || "https://tijdomloslaten.nl",
+  dehondenbijbel: process.env.DH_STOREFRONT_URL || "https://dehondenbijbel.nl",
+}
 
 export default async function orderPlacedDigitalDownloadHandler({
   event: { data },
@@ -40,8 +58,18 @@ export default async function orderPlacedDigitalDownloadHandler({
       relations: ['items', 'shipping_address'],
     })
 
-    // For now: always create download for every order (single product store)
-    // Later: check item metadata or product_type for digital products
+    // Project-specific config
+    const projectConfig = getProjectEmailConfig(order)
+    const projectId = projectConfig.project
+
+    // Get e-book files for this project
+    const ebookFiles = EBOOK_FILES_BY_PROJECT[projectId] || DEFAULT_EBOOK_FILES
+
+    // Skip if no e-book files configured for this project yet
+    if (!ebookFiles.length) {
+      console.log(`[digital-download] No e-book files configured for project "${projectId}", skipping for order ${order.id}`)
+      return
+    }
 
     // Generate unique token
     const token = crypto.randomUUID()
@@ -55,12 +83,13 @@ export default async function orderPlacedDigitalDownloadHandler({
       order_id: order.id,
       token,
       email: order.email,
-      files: EBOOK_FILES as any,
+      files: ebookFiles as any,
       expires_at: expiresAt,
       download_count: 0,
     })
 
-    const downloadUrl = `${STOREFRONT_URL}/download/${token}`
+    const storefrontUrl = STOREFRONT_URLS[projectId] || STOREFRONT_URLS.loslatenboek
+    const downloadUrl = `${storefrontUrl}/download/${token}`
 
     // Get customer first name from shipping address
     const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(
@@ -76,15 +105,19 @@ export default async function orderPlacedDigitalDownloadHandler({
       console.warn('[digital-download] Could not resolve billing entity:', err.message)
     }
 
-    // Send ebook delivery email
-    const emailSubject = 'Je e-books staan klaar! 📖'
+    // Send ebook delivery email (project-specific template)
+    const templateKey = resolveTemplateKey(EmailTemplates.EBOOK_DELIVERY, projectConfig.project)
+    const emailSubject = projectId === 'dehondenbijbel'
+      ? 'Je e-book staat klaar! 📖'
+      : 'Je e-books staan klaar! 📖'
+
     await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
-      template: EmailTemplates.EBOOK_DELIVERY,
+      template: templateKey,
       data: {
         emailOptions: {
-          replyTo: 'devries@loslatenboek.nl',
+          replyTo: projectConfig.replyTo,
           subject: emailSubject,
         },
         firstName,

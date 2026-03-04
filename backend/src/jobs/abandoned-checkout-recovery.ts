@@ -1,6 +1,6 @@
 import { MedusaContainer } from "@medusajs/framework/types"
 import { Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { EmailTemplates } from "../modules/email-notifications/templates"
+import { EmailTemplates, resolveTemplateKey } from "../modules/email-notifications/templates"
 
 /**
  * Abandoned Checkout Recovery
@@ -72,26 +72,36 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
       // Build checkout URL
       const checkoutUrl = meta.checkout_url || "https://loslatenboek.nl/p/loslatenboek/checkout"
 
+      // Detect project from cart metadata
+      const projectId = meta.project_id || "loslatenboek"
+      const projectReplyTo = projectId === "dehondenbijbel"
+        ? "support@dehondenbijbel.nl"
+        : "devries@loslatenboek.nl"
+
       // Extract customer name from shipping address
       const firstName = cart.shipping_address?.first_name || "daar"
 
       // Extract product info from cart items
       const mainItem = (cart.items || [])[0]
-      const productName = mainItem?.variant?.product?.title || mainItem?.title || "Laat Los Wat Je Kapotmaakt"
+      const productName = mainItem?.variant?.product?.title || mainItem?.title
+        || (projectId === "dehondenbijbel" ? "De Hondenbijbel" : "Laat Los Wat Je Kapotmaakt")
       const productPrice = mainItem?.unit_price
         ? Number(mainItem.unit_price).toFixed(2).replace(".", ",")
         : "35,00"
       const productImage = mainItem?.variant?.product?.thumbnail || ""
+
+      // Resolve project-specific template
+      const templateKey = resolveTemplateKey(EmailTemplates.ABANDONED_CHECKOUT, projectId)
 
       try {
         // Send recovery email
         await notificationModuleService.createNotifications({
           to: cart.email,
           channel: "email",
-          template: EmailTemplates.ABANDONED_CHECKOUT,
+          template: templateKey,
           data: {
             emailOptions: {
-              replyTo: "devries@loslatenboek.nl",
+              replyTo: projectReplyTo,
               subject: `Hoi ${firstName}, je bestelling wacht nog op je!`,
             },
             firstName,

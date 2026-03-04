@@ -1,9 +1,10 @@
 import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
-import { EmailTemplates } from '../modules/email-notifications/templates'
+import { EmailTemplates, resolveTemplateKey } from '../modules/email-notifications/templates'
 import { resolveBillingEntity } from '../utils/resolve-billing-entity'
 import { logEmailActivity } from '../utils/email-logger'
+import { getProjectEmailConfig } from '../utils/project-email-config'
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -102,15 +103,19 @@ export default async function orderPlacedHandler({
     console.warn('[OrderPlaced] Could not resolve billing entity:', err.message)
   }
 
+  // Project-specific email config (DH vs Loslatenboek)
+  const projectConfig = getProjectEmailConfig(order)
+  const templateKey = resolveTemplateKey(EmailTemplates.ORDER_PLACED, projectConfig.project)
+
   const emailSubject = `Bedankt voor je bestelling! #${displayId}`
   try {
     await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
-      template: EmailTemplates.ORDER_PLACED,
+      template: templateKey,
       data: {
         emailOptions: {
-          replyTo: 'devries@loslatenboek.nl',
+          replyTo: projectConfig.replyTo,
           subject: emailSubject,
         },
         order,

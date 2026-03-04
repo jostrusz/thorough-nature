@@ -1,9 +1,10 @@
 import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
-import { EmailTemplates } from '../modules/email-notifications/templates'
+import { EmailTemplates, resolveTemplateKey } from '../modules/email-notifications/templates'
 import { resolveBillingEntity } from '../utils/resolve-billing-entity'
 import { logEmailActivity } from '../utils/email-logger'
+import { getProjectEmailConfig } from '../utils/project-email-config'
 
 export default async function orderFulfillmentCreatedHandler({
   event: { data },
@@ -106,14 +107,18 @@ export default async function orderFulfillmentCreatedHandler({
 
     const displayId = (order as any).metadata?.custom_order_number || (order as any).display_id || order.id
 
+    // Project-specific email config
+    const projectConfig = getProjectEmailConfig(order)
+    const templateKey = resolveTemplateKey(EmailTemplates.SHIPMENT_NOTIFICATION, projectConfig.project)
+
     const emailSubject = `Je bestelling #${displayId} is verzonden! 📦`
     await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
-      template: EmailTemplates.SHIPMENT_NOTIFICATION,
+      template: templateKey,
       data: {
         emailOptions: {
-          replyTo: 'devries@loslatenboek.nl',
+          replyTo: projectConfig.replyTo,
           subject: emailSubject,
         },
         order,
