@@ -242,7 +242,7 @@ function PageRow({
             {page.status === "published" ? "\u{1F7E2} Published" : "\u{1F7E1} Draft"}
           </span>
           <span style={{ fontSize: "11px", color: colors.textMuted }}>
-            \u{1F441} {page.view_count} views
+            {"\u{1F441}"} {page.view_count} views
           </span>
           <span style={{ fontSize: "11px", color: colors.textMuted }}>
             {page.facebook_pixel_id ? "\u2705 FB Pixel" : "\u2014 No Pixel Override"}
@@ -392,7 +392,7 @@ function AdvertorialModal({
 
         {/* URL Preview */}
         <div style={{ marginBottom: "14px", padding: "8px 12px", background: colors.accentBg, borderRadius: "8px", fontSize: "12px", color: colors.accent, fontWeight: 500 }}>
-          \u{1F517} {previewUrl}
+          {"\u{1F517}"} {previewUrl}
         </div>
 
         {/* Facebook Pixel + Status — side by side */}
@@ -611,7 +611,7 @@ const AdvertorialsPage = () => {
       {/* Header */}
       <div style={headerStyle}>
         <h1 style={h1Style}>
-          \u{1F4F0} Advertorials
+          {"\u{1F4F0}"} Advertorials
         </h1>
         <button className="adv-btn-primary" style={btnPrimary} onClick={() => setModalPage("new")}>
           + New Advertorial
