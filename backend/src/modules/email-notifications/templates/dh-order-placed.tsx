@@ -1,4 +1,4 @@
-import { Text, Section, Hr, Link } from '@react-email/components'
+import { Text, Section, Hr, Link, Img } from '@react-email/components'
 import * as React from 'react'
 import { Base } from './base'
 
@@ -16,29 +16,36 @@ export interface DhOrderPlacedTemplateProps {
 export const isDhOrderPlacedTemplateData = (data: any): data is DhOrderPlacedTemplateProps =>
   typeof data.order === 'object' && typeof data.shippingAddress === 'object'
 
-const font = "'Inter', Arial, sans-serif"
-const pad = '24px'
+const font = "'Inter', 'Segoe UI', Arial, sans-serif"
+const pad = '28px'
 const padLR = `0 ${pad}`
 
-// DH Brand colors
+// DH Brand colors — warm orange palette
 const colors = {
-  headerBg: '#4C1D95',
-  headerGradient: 'linear-gradient(135deg, #4C1D95 0%, #2E1065 100%)',
-  accent: '#7C3AED',
-  accentLight: '#A78BFA',
-  accentMuted: '#8B5CF6',
-  textDark: '#1F2937',
-  textBody: '#374151',
-  textMuted: '#6B7280',
-  boxBg: '#FAF5FF',
-  boxBorder: '#E9D5FF',
-  footerBg: '#1E1B4B',
-  amber: '#F59E0B',
-  amberLight: '#FEF3C7',
+  headerBg: '#EA580C',
+  headerGradient: 'linear-gradient(135deg, #F97316 0%, #EA580C 50%, #C2410C 100%)',
+  accent: '#EA580C',
+  accentLight: '#FDBA74',
+  accentSoft: '#FFF7ED',
+  accentMuted: '#FB923C',
+  textDark: '#18181B',
+  textBody: '#3F3F46',
+  textMuted: '#71717A',
+  textLight: '#A1A1AA',
+  boxBg: '#FAFAFA',
+  boxBorder: '#E4E4E7',
+  cardBg: '#FFFFFF',
+  footerBg: '#18181B',
+  footerText: '#A1A1AA',
+  footerAccent: '#FB923C',
+  greenBg: '#F0FDF4',
+  greenBorder: '#BBF7D0',
+  greenText: '#166534',
+  amberBg: '#FFFBEB',
   amberBorder: '#FDE68A',
-  greenBg: '#E8F5E9',
-  greenBorder: '#A5D6A7',
-  greenText: '#2E7D32',
+  amberText: '#92400E',
+  divider: '#E4E4E7',
+  white: '#FFFFFF',
 }
 
 function formatPrice(amount: number, currencyCode: string): string {
@@ -94,7 +101,7 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
   billingAddress,
   paymentMethod,
   billingEntity,
-  preview = 'Bedankt voor je bestelling!',
+  preview = 'Bedankt voor je bestelling bij De Hondenbijbel!',
 }) => {
   const currency = order.currency_code || 'eur'
   const items = order.items || []
@@ -111,55 +118,86 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
 
   const invoiceAddress = billingAddress || shippingAddress
 
+  // Billing entity info — pulled from admin
+  const entityName = billingEntity?.legal_name || 'EverChapter OÜ'
+  const entityAddress = billingEntity?.address
+    ? `${billingEntity.address.city || 'Tallinn'}, ${billingEntity.address.district || billingEntity.address.country_code?.toUpperCase() || 'Estonia'}`
+    : 'Tallinn, Estonia'
+  const entityRegId = billingEntity?.registration_id || '16938029'
+
   return (
     <Base preview={preview}>
       <Section>
-        {/* HEADER */}
+        {/* ====== HEADER ====== */}
         <div style={{
           backgroundColor: colors.headerBg,
           background: colors.headerGradient,
-          padding: '32px 24px',
+          padding: '40px 28px 36px',
           textAlign: 'center' as const,
+          borderRadius: '0',
         }}>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
-            fontWeight: 500,
+            fontWeight: 600,
             letterSpacing: '3px',
             textTransform: 'uppercase' as const,
-            color: colors.accentLight,
-            marginBottom: '8px',
+            color: 'rgba(255,255,255,0.75)',
+            marginBottom: '10px',
+            margin: '0 0 10px 0',
           }}>
             De Hondenbijbel
           </Text>
           <Text style={{
             fontFamily: font,
-            fontSize: '24px',
-            fontWeight: 700,
+            fontSize: '26px',
+            fontWeight: 800,
             color: '#ffffff',
-            margin: '0',
-            lineHeight: '1.3',
+            margin: '0 0 8px 0',
+            lineHeight: '1.2',
+            letterSpacing: '-0.02em',
           }}>
-            Bedankt voor je bestelling! 🐾
+            Bedankt voor je bestelling!
           </Text>
           <Text style={{
             fontFamily: font,
             fontSize: '13px',
-            color: colors.accentMuted,
-            margin: '6px 0 0',
+            color: 'rgba(255,255,255,0.7)',
+            margin: '0',
           }}>
             Bestelling #{displayId} &bull; {orderDate}
           </Text>
         </div>
 
-        {/* GREETING */}
-        <div style={{ padding: `28px ${pad} 0 ${pad}` }}>
+        {/* ====== STATUS BADGE ====== */}
+        <div style={{ padding: `24px ${pad} 0`, textAlign: 'center' as const }}>
+          <div style={{
+            display: 'inline-block',
+            backgroundColor: colors.greenBg,
+            border: `1px solid ${colors.greenBorder}`,
+            borderRadius: '20px',
+            padding: '6px 18px',
+          }}>
+            <Text style={{
+              fontFamily: font,
+              fontSize: '13px',
+              fontWeight: 600,
+              color: colors.greenText,
+              margin: '0',
+            }}>
+              &#10003; Bestelling bevestigd
+            </Text>
+          </div>
+        </div>
+
+        {/* ====== GREETING ====== */}
+        <div style={{ padding: `24px ${pad} 0` }}>
           <Text style={{
             fontFamily: font,
             fontSize: '15px',
             color: colors.textBody,
-            lineHeight: '1.6',
-            marginBottom: '6px',
+            lineHeight: '1.7',
+            margin: '0',
           }}>
             Hoi {shippingAddress?.first_name || 'daar'},
           </Text>
@@ -167,124 +205,104 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
             fontFamily: font,
             fontSize: '15px',
             color: colors.textBody,
-            lineHeight: '1.6',
-            marginBottom: '0',
+            lineHeight: '1.7',
+            margin: '8px 0 0',
           }}>
-            Super dat je De Hondenbijbel hebt besteld! Je bestelling is ontvangen en we gaan er meteen mee aan de slag. Hieronder vind je alles op een rijtje.
+            Super dat je De Hondenbijbel hebt besteld! Je bestelling is bevestigd en we gaan er direct mee aan de slag. Hieronder vind je een overzicht.
           </Text>
         </div>
 
-        {/* ORDER SUMMARY BOX */}
+        {/* ====== ORDER DETAILS BOX ====== */}
         <div style={{ padding: `20px ${pad}` }}>
           <div style={{
             backgroundColor: colors.boxBg,
-            borderRadius: '10px',
+            borderRadius: '12px',
             border: `1px solid ${colors.boxBorder}`,
-            padding: '16px 20px',
+            padding: '18px 22px',
           }}>
-            <div style={{ marginBottom: '6px' }}>
-              <Text style={{
-                fontFamily: font,
-                fontSize: '13px',
-                color: colors.textBody,
-                margin: '0',
-              }}>
-                <strong style={{ color: colors.textDark }}>Bestelling:</strong> &nbsp; #{displayId}
-                &nbsp;&nbsp;
-                <span style={{
-                  backgroundColor: colors.greenBg,
-                  color: colors.greenText,
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  fontFamily: font,
-                }}>
-                  Bevestigd
-                </span>
-              </Text>
-            </div>
-            <Text style={{
-              fontFamily: font,
-              fontSize: '13px',
-              color: colors.textBody,
-              margin: '0 0 4px',
-            }}>
-              <strong style={{ color: colors.textDark }}>Datum:</strong> &nbsp; {orderDate}
-            </Text>
-            {paymentMethod && (
-              <Text style={{
-                fontFamily: font,
-                fontSize: '13px',
-                color: colors.textBody,
-                margin: '0',
-              }}>
-                <strong style={{ color: colors.textDark }}>Betaalmethode:</strong> &nbsp; {paymentMethod}
-              </Text>
-            )}
+            <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>
+              <tbody>
+                <tr>
+                  <td style={{ fontFamily: font, fontSize: '13px', color: colors.textMuted, padding: '3px 0' }}>Bestelling</td>
+                  <td align="right" style={{ fontFamily: font, fontSize: '13px', fontWeight: 600, color: colors.textDark, padding: '3px 0' }}>#{displayId}</td>
+                </tr>
+                <tr>
+                  <td style={{ fontFamily: font, fontSize: '13px', color: colors.textMuted, padding: '3px 0' }}>Datum</td>
+                  <td align="right" style={{ fontFamily: font, fontSize: '13px', color: colors.textDark, padding: '3px 0' }}>{orderDate}</td>
+                </tr>
+                {paymentMethod && (
+                  <tr>
+                    <td style={{ fontFamily: font, fontSize: '13px', color: colors.textMuted, padding: '3px 0' }}>Betaalmethode</td>
+                    <td align="right" style={{ fontFamily: font, fontSize: '13px', color: colors.textDark, padding: '3px 0' }}>{paymentMethod}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* ITEMS */}
+        {/* ====== ITEMS ====== */}
         <div style={{ padding: padLR }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '11px',
-            fontWeight: 600,
+            fontSize: '12px',
+            fontWeight: 700,
             textTransform: 'uppercase' as const,
-            letterSpacing: '1.5px',
-            color: colors.accentMuted,
-            marginBottom: '12px',
+            letterSpacing: '1px',
+            color: colors.accent,
+            marginBottom: '14px',
           }}>
             Je bestelling
           </Text>
 
           {items.map((item: any) => (
             <div key={item.id} style={{
-              marginBottom: '10px',
-              backgroundColor: colors.boxBg,
-              borderRadius: '8px',
+              marginBottom: '12px',
+              backgroundColor: colors.cardBg,
+              borderRadius: '12px',
               border: `1px solid ${colors.boxBorder}`,
-              padding: '12px 14px',
+              padding: '14px 16px',
             }}>
               <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>
                 <tbody>
                   <tr>
-                    <td width="52" valign="top" style={{ paddingRight: '12px' }}>
+                    <td width="60" valign="top" style={{ paddingRight: '14px' }}>
                       {item.thumbnail ? (
-                        <img
+                        <Img
                           src={item.thumbnail}
                           alt={item.title || item.product_title}
-                          width="52"
-                          height="68"
+                          width="60"
+                          height="76"
                           style={{
-                            width: '52px',
-                            height: '68px',
+                            width: '60px',
+                            height: '76px',
                             objectFit: 'cover' as const,
-                            borderRadius: '6px',
+                            borderRadius: '8px',
+                            border: `1px solid ${colors.boxBorder}`,
                           }}
                         />
                       ) : (
                         <div style={{
-                          width: '52px',
-                          height: '68px',
-                          background: `linear-gradient(135deg, ${colors.headerBg}, ${colors.accent})`,
-                          borderRadius: '6px',
+                          width: '60px',
+                          height: '76px',
+                          background: `linear-gradient(145deg, ${colors.accentSoft}, #FED7AA)`,
+                          borderRadius: '8px',
+                          border: `1px solid ${colors.boxBorder}`,
                           textAlign: 'center' as const,
-                          lineHeight: '68px',
-                          fontSize: '24px',
+                          lineHeight: '76px',
+                          fontSize: '28px',
                         }}>
-                          🐕
+                          &#128214;
                         </div>
                       )}
                     </td>
-                    <td valign="top">
+                    <td valign="middle">
                       <Text style={{
                         fontFamily: font,
-                        fontSize: '14px',
-                        fontWeight: 600,
+                        fontSize: '15px',
+                        fontWeight: 700,
                         color: colors.textDark,
-                        margin: '0 0 2px',
+                        margin: '0 0 4px',
                         lineHeight: '1.3',
                       }}>
                         {item.product_title || item.title || 'Item'}
@@ -298,11 +316,11 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
                         {item.variant_title ? `${item.variant_title} \u2022 ` : ''}Aantal: {item.quantity || 1}
                       </Text>
                     </td>
-                    <td width="70" align="right" valign="top">
+                    <td width="80" align="right" valign="middle">
                       <Text style={{
                         fontFamily: font,
-                        fontSize: '14px',
-                        fontWeight: 700,
+                        fontSize: '16px',
+                        fontWeight: 800,
                         color: colors.textDark,
                         margin: '0',
                       }}>
@@ -316,99 +334,110 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
           ))}
 
           {/* Totals */}
-          <div style={{ marginTop: '14px', borderTop: `2px solid ${colors.boxBorder}`, paddingTop: '12px' }}>
+          <div style={{
+            marginTop: '16px',
+            borderTop: `2px solid ${colors.boxBorder}`,
+            paddingTop: '14px',
+          }}>
             <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>
               <tbody>
                 <tr>
-                  <td style={{ fontFamily: font, fontSize: '13px', color: colors.textBody, padding: '3px 0' }}>Subtotaal</td>
-                  <td align="right" style={{ fontFamily: font, fontSize: '13px', color: colors.textBody, padding: '3px 0' }}>{formatPrice(subtotal, currency)}</td>
+                  <td style={{ fontFamily: font, fontSize: '13px', color: colors.textBody, padding: '4px 0' }}>Subtotaal</td>
+                  <td align="right" style={{ fontFamily: font, fontSize: '13px', color: colors.textBody, padding: '4px 0' }}>{formatPrice(subtotal, currency)}</td>
                 </tr>
                 <tr>
-                  <td style={{ fontFamily: font, fontSize: '13px', color: colors.textBody, padding: '3px 0' }}>Verzendkosten</td>
-                  <td align="right" style={{ fontFamily: font, fontSize: '13px', color: shippingTotal > 0 ? colors.textBody : colors.greenText, padding: '3px 0' }}>
+                  <td style={{ fontFamily: font, fontSize: '13px', color: colors.textBody, padding: '4px 0' }}>Verzendkosten</td>
+                  <td align="right" style={{ fontFamily: font, fontSize: '13px', color: shippingTotal > 0 ? colors.textBody : colors.greenText, fontWeight: shippingTotal > 0 ? 400 : 600, padding: '4px 0' }}>
                     {shippingTotal > 0 ? formatPrice(shippingTotal, currency) : 'Gratis'}
                   </td>
                 </tr>
                 {taxTotal > 0 && (
                   <tr>
-                    <td style={{ fontFamily: font, fontSize: '12px', color: colors.textMuted, padding: '3px 0' }}>Waarvan BTW</td>
-                    <td align="right" style={{ fontFamily: font, fontSize: '12px', color: colors.textMuted, padding: '3px 0' }}>{formatPrice(taxTotal, currency)}</td>
+                    <td style={{ fontFamily: font, fontSize: '12px', color: colors.textLight, padding: '4px 0' }}>Waarvan BTW</td>
+                    <td align="right" style={{ fontFamily: font, fontSize: '12px', color: colors.textLight, padding: '4px 0' }}>{formatPrice(taxTotal, currency)}</td>
                   </tr>
                 )}
                 <tr>
-                  <td style={{ fontFamily: font, fontSize: '17px', fontWeight: 700, color: colors.textDark, padding: '10px 0 0', borderTop: `1px solid ${colors.boxBorder}` }}>Totaal</td>
-                  <td align="right" style={{ fontFamily: font, fontSize: '17px', fontWeight: 700, color: colors.textDark, padding: '10px 0 0', borderTop: `1px solid ${colors.boxBorder}` }}>{formatPrice(total, currency)}</td>
+                  <td colSpan={2} style={{ paddingTop: '8px' }}>
+                    <div style={{ borderTop: `1px solid ${colors.boxBorder}` }}></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ fontFamily: font, fontSize: '18px', fontWeight: 800, color: colors.textDark, padding: '10px 0 0' }}>Totaal</td>
+                  <td align="right" style={{ fontFamily: font, fontSize: '18px', fontWeight: 800, color: colors.textDark, padding: '10px 0 0' }}>{formatPrice(total, currency)}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* E-BOOK NOTICE */}
-        <div style={{ padding: `20px ${pad} 0 ${pad}` }}>
+        {/* ====== E-BOOK NOTICE ====== */}
+        <div style={{ padding: `24px ${pad} 0` }}>
           <div style={{
             backgroundColor: colors.greenBg,
-            borderRadius: '8px',
+            borderRadius: '12px',
             border: `1px solid ${colors.greenBorder}`,
-            padding: '12px 16px',
+            padding: '14px 18px',
             textAlign: 'center' as const,
           }}>
             <Text style={{
               fontFamily: font,
-              fontSize: '13px',
+              fontSize: '14px',
               color: colors.greenText,
               margin: '0',
-              lineHeight: '1.5',
+              lineHeight: '1.6',
             }}>
-              📖 &nbsp; <strong>Je e-book is onderweg!</strong> Je ontvangt binnen enkele minuten een aparte e-mail met de download-link.
+              &#128214; &nbsp;<strong>Je e-book is onderweg!</strong>
+              <br />
+              <span style={{ fontSize: '13px' }}>Je ontvangt binnen enkele minuten een aparte e-mail met de download-link.</span>
             </Text>
           </div>
         </div>
 
-        {/* DELIVERY ESTIMATE */}
-        <div style={{ padding: `12px ${pad} 0 ${pad}` }}>
+        {/* ====== DELIVERY ESTIMATE ====== */}
+        <div style={{ padding: `12px ${pad} 0` }}>
           <div style={{
-            backgroundColor: colors.amberLight,
-            borderRadius: '8px',
+            backgroundColor: colors.amberBg,
+            borderRadius: '12px',
             border: `1px solid ${colors.amberBorder}`,
-            padding: '12px 16px',
+            padding: '14px 18px',
             textAlign: 'center' as const,
           }}>
             <Text style={{
               fontFamily: font,
-              fontSize: '13px',
-              color: '#795548',
+              fontSize: '14px',
+              color: colors.amberText,
               margin: '0',
               lineHeight: '1.5',
             }}>
-              📦 &nbsp; <strong>Verwachte levering:</strong> 4–7 werkdagen
+              &#128230; &nbsp;<strong>Verwachte levering: 4–7 werkdagen</strong>
             </Text>
             <Text style={{
               fontFamily: font,
               fontSize: '12px',
-              color: '#9e9e9e',
-              margin: '4px 0 0',
+              color: colors.textMuted,
+              margin: '6px 0 0',
               lineHeight: '1.5',
             }}>
-              Onze boeken worden verzonden vanuit ons centrale magazijn in Tsjechië, van waaruit we heel Europa bedienen.
+              Onze boeken worden verzonden vanuit ons centrale magazijn in Tsjechië.
             </Text>
           </div>
         </div>
 
-        {/* ADDRESSES */}
-        <div style={{ padding: `24px ${pad} 0 ${pad}` }}>
+        {/* ====== ADDRESSES — equal margins ====== */}
+        <div style={{ padding: `28px ${pad} 0` }}>
           <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>
             <tbody>
               <tr>
-                <td width="50%" valign="top" style={{ paddingRight: '10px' }}>
+                <td width="50%" valign="top" style={{ paddingRight: '12px' }}>
                   <Text style={{
                     fontFamily: font,
-                    fontSize: '11px',
-                    fontWeight: 600,
+                    fontSize: '12px',
+                    fontWeight: 700,
                     textTransform: 'uppercase' as const,
-                    letterSpacing: '1.5px',
-                    color: colors.accentMuted,
-                    marginBottom: '8px',
+                    letterSpacing: '1px',
+                    color: colors.accent,
+                    marginBottom: '10px',
                   }}>
                     Bezorgadres
                   </Text>
@@ -416,7 +445,7 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
                     fontFamily: font,
                     fontSize: '13px',
                     color: colors.textBody,
-                    lineHeight: '1.6',
+                    lineHeight: '1.7',
                     margin: '0',
                   }}>
                     {shippingAddress?.first_name} {shippingAddress?.last_name}
@@ -428,15 +457,15 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
                     {formatCountry(shippingAddress?.country_code)}
                   </Text>
                 </td>
-                <td width="50%" valign="top" style={{ paddingLeft: '10px' }}>
+                <td width="50%" valign="top" style={{ paddingLeft: '12px' }}>
                   <Text style={{
                     fontFamily: font,
-                    fontSize: '11px',
-                    fontWeight: 600,
+                    fontSize: '12px',
+                    fontWeight: 700,
                     textTransform: 'uppercase' as const,
-                    letterSpacing: '1.5px',
-                    color: colors.accentMuted,
-                    marginBottom: '8px',
+                    letterSpacing: '1px',
+                    color: colors.accent,
+                    marginBottom: '10px',
                   }}>
                     Factuuradres
                   </Text>
@@ -444,7 +473,7 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
                     fontFamily: font,
                     fontSize: '13px',
                     color: colors.textBody,
-                    lineHeight: '1.6',
+                    lineHeight: '1.7',
                     margin: '0',
                   }}>
                     {invoiceAddress?.first_name} {invoiceAddress?.last_name}
@@ -461,149 +490,153 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
           </table>
         </div>
 
-        <Hr style={{ borderColor: colors.boxBorder, margin: `20px ${pad} 0 ${pad}` }} />
+        <Hr style={{ borderColor: colors.divider, margin: `24px ${pad} 0` }} />
 
-        {/* WHAT HAPPENS NEXT */}
-        <div style={{ padding: `20px ${pad} 0 ${pad}` }}>
+        {/* ====== WHAT HAPPENS NEXT — timeline style ====== */}
+        <div style={{ padding: `24px ${pad} 0` }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '11px',
-            fontWeight: 600,
+            fontSize: '12px',
+            fontWeight: 700,
             textTransform: 'uppercase' as const,
-            letterSpacing: '1.5px',
-            color: colors.accentMuted,
-            marginBottom: '14px',
+            letterSpacing: '1px',
+            color: colors.accent,
+            marginBottom: '18px',
           }}>
             Wat gebeurt er nu?
           </Text>
 
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '12px' }}>
+          {/* Step 1 */}
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '16px' }}>
             <tbody>
               <tr>
-                <td width="34" valign="top">
+                <td width="38" valign="top">
                   <div style={{
-                    width: '26px',
-                    height: '26px',
+                    width: '28px',
+                    height: '28px',
                     backgroundColor: colors.accent,
                     borderRadius: '50%',
                     textAlign: 'center' as const,
-                    lineHeight: '26px',
+                    lineHeight: '28px',
                     fontFamily: font,
-                    fontSize: '12px',
+                    fontSize: '13px',
                     fontWeight: 700,
                     color: '#ffffff',
                   }}>1</div>
                 </td>
-                <td style={{ fontFamily: font, fontSize: '13px', color: colors.textBody, lineHeight: '1.5', paddingLeft: '8px' }}>
+                <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Bestelling verwerkt</strong>
                   <br />
-                  We maken je bestelling klaar voor verzending.
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>We maken je bestelling klaar voor verzending.</span>
                 </td>
               </tr>
             </tbody>
           </table>
 
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '12px' }}>
+          {/* Step 2 */}
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '16px' }}>
             <tbody>
               <tr>
-                <td width="34" valign="top">
+                <td width="38" valign="top">
                   <div style={{
-                    width: '26px',
-                    height: '26px',
-                    backgroundColor: colors.accentLight,
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: colors.accentMuted,
                     borderRadius: '50%',
                     textAlign: 'center' as const,
-                    lineHeight: '26px',
+                    lineHeight: '28px',
                     fontFamily: font,
-                    fontSize: '12px',
+                    fontSize: '13px',
                     fontWeight: 700,
                     color: '#ffffff',
                   }}>2</div>
                 </td>
-                <td style={{ fontFamily: font, fontSize: '13px', color: colors.textBody, lineHeight: '1.5', paddingLeft: '8px' }}>
+                <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Verzonden</strong>
                   <br />
-                  Zodra je pakket is verzonden, ontvang je direct een e-mail met je track &amp; trace code.
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Je ontvangt een e-mail met je track &amp; trace code.</span>
                 </td>
               </tr>
             </tbody>
           </table>
 
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '6px' }}>
+          {/* Step 3 */}
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '4px' }}>
             <tbody>
               <tr>
-                <td width="34" valign="top">
+                <td width="38" valign="top">
                   <div style={{
-                    width: '26px',
-                    height: '26px',
-                    backgroundColor: colors.boxBorder,
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: colors.accentLight,
                     borderRadius: '50%',
                     textAlign: 'center' as const,
-                    lineHeight: '26px',
+                    lineHeight: '28px',
                     fontFamily: font,
-                    fontSize: '12px',
+                    fontSize: '13px',
                     fontWeight: 700,
-                    color: colors.textDark,
+                    color: colors.accent,
                   }}>3</div>
                 </td>
-                <td style={{ fontFamily: font, fontSize: '13px', color: colors.textBody, lineHeight: '1.5', paddingLeft: '8px' }}>
+                <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Bezorgd</strong>
                   <br />
-                  Binnen 4–7 werkdagen heb je De Hondenbijbel in huis. 🐾
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Binnen 4–7 werkdagen heb je De Hondenbijbel in huis.</span>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        {/* HELP SECTION */}
-        <div style={{ padding: `24px ${pad} 0 ${pad}` }}>
+        {/* ====== HELP SECTION ====== */}
+        <div style={{ padding: `28px ${pad} 0` }}>
           <div style={{
-            backgroundColor: colors.boxBg,
-            borderRadius: '10px',
-            border: `1px solid ${colors.boxBorder}`,
-            padding: '16px 20px',
+            backgroundColor: colors.accentSoft,
+            borderRadius: '12px',
+            border: `1px solid #FED7AA`,
+            padding: '18px 22px',
             textAlign: 'center' as const,
           }}>
             <Text style={{
               fontFamily: font,
-              fontSize: '13px',
+              fontSize: '14px',
               color: colors.textBody,
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Vragen over je bestelling? Stuur een mailtje naar
+              Vragen over je bestelling?
               <br />
-              <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 600 }}>
+              <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
                 support@dehondenbijbel.nl
               </Link>
             </Text>
           </div>
         </div>
 
-        {/* SIGNATURE */}
-        <div style={{ padding: `20px ${pad} 24px ${pad}` }}>
+        {/* ====== SIGNATURE ====== */}
+        <div style={{ padding: `24px ${pad} 28px` }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '14px',
+            fontSize: '15px',
             color: colors.textBody,
-            marginBottom: '4px',
+            margin: '0 0 4px',
           }}>
             Warme groet,
           </Text>
           <Text style={{
             fontFamily: font,
-            fontSize: '14px',
+            fontSize: '15px',
             fontWeight: 700,
             color: colors.textDark,
-            marginBottom: '2px',
+            margin: '0 0 2px',
           }}>
             Lars Vermeulen
           </Text>
           <Text style={{
             fontFamily: font,
-            fontSize: '12px',
+            fontSize: '13px',
             color: colors.textMuted,
+            margin: '0',
           }}>
             <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'none' }}>
               support@dehondenbijbel.nl
@@ -611,49 +644,38 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
           </Text>
         </div>
 
-        {/* FOOTER */}
+        {/* ====== FOOTER — entity from admin ====== */}
         <div style={{
           backgroundColor: colors.footerBg,
-          padding: '24px 24px',
+          padding: '28px 28px',
           textAlign: 'center' as const,
+          borderRadius: '0',
         }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '12px',
-            color: colors.accentLight,
-            marginBottom: '6px',
+            fontSize: '13px',
+            fontWeight: 700,
+            color: colors.footerAccent,
+            margin: '0 0 8px',
+            letterSpacing: '0.5px',
           }}>
             De Hondenbijbel
           </Text>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
-            color: '#6366F1',
-            lineHeight: '1.6',
-            marginBottom: '6px',
+            color: colors.footerText,
+            lineHeight: '1.7',
+            margin: '0 0 8px',
           }}>
-            {billingEntity?.legal_name || 'EverChapter OÜ'}
-            {' '}&bull;{' '}
-            {billingEntity?.address
-              ? `${billingEntity.address.address_1 || ''}, ${billingEntity.address.postal_code || ''} ${billingEntity.address.city || ''}${billingEntity.address.district ? ', ' + billingEntity.address.district : ''}`
-              : 'Tallinn, Estonia'}
-            {billingEntity?.registration_id && (
-              <>
-                <br />
-                Reg. nr: {billingEntity.registration_id}
-              </>
-            )}
-            {!billingEntity && (
-              <>
-                <br />
-                Reg. nr: 16938029
-              </>
-            )}
+            {entityName} &bull; {entityAddress}
+            <br />
+            Reg. nr: {entityRegId}
           </Text>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
-            color: '#6366F1',
+            color: '#71717A',
             lineHeight: '1.5',
             margin: '0',
           }}>
@@ -706,6 +728,14 @@ DhOrderPlacedTemplate.PreviewProps = {
     country_code: 'nl',
   },
   paymentMethod: 'iDEAL (ING Bank)',
+  billingEntity: {
+    legal_name: 'EverChapter OÜ',
+    registration_id: '16938029',
+    address: {
+      city: 'Tallinn',
+      district: 'Estonia',
+    },
+  },
 } as any
 
 export default DhOrderPlacedTemplate
