@@ -2,6 +2,12 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { DIGITAL_DOWNLOAD_MODULE } from "../../../../modules/digital-download"
 import type DigitalDownloadModuleService from "../../../../modules/digital-download/service"
 
+// Project-specific contact emails
+const PROJECT_SUPPORT_EMAILS: Record<string, string> = {
+  dehondenbijbel: "support@dehondenbijbel.nl",
+  loslatenboek: "devries@loslatenboek.nl",
+}
+
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   try {
     const { token } = req.params
@@ -23,13 +29,17 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }
 
     const download = records[0]
+    const meta = (download.metadata as Record<string, any>) || {}
+    const projectId = meta.project_id || "loslatenboek"
+    const supportEmail = PROJECT_SUPPORT_EMAILS[projectId] || PROJECT_SUPPORT_EMAILS.loslatenboek
 
     // Check expiry
     if (new Date(download.expires_at) < new Date()) {
       return res.status(410).json({
         message:
-          "Deze download-link is verlopen. Neem contact op met devries@loslatenboek.nl voor een nieuwe link.",
+          `Deze download-link is verlopen. Neem contact op met ${supportEmail} voor een nieuwe link.`,
         expired: true,
+        project_id: projectId,
       })
     }
 
@@ -79,6 +89,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         email: download.email,
         expires_at: download.expires_at,
         download_count: (download.download_count || 0) + 1,
+        project_id: projectId,
         files: filesWithUrls,
       },
     })

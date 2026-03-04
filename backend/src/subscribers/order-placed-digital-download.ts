@@ -89,7 +89,7 @@ export default async function orderPlacedDigitalDownloadHandler({
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 7)
 
-    // Create digital download record
+    // Create digital download record (store project_id in metadata for frontend theming)
     await downloadService.createDigitalDownloads({
       order_id: order.id,
       token,
@@ -97,6 +97,7 @@ export default async function orderPlacedDigitalDownloadHandler({
       files: ebookFiles as any,
       expires_at: expiresAt,
       download_count: 0,
+      metadata: { project_id: projectId },
     })
 
     const storefrontUrl = STOREFRONT_URLS[projectId] || STOREFRONT_URLS.loslatenboek
