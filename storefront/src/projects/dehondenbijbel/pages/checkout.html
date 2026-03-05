@@ -5590,9 +5590,19 @@ body {
               break;
           }
         })
-        .catch(function() {
+        .catch(function(err) {
           hideSpinner(foxEmailField);
-          // Fallback naar lokale validatie bij API error
+          // Foxentry failed (400/429/network) — lokale regex validatie als fallback
+          console.warn('[Foxentry] Email validation failed, using local fallback:', err.message || err);
+          var localValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+          if (localValid) {
+            foxEmailField.classList.add('valid');
+            foxEmailField.classList.remove('invalid');
+          } else {
+            foxEmailField.classList.add('invalid');
+            foxEmailField.classList.remove('valid');
+          }
+          // Toon typo suggestie als beschikbaar
           var localSuggestion = checkEmailTypo(val);
           if (localSuggestion && foxEmailSuggestion) {
             foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + localSuggestion + '</strong>? Klik om te corrigeren.';
@@ -5600,10 +5610,10 @@ body {
             foxEmailSuggestion.onclick = function() {
               foxEmailField.value = localSuggestion;
               foxEmailSuggestion.style.display = 'none';
-              validateField(foxEmailField);
+              foxEmailField.classList.add('valid');
+              foxEmailField.classList.remove('invalid');
             };
           }
-          validateField(foxEmailField);
         });
       });
     }
@@ -5938,6 +5948,16 @@ body {
           if (el.value) el.classList.add('has-value');
         }
       });
+      // Trigger blur op velden met waarde zodat Foxentry/lokale validatie loopt
+      // en valid/invalid klasse wordt gezet (voorkomt submit-blokkade)
+      setTimeout(function() {
+        ['email', 'phone', 'address', 'city', 'postal_code', 'first_name', 'last_name'].forEach(function(f) {
+          var el = document.getElementById(f);
+          if (el && el.value.trim()) {
+            el.dispatchEvent(new Event('blur'));
+          }
+        });
+      }, 500);
       console.log('[Checkout Recovery] Form restored from localStorage');
     } catch (e) {
       console.warn('[Checkout Recovery] Restore failed:', e);
