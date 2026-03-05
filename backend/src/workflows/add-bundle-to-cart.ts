@@ -14,36 +14,35 @@ import {
 } from "@medusajs/medusa/core-flows"
 
 /**
- * Bundle pricing map: variant_id → { qty → total price in major units }
+ * Bundle pricing map: product_handle → { qty → total price in major units }
  * This is the server-side source of truth for bundle discounts.
+ * Keyed by product HANDLE (environment-agnostic — same on staging + production).
  *
  * IMPORTANT: These prices are TAX-INCLUSIVE (final customer price).
  * The workflow sets is_tax_inclusive=true on line items so Medusa
  * extracts tax from within the price instead of adding it on top.
- *
- * To add a new project's bundle pricing, add a new entry here keyed by variant_id.
  */
 const BUNDLE_PRICING: Record<string, Record<number, number>> = {
   // Loslatenboek — "Laat Los Wat Je Kapotmaakt"
-  "variant_01KJ9YQH8CA1DR2A77HNQ5AZTQ": {
+  "laat-los-wat-je-kapotmaakt": {
     1: 35,    // €35.00 incl. tax
     2: 59,    // €59.00 incl. tax (save €11)
     3: 79,    // €79.00 incl. tax (save €26)
     4: 99,    // €99.00 incl. tax (save €41)
   },
   // Dehondenbijbel — "De Hondenbijbel"
-  "variant_01KJSESHRDZRD8SP0W1EV3YBZE": {
+  "de-hondenbijbel": {
     1: 35,    // €35.00 incl. tax
     2: 59,    // €59.00 incl. tax (save €11)
     3: 79,    // €79.00 incl. tax (save €26)
     4: 99,    // €99.00 incl. tax (save €41)
   },
   // DH Upsell — "Laat Los Wat Je Kapotmaakt (DH Upsell)"
-  "variant_01KJSESHRDFQMXT0V0HDQZ9NXG": {
+  "laat-los-wat-je-kapotmaakt-dh": {
     1: 25,    // €25.00 incl. tax (upsell price, original €35)
   },
   // Loslatenboek Upsell — "Het Leven Dat Je Verdient"
-  "variant_01KJ9YR4K948VWEF7D4YNAQ7R0": {
+  "het-leven-dat-je-verdient": {
     1: 23,    // €23.00 incl. tax (upsell price, original €36)
   },
 }
@@ -56,19 +55,35 @@ type AddBundleToCartInput = {
 
 /**
  * Step: Calculate bundle unit price
- * Looks up bundle total for the variant+qty, then computes per-unit price.
+ * Resolves product handle from variant_id, looks up bundle total, computes per-unit price.
  */
 const calculateBundlePriceStep = createStep(
   "calculate-bundle-price",
-  async (input: { variant_id: string; quantity: number }) => {
+  async (input: { variant_id: string; quantity: number }, { container }) => {
     const { variant_id, quantity } = input
-    const variantPricing = BUNDLE_PRICING[variant_id]
 
-    if (variantPricing && variantPricing[quantity] !== undefined) {
-      // Bundle price found — compute per-unit price
-      const totalPrice = variantPricing[quantity]
-      const unitPrice = totalPrice / quantity
-      return new StepResponse(unitPrice)
+    // Resolve product handle from variant_id
+    const query = container.resolve("query") as any
+    let productHandle: string | null = null
+    try {
+      const { data: variants } = await query.graph({
+        entity: "product_variant",
+        fields: ["id", "product.handle"],
+        filters: { id: variant_id },
+      })
+      productHandle = variants?.[0]?.product?.handle || null
+    } catch {
+      // Fallback: no handle found
+    }
+
+    if (productHandle) {
+      const variantPricing = BUNDLE_PRICING[productHandle]
+      if (variantPricing && variantPricing[quantity] !== undefined) {
+        // Bundle price found — compute per-unit price
+        const totalPrice = variantPricing[quantity]
+        const unitPrice = totalPrice / quantity
+        return new StepResponse(unitPrice)
+      }
     }
 
     // No bundle pricing — return null (use default variant price)
