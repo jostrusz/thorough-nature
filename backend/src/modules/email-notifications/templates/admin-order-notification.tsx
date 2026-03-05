@@ -533,7 +533,7 @@ export const AdminOrderNotificationTemplate: React.FC<AdminOrderNotificationProp
   const messages = isUpsell ? v.upsellMessages : v.messages
   const message = pickMessage(messages, order.id || 'default')
 
-  const adminUrl = process.env.MEDUSA_ADMIN_URL || process.env.MEDUSA_BACKEND_URL || 'https://backend-staging-580e.up.railway.app'
+  const adminUrl = process.env.MEDUSA_ADMIN_URL || process.env.MEDUSA_BACKEND_URL || 'http://localhost:9000'
   const orderUrl = `${adminUrl}/app/custom-orders/${order.id}`
 
   const defaultPreview = isUpsell
