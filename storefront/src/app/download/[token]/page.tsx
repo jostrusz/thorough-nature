@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { CrossPromoSection } from "./cross-promo"
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
@@ -534,6 +535,9 @@ export default async function DownloadPage({
                   track &amp; trace code zodra het pakket is verzonden.
                 </p>
               </div>
+
+              {/* Cross-promo: show Laat Los on dehondenbijbel downloads */}
+              {projectId === "dehondenbijbel" && <CrossPromoSection />}
             </>
           )}
 
