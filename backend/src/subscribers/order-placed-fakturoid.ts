@@ -304,10 +304,9 @@ export default async function orderPlacedFakturoidHandler({
     // fakturoid_invoice_id = variable symbol (display field)
     // fakturoid_internal_id = numeric Fakturoid ID (for API operations)
     try {
-      const existingMeta = (order.metadata as any) || {}
+      // Only pass new fields — Medusa merges metadata (spreading existingMeta causes race conditions with other subscribers)
       await (orderService as any).updateOrders(order.id, {
         metadata: {
-          ...existingMeta,
           fakturoid_invoice_id: invoice.number,
           fakturoid_internal_id: invoice.id.toString(),
           fakturoid_invoice_number: invoice.number,
@@ -329,10 +328,8 @@ export default async function orderPlacedFakturoidHandler({
           Modules.CUSTOMER
         )
         const customer = await customerService.retrieveCustomer(customerId)
-        const existingCustomerMeta = (customer.metadata as any) || {}
         await customerService.updateCustomers(customerId, {
           metadata: {
-            ...existingCustomerMeta,
             last_fakturoid_invoice_id: invoice.number,
             last_fakturoid_invoice_url: invoice.public_html_url,
             fakturoid_subject_id: subject.id.toString(),

@@ -30,10 +30,9 @@ export default async function orderPlacedCustomNumberHandler({
     const displayId = (order as any).display_id
     const customOrderNumber = `${countryCode}${year}-${displayId}`
 
-    const existingMeta = (order as any).metadata || {}
+    // Only pass the new field — Medusa merges metadata (spreading existingMeta causes race conditions)
     await orderModuleService.updateOrders(data.id, {
       metadata: {
-        ...existingMeta,
         custom_order_number: customOrderNumber,
       },
     })

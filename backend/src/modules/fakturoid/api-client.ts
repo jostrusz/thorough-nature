@@ -42,6 +42,7 @@ export interface FakturoidInvoiceLine {
 
 export interface FakturoidInvoicePayload {
   subject_id: number
+  number?: string
   document_type?: string
   correction_id?: number
   custom_id?: string

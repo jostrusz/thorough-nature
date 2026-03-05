@@ -327,10 +327,9 @@ export default async function orderPlacedQuickBooksHandler({
 
     // ── Update order metadata ──
     try {
-      const existingMeta = (order.metadata as any) || {}
+      // Only pass new fields — Medusa merges metadata (spreading existingMeta causes race conditions with other subscribers)
       await (orderService as any).updateOrders(order.id, {
         metadata: {
-          ...existingMeta,
           quickbooks_invoice_id: invoice.Id,
           quickbooks_invoice_number: invoice.DocNumber || invoice.Id,
           quickbooks_invoice_url: invoiceLink || "",
@@ -353,10 +352,8 @@ export default async function orderPlacedQuickBooksHandler({
         const medusaCustomer = await customerService.retrieveCustomer(
           customerId
         )
-        const existingCustomerMeta = (medusaCustomer.metadata as any) || {}
         await customerService.updateCustomers(customerId, {
           metadata: {
-            ...existingCustomerMeta,
             last_quickbooks_invoice_id: invoice.Id,
             last_quickbooks_invoice_url: invoiceLink || "",
             quickbooks_customer_id: customer.Id,

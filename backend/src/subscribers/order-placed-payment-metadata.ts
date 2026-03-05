@@ -39,8 +39,8 @@ export default async function orderPlacedPaymentMetadataHandler({
       (pc: any) => pc.payments || []
     ) || []
 
-    const existingMetadata = order.metadata || {}
-    const newMetadata: any = { ...existingMetadata }
+    // Only build new fields — Medusa merges metadata (spreading existingMetadata causes race conditions with other subscribers)
+    const newMetadata: any = {}
     let found = false
 
     for (const payment of payments) {
