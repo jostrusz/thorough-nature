@@ -148,7 +148,7 @@ async function resolveProductIds(config: ProjectConfig): Promise<void> {
     if (!(config as any)._resolvedApiKey && config.salesChannelName) {
       try {
         const keyRes = await fetch(
-          `${baseUrl}/store/project-key/${encodeURIComponent(config.salesChannelName)}`,
+          `${baseUrl}/project-key/${encodeURIComponent(config.salesChannelName)}`,
           { next: { revalidate: 300 } }
         )
         if (keyRes.ok) {

@@ -4,7 +4,7 @@ import type { IApiKeyModuleService, ISalesChannelModuleService } from "@medusajs
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 
 /**
- * GET /store/project-key/:salesChannelName
+ * GET /project-key/:salesChannelName
  *
  * Returns the publishable API key token for a given sales channel name.
  * This is safe to expose publicly — publishable keys are meant for browser use.
