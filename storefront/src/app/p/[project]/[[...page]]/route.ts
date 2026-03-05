@@ -143,21 +143,27 @@ async function resolveProductIds(config: ProjectConfig): Promise<void> {
   try {
     const baseUrl = config.medusaUrl
 
-    // 1. Resolve publishable API key if not set
-    if (!config.publishableApiKey) {
+    // 1. Resolve publishable API key by matching project's sales channel name
+    // Each project has its own sales channel + publishable key — the global env var only covers Default Sales Channel
+    if (!(config as any)._resolvedApiKey && config.salesChannelName) {
       try {
-        const keysRes = await fetch(`${baseUrl}/admin/api-keys?limit=10`, {
-          headers: { "Authorization": `Bearer ${process.env.MEDUSA_ADMIN_TOKEN || ""}` },
-          next: { revalidate: 300 },
-        })
-        if (!keysRes.ok) {
-          // Try store endpoint to get key from sales channels
-          // Fallback: use env variable
-          config.publishableApiKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+        const keyRes = await fetch(
+          `${baseUrl}/store/project-key/${encodeURIComponent(config.salesChannelName)}`,
+          { next: { revalidate: 300 } }
+        )
+        if (keyRes.ok) {
+          const data = await keyRes.json()
+          if (data.token) {
+            config.publishableApiKey = data.token
+          }
         }
       } catch {
+        // Backend unavailable — keep existing key from env var
+      }
+      if (!config.publishableApiKey) {
         config.publishableApiKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
       }
+      ;(config as any)._resolvedApiKey = true
     }
 
     const headers: Record<string, string> = {
