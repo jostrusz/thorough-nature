@@ -21,13 +21,17 @@
  --cta: #DC3522;
  --section: #F3E8FF;
  --body: #374151;
+ --body-text: #4a4358;
  --highlight: #C4B5FD;
- --dark: #1A1A1A;
- --white: #FFFFFF;
+ --dark: #1a1028;
+ --white: #ffffff;
  --light: #F9FAFB;
  --muted: #6B7280;
- --cta-hover: #C62E1C;
+ --cta-hover: #b82d1e;
  --accent: #6B21A8;
+ --purple: #6b21a8;
+ --purple-light: #e9d5ff;
+ --purple-faint: #f5f0ff;
 }
 
 /* ═══ RESET ═══ */
@@ -35,41 +39,86 @@
 html { scroll-behavior: smooth; }
 body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
 
-/* ═══ NAVIGACE ═══ */
-.site-nav { background: var(--white); border-bottom: 1px solid var(--section); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06); }
-.nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
-.nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
-.nav-logo img { height: 40px; width: auto; }
-.nav-logo-text { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 600; color: var(--heading); line-height: 1.2; }
-.nav-links { display: flex; align-items: center; gap: 28px; }
-.nav-links a { font-family: 'Cabin', sans-serif; font-size: 14px; font-weight: 500; color: var(--body); text-decoration: none; transition: color 0.2s; position: relative; }
-.nav-links a:hover { color: var(--heading); }
-.nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--cta); transition: width 0.3s ease; }
-.nav-links a:hover::after { width: 100%; }
-.nav-links a.active { color: var(--heading); font-weight: 600; }
-.nav-links a.active::after { width: 100%; }
-.nav-cta { font-family: 'Cabin', sans-serif; font-size: 14px; font-weight: 700; color: var(--white) !important; background: var(--cta); padding: 10px 22px; border-radius: 8px; text-decoration: none !important; transition: all 0.25s ease; box-shadow: 0 3px 12px rgba(107, 33, 168, 0.2); }
-.nav-cta:hover { background: var(--cta-hover) !important; color: var(--white) !important; transform: translateY(-1px); box-shadow: 0 5px 18px rgba(107, 33, 168, 0.35); }
-.nav-cta::after { display: none !important; }
-.nav-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-direction: column; gap: 5px; }
-.nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--heading); border-radius: 2px; transition: all 0.3s ease; }
-.nav-mobile-overlay { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background: rgba(26, 16, 40, 0.5); z-index: 999; }
-.nav-mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--white); padding: 24px 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); z-index: 1000; flex-direction: column; gap: 0; border-bottom: 2px solid var(--section); }
-.nav-mobile-menu a { font-family: 'Cabin', sans-serif; font-size: 16px; font-weight: 500; color: var(--body); text-decoration: none; padding: 14px 0; border-bottom: 1px solid var(--section); display: block; transition: color 0.2s; }
-.nav-mobile-menu a:last-child { border-bottom: none; }
-.nav-mobile-menu a:hover { color: var(--heading); }
-.nav-mobile-menu .nav-cta-mobile { display: inline-block; font-weight: 700; color: var(--white); background: var(--cta); padding: 14px 28px; border-radius: 10px; text-align: center; margin-top: 16px; border-bottom: none; }
-.nav-mobile-menu .nav-cta-mobile:hover { background: var(--cta-hover); color: var(--white); }
-
-@media (max-width: 768px) {
- .nav-links { display: none; }
- .nav-hamburger { display: flex; }
- .nav-mobile-menu.open { display: flex; }
- .nav-mobile-overlay.open { display: block; }
- .nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
- .nav-hamburger.open span:nth-child(2) { opacity: 0; }
- .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+/* ═══ NAVBAR ═══ */
+.navbar {
+ position: sticky; top: 0; z-index: 1000;
+ background: rgba(255,255,255,0.92);
+ -webkit-backdrop-filter: blur(16px) saturate(1.8);
+ backdrop-filter: blur(16px) saturate(1.8);
+ border-bottom: 1px solid rgba(107, 33, 168, 0.08);
+ padding: 0 20px;
+ box-shadow: 0 1px 8px rgba(107, 33, 168, 0.04);
+ transition: transform 0.35s cubic-bezier(.4,0,.2,1), box-shadow 0.35s ease, background 0.35s ease;
 }
+.navbar.nav-hidden { transform: translateY(-100%); box-shadow: none; }
+.navbar.nav-scrolled { background: rgba(255, 255, 255, 0.85); box-shadow: 0 4px 24px rgba(107, 33, 168, 0.08); }
+.navbar-inner {
+ max-width: 1200px; margin: 0 auto;
+ display: flex; align-items: center; justify-content: space-between;
+ height: 64px;
+}
+.navbar-logo { display: flex; align-items: center; text-decoration: none; }
+.navbar-logo img { height: 38px; width: auto; }
+.navbar-links { display: flex; gap: 10px; align-items: center; white-space: nowrap; }
+.navbar-links a {
+ font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500;
+ color: var(--body-text); text-decoration: none; transition: color 0.2s;
+ position: relative; white-space: nowrap;
+}
+.navbar-links a:hover { color: var(--dark); }
+.navbar-links a::after {
+ content: ''; position: absolute; bottom: -4px; left: 0;
+ width: 0; height: 2px; background: var(--purple);
+ transition: width 0.3s ease;
+}
+.navbar-links a:hover::after { width: 100%; }
+.navbar-cta {
+ font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px;
+ color: var(--white) !important; background: var(--cta);
+ padding: 10px 28px; border-radius: 50px; letter-spacing: 0.02em;
+ text-decoration: none !important; transition: all 0.3s cubic-bezier(.4,0,.2,1);
+ box-shadow: 0 3px 12px rgba(220, 53, 34, 0.2);
+}
+.navbar-cta:hover {
+ background: var(--cta-hover) !important; color: var(--white) !important;
+ transform: translateY(-2px) scale(1.03);
+ box-shadow: 0 6px 20px rgba(220, 53, 34, 0.35);
+}
+.navbar-cta::after { display: none !important; }
+.navbar-hamburger {
+ display: none; background: none; border: none; cursor: pointer;
+ padding: 8px; flex-direction: column; gap: 5px;
+}
+.navbar-hamburger span {
+ display: block; width: 24px; height: 2px; background: var(--dark);
+ border-radius: 2px; transition: all 0.3s ease;
+}
+.nav-mobile-overlay {
+ display: none; position: fixed; top: 60px; left: 0; right: 0; bottom: 0;
+ background: rgba(26, 16, 40, 0.5); z-index: 999;
+}
+.nav-mobile-menu {
+ display: none; position: fixed; top: 60px; left: 0; right: 0;
+ background: var(--white); padding: 24px 20px;
+ box-shadow: 0 8px 24px rgba(107, 33, 168, 0.12);
+ z-index: 1000; flex-direction: column; gap: 0;
+ border-bottom: 2px solid var(--purple-light);
+}
+.nav-mobile-menu a {
+ font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 500;
+ color: var(--body-text); text-decoration: none;
+ padding: 14px 0; border-bottom: 1px solid var(--purple-faint);
+ display: block; transition: color 0.2s;
+}
+.nav-mobile-menu > a:last-of-type { border-bottom: none; }
+.nav-mobile-menu a:hover { color: var(--dark); }
+.nav-mobile-menu .nav-cta-mobile {
+ display: inline-block; font-weight: 700;
+ color: var(--white); background: var(--cta);
+ padding: 14px 28px; border-radius: 10px;
+ text-align: center; margin-top: 16px; border-bottom: none;
+}
+.nav-mobile-menu .nav-cta-mobile:hover { background: var(--cta-hover); color: var(--white); }
 
 /* ═══ CONTENT STRÁNKY ═══ */
 .page-header {
@@ -261,9 +310,19 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 .footer-contact { display: flex; flex-direction: column; gap: 8px; font-family: 'Cabin', sans-serif; font-size: 14px; }
 .footer-contact a { color: rgba(255, 255, 255, 0.7); text-decoration: none; }
 .footer-contact a:hover { color: var(--white); }
+.footer-payments { display: flex; align-items: center; gap: 10px; }
+.pay-icon { height: 28px; width: auto; opacity: 0.85; transition: opacity 0.2s; }
+.pay-icon:hover { opacity: 1; }
 .footer-bottom { max-width: 960px; margin: 32px auto 0; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: 'Cabin', sans-serif; font-size: 12px; color: rgba(255, 255, 255, 0.45); }
 
 @media (max-width: 768px) {
+ .navbar-links { display: none; }
+ .navbar-hamburger { display: flex; }
+ .nav-mobile-menu.open { display: flex; }
+ .nav-mobile-overlay.open { display: block; }
+ .navbar-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+ .navbar-hamburger.open span:nth-child(2) { opacity: 0; }
+ .navbar-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
  .page-header h1 { font-size: 28px; }
  .section-block h2 { font-size: 20px; }
  .delivery-table { font-size: 13px; }
@@ -281,34 +340,29 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 </head>
 <body>
 
-<!-- ═══ NAVIGACE ═══ -->
-<nav class="site-nav">
- <div class="nav-inner">
-  <a href="index.html" class="nav-logo">
-   <img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.png" alt="De Hondenbijbel" width="150" height="40">
-
-  </a>
-  <div class="nav-links">
-   <a href="verzending.html" class="active">Verzending &amp; Levering</a>
-   <a href="retourbeleid.html">Retour &amp; Garantie</a>
-   <a href="voorwaarden.html">Algemene Voorwaarden</a>
-   <a href="privacy.html">Privacybeleid</a>
-   <a href="contact.html">Klantenservice</a>
-   <a href="index.html" class="nav-cta">Bestel nu &rarr;</a>
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar" id="navbar">
+ <div class="navbar-inner">
+  <a href="." class="navbar-logo"><img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.webp" alt="De Hondenbijbel" width="160" height="40"></a>
+  <div class="navbar-links">
+   <a href="verzending">Verzending &amp; Levering</a>
+   <a href="retourbeleid">Retour &amp; Garantie</a>
+   <a href="voorwaarden">Algemene Voorwaarden</a>
+   <a href="privacy">Privacybeleid</a>
+   <a href="contact">Klantenservice</a>
+   <a href="checkout" class="navbar-cta">Bestel Nu &rarr;</a>
   </div>
-  <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
-   <span></span><span></span><span></span>
-  </button>
+  <button class="navbar-hamburger" id="navToggle" onclick="toggleMobileMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
  </div>
 </nav>
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
- <a href="verzending.html">Verzending &amp; Levering</a>
- <a href="retourbeleid.html">Retour &amp; Garantie</a>
- <a href="voorwaarden.html">Algemene Voorwaarden</a>
- <a href="privacy.html">Privacybeleid</a>
- <a href="contact.html">Klantenservice</a>
- <a href="index.html" class="nav-cta-mobile">Bestel nu &rarr;</a>
+ <a href="verzending" onclick="toggleMobileMenu()">Verzending &amp; Levering</a>
+ <a href="retourbeleid" onclick="toggleMobileMenu()">Retour &amp; Garantie</a>
+ <a href="voorwaarden" onclick="toggleMobileMenu()">Algemene Voorwaarden</a>
+ <a href="privacy" onclick="toggleMobileMenu()">Privacybeleid</a>
+ <a href="contact" onclick="toggleMobileMenu()">Klantenservice</a>
+ <a href="checkout" class="nav-cta-mobile" onclick="toggleMobileMenu()">Bestel Nu &rarr;</a>
 </div>
 
 <!-- ═══ HEADER ═══ -->
@@ -422,22 +476,25 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 <footer class="site-footer">
  <div class="footer-inner">
   <div class="footer-brand">
-   <div class="footer-brand-text">De Hondenbijbel</div>
+   <img src="/dehondenbijbel/images/DE-HONDENBIJBEL-logo.webp" alt="De Hondenbijbel" class="footer-logo">
   </div>
   <div class="footer-links">
-   <a href="verzending.html">Verzending &amp; Levering</a>
-   <a href="retourbeleid.html">Retour &amp; Garantie</a>
-   <a href="voorwaarden.html">Algemene Voorwaarden</a>
-   <a href="privacy.html">Privacybeleid</a>
-   <a href="contact.html">Klantenservice</a>
+   <a href="voorwaarden">Algemene Voorwaarden</a>
+   <a href="verzending">Verzending</a>
+   <a href="retourbeleid">Retourbeleid</a>
+   <a href="privacy">Privacybeleid</a>
+   <a href="contact">Contact</a>
   </div>
-  <div class="footer-contact">
-   <a href="mailto:support@dehondenbijbel.nl">📧 support@dehondenbijbel.nl</a>
-   <a href="tel:+420732915755">📞 +420 732 915 755</a>
+  <div class="footer-payments">
+   <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" width="36" height="28">
+   <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" width="36" height="28">
+   <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="36" height="28">
+   <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="36" height="28">
+   <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="36" height="28">
   </div>
  </div>
  <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, 110 00 Praha • KvK-nummer: 06259928 • BTW-nummer: CZ06259928</span>
+  <span>Performance Marketing Solution s.r.o. &bull; Rybn&aacute; 716/24, 110 00 Praha &bull; KvK-nummer: 06259928 &bull; BTW-nummer: CZ06259928</span>
   <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle rechten voorbehouden.</span>
  </div>
 </footer>
@@ -452,7 +509,7 @@ function toggleFaq(element) {
 }
 
 function toggleMobileMenu() {
- document.querySelector('.nav-hamburger').classList.toggle('open');
+ document.getElementById('navToggle').classList.toggle('open');
  document.querySelector('.nav-mobile-menu').classList.toggle('open');
  document.querySelector('.nav-mobile-overlay').classList.toggle('open');
 }
