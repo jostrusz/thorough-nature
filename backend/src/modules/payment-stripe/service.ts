@@ -284,8 +284,23 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
 
       if (isRedirectMethod && returnUrl) {
         piParams.confirm = true
-        piParams.payment_method_data = { type: stripeMethodType as any }
         piParams.return_url = returnUrl
+
+        // Stripe requires billing_details.name for redirect methods (Bancontact, iDEAL, etc.)
+        const billingAddress = data?.billing_address || context?.billing_address || {}
+        const shippingAddress = data?.shipping_address || context?.shipping_address || {}
+        const billingName = [
+          billingAddress.first_name || shippingAddress.first_name || "",
+          billingAddress.last_name || shippingAddress.last_name || "",
+        ].filter(Boolean).join(" ") || customerEmail || "Customer"
+
+        piParams.payment_method_data = {
+          type: stripeMethodType as any,
+          billing_details: {
+            name: billingName,
+            email: customerEmail || undefined,
+          },
+        }
       }
 
       const paymentIntent = await stripe.paymentIntents.create(piParams)
