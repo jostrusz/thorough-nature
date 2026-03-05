@@ -95,6 +95,9 @@ export async function GET(
     `<head$1><base href="${basePath}/">`
   )
 
+  // Resolve product/region IDs dynamically from Medusa API (handles are env-agnostic, IDs differ per env)
+  await resolveProductIds(config)
+
   // Fetch project settings (order bump / upsell toggles) from backend
   const projectToggles = await fetchProjectSettings(config)
 
@@ -129,6 +132,106 @@ export async function GET(
       "Cache-Control": "public, max-age=60, s-maxage=300",
     },
   })
+}
+
+/**
+ * Resolve product IDs, variant IDs, region IDs, and publishable API key
+ * dynamically from the Medusa API using product handles.
+ * This makes config.json environment-agnostic (same handles work on staging + production).
+ */
+async function resolveProductIds(config: ProjectConfig): Promise<void> {
+  try {
+    const baseUrl = config.medusaUrl
+
+    // 1. Resolve publishable API key if not set
+    if (!config.publishableApiKey) {
+      try {
+        const keysRes = await fetch(`${baseUrl}/admin/api-keys?limit=10`, {
+          headers: { "Authorization": `Bearer ${process.env.MEDUSA_ADMIN_TOKEN || ""}` },
+          next: { revalidate: 300 },
+        })
+        if (!keysRes.ok) {
+          // Try store endpoint to get key from sales channels
+          // Fallback: use env variable
+          config.publishableApiKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+        }
+      } catch {
+        config.publishableApiKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+      }
+    }
+
+    const headers: Record<string, string> = {
+      "x-publishable-api-key": config.publishableApiKey,
+    }
+
+    // 2. Resolve main product variant ID from handle
+    if (config.mainProduct?.handle) {
+      try {
+        const res = await fetch(
+          `${baseUrl}/store/products?handle=${config.mainProduct.handle}&fields=id,variants.id,variants.title,thumbnail,images`,
+          { headers, next: { revalidate: 60 } }
+        )
+        if (res.ok) {
+          const data = await res.json()
+          const product = data.products?.[0]
+          if (product) {
+            config.mainProduct.variantId = product.variants?.[0]?.id || config.mainProduct.variantId
+            if (product.thumbnail) config.mainProduct.thumbnail = product.thumbnail
+          }
+        }
+      } catch (err) {
+        console.warn("[resolveProductIds] Failed to resolve main product:", err)
+      }
+    }
+
+    // 3. Resolve upsell product variant ID from handle
+    if (config.upsellProduct?.handle) {
+      try {
+        const res = await fetch(
+          `${baseUrl}/store/products?handle=${config.upsellProduct.handle}&fields=id,variants.id,variants.title`,
+          { headers, next: { revalidate: 60 } }
+        )
+        if (res.ok) {
+          const data = await res.json()
+          const product = data.products?.[0]
+          if (product) {
+            config.upsellProduct.variantId = product.variants?.[0]?.id || config.upsellProduct.variantId
+          }
+        }
+      } catch (err) {
+        console.warn("[resolveProductIds] Failed to resolve upsell product:", err)
+      }
+    }
+
+    // 4. Resolve region ID for default country
+    if (config.defaultCountry) {
+      try {
+        const res = await fetch(`${baseUrl}/store/regions`, {
+          headers, next: { revalidate: 300 },
+        })
+        if (res.ok) {
+          const data = await res.json()
+          const regions = data.regions || []
+          for (const region of regions) {
+            const countryCodes = (region.countries || []).map((c: any) => c.iso_2?.toLowerCase())
+            if (countryCodes.includes(config.defaultCountry.toLowerCase())) {
+              // Update all region mappings
+              for (const key of Object.keys(config.regions)) {
+                if (countryCodes.includes(key.toLowerCase())) {
+                  config.regions[key] = region.id
+                }
+              }
+              break
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("[resolveProductIds] Failed to resolve regions:", err)
+      }
+    }
+  } catch (err) {
+    console.warn("[resolveProductIds] Failed to resolve product IDs:", err)
+  }
 }
 
 /**

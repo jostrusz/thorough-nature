@@ -5,20 +5,17 @@
   "locale": "nl",
   "defaultCountry": "NL",
   "salesChannelName": "Dehondenbijbel",
-  "medusaUrl": "https://backend-staging-580e.up.railway.app",
-  "publishableApiKey": "pk_ac97fc8605bdbe32a2802dabae506e0e90d8b6ea61909a736c9a055fe088d4ed",
+  "medusaUrl": "",
+  "publishableApiKey": "",
   "facebookPixelId": "",
-  "salesChannelId": "sc_01KJSENKGPV7GA0CYAT1JVN4W5",
-  "regionId": "reg_01KJ9YMS2SF9R3C01Y990D08KJ",
   "regions": {
-    "NL": "reg_01KJ9YMS2SF9R3C01Y990D08KJ",
-    "BE": "reg_01KJ9YMS2SF9R3C01Y990D08KJ"
+    "NL": "",
+    "BE": ""
   },
   "mainProduct": {
     "name": "De Hondenbijbel",
     "handle": "de-hondenbijbel",
-    "productId": "prod_01KJSESAW3S9D80WZWJ8BTGG4C",
-    "variantId": "variant_01KJSESHRDZRD8SP0W1EV3YBZE",
+    "variantId": "",
     "price": 35,
     "currency": "EUR",
     "thumbnail": ""
@@ -26,8 +23,7 @@
   "upsellProduct": {
     "name": "Laat Los Wat Je Kapotmaakt",
     "handle": "laat-los-wat-je-kapotmaakt-dh",
-    "productId": "prod_01KJSESAW35QRCKMB8TCKNRBSY",
-    "variantId": "variant_01KJSESHRDFQMXT0V0HDQZ9NXG",
+    "variantId": "",
     "price": 25,
     "originalPrice": 35,
     "currency": "EUR"
