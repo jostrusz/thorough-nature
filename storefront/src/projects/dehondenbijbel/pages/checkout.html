@@ -5915,6 +5915,15 @@ body {
 
     if (field.type === 'email') {
       isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      // Extra: TLD moet minimaal 2 tekens zijn (.nl, .com, .be — niet .c, .x)
+      if (isValid) {
+        var _vParts = value.split('@');
+        if (_vParts.length === 2) {
+          var _vDomain = _vParts[1].split('.');
+          var _vTld = _vDomain[_vDomain.length - 1] || '';
+          if (_vTld.length < 2) isValid = false;
+        }
+      }
     } else if (field.type === 'tel') {
       var stripped = value.replace(/[\s\-\(\)\.]/g, '');
       isValid = /^[\+]?\d{8,}$/.test(stripped);
