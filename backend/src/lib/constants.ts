@@ -62,6 +62,7 @@ export const COOKIE_SECRET = assertValue(
  * (optional) Minio configuration for file storage
  */
 export const MINIO_ENDPOINT = process.env.MINIO_ENDPOINT;
+export const MINIO_PUBLIC_ENDPOINT = process.env.MINIO_PUBLIC_ENDPOINT;
 export const MINIO_ACCESS_KEY = process.env.MINIO_ACCESS_KEY;
 export const MINIO_SECRET_KEY = process.env.MINIO_SECRET_KEY;
 export const MINIO_BUCKET = process.env.MINIO_BUCKET; // Optional, if not set bucket will be called: medusa-media
