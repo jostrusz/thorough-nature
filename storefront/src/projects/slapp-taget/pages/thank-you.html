@@ -1077,6 +1077,7 @@ body { background: var(--bg); }
       if (customer.region) purchaseUserData.st = customer.region;
     }
 
+    var purchaseEventId = 'purchase_' + orderId;
     MetaTracker.trackPurchase({
       content_ids: purchaseContentIds,
       contents: purchaseContentIds.map(function(id) { return { id: id, quantity: 1 }; }),
@@ -1084,8 +1085,8 @@ body { background: var(--bg); }
       currency: PROJECT_CONFIG.mainProduct.currency || 'SEK',
       num_items: purchaseNumItems,
       order_id: orderId
-    }, purchaseUserData);
-    console.log('TY: Purchase event (browser + CAPI) — ' + totalPrice + ' kr (' + purchaseNumItems + ' items)');
+    }, purchaseUserData, { event_id: purchaseEventId });
+    console.log('TY: Purchase event (browser + CAPI) — ' + totalPrice + ' kr (' + purchaseNumItems + ' items) event_id=' + purchaseEventId);
   }
 
   // ────────────────────────────────────────────────────
