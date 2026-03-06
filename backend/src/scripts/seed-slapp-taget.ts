@@ -59,21 +59,33 @@ export default async function seedSlappTaget({ container }: ExecArgs) {
     logger.info(`[SlappTaget] Created API key: ${newKey.token}`)
   }
 
-  // ─── 2. REGION (SEK / Sweden) ───
-  logger.info("[SlappTaget] Creating region...")
-  const { result: regionResult } = await createRegionsWorkflow(container).run({
-    input: {
-      regions: [
-        {
-          name: "Sweden (Slapp Taget)",
-          currency_code: "sek",
-          countries,
-          payment_providers: ["pp_system_default"],
-        },
-      ],
-    },
+  // ─── 2. REGION (reuse if SE already assigned) ───
+  logger.info("[SlappTaget] Finding or creating region...")
+  const regionModuleService = container.resolve(Modules.REGION)
+  const existingRegions = await regionModuleService.listRegions({}, {
+    relations: ["countries"],
   })
-  const region = regionResult[0]
+  let region = existingRegions.find((r: any) =>
+    r.countries?.some((c: any) => c.iso_2 === "se")
+  )
+  if (region) {
+    logger.info(`[SlappTaget] Reusing existing region: ${region.id} (${region.name})`)
+  } else {
+    const { result: regionResult } = await createRegionsWorkflow(container).run({
+      input: {
+        regions: [
+          {
+            name: "Sweden (Slapp Taget)",
+            currency_code: "sek",
+            countries,
+            payment_providers: ["pp_system_default"],
+          },
+        ],
+      },
+    })
+    region = regionResult[0]
+    logger.info(`[SlappTaget] Created region: ${region.id}`)
+  }
 
   // ─── 3. TAX REGION (skip if already exists) ───
   logger.info("[SlappTaget] Creating tax region...")
