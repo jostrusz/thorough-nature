@@ -1,16 +1,7 @@
-{
+var PROJECT_CONFIG = {
   "slug": "slapp-taget",
-  "name": "Släpp taget om det som förstör dig",
-  "domain": "",
-  "locale": "sv",
-  "defaultCountry": "SE",
-  "salesChannelName": "Slapp Taget",
   "medusaUrl": "https://backend-staging-580e.up.railway.app",
   "publishableApiKey": "pk_fcc7f4690d287adde9a5f707303021ebcb799c23f00f4d4f0cc9f2b825ad413d",
-  "facebookPixelId": "",
-  "regions": {
-    "SE": "reg_01KK1M7G5KWH78ZJA9PQZ45JTX"
-  },
   "mainProduct": {
     "name": "Släpp taget om det som förstör dig",
     "handle": "slapp-taget-om-det-som-forstor-dig",
@@ -33,16 +24,18 @@
     { "qty": 3, "price": 949, "label": "3 böcker", "save": 248 },
     { "qty": 4, "price": 1199, "label": "4 böcker", "save": 397 }
   ],
-  "mollieProfileId": "",
+  "regions": {
+    "SE": "reg_01KK1M7G5KWH78ZJA9PQZ45JTX"
+  },
   "paymentProviders": {},
-  "pages": {
-    "": "index.html",
-    "checkout": "checkout.html",
-    "thank-you": "thank-you.html",
-    "kontakt": "kontakt.html",
-    "integritet": "integritet.html",
-    "villkor": "villkor.html",
-    "frakt": "frakt.html",
-    "retur": "retur.html"
-  }
-}
+  "mollieProfileId": null,
+  "orderBumpEnabled": false,
+  "upsellEnabled": false,
+  "foxentryApiKey": null,
+  "homeUrl": "/",
+  "checkoutUrl": "/checkout.html",
+  "thankYouUrl": "/thank-you.html"
+};
+PROJECT_CONFIG.getRegionId = function(countryCode) {
+  return PROJECT_CONFIG.regions[countryCode] || Object.values(PROJECT_CONFIG.regions)[0];
+};
