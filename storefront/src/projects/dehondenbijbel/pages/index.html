@@ -973,6 +973,30 @@ window.addEventListener('load', () => {
  document.querySelectorAll('.video-lazy').forEach(function(el){vObs.observe(el);});
 })();
 
+// ─── Meta Pixel Events ───
+// ViewContent: customer sees the product (fires on page load)
+if (typeof MetaTracker !== 'undefined') {
+  MetaTracker.trackViewContent({
+    content_name: 'De Hondenbijbel',
+    value: 35,
+    currency: 'EUR'
+  });
+}
+
+// AddToCart: customer clicks any CTA button to checkout (shows purchase intent)
+document.querySelectorAll('a[href="checkout"], a[href="checkout/"]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    if (typeof MetaTracker !== 'undefined') {
+      MetaTracker.trackAddToCart({
+        content_name: 'De Hondenbijbel',
+        value: 35,
+        currency: 'EUR',
+        num_items: 1
+      });
+    }
+  });
+});
+
 </script>
 </body>
 </html>

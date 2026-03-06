@@ -2831,7 +2831,7 @@ body {
   if (typeof MetaTracker !== 'undefined') {
     MetaTracker.trackInitiateCheckout({
       content_ids: [PROJECT_CONFIG.mainProduct.handle],
-      value: selectedBundlePrice,
+      value: PROJECT_CONFIG.mainProduct.price,
       currency: PROJECT_CONFIG.mainProduct.currency,
       num_items: 1
     });
