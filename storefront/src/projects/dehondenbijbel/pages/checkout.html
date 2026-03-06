@@ -2827,8 +2827,9 @@ body {
   var selectedBundlePrice = PROJECT_CONFIG.bundleOptions[0].price; // Cena za bundle
   var orderBumpActive = false;      // Je order bump zaškrtnutý?
 
-  // FB Pixel + CAPI: InitiateCheckout on page load (customer visited checkout)
-  if (typeof MetaTracker !== 'undefined') {
+  // FB Pixel + CAPI: InitiateCheckout on page load (skip on payment return to avoid double firing)
+  var isPaymentReturn = window.location.search.indexOf('payment_return=1') !== -1 || window.location.search.indexOf('redirect_status=') !== -1;
+  if (!isPaymentReturn && typeof MetaTracker !== 'undefined') {
     MetaTracker.trackInitiateCheckout({
       content_ids: [PROJECT_CONFIG.mainProduct.handle],
       value: PROJECT_CONFIG.mainProduct.price,
@@ -5166,8 +5167,8 @@ body {
   var hasFoxentryKey = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
 
   if (emailField && emailSuggestion) {
-    // FB Pixel + CAPI: AddPaymentInfo when customer fills in email (high intent signal)
-    var addPaymentInfoFired = false;
+    // FB Pixel + CAPI: AddPaymentInfo when customer fills in email (skip on payment return)
+    var addPaymentInfoFired = isPaymentReturn;  // Already true if payment return → won't fire
     emailField.addEventListener('blur', function() {
       var emailVal = emailField.value.trim();
       if (emailVal && emailVal.includes('@') && !addPaymentInfoFired && typeof MetaTracker !== 'undefined') {
