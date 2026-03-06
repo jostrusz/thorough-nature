@@ -220,14 +220,10 @@ export function getOrderDisplayNumber(order: any): string {
   const cc = (
     order.shipping_address?.country_code ||
     order.billing_address?.country_code ||
-    ""
+    "nl"
   ).toUpperCase()
-  if (cc && order.display_id) {
-    const year = order.created_at
-      ? new Date(order.created_at).getFullYear()
-      : new Date().getFullYear()
-    return `${cc}${year}-${order.display_id}`
-  }
-
-  return `#${order.display_id}`
+  const year = order.created_at
+    ? new Date(order.created_at).getFullYear()
+    : new Date().getFullYear()
+  return `${cc}${year}-${order.display_id}`
 }

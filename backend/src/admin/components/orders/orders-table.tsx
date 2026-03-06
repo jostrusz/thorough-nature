@@ -365,7 +365,7 @@ export function OrdersTable({
                   const m = num.match(/^([A-Za-z]{2})\d/)
                   if (m) return m[1].toLowerCase()
                 }
-                return undefined
+                return "nl" // Default to NL (primary market)
               })()
             const deliveryStatus = order.metadata?.dextrum_status || (() => {
               const fulfillments = order.fulfillments || []
