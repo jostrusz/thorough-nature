@@ -5514,6 +5514,17 @@ body {
         var val = foxEmailField.value.trim();
         if (!val || val.indexOf('@') === -1) return;
 
+        // Pre-check: TLD moet minimaal 2 tekens zijn — skip Foxentry als ongeldig
+        var _preParts = val.split('@');
+        if (_preParts.length === 2) {
+          var _preDomain = _preParts[1].split('.');
+          var _preTld = _preDomain[_preDomain.length - 1] || '';
+          if (_preTld.length > 0 && _preTld.length < 2) {
+            // TLD te kort (.c, .x) — lokale handler heeft al invalid gezet, niet overschrijven
+            return;
+          }
+        }
+
         showSpinner(foxEmailField);
         foxentryFetch('/email/validate', {
           query: { email: val },
