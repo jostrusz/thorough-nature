@@ -5657,6 +5657,21 @@ body {
               }
               break;
           }
+
+          // Na Foxentry verwerking: herstel lokale typo suggestie als Foxentry geen eigen suggestie toonde
+          if (foxEmailSuggestion && foxEmailSuggestion.style.display === 'none') {
+            var _localTypo = checkEmailTypo(val);
+            if (_localTypo) {
+              foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + _localTypo + '</strong>? Klik om te corrigeren.';
+              foxEmailSuggestion.style.display = 'block';
+              foxEmailSuggestion.onclick = function() {
+                foxEmailField.value = _localTypo;
+                foxEmailSuggestion.style.display = 'none';
+                foxEmailField.classList.add('valid');
+                foxEmailField.classList.remove('invalid');
+              };
+            }
+          }
         })
         .catch(function(err) {
           hideSpinner(foxEmailField);
