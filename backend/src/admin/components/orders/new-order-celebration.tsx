@@ -15,18 +15,19 @@ interface NewOrderCelebrationProps {
   onDismiss: () => void
 }
 
-// ═══ Confetti Configuration ═══
+// ═══ Confetti Configuration (matches storefront thank-you page) ═══
 
 const CONFETTI_COLORS = [
-  colors.accent,
-  colors.green,
-  colors.blue,
-  colors.yellow,
-  colors.red,
-  colors.orange,
+  colors.accent,   // #6C5CE7
+  "#C4B5FD",       // light purple
+  "#1A1A1A",       // dark
+  "#F3E8FF",       // soft lavender
+  "#374151",       // charcoal
+  "#A78BFA",       // medium purple
+  "#fff",          // white
 ]
 
-const CONFETTI_COUNT = 40
+const CONFETTI_COUNT = 60
 
 interface ConfettiPiece {
   id: number
@@ -34,25 +35,20 @@ interface ConfettiPiece {
   left: number
   delay: number
   duration: number
-  width: number
-  height: number
-  rotation: number
-  swayAmount: number
-  shape: "rect" | "circle"
+  size: number
+  shape: "circle" | "square" | "triangle"
 }
 
 function generateConfetti(): ConfettiPiece[] {
+  const shapes: Array<"circle" | "square" | "triangle"> = ["circle", "square", "triangle"]
   return Array.from({ length: CONFETTI_COUNT }, (_, i) => ({
     id: i,
     color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-    left: 5 + Math.random() * 90,
-    delay: Math.random() * 0.8,
-    duration: 2 + Math.random() * 1.5,
-    width: 6 + Math.random() * 5,
-    height: Math.random() > 0.5 ? 10 + Math.random() * 6 : 6 + Math.random() * 4,
-    rotation: Math.random() * 360,
-    swayAmount: 15 + Math.random() * 30,
-    shape: Math.random() > 0.3 ? "rect" : "circle",
+    left: Math.random() * 100,
+    delay: Math.random() * 1.5,
+    duration: 2.5 + Math.random() * 2,
+    size: 6 + Math.random() * 10,
+    shape: shapes[Math.floor(Math.random() * shapes.length)],
   }))
 }
 
@@ -116,18 +112,15 @@ function ensureKeyframes() {
   style.textContent = `
     @keyframes confetti-fall {
       0% {
-        transform: translateY(-10px) rotate(0deg) translateX(0px);
         opacity: 1;
+        transform: translateY(0) rotate(0deg) scale(1);
       }
-      25% {
+      80% {
         opacity: 1;
-      }
-      50% {
-        opacity: 0.8;
       }
       100% {
-        transform: translateY(calc(100vh + 20px)) rotate(720deg) translateX(var(--sway, 20px));
         opacity: 0;
+        transform: translateY(100vh) rotate(720deg) scale(0.3);
       }
     }
 
@@ -154,6 +147,61 @@ function ensureKeyframes() {
     }
   `
   document.head.appendChild(style)
+}
+
+// ═══ Confetti Piece Renderer ═══
+
+function ConfettiPieceEl({ piece }: { piece: ConfettiPiece }) {
+  const baseStyle: React.CSSProperties = {
+    position: "absolute",
+    top: -20,
+    left: `${piece.left}%`,
+    opacity: 0,
+    animation: `confetti-fall ${piece.duration}s ease-in ${piece.delay}s forwards`,
+  }
+
+  if (piece.shape === "circle") {
+    return (
+      <div
+        style={{
+          ...baseStyle,
+          width: piece.size,
+          height: piece.size,
+          borderRadius: "50%",
+          background: piece.color,
+        }}
+      />
+    )
+  }
+
+  if (piece.shape === "square") {
+    return (
+      <div
+        style={{
+          ...baseStyle,
+          width: piece.size,
+          height: piece.size,
+          borderRadius: 2,
+          background: piece.color,
+        }}
+      />
+    )
+  }
+
+  // triangle
+  return (
+    <div
+      style={{
+        ...baseStyle,
+        width: 0,
+        height: 0,
+        borderLeft: `${piece.size / 2}px solid transparent`,
+        borderRight: `${piece.size / 2}px solid transparent`,
+        borderBottom: `${piece.size}px solid ${piece.color}`,
+        background: "none",
+      }}
+    />
+  )
 }
 
 // ═══ Component ═══
@@ -235,7 +283,7 @@ export function NewOrderCelebration({
     left: "50%",
     transform: "translateX(-50%)",
     zIndex: 9999,
-    maxWidth: 300,
+    maxWidth: 500,
     width: "90%",
     background: `linear-gradient(135deg, ${colors.accent} 0%, #8B7CF7 100%)`,
     color: "#fff",
@@ -294,25 +342,10 @@ export function NewOrderCelebration({
 
   return (
     <>
-      {/* Confetti layer */}
+      {/* Confetti layer — same style as storefront thank-you page */}
       <div style={confettiContainerStyle}>
         {confettiPieces.map((piece) => (
-          <div
-            key={piece.id}
-            style={{
-              position: "absolute",
-              top: -20,
-              left: `${piece.left}%`,
-              width: piece.width,
-              height: piece.height,
-              backgroundColor: piece.color,
-              borderRadius: piece.shape === "circle" ? "50%" : "2px",
-              transform: `rotate(${piece.rotation}deg)`,
-              animation: `confetti-fall ${piece.duration}s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${piece.delay}s forwards`,
-              opacity: 0,
-              ["--sway" as any]: `${piece.swayAmount * (piece.id % 2 === 0 ? 1 : -1)}px`,
-            }}
-          />
+          <ConfettiPieceEl key={piece.id} piece={piece} />
         ))}
       </div>
 
