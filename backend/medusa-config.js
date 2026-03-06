@@ -24,6 +24,7 @@ import {
   MINIO_ACCESS_KEY,
   MINIO_SECRET_KEY,
   MINIO_BUCKET,
+  MINIO_PUBLIC_ENDPOINT,
   MEILISEARCH_HOST,
   MEILISEARCH_ADMIN_KEY,
   KLARNA_API_KEY,
@@ -104,6 +105,7 @@ const medusaConfig = {
             id: 'minio',
             options: {
               endPoint: MINIO_ENDPOINT,
+              publicEndPoint: MINIO_PUBLIC_ENDPOINT,
               accessKey: MINIO_ACCESS_KEY,
               secretKey: MINIO_SECRET_KEY,
               bucket: MINIO_BUCKET // Optional, default: medusa-media
