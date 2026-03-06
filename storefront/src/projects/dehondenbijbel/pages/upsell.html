@@ -1151,13 +1151,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
           // Mark that Purchase was already tracked (so thank-you page doesn't fire again)
           localStorage.setItem('medusa_purchase_tracked', 'true');
           console.log('Upsell: Purchase tracked — €' + purchaseValue + ' event_id=' + purchaseEventId);
-
-          MetaTracker.trackViewContent({
-            content_ids: [PROJECT_CONFIG.upsellProduct.handle],
-            content_name: PROJECT_CONFIG.upsellProduct.name,
-            value: PROJECT_CONFIG.upsellProduct.price,
-            currency: PROJECT_CONFIG.upsellProduct.currency
-          });
         }
         return true;
       } else if (res.type === 'cart') {
