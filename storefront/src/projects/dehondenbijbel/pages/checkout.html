@@ -5050,20 +5050,24 @@ body {
 
   /* ─── SMART EMAIL VALIDATIE — typfouten detectie ─── */
   var COMMON_DOMAINS = {
-    'gmail.com': ['gmial.com','gmai.com','gmal.com','gamil.com','gmail.nl','gmail.co','gnail.com','gmaill.com','gmali.com','gmaik.com','gmail.con','gmail.cmo','gmeil.com','gemail.com'],
-    'hotmail.com': ['hotmai.com','hotmal.com','homail.com','hotmail.co','hotamil.com','hotmaill.com','hotmial.com','hotmail.con','hotmail.nl'],
-    'outlook.com': ['outlok.com','outllook.com','outook.com','outlook.co','outlool.com','outlouk.com'],
-    'yahoo.com': ['yaho.com','yahooo.com','yahoo.co','yaahoo.com','yhoo.com','yahoo.nl'],
-    'live.nl': ['live.nl.com','lve.nl','live.n','live.nll'],
-    'ziggo.nl': ['zigo.nl','ziggo.n','ziggo.nll','zigggo.nl'],
-    'kpnmail.nl': ['kpnmal.nl','kpnmail.n','kpnmai.nl','kpnmail.nll'],
-    'upcmail.nl': ['upcmal.nl','upcmail.n'],
-    'hetnet.nl': ['hetnet.n','henet.nl'],
+    'gmail.com': ['gmial.com','gmai.com','gmal.com','gamil.com','gmail.nl','gmail.co','gnail.com','gmaill.com','gmali.com','gmaik.com','gmail.con','gmail.cmo','gmeil.com','gemail.com','gmai.c','gmail.c','gmal.c','gmil.com','g mail.com','gamail.com','gimail.com','gmsil.com','gmqil.com'],
+    'hotmail.com': ['hotmai.com','hotmal.com','homail.com','hotmail.co','hotamil.com','hotmaill.com','hotmial.com','hotmail.con','hotmail.nl','hotmail.c','hotmai.c','hotmal.c','htomail.com','htmail.com','hotmil.com'],
+    'outlook.com': ['outlok.com','outllook.com','outook.com','outlook.co','outlool.com','outlouk.com','outlook.c','outlok.c','outloook.com','outlokk.com'],
+    'yahoo.com': ['yaho.com','yahooo.com','yahoo.co','yaahoo.com','yhoo.com','yahoo.nl','yahoo.c','yaho.c','yaoo.com','yhaoo.com'],
+    'live.nl': ['live.nl.com','lve.nl','live.n','live.nll','live.l'],
+    'ziggo.nl': ['zigo.nl','ziggo.n','ziggo.nll','zigggo.nl','ziggo.l','zigo.n'],
+    'kpnmail.nl': ['kpnmal.nl','kpnmail.n','kpnmai.nl','kpnmail.nll','kpnmail.l','kpnmal.n'],
+    'upcmail.nl': ['upcmal.nl','upcmail.n','upcmail.l'],
+    'hetnet.nl': ['hetnet.n','henet.nl','hetnet.l'],
     'telenet.be': ['telenet.b','telnet.be','telenet.bee'],
     'skynet.be': ['skynet.b','sknet.be'],
     'proximus.be': ['proximus.b','proxmus.be'],
-    'icloud.com': ['iclod.com','icloud.co','icoud.com','icloud.con'],
-    'protonmail.com': ['protonmal.com','protonmail.co','protonmail.con'],
+    'icloud.com': ['iclod.com','icloud.co','icoud.com','icloud.con','icloud.c','iclod.c'],
+    'protonmail.com': ['protonmal.com','protonmail.co','protonmail.con','protonmail.c'],
+    'online.nl': ['online.n','onlne.nl','online.l'],
+    'xs4all.nl': ['xs4all.n','xs4al.nl','xs4all.l'],
+    'planet.nl': ['planet.n','plnet.nl','planet.l'],
+    'casema.nl': ['casema.n','casma.nl','casema.l'],
   };
   var TYPO_MAP = {};
   Object.keys(COMMON_DOMAINS).forEach(function(correct) {
@@ -5083,10 +5087,37 @@ body {
   // Foxentry flag — als key is ingesteld, worden email/phone uitsluitend door Foxentry gevalideerd
   var hasFoxentryKey = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
 
-  if (emailField && emailSuggestion && !hasFoxentryKey) {
-    // Alleen lokale typo-check als Foxentry NIET actief is
+  if (emailField && emailSuggestion) {
+    // Lokale typo-check — altijd actief (ook naast Foxentry)
     emailField.addEventListener('blur', function() {
       var val = emailField.value.trim();
+      if (!val) return;
+
+      // 1. TLD lengte check — .c, .x etc. zijn geen geldige TLD's (min 2 tekens)
+      var atParts = val.split('@');
+      if (atParts.length === 2) {
+        var domainParts = atParts[1].split('.');
+        var tld = domainParts[domainParts.length - 1];
+        if (tld && tld.length < 2) {
+          emailField.classList.add('invalid');
+          emailField.classList.remove('valid');
+          // Probeer typo suggestie te geven
+          var tldSuggestion = checkEmailTypo(val);
+          if (tldSuggestion) {
+            emailSuggestion.innerHTML = 'Bedoelde je <strong>' + tldSuggestion + '</strong>? Klik om te corrigeren.';
+            emailSuggestion.style.display = 'block';
+            emailSuggestion.onclick = function() {
+              emailField.value = tldSuggestion;
+              emailSuggestion.style.display = 'none';
+              emailField.classList.add('valid');
+              emailField.classList.remove('invalid');
+            };
+          }
+          return; // Stop — ongeldige TLD
+        }
+      }
+
+      // 2. Typo check (gmail.co → gmail.com, hotmal.com → hotmail.com etc.)
       var suggestion = checkEmailTypo(val);
       if (suggestion) {
         emailSuggestion.innerHTML = 'Bedoelde je <strong>' + suggestion + '</strong>? Klik om te corrigeren.';
@@ -5094,7 +5125,8 @@ body {
         emailSuggestion.onclick = function() {
           emailField.value = suggestion;
           emailSuggestion.style.display = 'none';
-          validateField(emailField);
+          emailField.classList.add('valid');
+          emailField.classList.remove('invalid');
         };
       } else {
         emailSuggestion.style.display = 'none';
@@ -5497,11 +5529,36 @@ body {
           // Verberg eerdere suggestie
           if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
 
+          // Extra veiligheid: TLD lengte check (Foxentry basic mist dit)
+          var _emailParts = val.split('@');
+          var _tld = '';
+          if (_emailParts.length === 2) {
+            var _dParts = _emailParts[1].split('.');
+            _tld = _dParts[_dParts.length - 1] || '';
+          }
+          var _tldTooShort = _tld.length > 0 && _tld.length < 2;
+
           switch (proposal) {
             case 'valid':
-              // Email is OK
-              foxEmailField.classList.add('valid');
-              foxEmailField.classList.remove('invalid');
+              // Email is OK — maar override als TLD te kort is
+              if (_tldTooShort) {
+                foxEmailField.classList.add('invalid');
+                foxEmailField.classList.remove('valid');
+                var _typoFix = checkEmailTypo(val);
+                if (_typoFix && foxEmailSuggestion) {
+                  foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + _typoFix + '</strong>? Klik om te corrigeren.';
+                  foxEmailSuggestion.style.display = 'block';
+                  foxEmailSuggestion.onclick = function() {
+                    foxEmailField.value = _typoFix;
+                    foxEmailSuggestion.style.display = 'none';
+                    foxEmailField.classList.add('valid');
+                    foxEmailField.classList.remove('invalid');
+                  };
+                }
+              } else {
+                foxEmailField.classList.add('valid');
+                foxEmailField.classList.remove('invalid');
+              }
               break;
 
             case 'invalid':
@@ -5592,9 +5649,18 @@ body {
         })
         .catch(function(err) {
           hideSpinner(foxEmailField);
-          // Foxentry failed (400/429/network) — lokale regex validatie als fallback
+          // Foxentry failed (400/429/network) — lokale regex + TLD validatie als fallback
           console.warn('[Foxentry] Email validation failed, using local fallback:', err.message || err);
           var localValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+
+          // Extra: TLD lengte check
+          var _catchParts = val.split('@');
+          if (_catchParts.length === 2) {
+            var _catchDomain = _catchParts[1].split('.');
+            var _catchTld = _catchDomain[_catchDomain.length - 1] || '';
+            if (_catchTld.length < 2) localValid = false;
+          }
+
           if (localValid) {
             foxEmailField.classList.add('valid');
             foxEmailField.classList.remove('invalid');
