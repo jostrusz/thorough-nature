@@ -390,6 +390,54 @@ body {
 .email-suggestion:hover { background: rgba(230, 126, 34, 0.14); }
 .email-suggestion strong { color: #D35400; text-decoration: underline; text-underline-offset: 2px; }
 
+/* ─── PHONE PREFIX ─── */
+.phone-with-prefix {
+  display: flex;
+  flex-wrap: wrap;
+}
+.phone-with-prefix input {
+  padding-left: 80px !important;
+}
+.phone-with-prefix label {
+  left: 80px !important;
+}
+.phone-prefix {
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  bottom: 1px;
+  width: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  z-index: 2;
+  pointer-events: none;
+  border-right: 1px solid var(--border);
+  background: #FAFAFA;
+  border-radius: var(--radius) 0 0 var(--radius);
+  transition: border-color 0.2s ease;
+}
+.phone-with-prefix input:focus + label + .phone-prefix {
+  border-right-color: var(--cta);
+}
+.phone-with-prefix input.valid + label + .phone-prefix {
+  border-right-color: var(--success);
+}
+.phone-with-prefix input.invalid + label + .phone-prefix {
+  border-right-color: var(--error);
+}
+.phone-prefix-flag {
+  font-size: 16px;
+  line-height: 1;
+}
+.phone-prefix-code {
+  font-family: 'Cabin', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--heading);
+}
+
 /* ─── PHONE FORMAT PREVIEW ─── */
 .phone-preview {
   display: none;
@@ -2335,9 +2383,13 @@ body {
             <div class="foxentry-dropdown" id="foxentry-email-dropdown"></div>
           </div>
 
-          <div class="float-field form-group" style="margin-bottom:0;">
+          <div class="float-field form-group phone-with-prefix" style="margin-bottom:0;">
             <input type="tel" id="phone" name="phone" placeholder=" " required autocomplete="tel">
             <label for="phone">Telefoonnummer</label>
+            <div class="phone-prefix" id="phone-prefix">
+              <span class="phone-prefix-flag" id="phone-prefix-flag">🇳🇱</span>
+              <span class="phone-prefix-code" id="phone-prefix-code">+31</span>
+            </div>
             <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             <div class="field-error">Vul een geldig telefoonnummer in</div>
@@ -5137,45 +5189,114 @@ body {
     });
   }
 
-  /* ─── TELEFOONNUMMER FORMATTEREN — auto-prefix per land ─── */
+  /* ─── TELEFOONNUMMER — visuele prefix + auto-detectie land ─── */
   var phoneField = document.getElementById('phone');
   var phonePreview = document.getElementById('phone-preview');
   var countrySelect = document.getElementById('country');
-  var COUNTRY_PHONE_PREFIX = { NL: '+31', BE: '+32' };
+  var phonePrefixFlag = document.getElementById('phone-prefix-flag');
+  var phonePrefixCode = document.getElementById('phone-prefix-code');
 
-  function formatPhoneNumber(raw, countryCode) {
-    var cleaned = raw.replace(/[\s\-\(\)\.]/g, '');
-    if (cleaned.startsWith('+')) return cleaned;
-    if (cleaned.startsWith('00')) return '+' + cleaned.substring(2);
-    if (cleaned.startsWith('0')) {
-      var prefix = COUNTRY_PHONE_PREFIX[countryCode] || '+31';
-      return prefix + cleaned.substring(1);
+  var PHONE_COUNTRIES = {
+    NL: { prefix: '+31', flag: '\uD83C\uDDF3\uD83C\uDDF1' },
+    BE: { prefix: '+32', flag: '\uD83C\uDDE7\uD83C\uDDEA' },
+    DE: { prefix: '+49', flag: '\uD83C\uDDE9\uD83C\uDDEA' },
+    LU: { prefix: '+352', flag: '\uD83C\uDDF1\uD83C\uDDFA' },
+  };
+  // Omgekeerd: prefix → landcode
+  var PREFIX_TO_COUNTRY = {};
+  Object.keys(PHONE_COUNTRIES).forEach(function(cc) {
+    PREFIX_TO_COUNTRY[PHONE_COUNTRIES[cc].prefix] = cc;
+  });
+
+  function updatePhonePrefix(countryCode) {
+    var info = PHONE_COUNTRIES[countryCode] || PHONE_COUNTRIES.NL;
+    if (phonePrefixFlag) phonePrefixFlag.textContent = info.flag;
+    if (phonePrefixCode) phonePrefixCode.textContent = info.prefix;
+  }
+
+  // Detecteer land uit telefoonnummer (bijv. +32... → BE)
+  function detectCountryFromPhone(val) {
+    var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
+    if (!cleaned.startsWith('+') && cleaned.startsWith('00')) {
+      cleaned = '+' + cleaned.substring(2);
     }
-    if (/^\d{7,}$/.test(cleaned)) {
-      return (COUNTRY_PHONE_PREFIX[countryCode] || '+31') + cleaned;
+    if (cleaned.startsWith('+')) {
+      // Langste prefix eerst controleren (+352 voor +35)
+      var prefixes = Object.keys(PREFIX_TO_COUNTRY).sort(function(a, b) { return b.length - a.length; });
+      for (var i = 0; i < prefixes.length; i++) {
+        if (cleaned.startsWith(prefixes[i])) return PREFIX_TO_COUNTRY[prefixes[i]];
+      }
+    }
+    return null;
+  }
+
+  // Strip prefix uit ingevoerd nummer (voor weergave in veld)
+  function stripPrefix(val, countryCode) {
+    var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
+    if (cleaned.startsWith('00')) cleaned = '+' + cleaned.substring(2);
+    var info = PHONE_COUNTRIES[countryCode] || PHONE_COUNTRIES.NL;
+    if (cleaned.startsWith(info.prefix)) {
+      return cleaned.substring(info.prefix.length);
+    }
+    // Strip leading 0 (lokaal nummer)
+    if (cleaned.startsWith('0') && !cleaned.startsWith('+')) {
+      return cleaned.substring(1);
     }
     return cleaned;
   }
 
+  // Bouw volledig nummer: prefix + lokaal deel
+  function buildFullPhone(countryCode) {
+    var raw = phoneField.value.trim().replace(/[\s\-\(\)\.]/g, '');
+    if (!raw) return '';
+    var info = PHONE_COUNTRIES[countryCode] || PHONE_COUNTRIES.NL;
+    // Al volledig nummer met prefix?
+    if (raw.startsWith('+') || raw.startsWith('00')) return raw.startsWith('00') ? '+' + raw.substring(2) : raw;
+    // Strip leading 0
+    if (raw.startsWith('0')) raw = raw.substring(1);
+    return info.prefix + raw;
+  }
+
+  // Update prefix bij country change
+  if (countrySelect) {
+    countrySelect.addEventListener('change', function() {
+      updatePhonePrefix(countrySelect.value);
+    });
+    // Init
+    updatePhonePrefix(countrySelect.value || 'NL');
+  }
+
   if (phoneField && phonePreview) {
+    // Bij input: detecteer land uit prefix en update country + vlag
+    phoneField.addEventListener('input', function() {
+      var val = phoneField.value.trim();
+      var detected = detectCountryFromPhone(val);
+      if (detected && countrySelect && countrySelect.value !== detected) {
+        countrySelect.value = detected;
+        countrySelect.dispatchEvent(new Event('change'));
+        // Strip prefix uit veld — gebruiker ziet alleen lokaal nummer
+        var stripped = stripPrefix(val, detected);
+        if (stripped !== val.replace(/[\s\-\(\)\.]/g, '')) {
+          phoneField.value = stripped;
+        }
+      }
+      phonePreview.style.display = 'none';
+    });
+
     phoneField.addEventListener('blur', function() {
-      // Als Foxentry actief is, GEEN lokale formatting of validatie — alles via Foxentry
+      // Als Foxentry actief is, GEEN lokale formatting — Foxentry handelt dit af
       if (hasFoxentryKey) return;
       var raw = phoneField.value.trim();
       if (!raw) { phonePreview.style.display = 'none'; return; }
       var country = countrySelect ? countrySelect.value : 'NL';
-      var formatted = formatPhoneNumber(raw, country);
-      phoneField.value = formatted;
-      if (formatted !== raw) {
-        phonePreview.textContent = '\u2713 Opgeslagen als ' + formatted;
+      var fullNumber = buildFullPhone(country);
+      if (fullNumber && fullNumber !== raw) {
+        phonePreview.textContent = '\u2713 Opgeslagen als ' + fullNumber;
         phonePreview.style.display = 'block';
       } else {
         phonePreview.style.display = 'none';
       }
       validateField(phoneField);
-    });
-    phoneField.addEventListener('input', function() {
-      phonePreview.style.display = 'none';
     });
   }
 
@@ -5720,43 +5841,44 @@ body {
       // Foxentry handelt ALLE telefoonvalidatie + formatting af
       foxPhoneField.addEventListener('blur', function() {
         var val = foxPhoneField.value.trim();
-        if (!val || val.length < 5) return;
+        if (!val || val.length < 3) return;
 
-        // Voeg landprefix toe als die ontbreekt (bijv. 0612345678 → +31612345678)
-        var countryEl = document.getElementById('country');
-        var cc = countryEl ? countryEl.value : 'NL';
-        var prefixMap = { NL: '+31', BE: '+32' };
-        var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
-        if (!cleaned.startsWith('+') && !cleaned.startsWith('00')) {
-          if (cleaned.startsWith('0')) cleaned = (prefixMap[cc] || '+31') + cleaned.substring(1);
-          else if (/^\d{7,}$/.test(cleaned)) cleaned = (prefixMap[cc] || '+31') + cleaned;
-        } else if (cleaned.startsWith('00')) {
-          cleaned = '+' + cleaned.substring(2);
-        }
+        // Bouw volledig nummer met prefix uit visuele component
+        var cc = countrySelect ? countrySelect.value : 'NL';
+        var fullNumber = buildFullPhone(cc);
+        if (!fullNumber || fullNumber.length < 8) return;
 
         showSpinner(foxPhoneField);
         foxentryFetch('/phone/validate', {
-          query: { numberWithPrefix: cleaned }
+          query: { numberWithPrefix: fullNumber }
         })
           .then(function(resp) {
             hideSpinner(foxPhoneField);
             var fx = foxentryResult(resp);
             var isValid = fx.result.isValid === true;
-            // Gebruik geformatteerd nummer van Foxentry
+            // Gebruik geformatteerd nummer van Foxentry — strip prefix voor weergave
             var data = fx.result.data || {};
             var fmt = data.format || {};
-            if (fmt.internationalFormatted) {
-              foxPhoneField.value = fmt.internationalFormatted;
-            } else if (data.numberWithPrefix) {
-              foxPhoneField.value = data.numberWithPrefix;
+            var formattedFull = fmt.internationalFormatted || data.numberWithPrefix || fullNumber;
+            // Detecteer land uit Foxentry resultaat en update prefix
+            var detectedCC = detectCountryFromPhone(formattedFull);
+            if (detectedCC) {
+              if (countrySelect && countrySelect.value !== detectedCC) {
+                countrySelect.value = detectedCC;
+                countrySelect.dispatchEvent(new Event('change'));
+              }
+              updatePhonePrefix(detectedCC);
             }
+            // Toon alleen lokaal deel in het veld
+            var localPart = stripPrefix(formattedFull, detectedCC || cc);
+            foxPhoneField.value = localPart;
 
             if (isValid) {
               foxPhoneField.classList.add('valid');
               foxPhoneField.classList.remove('invalid');
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
-                foxPhonePreview.textContent = '\u2713 Geldig telefoonnummer';
+                foxPhonePreview.textContent = '\u2713 ' + formattedFull;
                 foxPhonePreview.style.display = 'block';
               }
             } else {
@@ -5771,18 +5893,16 @@ body {
           })
           .catch(function(err) {
             hideSpinner(foxPhoneField);
-            // Foxentry failed (429 rate limit, network error, etc.)
-            // Fall back to local phone validation
             console.warn('[Foxentry] Phone validation failed, using local fallback:', err.message || err);
-            var stripped = foxPhoneField.value.replace(/[\s\-\(\)\.]/g, '');
-            var localValid = /^[\+]?\d{8,}$/.test(stripped);
+            var testNumber = buildFullPhone(cc);
+            var localValid = /^[\+]\d{8,}$/.test(testNumber);
             if (localValid) {
               foxPhoneField.classList.add('valid');
               foxPhoneField.classList.remove('invalid');
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
-                foxPhonePreview.textContent = '';
-                foxPhonePreview.style.display = 'none';
+                foxPhonePreview.textContent = '\u2713 ' + testNumber;
+                foxPhonePreview.style.display = 'block';
               }
             } else {
               foxPhoneField.classList.add('invalid');
@@ -5940,7 +6060,11 @@ body {
         }
       }
     } else if (field.type === 'tel') {
-      var stripped = value.replace(/[\s\-\(\)\.]/g, '');
+      // Valideer het volledige nummer (prefix + lokaal deel)
+      var fullPhone = (typeof buildFullPhone === 'function' && document.getElementById('country'))
+        ? buildFullPhone(document.getElementById('country').value)
+        : value;
+      var stripped = fullPhone.replace(/[\s\-\(\)\.]/g, '');
       isValid = /^[\+]?\d{8,}$/.test(stripped);
     } else if (field.id === 'postal_code') {
       isValid = value.length >= 4;
@@ -6014,7 +6138,7 @@ body {
   function saveFormToStorage() {
     var draft = {
       email: (document.getElementById('email') || {}).value || '',
-      phone: (document.getElementById('phone') || {}).value || '',
+      phone: (typeof buildFullPhone === 'function' && document.getElementById('country')) ? buildFullPhone(document.getElementById('country').value) : ((document.getElementById('phone') || {}).value || ''),
       first_name: (document.getElementById('first_name') || {}).value || '',
       last_name: (document.getElementById('last_name') || {}).value || '',
       address: (document.getElementById('address') || {}).value || '',
@@ -6040,11 +6164,29 @@ body {
         localStorage.removeItem('checkout_draft');
         return;
       }
+      // Eerst country herstellen zodat prefix klopt
+      var countryEl = document.getElementById('country');
+      if (countryEl && draft.country && !countryEl.value) {
+        countryEl.value = draft.country;
+      }
+
       var fields = ['email', 'phone', 'first_name', 'last_name', 'address', 'city', 'postal_code', 'country', 'company_name', 'kvk_number', 'vat_number'];
       fields.forEach(function(f) {
         var el = document.getElementById(f);
         if (el && draft[f] && !el.value) {
-          el.value = draft[f];
+          if (f === 'phone' && typeof detectCountryFromPhone === 'function') {
+            // Telefoon: detecteer land en strip prefix
+            var detCC = detectCountryFromPhone(draft[f]);
+            if (detCC) {
+              if (countryEl) countryEl.value = detCC;
+              updatePhonePrefix(detCC);
+              el.value = stripPrefix(draft[f], detCC);
+            } else {
+              el.value = draft[f];
+            }
+          } else {
+            el.value = draft[f];
+          }
           // Trigger visual validation state
           if (el.value) el.classList.add('has-value');
         }
@@ -6131,7 +6273,7 @@ body {
         city: (ct && ct.value) || '',
         postal_code: (pc && pc.value) || '',
         country_code: (co && co.value) || 'nl',
-        phone: (ph && ph.value) || ''
+        phone: (ph && ph.value && typeof buildFullPhone === 'function') ? buildFullPhone((co && co.value) || 'NL') : ((ph && ph.value) || '')
       };
     }
 
@@ -6438,7 +6580,7 @@ body {
         city: document.getElementById('city').value.trim(),
         postal_code: document.getElementById('postal_code').value.trim(),
         country_code: document.getElementById('country').value.toLowerCase(),
-        phone: document.getElementById('phone').value.trim(),
+        phone: (typeof buildFullPhone === 'function') ? buildFullPhone(document.getElementById('country').value) : document.getElementById('phone').value.trim(),
       }
     };
 
