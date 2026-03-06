@@ -5166,6 +5166,21 @@ body {
   var hasFoxentryKey = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
 
   if (emailField && emailSuggestion) {
+    // FB Pixel + CAPI: AddPaymentInfo when customer fills in email (high intent signal)
+    var addPaymentInfoFired = false;
+    emailField.addEventListener('blur', function() {
+      var emailVal = emailField.value.trim();
+      if (emailVal && emailVal.includes('@') && !addPaymentInfoFired && typeof MetaTracker !== 'undefined') {
+        addPaymentInfoFired = true;
+        MetaTracker.trackAddPaymentInfo({
+          content_ids: [PROJECT_CONFIG.mainProduct.handle],
+          value: getCurrentTotal(),
+          currency: PROJECT_CONFIG.mainProduct.currency
+        }, { em: emailVal });
+        console.log('[Checkout] AddPaymentInfo fired — email entered');
+      }
+    });
+
     // Lokale typo-check — altijd actief (ook naast Foxentry)
     emailField.addEventListener('blur', function() {
       var val = emailField.value.trim();
@@ -6884,17 +6899,7 @@ body {
       localStorage.setItem('medusa_order_bump', checkoutOrderBump ? 'true' : 'false');
       localStorage.setItem('medusa_checkout_total', checkoutTotal);
 
-      // FB Pixel + CAPI: AddPaymentInfo (customer submitted form & proceeding to payment)
-      if (typeof MetaTracker !== 'undefined') {
-        var contentIds = [PROJECT_CONFIG.mainProduct.handle];
-        if (checkoutOrderBump) contentIds.push(PROJECT_CONFIG.upsellProduct.handle);
-        MetaTracker.trackAddPaymentInfo({
-          content_ids: contentIds,
-          value: checkoutTotal,
-          currency: PROJECT_CONFIG.mainProduct.currency,
-          num_items: checkoutBundleQty + (checkoutOrderBump ? 1 : 0)
-        });
-      }
+      // Note: AddPaymentInfo already fired on email blur (earlier in the funnel)
 
       // Analytics: Track initiate_checkout event
       if (window.AnalyticsTracker) {
