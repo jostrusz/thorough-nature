@@ -97,7 +97,9 @@ class MinioFileProviderService extends AbstractFileProviderService {
       port: port,
       useSSL: useSSL,
       accessKey: this.config_.accessKey,
-      secretKey: this.config_.secretKey
+      secretKey: this.config_.secretKey,
+      region: 'us-east-1',
+      pathStyle: true
     })
 
     // Initialize bucket and policy
