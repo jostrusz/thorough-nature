@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react"
-import { colors, radii, shadows, fontStack } from "./design-tokens"
+import { createPortal } from "react-dom"
+import { colors, radii, fontStack } from "./design-tokens"
 
 // ═══ Types ═══
 
@@ -73,23 +74,17 @@ function playNotificationChime() {
       osc.stop(start + dur)
     }
 
-    // C5 (523.25 Hz) then E5 (659.25 Hz) — two quick ascending tones
     playTone(523.25, now, 0.12)
     playTone(659.25, now + 0.08, 0.12)
-
-    // Close the context after the sounds finish
     setTimeout(() => ctx.close(), 500)
   } catch {
-    // Web Audio not available — silently skip
+    // Web Audio not available
   }
 }
 
 // ═══ Currency Formatting ═══
 
-function formatCurrency(
-  amount: number,
-  currencyCode: string = "EUR"
-): string {
+function formatCurrency(amount: number, currencyCode: string = "EUR"): string {
   try {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -110,7 +105,7 @@ function ensureKeyframes() {
   const style = document.createElement("style")
   style.id = STYLE_ID
   style.textContent = `
-    @keyframes confetti-fall {
+    @keyframes noc-confetti-fall {
       0% {
         opacity: 1;
         transform: translateY(0) rotate(0deg) scale(1);
@@ -124,25 +119,25 @@ function ensureKeyframes() {
       }
     }
 
-    @keyframes banner-slide-down {
+    @keyframes noc-banner-slide-down {
       0% {
-        transform: translateX(-50%) translateY(-100%);
         opacity: 0;
+        transform: translateY(-100%);
       }
       100% {
-        transform: translateX(-50%) translateY(0);
         opacity: 1;
+        transform: translateY(0);
       }
     }
 
-    @keyframes banner-slide-up {
+    @keyframes noc-banner-slide-up {
       0% {
-        transform: translateX(-50%) translateY(0);
         opacity: 1;
+        transform: translateY(0);
       }
       100% {
-        transform: translateX(-50%) translateY(-100%);
         opacity: 0;
+        transform: translateY(-100%);
       }
     }
   `
@@ -157,7 +152,7 @@ function ConfettiPieceEl({ piece }: { piece: ConfettiPiece }) {
     top: -20,
     left: `${piece.left}%`,
     opacity: 0,
-    animation: `confetti-fall ${piece.duration}s ease-in ${piece.delay}s forwards`,
+    animation: `noc-confetti-fall ${piece.duration}s ease-in ${piece.delay}s forwards`,
   }
 
   if (piece.shape === "circle") {
@@ -225,13 +220,11 @@ export function NewOrderCelebration({
     setExiting(false)
     soundPlayed.current = false
 
-    // Play chime
     if (!soundPlayed.current) {
       playNotificationChime()
       soundPlayed.current = true
     }
 
-    // Auto-dismiss after 5 seconds
     dismissTimer.current = setTimeout(() => {
       handleDismiss()
     }, 5000)
@@ -264,129 +257,140 @@ export function NewOrderCelebration({
       ? formatCurrency(order.total, order.currency_code)
       : null
 
-  // ═══ Styles ═══
+  // ═══ Render via portal to document.body ═══
+  // This bypasses Medusa admin's parent transforms that break position:fixed
 
-  const confettiContainerStyle: React.CSSProperties = {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100vw",
-    height: "100vh",
-    pointerEvents: "none",
-    zIndex: 9998,
-    overflow: "hidden",
-  }
-
-  const bannerStyle: React.CSSProperties = {
-    position: "fixed",
-    top: 0,
-    left: "50%",
-    transform: "translateX(-50%)",
-    zIndex: 9999,
-    maxWidth: 500,
-    width: "90%",
-    background: `linear-gradient(135deg, ${colors.accent} 0%, #8B7CF7 100%)`,
-    color: "#fff",
-    borderRadius: `0 0 ${radii.sm} ${radii.sm}`,
-    boxShadow: "0 4px 24px rgba(108,92,231,0.35), 0 1px 6px rgba(0,0,0,0.1)",
-    padding: "16px 20px",
-    fontFamily: fontStack,
-    animation: exiting
-      ? "banner-slide-up 0.35s ease-in forwards"
-      : "banner-slide-down 0.4s cubic-bezier(0.22,1,0.36,1) forwards",
-  }
-
-  const headerRowStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: customerName || formattedTotal ? 6 : 0,
-  }
-
-  const titleStyle: React.CSSProperties = {
-    fontSize: 15,
-    fontWeight: 700,
-    fontFamily: fontStack,
-    letterSpacing: "-0.01em",
-  }
-
-  const subtitleStyle: React.CSSProperties = {
-    fontSize: 13,
-    fontWeight: 400,
-    fontFamily: fontStack,
-    opacity: 0.88,
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-  }
-
-  const closeButtonStyle: React.CSSProperties = {
-    background: "rgba(255,255,255,0.18)",
-    border: "none",
-    color: "#fff",
-    width: 24,
-    height: 24,
-    borderRadius: "50%",
-    fontSize: 14,
-    lineHeight: "24px",
-    textAlign: "center",
-    cursor: "pointer",
-    padding: 0,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-    transition: "background 0.15s",
-    fontFamily: fontStack,
-  }
-
-  return (
+  const content = (
     <>
-      {/* Confetti layer — same style as storefront thank-you page */}
-      <div style={confettiContainerStyle}>
+      {/* Confetti layer */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          pointerEvents: "none",
+          zIndex: 99998,
+          overflow: "hidden",
+        }}
+      >
         {confettiPieces.map((piece) => (
           <ConfettiPieceEl key={piece.id} piece={piece} />
         ))}
       </div>
 
-      {/* Banner */}
-      <div style={bannerStyle}>
-        <div style={headerRowStyle}>
-          <span style={titleStyle}>
-            New order received! {"\uD83C\uDF89"} {order.metadata?.custom_order_number || `#${order.display_id}`}
-          </span>
-          <button
-            style={closeButtonStyle}
-            onClick={(e) => {
-              e.stopPropagation()
-              if (dismissTimer.current) clearTimeout(dismissTimer.current)
-              handleDismiss()
+      {/* Banner — centered, max 500px */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 99999,
+          display: "flex",
+          justifyContent: "center",
+          pointerEvents: "none",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 500,
+            width: "90%",
+            background: `linear-gradient(135deg, ${colors.accent} 0%, #8B7CF7 100%)`,
+            color: "#fff",
+            borderRadius: `0 0 ${radii.sm} ${radii.sm}`,
+            boxShadow: "0 4px 24px rgba(108,92,231,0.35), 0 1px 6px rgba(0,0,0,0.1)",
+            padding: "16px 20px",
+            fontFamily: fontStack,
+            pointerEvents: "auto",
+            animation: exiting
+              ? "noc-banner-slide-up 0.35s ease-in forwards"
+              : "noc-banner-slide-down 0.4s cubic-bezier(0.22,1,0.36,1) forwards",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: customerName || formattedTotal ? 6 : 0,
             }}
-            onMouseEnter={(e) => {
-              ;(e.target as HTMLElement).style.background =
-                "rgba(255,255,255,0.3)"
-            }}
-            onMouseLeave={(e) => {
-              ;(e.target as HTMLElement).style.background =
-                "rgba(255,255,255,0.18)"
-            }}
-            aria-label="Dismiss"
           >
-            &times;
-          </button>
-        </div>
-        {(customerName || formattedTotal) && (
-          <div style={subtitleStyle}>
-            {customerName && <span>{customerName}</span>}
-            {customerName && formattedTotal && (
-              <span style={{ opacity: 0.5 }}>&middot;</span>
-            )}
-            {formattedTotal && (
-              <span style={{ fontWeight: 600 }}>{formattedTotal}</span>
-            )}
+            <span
+              style={{
+                fontSize: 15,
+                fontWeight: 700,
+                fontFamily: fontStack,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              New order received! {"\uD83C\uDF89"}{" "}
+              {order.metadata?.custom_order_number || `#${order.display_id}`}
+            </span>
+            <button
+              style={{
+                background: "rgba(255,255,255,0.18)",
+                border: "none",
+                color: "#fff",
+                width: 24,
+                height: 24,
+                borderRadius: "50%",
+                fontSize: 14,
+                lineHeight: "24px",
+                textAlign: "center",
+                cursor: "pointer",
+                padding: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                transition: "background 0.15s",
+                fontFamily: fontStack,
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (dismissTimer.current) clearTimeout(dismissTimer.current)
+                handleDismiss()
+              }}
+              onMouseEnter={(e) => {
+                ;(e.target as HTMLElement).style.background =
+                  "rgba(255,255,255,0.3)"
+              }}
+              onMouseLeave={(e) => {
+                ;(e.target as HTMLElement).style.background =
+                  "rgba(255,255,255,0.18)"
+              }}
+              aria-label="Dismiss"
+            >
+              &times;
+            </button>
           </div>
-        )}
+          {(customerName || formattedTotal) && (
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 400,
+                fontFamily: fontStack,
+                opacity: 0.88,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              {customerName && <span>{customerName}</span>}
+              {customerName && formattedTotal && (
+                <span style={{ opacity: 0.5 }}>&middot;</span>
+              )}
+              {formattedTotal && (
+                <span style={{ fontWeight: 600 }}>{formattedTotal}</span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </>
   )
+
+  return createPortal(content, document.body)
 }
