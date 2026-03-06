@@ -75,14 +75,22 @@ export default async function seedSlappTaget({ container }: ExecArgs) {
   })
   const region = regionResult[0]
 
-  // ─── 3. TAX REGION ───
+  // ─── 3. TAX REGION (skip if already exists) ───
   logger.info("[SlappTaget] Creating tax region...")
-  await createTaxRegionsWorkflow(container).run({
-    input: countries.map((country_code) => ({
-      country_code,
-      provider_id: "tp_system",
-    })),
-  })
+  try {
+    await createTaxRegionsWorkflow(container).run({
+      input: countries.map((country_code) => ({
+        country_code,
+        provider_id: "tp_system",
+      })),
+    })
+  } catch (e: any) {
+    if (e.message?.includes("already exists")) {
+      logger.info("[SlappTaget] Tax region for SE already exists, skipping")
+    } else {
+      throw e
+    }
+  }
 
   // ─── 4. STOCK LOCATION ───
   logger.info("[SlappTaget] Creating stock location...")
