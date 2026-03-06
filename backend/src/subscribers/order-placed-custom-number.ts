@@ -16,7 +16,7 @@ export default async function orderPlacedCustomNumberHandler({
 
     const { data: [order] } = await query.graph({
       entity: "order",
-      fields: ["id", "display_id", "metadata", "shipping_address.country_code"],
+      fields: ["id", "display_id", "metadata", "shipping_address.country_code", "billing_address.country_code"],
       filters: { id: data.id },
     })
 
@@ -25,7 +25,11 @@ export default async function orderPlacedCustomNumberHandler({
     // Skip if custom_order_number already set (e.g., duplicated order)
     if ((order as any).metadata?.custom_order_number) return
 
-    const countryCode = (order as any).shipping_address?.country_code?.toUpperCase() || "XX"
+    const countryCode = (
+      (order as any).shipping_address?.country_code ||
+      (order as any).billing_address?.country_code ||
+      "nl"
+    ).toUpperCase()
     const year = new Date().getFullYear()
     const displayId = (order as any).display_id
     const customOrderNumber = `${countryCode}${year}-${displayId}`
