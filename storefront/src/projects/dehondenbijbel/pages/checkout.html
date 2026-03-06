@@ -5142,6 +5142,29 @@ body {
   var phonePreview = document.getElementById('phone-preview');
   var countrySelect = document.getElementById('country');
   var COUNTRY_PHONE_PREFIX = { NL: '+31', BE: '+32' };
+  var PHONE_PREFIX_TO_COUNTRY = { '+31': 'NL', '+32': 'BE', '+49': 'DE', '+352': 'LU' };
+
+  // Detecteer land uit telefoonnummer (bijv. +32... → BE)
+  function detectCountryFromPhone(val) {
+    var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
+    if (cleaned.startsWith('00')) cleaned = '+' + cleaned.substring(2);
+    if (!cleaned.startsWith('+')) return null;
+    // Langste prefix eerst (+352 voor +35)
+    var prefixes = Object.keys(PHONE_PREFIX_TO_COUNTRY).sort(function(a, b) { return b.length - a.length; });
+    for (var i = 0; i < prefixes.length; i++) {
+      if (cleaned.startsWith(prefixes[i])) return PHONE_PREFIX_TO_COUNTRY[prefixes[i]];
+    }
+    return null;
+  }
+
+  // Update country dropdown als prefix gedetecteerd
+  function syncCountryFromPhone(val) {
+    var detected = detectCountryFromPhone(val);
+    if (detected && countrySelect && countrySelect.value !== detected) {
+      countrySelect.value = detected;
+      countrySelect.dispatchEvent(new Event('change'));
+    }
+  }
 
   function formatPhoneNumber(raw, countryCode) {
     var cleaned = raw.replace(/[\s\-\(\)\.]/g, '');
@@ -5158,11 +5181,19 @@ body {
   }
 
   if (phoneField && phonePreview) {
+    // Bij input: detecteer land uit prefix en update country dropdown
+    phoneField.addEventListener('input', function() {
+      syncCountryFromPhone(phoneField.value.trim());
+      phonePreview.style.display = 'none';
+    });
+
     phoneField.addEventListener('blur', function() {
       // Als Foxentry actief is, GEEN lokale formatting of validatie — alles via Foxentry
       if (hasFoxentryKey) return;
       var raw = phoneField.value.trim();
       if (!raw) { phonePreview.style.display = 'none'; return; }
+      // Sync country van prefix
+      syncCountryFromPhone(raw);
       var country = countrySelect ? countrySelect.value : 'NL';
       var formatted = formatPhoneNumber(raw, country);
       phoneField.value = formatted;
@@ -5173,9 +5204,6 @@ body {
         phonePreview.style.display = 'none';
       }
       validateField(phoneField);
-    });
-    phoneField.addEventListener('input', function() {
-      phonePreview.style.display = 'none';
     });
   }
 
@@ -5745,11 +5773,14 @@ body {
             // Gebruik geformatteerd nummer van Foxentry
             var data = fx.result.data || {};
             var fmt = data.format || {};
+            var formattedFull = fmt.internationalFormatted || data.numberWithPrefix || cleaned;
             if (fmt.internationalFormatted) {
               foxPhoneField.value = fmt.internationalFormatted;
             } else if (data.numberWithPrefix) {
               foxPhoneField.value = data.numberWithPrefix;
             }
+            // Sync country dropdown op basis van Foxentry resultaat
+            syncCountryFromPhone(formattedFull);
 
             if (isValid) {
               foxPhoneField.classList.add('valid');
