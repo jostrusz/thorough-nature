@@ -1,0 +1,43 @@
+{
+  "slug": "slapp-taget",
+  "name": "Släpp taget om det som förstör dig",
+  "domain": "",
+  "locale": "sv",
+  "defaultCountry": "SE",
+  "salesChannelName": "Slapp Taget",
+  "medusaUrl": "",
+  "publishableApiKey": "",
+  "facebookPixelId": "",
+  "regions": {
+    "SE": ""
+  },
+  "mainProduct": {
+    "name": "Släpp taget om det som förstör dig",
+    "handle": "slapp-taget-om-det-som-forstor-dig",
+    "variantId": "",
+    "price": 0,
+    "currency": "SEK",
+    "thumbnail": ""
+  },
+  "upsellProduct": {
+    "name": "",
+    "handle": "",
+    "variantId": "",
+    "price": 0,
+    "originalPrice": 0,
+    "currency": "SEK"
+  },
+  "bundleOptions": [],
+  "mollieProfileId": "",
+  "paymentProviders": {},
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "thank-you": "thank-you.html",
+    "kontakt": "kontakt.html",
+    "integritet": "integritet.html",
+    "villkor": "villkor.html",
+    "frakt": "frakt.html",
+    "retur": "retur.html"
+  }
+}
