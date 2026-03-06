@@ -466,6 +466,43 @@ body {
 }
 @keyframes foxSpin { to { transform: translateY(-50%) rotate(360deg); } }
 
+/* ─── PHONE WARNING (orange soft block) ─── */
+.phone-warning {
+  display: none;
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: rgba(230, 126, 34, 0.08);
+  border: 1px solid rgba(230, 126, 34, 0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #92400E;
+  line-height: 1.4;
+  animation: fadeIn 0.2s ease;
+}
+.phone-warning-text { margin-bottom: 8px; }
+.phone-warning-actions { display: flex; gap: 8px; }
+.phone-warning-actions button {
+  font-family: 'Cabin', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+.phone-warning-confirm {
+  background: #F59E0B;
+  color: #fff;
+}
+.phone-warning-confirm:hover { background: #D97706; }
+.phone-warning-edit {
+  background: transparent;
+  color: #92400E;
+  border: 1px solid rgba(230, 126, 34, 0.3) !important;
+}
+.phone-warning-edit:hover { background: rgba(230, 126, 34, 0.1); }
+
 /* ─── FIREMNÍ POLE (B2B) ─── */
 .company-toggle {
   display: flex; align-items: center; gap: 10px;
@@ -2342,6 +2379,13 @@ body {
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             <div class="field-error">Vul een geldig telefoonnummer in</div>
             <div class="phone-preview" id="phone-preview"></div>
+            <div class="phone-warning" id="phone-warning">
+              <div class="phone-warning-text">⚠ Dit nummer lijkt niet geldig. Controleer of het correct is.</div>
+              <div class="phone-warning-actions">
+                <button type="button" class="phone-warning-confirm" id="phone-warning-confirm">Ja, dit klopt</button>
+                <button type="button" class="phone-warning-edit" id="phone-warning-edit">Aanpassen</button>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -5744,6 +5788,58 @@ body {
     var foxPhoneField = document.getElementById('phone');
     var foxPhonePreview = document.getElementById('phone-preview');
 
+    // ─── Phone warning elements ───
+    var phoneWarning = document.getElementById('phone-warning');
+    var phoneWarningConfirm = document.getElementById('phone-warning-confirm');
+    var phoneWarningEdit = document.getElementById('phone-warning-edit');
+    var phoneConfirmedNumber = null; // Bewaar bevestigd nummer — geen herhaalde warning
+
+    function showPhoneWarning() {
+      if (phoneWarning) phoneWarning.style.display = 'block';
+      if (foxPhoneField) {
+        foxPhoneField.classList.remove('valid', 'invalid');
+        foxPhoneField.dataset.phoneWarning = 'true';
+      }
+      if (foxPhonePreview) foxPhonePreview.style.display = 'none';
+    }
+
+    function hidePhoneWarning() {
+      if (phoneWarning) phoneWarning.style.display = 'none';
+      if (foxPhoneField) delete foxPhoneField.dataset.phoneWarning;
+    }
+
+    // "Ja, dit klopt" — bevestig nummer als geldig
+    if (phoneWarningConfirm) {
+      phoneWarningConfirm.addEventListener('click', function() {
+        phoneConfirmedNumber = foxPhoneField ? foxPhoneField.value.trim() : '';
+        hidePhoneWarning();
+        if (foxPhoneField) {
+          foxPhoneField.classList.add('valid');
+          foxPhoneField.classList.remove('invalid');
+        }
+        if (foxPhonePreview) {
+          foxPhonePreview.style.color = '';
+          foxPhonePreview.textContent = '\u2713 Telefoonnummer bevestigd';
+          foxPhonePreview.style.display = 'block';
+        }
+      });
+    }
+
+    // "Aanpassen" — focus terug naar veld
+    if (phoneWarningEdit) {
+      phoneWarningEdit.addEventListener('click', function() {
+        hidePhoneWarning();
+        if (foxPhoneField) foxPhoneField.focus();
+      });
+    }
+
+    // Bij input: verberg warning + reset bevestiging als nummer verandert
+    if (foxPhoneField) {
+      foxPhoneField.addEventListener('input', function() {
+        hidePhoneWarning();
+      });
+    }
+
     if (foxPhoneField) {
       // Foxentry handelt ALLE telefoonvalidatie + formatting af
       foxPhoneField.addEventListener('blur', function() {
@@ -5785,19 +5881,22 @@ body {
             if (isValid) {
               foxPhoneField.classList.add('valid');
               foxPhoneField.classList.remove('invalid');
+              hidePhoneWarning();
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
                 foxPhonePreview.textContent = '\u2713 Geldig telefoonnummer';
                 foxPhonePreview.style.display = 'block';
               }
             } else {
-              foxPhoneField.classList.add('invalid');
-              foxPhoneField.classList.remove('valid');
-              if (foxPhonePreview) {
-                foxPhonePreview.textContent = '\u2717 Controleer je telefoonnummer';
-                foxPhonePreview.style.display = 'block';
-                foxPhonePreview.style.color = 'var(--error)';
+              // Al bevestigd door gebruiker? Niet opnieuw waarschuwen.
+              if (phoneConfirmedNumber === foxPhoneField.value.trim()) {
+                foxPhoneField.classList.add('valid');
+                foxPhoneField.classList.remove('invalid');
+                hidePhoneWarning();
+                return;
               }
+              // Toon oranje waarschuwing i.p.v. rode fout
+              showPhoneWarning();
             }
           })
           .catch(function(err) {
@@ -5810,19 +5909,21 @@ body {
             if (localValid) {
               foxPhoneField.classList.add('valid');
               foxPhoneField.classList.remove('invalid');
+              hidePhoneWarning();
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
                 foxPhonePreview.textContent = '';
                 foxPhonePreview.style.display = 'none';
               }
             } else {
-              foxPhoneField.classList.add('invalid');
-              foxPhoneField.classList.remove('valid');
-              if (foxPhonePreview) {
-                foxPhonePreview.textContent = '\u2717 Controleer je telefoonnummer';
-                foxPhonePreview.style.display = 'block';
-                foxPhonePreview.style.color = 'var(--error)';
+              // Lokale fallback: ook oranje warning
+              if (phoneConfirmedNumber === foxPhoneField.value.trim()) {
+                foxPhoneField.classList.add('valid');
+                foxPhoneField.classList.remove('invalid');
+                hidePhoneWarning();
+                return;
               }
+              showPhoneWarning();
             }
           });
       });
@@ -5950,6 +6051,10 @@ body {
       if (markEmpty && field.value.trim().length === 0) {
         field.classList.add('invalid');
         field.classList.remove('valid');
+        return false;
+      }
+      // Telefoon: als oranje warning actief is (niet bevestigd), blokkeer submit
+      if (field.type === 'tel' && field.dataset.phoneWarning === 'true') {
         return false;
       }
       // Behoud huidige valid/invalid status (gezet door Foxentry), niet overschrijven
