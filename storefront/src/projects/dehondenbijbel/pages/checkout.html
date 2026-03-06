@@ -2827,6 +2827,16 @@ body {
   var selectedBundlePrice = PROJECT_CONFIG.bundleOptions[0].price; // Cena za bundle
   var orderBumpActive = false;      // Je order bump zaškrtnutý?
 
+  // FB Pixel + CAPI: InitiateCheckout on page load (customer visited checkout)
+  if (typeof MetaTracker !== 'undefined') {
+    MetaTracker.trackInitiateCheckout({
+      content_ids: [PROJECT_CONFIG.mainProduct.handle],
+      value: selectedBundlePrice,
+      currency: PROJECT_CONFIG.mainProduct.currency,
+      num_items: 1
+    });
+  }
+
   /* ─── FUNKCE PRO DYNAMICKÝ ORDER SUMMARY ─── */
   // Formátování cen v EU stylu (€32,11)
   function formatPrice(amount) {
@@ -6874,11 +6884,11 @@ body {
       localStorage.setItem('medusa_order_bump', checkoutOrderBump ? 'true' : 'false');
       localStorage.setItem('medusa_checkout_total', checkoutTotal);
 
-      // FB Pixel + CAPI: InitiateCheckout (deduplicated via MetaTracker)
+      // FB Pixel + CAPI: AddPaymentInfo (customer submitted form & proceeding to payment)
       if (typeof MetaTracker !== 'undefined') {
         var contentIds = [PROJECT_CONFIG.mainProduct.handle];
         if (checkoutOrderBump) contentIds.push(PROJECT_CONFIG.upsellProduct.handle);
-        MetaTracker.trackInitiateCheckout({
+        MetaTracker.trackAddPaymentInfo({
           content_ids: contentIds,
           value: checkoutTotal,
           currency: PROJECT_CONFIG.mainProduct.currency,
