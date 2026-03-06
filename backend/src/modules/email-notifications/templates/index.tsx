@@ -8,6 +8,9 @@ import { ShipmentNotificationTemplate, SHIPMENT_NOTIFICATION, isShipmentNotifica
 // De Hondenbijbel templates
 import { DhOrderPlacedTemplate, DH_ORDER_PLACED, isDhOrderPlacedTemplateData } from './dh-order-placed'
 import { DhAbandonedCheckoutTemplate, DH_ABANDONED_CHECKOUT, isDhAbandonedCheckoutData } from './dh-abandoned-checkout'
+import { DhAbandonedCheckout1Template, DH_ABANDONED_CHECKOUT_1, isDhAbandonedCheckout1Data } from './dh-abandoned-checkout-1'
+import { DhAbandonedCheckout2Template, DH_ABANDONED_CHECKOUT_2, isDhAbandonedCheckout2Data } from './dh-abandoned-checkout-2'
+import { DhAbandonedCheckout3Template, DH_ABANDONED_CHECKOUT_3, isDhAbandonedCheckout3Data } from './dh-abandoned-checkout-3'
 import { DhEbookDeliveryTemplate, DH_EBOOK_DELIVERY, isDhEbookDeliveryData } from './dh-ebook-delivery'
 import { DhShipmentNotificationTemplate, DH_SHIPMENT_NOTIFICATION, isDhShipmentNotificationData } from './dh-shipment-notification'
 // Admin notification
@@ -23,6 +26,9 @@ export const EmailTemplates = {
   // De Hondenbijbel
   DH_ORDER_PLACED,
   DH_ABANDONED_CHECKOUT,
+  DH_ABANDONED_CHECKOUT_1,
+  DH_ABANDONED_CHECKOUT_2,
+  DH_ABANDONED_CHECKOUT_3,
   DH_EBOOK_DELIVERY,
   DH_SHIPMENT_NOTIFICATION,
   // Admin notifications
@@ -115,6 +121,33 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <DhAbandonedCheckoutTemplate {...data} />
 
+    case EmailTemplates.DH_ABANDONED_CHECKOUT_1:
+      if (!isDhAbandonedCheckout1Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.DH_ABANDONED_CHECKOUT_1}"`
+        )
+      }
+      return <DhAbandonedCheckout1Template {...data} />
+
+    case EmailTemplates.DH_ABANDONED_CHECKOUT_2:
+      if (!isDhAbandonedCheckout2Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.DH_ABANDONED_CHECKOUT_2}"`
+        )
+      }
+      return <DhAbandonedCheckout2Template {...data} />
+
+    case EmailTemplates.DH_ABANDONED_CHECKOUT_3:
+      if (!isDhAbandonedCheckout3Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.DH_ABANDONED_CHECKOUT_3}"`
+        )
+      }
+      return <DhAbandonedCheckout3Template {...data} />
+
     case EmailTemplates.DH_EBOOK_DELIVERY:
       if (!isDhEbookDeliveryData(data)) {
         throw new MedusaError(
@@ -161,6 +194,9 @@ export {
   // De Hondenbijbel
   DhOrderPlacedTemplate,
   DhAbandonedCheckoutTemplate,
+  DhAbandonedCheckout1Template,
+  DhAbandonedCheckout2Template,
+  DhAbandonedCheckout3Template,
   DhEbookDeliveryTemplate,
   DhShipmentNotificationTemplate,
   // Admin notification
