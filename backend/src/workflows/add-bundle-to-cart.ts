@@ -45,6 +45,13 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
   "het-leven-dat-je-verdient": {
     1: 23,    // €23.00 incl. tax (upsell price, original €36)
   },
+  // Slapp Taget — "Släpp taget om det som förstör dig"
+  "slapp-taget-om-det-som-forstor-dig": {
+    1: 399,   // 399 kr incl. moms (6%)
+    2: 699,   // 699 kr incl. moms (save 99 kr)
+    3: 949,   // 949 kr incl. moms (save 248 kr)
+    4: 1199,  // 1199 kr incl. moms (save 397 kr)
+  },
 }
 
 type AddBundleToCartInput = {
