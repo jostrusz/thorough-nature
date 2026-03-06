@@ -1068,15 +1068,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
           localStorage.setItem('medusa_upsell_payment_id', result.upsell_payment_id);
         }
 
-        // FB Pixel: Purchase event for upsell
-        if (typeof MetaTracker !== 'undefined') {
-          MetaTracker.trackPurchase({
-            content_ids: [PROJECT_CONFIG.upsellProduct.handle],
-            content_name: PROJECT_CONFIG.upsellProduct.name,
-            value: PROJECT_CONFIG.upsellProduct.price,
-            currency: PROJECT_CONFIG.upsellProduct.currency
-          });
-        }
+        // Note: No Purchase event for upsell — we track only 1 Purchase per customer
+        // (the main checkout Purchase, fired on upsell page load or thank-you page)
       } else {
         // ❌ Payment NOT completed (abandoned, failed, or pending)
         console.log('Upsell: Payment not completed (' + (result.payment_status || 'unknown') + '), skipping upsell');
@@ -1129,13 +1122,36 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
         localStorage.setItem('medusa_order_id', res.order.id);
         localStorage.setItem('medusa_order_display_id', res.order.display_id || '');
 
-        // FB Pixel: Purchase event for main product
+        // FB Pixel + CAPI: Purchase event with checkout total (deterministic event_id for dedup with server subscriber)
         if (typeof MetaTracker !== 'undefined') {
+          var checkoutTotal = parseFloat(localStorage.getItem('medusa_checkout_total') || '0');
+          var purchaseValue = checkoutTotal > 0 ? checkoutTotal : PROJECT_CONFIG.mainProduct.price;
+          var purchaseEventId = 'purchase_' + res.order.id;
+
+          // Build user_data from stored customer info
+          var customerRaw = localStorage.getItem('medusa_customer');
+          var cust = customerRaw ? JSON.parse(customerRaw) : {};
+          var uData = {};
+          if (cust.email) uData.em = cust.email;
+          if (cust.first_name) uData.fn = cust.first_name;
+          if (cust.last_name) uData.ln = cust.last_name;
+          if (cust.phone) uData.ph = cust.phone;
+          if (cust.city) uData.ct = cust.city;
+          if (cust.postal_code) uData.zp = cust.postal_code;
+          if (cust.country_code) uData.country = cust.country_code;
+
           MetaTracker.trackPurchase({
             content_ids: [PROJECT_CONFIG.mainProduct.handle],
-            value: PROJECT_CONFIG.mainProduct.price,
-            currency: PROJECT_CONFIG.mainProduct.currency
-          });
+            value: purchaseValue,
+            currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
+            num_items: parseInt(localStorage.getItem('medusa_bundle_qty') || '1'),
+            order_id: res.order.id
+          }, uData, { event_id: purchaseEventId });
+
+          // Mark that Purchase was already tracked (so thank-you page doesn't fire again)
+          localStorage.setItem('medusa_purchase_tracked', 'true');
+          console.log('Upsell: Purchase tracked — €' + purchaseValue + ' event_id=' + purchaseEventId);
+
           MetaTracker.trackViewContent({
             content_ids: [PROJECT_CONFIG.upsellProduct.handle],
             content_name: PROJECT_CONFIG.upsellProduct.name,
