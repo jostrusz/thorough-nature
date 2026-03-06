@@ -145,46 +145,55 @@ export default async function seedSlappTaget({ container }: ExecArgs) {
     shippingProfile = result[0]
   }
 
-  const fulfillmentSet = await fulfillmentModuleService.createFulfillmentSets({
+  const existingFulfillmentSets = await fulfillmentModuleService.listFulfillmentSets({
     name: "Slapp Taget Delivery",
-    type: "shipping",
-    service_zones: [
-      {
-        name: "Sweden",
-        geo_zones: countries.map((c) => ({ country_code: c, type: "country" as const })),
-      },
-    ],
-  })
+  }, { relations: ["service_zones"] })
+  let fulfillmentSet = existingFulfillmentSets.length ? existingFulfillmentSets[0] : null
 
-  await link.create({
-    [Modules.STOCK_LOCATION]: { stock_location_id: stockLocation.id },
-    [Modules.FULFILLMENT]: { fulfillment_set_id: fulfillmentSet.id },
-  })
-
-  await createShippingOptionsWorkflow(container).run({
-    input: [
-      {
-        name: "Fri frakt (PostNord)",
-        price_type: "flat",
-        provider_id: "manual_manual",
-        service_zone_id: fulfillmentSet.service_zones[0].id,
-        shipping_profile_id: shippingProfile.id,
-        type: {
-          label: "Standard",
-          description: "Fri frakt via PostNord (3-5 arbetsdagar)",
-          code: "standard",
+  if (!fulfillmentSet) {
+    fulfillmentSet = await fulfillmentModuleService.createFulfillmentSets({
+      name: "Slapp Taget Delivery",
+      type: "shipping",
+      service_zones: [
+        {
+          name: "Sweden",
+          geo_zones: countries.map((c) => ({ country_code: c, type: "country" as const })),
         },
-        prices: [
-          { currency_code: "sek", amount: 0 },
-          { region_id: region.id, amount: 0 },
-        ],
-        rules: [
-          { attribute: "enabled_in_store", value: "true", operator: "eq" },
-          { attribute: "is_return", value: "false", operator: "eq" },
-        ],
-      },
-    ],
-  })
+      ],
+    })
+
+    await link.create({
+      [Modules.STOCK_LOCATION]: { stock_location_id: stockLocation.id },
+      [Modules.FULFILLMENT]: { fulfillment_set_id: fulfillmentSet.id },
+    })
+
+    await createShippingOptionsWorkflow(container).run({
+      input: [
+        {
+          name: "Fri frakt (PostNord)",
+          price_type: "flat",
+          provider_id: "manual_manual",
+          service_zone_id: fulfillmentSet.service_zones[0].id,
+          shipping_profile_id: shippingProfile.id,
+          type: {
+            label: "Standard",
+            description: "Fri frakt via PostNord (3-5 arbetsdagar)",
+            code: "standard",
+          },
+          prices: [
+            { currency_code: "sek", amount: 0 },
+            { region_id: region.id, amount: 0 },
+          ],
+          rules: [
+            { attribute: "enabled_in_store", value: "true", operator: "eq" },
+            { attribute: "is_return", value: "false", operator: "eq" },
+          ],
+        },
+      ],
+    })
+  } else {
+    logger.info("[SlappTaget] Fulfillment set already exists, skipping")
+  }
 
   await linkSalesChannelsToStockLocationWorkflow(container).run({
     input: { id: stockLocation.id, add: [salesChannel.id] },
