@@ -91,7 +91,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  gap: 10px;
 }
 .nav-logo img {
- max-height: 50px;
+ max-height: 42px;
  width: auto;
  height: auto;
  object-fit: contain;
@@ -1724,7 +1724,7 @@ h2 { font-size: 38px; }
  gap: 16px;
 }
 .footer-logo {
- max-height: 70px;
+ max-height: 48px;
  width: auto;
  height: auto;
  object-fit: contain;
