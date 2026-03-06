@@ -87,8 +87,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  gap: 10px;
 }
 .nav-logo img {
- height: 40px;
+ max-height: 40px;
  width: auto;
+ height: auto;
  object-fit: contain;
 }
 .nav-logo-text {
@@ -1719,8 +1720,9 @@ h2 { font-size: 38px; }
  gap: 16px;
 }
 .footer-logo {
- height: 56px;
+ max-height: 56px;
  width: auto;
+ height: auto;
  object-fit: contain;
 }
 .footer-brand-text {
