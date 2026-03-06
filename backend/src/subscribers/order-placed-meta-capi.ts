@@ -9,19 +9,16 @@ import {
   type CAPIUserData,
   type CAPIConfig,
 } from "../modules/meta-pixel/capi"
-import { randomUUID } from "crypto"
 
 /**
  * Server-side BACKUP Purchase event via CAPI.
  *
- * This fires for EVERY order.placed event as a safety net.
- * The primary Purchase event comes from the frontend with browser pixel
- * deduplication. This server-side event uses a DIFFERENT event_id,
- * so Facebook will only count it if the frontend event didn't arrive.
+ * Uses DETERMINISTIC event_id: purchase_{orderId} — matches the frontend
+ * browser pixel + CAPI event, so Facebook deduplicates to ONE conversion.
  *
  * Why backup?
  *  - Ad blockers might block the browser pixel
- *  - User might close the page before thank-you fires
+ *  - User might close the upsell page before the frontend event fires
  *  - Network errors on the CAPI fetch from frontend
  *
  * The subscriber extracts maximum user_data from the order for EMQ.
@@ -138,12 +135,11 @@ export default async function orderPlacedMetaCAPIHandler({
     const currency = order.currency_code?.toUpperCase() || "EUR"
 
     // ── Build and send event ──
-    // IMPORTANT: This is a SERVER-ONLY backup event with its OWN event_id.
-    // It will NOT deduplicate with the frontend event (different event_id).
-    // Facebook will only count it if no matching frontend event arrived.
+    // DETERMINISTIC event_id: matches frontend Purchase event for deduplication.
+    // Facebook keeps ONE event per event_name + event_id pair.
     const event: CAPIEvent = {
       event_name: "Purchase",
-      event_id: `srv_${randomUUID()}`, // Prefixed to clearly mark as server-only
+      event_id: `purchase_${order.id}`, // Deterministic — deduplicates with frontend
       event_time: Math.floor(Date.now() / 1000),
       event_source_url: (order.metadata as any)?.source_url || undefined,
       action_source: "website",

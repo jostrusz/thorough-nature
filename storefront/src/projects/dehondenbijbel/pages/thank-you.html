@@ -1060,23 +1060,27 @@ body { background: var(--bg); }
   }
 
   // ────────────────────────────────────────────────────
-  // 4. Facebook Pixel + CAPI — Purchase event (deduplicated via MetaTracker)
+  // 4. Facebook Pixel + CAPI — Purchase event (only if not already tracked on upsell page)
   // ────────────────────────────────────────────────────
-  if (typeof MetaTracker !== 'undefined') {
+  var alreadyTracked = localStorage.getItem('medusa_purchase_tracked') === 'true';
+
+  if (!alreadyTracked && typeof MetaTracker !== 'undefined') {
+    // This fires ONLY for order bump flow (customer skipped upsell page, came directly here)
     var purchaseContentIds = [PROJECT_CONFIG.mainProduct.handle];
-    if (upsellPurchased || orderBumpActive) purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
-    var purchaseNumItems = bundleQty + ((upsellPurchased || orderBumpActive) ? 1 : 0);
+    if (orderBumpActive) purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
+    var purchaseNumItems = bundleQty + (orderBumpActive ? 1 : 0);
+    var purchaseEventId = 'purchase_' + orderId;
 
     // Build user_data from customer info for maximum EMQ
     var purchaseUserData = {};
     if (customer) {
       if (customer.email) purchaseUserData.em = customer.email;
-      if (customer.firstName) purchaseUserData.fn = customer.firstName;
-      if (customer.lastName) purchaseUserData.ln = customer.lastName;
+      if (customer.firstName || customer.first_name) purchaseUserData.fn = customer.firstName || customer.first_name;
+      if (customer.lastName || customer.last_name) purchaseUserData.ln = customer.lastName || customer.last_name;
       if (customer.phone) purchaseUserData.ph = customer.phone;
       if (customer.city) purchaseUserData.ct = customer.city;
-      if (customer.postalCode) purchaseUserData.zp = customer.postalCode;
-      if (customer.country) purchaseUserData.country = customer.country;
+      if (customer.postalCode || customer.postal_code) purchaseUserData.zp = customer.postalCode || customer.postal_code;
+      if (customer.country || customer.country_code) purchaseUserData.country = customer.country || customer.country_code;
       if (customer.region) purchaseUserData.st = customer.region;
     }
 
@@ -1087,8 +1091,10 @@ body { background: var(--bg); }
       currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
       num_items: purchaseNumItems,
       order_id: orderId
-    }, purchaseUserData);
-    console.log('TY: Purchase event (browser + CAPI) — €' + totalPrice + ' (' + purchaseNumItems + ' items)');
+    }, purchaseUserData, { event_id: purchaseEventId });
+    console.log('TY: Purchase event (order bump flow) — €' + totalPrice + ' event_id=' + purchaseEventId);
+  } else if (alreadyTracked) {
+    console.log('TY: Purchase already tracked on upsell page, skipping');
   }
 
   // ────────────────────────────────────────────────────
@@ -1107,6 +1113,7 @@ body { background: var(--bg); }
     localStorage.removeItem('medusa_bundle_price');
     localStorage.removeItem('medusa_order_bump');
     localStorage.removeItem('medusa_checkout_total');
+    localStorage.removeItem('medusa_purchase_tracked');
     console.log('TY: localStorage vyčištěn (po 5 min)');
   }, 5 * 60 * 1000);
 

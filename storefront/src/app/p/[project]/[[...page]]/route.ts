@@ -585,12 +585,13 @@ window.MetaTracker = (function() {
   var firedEventIds = {};
 
   /* ── Core tracking function ─────────────────────────────── */
-  function trackEvent(eventName, customData, userData) {
+  function trackEvent(eventName, customData, userData, options) {
     customData = customData || {};
     userData = userData || {};
+    options = options || {};
 
-    // Step 1: Generate unique event_id
-    var eventId = generateEventId();
+    // Step 1: Use provided event_id or generate a new one
+    var eventId = options.event_id || generateEventId();
 
     // Step 2: Prevent duplicate firing
     if (firedEventIds[eventId]) return eventId;
@@ -699,7 +700,7 @@ window.MetaTracker = (function() {
     });
   }
 
-  function trackPurchase(data, userData) {
+  function trackPurchase(data, userData, options) {
     return trackEvent('Purchase', {
       content_type: 'product',
       content_ids: data.content_ids || [],
@@ -708,7 +709,7 @@ window.MetaTracker = (function() {
       currency: data.currency || 'EUR',
       num_items: data.num_items || 1,
       order_id: data.order_id || ''
-    }, userData);
+    }, userData, options);
   }
 
   /* ── Initialize: capture fbclid on every page ──────────── */
