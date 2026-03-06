@@ -133,8 +133,12 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         const checkoutUrl = meta.checkout_url || "https://dehondenbijbel.nl/p/dehondenbijbel/checkout"
         const mainItem = (cart.items || [])[0]
         const productName = mainItem?.variant?.product?.title || mainItem?.title || "De Hondenbijbel"
-        const productPrice = mainItem?.unit_price
-          ? Number(mainItem.unit_price).toFixed(2).replace(".", ",")
+        // Calculate total price from all cart items (quantity × unit_price)
+        const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+        }, 0)
+        const productPrice = cartTotal > 0
+          ? cartTotal.toFixed(2).replace(".", ",")
           : "35,00"
         const productImage = mainItem?.variant?.product?.thumbnail || ""
 
@@ -195,8 +199,12 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
       const checkoutUrl = meta.checkout_url || "https://loslatenboek.nl/p/loslatenboek/checkout"
       const mainItem = (cart.items || [])[0]
       const productName = mainItem?.variant?.product?.title || mainItem?.title || "Laat Los Wat Je Kapotmaakt"
-      const productPrice = mainItem?.unit_price
-        ? Number(mainItem.unit_price).toFixed(2).replace(".", ",")
+      // Calculate total price from all cart items (quantity × unit_price)
+      const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+        return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+      }, 0)
+      const productPrice = cartTotal > 0
+        ? cartTotal.toFixed(2).replace(".", ",")
         : "35,00"
       const productImage = mainItem?.variant?.product?.thumbnail || ""
       const templateKey = resolveTemplateKey(EmailTemplates.ABANDONED_CHECKOUT, projectId)
