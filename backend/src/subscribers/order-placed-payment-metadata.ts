@@ -148,8 +148,13 @@ export default async function orderPlacedPaymentMetadataHandler({
 
     if (!found) return
 
+    // Read existing metadata and merge to avoid overwriting other subscribers' fields
+    const existingMeta = (order as any).metadata || {}
     await orderModuleService.updateOrders(data.id, {
-      metadata: newMetadata,
+      metadata: {
+        ...existingMeta,
+        ...newMetadata,
+      },
     })
 
     const provider = newMetadata.payment_method || "unknown"
