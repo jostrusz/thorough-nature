@@ -466,6 +466,30 @@ body {
 }
 @keyframes foxSpin { to { transform: translateY(-50%) rotate(360deg); } }
 
+/* ─── SMART FILL BANNER ─── */
+.smart-fill-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #F0F9FF 0%, #F5F3FF 100%);
+  border: 1px solid rgba(107, 33, 168, 0.10);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--muted);
+  animation: fadeIn 0.2s ease;
+}
+.smart-fill-banner .smart-fill-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.smart-fill-banner .smart-fill-text { line-height: 1.4; }
+.smart-fill-banner .smart-fill-text strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* ─── PHONE WARNING (orange soft block) ─── */
 .phone-warning {
   display: none;
@@ -2353,6 +2377,10 @@ body {
 
         <!-- ═══ SEKCE 1: KONTAKT ═══ -->
         <div class="checkout-card animate-in">
+          <div class="smart-fill-banner">
+            <span class="smart-fill-icon">⚡</span>
+            <span class="smart-fill-text"><strong>Snel invullen</strong> — we vullen je gegevens automatisch aan</span>
+          </div>
           <div class="section-header">
             <div class="section-number">1</div>
             <h2 class="section-title">Contact</h2>
