@@ -5995,6 +5995,25 @@ body {
     emailField.addEventListener('blur', createBackgroundCart);
   }
 
+  // FB Pixel + CAPI: AddPaymentInfo when customer fills in email (skip on payment return)
+  var _isPaymentReturn = window.location.search.indexOf('payment_return=1') !== -1 || window.location.search.indexOf('redirect_status=') !== -1;
+  var addPaymentInfoFired = _isPaymentReturn;
+  var _apEmailField = document.getElementById('email');
+  if (_apEmailField) {
+    _apEmailField.addEventListener('blur', function() {
+      var emailVal = _apEmailField.value.trim();
+      if (emailVal && emailVal.includes('@') && !addPaymentInfoFired && typeof MetaTracker !== 'undefined') {
+        addPaymentInfoFired = true;
+        MetaTracker.trackAddPaymentInfo({
+          content_ids: [PROJECT_CONFIG.mainProduct.handle],
+          value: getCurrentTotal(),
+          currency: PROJECT_CONFIG.mainProduct.currency
+        }, { em: emailVal });
+        console.log('[Checkout] AddPaymentInfo fired — email entered');
+      }
+    });
+  }
+
   // Restore form on page load
   restoreFormFromStorage();
 
@@ -6254,6 +6273,11 @@ body {
       customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
       customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
       customerData.metadata.project_id = window.AnalyticsTracker.PROJECT_ID || '';
+    }
+    // ─── Meta Pixel attribution cookies (for server-side CAPI subscriber) ───
+    if (typeof MetaTracker !== 'undefined') {
+      customerData.metadata.fbc = MetaTracker.getFbc() || '';
+      customerData.metadata.fbp = MetaTracker.getFbp() || '';
     }
 
     // ─── Firemní údaje (B2B) ───
@@ -6519,8 +6543,9 @@ body {
       localStorage.setItem('medusa_order_bump', checkoutOrderBump ? 'true' : 'false');
       localStorage.setItem('medusa_checkout_total', checkoutTotal);
 
-      // FB Pixel + CAPI: InitiateCheckout (deduplicated via MetaTracker)
-      if (typeof MetaTracker !== 'undefined') {
+      // FB Pixel + CAPI: InitiateCheckout (skip on payment return to avoid double firing)
+      var isPaymentReturn = window.location.search.indexOf('payment_return=1') !== -1 || window.location.search.indexOf('redirect_status=') !== -1;
+      if (!isPaymentReturn && typeof MetaTracker !== 'undefined') {
         var contentIds = [PROJECT_CONFIG.mainProduct.handle];
         if (checkoutOrderBump) contentIds.push(PROJECT_CONFIG.upsellProduct.handle);
         MetaTracker.trackInitiateCheckout({
