@@ -13,6 +13,10 @@ import { DhAbandonedCheckout2Template, DH_ABANDONED_CHECKOUT_2, isDhAbandonedChe
 import { DhAbandonedCheckout3Template, DH_ABANDONED_CHECKOUT_3, isDhAbandonedCheckout3Data } from './dh-abandoned-checkout-3'
 import { DhEbookDeliveryTemplate, DH_EBOOK_DELIVERY, isDhEbookDeliveryData } from './dh-ebook-delivery'
 import { DhShipmentNotificationTemplate, DH_SHIPMENT_NOTIFICATION, isDhShipmentNotificationData } from './dh-shipment-notification'
+// Släpp Taget templates
+import { StOrderPlacedTemplate, ST_ORDER_PLACED, isStOrderPlacedTemplateData } from './st-order-placed'
+import { StEbookDeliveryTemplate, ST_EBOOK_DELIVERY, isStEbookDeliveryData } from './st-ebook-delivery'
+import { StShipmentNotificationTemplate, ST_SHIPMENT_NOTIFICATION, isStShipmentNotificationData } from './st-shipment-notification'
 // Admin notification
 import { AdminOrderNotificationTemplate, ADMIN_ORDER_NOTIFICATION, isAdminOrderNotificationData } from './admin-order-notification'
 
@@ -31,6 +35,10 @@ export const EmailTemplates = {
   DH_ABANDONED_CHECKOUT_3,
   DH_EBOOK_DELIVERY,
   DH_SHIPMENT_NOTIFICATION,
+  // Släpp Taget
+  ST_ORDER_PLACED,
+  ST_EBOOK_DELIVERY,
+  ST_SHIPMENT_NOTIFICATION,
   // Admin notifications
   ADMIN_ORDER_NOTIFICATION,
 } as const
@@ -45,10 +53,16 @@ export type EmailTemplateType = keyof typeof EmailTemplates
 export function resolveTemplateKey(templateKey: string, project?: string): string {
   if (project === 'dehondenbijbel') {
     const dhKey = `dh-${templateKey}`
-    // Check if we have a DH variant registered
     const allKeys = Object.values(EmailTemplates) as string[]
     if (allKeys.includes(dhKey)) {
       return dhKey
+    }
+  }
+  if (project === 'slapp-taget') {
+    const stKey = `st-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(stKey)) {
+      return stKey
     }
   }
   return templateKey
@@ -166,6 +180,34 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <DhShipmentNotificationTemplate {...data} />
 
+    // ── Släpp Taget templates ─────────────────────────────────
+    case EmailTemplates.ST_ORDER_PLACED:
+      if (!isStOrderPlacedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ST_ORDER_PLACED}"`
+        )
+      }
+      return <StOrderPlacedTemplate {...data} />
+
+    case EmailTemplates.ST_EBOOK_DELIVERY:
+      if (!isStEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ST_EBOOK_DELIVERY}"`
+        )
+      }
+      return <StEbookDeliveryTemplate {...data} />
+
+    case EmailTemplates.ST_SHIPMENT_NOTIFICATION:
+      if (!isStShipmentNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ST_SHIPMENT_NOTIFICATION}"`
+        )
+      }
+      return <StShipmentNotificationTemplate {...data} />
+
     // ── Admin notification ───────────────────────────────────
     case EmailTemplates.ADMIN_ORDER_NOTIFICATION:
       if (!isAdminOrderNotificationData(data)) {
@@ -199,6 +241,10 @@ export {
   DhAbandonedCheckout3Template,
   DhEbookDeliveryTemplate,
   DhShipmentNotificationTemplate,
+  // Släpp Taget
+  StOrderPlacedTemplate,
+  StEbookDeliveryTemplate,
+  StShipmentNotificationTemplate,
   // Admin notification
   AdminOrderNotificationTemplate,
 }

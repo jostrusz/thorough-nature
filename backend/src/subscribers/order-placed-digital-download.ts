@@ -45,6 +45,14 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "4.0 MB",
     },
   ],
+  'slapp-taget': [
+    {
+      key: "e-books/slapp-taget/Slapp-Taget-Ebook.pdf",
+      title: "Släpp Taget – E-bok",
+      description: "E-bok (PDF)",
+      size: "2.5 MB",
+    },
+  ],
 }
 
 // Fallback for unknown projects
@@ -54,6 +62,7 @@ const DEFAULT_EBOOK_FILES = EBOOK_FILES_BY_PROJECT.loslatenboek
 const STOREFRONT_URLS: Record<string, string> = {
   loslatenboek: process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_BASE_URL || "https://tijdomloslaten.nl",
   dehondenbijbel: process.env.DH_STOREFRONT_URL || process.env.STOREFRONT_URL || "https://www.dehondenbijbel.nl",
+  'slapp-taget': process.env.ST_STOREFRONT_URL || "https://www.slapptagetboken.se",
 }
 
 export default async function orderPlacedDigitalDownloadHandler({
@@ -121,7 +130,9 @@ export default async function orderPlacedDigitalDownloadHandler({
     const templateKey = resolveTemplateKey(EmailTemplates.EBOOK_DELIVERY, projectConfig.project)
     const emailSubject = projectId === 'dehondenbijbel'
       ? 'Je e-book staat klaar! 📖'
-      : 'Je e-books staan klaar! 📖'
+      : projectId === 'slapp-taget'
+        ? 'Din e-bok är redo! 📖'
+        : 'Je e-books staan klaar! 📖'
 
     await notificationModuleService.createNotifications({
       to: order.email,
