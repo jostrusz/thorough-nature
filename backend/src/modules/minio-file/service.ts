@@ -217,7 +217,7 @@ class MinioFileProviderService extends AbstractFileProviderService {
         content = Buffer.from(file.content as any)
       }
 
-      // Upload file with public-read access
+      // Upload file (bucket policy handles public-read, ACL header removed for MinIO compatibility)
       await this.client.putObject(
         this.bucket,
         fileKey,
@@ -225,8 +225,7 @@ class MinioFileProviderService extends AbstractFileProviderService {
         content.length,
         {
           'Content-Type': file.mimeType,
-          'x-amz-meta-original-filename': file.filename,
-          'x-amz-acl': 'public-read'
+          'x-amz-meta-original-filename': file.filename
         }
       )
 
