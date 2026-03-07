@@ -108,7 +108,7 @@ export const POST = async (
       }
 
       const { PayPalApiClient } = await import(
-        "../../../../modules/payment-paypal/api-client"
+        "../../../../../modules/payment-paypal/api-client"
       )
       const client = new PayPalApiClient({
         client_id: clientId,
@@ -178,7 +178,7 @@ export const POST = async (
       }
 
       const { KlarnaApiClient } = await import(
-        "../../../../modules/payment-klarna/api-client"
+        "../../../../../modules/payment-klarna/api-client"
       )
       const isLive = config.mode === "live"
       const keys = isLive ? config.live_keys : config.test_keys
@@ -254,7 +254,7 @@ export const POST = async (
       }
 
       const { AirwallexApiClient } = await import(
-        "../../../../modules/payment-airwallex/api-client"
+        "../../../../../modules/payment-airwallex/api-client"
       )
       const isLive = config.mode === "live"
       const keys = isLive ? config.live_keys : config.test_keys
