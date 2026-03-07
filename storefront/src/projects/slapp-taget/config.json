@@ -5,16 +5,16 @@
   "locale": "sv",
   "defaultCountry": "SE",
   "salesChannelName": "Slapp Taget",
-  "medusaUrl": "https://backend-staging-580e.up.railway.app",
-  "publishableApiKey": "pk_fcc7f4690d287adde9a5f707303021ebcb799c23f00f4d4f0cc9f2b825ad413d",
+  "medusaUrl": "",
+  "publishableApiKey": "",
   "facebookPixelId": "",
   "regions": {
-    "SE": "reg_01KK1M7G5KWH78ZJA9PQZ45JTX"
+    "SE": ""
   },
   "mainProduct": {
     "name": "Släpp taget om det som förstör dig",
     "handle": "slapp-taget-om-det-som-forstor-dig",
-    "variantId": "variant_01KK1MEDS5TERM6HX7SH8BMV92",
+    "variantId": "",
     "price": 399,
     "currency": "SEK",
     "thumbnail": ""

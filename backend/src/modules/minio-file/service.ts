@@ -7,7 +7,16 @@ import {
   ProviderGetFileDTO,
   ProviderGetPresignedUploadUrlDTO
 } from '@medusajs/framework/types';
-import { Client } from 'minio';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadBucketCommand,
+  CreateBucketCommand,
+  PutBucketPolicyCommand
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import path from 'path';
 import { ulid } from 'ulid';
 import { Readable } from 'stream';
@@ -35,47 +44,49 @@ export interface MinioFileProviderOptions {
 const DEFAULT_BUCKET = 'medusa-media'
 
 /**
- * Service to handle file storage using MinIO.
+ * Service to handle file storage using MinIO (via AWS SDK v3 S3 client).
  */
 class MinioFileProviderService extends AbstractFileProviderService {
   static identifier = 'minio-file'
   protected readonly config_: MinioServiceConfig
   protected readonly logger_: Logger
-  protected client: Client
+  protected client: S3Client
   protected readonly bucket: string
   protected readonly useSSL: boolean
   protected readonly publicEndPoint: string | null
+  protected readonly endpointUrl: string
 
   constructor({ logger }: InjectedDependencies, options: MinioFileProviderOptions) {
     super()
     this.logger_ = logger
-    
-    // Parse endpoint to extract hostname and protocol
+
+    // Parse endpoint to build full URL for AWS SDK
     let endPoint = options.endPoint
     let useSSL = true
-    let port = 443
-    
-    // Strip protocol if present (MinIO client v8+ requires hostname only)
+    let port: number | undefined = undefined
+    let protocol = 'https'
+
+    // Detect protocol from endpoint string
     if (endPoint.startsWith('https://')) {
       endPoint = endPoint.replace('https://', '')
       useSSL = true
-      port = 443
+      protocol = 'https'
     } else if (endPoint.startsWith('http://')) {
       endPoint = endPoint.replace('http://', '')
       useSSL = false
-      port = 80
+      protocol = 'http'
     }
-    
+
     // Remove trailing slash if present
     endPoint = endPoint.replace(/\/$/, '')
-    
+
     // Extract port from endpoint if specified (e.g., "minio.example.com:9000")
     const portMatch = endPoint.match(/:(\d+)$/)
     if (portMatch) {
       port = parseInt(portMatch[1], 10)
       endPoint = endPoint.replace(/:(\d+)$/, '')
     }
-    
+
     this.config_ = {
       endPoint: endPoint,
       publicEndPoint: options.publicEndPoint,
@@ -89,17 +100,22 @@ class MinioFileProviderService extends AbstractFileProviderService {
     this.useSSL = useSSL
     // Store public endpoint for URL generation (falls back to connection endpoint)
     this.publicEndPoint = options.publicEndPoint || null
-    this.logger_.info(`MinIO service initialized with bucket: ${this.bucket}, endpoint: ${endPoint}, port: ${port}, SSL: ${useSSL}, publicEndPoint: ${this.publicEndPoint || '(same as endpoint)'}`)
 
-    // Initialize Minio client with parsed settings
-    this.client = new Client({
-      endPoint: endPoint,
-      port: port,
-      useSSL: useSSL,
-      accessKey: this.config_.accessKey,
-      secretKey: this.config_.secretKey,
+    // Build the full endpoint URL for AWS SDK
+    const portSuffix = port ? `:${port}` : ''
+    this.endpointUrl = `${protocol}://${endPoint}${portSuffix}`
+
+    this.logger_.info(`MinIO service initialized with bucket: ${this.bucket}, endpoint: ${this.endpointUrl}, SSL: ${useSSL}, publicEndPoint: ${this.publicEndPoint || '(same as endpoint)'}`)
+
+    // Initialize AWS S3 client configured for MinIO
+    this.client = new S3Client({
+      endpoint: this.endpointUrl,
       region: 'us-east-1',
-      pathStyle: true
+      credentials: {
+        accessKeyId: this.config_.accessKey,
+        secretAccessKey: this.config_.secretKey,
+      },
+      forcePathStyle: true, // Required for MinIO (uses path-style URLs instead of virtual-hosted)
     })
 
     // Initialize bucket and policy
@@ -128,53 +144,43 @@ class MinioFileProviderService extends AbstractFileProviderService {
   private async initializeBucket(): Promise<void> {
     try {
       // Check if bucket exists
-      const bucketExists = await this.client.bucketExists(this.bucket)
-      
-      if (!bucketExists) {
-        // Create the bucket
-        await this.client.makeBucket(this.bucket)
-        this.logger_.info(`Created bucket: ${this.bucket}`)
-
-        // Set bucket policy to allow public read access
-        const policy = {
-          Version: '2012-10-17',
-          Statement: [
-            {
-              Sid: 'PublicRead',
-              Effect: 'Allow',
-              Principal: '*',
-              Action: ['s3:GetObject'],
-              Resource: [`arn:aws:s3:::${this.bucket}/*`]
-            }
-          ]
-        }
-
-        await this.client.setBucketPolicy(this.bucket, JSON.stringify(policy))
-        this.logger_.info(`Set public read policy for bucket: ${this.bucket}`)
-      } else {
+      try {
+        await this.client.send(new HeadBucketCommand({ Bucket: this.bucket }))
         this.logger_.info(`Using existing bucket: ${this.bucket}`)
-        
-        // Verify/update policy on existing bucket
-        try {
-          const policy = {
-            Version: '2012-10-17',
-            Statement: [
-              {
-                Sid: 'PublicRead',
-                Effect: 'Allow',
-                Principal: '*',
-                Action: ['s3:GetObject'],
-                Resource: [`arn:aws:s3:::${this.bucket}/*`]
-              }
-            ]
-          }
-          await this.client.setBucketPolicy(this.bucket, JSON.stringify(policy))
-          this.logger_.info(`Updated public read policy for existing bucket: ${this.bucket}`)
-        } catch (policyError) {
-          this.logger_.warn(`Failed to update policy for existing bucket: ${policyError.message}`)
+      } catch (headErr: any) {
+        // Bucket doesn't exist, create it
+        if (headErr.name === 'NotFound' || headErr.$metadata?.httpStatusCode === 404 || headErr.name === 'NoSuchBucket') {
+          await this.client.send(new CreateBucketCommand({ Bucket: this.bucket }))
+          this.logger_.info(`Created bucket: ${this.bucket}`)
+        } else {
+          throw headErr
         }
       }
-    } catch (error) {
+
+      // Set bucket policy to allow public read access
+      const policy = {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Sid: 'PublicRead',
+            Effect: 'Allow',
+            Principal: '*',
+            Action: ['s3:GetObject'],
+            Resource: [`arn:aws:s3:::${this.bucket}/*`]
+          }
+        ]
+      }
+
+      try {
+        await this.client.send(new PutBucketPolicyCommand({
+          Bucket: this.bucket,
+          Policy: JSON.stringify(policy)
+        }))
+        this.logger_.info(`Set public read policy for bucket: ${this.bucket}`)
+      } catch (policyError: any) {
+        this.logger_.warn(`Failed to set policy for bucket: ${policyError.message}`)
+      }
+    } catch (error: any) {
       this.logger_.error(`Error initializing bucket: ${error.message}`)
       throw error
     }
@@ -200,7 +206,7 @@ class MinioFileProviderService extends AbstractFileProviderService {
     try {
       const parsedFilename = path.parse(file.filename)
       const fileKey = `${parsedFilename.name}-${ulid()}${parsedFilename.ext}`
-      
+
       // Handle different content types properly
       let content: Buffer
       if (Buffer.isBuffer(file.content)) {
@@ -217,17 +223,17 @@ class MinioFileProviderService extends AbstractFileProviderService {
         content = Buffer.from(file.content as any)
       }
 
-      // Upload file (bucket policy handles public-read, ACL header removed for MinIO compatibility)
-      await this.client.putObject(
-        this.bucket,
-        fileKey,
-        content,
-        content.length,
-        {
-          'Content-Type': file.mimeType,
-          'x-amz-meta-original-filename': file.filename
+      // Upload file using AWS SDK PutObject
+      await this.client.send(new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: fileKey,
+        Body: content,
+        ContentLength: content.length,
+        ContentType: file.mimeType,
+        Metadata: {
+          'original-filename': file.filename
         }
-      )
+      }))
 
       // Generate URL using the public endpoint (or connection endpoint as fallback)
       let url: string
@@ -237,8 +243,7 @@ class MinioFileProviderService extends AbstractFileProviderService {
         const pubUrl = pubEp.startsWith('http') ? pubEp : `https://${pubEp}`
         url = `${pubUrl}/${this.bucket}/${fileKey}`
       } else {
-        const protocol = this.useSSL ? 'https' : 'http'
-        url = `${protocol}://${this.config_.endPoint}/${this.bucket}/${fileKey}`
+        url = `${this.endpointUrl}/${this.bucket}/${fileKey}`
       }
 
       this.logger_.info(`Successfully uploaded file ${fileKey} to MinIO bucket ${this.bucket}`)
@@ -247,7 +252,7 @@ class MinioFileProviderService extends AbstractFileProviderService {
         url,
         key: fileKey
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger_.error(`Failed to upload file: ${error.message}`)
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
@@ -270,9 +275,12 @@ class MinioFileProviderService extends AbstractFileProviderService {
       }
 
       try {
-        await this.client.removeObject(this.bucket, file.fileKey);
+        await this.client.send(new DeleteObjectCommand({
+          Bucket: this.bucket,
+          Key: file.fileKey
+        }));
         this.logger_.info(`Successfully deleted file ${file.fileKey} from MinIO bucket ${this.bucket}`);
-      } catch (error) {
+      } catch (error: any) {
         this.logger_.warn(`Failed to delete file ${file.fileKey}: ${error.message}`);
       }
     }
@@ -289,14 +297,16 @@ class MinioFileProviderService extends AbstractFileProviderService {
     }
 
     try {
-      const url = await this.client.presignedGetObject(
-        this.bucket,
-        fileData.fileKey,
-        24 * 60 * 60 // URL expires in 24 hours
-      )
+      const command = new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: fileData.fileKey,
+      })
+      const url = await getSignedUrl(this.client, command, {
+        expiresIn: 24 * 60 * 60 // URL expires in 24 hours
+      })
       this.logger_.info(`Generated presigned URL for file ${fileData.fileKey}`)
       return url
-    } catch (error) {
+    } catch (error: any) {
       this.logger_.error(`Failed to generate presigned URL: ${error.message}`)
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
@@ -320,17 +330,19 @@ class MinioFileProviderService extends AbstractFileProviderService {
       const fileKey = fileData.filename
 
       // Generate presigned PUT URL that expires in 15 minutes
-      const url = await this.client.presignedPutObject(
-        this.bucket,
-        fileKey,
-        15 * 60 // URL expires in 15 minutes
-      )
+      const command = new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: fileKey,
+      })
+      const url = await getSignedUrl(this.client, command, {
+        expiresIn: 15 * 60 // URL expires in 15 minutes
+      })
 
       return {
         url,
         key: fileKey
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger_.error(`Failed to generate presigned upload URL: ${error.message}`)
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
@@ -348,10 +360,15 @@ class MinioFileProviderService extends AbstractFileProviderService {
     }
 
     try {
-      const stream = await this.client.getObject(this.bucket, fileData.fileKey)
+      const response = await this.client.send(new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: fileData.fileKey,
+      }))
+
+      // Convert the readable stream to a buffer
+      const stream = response.Body as Readable
       const buffer = await new Promise<Buffer>((resolve, reject) => {
         const chunks: Buffer[] = []
-
         stream.on('data', (chunk: Buffer) => chunks.push(chunk))
         stream.on('end', () => resolve(Buffer.concat(chunks)))
         stream.on('error', reject)
@@ -359,7 +376,7 @@ class MinioFileProviderService extends AbstractFileProviderService {
 
       this.logger_.info(`Retrieved buffer for file ${fileData.fileKey}`)
       return buffer
-    } catch (error) {
+    } catch (error: any) {
       this.logger_.error(`Failed to get buffer: ${error.message}`)
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
@@ -377,12 +394,14 @@ class MinioFileProviderService extends AbstractFileProviderService {
     }
 
     try {
-      // Get the MinIO stream directly
-      const minioStream = await this.client.getObject(this.bucket, fileData.fileKey)
+      const response = await this.client.send(new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: fileData.fileKey,
+      }))
 
       this.logger_.info(`Retrieved download stream for file ${fileData.fileKey}`)
-      return minioStream
-    } catch (error) {
+      return response.Body as Readable
+    } catch (error: any) {
       this.logger_.error(`Failed to get download stream: ${error.message}`)
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
