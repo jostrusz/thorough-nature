@@ -12,6 +12,43 @@ export interface ProjectEmailConfig {
   fromEmail?: string
   /** Project identifier for template resolution */
   project: string
+  /** Locale code for email subjects (default: "nl") */
+  locale?: string
+}
+
+/** Localized email subject strings */
+const EMAIL_SUBJECTS: Record<string, Record<string, string>> = {
+  nl: {
+    orderPlaced: 'Bedankt voor je bestelling!',
+    orderPlacedPreview: 'Bedankt voor je bestelling!',
+    shipmentSent: 'Je bestelling {id} is verzonden! 📦',
+    shipmentPreview: 'Je bestelling is verzonden!',
+  },
+  sv: {
+    orderPlaced: 'Tack för din beställning!',
+    orderPlacedPreview: 'Tack för din beställning!',
+    shipmentSent: 'Din beställning {id} har skickats! 📦',
+    shipmentPreview: 'Din beställning har skickats!',
+  },
+}
+
+/**
+ * Get localized email subject for a given project config.
+ */
+export function getEmailSubject(
+  config: ProjectEmailConfig,
+  key: keyof typeof EMAIL_SUBJECTS['nl'],
+  replacements?: Record<string, string>
+): string {
+  const locale = config.locale || 'nl'
+  const strings = EMAIL_SUBJECTS[locale] || EMAIL_SUBJECTS['nl']
+  let subject = strings[key] || EMAIL_SUBJECTS['nl'][key] || ''
+  if (replacements) {
+    for (const [k, v] of Object.entries(replacements)) {
+      subject = subject.replace(`{${k}}`, v)
+    }
+  }
+  return subject
 }
 
 const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
@@ -25,6 +62,21 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     replyTo: 'devries@loslatenboek.nl',
     fromName: 'Laat Los Wat Je Kapotmaakt',
     project: 'loslatenboek',
+  },
+  'slapp-taget': {
+    replyTo: 'hej@slapptagetboken.se',
+    fromName: 'Släpp Taget',
+    fromEmail: 'Släpp Taget <hej@slapptagetboken.se>',
+    project: 'slapp-taget',
+    locale: 'sv',
+  },
+  // Also match without hyphen (fallback)
+  slapptaget: {
+    replyTo: 'hej@slapptagetboken.se',
+    fromName: 'Släpp Taget',
+    fromEmail: 'Släpp Taget <hej@slapptagetboken.se>',
+    project: 'slapp-taget',
+    locale: 'sv',
   },
 }
 

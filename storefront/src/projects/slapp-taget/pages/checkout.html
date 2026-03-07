@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Kassa — Släpp taget om det som förstör dig</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="/faviconlogo.png" type="image/png">
+<link rel="icon" href="/favicon.png" type="image/png">
 
 <!-- Prevent checkout flash on payment return — hide form immediately (CSS loaded in <style> below) -->
 <script>
@@ -53,10 +53,26 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
   justify-content: center;
   z-index: 99999;
 }
-.payment-preloader img {
-  width: 120px;
+.payment-preloader .preloader-logo-wrap {
+  position: relative;
+  overflow: hidden;
+  width: 140px;
   height: auto;
-  animation: ppPulse 1.4s ease-in-out infinite;
+}
+.payment-preloader .preloader-logo-wrap img {
+  width: 100%;
+  height: auto;
+  display: block;
+  animation: ppPulse 1.5s ease-in-out infinite;
+}
+.payment-preloader .preloader-shine {
+  position: absolute;
+  top: -100%; left: 0;
+  width: 50%; height: 300%;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.6) 50%, transparent 60%);
+  animation: ppShine 2s ease-in-out infinite;
+  pointer-events: none;
+  will-change: transform;
 }
 .payment-preloader p {
   margin-top: 24px;
@@ -70,8 +86,12 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
   color: #999;
 }
 @keyframes ppPulse {
-  0%, 100% { transform: scale(1); opacity: .85 }
-  50%       { transform: scale(1.08); opacity: 1 }
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.04); opacity: 0.92; }
+}
+@keyframes ppShine {
+  0% { transform: translateX(-160%); }
+  100% { transform: translateX(320%); }
 }
 
 /* ─── DESIGN TOKENS — Velvet Dusk (shodné s hlavní stránkou) ─── */
@@ -3737,7 +3757,7 @@ body {
     if (document.querySelector('.payment-preloader')) return;
     var el = document.createElement('div');
     el.className = 'payment-preloader';
-    el.innerHTML = '<img src="/faviconlogo.png" alt="Laddar..." width="120" height="110"><p>Betalningen behandlas...</p><p class="sub">Vänligen vänta.</p>';
+    el.innerHTML = '<div class="preloader-logo-wrap"><img src="/slapp-taget-logo-white.png" alt="Laddar..."><div class="preloader-shine"></div></div><p>Betalningen behandlas...</p><p class="sub">Vänligen vänta.</p>';
     document.body.insertBefore(el, document.body.firstChild);
   }
   function hideExpressPreloader() {
@@ -6034,7 +6054,7 @@ body {
     if (!document.querySelector('.payment-preloader')) {
       var preloaderDiv = document.createElement('div');
       preloaderDiv.className = 'payment-preloader';
-      preloaderDiv.innerHTML = '<img src="/faviconlogo.png" alt="Laddar..." width="120" height="110"><p>Betalningen behandlas...</p><p class="sub">Vänligen vänta.</p>';
+      preloaderDiv.innerHTML = '<div class="preloader-logo-wrap"><img src="/slapp-taget-logo-white.png" alt="Laddar..."><div class="preloader-shine"></div></div><p>Betalningen behandlas...</p><p class="sub">Vänligen vänta.</p>';
       document.body.insertBefore(preloaderDiv, document.body.firstChild);
     }
 
@@ -6669,7 +6689,7 @@ body {
                   if (!document.querySelector('.payment-preloader')) {
                     var kPreloader = document.createElement('div');
                     kPreloader.className = 'payment-preloader';
-                    kPreloader.innerHTML = '<img src="/faviconlogo.png" alt="Laddar..." width="120" height="110"><p>Betalningen behandlas...</p><p class="sub">Vänligen vänta.</p>';
+                    kPreloader.innerHTML = '<div class="preloader-logo-wrap"><img src="/slapp-taget-logo-white.png" alt="Laddar..."><div class="preloader-shine"></div></div><p>Betalningen behandlas...</p><p class="sub">Vänligen vänta.</p>';
                     document.body.insertBefore(kPreloader, document.body.firstChild);
                   }
 
@@ -6841,7 +6861,7 @@ body {
                 if (!document.querySelector('.payment-preloader')) {
                   var awPreloader = document.createElement('div');
                   awPreloader.className = 'payment-preloader';
-                  awPreloader.innerHTML = '<img src="/faviconlogo.png" alt="Laddar..." width="120" height="110"><p>Betalningen behandlas...</p><p class="sub">Vänligen vänta.</p>';
+                  awPreloader.innerHTML = '<div class="preloader-logo-wrap"><img src="/slapp-taget-logo-white.png" alt="Laddar..."><div class="preloader-shine"></div></div><p>Betalningen behandlas...</p><p class="sub">Vänligen vänta.</p>';
                   document.body.insertBefore(awPreloader, document.body.firstChild);
                 }
 

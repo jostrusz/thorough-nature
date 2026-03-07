@@ -4,7 +4,7 @@ import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates, resolveTemplateKey } from '../modules/email-notifications/templates'
 import { resolveBillingEntity } from '../utils/resolve-billing-entity'
 import { logEmailActivity } from '../utils/email-logger'
-import { getProjectEmailConfig } from '../utils/project-email-config'
+import { getProjectEmailConfig, getEmailSubject } from '../utils/project-email-config'
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -107,7 +107,8 @@ export default async function orderPlacedHandler({
   const projectConfig = getProjectEmailConfig(order)
   const templateKey = resolveTemplateKey(EmailTemplates.ORDER_PLACED, projectConfig.project)
 
-  const emailSubject = `Bedankt voor je bestelling! ${displayId}`
+  const emailSubject = `${getEmailSubject(projectConfig, 'orderPlaced')} ${displayId}`
+  const emailPreview = getEmailSubject(projectConfig, 'orderPlacedPreview')
   try {
     await notificationModuleService.createNotifications({
       to: order.email,
@@ -124,7 +125,7 @@ export default async function orderPlacedHandler({
         billingAddress,
         paymentMethod,
         billingEntity,
-        preview: 'Bedankt voor je bestelling!',
+        preview: emailPreview,
       },
     })
 

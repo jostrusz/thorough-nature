@@ -4,7 +4,7 @@ import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates, resolveTemplateKey } from '../modules/email-notifications/templates'
 import { resolveBillingEntity } from '../utils/resolve-billing-entity'
 import { logEmailActivity } from '../utils/email-logger'
-import { getProjectEmailConfig } from '../utils/project-email-config'
+import { getProjectEmailConfig, getEmailSubject } from '../utils/project-email-config'
 
 export default async function orderFulfillmentCreatedHandler({
   event: { data },
@@ -111,7 +111,8 @@ export default async function orderFulfillmentCreatedHandler({
     const projectConfig = getProjectEmailConfig(order)
     const templateKey = resolveTemplateKey(EmailTemplates.SHIPMENT_NOTIFICATION, projectConfig.project)
 
-    const emailSubject = `Je bestelling ${displayId} is verzonden! 📦`
+    const emailSubject = getEmailSubject(projectConfig, 'shipmentSent', { id: String(displayId) })
+    const emailPreview = getEmailSubject(projectConfig, 'shipmentPreview')
     await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
@@ -128,7 +129,7 @@ export default async function orderFulfillmentCreatedHandler({
         trackingUrl,
         trackingCompany,
         billingEntity,
-        preview: 'Je bestelling is verzonden!',
+        preview: emailPreview,
       },
     })
 
