@@ -1,6 +1,9 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { PayPalApiClient } from "../../../../../modules/payment-paypal/api-client"
+import { KlarnaApiClient } from "../../../../../modules/payment-klarna/api-client"
+import { AirwallexApiClient } from "../../../../../modules/payment-airwallex/api-client"
 
 /**
  * POST /admin/custom-orders/:id/capture
@@ -107,9 +110,6 @@ export const POST = async (
         return
       }
 
-      const { PayPalApiClient } = await import(
-        "../../../../../modules/payment-paypal/api-client"
-      )
       const client = new PayPalApiClient({
         client_id: clientId,
         client_secret: clientSecret,
@@ -177,9 +177,6 @@ export const POST = async (
         return
       }
 
-      const { KlarnaApiClient } = await import(
-        "../../../../../modules/payment-klarna/api-client"
-      )
       const isLive = config.mode === "live"
       const keys = isLive ? config.live_keys : config.test_keys
 
@@ -253,9 +250,6 @@ export const POST = async (
         return
       }
 
-      const { AirwallexApiClient } = await import(
-        "../../../../../modules/payment-airwallex/api-client"
-      )
       const isLive = config.mode === "live"
       const keys = isLive ? config.live_keys : config.test_keys
       const client = new AirwallexApiClient(
