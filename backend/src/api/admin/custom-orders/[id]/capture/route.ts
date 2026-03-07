@@ -1,6 +1,6 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 
 /**
  * POST /admin/custom-orders/:id/capture
@@ -24,7 +24,7 @@ export const POST = async (
   try {
     const { id: orderId } = req.params
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
-    const orderModuleService = req.scope.resolve("orderModuleService")
+    const orderModuleService = req.scope.resolve(Modules.ORDER)
     const logger = req.scope.resolve("logger")
 
     // Optional tracking info from request body
