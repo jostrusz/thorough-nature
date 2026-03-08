@@ -5905,6 +5905,10 @@ body {
           el.value = draft[f];
           // Trigger visual validation state
           if (el.value) el.classList.add('has-value');
+          // Run validation so the field gets .valid class (needed for submit check)
+          if (el.value.trim().length > 0) {
+            validateField(el);
+          }
         }
       });
       console.log('[Checkout Recovery] Form restored from localStorage');
@@ -6036,6 +6040,15 @@ body {
 
   // Restore form on page load
   restoreFormFromStorage();
+
+  // Re-validate prefilled fields after a short delay (handles browser autocomplete)
+  setTimeout(function() {
+    fields.forEach(function(field) {
+      if (field.value.trim().length > 0 && !field.classList.contains('valid')) {
+        validateField(field);
+      }
+    });
+  }, 500);
 
   /* ─── PAYMENT RETURN HANDLER ───
    * When customer returns from Mollie after paying,
