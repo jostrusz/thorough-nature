@@ -247,6 +247,7 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
             to: cart.email,
             channel: "email",
             template: nextStepConfig.templateKey,
+            from: "Joris de Vries - Släpp taget om det som förstör dig <hej@slapptagetboken.se>",
             data: {
               emailOptions: {
                 replyTo: "hej@slapptagetboken.se",
