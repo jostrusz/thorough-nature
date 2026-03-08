@@ -47,10 +47,16 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
   ],
   'slapp-taget': [
     {
-      key: "e-books/slapp-taget/Slapp-Taget-Ebook.pdf",
-      title: "Släpp Taget – E-bok",
+      key: "e-books/Kärlek utan nonsens.pdf",
+      title: "Kärlek utan nonsens",
       description: "E-bok (PDF)",
-      size: "2.5 MB",
+      size: "13.9 MB",
+    },
+    {
+      key: "e-books/Lösningen på överanalysering.pdf",
+      title: "Lösningen på överanalysering",
+      description: "E-bok (PDF)",
+      size: "1.3 MB",
     },
   ],
 }
@@ -131,7 +137,7 @@ export default async function orderPlacedDigitalDownloadHandler({
     const emailSubject = projectId === 'dehondenbijbel'
       ? 'Je e-book staat klaar! 📖'
       : projectId === 'slapp-taget'
-        ? 'Din e-bok är redo! 📖'
+        ? 'Dina e-böcker är redo! 📖'
         : 'Je e-books staan klaar! 📖'
 
     await notificationModuleService.createNotifications({
