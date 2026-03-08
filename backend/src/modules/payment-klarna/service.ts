@@ -255,8 +255,8 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       )
 
       const customer = context?.customer
-      const billingAddress = context?.billing_address || customer?.billing_address || {}
-      const shippingAddress = context?.shipping_address || billingAddress
+      const billingAddress = context?.billing_address || data?.billing_address || customer?.billing_address || {}
+      const shippingAddress = context?.shipping_address || data?.shipping_address || billingAddress
 
       // Build order lines from context items if available (buildOrderLines converts to minor units)
       const items = context?.extra?.items || context?.items || []
@@ -293,7 +293,12 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       // Tax amount in minor units
       const taxTotalMinor = toMinorUnits(context?.extra?.tax_total || 0, currencyUpper)
 
-      const purchaseCountry = billingAddress.country_code?.toUpperCase() || "NL"
+      // Derive country from billing address, or guess from currency as last resort
+      const currencyCountryFallback: Record<string, string> = { SEK: "SE", NOK: "NO", DKK: "DK", EUR: "NL", GBP: "GB", USD: "US", PLN: "PL", CZK: "CZ" }
+      const purchaseCountry = billingAddress.country_code?.toUpperCase()
+        || shippingAddress.country_code?.toUpperCase()
+        || currencyCountryFallback[currencyUpper]
+        || "NL"
       const sessionData = {
         purchase_country: purchaseCountry,
         purchase_currency: currencyUpper,
@@ -426,7 +431,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       // data matches EXACTLY what was sent during session creation (Klarna validates this)
       const storedSession = klarnaSessionData || {}
 
-      const purchaseCountry = storedSession.purchase_country || "NL"
+      const purchaseCountry = storedSession.purchase_country || currency?.toUpperCase() === "SEK" ? "SE" : "NL"
       const purchaseCurrency = storedSession.purchase_currency || currency?.toUpperCase() || "EUR"
       const locale = storedSession.locale || getKlarnaLocale(purchaseCountry)
 

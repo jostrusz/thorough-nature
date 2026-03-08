@@ -6289,10 +6289,11 @@ body {
 
     // ─── Analytics metadata ───
     customerData.metadata = {};
+    // Always set project_id for email template resolution
+    customerData.metadata.project_id = PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'slapp-taget';
     if (window.AnalyticsTracker) {
       customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
       customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
-      customerData.metadata.project_id = window.AnalyticsTracker.PROJECT_ID || '';
     }
     // ─── Meta Pixel attribution cookies (for server-side CAPI subscriber) ───
     if (typeof MetaTracker !== 'undefined') {

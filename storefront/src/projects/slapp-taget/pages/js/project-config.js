@@ -1,5 +1,6 @@
 var PROJECT_CONFIG = {
   "slug": "slapp-taget",
+  "projectId": "slapp-taget",
   "medusaUrl": "",
   "publishableApiKey": "",
   "mainProduct": {
