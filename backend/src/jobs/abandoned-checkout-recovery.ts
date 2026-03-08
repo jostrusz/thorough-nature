@@ -65,6 +65,34 @@ const DH_STEPS: StepConfig[] = [
   },
 ]
 
+/** Släpp Taget 3-step sequence */
+const ST_STEPS: StepConfig[] = [
+  {
+    step: 1,
+    templateKey: EmailTemplates.ST_ABANDONED_CHECKOUT_1,
+    subject: (name) => `Hej ${name}, din bok väntar på dig! 📦`,
+    preview: "Din bok ligger inpackad och väntar på dig!",
+    delayMs: THIRTY_MINUTES_MS,
+    delayFrom: (_meta, abandonedAt) => abandonedAt,
+  },
+  {
+    step: 2,
+    templateKey: EmailTemplates.ST_ABANDONED_CHECKOUT_2,
+    subject: (name) => `${name}, historien bakom Släpp Taget`,
+    preview: "Efter bara en vecka kände jag mig lättare än på länge...",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
+  },
+  {
+    step: 3,
+    templateKey: EmailTemplates.ST_ABANDONED_CHECKOUT_3,
+    subject: (name) => `Sista chansen, ${name} — din varukorg frigörs snart`,
+    preview: "Ännu 24 timmar — sedan måste jag frigöra din varukorg.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
+  },
+]
+
 export default async function abandonedCheckoutRecovery(container: MedusaContainer) {
   const notificationModuleService = container.resolve(Modules.NOTIFICATION) as any
   const query = container.resolve(ContainerRegistrationKeys.QUERY) as any
@@ -180,6 +208,78 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         } catch (emailError: any) {
           logger.error(
             `[Abandoned Cart] Failed to send DH step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
+          )
+        }
+        continue
+      }
+
+      // ── Släpp Taget: 3-step sequence ──
+      if (projectId === "slapp-taget") {
+        // All 3 steps sent? Done.
+        if (currentStep >= 3) {
+          skippedCount++
+          continue
+        }
+
+        const nextStepConfig = ST_STEPS[currentStep] // currentStep=0 → step 1, etc.
+
+        // Check if enough time has passed
+        const referenceTime = nextStepConfig.delayFrom(meta, abandonedAt)
+        if (isNaN(referenceTime.getTime())) continue // invalid date, skip
+        if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
+
+        // Extract customer data
+        const firstName = cart.shipping_address?.first_name || "där"
+        const checkoutUrl = meta.checkout_url || "https://www.slapptagetboken.se/checkout"
+        const mainItem = (cart.items || [])[0]
+        const productName = mainItem?.variant?.product?.title || mainItem?.title || "Släpp Taget"
+        // Calculate total price from all cart items (quantity × unit_price)
+        const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+        }, 0)
+        const productPrice = cartTotal > 0
+          ? Math.round(cartTotal).toString()
+          : "399"
+        const productImage = mainItem?.variant?.product?.thumbnail || ""
+
+        try {
+          await notificationModuleService.createNotifications({
+            to: cart.email,
+            channel: "email",
+            template: nextStepConfig.templateKey,
+            data: {
+              emailOptions: {
+                replyTo: "hej@slapptagetboken.se",
+                subject: nextStepConfig.subject(firstName),
+              },
+              firstName,
+              checkoutUrl,
+              productName,
+              productPrice,
+              productImage,
+              preview: nextStepConfig.preview,
+            },
+          })
+
+          // Update metadata with step tracking
+          await cartModuleService.updateCarts(cart.id, {
+            metadata: {
+              ...meta,
+              recovery_email_step: nextStepConfig.step,
+              [`recovery_email_step${nextStepConfig.step}_at`]: now.toISOString(),
+              // Legacy compat: mark as sent after step 1
+              recovery_email_sent: true,
+              recovery_email_sent_at: meta.recovery_email_sent_at || now.toISOString(),
+            },
+          })
+
+          sentCount++
+          logger.info(
+            `[Abandoned Cart] ST step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
+          )
+        } catch (emailError: any) {
+          logger.error(
+            `[Abandoned Cart] Failed to send ST step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
           )
         }
         continue

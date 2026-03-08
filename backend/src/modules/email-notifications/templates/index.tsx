@@ -15,6 +15,9 @@ import { DhEbookDeliveryTemplate, DH_EBOOK_DELIVERY, isDhEbookDeliveryData } fro
 import { DhShipmentNotificationTemplate, DH_SHIPMENT_NOTIFICATION, isDhShipmentNotificationData } from './dh-shipment-notification'
 // Släpp Taget templates
 import { StOrderPlacedTemplate, ST_ORDER_PLACED, isStOrderPlacedTemplateData } from './st-order-placed'
+import { StAbandonedCheckout1Template, ST_ABANDONED_CHECKOUT_1, isStAbandonedCheckout1Data } from './st-abandoned-checkout-1'
+import { StAbandonedCheckout2Template, ST_ABANDONED_CHECKOUT_2, isStAbandonedCheckout2Data } from './st-abandoned-checkout-2'
+import { StAbandonedCheckout3Template, ST_ABANDONED_CHECKOUT_3, isStAbandonedCheckout3Data } from './st-abandoned-checkout-3'
 import { StEbookDeliveryTemplate, ST_EBOOK_DELIVERY, isStEbookDeliveryData } from './st-ebook-delivery'
 import { StShipmentNotificationTemplate, ST_SHIPMENT_NOTIFICATION, isStShipmentNotificationData } from './st-shipment-notification'
 // Admin notification
@@ -37,6 +40,9 @@ export const EmailTemplates = {
   DH_SHIPMENT_NOTIFICATION,
   // Släpp Taget
   ST_ORDER_PLACED,
+  ST_ABANDONED_CHECKOUT_1,
+  ST_ABANDONED_CHECKOUT_2,
+  ST_ABANDONED_CHECKOUT_3,
   ST_EBOOK_DELIVERY,
   ST_SHIPMENT_NOTIFICATION,
   // Admin notifications
@@ -181,6 +187,33 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       return <DhShipmentNotificationTemplate {...data} />
 
     // ── Släpp Taget templates ─────────────────────────────────
+    case EmailTemplates.ST_ABANDONED_CHECKOUT_1:
+      if (!isStAbandonedCheckout1Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ST_ABANDONED_CHECKOUT_1}"`
+        )
+      }
+      return <StAbandonedCheckout1Template {...data} />
+
+    case EmailTemplates.ST_ABANDONED_CHECKOUT_2:
+      if (!isStAbandonedCheckout2Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ST_ABANDONED_CHECKOUT_2}"`
+        )
+      }
+      return <StAbandonedCheckout2Template {...data} />
+
+    case EmailTemplates.ST_ABANDONED_CHECKOUT_3:
+      if (!isStAbandonedCheckout3Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ST_ABANDONED_CHECKOUT_3}"`
+        )
+      }
+      return <StAbandonedCheckout3Template {...data} />
+
     case EmailTemplates.ST_ORDER_PLACED:
       if (!isStOrderPlacedTemplateData(data)) {
         throw new MedusaError(
@@ -243,6 +276,9 @@ export {
   DhShipmentNotificationTemplate,
   // Släpp Taget
   StOrderPlacedTemplate,
+  StAbandonedCheckout1Template,
+  StAbandonedCheckout2Template,
+  StAbandonedCheckout3Template,
   StEbookDeliveryTemplate,
   StShipmentNotificationTemplate,
   // Admin notification
