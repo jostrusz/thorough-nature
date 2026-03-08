@@ -335,7 +335,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
           postal_code: billingAddress.postal_code || "00000",
           city: billingAddress.city || "City",
           region: billingAddress.province || "",
-          country: billingAddress.country_code?.toUpperCase() || "NL",
+          country: billingAddress.country_code?.toUpperCase() || purchaseCountry,
         },
         shipping_address: shippingAddress.given_name ? shippingAddress : {
           given_name: customer?.first_name || shippingAddress.first_name || "Customer",
@@ -347,7 +347,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
           postal_code: shippingAddress.postal_code || "00000",
           city: shippingAddress.city || "City",
           region: shippingAddress.province || "",
-          country: shippingAddress.country_code?.toUpperCase() || "NL",
+          country: shippingAddress.country_code?.toUpperCase() || purchaseCountry,
         },
       }
 
@@ -431,7 +431,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       // data matches EXACTLY what was sent during session creation (Klarna validates this)
       const storedSession = klarnaSessionData || {}
 
-      const purchaseCountry = storedSession.purchase_country || currency?.toUpperCase() === "SEK" ? "SE" : "NL"
+      const purchaseCountry = storedSession.purchase_country || (currency?.toUpperCase() === "SEK" ? "SE" : "NL")
       const purchaseCurrency = storedSession.purchase_currency || currency?.toUpperCase() || "EUR"
       const locale = storedSession.locale || getKlarnaLocale(purchaseCountry)
 
