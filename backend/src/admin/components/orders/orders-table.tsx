@@ -50,6 +50,8 @@ function formatDate(iso: string) {
 // HELPER: determine payment status from order
 // ═══════════════════════════════════════════
 function getPaymentStatus(order: any): string {
+  // If metadata says captured, trust it (auto-capture or manual)
+  if (order.metadata?.payment_captured) return "paid"
   if (order.payment_collections?.length) {
     const pc = order.payment_collections[0]
     if (pc.status === "captured" || pc.status === "completed") return "paid"

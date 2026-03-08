@@ -329,6 +329,25 @@ export const POST = async (
       metadata: updatedMetadata,
     })
 
+    // Also update Medusa's internal payment status so admin shows "Paid"
+    try {
+      const paymentModuleService = req.scope.resolve(Modules.PAYMENT) as any
+      if (payment.id && payment.captured_at == null) {
+        await paymentModuleService.capturePayment({
+          payment_id: payment.id,
+          amount: Number(order.total),
+        })
+        logger.info(
+          `[Capture] Medusa payment ${payment.id} marked as captured for order ${orderId}`
+        )
+      }
+    } catch (paymentErr: any) {
+      // Non-fatal: provider capture succeeded, just internal status update failed
+      logger.warn(
+        `[Capture] Could not update Medusa payment status for order ${orderId}: ${paymentErr.message}`
+      )
+    }
+
     logger.info(
       `[Capture] Order ${orderId} captured successfully via ${captureResult.provider}`
     )
