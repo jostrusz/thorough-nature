@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
+import { gzipSync } from "zlib"
 import { getProjectBySlug, ProjectConfig } from "@lib/projects"
 
 // MIME types for static assets served from project pages folder
@@ -46,18 +47,22 @@ export async function GET(
     // Fonts are immutable — cache 1 year; CSS/JS 1 hour; images 1 day
     const isFont = [".woff", ".woff2", ".ttf", ".eot"].includes(ext)
     const isCode = [".css", ".js"].includes(ext)
+    const isCompressible = [".css", ".js", ".json", ".svg"].includes(ext)
     const cacheControl = isFont
       ? "public, max-age=31536000, immutable"
       : isCode
         ? "public, max-age=3600, s-maxage=3600"
         : "public, max-age=86400, s-maxage=604800"
-    return new NextResponse(content, {
-      status: 200,
-      headers: {
-        "Content-Type": STATIC_MIME_TYPES[ext],
-        "Cache-Control": cacheControl,
-      },
-    })
+    // Gzip text-based assets for faster transfer
+    const acceptEncoding = request.headers.get("accept-encoding") || ""
+    const useGzip = isCompressible && acceptEncoding.includes("gzip")
+    const body = useGzip ? gzipSync(content) : content
+    const headers: Record<string, string> = {
+      "Content-Type": STATIC_MIME_TYPES[ext],
+      "Cache-Control": cacheControl,
+    }
+    if (useGzip) headers["Content-Encoding"] = "gzip"
+    return new NextResponse(body, { status: 200, headers })
   }
 
   // Resolve page name: /p/loslatenboek -> "", /p/loslatenboek/checkout -> "checkout"
@@ -125,13 +130,15 @@ export async function GET(
   // Rewrite internal .html links to clean URLs with correct base path
   html = rewriteLinks(html, basePath, config)
 
-  return new NextResponse(html, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=60, s-maxage=300",
-    },
-  })
+  // Gzip HTML for faster transfer
+  const acceptGzip = (request.headers.get("accept-encoding") || "").includes("gzip")
+  const htmlBody = acceptGzip ? gzipSync(Buffer.from(html, "utf-8")) : html
+  const htmlHeaders: Record<string, string> = {
+    "Content-Type": "text/html; charset=utf-8",
+    "Cache-Control": "public, max-age=60, s-maxage=300",
+  }
+  if (acceptGzip) htmlHeaders["Content-Encoding"] = "gzip"
+  return new NextResponse(htmlBody, { status: 200, headers: htmlHeaders })
 }
 
 /**
@@ -416,13 +423,15 @@ async function serveAdvertorial(
     html = `${html}\n${analyticsScript}`
   }
 
-  return new NextResponse(html, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=60, s-maxage=300",
-    },
-  })
+  // Gzip HTML for faster transfer
+  const acceptGzip2 = (request.headers.get("accept-encoding") || "").includes("gzip")
+  const htmlBody2 = acceptGzip2 ? gzipSync(Buffer.from(html, "utf-8")) : html
+  const htmlHeaders2: Record<string, string> = {
+    "Content-Type": "text/html; charset=utf-8",
+    "Cache-Control": "public, max-age=60, s-maxage=300",
+  }
+  if (acceptGzip2) htmlHeaders2["Content-Encoding"] = "gzip"
+  return new NextResponse(htmlBody2, { status: 200, headers: htmlHeaders2 })
 }
 
 /**

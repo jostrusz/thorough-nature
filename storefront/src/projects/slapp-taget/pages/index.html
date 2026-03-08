@@ -58,25 +58,49 @@
 <link rel="dns-prefetch" href="https://assets.lightfunnels.com">
 <link rel="preconnect" href="https://assets.lightfunnels.com" crossorigin>
 <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-<link rel="dns-prefetch" href="https://pub-e45aa202606e48c48b752d5336015023.r2.dev">
-<link rel="preconnect" href="https://pub-e45aa202606e48c48b752d5336015023.r2.dev" crossorigin>
+<!-- R2 preconnect removed — video loads lazily, not needed for initial paint -->
 
 <!-- ═══ FONTS ═══ -->
 <link rel="preload" href="fonts/dm-sans-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2" as="font" type="font/woff2" crossorigin>
 
-<!-- Preload hero image -->
+<!-- Preload LCP image (preloader) and hero -->
+<link rel="preload" as="image" href="/slapp-taget-preloader.webp" type="image/webp" fetchpriority="high">
 <link rel="preload" as="image" href="https://assets.lightfunnels.com/account-85759/images_library/75269672-d06c-474e-9ba4-bbb3eb397b7d.Slapp-taget-om-det-som-forstor-dig_0a6daad1-93ab-490d-8a1f-21c881a11d43.webp" type="image/webp">
 
-<link rel="stylesheet" href="style.css">
+<!-- Critical CSS inlined for FCP/LCP performance -->
+<style>
+:root{--bg:#FAF5F8;--heading:#2D1B3D;--cta:#C27BA0;--section:#EDD9E5;--body:#5A3D6B;--highlight:#D9A4C0;--dark:#1A1028;--white:#FFFFFF;--light:#F5EDF2;--muted:#9B7AAD;--cta-hover:#A8628A;--accent:#D498B5}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--body);min-height:100vh}
+.preloader{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .6s cubic-bezier(.4,0,.2,1),visibility .6s}
+.preloader.loaded{opacity:0;visibility:hidden;pointer-events:none}
+.preloader-logo-container{position:relative;display:inline-block;overflow:hidden;border-radius:16px}
+.preloader-logo{max-width:280px;width:auto;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 4px 20px rgba(194,123,160,.25))}
+.preloader-logo-container::after{content:'';position:absolute;top:0;left:0;width:60%;height:100%;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,0) 30%,rgba(255,255,255,.45) 50%,rgba(255,255,255,0) 70%,transparent 100%);transform:translateX(-200%);will-change:transform;animation:preloaderShine 2s ease-in-out infinite}
+@keyframes preloaderShine{0%{transform:translateX(-200%)}60%{transform:translateX(300%)}100%{transform:translateX(300%)}}
+.site-nav{background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(16px) saturate(1.8);backdrop-filter:blur(16px) saturate(1.8);border-bottom:1px solid rgba(237,217,229,.5);padding:0 20px;position:sticky;top:0;z-index:1000;box-shadow:0 1px 8px rgba(45,27,61,.04)}
+.nav-inner{max-width:1050px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-logo{display:flex;align-items:center;text-decoration:none;gap:10px}.nav-logo img{max-height:42px;width:auto;height:auto;object-fit:contain}
+.nav-links{display:flex;align-items:center;gap:16px}.nav-links a{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--body);text-decoration:none}
+.nav-cta{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:var(--white)!important;background:var(--cta);padding:10px 22px;border-radius:8px;text-decoration:none!important;box-shadow:0 3px 12px rgba(194,123,160,.2)}
+.nav-hamburger{display:none}
+.hero-section{padding-top:72px;padding-bottom:72px;position:relative;overflow:hidden}
+.hero{display:flex;align-items:center;justify-content:space-between;gap:56px;flex-wrap:wrap;position:relative;z-index:1}
+.hero-left{flex:1 1 420px;min-width:300px}.hero-right{flex-shrink:0;position:relative}
+.skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:99999}
+@media(max-width:768px){.nav-links{display:none}.nav-hamburger{display:flex;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}.nav-hamburger span{display:block;width:24px;height:2px;background:var(--heading);border-radius:2px}.hero-section{padding-top:40px;padding-bottom:48px}.hero{flex-direction:column;text-align:center;gap:24px}.hero-left{display:contents}.hero-right img{width:300px!important}}
+</style>
+<!-- Full stylesheet loaded asynchronously -->
+<link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="style.css"></noscript>
 </head>
 <body>
 
 <!-- ═══ PRELOADER ═══ -->
 <div class="preloader" id="preloader">
  <div class="preloader-logo-container">
-  <img src="/slapp-taget-preloader.png" alt="Laddar..." class="preloader-logo">
+  <img src="/slapp-taget-preloader.webp" alt="Laddar..." class="preloader-logo" width="300" height="276" fetchpriority="high">
  </div>
 </div>
 
@@ -84,7 +108,7 @@
 <nav class="site-nav" aria-label="Huvudnavigering">
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
-   <img src="/slapp taget logo.png" alt="Släpp taget om det som förstör dig">
+   <img src="/slapp-taget-logo.webp" alt="Släpp taget om det som förstör dig" width="400" height="79">
   </a>
   <div class="nav-links">
    <a href="frakt.html">Frakt &amp; Leverans</a>
@@ -401,7 +425,7 @@
 
    <!-- Technische specificaties -->
    <div class="book-specs">
-    <h4 class="specs-title">📋 Produktspecifikationer</h4>
+    <h3 class="specs-title">📋 Produktspecifikationer</h3>
     <table class="specs-table">
      <tr><td>Titel</td><td><strong>Släpp taget om det som förstör dig</strong></td></tr>
      <tr><td>Författare</td><td>Joris de Vries</td></tr>
@@ -478,7 +502,7 @@
    <div class="guarantee-box reveal from-scale">
     <div class="guarantee-seal">100%<br>MONEY<br>BACK</div>
     <div class="guarantee-text">
-     <h4>Förlängd pengarna-tillbaka-garanti</h4>
+     <h3>Förlängd pengarna-tillbaka-garanti</h3>
      <p><span class="highlight-green">30 dagar istället för 14 dagar</span> – inte nöjd med boken? Du har hela 30 dagar på dig att returnera den och få pengarna tillbaka.</p>
     </div>
    </div>
@@ -1200,7 +1224,7 @@
     <div class="shipping-box">
      <div class="shipping-icon">🚚</div>
      <div>
-      <h4>Fri frakt</h4>
+      <h3>Fri frakt</h3>
       <p><span class="hl-orange">Till ett värde av 69 kr</span> – vi betalar fraktkostnaderna åt dig. Du betalar bara för boken – vi tar hand om resten.</p>
      </div>
     </div>
@@ -1285,17 +1309,17 @@
   <div class="urgency-boxes">
    <div class="urgency-box reveal reveal-d1">
     <span class="urgency-icon">⏰</span>
-    <h4>Hur länge ska du vänta innan smärtan lämnar dig?</h4>
+    <h3>Hur länge ska du vänta innan smärtan lämnar dig?</h3>
     <p>Varje dag du väntar är en dag längre fångad i dina egna tankar.</p>
    </div>
    <div class="urgency-box reveal reveal-d2">
     <span class="urgency-icon">💔</span>
-    <h4>Hur länge vill du fortsätta lida och må dåligt?</h4>
+    <h3>Hur länge vill du fortsätta lida och må dåligt?</h3>
     <p>Du förtjänar att må bra. Inte "någon gång". Utan nu.</p>
    </div>
    <div class="urgency-box reveal reveal-d3">
     <span class="urgency-icon">🔓</span>
-    <h4>Hur länge ska du fortsätta uthärda den här smärtan?</h4>
+    <h3>Hur länge ska du fortsätta uthärda den här smärtan?</h3>
     <p>Nyckeln till lättnad ligger bara ett klick bort. Ta den.</p>
    </div>
   </div>
@@ -1519,7 +1543,7 @@
 <footer class="site-footer" id="footer" role="contentinfo">
  <div class="footer-inner">
   <div class="footer-brand">
-   <img src="/slapp-taget-logo-white.png" alt="Släpp taget om det som förstör dig" class="footer-logo">
+   <img src="/slapp-taget-logo-white.webp" alt="Släpp taget om det som förstör dig" class="footer-logo" width="600" height="119">
   </div>
   <div class="footer-links">
    <a href="frakt.html">Frakt &amp; Leverans</a>
