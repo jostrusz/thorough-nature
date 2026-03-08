@@ -7,6 +7,7 @@ import { OrderTag } from "./order-tag"
 import { useUpdateMetadata } from "../../hooks/use-update-metadata"
 import { toast } from "@medusajs/ui"
 import { colors, radii, shadows, getPaymentIconUrl, getPaymentFallback, getOrderDisplayNumber } from "./design-tokens"
+import { formatCurrency } from "../../lib/format-currency"
 
 interface OrdersTableProps {
   orders: any[]
@@ -43,14 +44,7 @@ function formatDate(iso: string) {
   )
 }
 
-// ═══════════════════════════════════════════
-// CURRENCY FORMATTING
-// ═══════════════════════════════════════════
-function formatCurrency(amount: number, currency?: string) {
-  const c = (currency || "EUR").toUpperCase()
-  if (c === "EUR") return `\u20AC${amount.toFixed(2)}`
-  return `${amount.toFixed(2)} ${c}`
-}
+// Currency formatting — uses shared multi-currency utility from lib/format-currency
 
 // ═══════════════════════════════════════════
 // HELPER: determine payment status from order

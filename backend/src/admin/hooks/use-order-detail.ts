@@ -7,7 +7,7 @@ export function useOrderDetail(orderId: string | undefined) {
     queryFn: async () => {
       const response = await sdk.admin.order.retrieve(orderId!, {
         fields:
-          "+email,+metadata,+items.*,+items.variant.*,+items.variant.product.*,+shipping_address.*,+billing_address.*,+shipping_methods.*,+fulfillments.*,+fulfillments.items.*,+payment_collections.*,+payment_collections.payments.*",
+          "+currency_code,+email,+metadata,+items.*,+items.variant.*,+items.variant.product.*,+shipping_address.*,+billing_address.*,+shipping_methods.*,+fulfillments.*,+fulfillments.items.*,+payment_collections.*,+payment_collections.payments.*",
       })
       return response
     },
