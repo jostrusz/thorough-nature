@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zasady wysyłki i dostawy — Odpuść to, co cię niszczy</title>
+<meta name="description" content="Wszystko o wysyłce, czasie dostawy i realizacji zamówień książki Odpuść to, co cię niszczy.">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="/favicon.png" type="image/png">
+
+<!-- ═══ FONTS ═══ -->
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+<style>
+/* ═══ FONTS ═══ */
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+/* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
+:root {
+ --bg: #FAF5F8;
+ --heading: #2D1B3D;
+ --cta: #C27BA0;
+ --section: #EDD9E5;
+ --body: #5A3D6B;
+ --highlight: #D9A4C0;
+ --dark: #1A1028;
+ --white: #FFFFFF;
+ --light: #F5EDF2;
+ --muted: #9B7AAD;
+ --cta-hover: #A8628A;
+ --accent: #D498B5;
+}
+
+/* ═══ RESET ═══ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
+
+/* ═══ NAVIGACE ═══ */
+.site-nav { background: var(--white); border-bottom: 1px solid var(--section); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(45, 27, 61, 0.06); }
+.nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
+.nav-logo img { height: 40px; width: auto; }
+.nav-logo-text { font-family: 'Recoleta', serif; font-size: 16px; font-weight: 600; color: var(--heading); line-height: 1.2; }
+.nav-links { display: flex; align-items: center; gap: 28px; }
+.nav-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--body); text-decoration: none; transition: color 0.2s; position: relative; }
+.nav-links a:hover { color: var(--heading); }
+.nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--cta); transition: width 0.3s ease; }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--heading); font-weight: 600; }
+.nav-links a.active::after { width: 100%; }
+.nav-cta { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--white) !important; background: var(--cta); padding: 10px 22px; border-radius: 8px; text-decoration: none !important; transition: all 0.25s ease; box-shadow: 0 3px 12px rgba(194, 123, 160, 0.2); }
+.nav-cta:hover { background: var(--cta-hover) !important; color: var(--white) !important; transform: translateY(-1px); box-shadow: 0 5px 18px rgba(194, 123, 160, 0.35); }
+.nav-cta::after { display: none !important; }
+.nav-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-direction: column; gap: 5px; }
+.nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--heading); border-radius: 2px; transition: all 0.3s ease; }
+.nav-mobile-overlay { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background: rgba(26, 16, 40, 0.5); z-index: 999; }
+.nav-mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--white); padding: 24px 20px; box-shadow: 0 8px 24px rgba(45, 27, 61, 0.12); z-index: 1000; flex-direction: column; gap: 0; border-bottom: 2px solid var(--section); }
+.nav-mobile-menu a { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500; color: var(--body); text-decoration: none; padding: 14px 0; border-bottom: 1px solid var(--section); display: block; transition: color 0.2s; }
+.nav-mobile-menu a:last-child { border-bottom: none; }
+.nav-mobile-menu a:hover { color: var(--heading); }
+.nav-mobile-menu .nav-cta-mobile { display: inline-block; font-weight: 700; color: var(--white); background: var(--cta); padding: 14px 28px; border-radius: 10px; text-align: center; margin-top: 16px; border-bottom: none; }
+.nav-mobile-menu .nav-cta-mobile:hover { background: var(--cta-hover); color: var(--white); }
+
+@media (max-width: 768px) {
+ .nav-links { display: none; }
+ .nav-hamburger { display: flex; }
+ .nav-mobile-menu.open { display: flex; }
+ .nav-mobile-overlay.open { display: block; }
+ .nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+ .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+ .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+}
+
+/* ═══ CONTENT STRÁNKY ═══ */
+.page-header {
+ background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
+ padding: 56px 20px 48px;
+ text-align: center;
+}
+.page-header h1 { font-family: 'Recoleta', serif; font-size: 36px; font-weight: 600; color: var(--white); margin-bottom: 12px; line-height: 1.2; }
+.page-header p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: rgba(255, 255, 255, 0.7); max-width: 600px; margin: 0 auto; line-height: 1.6; }
+.page-header .badge { display: inline-block; background: rgba(194, 123, 160, 0.2); color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 16px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 0.5px; }
+
+.page-content { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+/* Informační boxy */
+.info-box {
+ background: var(--light);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 28px;
+ margin-bottom: 40px;
+}
+.info-box h3 { font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
+.info-box p, .info-box li { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; }
+.info-box ul { list-style: none; padding: 0; }
+.info-box ul li { padding: 4px 0; }
+.info-box ul li::before { content: '→ '; color: var(--cta); font-weight: 700; }
+
+/* Sekce */
+.section-block { margin-bottom: 40px; }
+.section-block h2 {
+ font-family: 'Recoleta', serif;
+ font-size: 24px;
+ font-weight: 600;
+ color: var(--heading);
+ margin-bottom: 16px;
+ line-height: 1.3;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+}
+.section-block h2 .icon { font-size: 28px; }
+.section-block p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 12px; }
+.section-block ul, .section-block ol { padding-left: 24px; margin-bottom: 12px; }
+.section-block li { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 6px; }
+.section-block strong { color: var(--heading); }
+
+.highlight-box {
+ background: linear-gradient(135deg, var(--light), var(--section));
+ border-left: 4px solid var(--cta);
+ border-radius: 0 12px 12px 0;
+ padding: 20px 24px;
+ margin: 20px 0;
+}
+.highlight-box p { margin: 0; font-size: 15px; }
+
+/* Tabulka levertijden */
+.delivery-table {
+ width: 100%;
+ border-collapse: collapse;
+ margin: 16px 0;
+ border-radius: 12px;
+ overflow: hidden;
+ border: 1px solid var(--section);
+}
+.delivery-table th {
+ background: var(--dark);
+ color: var(--white);
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ font-weight: 600;
+ padding: 12px 16px;
+ text-align: left;
+}
+.delivery-table td {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ color: var(--body);
+ padding: 12px 16px;
+ border-bottom: 1px solid var(--section);
+ line-height: 1.5;
+}
+.delivery-table tr:last-child td { border-bottom: none; }
+.delivery-table tr:nth-child(even) td { background: var(--light); }
+.delivery-table .free-tag {
+ display: inline-block;
+ background: var(--cta);
+ color: var(--white);
+ font-size: 11px;
+ font-weight: 700;
+ padding: 2px 8px;
+ border-radius: 4px;
+}
+
+/* FAQ */
+.faq-item {
+ border-bottom: 1px solid var(--section);
+}
+.faq-question {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ padding: 18px 0;
+ cursor: pointer;
+ transition: background 0.2s;
+}
+.faq-question h3 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 16px;
+ font-weight: 600;
+ color: var(--heading);
+ line-height: 1.4;
+ margin: 0;
+ flex: 1;
+}
+.faq-icon {
+ font-size: 24px;
+ color: var(--cta);
+ font-weight: 300;
+ transition: transform 0.3s ease;
+ flex-shrink: 0;
+ margin-left: 16px;
+}
+.faq-answer {
+ max-height: 0;
+ overflow: hidden;
+ transition: max-height 0.4s ease;
+}
+.faq-answer p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.75;
+ padding-bottom: 18px;
+ margin: 0;
+}
+.faq-item.active .faq-icon {
+ transform: rotate(45deg);
+}
+.faq-item.active .faq-answer {
+ max-height: 300px;
+}
+
+.divider { height: 1px; background: var(--section); margin: 40px 0; }
+
+/* Company info */
+.company-info {
+ background: var(--light);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 28px;
+ margin-top: 40px;
+}
+.company-info h3 { font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
+.company-info p { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; margin: 0 0 6px; }
+
+/* Cross-link note */
+.cross-link-note {
+ background: var(--white);
+ border: 1px solid var(--section);
+ border-radius: 12px;
+ padding: 20px 24px;
+ margin-top: 32px;
+ text-align: center;
+}
+.cross-link-note p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.7;
+ margin: 0;
+}
+.cross-link-note a {
+ color: var(--cta);
+ font-weight: 600;
+ text-decoration: underline;
+}
+.cross-link-note a:hover {
+ color: var(--cta-hover);
+}
+
+/* ═══ FOOTER ═══ */
+.site-footer { background: var(--dark); padding: 48px 24px 24px; color: rgba(255, 255, 255, 0.7); }
+.footer-inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
+.footer-brand { display: flex; align-items: center; gap: 16px; }
+.footer-brand-text { font-family: 'Recoleta', serif; font-size: 18px; color: var(--white); line-height: 1.3; }
+.footer-links { display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(255, 255, 255, 0.7); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--white); }
+.footer-contact { display: flex; flex-direction: column; gap: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; }
+.footer-contact a { color: rgba(255, 255, 255, 0.7); text-decoration: none; }
+.footer-contact a:hover { color: var(--white); }
+.footer-bottom { max-width: 960px; margin: 32px auto 0; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: rgba(255, 255, 255, 0.45); }
+
+@media (max-width: 768px) {
+ .page-header h1 { font-size: 28px; }
+ .section-block h2 { font-size: 20px; }
+ .delivery-table { font-size: 13px; }
+ .delivery-table th, .delivery-table td { padding: 10px 12px; }
+ .footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 32px; }
+ .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
+}
+@media (max-width: 480px) {
+ .page-header h1 { font-size: 24px; }
+ .page-header { padding: 40px 16px 36px; }
+ .page-content { padding: 32px 16px 60px; }
+ .delivery-table { display: block; overflow-x: auto; }
+}
+
+/* ═══ PRELOADER ═══ */
+.preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.6s cubic-bezier(.4,0,.2,1), visibility 0.6s; }
+.preloader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
+.preloader-logo-container { position: relative; display: inline-block; overflow: hidden; border-radius: 16px; }
+.preloader-logo-container img { max-width: 280px; width: auto; height: auto; object-fit: contain; display: block; filter: drop-shadow(0 4px 20px rgba(194, 123, 160, 0.25)); }
+.preloader-logo-container::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0) 70%, transparent 100%); animation: preloaderShine 2s ease-in-out infinite; }
+@keyframes preloaderShine { 0% { left: -100%; } 60% { left: 150%; } 100% { left: 150%; } }
+</style>
+</head>
+<body>
+
+<!-- ═══ PRELOADER ═══ -->
+<div class="preloader" id="preloader">
+ <div class="preloader-logo-container">
+  <img src="/slapp-taget-preloader.png" alt="Ładowanie..." class="preloader-logo">
+ </div>
+</div>
+
+<!-- ═══ NAVIGACE ═══ -->
+<nav class="site-nav">
+ <div class="nav-inner">
+  <a href="index.html" class="nav-logo">
+   <img src="/slapp taget logo.png" alt="Odpuść to, co cię niszczy" width="150" height="40">
+
+  </a>
+  <div class="nav-links">
+   <a href="wysylka.html" class="active">Wysyłka &amp; Dostawa</a>
+   <a href="zwroty.html">Zwroty &amp; Gwarancja</a>
+   <a href="regulamin.html">Regulamin</a>
+   <a href="prywatnosc.html">Polityka prywatności</a>
+   <a href="kontakt.html">Kontakt</a>
+   <a href="index.html" class="nav-cta">Zamów teraz &rarr;</a>
+  </div>
+  <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+   <span></span><span></span><span></span>
+  </button>
+ </div>
+</nav>
+<div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
+<div class="nav-mobile-menu">
+ <a href="wysylka.html">Wysyłka &amp; Dostawa</a>
+ <a href="zwroty.html">Zwroty &amp; Gwarancja</a>
+ <a href="regulamin.html">Regulamin</a>
+ <a href="prywatnosc.html">Polityka prywatności</a>
+ <a href="kontakt.html">Kontakt</a>
+ <a href="index.html" class="nav-cta-mobile">Zamów teraz &rarr;</a>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="page-header">
+ <div class="badge">📦 Wysyłka &amp; Dostawa</div>
+ <h1>Zasady wysyłki i dostawy</h1>
+ <p>Wszystko o wysyłce, czasie dostawy i realizacji zamówień</p>
+</header>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="page-content">
+
+ <div class="info-box">
+  <h3>📌 Podsumowanie</h3>
+  <ul>
+   <li>Darmowa wysyłka w całej Polsce</li>
+   <li>Czas dostawy: 5–10 dni roboczych</li>
+   <li>Kod śledzenia wysyłany e-mailem</li>
+   <li>Wysyłka w ciągu 24–48 godzin po płatności</li>
+  </ul>
+ </div>
+
+ <!-- Wysyłka -->
+ <div class="section-block">
+  <h2><span class="icon">📦</span> Wysyłka</h2>
+  <p>Wszystkie zamówienia wysyłamy z naszego magazynu w Europie. Po otrzymaniu płatności Twoje zamówienie jest realizowane i wysyłane w ciągu <strong>24–48 godzin</strong>.</p>
+
+  <table class="delivery-table">
+   <thead>
+    <tr>
+     <th>Kraj</th>
+     <th>Czas dostawy</th>
+     <th>Koszt wysyłki</th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr><td>🇵🇱 Polska</td><td>5–10 dni roboczych</td><td><span class="free-tag">DARMOWA</span></td></tr>
+   </tbody>
+  </table>
+
+  <div class="highlight-box">
+   <p><strong>Produkty cyfrowe (e-booki, PDF):</strong> Natychmiast po dokonaniu płatności otrzymasz link do pobrania na e-mail. Bez czekania!</p>
+  </div>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Śledź swoje zamówienie -->
+ <div class="section-block">
+  <h2><span class="icon">📍</span> Śledź swoje zamówienie</h2>
+  <p>Po wysłaniu przesyłki otrzymasz wiadomość e-mail z <strong>kodem śledzenia</strong>. Dzięki niemu możesz na bieżąco śledzić swoją paczkę na stronie przewoźnika.</p>
+  <p>Nie otrzymałeś kodu śledzenia? Sprawdź folder spam lub skontaktuj się z nami pod adresem <a href="mailto:biuro@odpusc-ksiazka.pl" style="color: var(--cta);">biuro@odpusc-ksiazka.pl</a>.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Uszkodzony lub wadliwy produkt -->
+ <div class="section-block">
+  <h2><span class="icon">⚠️</span> Uszkodzony lub wadliwy produkt?</h2>
+  <p>Otrzymałeś uszkodzony lub wadliwy produkt? Skontaktuj się z nami od razu. Bezpłatnie wyślemy zamiennik lub dokonamy pełnego zwrotu pieniędzy.</p>
+  <p>Wyślij zdjęcie uszkodzonego produktu na adres <a href="mailto:biuro@odpusc-ksiazka.pl" style="color: var(--cta);">biuro@odpusc-ksiazka.pl</a> wraz z numerem zamówienia.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- FAQ -->
+ <div class="section-block">
+  <h2><span class="icon">❓</span> Najczęściej zadawane pytania</h2>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Kiedy moje zamówienie zostanie wysłane?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Zamówienia są realizowane i wysyłane w ciągu 24–48 godzin od momentu płatności. Otrzymasz e-mail z potwierdzeniem i kodem śledzenia, gdy Twoja przesyłka zostanie nadana.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Moja paczka nie dotarła. Co mam zrobić?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Najpierw sprawdź kod śledzenia w e-mailu z potwierdzeniem. Jeśli Twoja paczka jest w drodze dłużej niż 14 dni roboczych (w UE), skontaktuj się z nami. Zbadamy sprawę i w razie potrzeby zorganizujemy ponowną wysyłkę.</p>
+   </div>
+  </div>
+
+  <p style="margin-top: 16px;">Informacje o zwrotach i gwarancji znajdziesz w naszych <a href="zwroty.html" style="color: var(--cta); font-weight: 600;">Zasadach zwrotów i gwarancji</a>.</p>
+ </div>
+
+ <!-- Cross-link note -->
+ <div class="cross-link-note">
+  <p>Informacje o zwrotach i gwarancji znajdziesz w naszych <a href="zwroty.html">Zasadach zwrotów i gwarancji</a>.</p>
+ </div>
+
+ <!-- Dane firmy -->
+ <div class="company-info">
+  <h3>🏢 Dane firmy</h3>
+  <p><strong>Performance Marketing Solution s.r.o.</strong></p>
+  <p>Rybná 716/24, 110 00 Praga 1, Czechy</p>
+  <p>NIP: 06259928 | NIP UE: CZ06259928</p>
+  <p>E-mail: <a href="mailto:biuro@odpusc-ksiazka.pl" style="color: var(--cta);">biuro@odpusc-ksiazka.pl</a></p>
+ </div>
+
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="site-footer">
+ <div class="footer-inner">
+  <div class="footer-brand">
+   <img src="/slapp-taget-logo-white.png" alt="Odpuść to, co cię niszczy" class="footer-logo" width="210" height="56">
+   <div class="footer-brand-text">Odpuść to, co<br>cię niszczy</div>
+  </div>
+  <div class="footer-links">
+   <a href="wysylka.html">Wysyłka &amp; Dostawa</a>
+   <a href="zwroty.html">Zwroty &amp; Gwarancja</a>
+   <a href="regulamin.html">Regulamin</a>
+   <a href="prywatnosc.html">Polityka prywatności</a>
+   <a href="kontakt.html">Kontakt</a>
+  </div>
+  <div class="footer-contact">
+   <a href="mailto:biuro@odpusc-ksiazka.pl">📧 biuro@odpusc-ksiazka.pl</a>
+   <a href="tel:+420732915755">📞 +420 732 915 755</a>
+  </div>
+ </div>
+ <div class="footer-bottom">
+  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, 110 00 Praha • NIP: 06259928 • NIP: CZ06259928</span>
+  <span>&copy; 2026 Performance Marketing Solution s.r.o. Wszelkie prawa zastrzeżone.</span>
+ </div>
+</footer>
+
+<script>
+function toggleFaq(element) {
+ var faqItem = element.closest('.faq-item');
+ var isActive = faqItem.classList.contains('active');
+ var allItems = document.querySelectorAll('.faq-item');
+ allItems.forEach(function(item) { item.classList.remove('active'); });
+ if (!isActive) { faqItem.classList.add('active'); }
+}
+
+function toggleMobileMenu() {
+ document.querySelector('.nav-hamburger').classList.toggle('open');
+ document.querySelector('.nav-mobile-menu').classList.toggle('open');
+ document.querySelector('.nav-mobile-overlay').classList.toggle('open');
+}
+</script>
+<script>
+window.addEventListener('load', function() {
+ var preloader = document.getElementById('preloader');
+ if (preloader) { setTimeout(function() { preloader.classList.add('loaded'); }, 400); }
+});
+</script>
+</body>
+</html>
