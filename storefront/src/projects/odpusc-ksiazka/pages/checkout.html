@@ -6055,6 +6055,20 @@ body {
     });
   }
 
+  // FB Pixel + CAPI: InitiateCheckout on checkout page load (skip on payment return)
+  (function() {
+    var isPaymentReturn = window.location.search.indexOf('payment_return=1') !== -1 || window.location.search.indexOf('redirect_status=') !== -1;
+    if (!isPaymentReturn && typeof MetaTracker !== 'undefined') {
+      MetaTracker.trackInitiateCheckout({
+        content_ids: [PROJECT_CONFIG.mainProduct.handle],
+        value: PROJECT_CONFIG.mainProduct.price,
+        currency: PROJECT_CONFIG.mainProduct.currency,
+        num_items: 1
+      });
+      console.log('[Checkout] InitiateCheckout fired — page loaded');
+    }
+  })();
+
   // Restore form on page load
   restoreFormFromStorage();
 
@@ -6605,19 +6619,6 @@ body {
       localStorage.setItem('medusa_bundle_price', checkoutBundlePrice);
       localStorage.setItem('medusa_order_bump', checkoutOrderBump ? 'true' : 'false');
       localStorage.setItem('medusa_checkout_total', checkoutTotal);
-
-      // FB Pixel + CAPI: InitiateCheckout (skip on payment return to avoid double firing)
-      var isPaymentReturn = window.location.search.indexOf('payment_return=1') !== -1 || window.location.search.indexOf('redirect_status=') !== -1;
-      if (!isPaymentReturn && typeof MetaTracker !== 'undefined') {
-        var contentIds = [PROJECT_CONFIG.mainProduct.handle];
-        if (checkoutOrderBump) contentIds.push(PROJECT_CONFIG.upsellProduct.handle);
-        MetaTracker.trackInitiateCheckout({
-          content_ids: contentIds,
-          value: checkoutTotal,
-          currency: PROJECT_CONFIG.mainProduct.currency,
-          num_items: checkoutBundleQty + (checkoutOrderBump ? 1 : 0)
-        });
-      }
 
       // Analytics: Track initiate_checkout event
       if (window.AnalyticsTracker) {
