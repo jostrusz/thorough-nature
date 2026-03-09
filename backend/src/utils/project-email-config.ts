@@ -30,6 +30,12 @@ const EMAIL_SUBJECTS: Record<string, Record<string, string>> = {
     shipmentSent: 'Din beställning {id} har skickats! 📦',
     shipmentPreview: 'Din beställning har skickats!',
   },
+  pl: {
+    orderPlaced: 'Dziękujemy za zamówienie!',
+    orderPlacedPreview: 'Dziękujemy za zamówienie!',
+    shipmentSent: 'Twoje zamówienie {id} zostało wysłane! 📦',
+    shipmentPreview: 'Twoje zamówienie zostało wysłane!',
+  },
 }
 
 /**
@@ -69,6 +75,13 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Släpp Taget <hej@slapptagetboken.se>',
     project: 'slapp-taget',
     locale: 'sv',
+  },
+  'odpusc-ksiazka': {
+    replyTo: 'biuro@odpusc-ksiazka.pl',
+    fromName: 'Odpuść to, co cię niszczy',
+    fromEmail: 'Odpuść to, co cię niszczy <biuro@odpusc-ksiazka.pl>',
+    project: 'odpusc-ksiazka',
+    locale: 'pl',
   },
   // Also match without hyphen (fallback)
   slapptaget: {

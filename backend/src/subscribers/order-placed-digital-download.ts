@@ -59,6 +59,9 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "1.3 MB",
     },
   ],
+  'odpusc-ksiazka': [
+    // E-book files — upload to MinIO under e-books/ folder, then update here
+  ],
 }
 
 // Fallback for unknown projects
@@ -69,6 +72,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   loslatenboek: process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_BASE_URL || "https://tijdomloslaten.nl",
   dehondenbijbel: process.env.DH_STOREFRONT_URL || process.env.STOREFRONT_URL || "https://www.dehondenbijbel.nl",
   'slapp-taget': process.env.ST_STOREFRONT_URL || "https://www.slapptagetboken.se",
+  'odpusc-ksiazka': process.env.OK_STOREFRONT_URL || "https://www.odpusc-ksiazka.pl",
 }
 
 export default async function orderPlacedDigitalDownloadHandler({
@@ -138,7 +142,9 @@ export default async function orderPlacedDigitalDownloadHandler({
       ? 'Je e-book staat klaar! 📖'
       : projectId === 'slapp-taget'
         ? 'Dina e-böcker är redo! 📖'
-        : 'Je e-books staan klaar! 📖'
+        : projectId === 'odpusc-ksiazka'
+          ? 'Twoje e-booki są gotowe! 📖'
+          : 'Je e-books staan klaar! 📖'
 
     await notificationModuleService.createNotifications({
       to: order.email,

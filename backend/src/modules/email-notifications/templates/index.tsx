@@ -21,9 +21,12 @@ import { StAbandonedCheckout3Template, ST_ABANDONED_CHECKOUT_3, isStAbandonedChe
 import { StEbookDeliveryTemplate, ST_EBOOK_DELIVERY, isStEbookDeliveryData } from './st-ebook-delivery'
 import { StShipmentNotificationTemplate, ST_SHIPMENT_NOTIFICATION, isStShipmentNotificationData } from './st-shipment-notification'
 // Odpuść to, co cię niszczy (odpusc-ksiazka) templates
+import { OkOrderPlacedTemplate, OK_ORDER_PLACED, isOkOrderPlacedTemplateData } from './ok-order-placed'
 import { OkAbandonedCheckout1Template, OK_ABANDONED_CHECKOUT_1, isOkAbandonedCheckout1Data } from './ok-abandoned-checkout-1'
 import { OkAbandonedCheckout2Template, OK_ABANDONED_CHECKOUT_2, isOkAbandonedCheckout2Data } from './ok-abandoned-checkout-2'
 import { OkAbandonedCheckout3Template, OK_ABANDONED_CHECKOUT_3, isOkAbandonedCheckout3Data } from './ok-abandoned-checkout-3'
+import { OkEbookDeliveryTemplate, OK_EBOOK_DELIVERY, isOkEbookDeliveryData } from './ok-ebook-delivery'
+import { OkShipmentNotificationTemplate, OK_SHIPMENT_NOTIFICATION, isOkShipmentNotificationData } from './ok-shipment-notification'
 // Admin notification
 import { AdminOrderNotificationTemplate, ADMIN_ORDER_NOTIFICATION, isAdminOrderNotificationData } from './admin-order-notification'
 
@@ -50,9 +53,12 @@ export const EmailTemplates = {
   ST_EBOOK_DELIVERY,
   ST_SHIPMENT_NOTIFICATION,
   // Odpuść to, co cię niszczy
+  OK_ORDER_PLACED,
   OK_ABANDONED_CHECKOUT_1,
   OK_ABANDONED_CHECKOUT_2,
   OK_ABANDONED_CHECKOUT_3,
+  OK_EBOOK_DELIVERY,
+  OK_SHIPMENT_NOTIFICATION,
   // Admin notifications
   ADMIN_ORDER_NOTIFICATION,
 } as const
@@ -257,6 +263,33 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       return <StShipmentNotificationTemplate {...data} />
 
     // ── Odpuść to, co cię niszczy templates ────────────────────
+    case EmailTemplates.OK_ORDER_PLACED:
+      if (!isOkOrderPlacedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.OK_ORDER_PLACED}"`
+        )
+      }
+      return <OkOrderPlacedTemplate {...data} />
+
+    case EmailTemplates.OK_EBOOK_DELIVERY:
+      if (!isOkEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.OK_EBOOK_DELIVERY}"`
+        )
+      }
+      return <OkEbookDeliveryTemplate {...data} />
+
+    case EmailTemplates.OK_SHIPMENT_NOTIFICATION:
+      if (!isOkShipmentNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.OK_SHIPMENT_NOTIFICATION}"`
+        )
+      }
+      return <OkShipmentNotificationTemplate {...data} />
+
     case EmailTemplates.OK_ABANDONED_CHECKOUT_1:
       if (!isOkAbandonedCheckout1Data(data)) {
         throw new MedusaError(
@@ -325,9 +358,12 @@ export {
   StEbookDeliveryTemplate,
   StShipmentNotificationTemplate,
   // Odpuść to, co cię niszczy
+  OkOrderPlacedTemplate,
   OkAbandonedCheckout1Template,
   OkAbandonedCheckout2Template,
   OkAbandonedCheckout3Template,
+  OkEbookDeliveryTemplate,
+  OkShipmentNotificationTemplate,
   // Admin notification
   AdminOrderNotificationTemplate,
 }
