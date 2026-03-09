@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Frakt- och leveranspolicy — Släpp taget om det som förstör dig</title>
-<meta name="description" content="Allt om frakt, leveranstider och leverans av Släpp taget om det som förstör dig.">
+<title>Datenschutzerklärung — Lass los, was dich kaputt macht</title>
+<meta name="description" content="Erfahren Sie, wie wir mit Ihren personenbezogenen Daten bei Bestellungen von Lass los, was dich kaputt macht umgehen.">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="/favicon.png" type="image/png">
 
@@ -117,7 +117,20 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  align-items: center;
  gap: 10px;
 }
-.section-block h2 .icon { font-size: 28px; }
+.section-block h2 .section-num {
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ width: 36px;
+ height: 36px;
+ background: var(--cta);
+ color: var(--white);
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ font-weight: 700;
+ border-radius: 10px;
+ flex-shrink: 0;
+}
 .section-block p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 12px; }
 .section-block ul, .section-block ol { padding-left: 24px; margin-bottom: 12px; }
 .section-block li { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 6px; }
@@ -132,8 +145,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .highlight-box p { margin: 0; font-size: 15px; }
 
-/* Tabulka levertijden */
-.delivery-table {
+/* Tabulka dat */
+.data-table {
  width: 100%;
  border-collapse: collapse;
  margin: 16px 0;
@@ -141,7 +154,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  overflow: hidden;
  border: 1px solid var(--section);
 }
-.delivery-table th {
+.data-table th {
  background: var(--dark);
  color: var(--white);
  font-family: 'DM Sans', sans-serif;
@@ -150,7 +163,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  padding: 12px 16px;
  text-align: left;
 }
-.delivery-table td {
+.data-table td {
  font-family: 'DM Sans', sans-serif;
  font-size: 14px;
  color: var(--body);
@@ -158,109 +171,48 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  border-bottom: 1px solid var(--section);
  line-height: 1.5;
 }
-.delivery-table tr:last-child td { border-bottom: none; }
-.delivery-table tr:nth-child(even) td { background: var(--light); }
-.delivery-table .free-tag {
- display: inline-block;
- background: var(--cta);
- color: var(--white);
- font-size: 11px;
- font-weight: 700;
- padding: 2px 8px;
- border-radius: 4px;
-}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:nth-child(even) td { background: var(--light); }
 
-/* FAQ */
-.faq-item {
- border-bottom: 1px solid var(--section);
-}
-.faq-question {
- display: flex;
- justify-content: space-between;
- align-items: center;
- padding: 18px 0;
- cursor: pointer;
- transition: background 0.2s;
-}
-.faq-question h3 {
- font-family: 'DM Sans', sans-serif;
- font-size: 16px;
- font-weight: 600;
- color: var(--heading);
- line-height: 1.4;
- margin: 0;
- flex: 1;
-}
-.faq-icon {
- font-size: 24px;
- color: var(--cta);
- font-weight: 300;
- transition: transform 0.3s ease;
- flex-shrink: 0;
- margin-left: 16px;
-}
-.faq-answer {
- max-height: 0;
- overflow: hidden;
- transition: max-height 0.4s ease;
-}
-.faq-answer p {
- font-family: 'DM Sans', sans-serif;
- font-size: 15px;
- color: var(--body);
- line-height: 1.75;
- padding-bottom: 18px;
- margin: 0;
-}
-.faq-item.active .faq-icon {
- transform: rotate(45deg);
-}
-.faq-item.active .faq-answer {
- max-height: 300px;
-}
-
-.divider { height: 1px; background: var(--section); margin: 40px 0; }
-
-/* Company info */
-.company-info {
- background: var(--light);
- border: 1px solid var(--section);
+/* Rechten box */
+.rights-box {
+ background: var(--white);
+ border: 2px solid var(--cta);
  border-radius: 16px;
  padding: 28px;
- margin-top: 40px;
+ margin: 24px 0;
 }
-.company-info h3 { font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
-.company-info p { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; margin: 0 0 6px; }
-
-/* Cross-link note */
-.cross-link-note {
- background: var(--white);
- border: 1px solid var(--section);
- border-radius: 12px;
- padding: 20px 24px;
- margin-top: 32px;
- text-align: center;
+.rights-box h3 {
+ font-family: 'Recoleta', serif;
+ font-size: 18px;
+ color: var(--heading);
+ margin-bottom: 16px;
 }
-.cross-link-note p {
+.rights-list {
+ list-style: none;
+ padding: 0;
+}
+.rights-list li {
+ display: flex;
+ align-items: flex-start;
+ gap: 12px;
+ padding: 10px 0;
+ border-bottom: 1px solid var(--section);
  font-family: 'DM Sans', sans-serif;
  font-size: 15px;
  color: var(--body);
- line-height: 1.7;
- margin: 0;
+ line-height: 1.6;
 }
-.cross-link-note a {
- color: var(--cta);
- font-weight: 600;
- text-decoration: underline;
-}
-.cross-link-note a:hover {
- color: var(--cta-hover);
-}
+.rights-list li:last-child { border-bottom: none; }
+.rights-list .icon { flex-shrink: 0; font-size: 18px; }
+
+.divider { height: 1px; background: var(--section); margin: 40px 0; }
 
 /* ═══ FOOTER ═══ */
 .site-footer { background: var(--dark); padding: 48px 24px 24px; color: rgba(255, 255, 255, 0.7); }
 .footer-inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
 .footer-brand { display: flex; align-items: center; gap: 16px; }
+.footer-brand img { height: 48px; width: auto; }
 .footer-brand-text { font-family: 'Recoleta', serif; font-size: 18px; color: var(--white); line-height: 1.3; }
 .footer-links { display: flex; flex-direction: column; gap: 10px; }
 .footer-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(255, 255, 255, 0.7); text-decoration: none; transition: color 0.2s; }
@@ -273,8 +225,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 @media (max-width: 768px) {
  .page-header h1 { font-size: 28px; }
  .section-block h2 { font-size: 20px; }
- .delivery-table { font-size: 13px; }
- .delivery-table th, .delivery-table td { padding: 10px 12px; }
+ .data-table { font-size: 13px; }
+ .data-table th, .data-table td { padding: 10px 12px; }
  .footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 32px; }
  .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
 }
@@ -282,7 +234,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .page-header h1 { font-size: 24px; }
  .page-header { padding: 40px 16px 36px; }
  .page-content { padding: 32px 16px 60px; }
- .delivery-table { display: block; overflow-x: auto; }
+ .data-table { display: block; overflow-x: auto; }
 }
 
 /* ═══ PRELOADER ═══ */
@@ -299,7 +251,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <!-- ═══ PRELOADER ═══ -->
 <div class="preloader" id="preloader">
  <div class="preloader-logo-container">
-  <img src="/slapp-taget-preloader.png" alt="Laddar..." class="preloader-logo">
+  <img src="/lass-los-logo.png" alt="Laden..." class="preloader-logo">
  </div>
 </div>
 
@@ -307,16 +259,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <nav class="site-nav">
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
-   <img src="/slapp taget logo.png" alt="Släpp taget om det som förstör dig" width="150" height="40">
+   <img src="/lass-los-logo.png" alt="Lass los, was dich kaputt macht" width="150" height="40">
 
   </a>
   <div class="nav-links">
-   <a href="frakt.html" class="active">Frakt &amp; Leverans</a>
-   <a href="retur.html">Retur &amp; Garanti</a>
-   <a href="villkor.html">Allmänna villkor</a>
-   <a href="integritet.html">Integritetspolicy</a>
-   <a href="kontakt.html">Kundtjänst</a>
-   <a href="index.html" class="nav-cta">Beställ nu &rarr;</a>
+   <a href="versand.html">Versand &amp; R&uuml;ckgabe</a>
+   <a href="sendungsverfolgung.html">Sendungsverfolgung</a>
+   <a href="agb.html">AGB</a>
+   <a href="datenschutz.html" class="active">Datenschutz</a>
+   <a href="kontakt.html">Kontakt</a>
+   <a href="index.html" class="nav-cta">Jetzt bestellen &rarr;</a>
   </div>
   <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
    <span></span><span></span><span></span>
@@ -325,116 +277,207 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </nav>
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
- <a href="frakt.html">Frakt &amp; Leverans</a>
- <a href="retur.html">Retur &amp; Garanti</a>
- <a href="villkor.html">Allmänna villkor</a>
- <a href="integritet.html">Integritetspolicy</a>
- <a href="kontakt.html">Kundtjänst</a>
- <a href="index.html" class="nav-cta-mobile">Beställ nu &rarr;</a>
+ <a href="versand.html">Versand &amp; R&uuml;ckgabe</a>
+ <a href="sendungsverfolgung.html">Sendungsverfolgung</a>
+ <a href="agb.html">AGB</a>
+ <a href="datenschutz.html">Datenschutz</a>
+ <a href="kontakt.html">Kontakt</a>
+ <a href="index.html" class="nav-cta-mobile">Jetzt bestellen &rarr;</a>
 </div>
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">📦 Frakt &amp; Leverans</div>
- <h1>Frakt- och leveranspolicy</h1>
- <p>Allt om frakt, leveranstider och leverans</p>
+ <div class="badge">🔒 DSGVO</div>
+ <h1>Datenschutzerkl&auml;rung</h1>
+ <p>Wie wir mit Ihren personenbezogenen Daten umgehen — transparent und gesetzeskonform.</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="page-content">
 
  <div class="info-box">
-  <h3>📌 Sammanfattning</h3>
+  <h3>📌 Zusammenfassung</h3>
   <ul>
-   <li>Fri frakt till hela Sverige</li>
-   <li>Leveranstid: 5–10 arbetsdagar</li>
-   <li>Spårningskod via e-post efter utskick</li>
-   <li>Utskick inom 24–48 timmar efter betalning</li>
+   <li>Wir erheben nur Daten, die f&uuml;r Ihre Bestellung erforderlich sind</li>
+   <li>Keine Weitergabe an Dritte zu Marketingzwecken</li>
+   <li>Recht auf Auskunft, Berichtigung und L&ouml;schung</li>
+   <li>Cookies f&uuml;r Analyse und Werbung (Facebook Pixel)</li>
+   <li>Sichere Datenspeicherung</li>
   </ul>
  </div>
 
- <!-- Frakt -->
+ <!-- Artikel 1 -->
  <div class="section-block">
-  <h2><span class="icon">📦</span> Frakt</h2>
-  <p>Vi skickar alla beställningar från vårt lager i Europa. Efter att din betalning har mottagits behandlas och skickas din beställning inom <strong>24–48 timmar</strong>.</p>
+  <h2><span class="section-num">1</span> Verantwortlicher</h2>
+  <p><strong>Performance Marketing Solution s.r.o.</strong></p>
+  <p>Rybn&aacute; 716/24, 110 00 Prag 1, Tschechien</p>
+  <p>Handelsregister-Nr.: 06259928</p>
+  <p>E-Mail: <a href="mailto:buch@befreiungsbuch.de" style="color: var(--cta);">buch@befreiungsbuch.de</a></p>
+ </div>
 
-  <table class="delivery-table">
+ <div class="divider"></div>
+
+ <!-- Artikel 2 -->
+ <div class="section-block">
+  <h2><span class="section-num">2</span> Welche Daten erheben wir?</h2>
+  <p>Wir erheben folgende personenbezogene Daten, wenn Sie eine Bestellung aufgeben:</p>
+
+  <table class="data-table">
    <thead>
     <tr>
-     <th>Land</th>
-     <th>Leveranstid</th>
-     <th>Fraktkostnad</th>
+     <th>Angabe</th>
+     <th>Zweck</th>
+     <th>Speicherdauer</th>
     </tr>
    </thead>
    <tbody>
-    <tr><td>🇸🇪 Sverige</td><td>5–10 arbetsdagar</td><td><span class="free-tag">GRATIS</span></td></tr>
+    <tr><td>Name (Vor- und Nachname)</td><td>Versand &amp; Rechnungsstellung</td><td>7 Jahre (Steuer)</td></tr>
+    <tr><td>E-Mail-Adresse</td><td>Bestellbest&auml;tigung, Kundenservice</td><td>Bis zur Abmeldung</td></tr>
+    <tr><td>Telefonnummer</td><td>Versand (Zustellung)</td><td>30 Tage nach Lieferung</td></tr>
+    <tr><td>Adressdaten</td><td>Versand &amp; Rechnungsstellung</td><td>7 Jahre (Steuer)</td></tr>
+    <tr><td>Zahlungsdaten</td><td>Zahlungsabwicklung</td><td>Werden nicht gespeichert*</td></tr>
+    <tr><td>IP-Adresse</td><td>Betrugspr&auml;vention, Analyse</td><td>90 Tage</td></tr>
+   </tbody>
+  </table>
+
+  <p style="font-size: 14px; color: var(--muted);">* Zahlungsdaten werden von Stripe verarbeitet und nicht auf unseren Servern gespeichert.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Artikel 3 -->
+ <div class="section-block">
+  <h2><span class="section-num">3</span> Wof&uuml;r verwenden wir Ihre Daten?</h2>
+  <ul>
+   <li>Abwicklung und Lieferung Ihrer Bestellung</li>
+   <li>Versand von Bestellbest&auml;tigungen und Versandbenachrichtigungen</li>
+   <li>Kundenservice und Beantwortung Ihrer Anfragen</li>
+   <li>Gesetzliche Pflichten (Rechnungsstellung, Steuererkl&auml;rung)</li>
+   <li>Verbesserung unserer Website und unserer Dienstleistungen (Analyse)</li>
+   <li>E-Mail-Marketing (nur mit Ihrer ausdr&uuml;cklichen Einwilligung)</li>
+  </ul>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Artikel 4 -->
+ <div class="section-block">
+  <h2><span class="section-num">4</span> Cookies &amp; Tracking</h2>
+  <p>Unsere Website verwendet folgende Cookies und Tracking-Tools:</p>
+
+  <table class="data-table">
+   <thead>
+    <tr>
+     <th>Tool</th>
+     <th>Zweck</th>
+     <th>Typ</th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr><td>Facebook Pixel (Meta)</td><td>Anzeigenmessung &amp; Remarketing</td><td>Marketing</td></tr>
+    <tr><td>Stripe</td><td>Zahlungsabwicklung</td><td>Notwendig</td></tr>
+    <tr><td>Session-Cookie</td><td>Warenkorb merken</td><td>Funktional</td></tr>
    </tbody>
   </table>
 
   <div class="highlight-box">
-   <p><strong>Digitala produkter (e-böcker, PDF):</strong> Direkt efter betalning får du en nedladdningslänk via e-post. Ingen väntetid!</p>
+   <p><strong>Marketing-Cookies:</strong> Das Facebook Pixel wird nur gesetzt, wenn Sie &uuml;ber den Cookie-Hinweis zustimmen. Sie k&ouml;nnen Ihre Einwilligung jederzeit widerrufen.</p>
   </div>
  </div>
 
  <div class="divider"></div>
 
- <!-- Följ din beställning -->
+ <!-- Artikel 5 -->
  <div class="section-block">
-  <h2><span class="icon">📍</span> Följ din beställning</h2>
-  <p>Efter utskick får du ett e-postmeddelande med en <strong>spårningskod</strong>. Med den kan du följa ditt paket i realtid via transportörens webbplats.</p>
-  <p>Har du inte fått din spårningskod? Kontrollera din skräppost eller kontakta oss via <a href="mailto:devries@loslatenboek.nl" style="color: var(--cta);">devries@loslatenboek.nl</a>.</p>
+  <h2><span class="section-num">5</span> Weitergabe an Dritte</h2>
+  <p>Wir geben Ihre Daten ausschlie&szlig;lich an folgende Partner weiter, f&uuml;r die nachstehend genannten Zwecke:</p>
+  <ul>
+   <li><strong>Stripe</strong> — Zahlungsabwicklung</li>
+   <li><strong>Versandpartner (Dextrum)</strong> — Lieferung Ihrer Bestellung</li>
+   <li><strong>MailerLite</strong> — E-Mail-Marketing (nur mit Ihrer Einwilligung)</li>
+   <li><strong>Facebook (Meta)</strong> — Anzeigenmessung (via Pixel, mit Cookie-Einwilligung)</li>
+   <li><strong>Fakturoid</strong> — Rechnungsstellung und Buchhaltung</li>
+  </ul>
+  <p>Wir verkaufen Ihre Daten <strong>niemals</strong> an Dritte.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Skadat eller fel produkt -->
+ <!-- Artikel 6 -->
  <div class="section-block">
-  <h2><span class="icon">⚠️</span> Skadat eller fel produkt?</h2>
-  <p>Har du fått en skadad eller felaktig produkt? Kontakta oss direkt. Vi ordnar kostnadsfritt en ersättning eller full återbetalning.</p>
-  <p>Skicka ett foto på den skadade produkten till <a href="mailto:devries@loslatenboek.nl" style="color: var(--cta);">devries@loslatenboek.nl</a> tillsammans med ditt ordernummer.</p>
+  <h2><span class="section-num">6</span> Sicherheit</h2>
+  <p>Wir nehmen den Schutz Ihrer Daten ernst und treffen geeignete Ma&szlig;nahmen:</p>
+  <ul>
+   <li>SSL/TLS-Verschl&uuml;sselung auf allen Seiten</li>
+   <li>Sichere Datenspeicherung in EU-Rechenzentren</li>
+   <li>Eingeschr&auml;nkter Zugang zu personenbezogenen Daten (Need-to-know-Basis)</li>
+   <li>Regelm&auml;&szlig;ige Sicherheitsupdates</li>
+   <li>PCI-DSS-konforme Zahlungsabwicklung &uuml;ber Stripe</li>
+  </ul>
  </div>
 
  <div class="divider"></div>
 
- <!-- FAQ -->
+ <!-- Artikel 7 -->
  <div class="section-block">
-  <h2><span class="icon">❓</span> Vanliga frågor</h2>
+  <h2><span class="section-num">7</span> Ihre Rechte (DSGVO)</h2>
 
-  <div class="faq-item">
-   <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>När skickas min beställning?</h3>
-    <span class="faq-icon">+</span>
-   </div>
-   <div class="faq-answer">
-    <p>Beställningar behandlas och skickas inom 24–48 timmar efter betalning. Du får ett bekräftelsemail med spårningskod så snart ditt paket är på väg.</p>
-   </div>
+  <div class="rights-box">
+   <h3>Sie haben folgende Rechte:</h3>
+   <ul class="rights-list">
+    <li><span class="icon">👁</span> <strong>Auskunftsrecht</strong> — Sie k&ouml;nnen Auskunft dar&uuml;ber verlangen, welche Daten wir &uuml;ber Sie gespeichert haben</li>
+    <li><span class="icon">✏️</span> <strong>Berichtigungsrecht</strong> — Sie k&ouml;nnen die Korrektur fehlerhafter Daten verlangen</li>
+    <li><span class="icon">🗑</span> <strong>L&ouml;schungsrecht</strong> — Sie k&ouml;nnen die L&ouml;schung Ihrer Daten verlangen</li>
+    <li><span class="icon">📦</span> <strong>Daten&uuml;bertragbarkeit</strong> — Sie k&ouml;nnen eine Kopie Ihrer Daten anfordern</li>
+    <li><span class="icon">🚫</span> <strong>Widerspruchsrecht</strong> — Sie k&ouml;nnen der Verarbeitung Ihrer Daten widersprechen</li>
+    <li><span class="icon">⏸</span> <strong>Einschr&auml;nkung der Verarbeitung</strong> — Sie k&ouml;nnen die Einschr&auml;nkung der Verarbeitung verlangen</li>
+   </ul>
   </div>
 
-  <div class="faq-item">
-   <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Mitt paket har inte kommit fram. Vad gör jag?</h3>
-    <span class="faq-icon">+</span>
-   </div>
-   <div class="faq-answer">
-    <p>Kontrollera först spårningskoden i ditt bekräftelsemail. Om ditt paket har varit på väg i mer än 14 arbetsdagar (inom EU), kontakta oss. Vi utreder ärendet och ordnar vid behov en ny leverans.</p>
-   </div>
+  <p>Um Ihre Rechte auszu&uuml;ben, senden Sie eine E-Mail an <a href="mailto:buch@befreiungsbuch.de" style="color: var(--cta);">buch@befreiungsbuch.de</a>. Wir antworten innerhalb von 30 Tagen.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Artikel 8 -->
+ <div class="section-block">
+  <h2><span class="section-num">8</span> E-Mail-Marketing</h2>
+  <p>Wenn Sie sich f&uuml;r unseren Newsletter angemeldet oder an der Kasse Ihre Einwilligung erteilt haben, k&ouml;nnen Sie E-Mails von uns erhalten &uuml;ber:</p>
+  <ul>
+   <li>Neue B&uuml;cher und Produkte</li>
+   <li>Exklusive Angebote und Rabatte</li>
+   <li>Tipps und Inspiration rund um unsere B&uuml;cher</li>
+  </ul>
+  <p>Sie k&ouml;nnen sich jederzeit &uuml;ber den Link am Ende jeder E-Mail abmelden. Nach der Abmeldung entfernen wir Ihre E-Mail-Adresse aus unserer Marketingliste.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Artikel 9 -->
+ <div class="section-block">
+  <h2><span class="section-num">9</span> Aufsichtsbeh&ouml;rde</h2>
+  <p>Wenn Sie eine Beschwerde &uuml;ber die Verarbeitung Ihrer personenbezogenen Daten haben, k&ouml;nnen Sie sich an die Aufsichtsbeh&ouml;rde wenden:</p>
+  <div class="highlight-box">
+   <p><strong>Bundesbeauftragter f&uuml;r den Datenschutz und die Informationsfreiheit (BfDI)</strong><br>
+   Website: <a href="https://www.bfdi.bund.de" target="_blank" style="color: var(--cta);">bfdi.bund.de</a></p>
   </div>
-
-  <p style="margin-top: 16px;">För information om retur och garanti, se vår <a href="retur.html" style="color: var(--cta); font-weight: 600;">Retur- och garantipolicy</a>.</p>
+  <div class="highlight-box" style="margin-top: 12px;">
+   <p><strong>&Uacute;OO&Uacute; (Tschechien)</strong><br>
+   Website: <a href="https://www.uoou.cz" target="_blank" style="color: var(--cta);">uoou.cz</a></p>
+  </div>
  </div>
 
- <!-- Cross-link note -->
- <div class="cross-link-note">
-  <p>För information om retur och garanti, se vår <a href="retur.html">Retur- och garantipolicy</a>.</p>
+ <div class="divider"></div>
+
+ <!-- Artikel 10 -->
+ <div class="section-block">
+  <h2><span class="section-num">10</span> &Auml;nderungen</h2>
+  <p>Wir behalten uns das Recht vor, diese Datenschutzerkl&auml;rung zu &auml;ndern. Die aktuelle Version ist stets auf dieser Seite verf&uuml;gbar.</p>
  </div>
 
- <!-- Företagsuppgifter -->
- <div class="company-info">
-  <h3>🏢 Företagsuppgifter</h3>
-  <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, 110 00 Prag 1, Tjeckien</p>
-  <p>Org.nr: 06259928 | Moms: CZ06259928</p>
-  <p>E-post: <a href="mailto:devries@loslatenboek.nl" style="color: var(--cta);">devries@loslatenboek.nl</a></p>
+ <div class="info-box" style="margin-top: 48px; background: linear-gradient(135deg, var(--light), var(--section));">
+  <h3>📅 Zuletzt aktualisiert</h3>
+  <p>Zuletzt aktualisiert: 9. M&auml;rz 2026.</p>
  </div>
 
 </div>
@@ -443,36 +486,28 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <footer class="site-footer">
  <div class="footer-inner">
   <div class="footer-brand">
-   <img src="/slapp-taget-logo-white.png" alt="Släpp taget" class="footer-logo" width="210" height="56">
-   <div class="footer-brand-text">Släpp taget om det<br>som förstör dig</div>
+   <img src="/lass-los-white.png" alt="Lass los, was dich kaputt macht" height="48">
+   <div class="footer-brand-text">Lass los, was dich<br>kaputt macht</div>
   </div>
   <div class="footer-links">
-   <a href="frakt.html">Frakt &amp; Leverans</a>
-   <a href="retur.html">Retur &amp; Garanti</a>
-   <a href="villkor.html">Allmänna villkor</a>
-   <a href="integritet.html">Integritetspolicy</a>
-   <a href="kontakt.html">Kundtjänst</a>
+   <a href="agb.html">AGB</a>
+   <a href="versand.html">Versand &amp; R&uuml;ckgabe</a>
+   <a href="sendungsverfolgung.html">Sendungsverfolgung</a>
+   <a href="datenschutz.html">Datenschutz</a>
+   <a href="kontakt.html">Kontakt</a>
   </div>
   <div class="footer-contact">
-   <a href="mailto:devries@loslatenboek.nl">📧 devries@loslatenboek.nl</a>
+   <a href="mailto:buch@befreiungsbuch.de">📧 buch@befreiungsbuch.de</a>
    <a href="tel:+420732915755">📞 +420 732 915 755</a>
   </div>
  </div>
  <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, 110 00 Praha • Org.nr: 06259928 • Moms: CZ06259928</span>
-  <span>&copy; 2026 Performance Marketing Solution s.r.o. Alla rättigheter förbehållna.</span>
+  <span>Performance Marketing Solution s.r.o. • Rybn&aacute; 716/24, 110 00 Praha • Handelsregister-Nr.: 06259928</span>
+  <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle Rechte vorbehalten.</span>
  </div>
 </footer>
 
 <script>
-function toggleFaq(element) {
- var faqItem = element.closest('.faq-item');
- var isActive = faqItem.classList.contains('active');
- var allItems = document.querySelectorAll('.faq-item');
- allItems.forEach(function(item) { item.classList.remove('active'); });
- if (!isActive) { faqItem.classList.add('active'); }
-}
-
 function toggleMobileMenu() {
  document.querySelector('.nav-hamburger').classList.toggle('open');
  document.querySelector('.nav-mobile-menu').classList.toggle('open');
