@@ -494,6 +494,7 @@ function GatewaysTab() {
       billing_entity_id: gw.billing_entity_id || "",
       mode: gw.mode || "test",
       priority: gw.priority || 1,
+      supported_currencies: gw.supported_currencies || [],
       live_keys: gw.live_keys || { api_key: "", secret_key: "", webhook_secret: "" },
       test_keys: gw.test_keys || { api_key: "", secret_key: "", webhook_secret: "" },
       selected_methods: (gw.payment_methods || [])
@@ -988,6 +989,43 @@ function GatewaysTab() {
                         <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase", marginBottom: "4px", display: "block" }}>Project Slugs</label>
                         <input className="bp-input" style={inputStyle} value={editForm.project_slugs || ""} onChange={(e) => setEditForm({ ...editForm, project_slugs: e.target.value })} placeholder="loslatenboek, other-project (comma-separated)" />
                         <span style={{ fontSize: "11px", color: "#8C9196", marginTop: "2px", display: "block" }}>Leave empty to make available for all projects</span>
+                      </div>
+
+                      {/* Supported Currencies */}
+                      <div style={{ marginBottom: "12px" }}>
+                        <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase", marginBottom: "8px", display: "block" }}>Supported Currencies</label>
+                        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                          {SUPPORTED_CURRENCIES.map((c) => {
+                            const selected = (editForm.supported_currencies || []).includes(c)
+                            return (
+                              <button
+                                key={c}
+                                onClick={() => {
+                                  const current = editForm.supported_currencies || []
+                                  setEditForm({
+                                    ...editForm,
+                                    supported_currencies: selected
+                                      ? current.filter((x: string) => x !== c)
+                                      : [...current, c],
+                                  })
+                                }}
+                                style={{
+                                  padding: "4px 12px",
+                                  borderRadius: "16px",
+                                  fontSize: "12px",
+                                  fontWeight: 500,
+                                  cursor: "pointer",
+                                  border: selected ? "1px solid #008060" : "1px solid #E1E3E5",
+                                  background: selected ? "#D1FAE5" : "#FFF",
+                                  color: selected ? "#0D5740" : "#6D7175",
+                                  transition: "all 0.15s ease",
+                                }}
+                              >
+                                {c}
+                              </button>
+                            )
+                          })}
+                        </div>
                       </div>
 
                       {/* Payment Methods Selection */}
