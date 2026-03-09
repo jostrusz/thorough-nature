@@ -20,6 +20,10 @@ import { StAbandonedCheckout2Template, ST_ABANDONED_CHECKOUT_2, isStAbandonedChe
 import { StAbandonedCheckout3Template, ST_ABANDONED_CHECKOUT_3, isStAbandonedCheckout3Data } from './st-abandoned-checkout-3'
 import { StEbookDeliveryTemplate, ST_EBOOK_DELIVERY, isStEbookDeliveryData } from './st-ebook-delivery'
 import { StShipmentNotificationTemplate, ST_SHIPMENT_NOTIFICATION, isStShipmentNotificationData } from './st-shipment-notification'
+// Odpuść to, co cię niszczy (odpusc-ksiazka) templates
+import { OkAbandonedCheckout1Template, OK_ABANDONED_CHECKOUT_1, isOkAbandonedCheckout1Data } from './ok-abandoned-checkout-1'
+import { OkAbandonedCheckout2Template, OK_ABANDONED_CHECKOUT_2, isOkAbandonedCheckout2Data } from './ok-abandoned-checkout-2'
+import { OkAbandonedCheckout3Template, OK_ABANDONED_CHECKOUT_3, isOkAbandonedCheckout3Data } from './ok-abandoned-checkout-3'
 // Admin notification
 import { AdminOrderNotificationTemplate, ADMIN_ORDER_NOTIFICATION, isAdminOrderNotificationData } from './admin-order-notification'
 
@@ -45,6 +49,10 @@ export const EmailTemplates = {
   ST_ABANDONED_CHECKOUT_3,
   ST_EBOOK_DELIVERY,
   ST_SHIPMENT_NOTIFICATION,
+  // Odpuść to, co cię niszczy
+  OK_ABANDONED_CHECKOUT_1,
+  OK_ABANDONED_CHECKOUT_2,
+  OK_ABANDONED_CHECKOUT_3,
   // Admin notifications
   ADMIN_ORDER_NOTIFICATION,
 } as const
@@ -69,6 +77,13 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
     const allKeys = Object.values(EmailTemplates) as string[]
     if (allKeys.includes(stKey)) {
       return stKey
+    }
+  }
+  if (project === 'odpusc-ksiazka') {
+    const okKey = `ok-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(okKey)) {
+      return okKey
     }
   }
   return templateKey
@@ -241,6 +256,34 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <StShipmentNotificationTemplate {...data} />
 
+    // ── Odpuść to, co cię niszczy templates ────────────────────
+    case EmailTemplates.OK_ABANDONED_CHECKOUT_1:
+      if (!isOkAbandonedCheckout1Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.OK_ABANDONED_CHECKOUT_1}"`
+        )
+      }
+      return <OkAbandonedCheckout1Template {...data} />
+
+    case EmailTemplates.OK_ABANDONED_CHECKOUT_2:
+      if (!isOkAbandonedCheckout2Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.OK_ABANDONED_CHECKOUT_2}"`
+        )
+      }
+      return <OkAbandonedCheckout2Template {...data} />
+
+    case EmailTemplates.OK_ABANDONED_CHECKOUT_3:
+      if (!isOkAbandonedCheckout3Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.OK_ABANDONED_CHECKOUT_3}"`
+        )
+      }
+      return <OkAbandonedCheckout3Template {...data} />
+
     // ── Admin notification ───────────────────────────────────
     case EmailTemplates.ADMIN_ORDER_NOTIFICATION:
       if (!isAdminOrderNotificationData(data)) {
@@ -281,6 +324,10 @@ export {
   StAbandonedCheckout3Template,
   StEbookDeliveryTemplate,
   StShipmentNotificationTemplate,
+  // Odpuść to, co cię niszczy
+  OkAbandonedCheckout1Template,
+  OkAbandonedCheckout2Template,
+  OkAbandonedCheckout3Template,
   // Admin notification
   AdminOrderNotificationTemplate,
 }
