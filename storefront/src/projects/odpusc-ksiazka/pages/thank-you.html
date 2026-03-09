@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="pl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tack för din beställning!</title>
+  <title>Dziękujemy — Odpuść to, co cię niszczy</title>
   <link rel="icon" href="/favicon.png" type="image/png">
 
   <!-- Sdílená konfigurace projektu -->
@@ -455,7 +455,7 @@ body { background: var(--bg); }
 <!-- ═══ PRELOADER ═══ -->
 <div class="preloader" id="preloader">
  <div class="preloader-logo-container">
-  <img src="/slapp-taget-preloader.png" alt="Laddar...">
+  <img src="/odpusc-logo.png" alt="Ładowanie...">
  </div>
 </div>
 
@@ -471,9 +471,9 @@ body { background: var(--bg); }
     <div class="ty-check-circle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <div class="ty-eyebrow">&#x2705; Beställning bekräftad</div>
-    <h1 class="ty-title" id="ty-main-title">Tack för din <span class="accent">beställning!</span></h1>
-    <p class="ty-subtitle">Din beställning har genomförts. Vi förbereder och skickar ditt paket så snart som möjligt.</p>
+    <div class="ty-eyebrow">&#x2705; Zamówienie potwierdzone</div>
+    <h1 class="ty-title" id="ty-main-title">Dziękujemy za <span class="accent">zamówienie!</span></h1>
+    <p class="ty-subtitle">Twoje zamówienie zostało złożone. Przygotowujemy i wysyłamy Twoją paczkę najszybciej jak to możliwe.</p>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -482,8 +482,8 @@ body { background: var(--bg); }
   <div class="ty-address-alert ty-reveal ty-d1">
     <div class="ty-address-alert-icon">&#x26A0;&#xFE0F;</div>
     <div class="ty-address-alert-text">
-      <div class="ty-address-alert-title">Kontrollera dina leveransuppgifter</div>
-      <div class="ty-address-alert-desc">Vi vill skicka din beställning så snart som möjligt. Kontrollera nedan att din <strong>adress</strong>, <strong>e-postadress</strong> och ditt <strong>telefonnummer</strong> stämmer.</div>
+      <div class="ty-address-alert-title">Sprawdź dane dostawy</div>
+      <div class="ty-address-alert-desc">Chcemy wysłać Twoje zamówienie jak najszybciej. Sprawdź poniżej, czy Twój <strong>adres</strong>, <strong>e-mail</strong> i <strong>numer telefonu</strong> są prawidłowe.</div>
     </div>
   </div>
 
@@ -494,36 +494,36 @@ body { background: var(--bg); }
     <div class="ty-details-header">
       <div class="ty-details-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Dina uppgifter
+        Twoje dane
       </div>
       <button class="ty-edit-btn" id="ty-edit-toggle" onclick="toggleEditForm()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Ändra uppgifter
+        Edytuj dane
       </button>
     </div>
     <div class="ty-details-grid" id="ty-details-grid">
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Förnamn</div>
+        <div class="ty-detail-label">Imię</div>
         <div class="ty-detail-value" id="ty-show-firstname">—</div>
       </div>
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Efternamn</div>
+        <div class="ty-detail-label">Nazwisko</div>
         <div class="ty-detail-value" id="ty-show-lastname">—</div>
       </div>
       <div class="ty-detail-item">
-        <div class="ty-detail-label">E-postadress</div>
+        <div class="ty-detail-label">Adres e-mail</div>
         <div class="ty-detail-value" id="ty-show-email">—</div>
       </div>
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Telefonnummer</div>
+        <div class="ty-detail-label">Numer telefonu</div>
         <div class="ty-detail-value" id="ty-show-phone">—</div>
       </div>
       <div class="ty-detail-item ty-detail-full">
-        <div class="ty-detail-label">Leveransadress</div>
+        <div class="ty-detail-label">Adres dostawy</div>
         <div class="ty-detail-value" id="ty-show-address">—</div>
       </div>
       <div class="ty-detail-item ty-detail-full" id="ty-company-row" style="display:none;">
-        <div class="ty-detail-label">Företagsuppgifter</div>
+        <div class="ty-detail-label">Dane firmy</div>
         <div class="ty-detail-value" id="ty-show-company">—</div>
       </div>
     </div>
@@ -536,69 +536,69 @@ body { background: var(--bg); }
     <div class="ty-edit-form-inner">
       <div class="ty-edit-form-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Ändra uppgifter
+        Edytuj dane
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-firstname" placeholder=" ">
-          <label for="edit-firstname">Förnamn</label>
+          <label for="edit-firstname">Imię</label>
         </div>
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-lastname" placeholder=" ">
-          <label for="edit-lastname">Efternamn</label>
+          <label for="edit-lastname">Nazwisko</label>
         </div>
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field">
           <input type="email" id="edit-email" placeholder=" ">
-          <label for="edit-email">E-postadress</label>
+          <label for="edit-email">Adres e-mail</label>
         </div>
         <div class="ty-form-group ty-float-field">
           <input type="tel" id="edit-phone" placeholder=" ">
-          <label for="edit-phone">Telefonnummer</label>
+          <label for="edit-phone">Numer telefonu</label>
         </div>
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field full">
           <input type="text" id="edit-address" placeholder=" ">
-          <label for="edit-address">Adress</label>
+          <label for="edit-address">Adres</label>
         </div>
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-postal" placeholder=" ">
-          <label for="edit-postal">Postnummer</label>
+          <label for="edit-postal">Kod pocztowy</label>
         </div>
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-city" placeholder=" ">
-          <label for="edit-city">Stad</label>
+          <label for="edit-city">Miasto</label>
         </div>
       </div>
-      <!-- Firemní pole (B2B) -->
+      <!-- Dane firmy (B2B) -->
       <div id="ty-edit-company-section" style="display:none; margin-top:4px;">
-        <div style="font-size:12px;font-weight:600;color:#9B7AAD;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Företagsuppgifter</div>
+        <div style="font-size:12px;font-weight:600;color:#9B7AAD;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Dane firmy</div>
         <div class="ty-form-row">
           <div class="ty-form-group ty-float-field full">
             <input type="text" id="edit-company" placeholder=" ">
-            <label for="edit-company">Företagsnamn</label>
+            <label for="edit-company">Nazwa firmy</label>
           </div>
         </div>
         <div class="ty-form-row">
           <div class="ty-form-group ty-float-field">
             <input type="text" id="edit-kvk" placeholder=" ">
-            <label for="edit-kvk">Org.nummer</label>
+            <label for="edit-kvk">NIP</label>
           </div>
           <div class="ty-form-group ty-float-field">
             <input type="text" id="edit-vat" placeholder=" ">
-            <label for="edit-vat">Momsnummer</label>
+            <label for="edit-vat">Nr VAT</label>
           </div>
         </div>
       </div>
       <div class="ty-form-actions">
         <button class="ty-form-save" id="ty-save-btn" onclick="saveDetails()">
-          Spara
+          Zaktualizuj
         </button>
-        <button class="ty-form-cancel" onclick="toggleEditForm()">Avbryt</button>
+        <button class="ty-form-cancel" onclick="toggleEditForm()">Anuluj</button>
       </div>
     </div>
   </div>
@@ -613,40 +613,40 @@ body { background: var(--bg); }
        5. ORDER SUMMARY
        ═══════════════════════════════════════ -->
   <div class="ty-order-box ty-reveal ty-d3">
-    <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Din beställning</div>
+    <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Twoje zamówienie</div>
     <div class="ty-order-items" id="ty-order-items">
       <div class="ty-order-item">
         <div class="ty-order-icon book">&#x1F4D6;</div>
         <div>
-          <div class="ty-order-name">Släpp taget om det som förstör dig</div>
-          <div class="ty-order-desc">Fysisk bok &mdash; 270 sidor &mdash; levereras hem</div>
+          <div class="ty-order-name">Odpuść to, co cię niszczy</div>
+          <div class="ty-order-desc">Książka fizyczna &mdash; 270 stron &mdash; dostawa do domu</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ebook">&#x1F4F1;</div>
         <div>
-          <div class="ty-order-name">Kärlek utan nonsens</div>
-          <div class="ty-order-desc">Gratis e-bok &mdash; kolla din inkorg</div>
+          <div class="ty-order-name">Miłość bez bzdur</div>
+          <div class="ty-order-desc">Darmowy e-book &mdash; sprawdź swoją skrzynkę</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ebook">&#x1F4F1;</div>
         <div>
-          <div class="ty-order-name">Lösningen på överanalysering</div>
-          <div class="ty-order-desc">Gratis e-bok &mdash; kolla din inkorg</div>
+          <div class="ty-order-name">Rozwiązanie na nadmierne analizowanie</div>
+          <div class="ty-order-desc">Darmowy e-book &mdash; sprawdź swoją skrzynkę</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ship">&#x1F69A;</div>
         <div>
-          <div class="ty-order-name">Gratis frakt</div>
-          <div class="ty-order-desc">Leverans inom 3–5 arbetsdagar</div>
+          <div class="ty-order-name">Darmowa wysyłka</div>
+          <div class="ty-order-desc">Dostawa w ciągu 3–5 dni roboczych</div>
         </div>
       </div>
     </div>
     <div class="ty-order-total">
-      <span class="ty-order-total-label">Betalt</span>
-      <span class="ty-order-total-price" id="ty-total-price">399 kr</span>
+      <span class="ty-order-total-label">Razem</span>
+      <span class="ty-order-total-price" id="ty-total-price">99 zł</span>
     </div>
   </div>
 
@@ -656,35 +656,35 @@ body { background: var(--bg); }
   <div class="ty-support ty-reveal ty-d4">
     <div class="ty-support-icon">&#x1F4E9;</div>
     <div class="ty-support-text">
-      <div class="ty-support-title">Frågor eller problem?</div>
-      <div class="ty-support-desc">Har du hittat ett fel, har en fråga om din beställning eller stöter du på problem? Kontakta oss gärna &mdash; vi hjälper dig med glädje!</div>
+      <div class="ty-support-title">Pytania lub problemy?</div>
+      <div class="ty-support-desc">Znalazłeś błąd, masz pytanie dotyczące zamówienia lub napotkałeś problem? Skontaktuj się z nami &mdash; chętnie pomożemy!</div>
     </div>
-    <a href="mailto:support@slapptaget.se?subject=Fr%C3%A5ga%20om%20best%C3%A4llning%20%23&body=Hej%2C%0A%0AJag%20har%20en%20fr%C3%A5ga%20om%20min%20best%C3%A4llning.%0A%0AOrdernummer%3A%20%0A%0AMin%20fr%C3%A5ga%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Skicka oss ett e-postmeddelande</a>
+    <a href="mailto:support@odpusc-ksiazka.pl?subject=Pytanie%20o%20zam%C3%B3wienie%20%23&body=Cze%C5%9B%C4%87%2C%0A%0AMam%20pytanie%20dotycz%C4%85ce%20mojego%20zam%C3%B3wienia.%0A%0ANumer%20zam%C3%B3wienia%3A%20%0A%0AMoje%20pytanie%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Wyślij nam e-mail</a>
   </div>
 
   <!-- ═══════════════════════════════════════
        6. WHAT HAPPENS NOW — 3 stappen
        ═══════════════════════════════════════ -->
   <div class="ty-steps ty-reveal ty-d5">
-    <div class="ty-steps-title">Vad händer nu?</div>
+    <div class="ty-steps-title">Następne kroki</div>
     <div class="ty-steps-grid">
       <div class="ty-step">
         <div class="ty-step-num">1</div>
         <div class="ty-step-icon">&#x1F4E7;</div>
-        <div class="ty-step-title">Kolla din inkorg</div>
-        <div class="ty-step-desc">Inom 2 minuter får du ett bekräftelsemail med dina två gratis e-böcker att ladda ner.</div>
+        <div class="ty-step-title">Potwierdzenie zamówienia</div>
+        <div class="ty-step-desc">W ciągu 2 minut otrzymasz e-mail z potwierdzeniem i dwoma darmowymi e-bookami do pobrania.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">2</div>
         <div class="ty-step-icon">&#x1F4E6;</div>
-        <div class="ty-step-title">Boken på väg</div>
-        <div class="ty-step-desc">Din fysiska bok skickas inom 24 timmar. Du får en spårningslänk via e-post.</div>
+        <div class="ty-step-title">Powiadomienie o wysyłce</div>
+        <div class="ty-step-desc">Twoja książka zostanie wysłana w ciągu 24 godzin. Otrzymasz link do śledzenia przesyłki na e-mail.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">3</div>
         <div class="ty-step-icon">&#x1F680;</div>
-        <div class="ty-step-title">Börja släppa taget</div>
-        <div class="ty-step-desc">Börja redan idag med e-böckerna. När din bok kommer kan du starta med övningarna.</div>
+        <div class="ty-step-title">Dostawa</div>
+        <div class="ty-step-desc">Zacznij już dziś od e-booków. Gdy książka dotrze, możesz zacząć od ćwiczeń.</div>
       </div>
     </div>
   </div>
@@ -693,19 +693,19 @@ body { background: var(--bg); }
        7. SOCIAL PROOF
        ═══════════════════════════════════════ -->
   <div class="ty-reviews ty-reveal ty-d5">
-    <div class="ty-reviews-title">De har redan läst boken</div>
+    <div class="ty-reviews-title">Opinie klientów</div>
     <div class="ty-review-cards">
       <div class="ty-review">
         <div class="ty-review-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
-        <div class="ty-review-text">&ldquo;I flera år bar jag på en tyngd i bröstet. Den här boken visade mig att det var obearbetad skuld. Efter 3 veckor kände jag bokstavligen hur den smälte bort.&rdquo;</div>
-        <div class="ty-review-author">Anna L.</div>
-        <div class="ty-review-loc">Stockholm</div>
+        <div class="ty-review-text">&ldquo;Przez lata nosiłam w sobie ciężar. Ta książka pokazała mi, że to nieprzetworzone poczucie winy. Po 3 tygodniach poczułam, jak dosłownie się rozpuszcza.&rdquo;</div>
+        <div class="ty-review-author">Zofia K.</div>
+        <div class="ty-review-loc">Warszawa</div>
       </div>
       <div class="ty-review">
         <div class="ty-review-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
-        <div class="ty-review-text">&ldquo;Jag sov hela natten för första gången på flera år. Övningarna är så konkreta &mdash; inget flummigt utan riktiga steg. Mina barn märkte skillnaden redan efter en vecka.&rdquo;</div>
-        <div class="ty-review-author">Maria K.</div>
-        <div class="ty-review-loc">Göteborg</div>
+        <div class="ty-review-text">&ldquo;Po raz pierwszy od lat przespałam całą noc. Ćwiczenia są bardzo konkretne &mdash; żadnych ogólników, tylko realne kroki. Moje dzieci zauważyły różnicę już po tygodniu.&rdquo;</div>
+        <div class="ty-review-author">Anna P.</div>
+        <div class="ty-review-loc">Kraków</div>
       </div>
     </div>
   </div>
@@ -714,20 +714,20 @@ body { background: var(--bg); }
        8. SHARE
        ═══════════════════════════════════════ -->
   <div class="ty-share ty-reveal ty-d6">
-    <div class="ty-share-title">Känner du någon som också behöver detta?</div>
-    <div class="ty-share-desc">Dela den här sidan med en vän och hjälp henne också till en ny start.</div>
+    <div class="ty-share-title">Podziel się ze znajomymi</div>
+    <div class="ty-share-desc">Znasz kogoś, kto też tego potrzebuje? Podziel się tą stroną i pomóż również jemu.</div>
     <div class="ty-share-buttons">
-      <a href="https://wa.me/?text=Jag%20har%20just%20best%C3%A4llt%20Sl%C3%A4pp%20taget%20om%20det%20som%20f%C3%B6rst%C3%B6r%20dig%20och%20jag%20tror%20att%20du%20ocks%C3%A5%20beh%C3%B6ver%20den%20%F0%9F%92%9B" target="_blank" class="ty-share-btn wa">
+      <a href="https://wa.me/?text=W%C5%82a%C5%9Bnie%20zam%C3%B3wi%C5%82am%20ksi%C4%85%C5%BCk%C4%99%20Odpu%C5%9B%C4%87%20to%2C%20co%20ci%C4%99%20niszczy%20i%20my%C5%9Bl%C4%99%2C%20%C5%BCe%20Tobie%20te%C5%BC%20si%C4%99%20przyda%20%F0%9F%92%9B" target="_blank" class="ty-share-btn wa">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.67-1.413A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.312-.727-5.994-1.96l-.418-.312-2.774.84.893-2.89-.338-.44A9.958 9.958 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
         WhatsApp
       </a>
-      <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fslapptaget.se" target="_blank" class="ty-share-btn fb">
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fodpusc-ksiazka.pl" target="_blank" class="ty-share-btn fb">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
         Facebook
       </a>
-      <a href="mailto:?subject=Du%20m%C3%A5ste%20l%C3%A4sa%20den%20h%C3%A4r%20boken&body=Jag%20har%20just%20best%C3%A4llt%20Sl%C3%A4pp%20taget%20om%20det%20som%20f%C3%B6rst%C3%B6r%20dig" class="ty-share-btn mail">
+      <a href="mailto:?subject=Musisz%20przeczyta%C4%87%20t%C4%99%20ksi%C4%85%C5%BCk%C4%99&body=W%C5%82a%C5%9Bnie%20zam%C3%B3wi%C5%82am%20ksi%C4%85%C5%BCk%C4%99%20Odpu%C5%9B%C4%87%20to%2C%20co%20ci%C4%99%20niszczy" class="ty-share-btn mail">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
-        E-post
+        E-mail
       </a>
     </div>
   </div>
@@ -770,8 +770,8 @@ body { background: var(--bg); }
 
   // Mapování country kódů na názvy
   var countryNames = {
-    SE: 'Sverige', NO: 'Norge', DK: 'Danmark',
-    FI: 'Finland', DE: 'Tyskland',
+    PL: 'Polska', DE: 'Niemcy', CZ: 'Czechy',
+    SK: 'Słowacja', SE: 'Szwecja',
   };
 
   // ────────────────────────────────────────────────────
@@ -781,25 +781,25 @@ body { background: var(--bg); }
   // 2a. Personalizovaný heading
   var titleEl = document.getElementById('ty-main-title');
   if (titleEl && customer && customer.first_name) {
-    titleEl.innerHTML = 'Tack, <span class="accent">' + customer.first_name + '!</span>';
+    titleEl.innerHTML = 'Dziękujemy, <span class="accent">' + customer.first_name + '!</span>';
   }
 
   // 2b. Objednávkové číslo
   var orderLabelEl = document.getElementById('ty-order-label');
   if (orderLabelEl && displayId) {
-    orderLabelEl.textContent = '\uD83D\uDCE6 Beställning #' + displayId;
+    orderLabelEl.textContent = '\uD83D\uDCE6 Zamówienie #' + displayId;
   } else if (orderLabelEl && orderId) {
     var shortId = orderId.replace('order_', '').substring(0, 8).toUpperCase();
-    orderLabelEl.textContent = '\uD83D\uDCE6 Beställning #' + shortId;
+    orderLabelEl.textContent = '\uD83D\uDCE6 Zamówienie #' + shortId;
   }
 
   // 2c. Mailto link — doplň číslo objednávky
   var mailtoEl = document.getElementById('ty-support-mailto');
   if (mailtoEl) {
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
-    var subject = encodeURIComponent('Fråga om beställning #' + orderNum);
-    var body = encodeURIComponent('Hej,\n\nJag har en fråga om min beställning.\n\nOrdernummer: #' + orderNum + '\n\nMin fråga: ');
-    mailtoEl.href = 'mailto:support@slapptaget.se?subject=' + subject + '&body=' + body;
+    var subject = encodeURIComponent('Pytanie o zamówienie #' + orderNum);
+    var body = encodeURIComponent('Cześć,\n\nMam pytanie dotyczące mojego zamówienia.\n\nNumer zamówienia: #' + orderNum + '\n\nMoje pytanie: ');
+    mailtoEl.href = 'mailto:support@odpusc-ksiazka.pl?subject=' + subject + '&body=' + body;
   }
 
   // 2d. Celková cena — bere v potaz bundle, order bump a upsell
@@ -819,7 +819,7 @@ body { background: var(--bg); }
   }
   var totalPriceEl = document.getElementById('ty-total-price');
   if (totalPriceEl) {
-    totalPriceEl.textContent = totalPrice.toFixed(0) + ' kr';
+    totalPriceEl.textContent = totalPrice.toFixed(0) + ' zł';
   }
 
   // 2e. Aktualizuj hlavní položku s bundle qty
@@ -827,11 +827,11 @@ body { background: var(--bg); }
   if (orderItemsEl && bundleQty > 1) {
     var mainItemName = orderItemsEl.querySelector('.ty-order-name');
     if (mainItemName) {
-      mainItemName.textContent = bundleQty + '\u00D7 Släpp taget om det som förstör dig';
+      mainItemName.textContent = bundleQty + '\u00D7 Odpuść to, co cię niszczy';
     }
     var mainItemDesc = orderItemsEl.querySelector('.ty-order-desc');
     if (mainItemDesc) {
-      mainItemDesc.textContent = bundleQty + '\u00D7 fysisk bok \u2014 levereras hem';
+      mainItemDesc.textContent = bundleQty + '\u00D7 książka fizyczna \u2014 dostawa do domu';
     }
   }
 
@@ -839,7 +839,7 @@ body { background: var(--bg); }
   if (upsellPurchased || orderBumpActive) {
     if (orderItemsEl) {
       var upsellName = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.name) || 'Upsell Product';
-      var extraLabel = orderBumpActive ? 'Fysisk bok \u2014 tillagd vid beställning' : 'Fysisk bok \u2014 upsell-beställning';
+      var extraLabel = orderBumpActive ? 'Książka fizyczna \u2014 dodana przy zamówieniu' : 'Książka fizyczna \u2014 zamówienie upsell';
       var upsellItemHtml = '<div class="ty-order-item">' +
         '<div class="ty-order-icon book">\uD83D\uDCD6</div>' +
         '<div>' +
@@ -880,8 +880,8 @@ body { background: var(--bg); }
       if (companyRow && companyVal) {
         companyRow.style.display = '';
         var cParts = [companyData.company_name];
-        if (companyData.kvk_number) cParts.push('Org.nr: ' + companyData.kvk_number);
-        if (companyData.vat_number) cParts.push('Moms: ' + companyData.vat_number);
+        if (companyData.kvk_number) cParts.push('NIP: ' + companyData.kvk_number);
+        if (companyData.vat_number) cParts.push('VAT: ' + companyData.vat_number);
         companyVal.innerHTML = cParts.join('<br>');
       }
       // Ukaž company sekci v edit formuláři
@@ -948,13 +948,13 @@ body { background: var(--bg); }
 
     // Validace — alespoň email a jméno
     if (!newData.email || !newData.first_name) {
-      showFeedback('Fyll i åtminstone ditt förnamn och din e-postadress.', 'error');
+      showFeedback('Wypełnij przynajmniej imię i adres e-mail.', 'error');
       return;
     }
 
     // Loading stav
     btn.disabled = true;
-    btn.innerHTML = '<span class="btn-spinner"></span> Sparar...';
+    btn.innerHTML = '<span class="btn-spinner"></span> Zapisywanie...';
 
     // Aktualizuj lokální data ihned (pro lepší UX)
     customer = {
@@ -965,7 +965,7 @@ body { background: var(--bg); }
       address_1: newData.address_1,
       city: newData.city,
       postal_code: newData.postal_code,
-      country_code: customer ? customer.country_code : 'SE',
+      country_code: customer ? customer.country_code : 'PL',
     };
 
     // Aktualizuj localStorage
@@ -1033,20 +1033,20 @@ body { background: var(--bg); }
       } else {
         console.warn('TY: API vrátilo chybu:', data.message);
         // Data jsou uložená lokálně, ale API selhalo
-        finishSave(true, 'Uppgifter sparade lokalt. Kontakta oss om problemet kvarstår.');
+        finishSave(true, 'Dane zapisane lokalnie. Skontaktuj się z nami, jeśli problem będzie się powtarzał.');
       }
     })
     .catch(function(err) {
       console.error('TY: Chyba při API volání:', err);
       // Lokální data jsou uložená, API nedostupné
-      finishSave(true, 'Uppgifter sparade lokalt. Servern är för tillfället inte tillgänglig.');
+      finishSave(true, 'Dane zapisane lokalnie. Serwer jest chwilowo niedostępny.');
     });
   };
 
   function finishSave(success, customMessage) {
     var btn = document.getElementById('ty-save-btn');
     btn.disabled = false;
-    btn.innerHTML = 'Spara';
+    btn.innerHTML = 'Zaktualizuj';
 
     // Zavři formulář, ukaž kartu
     document.getElementById('ty-edit-form').classList.remove('is-open');
@@ -1054,9 +1054,9 @@ body { background: var(--bg); }
 
     // Ukáž feedback
     if (success) {
-      showFeedback(customMessage || 'Dina uppgifter har uppdaterats! Vi skickar ditt paket till rätt adress.', 'success');
+      showFeedback(customMessage || 'Twoje dane zostały zaktualizowane! Wysyłamy paczkę na właściwy adres.', 'success');
     } else {
-      showFeedback(customMessage || 'Något gick fel. Försök igen.', 'error');
+      showFeedback(customMessage || 'Coś poszło nie tak. Spróbuj ponownie.', 'error');
     }
   }
 
@@ -1101,11 +1101,11 @@ body { background: var(--bg); }
       content_ids: purchaseContentIds,
       contents: purchaseContentIds.map(function(id) { return { id: id, quantity: 1 }; }),
       value: totalPrice,
-      currency: PROJECT_CONFIG.mainProduct.currency || 'SEK',
+      currency: PROJECT_CONFIG.mainProduct.currency || 'PLN',
       num_items: purchaseNumItems,
       order_id: orderId
     }, purchaseUserData, { event_id: purchaseEventId });
-    console.log('TY: Purchase event (browser + CAPI) — ' + totalPrice + ' kr (' + purchaseNumItems + ' items) event_id=' + purchaseEventId);
+    console.log('TY: Purchase event (browser + CAPI) — ' + totalPrice + ' zł (' + purchaseNumItems + ' items) event_id=' + purchaseEventId);
   }
 
   // ────────────────────────────────────────────────────
