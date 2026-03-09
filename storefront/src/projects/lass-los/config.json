@@ -1,0 +1,48 @@
+{
+  "slug": "slapp-taget",
+  "name": "Släpp taget om det som förstör dig",
+  "domain": "slapptagetboken.se",
+  "locale": "sv",
+  "defaultCountry": "SE",
+  "salesChannelName": "Slapp Taget",
+  "medusaUrl": "",
+  "publishableApiKey": "",
+  "facebookPixelId": "",
+  "regions": {
+    "SE": ""
+  },
+  "mainProduct": {
+    "name": "Släpp taget om det som förstör dig",
+    "handle": "slapp-taget-om-det-som-forstor-dig",
+    "variantId": "",
+    "price": 399,
+    "currency": "SEK",
+    "thumbnail": ""
+  },
+  "upsellProduct": {
+    "name": "",
+    "handle": "",
+    "variantId": "",
+    "price": 0,
+    "originalPrice": 0,
+    "currency": "SEK"
+  },
+  "bundleOptions": [
+    { "qty": 1, "price": 399, "label": "1 bok", "save": 0 },
+    { "qty": 2, "price": 699, "label": "2 böcker", "save": 99 },
+    { "qty": 3, "price": 949, "label": "3 böcker", "save": 248 },
+    { "qty": 4, "price": 1199, "label": "4 böcker", "save": 397 }
+  ],
+  "mollieProfileId": "",
+  "paymentProviders": {},
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "thank-you": "thank-you.html",
+    "kontakt": "kontakt.html",
+    "integritet": "integritet.html",
+    "villkor": "villkor.html",
+    "frakt": "frakt.html",
+    "retur": "retur.html"
+  }
+}
