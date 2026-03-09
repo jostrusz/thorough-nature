@@ -1,0 +1,48 @@
+{
+  "slug": "odpusc-ksiazka",
+  "name": "Odpuść to, co cię niszczy",
+  "domain": "odpuscto.pl",
+  "locale": "pl",
+  "defaultCountry": "PL",
+  "salesChannelName": "Odpusc Ksiazka",
+  "medusaUrl": "",
+  "publishableApiKey": "",
+  "facebookPixelId": "",
+  "regions": {
+    "PL": ""
+  },
+  "mainProduct": {
+    "name": "Odpuść to, co cię niszczy",
+    "handle": "odpusc-to-co-cie-niszczy",
+    "variantId": "",
+    "price": 119,
+    "currency": "PLN",
+    "thumbnail": ""
+  },
+  "upsellProduct": {
+    "name": "",
+    "handle": "",
+    "variantId": "",
+    "price": 0,
+    "originalPrice": 0,
+    "currency": "PLN"
+  },
+  "bundleOptions": [
+    { "qty": 1, "price": 119, "label": "1 książka", "save": 0 },
+    { "qty": 2, "price": 199, "label": "2 książki", "save": 39 },
+    { "qty": 3, "price": 279, "label": "3 książki", "save": 78 },
+    { "qty": 4, "price": 359, "label": "4 książki", "save": 117 }
+  ],
+  "mollieProfileId": "",
+  "paymentProviders": {},
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "thank-you": "thank-you.html",
+    "kontakt": "kontakt.html",
+    "prywatnosc": "prywatnosc.html",
+    "regulamin": "regulamin.html",
+    "wysylka": "wysylka.html",
+    "zwroty": "zwroty.html"
+  }
+}

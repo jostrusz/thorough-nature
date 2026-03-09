@@ -52,6 +52,13 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 949,   // 949 kr incl. moms (save 248 kr)
     4: 1199,  // 1199 kr incl. moms (save 397 kr)
   },
+  // Odpusc Ksiazka — "Odpuść to, co cię niszczy"
+  "odpusc-to-co-cie-niszczy": {
+    1: 119,   // 119 zł incl. VAT (23%)
+    2: 199,   // 199 zł incl. VAT (save 39 zł)
+    3: 279,   // 279 zł incl. VAT (save 78 zł)
+    4: 359,   // 359 zł incl. VAT (save 117 zł)
+  },
 }
 
 type AddBundleToCartInput = {
