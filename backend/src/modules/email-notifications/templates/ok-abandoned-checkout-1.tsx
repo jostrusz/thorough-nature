@@ -223,8 +223,8 @@ export const OkAbandonedCheckout1Template: React.FC<OkAbandonedCheckout1Props> &
             margin: '2px 0 0',
           }}>
             Odpuść to, co cię niszczy &bull;{' '}
-            <Link href="mailto:support@odpusc-ksiazka.pl" style={{ color: colors.accent, textDecoration: 'underline' }}>
-              support@odpusc-ksiazka.pl
+            <Link href="mailto:biuro@odpusc-ksiazka.pl" style={{ color: colors.accent, textDecoration: 'underline' }}>
+              biuro@odpusc-ksiazka.pl
             </Link>
           </Text>
         </div>

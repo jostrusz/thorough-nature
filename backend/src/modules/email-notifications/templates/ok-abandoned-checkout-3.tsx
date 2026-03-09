@@ -311,8 +311,8 @@ export const OkAbandonedCheckout3Template: React.FC<OkAbandonedCheckout3Props> &
             fontStyle: 'italic' as const,
           }}>
             P.S. Masz pytania? Napisz do mnie osobiście na{' '}
-            <Link href="mailto:support@odpusc-ksiazka.pl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 600, fontStyle: 'normal' as const }}>
-              support@odpusc-ksiazka.pl
+            <Link href="mailto:biuro@odpusc-ksiazka.pl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 600, fontStyle: 'normal' as const }}>
+              biuro@odpusc-ksiazka.pl
             </Link>
             . Czytam i odpowiadam na każdą wiadomość osobiście.
           </Text>

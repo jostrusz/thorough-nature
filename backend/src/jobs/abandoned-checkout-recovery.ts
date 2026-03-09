@@ -348,10 +348,10 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
             to: cart.email,
             channel: "email",
             template: nextStepConfig.templateKey,
-            from: "Joris De Vries - Odpuść to, co cię niszczy <support@odpusc-ksiazka.pl>",
+            from: "Joris De Vries - Odpuść to, co cię niszczy <biuro@odpusc-ksiazka.pl>",
             data: {
               emailOptions: {
-                replyTo: "support@odpusc-ksiazka.pl",
+                replyTo: "biuro@odpusc-ksiazka.pl",
                 subject: nextStepConfig.subject(firstName),
               },
               firstName,
