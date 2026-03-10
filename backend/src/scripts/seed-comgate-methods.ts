@@ -27,11 +27,18 @@ export default async function seedComgateMethods({ container }: ExecArgs) {
   const gateway = gateways[0]
   logger.info(`[Seed] Found Comgate gateway: ${gateway.id} (${gateway.display_name})`)
 
-  // Delete existing payment methods for this gateway (clean slate)
-  if (gateway.payment_methods?.length > 0) {
-    logger.info(`[Seed] Removing ${gateway.payment_methods.length} existing payment methods...`)
+  // Idempotent: skip if methods already exist
+  const existingMethods = gateway.payment_methods || []
+  if (existingMethods.length >= 4) {
+    logger.info(`[Seed] Comgate already has ${existingMethods.length} payment methods. Skipping.`)
+    return
+  }
+
+  // Delete any partial methods (clean slate for re-seed)
+  if (existingMethods.length > 0) {
+    logger.info(`[Seed] Removing ${existingMethods.length} partial payment methods...`)
     await gatewayConfigService.deletePaymentMethodConfigs(
-      gateway.payment_methods.map((m: any) => m.id)
+      existingMethods.map((m: any) => m.id)
     )
   }
 
