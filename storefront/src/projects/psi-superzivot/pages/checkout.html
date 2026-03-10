@@ -1,28 +1,28 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="cs">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Afrekenen — De Hondenbijbel</title>
+<title>Pokladna — Psí superživot</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="/dehondenbijbel/images/preloader.webp" type="image/webp">
+<link rel="icon" href="/psisuperzivot/images/preloader.webp" type="image/webp">
 
-<!-- Prevent checkout flash on payment return — hide form immediately (CSS loaded in <style> below) -->
+<!-- Zabránění probliknutí checkoutu při návratu z platby — formulář se ihned skryje (CSS v <style> níže) -->
 <script>
 if (window.location.search.indexOf('payment_return=1') !== -1) {
   document.write('<style>.checkout-form,.content,.order-summary{display:none!important}</style>');
 }
 </script>
 
-<!-- Mollie Components (credit card) -->
+<!-- Mollie Components (platební karta) -->
 <script src="https://js.mollie.com/v1/mollie.js"></script>
 
-<!-- Google Fonts: Inter + Cabin -->
+<!-- Google Fonts: Inter + Cabin (písma) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Klarna Payments SDK (widget-based authorize flow) -->
+<!-- Klarna Payments SDK (autorizační flow přes widget) -->
 <script src="https://x.klarnacdn.net/kp/lib/v1/api.js" async></script>
 
 <!-- Airwallex Drop-in Element SDK -->
@@ -32,7 +32,7 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
 <script src="https://js.stripe.com/v3/" async></script>
 
 <style>
-/* ─── FONTS — loaded via Google Fonts (Inter + Cabin) ─── */
+/* ─── PÍSMA — načtená přes Google Fonts (Inter + Cabin) ─── */
 
 /* ─── PAYMENT PRELOADER (Mollie redirect + Klarna inline) ─── */
 .payment-preloader {
@@ -67,7 +67,7 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
   50%       { transform: scale(1.08); opacity: 1 }
 }
 
-/* ─── DESIGN TOKENS — De Hondenbijbel (consistent with landing page) ─── */
+/* ─── DESIGN TOKENS — Psí superživot (shodné s hlavní stránkou) ─── */
 :root {
   --bg: #FFFAF5;
   --heading: #1A1A1A;
@@ -559,7 +559,7 @@ body {
 .company-kvk-label { display: none; }
 .company-kvk-label.active { display: inline; }
 
-/* ─── BILLING ADDRESS (anders dan verzendadres) ─── */
+/* ─── FAKTURAČNÍ ADRESA (odlišná od doručovací adresy) ─── */
 .billing-toggle {
   display: flex; align-items: center; gap: 10px;
   margin-top: 16px; padding: 12px 16px;
@@ -1018,7 +1018,7 @@ body {
   height: 100%;
   object-fit: contain;
 }
-/* Mini-boek mockup */
+/* Mini-kniha mockup */
 .mini-book {
   width: 50px;
   height: 70px;
@@ -1121,7 +1121,7 @@ body {
   color: var(--cta);
 }
 
-/* Garantie box */
+/* Box se zárukou */
 .guarantee-box {
   margin-top: 18px;
   padding: 14px;
@@ -1339,7 +1339,7 @@ body {
   will-change: box-shadow;
   margin: 0 0 12px;
 }
-/* Label "Besteloverzicht" nad headerem */
+/* Label "Přehled objednávky" nad headerem */
 .msb-label {
   font-size: 9px;
   font-weight: 700;
@@ -1514,7 +1514,7 @@ body {
   text-align: right;
   margin-top: 2px;
 }
-/* Malý GLS badge v baru */
+/* Malý badge dopravce v baru */
 .msb-gls {
   display: inline-block;
   background: #003399;
@@ -1762,7 +1762,7 @@ body {
   padding-top: 16px;
 }
 
-/* Boek detail top */
+/* Detail knihy nahoře */
 .order-bump-detail-top {
   display: flex; gap: 16px; margin-bottom: 16px;
 }
@@ -1802,7 +1802,7 @@ body {
 .order-bump-description strong { color: var(--heading); }
 .ob-intro { font-size: 14px; line-height: 1.6; }
 
-/* 5 Pijlers grid */
+/* 5 Pilířů grid */
 .ob-pillars {
   background: var(--white); border: 1px solid var(--border);
   border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;
@@ -1829,7 +1829,7 @@ body {
 }
 .ob-pillar span { color: var(--body); font-size: 11px; }
 
-/* Wat je bereikt */
+/* Co dosáhneš */
 .ob-results {
   margin-bottom: 14px;
 }
@@ -2137,30 +2137,30 @@ body {
 
 <body>
 
-<!-- ═══ HEADER + BREADCRUMB ═══ -->
+<!-- ═══ HLAVIČKA + BREADCRUMB ═══ -->
 <div class="checkout-header">
-  <a href="/" class="checkout-logo">De Hondenbijbel</a>
+  <a href="/" class="checkout-logo">Psí superživot</a>
   <div class="breadcrumb">
     <span class="breadcrumb-step done">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
-      Winkelwagen
+      Košík
     </span>
     <span class="breadcrumb-sep">›</span>
-    <span class="breadcrumb-step active">Gegevens &amp; Betaling</span>
+    <span class="breadcrumb-step active">Údaje &amp; Platba</span>
     <span class="breadcrumb-sep">›</span>
-    <span class="breadcrumb-step">Bevestiging</span>
+    <span class="breadcrumb-step">Potvrzení</span>
   </div>
 </div>
 
 <!-- ═══ MAIN CHECKOUT ═══ -->
 <div class="checkout-page">
 
-  <!-- ═══ MOBILE STICKY SUMMARY BAR (sticky, jen mobil/tablet ≤880px) ═══ -->
+  <!-- ═══ MOBILNÍ STICKY PŘEHLED (sticky, jen mobil/tablet ≤880px) ═══ -->
   <div class="mobile-summary-bar" id="mobile-summary-bar">
     <!-- Label -->
     <div class="msb-label">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-      Besteloverzicht
+      Přehled objednávky
     </div>
     <!-- Header — vždy viditelný, klikací pro rozbalení -->
     <div class="msb-header" id="msb-header">
@@ -2168,12 +2168,12 @@ body {
         <!-- Obrázek produktu z Medusa admin -->
       </div>
       <div class="msb-info">
-        <div class="msb-title" id="msb-title">De Hondenbijbel</div>
-        <div class="msb-subtitle" id="msb-subtitle">Paperback · 1× boek</div>
+        <div class="msb-title" id="msb-title">Psí superživot</div>
+        <div class="msb-subtitle" id="msb-subtitle">Paperback · 1× kniha</div>
       </div>
       <div class="msb-price-col">
-        <div class="msb-price" id="msb-price">&euro;35,00</div>
-        <div class="msb-items-label" id="msb-items-label">Totaal</div>
+        <div class="msb-price" id="msb-price">550&nbsp;Kč</div>
+        <div class="msb-items-label" id="msb-items-label">Celkem</div>
       </div>
       <svg class="msb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
     </div>
@@ -2182,38 +2182,38 @@ body {
       <div class="msb-divider"></div>
       <!-- Hlavní produkt -->
       <div class="msb-line" id="msb-product-line">
-        <span class="msb-line-label" id="msb-product-name">De Hondenbijbel</span>
-        <span class="msb-line-val" id="msb-product-price">&euro;35,00</span>
+        <span class="msb-line-label" id="msb-product-name">Psí superživot</span>
+        <span class="msb-line-val" id="msb-product-price">550&nbsp;Kč</span>
       </div>
       <!-- Order bump (skrytý pokud není vybrán) -->
       <div class="msb-line bump" id="msb-bump-line" style="display:none;">
         <span class="msb-line-label" id="msb-bump-name">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Laat Los Wat Je Kapotmaakt
+          Odpusť to, co tě ničí
         </span>
-        <span class="msb-line-val" id="msb-bump-price">&euro;25,00</span>
+        <span class="msb-line-val" id="msb-bump-price">399&nbsp;Kč</span>
       </div>
       <!-- Mezisoučet -->
       <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(107,33,168,0.18);">
-        <span class="msb-line-label">Subtotaal (excl. BTW)</span>
-        <span class="msb-line-val" id="msb-subtotal">&euro;32,11</span>
+        <span class="msb-line-label">Mezisoučet</span>
+        <span class="msb-line-val" id="msb-subtotal">550&nbsp;Kč</span>
       </div>
-      <!-- BTW -->
+      <!-- DPH -->
       <div class="msb-line" id="msb-tax-line">
-        <span class="msb-line-label" id="msb-tax-label">BTW (9%)</span>
-        <span class="msb-line-val" id="msb-tax-val">&euro;2,89</span>
+        <span class="msb-line-label" id="msb-tax-label">DPH (0%)</span>
+        <span class="msb-line-val" id="msb-tax-val">0&nbsp;Kč</span>
       </div>
-      <!-- Verzending -->
+      <!-- Doprava -->
       <div class="msb-line shipping">
-        <span class="msb-line-label">Verzending <span class="msb-gls">GLS</span></span>
-        <span class="msb-line-val">Gratis</span>
+        <span class="msb-line-label">Doprava</span>
+        <span class="msb-line-val">Zdarma</span>
       </div>
-      <!-- Totaal -->
+      <!-- Celkem -->
       <div class="msb-line total-line">
-        <span class="msb-line-label">Totaal</span>
-        <span class="msb-line-val" id="msb-total">&euro;35,00</span>
+        <span class="msb-line-label">Celkem</span>
+        <span class="msb-line-val" id="msb-total">550&nbsp;Kč</span>
       </div>
-      <div class="msb-tax-note">Inclusief BTW</div>
+      <div class="msb-tax-note">Včetně DPH</div>
     </div>
   </div>
 
@@ -2224,9 +2224,9 @@ body {
 
       <form id="checkout-form" novalidate>
 
-        <!-- ═══ EXPRESS CHECKOUT (dynamic — PayPal, Google Pay, Apple Pay) ═══ -->
+        <!-- ═══ EXPRESNÍ POKLADNA (dynamická — PayPal, Google Pay, Apple Pay) ═══ -->
         <div class="express-checkout animate-in" id="express-checkout" style="display:none;">
-          <div class="express-checkout-label">Snel afrekenen</div>
+          <div class="express-checkout-label">Rychlá platba</div>
           <div class="express-buttons-top" id="express-buttons-top">
             <!-- Google Pay / Apple Pay — side by side -->
           </div>
@@ -2234,15 +2234,15 @@ body {
             <!-- PayPal — full width -->
           </div>
           <div class="express-checkout-divider">
-            <span>of</span>
+            <span>nebo</span>
           </div>
         </div>
 
-        <!-- ═══ BUNDLE SELECTOR — nad formulářem ═══ -->
+        <!-- ═══ VÝBĚR MNOŽSTVÍ — nad formulářem ═══ -->
         <div class="bundle-section animate-in" id="bundle-section">
           <div class="bundle-section-title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-            Kies je aantal
+            Vyberte počet kusů
           </div>
           <div class="bundle-options" id="bundle-options">
             <!-- Dynamicky generováno z JS -->
@@ -2261,18 +2261,18 @@ body {
             </div>
             <div class="order-bump-header-text">
               <div class="order-bump-top-row">
-                <div class="order-bump-tag">Eenmalig aanbod</div>
+                <div class="order-bump-tag">Jednorázová nabídka</div>
                 <div class="order-bump-save-tag" id="order-bump-pct-tag">-29%</div>
               </div>
-              <div class="order-bump-title">Voeg <em id="order-bump-title-name">Laat Los Wat Je Kapotmaakt</em> toe</div>
+              <div class="order-bump-title">Přidejte <em id="order-bump-title-name">Odpusť to, co tě ničí</em></div>
               <div class="order-bump-prices-inline">
-                <span class="order-bump-old-price" id="order-bump-old-price">&euro;35,00</span>
-                <span class="order-bump-new-price" id="order-bump-new-price">&euro;25,00</span>
-                <span class="order-bump-inline-save" id="order-bump-inline-save">Bespaar &euro;10</span>
+                <span class="order-bump-old-price" id="order-bump-old-price">549&nbsp;Kč</span>
+                <span class="order-bump-new-price" id="order-bump-new-price">399&nbsp;Kč</span>
+                <span class="order-bump-inline-save" id="order-bump-inline-save">Ušetříte 150&nbsp;Kč</span>
               </div>
             </div>
-            <button type="button" class="order-bump-expand" id="order-bump-expand-btn" aria-expanded="false" aria-label="Meer informatie">
-              <span class="expand-label">Meer info</span>
+            <button type="button" class="order-bump-expand" id="order-bump-expand-btn" aria-expanded="false" aria-label="Více informací">
+              <span class="expand-label">Více info</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><path d="M6 9l6 6 6-6"/></svg>
             </button>
           </div>
@@ -2281,78 +2281,78 @@ body {
           <div class="order-bump-detail" id="order-bump-detail">
             <div class="order-bump-detail-inner">
 
-              <!-- Boek info + obrázek -->
+              <!-- Kniha info + obrázek -->
               <div class="order-bump-detail-top">
                 <div class="order-bump-img" id="order-bump-img">
                   <!-- Obrázek z Medusa admin -->
                 </div>
                 <div class="order-bump-detail-info">
-                  <div class="order-bump-name" id="order-bump-name">Laat Los Wat Je Kapotmaakt</div>
+                  <div class="order-bump-name" id="order-bump-name">Odpusť to, co tě ničí</div>
                   <div class="order-bump-author">Joris de Vries</div>
                   <div class="order-bump-meta">
-                    <span>&#128214; 290 pagina&rsquo;s + werkboek</span>
-                    <span>&#127891; Therapeut &amp; coach</span>
-                    <span>&#11088; 9.2/10 klanttevredenheid</span>
+                    <span>&#128214; 290 stran + pracovní sešit</span>
+                    <span>&#127891; Terapeut &amp; kouč</span>
+                    <span>&#11088; 9,2/10 spokojenost zákazníků</span>
                   </div>
                   <div class="order-bump-prices">
-                    <span class="order-bump-old-price" id="order-bump-detail-old">&euro;35,00</span>
-                    <span class="order-bump-new-price" id="order-bump-detail-new">&euro;25,00</span>
-                    <span class="order-bump-save" id="order-bump-detail-save">Bespaar &euro;10</span>
+                    <span class="order-bump-old-price" id="order-bump-detail-old">549&nbsp;Kč</span>
+                    <span class="order-bump-new-price" id="order-bump-detail-new">399&nbsp;Kč</span>
+                    <span class="order-bump-save" id="order-bump-detail-save">Ušetříte 150&nbsp;Kč</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Intro -->
+              <!-- Úvod -->
               <div class="order-bump-description">
-                <p class="ob-intro"><strong>Ben je moe van het vechten met je gedachten?</strong> Ontdek de methode die helpt om de stortvloed aan gedachten te stoppen en <u>innerlijke rust</u> te vinden.</p>
-                <p>Als je moe bent van het vasthouden aan pijn &mdash; een <strong>gebroken hart</strong>, schuldgevoel, of woede die je gevangen houdt &mdash; biedt dit boek je de tools, inzichten en de verlichting waar je al zo lang naar verlangt. <em>Zonder zelfdestructieve gewoontes of te doen alsof alles goed gaat.</em></p>
+                <p class="ob-intro"><strong>Unavuje vás nekonečný boj s vlastními myšlenkami?</strong> Objevte metodu, která vám pomůže zastavit příval myšlenek a najít <u>vnitřní klid</u>.</p>
+                <p>Pokud vás unavuje držet se bolesti &mdash; <strong>zlomené srdce</strong>, pocit viny nebo hněv, který vás svazuje &mdash; tato kniha vám nabídne nástroje, poznatky a úlevu, po které tak dlouho toužíte. <em>Bez sebezničujících návyků a bez předstírání, že je vše v pořádku.</em></p>
               </div>
 
-              <!-- Kernpunten -->
+              <!-- Klíčové body -->
               <div class="ob-pillars">
-                <div class="ob-pillars-title">Dit boek helpt je met</div>
+                <div class="ob-pillars-title">Tato kniha vám pomůže s</div>
                 <div class="ob-pillar-grid">
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#129504;</span>
-                    <div><strong>PIEKEREN</strong><span>Stop de eindeloze gedachtenlus &mdash; ook om 3 uur &rsquo;s nachts</span></div>
+                    <div><strong>PŘEMÝŠLENÍ</strong><span>Zastavte nekonečnou smyčku myšlenek &mdash; i ve 3 hodiny ráno</span></div>
                   </div>
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#128148;</span>
-                    <div><strong>LOSLATEN</strong><span>De pijn van een break-up, verraad of verlies verwerken</span></div>
+                    <div><strong>PUŠTĚNÍ</strong><span>Zpracujte bolest z rozchodu, zrady nebo ztráty</span></div>
                   </div>
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#128155;</span>
-                    <div><strong>VERGEVEN</strong><span>Stoppen met jezelf straffen voor het verleden</span></div>
+                    <div><strong>ODPUŠTĚNÍ</strong><span>Přestaňte se trestat za minulost</span></div>
                   </div>
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#128293;</span>
-                    <div><strong>WOEDE</strong><span>Oude wrok loslaten die je vanbinnen opvreet</span></div>
+                    <div><strong>HNĚV</strong><span>Pusťte starou zášť, která vás zevnitř ničí</span></div>
                   </div>
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#127793;</span>
-                    <div><strong>RUST</strong><span>Innerlijke stilte vinden &mdash; je geest wordt weer een plek van vrede</span></div>
+                    <div><strong>KLID</strong><span>Najděte vnitřní ticho &mdash; vaše mysl se opět stane místem míru</span></div>
                   </div>
                 </div>
               </div>
 
-              <!-- Wat je bereikt -->
+              <!-- Co dosáhneš -->
               <div class="ob-results">
-                <div class="ob-results-title">Na het lezen zul je&hellip;</div>
+                <div class="ob-results-title">Po přečtení budete&hellip;</div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>De piekerspiraal doorbreken en weer slapen zonder malen</span>
+                  <span>Prolomit spirálu přemýšlení a znovu spát bez nekonečného přemítání</span>
                 </div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Schuldgevoel en schaamte loslaten &mdash; jezelf eindelijk vergeven</span>
+                  <span>Pustit pocity viny a studu &mdash; konečně si odpustit</span>
                 </div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Weer vrij ademen &mdash; minder stress, meer lichtheid</span>
+                  <span>Znovu volně dýchat &mdash; méně stresu, více lehkosti</span>
                 </div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Stoppen met leven in het verleden en de weg terug naar jezelf vinden</span>
+                  <span>Přestat žít v minulosti a najít cestu zpět k sobě</span>
                 </div>
               </div>
 
@@ -2360,15 +2360,15 @@ body {
               <div class="ob-combo-box">
                 <div class="ob-combo-icon">&#128218;</div>
                 <div class="ob-combo-text">
-                  <strong>Samen met <em>De Hondenbijbel</em> heb je het complete pakket:</strong> een gelukkige hond &eacute;n een rustig hoofd. 92% van de lezers voelt al binnen de eerste maand echte verandering.
+                  <strong>Společně s knihou <em>Psí superživot</em> máte kompletní balíček:</strong> šťastný pes a klidná hlava. 92 % čtenářů pocítí skutečnou změnu už během prvního měsíce.
                 </div>
               </div>
 
               <!-- Social proof mini -->
               <div class="ob-social-proof">
                 <span>&#11088;&#11088;&#11088;&#11088;&#11088;</span>
-                <span>&ldquo;Ik dacht dat ik nooit van het piekeren af zou komen. Binnen een week voelde ik me al lichter. Dit boek is een keerpunt.&rdquo;</span>
-                <span class="ob-reviewer">&mdash; Sophie V., Amsterdam</span>
+                <span>&ldquo;Myslela jsem, že se nekonečného přemýšlení nikdy nezbavím. Už po týdnu jsem se cítila lehčeji. Tato kniha je zlomový bod.&rdquo;</span>
+                <span class="ob-reviewer">&mdash; Sophie V., Praha</span>
               </div>
 
             </div>
@@ -2379,82 +2379,81 @@ body {
         <div class="checkout-card animate-in">
           <div class="smart-fill-banner">
             <span class="smart-fill-icon">⚡</span>
-            <span class="smart-fill-text"><strong>Snel invullen</strong> — we vullen je gegevens automatisch aan</span>
+            <span class="smart-fill-text"><strong>Rychlé vyplnění</strong> — vaše údaje doplníme automaticky</span>
           </div>
           <div class="section-header">
             <div class="section-number">1</div>
-            <h2 class="section-title">Contact</h2>
+            <h2 class="section-title">Kontakt</h2>
           </div>
 
           <div class="float-field form-group">
             <input type="email" id="email" name="email" placeholder=" " required autocomplete="email">
-            <label for="email">E-mailadres</label>
+            <label for="email">E-mailová adresa</label>
             <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-            <div class="field-error">Vul een geldig e-mailadres in</div>
+            <div class="field-error">Zadejte platnou e-mailovou adresu</div>
             <div class="email-suggestion" id="email-suggestion"></div>
             <div class="foxentry-dropdown" id="foxentry-email-dropdown"></div>
           </div>
 
           <div class="float-field form-group" style="margin-bottom:0;">
             <input type="tel" id="phone" name="phone" placeholder=" " required autocomplete="tel">
-            <label for="phone">Telefoonnummer</label>
+            <label for="phone">Telefonní číslo</label>
             <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-            <div class="field-error">Vul een geldig telefoonnummer in</div>
+            <div class="field-error">Zadejte platné telefonní číslo</div>
             <div class="phone-preview" id="phone-preview"></div>
             <div class="phone-warning" id="phone-warning">
-              <div class="phone-warning-text">⚠ Dit nummer lijkt niet geldig. Controleer of het correct is.</div>
+              <div class="phone-warning-text">⚠ Toto číslo se nezdá být platné. Zkontrolujte, zda je správné.</div>
               <div class="phone-warning-actions">
-                <button type="button" class="phone-warning-confirm" id="phone-warning-confirm">Ja, dit klopt</button>
-                <button type="button" class="phone-warning-edit" id="phone-warning-edit">Aanpassen</button>
+                <button type="button" class="phone-warning-confirm" id="phone-warning-confirm">Ano, je správné</button>
+                <button type="button" class="phone-warning-edit" id="phone-warning-edit">Upravit</button>
               </div>
             </div>
           </div>
 
         </div>
 
-        <!-- ═══ SEKCE 2: VERZENDADRES ═══ -->
+        <!-- ═══ SEKCE 2: DORUČOVACÍ ADRESA ═══ -->
         <div class="checkout-card animate-in animate-in-delay-1">
           <div class="section-header">
             <div class="section-number">2</div>
-            <h2 class="section-title">Verzendadres</h2>
+            <h2 class="section-title">Doručovací adresa</h2>
           </div>
 
-          <!-- Land (první — Shopify styl) -->
+          <!-- Země (první — Shopify styl) -->
           <div class="float-field form-group has-value">
             <select id="country" name="country" required autocomplete="country">
-              <option value="NL" selected>🇳🇱 Nederland</option>
-              <option value="BE">🇧🇪 Belgi&euml;</option>
+              <option value="CZ" selected>🇨🇿 Česká republika</option>
             </select>
-            <label for="country">Land / regio</label>
+            <label for="country">Země</label>
           </div>
 
           <!-- Jméno + Příjmení -->
           <div class="form-row">
             <div class="float-field form-group">
               <input type="text" id="first_name" name="first_name" placeholder=" " required autocomplete="given-name">
-              <label for="first_name">Voornaam</label>
+              <label for="first_name">Jméno</label>
               <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
               <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              <div class="field-error">Vul je voornaam in</div>
+              <div class="field-error">Zadejte své jméno</div>
             </div>
             <div class="float-field form-group">
               <input type="text" id="last_name" name="last_name" placeholder=" " required autocomplete="family-name">
-              <label for="last_name">Achternaam</label>
+              <label for="last_name">Příjmení</label>
               <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
               <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              <div class="field-error">Vul je achternaam in</div>
+              <div class="field-error">Zadejte své příjmení</div>
             </div>
           </div>
 
           <!-- Adresa -->
           <div class="float-field form-group">
             <input type="text" id="address" name="address" placeholder=" " required autocomplete="street-address">
-            <label for="address">Straatnaam en huisnummer</label>
+            <label for="address">Ulice a číslo popisné</label>
             <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-            <div class="field-error">Vul je adres in</div>
+            <div class="field-error">Zadejte svou adresu</div>
             <div class="field-warning" id="address-warning">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 9v4"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
               <span id="address-warning-text"></span>
@@ -2467,17 +2466,17 @@ body {
           <div class="form-row">
             <div class="float-field form-group">
               <input type="text" id="city" name="city" placeholder=" " required autocomplete="address-level2">
-              <label for="city">Stad</label>
+              <label for="city">Město</label>
               <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
               <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              <div class="field-error">Vul je stad in</div>
+              <div class="field-error">Zadejte své město</div>
             </div>
             <div class="float-field form-group">
               <input type="text" id="postal_code" name="postal_code" placeholder=" " required autocomplete="postal-code">
-              <label for="postal_code">Postcode</label>
+              <label for="postal_code">PSČ</label>
               <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
               <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              <div class="field-error">Vul je postcode in</div>
+              <div class="field-error">Zadejte své PSČ</div>
             </div>
           </div>
 
@@ -2486,134 +2485,133 @@ body {
             <input type="checkbox" id="company-checkbox">
             <span class="company-toggle-label">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9h1"/><path d="M9 13h1"/><path d="M9 17h1"/></svg>
-              Ik bestel namens een bedrijf
+              Objednávám na firmu
             </span>
           </label>
 
           <div class="company-fields" id="company-fields">
             <div class="float-field form-group" style="position:relative;">
               <input type="text" id="company_name" name="company_name" placeholder=" " autocomplete="organization">
-              <label for="company_name">Bedrijfsnaam</label>
+              <label for="company_name">Název firmy</label>
               <!-- Foxentry company autocomplete dropdown -->
               <div class="foxentry-dropdown" id="foxentry-company-dropdown"></div>
             </div>
             <div class="float-field form-group">
               <input type="text" id="kvk_number" name="kvk_number" placeholder=" ">
               <label for="kvk_number">
-                <span class="company-kvk-label active" id="kvk-label-nl">KVK-nummer</span>
-                <span class="company-kvk-label" id="kvk-label-be">Ondernemingsnummer</span>
+                <span class="company-kvk-label active" id="kvk-label-nl">IČO</span>
+                <span class="company-kvk-label" id="kvk-label-be">IČO</span>
               </label>
             </div>
             <div class="float-field form-group">
               <input type="text" id="vat_number" name="vat_number" placeholder=" ">
-              <label for="vat_number">BTW-nummer (optioneel)</label>
+              <label for="vat_number">DIČ (volitelné)</label>
             </div>
           </div>
 
-          <!-- Factuuradres (billing address) — anders dan verzendadres -->
+          <!-- Fakturační adresa — odlišná od doručovací adresy -->
           <label class="billing-toggle" for="billing-checkbox">
             <input type="checkbox" id="billing-checkbox">
             <span class="billing-toggle-label">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-              Mijn factuuradres is anders
+              Mám jinou fakturační adresu
             </span>
           </label>
 
           <div class="billing-fields" id="billing-fields">
             <div class="float-field form-group">
               <input type="text" id="billing_first_name" name="billing_first_name" placeholder=" " autocomplete="billing given-name">
-              <label for="billing_first_name">Voornaam</label>
+              <label for="billing_first_name">Jméno</label>
             </div>
             <div class="float-field form-group">
               <input type="text" id="billing_last_name" name="billing_last_name" placeholder=" " autocomplete="billing family-name">
-              <label for="billing_last_name">Achternaam</label>
+              <label for="billing_last_name">Příjmení</label>
             </div>
             <div class="float-field form-group">
               <input type="text" id="billing_address" name="billing_address" placeholder=" " autocomplete="billing address-line1">
-              <label for="billing_address">Straat en huisnummer</label>
+              <label for="billing_address">Ulice a číslo popisné</label>
             </div>
             <div class="form-row">
               <div class="float-field form-group">
                 <input type="text" id="billing_city" name="billing_city" placeholder=" " autocomplete="billing address-level2">
-                <label for="billing_city">Stad</label>
+                <label for="billing_city">Město</label>
               </div>
               <div class="float-field form-group">
                 <input type="text" id="billing_postal_code" name="billing_postal_code" placeholder=" " autocomplete="billing postal-code">
-                <label for="billing_postal_code">Postcode</label>
+                <label for="billing_postal_code">PSČ</label>
               </div>
             </div>
             <div class="float-field form-group has-value">
               <select id="billing_country" name="billing_country" autocomplete="billing country">
-                <option value="NL" selected>🇳🇱 Nederland</option>
-                <option value="BE">🇧🇪 Belgi&euml;</option>
+                <option value="CZ" selected>🇨🇿 Česká republika</option>
               </select>
-              <label for="billing_country">Land</label>
+              <label for="billing_country">Země</label>
             </div>
           </div>
 
-          <!-- GLS Gratis verzending info -->
+          <!-- Doprava zdarma info -->
           <div id="shipping-info" style="display:flex;align-items:center;gap:10px;margin-top:16px;padding:12px 16px;background:#f0faf4;border:1px solid #b8e6c8;border-radius:10px;">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjE1Ij48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="flex-shrink:0;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2" stroke-linecap="round" width="24" height="24"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
             <div style="flex:1;">
-              <span style="font-weight:600;color:#1a1a2e;font-size:14px;">Gratis verzending</span>
-              <span style="color:#27AE60;font-weight:700;font-size:14px;margin-left:6px;">€0,00</span>
-              <div style="color:#666;font-size:12px;margin-top:2px;">Verzonden binnen 24 uur via GLS</div>
+              <span style="font-weight:600;color:#1a1a2e;font-size:14px;">Doprava zdarma</span>
+              <span style="color:#27AE60;font-weight:700;font-size:14px;margin-left:6px;">0 Kč</span>
+              <div style="color:#666;font-size:12px;margin-top:2px;">Odesláno do 24 hodin po celé ČR</div>
             </div>
             <svg viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2.5" stroke-linecap="round" width="20" height="20"><path d="M20 6L9 17l-5-5"/></svg>
           </div>
 
         </div>
 
-        <!-- ═══ PROMO KÓDY ═══ -->
+        <!-- ═══ SLEVOVÉ KÓDY ═══ -->
         <div class="checkout-card animate-in animate-in-delay-2" style="padding: 16px 20px;">
           <div class="promo-section">
             <button type="button" class="promo-toggle" id="promo-toggle">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
-              Heb je een kortingscode?
+              Máte slevový kód?
             </button>
             <div class="promo-form" id="promo-form">
               <div class="promo-input-row">
-                <input type="text" class="promo-input" id="promo-input" placeholder="Voer je code in" maxlength="30" autocomplete="off">
-                <button type="button" class="promo-apply-btn" id="promo-apply-btn">Toepassen</button>
+                <input type="text" class="promo-input" id="promo-input" placeholder="Zadejte kód" maxlength="30" autocomplete="off">
+                <button type="button" class="promo-apply-btn" id="promo-apply-btn">Použít</button>
               </div>
               <div class="promo-message" id="promo-message"></div>
             </div>
             <div class="promo-applied" id="promo-applied">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><path d="M20 6L9 17l-5-5"/></svg>
-              <span>Korting: <span class="promo-code-tag" id="promo-code-tag"></span></span>
-              <button type="button" class="promo-remove" id="promo-remove">Verwijderen</button>
+              <span>Sleva: <span class="promo-code-tag" id="promo-code-tag"></span></span>
+              <button type="button" class="promo-remove" id="promo-remove">Odstranit</button>
             </div>
           </div>
         </div>
 
-        <!-- ═══ SEKCE 3: BETAALMETHODE ═══ -->
+        <!-- ═══ SEKCE 3: PLATEBNÍ METODA ═══ -->
         <div class="checkout-card animate-in animate-in-delay-2" style="border-radius:0;">
           <div class="section-header">
             <div class="section-number">3</div>
-            <h2 class="section-title">Betaalmethode</h2>
+            <h2 class="section-title">Způsob platby</h2>
           </div>
 
           <div class="payment-methods" id="payment-methods">
             <!-- Payment methods are loaded dynamically from admin settings -->
             <div id="payment-methods-loading" style="text-align:center;padding:20px 0;color:var(--muted);font-size:13px;">
               <div style="width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.6s linear infinite;margin:0 auto 8px;"></div>
-              Betaalmethoden laden...
+              Načítání platebních metod...
             </div>
             <div id="payment-methods-error" style="display:none;text-align:center;padding:20px 0;color:var(--error);font-size:13px;">
-              <p>Betaalmethoden konden niet geladen worden.</p>
-              <button onclick="loadPaymentMethods()" style="margin-top:8px;padding:6px 16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);cursor:pointer;font-size:13px;">Opnieuw proberen</button>
+              <p>Platební metody se nepodařilo načíst.</p>
+              <button onclick="loadPaymentMethods()" style="margin-top:8px;padding:6px 16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);cursor:pointer;font-size:13px;">Zkusit znovu</button>
             </div>
           </div>
 
           <!-- Card fields (hidden, shown only when creditcard is active & selected) -->
           <div id="card-fields" style="display:none; padding: 4px 16px 12px 48px; animation: fadeIn 0.3s ease;">
             <div style="margin-bottom:10px;">
-              <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Kaartnummer</label>
+              <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Číslo karty</label>
               <div id="card-number" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
             </div>
             <div style="display:flex;gap:12px;margin-bottom:10px;">
               <div style="flex:1;">
-                <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Vervaldatum</label>
+                <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Platnost do</label>
                 <div id="expiry-date" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
               </div>
               <div style="flex:1;">
@@ -2622,7 +2620,7 @@ body {
               </div>
             </div>
             <div style="margin-bottom:6px;">
-              <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Naam op kaart</label>
+              <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Jméno na kartě</label>
               <div id="card-holder" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
             </div>
             <div id="card-errors" style="font-size:12px;color:var(--error);margin-top:6px;min-height:16px;"></div>
@@ -2637,24 +2635,24 @@ body {
         <div class="checkout-btn-wrap animate-in animate-in-delay-3">
           <button type="submit" class="checkout-btn" id="submit-btn">
             <span class="spinner"></span>
-            <span class="btn-text">Bestelling afronden — &euro;35,00</span>
+            <span class="btn-text">Dokončit objednávku — 550&nbsp;Kč</span>
           </button>
           <div id="submit-validation-msg" class="submit-validation-msg" style="display:none;"></div>
-          <p class="btn-subtext">Je wordt doorgestuurd naar een beveiligde betaalpagina.</p>
+          <p class="btn-subtext">Budete přesměrováni na zabezpečenou platební stránku.</p>
 
           <!-- Trust badges -->
           <div class="checkout-trust">
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-              <span id="trust-provider-text">Beveiligd via PayPal</span>
+              <span id="trust-provider-text">Zabezpečeno přes Comgate</span>
             </div>
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              30 dagen retourrecht
+              30denní záruka vrácení peněz
             </div>
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-              Gratis verzending NL &amp; BE
+              Doprava zdarma po celé ČR
             </div>
           </div>
         </div>
@@ -2662,152 +2660,149 @@ body {
       </form>
     </div>
 
-    <!-- ── PRAVÁ STRANA: ORDER SUMMARY ── -->
+    <!-- ── PRAVÁ STRANA: PŘEHLED OBJEDNÁVKY ── -->
     <div class="order-summary">
-      <h2 class="summary-title">Jouw bestelling</h2>
+      <h2 class="summary-title">Vaše objednávka</h2>
 
       <div class="summary-product" id="desktop-product">
         <div class="summary-product-img" id="desktop-product-img">
           <div class="mini-book">
-            <div class="mini-book-title">De Hondenbijbel</div>
+            <div class="mini-book-title">Psí superživot</div>
             <div class="mini-book-author">Lars Vermeulen</div>
           </div>
         </div>
         <div class="summary-product-info">
-          <div class="summary-product-name" id="desktop-product-name">De Hondenbijbel</div>
+          <div class="summary-product-name" id="desktop-product-name">Psí superživot</div>
           <div class="summary-product-author">Lars Vermeulen</div>
           <div class="summary-product-format">Paperback</div>
-          <div class="summary-product-price" id="desktop-product-price">&euro;35,00</div>
+          <div class="summary-product-price" id="desktop-product-price">550&nbsp;Kč</div>
         </div>
       </div>
 
-      <!-- 3 gratis bonus e-books -->
+      <!-- 3 bonusové e-knihy zdarma -->
       <div class="summary-bonus">
         <span class="bonus-icon">🎁</span>
-        <span class="bonus-text">+ 3 gratis bonus e-books inbegrepen</span>
+        <span class="bonus-text">+ 3 bonusové e-knihy zdarma</span>
       </div>
 
       <!-- Order bump řádek v summary (skrytý dokud nezaškrtne) -->
       <div class="summary-line" id="summary-order-bump" style="display:none;padding:8px 0;border-top:1px dashed rgba(107,33,168,0.2);">
         <span id="summary-bump-name" style="font-size:13px;display:flex;align-items:center;gap:4px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Laat Los Wat Je Kapotmaakt
+          Odpusť to, co tě ničí
         </span>
-        <span id="summary-bump-price" style="font-weight:600;color:var(--cta);">&euro;25,00</span>
+        <span id="summary-bump-price" style="font-weight:600;color:var(--cta);">399&nbsp;Kč</span>
       </div>
 
       <div class="summary-line" id="summary-subtotal">
-        <span>Subtotaal (excl. BTW)</span>
-        <span id="subtotal-value">&euro;32,11</span>
+        <span>Mezisoučet</span>
+        <span id="subtotal-value">550&nbsp;Kč</span>
       </div>
       <div class="summary-line" id="summary-tax">
-        <span id="tax-label">BTW (9%)</span>
-        <span id="tax-value">&euro;2,89</span>
+        <span id="tax-label">DPH (0%)</span>
+        <span id="tax-value">0&nbsp;Kč</span>
       </div>
       <div class="summary-line shipping" id="summary-shipping">
         <span style="display:flex;align-items:center;gap:6px;">
-          Verzending
-          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="vertical-align:middle;border-radius:2px;">
+          Doprava
         </span>
-        <span style="color:#27AE60;font-weight:600;">Gratis</span>
+        <span style="color:#27AE60;font-weight:600;">Zdarma</span>
       </div>
       <div class="summary-line discount" id="summary-discount" style="display:none;">
-        <span style="display:flex;align-items:center;gap:6px;">Korting <span id="discount-code-label" style="font-size:11px;background:rgba(39,174,96,0.1);color:#27AE60;padding:1px 6px;border-radius:4px;font-weight:600;"></span></span>
+        <span style="display:flex;align-items:center;gap:6px;">Sleva <span id="discount-code-label" style="font-size:11px;background:rgba(39,174,96,0.1);color:#27AE60;padding:1px 6px;border-radius:4px;font-weight:600;"></span></span>
         <span id="discount-value" style="color:#27AE60;font-weight:600;"></span>
       </div>
       <div class="summary-line total" id="summary-total">
-        <span>Totaal</span>
-        <span class="price" id="desktop-total-price">&euro;35,00</span>
+        <span>Celkem</span>
+        <span class="price" id="desktop-total-price">550&nbsp;Kč</span>
       </div>
       <div id="summary-tax-note" style="font-size:11px;color:#888;text-align:right;margin-top:4px;margin-bottom:8px;">
-        Inclusief BTW
+        Včetně DPH
       </div>
 
-      <!-- Garantie -->
+      <!-- Záruka -->
       <div class="guarantee-box">
         <div class="icon">🛡️</div>
-        <div class="title">100% Geld-Terug-Garantie</div>
-        <div class="desc">Niet tevreden? Binnen 30 dagen krijg je je volledige aankoopbedrag terug. Geen vragen, geen gedoe.</div>
+        <div class="title">100% Záruka vrácení peněz</div>
+        <div class="desc">Nejste spokojeni? Do 30 dnů vám vrátíme celou částku. Bez otázek, bez komplikací.</div>
       </div>
 
-      <!-- Shipping & Delivery info -->
+      <!-- Informace o dopravě -->
       <div class="summary-shipping-info">
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          <span>Levering via <strong>GLS</strong> in <strong>4–7 werkdagen</strong> (NL &amp; BE)</span>
+          <span>Doručení do <strong>4–7 pracovních dnů</strong> po celé ČR</span>
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
-          <span>Track &amp; trace per e-mail direct na verzending</span>
+          <span>Sledovací číslo e-mailem ihned po odeslání</span>
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Vragen? <strong>support@dehondenbijbel.nl</strong></span>
+          <span>Dotazy? <strong>podpora@psisuperzivot.cz</strong></span>
         </div>
       </div>
 
-      <!-- Mini reviews — De Hondenbijbel -->
+      <!-- Mini recenze — Psí superživot -->
       <div class="summary-reviews">
         <div class="summary-review">
           <div class="summary-review-avatar">
-            <img src="/dehondenbijbel/images/review-honden-pichi.webp" alt="Marieke" loading="lazy">
+            <img src="/psisuperzivot/images/review-honden-pichi.webp" alt="Jana" loading="lazy">
           </div>
           <div class="summary-review-content">
             <div class="summary-review-stars">★★★★★</div>
-            <div class="summary-review-text">&ldquo;Onze hond trok altijd aan de lijn. Na 1 week met dit boek loopt hij rustig naast me. Echt een aanrader!&rdquo;</div>
-            <div class="summary-review-author">Marieke D., Utrecht</div>
+            <div class="summary-review-text">&ldquo;Náš pes vždy tahal za vodítko. Po týdnu s touto knihou chodí klidně vedle mě. Opravdu doporučuji!&rdquo;</div>
+            <div class="summary-review-author">Jana D., Praha</div>
           </div>
         </div>
         <div class="summary-review">
           <div class="summary-review-avatar">
-            <img src="/dehondenbijbel/images/review-john-hondenbijbel-vertical-pichi.webp" alt="John" loading="lazy">
+            <img src="/psisuperzivot/images/review-john-hondenbijbel-vertical-pichi.webp" alt="Petr" loading="lazy">
           </div>
           <div class="summary-review-content">
             <div class="summary-review-stars">★★★★★</div>
-            <div class="summary-review-text">&ldquo;Alles wat je als baasje moet weten in &eacute;&eacute;n boek. De bonussen zijn ook fantastisch. Beste aankoop dit jaar.&rdquo;</div>
-            <div class="summary-review-author">John V., Den Haag</div>
+            <div class="summary-review-text">&ldquo;Vše, co jako páníček potřebujete vědět, v jedné knize. Bonusy jsou také fantastické. Nejlepší nákup letošního roku.&rdquo;</div>
+            <div class="summary-review-author">Petr V., Brno</div>
           </div>
         </div>
       </div>
 
-      <!-- Payment icons -->
+      <!-- Ikony platebních metod -->
       <div class="summary-payments">
-        <img src="/icons/ideal.svg" alt="iDEAL" width="40" height="26" style="border-radius:4px;border:1px solid rgba(107,33,168,0.12);">
-        <img src="/icons/bancontact.svg" alt="Bancontact" width="40" height="26" style="border-radius:4px;border:1px solid rgba(107,33,168,0.12);">
         <img src="/icons/mastercard.svg" alt="Mastercard" width="40" height="26" style="border-radius:4px;border:1px solid rgba(107,33,168,0.12);">
-        <img src="/icons/klarna.svg" alt="Klarna" width="40" height="26" style="border-radius:4px;border:1px solid rgba(107,33,168,0.12);">
+        <img src="/icons/visa.svg" alt="Visa" width="40" height="26" style="border-radius:4px;border:1px solid rgba(107,33,168,0.12);">
         <img src="/icons/paypal.svg" alt="PayPal" width="40" height="26" style="border-radius:4px;border:1px solid rgba(107,33,168,0.12);">
       </div>
 
-      <!-- Return policy link -->
+      <!-- Odkaz na reklamační řád -->
       <div class="summary-return-link">
-        <a href="retourbeleid.html">Bekijk ons retourbeleid &rarr;</a>
+        <a href="reklamace.html">Zobrazit reklamační řád &rarr;</a>
       </div>
     </div>
 
   </div><!-- /checkout-grid -->
 </div><!-- /checkout-page -->
 
-<!-- ═══ FOOTER ═══ -->
+<!-- ═══ PATIČKA ═══ -->
 <div class="checkout-footer">
   <div class="checkout-footer-trust" style="flex-direction:column;gap:4px;">
     <div style="display:flex;align-items:center;gap:6px;justify-content:center;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Betaling beveiligd via <strong>PayPal</strong>
+      Platba zabezpečena přes <strong>Comgate</strong>
     </div>
-    <p style="font-size:11px;color:#999;line-height:1.4;margin:2px 0 0 0;text-align:center;">Door met uw kaart te betalen, erkent u dat uw gegevens worden verwerkt door PayPal in overeenstemming met het Privacybeleid van PayPal, beschikbaar op <a href="https://www.paypal.com/legalhub/privacy-full" target="_blank" rel="noopener" style="color:#999;text-decoration:underline;">PayPal.com</a>.</p>
+    <p style="font-size:11px;color:#999;line-height:1.4;margin:2px 0 0 0;text-align:center;">Platbou kartou souhlasíte se zpracováním vašich údajů v souladu se zásadami ochrany osobních údajů platební brány.</p>
   </div>
   <div class="checkout-footer-company">
-    <strong>De Hondenbijbel</strong> is een uitgave van Performance Marketing Solution s.r.o.<br>
-    Rybná 716/24, Staré Město, 110 00 Praag, Tsjechië<br>
-    KvK-nummer: 06259928 · BTW-nummer: CZ06259928<br>
-    Wij verzenden vanuit ons magazijn in Tsjechië via GLS naar Nederland en België.<br>
-    Vragen of problemen? Neem gerust contact op: <a href="mailto:support@dehondenbijbel.nl"><strong>support@dehondenbijbel.nl</strong></a><br>
-    Wij reageren binnen 24 uur en lossen elk probleem persoonlijk op.
+    <strong>Psí superživot</strong> je publikace společnosti Performance Marketing Solution s.r.o.<br>
+    Rybná 716/24, Staré Město, 110 00 Praha, Česká republika<br>
+    IČO: 06259928 · DIČ: CZ06259928<br>
+    Knihy odesíláme z našeho skladu po celé České republice.<br>
+    Máte dotazy nebo problémy? Neváhejte nás kontaktovat: <a href="mailto:podpora@psisuperzivot.cz"><strong>podpora@psisuperzivot.cz</strong></a><br>
+    Odpovídáme do 24 hodin a každý problém řešíme osobně.
   </div>
   <div class="checkout-footer-links">
-    &copy; 2026 De Hondenbijbel · Lars Vermeulen<br>
-    <a href="voorwaarden.html">Algemene voorwaarden</a> · <a href="privacy.html">Privacybeleid</a> · <a href="retourbeleid.html">Retourbeleid</a> · <a href="verzending.html">Verzending &amp; Levering</a>
+    &copy; 2026 Psí superživot · Lars Vermeulen<br>
+    <a href="obchodni-podminky.html">Obchodní podmínky</a> · <a href="ochrana-osobnich-udaju.html">Ochrana osobních údajů</a> · <a href="reklamace.html">Reklamační řád</a> · <a href="doprava.html">Doprava &amp; Doručení</a>
   </div>
 </div>
 
@@ -2816,11 +2811,11 @@ body {
 (function() {
   'use strict';
 
-  /* ─── CONFIGURATIE (z project-config.js) ─── */
+  /* ─── KONFIGURACE (z project-config.js) ─── */
   var MEDUSA_URL = PROJECT_CONFIG.medusaUrl;
   var VARIANT_ID = PROJECT_CONFIG.mainProduct.variantId;
   // Dynamický region ID — mění se podle vybrané země
-  var currentRegionId = PROJECT_CONFIG.regions.NL; // Výchozí: NL
+  var currentRegionId = PROJECT_CONFIG.regions.CZ; // Výchozí: CZ
 
   /* ─── STAV: Bundle + Order Bump ─── */
   var selectedBundleQty = 1;       // Aktuálně vybraný počet knih (1-4)
@@ -2839,15 +2834,15 @@ body {
   }
 
   /* ─── FUNKCE PRO DYNAMICKÝ ORDER SUMMARY ─── */
-  // Formátování cen v EU stylu (€32,11)
+  // Formátování cen v českém stylu (550 Kč)
   function formatPrice(amount) {
-    if (amount === null || amount === undefined) return '€0,00';
+    if (amount === null || amount === undefined) return '0 Kč';
     var num = parseFloat(amount);
-    return '€' + num.toFixed(2).replace('.', ',');
+    return Math.round(num) + ' Kč';
   }
 
-  // Daňové sazby per země (tax-inclusive)
-  var TAX_RATES = { NL: 9, BE: 6 };
+  // Daňové sazby per země (tax-inclusive) — knihy v ČR jsou osvobozeny od DPH
+  var TAX_RATES = { CZ: 0 };
 
   // Získej aktuální celkovou cenu (bundle + order bump)
   function getCurrentTotal() {
@@ -2858,8 +2853,8 @@ body {
 
   // Přepočítej a zobraz CELÝ order summary (bundle, order bump, daně, totál)
   function recalculateOrderSummary() {
-    var countryCode = document.getElementById('country') ? document.getElementById('country').value : 'NL';
-    var rate = TAX_RATES[countryCode] || TAX_RATES.NL;
+    var countryCode = document.getElementById('country') ? document.getElementById('country').value : 'CZ';
+    var rate = TAX_RATES[countryCode] || TAX_RATES.CZ;
     var total = getCurrentTotal();
     var subtotal = total / (1 + rate / 100);
     var tax = total - subtotal;
@@ -2870,7 +2865,7 @@ body {
 
     var taxLabel = document.getElementById('tax-label');
     var taxValue = document.getElementById('tax-value');
-    if (taxLabel) taxLabel.textContent = 'BTW (' + rate + '%)';
+    if (taxLabel) taxLabel.textContent = 'DPH (' + rate + '%)';
     if (taxValue) taxValue.textContent = formatPrice(tax);
 
     var totalEl = document.getElementById('desktop-total-price');
@@ -2879,7 +2874,7 @@ body {
     var desktopPrice = document.getElementById('desktop-product-price');
     if (desktopPrice) desktopPrice.textContent = formatPrice(selectedBundlePrice);
 
-    // Product naam — update met qty als bundle > 1
+    // Název produktu — aktualizovat s qty pokud bundle > 1
     var bundle = PROJECT_CONFIG.bundleOptions.find(function(b) { return b.qty === selectedBundleQty; });
     var productName = PROJECT_CONFIG.mainProduct.name;
     if (selectedBundleQty > 1 && bundle) {
@@ -2906,8 +2901,8 @@ body {
     // Subtitle — popis co je v košíku
     var msbSubtitle = document.getElementById('msb-subtitle');
     if (msbSubtitle) {
-      var parts = ['Paperback · ' + selectedBundleQty + '× boek'];
-      if (orderBumpActive) parts.push('+ Laat Los');
+      var parts = ['Paperback · ' + selectedBundleQty + '× kniha'];
+      if (orderBumpActive) parts.push('+ Odpusť to');
       msbSubtitle.textContent = parts.join(' ');
     }
 
@@ -2915,7 +2910,7 @@ body {
     var msbItemsLabel = document.getElementById('msb-items-label');
     if (msbItemsLabel) {
       var itemCount = orderBumpActive ? 2 : 1;
-      msbItemsLabel.textContent = itemCount === 1 ? 'Totaal' : itemCount + ' items';
+      msbItemsLabel.textContent = itemCount === 1 ? 'Celkem' : itemCount + ' položky';
     }
 
     // Produkt v rozevřeném panelu
@@ -2928,11 +2923,11 @@ body {
     var msbBumpLine = document.getElementById('msb-bump-line');
     if (msbBumpLine) msbBumpLine.style.display = orderBumpActive ? 'flex' : 'none';
 
-    // Subtotaal, BTW, totaal v rozevřeném panelu
+    // Mezisoučet, DPH, celkem v rozevřeném panelu
     var msbSubtotal = document.getElementById('msb-subtotal');
     if (msbSubtotal) msbSubtotal.textContent = formatPrice(subtotal);
     var msbTaxLabel = document.getElementById('msb-tax-label');
-    if (msbTaxLabel) msbTaxLabel.textContent = 'BTW (' + rate + '%)';
+    if (msbTaxLabel) msbTaxLabel.textContent = 'DPH (' + rate + '%)';
     var msbTaxVal = document.getElementById('msb-tax-val');
     if (msbTaxVal) msbTaxVal.textContent = formatPrice(tax);
     var msbTotal = document.getElementById('msb-total');
@@ -2969,8 +2964,8 @@ body {
       html += '</div>';
       html += '<div class="bundle-pricing">';
       html += '<div class="bundle-price">' + formatPrice(opt.price) + '</div>';
-      if (opt.qty > 1) html += '<div class="bundle-per-unit">€' + perUnit + ' per boek</div>';
-      if (opt.savings > 0) html += '<div class="bundle-savings">Bespaar ' + formatPrice(opt.savings) + '</div>';
+      if (opt.qty > 1) html += '<div class="bundle-per-unit">' + perUnit + ' Kč za knihu</div>';
+      if (opt.savings > 0) html += '<div class="bundle-savings">Ušetříte ' + formatPrice(opt.savings) + '</div>';
       html += '</div>';
       html += '</label>';
     });
@@ -3042,11 +3037,11 @@ body {
           : product.thumbnail;
         if (!imgUrl) return;
         var fullUrl = imgUrl.indexOf('http') === 0 ? imgUrl : MEDUSA_URL + imgUrl;
-        var imgTag = '<img src="' + fullUrl + '" alt="' + (product.title || 'Laat Los Wat Je Kapotmaakt') + '" style="width:100%;height:100%;object-fit:cover;">';
+        var imgTag = '<img src="' + fullUrl + '" alt="' + (product.title || 'Odpusť to, co tě ničí') + '" style="width:100%;height:100%;object-fit:cover;">';
         if (thumbContainer) thumbContainer.innerHTML = imgTag;
         if (imgContainer) imgContainer.innerHTML = imgTag;
       }).catch(function(err) {
-        console.warn('Order bump image laden mislukt:', err);
+        console.warn('Načtení obrázku order bump selhalo:', err);
       });
     }
   }
@@ -3064,24 +3059,24 @@ body {
     var pctTag = document.getElementById('order-bump-pct-tag');
     if (pctTag) pctTag.textContent = '-' + savePct + '%';
     var oldPrice = document.getElementById('order-bump-old-price');
-    if (oldPrice) oldPrice.innerHTML = '&euro;' + Number(up.originalPrice).toFixed(2).replace('.', ',');
+    if (oldPrice) oldPrice.innerHTML = Math.round(Number(up.originalPrice)) + ' K&#269;';
     var newPrice = document.getElementById('order-bump-new-price');
-    if (newPrice) newPrice.innerHTML = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
+    if (newPrice) newPrice.innerHTML = Math.round(Number(up.price)) + ' K&#269;';
     var inlineSave = document.getElementById('order-bump-inline-save');
-    if (inlineSave) inlineSave.innerHTML = 'Bespaar &euro;' + saveAmt.toFixed(0);
+    if (inlineSave) inlineSave.innerHTML = 'U&#353;et&#345;&#237;te ' + saveAmt.toFixed(0) + ' K&#269;';
 
     // Detail
     var nameEl = document.getElementById('order-bump-name');
     if (nameEl) nameEl.textContent = up.name;
     var detailOld = document.getElementById('order-bump-detail-old');
-    if (detailOld) detailOld.innerHTML = '&euro;' + Number(up.originalPrice).toFixed(2).replace('.', ',');
+    if (detailOld) detailOld.innerHTML = Math.round(Number(up.originalPrice)) + ' K&#269;';
     var detailNew = document.getElementById('order-bump-detail-new');
-    if (detailNew) detailNew.innerHTML = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
+    if (detailNew) detailNew.innerHTML = Math.round(Number(up.price)) + ' K&#269;';
     var detailSave = document.getElementById('order-bump-detail-save');
-    if (detailSave) detailSave.innerHTML = 'Bespaar &euro;' + saveAmt.toFixed(0);
+    if (detailSave) detailSave.innerHTML = 'U&#353;et&#345;&#237;te ' + saveAmt.toFixed(0) + ' K&#269;';
 
     // Summary + Mobile sticky bar — aktualizuj název a cenu
-    var priceStr = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
+    var priceStr = Math.round(Number(up.price)) + ' K&#269;';
     var summaryBumpName = document.getElementById('summary-bump-name');
     if (summaryBumpName) {
       var svgHtml = summaryBumpName.querySelector('svg') ? summaryBumpName.querySelector('svg').outerHTML + ' ' : '';
@@ -3143,42 +3138,42 @@ body {
     var taxRate = 0;
     if (subtotal > 0 && taxTotal > 0) {
       if (isTaxInclusive) {
-        // tax_total / subtotal * 100 (subtotal je excl. BTW)
+        // tax_total / subtotal * 100 (subtotal je excl. DPH)
         taxRate = Math.round(taxTotal / subtotal * 100);
       } else {
         taxRate = Math.round(taxTotal / (total - taxTotal) * 100);
       }
     }
 
-    // Cena za produkt (totaal) — desktop summary
+    // Cena za produkt (celkem) — desktop summary
     var desktopPriceEl = document.getElementById('desktop-product-price');
     if (desktopPriceEl) desktopPriceEl.textContent = formatPrice(total);
 
-    // Mobile sticky bar — totaal cena
+    // Mobile sticky bar — celková cena
     var msbPriceEl = document.getElementById('msb-price');
     if (msbPriceEl) msbPriceEl.textContent = formatPrice(total);
 
-    // Subtotaal (excl. BTW)
+    // Mezisoučet (bez DPH)
     var subtotalEl = document.getElementById('summary-subtotal');
     if (subtotalEl) {
-      subtotalEl.innerHTML = '<span>Subtotaal (excl. BTW)</span><span>' + formatPrice(subtotal) + '</span>';
+      subtotalEl.innerHTML = '<span>Mezisoučet (bez DPH)</span><span>' + formatPrice(subtotal) + '</span>';
     }
 
-    // BTW řádek
+    // DPH řádek
     var taxEl = document.getElementById('summary-tax');
     if (taxEl && taxTotal > 0) {
       taxEl.style.display = '';
-      taxEl.innerHTML = '<span>BTW (' + taxRate + '%)</span><span>' + formatPrice(taxTotal) + '</span>';
+      taxEl.innerHTML = '<span>DPH (' + taxRate + '%)</span><span>' + formatPrice(taxTotal) + '</span>';
     }
 
     // Shipping
     var shipEl = document.getElementById('summary-shipping');
     if (shipEl) {
-      var shippingLabel = shippingTotal > 0 ? formatPrice(shippingTotal) : '<span style="color:#27AE60;font-weight:600;">Gratis</span>';
-      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Verzending <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="vertical-align:middle;border-radius:2px;"></span><span>' + shippingLabel + '</span>';
+      var shippingLabel = shippingTotal > 0 ? formatPrice(shippingTotal) : '<span style="color:#27AE60;font-weight:600;">Zdarma</span>';
+      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Doprava</span><span>' + shippingLabel + '</span>';
     }
 
-    // Korting (discount) — toon als promo kód is toegepast
+    // Sleva (discount) — zobraz pokud je promo kód aplikován
     var discountTotal = cart.discount_total || 0;
     var discountEl = document.getElementById('summary-discount');
     if (discountEl) {
@@ -3195,11 +3190,11 @@ body {
       }
     }
 
-    // Totaal
+    // Celkem
     var totalEl = document.getElementById('desktop-total-price');
     if (totalEl) totalEl.textContent = formatPrice(total);
 
-    // BTW poznámka
+    // DPH poznámka
     var taxNote = document.getElementById('summary-tax-note');
     if (taxNote && isTaxInclusive && taxTotal > 0) {
       taxNote.style.display = '';
@@ -3209,12 +3204,10 @@ body {
     var btnText = document.querySelector('.btn-text');
     if (btnText) {
       var labels = {
-        ideal: 'Betalen met iDEAL',
-        bancontact: 'Betalen met Bancontact',
-        klarna: 'Betalen met Klarna',
-        paypal: 'Betalen met PayPal'
+        klarna: 'Platba přes Klarna',
+        paypal: 'Platba přes PayPal'
       };
-      btnText.textContent = (labels[selectedMethod] || 'Bestelling afronden') + ' — ' + formatPrice(total);
+      btnText.textContent = (labels[selectedMethod] || 'Dokončit objednávku') + ' — ' + formatPrice(total);
     }
   }
 
@@ -3294,7 +3287,7 @@ body {
 
     try {
       mollieInstance = Mollie(profileId, {
-        locale: 'nl_NL',
+        locale: 'cs_CZ',
         testmode: testmode
       });
 
@@ -3364,7 +3357,7 @@ body {
       // For name field: replace Mollie cardHolder component with plain text input
       var holderDiv = document.getElementById('card-holder');
       if (holderDiv) {
-        holderDiv.innerHTML = '<input type="text" id="aw-card-name" placeholder="Naam op kaart" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
+        holderDiv.innerHTML = '<input type="text" id="aw-card-name" placeholder="Jméno na kartě" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
       }
 
       // Error handling
@@ -3445,7 +3438,7 @@ body {
       // For name field: replace with plain text input (same as Airwallex)
       var holderDiv = document.getElementById('card-holder');
       if (holderDiv) {
-        holderDiv.innerHTML = '<input type="text" id="stripe-card-name" placeholder="Naam op kaart" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
+        holderDiv.innerHTML = '<input type="text" id="stripe-card-name" placeholder="Jméno na kartě" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
       }
 
       // Error handling
@@ -3535,7 +3528,7 @@ body {
         },
         onError: function(err) {
           console.error('[PayPal Card] onError:', err);
-          if (cardErrorsEl) cardErrorsEl.textContent = err.message || 'Kaartbetaling mislukt';
+          if (cardErrorsEl) cardErrorsEl.textContent = err.message || 'Platba kartou selhala';
           if (window._paypalCardReject) {
             window._paypalCardReject(err);
           }
@@ -3563,7 +3556,7 @@ body {
 
       if (!paypalCardFieldsInstance.isEligible()) {
         console.warn('[PayPal Card] CardFields not eligible — Advanced Card Payments may not be enabled');
-        if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetalingen zijn niet beschikbaar. Controleer de PayPal-instellingen.';
+        if (cardErrorsEl) cardErrorsEl.textContent = 'Platba kartou není dostupná. Zkontrolujte nastavení PayPal.';
         paypalCardMounting = false;
         return;
       }
@@ -3633,7 +3626,7 @@ body {
             }
           });
 
-          if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetaling niet beschikbaar. Neem contact op met de beheerder.';
+          if (cardErrorsEl) cardErrorsEl.textContent = 'Platba kartou není dostupná. Kontaktujte správce.';
         });
 
     } catch (e) {
@@ -3694,7 +3687,7 @@ body {
     var sdkUrl = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(clientId.trim())
       + '&components=' + components.join(',')
       + '&currency=' + currency
-      + '&locale=nl_NL';
+      + '&locale=cs_CZ';
 
     console.log('[PayPal SDK] Loading URL:', sdkUrl);
 
@@ -3777,7 +3770,7 @@ body {
       method: 'GET'
     }).then(function(shipRes) {
       var options = shipRes.shipping_options || [];
-      if (options.length === 0) throw new Error('Geen verzendopties beschikbaar');
+      if (options.length === 0) throw new Error('Žádné možnosti dopravy nejsou k dispozici');
       return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
         method: 'POST',
         body: JSON.stringify({ option_id: options[0].id })
@@ -3853,10 +3846,10 @@ body {
       // Show error in preloader (same UX as regular flow)
       var preloader = document.querySelector('.payment-preloader');
       if (preloader) {
-        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Er ging iets mis bij het verwerken van je betaling.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Probeer het opnieuw of neem contact met ons op.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Opnieuw proberen</a></div>';
+        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Při zpracování platby došlo k chybě.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Zkuste to znovu nebo nás kontaktujte.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Zkusit znovu</a></div>';
       } else {
         hideExpressPreloader();
-        alert('Er is een fout opgetreden. Probeer het opnieuw.');
+        alert('Došlo k chybě. Zkuste to prosím znovu.');
       }
     });
   }
@@ -3866,7 +3859,7 @@ body {
     if (document.querySelector('.payment-preloader')) return;
     var el = document.createElement('div');
     el.className = 'payment-preloader';
-    el.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+    el.innerHTML = '<img src="/psisuperzivot/images/preloader.webp" alt="Načítání..." width="120" height="110"><p>Platba se zpracovává...</p><p class="sub">Prosím, vyčkejte.</p>';
     document.body.insertBefore(el, document.body.firstChild);
   }
   function hideExpressPreloader() {
@@ -4032,7 +4025,7 @@ body {
               );
               if (!orderId) {
                 console.error('[Express PayPal] No order ID in session data:', JSON.stringify(sessionData));
-                throw new Error('PayPal order ID niet ontvangen van server');
+                throw new Error('PayPal order ID nebylo přijato ze serveru');
               }
               console.log('[Express PayPal] Order created:', orderId);
               return orderId;
@@ -4081,7 +4074,7 @@ body {
                   address_1: address.address_line_1 || '',
                   city: address.admin_area_2 || '',
                   postal_code: address.postal_code || '',
-                  country_code: (address.country_code || 'NL').toLowerCase(),
+                  country_code: (address.country_code || 'CZ').toLowerCase(),
                   phone: (payer.phone && payer.phone.phone_number && payer.phone.phone_number.national_number) || '',
                 }
               };
@@ -4110,10 +4103,10 @@ body {
               console.error('[Express PayPal] Completion error:', err);
               var preloader = document.querySelector('.payment-preloader');
               if (preloader) {
-                preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Er ging iets mis bij het verwerken van je PayPal-betaling.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Probeer het opnieuw of gebruik het formulier hieronder.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Opnieuw proberen</a></div>';
+                preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Při zpracování PayPal platby došlo k chybě.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Zkuste to znovu nebo použijte formulář níže.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Zkusit znovu</a></div>';
               } else {
                 hideExpressPreloader();
-                alert('Er is een fout opgetreden bij het afronden van je PayPal-betaling.');
+                alert('Při dokončení PayPal platby došlo k chybě.');
               }
             });
         },
@@ -4170,13 +4163,13 @@ body {
           if (redirectUrl) {
             window.location.href = redirectUrl;
           } else {
-            throw new Error('Geen redirect URL ontvangen van betaalprovider');
+            throw new Error('Nebyla přijata URL pro přesměrování od poskytovatele plateb');
           }
         })
         .catch(function(err) {
           btn.classList.remove('loading');
           console.error('[Express ' + method.code + '] Error:', err);
-          alert('Er is een fout opgetreden. Probeer het opnieuw of gebruik het formulier hieronder.');
+          alert('Er is een fout opgetreden. Zkuste to znovu nebo použijte formulář níže.');
         });
     });
   }
@@ -4350,7 +4343,7 @@ body {
                     address_1: contact.address1 || '',
                     city: contact.locality || '',
                     postal_code: contact.postalCode || '',
-                    country_code: (contact.countryCode || 'NL').toLowerCase(),
+                    country_code: (contact.countryCode || 'CZ').toLowerCase(),
                     phone: contact.phoneNumber || '',
                   }
                 };
@@ -4451,14 +4444,14 @@ body {
 
           // Create Apple Pay payment request
           var paymentRequest = {
-            countryCode: applepayConfig.countryCode || 'NL',
+            countryCode: applepayConfig.countryCode || 'CZ',
             merchantCapabilities: applepayConfig.merchantCapabilities || ['supports3DS'],
             supportedNetworks: applepayConfig.supportedNetworks || ['visa', 'masterCard', 'amex'],
-            currencyCode: 'EUR',
+            currencyCode: 'CZK',
             requiredShippingContactFields: ['name', 'email', 'postalAddress'],
             requiredBillingContactFields: ['postalAddress'],
             total: {
-              label: PROJECT_CONFIG.name || 'Bestelling',
+              label: PROJECT_CONFIG.name || 'Objednávka',
               type: 'final',
               amount: String(selectedBundlePrice || 35),
             }
@@ -4472,7 +4465,7 @@ body {
             console.log('[Express Apple Pay] Validating merchant:', event.validationURL);
             applepay.validateMerchant({
               validationUrl: event.validationURL,
-              displayName: PROJECT_CONFIG.name || 'De Hondenbijbel',
+              displayName: PROJECT_CONFIG.name || 'Psí superživot',
             }).then(function(result) {
               session.completeMerchantValidation(result.merchantSession);
             }).catch(function(err) {
@@ -4517,7 +4510,7 @@ body {
                   address_1: (shipping.addressLines || [])[0] || '',
                   city: shipping.locality || '',
                   postal_code: shipping.postalCode || '',
-                  country_code: (shipping.countryCode || 'NL').toLowerCase(),
+                  country_code: (shipping.countryCode || 'CZ').toLowerCase(),
                   phone: shipping.phoneNumber || '',
                 }
               };
@@ -4558,36 +4551,36 @@ body {
     });
   }
 
-  // Method descriptions (Dutch)
+  // Popisy platebních metod (česky)
   var METHOD_DESCRIPTIONS = {
-    ideal: 'Betaal direct via je eigen bank',
-    bancontact: 'Belgisch betaalsysteem',
-    klarna: 'Betaal direct via Klarna',
-    klarna_later: 'Ontvang eerst, betaal later',
-    klarna_slice: 'Betaal in termijnen',
+    ideal: 'Platba přes vaši banku',
+    bancontact: 'Belgický platební systém',
+    klarna: 'Platba přes Klarna',
+    klarna_later: 'Nejprve obdržíte, zaplatíte později',
+    klarna_slice: 'Platba ve splátkách',
     creditcard: 'Visa, Mastercard, American Express',
-    paypal: 'Betaal met je PayPal-account',
-    eps: 'Betaal via je Oostenrijkse bank',
-    przelewy24: 'Polski system platnosci',
-    blik: 'Szybka platnosc mobilna',
-    in3: 'Betaal in 3 termijnen',
-    belfius: 'Betaal via Belfius',
-    kbc: 'Betaal via KBC/CBC',
-    riverty: 'Achteraf betalen',
-    trustly: 'Online bankbetaling',
-    applepay: 'Betaal met Apple Pay',
-    googlepay: 'Betaal met Google Pay',
-    bank_transfer: 'Betaal via bankoverschrijving',
-    sepa_debit: 'SEPA automatische incasso',
-    swish: 'Betaal met Swish (Zweden)',
-    revolut_pay: 'Betaal met Revolut',
+    paypal: 'Platba přes PayPal účet',
+    eps: 'Platba přes rakouskou banku',
+    przelewy24: 'Polský platební systém',
+    blik: 'Rychlá mobilní platba',
+    in3: 'Platba ve 3 splátkách',
+    belfius: 'Platba přes Belfius',
+    kbc: 'Platba přes KBC/CBC',
+    riverty: 'Platba po doručení',
+    trustly: 'Online bankovní platba',
+    applepay: 'Platba přes Apple Pay',
+    googlepay: 'Platba přes Google Pay',
+    bank_transfer: 'Bankovní převod',
+    sepa_debit: 'SEPA inkaso',
+    swish: 'Platba přes Swish (Švédsko)',
+    revolut_pay: 'Platba přes Revolut',
   };
 
-  // Klarna sub-method config: code → SDK payment_method_category + Dutch labels
+  // Klarna sub-method config: code → SDK payment_method_category + české popisky
   var KLARNA_METHODS = {
-    klarna:       { category: 'pay_now',       label: 'Betaal direct',        desc: 'Betaal nu via Klarna' },
-    klarna_later: { category: 'pay_later',     label: 'Achteraf betalen',     desc: 'Ontvang eerst, betaal later' },
-    klarna_slice: { category: 'pay_over_time', label: 'Gespreid betalen',     desc: 'Betaal in termijnen' },
+    klarna:       { category: 'pay_now',       label: 'Platba ihned',         desc: 'Zaplaťte nyní přes Klarna' },
+    klarna_later: { category: 'pay_later',     label: 'Platba později',       desc: 'Nejprve obdržíte, zaplatíte později' },
+    klarna_slice: { category: 'pay_over_time', label: 'Platba ve splátkách',  desc: 'Platba ve splátkách' },
   };
   var KLARNA_CODES = Object.keys(KLARNA_METHODS);
 
@@ -4685,7 +4678,7 @@ body {
 
       if (allPaymentOptions.length === 0) {
         if (errorEl) {
-          errorEl.innerHTML = '<p>Geen betaalmethoden beschikbaar.</p>';
+          errorEl.innerHTML = '<p>Žádné platební metody nejsou k dispozici.</p>';
           errorEl.style.display = 'block';
         }
         return;
@@ -4693,7 +4686,7 @@ body {
 
       // Render for current country
       var countrySelect = document.getElementById('country');
-      var country = countrySelect ? countrySelect.value : 'NL';
+      var country = countrySelect ? countrySelect.value : 'CZ';
       renderPaymentMethods(country);
       initExpressCheckout();
     })
@@ -4710,7 +4703,7 @@ body {
    */
   function renderPaymentMethods(countryCode) {
     var container = document.getElementById('payment-methods');
-    var country = (countryCode || 'NL').toLowerCase();
+    var country = (countryCode || 'CZ').toLowerCase();
 
     // Filter methods by country availability
     var methods = allPaymentOptions.filter(function(m) {
@@ -4752,7 +4745,7 @@ body {
 
     if (totalVisible === 0) {
       if (errorEl) {
-        errorEl.innerHTML = '<p>Geen betaalmethoden beschikbaar voor dit land.</p>';
+        errorEl.innerHTML = '<p>Žádné platební metody nejsou k dispozici pro tuto zemi.</p>';
         errorEl.style.display = 'block';
       }
       return;
@@ -4792,7 +4785,7 @@ body {
           '<img src="/icons/klarna.svg" alt="Klarna" class="pm-icon" onerror="this.style.display=\'none\'">' +
           '<div class="pm-info">' +
             '<div class="pm-name">Klarna</div>' +
-            '<div class="pm-desc">Betaal direct, later of in termijnen</div>' +
+            '<div class="pm-desc">Platba ihned, později nebo ve splátkách</div>' +
           '</div>' +
           '<svg class="klarna-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
@@ -4854,7 +4847,7 @@ body {
         label.setAttribute('data-provider', m.provider);
         label.setAttribute('data-provider-id', m.provider_id);
 
-        var isPopular = (m.code === 'ideal' && country === 'nl') || (m.code === 'bancontact' && country === 'be');
+        var isPopular = false; // V ČR nepoužíváme iDEAL/Bancontact
 
         label.innerHTML =
           '<input type="radio" name="payment_method" value="' + m.code + '"' + (isFirst ? ' checked' : '') + '>' +
@@ -4864,7 +4857,7 @@ body {
             '<div class="pm-name">' + m.display_name + '</div>' +
             '<div class="pm-desc">' + (METHOD_DESCRIPTIONS[m.code] || '') + '</div>' +
           '</div>' +
-          (isPopular ? '<span class="pm-badge">Populair</span>' : '');
+          (isPopular ? '<span class="pm-badge">Oblíbené</span>' : '');
 
         container.appendChild(label);
 
@@ -5073,11 +5066,11 @@ body {
         : cardProvider === 'airwallex' ? 'Airwallex'
         : cardProvider === 'paypal' ? 'PayPal'
         : 'Mollie';
-      subtext.textContent = 'Je kaartgegevens worden beveiligd verwerkt via ' + providerName + '.';
+      subtext.textContent = 'Údaje vaší karty jsou bezpečně zpracovány přes ' + providerName + '.';
     } else if (KLARNA_CODES.indexOf(selectedMethod) !== -1) {
-      subtext.textContent = 'Je wordt doorgestuurd naar Klarna om de betaling af te ronden.';
+      subtext.textContent = 'Budete přesměrováni na Klarna k dokončení platby.';
     } else {
-      subtext.textContent = 'Je wordt doorgestuurd naar een beveiligde betaalpagina.';
+      subtext.textContent = 'Budete přesměrováni na zabezpečenou platební stránku.';
     }
 
     // Update trust badge provider text
@@ -5088,9 +5081,9 @@ body {
           : cardProvider === 'airwallex' ? 'Airwallex'
           : cardProvider === 'paypal' ? 'PayPal'
           : 'Mollie';
-        trustText.textContent = 'Beveiligd via ' + trustProvider;
+        trustText.textContent = 'Zabezpečeno přes ' + trustProvider;
       } else {
-        trustText.textContent = 'Beveiligd via ' + (selectedProvider === 'paypal' ? 'PayPal' : selectedProvider === 'stripe' ? 'Stripe' : 'PayPal');
+        trustText.textContent = 'Zabezpečeno přes ' + (selectedProvider === 'paypal' ? 'PayPal' : selectedProvider === 'stripe' ? 'Stripe' : 'PayPal');
       }
     }
   }
@@ -5101,7 +5094,7 @@ body {
   function updateButtonText() {
     var btnText = document.querySelector('.btn-text');
     if (!selectedMethod) {
-      btnText.textContent = 'Bestelling afronden — ' + formatPrice(currentTotalPrice);
+      btnText.textContent = 'Dokončit objednávku — ' + formatPrice(currentTotalPrice);
       return;
     }
     // For Klarna sub-methods, show "Klarna" as the name
@@ -5113,7 +5106,7 @@ body {
       var opt = allPaymentOptions.find(function(m) { return m.code === selectedMethod; });
       methodName = opt ? opt.display_name : selectedMethod;
     }
-    btnText.textContent = 'Betalen met ' + methodName + ' — ' + formatPrice(currentTotalPrice);
+    btnText.textContent = 'Platba přes ' + methodName + ' — ' + formatPrice(currentTotalPrice);
   }
 
   // Load payment methods on page init
@@ -5127,26 +5120,22 @@ body {
     });
   });
 
-  /* ─── SMART EMAIL VALIDATIE — typfouten detectie ─── */
+  /* ─── SMART EMAIL VALIDACE — detekce překlepů ─── */
   var COMMON_DOMAINS = {
     'gmail.com': ['gmial.com','gmai.com','gmal.com','gamil.com','gmail.nl','gmail.co','gnail.com','gmaill.com','gmali.com','gmaik.com','gmail.con','gmail.cmo','gmeil.com','gemail.com','gmai.c','gmail.c','gmal.c','gmil.com','g mail.com','gamail.com','gimail.com','gmsil.com','gmqil.com'],
     'hotmail.com': ['hotmai.com','hotmal.com','homail.com','hotmail.co','hotamil.com','hotmaill.com','hotmial.com','hotmail.con','hotmail.nl','hotmail.c','hotmai.c','hotmal.c','htomail.com','htmail.com','hotmil.com'],
     'outlook.com': ['outlok.com','outllook.com','outook.com','outlook.co','outlool.com','outlouk.com','outlook.c','outlok.c','outloook.com','outlokk.com'],
     'yahoo.com': ['yaho.com','yahooo.com','yahoo.co','yaahoo.com','yhoo.com','yahoo.nl','yahoo.c','yaho.c','yaoo.com','yhaoo.com'],
-    'live.nl': ['live.nl.com','lve.nl','live.n','live.nll','live.l'],
-    'ziggo.nl': ['zigo.nl','ziggo.n','ziggo.nll','zigggo.nl','ziggo.l','zigo.n'],
-    'kpnmail.nl': ['kpnmal.nl','kpnmail.n','kpnmai.nl','kpnmail.nll','kpnmail.l','kpnmal.n'],
-    'upcmail.nl': ['upcmal.nl','upcmail.n','upcmail.l'],
-    'hetnet.nl': ['hetnet.n','henet.nl','hetnet.l'],
-    'telenet.be': ['telenet.b','telnet.be','telenet.bee'],
-    'skynet.be': ['skynet.b','sknet.be'],
-    'proximus.be': ['proximus.b','proxmus.be'],
+    'seznam.cz': ['seznam.c','senzam.cz','szenam.cz','seznam.cx','seznm.cz','sezam.cz','seanam.cz','seznam.co','seznam.cz.com'],
+    'centrum.cz': ['centrum.c','centum.cz','cetrum.cz','centrum.cx','centrum.co'],
+    'email.cz': ['email.c','emal.cz','emial.cz','email.cx','email.co'],
+    'post.cz': ['post.c','pots.cz','post.cx'],
+    'volny.cz': ['volny.c','volni.cz','volny.cx','vlony.cz'],
+    'tiscali.cz': ['tiscali.c','tiscal.cz','tiskali.cz'],
     'icloud.com': ['iclod.com','icloud.co','icoud.com','icloud.con','icloud.c','iclod.c'],
     'protonmail.com': ['protonmal.com','protonmail.co','protonmail.con','protonmail.c'],
-    'online.nl': ['online.n','onlne.nl','online.l'],
-    'xs4all.nl': ['xs4all.n','xs4al.nl','xs4all.l'],
-    'planet.nl': ['planet.n','plnet.nl','planet.l'],
-    'casema.nl': ['casema.n','casma.nl','casema.l'],
+    'atlas.cz': ['atlas.c','atals.cz','atlas.cx'],
+    'azet.sk': ['azet.s','azet.sk.com','azte.sk'],
   };
   var TYPO_MAP = {};
   Object.keys(COMMON_DOMAINS).forEach(function(correct) {
@@ -5163,7 +5152,7 @@ body {
 
   var emailField = document.getElementById('email');
   var emailSuggestion = document.getElementById('email-suggestion');
-  // Foxentry flag — als key is ingesteld, worden email/phone uitsluitend door Foxentry gevalideerd
+  // Foxentry flag — pokud je klíč nastaven, e-mail/telefon jsou validovány výhradně přes Foxentry
   var hasFoxentryKey = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
 
   if (emailField && emailSuggestion) {
@@ -5182,12 +5171,12 @@ body {
       }
     });
 
-    // Lokale typo-check — altijd actief (ook naast Foxentry)
+    // Lokální kontrola překlepů — vždy aktivní (i vedle Foxentry)
     emailField.addEventListener('blur', function() {
       var val = emailField.value.trim();
       if (!val) return;
 
-      // 1. TLD lengte check — .c, .x etc. zijn geen geldige TLD's (min 2 tekens)
+      // 1. Kontrola délky TLD — .c, .x atd. nejsou platné TLD (min 2 znaky)
       var atParts = val.split('@');
       if (atParts.length === 2) {
         var domainParts = atParts[1].split('.');
@@ -5195,10 +5184,10 @@ body {
         if (tld && tld.length < 2) {
           emailField.classList.add('invalid');
           emailField.classList.remove('valid');
-          // Probeer typo suggestie te geven
+          // Zkusit nabídnout opravu překlepu
           var tldSuggestion = checkEmailTypo(val);
           if (tldSuggestion) {
-            emailSuggestion.innerHTML = 'Bedoelde je <strong>' + tldSuggestion + '</strong>? Klik om te corrigeren.';
+            emailSuggestion.innerHTML = 'Mysleli jste <strong>' + tldSuggestion + '</strong>? Klikněte pro opravu.';
             emailSuggestion.style.display = 'block';
             emailSuggestion.onclick = function() {
               emailField.value = tldSuggestion;
@@ -5214,7 +5203,7 @@ body {
       // 2. Typo check (gmail.co → gmail.com, hotmal.com → hotmail.com etc.)
       var suggestion = checkEmailTypo(val);
       if (suggestion) {
-        emailSuggestion.innerHTML = 'Bedoelde je <strong>' + suggestion + '</strong>? Klik om te corrigeren.';
+        emailSuggestion.innerHTML = 'Mysleli jste <strong>' + suggestion + '</strong>? Klikněte pro opravu.';
         emailSuggestion.style.display = 'block';
         emailSuggestion.onclick = function() {
           emailField.value = suggestion;
@@ -5231,19 +5220,19 @@ body {
     });
   }
 
-  /* ─── TELEFOONNUMMER FORMATTEREN — auto-prefix per land ─── */
+  /* ─── FORMÁTOVÁNÍ TELEFONNÍHO ČÍSLA — auto-prefix podle země ─── */
   var phoneField = document.getElementById('phone');
   var phonePreview = document.getElementById('phone-preview');
   var countrySelect = document.getElementById('country');
-  var COUNTRY_PHONE_PREFIX = { NL: '+31', BE: '+32' };
-  var PHONE_PREFIX_TO_COUNTRY = { '+31': 'NL', '+32': 'BE', '+49': 'DE', '+352': 'LU' };
+  var COUNTRY_PHONE_PREFIX = { CZ: '+420' };
+  var PHONE_PREFIX_TO_COUNTRY = { '+420': 'CZ', '+421': 'SK' };
 
-  // Detecteer land uit telefoonnummer (bijv. +32... → BE)
+  // Detekce země z telefonního čísla (např. +420... → CZ)
   function detectCountryFromPhone(val) {
     var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
     if (cleaned.startsWith('00')) cleaned = '+' + cleaned.substring(2);
     if (!cleaned.startsWith('+')) return null;
-    // Langste prefix eerst (+352 voor +35)
+    // Nejdelší prefix první (+421 před +42)
     var prefixes = Object.keys(PHONE_PREFIX_TO_COUNTRY).sort(function(a, b) { return b.length - a.length; });
     for (var i = 0; i < prefixes.length; i++) {
       if (cleaned.startsWith(prefixes[i])) return PHONE_PREFIX_TO_COUNTRY[prefixes[i]];
@@ -5251,7 +5240,7 @@ body {
     return null;
   }
 
-  // Update country dropdown als prefix gedetecteerd
+  // Aktualizovat country dropdown pokud byl prefix detekován
   function syncCountryFromPhone(val) {
     var detected = detectCountryFromPhone(val);
     if (detected && countrySelect && countrySelect.value !== detected) {
@@ -5265,34 +5254,34 @@ body {
     if (cleaned.startsWith('+')) return cleaned;
     if (cleaned.startsWith('00')) return '+' + cleaned.substring(2);
     if (cleaned.startsWith('0')) {
-      var prefix = COUNTRY_PHONE_PREFIX[countryCode] || '+31';
+      var prefix = COUNTRY_PHONE_PREFIX[countryCode] || '+420';
       return prefix + cleaned.substring(1);
     }
     if (/^\d{7,}$/.test(cleaned)) {
-      return (COUNTRY_PHONE_PREFIX[countryCode] || '+31') + cleaned;
+      return (COUNTRY_PHONE_PREFIX[countryCode] || '+420') + cleaned;
     }
     return cleaned;
   }
 
   if (phoneField && phonePreview) {
-    // Bij input: detecteer land uit prefix en update country dropdown
+    // Při vstupu: detekovat zemi z prefixu a aktualizovat country dropdown
     phoneField.addEventListener('input', function() {
       syncCountryFromPhone(phoneField.value.trim());
       phonePreview.style.display = 'none';
     });
 
     phoneField.addEventListener('blur', function() {
-      // Als Foxentry actief is, GEEN lokale formatting of validatie — alles via Foxentry
+      // Pokud je Foxentry aktivní, ŽÁDNÉ lokální formátování ani validace — vše přes Foxentry
       if (hasFoxentryKey) return;
       var raw = phoneField.value.trim();
       if (!raw) { phonePreview.style.display = 'none'; return; }
-      // Sync country van prefix
+      // Sync country z prefixu
       syncCountryFromPhone(raw);
-      var country = countrySelect ? countrySelect.value : 'NL';
+      var country = countrySelect ? countrySelect.value : 'CZ';
       var formatted = formatPhoneNumber(raw, country);
       phoneField.value = formatted;
       if (formatted !== raw) {
-        phonePreview.textContent = '\u2713 Opgeslagen als ' + formatted;
+        phonePreview.textContent = '\u2713 Uloženo jako ' + formatted;
         phonePreview.style.display = 'block';
       } else {
         phonePreview.style.display = 'none';
@@ -5301,7 +5290,7 @@ body {
     });
   }
 
-  /* ─── FACTUURADRES (BILLING) — toggle ─── */
+  /* ─── FAKTURAČNÍ ADRESA (BILLING) — toggle ─── */
   var billingCheckbox = document.getElementById('billing-checkbox');
   var billingFields = document.getElementById('billing-fields');
 
@@ -5317,12 +5306,12 @@ body {
         document.getElementById('billing_address').value = '';
         document.getElementById('billing_city').value = '';
         document.getElementById('billing_postal_code').value = '';
-        document.getElementById('billing_country').value = 'NL';
+        document.getElementById('billing_country').value = 'CZ';
       }
     });
   }
 
-  /* ─── ADRES VALIDATIE — straatnaam + huisnummer ─── */
+  /* ─── VALIDACE ADRESY — ulice + číslo popisné ─── */
   var addressField = document.getElementById('address');
   var addressWarning = document.getElementById('address-warning');
   var addressWarningText = document.getElementById('address-warning-text');
@@ -5333,10 +5322,10 @@ body {
       var hasLetter = /[a-zA-Z\u00C0-\u024F]/.test(val);
       var hasDigit = /\d/.test(val);
       if (!hasDigit && hasLetter) {
-        addressWarningText.textContent = 'Vergeet niet je huisnummer toe te voegen';
+        addressWarningText.textContent = 'Nezapomeňte přidat číslo popisné';
         addressWarning.style.display = 'block';
       } else if (!hasLetter && hasDigit) {
-        addressWarningText.textContent = 'Vul ook je straatnaam in';
+        addressWarningText.textContent = 'Vyplňte také název ulice';
         addressWarning.style.display = 'block';
       } else {
         addressWarning.style.display = 'none';
@@ -5367,27 +5356,27 @@ body {
     });
   }
 
-  // Label KVK/Ondernemingsnummer se mění podle země
+  // Label IČO se mění podle země
   function updateCompanyLabels() {
     var country = document.getElementById('country').value;
     if (kvkLabelNL && kvkLabelBE) {
-      kvkLabelNL.className = 'company-kvk-label' + (country === 'NL' ? ' active' : '');
-      kvkLabelBE.className = 'company-kvk-label' + (country === 'BE' ? ' active' : '');
+      kvkLabelNL.className = 'company-kvk-label' + (country === 'CZ' ? ' active' : '');
+      kvkLabelBE.className = 'company-kvk-label' + (country !== 'CZ' ? ' active' : '');
     }
   }
   document.getElementById('country').addEventListener('change', updateCompanyLabels);
   updateCompanyLabels();
 
   /* ═══════════════════════════════════════════════════════════════════
-   *  FOXENTRY SMART VALIDATIE — adres autocomplete, e-mail, telefoon, bedrijf
-   *  Alleen actief als PROJECT_CONFIG.foxentryApiKey is ingesteld.
-   *  Werkt samen met bestaande validateField / checkEmailTypo / formatPhoneNumber.
+   *  FOXENTRY SMART VALIDACE — autocomplete adresy, e-mail, telefon, firma
+   *  Aktivní pouze pokud je nastaven PROJECT_CONFIG.foxentryApiKey.
+   *  Spolupracuje s existujícími validateField / checkEmailTypo / formatPhoneNumber.
    * ═══════════════════════════════════════════════════════════════════ */
   (function() {
     var FOXENTRY_KEY = (typeof PROJECT_CONFIG !== 'undefined' && PROJECT_CONFIG.foxentryApiKey) || null;
-    if (!FOXENTRY_KEY) return; // Geen key → alles blijft bij de lokale validatie
+    if (!FOXENTRY_KEY) return; // Žádný klíč → vše zůstává u lokální validace
 
-    // Markeer email en telefoon velden als Foxentry-managed (verbergt lokale .field-error via CSS)
+    // Označ email a telefon pole jako Foxentry-managed (skryje lokální .field-error přes CSS)
     var _emailEl = document.getElementById('email');
     var _phoneEl = document.getElementById('phone');
     if (_emailEl) _emailEl.classList.add('foxentry-managed');
@@ -5399,7 +5388,7 @@ body {
     function foxentryFetch(endpoint, body) {
       // Foxentry API v2: alles zit in "request" object, inclusief client
       body.client = {
-        country: (document.getElementById('country') || {}).value || 'NL'
+        country: (document.getElementById('country') || {}).value || 'CZ'
       };
       return fetch(API_BASE + endpoint, {
         method: 'POST',
@@ -5423,7 +5412,7 @@ body {
         result: r.result || {},
         corrected: r.resultCorrected || null,
         suggestions: r.suggestions || [],
-        results: r.results || [] // voor search endpoints
+        results: r.results || [] // pro search endpointy
       };
     }
 
@@ -5438,9 +5427,9 @@ body {
     }
 
     /* ─── Spinner helpers ─── */
-    // Terwijl Foxentry bezig is, verbergen we de check/cross iconen
-    // en blokkeren we de lokale validateField van het instellen van valid/invalid.
-    // Op window zodat validateField() (buiten deze IIFE) het kan lezen.
+    // Dokud Foxentry zpracovává, skryjeme ikony check/cross
+    // a blokujeme lokální validateField od nastavení valid/invalid.
+    // Na window aby validateField() (mimo tuto IIFE) mohla číst.
     window.__foxentryPending = window.__foxentryPending || {};
 
     function showSpinner(field) {
@@ -5452,7 +5441,7 @@ body {
         fg.appendChild(sp);
       }
       sp.style.display = 'block';
-      // Markeer veld als "Foxentry bezig" — verberg bestaande check/cross
+      // Označ pole jako "Foxentry zpracovává" — skryj stávající check/cross
       if (field.id) window.__foxentryPending[field.id] = true;
       field.classList.remove('valid', 'invalid');
     }
@@ -5488,7 +5477,7 @@ body {
     }
 
     /* ════════════════════════════════════════
-     *  1. ADRES AUTOCOMPLETE
+     *  1. AUTOCOMPLETE ADRESY
      * ════════════════════════════════════════ */
     var addrField = document.getElementById('address');
     var addrDropdown = document.getElementById('foxentry-address-dropdown');
@@ -5531,7 +5520,7 @@ body {
             if (cityField && data.city) cityField.value = data.city;
             if (postalField && data.zip) postalField.value = data.zip;
             addrSelectedFromDropdown = true;
-            // Trigger de float-label en validatie
+            // Trigger float-label a validaci
             [addrField, cityField, postalField].forEach(function(f) {
               if (f && f.value) {
                 f.closest('.float-field').classList.add('has-value');
@@ -5547,11 +5536,11 @@ body {
       }, 300));
 
       addrField.addEventListener('blur', function() {
-        // Sluit dropdown na korte delay (laat mousedown event eerst afhandelen)
+        // Zavřít dropdown po krátké prodlevě (nechat mousedown event proběhnout první)
         setTimeout(function() { hideDropdown(addrDropdown); }, 200);
       });
       addrField.addEventListener('focus', function() {
-        // Heropen als er items zijn
+        // Znovu otevřít pokud jsou položky
         if (addrDropdown.children.length > 0 && !addrSelectedFromDropdown) {
           addrDropdown.classList.add('is-open');
         }
@@ -5559,8 +5548,8 @@ body {
     }
 
     /* ════════════════════════════════════════
-     *  2a. E-MAIL DOMAIN AUTOCOMPLETE (/email/search)
-     *  Toont dropdown met populaire domeinen na @ (debounce 250ms)
+     *  2a. E-MAIL DOMÉNOVÝ AUTOCOMPLETE (/email/search)
+     *  Zobrazí dropdown s populárními doménami po @ (debounce 250ms)
      * ════════════════════════════════════════ */
     var foxEmailField = document.getElementById('email');
     var foxEmailSuggestion = document.getElementById('email-suggestion');
@@ -5570,13 +5559,13 @@ body {
       foxEmailField.addEventListener('input', debounce(function() {
         var val = foxEmailField.value.trim();
         var atIdx = val.indexOf('@');
-        // Alleen zoeken als er een @ is + minstens 1 teken erna
+        // Hledat pouze pokud je @ + alespoň 1 znak za ním
         if (atIdx === -1 || atIdx === val.length - 1) {
           hideDropdown(foxEmailDropdown);
           return;
         }
         var afterAt = val.substring(atIdx + 1);
-        // Stop met zoeken als domein al compleet lijkt (bevat een punt met tekst erna)
+        // Přestat hledat pokud doména vypadá kompletní (obsahuje tečku s textem za ní)
         if (/\.\w{2,}$/.test(afterAt)) {
           hideDropdown(foxEmailDropdown);
           return;
@@ -5603,7 +5592,7 @@ body {
             // Trigger float-label
             var ff = foxEmailField.closest('.float-field');
             if (ff) ff.classList.add('has-value');
-            // Valideer het geselecteerde email
+            // Validovat vybraný e-mail
             foxEmailField.dispatchEvent(new Event('blur'));
           });
         })
@@ -5612,11 +5601,11 @@ body {
         });
       }, 250));
 
-      // Sluit dropdown bij blur (met delay voor mousedown)
+      // Zavřít dropdown při blur (s prodlevou pro mousedown)
       foxEmailField.addEventListener('blur', function() {
         setTimeout(function() { hideDropdown(foxEmailDropdown); }, 200);
       });
-      // Heropen bij focus als er items zijn
+      // Znovu otevřít při focus pokud jsou položky
       foxEmailField.addEventListener('focus', function() {
         if (foxEmailDropdown.children.length > 0 && foxEmailField.value.indexOf('@') !== -1) {
           var afterAt = foxEmailField.value.substring(foxEmailField.value.indexOf('@') + 1);
@@ -5636,13 +5625,13 @@ body {
         var val = foxEmailField.value.trim();
         if (!val || val.indexOf('@') === -1) return;
 
-        // Pre-check: TLD moet minimaal 2 tekens zijn — skip Foxentry als ongeldig
+        // Pre-check: TLD musí mít minimálně 2 znaky — přeskočit Foxentry pokud neplatné
         var _preParts = val.split('@');
         if (_preParts.length === 2) {
           var _preDomain = _preParts[1].split('.');
           var _preTld = _preDomain[_preDomain.length - 1] || '';
           if (_preTld.length > 0 && _preTld.length < 2) {
-            // TLD te kort (.c, .x) — lokale handler heeft al invalid gezet, niet overschrijven
+            // TLD příliš krátká (.c, .x) — lokální handler již nastavil invalid, nepřepisovat
             return;
           }
         }
@@ -5659,7 +5648,7 @@ body {
           var correctedEmail = (fx.corrected && fx.corrected.data && fx.corrected.data.email) || null;
           var suggestions = fx.suggestions || [];
 
-          // Verberg eerdere suggestie
+          // Skrýt předchozí návrh
           if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
 
           // Extra veiligheid: TLD lengte check (Foxentry basic mist dit)
@@ -5673,13 +5662,13 @@ body {
 
           switch (proposal) {
             case 'valid':
-              // Email is OK — maar override als TLD te kort is
+              // E-mail je OK — ale přepsat pokud je TLD příliš krátká
               if (_tldTooShort) {
                 foxEmailField.classList.add('invalid');
                 foxEmailField.classList.remove('valid');
                 var _typoFix = checkEmailTypo(val);
                 if (_typoFix && foxEmailSuggestion) {
-                  foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + _typoFix + '</strong>? Klik om te corrigeren.';
+                  foxEmailSuggestion.innerHTML = 'Mysleli jste <strong>' + _typoFix + '</strong>? Klikněte pro opravu.';
                   foxEmailSuggestion.style.display = 'block';
                   foxEmailSuggestion.onclick = function() {
                     foxEmailField.value = _typoFix;
@@ -5695,17 +5684,17 @@ body {
               break;
 
             case 'invalid':
-              // Email is fout, geen correctie beschikbaar
+              // E-mail je chybný, žádná oprava není k dispozici
               foxEmailField.classList.add('invalid');
               foxEmailField.classList.remove('valid');
               break;
 
             case 'invalidWithCorrection':
-              // Fout maar Foxentry kent de correctie (bv. gamil.com → gmail.com)
+              // Chyba ale Foxentry zná opravu (např. gamil.com → gmail.com)
               foxEmailField.classList.add('invalid');
               foxEmailField.classList.remove('valid');
               if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + correctedEmail + '</strong>? Klik om te corrigeren.';
+                foxEmailSuggestion.innerHTML = 'Mysleli jste <strong>' + correctedEmail + '</strong>? Klikněte pro opravu.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = correctedEmail;
@@ -5717,18 +5706,18 @@ body {
               break;
 
             case 'invalidWithSuggestions':
-              // Fout, meerdere alternatieven beschikbaar
+              // Chyba, k dispozici více alternativ
               foxEmailField.classList.add('invalid');
               foxEmailField.classList.remove('valid');
               if (suggestions.length > 0 && foxEmailSuggestion) {
-                var sugHtml = 'Bedoelde je: ';
+                var sugHtml = 'Mysleli jste: ';
                 suggestions.forEach(function(s, idx) {
                   var sEmail = (s.data && s.data.email) || '';
                   if (!sEmail) return;
                   if (idx > 0) sugHtml += ' of ';
                   sugHtml += '<strong data-email="' + sEmail + '">' + sEmail + '</strong>';
                 });
-                sugHtml += '? Klik om te corrigeren.';
+                sugHtml += '? Klikněte pro opravu.';
                 foxEmailSuggestion.innerHTML = sugHtml;
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function(e) {
@@ -5741,8 +5730,8 @@ body {
                   }
                 };
               } else if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
-                // Fallback naar corrected als suggestions leeg
-                foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + correctedEmail + '</strong>? Klik om te corrigeren.';
+                // Fallback na corrected pokud jsou suggestions prázdné
+                foxEmailSuggestion.innerHTML = 'Mysleli jste <strong>' + correctedEmail + '</strong>? Klikněte pro opravu.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = correctedEmail;
@@ -5754,12 +5743,12 @@ body {
               break;
 
             case 'validWithSuggestion':
-              // Technisch geldig maar betere optie beschikbaar (bv. gmai.com → gmail.com)
+              // Technicky platné ale lepší varianta k dispozici (např. gmai.com → gmail.com)
               foxEmailField.classList.add('valid');
               foxEmailField.classList.remove('invalid');
               var betterEmail = correctedEmail || (suggestions[0] && suggestions[0].data && suggestions[0].data.email) || null;
               if (betterEmail && betterEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Bedoelde je misschien <strong>' + betterEmail + '</strong>? Klik om te corrigeren.';
+                foxEmailSuggestion.innerHTML = 'Nemysleli jste <strong>' + betterEmail + '</strong>? Klikněte pro opravu.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = betterEmail;
@@ -5769,7 +5758,7 @@ body {
               break;
 
             default:
-              // Onbekend proposal — val terug op isValid
+              // Neznámý proposal — fallback na isValid
               if (fx.result.isValid === true) {
                 foxEmailField.classList.add('valid');
                 foxEmailField.classList.remove('invalid');
@@ -5780,11 +5769,11 @@ body {
               break;
           }
 
-          // Na Foxentry verwerking: herstel lokale typo suggestie als Foxentry geen eigen suggestie toonde
+          // Po zpracování Foxentry: obnovit lokální návrh překlepu pokud Foxentry nezobrazilo vlastní návrh
           if (foxEmailSuggestion && foxEmailSuggestion.style.display === 'none') {
             var _localTypo = checkEmailTypo(val);
             if (_localTypo) {
-              foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + _localTypo + '</strong>? Klik om te corrigeren.';
+              foxEmailSuggestion.innerHTML = 'Mysleli jste <strong>' + _localTypo + '</strong>? Klikněte pro opravu.';
               foxEmailSuggestion.style.display = 'block';
               foxEmailSuggestion.onclick = function() {
                 foxEmailField.value = _localTypo;
@@ -5797,7 +5786,7 @@ body {
         })
         .catch(function(err) {
           hideSpinner(foxEmailField);
-          // Foxentry failed (400/429/network) — lokale regex + TLD validatie als fallback
+          // Foxentry selhalo (400/429/network) — lokální regex + TLD validace jako fallback
           console.warn('[Foxentry] Email validation failed, using local fallback:', err.message || err);
           var localValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
 
@@ -5816,10 +5805,10 @@ body {
             foxEmailField.classList.add('invalid');
             foxEmailField.classList.remove('valid');
           }
-          // Toon typo suggestie als beschikbaar
+          // Zobrazit návrh překlepu pokud je k dispozici
           var localSuggestion = checkEmailTypo(val);
           if (localSuggestion && foxEmailSuggestion) {
-            foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + localSuggestion + '</strong>? Klik om te corrigeren.';
+            foxEmailSuggestion.innerHTML = 'Mysleli jste <strong>' + localSuggestion + '</strong>? Klikněte pro opravu.';
             foxEmailSuggestion.style.display = 'block';
             foxEmailSuggestion.onclick = function() {
               foxEmailField.value = localSuggestion;
@@ -5833,7 +5822,7 @@ body {
     }
 
     /* ════════════════════════════════════════
-     *  3. TELEFOON VALIDATIE (versterkt bestaande formatting)
+     *  3. VALIDACE TELEFONU (rozšiřuje existující formátování)
      * ════════════════════════════════════════ */
     var foxPhoneField = document.getElementById('phone');
     var foxPhonePreview = document.getElementById('phone-preview');
@@ -5842,7 +5831,7 @@ body {
     var phoneWarning = document.getElementById('phone-warning');
     var phoneWarningConfirm = document.getElementById('phone-warning-confirm');
     var phoneWarningEdit = document.getElementById('phone-warning-edit');
-    var phoneConfirmedNumber = null; // Bewaar bevestigd nummer — geen herhaalde warning
+    var phoneConfirmedNumber = null; // Uložit potvrzené číslo — žádné opakované varování
 
     function showPhoneWarning() {
       if (phoneWarning) phoneWarning.style.display = 'block';
@@ -5858,7 +5847,7 @@ body {
       if (foxPhoneField) delete foxPhoneField.dataset.phoneWarning;
     }
 
-    // "Ja, dit klopt" — bevestig nummer als geldig
+    // "Ano, je správné" — potvrdit číslo jako platné
     if (phoneWarningConfirm) {
       phoneWarningConfirm.addEventListener('click', function() {
         phoneConfirmedNumber = foxPhoneField ? foxPhoneField.value.trim() : '';
@@ -5869,13 +5858,13 @@ body {
         }
         if (foxPhonePreview) {
           foxPhonePreview.style.color = '';
-          foxPhonePreview.textContent = '\u2713 Telefoonnummer bevestigd';
+          foxPhonePreview.textContent = '\u2713 Telefonní číslo potvrzeno';
           foxPhonePreview.style.display = 'block';
         }
       });
     }
 
-    // "Aanpassen" — focus terug naar veld
+    // "Upravit" — focus zpět na pole
     if (phoneWarningEdit) {
       phoneWarningEdit.addEventListener('click', function() {
         hidePhoneWarning();
@@ -5883,7 +5872,7 @@ body {
       });
     }
 
-    // Bij input: verberg warning + reset bevestiging als nummer verandert
+    // Při vstupu: skrýt varování + reset potvrzení pokud se číslo změní
     if (foxPhoneField) {
       foxPhoneField.addEventListener('input', function() {
         hidePhoneWarning();
@@ -5891,19 +5880,19 @@ body {
     }
 
     if (foxPhoneField) {
-      // Foxentry handelt ALLE telefoonvalidatie + formatting af
+      // Foxentry zpracovává VEŠKEROU telefonní validaci + formátování
       foxPhoneField.addEventListener('blur', function() {
         var val = foxPhoneField.value.trim();
         if (!val || val.length < 5) return;
 
-        // Voeg landprefix toe als die ontbreekt (bijv. 0612345678 → +31612345678)
+        // Přidat předvolbu země pokud chybí (např. 0612345678 → +420612345678)
         var countryEl = document.getElementById('country');
-        var cc = countryEl ? countryEl.value : 'NL';
-        var prefixMap = { NL: '+31', BE: '+32' };
+        var cc = countryEl ? countryEl.value : 'CZ';
+        var prefixMap = { CZ: '+420' };
         var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
         if (!cleaned.startsWith('+') && !cleaned.startsWith('00')) {
-          if (cleaned.startsWith('0')) cleaned = (prefixMap[cc] || '+31') + cleaned.substring(1);
-          else if (/^\d{7,}$/.test(cleaned)) cleaned = (prefixMap[cc] || '+31') + cleaned;
+          if (cleaned.startsWith('0')) cleaned = (prefixMap[cc] || '+420') + cleaned.substring(1);
+          else if (/^\d{7,}$/.test(cleaned)) cleaned = (prefixMap[cc] || '+420') + cleaned;
         } else if (cleaned.startsWith('00')) {
           cleaned = '+' + cleaned.substring(2);
         }
@@ -5916,7 +5905,7 @@ body {
             hideSpinner(foxPhoneField);
             var fx = foxentryResult(resp);
             var isValid = fx.result.isValid === true;
-            // Gebruik geformatteerd nummer van Foxentry
+            // Použít formátované číslo z Foxentry
             var data = fx.result.data || {};
             var fmt = data.format || {};
             var formattedFull = fmt.internationalFormatted || data.numberWithPrefix || cleaned;
@@ -5925,7 +5914,7 @@ body {
             } else if (data.numberWithPrefix) {
               foxPhoneField.value = data.numberWithPrefix;
             }
-            // Sync country dropdown op basis van Foxentry resultaat
+            // Sync country dropdown na základě výsledku Foxentry
             syncCountryFromPhone(formattedFull);
 
             if (isValid) {
@@ -5934,18 +5923,18 @@ body {
               hidePhoneWarning();
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
-                foxPhonePreview.textContent = '\u2713 Geldig telefoonnummer';
+                foxPhonePreview.textContent = '\u2713 Platné telefonní číslo';
                 foxPhonePreview.style.display = 'block';
               }
             } else {
-              // Al bevestigd door gebruiker? Niet opnieuw waarschuwen.
+              // Již potvrzeno uživatelem? Nevarovat znovu.
               if (phoneConfirmedNumber === foxPhoneField.value.trim()) {
                 foxPhoneField.classList.add('valid');
                 foxPhoneField.classList.remove('invalid');
                 hidePhoneWarning();
                 return;
               }
-              // Toon oranje waarschuwing i.p.v. rode fout
+              // Zobrazit oranžové varování místo červené chyby
               showPhoneWarning();
             }
           })
@@ -5966,7 +5955,7 @@ body {
                 foxPhonePreview.style.display = 'none';
               }
             } else {
-              // Lokale fallback: ook oranje warning
+              // Lokální fallback: také oranžové varování
               if (phoneConfirmedNumber === foxPhoneField.value.trim()) {
                 foxPhoneField.classList.add('valid');
                 foxPhoneField.classList.remove('invalid');
@@ -5980,7 +5969,7 @@ body {
     }
 
     /* ════════════════════════════════════════
-     *  4. BEDRIJF AUTOCOMPLETE (KVK / Ondernemingsnummer)
+     *  4. FIREMNÍ AUTOCOMPLETE (IČO / Identifikační číslo)
      * ════════════════════════════════════════ */
     var companyInput = document.getElementById('company_name');
     var companyDropdown = document.getElementById('foxentry-company-dropdown');
@@ -6013,7 +6002,7 @@ body {
             var city = (addr && addr.city) || '';
             items.push({
               html: '<strong>' + name + '</strong>' +
-                    (regNo ? '<small>KVK: ' + regNo + '</small>' : '') +
+                    (regNo ? '<small>IČO: ' + regNo + '</small>' : '') +
                     (city ? '<small>' + city + '</small>' : ''),
               data: { name: name, regNo: regNo, vatNo: vatNo, city: city }
             });
@@ -6048,7 +6037,7 @@ body {
       });
     }
 
-    /* ─── Sluit alle dropdowns bij klik buiten ─── */
+    /* ─── Zavřít všechny dropdowny při kliknutí mimo ─── */
     document.addEventListener('click', function(e) {
       if (!e.target.closest('.foxentry-dropdown') && !e.target.closest('.form-group')) {
         hideDropdown(addrDropdown);
@@ -6058,19 +6047,19 @@ body {
 
   })();
 
-  /* ─── INLINE VALIDATIE ─── */
+  /* ─── INLINE VALIDACE ─── */
   var fields = document.querySelectorAll('#checkout-form input[required]');
   var submitValidationMsg = document.getElementById('submit-validation-msg');
 
   // Field label lookup for error messages
   var fieldLabels = {
-    email: 'E-mailadres',
-    phone: 'Telefoonnummer',
-    first_name: 'Voornaam',
-    last_name: 'Achternaam',
-    address: 'Straatnaam en huisnummer',
-    city: 'Stad',
-    postal_code: 'Postcode'
+    email: 'E-mailová adresa',
+    phone: 'Telefonní číslo',
+    first_name: 'Jméno',
+    last_name: 'Příjmení',
+    address: 'Ulice a číslo popisné',
+    city: 'Město',
+    postal_code: 'PSČ'
   };
 
   fields.forEach(function(field) {
@@ -6090,24 +6079,24 @@ body {
 
   // onSubmit: also mark EMPTY required fields, not just incorrect ones
   function validateField(field, markEmpty) {
-    // Als Foxentry bezig is met dit veld, sla lokale validatie over
+    // Pokud Foxentry zpracovává toto pole, přeskočit lokální validaci
     if (window.__foxentryPending && window.__foxentryPending[field.id]) {
       return true;
     }
-    // Als Foxentry key actief is, email en telefoon worden UITSLUITEND door Foxentry gevalideerd
+    // Pokud je Foxentry klíč aktivní, e-mail a telefon jsou validovány VÝHRADNĚ přes Foxentry
     var _hasFox = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
     if (_hasFox && (field.type === 'email' || field.type === 'tel')) {
-      // Bij submit: als veld leeg is, markeer als invalid
+      // Při odeslání: pokud je pole prázdné, označit jako invalid
       if (markEmpty && field.value.trim().length === 0) {
         field.classList.add('invalid');
         field.classList.remove('valid');
         return false;
       }
-      // Telefoon: als oranje warning actief is (niet bevestigd), blokkeer submit
+      // Telefon: pokud je aktivní oranžové varování (nepotvrzeno), blokovat odeslání
       if (field.type === 'tel' && field.dataset.phoneWarning === 'true') {
         return false;
       }
-      // Behoud huidige valid/invalid status (gezet door Foxentry), niet overschrijven
+      // Zachovat aktuální valid/invalid stav (nastavený Foxentry), nepřepisovat
       return field.classList.contains('valid') || field.value.trim().length === 0;
     }
 
@@ -6116,7 +6105,7 @@ body {
 
     if (field.type === 'email') {
       isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-      // Extra: TLD moet minimaal 2 tekens zijn (.nl, .com, .be — niet .c, .x)
+      // Extra: TLD musí mít minimálně 2 znaky (.cz, .com, .sk — ne .c, .x)
       if (isValid) {
         var _vParts = value.split('@');
         if (_vParts.length === 2) {
@@ -6131,7 +6120,7 @@ body {
     } else if (field.id === 'postal_code') {
       isValid = value.length >= 4;
     } else if (field.id === 'address') {
-      // Adresa musí obsahovat písmena I číslo (ulice + huisnummer) pro zelený check
+      // Adresa musí obsahovat písmena I číslo (ulice + číslo popisné) pro zelený check
       var hasLetter = /[a-zA-Z\u00C0-\u024F]/.test(value);
       var hasDigit = /\d/.test(value);
       isValid = value.length >= 2 && hasLetter && hasDigit;
@@ -6158,7 +6147,7 @@ body {
 
     // Show/hide submit validation message
     if (!allValid && submitValidationMsg) {
-      submitValidationMsg.textContent = 'Controleer de volgende velden: ' + missingFields.join(', ');
+      submitValidationMsg.textContent = 'Zkontrolujte následující pole: ' + missingFields.join(', ');
       submitValidationMsg.style.display = '';
     } else if (submitValidationMsg) {
       submitValidationMsg.style.display = 'none';
@@ -6176,7 +6165,7 @@ body {
     }, options.headers || {});
     return fetch(MEDUSA_URL + path, options).then(function(res) {
       return res.json().then(function(data) {
-        if (!res.ok) throw new Error(data.message || 'API fout');
+        if (!res.ok) throw new Error(data.message || 'Chyba API');
         return data;
       });
     });
@@ -6235,8 +6224,8 @@ body {
           if (el.value) el.classList.add('has-value');
         }
       });
-      // Trigger blur op velden met waarde zodat Foxentry/lokale validatie loopt
-      // en valid/invalid klasse wordt gezet (voorkomt submit-blokkade)
+      // Trigger blur na polích s hodnotou, aby Foxentry/lokální validace proběhla
+      // a nastavila se třída valid/invalid (zabrání blokování odeslání)
       setTimeout(function() {
         ['email', 'phone', 'address', 'city', 'postal_code', 'first_name', 'last_name'].forEach(function(f) {
           var el = document.getElementById(f);
@@ -6373,7 +6362,7 @@ body {
     if (!document.querySelector('.payment-preloader')) {
       var preloaderDiv = document.createElement('div');
       preloaderDiv.className = 'payment-preloader';
-      preloaderDiv.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+      preloaderDiv.innerHTML = '<img src="/psisuperzivot/images/preloader.webp" alt="Načítání..." width="120" height="110"><p>Platba se zpracovává...</p><p class="sub">Prosím, vyčkejte.</p>';
       document.body.insertBefore(preloaderDiv, document.body.firstChild);
     }
 
@@ -6400,7 +6389,7 @@ body {
       console.error('[Payment Return] Cart completion failed:', err);
       var preloader = document.querySelector('.payment-preloader');
       if (preloader) {
-        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Er ging iets mis bij het verwerken van je betaling.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Probeer het opnieuw of neem contact met ons op.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Opnieuw proberen</a></div>';
+        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Při zpracování platby došlo k chybě.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Zkuste to znovu nebo nás kontaktujte.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Zkusit znovu</a></div>';
       }
     });
 
@@ -6436,7 +6425,7 @@ body {
         : product.thumbnail;
       if (imgUrl) setProductThumbnail(imgUrl);
     }).catch(function(err) {
-      console.warn('Product thumbnail laden mislukt:', err);
+      console.warn('Načtení náhledu produktu selhalo:', err);
     });
   })();
 
@@ -6473,16 +6462,16 @@ body {
     promoApplyBtn.addEventListener('click', function() {
       var code = promoInput.value.trim().toUpperCase();
       if (!code) {
-        promoMessage.textContent = 'Voer een kortingscode in.';
+        promoMessage.textContent = 'Zadejte slevový kód.';
         promoMessage.className = 'promo-message error';
         return;
       }
       // Disable button + loading
       promoApplyBtn.disabled = true;
-      promoApplyBtn.textContent = 'Controleren...';
+      promoApplyBtn.textContent = 'Ověřování...';
       promoMessage.className = 'promo-message';
 
-      // Stap 1: Cart aanmaken (als die nog niet bestaat)
+      // Krok 1: Vytvoř cart (pokud ještě neexistuje)
       var cartPromise;
       if (promoCartId) {
         cartPromise = Promise.resolve(promoCartId);
@@ -6492,7 +6481,7 @@ body {
           body: JSON.stringify({ region_id: currentRegionId })
         }).then(function(res) {
           promoCartId = res.cart.id;
-          // Voeg hoofdproduct toe zodat Medusa promotions kan evalueren
+          // Přidej hlavní produkt aby Medusa mohla vyhodnotit promo kódy
           return medusaFetch('/store/carts/' + promoCartId + '/line-items', {
             method: 'POST',
             body: JSON.stringify({ variant_id: VARIANT_ID, quantity: selectedBundleQty })
@@ -6500,7 +6489,7 @@ body {
         });
       }
 
-      // Stap 2: Promo code toepassen via Medusa
+      // Krok 2: Použít promo kód přes Medusa
       cartPromise.then(function(cartId) {
         return medusaFetch('/store/carts/' + cartId + '/promotions', {
           method: 'POST',
@@ -6508,7 +6497,7 @@ body {
         });
       })
       .then(function(promoRes) {
-        // Succes — code is geldig
+        // Úspěch — kód je platný
         savedPromoCode = code;
         promoAppliedToCart = true;
         promoCodeTag.textContent = code;
@@ -6518,15 +6507,15 @@ body {
         promoToggle.style.display = 'none';
         promoMessage.className = 'promo-message';
         promoInput.value = '';
-        // Update order summary met korting
+        // Aktualizovat souhrn objednávky se slevou
         if (promoRes && promoRes.cart) {
           updateOrderSummary(promoRes.cart);
         }
       })
       .catch(function(err) {
-        // Fout — code is ongeldig
-        console.warn('Promo code geweigerd:', err.message || err);
-        promoMessage.textContent = 'Ongeldige kortingscode';
+        // Chyba — kód je neplatný
+        console.warn('Promo kód odmítnut:', err.message || err);
+        promoMessage.textContent = 'Neplatný slevový kód';
         promoMessage.className = 'promo-message error';
         savedPromoCode = '';
         promoAppliedToCart = false;
@@ -6534,12 +6523,12 @@ body {
       .then(function() {
         // Reset button
         promoApplyBtn.disabled = false;
-        promoApplyBtn.textContent = 'Toepassen';
+        promoApplyBtn.textContent = 'Použít';
       });
     });
   }
 
-  // Enter v input = klik na Toepassen
+  // Enter v inputu = klik na Použít
   if (promoInput) {
     promoInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
@@ -6557,7 +6546,7 @@ body {
       promoApplied.classList.remove('is-visible');
       promoToggle.style.display = '';
       promoMessage.className = 'promo-message';
-      // Verwijder promo van cart als die bestaat
+      // Odstraň promo z cartu pokud existuje
       if (promoCartId && removedCode) {
         medusaFetch('/store/carts/' + promoCartId + '/promotions', {
           method: 'DELETE',
@@ -6566,13 +6555,13 @@ body {
           if (res && res.cart) updateOrderSummary(res.cart);
         }).catch(function() {});
       }
-      // Verberg korting regel in samenvatting
+      // Skryj řádek slevy v souhrnu
       var discountEl = document.getElementById('summary-discount');
       if (discountEl) discountEl.style.display = 'none';
     });
   }
 
-  /* ─── FORMULIER SUBMIT ─── */
+  /* ─── ODESLÁNÍ FORMULÁŘE ─── */
   var form = document.getElementById('checkout-form');
   var submitBtn = document.getElementById('submit-btn');
   var errorEl = document.getElementById('payment-errors');
@@ -6580,7 +6569,7 @@ body {
   form.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Valideer alle velden
+    // Validovat všechna pole
     if (!validateAllFields()) {
       var firstError = form.querySelector('.invalid');
       if (firstError) {
@@ -6590,7 +6579,7 @@ body {
       return;
     }
 
-    // Toon laadstatus
+    // Zobraz stav načítání
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
     errorEl.textContent = '';
@@ -6600,21 +6589,21 @@ body {
      *
      * Kompletni flow s Medusa v2 API:
      *
-     * 1. Maak cart aan (POST /store/carts)
-     * 2. Voeg product toe (POST /store/carts/{id}/line-items)
-     * 3. Update cart met klantgegevens (POST /store/carts/{id})
-     * 3b. Voeg shipping method toe (GET /store/shipping-options + POST /store/carts/{id}/shipping-methods)
-     * 4a. Maak payment collection (POST /store/payment-collections)
-     * 4b. Initialiseer payment session (POST /store/payment-collections/{id}/payment-sessions)
-     *    → Medusa roept initiatePayment aan op de geselecteerde provider
-     *    → Provider (Mollie/PayPal) retourneert checkout/approval URL
-     * 5. Redirect klant naar betaalpagina (Mollie of PayPal)
-     * 6. Na betaling keert klant terug → cart voltooien (POST /store/carts/{id}/complete)
+     * 1. Vytvořit cart (POST /store/carts)
+     * 2. Přidej produkt (POST /store/carts/{id}/line-items)
+     * 3. Aktualizuj cart s údaji zákazníka (POST /store/carts/{id})
+     * 3b. Přidej metodu dopravy (GET /store/shipping-options + POST /store/carts/{id}/shipping-methods)
+     * 4a. Vytvoř platební kolekci (POST /store/payment-collections)
+     * 4b. Inicializuj platební relaci (POST /store/payment-collections/{id}/payment-sessions)
+     *    → Medusa zavolá initiatePayment na vybraném poskytovateli
+     *    → Poskytovatel (Mollie/PayPal) vrátí checkout/approval URL
+     * 5. Přesměruj zákazníka na platební stránku (Mollie nebo PayPal)
+     * 6. Po platbě se zákazník vrátí → dokončit cart (POST /store/carts/{id}/complete)
      *
      * Hieronder staat de implementatie:
      */
 
-    // Klantgegevens uit formulier
+    // Údaje zákazníka z formuláře
     var customerData = {
       email: document.getElementById('email').value.trim(),
       shipping_address: {
@@ -6646,7 +6635,7 @@ body {
       if (companyName) {
         customerData.shipping_address.company = companyName;
       }
-      // KVK + BTW → metadata (merge into existing metadata)
+      // IČO + DIČ → metadata (merge into existing metadata)
       if (kvkNumber) customerData.metadata.kvk_number = kvkNumber;
       if (vatNumber) customerData.metadata.vat_number = vatNumber;
       // Uložit do localStorage pro thank-you stránku
@@ -6659,10 +6648,10 @@ body {
       localStorage.removeItem('medusa_company');
     }
 
-    // ─── Factuuradres (billing address) ───
+    // ─── Fakturační adresa (billing address) ───
     var isBillingDifferent = document.getElementById('billing-checkbox').checked;
     if (isBillingDifferent) {
-      // Gebruiker heeft een ander factuuradres opgegeven
+      // Uživatel zadal jinou fakturační adresu
       customerData.billing_address = {
         first_name: document.getElementById('billing_first_name').value.trim() || customerData.shipping_address.first_name,
         last_name: document.getElementById('billing_last_name').value.trim() || customerData.shipping_address.last_name,
@@ -6677,7 +6666,7 @@ body {
         customerData.billing_address.company = companyName;
       }
     } else {
-      // Factuuradres = verzendadres (kopie)
+      // Fakturační adresa = doručovací adresa (kopie)
       customerData.billing_address = Object.assign({}, customerData.shipping_address);
     }
 
@@ -6687,23 +6676,23 @@ body {
     var checkoutOrderBump = orderBumpActive;
     var checkoutTotal = getCurrentTotal();
 
-    // Stap 1: Cart aanmaken of hergebruiken (promo cart → background cart → nieuw)
+    // Krok 1: Vytvořit nebo znovu použít cart (promo cart → background cart → nový)
     var reuseCartId = promoCartId || backgroundCartId;
     var cartStep;
     if (reuseCartId) {
       // Cart bestaat al (promo code validatie of background cart recovery)
-      // Verwijder bestaande line items en voeg opnieuw toe (bundle/qty kan veranderd zijn)
+      // Odstraň stávající line items a přidej znovu (bundle/qty se mohly změnit)
       cartStep = medusaFetch('/store/carts/' + reuseCartId, { method: 'GET' })
         .then(function(cartRes) {
           var cart = cartRes.cart;
-          // Verwijder alle bestaande line items
+          // Odstraň všechny stávající line items
           var deletePromises = (cart.items || []).map(function(item) {
             return medusaFetch('/store/carts/' + reuseCartId + '/line-items/' + item.id, { method: 'DELETE' });
           });
           return Promise.all(deletePromises).then(function() { return reuseCartId; });
         })
         .catch(function() {
-          // Cart ophalen mislukt — maak een nieuwe aan
+          // Načtení cartu selhalo — vytvoř nový
           reuseCartId = null;
           backgroundCartId = null;
           promoCartId = null;
@@ -6721,7 +6710,7 @@ body {
 
     cartStep
     .then(function(cartId) {
-      // Stap 2a: Hoofdproduct toevoegen via bundle endpoint (custom pricing)
+      // Krok 2a: Přidat hlavní produkt přes bundle endpoint (custom pricing)
       // Uses /store/carts/{id}/line-items-bundle which applies bundle discount server-side
       return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
         method: 'POST',
@@ -6730,7 +6719,7 @@ body {
           quantity: checkoutBundleQty
         })
       }).then(function() {
-        // Stap 2b: Order bump produkt toevoegen (bundle endpoint = tax-inclusive + discounted price)
+        // Krok 2b: Přidat order bump produkt (bundle endpoint = cena včetně daně + se slevou)
         if (checkoutOrderBump) {
           return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
             method: 'POST',
@@ -6743,14 +6732,14 @@ body {
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
-      // Stap 3: Cart updaten met klantgegevens (must complete before shipping)
+      // Krok 3: Aktualizovat cart s údaji zákazníka (musí být dokončeno před shipping)
       return medusaFetch('/store/carts/' + cartId, {
         method: 'POST',
         body: JSON.stringify(customerData)
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
-      // Stap 3a: Promo code toepassen via Medusa Promotions API (opnieuw als cart hergebruikt wordt)
+      // Krok 3a: Aplikovat promo kód přes Medusa Promotions API (znovu pokud se cart znovupoužije)
       if (savedPromoCode) {
         return medusaFetch('/store/carts/' + cartId + '/promotions', {
           method: 'POST',
@@ -6763,19 +6752,19 @@ body {
           }
           return cartId;
         }).catch(function(err) {
-          // Medusa weigert de code — toon fout, verberg badge, stop NIET de bestelling
+          // Medusa odmítlo kód — zobrazit chybu, skrýt badge, NEZASTAVOVAT objednávku
           console.warn('Promo code geweigerd door Medusa:', err.message || err);
           savedPromoCode = '';
           promoAppliedToCart = false;
-          // Toon foutmelding
+          // Zobrazit chybovou hlášku
           if (promoMessage) {
-            promoMessage.textContent = 'Ongeldige kortingscode';
+            promoMessage.textContent = 'Neplatný slevový kód';
             promoMessage.className = 'promo-message error';
           }
-          // Verberg badge, toon toggle weer
+          // Skrýt badge, znovu zobrazit toggle
           promoApplied.classList.remove('is-visible');
           promoToggle.style.display = '';
-          // Verberg korting in samenvatting
+          // Skrýt slevu v souhrnu
           var discountEl = document.getElementById('summary-discount');
           if (discountEl) discountEl.style.display = 'none';
           return cartId;
@@ -6784,13 +6773,13 @@ body {
       return cartId;
     })
     .then(function(cartId) {
-      // Stap 3b: Shipping method toevoegen
+      // Krok 3b: Přidat metodu dopravy
       return medusaFetch('/store/shipping-options?cart_id=' + cartId, {
         method: 'GET'
       }).then(function(shipRes) {
         var options = shipRes.shipping_options || [];
         if (options.length === 0) {
-          throw new Error('Geen verzendopties beschikbaar');
+          throw new Error('Žádné možnosti dopravy nejsou k dispozici');
         }
         return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
           method: 'POST',
@@ -6804,7 +6793,7 @@ body {
       });
     })
     .then(function(cartId) {
-      // Stap 4: Payment — Medusa v2 Payment Collections flow
+      // Krok 4: Platba — Medusa v2 Payment Collections flow
       var USE_TEST_MODE = false; // Mollie live integration
 
       var providerId;
@@ -6834,7 +6823,7 @@ body {
           // Mollie: tokenize card → send token in session data
           tokenPromise = mollieInstance.createToken().then(function(tokenResult) {
             if (tokenResult.error) {
-              throw new Error(tokenResult.error.message || 'Creditcard verificatie mislukt');
+              throw new Error(tokenResult.error.message || 'Ověření kreditní karty selhalo');
             }
             sessionData.cardToken = tokenResult.token;
             console.log('[Mollie Components] Token created');
@@ -6935,7 +6924,7 @@ body {
           }
         });
       } else {
-        // PRODUKCE: Redirect naar betaalpagina of Klarna SDK flow
+        // PRODUKCE: Redirect na platební stránku nebo Klarna SDK flow
         var sessions = result.paymentCollection?.payment_sessions || [];
         var lastSession = sessions[sessions.length - 1] || {};
         var providerData = lastSession.data || {};
@@ -6971,7 +6960,7 @@ body {
           return new Promise(function(resolve, reject) {
             // Initialize Klarna Payments SDK
             if (typeof Klarna === 'undefined' || !Klarna.Payments) {
-              reject(new Error('Klarna Payments SDK niet geladen. Probeer het opnieuw.'));
+              reject(new Error('Klarna Payments SDK se nenačtalo. Zkuste to prosím znovu.'));
               return;
             }
 
@@ -6981,7 +6970,7 @@ body {
               });
               console.log('[Klarna] SDK initialized with client_token');
             } catch (initErr) {
-              reject(new Error('Klarna SDK initialisatie mislukt: ' + initErr.message));
+              reject(new Error('Inicializace Klarna SDK selhala: ' + initErr.message));
               return;
             }
 
@@ -6998,7 +6987,7 @@ body {
               street_address: billingAddr.address_1 || '',
               postal_code: billingAddr.postal_code || '',
               city: billingAddr.city || '',
-              country: (billingAddr.country_code || 'NL').toUpperCase(),
+              country: (billingAddr.country_code || 'CZ').toUpperCase(),
             };
 
             var category = klarnaSelectedCategory || 'pay_later';
@@ -7015,7 +7004,7 @@ body {
                   if (!document.querySelector('.payment-preloader')) {
                     var kPreloader = document.createElement('div');
                     kPreloader.className = 'payment-preloader';
-                    kPreloader.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+                    kPreloader.innerHTML = '<img src="/psisuperzivot/images/preloader.webp" alt="Načítání..." width="120" height="110"><p>Platba se zpracovává...</p><p class="sub">Prosím, vyčkejte.</p>';
                     document.body.insertBefore(kPreloader, document.body.firstChild);
                   }
 
@@ -7057,11 +7046,11 @@ body {
                   });
                 } else if (klarnaRes.show_form) {
                   // Klarna needs more info — customer should retry
-                  reject(new Error('Klarna heeft meer informatie nodig. Controleer je gegevens en probeer het opnieuw.'));
+                  reject(new Error('Klarna potřebuje více informací. Zkontrolujte své údaje a zkuste to znovu.'));
                 } else {
                   // Declined or cancelled
                   var reason = klarnaRes.error ? klarnaRes.error.invalid_fields?.join(', ') : '';
-                  reject(new Error('Klarna betaling niet goedgekeurd.' + (reason ? ' Controleer: ' + reason : ' Probeer een andere betaalmethode.')));
+                  reject(new Error('Platba Klarna nebyla schválena.' + (reason ? ' Zkontrolujte: ' + reason : ' Zkuste jinou platební metodu.')));
                 }
               }
             );
@@ -7101,7 +7090,7 @@ body {
                 window.location.href = PROJECT_CONFIG.upsellUrl;
               }
             } catch (err) {
-              throw new Error(err.message || 'Kaartbetaling mislukt');
+              throw new Error(err.message || 'Platba kartou selhala');
             }
           })();
         }
@@ -7132,7 +7121,7 @@ body {
             function waitForSDK(attempts) {
               if (typeof window.AirwallexComponentsSDK !== 'undefined') return initAirwallex();
               if (attempts <= 0) {
-                reject(new Error('Airwallex SDK niet geladen. Probeer het opnieuw.'));
+                reject(new Error('Airwallex SDK se nenačtalo. Zkuste to prosím znovu.'));
                 return;
               }
               setTimeout(function() { waitForSDK(attempts - 1); }, 300);
@@ -7169,7 +7158,7 @@ body {
                 intent_id: providerData.intentId,
                 client_secret: providerData.clientSecret,
                 currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
-                country_code: (countrySelect.value || 'NL').toUpperCase(),
+                country_code: (countrySelect.value || 'CZ').toUpperCase(),
                 autoCapture: true,
                 withBilling: false,
               };
@@ -7187,7 +7176,7 @@ body {
                 if (!document.querySelector('.payment-preloader')) {
                   var awPreloader = document.createElement('div');
                   awPreloader.className = 'payment-preloader';
-                  awPreloader.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+                  awPreloader.innerHTML = '<img src="/psisuperzivot/images/preloader.webp" alt="Načítání..." width="120" height="110"><p>Platba se zpracovává...</p><p class="sub">Prosím, vyčkejte.</p>';
                   document.body.insertBefore(awPreloader, document.body.firstChild);
                 }
 
@@ -7218,7 +7207,7 @@ body {
               dropIn.on('error', function(event) {
                 var error = event.detail && event.detail.error ? event.detail.error : event.detail || {};
                 submitBtn.style.display = '';
-                reject(new Error(error.message || 'Airwallex betaling mislukt.'));
+                reject(new Error(error.message || 'Platba Airwallex selhala.'));
               });
 
               dropIn.on('ready', function() {
@@ -7227,7 +7216,7 @@ body {
                 submitBtn.disabled = false;
               });
             } catch (awErr) {
-              reject(new Error('Airwallex initialisatie mislukt: ' + awErr.message));
+              reject(new Error('Inicializace Airwallex selhala: ' + awErr.message));
             }
             } // end initAirwallex
           });
@@ -7237,15 +7226,15 @@ body {
           window.location.href = redirectUrl;
         } else if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1) {
           // Airwallex without intentId — payment session not created properly
-          throw new Error('Airwallex betalingssessie niet correct aangemaakt. Probeer het opnieuw.');
+          throw new Error('Platební relace Airwallex nebyla správně vytvořena. Zkuste to prosím znovu.');
         } else {
-          throw new Error('Geen redirect URL ontvangen van betaalprovider');
+          throw new Error('Nebyla přijata URL pro přesměrování od poskytovatele plateb');
         }
       }
     })
     .catch(function(err) {
-      // Toon foutmelding
-      errorEl.textContent = err.message || 'Er ging iets mis. Probeer het opnieuw.';
+      // Zobrazit chybovou hlášku
+      errorEl.textContent = err.message || 'Něco se pokazilo. Zkuste to prosím znovu.';
       submitBtn.classList.remove('loading');
       submitBtn.disabled = false;
     });
