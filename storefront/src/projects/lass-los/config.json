@@ -1,22 +1,24 @@
 {
-  "slug": "slapp-taget",
-  "name": "Släpp taget om det som förstör dig",
-  "domain": "slapptagetboken.se",
-  "locale": "sv",
-  "defaultCountry": "SE",
-  "salesChannelName": "Slapp Taget",
+  "slug": "lass-los",
+  "name": "Lass los, was dich kaputt macht",
+  "domain": "befreiungsbuch.de",
+  "locale": "de",
+  "defaultCountry": "DE",
+  "salesChannelName": "Lass Los",
   "medusaUrl": "",
   "publishableApiKey": "",
   "facebookPixelId": "",
   "regions": {
-    "SE": ""
+    "DE": "",
+    "AT": "",
+    "LU": ""
   },
   "mainProduct": {
-    "name": "Släpp taget om det som förstör dig",
-    "handle": "slapp-taget-om-det-som-forstor-dig",
+    "name": "Lass los, was dich kaputt macht",
+    "handle": "lass-los-was-dich-kaputt-macht",
     "variantId": "",
-    "price": 399,
-    "currency": "SEK",
+    "price": 35,
+    "currency": "EUR",
     "thumbnail": ""
   },
   "upsellProduct": {
@@ -25,13 +27,13 @@
     "variantId": "",
     "price": 0,
     "originalPrice": 0,
-    "currency": "SEK"
+    "currency": "EUR"
   },
   "bundleOptions": [
-    { "qty": 1, "price": 399, "label": "1 bok", "save": 0 },
-    { "qty": 2, "price": 699, "label": "2 böcker", "save": 99 },
-    { "qty": 3, "price": 949, "label": "3 böcker", "save": 248 },
-    { "qty": 4, "price": 1199, "label": "4 böcker", "save": 397 }
+    { "qty": 1, "price": 35, "label": "1 Buch", "save": 0 },
+    { "qty": 2, "price": 59, "label": "2 Bücher", "save": 11 },
+    { "qty": 3, "price": 79, "label": "3 Bücher", "save": 26 },
+    { "qty": 4, "price": 99, "label": "4 Bücher", "save": 41 }
   ],
   "mollieProfileId": "",
   "paymentProviders": {},
@@ -40,9 +42,9 @@
     "checkout": "checkout.html",
     "thank-you": "thank-you.html",
     "kontakt": "kontakt.html",
-    "integritet": "integritet.html",
-    "villkor": "villkor.html",
-    "frakt": "frakt.html",
-    "retur": "retur.html"
+    "datenschutz": "datenschutz.html",
+    "agb": "agb.html",
+    "versand": "versand.html",
+    "sendungsverfolgung": "sendungsverfolgung.html"
   }
 }
