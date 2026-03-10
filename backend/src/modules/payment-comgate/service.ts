@@ -5,8 +5,17 @@ import {
   PaymentSessionStatus,
 } from "@medusajs/framework/utils"
 import { ComgateApiClient } from "./api-client"
+import { Client } from "pg"
 
 const GATEWAY_CONFIG_MODULE = "gatewayConfig"
+
+/**
+ * Shared config cache — survives across method calls, cleared after 5 min.
+ * Avoids opening a new DB connection on every request.
+ */
+let _comgateConfigCache: any = null
+let _comgateConfigCacheTime = 0
+const CONFIG_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
 export interface IComgatePaymentSessionData {
   transId?: string
@@ -73,11 +82,19 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Get the active Comgate gateway config from the database.
-   * Tries the gatewayConfig module first, then falls back to a direct DB query
-   * via __pg_connection__ (Knex). Payment providers run in a scoped container
-   * that may not have access to custom standalone modules.
+   * Uses a 3-level fallback strategy because payment providers run in a scoped
+   * container that may not have access to custom standalone modules:
+   *   1. gatewayConfig module service (ideal, may not resolve)
+   *   2. __pg_connection__ Knex instance (shared resource, may not resolve)
+   *   3. Raw pg Client via DATABASE_URL (always works, independent of container)
+   * Results are cached for 5 minutes to avoid repeated DB connections.
    */
   private async getComgateConfig(): Promise<any> {
+    // Return cached config if fresh
+    if (_comgateConfigCache && (Date.now() - _comgateConfigCacheTime) < CONFIG_CACHE_TTL) {
+      return _comgateConfigCache
+    }
+
     // Method 1: Try gateway config module service
     const gcService = this.getGatewayConfigService()
     if (gcService) {
@@ -88,6 +105,8 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         )
         if (configs[0]) {
           this.getLogger().info("[Comgate] Config loaded via gatewayConfig module")
+          _comgateConfigCache = configs[0]
+          _comgateConfigCacheTime = Date.now()
           return configs[0]
         }
       } catch (e: any) {
@@ -104,11 +123,42 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         .limit(1)
 
       if (rows && rows[0]) {
-        this.getLogger().info("[Comgate] Config loaded via direct DB query")
+        this.getLogger().info("[Comgate] Config loaded via __pg_connection__")
+        _comgateConfigCache = rows[0]
+        _comgateConfigCacheTime = Date.now()
         return rows[0]
       }
     } catch (e: any) {
-      this.getLogger().warn(`[Comgate] Direct DB query failed: ${e.message}`)
+      this.getLogger().warn(`[Comgate] __pg_connection__ query failed: ${e.message}`)
+    }
+
+    // Method 3: Raw pg Client via DATABASE_URL (ultimate fallback)
+    const dbUrl = process.env.DATABASE_URL
+    if (dbUrl) {
+      let pgClient: Client | null = null
+      try {
+        pgClient = new Client({
+          connectionString: dbUrl,
+          ssl: dbUrl.includes("railway") ? { rejectUnauthorized: false } : undefined,
+        })
+        await pgClient.connect()
+        const result = await pgClient.query(
+          "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL LIMIT 1",
+          ["comgate"]
+        )
+        if (result.rows[0]) {
+          this.getLogger().info("[Comgate] Config loaded via raw pg (DATABASE_URL)")
+          _comgateConfigCache = result.rows[0]
+          _comgateConfigCacheTime = Date.now()
+          return result.rows[0]
+        }
+      } catch (e: any) {
+        this.getLogger().warn(`[Comgate] Raw pg query failed: ${e.message}`)
+      } finally {
+        if (pgClient) {
+          try { await pgClient.end() } catch {}
+        }
+      }
     }
 
     this.getLogger().warn("[Comgate] No gateway config found via any method")

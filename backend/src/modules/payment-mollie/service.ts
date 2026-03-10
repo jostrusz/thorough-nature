@@ -5,6 +5,11 @@ import {
   PaymentSessionStatus,
 } from "@medusajs/framework/utils"
 import { MollieApiClient } from "./api-client"
+import { Client } from "pg"
+
+let _mollieConfigCache: any = null
+let _mollieConfigCacheTime = 0
+const CONFIG_CACHE_TTL = 5 * 60 * 1000
 
 type Options = {
   apiKey?: string
@@ -126,13 +131,49 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
         const isLive = config.mode === "live"
         const keys = isLive ? config.live_keys : config.test_keys
         if (keys?.api_key) {
-          this.logger_.info(`[Mollie] Using ${isLive ? "live" : "test"} keys from gateway config (direct DB)`)
+          this.logger_.info(`[Mollie] Using ${isLive ? "live" : "test"} keys from gateway config (__pg_connection__)`)
           this.client_ = new MollieApiClient(keys.api_key, !isLive)
           return this.client_
         }
       }
     } catch (e: any) {
-      this.logger_.warn(`[Mollie] Direct DB query failed: ${e.message}`)
+      this.logger_.warn(`[Mollie] __pg_connection__ query failed: ${e.message}`)
+    }
+
+    // 1c. Fallback: raw pg Client via DATABASE_URL
+    if (!_mollieConfigCache || (Date.now() - _mollieConfigCacheTime) >= CONFIG_CACHE_TTL) {
+      const dbUrl = process.env.DATABASE_URL
+      if (dbUrl) {
+        let pgClient: Client | null = null
+        try {
+          pgClient = new Client({
+            connectionString: dbUrl,
+            ssl: dbUrl.includes("railway") ? { rejectUnauthorized: false } : undefined,
+          })
+          await pgClient.connect()
+          const result = await pgClient.query(
+            "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL LIMIT 1",
+            ["mollie"]
+          )
+          if (result.rows[0]) {
+            _mollieConfigCache = result.rows[0]
+            _mollieConfigCacheTime = Date.now()
+          }
+        } catch (e: any) {
+          this.logger_.warn(`[Mollie] Raw pg query failed: ${e.message}`)
+        } finally {
+          if (pgClient) { try { await pgClient.end() } catch {} }
+        }
+      }
+    }
+    if (_mollieConfigCache) {
+      const isLive = _mollieConfigCache.mode === "live"
+      const keys = isLive ? _mollieConfigCache.live_keys : _mollieConfigCache.test_keys
+      if (keys?.api_key) {
+        this.logger_.info(`[Mollie] Using ${isLive ? "live" : "test"} keys from gateway config (raw pg)`)
+        this.client_ = new MollieApiClient(keys.api_key, !isLive)
+        return this.client_
+      }
     }
 
     // 2. Fallback to options (env vars via medusa-config.js)

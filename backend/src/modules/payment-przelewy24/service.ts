@@ -6,8 +6,13 @@ import {
 } from "@medusajs/framework/utils"
 import { Przelewy24ApiClient } from "./api-client"
 import crypto from "crypto"
+import { Client } from "pg"
 
 const GATEWAY_CONFIG_MODULE = "gatewayConfig"
+
+let _p24ConfigCache: any = null
+let _p24ConfigCacheTime = 0
+const CONFIG_CACHE_TTL = 5 * 60 * 1000
 
 export interface IP24PaymentSessionData {
   token?: string
@@ -79,11 +84,16 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Get the active P24 gateway config from the database.
-   * Tries the gatewayConfig module first, then falls back to a direct DB query
-   * via __pg_connection__ (Knex). Payment providers run in a scoped container
-   * that may not have access to custom standalone modules.
+   * Uses a 3-level fallback strategy (same as Comgate):
+   *   1. gatewayConfig module service
+   *   2. __pg_connection__ Knex instance
+   *   3. Raw pg Client via DATABASE_URL
    */
   private async getP24Config(): Promise<any> {
+    if (_p24ConfigCache && (Date.now() - _p24ConfigCacheTime) < CONFIG_CACHE_TTL) {
+      return _p24ConfigCache
+    }
+
     // Method 1: Try gateway config module service
     const gcService = this.getGatewayConfigService()
     if (gcService) {
@@ -94,6 +104,8 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         )
         if (configs[0]) {
           this.getLogger().info("[Przelewy24] Config loaded via gatewayConfig module")
+          _p24ConfigCache = configs[0]
+          _p24ConfigCacheTime = Date.now()
           return configs[0]
         }
       } catch (e: any) {
@@ -110,11 +122,42 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         .limit(1)
 
       if (rows && rows[0]) {
-        this.getLogger().info("[Przelewy24] Config loaded via direct DB query")
+        this.getLogger().info("[Przelewy24] Config loaded via __pg_connection__")
+        _p24ConfigCache = rows[0]
+        _p24ConfigCacheTime = Date.now()
         return rows[0]
       }
     } catch (e: any) {
-      this.getLogger().warn(`[Przelewy24] Direct DB query failed: ${e.message}`)
+      this.getLogger().warn(`[Przelewy24] __pg_connection__ query failed: ${e.message}`)
+    }
+
+    // Method 3: Raw pg Client via DATABASE_URL
+    const dbUrl = process.env.DATABASE_URL
+    if (dbUrl) {
+      let pgClient: Client | null = null
+      try {
+        pgClient = new Client({
+          connectionString: dbUrl,
+          ssl: dbUrl.includes("railway") ? { rejectUnauthorized: false } : undefined,
+        })
+        await pgClient.connect()
+        const result = await pgClient.query(
+          "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL LIMIT 1",
+          ["przelewy24"]
+        )
+        if (result.rows[0]) {
+          this.getLogger().info("[Przelewy24] Config loaded via raw pg (DATABASE_URL)")
+          _p24ConfigCache = result.rows[0]
+          _p24ConfigCacheTime = Date.now()
+          return result.rows[0]
+        }
+      } catch (e: any) {
+        this.getLogger().warn(`[Przelewy24] Raw pg query failed: ${e.message}`)
+      } finally {
+        if (pgClient) {
+          try { await pgClient.end() } catch {}
+        }
+      }
     }
 
     this.getLogger().warn("[Przelewy24] No gateway config found via any method")
