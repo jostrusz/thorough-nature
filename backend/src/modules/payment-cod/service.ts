@@ -32,7 +32,7 @@ class CodPaymentProviderService extends AbstractPaymentProvider {
     )
 
     return {
-      session_data: {
+      data: {
         id: "cod_" + Date.now(),
         method: "cod",
         amount,
@@ -44,10 +44,10 @@ class CodPaymentProviderService extends AbstractPaymentProvider {
   }
 
   async authorizePayment(paymentSessionData: any): Promise<any> {
-    this.logger_.info(`[COD] Payment authorized: ${paymentSessionData.id}`)
+    this.logger_.info(`[COD] Payment authorized: ${paymentSessionData?.id}`)
 
     return {
-      session_data: {
+      data: {
         ...paymentSessionData,
         status: "authorized",
       },
@@ -56,10 +56,10 @@ class CodPaymentProviderService extends AbstractPaymentProvider {
   }
 
   async capturePayment(paymentSessionData: any): Promise<any> {
-    this.logger_.info(`[COD] Payment captured: ${paymentSessionData.id}`)
+    this.logger_.info(`[COD] Payment captured: ${paymentSessionData?.id}`)
 
     return {
-      session_data: {
+      data: {
         ...paymentSessionData,
         status: "captured",
         capturedAt: Date.now(),
@@ -68,19 +68,19 @@ class CodPaymentProviderService extends AbstractPaymentProvider {
   }
 
   async refundPayment(paymentSessionData: any, refundAmount: number): Promise<any> {
-    this.logger_.info(`[COD] Refund requested: ${paymentSessionData.id}, amount: ${refundAmount}`)
+    this.logger_.info(`[COD] Refund requested: ${paymentSessionData?.id}, amount: ${refundAmount}`)
 
     return {
-      session_data: paymentSessionData,
+      data: paymentSessionData || {},
     }
   }
 
   async cancelPayment(paymentSessionData: any): Promise<any> {
-    this.logger_.info(`[COD] Payment cancelled: ${paymentSessionData.id}`)
+    this.logger_.info(`[COD] Payment cancelled: ${paymentSessionData?.id}`)
 
     return {
-      session_data: {
-        ...paymentSessionData,
+      data: {
+        ...(paymentSessionData || {}),
         status: "cancelled",
       },
     }
@@ -88,7 +88,7 @@ class CodPaymentProviderService extends AbstractPaymentProvider {
 
   async deletePayment(paymentSessionData: any): Promise<any> {
     return {
-      session_data: paymentSessionData,
+      data: paymentSessionData || {},
     }
   }
 
@@ -109,13 +109,13 @@ class CodPaymentProviderService extends AbstractPaymentProvider {
 
   async retrievePayment(paymentSessionData: any): Promise<any> {
     return {
-      session_data: paymentSessionData,
+      data: paymentSessionData || {},
     }
   }
 
   async updatePayment(context: any): Promise<any> {
     return {
-      session_data: context.paymentSessionData || context.data || {},
+      data: context.paymentSessionData || context.data || {},
     }
   }
 
