@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { IPaymentModuleService } from "@medusajs/framework/types"
-import { COMGATE_MODULE_NAME } from "../../../modules/payment-comgate"
+import { COMGATE_PROVIDER_ID } from "../../../modules/payment-comgate"
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
@@ -18,7 +18,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     const logger = req.scope.resolve("logger")
 
     // Get the Comgate payment provider
-    const comgateProvider = paymentModuleService.getProvider(COMGATE_MODULE_NAME)
+    const comgateProvider = paymentModuleService.getProvider(COMGATE_PROVIDER_ID)
 
     if (!comgateProvider) {
       logger.error("[Comgate Webhook] Provider not found")

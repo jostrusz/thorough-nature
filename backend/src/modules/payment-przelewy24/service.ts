@@ -1,5 +1,6 @@
 // @ts-nocheck
 import {
+  AbstractPaymentProvider,
   PaymentProviderError,
   PaymentSessionStatus,
 } from "@medusajs/framework/utils"
@@ -48,7 +49,7 @@ function mapP24StatusToMedusa(p24Status: string): PaymentSessionStatus {
  * Supports PLN, EUR and other currencies
  * Flow: register transaction → redirect → customer pays → webhook verification
  */
-export class Przelewy24PaymentProvider {
+export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
   protected container_: any
   protected client_: Przelewy24ApiClient | null = null
   protected gatewayConfigService_: any
@@ -57,9 +58,10 @@ export class Przelewy24PaymentProvider {
   static identifier = "przelewy24"
 
   constructor(container: any, options?: any) {
+    super(container, options)
     this.container_ = container
     try {
-      this.logger_ = container.resolve("logger")
+      this.logger_ = container.logger || console
     } catch {
       this.logger_ = console
     }

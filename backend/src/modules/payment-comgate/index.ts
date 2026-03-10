@@ -1,8 +1,8 @@
-import { Module } from "@medusajs/framework/utils"
+import { ModuleProvider, Modules } from "@medusajs/framework/utils"
 import { ComgatePaymentProvider } from "./service"
 
-export const COMGATE_MODULE_NAME = "payment_comgate"
+export const COMGATE_PROVIDER_ID = "comgate"
 
-export default Module(COMGATE_MODULE_NAME, {
-  service: ComgatePaymentProvider,
+export default ModuleProvider(Modules.PAYMENT, {
+  services: [ComgatePaymentProvider],
 })

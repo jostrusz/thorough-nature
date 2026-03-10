@@ -1,5 +1,6 @@
 // @ts-nocheck
 import {
+  AbstractPaymentProvider,
   PaymentProviderError,
   PaymentSessionStatus,
 } from "@medusajs/framework/utils"
@@ -42,7 +43,7 @@ function mapComgateStatusToMedusa(comgateStatus: string): PaymentSessionStatus {
  * Integrates with Comgate payment redirect API for bank transfers and cards
  * Supports CZK, EUR, and other currencies
  */
-export class ComgatePaymentProvider {
+export class ComgatePaymentProvider extends AbstractPaymentProvider {
   protected container_: any
   protected client_: ComgateApiClient | null = null
   protected gatewayConfigService_: any
@@ -51,9 +52,10 @@ export class ComgatePaymentProvider {
   static identifier = "comgate"
 
   constructor(container: any, options?: any) {
+    super(container, options)
     this.container_ = container
     try {
-      this.logger_ = container.resolve("logger")
+      this.logger_ = container.logger || console
     } catch {
       this.logger_ = console
     }

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { IPaymentModuleService } from "@medusajs/framework/types"
-import { PRZELEWY24_MODULE_NAME } from "../../../modules/payment-przelewy24"
+import { PRZELEWY24_PROVIDER_ID } from "../../../modules/payment-przelewy24"
 import crypto from "crypto"
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
@@ -20,7 +20,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     const logger = req.scope.resolve("logger")
 
     // Get the Przelewy24 payment provider
-    const p24Provider = paymentModuleService.getProvider(PRZELEWY24_MODULE_NAME)
+    const p24Provider = paymentModuleService.getProvider(PRZELEWY24_PROVIDER_ID)
 
     if (!p24Provider) {
       logger.error("[P24 Webhook] Provider not found")

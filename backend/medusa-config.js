@@ -90,10 +90,7 @@ const medusaConfig = {
     { resolve: "./src/modules/digital-download" },
     { resolve: "./src/modules/profitability" },
     { resolve: "./src/modules/advertorial" },
-    // ═══ Payment provider modules (non-Medusa-payment, standalone) ═══
-    { resolve: "./src/modules/payment-comgate" },
-    { resolve: "./src/modules/payment-przelewy24" },
-    // NOTE: payment-klarna & payment-airwallex are registered as proper payment providers below
+    // NOTE: payment-comgate, payment-przelewy24, payment-klarna & payment-airwallex are registered as proper payment providers below
     // ═══ Core modules ═══
     {
       key: Modules.FILE,
@@ -225,6 +222,16 @@ const medusaConfig = {
           {
             resolve: './src/modules/payment-cod',
             id: 'cod',
+            options: {},
+          },
+          {
+            resolve: './src/modules/payment-comgate',
+            id: 'comgate',
+            options: {},
+          },
+          {
+            resolve: './src/modules/payment-przelewy24',
+            id: 'przelewy24',
             options: {},
           },
         ],
