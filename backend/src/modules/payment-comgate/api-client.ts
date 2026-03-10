@@ -44,22 +44,38 @@ export class ComgateApiClient {
     this.client = axios.create({
       baseURL: "https://payments.comgate.cz",
       timeout: 10000,
+      // Force text response — Comgate returns application/x-www-form-urlencoded
+      // Without this, axios may try to auto-parse as JSON
+      responseType: "text",
+      // Don't follow redirects — we need the form-encoded body, not a redirect target
+      maxRedirects: 0,
+      // Accept all 2xx and 3xx status codes without throwing
+      validateStatus: (status) => status >= 200 && status < 400,
     })
   }
 
   /**
-   * Parse form-encoded response from Comgate
+   * Parse form-encoded response from Comgate.
+   * Uses URLSearchParams which correctly handles:
+   *   - "+" as space (standard form encoding)
+   *   - URL-encoded values (%3D, %26, etc.)
+   *   - Multiple "=" in values
+   * Falls back to manual parsing if data is not a string.
    */
-  private parseFormEncoded(data: string): Record<string, any> {
+  private parseResponse(data: any): Record<string, any> {
+    // If data is already an object (axios auto-parsed JSON), return as-is
+    if (typeof data === "object" && data !== null) {
+      return data
+    }
+
+    // Convert to string if needed
+    const str = String(data || "")
+
+    // Use URLSearchParams for robust parsing
+    const params = new URLSearchParams(str)
     const result: Record<string, any> = {}
-    const pairs = data.split("&")
-    for (const pair of pairs) {
-      // Split on first "=" only — values (like redirect URLs) can contain "="
-      const idx = pair.indexOf("=")
-      if (idx === -1) continue
-      const key = pair.substring(0, idx)
-      const value = pair.substring(idx + 1)
-      result[decodeURIComponent(key)] = decodeURIComponent(value || "")
+    for (const [key, value] of params.entries()) {
+      result[key] = value
     }
     return result
   }
@@ -99,9 +115,11 @@ export class ComgateApiClient {
         formData.append("prepareOnly", "true")
       }
 
+      console.log(`[Comgate] Sending create request with params: merchant=${params.merchant}, price=${params.price}, curr=${params.curr}, method=${params.method}, prepareOnly=${params.prepareOnly}`)
+
       const response = await this.client.post(
         "/v1.0/create",
-        formData,
+        formData.toString(),
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -109,16 +127,37 @@ export class ComgateApiClient {
         }
       )
 
-      // Comgate returns form-encoded response
-      // Debug: log raw response to identify field names
-      console.log(`[Comgate] Raw create response: ${typeof response.data === 'string' ? response.data.substring(0, 500) : JSON.stringify(response.data).substring(0, 500)}`)
-      const parsed = this.parseFormEncoded(response.data)
-      console.log(`[Comgate] Parsed response keys: ${Object.keys(parsed).join(', ')}`)
-      console.log(`[Comgate] Parsed: code=${parsed.code}, transId=${parsed.transId}, redirect=${parsed.redirect}, redirectUrl=${parsed.redirectUrl}`)
+      // Debug: log raw response
+      console.log(`[Comgate] Response status: ${response.status}`)
+      console.log(`[Comgate] Response content-type: ${response.headers?.['content-type']}`)
+      console.log(`[Comgate] Raw response data type: ${typeof response.data}`)
+      console.log(`[Comgate] Raw response data: ${String(response.data).substring(0, 500)}`)
+
+      // Check for redirect response (302/301)
+      if (response.status >= 300 && response.status < 400) {
+        const location = response.headers?.location
+        console.log(`[Comgate] Redirect response, location: ${location}`)
+        if (location) {
+          // Extract transId from redirect URL if possible
+          const urlMatch = location.match(/[?&]id=([^&]+)/) || location.match(/\/([A-Z0-9-]+)$/)
+          return {
+            success: true,
+            data: {
+              transId: urlMatch?.[1] || "",
+              redirectUrl: location,
+              code: "0",
+            },
+          }
+        }
+      }
+
+      // Parse form-encoded response
+      const parsed = this.parseResponse(response.data)
+      console.log(`[Comgate] Parsed response: ${JSON.stringify(parsed)}`)
 
       if (parsed.code === "0") {
         // Success — Comgate uses "redirect" field name in v1.0 API
-        const redirectUrl = parsed.redirect || parsed.redirectUrl
+        const redirectUrl = parsed.redirect || parsed.redirectUrl || ""
         return {
           success: true,
           data: {
@@ -142,10 +181,11 @@ export class ComgateApiClient {
       let errorDetail = ""
       if (error.response?.data) {
         try {
-          const errParsed = this.parseFormEncoded(error.response.data)
+          const errParsed = this.parseResponse(error.response.data)
           errorDetail = ` (Comgate: code=${errParsed.code}, msg=${errParsed.message})`
         } catch {}
       }
+      console.error(`[Comgate] createPayment exception: status=${error.response?.status}, data=${String(error.response?.data).substring(0, 300)}, message=${error.message}`)
       return {
         success: false,
         error:
@@ -179,14 +219,13 @@ export class ComgateApiClient {
         secret: params.secret,
       })
 
-      const response = await this.client.post("/v1.0/status", formData, {
+      const response = await this.client.post("/v1.0/status", formData.toString(), {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       })
 
-      // Comgate returns form-encoded response
-      const parsed = this.parseFormEncoded(response.data)
+      const parsed = this.parseResponse(response.data)
 
       if (parsed.code === "0") {
         return {
@@ -244,14 +283,13 @@ export class ComgateApiClient {
         formData.append("amount", params.amount.toString())
       }
 
-      const response = await this.client.post("/v1.0/refund", formData, {
+      const response = await this.client.post("/v1.0/refund", formData.toString(), {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       })
 
-      // Comgate returns form-encoded response
-      const parsed = this.parseFormEncoded(response.data)
+      const parsed = this.parseResponse(response.data)
 
       if (parsed.code === "0") {
         return {
@@ -292,7 +330,6 @@ export class ComgateApiClient {
   }> {
     try {
       const response = await this.client.get("/v1.0/methods", { params })
-      // getMethods may return JSON or form-encoded depending on endpoint version
       return {
         success: true,
         data: response.data,

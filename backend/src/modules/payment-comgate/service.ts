@@ -278,15 +278,16 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         `[Comgate] Payment created: transId=${result.data.transId}, redirect=${result.data.redirectUrl}`
       )
 
+      // Return format required by Medusa v2: { data: { ... } }
+      // Frontend reads lastSession.data.checkoutUrl for redirect
       return {
-        session_data: {
+        data: {
           transId: result.data.transId,
           amount,
           currency: currency_code,
           createdAt: Date.now(),
-          checkoutUrl: result.data.redirectUrl, // frontend reads providerData.checkoutUrl
-        } as IComgatePaymentSessionData,
-        redirect_url: result.data.redirectUrl,
+          checkoutUrl: result.data.redirectUrl,
+        },
       }
     } catch (error: any) {
       this.getLogger().error(`[Comgate] Payment initiation failed: ${error.message}`)
@@ -333,7 +334,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       const status = mapComgateStatusToMedusa(result.data?.status || "PENDING")
 
       return {
-        session_data: {
+        data: {
           ...paymentSessionData,
           transId,
           status: result.data?.status,
@@ -384,7 +385,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       const status = mapComgateStatusToMedusa(result.data?.status || "PENDING")
 
       return {
-        session_data: {
+        data: {
           ...paymentSessionData,
           transId,
           status: result.data?.status,
@@ -437,7 +438,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       )
 
       return {
-        session_data: paymentSessionData,
+        data: paymentSessionData,
         status: PaymentSessionStatus.AUTHORIZED,
       }
     } catch (error: any) {
@@ -458,7 +459,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
     )
 
     return {
-      session_data: paymentSessionData,
+      data: paymentSessionData,
       status: PaymentSessionStatus.CANCELED,
     }
   }
@@ -472,7 +473,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
   ): Promise<any> {
     // No-op for Comgate — cleanup handled server-side
     return {
-      session_data: paymentSessionData,
+      data: paymentSessionData,
       status: PaymentSessionStatus.CANCELED,
     }
   }
@@ -547,7 +548,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       const status = mapComgateStatusToMedusa(result.data?.status || "PENDING")
 
       return {
-        session_data: {
+        data: {
           ...paymentSessionData,
           transId,
           status: result.data?.status,
