@@ -20,11 +20,11 @@
     "thumbnail": ""
   },
   "upsellProduct": {
-    "name": "",
-    "handle": "",
+    "name": "Kočičí bible",
+    "handle": "kocici-bible",
     "variantId": "",
-    "price": 0,
-    "originalPrice": 0,
+    "price": 399,
+    "originalPrice": 550,
     "currency": "CZK"
   },
   "bundleOptions": [
