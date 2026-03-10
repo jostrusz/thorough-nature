@@ -39,6 +39,7 @@
   "pages": {
     "": "index.html",
     "checkout": "checkout.html",
+    "upsell": "upsell.html",
     "thank-you": "thank-you.html",
     "kontakt": "kontakt.html",
     "ochrana-udaju": "ochrana-udaju.html",
