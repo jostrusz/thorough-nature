@@ -238,21 +238,30 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         contextData?.statement_descriptor || `Order ${cart?.id}`
       ).substring(0, 16)
 
+      // Comgate expects price in haléře (cents). Medusa stores CZK amounts as
+      // integer koruny (e.g. 550 for 550 Kč), so we multiply by 100 to get
+      // haléře (55000 = 550.00 Kč). Same applies to EUR (cents).
+      const priceInCents = Math.round(amount * 100)
+
+      // Email: prefer context email (passed from checkout form), fallback to customer email
+      const customerEmail = contextData?.email || customer?.email || ""
+
       const paymentParams = {
         merchant: config?.live_keys?.api_key || config?.test_keys?.api_key,
-        price: amount, // already in cents
+        price: priceInCents,
         curr: currency_code.toUpperCase(),
         label: descriptor,
         refId: cart?.id || `ref-${Date.now()}`,
         secret: config?.live_keys?.secret_key || config?.test_keys?.secret_key,
-        email: customer?.email,
-        country: customer?.billing_address?.country_code?.toUpperCase(),
+        email: customerEmail,
+        country: customer?.billing_address?.country_code?.toUpperCase() || contextData?.billing_address?.country_code?.toUpperCase() || "CZ",
         prepareOnly: true, // get transId + URL without redirect
         method: contextData?.comgate_method || "ALL", // ALL = Comgate shows its own payment method selector
       }
 
       this.getLogger().info(`[Comgate] Creating payment: merchant=${paymentParams.merchant}, ` +
-        `price=${paymentParams.price}, curr=${paymentParams.curr}, refId=${paymentParams.refId}`)
+        `price=${paymentParams.price} (original amount=${amount}, *100), curr=${paymentParams.curr}, ` +
+        `email=${paymentParams.email}, refId=${paymentParams.refId}`)
 
       const result = await client.createPayment(paymentParams)
 
@@ -419,10 +428,13 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         )
       }
 
+      // Convert refund amount to haléře (same as createPayment)
+      const refundInCents = Math.round(refundAmount * 100)
+
       const result = await client.createRefund({
         merchant: keys?.api_key,
         transId,
-        amount: refundAmount, // in cents
+        amount: refundInCents,
         secret: keys?.secret_key,
       })
 

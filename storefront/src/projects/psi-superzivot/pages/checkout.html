@@ -7314,15 +7314,15 @@ body {
         };
       } else {
         // Use dynamic provider_id from selected payment method
-        providerId = selectedProviderId || 'pp_mollie_mollie';
+        providerId = selectedProviderId || 'pp_comgate_comgate';
         sessionData = {
           method: selectedMethod,
           return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
-          // Pass addresses for Klarna (requires billing address via Mollie Orders API)
+          // Pass addresses for payment provider
           billing_address: customerData.billing_address,
           shipping_address: customerData.shipping_address,
           email: customerData.email,
-          // Pass amount info for Klarna order lines
+          // Pass amount info
           amount: checkoutTotal,
           currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
         };
@@ -7416,7 +7416,7 @@ body {
         country_code: customerData.shipping_address.country_code,
         phone: customerData.shipping_address.phone,
       }));
-      localStorage.setItem('medusa_payment_provider', result.testMode ? 'pp_system_default' : (selectedProviderId || 'pp_mollie_mollie'));
+      localStorage.setItem('medusa_payment_provider', result.testMode ? 'pp_system_default' : (selectedProviderId || 'pp_comgate_comgate'));
       localStorage.setItem('medusa_payment_method', selectedMethod || '');
 
       // Uložit bundle + order bump info pro thank-you stránku
