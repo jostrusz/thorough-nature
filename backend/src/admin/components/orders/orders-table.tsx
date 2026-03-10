@@ -379,7 +379,9 @@ export function OrdersTable({
             })()
             const bookSent = order.metadata?.book_sent === true || order.metadata?.book_sent === "true"
             const itemCount = order.items?.length || 0
-            const total = Number(order.total) || 0
+            const total = (Number(order.total) || 0)
+              + (Number(order.metadata?.cod_fee) || 0)
+              + (Number(order.metadata?.shipping_fee) || 0)
 
             return (
               <tr

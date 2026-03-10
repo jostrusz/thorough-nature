@@ -113,7 +113,9 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
   const discountTotal = Number(order.discount_total) || 0
   const shippingTotal = Number(order.shipping_total) || 0
   const taxTotal = Number(order.tax_total) || 0
-  const total = Number(order.total) || 0
+  const total = (Number(order.total) || 0)
+    + (Number(order.metadata?.cod_fee) || 0)
+    + (Number(order.metadata?.shipping_fee) || 0)
 
   const discountCode =
     order.discounts?.[0]?.code ||
