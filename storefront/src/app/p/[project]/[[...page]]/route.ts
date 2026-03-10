@@ -489,6 +489,7 @@ function generateProjectConfigScript(
     regions: config.regions,
     paymentProviders: config.paymentProviders,
     mollieProfileId: (config as any).mollieProfileId || null,
+    packetaApiKey: (config as any).packetaApiKey || null,
     // Feature toggles from admin
     orderBumpEnabled: toggles.orderBumpEnabled,
     upsellEnabled: toggles.upsellEnabled,
