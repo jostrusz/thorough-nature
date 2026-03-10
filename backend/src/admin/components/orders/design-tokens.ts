@@ -140,6 +140,29 @@ export function getPaymentIconUrl(order: any): string {
     return `${ICON_BASE}/${map[method] || "apm/ideal.svg"}`
   }
 
+  // Comgate — map method to specific icon
+  if (providerId.includes("comgate")) {
+    const map: Record<string, string> = {
+      creditcard: "cards/visa.svg",
+      card: "cards/visa.svg",
+      CARD_CZ_CSOB_2: "cards/visa.svg",
+      CARD_ALL: "cards/visa.svg",
+      bank_transfer: "apm/sepa.svg",
+      BANK_CZ_FB: "apm/sepa.svg",
+      BANK_ALL: "apm/sepa.svg",
+      applepay: "wallets/apple-pay.svg",
+      APPLEPAY_REDIRECT: "wallets/apple-pay.svg",
+      googlepay: "wallets/google-pay.svg",
+      GPAY_REDIRECT: "wallets/google-pay.svg",
+    }
+    return `${ICON_BASE}/${map[method] || map[payment?.data?.comgate_method] || "cards/visa.svg"}`
+  }
+
+  // Przelewy24
+  if (providerId.includes("przelewy") || providerId.includes("p24")) {
+    return `${ICON_BASE}/apm/przelewy24.svg`
+  }
+
   return ""
 }
 
