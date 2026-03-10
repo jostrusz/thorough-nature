@@ -54,7 +54,11 @@ export class ComgateApiClient {
     const result: Record<string, any> = {}
     const pairs = data.split("&")
     for (const pair of pairs) {
-      const [key, value] = pair.split("=")
+      // Split on first "=" only — values (like redirect URLs) can contain "="
+      const idx = pair.indexOf("=")
+      if (idx === -1) continue
+      const key = pair.substring(0, idx)
+      const value = pair.substring(idx + 1)
       result[decodeURIComponent(key)] = decodeURIComponent(value || "")
     }
     return result
@@ -106,15 +110,20 @@ export class ComgateApiClient {
       )
 
       // Comgate returns form-encoded response
+      // Debug: log raw response to identify field names
+      console.log(`[Comgate] Raw create response: ${typeof response.data === 'string' ? response.data.substring(0, 500) : JSON.stringify(response.data).substring(0, 500)}`)
       const parsed = this.parseFormEncoded(response.data)
+      console.log(`[Comgate] Parsed response keys: ${Object.keys(parsed).join(', ')}`)
+      console.log(`[Comgate] Parsed: code=${parsed.code}, transId=${parsed.transId}, redirect=${parsed.redirect}, redirectUrl=${parsed.redirectUrl}`)
 
       if (parsed.code === "0") {
-        // Success
+        // Success — Comgate uses "redirect" field name in v1.0 API
+        const redirectUrl = parsed.redirect || parsed.redirectUrl
         return {
           success: true,
           data: {
             transId: parsed.transId,
-            redirectUrl: parsed.redirect,
+            redirectUrl: redirectUrl,
             code: parsed.code,
           },
         }
