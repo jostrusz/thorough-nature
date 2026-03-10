@@ -112,7 +112,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       partnerId: config.partner_id || "",
       orderItems,
       deliveryAddress,
-      cashAmount: isCOD ? Number((order as any).total) || 0 : undefined,
+      cashAmount: isCOD ? (Number((order as any).total) || 0) + (Number((order as any).metadata?.cod_fee) || 0) : undefined,
     })
 
     // 10. Create or update dextrum_order_map

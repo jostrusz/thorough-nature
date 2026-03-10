@@ -222,6 +222,11 @@ const medusaConfig = {
               testMode: STRIPE_TEST_MODE,
             },
           },
+          {
+            resolve: './src/modules/payment-cod',
+            id: 'cod',
+            options: {},
+          },
         ],
       },
     }

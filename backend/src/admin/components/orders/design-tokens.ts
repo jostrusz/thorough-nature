@@ -146,6 +146,7 @@ export function getPaymentIconUrl(order: any): string {
 export function getPaymentFallback(order: any): { letter: string; bg: string; color: string } {
   const payments = order.payment_collections?.flatMap((pc: any) => pc.payments || []) || []
   const providerId = payments[0]?.provider_id || ""
+  if (providerId.includes("cod")) return { letter: "D", bg: "#8B6914", color: "#fff" }
   if (providerId.includes("stripe")) return { letter: "S", bg: "#635BFF", color: "#fff" }
   if (providerId.includes("airwallex")) return { letter: "AW", bg: "#FF5100", color: "#fff" }
   if (providerId.includes("comgate")) return { letter: "C", bg: "#444", color: "#fff" }
@@ -159,6 +160,7 @@ export function getPaymentMethodName(order: any): string {
   const providerId = payment?.provider_id || ""
   const method = order.metadata?.payment_method || payment?.data?.method || ""
 
+  if (providerId.includes("cod")) return "Dobírka (COD)"
   if (providerId.includes("klarna")) return "Klarna"
   if (providerId.includes("paypal")) return "PayPal"
   if (providerId.includes("comgate")) return "Comgate"

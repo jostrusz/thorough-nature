@@ -136,6 +136,14 @@ export default async function orderPlacedPaymentMetadataHandler({
         break
       }
 
+      // COD (Cash on Delivery / Dobírka)
+      if (providerId.includes("cod") || paymentData.method === "cod") {
+        newMetadata.payment_method = "cod"
+        newMetadata.payment_provider = "cod"
+        found = true
+        break
+      }
+
       // Generic: detect provider from provider_id
       if (providerId.includes("klarna") && paymentData.sessionId) {
         newMetadata.klarnaOrderId = paymentData.klarnaOrderId || null

@@ -125,7 +125,7 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
             phone: addr.phone || "",
             email: (order as any).email || "",
           },
-          cashAmount: isCOD ? Number((order as any).total) || 0 : undefined,
+          cashAmount: isCOD ? (Number((order as any).total) || 0) + (Number((order as any).metadata?.cod_fee) || 0) : undefined,
         })
 
         // 7. Update dextrum_order_map

@@ -2321,6 +2321,11 @@ body {
         <span class="msb-line-label">Doprava</span>
         <span class="msb-line-val">Zdarma</span>
       </div>
+      <!-- Dobírka fee -->
+      <div class="msb-line" id="msb-cod-fee" style="display:none;">
+        <span class="msb-line-label">Dobírka</span>
+        <span class="msb-line-val">+30&nbsp;Kč</span>
+      </div>
       <!-- Celkem -->
       <div class="msb-line total-line">
         <span class="msb-line-label">Celkem</span>
@@ -2821,6 +2826,10 @@ body {
         </span>
         <span style="color:#27AE60;font-weight:600;">Zdarma</span>
       </div>
+      <div class="summary-line" id="summary-cod-fee" style="display:none;padding:4px 0;">
+        <span style="font-size:13px;">Dobírka</span>
+        <span style="font-weight:600;">+30&nbsp;Kč</span>
+      </div>
       <div class="summary-line discount" id="summary-discount" style="display:none;">
         <span style="display:flex;align-items:center;gap:6px;">Sleva <span id="discount-code-label" style="font-size:11px;background:rgba(39,174,96,0.1);color:#27AE60;padding:1px 6px;border-radius:4px;font-weight:600;"></span></span>
         <span id="discount-value" style="color:#27AE60;font-weight:600;"></span>
@@ -2961,6 +2970,7 @@ body {
   function getCurrentTotal() {
     var total = selectedBundlePrice;
     if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
+    if (selectedMethod === 'cod') total += 30;
     return total;
   }
 
@@ -3001,6 +3011,13 @@ body {
     if (bumpSummary) {
       bumpSummary.style.display = orderBumpActive ? 'flex' : 'none';
     }
+
+    // COD fee řádek — zobraz/skryj podle vybrané platební metody
+    var isCod = selectedMethod === 'cod';
+    var codFeeDesktop = document.getElementById('summary-cod-fee');
+    if (codFeeDesktop) codFeeDesktop.style.display = isCod ? 'flex' : 'none';
+    var codFeeMobile = document.getElementById('msb-cod-fee');
+    if (codFeeMobile) codFeeMobile.style.display = isCod ? 'flex' : 'none';
 
     // ─── MOBILE STICKY SUMMARY BAR ───
     // Hlavní cena
@@ -4713,6 +4730,7 @@ body {
     kbc: 'Platba přes KBC/CBC',
     riverty: 'Platba po doručení',
     trustly: 'Online bankovní platba',
+    cod: 'Platba při převzetí zásilky (+30 Kč)',
     applepay: 'Platba přes Apple Pay',
     googlepay: 'Platba přes Google Pay',
     bank_transfer: 'Online převod přes vaši banku',
@@ -4741,7 +4759,7 @@ body {
       return '<img src="/icons/creditcard.svg" alt="Platební karta" class="pm-icon" onerror="this.style.display=\'none\'">';
     }
     // For methods with known SVG icons
-    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'bank_transfer'];
+    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'bank_transfer', 'cod'];
     if (iconMethods.indexOf(code) !== -1) {
       return '<img src="/icons/' + code + '.svg" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
     }
@@ -5188,6 +5206,7 @@ body {
           }
         }
 
+        recalculateOrderSummary();
         updateButtonText();
         updateSubtext();
         document.getElementById('payment-errors').textContent = '';
@@ -5219,6 +5238,7 @@ body {
             // Hide credit card fields
             var cardFields = document.getElementById('card-fields');
             if (cardFields) cardFields.style.display = 'none';
+            recalculateOrderSummary();
             updateButtonText();
             updateSubtext();
             document.getElementById('payment-errors').textContent = '';
@@ -5244,6 +5264,7 @@ body {
           }
           var cardFields = document.getElementById('card-fields');
           if (cardFields) cardFields.style.display = 'none';
+          recalculateOrderSummary();
           updateButtonText();
           updateSubtext();
           document.getElementById('payment-errors').textContent = '';
@@ -5268,6 +5289,7 @@ body {
 
         var cardFields = document.getElementById('card-fields');
         if (cardFields) cardFields.style.display = 'none';
+        recalculateOrderSummary();
         updateButtonText();
         updateSubtext();
         document.getElementById('payment-errors').textContent = '';
@@ -5301,6 +5323,7 @@ body {
           }
           var cardFields = document.getElementById('card-fields');
           if (cardFields) cardFields.style.display = 'none';
+          recalculateOrderSummary();
           updateButtonText();
           updateSubtext();
           document.getElementById('payment-errors').textContent = '';
@@ -5324,6 +5347,7 @@ body {
         selectedProviderId = sub.getAttribute('data-provider-id');
         var cardFields = document.getElementById('card-fields');
         if (cardFields) cardFields.style.display = 'none';
+        recalculateOrderSummary();
         updateButtonText();
         updateSubtext();
         document.getElementById('payment-errors').textContent = '';
@@ -5345,6 +5369,8 @@ body {
     } else if (BANK_CODES.indexOf(selectedMethod) !== -1) {
       var bankName = BANK_METHODS[selectedMethod] ? BANK_METHODS[selectedMethod].label : 'banku';
       subtext.textContent = 'Budete přesměrováni na platbu přes ' + bankName + '.';
+    } else if (selectedMethod === 'cod') {
+      subtext.textContent = 'Zaplatíte při převzetí zásilky. Poplatek +30 Kč.';
     } else {
       subtext.textContent = 'Budete přesměrováni na zabezpečenou platební stránku.';
     }
@@ -5360,6 +5386,8 @@ body {
         trustText.textContent = 'Zabezpečeno přes ' + trustProvider;
       } else if (BANK_CODES.indexOf(selectedMethod) !== -1) {
         trustText.textContent = 'Zabezpečeno přes Comgate';
+      } else if (selectedMethod === 'cod') {
+        trustText.textContent = 'Platba při převzetí zásilky';
       } else {
         trustText.textContent = 'Zabezpečeno přes ' + (selectedProvider === 'paypal' ? 'PayPal' : selectedProvider === 'stripe' ? 'Stripe' : 'Comgate');
       }
@@ -5384,11 +5412,17 @@ body {
     } else if (BANK_CODES.indexOf(selectedMethod) !== -1) {
       var bankCfg = BANK_METHODS[selectedMethod];
       methodName = bankCfg ? bankCfg.label : 'Bankovní převod';
+    } else if (selectedMethod === 'cod') {
+      methodName = 'Dobírka';
     } else {
       var opt = allPaymentOptions.find(function(m) { return m.code === selectedMethod; });
       methodName = opt ? opt.display_name : selectedMethod;
     }
-    btnText.textContent = 'Platba přes ' + methodName + ' — ' + formatPrice(currentTotalPrice);
+    if (selectedMethod === 'cod') {
+      btnText.textContent = 'Dokončit objednávku — ' + formatPrice(currentTotalPrice);
+    } else {
+      btnText.textContent = 'Platba přes ' + methodName + ' — ' + formatPrice(currentTotalPrice);
+    }
   }
 
   // Load payment methods on page init
@@ -7082,6 +7116,14 @@ body {
       var sessionData = {};
       if (USE_TEST_MODE) {
         providerId = 'pp_system_default';
+      } else if (selectedMethod === 'cod') {
+        // COD: use COD payment provider, store COD fee in metadata
+        providerId = 'pp_cod_cod';
+        sessionData = {
+          method: 'cod',
+          amount: checkoutTotal,
+          currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
+        };
       } else {
         // Use dynamic provider_id from selected payment method
         providerId = selectedProviderId || 'pp_mollie_mollie';
@@ -7135,6 +7177,18 @@ body {
       }
 
       return tokenPromise.then(function() {
+        // COD: update cart metadata with cod_fee before payment collection
+        if (selectedMethod === 'cod') {
+          return medusaFetch('/store/carts/' + cartId, {
+            method: 'POST',
+            body: JSON.stringify({ metadata: { payment_method: 'cod', cod_fee: 30 } })
+          }).then(function() {
+            return medusaFetch('/store/payment-collections', {
+              method: 'POST',
+              body: JSON.stringify({ cart_id: cartId })
+            });
+          });
+        }
         return medusaFetch('/store/payment-collections', {
           method: 'POST',
           body: JSON.stringify({ cart_id: cartId })
@@ -7200,6 +7254,25 @@ body {
           // 1. Upsell vypnutý v admin → vždy na thank-you
           // 2. Order bump aktivní → upsell produkt už v objednávce → thank-you
           // 3. Jinak → upsell stránka
+          if (PROJECT_CONFIG.upsellEnabled === false) {
+            window.location.href = PROJECT_CONFIG.thankYouUrl;
+          } else if (checkoutOrderBump) {
+            localStorage.setItem('medusa_upsell_purchased', 'true');
+            window.location.href = PROJECT_CONFIG.thankYouUrl;
+          } else {
+            window.location.href = PROJECT_CONFIG.upsellUrl;
+          }
+        });
+      } else if (selectedMethod === 'cod') {
+        // DOBÍRKA (COD): rovnou dokončit objednávku (žádný redirect, žádná platba)
+        return medusaFetch('/store/carts/' + result.cartId + '/complete', {
+          method: 'POST'
+        }).then(function(completeRes) {
+          var order = completeRes.order || completeRes;
+          localStorage.setItem('medusa_order_id', order.id || '');
+          localStorage.setItem('medusa_order_display_id', order.display_id || '');
+
+          // ─── REDIRECT LOGIKA (COD) ───
           if (PROJECT_CONFIG.upsellEnabled === false) {
             window.location.href = PROJECT_CONFIG.thankYouUrl;
           } else if (checkoutOrderBump) {
