@@ -22,26 +22,30 @@ interface OrdersTableProps {
 // ═══════════════════════════════════════════
 // DATE FORMATTING
 // ═══════════════════════════════════════════
-function formatDate(iso: string) {
+function formatDate(iso: string): { label: string; time: string; isRecent: boolean } {
   const d = new Date(iso)
-  const now = new Date()
-  const isToday = d.toDateString() === now.toDateString()
-  const yesterday = new Date(now)
+  // Compare dates in CET
+  const cetOptions = { timeZone: "Europe/Prague" } as const
+  const cetDateStr = d.toLocaleDateString("en-US", cetOptions)
+  const nowCetStr = new Date().toLocaleDateString("en-US", cetOptions)
+  const yesterday = new Date()
   yesterday.setDate(yesterday.getDate() - 1)
-  const isYesterday = d.toDateString() === yesterday.toDateString()
+  const yesterdayCetStr = yesterday.toLocaleDateString("en-US", cetOptions)
 
   const time = d.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
+    timeZone: "Europe/Prague",
   })
 
-  if (isToday) return `Today at ${time}`
-  if (isYesterday) return `Yesterday at ${time}`
-  return (
-    d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) +
-    ` at ${time}`
-  )
+  if (cetDateStr === nowCetStr) return { label: "Today", time, isRecent: true }
+  if (cetDateStr === yesterdayCetStr) return { label: "Yesterday", time, isRecent: true }
+  return {
+    label: d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Europe/Prague" }),
+    time,
+    isRecent: false,
+  }
 }
 
 // Currency formatting — uses shared multi-currency utility from lib/format-currency
@@ -134,20 +138,20 @@ const tdStyle: React.CSSProperties = {
 function SkeletonRows() {
   return (
     <>
-      {Array.from({ length: 8 }).map((_, i) => (
+      {Array.from({ length: 12 }).map((_, i) => (
         <tr key={i}>
           <td style={{ ...tdStyle, width: "36px", textAlign: "center" }}>
             <div style={{ width: "18px", height: "18px", borderRadius: "4px", background: "#EBEBEB", margin: "0 auto" }} />
           </td>
-          <td style={tdStyle}><div style={{ width: "60px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "160px", height: "32px", borderRadius: "6px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "70px", height: "22px", borderRadius: "12px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "70px", height: "22px", borderRadius: "12px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "40px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
           <td style={tdStyle}><div style={{ width: "70px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "40px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "80px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
           <td style={tdStyle}><div style={{ width: "100px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "20px", height: "20px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "130px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "70px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "70px", height: "22px", borderRadius: "12px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "70px", height: "22px", borderRadius: "12px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "40px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "30px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
         </tr>
       ))}
     </>
@@ -298,14 +302,14 @@ export function OrdersTable({
             <tr>
               <th style={{ ...thStyle, width: "36px", textAlign: "center", cursor: "default" }}></th>
               <th style={thStyle}>Order</th>
+              <th style={thStyle}>Date</th>
               <th style={thStyle}>Customer</th>
+              <th style={thStyle}>Email</th>
+              <th style={thStyle}>Total</th>
               <th style={thStyle}>Payment</th>
               <th style={thStyle}>Fulfillment</th>
               <th style={thStyle}>Items</th>
-              <th style={thStyle}>Total</th>
               <th style={thStyle}>Country</th>
-              <th style={thStyle}>Date</th>
-              <th style={{ ...thStyle, width: "48px", cursor: "default" }}></th>
             </tr>
           </thead>
           <tbody>
@@ -355,23 +359,23 @@ export function OrdersTable({
                 onClick={toggleSelectAll}
               />
             </th>
-            <th style={{ ...thStyle, minWidth: "120px", whiteSpace: "nowrap" }} onClick={() => onSort("display_id")}>
+            <th style={{ ...thStyle, minWidth: "90px", whiteSpace: "nowrap" }} onClick={() => onSort("display_id")}>
               Order {renderSortIcon("display_id")}
+            </th>
+            <th style={thStyle} onClick={() => onSort("created_at")}>
+              Date {renderSortIcon("created_at")}
             </th>
             <th style={thStyle} onClick={() => onSort("customer")}>
               Customer {renderSortIcon("customer")}
             </th>
-            <th style={{ ...thStyle, cursor: "default" }}>Payment</th>
-            <th style={{ ...thStyle, cursor: "default" }}>Fulfillment</th>
-            <th style={{ ...thStyle, cursor: "default" }}>Items</th>
+            <th style={{ ...thStyle, cursor: "default" }}>Email</th>
             <th style={thStyle} onClick={() => onSort("total")}>
               Total {renderSortIcon("total")}
             </th>
+            <th style={{ ...thStyle, cursor: "default" }}>Payment</th>
+            <th style={{ ...thStyle, cursor: "default" }}>Fulfillment</th>
+            <th style={{ ...thStyle, cursor: "default" }}>Items</th>
             <th style={{ ...thStyle, cursor: "default" }}>Country</th>
-            <th style={thStyle} onClick={() => onSort("created_at")}>
-              Date {renderSortIcon("created_at")}
-            </th>
-            <th style={{ ...thStyle, width: "48px", cursor: "default" }}></th>
           </tr>
         </thead>
         <tbody>
@@ -434,27 +438,41 @@ export function OrdersTable({
 
                 {/* 2. Order */}
                 <td style={tdStyle}>
-                  <span
-                    style={{
-                      color: colors.accent,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
+                  <span style={{ color: colors.accent, fontWeight: 600, whiteSpace: "nowrap" }}>
                     {getOrderDisplayNumber(order)}
                   </span>
                 </td>
 
-                {/* 3. Customer (with payment method icon) */}
+                {/* 3. Date (highlighted) */}
                 <td style={tdStyle}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  {(() => {
+                    const dt = formatDate(order.created_at)
+                    return (
+                      <div style={{ whiteSpace: "nowrap" }}>
+                        <span style={{
+                          fontWeight: dt.isRecent ? 600 : 500,
+                          fontSize: "12px",
+                          color: dt.isRecent ? colors.text : colors.textSec,
+                        }}>
+                          {dt.label}
+                        </span>
+                        <span style={{ fontSize: "11px", color: colors.textMuted, marginLeft: "4px" }}>
+                          {dt.time}
+                        </span>
+                      </div>
+                    )
+                  })()}
+                </td>
+
+                {/* 4. Customer (name only) */}
+                <td style={tdStyle}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
                     {(() => {
                       const iconUrl = getPaymentIconUrl(order)
                       if (iconUrl) {
                         return (
                           <div style={{
-                            width: "26px", height: "26px", borderRadius: "6px",
+                            width: "24px", height: "24px", borderRadius: "5px",
                             background: "#f0f1f5", padding: "3px",
                             display: "flex", alignItems: "center", justifyContent: "center",
                             flexShrink: 0, overflow: "hidden",
@@ -466,27 +484,36 @@ export function OrdersTable({
                       const fb = getPaymentFallback(order)
                       return (
                         <div style={{
-                          width: "26px", height: "26px", borderRadius: "6px",
+                          width: "24px", height: "24px", borderRadius: "5px",
                           background: fb.bg, color: fb.color,
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          flexShrink: 0, fontSize: "8px", fontWeight: 700,
+                          flexShrink: 0, fontSize: "7px", fontWeight: 700,
                         }}>
                           {fb.letter}
                         </div>
                       )
                     })()}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 500, fontSize: "12.5px", color: colors.text }}>
-                        {customerName}
-                      </div>
-                      <div style={{ fontSize: "10.5px", color: colors.textMuted, marginTop: "0px" }}>
-                        {order.email}
-                      </div>
-                    </div>
+                    <span style={{ fontWeight: 500, fontSize: "12.5px", color: colors.text }}>
+                      {customerName}
+                    </span>
                   </div>
                 </td>
 
-                {/* 4. Payment */}
+                {/* 5. Email */}
+                <td style={tdStyle}>
+                  <span style={{ fontSize: "12px", color: colors.textMuted }}>
+                    {order.email}
+                  </span>
+                </td>
+
+                {/* 6. Total */}
+                <td style={tdStyle}>
+                  <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums", color: colors.text }}>
+                    {formatCurrency(total, order.currency_code)}
+                  </span>
+                </td>
+
+                {/* 7. Payment */}
                 <td style={tdStyle}>
                   <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                     {(() => {
@@ -494,7 +521,7 @@ export function OrdersTable({
                       if (iconUrl) {
                         return (
                           <div style={{
-                            width: "20px", height: "20px", borderRadius: "4px",
+                            width: "18px", height: "18px", borderRadius: "3px",
                             background: "#f0f1f5", padding: "2px",
                             display: "flex", alignItems: "center", justifyContent: "center",
                             flexShrink: 0, overflow: "hidden",
@@ -506,10 +533,10 @@ export function OrdersTable({
                       const fb = getPaymentFallback(order)
                       return (
                         <div style={{
-                          width: "20px", height: "20px", borderRadius: "4px",
+                          width: "18px", height: "18px", borderRadius: "3px",
                           background: fb.bg, color: fb.color,
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          flexShrink: 0, fontSize: "7px", fontWeight: 700,
+                          flexShrink: 0, fontSize: "6px", fontWeight: 700,
                         }}>
                           {fb.letter}
                         </div>
@@ -519,64 +546,21 @@ export function OrdersTable({
                   </div>
                 </td>
 
-                {/* 5. Fulfillment */}
+                {/* 8. Fulfillment */}
                 <td style={tdStyle}>
                   <DeliveryBadge status={deliveryStatus} />
                 </td>
 
-                {/* 6. Items */}
+                {/* 9. Items */}
                 <td style={tdStyle}>
                   <span style={{ color: colors.textMuted }}>
                     {itemCount} item{itemCount !== 1 ? "s" : ""}
                   </span>
                 </td>
 
-                {/* 7. Total */}
-                <td style={tdStyle}>
-                  <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums", color: colors.text }}>
-                    {formatCurrency(total, order.currency_code)}
-                  </span>
-                </td>
-
-                {/* 8. Country */}
+                {/* 10. Country */}
                 <td style={tdStyle}>
                   <CountryFlag code={countryCode} />
-                </td>
-
-                {/* 9. Date */}
-                <td style={tdStyle}>
-                  <span style={{ color: colors.textMuted, whiteSpace: "nowrap" }}>
-                    {formatDate(order.created_at)}
-                  </span>
-                </td>
-
-                {/* 10. Actions (three dots) */}
-                <td
-                  style={{ ...tdStyle, width: "48px", textAlign: "center" }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div
-                    className="row-actions"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      transition: "background 0.15s",
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.05)" }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent" }}
-                    onClick={() => navigate(`/custom-orders/${order.id}`)}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill={colors.textSec}>
-                      <circle cx="8" cy="3" r="1.5" />
-                      <circle cx="8" cy="8" r="1.5" />
-                      <circle cx="8" cy="13" r="1.5" />
-                    </svg>
-                  </div>
                 </td>
               </tr>
             )
