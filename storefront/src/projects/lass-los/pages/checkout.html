@@ -94,7 +94,7 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
   100% { transform: translateX(320%); }
 }
 
-/* ─── DESIGN TOKENS — Velvet Dusk (shodné s hlavní stránkou) ─── */
+/* ─── DESIGN TOKENS — Velvet Dusk (gleich wie Hauptseite) ─── */
 :root {
   --bg: #FAF5F8;
   --heading: #2D1B3D;
@@ -131,7 +131,7 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
-/* ─── ANIMACE — fade-in pro sekce (Shopify styl) ─── */
+/* ─── ANIMATION — Fade-in für Sektionen (Shopify-Stil) ─── */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
@@ -166,7 +166,7 @@ body {
 .animate-in-delay-3 { animation-delay: 0.3s; }
 .animate-in-delay-4 { animation-delay: 0.4s; }
 
-/* ─── BREADCRUMB NAVIGACE (Shopify styl) ─── */
+/* ─── BREADCRUMB-NAVIGATION (Shopify-Stil) ─── */
 .checkout-header {
   text-align: center;
   padding: 24px 16px 0;
@@ -231,7 +231,7 @@ body {
   gap: 0;
 }
 
-/* Shopify-style sekce karty */
+/* Shopify-Stil Kartensektion */
 .checkout-card {
   background: var(--white);
   border: 1px solid var(--border);
@@ -273,7 +273,7 @@ body {
   color: var(--heading);
 }
 
-/* ─── FLOATING LABELS (Shopify styl) ─── */
+/* ─── FLOATING LABELS (Shopify-Stil) ─── */
 .form-group {
   position: relative;
   margin-bottom: 14px;
@@ -330,7 +330,7 @@ body {
   padding: 0;
   z-index: 1;
 }
-/* Label plovoucí nahoru při focus nebo vyplněném poli */
+/* Label schwebt nach oben bei Fokus oder ausgefülltem Feld */
 .float-field input:focus ~ label,
 .float-field input:not(:placeholder-shown) ~ label,
 .float-field select:focus ~ label,
@@ -345,14 +345,14 @@ body {
 .float-field.has-value:not(:focus-within) label {
   color: var(--muted);
 }
-/* Focus stav */
+/* Fokus-Zustand */
 .float-field input:focus,
 .float-field select:focus {
   border-color: var(--cta);
   box-shadow: 0 0 0 3px rgba(194,123,160,0.12);
   background: var(--white);
 }
-/* Validace */
+/* Validierung */
 .float-field input.valid {
   border-color: var(--success);
 }
@@ -368,7 +368,7 @@ body {
 }
 .float-field input::placeholder { color: transparent; }
 
-/* Inline validační ikony — fixní pozice v inputu (nereaguje na warning/error pod polem) */
+/* Inline-Validierungssymbole — feste Position im Input (reagiert nicht auf Warnung/Fehler unter dem Feld) */
 .validation-icon {
   position: absolute;
   right: 14px;
@@ -399,7 +399,7 @@ body {
 /* Hide local error for Foxentry-managed fields — Foxentry shows its own feedback */
 .float-field input.foxentry-managed.invalid ~ .field-error { display: none; }
 
-/* ─── EMAIL SUGGESTION (překlep v doméně) ─── */
+/* ─── EMAIL SUGGESTION (Tippfehler in Domain) ─── */
 .email-suggestion {
   display: none;
   font-size: 12px;
@@ -426,7 +426,7 @@ body {
   animation: fadeIn 0.2s ease;
 }
 
-/* ─── ADDRESS WARNING (chybí číslo domu) ─── */
+/* ─── ADDRESS WARNING (Hausnummer fehlt) ─── */
 .field-warning {
   font-size: 12px;
   color: #E67E22;
@@ -492,7 +492,7 @@ body {
 }
 @keyframes foxSpin { to { transform: translateY(-50%) rotate(360deg); } }
 
-/* ─── FIREMNÍ POLE (B2B) ─── */
+/* ─── FIRMENFELDER (B2B) ─── */
 .company-toggle {
   display: flex; align-items: center; gap: 10px;
   margin-top: 16px; padding: 12px 16px;
@@ -524,7 +524,7 @@ body {
 .company-kvk-label { display: none; }
 .company-kvk-label.active { display: inline; }
 
-/* ─── BILLING ADDRESS (anders dan verzendadres) ─── */
+/* ─── RECHNUNGSADRESSE (abweichend von Lieferadresse) ─── */
 .billing-toggle {
   display: flex; align-items: center; gap: 10px;
   margin-top: 16px; padding: 12px 16px;
@@ -553,7 +553,7 @@ body {
 .billing-fields .float-field { margin-bottom: 8px; }
 .billing-fields .float-field:last-child { margin-bottom: 0; }
 
-/* ─── PROMO / KUPÓN ─── */
+/* ─── PROMO / GUTSCHEINCODE ─── */
 .promo-section { margin-top: 16px; }
 .promo-toggle {
   display: inline-flex; align-items: center; gap: 6px;
@@ -619,7 +619,7 @@ body {
 }
 .promo-remove:hover { color: var(--error); background: rgba(192, 57, 43, 0.06); }
 
-/* ─── PLATEBNÍ METODY ─── */
+/* ─── ZAHLUNGSMETHODEN ─── */
 .payment-methods {
   display: flex;
   flex-direction: column;
@@ -679,7 +679,7 @@ body {
 .payment-method.selected .pm-radio-dot {
   transform: scale(1);
 }
-/* Ikona */
+/* Symbol */
 .pm-icon {
   width: 46px;
   height: 30px;
@@ -850,7 +850,7 @@ body {
   animation: fadeIn 0.3s ease;
 }
 
-/* ─── CTA BUTTON ─── */
+/* ─── CTA-SCHALTFLÄCHE ─── */
 .checkout-btn-wrap {
   padding: 24px 28px 28px;
   background: var(--white);
@@ -921,7 +921,7 @@ body {
   margin-top: 10px;
 }
 
-/* ─── TRUST BADGES POD TLAČÍTKEM ─── */
+/* ─── TRUST BADGES UNTER DER SCHALTFLÄCHE ─── */
 .checkout-trust {
   display: flex;
   align-items: center;
@@ -940,7 +940,7 @@ body {
 }
 .checkout-trust-item svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.7; }
 
-/* ─── ORDER SUMMARY (pravá strana) ─── */
+/* ─── BESTELLÜBERSICHT (rechte Seite) ─── */
 .order-summary {
   background: var(--white);
   border-radius: var(--radius-lg);
@@ -983,7 +983,7 @@ body {
   height: 100%;
   object-fit: cover;
 }
-/* Mini-boek mockup */
+/* Mini-Buch Mockup */
 .mini-book {
   width: 50px;
   height: 70px;
@@ -1086,7 +1086,7 @@ body {
   color: var(--cta);
 }
 
-/* Garantie box */
+/* Garantie-Box */
 .guarantee-box {
   margin-top: 18px;
   padding: 14px;
@@ -1304,7 +1304,7 @@ body {
   will-change: box-shadow;
   margin: 0 0 12px;
 }
-/* Label "Besteloverzicht" nad headerem */
+/* Label "Bestellübersicht" über dem Header */
 .msb-label {
   font-size: 9px;
   font-weight: 700;
@@ -1321,7 +1321,7 @@ body {
 .mobile-summary-bar.compact .msb-label {
   max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; overflow: hidden;
 }
-/* --- Normální stav (nahoře) --- */
+/* --- Normalzustand (oben) --- */
 .mobile-summary-bar .msb-header {
   display: flex;
   align-items: center;
@@ -1332,7 +1332,7 @@ body {
   transition: padding 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   -webkit-tap-highlight-color: transparent;
 }
-/* Thumbnail produktu v baru */
+/* Produkt-Thumbnail in der Leiste */
 .msb-thumb {
   width: 40px;
   height: 54px;
@@ -1344,7 +1344,7 @@ body {
   transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .msb-thumb img { width: 100%; height: 100%; object-fit: cover; }
-/* Info blok — název + detail */
+/* Info-Block — Name + Detail */
 .msb-info {
   flex: 1;
   min-width: 0;
@@ -1370,7 +1370,7 @@ body {
   max-height: 30px;
   overflow: hidden;
 }
-/* Cena vpravo */
+/* Preis rechts */
 .msb-price-col {
   text-align: right;
   flex-shrink: 0;
@@ -1399,7 +1399,7 @@ body {
 }
 .mobile-summary-bar.open .msb-chevron { transform: rotate(180deg); }
 
-/* --- Compact stav (po scrollu dolů) --- */
+/* --- Kompaktzustand (nach Herunterscrollen) --- */
 .mobile-summary-bar.compact .msb-header {
   padding: 8px 16px;
 }
@@ -1428,7 +1428,7 @@ body {
   box-shadow: 0 4px 24px rgba(45,27,61,0.10);
 }
 
-/* --- Rozevřený content panel --- */
+/* --- Aufgeklapptes Inhalts-Panel --- */
 .msb-content {
   max-height: 0;
   overflow: hidden;
@@ -1443,7 +1443,7 @@ body {
   opacity: 1;
   padding: 0 20px 16px;
 }
-/* Řádky v rozevřeném panelu */
+/* Zeilen im aufgeklappten Panel */
 .msb-divider {
   height: 1px;
   background: var(--border);
@@ -1479,7 +1479,7 @@ body {
   text-align: right;
   margin-top: 2px;
 }
-/* Malý GLS badge v baru */
+/* Kleines DHL-Badge in der Leiste */
 .msb-gls {
   display: inline-block;
   background: #003399;
@@ -1494,7 +1494,7 @@ body {
 }
 
 /* ─── RESPONSIVE ─── */
-/* Menší notebooky / tablety na šířku — užší sidebar */
+/* Kleinere Notebooks / Tablets im Querformat — schmalere Sidebar */
 @media (max-width: 1100px) and (min-width: 881px) {
   .checkout-grid {
     grid-template-columns: 1fr 300px;
@@ -1516,7 +1516,7 @@ body {
   .mobile-summary-bar {
     display: block;
   }
-  /* Checkout header — viditelný na mobile (bar je pod ním) */
+  /* Checkout-Header — sichtbar auf Mobilgeräten (Leiste darunter) */
   .checkout-header {
     padding-bottom: 8px;
   }
@@ -1536,7 +1536,7 @@ body {
   .breadcrumb { font-size: 12px; }
   .breadcrumb-sep { margin: 0 6px; }
   .section-title { font-size: 16px; }
-  /* Fixed bar je už edge-to-edge */
+  /* Feste Leiste ist bereits randlos */
 }
 
 /* ─── BUNDLE SELECTOR ─── */
@@ -1710,7 +1710,7 @@ body {
 .order-bump-expand[aria-expanded="true"] svg { transform: rotate(180deg); }
 .order-bump-expand[aria-expanded="true"] .expand-label::after { content: none; }
 
-/* Accordion detail — skrytý defaultně */
+/* Accordion-Detail — standardmäßig ausgeblendet */
 .order-bump-detail {
   max-height: 0;
   overflow: hidden;
@@ -1727,7 +1727,7 @@ body {
   padding-top: 16px;
 }
 
-/* Boek detail top */
+/* Buchdetail oben */
 .order-bump-detail-top {
   display: flex; gap: 16px; margin-bottom: 16px;
 }
@@ -1767,7 +1767,7 @@ body {
 .order-bump-description strong { color: var(--heading); }
 .ob-intro { font-size: 14px; line-height: 1.6; }
 
-/* 5 Pijlers grid */
+/* 5 Säulen Grid */
 .ob-pillars {
   background: var(--white); border: 1px solid var(--border);
   border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;
@@ -1794,7 +1794,7 @@ body {
 }
 .ob-pillar span { color: var(--body); font-size: 11px; }
 
-/* Wat je bereikt */
+/* Was du erreichst */
 .ob-results {
   margin-bottom: 14px;
 }
@@ -2135,17 +2135,17 @@ body {
 <!-- ═══ MAIN CHECKOUT ═══ -->
 <div class="checkout-page">
 
-  <!-- ═══ MOBILE STICKY SUMMARY BAR (sticky, jen mobil/tablet ≤880px) ═══ -->
+  <!-- ═══ MOBILE STICKY SUMMARY BAR (sticky, nur Mobil/Tablet ≤880px) ═══ -->
   <div class="mobile-summary-bar" id="mobile-summary-bar">
     <!-- Label -->
     <div class="msb-label">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
       Bestellübersicht
     </div>
-    <!-- Header — vždy viditelný, klikací pro rozbalení -->
+    <!-- Header — immer sichtbar, klickbar zum Aufklappen -->
     <div class="msb-header" id="msb-header">
       <div class="msb-thumb" id="msb-thumb">
-        <!-- Obrázek produktu z Medusa admin -->
+        <!-- Produktbild aus Medusa Admin -->
       </div>
       <div class="msb-info">
         <div class="msb-title" id="msb-title">Lass los, was dich kaputt macht</div>
@@ -2157,15 +2157,15 @@ body {
       </div>
       <svg class="msb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
     </div>
-    <!-- Rozevírací panel s detailním přehledem košíku -->
+    <!-- Aufklappbares Panel mit detaillierter Warenkorbübersicht -->
     <div class="msb-content" id="msb-content">
       <div class="msb-divider"></div>
-      <!-- Hlavní produkt -->
+      <!-- Hauptprodukt -->
       <div class="msb-line" id="msb-product-line">
         <span class="msb-line-label" id="msb-product-name">Lass los, was dich kaputt macht</span>
         <span class="msb-line-val" id="msb-product-price">35&nbsp;&euro;</span>
       </div>
-      <!-- Order bump (skrytý pokud není vybrán) -->
+      <!-- Order Bump (ausgeblendet wenn nicht ausgewählt) -->
       <div class="msb-line bump" id="msb-bump-line" style="display:none;">
         <span class="msb-line-label">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -2178,17 +2178,17 @@ body {
         <span class="msb-line-label">Zwischensumme (exkl. MwSt.)</span>
         <span class="msb-line-val" id="msb-subtotal">29&nbsp;&euro;</span>
       </div>
-      <!-- BTW -->
+      <!-- MwSt. -->
       <div class="msb-line" id="msb-tax-line">
         <span class="msb-line-label" id="msb-tax-label">MwSt. (7%)</span>
         <span class="msb-line-val" id="msb-tax-val">2&nbsp;&euro;</span>
       </div>
-      <!-- Verzending -->
+      <!-- Versand -->
       <div class="msb-line shipping">
         <span class="msb-line-label">Versand <span class="msb-gls">DHL</span></span>
         <span class="msb-line-val">Kostenlos</span>
       </div>
-      <!-- Totaal -->
+      <!-- Gesamt -->
       <div class="msb-line total-line">
         <span class="msb-line-label">Gesamt</span>
         <span class="msb-line-val" id="msb-total">35&nbsp;&euro;</span>
@@ -2218,26 +2218,26 @@ body {
           </div>
         </div>
 
-        <!-- ═══ BUNDLE SELECTOR — nad formulářem ═══ -->
+        <!-- ═══ BUNDLE SELECTOR — über dem Formular ═══ -->
         <div class="bundle-section animate-in" id="bundle-section">
           <div class="bundle-section-title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
             Anzahl wählen
           </div>
           <div class="bundle-options" id="bundle-options">
-            <!-- Dynamicky generováno z JS -->
+            <!-- Dynamisch aus JS generiert -->
           </div>
         </div>
 
-        <!-- ═══ ORDER BUMP — accordion s detailem produktu ═══ -->
+        <!-- ═══ ORDER BUMP — Akkordeon mit Produktdetails ═══ -->
         <div class="order-bump animate-in" id="order-bump" style="display:none;">
-          <!-- Hlavička — obrázek + checkbox + info + šipka (vždy viditelné) -->
+          <!-- Header — Bild + Checkbox + Info + Pfeil (immer sichtbar) -->
           <div class="order-bump-header" id="order-bump-header">
             <div class="order-bump-checkbox" id="order-bump-check">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <div class="order-bump-thumb" id="order-bump-thumb">
-              <!-- Obrázek z Medusa admin — malý thumbnail v headeru -->
+              <!-- Bild aus Medusa Admin — kleines Thumbnail im Header -->
             </div>
             <div class="order-bump-header-text">
               <div class="order-bump-top-row">
@@ -2251,20 +2251,20 @@ body {
                 <span class="order-bump-inline-save">Spare 12 &euro;</span>
               </div>
             </div>
-            <button type="button" class="order-bump-expand" id="order-bump-expand-btn" aria-expanded="false" aria-label="Mer information">
+            <button type="button" class="order-bump-expand" id="order-bump-expand-btn" aria-expanded="false" aria-label="Mehr Informationen">
               <span class="expand-label">Mehr Info</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><path d="M6 9l6 6 6-6"/></svg>
             </button>
           </div>
 
-          <!-- Accordion detail — rozbalovací info o produktu -->
+          <!-- Akkordeon-Detail — aufklappbare Produktinformationen -->
           <div class="order-bump-detail" id="order-bump-detail">
             <div class="order-bump-detail-inner">
 
-              <!-- Boek info + obrázek -->
+              <!-- Buchinfo + Bild -->
               <div class="order-bump-detail-top">
                 <div class="order-bump-img" id="order-bump-img">
-                  <!-- Obrázek z Medusa admin -->
+                  <!-- Bild aus Medusa Admin -->
                 </div>
                 <div class="order-bump-detail-info">
                   <div class="order-bump-name" id="order-bump-name">Das Leben, das du verdienst</div>
@@ -2288,7 +2288,7 @@ body {
                 <p>Dieses Buch behandelt die <strong>5 konkreten Bereiche</strong>, die dein Leben festhalten &mdash; in 30 Tagen, Schritt f&uuml;r Schritt. Keine vagen Affirmationen, sondern ein praktisches System.</p>
               </div>
 
-              <!-- 5 Pijlers -->
+              <!-- 5 Säulen -->
               <div class="ob-pillars">
                 <div class="ob-pillars-title">LIFE RESET&trade;-System &mdash; 5 S&auml;ulen</div>
                 <div class="ob-pillar-grid">
@@ -2315,7 +2315,7 @@ body {
                 </div>
               </div>
 
-              <!-- Wat je bereikt -->
+              <!-- Was du erreichst -->
               <div class="ob-results">
                 <div class="ob-results-title">Nach 30 Tagen wirst du&hellip;</div>
                 <div class="ob-result-item">
@@ -2394,7 +2394,7 @@ body {
             <h2 class="section-title">Lieferadresse</h2>
           </div>
 
-          <!-- Land (první — Shopify styl) -->
+          <!-- Land (erstes Feld — Shopify-Stil) -->
           <div class="float-field form-group has-value">
             <select id="country" name="country" required autocomplete="country">
               <option value="DE" selected>🇩🇪 Deutschland</option>
@@ -2404,7 +2404,7 @@ body {
             <label for="country">Land</label>
           </div>
 
-          <!-- Jméno + Příjmení -->
+          <!-- Vorname + Nachname -->
           <div class="form-row">
             <div class="float-field form-group">
               <input type="text" id="first_name" name="first_name" placeholder=" " required autocomplete="given-name">
@@ -2422,7 +2422,7 @@ body {
             </div>
           </div>
 
-          <!-- Adresa -->
+          <!-- Adresse -->
           <div class="float-field form-group">
             <input type="text" id="address" name="address" placeholder=" " required autocomplete="street-address">
             <label for="address">Straße und Hausnummer</label>
@@ -2437,7 +2437,7 @@ body {
             <div class="foxentry-dropdown" id="foxentry-address-dropdown"></div>
           </div>
 
-          <!-- Město + PSČ -->
+          <!-- Stadt + PLZ -->
           <div class="form-row">
             <div class="float-field form-group">
               <input type="text" id="city" name="city" placeholder=" " required autocomplete="address-level2">
@@ -2455,7 +2455,7 @@ body {
             </div>
           </div>
 
-          <!-- Firemní pole (B2B) — pod adresou, nad dopravou -->
+          <!-- Firmenfelder (B2B) — unter der Adresse, über dem Versand -->
           <label class="company-toggle" for="company-checkbox">
             <input type="checkbox" id="company-checkbox">
             <span class="company-toggle-label">
@@ -2483,7 +2483,7 @@ body {
             </div>
           </div>
 
-          <!-- Factuuradres (billing address) — anders dan verzendadres -->
+          <!-- Rechnungsadresse (billing address) — abweichend von Lieferadresse -->
           <label class="billing-toggle" for="billing-checkbox">
             <input type="checkbox" id="billing-checkbox">
             <span class="billing-toggle-label">
@@ -2538,7 +2538,7 @@ body {
 
         </div>
 
-        <!-- ═══ PROMO KÓDY ═══ -->
+        <!-- ═══ RABATTCODES ═══ -->
         <div class="checkout-card animate-in animate-in-delay-2" style="padding: 16px 20px;">
           <div class="promo-section">
             <button type="button" class="promo-toggle" id="promo-toggle">
@@ -2655,13 +2655,13 @@ body {
         </div>
       </div>
 
-      <!-- 2 gratis e-books bonus -->
+      <!-- 2 kostenlose E-Books Bonus -->
       <div class="summary-bonus">
         <span class="bonus-icon">🎁</span>
         <span class="bonus-text">+ 2 kostenlose E-Books inklusive</span>
       </div>
 
-      <!-- Order bump řádek v summary (skrytý dokud nezaškrtne) -->
+      <!-- Order Bump Zeile in der Zusammenfassung (ausgeblendet bis aktiviert) -->
       <div class="summary-line" id="summary-order-bump" style="display:none;padding:8px 0;border-top:1px dashed rgba(194,123,160,0.2);">
         <span style="font-size:13px;display:flex;align-items:center;gap:4px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -2785,36 +2785,36 @@ body {
 (function() {
   'use strict';
 
-  /* ─── CONFIGURATIE (z project-config.js) ─── */
+  /* ─── KONFIGURATION (aus project-config.js) ─── */
   var MEDUSA_URL = PROJECT_CONFIG.medusaUrl;
   var VARIANT_ID = PROJECT_CONFIG.mainProduct.variantId;
-  // Dynamický region ID — mění se podle vybrané země
-  var currentRegionId = PROJECT_CONFIG.regions.DE; // Výchozí: DE
+  // Dynamische Region-ID — ändert sich je nach ausgewähltem Land
+  var currentRegionId = PROJECT_CONFIG.regions.DE; // Standard: DE
 
-  /* ─── STAV: Bundle + Order Bump ─── */
-  var selectedBundleQty = 1;       // Aktuálně vybraný počet knih (1-4)
-  var selectedBundlePrice = PROJECT_CONFIG.bundleOptions[0].price; // Cena za bundle
-  var orderBumpActive = false;      // Je order bump zaškrtnutý?
+  /* ─── ZUSTAND: Bundle + Order Bump ─── */
+  var selectedBundleQty = 1;       // Aktuell ausgewählte Anzahl Bücher (1-4)
+  var selectedBundlePrice = PROJECT_CONFIG.bundleOptions[0].price; // Preis für Bundle
+  var orderBumpActive = false;      // Ist Order Bump aktiviert?
 
-  /* ─── FUNKCE PRO DYNAMICKÝ ORDER SUMMARY ─── */
-  // Formátování cen v EU stylu (€32,11)
+  /* ─── FUNKTIONEN FÜR DYNAMISCHE BESTELLÜBERSICHT ─── */
+  // Preisformatierung im EU-Stil (€32,11)
   function formatPrice(amount) {
     if (amount === null || amount === undefined) return '0 €';
     var num = parseFloat(amount);
     return Math.round(num) + ' €';
   }
 
-  // Daňové sazby per země (tax-inclusive)
+  // Steuersätze pro Land (tax-inclusive)
   var TAX_RATES = { DE: 7, AT: 10, LU: 3 };
 
-  // Získej aktuální celkovou cenu (bundle + order bump)
+  // Aktuelle Gesamtsumme ermitteln (Bundle + Order Bump)
   function getCurrentTotal() {
     var total = selectedBundlePrice;
     if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
     return total;
   }
 
-  // Přepočítej a zobraz CELÝ order summary (bundle, order bump, daně, totál)
+  // Gesamte Bestellübersicht neu berechnen und anzeigen (Bundle, Order Bump, Steuern, Gesamtbetrag)
   function recalculateOrderSummary() {
     var countryCode = document.getElementById('country') ? document.getElementById('country').value : 'DE';
     var rate = TAX_RATES[countryCode] || TAX_RATES.DE;
@@ -2837,7 +2837,7 @@ body {
     var desktopPrice = document.getElementById('desktop-product-price');
     if (desktopPrice) desktopPrice.textContent = formatPrice(selectedBundlePrice);
 
-    // Product naam — update met qty als bundle > 1
+    // Produktname — aktualisieren mit Menge wenn Bundle > 1
     var bundle = PROJECT_CONFIG.bundleOptions.find(function(b) { return b.qty === selectedBundleQty; });
     var productName = PROJECT_CONFIG.mainProduct.name;
     if (selectedBundleQty > 1 && bundle) {
@@ -2846,14 +2846,14 @@ body {
     var desktopName = document.getElementById('desktop-product-name');
     if (desktopName) desktopName.textContent = productName;
 
-    // Order bump řádek v desktop summary
+    // Order Bump Zeile in Desktop-Zusammenfassung
     var bumpSummary = document.getElementById('summary-order-bump');
     if (bumpSummary) {
       bumpSummary.style.display = orderBumpActive ? 'flex' : 'none';
     }
 
     // ─── MOBILE STICKY SUMMARY BAR ───
-    // Hlavní cena
+    // Hauptpreis
     var msbPrice = document.getElementById('msb-price');
     if (msbPrice) msbPrice.textContent = formatPrice(total);
 
@@ -2861,7 +2861,7 @@ body {
     var msbTitle = document.getElementById('msb-title');
     if (msbTitle) msbTitle.textContent = productName;
 
-    // Subtitle — popis co je v košíku
+    // Untertitel — Beschreibung des Warenkorbs
     var msbSubtitle = document.getElementById('msb-subtitle');
     if (msbSubtitle) {
       var parts = ['Taschenbuch · ' + selectedBundleQty + '× Buch'];
@@ -2869,24 +2869,24 @@ body {
       msbSubtitle.textContent = parts.join(' ');
     }
 
-    // Items label pod cenou
+    // Artikelbezeichnung unter dem Preis
     var msbItemsLabel = document.getElementById('msb-items-label');
     if (msbItemsLabel) {
       var itemCount = orderBumpActive ? 2 : 1;
       msbItemsLabel.textContent = itemCount === 1 ? 'Gesamt' : itemCount + ' Artikel';
     }
 
-    // Produkt v rozevřeném panelu
+    // Produkt im aufgeklappten Panel
     var msbProductName = document.getElementById('msb-product-name');
     if (msbProductName) msbProductName.textContent = productName;
     var msbProductPrice = document.getElementById('msb-product-price');
     if (msbProductPrice) msbProductPrice.textContent = formatPrice(selectedBundlePrice);
 
-    // Order bump v rozevřeném panelu
+    // Order Bump im aufgeklappten Panel
     var msbBumpLine = document.getElementById('msb-bump-line');
     if (msbBumpLine) msbBumpLine.style.display = orderBumpActive ? 'flex' : 'none';
 
-    // Subtotaal, BTW, totaal v rozevřeném panelu
+    // Zwischensumme, MwSt., Gesamt im aufgeklappten Panel
     var msbSubtotal = document.getElementById('msb-subtotal');
     if (msbSubtotal) msbSubtotal.textContent = formatPrice(subtotal);
     var msbTaxLabel = document.getElementById('msb-tax-label');
@@ -2896,27 +2896,27 @@ body {
     var msbTotal = document.getElementById('msb-total');
     if (msbTotal) msbTotal.textContent = formatPrice(total);
 
-    // Aktualizuj celkovou proměnnou a tlačítko
+    // Gesamtvariable und Schaltfläche aktualisieren
     currentTotalPrice = total;
     updateButtonText();
 
-    // Aktualizuj PayPal Express cenu
+    // PayPal Express-Preis aktualisieren
     var paypalPrice = document.getElementById('paypal-price');
     if (paypalPrice) paypalPrice.textContent = '— ' + formatPrice(total);
   }
 
-  // Starý alias pro zpětnou kompatibilitu
+  // Alter Alias für Abwärtskompatibilität
   function updateTaxDisplay(countryCode) {
     recalculateOrderSummary();
   }
 
-  /* ─── BUNDLE OPTIONS — generování z konfigurace ─── */
+  /* ─── BUNDLE OPTIONS — Generierung aus Konfiguration ─── */
   function renderBundleOptions() {
     var container = document.getElementById('bundle-options');
     if (!container) return;
     var html = '';
     PROJECT_CONFIG.bundleOptions.forEach(function(opt, idx) {
-      var isSelected = (idx === 0); // Výchozí: první (1×)
+      var isSelected = (idx === 0); // Standard: erstes (1×)
       var perUnit = (opt.price / opt.qty).toFixed(2).replace('.', ',');
       html += '<label class="bundle-option' + (isSelected ? ' selected' : '') + '" data-qty="' + opt.qty + '" data-price="' + opt.price + '">';
       html += '<input type="radio" name="bundle" value="' + opt.qty + '"' + (isSelected ? ' checked' : '') + '>';
@@ -2934,18 +2934,18 @@ body {
     });
     container.innerHTML = html;
 
-    // Event listenery pro bundle opce
+    // Event-Listener für Bundle-Optionen
     container.querySelectorAll('.bundle-option').forEach(function(option) {
       option.addEventListener('click', function() {
-        // Deselektuj všechny
+        // Alle abwählen
         container.querySelectorAll('.bundle-option').forEach(function(o) { o.classList.remove('selected'); });
-        // Selektuj tuto
+        // Diese auswählen
         option.classList.add('selected');
         option.querySelector('input').checked = true;
-        // Aktualizuj stav
+        // Zustand aktualisieren
         selectedBundleQty = parseInt(option.getAttribute('data-qty'));
         selectedBundlePrice = parseFloat(option.getAttribute('data-price'));
-        // Přepočítej celý souhrn
+        // Gesamte Zusammenfassung neu berechnen
         recalculateOrderSummary();
       });
     });
@@ -2971,9 +2971,9 @@ body {
       });
     }
 
-    // Klik na HEADER (mimo expand button) → toggle checkbox
+    // Klick auf HEADER (außerhalb des Expand-Buttons) → Checkbox umschalten
     header.addEventListener('click', function(e) {
-      // Pokud uživatel klikl na expand button, nic nedělej (řeší se výše)
+      // Wenn der Benutzer auf den Expand-Button geklickt hat, nichts tun (wird oben behandelt)
       if (e.target.closest('.order-bump-expand')) return;
       orderBumpActive = !orderBumpActive;
       var bumpEl = document.getElementById('order-bump');
@@ -2982,12 +2982,12 @@ body {
     });
   })();
 
-  /* ─── ORDER BUMP — načtení obrázku z Medusa admin ─── */
+  /* ─── ORDER BUMP — Bild aus Medusa Admin laden ─── */
   function loadOrderBumpImage() {
-    var thumbContainer = document.getElementById('order-bump-thumb');  // Malý v headeru
-    var imgContainer = document.getElementById('order-bump-img');      // Velký v detailu
+    var thumbContainer = document.getElementById('order-bump-thumb');  // Klein im Header
+    var imgContainer = document.getElementById('order-bump-img');      // Groß im Detail
 
-    // Zkus načíst obrázek z Medusa API
+    // Versuche, das Bild über die Medusa API zu laden
     var upsellHandle = PROJECT_CONFIG.upsellProduct.handle;
     if (upsellHandle) {
       medusaFetch('/store/products?handle=' + upsellHandle, {
@@ -3004,12 +3004,12 @@ body {
           if (imgContainer) imgContainer.innerHTML = imgTag;
         }
       }).catch(function() {
-        // Fallback — CSS placeholder zůstane
+        // Fallback — CSS-Platzhalter bleibt
       });
     }
   }
 
-  // Inicializace — vygeneruj bundle, zobraz daně, načti obrázek
+  // Initialisierung — Bundle generieren, Steuern anzeigen, Bild laden
   renderBundleOptions();
   recalculateOrderSummary();
   loadOrderBumpImage();
@@ -3022,12 +3022,12 @@ body {
     recalculateOrderSummary();
   }
 
-  // Aktualizuj order summary na základě cart dat z Medusa API
+  // Bestellübersicht basierend auf Cart-Daten der Medusa API aktualisieren
   function updateOrderSummary(cart) {
     if (!cart) return;
     var item = (cart.items && cart.items.length > 0) ? cart.items[0] : null;
 
-    // --- Obrázek produktu ---
+    // --- Produktbild ---
     if (item && item.thumbnail) {
       var imgHtml = '<img src="' + item.thumbnail + '" alt="' + (item.product_title || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
       var desktopImg = document.getElementById('desktop-product-img');
@@ -3037,45 +3037,45 @@ body {
       if (msbThumb) msbThumb.innerHTML = '<img src="' + item.thumbnail + '" alt="' + (item.product_title || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">';
     }
 
-    // --- Název produktu ---
+    // --- Produktname ---
     if (item && item.product_title) {
       var desktopName = document.getElementById('desktop-product-name');
       if (desktopName) desktopName.textContent = item.product_title;
     }
 
-    // --- Ceny ---
+    // --- Preise ---
     var total = cart.total || 0;
     var taxTotal = cart.tax_total || 0;
     var subtotal = cart.subtotal || total;
     var shippingTotal = cart.shipping_total || 0;
     var isTaxInclusive = item ? item.is_tax_inclusive : false;
 
-    // Zjisti daňovou sazbu z poměru
+    // Steuersatz aus dem Verhältnis ermitteln
     var taxRate = 0;
     if (subtotal > 0 && taxTotal > 0) {
       if (isTaxInclusive) {
-        // tax_total / subtotal * 100 (subtotal je excl. BTW)
+        // tax_total / subtotal * 100 (Subtotal ist exkl. MwSt.)
         taxRate = Math.round(taxTotal / subtotal * 100);
       } else {
         taxRate = Math.round(taxTotal / (total - taxTotal) * 100);
       }
     }
 
-    // Cena za produkt (totaal) — desktop summary
+    // Produktpreis (Gesamt) — Desktop-Zusammenfassung
     var desktopPriceEl = document.getElementById('desktop-product-price');
     if (desktopPriceEl) desktopPriceEl.textContent = formatPrice(total);
 
-    // Mobile sticky bar — totaal cena
+    // Mobile Sticky Bar — Gesamtpreis
     var msbPriceEl = document.getElementById('msb-price');
     if (msbPriceEl) msbPriceEl.textContent = formatPrice(total);
 
-    // Subtotaal (excl. BTW)
+    // Zwischensumme (exkl. MwSt.)
     var subtotalEl = document.getElementById('summary-subtotal');
     if (subtotalEl) {
       subtotalEl.innerHTML = '<span>Zwischensumme (exkl. MwSt.)</span><span>' + formatPrice(subtotal) + '</span>';
     }
 
-    // BTW řádek
+    // MwSt.-Zeile
     var taxEl = document.getElementById('summary-tax');
     if (taxEl && taxTotal > 0) {
       taxEl.style.display = '';
@@ -3089,7 +3089,7 @@ body {
       shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Versand <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMjQiIHdpZHRoPSI1NiIgaGVpZ2h0PSIxMyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIyNCIgcng9IjMiIGZpbGw9IiNGRkNDMDAiLz48dGV4dCB4PSI1MCIgeT0iMTciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNENDA1MTEiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCI+REhMPC90ZXh0Pjwvc3ZnPg==" alt="DHL" style="vertical-align:middle;border-radius:2px;"></span><span>' + shippingLabel + '</span>';
     }
 
-    // Korting (discount) — toon als promo kód is toegepast
+    // Rabatt (Discount) — anzeigen, wenn Promo-Code angewendet
     var discountTotal = cart.discount_total || 0;
     var discountEl = document.getElementById('summary-discount');
     if (discountEl) {
@@ -3106,11 +3106,11 @@ body {
       }
     }
 
-    // Totaal
+    // Gesamt
     var totalEl = document.getElementById('desktop-total-price');
     if (totalEl) totalEl.textContent = formatPrice(total);
 
-    // BTW poznámka
+    // MwSt.-Hinweis
     var taxNote = document.getElementById('summary-tax-note');
     if (taxNote && isTaxInclusive && taxTotal > 0) {
       taxNote.style.display = '';
@@ -3128,24 +3128,24 @@ body {
     }
   }
 
-  /* ─── MOBILE STICKY SUMMARY BAR — klik pro rozbalení + scroll shrink ─── */
+  /* ─── MOBILE STICKY SUMMARY BAR — Klick zum Aufklappen + Scroll-Verkleinerung ─── */
   (function setupMobileSummaryBar() {
     var bar = document.getElementById('mobile-summary-bar');
     var header = document.getElementById('msb-header');
     if (!bar || !header) return;
 
-    // Klik na header → toggle rozbalení obsahu
+    // Klick auf Header → Inhalt auf-/zuklappen
     header.addEventListener('click', function(e) {
       e.preventDefault();
       bar.classList.toggle('open');
     });
 
-    // Scroll → compact/expand — sleduje směr scrollu
-    // Oprava vibrací: vyšší tolerance + cooldown po přepnutí
+    // Scroll → Kompakt/Erweitert — verfolgt Scrollrichtung
+    // Vibrations-Fix: höhere Toleranz + Cooldown nach Umschaltung
     var scrollThreshold = 80;
     var lastScrollY = 0;
     var lastSwitchTime = 0;
-    var SWITCH_COOLDOWN = 300; // ms — minimální čas mezi compact/expand přepnutími
+    var SWITCH_COOLDOWN = 300; // ms — Mindestzeit zwischen Kompakt/Erweitert-Umschaltungen
     var ticking = false;
 
     function onScroll() {
@@ -4595,7 +4595,7 @@ body {
 
       if (allPaymentOptions.length === 0) {
         if (errorEl) {
-          errorEl.innerHTML = '<p>Inga betalningsmetoder tillgängliga.</p>';
+          errorEl.innerHTML = '<p>Keine Zahlungsmethoden verfügbar.</p>';
           errorEl.style.display = 'block';
         }
         return;
@@ -4662,7 +4662,7 @@ body {
 
     if (totalVisible === 0) {
       if (errorEl) {
-        errorEl.innerHTML = '<p>Inga betalningsmetoder tillgängliga för detta land.</p>';
+        errorEl.innerHTML = '<p>Keine Zahlungsmethoden für dieses Land verfügbar.</p>';
         errorEl.style.display = 'block';
       }
       return;
@@ -5078,7 +5078,7 @@ body {
       var val = emailField.value.trim();
       var suggestion = checkEmailTypo(val);
       if (suggestion) {
-        emailSuggestion.innerHTML = 'Menade du <strong>' + suggestion + '</strong>? Klicka för att korrigera.';
+        emailSuggestion.innerHTML = 'Meinten Sie <strong>' + suggestion + '</strong>? Klicken Sie hier, um zu korrigieren.';
         emailSuggestion.style.display = 'block';
         emailSuggestion.onclick = function() {
           emailField.value = suggestion;
@@ -5168,10 +5168,10 @@ body {
       var hasLetter = /[a-zA-Z\u00C0-\u024F]/.test(val);
       var hasDigit = /\d/.test(val);
       if (!hasDigit && hasLetter) {
-        addressWarningText.textContent = 'Glöm inte att lägga till ditt husnummer';
+        addressWarningText.textContent = 'Bitte vergessen Sie nicht, Ihre Hausnummer anzugeben';
         addressWarning.style.display = 'block';
       } else if (!hasLetter && hasDigit) {
-        addressWarningText.textContent = 'Ange även ditt gatunamn';
+        addressWarningText.textContent = 'Bitte geben Sie auch Ihren Straßennamen an';
         addressWarning.style.display = 'block';
       } else {
         addressWarning.style.display = 'none';
@@ -5503,7 +5503,7 @@ body {
               foxEmailField.classList.add('invalid');
               foxEmailField.classList.remove('valid');
               if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Menade du <strong>' + correctedEmail + '</strong>? Klicka för att korrigera.';
+                foxEmailSuggestion.innerHTML = 'Meinten Sie <strong>' + correctedEmail + '</strong>? Klicken Sie hier, um zu korrigieren.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = correctedEmail;
@@ -5519,14 +5519,14 @@ body {
               foxEmailField.classList.add('invalid');
               foxEmailField.classList.remove('valid');
               if (suggestions.length > 0 && foxEmailSuggestion) {
-                var sugHtml = 'Menade du: ';
+                var sugHtml = 'Meinten Sie: ';
                 suggestions.forEach(function(s, idx) {
                   var sEmail = (s.data && s.data.email) || '';
                   if (!sEmail) return;
-                  if (idx > 0) sugHtml += ' eller';
+                  if (idx > 0) sugHtml += ' oder';
                   sugHtml += '<strong data-email="' + sEmail + '">' + sEmail + '</strong>';
                 });
-                sugHtml += '? Klicka för att korrigera.';
+                sugHtml += '? Klicken Sie hier, um zu korrigieren.';
                 foxEmailSuggestion.innerHTML = sugHtml;
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function(e) {
@@ -5540,7 +5540,7 @@ body {
                 };
               } else if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
                 // Fallback naar corrected als suggestions leeg
-                foxEmailSuggestion.innerHTML = 'Menade du <strong>' + correctedEmail + '</strong>? Klicka för att korrigera.';
+                foxEmailSuggestion.innerHTML = 'Meinten Sie <strong>' + correctedEmail + '</strong>? Klicken Sie hier, um zu korrigieren.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = correctedEmail;
@@ -5557,7 +5557,7 @@ body {
               foxEmailField.classList.remove('invalid');
               var betterEmail = correctedEmail || (suggestions[0] && suggestions[0].data && suggestions[0].data.email) || null;
               if (betterEmail && betterEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Menade du kanske <strong>' + betterEmail + '</strong>? Klicka för att korrigera.';
+                foxEmailSuggestion.innerHTML = 'Meinten Sie vielleicht <strong>' + betterEmail + '</strong>? Klicken Sie hier, um zu korrigieren.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = betterEmail;
@@ -5583,7 +5583,7 @@ body {
           // Fallback naar lokale validatie bij API error
           var localSuggestion = checkEmailTypo(val);
           if (localSuggestion && foxEmailSuggestion) {
-            foxEmailSuggestion.innerHTML = 'Menade du <strong>' + localSuggestion + '</strong>? Klicka för att korrigera.';
+            foxEmailSuggestion.innerHTML = 'Meinten Sie <strong>' + localSuggestion + '</strong>? Klicken Sie hier, um zu korrigieren.';
             foxEmailSuggestion.style.display = 'block';
             foxEmailSuggestion.onclick = function() {
               foxEmailField.value = localSuggestion;
@@ -5642,14 +5642,14 @@ body {
               foxPhoneField.classList.remove('invalid');
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
-                foxPhonePreview.textContent = '\u2713 Geldig telefoonnummer';
+                foxPhonePreview.textContent = '\u2713 Gültige Telefonnummer';
                 foxPhonePreview.style.display = 'block';
               }
             } else {
               foxPhoneField.classList.add('invalid');
               foxPhoneField.classList.remove('valid');
               if (foxPhonePreview) {
-                foxPhonePreview.textContent = '\u2717 Kontrollera ditt telefonnummer';
+                foxPhonePreview.textContent = '\u2717 Bitte überprüfen Sie Ihre Telefonnummer';
                 foxPhonePreview.style.display = 'block';
                 foxPhonePreview.style.color = 'var(--error)';
               }
@@ -5674,7 +5674,7 @@ body {
               foxPhoneField.classList.add('invalid');
               foxPhoneField.classList.remove('valid');
               if (foxPhonePreview) {
-                foxPhonePreview.textContent = '\u2717 Kontrollera ditt telefonnummer';
+                foxPhonePreview.textContent = '\u2717 Bitte überprüfen Sie Ihre Telefonnummer';
                 foxPhonePreview.style.display = 'block';
                 foxPhonePreview.style.color = 'var(--error)';
               }
@@ -5849,7 +5849,7 @@ body {
 
     // Show/hide submit validation message
     if (!allValid && submitValidationMsg) {
-      submitValidationMsg.textContent = 'Kontrollera följande fält: ' + missingFields.join(', ');
+      submitValidationMsg.textContent = 'Bitte überprüfen Sie die folgenden Felder: ' + missingFields.join(', ');
       submitValidationMsg.style.display = '';
     } else if (submitValidationMsg) {
       submitValidationMsg.style.display = 'none';
@@ -5867,7 +5867,7 @@ body {
     }, options.headers || {});
     return fetch(MEDUSA_URL + path, options).then(function(res) {
       return res.json().then(function(data) {
-        if (!res.ok) throw new Error(data.message || 'API-fel');
+        if (!res.ok) throw new Error(data.message || 'API-Fehler');
         return data;
       });
     });
@@ -6164,13 +6164,13 @@ body {
     promoApplyBtn.addEventListener('click', function() {
       var code = promoInput.value.trim().toUpperCase();
       if (!code) {
-        promoMessage.textContent = 'Ange en rabattkod.';
+        promoMessage.textContent = 'Bitte geben Sie einen Rabattcode ein.';
         promoMessage.className = 'promo-message error';
         return;
       }
       // Disable button + loading
       promoApplyBtn.disabled = true;
-      promoApplyBtn.textContent = 'Kontrollerar...';
+      promoApplyBtn.textContent = 'Wird überprüft...';
       promoMessage.className = 'promo-message';
 
       // Stap 1: Cart aanmaken (als die nog niet bestaat)
@@ -6217,7 +6217,7 @@ body {
       .catch(function(err) {
         // Fout — code is ongeldig
         console.warn('Promo code geweigerd:', err.message || err);
-        promoMessage.textContent = 'Ogiltig rabattkod';
+        promoMessage.textContent = 'Ungültiger Rabattcode';
         promoMessage.className = 'promo-message error';
         savedPromoCode = '';
         promoAppliedToCart = false;
@@ -6225,7 +6225,7 @@ body {
       .then(function() {
         // Reset button
         promoApplyBtn.disabled = false;
-        promoApplyBtn.textContent = 'Använd';
+        promoApplyBtn.textContent = 'Anwenden';
       });
     });
   }
@@ -6322,7 +6322,7 @@ body {
     // ─── Analytics metadata ───
     customerData.metadata = {};
     // Always set project_id for email template resolution
-    customerData.metadata.project_id = PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'slapp-taget';
+    customerData.metadata.project_id = PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'lass-los';
     if (window.AnalyticsTracker) {
       customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
       customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
@@ -6478,7 +6478,7 @@ body {
           promoAppliedToCart = false;
           // Toon foutmelding
           if (promoMessage) {
-            promoMessage.textContent = 'Ogiltig rabattkod';
+            promoMessage.textContent = 'Ungültiger Rabattcode';
             promoMessage.className = 'promo-message error';
           }
           // Verberg badge, toon toggle weer
@@ -6543,7 +6543,7 @@ body {
           // Mollie: tokenize card → send token in session data
           tokenPromise = mollieInstance.createToken().then(function(tokenResult) {
             if (tokenResult.error) {
-              throw new Error(tokenResult.error.message || 'Kreditkortsverifiering misslyckades');
+              throw new Error(tokenResult.error.message || 'Kreditkartenüberprüfung fehlgeschlagen');
             }
             sessionData.cardToken = tokenResult.token;
             console.log('[Mollie Components] Token created');
@@ -6690,7 +6690,7 @@ body {
           return new Promise(function(resolve, reject) {
             // Initialize Klarna Payments SDK
             if (typeof Klarna === 'undefined' || !Klarna.Payments) {
-              reject(new Error('Klarna Payments SDK inte laddat. Försök igen.'));
+              reject(new Error('Klarna Payments SDK nicht geladen. Bitte versuchen Sie es erneut.'));
               return;
             }
 
@@ -6700,7 +6700,7 @@ body {
               });
               console.log('[Klarna] SDK initialized with client_token');
             } catch (initErr) {
-              reject(new Error('Klarna SDK-initiering misslyckades:' + initErr.message));
+              reject(new Error('Klarna SDK-Initialisierung fehlgeschlagen: ' + initErr.message));
               return;
             }
 
@@ -6779,11 +6779,11 @@ body {
                   });
                 } else if (klarnaRes.show_form) {
                   // Klarna needs more info — customer should retry
-                  reject(new Error('Klarna behöver mer information. Kontrollera dina uppgifter och försök igen.'));
+                  reject(new Error('Klarna benötigt weitere Informationen. Bitte überprüfen Sie Ihre Angaben und versuchen Sie es erneut.'));
                 } else {
                   // Declined or cancelled
                   var reason = klarnaRes.error ? klarnaRes.error.invalid_fields?.join(', ') : '';
-                  reject(new Error('Klarna-betalningen godkändes inte.' + (reason ? ' Kontrollera: ' + reason : ' Prova en annan betalningsmetod.')));
+                  reject(new Error('Die Klarna-Zahlung wurde nicht genehmigt.' + (reason ? ' Bitte überprüfen Sie: ' + reason : ' Bitte versuchen Sie eine andere Zahlungsmethode.')));
                 }
               }
             );
@@ -6854,7 +6854,7 @@ body {
             function waitForSDK(attempts) {
               if (typeof window.AirwallexComponentsSDK !== 'undefined') return initAirwallex();
               if (attempts <= 0) {
-                reject(new Error('Airwallex SDK inte laddat. Försök igen.'));
+                reject(new Error('Airwallex SDK nicht geladen. Bitte versuchen Sie es erneut.'));
                 return;
               }
               setTimeout(function() { waitForSDK(attempts - 1); }, 300);
@@ -6943,7 +6943,7 @@ body {
               dropIn.on('error', function(event) {
                 var error = event.detail && event.detail.error ? event.detail.error : event.detail || {};
                 submitBtn.style.display = '';
-                reject(new Error(error.message || 'Airwallex-betalning misslyckades.'));
+                reject(new Error(error.message || 'Airwallex-Zahlung fehlgeschlagen.'));
               });
 
               dropIn.on('ready', function() {
@@ -6952,7 +6952,7 @@ body {
                 submitBtn.disabled = false;
               });
             } catch (awErr) {
-              reject(new Error('Airwallex-initiering misslyckades:' + awErr.message));
+              reject(new Error('Airwallex-Initialisierung fehlgeschlagen: ' + awErr.message));
             }
             } // end initAirwallex
           });
@@ -6962,7 +6962,7 @@ body {
           window.location.href = redirectUrl;
         } else if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1) {
           // Airwallex without intentId — payment session not created properly
-          throw new Error('Airwallex betalningssession skapades inte korrekt. Försök igen.');
+          throw new Error('Airwallex-Zahlungssitzung wurde nicht korrekt erstellt. Bitte versuchen Sie es erneut.');
         } else {
           throw new Error('Keine Weiterleitungs-URL vom Zahlungsanbieter erhalten');
         }
@@ -6970,7 +6970,7 @@ body {
     })
     .catch(function(err) {
       // Toon foutmelding
-      errorEl.textContent = err.message || 'Något gick fel. Försök igen.';
+      errorEl.textContent = err.message || 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.';
       submitBtn.classList.remove('loading');
       submitBtn.disabled = false;
     });
