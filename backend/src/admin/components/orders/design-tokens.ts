@@ -122,7 +122,9 @@ function findPrimaryPayment(order: any): { providerId: string; method: string; d
 function isCODOrder(order: any): boolean {
   const { providerId } = findPrimaryPayment(order)
   if (providerId.includes("cod")) return true
-  // Fallback: check metadata (upsell flow sets payment method info)
+  // Fallback: check metadata (survives order edits that cancel payment collections)
+  if (order.metadata?.payment_provider === "cod") return true
+  if (order.metadata?.payment_method === "cod") return true
   if (order.metadata?.upsell_payment_id === "cod") return true
   return false
 }

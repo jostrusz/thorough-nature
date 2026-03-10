@@ -25,9 +25,10 @@ function getPaymentStatus(order: any): string {
   if (order.metadata?.payment_captured) return "paid"
 
   // COD orders: stay "pending" until explicitly marked as captured
+  // Check payment_collections AND metadata (metadata survives order edits that cancel PCs)
   const isCOD = (order.payment_collections || []).some((pc: any) =>
     (pc.payments || []).some((p: any) => (p.provider_id || "").includes("cod"))
-  )
+  ) || order.metadata?.payment_provider === "cod" || order.metadata?.payment_method === "cod"
   if (isCOD) return "pending"
 
   if (order.payment_collections?.length) {
