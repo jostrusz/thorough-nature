@@ -1,7 +1,7 @@
 // @ts-nocheck
 import {
   AbstractPaymentProvider,
-  PaymentProviderError,
+  MedusaError,
   PaymentSessionStatus,
 } from "@medusajs/framework/utils"
 import { Przelewy24ApiClient } from "./api-client"
@@ -52,7 +52,6 @@ function mapP24StatusToMedusa(p24Status: string): PaymentSessionStatus {
 export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
   protected container_: any
   protected client_: Przelewy24ApiClient | null = null
-  protected gatewayConfigService_: any
   protected logger_: any
 
   static identifier = "przelewy24"
@@ -69,7 +68,6 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Lazily resolve the gateway config service from the container.
-   * Avoids issues where the gateway config module isn't available at constructor time.
    */
   private getGatewayConfigService() {
     try {
@@ -80,55 +78,63 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
   }
 
   /**
-   * Initialize the P24 API client with credentials from gateway_config
+   * Get the active P24 gateway config from the database.
    */
-  private async getP24Client(): Promise<Przelewy24ApiClient> {
-    if (!this.client_) {
-      const gcService = this.getGatewayConfigService()
+  private async getP24Config(): Promise<any> {
+    const gcService = this.getGatewayConfigService()
+    if (!gcService) {
+      this.getLogger().warn("[Przelewy24] Gateway config service not available")
+      return null
+    }
+    try {
       const configs = await gcService.listGatewayConfigs(
         { provider: "przelewy24", is_active: true },
         { take: 1 }
       )
-      const config = configs[0]
-      if (!config) {
-        throw new PaymentProviderError("Przelewy24 gateway not configured")
-      }
-      const isLive = config.mode === "live"
-      const keys = isLive ? config.live_keys : config.test_keys
-      const meta = config.metadata || {}
-      if (!keys?.api_key || !keys?.secret_key) {
-        throw new PaymentProviderError(
-          "Przelewy24 credentials not configured (need merchantId, api_key, CRC, and pos_id in metadata)"
-        )
-      }
-
-      const merchantId = keys.api_key
-      const posId = meta.pos_id || keys.api_key
-      const apiKey = keys.secret_key
-      const crc = meta.crc || ""
-      const testMode = !isLive
-
-      this.client_ = new Przelewy24ApiClient(
-        merchantId,
-        posId,
-        apiKey,
-        crc,
-        testMode
-      )
+      return configs[0] || null
+    } catch (e: any) {
+      this.getLogger().warn(`[Przelewy24] Gateway config read failed: ${e.message}`)
+      return null
     }
-    return this.client_
   }
 
   /**
-   * Helper to get active P24 config
+   * Initialize the P24 API client with credentials from gateway_config
    */
-  private async getP24Config() {
-    const gcService = this.getGatewayConfigService()
-    const configs = await gcService.listGatewayConfigs(
-      { provider: "przelewy24", is_active: true },
-      { take: 1 }
+  private async getP24Client(): Promise<Przelewy24ApiClient> {
+    if (this.client_) return this.client_
+
+    const config = await this.getP24Config()
+    if (!config) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Przelewy24 gateway not configured. Set credentials in admin gateway config."
+      )
+    }
+    const isLive = config.mode === "live"
+    const keys = isLive ? config.live_keys : config.test_keys
+    const meta = config.metadata || {}
+    if (!keys?.api_key || !keys?.secret_key) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Przelewy24 credentials not configured (need merchantId, api_key, CRC, and pos_id in metadata)"
+      )
+    }
+
+    const merchantId = keys.api_key
+    const posId = meta.pos_id || keys.api_key
+    const apiKey = keys.secret_key
+    const crc = meta.crc || ""
+    const testMode = !isLive
+
+    this.client_ = new Przelewy24ApiClient(
+      merchantId,
+      posId,
+      apiKey,
+      crc,
+      testMode
     )
-    return configs[0]
+    return this.client_
   }
 
   /**
@@ -164,13 +170,17 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
 
       const result = await client.registerTransaction(registerParams)
       if (!result.success) {
-        throw new PaymentProviderError(
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
           result.error || "Failed to register P24 transaction"
         )
       }
 
       if (!result.data?.transactionUrl) {
-        throw new PaymentProviderError("No transaction URL returned from P24")
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
+          "No transaction URL returned from P24"
+        )
       }
 
       this.getLogger().info(
@@ -189,7 +199,8 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
       }
     } catch (error: any) {
       this.getLogger().error(`[Przelewy24] Payment initiation failed: ${error.message}`)
-      throw new PaymentProviderError(
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
         error.message || "Failed to initiate Przelewy24 payment"
       )
     }
@@ -210,7 +221,8 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
       const { sessionId, orderId, amount, currency } = paymentSessionData
 
       if (!sessionId || !orderId) {
-        throw new PaymentProviderError(
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
           "Missing sessionId or orderId in session data"
         )
       }
@@ -227,7 +239,8 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
 
       const result = await client.verifyTransaction(verifyParams)
       if (!result.success) {
-        throw new PaymentProviderError(
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
           result.error || "Failed to verify P24 transaction"
         )
       }
@@ -245,7 +258,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
       }
     } catch (error: any) {
       this.getLogger().error(`[Przelewy24] Authorization check failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, error.message)
     }
   }
 
@@ -256,20 +269,14 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
     paymentSessionData: IP24PaymentSessionData,
     context: any
   ): Promise<any> {
-    try {
-      // P24 auto-captures on successful payment
-      // Return current status
-      const status = mapP24StatusToMedusa(
-        paymentSessionData.status || "pending"
-      )
+    // P24 auto-captures on successful payment
+    const status = mapP24StatusToMedusa(
+      paymentSessionData.status || "pending"
+    )
 
-      return {
-        session_data: paymentSessionData,
-        status,
-      }
-    } catch (error: any) {
-      this.getLogger().error(`[Przelewy24] Capture failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+    return {
+      session_data: paymentSessionData,
+      status,
     }
   }
 
@@ -288,7 +295,10 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
       const { sessionId, orderId } = paymentSessionData
 
       if (!orderId || !sessionId) {
-        throw new PaymentProviderError("Missing orderId or sessionId for refund")
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "Missing orderId or sessionId for refund"
+        )
       }
 
       const requestId = `refund-${Date.now()}`
@@ -308,7 +318,10 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
 
       const result = await client.createRefund(refundParams)
       if (!result.success) {
-        throw new PaymentProviderError(result.error || "Failed to create refund")
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
+          result.error || "Failed to create refund"
+        )
       }
 
       this.getLogger().info(
@@ -321,7 +334,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
       }
     } catch (error: any) {
       this.getLogger().error(`[Przelewy24] Refund failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+      throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, error.message)
     }
   }
 
@@ -332,18 +345,13 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
     paymentSessionData: IP24PaymentSessionData,
     context: any
   ): Promise<any> {
-    try {
-      this.getLogger().info(
-        `[Przelewy24] Transaction ${paymentSessionData.sessionId} marked for cancellation`
-      )
+    this.getLogger().info(
+      `[Przelewy24] Transaction ${paymentSessionData.sessionId} marked for cancellation`
+    )
 
-      return {
-        session_data: paymentSessionData,
-        status: PaymentSessionStatus.CANCELED,
-      }
-    } catch (error: any) {
-      this.getLogger().error(`[Przelewy24] Cancel failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+    return {
+      session_data: paymentSessionData,
+      status: PaymentSessionStatus.CANCELED,
     }
   }
 
@@ -384,18 +392,13 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
     paymentSessionData: IP24PaymentSessionData,
     context: any
   ): Promise<any> {
-    try {
-      const status = mapP24StatusToMedusa(
-        paymentSessionData.status || "pending"
-      )
+    const status = mapP24StatusToMedusa(
+      paymentSessionData.status || "pending"
+    )
 
-      return {
-        session_data: paymentSessionData,
-        status,
-      }
-    } catch (error: any) {
-      this.getLogger().error(`[Przelewy24] Retrieve failed: ${error.message}`)
-      throw new PaymentProviderError(error.message)
+    return {
+      session_data: paymentSessionData,
+      status,
     }
   }
 
@@ -408,8 +411,6 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Process Przelewy24 webhook
-   * P24 sends POST with: merchantId, posId, sessionId, orderId, amount, currency, sign
-   * MUST verify sign before processing
    */
   async getWebhookActionAndData(webhookData: any): Promise<{
     action: string
