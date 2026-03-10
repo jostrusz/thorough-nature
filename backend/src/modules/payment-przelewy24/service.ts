@@ -60,30 +60,23 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
   constructor(container: any, options?: any) {
     super(container, options)
     this.container_ = container
-    try {
-      this.logger_ = container.logger || console
-    } catch {
-      this.logger_ = console
-    }
-    try {
-      this.gatewayConfigService_ = container.resolve(GATEWAY_CONFIG_MODULE)
-    } catch {
-      this.gatewayConfigService_ = null
-    }
+    this.logger_ = container.logger || console
   }
 
   private getLogger() {
-    if (!this.logger_) {
-      try { this.logger_ = this.container_.resolve("logger") } catch { this.logger_ = console }
-    }
-    return this.logger_
+    return this.logger_ || console
   }
 
+  /**
+   * Lazily resolve the gateway config service from the container.
+   * Avoids issues where the gateway config module isn't available at constructor time.
+   */
   private getGatewayConfigService() {
-    if (!this.gatewayConfigService_) {
-      this.gatewayConfigService_ = this.container_.resolve(GATEWAY_CONFIG_MODULE)
+    try {
+      return this.container_.resolve(GATEWAY_CONFIG_MODULE)
+    } catch {
+      return null
     }
-    return this.gatewayConfigService_
   }
 
   /**
