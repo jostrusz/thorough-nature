@@ -2,11 +2,11 @@ var PROJECT_CONFIG = {
   "slug": "lass-los",
   "projectId": "lass-los",
   "medusaUrl": "https://backend-staging-580e.up.railway.app",
-  "publishableApiKey": "pk_e083604eefa6f6c1e62f4b39fe622d7585c3234adbf1b21cd8756c4e13b59357",
+  "publishableApiKey": "pk_9ae77cf9edbc080796019dcc29a618e9c133b329614a8b0350cc744210d667aa",
   "mainProduct": {
     "name": "Lass los, was dich kaputt macht",
     "handle": "lass-los-was-dich-kaputt-macht",
-    "variantId": "variant_01KK9FYYF8Z5YXMSR6H67MPHTB",
+    "variantId": "variant_01KKAXMK3JG00Y20C7DV5KZBC2",
     "price": 35,
     "currency": "EUR",
     "thumbnail": ""
@@ -26,9 +26,9 @@ var PROJECT_CONFIG = {
     { "qty": 4, "price": 99, "label": "4 Bücher", "save": 41 }
   ],
   "regions": {
-    "DE": "reg_01KK9FYYBDZ6DP61G25YNR1DJK",
-    "AT": "reg_01KK9FYYBDZ6DP61G25YNR1DJK",
-    "LU": "reg_01KK9FYYBDZ6DP61G25YNR1DJK"
+    "DE": "reg_01KKAXMJP7NJDD196M0BJC4Y4F",
+    "AT": "reg_01KKAXMJP7NJDD196M0BJC4Y4F",
+    "LU": "reg_01KKAXMJP7NJDD196M0BJC4Y4F"
   },
   "paymentProviders": {},
   "mollieProfileId": null,
