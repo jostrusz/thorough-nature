@@ -62,7 +62,6 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Lazily resolve the gateway config service from the container.
-   * Avoids issues where the gateway config module isn't available at constructor time.
    */
   private getGatewayConfigService() {
     try {
@@ -74,24 +73,46 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Get the active Comgate gateway config from the database.
-   * Returns null if gatewayConfig module is unavailable or no config found.
+   * Tries the gatewayConfig module first, then falls back to a direct DB query
+   * via __pg_connection__ (Knex). Payment providers run in a scoped container
+   * that may not have access to custom standalone modules.
    */
   private async getComgateConfig(): Promise<any> {
+    // Method 1: Try gateway config module service
     const gcService = this.getGatewayConfigService()
-    if (!gcService) {
-      this.getLogger().warn("[Comgate] Gateway config service not available")
-      return null
+    if (gcService) {
+      try {
+        const configs = await gcService.listGatewayConfigs(
+          { provider: "comgate", is_active: true },
+          { take: 1 }
+        )
+        if (configs[0]) {
+          this.getLogger().info("[Comgate] Config loaded via gatewayConfig module")
+          return configs[0]
+        }
+      } catch (e: any) {
+        this.getLogger().warn(`[Comgate] Gateway config module query failed: ${e.message}`)
+      }
     }
+
+    // Method 2: Direct DB query via Knex (__pg_connection__)
     try {
-      const configs = await gcService.listGatewayConfigs(
-        { provider: "comgate", is_active: true },
-        { take: 1 }
-      )
-      return configs[0] || null
+      const knex = this.container_.resolve("__pg_connection__")
+      const rows = await knex("gateway_config")
+        .where({ provider: "comgate", is_active: true })
+        .whereNull("deleted_at")
+        .limit(1)
+
+      if (rows && rows[0]) {
+        this.getLogger().info("[Comgate] Config loaded via direct DB query")
+        return rows[0]
+      }
     } catch (e: any) {
-      this.getLogger().warn(`[Comgate] Gateway config read failed: ${e.message}`)
-      return null
+      this.getLogger().warn(`[Comgate] Direct DB query failed: ${e.message}`)
     }
+
+    this.getLogger().warn("[Comgate] No gateway config found via any method")
+    return null
   }
 
   /**

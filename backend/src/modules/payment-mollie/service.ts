@@ -91,7 +91,7 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
   private async getMollieClient(): Promise<MollieApiClient> {
     if (this.client_) return this.client_
 
-    // 1. Try gateway config from database (admin-configured)
+    // 1a. Try gateway config from database via module service
     const gatewayConfigService = this.getGatewayConfigService()
     if (gatewayConfigService) {
       try {
@@ -104,14 +104,35 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
           const isLive = config.mode === "live"
           const keys = isLive ? config.live_keys : config.test_keys
           if (keys?.api_key) {
-            this.logger_.info(`[Mollie] Using ${isLive ? "live" : "test"} keys from gateway config`)
+            this.logger_.info(`[Mollie] Using ${isLive ? "live" : "test"} keys from gateway config (module)`)
             this.client_ = new MollieApiClient(keys.api_key, !isLive)
             return this.client_
           }
         }
       } catch (e: any) {
-        this.logger_.warn(`[Mollie] Gateway config read failed: ${e.message}`)
+        this.logger_.warn(`[Mollie] Gateway config module query failed: ${e.message}`)
       }
+    }
+
+    // 1b. Fallback: direct DB query via Knex (__pg_connection__)
+    try {
+      const knex = this.container_.resolve("__pg_connection__")
+      const rows = await knex("gateway_config")
+        .where({ provider: "mollie", is_active: true })
+        .whereNull("deleted_at")
+        .limit(1)
+      const config = rows?.[0]
+      if (config) {
+        const isLive = config.mode === "live"
+        const keys = isLive ? config.live_keys : config.test_keys
+        if (keys?.api_key) {
+          this.logger_.info(`[Mollie] Using ${isLive ? "live" : "test"} keys from gateway config (direct DB)`)
+          this.client_ = new MollieApiClient(keys.api_key, !isLive)
+          return this.client_
+        }
+      }
+    } catch (e: any) {
+      this.logger_.warn(`[Mollie] Direct DB query failed: ${e.message}`)
     }
 
     // 2. Fallback to options (env vars via medusa-config.js)

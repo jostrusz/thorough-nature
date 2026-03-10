@@ -79,23 +79,46 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Get the active P24 gateway config from the database.
+   * Tries the gatewayConfig module first, then falls back to a direct DB query
+   * via __pg_connection__ (Knex). Payment providers run in a scoped container
+   * that may not have access to custom standalone modules.
    */
   private async getP24Config(): Promise<any> {
+    // Method 1: Try gateway config module service
     const gcService = this.getGatewayConfigService()
-    if (!gcService) {
-      this.getLogger().warn("[Przelewy24] Gateway config service not available")
-      return null
+    if (gcService) {
+      try {
+        const configs = await gcService.listGatewayConfigs(
+          { provider: "przelewy24", is_active: true },
+          { take: 1 }
+        )
+        if (configs[0]) {
+          this.getLogger().info("[Przelewy24] Config loaded via gatewayConfig module")
+          return configs[0]
+        }
+      } catch (e: any) {
+        this.getLogger().warn(`[Przelewy24] Gateway config module query failed: ${e.message}`)
+      }
     }
+
+    // Method 2: Direct DB query via Knex (__pg_connection__)
     try {
-      const configs = await gcService.listGatewayConfigs(
-        { provider: "przelewy24", is_active: true },
-        { take: 1 }
-      )
-      return configs[0] || null
+      const knex = this.container_.resolve("__pg_connection__")
+      const rows = await knex("gateway_config")
+        .where({ provider: "przelewy24", is_active: true })
+        .whereNull("deleted_at")
+        .limit(1)
+
+      if (rows && rows[0]) {
+        this.getLogger().info("[Przelewy24] Config loaded via direct DB query")
+        return rows[0]
+      }
     } catch (e: any) {
-      this.getLogger().warn(`[Przelewy24] Gateway config read failed: ${e.message}`)
-      return null
+      this.getLogger().warn(`[Przelewy24] Direct DB query failed: ${e.message}`)
     }
+
+    this.getLogger().warn("[Przelewy24] No gateway config found via any method")
+    return null
   }
 
   /**
