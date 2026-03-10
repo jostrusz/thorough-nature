@@ -20,7 +20,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     // 2. Find kocici-bible inventory item
     const { data: inventoryItems } = await query.graph({
       entity: "inventory_item",
-      fields: ["id", "sku", "inventory_levels.*"],
+      fields: ["id", "sku"],
       filters: { sku: ["KOCICI-BIBLE-PB"] },
     })
 
@@ -32,7 +32,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
 
     const item = inventoryItems[0]
-    const existingLevels = item.inventory_levels || []
+
+    // Get existing inventory levels via inventory module
+    const existingLevels = await inventoryModule.listInventoryLevels({
+      inventory_item_id: item.id,
+    })
 
     // 3. Find which stock locations are missing
     const existingLocationIds = existingLevels.map((l: any) => l.location_id)
