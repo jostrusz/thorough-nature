@@ -14,6 +14,7 @@ export interface IComgatePaymentSessionData {
   currency?: string
   method?: string
   createdAt?: number
+  checkoutUrl?: string
 }
 
 /**
@@ -137,6 +138,7 @@ export class ComgatePaymentProvider {
         email: customer?.email,
         country: customer?.billing_address?.country_code?.toUpperCase(),
         prepareOnly: true, // get transId + URL without redirect
+        method: contextData?.comgate_method || undefined, // Pre-select method on Comgate page
       }
 
       const result = await client.createPayment(paymentParams)
@@ -158,6 +160,7 @@ export class ComgatePaymentProvider {
           amount,
           currency: currency_code,
           createdAt: Date.now(),
+          checkoutUrl: result.data.redirectUrl, // frontend reads providerData.checkoutUrl
         } as IComgatePaymentSessionData,
         redirect_url: result.data.redirectUrl,
       }

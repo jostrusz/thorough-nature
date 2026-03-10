@@ -4551,6 +4551,14 @@ body {
     });
   }
 
+  // Comgate method code mapping: our code → Comgate API method parameter
+  var COMGATE_METHOD_MAP = {
+    'creditcard': 'CARD_CZ_COMGATE',
+    'bank_transfer': 'BANK_ALL',
+    'applepay': 'APPLEPAY_REDIRECT',
+    'googlepay': 'GOOGLEPAY_REDIRECT',
+  };
+
   // Popisy platebních metod (česky)
   var METHOD_DESCRIPTIONS = {
     ideal: 'Platba přes vaši banku',
@@ -4558,7 +4566,7 @@ body {
     klarna: 'Platba přes Klarna',
     klarna_later: 'Nejprve obdržíte, zaplatíte později',
     klarna_slice: 'Platba ve splátkách',
-    creditcard: 'Visa, Mastercard, American Express',
+    creditcard: 'Visa, Mastercard, Maestro',
     paypal: 'Platba přes PayPal účet',
     eps: 'Platba přes rakouskou banku',
     przelewy24: 'Polský platební systém',
@@ -4570,7 +4578,7 @@ body {
     trustly: 'Online bankovní platba',
     applepay: 'Platba přes Apple Pay',
     googlepay: 'Platba přes Google Pay',
-    bank_transfer: 'Bankovní převod',
+    bank_transfer: 'Online převod přes vaši banku',
     sepa_debit: 'SEPA inkaso',
     swish: 'Platba přes Swish (Švédsko)',
     revolut_pay: 'Platba přes Revolut',
@@ -6814,6 +6822,10 @@ body {
           amount: checkoutTotal,
           currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
         };
+        // Map our method code to Comgate-specific method code for pre-selection
+        if (selectedProviderId && selectedProviderId.indexOf('comgate') !== -1 && COMGATE_METHOD_MAP[selectedMethod]) {
+          sessionData.comgate_method = COMGATE_METHOD_MAP[selectedMethod];
+        }
       }
 
       // For credit card: tokenize card data (branched by provider)
