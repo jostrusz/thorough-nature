@@ -94,6 +94,11 @@ export function getPaymentIconUrl(order: any): string {
   const providerId = payment?.provider_id || ""
   const method = order.metadata?.payment_method || payment?.data?.method || ""
 
+  // COD (Cash on Delivery) — inline banknotes SVG
+  if (providerId.includes("cod")) {
+    return `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%238B6914" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 6v12M18 6v12"/></svg>')}`
+  }
+
   if (providerId.includes("klarna")) return `${ICON_BASE}/apm/klarna.svg`
   if (providerId.includes("paypal")) return `${ICON_BASE}/apm/paypal.svg`
 
