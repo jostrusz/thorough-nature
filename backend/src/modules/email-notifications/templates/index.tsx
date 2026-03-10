@@ -27,6 +27,10 @@ import { OkAbandonedCheckout2Template, OK_ABANDONED_CHECKOUT_2, isOkAbandonedChe
 import { OkAbandonedCheckout3Template, OK_ABANDONED_CHECKOUT_3, isOkAbandonedCheckout3Data } from './ok-abandoned-checkout-3'
 import { OkEbookDeliveryTemplate, OK_EBOOK_DELIVERY, isOkEbookDeliveryData } from './ok-ebook-delivery'
 import { OkShipmentNotificationTemplate, OK_SHIPMENT_NOTIFICATION, isOkShipmentNotificationData } from './ok-shipment-notification'
+// Psí superživot (psi-superzivot) templates
+import { PsOrderPlacedTemplate, PS_ORDER_PLACED, isPsOrderPlacedTemplateData } from './ps-order-placed'
+import { PsShipmentNotificationTemplate, PS_SHIPMENT_NOTIFICATION, isPsShipmentNotificationData } from './ps-shipment-notification'
+import { PsUpsellConfirmedTemplate, PS_UPSELL_CONFIRMED, isPsUpsellConfirmedData } from './ps-upsell-confirmed'
 // Admin notification
 import { AdminOrderNotificationTemplate, ADMIN_ORDER_NOTIFICATION, isAdminOrderNotificationData } from './admin-order-notification'
 
@@ -59,6 +63,10 @@ export const EmailTemplates = {
   OK_ABANDONED_CHECKOUT_3,
   OK_EBOOK_DELIVERY,
   OK_SHIPMENT_NOTIFICATION,
+  // Psí superživot
+  PS_ORDER_PLACED,
+  PS_SHIPMENT_NOTIFICATION,
+  PS_UPSELL_CONFIRMED,
   // Admin notifications
   ADMIN_ORDER_NOTIFICATION,
 } as const
@@ -90,6 +98,13 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
     const allKeys = Object.values(EmailTemplates) as string[]
     if (allKeys.includes(okKey)) {
       return okKey
+    }
+  }
+  if (project === 'psi-superzivot') {
+    const psKey = `ps-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(psKey)) {
+      return psKey
     }
   }
   return templateKey
@@ -317,6 +332,34 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <OkAbandonedCheckout3Template {...data} />
 
+    // ── Psí superživot templates ─────────────────────────────
+    case EmailTemplates.PS_ORDER_PLACED:
+      if (!isPsOrderPlacedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.PS_ORDER_PLACED}"`
+        )
+      }
+      return <PsOrderPlacedTemplate {...data} />
+
+    case EmailTemplates.PS_SHIPMENT_NOTIFICATION:
+      if (!isPsShipmentNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.PS_SHIPMENT_NOTIFICATION}"`
+        )
+      }
+      return <PsShipmentNotificationTemplate {...data} />
+
+    case EmailTemplates.PS_UPSELL_CONFIRMED:
+      if (!isPsUpsellConfirmedData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.PS_UPSELL_CONFIRMED}"`
+        )
+      }
+      return <PsUpsellConfirmedTemplate {...data} />
+
     // ── Admin notification ───────────────────────────────────
     case EmailTemplates.ADMIN_ORDER_NOTIFICATION:
       if (!isAdminOrderNotificationData(data)) {
@@ -364,6 +407,10 @@ export {
   OkAbandonedCheckout3Template,
   OkEbookDeliveryTemplate,
   OkShipmentNotificationTemplate,
+  // Psí superživot
+  PsOrderPlacedTemplate,
+  PsShipmentNotificationTemplate,
+  PsUpsellConfirmedTemplate,
   // Admin notification
   AdminOrderNotificationTemplate,
 }

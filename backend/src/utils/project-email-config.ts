@@ -36,6 +36,12 @@ const EMAIL_SUBJECTS: Record<string, Record<string, string>> = {
     shipmentSent: 'Twoje zamówienie {id} zostało wysłane! 📦',
     shipmentPreview: 'Twoje zamówienie zostało wysłane!',
   },
+  cs: {
+    orderPlaced: 'Děkujeme za vaši objednávku!',
+    orderPlacedPreview: 'Děkujeme za vaši objednávku!',
+    shipmentSent: 'Vaše objednávka {id} byla odeslána! 📦',
+    shipmentPreview: 'Vaše objednávka byla odeslána!',
+  },
 }
 
 /**
@@ -90,6 +96,21 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Släpp Taget <hej@slapptagetboken.se>',
     project: 'slapp-taget',
     locale: 'sv',
+  },
+  'psi-superzivot': {
+    replyTo: 'info@psisuperzivot.cz',
+    fromName: 'Psí superživot',
+    fromEmail: 'Psí superživot <info@psisuperzivot.cz>',
+    project: 'psi-superzivot',
+    locale: 'cs',
+  },
+  // Also match without hyphen
+  psisuperzivot: {
+    replyTo: 'info@psisuperzivot.cz',
+    fromName: 'Psí superživot',
+    fromEmail: 'Psí superživot <info@psisuperzivot.cz>',
+    project: 'psi-superzivot',
+    locale: 'cs',
   },
 }
 
