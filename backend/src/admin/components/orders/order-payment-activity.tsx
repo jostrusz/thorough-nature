@@ -144,6 +144,7 @@ function extractGatewayPaymentId(payment: any): string {
 
 /**
  * Build a synthetic "Payment Received" entry from the order's payment collections.
+ * For COD orders, shows "Awaiting COD Payment" with pending status instead.
  */
 function buildReceivedEntry(order: any): PaymentActivityEntry | null {
   const payments = (order.payment_collections || []).flatMap(
@@ -158,16 +159,20 @@ function buildReceivedEntry(order: any): PaymentActivityEntry | null {
   const amount = Number(payment.amount) || Number(order.total) || 0
   const currency = order.currency_code || "eur"
 
+  // COD orders: payment is not received until delivery
+  const isCOD = (payment.provider_id || "").includes("cod")
+  const isCODCaptured = isCOD && order.metadata?.payment_captured === true
+
   return {
     timestamp: payment.created_at || payment.captured_at || order.created_at,
-    event: "received",
+    event: isCOD ? (isCODCaptured ? "received" : "cod_pending") : "received",
     gateway,
-    payment_method: method,
-    status: "success",
+    payment_method: isCOD ? "COD" : method,
+    status: isCOD && !isCODCaptured ? "pending" : "success",
     amount,
     currency,
     transaction_id: gatewayPaymentId,
-    detail: "Payment received",
+    detail: isCOD && !isCODCaptured ? "Awaiting cash on delivery" : "Payment received",
   }
 }
 
@@ -488,6 +493,7 @@ const ActivityEntryRow: React.FC<ActivityEntryProps> = ({
 function formatEventLabel(event: string): string {
   const labelMap: Record<string, string> = {
     received: "Payment Received",
+    cod_pending: "Awaiting COD Payment",
     initiate: "Payment Initiated",
     authorization: "Payment Authorized",
     capture: "Payment Captured",

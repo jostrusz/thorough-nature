@@ -23,6 +23,13 @@ interface OrderDetailPaymentProps {
 function getPaymentStatus(order: any): string {
   // If metadata says captured, trust it (auto-capture or manual)
   if (order.metadata?.payment_captured) return "paid"
+
+  // COD orders: stay "pending" until explicitly marked as captured
+  const isCOD = (order.payment_collections || []).some((pc: any) =>
+    (pc.payments || []).some((p: any) => (p.provider_id || "").includes("cod"))
+  )
+  if (isCOD) return "pending"
+
   if (order.payment_collections?.length) {
     const pc = order.payment_collections[0]
     if (pc.status === "captured" || pc.status === "completed") return "paid"
@@ -311,7 +318,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                 : "Pending"}
             </span>
             <span style={{ color: colors.text, fontWeight: 500 }}>
-              {formatCurrency(totalPaid || total, currency)}
+              {paymentStatus === "pending" ? formatCurrency(total, currency) : formatCurrency(totalPaid || total, currency)}
             </span>
           </div>
         </div>
