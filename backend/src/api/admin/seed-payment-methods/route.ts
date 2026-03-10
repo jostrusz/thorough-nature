@@ -11,7 +11,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   // 1. Comgate methods
   try {
-    const seedComgate = (await import("../../../scripts/seed-comgate-methods")).default
+    const seedComgate = (await import("../../../scripts/seed-comgate-methods.js")).default
     await seedComgate({ container: req.scope })
     results.push("Comgate: OK")
   } catch (err: any) {
@@ -21,7 +21,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   // 2. COD method
   try {
-    const seedCod = (await import("../../../scripts/seed-cod-method")).default
+    const seedCod = (await import("../../../scripts/seed-cod-method.js")).default
     await seedCod({ container: req.scope })
     results.push("COD: OK")
   } catch (err: any) {

@@ -17,7 +17,7 @@ export default async function seedPaymentMethods(args: ExecArgs) {
 
   try {
     // 1. Comgate methods
-    const seedComgate = (await import("./seed-comgate-methods")).default
+    const seedComgate = (await import("./seed-comgate-methods.js")).default
     await seedComgate(args)
   } catch (err: any) {
     logger.warn(`[Seed All] Comgate seed skipped: ${err.message}`)
@@ -25,7 +25,7 @@ export default async function seedPaymentMethods(args: ExecArgs) {
 
   try {
     // 2. COD method
-    const seedCod = (await import("./seed-cod-method")).default
+    const seedCod = (await import("./seed-cod-method.js")).default
     await seedCod(args)
   } catch (err: any) {
     logger.warn(`[Seed All] COD seed skipped: ${err.message}`)
