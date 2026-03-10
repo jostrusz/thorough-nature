@@ -248,7 +248,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         email: customer?.email,
         country: customer?.billing_address?.country_code?.toUpperCase(),
         prepareOnly: true, // get transId + URL without redirect
-        method: contextData?.comgate_method || undefined, // Pre-select method on Comgate page
+        method: contextData?.comgate_method || "ALL", // ALL = Comgate shows its own payment method selector
       }
 
       this.getLogger().info(`[Comgate] Creating payment: merchant=${paymentParams.merchant}, ` +
