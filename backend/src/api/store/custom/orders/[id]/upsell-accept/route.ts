@@ -87,6 +87,7 @@ export async function POST(
       compare_at_unit_price,
       upsell_cart_id,
       upsell_payment_id: frontendPaymentId,
+      is_cod,
     } = req.body as {
       variant_id: string
       quantity?: number
@@ -94,6 +95,7 @@ export async function POST(
       compare_at_unit_price?: number
       upsell_cart_id?: string
       upsell_payment_id?: string
+      is_cod?: boolean
     }
 
     if (!variant_id) {
@@ -135,6 +137,112 @@ export async function POST(
     )
 
     console.log(`[Upsell] Starting upsell-accept for order ${orderId}, variant ${variant_id}, unit_price ${unit_price}, upsell_cart_id: ${upsell_cart_id || "NONE"}, frontend_payment_id: ${frontendPaymentId || "NONE"}`)
+
+    // ── COD SHORTCUT: Skip payment verification entirely ─────────
+    // COD upsell doesn't create a separate cart — the upsell amount
+    // is simply added to the existing COD order (collected on delivery).
+    if (is_cod) {
+      console.log(`[Upsell] COD upsell for order ${orderId} — skipping payment verification`)
+
+      // Jump directly to order edit (steps 3-7)
+      const regionId = (orders[0] as any).region_id
+      if (regionId) {
+        try {
+          const pricingModule = req.scope.resolve(Modules.PRICING) as any
+          const existing = await pricingModule.listPricePreferences({
+            attribute: "region_id",
+            value: regionId,
+          })
+          if (existing.length === 0) {
+            await pricingModule.createPricePreferences({
+              attribute: "region_id",
+              value: regionId,
+              is_tax_inclusive: true,
+            })
+          } else if (!(existing[0] as any).is_tax_inclusive) {
+            await pricingModule.updatePricePreferences(existing[0].id, {
+              is_tax_inclusive: true,
+            })
+          }
+        } catch (ppErr: any) {
+          console.warn(`[Upsell] Could not set PricePreference:`, ppErr.message)
+        }
+      }
+
+      console.log(`[Upsell] COD: Beginning order edit for ${orderId}`)
+      await beginOrderEditOrderWorkflow(req.scope).run({
+        input: { order_id: orderId },
+      })
+
+      const item: any = {
+        variant_id,
+        quantity: quantity || 1,
+        is_tax_inclusive: true,
+        ...(unit_price !== undefined && { unit_price }),
+        ...(compare_at_unit_price !== undefined && { compare_at_unit_price }),
+      }
+
+      console.log(`[Upsell] COD: Adding item to order edit:`, JSON.stringify(item))
+      await orderEditAddNewItemWorkflow(req.scope).run({
+        input: { order_id: orderId, items: [item] },
+      })
+
+      console.log(`[Upsell] COD: Requesting order edit for ${orderId}`)
+      await requestOrderEditRequestWorkflow(req.scope).run({
+        input: { order_id: orderId },
+      })
+
+      console.log(`[Upsell] COD: Confirming order edit for ${orderId}`)
+      await confirmOrderEditRequestWorkflow(req.scope).run({
+        input: { order_id: orderId, confirmed_by: "system-upsell-cod" },
+      })
+
+      // For COD: mark any new "not_paid" payment collections as paid
+      // (The order edit creates one for the price difference)
+      try {
+        const { data: paymentCollections } = await query.graph({
+          entity: "order_payment_collection",
+          fields: ["payment_collection.id", "payment_collection.status"],
+          filters: { order_id: orderId },
+        })
+        for (const opc of paymentCollections) {
+          const pc = (opc as any).payment_collection
+          if (pc && pc.status === "not_paid") {
+            console.log(`[Upsell] COD: Marking payment collection ${pc.id} as paid`)
+            await markPaymentCollectionAsPaid(req.scope).run({
+              input: {
+                payment_collection_id: pc.id,
+                order_id: orderId,
+                captured_by: "system-upsell-cod",
+              },
+            })
+          }
+        }
+      } catch (pcErr: any) {
+        console.warn(`[Upsell] COD: Could not mark payment collection as paid:`, pcErr.message)
+      }
+
+      // Update metadata
+      const now = new Date().toISOString()
+      const existingLog = Array.isArray(existingMeta.upsell_log) ? (existingMeta.upsell_log as any[]) : []
+      await orderModuleService.updateOrders(orderId, {
+        metadata: {
+          ...existingMeta,
+          upsell_accepted: true,
+          upsell_accepted_at: now,
+          upsell_variant_id: variant_id,
+          upsell_payment_id: "cod",
+          upsell_log: [
+            ...existingLog,
+            { event: "upsell_accepted", timestamp: now, message: "Customer accepted upsell (COD — no payment needed)" },
+          ],
+        },
+      })
+
+      console.log(`[Upsell] ✅ COD order edit completed for ${orderId}`)
+      res.json({ success: true, order_id: orderId, upsell_payment_id: "cod" })
+      return
+    }
 
     // ── 2. Extract payment ID + session info ─────────────────────
     //    Priority 1: Frontend sends payment ID from gateway return URL

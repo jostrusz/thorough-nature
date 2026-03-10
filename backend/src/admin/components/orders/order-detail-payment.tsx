@@ -31,10 +31,17 @@ function getPaymentStatus(order: any): string {
   if (isCOD) return "pending"
 
   if (order.payment_collections?.length) {
-    const pc = order.payment_collections[0]
-    if (pc.status === "captured" || pc.status === "completed") return "paid"
-    if (pc.status === "refunded") return "refunded"
-    return pc.status || "pending"
+    // After order edits, old PCs may be canceled. Find the most relevant one.
+    const pcs = order.payment_collections as any[]
+    const activePC = pcs.find((pc: any) =>
+      pc.status === "captured" || pc.status === "completed"
+    ) || pcs.find((pc: any) =>
+      pc.status !== "canceled"
+    ) || pcs[pcs.length - 1]
+
+    if (activePC.status === "captured" || activePC.status === "completed") return "paid"
+    if (activePC.status === "refunded") return "refunded"
+    return activePC.status || "pending"
   }
   if (order.metadata?.copied_payment_status) return order.metadata.copied_payment_status
   return "pending"

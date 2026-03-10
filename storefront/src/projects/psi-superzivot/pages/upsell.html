@@ -1275,6 +1275,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   var btnNoAll = document.querySelectorAll('.btn-skip');
 
   // ─── UPSELL ACCEPT: Create cart → payment gateway → redirect ───
+  // For COD: skip cart creation entirely, call upsell-accept directly
   function handleUpsellAccept(e) {
     if (e) e.preventDefault();
 
@@ -1292,11 +1293,53 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     var paymentMethod = localStorage.getItem('medusa_payment_method') || '';
     var regionId = PROJECT_CONFIG.regions.CZ || PROJECT_CONFIG.getRegionId('CZ');
 
+    console.log('Upsell: Starting payment flow, provider:', paymentProvider, 'method:', paymentMethod);
+
+    // ─── COD SHORTCUT: No payment needed, add to order directly ───
+    if (paymentMethod === 'cod' || paymentProvider === 'pp_cod_cod' || (paymentProvider || '').indexOf('cod') !== -1) {
+      console.log('Upsell: COD detected — adding upsell directly to order (no cart needed)');
+      var originalOrderId = localStorage.getItem('medusa_order_id');
+      if (!originalOrderId) {
+        console.warn('Upsell: No original order ID for COD upsell');
+        window.location.href = PROJECT_CONFIG.thankYouUrl;
+        return;
+      }
+
+      fetch(MEDUSA_URL + '/store/custom/orders/' + originalOrderId + '/upsell-accept', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey,
+        },
+        body: JSON.stringify({
+          variant_id: PROJECT_CONFIG.upsellProduct.variantId,
+          quantity: 1,
+          unit_price: PROJECT_CONFIG.upsellProduct.price,
+          compare_at_unit_price: PROJECT_CONFIG.upsellProduct.originalPrice,
+          is_cod: true,
+        }),
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(result) {
+        console.log('Upsell: COD order edit result:', result);
+        if (result.success) {
+          localStorage.setItem('medusa_upsell_purchased', 'true');
+        }
+        localStorage.removeItem('medusa_cart_id');
+        window.location.href = PROJECT_CONFIG.thankYouUrl;
+      })
+      .catch(function(err) {
+        console.error('Upsell: COD upsell error:', err.message);
+        localStorage.removeItem('medusa_cart_id');
+        window.location.href = PROJECT_CONFIG.thankYouUrl;
+      });
+      return;
+    }
+
+    // ─── ONLINE PAYMENT: Create cart → payment gateway → redirect ───
     // Build return URL for payment gateway
     var baseUrl = window.location.href.split('?')[0];
     var upsellReturnUrl; // will be set after cart creation
-
-    console.log('Upsell: Starting payment flow, provider:', paymentProvider, 'method:', paymentMethod);
 
     // Step 1: Create cart
     medusaFetch('/store/carts', {
@@ -1411,7 +1454,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
         console.log('Upsell: Redirecting to payment gateway:', redirectUrl);
         window.location.href = redirectUrl;
       } else {
-        // No redirect needed (e.g., COD) — complete directly
+        // No redirect needed — complete directly
         console.log('Upsell: No redirect URL, completing directly');
         window.location.href = upsellReturnUrl;
       }

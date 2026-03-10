@@ -23,21 +23,37 @@ interface OrderDetailHeaderProps {
 }
 
 function getPaymentStatus(order: any): string {
+  // If metadata says captured, trust it (auto-capture or manual)
+  if (order.metadata?.payment_captured) return "paid"
+
   // Check metadata refund log first (custom refund route sets this)
   const refundLog = order.metadata?.payment_refund_log
   if (Array.isArray(refundLog) && refundLog.length > 0) {
-    // Calculate total refunded
     const totalRefunded = refundLog.reduce((sum: number, r: any) => sum + (Number(r.amount) || 0), 0)
     const totalPaid = Number(order.total) || 0
     if (totalRefunded >= totalPaid) return "refunded"
     return "partially_refunded"
   }
 
+  // COD orders: stay "pending" until explicitly marked as captured
+  const isCOD = (order.payment_collections || []).some((pc: any) =>
+    (pc.payments || []).some((p: any) => (p.provider_id || "").includes("cod"))
+  )
+  if (isCOD) return "pending"
+
   if (order.payment_collections?.length) {
-    const pc = order.payment_collections[0]
-    if (pc.status === "captured" || pc.status === "completed") return "paid"
-    if (pc.status === "refunded") return "refunded"
-    return pc.status || "pending"
+    // After order edits, old PCs may be canceled. Find the most relevant one.
+    const pcs = order.payment_collections as any[]
+    const activePC = pcs.find((pc: any) =>
+      pc.status === "captured" || pc.status === "completed"
+    ) || pcs.find((pc: any) =>
+      pc.status !== "canceled"
+    ) || pcs[pcs.length - 1]
+
+    if (activePC.status === "captured" || activePC.status === "completed") return "paid"
+    if (activePC.status === "refunded") return "refunded"
+    if (activePC.status === "partially_refunded") return "partially_refunded"
+    return activePC.status || "pending"
   }
   if (order.metadata?.copied_payment_status) return order.metadata.copied_payment_status
   return "pending"
