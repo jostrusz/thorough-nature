@@ -108,8 +108,8 @@ function getTag(order: any): string {
 // ═══════════════════════════════════════════
 const thStyle: React.CSSProperties = {
   textAlign: "left",
-  padding: "11px 20px",
-  fontSize: "11px",
+  padding: "7px 14px",
+  fontSize: "10.5px",
   fontWeight: 600,
   color: "#9CA3B8",
   textTransform: "uppercase",
@@ -122,9 +122,9 @@ const thStyle: React.CSSProperties = {
 }
 
 const tdStyle: React.CSSProperties = {
-  padding: "14px 20px",
-  fontSize: "13px",
-  borderBottom: "1px solid rgba(0,0,0,0.04)",
+  padding: "6px 14px",
+  fontSize: "12.5px",
+  borderBottom: "1px solid rgba(0,0,0,0.03)",
   verticalAlign: "middle",
 }
 
@@ -213,8 +213,21 @@ function Checkbox({
 // INLINE STYLES FOR ROW HOVER (actions visibility)
 // ═══════════════════════════════════════════
 const rowHoverStyles = `
+  .orders-table-row {
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+    border-left: 3px solid transparent;
+  }
+  .orders-table-row:hover {
+    background: #F4F5FA !important;
+    border-left-color: ${colors.accent};
+    box-shadow: 0 1px 4px rgba(108,92,231,0.06);
+  }
+  .orders-table-row:active {
+    background: #ECEDF5 !important;
+  }
   .orders-table-row .row-actions { opacity: 0; transition: opacity 0.15s ease; }
   .orders-table-row:hover .row-actions { opacity: 1; }
+  .orders-table-row td:first-child { padding-left: 11px; }
 `
 
 // ═══════════════════════════════════════════
@@ -403,15 +416,8 @@ export function OrdersTable({
                 key={order.id}
                 className="orders-table-row"
                 style={{
-                  background: isSelected ? "rgba(108,92,231,0.04)" : "transparent",
-                  transition: "background 0.12s ease",
+                  background: isSelected ? "rgba(108,92,231,0.05)" : "transparent",
                   cursor: "pointer",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) e.currentTarget.style.background = "#F8F9FC"
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) e.currentTarget.style.background = "transparent"
                 }}
                 onClick={() => navigate(`/custom-orders/${order.id}`)}
               >
@@ -442,53 +448,13 @@ export function OrdersTable({
 
                 {/* 3. Customer (with payment method icon) */}
                 <td style={tdStyle}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     {(() => {
                       const iconUrl = getPaymentIconUrl(order)
                       if (iconUrl) {
                         return (
                           <div style={{
-                            width: "32px", height: "32px", borderRadius: "8px",
-                            background: "#f0f1f5", padding: "4px",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            flexShrink: 0, overflow: "hidden",
-                          }}>
-                            <img src={iconUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-                          </div>
-                        )
-                      }
-                      const fb = getPaymentFallback(order)
-                      return (
-                        <div style={{
-                          width: "32px", height: "32px", borderRadius: "8px",
-                          background: fb.bg, color: fb.color,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          flexShrink: 0, fontSize: "10px", fontWeight: 700,
-                        }}>
-                          {fb.letter}
-                        </div>
-                      )
-                    })()}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 500, fontSize: "13px", color: colors.text }}>
-                        {customerName}
-                      </div>
-                      <div style={{ fontSize: "11px", color: colors.textMuted, marginTop: "1px" }}>
-                        {order.email}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-
-                {/* 4. Payment */}
-                <td style={tdStyle}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    {(() => {
-                      const iconUrl = getPaymentIconUrl(order)
-                      if (iconUrl) {
-                        return (
-                          <div style={{
-                            width: "22px", height: "22px", borderRadius: "4px",
+                            width: "26px", height: "26px", borderRadius: "6px",
                             background: "#f0f1f5", padding: "3px",
                             display: "flex", alignItems: "center", justifyContent: "center",
                             flexShrink: 0, overflow: "hidden",
@@ -500,10 +466,50 @@ export function OrdersTable({
                       const fb = getPaymentFallback(order)
                       return (
                         <div style={{
-                          width: "22px", height: "22px", borderRadius: "4px",
+                          width: "26px", height: "26px", borderRadius: "6px",
                           background: fb.bg, color: fb.color,
                           display: "flex", alignItems: "center", justifyContent: "center",
                           flexShrink: 0, fontSize: "8px", fontWeight: 700,
+                        }}>
+                          {fb.letter}
+                        </div>
+                      )
+                    })()}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 500, fontSize: "12.5px", color: colors.text }}>
+                        {customerName}
+                      </div>
+                      <div style={{ fontSize: "10.5px", color: colors.textMuted, marginTop: "0px" }}>
+                        {order.email}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                {/* 4. Payment */}
+                <td style={tdStyle}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                    {(() => {
+                      const iconUrl = getPaymentIconUrl(order)
+                      if (iconUrl) {
+                        return (
+                          <div style={{
+                            width: "20px", height: "20px", borderRadius: "4px",
+                            background: "#f0f1f5", padding: "2px",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            flexShrink: 0, overflow: "hidden",
+                          }}>
+                            <img src={iconUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                          </div>
+                        )
+                      }
+                      const fb = getPaymentFallback(order)
+                      return (
+                        <div style={{
+                          width: "20px", height: "20px", borderRadius: "4px",
+                          background: fb.bg, color: fb.color,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          flexShrink: 0, fontSize: "7px", fontWeight: 700,
                         }}>
                           {fb.letter}
                         </div>

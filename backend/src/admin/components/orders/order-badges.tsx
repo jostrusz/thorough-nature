@@ -7,10 +7,10 @@ import { colors } from "./design-tokens"
 const badgeBase: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
-  gap: "6px",
-  padding: "4px 10px",
-  borderRadius: "6px",
-  fontSize: "12px",
+  gap: "5px",
+  padding: "3px 8px",
+  borderRadius: "5px",
+  fontSize: "11px",
   fontWeight: 600,
   whiteSpace: "nowrap",
 }
