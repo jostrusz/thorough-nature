@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="cs">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stap 2 — Speciaal Aanbod Alleen Voor Jou</title>
+<title>Krok 2 — Speciální nabídka jen pro tebe</title>
 <link rel="icon" href="/dehondenbijbel/images/preloader.webp" type="image/webp">
 
-<!-- Hide upsell content on payment return — show preloader instead -->
+<!-- Skrýt upsell obsah při návratu z platby — zobrazit preloader -->
 <script>
 if (window.location.search.indexOf('upsell_return=1') !== -1) {
   document.write('<style>.page-wrap,.step-bar,.timer-bar{display:none!important}</style>');
@@ -290,7 +290,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   font-weight: 800; font-size: 18px; color: var(--heading);
 }
 
-/* ─── 5 PIJLERS GRID ─── */
+/* ─── 5 PILÍŘŮ GRID ─── */
 .pillar-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -399,7 +399,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .ba-card.before li::before { content: '✕ '; color: var(--muted); font-size: 11px; }
 .ba-card.after li::before { content: '✓ '; color: var(--success); font-weight: 700; }
 
-/* ─── BONUS E-BOOKS ─── */
+/* ─── BONUSOVÉ E-KNIHY ─── */
 .bonus-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0; }
 .bonus-card {
   background: var(--white); border: 1px solid var(--section);
@@ -454,7 +454,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   margin-top: 6px;
 }
 
-/* ─── GUARANTEE ─── */
+/* ─── ZÁRUKA ─── */
 .guarantee-box {
   display: flex; align-items: center; gap: 20px; background: var(--white);
   border: 2px solid rgba(194,123,160,0.2); border-radius: 14px;
@@ -482,7 +482,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; font-size: 14px; line-height: 1.7; color: var(--body); }
 .faq-a.open { max-height: 300px; padding-bottom: 16px; }
 
-/* ─── PAYMENT PRELOADER ─── */
+/* ─── PRELOADER PLATBY ─── */
 .payment-preloader {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   background: var(--bg); z-index: 9999;
@@ -542,344 +542,344 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </head>
 <body>
 
-<!-- ═══════ STEP INDICATOR BAR ═══════ -->
+<!-- ═══════ UKAZATEL KROKŮ ═══════ -->
 <div class="step-bar">
   <div class="step-bar-inner">
     <div class="step done">
       <span class="step-num">&#10003;</span>
-      <span class="step-label">Bestelling</span>
-      <span class="step-label-short">Besteld</span>
+      <span class="step-label">Objednávka</span>
+      <span class="step-label-short">Hotovo</span>
     </div>
     <div class="step-sep"></div>
     <div class="step active">
       <span class="step-num">2</span>
-      <span class="step-label">Speciaal Aanbod</span>
-      <span class="step-label-short">Aanbod</span>
+      <span class="step-label">Speciální nabídka</span>
+      <span class="step-label-short">Nabídka</span>
     </div>
     <div class="step-sep"></div>
     <div class="step">
       <span class="step-num">3</span>
-      <span class="step-label">Bevestiging</span>
-      <span class="step-label-short">Klaar</span>
+      <span class="step-label">Potvrzení</span>
+      <span class="step-label-short">Hotovo</span>
     </div>
   </div>
 </div>
 
-<!-- ═══════ URGENCY TIMER ═══════ -->
+<!-- ═══════ ČASOVAČ URGENCE ═══════ -->
 <div class="timer-bar">
-  Dit aanbod verdwijnt over <strong><span class="timer-digits" id="timer">09:59</span></strong> &mdash; alleen voor jou, alleen nu
+  Tato nabídka vyprší za <strong><span class="timer-digits" id="timer">09:59</span></strong> &mdash; jen pro tebe, jen teď
 </div>
 
 <div class="page-wrap">
 
-<!-- ═══════ DECISION HERO ═══════ -->
+<!-- ═══════ ROZHODOVACÍ HRDINA ═══════ -->
 <section class="decision-hero anim d1">
   <div class="confirm-badge">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-    Je bestelling is bevestigd!
+    Tvoje objednávka je potvrzena!
   </div>
 
-  <h1>Stop. Je pakket wordt verstuurd &mdash; maar lees dit <em>eerst</em><span class="dots">...</span></h1>
+  <h1>Počkej. Tvůj balíček se připravuje &mdash; ale nejdřív si přečti <em>tohle</em><span class="dots">...</span></h1>
 
   <p class="subtitle">
-    Je hebt zojuist <strong>De Hondenbijbel</strong> besteld. Maar terwijl we je bestelling klaarmaken,
-    is er één ding dat we je <strong>niet kunnen laten missen</strong>. Dit aanbod bestaat niet op onze website.
-    Het bestaat alleen hier. Alleen nu. Alleen voor jou als nieuwe klant.
+    Právě sis objednal/a <strong>Psí superživot</strong>. Ale zatímco tvoji objednávku připravujeme,
+    je tu jedna věc, kterou ti <strong>nemůžeme zatajit</strong>. Tato nabídka neexistuje na našem webu.
+    Existuje jen tady. Jen teď. Jen pro tebe jako nového zákazníka.
   </p>
 
   <div class="choose-instruction">
-    &#9660; Neem 60 seconden. Lees dit. Dan kies jij: <strong>ja of nee</strong>
+    &#9660; Dej tomu 60 sekund. Přečti si to. A pak se rozhodni: <strong>ano nebo ne</strong>
   </div>
 </section>
 
-<!-- ═══════ PRODUCT IMAGE ═══════ -->
+<!-- ═══════ OBRÁZEK PRODUKTU ═══════ -->
 <div class="product-showcase anim d2" style="display: flex; align-items: center; justify-content: center; padding: 24px 0;">
   <div class="product-image-wrap">
-    <img id="upsell-product-img" src="/Laat-los-wat-je-kapotmaakt-book-pichi.webp" alt="Laat Los Wat Je Kapotmaakt &mdash; boek door Joris de Vries" loading="eager" style="width: 100%; height: auto; border-radius: 4px; filter: drop-shadow(0 8px 30px rgba(0,0,0,0.15));">
-    <div class="product-badge">&minus;&euro;10</div>
+    <img id="upsell-product-img" src="/Laat-los-wat-je-kapotmaakt-book-pichi.webp" alt="Odpusť to, co tě ničí &mdash; kniha od Jorise de Vries" loading="eager" style="width: 100%; height: auto; border-radius: 4px; filter: drop-shadow(0 8px 30px rgba(0,0,0,0.15));">
+    <div class="product-badge">&minus;100 Kč</div>
   </div>
 </div>
 
-<!-- ═══════ COUPON CARD ═══════ -->
+<!-- ═══════ SLEVOVÝ KUPÓN ═══════ -->
 <div class="coupon-card anim d2">
   <div class="coupon-left">
     <div>
-      <div class="coupon-badge">KORTINGSBON</div>
-      <div class="coupon-code">HONDEN-VIP</div>
+      <div class="coupon-badge">SLEVOVÝ KUPÓN</div>
+      <div class="coupon-code">PSI-VIP</div>
     </div>
     <div>
-      <div class="coupon-value">&minus;&euro;10</div>
+      <div class="coupon-value">&minus;100 Kč</div>
       <div class="coupon-scissors">&#9986;</div>
     </div>
   </div>
   <div class="coupon-right">
     <div class="coupon-applied">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-      Automatisch toegepast op je bestelling
+      Automaticky uplatněno na tvoji objednávku
     </div>
-    <div class="cpb-row"><span>Originele prijs boek</span><span>&euro;35</span></div>
-    <div class="cpb-row cpb-discount"><span>Kortingsbon HONDEN-VIP</span><span>&minus;&euro;10</span></div>
-    <div class="cpb-row cpb-total"><span>Jouw exclusieve prijs</span><span>&euro;25</span></div>
+    <div class="cpb-row"><span>Původní cena knihy</span><span>550 Kč</span></div>
+    <div class="cpb-row cpb-discount"><span>Slevový kupón PSI-VIP</span><span>&minus;100 Kč</span></div>
+    <div class="cpb-row cpb-total"><span>Tvoje exkluzivní cena</span><span>450 Kč</span></div>
   </div>
 </div>
 
-<!-- ═══════ PROBLEMEN + MECHANISME ═══════ -->
+<!-- ═══════ PROBLÉMY + MECHANISMUS ═══════ -->
 <div class="anim d3" style="padding: 8px 0 20px;">
   <h2 style="font-family: 'Recoleta', serif; font-weight: 600; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 16px;">
-    Herken je dit?
+    Poznáváš se v tom?
   </h2>
 
   <p style="font-size: 15px; line-height: 1.8; color: var(--body); margin-bottom: 14px;">
-    Je hoofd gaat maar door. &rsquo;s Avonds in bed, onderweg, zelfs midden in een gesprek.
-    Dezelfde gedachten, dezelfde gesprekken, dezelfde &ldquo;wat als&rdquo;&mdash;in een eindeloze herhaling.
-    Je bent moe. Niet van het werk, maar van <em>jezelf</em>.
+    Tvoje hlava prostě nepřestává. Večer v posteli, cestou do práce, dokonce i uprostřed rozhovoru.
+    Stejné myšlenky, stejné vnitřní dialogy, stejné &ldquo;co kdyby&rdquo;&mdash;v nekonečné smyčce.
+    Jsi unavený/á. Ne z práce, ale ze <em>sebe samého/samé</em>.
   </p>
 
   <p style="font-size: 15px; line-height: 1.8; color: var(--body); margin-bottom: 14px;">
-    Misschien is het een oude pijn die je maar niet kwijtraakt. Of woede naar iemand die je
-    heeft gekwetst &mdash; waarvan je weet dat je hem los moet laten, maar dat gewoon niet lukt.
-    Of schuldgevoel over iets uit het verleden dat je elke dag een beetje verder
-    naar beneden trekt.
+    Možná je to stará bolest, které se nedokážeš zbavit. Nebo vztek na někoho, kdo ti
+    ublížil &mdash; víš, že ho musíš pustit, ale prostě to nejde.
+    Nebo pocit viny za něco z minulosti, který tě den za dnem táhne
+    hlouběji ke dnu.
   </p>
 
   <p style="font-size: 15px; line-height: 1.8; color: var(--body); margin-bottom: 20px;">
-    Het gekke is: je hebt het al zo lang meegedragen dat het bijna normaal voelt.
-    <strong>Maar het is niet normaal. En het hoeft ook niet zo te blijven.</strong>
+    Paradox je, že to neseš tak dlouho, že to už skoro vnímáš jako normální.
+    <strong>Ale normální to není. A nemusí to tak zůstat.</strong>
   </p>
 
   <div style="background: var(--light); border-radius: 14px; padding: 22px 24px; margin-bottom: 16px;">
-    <p style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em;">Wat dit boek anders maakt</p>
+    <p style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em;">Čím je tato kniha jiná</p>
     <p style="font-size: 15px; line-height: 1.8; color: var(--body);">
-      De meeste boeken vertellen je wat je moet <em>doen</em>. Dit boek laat je zien
-      <em>waarom</em> je vastloopt &mdash; en geeft je daarna concrete stappen om eruit te komen.
-      Geen positief denken, geen zweverige theorie. Joris de Vries combineert inzichten
-      uit de neuropsychologie met 12 jaar praktijkervaring: <strong>wat houdt ons
-      vanbinnen gevangen, en hoe doorbreek je dat patroon voor altijd?</strong>
+      Většina knih ti řekne, co máš <em>dělat</em>. Tato kniha ti ukáže,
+      <em>proč</em> se zasekáváš &mdash; a pak ti dá konkrétní kroky, jak se z toho dostat.
+      Žádné pozitivní myšlení, žádná vznášející se teorie. Joris de Vries kombinuje poznatky
+      z neuropsychologie s 12 lety praxe: <strong>co nás drží uvnitř v pasti
+      a jak tento vzorec prolomit jednou provždy?</strong>
     </p>
   </div>
 
   <p style="font-size: 15px; line-height: 1.8; color: var(--body);">
-    Na dit boek slaap je weer door. Je zegt &lsquo;nee&rsquo; zonder je schuldig te voelen.
-    Je draagt die oude woede niet meer mee. En je hond? Die merkt het ook &mdash;
-    want een rustige baas maakt een rustige hond.
+    Po přečtení této knihy budeš zase spát celou noc. Řekneš &lsquo;ne&rsquo; bez pocitu viny.
+    Nebudeš už v sobě nosit ten starý vztek. A tvůj pes? Ten si toho taky všimne &mdash;
+    protože klidný páníček znamená klidného psa.
   </p>
 </div>
 
-<!-- ═══════ SOCIAL PROOF STRIP ═══════ -->
+<!-- ═══════ SOCIÁLNÍ DŮKAZ ═══════ -->
 <div class="proof-strip anim d3">
   <div class="proof-item"><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span> <span>4.9/5</span></div>
-  <div class="proof-item"><span class="num">3.000+</span> lezers</div>
-  <div class="proof-item"><span class="num">92%</span> voelt verschil in 14 dagen</div>
+  <div class="proof-item"><span class="num">3 000+</span> čtenářů</div>
+  <div class="proof-item"><span class="num">92 %</span> cítí rozdíl do 14 dnů</div>
 </div>
 
-<!-- ═══════ EERSTE CTA ═══════ -->
+<!-- ═══════ PRVNÍ CTA ═══════ -->
 <div class="cta-block anim d3" id="first-cta">
   <a href="#" class="btn-upsell" id="btn-yes" onclick="return false;">
-    JA, voeg toe voor slechts &euro;25 &rarr;
-    <span class="btn-sub">Je wordt doorgestuurd naar dezelfde betaalmethode als bij je bestelling. De toevoeging is pas definitief na betaling.</span>
+    ANO, přidej za pouhých 450 Kč &rarr;
+    <span class="btn-sub">Budeš přesměrován/a na stejnou platební metodu jako u tvé objednávky. Přidání je definitivní až po zaplacení.</span>
   </a>
-  <a class="btn-skip" id="btn-no" href="#">Nee bedankt, ik sla dit eenmalige aanbod over</a>
+  <a class="btn-skip" id="btn-no" href="#">Ne, děkuji, tuto jednorázovou nabídku přeskočím</a>
 </div>
 
 <div class="divider"></div>
 
-<!-- ═══════ THE PITCH ═══════ -->
+<!-- ═══════ PRODEJNÍ ČÁST ═══════ -->
 <div class="anim d4" style="padding: 16px 0;">
   <h2 style="font-family: 'Recoleta', serif; font-weight: 600; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 16px;">
-    Je geeft alles voor je hond.<br>
-    <span style="font-style: italic; color: var(--cta);">Maar wie zorgt er eigenlijk voor jou?</span>
+    Dáváš všechno svému psovi.<br>
+    <span style="font-style: italic; color: var(--cta);">Ale kdo se vlastně stará o tebe?</span>
   </h2>
 
   <p style="font-size: 16px; line-height: 1.75; color: var(--body);">
-    Denk even na. Je hebt net een boek gekocht om <em>je hond</em> een beter leven te geven.
-    Maar hoe zit het met jouw leven? Hoelang zit jij al opgesloten in je eigen hoofd?
-    De <strong>gedachten die maar malen om 03:00</strong>. Het schuldgevoel als je
-    vijf minuten voor jezelf neemt. De woede die je inslikt — dag na dag — totdat die
-    ergens anders uitbarst.
+    Zamysli se. Právě sis koupil/a knihu, abys dal/a <em>svému psovi</em> lepší život.
+    Ale co tvůj vlastní život? Jak dlouho už jsi zavřený/á ve své vlastní hlavě?
+    Ty <strong>myšlenky, co se točí ve 3 ráno</strong>. Pocit viny, když si vezmeš
+    pět minut pro sebe. Vztek, který polyká &mdash; den za dnem &mdash; dokud
+    nevybuchne někde jinde.
   </p>
   <p style="font-size: 16px; line-height: 1.75; color: var(--body); margin-top: 12px;">
-    Wat als we je vertellen dat <strong>3.000 mensen net als jij</strong> dit patroon hebben doorbroken
-    &mdash; niet met therapie, niet met medicijnen &mdash; maar met 5 concrete stappen?
-    Geen vage theorie. Geen positief denken. Maar een <strong>praktisch systeem</strong> dat je
-    direct kunt toepassen, ook als je nu volledig uitgeput bent.
+    Co kdybychom ti řekli, že <strong>3 000 lidí jako ty</strong> tento vzorec prolomilo
+    &mdash; ne terapií, ne léky &mdash; ale 5 konkrétními kroky?
+    Žádná vágní teorie. Žádné pozitivní myšlení. Ale <strong>praktický systém</strong>, který
+    můžeš začít používat okamžitě, i když jsi teď úplně vyčerpaný/á.
   </p>
 
   <ul class="benefit-list" style="margin-top: 16px;">
     <li>
       <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><strong>Eindelijk doorslapen</strong> — stop de 03:00-gedachtespiraal die je elke nacht wakker houdt</div>
+      <div><strong>Konečně se vyspat</strong> &mdash; zastav tu spirálu myšlenek ve 3 ráno, která tě každou noc budí</div>
     </li>
     <li>
       <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><strong>'Nee' zeggen zonder je schuldig te voelen</strong> — misschien voor het eerst in jaren</div>
+      <div><strong>Říct &bdquo;ne&ldquo; bez pocitu viny</strong> &mdash; možná poprvé po letech</div>
     </li>
     <li>
       <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><strong>Woede omzetten in kracht</strong> — van reactief en uitgeput naar kalm en beheerst</div>
+      <div><strong>Proměnit vztek v sílu</strong> &mdash; z reaktivního a vyčerpaného do klidného a vyrovnaného</div>
     </li>
     <li>
       <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><strong>Loslaten wat je al jaren meesleept</strong> — en jezelf eindelijk bevrijden van die last</div>
+      <div><strong>Pustit to, co tě roky táhne ke dnu</strong> &mdash; a konečně se osvobodit od té tíhy</div>
     </li>
     <li>
       <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><strong>Energie overhouden voor jezelf</strong> — en daardoor ook een geduldiger, rustiger baasje zijn</div>
+      <div><strong>Mít energii i pro sebe</strong> &mdash; a díky tomu být trpělivějším a klidnějším páníčkem</div>
     </li>
   </ul>
 </div>
 
-<!-- ═══════ BEFORE / AFTER ═══════ -->
+<!-- ═══════ PŘED / PO ═══════ -->
 <div class="anim d4">
   <h3 style="font-family: 'Recoleta', serif; font-size: 19px; color: var(--heading); text-align: center; margin-bottom: 14px;">
-    Dezelfde persoon. <span style="font-style: italic; color: var(--cta);">Een compleet ander leven.</span>
+    Stejný člověk. <span style="font-style: italic; color: var(--cta);">Úplně jiný život.</span>
   </h3>
   <div class="ba-grid">
     <div class="ba-card before">
-      <div class="ba-label">&#128532; Vroeger</div>
+      <div class="ba-label">&#128532; Dříve</div>
       <ul>
-        <li>Wakker liggen met gedachten die niet stoppen</li>
-        <li>Alles geven — maar het is nooit genoeg</li>
-        <li>Geen NEE kunnen zeggen, uit angst</li>
-        <li>Schuldig voelen als je iets voor jezelf doet</li>
+        <li>Ležet v posteli s myšlenkami, které nepřestávají</li>
+        <li>Dávat ze sebe všechno &mdash; ale nikdy to nestačí</li>
+        <li>Nedokázat říct NE ze strachu</li>
+        <li>Cítit vinu, když uděláš něco pro sebe</li>
       </ul>
     </div>
     <div class="ba-card after">
-      <div class="ba-label">&#10024; Nu</div>
+      <div class="ba-label">&#10024; Teď</div>
       <ul>
-        <li>'s Ochtends opgewekt wakker worden</li>
-        <li>NEE zeggen — en de wereld staat nog steeds</li>
-        <li>Tijd nemen voor zichzelf. Zonder schuldgevoel</li>
-        <li>Rust in huis. En eindelijk ook in het hoofd.</li>
+        <li>Ráno se probouzet s úsměvem</li>
+        <li>Říct NE &mdash; a svět se nezhroutí</li>
+        <li>Vzít si čas pro sebe. Bez výčitek svědomí</li>
+        <li>Klid doma. A konečně i v hlavě.</li>
       </ul>
     </div>
   </div>
 </div>
 
-<!-- ═══════ TESTIMONIALS ═══════ -->
+<!-- ═══════ REFERENCE ═══════ -->
 <div class="testi-card anim d4">
-  <p class="testi-text">Ik kocht dit samen met De Hondenbijbel en het was de slimste beslissing die ik dit jaar heb gemaakt. Mijn hond merkte het al na een week &mdash; ik was rustiger, geduldiger. De 03:00-gedachten zijn weg. Ik wist niet dat het zo snel kon veranderen.</p>
-  <div class="testi-author">Marieke, 34 <span>&mdash; Utrecht</span></div>
+  <p class="testi-text">Koupila jsem si to spolu s Psím superživotem a bylo to nejchytřejší rozhodnutí, co jsem letos udělala. Můj pes si toho všiml už po týdnu &mdash; byla jsem klidnější, trpělivější. Ty myšlenky ve 3 ráno zmizely. Netušila jsem, že se to může změnit tak rychle.</p>
+  <div class="testi-author">Markéta, 34 <span>&mdash; Praha</span></div>
 </div>
 
 <div class="testi-card anim d5">
-  <p class="testi-text">Jaren van woede inslikken en piekeren — ik dacht dat het gewoon zo was. Dat ik zo was. Binnen 2 weken na dit boek voelde ik het verschil. Niet met therapie, niet met pillen. Gewoon stap voor stap, zoals het boek het uitlegt. Ik had het eerder moeten doen.</p>
-  <div class="testi-author">David, 41 <span>&mdash; Amsterdam</span></div>
+  <p class="testi-text">Roky polykat vztek a přemýšlet dokola &mdash; myslel jsem, že to tak prostě je. Že já jsem prostě takový. Během 2 týdnů po přečtení téhle knihy jsem cítil rozdíl. Ne terapií, ne prášky. Prostě krok za krokem, jak to kniha vysvětluje. Měl jsem to udělat dřív.</p>
+  <div class="testi-author">David, 41 <span>&mdash; Brno</span></div>
 </div>
 
-<!-- ═══════ WAAROM SAMEN ═══════ -->
+<!-- ═══════ PROČ OBĚ KNIHY ═══════ -->
 <div class="anim d5" style="padding: 20px 0;">
   <h2 style="font-family: 'Recoleta', serif; font-weight: 600; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 8px;">
-    Waarom kopen zoveel mensen <span style="font-style: italic; color: var(--cta);">beide</span> boeken tegelijk?
+    Proč si tolik lidí kupuje <span style="font-style: italic; color: var(--cta);">obě</span> knihy najednou?
   </h2>
-  <p style="text-align: center; font-size: 14px; color: var(--muted); margin-bottom: 16px;">Het antwoord is simpeler dan je denkt.</p>
+  <p style="text-align: center; font-size: 14px; color: var(--muted); margin-bottom: 16px;">Odpověď je jednodušší, než si myslíš.</p>
   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
     <div style="background: var(--light); border-radius: 12px; padding: 20px; text-align: center;">
       <div style="font-size: 28px; margin-bottom: 8px;">&#128054;</div>
-      <div style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 6px;">De Hondenbijbel</div>
-      <div style="font-size: 13px; color: var(--body); line-height: 1.55;">Geeft je hond het beste leven — opvoeding, gezondheid, band</div>
+      <div style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 6px;">Psí superživot</div>
+      <div style="font-size: 13px; color: var(--body); line-height: 1.55;">Dá tvému psovi nejlepší život &mdash; výchova, zdraví, pouto</div>
     </div>
     <div style="background: var(--light); border-radius: 12px; padding: 20px; text-align: center;">
       <div style="font-size: 28px; margin-bottom: 8px;">&#129504;</div>
-      <div style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 6px;">Laat Los Wat Je Kapotmaakt</div>
-      <div style="font-size: 13px; color: var(--body); line-height: 1.55;">Geeft <em>jou</em> het beste leven — rust, loslaten, innerlijke kracht</div>
+      <div style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 6px;">Odpusť to, co tě ničí</div>
+      <div style="font-size: 13px; color: var(--body); line-height: 1.55;">Dá <em>tobě</em> nejlepší život &mdash; klid, odpuštění, vnitřní síla</div>
     </div>
   </div>
   <p style="font-size: 15px; line-height: 1.7; color: var(--body); text-align: center; max-width: 500px; margin: 0 auto;">
-    Een rustig baasje maakt een rustige hond. Lezers die beide boeken lezen merken het direct &mdash;
-    meer geduld, meer rust, een sterkere band. <strong>Een beter leven voor jullie beiden begint bij jou.</strong> &#129505;
+    Klidný páníček znamená klidného psa. Čtenáři, kteří si přečtou obě knihy, to pocítí okamžitě &mdash;
+    víc trpělivosti, víc klidu, silnější pouto. <strong>Lepší život pro vás oba začíná u tebe.</strong> &#129505;
   </p>
 </div>
 
-<!-- ═══════ OVER DE AUTEUR ═══════ -->
+<!-- ═══════ O AUTOROVI ═══════ -->
 <div class="author-card anim d5">
   <div class="author-avatar">
     <img src="/images/joris-author.webp" alt="Joris de Vries">
   </div>
   <div class="author-info">
     <h4>Joris de Vries</h4>
-    <p>Coach en auteur met <strong>12+ jaar</strong> ervaring met mensen in crisis. Zelf jarenlang vastgelopen in piekeren, woede en schuldgevoel &mdash; tot hij een systeem vond dat wél werkt. <strong>Meer dan 3.000 mensen</strong> hebben sindsdien hun rust teruggevonden met zijn methode.</p>
-    <p style="margin-top: 6px; font-style: italic; font-size: 13px; color: var(--muted);">&ldquo;Ik was precies waar jij nu bent. Ik weet hoe het voelt. En ik heb de weg terug gevonden.&rdquo;</p>
+    <p>Kouč a autor s <strong>více než 12 lety</strong> zkušeností s lidmi v krizi. Sám roky uvízlý v přemýšlení, vzteku a pocitech viny &mdash; dokud nenašel systém, který skutečně funguje. <strong>Více než 3 000 lidí</strong> díky jeho metodě od té doby našlo svůj klid.</p>
+    <p style="margin-top: 6px; font-style: italic; font-size: 13px; color: var(--muted);">&ldquo;Byl jsem přesně tam, kde jsi teď ty. Vím, jaké to je. A našel jsem cestu zpět.&rdquo;</p>
   </div>
 </div>
 
 
 
-<!-- ═══════ PRICING CARD MET VALUE STACK ═══════ -->
+<!-- ═══════ CENOVÁ KARTA S HODNOTOVÝM STACKEM ═══════ -->
 <div class="pricing-card anim d5">
-  <div style="font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">&#9201; Dit aanbod sluit zodra je deze pagina verlaat</div>
+  <div style="font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">&#9201; Tato nabídka zmizí, jakmile opustíš tuto stránku</div>
 
-  <!-- Value Stack -->
+  <!-- Hodnotový stack -->
   <div style="padding: 16px 0;">
     <div class="stack-item">
       <div class="stack-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       </div>
-      <div class="stack-label"><strong>Gedrukt boek</strong> &mdash; Laat Los Wat Je Kapotmaakt (290 pagina's)</div>
-      <div class="stack-value">&euro;35</div>
+      <div class="stack-label"><strong>Tištěná kniha</strong> &mdash; Odpusť to, co tě ničí (290 stran)</div>
+      <div class="stack-value">550 Kč</div>
     </div>
     <div class="stack-item">
       <div class="stack-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><polygon points="23 7 16 12 16 2 23 7"/></svg>
       </div>
-      <div class="stack-label"><strong>Gratis verzending</strong> &mdash; in één pakket met De Hondenbijbel</div>
-      <div class="stack-value">&euro;6,95</div>
+      <div class="stack-label"><strong>Doprava zdarma</strong> &mdash; v jednom balíčku s Psím superživotem</div>
+      <div class="stack-value">99 Kč</div>
     </div>
   </div>
 
   <div style="background: rgba(192,57,43,0.07); border: 1px solid rgba(192,57,43,0.2); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px;">
     <span style="font-size: 16px; flex-shrink: 0;">⚠️</span>
     <p style="font-size: 13px; line-height: 1.6; color: #8B2020; margin: 0;">
-      <strong>Let op:</strong> Dit aanbod verdwijnt zodra je deze pagina verlaat of sluit. Je kunt het boek daarna alleen nog bestellen voor de volledige prijs van &euro;35 op onze website &mdash; de korting van &euro;10 is uitsluitend hier beschikbaar.
+      <strong>Pozor:</strong> Tato nabídka zmizí, jakmile opustíš nebo zavřeš tuto stránku. Knihu si pak můžeš objednat pouze za plnou cenu 550 Kč na našem webu &mdash; sleva 100 Kč je dostupná výhradně zde.
     </p>
   </div>
 
   <div style="height: 1px; background: var(--section); margin: 4px 0 16px;"></div>
 
-  <div style="font-size: 14px; color: var(--muted); margin-bottom: 4px;">Totale waarde: <span style="text-decoration: line-through;">&euro;41,95</span></div>
+  <div style="font-size: 14px; color: var(--muted); margin-bottom: 4px;">Celková hodnota: <span style="text-decoration: line-through;">649 Kč</span></div>
   <div class="price-row">
-    <span class="price-old">&euro;35</span>
-    <span class="price-new">&euro;25</span>
-    <span class="price-save">Bespaar &euro;10</span>
+    <span class="price-old">550 Kč</span>
+    <span class="price-new">450 Kč</span>
+    <span class="price-save">Ušetři 100 Kč</span>
   </div>
   <div class="price-coupon-ref">
-    &#9986; Kortingsbon <strong>HONDEN-VIP</strong> automatisch toegepast
+    &#9986; Slevový kupón <strong>PSI-VIP</strong> automaticky uplatněn
   </div>
   <div style="font-size: 13px; color: var(--muted); margin-top: 8px;">
-    Minder dan &euro;0,84 per dag &mdash; minder dan één kopje koffie. Voor levenslange rust.
+    Méně než 15 Kč denně &mdash; méně než jedno kafe. Za celoživotní klid.
   </div>
 
   <div style="margin-top: 24px;">
     <a href="#" class="btn-upsell" onclick="return false;">
-      JA, voeg toe voor slechts &euro;25 &rarr;
-      <span class="btn-sub">Je wordt doorgestuurd naar dezelfde betaalmethode als bij je bestelling. De toevoeging is pas definitief na betaling.</span>
+      ANO, přidej za pouhých 450 Kč &rarr;
+      <span class="btn-sub">Budeš přesměrován/a na stejnou platební metodu jako u tvé objednávky. Přidání je definitivní až po zaplacení.</span>
     </a>
   </div>
 
   <div style="margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
     <span style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      Veilige betaling
+      Bezpečná platba
     </span>
     <span style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      30 dagen garantie
+      30denní záruka
     </span>
     <span style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-      Gratis verzending
+      Doprava zdarma
     </span>
   </div>
 
-  <a class="btn-skip" href="#">Nee bedankt, ik sla dit eenmalige aanbod over</a>
+  <a class="btn-skip" href="#">Ne, děkuji, tuto jednorázovou nabídku přeskočím</a>
 </div>
 
-<!-- ═══════ GARANTIE ═══════ -->
+<!-- ═══════ ZÁRUKA ═══════ -->
 <div class="guarantee-box anim d6">
   <div class="guarantee-icon">
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
   </div>
   <div class="guarantee-text">
-    <strong>Jij riskeert helemaal niets. Wij wel.</strong> Lees het boek. Doe de oefeningen. Voel je binnen 30 dagen geen verschil? Dan krijg je elke cent terug &mdash; zonder vragen, zonder gedoe. 92% van de lezers merkt al binnen 2 weken resultaat. De andere 8% krijgt gewoon hun geld terug.
+    <strong>Ty neriskuješ vůbec nic. My ano.</strong> Přečti si knihu. Udělej cvičení. Necítíš do 30 dnů žádný rozdíl? Vrátíme ti každou korunu &mdash; bez otázek, bez komplikací. 92 % čtenářů pocítí výsledky už do 2 týdnů. Zbylých 8 % prostě dostane peníze zpět.
   </div>
 </div>
 
@@ -887,62 +887,63 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <div class="faq-section anim d6">
   <div class="faq-item">
     <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-      Wordt het apart verzonden?
+      Posílá se zvlášť?
       <span class="arrow">&#9662;</span>
     </div>
-    <div class="faq-a">Nee &mdash; we voegen het direct toe aan je huidige bestelling. Je ontvangt beide boeken in één pakket, gratis verzonden. Geen gedoe, geen extra kosten.</div>
+    <div class="faq-a">Ne &mdash; přidáme ji přímo k tvé aktuální objednávce. Obě knihy obdržíš v jednom balíčku s dopravou zdarma. Žádné komplikace, žádné další náklady.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-      Waar gaat Laat Los Wat Je Kapotmaakt over?
+      O čem je kniha Odpusť to, co tě ničí?
       <span class="arrow">&#9662;</span>
     </div>
-    <div class="faq-a">Dit boek helpt je concreet met 5 dingen die je leven vastzetten: piekeren, loslaten, vergeven, woede en innerlijke rust. Geen vage theorie, geen spirituele zweverigheid. Praktische stappen die ook werken als je nu volledig uitgeput bent. Geschreven door coach Joris de Vries.</div>
+    <div class="faq-a">Tato kniha ti konkrétně pomůže s 5 věcmi, které ti blokují život: přemýšlení dokola, odpuštění, puštění minulosti, vztek a vnitřní klid. Žádná vágní teorie, žádná spirituální mlha. Praktické kroky, které fungují, i když jsi teď úplně vyčerpaný/á. Napsal ji kouč Joris de Vries.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-      Hoe werkt de kortingsbon HONDEN-VIP?
+      Jak funguje slevový kupón PSI-VIP?
       <span class="arrow">&#9662;</span>
     </div>
-    <div class="faq-a">De kortingsbon is automatisch toegepast. Je betaalt &euro;25 in plaats van &euro;35. Dit aanbod bestaat alleen op deze pagina, alleen nu, alleen voor jou als nieuwe klant. Je kunt het nergens anders krijgen voor deze prijs.</div>
+    <div class="faq-a">Slevový kupón je automaticky uplatněn. Zaplatíš 450 Kč místo 550 Kč. Tato nabídka existuje pouze na této stránce, pouze teď, pouze pro tebe jako nového zákazníka. Nikde jinde ji za tuto cenu nedostaneš.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-      Kan ik het boek ook later bestellen?
+      Můžu si knihu objednat i později?
       <span class="arrow">&#9662;</span>
     </div>
-    <div class="faq-a">Ja, maar dan betaal je &euro;35 op onze website. De &euro;10 korting via HONDEN-VIP is exclusief voor deze pagina &mdash; en verdwijnt zodra je verder gaat. Je hebt deze kans maar één keer.</div>
+    <div class="faq-a">Ano, ale zaplatíš 550 Kč na našem webu. Sleva 100 Kč přes PSI-VIP je exkluzivní pro tuto stránku &mdash; a zmizí, jakmile odejdeš. Tuto šanci máš jen jednou.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-      Is er een garantie?
+      Je na to záruka?
       <span class="arrow">&#9662;</span>
     </div>
-    <div class="faq-a">Absoluut. 30 dagen niet-goed-geld-terug, geen vragen. Je riskeert niets. Als het boek je niet raakt, krijg je elke cent terug. Punt.</div>
+    <div class="faq-a">Rozhodně. 30denní záruka vrácení peněz, bez otázek. Neriskuješ nic. Pokud tě kniha neosloví, vrátíme ti každou korunu. Tečka.</div>
   </div>
 </div>
 
-<!-- ═══════ FINÁLNÍ CTA ═══════ -->
+<!-- ═══════ ZÁVĚREČNÉ CTA ═══════ -->
 <div style="text-align: center; padding: 20px 0 16px;" class="anim d6">
   <a href="#" class="btn-upsell" onclick="return false;">
-    JA, voeg toe voor slechts &euro;25 &rarr;
-    <span class="btn-sub">Je wordt doorgestuurd naar dezelfde betaalmethode als bij je bestelling. De toevoeging is pas definitief na betaling.</span>
+    ANO, přidej za pouhých 450 Kč &rarr;
+    <span class="btn-sub">Budeš přesměrován/a na stejnou platební metodu jako u tvé objednávky. Přidání je definitivní až po zaplacení.</span>
   </a>
-  <a class="btn-skip" href="#">Nee bedankt, ik sla dit eenmalige aanbod over</a>
+  <a class="btn-skip" href="#">Ne, děkuji, tuto jednorázovou nabídku přeskočím</a>
 </div>
 
-<!-- ═══════ FOOTER ═══════ -->
+<!-- ═══════ PATIČKA ═══════ -->
 <div class="upsell-footer">
-  <p>&copy; 2026 De Hondenbijbel &mdash; Alle rechten voorbehouden</p>
-  <p style="margin-top: 8px;">Vragen? <a href="mailto:support@travelbible.nl" style="color: var(--muted);">support@travelbible.nl</a></p>
+  <p>&copy; 2026 Psí superživot &mdash; Všechna práva vyhrazena</p>
+  <p style="margin-top: 4px; font-size: 11px;">Performance Marketing Solution s.r.o., Rybná 716/24, 110 00 Praha, IČO: 06259928</p>
+  <p style="margin-top: 8px;">Dotazy? <a href="mailto:support@psisuperzivot.cz" style="color: var(--muted);">support@psisuperzivot.cz</a></p>
 </div>
 
 </div><!-- /page-wrap -->
 
-<!-- ═══════ COUNTDOWN TIMER SCRIPT ═══════ -->
+<!-- ═══════ SKRIPT ODPOČÍTÁVACÍHO ČASOVAČE ═══════ -->
 <script>
 (function(){
-  var total = 10 * 60; // 10 minuten
+  var total = 10 * 60; // 10 minut
   var el = document.getElementById('timer');
   function tick(){
     if(total <= 0){ el.textContent = '00:00'; return; }
@@ -955,14 +956,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 })();
 </script>
 
-<!-- ═══════ UPSELL LOGIKA — Mollie payment flow ═══════ -->
+<!-- ═══════ UPSELL LOGIKA — Platební flow ═══════ -->
 <script>
 (function() {
   'use strict';
 
   var MEDUSA_URL = PROJECT_CONFIG.medusaUrl;
 
-  // Helper: Medusa API call
+  // Pomocník: Medusa API volání
   function medusaFetch(path, options) {
     options = options || {};
     options.headers = Object.assign({
@@ -971,47 +972,47 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     }, options.headers || {});
     return fetch(MEDUSA_URL + path, options).then(function(res) {
       return res.json().then(function(data) {
-        if (!res.ok) throw new Error(data.message || 'API fout');
+        if (!res.ok) throw new Error(data.message || 'Chyba API');
         return data;
       });
     });
   }
 
-  // Helper: Show preloader
+  // Pomocník: Zobrazit preloader
   function showPreloader(message, sub) {
     if (!document.querySelector('.payment-preloader')) {
       var div = document.createElement('div');
       div.className = 'payment-preloader';
-      div.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="100">'
-        + '<p>' + (message || 'Betaling wordt verwerkt...') + '</p>'
-        + '<p class="sub">' + (sub || 'Even geduld alsjeblieft.') + '</p>';
+      div.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Načítání..." width="100">'
+        + '<p>' + (message || 'Platba se zpracovává...') + '</p>'
+        + '<p class="sub">' + (sub || 'Chvilku strpení, prosím.') + '</p>';
       document.body.insertBefore(div, document.body.firstChild);
     }
   }
 
-  // Helper: Show error on preloader
+  // Pomocník: Zobrazit chybu na preloaderu
   function showPreloaderError(message) {
     var preloader = document.querySelector('.payment-preloader');
     if (preloader) {
       preloader.innerHTML = '<div style="text-align:center;padding:20px;">'
-        + '<p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Er ging iets mis.</p>'
-        + '<p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (message || 'Probeer het opnieuw.') + '</p>'
-        + '<a href="' + PROJECT_CONFIG.thankYouUrl + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#2D1B3D;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Ga naar je bestelling</a>'
+        + '<p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Něco se pokazilo.</p>'
+        + '<p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (message || 'Zkus to znovu.') + '</p>'
+        + '<a href="' + PROJECT_CONFIG.thankYouUrl + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#2D1B3D;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Přejít na objednávku</a>'
         + '</div>';
     }
   }
 
   // ═══════════════════════════════════════════════
-  // ROUTE A: UPSELL PAYMENT RETURN (from payment gateway)
+  // CESTA A: NÁVRAT Z UPSELL PLATBY (z platební brány)
   // URL: ?upsell_return=1&upsell_cart_id=xxx
   //
-  // IMPORTANT: We do NOT complete the upsell cart here.
-  // Completing it would create a second order in admin.
-  // Instead, we pass the cart ID to the backend which:
-  //   - Extracts the payment ID from the cart
-  //   - Adds the upsell item to the ORIGINAL order via Order Edit
-  //   - Marks the payment as captured
-  //   - Stores upsell_payment_id in order metadata
+  // DŮLEŽITÉ: Upsell košík zde NEDOKONČUJEME.
+  // Dokončení by vytvořilo druhou objednávku v adminu.
+  // Místo toho předáme ID košíku backendu, který:
+  //   - Extrahuje ID platby z košíku
+  //   - Přidá upsell položku do PŮVODNÍ objednávky přes Order Edit
+  //   - Označí platbu jako zachycenou
+  //   - Uloží upsell_payment_id do metadat objednávky
   // ═══════════════════════════════════════════════
   var params = new URLSearchParams(window.location.search);
   if (params.get('upsell_return') === '1') {
@@ -1021,23 +1022,23 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
       return;
     }
 
-    showPreloader('Upsell betaling wordt verwerkt...', 'Even geduld, we voegen het boek toe aan je bestelling.');
+    showPreloader('Upsell platba se zpracovává...', 'Chvilku strpení, přidáváme knihu do tvé objednávky.');
 
-    // Extract payment gateway return params from URL
-    // Stripe adds: ?payment_intent=pi_xxx&redirect_status=succeeded
-    // Mollie adds: nothing extra (uses webhooks)
-    // Airwallex adds: ?paymentIntentId=int_xxx
+    // Extrahovat parametry návratu z platební brány z URL
+    // Stripe přidává: ?payment_intent=pi_xxx&redirect_status=succeeded
+    // Mollie nepřidává nic navíc (používá webhooky)
+    // Airwallex přidává: ?paymentIntentId=int_xxx
     var gatewayPaymentId = params.get('payment_intent')       // Stripe/iDEAL
                         || params.get('paymentIntentId')      // Airwallex
                         || params.get('id')                   // Mollie (sometimes)
                         || null;
-    console.log('Upsell: Gateway payment ID from URL:', gatewayPaymentId);
+    console.log('Upsell: ID platby z brány z URL:', gatewayPaymentId);
 
-    // Add the upsell item to the ORIGINAL order via Order Edit
-    // The backend verifies payment from the upsell cart (no cart completion = no second order)
+    // Přidat upsell položku do PŮVODNÍ objednávky přes Order Edit
+    // Backend ověří platbu z upsell košíku (žádné dokončení košíku = žádná druhá objednávka)
     var originalOrderId = localStorage.getItem('medusa_order_id');
     if (!originalOrderId) {
-      console.warn('Upsell: No original order ID, redirecting to thank-you');
+      console.warn('Upsell: Žádné ID původní objednávky, přesměrování na děkovnou stránku');
       window.location.href = PROJECT_CONFIG.thankYouUrl;
       return;
     }
@@ -1059,76 +1060,76 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     })
     .then(function(r) { return r.json(); })
     .then(function(result) {
-      console.log('Upsell: Order edit result:', result);
+      console.log('Upsell: Výsledek editace objednávky:', result);
 
       if (result.success) {
-        // ✅ Payment verified & item added to order
+        // ✅ Platba ověřena a položka přidána do objednávky
         localStorage.setItem('medusa_upsell_purchased', 'true');
         if (result.upsell_payment_id) {
           localStorage.setItem('medusa_upsell_payment_id', result.upsell_payment_id);
         }
 
-        // Note: No Purchase event for upsell — we track only 1 Purchase per customer
-        // (the main checkout Purchase, fired on upsell page load or thank-you page)
+        // Poznámka: Žádný Purchase event pro upsell — sledujeme pouze 1 Purchase na zákazníka
+        // (hlavní checkout Purchase, spuštěný při načtení upsell stránky nebo děkovné stránky)
       } else {
-        // ❌ Payment NOT completed (abandoned, failed, or pending)
-        console.log('Upsell: Payment not completed (' + (result.payment_status || 'unknown') + '), skipping upsell');
-        // Do NOT set medusa_upsell_purchased — thank-you page will only show main product
+        // ❌ Platba NEDOKONČENA (opuštěna, selhala, nebo čeká)
+        console.log('Upsell: Platba nedokončena (' + (result.payment_status || 'neznámý') + '), přeskakuji upsell');
+        // NENASTAVOVAT medusa_upsell_purchased — děkovná stránka zobrazí pouze hlavní produkt
       }
 
-      // Always clean up and redirect to thank-you
+      // Vždy vyčistit a přesměrovat na děkovnou stránku
       localStorage.removeItem('medusa_upsell_cart_id');
       localStorage.removeItem('medusa_cart_id');
       window.location.href = PROJECT_CONFIG.thankYouUrl;
     })
     .catch(function(err) {
-      console.error('Upsell: Payment return error:', err.message);
-      // Network error — safe default: go to thank-you without upsell
+      console.error('Upsell: Chyba návratu platby:', err.message);
+      // Síťová chyba — bezpečný výchozí stav: přejít na děkovnou stránku bez upsell
       localStorage.removeItem('medusa_upsell_cart_id');
       localStorage.removeItem('medusa_cart_id');
       window.location.href = PROJECT_CONFIG.thankYouUrl;
     });
 
-    return; // Stop — don't run the normal upsell page logic
+    return; // Stop — nespouštět normální logiku upsell stránky
   }
 
   // ═══════════════════════════════════════════════
-  // ROUTE B: NORMAL UPSELL PAGE (after checkout)
-  // Complete original order, show upsell offer
+  // CESTA B: NORMÁLNÍ UPSELL STRÁNKA (po checkoutu)
+  // Dokončit původní objednávku, zobrazit upsell nabídku
   // ═══════════════════════════════════════════════
 
   var cartId = localStorage.getItem('medusa_cart_id');
 
   if (!cartId) {
-    console.warn('Upsell: No cart_id in localStorage, redirecting to thank-you');
+    console.warn('Upsell: Žádné cart_id v localStorage, přesměrování na děkovnou stránku');
     window.location.href = PROJECT_CONFIG.thankYouUrl;
     return;
   }
 
-  // ─── STEP 1: Complete original order ───
+  // ─── KROK 1: Dokončit původní objednávku ───
   var maxAttempts = 5;
   var attempt = 0;
 
   function completeOriginalOrder() {
     attempt++;
-    console.log('Upsell: Completing order, attempt ' + attempt + '/' + maxAttempts);
+    console.log('Upsell: Dokončuji objednávku, pokus ' + attempt + '/' + maxAttempts);
 
     return medusaFetch('/store/carts/' + cartId + '/complete', {
       method: 'POST'
     })
     .then(function(res) {
       if (res.type === 'order') {
-        console.log('Upsell: Order completed!', res.order.id);
+        console.log('Upsell: Objednávka dokončena!', res.order.id);
         localStorage.setItem('medusa_order_id', res.order.id);
         localStorage.setItem('medusa_order_display_id', res.order.display_id || '');
 
-        // FB Pixel + CAPI: Purchase event with checkout total (deterministic event_id for dedup with server subscriber)
+        // FB Pixel + CAPI: Purchase event s celkovou částkou checkoutu (deterministické event_id pro deduplikaci se serverovým odběratelem)
         if (typeof MetaTracker !== 'undefined') {
           var checkoutTotal = parseFloat(localStorage.getItem('medusa_checkout_total') || '0');
           var purchaseValue = checkoutTotal > 0 ? checkoutTotal : PROJECT_CONFIG.mainProduct.price;
           var purchaseEventId = 'purchase_' + res.order.id;
 
-          // Build user_data from stored customer info
+          // Sestavit user_data z uložených informací o zákazníkovi
           var customerRaw = localStorage.getItem('medusa_customer');
           var cust = customerRaw ? JSON.parse(customerRaw) : {};
           var uData = {};
@@ -1143,19 +1144,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
           MetaTracker.trackPurchase({
             content_ids: [PROJECT_CONFIG.mainProduct.handle],
             value: purchaseValue,
-            currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
+            currency: PROJECT_CONFIG.mainProduct.currency || 'CZK',
             num_items: parseInt(localStorage.getItem('medusa_bundle_qty') || '1'),
             order_id: res.order.id
           }, uData, { event_id: purchaseEventId });
 
-          // Mark that Purchase was already tracked (so thank-you page doesn't fire again)
+          // Označit, že Purchase už byl sledován (aby děkovná stránka nespouštěla znovu)
           localStorage.setItem('medusa_purchase_tracked', 'true');
-          console.log('Upsell: Purchase tracked — €' + purchaseValue + ' event_id=' + purchaseEventId);
+          console.log('Upsell: Purchase sledován — ' + purchaseValue + ' Kč event_id=' + purchaseEventId);
         }
         return true;
       } else if (res.type === 'cart') {
         if (attempt < maxAttempts) {
-          console.log('Upsell: Payment not confirmed yet, retrying in 2s...');
+          console.log('Upsell: Platba zatím nepotvrzena, opakuji za 2s...');
           return new Promise(function(resolve) {
             setTimeout(function() { resolve(completeOriginalOrder()); }, 2000);
           });
@@ -1164,7 +1165,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
       }
     })
     .catch(function(err) {
-      console.error('Upsell: Error completing order:', err.message);
+      console.error('Upsell: Chyba při dokončování objednávky:', err.message);
       if (err.message && err.message.includes('completed')) return true;
       if (attempt < maxAttempts) {
         return new Promise(function(resolve) {
@@ -1177,35 +1178,35 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
   completeOriginalOrder();
 
-  // ─── STEP 2: Wire up buttons ───
+  // ─── KROK 2: Napojit tlačítka ───
   var btnYesAll = document.querySelectorAll('.btn-upsell');
   var btnNoAll = document.querySelectorAll('.btn-skip');
 
-  // ─── UPSELL ACCEPT: Create cart → payment gateway → redirect ───
+  // ─── UPSELL PŘIJETÍ: Vytvořit košík → platební brána → přesměrování ───
   function handleUpsellAccept(e) {
     if (e) e.preventDefault();
 
-    // Disable all CTA buttons
+    // Deaktivovat všechna CTA tlačítka
     btnYesAll.forEach(function(btn) {
       btn.style.opacity = '0.7';
       btn.style.pointerEvents = 'none';
-      btn.innerHTML = '<span class="btn-spinner"></span> Bezig met verwerken...';
+      btn.innerHTML = '<span class="btn-spinner"></span> Zpracovávám...';
     });
 
-    // Get stored checkout data
+    // Získat uložená data z checkoutu
     var customerRaw = localStorage.getItem('medusa_customer');
     var customer = customerRaw ? JSON.parse(customerRaw) : {};
     var paymentProvider = localStorage.getItem('medusa_payment_provider') || '';
     var paymentMethod = localStorage.getItem('medusa_payment_method') || '';
     var regionId = PROJECT_CONFIG.regionId;
 
-    // Build return URL for payment gateway
+    // Sestavit návratové URL pro platební bránu
     var baseUrl = window.location.href.split('?')[0];
-    var upsellReturnUrl; // will be set after cart creation
+    var upsellReturnUrl; // bude nastaveno po vytvoření košíku
 
-    console.log('Upsell: Starting payment flow, provider:', paymentProvider, 'method:', paymentMethod);
+    console.log('Upsell: Spouštím platební flow, provider:', paymentProvider, 'metoda:', paymentMethod);
 
-    // Step 1: Create cart
+    // Krok 1: Vytvořit košík
     medusaFetch('/store/carts', {
       method: 'POST',
       body: JSON.stringify({ region_id: regionId })
@@ -1214,9 +1215,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
       var upsellCartId = res.cart.id;
       upsellReturnUrl = baseUrl + '?upsell_return=1&upsell_cart_id=' + upsellCartId;
       localStorage.setItem('medusa_upsell_cart_id', upsellCartId);
-      console.log('Upsell: Cart created:', upsellCartId);
+      console.log('Upsell: Košík vytvořen:', upsellCartId);
 
-      // Step 2: Add upsell product via bundle route (tax-inclusive pricing)
+      // Krok 2: Přidat upsell produkt přes bundle route (ceny včetně daně)
       return medusaFetch('/store/carts/' + upsellCartId + '/line-items-bundle', {
         method: 'POST',
         body: JSON.stringify({
@@ -1226,12 +1227,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
       }).then(function() { return upsellCartId; });
     })
     .then(function(upsellCartId) {
-      // Step 3: Update cart with customer data
+      // Krok 3: Aktualizovat košík s daty zákazníka
       var updateData = {
         email: customer.email || ''
       };
 
-      // Set shipping + billing address from original checkout
+      // Nastavit dodací + fakturační adresu z původního checkoutu
       if (customer.first_name) {
         var addr = {
           first_name: customer.first_name,
@@ -1239,7 +1240,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
           address_1: customer.address_1 || '',
           city: customer.city || '',
           postal_code: customer.postal_code || '',
-          country_code: customer.country_code || 'nl',
+          country_code: customer.country_code || 'cz',
           phone: customer.phone || '',
         };
         updateData.shipping_address = addr;
@@ -1252,7 +1253,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
       }).then(function() { return upsellCartId; });
     })
     .then(function(upsellCartId) {
-      // Step 4: Add shipping method
+      // Krok 4: Přidat způsob dopravy
       return medusaFetch('/store/shipping-options?cart_id=' + upsellCartId, {
         method: 'GET'
       }).then(function(shipRes) {
@@ -1266,14 +1267,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
       }).then(function() { return upsellCartId; });
     })
     .then(function(upsellCartId) {
-      // Step 5: Create payment collection
+      // Krok 5: Vytvořit platební kolekci
       return medusaFetch('/store/payment-collections', {
         method: 'POST',
         body: JSON.stringify({ cart_id: upsellCartId })
       }).then(function(pcRes) {
         var paymentCollectionId = pcRes.payment_collection.id;
 
-        // Step 6: Create payment session with SAME provider + method from checkout
+        // Krok 6: Vytvořit platební session se STEJNÝM providerem + metodou z checkoutu
         var sessionBody = {
           provider_id: paymentProvider,
           data: {
@@ -1282,7 +1283,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
           }
         };
 
-        // Pass customer data for payment gateways that need it (Klarna, etc.)
+        // Předat data zákazníka pro platební brány, které to potřebují (Klarna, atd.)
         if (customer.email) {
           sessionBody.data.email = customer.email;
           if (customer.first_name) {
@@ -1292,7 +1293,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
               address_1: customer.address_1 || '',
               city: customer.city || '',
               postal_code: customer.postal_code || '',
-              country_code: (customer.country_code || 'nl').toUpperCase(),
+              country_code: (customer.country_code || 'cz').toUpperCase(),
               phone: customer.phone || '',
             };
             sessionBody.data.shipping_address = sessionBody.data.billing_address;
@@ -1308,34 +1309,34 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
       });
     })
     .then(function(paymentCollection) {
-      // Step 7: Get redirect URL from payment gateway and redirect
+      // Krok 7: Získat URL přesměrování z platební brány a přesměrovat
       var sessions = paymentCollection.payment_sessions || [];
       var lastSession = sessions[sessions.length - 1] || {};
       var providerData = lastSession.data || {};
-      // Different gateways use different redirect URL keys
+      // Různé brány používají různé klíče pro URL přesměrování
       var redirectUrl = providerData.checkoutUrl || providerData.approvalUrl || providerData.url;
 
       if (redirectUrl) {
-        console.log('Upsell: Redirecting to payment gateway:', redirectUrl);
+        console.log('Upsell: Přesměrování na platební bránu:', redirectUrl);
         window.location.href = redirectUrl;
       } else {
-        // No redirect needed (e.g., already paid) — complete directly
-        console.log('Upsell: No redirect URL, completing directly');
+        // Přesměrování není potřeba (např. již zaplaceno) — dokončit přímo
+        console.log('Upsell: Žádné URL přesměrování, dokončuji přímo');
         window.location.href = upsellReturnUrl;
       }
     })
     .catch(function(err) {
-      console.error('Upsell: Payment flow error:', err.message);
-      // Re-enable buttons
+      console.error('Upsell: Chyba platebního flow:', err.message);
+      // Znovu aktivovat tlačítka
       btnYesAll.forEach(function(btn) {
         btn.style.opacity = '1';
         btn.style.pointerEvents = 'auto';
-        btn.innerHTML = 'JA! Voeg toe voor slechts &euro;25 &rarr;<span class="btn-sub">Probeer het opnieuw</span>';
+        btn.innerHTML = 'ANO! Přidej za pouhých 450 Kč &rarr;<span class="btn-sub">Zkusit znovu</span>';
       });
-      // Show error
+      // Zobrazit chybu
       var errorDiv = document.createElement('div');
       errorDiv.style.cssText = 'text-align:center;padding:12px;margin-top:10px;background:rgba(192,57,43,0.1);border-radius:8px;color:#C0392B;font-size:14px;';
-      errorDiv.textContent = 'Er ging iets mis: ' + (err.message || 'Probeer het opnieuw.');
+      errorDiv.textContent = 'Něco se pokazilo: ' + (err.message || 'Zkus to znovu.');
       var firstCta = document.getElementById('first-cta');
       if (firstCta && !firstCta.querySelector('.upsell-error')) {
         errorDiv.className = 'upsell-error';
@@ -1344,14 +1345,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     });
   }
 
-  // ─── UPSELL DECLINE: Clean up and go to thank-you ───
+  // ─── UPSELL ODMÍTNUTÍ: Vyčistit a přejít na děkovnou stránku ───
   function handleUpsellDecline(e) {
     if (e) e.preventDefault();
     localStorage.removeItem('medusa_cart_id');
     window.location.href = PROJECT_CONFIG.thankYouUrl;
   }
 
-  // Wire up all buttons
+  // Napojit všechna tlačítka
   btnYesAll.forEach(function(btn) {
     btn.addEventListener('click', handleUpsellAccept);
   });
