@@ -251,8 +251,14 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         method: contextData?.comgate_method || undefined, // Pre-select method on Comgate page
       }
 
+      this.getLogger().info(`[Comgate] Creating payment: merchant=${paymentParams.merchant}, ` +
+        `price=${paymentParams.price}, curr=${paymentParams.curr}, refId=${paymentParams.refId}`)
+
       const result = await client.createPayment(paymentParams)
+
       if (!result.success) {
+        this.getLogger().error(`[Comgate] Payment creation failed: ${result.error}, ` +
+          `code=${result.data?.code}, message=${result.data?.message}`)
         throw new MedusaError(
           MedusaError.Types.UNEXPECTED_STATE,
           result.error || "Failed to create payment"
@@ -260,6 +266,8 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       }
 
       if (!result.data?.transId || !result.data?.redirectUrl) {
+        this.getLogger().error(`[Comgate] Missing transId or redirectUrl in response: ` +
+          `transId=${result.data?.transId}, redirectUrl=${result.data?.redirectUrl}`)
         throw new MedusaError(
           MedusaError.Types.UNEXPECTED_STATE,
           "No payment redirect URL from Comgate"

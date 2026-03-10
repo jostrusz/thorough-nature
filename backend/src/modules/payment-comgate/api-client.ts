@@ -96,7 +96,7 @@ export class ComgateApiClient {
       }
 
       const response = await this.client.post(
-        `/v2.0/paymentRedirect/merchant/${params.merchant}`,
+        "/v1.0/create",
         formData,
         {
           headers: {
@@ -114,14 +114,14 @@ export class ComgateApiClient {
           success: true,
           data: {
             transId: parsed.transId,
-            redirectUrl: parsed.redirectUrl,
+            redirectUrl: parsed.redirect,
             code: parsed.code,
           },
         }
       } else {
         return {
           success: false,
-          error: parsed.message || "Payment creation failed",
+          error: `Comgate error ${parsed.code}: ${parsed.message || "Unknown error"}`,
           data: {
             code: parsed.code,
             message: parsed.message,
@@ -129,12 +129,20 @@ export class ComgateApiClient {
         }
       }
     } catch (error: any) {
+      // Try to parse Comgate error from response body
+      let errorDetail = ""
+      if (error.response?.data) {
+        try {
+          const errParsed = this.parseFormEncoded(error.response.data)
+          errorDetail = ` (Comgate: code=${errParsed.code}, msg=${errParsed.message})`
+        } catch {}
+      }
       return {
         success: false,
         error:
-          error.response?.data?.message ||
-          error.message ||
-          "Failed to create payment",
+          (error.response?.status ? `HTTP ${error.response.status}: ` : "") +
+          (error.message || "Failed to create payment") +
+          errorDetail,
       }
     }
   }
@@ -162,7 +170,7 @@ export class ComgateApiClient {
         secret: params.secret,
       })
 
-      const response = await this.client.post("/2.0/status", formData, {
+      const response = await this.client.post("/v1.0/status", formData, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -227,7 +235,7 @@ export class ComgateApiClient {
         formData.append("amount", params.amount.toString())
       }
 
-      const response = await this.client.post("/refund", formData, {
+      const response = await this.client.post("/v1.0/refund", formData, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -274,7 +282,7 @@ export class ComgateApiClient {
     error?: string
   }> {
     try {
-      const response = await this.client.get("/methods", { params })
+      const response = await this.client.get("/v1.0/methods", { params })
       // getMethods may return JSON or form-encoded depending on endpoint version
       return {
         success: true,
