@@ -3153,7 +3153,7 @@ body {
       var now = Date.now();
       var canSwitch = (now - lastSwitchTime) > SWITCH_COOLDOWN;
 
-      // Úplně nahoře — vždy plná velikost (bez cooldownu)
+      // Ganz oben — immer volle Größe (ohne Cooldown)
       if (currentY <= 10) {
         if (bar.classList.contains('compact')) {
           bar.classList.remove('compact');
@@ -3167,7 +3167,7 @@ body {
       var delta = currentY - lastScrollY;
       var pastThreshold = currentY > scrollThreshold;
 
-      // Vyšší tolerance (15px) zabrání mikro-pohybům
+      // Höhere Toleranz (15px) verhindert Mikro-Bewegungen
       if (pastThreshold && delta > 15 && canSwitch && !bar.classList.contains('compact')) {
         bar.classList.add('compact');
         if (bar.classList.contains('open')) bar.classList.remove('open');
@@ -5069,11 +5069,11 @@ body {
 
   var emailField = document.getElementById('email');
   var emailSuggestion = document.getElementById('email-suggestion');
-  // Foxentry flag — als key is ingesteld, worden email/phone uitsluitend door Foxentry gevalideerd
+  // Foxentry-Flag — wenn Key gesetzt ist, werden E-Mail/Telefon ausschließlich durch Foxentry validiert
   var hasFoxentryKey = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
 
   if (emailField && emailSuggestion && !hasFoxentryKey) {
-    // Alleen lokale typo-check als Foxentry NIET actief is
+    // Nur lokale Tippfehler-Prüfung, wenn Foxentry NICHT aktiv ist
     emailField.addEventListener('blur', function() {
       var val = emailField.value.trim();
       var suggestion = checkEmailTypo(val);
@@ -5094,7 +5094,7 @@ body {
     });
   }
 
-  /* ─── TELEFOONNUMMER FORMATTEREN — auto-prefix per land ─── */
+  /* ─── TELEFONNUMMER FORMATIEREN — Auto-Prefix je Land ─── */
   var phoneField = document.getElementById('phone');
   var phonePreview = document.getElementById('phone-preview');
   var countrySelect = document.getElementById('country');
@@ -5116,7 +5116,7 @@ body {
 
   if (phoneField && phonePreview) {
     phoneField.addEventListener('blur', function() {
-      // Als Foxentry actief is, GEEN lokale formatting of validatie — alles via Foxentry
+      // Wenn Foxentry aktiv ist, KEINE lokale Formatierung oder Validierung — alles über Foxentry
       if (hasFoxentryKey) return;
       var raw = phoneField.value.trim();
       if (!raw) { phonePreview.style.display = 'none'; return; }
@@ -5136,7 +5136,7 @@ body {
     });
   }
 
-  /* ─── FACTUURADRES (BILLING) — toggle ─── */
+  /* ─── RECHNUNGSADRESSE (BILLING) — Toggle ─── */
   var billingCheckbox = document.getElementById('billing-checkbox');
   var billingFields = document.getElementById('billing-fields');
 
@@ -5146,7 +5146,7 @@ body {
         billingFields.classList.add('is-open');
       } else {
         billingFields.classList.remove('is-open');
-        // Vymazat pole při odškrtnutí
+        // Felder beim Deaktivieren leeren
         document.getElementById('billing_first_name').value = '';
         document.getElementById('billing_last_name').value = '';
         document.getElementById('billing_address').value = '';
@@ -5157,7 +5157,7 @@ body {
     });
   }
 
-  /* ─── ADRES VALIDATIE — straatnaam + huisnummer ─── */
+  /* ─── ADRESS-VALIDIERUNG — Straßenname + Hausnummer ─── */
   var addressField = document.getElementById('address');
   var addressWarning = document.getElementById('address-warning');
   var addressWarningText = document.getElementById('address-warning-text');
@@ -5182,7 +5182,7 @@ body {
     });
   }
 
-  /* ─── FIREMNÍ POLE (B2B) — toggle + label podle země ─── */
+  /* ─── FIRMENFELDER (B2B) — Toggle + Label je nach Land ─── */
   var companyCheckbox = document.getElementById('company-checkbox');
   var companyFields = document.getElementById('company-fields');
   var kvkLabelNL = document.getElementById('kvk-label-nl');
@@ -5194,7 +5194,7 @@ body {
         companyFields.classList.add('is-open');
       } else {
         companyFields.classList.remove('is-open');
-        // Vymazat pole při odškrtnutí
+        // Felder beim Deaktivieren leeren
         document.getElementById('company_name').value = '';
         document.getElementById('kvk_number').value = '';
         document.getElementById('vat_number').value = '';
@@ -5202,7 +5202,7 @@ body {
     });
   }
 
-  // Label KVK/Ondernemingsnummer se mění podle země
+  // Label Handelsregisternummer ändert sich je nach Land
   function updateCompanyLabels() {
     var country = document.getElementById('country').value;
     if (kvkLabelNL && kvkLabelBE) {
@@ -5213,15 +5213,15 @@ body {
   updateCompanyLabels();
 
   /* ═══════════════════════════════════════════════════════════════════
-   *  FOXENTRY SMART VALIDATIE — adres autocomplete, e-mail, telefoon, bedrijf
-   *  Alleen actief als PROJECT_CONFIG.foxentryApiKey is ingesteld.
-   *  Werkt samen met bestaande validateField / checkEmailTypo / formatPhoneNumber.
+   *  FOXENTRY SMART-VALIDIERUNG — Adress-Autocomplete, E-Mail, Telefon, Firma
+   *  Nur aktiv, wenn PROJECT_CONFIG.foxentryApiKey gesetzt ist.
+   *  Arbeitet mit bestehenden validateField / checkEmailTypo / formatPhoneNumber zusammen.
    * ═══════════════════════════════════════════════════════════════════ */
   (function() {
     var FOXENTRY_KEY = (typeof PROJECT_CONFIG !== 'undefined' && PROJECT_CONFIG.foxentryApiKey) || null;
-    if (!FOXENTRY_KEY) return; // Geen key → alles blijft bij de lokale validatie
+    if (!FOXENTRY_KEY) return; // Kein Key → alles bleibt bei der lokalen Validierung
 
-    // Markeer email en telefoon velden als Foxentry-managed (verbergt lokale .field-error via CSS)
+    // E-Mail- und Telefonfelder als Foxentry-verwaltet markieren (blendet lokale .field-error via CSS aus)
     var _emailEl = document.getElementById('email');
     var _phoneEl = document.getElementById('phone');
     if (_emailEl) _emailEl.classList.add('foxentry-managed');
@@ -5231,7 +5231,7 @@ body {
 
     /* ─── Helper: Foxentry API fetch ─── */
     function foxentryFetch(endpoint, body) {
-      // Foxentry API v2: alles zit in "request" object, inclusief client
+      // Foxentry API v2: alles im "request"-Objekt, inklusive Client
       body.client = {
         country: (document.getElementById('country') || {}).value || 'DE'
       };
@@ -5249,15 +5249,15 @@ body {
       });
     }
 
-    /* ─── Response helper: navigeer naar result data ─── */
+    /* ─── Response-Helper: zum Ergebnis-Daten navigieren ─── */
     function foxentryResult(resp) {
-      // Foxentry antwoord: { response: { result: {...}, resultCorrected: {...}, suggestions: [...] } }
+      // Foxentry-Antwort: { response: { result: {...}, resultCorrected: {...}, suggestions: [...] } }
       var r = resp.response || resp;
       return {
         result: r.result || {},
         corrected: r.resultCorrected || null,
         suggestions: r.suggestions || [],
-        results: r.results || [] // voor search endpoints
+        results: r.results || [] // für Search-Endpunkte
       };
     }
 
@@ -5272,9 +5272,9 @@ body {
     }
 
     /* ─── Spinner helpers ─── */
-    // Terwijl Foxentry bezig is, verbergen we de check/cross iconen
-    // en blokkeren we de lokale validateField van het instellen van valid/invalid.
-    // Op window zodat validateField() (buiten deze IIFE) het kan lezen.
+    // Während Foxentry arbeitet, blenden wir die Häkchen-/Kreuz-Icons aus
+    // und blockieren validateField beim Setzen von valid/invalid.
+    // Auf window, damit validateField() (außerhalb dieses IIFE) es lesen kann.
     window.__foxentryPending = window.__foxentryPending || {};
 
     function showSpinner(field) {
@@ -5286,7 +5286,7 @@ body {
         fg.appendChild(sp);
       }
       sp.style.display = 'block';
-      // Markeer veld als "Foxentry bezig" — verberg bestaande check/cross
+      // Feld als "Foxentry arbeitet" markieren — bestehende Häkchen/Kreuz ausblenden
       if (field.id) window.__foxentryPending[field.id] = true;
       field.classList.remove('valid', 'invalid');
     }
@@ -5309,7 +5309,7 @@ body {
         div.className = 'foxentry-item';
         div.innerHTML = item.html;
         div.addEventListener('mousedown', function(e) {
-          e.preventDefault(); // Voorkom blur voordat select plaatsvindt
+          e.preventDefault(); // Blur verhindern, bevor Auswahl erfolgt
           onSelect(item.data, idx);
           dropdownEl.classList.remove('is-open');
         });
@@ -5322,7 +5322,7 @@ body {
     }
 
     /* ════════════════════════════════════════
-     *  1. ADRES AUTOCOMPLETE
+     *  1. ADRESS-AUTOCOMPLETE
      * ════════════════════════════════════════ */
     var addrField = document.getElementById('address');
     var addrDropdown = document.getElementById('foxentry-address-dropdown');
@@ -5365,7 +5365,7 @@ body {
             if (cityField && data.city) cityField.value = data.city;
             if (postalField && data.zip) postalField.value = data.zip;
             addrSelectedFromDropdown = true;
-            // Trigger de float-label en validatie
+            // Float-Label und Validierung auslösen
             [addrField, cityField, postalField].forEach(function(f) {
               if (f && f.value) {
                 f.closest('.float-field').classList.add('has-value');
@@ -5381,11 +5381,11 @@ body {
       }, 300));
 
       addrField.addEventListener('blur', function() {
-        // Sluit dropdown na korte delay (laat mousedown event eerst afhandelen)
+        // Dropdown nach kurzer Verzögerung schließen (mousedown-Event zuerst verarbeiten lassen)
         setTimeout(function() { hideDropdown(addrDropdown); }, 200);
       });
       addrField.addEventListener('focus', function() {
-        // Heropen als er items zijn
+        // Erneut öffnen, wenn Einträge vorhanden
         if (addrDropdown.children.length > 0 && !addrSelectedFromDropdown) {
           addrDropdown.classList.add('is-open');
         }
@@ -5394,7 +5394,7 @@ body {
 
     /* ════════════════════════════════════════
      *  2a. E-MAIL DOMAIN AUTOCOMPLETE (/email/search)
-     *  Toont dropdown met populaire domeinen na @ (debounce 250ms)
+     *  Zeigt Dropdown mit gängigen Domains nach @ (Debounce 250ms)
      * ════════════════════════════════════════ */
     var foxEmailField = document.getElementById('email');
     var foxEmailSuggestion = document.getElementById('email-suggestion');
@@ -5404,13 +5404,13 @@ body {
       foxEmailField.addEventListener('input', debounce(function() {
         var val = foxEmailField.value.trim();
         var atIdx = val.indexOf('@');
-        // Alleen zoeken als er een @ is + minstens 1 teken erna
+        // Nur suchen, wenn ein @ vorhanden + mindestens 1 Zeichen danach
         if (atIdx === -1 || atIdx === val.length - 1) {
           hideDropdown(foxEmailDropdown);
           return;
         }
         var afterAt = val.substring(atIdx + 1);
-        // Stop met zoeken als domein al compleet lijkt (bevat een punt met tekst erna)
+        // Suche stoppen, wenn Domain bereits vollständig erscheint (enthält Punkt mit Text danach)
         if (/\.\w{2,}$/.test(afterAt)) {
           hideDropdown(foxEmailDropdown);
           return;
@@ -5437,7 +5437,7 @@ body {
             // Trigger float-label
             var ff = foxEmailField.closest('.float-field');
             if (ff) ff.classList.add('has-value');
-            // Valideer het geselecteerde email
+            // Ausgewählte E-Mail validieren
             foxEmailField.dispatchEvent(new Event('blur'));
           });
         })
@@ -5446,11 +5446,11 @@ body {
         });
       }, 250));
 
-      // Sluit dropdown bij blur (met delay voor mousedown)
+      // Dropdown bei Blur schließen (mit Verzögerung für Mousedown)
       foxEmailField.addEventListener('blur', function() {
         setTimeout(function() { hideDropdown(foxEmailDropdown); }, 200);
       });
-      // Heropen bij focus als er items zijn
+      // Bei Fokus erneut öffnen, wenn Einträge vorhanden
       foxEmailField.addEventListener('focus', function() {
         if (foxEmailDropdown.children.length > 0 && foxEmailField.value.indexOf('@') !== -1) {
           var afterAt = foxEmailField.value.substring(foxEmailField.value.indexOf('@') + 1);
@@ -5462,8 +5462,8 @@ body {
     }
 
     /* ════════════════════════════════════════
-     *  2b. E-MAIL VALIDATIE — basic + full proposal handling
-     *  Beslist op basis van proposal (niet alleen isValid)
+     *  2b. E-MAIL-VALIDIERUNG — Basic + Full Proposal Handling
+     *  Entscheidet auf Basis des Proposals (nicht nur isValid)
      * ════════════════════════════════════════ */
     if (foxEmailField) {
       foxEmailField.addEventListener('blur', function() {
@@ -5482,7 +5482,7 @@ body {
           var correctedEmail = (fx.corrected && fx.corrected.data && fx.corrected.data.email) || null;
           var suggestions = fx.suggestions || [];
 
-          // Verberg eerdere suggestie
+          // Vorherigen Vorschlag ausblenden
           if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
 
           switch (proposal) {
@@ -5493,13 +5493,13 @@ body {
               break;
 
             case 'invalid':
-              // Email is fout, geen correctie beschikbaar
+              // E-Mail ungültig, keine Korrektur verfügbar
               foxEmailField.classList.add('invalid');
               foxEmailField.classList.remove('valid');
               break;
 
             case 'invalidWithCorrection':
-              // Fout maar Foxentry kent de correctie (bv. gamil.com → gmail.com)
+              // Ungültig, aber Foxentry kennt die Korrektur (z.B. gamil.com → gmail.com)
               foxEmailField.classList.add('invalid');
               foxEmailField.classList.remove('valid');
               if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
@@ -5515,7 +5515,7 @@ body {
               break;
 
             case 'invalidWithSuggestions':
-              // Fout, meerdere alternatieven beschikbaar
+              // Ungültig, mehrere Alternativen verfügbar
               foxEmailField.classList.add('invalid');
               foxEmailField.classList.remove('valid');
               if (suggestions.length > 0 && foxEmailSuggestion) {
@@ -5539,7 +5539,7 @@ body {
                   }
                 };
               } else if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
-                // Fallback naar corrected als suggestions leeg
+                // Fallback auf corrected, wenn suggestions leer
                 foxEmailSuggestion.innerHTML = 'Meinten Sie <strong>' + correctedEmail + '</strong>? Klicken Sie hier, um zu korrigieren.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
@@ -5552,7 +5552,7 @@ body {
               break;
 
             case 'validWithSuggestion':
-              // Technisch geldig maar betere optie beschikbaar (bv. gmai.com → gmail.com)
+              // Technisch gültig, aber bessere Option verfügbar (z.B. gmai.com → gmail.com)
               foxEmailField.classList.add('valid');
               foxEmailField.classList.remove('invalid');
               var betterEmail = correctedEmail || (suggestions[0] && suggestions[0].data && suggestions[0].data.email) || null;
@@ -5567,7 +5567,7 @@ body {
               break;
 
             default:
-              // Onbekend proposal — val terug op isValid
+              // Unbekanntes Proposal — auf isValid zurückfallen
               if (fx.result.isValid === true) {
                 foxEmailField.classList.add('valid');
                 foxEmailField.classList.remove('invalid');
@@ -5580,7 +5580,7 @@ body {
         })
         .catch(function() {
           hideSpinner(foxEmailField);
-          // Fallback naar lokale validatie bij API error
+          // Fallback auf lokale Validierung bei API-Fehler
           var localSuggestion = checkEmailTypo(val);
           if (localSuggestion && foxEmailSuggestion) {
             foxEmailSuggestion.innerHTML = 'Meinten Sie <strong>' + localSuggestion + '</strong>? Klicken Sie hier, um zu korrigieren.';
@@ -5597,13 +5597,13 @@ body {
     }
 
     /* ════════════════════════════════════════
-     *  3. TELEFOON VALIDATIE (versterkt bestaande formatting)
+     *  3. TELEFON-VALIDIERUNG (ergänzt bestehende Formatierung)
      * ════════════════════════════════════════ */
     var foxPhoneField = document.getElementById('phone');
     var foxPhonePreview = document.getElementById('phone-preview');
 
     if (foxPhoneField) {
-      // Foxentry handelt ALLE telefoonvalidatie + formatting af
+      // Foxentry übernimmt ALLE Telefonvalidierung + Formatierung
       foxPhoneField.addEventListener('blur', function() {
         var val = foxPhoneField.value.trim();
         if (!val || val.length < 5) return;
@@ -5628,7 +5628,7 @@ body {
             hideSpinner(foxPhoneField);
             var fx = foxentryResult(resp);
             var isValid = fx.result.isValid === true;
-            // Gebruik geformatteerd nummer van Foxentry
+            // Formatierte Nummer von Foxentry verwenden
             var data = fx.result.data || {};
             var fmt = data.format || {};
             if (fmt.internationalFormatted) {
@@ -5684,7 +5684,7 @@ body {
     }
 
     /* ════════════════════════════════════════
-     *  4. BEDRIJF AUTOCOMPLETE (KVK / Ondernemingsnummer)
+     *  4. FIRMEN-AUTOCOMPLETE (Handelsregisternummer)
      * ════════════════════════════════════════ */
     var companyInput = document.getElementById('company_name');
     var companyDropdown = document.getElementById('foxentry-company-dropdown');
@@ -5752,7 +5752,7 @@ body {
       });
     }
 
-    /* ─── Sluit alle dropdowns bij klik buiten ─── */
+    /* ─── Alle Dropdowns bei Klick außerhalb schließen ─── */
     document.addEventListener('click', function(e) {
       if (!e.target.closest('.foxentry-dropdown') && !e.target.closest('.form-group')) {
         hideDropdown(addrDropdown);
@@ -5762,7 +5762,7 @@ body {
 
   })();
 
-  /* ─── INLINE VALIDATIE ─── */
+  /* ─── INLINE-VALIDIERUNG ─── */
   var fields = document.querySelectorAll('#checkout-form input[required]');
   var submitValidationMsg = document.getElementById('submit-validation-msg');
 
@@ -5794,20 +5794,20 @@ body {
 
   // onSubmit: also mark EMPTY required fields, not just incorrect ones
   function validateField(field, markEmpty) {
-    // Als Foxentry bezig is met dit veld, sla lokale validatie over
+    // Wenn Foxentry gerade dieses Feld verarbeitet, lokale Validierung überspringen
     if (window.__foxentryPending && window.__foxentryPending[field.id]) {
       return true;
     }
-    // Als Foxentry key actief is, email en telefoon worden UITSLUITEND door Foxentry gevalideerd
+    // Wenn Foxentry-Key aktiv ist, werden E-Mail und Telefon AUSSCHLIESSLICH durch Foxentry validiert
     var _hasFox = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
     if (_hasFox && (field.type === 'email' || field.type === 'tel')) {
-      // Bij submit: als veld leeg is, markeer als invalid
+      // Beim Absenden: wenn Feld leer ist, als ungültig markieren
       if (markEmpty && field.value.trim().length === 0) {
         field.classList.add('invalid');
         field.classList.remove('valid');
         return false;
       }
-      // Behoud huidige valid/invalid status (gezet door Foxentry), niet overschrijven
+      // Aktuellen valid/invalid-Status beibehalten (von Foxentry gesetzt), nicht überschreiben
       return field.classList.contains('valid') || field.value.trim().length === 0;
     }
 
@@ -5822,7 +5822,7 @@ body {
     } else if (field.id === 'postal_code') {
       isValid = value.length >= 4;
     } else if (field.id === 'address') {
-      // Adresa musí obsahovat písmena I číslo (ulice + huisnummer) pro zelený check
+      // Adresse muss Buchstaben UND Ziffern enthalten (Straße + Hausnummer) für grünes Häkchen
       var hasLetter = /[a-zA-Z\u00C0-\u024F]/.test(value);
       var hasDigit = /\d/.test(value);
       isValid = value.length >= 2 && hasLetter && hasDigit;
@@ -6141,10 +6141,10 @@ body {
   var promoCodeTag = document.getElementById('promo-code-tag');
   var promoRemove = document.getElementById('promo-remove');
 
-  // Stav: uložený promo kód + sdílený cart pro promo validaci
+  // Zustand: gespeicherter Promo-Code + geteilter Cart für Promo-Validierung
   var savedPromoCode = '';
   var promoAppliedToCart = false;
-  var promoCartId = null; // Cart vytvořený při validaci promo kódu — sdílený se submitem
+  var promoCartId = null; // Cart erstellt bei Promo-Code-Validierung — geteilt mit Submit
 
   if (promoToggle) {
     promoToggle.addEventListener('click', function() {
@@ -6173,7 +6173,7 @@ body {
       promoApplyBtn.textContent = 'Wird überprüft...';
       promoMessage.className = 'promo-message';
 
-      // Stap 1: Cart aanmaken (als die nog niet bestaat)
+      // Schritt 1: Cart erstellen (falls noch nicht vorhanden)
       var cartPromise;
       if (promoCartId) {
         cartPromise = Promise.resolve(promoCartId);
@@ -6183,7 +6183,7 @@ body {
           body: JSON.stringify({ region_id: currentRegionId })
         }).then(function(res) {
           promoCartId = res.cart.id;
-          // Voeg hoofdproduct toe zodat Medusa promotions kan evalueren
+          // Hauptprodukt hinzufügen, damit Medusa Promotions auswerten kann
           return medusaFetch('/store/carts/' + promoCartId + '/line-items', {
             method: 'POST',
             body: JSON.stringify({ variant_id: VARIANT_ID, quantity: selectedBundleQty })
@@ -6191,7 +6191,7 @@ body {
         });
       }
 
-      // Stap 2: Promo code toepassen via Medusa
+      // Schritt 2: Promo-Code über Medusa anwenden
       cartPromise.then(function(cartId) {
         return medusaFetch('/store/carts/' + cartId + '/promotions', {
           method: 'POST',
@@ -6199,7 +6199,7 @@ body {
         });
       })
       .then(function(promoRes) {
-        // Succes — code is geldig
+        // Erfolg — Code ist gültig
         savedPromoCode = code;
         promoAppliedToCart = true;
         promoCodeTag.textContent = code;
@@ -6209,14 +6209,14 @@ body {
         promoToggle.style.display = 'none';
         promoMessage.className = 'promo-message';
         promoInput.value = '';
-        // Update order summary met korting
+        // Bestellübersicht mit Rabatt aktualisieren
         if (promoRes && promoRes.cart) {
           updateOrderSummary(promoRes.cart);
         }
       })
       .catch(function(err) {
-        // Fout — code is ongeldig
-        console.warn('Promo code geweigerd:', err.message || err);
+        // Fehler — Code ist ungültig
+        console.warn('Promo-Code abgelehnt:', err.message || err);
         promoMessage.textContent = 'Ungültiger Rabattcode';
         promoMessage.className = 'promo-message error';
         savedPromoCode = '';
@@ -6230,7 +6230,7 @@ body {
     });
   }
 
-  // Enter v input = klik na Toepassen
+  // Enter im Input = Klick auf Anwenden
   if (promoInput) {
     promoInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
@@ -6248,7 +6248,7 @@ body {
       promoApplied.classList.remove('is-visible');
       promoToggle.style.display = '';
       promoMessage.className = 'promo-message';
-      // Verwijder promo van cart als die bestaat
+      // Promo aus Cart entfernen, falls vorhanden
       if (promoCartId && removedCode) {
         medusaFetch('/store/carts/' + promoCartId + '/promotions', {
           method: 'DELETE',
@@ -6257,13 +6257,13 @@ body {
           if (res && res.cart) updateOrderSummary(res.cart);
         }).catch(function() {});
       }
-      // Verberg korting regel in samenvatting
+      // Rabattzeile in Zusammenfassung ausblenden
       var discountEl = document.getElementById('summary-discount');
       if (discountEl) discountEl.style.display = 'none';
     });
   }
 
-  /* ─── FORMULIER SUBMIT ─── */
+  /* ─── FORMULAR-SUBMIT ─── */
   var form = document.getElementById('checkout-form');
   var submitBtn = document.getElementById('submit-btn');
   var errorEl = document.getElementById('payment-errors');
@@ -6271,7 +6271,7 @@ body {
   form.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Valideer alle velden
+    // Alle Felder validieren
     if (!validateAllFields()) {
       var firstError = form.querySelector('.invalid');
       if (firstError) {
@@ -6281,7 +6281,7 @@ body {
       return;
     }
 
-    // Toon laadstatus
+    // Ladezustand anzeigen
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
     errorEl.textContent = '';
@@ -6289,23 +6289,23 @@ body {
     /*
      * ─── MEDUSA v2 CHECKOUT FLOW ───
      *
-     * Kompletni flow s Medusa v2 API:
+     * Vollständiger Flow mit Medusa v2 API:
      *
-     * 1. Maak cart aan (POST /store/carts)
-     * 2. Voeg product toe (POST /store/carts/{id}/line-items)
-     * 3. Update cart met klantgegevens (POST /store/carts/{id})
-     * 3b. Voeg shipping method toe (GET /store/shipping-options + POST /store/carts/{id}/shipping-methods)
-     * 4a. Maak payment collection (POST /store/payment-collections)
-     * 4b. Initialiseer payment session (POST /store/payment-collections/{id}/payment-sessions)
-     *    → Medusa roept initiatePayment aan op de geselecteerde provider
-     *    → Provider (Mollie/PayPal) retourneert checkout/approval URL
-     * 5. Redirect klant naar betaalpagina (Mollie of PayPal)
-     * 6. Na betaling keert klant terug → cart voltooien (POST /store/carts/{id}/complete)
+     * 1. Cart erstellen (POST /store/carts)
+     * 2. Produkt hinzufügen (POST /store/carts/{id}/line-items)
+     * 3. Cart mit Kundendaten aktualisieren (POST /store/carts/{id})
+     * 3b. Versandmethode hinzufügen (GET /store/shipping-options + POST /store/carts/{id}/shipping-methods)
+     * 4a. Payment Collection erstellen (POST /store/payment-collections)
+     * 4b. Payment Session initialisieren (POST /store/payment-collections/{id}/payment-sessions)
+     *    → Medusa ruft initiatePayment beim ausgewählten Provider auf
+     *    → Provider (Mollie/PayPal) gibt Checkout/Approval-URL zurück
+     * 5. Kunde zur Zahlungsseite weiterleiten (Mollie oder PayPal)
+     * 6. Nach Zahlung kehrt Kunde zurück → Cart abschließen (POST /store/carts/{id}/complete)
      *
-     * Hieronder staat de implementatie:
+     * Unten folgt die Implementierung:
      */
 
-    // Klantgegevens uit formulier
+    // Kundendaten aus dem Formular
     var customerData = {
       email: document.getElementById('email').value.trim(),
       shipping_address: {
@@ -6333,20 +6333,20 @@ body {
       customerData.metadata.fbp = MetaTracker.getFbp() || '';
     }
 
-    // ─── Firemní údaje (B2B) ───
+    // ─── Firmendaten (B2B) ───
     var isCompany = document.getElementById('company-checkbox').checked;
     if (isCompany) {
       var companyName = document.getElementById('company_name').value.trim();
       var kvkNumber = document.getElementById('kvk_number').value.trim();
       var vatNumber = document.getElementById('vat_number').value.trim();
-      // company → built-in Medusa pole v shipping_address
+      // company → eingebautes Medusa-Feld in shipping_address
       if (companyName) {
         customerData.shipping_address.company = companyName;
       }
-      // KVK + BTW → metadata (merge into existing metadata)
+      // Handelsregister + USt → metadata (in bestehende metadata einfügen)
       if (kvkNumber) customerData.metadata.kvk_number = kvkNumber;
       if (vatNumber) customerData.metadata.vat_number = vatNumber;
-      // Uložit do localStorage pro thank-you stránku
+      // In localStorage für die Danke-Seite speichern
       localStorage.setItem('medusa_company', JSON.stringify({
         company_name: companyName,
         kvk_number: kvkNumber,
@@ -6356,10 +6356,10 @@ body {
       localStorage.removeItem('medusa_company');
     }
 
-    // ─── Factuuradres (billing address) ───
+    // ─── Rechnungsadresse (Billing Address) ───
     var isBillingDifferent = document.getElementById('billing-checkbox').checked;
     if (isBillingDifferent) {
-      // Gebruiker heeft een ander factuuradres opgegeven
+      // Benutzer hat eine andere Rechnungsadresse angegeben
       customerData.billing_address = {
         first_name: document.getElementById('billing_first_name').value.trim() || customerData.shipping_address.first_name,
         last_name: document.getElementById('billing_last_name').value.trim() || customerData.shipping_address.last_name,
@@ -6369,27 +6369,27 @@ body {
         country_code: document.getElementById('billing_country').value.toLowerCase(),
         phone: customerData.shipping_address.phone,
       };
-      // B2B: company toevoegen aan billing address
+      // B2B: Firma zur Rechnungsadresse hinzufügen
       if (isCompany && companyName) {
         customerData.billing_address.company = companyName;
       }
     } else {
-      // Factuuradres = verzendadres (kopie)
+      // Rechnungsadresse = Lieferadresse (Kopie)
       customerData.billing_address = Object.assign({}, customerData.shipping_address);
     }
 
-    // ─── Bundle + Order Bump stav v momentě odeslání ───
+    // ─── Bundle + Order Bump Zustand zum Zeitpunkt des Absendens ───
     var checkoutBundleQty = selectedBundleQty;
     var checkoutBundlePrice = selectedBundlePrice;
     var checkoutOrderBump = orderBumpActive;
     var checkoutTotal = getCurrentTotal();
 
-    // Stap 1: Cart aanmaken of hergebruiken (promo cart → background cart → nieuw)
+    // Schritt 1: Cart erstellen oder wiederverwenden (Promo-Cart → Hintergrund-Cart → neu)
     var reuseCartId = promoCartId || backgroundCartId;
     var cartStep;
     if (reuseCartId) {
-      // Cart bestaat al (promo code validatie of background cart recovery)
-      // Verwijder bestaande line items en voeg opnieuw toe (bundle/qty kan veranderd zijn)
+      // Cart existiert bereits (Promo-Code-Validierung oder Hintergrund-Cart-Wiederherstellung)
+      // Bestehende Positionen entfernen und neu hinzufügen (Bundle/Menge kann sich geändert haben)
       cartStep = medusaFetch('/store/carts/' + reuseCartId, { method: 'GET' })
         .then(function(cartRes) {
           var cart = cartRes.cart;
@@ -6405,14 +6405,14 @@ body {
               body: JSON.stringify({ region_id: currentRegionId })
             }).then(function(res) { return res.cart.id; });
           }
-          // Verwijder alle bestaande line items
+          // Alle bestehenden Positionen entfernen
           var deletePromises = (cart.items || []).map(function(item) {
             return medusaFetch('/store/carts/' + reuseCartId + '/line-items/' + item.id, { method: 'DELETE' });
           });
           return Promise.all(deletePromises).then(function() { return reuseCartId; });
         })
         .catch(function() {
-          // Cart ophalen mislukt — maak een nieuwe aan
+          // Cart abrufen fehlgeschlagen — neuen erstellen
           reuseCartId = null;
           backgroundCartId = null;
           promoCartId = null;
@@ -6430,7 +6430,7 @@ body {
 
     cartStep
     .then(function(cartId) {
-      // Stap 2a: Hoofdproduct toevoegen via bundle endpoint (custom pricing)
+      // Schritt 2a: Hauptprodukt über Bundle-Endpunkt hinzufügen (Custom Pricing)
       // Uses /store/carts/{id}/line-items-bundle which applies bundle discount server-side
       return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
         method: 'POST',
@@ -6439,7 +6439,7 @@ body {
           quantity: checkoutBundleQty
         })
       }).then(function() {
-        // Stap 2b: Order bump produkt toevoegen (bundle endpoint = tax-inclusive + discounted price)
+        // Schritt 2b: Order-Bump-Produkt hinzufügen (Bundle-Endpunkt = steuerinklusiv + reduzierter Preis)
         if (checkoutOrderBump) {
           return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
             method: 'POST',
@@ -6452,39 +6452,39 @@ body {
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
-      // Stap 3: Cart updaten met klantgegevens (must complete before shipping)
+      // Schritt 3: Cart mit Kundendaten aktualisieren (muss vor Versand abgeschlossen sein)
       return medusaFetch('/store/carts/' + cartId, {
         method: 'POST',
         body: JSON.stringify(customerData)
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
-      // Stap 3a: Promo code toepassen via Medusa Promotions API (opnieuw als cart hergebruikt wordt)
+      // Schritt 3a: Promo-Code über Medusa Promotions API anwenden (erneut bei wiederverwendetem Cart)
       if (savedPromoCode) {
         return medusaFetch('/store/carts/' + cartId + '/promotions', {
           method: 'POST',
           body: JSON.stringify({ promo_codes: [savedPromoCode] })
         }).then(function(promoRes) {
-          console.log('Promo code toegepast via Medusa:', savedPromoCode);
+          console.log('Promo-Code über Medusa angewendet:', savedPromoCode);
           promoAppliedToCart = true;
           if (promoRes && promoRes.cart) {
             updateOrderSummary(promoRes.cart);
           }
           return cartId;
         }).catch(function(err) {
-          // Medusa weigert de code — toon fout, verberg badge, stop NIET de bestelling
-          console.warn('Promo code geweigerd door Medusa:', err.message || err);
+          // Medusa lehnt den Code ab — Fehler anzeigen, Badge ausblenden, Bestellung NICHT stoppen
+          console.warn('Promo-Code von Medusa abgelehnt:', err.message || err);
           savedPromoCode = '';
           promoAppliedToCart = false;
-          // Toon foutmelding
+          // Fehlermeldung anzeigen
           if (promoMessage) {
             promoMessage.textContent = 'Ungültiger Rabattcode';
             promoMessage.className = 'promo-message error';
           }
-          // Verberg badge, toon toggle weer
+          // Badge ausblenden, Toggle wieder anzeigen
           promoApplied.classList.remove('is-visible');
           promoToggle.style.display = '';
-          // Verberg korting in samenvatting
+          // Rabatt in Zusammenfassung ausblenden
           var discountEl = document.getElementById('summary-discount');
           if (discountEl) discountEl.style.display = 'none';
           return cartId;
@@ -6493,7 +6493,7 @@ body {
       return cartId;
     })
     .then(function(cartId) {
-      // Stap 3b: Shipping method toevoegen
+      // Schritt 3b: Versandmethode hinzufügen
       return medusaFetch('/store/shipping-options?cart_id=' + cartId, {
         method: 'GET'
       }).then(function(shipRes) {
@@ -6513,7 +6513,7 @@ body {
       });
     })
     .then(function(cartId) {
-      // Stap 4: Payment — Medusa v2 Payment Collections flow
+      // Schritt 4: Zahlung — Medusa v2 Payment Collections Flow
       var USE_TEST_MODE = false; // Mollie live integration
 
       var providerId;
@@ -6588,7 +6588,7 @@ body {
       });
     })
     .then(function(result) {
-      // Uložit zákaznická data do localStorage
+      // Kundendaten in localStorage speichern
       localStorage.setItem('medusa_cart_id', result.cartId);
       localStorage.setItem('medusa_customer', JSON.stringify({
         email: customerData.email,
@@ -6602,7 +6602,7 @@ body {
       }));
       localStorage.setItem('medusa_payment_provider', result.testMode ? 'pp_system_default' : (selectedProviderId || 'pp_mollie_mollie'));
 
-      // Uložit bundle + order bump info pro thank-you stránku
+      // Bundle + Order-Bump-Info für die Danke-Seite speichern
       localStorage.setItem('medusa_bundle_qty', checkoutBundleQty);
       localStorage.setItem('medusa_bundle_price', checkoutBundlePrice);
       localStorage.setItem('medusa_order_bump', checkoutOrderBump ? 'true' : 'false');
@@ -6632,7 +6632,7 @@ body {
       }
 
       if (result.testMode) {
-        // TEST MÓD: rovnou dokončit objednávku (žádný redirect)
+        // TEST-MODUS: Bestellung direkt abschließen (kein Redirect)
         return medusaFetch('/store/carts/' + result.cartId + '/complete', {
           method: 'POST'
         }).then(function(completeRes) {
@@ -6640,10 +6640,10 @@ body {
           localStorage.setItem('medusa_order_id', order.id || '');
           localStorage.setItem('medusa_order_display_id', order.display_id || '');
 
-          // ─── REDIRECT LOGIKA ───
-          // 1. Upsell vypnutý v admin → vždy na thank-you
-          // 2. Order bump aktivní → upsell produkt už v objednávce → thank-you
-          // 3. Jinak → upsell stránka
+          // ─── REDIRECT-LOGIK ───
+          // 1. Upsell im Admin deaktiviert → immer zur Danke-Seite
+          // 2. Order Bump aktiv → Upsell-Produkt bereits in Bestellung → Danke-Seite
+          // 3. Sonst → Upsell-Seite
           if (PROJECT_CONFIG.upsellEnabled === false) {
             window.location.href = PROJECT_CONFIG.thankYouUrl;
           } else if (checkoutOrderBump) {
@@ -6654,7 +6654,7 @@ body {
           }
         });
       } else {
-        // PRODUKCE: Redirect naar betaalpagina of Klarna SDK flow
+        // PRODUKTION: Weiterleitung zur Zahlungsseite oder Klarna SDK Flow
         var sessions = result.paymentCollection?.payment_sessions || [];
         var lastSession = sessions[sessions.length - 1] || {};
         var providerData = lastSession.data || {};
@@ -6969,14 +6969,14 @@ body {
       }
     })
     .catch(function(err) {
-      // Toon foutmelding
+      // Fehlermeldung anzeigen
       errorEl.textContent = err.message || 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.';
       submitBtn.classList.remove('loading');
       submitBtn.disabled = false;
     });
   });
 
-  /* ─── LAND SELECTIE — region + betaalmethoden ─── */
+  /* ─── LÄNDERAUSWAHL — Region + Zahlungsmethoden ─── */
   var countrySelect = document.getElementById('country');
   countrySelect.addEventListener('change', function() {
     var country = countrySelect.value;
@@ -6993,7 +6993,7 @@ body {
     window.scrollTo(0, scrollY);
   });
 
-  /* ─── ANIMACE — Intersection Observer pro fade-in ─── */
+  /* ─── ANIMATION — Intersection Observer für Fade-in ─── */
   if ('IntersectionObserver' in window) {
     var observer = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
