@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stap 2 — Speciaal Aanbod Alleen Voor Jou</title>
+<link rel="icon" href="/dehondenbijbel/images/preloader.webp" type="image/webp">
+
+<!-- Hide upsell content on payment return — show preloader instead -->
+<script>
+if (window.location.search.indexOf('upsell_return=1') !== -1) {
+  document.write('<style>.page-wrap,.step-bar,.timer-bar{display:none!important}</style>');
+}
+</script>
+
+<!-- Projekt konfigurace + FB Pixel -->
+<script src="js/project-config.js"></script>
+<script src="js/pixel.js"></script>
+<style>
+/* DM Sans — self-hosted */
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+
+/* ─── DESIGN TOKENS — Velvet Dusk ─── */
+:root {
+  --bg: #FAF5F8;
+  --heading: #2D1B3D;
+  --cta: #C27BA0;
+  --section: #EDD9E5;
+  --body: #5A3D6B;
+  --highlight: #D9A4C0;
+  --dark: #1A1028;
+  --white: #FFFFFF;
+  --light: #F5EDF2;
+  --muted: #9B7AAD;
+  --cta-hover: #A8628A;
+  --accent: #D498B5;
+  --success: #27AE60;
+  --urgency: #C0392B;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+@keyframes glow {
+  0%, 100% { box-shadow: 0 6px 24px rgba(194,123,160,0.27); }
+  50% { box-shadow: 0 8px 40px rgba(194,123,160,0.5); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes countdownPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scissorCut {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+
+.anim { opacity: 0; animation: fadeInUp 0.7s ease forwards; }
+.d1 { animation-delay: 0.1s; }
+.d2 { animation-delay: 0.2s; }
+.d3 { animation-delay: 0.3s; }
+.d4 { animation-delay: 0.4s; }
+.d5 { animation-delay: 0.5s; }
+.d6 { animation-delay: 0.6s; }
+
+/* ─── LAYOUT ─── */
+.page-wrap { max-width: 680px; margin: 0 auto; padding: 0 20px; }
+
+/* ─── STEP INDICATOR BAR ─── */
+.step-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--section);
+  padding: 14px 20px;
+  animation: slideDown 0.5s ease;
+}
+.step-bar-inner {
+  max-width: 440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.step.done { color: var(--success); }
+.step.done .step-num {
+  background: var(--success);
+  color: var(--white);
+}
+.step.active { color: var(--heading); font-weight: 700; }
+.step.active .step-num {
+  background: var(--cta);
+  color: var(--white);
+  animation: pulse 2s ease-in-out infinite;
+}
+.step-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--section); display: flex; align-items: center;
+  justify-content: center; font-size: 12px; font-weight: 700;
+  flex-shrink: 0; transition: all 0.3s;
+}
+.step-sep {
+  width: 28px; height: 2px; background: var(--section);
+  margin: 0 8px; flex-shrink: 0;
+}
+.step.done ~ .step-sep { background: var(--success); }
+
+/* ─── URGENCY TIMER ─── */
+.timer-bar {
+  background: linear-gradient(135deg, var(--dark), var(--heading));
+  color: var(--white); text-align: center; padding: 12px 20px;
+  font-size: 14px; font-weight: 500; letter-spacing: 0.02em;
+  position: sticky; top: 0; z-index: 100;
+}
+.timer-bar strong { color: var(--highlight); }
+.timer-digits {
+  display: inline-flex; gap: 2px; font-family: 'DM Sans', sans-serif;
+  font-weight: 700; font-size: 18px; color: var(--white);
+  background: rgba(255,255,255,0.12); padding: 4px 12px; border-radius: 6px;
+  margin-left: 8px; animation: countdownPulse 2s ease-in-out infinite;
+}
+
+/* ─── DECISION HERO ─── */
+.decision-hero {
+  text-align: center;
+  padding: 36px 0 24px;
+}
+.confirm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(39,174,96,0.08);
+  color: var(--success);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 24px;
+  margin-bottom: 20px;
+}
+.decision-hero h1 {
+  font-family: 'Recoleta', serif;
+  font-weight: 600;
+  font-size: 30px;
+  color: var(--heading);
+  line-height: 1.2;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+.decision-hero h1 .dots {
+  color: var(--cta);
+  animation: countdownPulse 1.5s ease-in-out infinite;
+}
+.decision-hero .subtitle {
+  font-size: 16px; color: var(--body); line-height: 1.65;
+  max-width: 540px; margin: 0 auto;
+}
+.decision-hero .choose-instruction {
+  margin-top: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--heading);
+  background: var(--light);
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 8px;
+}
+
+/* ─── PRODUCT IMAGE ─── */
+.product-showcase {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+  position: relative;
+}
+.product-image-wrap {
+  position: relative;
+  width: 200px;
+}
+.product-image-wrap img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  filter: drop-shadow(0 8px 30px rgba(0,0,0,0.15));
+}
+.product-badge {
+  position: absolute; top: -12px; right: -16px;
+  background: var(--cta); color: var(--white);
+  font-size: 12px; font-weight: 700; padding: 6px 14px;
+  border-radius: 20px; letter-spacing: 0.03em;
+  box-shadow: 0 4px 12px rgba(194,123,160,0.3);
+}
+
+/* ─── COUPON CARD ─── */
+.coupon-card {
+  background: var(--white);
+  border: 2px dashed var(--cta);
+  border-radius: 14px;
+  display: flex;
+  margin: 24px 0;
+  overflow: hidden;
+  position: relative;
+}
+.coupon-card::before,
+.coupon-card::after {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  background: var(--bg);
+  border-radius: 50%;
+  top: 50%; transform: translateY(-50%);
+  z-index: 2;
+}
+.coupon-card::before { left: -11px; }
+.coupon-card::after { right: -11px; }
+.coupon-left {
+  background: linear-gradient(135deg, var(--cta), var(--cta-hover));
+  color: var(--white);
+  padding: 20px 24px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-width: 160px; text-align: center;
+}
+.coupon-badge {
+  font-size: 9px; font-weight: 800;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  opacity: 0.8; margin-bottom: 6px;
+}
+.coupon-code {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 700;
+  background: rgba(255,255,255,0.2);
+  padding: 5px 12px; border-radius: 6px;
+  letter-spacing: 0.08em; margin-bottom: 8px;
+}
+.coupon-value {
+  font-family: 'Recoleta', serif;
+  font-size: 22px; font-weight: 700;
+}
+.coupon-scissors {
+  font-size: 16px; margin-top: 6px;
+  animation: scissorCut 1.5s ease-in-out infinite;
+}
+.coupon-right {
+  padding: 20px 24px;
+  flex: 1;
+}
+.coupon-applied {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600;
+  color: var(--success); margin-bottom: 14px;
+}
+.cpb-row {
+  display: flex; justify-content: space-between;
+  font-size: 14px; padding: 4px 0; color: var(--body);
+}
+.cpb-discount { color: var(--cta); font-weight: 600; }
+.cpb-total {
+  border-top: 2px solid var(--section);
+  padding-top: 8px; margin-top: 4px;
+  font-weight: 800; font-size: 18px; color: var(--heading);
+}
+
+/* ─── 5 PIJLERS GRID ─── */
+.pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px; margin: 16px 0;
+}
+.pillar {
+  background: var(--light); border-radius: 10px;
+  padding: 14px 8px; text-align: center;
+  font-size: 12px; line-height: 1.4; color: var(--body);
+}
+.pillar strong {
+  display: block; font-size: 10px; letter-spacing: 0.08em;
+  color: var(--heading); margin: 6px 0 2px;
+}
+.pillar-icon { font-size: 22px; }
+
+/* ─── CTA BUTTON ─── */
+.cta-block { text-align: center; padding: 24px 0; }
+.btn-upsell {
+  font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700;
+  color: var(--white); background: var(--cta); border: none;
+  padding: 20px 48px; border-radius: 12px; cursor: pointer;
+  letter-spacing: 0.02em; display: inline-block; text-decoration: none;
+  position: relative; overflow: hidden; width: 100%; max-width: 460px;
+  animation: glow 2s ease-in-out infinite;
+  transition: all 0.25s cubic-bezier(.4,0,.2,1);
+}
+.btn-upsell::after {
+  content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0;
+  background: rgba(255,255,255,0.15); border-radius: 50%;
+  transform: translate(-50%, -50%); transition: width 0.5s, height 0.5s;
+}
+.btn-upsell:hover::after { width: 400px; height: 400px; }
+.btn-upsell:hover {
+  background: var(--cta-hover); transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(194,123,160,0.45);
+}
+.btn-upsell .btn-sub {
+  display: block; font-size: 12px; font-weight: 500; opacity: 0.85; margin-top: 4px;
+}
+.btn-spinner {
+  display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: var(--white); border-radius: 50%; animation: spin 0.6s linear infinite;
+  vertical-align: middle; margin-right: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.btn-skip {
+  display: block; text-align: center; margin-top: 16px;
+  font-size: 13px; color: var(--muted); text-decoration: underline;
+  cursor: pointer; transition: color 0.2s;
+}
+.btn-skip:hover { color: var(--body); }
+
+/* ─── SOCIAL PROOF ─── */
+.proof-strip {
+  display: flex; align-items: center; justify-content: center; gap: 24px;
+  padding: 16px 0; flex-wrap: wrap;
+}
+.proof-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.proof-item .num { font-weight: 800; font-size: 16px; color: var(--heading); }
+.stars { color: #E8A040; font-size: 14px; letter-spacing: 2px; }
+
+/* ─── BENEFIT LIST ─── */
+.benefit-list { list-style: none; padding: 0; margin: 20px 0; text-align: left; }
+.benefit-list li {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid rgba(194,123,160,0.12);
+  font-size: 15px; line-height: 1.6;
+}
+.benefit-list li:last-child { border-bottom: none; }
+.benefit-list .check {
+  flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(194,123,160,0.1); display: flex; align-items: center;
+  justify-content: center; margin-top: 2px;
+}
+.benefit-list .check svg { width: 12px; height: 12px; }
+
+/* ─── TESTIMONIAL ─── */
+.testi-card {
+  background: var(--light); border-radius: 16px; padding: 28px;
+  margin: 24px 0; position: relative;
+}
+.testi-card::before {
+  content: '\201C'; position: absolute; top: 12px; left: 20px;
+  font-size: 48px; color: var(--highlight); opacity: 0.4;
+  font-family: Georgia, serif; line-height: 1;
+}
+.testi-text { font-size: 15px; line-height: 1.7; font-style: italic; color: var(--body); padding-left: 8px; }
+.testi-author { margin-top: 14px; font-size: 13px; font-weight: 700; color: var(--heading); }
+.testi-author span { font-weight: 400; color: var(--muted); }
+
+/* ─── BEFORE/AFTER GRID ─── */
+.ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+.ba-card { background: var(--white); border-radius: 12px; padding: 20px; }
+.ba-card.before { border: 1px solid rgba(194,123,160,0.15); }
+.ba-card.after { border: 2px solid var(--cta); }
+.ba-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.15em; margin-bottom: 10px;
+}
+.ba-card.before .ba-label { color: var(--muted); }
+.ba-card.after .ba-label { color: var(--cta); }
+.ba-card ul { list-style: none; padding: 0; }
+.ba-card li { font-size: 13px; line-height: 1.55; padding: 3px 0; color: var(--body); }
+.ba-card.before li::before { content: '✕ '; color: var(--muted); font-size: 11px; }
+.ba-card.after li::before { content: '✓ '; color: var(--success); font-weight: 700; }
+
+/* ─── BONUS E-BOOKS ─── */
+.bonus-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0; }
+.bonus-card {
+  background: var(--white); border: 1px solid var(--section);
+  border-radius: 12px; padding: 16px; position: relative; text-align: center;
+}
+.bonus-card .bonus-badge {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  background: var(--success); color: var(--white);
+  font-size: 10px; font-weight: 700; padding: 3px 10px;
+  border-radius: 12px; white-space: nowrap;
+}
+.bonus-card .bonus-img {
+  width: 60px; height: auto; margin: 8px auto;
+  display: block; border-radius: 4px;
+}
+.bonus-card h4 { font-family: 'Recoleta', serif; font-size: 13px; color: var(--heading); margin-bottom: 4px; line-height: 1.3; }
+.bonus-card p { font-size: 11px; line-height: 1.5; color: var(--body); }
+
+/* ─── PRICING CARD ─── */
+.pricing-card {
+  background: var(--white); border: 2px solid var(--section);
+  border-radius: 16px; padding: 32px; text-align: center;
+  margin: 24px 0; position: relative; overflow: hidden;
+}
+.pricing-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--cta), var(--highlight), var(--cta));
+  background-size: 200% auto; animation: shimmer 3s linear infinite;
+}
+.stack-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 0; border-bottom: 1px solid rgba(194,123,160,0.12);
+}
+.stack-item:last-child { border-bottom: none; }
+.stack-icon {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(194,123,160,0.1); display: flex; align-items: center;
+  justify-content: center;
+}
+.stack-label { font-size: 14px; line-height: 1.5; }
+.stack-label strong { color: var(--heading); }
+.stack-value { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--muted); text-decoration: line-through; white-space: nowrap; }
+.price-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 16px 0; }
+.price-old { font-size: 24px; color: var(--muted); text-decoration: line-through; font-weight: 500; }
+.price-new { font-size: 42px; font-weight: 800; color: var(--cta); letter-spacing: -0.02em; }
+.price-save { background: rgba(194,123,160,0.1); color: var(--cta); font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+.price-coupon-ref {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--cta); font-weight: 600;
+  background: rgba(194,123,160,0.06); padding: 4px 12px;
+  border-radius: 6px; border: 1px dashed var(--highlight);
+  margin-top: 6px;
+}
+
+/* ─── GUARANTEE ─── */
+.guarantee-box {
+  display: flex; align-items: center; gap: 20px; background: var(--white);
+  border: 2px solid rgba(194,123,160,0.2); border-radius: 14px;
+  padding: 24px; margin: 28px 0;
+}
+.guarantee-icon {
+  flex-shrink: 0; width: 56px; height: 56px; border-radius: 50%;
+  background: rgba(39,174,96,0.1); display: flex; align-items: center;
+  justify-content: center;
+}
+.guarantee-text { font-size: 14px; line-height: 1.65; }
+.guarantee-text strong { color: var(--heading); }
+
+/* ─── FAQ ─── */
+.faq-section { padding: 24px 0; }
+.faq-item { border-bottom: 1px solid rgba(194,123,160,0.15); }
+.faq-q {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 0; cursor: pointer; font-size: 15px; font-weight: 600;
+  color: var(--heading); transition: color 0.2s;
+}
+.faq-q:hover { color: var(--cta); }
+.faq-q .arrow { transition: transform 0.3s; font-size: 18px; color: var(--muted); }
+.faq-q.open .arrow { transform: rotate(180deg); }
+.faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; font-size: 14px; line-height: 1.7; color: var(--body); }
+.faq-a.open { max-height: 300px; padding-bottom: 16px; }
+
+/* ─── PAYMENT PRELOADER ─── */
+.payment-preloader {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg); z-index: 9999;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; padding: 20px;
+}
+.payment-preloader img { width: 100px; margin-bottom: 24px; animation: pulse 2s ease-in-out infinite; }
+.payment-preloader p { font-family: 'DM Sans', sans-serif; font-size: 18px; color: var(--heading); font-weight: 600; }
+.payment-preloader .sub { font-size: 14px; color: var(--muted); font-weight: 400; margin-top: 8px; }
+
+/* ─── FOOTER ─── */
+.upsell-footer { text-align: center; padding: 32px 0 48px; font-size: 12px; color: var(--muted); }
+
+/* ─── DIVIDER ─── */
+.divider { width: 60px; height: 3px; background: var(--highlight); border-radius: 2px; margin: 24px auto; }
+
+/* ─── AUTHOR CARD ─── */
+.author-card {
+  display: flex; gap: 20px; align-items: flex-start;
+  background: var(--light); border-radius: 14px; padding: 24px;
+  margin: 24px 0;
+}
+.author-avatar {
+  width: 60px; height: 60px; border-radius: 50%;
+  overflow: hidden; flex-shrink: 0;
+}
+.author-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.author-info h4 { font-family: 'Recoleta', serif; font-size: 16px; color: var(--heading); margin-bottom: 6px; }
+.author-info p { font-size: 14px; line-height: 1.6; color: var(--body); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 600px) {
+  .decision-hero h1 { font-size: 24px; }
+  .coupon-card { flex-direction: column; }
+  .coupon-left { min-width: auto; padding: 16px; flex-direction: row; gap: 12px; align-items: center; }
+  .coupon-value { font-size: 18px; }
+  .coupon-scissors { display: none; }
+  .coupon-badge { margin-bottom: 0; }
+  .coupon-code { margin-bottom: 0; }
+  .pillar-grid { grid-template-columns: repeat(3, 1fr); }
+  .price-new { font-size: 36px; }
+  .pricing-card { padding: 24px 18px; }
+  .guarantee-box { flex-direction: column; text-align: center; }
+  .btn-upsell { font-size: 16px; padding: 18px 32px; }
+  .ba-grid { grid-template-columns: 1fr; }
+  .bonus-grid { grid-template-columns: 1fr; }
+  .author-card { flex-direction: column; text-align: center; align-items: center; }
+  .step { font-size: 11px; }
+  .step-label { display: none; }
+  .step-label-short { display: inline; }
+  .product-image-wrap { width: 160px; }
+}
+@media (min-width: 601px) {
+  .step-label-short { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════ STEP INDICATOR BAR ═══════ -->
+<div class="step-bar">
+  <div class="step-bar-inner">
+    <div class="step done">
+      <span class="step-num">&#10003;</span>
+      <span class="step-label">Bestelling</span>
+      <span class="step-label-short">Besteld</span>
+    </div>
+    <div class="step-sep"></div>
+    <div class="step active">
+      <span class="step-num">2</span>
+      <span class="step-label">Speciaal Aanbod</span>
+      <span class="step-label-short">Aanbod</span>
+    </div>
+    <div class="step-sep"></div>
+    <div class="step">
+      <span class="step-num">3</span>
+      <span class="step-label">Bevestiging</span>
+      <span class="step-label-short">Klaar</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ URGENCY TIMER ═══════ -->
+<div class="timer-bar">
+  Dit aanbod verdwijnt over <strong><span class="timer-digits" id="timer">09:59</span></strong> &mdash; alleen voor jou, alleen nu
+</div>
+
+<div class="page-wrap">
+
+<!-- ═══════ DECISION HERO ═══════ -->
+<section class="decision-hero anim d1">
+  <div class="confirm-badge">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    Je bestelling is bevestigd!
+  </div>
+
+  <h1>Stop. Je pakket wordt verstuurd &mdash; maar lees dit <em>eerst</em><span class="dots">...</span></h1>
+
+  <p class="subtitle">
+    Je hebt zojuist <strong>De Hondenbijbel</strong> besteld. Maar terwijl we je bestelling klaarmaken,
+    is er één ding dat we je <strong>niet kunnen laten missen</strong>. Dit aanbod bestaat niet op onze website.
+    Het bestaat alleen hier. Alleen nu. Alleen voor jou als nieuwe klant.
+  </p>
+
+  <div class="choose-instruction">
+    &#9660; Neem 60 seconden. Lees dit. Dan kies jij: <strong>ja of nee</strong>
+  </div>
+</section>
+
+<!-- ═══════ PRODUCT IMAGE ═══════ -->
+<div class="product-showcase anim d2" style="display: flex; align-items: center; justify-content: center; padding: 24px 0;">
+  <div class="product-image-wrap">
+    <img id="upsell-product-img" src="/Laat-los-wat-je-kapotmaakt-book-pichi.webp" alt="Laat Los Wat Je Kapotmaakt &mdash; boek door Joris de Vries" loading="eager" style="width: 100%; height: auto; border-radius: 4px; filter: drop-shadow(0 8px 30px rgba(0,0,0,0.15));">
+    <div class="product-badge">&minus;&euro;10</div>
+  </div>
+</div>
+
+<!-- ═══════ COUPON CARD ═══════ -->
+<div class="coupon-card anim d2">
+  <div class="coupon-left">
+    <div>
+      <div class="coupon-badge">KORTINGSBON</div>
+      <div class="coupon-code">HONDEN-VIP</div>
+    </div>
+    <div>
+      <div class="coupon-value">&minus;&euro;10</div>
+      <div class="coupon-scissors">&#9986;</div>
+    </div>
+  </div>
+  <div class="coupon-right">
+    <div class="coupon-applied">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Automatisch toegepast op je bestelling
+    </div>
+    <div class="cpb-row"><span>Originele prijs boek</span><span>&euro;35</span></div>
+    <div class="cpb-row cpb-discount"><span>Kortingsbon HONDEN-VIP</span><span>&minus;&euro;10</span></div>
+    <div class="cpb-row cpb-total"><span>Jouw exclusieve prijs</span><span>&euro;25</span></div>
+  </div>
+</div>
+
+<!-- ═══════ PROBLEMEN + MECHANISME ═══════ -->
+<div class="anim d3" style="padding: 8px 0 20px;">
+  <h2 style="font-family: 'Recoleta', serif; font-weight: 600; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 16px;">
+    Herken je dit?
+  </h2>
+
+  <p style="font-size: 15px; line-height: 1.8; color: var(--body); margin-bottom: 14px;">
+    Je hoofd gaat maar door. &rsquo;s Avonds in bed, onderweg, zelfs midden in een gesprek.
+    Dezelfde gedachten, dezelfde gesprekken, dezelfde &ldquo;wat als&rdquo;&mdash;in een eindeloze herhaling.
+    Je bent moe. Niet van het werk, maar van <em>jezelf</em>.
+  </p>
+
+  <p style="font-size: 15px; line-height: 1.8; color: var(--body); margin-bottom: 14px;">
+    Misschien is het een oude pijn die je maar niet kwijtraakt. Of woede naar iemand die je
+    heeft gekwetst &mdash; waarvan je weet dat je hem los moet laten, maar dat gewoon niet lukt.
+    Of schuldgevoel over iets uit het verleden dat je elke dag een beetje verder
+    naar beneden trekt.
+  </p>
+
+  <p style="font-size: 15px; line-height: 1.8; color: var(--body); margin-bottom: 20px;">
+    Het gekke is: je hebt het al zo lang meegedragen dat het bijna normaal voelt.
+    <strong>Maar het is niet normaal. En het hoeft ook niet zo te blijven.</strong>
+  </p>
+
+  <div style="background: var(--light); border-radius: 14px; padding: 22px 24px; margin-bottom: 16px;">
+    <p style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em;">Wat dit boek anders maakt</p>
+    <p style="font-size: 15px; line-height: 1.8; color: var(--body);">
+      De meeste boeken vertellen je wat je moet <em>doen</em>. Dit boek laat je zien
+      <em>waarom</em> je vastloopt &mdash; en geeft je daarna concrete stappen om eruit te komen.
+      Geen positief denken, geen zweverige theorie. Joris de Vries combineert inzichten
+      uit de neuropsychologie met 12 jaar praktijkervaring: <strong>wat houdt ons
+      vanbinnen gevangen, en hoe doorbreek je dat patroon voor altijd?</strong>
+    </p>
+  </div>
+
+  <p style="font-size: 15px; line-height: 1.8; color: var(--body);">
+    Na dit boek slaap je weer door. Je zegt &lsquo;nee&rsquo; zonder je schuldig te voelen.
+    Je draagt die oude woede niet meer mee. En je hond? Die merkt het ook &mdash;
+    want een rustige baas maakt een rustige hond.
+  </p>
+</div>
+
+<!-- ═══════ SOCIAL PROOF STRIP ═══════ -->
+<div class="proof-strip anim d3">
+  <div class="proof-item"><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span> <span>4.9/5</span></div>
+  <div class="proof-item"><span class="num">3.000+</span> lezers</div>
+  <div class="proof-item"><span class="num">92%</span> voelt verschil in 14 dagen</div>
+</div>
+
+<!-- ═══════ EERSTE CTA ═══════ -->
+<div class="cta-block anim d3" id="first-cta">
+  <a href="#" class="btn-upsell" id="btn-yes" onclick="return false;">
+    JA, voeg toe voor slechts &euro;25 &rarr;
+    <span class="btn-sub">Je wordt doorgestuurd naar dezelfde betaalmethode als bij je bestelling. De toevoeging is pas definitief na betaling.</span>
+  </a>
+  <a class="btn-skip" id="btn-no" href="#">Nee bedankt, ik sla dit eenmalige aanbod over</a>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════ THE PITCH ═══════ -->
+<div class="anim d4" style="padding: 16px 0;">
+  <h2 style="font-family: 'Recoleta', serif; font-weight: 600; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 16px;">
+    Je geeft alles voor je hond.<br>
+    <span style="font-style: italic; color: var(--cta);">Maar wie zorgt er eigenlijk voor jou?</span>
+  </h2>
+
+  <p style="font-size: 16px; line-height: 1.75; color: var(--body);">
+    Denk even na. Je hebt net een boek gekocht om <em>je hond</em> een beter leven te geven.
+    Maar hoe zit het met jouw leven? Hoelang zit jij al opgesloten in je eigen hoofd?
+    De <strong>gedachten die maar malen om 03:00</strong>. Het schuldgevoel als je
+    vijf minuten voor jezelf neemt. De woede die je inslikt — dag na dag — totdat die
+    ergens anders uitbarst.
+  </p>
+  <p style="font-size: 16px; line-height: 1.75; color: var(--body); margin-top: 12px;">
+    Wat als we je vertellen dat <strong>3.000 mensen net als jij</strong> dit patroon hebben doorbroken
+    &mdash; niet met therapie, niet met medicijnen &mdash; maar met 5 concrete stappen?
+    Geen vage theorie. Geen positief denken. Maar een <strong>praktisch systeem</strong> dat je
+    direct kunt toepassen, ook als je nu volledig uitgeput bent.
+  </p>
+
+  <ul class="benefit-list" style="margin-top: 16px;">
+    <li>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><strong>Eindelijk doorslapen</strong> — stop de 03:00-gedachtespiraal die je elke nacht wakker houdt</div>
+    </li>
+    <li>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><strong>'Nee' zeggen zonder je schuldig te voelen</strong> — misschien voor het eerst in jaren</div>
+    </li>
+    <li>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><strong>Woede omzetten in kracht</strong> — van reactief en uitgeput naar kalm en beheerst</div>
+    </li>
+    <li>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><strong>Loslaten wat je al jaren meesleept</strong> — en jezelf eindelijk bevrijden van die last</div>
+    </li>
+    <li>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><strong>Energie overhouden voor jezelf</strong> — en daardoor ook een geduldiger, rustiger baasje zijn</div>
+    </li>
+  </ul>
+</div>
+
+<!-- ═══════ BEFORE / AFTER ═══════ -->
+<div class="anim d4">
+  <h3 style="font-family: 'Recoleta', serif; font-size: 19px; color: var(--heading); text-align: center; margin-bottom: 14px;">
+    Dezelfde persoon. <span style="font-style: italic; color: var(--cta);">Een compleet ander leven.</span>
+  </h3>
+  <div class="ba-grid">
+    <div class="ba-card before">
+      <div class="ba-label">&#128532; Vroeger</div>
+      <ul>
+        <li>Wakker liggen met gedachten die niet stoppen</li>
+        <li>Alles geven — maar het is nooit genoeg</li>
+        <li>Geen NEE kunnen zeggen, uit angst</li>
+        <li>Schuldig voelen als je iets voor jezelf doet</li>
+      </ul>
+    </div>
+    <div class="ba-card after">
+      <div class="ba-label">&#10024; Nu</div>
+      <ul>
+        <li>'s Ochtends opgewekt wakker worden</li>
+        <li>NEE zeggen — en de wereld staat nog steeds</li>
+        <li>Tijd nemen voor zichzelf. Zonder schuldgevoel</li>
+        <li>Rust in huis. En eindelijk ook in het hoofd.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ TESTIMONIALS ═══════ -->
+<div class="testi-card anim d4">
+  <p class="testi-text">Ik kocht dit samen met De Hondenbijbel en het was de slimste beslissing die ik dit jaar heb gemaakt. Mijn hond merkte het al na een week &mdash; ik was rustiger, geduldiger. De 03:00-gedachten zijn weg. Ik wist niet dat het zo snel kon veranderen.</p>
+  <div class="testi-author">Marieke, 34 <span>&mdash; Utrecht</span></div>
+</div>
+
+<div class="testi-card anim d5">
+  <p class="testi-text">Jaren van woede inslikken en piekeren — ik dacht dat het gewoon zo was. Dat ik zo was. Binnen 2 weken na dit boek voelde ik het verschil. Niet met therapie, niet met pillen. Gewoon stap voor stap, zoals het boek het uitlegt. Ik had het eerder moeten doen.</p>
+  <div class="testi-author">David, 41 <span>&mdash; Amsterdam</span></div>
+</div>
+
+<!-- ═══════ WAAROM SAMEN ═══════ -->
+<div class="anim d5" style="padding: 20px 0;">
+  <h2 style="font-family: 'Recoleta', serif; font-weight: 600; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 8px;">
+    Waarom kopen zoveel mensen <span style="font-style: italic; color: var(--cta);">beide</span> boeken tegelijk?
+  </h2>
+  <p style="text-align: center; font-size: 14px; color: var(--muted); margin-bottom: 16px;">Het antwoord is simpeler dan je denkt.</p>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+    <div style="background: var(--light); border-radius: 12px; padding: 20px; text-align: center;">
+      <div style="font-size: 28px; margin-bottom: 8px;">&#128054;</div>
+      <div style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 6px;">De Hondenbijbel</div>
+      <div style="font-size: 13px; color: var(--body); line-height: 1.55;">Geeft je hond het beste leven — opvoeding, gezondheid, band</div>
+    </div>
+    <div style="background: var(--light); border-radius: 12px; padding: 20px; text-align: center;">
+      <div style="font-size: 28px; margin-bottom: 8px;">&#129504;</div>
+      <div style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 6px;">Laat Los Wat Je Kapotmaakt</div>
+      <div style="font-size: 13px; color: var(--body); line-height: 1.55;">Geeft <em>jou</em> het beste leven — rust, loslaten, innerlijke kracht</div>
+    </div>
+  </div>
+  <p style="font-size: 15px; line-height: 1.7; color: var(--body); text-align: center; max-width: 500px; margin: 0 auto;">
+    Een rustig baasje maakt een rustige hond. Lezers die beide boeken lezen merken het direct &mdash;
+    meer geduld, meer rust, een sterkere band. <strong>Een beter leven voor jullie beiden begint bij jou.</strong> &#129505;
+  </p>
+</div>
+
+<!-- ═══════ OVER DE AUTEUR ═══════ -->
+<div class="author-card anim d5">
+  <div class="author-avatar">
+    <img src="/images/joris-author.webp" alt="Joris de Vries">
+  </div>
+  <div class="author-info">
+    <h4>Joris de Vries</h4>
+    <p>Coach en auteur met <strong>12+ jaar</strong> ervaring met mensen in crisis. Zelf jarenlang vastgelopen in piekeren, woede en schuldgevoel &mdash; tot hij een systeem vond dat wél werkt. <strong>Meer dan 3.000 mensen</strong> hebben sindsdien hun rust teruggevonden met zijn methode.</p>
+    <p style="margin-top: 6px; font-style: italic; font-size: 13px; color: var(--muted);">&ldquo;Ik was precies waar jij nu bent. Ik weet hoe het voelt. En ik heb de weg terug gevonden.&rdquo;</p>
+  </div>
+</div>
+
+
+
+<!-- ═══════ PRICING CARD MET VALUE STACK ═══════ -->
+<div class="pricing-card anim d5">
+  <div style="font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">&#9201; Dit aanbod sluit zodra je deze pagina verlaat</div>
+
+  <!-- Value Stack -->
+  <div style="padding: 16px 0;">
+    <div class="stack-item">
+      <div class="stack-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </div>
+      <div class="stack-label"><strong>Gedrukt boek</strong> &mdash; Laat Los Wat Je Kapotmaakt (290 pagina's)</div>
+      <div class="stack-value">&euro;35</div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><polygon points="23 7 16 12 16 2 23 7"/></svg>
+      </div>
+      <div class="stack-label"><strong>Gratis verzending</strong> &mdash; in één pakket met De Hondenbijbel</div>
+      <div class="stack-value">&euro;6,95</div>
+    </div>
+  </div>
+
+  <div style="background: rgba(192,57,43,0.07); border: 1px solid rgba(192,57,43,0.2); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px;">
+    <span style="font-size: 16px; flex-shrink: 0;">⚠️</span>
+    <p style="font-size: 13px; line-height: 1.6; color: #8B2020; margin: 0;">
+      <strong>Let op:</strong> Dit aanbod verdwijnt zodra je deze pagina verlaat of sluit. Je kunt het boek daarna alleen nog bestellen voor de volledige prijs van &euro;35 op onze website &mdash; de korting van &euro;10 is uitsluitend hier beschikbaar.
+    </p>
+  </div>
+
+  <div style="height: 1px; background: var(--section); margin: 4px 0 16px;"></div>
+
+  <div style="font-size: 14px; color: var(--muted); margin-bottom: 4px;">Totale waarde: <span style="text-decoration: line-through;">&euro;41,95</span></div>
+  <div class="price-row">
+    <span class="price-old">&euro;35</span>
+    <span class="price-new">&euro;25</span>
+    <span class="price-save">Bespaar &euro;10</span>
+  </div>
+  <div class="price-coupon-ref">
+    &#9986; Kortingsbon <strong>HONDEN-VIP</strong> automatisch toegepast
+  </div>
+  <div style="font-size: 13px; color: var(--muted); margin-top: 8px;">
+    Minder dan &euro;0,84 per dag &mdash; minder dan één kopje koffie. Voor levenslange rust.
+  </div>
+
+  <div style="margin-top: 24px;">
+    <a href="#" class="btn-upsell" onclick="return false;">
+      JA, voeg toe voor slechts &euro;25 &rarr;
+      <span class="btn-sub">Je wordt doorgestuurd naar dezelfde betaalmethode als bij je bestelling. De toevoeging is pas definitief na betaling.</span>
+    </a>
+  </div>
+
+  <div style="margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
+    <span style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Veilige betaling
+    </span>
+    <span style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      30 dagen garantie
+    </span>
+    <span style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+      Gratis verzending
+    </span>
+  </div>
+
+  <a class="btn-skip" href="#">Nee bedankt, ik sla dit eenmalige aanbod over</a>
+</div>
+
+<!-- ═══════ GARANTIE ═══════ -->
+<div class="guarantee-box anim d6">
+  <div class="guarantee-icon">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+  </div>
+  <div class="guarantee-text">
+    <strong>Jij riskeert helemaal niets. Wij wel.</strong> Lees het boek. Doe de oefeningen. Voel je binnen 30 dagen geen verschil? Dan krijg je elke cent terug &mdash; zonder vragen, zonder gedoe. 92% van de lezers merkt al binnen 2 weken resultaat. De andere 8% krijgt gewoon hun geld terug.
+  </div>
+</div>
+
+<!-- ═══════ MINI FAQ ═══════ -->
+<div class="faq-section anim d6">
+  <div class="faq-item">
+    <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      Wordt het apart verzonden?
+      <span class="arrow">&#9662;</span>
+    </div>
+    <div class="faq-a">Nee &mdash; we voegen het direct toe aan je huidige bestelling. Je ontvangt beide boeken in één pakket, gratis verzonden. Geen gedoe, geen extra kosten.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      Waar gaat Laat Los Wat Je Kapotmaakt over?
+      <span class="arrow">&#9662;</span>
+    </div>
+    <div class="faq-a">Dit boek helpt je concreet met 5 dingen die je leven vastzetten: piekeren, loslaten, vergeven, woede en innerlijke rust. Geen vage theorie, geen spirituele zweverigheid. Praktische stappen die ook werken als je nu volledig uitgeput bent. Geschreven door coach Joris de Vries.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      Hoe werkt de kortingsbon HONDEN-VIP?
+      <span class="arrow">&#9662;</span>
+    </div>
+    <div class="faq-a">De kortingsbon is automatisch toegepast. Je betaalt &euro;25 in plaats van &euro;35. Dit aanbod bestaat alleen op deze pagina, alleen nu, alleen voor jou als nieuwe klant. Je kunt het nergens anders krijgen voor deze prijs.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      Kan ik het boek ook later bestellen?
+      <span class="arrow">&#9662;</span>
+    </div>
+    <div class="faq-a">Ja, maar dan betaal je &euro;35 op onze website. De &euro;10 korting via HONDEN-VIP is exclusief voor deze pagina &mdash; en verdwijnt zodra je verder gaat. Je hebt deze kans maar één keer.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      Is er een garantie?
+      <span class="arrow">&#9662;</span>
+    </div>
+    <div class="faq-a">Absoluut. 30 dagen niet-goed-geld-terug, geen vragen. Je riskeert niets. Als het boek je niet raakt, krijg je elke cent terug. Punt.</div>
+  </div>
+</div>
+
+<!-- ═══════ FINÁLNÍ CTA ═══════ -->
+<div style="text-align: center; padding: 20px 0 16px;" class="anim d6">
+  <a href="#" class="btn-upsell" onclick="return false;">
+    JA, voeg toe voor slechts &euro;25 &rarr;
+    <span class="btn-sub">Je wordt doorgestuurd naar dezelfde betaalmethode als bij je bestelling. De toevoeging is pas definitief na betaling.</span>
+  </a>
+  <a class="btn-skip" href="#">Nee bedankt, ik sla dit eenmalige aanbod over</a>
+</div>
+
+<!-- ═══════ FOOTER ═══════ -->
+<div class="upsell-footer">
+  <p>&copy; 2026 De Hondenbijbel &mdash; Alle rechten voorbehouden</p>
+  <p style="margin-top: 8px;">Vragen? <a href="mailto:support@travelbible.nl" style="color: var(--muted);">support@travelbible.nl</a></p>
+</div>
+
+</div><!-- /page-wrap -->
+
+<!-- ═══════ COUNTDOWN TIMER SCRIPT ═══════ -->
+<script>
+(function(){
+  var total = 10 * 60; // 10 minuten
+  var el = document.getElementById('timer');
+  function tick(){
+    if(total <= 0){ el.textContent = '00:00'; return; }
+    total--;
+    var m = Math.floor(total/60).toString().padStart(2,'0');
+    var s = (total%60).toString().padStart(2,'0');
+    el.textContent = m + ':' + s;
+  }
+  setInterval(tick, 1000);
+})();
+</script>
+
+<!-- ═══════ UPSELL LOGIKA — Mollie payment flow ═══════ -->
+<script>
+(function() {
+  'use strict';
+
+  var MEDUSA_URL = PROJECT_CONFIG.medusaUrl;
+
+  // Helper: Medusa API call
+  function medusaFetch(path, options) {
+    options = options || {};
+    options.headers = Object.assign({
+      'Content-Type': 'application/json',
+      'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey,
+    }, options.headers || {});
+    return fetch(MEDUSA_URL + path, options).then(function(res) {
+      return res.json().then(function(data) {
+        if (!res.ok) throw new Error(data.message || 'API fout');
+        return data;
+      });
+    });
+  }
+
+  // Helper: Show preloader
+  function showPreloader(message, sub) {
+    if (!document.querySelector('.payment-preloader')) {
+      var div = document.createElement('div');
+      div.className = 'payment-preloader';
+      div.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="100">'
+        + '<p>' + (message || 'Betaling wordt verwerkt...') + '</p>'
+        + '<p class="sub">' + (sub || 'Even geduld alsjeblieft.') + '</p>';
+      document.body.insertBefore(div, document.body.firstChild);
+    }
+  }
+
+  // Helper: Show error on preloader
+  function showPreloaderError(message) {
+    var preloader = document.querySelector('.payment-preloader');
+    if (preloader) {
+      preloader.innerHTML = '<div style="text-align:center;padding:20px;">'
+        + '<p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Er ging iets mis.</p>'
+        + '<p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (message || 'Probeer het opnieuw.') + '</p>'
+        + '<a href="' + PROJECT_CONFIG.thankYouUrl + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#2D1B3D;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Ga naar je bestelling</a>'
+        + '</div>';
+    }
+  }
+
+  // ═══════════════════════════════════════════════
+  // ROUTE A: UPSELL PAYMENT RETURN (from payment gateway)
+  // URL: ?upsell_return=1&upsell_cart_id=xxx
+  //
+  // IMPORTANT: We do NOT complete the upsell cart here.
+  // Completing it would create a second order in admin.
+  // Instead, we pass the cart ID to the backend which:
+  //   - Extracts the payment ID from the cart
+  //   - Adds the upsell item to the ORIGINAL order via Order Edit
+  //   - Marks the payment as captured
+  //   - Stores upsell_payment_id in order metadata
+  // ═══════════════════════════════════════════════
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('upsell_return') === '1') {
+    var upsellCartId = params.get('upsell_cart_id');
+    if (!upsellCartId) {
+      window.location.href = PROJECT_CONFIG.thankYouUrl;
+      return;
+    }
+
+    showPreloader('Upsell betaling wordt verwerkt...', 'Even geduld, we voegen het boek toe aan je bestelling.');
+
+    // Extract payment gateway return params from URL
+    // Stripe adds: ?payment_intent=pi_xxx&redirect_status=succeeded
+    // Mollie adds: nothing extra (uses webhooks)
+    // Airwallex adds: ?paymentIntentId=int_xxx
+    var gatewayPaymentId = params.get('payment_intent')       // Stripe/iDEAL
+                        || params.get('paymentIntentId')      // Airwallex
+                        || params.get('id')                   // Mollie (sometimes)
+                        || null;
+    console.log('Upsell: Gateway payment ID from URL:', gatewayPaymentId);
+
+    // Add the upsell item to the ORIGINAL order via Order Edit
+    // The backend verifies payment from the upsell cart (no cart completion = no second order)
+    var originalOrderId = localStorage.getItem('medusa_order_id');
+    if (!originalOrderId) {
+      console.warn('Upsell: No original order ID, redirecting to thank-you');
+      window.location.href = PROJECT_CONFIG.thankYouUrl;
+      return;
+    }
+
+    fetch(MEDUSA_URL + '/store/custom/orders/' + originalOrderId + '/upsell-accept', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey,
+      },
+      body: JSON.stringify({
+        variant_id: PROJECT_CONFIG.upsellProduct.variantId,
+        quantity: 1,
+        unit_price: PROJECT_CONFIG.upsellProduct.price,
+        compare_at_unit_price: PROJECT_CONFIG.upsellProduct.originalPrice,
+        upsell_cart_id: upsellCartId,
+        upsell_payment_id: gatewayPaymentId,
+      }),
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(result) {
+      console.log('Upsell: Order edit result:', result);
+
+      if (result.success) {
+        // ✅ Payment verified & item added to order
+        localStorage.setItem('medusa_upsell_purchased', 'true');
+        if (result.upsell_payment_id) {
+          localStorage.setItem('medusa_upsell_payment_id', result.upsell_payment_id);
+        }
+
+        // Note: No Purchase event for upsell — we track only 1 Purchase per customer
+        // (the main checkout Purchase, fired on upsell page load or thank-you page)
+      } else {
+        // ❌ Payment NOT completed (abandoned, failed, or pending)
+        console.log('Upsell: Payment not completed (' + (result.payment_status || 'unknown') + '), skipping upsell');
+        // Do NOT set medusa_upsell_purchased — thank-you page will only show main product
+      }
+
+      // Always clean up and redirect to thank-you
+      localStorage.removeItem('medusa_upsell_cart_id');
+      localStorage.removeItem('medusa_cart_id');
+      window.location.href = PROJECT_CONFIG.thankYouUrl;
+    })
+    .catch(function(err) {
+      console.error('Upsell: Payment return error:', err.message);
+      // Network error — safe default: go to thank-you without upsell
+      localStorage.removeItem('medusa_upsell_cart_id');
+      localStorage.removeItem('medusa_cart_id');
+      window.location.href = PROJECT_CONFIG.thankYouUrl;
+    });
+
+    return; // Stop — don't run the normal upsell page logic
+  }
+
+  // ═══════════════════════════════════════════════
+  // ROUTE B: NORMAL UPSELL PAGE (after checkout)
+  // Complete original order, show upsell offer
+  // ═══════════════════════════════════════════════
+
+  var cartId = localStorage.getItem('medusa_cart_id');
+
+  if (!cartId) {
+    console.warn('Upsell: No cart_id in localStorage, redirecting to thank-you');
+    window.location.href = PROJECT_CONFIG.thankYouUrl;
+    return;
+  }
+
+  // ─── STEP 1: Complete original order ───
+  var maxAttempts = 5;
+  var attempt = 0;
+
+  function completeOriginalOrder() {
+    attempt++;
+    console.log('Upsell: Completing order, attempt ' + attempt + '/' + maxAttempts);
+
+    return medusaFetch('/store/carts/' + cartId + '/complete', {
+      method: 'POST'
+    })
+    .then(function(res) {
+      if (res.type === 'order') {
+        console.log('Upsell: Order completed!', res.order.id);
+        localStorage.setItem('medusa_order_id', res.order.id);
+        localStorage.setItem('medusa_order_display_id', res.order.display_id || '');
+
+        // FB Pixel + CAPI: Purchase event with checkout total (deterministic event_id for dedup with server subscriber)
+        if (typeof MetaTracker !== 'undefined') {
+          var checkoutTotal = parseFloat(localStorage.getItem('medusa_checkout_total') || '0');
+          var purchaseValue = checkoutTotal > 0 ? checkoutTotal : PROJECT_CONFIG.mainProduct.price;
+          var purchaseEventId = 'purchase_' + res.order.id;
+
+          // Build user_data from stored customer info
+          var customerRaw = localStorage.getItem('medusa_customer');
+          var cust = customerRaw ? JSON.parse(customerRaw) : {};
+          var uData = {};
+          if (cust.email) uData.em = cust.email;
+          if (cust.first_name) uData.fn = cust.first_name;
+          if (cust.last_name) uData.ln = cust.last_name;
+          if (cust.phone) uData.ph = cust.phone;
+          if (cust.city) uData.ct = cust.city;
+          if (cust.postal_code) uData.zp = cust.postal_code;
+          if (cust.country_code) uData.country = cust.country_code;
+
+          MetaTracker.trackPurchase({
+            content_ids: [PROJECT_CONFIG.mainProduct.handle],
+            value: purchaseValue,
+            currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
+            num_items: parseInt(localStorage.getItem('medusa_bundle_qty') || '1'),
+            order_id: res.order.id
+          }, uData, { event_id: purchaseEventId });
+
+          // Mark that Purchase was already tracked (so thank-you page doesn't fire again)
+          localStorage.setItem('medusa_purchase_tracked', 'true');
+          console.log('Upsell: Purchase tracked — €' + purchaseValue + ' event_id=' + purchaseEventId);
+        }
+        return true;
+      } else if (res.type === 'cart') {
+        if (attempt < maxAttempts) {
+          console.log('Upsell: Payment not confirmed yet, retrying in 2s...');
+          return new Promise(function(resolve) {
+            setTimeout(function() { resolve(completeOriginalOrder()); }, 2000);
+          });
+        }
+        return false;
+      }
+    })
+    .catch(function(err) {
+      console.error('Upsell: Error completing order:', err.message);
+      if (err.message && err.message.includes('completed')) return true;
+      if (attempt < maxAttempts) {
+        return new Promise(function(resolve) {
+          setTimeout(function() { resolve(completeOriginalOrder()); }, 2000);
+        });
+      }
+      return false;
+    });
+  }
+
+  completeOriginalOrder();
+
+  // ─── STEP 2: Wire up buttons ───
+  var btnYesAll = document.querySelectorAll('.btn-upsell');
+  var btnNoAll = document.querySelectorAll('.btn-skip');
+
+  // ─── UPSELL ACCEPT: Create cart → payment gateway → redirect ───
+  function handleUpsellAccept(e) {
+    if (e) e.preventDefault();
+
+    // Disable all CTA buttons
+    btnYesAll.forEach(function(btn) {
+      btn.style.opacity = '0.7';
+      btn.style.pointerEvents = 'none';
+      btn.innerHTML = '<span class="btn-spinner"></span> Bezig met verwerken...';
+    });
+
+    // Get stored checkout data
+    var customerRaw = localStorage.getItem('medusa_customer');
+    var customer = customerRaw ? JSON.parse(customerRaw) : {};
+    var paymentProvider = localStorage.getItem('medusa_payment_provider') || '';
+    var paymentMethod = localStorage.getItem('medusa_payment_method') || '';
+    var regionId = PROJECT_CONFIG.regionId;
+
+    // Build return URL for payment gateway
+    var baseUrl = window.location.href.split('?')[0];
+    var upsellReturnUrl; // will be set after cart creation
+
+    console.log('Upsell: Starting payment flow, provider:', paymentProvider, 'method:', paymentMethod);
+
+    // Step 1: Create cart
+    medusaFetch('/store/carts', {
+      method: 'POST',
+      body: JSON.stringify({ region_id: regionId })
+    })
+    .then(function(res) {
+      var upsellCartId = res.cart.id;
+      upsellReturnUrl = baseUrl + '?upsell_return=1&upsell_cart_id=' + upsellCartId;
+      localStorage.setItem('medusa_upsell_cart_id', upsellCartId);
+      console.log('Upsell: Cart created:', upsellCartId);
+
+      // Step 2: Add upsell product via bundle route (tax-inclusive pricing)
+      return medusaFetch('/store/carts/' + upsellCartId + '/line-items-bundle', {
+        method: 'POST',
+        body: JSON.stringify({
+          variant_id: PROJECT_CONFIG.upsellProduct.variantId,
+          quantity: 1
+        })
+      }).then(function() { return upsellCartId; });
+    })
+    .then(function(upsellCartId) {
+      // Step 3: Update cart with customer data
+      var updateData = {
+        email: customer.email || ''
+      };
+
+      // Set shipping + billing address from original checkout
+      if (customer.first_name) {
+        var addr = {
+          first_name: customer.first_name,
+          last_name: customer.last_name || '',
+          address_1: customer.address_1 || '',
+          city: customer.city || '',
+          postal_code: customer.postal_code || '',
+          country_code: customer.country_code || 'nl',
+          phone: customer.phone || '',
+        };
+        updateData.shipping_address = addr;
+        updateData.billing_address = addr;
+      }
+
+      return medusaFetch('/store/carts/' + upsellCartId, {
+        method: 'POST',
+        body: JSON.stringify(updateData)
+      }).then(function() { return upsellCartId; });
+    })
+    .then(function(upsellCartId) {
+      // Step 4: Add shipping method
+      return medusaFetch('/store/shipping-options?cart_id=' + upsellCartId, {
+        method: 'GET'
+      }).then(function(shipRes) {
+        var options = shipRes.shipping_options || [];
+        if (options.length > 0) {
+          return medusaFetch('/store/carts/' + upsellCartId + '/shipping-methods', {
+            method: 'POST',
+            body: JSON.stringify({ option_id: options[0].id })
+          });
+        }
+      }).then(function() { return upsellCartId; });
+    })
+    .then(function(upsellCartId) {
+      // Step 5: Create payment collection
+      return medusaFetch('/store/payment-collections', {
+        method: 'POST',
+        body: JSON.stringify({ cart_id: upsellCartId })
+      }).then(function(pcRes) {
+        var paymentCollectionId = pcRes.payment_collection.id;
+
+        // Step 6: Create payment session with SAME provider + method from checkout
+        var sessionBody = {
+          provider_id: paymentProvider,
+          data: {
+            method: paymentMethod,
+            return_url: upsellReturnUrl,
+          }
+        };
+
+        // Pass customer data for payment gateways that need it (Klarna, etc.)
+        if (customer.email) {
+          sessionBody.data.email = customer.email;
+          if (customer.first_name) {
+            sessionBody.data.billing_address = {
+              first_name: customer.first_name,
+              last_name: customer.last_name || '',
+              address_1: customer.address_1 || '',
+              city: customer.city || '',
+              postal_code: customer.postal_code || '',
+              country_code: (customer.country_code || 'nl').toUpperCase(),
+              phone: customer.phone || '',
+            };
+            sessionBody.data.shipping_address = sessionBody.data.billing_address;
+          }
+        }
+
+        return medusaFetch('/store/payment-collections/' + paymentCollectionId + '/payment-sessions', {
+          method: 'POST',
+          body: JSON.stringify(sessionBody)
+        });
+      }).then(function(sessionRes) {
+        return sessionRes.payment_collection;
+      });
+    })
+    .then(function(paymentCollection) {
+      // Step 7: Get redirect URL from payment gateway and redirect
+      var sessions = paymentCollection.payment_sessions || [];
+      var lastSession = sessions[sessions.length - 1] || {};
+      var providerData = lastSession.data || {};
+      // Different gateways use different redirect URL keys
+      var redirectUrl = providerData.checkoutUrl || providerData.approvalUrl || providerData.url;
+
+      if (redirectUrl) {
+        console.log('Upsell: Redirecting to payment gateway:', redirectUrl);
+        window.location.href = redirectUrl;
+      } else {
+        // No redirect needed (e.g., already paid) — complete directly
+        console.log('Upsell: No redirect URL, completing directly');
+        window.location.href = upsellReturnUrl;
+      }
+    })
+    .catch(function(err) {
+      console.error('Upsell: Payment flow error:', err.message);
+      // Re-enable buttons
+      btnYesAll.forEach(function(btn) {
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+        btn.innerHTML = 'JA! Voeg toe voor slechts &euro;25 &rarr;<span class="btn-sub">Probeer het opnieuw</span>';
+      });
+      // Show error
+      var errorDiv = document.createElement('div');
+      errorDiv.style.cssText = 'text-align:center;padding:12px;margin-top:10px;background:rgba(192,57,43,0.1);border-radius:8px;color:#C0392B;font-size:14px;';
+      errorDiv.textContent = 'Er ging iets mis: ' + (err.message || 'Probeer het opnieuw.');
+      var firstCta = document.getElementById('first-cta');
+      if (firstCta && !firstCta.querySelector('.upsell-error')) {
+        errorDiv.className = 'upsell-error';
+        firstCta.appendChild(errorDiv);
+      }
+    });
+  }
+
+  // ─── UPSELL DECLINE: Clean up and go to thank-you ───
+  function handleUpsellDecline(e) {
+    if (e) e.preventDefault();
+    localStorage.removeItem('medusa_cart_id');
+    window.location.href = PROJECT_CONFIG.thankYouUrl;
+  }
+
+  // Wire up all buttons
+  btnYesAll.forEach(function(btn) {
+    btn.addEventListener('click', handleUpsellAccept);
+  });
+  btnNoAll.forEach(function(btn) {
+    btn.addEventListener('click', handleUpsellDecline);
+  });
+
+})();
+</script>
+
+</body>
+</html> 

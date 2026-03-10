@@ -1,0 +1,48 @@
+{
+  "slug": "psi-superzivot",
+  "name": "Psí superživot",
+  "domain": "psisuperzivot.cz",
+  "locale": "cs",
+  "defaultCountry": "CZ",
+  "salesChannelName": "Psi Superzivot",
+  "medusaUrl": "",
+  "publishableApiKey": "",
+  "facebookPixelId": "",
+  "regions": {
+    "CZ": ""
+  },
+  "mainProduct": {
+    "name": "Psí superživot",
+    "handle": "psi-superzivot",
+    "variantId": "",
+    "price": 550,
+    "currency": "CZK",
+    "thumbnail": ""
+  },
+  "upsellProduct": {
+    "name": "",
+    "handle": "",
+    "variantId": "",
+    "price": 0,
+    "originalPrice": 0,
+    "currency": "CZK"
+  },
+  "bundleOptions": [
+    { "qty": 1, "price": 550, "label": "1 kniha", "save": 0 },
+    { "qty": 2, "price": 899, "label": "2 knihy", "save": 201 },
+    { "qty": 3, "price": 1199, "label": "3 knihy", "save": 451 },
+    { "qty": 4, "price": 1499, "label": "4 knihy", "save": 701 }
+  ],
+  "mollieProfileId": "",
+  "paymentProviders": {},
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "thank-you": "thank-you.html",
+    "kontakt": "kontakt.html",
+    "ochrana-udaju": "ochrana-udaju.html",
+    "obchodni-podminky": "obchodni-podminky.html",
+    "doprava": "doprava.html",
+    "reklamace": "reklamace.html"
+  }
+}
