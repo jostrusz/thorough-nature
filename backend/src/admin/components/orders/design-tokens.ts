@@ -88,16 +88,53 @@ export const btnPrimary: React.CSSProperties = {
 
 const ICON_BASE = "https://raw.githubusercontent.com/datatrans/payment-logos/master/assets"
 
-export function getPaymentIconUrl(order: any): string {
-  const payments = order.payment_collections?.flatMap((pc: any) => pc.payments || []) || []
-  const payment = payments[0]
-  const providerId = payment?.provider_id || ""
-  const method = order.metadata?.payment_method || payment?.data?.method || ""
-
-  // COD (Cash on Delivery) — inline banknotes SVG
-  if (providerId.includes("cod")) {
-    return `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%238B6914" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 6v12M18 6v12"/></svg>')}`
+// Robust payment detection — prefers non-canceled payment collections after order edits
+function findPrimaryPayment(order: any): { providerId: string; method: string; data: any } {
+  const pcs = order.payment_collections || []
+  // First: non-canceled payment collections
+  for (const pc of pcs) {
+    if (pc.status === "canceled") continue
+    const payments = pc.payments || []
+    if (payments.length > 0) {
+      const p = payments[0]
+      return {
+        providerId: p.provider_id || "",
+        method: order.metadata?.payment_method || p.data?.method || "",
+        data: p.data || {},
+      }
+    }
   }
+  // Fallback: any payment collection (even canceled)
+  for (const pc of pcs) {
+    const payments = pc.payments || []
+    if (payments.length > 0) {
+      const p = payments[0]
+      return {
+        providerId: p.provider_id || "",
+        method: order.metadata?.payment_method || p.data?.method || "",
+        data: p.data || {},
+      }
+    }
+  }
+  return { providerId: "", method: order.metadata?.payment_method || "", data: {} }
+}
+
+function isCODOrder(order: any): boolean {
+  const { providerId } = findPrimaryPayment(order)
+  if (providerId.includes("cod")) return true
+  // Fallback: check metadata (upsell flow sets payment method info)
+  if (order.metadata?.upsell_payment_id === "cod") return true
+  return false
+}
+
+// Bold COD badge — "COD" text in amber rounded rectangle, visible at all sizes
+const COD_ICON_SVG = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 28"><rect x="1" y="1" width="46" height="26" rx="5" fill="%238B6914"/><rect x="2" y="2" width="44" height="24" rx="4" fill="none" stroke="%23725610" stroke-width="0.5" opacity="0.3"/><text x="24" y="19.5" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="1">COD</text></svg>')}`
+
+export function getPaymentIconUrl(order: any): string {
+  // COD detection first (check across all PCs + metadata)
+  if (isCODOrder(order)) return COD_ICON_SVG
+
+  const { providerId, method, data } = findPrimaryPayment(order)
 
   if (providerId.includes("klarna")) return `${ICON_BASE}/apm/klarna.svg`
   if (providerId.includes("paypal")) return `${ICON_BASE}/apm/paypal.svg`
@@ -160,7 +197,7 @@ export function getPaymentIconUrl(order: any): string {
       googlepay: "wallets/google-pay.svg",
       GPAY_REDIRECT: "wallets/google-pay.svg",
     }
-    return `${ICON_BASE}/${map[method] || map[payment?.data?.comgate_method] || "cards/visa.svg"}`
+    return `${ICON_BASE}/${map[method] || map[data?.comgate_method] || "cards/visa.svg"}`
   }
 
   // Przelewy24
@@ -172,9 +209,8 @@ export function getPaymentIconUrl(order: any): string {
 }
 
 export function getPaymentFallback(order: any): { letter: string; bg: string; color: string } {
-  const payments = order.payment_collections?.flatMap((pc: any) => pc.payments || []) || []
-  const providerId = payments[0]?.provider_id || ""
-  if (providerId.includes("cod")) return { letter: "D", bg: "#8B6914", color: "#fff" }
+  if (isCODOrder(order)) return { letter: "COD", bg: "#8B6914", color: "#fff" }
+  const { providerId } = findPrimaryPayment(order)
   if (providerId.includes("stripe")) return { letter: "S", bg: "#635BFF", color: "#fff" }
   if (providerId.includes("airwallex")) return { letter: "AW", bg: "#FF5100", color: "#fff" }
   if (providerId.includes("comgate")) return { letter: "C", bg: "#444", color: "#fff" }
@@ -183,12 +219,8 @@ export function getPaymentFallback(order: any): { letter: string; bg: string; co
 }
 
 export function getPaymentMethodName(order: any): string {
-  const payments = order.payment_collections?.flatMap((pc: any) => pc.payments || []) || []
-  const payment = payments[0]
-  const providerId = payment?.provider_id || ""
-  const method = order.metadata?.payment_method || payment?.data?.method || ""
-
-  if (providerId.includes("cod")) return "Dobírka (COD)"
+  if (isCODOrder(order)) return "Dobírka (COD)"
+  const { providerId, method } = findPrimaryPayment(order)
   if (providerId.includes("klarna")) return "Klarna"
   if (providerId.includes("paypal")) return "PayPal"
   if (providerId.includes("comgate")) return "Comgate"
