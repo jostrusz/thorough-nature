@@ -91,7 +91,7 @@ function getCustomerName(order: any): string {
   if (addr?.first_name || addr?.last_name) {
     return [addr.first_name, addr.last_name].filter(Boolean).join(" ")
   }
-  return order.email || "Unknown"
+  return "—"
 }
 
 // ═══════════════════════════════════════════
