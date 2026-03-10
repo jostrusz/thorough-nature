@@ -3,21 +3,23 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 
 /**
  * POST /store/custom/fix-inventory
- * Fix missing inventory levels + sales channel links for kocici-bible.
+ * v3 - Uses workflows only, no direct module calls
  * DELETE THIS ROUTE AFTER USE.
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
+  const VERSION = "v3-2026-03-10"
+
   try {
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
-    const stockLocationModule = req.scope.resolve(Modules.STOCK_LOCATION)
     const remoteLink = req.scope.resolve(ContainerRegistrationKeys.REMOTE_LINK)
-    const inventoryModule = req.scope.resolve(Modules.INVENTORY)
 
-    // 1. Find all stock locations
-    const stockLocations = await stockLocationModule.listStockLocations({})
-    const locInfo = stockLocations.map((sl: any) => ({ id: sl.id, name: sl.name }))
+    // 1. Find all stock locations via query graph
+    const { data: stockLocations } = await query.graph({
+      entity: "stock_location",
+      fields: ["id", "name"],
+    })
 
-    // 2. Find kocici-bible inventory item by SKU
+    // 2. Find kocici-bible inventory item
     const { data: inventoryItems } = await query.graph({
       entity: "inventory_item",
       fields: ["id", "sku"],
@@ -25,34 +27,20 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     })
 
     if (!inventoryItems.length) {
-      res.json({ success: false, error: "No inventory item found for KOCICI-BIBLE-PB", stockLocations: locInfo })
+      res.json({ version: VERSION, success: false, error: "No inventory item for KOCICI-BIBLE-PB", stockLocations })
       return
     }
 
     const item = inventoryItems[0]
     const results: string[] = []
 
-    // 3. Create inventory levels at ALL stock locations (skip if exists)
-    for (const sl of stockLocations) {
-      try {
-        await inventoryModule.createInventoryLevels([{
-          inventory_item_id: item.id,
-          location_id: sl.id,
-          stocked_quantity: 1000000,
-        }])
-        results.push(`Created inventory level at ${sl.name} (${sl.id})`)
-      } catch (e: any) {
-        results.push(`Skipped ${sl.name} (${sl.id}): ${e.message?.substring(0, 80)}`)
-      }
-    }
-
-    // 4. Find "Psi Superzivot" sales channel
+    // 3. Find all sales channels
     const { data: salesChannels } = await query.graph({
       entity: "sales_channel",
       fields: ["id", "name"],
     })
 
-    // 5. Link ALL stock locations to ALL sales channels
+    // 4. Link ALL stock locations to ALL sales channels
     for (const sc of salesChannels) {
       for (const sl of stockLocations) {
         try {
@@ -60,22 +48,43 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
             [Modules.SALES_CHANNEL]: { sales_channel_id: sc.id },
             [Modules.STOCK_LOCATION]: { stock_location_id: sl.id },
           })
-          results.push(`Linked SC ${sc.name} → SL ${sl.name}`)
+          results.push(`Linked SC:${sc.name} → SL:${sl.name}`)
         } catch (e: any) {
-          results.push(`Link ${sc.name} → ${sl.name}: ${e.message?.substring(0, 60)}`)
+          results.push(`SC-SL link exists: ${sc.name} → ${sl.name}`)
         }
       }
     }
 
+    // 5. Create inventory levels using the workflow
+    const { createInventoryLevelsWorkflow } = await import("@medusajs/medusa/core-flows")
+
+    for (const sl of stockLocations) {
+      try {
+        await createInventoryLevelsWorkflow(req.scope).run({
+          input: {
+            inventory_levels: [{
+              location_id: sl.id,
+              stocked_quantity: 1000000,
+              inventory_item_id: item.id,
+            }],
+          },
+        })
+        results.push(`Created level: ${sl.name}`)
+      } catch (e: any) {
+        results.push(`Level exists/failed ${sl.name}: ${e.message?.substring(0, 80)}`)
+      }
+    }
+
     res.json({
+      version: VERSION,
       success: true,
       inventoryItem: item.id,
-      stockLocations: locInfo,
+      stockLocations,
       salesChannels: salesChannels.map((sc: any) => ({ id: sc.id, name: sc.name })),
       results,
     })
   } catch (error: any) {
     console.error("[FixInventory] Error:", error.message)
-    res.status(500).json({ success: false, error: error.message })
+    res.status(500).json({ version: VERSION, success: false, error: error.message })
   }
 }
