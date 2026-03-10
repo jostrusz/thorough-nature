@@ -1,90 +1,148 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { IPaymentModuleService } from "@medusajs/framework/types"
-import { COMGATE_PROVIDER_ID } from "../../../modules/payment-comgate"
+import { ComgateApiClient } from "../../../modules/payment-comgate/api-client"
+import { Client } from "pg"
 
+/**
+ * Comgate push notification webhook.
+ * Called by Comgate when a payment status changes (PAID, CANCELLED, etc.)
+ *
+ * Primary payment flow uses redirect (customer returns → cart/complete).
+ * This webhook is a backup for cases where the customer's browser doesn't redirect
+ * (closed tab, network issue, etc.) — it updates order metadata so admin can see the status.
+ */
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
+  let logger: any = console
   try {
-    const { transId: comgateTransactionId } = req.body
+    logger = req.scope.resolve("logger") || console
+  } catch {
+    // fallback to console
+  }
 
-    if (!comgateTransactionId) {
-      return res.status(400).json({ error: "Missing Comgate transaction ID" })
+  try {
+    // Comgate sends form-encoded body: transId=XXX-YYYY-ZZZZ
+    const transId = req.body?.transId || req.query?.transId
+
+    if (!transId) {
+      logger.warn("[Comgate Webhook] Missing transId in request")
+      return res.status(400).json({ error: "Missing transId" })
     }
 
-    const paymentModuleService: IPaymentModuleService = req.scope.resolve(
-      "paymentModuleService"
-    )
-    const orderModuleService = req.scope.resolve("orderModuleService")
-    const logger = req.scope.resolve("logger")
+    logger.info(`[Comgate Webhook] Received notification for transId: ${transId}`)
 
-    // Get the Comgate payment provider
-    const comgateProvider = paymentModuleService.getProvider(COMGATE_PROVIDER_ID)
-
-    if (!comgateProvider) {
-      logger.error("[Comgate Webhook] Provider not found")
-      return res.status(500).json({ error: "Provider not configured" })
+    // Load Comgate config from DB (same approach as service.ts)
+    const config = await loadComgateConfig(logger)
+    if (!config) {
+      logger.error("[Comgate Webhook] No Comgate config found")
+      return res.status(200).send("OK") // Return 200 so Comgate doesn't retry
     }
 
-    // Verify transaction status with Comgate
-    const verifyResult = await comgateProvider.getStatus(comgateTransactionId)
-
-    if (!verifyResult.success) {
-      logger.error(`[Comgate Webhook] Failed to verify transaction: ${verifyResult.error}`)
-      return res.status(400).json({ error: "Failed to verify transaction" })
+    const isLive = config.mode === "live"
+    let keys = isLive ? config.live_keys : config.test_keys
+    if (typeof keys === "string") {
+      try { keys = JSON.parse(keys) } catch { keys = null }
     }
 
-    const transactionStatus = verifyResult.data
-    const medusaStatus = mapComgateStatusToMedusa(transactionStatus.status)
-
-    // Find the order with this Comgate transaction ID
-    const orders = await orderModuleService.list({
-      filters: {
-        "metadata.comgateTransId": comgateTransactionId,
-      },
-    })
-
-    if (!orders.length) {
-      logger.warn(`[Comgate Webhook] No order found for transaction: ${comgateTransactionId}`)
+    if (!keys?.api_key || !keys?.secret_key) {
+      logger.error("[Comgate Webhook] Invalid Comgate credentials")
       return res.status(200).send("OK")
     }
 
-    const order = orders[0]
-    const activityEntry = {
-      timestamp: new Date().toISOString(),
-      event: "status_update",
-      gateway: "comgate",
-      payment_method: transactionStatus.method || "card",
-      status: medusaStatus === "authorized" ? "success" : "pending",
-      amount: transactionStatus.amount,
-      currency: transactionStatus.currency,
-      transaction_id: comgateTransactionId,
-      detail: `Comgate transaction status: ${transactionStatus.status}`,
+    // Verify transaction status directly with Comgate API
+    const client = new ComgateApiClient(keys.api_key, keys.secret_key)
+    const statusResult = await client.getStatus({
+      merchant: keys.api_key,
+      transId: transId,
+      secret: keys.secret_key,
+    })
+
+    if (!statusResult.success) {
+      logger.error(`[Comgate Webhook] Status check failed: ${statusResult.error}`)
+      return res.status(200).send("OK")
     }
 
-    // Update order metadata with activity log
-    const existingLog = order.metadata?.payment_activity_log || []
-    await orderModuleService.updateOrders(
-      {
-        id: order.id,
-        metadata: {
-          ...order.metadata,
-          payment_activity_log: [...existingLog, activityEntry],
-          comgateTransId: comgateTransactionId,
-          comgateStatus: transactionStatus.status,
-        },
-      },
-      { transactionManager: req.scope.resolve("manager") }
-    )
+    const comgateStatus = statusResult.data?.status || "PENDING"
+    const medusaStatus = mapComgateStatusToMedusa(comgateStatus)
 
-    logger.info(
-      `[Comgate Webhook] Order ${order.id} updated with status: ${medusaStatus}`
-    )
+    logger.info(`[Comgate Webhook] Transaction ${transId}: Comgate status=${comgateStatus}, mapped=${medusaStatus}`)
+
+    // Try to find and update the order with this transaction ID
+    try {
+      const orderModuleService = req.scope.resolve("order")
+      if (orderModuleService) {
+        // Search for orders with this transId in metadata
+        const orders = await orderModuleService.listOrders({}, { take: 100 })
+        const matchingOrder = (orders || []).find((o: any) =>
+          o.metadata?.comgateTransId === transId
+        )
+
+        if (matchingOrder) {
+          const activityEntry = {
+            timestamp: new Date().toISOString(),
+            event: "webhook_status_update",
+            gateway: "comgate",
+            payment_method: statusResult.data?.method || "unknown",
+            status: medusaStatus,
+            amount: statusResult.data?.price,
+            currency: statusResult.data?.curr,
+            transaction_id: transId,
+            detail: `Comgate webhook: ${comgateStatus}`,
+          }
+
+          const existingLog = matchingOrder.metadata?.payment_activity_log || []
+          await orderModuleService.updateOrders([{
+            id: matchingOrder.id,
+            metadata: {
+              ...matchingOrder.metadata,
+              payment_activity_log: [...existingLog, activityEntry],
+              comgateStatus: comgateStatus,
+            },
+          }])
+
+          logger.info(`[Comgate Webhook] Order ${matchingOrder.id} updated with status: ${medusaStatus}`)
+        } else {
+          logger.info(`[Comgate Webhook] No order found for transId ${transId} (may not be completed yet)`)
+        }
+      }
+    } catch (orderErr: any) {
+      // Order update is best-effort — don't fail the webhook
+      logger.warn(`[Comgate Webhook] Order update failed (non-critical): ${orderErr.message}`)
+    }
 
     return res.status(200).send("OK")
   } catch (error: any) {
-    const logger = req.scope.resolve("logger")
     logger.error(`[Comgate Webhook] Error: ${error.message}`)
-    return res.status(200).send("OK")
+    return res.status(200).send("OK") // Always 200 so Comgate doesn't retry
+  }
+}
+
+/**
+ * Load Comgate gateway config from DB.
+ * Uses raw pg Client via DATABASE_URL (most reliable in webhook context).
+ */
+async function loadComgateConfig(logger: any): Promise<any> {
+  const dbUrl = process.env.DATABASE_URL
+  if (!dbUrl) return null
+
+  let pgClient: Client | null = null
+  try {
+    pgClient = new Client({
+      connectionString: dbUrl,
+      ssl: dbUrl.includes("railway") ? { rejectUnauthorized: false } : undefined,
+    })
+    await pgClient.connect()
+    const result = await pgClient.query(
+      "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL LIMIT 1",
+      ["comgate"]
+    )
+    return result.rows[0] || null
+  } catch (e: any) {
+    logger.warn(`[Comgate Webhook] DB query failed: ${e.message}`)
+    return null
+  } finally {
+    if (pgClient) {
+      try { await pgClient.end() } catch {}
+    }
   }
 }
 
