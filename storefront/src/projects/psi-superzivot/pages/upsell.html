@@ -702,7 +702,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <!-- ═══════ PRODUCT IMAGE ═══════ -->
 <div class="product-showcase anim d2" style="display: flex; align-items: center; justify-content: center; padding: 24px 0;">
   <div class="product-image-wrap">
-    <img id="upsell-product-img" src="" alt="Ko&ccaron;i&ccaron;&iacute; bible &mdash; kniha" loading="eager" style="width: 100%; height: auto; border-radius: 4px; filter: drop-shadow(0 8px 30px rgba(0,0,0,0.15)); min-height: 250px; background: var(--light);">
+    <img id="upsell-product-img" src="/psi-superzivot/images/kocici-bible-cover.png" alt="Ko&ccaron;i&ccaron;&iacute; bible &mdash; kniha" loading="eager" style="width: 100%; height: auto; border-radius: 4px; filter: drop-shadow(0 8px 30px rgba(0,0,0,0.15));">
     <div class="product-badge">&minus;151&nbsp;K&ccaron;</div>
   </div>
 </div>
@@ -1058,28 +1058,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 })();
 </script>
 
-<!-- ═══════ LOAD PRODUCT IMAGE FROM MEDUSA ═══════ -->
-<script>
-(function(){
-  var img = document.getElementById('upsell-product-img');
-  if (!img || typeof PROJECT_CONFIG === 'undefined') return;
-  var handle = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.handle) || 'kocici-bible';
-  var MEDUSA_URL = PROJECT_CONFIG.medusaUrl;
-  var headers = { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey };
-  fetch(MEDUSA_URL + '/store/products?handle=' + handle + '&fields=thumbnail,images', { headers: headers })
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      var product = (data.products || [])[0];
-      if (!product) return;
-      var imgUrl = (product.images && product.images.length > 0) ? product.images[0].url : product.thumbnail;
-      if (imgUrl) {
-        img.src = imgUrl;
-        img.style.minHeight = '';
-      }
-    })
-    .catch(function(){ /* silently fail — image just won't show */ });
-})();
-</script>
+<!-- Product image is served statically from /psi-superzivot/images/kocici-bible-cover.png -->
 
 <!-- ═══════ UPSELL LOGIKA — Comgate / COD payment flow ═══════ -->
 <script>
