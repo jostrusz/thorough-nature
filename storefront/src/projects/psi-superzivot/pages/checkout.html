@@ -5087,8 +5087,8 @@ body {
       if (!hasCreditCard) {
         cardFieldsEl.style.display = 'none';
       } else if (selectedMethod === 'creditcard') {
-        // Stripe and PayPal use hosted checkout (redirect), no inline card fields needed
-        if (cardProvider === 'stripe' || cardProvider === 'paypal') {
+        // Stripe, PayPal, and Comgate use hosted checkout (redirect), no inline card fields needed
+        if (cardProvider === 'stripe' || cardProvider === 'paypal' || cardProvider === 'comgate') {
           cardFieldsEl.style.display = 'none';
         } else {
           cardFieldsEl.style.display = 'block';
@@ -5193,8 +5193,8 @@ body {
         // Show/hide card fields — init the right provider's card elements
         var cardFields = document.getElementById('card-fields');
         if (cardFields) {
-          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal') {
-            // Stripe and PayPal use hosted checkout (redirect), no inline card fields
+          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal' && cardProvider !== 'comgate') {
+            // Stripe, PayPal, and Comgate use hosted checkout (redirect), no inline card fields
             cardFields.style.display = 'block';
             if (cardProvider === 'mollie') {
               initMollieComponents();
@@ -5362,8 +5362,11 @@ body {
       var providerName = cardProvider === 'stripe' ? 'Stripe'
         : cardProvider === 'airwallex' ? 'Airwallex'
         : cardProvider === 'paypal' ? 'PayPal'
+        : cardProvider === 'comgate' ? 'Comgate'
         : 'Mollie';
-      subtext.textContent = 'Údaje vaší karty jsou bezpečně zpracovány přes ' + providerName + '.';
+      subtext.textContent = cardProvider === 'comgate'
+        ? 'Budete přesměrováni na zabezpečenou platbu kartou.'
+        : 'Údaje vaší karty jsou bezpečně zpracovány přes ' + providerName + '.';
     } else if (KLARNA_CODES.indexOf(selectedMethod) !== -1) {
       subtext.textContent = 'Budete přesměrováni na Klarna k dokončení platby.';
     } else if (BANK_CODES.indexOf(selectedMethod) !== -1) {
@@ -5382,6 +5385,7 @@ body {
         var trustProvider = cardProvider === 'stripe' ? 'Stripe'
           : cardProvider === 'airwallex' ? 'Airwallex'
           : cardProvider === 'paypal' ? 'PayPal'
+          : cardProvider === 'comgate' ? 'Comgate'
           : 'Mollie';
         trustText.textContent = 'Zabezpečeno přes ' + trustProvider;
       } else if (BANK_CODES.indexOf(selectedMethod) !== -1) {
