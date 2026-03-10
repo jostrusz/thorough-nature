@@ -152,6 +152,7 @@ function SkeletonRows() {
           <td style={tdStyle}><div style={{ width: "70px", height: "22px", borderRadius: "12px", background: "#EBEBEB" }} /></td>
           <td style={tdStyle}><div style={{ width: "40px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
           <td style={tdStyle}><div style={{ width: "30px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "100px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
         </tr>
       ))}
     </>
@@ -310,6 +311,7 @@ export function OrdersTable({
               <th style={thStyle}>Fulfillment</th>
               <th style={thStyle}>Items</th>
               <th style={thStyle}>Country</th>
+              <th style={thStyle}>Project</th>
             </tr>
           </thead>
           <tbody>
@@ -376,6 +378,7 @@ export function OrdersTable({
             <th style={{ ...thStyle, cursor: "default" }}>Fulfillment</th>
             <th style={{ ...thStyle, cursor: "default" }}>Items</th>
             <th style={{ ...thStyle, cursor: "default" }}>Country</th>
+            <th style={{ ...thStyle, cursor: "default" }}>Project</th>
           </tr>
         </thead>
         <tbody>
@@ -561,6 +564,21 @@ export function OrdersTable({
                 {/* 10. Country */}
                 <td style={tdStyle}>
                   <CountryFlag code={countryCode} />
+                </td>
+
+                {/* 11. Project */}
+                <td style={tdStyle}>
+                  <span style={{
+                    fontSize: "11px",
+                    color: colors.textMuted,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "inline-block",
+                    maxWidth: "160px",
+                  }}>
+                    {tag}
+                  </span>
                 </td>
               </tr>
             )
