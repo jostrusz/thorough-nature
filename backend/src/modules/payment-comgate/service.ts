@@ -272,7 +272,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
       this.getLogger().info(`[Comgate] Creating payment: merchant=${paymentParams.merchant}, ` +
         `price=${paymentParams.price} (original amount=${amount}, *100), curr=${paymentParams.curr}, ` +
-        `email=${paymentParams.email}, refId=${paymentParams.refId}`)
+        `email=${paymentParams.email}, refId=${paymentParams.refId}, method=${paymentParams.method}`)
 
       const result = await client.createPayment(paymentParams)
 
