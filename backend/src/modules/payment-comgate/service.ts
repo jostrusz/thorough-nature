@@ -230,6 +230,14 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
     } = context
 
     try {
+      // Debug: log full context structure to find where email/data lives
+      this.getLogger().info(`[Comgate] initiatePayment context keys: ${Object.keys(context || {}).join(', ')}`)
+      this.getLogger().info(`[Comgate] contextData keys: ${contextData ? Object.keys(contextData).join(', ') : 'null'}`)
+      this.getLogger().info(`[Comgate] contextData?.email: "${contextData?.email}", customer?.email: "${customer?.email}"`)
+      this.getLogger().info(`[Comgate] context.data keys: ${context?.data ? Object.keys(context.data).join(', ') : 'null'}`)
+      this.getLogger().info(`[Comgate] context.extra keys: ${context?.extra ? Object.keys(context.extra).join(', ') : 'null'}`)
+      this.getLogger().info(`[Comgate] cart?.email: "${cart?.email}", cart?.customer?.email: "${cart?.customer?.email}"`)
+
       const client = await this.getComgateClient()
       const config = await this.getComgateConfig()
 
@@ -243,8 +251,25 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       // haléře (55000 = 550.00 Kč). Same applies to EUR (cents).
       const priceInCents = Math.round(amount * 100)
 
-      // Email: prefer context email (passed from checkout form), fallback to customer email
-      const customerEmail = contextData?.email || customer?.email || ""
+      // Email: try ALL possible sources (Medusa v2 may put it in different places)
+      const customerEmail = contextData?.email
+        || context?.data?.email
+        || context?.extra?.email
+        || customer?.email
+        || cart?.email
+        || cart?.customer?.email
+        || ""
+
+      this.getLogger().info(`[Comgate] Resolved email: "${customerEmail}"`)
+
+      // Customer name for Comgate admin identification
+      const firstName = contextData?.billing_address?.first_name || contextData?.shipping_address?.first_name
+        || context?.data?.billing_address?.first_name || context?.data?.shipping_address?.first_name
+        || customer?.first_name || ""
+      const lastName = contextData?.billing_address?.last_name || contextData?.shipping_address?.last_name
+        || context?.data?.billing_address?.last_name || context?.data?.shipping_address?.last_name
+        || customer?.last_name || ""
+      const customerName = (firstName + " " + lastName).trim()
 
       const paymentParams = {
         merchant: config?.live_keys?.api_key || config?.test_keys?.api_key,
@@ -254,6 +279,8 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         refId: cart?.id || `ref-${Date.now()}`,
         secret: config?.live_keys?.secret_key || config?.test_keys?.secret_key,
         email: customerEmail,
+        name: customerName || undefined, // payer name (shown in Comgate admin)
+        lang: "cs", // Czech language for payment gateway UI
         country: customer?.billing_address?.country_code?.toUpperCase() || contextData?.billing_address?.country_code?.toUpperCase() || "CZ",
         prepareOnly: true, // get transId + URL without redirect
         method: contextData?.comgate_method || "ALL", // ALL = Comgate shows its own payment method selector

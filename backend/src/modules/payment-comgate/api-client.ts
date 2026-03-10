@@ -3,14 +3,16 @@ import axios, { AxiosInstance } from "axios"
 
 export interface IComgatePaymentParams {
   merchant: string
-  price: number // in cents
+  price: number // in haléře/cents (55000 = 550.00 CZK)
   curr: string // EUR, CZK, etc.
   label: string // max 16 chars descriptor
   refId: string // merchant reference ID
-  method?: string // bank transfer method
+  method?: string // bank transfer method or "ALL"
   prepareOnly?: boolean // if true, don't redirect, return transId + URL
   secret: string
   email?: string
+  name?: string // payer full name
+  lang?: string // gateway UI language: cs, en, sk, pl, etc.
   country?: string
 }
 
@@ -113,6 +115,16 @@ export class ComgateApiClient {
 
       if (params.prepareOnly) {
         formData.append("prepareOnly", "true")
+      }
+
+      // Optional: payer name (shown in Comgate admin)
+      if (params.name) {
+        formData.append("name", params.name)
+      }
+
+      // Optional: payment gateway UI language (cs, en, sk, pl...)
+      if (params.lang) {
+        formData.append("lang", params.lang)
       }
 
       console.log(`[Comgate] Sending create request with params: merchant=${params.merchant}, price=${params.price}, curr=${params.curr}, method=${params.method}, prepareOnly=${params.prepareOnly}`)
