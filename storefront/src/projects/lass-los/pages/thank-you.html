@@ -6,14 +6,14 @@
   <title>Vielen Dank für Ihre Bestellung! — Lass los, was dich kaputt macht</title>
   <link rel="icon" href="/favicon.png" type="image/png">
 
-  <!-- Sdílená konfigurace projektu -->
+  <!-- Gemeinsame Projektkonfiguration -->
   <script src="js/project-config.js"></script>
   <!-- Facebook Pixel -->
   <script src="js/pixel.js"></script>
 
 <!-- ═══════════════════════════════════════════════════════════
-     BEDANKPAGINA — Velvet Dusk Design
-     Objednávkový souhrn + kontrola adresy + edit formulář
+     DANKESEITE — Velvet Dusk Design
+     Bestellübersicht + Adressprüfung + Bearbeitungsformular
      ═══════════════════════════════════════════════════════════ -->
 <style>
 /* DM Sans — self-hosted */
@@ -23,7 +23,7 @@
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
 
-/* ══ Velvet Dusk barvy ══ */
+/* ══ Velvet Dusk Farben ══ */
 :root {
   --bg: #FAF5F8;
   --heading: #2D1B3D;
@@ -151,7 +151,7 @@ body { background: var(--bg); }
 .ty-detail-value { font-size: 15px; font-weight: 500; color: var(--heading); line-height: 1.45; }
 .ty-detail-full { grid-column: 1 / -1; }
 
-/* ══ 4. Edit form (skrytý) ══ */
+/* ══ 4. Edit form (versteckt) ══ */
 .ty-edit-form { display: none; margin-bottom: 24px; }
 .ty-edit-form.is-open { display: block; animation: ty-slideDown 0.35s cubic-bezier(.16,1,.3,1); }
 @keyframes ty-slideDown {
@@ -171,7 +171,7 @@ body { background: var(--bg); }
 .ty-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 0; }
 .ty-form-group { position: relative; margin-bottom: 14px; }
 .ty-form-group.full { grid-column: 1 / -1; }
-/* Shopify floating label styl */
+/* Shopify floating label Stil */
 .ty-float-field { position: relative; }
 .ty-float-field input {
   width: 100%; height: 54px;
@@ -193,7 +193,7 @@ body { background: var(--bg); }
   transform-origin: left center;
   background: transparent; padding: 0;
 }
-/* Label plovoucí nahoru */
+/* Label schwebt nach oben */
 .ty-float-field input:focus ~ label,
 .ty-float-field input:not(:placeholder-shown) ~ label {
   top: 10px; transform: translateY(0);
@@ -203,7 +203,7 @@ body { background: var(--bg); }
   color: var(--muted);
 }
 .ty-float-field input::placeholder { color: transparent; }
-/* Focus stav */
+/* Focus-Zustand */
 .ty-float-field input:focus {
   border-color: var(--cta);
   box-shadow: 0 0 0 3px rgba(194,123,160,0.12);
@@ -232,7 +232,7 @@ body { background: var(--bg); }
 }
 .ty-form-cancel:hover { background: rgba(45,27,61,0.06); transform: translateY(-1px); }
 
-/* Feedback zprávy */
+/* Feedback-Meldungen */
 .ty-feedback {
   display: none; padding: 14px 18px; border-radius: 12px;
   margin-bottom: 24px; font-size: 14px; font-weight: 500;
@@ -465,7 +465,7 @@ body { background: var(--bg); }
 <div class="ty-page">
 
   <!-- ═══════════════════════════════════════
-       1. HERO — bevestiging
+       1. HERO — Bestätigung
        ═══════════════════════════════════════ -->
   <div class="ty-hero ty-reveal">
     <div class="ty-check-circle">
@@ -530,7 +530,7 @@ body { background: var(--bg); }
   </div>
 
   <!-- ═══════════════════════════════════════
-       4. EDIT FORM (standaard verborgen)
+       4. BEARBEITUNGSFORMULAR (standardmäßig ausgeblendet)
        ═══════════════════════════════════════ -->
   <div class="ty-edit-form" id="ty-edit-form">
     <div class="ty-edit-form-inner">
@@ -574,7 +574,7 @@ body { background: var(--bg); }
           <label for="edit-city">Stadt</label>
         </div>
       </div>
-      <!-- Firemní pole (B2B) -->
+      <!-- Firmenfelder (B2B) -->
       <div id="ty-edit-company-section" style="display:none; margin-top:4px;">
         <div style="font-size:12px;font-weight:600;color:#9B7AAD;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Firmendaten</div>
         <div class="ty-form-row">
@@ -603,7 +603,7 @@ body { background: var(--bg); }
     </div>
   </div>
 
-  <!-- Feedback bericht (na opslaan) -->
+  <!-- Feedback-Meldung (nach dem Speichern) -->
   <div class="ty-feedback" id="ty-feedback">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
     <span id="ty-feedback-text"></span>
@@ -659,11 +659,11 @@ body { background: var(--bg); }
       <div class="ty-support-title">Fragen oder Probleme?</div>
       <div class="ty-support-desc">Haben Sie einen Fehler entdeckt, eine Frage zu Ihrer Bestellung oder ein Problem? Kontaktieren Sie uns gerne &mdash; wir helfen Ihnen mit Freude!</div>
     </div>
-    <a href="mailto:buch@befreiungsbuch.de?subject=Frage%20zur%20Bestellung%20%23&body=Hallo%2C%0A%0AIch%20habe%20eine%20Frage%20zu%20meiner%20Bestellung.%0A%0ABestellnummer%3A%20%0A%0AMeine%20Frage%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Senden Sie uns eine E-Mail</a>
+    <a href="mailto:buch@befreiungsbuch.de?subject=Frage%20zur%20Bestellung%20%23&body=Hallo%2C%0A%0AIch%20habe%20eine%20Frage%20zu%20meiner%20Bestellung.%0A%0ABestellnummer%3A%20%0A%0AMeine%20Frage%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; E-Mail schreiben</a>
   </div>
 
   <!-- ═══════════════════════════════════════
-       6. WHAT HAPPENS NOW — 3 stappen
+       6. WAS PASSIERT JETZT — 3 Schritte
        ═══════════════════════════════════════ -->
   <div class="ty-steps ty-reveal ty-d5">
     <div class="ty-steps-title">Was passiert jetzt?</div>
@@ -732,14 +732,30 @@ body { background: var(--bg); }
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════
+       9. FOOTER
+       ═══════════════════════════════════════ -->
+  <div style="text-align:center; padding:32px 16px 0; font-size:13px; color:var(--muted); line-height:1.8; border-top:1px solid rgba(45,27,61,0.08); margin-top:8px;">
+    <div style="margin-bottom:10px;">
+      Fragen? Schreiben Sie uns: <a href="mailto:buch@befreiungsbuch.de" style="color:var(--cta); text-decoration:underline; text-underline-offset:2px;">buch@befreiungsbuch.de</a>
+    </div>
+    <div style="font-size:12px; margin-bottom:6px;">
+      <a href="versand.html" style="color:var(--muted); text-decoration:underline; text-underline-offset:2px;">Versand</a> &middot;
+      <a href="sendungsverfolgung.html" style="color:var(--muted); text-decoration:underline; text-underline-offset:2px;">Sendungsverfolgung</a> &middot;
+      <a href="agb.html" style="color:var(--muted); text-decoration:underline; text-underline-offset:2px;">AGB</a> &middot;
+      <a href="datenschutz.html" style="color:var(--muted); text-decoration:underline; text-underline-offset:2px;">Datenschutz</a> &middot;
+      <a href="kontakt.html" style="color:var(--muted); text-decoration:underline; text-underline-offset:2px;">Kontakt</a>
+    </div>
+    <div style="font-size:11px; color:var(--muted);">&copy; 2026 Lass los, was dich kaputt macht</div>
+  </div>
 
 </div>
 
-<!-- ══ JS: Data z objednávky, edit formulář, FB Pixel, Confetti, Scroll reveal ══ -->
+<!-- ══ JS: Bestelldaten, Bearbeitungsformular, FB Pixel, Confetti, Scroll reveal ══ -->
 <script>
 (function(){
   // ────────────────────────────────────────────────────
-  // 1. Načtení dat z localStorage
+  // 1. Daten aus localStorage laden
   // ────────────────────────────────────────────────────
   var orderId = localStorage.getItem('medusa_order_id') || '';
   var displayId = localStorage.getItem('medusa_order_display_id') || '';
@@ -750,7 +766,7 @@ body { background: var(--bg); }
   localStorage.removeItem('checkout_draft');
   localStorage.removeItem('background_cart_id');
 
-  // Bundle + Order bump data z checkoutu
+  // Bundle + Order-Bump-Daten aus dem Checkout
   var bundleQty = parseInt(localStorage.getItem('medusa_bundle_qty') || '1');
   var bundlePrice = parseFloat(localStorage.getItem('medusa_bundle_price') || PROJECT_CONFIG.mainProduct.price);
   var orderBumpActive = localStorage.getItem('medusa_order_bump') === 'true';
@@ -758,33 +774,33 @@ body { background: var(--bg); }
 
   var customer = null;
   if (customerStr) {
-    try { customer = JSON.parse(customerStr); } catch(e) { console.warn('TY: Nelze parsovat zákaznická data'); }
+    try { customer = JSON.parse(customerStr); } catch(e) { console.warn('TY: Kundendaten konnten nicht geparst werden'); }
   }
 
-  // Firemní údaje (B2B)
+  // Firmendaten (B2B)
   var companyStr = localStorage.getItem('medusa_company');
   var companyData = null;
   if (companyStr) {
-    try { companyData = JSON.parse(companyStr); } catch(e) { console.warn('TY: Nelze parsovat firemní data'); }
+    try { companyData = JSON.parse(companyStr); } catch(e) { console.warn('TY: Firmendaten konnten nicht geparst werden'); }
   }
 
-  // Mapování country kódů na názvy
+  // Zuordnung der Ländercodes zu Namen
   var countryNames = {
     DE: 'Deutschland', AT: 'Österreich', LU: 'Luxemburg', CH: 'Schweiz',
     NL: 'Niederlande', BE: 'Belgien',
   };
 
   // ────────────────────────────────────────────────────
-  // 2. Vyplnění dynamických dat
+  // 2. Dynamische Daten einfügen
   // ────────────────────────────────────────────────────
 
-  // 2a. Personalizovaný heading
+  // 2a. Personalisierte Überschrift
   var titleEl = document.getElementById('ty-main-title');
   if (titleEl && customer && customer.first_name) {
     titleEl.innerHTML = 'Vielen Dank, <span class="accent">' + customer.first_name + '!</span>';
   }
 
-  // 2b. Objednávkové číslo
+  // 2b. Bestellnummer
   var orderLabelEl = document.getElementById('ty-order-label');
   if (orderLabelEl && displayId) {
     orderLabelEl.textContent = '\uD83D\uDCE6 Bestellung #' + displayId;
@@ -793,7 +809,7 @@ body { background: var(--bg); }
     orderLabelEl.textContent = '\uD83D\uDCE6 Bestellung #' + shortId;
   }
 
-  // 2c. Mailto link — doplň číslo objednávky
+  // 2c. Mailto-Link — Bestellnummer ergänzen
   var mailtoEl = document.getElementById('ty-support-mailto');
   if (mailtoEl) {
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
@@ -802,17 +818,17 @@ body { background: var(--bg); }
     mailtoEl.href = 'mailto:buch@befreiungsbuch.de?subject=' + subject + '&body=' + body;
   }
 
-  // 2d. Celková cena — bere v potaz bundle, order bump a upsell
+  // 2d. Gesamtpreis — berücksichtigt Bundle, Order Bump und Upsell
   var totalPrice;
   if (checkoutTotal > 0) {
-    // Máme uloženou celkovou cenu z checkoutu
+    // Gespeicherter Gesamtpreis aus dem Checkout
     totalPrice = checkoutTotal;
-    // Pokud upsell byl přidán po checkoutu (ne přes order bump), přičti ho
+    // Wenn Upsell nach dem Checkout hinzugefügt wurde (nicht über Order Bump), addieren
     if (upsellPurchased && !orderBumpActive) {
       totalPrice += PROJECT_CONFIG.upsellProduct.price;
     }
   } else {
-    // Fallback — starý výpočet
+    // Fallback — alte Berechnung
     var mainPrice = PROJECT_CONFIG.mainProduct.price;
     var upsellPrice = PROJECT_CONFIG.upsellProduct.price;
     totalPrice = upsellPurchased ? (mainPrice + upsellPrice) : mainPrice;
@@ -822,7 +838,7 @@ body { background: var(--bg); }
     totalPriceEl.textContent = totalPrice.toFixed(0) + ' \u20AC';
   }
 
-  // 2e. Aktualizuj hlavní položku s bundle qty
+  // 2e. Hauptartikel mit Bundle-Menge aktualisieren
   var orderItemsEl = document.getElementById('ty-order-items');
   if (orderItemsEl && bundleQty > 1) {
     var mainItemName = orderItemsEl.querySelector('.ty-order-name');
@@ -835,7 +851,7 @@ body { background: var(--bg); }
     }
   }
 
-  // 2f. Přidej upsell/order bump produkt do seznamu pokud byl zakoupen
+  // 2f. Upsell-/Order-Bump-Produkt zur Liste hinzufügen, falls gekauft
   if (upsellPurchased || orderBumpActive) {
     if (orderItemsEl) {
       var upsellName = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.name) || 'Upsell Product';
@@ -853,7 +869,7 @@ body { background: var(--bg); }
     }
   }
 
-  // 2e. Vyplnění zákaznických údajů
+  // 2g. Kundendaten anzeigen
   function updateDetailsDisplay() {
     if (!customer) return;
     var el = function(id) { return document.getElementById(id); };
@@ -873,7 +889,7 @@ body { background: var(--bg); }
       else if (cc) parts.push(cc);
       el('ty-show-address').innerHTML = parts.join('<br>');
     }
-    // Firemní údaje (B2B)
+    // Firmendaten (B2B)
     if (companyData && companyData.company_name) {
       var companyRow = el('ty-company-row');
       var companyVal = el('ty-show-company');
@@ -884,7 +900,7 @@ body { background: var(--bg); }
         if (companyData.vat_number) cParts.push('USt-IdNr.: ' + companyData.vat_number);
         companyVal.innerHTML = cParts.join('<br>');
       }
-      // Ukaž company sekci v edit formuláři
+      // Firmenbereich im Bearbeitungsformular anzeigen
       var editCompSection = el('ty-edit-company-section');
       if (editCompSection) editCompSection.style.display = '';
     }
@@ -892,7 +908,7 @@ body { background: var(--bg); }
   updateDetailsDisplay();
 
   // ────────────────────────────────────────────────────
-  // 3. Edit formulář — toggle + save
+  // 3. Bearbeitungsformular — Umschalten + Speichern
   // ────────────────────────────────────────────────────
   window.toggleEditForm = function() {
     var form = document.getElementById('ty-edit-form');
@@ -900,11 +916,11 @@ body { background: var(--bg); }
     var isOpen = form.classList.contains('is-open');
 
     if (isOpen) {
-      // Zavři formulář, ukaž kartu
+      // Formular schließen, Karte anzeigen
       form.classList.remove('is-open');
       card.style.display = '';
     } else {
-      // Otevři formulář, skryj kartu, předvyplň pole
+      // Formular öffnen, Karte ausblenden, Felder vorausfüllen
       card.style.display = 'none';
       form.classList.add('is-open');
       if (customer) {
@@ -916,7 +932,7 @@ body { background: var(--bg); }
         document.getElementById('edit-postal').value = customer.postal_code || '';
         document.getElementById('edit-city').value = customer.city || '';
       }
-      // Firemní pole předvyplnit
+      // Firmenfelder vorausfüllen
       if (companyData && companyData.company_name) {
         var ec = document.getElementById('edit-company');
         var ek = document.getElementById('edit-kvk');
@@ -925,7 +941,7 @@ body { background: var(--bg); }
         if (ek) ek.value = companyData.kvk_number || '';
         if (ev) ev.value = companyData.vat_number || '';
       }
-      // Scroll k formuláři
+      // Zum Formular scrollen
       form.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
@@ -935,7 +951,7 @@ body { background: var(--bg); }
     var feedback = document.getElementById('ty-feedback');
     var feedbackText = document.getElementById('ty-feedback-text');
 
-    // Načti hodnoty z formuláře
+    // Werte aus dem Formular laden
     var newData = {
       first_name: document.getElementById('edit-firstname').value.trim(),
       last_name: document.getElementById('edit-lastname').value.trim(),
@@ -946,17 +962,17 @@ body { background: var(--bg); }
       city: document.getElementById('edit-city').value.trim(),
     };
 
-    // Validace — alespoň email a jméno
+    // Validierung — mindestens E-Mail und Vorname
     if (!newData.email || !newData.first_name) {
       showFeedback('Bitte geben Sie mindestens Ihren Vornamen und Ihre E-Mail-Adresse ein.', 'error');
       return;
     }
 
-    // Loading stav
+    // Ladezustand
     btn.disabled = true;
     btn.innerHTML = '<span class="btn-spinner"></span> Speichern...';
 
-    // Aktualizuj lokální data ihned (pro lepší UX)
+    // Lokale Daten sofort aktualisieren (für bessere UX)
     customer = {
       email: newData.email,
       first_name: newData.first_name,
@@ -968,10 +984,10 @@ body { background: var(--bg); }
       country_code: customer ? customer.country_code : 'DE',
     };
 
-    // Aktualizuj localStorage
+    // localStorage aktualisieren
     localStorage.setItem('medusa_customer', JSON.stringify(customer));
 
-    // Firemní údaje aktualizovat
+    // Firmendaten aktualisieren
     var ecEl = document.getElementById('edit-company');
     if (ecEl) {
       var cName = ecEl.value.trim();
@@ -983,24 +999,24 @@ body { background: var(--bg); }
       }
     }
 
-    // Aktualizuj zobrazení na stránce
+    // Anzeige auf der Seite aktualisieren
     updateDetailsDisplay();
 
-    // Pokud nemáme order ID, přeskočíme API volání (preview/test mód)
+    // Ohne Order-ID API-Aufruf überspringen (Vorschau-/Testmodus)
     if (!orderId) {
-      console.log('TY: Žádné order ID — ukládám pouze lokálně');
+      console.log('TY: Keine Order-ID — nur lokal gespeichert');
       finishSave(true);
       return;
     }
 
-    // Volání Medusa API — aktualizace objednávky
+    // Medusa-API-Aufruf — Bestellung aktualisieren
     var apiUrl = PROJECT_CONFIG.medusaUrl + '/store/custom/orders/' + orderId + '/update-details';
     var headers = {
       'Content-Type': 'application/json',
       'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey,
     };
 
-    // Sestav API payload
+    // API-Payload zusammensetzen
     var apiPayload = {
       email: newData.email,
       shipping_address: {
@@ -1012,7 +1028,7 @@ body { background: var(--bg); }
         postal_code: newData.postal_code,
       }
     };
-    // Přidej firemní údaje pokud existují
+    // Firmendaten hinzufügen, falls vorhanden
     if (companyData && companyData.company_name) {
       apiPayload.shipping_address.company = companyData.company_name;
       apiPayload.metadata = {};
@@ -1028,17 +1044,17 @@ body { background: var(--bg); }
     .then(function(res) { return res.json(); })
     .then(function(data) {
       if (data.success) {
-        console.log('TY: Objednávka aktualizována v Meduse');
+        console.log('TY: Bestellung in Medusa aktualisiert');
         finishSave(true);
       } else {
-        console.warn('TY: API vrátilo chybu:', data.message);
-        // Data jsou uložená lokálně, ale API selhalo
+        console.warn('TY: API hat einen Fehler zurückgegeben:', data.message);
+        // Daten sind lokal gespeichert, aber API-Aufruf fehlgeschlagen
         finishSave(true, 'Angaben lokal gespeichert. Kontaktieren Sie uns, wenn das Problem weiterhin besteht.');
       }
     })
     .catch(function(err) {
-      console.error('TY: Chyba při API volání:', err);
-      // Lokální data jsou uložená, API nedostupné
+      console.error('TY: Fehler beim API-Aufruf:', err);
+      // Lokale Daten sind gespeichert, API nicht erreichbar
       finishSave(true, 'Angaben lokal gespeichert. Der Server ist derzeit nicht erreichbar.');
     });
   };
@@ -1048,11 +1064,11 @@ body { background: var(--bg); }
     btn.disabled = false;
     btn.innerHTML = 'Speichern';
 
-    // Zavři formulář, ukaž kartu
+    // Formular schließen, Karte anzeigen
     document.getElementById('ty-edit-form').classList.remove('is-open');
     document.getElementById('ty-details-card').style.display = '';
 
-    // Ukáž feedback
+    // Feedback anzeigen
     if (success) {
       showFeedback(customMessage || 'Ihre Angaben wurden aktualisiert! Wir senden Ihr Paket an die richtige Adresse.', 'success');
     } else {
@@ -1066,10 +1082,10 @@ body { background: var(--bg); }
     feedbackText.textContent = message;
     feedback.className = 'ty-feedback is-visible ' + type;
 
-    // Scroll k feedbacku
+    // Zum Feedback scrollen
     feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Auto-skryj po 8 sekundách
+    // Nach 8 Sekunden automatisch ausblenden
     setTimeout(function() {
       feedback.classList.remove('is-visible');
     }, 8000);
@@ -1109,7 +1125,7 @@ body { background: var(--bg); }
   }
 
   // ────────────────────────────────────────────────────
-  // 5. Vyčisti localStorage — odloženo na 5 minut (aby zákazník stihl upravit údaje)
+  // 5. localStorage bereinigen — verzögert um 5 Minuten (damit der Kunde seine Daten noch ändern kann)
   // ────────────────────────────────────────────────────
   setTimeout(function() {
     localStorage.removeItem('medusa_cart_id');
@@ -1124,7 +1140,7 @@ body { background: var(--bg); }
     localStorage.removeItem('medusa_bundle_price');
     localStorage.removeItem('medusa_order_bump');
     localStorage.removeItem('medusa_checkout_total');
-    console.log('TY: localStorage vyčištěn (po 5 min)');
+    console.log('TY: localStorage bereinigt (nach 5 Min.)');
   }, 5 * 60 * 1000);
 
   // ────────────────────────────────────────────────────
