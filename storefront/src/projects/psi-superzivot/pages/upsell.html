@@ -1290,7 +1290,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     var customer = customerRaw ? JSON.parse(customerRaw) : {};
     var paymentProvider = localStorage.getItem('medusa_payment_provider') || '';
     var paymentMethod = localStorage.getItem('medusa_payment_method') || '';
-    var regionId = PROJECT_CONFIG.regionId;
+    var regionId = PROJECT_CONFIG.regions.CZ || PROJECT_CONFIG.getRegionId('CZ');
 
     // Build return URL for payment gateway
     var baseUrl = window.location.href.split('?')[0];
