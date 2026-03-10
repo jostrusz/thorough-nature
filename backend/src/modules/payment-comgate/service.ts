@@ -180,23 +180,40 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
     }
     const isLive = config.mode === "live"
     const keys = isLive ? config.live_keys : config.test_keys
-    if (!keys?.api_key || !keys?.secret_key) {
+
+    // Debug: log config structure to identify key mapping issues
+    this.getLogger().info(`[Comgate] Config mode=${config.mode}, isLive=${isLive}, ` +
+      `live_keys type=${typeof config.live_keys}, test_keys type=${typeof config.test_keys}, ` +
+      `keys type=${typeof keys}, keys keys=${keys ? Object.keys(keys).join(',') : 'null'}, ` +
+      `has api_key=${!!keys?.api_key}, has secret_key=${!!keys?.secret_key}`)
+
+    // If keys is a string (raw pg might not auto-parse json), try to parse it
+    let parsedKeys = keys
+    if (typeof keys === 'string') {
+      try { parsedKeys = JSON.parse(keys) } catch {}
+    }
+
+    if (!parsedKeys?.api_key || !parsedKeys?.secret_key) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "Comgate merchant ID or secret not configured"
       )
     }
-    this.client_ = new ComgateApiClient(keys.api_key, keys.secret_key)
+    this.client_ = new ComgateApiClient(parsedKeys.api_key, parsedKeys.secret_key)
     return this.client_
   }
 
   /**
-   * Get keys from config for status/refund calls
+   * Get keys from config for status/refund calls.
+   * Handles both parsed objects and JSON strings (raw pg fallback).
    */
   private getKeysFromConfig(config: any): { api_key: string; secret_key: string } | null {
     if (!config) return null
     const isLive = config.mode === "live"
-    const keys = isLive ? config.live_keys : config.test_keys
+    let keys = isLive ? config.live_keys : config.test_keys
+    if (typeof keys === 'string') {
+      try { keys = JSON.parse(keys) } catch { return null }
+    }
     return keys?.api_key && keys?.secret_key ? keys : null
   }
 

@@ -178,8 +178,11 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
       )
     }
     const isLive = config.mode === "live"
-    const keys = isLive ? config.live_keys : config.test_keys
-    const meta = config.metadata || {}
+    let keys = isLive ? config.live_keys : config.test_keys
+    let meta = config.metadata || {}
+    // Handle JSON strings from raw pg fallback
+    if (typeof keys === 'string') { try { keys = JSON.parse(keys) } catch {} }
+    if (typeof meta === 'string') { try { meta = JSON.parse(meta) } catch {} }
     if (!keys?.api_key || !keys?.secret_key) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
