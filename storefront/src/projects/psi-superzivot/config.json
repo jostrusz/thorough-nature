@@ -34,7 +34,7 @@
     { "qty": 4, "price": 1499, "label": "4 knihy", "save": 701 }
   ],
   "mollieProfileId": "",
-  "packetaApiKey": "",
+  "packetaApiKey": "cbb760f552ef87b3",
   "paymentProviders": {},
   "pages": {
     "": "index.html",
