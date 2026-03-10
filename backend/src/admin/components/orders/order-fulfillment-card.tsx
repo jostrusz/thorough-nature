@@ -461,6 +461,52 @@ export function OrderFulfillmentCard({
         )
       })()}
 
+      {/* Zásilkovna pickup point info */}
+      {order.metadata?.packeta_point_name && (
+        <div
+          style={{
+            padding: "10px 20px",
+            borderTop: `1px solid ${colors.border}`,
+            background: "#f8f9ff",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B21A8" strokeWidth="2" strokeLinecap="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            <span style={{ fontSize: "12px", fontWeight: 700, color: "#6B21A8" }}>Zásilkovna</span>
+          </div>
+          <div style={{ fontSize: "12px", fontWeight: 600, color: colors.text }}>
+            {order.metadata.packeta_point_name}
+          </div>
+          <div style={{ fontSize: "11px", color: colors.textMuted, marginTop: "1px" }}>
+            {order.metadata.packeta_point_address}
+          </div>
+          {order.metadata.packeta_point_id && (
+            <div style={{ fontSize: "10px", color: colors.textMuted, marginTop: "2px" }}>
+              ID: {order.metadata.packeta_point_id}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Shipping method label for Zásilkovna orders */}
+      {order.metadata?.shipping_method && !order.metadata?.packeta_point_name && (
+        <div
+          style={{
+            padding: "8px 20px",
+            borderTop: `1px solid ${colors.border}`,
+            fontSize: "12px",
+            color: colors.textMuted,
+          }}
+        >
+          {order.metadata.shipping_method === "zasilkovna_home"
+            ? "Zásilkovna — Doprava domů (+20 Kč)"
+            : "Zásilkovna — Výdejní místo"}
+        </div>
+      )}
+
       {/* Action buttons — premium row */}
       {!hasFulfillments && (
         <div

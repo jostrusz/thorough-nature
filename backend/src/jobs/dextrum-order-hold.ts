@@ -111,6 +111,16 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         }
 
         // 7. Send to mySTOCK
+        const orderMeta = (order as any).metadata || {}
+        const deliveryFee = Number(orderMeta.shipping_fee) || 0
+        const isPickup = orderMeta.shipping_method === "zasilkovna_pickup"
+
+        // Build note with Zásilkovna pickup point info
+        let orderNote = ""
+        if (isPickup && orderMeta.packeta_point_id) {
+          orderNote = `Zásilkovna pickup: ${orderMeta.packeta_point_name || ""} (ID: ${orderMeta.packeta_point_id})`
+        }
+
         const wmsResult = await client.createOrder({
           orderCode,
           operatingUnitId: config.metadata?.operating_units?.[(order as any).metadata?.project_code] || config.partner_id || "",
@@ -125,7 +135,8 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
             phone: addr.phone || "",
             email: (order as any).email || "",
           },
-          cashAmount: isCOD ? (Number((order as any).total) || 0) + (Number((order as any).metadata?.cod_fee) || 0) : undefined,
+          cashAmount: isCOD ? (Number((order as any).total) || 0) + (Number(orderMeta.cod_fee) || 0) + deliveryFee : undefined,
+          note: orderNote || undefined,
         })
 
         // 7. Update dextrum_order_map

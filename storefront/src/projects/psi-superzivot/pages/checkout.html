@@ -2246,6 +2246,7 @@ body {
 <!-- ═══ PROJEKT KONFIGURACE + FACEBOOK PIXEL ═══ -->
 <script src="js/project-config.js"></script>
 <script src="js/pixel.js"></script>
+<script src="https://widget.packeta.com/v6/www/js/library.js"></script>
 </head>
 
 <body>
@@ -2317,9 +2318,14 @@ body {
         <span class="msb-line-val" id="msb-tax-val">0&nbsp;Kč</span>
       </div>
       <!-- Doprava -->
-      <div class="msb-line shipping">
+      <div class="msb-line shipping" id="msb-shipping">
         <span class="msb-line-label">Doprava</span>
-        <span class="msb-line-val">Zdarma</span>
+        <span class="msb-line-val" id="msb-shipping-val">Zdarma</span>
+      </div>
+      <!-- Delivery fee (home delivery +20 Kč) -->
+      <div class="msb-line" id="msb-delivery-fee" style="display:none;">
+        <span class="msb-line-label">Doprava domů</span>
+        <span class="msb-line-val">+20&nbsp;Kč</span>
       </div>
       <!-- Dobírka fee -->
       <div class="msb-line" id="msb-cod-fee" style="display:none;">
@@ -2667,15 +2673,49 @@ body {
             </div>
           </div>
 
-          <!-- Doprava zdarma info -->
-          <div id="shipping-info" style="display:flex;align-items:center;gap:10px;margin-top:16px;padding:12px 16px;background:#f0faf4;border:1px solid #b8e6c8;border-radius:10px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2" stroke-linecap="round" width="24" height="24"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            <div style="flex:1;">
-              <span style="font-weight:600;color:#1a1a2e;font-size:14px;">Doprava zdarma</span>
-              <span style="color:#27AE60;font-weight:700;font-size:14px;margin-left:6px;">0 Kč</span>
-              <div style="color:#666;font-size:12px;margin-top:2px;">Odesláno do 24 hodin po celé ČR</div>
+          <!-- ═══ ZPŮSOB DORUČENÍ ═══ -->
+          <div style="margin-top:16px;">
+            <div style="font-weight:700;font-size:14px;color:#1a1a2e;margin-bottom:10px;">Způsob doručení</div>
+
+            <!-- Option 1: Vyzvednutí na pobočce (Pickup) -->
+            <div class="shipping-option selected" id="shipping-pickup" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border:2px solid var(--accent);border-radius:10px;cursor:pointer;background:rgba(107,33,168,0.03);transition:all 0.15s ease;">
+              <div class="shipping-radio" style="width:18px;height:18px;border-radius:50%;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0;">
+                <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);"></div>
+              </div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" width="22" height="22" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;font-size:13px;color:#1a1a2e;">Vyzvednutí na pobočce</div>
+                <div style="font-size:12px;color:#666;margin-top:1px;">Zásilkovna — výdejní místa po celé ČR</div>
+              </div>
+              <span style="font-weight:700;color:#27AE60;font-size:14px;flex-shrink:0;">Zdarma</span>
             </div>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2.5" stroke-linecap="round" width="20" height="20"><path d="M20 6L9 17l-5-5"/></svg>
+
+            <!-- Packeta point selection (shown when pickup selected) -->
+            <div id="packeta-point-section" style="margin:8px 0 8px 0;padding-left:28px;">
+              <button type="button" id="packeta-select-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px dashed var(--accent);border-radius:8px;background:rgba(107,33,168,0.04);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s ease;" onmouseover="this.style.background='rgba(107,33,168,0.08)'" onmouseout="this.style.background='rgba(107,33,168,0.04)'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Vybrat výdejní místo
+              </button>
+              <div id="packeta-selected-point" style="display:none;margin-top:8px;padding:10px 14px;background:#f0faf4;border:1px solid #b8e6c8;border-radius:8px;">
+                <!-- Filled by Packeta Widget callback -->
+              </div>
+              <div id="packeta-error" style="display:none;margin-top:6px;color:var(--error);font-size:12px;font-weight:500;">
+                Vyberte prosím výdejní místo
+              </div>
+            </div>
+
+            <!-- Option 2: Doprava domů (Home delivery) -->
+            <div class="shipping-option" id="shipping-home" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;background:transparent;transition:all 0.15s ease;margin-top:8px;">
+              <div class="shipping-radio" style="width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0;">
+                <div style="width:10px;height:10px;border-radius:50%;background:transparent;"></div>
+              </div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" width="22" height="22" style="flex-shrink:0;"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;font-size:13px;color:#1a1a2e;">Doprava domů</div>
+                <div style="font-size:12px;color:#666;margin-top:1px;">Zásilka na vaši adresu</div>
+              </div>
+              <span style="font-weight:600;font-size:14px;color:#1a1a2e;flex-shrink:0;">+20&nbsp;Kč</span>
+            </div>
           </div>
 
         </div>
@@ -2826,6 +2866,10 @@ body {
         </span>
         <span style="color:#27AE60;font-weight:600;">Zdarma</span>
       </div>
+      <div class="summary-line" id="summary-delivery-fee" style="display:none;padding:4px 0;">
+        <span style="font-size:13px;">Doprava domů</span>
+        <span style="font-weight:600;">+20&nbsp;Kč</span>
+      </div>
       <div class="summary-line" id="summary-cod-fee" style="display:none;padding:4px 0;">
         <span style="font-size:13px;">Dobírka</span>
         <span style="font-weight:600;">+30&nbsp;Kč</span>
@@ -2971,6 +3015,7 @@ body {
     var total = selectedBundlePrice;
     if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
     if (selectedMethod === 'cod') total += 30;
+    if (selectedShipping === 'home') total += 20;
     return total;
   }
 
@@ -3018,6 +3063,34 @@ body {
     if (codFeeDesktop) codFeeDesktop.style.display = isCod ? 'flex' : 'none';
     var codFeeMobile = document.getElementById('msb-cod-fee');
     if (codFeeMobile) codFeeMobile.style.display = isCod ? 'flex' : 'none';
+
+    // Delivery fee řádek — zobraz/skryj podle způsobu doručení
+    var isHome = selectedShipping === 'home';
+    var deliveryFeeDesktop = document.getElementById('summary-delivery-fee');
+    if (deliveryFeeDesktop) deliveryFeeDesktop.style.display = isHome ? 'flex' : 'none';
+    var deliveryFeeMobile = document.getElementById('msb-delivery-fee');
+    if (deliveryFeeMobile) deliveryFeeMobile.style.display = isHome ? 'flex' : 'none';
+
+    // Update desktop + mobile shipping line text based on shipping method
+    var shippingLine = document.getElementById('summary-shipping');
+    if (shippingLine) {
+      var shippingVal = shippingLine.querySelector('span:last-child');
+      if (shippingVal) {
+        if (isHome) {
+          shippingVal.style.color = '#1a1a2e';
+          shippingVal.style.fontWeight = '600';
+          shippingVal.textContent = 'Zásilkovna';
+        } else {
+          shippingVal.style.color = '#27AE60';
+          shippingVal.style.fontWeight = '600';
+          shippingVal.textContent = 'Zdarma';
+        }
+      }
+    }
+    var msbShippingVal = document.getElementById('msb-shipping-val');
+    if (msbShippingVal) {
+      msbShippingVal.textContent = isHome ? 'Zásilkovna' : 'Zdarma';
+    }
 
     // ─── MOBILE STICKY SUMMARY BAR ───
     // Hlavní cena
@@ -3765,6 +3838,10 @@ body {
       paypalCardFieldsInstance = null;
     }
   }
+
+  /* ─── SHIPPING METHOD ─── */
+  var selectedShipping = 'pickup'; // 'pickup' or 'home'
+  var selectedPacketaPoint = null; // { id, name, address, zip, city }
 
   /* ─── DYNAMIC PAYMENT METHODS ─── */
   var selectedMethod = '';
@@ -5429,8 +5506,106 @@ body {
     }
   }
 
+  // ═══ SHIPPING METHOD EVENTS ═══
+  function bindShippingEvents() {
+    var pickupOpt = document.getElementById('shipping-pickup');
+    var homeOpt = document.getElementById('shipping-home');
+    var packetaSection = document.getElementById('packeta-point-section');
+
+    if (pickupOpt) {
+      pickupOpt.addEventListener('click', function() {
+        if (selectedShipping === 'pickup') return;
+        selectedShipping = 'pickup';
+        // Visual: activate pickup, deactivate home
+        pickupOpt.style.borderColor = 'var(--accent)';
+        pickupOpt.style.background = 'rgba(107,33,168,0.03)';
+        pickupOpt.querySelector('.shipping-radio div').style.background = 'var(--accent)';
+        homeOpt.style.borderColor = 'var(--border)';
+        homeOpt.style.background = 'transparent';
+        homeOpt.querySelector('.shipping-radio div').style.background = 'transparent';
+        if (packetaSection) packetaSection.style.display = '';
+        recalculateOrderSummary();
+        updateButtonText();
+      });
+    }
+
+    if (homeOpt) {
+      homeOpt.addEventListener('click', function() {
+        if (selectedShipping === 'home') return;
+        selectedShipping = 'home';
+        // Visual: activate home, deactivate pickup
+        homeOpt.style.borderColor = 'var(--accent)';
+        homeOpt.style.background = 'rgba(107,33,168,0.03)';
+        homeOpt.querySelector('.shipping-radio div').style.background = 'var(--accent)';
+        pickupOpt.style.borderColor = 'var(--border)';
+        pickupOpt.style.background = 'transparent';
+        pickupOpt.querySelector('.shipping-radio div').style.background = 'transparent';
+        if (packetaSection) packetaSection.style.display = 'none';
+        // Hide packeta error if shown
+        var packetaErr = document.getElementById('packeta-error');
+        if (packetaErr) packetaErr.style.display = 'none';
+        recalculateOrderSummary();
+        updateButtonText();
+      });
+    }
+
+    // Packeta Widget — select pickup point
+    var packetaBtn = document.getElementById('packeta-select-btn');
+    if (packetaBtn) {
+      packetaBtn.addEventListener('click', function() {
+        var apiKey = PROJECT_CONFIG.packetaApiKey;
+        if (!apiKey) {
+          console.error('[Packeta] API key not set in PROJECT_CONFIG.packetaApiKey');
+          alert('Zásilkovna API klíč není nastaven. Kontaktujte podporu.');
+          return;
+        }
+        if (typeof Packeta === 'undefined' || !Packeta.Widget) {
+          console.error('[Packeta] Widget library not loaded');
+          alert('Zásilkovna widget se nenačetl. Zkuste obnovit stránku.');
+          return;
+        }
+
+        Packeta.Widget.pick(apiKey, function(point) {
+          if (point) {
+            selectedPacketaPoint = {
+              id: point.id,
+              name: point.name,
+              address: point.place || point.street,
+              zip: point.zip,
+              city: point.city,
+            };
+            // Show selected point
+            var display = document.getElementById('packeta-selected-point');
+            if (display) {
+              display.style.display = 'block';
+              display.innerHTML = '<div style="display:flex;align-items:center;gap:8px;">'
+                + '<svg viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2" stroke-linecap="round" width="16" height="16" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg>'
+                + '<div style="flex:1;min-width:0;">'
+                + '<div style="font-weight:600;font-size:13px;color:#1a1a2e;">' + point.name + '</div>'
+                + '<div style="font-size:12px;color:#666;">' + (point.place || point.street || '') + ', ' + point.zip + ' ' + point.city + '</div>'
+                + '</div>'
+                + '</div>';
+            }
+            // Update button text
+            packetaBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Změnit výdejní místo';
+            // Hide error
+            var packetaErr = document.getElementById('packeta-error');
+            if (packetaErr) packetaErr.style.display = 'none';
+          }
+        }, {
+          language: 'cs',
+          country: 'cz',
+          appIdentity: PROJECT_CONFIG.domain || 'checkout',
+        });
+      });
+    }
+  }
+
   // Load payment methods on page init
   loadPaymentMethods();
+
+  // Bind shipping method events
+  bindShippingEvents();
 
   /* ─── FLOATING LABEL — select element needs has-value class ─── */
   var selects = document.querySelectorAll('.float-field select');
@@ -6899,6 +7074,15 @@ body {
       return;
     }
 
+    // Validace výdejního místa (pickup)
+    if (selectedShipping === 'pickup' && !selectedPacketaPoint) {
+      var packetaErr = document.getElementById('packeta-error');
+      if (packetaErr) packetaErr.style.display = 'block';
+      var packetaSection = document.getElementById('packeta-point-section');
+      if (packetaSection) packetaSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     // Zobraz stav načítání
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
@@ -7181,21 +7365,29 @@ body {
       }
 
       return tokenPromise.then(function() {
-        // COD: update cart metadata with cod_fee before payment collection
-        if (selectedMethod === 'cod') {
-          return medusaFetch('/store/carts/' + cartId, {
-            method: 'POST',
-            body: JSON.stringify({ metadata: { payment_method: 'cod', cod_fee: 30 } })
-          }).then(function() {
-            return medusaFetch('/store/payment-collections', {
-              method: 'POST',
-              body: JSON.stringify({ cart_id: cartId })
-            });
-          });
+        // Build metadata: shipping + optional COD
+        var cartMeta = {
+          shipping_method: selectedShipping === 'pickup' ? 'zasilkovna_pickup' : 'zasilkovna_home',
+          shipping_fee: selectedShipping === 'home' ? 20 : 0,
+        };
+        if (selectedShipping === 'pickup' && selectedPacketaPoint) {
+          cartMeta.packeta_point_id = String(selectedPacketaPoint.id);
+          cartMeta.packeta_point_name = selectedPacketaPoint.name;
+          cartMeta.packeta_point_address = selectedPacketaPoint.address + ', ' + selectedPacketaPoint.zip + ' ' + selectedPacketaPoint.city;
         }
-        return medusaFetch('/store/payment-collections', {
+        if (selectedMethod === 'cod') {
+          cartMeta.payment_method = 'cod';
+          cartMeta.cod_fee = 30;
+        }
+
+        return medusaFetch('/store/carts/' + cartId, {
           method: 'POST',
-          body: JSON.stringify({ cart_id: cartId })
+          body: JSON.stringify({ metadata: cartMeta })
+        }).then(function() {
+          return medusaFetch('/store/payment-collections', {
+            method: 'POST',
+            body: JSON.stringify({ cart_id: cartId })
+          });
         });
       }).then(function(pcRes) {
         var paymentCollectionId = pcRes.payment_collection.id;

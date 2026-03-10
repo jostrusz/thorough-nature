@@ -251,6 +251,18 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
           </span>
         </div>
 
+        {/* Delivery Fee (Doprava domů) */}
+        {Number(order.metadata?.shipping_fee) > 0 && (
+          <div className="od-row-hover" style={rowStyle}>
+            <span style={{ color: colors.textSec }}>
+              Doprava domů
+            </span>
+            <span style={{ color: colors.text }}>
+              +{formatCurrency(Number(order.metadata.shipping_fee), currency)}
+            </span>
+          </div>
+        )}
+
         {/* COD Fee (Dobírka) */}
         {order.metadata?.cod_fee && (
           <div className="od-row-hover" style={rowStyle}>
