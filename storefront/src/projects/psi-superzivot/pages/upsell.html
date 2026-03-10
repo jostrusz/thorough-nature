@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="cs">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stap 2 — Speciaal Aanbod Alleen Voor Jou</title>
-<link rel="icon" href="/dehondenbijbel/images/preloader.webp" type="image/webp">
+<title>Krok 2 — Speciální nabídka jen pro vás</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>" type="image/svg+xml">
 
 <!-- Hide upsell content on payment return — show preloader instead -->
 <script>
@@ -13,7 +13,7 @@ if (window.location.search.indexOf('upsell_return=1') !== -1) {
 }
 </script>
 
-<!-- Projekt konfigurace + FB Pixel -->
+<!-- Projekt konfigurace + FB Pixel (server-injected) -->
 <script src="js/project-config.js"></script>
 <script src="js/pixel.js"></script>
 <style>
@@ -24,20 +24,20 @@ if (window.location.search.indexOf('upsell_return=1') !== -1) {
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
 
-/* ─── DESIGN TOKENS — Velvet Dusk ─── */
+/* ─── DESIGN TOKENS — Golden Paw (cat theme) ─── */
 :root {
-  --bg: #FAF5F8;
-  --heading: #2D1B3D;
-  --cta: #C27BA0;
-  --section: #EDD9E5;
-  --body: #5A3D6B;
-  --highlight: #D9A4C0;
-  --dark: #1A1028;
+  --bg: #FFFAF5;
+  --heading: #2B1810;
+  --cta: #E07B3C;
+  --section: #F5E0CC;
+  --body: #5C4333;
+  --highlight: #F0B870;
+  --dark: #1A0F08;
   --white: #FFFFFF;
-  --light: #F5EDF2;
-  --muted: #9B7AAD;
-  --cta-hover: #A8628A;
-  --accent: #D498B5;
+  --light: #FFF3E8;
+  --muted: #9A7F68;
+  --cta-hover: #C66828;
+  --accent: #E09850;
   --success: #27AE60;
   --urgency: #C0392B;
 }
@@ -56,8 +56,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   50% { transform: scale(1.05); }
 }
 @keyframes glow {
-  0%, 100% { box-shadow: 0 6px 24px rgba(194,123,160,0.27); }
-  50% { box-shadow: 0 8px 40px rgba(194,123,160,0.5); }
+  0%, 100% { box-shadow: 0 6px 24px rgba(224,123,60,0.27); }
+  50% { box-shadow: 0 8px 40px rgba(224,123,60,0.5); }
 }
 @keyframes shimmer {
   0% { background-position: -200% center; }
@@ -75,6 +75,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   0%, 100% { transform: rotate(0deg); }
   25% { transform: rotate(-5deg); }
   75% { transform: rotate(5deg); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .anim { opacity: 0; animation: fadeInUp 0.7s ease forwards; }
@@ -101,403 +104,465 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 12px;
 }
 .step {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--muted);
-  font-weight: 500;
-  white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--muted); font-weight: 500;
 }
 .step.done { color: var(--success); }
-.step.done .step-num {
-  background: var(--success);
-  color: var(--white);
-}
 .step.active { color: var(--heading); font-weight: 700; }
-.step.active .step-num {
-  background: var(--cta);
-  color: var(--white);
-  animation: pulse 2s ease-in-out infinite;
-}
 .step-num {
   width: 24px; height: 24px; border-radius: 50%;
-  background: var(--section); display: flex; align-items: center;
-  justify-content: center; font-size: 12px; font-weight: 700;
-  flex-shrink: 0; transition: all 0.3s;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  border: 2px solid var(--muted); color: var(--muted);
 }
-.step-sep {
-  width: 28px; height: 2px; background: var(--section);
-  margin: 0 8px; flex-shrink: 0;
-}
-.step.done ~ .step-sep { background: var(--success); }
+.step.done .step-num { border-color: var(--success); color: var(--success); background: rgba(39,174,96,0.08); }
+.step.active .step-num { border-color: var(--cta); color: var(--white); background: var(--cta); }
+.step-sep { width: 24px; height: 2px; background: var(--section); border-radius: 1px; }
+.step-label-short { display: none; }
 
 /* ─── URGENCY TIMER ─── */
 .timer-bar {
-  background: linear-gradient(135deg, var(--dark), var(--heading));
-  color: var(--white); text-align: center; padding: 12px 20px;
-  font-size: 14px; font-weight: 500; letter-spacing: 0.02em;
-  position: sticky; top: 0; z-index: 100;
+  background: linear-gradient(135deg, var(--dark), #3D2815);
+  color: var(--white);
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
-.timer-bar strong { color: var(--highlight); }
 .timer-digits {
-  display: inline-flex; gap: 2px; font-family: 'DM Sans', sans-serif;
-  font-weight: 700; font-size: 18px; color: var(--white);
-  background: rgba(255,255,255,0.12); padding: 4px 12px; border-radius: 6px;
-  margin-left: 8px; animation: countdownPulse 2s ease-in-out infinite;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--highlight);
+  animation: countdownPulse 1s ease-in-out infinite;
+}
+
+/* ─── CONFIRM BADGE ─── */
+.confirm-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(39,174,96,0.1); border: 1px solid rgba(39,174,96,0.2);
+  border-radius: 100px; padding: 8px 18px; font-size: 14px;
+  font-weight: 600; color: var(--success); margin-bottom: 18px;
 }
 
 /* ─── DECISION HERO ─── */
 .decision-hero {
   text-align: center;
-  padding: 36px 0 24px;
-}
-.confirm-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(39,174,96,0.08);
-  color: var(--success);
-  font-size: 14px;
-  font-weight: 700;
-  padding: 8px 18px;
-  border-radius: 24px;
-  margin-bottom: 20px;
+  padding: 32px 0 8px;
 }
 .decision-hero h1 {
   font-family: 'Recoleta', serif;
-  font-weight: 600;
-  font-size: 30px;
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.3;
   color: var(--heading);
-  line-height: 1.2;
   margin-bottom: 16px;
-  letter-spacing: -0.02em;
-}
-.decision-hero h1 .dots {
-  color: var(--cta);
-  animation: countdownPulse 1.5s ease-in-out infinite;
 }
 .decision-hero .subtitle {
-  font-size: 16px; color: var(--body); line-height: 1.65;
-  max-width: 540px; margin: 0 auto;
+  font-size: 16px; line-height: 1.75; color: var(--body);
+  max-width: 560px; margin: 0 auto 14px;
 }
-.decision-hero .choose-instruction {
-  margin-top: 14px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--heading);
-  background: var(--light);
+.dots {
   display: inline-block;
-  padding: 8px 20px;
-  border-radius: 8px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+.choose-instruction {
+  font-size: 13px; color: var(--muted); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-top: 14px;
 }
 
 /* ─── PRODUCT IMAGE ─── */
-.product-showcase {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 0;
-  position: relative;
-}
 .product-image-wrap {
   position: relative;
   width: 200px;
 }
-.product-image-wrap img {
-  width: 100%;
-  height: auto;
-  border-radius: 4px;
-  filter: drop-shadow(0 8px 30px rgba(0,0,0,0.15));
-}
 .product-badge {
-  position: absolute; top: -12px; right: -16px;
-  background: var(--cta); color: var(--white);
-  font-size: 12px; font-weight: 700; padding: 6px 14px;
-  border-radius: 20px; letter-spacing: 0.03em;
-  box-shadow: 0 4px 12px rgba(194,123,160,0.3);
+  position: absolute;
+  top: -8px; right: -8px;
+  background: var(--urgency);
+  color: var(--white);
+  font-weight: 800;
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(192,57,43,0.4);
+  transform: rotate(4deg);
 }
 
 /* ─── COUPON CARD ─── */
 .coupon-card {
-  background: var(--white);
-  border: 2px dashed var(--cta);
-  border-radius: 14px;
   display: flex;
-  margin: 24px 0;
+  border: 2px dashed var(--accent);
+  border-radius: 14px;
   overflow: hidden;
-  position: relative;
+  margin: 20px 0;
+  background: var(--white);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 }
-.coupon-card::before,
-.coupon-card::after {
-  content: '';
-  position: absolute;
-  width: 20px; height: 20px;
-  background: var(--bg);
-  border-radius: 50%;
-  top: 50%; transform: translateY(-50%);
-  z-index: 2;
-}
-.coupon-card::before { left: -11px; }
-.coupon-card::after { right: -11px; }
 .coupon-left {
-  background: linear-gradient(135deg, var(--cta), var(--cta-hover));
+  background: linear-gradient(135deg, var(--cta), var(--accent));
   color: var(--white);
   padding: 20px 24px;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  min-width: 160px; text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-width: 160px;
 }
 .coupon-badge {
-  font-size: 9px; font-weight: 800;
-  letter-spacing: 0.2em; text-transform: uppercase;
-  opacity: 0.8; margin-bottom: 6px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; opacity: 0.85; margin-bottom: 4px;
 }
 .coupon-code {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px; font-weight: 700;
-  background: rgba(255,255,255,0.2);
-  padding: 5px 12px; border-radius: 6px;
-  letter-spacing: 0.08em; margin-bottom: 8px;
+  font-family: 'Recoleta', serif;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.04em;
 }
 .coupon-value {
   font-family: 'Recoleta', serif;
-  font-size: 22px; font-weight: 700;
+  font-weight: 700;
+  font-size: 24px;
 }
 .coupon-scissors {
-  font-size: 16px; margin-top: 6px;
-  animation: scissorCut 1.5s ease-in-out infinite;
+  font-size: 20px;
+  animation: scissorCut 2s ease-in-out infinite;
 }
 .coupon-right {
-  padding: 20px 24px;
   flex: 1;
+  padding: 20px 24px;
 }
 .coupon-applied {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 13px; font-weight: 600;
-  color: var(--success); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; color: var(--success);
+  margin-bottom: 14px;
 }
 .cpb-row {
   display: flex; justify-content: space-between;
-  font-size: 14px; padding: 4px 0; color: var(--body);
+  font-size: 14px; color: var(--body); padding: 4px 0;
 }
-.cpb-discount { color: var(--cta); font-weight: 600; }
+.cpb-discount { color: var(--urgency); font-weight: 600; }
 .cpb-total {
   border-top: 2px solid var(--section);
-  padding-top: 8px; margin-top: 4px;
-  font-weight: 800; font-size: 18px; color: var(--heading);
+  margin-top: 6px; padding-top: 10px;
+  font-weight: 700; color: var(--heading);
+  font-size: 16px;
 }
-
-/* ─── 5 PIJLERS GRID ─── */
-.pillar-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px; margin: 16px 0;
-}
-.pillar {
-  background: var(--light); border-radius: 10px;
-  padding: 14px 8px; text-align: center;
-  font-size: 12px; line-height: 1.4; color: var(--body);
-}
-.pillar strong {
-  display: block; font-size: 10px; letter-spacing: 0.08em;
-  color: var(--heading); margin: 6px 0 2px;
-}
-.pillar-icon { font-size: 22px; }
-
-/* ─── CTA BUTTON ─── */
-.cta-block { text-align: center; padding: 24px 0; }
-.btn-upsell {
-  font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700;
-  color: var(--white); background: var(--cta); border: none;
-  padding: 20px 48px; border-radius: 12px; cursor: pointer;
-  letter-spacing: 0.02em; display: inline-block; text-decoration: none;
-  position: relative; overflow: hidden; width: 100%; max-width: 460px;
-  animation: glow 2s ease-in-out infinite;
-  transition: all 0.25s cubic-bezier(.4,0,.2,1);
-}
-.btn-upsell::after {
-  content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0;
-  background: rgba(255,255,255,0.15); border-radius: 50%;
-  transform: translate(-50%, -50%); transition: width 0.5s, height 0.5s;
-}
-.btn-upsell:hover::after { width: 400px; height: 400px; }
-.btn-upsell:hover {
-  background: var(--cta-hover); transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(194,123,160,0.45);
-}
-.btn-upsell .btn-sub {
-  display: block; font-size: 12px; font-weight: 500; opacity: 0.85; margin-top: 4px;
-}
-.btn-spinner {
-  display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: var(--white); border-radius: 50%; animation: spin 0.6s linear infinite;
-  vertical-align: middle; margin-right: 8px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.btn-skip {
-  display: block; text-align: center; margin-top: 16px;
-  font-size: 13px; color: var(--muted); text-decoration: underline;
-  cursor: pointer; transition: color 0.2s;
-}
-.btn-skip:hover { color: var(--body); }
-
-/* ─── SOCIAL PROOF ─── */
-.proof-strip {
-  display: flex; align-items: center; justify-content: center; gap: 24px;
-  padding: 16px 0; flex-wrap: wrap;
-}
-.proof-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
-.proof-item .num { font-weight: 800; font-size: 16px; color: var(--heading); }
-.stars { color: #E8A040; font-size: 14px; letter-spacing: 2px; }
 
 /* ─── BENEFIT LIST ─── */
-.benefit-list { list-style: none; padding: 0; margin: 20px 0; text-align: left; }
+.benefit-list {
+  list-style: none;
+  padding: 0;
+}
 .benefit-list li {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 10px 0; border-bottom: 1px solid rgba(194,123,160,0.12);
-  font-size: 15px; line-height: 1.6;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--body);
 }
-.benefit-list li:last-child { border-bottom: none; }
-.benefit-list .check {
-  flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
-  background: rgba(194,123,160,0.1); display: flex; align-items: center;
-  justify-content: center; margin-top: 2px;
+.check {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  margin-top: 2px;
 }
-.benefit-list .check svg { width: 12px; height: 12px; }
 
-/* ─── TESTIMONIAL ─── */
-.testi-card {
-  background: var(--light); border-radius: 16px; padding: 28px;
-  margin: 24px 0; position: relative;
-}
-.testi-card::before {
-  content: '\201C'; position: absolute; top: 12px; left: 20px;
-  font-size: 48px; color: var(--highlight); opacity: 0.4;
-  font-family: Georgia, serif; line-height: 1;
-}
-.testi-text { font-size: 15px; line-height: 1.7; font-style: italic; color: var(--body); padding-left: 8px; }
-.testi-author { margin-top: 14px; font-size: 13px; font-weight: 700; color: var(--heading); }
-.testi-author span { font-weight: 400; color: var(--muted); }
-
-/* ─── BEFORE/AFTER GRID ─── */
-.ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
-.ba-card { background: var(--white); border-radius: 12px; padding: 20px; }
-.ba-card.before { border: 1px solid rgba(194,123,160,0.15); }
-.ba-card.after { border: 2px solid var(--cta); }
-.ba-label {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.15em; margin-bottom: 10px;
-}
-.ba-card.before .ba-label { color: var(--muted); }
-.ba-card.after .ba-label { color: var(--cta); }
-.ba-card ul { list-style: none; padding: 0; }
-.ba-card li { font-size: 13px; line-height: 1.55; padding: 3px 0; color: var(--body); }
-.ba-card.before li::before { content: '✕ '; color: var(--muted); font-size: 11px; }
-.ba-card.after li::before { content: '✓ '; color: var(--success); font-weight: 700; }
-
-/* ─── BONUS E-BOOKS ─── */
-.bonus-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0; }
-.bonus-card {
-  background: var(--white); border: 1px solid var(--section);
-  border-radius: 12px; padding: 16px; position: relative; text-align: center;
-}
-.bonus-card .bonus-badge {
-  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
-  background: var(--success); color: var(--white);
-  font-size: 10px; font-weight: 700; padding: 3px 10px;
-  border-radius: 12px; white-space: nowrap;
-}
-.bonus-card .bonus-img {
-  width: 60px; height: auto; margin: 8px auto;
-  display: block; border-radius: 4px;
-}
-.bonus-card h4 { font-family: 'Recoleta', serif; font-size: 13px; color: var(--heading); margin-bottom: 4px; line-height: 1.3; }
-.bonus-card p { font-size: 11px; line-height: 1.5; color: var(--body); }
-
-/* ─── PRICING CARD ─── */
-.pricing-card {
-  background: var(--white); border: 2px solid var(--section);
-  border-radius: 16px; padding: 32px; text-align: center;
-  margin: 24px 0; position: relative; overflow: hidden;
-}
-.pricing-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-  background: linear-gradient(90deg, var(--cta), var(--highlight), var(--cta));
-  background-size: 200% auto; animation: shimmer 3s linear infinite;
-}
-.stack-item {
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 0; border-bottom: 1px solid rgba(194,123,160,0.12);
-}
-.stack-item:last-child { border-bottom: none; }
-.stack-icon {
-  flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px;
-  background: rgba(194,123,160,0.1); display: flex; align-items: center;
+/* ─── SOCIAL PROOF STRIP ─── */
+.proof-strip {
+  display: flex;
   justify-content: center;
+  gap: 24px;
+  padding: 16px 0;
+  flex-wrap: wrap;
 }
-.stack-label { font-size: 14px; line-height: 1.5; }
-.stack-label strong { color: var(--heading); }
-.stack-value { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--muted); text-decoration: line-through; white-space: nowrap; }
-.price-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 16px 0; }
-.price-old { font-size: 24px; color: var(--muted); text-decoration: line-through; font-weight: 500; }
-.price-new { font-size: 42px; font-weight: 800; color: var(--cta); letter-spacing: -0.02em; }
-.price-save { background: rgba(194,123,160,0.1); color: var(--cta); font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
-.price-coupon-ref {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12px; color: var(--cta); font-weight: 600;
-  background: rgba(194,123,160,0.06); padding: 4px 12px;
-  border-radius: 6px; border: 1px dashed var(--highlight);
+.proof-item {
+  font-size: 13px; font-weight: 600; color: var(--heading);
+  display: flex; align-items: center; gap: 6px;
+}
+.stars { color: #F39C12; font-size: 16px; letter-spacing: 2px; }
+.num { color: var(--cta); }
+
+/* ─── CTA BUTTON ─── */
+.cta-block { text-align: center; padding: 8px 0 16px; }
+
+.btn-upsell {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--cta), var(--cta-hover));
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  padding: 20px 40px;
+  border-radius: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  line-height: 1.4;
+  animation: glow 2.5s ease-in-out infinite;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.btn-upsell:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px rgba(224,123,60,0.45);
+}
+.btn-upsell:active { transform: translateY(0); }
+.btn-sub {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.85;
   margin-top: 6px;
 }
 
-/* ─── GUARANTEE ─── */
-.guarantee-box {
-  display: flex; align-items: center; gap: 20px; background: var(--white);
-  border: 2px solid rgba(194,123,160,0.2); border-radius: 14px;
-  padding: 24px; margin: 28px 0;
+/* Spinner inside button */
+.btn-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
 }
-.guarantee-icon {
-  flex-shrink: 0; width: 56px; height: 56px; border-radius: 50%;
-  background: rgba(39,174,96,0.1); display: flex; align-items: center;
-  justify-content: center;
-}
-.guarantee-text { font-size: 14px; line-height: 1.65; }
-.guarantee-text strong { color: var(--heading); }
 
-/* ─── FAQ ─── */
-.faq-section { padding: 24px 0; }
-.faq-item { border-bottom: 1px solid rgba(194,123,160,0.15); }
-.faq-q {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 16px 0; cursor: pointer; font-size: 15px; font-weight: 600;
-  color: var(--heading); transition: color 0.2s;
+.btn-skip {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color 0.2s;
 }
-.faq-q:hover { color: var(--cta); }
-.faq-q .arrow { transition: transform 0.3s; font-size: 18px; color: var(--muted); }
-.faq-q.open .arrow { transform: rotate(180deg); }
-.faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; font-size: 14px; line-height: 1.7; color: var(--body); }
-.faq-a.open { max-height: 300px; padding-bottom: 16px; }
-
-/* ─── PAYMENT PRELOADER ─── */
-.payment-preloader {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: var(--bg); z-index: 9999;
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; text-align: center; padding: 20px;
-}
-.payment-preloader img { width: 100px; margin-bottom: 24px; animation: pulse 2s ease-in-out infinite; }
-.payment-preloader p { font-family: 'DM Sans', sans-serif; font-size: 18px; color: var(--heading); font-weight: 600; }
-.payment-preloader .sub { font-size: 14px; color: var(--muted); font-weight: 400; margin-top: 8px; }
-
-/* ─── FOOTER ─── */
-.upsell-footer { text-align: center; padding: 32px 0 48px; font-size: 12px; color: var(--muted); }
+.btn-skip:hover { color: var(--body); }
 
 /* ─── DIVIDER ─── */
 .divider { width: 60px; height: 3px; background: var(--highlight); border-radius: 2px; margin: 24px auto; }
+
+/* ─── BEFORE/AFTER GRID ─── */
+.ba-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 16px 0;
+}
+.ba-card {
+  border-radius: 14px;
+  padding: 20px;
+}
+.ba-card.before {
+  background: rgba(192,57,43,0.05);
+  border: 1px solid rgba(192,57,43,0.12);
+}
+.ba-card.after {
+  background: rgba(39,174,96,0.05);
+  border: 1px solid rgba(39,174,96,0.12);
+}
+.ba-label {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 12px;
+  color: var(--heading);
+}
+.ba-card ul {
+  list-style: none;
+  padding: 0;
+}
+.ba-card li {
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 4px 0;
+  padding-left: 18px;
+  position: relative;
+}
+.ba-card.before li::before { content: '✗'; position: absolute; left: 0; color: var(--urgency); font-weight: 700; }
+.ba-card.after li::before { content: '✓'; position: absolute; left: 0; color: var(--success); font-weight: 700; }
+
+/* ─── TESTIMONIALS ─── */
+.testi-card {
+  background: var(--white);
+  border: 1px solid var(--section);
+  border-radius: 14px;
+  padding: 24px;
+  margin: 16px 0;
+  position: relative;
+}
+.testi-card::before {
+  content: '"';
+  font-family: 'Recoleta', serif;
+  font-size: 60px;
+  color: var(--accent);
+  position: absolute;
+  top: 8px; left: 20px;
+  opacity: 0.3;
+  line-height: 1;
+}
+.testi-text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--body);
+  font-style: italic;
+  padding-left: 8px;
+}
+.testi-author {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--heading);
+  margin-top: 12px;
+  padding-left: 8px;
+}
+.testi-author span { font-weight: 400; color: var(--muted); }
+
+/* ─── PRICING CARD ─── */
+.pricing-card {
+  background: var(--white);
+  border: 2px solid var(--accent);
+  border-radius: 18px;
+  padding: 32px 28px;
+  margin: 24px 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.pricing-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--cta), var(--accent), var(--cta));
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+.stack-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  text-align: left;
+}
+.stack-icon {
+  width: 36px; height: 36px;
+  background: var(--light);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.stack-label { flex: 1; font-size: 14px; color: var(--body); }
+.stack-value {
+  font-weight: 700; font-size: 14px; color: var(--heading);
+  text-decoration: line-through; opacity: 0.5;
+}
+.price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 14px;
+  margin: 8px 0;
+}
+.price-old {
+  font-size: 22px;
+  text-decoration: line-through;
+  color: var(--muted);
+  font-weight: 500;
+}
+.price-new {
+  font-family: 'Recoleta', serif;
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--cta);
+}
+.price-save {
+  background: rgba(39,174,96,0.12);
+  color: var(--success);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+.price-coupon-ref {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* ─── GUARANTEE BOX ─── */
+.guarantee-box {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  background: rgba(39,174,96,0.06);
+  border: 1px solid rgba(39,174,96,0.15);
+  border-radius: 14px;
+  padding: 24px;
+  margin: 24px 0;
+}
+.guarantee-icon {
+  flex-shrink: 0;
+  width: 48px; height: 48px;
+  background: rgba(39,174,96,0.1);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.guarantee-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--body);
+}
+
+/* ─── FAQ ─── */
+.faq-section {
+  margin: 20px 0;
+}
+.faq-item {
+  border-bottom: 1px solid var(--section);
+}
+.faq-q {
+  padding: 16px 0;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--heading);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+.faq-q:hover { color: var(--cta); }
+.arrow {
+  font-size: 12px;
+  transition: transform 0.3s;
+  color: var(--muted);
+}
+.faq-q.open .arrow { transform: rotate(180deg); }
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--body);
+  padding: 0;
+}
+.faq-a.open {
+  max-height: 300px;
+  padding-bottom: 16px;
+}
 
 /* ─── AUTHOR CARD ─── */
 .author-card {
@@ -508,10 +573,54 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .author-avatar {
   width: 60px; height: 60px; border-radius: 50%;
   overflow: hidden; flex-shrink: 0;
+  background: var(--section);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
 }
 .author-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .author-info h4 { font-family: 'Recoleta', serif; font-size: 16px; color: var(--heading); margin-bottom: 6px; }
 .author-info p { font-size: 14px; line-height: 1.6; color: var(--body); }
+
+/* ─── FOOTER ─── */
+.upsell-footer {
+  text-align: center;
+  padding: 32px 0 48px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ─── PRELOADER ─── */
+.payment-preloader {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  gap: 16px;
+  padding: 20px;
+}
+.payment-preloader .spinner {
+  width: 48px; height: 48px;
+  border: 4px solid var(--section);
+  border-top-color: var(--cta);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.payment-preloader p {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--heading);
+  text-align: center;
+}
+.payment-preloader .sub {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+}
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 600px) {
@@ -522,13 +631,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   .coupon-scissors { display: none; }
   .coupon-badge { margin-bottom: 0; }
   .coupon-code { margin-bottom: 0; }
-  .pillar-grid { grid-template-columns: repeat(3, 1fr); }
   .price-new { font-size: 36px; }
   .pricing-card { padding: 24px 18px; }
   .guarantee-box { flex-direction: column; text-align: center; }
   .btn-upsell { font-size: 16px; padding: 18px 32px; }
   .ba-grid { grid-template-columns: 1fr; }
-  .bonus-grid { grid-template-columns: 1fr; }
   .author-card { flex-direction: column; text-align: center; align-items: center; }
   .step { font-size: 11px; }
   .step-label { display: none; }
@@ -547,27 +654,27 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   <div class="step-bar-inner">
     <div class="step done">
       <span class="step-num">&#10003;</span>
-      <span class="step-label">Bestelling</span>
-      <span class="step-label-short">Besteld</span>
+      <span class="step-label">Objedn&aacute;vka</span>
+      <span class="step-label-short">Objedn&aacute;no</span>
     </div>
     <div class="step-sep"></div>
     <div class="step active">
       <span class="step-num">2</span>
-      <span class="step-label">Speciaal Aanbod</span>
-      <span class="step-label-short">Aanbod</span>
+      <span class="step-label">Speci&aacute;ln&iacute; nab&iacute;dka</span>
+      <span class="step-label-short">Nab&iacute;dka</span>
     </div>
     <div class="step-sep"></div>
     <div class="step">
       <span class="step-num">3</span>
-      <span class="step-label">Bevestiging</span>
-      <span class="step-label-short">Klaar</span>
+      <span class="step-label">Potvrzen&iacute;</span>
+      <span class="step-label-short">Hotovo</span>
     </div>
   </div>
 </div>
 
 <!-- ═══════ URGENCY TIMER ═══════ -->
 <div class="timer-bar">
-  Dit aanbod verdwijnt over <strong><span class="timer-digits" id="timer">09:59</span></strong> &mdash; alleen voor jou, alleen nu
+  Tato nab&iacute;dka vypr&scaron;&iacute; za <strong><span class="timer-digits" id="timer">09:59</span></strong> &mdash; pouze pro v&aacute;s, pouze nyn&iacute;
 </div>
 
 <div class="page-wrap">
@@ -576,27 +683,27 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <section class="decision-hero anim d1">
   <div class="confirm-badge">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-    Je bestelling is bevestigd!
+    Va&scaron;e objedn&aacute;vka je potvrzena!
   </div>
 
-  <h1>Stop. Je pakket wordt verstuurd &mdash; maar lees dit <em>eerst</em><span class="dots">...</span></h1>
+  <h1>Po&ccaron;kejte. V&aacute;&scaron; bal&iacute;&ccaron;ek se p&rcaron;ipravuje &mdash; ale p&rcaron;e&ccaron;t&ecaron;te si nejd&rcaron;&iacute;v toto<span class="dots">...</span></h1>
 
   <p class="subtitle">
-    Je hebt zojuist <strong>De Hondenbijbel</strong> besteld. Maar terwijl we je bestelling klaarmaken,
-    is er één ding dat we je <strong>niet kunnen laten missen</strong>. Dit aanbod bestaat niet op onze website.
-    Het bestaat alleen hier. Alleen nu. Alleen voor jou als nieuwe klant.
+    Pr&aacute;v&ecaron; jste si objednali <strong>Ps&iacute; super&zcaron;ivot</strong>. Ale zat&iacute;mco bal&iacute;me va&scaron;i objedn&aacute;vku,
+    je tu jedna v&ecaron;c, o kterou nechceme, abyste p&rcaron;i&scaron;li. Tato nab&iacute;dka neexistuje na na&scaron;em webu.
+    Existuje jen tady. Jen te&dcaron;. Jen pro v&aacute;s jako nov&eacute;ho z&aacute;kazn&iacute;ka.
   </p>
 
   <div class="choose-instruction">
-    &#9660; Neem 60 seconden. Lees dit. Dan kies jij: <strong>ja of nee</strong>
+    &#9660; V&ecaron;nujte tomu 60 sekund. P&rcaron;e&ccaron;t&ecaron;te si to. Pak se rozhodn&ecaron;te: <strong>ano nebo ne</strong>
   </div>
 </section>
 
 <!-- ═══════ PRODUCT IMAGE ═══════ -->
 <div class="product-showcase anim d2" style="display: flex; align-items: center; justify-content: center; padding: 24px 0;">
   <div class="product-image-wrap">
-    <img id="upsell-product-img" src="/Laat-los-wat-je-kapotmaakt-book-pichi.webp" alt="Laat Los Wat Je Kapotmaakt &mdash; boek door Joris de Vries" loading="eager" style="width: 100%; height: auto; border-radius: 4px; filter: drop-shadow(0 8px 30px rgba(0,0,0,0.15));">
-    <div class="product-badge">&minus;&euro;10</div>
+    <img id="upsell-product-img" src="" alt="Ko&ccaron;i&ccaron;&iacute; bible &mdash; kniha" loading="eager" style="width: 100%; height: auto; border-radius: 4px; filter: drop-shadow(0 8px 30px rgba(0,0,0,0.15)); min-height: 250px; background: var(--light);">
+    <div class="product-badge">&minus;151&nbsp;K&ccaron;</div>
   </div>
 </div>
 
@@ -604,81 +711,79 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <div class="coupon-card anim d2">
   <div class="coupon-left">
     <div>
-      <div class="coupon-badge">KORTINGSBON</div>
-      <div class="coupon-code">HONDEN-VIP</div>
+      <div class="coupon-badge">SLEVOV&Yacute; KUP&Oacute;N</div>
+      <div class="coupon-code">PSI-VIP</div>
     </div>
     <div>
-      <div class="coupon-value">&minus;&euro;10</div>
+      <div class="coupon-value">&minus;151&nbsp;K&ccaron;</div>
       <div class="coupon-scissors">&#9986;</div>
     </div>
   </div>
   <div class="coupon-right">
     <div class="coupon-applied">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-      Automatisch toegepast op je bestelling
+      Automaticky aplikov&aacute;no na va&scaron;i objedn&aacute;vku
     </div>
-    <div class="cpb-row"><span>Originele prijs boek</span><span>&euro;35</span></div>
-    <div class="cpb-row cpb-discount"><span>Kortingsbon HONDEN-VIP</span><span>&minus;&euro;10</span></div>
-    <div class="cpb-row cpb-total"><span>Jouw exclusieve prijs</span><span>&euro;25</span></div>
+    <div class="cpb-row"><span>P&uring;vodn&iacute; cena knihy</span><span>550&nbsp;K&ccaron;</span></div>
+    <div class="cpb-row cpb-discount"><span>Slevov&yacute; kup&oacute;n PSI-VIP</span><span>&minus;151&nbsp;K&ccaron;</span></div>
+    <div class="cpb-row cpb-total"><span>Va&scaron;e exkluzivn&iacute; cena</span><span>399&nbsp;K&ccaron;</span></div>
   </div>
 </div>
 
-<!-- ═══════ PROBLEMEN + MECHANISME ═══════ -->
+<!-- ═══════ PROBLÉMY + MECHANISMUS ═══════ -->
 <div class="anim d3" style="padding: 8px 0 20px;">
   <h2 style="font-family: 'Recoleta', serif; font-weight: 600; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 16px;">
-    Herken je dit?
+    M&aacute;te doma i ko&ccaron;ku? &#128049;
   </h2>
 
   <p style="font-size: 15px; line-height: 1.8; color: var(--body); margin-bottom: 14px;">
-    Je hoofd gaat maar door. &rsquo;s Avonds in bed, onderweg, zelfs midden in een gesprek.
-    Dezelfde gedachten, dezelfde gesprekken, dezelfde &ldquo;wat als&rdquo;&mdash;in een eindeloze herhaling.
-    Je bent moe. Niet van het werk, maar van <em>jezelf</em>.
+    &Scaron;kr&aacute;be n&aacute;bytek. Ignoruje v&aacute;s, kdy&zcaron; ji zavol&aacute;te. V noci v&aacute;s bud&iacute;.
+    Nechce j&iacute;st to, co j&iacute; d&aacute;te. A kdy&zcaron; ji chcete vzít k veterin&aacute;&rcaron;i, je to boj.
+    Milujete svou ko&ccaron;ku &mdash; ale n&ecaron;kdy m&aacute;te pocit, &zcaron;e ji v&uring;bec nech&aacute;pete.
   </p>
 
   <p style="font-size: 15px; line-height: 1.8; color: var(--body); margin-bottom: 14px;">
-    Misschien is het een oude pijn die je maar niet kwijtraakt. Of woede naar iemand die je
-    heeft gekwetst &mdash; waarvan je weet dat je hem los moet laten, maar dat gewoon niet lukt.
-    Of schuldgevoel over iets uit het verleden dat je elke dag een beetje verder
-    naar beneden trekt.
+    Mo&zcaron;n&aacute; jste zkou&scaron;eli r&uring;zn&eacute; rady z internetu. Mo&zcaron;n&aacute; jste koupili dr&aacute;h&eacute; ko&ccaron;i&ccaron;&iacute; h&rcaron;a&ccaron;ky
+    nebo speci&aacute;ln&iacute; krmivo. Ale po&rcaron;&aacute;d m&aacute;te pocit, &zcaron;e va&scaron;e ko&ccaron;ka &zcaron;ije sv&uring;j vlastn&iacute; &zcaron;ivot &mdash;
+    a vy jste u toho jen n&aacute;hodn&yacute; divák.
   </p>
 
   <p style="font-size: 15px; line-height: 1.8; color: var(--body); margin-bottom: 20px;">
-    Het gekke is: je hebt het al zo lang meegedragen dat het bijna normaal voelt.
-    <strong>Maar het is niet normaal. En het hoeft ook niet zo te blijven.</strong>
+    Probl&eacute;m nen&iacute; va&scaron;e ko&ccaron;ka. Probl&eacute;m je, &zcaron;e nikdo v&aacute;m nikdy neuk&aacute;zal,
+    <strong>jak ko&ccaron;ky doopravdy funguj&iacute;</strong>. A p&rcaron;esn&ecaron; to tato kniha m&ecaron;n&iacute;.
   </p>
 
   <div style="background: var(--light); border-radius: 14px; padding: 22px 24px; margin-bottom: 16px;">
-    <p style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em;">Wat dit boek anders maakt</p>
+    <p style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em;">Co d&ecaron;l&aacute; tuto knihu v&yacute;jime&ccaron;nou</p>
     <p style="font-size: 15px; line-height: 1.8; color: var(--body);">
-      De meeste boeken vertellen je wat je moet <em>doen</em>. Dit boek laat je zien
-      <em>waarom</em> je vastloopt &mdash; en geeft je daarna concrete stappen om eruit te komen.
-      Geen positief denken, geen zweverige theorie. Joris de Vries combineert inzichten
-      uit de neuropsychologie met 12 jaar praktijkervaring: <strong>wat houdt ons
-      vanbinnen gevangen, en hoe doorbreek je dat patroon voor altijd?</strong>
+      Ko&ccaron;i&ccaron;&iacute; bible pokr&yacute;v&aacute; <strong>5 pil&iacute;&rcaron;&uring; spokojen&eacute;ho &zcaron;ivota s ko&ccaron;kou</strong>:
+      V&yacute;&zcaron;iva, Psychologie, P&eacute;&ccaron;e, V&yacute;chova a Pouto. Autor Michal Peterka
+      kombinuje nejnov&ecaron;j&scaron;&iacute; poznatky z ko&ccaron;i&ccaron;&iacute; behavior&aacute;ln&iacute; v&ecaron;dy s 15 lety
+      praktick&yacute;ch zku&scaron;enost&iacute;: <strong>220+ stran konkr&eacute;tn&iacute;ch rad, kter&eacute; m&uring;&zcaron;ete pou&zcaron;&iacute;t hned dnes.</strong>
     </p>
   </div>
 
   <p style="font-size: 15px; line-height: 1.8; color: var(--body);">
-    Na dit boek slaap je weer door. Je zegt &lsquo;nee&rsquo; zonder je schuldig te voelen.
-    Je draagt die oude woede niet meer mee. En je hond? Die merkt het ook &mdash;
-    want een rustige baas maakt een rustige hond.
+    Po t&eacute;to knize budete rozum&ecaron;t ka&zcaron;d&eacute;mu gestu va&scaron;&iacute; ko&ccaron;ky. Budete v&ecaron;d&ecaron;t,
+    co j&iacute; d&aacute;vat k j&iacute;dlu. Jak ji nau&ccaron;it pravidla. A hlavn&ecaron; &mdash;
+    jak spolu vytvo&rcaron;it pouto, o kter&eacute;m jste ani nev&ecaron;d&ecaron;li, &zcaron;e je mo&zcaron;n&eacute;. &#128149;
   </p>
 </div>
 
 <!-- ═══════ SOCIAL PROOF STRIP ═══════ -->
 <div class="proof-strip anim d3">
   <div class="proof-item"><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span> <span>4.9/5</span></div>
-  <div class="proof-item"><span class="num">3.000+</span> lezers</div>
-  <div class="proof-item"><span class="num">92%</span> voelt verschil in 14 dagen</div>
+  <div class="proof-item"><span class="num">2.500+</span> spokojených &ccaron;ten&aacute;&rcaron;&uring;</div>
+  <div class="proof-item"><span class="num">94%</span> vid&iacute; zm&ecaron;nu do 14 dn&iacute;</div>
 </div>
 
-<!-- ═══════ EERSTE CTA ═══════ -->
+<!-- ═══════ PRVNÍ CTA ═══════ -->
 <div class="cta-block anim d3" id="first-cta">
   <a href="#" class="btn-upsell" id="btn-yes" onclick="return false;">
-    JA, voeg toe voor slechts &euro;25 &rarr;
-    <span class="btn-sub">Je wordt doorgestuurd naar dezelfde betaalmethode als bij je bestelling. De toevoeging is pas definitief na betaling.</span>
+    ANO, p&rcaron;idejte za pouh&yacute;ch 399&nbsp;K&ccaron; &rarr;
+    <span class="btn-sub">Budete p&rcaron;esm&ecaron;rov&aacute;ni na stejnou platebn&iacute; metodu jako u va&scaron;&iacute; objedn&aacute;vky. P&rcaron;id&aacute;n&iacute; je definitivn&iacute; a&zcaron; po zaplacen&iacute;.</span>
   </a>
-  <a class="btn-skip" id="btn-no" href="#">Nee bedankt, ik sla dit eenmalige aanbod over</a>
+  <a class="btn-skip" id="btn-no" href="#">Ne, d&ecaron;kuji &mdash; tuto jednor&aacute;zovou nab&iacute;dku p&rcaron;esko&ccaron;&iacute;m</a>
 </div>
 
 <div class="divider"></div>
@@ -686,44 +791,43 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <!-- ═══════ THE PITCH ═══════ -->
 <div class="anim d4" style="padding: 16px 0;">
   <h2 style="font-family: 'Recoleta', serif; font-weight: 600; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 16px;">
-    Je geeft alles voor je hond.<br>
-    <span style="font-style: italic; color: var(--cta);">Maar wie zorgt er eigenlijk voor jou?</span>
+    Postaráte se o psa i o ko&ccaron;ku.<br>
+    <span style="font-style: italic; color: var(--cta);">Te&dcaron; d&aacute;v&aacute;te ob&ecaron;ma to nejlep&scaron;&iacute;.</span>
   </h2>
 
   <p style="font-size: 16px; line-height: 1.75; color: var(--body);">
-    Denk even na. Je hebt net een boek gekocht om <em>je hond</em> een beter leven te geven.
-    Maar hoe zit het met jouw leven? Hoelang zit jij al opgesloten in je eigen hoofd?
-    De <strong>gedachten die maar malen om 03:00</strong>. Het schuldgevoel als je
-    vijf minuten voor jezelf neemt. De woede die je inslikt — dag na dag — totdat die
-    ergens anders uitbarst.
+    Pr&aacute;v&ecaron; jste si koupili knihu, kter&aacute; zm&ecaron;n&iacute; &zcaron;ivot va&scaron;eho psa.
+    Ale co va&scaron;e ko&ccaron;ka? Ta, kter&aacute; sed&iacute; na okn&ecaron; a tv&aacute;&rcaron;&iacute; se, &zcaron;e j&iacute; je v&scaron;echno jedno?
+    <strong>Nen&iacute; j&iacute; to jedno.</strong> Ko&ccaron;ky jsou mistr&yacute;n&ecaron; v maská;ván&iacute; emoc&iacute; &mdash;
+    a pr&aacute;v&ecaron; proto pot&rcaron;ebuj&iacute; majitele, kte&rcaron;&iacute; jim rozum&iacute;.
   </p>
+
   <p style="font-size: 16px; line-height: 1.75; color: var(--body); margin-top: 12px;">
-    Wat als we je vertellen dat <strong>3.000 mensen net als jij</strong> dit patroon hebben doorbroken
-    &mdash; niet met therapie, niet met medicijnen &mdash; maar met 5 concrete stappen?
-    Geen vage theorie. Geen positief denken. Maar een <strong>praktisch systeem</strong> dat je
-    direct kunt toepassen, ook als je nu volledig uitgeput bent.
+    Co kdy&zcaron; v&aacute;m &rcaron;ekneme, &zcaron;e <strong>2.500 majitel&uring; ko&ccaron;ek</strong> u&zcaron; tento syst&eacute;m pou&zcaron;&iacute;v&aacute; &mdash;
+    a vid&iacute; v&yacute;sledky b&ecaron;hem prvn&iacute;ch dvou t&yacute;dn&uring;? &Zcaron;&aacute;dn&aacute; teorie. &Zcaron;&aacute;dn&eacute; pov&ecaron;ry.
+    Jen <strong>5 pil&iacute;&rcaron;&uring;</strong>, kter&eacute; pokr&yacute;vaj&iacute; v&scaron;e, co va&scaron;e ko&ccaron;ka pot&rcaron;ebuje.
   </p>
 
   <ul class="benefit-list" style="margin-top: 16px;">
     <li>
-      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><strong>Eindelijk doorslapen</strong> — stop de 03:00-gedachtespiraal die je elke nacht wakker houdt</div>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#E07B3C" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><strong>Optim&aacute;ln&iacute; v&yacute;&zcaron;iva</strong> &mdash; co ko&ccaron;ce d&aacute;vat, &ccaron;emu se vyhnout a jak poznat kvalitn&iacute; krmivo</div>
     </li>
     <li>
-      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><strong>'Nee' zeggen zonder je schuldig te voelen</strong> — misschien voor het eerst in jaren</div>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#E07B3C" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><strong>Psychologie ko&ccaron;ky</strong> &mdash; pochop&iacute;te, pro&ccaron; d&ecaron;l&aacute; to, co d&ecaron;l&aacute; (a jak na to reagovat)</div>
     </li>
     <li>
-      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><strong>Woede omzetten in kracht</strong> — van reactief en uitgeput naar kalm en beheerst</div>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#E07B3C" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><strong>Spr&aacute;vn&aacute; p&eacute;&ccaron;e</strong> &mdash; od srsti po dr&aacute;pky, prevence nemoc&iacute; a pravideln&eacute; kontroly</div>
     </li>
     <li>
-      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><strong>Loslaten wat je al jaren meesleept</strong> — en jezelf eindelijk bevrijden van die last</div>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#E07B3C" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><strong>V&yacute;chova bez stresu</strong> &mdash; nau&ccaron;te ko&ccaron;ku pravidla dom&aacute;cnosti bez k&rcaron;iku a trest&uring;</div>
     </li>
     <li>
-      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><strong>Energie overhouden voor jezelf</strong> — en daardoor ook een geduldiger, rustiger baasje zijn</div>
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#E07B3C" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><strong>Hlubok&eacute; pouto</strong> &mdash; vybudujte si s ko&ccaron;kou vztah pln&yacute; d&uring;v&ecaron;ry a l&aacute;sky</div>
     </li>
   </ul>
 </div>
@@ -731,25 +835,25 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <!-- ═══════ BEFORE / AFTER ═══════ -->
 <div class="anim d4">
   <h3 style="font-family: 'Recoleta', serif; font-size: 19px; color: var(--heading); text-align: center; margin-bottom: 14px;">
-    Dezelfde persoon. <span style="font-style: italic; color: var(--cta);">Een compleet ander leven.</span>
+    Stejn&yacute; majitel. <span style="font-style: italic; color: var(--cta);">Úpln&ecaron; jin&yacute; &zcaron;ivot s ko&ccaron;kou.</span>
   </h3>
   <div class="ba-grid">
     <div class="ba-card before">
-      <div class="ba-label">&#128532; Vroeger</div>
+      <div class="ba-label">&#128532; D&rcaron;&iacute;ve</div>
       <ul>
-        <li>Wakker liggen met gedachten die niet stoppen</li>
-        <li>Alles geven — maar het is nooit genoeg</li>
-        <li>Geen NEE kunnen zeggen, uit angst</li>
-        <li>Schuldig voelen als je iets voor jezelf doet</li>
+        <li>Ko&ccaron;ka &scaron;kr&aacute;be n&aacute;bytek a vy nev&iacute;te pro&ccaron;</li>
+        <li>Ignoruje v&aacute;s a schovává se</li>
+        <li>Problémy s j&iacute;dlem &mdash; nechce j&iacute;st</li>
+        <li>Stres p&rcaron;i n&aacute;v&scaron;t&ecaron;v&ecaron; veterin&aacute;&rcaron;e</li>
       </ul>
     </div>
     <div class="ba-card after">
-      <div class="ba-label">&#10024; Nu</div>
+      <div class="ba-label">&#10024; Te&dcaron;</div>
       <ul>
-        <li>'s Ochtends opgewekt wakker worden</li>
-        <li>NEE zeggen — en de wereld staat nog steeds</li>
-        <li>Tijd nemen voor zichzelf. Zonder schuldgevoel</li>
-        <li>Rust in huis. En eindelijk ook in het hoofd.</li>
+        <li>V&iacute;te, co ko&ccaron;ka pot&rcaron;ebuje &mdash; a projevuje to</li>
+        <li>P&rcaron;ich&aacute;z&iacute; za v&aacute;mi sama a vyhled&aacute;v&aacute; kontakt</li>
+        <li>Zdrav&aacute; strava, leskl&aacute; srst, v&iacute;ce energie</li>
+        <li>Klidn&yacute; a spokojen&yacute; spole&ccaron;n&yacute; &zcaron;ivot</li>
       </ul>
     </div>
   </div>
@@ -757,129 +861,128 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 <!-- ═══════ TESTIMONIALS ═══════ -->
 <div class="testi-card anim d4">
-  <p class="testi-text">Ik kocht dit samen met De Hondenbijbel en het was de slimste beslissing die ik dit jaar heb gemaakt. Mijn hond merkte het al na een week &mdash; ik was rustiger, geduldiger. De 03:00-gedachten zijn weg. Ik wist niet dat het zo snel kon veranderen.</p>
-  <div class="testi-author">Marieke, 34 <span>&mdash; Utrecht</span></div>
+  <p class="testi-text">Koupila jsem si to spolu s Ps&iacute;m super&zcaron;ivotem a byl to nejlep&scaron;&iacute; n&aacute;kup roku. Na&scaron;e ko&ccaron;ka p&rcaron;estala &scaron;kr&aacute;bat pohovku u&zcaron; po t&yacute;dnu. A hlavn&ecaron; &mdash; kone&ccaron;n&ecaron; ch&aacute;pu, pro&ccaron; d&ecaron;l&aacute; to, co d&ecaron;l&aacute;. Ta kniha mi otev&rcaron;ela o&ccaron;i.</p>
+  <div class="testi-author">Lucie, 32 <span>&mdash; Brno</span></div>
 </div>
 
 <div class="testi-card anim d5">
-  <p class="testi-text">Jaren van woede inslikken en piekeren — ik dacht dat het gewoon zo was. Dat ik zo was. Binnen 2 weken na dit boek voelde ik het verschil. Niet met therapie, niet met pillen. Gewoon stap voor stap, zoals het boek het uitlegt. Ik had het eerder moeten doen.</p>
-  <div class="testi-author">David, 41 <span>&mdash; Amsterdam</span></div>
+  <p class="testi-text">M&aacute;me psa i ko&ccaron;ku a ob&ecaron; knihy jsou dokonalé. Ko&ccaron;ka se za&ccaron;ala chovat &uacute;pln&ecaron; jinak &mdash; je klidn&ecaron;j&scaron;&iacute;, v&iacute;c si s n&aacute;mi hraje a dokonce za&ccaron;ala sp&aacute;t v posteli. To p&rcaron;edt&iacute;m nikdy ned&ecaron;lala. Jsem nad&scaron;en&yacute;.</p>
+  <div class="testi-author">Tom&aacute;&scaron;, 38 <span>&mdash; Praha</span></div>
 </div>
 
-<!-- ═══════ WAAROM SAMEN ═══════ -->
+<!-- ═══════ PROČ OBĚ KNIHY ═══════ -->
 <div class="anim d5" style="padding: 20px 0;">
   <h2 style="font-family: 'Recoleta', serif; font-weight: 600; font-size: 22px; color: var(--heading); text-align: center; margin-bottom: 8px;">
-    Waarom kopen zoveel mensen <span style="font-style: italic; color: var(--cta);">beide</span> boeken tegelijk?
+    Pro&ccaron; si tolik lid&iacute; kupuje <span style="font-style: italic; color: var(--cta);">ob&ecaron;</span> knihy najednou?
   </h2>
-  <p style="text-align: center; font-size: 14px; color: var(--muted); margin-bottom: 16px;">Het antwoord is simpeler dan je denkt.</p>
+  <p style="text-align: center; font-size: 14px; color: var(--muted); margin-bottom: 16px;">Odpov&ecaron;&dcaron; je jednodu&scaron;&scaron;&iacute;, ne&zcaron; si mysl&iacute;te.</p>
   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
     <div style="background: var(--light); border-radius: 12px; padding: 20px; text-align: center;">
       <div style="font-size: 28px; margin-bottom: 8px;">&#128054;</div>
-      <div style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 6px;">De Hondenbijbel</div>
-      <div style="font-size: 13px; color: var(--body); line-height: 1.55;">Geeft je hond het beste leven — opvoeding, gezondheid, band</div>
+      <div style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 6px;">Ps&iacute; super&zcaron;ivot</div>
+      <div style="font-size: 13px; color: var(--body); line-height: 1.55;">D&aacute;v&aacute; va&scaron;emu psovi nejlep&scaron;&iacute; &zcaron;ivot &mdash; v&yacute;chova, zdrav&iacute;, pouto</div>
     </div>
     <div style="background: var(--light); border-radius: 12px; padding: 20px; text-align: center;">
-      <div style="font-size: 28px; margin-bottom: 8px;">&#129504;</div>
-      <div style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 6px;">Laat Los Wat Je Kapotmaakt</div>
-      <div style="font-size: 13px; color: var(--body); line-height: 1.55;">Geeft <em>jou</em> het beste leven — rust, loslaten, innerlijke kracht</div>
+      <div style="font-size: 28px; margin-bottom: 8px;">&#128049;</div>
+      <div style="font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 6px;">Ko&ccaron;i&ccaron;&iacute; bible</div>
+      <div style="font-size: 13px; color: var(--body); line-height: 1.55;">D&aacute;v&aacute; va&scaron;&iacute; ko&ccaron;ce nejlep&scaron;&iacute; &zcaron;ivot &mdash; v&yacute;&zcaron;iva, p&eacute;&ccaron;e, porozum&ecaron;n&iacute;</div>
     </div>
   </div>
   <p style="font-size: 15px; line-height: 1.7; color: var(--body); text-align: center; max-width: 500px; margin: 0 auto;">
-    Een rustig baasje maakt een rustige hond. Lezers die beide boeken lezen merken het direct &mdash;
-    meer geduld, meer rust, een sterkere band. <strong>Een beter leven voor jullie beiden begint bij jou.</strong> &#129505;
+    Spokojen&yacute; mazl&iacute;&ccaron;ek = &scaron;&tcaron;astn&yacute; domov. &Ccaron;ten&aacute;&rcaron;i, kte&rcaron;&iacute; si p&rcaron;e&ccaron;tou ob&ecaron; knihy,
+    &rcaron;&iacute;kaj&iacute; totéž &mdash; v&iacute;ce klidu, v&iacute;ce radosti, siln&ecaron;j&scaron;&iacute; pouto.
+    <strong>Lep&scaron;&iacute; &zcaron;ivot pro celou va&scaron;i rodinu za&ccaron;&iacute;n&aacute; t&iacute;mto krokem.</strong> &#129505;
   </p>
 </div>
 
-<!-- ═══════ OVER DE AUTEUR ═══════ -->
+<!-- ═══════ O AUTOROVI ═══════ -->
 <div class="author-card anim d5">
   <div class="author-avatar">
-    <img src="/images/joris-author.webp" alt="Joris de Vries">
+    &#128049;
   </div>
   <div class="author-info">
-    <h4>Joris de Vries</h4>
-    <p>Coach en auteur met <strong>12+ jaar</strong> ervaring met mensen in crisis. Zelf jarenlang vastgelopen in piekeren, woede en schuldgevoel &mdash; tot hij een systeem vond dat wél werkt. <strong>Meer dan 3.000 mensen</strong> hebben sindsdien hun rust teruggevonden met zijn methode.</p>
-    <p style="margin-top: 6px; font-style: italic; font-size: 13px; color: var(--muted);">&ldquo;Ik was precies waar jij nu bent. Ik weet hoe het voelt. En ik heb de weg terug gevonden.&rdquo;</p>
+    <h4>Michal Peterka</h4>
+    <p>Ko&ccaron;i&ccaron;&iacute; behaviorista s <strong>15+ lety</strong> zku&scaron;enost&iacute;. Pomohl tis&iacute;c&uring;m majitel&uring; ko&ccaron;ek pochopit sv&eacute; mazl&iacute;&ccaron;ky a vybudovat s nimi hlub&scaron;&iacute; vztah. <strong>V&iacute;ce ne&zcaron; 2.500 &ccaron;ten&aacute;&rcaron;&uring;</strong> u&zcaron; d&iacute;ky jeho metod&ecaron; z&iacute;skalo spokojen&ecaron;j&scaron;&iacute; ko&ccaron;ku.</p>
+    <p style="margin-top: 6px; font-style: italic; font-size: 13px; color: var(--muted);">&bdquo;Ka&zcaron;d&aacute; ko&ccaron;ka chce b&yacute;t pochopena. Sta&ccaron;&iacute; v&ecaron;d&ecaron;t jak.&ldquo;</p>
   </div>
 </div>
 
-
-
-<!-- ═══════ PRICING CARD MET VALUE STACK ═══════ -->
+<!-- ═══════ PRICING CARD S VALUE STACK ═══════ -->
 <div class="pricing-card anim d5">
-  <div style="font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">&#9201; Dit aanbod sluit zodra je deze pagina verlaat</div>
+  <div style="font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">&#9201; Tato nab&iacute;dka kon&ccaron;&iacute;, jakmile opust&iacute;te tuto str&aacute;nku</div>
 
   <!-- Value Stack -->
   <div style="padding: 16px 0;">
     <div class="stack-item">
       <div class="stack-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E07B3C" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       </div>
-      <div class="stack-label"><strong>Gedrukt boek</strong> &mdash; Laat Los Wat Je Kapotmaakt (290 pagina's)</div>
-      <div class="stack-value">&euro;35</div>
+      <div class="stack-label"><strong>Ti&scaron;t&ecaron;n&aacute; kniha</strong> &mdash; Ko&ccaron;i&ccaron;&iacute; bible (220+ stran)</div>
+      <div class="stack-value">550&nbsp;K&ccaron;</div>
     </div>
     <div class="stack-item">
       <div class="stack-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><polygon points="23 7 16 12 16 2 23 7"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E07B3C" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><polygon points="23 7 16 12 16 2 23 7"/></svg>
       </div>
-      <div class="stack-label"><strong>Gratis verzending</strong> &mdash; in één pakket met De Hondenbijbel</div>
-      <div class="stack-value">&euro;6,95</div>
+      <div class="stack-label"><strong>Doprava zdarma</strong> &mdash; v jednom bal&iacute;&ccaron;ku s Ps&iacute;m super&zcaron;ivotem</div>
+      <div class="stack-value">89&nbsp;K&ccaron;</div>
     </div>
   </div>
 
   <div style="background: rgba(192,57,43,0.07); border: 1px solid rgba(192,57,43,0.2); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px;">
-    <span style="font-size: 16px; flex-shrink: 0;">⚠️</span>
+    <span style="font-size: 16px; flex-shrink: 0;">&#9888;&#65039;</span>
     <p style="font-size: 13px; line-height: 1.6; color: #8B2020; margin: 0;">
-      <strong>Let op:</strong> Dit aanbod verdwijnt zodra je deze pagina verlaat of sluit. Je kunt het boek daarna alleen nog bestellen voor de volledige prijs van &euro;35 op onze website &mdash; de korting van &euro;10 is uitsluitend hier beschikbaar.
+      <strong>Pozor:</strong> Tato nab&iacute;dka zmiz&iacute;, jakmile opust&iacute;te nebo zav&rcaron;ete tuto str&aacute;nku. Knihu si pak m&uring;&zcaron;ete objednat pouze za plnou cenu 550&nbsp;K&ccaron; na na&scaron;em webu &mdash; sleva 151&nbsp;K&ccaron; je dostupn&aacute; v&yacute;hradn&ecaron; zde.
     </p>
   </div>
 
   <div style="height: 1px; background: var(--section); margin: 4px 0 16px;"></div>
 
-  <div style="font-size: 14px; color: var(--muted); margin-bottom: 4px;">Totale waarde: <span style="text-decoration: line-through;">&euro;41,95</span></div>
+  <div style="font-size: 14px; color: var(--muted); margin-bottom: 4px;">Celkov&aacute; hodnota: <span style="text-decoration: line-through;">639&nbsp;K&ccaron;</span></div>
   <div class="price-row">
-    <span class="price-old">&euro;35</span>
-    <span class="price-new">&euro;25</span>
-    <span class="price-save">Bespaar &euro;10</span>
+    <span class="price-old">550&nbsp;K&ccaron;</span>
+    <span class="price-new">399&nbsp;K&ccaron;</span>
+    <span class="price-save">U&scaron;et&rcaron;&iacute;te 151&nbsp;K&ccaron;</span>
   </div>
   <div class="price-coupon-ref">
-    &#9986; Kortingsbon <strong>HONDEN-VIP</strong> automatisch toegepast
+    &#9986; Slevov&yacute; kup&oacute;n <strong>PSI-VIP</strong> automaticky aplikov&aacute;n
   </div>
   <div style="font-size: 13px; color: var(--muted); margin-top: 8px;">
-    Minder dan &euro;0,84 per dag &mdash; minder dan één kopje koffie. Voor levenslange rust.
+    M&eacute;n&ecaron; ne&zcaron; 14&nbsp;K&ccaron; denn&ecaron; &mdash; m&eacute;n&ecaron; ne&zcaron; jeden &scaron;&aacute;lek k&aacute;vy. Za celo&zcaron;ivotn&iacute; spokojenost s ko&ccaron;kou.
   </div>
 
   <div style="margin-top: 24px;">
     <a href="#" class="btn-upsell" onclick="return false;">
-      JA, voeg toe voor slechts &euro;25 &rarr;
-      <span class="btn-sub">Je wordt doorgestuurd naar dezelfde betaalmethode als bij je bestelling. De toevoeging is pas definitief na betaling.</span>
+      ANO, p&rcaron;idejte za pouh&yacute;ch 399&nbsp;K&ccaron; &rarr;
+      <span class="btn-sub">Budete p&rcaron;esm&ecaron;rov&aacute;ni na stejnou platebn&iacute; metodu jako u va&scaron;&iacute; objedn&aacute;vky. P&rcaron;id&aacute;n&iacute; je definitivn&iacute; a&zcaron; po zaplacen&iacute;.</span>
     </a>
   </div>
 
   <div style="margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
     <span style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      Veilige betaling
+      Bezpe&ccaron;n&aacute; platba
     </span>
     <span style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      30 dagen garantie
+      30 dn&iacute; garance
     </span>
     <span style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-      Gratis verzending
+      Doprava zdarma
     </span>
   </div>
 
-  <a class="btn-skip" href="#">Nee bedankt, ik sla dit eenmalige aanbod over</a>
+  <a class="btn-skip" href="#">Ne, d&ecaron;kuji &mdash; tuto jednor&aacute;zovou nab&iacute;dku p&rcaron;esko&ccaron;&iacute;m</a>
 </div>
 
-<!-- ═══════ GARANTIE ═══════ -->
+<!-- ═══════ GARANCE ═══════ -->
 <div class="guarantee-box anim d6">
   <div class="guarantee-icon">
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
   </div>
   <div class="guarantee-text">
-    <strong>Jij riskeert helemaal niets. Wij wel.</strong> Lees het boek. Doe de oefeningen. Voel je binnen 30 dagen geen verschil? Dan krijg je elke cent terug &mdash; zonder vragen, zonder gedoe. 92% van de lezers merkt al binnen 2 weken resultaat. De andere 8% krijgt gewoon hun geld terug.
+    <strong>Vy neriskujete v&uring;bec nic. My ano.</strong> P&rcaron;e&ccaron;t&ecaron;te si knihu. Vyzkou&scaron;ejte rady. Pokud do 30 dn&iacute; neucítíte rozd&iacute;l, vr&aacute;t&iacute;me v&aacute;m ka&zcaron;dou korunu &mdash; bez ot&aacute;zek, bez komplikac&iacute;. 94&nbsp;% &ccaron;ten&aacute;&rcaron;&uring; vid&iacute; v&yacute;sledky u&zcaron; b&ecaron;hem 2 t&yacute;dn&uring;. Zbytek dostane pen&iacute;ze zp&ecaron;t.
   </div>
 </div>
 
@@ -887,54 +990,54 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <div class="faq-section anim d6">
   <div class="faq-item">
     <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-      Wordt het apart verzonden?
+      Posílá se to zvlá&scaron;&tcaron;?
       <span class="arrow">&#9662;</span>
     </div>
-    <div class="faq-a">Nee &mdash; we voegen het direct toe aan je huidige bestelling. Je ontvangt beide boeken in één pakket, gratis verzonden. Geen gedoe, geen extra kosten.</div>
+    <div class="faq-a">Ne &mdash; p&rcaron;id&aacute;me knihu p&rcaron;&iacute;mo k va&scaron;&iacute; st&aacute;vaj&iacute;c&iacute; objedn&aacute;vce. Ob&ecaron; knihy obdr&zcaron;&iacute;te v jednom bal&iacute;&ccaron;ku, doprava zdarma. &Zcaron;&aacute;dn&eacute; komplikace, &zcaron;&aacute;dn&eacute; dal&scaron;&iacute; n&aacute;klady.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-      Waar gaat Laat Los Wat Je Kapotmaakt over?
+      O &ccaron;em Ko&ccaron;i&ccaron;&iacute; bible je?
       <span class="arrow">&#9662;</span>
     </div>
-    <div class="faq-a">Dit boek helpt je concreet met 5 dingen die je leven vastzetten: piekeren, loslaten, vergeven, woede en innerlijke rust. Geen vage theorie, geen spirituele zweverigheid. Praktische stappen die ook werken als je nu volledig uitgeput bent. Geschreven door coach Joris de Vries.</div>
+    <div class="faq-a">Tato kniha v&aacute;m pom&uring;&zcaron;e s 5 kl&iacute;&ccaron;ov&yacute;mi oblastmi &zcaron;ivota s ko&ccaron;kou: v&yacute;&zcaron;iva, psychologie, p&eacute;&ccaron;e, v&yacute;chova a budov&aacute;n&iacute; pouta. &Zcaron;&aacute;dn&aacute; teorie, &zcaron;&aacute;dn&eacute; pov&ecaron;ry. 220+ stran praktick&yacute;ch rad zalo&zcaron;en&yacute;ch na ko&ccaron;i&ccaron;&iacute; behavior&aacute;ln&iacute; v&ecaron;d&ecaron;. Napsal Michal Peterka.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-      Hoe werkt de kortingsbon HONDEN-VIP?
+      Jak funguje slevov&yacute; kup&oacute;n PSI-VIP?
       <span class="arrow">&#9662;</span>
     </div>
-    <div class="faq-a">De kortingsbon is automatisch toegepast. Je betaalt &euro;25 in plaats van &euro;35. Dit aanbod bestaat alleen op deze pagina, alleen nu, alleen voor jou als nieuwe klant. Je kunt het nergens anders krijgen voor deze prijs.</div>
+    <div class="faq-a">Kup&oacute;n je automaticky aplikov&aacute;n. Zaplat&iacute;te 399&nbsp;K&ccaron; m&iacute;sto 550&nbsp;K&ccaron;. Tato nab&iacute;dka existuje pouze na t&eacute;to str&aacute;nce, pouze te&dcaron;, pouze pro v&aacute;s jako nov&eacute;ho z&aacute;kazn&iacute;ka. Nikde jinde ji za tuto cenu nez&iacute;sk&aacute;te.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-      Kan ik het boek ook later bestellen?
+      M&uring;&zcaron;u si knihu objednat pozd&ecaron;ji?
       <span class="arrow">&#9662;</span>
     </div>
-    <div class="faq-a">Ja, maar dan betaal je &euro;35 op onze website. De &euro;10 korting via HONDEN-VIP is exclusief voor deze pagina &mdash; en verdwijnt zodra je verder gaat. Je hebt deze kans maar één keer.</div>
+    <div class="faq-a">Ano, ale pak zaplat&iacute;te 550&nbsp;K&ccaron; na na&scaron;em webu. Sleva 151&nbsp;K&ccaron; p&rcaron;es PSI-VIP je exkluzivn&iacute; pro tuto str&aacute;nku &mdash; a zmiz&iacute;, jakmile pokra&ccaron;ujete d&aacute;l. Tuto &scaron;anci m&aacute;te jen jednou.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-      Is er een garantie?
+      Je na to garance?
       <span class="arrow">&#9662;</span>
     </div>
-    <div class="faq-a">Absoluut. 30 dagen niet-goed-geld-terug, geen vragen. Je riskeert niets. Als het boek je niet raakt, krijg je elke cent terug. Punt.</div>
+    <div class="faq-a">Rozhodn&ecaron; ano. 30 dn&iacute; garance vr&aacute;cen&iacute; pen&ecaron;z, bez ot&aacute;zek. Neriskujete nic. Pokud v&aacute;s kniha neoslovi, dost&aacute;nete ka&zcaron;dou korunu zp&ecaron;t. Te&ccaron;ka.</div>
   </div>
 </div>
 
 <!-- ═══════ FINÁLNÍ CTA ═══════ -->
 <div style="text-align: center; padding: 20px 0 16px;" class="anim d6">
   <a href="#" class="btn-upsell" onclick="return false;">
-    JA, voeg toe voor slechts &euro;25 &rarr;
-    <span class="btn-sub">Je wordt doorgestuurd naar dezelfde betaalmethode als bij je bestelling. De toevoeging is pas definitief na betaling.</span>
+    ANO, p&rcaron;idejte za pouh&yacute;ch 399&nbsp;K&ccaron; &rarr;
+    <span class="btn-sub">Budete p&rcaron;esm&ecaron;rov&aacute;ni na stejnou platebn&iacute; metodu jako u va&scaron;&iacute; objedn&aacute;vky. P&rcaron;id&aacute;n&iacute; je definitivn&iacute; a&zcaron; po zaplacen&iacute;.</span>
   </a>
-  <a class="btn-skip" href="#">Nee bedankt, ik sla dit eenmalige aanbod over</a>
+  <a class="btn-skip" href="#">Ne, d&ecaron;kuji &mdash; tuto jednor&aacute;zovou nab&iacute;dku p&rcaron;esko&ccaron;&iacute;m</a>
 </div>
 
 <!-- ═══════ FOOTER ═══════ -->
 <div class="upsell-footer">
-  <p>&copy; 2026 De Hondenbijbel &mdash; Alle rechten voorbehouden</p>
-  <p style="margin-top: 8px;">Vragen? <a href="mailto:support@travelbible.nl" style="color: var(--muted);">support@travelbible.nl</a></p>
+  <p>&copy; 2026 Ps&iacute; super&zcaron;ivot &mdash; V&scaron;echna pr&aacute;va vyhrazena</p>
+  <p style="margin-top: 8px;">Ot&aacute;zky? <a href="mailto:podpora@psi-superzivot.cz" style="color: var(--muted);">podpora@psi-superzivot.cz</a></p>
 </div>
 
 </div><!-- /page-wrap -->
@@ -942,7 +1045,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <!-- ═══════ COUNTDOWN TIMER SCRIPT ═══════ -->
 <script>
 (function(){
-  var total = 10 * 60; // 10 minuten
+  var total = 10 * 60; // 10 minut
   var el = document.getElementById('timer');
   function tick(){
     if(total <= 0){ el.textContent = '00:00'; return; }
@@ -955,7 +1058,30 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 })();
 </script>
 
-<!-- ═══════ UPSELL LOGIKA — Mollie payment flow ═══════ -->
+<!-- ═══════ LOAD PRODUCT IMAGE FROM MEDUSA ═══════ -->
+<script>
+(function(){
+  var img = document.getElementById('upsell-product-img');
+  if (!img || typeof PROJECT_CONFIG === 'undefined') return;
+  var handle = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.handle) || 'kocici-bible';
+  var MEDUSA_URL = PROJECT_CONFIG.medusaUrl;
+  var headers = { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey };
+  fetch(MEDUSA_URL + '/store/products?handle=' + handle + '&fields=thumbnail,images', { headers: headers })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var product = (data.products || [])[0];
+      if (!product) return;
+      var imgUrl = (product.images && product.images.length > 0) ? product.images[0].url : product.thumbnail;
+      if (imgUrl) {
+        img.src = imgUrl;
+        img.style.minHeight = '';
+      }
+    })
+    .catch(function(){ /* silently fail — image just won't show */ });
+})();
+</script>
+
+<!-- ═══════ UPSELL LOGIKA — Comgate / COD payment flow ═══════ -->
 <script>
 (function() {
   'use strict';
@@ -971,7 +1097,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     }, options.headers || {});
     return fetch(MEDUSA_URL + path, options).then(function(res) {
       return res.json().then(function(data) {
-        if (!res.ok) throw new Error(data.message || 'API fout');
+        if (!res.ok) throw new Error(data.message || 'Chyba API');
         return data;
       });
     });
@@ -982,9 +1108,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     if (!document.querySelector('.payment-preloader')) {
       var div = document.createElement('div');
       div.className = 'payment-preloader';
-      div.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="100">'
-        + '<p>' + (message || 'Betaling wordt verwerkt...') + '</p>'
-        + '<p class="sub">' + (sub || 'Even geduld alsjeblieft.') + '</p>';
+      div.innerHTML = '<div class="spinner"></div>'
+        + '<p>' + (message || 'Platba se zpracovává...') + '</p>'
+        + '<p class="sub">' + (sub || 'Moment prosím.') + '</p>';
       document.body.insertBefore(div, document.body.firstChild);
     }
   }
@@ -994,9 +1120,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     var preloader = document.querySelector('.payment-preloader');
     if (preloader) {
       preloader.innerHTML = '<div style="text-align:center;padding:20px;">'
-        + '<p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Er ging iets mis.</p>'
-        + '<p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (message || 'Probeer het opnieuw.') + '</p>'
-        + '<a href="' + PROJECT_CONFIG.thankYouUrl + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#2D1B3D;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Ga naar je bestelling</a>'
+        + '<p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Něco se pokazilo.</p>'
+        + '<p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (message || 'Zkuste to prosím znovu.') + '</p>'
+        + '<a href="' + PROJECT_CONFIG.thankYouUrl + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#2B1810;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Přejít k objednávce</a>'
         + '</div>';
     }
   }
@@ -1021,20 +1147,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
       return;
     }
 
-    showPreloader('Upsell betaling wordt verwerkt...', 'Even geduld, we voegen het boek toe aan je bestelling.');
+    showPreloader('Upsell platba se zpracovává...', 'Moment prosím, přidáváme knihu k vaší objednávce.');
 
     // Extract payment gateway return params from URL
+    // Comgate adds: nothing extra (uses webhooks)
     // Stripe adds: ?payment_intent=pi_xxx&redirect_status=succeeded
-    // Mollie adds: nothing extra (uses webhooks)
-    // Airwallex adds: ?paymentIntentId=int_xxx
-    var gatewayPaymentId = params.get('payment_intent')       // Stripe/iDEAL
+    var gatewayPaymentId = params.get('payment_intent')       // Stripe
                         || params.get('paymentIntentId')      // Airwallex
-                        || params.get('id')                   // Mollie (sometimes)
+                        || params.get('id')                   // Comgate/Mollie
                         || null;
     console.log('Upsell: Gateway payment ID from URL:', gatewayPaymentId);
 
     // Add the upsell item to the ORIGINAL order via Order Edit
-    // The backend verifies payment from the upsell cart (no cart completion = no second order)
     var originalOrderId = localStorage.getItem('medusa_order_id');
     if (!originalOrderId) {
       console.warn('Upsell: No original order ID, redirecting to thank-you');
@@ -1062,28 +1186,20 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
       console.log('Upsell: Order edit result:', result);
 
       if (result.success) {
-        // ✅ Payment verified & item added to order
         localStorage.setItem('medusa_upsell_purchased', 'true');
         if (result.upsell_payment_id) {
           localStorage.setItem('medusa_upsell_payment_id', result.upsell_payment_id);
         }
-
-        // Note: No Purchase event for upsell — we track only 1 Purchase per customer
-        // (the main checkout Purchase, fired on upsell page load or thank-you page)
       } else {
-        // ❌ Payment NOT completed (abandoned, failed, or pending)
         console.log('Upsell: Payment not completed (' + (result.payment_status || 'unknown') + '), skipping upsell');
-        // Do NOT set medusa_upsell_purchased — thank-you page will only show main product
       }
 
-      // Always clean up and redirect to thank-you
       localStorage.removeItem('medusa_upsell_cart_id');
       localStorage.removeItem('medusa_cart_id');
       window.location.href = PROJECT_CONFIG.thankYouUrl;
     })
     .catch(function(err) {
       console.error('Upsell: Payment return error:', err.message);
-      // Network error — safe default: go to thank-you without upsell
       localStorage.removeItem('medusa_upsell_cart_id');
       localStorage.removeItem('medusa_cart_id');
       window.location.href = PROJECT_CONFIG.thankYouUrl;
@@ -1122,13 +1238,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
         localStorage.setItem('medusa_order_id', res.order.id);
         localStorage.setItem('medusa_order_display_id', res.order.display_id || '');
 
-        // FB Pixel + CAPI: Purchase event with checkout total (deterministic event_id for dedup with server subscriber)
+        // FB Pixel + CAPI: Purchase event
         if (typeof MetaTracker !== 'undefined') {
           var checkoutTotal = parseFloat(localStorage.getItem('medusa_checkout_total') || '0');
           var purchaseValue = checkoutTotal > 0 ? checkoutTotal : PROJECT_CONFIG.mainProduct.price;
           var purchaseEventId = 'purchase_' + res.order.id;
 
-          // Build user_data from stored customer info
           var customerRaw = localStorage.getItem('medusa_customer');
           var cust = customerRaw ? JSON.parse(customerRaw) : {};
           var uData = {};
@@ -1143,14 +1258,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
           MetaTracker.trackPurchase({
             content_ids: [PROJECT_CONFIG.mainProduct.handle],
             value: purchaseValue,
-            currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
+            currency: PROJECT_CONFIG.mainProduct.currency || 'CZK',
             num_items: parseInt(localStorage.getItem('medusa_bundle_qty') || '1'),
             order_id: res.order.id
           }, uData, { event_id: purchaseEventId });
 
-          // Mark that Purchase was already tracked (so thank-you page doesn't fire again)
           localStorage.setItem('medusa_purchase_tracked', 'true');
-          console.log('Upsell: Purchase tracked — €' + purchaseValue + ' event_id=' + purchaseEventId);
+          console.log('Upsell: Purchase tracked — ' + purchaseValue + ' CZK event_id=' + purchaseEventId);
         }
         return true;
       } else if (res.type === 'cart') {
@@ -1189,7 +1303,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     btnYesAll.forEach(function(btn) {
       btn.style.opacity = '0.7';
       btn.style.pointerEvents = 'none';
-      btn.innerHTML = '<span class="btn-spinner"></span> Bezig met verwerken...';
+      btn.innerHTML = '<span class="btn-spinner"></span> Zpracováváme...';
     });
 
     // Get stored checkout data
@@ -1231,7 +1345,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
         email: customer.email || ''
       };
 
-      // Set shipping + billing address from original checkout
       if (customer.first_name) {
         var addr = {
           first_name: customer.first_name,
@@ -1239,7 +1352,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
           address_1: customer.address_1 || '',
           city: customer.city || '',
           postal_code: customer.postal_code || '',
-          country_code: customer.country_code || 'nl',
+          country_code: customer.country_code || 'cz',
           phone: customer.phone || '',
         };
         updateData.shipping_address = addr;
@@ -1282,7 +1395,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
           }
         };
 
-        // Pass customer data for payment gateways that need it (Klarna, etc.)
+        // Pass customer data for payment gateways that need it
         if (customer.email) {
           sessionBody.data.email = customer.email;
           if (customer.first_name) {
@@ -1292,7 +1405,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
               address_1: customer.address_1 || '',
               city: customer.city || '',
               postal_code: customer.postal_code || '',
-              country_code: (customer.country_code || 'nl').toUpperCase(),
+              country_code: (customer.country_code || 'cz').toUpperCase(),
               phone: customer.phone || '',
             };
             sessionBody.data.shipping_address = sessionBody.data.billing_address;
@@ -1319,7 +1432,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
         console.log('Upsell: Redirecting to payment gateway:', redirectUrl);
         window.location.href = redirectUrl;
       } else {
-        // No redirect needed (e.g., already paid) — complete directly
+        // No redirect needed (e.g., COD) — complete directly
         console.log('Upsell: No redirect URL, completing directly');
         window.location.href = upsellReturnUrl;
       }
@@ -1330,12 +1443,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
       btnYesAll.forEach(function(btn) {
         btn.style.opacity = '1';
         btn.style.pointerEvents = 'auto';
-        btn.innerHTML = 'JA! Voeg toe voor slechts &euro;25 &rarr;<span class="btn-sub">Probeer het opnieuw</span>';
+        btn.innerHTML = 'ANO, přidejte za 399&nbsp;Kč &rarr;<span class="btn-sub">Zkuste to prosím znovu</span>';
       });
       // Show error
       var errorDiv = document.createElement('div');
       errorDiv.style.cssText = 'text-align:center;padding:12px;margin-top:10px;background:rgba(192,57,43,0.1);border-radius:8px;color:#C0392B;font-size:14px;';
-      errorDiv.textContent = 'Er ging iets mis: ' + (err.message || 'Probeer het opnieuw.');
+      errorDiv.textContent = 'Něco se pokazilo: ' + (err.message || 'Zkuste to prosím znovu.');
       var firstCta = document.getElementById('first-cta');
       if (firstCta && !firstCta.querySelector('.upsell-error')) {
         errorDiv.className = 'upsell-error';
@@ -1363,4 +1476,4 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </script>
 
 </body>
-</html> 
+</html>
