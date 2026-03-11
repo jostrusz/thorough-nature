@@ -529,7 +529,7 @@ function buildTimelineEvents(order: any): TimelineEvent[] {
     const isDelivered = entry.status === "DELIVERED"
     const isDispatched = entry.status === "DISPATCHED"
     events.push({
-      date: entry.date || order.updated_at || order.created_at,
+      date: entry.date || entry.timestamp || order.created_at,
       label: DEXTRUM_STATUS_LABELS[entry.status] || `WMS: ${entry.status}`,
       detail: entry.detail || undefined,
       icon: "dextrum",
@@ -544,7 +544,7 @@ function buildTimelineEvents(order: any): TimelineEvent[] {
   if (meta.dextrum_status && !dextrumTimeline.length) {
     const isDexDispatched = ["DISPATCHED", "IN_TRANSIT", "DELIVERED"].includes(meta.dextrum_status)
     events.push({
-      date: meta.dextrum_sent_at || meta.dextrum_status_updated_at || order.updated_at || order.created_at,
+      date: meta.dextrum_sent_at || meta.dextrum_status_updated_at || order.created_at,
       label: DEXTRUM_STATUS_LABELS[meta.dextrum_status] || `WMS: ${meta.dextrum_status}`,
       detail: meta.dextrum_order_code ? `WMS Order: ${meta.dextrum_order_code}` : undefined,
       icon: "dextrum",
@@ -566,7 +566,7 @@ function buildTimelineEvents(order: any): TimelineEvent[] {
   }
   if (order.status === "archived") {
     events.push({
-      date: order.updated_at || order.created_at,
+      date: order.created_at,
       label: "Order archived",
       icon: "archive",
       status: "neutral",
@@ -608,7 +608,7 @@ function buildTimelineEvents(order: any): TimelineEvent[] {
   // ─── 8. Integrations (Fakturoid, QuickBooks) ───
   if (meta.fakturoid_invoice_id) {
     events.push({
-      date: meta.fakturoid_created_at || order.updated_at || order.created_at,
+      date: meta.fakturoid_created_at || order.created_at,
       label: "Fakturoid: Invoice created",
       detail: `Invoice #${meta.fakturoid_invoice_id}`,
       icon: "fakturoid",
@@ -617,7 +617,7 @@ function buildTimelineEvents(order: any): TimelineEvent[] {
   }
   if (meta.fakturoid_credit_note_id) {
     events.push({
-      date: meta.fakturoid_credit_note_created_at || order.updated_at || order.created_at,
+      date: meta.fakturoid_credit_note_created_at || order.created_at,
       label: "Fakturoid: Credit note created",
       detail: `Credit note #${meta.fakturoid_credit_note_id}`,
       icon: "fakturoid",
@@ -626,7 +626,7 @@ function buildTimelineEvents(order: any): TimelineEvent[] {
   }
   if (meta.quickbooks_invoice_id) {
     events.push({
-      date: meta.quickbooks_created_at || order.updated_at || order.created_at,
+      date: meta.quickbooks_created_at || order.created_at,
       label: "QuickBooks: Invoice created",
       detail: `Invoice #${meta.quickbooks_invoice_id}`,
       icon: "quickbooks",
@@ -635,7 +635,7 @@ function buildTimelineEvents(order: any): TimelineEvent[] {
   }
   if (meta.quickbooks_credit_memo_id) {
     events.push({
-      date: meta.quickbooks_credit_memo_created_at || order.updated_at || order.created_at,
+      date: meta.quickbooks_credit_memo_created_at || order.created_at,
       label: "QuickBooks: Credit memo created",
       detail: `Credit memo #${meta.quickbooks_credit_memo_id}`,
       icon: "quickbooks",
@@ -646,7 +646,7 @@ function buildTimelineEvents(order: any): TimelineEvent[] {
   // ─── 9. Book sent ───
   if (meta.book_sent === true || meta.book_sent === "true") {
     events.push({
-      date: meta.book_sent_at || order.updated_at || order.created_at,
+      date: meta.book_sent_at || order.created_at,
       label: "Book marked as sent",
       icon: "fulfillment",
       status: "success",
