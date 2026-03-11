@@ -48,6 +48,7 @@ import { DeliveryBadge } from "../../../components/orders/order-badges"
 import { CancelOrderModal } from "../../../components/orders/cancel-order-modal"
 import { RefundModal } from "../../../components/orders/refund-modal"
 import { DuplicateOrderModal } from "../../../components/orders/duplicate-order-modal"
+import { FulfillmentModal } from "../../../components/orders/fulfillment-modal"
 
 // Global hover animation styles
 function OrderDetailStyles() {
@@ -273,38 +274,102 @@ function LoadingSpinner() {
 // ═══ Health Bar ═══
 // Shows order progress: Created → Paid → Fulfilled → Shipped → Delivered
 
-function getOrderHealthStep(order: any): number {
-  // 0=Created, 1=Paid, 2=Fulfilled, 3=Shipped, 4=Delivered
-  const dextrumStatus = order.metadata?.dextrum_status?.toLowerCase?.() || ""
-  const fulfillmentStatus = (order.fulfillment_status || "").toLowerCase()
-  const paymentStatus = (order.payment_status || "").toLowerCase()
+// Compute payment status from order data (same logic as orders-table.tsx)
+function getPaymentStatusForHealth(order: any): string {
+  if (order.metadata?.payment_captured) return "paid"
+  const isCOD = (order.payment_collections || []).some((pc: any) =>
+    (pc.payments || []).some((p: any) => (p.provider_id || "").includes("cod"))
+  ) || order.metadata?.payment_provider === "cod" || order.metadata?.payment_method === "cod"
+  if (isCOD) return "pending"
+  if (order.payment_collections?.length) {
+    const pcs = order.payment_collections as any[]
+    const activePC = pcs.find((pc: any) => pc.status === "captured" || pc.status === "completed")
+      || pcs.find((pc: any) => pc.status !== "canceled")
+      || pcs[pcs.length - 1]
+    if (activePC.status === "captured" || activePC.status === "completed") return "paid"
+    if (activePC.status === "refunded") return "refunded"
+    if (activePC.status === "partially_refunded") return "partially_refunded"
+    if (activePC.status === "authorized") return "authorized"
+    return activePC.status || "pending"
+  }
+  if (order.metadata?.copied_payment_status) return order.metadata.copied_payment_status
+  return "pending"
+}
 
-  if (dextrumStatus === "delivered" || dextrumStatus === "completed") return 4
-  if (
-    dextrumStatus === "shipped" ||
-    dextrumStatus === "in_transit" ||
-    order.metadata?.dextrum_tracking_number
-  )
-    return 3
-  if (
-    fulfillmentStatus === "fulfilled" ||
-    fulfillmentStatus === "shipped" ||
-    fulfillmentStatus === "partially_fulfilled"
-  )
-    return 2
-  if (
-    paymentStatus === "captured" ||
-    paymentStatus === "paid" ||
-    paymentStatus === "partially_refunded"
-  )
-    return 1
-  return 0
+// Get delivery/fulfillment status (same logic as orders-table.tsx)
+function getDeliveryStatus(order: any): string {
+  return order.metadata?.dextrum_status || (() => {
+    const fulfillments = order.fulfillments || []
+    if (fulfillments.length === 0) return "unfulfilled"
+    const itemCount = order.items?.length || 0
+    const fulfilledItemIds = new Set<string>()
+    fulfillments.forEach((f: any) => {
+      (f.items || []).forEach((fi: any) => fulfilledItemIds.add(fi.line_item_id))
+    })
+    if (itemCount > 0 && fulfilledItemIds.size < itemCount) return "partially_fulfilled"
+    return "fulfilled"
+  })()
+}
+
+// Per-step status: which steps are "done" (green) vs "active" (blue) vs "pending" (gray)
+function getHealthStepStatuses(order: any): Array<"done" | "active" | "pending"> {
+  const paymentStatus = getPaymentStatusForHealth(order)
+  const deliveryStatus = getDeliveryStatus(order).toUpperCase()
+  const isPaid = paymentStatus === "paid" || paymentStatus === "captured"
+  const isPending = paymentStatus === "pending" || paymentStatus === "authorized"
+
+  // Fulfilled = PACKED, DISPATCHED, IN_TRANSIT, DELIVERED or Medusa fulfilled
+  const fulfilledStatuses = ["PACKED", "DISPATCHED", "IN_TRANSIT", "DELIVERED", "COMPLETED"]
+  const isFulfilled = fulfilledStatuses.includes(deliveryStatus)
+    || deliveryStatus === "FULFILLED"
+
+  // Shipped = DISPATCHED, IN_TRANSIT, DELIVERED
+  const shippedStatuses = ["DISPATCHED", "IN_TRANSIT", "DELIVERED", "COMPLETED"]
+  const isShipped = shippedStatuses.includes(deliveryStatus)
+
+  // Delivered
+  const isDelivered = deliveryStatus === "DELIVERED" || deliveryStatus === "COMPLETED"
+
+  const steps: Array<"done" | "active" | "pending"> = ["pending", "pending", "pending", "pending", "pending"]
+
+  // Step 0: Created — always at least active (blue), green if paid
+  steps[0] = isPaid ? "done" : "active"
+
+  // Step 1: Paid — green if paid, blue if pending/authorized, gray otherwise
+  if (isPaid) {
+    steps[1] = "done"
+  } else if (isPending) {
+    steps[1] = "active"
+  }
+
+  // Step 2: Fulfilled — green if at least PACKED
+  if (isFulfilled) steps[2] = "done"
+
+  // Step 3: Shipped — green if DISPATCHED+
+  if (isShipped) steps[3] = "done"
+
+  // Step 4: Delivered — green if DELIVERED
+  if (isDelivered) steps[4] = "done"
+
+  return steps
 }
 
 const HEALTH_STEPS = ["Created", "Paid", "Fulfilled", "Shipped", "Delivered"]
 
 function OrderHealthBar({ order }: { order: any }) {
-  const currentStep = getOrderHealthStep(order)
+  const stepStatuses = getHealthStepStatuses(order)
+
+  const getColor = (status: "done" | "active" | "pending") => {
+    if (status === "done") return colors.green
+    if (status === "active") return colors.blue
+    return colors.border
+  }
+
+  const getLabelColor = (status: "done" | "active" | "pending") => {
+    if (status === "done") return colors.green
+    if (status === "active") return colors.blue
+    return colors.textMuted
+  }
 
   return (
     <div
@@ -320,68 +385,35 @@ function OrderHealthBar({ order }: { order: any }) {
     >
       {/* Bar segments */}
       <div style={{ display: "flex", gap: "4px", marginBottom: "10px" }}>
-        {HEALTH_STEPS.map((_, idx) => {
-          let segColor: string
-          if (currentStep === 0) {
-            // Created only — purple for the first segment
-            segColor = idx === 0 ? colors.accent : colors.border
-          } else {
-            // Paid and beyond — all completed steps are green
-            segColor = idx <= currentStep ? colors.green : colors.border
-          }
-          return (
-            <div
-              key={idx}
-              style={{
-                flex: 1,
-                height: "6px",
-                borderRadius: "3px",
-                background: segColor,
-                transition: "background 0.3s ease",
-              }}
-            />
-          )
-        })}
+        {HEALTH_STEPS.map((_, idx) => (
+          <div
+            key={idx}
+            style={{
+              flex: 1,
+              height: "6px",
+              borderRadius: "3px",
+              background: getColor(stepStatuses[idx]),
+              transition: "background 0.3s ease",
+            }}
+          />
+        ))}
       </div>
       {/* Labels */}
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        {HEALTH_STEPS.map((label, idx) => {
-          let labelColor: string
-          let labelWeight: number
-          if (currentStep === 0) {
-            // Created only — purple label for Created
-            if (idx === 0) {
-              labelColor = colors.accent
-              labelWeight = 600
-            } else {
-              labelColor = colors.textMuted
-              labelWeight = 400
-            }
-          } else {
-            // Paid and beyond — green for completed, muted for rest
-            if (idx <= currentStep) {
-              labelColor = colors.green
-              labelWeight = idx === currentStep ? 600 : 500
-            } else {
-              labelColor = colors.textMuted
-              labelWeight = 400
-            }
-          }
-          return (
-            <span
-              key={idx}
-              style={{
-                fontSize: "11px",
-                fontWeight: labelWeight,
-                color: labelColor,
-                textAlign: "center",
-                flex: 1,
-              }}
-            >
-              {label}
-            </span>
-          )
-        })}
+        {HEALTH_STEPS.map((label, idx) => (
+          <span
+            key={idx}
+            style={{
+              fontSize: "11px",
+              fontWeight: stepStatuses[idx] !== "pending" ? 600 : 400,
+              color: getLabelColor(stepStatuses[idx]),
+              textAlign: "center",
+              flex: 1,
+            }}
+          >
+            {label}
+          </span>
+        ))}
       </div>
     </div>
   )
@@ -457,6 +489,7 @@ const OrderDetailPage = () => {
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
   const [refundModalOpen, setRefundModalOpen] = useState(false)
   const [duplicateModalOpen, setDuplicateModalOpen] = useState(false)
+  const [fulfillmentModalOpen, setFulfillmentModalOpen] = useState(false)
 
   // ═══════════════════════════════════════════
   // HANDLERS
@@ -487,24 +520,38 @@ const OrderDetailPage = () => {
     })
   }, [id, archiveOrder])
 
-  const handleFulfill = useCallback(() => {
-    if (!id || !order?.items) return
-    const items = order.items.map((item: any) => ({
-      id: item.id,
-      quantity: item.quantity || 1,
-    }))
-    createFulfillment.mutate(
-      { orderId: id, items },
-      {
-        onSuccess: () => {
-          toast.success("Order fulfilled")
+  const handleFulfillClick = useCallback(() => {
+    setFulfillmentModalOpen(true)
+  }, [])
+
+  const handleFulfillConfirm = useCallback(
+    (trackingData: { trackingNumber: string; trackingUrl: string; carrier: string }) => {
+      if (!id || !order?.items) return
+      const items = order.items.map((item: any) => ({
+        id: item.id,
+        quantity: item.quantity || 1,
+      }))
+      createFulfillment.mutate(
+        {
+          orderId: id,
+          items,
+          trackingNumber: trackingData.trackingNumber || undefined,
+          trackingUrl: trackingData.trackingUrl || undefined,
+          carrier: trackingData.carrier || undefined,
         },
-        onError: (err: any) => {
-          toast.error(err?.message || "Failed to fulfill order")
-        },
-      }
-    )
-  }, [id, order, createFulfillment])
+        {
+          onSuccess: () => {
+            toast.success("Order fulfilled")
+            setFulfillmentModalOpen(false)
+          },
+          onError: (err: any) => {
+            toast.error(err?.message || "Failed to fulfill order")
+          },
+        }
+      )
+    },
+    [id, order, createFulfillment]
+  )
 
   const handleRefund = useCallback(
     (amount: number, note: string) => {
@@ -817,7 +864,7 @@ const OrderDetailPage = () => {
         <div>
           <OrderFulfillmentCard
             order={order}
-            onMarkAsFulfilled={handleFulfill}
+            onMarkAsFulfilled={handleFulfillClick}
             onSendToDextrum={handleSendToDextrum}
             onFakturoidCreate={handleFakturoidCreate}
             onQBCreate={handleQBCreate}
@@ -948,6 +995,13 @@ const OrderDetailPage = () => {
         onClose={() => setDuplicateModalOpen(false)}
         onConfirm={handleDuplicate}
         isLoading={duplicateOrder.isPending}
+        orderDisplayId={order.display_id}
+      />
+      <FulfillmentModal
+        open={fulfillmentModalOpen}
+        onClose={() => setFulfillmentModalOpen(false)}
+        onConfirm={handleFulfillConfirm}
+        isLoading={createFulfillment.isPending}
         orderDisplayId={order.display_id}
       />
     </div>

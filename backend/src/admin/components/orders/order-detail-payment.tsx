@@ -42,6 +42,8 @@ function getPaymentStatus(order: any): string {
 
     if (activePC.status === "captured" || activePC.status === "completed") return "paid"
     if (activePC.status === "refunded") return "refunded"
+    if (activePC.status === "partially_refunded") return "partially_refunded"
+    if (activePC.status === "authorized") return "authorized"
     return activePC.status || "pending"
   }
   if (order.metadata?.copied_payment_status) return order.metadata.copied_payment_status

@@ -35,7 +35,7 @@ export function useArchiveOrder() {
 }
 
 // ═══════════════════════════════════════════
-// Create Fulfillment
+// Create Fulfillment (with optional tracking info)
 // ═══════════════════════════════════════════
 export function useCreateFulfillment() {
   const queryClient = useQueryClient()
@@ -43,11 +43,36 @@ export function useCreateFulfillment() {
     mutationFn: async ({
       orderId,
       items,
+      trackingNumber,
+      trackingUrl,
+      carrier,
     }: {
       orderId: string
       items: { id: string; quantity: number }[]
+      trackingNumber?: string
+      trackingUrl?: string
+      carrier?: string
     }) => {
-      return sdk.admin.order.createFulfillment(orderId, { items })
+      // 1. Create the fulfillment in Medusa
+      const result = await sdk.admin.order.createFulfillment(orderId, { items })
+
+      // 2. Save tracking info + set dextrum_status to PACKED (fulfilled)
+      const metadata: Record<string, any> = {}
+      if (trackingNumber) metadata.dextrum_tracking_number = trackingNumber
+      if (trackingUrl) metadata.dextrum_tracking_url = trackingUrl
+      if (carrier) metadata.dextrum_carrier = carrier
+      // Set delivery status to PACKED when manually fulfilled
+      if (!metadata.dextrum_status) metadata.dextrum_status = "PACKED"
+      metadata.fulfilled_at = new Date().toISOString()
+
+      if (Object.keys(metadata).length > 0) {
+        await sdk.client.fetch(`/admin/custom-orders/${orderId}/metadata`, {
+          method: "POST",
+          body: { metadata },
+        })
+      }
+
+      return result
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["custom-order-detail"] })

@@ -353,6 +353,7 @@ const CustomOrdersPage = () => {
   // New order celebration state
   const [celebrationOrder, setCelebrationOrder] = useState<any>(null)
   const lastKnownOrderId = useRef<string | number | null>(null)
+  const lastKnownCount = useRef<number | null>(null)
   const isInitialLoad = useRef(true)
 
   // Build query params from active tab
@@ -377,21 +378,26 @@ const CustomOrdersPage = () => {
   const updateMetadata = useUpdateMetadata()
 
   // Detect new orders (from polling) and trigger celebration
+  // Only celebrate when count goes UP and newest order ID changes (= real new order)
+  // Do NOT celebrate when count goes down (= delete) or stays same (= status update)
   useEffect(() => {
     if (!ordersData?.orders?.length) return
 
     const newestOrder = ordersData.orders[0]
     const newestId = newestOrder.display_id
+    const currentCount = ordersData.count || ordersData.orders.length
 
-    // On first load, just store the ID — don't celebrate
+    // On first load, just store the ID and count — don't celebrate
     if (isInitialLoad.current) {
       lastKnownOrderId.current = newestId
+      lastKnownCount.current = currentCount
       isInitialLoad.current = false
       return
     }
 
-    // If we have a new order that's different from what we last saw
-    if (lastKnownOrderId.current !== null && newestId !== lastKnownOrderId.current) {
+    // Only celebrate if: newest order changed AND total count went UP (new order arrived)
+    const countIncreased = lastKnownCount.current !== null && currentCount > lastKnownCount.current
+    if (lastKnownOrderId.current !== null && newestId !== lastKnownOrderId.current && countIncreased) {
       setCelebrationOrder({
         display_id: newestOrder.display_id,
         email: newestOrder.email,
@@ -403,6 +409,7 @@ const CustomOrdersPage = () => {
     }
 
     lastKnownOrderId.current = newestId
+    lastKnownCount.current = currentCount
   }, [ordersData])
 
   const handleDismissCelebration = useCallback(() => {
