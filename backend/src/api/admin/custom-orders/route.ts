@@ -59,41 +59,63 @@ export async function GET(
       },
     })
 
-    // Medusa v2 query.graph returns shipping_address with only { id } — resolve full addresses
+    // Medusa v2 query.graph returns shipping_address as null — resolve via orderModuleService
     try {
-      const addressService = (orderModuleService as any).orderAddressService_
-      if (addressService) {
-        const allIds: string[] = []
-        for (const order of orders as any[]) {
-          if (order.shipping_address?.id) allIds.push(order.shipping_address.id)
-          if (order.billing_address?.id) allIds.push(order.billing_address.id)
-        }
-        const uniqueIds = [...new Set(allIds)]
+      const orderIds = (orders as any[]).map((o: any) => o.id)
+      if (orderIds.length > 0) {
+        // Step 1: Get orders with address relations (returns address as { id: "..." })
+        const ordersWithRels = await orderModuleService.listOrders(
+          { id: orderIds },
+          { relations: ["shipping_address", "billing_address"], select: ["id"] }
+        )
 
-        if (uniqueIds.length > 0) {
-          // Try batch list first, fall back to individual retrieves
+        // Step 2: Collect all address IDs
+        const addressIds: string[] = []
+        for (const o of ordersWithRels as any[]) {
+          if (o.shipping_address?.id) addressIds.push(o.shipping_address.id)
+          if (o.billing_address?.id) addressIds.push(o.billing_address.id)
+        }
+        const uniqueAddrIds = [...new Set(addressIds)]
+
+        // Step 3: Fetch full address data via orderAddressService_
+        if (uniqueAddrIds.length > 0) {
+          const addressService = (orderModuleService as any).orderAddressService_
           let addressMap = new Map<string, any>()
-          try {
-            const addresses = await addressService.list({ id: uniqueIds })
-            addressMap = new Map(addresses.map((a: any) => [a.id, a]))
-          } catch {
-            // Fallback: retrieve individually
-            const results = await Promise.all(
-              uniqueIds.map((id: string) =>
-                addressService.retrieve(id).catch(() => null)
+
+          if (addressService) {
+            try {
+              // Try batch list
+              const addresses = await addressService.list({ id: uniqueAddrIds })
+              addressMap = new Map(addresses.map((a: any) => [a.id, a]))
+            } catch {
+              // Fallback: retrieve individually
+              const results = await Promise.all(
+                uniqueAddrIds.map((id: string) =>
+                  addressService.retrieve(id).catch(() => null)
+                )
               )
-            )
-            for (const addr of results) {
-              if (addr?.id) addressMap.set(addr.id, addr)
+              for (const addr of results) {
+                if (addr?.id) addressMap.set(addr.id, addr)
+              }
             }
           }
 
+          // Step 4: Map addresses back to query.graph orders
+          const relMap = new Map<string, any>()
+          for (const o of ordersWithRels as any[]) {
+            relMap.set(o.id, {
+              shipping_id: o.shipping_address?.id,
+              billing_id: o.billing_address?.id,
+            })
+          }
+
           for (const order of orders as any[]) {
-            if (order.shipping_address?.id && addressMap.has(order.shipping_address.id)) {
-              order.shipping_address = addressMap.get(order.shipping_address.id)
+            const rel = relMap.get(order.id)
+            if (rel?.shipping_id && addressMap.has(rel.shipping_id)) {
+              order.shipping_address = addressMap.get(rel.shipping_id)
             }
-            if (order.billing_address?.id && addressMap.has(order.billing_address.id)) {
-              order.billing_address = addressMap.get(order.billing_address.id)
+            if (rel?.billing_id && addressMap.has(rel.billing_id)) {
+              order.billing_address = addressMap.get(rel.billing_id)
             }
           }
         }
