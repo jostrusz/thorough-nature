@@ -559,7 +559,7 @@ const TicketDetailPage = () => {
   const status = statusConfig[ticket.status as keyof typeof statusConfig] || statusConfig.new
 
   return (
-    <div ref={pageRef} style={{ maxWidth: "1600px", margin: "0 auto", padding: "24px 32px", background: BG }}>
+    <div ref={pageRef} style={{ margin: "0 auto", padding: "24px 32px", background: BG }}>
       {/* ═══ Top Bar ═══ */}
       <div style={{
         display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -627,8 +627,8 @@ const TicketDetailPage = () => {
       {/* ═══ Main Layout — Conversation + Sidebar ═══ */}
       <div style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}>
 
-        {/* ─── LEFT: Conversation + Reply ─── */}
-        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "16px" }}>
+        {/* ─── LEFT: Conversation + Reply (75%) ─── */}
+        <div style={{ flex: 3, minWidth: 0, display: "flex", flexDirection: "column", gap: "16px" }}>
           {/* Messages area */}
           <div style={{
             backgroundColor: C.white,
@@ -672,8 +672,8 @@ const TicketDetailPage = () => {
           )}
         </div>
 
-        {/* ─── RIGHT: Customer Sidebar ─── */}
-        <div style={{ width: "340px", flexShrink: 0 }}>
+        {/* ─── RIGHT: Customer Sidebar (25%) ─── */}
+        <div style={{ flex: 1, minWidth: "280px", maxWidth: "380px" }}>
           <CustomerSidebar fromEmail={ticket.from_email} allOrders={allOrders} />
         </div>
       </div>
