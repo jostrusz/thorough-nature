@@ -2,10 +2,60 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { ChatBubbleLeftRight } from "@medusajs/icons"
 import { Badge, Button, Input, Select } from "@medusajs/ui"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { sdk } from "../../lib/sdk"
+
+// ═══════════════════════════════════════════
+// FULL-WIDTH OVERRIDE
+// ═══════════════════════════════════════════
+const BG_COLOR = "#F9FAFB"
+
+function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const originals: { el: HTMLElement; bg: string }[] = []
+    let node: HTMLElement | null = el.parentElement
+    while (node && node !== document.documentElement) {
+      originals.push({ el: node, bg: node.style.background })
+      node.style.setProperty("background", BG_COLOR, "important")
+      node.style.setProperty("max-width", "none", "important")
+      node.style.setProperty("width", "100%", "important")
+      node = node.parentElement
+    }
+    return () => {
+      originals.forEach(({ el: n, bg }) => {
+        n.style.background = bg
+        n.style.removeProperty("max-width")
+        n.style.removeProperty("width")
+      })
+    }
+  }, [ref])
+}
+
+function FullWidthStyles() {
+  return (
+    <style>{`
+      main,
+      main > div,
+      main > div > div,
+      main > div > div > div,
+      main > div > div > div > div,
+      main > div > div > div > div > div,
+      main > div > div > div > div > div > div {
+        max-width: none !important;
+        width: 100% !important;
+      }
+      main > div,
+      main > div > div {
+        flex: 1 1 100% !important;
+        min-width: 0 !important;
+      }
+    `}</style>
+  )
+}
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -241,6 +291,9 @@ function TicketCard({ ticket }: { ticket: any }) {
 // MAIN DASHBOARD
 // ═══════════════════════════════════════════
 const SupportBoxDashboard = () => {
+  const pageRef = useRef<HTMLDivElement>(null)
+  useFullWidth(pageRef)
+
   const [selectedConfigId, setSelectedConfigId] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
@@ -282,7 +335,8 @@ const SupportBoxDashboard = () => {
   }
 
   return (
-    <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "24px 32px" }}>
+    <div ref={pageRef} style={{ maxWidth: "1600px", margin: "0 auto", padding: "24px 32px", background: BG_COLOR }}>
+      <FullWidthStyles />
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <h1 style={{ fontSize: "20px", fontWeight: 600, color: C.text, margin: 0 }}>SupportBox</h1>
@@ -297,9 +351,9 @@ const SupportBoxDashboard = () => {
         </Link>
       </div>
 
-      <div style={{ display: "flex", gap: "24px" }}>
+      <div style={{ display: "flex", gap: "28px" }}>
         {/* ═══ Left Sidebar — Inboxes ═══ */}
-        <div style={{ width: "240px", flexShrink: 0 }}>
+        <div style={{ width: "280px", flexShrink: 0 }}>
           <div style={{ fontSize: "11px", fontWeight: 600, color: C.textMuted, textTransform: "uppercase", letterSpacing: "0.5px", padding: "0 14px", marginBottom: "8px" }}>
             Inboxes
           </div>
@@ -336,8 +390,8 @@ const SupportBoxDashboard = () => {
 
           {/* Filters */}
           <div style={{
-            display: "flex", gap: "12px", alignItems: "center", marginBottom: "16px",
-            padding: "12px 16px", backgroundColor: C.white, border: `1px solid ${C.border}`,
+            display: "flex", gap: "12px", alignItems: "center",
+            padding: "14px 20px", backgroundColor: C.white, border: `1px solid ${C.border}`,
             borderRadius: "12px 12px 0 0", borderBottom: "none",
           }}>
             <div style={{ flex: 1 }}>
