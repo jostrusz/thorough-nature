@@ -1,14 +1,14 @@
 // @ts-nocheck
 import { useState, useRef, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
-import { Button, Badge } from "@medusajs/ui"
+import { Badge } from "@medusajs/ui"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "../../../lib/sdk"
 
 // ═══════════════════════════════════════════
 // FULL-WIDTH OVERRIDE
 // ═══════════════════════════════════════════
-const BG = "#F8FAFC"
+const BG = "#F7F8FA"
 
 function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
@@ -55,130 +55,127 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
 }
 
 // ═══════════════════════════════════════════
-// COLORS & THEME
+// DESIGN TOKENS
 // ═══════════════════════════════════════════
-const C = {
-  bg: "#F8FAFC",
-  white: "#FFFFFF",
-  border: "#E2E8F0",
-  borderLight: "#F1F5F9",
-  text: "#0F172A",
-  textSecondary: "#64748B",
-  textMuted: "#94A3B8",
-  green: "#10B981",
+const T = {
+  bg: "#F7F8FA",
+  card: "#FFFFFF",
+  border: "#E5E7EB",
+  borderLight: "#F3F4F6",
+  text: "#111827",
+  textSec: "#6B7280",
+  textMuted: "#9CA3AF",
+  textFaint: "#D1D5DB",
+  green: "#059669",
   greenBg: "#ECFDF5",
-  greenLight: "#D1FAE5",
-  blue: "#3B82F6",
+  greenBorder: "#A7F3D0",
+  blue: "#2563EB",
   blueBg: "#EFF6FF",
-  blueLight: "#DBEAFE",
-  purple: "#8B5CF6",
+  blueBorder: "#BFDBFE",
+  purple: "#7C3AED",
   purpleBg: "#F5F3FF",
-  orange: "#F59E0B",
+  orange: "#D97706",
   orangeBg: "#FFFBEB",
-  red: "#EF4444",
-  inboundBg: "#F1F5F9",
-  inboundBorder: "#E2E8F0",
-  outboundBg: "#ECFDF5",
-  outboundBorder: "#A7F3D0",
-  accent: "#6366F1",
+  red: "#DC2626",
+  redBg: "#FEF2F2",
+  accent: "#4F46E5",
   accentBg: "#EEF2FF",
+  shadow: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
+  shadowMd: "0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04)",
+  radius: "12px",
+  radiusSm: "8px",
+  radiusLg: "16px",
 }
 
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
-function formatDate(date: string): string {
-  return new Date(date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
-}
-
-function formatTime(date: string): string {
-  return new Date(date).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
-}
-
-function formatDateTime(date: string): string {
-  return `${formatTime(date)}, ${formatDate(date)}`
-}
-
-function formatCurrency(amount: number, currency: string): string {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: currency || "EUR" }).format(amount || 0)
-}
-
-function stripHtml(html: string): string {
-  return html?.replace(/<[^>]*>/g, "").trim() || ""
+const fmt = {
+  date: (d: string) => d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
+  time: (d: string) => d ? new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "",
+  dateTime: (d: string) => d ? `${fmt.time(d)}, ${fmt.date(d)}` : "",
+  money: (n: number, c: string) => new Intl.NumberFormat("en-US", { style: "currency", currency: c || "EUR" }).format(n || 0),
+  strip: (html: string) => html?.replace(/<[^>]*>/g, "").trim() || "",
 }
 
 // ═══════════════════════════════════════════
-// ORDER CARD — compact, clickable
+// SECTION CARD wrapper
 // ═══════════════════════════════════════════
-function OrderCard({ order }: { order: any }) {
-  const [hovered, setHovered] = useState(false)
-  const statusColor = order.status === "completed" || order.status === "fulfilled"
-    ? "green" : order.status === "canceled" ? "red" : "orange"
-  const statusEmoji = order.status === "completed" || order.status === "fulfilled"
-    ? "✅" : order.status === "canceled" ? "❌" : "⏳"
-
+function SidebarCard({ title, icon, children, defaultOpen = true }: {
+  title: string; icon: string; children: React.ReactNode; defaultOpen?: boolean
+}) {
+  const [open, setOpen] = useState(defaultOpen)
   return (
-    <Link to={`/orders/${order.order_id}`} style={{ textDecoration: "none", color: "inherit" }}>
-      <div
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+    <div style={{
+      backgroundColor: T.card, border: `1px solid ${T.border}`,
+      borderRadius: T.radius, overflow: "hidden", boxShadow: T.shadow,
+    }}>
+      <button
+        onClick={() => setOpen(!open)}
         style={{
-          padding: "14px 16px",
-          border: `1px solid ${hovered ? C.blue : C.border}`,
-          borderRadius: "10px",
-          marginBottom: "8px",
-          backgroundColor: hovered ? C.blueBg : C.white,
-          transform: hovered ? "translateY(-1px)" : "none",
-          boxShadow: hovered ? "0 4px 12px rgba(59,130,246,0.1)" : "none",
-          transition: "all 0.2s ease",
-          cursor: "pointer",
+          width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "14px 18px", border: "none", backgroundColor: "transparent", cursor: "pointer",
+          borderBottom: open ? `1px solid ${T.borderLight}` : "none",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-          <span style={{ fontSize: "13px", fontWeight: 700, color: C.text }}>
-            {statusEmoji} #{order.display_id}
-          </span>
-          <span style={{ fontSize: "14px", fontWeight: 700, color: C.text }}>
-            {formatCurrency(order.total, order.currency_code)}
-          </span>
-        </div>
-
-        <Badge color={statusColor} style={{ marginBottom: "6px" }}>{order.status || "pending"}</Badge>
-
-        {order.tracking_link && (
-          <a
-            href={order.tracking_link}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            style={{ fontSize: "11px", color: C.blue, textDecoration: "none", display: "block", marginTop: "6px" }}
-          >
-            📦 Track shipment &rarr;
-          </a>
-        )}
-
-        {order.items?.length > 0 && (
-          <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: `1px solid ${C.borderLight}` }}>
-            {order.items.map((item: any, i: number) => (
-              <div key={i} style={{ fontSize: "12px", color: C.textSecondary, lineHeight: 1.5 }}>
-                {item.title} &times; {item.quantity}
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div style={{ fontSize: "11px", color: C.textMuted, marginTop: "6px" }}>
-          Ordered {formatDate(order.created_at)}
-        </div>
-      </div>
-    </Link>
+        <span style={{ fontSize: "12px", fontWeight: 700, color: T.textSec, textTransform: "uppercase", letterSpacing: "0.5px", display: "flex", alignItems: "center", gap: "6px" }}>
+          {icon} {title}
+        </span>
+        <span style={{ fontSize: "11px", color: T.textMuted, transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▼</span>
+      </button>
+      {open && <div style={{ padding: "16px 18px" }}>{children}</div>}
+    </div>
   )
 }
 
 // ═══════════════════════════════════════════
-// CUSTOMER SIDEBAR — compact & info-rich
+// INFO ROW — label: value pair
 // ═══════════════════════════════════════════
-function CustomerSidebar({ fromEmail, allOrders }: { fromEmail: string; allOrders: any[] }) {
+function InfoRow({ label, value, mono, color }: { label: string; value: React.ReactNode; mono?: boolean; color?: string }) {
+  if (!value) return null
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "5px 0", gap: "12px" }}>
+      <span style={{ fontSize: "12px", color: T.textMuted, flexShrink: 0, minWidth: "80px" }}>{label}</span>
+      <span style={{
+        fontSize: "12px", color: color || T.text, fontWeight: 500, textAlign: "right",
+        fontFamily: mono ? "SF Mono, Menlo, monospace" : "inherit", wordBreak: "break-all",
+      }}>{value}</span>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════
+// TIMELINE DOT — for order events
+// ═══════════════════════════════════════════
+function TimelineEvent({ label, date, color, isLast }: { label: string; date?: string; color: string; isLast?: boolean }) {
+  return (
+    <div style={{ display: "flex", gap: "10px", position: "relative" }}>
+      {/* Dot + line */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+        <div style={{
+          width: "10px", height: "10px", borderRadius: "50%",
+          backgroundColor: date ? color : T.textFaint,
+          border: `2px solid ${date ? color : T.textFaint}`,
+          boxShadow: date ? `0 0 0 3px ${color}22` : "none",
+        }} />
+        {!isLast && (
+          <div style={{ width: "2px", height: "20px", backgroundColor: T.borderLight }} />
+        )}
+      </div>
+      {/* Text */}
+      <div style={{ paddingBottom: isLast ? 0 : "8px", marginTop: "-2px" }}>
+        <div style={{ fontSize: "12px", fontWeight: 600, color: date ? T.text : T.textMuted }}>{label}</div>
+        {date && <div style={{ fontSize: "11px", color: T.textMuted }}>{fmt.dateTime(date)}</div>}
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════
+// CUSTOMER SIDEBAR — rich context panel
+// ═══════════════════════════════════════════
+function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] }) {
+  const fromEmail = ticket.from_email
   const { data: customer } = useQuery({
     queryKey: ["customer-by-email", fromEmail],
     queryFn: async () => {
@@ -191,178 +188,295 @@ function CustomerSidebar({ fromEmail, allOrders }: { fromEmail: string; allOrder
 
   const totalSpent = allOrders.reduce((sum: number, o: any) => sum + (Number(o.total) || 0), 0)
   const mainCurrency = allOrders[0]?.currency_code || "EUR"
-  const name = customer ? `${customer.first_name || ""} ${customer.last_name || ""}`.trim() : ""
+  const name = customer ? `${customer.first_name || ""} ${customer.last_name || ""}`.trim() : (ticket.from_name || "")
   const initial = (name?.[0] || fromEmail?.[0] || "?").toUpperCase()
 
+  // Get shipping address from most recent order
+  const latestAddr = allOrders[0]?.shipping_address
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-      {/* Customer Card */}
-      <div style={{
-        backgroundColor: C.white, border: `1px solid ${C.border}`,
-        borderRadius: "14px", padding: "20px",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-      }}>
-        {/* Avatar + Name */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+
+      {/* ── CUSTOMER PROFILE ── */}
+      <SidebarCard title="Customer" icon="👤">
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px" }}>
           <div style={{
-            width: "44px", height: "44px", borderRadius: "50%",
-            background: `linear-gradient(135deg, ${C.accent}, ${C.purple})`,
+            width: "42px", height: "42px", borderRadius: "50%",
+            background: `linear-gradient(135deg, ${T.accent}, ${T.purple})`,
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "17px", fontWeight: 700, color: "#fff", flexShrink: 0,
-            boxShadow: "0 2px 8px rgba(99,102,241,0.3)",
+            fontSize: "16px", fontWeight: 700, color: "#fff", flexShrink: 0,
           }}>
             {initial}
           </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: "14px", fontWeight: 700, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: "14px", fontWeight: 700, color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {name || fromEmail}
             </div>
-            <a href={`mailto:${fromEmail}`} style={{ fontSize: "12px", color: C.blue, textDecoration: "none" }}>
+            <div style={{ fontSize: "12px", color: T.blue, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {fromEmail}
-            </a>
+            </div>
           </div>
         </div>
 
-        {customer?.phone && (
-          <div style={{ fontSize: "12px", color: C.textSecondary, marginBottom: "4px" }}>📱 {customer.phone}</div>
-        )}
-        {customer?.addresses?.[0] && (
-          <div style={{ fontSize: "12px", color: C.textSecondary, marginBottom: "4px" }}>
-            📍 {[customer.addresses[0].city, customer.addresses[0].country_code?.toUpperCase()].filter(Boolean).join(", ")}
-          </div>
-        )}
-        {customer?.created_at && (
-          <div style={{ fontSize: "11px", color: C.textMuted, marginBottom: "12px" }}>
-            Customer since {formatDate(customer.created_at)}
-          </div>
-        )}
+        {customer?.phone && <InfoRow label="Phone" value={customer.phone} />}
+        {customer?.created_at && <InfoRow label="Since" value={fmt.date(customer.created_at)} />}
 
-        {/* Stats */}
-        <div style={{
-          display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px",
-          borderTop: `1px solid ${C.borderLight}`, paddingTop: "14px",
-        }}>
-          <div style={{
-            textAlign: "center", padding: "10px", borderRadius: "10px",
-            backgroundColor: C.purpleBg,
-          }}>
-            <div style={{ fontSize: "20px", fontWeight: 800, color: C.purple }}>{allOrders.length}</div>
-            <div style={{ fontSize: "10px", fontWeight: 600, color: C.textMuted, textTransform: "uppercase", letterSpacing: "0.5px" }}>orders</div>
+        {/* Address from customer or latest order */}
+        {(customer?.addresses?.[0] || latestAddr) && (() => {
+          const addr = customer?.addresses?.[0] || latestAddr
+          const lines = [
+            addr.address_1,
+            addr.address_2,
+            [addr.city, addr.postal_code].filter(Boolean).join(" "),
+            addr.province,
+            addr.country_code?.toUpperCase(),
+          ].filter(Boolean)
+          return (
+            <div style={{ marginTop: "8px", padding: "10px 12px", backgroundColor: T.bg, borderRadius: T.radiusSm }}>
+              <div style={{ fontSize: "11px", fontWeight: 600, color: T.textMuted, marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.3px" }}>Address</div>
+              {lines.map((line, i) => (
+                <div key={i} style={{ fontSize: "12px", color: T.text, lineHeight: 1.5 }}>{line}</div>
+              ))}
+            </div>
+          )
+        })()}
+
+        {/* Quick stats */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "12px" }}>
+          <div style={{ textAlign: "center", padding: "10px 8px", borderRadius: T.radiusSm, backgroundColor: T.purpleBg }}>
+            <div style={{ fontSize: "18px", fontWeight: 800, color: T.purple }}>{allOrders.length}</div>
+            <div style={{ fontSize: "10px", fontWeight: 600, color: T.textMuted, textTransform: "uppercase" }}>orders</div>
           </div>
-          <div style={{
-            textAlign: "center", padding: "10px", borderRadius: "10px",
-            backgroundColor: C.greenBg,
-          }}>
-            <div style={{ fontSize: "20px", fontWeight: 800, color: C.green }}>{formatCurrency(totalSpent, mainCurrency)}</div>
-            <div style={{ fontSize: "10px", fontWeight: 600, color: C.textMuted, textTransform: "uppercase", letterSpacing: "0.5px" }}>spent</div>
+          <div style={{ textAlign: "center", padding: "10px 8px", borderRadius: T.radiusSm, backgroundColor: T.greenBg }}>
+            <div style={{ fontSize: "18px", fontWeight: 800, color: T.green }}>{fmt.money(totalSpent, mainCurrency)}</div>
+            <div style={{ fontSize: "10px", fontWeight: 600, color: T.textMuted, textTransform: "uppercase" }}>spent</div>
           </div>
         </div>
-      </div>
+      </SidebarCard>
 
-      {/* Orders */}
-      {allOrders.length > 0 && (
-        <div style={{
-          backgroundColor: C.white, border: `1px solid ${C.border}`,
-          borderRadius: "14px", padding: "16px",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-        }}>
-          <div style={{
-            fontSize: "11px", fontWeight: 700, color: C.textMuted,
-            textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "10px",
-          }}>
-            📦 Orders ({allOrders.length})
+      {/* ── ORDERS ── */}
+      {allOrders.map((order: any) => (
+        <SidebarCard
+          key={order.order_id}
+          title={`Order #${order.display_id}`}
+          icon="📦"
+          defaultOpen={allOrders.length <= 2}
+        >
+          {/* Order header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+            <Link to={`/orders/${order.order_id}`} style={{ fontSize: "13px", fontWeight: 700, color: T.blue, textDecoration: "none" }}>
+              #{order.display_id} →
+            </Link>
+            <span style={{ fontSize: "14px", fontWeight: 700, color: T.text }}>
+              {fmt.money(order.total, order.currency_code)}
+            </span>
           </div>
-          {allOrders.map((order: any) => (
-            <OrderCard key={order.order_id} order={order} />
-          ))}
-        </div>
+
+          {/* Status badges */}
+          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "12px" }}>
+            <span style={{
+              fontSize: "11px", fontWeight: 600, padding: "3px 8px", borderRadius: "6px",
+              backgroundColor: order.status === "completed" ? T.greenBg : order.status === "canceled" ? T.redBg : T.orangeBg,
+              color: order.status === "completed" ? T.green : order.status === "canceled" ? T.red : T.orange,
+            }}>
+              {order.status}
+            </span>
+            <span style={{
+              fontSize: "11px", fontWeight: 600, padding: "3px 8px", borderRadius: "6px",
+              backgroundColor: order.payment_status === "paid" ? T.greenBg : order.payment_status === "canceled" ? T.redBg : T.orangeBg,
+              color: order.payment_status === "paid" ? T.green : order.payment_status === "canceled" ? T.red : T.orange,
+            }}>
+              {order.payment_status === "paid" ? "Paid" : order.payment_status === "canceled" ? "Payment canceled" : "Awaiting payment"}
+            </span>
+          </div>
+
+          {/* Items */}
+          <div style={{ marginBottom: "12px" }}>
+            {order.items?.map((item: any, i: number) => (
+              <div key={i} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "6px 0", borderBottom: i < order.items.length - 1 ? `1px solid ${T.borderLight}` : "none",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+                  {item.thumbnail && (
+                    <img src={item.thumbnail} alt="" style={{ width: "28px", height: "28px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }} />
+                  )}
+                  <span style={{ fontSize: "12px", color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {item.title}
+                  </span>
+                </div>
+                <span style={{ fontSize: "11px", color: T.textMuted, flexShrink: 0, marginLeft: "8px" }}>
+                  x{item.quantity}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Delivery address */}
+          {order.shipping_address && (
+            <div style={{ padding: "10px 12px", backgroundColor: T.bg, borderRadius: T.radiusSm, marginBottom: "12px" }}>
+              <div style={{ fontSize: "11px", fontWeight: 600, color: T.textMuted, marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.3px" }}>Ship to</div>
+              <div style={{ fontSize: "12px", color: T.text, lineHeight: 1.5 }}>
+                {[order.shipping_address.first_name, order.shipping_address.last_name].filter(Boolean).join(" ")}
+              </div>
+              <div style={{ fontSize: "12px", color: T.textSec, lineHeight: 1.5 }}>
+                {[
+                  order.shipping_address.address_1,
+                  order.shipping_address.address_2,
+                  [order.shipping_address.city, order.shipping_address.postal_code].filter(Boolean).join(" "),
+                  order.shipping_address.country_code?.toUpperCase(),
+                ].filter(Boolean).join(", ")}
+              </div>
+              {order.shipping_address.phone && (
+                <div style={{ fontSize: "11px", color: T.textMuted, marginTop: "2px" }}>Tel: {order.shipping_address.phone}</div>
+              )}
+            </div>
+          )}
+
+          {/* Order timeline */}
+          <div style={{ padding: "10px 12px", backgroundColor: T.bg, borderRadius: T.radiusSm, marginBottom: "8px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: T.textMuted, marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.3px" }}>Timeline</div>
+            <TimelineEvent label="Order placed" date={order.created_at} color={T.green} />
+            <TimelineEvent
+              label="Payment"
+              date={order.payments?.[0]?.captured_at || (order.payment_status === "paid" ? order.created_at : undefined)}
+              color={T.blue}
+            />
+            <TimelineEvent
+              label="Shipped"
+              date={order.fulfillments?.[0]?.shipped_at || order.fulfillments?.[0]?.created_at}
+              color={T.purple}
+            />
+            <TimelineEvent
+              label="Delivered"
+              date={order.delivery_status === "delivered" ? (order.fulfillments?.[0]?.delivered_at || undefined) : undefined}
+              color={T.green}
+              isLast
+            />
+          </div>
+
+          {/* Tracking */}
+          {(order.tracking_number || order.fulfillments?.[0]?.labels?.[0]?.tracking_number) && (
+            <div style={{ padding: "10px 12px", backgroundColor: T.blueBg, borderRadius: T.radiusSm, border: `1px solid ${T.blueBorder}` }}>
+              <div style={{ fontSize: "11px", fontWeight: 600, color: T.blue, marginBottom: "4px" }}>Tracking</div>
+              <div style={{ fontSize: "12px", color: T.text, fontFamily: "SF Mono, Menlo, monospace" }}>
+                {order.tracking_number || order.fulfillments?.[0]?.labels?.[0]?.tracking_number}
+              </div>
+              {order.carrier && (
+                <div style={{ fontSize: "11px", color: T.textSec, marginTop: "2px" }}>via {order.carrier}</div>
+              )}
+              {(order.tracking_link || order.fulfillments?.[0]?.labels?.[0]?.tracking_url) && (
+                <a
+                  href={order.tracking_link || order.fulfillments?.[0]?.labels?.[0]?.tracking_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize: "11px", color: T.blue, textDecoration: "none", display: "inline-block", marginTop: "4px", fontWeight: 600 }}
+                >
+                  Track shipment →
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Delivery status from Dextrum */}
+          {order.delivery_status && (
+            <div style={{ marginTop: "8px" }}>
+              <InfoRow label="Delivery" value={
+                <span style={{
+                  fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "6px",
+                  backgroundColor: order.delivery_status === "delivered" ? T.greenBg : T.orangeBg,
+                  color: order.delivery_status === "delivered" ? T.green : T.orange,
+                }}>
+                  {order.delivery_status}
+                </span>
+              } />
+            </div>
+          )}
+
+          <div style={{ fontSize: "11px", color: T.textMuted, marginTop: "8px", textAlign: "right" }}>
+            Ordered {fmt.date(order.created_at)}
+          </div>
+        </SidebarCard>
+      ))}
+
+      {allOrders.length === 0 && (
+        <SidebarCard title="Orders" icon="📦">
+          <div style={{ textAlign: "center", padding: "12px 0", color: T.textMuted, fontSize: "13px" }}>
+            No orders found for this email
+          </div>
+        </SidebarCard>
       )}
     </div>
   )
 }
 
 // ═══════════════════════════════════════════
-// MESSAGE BUBBLE — modern chat design
+// MESSAGE BUBBLE
 // ═══════════════════════════════════════════
 function MessageBubble({ message }: { message: any }) {
   const isInbound = message.direction === "inbound"
   const body = message.body_html || message.body_text || ""
-  const hasContent = stripHtml(body).length > 0
+  const hasContent = fmt.strip(body).length > 0
 
   return (
-    <div style={{
-      display: "flex",
-      justifyContent: isInbound ? "flex-start" : "flex-end",
-      paddingLeft: isInbound ? 0 : "48px",
-      paddingRight: isInbound ? "48px" : 0,
-    }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: isInbound ? "flex-start" : "flex-end" }}>
+      {/* Sender */}
       <div style={{
-        maxWidth: "100%",
-        width: "100%",
+        fontSize: "11px", fontWeight: 600, marginBottom: "6px",
+        color: isInbound ? T.textSec : T.green,
+        paddingLeft: isInbound ? "16px" : 0,
+        paddingRight: isInbound ? 0 : "16px",
       }}>
-        {/* Sender label */}
-        <div style={{
-          fontSize: "11px", fontWeight: 600, marginBottom: "4px",
-          color: isInbound ? C.textSecondary : C.green,
-          textAlign: isInbound ? "left" : "right",
-          paddingLeft: isInbound ? "14px" : 0,
-          paddingRight: isInbound ? 0 : "14px",
-        }}>
-          {isInbound ? "👤 " : "💬 "}
-          {message.from_name || message.from_email || (isInbound ? "Customer" : "Support")}
-        </div>
+        {isInbound ? "👤 " : "💬 "}
+        {message.from_name || message.from_email || (isInbound ? "Customer" : "Support")}
+      </div>
 
-        {/* Bubble */}
-        <div style={{
-          padding: "16px 20px",
-          borderRadius: isInbound ? "4px 18px 18px 18px" : "18px 4px 18px 18px",
-          backgroundColor: isInbound ? C.white : C.outboundBg,
-          border: `1px solid ${isInbound ? C.border : C.outboundBorder}`,
-          boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-        }}>
-          {hasContent ? (
-            <div
-              style={{ fontSize: "14px", lineHeight: 1.7, color: C.text, wordBreak: "break-word" }}
-              dangerouslySetInnerHTML={{ __html: body }}
-            />
-          ) : (
-            <div style={{ fontSize: "13px", color: C.textMuted, fontStyle: "italic" }}>
-              (no email body)
-            </div>
-          )}
-        </div>
+      {/* Bubble */}
+      <div style={{
+        maxWidth: "85%",
+        padding: "16px 20px",
+        borderRadius: isInbound ? "4px 16px 16px 16px" : "16px 4px 16px 16px",
+        backgroundColor: isInbound ? T.card : T.greenBg,
+        border: `1px solid ${isInbound ? T.border : T.greenBorder}`,
+        boxShadow: T.shadow,
+      }}>
+        {hasContent ? (
+          <div
+            style={{ fontSize: "14px", lineHeight: 1.75, color: T.text, wordBreak: "break-word" }}
+            dangerouslySetInnerHTML={{ __html: body }}
+          />
+        ) : (
+          <div style={{ fontSize: "13px", color: T.textMuted, fontStyle: "italic" }}>(no email body)</div>
+        )}
+      </div>
 
-        {/* Time */}
-        <div style={{
-          fontSize: "11px", color: C.textMuted, marginTop: "4px",
-          textAlign: isInbound ? "left" : "right",
-          paddingLeft: isInbound ? "14px" : 0,
-          paddingRight: isInbound ? 0 : "14px",
-        }}>
-          {formatDateTime(message.created_at)}
-        </div>
+      {/* Time */}
+      <div style={{
+        fontSize: "11px", color: T.textMuted, marginTop: "6px",
+        paddingLeft: isInbound ? "16px" : 0,
+        paddingRight: isInbound ? 0 : "16px",
+      }}>
+        {fmt.dateTime(message.created_at)}
       </div>
     </div>
   )
 }
 
 // ═══════════════════════════════════════════
-// REPLY COMPOSER — big, prominent
+// REPLY COMPOSER
 // ═══════════════════════════════════════════
 function ReplyComposer({ replyText, setReplyText, onSend, isSending }: {
   replyText: string; setReplyText: (v: string) => void; onSend: () => void; isSending: boolean
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Auto-resize textarea
   useEffect(() => {
     const el = textareaRef.current
     if (!el) return
     el.style.height = "auto"
-    el.style.height = Math.max(120, el.scrollHeight) + "px"
+    el.style.height = Math.max(100, el.scrollHeight) + "px"
   }, [replyText])
 
-  // Ctrl+Enter to send
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && replyText.trim()) {
       e.preventDefault()
@@ -372,33 +486,16 @@ function ReplyComposer({ replyText, setReplyText, onSend, isSending }: {
 
   return (
     <div style={{
-      backgroundColor: C.white,
-      border: `2px solid ${C.accent}`,
-      borderRadius: "16px",
-      padding: "20px 24px",
-      boxShadow: "0 4px 20px rgba(99,102,241,0.08)",
+      backgroundColor: T.card, border: `1px solid ${T.accent}`,
+      borderRadius: T.radiusLg, padding: "20px 24px", boxShadow: T.shadowMd,
     }}>
       {/* Header */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        marginBottom: "14px",
-      }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <div style={{
-            width: "28px", height: "28px", borderRadius: "8px",
-            background: `linear-gradient(135deg, ${C.accent}, ${C.purple})`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "13px",
-          }}>
-            ✉️
-          </div>
-          <span style={{ fontSize: "14px", fontWeight: 700, color: C.text }}>
-            Reply to Customer
-          </span>
+          <span style={{ fontSize: "16px" }}>✉️</span>
+          <span style={{ fontSize: "13px", fontWeight: 700, color: T.text }}>Reply to Customer</span>
         </div>
-        <span style={{ fontSize: "11px", color: C.textMuted }}>
-          ⌘+Enter to send
-        </span>
+        <span style={{ fontSize: "11px", color: T.textMuted }}>⌘+Enter to send</span>
       </div>
 
       {/* Textarea */}
@@ -407,35 +504,22 @@ function ReplyComposer({ replyText, setReplyText, onSend, isSending }: {
         value={replyText}
         onChange={(e) => setReplyText(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Write your reply here... Be helpful and friendly 😊"
+        placeholder="Write your reply here..."
         style={{
-          width: "100%",
-          minHeight: "120px",
-          maxHeight: "400px",
-          padding: "16px",
-          fontSize: "14px",
-          lineHeight: 1.7,
-          color: C.text,
-          backgroundColor: C.bg,
-          border: `1px solid ${C.borderLight}`,
-          borderRadius: "12px",
-          resize: "none",
-          outline: "none",
-          fontFamily: "inherit",
-          transition: "border-color 0.2s ease",
-          boxSizing: "border-box",
+          width: "100%", minHeight: "100px", maxHeight: "350px",
+          padding: "14px 16px", fontSize: "14px", lineHeight: 1.7, color: T.text,
+          backgroundColor: T.bg, border: `1px solid ${T.borderLight}`,
+          borderRadius: T.radius, resize: "none", outline: "none",
+          fontFamily: "inherit", transition: "border-color 0.2s ease", boxSizing: "border-box",
         }}
-        onFocus={(e) => { e.target.style.borderColor = C.accent }}
-        onBlur={(e) => { e.target.style.borderColor = C.borderLight }}
+        onFocus={(e) => { e.target.style.borderColor = T.accent }}
+        onBlur={(e) => { e.target.style.borderColor = T.borderLight }}
       />
 
       {/* Actions */}
-      <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        marginTop: "14px",
-      }}>
-        <div style={{ fontSize: "12px", color: C.textMuted }}>
-          {replyText.trim().length > 0 && `${replyText.trim().length} characters`}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "12px" }}>
+        <div style={{ fontSize: "11px", color: T.textMuted }}>
+          {replyText.trim().length > 0 && `${replyText.trim().length} chars`}
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
           {replyText.trim() && (
@@ -443,15 +527,10 @@ function ReplyComposer({ replyText, setReplyText, onSend, isSending }: {
               onClick={() => setReplyText("")}
               disabled={isSending}
               style={{
-                padding: "8px 16px",
-                fontSize: "13px",
-                fontWeight: 500,
-                color: C.textSecondary,
-                backgroundColor: "transparent",
-                border: `1px solid ${C.border}`,
-                borderRadius: "8px",
+                padding: "8px 14px", fontSize: "12px", fontWeight: 500,
+                color: T.textSec, backgroundColor: "transparent",
+                border: `1px solid ${T.border}`, borderRadius: T.radiusSm,
                 cursor: "pointer",
-                transition: "all 0.15s ease",
               }}
             >
               Clear
@@ -461,24 +540,15 @@ function ReplyComposer({ replyText, setReplyText, onSend, isSending }: {
             onClick={onSend}
             disabled={!replyText.trim() || isSending}
             style={{
-              padding: "10px 24px",
-              fontSize: "13px",
-              fontWeight: 700,
-              color: "#fff",
-              background: replyText.trim()
-                ? `linear-gradient(135deg, ${C.accent}, ${C.purple})`
-                : C.borderLight,
-              border: "none",
-              borderRadius: "10px",
+              padding: "10px 22px", fontSize: "13px", fontWeight: 700, color: "#fff",
+              background: replyText.trim() ? `linear-gradient(135deg, ${T.accent}, ${T.purple})` : T.borderLight,
+              border: "none", borderRadius: T.radiusSm,
               cursor: replyText.trim() ? "pointer" : "not-allowed",
-              boxShadow: replyText.trim() ? "0 4px 14px rgba(99,102,241,0.3)" : "none",
+              boxShadow: replyText.trim() ? "0 4px 14px rgba(79,70,229,0.25)" : "none",
               transition: "all 0.2s ease",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
             }}
           >
-            {isSending ? "Sending..." : "Send Reply ✨"}
+            {isSending ? "Sending..." : "Send Reply"}
           </button>
         </div>
       </div>
@@ -556,18 +626,18 @@ const TicketDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div style={{ padding: "64px", textAlign: "center" }}>
-        <div style={{ fontSize: "24px", marginBottom: "8px" }}>⏳</div>
-        <div style={{ color: C.textSecondary, fontSize: "14px" }}>Loading ticket...</div>
+      <div style={{ padding: "80px", textAlign: "center" }}>
+        <div style={{ fontSize: "28px", marginBottom: "12px" }}>⏳</div>
+        <div style={{ color: T.textSec, fontSize: "14px" }}>Loading ticket...</div>
       </div>
     )
   }
 
   if (!ticket) {
     return (
-      <div style={{ padding: "64px", textAlign: "center" }}>
-        <div style={{ fontSize: "24px", marginBottom: "8px" }}>🔍</div>
-        <div style={{ color: C.textSecondary, fontSize: "14px" }}>Ticket not found</div>
+      <div style={{ padding: "80px", textAlign: "center" }}>
+        <div style={{ fontSize: "28px", marginBottom: "12px" }}>🔍</div>
+        <div style={{ color: T.textSec, fontSize: "14px" }}>Ticket not found</div>
       </div>
     )
   }
@@ -580,8 +650,8 @@ const TicketDetailPage = () => {
   const status = statusConfig[ticket.status as keyof typeof statusConfig] || statusConfig.new
 
   return (
-    <div ref={pageRef} style={{ width: "100%", padding: "24px 32px", background: BG, boxSizing: "border-box" }}>
-      {/* Inject global CSS to override Medusa admin container constraints */}
+    <div ref={pageRef} style={{ width: "100%", padding: "28px 40px", background: BG, boxSizing: "border-box", minHeight: "100vh" }}>
+      {/* Global CSS override */}
       <style>{`
         main > div, main > div > div, main > div > div > div,
         main > div > div > div > div, main > div > div > div > div > div {
@@ -593,49 +663,47 @@ const TicketDetailPage = () => {
           margin-right: 0 !important;
         }
       `}</style>
-      {/* ═══ Top Bar ═══ */}
+
+      {/* ═══ TOP BAR ═══ */}
       <div style={{
         display: "flex", justifyContent: "space-between", alignItems: "center",
-        marginBottom: "24px", paddingBottom: "20px", borderBottom: `1px solid ${C.border}`,
+        marginBottom: "28px", paddingBottom: "20px", borderBottom: `1px solid ${T.border}`,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <Link to="/supportbox" style={{ textDecoration: "none" }}>
             <button style={{
               padding: "8px 14px", fontSize: "13px", fontWeight: 500,
-              color: C.textSecondary, backgroundColor: C.white,
-              border: `1px solid ${C.border}`, borderRadius: "8px",
-              cursor: "pointer", transition: "all 0.15s ease",
-              display: "flex", alignItems: "center", gap: "6px",
+              color: T.textSec, backgroundColor: T.card,
+              border: `1px solid ${T.border}`, borderRadius: T.radiusSm,
+              cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
+              boxShadow: T.shadow, transition: "all 0.15s",
             }}>
               ← Back
             </button>
           </Link>
           <div>
-            <h1 style={{ fontSize: "20px", fontWeight: 700, color: C.text, margin: 0, lineHeight: 1.3 }}>
+            <h1 style={{ fontSize: "20px", fontWeight: 700, color: T.text, margin: 0, lineHeight: 1.3 }}>
               {ticket.subject}
             </h1>
-            <div style={{ fontSize: "13px", color: C.textSecondary, marginTop: "2px" }}>
+            <div style={{ fontSize: "13px", color: T.textSec, marginTop: "4px" }}>
               From: {ticket.from_name ? `${ticket.from_name} <${ticket.from_email}>` : ticket.from_email}
-              <span style={{ color: C.textMuted, margin: "0 8px" }}>·</span>
-              {formatDateTime(ticket.created_at)}
+              <span style={{ color: T.textMuted, margin: "0 8px" }}>·</span>
+              {fmt.dateTime(ticket.created_at)}
             </div>
           </div>
         </div>
 
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <Badge color={status.color}>
-            {status.emoji} {status.label}
-          </Badge>
+          <Badge color={status.color}>{status.emoji} {status.label}</Badge>
           {ticket.status !== "solved" ? (
             <button
               onClick={() => solveMutation.mutate()}
               disabled={solveMutation.isPending}
               style={{
-                padding: "8px 16px", fontSize: "13px", fontWeight: 600,
-                color: "#fff", background: `linear-gradient(135deg, ${C.green}, #059669)`,
-                border: "none", borderRadius: "8px", cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(16,185,129,0.3)",
-                transition: "all 0.15s ease",
+                padding: "8px 18px", fontSize: "13px", fontWeight: 600,
+                color: "#fff", background: `linear-gradient(135deg, ${T.green}, #047857)`,
+                border: "none", borderRadius: T.radiusSm, cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(5,150,105,0.3)", transition: "all 0.15s",
               }}
             >
               {solveMutation.isPending ? "..." : "✓ Mark Solved"}
@@ -645,10 +713,10 @@ const TicketDetailPage = () => {
               onClick={() => reopenMutation.mutate()}
               disabled={reopenMutation.isPending}
               style={{
-                padding: "8px 16px", fontSize: "13px", fontWeight: 600,
-                color: C.orange, backgroundColor: C.orangeBg,
-                border: `1px solid ${C.orange}`, borderRadius: "8px",
-                cursor: "pointer", transition: "all 0.15s ease",
+                padding: "8px 18px", fontSize: "13px", fontWeight: 600,
+                color: T.orange, backgroundColor: T.orangeBg,
+                border: `1px solid ${T.orange}`, borderRadius: T.radiusSm,
+                cursor: "pointer", transition: "all 0.15s",
               }}
             >
               {reopenMutation.isPending ? "..." : "↩ Reopen"}
@@ -657,26 +725,24 @@ const TicketDetailPage = () => {
         </div>
       </div>
 
-      {/* ═══ Main Layout — Conversation + Sidebar ═══ */}
-      <div style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}>
+      {/* ═══ MAIN LAYOUT ═══ */}
+      <div style={{ display: "flex", gap: "28px", alignItems: "flex-start" }}>
 
-        {/* ─── LEFT: Conversation + Reply (75%) ─── */}
-        <div style={{ flex: 3, minWidth: 0, display: "flex", flexDirection: "column", gap: "16px" }}>
-          {/* Messages area */}
+        {/* LEFT: Conversation + Reply (flex 3) */}
+        <div style={{ flex: 3, minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
+
+          {/* Messages */}
           <div style={{
-            backgroundColor: C.white,
-            border: `1px solid ${C.border}`,
-            borderRadius: "16px",
-            padding: "24px",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            backgroundColor: T.card, border: `1px solid ${T.border}`,
+            borderRadius: T.radiusLg, padding: "28px 32px", boxShadow: T.shadow,
           }}>
             {sortedMessages.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "40px 0", color: C.textMuted }}>
-                <div style={{ fontSize: "28px", marginBottom: "8px" }}>💬</div>
+              <div style={{ textAlign: "center", padding: "48px 0", color: T.textMuted }}>
+                <div style={{ fontSize: "32px", marginBottom: "8px" }}>💬</div>
                 <div style={{ fontSize: "14px" }}>No messages yet</div>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                 {sortedMessages.map((message: any) => (
                   <MessageBubble key={message.id} message={message} />
                 ))}
@@ -685,7 +751,7 @@ const TicketDetailPage = () => {
             )}
           </div>
 
-          {/* Reply Composer */}
+          {/* Reply */}
           <ReplyComposer
             replyText={replyText}
             setReplyText={setReplyText}
@@ -693,21 +759,24 @@ const TicketDetailPage = () => {
             isSending={replyMutation.isPending}
           />
 
-          {/* Error display */}
           {replyMutation.isError && (
             <div style={{
-              padding: "12px 16px", backgroundColor: "#FEF2F2",
-              border: "1px solid #FECACA", borderRadius: "10px",
-              fontSize: "13px", color: C.red,
+              padding: "12px 16px", backgroundColor: T.redBg,
+              border: "1px solid #FECACA", borderRadius: T.radius,
+              fontSize: "13px", color: T.red,
             }}>
-              ❌ Failed to send: {(replyMutation.error as any)?.message || "Unknown error"}
+              Failed to send: {(replyMutation.error as any)?.message || "Unknown error"}
             </div>
           )}
         </div>
 
-        {/* ─── RIGHT: Customer Sidebar (25%) ─── */}
-        <div style={{ flex: 1, minWidth: "280px", maxWidth: "380px" }}>
-          <CustomerSidebar fromEmail={ticket.from_email} allOrders={allOrders} />
+        {/* RIGHT: Sidebar (flex 1, sticky) */}
+        <div style={{
+          flex: 1, minWidth: "300px", maxWidth: "400px",
+          position: "sticky", top: "20px", maxHeight: "calc(100vh - 60px)",
+          overflowY: "auto", paddingRight: "4px",
+        }}>
+          <CustomerSidebar ticket={ticket} allOrders={allOrders} />
         </div>
       </div>
     </div>
