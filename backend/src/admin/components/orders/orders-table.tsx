@@ -32,10 +32,10 @@ function formatDate(iso: string): { label: string; time: string; isRecent: boole
   yesterday.setDate(yesterday.getDate() - 1)
   const yesterdayCetStr = yesterday.toLocaleDateString("en-US", cetOptions)
 
-  const time = d.toLocaleTimeString("en-US", {
-    hour: "numeric",
+  const time = d.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
     minute: "2-digit",
-    hour12: true,
+    hour12: false,
     timeZone: "Europe/Prague",
   })
 

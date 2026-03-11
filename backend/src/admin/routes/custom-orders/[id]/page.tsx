@@ -932,7 +932,7 @@ const OrderDetailPage = () => {
                     <span style={{ fontSize: "12px", color: colors.textSec }}>
                       {new Date(order.metadata.dextrum_sent_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                       {" at "}
-                      {new Date(order.metadata.dextrum_sent_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
+                      {new Date(order.metadata.dextrum_sent_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Prague" })}
                     </span>
                   </div>
                 )}

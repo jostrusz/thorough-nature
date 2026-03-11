@@ -192,6 +192,19 @@ export async function GET(
       )
     }
 
+    // Strip html_body from email_activity_log to keep list response lean
+    // (html_body is only needed on the order detail page, not the list)
+    for (const o of filteredOrders as any[]) {
+      if (o.metadata?.email_activity_log) {
+        o.metadata.email_activity_log = o.metadata.email_activity_log.map(
+          (entry: any) => {
+            const { html_body, ...rest } = entry
+            return rest
+          }
+        )
+      }
+    }
+
     res.json({
       orders: filteredOrders,
       count: (metadata as any)?.count ?? orders.length,

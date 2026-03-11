@@ -99,15 +99,39 @@ function detectProvider(payments: any[]): {
   }
 }
 
+/* ─── Styles ─── */
+
+const labelStyle: React.CSSProperties = {
+  color: colors.textSec,
+  fontSize: "13px",
+  fontWeight: 400,
+}
+
+const valueStyle: React.CSSProperties = {
+  color: colors.text,
+  fontSize: "13px",
+  fontWeight: 500,
+  textAlign: "right" as const,
+}
+
+const mutedDetailStyle: React.CSSProperties = {
+  marginLeft: "6px",
+  color: colors.textMuted,
+  fontSize: "12px",
+  fontWeight: 400,
+}
+
 const rowStyle: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  padding: "7px 4px",
-  fontSize: "14px",
-  borderRadius: "4px",
-  margin: "0 -4px",
-  transition: "background 0.12s ease",
+  padding: "6px 0",
+  fontSize: "13px",
+}
+
+const dividerStyle: React.CSSProperties = {
+  borderTop: `1px solid ${colors.border}`,
+  margin: "10px 0",
 }
 
 const TRACKING_URLS: Record<string, (n: string) => string> = {
@@ -173,11 +197,8 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
   const paymentMethodName = getPaymentMethodName(order)
 
   return (
-    <div
-      className="od-card"
-      style={cardStyle}
-    >
-      {/* Header with payment badge and payment method icon */}
+    <div className="od-card" style={cardStyle}>
+      {/* Header: payment badge + payment method icon */}
       <div style={cardHeaderStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <PaymentBadge status={paymentStatus} />
@@ -216,79 +237,75 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
       </div>
 
       {/* Payment breakdown */}
-      <div style={{ padding: "16px 20px" }}>
+      <div style={{ padding: "14px 20px 16px" }}>
         {/* Subtotal */}
-        <div className="od-row-hover" style={rowStyle}>
-          <span style={{ color: colors.textSec }}>
+        <div style={rowStyle}>
+          <span style={labelStyle}>
             Subtotal
-            <span style={{ marginLeft: "8px", color: colors.textMuted }}>
+            <span style={mutedDetailStyle}>
               {itemCount} {itemCount === 1 ? "item" : "items"}
             </span>
           </span>
-          <span style={{ color: colors.text }}>{formatCurrency(subtotal, currency)}</span>
+          <span style={valueStyle}>{formatCurrency(subtotal, currency)}</span>
         </div>
 
         {/* Discount */}
         {discountTotal > 0 && (
-          <div className="od-row-hover" style={rowStyle}>
-            <span style={{ color: colors.textSec }}>
+          <div style={rowStyle}>
+            <span style={labelStyle}>
               Discount
               {discountCode && (
                 <span
                   style={{
                     marginLeft: "8px",
-                    fontSize: "12px",
+                    fontSize: "11px",
                     background: colors.accentBg,
                     padding: "1px 6px",
                     borderRadius: "4px",
                     color: colors.accent,
+                    fontWeight: 600,
                     textTransform: "uppercase",
+                    letterSpacing: "0.3px",
                   }}
                 >
                   {discountCode}
                 </span>
               )}
             </span>
-            <span style={{ color: colors.text }}>
+            <span style={{ ...valueStyle, color: colors.green }}>
               -{formatCurrency(discountTotal, currency)}
             </span>
           </div>
         )}
 
         {/* Shipping */}
-        <div className="od-row-hover" style={rowStyle}>
-          <span style={{ color: colors.textSec }}>
+        <div style={rowStyle}>
+          <span style={labelStyle}>
             Shipping
-            <span style={{ marginLeft: "8px", color: colors.textMuted, fontSize: "12px" }}>
-              {shippingMethodName}
-            </span>
+            <span style={mutedDetailStyle}>{shippingMethodName}</span>
           </span>
-          <span style={{ color: colors.text }}>
+          <span style={valueStyle}>
             {shippingTotal === 0
               ? formatCurrency(0, currency)
               : formatCurrency(shippingTotal, currency)}
           </span>
         </div>
 
-        {/* Delivery Fee (Doprava domů) */}
+        {/* Delivery Fee (Doprava domu) */}
         {Number(order.metadata?.shipping_fee) > 0 && (
-          <div className="od-row-hover" style={rowStyle}>
-            <span style={{ color: colors.textSec }}>
-              Doprava domů
-            </span>
-            <span style={{ color: colors.text }}>
+          <div style={rowStyle}>
+            <span style={labelStyle}>Doprava domu</span>
+            <span style={valueStyle}>
               +{formatCurrency(Number(order.metadata.shipping_fee), currency)}
             </span>
           </div>
         )}
 
-        {/* COD Fee (Dobírka) */}
+        {/* COD Fee (Dobirka) */}
         {order.metadata?.cod_fee && (
-          <div className="od-row-hover" style={rowStyle}>
-            <span style={{ color: colors.textSec }}>
-              Dobírka (COD)
-            </span>
-            <span style={{ color: colors.text }}>
+          <div style={rowStyle}>
+            <span style={labelStyle}>Dobirka (COD)</span>
+            <span style={valueStyle}>
               +{formatCurrency(Number(order.metadata.cod_fee), currency)}
             </span>
           </div>
@@ -296,54 +313,62 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
 
         {/* Taxes */}
         {taxTotal > 0 && (
-          <div className="od-row-hover" style={rowStyle}>
-            <span style={{ color: colors.textSec }}>
-              Taxes
-              <span style={{ marginLeft: "8px", color: colors.textMuted, fontSize: "12px" }}>
+          <div style={rowStyle}>
+            <span style={labelStyle}>
+              Tax
+              <span style={mutedDetailStyle}>
                 {order.metadata?.tax_rate || "VAT"} (Included)
               </span>
             </span>
-            <span style={{ color: colors.text }}>
-              {formatCurrency(taxTotal, currency)}
-            </span>
+            <span style={valueStyle}>{formatCurrency(taxTotal, currency)}</span>
           </div>
         )}
 
-        {/* Divider + Total */}
-        <div style={{ borderTop: `1px solid ${colors.border}`, marginTop: "8px", paddingTop: "8px" }}>
-          <div style={{ ...rowStyle, fontSize: "15px", fontWeight: 700 }}>
-            <span style={{ color: colors.text }}>Total</span>
-            <span style={{ color: colors.text }}>{formatCurrency(total, currency)}</span>
-          </div>
+        {/* ─── Divider ─── */}
+        <div style={dividerStyle} />
+
+        {/* Total */}
+        <div style={{ ...rowStyle, padding: "4px 0" }}>
+          <span style={{ color: colors.text, fontSize: "14px", fontWeight: 700 }}>
+            Total
+          </span>
+          <span style={{ color: colors.text, fontSize: "14px", fontWeight: 700 }}>
+            {formatCurrency(total, currency)}
+          </span>
         </div>
 
-        {/* Paid amount — kept as summary line */}
-        <div style={{ borderTop: `1px solid ${colors.border}`, marginTop: "8px", paddingTop: "8px" }}>
-          <div className="od-row-hover" style={rowStyle}>
-            <span style={{ color: colors.text, fontWeight: 500 }}>
-              {paymentStatus === "paid" || paymentStatus === "captured"
-                ? "Paid"
-                : paymentStatus === "refunded"
-                ? "Refunded"
-                : "Pending"}
-            </span>
-            <span style={{ color: colors.text, fontWeight: 500 }}>
-              {paymentStatus === "pending" ? formatCurrency(total, currency) : formatCurrency(totalPaid || total, currency)}
-            </span>
-          </div>
+        {/* ─── Divider ─── */}
+        <div style={dividerStyle} />
+
+        {/* Paid / Pending / Refunded */}
+        <div style={{ ...rowStyle, padding: "4px 0" }}>
+          <span style={{ color: colors.text, fontSize: "13px", fontWeight: 600 }}>
+            {paymentStatus === "paid" || paymentStatus === "captured"
+              ? "Paid"
+              : paymentStatus === "refunded"
+              ? "Refunded"
+              : "Pending"}
+          </span>
+          <span style={{ color: colors.text, fontSize: "13px", fontWeight: 600 }}>
+            {paymentStatus === "pending"
+              ? formatCurrency(total, currency)
+              : formatCurrency(totalPaid || total, currency)}
+          </span>
         </div>
 
         {/* ─── Order & Tracking Info ─── */}
-        <div style={{ borderTop: `1px solid ${colors.border}`, marginTop: "8px", paddingTop: "8px" }}>
-          {/* Medusa Order ID */}
+        <div style={dividerStyle} />
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+          {/* Order ID */}
           {order.display_id && (
-            <div className="od-row-hover" style={{ ...rowStyle, fontSize: "12px" }}>
-              <span style={{ color: colors.textMuted }}>Order ID</span>
+            <div style={{ ...rowStyle, padding: "4px 0" }}>
+              <span style={{ color: colors.textMuted, fontSize: "12px" }}>Order ID</span>
               <code
                 style={{
                   fontSize: "12px",
                   background: colors.bgHover,
-                  padding: "1px 8px",
+                  padding: "2px 8px",
                   borderRadius: "4px",
                   color: colors.text,
                   fontFamily: "monospace",
@@ -356,131 +381,119 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
 
           {/* Tracking Number */}
           {trackingNumber && (
-            <div className="od-row-hover" style={{ ...rowStyle, fontSize: "12px" }}>
-              <span style={{ color: colors.textMuted }}>Tracking Number</span>
-              <code
-                style={{
-                  fontSize: "12px",
-                  background: colors.bgHover,
-                  padding: "1px 8px",
-                  borderRadius: "4px",
-                  color: colors.text,
-                  fontFamily: "monospace",
-                }}
-              >
-                {trackingNumber}
-              </code>
-            </div>
-          )}
-
-          {/* Tracking Link */}
-          {trackingUrl && (
-            <div className="od-row-hover" style={{ ...rowStyle, fontSize: "12px" }}>
-              <span style={{ color: colors.textMuted }}>Tracking Link</span>
-              <a
-                href={trackingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  fontSize: "12px",
-                  color: colors.accent,
-                  textDecoration: "none",
-                }}
-              >
-                {trackingCarrier.toUpperCase() || "Track"} &rarr;
-              </a>
+            <div style={{ ...rowStyle, padding: "4px 0" }}>
+              <span style={{ color: colors.textMuted, fontSize: "12px" }}>Tracking</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <code
+                  style={{
+                    fontSize: "12px",
+                    background: colors.bgHover,
+                    padding: "2px 8px",
+                    borderRadius: "4px",
+                    color: colors.text,
+                    fontFamily: "monospace",
+                  }}
+                >
+                  {trackingNumber}
+                </code>
+                {trackingUrl && (
+                  <a
+                    href={trackingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      fontSize: "12px",
+                      color: colors.accent,
+                      textDecoration: "none",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {trackingCarrier.toUpperCase() || "Track"} &rarr;
+                  </a>
+                )}
+              </div>
             </div>
           )}
         </div>
 
-        {/* Payment provider info moved to Payment Activity section */}
-
-        {/* ─── Universal Capture Button (PayPal / Klarna) ─── */}
+        {/* ─── Capture Button (PayPal / Klarna) ─── */}
         {showCaptureButton && (
-          <div
-            style={{
-              borderTop: `1px solid ${colors.border}`,
-              marginTop: "12px",
-              paddingTop: "12px",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  background: colors.yellowBg,
-                  color: colors.yellow,
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  padding: "2px 8px",
-                  borderRadius: "10px",
-                }}
-              >
+          <>
+            <div style={dividerStyle} />
+            <div style={{ padding: "2px 0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    background: colors.yellowBg,
+                    color: colors.yellow,
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    padding: "2px 8px",
+                    borderRadius: "10px",
+                  }}
+                >
+                  {provider.isPayPal
+                    ? "PayPal — Authorized (not yet captured)"
+                    : "Klarna — Authorized (not yet captured)"}
+                </span>
+              </div>
+              <div style={{ fontSize: "12px", color: colors.textMuted, marginBottom: "10px", lineHeight: "1.5" }}>
                 {provider.isPayPal
-                  ? "PayPal — Authorized (not yet captured)"
-                  : "Klarna — Authorized (not yet captured)"}
-              </span>
+                  ? "PayPal authorizations must be captured within 29 days. Capture after shipping the order."
+                  : "Klarna payments must be captured within 28 days of authorization. Capture after shipping the order."}
+              </div>
+              {onCapture && (
+                <button
+                  onClick={onCapture}
+                  disabled={isCapturing}
+                  className="od-btn-primary"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "8px 16px",
+                    background: colors.accent,
+                    color: "#FFFFFF",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    cursor: isCapturing ? "not-allowed" : "pointer",
+                    opacity: isCapturing ? 0.7 : 1,
+                    boxShadow: shadows.btn,
+                  }}
+                >
+                  {isCapturing ? (
+                    <>
+                      <span
+                        style={{
+                          width: "14px",
+                          height: "14px",
+                          border: "2px solid rgba(255,255,255,0.3)",
+                          borderTopColor: "#fff",
+                          borderRadius: "50%",
+                          animation: "spin 0.8s linear infinite",
+                          display: "inline-block",
+                        }}
+                      />
+                      Capturing...
+                    </>
+                  ) : (
+                    `Capture ${provider.label} Payment`
+                  )}
+                </button>
+              )}
             </div>
-            <div style={{ fontSize: "12px", color: colors.textMuted, marginBottom: "8px" }}>
-              {provider.isPayPal
-                ? "PayPal authorizations must be captured within 29 days. Capture after shipping the order."
-                : "Klarna payments must be captured within 28 days of authorization. Capture after shipping the order."}
-            </div>
-            {onCapture && (
-              <button
-                onClick={onCapture}
-                disabled={isCapturing}
-                className="od-btn-primary"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "8px 16px",
-                  background: colors.accent,
-                  color: "#FFFFFF",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  cursor: isCapturing ? "not-allowed" : "pointer",
-                  opacity: isCapturing ? 0.7 : 1,
-                  boxShadow: shadows.btn,
-                }}
-              >
-                {isCapturing ? (
-                  <>
-                    <span
-                      style={{
-                        width: "14px",
-                        height: "14px",
-                        border: "2px solid rgba(255,255,255,0.3)",
-                        borderTopColor: "#fff",
-                        borderRadius: "50%",
-                        animation: "spin 0.8s linear infinite",
-                        display: "inline-block",
-                      }}
-                    />
-                    Capturing...
-                  </>
-                ) : (
-                  `Capture ${provider.label} Payment`
-                )}
-              </button>
-            )}
-          </div>
+          </>
         )}
 
         {/* Captured confirmation */}
         {isCaptured && (provider.isPayPal || provider.isKlarna) && (
-          <div
-            style={{
-              borderTop: `1px solid ${colors.border}`,
-              marginTop: "12px",
-              paddingTop: "12px",
-            }}
-          >
+          <>
+            <div style={dividerStyle} />
             <span
               style={{
                 display: "inline-flex",
@@ -504,7 +517,7 @@ export function OrderDetailPayment({ order, onCapture, isCapturing }: OrderDetai
                 </span>
               )}
             </span>
-          </div>
+          </>
         )}
       </div>
     </div>

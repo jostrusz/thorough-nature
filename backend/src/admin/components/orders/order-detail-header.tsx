@@ -271,10 +271,11 @@ export function OrderDetailHeader({
           day: "numeric",
         })}{" "}
         at{" "}
-        {createdAt.toLocaleTimeString("en-US", {
-          hour: "numeric",
+        {createdAt.toLocaleTimeString("en-GB", {
+          hour: "2-digit",
           minute: "2-digit",
-          hour12: true,
+          hour12: false,
+          timeZone: "Europe/Prague",
         })}
         {order.metadata?.source && (
           <span style={{ color: colors.textMuted }}> from {order.metadata.source}</span>

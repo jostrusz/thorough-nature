@@ -10,6 +10,7 @@ export interface EmailActivityEvent {
   to: string
   status: "sent" | "failed"
   error_message?: string
+  html_body?: string
 }
 
 /**

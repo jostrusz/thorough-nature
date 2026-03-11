@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { colors, radii, cardStyle, cardHeaderStyle, fontStack } from "./design-tokens"
 
 // ═══════════════════════════════════════════
@@ -14,6 +14,7 @@ type EventIcon =
   | "order" | "payment" | "fulfillment" | "dextrum"
   | "fakturoid" | "quickbooks" | "cancel" | "refund"
   | "edit" | "email" | "archive" | "tracking" | "upsell"
+  | "download"
 
 type EventStatus = "success" | "info" | "warning" | "error" | "neutral"
 
@@ -34,9 +35,14 @@ interface TimelineEvent {
   errorCode?: string
   trackingNumber?: string
   trackingCarrier?: string
+  trackingUrl?: string
   // Email data
   emailTo?: string
   emailSubject?: string
+  htmlBody?: string
+  // Download data
+  downloadCount?: number
+  downloadFiles?: string[]
 }
 
 // ═══ CONSTANTS ═══
@@ -213,6 +219,14 @@ function EventIconCircle({ icon }: { icon: EventIcon }) {
           </svg>
         </div>
       )
+    case "download":
+      return (
+        <div style={{ ...base, background: colors.accentBg }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={colors.accent} strokeWidth="2">
+            <path d="M10 3v10M6 9l4 4 4-4M4 15h12" />
+          </svg>
+        </div>
+      )
     default: // "order"
       return (
         <div style={{ ...base, background: colors.greenBg }}>
@@ -273,7 +287,13 @@ function formatTime(iso: string): string {
   yesterday.setDate(yesterday.getDate() - 1)
   const isYesterday = d.toDateString() === yesterday.toDateString()
 
-  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
+  const time = d.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+    timeZone: "Europe/Prague",
+  })
 
   if (isToday) return `Today at ${time}`
   if (isYesterday) return `Yesterday at ${time}`
@@ -456,23 +476,32 @@ function buildTimelineEvents(order: any): TimelineEvent[] {
   }
 
   // ─── 4. Fulfillments ───
+  // Tracking URL from order metadata
+  const orderTrackingUrl = meta.dextrum_tracking_url || meta.tracking_url || ""
+  const orderTrackingNumber = meta.dextrum_tracking_number || ""
+  const orderTrackingCarrier = meta.dextrum_carrier || meta.carrier_name || ""
+
   for (const f of order.fulfillments || []) {
     if (f.created_at) {
       events.push({
         date: f.created_at,
         label: "Items fulfilled",
-        detail: f.tracking_numbers?.length ? `Tracking: ${f.tracking_numbers.join(", ")}` : undefined,
         icon: "fulfillment",
         status: "info",
+        trackingNumber: f.tracking_numbers?.length ? f.tracking_numbers[0] : orderTrackingNumber || undefined,
+        trackingCarrier: orderTrackingCarrier || undefined,
+        trackingUrl: orderTrackingUrl || undefined,
       })
     }
     if (f.shipped_at) {
       events.push({
         date: f.shipped_at,
         label: "Shipment created",
-        detail: f.tracking_numbers?.length ? `Tracking: ${f.tracking_numbers.join(", ")}` : undefined,
         icon: "fulfillment",
         status: "info",
+        trackingNumber: f.tracking_numbers?.length ? f.tracking_numbers[0] : orderTrackingNumber || undefined,
+        trackingCarrier: orderTrackingCarrier || undefined,
+        trackingUrl: orderTrackingUrl || undefined,
       })
     }
     if (f.delivered_at) {
@@ -498,23 +527,31 @@ function buildTimelineEvents(order: any): TimelineEvent[] {
   for (const entry of dextrumTimeline) {
     const isError = ["ALLOCATION_ISSUE", "CANCELLED", "FAILED"].includes(entry.status)
     const isDelivered = entry.status === "DELIVERED"
+    const isDispatched = entry.status === "DISPATCHED"
     events.push({
       date: entry.date || order.updated_at || order.created_at,
       label: DEXTRUM_STATUS_LABELS[entry.status] || `WMS: ${entry.status}`,
-      detail: entry.detail || (entry.tracking_number ? `Tracking: ${entry.tracking_number}` : undefined),
+      detail: entry.detail || undefined,
       icon: "dextrum",
       status: isError ? "error" : isDelivered ? "success" : "info",
+      trackingNumber: entry.tracking_number || (isDispatched || isDelivered ? orderTrackingNumber : undefined) || undefined,
+      trackingCarrier: (isDispatched || isDelivered ? orderTrackingCarrier : undefined) || undefined,
+      trackingUrl: (isDispatched || isDelivered ? orderTrackingUrl : undefined) || undefined,
     })
   }
 
   // Dextrum fallback (if status but no timeline array)
   if (meta.dextrum_status && !dextrumTimeline.length) {
+    const isDexDispatched = ["DISPATCHED", "IN_TRANSIT", "DELIVERED"].includes(meta.dextrum_status)
     events.push({
       date: meta.dextrum_sent_at || meta.dextrum_status_updated_at || order.updated_at || order.created_at,
       label: DEXTRUM_STATUS_LABELS[meta.dextrum_status] || `WMS: ${meta.dextrum_status}`,
       detail: meta.dextrum_order_code ? `WMS Order: ${meta.dextrum_order_code}` : undefined,
       icon: "dextrum",
       status: "info",
+      trackingNumber: isDexDispatched ? orderTrackingNumber || undefined : undefined,
+      trackingCarrier: isDexDispatched ? orderTrackingCarrier || undefined : undefined,
+      trackingUrl: isDexDispatched ? orderTrackingUrl || undefined : undefined,
     })
   }
 
@@ -553,6 +590,7 @@ function buildTimelineEvents(order: any): TimelineEvent[] {
         emailTo: entry.to || order.email,
         emailSubject: entry.subject,
         errorMessage: isFailed ? (entry.error_message || "Sending failed") : undefined,
+        htmlBody: entry.html_body || undefined,
       })
     }
   } else if (emailLogLegacy.length > 0) {
@@ -612,6 +650,21 @@ function buildTimelineEvents(order: any): TimelineEvent[] {
       label: "Book marked as sent",
       icon: "fulfillment",
       status: "success",
+    })
+  }
+
+  // ─── 9b. E-book downloads ───
+  const downloadLog: any[] = meta.download_activity_log || []
+  for (const entry of downloadLog) {
+    events.push({
+      date: entry.timestamp,
+      label: `E-book downloaded (${entry.download_count || ""}x)`,
+      icon: "download",
+      status: "info",
+      emailTo: entry.email,
+      downloadCount: entry.download_count,
+      downloadFiles: entry.files,
+      detail: entry.ip && entry.ip !== "unknown" ? `IP: ${entry.ip}` : undefined,
     })
   }
 
@@ -709,6 +762,119 @@ export function OrderTimeline({ order }: OrderTimelineProps) {
   )
 }
 
+// ═══ EMAIL PREVIEW (Expandable iframe) ═══
+
+function EmailPreview({ htmlBody }: { htmlBody: string }) {
+  const [expanded, setExpanded] = useState(false)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const [iframeHeight, setIframeHeight] = useState(400)
+
+  useEffect(() => {
+    if (!expanded || !iframeRef.current) return
+
+    const iframe = iframeRef.current
+    const doc = iframe.contentDocument || iframe.contentWindow?.document
+    if (!doc) return
+
+    doc.open()
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <style>
+            body { margin: 0; padding: 8px; font-family: sans-serif; }
+            img { max-width: 100%; height: auto; }
+          </style>
+        </head>
+        <body>${htmlBody}</body>
+      </html>
+    `)
+    doc.close()
+
+    // Auto-resize iframe to content height
+    const resizeObserver = new ResizeObserver(() => {
+      const bodyHeight = doc.body?.scrollHeight || 400
+      setIframeHeight(Math.min(bodyHeight + 20, 800))
+    })
+
+    if (doc.body) {
+      resizeObserver.observe(doc.body)
+    }
+
+    // Fallback: set height after a short delay
+    setTimeout(() => {
+      const bodyHeight = doc.body?.scrollHeight || 400
+      setIframeHeight(Math.min(bodyHeight + 20, 800))
+    }, 200)
+
+    return () => resizeObserver.disconnect()
+  }, [expanded, htmlBody])
+
+  return (
+    <div style={{ marginTop: "6px" }}>
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        style={{
+          background: "none",
+          border: `1px solid ${colors.border}`,
+          borderRadius: radii.xs,
+          padding: "3px 10px",
+          fontSize: "11px",
+          color: colors.accent,
+          cursor: "pointer",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "4px",
+          fontFamily: fontStack,
+        }}
+      >
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke={colors.accent}
+          strokeWidth="2"
+          style={{
+            transform: expanded ? "rotate(90deg)" : "rotate(0)",
+            transition: "transform 0.15s ease",
+          }}
+        >
+          <polyline points="6 4 14 10 6 16" />
+        </svg>
+        {expanded ? "Hide email" : "View email"}
+      </button>
+
+      {expanded && (
+        <div
+          style={{
+            marginTop: "8px",
+            border: `1px solid ${colors.border}`,
+            borderRadius: radii.sm,
+            overflow: "hidden",
+            background: "#fff",
+          }}
+        >
+          <iframe
+            ref={iframeRef}
+            title="Email preview"
+            sandbox="allow-same-origin"
+            style={{
+              width: "100%",
+              height: `${iframeHeight}px`,
+              border: "none",
+              display: "block",
+            }}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ═══ EVENT ROW ═══
 
 function TimelineEventRow({
@@ -720,7 +886,7 @@ function TimelineEventRow({
   isLast: boolean
   currencyCode: string
 }) {
-  const hasRichData = !!(event.gateway || event.amount || event.transactionId || event.emailTo || event.errorMessage)
+  const hasRichData = !!(event.gateway || event.amount || event.transactionId || event.emailTo || event.errorMessage || event.trackingUrl || event.trackingNumber || event.downloadCount !== undefined)
 
   return (
     <div
@@ -831,8 +997,50 @@ function TimelineEventRow({
             {/* Tracking info */}
             {event.trackingNumber && (
               <p style={{ color: colors.textSec, margin: 0 }}>
-                <span style={{ fontWeight: 500 }}>Tracking:</span> {event.trackingNumber}
-                {event.trackingCarrier && ` (${event.trackingCarrier})`}
+                <span style={{ fontWeight: 500 }}>Tracking:</span>{" "}
+                <code style={{ background: colors.bgHover, padding: "1px 4px", borderRadius: "4px", fontFamily: "monospace", fontSize: "11px" }}>
+                  {event.trackingNumber}
+                </code>
+                {event.trackingCarrier && (
+                  <span style={{ marginLeft: "6px", fontSize: "11px", color: colors.textMuted }}>
+                    ({event.trackingCarrier})
+                  </span>
+                )}
+              </p>
+            )}
+            {event.trackingUrl && (
+              <p style={{ margin: 0 }}>
+                <a
+                  href={event.trackingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontSize: "12px",
+                    color: colors.accent,
+                    textDecoration: "none",
+                    fontWeight: 500,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke={colors.accent} strokeWidth="2">
+                    <path d="M15 11v5a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h5M12 3h5v5M10 10l7-7" />
+                  </svg>
+                  Track shipment &rarr;
+                </a>
+              </p>
+            )}
+
+            {/* Download info */}
+            {event.downloadCount !== undefined && (
+              <p style={{ color: colors.textSec, margin: 0 }}>
+                <span style={{ fontWeight: 500 }}>Downloads:</span> {event.downloadCount}x
+                {event.downloadFiles?.length ? (
+                  <span style={{ marginLeft: "4px", color: colors.textMuted }}>
+                    ({event.downloadFiles.join(", ")})
+                  </span>
+                ) : null}
               </p>
             )}
 
@@ -861,6 +1069,9 @@ function TimelineEventRow({
                 )}
               </div>
             )}
+
+            {/* Email HTML preview (expandable) */}
+            {event.htmlBody && <EmailPreview htmlBody={event.htmlBody} />}
           </div>
         )}
 

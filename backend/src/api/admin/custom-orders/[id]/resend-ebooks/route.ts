@@ -5,6 +5,7 @@ import type DigitalDownloadModuleService from "../../../../../modules/digital-do
 import { EmailTemplates } from "../../../../../modules/email-notifications/templates"
 import { resolveBillingEntity } from "../../../../../utils/resolve-billing-entity"
 import { logEmailActivity } from "../../../../../utils/email-logger"
+import { renderEmailToHtml } from "../../../../../utils/render-email-html"
 import crypto from "crypto"
 
 // Same ebook files as the order-placed subscriber
@@ -122,12 +123,28 @@ export async function POST(
       },
     })
 
+    // Render HTML for email preview in timeline
+    const emailData = {
+      emailOptions: {
+        replyTo: "devries@loslatenboek.nl",
+        subject: emailSubject,
+      },
+      firstName,
+      downloadUrl,
+      expiresAt: new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000
+      ).toISOString(),
+      billingEntity,
+    }
+    const htmlBody = await renderEmailToHtml(EmailTemplates.EBOOK_DELIVERY, emailData).catch(() => '')
+
     const orderService = req.scope.resolve(Modules.ORDER) as any
     await logEmailActivity(orderService, id, {
       template: "ebook_delivery_resend",
       subject: emailSubject,
       to: src.email,
       status: "sent",
+      ...(htmlBody ? { html_body: htmlBody } : {}),
     }).catch((err: any) => console.warn('[Resend E-books] Could not log email activity:', err.message))
 
     console.log(`[Resend E-books] Sent ebook email to ${src.email} for order ${id}`)

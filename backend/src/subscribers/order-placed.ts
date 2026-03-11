@@ -4,6 +4,7 @@ import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates, resolveTemplateKey } from '../modules/email-notifications/templates'
 import { resolveBillingEntity } from '../utils/resolve-billing-entity'
 import { logEmailActivity } from '../utils/email-logger'
+import { renderEmailToHtml } from '../utils/render-email-html'
 import { getProjectEmailConfig, getEmailSubject } from '../utils/project-email-config'
 
 export default async function orderPlacedHandler({
@@ -129,11 +130,27 @@ export default async function orderPlacedHandler({
       },
     })
 
+    // Render HTML for email preview in timeline
+    const emailData = {
+      emailOptions: {
+        replyTo: projectConfig.replyTo,
+        subject: emailSubject,
+      },
+      order,
+      shippingAddress,
+      billingAddress,
+      paymentMethod,
+      billingEntity,
+      preview: emailPreview,
+    }
+    const htmlBody = await renderEmailToHtml(templateKey, emailData).catch(() => '')
+
     await logEmailActivity(orderModuleService, data.id, {
       template: "order_confirmation",
       subject: emailSubject,
       to: order.email,
       status: "sent",
+      ...(htmlBody ? { html_body: htmlBody } : {}),
     }).catch((err) => console.warn('[OrderPlaced] Could not log email activity:', err.message))
   } catch (error: any) {
     console.error('Error sending order confirmation notification:', error)

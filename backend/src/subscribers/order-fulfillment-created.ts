@@ -4,6 +4,7 @@ import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates, resolveTemplateKey } from '../modules/email-notifications/templates'
 import { resolveBillingEntity } from '../utils/resolve-billing-entity'
 import { logEmailActivity } from '../utils/email-logger'
+import { renderEmailToHtml } from '../utils/render-email-html'
 import { getProjectEmailConfig, getEmailSubject } from '../utils/project-email-config'
 
 export default async function orderFulfillmentCreatedHandler({
@@ -133,11 +134,28 @@ export default async function orderFulfillmentCreatedHandler({
       },
     })
 
+    // Render HTML for email preview in timeline
+    const emailData = {
+      emailOptions: {
+        replyTo: projectConfig.replyTo,
+        subject: emailSubject,
+      },
+      order,
+      shippingAddress,
+      trackingNumber,
+      trackingUrl,
+      trackingCompany,
+      billingEntity,
+      preview: emailPreview,
+    }
+    const htmlBody = await renderEmailToHtml(templateKey, emailData).catch(() => '')
+
     await logEmailActivity(orderModuleService, orderId, {
       template: "shipment_notification",
       subject: emailSubject,
       to: order.email,
       status: "sent",
+      ...(htmlBody ? { html_body: htmlBody } : {}),
     }).catch((err) => console.warn('[ShipmentNotification] Could not log email activity:', err.message))
 
     console.log(`[ShipmentNotification] Sent shipment email for order ${orderId} (fulfillment ${fulfillmentId})`)

@@ -6,6 +6,7 @@ import { DIGITAL_DOWNLOAD_MODULE } from '../modules/digital-download'
 import type DigitalDownloadModuleService from '../modules/digital-download/service'
 import { resolveBillingEntity } from '../utils/resolve-billing-entity'
 import { logEmailActivity } from '../utils/email-logger'
+import { renderEmailToHtml } from '../utils/render-email-html'
 import { getProjectEmailConfig } from '../utils/project-email-config'
 import crypto from 'crypto'
 
@@ -163,11 +164,25 @@ export default async function orderPlacedDigitalDownloadHandler({
       },
     })
 
+    // Render HTML for email preview in timeline
+    const emailData = {
+      emailOptions: {
+        replyTo: projectConfig.replyTo,
+        subject: emailSubject,
+      },
+      firstName,
+      downloadUrl,
+      expiresAt: expiresAt.toISOString(),
+      billingEntity,
+    }
+    const htmlBody = await renderEmailToHtml(templateKey, emailData).catch(() => '')
+
     await logEmailActivity(orderModuleService, data.id, {
       template: "ebook_delivery",
       subject: emailSubject,
       to: order.email,
       status: "sent",
+      ...(htmlBody ? { html_body: htmlBody } : {}),
     }).catch((err) => console.warn('[digital-download] Could not log email activity:', err.message))
 
     console.log(`[digital-download] Created download token ${token} for order ${order.id}`)

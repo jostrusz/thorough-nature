@@ -1,4 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Modules } from "@medusajs/framework/utils"
 import { DIGITAL_DOWNLOAD_MODULE } from "../../../../modules/digital-download"
 import type DigitalDownloadModuleService from "../../../../modules/digital-download/service"
 
@@ -44,13 +45,39 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }
 
     // Increment download count (MedusaService format: { id, ...fields })
+    const newCount = (download.download_count || 0) + 1
     try {
       await downloadService.updateDigitalDownloads({
         id: download.id,
-        download_count: (download.download_count || 0) + 1,
+        download_count: newCount,
       })
     } catch (updateErr: any) {
       console.warn("[Download] Could not update download count:", updateErr.message)
+    }
+
+    // Log download event to order timeline
+    try {
+      if (download.order_id) {
+        const orderModuleService = req.scope.resolve(Modules.ORDER) as any
+        const order = await orderModuleService.retrieveOrder(download.order_id, {
+          select: ["id", "metadata"],
+        })
+        const currentMeta = order.metadata || {}
+        const downloadLog: any[] = currentMeta.download_activity_log || []
+        const fileNames = (download.files as unknown as any[] || []).map((f: any) => f.title || f.key).filter(Boolean)
+        downloadLog.push({
+          timestamp: new Date().toISOString(),
+          download_count: newCount,
+          email: download.email,
+          files: fileNames,
+          ip: req.headers["x-forwarded-for"] || req.ip || "unknown",
+        })
+        await orderModuleService.updateOrders(download.order_id, {
+          metadata: { ...currentMeta, download_activity_log: downloadLog },
+        })
+      }
+    } catch (logErr: any) {
+      console.warn("[Download] Could not log download activity:", logErr.message)
     }
 
     // Build public file URLs from MinIO endpoint (bucket has public-read policy)
