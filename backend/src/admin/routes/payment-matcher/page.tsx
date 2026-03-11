@@ -63,10 +63,8 @@ function PageStyles() {
       .pm-mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; }
       .pm-order-num { font-weight: 600; color: #4F46E5; }
       .pm-invoice { font-weight: 500; color: #0D9488; }
-      .pm-pid { color: #7C3AED; background: #F5F3FF; padding: 2px 6px; border-radius: 4px; font-size: 11px; display: inline-block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .pm-pid:hover { max-width: none; overflow: visible; box-shadow: 0 2px 8px rgba(0,0,0,0.12); position: relative; z-index: 10; }
-      .pm-pid2 { color: #C026D3; background: #FDF4FF; padding: 2px 6px; border-radius: 4px; font-size: 11px; display: inline-block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .pm-pid2:hover { max-width: none; overflow: visible; box-shadow: 0 2px 8px rgba(0,0,0,0.12); position: relative; z-index: 10; }
+      .pm-pid { color: #7C3AED; background: #F5F3FF; padding: 2px 6px; border-radius: 4px; font-size: 11px; display: inline-block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: default; }
+      .pm-pid2 { color: #C026D3; background: #FDF4FF; padding: 2px 6px; border-radius: 4px; font-size: 11px; display: inline-block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: default; }
       .pm-pid-cod { color: #92400E; background: #FFFBEB; }
       .pm-amount { font-weight: 600; text-align: right; white-space: nowrap; }
       .pm-currency { font-size: 11px; color: #9CA3AF; margin-left: 2px; }
@@ -397,13 +395,13 @@ const PaymentMatcherPage = () => {
                       </td>
                       <td>
                         {row.payment_id_1
-                          ? <span className={`pm-mono ${row.is_cod ? "pm-pid pm-pid-cod" : "pm-pid"}`}>{row.payment_id_1}</span>
+                          ? <span title={row.payment_id_1} className={`pm-mono ${row.is_cod ? "pm-pid pm-pid-cod" : "pm-pid"}`}>{row.payment_id_1}</span>
                           : <span style={{ color: "#D1D5DB" }}>—</span>
                         }
                       </td>
                       <td>
                         {row.payment_id_2
-                          ? <span className="pm-pid2 pm-mono">{row.payment_id_2}</span>
+                          ? <span title={row.payment_id_2} className="pm-pid2 pm-mono">{row.payment_id_2}</span>
                           : row.is_upsell && row.is_cod
                             ? <span style={{ color: "#9CA3AF", fontSize: 11 }}>COD</span>
                             : <span style={{ color: "#D1D5DB" }}>—</span>
