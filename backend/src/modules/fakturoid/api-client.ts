@@ -62,6 +62,7 @@ export interface FakturoidInvoice {
   number: string
   status: string
   total: string
+  note?: string
   public_html_url: string
   html_url: string
   pdf_url: string
@@ -260,6 +261,40 @@ export async function createInvoice(
 }
 
 /**
+ * Update an existing invoice (PATCH).
+ * Used to update line items, note, etc. after upsell.
+ * Returns updated invoice or null if invoice is locked (403).
+ */
+export async function updateInvoice(
+  creds: FakturoidCredentials,
+  token: string,
+  invoiceId: number,
+  updates: Partial<Omit<FakturoidInvoicePayload, "subject_id">>
+): Promise<FakturoidInvoice | null> {
+  const url = `${accountUrl(creds.slug)}/invoices/${invoiceId}.json`
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: headers(token, creds.user_agent_email),
+    body: JSON.stringify(updates),
+  })
+
+  // 403 = locked invoice — cannot update
+  if (res.status === 403) {
+    console.warn(
+      `[Fakturoid] Invoice ${invoiceId} is locked (403) — cannot update`
+    )
+    return null
+  }
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Fakturoid update invoice failed (${res.status}): ${text}`)
+  }
+
+  return await res.json()
+}
+
+/**
  * Mark an invoice as paid (full payment today).
  * Optionally include gateway payment ID in the payment note.
  */
@@ -293,6 +328,55 @@ export async function markInvoicePaid(
       `Fakturoid mark paid failed (${res.status}): ${text}`
     )
   }
+}
+
+/**
+ * Add a payment record with a specific amount to an invoice.
+ * Used for recording upsell payments separately from the original payment.
+ * Returns true if payment was added, false if invoice is locked.
+ */
+export async function addPaymentRecord(
+  creds: FakturoidCredentials,
+  token: string,
+  invoiceId: number,
+  amount: number,
+  options?: { gatewayPaymentId?: string }
+): Promise<boolean> {
+  const url = `${accountUrl(creds.slug)}/invoices/${invoiceId}/payments.json`
+  const today = new Date().toISOString().split("T")[0]
+
+  const payload: Record<string, any> = {
+    paid_on: today,
+    amount,
+  }
+
+  // Include gateway payment ID in variable_symbol (max 10 chars)
+  if (options?.gatewayPaymentId) {
+    payload.variable_symbol = options.gatewayPaymentId.slice(0, 10)
+  }
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: headers(token, creds.user_agent_email),
+    body: JSON.stringify(payload),
+  })
+
+  // 403 = locked invoice
+  if (res.status === 403) {
+    console.warn(
+      `[Fakturoid] Invoice ${invoiceId} is locked (403) — cannot add payment record`
+    )
+    return false
+  }
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(
+      `Fakturoid add payment record failed (${res.status}): ${text}`
+    )
+  }
+
+  return true
 }
 
 /**
