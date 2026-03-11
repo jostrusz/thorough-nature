@@ -41,8 +41,7 @@ function formatDate(isoDate: string): string {
   return `${dd}.${mm}.${yyyy}`
 }
 
-function formatAmount(cents: number): string {
-  const amount = cents / 100
+function formatAmount(amount: number): string {
   return amount.toFixed(2).replace(".", ",")
 }
 
@@ -179,7 +178,7 @@ export async function GET(
 
       const paymentMethod = meta.payment_method || meta.payment_provider || ""
       const currency = ((order as any).currency_code || "EUR").toUpperCase()
-      const totalCents = (order as any).total || 0
+      const totalAmount = Number((order as any).total) || 0
 
       const customerName = addr
         ? stripDiacritics([addr.first_name, addr.last_name].filter(Boolean).join(" "))
@@ -208,18 +207,18 @@ export async function GET(
       const isUpsell = !!meta.upsell_accepted && !!upsellPaymentId
 
       // Determine amounts for upsell
-      let mainAmountCents = totalCents
-      let upsellAmountCents = 0
+      let mainAmount = totalAmount
+      let upsellAmount = 0
 
       if (isUpsell && meta.upsell_amount) {
-        upsellAmountCents = Number(meta.upsell_amount)
-        mainAmountCents = totalCents - upsellAmountCents
+        upsellAmount = Number(meta.upsell_amount)
+        mainAmount = totalAmount - upsellAmount
       }
 
       // === ROW 1: Main payment ===
       const oldBalance1 = runningBalance
-      const amountForRow1 = isUpsell && upsellAmountCents > 0 ? mainAmountCents : totalCents
-      runningBalance += amountForRow1 / 100
+      const amountForRow1 = isUpsell && upsellAmount > 0 ? mainAmount : totalAmount
+      runningBalance += amountForRow1
 
       const note1 = `${orderNumber} / ${paymentMethod}`
 
@@ -246,9 +245,9 @@ export async function GET(
       ].join(";"))
 
       // === ROW 2: Upsell payment (if applicable, non-COD) ===
-      if (isUpsell && upsellPaymentId !== "cod" && upsellAmountCents > 0) {
+      if (isUpsell && upsellPaymentId !== "cod" && upsellAmount > 0) {
         const oldBalance2 = runningBalance
-        runningBalance += upsellAmountCents / 100
+        runningBalance += upsellAmount
 
         const note2 = `${orderNumber} / ${paymentMethod} (upsell)`
         const upsellPid = upsellPaymentId !== "extraction_failed" ? upsellPaymentId : ""
@@ -258,7 +257,7 @@ export async function GET(
           stripDiacritics(accountName),
           "",
           upsellPid,
-          formatAmount(upsellAmountCents),
+          formatAmount(upsellAmount),
           invoiceNumber,                 // Same VS as main payment
           "",
           "0558",
@@ -271,7 +270,7 @@ export async function GET(
           runningBalance.toFixed(2).replace(".", ","),
           stripDiacritics(note2),
           "",
-          formatAmount(upsellAmountCents),
+          formatAmount(upsellAmount),
           "",
         ].join(";"))
       }

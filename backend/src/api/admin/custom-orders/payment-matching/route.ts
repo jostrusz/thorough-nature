@@ -191,15 +191,14 @@ export async function GET(
         ? [addr.first_name, addr.last_name].filter(Boolean).join(" ")
         : meta.company_name || (order as any).email || ""
 
-      // Amount calculation
-      const totalCents = (order as any).total || 0
-      const totalAmount = totalCents / 100
+      // Amount calculation (Medusa v2 stores totals in decimal, not cents)
+      const totalAmount = Number((order as any).total) || 0
 
       // For upsell: try to calculate upsell amount from metadata
       let amount1 = totalAmount
       let amount2: number | null = null
       if (isUpsell && meta.upsell_amount) {
-        amount2 = Number(meta.upsell_amount) / 100
+        amount2 = Number(meta.upsell_amount)
         amount1 = totalAmount - (amount2 || 0)
       } else if (isUpsell) {
         // Estimate: we don't have exact split, show total as amount1
