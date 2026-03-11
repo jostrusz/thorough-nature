@@ -56,14 +56,16 @@ export function useCreateFulfillment() {
       // 1. Create the fulfillment in Medusa
       const result = await sdk.admin.order.createFulfillment(orderId, { items })
 
-      // 2. Save tracking info + set dextrum_status to PACKED (fulfilled)
+      // 2. Save tracking info + set dextrum_status
       const metadata: Record<string, any> = {}
       if (trackingNumber) metadata.dextrum_tracking_number = trackingNumber
       if (trackingUrl) metadata.dextrum_tracking_url = trackingUrl
       if (carrier) metadata.dextrum_carrier = carrier
-      // Set delivery status to PACKED when manually fulfilled
-      if (!metadata.dextrum_status) metadata.dextrum_status = "PACKED"
+      // DISPATCHED when we have tracking info (= shipment is on its way)
+      // PACKED as fallback if no tracking number provided
+      metadata.dextrum_status = trackingNumber ? "DISPATCHED" : "PACKED"
       metadata.fulfilled_at = new Date().toISOString()
+      if (trackingNumber) metadata.dispatched_at = new Date().toISOString()
 
       if (Object.keys(metadata).length > 0) {
         await sdk.client.fetch(`/admin/custom-orders/${orderId}/metadata`, {
