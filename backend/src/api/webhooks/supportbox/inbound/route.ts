@@ -93,7 +93,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     if (config.resend_api_key) {
       try {
         const emailResponse = await axios.get(
-          `https://api.resend.com/emails/${emailId}`,
+          `https://api.resend.com/emails/receiving/${emailId}`,
           {
             headers: {
               Authorization: `Bearer ${config.resend_api_key}`,
