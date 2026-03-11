@@ -184,7 +184,7 @@ function Timeline({ events }: { events: { label: string; date?: string; color: s
    ═══════════════════════════════════════════════════════════════ */
 function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] }) {
   const email = ticket.from_email
-  const { data: customer } = useQuery({
+  const { data: customer, isLoading: custLoading } = useQuery({
     queryKey: ["customer-by-email", email],
     queryFn: async () => {
       try { const r = await sdk.client.fetch(`/admin/customers?q=${email}`, { method: "GET" }) as any; return r.customers?.[0] || null } catch { return null }
@@ -197,6 +197,9 @@ function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] 
   const initial = (name?.[0] || email?.[0] || "?").toUpperCase()
   const addr = customer?.addresses?.[0] || allOrders[0]?.shipping_address
 
+  // Determine if this is an unknown customer — no customer record AND no orders
+  const isUnknown = !custLoading && !customer && allOrders.length === 0
+
   return (
     <div style={{
       backgroundColor: D.card, borderRadius: D.r16, border: `1px solid ${D.border}`,
@@ -204,19 +207,21 @@ function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] 
     }}>
       {/* Profile header */}
       <div style={{ padding: "24px 24px 20px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "20px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: isUnknown ? "0" : "20px" }}>
           <div style={{
             width: "44px", height: "44px", borderRadius: "50%",
-            background: `linear-gradient(135deg, ${D.brand}, ${D.purple})`,
+            background: isUnknown
+              ? `linear-gradient(135deg, ${D.textMuted}, ${D.textFaint})`
+              : `linear-gradient(135deg, ${D.brand}, ${D.purple})`,
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: "16px", fontWeight: 700, color: "#fff", flexShrink: 0,
-            boxShadow: `0 2px 8px ${D.brand}33`,
+            boxShadow: isUnknown ? "none" : `0 2px 8px ${D.brand}33`,
           }}>
-            {initial}
+            {isUnknown ? "?" : initial}
           </div>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: "14px", fontWeight: 700, color: D.text, lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {name || email}
+              {name || email || "Unknown"}
             </div>
             <div style={{ fontSize: "12px", color: D.textSec, marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {email}
@@ -224,17 +229,41 @@ function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] 
           </div>
         </div>
 
-        {/* Stats strip */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-          <div style={{ textAlign: "center", padding: "12px 8px", borderRadius: D.r12, backgroundColor: D.brandLight }}>
-            <div style={{ fontSize: "20px", fontWeight: 800, color: D.brand, lineHeight: 1 }}>{allOrders.length}</div>
-            <div style={{ fontSize: "10px", fontWeight: 600, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "4px" }}>orders</div>
+        {/* Unknown customer banner */}
+        {isUnknown && (
+          <div style={{
+            marginTop: "16px", padding: "14px 16px", borderRadius: D.r12,
+            backgroundColor: D.orangeLight, border: `1px solid ${D.orange}25`,
+          }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ flexShrink: 0, marginTop: "1px" }}>
+                <path d="M9 1.5a7.5 7.5 0 100 15 7.5 7.5 0 000-15zM9 5.25v3.75M9 12h.008" stroke={D.orange} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <div>
+                <div style={{ fontSize: "13px", fontWeight: 600, color: D.orange, lineHeight: 1.3, marginBottom: "4px" }}>
+                  Customer not found
+                </div>
+                <div style={{ fontSize: "12px", color: D.textSec, lineHeight: 1.5 }}>
+                  No customer account or orders match <strong style={{ color: D.text }}>{email}</strong>. This may be a new inquiry from someone who hasn't purchased yet.
+                </div>
+              </div>
+            </div>
           </div>
-          <div style={{ textAlign: "center", padding: "12px 8px", borderRadius: D.r12, backgroundColor: D.greenLight }}>
-            <div style={{ fontSize: "20px", fontWeight: 800, color: D.green, lineHeight: 1 }}>{f.money(spent, curr)}</div>
-            <div style={{ fontSize: "10px", fontWeight: 600, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "4px" }}>total spent</div>
+        )}
+
+        {/* Stats strip — only show when we have data */}
+        {!isUnknown && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+            <div style={{ textAlign: "center", padding: "12px 8px", borderRadius: D.r12, backgroundColor: D.brandLight }}>
+              <div style={{ fontSize: "20px", fontWeight: 800, color: D.brand, lineHeight: 1 }}>{allOrders.length}</div>
+              <div style={{ fontSize: "10px", fontWeight: 600, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "4px" }}>orders</div>
+            </div>
+            <div style={{ textAlign: "center", padding: "12px 8px", borderRadius: D.r12, backgroundColor: D.greenLight }}>
+              <div style={{ fontSize: "20px", fontWeight: 800, color: D.green, lineHeight: 1 }}>{f.money(spent, curr)}</div>
+              <div style={{ fontSize: "10px", fontWeight: 600, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "4px" }}>total spent</div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Detail sections */}
@@ -356,7 +385,7 @@ function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] 
           </Section>
         ))}
 
-        {allOrders.length === 0 && (
+        {allOrders.length === 0 && !isUnknown && (
           <Section label="Orders">
             <div style={{ fontSize: "13px", color: D.textMuted, textAlign: "center", padding: "8px 0" }}>
               No orders found
@@ -536,38 +565,40 @@ const TicketDetailPage = () => {
     <div ref={pageRef} style={{ width: "100%", padding: "24px 32px", background: PAGE_BG, boxSizing: "border-box", minHeight: "100vh", overflowX: "hidden" }}>
 
       {/* ══════ HEADER ══════ */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
-        <div style={{ display: "flex", alignItems: "flex-start", gap: "20px" }}>
-          <Link to="/supportbox" style={{ textDecoration: "none" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: 0 }}>
+          <Link to="/supportbox" style={{ textDecoration: "none", flexShrink: 0 }}>
             <div style={{
-              width: "36px", height: "36px", borderRadius: D.r8, backgroundColor: D.card,
+              width: "34px", height: "34px", borderRadius: D.r8, backgroundColor: D.card,
               border: `1px solid ${D.border}`, display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", boxShadow: D.xs, marginTop: "2px",
+              cursor: "pointer", boxShadow: D.xs,
             }}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke={D.textSec} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
           </Link>
-          <div>
-            <h1 style={{ fontSize: "22px", fontWeight: 700, color: D.text, margin: 0, lineHeight: 1.25, letterSpacing: "-0.01em" }}>
-              {ticket.subject}
-            </h1>
-            <div style={{ fontSize: "13px", color: D.textSec, marginTop: "6px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-              <span>{ticket.from_name ? `${ticket.from_name}` : ticket.from_email}</span>
-              <span style={{ color: D.textFaint }}>·</span>
-              <span>{f.dt(ticket.created_at)}</span>
-              <span style={{ color: D.textFaint }}>·</span>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              <h1 style={{ fontSize: "18px", fontWeight: 700, color: D.text, margin: 0, lineHeight: 1.3 }}>
+                {ticket.subject}
+              </h1>
               <Pill bg={st.bg} color={st.color}>{st.label}</Pill>
+            </div>
+            <div style={{ fontSize: "13px", color: D.textSec, marginTop: "3px" }}>
+              {ticket.from_name ? `${ticket.from_name}` : ticket.from_email}
+              <span style={{ color: D.textFaint, margin: "0 6px" }}>·</span>
+              {f.dt(ticket.created_at)}
             </div>
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "8px", alignItems: "center", flexShrink: 0 }}>
+        <div style={{ flexShrink: 0, marginLeft: "16px" }}>
           {ticket.status !== "solved" ? (
             <button onClick={() => solveMut.mutate()} disabled={solveMut.isPending}
               style={{
                 padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: "#fff",
                 backgroundColor: D.green, border: "none", borderRadius: D.r8,
                 cursor: "pointer", boxShadow: D.xs, transition: "all 0.15s",
+                whiteSpace: "nowrap",
               }}>
               {solveMut.isPending ? "..." : "Mark solved"}
             </button>
@@ -577,6 +608,7 @@ const TicketDetailPage = () => {
                 padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: D.orange,
                 backgroundColor: D.orangeLight, border: `1px solid ${D.orange}40`,
                 borderRadius: D.r8, cursor: "pointer", transition: "all 0.15s",
+                whiteSpace: "nowrap",
               }}>
               {reopenMut.isPending ? "..." : "Reopen"}
             </button>
