@@ -61,16 +61,30 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
     const saved: { el: HTMLElement; s: Record<string, string> }[] = []
     let n: HTMLElement | null = el.parentElement
     while (n && n !== document.documentElement) {
-      saved.push({ el: n, s: { bg: n.style.background, mw: n.style.maxWidth, w: n.style.width, pl: n.style.paddingLeft, pr: n.style.paddingRight, m: n.style.margin } })
+      saved.push({
+        el: n,
+        s: {
+          bg: n.style.background, mw: n.style.maxWidth, w: n.style.width,
+          pl: n.style.paddingLeft, pr: n.style.paddingRight, m: n.style.margin,
+          overflow: n.style.overflow,
+        },
+      })
       n.style.setProperty("background", PAGE_BG, "important")
       n.style.setProperty("max-width", "none", "important")
       n.style.setProperty("width", "100%", "important")
       n.style.setProperty("padding-left", "0", "important")
       n.style.setProperty("padding-right", "0", "important")
       n.style.setProperty("margin", "0", "important")
+      n.style.setProperty("overflow-x", "hidden", "important")
       n = n.parentElement
     }
-    return () => { saved.forEach(({ el: x, s }) => { x.style.background = s.bg; x.style.maxWidth = s.mw; x.style.width = s.w; x.style.paddingLeft = s.pl; x.style.paddingRight = s.pr; x.style.margin = s.m }) }
+    return () => {
+      saved.forEach(({ el: x, s }) => {
+        x.style.background = s.bg; x.style.maxWidth = s.mw; x.style.width = s.w
+        x.style.paddingLeft = s.pl; x.style.paddingRight = s.pr; x.style.margin = s.m
+        x.style.overflow = s.overflow
+      })
+    }
   }, [ref])
 }
 
@@ -519,18 +533,10 @@ const TicketDetailPage = () => {
     : { label: "New", bg: D.greenLight, color: D.green }
 
   return (
-    <div ref={pageRef} style={{ width: "100%", padding: "24px 32px", background: PAGE_BG, boxSizing: "border-box", minHeight: "100vh" }}>
-      <style>{`
-        main > div, main > div > div, main > div > div > div,
-        main > div > div > div > div, main > div > div > div > div > div {
-          max-width: none !important; width: 100% !important;
-          padding-left: 0 !important; padding-right: 0 !important;
-          margin-left: 0 !important; margin-right: 0 !important;
-        }
-      `}</style>
+    <div ref={pageRef} style={{ width: "100%", padding: "24px 32px", background: PAGE_BG, boxSizing: "border-box", minHeight: "100vh", overflowX: "hidden" }}>
 
       {/* ══════ HEADER ══════ */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: "20px" }}>
           <Link to="/supportbox" style={{ textDecoration: "none" }}>
             <div style={{
@@ -579,7 +585,7 @@ const TicketDetailPage = () => {
       </div>
 
       {/* ══════ LAYOUT: Conversation | Sidebar ══════ */}
-      <div style={{ display: "flex", gap: "32px", alignItems: "flex-start" }}>
+      <div style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}>
 
         {/* Conversation (flex 7 = ~70%) */}
         <div style={{ flex: 7, minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -587,7 +593,7 @@ const TicketDetailPage = () => {
           <div style={{
             backgroundColor: D.card, borderRadius: D.r16,
             border: `1px solid ${D.border}`, boxShadow: D.sm,
-            padding: "32px 36px",
+            padding: "24px 28px",
           }}>
             {msgs.length === 0 ? (
               <div style={{ textAlign: "center", padding: "48px 0", color: D.textMuted, fontSize: "14px" }}>
