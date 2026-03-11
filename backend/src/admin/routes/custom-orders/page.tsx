@@ -542,7 +542,10 @@ const CustomOrdersPage = () => {
         onDismiss={handleDismissCelebration}
       />
 
-      {/* Page Header */}
+      {/* Profitability Section */}
+      <ProfitabilitySection />
+
+      {/* Page Header — between profitability and orders table */}
       <div style={headerStyle}>
         <h1 style={h1Style}>
           Orders
@@ -600,9 +603,6 @@ const CustomOrdersPage = () => {
           </button>
         </div>
       </div>
-
-      {/* Profitability Section */}
-      <ProfitabilitySection />
 
       {/* Main Card */}
       <div className="dash-main-card" style={mainCardStyle}>

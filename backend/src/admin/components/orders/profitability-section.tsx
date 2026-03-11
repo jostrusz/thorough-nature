@@ -59,12 +59,12 @@ function ProfitabilityStyles() {
         transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
       }
       .profit-project-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.03);
+        transform: translateY(-3px) scale(1.01);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04);
         border-color: rgba(0,0,0,0.1) !important;
       }
       .profit-project-card:active {
-        transform: translateY(0) scale(0.99);
+        transform: translateY(0) scale(0.98);
       }
       .profit-total-bar {
         transition: all 0.25s ease !important;
@@ -146,7 +146,7 @@ const dateInputStyle: React.CSSProperties = {
 const cardOuterStyle: React.CSSProperties = {
   background: "#FFFFFF",
   border: "1px solid rgba(0,0,0,0.06)",
-  borderRadius: "10px",
+  borderRadius: "12px",
   padding: 0,
   overflow: "hidden",
   position: "relative",
@@ -154,7 +154,7 @@ const cardOuterStyle: React.CSSProperties = {
 }
 
 const cardInnerStyle: React.CSSProperties = {
-  padding: "10px 12px 11px",
+  padding: "12px 14px 13px",
 }
 
 const projectNameRowStyle: React.CSSProperties = {
@@ -228,6 +228,23 @@ const metricValueStyle: React.CSSProperties = {
   fontVariantNumeric: "tabular-nums",
 }
 
+// Subtle background tints per glow level
+const glowBg: Record<GlowLevel, string> = {
+  excellent: "linear-gradient(135deg, #F0FDF9 0%, #FFFFFF 60%)",
+  good: "linear-gradient(135deg, #F0FDF9 0%, #FFFFFF 60%)",
+  warning: "linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 60%)",
+  danger: "linear-gradient(135deg, #FEF2F2 0%, #FFFFFF 60%)",
+  neutral: "linear-gradient(135deg, #F8F9FB 0%, #FFFFFF 60%)",
+}
+
+function getStatusEmoji(project: ProjectStats): string {
+  if (project.order_count === 0) return "💤"
+  if (project.profit_margin > 30) return "🔥"
+  if (project.profit_margin > 15) return "✨"
+  if (project.profit_margin > 0) return "📈"
+  return "⚠️"
+}
+
 function ProjectCard({ project }: { project: ProjectStats }) {
   const glow = getGlowLevel(project)
   const profitColor =
@@ -238,11 +255,17 @@ function ProjectCard({ project }: { project: ProjectStats }) {
         : "#9CA3B8"
 
   return (
-    <div className="profit-project-card" style={cardOuterStyle}>
+    <div
+      className="profit-project-card"
+      style={{
+        ...cardOuterStyle,
+        background: glowBg[glow],
+      }}
+    >
       {/* Glow bar */}
       <div
         style={{
-          height: "2.5px",
+          height: "3px",
           background: glowGradients[glow],
           transition: "all 0.5s ease",
         }}
@@ -253,26 +276,29 @@ function ProjectCard({ project }: { project: ProjectStats }) {
         {/* Project name row */}
         <div style={projectNameRowStyle}>
           <div style={projectNameStyle}>
-            <span style={{ fontSize: "14px", lineHeight: 1 }}>{project.flag_emoji}</span>
+            <span style={{ fontSize: "15px", lineHeight: 1 }}>{project.flag_emoji}</span>
             {project.project_name}
           </div>
           <span style={countryTagStyle}>{project.country_tag}</span>
         </div>
 
-        {/* Net Profit — big number */}
-        <div
-          style={{
-            fontSize: "20px",
-            fontWeight: 800,
-            letterSpacing: "-0.8px",
-            lineHeight: 1.1,
-            marginBottom: "2px",
-            fontVariantNumeric: "tabular-nums",
-            color: profitColor,
-            transition: "color 0.3s ease",
-          }}
-        >
-          {formatEur(project.net_profit)}
+        {/* Net Profit — big number + status emoji */}
+        <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+          <div
+            style={{
+              fontSize: "22px",
+              fontWeight: 800,
+              letterSpacing: "-0.8px",
+              lineHeight: 1.1,
+              marginBottom: "2px",
+              fontVariantNumeric: "tabular-nums",
+              color: profitColor,
+              transition: "color 0.3s ease",
+            }}
+          >
+            {formatEur(project.net_profit)}
+          </div>
+          <span style={{ fontSize: "14px", lineHeight: 1 }}>{getStatusEmoji(project)}</span>
         </div>
 
         {/* Label */}
@@ -289,7 +315,9 @@ function ProjectCard({ project }: { project: ProjectStats }) {
           </div>
           <div style={{ ...metricStyle, alignItems: "center" }}>
             <span style={metricLabelStyle}>Orders</span>
-            <span style={metricValueStyle}>{project.order_count}</span>
+            <span style={{ ...metricValueStyle, fontSize: "14px" }}>
+              {project.order_count > 0 ? project.order_count : "—"}
+            </span>
           </div>
           <div style={{ ...metricStyle, alignItems: "flex-end" }}>
             <span style={metricLabelStyle}>Ad Spend</span>
@@ -509,11 +537,12 @@ export function ProfitabilitySection() {
             gap: "10px",
             margin: 0,
             fontFamily: fontStack,
+            whiteSpace: "nowrap",
           }}
         >
           Project Profitability
           {period === "today" && (
-            <>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginRight: "8px" }}>
               <span
                 style={{
                   width: "8px",
@@ -536,7 +565,7 @@ export function ProfitabilitySection() {
               >
                 Live
               </span>
-            </>
+            </span>
           )}
         </h2>
 
@@ -693,8 +722,6 @@ export function ProfitabilitySection() {
         </div>
       </div>
 
-      {/* ═══ Section Divider ═══ */}
-      <div style={sectionDividerStyle} />
     </div>
   )
 }
