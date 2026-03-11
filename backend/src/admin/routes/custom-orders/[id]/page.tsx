@@ -37,10 +37,9 @@ import {
 import { OrderDetailHeader } from "../../../components/orders/order-detail-header"
 import { OrderFulfillmentCard } from "../../../components/orders/order-fulfillment-card"
 import { OrderDetailPayment } from "../../../components/orders/order-detail-payment"
-import { OrderDetailTimeline } from "../../../components/orders/order-detail-timeline"
+import { OrderTimeline } from "../../../components/orders/order-timeline"
 import { OrderDetailCustomer } from "../../../components/orders/order-detail-customer"
 import { OrderDetailMetadata } from "../../../components/orders/order-detail-metadata"
-import { PaymentActivityLog } from "../../../components/orders/order-payment-activity"
 import { OrderNotesCard } from "../../../components/orders/order-notes-card"
 import { DeliveryBadge } from "../../../components/orders/order-badges"
 
@@ -752,31 +751,6 @@ const OrderDetailPage = () => {
     [id, updateMetadata]
   )
 
-  const handleAddComment = useCallback(
-    (comment: string) => {
-      if (!id || !order) return
-      const existingComments = order.metadata?.timeline_comments || []
-      const newComment = {
-        text: comment,
-        author: "Staff",
-        created_at: new Date().toISOString(),
-      }
-      updateMetadata.mutate(
-        {
-          orderId: id,
-          metadata: {
-            timeline_comments: [...existingComments, newComment],
-          },
-        },
-        {
-          onSuccess: () => toast.success("Comment added"),
-          onError: () => toast.error("Failed to add comment"),
-        }
-      )
-    },
-    [id, order, updateMetadata]
-  )
-
   // ═══════════════════════════════════════════
   // RENDER
   // ═══════════════════════════════════════════
@@ -880,12 +854,7 @@ const OrderDetailPage = () => {
             onCapture={handleCapture}
             isCapturing={capturePayment.isPending}
           />
-          <PaymentActivityLog order={order} />
-          <OrderDetailTimeline
-            order={order}
-            onAddComment={handleAddComment}
-            isAddingComment={updateMetadata.isPending}
-          />
+          <OrderTimeline order={order} />
         </div>
 
         {/* Right column - Sidebar */}
