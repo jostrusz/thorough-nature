@@ -374,7 +374,7 @@ function MessageBubble({ msg }: { msg: any }) {
 
       {/* Bubble */}
       <div style={{
-        maxWidth: "78%",
+        maxWidth: "88%",
         padding: "14px 18px",
         borderRadius: inb ? "4px 16px 16px 16px" : "16px 4px 16px 16px",
         backgroundColor: inb ? D.card : D.greenLight,
@@ -519,7 +519,7 @@ const TicketDetailPage = () => {
     : { label: "New", bg: D.greenLight, color: D.green }
 
   return (
-    <div ref={pageRef} style={{ width: "100%", padding: "32px 48px", background: PAGE_BG, boxSizing: "border-box", minHeight: "100vh" }}>
+    <div ref={pageRef} style={{ width: "100%", padding: "24px 32px", background: PAGE_BG, boxSizing: "border-box", minHeight: "100vh" }}>
       <style>{`
         main > div, main > div > div, main > div > div > div,
         main > div > div > div > div, main > div > div > div > div > div {
@@ -581,8 +581,8 @@ const TicketDetailPage = () => {
       {/* ══════ LAYOUT: Conversation | Sidebar ══════ */}
       <div style={{ display: "flex", gap: "32px", alignItems: "flex-start" }}>
 
-        {/* Conversation (flex 5) */}
-        <div style={{ flex: 5, minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
+        {/* Conversation (flex 7 = ~70%) */}
+        <div style={{ flex: 7, minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
           {/* Messages card */}
           <div style={{
             backgroundColor: D.card, borderRadius: D.r16,
@@ -611,9 +611,9 @@ const TicketDetailPage = () => {
           )}
         </div>
 
-        {/* Sidebar (flex 2, sticky) */}
+        {/* Sidebar (flex 3 = ~30%, responsive min) */}
         <div style={{
-          flex: 2, minWidth: "320px", maxWidth: "420px",
+          flex: 3, minWidth: "260px", maxWidth: "400px",
           position: "sticky", top: "24px",
           maxHeight: "calc(100vh - 80px)", overflowY: "auto",
         }}>
