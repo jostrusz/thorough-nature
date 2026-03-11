@@ -9,9 +9,14 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const { id } = req.params
 
   try {
-    const ticket = await supportboxService.retrieveSupportboxTicket(id, {
-      relations: ["messages"],
-    })
+    const ticket = await supportboxService.retrieveSupportboxTicket(id)
+
+    // Load messages separately (models don't define ORM relations)
+    const messages = await supportboxService.listSupportboxMessages(
+      { ticket_id: id },
+      { order: { created_at: "ASC" } }
+    )
+    ticket.messages = messages
 
     // Fetch ALL orders for customer by email
     let allOrders: any[] = []

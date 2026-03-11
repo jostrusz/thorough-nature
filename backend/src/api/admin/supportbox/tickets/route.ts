@@ -13,8 +13,25 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
 
     let tickets = await supportboxService.listSupportboxTickets(filters, {
       order: { created_at: "DESC" },
-      relations: ["messages"],
     })
+
+    // Load messages separately (models don't define ORM relations)
+    const allMessages = await supportboxService.listSupportboxMessages({}, {
+      order: { created_at: "ASC" },
+    })
+
+    // Index messages by ticket_id
+    const messagesByTicket: Record<string, any[]> = {}
+    for (const msg of allMessages) {
+      if (!messagesByTicket[msg.ticket_id]) messagesByTicket[msg.ticket_id] = []
+      messagesByTicket[msg.ticket_id].push(msg)
+    }
+
+    // Attach messages to tickets
+    tickets = tickets.map((t: any) => ({
+      ...t,
+      messages: messagesByTicket[t.id] || [],
+    }))
 
     // Client-side search filter (subject/from_email)
     if (q) {

@@ -36,25 +36,10 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
 }
 
 function FullWidthStyles() {
-  return (
-    <style>{`
-      main,
-      main > div,
-      main > div > div,
-      main > div > div > div,
-      main > div > div > div > div,
-      main > div > div > div > div > div,
-      main > div > div > div > div > div > div {
-        max-width: none !important;
-        width: 100% !important;
-      }
-      main > div,
-      main > div > div {
-        flex: 1 1 100% !important;
-        min-width: 0 !important;
-      }
-    `}</style>
-  )
+  // Only override Medusa admin wrapper constraints — NOT child layout divs.
+  // The useFullWidth hook handles ancestor elements via inline styles.
+  // Here we just ensure no stray max-width caps the page container.
+  return null
 }
 
 // ═══════════════════════════════════════════

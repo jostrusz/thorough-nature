@@ -9,10 +9,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const body = req.body as any
 
   try {
-    // Get ticket with messages and config
-    const ticket = await supportboxService.retrieveSupportboxTicket(id, {
-      relations: ["messages"],
-    })
+    // Get ticket and messages separately (models don't define ORM relations)
+    const ticket = await supportboxService.retrieveSupportboxTicket(id)
+    ticket.messages = await supportboxService.listSupportboxMessages(
+      { ticket_id: id },
+      { order: { created_at: "ASC" } }
+    )
 
     // Get config for API key
     const config = await supportboxService.retrieveSupportboxConfig(ticket.config_id)
