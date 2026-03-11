@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order #EC-4821 — EverChapter Admin</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F5F6FA;
+  --bg-card: #FFFFFF;
+  --bg-hover: #F8F9FC;
+  --border: rgba(0,0,0,0.07);
+  --border-active: rgba(0,0,0,0.14);
+  --text: #1A1D2E;
+  --text-sec: #6B7185;
+  --text-muted: #9CA3B8;
+  --accent: #6C5CE7;
+  --accent-bg: rgba(108,92,231,0.08);
+  --green: #00B37A;
+  --green-bg: rgba(0,179,122,0.08);
+  --red: #E74C3C;
+  --red-bg: rgba(231,76,60,0.07);
+  --yellow: #D4A017;
+  --yellow-bg: rgba(212,160,23,0.08);
+  --blue: #3B82F6;
+  --blue-bg: rgba(59,130,246,0.07);
+  --orange: #E67E22;
+  --orange-bg: rgba(230,126,34,0.07);
+  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 24px rgba(0,0,0,0.03);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  padding: 32px 48px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════ */
+/* BACK NAV                               */
+/* ═══════════════════════════════════════ */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-sec);
+  text-decoration: none;
+  margin-bottom: 20px;
+  transition: color 0.15s;
+}
+.back-link:hover { color: var(--accent); }
+.back-link svg { width: 16px; height: 16px; }
+
+/* ═══════════════════════════════════════ */
+/* ORDER HEADER                           */
+/* ═══════════════════════════════════════ */
+.order-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.order-header-left { display: flex; align-items: center; gap: 14px; }
+.order-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.order-header-badges { display: flex; gap: 6px; }
+.order-header-date {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.order-header-right { display: flex; gap: 8px; }
+
+/* ═══════════════════════════════════════ */
+/* BADGES                                 */
+/* ═══════════════════════════════════════ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.badge.paid { background: var(--green-bg); color: var(--green); }
+.badge.paid::before { background: var(--green); }
+.badge.authorized { background: var(--blue-bg); color: var(--blue); }
+.badge.authorized::before { background: var(--blue); }
+.badge.pending { background: var(--yellow-bg); color: var(--yellow); }
+.badge.pending::before { background: var(--yellow); }
+.badge.refunded { background: rgba(0,0,0,0.04); color: var(--text-sec); }
+.badge.refunded::before { background: var(--text-sec); }
+.badge.failed { background: var(--red-bg); color: var(--red); }
+.badge.failed::before { background: var(--red); }
+.badge.unfulfilled { background: var(--orange-bg); color: var(--orange); }
+.badge.unfulfilled::before { background: var(--orange); }
+.badge.fulfilled { background: var(--green-bg); color: var(--green); }
+.badge.fulfilled::before { background: var(--green); }
+.badge.shipped { background: var(--blue-bg); color: var(--blue); }
+.badge.shipped::before { background: var(--blue); }
+.badge.delivered { background: var(--green-bg); color: var(--green); }
+.badge.delivered::before { background: var(--green); }
+
+/* ═══════════════════════════════════════ */
+/* BUTTONS                                */
+/* ═══════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  font-family: inherit;
+}
+.btn svg { width: 14px; height: 14px; }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(108,92,231,0.25);
+}
+.btn-primary:hover { background: #5B4BD5; }
+.btn-outline {
+  background: var(--bg-card);
+  color: var(--text-sec);
+  border: 1px solid var(--border);
+}
+.btn-outline:hover { border-color: var(--border-active); background: var(--bg-hover); }
+.btn-danger {
+  background: var(--bg-card);
+  color: var(--red);
+  border: 1px solid var(--border);
+}
+.btn-danger:hover { background: var(--red-bg); border-color: var(--red); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+/* ═══════════════════════════════════════ */
+/* CARDS                                  */
+/* ═══════════════════════════════════════ */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  border-color: var(--border-active);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title svg { width: 16px; height: 16px; color: var(--text-sec); }
+
+.card-body { padding: 16px 20px; }
+
+/* ═══════════════════════════════════════ */
+/* TWO-COLUMN LAYOUT                      */
+/* ═══════════════════════════════════════ */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ═══════════════════════════════════════ */
+/* STATUS HEALTH BAR — the KEY feature    */
+/* ═══════════════════════════════════════ */
+.health-bar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.health-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.health-item::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.health-item.ok::before { background: var(--green); }
+.health-item.warn::before { background: var(--yellow); }
+.health-item.bad::before { background: var(--red); }
+.health-item.info::before { background: var(--blue); }
+.health-item.neutral::before { background: var(--text-muted); }
+
+.health-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.health-value {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.health-value .check { color: var(--green); }
+.health-value .warn { color: var(--yellow); }
+.health-value .cross { color: var(--red); }
+
+/* ═══════════════════════════════════════ */
+/* ORDER ITEMS                            */
+/* ═══════════════════════════════════════ */
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.item-row:last-child { border-bottom: none; }
+
+.item-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  background: #f0f1f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.item-thumb-placeholder {
+  font-size: 20px;
+}
+
+.item-info { flex: 1; min-width: 0; }
+.item-title { font-size: 13px; font-weight: 600; }
+.item-variant { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.item-qty { font-size: 12px; color: var(--text-sec); }
+.item-price {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Totals */
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+}
+.totals-row.muted { color: var(--text-sec); }
+.totals-row.total {
+  font-weight: 700;
+  font-size: 15px;
+  padding-top: 10px;
+  margin-top: 6px;
+  border-top: 2px solid var(--border);
+}
+
+/* ═══════════════════════════════════════ */
+/* CUSTOMER & SIDEBAR                     */
+/* ═══════════════════════════════════════ */
+.customer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.customer-avatar-lg {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #a29bfe);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+.customer-main-name { font-size: 14px; font-weight: 600; }
+.customer-orders { font-size: 11px; color: var(--text-muted); }
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-label { color: var(--text-muted); font-size: 12px; }
+.detail-value { font-weight: 500; text-align: right; max-width: 60%; }
+.detail-value a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.detail-value a:hover { text-decoration: underline; }
+
+/* Address block */
+.address-block {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-sec);
+}
+.address-block strong { color: var(--text); font-weight: 500; }
+
+/* ═══════════════════════════════════════ */
+/* TIMELINE                               */
+/* ═══════════════════════════════════════ */
+.timeline { padding: 0 20px 16px; }
+.timeline-item {
+  display: flex;
+  gap: 12px;
+  position: relative;
+  padding-bottom: 16px;
+}
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 24px;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+.timeline-item:last-child::before { display: none; }
+
+.timeline-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 12px;
+}
+.timeline-dot.green { background: var(--green-bg); color: var(--green); }
+.timeline-dot.blue { background: var(--blue-bg); color: var(--blue); }
+.timeline-dot.red { background: var(--red-bg); color: var(--red); }
+.timeline-dot.gray { background: rgba(0,0,0,0.04); color: var(--text-muted); }
+.timeline-dot.accent { background: var(--accent-bg); color: var(--accent); }
+
+.timeline-content { flex: 1; }
+.timeline-text { font-size: 13px; }
+.timeline-text strong { font-weight: 600; }
+.timeline-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* ═══════════════════════════════════════ */
+/* PAYMENT GATEWAY ICON                   */
+/* ═══════════════════════════════════════ */
+.gateway-icon-lg {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f0f1f5;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gateway-icon-lg img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ═══════════════════════════════════════ */
+/* SECTION DIVIDER                        */
+/* ═══════════════════════════════════════ */
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  padding: 12px 0 6px;
+}
+
+/* ═══════════════════════════════════════ */
+/* ANIMATIONS                             */
+/* ═══════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.health-bar { animation: fadeUp 0.3s ease both; }
+.card { animation: fadeUp 0.3s ease both; animation-delay: 0.05s; }
+</style>
+</head>
+<body>
+
+<!-- BACK LINK -->
+<a href="#" class="back-link">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+  Orders
+</a>
+
+<!-- ORDER HEADER -->
+<div class="order-header">
+  <div>
+    <div class="order-header-left">
+      <h1>#EC-4821</h1>
+      <div class="order-header-badges">
+        <span class="badge paid">Paid</span>
+        <span class="badge unfulfilled">Unfulfilled</span>
+      </div>
+    </div>
+    <div class="order-header-date">28 Feb 2026, 09:14 · via loslatenboek storefront</div>
+  </div>
+  <div class="order-header-right">
+    <button class="btn btn-outline">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 9 8 12 2 12"/></svg>
+      Refund
+    </button>
+    <button class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      Fulfill
+    </button>
+    <button class="btn btn-outline" style="padding:8px 10px" title="More actions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- HEALTH BAR — Quick status at a glance  -->
+<!-- ═══════════════════════════════════════ -->
+<div class="health-bar">
+  <div class="health-item ok">
+    <div class="health-label">Payment</div>
+    <div class="health-value"><span class="check">✓</span> Paid · iDEAL</div>
+  </div>
+  <div class="health-item warn">
+    <div class="health-label">Fulfillment</div>
+    <div class="health-value"><span class="warn">●</span> Not shipped</div>
+  </div>
+  <div class="health-item info">
+    <div class="health-label">WMS</div>
+    <div class="health-value"><span style="color:var(--blue)">↻</span> Sent to Dextrum</div>
+  </div>
+  <div class="health-item ok">
+    <div class="health-label">Invoice</div>
+    <div class="health-value"><span class="check">✓</span> Fakturoid</div>
+  </div>
+  <div class="health-item ok">
+    <div class="health-label">Customer</div>
+    <div class="health-value"><span class="check">✓</span> Verified · 3rd order</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- TWO-COLUMN LAYOUT                      -->
+<!-- ═══════════════════════════════════════ -->
+<div class="layout">
+
+  <!-- LEFT COLUMN -->
+  <div>
+
+    <!-- ORDER ITEMS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+          Items
+        </div>
+        <span class="badge" style="background:var(--accent-bg);color:var(--accent)">1 item</span>
+      </div>
+      <div class="card-body">
+        <div class="item-row">
+          <div class="item-thumb">
+            <span class="item-thumb-placeholder">📖</span>
+          </div>
+          <div class="item-info">
+            <div class="item-title">Laat los wat je kapotmaakt</div>
+            <div class="item-variant">Paperback · NL Edition</div>
+            <div class="item-qty">1 × €24.95</div>
+          </div>
+          <div class="item-price">€24.95</div>
+        </div>
+
+        <div style="margin-top: 14px;">
+          <div class="totals-row muted">
+            <span>Subtotal</span>
+            <span>€24.95</span>
+          </div>
+          <div class="totals-row muted">
+            <span>Shipping (PostNL Standard)</span>
+            <span>€5.00</span>
+          </div>
+          <div class="totals-row muted">
+            <span>VAT 9%</span>
+            <span>€2.70</span>
+          </div>
+          <div class="totals-row muted">
+            <span>Discount <span style="background:var(--accent-bg);color:var(--accent);padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;margin-left:4px">WELKOM10</span></span>
+            <span style="color:var(--green)">-€2.50</span>
+          </div>
+          <div class="totals-row total">
+            <span>Total</span>
+            <span>€30.15</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENT DETAILS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Payment
+        </div>
+        <span class="badge paid">Captured</span>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 14px;background:var(--bg);border-radius:var(--radius-sm)">
+          <div class="gateway-icon-lg">
+            <img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/ideal.svg" alt="iDEAL">
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:600">iDEAL via Mollie</div>
+            <div style="font-size:12px;color:var(--text-muted)">tr_A1b2C3d4E5 · Captured 28 Feb 09:14</div>
+          </div>
+          <div style="margin-left:auto;font-size:16px;font-weight:700">€30.15</div>
+        </div>
+
+        <div class="section-label">Transaction details</div>
+        <div class="detail-row">
+          <span class="detail-label">Payment ID</span>
+          <span class="detail-value" style="font-family:monospace;font-size:12px">tr_A1b2C3d4E5</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Gateway</span>
+          <span class="detail-value">Mollie · loslatenboek</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Method</span>
+          <span class="detail-value">iDEAL (ING Bank)</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Status</span>
+          <span class="detail-value"><span class="badge paid" style="font-size:10px;padding:2px 8px">Captured</span></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Paid at</span>
+          <span class="detail-value">28 Feb 2026, 09:14</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FULFILLMENT / SHIPPING -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          Fulfillment
+        </div>
+        <span class="badge unfulfilled">Awaiting shipment</span>
+      </div>
+      <div class="card-body">
+        <div class="detail-row">
+          <span class="detail-label">WMS Status</span>
+          <span class="detail-value"><span class="badge" style="background:var(--blue-bg);color:var(--blue);font-size:10px;padding:2px 8px">Sent to Dextrum</span></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">WMS Order Code</span>
+          <span class="detail-value" style="font-family:monospace;font-size:12px">DXT-2026-04821</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Carrier</span>
+          <span class="detail-value">PostNL</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Tracking</span>
+          <span class="detail-value" style="color:var(--text-muted);font-style:italic">Awaiting dispatch</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Sent to WMS</span>
+          <span class="detail-value">28 Feb, 09:15</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Timeline
+        </div>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot blue">↻</div>
+          <div class="timeline-content">
+            <div class="timeline-text">Sent to <strong>Dextrum WMS</strong></div>
+            <div class="timeline-time">28 Feb, 09:15</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot accent">📄</div>
+          <div class="timeline-content">
+            <div class="timeline-text"><strong>Fakturoid invoice</strong> #2026-0421 created</div>
+            <div class="timeline-time">28 Feb, 09:14</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot green">✓</div>
+          <div class="timeline-content">
+            <div class="timeline-text">Payment <strong>captured</strong> · €30.15 via iDEAL</div>
+            <div class="timeline-time">28 Feb, 09:14</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot green">✓</div>
+          <div class="timeline-content">
+            <div class="timeline-text">Payment <strong>authorized</strong> via Mollie</div>
+            <div class="timeline-time">28 Feb, 09:14</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot gray">+</div>
+          <div class="timeline-content">
+            <div class="timeline-text"><strong>Order created</strong> from loslatenboek storefront</div>
+            <div class="timeline-time">28 Feb, 09:13</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN — Sidebar -->
+  <div>
+
+    <!-- CUSTOMER -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Customer
+        </div>
+        <button class="btn btn-outline btn-sm">Edit</button>
+      </div>
+      <div class="card-body">
+        <div class="customer-header">
+          <div class="customer-avatar-lg">SV</div>
+          <div>
+            <div class="customer-main-name">Sophie Vermeer</div>
+            <div class="customer-orders">3 orders · €89.85 spent</div>
+          </div>
+        </div>
+
+        <div class="section-label">Contact</div>
+        <div class="detail-row">
+          <span class="detail-label">Email</span>
+          <span class="detail-value"><a href="mailto:sophie@gmail.com">sophie@gmail.com</a></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Phone</span>
+          <span class="detail-value">+31 6 1234 5678</span>
+        </div>
+
+        <div class="section-label">Shipping address</div>
+        <div class="address-block">
+          <strong>Sophie Vermeer</strong><br>
+          Keizersgracht 123<br>
+          1015 CJ Amsterdam<br>
+          <span style="font-size:14px">🇳🇱</span> Netherlands
+        </div>
+        <div style="margin-top:8px">
+          <a href="#" style="font-size:12px;color:var(--accent);text-decoration:none">View on map →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- METADATA / INTEGRATIONS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 9 8 12 2 12"/></svg>
+          Integrations
+        </div>
+      </div>
+      <div class="card-body" style="padding:12px 20px">
+        <div class="detail-row">
+          <span class="detail-label">Fakturoid</span>
+          <span class="detail-value"><a href="#">#2026-0421 →</a></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">QuickBooks</span>
+          <span class="detail-value"><a href="#">INV-04821 →</a></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Dextrum WMS</span>
+          <span class="detail-value" style="font-family:monospace;font-size:12px">DXT-2026-04821</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Sales Channel</span>
+          <span class="detail-value">loslatenboek</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Upsell</span>
+          <span class="detail-value" style="color:var(--text-muted)">Not offered</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Notes
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="padding:10px 12px;background:var(--bg);border-radius:var(--radius-xs);font-size:13px;color:var(--text-sec);border:1px dashed var(--border);min-height:48px;display:flex;align-items:center;cursor:text">
+          Click to add a note...
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

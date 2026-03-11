@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fulfillment Card — Premium Buttons Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f4f5fa;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    .page { max-width: 680px; margin: 0 auto; }
+    .page-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9CA3B8;
+      margin-bottom: 16px;
+    }
+
+    /* Card */
+    .card {
+      background: #FFFFFF;
+      border: 1px solid rgba(0,0,0,0.07);
+      border-radius: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 24px rgba(0,0,0,0.03);
+      overflow: hidden;
+      margin-bottom: 24px;
+      transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+    }
+    .card:hover {
+      box-shadow: 0 8px 32px rgba(108,92,231,0.08), 0 2px 8px rgba(0,0,0,0.04);
+      border-color: rgba(0,0,0,0.14);
+      transform: translateY(-1px);
+    }
+
+    /* Card header */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+      font-size: 14px;
+      font-weight: 600;
+      color: #1A1D2E;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: transform 0.15s ease;
+    }
+    .badge:hover { transform: scale(1.04); }
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .badge-unfulfilled {
+      background: rgba(230,126,34,0.07);
+      color: #E67E22;
+    }
+    .badge-unfulfilled .badge-dot { background: #E67E22; }
+    .badge-fulfilled {
+      background: rgba(0,179,122,0.08);
+      color: #00B37A;
+    }
+    .badge-fulfilled .badge-dot { background: #00B37A; }
+
+    /* Shipping method */
+    .shipping-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      font-size: 13px;
+      color: #6B7185;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+
+    /* Item row */
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 4px;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+      border-radius: 6px;
+      margin: 0 -4px;
+      transition: background 0.12s ease;
+    }
+    .item-row:hover { background: #F8F9FC; }
+    .item-row:last-child { border-bottom: none; }
+    .item-thumb {
+      width: 48px; height: 48px;
+      border-radius: 6px;
+      background: #F8F9FC;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #9CA3B8;
+      border: 1px solid rgba(0,0,0,0.07);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .item-row:hover .item-thumb {
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .item-info { flex: 1; min-width: 0; }
+    .item-title { font-size: 13px; font-weight: 600; color: #6C5CE7; }
+    .item-sku { font-size: 12px; color: #9CA3B8; margin-top: 1px; }
+    .item-price { text-align: right; white-space: nowrap; }
+    .item-unit { font-size: 13px; color: #1A1D2E; }
+    .item-total { font-size: 13px; font-weight: 600; color: #1A1D2E; margin-top: 2px; }
+    .items-wrap { padding: 12px 20px; }
+
+    /* ═══ PREMIUM BUTTONS ═══ */
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 14px 20px;
+      border-top: 1px solid rgba(0,0,0,0.07);
+      background: linear-gradient(180deg, rgba(248,249,252,0) 0%, rgba(248,249,252,0.5) 100%);
+    }
+    .btn-row-invoice {
+      padding: 12px 20px;
+      background: none;
+    }
+
+    /* Shared button base */
+    .premium-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .premium-btn:active {
+      transform: translateY(1px) scale(0.97) !important;
+    }
+
+    /* Primary — Mark as fulfilled */
+    .btn-primary {
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      letter-spacing: 0.01em;
+      color: #FFFFFF;
+      background: linear-gradient(135deg, #7C6CF0 0%, #6C5CE7 50%, #5A4BD1 100%);
+      box-shadow: 0 2px 8px rgba(108,92,231,0.3), 0 1px 3px rgba(108,92,231,0.2);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #8B7DF5 0%, #7C6CF0 50%, #6C5CE7 100%);
+      box-shadow: 0 6px 20px rgba(108,92,231,0.4), 0 2px 8px rgba(108,92,231,0.25), 0 0 0 3px rgba(108,92,231,0.15);
+      transform: translateY(-1px);
+    }
+    .btn-primary:active {
+      box-shadow: 0 1px 4px rgba(108,92,231,0.3) !important;
+    }
+    .btn-primary .shimmer {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
+      transform: translateX(-100%);
+      pointer-events: none;
+    }
+    .btn-primary:hover .shimmer {
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+
+    /* Secondary — Send to Dextrum */
+    .btn-secondary {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #1A1D2E;
+      background: linear-gradient(135deg, #FFFFFF 0%, #FAFBFF 100%);
+      border: 1px solid rgba(0,0,0,0.10);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .btn-secondary:hover {
+      background: linear-gradient(135deg, #F8F9FF 0%, #F0F1FA 100%);
+      border-color: rgba(108,92,231,0.3);
+      box-shadow: 0 4px 12px rgba(108,92,231,0.12), 0 2px 4px rgba(0,0,0,0.06), 0 0 0 3px rgba(108,92,231,0.1);
+      transform: translateY(-1px);
+    }
+    .btn-secondary:active {
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08) !important;
+    }
+
+    /* Fakturoid */
+    .btn-fakturoid {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #008060;
+      background: linear-gradient(135deg, #FFFFFF 0%, #F0FFF8 100%);
+      border: 1px solid rgba(0,128,96,0.15);
+      box-shadow: 0 1px 3px rgba(0,128,96,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .btn-fakturoid:hover {
+      background: linear-gradient(135deg, #F0FFF8 0%, #E0F7EC 100%);
+      border-color: rgba(0,128,96,0.35);
+      box-shadow: 0 4px 12px rgba(0,128,96,0.15), 0 2px 4px rgba(0,128,96,0.08), 0 0 0 3px rgba(0,128,96,0.1);
+      transform: translateY(-1px);
+    }
+    .btn-fakturoid:active {
+      box-shadow: 0 1px 2px rgba(0,128,96,0.12) !important;
+    }
+
+    /* QuickBooks */
+    .btn-quickbooks {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #2CA01C;
+      background: linear-gradient(135deg, #FFFFFF 0%, #F0FFF0 100%);
+      border: 1px solid rgba(44,160,28,0.15);
+      box-shadow: 0 1px 3px rgba(44,160,28,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .btn-quickbooks:hover {
+      background: linear-gradient(135deg, #F0FFF0 0%, #E0F7E0 100%);
+      border-color: rgba(44,160,28,0.35);
+      box-shadow: 0 4px 12px rgba(44,160,28,0.15), 0 2px 4px rgba(44,160,28,0.08), 0 0 0 3px rgba(44,160,28,0.1);
+      transform: translateY(-1px);
+    }
+    .btn-quickbooks:active {
+      box-shadow: 0 1px 2px rgba(44,160,28,0.12) !important;
+    }
+
+    .btn-icon-text { font-size: 11px; font-weight: 800; letter-spacing: -0.02em; }
+
+    /* ═══ HEADER BUTTONS ═══ */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1A1D2E;
+    }
+    .header-title span { color: #6C5CE7; }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #6B7185;
+      background: linear-gradient(135deg, #FFFFFF 0%, #FAFBFF 100%);
+      border: 1px solid rgba(0,0,0,0.10);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      font-family: 'Inter', -apple-system, sans-serif;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .header-btn:hover {
+      background: linear-gradient(135deg, #F8F9FF 0%, #F0F1FA 100%);
+      border-color: rgba(108,92,231,0.3);
+      box-shadow: 0 4px 12px rgba(108,92,231,0.12), 0 2px 4px rgba(0,0,0,0.06), 0 0 0 3px rgba(108,92,231,0.1);
+      transform: translateY(-1px);
+      color: #1A1D2E;
+    }
+    .header-btn:active {
+      transform: translateY(1px) scale(0.97);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    .more-btn {
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #6C5CE7 0%, #5A4BD1 100%);
+      color: #fff;
+      border: none;
+      box-shadow: 0 2px 8px rgba(108,92,231,0.3);
+    }
+    .more-btn:hover {
+      background: linear-gradient(135deg, #7C6CF0 0%, #6C5CE7 100%);
+      box-shadow: 0 4px 16px rgba(108,92,231,0.4), 0 0 0 3px rgba(108,92,231,0.15);
+    }
+
+    /* ═══ FULFILLED VARIANT ═══ */
+    .fulfilled-info {
+      padding: 12px 20px;
+      border-top: 1px solid rgba(0,0,0,0.07);
+      font-size: 13px;
+      color: #6B7185;
+    }
+    .fulfilled-info strong { font-weight: 500; color: #1A1D2E; }
+
+    /* Section label */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #9CA3B8;
+      margin: 32px 0 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <h1 class="header-title"><span>#</span><span>56</span></h1>
+        <span class="badge" style="background:rgba(0,179,122,0.08);color:#00B37A"><span class="badge-dot" style="background:#00B37A"></span>Paid</span>
+        <span class="badge badge-unfulfilled"><span class="badge-dot"></span>Unfulfilled</span>
+      </div>
+      <div class="header-right">
+        <button class="header-btn">Refund</button>
+        <button class="header-btn">Edit</button>
+        <button class="header-btn more-btn">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="4" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="16" r="1.5"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ UNFULFILLED CARD ═══ -->
+    <div class="page-title">Unfulfilled order</div>
+    <div class="card">
+      <div class="card-header">
+        <span class="badge badge-unfulfilled"><span class="badge-dot"></span>Unfulfilled</span>
+      </div>
+
+      <div class="shipping-row">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="6" width="12" height="9" rx="1"/><path d="M13 9h4l2 3v3h-6V9zM4 18a2 2 0 104 0M14 18a2 2 0 104 0"/>
+        </svg>
+        PostNL Standaard Verzending
+      </div>
+
+      <div class="items-wrap">
+        <div class="item-row">
+          <div class="item-thumb">&#128214;</div>
+          <div class="item-info">
+            <div class="item-title">Laat Los Wat Je Kapotmaakt</div>
+            <div class="item-sku">SKU: LOSLATEN-BOEK-001</div>
+          </div>
+          <div class="item-price">
+            <div class="item-unit">&euro;35.00 &times; 1</div>
+            <div class="item-total">&euro;35.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premium action buttons -->
+      <div class="btn-row">
+        <button class="premium-btn btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="16" height="12" rx="2"/><path d="M2 8h16M7 4v4M13 4v4"/>
+          </svg>
+          Send to Dextrum
+        </button>
+        <button class="premium-btn btn-primary">
+          <span class="shimmer"></span>
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 10 8 14 16 6"/>
+          </svg>
+          Mark as fulfilled
+        </button>
+      </div>
+
+      <div class="btn-row btn-row-invoice">
+        <button class="premium-btn btn-fakturoid">
+          <span class="btn-icon-text">fa</span>
+          Send to Fakturoid
+        </button>
+        <button class="premium-btn btn-quickbooks">
+          <span class="btn-icon-text">qb</span>
+          Send to QuickBooks
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ FULFILLED CARD ═══ -->
+    <div class="section-label">Fulfilled order</div>
+    <div class="card">
+      <div class="card-header">
+        <span class="badge badge-fulfilled"><span class="badge-dot"></span>Fulfilled</span>
+      </div>
+
+      <div class="shipping-row">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="6" width="12" height="9" rx="1"/><path d="M13 9h4l2 3v3h-6V9zM4 18a2 2 0 104 0M14 18a2 2 0 104 0"/>
+        </svg>
+        PostNL Standaard Verzending
+      </div>
+
+      <div class="items-wrap">
+        <div class="item-row">
+          <div class="item-thumb">&#128214;</div>
+          <div class="item-info">
+            <div class="item-title">Laat Los Wat Je Kapotmaakt</div>
+            <div class="item-sku">SKU: LOSLATEN-BOEK-001</div>
+          </div>
+          <div class="item-price">
+            <div class="item-unit">&euro;35.00 &times; 1</div>
+            <div class="item-total">&euro;35.00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fulfilled-info">
+        <strong>Fulfilled</strong> on Mar 1, 2026 &bull; Tracking: 3SNLPS0123456789
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

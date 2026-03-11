@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics Dashboard — Preview</title>
+<style>
+/* ═══════════════════════════════════════════════════ */
+/* RESET & BASE                                       */
+/* ═══════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F6F6F7;
+  --card: #FFFFFF;
+  --border: #E1E3E5;
+  --text-primary: #1A1A1A;
+  --text-secondary: #6D7175;
+  --text-muted: #8C9196;
+  --green: #008060;
+  --green-light: #F1F8F5;
+  --hover-bg: #F9FAFB;
+  --selected-bg: #F2F7FE;
+  --focus-ring: rgba(0, 128, 96, 0.25);
+
+  /* Badges */
+  --badge-paid: #AEE9D1;
+  --badge-paid-text: #0D5740;
+  --badge-pending: #FFD79D;
+  --badge-pending-text: #7A4F01;
+  --badge-unfulfilled: #FED3D1;
+  --badge-unfulfilled-text: #9E2B25;
+  --badge-fulfilled: #E4E5E7;
+  --badge-fulfilled-text: #44474A;
+  --badge-transit: #A4E8F2;
+  --badge-transit-text: #0E4F5C;
+  --badge-delivered: #AEE9D1;
+  --badge-delivered-text: #0D5740;
+  --badge-refunded: #E4E5E7;
+  --badge-refunded-text: #44474A;
+  --badge-tracking: #D4C5F9;
+  --badge-tracking-text: #3B1F8E;
+  --badge-imported: #E0E7FF;
+  --badge-imported-text: #3730A3;
+  --badge-processing: #FEF3C7;
+  --badge-processing-text: #92400E;
+  --badge-sent: #DBEAFE;
+  --badge-sent-text: #1E40AF;
+  --badge-returned: #FED3D1;
+  --badge-returned-text: #9E2B25;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* LAYOUT                                             */
+/* ═══════════════════════════════════════════════════ */
+.dashboard {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 32px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.page-header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.header-actions { display: flex; gap: 8px; }
+
+/* ═══════════════════════════════════════════════════ */
+/* PROJECT SELECTOR                                   */
+/* ═══════════════════════════════════════════════════ */
+.project-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  flex-wrap: wrap;
+  align-items: center;
+}
+.project-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  background: #F1F1F1;
+  color: var(--text-primary);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.project-chip:hover {
+  background: var(--hover-bg);
+}
+.project-chip.active {
+  background: var(--text-primary);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+.project-chip-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  margin-left: 4px;
+}
+.tag-nl-chip { background: #E65100; }
+.tag-de-chip { background: #F57F17; }
+.tag-pl-chip { background: #C62828; }
+.tag-cz-chip { background: #1565C0; }
+.tag-se-chip { background: #00695C; }
+
+/* ═══════════════════════════════════════════════════ */
+/* BUTTONS                                            */
+/* ═══════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--hover-bg); box-shadow: var(--shadow-sm); }
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+.btn-primary:hover { background: #006e52; }
+.btn svg { width: 15px; height: 15px; }
+
+/* ═══════════════════════════════════════════════════ */
+/* STAT CARDS                                         */
+/* ═══════════════════════════════════════════════════ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  animation: fadeIn 0.3s ease;
+}
+.stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.stat-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.stat-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+.stat-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.stat-change.up { color: var(--badge-paid-text); background: var(--badge-paid); }
+.stat-change.down { color: var(--badge-unfulfilled-text); background: var(--badge-unfulfilled); }
+.stat-change.neutral { color: var(--text-secondary); background: #F1F1F1; }
+
+/* ═══════════════════════════════════════════════════ */
+/* CARD CONTAINER                                     */
+/* ═══════════════════════════════════════════════════ */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 24px;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* TABS                                               */
+/* ═══════════════════════════════════════════════════ */
+.tabs-container {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs-container::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.tab:hover { color: var(--text-primary); }
+.tab.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* TABLE                                              */
+/* ═══════════════════════════════════════════════════ */
+.analytics-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.analytics-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  user-select: none;
+  position: sticky;
+  top: 0;
+  background: var(--card);
+  z-index: 2;
+}
+.analytics-table td {
+  padding: 12px;
+  font-size: 13px;
+  border-bottom: 1px solid #F1F1F1;
+  vertical-align: middle;
+}
+.analytics-table tbody tr {
+  transition: background 0.12s ease;
+  cursor: pointer;
+}
+.analytics-table tbody tr:hover {
+  background: var(--hover-bg);
+}
+.email-link {
+  color: #2C6ECB;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.12s;
+}
+.email-link:hover { color: #1A5DB4; text-decoration: underline; }
+
+/* ═══════════════════════════════════════════════════ */
+/* BADGE                                              */
+/* ═══════════════════════════════════════════════════ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: transform 0.12s ease;
+}
+.badge:hover { transform: scale(1.03); }
+.badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge-facebook { background: #E7F3FF; color: #1565C0; }
+.badge-facebook .badge-dot { background: #1565C0; }
+.badge-email { background: #FFF3E0; color: #E65100; }
+.badge-email .badge-dot { background: #E65100; }
+.badge-organic { background: #E8F5E9; color: #2E7D32; }
+.badge-organic .badge-dot { background: #2E7D32; }
+.badge-direct { background: #F3E5F5; color: #7B1FA2; }
+.badge-direct .badge-dot { background: #7B1FA2; }
+.badge-google { background: #FFF8E1; color: #F57F17; }
+.badge-google .badge-dot { background: #F57F17; }
+.badge-instagram { background: #FCE4EC; color: #C62828; }
+.badge-instagram .badge-dot { background: #C62828; }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #F3F3F3;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.tag-nl { background: #FFF3E0; color: #E65100; }
+.tag-de { background: #FFF8E1; color: #F57F17; }
+.tag-cz { background: #E3F2FD; color: #1565C0; }
+.tag-pl { background: #FCE4EC; color: #C62828; }
+.tag-se { background: #E0F7FA; color: #00695C; }
+.tag-hu { background: #F3E5F5; color: #7B1FA2; }
+
+/* ═══════════════════════════════════════════════════ */
+/* EMAIL DRILL-DOWN MODAL                             */
+/* ═══════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 450px;
+  background: var(--card);
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  z-index: 1000;
+  overflow-y: auto;
+  transform: translateX(450px);
+  transition: transform 0.3s ease;
+}
+.modal-panel.visible {
+  transform: translateX(0);
+}
+
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg);
+}
+.modal-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--text-muted);
+  transition: color 0.2s;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-close:hover { color: var(--text-primary); }
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-section {
+  margin-bottom: 24px;
+}
+.modal-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.modal-stat {
+  padding: 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+}
+.modal-stat-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.modal-stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modal-list {
+  list-style: none;
+}
+.modal-list-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #F1F1F1;
+  font-size: 12px;
+  color: var(--text-primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-list-item:last-child {
+  border-bottom: none;
+}
+.modal-list-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.mini-funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mini-funnel-step {
+  padding: 8px 12px;
+  background: var(--bg);
+  border-radius: 4px;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mini-funnel-step-label { font-weight: 500; }
+.mini-funnel-step-count { color: var(--text-secondary); font-weight: 600; }
+
+.converter-item {
+  padding: 10px;
+  background: var(--bg);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+.converter-name { font-weight: 500; color: var(--text-primary); }
+.converter-amount { font-weight: 600; color: var(--green); }
+
+/* ═══════════════════════════════════════════════════ */
+/* FUNNEL VISUALIZATION                              */
+/* ═══════════════════════════════════════════════════ */
+.funnel-container {
+  padding: 24px;
+}
+.funnel-step {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+.funnel-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.funnel-bar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.funnel-bar {
+  flex: 1;
+  height: 32px;
+  background: linear-gradient(90deg, var(--green), #00a870);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+}
+.funnel-value {
+  min-width: 120px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.funnel-dropoff {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: auto;
+  min-width: 80px;
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* JOURNEY TIMELINE                                   */
+/* ═══════════════════════════════════════════════════ */
+.journey-container {
+  padding: 24px;
+}
+.journey-item {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.journey-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.journey-icon {
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--green-light);
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.journey-content {
+  flex: 1;
+}
+.journey-time {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.journey-event {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+.journey-detail {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* CONVERSION PATHS                                   */
+/* ═══════════════════════════════════════════════════ */
+.paths-container {
+  padding: 24px;
+}
+.path-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.path-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.path-rank {
+  min-width: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.path-flow {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+.path-arrow {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.path-percent {
+  min-width: 50px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--green);
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* CHART (Simple SVG)                                 */
+/* ═══════════════════════════════════════════════════ */
+.chart-container {
+  padding: 24px;
+}
+.chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+svg.simple-chart {
+  width: 100%;
+  height: auto;
+  min-height: 300px;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* METRICS SECTION                                    */
+/* ═══════════════════════════════════════════════════ */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 24px;
+  border-top: 1px solid var(--border);
+}
+.metric-item {
+  text-align: center;
+}
+.metric-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.metric-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* SKELETON LOADING                                   */
+/* ═══════════════════════════════════════════════════ */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #EBEBEB;
+  border-radius: 4px;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.skeleton-line {
+  height: 14px;
+  border-radius: 4px;
+  background: #EBEBEB;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.skeleton-line::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  animation: shimmer 1.5s infinite;
+}
+.skeleton-badge {
+  width: 70px;
+  height: 22px;
+  border-radius: 12px;
+  background: #EBEBEB;
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+.skeleton-badge::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  animation: shimmer 1.5s infinite;
+}
+.skeleton-row td { padding: 16px 12px; }
+
+/* ═══════════════════════════════════════════════════ */
+/* EMPTY STATE                                        */
+/* ═══════════════════════════════════════════════════ */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+.empty-state svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state p { font-size: 14px; }
+
+/* ═══════════════════════════════════════════════════ */
+/* TOAST                                              */
+/* ═══════════════════════════════════════════════════ */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+.toast {
+  padding: 12px 20px;
+  background: #1A1A1A;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toast svg { width: 16px; height: 16px; color: #34D399; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(16px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* RESPONSIVE                                         */
+/* ═══════════════════════════════════════════════════ */
+@media (max-width: 1200px) {
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .modal-panel { width: 400px; transform: translateX(400px); }
+}
+@media (max-width: 900px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .dashboard { padding: 16px; }
+  .metrics-grid { grid-template-columns: 1fr; }
+  .modal-panel { width: 100%; }
+  .modal-panel.visible { transform: translateX(0); }
+}
+@media (max-width: 600px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .page-header h1 { font-size: 18px; }
+  .funnel-bar-wrapper { flex-direction: column; align-items: flex-start; }
+  .funnel-value { width: 100%; text-align: left; }
+  .project-selector { flex-direction: column; }
+  .project-chip { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- ─── PAGE HEADER ─── -->
+  <div class="page-header">
+    <h1>Analytics</h1>
+    <div class="header-actions">
+      <button class="btn" onclick="exportData()">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 14v3h14v-3M10 3v10M6 9l4 4 4-4"/></svg>
+        Export
+      </button>
+      <button class="btn btn-primary">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>
+        New Report
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── PROJECT SELECTOR ─── -->
+  <div class="project-selector" id="projectSelector"></div>
+
+  <!-- ─── TOP STAT CARDS ─── -->
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <!-- ─── TRAFFIC SOURCES CARD ─── -->
+  <div class="card">
+    <div class="tabs-container" id="sourcesTabs"></div>
+    <div style="overflow-x:auto;">
+      <table class="analytics-table">
+        <thead>
+          <tr>
+            <th>Source / Medium</th>
+            <th style="text-align: right;">Visitors</th>
+            <th style="text-align: right;">Conversion Rate</th>
+            <th style="text-align: right;">Revenue</th>
+            <th style="text-align: right;">Orders</th>
+            <th style="text-align: right;">CPA</th>
+            <th style="text-align: right;">ROAS</th>
+          </tr>
+        </thead>
+        <tbody id="sourcesTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ─── CONVERSION FUNNEL ─── -->
+  <div class="card">
+    <div class="funnel-container">
+      <div style="margin-bottom: 20px;">
+        <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary);">Conversion Funnel</h3>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">7-day view</p>
+      </div>
+      <div id="funnelViz"></div>
+    </div>
+  </div>
+
+  <!-- ─── EMAIL PERFORMANCE ─── -->
+  <div class="card">
+    <div style="padding: 16px; border-bottom: 1px solid var(--border);">
+      <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary);">Email Performance</h3>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="analytics-table">
+        <thead>
+          <tr>
+            <th>Email Name</th>
+            <th style="text-align: right;">Sent</th>
+            <th style="text-align: right;">Delivered</th>
+            <th style="text-align: right;">Open Rate</th>
+            <th style="text-align: right;">Click Rate</th>
+            <th style="text-align: right;">Conversions</th>
+            <th style="text-align: right;">Revenue</th>
+            <th style="text-align: right;">Conv. Rate</th>
+          </tr>
+        </thead>
+        <tbody id="emailsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ─── PROJECT COMPARISON ─── -->
+  <div class="card" id="projectComparisonCard" style="display: none;">
+    <div style="padding: 16px; border-bottom: 1px solid var(--border);">
+      <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary);">Project Performance</h3>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="analytics-table">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th style="text-align: right;">Visitors</th>
+            <th style="text-align: right;">Orders</th>
+            <th style="text-align: right;">Conv. Rate</th>
+            <th style="text-align: right;">Revenue</th>
+            <th style="text-align: right;">Ad Spend</th>
+            <th style="text-align: right;">ROAS</th>
+            <th style="text-align: right;">Profit</th>
+            <th style="text-align: right;">Margin %</th>
+          </tr>
+        </thead>
+        <tbody id="projectsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ─── CHANNEL PERFORMANCE OVER TIME ─── -->
+  <div class="card">
+    <div class="chart-container">
+      <div class="chart-title">Daily Visitors by Channel (Last 7 Days)</div>
+      <svg class="simple-chart" id="channelChart" viewBox="0 0 1000 350"></svg>
+    </div>
+  </div>
+
+  <!-- ─── TOP CONVERSION PATHS ─── -->
+  <div class="card">
+    <div style="padding: 16px; border-bottom: 1px solid var(--border);">
+      <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary);">Top Conversion Paths</h3>
+    </div>
+    <div class="paths-container" id="pathsViz"></div>
+  </div>
+
+  <!-- ─── CUSTOMER JOURNEY SECTION ─── -->
+  <div class="card">
+    <div style="padding: 16px; border-bottom: 1px solid var(--border);">
+      <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary);">Sample Customer Journey</h3>
+      <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Order #7446 — Rita Van Damme</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px;">
+      <!-- Attribution Info -->
+      <div>
+        <h4 style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px;">Attribution</h4>
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 11px; color: var(--text-secondary); font-weight: 500; margin-bottom: 4px;">FIRST TOUCH</div>
+          <div style="font-size: 13px; color: var(--text-primary);">Facebook Ad</div>
+          <div style="font-size: 12px; color: var(--text-muted);">Laat los - Cold - NL</div>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 11px; color: var(--text-secondary); font-weight: 500; margin-bottom: 4px;">LAST TOUCH</div>
+          <div style="font-size: 13px; color: var(--text-primary);">Email Campaign</div>
+          <div style="font-size: 12px; color: var(--text-muted);">Abandoned cart reminder</div>
+        </div>
+        <div style="padding: 12px; background: var(--bg); border-radius: 6px; margin-top: 16px;">
+          <div style="font-size: 11px; color: var(--text-secondary); font-weight: 500; margin-bottom: 8px;">UTM PARAMETERS</div>
+          <div style="font-size: 12px; color: var(--text-primary);">
+            <div><strong>Source:</strong> facebook</div>
+            <div><strong>Medium:</strong> cpc</div>
+            <div><strong>Campaign:</strong> Laat-los-cold-NL</div>
+            <div><strong>Content:</strong> Ad Variant A</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 16px; font-size: 12px; color: var(--text-secondary);">
+          <span><strong>Sessions:</strong> 2</span>
+          <span><strong>Days to Conv.:</strong> 1</span>
+        </div>
+      </div>
+
+      <!-- Journey Timeline -->
+      <div>
+        <h4 style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px;">Session Timeline</h4>
+        <div class="journey-container" style="padding: 0;">
+          <div class="journey-item">
+            <div class="journey-icon">📱</div>
+            <div class="journey-content">
+              <div class="journey-time">Feb 23, 14:22</div>
+              <div class="journey-event">Clicked Facebook Ad</div>
+              <div class="journey-detail">Campaign: Laat los - Cold - NL</div>
+            </div>
+          </div>
+          <div class="journey-item">
+            <div class="journey-icon">👁</div>
+            <div class="journey-content">
+              <div class="journey-time">Feb 23, 14:22</div>
+              <div class="journey-event">Landed on sales page</div>
+              <div class="journey-detail">Time on page: 3m 42s • Device: Mobile</div>
+            </div>
+          </div>
+          <div class="journey-item">
+            <div class="journey-icon">📖</div>
+            <div class="journey-content">
+              <div class="journey-time">Feb 23, 14:25</div>
+              <div class="journey-event">Scrolled 85% of page</div>
+              <div class="journey-detail">Engaged with product details</div>
+            </div>
+          </div>
+          <div class="journey-item">
+            <div class="journey-icon">❌</div>
+            <div class="journey-content">
+              <div class="journey-time">Feb 23, 14:26</div>
+              <div class="journey-event">Left site</div>
+              <div class="journey-detail">Session ended • Browser: Mobile Safari</div>
+            </div>
+          </div>
+          <div class="journey-item">
+            <div class="journey-icon">📧</div>
+            <div class="journey-content">
+              <div class="journey-time">Feb 24, 09:15</div>
+              <div class="journey-event">Opened email</div>
+              <div class="journey-detail">Subject: "Je bent het vergeten" (Abandoned cart)</div>
+            </div>
+          </div>
+          <div class="journey-item">
+            <div class="journey-icon">🔗</div>
+            <div class="journey-content">
+              <div class="journey-time">Feb 24, 09:16</div>
+              <div class="journey-event">Clicked email link</div>
+              <div class="journey-detail">Campaign: Abandoned Cart Email</div>
+            </div>
+          </div>
+          <div class="journey-item">
+            <div class="journey-icon">👁</div>
+            <div class="journey-content">
+              <div class="journey-time">Feb 24, 09:16</div>
+              <div class="journey-event">Returned to sales page</div>
+              <div class="journey-detail">Time on page: 1m 15s • Device: Desktop</div>
+            </div>
+          </div>
+          <div class="journey-item">
+            <div class="journey-icon">🛒</div>
+            <div class="journey-content">
+              <div class="journey-time">Feb 24, 09:17</div>
+              <div class="journey-event">Added to cart</div>
+              <div class="journey-detail">Product: Laat los wat je kapotmaakt</div>
+            </div>
+          </div>
+          <div class="journey-item">
+            <div class="journey-icon">💳</div>
+            <div class="journey-content">
+              <div class="journey-time">Feb 24, 09:18</div>
+              <div class="journey-event">Entered checkout</div>
+              <div class="journey-detail">Country: NL • Shipping method: GLS</div>
+            </div>
+          </div>
+          <div class="journey-item">
+            <div class="journey-icon">✅</div>
+            <div class="journey-content">
+              <div class="journey-time">Feb 24, 09:19</div>
+              <div class="journey-event">Purchase completed</div>
+              <div class="journey-detail">Order total: €35.00 • Status: Paid</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics Footer -->
+    <div class="metrics-grid">
+      <div class="metric-item">
+        <div class="metric-label">Total Touchpoints</div>
+        <div class="metric-value">10</div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-label">Sessions</div>
+        <div class="metric-value">2</div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-label">Days to Purchase</div>
+        <div class="metric-value">1</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- EMAIL DRILL-DOWN MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeEmailModal()"></div>
+<div class="modal-panel" id="modalPanel">
+  <div class="modal-header">
+    <h2 id="modalTitle">Email Campaign</h2>
+    <button class="modal-close" onclick="closeEmailModal()">✕</button>
+  </div>
+  <div class="modal-body" id="modalContent"></div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// PROJECT DATA
+// ═══════════════════════════════════════════════════
+const PROJECTS = [
+  { id: "all", name: "All Projects", tag: null },
+  { id: "nl1", name: "Laat los wat je kapotmaakt", tag: "tag-nl" },
+  { id: "de1", name: "Lass los was dich kaputt macht", tag: "tag-de" },
+  { id: "pl1", name: "Odpuść to co cię niszczy", tag: "tag-pl" },
+  { id: "cz1", name: "Psí superživot", tag: "tag-cz" },
+  { id: "se1", name: "Släpp taget om det som förstör dig", tag: "tag-se" },
+  { id: "nl2", name: "De Hondenbijbel", tag: "tag-nl" },
+];
+
+const PROJECT_TAG_COLORS = {
+  "tag-nl": "tag-nl-chip",
+  "tag-de": "tag-de-chip",
+  "tag-pl": "tag-pl-chip",
+  "tag-cz": "tag-cz-chip",
+  "tag-se": "tag-se-chip",
+};
+
+// ═══════════════════════════════════════════════════
+// STAT CARDS DATA BY PROJECT
+// ═══════════════════════════════════════════════════
+const PROJECT_STATS = {
+  all: { visitors: 2847, convRate: 3.2, revenue: 2847, cpa: 8.5 },
+  nl1: { visitors: 1240, convRate: 4.1, revenue: 982, cpa: 8.2 },
+  de1: { visitors: 756, convRate: 2.4, revenue: 630, cpa: 11.2 },
+  pl1: { visitors: 423, convRate: 3.3, revenue: 428, cpa: 9.8 },
+  cz1: { visitors: 384, convRate: 2.9, revenue: 350, cpa: 10.1 },
+  se1: { visitors: 215, convRate: 3.3, revenue: 264, cpa: 9.5 },
+  nl2: { visitors: 177, convRate: 7.3, revenue: 193, cpa: 6.8 },
+};
+
+// ═══════════════════════════════════════════════════
+// TRAFFIC SOURCES DATA
+// ═══════════════════════════════════════════════════
+const TRAFFIC_SOURCES = [
+  { source: "facebook", medium: "cpc", visitors: 1240, convRate: 4.1, revenue: 3847, orders: 51, cpa: 8.2, roas: 3.8 },
+  { source: "google", medium: "organic", visitors: 682, convRate: 2.8, revenue: 1542, orders: 19, cpa: 12.1, roas: 2.2 },
+  { source: "email", medium: "newsletter", visitors: 421, convRate: 5.7, revenue: 1684, orders: 24, cpa: 6.3, roas: 4.2 },
+  { source: "direct", medium: "none", visitors: 318, convRate: 3.2, revenue: 847, orders: 10, cpa: 10.5, roas: 2.8 },
+  { source: "instagram", medium: "cpc", visitors: 186, convRate: 2.1, revenue: 428, orders: 4, cpa: 28.7, roas: 1.6 },
+];
+
+const SOURCE_BADGES = {
+  facebook: "badge-facebook",
+  google: "badge-google",
+  email: "badge-email",
+  direct: "badge-direct",
+  instagram: "badge-instagram",
+};
+
+const SOURCE_LABELS = {
+  facebook: "Facebook",
+  google: "Google",
+  email: "Email",
+  direct: "Direct",
+  instagram: "Instagram",
+};
+
+// ═══════════════════════════════════════════════════
+// EMAIL CAMPAIGNS DATA
+// ═══════════════════════════════════════════════════
+const EMAIL_CAMPAIGNS = [
+  { id: 1, name: "Welcome Series - Day 1", sent: 2840, delivered: 2788, openRate: 55.2, clickRate: 12.8, conversions: 156, revenue: 5460, convRate: 5.6 },
+  { id: 2, name: "Welcome Series - Day 3 - Social Proof", sent: 2788, delivered: 2734, openRate: 42.1, clickRate: 8.4, conversions: 98, revenue: 3430, convRate: 3.6 },
+  { id: 3, name: "Abandoned Cart - 1h", sent: 847, delivered: 823, openRate: 45.3, clickRate: 22.6, conversions: 66, revenue: 2310, convRate: 8.0 },
+  { id: 4, name: "Abandoned Cart - 24h", sent: 621, delivered: 603, openRate: 38.2, clickRate: 16.4, conversions: 30, revenue: 1050, convRate: 5.0 },
+  { id: 5, name: "Post-Purchase Upsell", sent: 1256, delivered: 1234, openRate: 35.1, clickRate: 9.2, conversions: 52, revenue: 2080, convRate: 4.2 },
+  { id: 6, name: "Weekly Newsletter #47", sent: 5230, delivered: 5102, openRate: 28.4, clickRate: 4.1, conversions: 68, revenue: 1972, convRate: 1.3 },
+  { id: 7, name: "Flash Sale - Valentine's", sent: 4156, delivered: 4042, openRate: 32.1, clickRate: 11.3, conversions: 142, revenue: 4690, convRate: 3.5 },
+  { id: 8, name: "Re-engagement - 30 days inactive", sent: 3421, delivered: 3284, openRate: 18.2, clickRate: 3.8, conversions: 31, revenue: 868, convRate: 0.9 },
+];
+
+// ═══════════════════════════════════════════════════
+// FUNNEL DATA
+// ═══════════════════════════════════════════════════
+const FUNNEL_STEPS = [
+  { label: "Landing Page Views", value: 2847, percent: 100 },
+  { label: "Product Page Views", value: 2156, percent: 75.8 },
+  { label: "Add to Cart", value: 684, percent: 31.8 },
+  { label: "Checkout Started", value: 521, percent: 76.2 },
+  { label: "Payment Info Entered", value: 448, percent: 86.0 },
+  { label: "Purchase Completed", value: 91, percent: 20.3 },
+];
+
+// ═══════════════════════════════════════════════════
+// PROJECT PERFORMANCE DATA
+// ═══════════════════════════════════════════════════
+const PROJECTS_DATA = [
+  { name: "Laat los wat je kapotmaakt", tag: "tag-nl", visitors: 892, orders: 28, convRate: 3.14, revenue: 982, adSpend: 240, roas: 4.09, profit: 742, margin: 75.6 },
+  { name: "Lass los was dich kaputt macht", tag: "tag-de", visitors: 756, orders: 18, convRate: 2.38, revenue: 630, adSpend: 168, roas: 3.75, profit: 462, margin: 73.3 },
+  { name: "Odpuść to co cię niszczy", tag: "tag-pl", visitors: 423, orders: 14, convRate: 3.31, revenue: 428, adSpend: 98, roas: 4.37, profit: 330, margin: 77.1 },
+  { name: "Psí superzivot", tag: "tag-cz", visitors: 384, orders: 11, convRate: 2.86, revenue: 350, adSpend: 84, roas: 4.17, profit: 266, margin: 76.0 },
+  { name: "Släpp taget om det som förstör dig", tag: "tag-se", visitors: 215, orders: 7, convRate: 3.26, revenue: 264, adSpend: 52, roas: 5.08, profit: 212, margin: 80.3 },
+  { name: "De Hondenbijbel", tag: "tag-nl", visitors: 177, orders: 13, convRate: 7.34, revenue: 193, adSpend: 45, roas: 4.29, profit: 148, margin: 76.7 },
+];
+
+// ═══════════════════════════════════════════════════
+// CONVERSION PATHS
+// ═══════════════════════════════════════════════════
+const CONVERSION_PATHS = [
+  { rank: 1, steps: ["Facebook Ad", "Sales Page", "Cart", "Purchase"], percent: 45 },
+  { rank: 2, steps: ["Facebook Ad", "Sales Page", "Left", "Email", "Sales Page", "Cart", "Purchase"], percent: 28 },
+  { rank: 3, steps: ["Google Search", "Sales Page", "Cart", "Purchase"], percent: 12 },
+  { rank: 4, steps: ["Direct", "Sales Page", "Cart", "Purchase"], percent: 8 },
+  { rank: 5, steps: ["Instagram Ad", "Sales Page", "Cart", "Purchase"], percent: 7 },
+];
+
+// ═══════════════════════════════════════════════════
+// DAILY TRAFFIC DATA (last 7 days)
+// ═══════════════════════════════════════════════════
+const DAILY_TRAFFIC = [
+  { date: "Feb 19", facebook: 450, google: 220, email: 120, direct: 85, instagram: 45 },
+  { date: "Feb 20", facebook: 520, google: 240, email: 140, direct: 95, instagram: 52 },
+  { date: "Feb 21", facebook: 480, google: 210, email: 130, direct: 78, instagram: 40 },
+  { date: "Feb 22", facebook: 580, google: 280, email: 160, direct: 120, instagram: 65 },
+  { date: "Feb 23", facebook: 650, google: 310, email: 180, direct: 95, instagram: 78 },
+  { date: "Feb 24", facebook: 710, google: 320, email: 210, direct: 108, instagram: 92 },
+  { date: "Feb 25", facebook: 640, google: 300, email: 95, direct: 82, instagram: 48 },
+];
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let activeProject = "all";
+
+// ═══════════════════════════════════════════════════
+// PROJECT SELECTOR RENDER
+// ═══════════════════════════════════════════════════
+function renderProjectSelector() {
+  const container = document.getElementById("projectSelector");
+  container.innerHTML = PROJECTS.map(p => {
+    const isActive = p.id === activeProject ? "active" : "";
+    const tagColor = p.tag ? PROJECT_TAG_COLORS[p.tag] : "";
+    const tagIcon = p.tag ? `<span class="project-chip-tag ${tagColor}"></span>` : "";
+    return `<div class="project-chip ${isActive}" onclick="switchProject('${p.id}')">
+      ${p.name}${tagIcon}
+    </div>`;
+  }).join("");
+}
+
+function switchProject(projectId) {
+  activeProject = projectId;
+  renderProjectSelector();
+  renderStats();
+  renderSourcesTabs();
+  renderSourcesTable("All Sources");
+  renderFunnel();
+  updateProjectComparisonVisibility();
+}
+
+// ═══════════════════════════════════════════════════
+// STATS RENDER
+// ═══════════════════════════════════════════════════
+function renderStats() {
+  const stats = PROJECT_STATS[activeProject];
+  const grid = document.getElementById("statsGrid");
+  grid.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Visitors Today</div>
+      <div class="stat-value">${stats.visitors.toLocaleString()}</div>
+      <span class="stat-change up">▲ 18% vs yesterday</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Conversion Rate</div>
+      <div class="stat-value">${stats.convRate}%</div>
+      <span class="stat-change up">▲ 0.3% vs yesterday</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Revenue Today</div>
+      <div class="stat-value">€${stats.revenue.toLocaleString()}</div>
+      <span class="stat-change up">▲ 24% vs yesterday</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Cost per Acquisition</div>
+      <div class="stat-value">€${stats.cpa.toFixed(2)}</div>
+      <span class="stat-change down">▼ 5% vs yesterday</span>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════
+// TRAFFIC SOURCES
+// ═══════════════════════════════════════════════════
+function renderSourcesTabs() {
+  const container = document.getElementById("sourcesTabs");
+  const allSources = ["All Sources", ...Object.values(SOURCE_LABELS)];
+  container.innerHTML = allSources.map((label, idx) => {
+    const isActive = idx === 0 ? "active" : "";
+    return `<div class="tab ${isActive}" onclick="switchSourceTab(this, '${label}')">${label}</div>`;
+  }).join("");
+}
+
+function switchSourceTab(el, source) {
+  document.querySelectorAll("#sourcesTabs .tab").forEach(t => t.classList.remove("active"));
+  el.classList.add("active");
+  renderSourcesTable(source);
+}
+
+function renderSourcesTable(filterSource = "All Sources") {
+  const tbody = document.getElementById("sourcesTable");
+  let sources = TRAFFIC_SOURCES;
+
+  if (filterSource !== "All Sources") {
+    sources = sources.filter(s => SOURCE_LABELS[s.source] === filterSource);
+  }
+
+  tbody.innerHTML = sources.map(s => {
+    const badgeClass = SOURCE_BADGES[s.source] || "badge-direct";
+    const sourceLabel = `${SOURCE_LABELS[s.source]} / ${s.medium}`;
+    return `<tr>
+      <td><span class="badge ${badgeClass}"><span class="badge-dot"></span>${sourceLabel}</span></td>
+      <td style="text-align: right;"><strong>${s.visitors.toLocaleString()}</strong></td>
+      <td style="text-align: right;">${s.convRate}%</td>
+      <td style="text-align: right;"><strong>€${s.revenue.toLocaleString()}</strong></td>
+      <td style="text-align: right;">${s.orders}</td>
+      <td style="text-align: right;">€${s.cpa.toFixed(2)}</td>
+      <td style="text-align: right;"><strong style="color: var(--green);">${s.roas.toFixed(2)}x</strong></td>
+    </tr>`;
+  }).join("");
+}
+
+// ═══════════════════════════════════════════════════
+// FUNNEL RENDER
+// ═══════════════════════════════════════════════════
+function renderFunnel() {
+  const container = document.getElementById("funnelViz");
+  const maxValue = FUNNEL_STEPS[0].value;
+
+  container.innerHTML = FUNNEL_STEPS.map((step, idx) => {
+    const width = (step.value / maxValue) * 100;
+    const dropoff = idx > 0 ? Math.round(100 - (step.percent)) + "%" : null;
+
+    return `<div class="funnel-step">
+      <div class="funnel-label">${step.label}</div>
+      <div class="funnel-bar-wrapper">
+        <div class="funnel-bar" style="width: ${width}%;">
+          ${step.value.toLocaleString()}
+        </div>
+        <div class="funnel-value">${step.percent.toFixed(1)}%</div>
+        ${dropoff ? `<div class="funnel-dropoff">↓ ${dropoff}</div>` : ''}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ═══════════════════════════════════════════════════
+// EMAIL CAMPAIGNS RENDER
+// ═══════════════════════════════════════════════════
+function renderEmails() {
+  const tbody = document.getElementById("emailsTable");
+  tbody.innerHTML = EMAIL_CAMPAIGNS.map(e => {
+    return `<tr style="cursor: pointer;" onclick="openEmailModal(${e.id})">
+      <td><a class="email-link" onclick="event.stopPropagation(); openEmailModal(${e.id})">${e.name}</a></td>
+      <td style="text-align: right;"><strong>${e.sent.toLocaleString()}</strong></td>
+      <td style="text-align: right;">${e.delivered.toLocaleString()}</td>
+      <td style="text-align: right;">${e.openRate.toFixed(1)}%</td>
+      <td style="text-align: right;">${e.clickRate.toFixed(1)}%</td>
+      <td style="text-align: right;"><strong>${e.conversions}</strong></td>
+      <td style="text-align: right;"><strong>€${e.revenue.toLocaleString()}</strong></td>
+      <td style="text-align: right;">${e.convRate.toFixed(1)}%</td>
+    </tr>`;
+  }).join("");
+}
+
+// ═══════════════════════════════════════════════════
+// EMAIL DRILL-DOWN MODAL
+// ═══════════════════════════════════════════════════
+function openEmailModal(emailId) {
+  const email = EMAIL_CAMPAIGNS.find(e => e.id === emailId);
+  if (!email) return;
+
+  const bounced = email.sent - email.delivered;
+  const opens = Math.round(email.delivered * email.openRate / 100);
+  const clicks = Math.round(email.delivered * email.clickRate / 100);
+  const unopened = email.delivered - opens;
+
+  const topConverters = [
+    { name: "Maria Hernandez", amount: 95 },
+    { name: "James O'Connor", amount: 85 },
+    { name: "Sophie Mueller", amount: 75 },
+    { name: "Anna Kowalski", amount: 65 },
+    { name: "Emma Johansen", amount: 55 },
+  ];
+
+  const clickLinks = [
+    { url: "Shop Now Button", clicks: Math.round(clicks * 0.65) },
+    { url: "Product Link #1", clicks: Math.round(clicks * 0.25) },
+    { url: "Footer Link", clicks: Math.round(clicks * 0.1) },
+  ];
+
+  const content = `
+    <div class="modal-section">
+      <div class="modal-section-title">Email Preview</div>
+      <div style="padding: 12px; background: var(--bg); border-radius: 6px; font-size: 12px;">
+        <div style="font-weight: 600; margin-bottom: 4px;">Subject: ${email.name}</div>
+        <div style="color: var(--text-secondary);">First line of email content would appear here...</div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">Delivery Stats</div>
+      <div class="modal-grid">
+        <div class="modal-stat">
+          <div class="modal-stat-label">Sent</div>
+          <div class="modal-stat-value">${email.sent.toLocaleString()}</div>
+        </div>
+        <div class="modal-stat">
+          <div class="modal-stat-label">Delivered</div>
+          <div class="modal-stat-value">${email.delivered.toLocaleString()}</div>
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div class="modal-stat">
+          <div class="modal-stat-label">Bounced</div>
+          <div class="modal-stat-value">${bounced}</div>
+        </div>
+        <div class="modal-stat">
+          <div class="modal-stat-label">Unsubscribed</div>
+          <div class="modal-stat-value">${Math.round(email.delivered * 0.02)}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">Engagement</div>
+      <div class="modal-grid">
+        <div class="modal-stat">
+          <div class="modal-stat-label">Opens</div>
+          <div class="modal-stat-value">${opens.toLocaleString()}</div>
+        </div>
+        <div class="modal-stat">
+          <div class="modal-stat-label">Unique Opens</div>
+          <div class="modal-stat-value">${Math.round(opens * 0.85).toLocaleString()}</div>
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div class="modal-stat">
+          <div class="modal-stat-label">Clicks</div>
+          <div class="modal-stat-value">${clicks.toLocaleString()}</div>
+        </div>
+        <div class="modal-stat">
+          <div class="modal-stat-label">Unique Clicks</div>
+          <div class="modal-stat-value">${Math.round(clicks * 0.92).toLocaleString()}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">Revenue Attribution</div>
+      <ul class="modal-list">
+        <li class="modal-list-item">
+          <span class="modal-list-label">Orders from Email</span>
+          <span><strong>${email.conversions}</strong></span>
+        </li>
+        <li class="modal-list-item">
+          <span class="modal-list-label">Total Revenue</span>
+          <span><strong>€${email.revenue.toLocaleString()}</strong></span>
+        </li>
+        <li class="modal-list-item">
+          <span class="modal-list-label">Average Order Value</span>
+          <span><strong>€${(email.revenue / email.conversions).toFixed(2)}</strong></span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">Click Map - Links Clicked</div>
+      <ul class="modal-list">
+        ${clickLinks.map(link => `
+          <li class="modal-list-item">
+            <span class="modal-list-label">${link.url}</span>
+            <span><strong>${link.clicks}</strong> clicks</span>
+          </li>
+        `).join('')}
+      </ul>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">Conversion Funnel - 48h</div>
+      <div class="mini-funnel">
+        <div class="mini-funnel-step">
+          <span class="mini-funnel-step-label">Delivered</span>
+          <span class="mini-funnel-step-count">${email.delivered.toLocaleString()}</span>
+        </div>
+        <div class="mini-funnel-step">
+          <span class="mini-funnel-step-label">Opened</span>
+          <span class="mini-funnel-step-count">${opens.toLocaleString()} (${email.openRate.toFixed(1)}%)</span>
+        </div>
+        <div class="mini-funnel-step">
+          <span class="mini-funnel-step-label">Clicked</span>
+          <span class="mini-funnel-step-count">${clicks.toLocaleString()} (${email.clickRate.toFixed(1)}%)</span>
+        </div>
+        <div class="mini-funnel-step">
+          <span class="mini-funnel-step-label">Purchased</span>
+          <span class="mini-funnel-step-count">${email.conversions} (${email.convRate.toFixed(2)}%)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">Top Converters</div>
+      ${topConverters.map(c => `
+        <div class="converter-item">
+          <span class="converter-name">${c.name}</span>
+          <span class="converter-amount">€${c.amount}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  document.getElementById("modalTitle").textContent = email.name;
+  document.getElementById("modalContent").innerHTML = content;
+  document.getElementById("modalOverlay").classList.add("visible");
+  document.getElementById("modalPanel").classList.add("visible");
+}
+
+function closeEmailModal() {
+  document.getElementById("modalOverlay").classList.remove("visible");
+  document.getElementById("modalPanel").classList.remove("visible");
+}
+
+// ═══════════════════════════════════════════════════
+// PROJECT COMPARISON
+// ═══════════════════════════════════════════════════
+function renderProjects() {
+  const tbody = document.getElementById("projectsTable");
+  tbody.innerHTML = PROJECTS_DATA.map(p => {
+    return `<tr>
+      <td><span class="tag ${p.tag}">${p.name}</span></td>
+      <td style="text-align: right;"><strong>${p.visitors.toLocaleString()}</strong></td>
+      <td style="text-align: right;">${p.orders}</td>
+      <td style="text-align: right;">${p.convRate.toFixed(2)}%</td>
+      <td style="text-align: right;"><strong>€${p.revenue.toLocaleString()}</strong></td>
+      <td style="text-align: right;">€${p.adSpend}</td>
+      <td style="text-align: right;"><strong style="color: var(--green);">${p.roas.toFixed(2)}x</strong></td>
+      <td style="text-align: right;">€${p.profit}</td>
+      <td style="text-align: right;">${p.margin.toFixed(1)}%</td>
+    </tr>`;
+  }).join("");
+}
+
+function updateProjectComparisonVisibility() {
+  const card = document.getElementById("projectComparisonCard");
+  if (activeProject === "all") {
+    card.style.display = "block";
+  } else {
+    card.style.display = "none";
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// CONVERSION PATHS
+// ═══════════════════════════════════════════════════
+function renderPaths() {
+  const container = document.getElementById("pathsViz");
+  container.innerHTML = CONVERSION_PATHS.map(p => {
+    const flowSteps = p.steps.map(step => {
+      if (step === "Left") return `<span style="color: var(--badge-unfulfilled-text); font-weight: 500;">${step}</span>`;
+      return `<span>${step}</span>`;
+    }).join(`<span class="path-arrow"> → </span>`);
+
+    return `<div class="path-item">
+      <div class="path-rank">${p.rank}.</div>
+      <div class="path-flow">${flowSteps}</div>
+      <div class="path-percent">${p.percent}%</div>
+    </div>`;
+  }).join("");
+}
+
+// ═══════════════════════════════════════════════════
+// CHART RENDER
+// ═══════════════════════════════════════════════════
+function renderChart() {
+  const svg = document.getElementById("channelChart");
+  const width = 1000, height = 350;
+  const padding = { top: 40, right: 40, bottom: 60, left: 60 };
+  const graphWidth = width - padding.left - padding.right;
+  const graphHeight = height - padding.top - padding.bottom;
+
+  const channels = ["facebook", "google", "email", "direct"];
+  const colors = {
+    facebook: "#1E40AF",
+    google: "#F57F17",
+    email: "#E65100",
+    direct: "#7B1FA2"
+  };
+
+  const maxValue = 800;
+  const daysCount = DAILY_TRAFFIC.length;
+  const dayWidth = graphWidth / (daysCount - 1);
+
+  let svgContent = `
+    <defs>
+      <linearGradient id="facebookGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:#1E40AF;stop-opacity:0.3" />
+        <stop offset="100%" style="stop-color:#1E40AF;stop-opacity:0" />
+      </linearGradient>
+      <linearGradient id="googleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:#F57F17;stop-opacity:0.3" />
+        <stop offset="100%" style="stop-color:#F57F17;stop-opacity:0" />
+      </linearGradient>
+    </defs>
+    <g transform="translate(${padding.left}, ${padding.top})">
+      <!-- Grid -->
+      <g stroke="#E1E3E5" stroke-width="1">
+  `;
+
+  for (let i = 0; i <= 4; i++) {
+    const y = (graphHeight / 4) * i;
+    svgContent += `<line x1="0" y1="${y}" x2="${graphWidth}" y2="${y}" />`;
+  }
+
+  svgContent += `
+      </g>
+      <!-- Axes -->
+      <line x1="0" y1="${graphHeight}" x2="${graphWidth}" y2="${graphHeight}" stroke="#000" stroke-width="1.5"/>
+      <line x1="0" y1="0" x2="0" y2="${graphHeight}" stroke="#000" stroke-width="1.5"/>
+  `;
+
+  // Draw lines for each channel
+  channels.forEach(channel => {
+    const points = DAILY_TRAFFIC.map((day, idx) => {
+      const x = idx * dayWidth;
+      const value = day[channel];
+      const y = graphHeight - (value / maxValue) * graphHeight;
+      return `${x},${y}`;
+    }).join(" ");
+
+    svgContent += `<polyline points="${points}" fill="none" stroke="${colors[channel]}" stroke-width="2.5" />`;
+  });
+
+  // X-axis labels
+  DAILY_TRAFFIC.forEach((day, idx) => {
+    const x = idx * dayWidth;
+    svgContent += `<text x="${x}" y="${graphHeight + 30}" text-anchor="middle" font-size="12" fill="#6D7175">${day.date}</text>`;
+  });
+
+  // Y-axis labels
+  for (let i = 0; i <= 4; i++) {
+    const value = (maxValue / 4) * i;
+    const y = graphHeight - (value / maxValue) * graphHeight;
+    svgContent += `<text x="-10" y="${y + 4}" text-anchor="end" font-size="12" fill="#6D7175">${Math.round(value)}</text>`;
+  }
+
+  svgContent += `</g>`;
+
+  // Legend
+  channels.forEach((channel, idx) => {
+    const y = 20 + idx * 20;
+    svgContent += `
+      <circle cx="20" cy="${y}" r="4" fill="${colors[channel]}"/>
+      <text x="30" y="${y + 4}" font-size="12" fill="#1A1A1A" font-weight="500">${SOURCE_LABELS[channel] || channel}</text>
+    `;
+  });
+
+  svg.innerHTML = svgContent;
+}
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+function showToast(message) {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/></svg>${message}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function exportData() {
+  showToast("Exported analytics data to CSV");
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", () => {
+  renderProjectSelector();
+  renderStats();
+  renderSourcesTabs();
+  renderSourcesTable();
+  renderFunnel();
+  renderEmails();
+  renderProjects();
+  renderPaths();
+  renderChart();
+  updateProjectComparisonVisibility();
+});
+
+// Close modal on escape key
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeEmailModal();
+});
+</script>
+
+</body>
+</html>

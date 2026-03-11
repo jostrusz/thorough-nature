@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orders Dashboard — Preview</title>
+<style>
+/* ═══════════════════════════════════════════════════ */
+/* RESET & BASE                                       */
+/* ═══════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F6F6F7;
+  --card: #FFFFFF;
+  --border: #E1E3E5;
+  --text-primary: #1A1A1A;
+  --text-secondary: #6D7175;
+  --text-muted: #8C9196;
+  --green: #008060;
+  --green-light: #F1F8F5;
+  --hover-bg: #F9FAFB;
+  --selected-bg: #F2F7FE;
+  --focus-ring: rgba(0, 128, 96, 0.25);
+
+  /* Badges */
+  --badge-paid: #AEE9D1;
+  --badge-paid-text: #0D5740;
+  --badge-pending: #FFD79D;
+  --badge-pending-text: #7A4F01;
+  --badge-unfulfilled: #FED3D1;
+  --badge-unfulfilled-text: #9E2B25;
+  --badge-fulfilled: #E4E5E7;
+  --badge-fulfilled-text: #44474A;
+  --badge-transit: #A4E8F2;
+  --badge-transit-text: #0E4F5C;
+  --badge-delivered: #AEE9D1;
+  --badge-delivered-text: #0D5740;
+  --badge-refunded: #E4E5E7;
+  --badge-refunded-text: #44474A;
+  --badge-tracking: #D4C5F9;
+  --badge-tracking-text: #3B1F8E;
+  --badge-imported: #E0E7FF;
+  --badge-imported-text: #3730A3;
+  --badge-processing: #FEF3C7;
+  --badge-processing-text: #92400E;
+  --badge-sent: #DBEAFE;
+  --badge-sent-text: #1E40AF;
+  --badge-returned: #FED3D1;
+  --badge-returned-text: #9E2B25;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* LAYOUT                                             */
+/* ═══════════════════════════════════════════════════ */
+.dashboard {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 32px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.page-header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.header-actions { display: flex; gap: 8px; }
+
+/* ═══════════════════════════════════════════════════ */
+/* BUTTONS                                            */
+/* ═══════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--hover-bg); box-shadow: var(--shadow-sm); }
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+.btn-primary:hover { background: #006e52; }
+.btn svg { width: 15px; height: 15px; }
+
+/* ═══════════════════════════════════════════════════ */
+/* STAT CARDS                                         */
+/* ═══════════════════════════════════════════════════ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.stat-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.stat-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+.stat-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.stat-change.up { color: var(--badge-paid-text); background: var(--badge-paid); }
+.stat-change.down { color: var(--badge-unfulfilled-text); background: var(--badge-unfulfilled); }
+.stat-change.neutral { color: var(--text-secondary); background: #F1F1F1; }
+.stat-alert { color: #D72C0D; }
+
+/* ═══════════════════════════════════════════════════ */
+/* CARD CONTAINER                                     */
+/* ═══════════════════════════════════════════════════ */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* TABS                                               */
+/* ═══════════════════════════════════════════════════ */
+.tabs-container {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs-container::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.tab:hover { color: var(--text-primary); }
+.tab.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--text-primary);
+  font-weight: 600;
+}
+.tab .count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #F1F1F1;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 6px;
+  color: var(--text-secondary);
+}
+.tab.active .count { background: var(--text-primary); color: #fff; }
+
+/* ═══════════════════════════════════════════════════ */
+/* TOOLBAR (search + filters + actions)               */
+/* ═══════════════════════════════════════════════════ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  max-width: 400px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  transition: all 0.2s ease;
+}
+.search-box:focus-within {
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px var(--focus-ring);
+  background: #fff;
+}
+.search-box svg { width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  color: var(--text-primary);
+  width: 100%;
+}
+.search-box input::placeholder { color: var(--text-muted); }
+
+.filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.filter-btn:hover { background: var(--hover-bg); color: var(--text-primary); }
+.filter-btn svg { width: 15px; height: 15px; }
+
+/* Bulk actions bar */
+.bulk-bar {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #F2F7FE;
+  border-bottom: 1px solid #C9DEFF;
+  animation: slideDown 0.2s ease;
+}
+.bulk-bar.visible { display: flex; }
+.bulk-bar .selected-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1A5DB4;
+  margin-right: 8px;
+}
+.bulk-bar .btn { font-size: 12px; padding: 5px 10px; }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* TABLE                                              */
+/* ═══════════════════════════════════════════════════ */
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.orders-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  transition: color 0.15s;
+  position: sticky;
+  top: 0;
+  background: var(--card);
+  z-index: 2;
+}
+.orders-table th:hover { color: var(--text-primary); }
+.orders-table th .sort-icon {
+  display: inline-block;
+  margin-left: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  font-size: 10px;
+}
+.orders-table th:hover .sort-icon { opacity: 0.5; }
+.orders-table th.sorted .sort-icon { opacity: 1; }
+.orders-table th.no-sort { cursor: default; }
+.orders-table th.no-sort:hover { color: var(--text-secondary); }
+
+.orders-table td {
+  padding: 12px;
+  font-size: 13px;
+  border-bottom: 1px solid #F1F1F1;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.orders-table tr {
+  transition: background 0.12s ease;
+}
+.orders-table tbody tr:hover {
+  background: var(--hover-bg);
+}
+.orders-table tbody tr.selected {
+  background: var(--selected-bg);
+}
+
+/* Checkbox */
+.checkbox-cell { width: 40px; text-align: center; }
+.custom-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #C9CCCF;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  background: #fff;
+  position: relative;
+}
+.custom-checkbox:hover { border-color: #919EAB; }
+.custom-checkbox.checked {
+  background: var(--green);
+  border-color: var(--green);
+  animation: checkPop 0.25s ease;
+}
+.custom-checkbox.checked::after {
+  content: '';
+  width: 5px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg) translateY(-1px);
+}
+.custom-checkbox.indeterminate {
+  background: var(--green);
+  border-color: var(--green);
+}
+.custom-checkbox.indeterminate::after {
+  content: '';
+  width: 8px;
+  height: 2px;
+  background: #fff;
+  border-radius: 1px;
+}
+
+@keyframes checkPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Order number link */
+.order-link {
+  color: #2C6ECB;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.12s;
+}
+.order-link:hover { color: #1A5DB4; text-decoration: underline; }
+
+/* Date */
+.date-primary { color: var(--text-primary); }
+.date-secondary { color: var(--text-muted); font-size: 12px; }
+
+/* Book sent checkmark */
+.book-sent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+.book-sent.yes {
+  background: var(--badge-paid);
+  color: var(--badge-paid-text);
+}
+.book-sent.no {
+  background: #F1F1F1;
+  color: #C0C0C0;
+}
+.book-sent svg { width: 13px; height: 13px; }
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: transform 0.12s ease;
+}
+.badge:hover { transform: scale(1.03); }
+.badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.badge-paid { background: var(--badge-paid); color: var(--badge-paid-text); }
+.badge-paid .badge-dot { background: var(--badge-paid-text); }
+.badge-pending { background: var(--badge-pending); color: var(--badge-pending-text); }
+.badge-pending .badge-dot { background: var(--badge-pending-text); }
+.badge-refunded { background: var(--badge-refunded); color: var(--badge-refunded-text); }
+.badge-refunded .badge-dot { background: var(--badge-refunded-text); }
+.badge-partial-refund { background: #F0E0FF; color: #6B21A8; }
+.badge-partial-refund .badge-dot { background: #6B21A8; }
+.badge-unfulfilled { background: var(--badge-unfulfilled); color: var(--badge-unfulfilled-text); }
+.badge-unfulfilled .badge-dot { background: var(--badge-unfulfilled-text); }
+.badge-fulfilled { background: var(--badge-fulfilled); color: var(--badge-fulfilled-text); }
+.badge-fulfilled .badge-dot { background: var(--badge-fulfilled-text); }
+.badge-transit { background: var(--badge-transit); color: var(--badge-transit-text); }
+.badge-transit .badge-dot { background: var(--badge-transit-text); }
+.badge-delivered { background: var(--badge-delivered); color: var(--badge-delivered-text); }
+.badge-delivered .badge-dot { background: var(--badge-delivered-text); }
+.badge-tracking { background: var(--badge-tracking); color: var(--badge-tracking-text); }
+.badge-tracking .badge-dot { background: var(--badge-tracking-text); }
+.badge-imported { background: var(--badge-imported); color: var(--badge-imported-text); }
+.badge-imported .badge-dot { background: var(--badge-imported-text); }
+.badge-processing { background: var(--badge-processing); color: var(--badge-processing-text); }
+.badge-processing .badge-dot { background: var(--badge-processing-text); }
+.badge-sent { background: var(--badge-sent); color: var(--badge-sent-text); }
+.badge-sent .badge-dot { background: var(--badge-sent-text); }
+.badge-returned { background: var(--badge-returned); color: var(--badge-returned-text); }
+.badge-returned .badge-dot { background: var(--badge-returned-text); }
+
+/* Tags */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #F3F3F3;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.tag-nl { background: #FFF3E0; color: #E65100; }
+.tag-de { background: #FFF8E1; color: #F57F17; }
+.tag-cz { background: #E3F2FD; color: #1565C0; }
+.tag-pl { background: #FCE4EC; color: #C62828; }
+.tag-se { background: #E0F7FA; color: #00695C; }
+.tag-hu { background: #F3E5F5; color: #7B1FA2; }
+
+/* Country flag */
+.country-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.flag { font-size: 16px; }
+
+/* Items */
+.items-count { color: var(--text-secondary); }
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.pagination-btns { display: flex; gap: 4px; }
+.page-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 13px;
+}
+.page-btn:hover { background: var(--hover-bg); }
+.page-btn.active {
+  background: var(--text-primary);
+  color: #fff;
+  border-color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* SKELETON LOADING                                   */
+/* ═══════════════════════════════════════════════════ */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #EBEBEB;
+  border-radius: 4px;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.skeleton-row td { padding: 16px 12px; }
+.skeleton-line {
+  height: 14px;
+  border-radius: 4px;
+  background: #EBEBEB;
+  position: relative;
+  overflow: hidden;
+}
+.skeleton-line::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  animation: shimmer 1.5s infinite;
+}
+.skeleton-badge {
+  width: 70px;
+  height: 22px;
+  border-radius: 12px;
+  background: #EBEBEB;
+  position: relative;
+  overflow: hidden;
+}
+.skeleton-badge::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  animation: shimmer 1.5s infinite;
+}
+.skeleton-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: #EBEBEB;
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* TOAST                                              */
+/* ═══════════════════════════════════════════════════ */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+.toast {
+  padding: 12px 20px;
+  background: #1A1A1A;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toast svg { width: 16px; height: 16px; color: #34D399; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(16px); }
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* EMPTY STATE                                        */
+/* ═══════════════════════════════════════════════════ */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+.empty-state svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state p { font-size: 14px; }
+
+/* ═══════════════════════════════════════════════════ */
+/* RESPONSIVE                                         */
+/* ═══════════════════════════════════════════════════ */
+@media (max-width: 1200px) {
+  .orders-table .col-delivery,
+  .orders-table .col-items { display: none; }
+}
+@media (max-width: 900px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .orders-table .col-booksent,
+  .orders-table .col-country { display: none; }
+  .dashboard { padding: 16px; }
+}
+@media (max-width: 600px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .toolbar { flex-wrap: wrap; }
+  .search-box { max-width: 100%; }
+  .page-header h1 { font-size: 18px; }
+}
+
+/* Fade-in animation for table body swap */
+.table-fade-enter {
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- ─── PAGE HEADER ─── -->
+  <div class="page-header">
+    <h1>Orders</h1>
+    <div class="header-actions">
+      <button class="btn" onclick="exportCSV()">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 14v3h14v-3M10 3v10M6 9l4 4 4-4"/></svg>
+        Export
+      </button>
+      <button class="btn btn-primary">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>
+        Create order
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── STAT CARDS ─── -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Orders Today</div>
+      <div class="stat-value">19</div>
+      <span class="stat-change up">&#9650; 12% vs yesterday</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Revenue Today</div>
+      <div class="stat-value">&euro;648.50</div>
+      <span class="stat-change up">&#9650; 8% vs yesterday</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label stat-alert">Unfulfilled</div>
+      <div class="stat-value stat-alert">14</div>
+      <span class="stat-change neutral">awaiting shipment</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">In Transit</div>
+      <div class="stat-value">9</div>
+      <span class="stat-change neutral">on the way</span>
+    </div>
+  </div>
+
+  <!-- ─── MAIN CARD ─── -->
+  <div class="card">
+
+    <!-- TABS -->
+    <div class="tabs-container" id="tabs"></div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-box">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4"/></svg>
+        <input type="text" id="searchInput" placeholder="Search orders, customers, emails..." oninput="onSearch()">
+      </div>
+      <button class="filter-btn" onclick="toggleFilters()">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h14M5 10h10M7 15h6"/></svg>
+        Filters
+      </button>
+      <button class="filter-btn" onclick="toggleSort()">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h12M6 10h8M8 14h4"/></svg>
+        Sort
+      </button>
+    </div>
+
+    <!-- BULK ACTIONS BAR -->
+    <div class="bulk-bar" id="bulkBar">
+      <span class="selected-count" id="selectedCount">0 selected</span>
+      <button class="btn" onclick="bulkAction('Marked as fulfilled')">Mark Fulfilled</button>
+      <button class="btn" onclick="bulkAction('Tags added')">Add Tags</button>
+      <button class="btn" onclick="bulkAction('Sent to BaseLinker')">Send to BaseLinker</button>
+      <button class="btn" onclick="bulkAction('Exported')">Export Selected</button>
+    </div>
+
+    <!-- TABLE -->
+    <div style="overflow-x:auto;">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th class="checkbox-cell no-sort">
+              <div class="custom-checkbox" id="selectAll" onclick="toggleSelectAll()"></div>
+            </th>
+            <th onclick="sortBy('order')">Order <span class="sort-icon">&#9660;</span></th>
+            <th onclick="sortBy('date')">Date <span class="sort-icon">&#9660;</span></th>
+            <th onclick="sortBy('customer')">Customer <span class="sort-icon">&#9660;</span></th>
+            <th onclick="sortBy('total')">Total <span class="sort-icon">&#9660;</span></th>
+            <th class="col-booksent no-sort">Book sent</th>
+            <th>Payment status</th>
+            <th class="col-delivery">Delivery status</th>
+            <th class="col-items">Items</th>
+            <th>Tags</th>
+            <th class="col-country">Country</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination">
+      <span id="paginationInfo">Showing 1-30 of 30 orders</span>
+      <div class="pagination-btns">
+        <button class="page-btn">&lsaquo;</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">&rsaquo;</button>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /dashboard -->
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// MOCK DATA
+// ═══════════════════════════════════════════════════
+const ORDERS = [
+  // ── Nové objednávky (dnes) — čerstvé, BaseLinker: imported/processing ──
+  { order: 7446, date: "2026-02-24T11:03", customer: "Rita Van Damme", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "imported", fulfillment: "unfulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7445, date: "2026-02-24T10:55", customer: "Małgorzata Rus", total: 30.59, currency: "EUR", bookSent: true, payment: "paid", delivery: "imported", fulfillment: "unfulfilled", items: 1, tag: "Odpuść to co cię niszczy", country: "PL", deliveryMethod: "Shipping" },
+  { order: 7444, date: "2026-02-24T10:53", customer: "Hubert Prask", total: 30.59, currency: "EUR", bookSent: true, payment: "paid", delivery: "imported", fulfillment: "unfulfilled", items: 1, tag: "Odpuść to co cię niszczy", country: "PL", deliveryMethod: "Shipping" },
+  { order: 7443, date: "2026-02-24T10:53", customer: "Ingrid Buitenhuis", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "processing", fulfillment: "unfulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7442, date: "2026-02-24T10:42", customer: "Diana Tabben-Meinster", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "processing", fulfillment: "unfulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7441, date: "2026-02-24T10:39", customer: "Hana Loukota", total: 22.71, currency: "EUR", bookSent: false, payment: "paid", delivery: "imported", fulfillment: "unfulfilled", items: 1, tag: "Kočičí bible", country: "CZ", deliveryMethod: "Shipping" },
+  { order: 7440, date: "2026-02-24T10:36", customer: "Sieta Beekhuizen", total: 55, currency: "EUR", bookSent: true, payment: "paid", delivery: "processing", fulfillment: "unfulfilled", items: 2, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7439, date: "2026-02-24T10:33", customer: "Jeroen Brouwer", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "processing", fulfillment: "unfulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7438, date: "2026-02-24T10:31", customer: "Francis Huisman", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "sent", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "BE", deliveryMethod: "Koerier GLS" },
+  { order: 7437, date: "2026-02-24T10:26", customer: "Sandra Mottier", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "sent", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7436, date: "2026-02-24T10:22", customer: "Jana Pickrodt", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "imported", fulfillment: "unfulfilled", items: 1, tag: "Lass los was dich kaputt macht", country: "DE", deliveryMethod: "Shipping" },
+  { order: 7435, date: "2026-02-24T10:21", customer: "Heike Schwarz", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "imported", fulfillment: "unfulfilled", items: 1, tag: "Lass los was dich kaputt macht", country: "DE", deliveryMethod: "Shipping" },
+  { order: 7434, date: "2026-02-24T10:12", customer: "Judith Monfrooij", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "processing", fulfillment: "unfulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7433, date: "2026-02-24T10:02", customer: "Lieve Verschaeren", total: 31.50, currency: "EUR", bookSent: true, payment: "paid", delivery: "sent", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "BE", deliveryMethod: "Koerier GLS" },
+  { order: 7432, date: "2026-02-24T09:51", customer: "Saskia Venema", total: 31.50, currency: "EUR", bookSent: true, payment: "paid", delivery: "sent", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "BE", deliveryMethod: "Koerier GLS" },
+  { order: 7431, date: "2026-02-24T09:50", customer: "Helmie Heesakkers", total: 55, currency: "EUR", bookSent: true, payment: "paid", delivery: "processing", fulfillment: "unfulfilled", items: 2, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7430, date: "2026-02-24T09:37", customer: "Sven De Kerpel", total: 31.50, currency: "EUR", bookSent: true, payment: "paid", delivery: "sent", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "BE", deliveryMethod: "Koerier GLS" },
+  // ── Starší objednávky — mix všech BaseLinker statusů ──
+  { order: 7296, date: "2026-02-24T01:07", customer: "Elena Hrdličkova", total: 22.69, currency: "EUR", bookSent: false, payment: "pending", delivery: "", fulfillment: "unfulfilled", items: 1, tag: "Psí superzivot", country: "CZ", deliveryMethod: "Shipping" },
+  { order: 7295, date: "2026-02-23T23:50", customer: "Rianne van der Feijst", total: 31.50, currency: "EUR", bookSent: true, payment: "paid", delivery: "transit", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7294, date: "2026-02-23T23:49", customer: "Jana Würzlerová", total: 22.69, currency: "EUR", bookSent: false, payment: "paid", delivery: "imported", fulfillment: "unfulfilled", items: 1, tag: "Psí superzivot", country: "CZ", deliveryMethod: "Shipping" },
+  { order: 7293, date: "2026-02-23T23:30", customer: "Lucyna Pyszyńska", total: 30.54, currency: "EUR", bookSent: true, payment: "paid", delivery: "sent", fulfillment: "fulfilled", items: 1, tag: "Odpuść to co cię niszczy", country: "PL", deliveryMethod: "Shipping" },
+  { order: 7292, date: "2026-02-23T22:45", customer: "Marjon Hefting", total: 31.50, currency: "EUR", bookSent: true, payment: "paid", delivery: "transit", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "BE", deliveryMethod: "Koerier GLS" },
+  { order: 7291, date: "2026-02-23T22:37", customer: "Judith Razoux", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "transit", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7290, date: "2026-02-23T22:22", customer: "Carla Van Havenberghe", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "transit", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "BE", deliveryMethod: "Koerier GLS" },
+  { order: 7289, date: "2026-02-23T22:15", customer: "Yvette Goorts", total: 31.50, currency: "EUR", bookSent: true, payment: "paid", delivery: "transit", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7288, date: "2026-02-23T22:10", customer: "Irene Neele", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "transit", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7287, date: "2026-02-23T22:03", customer: "Christopher Gliech", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "processing", fulfillment: "unfulfilled", items: 1, tag: "Lass los was dich kaputt macht", country: "DE", deliveryMethod: "Shipping" },
+  { order: 7286, date: "2026-02-23T21:55", customer: "Sylvia van Genderen", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "transit", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7285, date: "2026-02-23T21:53", customer: "Stefan Robertsson", total: 37.38, currency: "EUR", bookSent: true, payment: "paid", delivery: "sent", fulfillment: "fulfilled", items: 1, tag: "Släpp taget om det som förstör dig", country: "SE", deliveryMethod: "PostNord" },
+  { order: 7284, date: "2026-02-23T21:49", customer: "Lesley Durwael", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "transit", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "BE", deliveryMethod: "Koerier GLS" },
+  { order: 7283, date: "2026-02-23T21:25", customer: "Agnes Evenepoel", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "delivered", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "BE", deliveryMethod: "Koerier GLS" },
+  { order: 7282, date: "2026-02-23T21:24", customer: "Niels Fortan", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "delivered", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "BE", deliveryMethod: "Koerier GLS" },
+  { order: 7281, date: "2026-02-23T21:03", customer: "Zdenka Šínová", total: 22.69, currency: "EUR", bookSent: false, payment: "paid", delivery: "imported", fulfillment: "unfulfilled", items: 1, tag: "Psí superzivot", country: "CZ", deliveryMethod: "Shipping" },
+  { order: 7280, date: "2026-02-23T20:43", customer: "Anne-Kathrin Hartmann", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "processing", fulfillment: "unfulfilled", items: 1, tag: "Lass los was dich kaputt macht", country: "DE", deliveryMethod: "Shipping" },
+  { order: 7279, date: "2026-02-23T20:38", customer: "Ivana Michálková", total: 22.69, currency: "EUR", bookSent: false, payment: "paid", delivery: "imported", fulfillment: "unfulfilled", items: 1, tag: "Psí superzivot", country: "CZ", deliveryMethod: "Shipping" },
+  { order: 7278, date: "2026-02-23T20:26", customer: "Deborah Vock Hinzmann", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "processing", fulfillment: "unfulfilled", items: 1, tag: "Lass los was dich kaputt macht", country: "DE", deliveryMethod: "Shipping" },
+  { order: 7277, date: "2026-02-23T20:17", customer: "Karolien Verschueren", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "delivered", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "BE", deliveryMethod: "Koerier GLS" },
+  { order: 7276, date: "2026-02-23T20:10", customer: "Nicole Spicker", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "sent", fulfillment: "fulfilled", items: 1, tag: "Lass los was dich kaputt macht", country: "DE", deliveryMethod: "Shipping" },
+  { order: 7275, date: "2026-02-23T19:46", customer: "Magdalena Kościelna", total: 30.54, currency: "EUR", bookSent: true, payment: "paid", delivery: "transit", fulfillment: "fulfilled", items: 1, tag: "Odpuść to co cię niszczy", country: "PL", deliveryMethod: "Shipping" },
+  { order: 7274, date: "2026-02-23T19:43", customer: "Hille Douma", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "delivered", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "NL", deliveryMethod: "Koerier GLS" },
+  { order: 7273, date: "2026-02-23T19:15", customer: "Kovács Ágnes", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "imported", fulfillment: "unfulfilled", items: 1, tag: "Engedd el, ami tönkretesz", country: "HU", deliveryMethod: "Shipping" },
+  { order: 7272, date: "2026-02-23T18:50", customer: "Karl Meier", total: 35, currency: "EUR", bookSent: true, payment: "refunded", delivery: "returned", fulfillment: "fulfilled", items: 1, tag: "Lass los was dich kaputt macht", country: "AT", deliveryMethod: "Shipping" },
+  { order: 7271, date: "2026-02-23T18:30", customer: "Marie Dumont", total: 35, currency: "EUR", bookSent: true, payment: "paid", delivery: "delivered", fulfillment: "fulfilled", items: 1, tag: "Laat los wat je kapotmaakt", country: "LU", deliveryMethod: "Koerier GLS" },
+];
+
+// ═══════════════════════════════════════════════════
+// COUNTRY CONFIG
+// ═══════════════════════════════════════════════════
+const FLAGS = {
+  NL: "🇳🇱", BE: "🇧🇪", DE: "🇩🇪", AT: "🇦🇹", PL: "🇵🇱",
+  CZ: "🇨🇿", SK: "🇸🇰", SE: "🇸🇪", HU: "🇭🇺", LU: "🇱🇺", DK: "🇩🇰"
+};
+
+const TAG_CLASSES = {
+  "Laat los wat je kapotmaakt": "tag-nl",
+  "Lass los was dich kaputt macht": "tag-de",
+  "Odpuść to co cię niszczy": "tag-pl",
+  "Psí superzivot": "tag-cz",
+  "Kočičí bible": "tag-cz",
+  "De Hondenbijbel": "tag-nl",
+  "Släpp taget om det som förstör dig": "tag-se",
+  "Engedd el, ami tönkretesz": "tag-hu",
+};
+
+// ═══════════════════════════════════════════════════
+// TABS CONFIG
+// ═══════════════════════════════════════════════════
+const TABS = [
+  { id: "all", label: "All", filter: () => true },
+  { id: "imported", label: "Imported", filter: o => o.delivery === "imported" },
+  { id: "processing", label: "Processing", filter: o => o.delivery === "processing" },
+  { id: "sent", label: "Order sent", filter: o => o.delivery === "sent" },
+  { id: "transit", label: "In Transit", filter: o => o.delivery === "transit" },
+  { id: "delivered", label: "Delivered", filter: o => o.delivery === "delivered" },
+  { id: "returned", label: "Returned", filter: o => o.delivery === "returned" },
+  { id: "refunded", label: "Refunded", filter: o => o.payment === "refunded" },
+  { id: "nlbe", label: "NL/BE", filter: o => ["NL","BE"].includes(o.country) },
+  { id: "deatlu", label: "DE/AT/LU", filter: o => ["DE","AT","LU"].includes(o.country) },
+  { id: "czsk", label: "CZ/SK", filter: o => ["CZ","SK"].includes(o.country) },
+  { id: "pl", label: "PL", filter: o => o.country === "PL" },
+  { id: "swe", label: "SWE", filter: o => o.country === "SE" },
+  { id: "hu", label: "HU", filter: o => o.country === "HU" },
+];
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let activeTab = "all";
+let selectedOrders = new Set();
+let searchTerm = "";
+let sortField = "order";
+let sortDir = "desc";
+
+// ═══════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════
+function formatDate(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const isYesterday = d.toDateString() === yesterday.toDateString();
+
+  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+
+  if (isToday) return `Today at ${time}`;
+  if (isYesterday) return `Yesterday at ${time}`;
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + ` at ${time}`;
+}
+
+function formatCurrency(amount, currency) {
+  if (currency === "EUR") return `€${amount.toFixed(2)}`;
+  if (currency === "CZK") return `${amount.toFixed(2)} CZK`;
+  if (currency === "SEK") return `${amount.toFixed(2)} SEK`;
+  if (currency === "PLN") return `${amount.toFixed(2)} PLN`;
+  return `€${amount.toFixed(2)}`;
+}
+
+function paymentBadge(status) {
+  const map = {
+    paid: { cls: "badge-paid", label: "Paid" },
+    pending: { cls: "badge-pending", label: "Payment pending" },
+    refunded: { cls: "badge-refunded", label: "Refunded" },
+    partial_refund: { cls: "badge-partial-refund", label: "Partially refunded" },
+  };
+  const b = map[status] || map.paid;
+  return `<span class="badge ${b.cls}"><span class="badge-dot"></span>${b.label}</span>`;
+}
+
+function deliveryBadge(status) {
+  if (!status) return '<span style="color:var(--text-muted);font-size:12px;">—</span>';
+  const map = {
+    imported:   { cls: "badge-imported",   label: "Imported" },
+    processing: { cls: "badge-processing", label: "Processing" },
+    sent:       { cls: "badge-sent",       label: "Order sent" },
+    transit:    { cls: "badge-transit",     label: "In transit" },
+    delivered:  { cls: "badge-delivered",   label: "Delivered" },
+    returned:   { cls: "badge-returned",   label: "Returned" },
+  };
+  const b = map[status] || { cls: "badge-fulfilled", label: status };
+  return `<span class="badge ${b.cls}"><span class="badge-dot"></span>${b.label}</span>`;
+}
+
+function bookSentIcon(sent) {
+  if (sent) {
+    return `<span class="book-sent yes"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/></svg></span>`;
+  }
+  return `<span class="book-sent no"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.28 3.22a.75.75 0 00-1.06 1.06L6.94 8l-3.72 3.72a.75.75 0 101.06 1.06L8 9.06l3.72 3.72a.75.75 0 101.06-1.06L9.06 8l3.72-3.72a.75.75 0 00-1.06-1.06L8 6.94 4.28 3.22z"/></svg></span>`;
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER TABS
+// ═══════════════════════════════════════════════════
+function renderTabs() {
+  const container = document.getElementById("tabs");
+  container.innerHTML = TABS.map(tab => {
+    const count = ORDERS.filter(tab.filter).length;
+    const isActive = tab.id === activeTab;
+    return `<div class="tab ${isActive ? 'active' : ''}" onclick="switchTab('${tab.id}')">${tab.label}<span class="count">${count}</span></div>`;
+  }).join("");
+}
+
+function switchTab(tabId) {
+  activeTab = tabId;
+  selectedOrders.clear();
+  renderTabs();
+  renderTable();
+  updateBulkBar();
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER TABLE
+// ═══════════════════════════════════════════════════
+function getFilteredOrders() {
+  const tabFilter = TABS.find(t => t.id === activeTab).filter;
+  let filtered = ORDERS.filter(tabFilter);
+
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    filtered = filtered.filter(o =>
+      ("#" + o.order).includes(q) ||
+      o.customer.toLowerCase().includes(q) ||
+      o.tag.toLowerCase().includes(q) ||
+      o.country.toLowerCase().includes(q)
+    );
+  }
+
+  // Sort
+  filtered.sort((a, b) => {
+    let va = a[sortField], vb = b[sortField];
+    if (typeof va === "string") va = va.toLowerCase();
+    if (typeof vb === "string") vb = vb.toLowerCase();
+    if (va < vb) return sortDir === "asc" ? -1 : 1;
+    if (va > vb) return sortDir === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  return filtered;
+}
+
+function renderTable() {
+  const orders = getFilteredOrders();
+  const tbody = document.getElementById("tableBody");
+
+  if (orders.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="10" width="36" height="28" rx="3"/><path d="M6 18h36M18 10v8"/></svg><p>No orders match your filters</p></div></td></tr>`;
+    document.getElementById("paginationInfo").textContent = "0 orders";
+    return;
+  }
+
+  tbody.innerHTML = orders.map(o => {
+    const isSelected = selectedOrders.has(o.order);
+    const tagClass = TAG_CLASSES[o.tag] || "";
+    return `<tr class="${isSelected ? 'selected' : ''}" data-order="${o.order}">
+      <td class="checkbox-cell">
+        <div class="custom-checkbox ${isSelected ? 'checked' : ''}" onclick="toggleOrder(${o.order}, event)"></div>
+      </td>
+      <td><a class="order-link" onclick="showToast('Order #${o.order} detail would open here')">#${o.order}</a></td>
+      <td><span class="date-primary">${formatDate(o.date)}</span></td>
+      <td>${o.customer}</td>
+      <td><strong>${formatCurrency(o.total, o.currency)}</strong></td>
+      <td class="col-booksent" style="text-align:center;">${bookSentIcon(o.bookSent)}</td>
+      <td>${paymentBadge(o.payment)}</td>
+      <td class="col-delivery">${deliveryBadge(o.delivery)}</td>
+      <td class="col-items"><span class="items-count">${o.items} item${o.items > 1 ? 's' : ''}</span></td>
+      <td><span class="tag ${tagClass}">${o.tag}</span></td>
+      <td class="col-country"><div class="country-cell"><span class="flag">${FLAGS[o.country] || ''}</span>${o.country}</div></td>
+    </tr>`;
+  }).join("");
+
+  // Fade animation
+  tbody.classList.remove("table-fade-enter");
+  void tbody.offsetWidth;
+  tbody.classList.add("table-fade-enter");
+
+  document.getElementById("paginationInfo").textContent = `Showing 1-${orders.length} of ${orders.length} orders`;
+}
+
+// ═══════════════════════════════════════════════════
+// SKELETON LOADING
+// ═══════════════════════════════════════════════════
+function renderSkeleton() {
+  const tbody = document.getElementById("tableBody");
+  let rows = "";
+  for (let i = 0; i < 8; i++) {
+    rows += `<tr class="skeleton-row">
+      <td class="checkbox-cell"><div class="skeleton-check"></div></td>
+      <td><div class="skeleton-line" style="width:60px;"></div></td>
+      <td><div class="skeleton-line" style="width:130px;"></div></td>
+      <td><div class="skeleton-line" style="width:140px;"></div></td>
+      <td><div class="skeleton-line" style="width:60px;"></div></td>
+      <td class="col-booksent"><div class="skeleton-check" style="margin:0 auto;border-radius:50%;"></div></td>
+      <td><div class="skeleton-badge"></div></td>
+      <td class="col-delivery"><div class="skeleton-badge"></div></td>
+      <td class="col-items"><div class="skeleton-line" style="width:50px;"></div></td>
+      <td><div class="skeleton-badge" style="width:120px;"></div></td>
+      <td class="col-country"><div class="skeleton-line" style="width:50px;"></div></td>
+    </tr>`;
+  }
+  tbody.innerHTML = rows;
+}
+
+// ═══════════════════════════════════════════════════
+// SELECTION
+// ═══════════════════════════════════════════════════
+function toggleOrder(orderId, e) {
+  e.stopPropagation();
+  if (selectedOrders.has(orderId)) {
+    selectedOrders.delete(orderId);
+  } else {
+    selectedOrders.add(orderId);
+  }
+  renderTable();
+  updateBulkBar();
+  updateSelectAll();
+}
+
+function toggleSelectAll() {
+  const orders = getFilteredOrders();
+  const allSelected = orders.every(o => selectedOrders.has(o.order));
+
+  if (allSelected) {
+    orders.forEach(o => selectedOrders.delete(o.order));
+  } else {
+    orders.forEach(o => selectedOrders.add(o.order));
+  }
+  renderTable();
+  updateBulkBar();
+  updateSelectAll();
+}
+
+function updateSelectAll() {
+  const orders = getFilteredOrders();
+  const el = document.getElementById("selectAll");
+  const allSelected = orders.length > 0 && orders.every(o => selectedOrders.has(o.order));
+  const someSelected = orders.some(o => selectedOrders.has(o.order));
+
+  el.className = "custom-checkbox";
+  if (allSelected) el.classList.add("checked");
+  else if (someSelected) el.classList.add("indeterminate");
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById("bulkBar");
+  const count = selectedOrders.size;
+  if (count > 0) {
+    bar.classList.add("visible");
+    document.getElementById("selectedCount").textContent = `${count} selected`;
+  } else {
+    bar.classList.remove("visible");
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// SEARCH
+// ═══════════════════════════════════════════════════
+let searchTimeout;
+function onSearch() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    searchTerm = document.getElementById("searchInput").value.trim();
+    renderTable();
+  }, 200);
+}
+
+// ═══════════════════════════════════════════════════
+// SORT
+// ═══════════════════════════════════════════════════
+function sortBy(field) {
+  if (sortField === field) {
+    sortDir = sortDir === "desc" ? "asc" : "desc";
+  } else {
+    sortField = field;
+    sortDir = "desc";
+  }
+  renderTable();
+}
+
+function toggleFilters() { showToast("Filter panel coming soon"); }
+function toggleSort() { showToast("Sort panel coming soon"); }
+function exportCSV() { showToast("Exported " + getFilteredOrders().length + " orders to CSV"); }
+
+// ═══════════════════════════════════════════════════
+// BULK ACTIONS
+// ═══════════════════════════════════════════════════
+function bulkAction(action) {
+  showToast(`${action}: ${selectedOrders.size} orders`);
+  selectedOrders.clear();
+  renderTable();
+  updateBulkBar();
+  updateSelectAll();
+}
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+function showToast(message) {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/></svg>${message}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", () => {
+  renderTabs();
+  renderSkeleton();
+
+  // Simulate loading
+  setTimeout(() => {
+    renderTable();
+  }, 1200);
+});
+</script>
+
+</body>
+</html>

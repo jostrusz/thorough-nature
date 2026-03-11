@@ -1,0 +1,3514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Platform v2 — Preview</title>
+<style>
+/* ═══════════════════════════════════════════════════ */
+/* RESET & BASE                                       */
+/* ═══════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F6F6F7;
+  --card: #FFFFFF;
+  --border: #E1E3E5;
+  --text-primary: #1A1A1A;
+  --text-secondary: #6D7175;
+  --text-muted: #8C9196;
+  --green: #008060;
+  --green-light: #F1F8F5;
+  --hover-bg: #F9FAFB;
+  --selected-bg: #F2F7FE;
+  --focus-ring: rgba(0, 128, 96, 0.25);
+
+  /* Badges */
+  --badge-paid: #AEE9D1;
+  --badge-paid-text: #0D5740;
+  --badge-pending: #FFD79D;
+  --badge-pending-text: #7A4F01;
+  --badge-unfulfilled: #FED3D1;
+  --badge-unfulfilled-text: #9E2B25;
+  --badge-fulfilled: #E4E5E7;
+  --badge-fulfilled-text: #44474A;
+  --badge-transit: #A4E8F2;
+  --badge-transit-text: #0E4F5C;
+  --badge-delivered: #AEE9D1;
+  --badge-delivered-text: #0D5740;
+  --badge-refunded: #E4E5E7;
+  --badge-refunded-text: #44474A;
+  --badge-tracking: #D4C5F9;
+  --badge-tracking-text: #3B1F8E;
+  --badge-imported: #E0E7FF;
+  --badge-imported-text: #3730A3;
+  --badge-processing: #FEF3C7;
+  --badge-processing-text: #92400E;
+  --badge-sent: #DBEAFE;
+  --badge-sent-text: #1E40AF;
+  --badge-returned: #FED3D1;
+  --badge-returned-text: #9E2B25;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --sidebar-bg: #1A1A1A;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* LAYOUT — SIDEBAR + CONTENT                        */
+/* ═══════════════════════════════════════════════════ */
+.app-container {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 70px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid #2A2A2A;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  gap: 20px;
+  overflow-y: auto;
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+}
+
+.sidebar-icon {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+  color: #999;
+  text-decoration: none;
+}
+
+.sidebar-icon:hover {
+  background: #2A2A2A;
+  color: #fff;
+}
+
+.sidebar-icon.active {
+  background: var(--green);
+  color: #fff;
+}
+
+.sidebar-icon::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 65px;
+  background: #2A2A2A;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 100;
+}
+
+.sidebar-icon:hover::after {
+  opacity: 1;
+}
+
+.main-content {
+  margin-left: 70px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.view {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.view.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* DASHBOARD VIEW                                     */
+/* ═══════════════════════════════════════════════════ */
+.dashboard-view {
+  padding: 24px 32px;
+  gap: 24px;
+}
+
+.project-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.pill.active {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+.pill:hover {
+  background: var(--hover-bg);
+}
+
+.tag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.tag-nl-dot { background: #FFF3E0; }
+.tag-de-dot { background: #FFF8E1; }
+.tag-cz-dot { background: #E3F2FD; }
+.tag-pl-dot { background: #FCE4EC; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.stat-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.stat-change.up { color: var(--badge-paid-text); background: var(--badge-paid); }
+.stat-change.down { color: var(--badge-unfulfilled-text); background: var(--badge-unfulfilled); }
+
+.ai-insights-bar {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.ai-insights-bar .icon { font-size: 20px; }
+.ai-insights-bar .text { flex: 1; font-size: 13px; line-height: 1.5; }
+.ai-insights-bar .btn { margin-left: auto; }
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 60% 1fr;
+  gap: 24px;
+  flex: 1;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* CARDS & LAYOUT                                     */
+/* ═══════════════════════════════════════════════════ */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-body {
+  padding: 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* BUTTONS                                            */
+/* ═══════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn:hover { background: var(--hover-bg); box-shadow: var(--shadow-sm); }
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+.btn-primary:hover { background: #006e52; }
+
+/* ═══════════════════════════════════════════════════ */
+/* TABLE                                              */
+/* ═══════════════════════════════════════════════════ */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  background: var(--card);
+}
+
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid #F1F1F1;
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background: var(--hover-bg);
+}
+
+.table a {
+  color: #2C6ECB;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.table a:hover { color: #1A5DB4; }
+
+/* ═══════════════════════════════════════════════════ */
+/* BADGES & TAGS                                      */
+/* ═══════════════════════════════════════════════════ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge-paid { background: var(--badge-paid); color: var(--badge-paid-text); }
+.badge-paid .badge-dot { background: var(--badge-paid-text); }
+
+.badge-pending { background: var(--badge-pending); color: var(--badge-pending-text); }
+.badge-pending .badge-dot { background: var(--badge-pending-text); }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #F3F3F3;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.tag-nl { background: #FFF3E0; color: #E65100; }
+.tag-de { background: #FFF8E1; color: #F57F17; }
+.tag-cz { background: #E3F2FD; color: #1565C0; }
+.tag-pl { background: #FCE4EC; color: #C62828; }
+
+/* ═══════════════════════════════════════════════════ */
+/* SEQUENCE TIMELINE                                  */
+/* ═══════════════════════════════════════════════════ */
+.timeline-container {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.timeline-left {
+  flex: 7;
+  overflow-y: auto;
+  padding-right: 20px;
+}
+
+.timeline-right {
+  flex: 3;
+  background: var(--card);
+  border-left: 1px solid var(--border);
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.timeline-step {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.timeline-step.trigger {
+  background: #F0F0F0;
+  border: 1px dashed var(--border);
+}
+
+.timeline-step.end {
+  background: var(--green-light);
+  border: 1px solid #D0E8E1;
+}
+
+.step-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: var(--green);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+.step-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.step-field label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  min-width: 60px;
+}
+
+.step-field input,
+.step-field select {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.step-stats {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.add-step {
+  text-align: center;
+  padding: 16px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.add-step:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* CAMPAIGN FORM (STEP-BY-STEP OVERLAY)               */
+/* ═══════════════════════════════════════════════════ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal {
+  background: var(--card);
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modal-close {
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px var(--focus-ring);
+}
+
+.form-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.step-dot {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #F1F1F1;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.step-dot.active {
+  background: var(--green);
+  color: #fff;
+}
+
+.step-dot.done {
+  background: #AEE9D1;
+  color: var(--badge-paid-text);
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* EMAIL BUILDER                                      */
+/* ═══════════════════════════════════════════════════ */
+.email-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.email-header {
+  background: var(--hover-bg);
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.email-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.email-header-row label {
+  font-weight: 500;
+  color: var(--text-secondary);
+  min-width: 70px;
+}
+
+.email-header-row input,
+.email-header-row select {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+
+.email-editor-wrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-toolbar {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--hover-bg);
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.editor-tool {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+}
+
+.editor-tool:hover {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+.editor-tool.separator {
+  width: 1px;
+  border: 1px solid var(--border);
+  background: var(--border);
+  margin: 0 4px;
+  padding: 0;
+}
+
+.editor-content {
+  padding: 16px;
+  background: #fff;
+  flex: 1;
+  min-height: 300px;
+  outline: none;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.email-footer {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--hover-bg);
+  border-radius: var(--radius-sm);
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.email-personalization,
+.email-dynamic {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.email-personalization label,
+.email-dynamic label {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.email-personalization select,
+.email-dynamic select {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+
+.ai-assistant-panel {
+  background: #F9FAFB;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+}
+
+.ai-action:hover {
+  background: var(--hover-bg);
+}
+
+.ai-action::before {
+  content: '🤖';
+  font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* CALENDAR VIEW                                      */
+/* ═══════════════════════════════════════════════════ */
+.calendar-container {
+  display: flex;
+  gap: 24px;
+  padding: 24px 32px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.calendar-main {
+  flex: 1;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.calendar-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.calendar-day-header {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 8px;
+  text-transform: uppercase;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  background: var(--card);
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-day:hover {
+  background: var(--hover-bg);
+}
+
+.calendar-day.today {
+  background: var(--green-light);
+  border-color: var(--green);
+}
+
+.calendar-day-number {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.calendar-event {
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendar-event.nl { background: #FFF3E0; color: #E65100; }
+.calendar-event.de { background: #FFF8E1; color: #F57F17; }
+.calendar-event.cz { background: #E3F2FD; color: #1565C0; }
+.calendar-event.pl { background: #FCE4EC; color: #C62828; }
+
+.calendar-sidebar {
+  width: 250px;
+  overflow-y: auto;
+}
+
+.calendar-sidebar-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.calendar-sidebar-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.calendar-event-suggestion {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.calendar-event-suggestion-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.calendar-event-suggestion-desc {
+  color: var(--text-secondary);
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* STAT BOXES FOR SUBSCRIBERS VIEW                    */
+/* ═══════════════════════════════════════════════════ */
+.entry-points {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.entry-point {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+}
+
+.entry-point-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.entry-point-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.entry-point-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--green);
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* AI AUTOPILOT VIEW                                  */
+/* ═══════════════════════════════════════════════════ */
+.autopilot-container {
+  padding: 24px 32px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.health-score {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.health-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.health-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+.health-gauge {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(var(--green) 0deg 266.4deg, #E1E3E5 266.4deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--green);
+}
+
+.health-subscores {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.health-subscore {
+  background: var(--hover-bg);
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.health-subscore-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.health-subscore-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.autopilot-settings {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.autopilot-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.autopilot-setting:last-child {
+  border-bottom: none;
+}
+
+.setting-info {
+  flex: 1;
+}
+
+.setting-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.setting-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.toggle {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: #E1E3E5;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.toggle.on {
+  background: var(--green);
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  top: 2px;
+  left: 2px;
+  transition: left 0.2s ease;
+}
+
+.toggle.on::after {
+  left: 22px;
+}
+
+.insights-feed {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.insight-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.insight-priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.insight-priority.critical {
+  background: #FED3D1;
+  color: #9E2B25;
+}
+
+.insight-priority.warning {
+  background: #FFD79D;
+  color: #7A4F01;
+}
+
+.insight-priority.info {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
+.insight-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.insight-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.insight-impact {
+  font-size: 11px;
+  color: var(--green);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.insight-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.insight-btn {
+  flex: 1;
+  min-width: 100px;
+  padding: 6px 10px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.insight-btn:hover {
+  background: #006e52;
+}
+
+.insight-btn.secondary {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.insight-btn.secondary:hover {
+  background: var(--border);
+}
+
+.ai-changelog {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.ai-changelog-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.changelog-entry {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.changelog-entry:last-child {
+  border-bottom: none;
+}
+
+.changelog-time {
+  color: var(--text-secondary);
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.changelog-desc {
+  color: var(--text-primary);
+  flex: 1;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* TABS (for campaigns view)                          */
+/* ═══════════════════════════════════════════════════ */
+.tabs-container {
+  display: flex;
+  gap: 0;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  background: var(--card);
+}
+
+.tab {
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.tab:hover { color: var(--text-primary); }
+.tab.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* SUBSCRIBER DETAIL PANEL                           */
+/* ═══════════════════════════════════════════════════ */
+.subscriber-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  width: 400px;
+  background: var(--card);
+  border-left: 1px solid var(--border);
+  box-shadow: -4px 0 12px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 900;
+}
+
+.subscriber-panel.active {
+  transform: translateX(0);
+}
+
+.subscriber-panel-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.subscriber-panel-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.subscriber-panel-close {
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.subscriber-panel-close:hover {
+  background: var(--hover-bg);
+}
+
+.subscriber-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.subscriber-detail-row {
+  margin-bottom: 20px;
+}
+
+.subscriber-detail-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.subscriber-detail-value {
+  font-size: 13px;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.subscriber-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.subscriber-activity {
+  background: var(--hover-bg);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.subscriber-activity-time {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.subscriber-activity-desc {
+  color: var(--text-primary);
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* SETTINGS PANEL                                    */
+/* ═══════════════════════════════════════════════════ */
+.settings-container {
+  padding: 24px 32px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.settings-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.settings-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-item {
+  margin-bottom: 16px;
+}
+
+.settings-item:last-child {
+  margin-bottom: 0;
+}
+
+.settings-item label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.settings-item input[type="text"],
+.settings-item input[type="email"],
+.settings-item select,
+.settings-item textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.settings-item input:focus,
+.settings-item select:focus,
+.settings-item textarea:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px var(--focus-ring);
+}
+
+.settings-item-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.domain-list {
+  background: var(--hover-bg);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.domain-list-item {
+  flex: 1;
+}
+
+.domain-verified {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--badge-paid-text);
+  background: var(--badge-paid);
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.domain-btn {
+  cursor: pointer;
+  padding: 4px 8px;
+  color: #2C6ECB;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  background: none;
+  margin-left: 8px;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* RESPONSIVE                                         */
+/* ═══════════════════════════════════════════════════ */
+@media (max-width: 1200px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .insights-feed { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  .sidebar { width: 60px; }
+  .main-content { margin-left: 60px; }
+  .sidebar-icon { width: 45px; height: 45px; font-size: 20px; }
+  .sidebar-icon::after { left: 55px; }
+}
+
+@media (max-width: 600px) {
+  .sidebar { width: 50px; }
+  .main-content { margin-left: 50px; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .dashboard-view { padding: 16px; }
+  .entry-points { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SIDEBAR NAVIGATION                                -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="sidebar">
+  <div class="sidebar-icon active" data-tooltip="Dashboard" data-view="dashboard" onclick="switchView('dashboard')">📊</div>
+  <div class="sidebar-icon" data-tooltip="Campaigns" data-view="campaigns" onclick="switchView('campaigns')">📧</div>
+  <div class="sidebar-icon" data-tooltip="Sequences" data-view="sequences" onclick="switchView('sequences')">⚡</div>
+  <div class="sidebar-icon" data-tooltip="Subscribers" data-view="subscribers" onclick="switchView('subscribers')">👥</div>
+  <div class="sidebar-icon" data-tooltip="AI Autopilot" data-view="autopilot" onclick="switchView('autopilot')">🤖</div>
+  <div class="sidebar-icon" data-tooltip="Calendar" data-view="calendar" onclick="switchView('calendar')">📅</div>
+  <div class="sidebar-icon" data-tooltip="Settings" data-view="settings" onclick="switchView('settings')">⚙️</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- MAIN CONTENT AREA                                 -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="main-content">
+
+  <!-- VIEW 1: DASHBOARD -->
+  <div class="view active" id="dashboard-view">
+    <div class="dashboard-view">
+      <!-- Project Selector -->
+      <div class="project-pills">
+        <div class="pill active"><span class="tag-dot tag-nl-dot"></span>All Projects</div>
+        <div class="pill"><span class="tag-dot tag-nl-dot"></span>Laat los</div>
+        <div class="pill"><span class="tag-dot tag-pl-dot"></span>Odpuść</div>
+        <div class="pill"><span class="tag-dot tag-cz-dot"></span>Psí superživot</div>
+        <div class="pill"><span class="tag-dot tag-de-dot"></span>Lass los</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Subscribers</div>
+          <div class="stat-value">14,847</div>
+          <span class="stat-change up">⬆ 3.2% this week</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Open Rate</div>
+          <div class="stat-value">38.2%</div>
+          <span class="stat-change up">⬆ 4.1% vs last week</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Click Rate</div>
+          <div class="stat-value">4.8%</div>
+          <span class="stat-change up">⬆ 0.2% vs last week</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Email Revenue (30d)</div>
+          <div class="stat-value">€8,420</div>
+          <span class="stat-change up">⬆ 12% vs prev 30d</span>
+        </div>
+      </div>
+
+      <!-- AI Quick Insights -->
+      <div class="ai-insights-bar">
+        <div class="icon">🤖</div>
+        <div class="text"><strong>AI says:</strong> Your "Abandoned Cart Email 2" subject line is fatigued — open rate dropped 23% this week. Click to auto-generate 3 new variants and start A/B test.</div>
+        <button class="btn" onclick="showToast('Auto-Fix initiated')">Auto-Fix</button>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="dashboard-grid">
+        <!-- Left: Recent Campaigns -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Recent Campaigns</h3>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Sent</th>
+                  <th>Open Rate</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><a>Welcome Email NL</a></td>
+                  <td>4,230</td>
+                  <td>42.3%</td>
+                  <td><span class="badge badge-paid"><span class="badge-dot"></span>Sent</span></td>
+                </tr>
+                <tr>
+                  <td><a>Abandoned Cart 2</a></td>
+                  <td>3,450</td>
+                  <td>28.1%</td>
+                  <td><span class="badge badge-paid"><span class="badge-dot"></span>Sent</span></td>
+                </tr>
+                <tr>
+                  <td><a>Spring Sale PL</a></td>
+                  <td>2,890</td>
+                  <td>35.7%</td>
+                  <td><span class="badge badge-pending"><span class="badge-dot"></span>Scheduled</span></td>
+                </tr>
+                <tr>
+                  <td><a>Social Proof Email</a></td>
+                  <td>3,200</td>
+                  <td>39.2%</td>
+                  <td><span class="badge badge-paid"><span class="badge-dot"></span>Sent</span></td>
+                </tr>
+                <tr>
+                  <td><a>Customer Stories</a></td>
+                  <td>1,450</td>
+                  <td>44.8%</td>
+                  <td><span class="badge badge-pending"><span class="badge-dot"></span>Draft</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right: Active Sequences -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Active Sequences</h3>
+          </div>
+          <div class="card-body" style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: block;"></span>
+                <strong style="font-size: 13px;">Welcome Sequence</strong>
+              </div>
+              <div style="font-size: 11px; color: var(--text-secondary); display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div>Enrolled: 4,230</div>
+                <div>Completed: 2,145</div>
+              </div>
+            </div>
+            <div style="padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #FFA500; display: block;"></span>
+                <strong style="font-size: 13px;">Re-engagement Drip</strong>
+              </div>
+              <div style="font-size: 11px; color: var(--text-secondary); display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div>Enrolled: 890</div>
+                <div>Completed: 234</div>
+              </div>
+            </div>
+            <div style="padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #FF6B6B; display: block;"></span>
+                <strong style="font-size: 13px;">Upsell Sequence</strong>
+              </div>
+              <div style="font-size: 11px; color: var(--text-secondary); display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div>Enrolled: 1,230</div>
+                <div>Completed: 567</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 2: CAMPAIGNS -->
+  <div class="view" id="campaigns-view">
+    <div style="padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; flex: 1; overflow: hidden;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <h1 style="font-size: 20px; font-weight: 600;">Campaigns</h1>
+        <button class="btn btn-primary" onclick="openCampaignForm()">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>
+          Create Campaign
+        </button>
+      </div>
+
+      <div class="card" style="flex: 1; overflow: hidden;">
+        <div class="tabs-container">
+          <div class="tab active" onclick="switchCampaignTab('all')">All</div>
+          <div class="tab" onclick="switchCampaignTab('sent')">Sent</div>
+          <div class="tab" onclick="switchCampaignTab('scheduled')">Scheduled</div>
+          <div class="tab" onclick="switchCampaignTab('draft')">Draft</div>
+        </div>
+        <div style="overflow-x: auto; flex: 1;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Campaign</th>
+                <th>Status</th>
+                <th>Recipients</th>
+                <th>Open Rate</th>
+                <th>Click Rate</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a>Welcome Email NL</a></td>
+                <td><span class="badge badge-paid"><span class="badge-dot"></span>Sent</span></td>
+                <td>4,230</td>
+                <td>42.3%</td>
+                <td>5.2%</td>
+                <td style="font-size: 11px;"><a style="color: #2C6ECB;">View</a> | <a style="color: #2C6ECB;">Edit</a></td>
+              </tr>
+              <tr>
+                <td><a>Spring Sale Campaign</a></td>
+                <td><span class="badge badge-pending"><span class="badge-dot"></span>Scheduled</span></td>
+                <td>3,890</td>
+                <td>—</td>
+                <td>—</td>
+                <td style="font-size: 11px;"><a style="color: #2C6ECB;">Edit</a> | <a style="color: #2C6ECB;">Preview</a></td>
+              </tr>
+              <tr>
+                <td><a>Customer Stories</a></td>
+                <td><span class="badge badge-fulfilled"><span class="badge-dot"></span>Draft</span></td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td style="font-size: 11px;"><a style="color: #2C6ECB;">Edit</a> | <a style="color: #2C6ECB;">Delete</a></td>
+              </tr>
+              <tr>
+                <td><a>Abandoned Cart Reminder</a></td>
+                <td><span class="badge badge-paid"><span class="badge-dot"></span>Sent</span></td>
+                <td>2,145</td>
+                <td>38.9%</td>
+                <td>4.1%</td>
+                <td style="font-size: 11px;"><a style="color: #2C6ECB;">View</a> | <a style="color: #2C6ECB;">Edit</a></td>
+              </tr>
+              <tr>
+                <td><a>Flash Sale 24h</a></td>
+                <td><span class="badge badge-paid"><span class="badge-dot"></span>Sent</span></td>
+                <td>5,120</td>
+                <td>51.2%</td>
+                <td>7.8%</td>
+                <td style="font-size: 11px;"><a style="color: #2C6ECB;">View</a> | <a style="color: #2C6ECB;">Duplicate</a></td>
+              </tr>
+              <tr>
+                <td><a>Weekly Newsletter</a></td>
+                <td><span class="badge badge-pending"><span class="badge-dot"></span>Scheduled</span></td>
+                <td>6,340</td>
+                <td>—</td>
+                <td>—</td>
+                <td style="font-size: 11px;"><a style="color: #2C6ECB;">Edit</a> | <a style="color: #2C6ECB;">Preview</a></td>
+              </tr>
+              <tr>
+                <td><a>Re-engagement Campaign</a></td>
+                <td><span class="badge badge-fulfilled"><span class="badge-dot"></span>Draft</span></td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td style="font-size: 11px;"><a style="color: #2C6ECB;">Edit</a> | <a style="color: #2C6ECB;">Delete</a></td>
+              </tr>
+              <tr>
+                <td><a>Product Launch Email</a></td>
+                <td><span class="badge badge-pending"><span class="badge-dot"></span>Scheduled</span></td>
+                <td>4,560</td>
+                <td>—</td>
+                <td>—</td>
+                <td style="font-size: 11px;"><a style="color: #2C6ECB;">Edit</a> | <a style="color: #2C6ECB;">Preview</a></td>
+              </tr>
+              <tr>
+                <td><a>Birthday Offer</a></td>
+                <td><span class="badge badge-paid"><span class="badge-dot"></span>Sent</span></td>
+                <td>1,230</td>
+                <td>45.6%</td>
+                <td>6.3%</td>
+                <td style="font-size: 11px;"><a style="color: #2C6ECB;">View</a> | <a style="color: #2C6ECB;">Edit</a></td>
+              </tr>
+              <tr>
+                <td><a>VIP Exclusive</a></td>
+                <td><span class="badge badge-pending"><span class="badge-dot"></span>Scheduled</span></td>
+                <td>890</td>
+                <td>—</td>
+                <td>—</td>
+                <td style="font-size: 11px;"><a style="color: #2C6ECB;">Edit</a> | <a style="color: #2C6ECB;">Preview</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 3: SEQUENCES -->
+  <div class="view" id="sequences-view">
+    <div style="padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; flex: 1; overflow: hidden;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <h1 style="font-size: 20px; font-weight: 600;">Sequences</h1>
+        <button class="btn btn-primary" onclick="editSequence()">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>
+          Create Sequence
+        </button>
+      </div>
+
+      <!-- Sequence Cards List -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; flex: 1; overflow-y: auto;">
+        <div class="card" style="display: flex; flex-direction: column; padding: 0;">
+          <div style="padding: 16px; border-bottom: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <div style="font-weight: 600; color: var(--text-primary);">Welcome Sequence</div>
+              <span style="width: 40px; height: 24px; background: var(--green); border-radius: 12px; cursor: pointer;"></span>
+            </div>
+            <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+              <span class="tag tag-nl">Laat los</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; font-size: 11px;">
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: var(--green);">4,230</div>
+                <div style="color: var(--text-secondary);">Enrolled</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: var(--text-primary);">2,145</div>
+                <div style="color: var(--text-secondary);">Completed</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: var(--text-primary);">50.7%</div>
+                <div style="color: var(--text-secondary);">Goal Rate</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: var(--text-primary);">€8.2k</div>
+                <div style="color: var(--text-secondary);">Revenue</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding: 12px; display: flex; gap: 8px;">
+            <button class="btn" style="flex: 1; font-size: 12px;" onclick="editSequence()">Edit</button>
+            <button class="btn" style="flex: 1; font-size: 12px;" onclick="showToast('Viewing sequence stats')">Stats</button>
+          </div>
+        </div>
+
+        <div class="card" style="display: flex; flex-direction: column; padding: 0;">
+          <div style="padding: 16px; border-bottom: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <div style="font-weight: 600; color: var(--text-primary);">Re-engagement Drip</div>
+              <span style="width: 40px; height: 24px; background: #E1E3E5; border-radius: 12px; cursor: pointer;"></span>
+            </div>
+            <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+              <span class="tag tag-nl">Laat los</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; font-size: 11px;">
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: var(--green);">890</div>
+                <div style="color: var(--text-secondary);">Enrolled</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: var(--text-primary);">234</div>
+                <div style="color: var(--text-secondary);">Completed</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: var(--text-primary);">26.3%</div>
+                <div style="color: var(--text-secondary);">Goal Rate</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: var(--text-primary);">€1.4k</div>
+                <div style="color: var(--text-secondary);">Revenue</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding: 12px; display: flex; gap: 8px;">
+            <button class="btn" style="flex: 1; font-size: 12px;" onclick="editSequence()">Edit</button>
+            <button class="btn" style="flex: 1; font-size: 12px;" onclick="showToast('Viewing sequence stats')">Stats</button>
+          </div>
+        </div>
+
+        <div class="card" style="display: flex; flex-direction: column; padding: 0;">
+          <div style="padding: 16px; border-bottom: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <div style="font-weight: 600; color: var(--text-primary);">Upsell Sequence</div>
+              <span style="width: 40px; height: 24px; background: var(--green); border-radius: 12px; cursor: pointer;"></span>
+            </div>
+            <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+              <span class="tag tag-de">Lass los</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; font-size: 11px;">
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: var(--green);">1,230</div>
+                <div style="color: var(--text-secondary);">Enrolled</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: var(--text-primary);">567</div>
+                <div style="color: var(--text-secondary);">Completed</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: var(--text-primary);">46.1%</div>
+                <div style="color: var(--text-secondary);">Goal Rate</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: var(--text-primary);">€6.8k</div>
+                <div style="color: var(--text-secondary);">Revenue</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding: 12px; display: flex; gap: 8px;">
+            <button class="btn" style="flex: 1; font-size: 12px;" onclick="editSequence()">Edit</button>
+            <button class="btn" style="flex: 1; font-size: 12px;" onclick="showToast('Viewing sequence stats')">Stats</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline editor (hidden by default, shown when editing) -->
+      <div id="timeline-editor" style="display: none; flex: 1; overflow: hidden;">
+        <div style="padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); display: flex; gap: 16px; height: 100%; overflow: hidden;">
+          <div style="flex: 7; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 20px;">
+            <!-- TRIGGER -->
+            <div class="timeline-step trigger">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <span style="font-size: 16px;">🔔</span>
+                <span class="step-label">Trigger</span>
+              </div>
+              <div class="step-content">
+                <div class="step-field">
+                  <label>When:</label>
+                  <select style="flex: 1;">
+                    <option>Subscriber joins group</option>
+                  </select>
+                </div>
+                <div class="step-field">
+                  <label>Group:</label>
+                  <select style="flex: 1;">
+                    <option>Leads — Laat los</option>
+                  </select>
+                </div>
+                <div class="step-field">
+                  <label>Stop if:</label>
+                  <select style="flex: 1;">
+                    <option>Tag "purchased" added</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="add-step" onclick="showToast('Step added')">+ Add Step</div>
+
+            <!-- STEP 1: SEND EMAIL -->
+            <div class="timeline-step">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <span style="font-size: 16px;">📧</span>
+                <span class="step-label">Step 1 — Send Email</span>
+              </div>
+              <div class="step-content">
+                <div class="step-field">
+                  <label>Subject:</label>
+                  <input type="text" value="Welkom! Hier is je eerste voordeel...">
+                </div>
+                <div class="step-field">
+                  <label>Template:</label>
+                  <select>
+                    <option>Welcome Email 1</option>
+                  </select>
+                </div>
+                <div class="step-stats">Stats: 4,230 sent · 55.2% open</div>
+                <button class="btn" style="font-size: 11px; margin-top: 6px;" onclick="showToast('Editing email')">Edit Email</button>
+              </div>
+            </div>
+
+            <div class="add-step" onclick="showToast('Step added')">+ Add Step</div>
+
+            <!-- STEP 2: WAIT -->
+            <div class="timeline-step">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <span style="font-size: 16px;">⏱</span>
+                <span class="step-label">Step 2 — Wait</span>
+              </div>
+              <div class="step-content">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <input type="number" value="2" style="width: 60px;">
+                  <select style="flex: 1;">
+                    <option>days</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="add-step" onclick="showToast('Step added')">+ Add Step</div>
+
+            <!-- STEP 3: CONDITIONAL -->
+            <div class="timeline-step">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <span style="font-size: 16px;">🔀</span>
+                <span class="step-label">Step 3 — If / Otherwise</span>
+              </div>
+              <div class="step-content">
+                <div class="step-field">
+                  <label>If:</label>
+                  <select>
+                    <option>subscriber has tag</option>
+                  </select>
+                </div>
+                <div class="step-field">
+                  <label></label>
+                  <select>
+                    <option>"purchased"</option>
+                  </select>
+                </div>
+                <div style="padding: 8px; background: var(--hover-bg); border-radius: var(--radius-sm); margin-top: 8px; font-size: 12px;">
+                  <div style="margin-bottom: 6px;">→ Yes: <select style="width: 80px; padding: 4px;"><option>Skip to end</option></select></div>
+                  <div>→ No: <select style="width: 80px; padding: 4px;"><option>Continue</option></select></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="add-step" onclick="showToast('Step added')">+ Add Step</div>
+
+            <!-- STEP 4: SEND EMAIL -->
+            <div class="timeline-step">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <span style="font-size: 16px;">📧</span>
+                <span class="step-label">Step 4 — Send Email</span>
+              </div>
+              <div class="step-content">
+                <div class="step-field">
+                  <label>Subject:</label>
+                  <input type="text" value="Wat anderen zeggen over ons...">
+                </div>
+                <div class="step-stats">Stats: 3,450 sent · 42.1% open</div>
+                <div style="padding: 8px; background: #FEF3C7; border-radius: var(--radius-sm); margin-top: 8px; font-size: 11px; color: #7A4F01;">
+                  🤖 <strong>AI:</strong> Open rate 13% below avg. Suggest new subject line?
+                </div>
+                <button class="btn" style="font-size: 11px; margin-top: 6px; background: var(--green); color: #fff; border-color: var(--green);" onclick="showToast('Auto-optimizing...')">Auto-optimize</button>
+              </div>
+            </div>
+
+            <div class="add-step" onclick="showToast('Step added')">+ Add Step</div>
+
+            <!-- STEP 5: WAIT -->
+            <div class="timeline-step">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <span style="font-size: 16px;">⏱</span>
+                <span class="step-label">Step 5 — Wait</span>
+              </div>
+              <div class="step-content">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <input type="number" value="3" style="width: 60px;">
+                  <select style="flex: 1;">
+                    <option>days</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="add-step" onclick="showToast('Step added')">+ Add Step</div>
+
+            <!-- STEP 6: SEND EMAIL -->
+            <div class="timeline-step">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <span style="font-size: 16px;">📧</span>
+                <span class="step-label">Step 6 — Send Email</span>
+              </div>
+              <div class="step-content">
+                <div class="step-field">
+                  <label>Subject:</label>
+                  <input type="text" value="Laatste kans: 10% korting voor jou...">
+                </div>
+                <div class="step-stats">Stats: 2,890 sent · 38.4% open</div>
+                <div style="padding: 8px; background: #D0E8E1; border-radius: var(--radius-sm); margin-top: 8px; font-size: 11px; color: #0D5740;">
+                  🤖 <strong>AI:</strong> This is your best converting email! 7.4% CTR 👏
+                </div>
+              </div>
+            </div>
+
+            <div class="add-step" onclick="showToast('Step added')">+ Add Step</div>
+
+            <!-- END -->
+            <div class="timeline-step end">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <span style="font-size: 16px;">🏁</span>
+                <span class="step-label">End</span>
+              </div>
+              <div class="step-content">
+                <div class="step-field">
+                  <label>Action:</label>
+                  <select>
+                    <option>Add tag "completed_welcome"</option>
+                  </select>
+                </div>
+                <div class="step-field">
+                  <label>Move to:</label>
+                  <select>
+                    <option>Newsletter group</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SIDEBAR: Sequence Stats -->
+          <div style="flex: 3; border-left: 1px solid var(--border); padding-left: 16px; display: flex; flex-direction: column; gap: 16px;">
+            <div>
+              <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px;">SEQUENCE STATS</div>
+              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Total enrolled:</span>
+                  <strong>4,230</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Active:</span>
+                  <strong>2,085</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Completed:</span>
+                  <strong>2,145</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Goal reached:</span>
+                  <strong style="color: var(--green);">1,087</strong>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">CONVERSION FUNNEL</div>
+              <div style="font-size: 11px; line-height: 1.8;">
+                <div>Step 1: 4,230 (100%)</div>
+                <div>Step 2: 4,230 (100%)</div>
+                <div>Step 3: 3,450 (82%)</div>
+                <div>Step 4: 3,450 (82%)</div>
+                <div>Step 5: 3,200 (76%)</div>
+                <div>Step 6: 2,890 (68%)</div>
+                <div style="color: var(--green); font-weight: 600; margin-top: 6px;">Goal: 1,087 (26%)</div>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">AI SUMMARY</div>
+              <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.6;">
+                This sequence converts 12.3% of leads to customers. Main drop-off at Step 3 (social proof email). Recommend testing urgency-based subject line.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 4: SUBSCRIBERS -->
+  <div class="view" id="subscribers-view">
+    <div style="padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; flex: 1; overflow: hidden;">
+      <h1 style="font-size: 20px; font-weight: 600;">Subscribers</h1>
+
+      <!-- Subscriber stats -->
+      <div style="display: flex; gap: 16px; font-size: 13px;">
+        <div><strong>Total:</strong> 14,847</div>
+        <div><strong>Active:</strong> 12,430</div>
+        <div><strong>Unsubscribed:</strong> 1,890</div>
+        <div><strong>Bounced:</strong> 527</div>
+      </div>
+
+      <!-- Entry points -->
+      <div class="entry-points">
+        <div class="entry-point">
+          <div class="entry-point-icon">📝</div>
+          <div class="entry-point-label">Popup Form</div>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">Form on site</div>
+          <div class="entry-point-value">+89 this week</div>
+        </div>
+        <div class="entry-point">
+          <div class="entry-point-icon">📄</div>
+          <div class="entry-point-label">Inline Form</div>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">Form embed</div>
+          <div class="entry-point-value">+45 this week</div>
+        </div>
+        <div class="entry-point">
+          <div class="entry-point-icon">🛒</div>
+          <div class="entry-point-label">Purchase</div>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">At checkout</div>
+          <div class="entry-point-value">+178 this week</div>
+        </div>
+      </div>
+
+      <!-- Subscriber search -->
+      <div style="margin-bottom: 12px;">
+        <input type="text" id="subscriberSearch" placeholder="Search subscribers by email or name..." style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px;">
+      </div>
+
+      <!-- Subscribers table -->
+      <div class="card" style="flex: 1; overflow: hidden;">
+        <div style="overflow-x: auto; flex: 1;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Engagement</th>
+                <th>Tags</th>
+                <th>Subscribed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a>anna.vandamme@email.nl</a></td>
+                <td>Anna Van Damme</td>
+                <td><span class="badge badge-paid"><span class="badge-dot"></span>Active</span></td>
+                <td><span style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block;"></span></td>
+                <td><span class="tag tag-nl">Laat los</span></td>
+                <td>Jan 15, 2025</td>
+              </tr>
+              <tr>
+                <td><a>mg.rus@email.pl</a></td>
+                <td>Małgorzata Rus</td>
+                <td><span class="badge badge-paid"><span class="badge-dot"></span>Active</span></td>
+                <td><span style="width: 8px; height: 8px; border-radius: 50%; background: #FFA500; display: inline-block;"></span></td>
+                <td><span class="tag tag-pl">Odpuść</span></td>
+                <td>Jan 18, 2025</td>
+              </tr>
+              <tr>
+                <td><a>hubert.prask@email.pl</a></td>
+                <td>Hubert Prask</td>
+                <td><span class="badge badge-paid"><span class="badge-dot"></span>Active</span></td>
+                <td><span style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block;"></span></td>
+                <td><span class="tag tag-pl">Odpuść</span></td>
+                <td>Dec 22, 2024</td>
+              </tr>
+              <tr>
+                <td><a>ingrid.buitenhuis@email.nl</a></td>
+                <td>Ingrid Buitenhuis</td>
+                <td><span class="badge badge-pending"><span class="badge-dot"></span>Inactive</span></td>
+                <td><span style="width: 8px; height: 8px; border-radius: 50%; background: #C0C0C0; display: inline-block;"></span></td>
+                <td><span class="tag tag-nl">Laat los</span></td>
+                <td>Nov 10, 2024</td>
+              </tr>
+              <tr>
+                <td><a>diana.tabben@email.nl</a></td>
+                <td>Diana Tabben-Meinster</td>
+                <td><span class="badge badge-paid"><span class="badge-dot"></span>Active</span></td>
+                <td><span style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block;"></span></td>
+                <td><span class="tag tag-nl">Laat los</span></td>
+                <td>Jan 8, 2025</td>
+              </tr>
+              <tr>
+                <td><a>hana.loukota@email.cz</a></td>
+                <td>Hana Loukota</td>
+                <td><span class="badge badge-paid"><span class="badge-dot"></span>Active</span></td>
+                <td><span style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block;"></span></td>
+                <td><span class="tag tag-cz">Psí superživot</span></td>
+                <td>Feb 1, 2025</td>
+              </tr>
+              <tr>
+                <td><a>sieta.beekhuizen@email.nl</a></td>
+                <td>Sieta Beekhuizen</td>
+                <td><span class="badge badge-paid"><span class="badge-dot"></span>Active</span></td>
+                <td><span style="width: 8px; height: 8px; border-radius: 50%; background: #FFA500; display: inline-block;"></span></td>
+                <td><span class="tag tag-nl">Laat los</span></td>
+                <td>Jan 22, 2025</td>
+              </tr>
+              <tr>
+                <td><a>jeroen.brouwer@email.nl</a></td>
+                <td>Jeroen Brouwer</td>
+                <td><span class="badge badge-paid"><span class="badge-dot"></span>Active</span></td>
+                <td><span style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block;"></span></td>
+                <td><span class="tag tag-nl">Laat los</span></td>
+                <td>Dec 28, 2024</td>
+              </tr>
+              <tr>
+                <td><a>francis.huisman@email.be</a></td>
+                <td>Francis Huisman</td>
+                <td><span class="badge badge-paid"><span class="badge-dot"></span>Active</span></td>
+                <td><span style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block;"></span></td>
+                <td><span class="tag tag-nl">Laat los</span></td>
+                <td>Feb 5, 2025</td>
+              </tr>
+              <tr>
+                <td><a>sandra.mottier@email.nl</a></td>
+                <td>Sandra Mottier</td>
+                <td><span class="badge badge-paid"><span class="badge-dot"></span>Active</span></td>
+                <td><span style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block;"></span></td>
+                <td><span class="tag tag-nl">Laat los</span></td>
+                <td>Jan 30, 2025</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 5: AI AUTOPILOT -->
+  <div class="view" id="autopilot-view">
+    <div class="autopilot-container">
+      <h1 style="font-size: 20px; font-weight: 600; margin-bottom: 20px;">AI Autopilot</h1>
+
+      <!-- Health Score -->
+      <div class="health-score">
+        <div class="health-header">
+          <h3>Overall Health Score</h3>
+          <div class="health-gauge">74</div>
+        </div>
+        <div class="health-subscores">
+          <div class="health-subscore">
+            <div class="health-subscore-label">Deliverability</div>
+            <div class="health-subscore-value">92</div>
+          </div>
+          <div class="health-subscore">
+            <div class="health-subscore-label">Engagement</div>
+            <div class="health-subscore-value">71</div>
+          </div>
+          <div class="health-subscore">
+            <div class="health-subscore-label">Revenue</div>
+            <div class="health-subscore-value">68</div>
+          </div>
+          <div class="health-subscore">
+            <div class="health-subscore-label">List Health</div>
+            <div class="health-subscore-value">65</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Autopilot Settings -->
+      <div class="autopilot-settings">
+        <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px;">AI Auto-Actions</div>
+
+        <div class="autopilot-setting">
+          <div class="setting-info">
+            <div class="setting-title">Auto A/B test subject lines</div>
+            <div class="setting-desc">AI generates and tests subject line variants when open rate drops below avg</div>
+          </div>
+          <div class="toggle on" onclick="toggleSetting(event)"></div>
+        </div>
+
+        <div class="autopilot-setting">
+          <div class="setting-info">
+            <div class="setting-title">Smart send time optimization</div>
+            <div class="setting-desc">AI sends each email at subscriber's optimal open time</div>
+          </div>
+          <div class="toggle on" onclick="toggleSetting(event)"></div>
+        </div>
+
+        <div class="autopilot-setting">
+          <div class="setting-info">
+            <div class="setting-title">Auto list cleanup</div>
+            <div class="setting-desc">Remove inactive 90d+ subscribers automatically</div>
+          </div>
+          <div class="toggle on" onclick="toggleSetting(event)"></div>
+        </div>
+
+        <div class="autopilot-setting">
+          <div class="setting-info">
+            <div class="setting-title">Weekly AI report</div>
+            <div class="setting-desc">Receive weekly analysis email</div>
+          </div>
+          <div class="toggle on" onclick="toggleSetting(event)"></div>
+        </div>
+
+        <div class="autopilot-setting">
+          <div class="setting-info">
+            <div class="setting-title">Auto-pause bad campaigns</div>
+            <div class="setting-desc">Pause if bounce >2% or complaint >0.1%</div>
+          </div>
+          <div class="toggle on" onclick="toggleSetting(event)"></div>
+        </div>
+
+        <div class="autopilot-setting">
+          <div class="setting-info">
+            <div class="setting-title">Auto-optimize email content</div>
+            <div class="setting-desc">AI rewrites underperforming emails (requires approval)</div>
+          </div>
+          <div class="toggle" onclick="toggleSetting(event)"></div>
+        </div>
+      </div>
+
+      <!-- Insights Feed -->
+      <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px;">AI Insights</div>
+      <div class="insights-feed">
+        <div class="insight-card">
+          <div class="insight-priority critical">CRITICAL</div>
+          <div class="insight-title">Abandoned Cart Email 2: Open rate dropped 23%</div>
+          <div class="insight-desc">Subject "Je vergeet iets!" has been running for 3 months. Subscribers are fatigued.</div>
+          <div class="insight-impact">Impact: ~€340/week potential recovery</div>
+          <div class="insight-actions">
+            <button class="insight-btn" onclick="showToast('Generating variants...')">Auto-generate</button>
+            <button class="insight-btn secondary" onclick="showToast('Dismissed')">Dismiss</button>
+          </div>
+        </div>
+
+        <div class="insight-card">
+          <div class="insight-priority warning">WARNING</div>
+          <div class="insight-title">Bounce rate elevated in PL segment</div>
+          <div class="insight-desc">Last campaign had 2.1% bounce rate (up from 0.8%). Consider list cleaning.</div>
+          <div class="insight-impact">Impact: ~€180/week at risk</div>
+          <div class="insight-actions">
+            <button class="insight-btn" onclick="showToast('Running analysis...')">Analyze</button>
+            <button class="insight-btn secondary" onclick="showToast('Dismissed')">Dismiss</button>
+          </div>
+        </div>
+
+        <div class="insight-card">
+          <div class="insight-priority info">INFO</div>
+          <div class="insight-title">Flash Sale generated highest CTR ever</div>
+          <div class="insight-desc">Your "24-hour flash sale" email achieved 7.8% CTR — 58% above average. Use this format for future campaigns.</div>
+          <div class="insight-impact">Impact: High-performing template identified</div>
+          <div class="insight-actions">
+            <button class="insight-btn" onclick="showToast('Creating template...')">Create Template</button>
+            <button class="insight-btn secondary" onclick="showToast('Dismissed')">Dismiss</button>
+          </div>
+        </div>
+
+        <div class="insight-card">
+          <div class="insight-priority info">INFO</div>
+          <div class="insight-title">Optimal send time detected for NL segment</div>
+          <div class="insight-desc">Data shows highest opens at 10 AM CET on Tuesdays. Next campaign will auto-send at this time.</div>
+          <div class="insight-impact">Impact: Expect +6% open rate lift</div>
+          <div class="insight-actions">
+            <button class="insight-btn" onclick="showToast('Applied')">Applied</button>
+          </div>
+        </div>
+
+        <div class="insight-card">
+          <div class="insight-priority warning">WARNING</div>
+          <div class="insight-title">Complaint rate trending up</div>
+          <div class="insight-desc">Last 3 campaigns averaged 0.08% complaint rate (up from 0.03%). Review content strategy.</div>
+          <div class="insight-impact">Impact: Deliverability at risk</div>
+          <div class="insight-actions">
+            <button class="insight-btn" onclick="showToast('Running analysis...')">Analyze</button>
+            <button class="insight-btn secondary" onclick="showToast('Dismissed')">Dismiss</button>
+          </div>
+        </div>
+
+        <div class="insight-card">
+          <div class="insight-priority info">INFO</div>
+          <div class="insight-title">A/B test winner: Urgency subject line</div>
+          <div class="insight-desc">"Limited time offer" subjects won with +41% CTR. AI will favor this format in future subject suggestions.</div>
+          <div class="insight-impact">Impact: Template learned for future campaigns</div>
+          <div class="insight-actions">
+            <button class="insight-btn" onclick="showToast('Saving pattern...')">Save Pattern</button>
+          </div>
+        </div>
+
+        <div class="insight-card">
+          <div class="insight-priority critical">CRITICAL</div>
+          <div class="insight-title">High inactivity in CZ segment</div>
+          <div class="insight-desc">1,240 CZ subscribers inactive for 90+ days. Recommend re-engagement campaign or suppression.</div>
+          <div class="insight-impact">Impact: €2.1k potential revenue recovery</div>
+          <div class="insight-actions">
+            <button class="insight-btn" onclick="openCampaignForm()">Create Re-engagement</button>
+            <button class="insight-btn secondary" onclick="showToast('Dismissed')">Dismiss</button>
+          </div>
+        </div>
+
+        <div class="insight-card">
+          <div class="insight-priority info">INFO</div>
+          <div class="insight-title">Unsubscribe rate normal</div>
+          <div class="insight-desc">0.12% unsubscribe rate this week — within expected range. No action needed.</div>
+          <div class="insight-impact">Impact: List health good</div>
+          <div class="insight-actions">
+            <button class="insight-btn secondary" onclick="showToast('Acknowledged')">OK</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Changelog -->
+      <div class="ai-changelog" style="margin-top: 24px;">
+        <div class="ai-changelog-title">AI Action Log</div>
+        <div class="changelog-entry">
+          <div class="changelog-time">Today, 09:14</div>
+          <div class="changelog-desc">🤖 Auto-paused campaign "Flash Sale NL" (complaint rate 0.4%)</div>
+        </div>
+        <div class="changelog-entry">
+          <div class="changelog-time">Feb 24, 10:00</div>
+          <div class="changelog-desc">🤖 A/B test completed: "Story subject" won (+41% CTR), auto-applied</div>
+        </div>
+        <div class="changelog-entry">
+          <div class="changelog-time">Feb 23, 03:00</div>
+          <div class="changelog-desc">🤖 Cleaned 47 inactive subscribers from "Odpuść" list</div>
+        </div>
+        <div class="changelog-entry">
+          <div class="changelog-time">Feb 22, 10:00</div>
+          <div class="changelog-desc">🤖 Started A/B test on Welcome Email 2 subject line</div>
+        </div>
+        <div class="changelog-entry">
+          <div class="changelog-time">Feb 21, 03:00</div>
+          <div class="changelog-desc">🤖 Weekly report sent: Overall health improved from 71 to 74</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 6: CALENDAR -->
+  <div class="view" id="calendar-view">
+    <div class="calendar-container">
+      <div class="calendar-main">
+        <div class="calendar-header">
+          <h2>February 2026</h2>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" onclick="showToast('Previous month')">←</button>
+            <button class="btn" onclick="showToast('Today')">Today</button>
+            <button class="btn" onclick="showToast('Next month')">→</button>
+          </div>
+        </div>
+
+        <div class="calendar-grid">
+          <!-- Day headers -->
+          <div class="calendar-day-header">Mon</div>
+          <div class="calendar-day-header">Tue</div>
+          <div class="calendar-day-header">Wed</div>
+          <div class="calendar-day-header">Thu</div>
+          <div class="calendar-day-header">Fri</div>
+          <div class="calendar-day-header">Sat</div>
+          <div class="calendar-day-header">Sun</div>
+
+          <!-- Days -->
+          <div class="calendar-day"></div>
+          <div class="calendar-day"></div>
+          <div class="calendar-day"></div>
+          <div class="calendar-day"></div>
+          <div class="calendar-day"></div>
+          <div class="calendar-day"></div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">1</div>
+          </div>
+
+          <div class="calendar-day">
+            <div class="calendar-day-number">2</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">3</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">4</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">5</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">6</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">7</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">8</div>
+            <div class="calendar-event nl">NL: Newsletter</div>
+          </div>
+
+          <div class="calendar-day">
+            <div class="calendar-day-number">9</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">10</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">11</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">12</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">13</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">14</div>
+            <div class="calendar-event de">DE: Promo</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">15</div>
+          </div>
+
+          <div class="calendar-day">
+            <div class="calendar-day-number">16</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">17</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">18</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">19</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">20</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">21</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">22</div>
+          </div>
+
+          <div class="calendar-day">
+            <div class="calendar-day-number">23</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">24</div>
+            <div class="calendar-event pl">PL: Sale</div>
+          </div>
+          <div class="calendar-day today">
+            <div class="calendar-day-number">25</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">26</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">27</div>
+            <div class="calendar-event cz">CZ: Weekly</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">28</div>
+          </div>
+          <div class="calendar-day">
+            <div class="calendar-day-number">1</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar: Holiday suggestions -->
+      <div class="calendar-sidebar">
+        <div class="calendar-sidebar-section">
+          <div class="calendar-sidebar-title">Upcoming Events</div>
+
+          <div class="calendar-event-suggestion">
+            <div class="calendar-event-suggestion-title">🇳🇱 Mar 8 — Women's Day</div>
+            <div class="calendar-event-suggestion-desc">78% of your NL audience is female. Suggest: themed campaign for Laat los</div>
+            <button class="btn" style="width: 100%; font-size: 11px; padding: 6px;" onclick="openCampaignForm()">Create Campaign</button>
+          </div>
+
+          <div class="calendar-event-suggestion">
+            <div class="calendar-event-suggestion-title">🇵🇱 Mar 8 — Dzień Kobiet</div>
+            <div class="calendar-event-suggestion-desc">Popular gift-giving day in Poland. Suggest: "Give Odpuść as a gift"</div>
+            <button class="btn" style="width: 100%; font-size: 11px; padding: 6px;" onclick="openCampaignForm()">Create Campaign</button>
+          </div>
+
+          <div class="calendar-event-suggestion">
+            <div class="calendar-event-suggestion-title">🇨🇿 Mar 28 — Velikonoce Prep</div>
+            <div class="calendar-event-suggestion-desc">Start Easter campaign 2 weeks early</div>
+            <button class="btn" style="width: 100%; font-size: 11px; padding: 6px;" onclick="openCampaignForm()">Create Campaign</button>
+          </div>
+
+          <div class="calendar-event-suggestion">
+            <div class="calendar-event-suggestion-title">🇳🇱 Apr 27 — Koningsdag</div>
+            <div class="calendar-event-suggestion-desc">Major Dutch holiday. Plan special offer.</div>
+            <button class="btn" style="width: 100%; font-size: 11px; padding: 6px;" onclick="openCampaignForm()">Create Campaign</button>
+          </div>
+
+          <div class="calendar-event-suggestion">
+            <div class="calendar-event-suggestion-title">🇵🇱 May 26 — Dzień Matki</div>
+            <div class="calendar-event-suggestion-desc">Mother's Day PL — high gift potential</div>
+            <button class="btn" style="width: 100%; font-size: 11px; padding: 6px;" onclick="openCampaignForm()">Create Campaign</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 7: SETTINGS -->
+  <div class="view" id="settings-view">
+    <div class="settings-container">
+      <h1 style="font-size: 20px; font-weight: 600; margin-bottom: 24px;">Settings</h1>
+
+      <!-- API Keys -->
+      <div class="settings-section">
+        <div class="settings-section-title">🔑 API Keys</div>
+        <div class="settings-item">
+          <label>Resend API Key</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="password" id="resendApiKey" value="re_abc123xyz789..." placeholder="Your Resend API key">
+            <button class="btn" onclick="toggleApiKeyVisibility('resendApiKey')">👁</button>
+          </div>
+          <div class="settings-item-hint">Get your API key from resend.com/settings/api-keys</div>
+        </div>
+      </div>
+
+      <!-- Sender Configuration -->
+      <div class="settings-section">
+        <div class="settings-section-title">📧 Sender Configuration</div>
+        <div class="settings-item">
+          <label>Default From Name</label>
+          <input type="text" value="Laat los team" placeholder="Your sender name">
+        </div>
+        <div class="settings-item">
+          <label>Default From Email</label>
+          <input type="email" value="noreply@laatlos.nl" placeholder="noreply@yourdomain.com">
+          <div class="settings-item-hint">Must be from a verified sender domain</div>
+        </div>
+      </div>
+
+      <!-- Verified Sender Domains -->
+      <div class="settings-section">
+        <div class="settings-section-title">🔐 Verified Sender Domains</div>
+        <div class="domain-list">
+          <div class="domain-list-item">
+            <strong>laatlos.nl</strong>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Added Jan 12, 2025</div>
+          </div>
+          <span class="domain-verified">✓ Verified</span>
+        </div>
+        <div class="domain-list">
+          <div class="domain-list-item">
+            <strong>shop.oudpiste.pl</strong>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Added Feb 1, 2025</div>
+          </div>
+          <span class="domain-verified">✓ Verified</span>
+        </div>
+        <button class="btn btn-primary" style="width: 100%; margin-top: 8px;" onclick="showToast('Adding new domain...')">+ Add Domain</button>
+      </div>
+
+      <!-- Warmup Settings -->
+      <div class="settings-section">
+        <div class="settings-section-title">🔥 IP Warmup Settings</div>
+        <div class="settings-item">
+          <label>Enable IP Warmup</label>
+          <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+            <div class="toggle on" onclick="toggleSetting(event)"></div>
+            <span style="font-size: 12px; color: var(--text-secondary);">Gradually increase sending volume to maintain deliverability</span>
+          </div>
+        </div>
+        <div class="settings-item" style="margin-top: 16px;">
+          <label>Max Emails Per Day (Warmup Phase)</label>
+          <input type="number" value="5000" min="100" max="50000">
+          <div class="settings-item-hint">Current phase: Day 3 of 7. Increase by 25% each day.</div>
+        </div>
+      </div>
+
+      <!-- Suppression List -->
+      <div class="settings-section">
+        <div class="settings-section-title">🚫 Suppression List</div>
+        <div class="settings-item">
+          <label>Auto-suppress hard bounces</label>
+          <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+            <div class="toggle on" onclick="toggleSetting(event)"></div>
+            <span style="font-size: 12px; color: var(--text-secondary);">Automatically remove invalid emails</span>
+          </div>
+        </div>
+        <div class="settings-item" style="margin-top: 16px;">
+          <label>Auto-suppress complaints after</label>
+          <input type="number" value="1" min="1" max="10"> complaint(s)
+          <div class="settings-item-hint">Recipients will be removed if they mark emails as spam</div>
+        </div>
+        <div class="settings-item" style="margin-top: 16px;">
+          <label>Reactivate unsubscribed after</label>
+          <input type="number" value="180"> days
+          <div class="settings-item-hint">Allow re-subscription after inactivity period</div>
+        </div>
+      </div>
+
+      <!-- Per-Project Settings -->
+      <div class="settings-section">
+        <div class="settings-section-title">⚙️ Per-Project Configuration</div>
+
+        <div style="background: var(--hover-bg); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">📌 Laat los</div>
+          <div class="settings-item">
+            <label>Project from name</label>
+            <input type="text" value="Laat los team">
+          </div>
+          <div class="settings-item">
+            <label>Project from email</label>
+            <input type="email" value="noreply@laatlos.nl">
+          </div>
+          <div class="settings-item">
+            <label>Monthly send limit</label>
+            <input type="number" value="250000">
+            <div class="settings-item-hint">Leave blank for unlimited</div>
+          </div>
+        </div>
+
+        <div style="background: var(--hover-bg); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">📌 Odpuść</div>
+          <div class="settings-item">
+            <label>Project from name</label>
+            <input type="text" value="Odpuść team">
+          </div>
+          <div class="settings-item">
+            <label>Project from email</label>
+            <input type="email" value="noreply@oudpiste.pl">
+          </div>
+          <div class="settings-item">
+            <label>Monthly send limit</label>
+            <input type="number" value="150000">
+          </div>
+        </div>
+      </div>
+
+      <!-- Backup & Export -->
+      <div class="settings-section">
+        <div class="settings-section-title">💾 Data Management</div>
+        <button class="btn" style="width: 100%; margin-bottom: 8px;" onclick="showToast('Exporting settings...')">📥 Export Settings</button>
+        <button class="btn" style="width: 100%; margin-bottom: 8px;" onclick="showToast('Exporting subscriber list...')">📥 Export Subscriber List</button>
+        <button class="btn" style="width: 100%; margin-bottom: 8px;" onclick="showToast('Creating backup...')">💾 Create Backup</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main-content -->
+
+</div><!-- /app-container -->
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SUBSCRIBER DETAIL PANEL                           -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="subscriber-panel" id="subscriberPanel">
+  <div class="subscriber-panel-header">
+    <h3>Subscriber Details</h3>
+    <button class="subscriber-panel-close" onclick="closeSubscriberPanel()">×</button>
+  </div>
+  <div class="subscriber-panel-content" id="subscriberPanelContent">
+    <!-- Content will be populated dynamically -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- CAMPAIGN FORM MODAL                               -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="campaignModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Create Campaign</h2>
+      <button class="modal-close" onclick="closeCampaignForm()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="formContent"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="backBtn" style="display:none;" onclick="prevStep()">← Back</button>
+      <button class="btn" onclick="closeCampaignForm()">Cancel</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// STATE & DATA
+// ═══════════════════════════════════════════════════
+let currentView = 'dashboard';
+let campaignFormStep = 1;
+let currentCampaignTab = 'all';
+let subscriberSearchQuery = '';
+
+// Project pill data
+const projectData = {
+  'All Projects': { subscribers: 14847, openRate: 38.2, clickRate: 4.8, revenue: 8420 },
+  'Laat los': { subscribers: 5230, openRate: 42.3, clickRate: 5.2, revenue: 3100 },
+  'Odpuść': { subscribers: 4560, openRate: 35.8, clickRate: 4.2, revenue: 2800 },
+  'Psí superživot': { subscribers: 3120, openRate: 36.5, clickRate: 4.5, revenue: 1900 },
+  'Lass los': { subscribers: 1937, openRate: 38.9, clickRate: 5.1, revenue: 620 }
+};
+
+// Campaign data with status badges
+const campaignData = [
+  { id: 1, name: 'Welcome Email NL', status: 'Sent', recipients: 4230, openRate: 42.3, clickRate: 5.2 },
+  { id: 2, name: 'Spring Sale Campaign', status: 'Scheduled', recipients: 3890, openRate: null, clickRate: null },
+  { id: 3, name: 'Customer Stories', status: 'Draft', recipients: null, openRate: null, clickRate: null },
+  { id: 4, name: 'Abandoned Cart Reminder', status: 'Sent', recipients: 2145, openRate: 38.9, clickRate: 4.1 },
+  { id: 5, name: 'Flash Sale 24h', status: 'Sent', recipients: 5120, openRate: 51.2, clickRate: 7.8 },
+  { id: 6, name: 'Weekly Newsletter', status: 'Scheduled', recipients: 6340, openRate: null, clickRate: null },
+  { id: 7, name: 'Re-engagement Campaign', status: 'Draft', recipients: null, openRate: null, clickRate: null },
+  { id: 8, name: 'Product Launch Email', status: 'Scheduled', recipients: 4560, openRate: null, clickRate: null },
+  { id: 9, name: 'Birthday Offer', status: 'Sent', recipients: 1230, openRate: 45.6, clickRate: 6.3 },
+  { id: 10, name: 'VIP Exclusive', status: 'Scheduled', recipients: 890, openRate: null, clickRate: null }
+];
+
+// Subscriber data for detail panel
+const subscriberDatabase = {
+  'anna.vandamme@email.nl': {
+    name: 'Anna Van Damme',
+    email: 'anna.vandamme@email.nl',
+    status: 'Active',
+    engagementScore: 92,
+    tags: ['Laat los', 'VIP', 'Purchased'],
+    subscribed: 'Jan 15, 2025',
+    activity: [
+      { date: 'Today, 14:32', action: 'Opened: Welcome Email NL' },
+      { date: 'Yesterday, 10:15', action: 'Clicked: Spring Sale Campaign' },
+      { date: 'Feb 23, 08:45', action: 'Purchased: Annual Plan' },
+      { date: 'Feb 20, 16:20', action: 'Opened: Weekly Newsletter' }
+    ],
+    sequences: ['Welcome Sequence', 'VIP Upsell']
+  },
+  'mg.rus@email.pl': {
+    name: 'Małgorzata Rus',
+    email: 'mg.rus@email.pl',
+    status: 'Active',
+    engagementScore: 68,
+    tags: ['Odpuść', 'Engaged'],
+    subscribed: 'Jan 18, 2025',
+    activity: [
+      { date: 'Feb 24, 09:12', action: 'Opened: Weekly Newsletter' },
+      { date: 'Feb 22, 15:30', action: 'Unsubscribed from: Promo List' },
+      { date: 'Feb 18, 11:00', action: 'Opened: Product Launch Email' }
+    ],
+    sequences: ['Re-engagement Drip']
+  },
+  'hana.loukota@email.cz': {
+    name: 'Hana Loukota',
+    email: 'hana.loukota@email.cz',
+    status: 'Active',
+    engagementScore: 85,
+    tags: ['Psí superživot', 'Customer'],
+    subscribed: 'Feb 1, 2025',
+    activity: [
+      { date: 'Today, 12:45', action: 'Opened: Birthday Offer' },
+      { date: 'Feb 23, 14:20', action: 'Clicked: Flash Sale 24h' },
+      { date: 'Feb 15, 09:30', action: 'Purchased: Product Bundle' }
+    ],
+    sequences: ['Welcome Sequence', 'Upsell Sequence']
+  }
+};
+
+// ═══════════════════════════════════════════════════
+// VIEW SWITCHING
+// ═══════════════════════════════════════════════════
+function switchView(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const targetView = document.getElementById(view + '-view');
+  if (targetView) targetView.classList.add('active');
+
+  document.querySelectorAll('.sidebar-icon').forEach(icon => icon.classList.remove('active'));
+  const activeIcon = document.querySelector('.sidebar-icon[data-view="' + view + '"]');
+  if (activeIcon) activeIcon.classList.add('active');
+
+  currentView = view;
+}
+
+// ═══════════════════════════════════════════════════
+// PROJECT PILLS - CLICK & FILTER
+// ═══════════════════════════════════════════════════
+function initProjectPills() {
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', function() {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+
+      const projectName = this.textContent.trim();
+      updateDashboardStats(projectName);
+      showToast('Filtered to: ' + projectName);
+    });
+  });
+}
+
+function updateDashboardStats(projectName) {
+  const data = projectData[projectName] || projectData['All Projects'];
+  const stats = document.querySelectorAll('.stat-value');
+  if (stats[0]) stats[0].textContent = data.subscribers.toLocaleString();
+  if (stats[1]) stats[1].textContent = data.openRate.toFixed(1) + '%';
+  if (stats[2]) stats[2].textContent = data.clickRate.toFixed(1) + '%';
+  if (stats[3]) stats[3].textContent = '€' + data.revenue.toLocaleString();
+}
+
+// ═══════════════════════════════════════════════════
+// CAMPAIGN TABS - FILTER ROWS
+// ═══════════════════════════════════════════════════
+function initCampaignTabs() {
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      currentCampaignTab = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+
+      filterCampaignTable();
+    });
+  });
+}
+
+function filterCampaignTable() {
+  const rows = document.querySelectorAll('#campaigns-view tbody tr');
+  rows.forEach(row => {
+    const badge = row.querySelector('.badge');
+    if (!badge) return;
+
+    const status = badge.textContent.toLowerCase().trim();
+    let show = false;
+
+    if (currentCampaignTab === 'all') show = true;
+    else if (currentCampaignTab === 'sent' && status === 'sent') show = true;
+    else if (currentCampaignTab === 'scheduled' && status === 'scheduled') show = true;
+    else if (currentCampaignTab === 'draft' && status === 'draft') show = true;
+
+    row.style.display = show ? '' : 'none';
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// SEQUENCE CARD TOGGLES
+// ═══════════════════════════════════════════════════
+function initSequenceTogles() {
+  document.querySelectorAll('#sequences-view .card span[style*="width: 40px"]').forEach(toggle => {
+    toggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      this.classList.toggle('on');
+      const isOn = this.classList.contains('on') || this.style.background === 'var(--green)';
+      this.style.background = isOn ? '#E1E3E5' : 'var(--green)';
+      this.style.background = this.style.background === 'var(--green)' ? '#E1E3E5' : 'var(--green)';
+      showToast('Sequence ' + (this.style.background === 'var(--green)' ? 'enabled' : 'disabled'));
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// SUBSCRIBER DETAIL PANEL
+// ═══════════════════════════════════════════════════
+function initSubscriberLinks() {
+  const table = document.querySelector('#subscribers-view tbody');
+  if (!table) return;
+
+  table.addEventListener('click', function(e) {
+    if (e.target.tagName === 'A') {
+      const email = e.target.textContent.trim();
+      openSubscriberPanel(email);
+    }
+  });
+}
+
+function openSubscriberPanel(email) {
+  const subscriber = subscriberDatabase[email];
+  if (!subscriber) {
+    showToast('Subscriber not found');
+    return;
+  }
+
+  const content = document.getElementById('subscriberPanelContent');
+  content.innerHTML = `
+    <div class="subscriber-detail-row">
+      <div class="subscriber-detail-label">Email</div>
+      <div class="subscriber-detail-value">${subscriber.email}</div>
+    </div>
+
+    <div class="subscriber-detail-row">
+      <div class="subscriber-detail-label">Name</div>
+      <div class="subscriber-detail-value">${subscriber.name}</div>
+    </div>
+
+    <div class="subscriber-detail-row">
+      <div class="subscriber-detail-label">Status</div>
+      <div class="subscriber-detail-value">
+        <span class="badge badge-paid"><span class="badge-dot"></span>${subscriber.status}</span>
+      </div>
+    </div>
+
+    <div class="subscriber-detail-row">
+      <div class="subscriber-detail-label">Engagement Score</div>
+      <div class="subscriber-detail-value">
+        <strong style="font-size: 16px; color: var(--green);">${subscriber.engagementScore}</strong>/100
+      </div>
+    </div>
+
+    <div class="subscriber-detail-row">
+      <div class="subscriber-detail-label">Tags</div>
+      <div class="subscriber-tags">
+        ${subscriber.tags.map(tag => {
+          let tagClass = 'tag';
+          if (tag.includes('los') || tag === 'Laat los') tagClass += ' tag-nl';
+          else if (tag.includes('Odpuść')) tagClass += ' tag-pl';
+          else if (tag.includes('superživot')) tagClass += ' tag-cz';
+          return '<span class="' + tagClass + '">' + tag + '</span>';
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="subscriber-detail-row">
+      <div class="subscriber-detail-label">Subscribed Date</div>
+      <div class="subscriber-detail-value">${subscriber.subscribed}</div>
+    </div>
+
+    <div class="subscriber-detail-row">
+      <div class="subscriber-detail-label">Enrolled Sequences</div>
+      <div style="font-size: 12px;">
+        ${subscriber.sequences.map(seq => '<div style="padding: 4px 0;">→ ' + seq + '</div>').join('')}
+      </div>
+    </div>
+
+    <div style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px;">
+      <div class="subscriber-detail-label">Recent Activity</div>
+      <div style="margin-top: 8px;">
+        ${subscriber.activity.map(act => `
+          <div class="subscriber-activity">
+            <div class="subscriber-activity-time">${act.date}</div>
+            <div class="subscriber-activity-desc">${act.action}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('subscriberPanel').classList.add('active');
+}
+
+function closeSubscriberPanel() {
+  document.getElementById('subscriberPanel').classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════════
+// SUBSCRIBER SEARCH
+// ═══════════════════════════════════════════════════
+function initSubscriberSearch() {
+  const searchInput = document.getElementById('subscriberSearch');
+  if (!searchInput) return;
+
+  searchInput.addEventListener('input', function(e) {
+    subscriberSearchQuery = e.target.value.toLowerCase();
+    filterSubscriberTable();
+  });
+}
+
+function filterSubscriberTable() {
+  const rows = document.querySelectorAll('#subscribers-view tbody tr');
+  rows.forEach(row => {
+    const email = row.cells[0].textContent.toLowerCase();
+    const name = row.cells[1].textContent.toLowerCase();
+
+    const matches = email.includes(subscriberSearchQuery) || name.includes(subscriberSearchQuery);
+    row.style.display = matches ? '' : 'none';
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// CALENDAR DAY CLICKS
+// ═══════════════════════════════════════════════════
+function initCalendarDays() {
+  document.querySelectorAll('.calendar-day').forEach(day => {
+    day.addEventListener('click', function() {
+      const dayNum = this.querySelector('.calendar-day-number');
+      if (!dayNum) return;
+
+      const event = this.querySelector('.calendar-event');
+      if (event) {
+        const eventText = event.textContent.trim();
+        showToast('Event: ' + eventText);
+      } else {
+        openCampaignForm();
+        showToast('Create campaign for ' + dayNum.textContent);
+      }
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// TABLE ACTION LINKS
+// ═══════════════════════════════════════════════════
+function initTableActions() {
+  const table = document.querySelector('#campaigns-view tbody');
+  if (!table) return;
+
+  table.addEventListener('click', function(e) {
+    if (e.target.tagName === 'A') {
+      const action = e.target.textContent.toLowerCase().trim();
+      const campaignName = e.target.closest('tr').cells[0].textContent.trim();
+
+      if (action === 'view') {
+        showToast('Viewing: ' + campaignName);
+      } else if (action === 'edit') {
+        openCampaignForm();
+        showToast('Editing: ' + campaignName);
+      } else if (action === 'duplicate') {
+        showToast('Duplicating: ' + campaignName);
+      } else if (action === 'delete') {
+        showToast('Deleted: ' + campaignName);
+      } else if (action === 'preview') {
+        showToast('Previewing: ' + campaignName);
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// CAMPAIGN FORM
+// ═══════════════════════════════════════════════════
+function openCampaignForm() {
+  campaignFormStep = 1;
+  renderCampaignForm();
+  document.getElementById('campaignModal').classList.add('active');
+}
+
+function closeCampaignForm() {
+  document.getElementById('campaignModal').classList.remove('active');
+  campaignFormStep = 1;
+}
+
+function renderCampaignForm() {
+  const content = document.getElementById('formContent');
+  const nextBtn = document.getElementById('nextBtn');
+  const backBtn = document.getElementById('backBtn');
+  const modal = document.querySelector('.modal');
+
+  if (campaignFormStep === 1) {
+    document.getElementById('modalTitle').textContent = 'Create Campaign — Basics';
+    nextBtn.textContent = 'Next →';
+    backBtn.style.display = 'none';
+    modal.style.maxWidth = '600px';
+
+    content.innerHTML = `
+      <div class="step-indicator">
+        <div class="step-dot active">1</div>
+        <span>Basics</span>
+        <span>—</span>
+        <span style="color: var(--text-muted);">Email Content</span>
+        <span style="color: var(--text-muted);">—</span>
+        <span style="color: var(--text-muted);">Schedule & Send</span>
+      </div>
+
+      <div class="form-group">
+        <label>Campaign Name</label>
+        <input type="text" placeholder="e.g., Spring Sale Campaign" value="Spring Sale Campaign">
+      </div>
+
+      <div class="form-group">
+        <label>Project</label>
+        <select>
+          <option>Laat los</option>
+          <option>Odpuść</option>
+          <option>Psí superživot</option>
+          <option>Lass los</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Send to</label>
+        <select>
+          <option>All Subscribers</option>
+          <option>Leads</option>
+          <option>Customers</option>
+          <option>Custom Segment</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Exclude</label>
+        <select>
+          <option>None</option>
+          <option>Already Purchased</option>
+          <option>Inactive 30+ days</option>
+          <option>Unsubscribed</option>
+        </select>
+      </div>
+
+      <div style="padding: 12px; background: var(--hover-bg); border-radius: var(--radius-sm); margin-top: 16px;">
+        <div style="font-size: 13px; font-weight: 600; color: var(--text-primary);">Recipients: ~4,230 subscribers</div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">This includes all active subscribers in the selected segment</div>
+      </div>
+    `;
+  } else if (campaignFormStep === 2) {
+    document.getElementById('modalTitle').textContent = 'Create Campaign — Email Content';
+    nextBtn.textContent = 'Next →';
+    backBtn.style.display = 'block';
+    modal.style.maxWidth = '800px';
+
+    content.innerHTML = `
+      <div class="step-indicator">
+        <div class="step-dot done">✓</div>
+        <span>Basics</span>
+        <span>—</span>
+        <div class="step-dot active">2</div>
+        <span>Email Content</span>
+        <span>—</span>
+        <span style="color: var(--text-muted);">Schedule & Send</span>
+      </div>
+
+      <div class="email-builder">
+        <div class="email-header">
+          <div class="email-header-row">
+            <label>From:</label>
+            <select>
+              <option>Laat los team</option>
+            </select>
+          </div>
+          <div class="email-header-row">
+            <label>Reply-to:</label>
+            <input type="email" value="info@laatlos.nl">
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+          <div class="email-header-row">
+            <label>Subject:</label>
+            <input type="text" value="Jouw reis naar innerlijke rust">
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" style="flex: 1; font-size: 11px;" onclick="showToast('Generating AI variants...')">🤖 AI: Generate 3 variants</button>
+          </div>
+          <div class="email-header-row">
+            <label>Preview:</label>
+            <input type="text" value="Open deze mail voor een speciaal...">
+          </div>
+        </div>
+
+        <div class="email-editor-wrapper" style="margin-top: 12px;">
+          <div class="editor-toolbar">
+            <button class="editor-tool">B</button>
+            <button class="editor-tool">I</button>
+            <button class="editor-tool">U</button>
+            <div class="editor-tool separator"></div>
+            <button class="editor-tool">H1</button>
+            <button class="editor-tool">H2</button>
+            <div class="editor-tool separator"></div>
+            <button class="editor-tool">Link</button>
+            <button class="editor-tool">Image</button>
+            <button class="editor-tool">—</button>
+          </div>
+          <div contenteditable="true" class="editor-content">Hoi {{first_name}},
+
+We hebben iets speciaals voor je voorbereid...
+
+[Bestel nu →]
+
+Groetjes,
+Team Laat Los</div>
+        </div>
+
+        <div class="email-footer">
+          <div class="email-personalization">
+            <label>Personalization:</label>
+            <select>
+              <option>{{first_name}}</option>
+              <option>{{last_name}}</option>
+              <option>{{customer_since}}</option>
+            </select>
+          </div>
+          <div class="email-dynamic">
+            <label>Dynamic block:</label>
+            <select>
+              <option>Show only if:</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="ai-assistant-panel">
+          <div class="ai-action" onclick="showToast('Analyzing email...')">Improve this email</div>
+          <div class="ai-action" onclick="showToast('Checking spam triggers...')">Check spam triggers</div>
+          <div class="ai-action" onclick="showToast('Translating...')">Translate to: DE / PL / CS</div>
+          <div class="ai-action" onclick="showToast('Predicting: ~34% open rate')">Predict open rate</div>
+        </div>
+      </div>
+    `;
+  } else if (campaignFormStep === 3) {
+    document.getElementById('modalTitle').textContent = 'Create Campaign — Schedule & Send';
+    nextBtn.textContent = 'Send Campaign';
+    backBtn.style.display = 'block';
+    modal.style.maxWidth = '600px';
+
+    content.innerHTML = `
+      <div class="step-indicator">
+        <div class="step-dot done">✓</div>
+        <span>Basics</span>
+        <span>—</span>
+        <div class="step-dot done">✓</div>
+        <span>Email Content</span>
+        <span>—</span>
+        <div class="step-dot active">3</div>
+        <span>Schedule & Send</span>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <input type="radio" name="timing" value="now" checked>
+          <label style="margin: 0; font-weight: 600; cursor: pointer;">Send now</label>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <input type="radio" name="timing" value="scheduled">
+          <label style="margin: 0; font-weight: 600; cursor: pointer;">Schedule for:</label>
+          <input type="date" style="padding: 6px 8px;">
+          <input type="time" style="padding: 6px 8px;">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <input type="radio" name="timing" value="smart">
+          <label style="margin: 0; font-weight: 600; cursor: pointer;">Smart Send (AI picks optimal time)</label>
+        </div>
+      </div>
+
+      <div style="padding: 12px; background: var(--hover-bg); border-radius: var(--radius-sm); margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+          <input type="checkbox">
+          <label style="margin: 0; font-weight: 600; cursor: pointer;">A/B Test Subject Line?</label>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary);">AI will generate variants and test automatically</div>
+      </div>
+
+      <div style="padding: 12px; background: var(--hover-bg); border-radius: var(--radius-sm); margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+          <input type="checkbox">
+          <label style="margin: 0; font-weight: 600; cursor: pointer;">Throttle sending?</label>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary);">Max <input type="number" value="500" style="width: 60px; padding: 4px;"> emails per hour (for warmup)</div>
+      </div>
+
+      <button class="btn" style="width: 100%; margin-bottom: 12px;" onclick="showToast('Sending test email...')">📧 Send Test Email</button>
+    `;
+  }
+}
+
+function nextStep() {
+  if (campaignFormStep < 3) {
+    campaignFormStep++;
+    renderCampaignForm();
+  } else {
+    showToast('Campaign scheduled successfully!');
+    closeCampaignForm();
+  }
+}
+
+function prevStep() {
+  if (campaignFormStep > 1) {
+    campaignFormStep--;
+    renderCampaignForm();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// SEQUENCE EDITOR
+// ═══════════════════════════════════════════════════
+function editSequence() {
+  const editor = document.getElementById('timeline-editor');
+  editor.style.display = editor.style.display === 'none' ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════
+function toggleApiKeyVisibility(id) {
+  const input = document.getElementById(id);
+  if (input.type === 'password') {
+    input.type = 'text';
+  } else {
+    input.type = 'password';
+  }
+}
+
+function toggleSetting(e) {
+  e.target.classList.toggle('on');
+  showToast('Setting updated');
+}
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+function showToast(message) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.style.cssText = 'padding: 12px 20px; background: #1A1A1A; color: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.15); animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;';
+  toast.textContent = '✓ ' + message;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelector('.sidebar-icon').classList.add('active');
+
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(16px); }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Initialize all interactive features
+  initProjectPills();
+  initCampaignTabs();
+  initSequenceTogles();
+  initSubscriberLinks();
+  initSubscriberSearch();
+  initCalendarDays();
+  initTableActions();
+});
+</script>
+
+</body>
+</html>

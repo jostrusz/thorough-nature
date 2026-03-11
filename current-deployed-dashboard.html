@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EverChapter Admin — Orders HQ (Current Deployed)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ═══ Reset & Base ═══ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #fafafa;
+    color: #1A1D2E;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ═══ Dashboard Container ═══ */
+  .dashboard {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px 48px 32px;
+    animation: dashFadeIn 0.4s ease;
+    margin-top: -12px;
+  }
+
+  @keyframes dashFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ═══ Page Header ═══ */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #1A1D2E;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .count-badge {
+    background: rgba(108,92,231,0.08);
+    color: #6C5CE7;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+  }
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* ═══ Buttons ═══ */
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.07);
+    background: linear-gradient(135deg, #FFFFFF 0%, #FAFBFF 100%);
+    color: #6B7185;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: inherit;
+  }
+  .btn-outline:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 0 0 3px rgba(108,92,231,0.08);
+    border-color: rgba(108,92,231,0.25);
+  }
+  .btn-outline:active {
+    transform: translateY(1px) scale(0.97);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid #6C5CE7;
+    background: #6C5CE7;
+    color: #fff;
+    box-shadow: 0 1px 4px rgba(108,92,231,0.25);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: inherit;
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(108,92,231,0.35), 0 0 0 3px rgba(108,92,231,0.12);
+  }
+  .btn-primary:active {
+    transform: translateY(1px) scale(0.97);
+    box-shadow: 0 1px 4px rgba(108,92,231,0.3);
+  }
+
+  /* ═══ Stat Cards Grid ═══ */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: #FFFFFF;
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 24px rgba(0,0,0,0.03);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04);
+    border-color: rgba(0,0,0,0.12);
+  }
+  .stat-card:active {
+    transform: translateY(0) scale(0.99);
+  }
+  .stat-card .top-line {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .stat-card .label {
+    font-size: 13px;
+    color: #6B7185;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .stat-card .value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1A1D2E;
+    letter-spacing: -0.5px;
+  }
+  .trend-badge {
+    position: absolute;
+    top: 16px; right: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .trend-up { background: rgba(0,179,122,0.08); color: #00B37A; }
+  .trend-down { background: rgba(231,76,60,0.07); color: #E74C3C; }
+  .trend-neutral { background: rgba(0,0,0,0.04); color: #9CA3B8; }
+
+  /* ═══ Main Card ═══ */
+  .main-card {
+    background: #FFFFFF;
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 24px rgba(0,0,0,0.03);
+    transition: box-shadow 0.3s ease;
+  }
+
+  /* ═══ Tabs ═══ */
+  .tabs-row {
+    background: rgba(0,0,0,0.03);
+    border-radius: 8px;
+    padding: 3px;
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    margin: 12px 16px 0;
+  }
+  .tab {
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6B7185;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+    font-family: inherit;
+  }
+  .tab:hover {
+    background: rgba(0,0,0,0.04);
+    transform: translateY(-1px);
+  }
+  .tab:active { transform: scale(0.97); }
+  .tab.active {
+    font-weight: 600;
+    color: #1A1D2E;
+    background: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .tab .tab-count {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+    background: rgba(0,0,0,0.04);
+    color: #9CA3B8;
+  }
+  .tab.active .tab-count {
+    background: rgba(108,92,231,0.08);
+    color: #6C5CE7;
+  }
+
+  /* ═══ Toolbar ═══ */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+  }
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    background: #fafafa;
+    border-radius: 6px;
+    padding: 8px 12px;
+    border: 1px solid rgba(0,0,0,0.07);
+    transition: all 0.2s ease;
+  }
+  .search-box:focus-within {
+    border-color: rgba(108,92,231,0.35);
+    box-shadow: 0 0 0 3px rgba(108,92,231,0.08);
+  }
+  .search-box input {
+    border: none;
+    background: transparent;
+    outline: none;
+    flex: 1;
+    font-size: 13px;
+    color: #1A1D2E;
+    font-family: inherit;
+  }
+  .search-box input::placeholder { color: #9CA3B8; }
+
+  /* ═══ Table ═══ */
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    padding: 11px 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9CA3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    background: #F5F6FA;
+    user-select: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  th.no-sort { cursor: default; }
+  td {
+    padding: 14px 20px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    vertical-align: middle;
+  }
+  tr.data-row { transition: background 0.15s ease; cursor: pointer; }
+  tr.data-row:hover { background: #F8F9FC; }
+
+  /* ═══ Checkbox ═══ */
+  .checkbox {
+    width: 18px; height: 18px;
+    border: 2px solid #C9CCCF;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    transition: all 0.15s ease;
+  }
+  .checkbox.checked {
+    background: #6C5CE7;
+    border-color: #6C5CE7;
+  }
+
+  /* ═══ Customer Cell ═══ */
+  .customer-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .gateway-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: #f0f1f5;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .gateway-icon img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+  }
+  .gateway-icon.fallback {
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    padding: 0;
+  }
+  .customer-name { font-weight: 500; font-size: 13px; color: #1A1D2E; }
+  .customer-email { font-size: 11px; color: #9CA3B8; margin-top: 1px; }
+
+  /* ═══ Badges ═══ */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .badge-paid { background: rgba(0,179,122,0.08); color: #00B37A; }
+  .badge-paid .dot { background: #00B37A; }
+  .badge-pending { background: rgba(212,160,23,0.08); color: #D4A017; }
+  .badge-pending .dot { background: #D4A017; }
+  .badge-authorized { background: rgba(59,130,246,0.07); color: #3B82F6; }
+  .badge-authorized .dot { background: #3B82F6; }
+  .badge-refunded { background: rgba(0,0,0,0.04); color: #6B7185; }
+  .badge-refunded .dot { background: #6B7185; }
+
+  .badge-unfulfilled { background: rgba(212,160,23,0.08); color: #D4A017; }
+  .badge-unfulfilled .dot { background: #D4A017; }
+  .badge-waiting { background: rgba(212,160,23,0.08); color: #D4A017; }
+  .badge-waiting .dot { background: #D4A017; }
+  .badge-imported { background: rgba(59,130,246,0.07); color: #3B82F6; }
+  .badge-imported .dot { background: #3B82F6; }
+  .badge-processed { background: rgba(59,130,246,0.07); color: #3B82F6; }
+  .badge-processed .dot { background: #3B82F6; }
+  .badge-packed { background: rgba(108,92,231,0.08); color: #6C5CE7; }
+  .badge-packed .dot { background: #6C5CE7; }
+  .badge-dispatched { background: rgba(59,130,246,0.07); color: #3B82F6; }
+  .badge-dispatched .dot { background: #3B82F6; }
+  .badge-in-transit { background: rgba(59,130,246,0.07); color: #3B82F6; }
+  .badge-in-transit .dot { background: #3B82F6; }
+  .badge-delivered { background: rgba(0,179,122,0.08); color: #00B37A; }
+  .badge-delivered .dot { background: #00B37A; }
+  .badge-issue { background: rgba(231,76,60,0.07); color: #E74C3C; }
+  .badge-issue .dot { background: #E74C3C; }
+
+  /* ═══ Order # ═══ */
+  .order-num {
+    color: #6C5CE7;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* ═══ Country Cell ═══ */
+  .country {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .country .flag { font-size: 16px; }
+
+  /* ═══ Amount ═══ */
+  .amount {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: #1A1D2E;
+  }
+
+  /* ═══ Date ═══ */
+  .date { color: #9CA3B8; white-space: nowrap; }
+
+  /* ═══ Items ═══ */
+  .items-count { color: #9CA3B8; }
+
+  /* ═══ Row Actions ═══ */
+  .row-actions {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  tr.data-row:hover .row-actions { opacity: 1; }
+  .row-actions:hover { background: rgba(0,0,0,0.05); }
+
+  /* ═══ Pagination ═══ */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 16px 20px;
+    border-top: 1px solid rgba(0,0,0,0.07);
+  }
+  .pagination-info {
+    font-size: 13px;
+    color: #9CA3B8;
+  }
+  .page-btn {
+    width: 32px; height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.07);
+    background: #FFFFFF;
+    color: #6B7185;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: inherit;
+  }
+  .page-btn:hover {
+    background: #F8F9FB;
+    border-color: rgba(0,0,0,0.14);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .page-btn:active { transform: translateY(1px) scale(0.95); }
+  .page-btn.active {
+    background: #6C5CE7;
+    color: #fff;
+    border-color: #6C5CE7;
+    font-weight: 600;
+  }
+
+  /* ═══ Sort Icon ═══ */
+  .sort-icon { margin-left: 4px; font-size: 10px; }
+  .sort-icon.active { color: #6C5CE7; }
+  .sort-icon.hidden { opacity: 0; }
+
+  /* ═══ Responsive ═══ */
+  @media (max-width: 1400px) {
+    .dashboard { padding-left: 32px; padding-right: 32px; }
+  }
+  @media (max-width: 1100px) {
+    .dashboard { padding-left: 20px; padding-right: 20px; }
+  }
+  @media (max-width: 768px) {
+    .dashboard { padding-left: 12px; padding-right: 12px; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- ═══ Page Header ═══ -->
+  <div class="page-header">
+    <h1>
+      Orders
+      <span class="count-badge">847</span>
+    </h1>
+    <div class="header-actions">
+      <button class="btn-outline">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 14v3h14v-3M10 3v10M6 9l4 4 4-4"/></svg>
+        Export
+      </button>
+      <button class="btn-primary">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4v12M4 10h12"/></svg>
+        Create Order
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ Stat Cards ═══ -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="top-line" style="background: #00B37A"></div>
+      <div class="label">Orders Today</div>
+      <div class="value">12</div>
+      <span class="trend-badge trend-up">▲ 33% vs yesterday</span>
+    </div>
+    <div class="stat-card">
+      <div class="top-line" style="background: #00B37A"></div>
+      <div class="label">Revenue Today</div>
+      <div class="value">€347.40</div>
+      <span class="trend-badge trend-up">▲ 18% vs yesterday</span>
+    </div>
+    <div class="stat-card">
+      <div class="top-line" style="background: #E74C3C"></div>
+      <div class="label">Unfulfilled</div>
+      <div class="value">23</div>
+      <span class="trend-badge trend-neutral">awaiting shipment</span>
+    </div>
+    <div class="stat-card">
+      <div class="top-line" style="background: #3B82F6"></div>
+      <div class="label">In Transit</div>
+      <div class="value">156</div>
+      <span class="trend-badge trend-neutral">on the way</span>
+    </div>
+  </div>
+
+  <!-- ═══ Main Card ═══ -->
+  <div class="main-card">
+
+    <!-- Tabs -->
+    <div class="tabs-row">
+      <div class="tab active">All <span class="tab-count">847</span></div>
+      <div class="tab">Waiting</div>
+      <div class="tab">Imported</div>
+      <div class="tab">Processed</div>
+      <div class="tab">Packed</div>
+      <div class="tab">Dispatched</div>
+      <div class="tab">In Transit</div>
+      <div class="tab">Delivered</div>
+      <div class="tab">Issues</div>
+      <div class="tab">Refunded</div>
+      <div class="tab" style="border-left: 1px solid rgba(0,0,0,0.06); margin-left: 4px; padding-left: 18px;">NL/BE</div>
+      <div class="tab">DE/AT/LU</div>
+      <div class="tab">CZ/SK</div>
+      <div class="tab">PL</div>
+      <div class="tab">SWE</div>
+      <div class="tab">HU</div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#9CA3B8" stroke-width="1.8"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4"/></svg>
+        <input type="text" placeholder="Search orders, customers, emails...">
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th class="no-sort" style="width: 36px; text-align: center;">
+              <div class="checkbox"></div>
+            </th>
+            <th style="min-width: 120px;">Order <span class="sort-icon hidden">▼</span></th>
+            <th>Customer <span class="sort-icon hidden">▼</span></th>
+            <th class="no-sort">Payment</th>
+            <th class="no-sort">Fulfillment</th>
+            <th class="no-sort">Items</th>
+            <th>Total <span class="sort-icon hidden">▼</span></th>
+            <th class="no-sort">Country</th>
+            <th>Date <span class="sort-icon active">▼</span></th>
+            <th class="no-sort" style="width: 48px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Row 1 -->
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">NL2026-847</span></td>
+            <td>
+              <div class="customer-cell">
+                <div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/ideal.svg" alt="iDEAL"></div>
+                <div>
+                  <div class="customer-name">Sophie de Vries</div>
+                  <div class="customer-email">sophie.devries@gmail.com</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-waiting"><span class="dot"></span>Waiting</span></td>
+            <td><span class="items-count">2 items</span></td>
+            <td><span class="amount">€34.90</span></td>
+            <td><span class="country"><span class="flag">🇳🇱</span> NL</span></td>
+            <td><span class="date">Today at 2:34 PM</span></td>
+            <td style="text-align: center;">
+              <div class="row-actions">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 2 -->
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">BE2026-846</span></td>
+            <td>
+              <div class="customer-cell">
+                <div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/bancontact.svg" alt="Bancontact"></div>
+                <div>
+                  <div class="customer-name">Marc Janssens</div>
+                  <div class="customer-email">marc.j@hotmail.be</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-imported"><span class="dot"></span>Imported</span></td>
+            <td><span class="items-count">1 item</span></td>
+            <td><span class="amount">€24.95</span></td>
+            <td><span class="country"><span class="flag">🇧🇪</span> BE</span></td>
+            <td><span class="date">Today at 1:12 PM</span></td>
+            <td style="text-align: center;">
+              <div class="row-actions">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 3 -->
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">DE2026-845</span></td>
+            <td>
+              <div class="customer-cell">
+                <div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/klarna.svg" alt="Klarna"></div>
+                <div>
+                  <div class="customer-name">Anna Müller</div>
+                  <div class="customer-email">anna.mueller@web.de</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-processed"><span class="dot"></span>Processed</span></td>
+            <td><span class="items-count">1 item</span></td>
+            <td><span class="amount">€29.95</span></td>
+            <td><span class="country"><span class="flag">🇩🇪</span> DE</span></td>
+            <td><span class="date">Today at 11:45 AM</span></td>
+            <td style="text-align: center;">
+              <div class="row-actions">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 4 -->
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">PL2026-844</span></td>
+            <td>
+              <div class="customer-cell">
+                <div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/przelewy24.svg" alt="Przelewy24"></div>
+                <div>
+                  <div class="customer-name">Katarzyna Nowak</div>
+                  <div class="customer-email">k.nowak@wp.pl</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-packed"><span class="dot"></span>Packed</span></td>
+            <td><span class="items-count">3 items</span></td>
+            <td><span class="amount">€52.85</span></td>
+            <td><span class="country"><span class="flag">🇵🇱</span> PL</span></td>
+            <td><span class="date">Today at 10:23 AM</span></td>
+            <td style="text-align: center;">
+              <div class="row-actions">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 5 -->
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">SE2026-843</span></td>
+            <td>
+              <div class="customer-cell">
+                <div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/klarna.svg" alt="Klarna"></div>
+                <div>
+                  <div class="customer-name">Erik Lindström</div>
+                  <div class="customer-email">erik.lindstrom@outlook.se</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-dispatched"><span class="dot"></span>Dispatched</span></td>
+            <td><span class="items-count">1 item</span></td>
+            <td><span class="amount">€27.50</span></td>
+            <td><span class="country"><span class="flag">🇸🇪</span> SE</span></td>
+            <td><span class="date">Today at 9:08 AM</span></td>
+            <td style="text-align: center;">
+              <div class="row-actions">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 6 -->
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">NL2026-842</span></td>
+            <td>
+              <div class="customer-cell">
+                <div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/paypal.svg" alt="PayPal"></div>
+                <div>
+                  <div class="customer-name">Jan van der Berg</div>
+                  <div class="customer-email">jan.vdb@ziggo.nl</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-in-transit"><span class="dot"></span>In Transit</span></td>
+            <td><span class="items-count">2 items</span></td>
+            <td><span class="amount">€49.90</span></td>
+            <td><span class="country"><span class="flag">🇳🇱</span> NL</span></td>
+            <td><span class="date">Yesterday at 8:47 PM</span></td>
+            <td style="text-align: center;">
+              <div class="row-actions">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 7 -->
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">CZ2026-841</span></td>
+            <td>
+              <div class="customer-cell">
+                <div class="gateway-icon fallback" style="background: #444;">C</div>
+                <div>
+                  <div class="customer-name">Petr Dvořák</div>
+                  <div class="customer-email">petr.dvorak@seznam.cz</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-delivered"><span class="dot"></span>Delivered</span></td>
+            <td><span class="items-count">1 item</span></td>
+            <td><span class="amount">€19.90</span></td>
+            <td><span class="country"><span class="flag">🇨🇿</span> CZ</span></td>
+            <td><span class="date">Yesterday at 6:15 PM</span></td>
+            <td style="text-align: center;">
+              <div class="row-actions">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 8 -->
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">AT2026-840</span></td>
+            <td>
+              <div class="customer-cell">
+                <div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/klarna.svg" alt="Klarna"></div>
+                <div>
+                  <div class="customer-name">Lisa Huber</div>
+                  <div class="customer-email">lisa.huber@gmx.at</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-in-transit"><span class="dot"></span>In Transit</span></td>
+            <td><span class="items-count">1 item</span></td>
+            <td><span class="amount">€29.95</span></td>
+            <td><span class="country"><span class="flag">🇦🇹</span> AT</span></td>
+            <td><span class="date">Yesterday at 3:22 PM</span></td>
+            <td style="text-align: center;">
+              <div class="row-actions">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 9 -->
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">NL2026-839</span></td>
+            <td>
+              <div class="customer-cell">
+                <div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/wallets/google-pay.svg" alt="Google Pay"></div>
+                <div>
+                  <div class="customer-name">Emma Bakker</div>
+                  <div class="customer-email">emma.bakker@gmail.com</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-delivered"><span class="dot"></span>Delivered</span></td>
+            <td><span class="items-count">1 item</span></td>
+            <td><span class="amount">€24.95</span></td>
+            <td><span class="country"><span class="flag">🇳🇱</span> NL</span></td>
+            <td><span class="date">Yesterday at 1:50 PM</span></td>
+            <td style="text-align: center;">
+              <div class="row-actions">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 10 -->
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">BE2026-838</span></td>
+            <td>
+              <div class="customer-cell">
+                <div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/ideal.svg" alt="iDEAL"></div>
+                <div>
+                  <div class="customer-name">Thomas Peeters</div>
+                  <div class="customer-email">thomas.p@telenet.be</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-refunded"><span class="dot"></span>Refunded</span></td>
+            <td><span class="badge badge-delivered"><span class="dot"></span>Delivered</span></td>
+            <td><span class="items-count">1 item</span></td>
+            <td><span class="amount">€24.95</span></td>
+            <td><span class="country"><span class="flag">🇧🇪</span> BE</span></td>
+            <td><span class="date">Yesterday at 11:30 AM</span></td>
+            <td style="text-align: center;">
+              <div class="row-actions">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 11 -->
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">HU2026-837</span></td>
+            <td>
+              <div class="customer-cell">
+                <div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/cards/visa.svg" alt="Visa"></div>
+                <div>
+                  <div class="customer-name">Zsófia Nagy</div>
+                  <div class="customer-email">zsofia.nagy@freemail.hu</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-waiting"><span class="dot"></span>Waiting</span></td>
+            <td><span class="items-count">2 items</span></td>
+            <td><span class="amount">€39.90</span></td>
+            <td><span class="country"><span class="flag">🇭🇺</span> HU</span></td>
+            <td><span class="date">Yesterday at 9:05 AM</span></td>
+            <td style="text-align: center;">
+              <div class="row-actions">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 12 -->
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">LU2026-836</span></td>
+            <td>
+              <div class="customer-cell">
+                <div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/paypal.svg" alt="PayPal"></div>
+                <div>
+                  <div class="customer-name">Pierre Lambert</div>
+                  <div class="customer-email">p.lambert@pt.lu</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-issue"><span class="dot"></span>Stock Issue</span></td>
+            <td><span class="items-count">1 item</span></td>
+            <td><span class="amount">€24.95</span></td>
+            <td><span class="country"><span class="flag">🇱🇺</span> LU</span></td>
+            <td><span class="date">Mar 1 at 4:18 PM</span></td>
+            <td style="text-align: center;">
+              <div class="row-actions">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <span class="pagination-info">Showing 1-20 of 847 orders</span>
+      <div style="display: flex; gap: 4px; margin-left: 16px;">
+        <button class="page-btn" disabled style="opacity: 0.4;">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">4</button>
+        <button class="page-btn">5</button>
+        <button class="page-btn">›</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

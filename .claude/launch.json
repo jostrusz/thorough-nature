@@ -38,7 +38,7 @@
     {
       "name": "loslatenboek",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["http-server", "storefront/public", "-p", "8090", "-c-1"],
+      "runtimeArgs": ["http-server", "storefront/src/projects/loslatenboek/pages", "-p", "8090", "-c-1"],
       "port": 8090
     },
     {
@@ -52,6 +52,30 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["http-server", "storefront/src/projects/slapp-taget/pages", "-p", "8096", "-c-1"],
       "port": 8096
+    },
+    {
+      "name": "email-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["http-server", ".", "-p", "8097", "-c-1"],
+      "port": 8097
+    },
+    {
+      "name": "odpusc-ksiazka",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["http-server", "storefront/src/projects/odpusc-ksiazka/pages", "-p", "8098", "-c-1"],
+      "port": 8098
+    },
+    {
+      "name": "lass-los",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["http-server", "storefront/src/projects/lass-los/pages", "-p", "8099", "-c-1"],
+      "port": 8099
+    },
+    {
+      "name": "psi-superzivot",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["http-server", "storefront/src/projects/psi-superzivot/pages", "-p", "8100", "-c-1"],
+      "port": 8100
     }
   ]
 }

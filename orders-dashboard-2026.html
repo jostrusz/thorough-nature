@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orders — EverChapter Admin</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F5F6FA;
+  --bg-elevated: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-hover: #F8F9FC;
+  --border: rgba(0,0,0,0.07);
+  --border-active: rgba(0,0,0,0.14);
+  --text-primary: #1A1D2E;
+  --text-secondary: #6B7185;
+  --text-muted: #9CA3B8;
+  --accent: #6C5CE7;
+  --accent-light: rgba(108,92,231,0.08);
+  --green: #00B37A;
+  --green-bg: rgba(0,179,122,0.08);
+  --red: #E74C3C;
+  --red-bg: rgba(231,76,60,0.07);
+  --yellow: #D4A017;
+  --yellow-bg: rgba(212,160,23,0.08);
+  --blue: #3B82F6;
+  --blue-bg: rgba(59,130,246,0.07);
+  --orange: #E67E22;
+  --orange-bg: rgba(230,126,34,0.07);
+  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 24px rgba(0,0,0,0.03);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  padding: 32px 48px;
+}
+
+/* ═══════════════════════════════════════ */
+/* PAGE HEADER                            */
+/* ═══════════════════════════════════════ */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.page-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+}
+
+.order-count {
+  padding: 3px 10px;
+  background: var(--accent-light);
+  color: var(--accent);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.page-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ═══════════════════════════════════════ */
+/* BUTTONS                                */
+/* ═══════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  font-family: inherit;
+}
+.btn svg { width: 15px; height: 15px; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(108,92,231,0.25);
+}
+.btn-primary:hover {
+  background: #5B4BD5;
+  box-shadow: 0 2px 8px rgba(108,92,231,0.35);
+}
+
+.btn-outline {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-outline:hover {
+  border-color: var(--border-active);
+  background: var(--bg-hover);
+}
+
+/* ═══════════════════════════════════════ */
+/* TOOLBAR — Filters + Search             */
+/* ═══════════════════════════════════════ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 14px 20px;
+  box-shadow: var(--shadow);
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 2px;
+  background: rgba(0,0,0,0.03);
+  border-radius: 8px;
+  padding: 3px;
+}
+.filter-tab {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  background: none;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.filter-tab:hover { color: var(--text-secondary); background: rgba(0,0,0,0.02); }
+.filter-tab.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.filter-tab .tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 5px;
+}
+.filter-tab.active .tab-count {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+.filter-tab:not(.active) .tab-count {
+  background: rgba(0,0,0,0.04);
+  color: var(--text-muted);
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  color: var(--text-muted);
+  font-size: 13px;
+  min-width: 220px;
+  transition: all 0.15s;
+}
+.search-input:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+.search-input svg { width: 15px; height: 15px; opacity: 0.4; flex-shrink: 0; }
+.search-input input {
+  border: none;
+  background: none;
+  outline: none;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text-primary);
+  width: 100%;
+}
+.search-input input::placeholder { color: var(--text-muted); }
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.icon-btn:hover { background: var(--bg-hover); border-color: var(--border-active); }
+.icon-btn svg { width: 15px; height: 15px; }
+
+/* ═══════════════════════════════════════ */
+/* ORDERS TABLE                           */
+/* ═══════════════════════════════════════ */
+.table-wrapper {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orders-table th {
+  text-align: left;
+  padding: 11px 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  user-select: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.orders-table th:hover { color: var(--text-secondary); }
+.orders-table th .sort-icon {
+  display: inline-block;
+  margin-left: 4px;
+  opacity: 0.3;
+  font-size: 10px;
+}
+.orders-table th.sorted .sort-icon { opacity: 1; color: var(--accent); }
+
+.orders-table td {
+  padding: 14px 20px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  transition: background 0.1s;
+  vertical-align: middle;
+}
+
+.orders-table tbody tr {
+  cursor: pointer;
+}
+.orders-table tbody tr:hover td {
+  background: var(--bg-hover);
+}
+.orders-table tbody tr:last-child td { border-bottom: none; }
+
+/* Checkbox column */
+.col-check { width: 44px; text-align: center !important; }
+.row-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--border-active);
+  border-radius: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  vertical-align: middle;
+}
+.row-checkbox:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.row-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -1px;
+  left: 2px;
+  font-size: 11px;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Order ID */
+.order-id {
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+.order-id:hover { text-decoration: underline; }
+
+/* Customer cell — gateway icon + name */
+.customer-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.gateway-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #f0f1f5;
+  padding: 4px;
+  overflow: hidden;
+}
+.gateway-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.customer-info { flex: 1; min-width: 0; }
+.customer-name { font-weight: 500; font-size: 13px; }
+.customer-email { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+/* Status badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+.badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge.paid { background: var(--green-bg); color: var(--green); }
+.badge.paid::before { background: var(--green); }
+.badge.pending { background: var(--yellow-bg); color: var(--yellow); }
+.badge.pending::before { background: var(--yellow); }
+.badge.failed { background: var(--red-bg); color: var(--red); }
+.badge.failed::before { background: var(--red); }
+.badge.refunded { background: rgba(0,0,0,0.04); color: var(--text-secondary); }
+.badge.refunded::before { background: var(--text-secondary); }
+.badge.authorized { background: var(--blue-bg); color: var(--blue); }
+.badge.authorized::before { background: var(--blue); }
+
+.badge.fulfilled { background: var(--green-bg); color: var(--green); }
+.badge.fulfilled::before { background: var(--green); }
+.badge.unfulfilled { background: var(--orange-bg); color: var(--orange); }
+.badge.unfulfilled::before { background: var(--orange); }
+.badge.shipped { background: var(--blue-bg); color: var(--blue); }
+.badge.shipped::before { background: var(--blue); }
+.badge.delivered { background: var(--green-bg); color: var(--green); }
+.badge.delivered::before { background: var(--green); }
+.badge.returned { background: rgba(0,0,0,0.04); color: var(--text-secondary); }
+.badge.returned::before { background: var(--text-secondary); }
+
+/* Gateway icon */
+.gateway-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.gateway-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+/* Amount */
+.order-amount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+.order-amount.striked {
+  text-decoration: line-through;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Items count */
+.items-count {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+/* Country flag */
+.country {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.country-flag {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Date */
+.order-date {
+  color: var(--text-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Row actions */
+.row-actions {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.orders-table tbody tr:hover .row-actions { opacity: 1; }
+
+/* ═══════════════════════════════════════ */
+/* TABLE FOOTER — Pagination              */
+/* ═══════════════════════════════════════ */
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.table-footer-info {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.table-footer-info strong {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.page-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.page-btn:hover { background: rgba(0,0,0,0.04); }
+.page-btn.active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+.page-btn.disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.page-btn svg { width: 14px; height: 14px; }
+
+/* ═══════════════════════════════════════ */
+/* ANIMATIONS                             */
+/* ═══════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.toolbar { animation: fadeUp 0.3s ease both; }
+.table-wrapper { animation: fadeUp 0.3s ease both; animation-delay: 0.05s; }
+
+/* ═══════════════════════════════════════ */
+/* SCROLLBAR                              */
+/* ═══════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.18); }
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>Orders</h1>
+    <span class="order-count">1,247 orders</span>
+  </div>
+  <div class="page-header-right">
+    <button class="btn btn-outline">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export
+    </button>
+    <button class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Create order
+    </button>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <div class="filter-tabs">
+      <button class="filter-tab active">All<span class="tab-count">1,247</span></button>
+      <button class="filter-tab">Paid<span class="tab-count">1,089</span></button>
+      <button class="filter-tab">Unfulfilled<span class="tab-count">23</span></button>
+      <button class="filter-tab">Shipped<span class="tab-count">84</span></button>
+      <button class="filter-tab">Refunded<span class="tab-count">31</span></button>
+      <button class="filter-tab">Failed<span class="tab-count">20</span></button>
+    </div>
+  </div>
+  <div class="toolbar-right">
+    <div class="search-input">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search by order, customer, email...">
+    </div>
+    <div class="icon-btn" title="Filter">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+    </div>
+    <div class="icon-btn" title="Columns">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- TABLE -->
+<div class="table-wrapper">
+  <table class="orders-table">
+    <thead>
+      <tr>
+        <th class="col-check"><input type="checkbox" class="row-checkbox"></th>
+        <th class="sorted">Order <span class="sort-icon">▼</span></th>
+        <th>Customer</th>
+        <th>Payment</th>
+        <th>Fulfillment</th>
+        <th>Items</th>
+        <th>Total</th>
+        <th>Country</th>
+        <th>Date <span class="sort-icon">▼</span></th>
+        <th style="width:40px"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-check"><input type="checkbox" class="row-checkbox"></td>
+        <td><a class="order-id" href="#">#EC-4821</a></td>
+        <td>
+          <div class="customer-cell">
+            <div class="gateway-icon" title="iDEAL"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/ideal.svg" alt="iDEAL"></div>
+            <div class="customer-info">
+              <div class="customer-name">Sophie Vermeer</div>
+              <div class="customer-email">sophie@gmail.com</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge paid">Paid</span></td>
+        <td><span class="badge unfulfilled">Unfulfilled</span></td>
+        <td><span class="items-count">1 item</span></td>
+        <td><span class="order-amount">€29.95</span></td>
+        <td><span class="country"><span class="country-flag">🇳🇱</span> NL</span></td>
+        <td><span class="order-date">28 Feb, 09:14</span></td>
+        <td>
+          <div class="row-actions">
+            <div class="icon-btn" style="border:none;background:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox" class="row-checkbox"></td>
+        <td><a class="order-id" href="#">#EC-4820</a></td>
+        <td>
+          <div class="customer-cell">
+            <div class="gateway-icon" title="Bancontact"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/bancontact.svg" alt="Bancontact"></div>
+            <div class="customer-info">
+              <div class="customer-name">Jan De Groot</div>
+              <div class="customer-email">jdegroot@outlook.nl</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge paid">Paid</span></td>
+        <td><span class="badge shipped">Shipped</span></td>
+        <td><span class="items-count">2 items</span></td>
+        <td><span class="order-amount">€54.90</span></td>
+        <td><span class="country"><span class="country-flag">🇧🇪</span> BE</span></td>
+        <td><span class="order-date">28 Feb, 08:51</span></td>
+        <td>
+          <div class="row-actions">
+            <div class="icon-btn" style="border:none;background:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox" class="row-checkbox"></td>
+        <td><a class="order-id" href="#">#EC-4819</a></td>
+        <td>
+          <div class="customer-cell">
+            <div class="gateway-icon" title="Google Pay"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/wallets/google-pay.svg" alt="Google Pay"></div>
+            <div class="customer-info">
+              <div class="customer-name">Lisa Peeters</div>
+              <div class="customer-email">lisa.p@hotmail.be</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge failed">Failed</span></td>
+        <td><span class="badge unfulfilled">Unfulfilled</span></td>
+        <td><span class="items-count">1 item</span></td>
+        <td><span class="order-amount">€29.95</span></td>
+        <td><span class="country"><span class="country-flag">🇧🇪</span> BE</span></td>
+        <td><span class="order-date">28 Feb, 08:23</span></td>
+        <td>
+          <div class="row-actions">
+            <div class="icon-btn" style="border:none;background:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox" class="row-checkbox"></td>
+        <td><a class="order-id" href="#">#EC-4818</a></td>
+        <td>
+          <div class="customer-cell">
+            <div class="gateway-icon" title="Klarna"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/klarna.svg" alt="Klarna"></div>
+            <div class="customer-info">
+              <div class="customer-name">Mark Willems</div>
+              <div class="customer-email">mark.w@gmail.com</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge paid">Paid</span></td>
+        <td><span class="badge delivered">Delivered</span></td>
+        <td><span class="items-count">1 item</span></td>
+        <td><span class="order-amount">€29.95</span></td>
+        <td><span class="country"><span class="country-flag">🇳🇱</span> NL</span></td>
+        <td><span class="order-date">27 Feb, 22:07</span></td>
+        <td>
+          <div class="row-actions">
+            <div class="icon-btn" style="border:none;background:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox" class="row-checkbox"></td>
+        <td><a class="order-id" href="#">#EC-4817</a></td>
+        <td>
+          <div class="customer-cell">
+            <div class="gateway-icon" title="PayPal"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/paypal.svg" alt="PayPal"></div>
+            <div class="customer-info">
+              <div class="customer-name">Anna Bakker</div>
+              <div class="customer-email">a.bakker@ziggo.nl</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge refunded">Refunded</span></td>
+        <td><span class="badge returned">Returned</span></td>
+        <td><span class="items-count">1 item</span></td>
+        <td><span class="order-amount striked">€29.95</span></td>
+        <td><span class="country"><span class="country-flag">🇳🇱</span> NL</span></td>
+        <td><span class="order-date">27 Feb, 19:44</span></td>
+        <td>
+          <div class="row-actions">
+            <div class="icon-btn" style="border:none;background:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox" class="row-checkbox"></td>
+        <td><a class="order-id" href="#">#EC-4816</a></td>
+        <td>
+          <div class="customer-cell">
+            <div class="gateway-icon" title="iDEAL"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/ideal.svg" alt="iDEAL"></div>
+            <div class="customer-info">
+              <div class="customer-name">Thomas Dijkstra</div>
+              <div class="customer-email">thomas.d@gmail.com</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge paid">Paid</span></td>
+        <td><span class="badge fulfilled">Fulfilled</span></td>
+        <td><span class="items-count">3 items</span></td>
+        <td><span class="order-amount">€82.85</span></td>
+        <td><span class="country"><span class="country-flag">🇩🇪</span> DE</span></td>
+        <td><span class="order-date">27 Feb, 17:32</span></td>
+        <td>
+          <div class="row-actions">
+            <div class="icon-btn" style="border:none;background:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox" class="row-checkbox"></td>
+        <td><a class="order-id" href="#">#EC-4815</a></td>
+        <td>
+          <div class="customer-cell">
+            <div class="gateway-icon" title="Bancontact"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/bancontact.svg" alt="Bancontact"></div>
+            <div class="customer-info">
+              <div class="customer-name">Eva Martens</div>
+              <div class="customer-email">eva.m@telenet.be</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge authorized">Authorized</span></td>
+        <td><span class="badge unfulfilled">Unfulfilled</span></td>
+        <td><span class="items-count">1 item</span></td>
+        <td><span class="order-amount">€29.95</span></td>
+        <td><span class="country"><span class="country-flag">🇧🇪</span> BE</span></td>
+        <td><span class="order-date">27 Feb, 16:18</span></td>
+        <td>
+          <div class="row-actions">
+            <div class="icon-btn" style="border:none;background:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox" class="row-checkbox"></td>
+        <td><a class="order-id" href="#">#EC-4814</a></td>
+        <td>
+          <div class="customer-cell">
+            <div class="gateway-icon" title="Klarna"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/klarna.svg" alt="Klarna"></div>
+            <div class="customer-info">
+              <div class="customer-name">Katarzyna Nowak</div>
+              <div class="customer-email">k.nowak@wp.pl</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge paid">Paid</span></td>
+        <td><span class="badge shipped">Shipped</span></td>
+        <td><span class="items-count">1 item</span></td>
+        <td><span class="order-amount">89.00 zł</span></td>
+        <td><span class="country"><span class="country-flag">🇵🇱</span> PL</span></td>
+        <td><span class="order-date">27 Feb, 14:55</span></td>
+        <td>
+          <div class="row-actions">
+            <div class="icon-btn" style="border:none;background:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox" class="row-checkbox"></td>
+        <td><a class="order-id" href="#">#EC-4813</a></td>
+        <td>
+          <div class="customer-cell">
+            <div class="gateway-icon" title="Google Pay"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/wallets/google-pay.svg" alt="Google Pay"></div>
+            <div class="customer-info">
+              <div class="customer-name">Erik Svensson</div>
+              <div class="customer-email">erik.s@gmail.com</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge paid">Paid</span></td>
+        <td><span class="badge fulfilled">Fulfilled</span></td>
+        <td><span class="items-count">1 item</span></td>
+        <td><span class="order-amount">249 kr</span></td>
+        <td><span class="country"><span class="country-flag">🇸🇪</span> SE</span></td>
+        <td><span class="order-date">27 Feb, 12:30</span></td>
+        <td>
+          <div class="row-actions">
+            <div class="icon-btn" style="border:none;background:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-check"><input type="checkbox" class="row-checkbox"></td>
+        <td><a class="order-id" href="#">#EC-4812</a></td>
+        <td>
+          <div class="customer-cell">
+            <div class="gateway-icon" title="PayPal"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/paypal.svg" alt="PayPal"></div>
+            <div class="customer-info">
+              <div class="customer-name">Petr Kovář</div>
+              <div class="customer-email">petr.k@seznam.cz</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge paid">Paid</span></td>
+        <td><span class="badge delivered">Delivered</span></td>
+        <td><span class="items-count">1 item</span></td>
+        <td><span class="order-amount">499 Kč</span></td>
+        <td><span class="country"><span class="country-flag">🇨🇿</span> CZ</span></td>
+        <td><span class="order-date">27 Feb, 10:12</span></td>
+        <td>
+          <div class="row-actions">
+            <div class="icon-btn" style="border:none;background:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- PAGINATION -->
+  <div class="table-footer">
+    <div class="table-footer-info">
+      Showing <strong>1–10</strong> of <strong>1,247</strong> orders
+    </div>
+    <div class="pagination">
+      <button class="page-btn disabled">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <button class="page-btn">4</button>
+      <button class="page-btn">5</button>
+      <button class="page-btn">...</button>
+      <button class="page-btn">125</button>
+      <button class="page-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

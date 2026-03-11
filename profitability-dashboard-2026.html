@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EverChapter Admin — Profitability + Orders Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ═══ Reset & Base ═══ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F5F6FA;
+    color: #1A1D2E;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ═══ Dashboard Container ═══ */
+  .dashboard {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px 48px 32px;
+    animation: dashFadeIn 0.4s ease;
+  }
+
+  @keyframes dashFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ═══════════════════════════════════════════════════
+     PROFITABILITY SECTION
+     ═══════════════════════════════════════════════════ */
+
+  .profit-section {
+    margin-bottom: 28px;
+  }
+
+  .profit-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .profit-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: #1A1D2E;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .profit-header .live-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #00B37A;
+    animation: livePulse 2s ease-in-out infinite;
+    box-shadow: 0 0 6px rgba(0,179,122,0.4);
+  }
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(0,179,122,0.4); }
+    50% { opacity: 0.5; box-shadow: 0 0 12px rgba(0,179,122,0.6); }
+  }
+  .profit-header .live-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #00B37A;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .profit-header .period-selector {
+    display: flex;
+    gap: 2px;
+    background: rgba(0,0,0,0.04);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .profit-header .period-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #6B7185;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .profit-header .period-btn:hover {
+    color: #1A1D2E;
+    background: rgba(0,0,0,0.03);
+  }
+  .profit-header .period-btn.active {
+    background: #fff;
+    color: #1A1D2E;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  /* ═══ Project Cards Grid ═══ */
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  /* ═══ Project Card — Compact ═══ */
+  .project-card {
+    background: #FFFFFF;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 10px;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+  }
+  .project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.03);
+    border-color: rgba(0,0,0,0.1);
+  }
+  .project-card:active {
+    transform: translateY(0) scale(0.99);
+  }
+
+  /* Glow bar at top */
+  .project-card .glow-bar {
+    height: 2.5px;
+    transition: all 0.5s ease;
+  }
+  .glow-bar.excellent { background: linear-gradient(90deg, #00B37A, #00D68F); }
+  .glow-bar.good { background: linear-gradient(90deg, #00B37A, #7ED8A8); }
+  .glow-bar.warning { background: linear-gradient(90deg, #D4A017, #F0C040); }
+  .glow-bar.danger { background: linear-gradient(90deg, #E74C3C, #FF6B5A); }
+  .glow-bar.neutral { background: linear-gradient(90deg, #9CA3B8, #BCC3D4); }
+
+  /* Card inner — compact */
+  .project-card .card-inner {
+    padding: 10px 12px 11px;
+  }
+
+  /* Project name row */
+  .project-card .project-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  .project-card .project-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1A1D2E;
+    letter-spacing: -0.1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .project-card .country-tag {
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.04);
+    color: #6B7185;
+    letter-spacing: 0.3px;
+  }
+  .project-card .project-flag {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  /* Profit — the big number */
+  .project-card .profit-value {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    line-height: 1.1;
+    margin-bottom: 2px;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.3s ease;
+  }
+  .profit-value.positive { color: #00B37A; }
+  .profit-value.negative { color: #E74C3C; }
+  .profit-value.zero { color: #9CA3B8; }
+
+  .project-card .profit-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: #9CA3B8;
+    margin-bottom: 7px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  /* Divider */
+  .project-card .card-divider {
+    height: 1px;
+    background: rgba(0,0,0,0.05);
+    margin: 0 -12px 6px;
+  }
+
+  /* Bottom metrics row */
+  .project-card .metrics-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+  }
+  .project-card .metric {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+  .project-card .metric-label {
+    font-size: 9px;
+    font-weight: 500;
+    color: #9CA3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .project-card .metric-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1A1D2E;
+    font-variant-numeric: tabular-nums;
+  }
+  .project-card .metric-value.ad-spend {
+    color: #6B7185;
+  }
+
+  /* ROAS mini badge */
+  .project-card .roas-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+  .roas-badge.high { background: rgba(0,179,122,0.1); color: #00B37A; }
+  .roas-badge.medium { background: rgba(212,160,23,0.1); color: #D4A017; }
+  .roas-badge.low { background: rgba(231,76,60,0.08); color: #E74C3C; }
+
+  /* ═══ Total Summary Bar ═══ */
+  .total-bar {
+    background: #FFFFFF;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 12px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    margin-bottom: 28px;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .total-bar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #6C5CE7, #00B37A, #3B82F6, #D4A017);
+    background-size: 300% 100%;
+    animation: gradientShift 6s ease infinite;
+  }
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .total-bar:hover {
+    box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+  }
+  .total-bar .total-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6B7185;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .total-bar .total-label svg {
+    opacity: 0.5;
+  }
+  .total-bar .total-metrics {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+  .total-bar .total-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+  }
+  .total-bar .total-item-label {
+    font-size: 9px;
+    font-weight: 500;
+    color: #9CA3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .total-bar .total-item-value {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .total-item-value.profit { color: #00B37A; }
+  .total-item-value.spend { color: #6B7185; }
+  .total-item-value.revenue { color: #1A1D2E; }
+
+  /* ═══ Separator ═══ */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);
+    margin: 0 0 24px;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     ORDERS SECTION (same as current deployed)
+     ═══════════════════════════════════════════════════ */
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #1A1D2E;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .count-badge {
+    background: rgba(108,92,231,0.08);
+    color: #6C5CE7;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+  }
+  .header-actions { display: flex; gap: 8px; }
+
+  /* Buttons */
+  .btn-outline {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: 1px solid rgba(0,0,0,0.07);
+    background: linear-gradient(135deg, #FFFFFF 0%, #FAFBFF 100%);
+    color: #6B7185; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: inherit;
+  }
+  .btn-outline:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 0 0 3px rgba(108,92,231,0.08); border-color: rgba(108,92,231,0.25); }
+  .btn-outline:active { transform: translateY(1px) scale(0.97); }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: 1px solid #6C5CE7;
+    background: #6C5CE7; color: #fff;
+    box-shadow: 0 1px 4px rgba(108,92,231,0.25);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: inherit;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(108,92,231,0.35); }
+
+  /* Stat Cards */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-card {
+    background: #FFFFFF; border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 14px; padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 24px rgba(0,0,0,0.03);
+    position: relative; overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.07); border-color: rgba(0,0,0,0.12); }
+  .stat-card .top-line { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .stat-card .label { font-size: 13px; color: #6B7185; font-weight: 500; margin-bottom: 8px; }
+  .stat-card .value { font-size: 28px; font-weight: 700; color: #1A1D2E; letter-spacing: -0.5px; }
+  .trend-badge {
+    position: absolute; top: 16px; right: 16px;
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  }
+  .trend-up { background: rgba(0,179,122,0.08); color: #00B37A; }
+  .trend-neutral { background: rgba(0,0,0,0.04); color: #9CA3B8; }
+
+  /* Main card */
+  .main-card {
+    background: #FFFFFF; border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 14px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 24px rgba(0,0,0,0.03);
+  }
+
+  /* Tabs */
+  .tabs-row {
+    background: rgba(0,0,0,0.03); border-radius: 8px; padding: 3px;
+    display: flex; gap: 2px; overflow-x: auto; margin: 12px 16px 0;
+  }
+  .tab {
+    padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    color: #6B7185; cursor: pointer; border: none; background: transparent;
+    white-space: nowrap; transition: all 0.15s; display: flex; align-items: center;
+    gap: 6px; user-select: none; font-family: inherit;
+  }
+  .tab:hover { background: rgba(0,0,0,0.04); }
+  .tab.active { font-weight: 600; color: #1A1D2E; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .tab .tab-count {
+    font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 10px;
+    background: rgba(0,0,0,0.04); color: #9CA3B8;
+  }
+  .tab.active .tab-count { background: rgba(108,92,231,0.08); color: #6C5CE7; }
+
+  /* Toolbar */
+  .toolbar { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid rgba(0,0,0,0.07); }
+  .search-box {
+    display: flex; align-items: center; gap: 8px; flex: 1;
+    background: #fafafa; border-radius: 6px; padding: 8px 12px;
+    border: 1px solid rgba(0,0,0,0.07); transition: all 0.2s ease;
+  }
+  .search-box:focus-within { border-color: rgba(108,92,231,0.35); box-shadow: 0 0 0 3px rgba(108,92,231,0.08); }
+  .search-box input { border: none; background: transparent; outline: none; flex: 1; font-size: 13px; color: #1A1D2E; font-family: inherit; }
+  .search-box input::placeholder { color: #9CA3B8; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 11px 20px; font-size: 11px; font-weight: 600; color: #9CA3B8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(0,0,0,0.07); background: #F5F6FA; white-space: nowrap; cursor: pointer; }
+  th.no-sort { cursor: default; }
+  td { padding: 14px 20px; font-size: 13px; border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: middle; }
+  tr.data-row { transition: background 0.15s ease; cursor: pointer; }
+  tr.data-row:hover { background: #F8F9FC; }
+
+  .checkbox { width: 18px; height: 18px; border: 2px solid #C9CCCF; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; background: #fff; cursor: pointer; }
+
+  .customer-cell { display: flex; align-items: center; gap: 10px; }
+  .gateway-icon { width: 32px; height: 32px; border-radius: 8px; background: #f0f1f5; padding: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+  .gateway-icon img { width: 100%; height: 100%; object-fit: contain; }
+  .gateway-icon.fallback { font-size: 10px; font-weight: 700; color: #fff; padding: 0; }
+  .customer-name { font-weight: 500; font-size: 13px; color: #1A1D2E; }
+  .customer-email { font-size: 11px; color: #9CA3B8; margin-top: 1px; }
+
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .badge-paid { background: rgba(0,179,122,0.08); color: #00B37A; }
+  .badge-paid .dot { background: #00B37A; }
+  .badge-waiting { background: rgba(212,160,23,0.08); color: #D4A017; }
+  .badge-waiting .dot { background: #D4A017; }
+  .badge-imported { background: rgba(59,130,246,0.07); color: #3B82F6; }
+  .badge-imported .dot { background: #3B82F6; }
+  .badge-processed { background: rgba(59,130,246,0.07); color: #3B82F6; }
+  .badge-processed .dot { background: #3B82F6; }
+  .badge-packed { background: rgba(108,92,231,0.08); color: #6C5CE7; }
+  .badge-packed .dot { background: #6C5CE7; }
+  .badge-dispatched { background: rgba(59,130,246,0.07); color: #3B82F6; }
+  .badge-dispatched .dot { background: #3B82F6; }
+  .badge-in-transit { background: rgba(59,130,246,0.07); color: #3B82F6; }
+  .badge-in-transit .dot { background: #3B82F6; }
+  .badge-delivered { background: rgba(0,179,122,0.08); color: #00B37A; }
+  .badge-delivered .dot { background: #00B37A; }
+  .badge-refunded { background: rgba(0,0,0,0.04); color: #6B7185; }
+  .badge-refunded .dot { background: #6B7185; }
+  .badge-issue { background: rgba(231,76,60,0.07); color: #E74C3C; }
+  .badge-issue .dot { background: #E74C3C; }
+
+  .order-num { color: #6C5CE7; font-weight: 600; white-space: nowrap; }
+  .country { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; }
+  .country .flag { font-size: 16px; }
+  .amount { font-weight: 600; font-variant-numeric: tabular-nums; color: #1A1D2E; }
+  .date { color: #9CA3B8; white-space: nowrap; }
+  .items-count { color: #9CA3B8; }
+  .row-actions { opacity: 0; transition: opacity 0.15s ease; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; }
+  tr.data-row:hover .row-actions { opacity: 1; }
+  .row-actions:hover { background: rgba(0,0,0,0.05); }
+
+  .pagination { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 16px 20px; border-top: 1px solid rgba(0,0,0,0.07); }
+  .pagination-info { font-size: 13px; color: #9CA3B8; }
+  .page-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid rgba(0,0,0,0.07); background: #FFFFFF; color: #6B7185; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+  .page-btn:hover { background: #F8F9FB; border-color: rgba(0,0,0,0.14); transform: translateY(-1px); }
+  .page-btn.active { background: #6C5CE7; color: #fff; border-color: #6C5CE7; font-weight: 600; }
+
+  /* ═══ Responsive ═══ */
+  @media (max-width: 1400px) {
+    .dashboard { padding-left: 32px; padding-right: 32px; }
+    .project-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 1100px) {
+    .dashboard { padding-left: 20px; padding-right: 20px; }
+    .project-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .dashboard { padding-left: 12px; padding-right: 12px; }
+    .project-grid { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- ═══════════════════════════════════════════════
+       PROFITABILITY SECTION
+       ═══════════════════════════════════════════════ -->
+  <div class="profit-section">
+
+    <!-- Header -->
+    <div class="profit-header">
+      <h2>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#6C5CE7" stroke-width="1.5"><path d="M3 17V8l4-5 4 3 6-4v15"/><path d="M3 17h14" stroke-opacity="0.3"/></svg>
+        Project Profitability
+        <span class="live-dot"></span>
+        <span class="live-label">Live</span>
+      </h2>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="period-selector">
+          <button class="period-btn active">Today</button>
+          <button class="period-btn">Yesterday</button>
+          <button class="period-btn">This Week</button>
+          <button class="period-btn">This Month</button>
+          <button class="period-btn" id="customBtn" onclick="toggleCustomRange()">Custom</button>
+        </div>
+        <div id="customRange" style="display: none; align-items: center; gap: 6px; animation: fadeSlideIn 0.2s ease;">
+          <input type="date" value="2026-03-01" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; font-size: 12px; font-family: inherit; color: #1A1D2E; background: #fff; outline: none;">
+          <span style="font-size: 12px; color: #9CA3B8;">–</span>
+          <input type="date" value="2026-03-04" style="padding: 5px 10px; border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; font-size: 12px; font-family: inherit; color: #1A1D2E; background: #fff; outline: none;">
+          <span style="font-size: 11px; font-weight: 600; color: #6C5CE7; white-space: nowrap;">Mar 1 – Mar 4</span>
+        </div>
+      </div>
+    </div>
+    <style>
+      @keyframes fadeSlideIn { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: translateX(0); } }
+      #customRange input[type="date"]:focus { border-color: rgba(108,92,231,0.4); box-shadow: 0 0 0 3px rgba(108,92,231,0.08); }
+    </style>
+    <script>
+      function toggleCustomRange() {
+        const range = document.getElementById('customRange');
+        const btn = document.getElementById('customBtn');
+        const isVisible = range.style.display === 'flex';
+        range.style.display = isVisible ? 'none' : 'flex';
+        // Toggle active state
+        document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+        if (!isVisible) btn.classList.add('active');
+        else document.querySelector('.period-btn').classList.add('active');
+      }
+    </script>
+
+    <!-- Row 1 — 4 projects -->
+    <div class="project-grid">
+
+      <!-- 1. Laat Los NL/BE -->
+      <div class="project-card">
+        <div class="glow-bar excellent"></div>
+        <div class="card-inner">
+          <div class="project-name-row">
+            <div class="project-name">
+              <span class="project-flag">🇳🇱</span>
+              Laat Los
+              <span class="country-tag">NL/BE</span>
+            </div>
+          </div>
+          <div class="profit-value positive">€247.80</div>
+          <div class="profit-label">Net Profit</div>
+          <div class="card-divider"></div>
+          <div class="metrics-row">
+            <div class="metric">
+              <span class="metric-label">Revenue</span>
+              <span class="metric-value">€487.50</span>
+            </div>
+            <div class="metric" style="align-items: center;">
+              <span class="metric-label">Orders</span>
+              <span class="metric-value">18</span>
+            </div>
+            <div class="metric" style="align-items: flex-end;">
+              <span class="metric-label">Ad Spend</span>
+              <span class="metric-value ad-spend">€89.40</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Lass Los DE/AT/LU -->
+      <div class="project-card">
+        <div class="glow-bar good"></div>
+        <div class="card-inner">
+          <div class="project-name-row">
+            <div class="project-name">
+              <span class="project-flag">🇩🇪</span>
+              Lass Los
+              <span class="country-tag">DE/AT/LU</span>
+            </div>
+          </div>
+          <div class="profit-value positive">€156.30</div>
+          <div class="profit-label">Net Profit</div>
+          <div class="card-divider"></div>
+          <div class="metrics-row">
+            <div class="metric">
+              <span class="metric-label">Revenue</span>
+              <span class="metric-value">€349.80</span>
+            </div>
+            <div class="metric" style="align-items: center;">
+              <span class="metric-label">Orders</span>
+              <span class="metric-value">12</span>
+            </div>
+            <div class="metric" style="align-items: flex-end;">
+              <span class="metric-label">Ad Spend</span>
+              <span class="metric-value ad-spend">€72.10</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Odpuść PL -->
+      <div class="project-card">
+        <div class="glow-bar good"></div>
+        <div class="card-inner">
+          <div class="project-name-row">
+            <div class="project-name">
+              <span class="project-flag">🇵🇱</span>
+              Odpuść
+              <span class="country-tag">PL</span>
+            </div>
+          </div>
+          <div class="profit-value positive">€98.50</div>
+          <div class="profit-label">Net Profit</div>
+          <div class="card-divider"></div>
+          <div class="metrics-row">
+            <div class="metric">
+              <span class="metric-label">Revenue</span>
+              <span class="metric-value">€224.70</span>
+            </div>
+            <div class="metric" style="align-items: center;">
+              <span class="metric-label">Orders</span>
+              <span class="metric-value">9</span>
+            </div>
+            <div class="metric" style="align-items: flex-end;">
+              <span class="metric-label">Ad Spend</span>
+              <span class="metric-value ad-spend">€45.20</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Släpp Taget SE -->
+      <div class="project-card">
+        <div class="glow-bar warning"></div>
+        <div class="card-inner">
+          <div class="project-name-row">
+            <div class="project-name">
+              <span class="project-flag">🇸🇪</span>
+              Släpp Taget
+              <span class="country-tag">SE</span>
+            </div>
+          </div>
+          <div class="profit-value positive">€34.10</div>
+          <div class="profit-label">Net Profit</div>
+          <div class="card-divider"></div>
+          <div class="metrics-row">
+            <div class="metric">
+              <span class="metric-label">Revenue</span>
+              <span class="metric-value">€137.50</span>
+            </div>
+            <div class="metric" style="align-items: center;">
+              <span class="metric-label">Orders</span>
+              <span class="metric-value">5</span>
+            </div>
+            <div class="metric" style="align-items: flex-end;">
+              <span class="metric-label">Ad Spend</span>
+              <span class="metric-value ad-spend">€52.80</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Row 2 — 4 projects -->
+    <div class="project-grid">
+
+      <!-- 5. Psí Superživot CZ/SK -->
+      <div class="project-card">
+        <div class="glow-bar excellent"></div>
+        <div class="card-inner">
+          <div class="project-name-row">
+            <div class="project-name">
+              <span class="project-flag">🇨🇿</span>
+              Psí Superživot
+              <span class="country-tag">CZ/SK</span>
+            </div>
+          </div>
+          <div class="profit-value positive">€189.20</div>
+          <div class="profit-label">Net Profit</div>
+          <div class="card-divider"></div>
+          <div class="metrics-row">
+            <div class="metric">
+              <span class="metric-label">Revenue</span>
+              <span class="metric-value">€362.40</span>
+            </div>
+            <div class="metric" style="align-items: center;">
+              <span class="metric-label">Orders</span>
+              <span class="metric-value">15</span>
+            </div>
+            <div class="metric" style="align-items: flex-end;">
+              <span class="metric-label">Ad Spend</span>
+              <span class="metric-value ad-spend">€38.60</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. De Hondenbijbel NL/BE -->
+      <div class="project-card">
+        <div class="glow-bar good"></div>
+        <div class="card-inner">
+          <div class="project-name-row">
+            <div class="project-name">
+              <span class="project-flag">🇳🇱</span>
+              Hondenbijbel
+              <span class="country-tag">NL/BE</span>
+            </div>
+          </div>
+          <div class="profit-value positive">€112.40</div>
+          <div class="profit-label">Net Profit</div>
+          <div class="card-divider"></div>
+          <div class="metrics-row">
+            <div class="metric">
+              <span class="metric-label">Revenue</span>
+              <span class="metric-value">€274.50</span>
+            </div>
+            <div class="metric" style="align-items: center;">
+              <span class="metric-label">Orders</span>
+              <span class="metric-value">10</span>
+            </div>
+            <div class="metric" style="align-items: flex-end;">
+              <span class="metric-label">Ad Spend</span>
+              <span class="metric-value ad-spend">€56.90</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Biblia Kotów PL -->
+      <div class="project-card">
+        <div class="glow-bar danger"></div>
+        <div class="card-inner">
+          <div class="project-name-row">
+            <div class="project-name">
+              <span class="project-flag">🇵🇱</span>
+              Biblia Kotów
+              <span class="country-tag">PL</span>
+            </div>
+          </div>
+          <div class="profit-value negative">-€12.30</div>
+          <div class="profit-label">Net Profit</div>
+          <div class="card-divider"></div>
+          <div class="metrics-row">
+            <div class="metric">
+              <span class="metric-label">Revenue</span>
+              <span class="metric-value">€74.85</span>
+            </div>
+            <div class="metric" style="align-items: center;">
+              <span class="metric-label">Orders</span>
+              <span class="metric-value">3</span>
+            </div>
+            <div class="metric" style="align-items: flex-end;">
+              <span class="metric-label">Ad Spend</span>
+              <span class="metric-value ad-spend">€67.40</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. Kutyabiblia HU -->
+      <div class="project-card">
+        <div class="glow-bar warning"></div>
+        <div class="card-inner">
+          <div class="project-name-row">
+            <div class="project-name">
+              <span class="project-flag">🇭🇺</span>
+              Kutyabiblia
+              <span class="country-tag">HU</span>
+            </div>
+          </div>
+          <div class="profit-value positive">€18.70</div>
+          <div class="profit-label">Net Profit</div>
+          <div class="card-divider"></div>
+          <div class="metrics-row">
+            <div class="metric">
+              <span class="metric-label">Revenue</span>
+              <span class="metric-value">€99.80</span>
+            </div>
+            <div class="metric" style="align-items: center;">
+              <span class="metric-label">Orders</span>
+              <span class="metric-value">4</span>
+            </div>
+            <div class="metric" style="align-items: flex-end;">
+              <span class="metric-label">Ad Spend</span>
+              <span class="metric-value ad-spend">€41.30</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Total Summary Bar -->
+    <div class="total-bar">
+      <div class="total-label">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 15l3-6 3 3 3-7 3 4"/><rect x="2" y="2" width="16" height="16" rx="2"/></svg>
+        Total All Projects
+      </div>
+      <div class="total-metrics">
+        <div class="total-item">
+          <span class="total-item-label">Revenue</span>
+          <span class="total-item-value revenue">€2,011.05</span>
+        </div>
+        <div class="total-item">
+          <span class="total-item-label">Orders</span>
+          <span class="total-item-value revenue">76</span>
+        </div>
+        <div class="total-item">
+          <span class="total-item-label">Ad Spend</span>
+          <span class="total-item-value spend">€463.70</span>
+        </div>
+        <div class="total-item">
+          <span class="total-item-label">Net Profit</span>
+          <span class="total-item-value profit">€844.70</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ Separator ═══ -->
+  <div class="section-divider"></div>
+
+  <!-- ═══════════════════════════════════════════════
+       ORDERS SECTION
+       ═══════════════════════════════════════════════ -->
+
+  <div class="page-header">
+    <h1>
+      Orders
+      <span class="count-badge">847</span>
+    </h1>
+    <div class="header-actions">
+      <button class="btn-outline">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 14v3h14v-3M10 3v10M6 9l4 4 4-4"/></svg>
+        Export
+      </button>
+      <button class="btn-primary">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4v12M4 10h12"/></svg>
+        Create Order
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Card -->
+  <div class="main-card">
+
+    <div class="tabs-row">
+      <div class="tab active">All <span class="tab-count">847</span></div>
+      <div class="tab">Waiting</div>
+      <div class="tab">Imported</div>
+      <div class="tab">Processed</div>
+      <div class="tab">Packed</div>
+      <div class="tab">Dispatched</div>
+      <div class="tab">In Transit</div>
+      <div class="tab">Delivered</div>
+      <div class="tab">Issues</div>
+      <div class="tab">Refunded</div>
+      <div class="tab" style="border-left: 1px solid rgba(0,0,0,0.06); margin-left: 4px; padding-left: 18px;">NL/BE</div>
+      <div class="tab">DE/AT/LU</div>
+      <div class="tab">CZ/SK</div>
+      <div class="tab">PL</div>
+      <div class="tab">SWE</div>
+      <div class="tab">HU</div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#9CA3B8" stroke-width="1.8"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4"/></svg>
+        <input type="text" placeholder="Search orders, customers, emails...">
+      </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th class="no-sort" style="width: 36px; text-align: center;"><div class="checkbox"></div></th>
+            <th style="min-width: 120px;">Order</th>
+            <th>Customer</th>
+            <th class="no-sort">Payment</th>
+            <th class="no-sort">Fulfillment</th>
+            <th class="no-sort">Items</th>
+            <th>Total</th>
+            <th class="no-sort">Country</th>
+            <th>Date <span style="margin-left: 4px; font-size: 10px; color: #6C5CE7;">▼</span></th>
+            <th class="no-sort" style="width: 48px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">NL2026-847</span></td>
+            <td><div class="customer-cell"><div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/ideal.svg" alt="iDEAL"></div><div><div class="customer-name">Sophie de Vries</div><div class="customer-email">sophie.devries@gmail.com</div></div></div></td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-waiting"><span class="dot"></span>Waiting</span></td>
+            <td><span class="items-count">2 items</span></td>
+            <td><span class="amount">€34.90</span></td>
+            <td><span class="country"><span class="flag">🇳🇱</span> NL</span></td>
+            <td><span class="date">Today at 2:34 PM</span></td>
+            <td style="text-align: center;"><div class="row-actions"><svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></div></td>
+          </tr>
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">BE2026-846</span></td>
+            <td><div class="customer-cell"><div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/bancontact.svg" alt="Bancontact"></div><div><div class="customer-name">Marc Janssens</div><div class="customer-email">marc.j@hotmail.be</div></div></div></td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-imported"><span class="dot"></span>Imported</span></td>
+            <td><span class="items-count">1 item</span></td>
+            <td><span class="amount">€24.95</span></td>
+            <td><span class="country"><span class="flag">🇧🇪</span> BE</span></td>
+            <td><span class="date">Today at 1:12 PM</span></td>
+            <td style="text-align: center;"><div class="row-actions"><svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></div></td>
+          </tr>
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">DE2026-845</span></td>
+            <td><div class="customer-cell"><div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/klarna.svg" alt="Klarna"></div><div><div class="customer-name">Anna Müller</div><div class="customer-email">anna.mueller@web.de</div></div></div></td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-processed"><span class="dot"></span>Processed</span></td>
+            <td><span class="items-count">1 item</span></td>
+            <td><span class="amount">€29.95</span></td>
+            <td><span class="country"><span class="flag">🇩🇪</span> DE</span></td>
+            <td><span class="date">Today at 11:45 AM</span></td>
+            <td style="text-align: center;"><div class="row-actions"><svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></div></td>
+          </tr>
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">PL2026-844</span></td>
+            <td><div class="customer-cell"><div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/przelewy24.svg" alt="P24"></div><div><div class="customer-name">Katarzyna Nowak</div><div class="customer-email">k.nowak@wp.pl</div></div></div></td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-packed"><span class="dot"></span>Packed</span></td>
+            <td><span class="items-count">3 items</span></td>
+            <td><span class="amount">€52.85</span></td>
+            <td><span class="country"><span class="flag">🇵🇱</span> PL</span></td>
+            <td><span class="date">Today at 10:23 AM</span></td>
+            <td style="text-align: center;"><div class="row-actions"><svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></div></td>
+          </tr>
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">SE2026-843</span></td>
+            <td><div class="customer-cell"><div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/klarna.svg" alt="Klarna"></div><div><div class="customer-name">Erik Lindström</div><div class="customer-email">erik.lindstrom@outlook.se</div></div></div></td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-dispatched"><span class="dot"></span>Dispatched</span></td>
+            <td><span class="items-count">1 item</span></td>
+            <td><span class="amount">€27.50</span></td>
+            <td><span class="country"><span class="flag">🇸🇪</span> SE</span></td>
+            <td><span class="date">Today at 9:08 AM</span></td>
+            <td style="text-align: center;"><div class="row-actions"><svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></div></td>
+          </tr>
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">NL2026-842</span></td>
+            <td><div class="customer-cell"><div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/paypal.svg" alt="PayPal"></div><div><div class="customer-name">Jan van der Berg</div><div class="customer-email">jan.vdb@ziggo.nl</div></div></div></td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-in-transit"><span class="dot"></span>In Transit</span></td>
+            <td><span class="items-count">2 items</span></td>
+            <td><span class="amount">€49.90</span></td>
+            <td><span class="country"><span class="flag">🇳🇱</span> NL</span></td>
+            <td><span class="date">Yesterday at 8:47 PM</span></td>
+            <td style="text-align: center;"><div class="row-actions"><svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></div></td>
+          </tr>
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">CZ2026-841</span></td>
+            <td><div class="customer-cell"><div class="gateway-icon fallback" style="background: #444;">C</div><div><div class="customer-name">Petr Dvořák</div><div class="customer-email">petr.dvorak@seznam.cz</div></div></div></td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-delivered"><span class="dot"></span>Delivered</span></td>
+            <td><span class="items-count">1 item</span></td>
+            <td><span class="amount">€19.90</span></td>
+            <td><span class="country"><span class="flag">🇨🇿</span> CZ</span></td>
+            <td><span class="date">Yesterday at 6:15 PM</span></td>
+            <td style="text-align: center;"><div class="row-actions"><svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></div></td>
+          </tr>
+          <tr class="data-row">
+            <td style="width: 36px; text-align: center;"><div class="checkbox"></div></td>
+            <td><span class="order-num">AT2026-840</span></td>
+            <td><div class="customer-cell"><div class="gateway-icon"><img src="https://raw.githubusercontent.com/datatrans/payment-logos/master/assets/apm/klarna.svg" alt="Klarna"></div><div><div class="customer-name">Lisa Huber</div><div class="customer-email">lisa.huber@gmx.at</div></div></div></td>
+            <td><span class="badge badge-paid"><span class="dot"></span>Paid</span></td>
+            <td><span class="badge badge-in-transit"><span class="dot"></span>In Transit</span></td>
+            <td><span class="items-count">1 item</span></td>
+            <td><span class="amount">€29.95</span></td>
+            <td><span class="country"><span class="flag">🇦🇹</span> AT</span></td>
+            <td><span class="date">Yesterday at 3:22 PM</span></td>
+            <td style="text-align: center;"><div class="row-actions"><svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7185"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <span class="pagination-info">Showing 1-20 of 847 orders</span>
+      <div style="display: flex; gap: 4px; margin-left: 16px;">
+        <button class="page-btn" disabled style="opacity: 0.4;">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">4</button>
+        <button class="page-btn">5</button>
+        <button class="page-btn">›</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

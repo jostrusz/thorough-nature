@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Matcher — Spárování plateb a faktur</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #1a1a2e; }
+
+  /* Top bar */
+  .topbar { background: #1e293b; color: white; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar h1 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .topbar h1 span { font-size: 20px; }
+  .topbar .right { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+  .topbar .env { background: #22c55e; color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Layout */
+  .container { max-width: 1440px; margin: 0 auto; padding: 24px 28px; }
+
+  /* Summary cards */
+  .summary-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; }
+  .stat-card { background: white; border-radius: 10px; border: 1px solid #e5e7eb; padding: 16px 18px; }
+  .stat-card .label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .stat-card .value { font-size: 22px; font-weight: 700; }
+  .stat-card .sub { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+  /* Toolbar */
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+  .toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+  .filter-group { display: flex; align-items: center; gap: 6px; }
+  .filter-group label { font-size: 12px; color: #6b7280; font-weight: 500; }
+
+  select, input[type="date"], input[type="text"] {
+    font-size: 13px; padding: 7px 10px; border: 1px solid #d1d5db; border-radius: 6px;
+    background: white; color: #1a1a2e; outline: none;
+  }
+  select:focus, input:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.15); }
+
+  .btn { font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 6px; border: 1px solid #d1d5db; background: white; color: #374151; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
+  .btn:hover { background: #f9fafb; border-color: #9ca3af; }
+  .btn-primary { background: #4f46e5; color: white; border-color: #4f46e5; }
+  .btn-primary:hover { background: #4338ca; }
+  .btn-green { background: #16a34a; color: white; border-color: #16a34a; }
+  .btn-green:hover { background: #15803d; }
+
+  /* Main table */
+  .table-card { background: white; border-radius: 10px; border: 1px solid #e5e7eb; overflow: hidden; }
+  .table-wrap { overflow-x: auto; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { background: #f8fafc; padding: 10px 12px; text-align: left; font-weight: 600; font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid #e5e7eb; white-space: nowrap; position: sticky; top: 0; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+  tbody tr:hover { background: #f9fafb; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* Cell styles */
+  .mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; }
+  .order-num { font-weight: 600; color: #4f46e5; cursor: pointer; }
+  .order-num:hover { text-decoration: underline; }
+  .invoice-num { font-weight: 500; color: #0d9488; }
+  .payment-id { color: #7c3aed; background: #f5f3ff; padding: 2px 6px; border-radius: 4px; font-size: 11px; display: inline-block; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .payment-id-2 { color: #c026d3; background: #fdf4ff; padding: 2px 6px; border-radius: 4px; font-size: 11px; display: inline-block; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+  .payment-id.cod { color: #92400e; background: #fffbeb; }
+  .amount { font-weight: 600; text-align: right; white-space: nowrap; }
+  .amount-small { font-size: 11px; color: #9ca3af; font-weight: 400; }
+  .currency { font-size: 11px; color: #9ca3af; margin-left: 2px; }
+
+  .method-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; display: inline-block; }
+  .method-ideal { background: #fce7f3; color: #be185d; }
+  .method-bancontact { background: #dbeafe; color: #1d4ed8; }
+  .method-card { background: #f3f4f6; color: #374151; }
+  .method-klarna { background: #fef3c7; color: #92400e; }
+  .method-paypal { background: #dbeafe; color: #1e40af; }
+  .method-cod { background: #fef9c3; color: #854d0e; }
+  .method-sofort { background: #ede9fe; color: #6d28d9; }
+  .method-p24 { background: #fce7f3; color: #9d174d; }
+
+  .status-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .status-matched { background: #dcfce7; color: #166534; }
+  .status-partial { background: #fef9c3; color: #854d0e; }
+  .status-missing { background: #fee2e2; color: #991b1b; }
+
+  .upsell-tag { font-size: 10px; background: #ede9fe; color: #7c3aed; padding: 1px 6px; border-radius: 8px; font-weight: 600; margin-left: 4px; }
+  .cod-tag { font-size: 10px; background: #fef9c3; color: #854d0e; padding: 1px 6px; border-radius: 8px; font-weight: 600; margin-left: 4px; }
+
+  /* Customer name */
+  .customer { font-weight: 500; }
+  .customer-email { font-size: 11px; color: #9ca3af; display: block; }
+
+  /* Footer */
+  .table-footer { padding: 12px 16px; border-top: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #6b7280; }
+  .table-footer .totals { font-weight: 600; color: #1a1a2e; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; margin-bottom: 20px; }
+  .tab { padding: 10px 18px; font-size: 13px; font-weight: 500; color: #6b7280; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.15s; }
+  .tab:hover { color: #374151; }
+  .tab.active { color: #4f46e5; border-bottom-color: #4f46e5; font-weight: 600; }
+  .tab .count { font-size: 11px; background: #e5e7eb; color: #6b7280; padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
+  .tab.active .count { background: #e0e7ff; color: #4338ca; }
+
+  /* Legend */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; font-size: 12px; color: #6b7280; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+
+  /* Info panel */
+  .info-panel { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; font-size: 13px; color: #1e40af; line-height: 1.6; }
+  .info-panel strong { color: #1e3a8a; }
+
+  /* Section headers */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .section-header h2 { font-size: 16px; font-weight: 600; }
+
+  /* Checkbox column */
+  .cb { width: 32px; text-align: center; }
+  input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; accent-color: #4f46e5; }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .summary-row { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* Tooltip on hover for full payment ID */
+  .payment-id:hover, .payment-id-2:hover {
+    max-width: none; overflow: visible; position: relative; z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  }
+
+  /* Row with upsell highlight */
+  tr.upsell-row { background: #faf5ff; }
+  tr.upsell-row:hover { background: #f3e8ff; }
+  tr.cod-row { background: #fffef5; }
+  tr.cod-row:hover { background: #fefce8; }
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <h1><span>💳</span> Payment Matcher</h1>
+  <div class="right">
+    <span class="env">admin</span>
+    <span>Performance Marketing Solution s.r.o.</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Info Panel -->
+  <div class="info-panel">
+    <strong>Jak to funguje:</strong> Tato aplikace automaticky spojuje objednávky, faktury a platby z bran (Mollie, Stripe, PayPal...) do jednoho přehledu.
+    Každý řádek = jedna objednávka s jejím Payment ID, číslem faktury a variabilním symbolem.
+    U upsell objednávek se zobrazí i <strong>Payment ID 2</strong>.
+    Export do CSV generuje soubor kompatibilní s GPC konvertorem pro účetní software.
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-row">
+    <div class="stat-card">
+      <div class="label">Objednávky v období</div>
+      <div class="value">847</div>
+      <div class="sub">1. 3. 2026 — 11. 3. 2026</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Celkový obrat</div>
+      <div class="value" style="color: #16a34a;">€ 24 892,30</div>
+      <div class="sub">+12 % vs. minulý měsíc</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Spárované</div>
+      <div class="value" style="color: #4f46e5;">831</div>
+      <div class="sub">98,1 % — faktura + payment ID</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">S upsellem</div>
+      <div class="value" style="color: #7c3aed;">43</div>
+      <div class="sub">5,1 % — 2 platby na objednávku</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">COD objednávky</div>
+      <div class="value" style="color: #d97706;">28</div>
+      <div class="sub">VS = číslo faktury</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active">Všechny <span class="count">847</span></div>
+    <div class="tab">S upsellem <span class="count">43</span></div>
+    <div class="tab">COD <span class="count">28</span></div>
+    <div class="tab">Chybí faktura <span class="count">9</span></div>
+    <div class="tab">Chybí Payment ID <span class="count">7</span></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="filter-group">
+        <label>Období:</label>
+        <input type="date" value="2026-03-01" style="width: 130px;">
+        <span style="color: #9ca3af;">—</span>
+        <input type="date" value="2026-03-11" style="width: 130px;">
+      </div>
+      <div class="filter-group">
+        <label>Projekt:</label>
+        <select>
+          <option>Všechny projekty</option>
+          <option>Laat los (NL/BE)</option>
+          <option>Odpuść (PL)</option>
+          <option>Lass los (DE/AT)</option>
+          <option>Släpp taget (SE)</option>
+          <option>Psí superživot (CZ)</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Platba:</label>
+        <select>
+          <option>Všechny metody</option>
+          <option>iDEAL</option>
+          <option>Bancontact</option>
+          <option>Karta</option>
+          <option>PayPal</option>
+          <option>Klarna</option>
+          <option>COD</option>
+          <option>Sofort</option>
+          <option>Przelewy24</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Stav:</label>
+        <select>
+          <option>Všechny</option>
+          <option selected>Spárované</option>
+          <option>Chybí faktura</option>
+          <option>Chybí Payment ID</option>
+        </select>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn">🔍 Hledat</button>
+      <button class="btn-green btn">⬇ Export CSV (GPC)</button>
+      <button class="btn">📊 Export kompletní</button>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><span class="status-badge status-matched">Spárováno</span> Faktura + Payment ID</div>
+    <div class="legend-item"><span class="upsell-tag">UPSELL</span> 2 platby (Payment ID + Payment ID 2)</div>
+    <div class="legend-item"><span class="cod-tag">COD</span> Dobírka — VS = číslo faktury</div>
+    <div class="legend-item"><span class="status-badge status-missing">Chybí</span> Chybí faktura nebo payment ID</div>
+  </div>
+
+  <!-- Main Table -->
+  <div class="table-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="cb"><input type="checkbox"></th>
+            <th>Objednávka</th>
+            <th>Datum</th>
+            <th>Zákazník</th>
+            <th>Číslo faktury (VS)</th>
+            <th>Payment ID 1</th>
+            <th>Payment ID 2</th>
+            <th>Platební metoda</th>
+            <th style="text-align: right;">Částka 1</th>
+            <th style="text-align: right;">Částka 2</th>
+            <th style="text-align: right;">Celkem</th>
+            <th>Měna</th>
+            <th>Stav</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Regular order - iDEAL -->
+          <tr>
+            <td class="cb"><input type="checkbox"></td>
+            <td><span class="order-num">NL2026-851</span></td>
+            <td class="mono">11.03.2026</td>
+            <td>
+              <span class="customer">Jan de Vries</span>
+              <span class="customer-email">jan.devries@gmail.com</span>
+            </td>
+            <td><span class="invoice-num mono">2026000851</span></td>
+            <td><span class="payment-id mono">tr_MxR7yK3qWp</span></td>
+            <td><span style="color: #d1d5db;">—</span></td>
+            <td><span class="method-badge method-ideal">iDEAL</span></td>
+            <td class="amount">29,90</td>
+            <td class="amount"><span style="color: #d1d5db;">—</span></td>
+            <td class="amount">29,90 <span class="currency">EUR</span></td>
+            <td>EUR</td>
+            <td><span class="status-badge status-matched">Spárováno</span></td>
+          </tr>
+
+          <!-- Upsell order - Bancontact -->
+          <tr class="upsell-row">
+            <td class="cb"><input type="checkbox"></td>
+            <td><span class="order-num">BE2026-850</span><span class="upsell-tag">UPSELL</span></td>
+            <td class="mono">11.03.2026</td>
+            <td>
+              <span class="customer">Sophie Janssen</span>
+              <span class="customer-email">sophie.j@hotmail.be</span>
+            </td>
+            <td><span class="invoice-num mono">2026000850</span></td>
+            <td><span class="payment-id mono">tr_Kp5nL8wQxJ</span></td>
+            <td><span class="payment-id-2 mono">tr_Ym9vR2hTsN</span></td>
+            <td><span class="method-badge method-bancontact">Bancontact</span></td>
+            <td class="amount">29,90</td>
+            <td class="amount" style="color: #7c3aed;">14,90</td>
+            <td class="amount">44,80 <span class="currency">EUR</span></td>
+            <td>EUR</td>
+            <td><span class="status-badge status-matched">Spárováno</span></td>
+          </tr>
+
+          <!-- Regular - Card -->
+          <tr>
+            <td class="cb"><input type="checkbox"></td>
+            <td><span class="order-num">NL2026-849</span></td>
+            <td class="mono">10.03.2026</td>
+            <td>
+              <span class="customer">Emma van Dijk</span>
+              <span class="customer-email">emma.vandijk@outlook.nl</span>
+            </td>
+            <td><span class="invoice-num mono">2026000849</span></td>
+            <td><span class="payment-id mono">tr_Wq4jN6pZmB</span></td>
+            <td><span style="color: #d1d5db;">—</span></td>
+            <td><span class="method-badge method-card">Karta</span></td>
+            <td class="amount">29,90</td>
+            <td class="amount"><span style="color: #d1d5db;">—</span></td>
+            <td class="amount">29,90 <span class="currency">EUR</span></td>
+            <td>EUR</td>
+            <td><span class="status-badge status-matched">Spárováno</span></td>
+          </tr>
+
+          <!-- COD order -->
+          <tr class="cod-row">
+            <td class="cb"><input type="checkbox"></td>
+            <td><span class="order-num">CZ2026-848</span><span class="cod-tag">COD</span></td>
+            <td class="mono">10.03.2026</td>
+            <td>
+              <span class="customer">Anna Novotná</span>
+              <span class="customer-email">anna.novotna@seznam.cz</span>
+            </td>
+            <td><span class="invoice-num mono">2026000848</span></td>
+            <td><span class="payment-id cod mono">2026000848</span></td>
+            <td><span style="color: #d1d5db;">—</span></td>
+            <td><span class="method-badge method-cod">Dobírka</span></td>
+            <td class="amount">299,00</td>
+            <td class="amount"><span style="color: #d1d5db;">—</span></td>
+            <td class="amount">299,00 <span class="currency">CZK</span></td>
+            <td>CZK</td>
+            <td><span class="status-badge status-matched">Spárováno</span></td>
+          </tr>
+
+          <!-- Upsell + COD -->
+          <tr class="cod-row">
+            <td class="cb"><input type="checkbox"></td>
+            <td><span class="order-num">CZ2026-847</span><span class="cod-tag">COD</span><span class="upsell-tag">UPSELL</span></td>
+            <td class="mono">10.03.2026</td>
+            <td>
+              <span class="customer">Petr Svoboda</span>
+              <span class="customer-email">p.svoboda@email.cz</span>
+            </td>
+            <td><span class="invoice-num mono">2026000847</span></td>
+            <td><span class="payment-id cod mono">2026000847</span></td>
+            <td><span style="color: #9ca3af; font-size: 11px;">COD — bez ID</span></td>
+            <td><span class="method-badge method-cod">Dobírka</span></td>
+            <td class="amount">299,00</td>
+            <td class="amount" style="color: #854d0e;">149,00</td>
+            <td class="amount">448,00 <span class="currency">CZK</span></td>
+            <td>CZK</td>
+            <td><span class="status-badge status-matched">Spárováno</span></td>
+          </tr>
+
+          <!-- Klarna order -->
+          <tr>
+            <td class="cb"><input type="checkbox"></td>
+            <td><span class="order-num">SE2026-846</span></td>
+            <td class="mono">09.03.2026</td>
+            <td>
+              <span class="customer">Erik Lindqvist</span>
+              <span class="customer-email">erik.l@gmail.com</span>
+            </td>
+            <td><span class="invoice-num mono">QB-2026-0372</span></td>
+            <td><span class="payment-id mono">KLRN_8x7mV3pQ</span></td>
+            <td><span style="color: #d1d5db;">—</span></td>
+            <td><span class="method-badge method-klarna">Klarna</span></td>
+            <td class="amount">299,00</td>
+            <td class="amount"><span style="color: #d1d5db;">—</span></td>
+            <td class="amount">299,00 <span class="currency">SEK</span></td>
+            <td>SEK</td>
+            <td><span class="status-badge status-matched">Spárováno</span></td>
+          </tr>
+
+          <!-- PayPal -->
+          <tr>
+            <td class="cb"><input type="checkbox"></td>
+            <td><span class="order-num">DE2026-845</span></td>
+            <td class="mono">09.03.2026</td>
+            <td>
+              <span class="customer">Maria Schmidt</span>
+              <span class="customer-email">m.schmidt@web.de</span>
+            </td>
+            <td><span class="invoice-num mono">2026000845</span></td>
+            <td><span class="payment-id mono">PAY-5AB12345XY</span></td>
+            <td><span style="color: #d1d5db;">—</span></td>
+            <td><span class="method-badge method-paypal">PayPal</span></td>
+            <td class="amount">24,90</td>
+            <td class="amount"><span style="color: #d1d5db;">—</span></td>
+            <td class="amount">24,90 <span class="currency">EUR</span></td>
+            <td>EUR</td>
+            <td><span class="status-badge status-matched">Spárováno</span></td>
+          </tr>
+
+          <!-- Przelewy24 -->
+          <tr>
+            <td class="cb"><input type="checkbox"></td>
+            <td><span class="order-num">PL2026-844</span></td>
+            <td class="mono">09.03.2026</td>
+            <td>
+              <span class="customer">Katarzyna Kowalska</span>
+              <span class="customer-email">k.kowalska@wp.pl</span>
+            </td>
+            <td><span class="invoice-num mono">2026000844</span></td>
+            <td><span class="payment-id mono">P24_r7K3mNx9</span></td>
+            <td><span style="color: #d1d5db;">—</span></td>
+            <td><span class="method-badge method-p24">Przelewy24</span></td>
+            <td class="amount">79,90</td>
+            <td class="amount"><span style="color: #d1d5db;">—</span></td>
+            <td class="amount">79,90 <span class="currency">PLN</span></td>
+            <td>PLN</td>
+            <td><span class="status-badge status-matched">Spárováno</span></td>
+          </tr>
+
+          <!-- Upsell + iDEAL -->
+          <tr class="upsell-row">
+            <td class="cb"><input type="checkbox"></td>
+            <td><span class="order-num">NL2026-843</span><span class="upsell-tag">UPSELL</span></td>
+            <td class="mono">08.03.2026</td>
+            <td>
+              <span class="customer">Lieke Bakker</span>
+              <span class="customer-email">lieke.b@gmail.com</span>
+            </td>
+            <td><span class="invoice-num mono">2026000843</span></td>
+            <td><span class="payment-id mono">tr_Hn6wP4kRxT</span></td>
+            <td><span class="payment-id-2 mono">tr_Bq2yJ8mVsL</span></td>
+            <td><span class="method-badge method-ideal">iDEAL</span></td>
+            <td class="amount">29,90</td>
+            <td class="amount" style="color: #7c3aed;">14,90</td>
+            <td class="amount">44,80 <span class="currency">EUR</span></td>
+            <td>EUR</td>
+            <td><span class="status-badge status-matched">Spárováno</span></td>
+          </tr>
+
+          <!-- Missing invoice -->
+          <tr>
+            <td class="cb"><input type="checkbox"></td>
+            <td><span class="order-num">NL2026-842</span></td>
+            <td class="mono">08.03.2026</td>
+            <td>
+              <span class="customer">Thomas Hendriks</span>
+              <span class="customer-email">t.hendriks@live.nl</span>
+            </td>
+            <td><span style="color: #ef4444; font-size: 12px;">⚠ Chybí faktura</span></td>
+            <td><span class="payment-id mono">tr_Xw3cD9fMnQ</span></td>
+            <td><span style="color: #d1d5db;">—</span></td>
+            <td><span class="method-badge method-ideal">iDEAL</span></td>
+            <td class="amount">29,90</td>
+            <td class="amount"><span style="color: #d1d5db;">—</span></td>
+            <td class="amount">29,90 <span class="currency">EUR</span></td>
+            <td>EUR</td>
+            <td><span class="status-badge status-missing">Chybí faktura</span></td>
+          </tr>
+
+          <!-- Sofort -->
+          <tr>
+            <td class="cb"><input type="checkbox"></td>
+            <td><span class="order-num">AT2026-841</span></td>
+            <td class="mono">08.03.2026</td>
+            <td>
+              <span class="customer">Lukas Huber</span>
+              <span class="customer-email">l.huber@gmx.at</span>
+            </td>
+            <td><span class="invoice-num mono">2026000841</span></td>
+            <td><span class="payment-id mono">tr_Fg5hJ2nKwR</span></td>
+            <td><span style="color: #d1d5db;">—</span></td>
+            <td><span class="method-badge method-sofort">Sofort</span></td>
+            <td class="amount">24,90</td>
+            <td class="amount"><span style="color: #d1d5db;">—</span></td>
+            <td class="amount">24,90 <span class="currency">EUR</span></td>
+            <td>EUR</td>
+            <td><span class="status-badge status-matched">Spárováno</span></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="table-footer">
+      <span>Zobrazeno 11 z 847 objednávek</span>
+      <div class="totals">
+        Celkem na stránce: <strong>€ 254,20</strong> + <strong>CZK 747,00</strong> + <strong>SEK 299,00</strong> + <strong>PLN 79,90</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Preview Section -->
+  <div style="margin-top: 32px;">
+    <div class="section-header">
+      <h2>📄 Náhled exportu CSV (GPC formát)</h2>
+      <button class="btn-green btn" style="font-size: 14px; padding: 9px 18px;">⬇ Stáhnout CSV</button>
+    </div>
+    <p style="font-size: 13px; color: #6b7280; margin-bottom: 14px;">
+      Export ve formátu kompatibilním s csv2gpc konvertorem. Kódování Windows-1250, oddělovač středník (;).
+      Řádky řazeny chronologicky podle data zaúčtování.
+    </p>
+    <div class="table-card" style="overflow-x: auto;">
+      <table style="font-size: 11px;">
+        <thead>
+          <tr>
+            <th>Číslo účtu</th>
+            <th>Název účtu</th>
+            <th>Protiúčet</th>
+            <th>Id transakce</th>
+            <th>Částka</th>
+            <th>VS</th>
+            <th>Kód banky</th>
+            <th>KS</th>
+            <th>SS</th>
+            <th>Datum</th>
+            <th>Protistr.</th>
+            <th>Měna</th>
+            <th>Pozn.</th>
+            <th>KREDIT</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">2534820205</td>
+            <td>PMS s.r.o.</td>
+            <td></td>
+            <td class="mono" style="color: #7c3aed;">tr_Hn6wP4kRxT</td>
+            <td class="mono" style="font-weight: 600;">29,90</td>
+            <td class="mono" style="color: #0d9488;">2026000843</td>
+            <td></td>
+            <td class="mono">0558</td>
+            <td></td>
+            <td class="mono">08.03.2026</td>
+            <td>Lieke Bakker</td>
+            <td>EUR</td>
+            <td style="font-size: 10px;">NL2026-843 / ideal</td>
+            <td class="mono" style="font-weight: 600;">29,90</td>
+          </tr>
+          <tr style="background: #faf5ff;">
+            <td class="mono">2534820205</td>
+            <td>PMS s.r.o.</td>
+            <td></td>
+            <td class="mono" style="color: #c026d3;">tr_Bq2yJ8mVsL</td>
+            <td class="mono" style="font-weight: 600;">14,90</td>
+            <td class="mono" style="color: #0d9488;">2026000843</td>
+            <td></td>
+            <td class="mono">0558</td>
+            <td></td>
+            <td class="mono">08.03.2026</td>
+            <td>Lieke Bakker</td>
+            <td>EUR</td>
+            <td style="font-size: 10px;">NL2026-843 / ideal <b>(upsell)</b></td>
+            <td class="mono" style="font-weight: 600;">14,90</td>
+          </tr>
+          <tr>
+            <td class="mono">2534820205</td>
+            <td>PMS s.r.o.</td>
+            <td></td>
+            <td class="mono" style="color: #7c3aed;">tr_Xw3cD9fMnQ</td>
+            <td class="mono" style="font-weight: 600;">29,90</td>
+            <td class="mono" style="color: #0d9488;"></td>
+            <td></td>
+            <td class="mono">0558</td>
+            <td></td>
+            <td class="mono">08.03.2026</td>
+            <td>Thomas Hendriks</td>
+            <td>EUR</td>
+            <td style="font-size: 10px;">NL2026-842 / ideal</td>
+            <td class="mono" style="font-weight: 600;">29,90</td>
+          </tr>
+          <tr>
+            <td class="mono">2534820205</td>
+            <td>PMS s.r.o.</td>
+            <td></td>
+            <td class="mono" style="color: #7c3aed;">tr_Fg5hJ2nKwR</td>
+            <td class="mono" style="font-weight: 600;">24,90</td>
+            <td class="mono" style="color: #0d9488;">2026000841</td>
+            <td></td>
+            <td class="mono">0558</td>
+            <td></td>
+            <td class="mono">08.03.2026</td>
+            <td>Lukas Huber</td>
+            <td>EUR</td>
+            <td style="font-size: 10px;">AT2026-841 / sofort</td>
+            <td class="mono" style="font-weight: 600;">24,90</td>
+          </tr>
+          <tr style="background: #fffef5;">
+            <td class="mono">2534820205</td>
+            <td>PMS s.r.o.</td>
+            <td></td>
+            <td class="mono" style="color: #92400e;">2026000848</td>
+            <td class="mono" style="font-weight: 600;">299,00</td>
+            <td class="mono" style="color: #0d9488;">2026000848</td>
+            <td></td>
+            <td class="mono">0558</td>
+            <td></td>
+            <td class="mono">10.03.2026</td>
+            <td>Anna Novotna</td>
+            <td>CZK</td>
+            <td style="font-size: 10px;">CZ2026-848 / cod</td>
+            <td class="mono" style="font-weight: 600;">299,00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top: 10px; font-size: 12px; color: #9ca3af;">
+      💡 Upsell objednávky = <strong>2 řádky</strong> (hlavní platba + upsell platba se stejným VS).
+      COD objednávky: Id transakce = variabilní symbol faktury.
+    </p>
+  </div>
+
+  <!-- How it works -->
+  <div style="margin-top: 32px; margin-bottom: 40px;">
+    <h2 style="font-size: 16px; font-weight: 600; margin-bottom: 14px;">🔄 Jak funguje řazení a export</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+      <div class="stat-card">
+        <div class="label">1. Řazení</div>
+        <div style="font-size: 13px; color: #374151; margin-top: 6px;">
+          Řádky chronologicky podle <strong>data zaúčtování</strong> (payment_captured_at).
+          Upsell řádek následuje hned za hlavní platbou.
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="label">2. Upsell</div>
+        <div style="font-size: 13px; color: #374151; margin-top: 6px;">
+          Objednávka s upsellem = <strong>2 řádky v CSV</strong>.
+          Řádek 1: hlavní platba (Payment ID 1).
+          Řádek 2: upsell (Payment ID 2), stejný VS.
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="label">3. COD logika</div>
+        <div style="font-size: 13px; color: #374151; margin-top: 6px;">
+          COD objednávky nemají gateway Payment ID.
+          Místo toho: <strong>Id transakce = VS faktury</strong> (např. 2026000848).
+          Účetní páruje přes variabilní symbol.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

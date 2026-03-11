@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Download Preview — De Hondenbijbel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  background: #FFFBF5;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+.container {
+  max-width: 520px;
+  width: 100%;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(234,88,12,0.08);
+}
+.header {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 50%, #C2410C 100%);
+  padding: 40px 40px 36px;
+  text-align: center;
+}
+.brand-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 3px;
+  text-transform: uppercase; color: rgba(255,255,255,0.75);
+  margin-bottom: 10px;
+}
+.header h1 {
+  font-size: 24px; font-weight: 800; color: #fff;
+  line-height: 1.2; letter-spacing: -0.02em;
+}
+.content { padding: 36px 32px; }
+.intro {
+  font-size: 15px; color: #3F3F46; line-height: 1.7;
+  margin-bottom: 28px;
+}
+.file-card {
+  display: flex; align-items: center;
+  background: #FFF7ED; border-radius: 12px;
+  border: 1px solid #FED7AA; padding: 20px;
+  margin-bottom: 16px; gap: 16px;
+}
+.file-emoji { font-size: 32px; flex-shrink: 0; }
+.file-info { flex: 1; min-width: 0; }
+.file-title { font-size: 15px; font-weight: 700; color: #18181B; margin-bottom: 4px; line-height: 1.3; }
+.file-meta { font-size: 12px; color: #71717A; }
+.download-btn {
+  display: inline-block; background: #EA580C; color: #fff;
+  font-size: 14px; font-weight: 700; text-decoration: none;
+  padding: 10px 20px; border-radius: 10px; flex-shrink: 0; white-space: nowrap;
+}
+.expiry {
+  background: #FFFBEB; border-radius: 12px; padding: 12px 16px;
+  text-align: center; border: 1px solid #FDE68A;
+  margin-bottom: 20px; margin-top: 8px;
+}
+.expiry p { font-size: 13px; color: #92400E; }
+.info-box {
+  background: #FAFAFA; border-radius: 12px; border: 1px solid #E4E4E7;
+  padding: 16px 20px; text-align: center; margin-bottom: 20px;
+}
+.info-box p { font-size: 14px; color: #3F3F46; line-height: 1.6; }
+
+/* ═══ PROMO SECTION ═══ */
+.promo-section {
+  background: linear-gradient(135deg, #FAF5F8 0%, #F3E8FF 100%);
+  border-radius: 16px;
+  border: 1.5px solid #EDD9E5;
+  padding: 28px 24px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.promo-section::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, rgba(194,123,160,0.12) 0%, transparent 70%);
+  border-radius: 0 16px 0 0;
+}
+.promo-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #C27BA0;
+  background: rgba(194,123,160,0.12);
+  padding: 5px 12px; border-radius: 6px;
+  margin-bottom: 16px;
+}
+.promo-body {
+  display: flex; gap: 20px; align-items: flex-start;
+}
+.promo-image {
+  flex-shrink: 0; width: 110px;
+}
+.promo-image img {
+  width: 100%; height: auto; border-radius: 8px;
+  filter: drop-shadow(0 6px 20px rgba(45,27,61,0.15));
+}
+.promo-text { flex: 1; }
+.promo-title {
+  font-size: 18px; font-weight: 800; color: #2D1B3D;
+  line-height: 1.25; margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+.promo-title em {
+  font-style: italic; color: #C27BA0;
+}
+.promo-desc {
+  font-size: 13.5px; color: #5A3D6B; line-height: 1.65;
+  margin-bottom: 16px;
+}
+.promo-bullets {
+  list-style: none; margin-bottom: 18px;
+}
+.promo-bullets li {
+  font-size: 13px; color: #5A3D6B; line-height: 1.5;
+  padding: 3px 0; padding-left: 22px;
+  position: relative;
+}
+.promo-bullets li::before {
+  content: '✓';
+  position: absolute; left: 0; top: 3px;
+  color: #C27BA0; font-weight: 700; font-size: 13px;
+}
+/* Coupon banner */
+.promo-coupon {
+  border: 2px dashed #C27BA0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+  background: rgba(194,123,160,0.06);
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.promo-coupon:hover {
+  background: rgba(194,123,160,0.12);
+  border-color: #A8628A;
+}
+.promo-coupon-icon {
+  font-size: 28px; flex-shrink: 0;
+}
+.promo-coupon-body { flex: 1; }
+.promo-coupon-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #C27BA0; margin-bottom: 4px;
+}
+.promo-coupon-code {
+  font-family: 'Courier New', monospace;
+  font-size: 20px; font-weight: 800; color: #2D1B3D;
+  letter-spacing: 2px;
+}
+.promo-coupon-hint {
+  font-size: 11px; color: #9B7AAD; margin-top: 3px;
+}
+.promo-coupon-copy {
+  display: flex; align-items: center; gap: 5px;
+  background: #C27BA0; color: #fff;
+  font-size: 12px; font-weight: 700;
+  padding: 8px 14px; border-radius: 8px;
+  flex-shrink: 0; white-space: nowrap;
+  transition: background 0.2s;
+}
+.promo-coupon:hover .promo-coupon-copy { background: #A8628A; }
+.promo-coupon-copy.copied {
+  background: #27AE60;
+}
+/* Copied toast */
+.coupon-toast {
+  position: fixed;
+  top: 24px; left: 50%; transform: translateX(-50%) translateY(-20px);
+  background: #1A1028;
+  color: #fff;
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 14px; font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  display: flex; align-items: center; gap: 10px;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+.coupon-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.coupon-toast-check {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #27AE60;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.coupon-toast-text span { color: #C27BA0; }
+.promo-discount-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #C27BA0, #A8628A);
+  color: #fff; font-size: 13px; font-weight: 800;
+  padding: 4px 12px; border-radius: 6px;
+  margin-bottom: 12px;
+}
+.promo-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #2D1B3D, #1A1028);
+  color: #fff; font-size: 14px; font-weight: 700;
+  text-decoration: none; padding: 12px 24px;
+  border-radius: 10px; transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(45,27,61,0.2);
+}
+.promo-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(45,27,61,0.3);
+}
+.promo-cta svg { flex-shrink: 0; }
+.promo-rating {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 12px; font-size: 12px; color: #9B7AAD;
+}
+.promo-stars { color: #F59E0B; font-size: 13px; letter-spacing: 1px; }
+
+/* ═══ END PROMO ═══ */
+
+.help-box {
+  text-align: center; padding-top: 16px;
+  border-top: 1px solid #E4E4E7;
+}
+.help-box p { font-size: 13px; color: #71717A; }
+.help-box a { color: #EA580C; text-decoration: underline; font-weight: 600; }
+.footer {
+  background: #18181B; padding: 28px 40px; text-align: center;
+}
+.footer-brand { font-size: 13px; font-weight: 700; color: #FB923C; margin-bottom: 6px; letter-spacing: 0.5px; }
+.footer-company { font-size: 11px; color: #A1A1AA; }
+</style>
+</head>
+<body>
+
+<!-- Copied toast notification -->
+<div class="coupon-toast" id="coupon-toast">
+  <div class="coupon-toast-check">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <div>Kortingscode <span>HETGAATOMJOU</span> gekopieerd! Plak deze bij je bestelling.</div>
+</div>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <p class="brand-label">DE HONDENBIJBEL</p>
+    <h1>Je e-books staan klaar! 📖</h1>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <p class="intro">
+      Hoi! Klik op de downloadknoppen hieronder om je e-books op te slaan.
+    </p>
+
+    <!-- File cards -->
+    <div class="file-card">
+      <div class="file-emoji">📙</div>
+      <div class="file-info">
+        <p class="file-title">Langlevendheid begint in de voerbak</p>
+        <p class="file-meta">E-book (PDF) &bull; 3.7 MB</p>
+      </div>
+      <a href="#" class="download-btn">Download &darr;</a>
+    </div>
+
+    <div class="file-card">
+      <div class="file-emoji">🐾</div>
+      <div class="file-info">
+        <p class="file-title">TOP 20 spelletjes</p>
+        <p class="file-meta">E-book (PDF) &bull; 798 KB</p>
+      </div>
+      <a href="#" class="download-btn">Download &darr;</a>
+    </div>
+
+    <div class="file-card">
+      <div class="file-emoji">🎾</div>
+      <div class="file-info">
+        <p class="file-title">Waarom Doet Hij Dat</p>
+        <p class="file-meta">E-book (PDF) &bull; 4.0 MB</p>
+      </div>
+      <a href="#" class="download-btn">Download &darr;</a>
+    </div>
+
+    <!-- Expiry -->
+    <div class="expiry">
+      <p>⏳ Link geldig tot 12 maart 2026</p>
+    </div>
+
+    <!-- Physical book note -->
+    <div class="info-box">
+      <p>📦 Je fysieke boek is onderweg en wordt binnen <strong>4–7 werkdagen</strong> bezorgd. Je ontvangt apart een track &amp; trace code zodra het pakket is verzonden.</p>
+    </div>
+
+    <!-- ═══════ PROMO SECTION ═══════ -->
+    <div style="text-align:center; margin-bottom: -6px; margin-top: 8px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C27BA0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+      <p style="font-size:12px; font-weight:700; color:#C27BA0; text-transform:uppercase; letter-spacing:0.1em; margin:4px 0 12px;">Exclusief voor jou als klant</p>
+    </div>
+    <div class="promo-section">
+      <div class="promo-eyebrow">💜 Beperkte aanbieding — alleen voor jou</div>
+
+      <div class="promo-body">
+        <div class="promo-image">
+          <img src="/Laat-los-wat-je-kapotmaakt-book-pichi.webp" alt="Laat Los Wat Je Kapotmaakt — boek">
+        </div>
+        <div class="promo-text">
+          <h3 class="promo-title">Laat Los Wat Je <em>Kapotmaakt</em></h3>
+          <p class="promo-desc">
+            Je geeft alles voor je hond. Maar wie zorgt er voor jou? Dit boek helpt je om
+            patronen te doorbreken, los te laten wat je vasthoudt en weer rust te vinden
+            — in je hoofd én in huis.
+          </p>
+
+          <ul class="promo-bullets">
+            <li>Doorbreek negatieve gedachtepatronen</li>
+            <li>Leer grenzen stellen zonder schuldgevoel</li>
+            <li>Concrete oefeningen uit de praktijk</li>
+          </ul>
+
+          <div class="promo-rating" style="margin-top:0; margin-bottom:16px;">
+            <span class="promo-stars">★★★★★</span>
+            <span>4.8/5 — 2.400+ lezers</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coupon banner -->
+      <div class="promo-coupon" id="coupon-banner" onclick="copyCoupon()">
+        <div class="promo-coupon-icon">✂️</div>
+        <div class="promo-coupon-body">
+          <div class="promo-coupon-label">Jouw kortingscode — 10% korting</div>
+          <div class="promo-coupon-code" id="coupon-code">HETGAATOMJOU</div>
+          <div class="promo-coupon-hint">Klik om te kopiëren</div>
+        </div>
+        <div class="promo-coupon-copy" id="coupon-copy-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Kopiëren
+        </div>
+      </div>
+
+      <div style="text-align:center;">
+        <a href="https://www.tijdomloslaten.nl" class="promo-cta" target="_blank" rel="noopener">
+          Korting verzilveren
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <script>
+      function copyCoupon() {
+        var code = 'HETGAATOMJOU';
+        var btn = document.getElementById('coupon-copy-btn');
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(code).then(function() { showCopied(btn); });
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = code; ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+          document.body.removeChild(ta); showCopied(btn);
+        }
+      }
+      function showCopied(btn) {
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Gekopieerd!';
+        // Show toast notification
+        var toast = document.getElementById('coupon-toast');
+        toast.classList.add('show');
+        setTimeout(function() {
+          toast.classList.remove('show');
+        }, 3500);
+        setTimeout(function() {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Kopiëren';
+        }, 2500);
+      }
+      </script>
+    </div>
+    <!-- ═══════ END PROMO ═══════ -->
+
+    <!-- Help -->
+    <div class="help-box">
+      <p>Problemen met de download? Stuur een mailtje naar <a href="mailto:support@dehondenbijbel.nl">support@dehondenbijbel.nl</a></p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p class="footer-brand">De Hondenbijbel</p>
+    <p class="footer-company">EverChapter OÜ &bull; Tallinn, Estonia</p>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSV Export — Mapování dat z Orders HQ</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; color: #1a1a2e; padding: 24px; line-height: 1.5; }
+
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .subtitle { color: #6b7280; font-size: 14px; margin-bottom: 28px; }
+
+  h2 { font-size: 16px; font-weight: 600; margin: 28px 0 12px; color: #1a1a2e; display: flex; align-items: center; gap: 8px; }
+  h2 .badge { font-size: 11px; font-weight: 600; background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 10px; }
+
+  .card { background: white; border-radius: 10px; border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 20px; }
+
+  /* Mapping table */
+  .map-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .map-table th { text-align: left; padding: 8px 10px; background: #f3f4f6; font-weight: 600; font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e5e7eb; }
+  .map-table td { padding: 8px 10px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+  .map-table tr:last-child td { border-bottom: none; }
+  .map-table tr:hover { background: #f9fafb; }
+
+  .col-name { font-weight: 600; color: #1a1a2e; white-space: nowrap; }
+  .col-source { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; color: #7c3aed; background: #f5f3ff; padding: 2px 6px; border-radius: 4px; display: inline-block; margin: 1px 0; }
+  .col-note { color: #6b7280; font-size: 12px; }
+
+  .avail { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .avail.green { background: #22c55e; }
+  .avail.yellow { background: #f59e0b; }
+  .avail.red { background: #ef4444; }
+  .avail.blue { background: #3b82f6; }
+
+  /* Preview CSV table */
+  .csv-wrap { overflow-x: auto; margin-top: 12px; }
+  .csv-table { border-collapse: collapse; font-size: 12px; white-space: nowrap; min-width: 100%; }
+  .csv-table th { background: #1e293b; color: white; padding: 7px 10px; font-weight: 600; text-align: left; font-size: 11px; }
+  .csv-table td { padding: 6px 10px; border-bottom: 1px solid #e5e7eb; font-family: 'SF Mono', Monaco, monospace; font-size: 11px; }
+  .csv-table tr:nth-child(even) { background: #f9fafb; }
+  .csv-table .highlight { background: #fefce8; }
+
+  /* Legend */
+  .legend { display: flex; gap: 20px; flex-wrap: wrap; font-size: 12px; color: #6b7280; margin-bottom: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+
+  /* Summary boxes */
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .summary-box { background: white; border-radius: 8px; border: 1px solid #e5e7eb; padding: 14px 16px; }
+  .summary-box .label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .summary-box .value { font-size: 20px; font-weight: 700; color: #1a1a2e; }
+  .summary-box .detail { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+  /* Notes */
+  .note-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #92400e; margin-bottom: 20px; }
+  .note-box strong { color: #78350f; }
+
+  .info-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #1e40af; }
+  .info-box strong { color: #1e3a8a; }
+</style>
+</head>
+<body>
+
+<h1>CSV Export — Mapování dat z Orders HQ do GPC šablony</h1>
+<p class="subtitle">Analýza šablony <code>PMSsablona_csv2gpc.csv</code> a dostupných dat z Medusa objednávek</p>
+
+<!-- Summary -->
+<div class="summary-grid">
+  <div class="summary-box">
+    <div class="label">Sloupců v šabloně</div>
+    <div class="value">19</div>
+    <div class="detail">CSV → GPC bankovní výpis</div>
+  </div>
+  <div class="summary-box">
+    <div class="label">Plně mapovatelné</div>
+    <div class="value" style="color: #22c55e;">10</div>
+    <div class="detail">Přímá data z objednávek</div>
+  </div>
+  <div class="summary-box">
+    <div class="label">Konfigurací</div>
+    <div class="value" style="color: #3b82f6;">4</div>
+    <div class="detail">Statické hodnoty (číslo účtu atd.)</div>
+  </div>
+  <div class="summary-box">
+    <div class="label">Nelze naplnit</div>
+    <div class="value" style="color: #ef4444;">5</div>
+    <div class="detail">Nedostupné pro online platby</div>
+  </div>
+</div>
+
+<!-- Mapping -->
+<h2>Mapování sloupců <span class="badge">CSV → Order data</span></h2>
+
+<div class="legend">
+  <div class="legend-item"><span class="avail green"></span> Plně dostupné z objednávek</div>
+  <div class="legend-item"><span class="avail blue"></span> Statická konfigurace</div>
+  <div class="legend-item"><span class="avail yellow"></span> Částečně / odvozené</div>
+  <div class="legend-item"><span class="avail red"></span> Nedostupné (online platby nemají)</div>
+</div>
+
+<div class="card">
+<table class="map-table">
+<thead>
+<tr><th>#</th><th>CSV sloupec</th><th>Zdroj dat z Orders HQ</th><th>Poznámka</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td class="col-name"><span class="avail blue"></span>Číslo účtu</td>
+  <td><span class="col-source">konfigurace</span></td>
+  <td class="col-note">Statické — číslo firemního účtu PMS s.r.o. Nastaví se v exportu jednou.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td class="col-name"><span class="avail blue"></span>Název účtu</td>
+  <td><span class="col-source">konfigurace</span></td>
+  <td class="col-note">Statické — "PMS s.r.o." nebo "Performance Marketing Solution"</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td class="col-name"><span class="avail red"></span>Číslo protiúčtu</td>
+  <td>—</td>
+  <td class="col-note">Online platby (Mollie, Stripe) nemají číslo protiúčtu zákazníka. Prázdné.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td class="col-name"><span class="avail green"></span>Id transakce</td>
+  <td>
+    <span class="col-source">metadata.molliePaymentId</span><br>
+    <span class="col-source">metadata.stripePaymentIntentId</span><br>
+    <span class="col-source">metadata.paypalOrderId</span><br>
+    <span class="col-source">metadata.comgateTransId</span>
+  </td>
+  <td class="col-note">ID platby z platební brány — unikátní identifikátor transakce. Vždy dostupné.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td class="col-name"><span class="avail green"></span>Zaúčtovaná částka</td>
+  <td><span class="col-source">order.total</span> / <span class="col-source">summary.current_order_total</span></td>
+  <td class="col-note">Celková částka objednávky včetně DPH. Formát: "29,90" (čárka jako des. oddělovač).</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td class="col-name"><span class="avail green"></span>Variabilní symbol</td>
+  <td>
+    <span class="col-source">metadata.fakturoid_invoice_id</span><br>
+    <span class="col-source">display_id</span>
+  </td>
+  <td class="col-note">Číslo faktury z Fakturoidu (variabilní symbol). Fallback na display_id objednávky.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td class="col-name"><span class="avail red"></span>Kód banky protistrany</td>
+  <td>—</td>
+  <td class="col-note">Nedostupné — online platby neposkytují kód banky zákazníka.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td class="col-name"><span class="avail yellow"></span>Konstantní symbol</td>
+  <td><span class="col-source">konfigurace / prázdné</span></td>
+  <td class="col-note">Volitelné. Lze nastavit konstantu (0558 = platba kartou, 0008 = online platba).</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td class="col-name"><span class="avail red"></span>Specifický symbol</td>
+  <td>—</td>
+  <td class="col-note">Většinou prázdné u online plateb. Lze naplnit order display_id.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td class="col-name"><span class="avail green"></span>Datum zaúčtování</td>
+  <td>
+    <span class="col-source">metadata.payment_captured_at</span><br>
+    <span class="col-source">order.created_at</span>
+  </td>
+  <td class="col-note">Datum zachycení platby. Formát: "11.03.2026". Fallback na datum vytvoření objednávky.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td class="col-name"><span class="avail green"></span>Název protistrany</td>
+  <td>
+    <span class="col-source">shipping_address.first_name</span> + <span class="col-source">last_name</span><br>
+    <span class="col-source">metadata.company_name</span>
+  </td>
+  <td class="col-note">Jméno zákazníka z adresy. Pro B2B: název firmy z metadat.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td class="col-name"><span class="avail green"></span>Měna</td>
+  <td><span class="col-source">order.currency_code</span></td>
+  <td class="col-note">EUR, CZK, SEK, PLN. Převod na uppercase.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td class="col-name"><span class="avail blue"></span>Datum starého zůstatku</td>
+  <td><span class="col-source">počátek exportního období</span></td>
+  <td class="col-note">První den měsíce/období. Např. "01.03.2026".</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td class="col-name"><span class="avail yellow"></span>Starý zůstatek</td>
+  <td><span class="col-source">počítaný kumulativně</span></td>
+  <td class="col-note">Kumulativní součet — počáteční zůstatek období. Výchozí: 0,00.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td class="col-name"><span class="avail yellow"></span>Nový zůstatek</td>
+  <td><span class="col-source">počítaný kumulativně</span></td>
+  <td class="col-note">Starý zůstatek + zaúčtovaná částka. Počítá se automaticky při exportu.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td class="col-name"><span class="avail green"></span>Poznámka</td>
+  <td>
+    <span class="col-source">custom_order_number</span> + <span class="col-source">payment_method</span>
+  </td>
+  <td class="col-note">Např. "NL2026-1234 / ideal" — číslo objednávky + platební metoda.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td class="col-name"><span class="avail yellow"></span>Obraty DEBET</td>
+  <td><span class="col-source">refund amount (pokud existuje)</span></td>
+  <td class="col-note">Pro refundy: záporná částka. Pro běžné platby: prázdné.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td class="col-name"><span class="avail green"></span>Obraty KREDIT</td>
+  <td><span class="col-source">order.total</span></td>
+  <td class="col-note">Pro příchozí platby: celková částka. Pro refundy: prázdné.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td class="col-name"><span class="avail red"></span>IBAN protistrany</td>
+  <td>—</td>
+  <td class="col-note">Nedostupné — online platby neposkytují IBAN zákazníka. Prázdné.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<!-- Notes -->
+<div class="note-box">
+  <strong>⚠️ Důležité:</strong> Sloupce 3, 7, 19 (číslo protiúčtu, kód banky, IBAN) budou u online plateb vždy prázdné — platební brány tyto údaje neposkytují. GPC konvertor by je měl akceptovat jako prázdné.
+</div>
+
+<!-- Example export preview -->
+<h2>Ukázkový export <span class="badge">3 objednávky</span></h2>
+
+<div class="card">
+<div class="csv-wrap">
+<table class="csv-table">
+<thead>
+<tr>
+  <th>Číslo účtu</th>
+  <th>Název účtu</th>
+  <th>Číslo protiúčtu</th>
+  <th>Id transakce</th>
+  <th>Částka</th>
+  <th>Var. symbol</th>
+  <th>Kód banky</th>
+  <th>Konst. symbol</th>
+  <th>Spec. symbol</th>
+  <th>Datum</th>
+  <th>Název protistrany</th>
+  <th>Měna</th>
+  <th>Datum st. zůst.</th>
+  <th>Starý zůst.</th>
+  <th>Nový zůst.</th>
+  <th>Poznámka</th>
+  <th>DEBET</th>
+  <th>KREDIT</th>
+  <th>IBAN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>2534820205</td>
+  <td>PMS s.r.o.</td>
+  <td></td>
+  <td class="highlight">tr_ABC123xyz</td>
+  <td class="highlight">29,90</td>
+  <td class="highlight">2026000142</td>
+  <td></td>
+  <td>0558</td>
+  <td></td>
+  <td class="highlight">08.03.2026</td>
+  <td class="highlight">Jan de Vries</td>
+  <td class="highlight">EUR</td>
+  <td>01.03.2026</td>
+  <td>0,00</td>
+  <td>29,90</td>
+  <td class="highlight">NL2026-142 / ideal</td>
+  <td></td>
+  <td class="highlight">29,90</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2534820205</td>
+  <td>PMS s.r.o.</td>
+  <td></td>
+  <td class="highlight">tr_DEF456abc</td>
+  <td class="highlight">44,80</td>
+  <td class="highlight">2026000143</td>
+  <td></td>
+  <td>0558</td>
+  <td></td>
+  <td class="highlight">09.03.2026</td>
+  <td class="highlight">Sophie Janssen</td>
+  <td class="highlight">EUR</td>
+  <td>01.03.2026</td>
+  <td>29,90</td>
+  <td>74,70</td>
+  <td class="highlight">NL2026-143 / bancontact</td>
+  <td></td>
+  <td class="highlight">44,80</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2534820205</td>
+  <td>PMS s.r.o.</td>
+  <td></td>
+  <td class="highlight">pi_3QrXy7z</td>
+  <td class="highlight">299,00</td>
+  <td class="highlight">2026000050</td>
+  <td></td>
+  <td>0558</td>
+  <td></td>
+  <td class="highlight">10.03.2026</td>
+  <td class="highlight">Anna Novotná</td>
+  <td class="highlight">CZK</td>
+  <td>01.03.2026</td>
+  <td>74,70</td>
+  <td>373,70</td>
+  <td class="highlight">CZ2026-50 / card</td>
+  <td></td>
+  <td class="highlight">299,00</td>
+  <td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p style="margin-top: 12px; font-size: 12px; color: #9ca3af;">🟡 Žlutě zvýrazněné buňky = data přímo z objednávek. Ostatní = konfigurace / dopočítané.</p>
+</div>
+
+<!-- What data we actually have -->
+<h2>Kompletní data dostupná z Orders HQ <span class="badge">pro export</span></h2>
+
+<div class="card">
+<table class="map-table">
+<thead>
+<tr><th>Kategorie</th><th>Data</th><th>Příklad</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td class="col-name">Objednávka</td>
+  <td>
+    <span class="col-source">order.id</span>
+    <span class="col-source">display_id</span>
+    <span class="col-source">custom_order_number</span>
+    <span class="col-source">created_at</span>
+    <span class="col-source">status</span>
+    <span class="col-source">currency_code</span>
+  </td>
+  <td class="col-note">ord_abc123, 142, NL2026-142, 2026-03-08, completed, EUR</td>
+</tr>
+<tr>
+  <td class="col-name">Částky</td>
+  <td>
+    <span class="col-source">total</span>
+    <span class="col-source">subtotal</span>
+    <span class="col-source">tax_total</span>
+    <span class="col-source">shipping_total</span>
+  </td>
+  <td class="col-note">2990 (v centech), 2479, 511, 0</td>
+</tr>
+<tr>
+  <td class="col-name">Položky</td>
+  <td>
+    <span class="col-source">items[].title</span>
+    <span class="col-source">items[].quantity</span>
+    <span class="col-source">items[].unit_price</span>
+    <span class="col-source">items[].tax_lines[].rate</span>
+  </td>
+  <td class="col-note">Laat los wat je kapotmaakt, 1, 2990, 9%</td>
+</tr>
+<tr>
+  <td class="col-name">Zákazník</td>
+  <td>
+    <span class="col-source">email</span>
+    <span class="col-source">shipping_address.first_name</span>
+    <span class="col-source">shipping_address.last_name</span>
+    <span class="col-source">shipping_address.phone</span>
+    <span class="col-source">shipping_address.company</span>
+  </td>
+  <td class="col-note">jan@example.nl, Jan, de Vries, +31612345678</td>
+</tr>
+<tr>
+  <td class="col-name">Adresa</td>
+  <td>
+    <span class="col-source">address_1</span>
+    <span class="col-source">city</span>
+    <span class="col-source">postal_code</span>
+    <span class="col-source">country_code</span>
+    <span class="col-source">province</span>
+  </td>
+  <td class="col-note">Keizersgracht 123, Amsterdam, 1015 CJ, NL</td>
+</tr>
+<tr>
+  <td class="col-name">Platba</td>
+  <td>
+    <span class="col-source">payment_provider</span>
+    <span class="col-source">payment_method</span>
+    <span class="col-source">payment_captured_at</span>
+    <span class="col-source">molliePaymentId</span>
+    <span class="col-source">stripePaymentIntentId</span>
+  </td>
+  <td class="col-note">mollie, ideal, 2026-03-08T14:32:00, tr_ABC123xyz</td>
+</tr>
+<tr>
+  <td class="col-name">Fakturace</td>
+  <td>
+    <span class="col-source">fakturoid_invoice_id</span>
+    <span class="col-source">fakturoid_invoice_number</span>
+    <span class="col-source">fakturoid_invoice_url</span>
+  </td>
+  <td class="col-note">2026000142, 2026000142, https://app.fakturoid.cz/...</td>
+</tr>
+<tr>
+  <td class="col-name">B2B</td>
+  <td>
+    <span class="col-source">company_name</span>
+    <span class="col-source">kvk_number</span>
+    <span class="col-source">vat_number</span>
+  </td>
+  <td class="col-note">ABC B.V., 12345678, NL123456789B01</td>
+</tr>
+<tr>
+  <td class="col-name">Fulfillment</td>
+  <td>
+    <span class="col-source">dextrum_status</span>
+    <span class="col-source">dextrum_tracking_number</span>
+    <span class="col-source">dextrum_carrier</span>
+    <span class="col-source">dispatched_at</span>
+  </td>
+  <td class="col-note">DISPATCHED, 3SXYZ123456, DHL, 2026-03-09T10:00:00</td>
+</tr>
+<tr>
+  <td class="col-name">Upsell</td>
+  <td>
+    <span class="col-source">upsell_accepted</span>
+    <span class="col-source">upsell_payment_id</span>
+    <span class="col-source">upsell_accepted_at</span>
+  </td>
+  <td class="col-note">true, tr_UPS789xyz, 2026-03-08T14:35:00</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="info-box" style="margin-top: 20px;">
+  <strong>💡 Jak to bude fungovat:</strong> V admin dashboardu (Orders HQ) přidáme tlačítko "Export CSV (GPC)" s výběrem období. Export stáhne CSV soubor v kódování Windows-1250 s oddělovačem středník (;) — přesně v šabloně, kterou akceptuje csv2gpc konvertor. Každá zaplacená objednávka = jeden řádek. Refundy se zapíší jako DEBET záznamy.
+</div>
+
+</body>
+</html>

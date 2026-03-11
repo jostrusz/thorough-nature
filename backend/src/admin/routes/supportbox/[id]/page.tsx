@@ -14,20 +14,41 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    const originals: { el: HTMLElement; bg: string }[] = []
+    const originals: { el: HTMLElement; styles: Record<string, string> }[] = []
     let node: HTMLElement | null = el.parentElement
     while (node && node !== document.documentElement) {
-      originals.push({ el: node, bg: node.style.background })
+      originals.push({
+        el: node,
+        styles: {
+          background: node.style.background,
+          maxWidth: node.style.maxWidth,
+          width: node.style.width,
+          padding: node.style.padding,
+          paddingLeft: node.style.paddingLeft,
+          paddingRight: node.style.paddingRight,
+          margin: node.style.margin,
+          boxSizing: node.style.boxSizing,
+        },
+      })
       node.style.setProperty("background", BG, "important")
       node.style.setProperty("max-width", "none", "important")
       node.style.setProperty("width", "100%", "important")
+      node.style.setProperty("padding-left", "0", "important")
+      node.style.setProperty("padding-right", "0", "important")
+      node.style.setProperty("margin", "0", "important")
+      node.style.setProperty("box-sizing", "border-box", "important")
       node = node.parentElement
     }
     return () => {
-      originals.forEach(({ el: n, bg }) => {
-        n.style.background = bg
-        n.style.removeProperty("max-width")
-        n.style.removeProperty("width")
+      originals.forEach(({ el: n, styles }) => {
+        n.style.background = styles.background
+        n.style.maxWidth = styles.maxWidth
+        n.style.width = styles.width
+        n.style.padding = styles.padding
+        n.style.paddingLeft = styles.paddingLeft
+        n.style.paddingRight = styles.paddingRight
+        n.style.margin = styles.margin
+        n.style.boxSizing = styles.boxSizing
       })
     }
   }, [ref])
@@ -559,7 +580,19 @@ const TicketDetailPage = () => {
   const status = statusConfig[ticket.status as keyof typeof statusConfig] || statusConfig.new
 
   return (
-    <div ref={pageRef} style={{ margin: "0 auto", padding: "24px 32px", background: BG }}>
+    <div ref={pageRef} style={{ width: "100%", padding: "24px 32px", background: BG, boxSizing: "border-box" }}>
+      {/* Inject global CSS to override Medusa admin container constraints */}
+      <style>{`
+        main > div, main > div > div, main > div > div > div,
+        main > div > div > div > div, main > div > div > div > div > div {
+          max-width: none !important;
+          width: 100% !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+        }
+      `}</style>
       {/* ═══ Top Bar ═══ */}
       <div style={{
         display: "flex", justifyContent: "space-between", alignItems: "center",

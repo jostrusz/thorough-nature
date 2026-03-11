@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Popup — Laat los wat je kapotmaakt</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+  /* OVERLAY */
+  .quiz-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center; z-index: 9999;
+    animation: overlayIn 0.3s ease;
+  }
+  @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* POPUP CONTAINER */
+  .quiz-popup {
+    background: #FFFFFF; border-radius: 16px; width: 480px; max-width: 94vw;
+    max-height: 90vh; overflow: hidden; position: relative;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
+    animation: popupIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes popupIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+  /* CLOSE BUTTON */
+  .quiz-close {
+    position: absolute; top: 12px; right: 12px; width: 32px; height: 32px;
+    border: none; background: rgba(0,0,0,0.06); border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+    color: #6D7175; transition: all 0.15s; z-index: 10;
+  }
+  .quiz-close:hover { background: rgba(0,0,0,0.12); color: #1A1A1A; transform: scale(1.1); }
+
+  /* PROGRESS BAR */
+  .quiz-progress { height: 4px; background: #F0F0F0; }
+  .quiz-progress-fill {
+    height: 100%; background: linear-gradient(90deg, #008060, #00b386);
+    border-radius: 0 2px 2px 0; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* HEADER SECTION */
+  .quiz-header {
+    padding: 28px 28px 0; text-align: center;
+  }
+  .quiz-step-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;
+    color: #008060; margin-bottom: 12px;
+  }
+  .quiz-question {
+    font-size: 22px; font-weight: 700; color: #1A1A1A; line-height: 1.35;
+    margin-bottom: 6px; min-height: 60px;
+  }
+  .quiz-subtitle {
+    font-size: 13px; color: #8C9196; margin-bottom: 20px;
+  }
+
+  /* OPTIONS */
+  .quiz-options { padding: 0 28px 28px; }
+  .quiz-option {
+    display: flex; align-items: center; gap: 14px; width: 100%;
+    padding: 14px 18px; margin-bottom: 10px; border: 2px solid #E8E8E8;
+    border-radius: 12px; background: #FAFAFA; cursor: pointer;
+    transition: all 0.2s ease; text-align: left; font-size: 15px;
+    color: #1A1A1A; font-weight: 500; font-family: inherit;
+  }
+  .quiz-option:hover {
+    border-color: #008060; background: #F0FDF4; transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0,128,96,0.12);
+  }
+  .quiz-option:active { transform: translateX(2px) scale(0.99); }
+  .quiz-option-icon {
+    width: 40px; height: 40px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 20px;
+    background: #F0F0F0; flex-shrink: 0; transition: background 0.2s;
+  }
+  .quiz-option:hover .quiz-option-icon { background: #E3F1DF; }
+  .quiz-option-text { flex: 1; }
+  .quiz-option-label { font-size: 15px; font-weight: 600; color: #1A1A1A; }
+  .quiz-option-desc { font-size: 12px; color: #8C9196; margin-top: 2px; }
+
+  /* CUSTOM INPUT OPTION */
+  .quiz-custom-wrapper {
+    padding: 0 28px 28px;
+  }
+  .quiz-custom-toggle {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    padding: 12px 18px; border: 2px dashed #D0D0D0; border-radius: 12px;
+    background: transparent; cursor: pointer; transition: all 0.2s;
+    font-size: 14px; color: #8C9196; font-family: inherit;
+  }
+  .quiz-custom-toggle:hover { border-color: #008060; color: #008060; }
+  .quiz-custom-input-wrap {
+    display: none; margin-top: 10px;
+  }
+  .quiz-custom-input-wrap.active { display: flex; gap: 8px; }
+  .quiz-custom-input {
+    flex: 1; padding: 12px 16px; border: 2px solid #E8E8E8; border-radius: 10px;
+    font-size: 14px; font-family: inherit; outline: none; background: #FAFAFA;
+    transition: border-color 0.2s;
+  }
+  .quiz-custom-input:focus { border-color: #008060; background: #FFF; }
+  .quiz-custom-send {
+    padding: 12px 20px; border: none; border-radius: 10px; background: #008060;
+    color: #FFF; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; font-family: inherit; white-space: nowrap;
+  }
+  .quiz-custom-send:hover { background: #006B4F; box-shadow: 0 2px 8px rgba(0,128,96,0.3); }
+  .quiz-custom-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* AI LOADING */
+  .quiz-ai-loading {
+    display: none; padding: 40px 28px; text-align: center;
+  }
+  .quiz-ai-loading.active { display: block; }
+  .quiz-ai-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 12px; }
+  .quiz-ai-dot {
+    width: 10px; height: 10px; border-radius: 50%; background: #008060;
+    animation: dotPulse 1.4s ease-in-out infinite;
+  }
+  .quiz-ai-dot:nth-child(2) { animation-delay: 0.2s; }
+  .quiz-ai-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dotPulse {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+  .quiz-ai-text { font-size: 14px; color: #6D7175; }
+
+  /* SLIDE ANIMATION */
+  .quiz-slide-enter { animation: slideIn 0.35s ease; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ===== EMAIL CTA SCREEN ===== */
+  .quiz-cta { padding: 32px 28px; text-align: center; display: none; }
+  .quiz-cta.active { display: block; }
+  .quiz-cta-emoji { font-size: 48px; margin-bottom: 16px; }
+  .quiz-cta-title {
+    font-size: 20px; font-weight: 700; color: #1A1A1A; line-height: 1.35; margin-bottom: 8px;
+  }
+  .quiz-cta-subtitle {
+    font-size: 14px; color: #6D7175; margin-bottom: 24px; line-height: 1.5;
+  }
+  .quiz-cta-form { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-cta-input {
+    width: 100%; padding: 14px 18px; border: 2px solid #E8E8E8; border-radius: 12px;
+    font-size: 15px; font-family: inherit; outline: none; background: #FAFAFA;
+    transition: all 0.2s;
+  }
+  .quiz-cta-input:focus { border-color: #008060; background: #FFF; box-shadow: 0 0 0 4px rgba(0,128,96,0.08); }
+  .quiz-cta-submit {
+    width: 100%; padding: 16px; border: none; border-radius: 12px;
+    background: linear-gradient(135deg, #008060, #00a37a); color: #FFF;
+    font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    font-family: inherit; letter-spacing: 0.3px;
+  }
+  .quiz-cta-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,128,96,0.35); }
+  .quiz-cta-submit:active { transform: translateY(0); }
+  .quiz-cta-privacy {
+    font-size: 11px; color: #B0B0B0; margin-top: 8px;
+  }
+
+  /* ===== SUCCESS SCREEN ===== */
+  .quiz-success { padding: 48px 28px; text-align: center; display: none; }
+  .quiz-success.active { display: block; }
+  .quiz-success-check {
+    width: 64px; height: 64px; border-radius: 50%; background: #E3F1DF;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px; font-size: 32px;
+    animation: checkBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes checkBounce { from { transform: scale(0); } to { transform: scale(1); } }
+  .quiz-success-title { font-size: 22px; font-weight: 700; color: #1A1A1A; margin-bottom: 8px; }
+  .quiz-success-text { font-size: 14px; color: #6D7175; line-height: 1.5; }
+
+  /* ===== INTRO SCREEN ===== */
+  .quiz-intro { padding: 32px 28px; text-align: center; }
+  .quiz-intro-emoji { font-size: 52px; margin-bottom: 16px; }
+  .quiz-intro-title { font-size: 24px; font-weight: 800; color: #1A1A1A; line-height: 1.3; margin-bottom: 10px; }
+  .quiz-intro-text { font-size: 14px; color: #6D7175; line-height: 1.6; margin-bottom: 24px; }
+  .quiz-intro-start {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 16px 36px; border: none; border-radius: 12px;
+    background: linear-gradient(135deg, #008060, #00a37a); color: #FFF;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .quiz-intro-start:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,128,96,0.35); }
+  .quiz-intro-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 20px; background: #FFF3CD;
+    font-size: 12px; font-weight: 600; color: #856404; margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="quiz-overlay" id="quizOverlay">
+  <div class="quiz-popup">
+    <button class="quiz-close" onclick="closeQuiz()">✕</button>
+
+    <!-- PROGRESS BAR -->
+    <div class="quiz-progress">
+      <div class="quiz-progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+
+    <!-- SCREEN: INTRO -->
+    <div id="screenIntro" class="quiz-intro">
+      <div class="quiz-intro-badge">⏱ Duurt maar 30 seconden</div>
+      <div class="quiz-intro-emoji">🪞</div>
+      <div class="quiz-intro-title">Ontdek wat jou écht tegenhoudt</div>
+      <div class="quiz-intro-text">
+        Beantwoord 5 korte vragen en ontdek welke emotionele ballast jou kapotmaakt — en hoe je die kunt loslaten.
+        <br><br>
+        <strong>10.000+ mensen</strong> gingen je voor.
+      </div>
+      <button class="quiz-intro-start" onclick="startQuiz()">
+        Ja, ik wil dit weten →
+      </button>
+    </div>
+
+    <!-- SCREEN: QUESTIONS -->
+    <div id="screenQuestions" style="display:none;">
+      <div class="quiz-header">
+        <div class="quiz-step-label" id="stepLabel">Vraag 1 van 5</div>
+        <div class="quiz-question quiz-slide-enter" id="questionText"></div>
+        <div class="quiz-subtitle" id="questionSubtitle"></div>
+      </div>
+
+      <div class="quiz-options quiz-slide-enter" id="optionsContainer"></div>
+
+      <div class="quiz-custom-wrapper" id="customWrapper">
+        <button class="quiz-custom-toggle" onclick="showCustomInput()">
+          ✏️ Ik wil mijn eigen antwoord typen...
+        </button>
+        <div class="quiz-custom-input-wrap" id="customInputWrap">
+          <input class="quiz-custom-input" id="customInput"
+                 placeholder="Typ hier je antwoord..."
+                 maxlength="200"
+                 onkeydown="if(event.key==='Enter')submitCustom()">
+          <button class="quiz-custom-send" id="customSendBtn" onclick="submitCustom()">→</button>
+        </div>
+      </div>
+
+      <!-- AI Loading -->
+      <div class="quiz-ai-loading" id="aiLoading">
+        <div class="quiz-ai-dots">
+          <div class="quiz-ai-dot"></div>
+          <div class="quiz-ai-dot"></div>
+          <div class="quiz-ai-dot"></div>
+        </div>
+        <div class="quiz-ai-text">Even nadenken over jouw antwoord...</div>
+      </div>
+    </div>
+
+    <!-- SCREEN: EMAIL CTA -->
+    <div id="screenCTA" class="quiz-cta">
+      <div class="quiz-cta-emoji">💌</div>
+      <div class="quiz-cta-title" id="ctaTitle">We hebben iets voor je...</div>
+      <div class="quiz-cta-subtitle" id="ctaSubtitle">Op basis van jouw antwoorden...</div>
+      <div class="quiz-cta-form">
+        <input class="quiz-cta-input" id="inputName" placeholder="Je voornaam" autocomplete="given-name">
+        <input class="quiz-cta-input" id="inputEmail" placeholder="Je e-mailadres" type="email" autocomplete="email">
+        <button class="quiz-cta-submit" id="ctaSubmitBtn" onclick="submitEmail()">
+          Ja, stuur mij dit gratis →
+        </button>
+      </div>
+      <div class="quiz-cta-privacy">🔒 100% gratis. Geen spam. Je kunt je altijd uitschrijven.</div>
+    </div>
+
+    <!-- SCREEN: SUCCESS -->
+    <div id="screenSuccess" class="quiz-success">
+      <div class="quiz-success-check">✓</div>
+      <div class="quiz-success-title">Check je inbox! 📬</div>
+      <div class="quiz-success-text" id="successText">
+        We hebben je eerste persoonlijke e-mail verstuurd. Kijk ook even bij spam als je hem niet ziet.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// DECISION TREE — pre-defined questions
+// ═══════════════════════════════════════
+const DECISION_TREE = {
+  q1: {
+    question: "Wat houdt jou het meeste bezig?",
+    subtitle: "Kies wat het dichtst bij je gevoel komt",
+    options: [
+      { icon: "⏪", label: "Het verleden", desc: "Dingen die ik niet kan loslaten", next: "q2_past" },
+      { icon: "😰", label: "Het nu", desc: "Stress, overweldiging, onrust", next: "q2_present" },
+      { icon: "😟", label: "De toekomst", desc: "Angst voor wat komen gaat", next: "q2_future" },
+      { icon: "🌀", label: "Alles tegelijk", desc: "Mijn hoofd staat nooit stil", next: "q2_all" },
+    ]
+  },
+
+  // === PAST BRANCH ===
+  q2_past: {
+    question: "Welk gevoel uit het verleden speelt het meest?",
+    subtitle: "Er is geen goed of fout antwoord",
+    options: [
+      { icon: "💔", label: "Schuldgevoel", desc: "Ik had anders moeten handelen", next: "q3_guilt" },
+      { icon: "😤", label: "Woede of wrok", desc: "Ik kan het niet vergeven", next: "q3_anger" },
+      { icon: "😢", label: "Verdriet of verlies", desc: "Iets of iemand kwijt", next: "q3_grief" },
+      { icon: "😶", label: "Schaamte", desc: "Ik schaam me voor wie ik was", next: "q3_shame" },
+    ]
+  },
+
+  // === PRESENT BRANCH ===
+  q2_present: {
+    question: "Wat maakt het nu zo zwaar?",
+    subtitle: "",
+    options: [
+      { icon: "🧠", label: "Piekeren", desc: "Mijn hoofd stopt nooit", next: "q3_overthink" },
+      { icon: "😤", label: "Woede-uitbarstingen", desc: "Ik reageer me af op anderen", next: "q3_anger" },
+      { icon: "😴", label: "Uitputting", desc: "Ik ben compleet op", next: "q3_burnout" },
+      { icon: "🎭", label: "Masker dragen", desc: "Ik doe alsof alles oké is", next: "q3_mask" },
+    ]
+  },
+
+  // === FUTURE BRANCH ===
+  q2_future: {
+    question: "Waar ben je het bangst voor?",
+    subtitle: "",
+    options: [
+      { icon: "🔄", label: "Dezelfde fouten herhalen", desc: "Ik loop in cirkels", next: "q3_patterns" },
+      { icon: "💑", label: "Nooit echte liefde", desc: "Dat ik altijd alleen blijf", next: "q3_love" },
+      { icon: "📉", label: "Falen", desc: "Dat het nooit beter wordt", next: "q3_failure" },
+      { icon: "👻", label: "Mijn kinderen beschadigen", desc: "Dat ik mijn patronen doorgeef", next: "q3_legacy" },
+    ]
+  },
+
+  // === ALL BRANCH ===
+  q2_all: {
+    question: "Als je één ding kon veranderen, wat zou dat zijn?",
+    subtitle: "Stel je voor dat je één knop kon indrukken...",
+    options: [
+      { icon: "🧘", label: "Rust in mijn hoofd", desc: "Het piekeren stoppen", next: "q3_overthink" },
+      { icon: "💪", label: "Meer zelfvertrouwen", desc: "Eindelijk geloven in mezelf", next: "q3_confidence" },
+      { icon: "❤️", label: "Betere relaties", desc: "Niet meer steeds hetzelfde patroon", next: "q3_patterns" },
+      { icon: "🌅", label: "Het verleden loslaten", desc: "Vrij zijn van wat was", next: "q3_guilt" },
+    ]
+  },
+
+  // === LEVEL 3 (multiple branches merge) ===
+  q3_guilt: {
+    question: "Hoe beïnvloedt dit schuldgevoel je dagelijks leven?",
+    subtitle: "",
+    options: [
+      { icon: "🌙", label: "Ik kan niet slapen", desc: "Ik lig 's nachts te malen", next: "q4_sleep" },
+      { icon: "🫣", label: "Ik vermijd situaties", desc: "Ik durf dingen niet meer", next: "q4_avoid" },
+      { icon: "💔", label: "Het raakt mijn relaties", desc: "Ik duw mensen weg", next: "q4_relationships" },
+      { icon: "🪨", label: "Het voelt als een last", desc: "Ik draag het overal mee", next: "q4_weight" },
+    ]
+  },
+
+  q3_anger: {
+    question: "Op wie of wat richt zich die woede het meest?",
+    subtitle: "",
+    options: [
+      { icon: "👨‍👩‍👧", label: "Familie", desc: "Ouders, broers/zussen", next: "q4_family" },
+      { icon: "💑", label: "Ex-partner", desc: "Relatie die me kapotmaakte", next: "q4_relationships" },
+      { icon: "🪞", label: "Mezelf", desc: "Ik ben boos op mezelf", next: "q4_selfanger" },
+      { icon: "🌍", label: "Het leven", desc: "Waarom overkomt mij dit?", next: "q4_weight" },
+    ]
+  },
+
+  q3_grief: {
+    question: "Wat maakt het rouwen zo moeilijk?",
+    subtitle: "",
+    options: [
+      { icon: "🤐", label: "Niemand begrijpt het", desc: "Ik voel me alleen hierin", next: "q4_alone" },
+      { icon: "⏰", label: "Het is al lang geleden", desc: "Maar het doet nog steeds pijn", next: "q4_weight" },
+      { icon: "😡", label: "Ik voel ook woede", desc: "Boos dat het zo gelopen is", next: "q4_selfanger" },
+      { icon: "🫥", label: "Ik voel niets meer", desc: "Ik heb mezelf afgesloten", next: "q4_avoid" },
+    ]
+  },
+
+  q3_shame: { question: "Wat heb je het moeilijkst om te accepteren?", subtitle: "", options: [
+    { icon: "🔙", label: "Keuzes uit het verleden", desc: "Wat ik heb gedaan of niet", next: "q4_weight" },
+    { icon: "🫣", label: "Wie ik was", desc: "De persoon die ik ooit was", next: "q4_selfanger" },
+    { icon: "🤫", label: "Een geheim", desc: "Iets dat niemand weet", next: "q4_alone" },
+    { icon: "📊", label: "Andermans oordeel", desc: "Wat mensen van me denken", next: "q4_avoid" },
+  ]},
+
+  q3_overthink: { question: "Wat zegt die stem in je hoofd het vaakst?", subtitle: "", options: [
+    { icon: "⚠️", label: "Je bent niet goed genoeg", desc: "", next: "q4_selfanger" },
+    { icon: "🔮", label: "Wat als het misgaat?", desc: "", next: "q4_avoid" },
+    { icon: "🔁", label: "Waarom deed ik dat?", desc: "", next: "q4_weight" },
+    { icon: "😞", label: "Niemand geeft echt om je", desc: "", next: "q4_alone" },
+  ]},
+
+  q3_burnout: { question: "Wat kost je de meeste energie?", subtitle: "", options: [
+    { icon: "🏠", label: "Zorgen voor anderen", desc: "Iedereen behalve mezelf", next: "q4_selfanger" },
+    { icon: "💼", label: "Werk & presteren", desc: "De druk om alles perfect te doen", next: "q4_avoid" },
+    { icon: "🧠", label: "Het piekeren zelf", desc: "Mijn gedachten vreten me op", next: "q4_sleep" },
+    { icon: "💔", label: "Een moeilijke relatie", desc: "Het zuigt me leeg", next: "q4_relationships" },
+  ]},
+
+  q3_mask: { question: "Wat verberg je het meest voor anderen?", subtitle: "", options: [
+    { icon: "😢", label: "Hoe slecht ik me voel", desc: "", next: "q4_alone" },
+    { icon: "😤", label: "Mijn woede", desc: "", next: "q4_selfanger" },
+    { icon: "😰", label: "Mijn angst", desc: "", next: "q4_avoid" },
+    { icon: "🫠", label: "Dat ik het niet meer trek", desc: "", next: "q4_weight" },
+  ]},
+
+  q3_confidence: { question: "Wanneer voel je je het onzekerst?", subtitle: "", options: [
+    { icon: "👥", label: "In groepen", desc: "Ik vergelijk mezelf constant", next: "q4_avoid" },
+    { icon: "🗣️", label: "Als ik iets moet zeggen", desc: "Ik durf mijn mening niet", next: "q4_alone" },
+    { icon: "🪞", label: "Als ik in de spiegel kijk", desc: "Ik zie alleen mijn fouten", next: "q4_selfanger" },
+    { icon: "❤️", label: "In relaties", desc: "Ik geloof niet dat iemand van me kan houden", next: "q4_relationships" },
+  ]},
+
+  q3_patterns: { question: "Welk patroon herken je het meest?", subtitle: "", options: [
+    { icon: "🧲", label: "Altijd de verkeerde partner", desc: "", next: "q4_relationships" },
+    { icon: "🚪", label: "Ik ga weg zodra het serieus wordt", desc: "", next: "q4_avoid" },
+    { icon: "🐕", label: "Ik geef altijd toe", desc: "", next: "q4_selfanger" },
+    { icon: "🔥", label: "Ik blaas relaties op", desc: "", next: "q4_family" },
+  ]},
+
+  q3_love: { question: "Wat houdt je tegen in de liefde?", subtitle: "", options: [
+    { icon: "🛡️", label: "Vertrouwensproblemen", desc: "", next: "q4_relationships" },
+    { icon: "😰", label: "Angst voor afwijzing", desc: "", next: "q4_avoid" },
+    { icon: "💔", label: "Oude wonden", desc: "Vorige relaties hebben me kapotgemaakt", next: "q4_weight" },
+    { icon: "🚫", label: "Ik voel het niet waard", desc: "", next: "q4_selfanger" },
+  ]},
+
+  q3_failure: { question: "Wat is je grootste angst hierin?", subtitle: "", options: [
+    { icon: "🏚️", label: "Vastzitten", desc: "Dat mijn leven nooit verbetert", next: "q4_weight" },
+    { icon: "👎", label: "Teleurstelling", desc: "Anderen of mezelf teleurstellen", next: "q4_selfanger" },
+    { icon: "⏰", label: "Tijd verspild", desc: "Dat het te laat is", next: "q4_alone" },
+    { icon: "🔄", label: "In cirkels blijven draaien", desc: "", next: "q4_avoid" },
+  ]},
+
+  q3_legacy: { question: "Wat wil je het meest voor je kinderen?", subtitle: "", options: [
+    { icon: "🔇", label: "Geen schreeuwende ouder", desc: "Ik wil niet zijn wie mijn ouders waren", next: "q4_family" },
+    { icon: "💪", label: "Emotionele stabiliteit", desc: "Dat ze zich veilig voelen", next: "q4_relationships" },
+    { icon: "❤️‍🩹", label: "Niet mijn trauma doorgeven", desc: "", next: "q4_weight" },
+    { icon: "🌱", label: "Ze leren los te laten", desc: "Wat ik zelf nooit geleerd heb", next: "q4_selfanger" },
+  ]},
+
+  // === LEVEL 4 (converging) ===
+  q4_sleep: { question: "Wat heb je al geprobeerd?", subtitle: "Het is oké als het antwoord 'niets' is", options: [
+    { icon: "📖", label: "Boeken gelezen", desc: "Maar niets werkte echt", next: "q5_final" },
+    { icon: "🧘", label: "Meditatie / yoga", desc: "Maar mijn hoofd stopt niet", next: "q5_final" },
+    { icon: "🗣️", label: "Therapie", desc: "Maar ik heb meer nodig", next: "q5_final" },
+    { icon: "🤷", label: "Niets concreets", desc: "Ik weet niet waar te beginnen", next: "q5_final" },
+  ]},
+
+  q4_avoid: { question: "Wat heb je al geprobeerd?", subtitle: "", options: [
+    { icon: "🙈", label: "Negeren en doorgaan", desc: "Maar het komt steeds terug", next: "q5_final" },
+    { icon: "📖", label: "Zelfhulpboeken", desc: "Te vaag of te zweverig", next: "q5_final" },
+    { icon: "🗣️", label: "Erover praten", desc: "Maar niemand begrijpt het echt", next: "q5_final" },
+    { icon: "🤷", label: "Ik weet het niet meer", desc: "Ik sta met mijn rug tegen de muur", next: "q5_final" },
+  ]},
+
+  q4_relationships: { question: "Wat heb je al geprobeerd?", subtitle: "", options: [
+    { icon: "🗣️", label: "Therapie / coaching", desc: "Het hielp even, maar niet blijvend", next: "q5_final" },
+    { icon: "📖", label: "Boeken / podcasts", desc: "Te algemeen, niet voor mij", next: "q5_final" },
+    { icon: "🏃", label: "Afstand genomen", desc: "Maar het voelt niet opgelost", next: "q5_final" },
+    { icon: "🤷", label: "Nog niets", desc: "Ik zoek iets dat echt werkt", next: "q5_final" },
+  ]},
+
+  q4_weight: { question: "Wat heb je al geprobeerd om los te laten?", subtitle: "", options: [
+    { icon: "🧘", label: "Meditatie / mindfulness", desc: "Te zweverig voor mij", next: "q5_final" },
+    { icon: "📖", label: "Boeken gelezen", desc: "Maar niets concreets", next: "q5_final" },
+    { icon: "💊", label: "Medicatie", desc: "Het maskeert alleen", next: "q5_final" },
+    { icon: "🤷", label: "Ik weet niet hoe", desc: "Niemand heeft me dat geleerd", next: "q5_final" },
+  ]},
+
+  q4_selfanger: { question: "Wat zou je het liefst tegen jezelf zeggen?", subtitle: "", options: [
+    { icon: "🤗", label: "Het is oké, je doet je best", desc: "", next: "q5_final" },
+    { icon: "💪", label: "Je bent sterker dan je denkt", desc: "", next: "q5_final" },
+    { icon: "🙏", label: "Ik vergeef je", desc: "", next: "q5_final" },
+    { icon: "🆕", label: "Het is nog niet te laat", desc: "", next: "q5_final" },
+  ]},
+
+  q4_alone: { question: "Wat zou je het meeste helpen nu?", subtitle: "", options: [
+    { icon: "📖", label: "Een praktisch plan", desc: "Stappen die ik kan volgen", next: "q5_final" },
+    { icon: "🤝", label: "Weten dat ik niet alleen ben", desc: "Dat anderen dit ook voelen", next: "q5_final" },
+    { icon: "🔑", label: "Begrijpen waarom ik zo ben", desc: "Inzicht in mezelf", next: "q5_final" },
+    { icon: "⚡", label: "Iets dat snel werkt", desc: "Ik wil nu verandering", next: "q5_final" },
+  ]},
+
+  q4_family: { question: "Wat heb je al geprobeerd?", subtitle: "", options: [
+    { icon: "🗣️", label: "Contact verbroken", desc: "Maar de pijn blijft", next: "q5_final" },
+    { icon: "🤝", label: "Gesprekken gevoerd", desc: "Maar het verandert niets", next: "q5_final" },
+    { icon: "🙈", label: "Doen alsof het niet erg is", desc: "Maar vanbinnen brand het", next: "q5_final" },
+    { icon: "🤷", label: "Ik weet niet wat ik moet doen", desc: "Ik zit vast", next: "q5_final" },
+  ]},
+
+  // === FINAL Q5 ===
+  q5_final: {
+    question: "Hoe snel wil je verandering zien?",
+    subtitle: "Wees eerlijk tegen jezelf",
+    options: [
+      { icon: "⚡", label: "Nu meteen", desc: "Ik kan niet meer wachten", next: "CTA" },
+      { icon: "📅", label: "Binnen een paar weken", desc: "Ik wil structurele verbetering", next: "CTA" },
+      { icon: "🌱", label: "Ik neem de tijd", desc: "Als het maar werkt", next: "CTA" },
+      { icon: "🤔", label: "Ik twijfel nog", desc: "Maar ik sta open voor hulp", next: "CTA" },
+    ]
+  },
+}
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let currentStep = 0
+let totalSteps = 5
+let answers = []
+let currentQuestionKey = 'q1'
+
+// ═══════════════════════════════════════
+// FUNCTIONS
+// ═══════════════════════════════════════
+
+function startQuiz() {
+  document.getElementById('screenIntro').style.display = 'none'
+  document.getElementById('screenQuestions').style.display = 'block'
+  currentStep = 1
+  renderQuestion('q1')
+}
+
+function renderQuestion(key) {
+  currentQuestionKey = key
+  const q = DECISION_TREE[key]
+  if (!q) return showCTA()
+
+  // Update progress
+  document.getElementById('progressFill').style.width = `${(currentStep / totalSteps) * 100}%`
+  document.getElementById('stepLabel').textContent = `Vraag ${currentStep} van ${totalSteps}`
+
+  // Animate question
+  const questionEl = document.getElementById('questionText')
+  const optionsEl = document.getElementById('optionsContainer')
+  questionEl.className = 'quiz-question'
+  optionsEl.className = 'quiz-options'
+  void questionEl.offsetWidth // force reflow
+  questionEl.className = 'quiz-question quiz-slide-enter'
+  optionsEl.className = 'quiz-options quiz-slide-enter'
+
+  questionEl.textContent = q.question
+  document.getElementById('questionSubtitle').textContent = q.subtitle || ''
+
+  // Render options
+  optionsEl.innerHTML = q.options.map((opt, i) => `
+    <button class="quiz-option" onclick="selectOption('${opt.next}', '${opt.label.replace(/'/g, "\\'")}')">
+      <div class="quiz-option-icon">${opt.icon}</div>
+      <div class="quiz-option-text">
+        <div class="quiz-option-label">${opt.label}</div>
+        ${opt.desc ? `<div class="quiz-option-desc">${opt.desc}</div>` : ''}
+      </div>
+    </button>
+  `).join('')
+
+  // Show custom input area
+  document.getElementById('customWrapper').style.display = 'block'
+  document.getElementById('customInputWrap').classList.remove('active')
+  document.getElementById('aiLoading').classList.remove('active')
+}
+
+function selectOption(nextKey, label) {
+  answers.push({ step: currentStep, question: DECISION_TREE[currentQuestionKey].question, answer: label, type: 'choice' })
+  currentStep++
+
+  if (nextKey === 'CTA' || currentStep > totalSteps) {
+    showCTA()
+  } else {
+    renderQuestion(nextKey)
+  }
+}
+
+function showCustomInput() {
+  document.getElementById('customInputWrap').classList.add('active')
+  document.getElementById('customInput').focus()
+}
+
+async function submitCustom() {
+  const input = document.getElementById('customInput')
+  const text = input.value.trim()
+  if (!text) return
+
+  answers.push({ step: currentStep, question: DECISION_TREE[currentQuestionKey].question, answer: text, type: 'custom' })
+
+  // Show AI loading
+  document.getElementById('optionsContainer').style.display = 'none'
+  document.getElementById('customWrapper').style.display = 'none'
+  document.getElementById('aiLoading').classList.add('active')
+
+  if (currentStep >= totalSteps) {
+    setTimeout(() => showCTA(), 1200)
+    return
+  }
+
+  // === AI CALL: generate next question ===
+  // In production, this calls your backend which calls Claude/GPT
+  // For demo, we simulate with a timeout
+  try {
+    // const response = await fetch('/api/store/quiz/generate-question', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ answers, customText: text, step: currentStep })
+    // })
+    // const data = await response.json()
+    // renderAIQuestion(data)
+
+    // DEMO: simulate AI response after 1.5s
+    setTimeout(() => {
+      currentStep++
+      document.getElementById('aiLoading').classList.remove('active')
+      document.getElementById('optionsContainer').style.display = 'block'
+      document.getElementById('customWrapper').style.display = 'block'
+
+      // Pick next logical question from tree based on content keywords
+      const nextKey = findBestNextQuestion(text)
+      renderQuestion(nextKey)
+    }, 1500)
+
+  } catch (err) {
+    currentStep++
+    document.getElementById('aiLoading').classList.remove('active')
+    document.getElementById('optionsContainer').style.display = 'block'
+    document.getElementById('customWrapper').style.display = 'block'
+    renderQuestion('q5_final')
+  }
+}
+
+function findBestNextQuestion(text) {
+  // Simple keyword matching for demo — in production AI generates the full question
+  const lower = text.toLowerCase()
+  if (lower.includes('schuld') || lower.includes('spijt')) return 'q3_guilt'
+  if (lower.includes('boos') || lower.includes('woe')) return 'q3_anger'
+  if (lower.includes('verlies') || lower.includes('dood') || lower.includes('rouw')) return 'q3_grief'
+  if (lower.includes('schaam')) return 'q3_shame'
+  if (lower.includes('pieker') || lower.includes('denk')) return 'q3_overthink'
+  if (lower.includes('moe') || lower.includes('uitge') || lower.includes('burn')) return 'q3_burnout'
+  if (lower.includes('relat') || lower.includes('partner') || lower.includes('lief')) return 'q3_love'
+  if (lower.includes('kind') || lower.includes('moeder') || lower.includes('vader') || lower.includes('famil')) return 'q3_legacy'
+  if (lower.includes('werk') || lower.includes('baan')) return 'q3_burnout'
+  if (lower.includes('alleen') || lower.includes('eenzaam')) return 'q3_mask'
+  // Default fallback
+  const keys = Object.keys(DECISION_TREE).filter(k => k.startsWith('q3_') || k.startsWith('q4_'))
+  return keys[Math.floor(Math.random() * keys.length)]
+}
+
+function showCTA() {
+  document.getElementById('screenQuestions').style.display = 'none'
+  document.getElementById('progressFill').style.width = '100%'
+
+  // Build personalized CTA from answers
+  const ctaData = buildCTAMessage()
+  document.getElementById('ctaTitle').textContent = ctaData.title
+  document.getElementById('ctaSubtitle').textContent = ctaData.subtitle
+
+  const ctaScreen = document.getElementById('screenCTA')
+  ctaScreen.classList.add('active')
+  ctaScreen.style.display = 'block'
+
+  setTimeout(() => document.getElementById('inputName').focus(), 300)
+}
+
+function buildCTAMessage() {
+  // Extract key themes from answers
+  const allAnswers = answers.map(a => a.answer.toLowerCase()).join(' ')
+  let theme = ''
+  let action = ''
+
+  if (allAnswers.includes('schuld') || allAnswers.includes('verleden') || allAnswers.includes('spijt')) {
+    theme = 'het schuldgevoel uit je verleden'
+    action = 'dat schuldgevoel kunt loslaten'
+  } else if (allAnswers.includes('woede') || allAnswers.includes('boos') || allAnswers.includes('wrok')) {
+    theme = 'de woede die je vanbinnen opvreet'
+    action = 'die woede kunt omzetten in rust'
+  } else if (allAnswers.includes('pieker') || allAnswers.includes('hoofd') || allAnswers.includes('denk')) {
+    theme = 'het eindeloze piekeren'
+    action = 'je hoofd eindelijk stil kunt krijgen'
+  } else if (allAnswers.includes('relat') || allAnswers.includes('partner') || allAnswers.includes('lief')) {
+    theme = 'de patronen in je relaties'
+    action = 'gezonde relaties kunt opbouwen'
+  } else if (allAnswers.includes('familie') || allAnswers.includes('moeder') || allAnswers.includes('vader')) {
+    theme = 'de pijn uit je familiegeschiedenis'
+    action = 'jezelf kunt bevrijden van die last'
+  } else if (allAnswers.includes('angst') || allAnswers.includes('bang') || allAnswers.includes('toekomst')) {
+    theme = 'de angst die je tegenhoudt'
+    action = 'met vertrouwen vooruit kunt kijken'
+  } else {
+    theme = 'wat jou kapotmaakt'
+    action = 'dat kunt loslaten en weer vrij kunt ademen'
+  }
+
+  return {
+    title: `Ontdek hoe je ${action}`,
+    subtitle: `Op basis van je antwoorden zien we dat ${theme} je dagelijks leven beïnvloedt. We hebben een persoonlijk plan voor je klaar — gratis in je inbox.`,
+  }
+}
+
+async function submitEmail() {
+  const name = document.getElementById('inputName').value.trim()
+  const email = document.getElementById('inputEmail').value.trim()
+
+  if (!name || !email || !email.includes('@')) {
+    document.getElementById('inputEmail').style.borderColor = '#E53E3E'
+    return
+  }
+
+  const btn = document.getElementById('ctaSubmitBtn')
+  btn.textContent = 'Even geduld...'
+  btn.disabled = true
+
+  // === SEND TO BACKEND ===
+  const payload = {
+    name,
+    email,
+    answers,
+    source: 'quiz_popup',
+    project: 'laat-los',
+    url: window.location.href,
+  }
+
+  try {
+    // In production:
+    // await fetch('/api/store/quiz/submit', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(payload)
+    // })
+
+    console.log('Quiz submitted:', payload)
+
+    // Show success
+    document.getElementById('screenCTA').style.display = 'none'
+    document.getElementById('screenSuccess').classList.add('active')
+    document.getElementById('screenSuccess').style.display = 'block'
+
+  } catch (err) {
+    btn.textContent = 'Er ging iets mis. Probeer opnieuw →'
+    btn.disabled = false
+  }
+}
+
+function closeQuiz() {
+  document.getElementById('quizOverlay').style.display = 'none'
+}
+</script>
+</body>
+</html>
