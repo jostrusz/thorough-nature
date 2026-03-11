@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { colors, fontStack } from "./design-tokens"
 
 interface FulfillmentModalProps {
@@ -11,6 +11,10 @@ interface FulfillmentModalProps {
   }) => void
   isLoading: boolean
   orderDisplayId: number | string
+  /** Shipping country code (lowercase, e.g. "nl", "cz", "pl") */
+  shippingCountry?: string
+  /** Shipping postal/zip code (e.g. "7731 RD") */
+  shippingZip?: string
 }
 
 const overlayStyle: React.CSSProperties = {
@@ -77,6 +81,13 @@ const btnBase: React.CSSProperties = {
   fontFamily: fontStack,
 }
 
+const errorStyle: React.CSSProperties = {
+  fontSize: "11px",
+  color: colors.red,
+  marginTop: "2px",
+  display: "block",
+}
+
 const CARRIERS = [
   { value: "", label: "Select carrier..." },
   { value: "gls", label: "GLS" },
@@ -85,11 +96,57 @@ const CARRIERS = [
   { value: "inpost", label: "inPost" },
 ]
 
-const TRACKING_URL_TEMPLATES: Record<string, (n: string) => string> = {
-  gls: (n) => `https://gls-group.eu/GROUP/en/parcel-tracking?match=${n}`,
-  packeta: (n) => `https://tracking.packeta.com/cs/?id=${n}`,
-  postnord: (n) => `https://tracking.postnord.com/tracking.html?id=${n}`,
-  inpost: (n) => `https://inpost.pl/sledzenie-przesylek?number=${n}`,
+// Country → default carrier mapping
+const COUNTRY_CARRIER_MAP: Record<string, string> = {
+  nl: "gls",
+  be: "gls",
+  de: "gls",
+  lu: "gls",
+  at: "gls",
+  cz: "packeta",
+  sk: "packeta",
+  pl: "packeta",
+  hu: "packeta",
+  se: "postnord",
+}
+
+// Packeta language codes per country
+const PACKETA_LANG: Record<string, string> = {
+  cz: "cs",
+  sk: "sk",
+  pl: "pl",
+  hu: "hu",
+}
+
+/**
+ * Build tracking URL from carrier, tracking number, country code, and postal code.
+ * Exported so it can be reused by backend logic.
+ */
+export function buildTrackingUrl(
+  carrier: string,
+  trackingNumber: string,
+  countryCode?: string,
+  postalCode?: string,
+): string {
+  if (!trackingNumber) return ""
+  const cc = (countryCode || "").toLowerCase()
+
+  switch (carrier) {
+    case "gls": {
+      const zip = (postalCode || "").replace(/\s+/g, "+")
+      return `https://gls-group.eu/CZ/en/parcel-tracking?match=${trackingNumber}${zip ? `&postalCode=${zip}` : ""}`
+    }
+    case "packeta": {
+      const lang = PACKETA_LANG[cc] || "en"
+      return `https://tracking.packeta.com/${lang}/${trackingNumber}`
+    }
+    case "postnord":
+      return `https://tracking.postnord.com/tracking.html?id=${trackingNumber}`
+    case "inpost":
+      return `https://inpost.pl/sledzenie-przesylek?number=${trackingNumber}`
+    default:
+      return ""
+  }
 }
 
 export function FulfillmentModal({
@@ -98,36 +155,79 @@ export function FulfillmentModal({
   onConfirm,
   isLoading,
   orderDisplayId,
+  shippingCountry,
+  shippingZip,
 }: FulfillmentModalProps) {
   const [carrier, setCarrier] = useState("")
   const [trackingNumber, setTrackingNumber] = useState("")
   const [trackingUrl, setTrackingUrl] = useState("")
+  const [errors, setErrors] = useState<{ carrier?: string; trackingNumber?: string }>({})
+
+  const cc = (shippingCountry || "").toLowerCase()
+
+  // Auto-select carrier based on shipping country when modal opens
+  useEffect(() => {
+    if (open && cc) {
+      const autoCarrier = COUNTRY_CARRIER_MAP[cc] || ""
+      if (autoCarrier) {
+        setCarrier(autoCarrier)
+      }
+    }
+  }, [open, cc])
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (open) {
+      setTrackingNumber("")
+      setTrackingUrl("")
+      setErrors({})
+    }
+  }, [open])
 
   if (!open) return null
 
+  const regenerateUrl = (c: string, tn: string) => {
+    if (tn && c) {
+      setTrackingUrl(buildTrackingUrl(c, tn, cc, shippingZip))
+    }
+  }
+
   const handleCarrierChange = (value: string) => {
     setCarrier(value)
-    // Auto-generate tracking URL if we have a tracking number
-    if (trackingNumber && TRACKING_URL_TEMPLATES[value]) {
-      setTrackingUrl(TRACKING_URL_TEMPLATES[value](trackingNumber))
-    }
+    setErrors((e) => ({ ...e, carrier: undefined }))
+    regenerateUrl(value, trackingNumber)
   }
 
   const handleTrackingNumberChange = (value: string) => {
     setTrackingNumber(value)
-    // Auto-generate tracking URL if we have a carrier
-    if (carrier && TRACKING_URL_TEMPLATES[carrier]) {
-      setTrackingUrl(TRACKING_URL_TEMPLATES[carrier](value))
-    }
+    setErrors((e) => ({ ...e, trackingNumber: undefined }))
+    regenerateUrl(carrier, value)
   }
 
   const handleSubmit = () => {
+    const newErrors: { carrier?: string; trackingNumber?: string } = {}
+    if (!trackingNumber.trim()) {
+      newErrors.trackingNumber = "Tracking number is required"
+    }
+    if (!carrier) {
+      newErrors.carrier = "Please select a carrier"
+    }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+
+    // Final URL: use manually entered if user changed it, otherwise auto-generated
+    const finalUrl = trackingUrl.trim() || buildTrackingUrl(carrier, trackingNumber.trim(), cc, shippingZip)
+
     onConfirm({
       trackingNumber: trackingNumber.trim(),
-      trackingUrl: trackingUrl.trim(),
+      trackingUrl: finalUrl,
       carrier,
     })
   }
+
+  const detectedCarrierLabel = cc ? COUNTRY_CARRIER_MAP[cc] : null
 
   return (
     <div style={overlayStyle} onClick={onClose}>
@@ -136,14 +236,18 @@ export function FulfillmentModal({
           Fulfill order #{orderDisplayId}
         </h3>
         <p style={{ fontSize: "13px", color: colors.textMuted, lineHeight: 1.5, margin: "0 0 20px" }}>
-          Enter shipping details. Tracking link is auto-generated based on the selected carrier.
+          Enter shipping details. Carrier and tracking link are auto-detected from the shipping country
+          {cc ? ` (${cc.toUpperCase()})` : ""}.
         </p>
 
         {/* Carrier */}
         <div style={{ marginBottom: "14px" }}>
           <label style={labelStyle}>Carrier</label>
           <select
-            style={selectStyle}
+            style={{
+              ...selectStyle,
+              borderColor: errors.carrier ? colors.red : colors.border,
+            }}
             value={carrier}
             onChange={(e) => handleCarrierChange(e.target.value)}
           >
@@ -151,6 +255,12 @@ export function FulfillmentModal({
               <option key={c.value} value={c.value}>{c.label}</option>
             ))}
           </select>
+          {errors.carrier && <span style={errorStyle}>{errors.carrier}</span>}
+          {detectedCarrierLabel && !errors.carrier && (
+            <span style={{ fontSize: "11px", color: colors.textMuted, marginTop: "2px", display: "block" }}>
+              Auto-selected based on shipping country ({cc.toUpperCase()})
+            </span>
+          )}
         </div>
 
         {/* Tracking Number */}
@@ -158,11 +268,15 @@ export function FulfillmentModal({
           <label style={labelStyle}>Tracking Number</label>
           <input
             type="text"
-            style={inputStyle}
-            placeholder="e.g. 123456789"
+            style={{
+              ...inputStyle,
+              borderColor: errors.trackingNumber ? colors.red : colors.border,
+            }}
+            placeholder="e.g. 90453222863"
             value={trackingNumber}
             onChange={(e) => handleTrackingNumberChange(e.target.value)}
           />
+          {errors.trackingNumber && <span style={errorStyle}>{errors.trackingNumber}</span>}
         </div>
 
         {/* Tracking URL */}
@@ -176,7 +290,7 @@ export function FulfillmentModal({
             onChange={(e) => setTrackingUrl(e.target.value)}
           />
           <span style={{ fontSize: "11px", color: colors.textMuted, marginTop: "2px", display: "block" }}>
-            Auto-generated based on carrier. You can override it.
+            Auto-generated from carrier + tracking number. You can override it.
           </span>
         </div>
 

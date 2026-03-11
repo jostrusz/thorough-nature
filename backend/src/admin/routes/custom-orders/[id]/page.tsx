@@ -1003,6 +1003,8 @@ const OrderDetailPage = () => {
         onConfirm={handleFulfillConfirm}
         isLoading={createFulfillment.isPending}
         orderDisplayId={order.display_id}
+        shippingCountry={order.shipping_address?.country_code}
+        shippingZip={order.shipping_address?.postal_code}
       />
     </div>
   )

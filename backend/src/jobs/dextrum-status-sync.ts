@@ -2,6 +2,7 @@ import { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { DEXTRUM_MODULE } from "../modules/dextrum"
 import { MyStockApiClient } from "../modules/dextrum/api-client"
+import { generateTrackingUrl } from "../utils/tracking-url"
 
 /**
  * Dextrum Status Sync Job
@@ -76,12 +77,41 @@ export default async function dextrumStatusSync(container: MedusaContainer) {
           })
           if (order) {
             const meta = (order as any).metadata || {}
+
+            // Auto-generate tracking URL if we have a tracking number but no URL
+            const trackingNum = updateData.tracking_number || meta.dextrum_tracking_number
+            let trackingUrl = updateData.tracking_url || meta.dextrum_tracking_url || ""
+            let carrierCode = updateData.carrier_name || meta.dextrum_carrier || ""
+
+            if (trackingNum && !trackingUrl) {
+              try {
+                const fullOrder = await orderModuleService.retrieveOrder(orderMap.medusa_order_id, {
+                  relations: ["shipping_address"],
+                })
+                const shippingAddress = fullOrder?.shipping_address
+                const countryCode = shippingAddress?.country_code || ""
+                const postalCode = shippingAddress?.postal_code || ""
+
+                const generated = generateTrackingUrl(trackingNum, countryCode, postalCode, carrierCode)
+                if (generated.trackingUrl) {
+                  trackingUrl = generated.trackingUrl
+                  updateData.tracking_url = trackingUrl
+                }
+                if (generated.carrier && !carrierCode) {
+                  carrierCode = generated.carrier
+                  updateData.carrier_name = carrierCode
+                }
+              } catch (addrErr: any) {
+                console.error(`[Dextrum Sync] Failed to resolve shipping address for tracking URL:`, addrErr.message)
+              }
+            }
+
             const timelineEntry = {
               type: "dextrum",
               status: newStatus,
               date: now,
               detail: `Synced: ${newStatus}`,
-              tracking_number: updateData.tracking_number || meta.dextrum_tracking_number,
+              tracking_number: trackingNum,
             }
             const dextrumTimeline = meta.dextrum_timeline || []
             dextrumTimeline.push(timelineEntry)
@@ -91,9 +121,9 @@ export default async function dextrumStatusSync(container: MedusaContainer) {
                 ...meta,
                 dextrum_status: newStatus,
                 dextrum_status_updated_at: now,
-                dextrum_tracking_number: updateData.tracking_number || meta.dextrum_tracking_number,
-                dextrum_tracking_url: updateData.tracking_url || meta.dextrum_tracking_url,
-                dextrum_carrier: updateData.carrier_name || meta.dextrum_carrier,
+                dextrum_tracking_number: trackingNum,
+                dextrum_tracking_url: trackingUrl,
+                dextrum_carrier: carrierCode,
                 dextrum_timeline: dextrumTimeline,
               },
             })
