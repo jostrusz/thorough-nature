@@ -78,7 +78,7 @@ const btnBase: React.CSSProperties = {
 }
 
 const CARRIERS = [
-  { value: "", label: "Vyberte kurýra..." },
+  { value: "", label: "Select carrier..." },
   { value: "gls", label: "GLS" },
   { value: "packeta", label: "Packeta (Zásilkovna)" },
   { value: "postnord", label: "PostNord" },
@@ -136,12 +136,12 @@ export function FulfillmentModal({
           Fulfill order #{orderDisplayId}
         </h3>
         <p style={{ fontSize: "13px", color: colors.textMuted, lineHeight: 1.5, margin: "0 0 20px" }}>
-          Zadejte informace o doručení. Tracking link se vygeneruje automaticky podle kurýra.
+          Enter shipping details. Tracking link is auto-generated based on the selected carrier.
         </p>
 
         {/* Carrier */}
         <div style={{ marginBottom: "14px" }}>
-          <label style={labelStyle}>Kurýr</label>
+          <label style={labelStyle}>Carrier</label>
           <select
             style={selectStyle}
             value={carrier}
@@ -159,7 +159,7 @@ export function FulfillmentModal({
           <input
             type="text"
             style={inputStyle}
-            placeholder="Např. 123456789"
+            placeholder="e.g. 123456789"
             value={trackingNumber}
             onChange={(e) => handleTrackingNumberChange(e.target.value)}
           />
@@ -176,7 +176,7 @@ export function FulfillmentModal({
             onChange={(e) => setTrackingUrl(e.target.value)}
           />
           <span style={{ fontSize: "11px", color: colors.textMuted, marginTop: "2px", display: "block" }}>
-            Automaticky generováno podle kurýra. Můžete přepsat.
+            Auto-generated based on carrier. You can override it.
           </span>
         </div>
 
@@ -186,7 +186,7 @@ export function FulfillmentModal({
             onClick={onClose}
             style={{ ...btnBase, background: "#FFFFFF", color: colors.text }}
           >
-            Zrušit
+            Cancel
           </button>
           <button
             onClick={handleSubmit}
@@ -199,7 +199,7 @@ export function FulfillmentModal({
               opacity: isLoading ? 0.6 : 1,
             }}
           >
-            {isLoading ? "Zpracovávám..." : "Fulfill objednávku"}
+            {isLoading ? "Processing..." : "Fulfill order"}
           </button>
         </div>
       </div>
