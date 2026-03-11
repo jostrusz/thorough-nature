@@ -1,782 +1,623 @@
 // @ts-nocheck
 import { useState, useRef, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
-import { Badge } from "@medusajs/ui"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "../../../lib/sdk"
 
-// ═══════════════════════════════════════════
-// FULL-WIDTH OVERRIDE
-// ═══════════════════════════════════════════
-const BG = "#F7F8FA"
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — Premium SaaS look
+   ═══════════════════════════════════════════════════════════════ */
+const PAGE_BG = "#F9FAFB"
 
-function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const originals: { el: HTMLElement; styles: Record<string, string> }[] = []
-    let node: HTMLElement | null = el.parentElement
-    while (node && node !== document.documentElement) {
-      originals.push({
-        el: node,
-        styles: {
-          background: node.style.background,
-          maxWidth: node.style.maxWidth,
-          width: node.style.width,
-          padding: node.style.padding,
-          paddingLeft: node.style.paddingLeft,
-          paddingRight: node.style.paddingRight,
-          margin: node.style.margin,
-          boxSizing: node.style.boxSizing,
-        },
-      })
-      node.style.setProperty("background", BG, "important")
-      node.style.setProperty("max-width", "none", "important")
-      node.style.setProperty("width", "100%", "important")
-      node.style.setProperty("padding-left", "0", "important")
-      node.style.setProperty("padding-right", "0", "important")
-      node.style.setProperty("margin", "0", "important")
-      node.style.setProperty("box-sizing", "border-box", "important")
-      node = node.parentElement
-    }
-    return () => {
-      originals.forEach(({ el: n, styles }) => {
-        n.style.background = styles.background
-        n.style.maxWidth = styles.maxWidth
-        n.style.width = styles.width
-        n.style.padding = styles.padding
-        n.style.paddingLeft = styles.paddingLeft
-        n.style.paddingRight = styles.paddingRight
-        n.style.margin = styles.margin
-        n.style.boxSizing = styles.boxSizing
-      })
-    }
-  }, [ref])
-}
-
-// ═══════════════════════════════════════════
-// DESIGN TOKENS
-// ═══════════════════════════════════════════
-const T = {
-  bg: "#F7F8FA",
+const D = {
+  // surfaces
+  bg: PAGE_BG,
   card: "#FFFFFF",
+  raised: "#FFFFFF",
+  inset: "#F3F4F6",
+  // borders
   border: "#E5E7EB",
-  borderLight: "#F3F4F6",
+  borderSubtle: "#F3F4F6",
+  // text
   text: "#111827",
   textSec: "#6B7280",
   textMuted: "#9CA3AF",
   textFaint: "#D1D5DB",
+  // accents
+  brand: "#4F46E5",
+  brandLight: "#EEF2FF",
   green: "#059669",
-  greenBg: "#ECFDF5",
-  greenBorder: "#A7F3D0",
+  greenLight: "#ECFDF5",
+  greenBorder: "#D1FAE5",
   blue: "#2563EB",
-  blueBg: "#EFF6FF",
-  blueBorder: "#BFDBFE",
+  blueLight: "#EFF6FF",
+  blueBorder: "#DBEAFE",
   purple: "#7C3AED",
-  purpleBg: "#F5F3FF",
+  purpleLight: "#F5F3FF",
   orange: "#D97706",
-  orangeBg: "#FFFBEB",
+  orangeLight: "#FFFBEB",
   red: "#DC2626",
-  redBg: "#FEF2F2",
-  accent: "#4F46E5",
-  accentBg: "#EEF2FF",
-  shadow: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
-  shadowMd: "0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04)",
-  radius: "12px",
-  radiusSm: "8px",
-  radiusLg: "16px",
+  redLight: "#FEF2F2",
+  // shadows
+  xs: "0 1px 2px rgba(0,0,0,0.04)",
+  sm: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
+  md: "0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04)",
+  lg: "0 10px 15px -3px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.04)",
+  // radii
+  r8: "8px",
+  r12: "12px",
+  r16: "16px",
+  r20: "20px",
+  rFull: "9999px",
 }
 
-// ═══════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════
-const fmt = {
+/* ═══════════════════════════════════════════════════════════════
+   FULL WIDTH HOOK
+   ═══════════════════════════════════════════════════════════════ */
+function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const saved: { el: HTMLElement; s: Record<string, string> }[] = []
+    let n: HTMLElement | null = el.parentElement
+    while (n && n !== document.documentElement) {
+      saved.push({ el: n, s: { bg: n.style.background, mw: n.style.maxWidth, w: n.style.width, pl: n.style.paddingLeft, pr: n.style.paddingRight, m: n.style.margin } })
+      n.style.setProperty("background", PAGE_BG, "important")
+      n.style.setProperty("max-width", "none", "important")
+      n.style.setProperty("width", "100%", "important")
+      n.style.setProperty("padding-left", "0", "important")
+      n.style.setProperty("padding-right", "0", "important")
+      n.style.setProperty("margin", "0", "important")
+      n = n.parentElement
+    }
+    return () => { saved.forEach(({ el: x, s }) => { x.style.background = s.bg; x.style.maxWidth = s.mw; x.style.width = s.w; x.style.paddingLeft = s.pl; x.style.paddingRight = s.pr; x.style.margin = s.m }) }
+  }, [ref])
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+const f = {
   date: (d: string) => d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
   time: (d: string) => d ? new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "",
-  dateTime: (d: string) => d ? `${fmt.time(d)}, ${fmt.date(d)}` : "",
-  money: (n: number, c: string) => new Intl.NumberFormat("en-US", { style: "currency", currency: c || "EUR" }).format(n || 0),
-  strip: (html: string) => html?.replace(/<[^>]*>/g, "").trim() || "",
+  dt: (d: string) => d ? `${f.date(d)} at ${f.time(d)}` : "",
+  money: (n: number, c: string) => new Intl.NumberFormat("en-US", { style: "currency", currency: c || "EUR", minimumFractionDigits: 2 }).format(n || 0),
+  strip: (h: string) => h?.replace(/<[^>]*>/g, "").trim() || "",
 }
 
-// ═══════════════════════════════════════════
-// SECTION CARD wrapper
-// ═══════════════════════════════════════════
-function SidebarCard({ title, icon, children, defaultOpen = true }: {
-  title: string; icon: string; children: React.ReactNode; defaultOpen?: boolean
-}) {
+/* ═══════════════════════════════════════════════════════════════
+   PILL BADGE
+   ═══════════════════════════════════════════════════════════════ */
+function Pill({ children, bg, color }: { children: React.ReactNode; bg: string; color: string }) {
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", padding: "2px 10px", borderRadius: D.rFull,
+      fontSize: "11px", fontWeight: 600, lineHeight: "20px", backgroundColor: bg, color,
+      letterSpacing: "0.01em",
+    }}>
+      {children}
+    </span>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COLLAPSIBLE SECTION
+   ═══════════════════════════════════════════════════════════════ */
+function Section({ label, children, open: defaultOpen = true }: { label: string; children: React.ReactNode; open?: boolean }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div style={{
-      backgroundColor: T.card, border: `1px solid ${T.border}`,
-      borderRadius: T.radius, overflow: "hidden", boxShadow: T.shadow,
-    }}>
+    <div style={{ borderBottom: `1px solid ${D.borderSubtle}` }}>
       <button
         onClick={() => setOpen(!open)}
         style={{
           width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "14px 18px", border: "none", backgroundColor: "transparent", cursor: "pointer",
-          borderBottom: open ? `1px solid ${T.borderLight}` : "none",
+          padding: "12px 0", border: "none", background: "none", cursor: "pointer",
         }}
       >
-        <span style={{ fontSize: "12px", fontWeight: 700, color: T.textSec, textTransform: "uppercase", letterSpacing: "0.5px", display: "flex", alignItems: "center", gap: "6px" }}>
-          {icon} {title}
+        <span style={{ fontSize: "11px", fontWeight: 700, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          {label}
         </span>
-        <span style={{ fontSize: "11px", color: T.textMuted, transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▼</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s", color: D.textFaint }}>
+          <path d="M3 5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+        </svg>
       </button>
-      {open && <div style={{ padding: "16px 18px" }}>{children}</div>}
+      {open && <div style={{ paddingBottom: "16px" }}>{children}</div>}
     </div>
   )
 }
 
-// ═══════════════════════════════════════════
-// INFO ROW — label: value pair
-// ═══════════════════════════════════════════
-function InfoRow({ label, value, mono, color }: { label: string; value: React.ReactNode; mono?: boolean; color?: string }) {
-  if (!value) return null
+/* ═══════════════════════════════════════════════════════════════
+   DETAIL ROW — key/value
+   ═══════════════════════════════════════════════════════════════ */
+function Row({ k, v, mono }: { k: string; v: React.ReactNode; mono?: boolean }) {
+  if (!v) return null
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "5px 0", gap: "12px" }}>
-      <span style={{ fontSize: "12px", color: T.textMuted, flexShrink: 0, minWidth: "80px" }}>{label}</span>
-      <span style={{
-        fontSize: "12px", color: color || T.text, fontWeight: 500, textAlign: "right",
-        fontFamily: mono ? "SF Mono, Menlo, monospace" : "inherit", wordBreak: "break-all",
-      }}>{value}</span>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "4px 0", gap: "16px" }}>
+      <span style={{ fontSize: "12px", color: D.textMuted, whiteSpace: "nowrap" }}>{k}</span>
+      <span style={{ fontSize: "12px", color: D.text, fontWeight: 500, textAlign: "right", fontFamily: mono ? "'SF Mono',Menlo,monospace" : "inherit", wordBreak: "break-all" }}>{v}</span>
     </div>
   )
 }
 
-// ═══════════════════════════════════════════
-// TIMELINE DOT — for order events
-// ═══════════════════════════════════════════
-function TimelineEvent({ label, date, color, isLast }: { label: string; date?: string; color: string; isLast?: boolean }) {
+/* ═══════════════════════════════════════════════════════════════
+   ORDER TIMELINE
+   ═══════════════════════════════════════════════════════════════ */
+function Timeline({ events }: { events: { label: string; date?: string; color: string }[] }) {
   return (
-    <div style={{ display: "flex", gap: "10px", position: "relative" }}>
-      {/* Dot + line */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
-        <div style={{
-          width: "10px", height: "10px", borderRadius: "50%",
-          backgroundColor: date ? color : T.textFaint,
-          border: `2px solid ${date ? color : T.textFaint}`,
-          boxShadow: date ? `0 0 0 3px ${color}22` : "none",
-        }} />
-        {!isLast && (
-          <div style={{ width: "2px", height: "20px", backgroundColor: T.borderLight }} />
-        )}
-      </div>
-      {/* Text */}
-      <div style={{ paddingBottom: isLast ? 0 : "8px", marginTop: "-2px" }}>
-        <div style={{ fontSize: "12px", fontWeight: 600, color: date ? T.text : T.textMuted }}>{label}</div>
-        {date && <div style={{ fontSize: "11px", color: T.textMuted }}>{fmt.dateTime(date)}</div>}
-      </div>
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      {events.map((ev, i) => (
+        <div key={i} style={{ display: "flex", gap: "10px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "14px", flexShrink: 0 }}>
+            <div style={{
+              width: "8px", height: "8px", borderRadius: "50%", marginTop: "4px",
+              backgroundColor: ev.date ? ev.color : D.borderSubtle,
+              boxShadow: ev.date ? `0 0 0 3px ${ev.color}18` : "none",
+            }} />
+            {i < events.length - 1 && <div style={{ width: "1.5px", flex: 1, minHeight: "16px", backgroundColor: D.borderSubtle }} />}
+          </div>
+          <div style={{ paddingBottom: i < events.length - 1 ? "10px" : 0, minWidth: 0 }}>
+            <div style={{ fontSize: "12px", fontWeight: ev.date ? 600 : 400, color: ev.date ? D.text : D.textFaint, lineHeight: "16px" }}>{ev.label}</div>
+            {ev.date && <div style={{ fontSize: "11px", color: D.textMuted, marginTop: "1px" }}>{f.dt(ev.date)}</div>}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
 
-// ═══════════════════════════════════════════
-// CUSTOMER SIDEBAR — rich context panel
-// ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOMER SIDEBAR
+   ═══════════════════════════════════════════════════════════════ */
 function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] }) {
-  const fromEmail = ticket.from_email
+  const email = ticket.from_email
   const { data: customer } = useQuery({
-    queryKey: ["customer-by-email", fromEmail],
+    queryKey: ["customer-by-email", email],
     queryFn: async () => {
-      try {
-        const response = await sdk.client.fetch(`/admin/customers?q=${fromEmail}`, { method: "GET" }) as any
-        return response.customers?.[0] || null
-      } catch { return null }
+      try { const r = await sdk.client.fetch(`/admin/customers?q=${email}`, { method: "GET" }) as any; return r.customers?.[0] || null } catch { return null }
     },
   })
 
-  const totalSpent = allOrders.reduce((sum: number, o: any) => sum + (Number(o.total) || 0), 0)
-  const mainCurrency = allOrders[0]?.currency_code || "EUR"
+  const spent = allOrders.reduce((s: number, o: any) => s + (Number(o.total) || 0), 0)
+  const curr = allOrders[0]?.currency_code || "EUR"
   const name = customer ? `${customer.first_name || ""} ${customer.last_name || ""}`.trim() : (ticket.from_name || "")
-  const initial = (name?.[0] || fromEmail?.[0] || "?").toUpperCase()
-
-  // Get shipping address from most recent order
-  const latestAddr = allOrders[0]?.shipping_address
+  const initial = (name?.[0] || email?.[0] || "?").toUpperCase()
+  const addr = customer?.addresses?.[0] || allOrders[0]?.shipping_address
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-
-      {/* ── CUSTOMER PROFILE ── */}
-      <SidebarCard title="Customer" icon="👤">
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px" }}>
+    <div style={{
+      backgroundColor: D.card, borderRadius: D.r16, border: `1px solid ${D.border}`,
+      boxShadow: D.sm, overflow: "hidden",
+    }}>
+      {/* Profile header */}
+      <div style={{ padding: "24px 24px 20px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "20px" }}>
           <div style={{
-            width: "42px", height: "42px", borderRadius: "50%",
-            background: `linear-gradient(135deg, ${T.accent}, ${T.purple})`,
+            width: "44px", height: "44px", borderRadius: "50%",
+            background: `linear-gradient(135deg, ${D.brand}, ${D.purple})`,
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: "16px", fontWeight: 700, color: "#fff", flexShrink: 0,
+            boxShadow: `0 2px 8px ${D.brand}33`,
           }}>
             {initial}
           </div>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: "14px", fontWeight: 700, color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {name || fromEmail}
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: "14px", fontWeight: 700, color: D.text, lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {name || email}
             </div>
-            <div style={{ fontSize: "12px", color: T.blue, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {fromEmail}
+            <div style={{ fontSize: "12px", color: D.textSec, marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {email}
             </div>
           </div>
         </div>
 
-        {customer?.phone && <InfoRow label="Phone" value={customer.phone} />}
-        {customer?.created_at && <InfoRow label="Since" value={fmt.date(customer.created_at)} />}
+        {/* Stats strip */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+          <div style={{ textAlign: "center", padding: "12px 8px", borderRadius: D.r12, backgroundColor: D.brandLight }}>
+            <div style={{ fontSize: "20px", fontWeight: 800, color: D.brand, lineHeight: 1 }}>{allOrders.length}</div>
+            <div style={{ fontSize: "10px", fontWeight: 600, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "4px" }}>orders</div>
+          </div>
+          <div style={{ textAlign: "center", padding: "12px 8px", borderRadius: D.r12, backgroundColor: D.greenLight }}>
+            <div style={{ fontSize: "20px", fontWeight: 800, color: D.green, lineHeight: 1 }}>{f.money(spent, curr)}</div>
+            <div style={{ fontSize: "10px", fontWeight: 600, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "4px" }}>total spent</div>
+          </div>
+        </div>
+      </div>
 
-        {/* Address from customer or latest order */}
-        {(customer?.addresses?.[0] || latestAddr) && (() => {
-          const addr = customer?.addresses?.[0] || latestAddr
-          const lines = [
-            addr.address_1,
-            addr.address_2,
-            [addr.city, addr.postal_code].filter(Boolean).join(" "),
-            addr.province,
-            addr.country_code?.toUpperCase(),
-          ].filter(Boolean)
-          return (
-            <div style={{ marginTop: "8px", padding: "10px 12px", backgroundColor: T.bg, borderRadius: T.radiusSm }}>
-              <div style={{ fontSize: "11px", fontWeight: 600, color: T.textMuted, marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.3px" }}>Address</div>
-              {lines.map((line, i) => (
-                <div key={i} style={{ fontSize: "12px", color: T.text, lineHeight: 1.5 }}>{line}</div>
+      {/* Detail sections */}
+      <div style={{ padding: "0 24px 8px" }}>
+        {/* Contact */}
+        <Section label="Contact details">
+          <Row k="Email" v={email} />
+          {customer?.phone && <Row k="Phone" v={customer.phone} />}
+          {customer?.created_at && <Row k="Customer since" v={f.date(customer.created_at)} />}
+        </Section>
+
+        {/* Address */}
+        {addr && (
+          <Section label="Shipping address">
+            <div style={{ fontSize: "13px", color: D.text, lineHeight: 1.6 }}>
+              {[addr.first_name, addr.last_name].filter(Boolean).join(" ") && (
+                <div style={{ fontWeight: 600 }}>{[addr.first_name, addr.last_name].filter(Boolean).join(" ")}</div>
+              )}
+              {addr.company && <div>{addr.company}</div>}
+              {addr.address_1 && <div>{addr.address_1}</div>}
+              {addr.address_2 && <div>{addr.address_2}</div>}
+              <div>{[addr.postal_code, addr.city].filter(Boolean).join(" ")}</div>
+              {addr.province && <div>{addr.province}</div>}
+              {addr.country_code && <div>{addr.country_code.toUpperCase()}</div>}
+              {addr.phone && <div style={{ color: D.textSec, marginTop: "4px", fontSize: "12px" }}>Tel: {addr.phone}</div>}
+            </div>
+          </Section>
+        )}
+
+        {/* Orders */}
+        {allOrders.map((order: any, idx: number) => (
+          <Section key={order.order_id} label={`Order #${order.display_id}`} open={idx === 0}>
+            {/* Header row */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+              <Link to={`/orders/${order.order_id}`} style={{ fontSize: "13px", fontWeight: 600, color: D.blue, textDecoration: "none" }}>
+                View order →
+              </Link>
+              <span style={{ fontSize: "14px", fontWeight: 700, color: D.text }}>{f.money(order.total, order.currency_code)}</span>
+            </div>
+
+            {/* Badges */}
+            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "14px" }}>
+              <Pill
+                bg={order.status === "completed" ? D.greenLight : order.status === "canceled" ? D.redLight : D.orangeLight}
+                color={order.status === "completed" ? D.green : order.status === "canceled" ? D.red : D.orange}
+              >
+                {order.status}
+              </Pill>
+              <Pill
+                bg={order.payment_status === "paid" ? D.greenLight : D.orangeLight}
+                color={order.payment_status === "paid" ? D.green : D.orange}
+              >
+                {order.payment_status === "paid" ? "Paid" : "Awaiting"}
+              </Pill>
+              {order.delivery_status && (
+                <Pill
+                  bg={order.delivery_status === "delivered" ? D.greenLight : D.blueLight}
+                  color={order.delivery_status === "delivered" ? D.green : D.blue}
+                >
+                  {order.delivery_status}
+                </Pill>
+              )}
+            </div>
+
+            {/* Items */}
+            <div style={{ marginBottom: "14px" }}>
+              {order.items?.map((item: any, i: number) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "6px 0" }}>
+                  {item.thumbnail && (
+                    <img src={item.thumbnail} alt="" style={{ width: "32px", height: "32px", borderRadius: D.r8, objectFit: "cover", border: `1px solid ${D.borderSubtle}` }} />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: "12px", color: D.text, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title}</div>
+                    <div style={{ fontSize: "11px", color: D.textMuted }}>Qty: {item.quantity}</div>
+                  </div>
+                </div>
               ))}
             </div>
-          )
-        })()}
 
-        {/* Quick stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "12px" }}>
-          <div style={{ textAlign: "center", padding: "10px 8px", borderRadius: T.radiusSm, backgroundColor: T.purpleBg }}>
-            <div style={{ fontSize: "18px", fontWeight: 800, color: T.purple }}>{allOrders.length}</div>
-            <div style={{ fontSize: "10px", fontWeight: 600, color: T.textMuted, textTransform: "uppercase" }}>orders</div>
-          </div>
-          <div style={{ textAlign: "center", padding: "10px 8px", borderRadius: T.radiusSm, backgroundColor: T.greenBg }}>
-            <div style={{ fontSize: "18px", fontWeight: 800, color: T.green }}>{fmt.money(totalSpent, mainCurrency)}</div>
-            <div style={{ fontSize: "10px", fontWeight: 600, color: T.textMuted, textTransform: "uppercase" }}>spent</div>
-          </div>
-        </div>
-      </SidebarCard>
-
-      {/* ── ORDERS ── */}
-      {allOrders.map((order: any) => (
-        <SidebarCard
-          key={order.order_id}
-          title={`Order #${order.display_id}`}
-          icon="📦"
-          defaultOpen={allOrders.length <= 2}
-        >
-          {/* Order header */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-            <Link to={`/orders/${order.order_id}`} style={{ fontSize: "13px", fontWeight: 700, color: T.blue, textDecoration: "none" }}>
-              #{order.display_id} →
-            </Link>
-            <span style={{ fontSize: "14px", fontWeight: 700, color: T.text }}>
-              {fmt.money(order.total, order.currency_code)}
-            </span>
-          </div>
-
-          {/* Status badges */}
-          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "12px" }}>
-            <span style={{
-              fontSize: "11px", fontWeight: 600, padding: "3px 8px", borderRadius: "6px",
-              backgroundColor: order.status === "completed" ? T.greenBg : order.status === "canceled" ? T.redBg : T.orangeBg,
-              color: order.status === "completed" ? T.green : order.status === "canceled" ? T.red : T.orange,
-            }}>
-              {order.status}
-            </span>
-            <span style={{
-              fontSize: "11px", fontWeight: 600, padding: "3px 8px", borderRadius: "6px",
-              backgroundColor: order.payment_status === "paid" ? T.greenBg : order.payment_status === "canceled" ? T.redBg : T.orangeBg,
-              color: order.payment_status === "paid" ? T.green : order.payment_status === "canceled" ? T.red : T.orange,
-            }}>
-              {order.payment_status === "paid" ? "Paid" : order.payment_status === "canceled" ? "Payment canceled" : "Awaiting payment"}
-            </span>
-          </div>
-
-          {/* Items */}
-          <div style={{ marginBottom: "12px" }}>
-            {order.items?.map((item: any, i: number) => (
-              <div key={i} style={{
-                display: "flex", justifyContent: "space-between", alignItems: "center",
-                padding: "6px 0", borderBottom: i < order.items.length - 1 ? `1px solid ${T.borderLight}` : "none",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
-                  {item.thumbnail && (
-                    <img src={item.thumbnail} alt="" style={{ width: "28px", height: "28px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }} />
-                  )}
-                  <span style={{ fontSize: "12px", color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {item.title}
-                  </span>
+            {/* Ship to */}
+            {order.shipping_address && (
+              <div style={{ padding: "10px 12px", backgroundColor: D.inset, borderRadius: D.r8, marginBottom: "14px" }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>Ship to</div>
+                <div style={{ fontSize: "12px", color: D.text, lineHeight: 1.5 }}>
+                  {[order.shipping_address.first_name, order.shipping_address.last_name].filter(Boolean).join(" ")}
+                  {order.shipping_address.address_1 && <>, {order.shipping_address.address_1}</>}
+                  {order.shipping_address.city && <>, {order.shipping_address.postal_code} {order.shipping_address.city}</>}
+                  {order.shipping_address.country_code && <>, {order.shipping_address.country_code.toUpperCase()}</>}
                 </div>
-                <span style={{ fontSize: "11px", color: T.textMuted, flexShrink: 0, marginLeft: "8px" }}>
-                  x{item.quantity}
-                </span>
               </div>
-            ))}
-          </div>
+            )}
 
-          {/* Delivery address */}
-          {order.shipping_address && (
-            <div style={{ padding: "10px 12px", backgroundColor: T.bg, borderRadius: T.radiusSm, marginBottom: "12px" }}>
-              <div style={{ fontSize: "11px", fontWeight: 600, color: T.textMuted, marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.3px" }}>Ship to</div>
-              <div style={{ fontSize: "12px", color: T.text, lineHeight: 1.5 }}>
-                {[order.shipping_address.first_name, order.shipping_address.last_name].filter(Boolean).join(" ")}
-              </div>
-              <div style={{ fontSize: "12px", color: T.textSec, lineHeight: 1.5 }}>
-                {[
-                  order.shipping_address.address_1,
-                  order.shipping_address.address_2,
-                  [order.shipping_address.city, order.shipping_address.postal_code].filter(Boolean).join(" "),
-                  order.shipping_address.country_code?.toUpperCase(),
-                ].filter(Boolean).join(", ")}
-              </div>
-              {order.shipping_address.phone && (
-                <div style={{ fontSize: "11px", color: T.textMuted, marginTop: "2px" }}>Tel: {order.shipping_address.phone}</div>
-              )}
+            {/* Timeline */}
+            <div style={{ marginBottom: "14px" }}>
+              <Timeline events={[
+                { label: "Ordered", date: order.created_at, color: D.green },
+                { label: "Paid", date: order.payments?.[0]?.captured_at || (order.payment_status === "paid" ? order.created_at : undefined), color: D.blue },
+                { label: "Shipped", date: order.fulfillments?.[0]?.shipped_at || order.fulfillments?.[0]?.created_at, color: D.purple },
+                { label: "Delivered", date: order.delivery_status === "delivered" ? (order.fulfillments?.[0]?.delivered_at || order.created_at) : undefined, color: D.green },
+              ]} />
             </div>
-          )}
 
-          {/* Order timeline */}
-          <div style={{ padding: "10px 12px", backgroundColor: T.bg, borderRadius: T.radiusSm, marginBottom: "8px" }}>
-            <div style={{ fontSize: "11px", fontWeight: 600, color: T.textMuted, marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.3px" }}>Timeline</div>
-            <TimelineEvent label="Order placed" date={order.created_at} color={T.green} />
-            <TimelineEvent
-              label="Payment"
-              date={order.payments?.[0]?.captured_at || (order.payment_status === "paid" ? order.created_at : undefined)}
-              color={T.blue}
-            />
-            <TimelineEvent
-              label="Shipped"
-              date={order.fulfillments?.[0]?.shipped_at || order.fulfillments?.[0]?.created_at}
-              color={T.purple}
-            />
-            <TimelineEvent
-              label="Delivered"
-              date={order.delivery_status === "delivered" ? (order.fulfillments?.[0]?.delivered_at || undefined) : undefined}
-              color={T.green}
-              isLast
-            />
-          </div>
-
-          {/* Tracking */}
-          {(order.tracking_number || order.fulfillments?.[0]?.labels?.[0]?.tracking_number) && (
-            <div style={{ padding: "10px 12px", backgroundColor: T.blueBg, borderRadius: T.radiusSm, border: `1px solid ${T.blueBorder}` }}>
-              <div style={{ fontSize: "11px", fontWeight: 600, color: T.blue, marginBottom: "4px" }}>Tracking</div>
-              <div style={{ fontSize: "12px", color: T.text, fontFamily: "SF Mono, Menlo, monospace" }}>
-                {order.tracking_number || order.fulfillments?.[0]?.labels?.[0]?.tracking_number}
+            {/* Tracking */}
+            {(order.tracking_number || order.fulfillments?.[0]?.labels?.[0]?.tracking_number) && (
+              <div style={{ padding: "10px 12px", backgroundColor: D.blueLight, borderRadius: D.r8, border: `1px solid ${D.blueBorder}` }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: D.blue, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>Tracking</div>
+                <div style={{ fontSize: "12px", color: D.text, fontFamily: "'SF Mono',Menlo,monospace", fontWeight: 500 }}>
+                  {order.tracking_number || order.fulfillments?.[0]?.labels?.[0]?.tracking_number}
+                </div>
+                {order.carrier && <div style={{ fontSize: "11px", color: D.textSec, marginTop: "2px" }}>via {order.carrier}</div>}
+                {(order.tracking_link || order.fulfillments?.[0]?.labels?.[0]?.tracking_url) && (
+                  <a href={order.tracking_link || order.fulfillments?.[0]?.labels?.[0]?.tracking_url} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: "11px", color: D.blue, textDecoration: "none", fontWeight: 600, display: "inline-block", marginTop: "4px" }}>
+                    Track shipment →
+                  </a>
+                )}
               </div>
-              {order.carrier && (
-                <div style={{ fontSize: "11px", color: T.textSec, marginTop: "2px" }}>via {order.carrier}</div>
-              )}
-              {(order.tracking_link || order.fulfillments?.[0]?.labels?.[0]?.tracking_url) && (
-                <a
-                  href={order.tracking_link || order.fulfillments?.[0]?.labels?.[0]?.tracking_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ fontSize: "11px", color: T.blue, textDecoration: "none", display: "inline-block", marginTop: "4px", fontWeight: 600 }}
-                >
-                  Track shipment →
-                </a>
-              )}
+            )}
+          </Section>
+        ))}
+
+        {allOrders.length === 0 && (
+          <Section label="Orders">
+            <div style={{ fontSize: "13px", color: D.textMuted, textAlign: "center", padding: "8px 0" }}>
+              No orders found
             </div>
-          )}
-
-          {/* Delivery status from Dextrum */}
-          {order.delivery_status && (
-            <div style={{ marginTop: "8px" }}>
-              <InfoRow label="Delivery" value={
-                <span style={{
-                  fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "6px",
-                  backgroundColor: order.delivery_status === "delivered" ? T.greenBg : T.orangeBg,
-                  color: order.delivery_status === "delivered" ? T.green : T.orange,
-                }}>
-                  {order.delivery_status}
-                </span>
-              } />
-            </div>
-          )}
-
-          <div style={{ fontSize: "11px", color: T.textMuted, marginTop: "8px", textAlign: "right" }}>
-            Ordered {fmt.date(order.created_at)}
-          </div>
-        </SidebarCard>
-      ))}
-
-      {allOrders.length === 0 && (
-        <SidebarCard title="Orders" icon="📦">
-          <div style={{ textAlign: "center", padding: "12px 0", color: T.textMuted, fontSize: "13px" }}>
-            No orders found for this email
-          </div>
-        </SidebarCard>
-      )}
+          </Section>
+        )}
+      </div>
     </div>
   )
 }
 
-// ═══════════════════════════════════════════
-// MESSAGE BUBBLE
-// ═══════════════════════════════════════════
-function MessageBubble({ message }: { message: any }) {
-  const isInbound = message.direction === "inbound"
-  const body = message.body_html || message.body_text || ""
-  const hasContent = fmt.strip(body).length > 0
+/* ═══════════════════════════════════════════════════════════════
+   MESSAGE BUBBLE
+   ═══════════════════════════════════════════════════════════════ */
+function MessageBubble({ msg }: { msg: any }) {
+  const inb = msg.direction === "inbound"
+  const body = msg.body_html || msg.body_text || ""
+  const has = f.strip(body).length > 0
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: isInbound ? "flex-start" : "flex-end" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: inb ? "flex-start" : "flex-end" }}>
       {/* Sender */}
       <div style={{
-        fontSize: "11px", fontWeight: 600, marginBottom: "6px",
-        color: isInbound ? T.textSec : T.green,
-        paddingLeft: isInbound ? "16px" : 0,
-        paddingRight: isInbound ? 0 : "16px",
+        fontSize: "11px", fontWeight: 600, color: inb ? D.textSec : D.green,
+        marginBottom: "6px", paddingLeft: inb ? "2px" : 0, paddingRight: inb ? 0 : "2px",
       }}>
-        {isInbound ? "👤 " : "💬 "}
-        {message.from_name || message.from_email || (isInbound ? "Customer" : "Support")}
+        {msg.from_name || msg.from_email || (inb ? "Customer" : "You")}
       </div>
 
       {/* Bubble */}
       <div style={{
-        maxWidth: "85%",
-        padding: "16px 20px",
-        borderRadius: isInbound ? "4px 16px 16px 16px" : "16px 4px 16px 16px",
-        backgroundColor: isInbound ? T.card : T.greenBg,
-        border: `1px solid ${isInbound ? T.border : T.greenBorder}`,
-        boxShadow: T.shadow,
+        maxWidth: "78%",
+        padding: "14px 18px",
+        borderRadius: inb ? "4px 16px 16px 16px" : "16px 4px 16px 16px",
+        backgroundColor: inb ? D.card : D.greenLight,
+        border: `1px solid ${inb ? D.border : D.greenBorder}`,
+        boxShadow: D.xs,
       }}>
-        {hasContent ? (
-          <div
-            style={{ fontSize: "14px", lineHeight: 1.75, color: T.text, wordBreak: "break-word" }}
-            dangerouslySetInnerHTML={{ __html: body }}
-          />
+        {has ? (
+          <div style={{ fontSize: "14px", lineHeight: 1.7, color: D.text, wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html: body }} />
         ) : (
-          <div style={{ fontSize: "13px", color: T.textMuted, fontStyle: "italic" }}>(no email body)</div>
+          <div style={{ fontSize: "13px", color: D.textMuted, fontStyle: "italic" }}>(empty)</div>
         )}
       </div>
 
-      {/* Time */}
+      {/* Timestamp */}
       <div style={{
-        fontSize: "11px", color: T.textMuted, marginTop: "6px",
-        paddingLeft: isInbound ? "16px" : 0,
-        paddingRight: isInbound ? 0 : "16px",
+        fontSize: "11px", color: D.textMuted, marginTop: "6px",
+        paddingLeft: inb ? "2px" : 0, paddingRight: inb ? 0 : "2px",
       }}>
-        {fmt.dateTime(message.created_at)}
+        {f.dt(msg.created_at)}
       </div>
     </div>
   )
 }
 
-// ═══════════════════════════════════════════
-// REPLY COMPOSER
-// ═══════════════════════════════════════════
-function ReplyComposer({ replyText, setReplyText, onSend, isSending }: {
-  replyText: string; setReplyText: (v: string) => void; onSend: () => void; isSending: boolean
+/* ═══════════════════════════════════════════════════════════════
+   REPLY COMPOSER
+   ═══════════════════════════════════════════════════════════════ */
+function Composer({ text, setText, onSend, sending }: {
+  text: string; setText: (v: string) => void; onSend: () => void; sending: boolean
 }) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const ref = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    const el = textareaRef.current
+    const el = ref.current
     if (!el) return
     el.style.height = "auto"
-    el.style.height = Math.max(100, el.scrollHeight) + "px"
-  }, [replyText])
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && replyText.trim()) {
-      e.preventDefault()
-      onSend()
-    }
-  }
+    el.style.height = Math.max(80, el.scrollHeight) + "px"
+  }, [text])
 
   return (
     <div style={{
-      backgroundColor: T.card, border: `1px solid ${T.accent}`,
-      borderRadius: T.radiusLg, padding: "20px 24px", boxShadow: T.shadowMd,
+      backgroundColor: D.card, borderRadius: D.r16,
+      border: `1px solid ${D.border}`, boxShadow: D.sm, overflow: "hidden",
     }}>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "16px" }}>✉️</span>
-          <span style={{ fontSize: "13px", fontWeight: 700, color: T.text }}>Reply to Customer</span>
-        </div>
-        <span style={{ fontSize: "11px", color: T.textMuted }}>⌘+Enter to send</span>
+      {/* Input area */}
+      <div style={{ padding: "20px 24px 12px" }}>
+        <textarea
+          ref={ref}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && text.trim()) { e.preventDefault(); onSend() } }}
+          placeholder="Write your reply..."
+          style={{
+            width: "100%", minHeight: "80px", maxHeight: "300px",
+            padding: 0, fontSize: "14px", lineHeight: 1.7, color: D.text,
+            backgroundColor: "transparent", border: "none", resize: "none", outline: "none",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+            boxSizing: "border-box",
+          }}
+        />
       </div>
 
-      {/* Textarea */}
-      <textarea
-        ref={textareaRef}
-        value={replyText}
-        onChange={(e) => setReplyText(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Write your reply here..."
-        style={{
-          width: "100%", minHeight: "100px", maxHeight: "350px",
-          padding: "14px 16px", fontSize: "14px", lineHeight: 1.7, color: T.text,
-          backgroundColor: T.bg, border: `1px solid ${T.borderLight}`,
-          borderRadius: T.radius, resize: "none", outline: "none",
-          fontFamily: "inherit", transition: "border-color 0.2s ease", boxSizing: "border-box",
-        }}
-        onFocus={(e) => { e.target.style.borderColor = T.accent }}
-        onBlur={(e) => { e.target.style.borderColor = T.borderLight }}
-      />
-
-      {/* Actions */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "12px" }}>
-        <div style={{ fontSize: "11px", color: T.textMuted }}>
-          {replyText.trim().length > 0 && `${replyText.trim().length} chars`}
-        </div>
-        <div style={{ display: "flex", gap: "8px" }}>
-          {replyText.trim() && (
-            <button
-              onClick={() => setReplyText("")}
-              disabled={isSending}
-              style={{
-                padding: "8px 14px", fontSize: "12px", fontWeight: 500,
-                color: T.textSec, backgroundColor: "transparent",
-                border: `1px solid ${T.border}`, borderRadius: T.radiusSm,
-                cursor: "pointer",
-              }}
-            >
-              Clear
-            </button>
-          )}
-          <button
-            onClick={onSend}
-            disabled={!replyText.trim() || isSending}
-            style={{
-              padding: "10px 22px", fontSize: "13px", fontWeight: 700, color: "#fff",
-              background: replyText.trim() ? `linear-gradient(135deg, ${T.accent}, ${T.purple})` : T.borderLight,
-              border: "none", borderRadius: T.radiusSm,
-              cursor: replyText.trim() ? "pointer" : "not-allowed",
-              boxShadow: replyText.trim() ? "0 4px 14px rgba(79,70,229,0.25)" : "none",
-              transition: "all 0.2s ease",
-            }}
-          >
-            {isSending ? "Sending..." : "Send Reply"}
-          </button>
-        </div>
+      {/* Action bar */}
+      <div style={{
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        padding: "12px 24px", borderTop: `1px solid ${D.borderSubtle}`,
+        backgroundColor: D.inset,
+      }}>
+        <span style={{ fontSize: "11px", color: D.textMuted }}>
+          {text.trim() ? `${text.trim().length} chars · ⌘+Enter` : "⌘+Enter to send"}
+        </span>
+        <button
+          onClick={onSend}
+          disabled={!text.trim() || sending}
+          style={{
+            padding: "8px 20px", fontSize: "13px", fontWeight: 600, color: "#fff",
+            background: text.trim() ? D.brand : D.textFaint,
+            border: "none", borderRadius: D.r8,
+            cursor: text.trim() ? "pointer" : "not-allowed",
+            boxShadow: text.trim() ? `0 1px 3px ${D.brand}44` : "none",
+            transition: "all 0.15s ease",
+          }}
+        >
+          {sending ? "Sending..." : "Send reply"}
+        </button>
       </div>
     </div>
   )
 }
 
-// ═══════════════════════════════════════════
-// MAIN PAGE
-// ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
+   MAIN PAGE
+   ═══════════════════════════════════════════════════════════════ */
 const TicketDetailPage = () => {
   const pageRef = useRef<HTMLDivElement>(null)
   useFullWidth(pageRef)
 
   const { id: ticketId } = useParams()
-  const queryClient = useQueryClient()
-  const [replyText, setReplyText] = useState("")
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const qc = useQueryClient()
+  const [reply, setReply] = useState("")
+  const endRef = useRef<HTMLDivElement>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ["supportbox-ticket-detail", ticketId],
-    queryFn: async () => {
-      const response = await sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}`, { method: "GET" })
-      return response as any
-    },
+    queryFn: async () => await sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}`, { method: "GET" }) as any,
     enabled: !!ticketId,
   })
 
   const ticket = data?.ticket
-  const allOrders = data?.allOrders || []
+  const orders = data?.allOrders || []
 
-  const replyMutation = useMutation({
-    mutationFn: async (bodyHtml: string) => {
-      return await sdk.client.fetch(
-        `/admin/supportbox/tickets/${ticketId}/reply`,
-        { method: "POST", body: { body_html: bodyHtml, body_text: replyText } }
-      )
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] })
-      setReplyText("")
-    },
+  const replyMut = useMutation({
+    mutationFn: async (html: string) => sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/reply`, { method: "POST", body: { body_html: html, body_text: reply } }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] }); setReply("") },
   })
 
-  const solveMutation = useMutation({
+  const solveMut = useMutation({
     mutationFn: async () => sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/solve`, { method: "POST" }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] })
-      queryClient.invalidateQueries({ queryKey: ["supportbox-tickets"] })
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] }); qc.invalidateQueries({ queryKey: ["supportbox-tickets"] }) },
   })
 
-  const reopenMutation = useMutation({
+  const reopenMut = useMutation({
     mutationFn: async () => sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/reopen`, { method: "POST" }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] })
-      queryClient.invalidateQueries({ queryKey: ["supportbox-tickets"] })
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] }); qc.invalidateQueries({ queryKey: ["supportbox-tickets"] }) },
   })
 
-  const messages = ticket?.messages || []
-  const sortedMessages = [...messages].sort(
-    (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-  )
+  const msgs = [...(ticket?.messages || [])].sort((a: any, b: any) => +new Date(a.created_at) - +new Date(b.created_at))
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [sortedMessages.length])
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }) }, [msgs.length])
 
-  const handleSendReply = async () => {
-    if (!replyText.trim()) return
-    const bodyHtml = replyText.split("\n").map((line) => `<p>${line}</p>`).join("")
-    await replyMutation.mutateAsync(bodyHtml)
+  const send = () => {
+    if (!reply.trim()) return
+    replyMut.mutateAsync(reply.split("\n").map(l => `<p>${l}</p>`).join(""))
   }
 
-  if (isLoading) {
-    return (
-      <div style={{ padding: "80px", textAlign: "center" }}>
-        <div style={{ fontSize: "28px", marginBottom: "12px" }}>⏳</div>
-        <div style={{ color: T.textSec, fontSize: "14px" }}>Loading ticket...</div>
-      </div>
-    )
-  }
+  // Loading / 404
+  if (isLoading) return <div style={{ padding: "100px", textAlign: "center", color: D.textSec }}>Loading...</div>
+  if (!ticket) return <div style={{ padding: "100px", textAlign: "center", color: D.textSec }}>Ticket not found</div>
 
-  if (!ticket) {
-    return (
-      <div style={{ padding: "80px", textAlign: "center" }}>
-        <div style={{ fontSize: "28px", marginBottom: "12px" }}>🔍</div>
-        <div style={{ color: T.textSec, fontSize: "14px" }}>Ticket not found</div>
-      </div>
-    )
-  }
-
-  const statusConfig = {
-    new: { label: "New", color: "green" as const, emoji: "🟢" },
-    solved: { label: "Solved", color: "grey" as const, emoji: "✅" },
-    old: { label: "Old", color: "orange" as const, emoji: "📂" },
-  }
-  const status = statusConfig[ticket.status as keyof typeof statusConfig] || statusConfig.new
+  const st = ticket.status === "solved" ? { label: "Solved", bg: D.greenLight, color: D.green }
+    : ticket.status === "old" ? { label: "Old", bg: D.orangeLight, color: D.orange }
+    : { label: "New", bg: D.greenLight, color: D.green }
 
   return (
-    <div ref={pageRef} style={{ width: "100%", padding: "28px 40px", background: BG, boxSizing: "border-box", minHeight: "100vh" }}>
-      {/* Global CSS override */}
+    <div ref={pageRef} style={{ width: "100%", padding: "32px 48px", background: PAGE_BG, boxSizing: "border-box", minHeight: "100vh" }}>
       <style>{`
         main > div, main > div > div, main > div > div > div,
         main > div > div > div > div, main > div > div > div > div > div {
-          max-width: none !important;
-          width: 100% !important;
-          padding-left: 0 !important;
-          padding-right: 0 !important;
-          margin-left: 0 !important;
-          margin-right: 0 !important;
+          max-width: none !important; width: 100% !important;
+          padding-left: 0 !important; padding-right: 0 !important;
+          margin-left: 0 !important; margin-right: 0 !important;
         }
       `}</style>
 
-      {/* ═══ TOP BAR ═══ */}
-      <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        marginBottom: "28px", paddingBottom: "20px", borderBottom: `1px solid ${T.border}`,
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+      {/* ══════ HEADER ══════ */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "20px" }}>
           <Link to="/supportbox" style={{ textDecoration: "none" }}>
-            <button style={{
-              padding: "8px 14px", fontSize: "13px", fontWeight: 500,
-              color: T.textSec, backgroundColor: T.card,
-              border: `1px solid ${T.border}`, borderRadius: T.radiusSm,
-              cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
-              boxShadow: T.shadow, transition: "all 0.15s",
+            <div style={{
+              width: "36px", height: "36px", borderRadius: D.r8, backgroundColor: D.card,
+              border: `1px solid ${D.border}`, display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", boxShadow: D.xs, marginTop: "2px",
             }}>
-              ← Back
-            </button>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke={D.textSec} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
           </Link>
           <div>
-            <h1 style={{ fontSize: "20px", fontWeight: 700, color: T.text, margin: 0, lineHeight: 1.3 }}>
+            <h1 style={{ fontSize: "22px", fontWeight: 700, color: D.text, margin: 0, lineHeight: 1.25, letterSpacing: "-0.01em" }}>
               {ticket.subject}
             </h1>
-            <div style={{ fontSize: "13px", color: T.textSec, marginTop: "4px" }}>
-              From: {ticket.from_name ? `${ticket.from_name} <${ticket.from_email}>` : ticket.from_email}
-              <span style={{ color: T.textMuted, margin: "0 8px" }}>·</span>
-              {fmt.dateTime(ticket.created_at)}
+            <div style={{ fontSize: "13px", color: D.textSec, marginTop: "6px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              <span>{ticket.from_name ? `${ticket.from_name}` : ticket.from_email}</span>
+              <span style={{ color: D.textFaint }}>·</span>
+              <span>{f.dt(ticket.created_at)}</span>
+              <span style={{ color: D.textFaint }}>·</span>
+              <Pill bg={st.bg} color={st.color}>{st.label}</Pill>
             </div>
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <Badge color={status.color}>{status.emoji} {status.label}</Badge>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center", flexShrink: 0 }}>
           {ticket.status !== "solved" ? (
-            <button
-              onClick={() => solveMutation.mutate()}
-              disabled={solveMutation.isPending}
+            <button onClick={() => solveMut.mutate()} disabled={solveMut.isPending}
               style={{
-                padding: "8px 18px", fontSize: "13px", fontWeight: 600,
-                color: "#fff", background: `linear-gradient(135deg, ${T.green}, #047857)`,
-                border: "none", borderRadius: T.radiusSm, cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(5,150,105,0.3)", transition: "all 0.15s",
-              }}
-            >
-              {solveMutation.isPending ? "..." : "✓ Mark Solved"}
+                padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: "#fff",
+                backgroundColor: D.green, border: "none", borderRadius: D.r8,
+                cursor: "pointer", boxShadow: D.xs, transition: "all 0.15s",
+              }}>
+              {solveMut.isPending ? "..." : "Mark solved"}
             </button>
           ) : (
-            <button
-              onClick={() => reopenMutation.mutate()}
-              disabled={reopenMutation.isPending}
+            <button onClick={() => reopenMut.mutate()} disabled={reopenMut.isPending}
               style={{
-                padding: "8px 18px", fontSize: "13px", fontWeight: 600,
-                color: T.orange, backgroundColor: T.orangeBg,
-                border: `1px solid ${T.orange}`, borderRadius: T.radiusSm,
-                cursor: "pointer", transition: "all 0.15s",
-              }}
-            >
-              {reopenMutation.isPending ? "..." : "↩ Reopen"}
+                padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: D.orange,
+                backgroundColor: D.orangeLight, border: `1px solid ${D.orange}40`,
+                borderRadius: D.r8, cursor: "pointer", transition: "all 0.15s",
+              }}>
+              {reopenMut.isPending ? "..." : "Reopen"}
             </button>
           )}
         </div>
       </div>
 
-      {/* ═══ MAIN LAYOUT ═══ */}
-      <div style={{ display: "flex", gap: "28px", alignItems: "flex-start" }}>
+      {/* ══════ LAYOUT: Conversation | Sidebar ══════ */}
+      <div style={{ display: "flex", gap: "32px", alignItems: "flex-start" }}>
 
-        {/* LEFT: Conversation + Reply (flex 3) */}
-        <div style={{ flex: 3, minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
-
-          {/* Messages */}
+        {/* Conversation (flex 5) */}
+        <div style={{ flex: 5, minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
+          {/* Messages card */}
           <div style={{
-            backgroundColor: T.card, border: `1px solid ${T.border}`,
-            borderRadius: T.radiusLg, padding: "28px 32px", boxShadow: T.shadow,
+            backgroundColor: D.card, borderRadius: D.r16,
+            border: `1px solid ${D.border}`, boxShadow: D.sm,
+            padding: "32px 36px",
           }}>
-            {sortedMessages.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "48px 0", color: T.textMuted }}>
-                <div style={{ fontSize: "32px", marginBottom: "8px" }}>💬</div>
-                <div style={{ fontSize: "14px" }}>No messages yet</div>
+            {msgs.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "48px 0", color: D.textMuted, fontSize: "14px" }}>
+                No messages yet
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                {sortedMessages.map((message: any) => (
-                  <MessageBubble key={message.id} message={message} />
-                ))}
-                <div ref={messagesEndRef} />
+              <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+                {msgs.map((m: any) => <MessageBubble key={m.id} msg={m} />)}
+                <div ref={endRef} />
               </div>
             )}
           </div>
 
-          {/* Reply */}
-          <ReplyComposer
-            replyText={replyText}
-            setReplyText={setReplyText}
-            onSend={handleSendReply}
-            isSending={replyMutation.isPending}
-          />
+          {/* Composer */}
+          <Composer text={reply} setText={setReply} onSend={send} sending={replyMut.isPending} />
 
-          {replyMutation.isError && (
-            <div style={{
-              padding: "12px 16px", backgroundColor: T.redBg,
-              border: "1px solid #FECACA", borderRadius: T.radius,
-              fontSize: "13px", color: T.red,
-            }}>
-              Failed to send: {(replyMutation.error as any)?.message || "Unknown error"}
+          {replyMut.isError && (
+            <div style={{ padding: "12px 16px", backgroundColor: D.redLight, border: `1px solid ${D.red}30`, borderRadius: D.r12, fontSize: "13px", color: D.red }}>
+              Failed to send: {(replyMut.error as any)?.message || "Unknown error"}
             </div>
           )}
         </div>
 
-        {/* RIGHT: Sidebar (flex 1, sticky) */}
+        {/* Sidebar (flex 2, sticky) */}
         <div style={{
-          flex: 1, minWidth: "300px", maxWidth: "400px",
-          position: "sticky", top: "20px", maxHeight: "calc(100vh - 60px)",
-          overflowY: "auto", paddingRight: "4px",
+          flex: 2, minWidth: "320px", maxWidth: "420px",
+          position: "sticky", top: "24px",
+          maxHeight: "calc(100vh - 80px)", overflowY: "auto",
         }}>
-          <CustomerSidebar ticket={ticket} allOrders={allOrders} />
+          <CustomerSidebar ticket={ticket} allOrders={orders} />
         </div>
       </div>
     </div>
