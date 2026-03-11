@@ -11,6 +11,7 @@ export interface TabDef {
 
 export const TABS: TabDef[] = [
   { id: "all", label: "All" },
+  { id: "new", label: "New", deliveryStatus: "NEW" },
   { id: "waiting", label: "Waiting", deliveryStatus: "WAITING" },
   { id: "imported", label: "Imported", deliveryStatus: "IMPORTED" },
   { id: "processed", label: "Processed", deliveryStatus: "PROCESSED" },
@@ -20,6 +21,8 @@ export const TABS: TabDef[] = [
   { id: "delivered", label: "Delivered", deliveryStatus: "DELIVERED" },
   { id: "issues", label: "Issues", deliveryStatus: "ALLOCATION_ISSUE" },
   { id: "refunded", label: "Refunded", paymentStatus: "refunded" },
+  { id: "paid", label: "Paid", paymentStatus: "paid" },
+  { id: "pending", label: "Pending", paymentStatus: "pending" },
   { id: "nlbe", label: "NL/BE", country: "NL,BE" },
   { id: "deatlu", label: "DE/AT/LU", country: "DE,AT,LU" },
   { id: "czsk", label: "CZ/SK", country: "CZ,SK" },

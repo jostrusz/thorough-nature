@@ -127,6 +127,21 @@ export async function POST(
         return
       }
 
+      case "delete": {
+        const results = []
+        for (const orderId of order_ids) {
+          try {
+            await orderModuleService.deleteOrders([orderId])
+            results.push({ id: orderId, success: true })
+          } catch (err: any) {
+            results.push({ id: orderId, success: false, error: err.message })
+          }
+        }
+
+        res.json({ success: true, action: "delete", results, count: results.filter(r => r.success).length })
+        return
+      }
+
       default:
         res.status(400).json({ error: `Unknown action: ${action}` })
         return

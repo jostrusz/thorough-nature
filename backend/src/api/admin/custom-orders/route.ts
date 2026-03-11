@@ -2,6 +2,33 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { IOrderModuleService } from "@medusajs/framework/types"
 
+// Compute payment status from order data (same logic as frontend orders-table.tsx)
+function getPaymentStatus(order: any): string {
+  if (order.metadata?.payment_captured) return "paid"
+
+  const isCOD = (order.payment_collections || []).some((pc: any) =>
+    (pc.payments || []).some((p: any) => (p.provider_id || "").includes("cod"))
+  ) || order.metadata?.payment_provider === "cod" || order.metadata?.payment_method === "cod"
+  if (isCOD) return "pending"
+
+  if (order.payment_collections?.length) {
+    const pcs = order.payment_collections as any[]
+    const activePC = pcs.find((pc: any) =>
+      pc.status === "captured" || pc.status === "completed"
+    ) || pcs.find((pc: any) =>
+      pc.status !== "canceled"
+    ) || pcs[pcs.length - 1]
+
+    if (activePC.status === "captured" || activePC.status === "completed") return "paid"
+    if (activePC.status === "refunded") return "refunded"
+    if (activePC.status === "partially_refunded") return "partially_refunded"
+    if (activePC.status === "authorized") return "authorized"
+    return activePC.status || "pending"
+  }
+  if (order.metadata?.copied_payment_status) return order.metadata.copied_payment_status
+  return "pending"
+}
+
 export async function GET(
   req: MedusaRequest,
   res: MedusaResponse
@@ -20,10 +47,6 @@ export async function GET(
     const sortDir = (req.query.sort_dir as string) || "DESC"
 
     const filters: Record<string, any> = {}
-
-    if (paymentStatus) {
-      filters.payment_status = paymentStatus
-    }
 
     const { data: orders, metadata } = await query.graph({
       entity: "order",
@@ -124,8 +147,14 @@ export async function GET(
       console.warn("Could not resolve order addresses:", addrErr.message)
     }
 
-    // Client-side filtering for metadata and country (Medusa doesn't support metadata filtering in query.graph)
+    // Client-side filtering (Medusa query.graph doesn't support metadata/computed field filtering)
     let filteredOrders = orders
+
+    if (paymentStatus) {
+      filteredOrders = filteredOrders.filter(
+        (o: any) => getPaymentStatus(o) === paymentStatus
+      )
+    }
 
     if (deliveryStatus) {
       if (deliveryStatus === "new" || deliveryStatus === "NEW") {

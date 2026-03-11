@@ -7,6 +7,7 @@ interface BulkActionsBarProps {
   onAddTags: () => void
   onSendToDextrum: () => void
   onExport: () => void
+  onDelete: () => void
 }
 
 const actionBtnStyle: React.CSSProperties = {
@@ -25,12 +26,19 @@ const actionBtnStyle: React.CSSProperties = {
   whiteSpace: "nowrap",
 }
 
+const deleteBtnStyle: React.CSSProperties = {
+  ...actionBtnStyle,
+  color: "#E74C3C",
+  borderColor: "rgba(231,76,60,0.25)",
+}
+
 export function BulkActionsBar({
   selectedCount,
   onMarkFulfilled,
   onAddTags,
   onSendToDextrum,
   onExport,
+  onDelete,
 }: BulkActionsBarProps) {
   if (selectedCount === 0) return null
 
@@ -69,6 +77,9 @@ export function BulkActionsBar({
       </button>
       <button style={actionBtnStyle} onClick={onExport}>
         Export Selected
+      </button>
+      <button style={deleteBtnStyle} onClick={onDelete}>
+        Delete Selected
       </button>
     </div>
   )

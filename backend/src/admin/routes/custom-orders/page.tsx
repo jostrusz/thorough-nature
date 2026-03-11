@@ -498,6 +498,29 @@ const CustomOrdersPage = () => {
     toast.info("Use order detail to send individual orders to Dextrum WMS")
   }, [])
 
+  const handleDelete = useCallback(() => {
+    if (selectedOrders.size === 0) return
+    const confirmed = window.confirm(
+      `Opravdu chcete smazat ${selectedOrders.size} objednávek? Tuto akci nelze vrátit zpět.`
+    )
+    if (!confirmed) return
+    bulkActions.mutate(
+      {
+        action: "delete",
+        order_ids: Array.from(selectedOrders),
+      },
+      {
+        onSuccess: (data: any) => {
+          toast.success(`Smazáno ${data.count} objednávek`)
+          setSelectedOrders(new Set())
+        },
+        onError: () => {
+          toast.error("Nepodařilo se smazat objednávky")
+        },
+      }
+    )
+  }, [selectedOrders, bulkActions])
+
   const orders = ordersData?.orders || []
   const totalCount = ordersData?.count || 0
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
@@ -614,6 +637,7 @@ const CustomOrdersPage = () => {
           onAddTags={handleAddTags}
           onSendToDextrum={handleSendToDextrum}
           onExport={handleExport}
+          onDelete={handleDelete}
         />
 
         {/* Table */}
