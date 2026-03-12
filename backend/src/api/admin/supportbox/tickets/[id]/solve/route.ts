@@ -10,7 +10,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     const ticket = await supportboxService.updateSupportboxTickets({
       id,
       status: "solved",
-      solved_at: new Date(),
+      solved_at: new Date().toISOString(),
     })
     res.json({ ticket })
   } catch (error: any) {

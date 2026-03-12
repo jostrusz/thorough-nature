@@ -280,7 +280,7 @@ const SupportBoxDashboard = () => {
   useFullWidth(pageRef)
 
   const [selectedConfigId, setSelectedConfigId] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [statusFilter, setStatusFilter] = useState<string>("inbox")
   const [searchQuery, setSearchQuery] = useState("")
 
   const { data: configs = [] } = useQuery({
@@ -291,12 +291,12 @@ const SupportBoxDashboard = () => {
     },
   })
 
-  const { data: tickets = [], isLoading } = useQuery({
-    queryKey: ["supportbox-tickets", selectedConfigId, statusFilter, searchQuery],
+  // Always fetch ALL tickets — filtering happens on frontend
+  const { data: allTickets = [], isLoading } = useQuery({
+    queryKey: ["supportbox-tickets", selectedConfigId, searchQuery],
     queryFn: async () => {
       const params = new URLSearchParams()
       if (selectedConfigId) params.append("config_id", selectedConfigId)
-      if (statusFilter !== "all") params.append("status", statusFilter)
       if (searchQuery) params.append("q", searchQuery)
       const response = await sdk.client.fetch(
         `/admin/supportbox/tickets?${params.toString()}`,
@@ -306,17 +306,25 @@ const SupportBoxDashboard = () => {
     },
   })
 
-  const newCount = tickets.filter((t: any) => t.status === "new").length
-  const solvedCount = tickets.filter((t: any) => t.status === "solved").length
-  const oldCount = tickets.filter((t: any) => t.status !== "new" && t.status !== "solved").length
+  // Counts always from FULL dataset
+  const newCount = allTickets.filter((t: any) => t.status === "new").length
+  const solvedCount = allTickets.filter((t: any) => t.status === "solved").length
+  const oldCount = allTickets.filter((t: any) => t.status !== "new" && t.status !== "solved").length
 
-  // Count new tickets per config
+  // Filtered tickets for display
+  const tickets = statusFilter === "all"
+    ? allTickets
+    : statusFilter === "inbox"
+      ? allTickets.filter((t: any) => t.status !== "solved")
+      : allTickets.filter((t: any) => t.status === statusFilter)
+
+  // Count new tickets per config (from full dataset)
   const newPerConfig = (configId: string) =>
-    tickets.filter((t: any) => t.config_id === configId && t.status === "new").length
+    allTickets.filter((t: any) => t.config_id === configId && t.status === "new").length
 
-  // Handle stat card click
+  // Handle stat card click — toggle filter, inbox is the "off" state
   const handleStatClick = (status: string) => {
-    setStatusFilter(statusFilter === status ? "all" : status)
+    setStatusFilter(statusFilter === status ? "inbox" : status)
   }
 
   return (
@@ -370,7 +378,7 @@ const SupportBoxDashboard = () => {
             <StatCard label="New" count={newCount} color={C.green} bgColor={C.greenBg} icon="📩" isActive={statusFilter === "new"} onClick={() => handleStatClick("new")} />
             <StatCard label="Solved" count={solvedCount} color={C.blue} bgColor={C.blueBg} icon="✅" isActive={statusFilter === "solved"} onClick={() => handleStatClick("solved")} />
             <StatCard label="Old" count={oldCount} color={C.orange} bgColor={C.orangeBg} icon="📂" isActive={statusFilter === "old"} onClick={() => handleStatClick("old")} />
-            <StatCard label="Total" count={tickets.length} color={C.textMuted} bgColor={C.bg} icon="📊" />
+            <StatCard label="Total" count={allTickets.length} color={C.textMuted} bgColor={C.bg} icon="📊" isActive={statusFilter === "all"} onClick={() => setStatusFilter(statusFilter === "all" ? "inbox" : "all")} />
           </div>
 
           {/* Filters */}
@@ -389,12 +397,13 @@ const SupportBoxDashboard = () => {
             </div>
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
               <Select.Trigger>
-                <Select.Value placeholder="All Status" />
+                <Select.Value placeholder="Inbox" />
               </Select.Trigger>
               <Select.Content>
-                <Select.Item value="all">All Status</Select.Item>
+                <Select.Item value="inbox">Inbox</Select.Item>
                 <Select.Item value="new">New</Select.Item>
                 <Select.Item value="solved">Solved</Select.Item>
+                <Select.Item value="all">All</Select.Item>
               </Select.Content>
             </Select>
           </div>
