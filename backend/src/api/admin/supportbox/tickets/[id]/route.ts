@@ -26,12 +26,14 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
           entity: "order",
           fields: [
             "id", "display_id", "status", "email", "total", "currency_code",
-            "created_at", "metadata",
+            "created_at", "canceled_at", "metadata",
             "items.*",
             "fulfillments.*", "fulfillments.labels.*",
             "shipping_address.*",
             "billing_address.*",
             "payment_collections.*", "payment_collections.payments.*",
+            "payment_collections.payments.captures.*",
+            "payment_collections.payments.refunds.*",
           ],
           filters: { email: ticket.from_email },
           pagination: { order: { created_at: "DESC" } },
@@ -47,6 +49,12 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
               captured_at: p.captured_at,
               canceled_at: p.canceled_at,
               created_at: p.created_at,
+              refunds: (p.refunds || []).map((r: any) => ({
+                id: r.id,
+                amount: r.amount,
+                note: r.note,
+                created_at: r.created_at,
+              })),
             }))
           )
           const paymentStatus = payments.some((p: any) => p.captured_at)
@@ -75,6 +83,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
             total: order.total,
             currency_code: order.currency_code,
             created_at: order.created_at,
+            canceled_at: order.canceled_at || null,
             email: order.email,
             payment_status: paymentStatus,
             payments,

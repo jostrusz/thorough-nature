@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useRef, useEffect } from "react"
-import { useParams, Link } from "react-router-dom"
+import { useParams, Link, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "../../../lib/sdk"
 
@@ -509,6 +509,286 @@ function Composer({ text, setText, onSend, sending }: {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   ORDER CONTEXT CARD — shown above messages in conversation
+   ═══════════════════════════════════════════════════════════════ */
+function OrderContextCard({ orders }: { orders: any[] }) {
+  const [expanded, setExpanded] = useState<string | null>(orders[0]?.order_id || null)
+  if (orders.length === 0) return null
+
+  return (
+    <div style={{
+      backgroundColor: D.card, borderRadius: D.r16,
+      border: `1px solid ${D.border}`, boxShadow: D.sm,
+      overflow: "hidden",
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: "14px 20px",
+        borderBottom: `1px solid ${D.borderSubtle}`,
+        display: "flex", alignItems: "center", gap: "10px",
+        backgroundColor: D.inset,
+      }}>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 3h12l-1.5 7H3.5L2 3z" stroke={D.brand} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+          <circle cx="5.5" cy="13" r="1" fill={D.brand}/>
+          <circle cx="10.5" cy="13" r="1" fill={D.brand}/>
+        </svg>
+        <span style={{ fontSize: "12px", fontWeight: 700, color: D.textSec, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          Order context
+        </span>
+        <span style={{ fontSize: "11px", color: D.textMuted }}>
+          {orders.length} order{orders.length > 1 ? "s" : ""} found
+        </span>
+      </div>
+
+      {/* Orders */}
+      {orders.map((order: any) => {
+        const isOpen = expanded === order.order_id
+        const trackingNo = order.tracking_number || order.fulfillments?.[0]?.labels?.[0]?.tracking_number
+        const trackingUrl = order.tracking_link || order.fulfillments?.[0]?.labels?.[0]?.tracking_url
+        const paymentProvider = order.payments?.[0]?.provider_id || ""
+        const providerLabel = paymentProvider.includes("stripe") ? "Stripe"
+          : paymentProvider.includes("paypal") ? "PayPal"
+          : paymentProvider.includes("mollie") ? "Mollie"
+          : paymentProvider.includes("comgate") ? "Comgate"
+          : paymentProvider.includes("cod") ? "COD"
+          : paymentProvider || "—"
+        const refunds = (order.payments || []).flatMap((p: any) => p.refunds || [])
+        const totalRefunded = refunds.reduce((s: number, r: any) => s + (Number(r.amount) || 0), 0)
+
+        // Build comprehensive timeline events
+        const timelineEvents: { label: string; date?: string; color: string; detail?: string }[] = []
+        // 1. Order placed
+        timelineEvents.push({ label: "Order placed", date: order.created_at, color: D.green, detail: `#${order.display_id}` })
+        // 2. Payment captured
+        const capturedAt = order.payments?.[0]?.captured_at || (order.payment_status === "paid" ? order.created_at : undefined)
+        timelineEvents.push({ label: `Payment captured (${providerLabel})`, date: capturedAt, color: D.blue })
+        // 3. Fulfillment created
+        const fulfillment = order.fulfillments?.[0]
+        if (fulfillment) {
+          timelineEvents.push({ label: "Fulfillment created", date: fulfillment.created_at, color: D.purple })
+        } else {
+          timelineEvents.push({ label: "Fulfillment created", date: undefined, color: D.purple })
+        }
+        // 4. Shipped
+        const shippedAt = fulfillment?.shipped_at || (trackingNo ? fulfillment?.created_at : undefined)
+        timelineEvents.push({
+          label: trackingNo ? `Shipped — ${trackingNo}` : "Shipped",
+          date: shippedAt,
+          color: D.blue,
+          detail: order.carrier || undefined,
+        })
+        // 5. Delivery status (from metadata / Dextrum)
+        if (order.delivery_status) {
+          const delDate = order.delivery_status === "delivered"
+            ? (fulfillment?.delivered_at || order.created_at)
+            : undefined
+          timelineEvents.push({
+            label: `Delivery: ${order.delivery_status}`,
+            date: order.delivery_status === "delivered" ? delDate : undefined,
+            color: order.delivery_status === "delivered" ? D.green : D.orange,
+          })
+        } else {
+          timelineEvents.push({ label: "Delivered", date: fulfillment?.delivered_at, color: D.green })
+        }
+        // 6. Refunds
+        refunds.forEach((r: any) => {
+          timelineEvents.push({
+            label: `Refund: ${f.money(r.amount, order.currency_code)}`,
+            date: r.created_at,
+            color: D.red,
+            detail: r.note || undefined,
+          })
+        })
+        // 7. Canceled
+        if (order.canceled_at || order.status === "canceled") {
+          timelineEvents.push({ label: "Order canceled", date: order.canceled_at || order.created_at, color: D.red })
+        }
+
+        return (
+          <div key={order.order_id} style={{ borderBottom: `1px solid ${D.borderSubtle}` }}>
+            {/* Order toggle header */}
+            <button
+              onClick={() => setExpanded(isOpen ? null : order.order_id)}
+              style={{
+                width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "12px 20px", border: "none", background: "none", cursor: "pointer",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span style={{ fontSize: "13px", fontWeight: 700, color: D.text }}>
+                  Order #{order.display_id}
+                </span>
+                <Pill
+                  bg={order.status === "completed" ? D.greenLight : order.status === "canceled" ? D.redLight : D.orangeLight}
+                  color={order.status === "completed" ? D.green : order.status === "canceled" ? D.red : D.orange}
+                >
+                  {order.status}
+                </Pill>
+                <Pill
+                  bg={order.payment_status === "paid" ? D.greenLight : D.orangeLight}
+                  color={order.payment_status === "paid" ? D.green : D.orange}
+                >
+                  {order.payment_status === "paid" ? "Paid" : "Awaiting"}
+                </Pill>
+                {order.delivery_status && (
+                  <Pill
+                    bg={order.delivery_status === "delivered" ? D.greenLight : D.blueLight}
+                    color={order.delivery_status === "delivered" ? D.green : D.blue}
+                  >
+                    {order.delivery_status}
+                  </Pill>
+                )}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span style={{ fontSize: "14px", fontWeight: 700, color: D.text }}>
+                  {f.money(order.total, order.currency_code)}
+                </span>
+                <svg width="12" height="12" viewBox="0 0 12 12" style={{ transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s", color: D.textFaint }}>
+                  <path d="M3 5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                </svg>
+              </div>
+            </button>
+
+            {/* Expanded content */}
+            {isOpen && (
+              <div style={{ padding: "0 20px 20px" }}>
+                <div style={{ display: "flex", gap: "20px" }}>
+                  {/* Left: Products + Details */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* Products */}
+                    <div style={{ marginBottom: "16px" }}>
+                      <div style={{ fontSize: "10px", fontWeight: 700, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>
+                        Products
+                      </div>
+                      {order.items?.map((item: any, i: number) => (
+                        <div key={i} style={{
+                          display: "flex", alignItems: "center", gap: "12px", padding: "8px 12px",
+                          backgroundColor: D.inset, borderRadius: D.r8,
+                          marginBottom: i < order.items.length - 1 ? "6px" : 0,
+                        }}>
+                          {item.thumbnail && (
+                            <img src={item.thumbnail} alt="" style={{
+                              width: "40px", height: "40px", borderRadius: D.r8, objectFit: "cover",
+                              border: `1px solid ${D.borderSubtle}`,
+                            }} />
+                          )}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: "13px", color: D.text, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {item.title}
+                            </div>
+                            <div style={{ fontSize: "11px", color: D.textMuted, marginTop: "2px" }}>
+                              Qty: {item.quantity}
+                              {item.unit_price > 0 && <> · {f.money(item.unit_price, order.currency_code)}</>}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Quick info grid */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                      <div style={{ padding: "8px 12px", backgroundColor: D.inset, borderRadius: D.r8 }}>
+                        <div style={{ fontSize: "10px", fontWeight: 700, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Payment</div>
+                        <div style={{ fontSize: "12px", fontWeight: 600, color: D.text, marginTop: "2px" }}>{providerLabel}</div>
+                      </div>
+                      <div style={{ padding: "8px 12px", backgroundColor: D.inset, borderRadius: D.r8 }}>
+                        <div style={{ fontSize: "10px", fontWeight: 700, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Total</div>
+                        <div style={{ fontSize: "12px", fontWeight: 600, color: D.text, marginTop: "2px" }}>{f.money(order.total, order.currency_code)}</div>
+                      </div>
+                      {totalRefunded > 0 && (
+                        <div style={{ padding: "8px 12px", backgroundColor: D.redLight, borderRadius: D.r8 }}>
+                          <div style={{ fontSize: "10px", fontWeight: 700, color: D.red, textTransform: "uppercase", letterSpacing: "0.05em" }}>Refunded</div>
+                          <div style={{ fontSize: "12px", fontWeight: 600, color: D.red, marginTop: "2px" }}>{f.money(totalRefunded, order.currency_code)}</div>
+                        </div>
+                      )}
+                      {order.shipping_address && (
+                        <div style={{ padding: "8px 12px", backgroundColor: D.inset, borderRadius: D.r8, gridColumn: totalRefunded > 0 ? undefined : "span 1" }}>
+                          <div style={{ fontSize: "10px", fontWeight: 700, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Ship to</div>
+                          <div style={{ fontSize: "12px", fontWeight: 500, color: D.text, marginTop: "2px" }}>
+                            {[order.shipping_address.city, order.shipping_address.country_code?.toUpperCase()].filter(Boolean).join(", ")}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Tracking bar */}
+                    {trackingNo && (
+                      <div style={{ marginTop: "10px", padding: "10px 12px", backgroundColor: D.blueLight, borderRadius: D.r8, border: `1px solid ${D.blueBorder}` }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <div>
+                            <span style={{ fontSize: "10px", fontWeight: 700, color: D.blue, textTransform: "uppercase", letterSpacing: "0.05em" }}>Tracking: </span>
+                            <span style={{ fontSize: "12px", color: D.text, fontFamily: "'SF Mono',Menlo,monospace", fontWeight: 500 }}>{trackingNo}</span>
+                            {order.carrier && <span style={{ fontSize: "11px", color: D.textSec }}> via {order.carrier}</span>}
+                          </div>
+                          {trackingUrl && (
+                            <a href={trackingUrl} target="_blank" rel="noopener noreferrer"
+                              style={{ fontSize: "11px", color: D.blue, textDecoration: "none", fontWeight: 600 }}>
+                              Track →
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* View in admin */}
+                    <div style={{ marginTop: "10px" }}>
+                      <Link to={`/orders/${order.order_id}`} style={{ fontSize: "12px", fontWeight: 600, color: D.blue, textDecoration: "none" }}>
+                        View full order in admin →
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Right: Timeline */}
+                  <div style={{ width: "240px", flexShrink: 0 }}>
+                    <div style={{ fontSize: "10px", fontWeight: 700, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "10px" }}>
+                      Timeline
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      {timelineEvents.map((ev, i) => (
+                        <div key={i} style={{ display: "flex", gap: "10px" }}>
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "14px", flexShrink: 0 }}>
+                            <div style={{
+                              width: "8px", height: "8px", borderRadius: "50%", marginTop: "4px",
+                              backgroundColor: ev.date ? ev.color : D.borderSubtle,
+                              boxShadow: ev.date ? `0 0 0 3px ${ev.color}18` : "none",
+                            }} />
+                            {i < timelineEvents.length - 1 && (
+                              <div style={{ width: "1.5px", flex: 1, minHeight: "14px", backgroundColor: D.borderSubtle }} />
+                            )}
+                          </div>
+                          <div style={{ paddingBottom: i < timelineEvents.length - 1 ? "8px" : 0, minWidth: 0 }}>
+                            <div style={{
+                              fontSize: "11px", fontWeight: ev.date ? 600 : 400,
+                              color: ev.date ? D.text : D.textFaint, lineHeight: "16px",
+                              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                            }}>
+                              {ev.label}
+                            </div>
+                            {ev.date && (
+                              <div style={{ fontSize: "10px", color: D.textMuted, marginTop: "1px" }}>
+                                {f.dt(ev.date)}
+                              </div>
+                            )}
+                            {ev.detail && (
+                              <div style={{ fontSize: "10px", color: D.textMuted, fontStyle: "italic" }}>{ev.detail}</div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
    MAIN PAGE
    ═══════════════════════════════════════════════════════════════ */
 const TicketDetailPage = () => {
@@ -516,6 +796,7 @@ const TicketDetailPage = () => {
   useFullWidth(pageRef)
 
   const { id: ticketId } = useParams()
+  const navigate = useNavigate()
   const qc = useQueryClient()
   const [reply, setReply] = useState("")
   const endRef = useRef<HTMLDivElement>(null)
@@ -536,7 +817,11 @@ const TicketDetailPage = () => {
 
   const solveMut = useMutation({
     mutationFn: async () => sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/solve`, { method: "POST" }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] }); qc.invalidateQueries({ queryKey: ["supportbox-tickets"] }) },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] })
+      qc.invalidateQueries({ queryKey: ["supportbox-tickets"] })
+      navigate("/supportbox")
+    },
   })
 
   const reopenMut = useMutation({
@@ -621,6 +906,9 @@ const TicketDetailPage = () => {
 
         {/* Conversation (flex 7 = ~70%) */}
         <div style={{ flex: 7, minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
+          {/* Order context */}
+          <OrderContextCard orders={orders} />
+
           {/* Messages card */}
           <div style={{
             backgroundColor: D.card, borderRadius: D.r16,
