@@ -170,19 +170,39 @@ export default async function seedOdpuscKsiazka({ container }: ExecArgs) {
     await createShippingOptionsWorkflow(container).run({
       input: [
         {
-          name: "Darmowa wysyłka (InPost)",
+          name: "Darmowa wysyłka (InPost Paczkomat)",
           price_type: "flat",
           provider_id: "manual_manual",
           service_zone_id: fulfillmentSet.service_zones[0].id,
           shipping_profile_id: shippingProfile.id,
           type: {
             label: "Standard",
-            description: "Darmowa wysyłka w Polsce (3-5 dni roboczych)",
+            description: "Darmowa wysyłka w Polsce — odbiór w Paczkomacie InPost",
             code: "standard",
           },
           prices: [
             { currency_code: "pln", amount: 0 },
             { region_id: region.id, amount: 0 },
+          ],
+          rules: [
+            { attribute: "enabled_in_store", value: "true", operator: "eq" },
+            { attribute: "is_return", value: "false", operator: "eq" },
+          ],
+        },
+        {
+          name: "Dostawa do domu (Kurier)",
+          price_type: "flat",
+          provider_id: "manual_manual",
+          service_zone_id: fulfillmentSet.service_zones[0].id,
+          shipping_profile_id: shippingProfile.id,
+          type: {
+            label: "Kurier",
+            description: "Dostawa kurierem pod wskazany adres (3-5 dni roboczych)",
+            code: "home_delivery",
+          },
+          prices: [
+            { currency_code: "pln", amount: 500 },
+            { region_id: region.id, amount: 500 },
           ],
           rules: [
             { attribute: "enabled_in_store", value: "true", operator: "eq" },

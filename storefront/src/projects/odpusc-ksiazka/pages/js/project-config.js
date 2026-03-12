@@ -28,6 +28,11 @@ var PROJECT_CONFIG = {
   "regions": {
     "PL": ""
   },
+  "shippingOptions": {
+    "paczkomat": { "name": "Paczkomat InPost", "price": 0, "matchName": "InPost" },
+    "homeDelivery": { "name": "Dostawa do domu (Kurier)", "price": 5, "matchName": "Kurier" }
+  },
+  "inpostGeowidgetToken": "",
   "paymentProviders": {},
   "mollieProfileId": null,
   "orderBumpEnabled": false,
