@@ -292,6 +292,7 @@ const SupportBoxDashboard = () => {
   })
 
   // Always fetch ALL tickets — filtering happens on frontend
+  // refetchInterval: poll every 10s for real-time new email visibility
   const { data: allTickets = [], isLoading } = useQuery({
     queryKey: ["supportbox-tickets", selectedConfigId, searchQuery],
     queryFn: async () => {
@@ -304,6 +305,7 @@ const SupportBoxDashboard = () => {
       )
       return (response as any).tickets || []
     },
+    refetchInterval: 10000,
   })
 
   // Counts always from FULL dataset
@@ -328,7 +330,7 @@ const SupportBoxDashboard = () => {
   }
 
   return (
-    <div ref={pageRef} style={{ maxWidth: "1600px", margin: "0 auto", padding: "24px 32px", background: BG_COLOR }}>
+    <div ref={pageRef} style={{ maxWidth: "1140px", margin: "0 auto", padding: "24px 32px", background: BG_COLOR }}>
       <FullWidthStyles />
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>

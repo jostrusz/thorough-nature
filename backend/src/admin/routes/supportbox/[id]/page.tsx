@@ -298,7 +298,7 @@ function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] 
           <Section key={order.order_id} label={`Order #${order.display_id}`} open={idx === 0}>
             {/* Header row */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-              <Link to={`/orders/${order.order_id}`} style={{ fontSize: "13px", fontWeight: 600, color: D.blue, textDecoration: "none" }}>
+              <Link to={`/custom-orders/${order.order_id}`} style={{ fontSize: "13px", fontWeight: 600, color: D.blue, textDecoration: "none" }}>
                 View order →
               </Link>
               <span style={{ fontSize: "14px", fontWeight: 700, color: D.text }}>{f.money(order.total, order.currency_code)}</span>
@@ -733,7 +733,7 @@ function OrderContextCard({ orders }: { orders: any[] }) {
 
                     {/* View in admin */}
                     <div style={{ marginTop: "10px" }}>
-                      <Link to={`/orders/${order.order_id}`} style={{ fontSize: "12px", fontWeight: 600, color: D.blue, textDecoration: "none" }}>
+                      <Link to={`/custom-orders/${order.order_id}`} style={{ fontSize: "12px", fontWeight: 600, color: D.blue, textDecoration: "none" }}>
                         View full order in admin →
                       </Link>
                     </div>
