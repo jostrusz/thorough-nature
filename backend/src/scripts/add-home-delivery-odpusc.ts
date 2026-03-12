@@ -60,8 +60,8 @@ export default async function addHomeDeliveryOdpusc({ container }: ExecArgs) {
 
   // 4. Check if home delivery option already exists
   const existingOptions = await fulfillmentModuleService.listShippingOptions({
-    service_zone_id: serviceZone.id,
-  })
+    service_zone: { id: serviceZone.id },
+  } as any)
   const alreadyExists = existingOptions.some((o: any) =>
     o.name.includes("Kurier") || o.name.includes("domu")
   )
