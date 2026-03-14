@@ -35,6 +35,17 @@ const EVENT_STATUS_MAP: Record<string, string> = {
   "33": "STOCK_CHANGE",
 }
 
+// GET /webhooks/mystock — Returns server outbound IP (for firewall whitelisting)
+export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
+  try {
+    const response = await fetch("https://api.ipify.org?format=json")
+    const data = await response.json() as { ip: string }
+    res.json({ ip: data.ip })
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+}
+
 // POST /webhooks/mystock — Receive mySTOCK webhook events
 export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   try {
