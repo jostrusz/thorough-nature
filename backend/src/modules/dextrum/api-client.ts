@@ -6,6 +6,8 @@
  * All responses: { data: {...}, errors: [...] }
  */
 
+import { Agent } from "undici"
+
 interface MyStockResponse<T = any> {
   data: T
   errors: Array<{ code: string; message: string }>
@@ -19,9 +21,16 @@ interface MyStockConfig {
 
 export class MyStockApiClient {
   private config: MyStockConfig
+  private agent: Agent
 
   constructor(config: MyStockConfig) {
     this.config = config
+    // Allow self-signed SSL certificates (common for WMS test/staging environments)
+    this.agent = new Agent({
+      connect: {
+        rejectUnauthorized: false,
+      },
+    })
   }
 
   private get authHeader(): string {
@@ -50,7 +59,11 @@ export class MyStockApiClient {
       options.body = JSON.stringify(body)
     }
 
-    const response = await fetch(url, options)
+    const response = await fetch(url, {
+      ...options,
+      // @ts-ignore — dispatcher is supported by Node.js native fetch (undici) for custom TLS
+      dispatcher: this.agent,
+    } as any)
 
     if (!response.ok) {
       const text = await response.text().catch(() => "")
