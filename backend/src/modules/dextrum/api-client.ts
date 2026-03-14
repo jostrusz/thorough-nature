@@ -6,7 +6,20 @@
  * All responses: { data: {...}, errors: [...] }
  */
 
-import { Agent } from "undici"
+import { fetch as undiciFetch, Agent } from "undici"
+import { readFileSync } from "fs"
+import { join } from "path"
+
+// Load Kvados Root CA certificates (Dextrum/mySTOCK uses Kvados CA)
+let kvadosCaCerts: string
+try {
+  const ca1 = readFileSync(join(__dirname, "certs", "kvados-root-ca.pem"), "utf-8")
+  const ca2 = readFileSync(join(__dirname, "certs", "kvados-root-ca-g2.pem"), "utf-8")
+  kvadosCaCerts = ca1 + "\n" + ca2
+} catch {
+  // Fallback: if cert files not found, we'll use rejectUnauthorized: false
+  kvadosCaCerts = ""
+}
 
 interface MyStockResponse<T = any> {
   data: T
@@ -25,11 +38,11 @@ export class MyStockApiClient {
 
   constructor(config: MyStockConfig) {
     this.config = config
-    // Allow self-signed SSL certificates (common for WMS test/staging environments)
+    // Configure TLS to trust Kvados Root CA (used by Dextrum/mySTOCK servers)
     this.agent = new Agent({
-      connect: {
-        rejectUnauthorized: false,
-      },
+      connect: kvadosCaCerts
+        ? { ca: kvadosCaCerts }
+        : { rejectUnauthorized: false },
     })
   }
 
@@ -54,23 +67,24 @@ export class MyStockApiClient {
       Accept: "application/json",
     }
 
-    const options: RequestInit = { method, headers }
-    if (body && (method === "POST" || method === "PUT")) {
-      options.body = JSON.stringify(body)
+    const fetchOptions: any = {
+      method,
+      headers,
+      dispatcher: this.agent,
     }
 
-    const response = await fetch(url, {
-      ...options,
-      // @ts-ignore — dispatcher is supported by Node.js native fetch (undici) for custom TLS
-      dispatcher: this.agent,
-    } as any)
+    if (body && (method === "POST" || method === "PUT")) {
+      fetchOptions.body = JSON.stringify(body)
+    }
+
+    const response = await undiciFetch(url, fetchOptions)
 
     if (!response.ok) {
       const text = await response.text().catch(() => "")
       throw new Error(`mySTOCK API ${method} ${path} failed: ${response.status} ${response.statusText} - ${text}`)
     }
 
-    return response.json()
+    return response.json() as Promise<MyStockResponse<T>>
   }
 
   // ═══════════════════════════════════════════
