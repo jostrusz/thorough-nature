@@ -129,7 +129,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     // 10. Create or update dextrum_order_map
     const now = new Date().toISOString()
     if (existing[0]) {
-      await dextrumService.updateDextrumOrderMaps(existing[0].id, {
+      await dextrumService.updateDextrumOrderMaps({ id: existing[0].id,
         mystock_order_id: wmsResult.id,
         delivery_status: "IMPORTED",
         delivery_status_updated_at: now,

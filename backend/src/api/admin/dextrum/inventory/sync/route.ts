@@ -125,7 +125,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     }
 
     // 7. Update config with sync metadata
-    await dextrumService.updateDextrumConfigs(config.id, {
+    await dextrumService.updateDextrumConfigs({
+      id: config.id,
       last_inventory_sync: now,
       last_inventory_sync_products: totalProducts,
       last_inventory_sync_updated: updatedProducts,

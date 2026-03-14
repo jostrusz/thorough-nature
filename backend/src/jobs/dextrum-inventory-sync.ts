@@ -108,7 +108,8 @@ export default async function dextrumInventorySync(container: MedusaContainer) {
     }
 
     // 5. Update config
-    await dextrumService.updateDextrumConfigs(config.id, {
+    await dextrumService.updateDextrumConfigs({
+      id: config.id,
       last_inventory_sync: now,
       last_inventory_sync_products: total,
       last_inventory_sync_updated: updated,

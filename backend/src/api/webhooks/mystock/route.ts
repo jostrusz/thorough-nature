@@ -127,7 +127,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         updateData.delivered_at = now
       }
 
-      await dextrumService.updateDextrumOrderMaps(orderMap.id, updateData)
+      await dextrumService.updateDextrumOrderMaps({ id: orderMap.id, ...updateData })
 
       // 5. Also update Medusa order metadata + auto-fulfill on DISPATCHED
       try {

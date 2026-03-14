@@ -66,7 +66,7 @@ export default async function dextrumStatusSync(container: MedusaContainer) {
         if (newStatus === "DISPATCHED") updateData.dispatched_at = now
         if (newStatus === "DELIVERED") updateData.delivered_at = now
 
-        await dextrumService.updateDextrumOrderMaps(orderMap.id, updateData)
+        await dextrumService.updateDextrumOrderMaps({ id: orderMap.id, ...updateData })
 
         // Update Medusa order metadata + auto-fulfill on DISPATCHED
         try {

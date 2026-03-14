@@ -27,7 +27,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     let config
     if (configs[0]) {
       // Update existing
-      config = await dextrumService.updateDextrumConfigs(configs[0].id, body)
+      config = await dextrumService.updateDextrumConfigs({ id: configs[0].id, ...body })
     } else {
       // Create new
       config = await dextrumService.createDextrumConfigs(body)

@@ -23,7 +23,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const result = await client.testConnection()
 
     // Update connection status
-    await dextrumService.updateDextrumConfigs(config.id, {
+    await dextrumService.updateDextrumConfigs({
+      id: config.id,
       connection_status: result.ok ? "connected" : "error",
       last_connection_test: new Date().toISOString(),
     })

@@ -67,7 +67,7 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           // Not paid yet — increment retry
           const retries = (orderMap.retry_count || 0) + 1
           if (retries > config.retry_max_attempts) {
-            await dextrumService.updateDextrumOrderMaps(orderMap.id, {
+            await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
               delivery_status: "FAILED",
               delivery_status_updated_at: now.toISOString(),
               last_error: "Payment timeout — order not paid within time limit",
@@ -79,7 +79,7 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
             })
           } else {
             const nextRetry = new Date(now.getTime() + config.retry_interval_minutes * 60 * 1000)
-            await dextrumService.updateDextrumOrderMaps(orderMap.id, {
+            await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
               hold_until: nextRetry.toISOString(),
               retry_count: retries,
               last_error: `Waiting for payment (retry ${retries}/${config.retry_max_attempts})`,
@@ -141,7 +141,7 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
 
         // 7. Update dextrum_order_map
         const sentAt = new Date().toISOString()
-        await dextrumService.updateDextrumOrderMaps(orderMap.id, {
+        await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
           mystock_order_id: wmsResult.id,
           delivery_status: "IMPORTED",
           delivery_status_updated_at: sentAt,
@@ -165,7 +165,7 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         console.log(`[Dextrum Hold] Order ${orderCode} sent to WMS → ${wmsResult.id}`)
       } catch (err: any) {
         console.error(`[Dextrum Hold] Failed to send ${orderMap.mystock_order_code}:`, err.message)
-        await dextrumService.updateDextrumOrderMaps(orderMap.id, {
+        await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
           retry_count: (orderMap.retry_count || 0) + 1,
           last_error: err.message,
           hold_until: new Date(now.getTime() + (config.retry_interval_minutes || 5) * 60 * 1000).toISOString(),
