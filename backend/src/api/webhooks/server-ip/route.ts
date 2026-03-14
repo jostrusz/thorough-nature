@@ -1,8 +1,9 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 
 /**
- * GET /store/server-ip
+ * GET /webhooks/server-ip
  * Returns the outbound IP of this server (for firewall whitelisting)
+ * No authentication required — temporary utility endpoint
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   try {
