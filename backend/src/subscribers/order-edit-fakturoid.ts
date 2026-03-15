@@ -151,9 +151,27 @@ export default async function orderEditFakturoidHandler({
       console.warn("[Fakturoid:Edit] Could not fetch tax lines:", taxErr.message)
     }
 
+    // ── Get existing invoice to read current note + lines ──
+    const existingInvoice = await getInvoice(creds, token, invoiceId)
+    if (!existingInvoice) {
+      console.warn(
+        `[Fakturoid:Edit] Could not retrieve invoice ${invoiceId} — may have been deleted`
+      )
+      return
+    }
+
     // ── Build ALL invoice lines from current order items ──
+    // First: mark all existing lines for deletion (by ID + _destroy)
+    // Then: add fresh lines from current order items
+    // This prevents duplicates when Fakturoid adds lines instead of replacing them
+    const existingLines = (existingInvoice as any).lines || []
+    const deletedLines = existingLines.map((line: any) => ({
+      id: line.id,
+      _destroy: true,
+    }))
+
     const items = order.items || []
-    const lines = items.map((item: any) => {
+    const newLines = items.map((item: any) => {
       const line: any = {
         name: item.title || item.product_title || "Item",
         quantity: item.quantity || 1,
@@ -166,17 +184,11 @@ export default async function orderEditFakturoidHandler({
       return line
     })
 
-    if (!lines.length) {
-      console.warn("[Fakturoid:Edit] No line items for order:", orderId)
-      return
-    }
+    // Combine: delete old lines + create new ones
+    const lines = [...deletedLines, ...newLines]
 
-    // ── Get existing invoice to read current note ──
-    const existingInvoice = await getInvoice(creds, token, invoiceId)
-    if (!existingInvoice) {
-      console.warn(
-        `[Fakturoid:Edit] Could not retrieve invoice ${invoiceId} — may have been deleted`
-      )
+    if (!newLines.length) {
+      console.warn("[Fakturoid:Edit] No line items for order:", orderId)
       return
     }
 
