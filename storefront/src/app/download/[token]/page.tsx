@@ -228,7 +228,7 @@ const loslatenboekTheme: ProjectTheme = {
 const dehondenbijbelTheme: ProjectTheme = {
   brandLabel: "DE HONDENBIJBEL",
   brandName: "De Hondenbijbel",
-  supportEmail: "support@travelbible.nl",
+  supportEmail: "support@dehondenbijbel.nl",
   companyName: "EverChapter OÜ",
   companyLocation: "Tallinn, Estonia",
   page: {

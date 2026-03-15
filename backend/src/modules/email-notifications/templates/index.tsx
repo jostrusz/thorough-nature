@@ -13,6 +13,7 @@ import { DhAbandonedCheckout2Template, DH_ABANDONED_CHECKOUT_2, isDhAbandonedChe
 import { DhAbandonedCheckout3Template, DH_ABANDONED_CHECKOUT_3, isDhAbandonedCheckout3Data } from './dh-abandoned-checkout-3'
 import { DhEbookDeliveryTemplate, DH_EBOOK_DELIVERY, isDhEbookDeliveryData } from './dh-ebook-delivery'
 import { DhShipmentNotificationTemplate, DH_SHIPMENT_NOTIFICATION, isDhShipmentNotificationData } from './dh-shipment-notification'
+import { DhUpsellConfirmedTemplate, DH_UPSELL_CONFIRMED, isDhUpsellConfirmedData } from './dh-upsell-confirmed'
 // Släpp Taget templates
 import { StOrderPlacedTemplate, ST_ORDER_PLACED, isStOrderPlacedTemplateData } from './st-order-placed'
 import { StAbandonedCheckout1Template, ST_ABANDONED_CHECKOUT_1, isStAbandonedCheckout1Data } from './st-abandoned-checkout-1'
@@ -49,6 +50,7 @@ export const EmailTemplates = {
   DH_ABANDONED_CHECKOUT_3,
   DH_EBOOK_DELIVERY,
   DH_SHIPMENT_NOTIFICATION,
+  DH_UPSELL_CONFIRMED,
   // Släpp Taget
   ST_ORDER_PLACED,
   ST_ABANDONED_CHECKOUT_1,
@@ -222,6 +224,15 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <DhShipmentNotificationTemplate {...data} />
 
+    case EmailTemplates.DH_UPSELL_CONFIRMED:
+      if (!isDhUpsellConfirmedData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.DH_UPSELL_CONFIRMED}"`
+        )
+      }
+      return <DhUpsellConfirmedTemplate {...data} />
+
     // ── Släpp Taget templates ─────────────────────────────────
     case EmailTemplates.ST_ABANDONED_CHECKOUT_1:
       if (!isStAbandonedCheckout1Data(data)) {
@@ -393,6 +404,7 @@ export {
   DhAbandonedCheckout3Template,
   DhEbookDeliveryTemplate,
   DhShipmentNotificationTemplate,
+  DhUpsellConfirmedTemplate,
   // Släpp Taget
   StOrderPlacedTemplate,
   StAbandonedCheckout1Template,

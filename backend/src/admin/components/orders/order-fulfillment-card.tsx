@@ -300,8 +300,8 @@ export function OrderFulfillmentCard({
                   src={thumbnail}
                   alt={productTitle}
                   style={{
-                    width: "48px",
-                    height: "48px",
+                    width: "64px",
+                    height: "64px",
                     borderRadius: radii.xs,
                     objectFit: "cover",
                     border: `1px solid ${colors.border}`,
@@ -311,8 +311,8 @@ export function OrderFulfillmentCard({
               ) : (
                 <div
                   style={{
-                    width: "48px",
-                    height: "48px",
+                    width: "64px",
+                    height: "64px",
                     borderRadius: radii.xs,
                     background: colors.bgHover,
                     display: "flex",

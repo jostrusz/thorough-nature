@@ -260,8 +260,8 @@ export const DhEbookDeliveryTemplate: React.FC<DhEbookDeliveryTemplateProps> & {
             }}>
               Problemen met de download?
               <br />
-              <Link href="mailto:support@travelbible.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                support@travelbible.nl
+              <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                support@dehondenbijbel.nl
               </Link>
             </Text>
           </div>
@@ -292,8 +292,8 @@ export const DhEbookDeliveryTemplate: React.FC<DhEbookDeliveryTemplateProps> & {
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:support@travelbible.nl" style={{ color: colors.accent, textDecoration: 'none' }}>
-              support@travelbible.nl
+            <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'none' }}>
+              support@dehondenbijbel.nl
             </Link>
           </Text>
         </div>

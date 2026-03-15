@@ -64,8 +64,8 @@ export function OrderDetailItems({ order }: OrderDetailItemsProps) {
                     src={thumbnail}
                     alt={productTitle}
                     style={{
-                      width: "48px",
-                      height: "48px",
+                      width: "64px",
+                      height: "64px",
                       borderRadius: "6px",
                       objectFit: "cover",
                       border: "1px solid #E1E3E5",
@@ -74,8 +74,8 @@ export function OrderDetailItems({ order }: OrderDetailItemsProps) {
                 ) : (
                   <div
                     style={{
-                      width: "48px",
-                      height: "48px",
+                      width: "64px",
+                      height: "64px",
                       borderRadius: "6px",
                       background: "#E1E3E5",
                       display: "flex",

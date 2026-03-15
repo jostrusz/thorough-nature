@@ -65,9 +65,9 @@ export function getEmailSubject(
 
 const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
   dehondenbijbel: {
-    replyTo: 'support@travelbible.nl',
+    replyTo: 'support@dehondenbijbel.nl',
     fromName: 'De Hondenbijbel',
-    fromEmail: 'De Hondenbijbel <support@travelbible.nl>',
+    fromEmail: 'De Hondenbijbel <support@dehondenbijbel.nl>',
     project: 'dehondenbijbel',
   },
   loslatenboek: {

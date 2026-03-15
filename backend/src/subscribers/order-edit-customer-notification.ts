@@ -83,7 +83,17 @@ export default async function orderEditCustomerNotificationHandler({
     }
 
     const displayId = (order as any).metadata?.custom_order_number || (order as any).display_id || order.id
-    const emailSubject = `Objednávka ${displayId} — aktualizována`
+
+    // Localized subject and preview based on project
+    let emailSubject: string
+    let previewText: string
+    if (projectConfig.project === 'dehondenbijbel') {
+      emailSubject = `Bestelling ${displayId} — bijgewerkt`
+      previewText = 'Je bestelling is bijgewerkt!'
+    } else {
+      emailSubject = `Objednávka ${displayId} — aktualizována`
+      previewText = 'Vaše objednávka byla aktualizována!'
+    }
 
     await notificationModuleService.createNotifications({
       to: order.email,
@@ -99,7 +109,7 @@ export default async function orderEditCustomerNotificationHandler({
         shippingAddress,
         addedItems: addedItems.length > 0 ? addedItems : undefined,
         billingEntity,
-        preview: 'Vaše objednávka byla aktualizována!',
+        preview: previewText,
       },
     })
 
@@ -113,7 +123,7 @@ export default async function orderEditCustomerNotificationHandler({
       shippingAddress,
       addedItems: addedItems.length > 0 ? addedItems : undefined,
       billingEntity,
-      preview: 'Vaše objednávka byla aktualizována!',
+      preview: previewText,
     }
     const htmlBody = await renderEmailToHtml(templateKey, emailData).catch(() => '')
 

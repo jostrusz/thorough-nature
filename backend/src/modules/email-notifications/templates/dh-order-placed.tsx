@@ -105,7 +105,13 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
 }) => {
   const currency = order.currency_code || 'eur'
   const items = order.items || []
-  const displayId = order.metadata?.custom_order_number || order.display_id || order.id
+  // Build display ID: prefer custom_order_number, fallback to generating it inline
+  const rawDisplayId = order.display_id || order.id
+  const displayId = order.metadata?.custom_order_number || (() => {
+    const cc = (shippingAddress?.country_code || billingAddress?.country_code || 'nl').toUpperCase()
+    const year = new Date().getFullYear()
+    return `${cc}${year}-${rawDisplayId}`
+  })()
   const orderDate = formatDate(order.created_at)
 
   const subtotal = items.reduce(
@@ -606,8 +612,8 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
             }}>
               Vragen over je bestelling?
               <br />
-              <Link href="mailto:support@travelbible.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                support@travelbible.nl
+              <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                support@dehondenbijbel.nl
               </Link>
             </Text>
           </div>
@@ -638,8 +644,8 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:support@travelbible.nl" style={{ color: colors.accent, textDecoration: 'none' }}>
-              support@travelbible.nl
+            <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'none' }}>
+              support@dehondenbijbel.nl
             </Link>
           </Text>
         </div>

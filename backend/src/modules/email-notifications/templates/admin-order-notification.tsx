@@ -513,7 +513,12 @@ export const AdminOrderNotificationTemplate: React.FC<AdminOrderNotificationProp
   const isUpsell = type === 'upsell_added'
   const currency = order.currency_code || 'eur'
   const items = order.items || []
-  const displayId = order.metadata?.custom_order_number || order.display_id || order.id
+  const rawDisplayId = order.display_id || order.id
+  const displayId = order.metadata?.custom_order_number || (() => {
+    const cc = (shippingAddress?.country_code || 'xx').toUpperCase()
+    const year = new Date().getFullYear()
+    return `${cc}${year}-${rawDisplayId}`
+  })()
   const orderDate = formatDate(order.created_at)
   const projectName = getProjectName(order)
   const country = getCountryDisplay(shippingAddress?.country_code || '')
@@ -564,11 +569,12 @@ export const AdminOrderNotificationTemplate: React.FC<AdminOrderNotificationProp
             fontFamily: font,
             fontSize: '28px',
             fontWeight: 900,
-            color: v.accent,
+            color: '#FFFFFF',
             margin: '0 0 4px 0',
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
             textTransform: 'uppercase' as const,
+            textShadow: '0 2px 8px rgba(0,0,0,0.3)',
           }}>
             {title}
           </Text>

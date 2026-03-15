@@ -81,7 +81,13 @@ export const DhShipmentNotificationTemplate: React.FC<DhShipmentNotificationTemp
 }) => {
   const currency = order.currency_code || 'eur'
   const items = order.items || []
-  const displayId = order.metadata?.custom_order_number || order.display_id || order.id
+  // Build display ID: prefer custom_order_number, fallback to generating it inline
+  const rawDisplayId = order.display_id || order.id
+  const displayId = order.metadata?.custom_order_number || (() => {
+    const cc = (shippingAddress?.country_code || 'nl').toUpperCase()
+    const year = new Date().getFullYear()
+    return `${cc}${year}-${rawDisplayId}`
+  })()
 
   // Billing entity info — pulled from admin
   const entityName = billingEntity?.legal_name || 'EverChapter OÜ'
@@ -514,8 +520,8 @@ export const DhShipmentNotificationTemplate: React.FC<DhShipmentNotificationTemp
             }}>
               Vragen over je verzending?
               <br />
-              <Link href="mailto:support@travelbible.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                support@travelbible.nl
+              <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                support@dehondenbijbel.nl
               </Link>
             </Text>
           </div>
@@ -546,8 +552,8 @@ export const DhShipmentNotificationTemplate: React.FC<DhShipmentNotificationTemp
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:support@travelbible.nl" style={{ color: colors.accent, textDecoration: 'none' }}>
-              support@travelbible.nl
+            <Link href="mailto:support@dehondenbijbel.nl" style={{ color: colors.accent, textDecoration: 'none' }}>
+              support@dehondenbijbel.nl
             </Link>
           </Text>
         </div>
