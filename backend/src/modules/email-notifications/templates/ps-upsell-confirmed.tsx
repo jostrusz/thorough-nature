@@ -71,7 +71,9 @@ export const PsUpsellConfirmedTemplate: React.FC<PsUpsellConfirmedTemplateProps>
 
   const codFee = Number(order.metadata?.cod_fee) || 0
   const shippingFee = Number(order.metadata?.shipping_fee) || 0
-  const total = (order.summary?.raw_current_order_total?.value ?? order.summary?.current_order_total ?? 0) + codFee + shippingFee
+  // Calculate total from items to avoid raw_current_order_total cents vs euros inconsistency after order edits
+  const itemsTotal = items.reduce((sum: number, item: any) => sum + (item.unit_price || 0) * (item.quantity || 1), 0)
+  const total = itemsTotal + codFee + shippingFee
 
   // Billing entity info
   const entityName = billingEntity?.legal_name || 'EverChapter OÜ'

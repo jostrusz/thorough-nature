@@ -19,25 +19,25 @@ export interface ProjectEmailConfig {
 /** Localized email subject strings */
 const EMAIL_SUBJECTS: Record<string, Record<string, string>> = {
   nl: {
-    orderPlaced: 'Bedankt voor je bestelling!',
+    orderPlaced: 'Bedankt voor je bestelling {id}!',
     orderPlacedPreview: 'Bedankt voor je bestelling!',
     shipmentSent: 'Je bestelling {id} is verzonden! 📦',
     shipmentPreview: 'Je bestelling is verzonden!',
   },
   sv: {
-    orderPlaced: 'Tack för din beställning!',
+    orderPlaced: 'Tack för din beställning {id}!',
     orderPlacedPreview: 'Tack för din beställning!',
     shipmentSent: 'Din beställning {id} har skickats! 📦',
     shipmentPreview: 'Din beställning har skickats!',
   },
   pl: {
-    orderPlaced: 'Dziękujemy za zamówienie!',
+    orderPlaced: 'Dziękujemy za zamówienie {id}!',
     orderPlacedPreview: 'Dziękujemy za zamówienie!',
     shipmentSent: 'Twoje zamówienie {id} zostało wysłane! 📦',
     shipmentPreview: 'Twoje zamówienie zostało wysłane!',
   },
   cs: {
-    orderPlaced: 'Děkujeme za vaši objednávku!',
+    orderPlaced: 'Děkujeme za vaši objednávku {id}!',
     orderPlacedPreview: 'Děkujeme za vaši objednávku!',
     shipmentSent: 'Vaše objednávka {id} byla odeslána! 📦',
     shipmentPreview: 'Vaše objednávka byla odeslána!',

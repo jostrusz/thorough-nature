@@ -108,7 +108,7 @@ export default async function orderPlacedHandler({
   const projectConfig = getProjectEmailConfig(order)
   const templateKey = resolveTemplateKey(EmailTemplates.ORDER_PLACED, projectConfig.project)
 
-  const emailSubject = `${getEmailSubject(projectConfig, 'orderPlaced')} ${displayId}`
+  const emailSubject = getEmailSubject(projectConfig, 'orderPlaced').replace('{id}', String(displayId))
   const emailPreview = getEmailSubject(projectConfig, 'orderPlacedPreview')
   try {
     await notificationModuleService.createNotifications({
