@@ -909,9 +909,12 @@ h3 { font-size: 22px; font-weight: 700; line-height: 1.3; }
 }
 
 /* ═══ ANIMATIONS ═══ */
-.anim { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
-.anim.vis { opacity: 1; transform: translateY(0); }
-.d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; } .d3 { transition-delay: 0.3s; } .d4 { transition-delay: 0.4s; }
+/* Default: content visible (for bots/crawlers/noscript) */
+.anim { opacity: 1; transform: translateY(0); }
+/* JS adds .js-anim to <html> — only then hide & animate */
+.js-anim .anim { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.js-anim .anim.vis { opacity: 1; transform: translateY(0); }
+.js-anim .d1 { transition-delay: 0.1s; } .js-anim .d2 { transition-delay: 0.2s; } .js-anim .d3 { transition-delay: 0.3s; } .js-anim .d4 { transition-delay: 0.4s; }
 
 /* ═══ HOVER ANIMATIONS ═══ */
 .btn-cta { transition: all 0.3s cubic-bezier(.4,0,.2,1); }
