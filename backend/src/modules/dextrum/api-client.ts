@@ -198,8 +198,11 @@ export class MyStockApiClient {
     }
 
     console.log(`[mySTOCK] createOrder payload:`, JSON.stringify(body, null, 2))
-    const result = await this.request<{ id: string }>("POST", "/orderIncoming/", body)
-    return result.data
+    const result = await this.request<any>("POST", "/orderIncoming/", body)
+    console.log(`[mySTOCK] createOrder response:`, JSON.stringify(result.data))
+    // Response format: { ids: [{ id: "UUID", type: "orderIncoming", ... }, ...] }
+    const orderId = result.data?.ids?.[0]?.id || result.data?.id || null
+    return { id: orderId }
   }
 
   // ═══════════════════════════════════════════
