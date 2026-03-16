@@ -28,29 +28,11 @@ export default async function dextrumStatusSync(container: MedusaContainer) {
       password: config.api_password,
     })
 
-    // 2. Get all active orders (not DELIVERED, not CANCELLED, not FAILED)
-    const activeOrders = await dextrumService.listDextrumOrderMaps(
-      {},
-      { take: 200, order: { created_at: "DESC" } }
-    )
-
-    const ordersToSync = activeOrders.filter((o: any) =>
-      o.mystock_order_id &&
-      !["DELIVERED", "CANCELLED", "FAILED"].includes(o.delivery_status)
-    )
-
-    if (ordersToSync.length === 0) return
-
-    let updated = 0
-
-    // 3. Poll each active order
-    for (const orderMap of ordersToSync) {
-      try {
-        const wmsOrder = await client.getOrder(orderMap.mystock_order_id)
-        if (!wmsOrder) continue
-
-        const newStatus = mapWmsStatus(wmsOrder)
-        if (!newStatus || newStatus === orderMap.delivery_status) continue
+    // NOTE: mySTOCK does not support GET /orderIncoming/{id} (returns 405).
+    // Status updates come via webhooks (POST /webhooks/mystock) — see api/webhooks/mystock/route.ts.
+    // This job is kept as a placeholder for any future polling needs, but currently does nothing.
+    // The webhook handles: event 7 (processing), event 12 (dispatch), event 29 (carrier status), etc.
+    return
 
         const now = new Date().toISOString()
         const updateData: any = {
