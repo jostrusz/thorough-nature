@@ -172,7 +172,7 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
 
         const wmsResult = await client.createOrder({
           orderCode,
-          operatingUnitId: config.default_warehouse_code || undefined,
+          warehouseCode: config.default_warehouse_code || undefined,
           partnerId: config.partner_id || "",
           orderItems,
           deliveryAddress,

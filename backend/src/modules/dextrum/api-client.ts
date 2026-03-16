@@ -107,6 +107,7 @@ export class MyStockApiClient {
   // ═══════════════════════════════════════════
   async createOrder(payload: {
     orderCode: string
+    warehouseCode?: string
     operatingUnitId?: string
     partnerId: string
     deliveryMethodId?: string
@@ -135,14 +136,18 @@ export class MyStockApiClient {
   }): Promise<{ id: string }> {
     const body: any = {
       orderCode: payload.orderCode,
+      extIsId: payload.orderCode, // unique ERP identifier
       type: 1, // External order
       partnerId: payload.partnerId,
+      warehouseCode: payload.warehouseCode || undefined,
       items: payload.orderItems.map((item, i) => ({
         itemCode: `${payload.orderCode}/${String(i + 1).padStart(3, "0")}`,
+        extIsId: `${payload.orderCode}/${String(i + 1).padStart(3, "0")}`,
         productId: item.productCode, // ext. system code (SKU)
         amount: {
           quantity: item.quantity,
         },
+        warehouseCode: payload.warehouseCode || undefined,
         name: item.productName || undefined,
       })),
       partyIdentification: {

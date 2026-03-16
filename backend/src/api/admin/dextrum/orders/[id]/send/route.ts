@@ -145,7 +145,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
     const wmsResult = await client.createOrder({
       orderCode,
-      operatingUnitId: config.default_warehouse_code || undefined,
+      warehouseCode: config.default_warehouse_code || undefined,
       partnerId: config.partner_id || "",
       orderItems,
       deliveryAddress,
