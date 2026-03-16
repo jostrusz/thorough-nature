@@ -76,11 +76,11 @@ export default async function orderPlacedNtfyHandler({
       || metadata.custom_order_number
       || order.id.slice(-8)
 
-    // Send ntfy notification
-    const title = `🎉 Nová objednávka`
+    // Send ntfy notification (use base64-encoded UTF-8 title to avoid non-ASCII header error)
+    const title = `Nova objednavka`
     const body = [
-      `💰 ${amount} ${symbol}`,
-      `📦 ${projectName}`,
+      `${amount} ${symbol} | ${projectName}`,
+      `${customerName}${country ? ` (${country})` : ""}`,
     ].join("\n")
 
     await fetch(NTFY_URL, {
