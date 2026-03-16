@@ -53,11 +53,8 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Cabin:wght@400;700&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Cabin:wght@400;700&display=swap" rel="stylesheet">
 
-<!-- Enable animations only for JS-capable browsers (bots see content immediately) -->
-<script>document.documentElement.classList.add('js-anim');</script>
-
 <!-- Stylesheet -->
-<link rel="stylesheet" href="style.css?v=58">
+<link rel="stylesheet" href="style.css?v=59">
 
 <!-- JSON-LD Structured Data: Product -->
 <script type="application/ld+json">
@@ -949,11 +946,7 @@ document.querySelectorAll('.pages-slide img').forEach(img => {
 });
 lightbox?.addEventListener('click', () => lightbox.classList.remove('active'));
 
-// Scroll animations
-const observer = new IntersectionObserver((entries) => {
- entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); observer.unobserve(e.target); } });
-}, { threshold: 0.08, rootMargin: '0px 0px -100px 0px' });
-document.querySelectorAll('.anim').forEach(el => observer.observe(el));
+// Scroll animations temporarily disabled for iDEAL verification
 
 // Smooth scroll for anchor links
 document.querySelectorAll('a[href^="#"]').forEach(a => {
