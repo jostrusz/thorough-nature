@@ -236,4 +236,89 @@ export class MyStockApiClient {
     const result = await this.request("GET", `/despatchAdvice/${documentId}`)
     return result.data
   }
+
+  // ═══════════════════════════════════════════
+  // CREATE PRODUCT — Register product in WMS
+  // ═══════════════════════════════════════════
+  async createProduct(payload: {
+    productCode: string
+    name: string
+    type?: number
+    measurementUnitCode?: string
+    warehouseCode?: string
+    weightGross?: number
+    weightNett?: number
+  }): Promise<any> {
+    const body: any = {
+      productCode: payload.productCode,
+      extIsId: payload.productCode,
+      name: payload.name,
+      type: payload.type ?? 0, // 0 = Goods
+      measurementUnitCode: payload.measurementUnitCode || "ks",
+    }
+    if (payload.warehouseCode) body.warehouseCode = payload.warehouseCode
+    if (payload.weightGross) body.weightGross = payload.weightGross
+    if (payload.weightNett) body.weightNett = payload.weightNett
+
+    console.log(`[mySTOCK] createProduct payload:`, JSON.stringify(body, null, 2))
+    const result = await this.request("POST", "/product/", body)
+    return result.data
+  }
+
+  // ═══════════════════════════════════════════
+  // UPDATE PRODUCT
+  // ═══════════════════════════════════════════
+  async updateProduct(productId: string, payload: {
+    warehouseCode?: string
+    name?: string
+  }): Promise<any> {
+    const body: any = {}
+    if (payload.warehouseCode) body.warehouseCode = payload.warehouseCode
+    if (payload.name) body.name = payload.name
+
+    console.log(`[mySTOCK] updateProduct ${productId} payload:`, JSON.stringify(body, null, 2))
+    const result = await this.request("PUT", `/product/${productId}`, body)
+    return result.data
+  }
+
+  // ═══════════════════════════════════════════
+  // CREATE RECEIPT — Add stock to warehouse
+  // ═══════════════════════════════════════════
+  async createReceipt(payload: {
+    receiptCode: string
+    type?: number
+    warehouseCode?: string
+    partnerId?: string
+    receiptDate: string
+    items: Array<{
+      productId: string
+      quantity: number
+      itemCode?: string
+    }>
+  }): Promise<any> {
+    const body: any = {
+      receiptCode: payload.receiptCode,
+      extIsId: payload.receiptCode,
+      type: payload.type ?? 1, // 1 = External receipt
+      receiptDate: payload.receiptDate,
+      items: payload.items.map((item, i) => ({
+        itemCode: item.itemCode || `${payload.receiptCode}/${String(i + 1).padStart(3, "0")}`,
+        extIsId: item.itemCode || `${payload.receiptCode}/${String(i + 1).padStart(3, "0")}`,
+        productId: item.productId,
+        amount: {
+          quantity: item.quantity,
+        },
+        qualityControlStatus: 30, // Blocked (no QC needed)
+      })),
+    }
+    if (payload.warehouseCode) {
+      body.warehouseCode = payload.warehouseCode
+      body.items.forEach((item: any) => { item.warehouseCode = payload.warehouseCode })
+    }
+    if (payload.partnerId) body.partnerId = payload.partnerId
+
+    console.log(`[mySTOCK] createReceipt payload:`, JSON.stringify(body, null, 2))
+    const result = await this.request("POST", "/receipt/", body)
+    return result.data
+  }
 }
