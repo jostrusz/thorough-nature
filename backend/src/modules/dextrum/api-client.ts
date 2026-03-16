@@ -151,6 +151,7 @@ export class MyStockApiClient {
         amount: {
           quantity: item.quantity,
         },
+        warehouseCode: payload.warehouseCode || undefined,
         name: item.productName || undefined,
       })),
       partyIdentification: {
