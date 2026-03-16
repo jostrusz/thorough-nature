@@ -99,7 +99,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
     // 8. Build address (mySTOCK partyIdentification format)
     const addr = (order as any).shipping_address || {}
-    const deliveryAddress = {
+    const deliveryAddress: any = {
       firstName: addr.first_name || "",
       lastName: addr.last_name || "",
       company: addr.company || undefined,
