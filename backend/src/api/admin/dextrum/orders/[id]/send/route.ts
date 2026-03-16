@@ -35,19 +35,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       return
     }
 
-    // 3. Determine project code from metadata or shipping address
-    const projectCode = (order as any).metadata?.project_code || "DEFAULT"
-    const countryCode = (order as any).shipping_address?.country_code?.toUpperCase() || "CZ"
-
-    // 4. Build order code
-    const prefixMap: Record<string, string> = {
-      NL: "NL", BE: "BE", DE: "DE", AT: "AT", LU: "LU",
-      PL: "PL", CZ: "CZ", SK: "SK", SE: "SE", HU: "HU",
-    }
-    const prefix = prefixMap[countryCode] || countryCode
-    const orderCode = `${prefix}-${(order as any).display_id}`
-
-    // 5a. Check if this Medusa order was already sent
+    // 3. Check if order map already exists
     const existing = await dextrumService.listDextrumOrderMaps(
       { medusa_order_id: medusaOrderId },
       { take: 1 }
@@ -57,7 +45,23 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       return
     }
 
-    // 5b. Check if this order code was already sent (prevents duplicates from different Medusa orders)
+    // 4. Build order code — use existing map's code if available, otherwise calculate
+    const countryCode = (order as any).shipping_address?.country_code?.toUpperCase() || "CZ"
+    let orderCode: string
+    if (existing[0]?.mystock_order_code) {
+      orderCode = existing[0].mystock_order_code
+    } else {
+      const prefixMap: Record<string, string> = {
+        NL: "NL", BE: "BE", DE: "DE", AT: "AT", LU: "LU",
+        PL: "PL", CZ: "CZ", SK: "SK", SE: "SE", HU: "HU",
+      }
+      const prefix = prefixMap[countryCode] || countryCode
+      orderCode = `${prefix}-${(order as any).display_id}`
+    }
+
+    const projectCode = (order as any).metadata?.project_code || "DEFAULT"
+
+    // 5. Check if this order code was already sent (prevents duplicates from different Medusa orders)
     const existingByCode = await dextrumService.listDextrumOrderMaps(
       { mystock_order_code: orderCode },
       { take: 1 }
