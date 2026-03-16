@@ -144,9 +144,19 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           orderNote = `Zásilkovna pickup: ${orderMeta.packeta_point_name || ""} (ID: ${orderMeta.packeta_point_id})`
         }
 
+        // Resolve delivery method: pickup vs standard
+        const deliveryMethodId = isPickup
+          ? (config.default_pickup_delivery_method_id || config.default_delivery_method_id || "")
+          : (config.default_delivery_method_id || "")
+
+        // Resolve payment method: COD vs paid
+        const paymentMethodId = isCOD
+          ? (config.default_payment_method_cod || "")
+          : (config.default_payment_method_paid || "")
+
         const wmsResult = await client.createOrder({
           orderCode,
-          operatingUnitId: config.metadata?.operating_units?.[(order as any).metadata?.project_code] || config.partner_id || "",
+          operatingUnitId: config.default_warehouse_code || "",
           partnerId: config.partner_id || "",
           orderItems,
           deliveryAddress: {
@@ -158,6 +168,8 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
             phone: addr.phone || "",
             email: (order as any).email || "",
           },
+          deliveryMethodId: deliveryMethodId || undefined,
+          paymentMethodId: paymentMethodId || undefined,
           cashAmount: isCOD ? (Number((order as any).total) || 0) + (Number(orderMeta.cod_fee) || 0) + deliveryFee : undefined,
           note: orderNote || undefined,
         })

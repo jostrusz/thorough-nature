@@ -92,6 +92,10 @@ const DextrumPage = () => {
         default_warehouse_code: config.default_warehouse_code || "MAIN",
         partner_id: config.partner_id || "",
         partner_code: config.partner_code || "",
+        default_delivery_method_id: config.default_delivery_method_id || "",
+        default_pickup_delivery_method_id: config.default_pickup_delivery_method_id || "",
+        default_payment_method_cod: config.default_payment_method_cod || "",
+        default_payment_method_paid: config.default_payment_method_paid || "",
         webhook_secret: config.webhook_secret || "",
         order_hold_minutes: config.order_hold_minutes ?? 15,
         inventory_sync_interval_minutes: config.inventory_sync_interval_minutes ?? 15,
@@ -192,6 +196,29 @@ const DextrumPage = () => {
           <div style={fieldRow}>
             <span style={labelStyle}>Partner Code</span>
             <input style={inputStyle} value={form.partner_code || ""} onChange={(e) => handleChange("partner_code", e.target.value)} placeholder="EVERCHAPTER" />
+          </div>
+        </div>
+      </div>
+
+      {/* Delivery & Payment Methods */}
+      <div style={cardStyle}>
+        <div style={cardHeaderStyle}>Delivery & Payment Methods (mySTOCK keys)</div>
+        <div style={{ padding: "16px 20px" }}>
+          <div style={fieldRow}>
+            <span style={labelStyle}>Delivery — to address</span>
+            <input style={inputStyle} value={form.default_delivery_method_id || ""} onChange={(e) => handleChange("default_delivery_method_id", e.target.value)} placeholder="e.g. U0123_GLS_API" />
+          </div>
+          <div style={fieldRow}>
+            <span style={labelStyle}>Delivery — pickup point</span>
+            <input style={inputStyle} value={form.default_pickup_delivery_method_id || ""} onChange={(e) => handleChange("default_pickup_delivery_method_id", e.target.value)} placeholder="e.g. U0123_GLS_API_VYD" />
+          </div>
+          <div style={fieldRow}>
+            <span style={labelStyle}>Payment — COD (dobírka)</span>
+            <input style={inputStyle} value={form.default_payment_method_cod || ""} onChange={(e) => handleChange("default_payment_method_cod", e.target.value)} placeholder="e.g. U0123_DOBIRKA" />
+          </div>
+          <div style={fieldRow}>
+            <span style={labelStyle}>Payment — prepaid</span>
+            <input style={inputStyle} value={form.default_payment_method_paid || ""} onChange={(e) => handleChange("default_payment_method_paid", e.target.value)} placeholder="e.g. U0123_OSTATNI" />
           </div>
         </div>
       </div>

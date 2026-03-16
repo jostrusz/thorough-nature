@@ -13,6 +13,12 @@ const DextrumConfig = model.define("dextrum_config", {
   partner_id: model.text().nullable(),
   partner_code: model.text().nullable(),
 
+  // Delivery & Payment defaults for mySTOCK
+  default_delivery_method_id: model.text().nullable(),
+  default_pickup_delivery_method_id: model.text().nullable(),
+  default_payment_method_cod: model.text().nullable(),
+  default_payment_method_paid: model.text().nullable(),
+
   // Webhook
   webhook_secret: model.text().nullable(),
 
