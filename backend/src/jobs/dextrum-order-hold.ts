@@ -47,7 +47,7 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           fields: [
             "id", "display_id", "email", "currency_code", "total",
             "metadata", "items.*", "items.variant.*", "items.variant.product.*",
-            "shipping_address.*", "shipping_methods.*",
+            "shipping_address.*", "shipping_methods.*", "shipping_methods.shipping_option.*",
             "payment_collections.*", "payment_collections.payments.*",
           ],
           filters: { id: orderMap.medusa_order_id },
@@ -144,15 +144,23 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           orderNote = `Zásilkovna pickup: ${orderMeta.packeta_point_name || ""} (ID: ${orderMeta.packeta_point_id})`
         }
 
-        // Resolve delivery method: pickup vs standard
-        const deliveryMethodId = isPickup
-          ? (config.default_pickup_delivery_method_id || config.default_delivery_method_id || "")
-          : (config.default_delivery_method_id || "")
+        // Resolve delivery method: prefer shipping option metadata, fallback to config defaults
+        const shippingOption = (order as any).shipping_methods?.[0]?.shipping_option
+        const soMeta = shippingOption?.metadata || shippingOption?.data || {}
+        let deliveryMethodId = soMeta.mystock_delivery_method_id || ""
+        if (!deliveryMethodId) {
+          deliveryMethodId = isPickup
+            ? (config.default_pickup_delivery_method_id || config.default_delivery_method_id || "")
+            : (config.default_delivery_method_id || "")
+        }
 
-        // Resolve payment method: COD vs paid
-        const paymentMethodId = isCOD
-          ? (config.default_payment_method_cod || "")
-          : (config.default_payment_method_paid || "")
+        // Resolve payment method: prefer shipping option metadata, fallback to config defaults
+        let paymentMethodId = ""
+        if (isCOD) {
+          paymentMethodId = soMeta.mystock_payment_method_cod || config.default_payment_method_cod || ""
+        } else {
+          paymentMethodId = soMeta.mystock_payment_method_paid || config.default_payment_method_paid || ""
+        }
 
         // Add pickup place code for Zásilkovna
         const deliveryAddress: any = {
