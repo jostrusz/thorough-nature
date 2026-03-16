@@ -97,12 +97,34 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         }
         const orderCode = orderMap.mystock_order_code || `${prefixMap[countryCode] || countryCode}-${(order as any).display_id}`
 
-        const orderItems = ((order as any).items || []).map((item: any) => ({
+        const rawItems = (order as any).items || []
+        const orderItems = rawItems.map((item: any) => ({
           productCode: item.variant?.sku || "UNKNOWN",
           quantity: item.quantity || 1,
           unitPrice: Number(item.unit_price) || 0,
           productName: item.variant?.product?.title || item.title || "",
         }))
+
+        // 5b. Safety: do not send empty orders — retry later
+        if (orderItems.length === 0) {
+          console.warn(`[Dextrum Hold] Order ${orderCode} has no items (raw items: ${rawItems.length}), retrying later`)
+          const retries = (orderMap.retry_count || 0) + 1
+          if (retries > (config.retry_max_attempts || 10)) {
+            await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+              delivery_status: "FAILED",
+              delivery_status_updated_at: now.toISOString(),
+              last_error: "Order has no items after max retries",
+              retry_count: retries,
+            })
+          } else {
+            await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+              hold_until: new Date(now.getTime() + 2 * 60 * 1000).toISOString(),
+              retry_count: retries,
+              last_error: `Order has no items (retry ${retries})`,
+            })
+          }
+          continue
+        }
 
         // 6. Safety: skip if already sent (e.g., by manual send route)
         if (orderMap.mystock_order_id) {

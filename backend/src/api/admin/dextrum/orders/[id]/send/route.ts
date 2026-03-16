@@ -87,6 +87,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       productName: item.variant?.product?.title || item.title || "",
     }))
 
+    if (orderItems.length === 0) {
+      res.status(400).json({ error: "Order has no items. Cannot send to WMS." })
+      return
+    }
+
     // 8. Build address
     const addr = (order as any).shipping_address || {}
     const deliveryAddress = {
