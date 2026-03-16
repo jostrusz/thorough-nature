@@ -81,7 +81,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }
 
     // Build public file URLs from MinIO endpoint (bucket has public-read policy)
-    const minioEndpoint = process.env.MINIO_ENDPOINT || ""
+    const minioEndpoint = process.env.MINIO_PUBLIC_ENDPOINT || process.env.MINIO_ENDPOINT || ""
     const minioBucket = process.env.MINIO_BUCKET || "medusa-media"
 
     const files = (download.files as unknown as any[]) || []
