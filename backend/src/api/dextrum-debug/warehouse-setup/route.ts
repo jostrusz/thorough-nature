@@ -27,8 +27,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       password: config.api_password,
     })
 
-    const warehouseCode = config.default_warehouse_code || "1001"
-    const partnerId = config.partner_id || "KONCOVY_U0123"
+    const warehouseCode = (req.query.warehouseCode as string) || config.default_warehouse_code || ""
+    const partnerId = (req.query.partnerId as string) || config.partner_id || "KONCOVY_U0123"
     const results: any = { steps: [] }
 
     // Products to set up (from mySTOCK sortiment)
@@ -42,7 +42,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       try {
         // Use ext. system code as productId (same as how products were created)
         const updateResult = await client.updateProduct(product.code, {
-          warehouseCode,
+          warehouseCode: warehouseCode || undefined,
         })
         results.steps.push({
           step: `updateProduct ${product.code}`,
@@ -66,7 +66,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       const receiptResult = await client.createReceipt({
         receiptCode,
         type: 1, // External receipt
-        warehouseCode,
+        warehouseCode: warehouseCode || undefined,
         partnerId,
         receiptDate: `${now.toISOString().slice(0, 10)} 00:00:00.000`,
         items: products.map((p) => ({
