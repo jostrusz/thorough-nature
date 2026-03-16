@@ -164,6 +164,7 @@ export class MyStockApiClient {
       body.note = payload.note
     }
 
+    console.log(`[mySTOCK] createOrder payload:`, JSON.stringify(body, null, 2))
     const result = await this.request<{ id: string }>("POST", "/orderIncoming/", body)
     return result.data
   }
