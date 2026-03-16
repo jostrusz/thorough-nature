@@ -24,7 +24,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       fields: [
         "id", "display_id", "email", "currency_code", "total", "sales_channel_id",
         "metadata", "items.*", "items.variant.*", "items.variant.product.*",
-        "shipping_address.*", "shipping_methods.*", "shipping_methods.shipping_option.*",
+        "shipping_address.*", "shipping_methods.*",
         "payment_collections.*", "payment_collections.payments.*",
       ],
       filters: { id: medusaOrderId },
@@ -130,8 +130,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     }
 
     // Resolve delivery & payment via delivery mappings
-    const shippingOption = (order as any).shipping_methods?.[0]?.shipping_option
-    const shippingOptionId = shippingOption?.id || (order as any).shipping_methods?.[0]?.shipping_option_id || ""
+    const shippingOptionId = (order as any).shipping_methods?.[0]?.shipping_option_id || ""
     const salesChannelId = (order as any).sales_channel_id || orderMeta.sales_channel_id || ""
 
     // Look up mapping: sales_channel + shipping_option + is_cod
@@ -154,8 +153,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       paymentMethodId = mapping.payment_method_id || ""
       externalCarrierCode = mapping.external_carrier_code || ""
     } else {
-      // Fallback to config defaults
-      const soMeta = shippingOption?.metadata || shippingOption?.data || {}
+      // Fallback to config defaults (shipping_option metadata not available via cross-module query)
+      const soMeta: Record<string, any> = {}
       deliveryMethodId = soMeta.mystock_delivery_method_id || ""
       if (!deliveryMethodId) {
         deliveryMethodId = isPickup
