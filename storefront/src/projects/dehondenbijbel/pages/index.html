@@ -1015,6 +1015,28 @@ document.querySelectorAll('a[href="checkout"], a[href="checkout/"]').forEach(fun
   });
 });
 
+// Sticky bottom CTA bar — inverse of navbar (show on scroll down, hide on scroll up)
+(function() {
+ var bar = document.getElementById('stickyBottomBar');
+ var lastY = 0;
+ var threshold = 400; // show after scrolling past hero
+ window.addEventListener('scroll', function() {
+  var y = window.scrollY;
+  if (y > threshold && y > lastY) {
+   bar.classList.add('visible');
+  } else {
+   bar.classList.remove('visible');
+  }
+  lastY = y;
+ });
+})();
 </script>
+
+<!-- Sticky Bottom CTA Bar -->
+<div class="sticky-bottom-bar" id="stickyBottomBar">
+ <div class="sticky-bottom-text">🚚 <span>Alleen vandaag</span> — gratis verzending NL &amp; BE</div>
+ <a href="checkout" class="sticky-bottom-btn">Bestel nu &rarr;</a>
+</div>
+
 </body>
 </html>
