@@ -150,6 +150,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     if (isPickup && orderMeta.packeta_point_id) {
       deliveryAddress.pickupPlaceCode = orderMeta.packeta_point_id
     }
+    // External carrier code for cross-border Zásilkovna (e.g. inPost in PL, Magyar Posta in HU)
+    const externalCarrierCode = soMeta.mystock_external_carrier_code || ""
+    if (externalCarrierCode) {
+      deliveryAddress.externalCarrierCode = externalCarrierCode
+    }
 
     const wmsResult = await client.createOrder({
       orderCode,
