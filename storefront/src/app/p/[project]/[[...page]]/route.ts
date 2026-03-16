@@ -152,7 +152,10 @@ async function resolveProductIds(config: ProjectConfig): Promise<void> {
 
     // 1. Resolve publishable API key by matching project's sales channel name
     // Each project has its own sales channel + publishable key — the global env var only covers Default Sales Channel
-    if (!(config as any)._resolvedApiKey && config.salesChannelName) {
+    // Re-resolve every 5 minutes to pick up admin changes without server restart
+    const now = Date.now()
+    const keyAge = now - ((config as any)._resolvedKeyAt || 0)
+    if (config.salesChannelName && keyAge > 300_000) {
       try {
         const keyRes = await fetch(
           `${baseUrl}/project-key/${encodeURIComponent(config.salesChannelName)}`,
@@ -162,6 +165,7 @@ async function resolveProductIds(config: ProjectConfig): Promise<void> {
           const data = await keyRes.json()
           if (data.token) {
             config.publishableApiKey = data.token
+            ;(config as any)._resolvedKeyAt = now
           }
         }
       } catch {
@@ -170,7 +174,6 @@ async function resolveProductIds(config: ProjectConfig): Promise<void> {
       if (!config.publishableApiKey) {
         config.publishableApiKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
       }
-      ;(config as any)._resolvedApiKey = true
     }
 
     const headers: Record<string, string> = {
