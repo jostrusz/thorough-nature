@@ -97,14 +97,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       return
     }
 
-    // 8. Build address
+    // 8. Build address (mySTOCK partyIdentification format)
     const addr = (order as any).shipping_address || {}
     const deliveryAddress = {
-      name: [addr.first_name, addr.last_name].filter(Boolean).join(" "),
+      firstName: addr.first_name || "",
+      lastName: addr.last_name || "",
+      company: addr.company || undefined,
       street: [addr.address_1, addr.address_2].filter(Boolean).join(", "),
       city: addr.city || "",
       zip: addr.postal_code || "",
-      countryCode: addr.country_code?.toUpperCase() || "CZ",
+      country: addr.country_code?.toUpperCase() || "NL",
       phone: addr.phone || "",
       email: (order as any).email || "",
     }
@@ -136,15 +138,21 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       ? (config.default_payment_method_cod || "")
       : (config.default_payment_method_paid || "")
 
+    // Add pickup place code for Zásilkovna
+    if (isPickup && orderMeta.packeta_point_id) {
+      deliveryAddress.pickupPlaceCode = orderMeta.packeta_point_id
+    }
+
     const wmsResult = await client.createOrder({
       orderCode,
-      operatingUnitId: config.default_warehouse_code || "",
+      operatingUnitId: config.default_warehouse_code || undefined,
       partnerId: config.partner_id || "",
       orderItems,
       deliveryAddress,
       deliveryMethodId: deliveryMethodId || undefined,
       paymentMethodId: paymentMethodId || undefined,
       cashAmount: isCOD ? (Number((order as any).total) || 0) + (Number(orderMeta.cod_fee) || 0) + deliveryFee : undefined,
+      cashCurrencyCode: "EUR",
       note: orderNote || undefined,
     })
 

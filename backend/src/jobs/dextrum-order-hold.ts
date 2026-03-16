@@ -154,23 +154,32 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           ? (config.default_payment_method_cod || "")
           : (config.default_payment_method_paid || "")
 
+        // Add pickup place code for Zásilkovna
+        const deliveryAddress: any = {
+          firstName: addr.first_name || "",
+          lastName: addr.last_name || "",
+          street: [addr.address_1, addr.address_2].filter(Boolean).join(", "),
+          city: addr.city || "",
+          zip: addr.postal_code || "",
+          country: countryCode,
+          phone: addr.phone || "",
+          email: (order as any).email || "",
+        }
+        if (addr.company) deliveryAddress.company = addr.company
+        if (isPickup && orderMeta.packeta_point_id) {
+          deliveryAddress.pickupPlaceCode = orderMeta.packeta_point_id
+        }
+
         const wmsResult = await client.createOrder({
           orderCode,
-          operatingUnitId: config.default_warehouse_code || "",
+          operatingUnitId: config.default_warehouse_code || undefined,
           partnerId: config.partner_id || "",
           orderItems,
-          deliveryAddress: {
-            name: [addr.first_name, addr.last_name].filter(Boolean).join(" "),
-            street: [addr.address_1, addr.address_2].filter(Boolean).join(", "),
-            city: addr.city || "",
-            zip: addr.postal_code || "",
-            countryCode,
-            phone: addr.phone || "",
-            email: (order as any).email || "",
-          },
+          deliveryAddress,
           deliveryMethodId: deliveryMethodId || undefined,
           paymentMethodId: paymentMethodId || undefined,
           cashAmount: isCOD ? (Number((order as any).total) || 0) + (Number(orderMeta.cod_fee) || 0) + deliveryFee : undefined,
+          cashCurrencyCode: "EUR",
           note: orderNote || undefined,
         })
 

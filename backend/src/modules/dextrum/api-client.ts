@@ -107,50 +107,68 @@ export class MyStockApiClient {
   // ═══════════════════════════════════════════
   async createOrder(payload: {
     orderCode: string
-    operatingUnitId: string
+    operatingUnitId?: string
     partnerId: string
     deliveryMethodId?: string
     paymentMethodId?: string
     orderItems: Array<{
       productCode: string
       quantity: number
-      unitPrice?: number
       productName?: string
     }>
     deliveryAddress: {
-      name: string
+      firstName: string
+      lastName: string
+      company?: string
       street: string
       city: string
       zip: string
-      countryCode: string
+      country: string
       phone?: string
       email?: string
+      pickupPlaceCode?: string
+      externalCarrierCode?: string
     }
     cashAmount?: number
+    cashCurrencyCode?: string
     note?: string
   }): Promise<{ id: string }> {
     const body: any = {
       orderCode: payload.orderCode,
-      operatingUnitId: payload.operatingUnitId,
+      type: 1, // External order
       partnerId: payload.partnerId,
-      orderItems: payload.orderItems.map((item, i) => ({
-        lineNumber: i + 1,
-        productCode: item.productCode,
-        quantityOrdered: item.quantity,
-        unitPrice: item.unitPrice || 0,
-        productName: item.productName || "",
+      items: payload.orderItems.map((item, i) => ({
+        itemCode: `${payload.orderCode}/${String(i + 1).padStart(3, "0")}`,
+        productId: item.productCode, // ext. system code (SKU)
+        amount: {
+          quantity: item.quantity,
+        },
+        name: item.productName || undefined,
       })),
-      deliveryAddress: {
-        name: payload.deliveryAddress.name,
+      partyIdentification: {
+        firstName: payload.deliveryAddress.firstName,
+        lastName: payload.deliveryAddress.lastName,
         street: payload.deliveryAddress.street,
         city: payload.deliveryAddress.city,
-        zipCode: payload.deliveryAddress.zip,
-        countryCode: payload.deliveryAddress.countryCode,
+        zip: payload.deliveryAddress.zip,
+        country: payload.deliveryAddress.country,
         phone: payload.deliveryAddress.phone || "",
         email: payload.deliveryAddress.email || "",
       },
     }
 
+    if (payload.operatingUnitId) {
+      body.operatingUnitId = payload.operatingUnitId
+    }
+    if (payload.deliveryAddress.company) {
+      body.partyIdentification.company = payload.deliveryAddress.company
+    }
+    if (payload.deliveryAddress.pickupPlaceCode) {
+      body.partyIdentification.pickupPlaceCode = payload.deliveryAddress.pickupPlaceCode
+    }
+    if (payload.deliveryAddress.externalCarrierCode) {
+      body.partyIdentification.externalCarrierCode = payload.deliveryAddress.externalCarrierCode
+    }
     if (payload.deliveryMethodId) {
       body.deliveryMethodId = payload.deliveryMethodId
     }
@@ -158,7 +176,10 @@ export class MyStockApiClient {
       body.paymentMethodId = payload.paymentMethodId
     }
     if (payload.cashAmount !== undefined) {
-      body.paymentInformation = { cashAmount: payload.cashAmount }
+      body.paymentInformation = {
+        cashAmount: payload.cashAmount,
+        currencyCode: payload.cashCurrencyCode || "EUR",
+      }
     }
     if (payload.note) {
       body.note = payload.note
