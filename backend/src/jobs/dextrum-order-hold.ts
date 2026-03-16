@@ -45,7 +45,7 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         const { data: [order] } = await query.graph({
           entity: "order",
           fields: [
-            "id", "display_id", "email", "currency_code", "total",
+            "id", "display_id", "email", "currency_code", "total", "sales_channel_id",
             "metadata", "items.*", "items.variant.*", "items.variant.product.*",
             "shipping_address.*", "shipping_methods.*", "shipping_methods.shipping_option.*",
             "payment_collections.*", "payment_collections.payments.*",
@@ -144,25 +144,51 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           orderNote = `Zásilkovna pickup: ${orderMeta.packeta_point_name || ""} (ID: ${orderMeta.packeta_point_id})`
         }
 
-        // Resolve delivery method: prefer shipping option metadata, fallback to config defaults
+        // Resolve delivery & payment via delivery mappings
         const shippingOption = (order as any).shipping_methods?.[0]?.shipping_option
-        const soMeta = shippingOption?.metadata || shippingOption?.data || {}
-        let deliveryMethodId = soMeta.mystock_delivery_method_id || ""
-        if (!deliveryMethodId) {
-          deliveryMethodId = isPickup
-            ? (config.default_pickup_delivery_method_id || config.default_delivery_method_id || "")
-            : (config.default_delivery_method_id || "")
+        const shippingOptionId = shippingOption?.id || (order as any).shipping_methods?.[0]?.shipping_option_id || ""
+        const salesChannelId = (order as any).sales_channel_id || orderMeta.sales_channel_id || ""
+
+        // Look up mapping: sales_channel + shipping_option + is_cod
+        let mapping: any = null
+        if (salesChannelId && shippingOptionId) {
+          const mappings = await dextrumService.listDextrumDeliveryMappings({
+            sales_channel_id: salesChannelId,
+            shipping_option_id: shippingOptionId,
+            is_cod: isCOD,
+          }, { take: 1 })
+          mapping = mappings[0] || null
         }
 
-        // Resolve payment method: prefer shipping option metadata, fallback to config defaults
+        let deliveryMethodId = ""
         let paymentMethodId = ""
-        if (isCOD) {
-          paymentMethodId = soMeta.mystock_payment_method_cod || config.default_payment_method_cod || ""
+        let externalCarrierCode = ""
+
+        if (mapping) {
+          // Use mapping values
+          deliveryMethodId = mapping.delivery_method_id || ""
+          paymentMethodId = mapping.payment_method_id || ""
+          externalCarrierCode = mapping.external_carrier_code || ""
+          console.log(`[Dextrum Hold] Mapping found for ${orderCode}: delivery=${deliveryMethodId}, payment=${paymentMethodId}, carrier=${externalCarrierCode}`)
         } else {
-          paymentMethodId = soMeta.mystock_payment_method_paid || config.default_payment_method_paid || ""
+          // Fallback to config defaults
+          const soMeta = shippingOption?.metadata || shippingOption?.data || {}
+          deliveryMethodId = soMeta.mystock_delivery_method_id || ""
+          if (!deliveryMethodId) {
+            deliveryMethodId = isPickup
+              ? (config.default_pickup_delivery_method_id || config.default_delivery_method_id || "")
+              : (config.default_delivery_method_id || "")
+          }
+          if (isCOD) {
+            paymentMethodId = soMeta.mystock_payment_method_cod || config.default_payment_method_cod || ""
+          } else {
+            paymentMethodId = soMeta.mystock_payment_method_paid || config.default_payment_method_paid || ""
+          }
+          externalCarrierCode = soMeta.mystock_external_carrier_code || ""
+          console.log(`[Dextrum Hold] No mapping for ${orderCode} (sc=${salesChannelId}, so=${shippingOptionId}, cod=${isCOD}), using defaults`)
         }
 
-        // Add pickup place code for Zásilkovna
+        // Build delivery address
         const deliveryAddress: any = {
           firstName: addr.first_name || "",
           lastName: addr.last_name || "",
@@ -177,8 +203,6 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         if (isPickup && orderMeta.packeta_point_id) {
           deliveryAddress.pickupPlaceCode = orderMeta.packeta_point_id
         }
-        // External carrier code for cross-border Zásilkovna (e.g. inPost in PL, Magyar Posta in HU)
-        const externalCarrierCode = soMeta.mystock_external_carrier_code || ""
         if (externalCarrierCode) {
           deliveryAddress.externalCarrierCode = externalCarrierCode
         }

@@ -109,6 +109,75 @@ export function useDextrumInventory(params?: { q?: string; low_stock?: boolean; 
 }
 
 // ═══════════════════════════════════════════
+// Delivery Mappings
+// ═══════════════════════════════════════════
+export function useDextrumDeliveryMappings() {
+  return useQuery({
+    queryKey: ["dextrum-delivery-mappings"],
+    queryFn: async () => {
+      const response = await sdk.client.fetch<{ mappings: any[] }>("/admin/dextrum/delivery-mappings")
+      return response.mappings
+    },
+  })
+}
+
+export function useSaveDextrumDeliveryMapping() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: Record<string, any>) => {
+      return sdk.client.fetch("/admin/dextrum/delivery-mappings", {
+        method: "POST",
+        body: data,
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dextrum-delivery-mappings"] })
+    },
+  })
+}
+
+export function useDeleteDextrumDeliveryMapping() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      return sdk.client.fetch("/admin/dextrum/delivery-mappings", {
+        method: "DELETE",
+        body: { id },
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dextrum-delivery-mappings"] })
+    },
+  })
+}
+
+// ═══════════════════════════════════════════
+// Sales Channels (for dropdown)
+// ═══════════════════════════════════════════
+export function useSalesChannels() {
+  return useQuery({
+    queryKey: ["sales-channels"],
+    queryFn: async () => {
+      const response = await sdk.client.fetch<{ sales_channels: any[] }>("/admin/sales-channels?limit=100")
+      return response.sales_channels
+    },
+  })
+}
+
+// ═══════════════════════════════════════════
+// Shipping Options (for dropdown)
+// ═══════════════════════════════════════════
+export function useShippingOptions() {
+  return useQuery({
+    queryKey: ["shipping-options-all"],
+    queryFn: async () => {
+      const response = await sdk.client.fetch<{ shipping_options: any[] }>("/admin/shipping-options?limit=100")
+      return response.shipping_options
+    },
+  })
+}
+
+// ═══════════════════════════════════════════
 // Sync Dextrum Inventory
 // ═══════════════════════════════════════════
 export function useSyncDextrumInventory() {
