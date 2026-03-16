@@ -43,7 +43,8 @@ export default async function orderPlacedDextrumHandler({
       PL: "PL", CZ: "CZ", SK: "SK", SE: "SE", HU: "HU",
     }
     const prefix = prefixMap[countryCode] || countryCode
-    const orderCode = `${prefix}-${(order as any).display_id}`
+    const year = new Date().getFullYear()
+    const orderCode = `${prefix}${year}-${(order as any).display_id}`
     const projectCode = (order as any).metadata?.project_code || "DEFAULT"
 
     // 5. Calculate hold_until

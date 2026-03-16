@@ -6,7 +6,7 @@ const SupportboxTicket = model.define("supportbox_ticket", {
   from_email: model.text(),
   from_name: model.text().nullable(),
   subject: model.text(),
-  status: model.text().default("new"), // "new", "solved", "old"
+  status: model.text().default("new"), // "new", "solved", "old", "spam"
   solved_at: model.text().nullable(), // ISO timestamp when solved
   order_id: model.text().nullable(),
   customer_id: model.text().nullable(),

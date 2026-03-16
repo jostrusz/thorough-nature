@@ -76,6 +76,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["http-server", "storefront/src/projects/psi-superzivot/pages", "-p", "8100", "-c-1"],
       "port": 8100
+    },
+    {
+      "name": "dehondenbijbel",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["http-server", "storefront/src/projects/dehondenbijbel/pages", "-p", "8101", "-c-1"],
+      "port": 8101
     }
   ]
 }

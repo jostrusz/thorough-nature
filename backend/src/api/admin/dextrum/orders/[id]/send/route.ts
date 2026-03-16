@@ -56,7 +56,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         PL: "PL", CZ: "CZ", SK: "SK", SE: "SE", HU: "HU",
       }
       const prefix = prefixMap[countryCode] || countryCode
-      orderCode = `${prefix}-${(order as any).display_id}`
+      const year = new Date().getFullYear()
+      orderCode = `${prefix}${year}-${(order as any).display_id}`
     }
 
     const projectCode = (order as any).metadata?.project_code || "DEFAULT"

@@ -95,7 +95,8 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           NL: "NL", BE: "BE", DE: "DE", AT: "AT", LU: "LU",
           PL: "PL", CZ: "CZ", SK: "SK", SE: "SE", HU: "HU",
         }
-        const orderCode = orderMap.mystock_order_code || `${prefixMap[countryCode] || countryCode}-${(order as any).display_id}`
+        const year = new Date().getFullYear()
+        const orderCode = orderMap.mystock_order_code || `${prefixMap[countryCode] || countryCode}${year}-${(order as any).display_id}`
 
         const rawItems = (order as any).items || []
         console.log(`[Dextrum Hold] Order ${orderCode} items count: ${(order as any).items?.length ?? 'undefined'}, keys: ${Object.keys(order as any).join(', ')}`)

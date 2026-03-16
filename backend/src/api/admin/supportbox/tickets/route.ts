@@ -9,11 +9,16 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
     const filters: any = {}
     if (config_id) filters.config_id = config_id
-    if (status && status !== "all") filters.status = status
+    if (status && status !== "all" && status !== "inbox") filters.status = status
 
     let tickets = await supportboxService.listSupportboxTickets(filters, {
       order: { created_at: "DESC" },
     })
+
+    // Exclude spam from non-spam views (inbox, new, solved, old, all)
+    if (status !== "spam") {
+      tickets = tickets.filter((t: any) => t.status !== "spam")
+    }
 
     // Load messages separately (models don't define ORM relations)
     const allMessages = await supportboxService.listSupportboxMessages({}, {
@@ -33,13 +38,18 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       messages: messagesByTicket[t.id] || [],
     }))
 
-    // Client-side search filter (subject/from_email)
+    // Fulltext search: subject, from_email, from_name, and message body content
     if (q) {
       const query = (q as string).toLowerCase()
       tickets = tickets.filter(
         (t: any) =>
           t.subject?.toLowerCase().includes(query) ||
-          t.from_email?.toLowerCase().includes(query)
+          t.from_email?.toLowerCase().includes(query) ||
+          t.from_name?.toLowerCase().includes(query) ||
+          (t.messages || []).some((m: any) =>
+            m.body_text?.toLowerCase().includes(query) ||
+            m.body_html?.replace(/<[^>]*>/g, "").toLowerCase().includes(query)
+          )
       )
     }
 
