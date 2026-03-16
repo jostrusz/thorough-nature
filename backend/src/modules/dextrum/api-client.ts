@@ -144,7 +144,6 @@ export class MyStockApiClient {
       extIsId: payload.orderCode, // unique ERP identifier
       type: 1, // External order
       partnerId: payload.partnerId,
-      warehouseCode: payload.warehouseCode || undefined,
       items: payload.orderItems.map((item, i) => ({
         itemCode: `${payload.orderCode}/${String(i + 1).padStart(3, "0")}`,
         extIsId: `${payload.orderCode}/${String(i + 1).padStart(3, "0")}`,
@@ -152,7 +151,6 @@ export class MyStockApiClient {
         amount: {
           quantity: item.quantity,
         },
-        warehouseCode: payload.warehouseCode || undefined,
         name: item.productName || undefined,
       })),
       partyIdentification: {
@@ -167,6 +165,9 @@ export class MyStockApiClient {
       },
     }
 
+    if (payload.warehouseCode) {
+      body.warehouseCode = payload.warehouseCode
+    }
     if (payload.operatingUnitId) {
       body.operatingUnitId = payload.operatingUnitId
     }
