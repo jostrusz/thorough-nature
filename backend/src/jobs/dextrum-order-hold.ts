@@ -98,6 +98,7 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         const orderCode = orderMap.mystock_order_code || `${prefixMap[countryCode] || countryCode}-${(order as any).display_id}`
 
         const rawItems = (order as any).items || []
+        console.log(`[Dextrum Hold] Order ${orderCode} items count: ${(order as any).items?.length ?? 'undefined'}, keys: ${Object.keys(order as any).join(', ')}`)
         const orderItems = rawItems.map((item: any) => ({
           productCode: item.variant?.sku || "UNKNOWN",
           quantity: item.quantity || 1,

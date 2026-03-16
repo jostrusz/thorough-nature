@@ -80,6 +80,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     }
 
     // 7. Build items
+    console.log(`[Dextrum Send] Order ${medusaOrderId} items count: ${(order as any).items?.length ?? 'undefined'}, keys: ${Object.keys(order as any).join(', ')}`)
     const orderItems = ((order as any).items || []).map((item: any) => ({
       productCode: item.variant?.sku || item.variant?.product?.handle || "UNKNOWN",
       quantity: item.quantity || 1,
