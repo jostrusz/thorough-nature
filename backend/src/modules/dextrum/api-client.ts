@@ -90,6 +90,11 @@ export class MyStockApiClient {
   // ═══════════════════════════════════════════
   // CONNECTION TEST
   // ═══════════════════════════════════════════
+  async aboutMe(): Promise<any> {
+    const result = await this.request("GET", "/aboutMe/")
+    return result.data
+  }
+
   async testConnection(): Promise<{ ok: boolean; message: string }> {
     try {
       const result = await this.request("GET", "/aboutMe/")
