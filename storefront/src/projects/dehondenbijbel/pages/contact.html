@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact — De Hondenbijbel</title>
-<meta name="description" content="Neem contact met ons op voor vragen over je bestelling, het boek of ons retourbeleid.">
+<meta name="description" content="Neem contact met ons op voor vragen over uw bestelling, het boek of ons retourbeleid.">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="/dehondenbijbel/images/preloader.webp" type="image/webp">
 
@@ -190,11 +190,14 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
  width: 48px;
  height: 48px;
  border-radius: 12px;
- background: var(--light);
+ background: var(--cta);
+ color: var(--white);
  display: flex;
  align-items: center;
  justify-content: center;
- font-size: 22px;
+ font-family: 'Inter', sans-serif;
+ font-size: 18px;
+ font-weight: 700;
  flex-shrink: 0;
 }
 .contact-info h3 {
@@ -262,9 +265,18 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
  border-color: var(--highlight);
 }
 .service-card .icon {
- font-size: 32px;
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ width: 48px;
+ height: 48px;
+ background: var(--cta);
+ color: var(--white);
+ border-radius: 50%;
+ font-family: 'Inter', sans-serif;
+ font-size: 18px;
+ font-weight: 700;
  margin-bottom: 14px;
- display: block;
 }
 .service-card h3 {
  font-family: 'Cabin', sans-serif;
@@ -301,6 +313,17 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
  color: var(--body);
  line-height: 1.7;
  margin: 0 0 6px;
+}
+
+/* Last updated */
+.last-updated {
+ text-align: center;
+ font-family: 'Cabin', sans-serif;
+ font-size: 13px;
+ color: var(--muted);
+ margin-top: 40px;
+ padding-top: 20px;
+ border-top: 1px solid var(--section);
 }
 
 /* ═══ FOOTER ═══ */
@@ -413,9 +436,9 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">💬 Klantenservice</div>
+ <div class="badge">Klantenservice</div>
  <h1>Contact</h1>
- <p>Heb je een vraag over je bestelling, het boek of ons retourbeleid? We helpen je graag!</p>
+ <p>Heeft u een vraag over uw bestelling, het boek of ons retourbeleid? Wij helpen u graag!</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
@@ -426,7 +449,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
   <h2>Neem contact met ons op</h2>
 
   <div class="contact-item">
-   <div class="contact-icon">📧</div>
+   <div class="contact-icon">E</div>
    <div class="contact-info">
     <h3>E-mail</h3>
     <p><a href="mailto:support@dehondenbijbel.nl">support@dehondenbijbel.nl</a></p>
@@ -435,7 +458,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
   </div>
 
   <div class="contact-item">
-   <div class="contact-icon">📞</div>
+   <div class="contact-icon">T</div>
    <div class="contact-info">
     <h3>Telefoon</h3>
     <p><a href="tel:+420732915755">+420 732 915 755</a></p>
@@ -444,49 +467,54 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
   </div>
 
   <div class="contact-item">
-   <div class="contact-icon">📍</div>
+   <div class="contact-icon">A</div>
    <div class="contact-info">
     <h3>Adres</h3>
     <p>Performance Marketing Solution s.r.o.<br>
-    Rybná 716/24<br>
-    110 00 Praha, Tsjechië</p>
+    Rybn&aacute; 716/24, Star&eacute; M&#283;sto<br>
+    110 00 Praha, Tsjechi&euml;</p>
    </div>
   </div>
  </div>
 
  <!-- Upozornění -->
  <div class="notice-box">
-  <h3>⏱ Reactietijd</h3>
-  <p>We doen ons best om alle vragen binnen <strong>24 uur</strong> te beantwoorden op werkdagen. In het weekend en op feestdagen kan de reactietijd iets langer zijn.</p>
+  <h3>Reactietijd</h3>
+  <p>Wij doen ons best om alle vragen binnen <strong>24 uur</strong> te beantwoorden op werkdagen. In het weekend en op feestdagen kan de reactietijd iets langer zijn.</p>
  </div>
 
  <!-- Služby -->
  <div class="service-grid">
   <div class="service-card">
-   <span class="icon">📦</span>
+   <span class="icon">B</span>
    <h3>Bestelling volgen</h3>
-   <p>Heb je je trackingcode ontvangen? Volg je pakket via de link in je bevestigingsmail.</p>
+   <p>Heeft u uw trackingcode ontvangen? Volg uw pakket via de link in uw bevestigingsmail.</p>
   </div>
   <div class="service-card">
-   <span class="icon">🔄</span>
+   <span class="icon">R</span>
    <h3>Retour aanvragen</h3>
-   <p>Niet tevreden? Stuur ons een e-mail met je ordernummer en reden voor retour.</p>
+   <p>Niet tevreden? Stuur ons een e-mail met uw bestelnummer en reden voor retour.</p>
   </div>
   <div class="service-card">
-   <span class="icon">💳</span>
+   <span class="icon">F</span>
    <h3>Betaling &amp; Factuur</h3>
-   <p>Vragen over je betaling of een factuur nodig? Neem contact op met je ordernummer.</p>
+   <p>Vragen over uw betaling of een factuur nodig? Neem contact op met uw bestelnummer.</p>
   </div>
  </div>
 
  <!-- Firemní údaje -->
  <div class="company-info">
-  <h3>🏢 Bedrijfsgegevens</h3>
+  <h3>Bedrijfsgegevens</h3>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, 110 00 Praha, Tsjechië</p>
-  <p>KvK-nummer: 06259928</p>
+  <p>Rybn&aacute; 716/24, Star&eacute; M&#283;sto, 110 00 Praha, Tsjechi&euml;</p>
+  <p>Registratienummer: 06259928</p>
   <p>BTW-nummer: CZ06259928</p>
   <p>E-mail: <a href="mailto:support@dehondenbijbel.nl" style="color: var(--cta);">support@dehondenbijbel.nl</a></p>
+ </div>
+
+ <!-- Laatst bijgewerkt -->
+ <div class="last-updated">
+  Laatst bijgewerkt: 17 maart 2026
  </div>
 
 </div>
