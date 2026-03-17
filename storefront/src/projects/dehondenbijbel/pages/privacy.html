@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Privacybeleid — De Hondenbijbel</title>
-<meta name="description" content="Lees hoe wij omgaan met je persoonsgegevens bij bestellingen van De Hondenbijbel.">
+<meta name="description" content="Lees hoe wij omgaan met uw persoonsgegevens bij bestellingen van De Hondenbijbel.">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="/dehondenbijbel/images/preloader.webp" type="image/webp">
 
@@ -144,7 +144,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 .info-box p, .info-box li { font-family: 'Cabin', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; }
 .info-box ul { list-style: none; padding: 0; }
 .info-box ul li { padding: 4px 0; }
-.info-box ul li::before { content: '→ '; color: var(--cta); font-weight: 700; }
+.info-box ul li::before { content: '\2192\0020'; color: var(--cta); font-weight: 700; }
 
 /* Sekce */
 .section-block { margin-bottom: 40px; }
@@ -159,7 +159,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
  align-items: center;
  gap: 10px;
 }
-.section-block h2 .section-num {
+.section-block h2 .num {
  display: inline-flex;
  align-items: center;
  justify-content: center;
@@ -167,10 +167,9 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
  height: 36px;
  background: var(--cta);
  color: var(--white);
- font-family: 'Cabin', sans-serif;
- font-size: 15px;
+ border-radius: 50%;
+ font-size: 16px;
  font-weight: 700;
- border-radius: 10px;
  flex-shrink: 0;
 }
 .section-block p { font-family: 'Cabin', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 12px; }
@@ -250,6 +249,17 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
 .divider { height: 1px; background: var(--section); margin: 40px 0; }
 
+/* Last updated */
+.last-updated {
+ text-align: center;
+ font-family: 'Cabin', sans-serif;
+ font-size: 13px;
+ color: var(--muted);
+ margin-top: 40px;
+ padding-top: 20px;
+ border-top: 1px solid var(--section);
+}
+
 /* ═══ FOOTER ═══ */
 .site-footer { background: var(--dark); padding: 48px 24px 24px; color: rgba(255, 255, 255, 0.7); }
 .footer-inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
@@ -318,31 +328,32 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">🔒 AVG / GDPR</div>
+ <div class="badge">Privacybeleid</div>
  <h1>Privacybeleid</h1>
- <p>Hoe wij omgaan met je persoonsgegevens — transparant en volgens de wet.</p>
+ <p>Hoe wij omgaan met uw persoonsgegevens — transparant en volgens de wet.</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="page-content">
 
  <div class="info-box">
-  <h3>📌 Samenvatting</h3>
+  <h3>Samenvatting</h3>
   <ul>
-   <li>We verzamelen alleen gegevens die nodig zijn voor je bestelling</li>
-   <li>We delen je gegevens niet met derden voor marketingdoeleinden</li>
-   <li>Je hebt recht op inzage, correctie en verwijdering van je gegevens</li>
+   <li>We verzamelen alleen gegevens die nodig zijn voor uw bestelling</li>
+   <li>We delen uw gegevens niet met derden voor marketingdoeleinden</li>
+   <li>U heeft recht op inzage, correctie en verwijdering van uw gegevens</li>
    <li>We gebruiken cookies voor analyse en advertenties (Facebook Pixel)</li>
-   <li>Je gegevens worden beveiligd opgeslagen</li>
+   <li>Uw gegevens worden beveiligd opgeslagen</li>
   </ul>
  </div>
 
  <!-- Artikel 1 -->
  <div class="section-block">
-  <h2><span class="section-num">1</span> Verwerkingsverantwoordelijke</h2>
+  <h2><span class="num">1</span> Verwerkingsverantwoordelijke</h2>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, 110 00 Praha, Tsjechië</p>
+  <p>Rybn&aacute; 716/24, Star&eacute; M&#283;sto, 110 00 Praha, Tsjechi&euml;</p>
   <p>KvK-nummer: 06259928</p>
+  <p>Registratienummer: 06259928</p>
   <p>E-mail: <a href="mailto:support@dehondenbijbel.nl" style="color: var(--cta);">support@dehondenbijbel.nl</a></p>
  </div>
 
@@ -350,8 +361,8 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
  <!-- Artikel 2 -->
  <div class="section-block">
-  <h2><span class="section-num">2</span> Welke gegevens verzamelen wij?</h2>
-  <p>Wij verzamelen de volgende persoonsgegevens wanneer je een bestelling plaatst:</p>
+  <h2><span class="num">2</span> Welke gegevens verzamelen wij?</h2>
+  <p>Wij verzamelen de volgende persoonsgegevens wanneer u een bestelling plaatst:</p>
 
   <table class="data-table">
    <thead>
@@ -378,14 +389,14 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
  <!-- Artikel 3 -->
  <div class="section-block">
-  <h2><span class="section-num">3</span> Waarvoor gebruiken wij je gegevens?</h2>
+  <h2><span class="num">3</span> Waarvoor gebruiken wij uw gegevens?</h2>
   <ul>
-   <li>Het verwerken en verzenden van je bestelling</li>
+   <li>Het verwerken en verzenden van uw bestelling</li>
    <li>Het sturen van orderbevestigingen en verzendupdates</li>
-   <li>Klantenservice en het beantwoorden van je vragen</li>
+   <li>Klantenservice en het beantwoorden van uw vragen</li>
    <li>Wettelijke verplichtingen (facturatie, belastingaangifte)</li>
    <li>Verbetering van onze website en diensten (analyse)</li>
-   <li>Marketing via e-mail (alleen met je expliciete toestemming)</li>
+   <li>Marketing via e-mail (alleen met uw expliciete toestemming)</li>
   </ul>
  </div>
 
@@ -393,7 +404,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
  <!-- Artikel 4 -->
  <div class="section-block">
-  <h2><span class="section-num">4</span> Cookies &amp; tracking</h2>
+  <h2><span class="num">4</span> Cookies &amp; tracking</h2>
   <p>Onze website maakt gebruik van de volgende cookies en trackingtools:</p>
 
   <table class="data-table">
@@ -413,7 +424,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
   </table>
 
   <div class="highlight-box">
-   <p><strong>Marketing cookies:</strong> Facebook Pixel wordt alleen geplaatst als je hiermee instemt via de cookiemelding. Je kunt je toestemming op elk moment intrekken.</p>
+   <p><strong>Marketing cookies:</strong> Facebook Pixel wordt alleen geplaatst als u hiermee instemt via de cookiemelding. U kunt uw toestemming op elk moment intrekken.</p>
   </div>
  </div>
 
@@ -421,24 +432,24 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
  <!-- Artikel 5 -->
  <div class="section-block">
-  <h2><span class="section-num">5</span> Delen met derden</h2>
-  <p>Wij delen je gegevens uitsluitend met de volgende partijen, voor de hieronder genoemde doeleinden:</p>
+  <h2><span class="num">5</span> Delen met derden</h2>
+  <p>Wij delen uw gegevens uitsluitend met de volgende partijen, voor de hieronder genoemde doeleinden:</p>
   <ul>
    <li><strong>Stripe / Mollie</strong> — betalingsverwerking</li>
-   <li><strong>Verzendpartner (Dextrum)</strong> — bezorging van je bestelling</li>
-   <li><strong>MailerLite</strong> — e-mailmarketing (alleen met jouw toestemming)</li>
+   <li><strong>Verzendpartner</strong> — bezorging van uw bestelling</li>
+   <li><strong>MailerLite</strong> — e-mailmarketing (alleen met uw toestemming)</li>
    <li><strong>Facebook (Meta)</strong> — advertentiemeting (via Pixel, met cookie-toestemming)</li>
    <li><strong>Fakturoid</strong> — facturatie en boekhouding</li>
   </ul>
-  <p>Wij verkopen je gegevens <strong>nooit</strong> aan derden.</p>
+  <p>Wij verkopen uw gegevens <strong>nooit</strong> aan derden.</p>
  </div>
 
  <div class="divider"></div>
 
  <!-- Artikel 6 -->
  <div class="section-block">
-  <h2><span class="section-num">6</span> Beveiliging</h2>
-  <p>Wij nemen de bescherming van je gegevens serieus en treffen passende maatregelen:</p>
+  <h2><span class="num">6</span> Beveiliging</h2>
+  <p>Wij nemen de bescherming van uw gegevens serieus en treffen passende maatregelen:</p>
   <ul>
    <li>SSL/TLS-versleuteling op alle pagina's</li>
    <li>Veilige opslag van gegevens in EU-datacenters</li>
@@ -452,43 +463,43 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
  <!-- Artikel 7 -->
  <div class="section-block">
-  <h2><span class="section-num">7</span> Jouw rechten (AVG/GDPR)</h2>
+  <h2><span class="num">7</span> Uw rechten (AVG/GDPR)</h2>
 
   <div class="rights-box">
-   <h3>Je hebt de volgende rechten:</h3>
+   <h3>U heeft de volgende rechten:</h3>
    <ul class="rights-list">
-    <li><span class="icon">👁</span> <strong>Recht op inzage</strong> — Je kunt opvragen welke gegevens wij van je hebben</li>
-    <li><span class="icon">✏️</span> <strong>Recht op correctie</strong> — Je kunt onjuiste gegevens laten aanpassen</li>
-    <li><span class="icon">🗑</span> <strong>Recht op verwijdering</strong> — Je kunt vragen om verwijdering van je gegevens</li>
-    <li><span class="icon">📦</span> <strong>Recht op overdracht</strong> — Je kunt een kopie van je gegevens opvragen</li>
-    <li><span class="icon">🚫</span> <strong>Recht op bezwaar</strong> — Je kunt bezwaar maken tegen bepaalde verwerkingen</li>
-    <li><span class="icon">⏸</span> <strong>Recht op beperking</strong> — Je kunt vragen om beperking van de verwerking</li>
+    <li><span class="icon">&#9679;</span> <strong>Recht op inzage</strong> — U kunt opvragen welke gegevens wij van u hebben</li>
+    <li><span class="icon">&#9679;</span> <strong>Recht op correctie</strong> — U kunt onjuiste gegevens laten aanpassen</li>
+    <li><span class="icon">&#9679;</span> <strong>Recht op verwijdering</strong> — U kunt vragen om verwijdering van uw gegevens</li>
+    <li><span class="icon">&#9679;</span> <strong>Recht op overdracht</strong> — U kunt een kopie van uw gegevens opvragen</li>
+    <li><span class="icon">&#9679;</span> <strong>Recht op bezwaar</strong> — U kunt bezwaar maken tegen bepaalde verwerkingen</li>
+    <li><span class="icon">&#9679;</span> <strong>Recht op beperking</strong> — U kunt vragen om beperking van de verwerking</li>
    </ul>
   </div>
 
-  <p>Om je rechten uit te oefenen, stuur een e-mail naar <a href="mailto:support@dehondenbijbel.nl" style="color: var(--cta);">support@dehondenbijbel.nl</a>. We reageren binnen 30 dagen.</p>
+  <p>Om uw rechten uit te oefenen, stuur een e-mail naar <a href="mailto:support@dehondenbijbel.nl" style="color: var(--cta);">support@dehondenbijbel.nl</a>. We reageren binnen 30 dagen.</p>
  </div>
 
  <div class="divider"></div>
 
  <!-- Artikel 8 -->
  <div class="section-block">
-  <h2><span class="section-num">8</span> E-mailmarketing</h2>
-  <p>Als je je hebt aangemeld voor onze nieuwsbrief of toestemming hebt gegeven bij het afrekenen, kun je e-mails van ons ontvangen over:</p>
+  <h2><span class="num">8</span> E-mailmarketing</h2>
+  <p>Als u zich heeft aangemeld voor onze nieuwsbrief of toestemming heeft gegeven bij het afrekenen, kunt u e-mails van ons ontvangen over:</p>
   <ul>
    <li>Nieuwe boeken en producten</li>
    <li>Exclusieve aanbiedingen en kortingen</li>
    <li>Tips en inspiratie gerelateerd aan onze boeken</li>
   </ul>
-  <p>Je kunt je op elk moment uitschrijven via de link onderaan elke e-mail. Na uitschrijving verwijderen we je e-mailadres uit onze marketinglijst.</p>
+  <p>U kunt zich op elk moment uitschrijven via de link onderaan elke e-mail. Na uitschrijving verwijderen we uw e-mailadres uit onze marketinglijst.</p>
  </div>
 
  <div class="divider"></div>
 
  <!-- Artikel 9 -->
  <div class="section-block">
-  <h2><span class="section-num">9</span> Toezichthouder</h2>
-  <p>Als je een klacht hebt over de verwerking van je persoonsgegevens, kun je contact opnemen met de toezichthoudende autoriteit:</p>
+  <h2><span class="num">9</span> Toezichthouder</h2>
+  <p>Als u een klacht heeft over de verwerking van uw persoonsgegevens, kunt u contact opnemen met de toezichthoudende autoriteit:</p>
   <div class="highlight-box">
    <p><strong>Autoriteit Persoonsgegevens (NL)</strong><br>
    Website: <a href="https://autoriteitpersoonsgegevens.nl" target="_blank" style="color: var(--cta);">autoriteitpersoonsgegevens.nl</a></p>
@@ -503,13 +514,13 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
  <!-- Artikel 10 -->
  <div class="section-block">
-  <h2><span class="section-num">10</span> Wijzigingen</h2>
+  <h2><span class="num">10</span> Wijzigingen</h2>
   <p>Wij behouden ons het recht voor dit privacybeleid te wijzigen. De meest recente versie is altijd beschikbaar op deze pagina.</p>
  </div>
 
- <div class="info-box" style="margin-top: 48px; background: linear-gradient(135deg, var(--light), var(--section));">
-  <h3>📅 Laatste update</h3>
-  <p>Dit privacybeleid is voor het laatst bijgewerkt op 1 maart 2026.</p>
+ <!-- Laatst bijgewerkt -->
+ <div class="last-updated">
+  Laatst bijgewerkt: 17 maart 2026
  </div>
 
 </div>
