@@ -128,12 +128,10 @@ async function computeLiveStats(
             fields: [
               "id",
               "summary.raw_current_order_total.value",
-              "summary.raw_original_order_total.value",
               "summary.current_order_total",
               "summary.raw_current_order_tax_total.value",
               "summary.current_order_tax_total",
-              "items.quantity",
-              "sales_channel_id",
+              "items.*",
             ],
             filters: {
               sales_channel_id: project.sales_channel_id,
