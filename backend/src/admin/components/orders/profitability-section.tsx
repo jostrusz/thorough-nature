@@ -245,7 +245,29 @@ function getStatusEmoji(project: ProjectStats): string {
   return "⚠️"
 }
 
+function CostBreakdownRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "4px 0",
+    }}>
+      <span style={{ fontSize: "11px", color: "#6B7185", fontWeight: 500 }}>{label}</span>
+      <span style={{
+        fontSize: "11px",
+        color: value > 0 ? "#1A1D2E" : "#9CA3B8",
+        fontWeight: 600,
+        fontVariantNumeric: "tabular-nums",
+      }}>
+        {value > 0 ? formatEur(value) : "\u2014"}
+      </span>
+    </div>
+  )
+}
+
 function ProjectCard({ project }: { project: ProjectStats }) {
+  const [expanded, setExpanded] = useState(false)
   const glow = getGlowLevel(project)
   const profitColor =
     project.net_profit > 0
@@ -254,6 +276,10 @@ function ProjectCard({ project }: { project: ProjectStats }) {
         ? "#E74C3C"
         : "#9CA3B8"
 
+  const totalCosts = project.ad_spend + project.shipping_cost_total
+    + project.pick_pack_total + project.tax_amount
+    + project.book_cost_total + project.payment_fee_total
+
   return (
     <div
       className="profit-project-card"
@@ -261,6 +287,7 @@ function ProjectCard({ project }: { project: ProjectStats }) {
         ...cardOuterStyle,
         background: glowBg[glow],
       }}
+      onClick={() => setExpanded(!expanded)}
     >
       {/* Glow bar */}
       <div
@@ -279,7 +306,18 @@ function ProjectCard({ project }: { project: ProjectStats }) {
             <span style={{ fontSize: "15px", lineHeight: 1 }}>{project.flag_emoji}</span>
             {project.project_name}
           </div>
-          <span style={countryTagStyle}>{project.country_tag}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={countryTagStyle}>{project.country_tag}</span>
+            <span style={{
+              fontSize: "10px",
+              color: "#9CA3B8",
+              transition: "transform 0.2s ease",
+              transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+              display: "inline-block",
+            }}>
+              &#9660;
+            </span>
+          </div>
         </div>
 
         {/* Net Profit — big number + status emoji */}
@@ -323,6 +361,60 @@ function ProjectCard({ project }: { project: ProjectStats }) {
             <span style={metricLabelStyle}>Ad Spend</span>
             <span style={{ ...metricValueStyle, color: "#6B7185" }}>
               {project.ad_spend > 0 ? formatEur(project.ad_spend) : "\u2014"}
+            </span>
+          </div>
+        </div>
+
+        {/* Cost Breakdown Accordion */}
+        <div style={{
+          maxHeight: expanded ? "300px" : "0px",
+          overflow: "hidden",
+          transition: "max-height 0.25s ease",
+        }}>
+          <div style={{
+            height: "1px",
+            background: "rgba(0,0,0,0.05)",
+            margin: "8px -12px 6px",
+          }} />
+
+          <div style={{
+            fontSize: "9px",
+            fontWeight: 600,
+            color: "#9CA3B8",
+            textTransform: "uppercase" as const,
+            letterSpacing: "0.5px",
+            marginBottom: "4px",
+          }}>
+            Cost Breakdown
+          </div>
+
+          <CostBreakdownRow label="Advertising" value={project.ad_spend} />
+          <CostBreakdownRow label="Shipping" value={project.shipping_cost_total} />
+          <CostBreakdownRow label="Pick & Pack" value={project.pick_pack_total} />
+          <CostBreakdownRow label="Taxes" value={project.tax_amount} />
+          <CostBreakdownRow label="COG (books)" value={project.book_cost_total} />
+          <CostBreakdownRow label="Payment Fee" value={project.payment_fee_total} />
+
+          <div style={{
+            height: "1px",
+            background: "rgba(0,0,0,0.08)",
+            margin: "6px 0 4px",
+          }} />
+
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "2px 0",
+          }}>
+            <span style={{ fontSize: "11px", color: "#1A1D2E", fontWeight: 700 }}>Total Costs</span>
+            <span style={{
+              fontSize: "11px",
+              color: "#E74C3C",
+              fontWeight: 700,
+              fontVariantNumeric: "tabular-nums",
+            }}>
+              {totalCosts > 0 ? formatEur(totalCosts) : "\u2014"}
             </span>
           </div>
         </div>
