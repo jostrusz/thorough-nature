@@ -129,9 +129,10 @@ export async function syncProjectDay({
         entity: "order",
         fields: [
           "id",
-          "total",
-          "tax_total",
-          "item_total",
+          "summary.raw_current_order_total.value",
+          "summary.current_order_total",
+          "summary.raw_current_order_tax_total.value",
+          "summary.current_order_tax_total",
           "items.*",
         ],
         filters: {
@@ -142,8 +143,8 @@ export async function syncProjectDay({
 
       for (const order of (orders || [])) {
         const o = order as any
-        revenue += Number(o.total ?? 0)
-        taxAmount += Number(o.tax_total ?? 0)
+        revenue += Number(o.summary?.raw_current_order_total?.value ?? o.summary?.current_order_total ?? 0)
+        taxAmount += Number(o.summary?.raw_current_order_tax_total?.value ?? o.summary?.current_order_tax_total ?? 0)
         orderCount++
         itemCount += (o.items || []).reduce(
           (sum: number, item: any) => sum + (Number(item?.quantity) || 0), 0
