@@ -75,7 +75,7 @@ export default async function recalculateDailyStatsJob(container: MedusaContaine
                 "summary.current_order_total",
                 "summary.raw_current_order_tax_total.value",
                 "summary.current_order_tax_total",
-                "items.quantity",
+                "items.*",
               ],
               filters: {
                 sales_channel_id: p.sales_channel_id,
@@ -89,7 +89,7 @@ export default async function recalculateDailyStatsJob(container: MedusaContaine
               taxAmount += Number(o.summary?.raw_current_order_tax_total?.value ?? o.summary?.current_order_tax_total ?? 0)
               orderCount++
               itemCount += (o.items || []).reduce(
-                (sum: number, item: any) => sum + (Number(item.quantity) || 0), 0
+                (sum: number, item: any) => sum + (Number(item?.quantity) || 0), 0
               )
             }
           } catch (err: any) {
