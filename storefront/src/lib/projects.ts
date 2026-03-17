@@ -62,6 +62,13 @@ function loadProjects() {
       if (config.domain) {
         projectsByDomain.set(config.domain.replace(/^www\./, ""), config)
       }
+      // Register domain aliases (e.g. de-hondenbijbel.nl → dehondenbijbel)
+      const aliases = (config as any).domainAliases as string[] | undefined
+      if (aliases && Array.isArray(aliases)) {
+        for (const alias of aliases) {
+          projectsByDomain.set(alias.replace(/^www\./, ""), config)
+        }
+      }
     }
   }
 

@@ -2,6 +2,7 @@
   "slug": "dehondenbijbel",
   "name": "De Hondenbijbel",
   "domain": "dehondenbijbel.nl",
+  "domainAliases": ["de-hondenbijbel.nl"],
   "locale": "nl",
   "defaultCountry": "NL",
   "salesChannelName": "Dehondenbijbel",
