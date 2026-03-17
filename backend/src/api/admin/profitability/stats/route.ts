@@ -102,9 +102,9 @@ async function computeLiveStats(
   todayStr: string
 ) {
   const queryService = req.scope.resolve(ContainerRegistrationKeys.QUERY)
-  const today = new Date(todayStr)
-  const todayStart = new Date(today.setHours(0, 0, 0, 0)).toISOString()
-  const todayEnd = new Date(today.setHours(23, 59, 59, 999)).toISOString()
+  const logger = req.scope.resolve("logger") as any
+  const todayStart = `${todayStr}T00:00:00.000Z`
+  const todayEnd = `${todayStr}T23:59:59.999Z`
 
   const projectStats = await Promise.all(
     projects.map(async (project: any) => {
@@ -159,7 +159,7 @@ async function computeLiveStats(
           }
         }
       } catch (err: any) {
-        // If querying fails, fall back to cached stats
+        logger.warn(`[ProfitStats] Failed to query orders for ${project.project_slug}: ${err.message}`)
       }
 
       // Use cached ad_spend from the cron job
