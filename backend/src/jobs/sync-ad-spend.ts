@@ -83,7 +83,7 @@ export default async function syncAdSpendJob(container: MedusaContainer) {
                 "total",
                 "tax_total",
                 "item_total",
-                "items.quantity",
+                "items.*",
               ],
               filters: {
                 sales_channel_id: p.sales_channel_id,
@@ -97,7 +97,7 @@ export default async function syncAdSpendJob(container: MedusaContainer) {
               taxAmount += Number(o.tax_total ?? 0)
               orderCount++
               itemCount += (o.items || []).reduce(
-                (sum: number, item: any) => sum + (Number(item.quantity) || 0), 0
+                (sum: number, item: any) => sum + (Number(item?.quantity) || 0), 0
               )
             }
           } catch (err: any) {
