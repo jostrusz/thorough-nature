@@ -120,213 +120,129 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 }
 .nav-mobile-menu .nav-cta-mobile:hover { background: var(--cta-hover); color: var(--white); }
 
-/* ═══ CONTENT STRÁNKY ═══ */
+/* ═══ HEADER ═══ */
 .page-header {
  background: linear-gradient(135deg, var(--dark) 0%, #1A1A1A 50%, #2D2D2D 100%);
  padding: 56px 20px 48px;
  text-align: center;
 }
 .page-header h1 {
- font-family: 'Inter', sans-serif;
- font-size: 36px;
- font-weight: 600;
- color: var(--white);
- margin-bottom: 12px;
- line-height: 1.2;
+ font-family: 'Inter', sans-serif; font-size: 36px; font-weight: 600;
+ color: var(--white); margin-bottom: 12px; line-height: 1.2;
 }
 .page-header p {
- font-family: 'Cabin', sans-serif;
- font-size: 16px;
- color: rgba(255, 255, 255, 0.7);
- max-width: 600px;
- margin: 0 auto;
- line-height: 1.6;
+ font-family: 'Cabin', sans-serif; font-size: 16px;
+ color: rgba(255, 255, 255, 0.7); max-width: 600px; margin: 0 auto; line-height: 1.6;
 }
 .page-header .badge {
- display: inline-block;
- background: rgba(107, 33, 168, 0.2);
- color: var(--accent);
- font-family: 'Cabin', sans-serif;
- font-size: 13px;
- font-weight: 600;
- padding: 6px 16px;
- border-radius: 20px;
- margin-bottom: 16px;
- letter-spacing: 0.5px;
+ display: inline-block; background: rgba(107, 33, 168, 0.2); color: var(--accent);
+ font-family: 'Cabin', sans-serif; font-size: 13px; font-weight: 600;
+ padding: 6px 16px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 0.5px;
 }
 
-.page-content {
- max-width: 760px;
- margin: 0 auto;
- padding: 48px 20px 80px;
-}
+/* ═══ CONTENT ═══ */
+.page-content { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
 
 .info-box {
- background: var(--light);
- border: 1px solid var(--section);
- border-radius: 16px;
- padding: 28px;
- margin-bottom: 40px;
+ background: var(--light); border: 1px solid var(--section);
+ border-radius: 16px; padding: 28px; margin-bottom: 40px;
 }
-.info-box h3 {
- font-family: 'Inter', sans-serif;
- font-size: 18px;
- color: var(--heading);
- margin-bottom: 12px;
-}
-.info-box p, .info-box li {
- font-family: 'Cabin', sans-serif;
- font-size: 15px;
- color: var(--body);
- line-height: 1.7;
-}
-.info-box ul {
- list-style: none;
- padding: 0;
-}
-.info-box ul li {
- padding: 4px 0;
-}
-.info-box ul li::before {
- content: '→ ';
- color: var(--cta);
- font-weight: 700;
-}
+.info-box h3 { font-family: 'Inter', sans-serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
+.info-box p, .info-box li { font-family: 'Cabin', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; }
+.info-box ul { list-style: none; padding: 0; }
+.info-box ul li { padding: 4px 0; }
+.info-box ul li::before { content: '\2192 '; color: var(--cta); font-weight: 700; }
 
-.section-block {
- margin-bottom: 40px;
+/* ═══ SECTIONS ═══ */
+.voorwaarden-section {
+ margin-bottom: 40px; padding: 32px;
+ background: linear-gradient(180deg, #F8F9FF 0%, #FFFFFF 100%);
+ border: 2px solid #E8EAF6; border-radius: 12px;
 }
-.section-block h2 {
- font-family: 'Inter', sans-serif;
- font-size: 24px;
- font-weight: 600;
- color: var(--heading);
- margin-bottom: 16px;
- line-height: 1.3;
- display: flex;
- align-items: center;
- gap: 10px;
+.voorwaarden-section h2 {
+ font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 600;
+ color: var(--heading); margin-bottom: 20px; padding-bottom: 14px;
+ border-bottom: 2px solid #C5CAE9; display: flex; align-items: center; gap: 10px;
 }
-.section-block h2 .section-num {
- display: inline-flex;
- align-items: center;
- justify-content: center;
- width: 36px;
- height: 36px;
- background: var(--cta);
- color: var(--white);
- font-family: 'Cabin', sans-serif;
- font-size: 15px;
- font-weight: 700;
- border-radius: 10px;
- flex-shrink: 0;
+.voorwaarden-section h2 .section-num {
+ display: inline-flex; align-items: center; justify-content: center;
+ width: 36px; height: 36px; background: var(--cta); color: var(--white);
+ font-family: 'Cabin', sans-serif; font-size: 15px; font-weight: 700;
+ border-radius: 10px; flex-shrink: 0;
 }
-.section-block p {
- font-family: 'Cabin', sans-serif;
- font-size: 16px;
- color: var(--body);
- line-height: 1.75;
- margin-bottom: 12px;
+.voorwaarden-item { margin-bottom: 24px; }
+.voorwaarden-item:last-child { margin-bottom: 0; }
+.voorwaarden-item h3 { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: #7B1FA2; margin: 0 0 8px 0; }
+.voorwaarden-item p {
+ font-family: 'Cabin', sans-serif; font-size: 16px; font-weight: 400;
+ line-height: 1.75; color: var(--body); margin: 0 0 12px 0;
 }
-.section-block ul, .section-block ol {
- padding-left: 24px;
- margin-bottom: 12px;
+.voorwaarden-item p:last-child { margin-bottom: 0; }
+.voorwaarden-item strong { font-weight: 700; color: var(--heading); }
+.voorwaarden-item a { color: var(--cta); text-decoration: underline; font-weight: 600; transition: color 0.2s; }
+.voorwaarden-item a:hover { color: var(--cta-hover); }
+.voorwaarden-item ul { list-style: none; margin: 12px 0 12px 0; padding: 0; }
+.voorwaarden-item ul li {
+ font-family: 'Cabin', sans-serif; font-size: 16px; line-height: 1.75;
+ color: var(--body); margin-bottom: 8px; position: relative; padding-left: 24px;
 }
-.section-block li {
- font-family: 'Cabin', sans-serif;
- font-size: 16px;
- color: var(--body);
- line-height: 1.75;
- margin-bottom: 6px;
-}
-.section-block strong {
- color: var(--heading);
-}
+.voorwaarden-item ul li::before { content: '\2713'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+.voorwaarden-item ol { margin: 12px 0 12px 24px; padding: 0; }
+.voorwaarden-item ol li { font-family: 'Cabin', sans-serif; font-size: 16px; line-height: 1.75; color: var(--body); margin-bottom: 8px; }
 
 .highlight-box {
  background: linear-gradient(135deg, var(--light), var(--section));
- border-left: 4px solid var(--cta);
- border-radius: 0 12px 12px 0;
- padding: 20px 24px;
- margin: 20px 0;
+ border-left: 4px solid var(--cta); border-radius: 0 12px 12px 0;
+ padding: 20px 24px; margin: 20px 0;
 }
-.highlight-box p {
- margin: 0;
- font-size: 15px;
-}
+.highlight-box p { margin: 0; font-size: 15px; }
 
-.divider {
- height: 1px;
- background: var(--section);
- margin: 40px 0;
+.retour-address-box {
+ background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+ border: 3px solid #FF9800; border-radius: 12px;
+ padding: 24px; margin: 20px 0; text-align: center;
 }
+.retour-address-box h4 { font-size: 18px; font-weight: 700; color: #E65100; margin: 0 0 12px 0; }
+.retour-address-box p { font-size: 16px; font-weight: 600; color: var(--body); margin: 4px 0; line-height: 1.5; }
+
+.contact-box {
+ background: linear-gradient(135deg, #E8EAF6 0%, #C5CAE9 100%);
+ border: 3px solid #C5CAE9; border-radius: 12px;
+ padding: 32px; text-align: center; margin-top: 48px;
+}
+.contact-box h3 { font-size: 24px; font-weight: 700; color: #4A148C; margin: 0 0 16px 0; }
+.contact-box p { font-size: 18px; color: var(--body); margin: 8px 0; }
+.contact-box a { color: #4A148C; font-weight: 700; text-decoration: underline; }
+
+.odr-box {
+ background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+ border: 3px solid #2196F3; border-radius: 12px;
+ padding: 24px 32px; text-align: center; margin-top: 32px;
+}
+.odr-box h3 { font-size: 20px; font-weight: 700; color: #1565C0; margin: 0 0 12px 0; }
+.odr-box p { font-size: 16px; color: var(--body); margin: 8px 0; }
+.odr-box a { color: #1565C0; font-weight: 700; text-decoration: underline; }
+
+.divider { height: 1px; background: var(--section); margin: 40px 0; }
 
 /* ═══ FOOTER ═══ */
-.site-footer {
- background: var(--dark);
- padding: 48px 24px 24px;
- color: rgba(255, 255, 255, 0.7);
-}
-.footer-inner {
- max-width: 960px;
- margin: 0 auto;
- display: flex;
- justify-content: space-between;
- align-items: flex-start;
- gap: 40px;
- flex-wrap: wrap;
-}
-.footer-brand {
- display: flex;
- align-items: center;
- gap: 16px;
-}
-.footer-brand-text {
- font-family: 'Inter', sans-serif;
- font-size: 18px;
- color: var(--white);
- line-height: 1.3;
-}
-.footer-links {
- display: flex;
- flex-direction: column;
- gap: 10px;
-}
-.footer-links a {
- font-family: 'Cabin', sans-serif;
- font-size: 14px;
- color: rgba(255, 255, 255, 0.7);
- text-decoration: none;
- transition: color 0.2s;
-}
+.site-footer { background: var(--dark); padding: 48px 24px 24px; color: rgba(255, 255, 255, 0.7); }
+.footer-inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
+.footer-brand { display: flex; align-items: center; gap: 16px; }
+.footer-links { display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { font-family: 'Cabin', sans-serif; font-size: 14px; color: rgba(255, 255, 255, 0.7); text-decoration: none; transition: color 0.2s; }
 .footer-links a:hover { color: var(--white); }
-.footer-contact {
- display: flex;
- flex-direction: column;
- gap: 8px;
- font-family: 'Cabin', sans-serif;
- font-size: 14px;
-}
-.footer-contact a {
- color: rgba(255, 255, 255, 0.7);
- text-decoration: none;
-}
+.footer-contact { display: flex; flex-direction: column; gap: 8px; font-family: 'Cabin', sans-serif; font-size: 14px; }
+.footer-contact a { color: rgba(255, 255, 255, 0.7); text-decoration: none; }
 .footer-contact a:hover { color: var(--white); }
 .footer-payments { display: flex; align-items: center; gap: 10px; }
 .pay-icon { height: 28px; width: auto; opacity: 0.85; transition: opacity 0.2s; }
 .pay-icon:hover { opacity: 1; }
 .footer-bottom {
- max-width: 960px;
- margin: 32px auto 0;
- padding-top: 20px;
+ max-width: 960px; margin: 32px auto 0; padding-top: 20px;
  border-top: 1px solid rgba(255, 255, 255, 0.1);
- display: flex;
- justify-content: space-between;
- flex-wrap: wrap;
- gap: 8px;
- font-family: 'Cabin', sans-serif;
- font-size: 12px;
- color: rgba(255, 255, 255, 0.45);
+ display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+ font-family: 'Cabin', sans-serif; font-size: 12px; color: rgba(255, 255, 255, 0.45);
 }
 
 @media (max-width: 768px) {
@@ -338,7 +254,8 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
  .navbar-hamburger.open span:nth-child(2) { opacity: 0; }
  .navbar-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
  .page-header h1 { font-size: 28px; }
- .section-block h2 { font-size: 20px; }
+ .voorwaarden-section { padding: 24px 20px; margin-bottom: 32px; }
+ .voorwaarden-section h2 { font-size: 20px; }
  .footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 32px; }
  .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
 }
@@ -346,6 +263,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
  .page-header h1 { font-size: 24px; }
  .page-header { padding: 40px 16px 36px; }
  .page-content { padding: 32px 16px 60px; }
+ .voorwaarden-section { padding: 20px 16px; }
 }
 </style>
 </head>
@@ -378,7 +296,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">📋 Juridisch</div>
+ <div class="badge">Juridisch</div>
  <h1>Algemene Voorwaarden</h1>
  <p>Lees onze voorwaarden zorgvuldig door voordat je een bestelling plaatst.</p>
 </header>
@@ -387,150 +305,606 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 <div class="page-content">
 
  <div class="info-box">
-  <h3>📌 Samenvatting</h3>
+  <h3>Samenvatting</h3>
   <ul>
-   <li>14 dagen bedenktijd (herroepingsrecht)</li>
-   <li>Gratis verzending naar Nederland en België</li>
-   <li>30 dagen geld-terug-garantie</li>
-   <li>Veilig betalen via iDEAL, Bancontact, creditcard</li>
-   <li>Digitale producten: geen retourrecht na levering</li>
+   <li>30 dagen bedenktijd en geld-terug-garantie</li>
+   <li>Gratis verzending naar Nederland en Belgi&euml;</li>
+   <li>Levertijd: 4-7 werkdagen</li>
+   <li>Veilig betalen via iDEAL, Bancontact, creditcard, PayPal, Klarna</li>
+   <li>Tsjechisch recht van toepassing, met EU-consumentenbescherming</li>
   </ul>
  </div>
 
- <!-- Artikel 1 -->
- <div class="section-block">
-  <h2><span class="section-num">1</span> Identiteit van de ondernemer</h2>
-  <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, 110 00 Praha, Tsjechi&euml;</p>
-  <p>KvK-nummer: 06259928<br>BTW-nummer: CZ06259928</p>
-  <p>E-mail: <a href="mailto:support@dehondenbijbel.nl" style="color: var(--cta);">support@dehondenbijbel.nl</a><br>
-  Telefoon: +420 732 915 755</p>
- </div>
+ <!-- Sectie 1 -->
+ <section class="voorwaarden-section">
+  <h2><span class="section-num">1</span> Algemene Bepalingen</h2>
 
- <div class="divider"></div>
-
- <!-- Artikel 2 -->
- <div class="section-block">
-  <h2><span class="section-num">2</span> Toepasselijkheid</h2>
-  <p>Deze algemene voorwaarden zijn van toepassing op elk aanbod van de ondernemer en op elke tot stand gekomen overeenkomst op afstand tussen ondernemer en consument.</p>
-  <p>Voordat de overeenkomst op afstand wordt gesloten, wordt de tekst van deze algemene voorwaarden aan de consument beschikbaar gesteld.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 3 -->
- <div class="section-block">
-  <h2><span class="section-num">3</span> Het aanbod</h2>
-  <p>Indien een aanbod een beperkte geldigheidsduur heeft of onder voorwaarden geschiedt, wordt dit nadrukkelijk in het aanbod vermeld.</p>
-  <p>Het aanbod bevat een volledige en nauwkeurige omschrijving van de aangeboden producten en/of diensten. De beschrijving is voldoende gedetailleerd om een goede beoordeling van het aanbod door de consument mogelijk te maken.</p>
-  <p>Kennelijke vergissingen of fouten in het aanbod binden de ondernemer niet.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 4 -->
- <div class="section-block">
-  <h2><span class="section-num">4</span> De overeenkomst</h2>
-  <p>De overeenkomst komt tot stand op het moment van aanvaarding door de consument van het aanbod en het voldoen aan de daarbij gestelde voorwaarden.</p>
-  <p>Indien de consument het aanbod langs elektronische weg heeft aanvaard, bevestigt de ondernemer onverwijld langs elektronische weg de ontvangst van de aanvaarding van het aanbod.</p>
-
-  <div class="highlight-box">
-   <p><strong>Let op:</strong> De ondernemer treft passende technische en organisatorische maatregelen ter beveiliging van de elektronische overdracht van data en zorgt voor een veilige webomgeving.</p>
+  <div class="voorwaarden-item">
+   <h3>1.1 Verkoper</h3>
+   <p>Deze algemene verkoopvoorwaarden (hierna "Voorwaarden" genoemd) zijn van toepassing bij de verkoop van het boek <strong>De Hondenbijbel</strong> door de verkoper:</p>
+   <p><strong>Performance Marketing Solution s.r.o.</strong><br>
+   Rybn&aacute; 716/24, Star&eacute; M&ecaron;sto<br>
+   110 00 Praha, Tsjechi&euml;<br>
+   Registratienummer: 06259928<br>
+   BTW-nummer: CZ06259928<br>
+   E-mail: <a href="mailto:support@dehondenbijbel.nl">support@dehondenbijbel.nl</a><br>
+   Website: <a href="https://dehondenbijbel.nl" target="_blank">https://dehondenbijbel.nl</a></p>
   </div>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 5 -->
- <div class="section-block">
-  <h2><span class="section-num">5</span> Herroepingsrecht</h2>
-  <p><strong>Bij fysieke producten:</strong></p>
-  <p>Bij de aankoop van producten heeft de consument de mogelijkheid de overeenkomst zonder opgave van redenen te ontbinden gedurende 14 dagen. Deze bedenktermijn gaat in op de dag na ontvangst van het product door de consument.</p>
-  <p>Tijdens de bedenktijd zal de consument zorgvuldig omgaan met het product en de verpakking. Hij zal het product slechts in die mate uitpakken of gebruiken voor zover dat nodig is om te kunnen beoordelen of hij het product wenst te behouden.</p>
-  <p><strong>Bij digitale producten (e-books, PDF):</strong></p>
-  <p>Na levering van digitale inhoud (download) vervalt het herroepingsrecht, mits de consument uitdrukkelijk heeft ingestemd met het afstand doen van zijn herroepingsrecht.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 6 -->
- <div class="section-block">
-  <h2><span class="section-num">6</span> De prijs</h2>
-  <p>Gedurende de in het aanbod vermelde geldigheidsduur worden de prijzen van de aangeboden producten en/of diensten niet verhoogd, behoudens prijswijzigingen als gevolg van veranderingen in btw-tarieven.</p>
-  <p>Alle prijzen zijn inclusief btw en inclusief verzendkosten (tenzij anders vermeld).</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 7 -->
- <div class="section-block">
-  <h2><span class="section-num">7</span> Betaling</h2>
-  <p>De consument kan betalen via de volgende betaalmethoden:</p>
-  <ul>
-   <li>iDEAL (Nederland)</li>
-   <li>Bancontact (België)</li>
-   <li>Creditcard (Visa, Mastercard)</li>
-   <li>Apple Pay / Google Pay</li>
-   <li>PayPal</li>
-   <li>Klarna</li>
-  </ul>
-  <p>De betaling wordt verwerkt op het moment van bestelling. Na succesvolle betaling ontvangt de consument een orderbevestiging per e-mail.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 8 -->
- <div class="section-block">
-  <h2><span class="section-num">8</span> Levering</h2>
-  <p>De ondernemer zal de grootst mogelijke zorgvuldigheid in acht nemen bij het in ontvangst nemen en bij de uitvoering van bestellingen van producten.</p>
-  <p>Als plaats van levering geldt het adres dat de consument aan het bedrijf kenbaar heeft gemaakt.</p>
-  <p>De levertijd bedraagt gemiddeld 3-5 werkdagen voor Nederland en België. Voor overige EU-landen kan de levertijd langer zijn.</p>
-
-  <div class="highlight-box">
-   <p><strong>Verzending is gratis</strong> naar Nederland en België. Voor andere landen kunnen extra verzendkosten van toepassing zijn.</p>
+  <div class="voorwaarden-item">
+   <h3>1.2 Toepassing</h3>
+   <p>Deze Voorwaarden zijn van toepassing op alle bestellingen en overeenkomsten tussen de verkoper en de klant via de website dehondenbijbel.nl en gerelateerde verkoopdomeinen.</p>
   </div>
+  <div class="voorwaarden-item">
+   <h3>1.3 Rechten en plichten</h3>
+   <p>De Voorwaarden specificeren en verduidelijken de rechten en verplichtingen van de verkoper en de koper (hierna ook "klant" genoemd). De bepalingen van deze Voorwaarden vormen een integraal onderdeel van de koopovereenkomst.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>1.4 Toepasselijk recht</h3>
+   <p>Indien de koper een consument is, worden de niet in deze voorwaarden geregelde rechten en plichten geregeld door:</p>
+   <ul>
+    <li>Het Tsjechisch Burgerlijk Wetboek (Ob&ccaron;ansk&yacute; z&aacute;kon&iacute;k)</li>
+    <li>De Tsjechische wet op consumentenbescherming (Z&aacute;kon o ochran&ecaron; spot&rcaron;ebitele)</li>
+    <li>EU-richtlijn 2011/83/EU betreffende consumentenrechten</li>
+    <li>Voor klanten in Nederland: aanvullend de Nederlandse consumentenbeschermingswetten voor zover deze gunstiger zijn</li>
+   </ul>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>1.5 Definities</h3>
+   <p><strong>Klant/Consument:</strong> Een natuurlijke persoon die niet handelt in de uitoefening van een beroep of bedrijf.<br>
+   <strong>Product:</strong> Het gedrukte boek "De Hondenbijbel".<br>
+   <strong>Herroepingstermijn:</strong> De termijn van 30 dagen waarbinnen de consument gebruik kan maken van zijn herroepingsrecht.</p>
+  </div>
+ </section>
+
+ <!-- Sectie 2 -->
+ <section class="voorwaarden-section">
+  <h2><span class="section-num">2</span> Bestelling en Totstandkoming van de Overeenkomst</h2>
+
+  <div class="voorwaarden-item">
+   <h3>2.1 Productinformatie</h3>
+   <p>Informatie over het boek, de prijs inclusief BTW en verzendkosten worden duidelijk vermeld op de website van de verkoper en in het bestelformulier. Alle prijzen zijn in euro's (&euro;) en inclusief BTW.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>2.2 Bestelproces</h3>
+   <p>De bestelling bevat de volgende informatie:</p>
+   <ul>
+    <li>Productbeschrijving</li>
+    <li>Klantgegevens (naam, adres, e-mail)</li>
+    <li>Prijs inclusief gratis verzending</li>
+    <li>Wijze van betaling (iDeal, Bancontact, PayPal, Creditcard, Klarna)</li>
+    <li>Leveringsadres en verwachte levertijd</li>
+   </ul>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>2.3 Totstandkoming overeenkomst</h3>
+   <p>De overeenkomst komt tot stand zodra:</p>
+   <ol>
+    <li>De klant op de knop "Bestellen" of vergelijkbare bevestigingsknop klikt</li>
+    <li>De klant een bevestigingsmail ontvangt van de verkoper</li>
+   </ol>
+   <p>Door te bestellen bevestigt de klant dat hij deze Voorwaarden heeft gelezen en ermee akkoord gaat.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>2.4 Controle en correctie</h3>
+   <p>Tijdens het bestelproces heeft de klant de mogelijkheid om gegevens te controleren en te corrigeren voordat de bestelling wordt geplaatst. De verkoper gaat uit van de juistheid van de door de klant verstrekte gegevens.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>2.5 Elektronische communicatie</h3>
+   <p>De klant stemt in met communicatie via elektronische middelen (e-mail). Alle bevestigingen, facturen en andere communicatie worden elektronisch verzonden naar het opgegeven e-mailadres.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>2.6 Bewaartermijn</h3>
+   <p>De overeenkomst wordt gesloten in de Nederlandse taal. Deze wordt samen met de factuur gedurende zeven jaar opgeslagen in het elektronische archief van de verkoper conform wettelijke verplichtingen en is niet toegankelijk voor derden buiten de noodzakelijke verwerkers.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>2.7 Verplichtingen partijen</h3>
+   <p>De verkoper is verplicht het bestelde product te leveren conform de overeenkomst. De klant is verplicht het product in ontvangst te nemen en de overeengekomen prijs te betalen. Indien het boek tijdelijk niet beschikbaar is, wordt de klant hiervan binnen 3 werkdagen op de hoogte gesteld en krijgt de mogelijkheid om de bestelling te annuleren met volledige terugbetaling.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>2.8 Eigendomsovergang</h3>
+   <p>Het eigendom van het boek gaat over op de klant na volledige betaling van de aankoopprijs &eacute;n fysieke ontvangst van het product.</p>
+  </div>
+ </section>
+
+ <!-- Sectie 3 -->
+ <section class="voorwaarden-section">
+  <h2><span class="section-num">3</span> Prijs en Betaling</h2>
+
+  <div class="voorwaarden-item">
+   <h3>3.1 Prijs</h3>
+   <p>De verkoopprijs van het boek wordt duidelijk vermeld op de website. Het pakket omvat:</p>
+   <ul>
+    <li>1x fysiek boek "De Hondenbijbel"</li>
+    <li>Gratis verzending naar Nederland en Belgi&euml;</li>
+   </ul>
+   <p>Alle prijzen zijn inclusief BTW en exclusief eventuele invoerrechten voor bestellingen buiten de EU.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>3.2 Verzendkosten</h3>
+   <p>De verzendkosten zijn <strong>gratis</strong> en zijn reeds verwerkt in de productprijs. Er worden geen extra kosten in rekening gebracht bij het afrekenen.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>3.3 Factuur</h3>
+   <p>De klant ontvangt automatisch een digitale factuur per e-mail direct na bevestiging van de betaling. Deze factuur dient als bewijs van aankoop en is noodzakelijk bij eventuele retourzendingen of klachten.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>3.4 Betaalmethoden</h3>
+   <p>De betaling dient vooraf plaats te vinden via &eacute;&eacute;n van de volgende methoden:</p>
+   <ul>
+    <li><strong>iDeal:</strong> Voor Nederlandse klanten via beveiligde betalingsgateway</li>
+    <li><strong>Bancontact:</strong> Voor Belgische klanten via beveiligde betalingsgateway</li>
+    <li><strong>PayPal:</strong> Internationale betalingen via PayPal account</li>
+    <li><strong>Creditcard/Debitcard:</strong> VISA, VISA Electron, Mastercard, Maestro (via beveiligde gateway)</li>
+    <li><strong>Klarna:</strong> Betalen achteraf of in termijnen (afhankelijk van beschikbaarheid)</li>
+   </ul>
+   <p>Alle betalingen worden beveiligd verwerkt door gecertificeerde betalingsproviders. De verkoper slaat geen creditcardgegevens of bankrekening informatie op.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>3.5 Betalingsvoorwaarden</h3>
+   <p>Betaling geschiedt in &eacute;&eacute;n keer, tenzij u gebruik maakt van Klarna en kiest voor betaling in termijnen. De klant dient correcte betalingsgegevens te gebruiken. De betalingsverplichting is voldaan wanneer het volledige bedrag is bijgeschreven op de rekening van de verkoper of betalingsprovider.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>3.6 Niet-betaling</h3>
+   <p>Bij afwijzing van de betaling door de bank of betalingsprovider wordt de klant hiervan per e-mail op de hoogte gesteld. De bestelling wordt pas verwerkt na succesvolle betaling. Bij herhaalde mislukte betalingspogingen behoudt de verkoper zich het recht voor om de bestelling te annuleren.</p>
+  </div>
+ </section>
+
+ <!-- Sectie 4 -->
+ <section class="voorwaarden-section">
+  <h2><span class="section-num">4</span> Levering en Verzending</h2>
+
+  <div class="voorwaarden-item">
+   <h3>4.1 Leveringsadres</h3>
+   <p>Het boek wordt geleverd op het adres dat door de klant is opgegeven in het bestelformulier. De klant is verantwoordelijk voor het verstrekken van een correct en compleet leveringsadres. De verkoper is niet aansprakelijk voor verlies of vertraging als gevolg van onjuiste adresgegevens.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>4.2 Verwerkingstijd en levertermijnen</h3>
+   <p><strong>Verwerkingstijd:</strong> Bestellingen worden binnen 24-48 uur na bevestiging van betaling verzonden (werkdagen: maandag t/m vrijdag, exclusief feestdagen).</p>
+   <p><strong>Levertijden vanaf verzending:</strong></p>
+   <ul>
+    <li><strong>Nederland:</strong> 4-7 werkdagen</li>
+    <li><strong>Belgi&euml;:</strong> 4-7 werkdagen</li>
+   </ul>
+   <p>De genoemde levertijden zijn indicatief en gebaseerd op normale omstandigheden. De verkoper kan niet aansprakelijk worden gesteld voor vertragingen veroorzaakt door de transporteur of overmacht.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>4.3 Verzending</h3>
+   <p>De boeken worden verzonden vanuit ons magazijn:</p>
+   <p><strong>Performance Marketing Solution s.r.o.</strong><br>
+   Rybn&aacute; 716/24, Star&eacute; M&ecaron;sto<br>
+   110 00 Praha<br>
+   Tsjechi&euml;</p>
+   <p><strong>Vervoerder:</strong> GLS (General Logistics Systems)<br>
+   <strong>Track &amp; Trace:</strong> Na verzending ontvangt de klant automatisch een Track &amp; Trace-code per e-mail waarmee de zending kan worden gevolgd.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>4.4 Vertraging bij levering</h3>
+   <p>Indien het boek niet binnen 14 dagen na de verwachte levertijd is geleverd, dient de klant contact op te nemen met de verkoper via <a href="mailto:support@dehondenbijbel.nl">support@dehondenbijbel.nl</a>. Bij vertraging van meer dan 30 dagen na besteldatum heeft de klant recht op annulering van de bestelling en volledige terugbetaling, tenzij de vertraging het gevolg is van overmacht.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>4.5 Force majeure</h3>
+   <p>De verkoper is niet aansprakelijk voor vertraging of niet-levering door omstandigheden buiten redelijke controle, waaronder maar niet beperkt tot:</p>
+   <ul>
+    <li>Natuurrampen, pandemie&euml;n, oorlog, terrorisme</li>
+    <li>Stakingen bij transporteurs of leveranciers</li>
+    <li>Douaneproblemen of importbeperkingen</li>
+    <li>Technische storingen bij systemen van derden</li>
+    <li>Beperkende overheidsmaatregelen</li>
+   </ul>
+   <p>In geval van force majeure wordt de klant zo spoedig mogelijk ge&iuml;nformeerd en krijgt de mogelijkheid om de bestelling te annuleren met volledige terugbetaling indien levering onmogelijk of onredelijk vertraagd blijkt.</p>
+  </div>
+ </section>
+
+ <!-- Sectie 5 -->
+ <section class="voorwaarden-section">
+  <h2><span class="section-num">5</span> Herroepingsrecht en Retourbeleid</h2>
+
+  <div class="voorwaarden-item">
+   <h3>5.1 Herroepingstermijn</h3>
+   <p>Consumenten hebben het recht om binnen <strong>30 dagen</strong> na ontvangst van het boek de overeenkomst zonder opgave van redenen te herroepen. Dit is een uitgebreide termijn ten opzichte van de wettelijk verplichte 14 dagen en geldt als extra service van de verkoper.</p>
+
+   <div class="highlight-box">
+    <p><strong>30 dagen geld-terug-garantie:</strong> Bent u niet tevreden? Binnen 30 dagen na ontvangst krijgt u uw volledige aankoopbedrag terug.</p>
+   </div>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>5.2 Herroeping melden</h3>
+   <p>Om gebruik te maken van het herroepingsrecht dient de klant de verkoper binnen de termijn van 30 dagen op ondubbelzinnige wijze op de hoogte te stellen van de beslissing om de overeenkomst te herroepen. Dit kan via:</p>
+   <ul>
+    <li><strong>E-mail:</strong> <a href="mailto:support@dehondenbijbel.nl">support@dehondenbijbel.nl</a></li>
+   </ul>
+   <p><strong>Verplichte informatie in uw herroepingsmail:</strong></p>
+   <ul>
+    <li>Uw volledige naam en leveringsadres</li>
+    <li>Bestelnummer (te vinden op de factuur)</li>
+    <li>Datum van ontvangst van het boek</li>
+    <li>Bijlage van de digitale factuur (PDF)</li>
+    <li>Rekeningnummer (IBAN) voor terugbetaling</li>
+   </ul>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>5.3 Staat van het geretourneerde boek</h3>
+   <p>Het boek moet worden geretourneerd in <strong>nieuwe, ongebruikte staat</strong>. Dit betekent:</p>
+   <ul>
+    <li>Ongelezen (geen omgeslagen bladzijden, geen markeringen)</li>
+    <li>Onbeschadigde verpakking (indien van toepassing)</li>
+    <li>Geen vlekken, krassen, vouwen of andere gebruikssporen</li>
+    <li>Alle originele onderdelen compleet</li>
+   </ul>
+   <p><strong>Let op:</strong> Boeken die gelezen, beschadigd of anderszins gebruikt zijn komen <strong>niet</strong> in aanmerking voor retournering en terugbetaling.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>5.4 Retouradres</h3>
+   <p>Het boek dient binnen 14 dagen na melding van herroeping te worden geretourneerd naar:</p>
+
+   <div class="retour-address-box">
+    <h4>RETOURADRES - STUUR UW BOEK NAAR:</h4>
+    <p><strong>Performance Marketing Solution s.r.o. - Retourzendingen</strong></p>
+    <p>Rybn&aacute; 716/24, Star&eacute; M&ecaron;sto</p>
+    <p>110 00 Praha</p>
+    <p><strong>Tsjechi&euml;</strong></p>
+    <p style="margin-top: 12px; font-size: 14px; color: #E65100;">Vermeld op het pakket: "Retour - Bestelnummer: [uw bestelnummer]"</p>
+   </div>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>5.5 Retourkosten</h3>
+   <p>De <strong>directe kosten van retourzending zijn voor rekening van de klant</strong>, tenzij:</p>
+   <ul>
+    <li>Het product een gebrek vertoont dat bij levering aanwezig was (zie sectie 6)</li>
+    <li>De verkoper een verkeerd product heeft geleverd</li>
+    <li>Het product beschadigd is aangekomen door fout van de transporteur</li>
+   </ul>
+   <p><em>Wij adviseren een aangetekende en traceerbare verzendmethode te gebruiken.</em></p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>5.6 Terugbetaling</h3>
+   <p>De verkoper betaalt de aankoopprijs binnen <strong>14 dagen</strong> na ontvangst van het geretourneerde boek in goede staat terug, via <strong>dezelfde betaalmethode</strong> als waarmee de klant heeft betaald, tenzij de klant uitdrukkelijk heeft ingestemd met een andere methode.</p>
+   <p>De verkoper mag de terugbetaling uitstellen totdat het product is ontvangen of de klant heeft aangetoond dat het product is teruggezonden, afhankelijk van welk tijdstip eerst valt.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>5.7 Geen herroepingsrecht voor zakelijke kopers</h3>
+   <p>Het herroepingsrecht geldt uitsluitend voor <strong>consumenten</strong> (natuurlijke personen die handelen voor doeleinden die buiten hun bedrijfs- of beroepsactiviteit vallen). Zakelijke kopers hebben geen wettelijk herroepingsrecht.</p>
+  </div>
+ </section>
+
+ <!-- Sectie 6 -->
+ <section class="voorwaarden-section">
+  <h2><span class="section-num">6</span> Klachten, Gebreken en Conformiteit</h2>
+
+  <div class="voorwaarden-item">
+   <h3>6.1 Wettelijke garantie</h3>
+   <p>De verkoper is verantwoordelijk voor gebreken aan het boek die bij levering aanwezig waren of binnen <strong>2 jaar</strong> na levering manifest worden (wettelijke conformiteitsgarantie volgens EU-richtlijn 1999/44/EG).</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>6.2 Wat is een gebrek?</h3>
+   <p>Een product vertoont een gebrek indien het niet voldoet aan de overeenkomst, bijvoorbeeld:</p>
+   <ul>
+    <li>Missende, losse of beschadigde pagina's</li>
+    <li>Onleesbare tekst door drukfouten</li>
+    <li>Verkeerde boek geleverd</li>
+    <li>Schade aan de kaft of binding bij ontvangst</li>
+    <li>Product komt niet overeen met beschrijving op website</li>
+   </ul>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>6.3 Klacht indienen</h3>
+   <p>Klachten over gebreken dienen <strong>binnen 2 maanden</strong> na ontdekking gemeld te worden, maar uiterlijk binnen 2 jaar na levering. Indienen via:</p>
+   <ul>
+    <li><strong>E-mail:</strong> <a href="mailto:support@dehondenbijbel.nl">support@dehondenbijbel.nl</a></li>
+   </ul>
+   <p><strong>Verplichte informatie bij klacht:</strong></p>
+   <ul>
+    <li>Duidelijke omschrijving van het gebrek</li>
+    <li>Foto's van het gebrek (indien van toepassing)</li>
+    <li>Bestelnummer en orderdatum</li>
+    <li>Kopie van de factuur</li>
+    <li>Uw contactgegevens</li>
+   </ul>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>6.4 Behandeling van klachten</h3>
+   <p>De verkoper behandelt klachten binnen <strong>14 dagen</strong> na ontvangst. U ontvangt binnen deze termijn een reactie over de voorgestelde oplossing. Indien meer tijd nodig is voor onderzoek, wordt u hiervan op de hoogte gesteld met een indicatie van de verwachte behandeltermijn.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>6.5 Oplossingen bij gebreken</h3>
+   <p>Bij een gegrond gebrek kan de klant aanspraak maken op (naar keuze van de verkoper of na overleg):</p>
+   <ul>
+    <li><strong>Kosteloze vervanging</strong> door een nieuw exemplaar (indien op voorraad)</li>
+    <li><strong>Prijsvermindering</strong> proportioneel aan de ernst van het gebrek</li>
+    <li><strong>Volledige terugbetaling</strong> bij ernstige gebreken die niet kunnen worden verholpen</li>
+   </ul>
+   <p>Bij gegronde klachten zijn retourkosten voor rekening van de verkoper. De klant ontvangt hiervoor een prepaid retourlabel of terugbetaling van gemaakte verzendkosten (tegen overlegging van bewijs).</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>6.6 Uitgesloten gevallen</h3>
+   <p>De verkoper is <strong>niet verantwoordelijk</strong> voor schade als gevolg van:</p>
+   <ul>
+    <li>Onjuist of onzorgvuldig gebruik van het product</li>
+    <li>Normale slijtage (bijvoorbeeld bij intensief gebruik)</li>
+    <li>Schade ontstaan na levering (vallen, water, vuur, etc.)</li>
+    <li>Eigen wijzigingen of reparaties door de klant</li>
+   </ul>
+  </div>
+ </section>
+
+ <!-- Sectie 7 -->
+ <section class="voorwaarden-section">
+  <h2><span class="section-num">7</span> Auteursrecht en Intellectueel Eigendom</h2>
+
+  <div class="voorwaarden-item">
+   <h3>7.1 Bescherming</h3>
+   <p>Het boek "De Hondenbijbel" is beschermd door auteursrecht en intellectuele eigendomsrechten. Alle rechten zijn voorbehouden aan de auteur en uitgever.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>7.2 Toegestaan gebruik</h3>
+   <p>De klant krijgt <strong>&eacute;&eacute;n exemplaar voor strikt persoonlijk, niet-commercieel gebruik</strong>. Dit betekent:</p>
+   <ul>
+    <li>Lezen en studeren voor eigen ontwikkeling</li>
+    <li>Maken van handgeschreven aantekeningen</li>
+   </ul>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>7.3 Verboden handelingen</h3>
+   <p>Het is <strong>uitdrukkelijk verboden</strong> zonder schriftelijke toestemming van de rechthebbende om:</p>
+   <ul>
+    <li>Het boek of delen ervan te kopi&euml;ren, scannen of digitaliseren</li>
+    <li>Content te gebruiken voor commerci&euml;le doeleinden</li>
+    <li>Delen te publiceren op websites, sociale media of in andere publicaties</li>
+    <li>Afgeleide werken te cre&euml;ren op basis van de inhoud</li>
+   </ul>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>7.4 Sancties bij inbreuk</h3>
+   <p>Inbreuk op het auteursrecht kan leiden tot:</p>
+   <ul>
+    <li>Een vordering tot staking van de inbreuk</li>
+    <li>Schadevergoeding conform wettelijke bepalingen</li>
+    <li>Strafrechtelijke vervolging</li>
+   </ul>
+  </div>
+ </section>
+
+ <!-- Sectie 8 -->
+ <section class="voorwaarden-section">
+  <h2><span class="section-num">8</span> Privacy en Bescherming Persoonsgegevens (GDPR)</h2>
+
+  <div class="voorwaarden-item">
+   <h3>8.1 Verwerkingsverantwoordelijke</h3>
+   <p><strong>Performance Marketing Solution s.r.o.</strong><br>
+   Rybn&aacute; 716/24, Star&eacute; M&ecaron;sto<br>
+   110 00 Praha, Tsjechi&euml;<br>
+   E-mail: <a href="mailto:support@dehondenbijbel.nl">support@dehondenbijbel.nl</a><br>
+   Registratienummer: 06259928</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>8.2 Welke persoonsgegevens verwerken wij?</h3>
+   <ul>
+    <li><strong>Identificatiegegevens:</strong> Voor- en achternaam</li>
+    <li><strong>Contactgegevens:</strong> E-mailadres, telefoonnummer (optioneel)</li>
+    <li><strong>Adresgegevens:</strong> Straat, huisnummer, postcode, woonplaats, land</li>
+    <li><strong>Ordergegevens:</strong> Bestelnummer, productinformatie, orderdatum, orderwaarde</li>
+    <li><strong>Betaalgegevens:</strong> Alleen betalingsmethode; volledige betaalgegevens worden uitsluitend verwerkt door gecertificeerde betalingsproviders en NIET door ons opgeslagen</li>
+    <li><strong>Technische gegevens:</strong> IP-adres, browsertype, apparaattype (via cookies)</li>
+   </ul>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>8.3 Doeleinden van verwerking</h3>
+   <ul>
+    <li><strong>Orderverwerking:</strong> Het uitvoeren van de koopovereenkomst, verzending en levering</li>
+    <li><strong>Klantenservice:</strong> Beantwoorden van vragen, afhandelen van klachten en retourzendingen</li>
+    <li><strong>Facturatie en boekhouding:</strong> Voldoen aan fiscale verplichtingen</li>
+    <li><strong>Marketingcommunicatie:</strong> Verzenden van nieuwsbriefs en productinformatie (alleen met uw toestemming)</li>
+    <li><strong>Websiteoptimalisatie:</strong> Verbeteren van gebruikerservaring via tracking pixels</li>
+    <li><strong>Fraudepreventie:</strong> Voorkomen van misbruik en fraude</li>
+   </ul>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>8.4 Rechtsgrondslagen</h3>
+   <ul>
+    <li><strong>Uitvoering overeenkomst</strong> (GDPR art. 6 lid 1 sub b): Voor orderverwerking en levering</li>
+    <li><strong>Wettelijke verplichting</strong> (GDPR art. 6 lid 1 sub c): Voor facturatie en belastingdoeleinden</li>
+    <li><strong>Toestemming</strong> (GDPR art. 6 lid 1 sub a): Voor marketing en nieuwsbriefs</li>
+    <li><strong>Gerechtvaardigd belang</strong> (GDPR art. 6 lid 1 sub f): Voor fraudepreventie en klantenservice</li>
+   </ul>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>8.5 Bewaartermijnen</h3>
+   <ul>
+    <li><strong>Ordergegevens en facturen:</strong> 10 jaar (wettelijke bewaarplicht belastingdienst Tsjechi&euml;)</li>
+    <li><strong>Klantaccountgegevens:</strong> Tot 2 jaar na laatste activiteit</li>
+    <li><strong>Marketinggegevens:</strong> Tot het moment van uitschrijving + 1 maand administratieve verwerking</li>
+    <li><strong>Technische logs:</strong> Maximaal 12 maanden</li>
+   </ul>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>8.6 Delen met derden</h3>
+   <p>Wij delen uw gegevens alleen met de volgende partijen voor uitvoering van onze dienstverlening:</p>
+   <ul>
+    <li><strong>Betalingsproviders:</strong> Voor verwerking van iDeal, Bancontact, PayPal, Creditcard en Klarna betalingen</li>
+    <li><strong>GLS:</strong> Transporteur voor bezorging</li>
+    <li><strong>E-commerce platform:</strong> Platform hosting en orderverwerking</li>
+    <li><strong>Marketing analytics:</strong> Tracking pixels (alleen met uw toestemming)</li>
+   </ul>
+   <p>Alle verwerkers zijn contractueel verplicht om uw gegevens uitsluitend te gebruiken voor de overeengekomen doeleinden en passende beveiligingsmaatregelen te treffen.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>8.7 Uw rechten onder de GDPR</h3>
+   <p>U heeft te allen tijde de volgende rechten:</p>
+   <ul>
+    <li><strong>Recht op inzage</strong> (art. 15): Opvragen welke gegevens wij van u verwerken</li>
+    <li><strong>Recht op rectificatie</strong> (art. 16): Correctie van onjuiste of onvolledige gegevens</li>
+    <li><strong>Recht op gegevenswissing</strong> (art. 17): "Recht om vergeten te worden"</li>
+    <li><strong>Recht op beperking</strong> (art. 18): Beperking van verwerking onder bepaalde omstandigheden</li>
+    <li><strong>Recht op dataportabiliteit</strong> (art. 20): Overdracht van gegevens naar andere dienstverlener</li>
+    <li><strong>Recht van bezwaar</strong> (art. 21): Bezwaar maken tegen verwerking op basis van gerechtvaardigd belang</li>
+    <li><strong>Recht om toestemming in te trekken:</strong> Voor marketing of cookies</li>
+   </ul>
+   <p>Om gebruik te maken van deze rechten, stuur een e-mail naar: <strong><a href="mailto:support@dehondenbijbel.nl">support@dehondenbijbel.nl</a></strong><br>
+   Wij reageren binnen <strong>30 dagen</strong> op uw verzoek.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>8.8 Beveiliging</h3>
+   <p>Wij nemen passende technische en organisatorische maatregelen om uw persoonsgegevens te beschermen:</p>
+   <ul>
+    <li>SSL/TLS-versleuteling voor alle datatransmissie</li>
+    <li>Beveiligde, toegangsbeperkte servers</li>
+    <li>Regelmatige beveiligingsupdates en monitoring</li>
+    <li>Strikte toegangscontrole voor medewerkers</li>
+   </ul>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>8.9 Klacht indienen</h3>
+   <p>Bent u niet tevreden over hoe wij met uw persoonsgegevens omgaan? U heeft het recht om een klacht in te dienen bij de toezichthoudende autoriteit:</p>
+   <p><strong>Tsjechi&euml;:</strong> &Uacute;&rcaron;ad pro ochranu osobn&iacute;ch &uacute;daj&uring; (&Uacute;OO&Uacute;) &mdash; <a href="https://www.uoou.cz" target="_blank">www.uoou.cz</a></p>
+   <p><strong>Nederland:</strong> Autoriteit Persoonsgegevens &mdash; <a href="https://www.autoriteitpersoonsgegevens.nl" target="_blank">www.autoriteitpersoonsgegevens.nl</a></p>
+  </div>
+ </section>
+
+ <!-- Sectie 9 -->
+ <section class="voorwaarden-section">
+  <h2><span class="section-num">9</span> Cookies en Tracking Technologie&euml;n</h2>
+
+  <div class="voorwaarden-item">
+   <h3>9.1 Wat zijn cookies?</h3>
+   <p>Cookies zijn kleine tekstbestanden die op uw apparaat worden geplaatst wanneer u onze website bezoekt. Cookies helpen de website goed te laten functioneren en uw gebruikerservaring te verbeteren.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>9.2 Welke cookies gebruiken wij?</h3>
+   <p><strong>Functionele/Noodzakelijke Cookies (geen toestemming vereist):</strong></p>
+   <ul>
+    <li>Sessiebeheer (ingelogd blijven)</li>
+    <li>Winkelwagenfunctionaliteit</li>
+    <li>Beveiligingscookies</li>
+    <li>Taalvoorkeuren</li>
+   </ul>
+   <p><strong>Analytische/Tracking Cookies (toestemming vereist):</strong></p>
+   <ul>
+    <li>Meten van advertentie-effectiviteit, retargeting, conversie tracking</li>
+    <li>Gegevens: IP-adres, browserinfo, bezochte pagina's, klikgedrag, conversies</li>
+    <li>Bewaartermijn: tot 2 jaar</li>
+   </ul>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>9.3 Toestemming beheren</h3>
+   <p>Bij uw eerste bezoek aan onze website verschijnt een cookiebanner waarin u kunt kiezen:</p>
+   <ul>
+    <li><strong>Alle cookies accepteren:</strong> Functionele &eacute;n tracking cookies</li>
+    <li><strong>Alleen noodzakelijke cookies:</strong> Weigert tracking cookies</li>
+   </ul>
+   <p>U kunt uw cookievoorkeuren op elk moment wijzigen door uw browsercookies te verwijderen en de website opnieuw te bezoeken.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>9.4 Do Not Track</h3>
+   <p>Onze website respecteert "Do Not Track" (DNT) signalen. Als u DNT in uw browser heeft ingeschakeld, plaatsen wij geen tracking cookies zonder uw expliciete toestemming.</p>
+  </div>
+ </section>
+
+ <!-- Sectie 10 -->
+ <section class="voorwaarden-section">
+  <h2><span class="section-num">10</span> Geschillenbeslechting en Klachten</h2>
+
+  <div class="voorwaarden-item">
+   <h3>10.1 Eerst contact opnemen</h3>
+   <p>Heeft u een klacht of geschil? Neem dan eerst contact met ons op. Wij streven ernaar om alle klachten binnen 14 dagen in onderling overleg op te lossen.</p>
+   <p><strong>Contact:</strong><br>
+   E-mail: <a href="mailto:support@dehondenbijbel.nl">support@dehondenbijbel.nl</a><br>
+   Verwachte reactietijd: 1-2 werkdagen</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>10.2 EU Online Geschillenbeslechting (ODR)</h3>
+   <p>Voor geschillen die niet in onderling overleg kunnen worden opgelost, kunt u gebruik maken van het <strong>Europese online platform voor geschillenbeslechting (ODR)</strong>:</p>
+   <p><a href="https://ec.europa.eu/consumers/odr" target="_blank">https://ec.europa.eu/consumers/odr</a></p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>10.3 Geschillencommissie</h3>
+   <p>Als consument kunt u ook terecht bij een erkende geschillencommissie in uw land. Voor Nederlandse consumenten:</p>
+   <p><a href="https://www.degeschillencommissie.nl" target="_blank">www.degeschillencommissie.nl</a></p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>10.4 Onze verbintenis</h3>
+   <p>Performance Marketing Solution s.r.o. verbindt zich ertoe om:</p>
+   <ul>
+    <li>Alle klachten serieus te nemen en binnen 14 dagen te reageren</li>
+    <li>Mee te werken aan buitengerechtelijke geschillenbeslechting</li>
+    <li>Transparant te communiceren over de oplossing</li>
+    <li>Bindende uitspraken van geschillencommissies te respecteren</li>
+   </ul>
+  </div>
+ </section>
+
+ <!-- Sectie 11 -->
+ <section class="voorwaarden-section">
+  <h2><span class="section-num">11</span> Toepasselijk Recht en Bevoegde Rechter</h2>
+
+  <div class="voorwaarden-item">
+   <h3>11.1 Toepasselijk recht</h3>
+   <p>Op deze algemene voorwaarden en alle overeenkomsten tussen de verkoper en de klant is <strong>Tsjechisch recht</strong> van toepassing, met uitzondering van het Weens Koopverdrag (CISG).</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>11.2 Bescherming consumenten EU</h3>
+   <p>Voor <strong>consumenten binnen de Europese Unie</strong> geldt dat de toepassing van Tsjechisch recht geen afbreuk doet aan de bescherming die wordt geboden door dwingende bepalingen van consumentenbescherming in het land waar de consument zijn gewone verblijfplaats heeft, indien deze bepalingen gunstiger zijn.</p>
+   <p>Dit betekent dat consumenten in Nederland ook een beroep kunnen doen op beschermende Nederlandse wetgeving indien deze verder gaat dan de Tsjechische of Europese regelgeving.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>11.3 Bevoegde rechter voor consumenten</h3>
+   <p>Voor <strong>consumenten</strong> geldt dat geschillen kunnen worden voorgelegd aan:</p>
+   <ul>
+    <li>De bevoegde rechter in <strong>Tsjechi&euml; (Praha)</strong>, OF</li>
+    <li>De bevoegde rechter in het land waar de consument zijn <strong>woonplaats</strong> heeft</li>
+   </ul>
+   <p>De consument heeft de keuze welke rechter hij aanspreekt. De verkoper kan een consument alleen dagvaarden voor de rechter van de woonplaats van de consument.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>11.4 Bevoegde rechter voor zakelijke klanten</h3>
+   <p>Voor <strong>zakelijke kopers</strong> (niet-consumenten) geldt dat alle geschillen uitsluitend worden voorgelegd aan de bevoegde rechter in <strong>Praha, Tsjechi&euml;</strong>.</p>
+  </div>
+ </section>
+
+ <!-- Sectie 12 -->
+ <section class="voorwaarden-section">
+  <h2><span class="section-num">12</span> Slotbepalingen</h2>
+
+  <div class="voorwaarden-item">
+   <h3>12.1 Wijzigingen</h3>
+   <p>De verkoper behoudt zich het recht voor om deze Algemene Voorwaarden te wijzigen. Wijzigingen worden van kracht vanaf de datum van publicatie op de website.</p>
+   <p>Voor reeds gesloten overeenkomsten blijven de voorwaarden gelden die golden op het moment van bestelling, tenzij wettelijke bepalingen anders voorschrijven.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>12.2 Nietigheid van bepalingen</h3>
+   <p>Indien &eacute;&eacute;n of meerdere bepalingen van deze Algemene Voorwaarden nietig zijn of vernietigd worden, blijven de overige bepalingen volledig van kracht.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>12.3 Volledige overeenkomst</h3>
+   <p>Deze Algemene Voorwaarden vormen samen met de orderbevestiging de volledige overeenkomst tussen de verkoper en de klant.</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>12.4 Contact en vragen</h3>
+   <p>Voor vragen over deze Algemene Voorwaarden of over uw bestelling kunt u contact met ons opnemen:</p>
+   <p><strong>Performance Marketing Solution s.r.o.</strong><br>
+   E-mail: <a href="mailto:support@dehondenbijbel.nl">support@dehondenbijbel.nl</a><br>
+   Website: <a href="https://dehondenbijbel.nl" target="_blank">https://dehondenbijbel.nl</a></p>
+   <p><strong>Klantenservice openingstijden:</strong><br>
+   Maandag t/m vrijdag: 9:00 - 17:00 CET<br>
+   Gemiddelde reactietijd: 1-2 werkdagen</p>
+  </div>
+  <div class="voorwaarden-item">
+   <h3>12.5 Datum inwerkingtreding</h3>
+   <p>Deze Algemene Voorwaarden zijn geldig vanaf <strong>17 maart 2026</strong>.</p>
+  </div>
+ </section>
+
+ <!-- Contact Box -->
+ <div class="contact-box">
+  <h3>Vragen over deze voorwaarden?</h3>
+  <p>Neem contact met ons op via <a href="mailto:support@dehondenbijbel.nl">support@dehondenbijbel.nl</a></p>
+  <p>Wij helpen u graag verder!</p>
  </div>
 
- <div class="divider"></div>
-
- <!-- Artikel 9 -->
- <div class="section-block">
-  <h2><span class="section-num">9</span> Garantie</h2>
-  <p>Naast het wettelijke herroepingsrecht van 14 dagen bieden wij een <strong>uitgebreide 30 dagen geld-terug-garantie</strong>.</p>
-  <p>Indien je niet tevreden bent met het product, kun je binnen 30 dagen na ontvangst contact met ons opnemen voor een volledige terugbetaling, zonder lastige vragen.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 10 -->
- <div class="section-block">
-  <h2><span class="section-num">10</span> Klachtenregeling</h2>
-  <p>Klachten over de uitvoering van de overeenkomst moeten binnen bekwame tijd, volledig en duidelijk omschreven worden ingediend bij de ondernemer, nadat de consument de gebreken heeft geconstateerd.</p>
-  <p>Bij de ondernemer ingediende klachten worden binnen een termijn van 14 dagen gerekend vanaf de datum van ontvangst beantwoord.</p>
-  <p>Neem contact op via: <a href="mailto:support@dehondenbijbel.nl" style="color: var(--cta);">support@dehondenbijbel.nl</a></p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 11 -->
- <div class="section-block">
-  <h2><span class="section-num">11</span> Intellectueel eigendom</h2>
-  <p>Alle intellectuele eigendomsrechten op de producten, waaronder maar niet beperkt tot teksten, afbeeldingen, ontwerpen en lay-outs, berusten bij de ondernemer of diens licentiegevers.</p>
-  <p>Het is niet toegestaan om zonder voorafgaande schriftelijke toestemming van de ondernemer de producten of enig onderdeel daarvan te verveelvoudigen, op te slaan in een gegevensbestand, of openbaar te maken.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 12 -->
- <div class="section-block">
-  <h2><span class="section-num">12</span> Toepasselijk recht</h2>
-  <p>Op alle geschillen met betrekking tot deze overeenkomst is het recht van de Tsjechische Republiek van toepassing, met inachtneming van de dwingendrechtelijke bepalingen van het land waar de consument woonachtig is.</p>
-  <p>De Europese Commissie biedt een platform voor onlinegeschillenbeslechting (ODR): <a href="https://ec.europa.eu/consumers/odr/" target="_blank" style="color: var(--cta);">https://ec.europa.eu/consumers/odr/</a></p>
- </div>
-
- <div class="info-box" style="margin-top: 48px; background: linear-gradient(135deg, var(--light), var(--section));">
-  <h3>📅 Laatste update</h3>
-  <p>Deze voorwaarden zijn voor het laatst bijgewerkt op 1 maart 2026. Wij behouden ons het recht voor deze voorwaarden te allen tijde te wijzigen.</p>
+ <!-- ODR Link Box -->
+ <div class="odr-box">
+  <h3>EU Platform voor Online Geschillenbeslechting</h3>
+  <p>De Europese Commissie biedt een platform voor online geschillenbeslechting (ODR):</p>
+  <p><strong><a href="https://ec.europa.eu/consumers/odr" target="_blank">https://ec.europa.eu/consumers/odr</a></strong></p>
  </div>
 
 </div>

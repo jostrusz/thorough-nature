@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verzend- en Leveringsbeleid — De Hondenbijbel</title>
-<meta name="description" content="Alles over verzending, levertijden en levering van De Hondenbijbel.">
+<meta name="description" content="Alles over verzending, levertijden en levering van De Hondenbijbel. Gratis verzending naar Nederland en België, levertijd 4-7 werkdagen.">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="/dehondenbijbel/images/preloader.webp" type="image/webp">
 
@@ -144,7 +144,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 .info-box p, .info-box li { font-family: 'Cabin', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; }
 .info-box ul { list-style: none; padding: 0; }
 .info-box ul li { padding: 4px 0; }
-.info-box ul li::before { content: '→ '; color: var(--cta); font-weight: 700; }
+.info-box ul li::before { content: '\2192\0020'; color: var(--cta); font-weight: 700; }
 
 /* Sekce */
 .section-block { margin-bottom: 40px; }
@@ -159,7 +159,26 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
  align-items: center;
  gap: 10px;
 }
-.section-block h2 .icon { font-size: 28px; }
+.section-block h2 .num {
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ width: 36px;
+ height: 36px;
+ background: var(--cta);
+ color: var(--white);
+ border-radius: 50%;
+ font-size: 16px;
+ font-weight: 700;
+ flex-shrink: 0;
+}
+.section-block h3 {
+ font-family: 'Cabin', sans-serif;
+ font-size: 17px;
+ font-weight: 700;
+ color: var(--heading);
+ margin: 24px 0 12px;
+}
 .section-block p { font-family: 'Cabin', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 12px; }
 .section-block ul, .section-block ol { padding-left: 24px; margin-bottom: 12px; }
 .section-block li { font-family: 'Cabin', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 6px; }
@@ -173,6 +192,15 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
  margin: 20px 0;
 }
 .highlight-box p { margin: 0; font-size: 15px; }
+
+.warning-box {
+ background: linear-gradient(135deg, #FFF8F0, #FFEDDB);
+ border-left: 4px solid #E8A050;
+ border-radius: 0 12px 12px 0;
+ padding: 20px 24px;
+ margin: 20px 0;
+}
+.warning-box p { margin: 0; font-size: 15px; color: var(--body); }
 
 /* Tabulka levertijden */
 .delivery-table {
@@ -274,42 +302,24 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 .company-info h3 { font-family: 'Inter', sans-serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
 .company-info p { font-family: 'Cabin', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; margin: 0 0 6px; }
 
-/* Cross-link note */
-.cross-link-note {
- background: var(--white);
- border: 1px solid var(--section);
- border-radius: 12px;
- padding: 20px 24px;
- margin-top: 32px;
+/* Last updated */
+.last-updated {
  text-align: center;
-}
-.cross-link-note p {
  font-family: 'Cabin', sans-serif;
- font-size: 15px;
- color: var(--body);
- line-height: 1.7;
- margin: 0;
-}
-.cross-link-note a {
- color: var(--cta);
- font-weight: 600;
- text-decoration: underline;
-}
-.cross-link-note a:hover {
- color: var(--cta-hover);
+ font-size: 13px;
+ color: var(--muted);
+ margin-top: 40px;
+ padding-top: 20px;
+ border-top: 1px solid var(--section);
 }
 
 /* ═══ FOOTER ═══ */
 .site-footer { background: var(--dark); padding: 48px 24px 24px; color: rgba(255, 255, 255, 0.7); }
 .footer-inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
 .footer-brand { display: flex; align-items: center; gap: 16px; }
-.footer-brand-text { font-family: 'Inter', sans-serif; font-size: 18px; color: var(--white); line-height: 1.3; }
 .footer-links { display: flex; flex-direction: column; gap: 10px; }
 .footer-links a { font-family: 'Cabin', sans-serif; font-size: 14px; color: rgba(255, 255, 255, 0.7); text-decoration: none; transition: color 0.2s; }
 .footer-links a:hover { color: var(--white); }
-.footer-contact { display: flex; flex-direction: column; gap: 8px; font-family: 'Cabin', sans-serif; font-size: 14px; }
-.footer-contact a { color: rgba(255, 255, 255, 0.7); text-decoration: none; }
-.footer-contact a:hover { color: var(--white); }
 .footer-payments { display: flex; align-items: center; gap: 10px; }
 .pay-icon { height: 28px; width: auto; opacity: 0.85; transition: opacity 0.2s; }
 .pay-icon:hover { opacity: 1; }
@@ -367,28 +377,34 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">📦 Verzending &amp; Levering</div>
+ <div class="badge">Verzending &amp; Levering</div>
  <h1>Verzend- en Leveringsbeleid</h1>
- <p>Alles over verzending, levertijden en levering</p>
+ <p>Alles over verzending, levertijden en levering van uw bestelling</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="page-content">
 
+ <!-- Samenvatting -->
  <div class="info-box">
-  <h3>📌 Samenvatting</h3>
+  <h3>Samenvatting</h3>
   <ul>
-   <li>Gratis verzending naar Nederland en België</li>
-   <li>Levertijd: 4-7 werkdagen (NL/BE)</li>
+   <li>Gratis verzending naar Nederland en Belgi&euml;</li>
+   <li>Levertijd: 4-7 werkdagen</li>
    <li>Trackingcode per e-mail na verzending</li>
    <li>Verzending binnen 24-48 uur na betaling</li>
   </ul>
  </div>
 
- <!-- Verzending -->
+ <!-- 1. Verzending -->
  <div class="section-block">
-  <h2><span class="icon">📦</span> Verzending</h2>
-  <p>Wij verzenden alle bestellingen vanuit ons magazijn in Europa. Na ontvangst van je betaling wordt je bestelling binnen <strong>24-48 uur</strong> verwerkt en verzonden.</p>
+  <h2><span class="num">1</span> Verzending</h2>
+
+  <h3>1.1 Verwerking van uw bestelling</h3>
+  <p>Na ontvangst van uw betaling wordt uw bestelling binnen <strong>24-48 uur</strong> verwerkt en verzonden. U ontvangt een bevestigingsmail zodra uw pakket is verzonden.</p>
+
+  <h3>1.2 Verzendkosten en levertijden</h3>
+  <p>De verzendkosten zijn <strong>gratis</strong> en zijn reeds verwerkt in de productprijs. Er worden geen extra kosten in rekening gebracht bij het afrekenen.</p>
 
   <table class="delivery-table">
    <thead>
@@ -399,39 +415,75 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
     </tr>
    </thead>
    <tbody>
-    <tr><td>🇳🇱 Nederland</td><td>4-7 werkdagen</td><td><span class="free-tag">GRATIS</span></td></tr>
-    <tr><td>🇧🇪 België</td><td>4-7 werkdagen</td><td><span class="free-tag">GRATIS</span></td></tr>
+    <tr><td>Nederland</td><td>4-7 werkdagen</td><td><span class="free-tag">GRATIS</span></td></tr>
+    <tr><td>Belgi&euml;</td><td>4-7 werkdagen</td><td><span class="free-tag">GRATIS</span></td></tr>
    </tbody>
   </table>
 
   <div class="highlight-box">
-   <p><strong>Digitale producten (e-books, PDF):</strong> Direct na betaling ontvang je een downloadlink per e-mail. Geen wachttijd!</p>
+   <p><strong>Let op:</strong> Levertijden zijn indicatief en kunnen variëren door omstandigheden bij de vervoerder. Tijdens feestdagen en piekperiodes kan de levertijd iets langer zijn.</p>
   </div>
+
+  <h3>1.3 Vervoerder</h3>
+  <p>Wij werken samen met betrouwbare internationale vervoerders om uw bestelling veilig en op tijd te bezorgen. De exacte vervoerder wordt bepaald op basis van uw bestemming.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Tracking -->
+ <!-- 2. Bestelling volgen -->
  <div class="section-block">
-  <h2><span class="icon">📍</span> Bestelling volgen</h2>
-  <p>Na verzending ontvang je per e-mail een bevestiging met een <strong>trackingcode</strong>. Hiermee kun je je pakket real-time volgen via de website van de vervoerder.</p>
-  <p>Heb je je trackingcode niet ontvangen? Controleer je spammap of neem contact met ons op via <a href="mailto:support@dehondenbijbel.nl" style="color: var(--cta);">support@dehondenbijbel.nl</a>.</p>
+  <h2><span class="num">2</span> Bestelling volgen</h2>
+
+  <h3>2.1 Trackingcode</h3>
+  <p>Na verzending ontvangt u per e-mail een bevestiging met een <strong>trackingcode</strong>. Hiermee kunt u uw pakket real-time volgen via de website van de vervoerder.</p>
+
+  <h3>2.2 Trackingcode niet ontvangen?</h3>
+  <p>Controleer eerst uw spammap of ongewenste e-mail. Heeft u na 48 uur nog geen trackingcode ontvangen? Neem dan contact met ons op via <a href="mailto:support@dehondenbijbel.nl" style="color: var(--cta);">support@dehondenbijbel.nl</a>.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Beschadigd -->
+ <!-- 3. Levering -->
  <div class="section-block">
-  <h2><span class="icon">⚠️</span> Beschadigd of verkeerd product?</h2>
-  <p>Heb je een beschadigd of verkeerd product ontvangen? Neem dan direct contact met ons op. Wij zorgen kosteloos voor een vervanging of volledige terugbetaling.</p>
-  <p>Stuur een foto van het beschadigde product naar <a href="mailto:support@dehondenbijbel.nl" style="color: var(--cta);">support@dehondenbijbel.nl</a> samen met je ordernummer.</p>
+  <h2><span class="num">3</span> Levering</h2>
+
+  <h3>3.1 Leveringsadres</h3>
+  <p>Het boek wordt bezorgd op het adres dat u bij de bestelling heeft opgegeven. Controleer uw adresgegevens zorgvuldig voordat u de bestelling afrondt.</p>
+
+  <h3>3.2 Niet thuis bij levering</h3>
+  <p>Als u niet thuis bent, laat de vervoerder doorgaans een bericht achter met informatie over een tweede bezorgpoging of afhaalpunt. De exacte procedure verschilt per vervoerder en land.</p>
+
+  <h3>3.3 Risico-overgang</h3>
+  <p>Het risico van verlies of beschadiging van het product gaat over op de klant op het moment van levering. Tot dat moment draagt de verkoper het risico. Indien het product tijdens het transport beschadigd raakt, is dit onze verantwoordelijkheid.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- FAQ -->
+ <!-- 4. Beschadigd of verloren -->
  <div class="section-block">
-  <h2><span class="icon">❓</span> Veelgestelde vragen</h2>
+  <h2><span class="num">4</span> Beschadigd of verkeerd product</h2>
+
+  <h3>4.1 Beschadigd product</h3>
+  <p>Heeft u een beschadigd product ontvangen? Neem dan direct contact met ons op. Stuur een e-mail naar <a href="mailto:support@dehondenbijbel.nl" style="color: var(--cta);">support@dehondenbijbel.nl</a> met:</p>
+  <ul>
+   <li>Uw naam en bestelnummer</li>
+   <li>Foto's van het beschadigde product</li>
+   <li>Beschrijving van de schade</li>
+  </ul>
+  <p>Wij zorgen kosteloos voor een <strong>vervanging</strong> of <strong>volledige terugbetaling</strong> &mdash; de keuze is aan u.</p>
+
+  <h3>4.2 Verkeerd product</h3>
+  <p>Heeft u een ander product ontvangen dan besteld? Neem contact met ons op en wij sturen u het juiste product toe. De retourkosten zijn in dit geval voor onze rekening.</p>
+
+  <h3>4.3 Pakket niet ontvangen</h3>
+  <p>Als uw pakket langer dan <strong>14 werkdagen</strong> onderweg is, neem dan contact met ons op met uw bestelnummer en trackingcode. Wij starten een onderzoek bij de vervoerder en zorgen indien nodig voor een nieuwe verzending of volledige terugbetaling.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 5. FAQ -->
+ <div class="section-block">
+  <h2><span class="num">5</span> Veelgestelde vragen</h2>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
@@ -439,7 +491,27 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Bestellingen worden binnen 24-48 uur na betaling verwerkt en verzonden. Je ontvangt een bevestigingsmail met trackingcode zodra je pakket onderweg is.</p>
+    <p>Bestellingen worden binnen 24-48 uur na betaling verwerkt en verzonden. U ontvangt een bevestigingsmail met trackingcode zodra uw pakket onderweg is.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Kan ik mijn bestelling annuleren?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Ja, als uw bestelling nog niet is verzonden, kunt u deze kosteloos annuleren. Stuur zo snel mogelijk een e-mail naar support@dehondenbijbel.nl met uw bestelnummer. Is de bestelling al verzonden? Dan kunt u het boek na ontvangst retourneren via ons <a href="retourbeleid" style="color: var(--cta);">retourbeleid</a>.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Leveren jullie ook buiten Nederland en Belgi&euml;?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Op dit moment verzenden wij uitsluitend naar Nederland en Belgi&euml;. Wij werken aan het uitbreiden van onze verzendmogelijkheden naar andere EU-landen.</p>
    </div>
   </div>
 
@@ -449,25 +521,29 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Controleer eerst de trackingcode in je bevestigingsmail. Als je pakket langer dan 14 werkdagen onderweg is (binnen EU), neem dan contact met ons op. Wij zoeken het voor je uit en zorgen indien nodig voor een nieuwe verzending.</p>
+    <p>Controleer eerst de trackingcode in uw bevestigingsmail. Als uw pakket langer dan 14 werkdagen onderweg is, neem dan contact met ons op. Wij zoeken het voor u uit en zorgen indien nodig voor een nieuwe verzending of volledige terugbetaling.</p>
    </div>
   </div>
-
-  <p style="margin-top: 16px;">Heb je vragen over retourneren of garantie? Bekijk ons <a href="retourbeleid.html" style="color: var(--cta); font-weight: 600;">Retour- en Garantiebeleid</a>.</p>
  </div>
 
- <!-- Cross-link note -->
- <div class="cross-link-note">
-  <p>Voor informatie over retourneren en garantie, zie ons <a href="retourbeleid.html">Retour- en Garantiebeleid</a>.</p>
+ <!-- Cross-link -->
+ <div class="highlight-box" style="text-align: center; border-left-color: var(--purple);">
+  <p>Voor informatie over retourneren en garantie, zie ons <a href="retourbeleid" style="color: var(--cta); font-weight: 600;">Retour- en Garantiebeleid</a>. Voor alle overige voorwaarden, zie onze <a href="voorwaarden" style="color: var(--cta); font-weight: 600;">Algemene Voorwaarden</a>.</p>
  </div>
 
- <!-- Firemní údaje -->
+ <!-- Bedrijfsgegevens -->
  <div class="company-info">
-  <h3>🏢 Bedrijfsgegevens</h3>
+  <h3>Bedrijfsgegevens</h3>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, 110 00 Praha, Tsjechie</p>
-  <p>KvK-nummer: 06259928 | BTW-nummer: CZ06259928</p>
-  <p>E-mail: <a href="mailto:support@dehondenbijbel.nl" style="color: var(--cta);">support@dehondenbijbel.nl</a></p>
+  <p>Rybn&aacute; 716/24, Star&eacute; M&#283;sto, 110 00 Praha, Tsjechi&euml;</p>
+  <p>Registratienummer: 06259928</p>
+  <p>BTW-nummer: CZ06259928</p>
+  <p>Klantenservice: <a href="mailto:support@dehondenbijbel.nl" style="color: var(--cta);">support@dehondenbijbel.nl</a></p>
+ </div>
+
+ <!-- Laatst bijgewerkt -->
+ <div class="last-updated">
+  Laatst bijgewerkt: 17 maart 2026
  </div>
 
 </div>
