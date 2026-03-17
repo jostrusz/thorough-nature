@@ -127,10 +127,8 @@ async function computeLiveStats(
             entity: "order",
             fields: [
               "id",
-              "summary.raw_current_order_total.value",
-              "summary.current_order_total",
-              "summary.raw_current_order_tax_total.value",
-              "summary.current_order_tax_total",
+              "total",
+              "tax_total",
               "items.*",
             ],
             filters: {
@@ -141,15 +139,8 @@ async function computeLiveStats(
 
           for (const order of (orders || [])) {
             const orderObj = order as any
-            const total = orderObj.summary?.raw_current_order_total?.value
-              ?? orderObj.summary?.current_order_total
-              ?? 0
-            const tax = orderObj.summary?.raw_current_order_tax_total?.value
-              ?? orderObj.summary?.current_order_tax_total
-              ?? 0
-
-            revenue += Number(total)
-            taxAmount += Number(tax)
+            revenue += Number(orderObj.total ?? 0)
+            taxAmount += Number(orderObj.tax_total ?? 0)
             orderCount++
             itemCount += (orderObj.items || []).reduce(
               (sum: number, item: any) => sum + (Number(item.quantity) || 0), 0
