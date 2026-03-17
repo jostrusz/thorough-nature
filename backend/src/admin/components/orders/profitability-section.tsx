@@ -266,8 +266,7 @@ function CostBreakdownRow({ label, value }: { label: string; value: number }) {
   )
 }
 
-function ProjectCard({ project }: { project: ProjectStats }) {
-  const [expanded, setExpanded] = useState(false)
+function ProjectCard({ project, expanded, onToggle }: { project: ProjectStats; expanded: boolean; onToggle: () => void }) {
   const glow = getGlowLevel(project)
   const profitColor =
     project.net_profit > 0
@@ -287,7 +286,7 @@ function ProjectCard({ project }: { project: ProjectStats }) {
         ...cardOuterStyle,
         background: glowBg[glow],
       }}
-      onClick={() => setExpanded(!expanded)}
+      onClick={onToggle}
     >
       {/* Glow bar */}
       <div
@@ -548,6 +547,7 @@ export function ProfitabilitySection() {
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
   const [showCustomRange, setShowCustomRange] = useState(false)
+  const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null)
 
   const { data, isLoading } = useProfitability(period, dateFrom, dateTo)
 
@@ -754,7 +754,14 @@ export function ProfitabilitySection() {
           }}
         >
           {projects.map((project) => (
-            <ProjectCard key={project.project_id} project={project} />
+            <ProjectCard
+              key={project.project_id}
+              project={project}
+              expanded={expandedProjectId === project.project_id}
+              onToggle={() => setExpandedProjectId(
+                expandedProjectId === project.project_id ? null : project.project_id
+              )}
+            />
           ))}
         </div>
       )}
