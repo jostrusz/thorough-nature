@@ -5,6 +5,7 @@ import {
   PaymentSessionStatus,
 } from "@medusajs/framework/utils"
 import { AirwallexApiClient } from "./api-client"
+import { Pool } from "pg"
 
 type Options = {
   clientId?: string
@@ -62,6 +63,7 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
   protected options_: Options
   protected client_: AirwallexApiClient | null = null
   protected container_: any = null
+  private pgPool_: Pool | null = null
 
   constructor(container: InjectedDependencies, options: Options) {
     super(container, options)
@@ -75,56 +77,61 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
   }
 
   /**
-   * Lazily resolve the gateway config service from the container.
+   * Get a shared PostgreSQL connection pool for direct DB queries.
+   * Used because gatewayConfig module is not available in payment provider's DI scope.
    */
-  private getGatewayConfigService(): any {
-    try {
-      return this.container_.resolve("gatewayConfig")
-    } catch {
-      return null
+  private getPool(): Pool {
+    if (!this.pgPool_) {
+      const dbUrl = process.env.DATABASE_URL
+      if (!dbUrl) throw new Error("DATABASE_URL not set")
+      this.pgPool_ = new Pool({ connectionString: dbUrl, max: 3 })
     }
+    return this.pgPool_
   }
 
   /**
    * Build or return the Airwallex API client.
-   * Tries gateway config (admin DB) first, then falls back to provider options (env vars).
+   * Reads gateway config via direct DB query (bypasses DI container).
+   * Falls back to provider options (env vars) if DB query fails.
    */
   private async getAirwallexClient(): Promise<AirwallexApiClient> {
     if (this.client_) return this.client_
 
-    // 1. Try gateway config from database (admin-configured)
-    const gatewayConfigService = this.getGatewayConfigService()
-    if (gatewayConfigService) {
-      try {
-        const configs = await gatewayConfigService.listGatewayConfigs(
-          { provider: "airwallex", is_active: true },
-          { take: 1 }
-        )
-        const config = configs[0]
-        if (config) {
-          const isLive = config.mode === "live"
-          const keys = isLive ? config.live_keys : config.test_keys
-          if (keys?.api_key && keys?.secret_key) {
-            this.logger_.info(`[Airwallex] Using ${isLive ? "live" : "test"} keys from gateway config${keys.account_id ? `, account: ${keys.account_id}` : ""}`)
-            this.client_ = new AirwallexApiClient(
-              keys.api_key,      // DB field "api_key" = Airwallex "Client ID"
-              keys.secret_key,   // DB field "secret_key" = Airwallex "API Key"
-              !isLive,           // isTest
-              this.logger_,
-              keys.account_id    // Account ID for org-level keys (x-on-behalf-of)
-            )
-            await this.client_.login()
-            return this.client_
-          }
+    // 1. Try gateway config from database (admin-configured) via direct DB query
+    try {
+      const pool = this.getPool()
+      const { rows } = await pool.query(
+        `SELECT id, display_name, mode, live_keys, test_keys, project_slugs, priority
+         FROM gateway_config
+         WHERE provider = 'airwallex' AND is_active = true AND deleted_at IS NULL
+         ORDER BY priority ASC
+         LIMIT 1`
+      )
+
+      const config = rows[0]
+      if (config) {
+        const isLive = config.mode === "live"
+        const keys = isLive ? config.live_keys : config.test_keys
+        if (keys?.api_key && keys?.secret_key) {
+          this.logger_.info(`[Airwallex] ✓ Using ${isLive ? "LIVE" : "TEST"} keys from admin gateway "${config.display_name}" (id: ${config.id})`)
+          this.client_ = new AirwallexApiClient(
+            keys.api_key,      // DB field "api_key" = Airwallex "Client ID"
+            keys.secret_key,   // DB field "secret_key" = Airwallex "API Key"
+            !isLive,           // isTest
+            this.logger_,
+            keys.account_id    // Account ID for org-level keys (x-on-behalf-of)
+          )
+          await this.client_.login()
+          return this.client_
         }
-      } catch (e: any) {
-        this.logger_.warn(`[Airwallex] Gateway config read failed: ${e.message}`)
       }
+    } catch (e: any) {
+      this.logger_.error(`[Airwallex] Direct DB query failed: ${e.message}`)
     }
 
     // 2. Fallback to options (env vars via medusa-config.js)
     if (this.options_?.clientId && this.options_?.apiKey) {
-      this.logger_.info(`[Airwallex] Using credentials from provider options`)
+      this.logger_.warn(`[Airwallex] ⚠️ FALLBACK: Using credentials from ENV VARS (DB query failed)`)
       this.client_ = new AirwallexApiClient(
         this.options_.clientId,
         this.options_.apiKey,
@@ -193,19 +200,17 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
         `[Airwallex] Payment intent created: ${paymentIntent.id}, status: ${paymentIntent.status}`
       )
 
-      // Determine environment for frontend SDK based on the client's baseUrl
+      // Determine environment for frontend SDK via direct DB query
       let environment = "demo"
       try {
-        const gatewayConfigService = this.getGatewayConfigService()
-        if (gatewayConfigService) {
-          const configs = await gatewayConfigService.listGatewayConfigs(
-            { provider: "airwallex", is_active: true },
-            { take: 1 }
-          )
-          if (configs[0]?.mode === "live") environment = "prod"
-        } else if (this.options_?.testMode === false) {
-          environment = "prod"
-        }
+        const pool = this.getPool()
+        const { rows } = await pool.query(
+          `SELECT mode FROM gateway_config
+           WHERE provider = 'airwallex' AND is_active = true AND deleted_at IS NULL
+           LIMIT 1`
+        )
+        if (rows[0]?.mode === "live") environment = "prod"
+        else if (this.options_?.testMode === false) environment = "prod"
       } catch {}
 
       // Redirect-based methods: confirm intent server-side → get redirect URL
