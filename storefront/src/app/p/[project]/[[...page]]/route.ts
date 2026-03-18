@@ -352,11 +352,8 @@ async function fetchAdvertorial(
   if (slug.includes(".")) return null
 
   try {
-    const url = `${config.medusaUrl}/store/advertorials/${encodeURIComponent(slug)}?project_id=${config.slug}`
+    const url = `${config.medusaUrl}/public/advertorials/${encodeURIComponent(slug)}?project_id=${config.slug}`
     const res = await fetch(url, {
-      headers: {
-        "x-publishable-api-key": config.publishableApiKey || "",
-      },
       next: { revalidate: 60 }, // Cache for 60s on server
     })
 

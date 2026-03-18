@@ -62,6 +62,7 @@ interface ProjectConfig {
   project_slug: string
   flag_emoji: string
   country_tag: string
+  domain?: string
 }
 
 interface MetaPixelConfig {
@@ -95,27 +96,6 @@ function generateSlug(title: string): string {
     if (lastHyphen > 40) slug = slug.substring(0, lastHyphen)
   }
   return slug
-}
-
-// ═══════════════════════════════════════════
-// DOMAIN MAPPING (project slug → domain)
-// ═══════════════════════════════════════════
-
-const PROJECT_DOMAINS: Record<string, string> = {
-  loslatenboek: "loslatenboek.nl",
-  dehondenbijbel: "dehondenbijbel.nl",
-  "laat-los-nl": "loslatenboek.nl",
-  "lass-los-de": "lassloslive.de",
-  "odpusc-pl": "odpusc.pl",
-  "slapp-taget-se": "slapptaget.se",
-  "psi-superzivot-cz": "psisuperzivot.cz",
-  "hondenbijbel-nl": "dehondenbijbel.nl",
-  "biblia-kotow-pl": "bibliakotow.pl",
-  "kutyabiblia-hu": "kutyabiblia.hu",
-}
-
-function getDomain(projectSlug: string): string {
-  return PROJECT_DOMAINS[projectSlug] || `${projectSlug}.com`
 }
 
 // ═══════════════════════════════════════════
@@ -207,7 +187,7 @@ function PageRow({
   onDelete: (id: string) => void
 }) {
   const project = projects.find((p) => p.project_slug === page.project_id)
-  const domain = getDomain(page.project_id)
+  const domain = project?.domain || page.project_id + ".com"
   const fullUrl = `https://${domain}/${page.slug}`
 
   const handleCopyUrl = useCallback(() => {
@@ -303,7 +283,8 @@ function AdvertorialModal({
   const [facebookPixelId, setFacebookPixelId] = useState(page?.facebook_pixel_id || "")
   const [showSeo, setShowSeo] = useState(false)
 
-  const domain = getDomain(projectId)
+  const selectedProject = projects.find((p) => p.project_slug === projectId)
+  const domain = selectedProject?.domain || projectId + ".com"
   const previewUrl = `https://${domain}/${slug || generateSlug(title)}`
 
   const handleTitleChange = (val: string) => {
@@ -383,7 +364,7 @@ function AdvertorialModal({
             <select className="adv-input" style={selectStyle} value={projectId} onChange={(e) => setProjectId(e.target.value)}>
               {projects.map((p) => (
                 <option key={p.project_slug} value={p.project_slug}>
-                  {p.flag_emoji} {p.project_name} ({getDomain(p.project_slug)})
+                  {p.flag_emoji} {p.project_name} ({p.domain || p.project_slug + ".com"})
                 </option>
               ))}
             </select>

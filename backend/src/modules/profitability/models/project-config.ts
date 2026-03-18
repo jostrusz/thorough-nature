@@ -8,6 +8,7 @@ const ProjectConfig = model.define("project_config", {
   flag_emoji: model.text(),
   country_tag: model.text(),
   sales_channel_id: model.text().nullable(),
+  domain: model.text().nullable(),
   book_cost_eur: model.bigNumber().default(1.80),
   shipping_cost_eur: model.bigNumber().default(5.00),
   pick_pack_cost_eur: model.bigNumber().default(1.50),

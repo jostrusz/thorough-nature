@@ -58,6 +58,7 @@ interface ProjectConfig {
   pick_pack_cost_eur: number
   payment_fee_rate: number
   meta_ad_account_id: string | null
+  domain: string | null
   is_active: boolean
   display_order: number
 }
@@ -265,6 +266,7 @@ function ProjectModal({
     pick_pack_cost_eur: project?.pick_pack_cost_eur ?? 1.50,
     payment_fee_rate: project?.payment_fee_rate ?? 0.03,
     meta_ad_account_id: project?.meta_ad_account_id || "",
+    domain: project?.domain || "",
     is_active: project?.is_active ?? true,
     display_order: project?.display_order ?? 0,
   })
@@ -280,6 +282,7 @@ function ProjectModal({
         display_order: Number(form.display_order),
         sales_channel_id: form.sales_channel_id || null,
         meta_ad_account_id: form.meta_ad_account_id || null,
+        domain: form.domain || null,
       }
       if (isCreate) {
         return sdk.client.fetch("/admin/profitability/projects", { method: "POST", body })
@@ -331,6 +334,10 @@ function ProjectModal({
                 <option key={sc.id} value={sc.id}>{sc.name}</option>
               ))}
             </select>
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label style={labelStyle}>Domain</label>
+            <input className="pf-input" style={inputStyle} value={form.domain} onChange={(e) => set("domain", e.target.value)} placeholder="e.g. loslatenboek.nl" />
           </div>
           <div>
             <label style={labelStyle}>Book Cost (EUR)</label>
