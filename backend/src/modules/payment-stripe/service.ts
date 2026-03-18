@@ -108,30 +108,48 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
   }
 
   /**
-   * Resolve Stripe credentials (secret key, publishable key, webhook secret).
-   * ONLY reads from admin gateway config (database). No env var fallback.
-   * Returns fresh credentials each time (no caching) — supports multiple Stripe accounts.
+   * Resolve Stripe credentials from admin gateway config in database.
+   * Supports per-project Stripe accounts by matching project_slug.
+   * Falls back to env vars ONLY if gateway config module is unavailable.
    */
-  private async resolveCredentials(): Promise<{
+  private async resolveCredentials(projectSlug?: string): Promise<{
     secretKey: string
     publishableKey: string | null
     webhookSecret: string | null
     testMode: boolean
   }> {
-    // 1. Try gateway config from database (admin-configured) — preferred source
+    // 1. Try gateway config from database (admin-configured)
     const gatewayConfigService = this.getGatewayConfigService()
     if (gatewayConfigService) {
       try {
-        const configs = await gatewayConfigService.listGatewayConfigs(
+        const allConfigs = await gatewayConfigService.listGatewayConfigs(
           { provider: "stripe", is_active: true },
-          { take: 1 }
+          { order: { priority: "ASC" } }
         )
-        const config = configs[0]
+
+        // Find the best matching config for the project
+        let config = null
+        if (projectSlug && allConfigs.length > 1) {
+          // First: find a gateway that explicitly lists this project
+          config = allConfigs.find((c: any) => {
+            const slugs = Array.isArray(c.project_slugs) ? c.project_slugs : []
+            return slugs.includes(projectSlug)
+          })
+          if (config) {
+            this.logger_.info(`[Stripe] Matched gateway config for project "${projectSlug}" (id: ${config.id})`)
+          }
+        }
+
+        // Fallback: first active gateway (lowest priority number)
+        if (!config) {
+          config = allConfigs[0]
+        }
+
         if (config) {
           const isLive = config.mode === "live"
           const keys = isLive ? config.live_keys : config.test_keys
           if (keys?.api_key) {
-            this.logger_.info(`[Stripe] Using ${isLive ? "LIVE" : "TEST"} keys from admin gateway config (id: ${config.id})`)
+            this.logger_.info(`[Stripe] Using ${isLive ? "LIVE" : "TEST"} keys from admin gateway config "${config.display_name}" (id: ${config.id})`)
             return {
               secretKey: keys.api_key,
               publishableKey: keys.publishable_key || null,
@@ -141,15 +159,15 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
           }
         }
       } catch (e: any) {
-        this.logger_.warn(`[Stripe] Gateway config read failed: ${e.message}, falling back to env vars`)
+        this.logger_.warn(`[Stripe] Gateway config read failed: ${e.message}`)
       }
     } else {
-      this.logger_.warn(`[Stripe] gatewayConfig service not available in container, falling back to env vars`)
+      this.logger_.warn(`[Stripe] gatewayConfig service not available in DI container`)
     }
 
-    // 2. Fallback to options (env vars via medusa-config.js) — only if gateway config unavailable
+    // 2. Fallback to env vars — only if gateway config module unavailable
     if (this.options_?.secretKey) {
-      this.logger_.warn(`[Stripe] ⚠️ Using credentials from ENV VARS (not admin gateway config). Configure Stripe in admin to fix this.`)
+      this.logger_.warn(`[Stripe] ⚠️ FALLBACK: Using credentials from ENV VARS. Configure Stripe in admin gateway settings!`)
       return {
         secretKey: this.options_.secretKey,
         publishableKey: this.options_.publishableKey || null,
@@ -167,8 +185,8 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
   /**
    * Create a fresh Stripe SDK instance from resolved credentials.
    */
-  private async getStripeClient(): Promise<Stripe> {
-    const creds = await this.resolveCredentials()
+  private async getStripeClient(projectSlug?: string): Promise<Stripe> {
+    const creds = await this.resolveCredentials(projectSlug)
     return new Stripe(creds.secretKey, {
       apiVersion: "2025-03-31.basil" as any,
     })
@@ -196,8 +214,10 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
     const { amount, currency_code, data, context } = input
 
     try {
-      const stripe = await this.getStripeClient()
-      const creds = await this.resolveCredentials()
+      // Extract project slug from payment data or context for per-project gateway matching
+      const projectSlug = data?.project_slug || context?.project_slug || null
+      const stripe = await this.getStripeClient(projectSlug)
+      const creds = await this.resolveCredentials(projectSlug)
 
       const method = data?.method || "creditcard"
       const returnUrl = data?.return_url
