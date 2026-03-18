@@ -7248,6 +7248,36 @@ body {
     var scrollY = window.scrollY;
     renderPaymentMethods(country);
     window.scrollTo(0, scrollY);
+
+    // Update phone prefix when country changes
+    var phoneField = document.getElementById('phone');
+    if (phoneField) {
+      var PREFIXES = { NL: '+31', BE: '+32', DE: '+49', LU: '+352', AT: '+43', PL: '+48', CZ: '+420', SE: '+46', HU: '+36' };
+      var newPrefix = PREFIXES[country];
+      var oldVal = phoneField.value.trim();
+      if (newPrefix) {
+        if (!oldVal || oldVal === '+31' || oldVal === '+32' || oldVal === '+49' || oldVal === '+352') {
+          // Empty or just a prefix — replace with new prefix
+          phoneField.value = newPrefix;
+        } else {
+          // Replace existing prefix with new one
+          var prefixValues = Object.values(PREFIXES);
+          var replaced = false;
+          for (var i = 0; i < prefixValues.length; i++) {
+            if (oldVal.startsWith(prefixValues[i])) {
+              phoneField.value = newPrefix + oldVal.substring(prefixValues[i].length);
+              replaced = true;
+              break;
+            }
+          }
+          if (!replaced && !oldVal.startsWith('+')) {
+            // No prefix at all — prepend new one
+            var num = oldVal.startsWith('0') ? oldVal.substring(1) : oldVal;
+            phoneField.value = newPrefix + num;
+          }
+        }
+      }
+    }
   });
 
   /* ─── ANIMACE — Intersection Observer pro fade-in ─── */
