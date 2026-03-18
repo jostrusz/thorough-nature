@@ -479,6 +479,8 @@ const AdvertorialsPage = () => {
   const [modalPage, setModalPage] = useState<AdvertorialPage | null | "new">(null)
   const [filterProject, setFilterProject] = useState("")
   const [filterStatus, setFilterStatus] = useState("")
+  const [showDomains, setShowDomains] = useState(false)
+  const [editingDomains, setEditingDomains] = useState<Record<string, string>>({})
 
   // Fetch advertorial pages
   const { data: pagesData, isLoading: pagesLoading } = useQuery({
@@ -574,6 +576,23 @@ const AdvertorialsPage = () => {
     },
   })
 
+  // Update project domain mutation
+  const updateDomainMutation = useMutation({
+    mutationFn: async ({ id, domain }: { id: string; domain: string }) => {
+      return sdk.client.fetch(`/admin/profitability/projects/${id}`, {
+        method: "POST",
+        body: { domain },
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profitability-projects"] })
+      toast.success("Domain updated")
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Failed to update domain")
+    },
+  })
+
   const handleSave = useCallback(
     (data: Record<string, any>) => {
       if (data.id) {
@@ -594,9 +613,14 @@ const AdvertorialsPage = () => {
         <h1 style={h1Style}>
           {"\u{1F4F0}"} Advertorials
         </h1>
-        <button className="adv-btn-primary" style={btnPrimary} onClick={() => setModalPage("new")}>
-          + New Advertorial
-        </button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button className="adv-btn" style={{ ...btnOutline, padding: "8px 16px", fontSize: "13px" }} onClick={() => setShowDomains(!showDomains)}>
+            {showDomains ? "Hide Domains" : "Manage Domains"}
+          </button>
+          <button className="adv-btn-primary" style={btnPrimary} onClick={() => setModalPage("new")}>
+            + New Advertorial
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -625,6 +649,57 @@ const AdvertorialsPage = () => {
           <option value="draft">Draft</option>
         </select>
       </div>
+
+      {/* Domain Management */}
+      {showDomains && (
+        <div className="adv-card" style={{ ...sectionStyle, marginBottom: "16px" }}>
+          <div style={sectionHeaderStyle}>
+            <span style={{ fontSize: "14px", fontWeight: 600, color: colors.text }}>
+              Project Domains
+            </span>
+          </div>
+          <div style={{ padding: "12px 16px" }}>
+            {projects.map((p) => {
+              const editVal = editingDomains[p.id]
+              const currentDomain = editVal !== undefined ? editVal : (p.domain || "")
+              const isEditing = editVal !== undefined
+              return (
+                <div key={p.id} style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                  <span style={{ fontSize: "13px", minWidth: "180px", color: colors.text }}>
+                    {p.flag_emoji} {p.project_name}
+                  </span>
+                  <input
+                    className="adv-input"
+                    style={{ ...inputStyle, flex: 1, marginBottom: 0, fontSize: "12px", padding: "6px 10px" }}
+                    value={currentDomain}
+                    placeholder="example.com"
+                    onChange={(e) => setEditingDomains((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                  />
+                  {isEditing && (
+                    <button
+                      className="adv-btn-primary"
+                      style={{ ...btnPrimary, padding: "6px 14px", fontSize: "11px" }}
+                      onClick={() => {
+                        updateDomainMutation.mutate({ id: p.id, domain: currentDomain })
+                        setEditingDomains((prev) => {
+                          const next = { ...prev }
+                          delete next[p.id]
+                          return next
+                        })
+                      }}
+                    >
+                      Save
+                    </button>
+                  )}
+                  <span style={{ fontSize: "11px", color: colors.textMuted, minWidth: "180px" }}>
+                    https://{currentDomain || p.project_slug + ".com"}/
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Pages List */}
       <div className="adv-card" style={sectionStyle}>
