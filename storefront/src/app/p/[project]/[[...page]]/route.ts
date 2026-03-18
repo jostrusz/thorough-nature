@@ -351,20 +351,35 @@ async function fetchAdvertorial(
   // Skip slugs that clearly aren't advertorials (contain dots = file extensions)
   if (slug.includes(".")) return null
 
-  try {
-    const url = `${config.medusaUrl}/public/advertorials/${encodeURIComponent(slug)}?project_id=${config.slug}`
-    const res = await fetch(url, {
-      next: { revalidate: 60 }, // Cache for 60s on server
-    })
+  // Try /public/ first (no auth required), then fallback to /store/ (with API key)
+  const endpoints = [
+    `${config.medusaUrl}/public/advertorials/${encodeURIComponent(slug)}?project_id=${config.slug}`,
+    `${config.medusaUrl}/store/advertorials/${encodeURIComponent(slug)}?project_id=${config.slug}`,
+  ]
 
-    if (!res.ok) return null
+  for (const url of endpoints) {
+    try {
+      const headers: Record<string, string> = {}
+      if (url.includes("/store/")) {
+        headers["x-publishable-api-key"] = config.publishableApiKey || ""
+      }
+      const res = await fetch(url, {
+        headers,
+        next: { revalidate: 60 },
+      })
 
-    const data = await res.json()
-    if (data.found && data.page) {
-      return data.page as AdvertorialPage
+      if (!res.ok) {
+        console.warn(`[Advertorial] ${url} returned ${res.status}`)
+        continue
+      }
+
+      const data = await res.json()
+      if (data.found && data.page) {
+        return data.page as AdvertorialPage
+      }
+    } catch (e) {
+      console.warn(`[Advertorial] Failed to fetch "${slug}" from ${url}:`, e)
     }
-  } catch (e) {
-    console.warn(`[Advertorial] Failed to fetch "${slug}" for ${config.slug}:`, e)
   }
 
   return null
