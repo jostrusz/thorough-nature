@@ -25,15 +25,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(400).json({ error: "Missing stripe-signature header" })
     }
 
-    // Resolve webhook secret: admin gateway config first, env vars fallback
+    // Resolve webhook secret from gateway_config DB table (direct query)
     let webhookSecret: string | null = null
     let secretKey: string | null = null
 
     try {
+      // Try DI container first (works in request scope)
       const gatewayConfigService = req.scope.resolve("gatewayConfig")
       const configs = await gatewayConfigService.listGatewayConfigs(
         { provider: "stripe", is_active: true },
-        { take: 1 }
+        { take: 1, order: { priority: "ASC" } }
       )
       const config = configs[0]
       if (config) {
@@ -41,13 +42,34 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         const keys = isLive ? config.live_keys : config.test_keys
         webhookSecret = keys?.secret_key || null
         secretKey = keys?.api_key || null
-        logger.info(`[Stripe Webhook] Using ${isLive ? "LIVE" : "TEST"} keys from admin gateway config (id: ${config.id})`)
+        logger.info(`[Stripe Webhook] ✓ Using ${isLive ? "LIVE" : "TEST"} keys from admin gateway "${config.display_name}"`)
       }
     } catch (e: any) {
-      logger.warn(`[Stripe Webhook] Gateway config read failed: ${e.message}, trying env vars`)
+      logger.warn(`[Stripe Webhook] DI resolve failed: ${e.message}, trying direct DB`)
+      // Fallback: direct DB query
+      try {
+        const { Pool } = require("pg")
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+        const { rows } = await pool.query(
+          `SELECT mode, live_keys, test_keys, display_name FROM gateway_config
+           WHERE provider = 'stripe' AND is_active = true AND deleted_at IS NULL
+           ORDER BY priority ASC LIMIT 1`
+        )
+        if (rows[0]) {
+          const config = rows[0]
+          const isLive = config.mode === "live"
+          const keys = isLive ? config.live_keys : config.test_keys
+          webhookSecret = keys?.secret_key || null
+          secretKey = keys?.api_key || null
+          logger.info(`[Stripe Webhook] ✓ Using ${isLive ? "LIVE" : "TEST"} keys from DB gateway "${config.display_name}"`)
+        }
+        await pool.end()
+      } catch (dbErr: any) {
+        logger.error(`[Stripe Webhook] Direct DB query failed: ${dbErr.message}`)
+      }
     }
 
-    // Env var fallback (only if gateway config unavailable)
+    // Env var fallback (last resort)
     if (!webhookSecret) {
       webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || null
       if (webhookSecret) logger.warn("[Stripe Webhook] ⚠️ Using STRIPE_WEBHOOK_SECRET from env vars")

@@ -5,6 +5,7 @@ import {
   PaymentSessionStatus,
 } from "@medusajs/framework/utils"
 import Stripe from "stripe"
+import { Pool } from "pg"
 
 type Options = {
   secretKey?: string
@@ -83,13 +84,13 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
   protected logger_: any
   protected options_: Options
   protected container_: any = null
+  private pgPool_: Pool | null = null
 
   constructor(container: InjectedDependencies, options: Options) {
     super(container, options)
     this.container_ = container
     this.logger_ = container.logger || console
     this.options_ = options || {}
-    this.container_ = container
 
     this.logger_.info(
       `[Stripe] Provider initialized. Options secretKey: ${this.options_?.secretKey ? "set" : "not set"}`
@@ -97,20 +98,22 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
   }
 
   /**
-   * Lazily resolve the gateway config service from the container.
+   * Get a shared PostgreSQL connection pool for direct DB queries.
+   * Used because gatewayConfig module is not available in payment provider's DI scope.
    */
-  private getGatewayConfigService(): any {
-    try {
-      return this.container_.resolve("gatewayConfig")
-    } catch {
-      return null
+  private getPool(): Pool {
+    if (!this.pgPool_) {
+      const dbUrl = process.env.DATABASE_URL
+      if (!dbUrl) throw new Error("DATABASE_URL not set")
+      this.pgPool_ = new Pool({ connectionString: dbUrl, max: 3 })
     }
+    return this.pgPool_
   }
 
   /**
-   * Resolve Stripe credentials from admin gateway config in database.
-   * Supports per-project Stripe accounts by matching project_slug.
-   * Falls back to env vars ONLY if gateway config module is unavailable.
+   * Resolve Stripe credentials directly from gateway_config DB table.
+   * Bypasses DI container (not available in payment provider scope).
+   * Supports per-project Stripe accounts by matching project_slug in project_slugs JSONB.
    */
   private async resolveCredentials(projectSlug?: string): Promise<{
     secretKey: string
@@ -118,56 +121,57 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
     webhookSecret: string | null
     testMode: boolean
   }> {
-    // 1. Try gateway config from database (admin-configured)
-    const gatewayConfigService = this.getGatewayConfigService()
-    if (gatewayConfigService) {
-      try {
-        const allConfigs = await gatewayConfigService.listGatewayConfigs(
-          { provider: "stripe", is_active: true },
-          { order: { priority: "ASC" } }
-        )
+    // 1. Query gateway_config table directly
+    try {
+      const pool = this.getPool()
 
-        // Find the best matching config for the project
+      // Get all active Stripe gateways, ordered by priority
+      const { rows } = await pool.query(
+        `SELECT id, display_name, mode, live_keys, test_keys, project_slugs, priority
+         FROM gateway_config
+         WHERE provider = 'stripe' AND is_active = true AND deleted_at IS NULL
+         ORDER BY priority ASC`
+      )
+
+      if (rows.length > 0) {
         let config = null
-        if (projectSlug && allConfigs.length > 1) {
-          // First: find a gateway that explicitly lists this project
-          config = allConfigs.find((c: any) => {
-            const slugs = Array.isArray(c.project_slugs) ? c.project_slugs : []
+
+        // Match by project_slug if provided
+        if (projectSlug) {
+          config = rows.find((r: any) => {
+            const slugs = Array.isArray(r.project_slugs) ? r.project_slugs : []
             return slugs.includes(projectSlug)
           })
           if (config) {
-            this.logger_.info(`[Stripe] Matched gateway config for project "${projectSlug}" (id: ${config.id})`)
+            this.logger_.info(`[Stripe] ✓ Matched gateway "${config.display_name}" for project "${projectSlug}"`)
           }
         }
 
-        // Fallback: first active gateway (lowest priority number)
+        // Fallback: first active gateway (lowest priority)
         if (!config) {
-          config = allConfigs[0]
+          config = rows[0]
+          this.logger_.info(`[Stripe] Using default gateway "${config.display_name}" (no project match)`)
         }
 
-        if (config) {
-          const isLive = config.mode === "live"
-          const keys = isLive ? config.live_keys : config.test_keys
-          if (keys?.api_key) {
-            this.logger_.info(`[Stripe] Using ${isLive ? "LIVE" : "TEST"} keys from admin gateway config "${config.display_name}" (id: ${config.id})`)
-            return {
-              secretKey: keys.api_key,
-              publishableKey: keys.publishable_key || null,
-              webhookSecret: keys.secret_key || null,
-              testMode: !isLive,
-            }
+        const isLive = config.mode === "live"
+        const keys = isLive ? config.live_keys : config.test_keys
+        if (keys?.api_key) {
+          this.logger_.info(`[Stripe] ✓ Using ${isLive ? "LIVE" : "TEST"} keys from admin gateway "${config.display_name}" (id: ${config.id})`)
+          return {
+            secretKey: keys.api_key,
+            publishableKey: keys.publishable_key || null,
+            webhookSecret: keys.secret_key || null,
+            testMode: !isLive,
           }
         }
-      } catch (e: any) {
-        this.logger_.warn(`[Stripe] Gateway config read failed: ${e.message}`)
       }
-    } else {
-      this.logger_.warn(`[Stripe] gatewayConfig service not available in DI container`)
+    } catch (e: any) {
+      this.logger_.error(`[Stripe] Direct DB query failed: ${e.message}`)
     }
 
-    // 2. Fallback to env vars — only if gateway config module unavailable
+    // 2. Fallback to env vars — only if DB query fails
     if (this.options_?.secretKey) {
-      this.logger_.warn(`[Stripe] ⚠️ FALLBACK: Using credentials from ENV VARS. Configure Stripe in admin gateway settings!`)
+      this.logger_.warn(`[Stripe] ⚠️ FALLBACK: Using credentials from ENV VARS (DB query failed)`)
       return {
         secretKey: this.options_.secretKey,
         publishableKey: this.options_.publishableKey || null,
@@ -178,7 +182,7 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
 
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      "Stripe credentials not configured. Set via admin gateway config or STRIPE_SECRET_KEY env var."
+      "Stripe credentials not configured. Set via admin gateway config."
     )
   }
 
