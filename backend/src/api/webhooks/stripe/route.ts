@@ -25,7 +25,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(400).json({ error: "Missing stripe-signature header" })
     }
 
-    // Resolve webhook secret from admin gateway config ONLY (no env var fallback)
+    // Resolve webhook secret: admin gateway config first, env vars fallback
     let webhookSecret: string | null = null
     let secretKey: string | null = null
 
@@ -39,17 +39,27 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       if (config) {
         const isLive = config.mode === "live"
         const keys = isLive ? config.live_keys : config.test_keys
-        webhookSecret = keys?.secret_key || null  // DB "secret_key" = webhook secret
+        webhookSecret = keys?.secret_key || null
         secretKey = keys?.api_key || null
         logger.info(`[Stripe Webhook] Using ${isLive ? "LIVE" : "TEST"} keys from admin gateway config (id: ${config.id})`)
       }
     } catch (e: any) {
-      logger.error(`[Stripe Webhook] Failed to read gateway config: ${e.message}`)
+      logger.warn(`[Stripe Webhook] Gateway config read failed: ${e.message}, trying env vars`)
+    }
+
+    // Env var fallback (only if gateway config unavailable)
+    if (!webhookSecret) {
+      webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || null
+      if (webhookSecret) logger.warn("[Stripe Webhook] ⚠️ Using STRIPE_WEBHOOK_SECRET from env vars")
+    }
+    if (!secretKey) {
+      secretKey = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY || null
+      if (secretKey) logger.warn("[Stripe Webhook] ⚠️ Using STRIPE_SECRET_KEY from env vars")
     }
 
     if (!webhookSecret || !secretKey) {
-      logger.error("[Stripe Webhook] No webhook secret or secret key found in admin gateway config")
-      return res.status(500).json({ error: "Stripe webhook not configured in admin settings" })
+      logger.error("[Stripe Webhook] No webhook secret or secret key configured")
+      return res.status(500).json({ error: "Stripe webhook not configured" })
     }
 
     // Verify signature using raw body
