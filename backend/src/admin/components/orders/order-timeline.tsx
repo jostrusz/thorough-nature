@@ -110,6 +110,7 @@ const DEXTRUM_STATUS_LABELS: Record<string, string> = {
   ALLOCATION_ISSUE: "WMS: Stock allocation issue",
   PARTIALLY_PICKED: "WMS: Partially picked",
   CANCELLED: "WMS: Cancelled",
+  RESENT: "WMS: Resent to warehouse",
   FAILED: "WMS: Failed",
 }
 

@@ -35,21 +35,24 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       return
     }
 
-    // 3. Check if order map already exists
+    // 3. Check if order map already exists (resend support)
     const existing = await dextrumService.listDextrumOrderMaps(
       { medusa_order_id: medusaOrderId },
       { take: 1 }
     )
-    if (existing[0]?.mystock_order_id) {
-      res.status(400).json({ error: "Order already sent to WMS", dextrum_order: existing[0] })
-      return
+    const isResend = !!existing[0]?.mystock_order_id
+    const resendCount = isResend ? (existing[0].resend_count || 0) + 1 : 0
+
+    if (isResend) {
+      console.log(`[Dextrum] Resending order ${medusaOrderId} (attempt #${resendCount})`)
     }
 
-    // 4. Build order code — use existing map's code if available, otherwise calculate
+    // 4. Build order code — use existing map's base code, add -R suffix for resends
     const countryCode = (order as any).shipping_address?.country_code?.toUpperCase() || "CZ"
-    let orderCode: string
+    let baseOrderCode: string
     if (existing[0]?.mystock_order_code) {
-      orderCode = existing[0].mystock_order_code
+      // Strip any existing -R suffix to get the base code
+      baseOrderCode = existing[0].mystock_order_code.replace(/-R\d+$/, "")
     } else {
       const prefixMap: Record<string, string> = {
         NL: "NL", BE: "BE", DE: "DE", AT: "AT", LU: "LU",
@@ -57,22 +60,25 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       }
       const prefix = prefixMap[countryCode] || countryCode
       const year = new Date().getFullYear()
-      orderCode = `${prefix}${year}-${(order as any).display_id}`
+      baseOrderCode = `${prefix}${year}-${(order as any).display_id}`
     }
+    const orderCode = isResend ? `${baseOrderCode}-R${resendCount}` : baseOrderCode
 
     const projectCode = (order as any).metadata?.project_code || "DEFAULT"
 
-    // 5. Check if this order code was already sent (prevents duplicates from different Medusa orders)
-    const existingByCode = await dextrumService.listDextrumOrderMaps(
-      { mystock_order_code: orderCode },
-      { take: 1 }
-    )
-    if (existingByCode[0]?.mystock_order_id) {
-      res.status(400).json({
-        error: `Order code ${orderCode} was already sent to WMS`,
-        dextrum_order: existingByCode[0],
-      })
-      return
+    // 5. Check if this exact order code was already sent (prevents duplicates)
+    if (!isResend) {
+      const existingByCode = await dextrumService.listDextrumOrderMaps(
+        { mystock_order_code: orderCode },
+        { take: 1 }
+      )
+      if (existingByCode[0]?.mystock_order_id) {
+        res.status(400).json({
+          error: `Order code ${orderCode} was already sent to WMS`,
+          dextrum_order: existingByCode[0],
+        })
+        return
+      }
     }
 
     // 6. Check payment status
@@ -195,10 +201,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     if (existing[0]) {
       await dextrumService.updateDextrumOrderMaps({ id: existing[0].id,
         mystock_order_id: wmsResult.id,
+        mystock_order_code: orderCode,
         delivery_status: "IMPORTED",
         delivery_status_updated_at: now,
         sent_to_wms_at: now,
         last_error: null,
+        resend_count: resendCount,
       })
     } else {
       await dextrumService.createDextrumOrderMaps({
@@ -210,12 +218,32 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         delivery_status: "IMPORTED",
         delivery_status_updated_at: now,
         sent_to_wms_at: now,
+        resend_count: 0,
       })
     }
 
     // 11. Update order metadata with dextrum status
     const orderModuleService = req.scope.resolve(Modules.ORDER) as any
     const existingMeta = (order as any).metadata || {}
+
+    // Add RESENT timeline entry if this is a resend
+    const dextrumTimeline = existingMeta.dextrum_timeline || []
+    if (isResend) {
+      dextrumTimeline.push({
+        type: "dextrum",
+        status: "RESENT",
+        date: now,
+        detail: `Order resent to warehouse (attempt #${resendCount})`,
+      })
+    }
+    // Add IMPORTED timeline entry
+    dextrumTimeline.push({
+      type: "dextrum",
+      status: "IMPORTED",
+      date: now,
+      detail: `WMS Order: ${orderCode}`,
+    })
+
     await orderModuleService.updateOrders(medusaOrderId, {
       metadata: {
         ...existingMeta,
@@ -223,6 +251,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         dextrum_order_code: orderCode,
         dextrum_mystock_id: wmsResult.id,
         dextrum_sent_at: now,
+        dextrum_timeline: dextrumTimeline,
+        // Clear old tracking on resend so new tracking comes through
+        ...(isResend ? {
+          dextrum_tracking_number: null,
+          dextrum_tracking_url: null,
+          dextrum_carrier: null,
+        } : {}),
       },
     })
 

@@ -991,6 +991,16 @@
           "nullable": true,
           "mappedType": "text"
         },
+        "resend_count": {
+          "name": "resend_count",
+          "type": "integer",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "0",
+          "mappedType": "integer"
+        },
         "hold_until": {
           "name": "hold_until",
           "type": "text",

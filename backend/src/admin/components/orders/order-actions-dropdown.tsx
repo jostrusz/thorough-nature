@@ -260,19 +260,17 @@ export function OrderActionsDropdown({
       <div style={dividerStyle} />
 
       {/* Dextrum WMS */}
-      {!dextrumMystockId && (
-        <button
-          className="od-dropdown-item"
-          style={itemStyle}
-          onClick={() => { onSendToDextrum(); onClose() }}
-        >
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={iconColor} strokeWidth="1.5">
-            <rect x="2" y="4" width="16" height="12" rx="2" />
-            <path d="M2 8h16M7 4v4M13 4v4" />
-          </svg>
-          Send to Dextrum WMS
-        </button>
-      )}
+      <button
+        className="od-dropdown-item"
+        style={itemStyle}
+        onClick={() => { onSendToDextrum(); onClose() }}
+      >
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={iconColor} strokeWidth="1.5">
+          <rect x="2" y="4" width="16" height="12" rx="2" />
+          <path d="M2 8h16M7 4v4M13 4v4" />
+        </svg>
+        {dextrumMystockId ? "Resend to Dextrum WMS" : "Send to Dextrum WMS"}
+      </button>
     </div>
   )
 }

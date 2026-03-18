@@ -303,6 +303,7 @@ export function OrderDetailTimeline({
       ALLOCATION_ISSUE: "Dextrum: Stock allocation issue",
       PARTIALLY_PICKED: "Dextrum: Partially picked",
       CANCELLED: "Dextrum: Cancelled",
+      RESENT: "Dextrum: Resent to warehouse",
       FAILED: "Dextrum: Failed",
     }
     events.push({

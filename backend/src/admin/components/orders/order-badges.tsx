@@ -66,6 +66,7 @@ const DELIVERY_STYLES: Record<string, { bg: string; text: string; label: string 
   ALLOCATION_ISSUE:  { bg: "rgba(231,76,60,0.07)",   text: "#E74C3C", label: "Stock Issue" },
   PARTIALLY_PICKED:  { bg: "rgba(212,160,23,0.08)",  text: "#D4A017", label: "Partial Pick" },
   CANCELLED:         { bg: "rgba(0,0,0,0.04)",       text: "#6B7185", label: "Cancelled" },
+  RESENT:            { bg: "rgba(52,152,219,0.08)",  text: "#3498DB", label: "Resent" },
   FAILED:            { bg: "rgba(231,76,60,0.07)",   text: "#E74C3C", label: "Failed" },
 }
 

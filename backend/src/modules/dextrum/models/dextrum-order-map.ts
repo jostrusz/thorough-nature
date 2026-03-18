@@ -25,6 +25,9 @@ const DextrumOrderMap = model.define("dextrum_order_map", {
   package_count: model.number().default(0),
   total_weight_kg: model.text().nullable(),
 
+  // Resend tracking
+  resend_count: model.number().default(0),
+
   // Hold logic
   hold_until: model.text().nullable(),
   retry_count: model.number().default(0),
