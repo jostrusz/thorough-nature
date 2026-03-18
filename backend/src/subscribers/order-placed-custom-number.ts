@@ -1,10 +1,23 @@
 import { Modules } from "@medusajs/framework/utils"
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
 
+// Project display names for order tags
+const PROJECT_TAG_NAMES: Record<string, string> = {
+  dehondenbijbel: "De Hondenbijbel",
+  odpusc: "Odpuść",
+  "odpusc-ksiazka": "Odpuść",
+  slapp: "Släpp taget",
+  "slapp-taget": "Släpp taget",
+  "psi-superzivot": "Psí superživot",
+  "lass-los": "Lass los",
+}
+
 /**
  * When an order is placed, generate a custom order number
  * in format: {COUNTRY}{YEAR}-{display_id}
  * e.g., NL2026-1111, BE2026-1112, SE2026-1113
+ *
+ * Also sets metadata.tags based on project_id for Orders HQ display.
  *
  * Runs with a 2s delay so other subscribers (payment-metadata, etc.)
  * finish their metadata writes first. Then reads the fresh metadata,
@@ -43,15 +56,22 @@ export default async function orderPlacedCustomNumberHandler({
     const displayId = (order as any).display_id
     const customOrderNumber = `${countryCode}${year}-${displayId}`
 
+    // Set project tag from project_id if not already set
+    const projectId = existingMeta.project_id || ""
+    const projectTag = !existingMeta.tags && projectId
+      ? PROJECT_TAG_NAMES[projectId] || projectId
+      : undefined
+
     // Merge with existing metadata to avoid overwriting other subscribers' fields
     await orderModuleService.updateOrders(data.id, {
       metadata: {
         ...existingMeta,
         custom_order_number: customOrderNumber,
+        ...(projectTag ? { tags: projectTag } : {}),
       },
     })
 
-    console.log(`[CustomNumber] Order ${data.id} → ${customOrderNumber}`)
+    console.log(`[CustomNumber] Order ${data.id} → ${customOrderNumber}${projectTag ? ` | tag: ${projectTag}` : ""}`)
   } catch (error: any) {
     console.error("[CustomNumber] Error:", error.message)
   }
