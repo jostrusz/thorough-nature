@@ -108,7 +108,7 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
 
   /**
    * Resolve Stripe credentials (secret key, publishable key, webhook secret).
-   * Tries gateway config (admin DB) first, then falls back to provider options (env vars).
+   * ONLY reads from admin gateway config (database). No env var fallback.
    * Returns fresh credentials each time (no caching) — supports multiple Stripe accounts.
    */
   private async resolveCredentials(): Promise<{
@@ -117,48 +117,51 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
     webhookSecret: string | null
     testMode: boolean
   }> {
-    // 1. Try gateway config from database (admin-configured)
     const gatewayConfigService = this.getGatewayConfigService()
-    if (gatewayConfigService) {
-      try {
-        const configs = await gatewayConfigService.listGatewayConfigs(
-          { provider: "stripe", is_active: true },
-          { take: 1 }
+    if (!gatewayConfigService) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Stripe credentials not configured. Configure Stripe in the admin gateway settings."
+      )
+    }
+
+    try {
+      const configs = await gatewayConfigService.listGatewayConfigs(
+        { provider: "stripe", is_active: true },
+        { take: 1 }
+      )
+      const config = configs[0]
+      if (!config) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "No active Stripe gateway found in admin settings. Please configure and activate a Stripe gateway."
         )
-        const config = configs[0]
-        if (config) {
-          const isLive = config.mode === "live"
-          const keys = isLive ? config.live_keys : config.test_keys
-          if (keys?.api_key) {
-            this.logger_.info(`[Stripe] Using ${isLive ? "live" : "test"} keys from gateway config`)
-            return {
-              secretKey: keys.api_key,
-              publishableKey: keys.publishable_key || null,
-              webhookSecret: keys.secret_key || null,
-              testMode: !isLive,
-            }
-          }
-        }
-      } catch (e: any) {
-        this.logger_.warn(`[Stripe] Gateway config read failed: ${e.message}`)
       }
-    }
 
-    // 2. Fallback to options (env vars via medusa-config.js)
-    if (this.options_?.secretKey) {
-      this.logger_.info(`[Stripe] Using credentials from provider options`)
+      const isLive = config.mode === "live"
+      const keys = isLive ? config.live_keys : config.test_keys
+      if (!keys?.api_key) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Stripe ${isLive ? "live" : "test"} API key not set in admin gateway config.`
+        )
+      }
+
+      this.logger_.info(`[Stripe] Using ${isLive ? "LIVE" : "TEST"} keys from admin gateway config (id: ${config.id})`)
       return {
-        secretKey: this.options_.secretKey,
-        publishableKey: this.options_.publishableKey || null,
-        webhookSecret: this.options_.webhookSecret || null,
-        testMode: this.options_.testMode !== false,
+        secretKey: keys.api_key,
+        publishableKey: keys.publishable_key || null,
+        webhookSecret: keys.secret_key || null,
+        testMode: !isLive,
       }
+    } catch (e: any) {
+      if (e instanceof MedusaError) throw e
+      this.logger_.error(`[Stripe] Gateway config read failed: ${e.message}`)
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `Failed to read Stripe gateway config: ${e.message}`
+      )
     }
-
-    throw new MedusaError(
-      MedusaError.Types.INVALID_DATA,
-      "Stripe credentials not configured. Set via admin gateway config or STRIPE_SECRET_KEY env var."
-    )
   }
 
   /**

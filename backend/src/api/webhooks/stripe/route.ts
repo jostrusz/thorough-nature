@@ -25,7 +25,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(400).json({ error: "Missing stripe-signature header" })
     }
 
-    // Resolve webhook secret: DB → env fallback
+    // Resolve webhook secret from admin gateway config ONLY (no env var fallback)
     let webhookSecret: string | null = null
     let secretKey: string | null = null
 
@@ -41,22 +41,15 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         const keys = isLive ? config.live_keys : config.test_keys
         webhookSecret = keys?.secret_key || null  // DB "secret_key" = webhook secret
         secretKey = keys?.api_key || null
+        logger.info(`[Stripe Webhook] Using ${isLive ? "LIVE" : "TEST"} keys from admin gateway config (id: ${config.id})`)
       }
-    } catch {
-      // Gateway config not available
-    }
-
-    // Env var fallback
-    if (!webhookSecret) {
-      webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || null
-    }
-    if (!secretKey) {
-      secretKey = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY || null
+    } catch (e: any) {
+      logger.error(`[Stripe Webhook] Failed to read gateway config: ${e.message}`)
     }
 
     if (!webhookSecret || !secretKey) {
-      logger.error("[Stripe Webhook] No webhook secret or secret key configured")
-      return res.status(500).json({ error: "Stripe webhook not configured" })
+      logger.error("[Stripe Webhook] No webhook secret or secret key found in admin gateway config")
+      return res.status(500).json({ error: "Stripe webhook not configured in admin settings" })
     }
 
     // Verify signature using raw body
