@@ -331,7 +331,7 @@ function AdvertorialModal({
             {isEditing ? "Edit Advertorial" : "New Advertorial"}
           </h2>
           <button className="adv-btn" style={{ ...btnOutline, padding: "4px 10px", fontSize: "12px" }} onClick={onClose}>
-            \u2715
+            {"\u2715"}
           </button>
         </div>
 
@@ -343,7 +343,7 @@ function AdvertorialModal({
             style={inputStyle}
             value={title}
             onChange={(e) => handleTitleChange(e.target.value)}
-            placeholder="5 d\u016Fvod\u016F pro\u010D psi pot\u0159ebuj\u00ED kvalitn\u00ED stravu"
+            placeholder="5 důvodů proč psi potřebují kvalitní stravu"
           />
         </div>
 
