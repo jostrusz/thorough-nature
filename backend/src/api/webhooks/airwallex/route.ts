@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Modules } from "@medusajs/framework/utils"
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
@@ -9,7 +10,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(400).json({ error: "Missing required Airwallex webhook fields" })
     }
 
-    const orderModuleService = req.scope.resolve("orderModuleService")
+    const orderModuleService = req.scope.resolve(Modules.ORDER)
     const logger = req.scope.resolve("logger")
 
     // Airwallex webhook data: the object is directly in `data` or nested in `data.object`
