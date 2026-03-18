@@ -6936,6 +6936,7 @@ body {
         sessionData = {
           method: selectedMethod,
           return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
+          project_slug: PROJECT_CONFIG.slug || '',
           // Pass addresses for Klarna (requires billing address via Mollie Orders API)
           billing_address: customerData.billing_address,
           shipping_address: customerData.shipping_address,
