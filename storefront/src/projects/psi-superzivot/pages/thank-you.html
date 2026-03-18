@@ -876,6 +876,34 @@ body { background: var(--bg); }
   updateDetailsDisplay();
 
   // ────────────────────────────────────────────────────
+  // 2b. 5-minute edit window — hide edit button after 5 min
+  // ────────────────────────────────────────────────────
+  (function() {
+    if (!localStorage.getItem('medusa_edit_started_at')) {
+      localStorage.setItem('medusa_edit_started_at', new Date().toISOString());
+    }
+    var editStarted = localStorage.getItem('medusa_edit_started_at');
+    var elapsedMs = Date.now() - new Date(editStarted).getTime();
+    var editBtn = document.getElementById('ty-edit-toggle');
+    var editForm = document.getElementById('ty-edit-form');
+
+    if (elapsedMs >= 5 * 60 * 1000) {
+      // Already expired — hide edit button
+      if (editBtn) editBtn.style.display = 'none';
+      if (editForm) editForm.classList.remove('is-open');
+    } else {
+      // Set timeout to hide when 5 min elapses
+      var remaining = (5 * 60 * 1000) - elapsedMs;
+      setTimeout(function() {
+        if (editBtn) editBtn.style.display = 'none';
+        if (editForm) { editForm.classList.remove('is-open'); }
+        var card = document.getElementById('ty-details-card');
+        if (card) card.style.display = '';
+      }, remaining);
+    }
+  })();
+
+  // ────────────────────────────────────────────────────
   // 3. Edit formulář — toggle + save
   // ────────────────────────────────────────────────────
   window.toggleEditForm = function() {

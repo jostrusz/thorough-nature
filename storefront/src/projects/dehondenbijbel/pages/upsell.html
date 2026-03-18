@@ -942,10 +942,33 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <!-- ═══════ COUNTDOWN TIMER SCRIPT ═══════ -->
 <script>
 (function(){
-  var total = 10 * 60; // 10 minuten
+  var thankYouUrl = (typeof PROJECT_CONFIG !== 'undefined' && PROJECT_CONFIG.thankYouUrl) || '/';
+
+  // Check if order was created more than 10 min ago (from localStorage timestamp)
+  // Store timestamp on first upsell page visit
+  if (!localStorage.getItem('medusa_upsell_started_at')) {
+    localStorage.setItem('medusa_upsell_started_at', new Date().toISOString());
+  }
+  var orderCreatedAt = localStorage.getItem('medusa_upsell_started_at');
+  if (orderCreatedAt) {
+    var elapsed = (Date.now() - new Date(orderCreatedAt).getTime()) / 1000;
+    if (elapsed >= 600) {
+      window.location.href = thankYouUrl;
+      return;
+    }
+    // Adjust timer to remaining time
+    var total = Math.max(0, Math.floor(600 - elapsed));
+  } else {
+    var total = 10 * 60; // 10 minuten
+  }
+
   var el = document.getElementById('timer');
   function tick(){
-    if(total <= 0){ el.textContent = '00:00'; return; }
+    if(total <= 0){
+      el.textContent = '00:00';
+      window.location.href = thankYouUrl;
+      return;
+    }
     total--;
     var m = Math.floor(total/60).toString().padStart(2,'0');
     var s = (total%60).toString().padStart(2,'0');

@@ -109,13 +109,26 @@ export async function POST(
     // ── 1. Verify order exists ──────────────────────────────────
     const { data: orders } = await query.graph({
       entity: "order",
-      fields: ["id", "metadata", "region_id", "items.id", "items.variant_id"],
+      fields: ["id", "metadata", "region_id", "created_at", "items.id", "items.variant_id"],
       filters: { id: orderId },
     })
 
     if (!orders.length) {
       res.status(404).json({ success: false, message: "Order not found" })
       return
+    }
+
+    // ── 1b. Verify 10-minute timer hasn't expired ──
+    const upsellCreatedAt = (orders[0].metadata as any)?.upsell_created_at || (orders[0] as any).created_at
+    if (upsellCreatedAt) {
+      const createdTime = new Date(upsellCreatedAt).getTime()
+      const now = Date.now()
+      const minutesElapsed = (now - createdTime) / (1000 * 60)
+      if (minutesElapsed > 10) {
+        console.log(`[Upsell] Offer expired for ${orderId} (${minutesElapsed.toFixed(1)} min elapsed)`)
+        res.status(400).json({ success: false, message: "Upsell offer expired (10 minutes)" })
+        return
+      }
     }
 
     // Idempotency: if upsell already accepted, return success
