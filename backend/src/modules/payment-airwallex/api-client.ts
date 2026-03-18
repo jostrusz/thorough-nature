@@ -237,8 +237,10 @@ export class AirwallexApiClient {
       )
       return response.data
     } catch (error: any) {
-      const message = error.response?.data?.message || error.message
-      this.logger.error(`[Airwallex] Create payment intent failed: ${message}`)
+      const respData = error.response?.data
+      const message = respData?.message || error.message
+      const details = respData ? JSON.stringify(respData) : `status=${error.response?.status}`
+      this.logger.error(`[Airwallex] Create payment intent failed: ${message} | details: ${details}`)
       throw new Error(`Failed to create payment intent: ${message}`)
     }
   }
