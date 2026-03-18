@@ -7059,7 +7059,11 @@ body {
 
               // Determine environment from provider data
               var env = providerData.environment || 'demo';
-              await window.AirwallexComponentsSDK.init({ env: env, origin: window.location.origin });
+              var sdkResult = await window.AirwallexComponentsSDK.init({
+                env: env,
+                origin: window.location.origin,
+                enabledElements: ['payments'],
+              });
 
               // Build return URL for after payment
               var returnPath = PROJECT_CONFIG.upsellEnabled === false || checkoutOrderBump
@@ -7068,7 +7072,9 @@ body {
               var successUrl = window.location.origin + returnPath + '?payment_return=1';
 
               // Redirect to Airwallex hosted payment page
-              await window.AirwallexComponentsSDK.redirectToCheckout({
+              sdkResult.payments.redirectToCheckout({
+                env: env,
+                mode: 'payment',
                 intent_id: providerData.intentId,
                 client_secret: providerData.clientSecret,
                 currency: providerData.currency_code || providerData.currency || 'eur',
