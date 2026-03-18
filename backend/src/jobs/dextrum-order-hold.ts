@@ -166,9 +166,9 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
 
         if (mapping) {
           // Use mapping values
-          deliveryMethodId = mapping.delivery_method_id || ""
-          paymentMethodId = mapping.payment_method_id || ""
-          externalCarrierCode = mapping.external_carrier_code || ""
+          deliveryMethodId = (mapping.delivery_method_id || "").trim()
+          paymentMethodId = (mapping.payment_method_id || "").trim()
+          externalCarrierCode = (mapping.external_carrier_code || "").trim()
           console.log(`[Dextrum Hold] Mapping found for ${orderCode}: delivery=${deliveryMethodId}, payment=${paymentMethodId}, carrier=${externalCarrierCode}`)
         } else {
           // Fallback to config defaults (shipping_option metadata not available via cross-module query)
@@ -209,12 +209,12 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
 
         const wmsResult = await client.createOrder({
           orderCode,
-          warehouseCode: config.default_warehouse_code || undefined,
-          partnerId: config.partner_id || "",
+          warehouseCode: (config.default_warehouse_code || "").trim() || undefined,
+          partnerId: (config.partner_id || "").trim(),
           orderItems,
           deliveryAddress,
-          deliveryMethodId: deliveryMethodId || undefined,
-          paymentMethodId: paymentMethodId || undefined,
+          deliveryMethodId: (deliveryMethodId || "").trim() || undefined,
+          paymentMethodId: (paymentMethodId || "").trim() || undefined,
           cashAmount: isCOD ? (Number((order as any).total) || 0) + (Number(orderMeta.cod_fee) || 0) + deliveryFee : undefined,
           cashCurrencyCode: "EUR",
           note: orderNote || undefined,
