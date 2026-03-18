@@ -24,21 +24,32 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     logger.info(`[Airwallex Webhook] Received event: ${event_type}, intent: ${paymentIntentId}`)
 
-    // Find the order with this Airwallex payment intent ID
-    const orders = await orderModuleService.listOrders({
-      filters: {
-        "metadata.airwallexPaymentIntentId": paymentIntentId,
-      },
-    })
+    // Find the order with this Airwallex payment intent ID via direct DB query
+    // (metadata filtering not supported via orderModuleService.listOrders)
+    let order = null
+    try {
+      const { Pool } = require("pg")
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+      const { rows } = await pool.query(
+        `SELECT id, metadata FROM "order"
+         WHERE metadata->>'airwallexPaymentIntentId' = $1
+         LIMIT 1`,
+        [paymentIntentId]
+      )
+      await pool.end()
+      if (rows[0]) {
+        order = rows[0]
+      }
+    } catch (dbErr: any) {
+      logger.warn(`[Airwallex Webhook] DB query failed: ${dbErr.message}`)
+    }
 
-    if (!orders.length) {
+    if (!order) {
       logger.warn(
         `[Airwallex Webhook] No order found for payment intent: ${paymentIntentId}`
       )
       return res.status(200).json({ received: true })
     }
-
-    const order = orders[0]
 
     const activityEntry = {
       timestamp: new Date().toISOString(),
@@ -55,10 +66,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     // Update order metadata with activity log
-    const existingLog = order.metadata?.payment_activity_log || []
+    const existingMeta = order.metadata || {}
+    const existingLog = existingMeta.payment_activity_log || []
     await orderModuleService.updateOrders(order.id, {
       metadata: {
-        ...order.metadata,
+        ...existingMeta,
         payment_activity_log: [...existingLog, activityEntry],
         airwallexPaymentIntentId: paymentIntentId,
         airwallexStatus: event_type,

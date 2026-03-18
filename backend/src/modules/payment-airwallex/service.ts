@@ -221,8 +221,13 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
 
       if (method && REDIRECT_METHODS.includes(method) && returnUrl) {
         try {
+          const paymentMethodPayload: Record<string, any> = { type: method }
+          // Airwallex requires method-specific sub-object (e.g. bancontact: {}, ideal: {})
+          if (["bancontact", "ideal", "eps", "blik", "przelewy24", "paypal"].includes(method)) {
+            paymentMethodPayload[method] = {}
+          }
           const confirmed = await client.confirmPaymentIntent(paymentIntent.id, {
-            payment_method: { type: method },
+            payment_method: paymentMethodPayload,
             return_url: returnUrl,
           })
           checkoutUrl = confirmed.next_action?.url || null
