@@ -214,7 +214,7 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
       } catch {}
 
       // Redirect-based methods: confirm intent server-side → get redirect URL
-      const REDIRECT_METHODS = ["ideal", "bancontact", "eps", "blik", "przelewy24"]
+      const REDIRECT_METHODS = ["ideal", "bancontact", "eps", "blik", "przelewy24", "paypal"]
       let checkoutUrl: string | null = null
 
       if (method && REDIRECT_METHODS.includes(method) && returnUrl) {

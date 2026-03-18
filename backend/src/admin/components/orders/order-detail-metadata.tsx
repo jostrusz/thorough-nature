@@ -174,11 +174,21 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
     )
   }
 
-  // Get product tag from first item if not in metadata
+  // Get product tag from metadata or map from project_id
+  const PROJECT_TAG_NAMES: Record<string, string> = {
+    dehondenbijbel: "De Hondenbijbel",
+    odpusc: "Odpuść",
+    "odpusc-ksiazka": "Odpuść",
+    slapp: "Släpp taget",
+    "slapp-taget": "Släpp taget",
+    "psi-superzivot": "Psí superživot",
+    "lass-los": "Lass los",
+    loslatenboek: "Laat los",
+  }
+  const projectId = order.metadata?.project_id
   const displayTag =
     tag ||
-    order.items?.[0]?.variant?.product?.title ||
-    order.items?.[0]?.title ||
+    (projectId && PROJECT_TAG_NAMES[projectId]) ||
     ""
 
   return (

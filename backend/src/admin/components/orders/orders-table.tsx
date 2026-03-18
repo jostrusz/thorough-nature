@@ -97,13 +97,22 @@ function getCustomerName(order: any): string {
 // ═══════════════════════════════════════════
 // HELPER: get tag (from metadata or first item product title)
 // ═══════════════════════════════════════════
+const PROJECT_TAG_NAMES: Record<string, string> = {
+  dehondenbijbel: "De Hondenbijbel",
+  odpusc: "Odpuść",
+  "odpusc-ksiazka": "Odpuść",
+  slapp: "Släpp taget",
+  "slapp-taget": "Släpp taget",
+  "psi-superzivot": "Psí superživot",
+  "lass-los": "Lass los",
+  loslatenboek: "Laat los",
+}
+
 function getTag(order: any): string {
   if (order.metadata?.tags) return order.metadata.tags
-  if (order.items?.length > 0) {
-    const product = order.items[0]?.variant?.product
-    if (product?.title) return product.title
-    if (order.items[0]?.title) return order.items[0].title
-  }
+  // Fallback: map project_id to display name
+  const projectId = order.metadata?.project_id
+  if (projectId && PROJECT_TAG_NAMES[projectId]) return PROJECT_TAG_NAMES[projectId]
   return ""
 }
 

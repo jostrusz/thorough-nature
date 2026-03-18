@@ -169,6 +169,7 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "blik", name: "BLIK", icon: "blik", available_countries: ["pl"], supported_currencies: ["PLN"] },
     { code: "eps", name: "EPS", icon: "eps", available_countries: ["at"], supported_currencies: ["EUR"] },
     { code: "klarna", name: "Klarna", icon: "klarna", available_countries: ["nl", "be", "de", "at", "fi", "fr", "it", "se", "es", "dk", "no", "gb", "ie"], supported_currencies: [] },
+    { code: "paypal", name: "PayPal", icon: "paypal", available_countries: [], supported_currencies: ["EUR", "USD", "GBP", "AUD", "CAD", "JPY", "PLN", "SEK", "CZK", "HUF"] },
     { code: "googlepay", name: "Google Pay", icon: "googlepay", available_countries: [], supported_currencies: [] },
     { code: "applepay", name: "Apple Pay", icon: "applepay", available_countries: [], supported_currencies: [] },
   ],
