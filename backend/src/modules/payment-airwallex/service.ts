@@ -95,7 +95,9 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
    * Falls back to provider options (env vars) if DB query fails.
    */
   private async getAirwallexClient(): Promise<AirwallexApiClient> {
-    if (this.client_) return this.client_
+    // Don't cache client — always re-read gateway config from DB
+    // to pick up key changes without requiring a restart
+    this.client_ = null
 
     // 1. Try gateway config from database (admin-configured) via direct DB query
     try {
