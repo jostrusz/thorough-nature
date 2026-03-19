@@ -4693,9 +4693,13 @@ body {
     });
 
     // Apple Pay: only show if device supports it
+    // Google Pay: hide from checkout methods (only available as express button above)
     methods = methods.filter(function(m) {
       if (m.code === 'applepay') {
         return window.ApplePaySession && ApplePaySession.canMakePayments();
+      }
+      if (m.code === 'googlepay') {
+        return false;
       }
       return true;
     });
