@@ -1320,7 +1320,7 @@ h2.h2, .h2 {
  .sticky-bottom-btn { font-size: 15px; padding: 13px 24px; width: 100%; }
 }
 
-/* ═══ REVIEWS SLIDER ═══ */
+/* ═══ REVIEWS PHOTO SLIDER ═══ */
 .reviews-section {
  background: var(--bg-warm);
  padding: 60px 0 56px;
@@ -1334,71 +1334,37 @@ h2.h2, .h2 {
 }
 .reviews-track {
  display: flex;
- gap: 24px;
+ gap: 20px;
  width: max-content;
- animation: reviewsScroll 36s linear infinite;
+ animation: reviewsScroll 30s linear infinite;
 }
 .reviews-track:hover {
  animation-play-state: paused;
 }
 @keyframes reviewsScroll {
  0% { transform: translateX(0); }
- 100% { transform: translateX(calc(-50% - 12px)); }
+ 100% { transform: translateX(calc(-50% - 10px)); }
 }
-.review-card {
- flex: 0 0 340px;
- background: var(--white);
- border-radius: var(--radius);
- padding: 28px 24px 24px;
- box-shadow: var(--shadow);
- transition: box-shadow 0.3s ease;
+.review-photo {
+ flex: 0 0 200px;
+ height: 200px;
+ border-radius: 16px;
+ overflow: hidden;
+ border: 4px solid var(--purple-medium);
+ box-shadow: 0 8px 24px rgba(74, 20, 140, 0.15);
+ transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.review-card:hover {
- box-shadow: var(--shadow-hover);
+.review-photo:hover {
+ transform: scale(1.05);
+ box-shadow: 0 12px 32px rgba(74, 20, 140, 0.25);
 }
-.review-card-header {
- display: flex;
- align-items: center;
- gap: 14px;
- margin-bottom: 16px;
-}
-.review-avatar {
- width: 80px;
- height: 80px;
- border-radius: 50%;
+.review-photo img {
+ width: 100%;
+ height: 100%;
  object-fit: cover;
- border: 3px solid var(--purple-light);
- flex-shrink: 0;
-}
-.review-stars {
- color: var(--yellow-strong);
- font-size: 18px;
- letter-spacing: 2px;
- margin-bottom: 2px;
-}
-.review-name {
  display: block;
- font-family: var(--font-heading);
- font-size: 15px;
- color: var(--dark);
-}
-.review-location {
- font-size: 13px;
- color: var(--gray);
-}
-.review-body {
- border-left: 3px solid var(--purple-medium);
- padding-left: 14px;
- font-size: 14px;
- line-height: 1.65;
- color: var(--body-text);
-}
-.review-body p {
- margin: 0;
 }
 @media (max-width: 600px) {
  .reviews-section { padding: 40px 0 36px; }
- .review-card { flex: 0 0 290px; padding: 22px 18px 20px; }
- .review-avatar { width: 60px; height: 60px; }
- .review-body { font-size: 13px; }
+ .review-photo { flex: 0 0 150px; height: 150px; border-width: 3px; border-radius: 12px; }
 }
