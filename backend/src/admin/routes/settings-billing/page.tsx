@@ -912,6 +912,22 @@ function GatewaysTab() {
                         <span style={{ fontSize: "11px", color: "#8C9196", alignSelf: "center" }}>+{activeMethods.length - 5}</span>
                       )}
                     </div>
+                    <button
+                      title="Delete gateway"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (window.confirm(`Delete gateway "${gw.display_name}"? This cannot be undone.`)) {
+                          deleteMutation.mutate(gw.id)
+                        }
+                      }}
+                      style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", opacity: 0.5 }}
+                      onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                      onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.5")}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#9E2B25" strokeWidth="2">
+                        <path d="M3 6h14M8 6V4h4v2M5 6v10a2 2 0 002 2h6a2 2 0 002-2V6" />
+                      </svg>
+                    </button>
                     <Toggle
                       checked={gw.is_active}
                       onChange={() => toggleMutation.mutate(gw.id)}
@@ -1094,7 +1110,7 @@ function GatewaysTab() {
                         </label>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
                           <div>
-                            <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" || editForm.provider === "airwallex" ? "Client ID" : editForm.provider === "stripe" ? "Secret Key (sk_...)" : "API Key"}</label>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" || editForm.provider === "airwallex" ? "Client ID" : editForm.provider === "stripe" ? "Secret Key (sk_...)" : editForm.provider === "comgate" ? "Merchant ID" : "API Key"}</label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? editForm.live_keys.api_key : editForm.test_keys.api_key}
                               onChange={(e) => {
@@ -1104,7 +1120,7 @@ function GatewaysTab() {
                             />
                           </div>
                           <div>
-                            <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" ? "Client Secret" : editForm.provider === "airwallex" ? "API Key" : editForm.provider === "stripe" ? "Secret Key (sk_...)" : "Secret Key"}</label>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" ? "Client Secret" : editForm.provider === "airwallex" ? "API Key" : editForm.provider === "stripe" ? "Webhook Secret (whsec_...)" : "Secret Key"}</label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? editForm.live_keys.secret_key : editForm.test_keys.secret_key}
                               onChange={(e) => {
@@ -1113,6 +1129,7 @@ function GatewaysTab() {
                               }}
                             />
                           </div>
+                          {editForm.provider !== "stripe" && (
                           <div>
                             <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" ? "Webhook ID" : "Webhook Secret"}</label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
@@ -1123,6 +1140,7 @@ function GatewaysTab() {
                               }}
                             />
                           </div>
+                          )}
                         </div>
                         {editForm.provider === "airwallex" && (
                           <div style={{ marginTop: "8px", gridColumn: "1 / -1" }}>
