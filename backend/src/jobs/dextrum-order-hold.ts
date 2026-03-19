@@ -58,7 +58,7 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
 
         // 4. Check payment
         const pc = (order as any).payment_collections?.[0]
-        const isPaid = pc?.status === "captured" || pc?.status === "completed"
+        const isPaid = pc?.status === "captured" || pc?.status === "completed" || pc?.status === "authorized"
         const isCOD = (order as any).metadata?.payment_method === "cod"
 
         if (!isPaid && !isCOD) {
