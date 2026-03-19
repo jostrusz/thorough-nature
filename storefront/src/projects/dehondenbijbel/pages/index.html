@@ -369,21 +369,30 @@
   <h2 class="anim">Wat onze <span class="hl"><em>lezers</em></span> zeggen</h2>
   <p class="anim" style="color:var(--gray);font-size:15px;margin-top:8px">Echte ervaringen van hondenbezitters door heel Nederland</p>
  </div>
- <div class="reviews-slider-wrap">
-  <div class="reviews-track">
-   <div class="review-photo"><img src="/dehondenbijbel/images/review-daan.jpg" alt="Lezer" loading="lazy"></div>
-   <div class="review-photo"><img src="/dehondenbijbel/images/review-lisa.jpg" alt="Lezer" loading="lazy"></div>
-   <div class="review-photo"><img src="/dehondenbijbel/images/review-tim.jpg" alt="Lezer" loading="lazy"></div>
-   <div class="review-photo"><img src="/dehondenbijbel/images/review-sanne.jpg" alt="Lezer" loading="lazy"></div>
-   <div class="review-photo"><img src="/dehondenbijbel/images/review-mark.jpg" alt="Lezer" loading="lazy"></div>
-   <div class="review-photo"><img src="/dehondenbijbel/images/review-jeroen.jpg" alt="Lezer" loading="lazy"></div>
-   <!-- Duplicates for seamless loop -->
-   <div class="review-photo"><img src="/dehondenbijbel/images/review-daan.jpg" alt="Lezer" loading="lazy"></div>
-   <div class="review-photo"><img src="/dehondenbijbel/images/review-lisa.jpg" alt="Lezer" loading="lazy"></div>
-   <div class="review-photo"><img src="/dehondenbijbel/images/review-tim.jpg" alt="Lezer" loading="lazy"></div>
-   <div class="review-photo"><img src="/dehondenbijbel/images/review-sanne.jpg" alt="Lezer" loading="lazy"></div>
-   <div class="review-photo"><img src="/dehondenbijbel/images/review-mark.jpg" alt="Lezer" loading="lazy"></div>
-   <div class="review-photo"><img src="/dehondenbijbel/images/review-jeroen.jpg" alt="Lezer" loading="lazy"></div>
+ <style>
+  .rp-wrap{overflow:hidden;width:100%;mask-image:linear-gradient(to right,transparent 0%,#000 5%,#000 95%,transparent 100%);-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 5%,#000 95%,transparent 100%)}
+  .rp-track{display:flex!important;flex-direction:row!important;gap:20px;width:max-content;animation:rpScroll 30s linear infinite}
+  .rp-track:hover{animation-play-state:paused}
+  @keyframes rpScroll{0%{transform:translateX(0)}100%{transform:translateX(calc(-50% - 10px))}}
+  .rp-item{flex:0 0 300px!important;width:300px!important;height:300px!important;border-radius:20px;overflow:hidden;border:5px solid #7c3aed;box-shadow:0 8px 24px rgba(74,20,140,.15);transition:transform .3s,box-shadow .3s}
+  .rp-item:hover{transform:scale(1.05);box-shadow:0 12px 32px rgba(74,20,140,.25)}
+  .rp-item img{width:100%!important;height:100%!important;object-fit:cover;display:block}
+  @media(max-width:600px){.rp-item{flex:0 0 220px!important;width:220px!important;height:220px!important;border-width:4px;border-radius:16px}}
+ </style>
+ <div class="rp-wrap">
+  <div class="rp-track">
+   <div class="rp-item"><img src="/dehondenbijbel/images/review-daan.jpg" alt="Lezer" loading="lazy"></div>
+   <div class="rp-item"><img src="/dehondenbijbel/images/review-lisa.jpg" alt="Lezer" loading="lazy"></div>
+   <div class="rp-item"><img src="/dehondenbijbel/images/review-tim.jpg" alt="Lezer" loading="lazy"></div>
+   <div class="rp-item"><img src="/dehondenbijbel/images/review-sanne.jpg" alt="Lezer" loading="lazy"></div>
+   <div class="rp-item"><img src="/dehondenbijbel/images/review-mark.jpg" alt="Lezer" loading="lazy"></div>
+   <div class="rp-item"><img src="/dehondenbijbel/images/review-jeroen.jpg" alt="Lezer" loading="lazy"></div>
+   <div class="rp-item"><img src="/dehondenbijbel/images/review-daan.jpg" alt="Lezer" loading="lazy"></div>
+   <div class="rp-item"><img src="/dehondenbijbel/images/review-lisa.jpg" alt="Lezer" loading="lazy"></div>
+   <div class="rp-item"><img src="/dehondenbijbel/images/review-tim.jpg" alt="Lezer" loading="lazy"></div>
+   <div class="rp-item"><img src="/dehondenbijbel/images/review-sanne.jpg" alt="Lezer" loading="lazy"></div>
+   <div class="rp-item"><img src="/dehondenbijbel/images/review-mark.jpg" alt="Lezer" loading="lazy"></div>
+   <div class="rp-item"><img src="/dehondenbijbel/images/review-jeroen.jpg" alt="Lezer" loading="lazy"></div>
   </div>
  </div>
 </section>
