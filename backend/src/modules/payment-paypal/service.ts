@@ -109,39 +109,43 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
    * Tries gateway config (admin DB) first, then falls back to options/env vars.
    */
   private async getPayPalClient(): Promise<PayPalApiClient> {
-    if (this.client_) return this.client_
+    // Don't cache client — always re-read gateway config from DB
+    // to pick up key changes without requiring a restart
+    this.client_ = null
 
-    // 1. Try gateway config from database (admin-configured)
-    const gatewayConfigService = this.getGatewayConfigService()
-    if (gatewayConfigService) {
-      try {
-        const configs = await gatewayConfigService.listGatewayConfigs(
-          { provider: "paypal", is_active: true },
-          { take: 1 }
-        )
-        const config = configs[0]
-        if (config) {
-          const isLive = config.mode === "live"
-          const keys = isLive ? config.live_keys : config.test_keys
-          // Support both generic key names (api_key/secret_key from admin form)
-          // and PayPal-specific names (client_id/client_secret)
-          const cfgClientId = keys?.client_id || keys?.api_key
-          const cfgClientSecret = keys?.client_secret || keys?.secret_key
-          if (cfgClientId && cfgClientSecret) {
-            this.logger_.info(
-              `[PayPal] Using ${isLive ? "live" : "sandbox"} keys from gateway config`
-            )
-            this.client_ = new PayPalApiClient({
-              client_id: cfgClientId,
-              client_secret: cfgClientSecret,
-              mode: isLive ? "live" : "test",
-            })
-            return this.client_
-          }
+    // 1. Try gateway config from database via direct DB query (bypasses DI container)
+    try {
+      const { Pool } = require("pg")
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+      const { rows } = await pool.query(
+        `SELECT id, display_name, mode, live_keys, test_keys, project_slugs, priority
+         FROM gateway_config
+         WHERE provider = 'paypal' AND is_active = true AND deleted_at IS NULL
+         ORDER BY priority ASC
+         LIMIT 1`
+      )
+      await pool.end()
+
+      const config = rows[0]
+      if (config) {
+        const isLive = config.mode === "live"
+        const keys = isLive ? config.live_keys : config.test_keys
+        const cfgClientId = keys?.client_id || keys?.api_key
+        const cfgClientSecret = keys?.client_secret || keys?.secret_key
+        if (cfgClientId && cfgClientSecret) {
+          this.logger_.info(
+            `[PayPal] ✓ Using ${isLive ? "LIVE" : "SANDBOX"} keys from admin gateway "${config.display_name}" (id: ${config.id})`
+          )
+          this.client_ = new PayPalApiClient({
+            client_id: cfgClientId,
+            client_secret: cfgClientSecret,
+            mode: isLive ? "live" : "test",
+          })
+          return this.client_
         }
-      } catch (e: any) {
-        this.logger_.warn(`[PayPal] Gateway config read failed: ${e.message}`)
       }
+    } catch (e: any) {
+      this.logger_.warn(`[PayPal] ⚠️ DB gateway config query failed: ${e.message}`)
     }
 
     // 2. Fallback to options (env vars via medusa-config.js)
@@ -154,7 +158,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
       (process.env.PAYPAL_MODE === "live" ? "live" : "test")
 
     if (clientId && clientSecret) {
-      this.logger_.info(`[PayPal] Using credentials from provider options/env vars`)
+      this.logger_.info(`[PayPal] ⚠️ FALLBACK: Using credentials from ENV VARS (DB query failed)`)
       this.client_ = new PayPalApiClient({
         client_id: clientId,
         client_secret: clientSecret,
@@ -174,22 +178,25 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
    * Returns from gateway config or env var.
    */
   private async getClientIdForFrontend(): Promise<string | null> {
-    const gatewayConfigService = this.getGatewayConfigService()
-    if (gatewayConfigService) {
-      try {
-        const configs = await gatewayConfigService.listGatewayConfigs(
-          { provider: "paypal", is_active: true },
-          { take: 1 }
-        )
-        const config = configs[0]
-        if (config) {
-          const isLive = config.mode === "live"
-          const keys = isLive ? config.live_keys : config.test_keys
-          return keys?.client_id || keys?.api_key || null
-        }
-      } catch {
-        // fall through
+    try {
+      const { Pool } = require("pg")
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+      const { rows } = await pool.query(
+        `SELECT mode, live_keys, test_keys
+         FROM gateway_config
+         WHERE provider = 'paypal' AND is_active = true AND deleted_at IS NULL
+         ORDER BY priority ASC
+         LIMIT 1`
+      )
+      await pool.end()
+      const config = rows[0]
+      if (config) {
+        const isLive = config.mode === "live"
+        const keys = isLive ? config.live_keys : config.test_keys
+        return keys?.client_id || keys?.api_key || null
       }
+    } catch {
+      // fall through
     }
     return this.options_?.clientId || process.env.PAYPAL_CLIENT_ID || null
   }
