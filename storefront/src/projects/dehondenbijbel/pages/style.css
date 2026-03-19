@@ -695,67 +695,13 @@ h3 { font-size: 22px; font-weight: 700; line-height: 1.3; }
 .list-item .arrow { font-size: 18px; font-weight: 700; color: var(--purple); flex-shrink: 0; margin-top: 2px; }
 .list-item p { margin: 0; font-family: var(--font-body); font-size: 16px; line-height: 1.7; color: var(--dark); text-align: left; }
 
-/* ═══ REVIEWS SLIDER ═══ */
-.reviews-slider-wrap {
- position: relative; max-width: 1100px; margin: 0 auto; overflow: hidden;
-}
-.reviews-slider-track {
- display: flex; gap: 24px;
- animation: reviewSlide 25s linear infinite; width: max-content;
-}
-.reviews-slider-track:hover { animation-play-state: paused; }
-@keyframes reviewSlide {
- 0% { transform: translateX(0); }
- 100% { transform: translateX(-50%); }
-}
-.review-photo-card {
- flex-shrink: 0; width: 220px; height: 280px; border-radius: 20px;
- overflow: hidden; position: relative;
- box-shadow: 0 8px 32px rgba(74,20,140,0.1);
- transition: all 0.4s cubic-bezier(.4,0,.2,1);
- border: 3px solid transparent;
- background-image: linear-gradient(var(--white), var(--white)), linear-gradient(135deg, var(--purple-medium), var(--purple));
- background-origin: border-box; background-clip: content-box, border-box;
-}
-.review-photo-card:hover {
- transform: translateY(-8px) scale(1.03);
- box-shadow: 0 20px 48px rgba(74,20,140,0.18);
-}
-.review-photo-card img {
- width: 100%; height: 100%; object-fit: cover; display: block; aspect-ratio: 220/280;
-}
-.photo-overlay {
- position: absolute; bottom: 0; left: 0; right: 0; padding: 16px;
- background: linear-gradient(transparent, rgba(45,27,61,0.8)); color: white;
-}
-.photo-name { font-family: var(--font-heading); font-size: 14px; font-weight: 700; margin: 0; }
-.photo-stars { font-size: 12px; letter-spacing: 1px; }
-.reviews-rating-bar {
- text-align: center; margin-top: 40px; font-family: var(--font-heading); color: var(--body-text);
-}
-.rating-big { font-size: 48px; font-weight: 800; color: var(--purple); }
-.rating-stars { display: block; font-size: 24px; margin: 8px 0; }
-.rating-count { font-size: 15px; color: var(--gray); }
+/* Old reviews slider styles removed — see REVIEWS PHOTO SLIDER section below */
 
 /* ═══ AUTEUR PHOTO SINGLE ═══ */
 .auteur-photo-single { max-width: 600px; margin: 0 auto 40px; }
 .auteur-photo-single img { width: 100%; border-radius: var(--radius-sm); box-shadow: none; }
 
-/* ═══ REVIEWS (OLD — kept for backwards compat) ═══ */
-.reviews-section { background: linear-gradient(180deg, #FFFCF7 0%, #FFF5EB 100%); }
-.reviews-heading { text-align: center; margin-bottom: 48px; }
-.reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto; }
-.review-card {
- background: var(--white); border-radius: var(--radius); padding: 28px;
- border: 2px solid var(--purple-border); display: flex; flex-direction: column;
-}
-/* .review-photo old styles removed — now handled by REVIEWS PHOTO SLIDER section */
-.review-stars { color: var(--yellow-strong); font-size: 20px; margin-bottom: 8px; }
-.review-author { font-weight: 700; font-size: 16px; color: var(--dark); margin-bottom: 12px; }
-.review-text { font-size: 15px; color: var(--body-text); line-height: 1.7; flex: 1; }
-.review-text strong { color: var(--dark); }
-.review-text em { color: var(--purple); }
-.review-text u { text-decoration: underline; }
+/* Old review card styles removed — replaced by photo slider */
 
 /* ═══ AUTEUR SECTION ═══ */
 .auteur-section { background: var(--white); }
