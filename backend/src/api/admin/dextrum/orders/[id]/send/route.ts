@@ -279,9 +279,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
 function getPaymentStatus(order: any): string {
   if (order.payment_collections?.length) {
-    const pc = order.payment_collections[0]
-    if (pc.status === "captured" || pc.status === "completed" || pc.status === "authorized") return "paid"
-    return pc.status || "pending"
+    // Check ALL payment collections — find any that is paid
+    const paidStatuses = ["captured", "completed", "authorized"]
+    for (const pc of order.payment_collections) {
+      if (paidStatuses.includes(pc.status)) return "paid"
+    }
+    // If none is paid, return the first non-canceled status
+    for (const pc of order.payment_collections) {
+      if (pc.status !== "canceled") return pc.status || "pending"
+    }
+    return order.payment_collections[0].status || "pending"
   }
   return "pending"
 }
