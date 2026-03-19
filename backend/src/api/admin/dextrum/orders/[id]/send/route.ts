@@ -223,7 +223,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     }
 
     // 11. Update order metadata with dextrum status
-    const orderModuleService = req.scope.resolve(Modules.ORDER) as any
     const existingMeta = (order as any).metadata || {}
 
     // Add RESENT timeline entry if this is a resend
@@ -244,22 +243,27 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       detail: `WMS Order: ${orderCode}`,
     })
 
-    await orderModuleService.updateOrders(medusaOrderId, {
-      metadata: {
-        ...existingMeta,
-        dextrum_status: "IMPORTED",
-        dextrum_order_code: orderCode,
-        dextrum_mystock_id: wmsResult.id,
-        dextrum_sent_at: now,
-        dextrum_timeline: dextrumTimeline,
+    const updatedMeta = {
+      ...existingMeta,
+      dextrum_status: "IMPORTED",
+      dextrum_order_code: orderCode,
+      dextrum_mystock_id: wmsResult.id,
+      dextrum_sent_at: now,
+      dextrum_timeline: dextrumTimeline,
         // Clear old tracking on resend so new tracking comes through
         ...(isResend ? {
           dextrum_tracking_number: null,
           dextrum_tracking_url: null,
           dextrum_carrier: null,
         } : {}),
-      },
-    })
+      }
+    const { Pool } = require("pg")
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+    await pool.query(
+      `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+      [JSON.stringify(updatedMeta), medusaOrderId]
+    )
+    await pool.end()
 
     res.json({
       success: true,
