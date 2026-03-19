@@ -10,7 +10,6 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(400).json({ error: "Missing required Airwallex webhook fields" })
     }
 
-    const orderModuleService = req.scope.resolve(Modules.ORDER)
     const logger = req.scope.resolve("logger")
 
     // Airwallex webhook data: the object is directly in `data` or nested in `data.object`
@@ -68,14 +67,24 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     // Update order metadata with activity log
     const existingMeta = order.metadata || {}
     const existingLog = existingMeta.payment_activity_log || []
-    await orderModuleService.updateOrders(order.id, {
-      metadata: {
-        ...existingMeta,
-        payment_activity_log: [...existingLog, activityEntry],
-        airwallexPaymentIntentId: paymentIntentId,
-        airwallexStatus: event_type,
-      },
-    })
+    // Update order metadata via direct DB query (orderModuleService not available in webhook context)
+    const updatedMetadata = {
+      ...existingMeta,
+      payment_activity_log: [...existingLog, activityEntry],
+      airwallexPaymentIntentId: paymentIntentId,
+      airwallexStatus: event_type,
+    }
+    try {
+      const { Pool } = require("pg")
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+      await pool.query(
+        `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+        [JSON.stringify(updatedMetadata), order.id]
+      )
+      await pool.end()
+    } catch (dbErr: any) {
+      logger.warn(`[Airwallex Webhook] DB update failed: ${dbErr.message}`)
+    }
 
     logger.info(
       `[Airwallex Webhook] Order ${order.id} updated with event: ${event_type}`

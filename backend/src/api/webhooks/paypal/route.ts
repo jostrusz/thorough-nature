@@ -32,7 +32,6 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(200).json({ received: true, error: "No event_type" })
     }
 
-    const orderModuleService = req.scope.resolve("orderModuleService")
     const logger = req.scope.resolve("logger")
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
@@ -258,9 +257,18 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         updatedMetadata.payment_paypal_authorization_id = resource.id
       }
 
-      await orderModuleService.updateOrders(order.id, {
-        metadata: updatedMetadata,
-      })
+      // Update order metadata via direct DB query (orderModuleService not available in webhook context)
+      try {
+        const { Pool } = require("pg")
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+        await pool.query(
+          `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+          [JSON.stringify(updatedMetadata), order.id]
+        )
+        await pool.end()
+      } catch (dbErr: any) {
+        logger.warn(`[PayPal Webhook] DB update failed: ${dbErr.message}`)
+      }
 
       logger.info(
         `[PayPal Webhook] Order ${order.id} updated with event: ${eventType}`
