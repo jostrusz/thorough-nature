@@ -254,7 +254,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
             paypal: {
               experience_context: {
                 payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
-                brand_name: process.env.STORE_NAME || "EverChapter",
+                brand_name: process.env.STORE_NAME || "Performance Marketing Solution",
                 user_action: "PAY_NOW",
                 return_url: returnUrl,
                 cancel_url: cancelUrl,
@@ -331,16 +331,17 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
           `[PayPal] Creating express order (SDK Buttons): amount=${totalValue} ${currency}`
         )
       } else {
-        // ── PayPal Wallet Redirect Flow: AUTHORIZE ──
+        // ── PayPal Wallet Redirect Flow: CAPTURE (auto-capture on approval) ──
         // Used when redirecting to PayPal hosted page (non-SDK flow)
         orderData = {
-          intent: "AUTHORIZE",
+          intent: "CAPTURE",
+          processing_instruction: "ORDER_COMPLETE_ON_PAYMENT_APPROVAL",
           purchase_units: purchaseUnits,
           payment_source: {
             paypal: {
               experience_context: {
                 payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
-                brand_name: process.env.STORE_NAME || "EverChapter",
+                brand_name: process.env.STORE_NAME || "Performance Marketing Solution",
                 user_action: "PAY_NOW",
                 return_url: returnUrl,
                 cancel_url: cancelUrl,
