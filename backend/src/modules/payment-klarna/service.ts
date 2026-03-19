@@ -176,14 +176,16 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
   /**
    * Initialize the Klarna API client with credentials from gateway_config or options
    */
-  private async getKlarnaClient(): Promise<KlarnaApiClient> {
-    if (!this.client_) {
+  private async getKlarnaClient(projectSlug?: string): Promise<KlarnaApiClient> {
+    // Don't cache client — re-read config each time to support per-project credentials
+    {
       let apiKey: string | undefined
       let secretKey: string | undefined
       let isTestMode = true
       let source = "none"
 
       // Try gateway config first (admin-configured) via direct DB query
+      // Supports per-project Klarna accounts by matching project_slugs
       const dbUrl = process.env.DATABASE_URL
       if (dbUrl) {
         try {
@@ -194,18 +196,41 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
           })
           await pgClient.connect()
           const result = await pgClient.query(
-            "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL LIMIT 1",
+            `SELECT * FROM gateway_config
+             WHERE provider = $1 AND is_active = true AND deleted_at IS NULL
+             ORDER BY priority ASC`,
             ["klarna"]
           )
           await pgClient.end()
-          const config = result.rows[0]
+
+          let config = null
+          if (result.rows.length > 0) {
+            // Match by project_slug if provided
+            if (projectSlug) {
+              config = result.rows.find((r: any) => {
+                const slugs = Array.isArray(r.project_slugs) ? r.project_slugs : []
+                return slugs.includes(projectSlug)
+              })
+              if (config) {
+                this.logger_.info(`[Klarna] ✓ Matched gateway "${config.display_name}" for project "${projectSlug}"`)
+              }
+            }
+            // Fallback: first gateway with empty project_slugs, or first overall
+            if (!config) {
+              config = result.rows.find((r: any) => !r.project_slugs || r.project_slugs.length === 0) || result.rows[0]
+              if (projectSlug) {
+                this.logger_.info(`[Klarna] Using default gateway "${config.display_name}" (no project match)`)
+              }
+            }
+          }
+
           if (config) {
             const isLive = config.mode === "live"
             const keys = isLive ? config.live_keys : config.test_keys
             apiKey = keys?.api_key
             secretKey = keys?.secret_key
             isTestMode = !isLive
-            source = `admin gateway "${config.display_name || 'Klarna'}" (mode=${config.mode})`
+            source = `admin gateway "${config.display_name || 'Klarna'}" (id: ${config.id})`
             this.logger_.info(`[Klarna] ✓ Using ${isLive ? 'LIVE' : 'TEST'} keys from ${source}`)
           } else {
             this.logger_.info(`[Klarna] No gateway config found for klarna`)
@@ -249,7 +274,8 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
     const { amount, currency_code, data, context } = input
 
     try {
-      const client = await this.getKlarnaClient()
+      const projectSlug = data?.project_slug || context?.project_slug || null
+      const client = await this.getKlarnaClient(projectSlug)
       const currencyUpper = (currency_code || "EUR").toUpperCase()
 
       // Convert Medusa amount (major units: 99 = €99.00) to Klarna minor units (9900 = €99.00)
@@ -387,6 +413,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
           amount,
           currency: currency_code,
           createdAt: Date.now(),
+          project_slug: projectSlug,
           // Store session creation data for createOrder matching
           klarnaSessionData: {
             purchase_country: sessionData.purchase_country,
@@ -419,7 +446,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
   async authorizePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const client = await this.getKlarnaClient()
+      const client = await this.getKlarnaClient(sessionData.project_slug)
       const { sessionId, clientToken, authorizationToken, amount, currency, klarnaSessionData } =
         sessionData
 
@@ -526,7 +553,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
   async capturePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const client = await this.getKlarnaClient()
+      const client = await this.getKlarnaClient(sessionData?.project_slug)
       const { klarnaOrderId, amount, currency } = sessionData
       const currencyUpper = (currency || "EUR").toUpperCase()
 
@@ -603,7 +630,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
     const refundAmount = input.amount || sessionData.amount
     const currencyUpper = (sessionData.currency || "EUR").toUpperCase()
     try {
-      const client = await this.getKlarnaClient()
+      const client = await this.getKlarnaClient(sessionData?.project_slug)
       const { klarnaOrderId } = sessionData
 
       if (!klarnaOrderId) {
@@ -666,7 +693,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
   async cancelPayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const client = await this.getKlarnaClient()
+      const client = await this.getKlarnaClient(sessionData?.project_slug)
       const { klarnaOrderId } = sessionData
 
       if (klarnaOrderId) {
@@ -702,7 +729,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
   async getPaymentStatus(input: any): Promise<PaymentSessionStatus> {
     const sessionData = input.data || input
     try {
-      const client = await this.getKlarnaClient()
+      const client = await this.getKlarnaClient(sessionData?.project_slug)
       const { klarnaOrderId } = sessionData
 
       if (!klarnaOrderId) {
@@ -727,7 +754,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
   async retrievePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const client = await this.getKlarnaClient()
+      const client = await this.getKlarnaClient(sessionData?.project_slug)
       const { klarnaOrderId } = sessionData
 
       if (!klarnaOrderId) {
@@ -782,7 +809,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
         }
       }
 
-      const client = await this.getKlarnaClient()
+      const client = await this.getKlarnaClient(sessionData?.project_slug)
       const result = await client.getOrder(order_id)
 
       if (!result.success) {
