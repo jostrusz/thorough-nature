@@ -934,10 +934,15 @@ window.addEventListener('load', () => {
 })();
 
 // ─── Meta Pixel Events ───
+// Catalog content IDs (match Meta Product Catalog for DPA remarketing)
+var DH_CATALOG_IDS = ['9hduqtwz07', '5e8vclt1pz', '5d5yd6u51i', 'edr7gf3itr', '1emdl02y05', 'lgn3th5xv4', 'zjk1xb6h9u'];
+
 // ViewContent: customer sees the product (fires on page load)
+// Sends all catalog content_ids so Meta can match viewer → catalog products for DPA remarketing
 if (typeof MetaTracker !== 'undefined') {
   MetaTracker.trackViewContent({
     content_name: 'De Hondenbijbel',
+    content_ids: DH_CATALOG_IDS,
     value: 35,
     currency: 'EUR'
   });
@@ -949,6 +954,7 @@ document.querySelectorAll('a[href="checkout"], a[href="checkout/"]').forEach(fun
     if (typeof MetaTracker !== 'undefined') {
       MetaTracker.trackAddToCart({
         content_name: 'De Hondenbijbel',
+        content_ids: DH_CATALOG_IDS,
         value: 35,
         currency: 'EUR',
         num_items: 1

@@ -1164,7 +1164,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
           if (cust.country_code) uData.country = cust.country_code;
 
           MetaTracker.trackPurchase({
-            content_ids: [PROJECT_CONFIG.mainProduct.handle],
+            content_ids: PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle],
             value: purchaseValue,
             currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
             num_items: parseInt(localStorage.getItem('medusa_bundle_qty') || '1'),

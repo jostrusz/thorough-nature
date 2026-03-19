@@ -108,14 +108,20 @@ export default async function orderPlacedMetaCAPIHandler({
     if ((order.metadata as any)?.fbp) userData.fbp = (order.metadata as any).fbp
 
     // ── Build custom_data ──
+    // Use catalog content IDs if configured for the project (for DPA remarketing)
+    const CATALOG_IDS: Record<string, string[]> = {
+      dehondenbijbel: ["9hduqtwz07", "5e8vclt1pz", "5d5yd6u51i", "edr7gf3itr", "1emdl02y05", "lgn3th5xv4", "zjk1xb6h9u"],
+    }
+
     const items = order.items || []
-    const contentIds = items.map(
+    const catalogIds = CATALOG_IDS[projectId as string]
+    const contentIds = catalogIds || items.map(
       (item: any) => item.variant_id || item.product_id || item.id
     )
-    const contents = items.map((item: any) => ({
-      id: item.variant_id || item.product_id || item.id,
-      quantity: item.quantity || 1,
-      item_price: item.unit_price || 0,
+    const contents = (catalogIds || items.map((i: any) => i.variant_id || i.product_id || i.id)).map((id: string, idx: number) => ({
+      id,
+      quantity: items[idx]?.quantity || 1,
+      item_price: items[idx]?.unit_price || 0,
     }))
     const numItems = items.reduce(
       (sum: number, item: any) => sum + (item.quantity || 1),

@@ -1094,8 +1094,8 @@ body { background: var(--bg); }
 
   if (!alreadyTracked && typeof MetaTracker !== 'undefined') {
     // This fires ONLY for order bump flow (customer skipped upsell page, came directly here)
-    var purchaseContentIds = [PROJECT_CONFIG.mainProduct.handle];
-    if (orderBumpActive) purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
+    var purchaseContentIds = PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle];
+    if (orderBumpActive && !PROJECT_CONFIG.catalogContentIds) purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
     var purchaseNumItems = bundleQty + (orderBumpActive ? 1 : 0);
     var purchaseEventId = 'purchase_' + orderId;
 
