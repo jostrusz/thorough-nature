@@ -319,6 +319,30 @@ export async function POST(
                   console.log(`[Upsell] Found payment ID from session.data.payment_intent: ${externalPaymentId}`)
                   break
                 }
+                // PayPal: order ID stored as paypalOrderId
+                if (session.data?.paypalOrderId) {
+                  externalPaymentId = String(session.data.paypalOrderId)
+                  console.log(`[Upsell] Found payment ID from session.data.paypalOrderId: ${externalPaymentId}`)
+                  break
+                }
+                // PayPal: capture ID
+                if (session.data?.captureId) {
+                  externalPaymentId = String(session.data.captureId)
+                  console.log(`[Upsell] Found payment ID from session.data.captureId: ${externalPaymentId}`)
+                  break
+                }
+                // Airwallex: intent ID
+                if (session.data?.intentId) {
+                  externalPaymentId = String(session.data.intentId)
+                  console.log(`[Upsell] Found payment ID from session.data.intentId: ${externalPaymentId}`)
+                  break
+                }
+                // Airwallex: airwallexPaymentIntentId
+                if (session.data?.airwallexPaymentIntentId) {
+                  externalPaymentId = String(session.data.airwallexPaymentIntentId)
+                  console.log(`[Upsell] Found payment ID from session.data.airwallexPaymentIntentId: ${externalPaymentId}`)
+                  break
+                }
               }
             }
           } catch (sessErr: any) {
