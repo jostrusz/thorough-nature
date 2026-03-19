@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import Stripe from "stripe"
 
 /**
@@ -118,19 +118,25 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(200).json({ received: true })
     }
 
-    // Find the order with this Stripe payment intent ID
-    const orderModuleService = req.scope.resolve(Modules.ORDER)
+    // Find the order with this Stripe payment intent ID via query.graph
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
     let order = null
 
     try {
-      const orders = await orderModuleService.listOrders({
-        filters: {
-          "metadata.stripePaymentIntentId": paymentIntentId,
-        },
+      const { data: orders } = await query.graph({
+        entity: "order",
+        fields: ["id", "metadata"],
+        filters: {},
+        pagination: { order: { created_at: "DESC" }, skip: 0, take: 100 },
       })
-      order = orders[0] || null
-    } catch {
-      // Metadata filter may not be supported — try fallback
+      for (const o of orders || []) {
+        if ((o as any).metadata?.stripePaymentIntentId === paymentIntentId) {
+          order = o
+          break
+        }
+      }
+    } catch (e: any) {
+      logger.warn(`[Stripe Webhook] Order search failed: ${e.message}`)
     }
 
     if (!order) {
@@ -141,6 +147,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     // Build activity log entry
+    const paymentIntent = event.data.object as any
     const activityEntry = {
       timestamp: new Date().toISOString(),
       event: mapStripeEventToActivity(event.type),
@@ -155,19 +162,28 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       detail: `Stripe event: ${event.type}`,
     }
 
-    // Update order metadata
-    const existingLog = order.metadata?.payment_activity_log || []
-    await orderModuleService.updateOrders(order.id, {
-      metadata: {
-        ...order.metadata,
-        payment_activity_log: [...existingLog, activityEntry],
-        stripePaymentIntentId: paymentIntentId,
-        stripeStatus: event.type,
-      },
-    })
+    // Update order metadata via direct DB query (orderModuleService not available in webhook context)
+    const existingLog = (order as any).metadata?.payment_activity_log || []
+    const updatedMetadata = {
+      ...(order as any).metadata,
+      payment_activity_log: [...existingLog, activityEntry],
+      stripePaymentIntentId: paymentIntentId,
+      stripeStatus: event.type,
+    }
+    try {
+      const { Pool } = require("pg")
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+      await pool.query(
+        `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+        [JSON.stringify(updatedMetadata), (order as any).id]
+      )
+      await pool.end()
+    } catch (dbErr: any) {
+      logger.error(`[Stripe Webhook] DB update failed: ${dbErr.message}`)
+    }
 
     logger.info(
-      `[Stripe Webhook] Order ${order.id} updated with event: ${event.type}`
+      `[Stripe Webhook] Order ${(order as any).id} updated with event: ${event.type}`
     )
 
     return res.status(200).json({ received: true })

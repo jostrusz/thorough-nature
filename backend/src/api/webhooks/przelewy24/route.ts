@@ -15,7 +15,6 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     const paymentModuleService: IPaymentModuleService = req.scope.resolve(
       "paymentModuleService"
     )
-    const orderModuleService = req.scope.resolve("orderModuleService")
     const configService = req.scope.resolve("configService")
     const logger = req.scope.resolve("logger")
 
@@ -53,19 +52,25 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     const transactionData = verifyResult.data
     const medusaStatus = mapP24StatusToMedusa(transactionData.status)
 
-    // Find the order with this P24 session ID
-    const orders = await orderModuleService.list({
-      filters: {
-        "metadata.p24SessionId": sessionId,
-      },
-    })
+    // Find the order with this P24 session ID via direct DB query
+    const { Pool } = require("pg")
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+    const { rows: orders } = await pool.query(
+      `SELECT id, metadata FROM "order" WHERE metadata->>'p24SessionId' = $1 LIMIT 1`,
+      [sessionId]
+    )
 
     if (!orders.length) {
       logger.warn(`[P24 Webhook] No order found for session: ${sessionId}`)
+      await pool.end()
       return res.status(200).json({ received: true })
     }
 
     const order = orders[0]
+    const meta = typeof order.metadata === "string"
+      ? JSON.parse(order.metadata)
+      : order.metadata || {}
+
     const activityEntry = {
       timestamp: new Date().toISOString(),
       event: "status_update",
@@ -78,21 +83,20 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       detail: `P24 transaction verified: ${transactionData.status}`,
     }
 
-    // Update order metadata with activity log
-    const existingLog = order.metadata?.payment_activity_log || []
-    await orderModuleService.updateOrders(
-      {
-        id: order.id,
-        metadata: {
-          ...order.metadata,
-          payment_activity_log: [...existingLog, activityEntry],
-          p24OrderId: orderId,
-          p24SessionId: sessionId,
-          p24Status: transactionData.status,
-        },
-      },
-      { transactionManager: req.scope.resolve("manager") }
+    // Update order metadata with activity log via direct DB query
+    const existingLog = meta.payment_activity_log || []
+    const updatedMetadata = {
+      ...meta,
+      payment_activity_log: [...existingLog, activityEntry],
+      p24OrderId: orderId,
+      p24SessionId: sessionId,
+      p24Status: transactionData.status,
+    }
+    await pool.query(
+      `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+      [JSON.stringify(updatedMetadata), order.id]
     )
+    await pool.end()
 
     logger.info(
       `[P24 Webhook] Order ${order.id} verified with status: ${medusaStatus}`

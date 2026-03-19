@@ -68,42 +68,48 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     // Try to find and update the order with this transaction ID
     try {
-      const orderModuleService = req.scope.resolve("order")
-      if (orderModuleService) {
-        // Search for orders with this transId in metadata
-        const orders = await orderModuleService.listOrders({}, { take: 100 })
-        const matchingOrder = (orders || []).find((o: any) =>
-          o.metadata?.comgateTransId === transId
+      // Search for orders with this transId in metadata via direct DB query
+      const { Pool } = require("pg")
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+      const { rows: orders } = await pool.query(
+        `SELECT id, metadata FROM "order" WHERE metadata->>'comgateTransId' = $1 LIMIT 1`,
+        [transId]
+      )
+      const matchingOrder = orders[0] || null
+
+      if (matchingOrder) {
+        const meta = typeof matchingOrder.metadata === "string"
+          ? JSON.parse(matchingOrder.metadata)
+          : matchingOrder.metadata || {}
+
+        const activityEntry = {
+          timestamp: new Date().toISOString(),
+          event: "webhook_status_update",
+          gateway: "comgate",
+          payment_method: statusResult.data?.method || "unknown",
+          status: medusaStatus,
+          amount: statusResult.data?.price,
+          currency: statusResult.data?.curr,
+          transaction_id: transId,
+          detail: `Comgate webhook: ${comgateStatus}`,
+        }
+
+        const existingLog = meta.payment_activity_log || []
+        const updatedMetadata = {
+          ...meta,
+          payment_activity_log: [...existingLog, activityEntry],
+          comgateStatus: comgateStatus,
+        }
+        await pool.query(
+          `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+          [JSON.stringify(updatedMetadata), matchingOrder.id]
         )
 
-        if (matchingOrder) {
-          const activityEntry = {
-            timestamp: new Date().toISOString(),
-            event: "webhook_status_update",
-            gateway: "comgate",
-            payment_method: statusResult.data?.method || "unknown",
-            status: medusaStatus,
-            amount: statusResult.data?.price,
-            currency: statusResult.data?.curr,
-            transaction_id: transId,
-            detail: `Comgate webhook: ${comgateStatus}`,
-          }
-
-          const existingLog = matchingOrder.metadata?.payment_activity_log || []
-          await orderModuleService.updateOrders([{
-            id: matchingOrder.id,
-            metadata: {
-              ...matchingOrder.metadata,
-              payment_activity_log: [...existingLog, activityEntry],
-              comgateStatus: comgateStatus,
-            },
-          }])
-
-          logger.info(`[Comgate Webhook] Order ${matchingOrder.id} updated with status: ${medusaStatus}`)
-        } else {
-          logger.info(`[Comgate Webhook] No order found for transId ${transId} (may not be completed yet)`)
-        }
+        logger.info(`[Comgate Webhook] Order ${matchingOrder.id} updated with status: ${medusaStatus}`)
+      } else {
+        logger.info(`[Comgate Webhook] No order found for transId ${transId} (may not be completed yet)`)
       }
+      await pool.end()
     } catch (orderErr: any) {
       // Order update is best-effort — don't fail the webhook
       logger.warn(`[Comgate Webhook] Order update failed (non-critical): ${orderErr.message}`)

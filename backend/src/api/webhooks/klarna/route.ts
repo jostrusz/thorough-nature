@@ -26,7 +26,6 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(400).json({ error: "Missing required Klarna webhook fields" })
     }
 
-    const orderModuleService = req.scope.resolve("orderModuleService")
     const logger = req.scope.resolve("logger")
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
@@ -154,9 +153,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         updatedMetadata.klarna_refunded_at = new Date().toISOString()
       }
 
-      await orderModuleService.updateOrders(order.id, {
-        metadata: updatedMetadata,
-      })
+      try {
+        const { Pool } = require("pg")
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+        await pool.query(
+          `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+          [JSON.stringify(updatedMetadata), order.id]
+        )
+        await pool.end()
+      } catch (dbErr: any) {
+        logger.error(`[Klarna Webhook] DB update failed: ${dbErr.message}`)
+      }
 
       logger.info(
         `[Klarna Webhook] Order ${order.id} updated with event: ${event_type}`

@@ -1,5 +1,5 @@
 import { MedusaContainer } from "@medusajs/framework/types"
-import { Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 
 /**
  * Klarna Authorization Expiration Check
@@ -12,7 +12,6 @@ import { Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils"
  * - 28+ days old: Marks as expired in metadata
  */
 export default async function klarnaAuthorizationCheck(container: MedusaContainer) {
-  const orderModuleService = container.resolve(Modules.ORDER) as any
   const query = container.resolve(ContainerRegistrationKeys.QUERY) as any
   const logger = container.resolve("logger") as any
 
@@ -67,26 +66,35 @@ export default async function klarnaAuthorizationCheck(container: MedusaContaine
       if (ageDays >= EXPIRE_DAYS) {
         // Mark as expired
         const existingLog = meta.payment_activity_log || []
-        await orderModuleService.updateOrders(order.id, {
-          metadata: {
-            ...meta,
-            klarna_expired: true,
-            klarna_expired_at: now.toISOString(),
-            payment_activity_log: [
-              ...existingLog,
-              {
-                timestamp: now.toISOString(),
-                event: "authorization_expired",
-                gateway: "klarna",
-                payment_method: "klarna",
-                status: "failed",
-                amount: order.total || 0,
-                currency: order.currency_code,
-                detail: `Klarna authorization expired after ${ageDays} days (28-day limit). Order #${order.display_id}`,
-              },
-            ],
-          },
-        })
+        const expiredMetadata = {
+          ...meta,
+          klarna_expired: true,
+          klarna_expired_at: now.toISOString(),
+          payment_activity_log: [
+            ...existingLog,
+            {
+              timestamp: now.toISOString(),
+              event: "authorization_expired",
+              gateway: "klarna",
+              payment_method: "klarna",
+              status: "failed",
+              amount: order.total || 0,
+              currency: order.currency_code,
+              detail: `Klarna authorization expired after ${ageDays} days (28-day limit). Order #${order.display_id}`,
+            },
+          ],
+        }
+        try {
+          const { Pool } = require("pg")
+          const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+          await pool.query(
+            `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+            [JSON.stringify(expiredMetadata), order.id]
+          )
+          await pool.end()
+        } catch (dbErr: any) {
+          logger.error(`[Klarna Auth Check] DB update failed for order ${order.id}: ${dbErr.message}`)
+        }
         expireCount++
         logger.warn(
           `[Klarna Auth Check] Order #${order.display_id} (${order.id}): Authorization EXPIRED after ${ageDays} days`
@@ -100,26 +108,35 @@ export default async function klarnaAuthorizationCheck(container: MedusaContaine
 
         if (!alreadyWarned) {
           const daysLeft = EXPIRE_DAYS - ageDays
-          await orderModuleService.updateOrders(order.id, {
-            metadata: {
-              ...meta,
-              klarna_expiration_warning: true,
-              klarna_expiration_warning_at: now.toISOString(),
-              payment_activity_log: [
-                ...existingLog,
-                {
-                  timestamp: now.toISOString(),
-                  event: "authorization_expiring_soon",
-                  gateway: "klarna",
-                  payment_method: "klarna",
-                  status: "warning",
-                  amount: order.total || 0,
-                  currency: order.currency_code,
-                  detail: `Klarna authorization expires in ${daysLeft} days! Capture payment before expiration. Order #${order.display_id}`,
-                },
-              ],
-            },
-          })
+          const warningMetadata = {
+            ...meta,
+            klarna_expiration_warning: true,
+            klarna_expiration_warning_at: now.toISOString(),
+            payment_activity_log: [
+              ...existingLog,
+              {
+                timestamp: now.toISOString(),
+                event: "authorization_expiring_soon",
+                gateway: "klarna",
+                payment_method: "klarna",
+                status: "warning",
+                amount: order.total || 0,
+                currency: order.currency_code,
+                detail: `Klarna authorization expires in ${daysLeft} days! Capture payment before expiration. Order #${order.display_id}`,
+              },
+            ],
+          }
+          try {
+            const { Pool } = require("pg")
+            const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+            await pool.query(
+              `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+              [JSON.stringify(warningMetadata), order.id]
+            )
+            await pool.end()
+          } catch (dbErr: any) {
+            logger.error(`[Klarna Auth Check] DB update failed for order ${order.id}: ${dbErr.message}`)
+          }
           warnCount++
           logger.warn(
             `[Klarna Auth Check] Order #${order.display_id} (${order.id}): Authorization expires in ${daysLeft} days — CAPTURE NOW`

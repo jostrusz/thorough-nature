@@ -1,7 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { Modules } from "@medusajs/framework/utils"
 import { DEXTRUM_MODULE } from "../../../modules/dextrum"
 import { generateTrackingUrl } from "../../../utils/tracking-url"
+import { Pool } from "pg"
 
 // ═══════════════════════════════════════════
 // WEBHOOK EVENT → DELIVERY STATUS MAPPING
@@ -57,7 +57,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     }
 
     const dextrumService = req.scope.resolve(DEXTRUM_MODULE) as any
-    const orderModuleService = req.scope.resolve(Modules.ORDER) as any
 
     // 1. Deduplicate by eventId
     const existingEvents = await dextrumService.listDextrumEventLogs(
@@ -158,11 +157,18 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
           if (trackingNum && !trackingUrl) {
             try {
-              // Fetch shipping address to get country + zip
-              const fullOrder = await orderModuleService.retrieveOrder(orderMap.medusa_order_id, {
-                relations: ["shipping_address"],
-              })
-              const shippingAddress = fullOrder?.shipping_address
+              // Fetch shipping address to get country + zip via direct DB query
+              const addrPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+              const addrResult = await addrPool.query(
+                `SELECT osa.country_code, osa.postal_code
+                 FROM order_shipping_address osa
+                 JOIN "order" o ON o.shipping_address_id = osa.id
+                 WHERE o.id = $1
+                 LIMIT 1`,
+                [orderMap.medusa_order_id]
+              )
+              await addrPool.end()
+              const shippingAddress = addrResult.rows[0]
               const countryCode = shippingAddress?.country_code || ""
               const postalCode = shippingAddress?.postal_code || ""
 
@@ -190,17 +196,21 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
           const dextrumTimeline = meta.dextrum_timeline || []
           dextrumTimeline.push(timelineEntry)
 
-          await orderModuleService.updateOrders(orderMap.medusa_order_id, {
-            metadata: {
-              ...meta,
-              dextrum_status: newStatus,
-              dextrum_status_updated_at: now,
-              dextrum_tracking_number: trackingNum,
-              dextrum_tracking_url: trackingUrl,
-              dextrum_carrier: carrierCode,
-              dextrum_timeline: dextrumTimeline,
-            },
-          })
+          const updatedMeta = {
+            ...meta,
+            dextrum_status: newStatus,
+            dextrum_status_updated_at: now,
+            dextrum_tracking_number: trackingNum,
+            dextrum_tracking_url: trackingUrl,
+            dextrum_carrier: carrierCode,
+            dextrum_timeline: dextrumTimeline,
+          }
+          const metaPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+          await metaPool.query(
+            `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+            [JSON.stringify(updatedMeta), orderMap.medusa_order_id]
+          )
+          await metaPool.end()
 
           // Auto-fulfill on DISPATCHED — mark order as fulfilled with tracking
           if (newStatus === "DISPATCHED") {
@@ -209,23 +219,30 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
               const alreadyFulfilled = existingFulfillments.length > 0
 
               if (!alreadyFulfilled) {
-                const fulfillmentModuleService = req.scope.resolve(Modules.FULFILLMENT) as any
                 const items = ((order as any).items || []).map((item: any) => ({
                   id: item.id,
                   quantity: item.quantity || 1,
                 }))
 
                 if (items.length > 0) {
-                  await orderModuleService.createFulfillment({
-                    order_id: orderMap.medusa_order_id,
-                    items,
-                    metadata: {
-                      tracking_number: updateData.tracking_number || null,
-                      tracking_url: updateData.tracking_url || null,
-                      carrier: updateData.carrier_name || null,
-                      source: "dextrum_wms",
-                    },
-                  })
+                  // Create fulfillment via direct DB insert (orderModuleService not available in webhook context)
+                  const fulfillPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                  const fulfillmentId = `ful_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+                  await fulfillPool.query(
+                    `INSERT INTO order_fulfillment (id, order_id, metadata, created_at, updated_at)
+                     VALUES ($1, $2, $3::jsonb, NOW(), NOW())`,
+                    [
+                      fulfillmentId,
+                      orderMap.medusa_order_id,
+                      JSON.stringify({
+                        tracking_number: updateData.tracking_number || null,
+                        tracking_url: updateData.tracking_url || null,
+                        carrier: updateData.carrier_name || null,
+                        source: "dextrum_wms",
+                      }),
+                    ]
+                  )
+                  await fulfillPool.end()
                   console.log(`[Webhook] Auto-fulfilled order ${orderMap.medusa_order_id} on DISPATCHED`)
                 }
               }
