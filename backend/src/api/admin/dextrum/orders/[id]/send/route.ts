@@ -280,7 +280,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 function getPaymentStatus(order: any): string {
   if (order.payment_collections?.length) {
     const pc = order.payment_collections[0]
-    if (pc.status === "captured" || pc.status === "completed") return "paid"
+    if (pc.status === "captured" || pc.status === "completed" || pc.status === "authorized") return "paid"
     return pc.status || "pending"
   }
   return "pending"
