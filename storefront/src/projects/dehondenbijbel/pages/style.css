@@ -1319,3 +1319,86 @@ h2.h2, .h2 {
  .sticky-bottom-text { font-size: 11px; }
  .sticky-bottom-btn { font-size: 15px; padding: 13px 24px; width: 100%; }
 }
+
+/* ═══ REVIEWS SLIDER ═══ */
+.reviews-section {
+ background: var(--bg-warm);
+ padding: 60px 0 56px;
+ overflow: hidden;
+}
+.reviews-slider-wrap {
+ overflow: hidden;
+ width: 100%;
+ mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+ -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+.reviews-track {
+ display: flex;
+ gap: 24px;
+ width: max-content;
+ animation: reviewsScroll 36s linear infinite;
+}
+.reviews-track:hover {
+ animation-play-state: paused;
+}
+@keyframes reviewsScroll {
+ 0% { transform: translateX(0); }
+ 100% { transform: translateX(calc(-50% - 12px)); }
+}
+.review-card {
+ flex: 0 0 340px;
+ background: var(--white);
+ border-radius: var(--radius);
+ padding: 28px 24px 24px;
+ box-shadow: var(--shadow);
+ transition: box-shadow 0.3s ease;
+}
+.review-card:hover {
+ box-shadow: var(--shadow-hover);
+}
+.review-card-header {
+ display: flex;
+ align-items: center;
+ gap: 14px;
+ margin-bottom: 16px;
+}
+.review-avatar {
+ width: 80px;
+ height: 80px;
+ border-radius: 50%;
+ object-fit: cover;
+ border: 3px solid var(--purple-light);
+ flex-shrink: 0;
+}
+.review-stars {
+ color: var(--yellow-strong);
+ font-size: 18px;
+ letter-spacing: 2px;
+ margin-bottom: 2px;
+}
+.review-name {
+ display: block;
+ font-family: var(--font-heading);
+ font-size: 15px;
+ color: var(--dark);
+}
+.review-location {
+ font-size: 13px;
+ color: var(--gray);
+}
+.review-body {
+ border-left: 3px solid var(--purple-medium);
+ padding-left: 14px;
+ font-size: 14px;
+ line-height: 1.65;
+ color: var(--body-text);
+}
+.review-body p {
+ margin: 0;
+}
+@media (max-width: 600px) {
+ .reviews-section { padding: 40px 0 36px; }
+ .review-card { flex: 0 0 290px; padding: 22px 18px 20px; }
+ .review-avatar { width: 60px; height: 60px; }
+ .review-body { font-size: 13px; }
+}
