@@ -90,13 +90,14 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
   }
 
   /**
-   * Build or return the Airwallex API client.
+   * Build the Airwallex API client with per-project gateway matching.
    * Reads gateway config via direct DB query (bypasses DI container).
+   * Supports per-project Airwallex accounts by matching project_slug in project_slugs JSONB.
    * Falls back to provider options (env vars) if DB query fails.
    */
-  private async getAirwallexClient(): Promise<AirwallexApiClient> {
+  private async getAirwallexClient(projectSlug?: string): Promise<AirwallexApiClient> {
     // Don't cache client — always re-read gateway config from DB
-    // to pick up key changes without requiring a restart
+    // to support per-project credentials
     this.client_ = null
 
     // 1. Try gateway config from database (admin-configured) via direct DB query
@@ -106,11 +107,30 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
         `SELECT id, display_name, mode, live_keys, test_keys, project_slugs, priority
          FROM gateway_config
          WHERE provider = 'airwallex' AND is_active = true AND deleted_at IS NULL
-         ORDER BY priority ASC
-         LIMIT 1`
+         ORDER BY priority ASC`
       )
 
-      const config = rows[0]
+      let config = null
+      if (rows.length > 0) {
+        // Match by project_slug if provided
+        if (projectSlug) {
+          config = rows.find((r: any) => {
+            const slugs = Array.isArray(r.project_slugs) ? r.project_slugs : []
+            return slugs.includes(projectSlug)
+          })
+          if (config) {
+            this.logger_.info(`[Airwallex] ✓ Matched gateway "${config.display_name}" for project "${projectSlug}"`)
+          }
+        }
+        // Fallback: first gateway with empty project_slugs, or first overall
+        if (!config) {
+          config = rows.find((r: any) => !r.project_slugs || r.project_slugs.length === 0) || rows[0]
+          if (projectSlug) {
+            this.logger_.info(`[Airwallex] Using default gateway "${config.display_name}" (no project match)`)
+          }
+        }
+      }
+
       if (config) {
         const isLive = config.mode === "live"
         const keys = isLive ? config.live_keys : config.test_keys
@@ -165,7 +185,9 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
     const { amount, currency_code, data, context } = input
 
     try {
-      const client = await this.getAirwallexClient()
+      // Extract project slug from payment data or context for per-project gateway matching
+      const projectSlug = data?.project_slug || context?.project_slug || null
+      const client = await this.getAirwallexClient(projectSlug)
 
       const returnUrl = data?.return_url
       const method = data?.method || null
@@ -207,11 +229,23 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
       try {
         const pool = this.getPool()
         const { rows } = await pool.query(
-          `SELECT mode FROM gateway_config
+          `SELECT mode, project_slugs FROM gateway_config
            WHERE provider = 'airwallex' AND is_active = true AND deleted_at IS NULL
-           LIMIT 1`
+           ORDER BY priority ASC`
         )
-        if (rows[0]?.mode === "live") environment = "prod"
+        let envConfig = null
+        if (rows.length > 0) {
+          if (projectSlug) {
+            envConfig = rows.find((r: any) => {
+              const slugs = Array.isArray(r.project_slugs) ? r.project_slugs : []
+              return slugs.includes(projectSlug)
+            })
+          }
+          if (!envConfig) {
+            envConfig = rows.find((r: any) => !r.project_slugs || r.project_slugs.length === 0) || rows[0]
+          }
+        }
+        if (envConfig?.mode === "live") environment = "prod"
         else if (this.options_?.testMode === false) environment = "prod"
       } catch {}
 
@@ -257,6 +291,7 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
           checkoutUrl: checkoutUrl,
           session_id: data?.session_id,
           currency_code,
+          project_slug: projectSlug,
         },
       }
     } catch (error: any) {
@@ -274,7 +309,7 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
   async authorizePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const client = await this.getAirwallexClient()
+      const client = await this.getAirwallexClient(sessionData.project_slug)
       const intentId = sessionData.intentId
 
       if (!intentId) {
@@ -312,7 +347,7 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
   async capturePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const client = await this.getAirwallexClient()
+      const client = await this.getAirwallexClient(sessionData.project_slug)
       const intentId = sessionData.intentId
 
       if (!intentId) {
@@ -344,7 +379,7 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
     const sessionData = input.data || input
     const refundAmount = input.amount
     try {
-      const client = await this.getAirwallexClient()
+      const client = await this.getAirwallexClient(sessionData.project_slug)
       const intentId = sessionData.intentId
 
       if (!intentId) {
@@ -384,7 +419,7 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
   async cancelPayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const client = await this.getAirwallexClient()
+      const client = await this.getAirwallexClient(sessionData.project_slug)
       const intentId = sessionData.intentId
 
       if (intentId) {
@@ -419,7 +454,7 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
    */
   async getPaymentStatus(data: any): Promise<PaymentSessionStatus> {
     try {
-      const client = await this.getAirwallexClient()
+      const client = await this.getAirwallexClient(data.project_slug)
       const intentId = data.intentId
 
       if (!intentId) return PaymentSessionStatus.PENDING
@@ -437,7 +472,7 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
   async retrievePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const client = await this.getAirwallexClient()
+      const client = await this.getAirwallexClient(sessionData.project_slug)
       const intentId = sessionData.intentId
 
       if (!intentId) {
@@ -489,7 +524,7 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
       const client = await this.getAirwallexClient()
       const paymentIntent = await client.getPaymentIntent(intentId)
 
-      let action = "not_supported"
+      let action: string = "not_supported"
 
       if (event_type === "payment_intent.succeeded" || paymentIntent.status === "SUCCEEDED") {
         action = "authorized"

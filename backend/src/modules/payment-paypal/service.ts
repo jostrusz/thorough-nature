@@ -105,12 +105,13 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
   }
 
   /**
-   * Build or return the PayPal API client.
+   * Build the PayPal API client with per-project gateway matching.
    * Tries gateway config (admin DB) first, then falls back to options/env vars.
+   * Supports per-project PayPal accounts by matching project_slug in project_slugs JSONB.
    */
-  private async getPayPalClient(): Promise<PayPalApiClient> {
+  private async getPayPalClient(projectSlug?: string): Promise<PayPalApiClient> {
     // Don't cache client — always re-read gateway config from DB
-    // to pick up key changes without requiring a restart
+    // to support per-project credentials
     this.client_ = null
 
     // 1. Try gateway config from database via direct DB query (bypasses DI container)
@@ -121,12 +122,31 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         `SELECT id, display_name, mode, live_keys, test_keys, project_slugs, priority
          FROM gateway_config
          WHERE provider = 'paypal' AND is_active = true AND deleted_at IS NULL
-         ORDER BY priority ASC
-         LIMIT 1`
+         ORDER BY priority ASC`
       )
       await pool.end()
 
-      const config = rows[0]
+      let config = null
+      if (rows.length > 0) {
+        // Match by project_slug if provided
+        if (projectSlug) {
+          config = rows.find((r: any) => {
+            const slugs = Array.isArray(r.project_slugs) ? r.project_slugs : []
+            return slugs.includes(projectSlug)
+          })
+          if (config) {
+            this.logger_.info(`[PayPal] ✓ Matched gateway "${config.display_name}" for project "${projectSlug}"`)
+          }
+        }
+        // Fallback: first gateway with empty project_slugs, or first overall
+        if (!config) {
+          config = rows.find((r: any) => !r.project_slugs || r.project_slugs.length === 0) || rows[0]
+          if (projectSlug) {
+            this.logger_.info(`[PayPal] Using default gateway "${config.display_name}" (no project match)`)
+          }
+        }
+      }
+
       if (config) {
         const isLive = config.mode === "live"
         const keys = isLive ? config.live_keys : config.test_keys
@@ -175,21 +195,34 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
 
   /**
    * Get PayPal client_id for frontend (safe to expose).
+   * Supports per-project gateway matching via project_slug.
    * Returns from gateway config or env var.
    */
-  private async getClientIdForFrontend(): Promise<string | null> {
+  private async getClientIdForFrontend(projectSlug?: string): Promise<string | null> {
     try {
       const { Pool } = require("pg")
       const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
       const { rows } = await pool.query(
-        `SELECT mode, live_keys, test_keys
+        `SELECT mode, live_keys, test_keys, project_slugs
          FROM gateway_config
          WHERE provider = 'paypal' AND is_active = true AND deleted_at IS NULL
-         ORDER BY priority ASC
-         LIMIT 1`
+         ORDER BY priority ASC`
       )
       await pool.end()
-      const config = rows[0]
+
+      let config = null
+      if (rows.length > 0) {
+        if (projectSlug) {
+          config = rows.find((r: any) => {
+            const slugs = Array.isArray(r.project_slugs) ? r.project_slugs : []
+            return slugs.includes(projectSlug)
+          })
+        }
+        if (!config) {
+          config = rows.find((r: any) => !r.project_slugs || r.project_slugs.length === 0) || rows[0]
+        }
+      }
+
       if (config) {
         const isLive = config.mode === "live"
         const keys = isLive ? config.live_keys : config.test_keys
@@ -213,8 +246,10 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
 
     let orderData: any
     try {
-      const client = await this.getPayPalClient()
-      const clientIdForFrontend = await this.getClientIdForFrontend()
+      // Extract project slug from payment data or context for per-project gateway matching
+      const projectSlug = data?.project_slug || context?.project_slug || null
+      const client = await this.getPayPalClient(projectSlug)
+      const clientIdForFrontend = await this.getClientIdForFrontend(projectSlug)
 
       const currency = currency_code?.toUpperCase() || "EUR"
       const totalValue = formatPayPalAmount(amount)
@@ -388,6 +423,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
           isAPM,
           isCard,
           method,
+          project_slug: projectSlug,
         },
       }
     } catch (error: any) {
@@ -425,7 +461,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
   async authorizePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const client = await this.getPayPalClient()
+      const client = await this.getPayPalClient(sessionData.project_slug)
       const { paypalOrderId } = sessionData
 
       if (!paypalOrderId) {
@@ -526,7 +562,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
   async capturePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const client = await this.getPayPalClient()
+      const client = await this.getPayPalClient(sessionData.project_slug)
       const { paypalOrderId, authorizationId, currency_code, amount } =
         sessionData
 
@@ -617,7 +653,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
     const sessionData = input.data || input
     const refundAmount = input.amount
     try {
-      const client = await this.getPayPalClient()
+      const client = await this.getPayPalClient(sessionData.project_slug)
       const { captureId, currency_code } = sessionData
 
       if (!captureId) {
@@ -663,7 +699,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
   async cancelPayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const client = await this.getPayPalClient()
+      const client = await this.getPayPalClient(sessionData.project_slug)
       const { authorizationId } = sessionData
 
       if (authorizationId) {
@@ -700,7 +736,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
    */
   async getPaymentStatus(data: any): Promise<PaymentSessionStatus> {
     try {
-      const client = await this.getPayPalClient()
+      const client = await this.getPayPalClient(data.project_slug)
       const { paypalOrderId } = data
 
       if (!paypalOrderId) return PaymentSessionStatus.PENDING
@@ -718,7 +754,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
   async retrievePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const client = await this.getPayPalClient()
+      const client = await this.getPayPalClient(sessionData.project_slug)
       const { paypalOrderId } = sessionData
 
       if (!paypalOrderId) {
