@@ -471,6 +471,31 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         }
       }
 
+      // Auto-capture: if order is APPROVED and intent was CAPTURE, capture now
+      if (status === "APPROVED") {
+        try {
+          const capturedOrder = await client.captureOrder(paypalOrderId)
+          const newCaptures = capturedOrder.purchase_units?.[0]?.payments?.captures || []
+          if (newCaptures.length > 0 && newCaptures[0].status === "COMPLETED") {
+            this.logger_.info(
+              `[PayPal] Auto-captured order ${paypalOrderId}, captureId=${newCaptures[0].id}`
+            )
+            return {
+              status: PaymentSessionStatus.AUTHORIZED,
+              data: {
+                ...sessionData,
+                paypalOrderId,
+                captureId: newCaptures[0].id,
+                status: "CAPTURED",
+                payer: capturedOrder.payer,
+              },
+            }
+          }
+        } catch (captureErr: any) {
+          this.logger_.warn(`[PayPal] Auto-capture failed for ${paypalOrderId}: ${captureErr.message}`)
+        }
+      }
+
       return {
         status: mapPayPalStatusToMedusa(status),
         data: {
