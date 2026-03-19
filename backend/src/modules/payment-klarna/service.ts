@@ -183,31 +183,36 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       let isTestMode = true
       let source = "none"
 
-      // Try gateway config first (admin-configured)
-      const gatewayConfigService = this.getGatewayConfigService()
-      if (gatewayConfigService) {
+      // Try gateway config first (admin-configured) via direct DB query
+      const dbUrl = process.env.DATABASE_URL
+      if (dbUrl) {
         try {
-          const configs = await gatewayConfigService.listGatewayConfigs(
-            { provider: "klarna", is_active: true },
-            { take: 1 }
+          const { Client } = require("pg")
+          const pgClient = new Client({
+            connectionString: dbUrl,
+            ssl: dbUrl.includes("railway") ? { rejectUnauthorized: false } : undefined,
+          })
+          await pgClient.connect()
+          const result = await pgClient.query(
+            "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL LIMIT 1",
+            ["klarna"]
           )
-          const config = configs[0]
+          await pgClient.end()
+          const config = result.rows[0]
           if (config) {
             const isLive = config.mode === "live"
             const keys = isLive ? config.live_keys : config.test_keys
             apiKey = keys?.api_key
             secretKey = keys?.secret_key
             isTestMode = !isLive
-            source = `gateway_config (mode=${config.mode}, hasApiKey=${!!apiKey}, hasSecret=${!!secretKey})`
-            this.logger_.info(`[Klarna] Using gateway config: mode=${config.mode}, apiKey=${apiKey ? apiKey.substring(0, 8) + '...' : 'EMPTY'}, secretKey=${secretKey ? secretKey.substring(0, 16) + '...' : 'EMPTY'}`)
+            source = `admin gateway "${config.display_name || 'Klarna'}" (mode=${config.mode})`
+            this.logger_.info(`[Klarna] ✓ Using ${isLive ? 'LIVE' : 'TEST'} keys from ${source}`)
           } else {
             this.logger_.info(`[Klarna] No gateway config found for klarna`)
           }
-        } catch (err) {
-          this.logger_.warn(`[Klarna] Failed to load gateway config: ${err.message}`)
+        } catch (err: any) {
+          this.logger_.warn(`[Klarna] Failed to load gateway config via DB: ${err.message}`)
         }
-      } else {
-        this.logger_.info(`[Klarna] Gateway config service not available`)
       }
 
       // Fallback to provider options / env vars
