@@ -1,5 +1,4 @@
 import { MedusaContainer } from "@medusajs/framework/types"
-import { Modules } from "@medusajs/framework/utils"
 import { DEXTRUM_MODULE } from "../modules/dextrum"
 import { MyStockApiClient } from "../modules/dextrum/api-client"
 
@@ -10,7 +9,6 @@ import { MyStockApiClient } from "../modules/dextrum/api-client"
  */
 export default async function dextrumOrderHold(container: MedusaContainer) {
   const dextrumService = container.resolve(DEXTRUM_MODULE) as any
-  const orderModuleService = container.resolve(Modules.ORDER) as any
   const query = container.resolve("query") as any
 
   try {
@@ -74,9 +72,13 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
               retry_count: retries,
             })
             const meta = (order as any).metadata || {}
-            await orderModuleService.updateOrders(orderMap.medusa_order_id, {
-              metadata: { ...meta, dextrum_status: "FAILED", dextrum_error: "Payment timeout" },
-            })
+            const { Pool } = require("pg")
+            const p = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+            await p.query(
+              `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+              [JSON.stringify({ ...meta, dextrum_status: "FAILED", dextrum_error: "Payment timeout" }), orderMap.medusa_order_id]
+            )
+            await p.end()
           } else {
             const nextRetry = new Date(now.getTime() + config.retry_interval_minutes * 60 * 1000)
             await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
@@ -231,17 +233,22 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           retry_count: 0,
         })
 
-        // 8. Update order metadata
+        // 8. Update order metadata via direct DB query
         const meta = (order as any).metadata || {}
-        await orderModuleService.updateOrders(orderMap.medusa_order_id, {
-          metadata: {
-            ...meta,
-            dextrum_status: "IMPORTED",
-            dextrum_order_code: orderCode,
-            dextrum_mystock_id: wmsResult.id,
-            dextrum_sent_at: sentAt,
-          },
-        })
+        const updatedMeta = {
+          ...meta,
+          dextrum_status: "IMPORTED",
+          dextrum_order_code: orderCode,
+          dextrum_mystock_id: wmsResult.id,
+          dextrum_sent_at: sentAt,
+        }
+        const { Pool: PgPool } = require("pg")
+        const pgPool = new PgPool({ connectionString: process.env.DATABASE_URL, max: 2 })
+        await pgPool.query(
+          `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+          [JSON.stringify(updatedMeta), orderMap.medusa_order_id]
+        )
+        await pgPool.end()
 
         console.log(`[Dextrum Hold] Order ${orderCode} sent to WMS → ${wmsResult.id}`)
       } catch (err: any) {
