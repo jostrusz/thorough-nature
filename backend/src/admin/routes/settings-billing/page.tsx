@@ -1104,7 +1104,7 @@ function GatewaysTab() {
                             />
                           </div>
                           <div>
-                            <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" ? "Client Secret" : editForm.provider === "airwallex" ? "API Key" : editForm.provider === "stripe" ? "Webhook Secret (whsec_...)" : "Secret Key"}</label>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" ? "Client Secret" : editForm.provider === "airwallex" ? "API Key" : editForm.provider === "stripe" ? "Secret Key (sk_...)" : "Secret Key"}</label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? editForm.live_keys.secret_key : editForm.test_keys.secret_key}
                               onChange={(e) => {
