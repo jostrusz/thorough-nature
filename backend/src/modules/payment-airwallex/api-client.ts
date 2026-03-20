@@ -20,6 +20,7 @@ interface AirwallexPaymentIntentRequest {
   descriptor?: string
   return_url?: string
   metadata?: Record<string, any>
+  order?: Record<string, any>
 }
 
 interface AirwallexPaymentIntentResponse {
