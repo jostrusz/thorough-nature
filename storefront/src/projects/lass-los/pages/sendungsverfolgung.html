@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>R&uuml;ckgabe- und Garantierichtlinien &mdash; Lass los, was dich kaputt macht</title>
-<meta name="description" content="R&uuml;ckgabe- und Garantierichtlinien f&uuml;r Lass los, was dich kaputt macht. 30 Tage Geld-zur&uuml;ck-Garantie, R&uuml;ckgabeprozess und Ihre Rechte.">
+<meta name="description" content="R&uuml;ckgabe- und Garantierichtlinien f&uuml;r das Buch Lass los, was dich kaputt macht. 30 Tage Widerrufsrecht, R&uuml;ckgabeprozess und gesetzliche Gew&auml;hrleistung.">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="/favicon.png" type="image/png">
 
@@ -21,7 +21,7 @@
 @font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
-/* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
+/* ═══ CSS — Velvet Dusk ═══ */
 :root {
  --bg: #FAF5F8;
  --heading: #2D1B3D;
@@ -47,7 +47,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
 .nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
 .nav-logo img { height: 40px; width: auto; }
-.nav-logo-text { font-family: 'Recoleta', serif; font-size: 16px; font-weight: 600; color: var(--heading); line-height: 1.2; }
 .nav-links { display: flex; align-items: center; gap: 28px; }
 .nav-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--body); text-decoration: none; transition: color 0.2s; position: relative; }
 .nav-links a:hover { color: var(--heading); }
@@ -78,7 +77,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 }
 
-/* ═══ CONTENT STRÁNKY ═══ */
+/* ═══ CONTENT ═══ */
 .page-header {
  background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
  padding: 56px 20px 48px;
@@ -90,7 +89,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 .page-content { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
 
-/* Informační boxy */
+/* Info box */
 .info-box {
  background: var(--light);
  border: 1px solid var(--section);
@@ -102,9 +101,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .info-box p, .info-box li { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; }
 .info-box ul { list-style: none; padding: 0; }
 .info-box ul li { padding: 4px 0; }
-.info-box ul li::before { content: '\2192\0020'; color: var(--cta); font-weight: 700; }
+.info-box ul li::before { content: '→ '; color: var(--cta); font-weight: 700; }
 
-/* Sekce */
+/* Sections */
 .section-block { margin-bottom: 40px; }
 .section-block h2 {
  font-family: 'Recoleta', serif;
@@ -117,18 +116,34 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  align-items: center;
  gap: 10px;
 }
-.section-block h2 .icon { font-size: 28px; }
+.section-block h2 .section-num {
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ width: 36px;
+ height: 36px;
+ background: var(--cta);
+ color: var(--white);
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ font-weight: 700;
+ border-radius: 10px;
+ flex-shrink: 0;
+}
 .section-block h3 {
  font-family: 'DM Sans', sans-serif;
  font-size: 17px;
  font-weight: 700;
  color: var(--heading);
- margin: 24px 0 12px;
+ margin: 20px 0 8px;
 }
+.section-block h3:first-of-type { margin-top: 0; }
 .section-block p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 12px; }
 .section-block ul, .section-block ol { padding-left: 24px; margin-bottom: 12px; }
 .section-block li { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 6px; }
 .section-block strong { color: var(--heading); }
+.section-block a { color: var(--cta); text-decoration: underline; font-weight: 600; transition: color 0.3s ease; }
+.section-block a:hover { color: var(--cta-hover); }
 
 .highlight-box {
  background: linear-gradient(135deg, var(--light), var(--section));
@@ -139,14 +154,28 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .highlight-box p { margin: 0; font-size: 15px; }
 
-.warning-box {
- background: linear-gradient(135deg, #FFF8F0, #FFEDDB);
- border-left: 4px solid #E8A050;
- border-radius: 0 12px 12px 0;
- padding: 20px 24px;
+.retour-box {
+ background: linear-gradient(135deg, var(--light), var(--section));
+ border: 2px solid var(--cta);
+ border-radius: 16px;
+ padding: 24px;
  margin: 20px 0;
+ text-align: center;
 }
-.warning-box p { margin: 0; font-size: 15px; color: var(--body); }
+.retour-box h4 {
+ font-family: 'Recoleta', serif;
+ font-size: 17px;
+ font-weight: 600;
+ color: var(--heading);
+ margin-bottom: 12px;
+}
+.retour-box p {
+ font-size: 15px;
+ font-weight: 500;
+ color: var(--body);
+ margin: 4px 0;
+ line-height: 1.5;
+}
 
 /* Guarantee box */
 .guarantee-box {
@@ -156,7 +185,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  padding: 32px;
  text-align: center;
  margin: 40px 0;
- position: relative;
 }
 .guarantee-seal {
  width: 72px;
@@ -185,7 +213,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  margin: 0 auto;
 }
 
-/* Retour stappen */
+/* Steps */
 .steps {
  display: grid;
  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -234,45 +262,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  margin: 0;
 }
 
-/* Conditions list */
-.conditions-grid {
- display: grid;
- grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
- gap: 12px;
- margin: 16px 0;
-}
-.condition-item {
- background: var(--white);
- border: 1px solid var(--section);
- border-radius: 12px;
- padding: 16px;
- text-align: center;
- transition: all 0.3s ease;
-}
-.condition-item:hover {
- border-color: var(--highlight);
- box-shadow: 0 4px 16px rgba(45, 27, 61, 0.06);
-}
-.condition-icon { font-size: 24px; margin-bottom: 8px; }
-.condition-item strong {
- display: block;
- font-family: 'DM Sans', sans-serif;
- font-size: 14px;
- font-weight: 700;
- color: var(--heading);
- margin-bottom: 4px;
-}
-.condition-item span {
- font-family: 'DM Sans', sans-serif;
- font-size: 13px;
- color: var(--muted);
- line-height: 1.4;
-}
-
 /* FAQ */
-.faq-item {
- border-bottom: 1px solid var(--section);
-}
+.faq-item { border-bottom: 1px solid var(--section); }
 .faq-question {
  display: flex;
  justify-content: space-between;
@@ -311,12 +302,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  padding-bottom: 18px;
  margin: 0;
 }
-.faq-item.active .faq-icon {
- transform: rotate(45deg);
-}
-.faq-item.active .faq-answer {
- max-height: 300px;
-}
+.faq-item.active .faq-icon { transform: rotate(45deg); }
+.faq-item.active .faq-answer { max-height: 400px; }
 
 .divider { height: 1px; background: var(--section); margin: 40px 0; }
 
@@ -330,6 +317,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .company-info h3 { font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
 .company-info p { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; margin: 0 0 6px; }
+
+/* Cross-link note */
+.cross-link-note {
+ background: var(--white);
+ border: 1px solid var(--section);
+ border-radius: 12px;
+ padding: 20px 24px;
+ margin-top: 32px;
+ text-align: center;
+}
+.cross-link-note p { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; margin: 0; }
+.cross-link-note a { color: var(--cta); font-weight: 600; text-decoration: underline; }
+.cross-link-note a:hover { color: var(--cta-hover); }
 
 /* Last updated */
 .last-updated {
@@ -359,7 +359,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .page-header h1 { font-size: 28px; }
  .section-block h2 { font-size: 20px; }
  .steps { grid-template-columns: 1fr; }
- .conditions-grid { grid-template-columns: repeat(2, 1fr); }
  .footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 32px; }
  .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
 }
@@ -367,7 +366,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .page-header h1 { font-size: 24px; }
  .page-header { padding: 40px 16px 36px; }
  .page-content { padding: 32px 16px 60px; }
- .conditions-grid { grid-template-columns: 1fr 1fr; }
 }
 
 /* ═══ PRELOADER ═══ */
@@ -396,7 +394,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   </a>
   <div class="nav-links">
    <a href="versand.html">Versand &amp; R&uuml;ckgabe</a>
-   <a href="sendungsverfolgung.html" class="active">Sendungsverfolgung</a>
+   <a href="sendungsverfolgung.html" class="active">R&uuml;ckgabe &amp; Garantie</a>
    <a href="agb.html">AGB</a>
    <a href="datenschutz.html">Datenschutz</a>
    <a href="kontakt.html">Kontakt</a>
@@ -410,7 +408,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
  <a href="versand.html">Versand &amp; R&uuml;ckgabe</a>
- <a href="sendungsverfolgung.html">Sendungsverfolgung</a>
+ <a href="sendungsverfolgung.html" class="active">R&uuml;ckgabe &amp; Garantie</a>
  <a href="agb.html">AGB</a>
  <a href="datenschutz.html">Datenschutz</a>
  <a href="kontakt.html">Kontakt</a>
@@ -419,9 +417,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">R&uuml;ckgabe &amp; Garantie</div>
+ <div class="badge">Ihre Rechte als Kunde</div>
  <h1>R&uuml;ckgabe- und Garantierichtlinien</h1>
- <p>Ihre Rechte und unser Zufriedenheitsversprechen</p>
+ <p>Transparente Informationen zu Ihrem Widerrufsrecht, dem R&uuml;ckgabeprozess und der gesetzlichen Gew&auml;hrleistung.</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
@@ -431,234 +429,183 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <div class="info-box">
   <h3>Zusammenfassung</h3>
   <ul>
-   <li>30 Tage verl&auml;ngerte Geld-zur&uuml;ck-Garantie</li>
-   <li>14 Tage gesetzliches Widerrufsrecht</li>
-   <li>100% R&uuml;ckerstattung bei Unzufriedenheit</li>
-   <li>R&uuml;ckgabeprozess in 5 einfachen Schritten</li>
+   <li><strong>30 Tage Widerrufsrecht</strong> ohne Angabe von Gr&uuml;nden</li>
+   <li>Vollst&auml;ndige R&uuml;ckerstattung innerhalb von 14 Tagen nach Wareneingang</li>
+   <li>2 Jahre gesetzliche Gew&auml;hrleistung bei M&auml;ngeln</li>
+   <li>Kostenloser Ersatz bei besch&auml;digten oder fehlerhaften Produkten</li>
   </ul>
  </div>
 
- <!-- Garantie -->
+ <!-- Garantie-Siegel -->
  <div class="guarantee-box">
   <div class="guarantee-seal">30</div>
-  <h3>30 Tage Geld-zur&uuml;ck-Garantie</h3>
-  <p>Nicht zufrieden? Sie bekommen Ihr Geld zur&uuml;ck. <strong>Ohne Fragen. Ohne Aufwand.</strong> Laut Gesetz haben Sie ein 14-t&auml;giges Widerrufsrecht. Wir bieten Ihnen 30 Tage.</p>
+  <h3>30 Tage Widerrufsrecht</h3>
+  <p>Gem&auml;&szlig; den gesetzlichen Bestimmungen der EU und des deutschen Fernabsatzrechts gew&auml;hren wir Ihnen ein <strong>30-t&auml;giges Widerrufsrecht</strong>. Sollten Sie mit Ihrem Kauf nicht zufrieden sein, k&ouml;nnen Sie die Ware innerhalb dieser Frist ohne Angabe von Gr&uuml;nden zur&uuml;cksenden.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sektion 1: Widerrufsrecht -->
+ <!-- ═══ 1. Widerrufsrecht ═══ -->
  <div class="section-block">
-  <h2><span class="icon">1.</span> Widerrufsrecht (Bedenkzeit)</h2>
+  <h2><span class="section-num">1</span> Widerrufsrecht</h2>
 
-  <h3>1.1 Ihre gesetzlichen Rechte</h3>
-  <p>Gem&auml;&szlig; der EU-Verbraucherschutzgesetzgebung haben Sie das Recht, Ihren Kauf innerhalb von <strong>14 Tagen</strong> nach Erhalt ohne Angabe von Gr&uuml;nden zu widerrufen. Wir gehen jedoch einen Schritt weiter und bieten Ihnen ein verl&auml;ngertes Widerrufsrecht von <strong>30 Tagen</strong>.</p>
+  <h3>1.1 Gesetzliche Grundlage</h3>
+  <p>Als Verbraucher haben Sie gem&auml;&szlig; &sect; 355 BGB und der EU-Verbraucherrechterichtlinie 2011/83/EU das Recht, Ihren Kaufvertrag innerhalb von <strong>30 Tagen</strong> ohne Angabe von Gr&uuml;nden zu widerrufen. Die Widerrufsfrist beginnt an dem Tag, an dem Sie oder ein von Ihnen benannter Dritter, der nicht der Bef&ouml;rderer ist, die Ware in Empfang genommen haben.</p>
 
-  <h3>1.2 Bedingungen f&uuml;r die R&uuml;ckgabe</h3>
-  <p>Um sich f&uuml;r eine vollst&auml;ndige R&uuml;ckerstattung zu qualifizieren, muss das Buch die folgenden Bedingungen erf&uuml;llen:</p>
-
-  <div class="conditions-grid">
-   <div class="condition-item">
-    <div class="condition-icon">&#128214;</div>
-    <strong>Ungelesen</strong>
-    <span>Nicht gelesen oder durchgebl&auml;ttert</span>
-   </div>
-   <div class="condition-item">
-    <div class="condition-icon">&#9989;</div>
-    <strong>Unbesch&auml;digt</strong>
-    <span>Keine Knicke, Kratzer oder Flecken</span>
-   </div>
-   <div class="condition-item">
-    <div class="condition-icon">&#9998;</div>
-    <strong>Unmarkiert</strong>
-    <span>Keine Notizen oder Markierungen</span>
-   </div>
-   <div class="condition-item">
-    <div class="condition-icon">&#128230;</div>
-    <strong>Vollst&auml;ndig</strong>
-    <span>Alle Teile vorhanden</span>
-   </div>
-   <div class="condition-item">
-    <div class="condition-icon">&#10024;</div>
-    <strong>Originalzustand</strong>
-    <span>Wie bei Erhalt</span>
-   </div>
+  <h3>1.2 Aus&uuml;bung des Widerrufsrechts</h3>
+  <p>Um Ihr Widerrufsrecht auszu&uuml;ben, m&uuml;ssen Sie uns mittels einer eindeutigen Erkl&auml;rung (z.&nbsp;B. per E-Mail) &uuml;ber Ihren Entschluss, den Vertrag zu widerrufen, informieren. Senden Sie hierzu eine E-Mail an:</p>
+  <div class="highlight-box">
+   <p><strong>E-Mail:</strong> <a href="mailto:buch@lasslosbuch.de" style="color: var(--cta);">buch@lasslosbuch.de</a><br>
+   <strong>Betreff:</strong> Widerruf &mdash; Bestellnummer [Ihre Bestellnummer]</p>
   </div>
+  <p>Zur Wahrung der Widerrufsfrist gen&uuml;gt es, dass Sie die Mitteilung &uuml;ber die Aus&uuml;bung des Widerrufsrechts vor Ablauf der Widerrufsfrist absenden.</p>
 
-  <div class="warning-box">
-   <p><strong>Hinweis:</strong> B&uuml;cher, die offensichtlich gelesen oder benutzt wurden, qualifizieren sich <strong>nicht</strong> f&uuml;r eine vollst&auml;ndige R&uuml;ckerstattung.</p>
-  </div>
-
-  <h3>1.3 Digitale Produkte (E-Books)</h3>
-  <p>Durch das Herunterladen digitaler Produkte stimmen Sie zu, dass Sie auf Ihr Widerrufsrecht verzichten (gem&auml;&szlig; EU-Richtlinie 2011/83/EU, Artikel 16m). Dies gilt ausschlie&szlig;lich f&uuml;r die digitalen Produkte.</p>
-  <p>Dies beeinflusst <strong>nicht</strong> Ihr Recht, das physische Buch zur&uuml;ckzugeben. Der Wert etwaiger Gratisboni wird nicht von Ihrer R&uuml;ckerstattung abgezogen.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sektion 2: Rückgabe -->
+ <!-- ═══ 2. Rückgabe — Schritt für Schritt ═══ -->
  <div class="section-block">
-  <h2><span class="icon">2.</span> R&uuml;ckgabe &mdash; Schritt f&uuml;r Schritt</h2>
+  <h2><span class="section-num">2</span> R&uuml;ckgabeprozess</h2>
 
-  <h3>2.1 So geben Sie in 5 Schritten zur&uuml;ck</h3>
+  <h3>2.1 So funktioniert die R&uuml;cksendung</h3>
 
   <div class="steps">
    <div class="step">
     <div class="step-num">1</div>
-    <h4>E-Mail senden</h4>
-    <p>Senden Sie eine E-Mail an buch@befreiungsbuch.de mit Ihrem Namen, Ihrer Bestellnummer und dem Grund f&uuml;r die R&uuml;ckgabe.</p>
+    <h4>Widerruf erkl&auml;ren</h4>
+    <p>Senden Sie eine E-Mail an buch@lasslosbuch.de mit Ihrer Bestellnummer und dem Wunsch, den Kauf zu widerrufen.</p>
    </div>
    <div class="step">
     <div class="step-num">2</div>
-    <h4>Best&auml;tigung</h4>
-    <p>Sie erhalten innerhalb von 1&ndash;2 Werktagen eine Best&auml;tigung mit R&uuml;cksendeanweisungen.</p>
+    <h4>Best&auml;tigung erhalten</h4>
+    <p>Sie erhalten innerhalb von 1&ndash;2 Werktagen eine Best&auml;tigung mit R&uuml;cksendeanweisungen und der R&uuml;cksendeadresse.</p>
    </div>
    <div class="step">
     <div class="step-num">3</div>
-    <h4>Sorgf&auml;ltig verpacken</h4>
-    <p>Verpacken Sie das Buch sorgf&auml;ltig, um Sch&auml;den w&auml;hrend des Transports zu vermeiden.</p>
+    <h4>Ware zur&uuml;cksenden</h4>
+    <p>Verpacken Sie das Buch sorgf&auml;ltig und senden Sie es innerhalb von 14 Tagen nach Widerrufserkl&auml;rung an die angegebene Adresse.</p>
    </div>
    <div class="step">
     <div class="step-num">4</div>
-    <h4>Versenden</h4>
-    <p>Senden Sie das Paket innerhalb von 14 Tagen an die R&uuml;cksendeadresse.</p>
-   </div>
-   <div class="step">
-    <div class="step-num">5</div>
     <h4>R&uuml;ckerstattung</h4>
-    <p>Sie erhalten Ihre R&uuml;ckerstattung innerhalb von 14 Tagen nach Eingang des Buches.</p>
+    <p>Sie erhalten Ihre vollst&auml;ndige R&uuml;ckerstattung innerhalb von 14 Tagen nach Eingang der Ware.</p>
    </div>
   </div>
 
   <h3>2.2 R&uuml;cksendeadresse</h3>
-  <div class="highlight-box">
-   <p><strong>Performance Marketing Solution s.r.o. &mdash; Retouren</strong><br>
-   c/o Dextrum Fulfillment a.s.<br>
-   Kirilovova 181<br>
-   739 21 Paskov<br>
-   Tschechien</p>
+  <div class="retour-box">
+   <h4>R&uuml;cksendung an</h4>
+   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
+   <p>Rybn&aacute; 716/24, 110 00 Prag 1</p>
+   <p>Tschechische Republik</p>
   </div>
 
-  <div class="warning-box">
-   <p><strong>Wichtig:</strong> Schreiben Sie immer <strong>&quot;Retoure &mdash; Bestellnummer: [Ihre Bestellnummer]&quot;</strong> auf die Au&szlig;enseite des Pakets.</p>
-  </div>
+  <h3>2.3 Zustand der Ware</h3>
+  <p>Die Ware muss in unbesch&auml;digtem Zustand zur&uuml;ckgesandt werden. Normale Gebrauchsspuren durch Pr&uuml;fung des Produkts &mdash; wie Sie es auch in einem Gesch&auml;ft tun w&uuml;rden &mdash; sind zul&auml;ssig und f&uuml;hren nicht zu einer Wertminderung.</p>
 
-  <h3>2.3 R&uuml;cksendekosten</h3>
-  <p>Die R&uuml;cksendekosten tr&auml;gt der Kunde, <strong>es sei denn</strong>:</p>
+  <h3>2.4 R&uuml;cksendekosten</h3>
+  <p>Die Kosten der R&uuml;cksendung tr&auml;gt grunds&auml;tzlich der K&auml;ufer, <strong>es sei denn</strong>:</p>
   <ul>
-   <li>Das Produkt ist defekt</li>
-   <li>Sie haben das falsche Produkt erhalten</li>
-   <li>Das Produkt wurde beim Transport besch&auml;digt</li>
+   <li>Das Produkt weist einen Produktions- oder Druckfehler auf</li>
+   <li>Sie haben ein falsches Produkt erhalten</li>
+   <li>Das Produkt wurde w&auml;hrend des Transports besch&auml;digt</li>
   </ul>
-  <p>Gesch&auml;tzte Versandkosten: <strong>~10&ndash;15 &euro;</strong> (Einschreiben nach Tschechien).</p>
+  <p>In diesen F&auml;llen &uuml;bernehmen wir s&auml;mtliche R&uuml;cksendekosten.</p>
 
   <div class="highlight-box">
-   <p><strong>Tipp:</strong> Verwenden Sie immer eine Versandmethode mit Sendungsverfolgung, damit Sie nachweisen k&ouml;nnen, dass das Paket versendet und zugestellt wurde.</p>
+   <p><strong>Empfehlung:</strong> Verwenden Sie f&uuml;r die R&uuml;cksendung eine Versandmethode mit Sendungsverfolgung, damit der Versand nachweisbar ist.</p>
   </div>
-
-  <h3>2.4 Was sollten Sie in Ihrer R&uuml;cksende-E-Mail angeben?</h3>
-  <ul>
-   <li>Ihr vollst&auml;ndiger Name</li>
-   <li>Bestellnummer</li>
-   <li>Empfangsdatum</li>
-   <li>Grund f&uuml;r die R&uuml;ckgabe (optional)</li>
-   <li>Bankdaten f&uuml;r die R&uuml;ckerstattung</li>
-  </ul>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sektion 3: Rückerstattung -->
+ <!-- ═══ 3. Rückerstattung ═══ -->
  <div class="section-block">
-  <h2><span class="icon">3.</span> R&uuml;ckerstattung</h2>
+  <h2><span class="section-num">3</span> R&uuml;ckerstattung</h2>
 
-  <h3>3.1 Wann erhalten Sie Ihre R&uuml;ckerstattung?</h3>
-  <p>Innerhalb von <strong>14 Tagen</strong> nach Eingang des zur&uuml;ckgesendeten Buches bearbeiten wir Ihre R&uuml;ckerstattung in H&ouml;he von <strong>35 &euro;</strong>.</p>
+  <h3>3.1 Frist und Umfang</h3>
+  <p>Nach Eingang und Pr&uuml;fung der zur&uuml;ckgesandten Ware erstatten wir den vollst&auml;ndigen Kaufpreis einschlie&szlig;lich der Versandkosten (mit Ausnahme der Zusatzkosten, die sich daraus ergeben, dass Sie eine andere Art der Lieferung als die angebotene g&uuml;nstigste Standardlieferung gew&auml;hlt haben) innerhalb von <strong>14 Tagen</strong>.</p>
 
-  <h3>3.2 Wie erfolgt die R&uuml;ckerstattung?</h3>
-  <p>Die R&uuml;ckerstattung erfolgt &uuml;ber dieselbe Zahlungsmethode, die Sie bei der Bestellung verwendet haben:</p>
+  <h3>3.2 Zahlungsmethode</h3>
+  <p>Die R&uuml;ckerstattung erfolgt &uuml;ber dasselbe Zahlungsmittel, das Sie bei der urspr&uuml;nglichen Transaktion eingesetzt haben:</p>
   <ul>
-   <li><strong>PayPal</strong> &rarr; R&uuml;ckerstattung auf Ihr PayPal-Konto</li>
-   <li><strong>Klarna</strong> &rarr; R&uuml;ckerstattung &uuml;ber Klarna</li>
-   <li><strong>Karte</strong> &rarr; R&uuml;ckerstattung auf Ihre Karte</li>
-   <li><strong>Bank&uuml;berweisung</strong> &rarr; R&uuml;ckerstattung auf Ihr Bankkonto</li>
+   <li><strong>PayPal:</strong> R&uuml;ckerstattung auf Ihr PayPal-Konto</li>
+   <li><strong>Kreditkarte:</strong> R&uuml;ckerstattung auf die verwendete Karte (kann je nach Bank 5&ndash;10 Werktage dauern)</li>
+   <li><strong>Klarna:</strong> R&uuml;ckerstattung &uuml;ber Klarna auf das hinterlegte Konto</li>
+   <li><strong>Sofort&uuml;berweisung / Bank&uuml;berweisung:</strong> R&uuml;ckerstattung auf das Bankkonto, von dem die Zahlung erfolgt ist</li>
   </ul>
-  <p>Nach der Bearbeitung kann es <strong>3&ndash;5 Werktage</strong> dauern, bis der Betrag auf Ihrem Konto sichtbar ist, abh&auml;ngig von Ihrer Bank.</p>
+  <p>F&uuml;r die R&uuml;ckerstattung werden Ihnen keine Geb&uuml;hren berechnet.</p>
 
-  <h3>3.3 Teilweise R&uuml;ckerstattung</h3>
-  <p>In folgenden F&auml;llen kann eine teilweise R&uuml;ckerstattung gelten:</p>
-  <ul>
-   <li>Das Buch zeigt Gebrauchsspuren</li>
-   <li>Das Buch wurde vom Kunden besch&auml;digt</li>
-   <li>Teile fehlen</li>
-  </ul>
-  <p>Die Wertminderung wird ermittelt und Sie werden informiert, bevor die R&uuml;ckerstattung bearbeitet wird.</p>
+  <h3>3.3 Wertminderung</h3>
+  <p>Sollte die zur&uuml;ckgesandte Ware eine Wertminderung aufweisen, die &uuml;ber das hinausgeht, was zur Feststellung der Beschaffenheit, Eigenschaften und Funktionsweise der Ware notwendig ist, kann ein entsprechender Betrag von der R&uuml;ckerstattung abgezogen werden. Sie werden in diesem Fall vorab informiert.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sektion 4: Reklamation und Produktgarantie -->
+ <!-- ═══ 4. Reklamation und Gewährleistung ═══ -->
  <div class="section-block">
-  <h2><span class="icon">4.</span> Reklamation und Produktgarantie</h2>
+  <h2><span class="section-num">4</span> Reklamation und Gew&auml;hrleistung</h2>
 
-  <h3>4.1 Wann k&ouml;nnen Sie eine Reklamation einreichen?</h3>
+  <h3>4.1 Gesetzliche Gew&auml;hrleistung</h3>
+  <p>Unabh&auml;ngig vom Widerrufsrecht steht Ihnen die gesetzliche Gew&auml;hrleistung von <strong>2 Jahren</strong> gem&auml;&szlig; &sect;&sect; 437 ff. BGB zu. Diese greift bei M&auml;ngeln, die bereits zum Zeitpunkt der Lieferung bestanden haben. Innerhalb der ersten 12 Monate nach Lieferung wird vermutet, dass ein Mangel bereits bei &Uuml;bergabe vorlag (Beweislastumkehr gem&auml;&szlig; &sect; 477 BGB).</p>
+
+  <h3>4.2 Reklamationsgr&uuml;nde</h3>
   <p>Sie k&ouml;nnen eine Reklamation einreichen, wenn:</p>
   <ul>
-   <li>Das Produkt besch&auml;digt angekommen ist</li>
+   <li>Das Produkt beim Transport besch&auml;digt wurde</li>
+   <li>Druckfehler oder Produktionsfehler vorliegen (z.&nbsp;B. fehlende Seiten, verschmierter Druck)</li>
    <li>Das Produkt nicht mit der Beschreibung &uuml;bereinstimmt</li>
-   <li>Es Druckfehler oder Produktionsfehler gibt</li>
-   <li>Seiten fehlen</li>
-   <li>Sie das falsche Produkt erhalten haben</li>
+   <li>Sie ein falsches Produkt erhalten haben</li>
   </ul>
 
-  <h3>4.2 Wie reichen Sie eine Reklamation ein?</h3>
-  <p>Senden Sie eine E-Mail an <a href="mailto:buch@befreiungsbuch.de" style="color: var(--cta);">buch@befreiungsbuch.de</a> mit:</p>
+  <h3>4.3 Reklamation einreichen</h3>
+  <p>Senden Sie Ihre Reklamation an <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a> mit:</p>
   <ul>
-   <li>Ihrem Namen und Ihrer Bestellnummer</li>
-   <li>Beschreibung des Problems</li>
-   <li>Fotos des besch&auml;digten oder defekten Produkts</li>
+   <li>Ihrem vollst&auml;ndigen Namen und Ihrer Bestellnummer</li>
+   <li>Einer Beschreibung des Mangels</li>
+   <li>Fotos des besch&auml;digten oder fehlerhaften Produkts</li>
   </ul>
-  <p>Wir antworten innerhalb von <strong>48 Stunden</strong> auf Ihre Reklamation.</p>
+  <p>Wir bearbeiten Ihre Reklamation innerhalb von <strong>48 Stunden</strong> und bieten Ihnen einen <strong>kostenlosen Ersatz</strong> oder eine <strong>vollst&auml;ndige R&uuml;ckerstattung</strong> an. Bei berechtigten Reklamationen &uuml;bernehmen wir s&auml;mtliche R&uuml;cksendekosten.</p>
 
-  <h3>4.3 Gesetzliche Garantie</h3>
   <div class="highlight-box">
-   <p>Sie haben Anspruch auf <strong>2 Jahre gesetzliche Garantie</strong> f&uuml;r M&auml;ngel, die bei der Lieferung vorhanden waren. Bei einer berechtigten Reklamation erhalten Sie einen <strong>kostenlosen Ersatz</strong> oder eine <strong>vollst&auml;ndige R&uuml;ckerstattung</strong>. Die R&uuml;cksendekosten &uuml;bernehmen wir in diesem Fall.</p>
+   <p><strong>Hinweis:</strong> Ihre gesetzlichen Gew&auml;hrleistungsrechte bleiben von diesen Richtlinien unber&uuml;hrt. Als Verbraucher k&ouml;nnen Sie sich stets auf die f&uuml;r Sie g&uuml;nstigeren gesetzlichen Bestimmungen berufen.</p>
   </div>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sektion 5: Häufig gestellte Fragen -->
+ <!-- ═══ 5. FAQ ═══ -->
  <div class="section-block">
-  <h2><span class="icon">5.</span> H&auml;ufig gestellte Fragen</h2>
+  <h2><span class="section-num">5</span> H&auml;ufig gestellte Fragen</h2>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Kann ich meine Bestellung stornieren?</h3>
+    <h3>Kann ich meine Bestellung stornieren, bevor sie versandt wurde?</h3>
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Ja, wenn Ihre Bestellung noch nicht versendet wurde, k&ouml;nnen Sie sie kostenlos stornieren. Senden Sie so schnell wie m&ouml;glich eine E-Mail an <a href="mailto:buch@befreiungsbuch.de" style="color: var(--cta);">buch@befreiungsbuch.de</a> mit Ihrer Bestellnummer.</p>
+    <p>Ja. Solange Ihre Bestellung noch nicht versandt wurde, k&ouml;nnen Sie diese kostenlos stornieren. Senden Sie uns hierzu eine E-Mail an <a href="mailto:buch@lasslosbuch.de" style="color: var(--cta);">buch@lasslosbuch.de</a> mit Ihrer Bestellnummer. Wurde die Bestellung bereits versandt, k&ouml;nnen Sie von Ihrem 30-t&auml;gigen Widerrufsrecht Gebrauch machen.</p>
    </div>
   </div>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Ich habe die digitalen E-Books nicht erhalten, was soll ich tun?</h3>
+    <h3>Wie lange habe ich Zeit f&uuml;r eine R&uuml;ckgabe?</h3>
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>&Uuml;berpr&uuml;fen Sie zun&auml;chst Ihren Spam- oder Junk-Ordner. Haben Sie die E-Books immer noch nicht erhalten? Senden Sie dann eine E-Mail an <a href="mailto:buch@befreiungsbuch.de" style="color: var(--cta);">buch@befreiungsbuch.de</a> mit Ihrer Bestellnummer, und wir senden Ihnen die Download-Links erneut zu.</p>
+    <p>Sie haben <strong>30 Tage</strong> ab Erhalt der Ware Zeit, Ihren Kauf ohne Angabe von Gr&uuml;nden zu widerrufen. Diese Frist &uuml;bersteigt das gesetzliche Minimum und gibt Ihnen ausreichend Zeit, das Produkt zu pr&uuml;fen.</p>
    </div>
   </div>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Kann ich das Buch gegen ein anderes Produkt umtauschen?</h3>
+    <h3>Was passiert, wenn mein Paket besch&auml;digt ankommt?</h3>
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Leider ist ein Umtausch nicht m&ouml;glich. Sie k&ouml;nnen das Buch jedoch gem&auml;&szlig; unserer R&uuml;ckgaberichtlinie zur&uuml;ckgeben und anschlie&szlig;end eine neue Bestellung aufgeben.</p>
+    <p>Senden Sie uns ein Foto des besch&auml;digten Produkts zusammen mit Ihrer Bestellnummer an <a href="mailto:buch@lasslosbuch.de" style="color: var(--cta);">buch@lasslosbuch.de</a>. Wir senden Ihnen kostenlos ein neues Exemplar oder erstatten den vollen Kaufpreis &mdash; einschlie&szlig;lich der R&uuml;cksendekosten.</p>
    </div>
   </div>
 
@@ -668,24 +615,38 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Kontaktieren Sie uns mit Ihrer Sendungsverfolgungsnummer. Wir leiten eine Untersuchung beim Transportunternehmen ein. Je nach Ergebnis senden wir Ihnen ein neues Exemplar oder bearbeiten eine vollst&auml;ndige R&uuml;ckerstattung.</p>
+    <p>Kontaktieren Sie uns mit Ihrer Bestellnummer. Wir leiten eine Nachforschung beim Versanddienstleister ein. Je nach Ergebnis senden wir Ihnen kostenlos ein neues Exemplar oder bearbeiten eine vollst&auml;ndige R&uuml;ckerstattung.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Wie schnell erhalte ich meine R&uuml;ckerstattung?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Nach Eingang und Pr&uuml;fung der Ware erstatten wir den Kaufpreis innerhalb von <strong>14 Tagen</strong>. Je nach Zahlungsanbieter kann die Gutschrift weitere 5&ndash;10 Werktage in Anspruch nehmen.</p>
    </div>
   </div>
  </div>
 
- <!-- Unternehmensdaten -->
- <div class="company-info">
-  <h3>Unternehmensdaten</h3>
-  <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybn&aacute; 716/24, Star&eacute; M&#283;sto, 110 00 Prag, Tschechien</p>
-  <p>I&#268;O: 06259928</p>
-  <p>USt-IdNr: CZ06259928</p>
-  <p>Kundenservice: <a href="mailto:buch@befreiungsbuch.de" style="color: var(--cta);">buch@befreiungsbuch.de</a></p>
+ <!-- Cross-link -->
+ <div class="cross-link-note">
+  <p>Weitere Informationen finden Sie in unseren <a href="agb.html">Allgemeinen Gesch&auml;ftsbedingungen</a> und auf der Seite <a href="versand.html">Versand &amp; R&uuml;ckgabe</a>.</p>
  </div>
 
- <!-- Zuletzt aktualisiert -->
+ <!-- Unternehmensdaten -->
+ <div class="company-info">
+  <h3>Herausgeber &amp; Verk&auml;ufer</h3>
+  <p><strong>Performance Marketing Solution s.r.o.</strong></p>
+  <p>Rybn&aacute; 716/24, 110 00 Prag 1, Tschechische Republik</p>
+  <p>Reg.Nr.: 06259928 | USt-IdNr.: CZ06259928</p>
+  <p>E-Mail: <a href="mailto:buch@lasslosbuch.de" style="color: var(--cta);">buch@lasslosbuch.de</a></p>
+  <p style="margin-top: 8px; font-size: 14px; color: var(--muted);">Offizieller Herausgeber und alleiniger Distributor des Buches &bdquo;Lass los, was dich kaputt macht&ldquo;.</p>
+ </div>
+
  <div class="last-updated">
-  Zuletzt aktualisiert: 9. M&auml;rz 2026
+  Zuletzt aktualisiert: 20. M&auml;rz 2026
  </div>
 
 </div>
@@ -694,22 +655,23 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <footer class="site-footer">
  <div class="footer-inner">
   <div class="footer-brand">
-   <img src="/lass-los-white.png" alt="Lass los, was dich kaputt macht" height="40">
+   <img src="/lass-los-white.png" alt="Lass los, was dich kaputt macht" class="footer-logo" width="210" height="56">
    <div class="footer-brand-text">Lass los, was dich<br>kaputt macht</div>
   </div>
   <div class="footer-links">
    <a href="versand.html">Versand &amp; R&uuml;ckgabe</a>
-   <a href="sendungsverfolgung.html">Sendungsverfolgung</a>
+   <a href="sendungsverfolgung.html">R&uuml;ckgabe &amp; Garantie</a>
    <a href="agb.html">AGB</a>
    <a href="datenschutz.html">Datenschutz</a>
    <a href="kontakt.html">Kontakt</a>
   </div>
   <div class="footer-contact">
-   <a href="mailto:buch@befreiungsbuch.de">buch@befreiungsbuch.de</a>
+   <a href="mailto:buch@lasslosbuch.de">📧 buch@lasslosbuch.de</a>
+   <a href="tel:+420732915755">📞 +420 732 915 755</a>
   </div>
  </div>
  <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. &bull; Rybn&aacute; 716/24, 110 00 Prag &bull; I&#268;O: 06259928 &bull; USt-IdNr: CZ06259928</span>
+  <span>Performance Marketing Solution s.r.o. &bull; Rybn&aacute; 716/24, 110 00 Prag &bull; Reg.Nr.: 06259928 &bull; USt-IdNr.: CZ06259928</span>
   <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle Rechte vorbehalten.</span>
  </div>
 </footer>

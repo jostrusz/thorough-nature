@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Datenschutzerklärung — Lass los, was dich kaputt macht</title>
-<meta name="description" content="Erfahren Sie, wie wir mit Ihren personenbezogenen Daten bei Bestellungen von Lass los, was dich kaputt macht umgehen.">
+<title>Datenschutzerkl&auml;rung &mdash; Lass los, was dich kaputt macht</title>
+<meta name="description" content="Datenschutzerkl&auml;rung f&uuml;r lasslosbuch.de. Erfahren Sie, wie wir Ihre personenbezogenen Daten erheben, verwenden und sch&uuml;tzen.">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="/favicon.png" type="image/png">
 
@@ -21,7 +21,7 @@
 @font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
-/* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
+/* ═══ CSS — Velvet Dusk ═══ */
 :root {
  --bg: #FAF5F8;
  --heading: #2D1B3D;
@@ -47,7 +47,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
 .nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
 .nav-logo img { height: 40px; width: auto; }
-.nav-logo-text { font-family: 'Recoleta', serif; font-size: 16px; font-weight: 600; color: var(--heading); line-height: 1.2; }
 .nav-links { display: flex; align-items: center; gap: 28px; }
 .nav-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--body); text-decoration: none; transition: color 0.2s; position: relative; }
 .nav-links a:hover { color: var(--heading); }
@@ -78,7 +77,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 }
 
-/* ═══ CONTENT STRÁNKY ═══ */
+/* ═══ CONTENT ═══ */
 .page-header {
  background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
  padding: 56px 20px 48px;
@@ -90,7 +89,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 .page-content { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
 
-/* Informační boxy */
+/* Info box */
 .info-box {
  background: var(--light);
  border: 1px solid var(--section);
@@ -104,7 +103,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .info-box ul li { padding: 4px 0; }
 .info-box ul li::before { content: '→ '; color: var(--cta); font-weight: 700; }
 
-/* Sekce */
+/* Sections */
 .section-block { margin-bottom: 40px; }
 .section-block h2 {
  font-family: 'Recoleta', serif;
@@ -131,10 +130,20 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  border-radius: 10px;
  flex-shrink: 0;
 }
+.section-block h3 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 17px;
+ font-weight: 700;
+ color: var(--heading);
+ margin: 20px 0 8px;
+}
+.section-block h3:first-of-type { margin-top: 0; }
 .section-block p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 12px; }
 .section-block ul, .section-block ol { padding-left: 24px; margin-bottom: 12px; }
 .section-block li { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 6px; }
 .section-block strong { color: var(--heading); }
+.section-block a { color: var(--cta); text-decoration: underline; font-weight: 600; transition: color 0.3s ease; }
+.section-block a:hover { color: var(--cta-hover); }
 
 .highlight-box {
  background: linear-gradient(135deg, var(--light), var(--section));
@@ -145,7 +154,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .highlight-box p { margin: 0; font-size: 15px; }
 
-/* Tabulka dat */
+/* Data table */
 .data-table {
  width: 100%;
  border-collapse: collapse;
@@ -174,7 +183,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tr:nth-child(even) td { background: var(--light); }
 
-/* Rechten box */
+/* Rights box */
 .rights-box {
  background: var(--white);
  border: 2px solid var(--cta);
@@ -206,13 +215,57 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .rights-list li:last-child { border-bottom: none; }
 .rights-list .icon { flex-shrink: 0; font-size: 18px; }
 
+/* Authority box */
+.authority-box {
+ background: var(--light);
+ border: 1px solid var(--section);
+ border-radius: 12px;
+ padding: 20px 24px;
+ margin: 16px 0;
+}
+.authority-box h4 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 16px;
+ font-weight: 700;
+ color: var(--heading);
+ margin-bottom: 8px;
+}
+.authority-box p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.6;
+ margin: 4px 0;
+}
+
+/* Company info */
+.company-info {
+ background: var(--light);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 28px;
+ margin-top: 40px;
+}
+.company-info h3 { font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
+.company-info p { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; margin: 0 0 6px; }
+
+/* Last updated */
+.last-updated {
+ text-align: center;
+ font-family: 'DM Sans', sans-serif;
+ font-size: 13px;
+ color: var(--muted);
+ margin-top: 40px;
+ padding-top: 20px;
+ border-top: 1px solid var(--section);
+}
+
 .divider { height: 1px; background: var(--section); margin: 40px 0; }
 
 /* ═══ FOOTER ═══ */
 .site-footer { background: var(--dark); padding: 48px 24px 24px; color: rgba(255, 255, 255, 0.7); }
 .footer-inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
 .footer-brand { display: flex; align-items: center; gap: 16px; }
-.footer-brand img { height: 48px; width: auto; }
 .footer-brand-text { font-family: 'Recoleta', serif; font-size: 18px; color: var(--white); line-height: 1.3; }
 .footer-links { display: flex; flex-direction: column; gap: 10px; }
 .footer-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(255, 255, 255, 0.7); text-decoration: none; transition: color 0.2s; }
@@ -260,11 +313,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
    <img src="/lass-los-logo.png" alt="Lass los, was dich kaputt macht" width="150" height="40">
-
   </a>
   <div class="nav-links">
    <a href="versand.html">Versand &amp; R&uuml;ckgabe</a>
-   <a href="sendungsverfolgung.html">Sendungsverfolgung</a>
+   <a href="sendungsverfolgung.html">R&uuml;ckgabe &amp; Garantie</a>
    <a href="agb.html">AGB</a>
    <a href="datenschutz.html" class="active">Datenschutz</a>
    <a href="kontakt.html">Kontakt</a>
@@ -278,206 +330,414 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
  <a href="versand.html">Versand &amp; R&uuml;ckgabe</a>
- <a href="sendungsverfolgung.html">Sendungsverfolgung</a>
+ <a href="sendungsverfolgung.html">R&uuml;ckgabe &amp; Garantie</a>
  <a href="agb.html">AGB</a>
- <a href="datenschutz.html">Datenschutz</a>
+ <a href="datenschutz.html" class="active">Datenschutz</a>
  <a href="kontakt.html">Kontakt</a>
  <a href="index.html" class="nav-cta-mobile">Jetzt bestellen &rarr;</a>
 </div>
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">🔒 DSGVO</div>
+ <div class="badge">DSGVO-konform</div>
  <h1>Datenschutzerkl&auml;rung</h1>
- <p>Wie wir mit Ihren personenbezogenen Daten umgehen — transparent und gesetzeskonform.</p>
+ <p>Wie wir mit Ihren personenbezogenen Daten umgehen &mdash; transparent und gesetzeskonform.</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="page-content">
 
+ <!-- Zusammenfassung -->
  <div class="info-box">
-  <h3>📌 Zusammenfassung</h3>
+  <h3>Zusammenfassung</h3>
   <ul>
-   <li>Wir erheben nur Daten, die f&uuml;r Ihre Bestellung erforderlich sind</li>
-   <li>Keine Weitergabe an Dritte zu Marketingzwecken</li>
-   <li>Recht auf Auskunft, Berichtigung und L&ouml;schung</li>
-   <li>Cookies f&uuml;r Analyse und Werbung (Facebook Pixel)</li>
-   <li>Sichere Datenspeicherung</li>
+   <li>Wir erheben nur Daten, die f&uuml;r Ihre Bestellung und Lieferung erforderlich sind</li>
+   <li>Zahlungsdaten werden sicher von zertifizierten Zahlungsanbietern verarbeitet (Stripe, PCI-DSS Level 1)</li>
+   <li>Wir verkaufen Ihre Daten <strong>niemals</strong> an Dritte</li>
+   <li>Sie haben volle Kontrolle &uuml;ber Ihre Daten (Auskunft, Berichtigung, L&ouml;schung)</li>
+   <li>Wir erf&uuml;llen die DSGVO, das deutsche BDSG und das tschechische Datenschutzgesetz</li>
+   <li>Bei Fragen: <a href="mailto:buch@lasslosbuch.de" style="color: var(--cta);">buch@lasslosbuch.de</a></li>
   </ul>
  </div>
 
- <!-- Artikel 1 -->
+ <!-- ═══ 1. Einleitung & Verantwortlicher ═══ -->
  <div class="section-block">
-  <h2><span class="section-num">1</span> Verantwortlicher</h2>
-  <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybn&aacute; 716/24, 110 00 Prag 1, Tschechien</p>
-  <p>Handelsregister-Nr.: 06259928</p>
-  <p>E-Mail: <a href="mailto:buch@befreiungsbuch.de" style="color: var(--cta);">buch@befreiungsbuch.de</a></p>
+  <h2><span class="section-num">1</span> Einleitung &amp; Verantwortlicher</h2>
+
+  <h3>1.1 &Uuml;ber diese Datenschutzerkl&auml;rung</h3>
+  <p>Diese Datenschutzerkl&auml;rung beschreibt, wie Performance Marketing Solution s.r.o. (nachfolgend &bdquo;wir&ldquo;, &bdquo;uns&ldquo; oder &bdquo;unser&ldquo;) Ihre personenbezogenen Daten erhebt, verwendet, speichert und sch&uuml;tzt, wenn Sie unsere Website <strong>lasslosbuch.de</strong> besuchen oder eine Bestellung f&uuml;r das Buch &bdquo;Lass los, was dich kaputt macht&ldquo; und verwandte Produkte aufgeben.</p>
+  <p>Wir legen gro&szlig;en Wert auf den Schutz Ihrer Privatsph&auml;re und verarbeiten Ihre personenbezogenen Daten in &Uuml;bereinstimmung mit:</p>
+  <ul>
+   <li>Der <strong>Datenschutz-Grundverordnung (DSGVO)</strong> &mdash; Verordnung (EU) 2016/679</li>
+   <li>Dem <strong>deutschen Bundesdatenschutzgesetz (BDSG)</strong></li>
+   <li>Dem <strong>tschechischen Datenschutzgesetz</strong> (Z&aacute;kon &ccedil;. 110/2019 Sb.)</li>
+   <li>Sonstigen anwendbaren Datenschutzvorschriften</li>
+  </ul>
+
+  <h3>1.2 Verantwortlicher (gem&auml;&szlig; Art. 4 Nr. 7 DSGVO)</h3>
+  <p><strong>Performance Marketing Solution s.r.o.</strong><br>
+  Rybn&aacute; 716/24, Star&eacute; M&ecaron;sto<br>
+  110 00 Praha, Tschechische Republik<br>
+  Handelsregisternr.: 06259928<br>
+  USt-IdNr.: CZ06259928<br>
+  E-Mail: <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a><br>
+  Website: <a href="https://lasslosbuch.de" target="_blank">https://lasslosbuch.de</a></p>
+
+  <div class="highlight-box">
+   <p><strong>Hinweis:</strong> Performance Marketing Solution s.r.o. ist der offizielle Herausgeber und alleinige Distributor des Buches &bdquo;Lass los, was dich kaputt macht&ldquo;. Wir sind sowohl f&uuml;r den Verkauf als auch f&uuml;r den Schutz Ihrer Daten verantwortlich.</p>
+  </div>
+
+  <h3>1.3 Wann gilt diese Erkl&auml;rung?</h3>
+  <p>Diese Datenschutzerkl&auml;rung gilt, wenn Sie:</p>
+  <ul>
+   <li>Unsere Website besuchen (lasslosbuch.de)</li>
+   <li>Eine Bestellung f&uuml;r unsere Produkte aufgeben</li>
+   <li>Uns per E-Mail oder &uuml;ber Formulare kontaktieren</li>
+   <li>Sich f&uuml;r unseren Newsletter anmelden</li>
+   <li>An Umfragen oder Aktionen teilnehmen</li>
+  </ul>
+
+  <h3>1.4 &Auml;nderungen dieser Erkl&auml;rung</h3>
+  <p>Wir k&ouml;nnen diese Datenschutzerkl&auml;rung von Zeit zu Zeit aktualisieren. Die aktuelle Version ist immer auf unserer Website verf&uuml;gbar. Bei wesentlichen &Auml;nderungen informieren wir Sie per E-Mail, sofern Sie eine Bestellung aufgegeben haben.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 2 -->
+ <!-- ═══ 2. Welche Daten erheben wir? ═══ -->
  <div class="section-block">
-  <h2><span class="section-num">2</span> Welche Daten erheben wir?</h2>
-  <p>Wir erheben folgende personenbezogene Daten, wenn Sie eine Bestellung aufgeben:</p>
+  <h2><span class="section-num">2</span> Welche personenbezogenen Daten erheben wir?</h2>
+
+  <h3>2.1 Daten, die Sie uns zur Verf&uuml;gung stellen</h3>
+  <p>Wenn Sie eine Bestellung aufgeben oder uns kontaktieren, erheben wir folgende Daten:</p>
 
   <table class="data-table">
    <thead>
     <tr>
-     <th>Angabe</th>
+     <th>Kategorie</th>
+     <th>Daten</th>
      <th>Zweck</th>
-     <th>Speicherdauer</th>
     </tr>
    </thead>
    <tbody>
-    <tr><td>Name (Vor- und Nachname)</td><td>Versand &amp; Rechnungsstellung</td><td>7 Jahre (Steuer)</td></tr>
-    <tr><td>E-Mail-Adresse</td><td>Bestellbest&auml;tigung, Kundenservice</td><td>Bis zur Abmeldung</td></tr>
-    <tr><td>Telefonnummer</td><td>Versand (Zustellung)</td><td>30 Tage nach Lieferung</td></tr>
-    <tr><td>Adressdaten</td><td>Versand &amp; Rechnungsstellung</td><td>7 Jahre (Steuer)</td></tr>
-    <tr><td>Zahlungsdaten</td><td>Zahlungsabwicklung</td><td>Werden nicht gespeichert*</td></tr>
-    <tr><td>IP-Adresse</td><td>Betrugspr&auml;vention, Analyse</td><td>90 Tage</td></tr>
+    <tr><td><strong>Identifikation</strong></td><td>Vorname, Nachname</td><td>Bestellabwicklung, Versand</td></tr>
+    <tr><td><strong>Kontakt</strong></td><td>E-Mail-Adresse, Telefonnr. (optional)</td><td>Bestellbest&auml;tigung, Kundenservice</td></tr>
+    <tr><td><strong>Adresse</strong></td><td>Stra&szlig;e, PLZ, Stadt, Land</td><td>Versand des gedruckten Buches</td></tr>
+    <tr><td><strong>Bestellung</strong></td><td>Bestellnr., Produkt, Datum, Betrag</td><td>Bestellabwicklung, Rechnungsstellung</td></tr>
+    <tr><td><strong>Zahlung</strong></td><td>Zahlungsmethode (Kartentyp/Bank)</td><td>Transaktionsabwicklung</td></tr>
+    <tr><td><strong>Kommunikation</strong></td><td>E-Mails, Nachrichten, Beschwerden</td><td>Kundenservice, Streitbeilegung</td></tr>
    </tbody>
   </table>
 
-  <p style="font-size: 14px; color: var(--muted);">* Zahlungsdaten werden von Stripe verarbeitet und nicht auf unseren Servern gespeichert.</p>
- </div>
+  <div class="highlight-box">
+   <p><strong>Wichtig:</strong> Vollst&auml;ndige Zahlungsdaten (Kreditkartennummern, Bankkontonummern) werden von uns <strong>niemals</strong> gespeichert. Diese werden ausschlie&szlig;lich von unserem zertifizierten Zahlungsanbieter Stripe verarbeitet.</p>
+  </div>
 
- <div class="divider"></div>
-
- <!-- Artikel 3 -->
- <div class="section-block">
-  <h2><span class="section-num">3</span> Wof&uuml;r verwenden wir Ihre Daten?</h2>
+  <h3>2.2 Automatisch erhobene Daten</h3>
+  <p>Wenn Sie unsere Website besuchen, k&ouml;nnen automatisch bestimmte technische Daten erhoben werden:</p>
   <ul>
-   <li>Abwicklung und Lieferung Ihrer Bestellung</li>
-   <li>Versand von Bestellbest&auml;tigungen und Versandbenachrichtigungen</li>
-   <li>Kundenservice und Beantwortung Ihrer Anfragen</li>
-   <li>Gesetzliche Pflichten (Rechnungsstellung, Steuererkl&auml;rung)</li>
-   <li>Verbesserung unserer Website und unserer Dienstleistungen (Analyse)</li>
-   <li>E-Mail-Marketing (nur mit Ihrer ausdr&uuml;cklichen Einwilligung)</li>
+   <li><strong>IP-Adresse</strong> &mdash; f&uuml;r Sicherheit und Betrugspr&auml;vention</li>
+   <li><strong>Browsertyp und -version</strong> &mdash; f&uuml;r Website-Optimierung</li>
+   <li><strong>Ger&auml;tetyp</strong> &mdash; Desktop, Tablet oder Mobilger&auml;t</li>
+   <li><strong>Besuchte Seiten und Verweildauer</strong> &mdash; f&uuml;r Website-Analyse</li>
+   <li><strong>Verweisende Website</strong> &mdash; wie Sie zu uns gelangt sind</li>
+   <li><strong>Datum und Uhrzeit des Besuchs</strong> &mdash; f&uuml;r Statistiken</li>
   </ul>
+
+  <h3>2.3 Daten, die wir NICHT erheben</h3>
+  <p>Wir erheben <strong>keine</strong> besonderen Kategorien personenbezogener Daten gem&auml;&szlig; Art. 9 DSGVO (rassische/ethnische Herkunft, politische Meinungen, religi&ouml;se &Uuml;berzeugungen, genetische oder biometrische Daten, Gesundheitsdaten oder Daten zum Sexualleben).</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 4 -->
+ <!-- ═══ 3. Zwecke und Rechtsgrundlagen ═══ -->
  <div class="section-block">
-  <h2><span class="section-num">4</span> Cookies &amp; Tracking</h2>
-  <p>Unsere Website verwendet folgende Cookies und Tracking-Tools:</p>
+  <h2><span class="section-num">3</span> Zwecke und Rechtsgrundlagen der Verarbeitung</h2>
 
   <table class="data-table">
    <thead>
     <tr>
-     <th>Tool</th>
+     <th>Zweck</th>
+     <th>Rechtsgrundlage (DSGVO)</th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr><td><strong>Bestellabwicklung und Lieferung</strong><br>Verarbeitung Ihrer Bestellung und Versand des Buches</td><td>Vertragserf&uuml;llung (Art. 6 Abs. 1 lit. b)</td></tr>
+    <tr><td><strong>Zahlungsabwicklung</strong><br>Verarbeitung von Zahlungen &uuml;ber Kreditkarte, PayPal, Klarna oder andere Zahlungsmethoden</td><td>Vertragserf&uuml;llung (Art. 6 Abs. 1 lit. b)</td></tr>
+    <tr><td><strong>Kundenservice</strong><br>Beantwortung von Fragen, Bearbeitung von Beschwerden, Abwicklung von R&uuml;cksendungen</td><td>Vertragserf&uuml;llung (Art. 6 Abs. 1 lit. b)</td></tr>
+    <tr><td><strong>Rechnungsstellung und Buchhaltung</strong><br>Erstellung und Aufbewahrung von Rechnungen gem&auml;&szlig; steuerlichen Pflichten</td><td>Rechtliche Verpflichtung (Art. 6 Abs. 1 lit. c)</td></tr>
+    <tr><td><strong>Newsletter und Marketing</strong><br>Versand von Newslettern, Angeboten und Produktinformationen</td><td>Einwilligung (Art. 6 Abs. 1 lit. a)</td></tr>
+    <tr><td><strong>Website-Analyse und Verbesserung</strong><br>Analyse der Website-Nutzung, Verbesserung der Benutzererfahrung</td><td>Berechtigtes Interesse (Art. 6 Abs. 1 lit. f)</td></tr>
+    <tr><td><strong>Betrugspr&auml;vention und Sicherheit</strong><br>Schutz vor Betrug, Missbrauch und unbefugtem Zugriff</td><td>Berechtigtes Interesse (Art. 6 Abs. 1 lit. f)</td></tr>
+   </tbody>
+  </table>
+
+  <h3>3.1 Einwilligung widerrufen</h3>
+  <p>Wenn die Verarbeitung auf Ihrer Einwilligung beruht (z.&nbsp;B. f&uuml;r den Newsletter), k&ouml;nnen Sie diese Einwilligung jederzeit <strong>kostenlos und ohne Angabe von Gr&uuml;nden widerrufen</strong>:</p>
+  <ul>
+   <li>&Uuml;ber den Abmeldelink am Ende jedes Newsletters</li>
+   <li>Durch eine E-Mail an <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a></li>
+  </ul>
+  <p>Der Widerruf ber&uuml;hrt nicht die Rechtm&auml;&szlig;igkeit der Verarbeitung vor dem Widerruf.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ 4. Zahlungsabwicklung ═══ -->
+ <div class="section-block">
+  <h2><span class="section-num">4</span> Zahlungsabwicklung und Zahlungsdaten</h2>
+
+  <h3>4.1 Wie werden Zahlungen verarbeitet?</h3>
+  <p>Alle Zahlungen auf unserer Website werden von <strong>Stripe</strong>, einem weltweit anerkannten und zertifizierten Zahlungsanbieter, verarbeitet. Wir bieten folgende Zahlungsmethoden an:</p>
+  <ul>
+   <li><strong>Kreditkarte / Debitkarte</strong> &mdash; VISA, Mastercard, Maestro</li>
+   <li><strong>PayPal</strong> &mdash; Zahlung &uuml;ber Ihr PayPal-Konto</li>
+   <li><strong>Klarna</strong> &mdash; Rechnung, Ratenzahlung oder Sofort&uuml;berweisung</li>
+   <li><strong>SEPA-&Uuml;berweisung</strong> &mdash; Europ&auml;ische Bank&uuml;berweisung</li>
+  </ul>
+
+  <h3>4.2 Sicherheit der Zahlungsdaten</h3>
+  <p>Ihre Finanzdaten sind maximal gesch&uuml;tzt:</p>
+  <ul>
+   <li><strong>PCI-DSS Level 1 Zertifizierung:</strong> Stripe erf&uuml;llt den h&ouml;chsten Sicherheitsstandard f&uuml;r Zahlungsabwicklung</li>
+   <li><strong>Keine Speicherung bei uns:</strong> Kreditkartennummern und Bankkontonummern werden von uns <strong>niemals</strong> gespeichert oder eingesehen</li>
+   <li><strong>Verschl&uuml;sselte Verbindung:</strong> Alle Daten werden &uuml;ber SSL/TLS-Verschl&uuml;sselung &uuml;bertragen</li>
+   <li><strong>3D Secure:</strong> Zus&auml;tzliche Authentifizierung f&uuml;r Kreditkartenzahlungen (gem&auml;&szlig; PSD2)</li>
+  </ul>
+
+  <h3>4.3 PayPal-Zahlungen</h3>
+  <p>Bei Zahlung &uuml;ber PayPal werden Sie zur sicheren Umgebung von PayPal weitergeleitet. Wir erhalten lediglich eine Best&auml;tigung der erfolgreichen Zahlung, den gezahlten Betrag und eine Transaktionsreferenz. Wir erhalten <strong>keinen</strong> Zugang zu Ihrem PayPal-Konto, Ihren Anmeldedaten oder Ihrer vollst&auml;ndigen Kontonummer.</p>
+
+  <h3>4.4 Zahlungsanbieter</h3>
+  <div class="highlight-box">
+   <p><strong>Stripe Payments Europe, Ltd.</strong><br>
+   Website: <a href="https://stripe.com" target="_blank" style="color: var(--cta);">stripe.com</a><br>
+   Datenschutzerkl&auml;rung: <a href="https://stripe.com/privacy" target="_blank" style="color: var(--cta);">stripe.com/privacy</a><br>
+   Stripe ist als Zahlungsinstitut bei der Central Bank of Ireland registriert und operiert in der EU gem&auml;&szlig; der Zahlungsdiensterichtlinie (PSD2).</p>
+  </div>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ 5. Weitergabe an Dritte ═══ -->
+ <div class="section-block">
+  <h2><span class="section-num">5</span> Weitergabe an Dritte</h2>
+
+  <h3>5.1 Kategorien von Empf&auml;ngern</h3>
+  <p>Wir teilen Ihre personenbezogenen Daten nur mit Dritten, wenn dies f&uuml;r die Erbringung unserer Dienstleistungen erforderlich ist. Wir <strong>verkaufen Ihre Daten niemals</strong>.</p>
+
+  <table class="data-table">
+   <thead>
+    <tr>
+     <th>Empf&auml;nger</th>
+     <th>Zweck</th>
+     <th>Daten</th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr><td><strong>Stripe</strong> (Zahlungsanbieter)</td><td>Zahlungsabwicklung</td><td>Zahlungsdaten, Bestellbetrag</td></tr>
+    <tr><td><strong>Dextrum Fulfillment a.s.</strong> (Logistik)</td><td>Lagerung und Versand</td><td>Name, Adresse, Bestellnummer</td></tr>
+    <tr><td><strong>Versanddienstleister</strong> (DHL, GLS)</td><td>Paketzustellung</td><td>Name, Adresse, Telefonnummer</td></tr>
+    <tr><td><strong>Meta (Facebook)</strong></td><td>Marketing (mit Einwilligung)</td><td>Anonymisierte Website-Daten</td></tr>
+    <tr><td><strong>Fakturoid</strong></td><td>Rechnungsstellung</td><td>Name, Adresse, Bestelldaten</td></tr>
+   </tbody>
+  </table>
+
+  <h3>5.2 Auftragsverarbeitungsvertr&auml;ge</h3>
+  <p>Mit allen Parteien, die personenbezogene Daten in unserem Auftrag verarbeiten, haben wir <strong>Auftragsverarbeitungsvertr&auml;ge</strong> gem&auml;&szlig; Art. 28 DSGVO abgeschlossen. Diese Vertr&auml;ge garantieren, dass Ihre Daten nur f&uuml;r die vereinbarten Zwecke und mit angemessenen Sicherheitsma&szlig;nahmen verwendet werden.</p>
+
+  <h3>5.3 Internationale Daten&uuml;bermittlung</h3>
+  <p>Einige unserer Auftragsverarbeiter k&ouml;nnen Daten au&szlig;erhalb des Europ&auml;ischen Wirtschaftsraums (EWR) verarbeiten. In solchen F&auml;llen sorgen wir f&uuml;r angemessene Garantien gem&auml;&szlig; Art. 46 DSGVO:</p>
+  <ul>
+   <li><strong>Angemessenheitsbeschluss:</strong> Das Empf&auml;ngerland bietet ein angemessenes Schutzniveau (Art. 45 DSGVO)</li>
+   <li><strong>Standardvertragsklauseln (SCC):</strong> Von der Europ&auml;ischen Kommission genehmigte Vertr&auml;ge</li>
+  </ul>
+
+  <h3>5.4 Gesetzliche Verpflichtungen</h3>
+  <p>Wir k&ouml;nnen Ihre Daten weitergeben, wenn wir gesetzlich dazu verpflichtet sind, z.&nbsp;B. auf Anfrage zust&auml;ndiger Beh&ouml;rden, f&uuml;r Steuererkl&auml;rungen oder bei Gerichtsverfahren.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ 6. Aufbewahrungsfristen ═══ -->
+ <div class="section-block">
+  <h2><span class="section-num">6</span> Aufbewahrungsfristen</h2>
+
+  <p>Wir bewahren Ihre personenbezogenen Daten nicht l&auml;nger auf, als f&uuml;r die Zwecke, f&uuml;r die sie erhoben wurden, erforderlich ist:</p>
+
+  <table class="data-table">
+   <thead>
+    <tr>
+     <th>Art der Daten</th>
+     <th>Aufbewahrungsfrist</th>
+     <th>Grund</th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr><td><strong>Bestelldaten und Rechnungen</strong></td><td>10 Jahre</td><td>Gesetzliche Aufbewahrungspflicht (&sect; 147 AO, &sect; 257 HGB)</td></tr>
+    <tr><td><strong>Kundenkommunikation</strong></td><td>3 Jahre nach letztem Kontakt</td><td>Kundenservice und Gew&auml;hrleistung</td></tr>
+    <tr><td><strong>Newsletter-Daten</strong></td><td>Bis zur Abmeldung + 1 Monat</td><td>Administrative Verarbeitung</td></tr>
+    <tr><td><strong>Website-Statistiken</strong></td><td>26 Monate</td><td>Analyse und Verbesserung</td></tr>
+    <tr><td><strong>IP-Adressen (Logs)</strong></td><td>12 Monate</td><td>Sicherheit und Betrugspr&auml;vention</td></tr>
+   </tbody>
+  </table>
+
+  <p>Nach Ablauf der Aufbewahrungsfrist werden Ihre Daten sicher gel&ouml;scht oder anonymisiert, sodass sie nicht mehr auf Sie zur&uuml;ckgef&uuml;hrt werden k&ouml;nnen.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ 7. Ihre Rechte ═══ -->
+ <div class="section-block">
+  <h2><span class="section-num">7</span> Ihre Rechte nach der DSGVO</h2>
+
+  <p>Gem&auml;&szlig; der Datenschutz-Grundverordnung haben Sie umfassende Rechte in Bezug auf Ihre personenbezogenen Daten:</p>
+
+  <div class="rights-box">
+   <h3>Ihre Datenschutzrechte</h3>
+   <ul class="rights-list">
+    <li><span class="icon">&#x1F441;</span> <strong>Auskunftsrecht (Art. 15):</strong> Sie k&ouml;nnen erfragen, welche Daten wir &uuml;ber Sie verarbeiten</li>
+    <li><span class="icon">&#x270F;&#xFE0F;</span> <strong>Recht auf Berichtigung (Art. 16):</strong> Sie k&ouml;nnen unrichtige oder unvollst&auml;ndige Daten korrigieren lassen</li>
+    <li><span class="icon">&#x1F5D1;</span> <strong>Recht auf L&ouml;schung (Art. 17):</strong> Sie k&ouml;nnen die L&ouml;schung Ihrer Daten verlangen (&bdquo;Recht auf Vergessenwerden&ldquo;)</li>
+    <li><span class="icon">&#x23F8;&#xFE0F;</span> <strong>Recht auf Einschr&auml;nkung (Art. 18):</strong> Sie k&ouml;nnen die Verarbeitung Ihrer Daten einschr&auml;nken lassen</li>
+    <li><span class="icon">&#x1F4E6;</span> <strong>Daten&uuml;bertragbarkeit (Art. 20):</strong> Sie k&ouml;nnen Ihre Daten in einem strukturierten Format erhalten</li>
+    <li><span class="icon">&#x1F6AB;</span> <strong>Widerspruchsrecht (Art. 21):</strong> Sie k&ouml;nnen der Verarbeitung auf Grundlage eines berechtigten Interesses widersprechen</li>
+    <li><span class="icon">&#x21A9;&#xFE0F;</span> <strong>Widerruf der Einwilligung:</strong> Sie k&ouml;nnen eine erteilte Einwilligung jederzeit widerrufen</li>
+   </ul>
+  </div>
+
+  <h3>7.1 Wie k&ouml;nnen Sie Ihre Rechte aus&uuml;ben?</h3>
+  <p>Senden Sie eine E-Mail an <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a> mit dem Betreff &bdquo;Datenschutzanfrage&ldquo;. Geben Sie bitte Ihren vollst&auml;ndigen Namen, die E-Mail-Adresse, mit der Sie bestellt haben, und das spezifische Recht, das Sie aus&uuml;ben m&ouml;chten, an.</p>
+
+  <h3>7.2 Antwortfrist</h3>
+  <p>Wir antworten innerhalb von <strong>30 Tagen</strong> auf Ihren Antrag. Bei komplexen Antr&auml;gen kann diese Frist um maximal 60 Tage verl&auml;ngert werden; wir informieren Sie dar&uuml;ber innerhalb der ersten 30 Tage.</p>
+
+  <h3>7.3 Kosten</h3>
+  <p>Die Aus&uuml;bung Ihrer Rechte ist <strong>kostenlos</strong>. Nur bei offensichtlich unbegr&uuml;ndeten oder &uuml;berm&auml;&szlig;igen Antr&auml;gen (insbesondere bei wiederholten Antr&auml;gen) k&ouml;nnen wir eine angemessene Geb&uuml;hr verlangen oder die Bearbeitung verweigern.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ 8. Cookies & Tracking ═══ -->
+ <div class="section-block">
+  <h2><span class="section-num">8</span> Cookies &amp; Tracking</h2>
+
+  <h3>8.1 Was sind Cookies?</h3>
+  <p>Cookies sind kleine Textdateien, die auf Ihrem Ger&auml;t gespeichert werden, wenn Sie unsere Website besuchen. Sie helfen der Website, ordnungsgem&auml;&szlig; zu funktionieren, und verbessern Ihr Benutzererlebnis.</p>
+
+  <h3>8.2 Welche Cookies verwenden wir?</h3>
+
+  <table class="data-table">
+   <thead>
+    <tr>
+     <th>Cookie / Tool</th>
      <th>Zweck</th>
      <th>Typ</th>
     </tr>
    </thead>
    <tbody>
-    <tr><td>Facebook Pixel (Meta)</td><td>Anzeigenmessung &amp; Remarketing</td><td>Marketing</td></tr>
-    <tr><td>Stripe</td><td>Zahlungsabwicklung</td><td>Notwendig</td></tr>
-    <tr><td>Session-Cookie</td><td>Warenkorb merken</td><td>Funktional</td></tr>
+    <tr><td><strong>Session-Cookie</strong></td><td>Warenkorb, Sitzungsverwaltung</td><td>Notwendig</td></tr>
+    <tr><td><strong>Stripe</strong></td><td>Zahlungsabwicklung, Betrugspr&auml;vention</td><td>Notwendig</td></tr>
+    <tr><td><strong>Facebook Meta Pixel</strong></td><td>Anzeigenmessung &amp; Remarketing</td><td>Marketing (Einwilligung)</td></tr>
    </tbody>
   </table>
 
-  <div class="highlight-box">
-   <p><strong>Marketing-Cookies:</strong> Das Facebook Pixel wird nur gesetzt, wenn Sie &uuml;ber den Cookie-Hinweis zustimmen. Sie k&ouml;nnen Ihre Einwilligung jederzeit widerrufen.</p>
-  </div>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 5 -->
- <div class="section-block">
-  <h2><span class="section-num">5</span> Weitergabe an Dritte</h2>
-  <p>Wir geben Ihre Daten ausschlie&szlig;lich an folgende Partner weiter, f&uuml;r die nachstehend genannten Zwecke:</p>
+  <h3>8.3 Cookie-Einwilligung</h3>
+  <p>Bei Ihrem ersten Besuch auf unserer Website erscheint ein Cookie-Banner, in dem Sie w&auml;hlen k&ouml;nnen:</p>
   <ul>
-   <li><strong>Stripe</strong> — Zahlungsabwicklung</li>
-   <li><strong>Versandpartner (Dextrum)</strong> — Lieferung Ihrer Bestellung</li>
-   <li><strong>MailerLite</strong> — E-Mail-Marketing (nur mit Ihrer Einwilligung)</li>
-   <li><strong>Facebook (Meta)</strong> — Anzeigenmessung (via Pixel, mit Cookie-Einwilligung)</li>
-   <li><strong>Fakturoid</strong> — Rechnungsstellung und Buchhaltung</li>
+   <li><strong>Alle Cookies akzeptieren:</strong> Funktionale und Marketing-Cookies</li>
+   <li><strong>Nur notwendige Cookies:</strong> Ablehnung von Marketing-Cookies</li>
   </ul>
-  <p>Wir verkaufen Ihre Daten <strong>niemals</strong> an Dritte.</p>
+  <p>Sie k&ouml;nnen Ihre Wahl jederzeit &auml;ndern, indem Sie Ihre Browser-Cookies l&ouml;schen. Das Deaktivieren notwendiger Cookies kann die Funktionalit&auml;t der Website beeintr&auml;chtigen.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 6 -->
+ <!-- ═══ 9. Sicherheit ═══ -->
  <div class="section-block">
-  <h2><span class="section-num">6</span> Sicherheit</h2>
-  <p>Wir nehmen den Schutz Ihrer Daten ernst und treffen geeignete Ma&szlig;nahmen:</p>
+  <h2><span class="section-num">9</span> Sicherheit Ihrer Daten</h2>
+
+  <h3>9.1 Technische Ma&szlig;nahmen</h3>
   <ul>
-   <li>SSL/TLS-Verschl&uuml;sselung auf allen Seiten</li>
-   <li>Sichere Datenspeicherung in EU-Rechenzentren</li>
-   <li>Eingeschr&auml;nkter Zugang zu personenbezogenen Daten (Need-to-know-Basis)</li>
-   <li>Regelm&auml;&szlig;ige Sicherheitsupdates</li>
-   <li>PCI-DSS-konforme Zahlungsabwicklung &uuml;ber Stripe</li>
+   <li><strong>SSL/TLS-Verschl&uuml;sselung:</strong> Alle Daten&uuml;bertragungen sind verschl&uuml;sselt (HTTPS)</li>
+   <li><strong>Sichere Server:</strong> Unsere Systeme werden auf sicheren, zugangsbeschr&auml;nkten Servern in der EU gehostet</li>
+   <li><strong>Firewalls:</strong> Schutz vor unbefugtem Zugriff</li>
+   <li><strong>Regelm&auml;&szlig;ige Updates:</strong> Software und Sicherheits-Patches werden aktuell gehalten</li>
+   <li><strong>PCI-DSS-konforme Zahlungsabwicklung:</strong> &uuml;ber Stripe</li>
   </ul>
- </div>
 
- <div class="divider"></div>
-
- <!-- Artikel 7 -->
- <div class="section-block">
-  <h2><span class="section-num">7</span> Ihre Rechte (DSGVO)</h2>
-
-  <div class="rights-box">
-   <h3>Sie haben folgende Rechte:</h3>
-   <ul class="rights-list">
-    <li><span class="icon">👁</span> <strong>Auskunftsrecht</strong> — Sie k&ouml;nnen Auskunft dar&uuml;ber verlangen, welche Daten wir &uuml;ber Sie gespeichert haben</li>
-    <li><span class="icon">✏️</span> <strong>Berichtigungsrecht</strong> — Sie k&ouml;nnen die Korrektur fehlerhafter Daten verlangen</li>
-    <li><span class="icon">🗑</span> <strong>L&ouml;schungsrecht</strong> — Sie k&ouml;nnen die L&ouml;schung Ihrer Daten verlangen</li>
-    <li><span class="icon">📦</span> <strong>Daten&uuml;bertragbarkeit</strong> — Sie k&ouml;nnen eine Kopie Ihrer Daten anfordern</li>
-    <li><span class="icon">🚫</span> <strong>Widerspruchsrecht</strong> — Sie k&ouml;nnen der Verarbeitung Ihrer Daten widersprechen</li>
-    <li><span class="icon">⏸</span> <strong>Einschr&auml;nkung der Verarbeitung</strong> — Sie k&ouml;nnen die Einschr&auml;nkung der Verarbeitung verlangen</li>
-   </ul>
-  </div>
-
-  <p>Um Ihre Rechte auszu&uuml;ben, senden Sie eine E-Mail an <a href="mailto:buch@befreiungsbuch.de" style="color: var(--cta);">buch@befreiungsbuch.de</a>. Wir antworten innerhalb von 30 Tagen.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 8 -->
- <div class="section-block">
-  <h2><span class="section-num">8</span> E-Mail-Marketing</h2>
-  <p>Wenn Sie sich f&uuml;r unseren Newsletter angemeldet oder an der Kasse Ihre Einwilligung erteilt haben, k&ouml;nnen Sie E-Mails von uns erhalten &uuml;ber:</p>
+  <h3>9.2 Organisatorische Ma&szlig;nahmen</h3>
   <ul>
-   <li>Neue B&uuml;cher und Produkte</li>
-   <li>Exklusive Angebote und Rabatte</li>
-   <li>Tipps und Inspiration rund um unsere B&uuml;cher</li>
+   <li><strong>Zugangskontrolle:</strong> Nur autorisierte Mitarbeiter haben Zugang zu personenbezogenen Daten</li>
+   <li><strong>Need-to-know-Prinzip:</strong> Mitarbeiter sehen nur Daten, die f&uuml;r ihre Arbeit erforderlich sind</li>
+   <li><strong>Vertraulichkeitspflicht:</strong> Alle Mitarbeiter sind zur Vertraulichkeit verpflichtet</li>
   </ul>
-  <p>Sie k&ouml;nnen sich jederzeit &uuml;ber den Link am Ende jeder E-Mail abmelden. Nach der Abmeldung entfernen wir Ihre E-Mail-Adresse aus unserer Marketingliste.</p>
+
+  <h3>9.3 Datenpannen</h3>
+  <p>Im unwahrscheinlichen Fall einer Datenpanne, die ein Risiko f&uuml;r Ihre Rechte und Freiheiten darstellt, werden wir:</p>
+  <ul>
+   <li>Die zust&auml;ndige Aufsichtsbeh&ouml;rde innerhalb von <strong>72 Stunden</strong> informieren (Art. 33 DSGVO)</li>
+   <li>Sie unverz&uuml;glich informieren, wenn die Panne ein hohes Risiko f&uuml;r Sie darstellt (Art. 34 DSGVO)</li>
+   <li>Angemessene Ma&szlig;nahmen ergreifen, um die Folgen zu begrenzen</li>
+  </ul>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 9 -->
+ <!-- ═══ 10. E-Mail-Marketing ═══ -->
  <div class="section-block">
-  <h2><span class="section-num">9</span> Aufsichtsbeh&ouml;rde</h2>
-  <p>Wenn Sie eine Beschwerde &uuml;ber die Verarbeitung Ihrer personenbezogenen Daten haben, k&ouml;nnen Sie sich an die Aufsichtsbeh&ouml;rde wenden:</p>
-  <div class="highlight-box">
+  <h2><span class="section-num">10</span> E-Mail-Marketing</h2>
+  <p>Wenn Sie sich f&uuml;r unseren Newsletter angemeldet oder an der Kasse Ihre Einwilligung erteilt haben, k&ouml;nnen Sie E-Mails &uuml;ber neue Produkte, exklusive Angebote und Tipps rund um unsere B&uuml;cher erhalten.</p>
+  <p>Sie k&ouml;nnen sich jederzeit &uuml;ber den Link am Ende jeder E-Mail abmelden. Nach der Abmeldung entfernen wir Ihre E-Mail-Adresse innerhalb eines Monats aus unserer Marketingliste.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ 11. Minderjährige ═══ -->
+ <div class="section-block">
+  <h2><span class="section-num">11</span> Minderj&auml;hrige</h2>
+  <p>Unsere Website und Produkte richten sich nicht an Personen unter 16 Jahren. Wir erheben wissentlich keine personenbezogenen Daten von Minderj&auml;hrigen. Sollten wir feststellen, dass wir unbeabsichtigt Daten eines Minderj&auml;hrigen erhoben haben, werden wir diese schnellstm&ouml;glich l&ouml;schen.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ 12. Beschwerden & Aufsichtsbehörde ═══ -->
+ <div class="section-block">
+  <h2><span class="section-num">12</span> Beschwerden &amp; Aufsichtsbeh&ouml;rde</h2>
+
+  <h3>12.1 Beschwerde bei uns einreichen</h3>
+  <p>Sind Sie nicht zufrieden damit, wie wir mit Ihren personenbezogenen Daten umgehen? Kontaktieren Sie uns zun&auml;chst unter <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a>. Wir nehmen jede Beschwerde ernst und bem&uuml;hen uns, innerhalb von 14 Tagen zu antworten.</p>
+
+  <h3>12.2 Beschwerde bei der Aufsichtsbeh&ouml;rde</h3>
+  <p>Sie haben das Recht, eine Beschwerde bei der zust&auml;ndigen Aufsichtsbeh&ouml;rde einzureichen:</p>
+
+  <div class="authority-box">
+   <h4>&#x1F1E9;&#x1F1EA; Deutschland</h4>
    <p><strong>Bundesbeauftragter f&uuml;r den Datenschutz und die Informationsfreiheit (BfDI)</strong><br>
-   Website: <a href="https://www.bfdi.bund.de" target="_blank" style="color: var(--cta);">bfdi.bund.de</a></p>
+   Graurheindorfer Str. 153, 53117 Bonn<br>
+   Telefon: +49 (0)228 997799-0<br>
+   Website: <a href="https://www.bfdi.bund.de" target="_blank" style="color: var(--cta);">www.bfdi.bund.de</a></p>
+   <p style="margin-top: 8px; font-size: 14px; color: var(--muted);"><em>Hinweis: Sie k&ouml;nnen sich auch an die Datenschutzaufsichtsbeh&ouml;rde Ihres Bundeslandes wenden.</em></p>
   </div>
-  <div class="highlight-box" style="margin-top: 12px;">
-   <p><strong>&Uacute;OO&Uacute; (Tschechien)</strong><br>
-   Website: <a href="https://www.uoou.cz" target="_blank" style="color: var(--cta);">uoou.cz</a></p>
+  <div class="authority-box">
+   <h4>&#x1F1E8;&#x1F1FF; Tschechische Republik</h4>
+   <p><strong>&Uacute;&rcaron;ad pro ochranu osobn&iacute;ch &uacute;daj&ucircrc; (&Uacute;OO&Uacute;)</strong><br>
+   Pplk. Sochora 27, 170 00 Prag 7<br>
+   Website: <a href="https://www.uoou.cz" target="_blank" style="color: var(--cta);">www.uoou.cz</a></p>
   </div>
  </div>
 
- <div class="divider"></div>
-
- <!-- Artikel 10 -->
- <div class="section-block">
-  <h2><span class="section-num">10</span> &Auml;nderungen</h2>
-  <p>Wir behalten uns das Recht vor, diese Datenschutzerkl&auml;rung zu &auml;ndern. Die aktuelle Version ist stets auf dieser Seite verf&uuml;gbar.</p>
+ <!-- Unternehmensdaten -->
+ <div class="company-info">
+  <h3>Herausgeber &amp; Verk&auml;ufer</h3>
+  <p><strong>Performance Marketing Solution s.r.o.</strong></p>
+  <p>Rybn&aacute; 716/24, 110 00 Prag 1, Tschechische Republik</p>
+  <p>Reg.Nr.: 06259928 | USt-IdNr.: CZ06259928</p>
+  <p>E-Mail: <a href="mailto:buch@lasslosbuch.de" style="color: var(--cta);">buch@lasslosbuch.de</a></p>
+  <p style="margin-top: 8px; font-size: 14px; color: var(--muted);">Offizieller Herausgeber und alleiniger Distributor des Buches &bdquo;Lass los, was dich kaputt macht&ldquo;.</p>
  </div>
 
- <div class="info-box" style="margin-top: 48px; background: linear-gradient(135deg, var(--light), var(--section));">
-  <h3>📅 Zuletzt aktualisiert</h3>
-  <p>Zuletzt aktualisiert: 9. M&auml;rz 2026.</p>
+ <div class="last-updated">
+  Zuletzt aktualisiert: 20. M&auml;rz 2026
  </div>
 
 </div>
@@ -486,23 +746,23 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <footer class="site-footer">
  <div class="footer-inner">
   <div class="footer-brand">
-   <img src="/lass-los-white.png" alt="Lass los, was dich kaputt macht" height="48">
+   <img src="/lass-los-white.png" alt="Lass los, was dich kaputt macht" class="footer-logo" width="210" height="56">
    <div class="footer-brand-text">Lass los, was dich<br>kaputt macht</div>
   </div>
   <div class="footer-links">
-   <a href="agb.html">AGB</a>
    <a href="versand.html">Versand &amp; R&uuml;ckgabe</a>
-   <a href="sendungsverfolgung.html">Sendungsverfolgung</a>
+   <a href="sendungsverfolgung.html">R&uuml;ckgabe &amp; Garantie</a>
+   <a href="agb.html">AGB</a>
    <a href="datenschutz.html">Datenschutz</a>
    <a href="kontakt.html">Kontakt</a>
   </div>
   <div class="footer-contact">
-   <a href="mailto:buch@befreiungsbuch.de">📧 buch@befreiungsbuch.de</a>
+   <a href="mailto:buch@lasslosbuch.de">📧 buch@lasslosbuch.de</a>
    <a href="tel:+420732915755">📞 +420 732 915 755</a>
   </div>
  </div>
  <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. • Rybn&aacute; 716/24, 110 00 Praha • Handelsregister-Nr.: 06259928</span>
+  <span>Performance Marketing Solution s.r.o. &bull; Rybn&aacute; 716/24, 110 00 Prag &bull; Reg.Nr.: 06259928 &bull; USt-IdNr.: CZ06259928</span>
   <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle Rechte vorbehalten.</span>
  </div>
 </footer>
