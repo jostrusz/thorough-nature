@@ -45,6 +45,7 @@ interface AirwallexConfirmRequest {
     [key: string]: any
   }
   return_url?: string
+  order?: Record<string, any>
 }
 
 interface AirwallexCaptureRequest {

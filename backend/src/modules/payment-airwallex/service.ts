@@ -268,10 +268,40 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
               paymentMethodPayload.klarna.country_code = countryCode
             }
           }
-          const confirmed = await client.confirmPaymentIntent(paymentIntent.id, {
+          const confirmPayload: Record<string, any> = {
             payment_method: paymentMethodPayload,
             return_url: returnUrl,
-          })
+          }
+          // Klarna requires order object with product details and shipping/billing
+          if (method.startsWith("klarna")) {
+            const billingAddr = data?.billing_address || data?.shipping_address || {}
+            const shippingAddr = data?.shipping_address || data?.billing_address || {}
+            const orderAmount = Number(amount)
+            confirmPayload.order = {
+              type: "physical",
+              products: [
+                {
+                  type: "physical",
+                  name: "Book Order",
+                  quantity: 1,
+                  unit_price: orderAmount,
+                  desc: "Book order",
+                  sku: "book-order",
+                }
+              ],
+              shipping: {
+                first_name: shippingAddr.first_name || "",
+                last_name: shippingAddr.last_name || "",
+                address: {
+                  city: shippingAddr.city || "",
+                  country_code: (shippingAddr.country_code || "DE").toUpperCase(),
+                  postcode: shippingAddr.postal_code || "",
+                  street: shippingAddr.address_1 || "",
+                },
+              },
+            }
+          }
+          const confirmed = await client.confirmPaymentIntent(paymentIntent.id, confirmPayload)
           checkoutUrl = confirmed.next_action?.url || null
           this.logger_.info(
             `[Airwallex] Redirect method ${method} confirmed: ${paymentIntent.id}, redirect: ${checkoutUrl ? "yes" : "no"}`
