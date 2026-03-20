@@ -250,14 +250,14 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
       } catch {}
 
       // Redirect-based methods: confirm intent server-side → get redirect URL
-      const REDIRECT_METHODS = ["ideal", "bancontact", "eps", "blik", "przelewy24", "paypal"]
+      const REDIRECT_METHODS = ["ideal", "bancontact", "eps", "blik", "przelewy24", "paypal", "klarna", "klarna_later", "klarna_slice"]
       let checkoutUrl: string | null = null
 
       if (method && REDIRECT_METHODS.includes(method) && returnUrl) {
         try {
           const paymentMethodPayload: Record<string, any> = { type: method }
           // Airwallex requires method-specific sub-object (e.g. bancontact: {}, ideal: {})
-          if (["bancontact", "ideal", "eps", "blik", "przelewy24", "paypal"].includes(method)) {
+          if (["bancontact", "ideal", "eps", "blik", "przelewy24", "paypal", "klarna", "klarna_later", "klarna_slice"].includes(method)) {
             paymentMethodPayload[method] = {}
           }
           const confirmed = await client.confirmPaymentIntent(paymentIntent.id, {
