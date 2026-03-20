@@ -63,6 +63,20 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
   'odpusc-ksiazka': [
     // E-book files — upload to MinIO under e-books/ folder, then update here
   ],
+  'lass-los': [
+    {
+      key: "e-books/Die Lösung für Überdenkerinnen.docx.pdf",
+      title: "Die Lösung für Überdenkerinnen",
+      description: "E-Book (PDF)",
+      size: "1.4 MB",
+    },
+    {
+      key: "e-books/LIEBE OHNE UNSINN.pdf",
+      title: "Liebe ohne Unsinn",
+      description: "E-Book (PDF)",
+      size: "14.3 MB",
+    },
+  ],
 }
 
 // Fallback for unknown projects
@@ -74,6 +88,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   dehondenbijbel: process.env.DH_STOREFRONT_URL || process.env.STOREFRONT_URL || "https://www.dehondenbijbel.nl",
   'slapp-taget': process.env.ST_STOREFRONT_URL || "https://www.slapptagetboken.se",
   'odpusc-ksiazka': process.env.OK_STOREFRONT_URL || "https://www.odpusc-ksiazka.pl",
+  'lass-los': process.env.LL_STOREFRONT_URL || "https://www.lasslosbuch.de",
 }
 
 export default async function orderPlacedDigitalDownloadHandler({
@@ -145,7 +160,9 @@ export default async function orderPlacedDigitalDownloadHandler({
         ? 'Dina e-böcker är redo! 📖'
         : projectId === 'odpusc-ksiazka'
           ? 'Twoje e-booki są gotowe! 📖'
-          : 'Je e-books staan klaar! 📖'
+          : projectId === 'lass-los'
+            ? 'Deine E-Books sind bereit! 📖'
+            : 'Je e-books staan klaar! 📖'
 
     await notificationModuleService.createNotifications({
       to: order.email,

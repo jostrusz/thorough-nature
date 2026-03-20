@@ -28,6 +28,8 @@ import { OkAbandonedCheckout2Template, OK_ABANDONED_CHECKOUT_2, isOkAbandonedChe
 import { OkAbandonedCheckout3Template, OK_ABANDONED_CHECKOUT_3, isOkAbandonedCheckout3Data } from './ok-abandoned-checkout-3'
 import { OkEbookDeliveryTemplate, OK_EBOOK_DELIVERY, isOkEbookDeliveryData } from './ok-ebook-delivery'
 import { OkShipmentNotificationTemplate, OK_SHIPMENT_NOTIFICATION, isOkShipmentNotificationData } from './ok-shipment-notification'
+// Lass los, was dich kaputt macht (lass-los) templates
+import { LlEbookDeliveryTemplate, LL_EBOOK_DELIVERY, isLlEbookDeliveryData } from './ll-ebook-delivery'
 // Psí superživot (psi-superzivot) templates
 import { PsOrderPlacedTemplate, PS_ORDER_PLACED, isPsOrderPlacedTemplateData } from './ps-order-placed'
 import { PsShipmentNotificationTemplate, PS_SHIPMENT_NOTIFICATION, isPsShipmentNotificationData } from './ps-shipment-notification'
@@ -65,6 +67,8 @@ export const EmailTemplates = {
   OK_ABANDONED_CHECKOUT_3,
   OK_EBOOK_DELIVERY,
   OK_SHIPMENT_NOTIFICATION,
+  // Lass los
+  LL_EBOOK_DELIVERY,
   // Psí superživot
   PS_ORDER_PLACED,
   PS_SHIPMENT_NOTIFICATION,
@@ -107,6 +111,13 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
     const allKeys = Object.values(EmailTemplates) as string[]
     if (allKeys.includes(psKey)) {
       return psKey
+    }
+  }
+  if (project === 'lass-los') {
+    const llKey = `ll-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(llKey)) {
+      return llKey
     }
   }
   return templateKey
@@ -343,6 +354,16 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <OkAbandonedCheckout3Template {...data} />
 
+    // ── Lass los templates ──────────────────────────────────
+    case EmailTemplates.LL_EBOOK_DELIVERY:
+      if (!isLlEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.LL_EBOOK_DELIVERY}"`
+        )
+      }
+      return <LlEbookDeliveryTemplate {...data} />
+
     // ── Psí superživot templates ─────────────────────────────
     case EmailTemplates.PS_ORDER_PLACED:
       if (!isPsOrderPlacedTemplateData(data)) {
@@ -419,6 +440,8 @@ export {
   OkAbandonedCheckout3Template,
   OkEbookDeliveryTemplate,
   OkShipmentNotificationTemplate,
+  // Lass los
+  LlEbookDeliveryTemplate,
   // Psí superživot
   PsOrderPlacedTemplate,
   PsShipmentNotificationTemplate,

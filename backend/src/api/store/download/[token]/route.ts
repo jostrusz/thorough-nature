@@ -7,6 +7,7 @@ import type DigitalDownloadModuleService from "../../../../modules/digital-downl
 const PROJECT_SUPPORT_EMAILS: Record<string, string> = {
   dehondenbijbel: "support@dehondenbijbel.nl",
   loslatenboek: "devries@loslatenboek.nl",
+  'lass-los': "buch@lasslosbuch.de",
 }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {

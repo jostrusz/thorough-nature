@@ -391,9 +391,17 @@ const dehondenbijbelTheme: ProjectTheme = {
   errorLink: { color: "#EA580C", textDecoration: "underline", fontWeight: 600 },
 }
 
+const lassLosTheme: ProjectTheme = {
+  ...loslatenboekTheme,
+  brandLabel: "LASS LOS, WAS DICH KAPUTT MACHT",
+  brandName: "Lass los, was dich kaputt macht",
+  supportEmail: "buch@lasslosbuch.de",
+}
+
 const THEMES: Record<string, ProjectTheme> = {
   loslatenboek: loslatenboekTheme,
   dehondenbijbel: dehondenbijbelTheme,
+  'lass-los': lassLosTheme,
 }
 
 function getTheme(projectId?: string): ProjectTheme {
@@ -455,8 +463,9 @@ export default async function DownloadPage({
   const { data, error, expired, projectId } = await getDownloadData(token)
   const t = getTheme(projectId)
 
+  const dateLocale = projectId === "lass-los" ? "de-DE" : projectId === "dehondenbijbel" ? "nl-NL" : "nl-NL"
   const expiryDate = data?.download?.expires_at
-    ? new Date(data.download.expires_at).toLocaleDateString("nl-NL", {
+    ? new Date(data.download.expires_at).toLocaleDateString(dateLocale, {
         day: "numeric",
         month: "long",
         year: "numeric",
