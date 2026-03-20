@@ -6084,7 +6084,7 @@ body {
       if (emailVal && emailVal.includes('@') && !addPaymentInfoFired && typeof MetaTracker !== 'undefined') {
         addPaymentInfoFired = true;
         MetaTracker.trackAddPaymentInfo({
-          content_ids: [PROJECT_CONFIG.mainProduct.handle],
+          content_ids: PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle],
           value: getCurrentTotal(),
           currency: PROJECT_CONFIG.mainProduct.currency
         }, { em: emailVal });
@@ -6658,8 +6658,7 @@ body {
       // FB Pixel + CAPI: InitiateCheckout (skip on payment return to avoid double firing)
       var isPaymentReturn = window.location.search.indexOf('payment_return=1') !== -1 || window.location.search.indexOf('redirect_status=') !== -1;
       if (!isPaymentReturn && typeof MetaTracker !== 'undefined') {
-        var contentIds = [PROJECT_CONFIG.mainProduct.handle];
-        if (checkoutOrderBump) contentIds.push(PROJECT_CONFIG.upsellProduct.handle);
+        var contentIds = PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle];
         MetaTracker.trackInitiateCheckout({
           content_ids: contentIds,
           value: checkoutTotal,

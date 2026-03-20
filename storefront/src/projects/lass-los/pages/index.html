@@ -94,6 +94,8 @@
 <!-- Full stylesheet loaded asynchronously -->
 <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="style.css"></noscript>
+<script src="js/project-config.js"></script>
+<script src="js/pixel.js"></script>
 </head>
 <body>
 
@@ -1993,6 +1995,34 @@ function toggleMobileMenu() {
   "name": "Lass los, was dich kaputt macht"
  }
 }
+</script>
+
+<!-- ─── Meta Pixel Events ─── -->
+<script>
+// ViewContent: customer sees the product (fires on page load)
+if (typeof MetaTracker !== 'undefined' && PROJECT_CONFIG.catalogContentIds) {
+  MetaTracker.trackViewContent({
+    content_name: PROJECT_CONFIG.mainProduct.name,
+    content_ids: PROJECT_CONFIG.catalogContentIds,
+    value: PROJECT_CONFIG.mainProduct.price,
+    currency: PROJECT_CONFIG.mainProduct.currency
+  });
+}
+
+// AddToCart: customer clicks any CTA button to checkout
+document.querySelectorAll('a[href="checkout.html"]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    if (typeof MetaTracker !== 'undefined' && PROJECT_CONFIG.catalogContentIds) {
+      MetaTracker.trackAddToCart({
+        content_name: PROJECT_CONFIG.mainProduct.name,
+        content_ids: PROJECT_CONFIG.catalogContentIds,
+        value: PROJECT_CONFIG.mainProduct.price,
+        currency: PROJECT_CONFIG.mainProduct.currency,
+        num_items: 1
+      });
+    }
+  });
+});
 </script>
 
 </body>

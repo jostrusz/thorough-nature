@@ -37,7 +37,8 @@ var PROJECT_CONFIG = {
   "foxentryApiKey": null,
   "homeUrl": "/",
   "checkoutUrl": "/checkout.html",
-  "thankYouUrl": "/thank-you.html"
+  "thankYouUrl": "/thank-you.html",
+  "catalogContentIds": ["1azgp7ymuv", "82764876", "31epnhw6c4", "dnoiszdeax", "gh1u1icp8r"]
 };
 PROJECT_CONFIG.getRegionId = function(countryCode) {
   return PROJECT_CONFIG.regions[countryCode] || Object.values(PROJECT_CONFIG.regions)[0];

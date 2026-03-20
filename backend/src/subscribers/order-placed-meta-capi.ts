@@ -111,6 +111,7 @@ export default async function orderPlacedMetaCAPIHandler({
     // Use catalog content IDs if configured for the project (for DPA remarketing)
     const CATALOG_IDS: Record<string, string[]> = {
       dehondenbijbel: ["9hduqtwz07", "5e8vclt1pz", "5d5yd6u51i", "edr7gf3itr", "1emdl02y05", "lgn3th5xv4", "zjk1xb6h9u"],
+      "lass-los": ["1azgp7ymuv", "82764876", "31epnhw6c4", "dnoiszdeax", "gh1u1icp8r"],
     }
 
     const items = order.items || []
