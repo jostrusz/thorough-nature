@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Versand- und Lieferrichtlinien — Lass los, was dich kaputt macht</title>
-<meta name="description" content="Alles über Versand, Lieferzeiten und Lieferung von Lass los, was dich kaputt macht.">
+<title>Versand &amp; R&uuml;ckgabe &mdash; Lass los, was dich kaputt macht</title>
+<meta name="description" content="Informationen zu Versand, Lieferzeiten, R&uuml;ckgabe und Erstattung f&uuml;r das Buch Lass los, was dich kaputt macht.">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="/favicon.png" type="image/png">
 
@@ -21,7 +21,7 @@
 @font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
-/* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
+/* ═══ CSS PROM&Ecaron;NN&Eacute; — Velvet Dusk ═══ */
 :root {
  --bg: #FAF5F8;
  --heading: #2D1B3D;
@@ -78,7 +78,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 }
 
-/* ═══ CONTENT STRÁNKY ═══ */
+/* ═══ CONTENT STR&Aacute;NKY ═══ */
 .page-header {
  background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
  padding: 56px 20px 48px;
@@ -90,7 +90,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 .page-content { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
 
-/* Informační boxy */
+/* Informa&ccedil;n&iacute; boxy */
 .info-box {
  background: var(--light);
  border: 1px solid var(--section);
@@ -118,10 +118,20 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  gap: 10px;
 }
 .section-block h2 .icon { font-size: 28px; }
+.section-block h3 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 17px;
+ font-weight: 700;
+ color: var(--heading);
+ margin: 20px 0 8px;
+}
+.section-block h3:first-of-type { margin-top: 0; }
 .section-block p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 12px; }
 .section-block ul, .section-block ol { padding-left: 24px; margin-bottom: 12px; }
 .section-block li { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 6px; }
 .section-block strong { color: var(--heading); }
+.section-block a { color: var(--cta); text-decoration: underline; font-weight: 600; transition: color 0.3s ease; }
+.section-block a:hover { color: var(--cta-hover); }
 
 .highlight-box {
  background: linear-gradient(135deg, var(--light), var(--section));
@@ -132,7 +142,30 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .highlight-box p { margin: 0; font-size: 15px; }
 
-/* Tabulka levertijden */
+.retour-box {
+ background: linear-gradient(135deg, var(--light), var(--section));
+ border: 2px solid var(--cta);
+ border-radius: 16px;
+ padding: 24px;
+ margin: 20px 0;
+ text-align: center;
+}
+.retour-box h4 {
+ font-family: 'Recoleta', serif;
+ font-size: 17px;
+ font-weight: 600;
+ color: var(--heading);
+ margin-bottom: 12px;
+}
+.retour-box p {
+ font-size: 15px;
+ font-weight: 500;
+ color: var(--body);
+ margin: 4px 0;
+ line-height: 1.5;
+}
+
+/* Tabulka */
 .delivery-table {
  width: 100%;
  border-collapse: collapse;
@@ -170,10 +203,38 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  border-radius: 4px;
 }
 
-/* FAQ */
-.faq-item {
+/* Steps */
+.steps-list {
+ list-style: none;
+ padding: 0;
+ counter-reset: step-counter;
+}
+.steps-list li {
+ counter-increment: step-counter;
+ padding: 12px 0 12px 48px;
+ position: relative;
  border-bottom: 1px solid var(--section);
 }
+.steps-list li:last-child { border-bottom: none; }
+.steps-list li::before {
+ content: counter(step-counter);
+ position: absolute;
+ left: 0;
+ top: 12px;
+ width: 32px;
+ height: 32px;
+ background: var(--cta);
+ color: var(--white);
+ font-weight: 700;
+ font-size: 14px;
+ border-radius: 8px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+}
+
+/* FAQ */
+.faq-item { border-bottom: 1px solid var(--section); }
 .faq-question {
  display: flex;
  justify-content: space-between;
@@ -212,12 +273,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  padding-bottom: 18px;
  margin: 0;
 }
-.faq-item.active .faq-icon {
- transform: rotate(45deg);
-}
-.faq-item.active .faq-answer {
- max-height: 300px;
-}
+.faq-item.active .faq-icon { transform: rotate(45deg); }
+.faq-item.active .faq-answer { max-height: 400px; }
 
 .divider { height: 1px; background: var(--section); margin: 40px 0; }
 
@@ -248,14 +305,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  line-height: 1.7;
  margin: 0;
 }
-.cross-link-note a {
- color: var(--cta);
- font-weight: 600;
- text-decoration: underline;
-}
-.cross-link-note a:hover {
- color: var(--cta-hover);
-}
+.cross-link-note a { color: var(--cta); font-weight: 600; text-decoration: underline; }
+.cross-link-note a:hover { color: var(--cta-hover); }
 
 /* ═══ FOOTER ═══ */
 .site-footer { background: var(--dark); padding: 48px 24px 24px; color: rgba(255, 255, 255, 0.7); }
@@ -308,10 +359,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
    <img src="/lass-los-logo.png" alt="Lass los, was dich kaputt macht" width="150" height="40">
-
   </a>
   <div class="nav-links">
-   <a href="versand.html" class="active">Versand &amp; Rückgabe</a>
+   <a href="versand.html" class="active">Versand &amp; R&uuml;ckgabe</a>
    <a href="sendungsverfolgung.html">Sendungsverfolgung</a>
    <a href="agb.html">AGB</a>
    <a href="datenschutz.html">Datenschutz</a>
@@ -325,7 +375,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </nav>
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
- <a href="versand.html" class="active">Versand &amp; Rückgabe</a>
+ <a href="versand.html" class="active">Versand &amp; R&uuml;ckgabe</a>
  <a href="sendungsverfolgung.html">Sendungsverfolgung</a>
  <a href="agb.html">AGB</a>
  <a href="datenschutz.html">Datenschutz</a>
@@ -335,28 +385,31 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">📦 Versand &amp; Lieferung</div>
- <h1>Versand- und Lieferrichtlinien</h1>
- <p>Alles über Versand, Lieferzeiten und Lieferung</p>
+ <div class="badge">Versand &amp; R&uuml;ckgabe</div>
+ <h1>Versand, Lieferung &amp; R&uuml;ckgabe</h1>
+ <p>Alle Informationen zu Versand, Lieferzeiten, R&uuml;cksendungen und Erstattungen auf einen Blick.</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="page-content">
 
  <div class="info-box">
-  <h3>📌 Zusammenfassung</h3>
+  <h3>Auf einen Blick</h3>
   <ul>
-   <li>Kostenloser Versand nach Deutschland, Österreich und Luxemburg</li>
-   <li>Lieferzeit: 5–10 Werktage</li>
+   <li>Kostenloser Versand nach Deutschland, &Ouml;sterreich und Luxemburg</li>
+   <li>Lieferzeit: <strong>3&ndash;4 Werktage</strong></li>
+   <li>Versand innerhalb von 24&ndash;48 Stunden nach Zahlungseingang</li>
    <li>Sendungsverfolgungscode per E-Mail nach dem Versand</li>
-   <li>Versand innerhalb von 24–48 Stunden nach Zahlungseingang</li>
+   <li><strong>30 Tage R&uuml;ckgaberecht</strong> &mdash; ohne Angabe von Gr&uuml;nden</li>
+   <li>Vollst&auml;ndige R&uuml;ckerstattung innerhalb von 14 Tagen nach Wareneingang</li>
   </ul>
  </div>
 
- <!-- Versand -->
+ <!-- ═══ VERSAND ═══ -->
  <div class="section-block">
-  <h2><span class="icon">📦</span> Versand</h2>
-  <p>Wir versenden alle Bestellungen aus unserem Lager in Europa. Nach Eingang Ihrer Zahlung wird Ihre Bestellung innerhalb von <strong>24–48 Stunden</strong> bearbeitet und versandt.</p>
+  <h2><span class="icon">📦</span> Versand &amp; Lieferzeiten</h2>
+
+  <p>Alle Bestellungen werden aus unserem europ&auml;ischen Logistikzentrum versandt. Nach Eingang Ihrer Zahlung wird Ihre Bestellung innerhalb von <strong>24&ndash;48 Stunden</strong> bearbeitet und an den Versanddienstleister &uuml;bergeben.</p>
 
   <table class="delivery-table">
    <thead>
@@ -367,40 +420,103 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     </tr>
    </thead>
    <tbody>
-    <tr><td>🇩🇪 Deutschland</td><td>5–10 Werktage</td><td><span class="free-tag">GRATIS</span></td></tr>
-    <tr><td>🇦🇹 Österreich</td><td>5–10 Werktage</td><td><span class="free-tag">GRATIS</span></td></tr>
-    <tr><td>🇱🇺 Luxemburg</td><td>5–10 Werktage</td><td><span class="free-tag">GRATIS</span></td></tr>
+    <tr><td>&#x1F1E9;&#x1F1EA; Deutschland</td><td>3&ndash;4 Werktage</td><td><span class="free-tag">GRATIS</span></td></tr>
+    <tr><td>&#x1F1E6;&#x1F1F9; &Ouml;sterreich</td><td>3&ndash;4 Werktage</td><td><span class="free-tag">GRATIS</span></td></tr>
+    <tr><td>&#x1F1F1;&#x1F1FA; Luxemburg</td><td>3&ndash;4 Werktage</td><td><span class="free-tag">GRATIS</span></td></tr>
    </tbody>
   </table>
 
   <div class="highlight-box">
-   <p><strong>Digitale Produkte (E-Books, PDF):</strong> Direkt nach der Zahlung erhalten Sie einen Download-Link per E-Mail. Keine Wartezeit!</p>
+   <p><strong>Hinweis:</strong> Die angegebenen Lieferzeiten gelten ab dem Zeitpunkt des Versands. In Ausnahmef&auml;llen (Feiertage, erh&ouml;htes Bestellvolumen) kann sich die Lieferzeit um 1&ndash;2 Werktage verl&auml;ngern.</p>
+  </div>
+
+  <h3>Lager &amp; Logistik</h3>
+  <p>Unser Lager befindet sich bei <strong>Performance Marketing Solution s.r.o.</strong>, Rybn&aacute; 716/24, 110 00 Prag 1, Tschechische Republik. Die logistische Abwicklung erfolgt in Zusammenarbeit mit unserem Logistikpartner <strong>Dextrum</strong>, der den professionellen Versand und die zuverl&auml;ssige Zustellung Ihrer Bestellung sicherstellt.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ SENDUNGSVERFOLGUNG ═══ -->
+ <div class="section-block">
+  <h2><span class="icon">📍</span> Sendungsverfolgung</h2>
+  <p>Sobald Ihre Bestellung versandt wurde, erhalten Sie automatisch eine E-Mail mit Ihrem <strong>Sendungsverfolgungscode</strong>. Damit k&ouml;nnen Sie den aktuellen Status Ihres Pakets jederzeit online einsehen.</p>
+  <p>Alternativ k&ouml;nnen Sie Ihre Sendung auch &uuml;ber unsere <a href="sendungsverfolgung.html">Sendungsverfolgungsseite</a> verfolgen.</p>
+
+  <div class="highlight-box">
+   <p><strong>Tipp:</strong> Falls Sie die Versandbestätigung nicht in Ihrem Posteingang finden, pr&uuml;fen Sie bitte auch Ihren Spam- oder Junk-Ordner. Sollte die E-Mail fehlen, kontaktieren Sie uns unter <a href="mailto:buch@lasslosbuch.de" style="color: var(--cta);">buch@lasslosbuch.de</a>.</p>
   </div>
  </div>
 
  <div class="divider"></div>
 
- <!-- Verfolgen Sie Ihre Bestellung -->
+ <!-- ═══ DIGITALE PRODUKTE ═══ -->
  <div class="section-block">
-  <h2><span class="icon">📍</span> Verfolgen Sie Ihre Bestellung</h2>
-  <p>Nach dem Versand erhalten Sie eine E-Mail mit einem <strong>Sendungsverfolgungscode</strong>. Damit können Sie Ihr Paket in Echtzeit auf der Website des Transportunternehmens verfolgen.</p>
-  <p>Haben Sie Ihren Sendungsverfolgungscode nicht erhalten? Überprüfen Sie Ihren Spam-Ordner oder kontaktieren Sie uns unter <a href="mailto:buch@befreiungsbuch.de" style="color: var(--cta);">buch@befreiungsbuch.de</a>.</p>
+  <h2><span class="icon">📱</span> Digitale Produkte</h2>
+  <p>F&uuml;r digitale Produkte (E-Books, PDFs) erhalten Sie direkt nach der Zahlung einen Download-Link per E-Mail. Es entstehen keine Versandkosten und keine Wartezeit.</p>
+  <p><strong>Bitte beachten Sie:</strong> Nach dem Download eines digitalen Produkts erlischt das Widerrufsrecht, da die Leistung vollst&auml;ndig erbracht wurde (gem&auml;&szlig; &sect; 356 Abs. 5 BGB).</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Beschädigtes oder falsches Produkt -->
+ <!-- ═══ R&Uuml;CKGABE & WIDERRUF ═══ -->
  <div class="section-block">
-  <h2><span class="icon">⚠️</span> Beschädigtes oder falsches Produkt?</h2>
-  <p>Haben Sie ein beschädigtes oder falsches Produkt erhalten? Kontaktieren Sie uns direkt. Wir organisieren kostenlos einen Ersatz oder eine vollständige Rückerstattung.</p>
-  <p>Senden Sie ein Foto des beschädigten Produkts an <a href="mailto:buch@befreiungsbuch.de" style="color: var(--cta);">buch@befreiungsbuch.de</a> zusammen mit Ihrer Bestellnummer.</p>
+  <h2><span class="icon">↩️</span> R&uuml;ckgabe &amp; Widerrufsrecht</h2>
+
+  <p>Als Verbraucher haben Sie das Recht, Ihren Kaufvertrag innerhalb von <strong>30 Tagen</strong> ohne Angabe von Gr&uuml;nden zu widerrufen. Die Widerrufsfrist beginnt an dem Tag, an dem Sie oder ein von Ihnen benannter Dritter die Ware in Empfang genommen haben.</p>
+
+  <div class="retour-box">
+   <h4>30 Tage R&uuml;ckgaberecht</h4>
+   <p>Widerrufsfrist: <strong>30 Tage</strong> ab Warenerhalt</p>
+   <p>R&uuml;cksendung an: <strong>Performance Marketing Solution s.r.o.</strong></p>
+   <p>Rybn&aacute; 716/24, 110 00 Prag 1, Tschechische Republik</p>
+  </div>
+
+  <h3>So funktioniert die R&uuml;cksendung</h3>
+  <ol class="steps-list">
+   <li><strong>Widerruf erkl&auml;ren:</strong> Senden Sie eine E-Mail an <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a> mit Ihrer Bestellnummer und dem Wunsch, den Kauf zu widerrufen.</li>
+   <li><strong>Best&auml;tigung abwarten:</strong> Sie erhalten von uns eine Best&auml;tigung mit der R&uuml;cksendeadresse und ggf. einem R&uuml;cksendeetikett.</li>
+   <li><strong>Ware zur&uuml;cksenden:</strong> Senden Sie die Ware in ihrem Originalzustand an die angegebene Adresse.</li>
+   <li><strong>R&uuml;ckerstattung erhalten:</strong> Nach Eingang und Pr&uuml;fung der Ware erstatten wir den Kaufpreis innerhalb von <strong>14 Tagen</strong> auf das urspr&uuml;ngliche Zahlungsmittel.</li>
+  </ol>
+
+  <div class="highlight-box">
+   <p><strong>Wichtig:</strong> Die Ware muss in unbesch&auml;digtem Zustand zur&uuml;ckgesandt werden. Normale Gebrauchsspuren durch Pr&uuml;fung des Produkts sind zul&auml;ssig. Die Kosten der R&uuml;cksendung tr&auml;gt der K&auml;ufer.</p>
+  </div>
  </div>
 
  <div class="divider"></div>
 
- <!-- FAQ -->
+ <!-- ═══ ERSTATTUNG ═══ -->
  <div class="section-block">
-  <h2><span class="icon">❓</span> Häufig gestellte Fragen</h2>
+  <h2><span class="icon">💶</span> Erstattung</h2>
+  <p>Sobald wir die zur&uuml;ckgesandte Ware erhalten und gepr&uuml;ft haben, erstatten wir den vollst&auml;ndigen Kaufpreis innerhalb von <strong>14 Tagen</strong> auf das urspr&uuml;ngliche Zahlungsmittel. Es fallen keine zus&auml;tzlichen Geb&uuml;hren an.</p>
+  <p>Folgende Zahlungsmethoden werden bei der Erstattung ber&uuml;cksichtigt:</p>
+  <ul>
+   <li><strong>PayPal:</strong> R&uuml;ckerstattung direkt auf Ihr PayPal-Konto</li>
+   <li><strong>Kreditkarte:</strong> R&uuml;ckerstattung auf die verwendete Karte (kann je nach Bank 5&ndash;10 Werktage dauern)</li>
+   <li><strong>Klarna:</strong> R&uuml;ckerstattung &uuml;ber Klarna auf das bei Klarna hinterlegte Konto</li>
+   <li><strong>Sofort&uuml;berweisung / Bank&uuml;berweisung:</strong> R&uuml;ckerstattung auf das Bankkonto, von dem die Zahlung erfolgt ist</li>
+  </ul>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ BESCH&Auml;DIGTES PRODUKT ═══ -->
+ <div class="section-block">
+  <h2><span class="icon">⚠️</span> Besch&auml;digtes oder falsches Produkt</h2>
+  <p>Sollten Sie ein besch&auml;digtes oder falsches Produkt erhalten haben, kontaktieren Sie uns bitte umgehend. Wir organisieren kostenlos einen Ersatz oder eine vollst&auml;ndige R&uuml;ckerstattung.</p>
+  <p>Bitte senden Sie ein Foto des besch&auml;digten Produkts zusammen mit Ihrer Bestellnummer an <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a>. Wir melden uns in der Regel innerhalb von 24 Stunden bei Ihnen.</p>
+
+  <div class="highlight-box">
+   <p><strong>Garantie:</strong> Bei nachweislich besch&auml;digter Ware &uuml;bernehmen wir s&auml;mtliche Kosten f&uuml;r R&uuml;cksendung und Ersatzlieferung. Ihre Rechte als Verbraucher bleiben hiervon unber&uuml;hrt.</p>
+  </div>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ FAQ ═══ -->
+ <div class="section-block">
+  <h2><span class="icon">❓</span> H&auml;ufig gestellte Fragen</h2>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
@@ -408,7 +524,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Bestellungen werden innerhalb von 24–48 Stunden nach Zahlungseingang bearbeitet und versandt. Sie erhalten eine Bestätigungs-E-Mail mit Sendungsverfolgungscode, sobald Ihr Paket unterwegs ist.</p>
+    <p>Bestellungen werden innerhalb von 24&ndash;48 Stunden nach Zahlungseingang bearbeitet und an den Versanddienstleister &uuml;bergeben. Sie erhalten eine Best&auml;tigungs-E-Mail mit Sendungsverfolgungscode, sobald Ihr Paket unterwegs ist.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Wie lange dauert die Lieferung?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Die Standardlieferzeit betr&auml;gt <strong>3&ndash;4 Werktage</strong> nach Versand f&uuml;r Deutschland, &Ouml;sterreich und Luxemburg. In Ausnahmef&auml;llen (Feiertage, hohes Bestellvolumen) kann sich die Lieferung um 1&ndash;2 Werktage verl&auml;ngern.</p>
    </div>
   </div>
 
@@ -418,25 +544,54 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Überprüfen Sie zunächst den Sendungsverfolgungscode in Ihrer Bestätigungs-E-Mail. Wenn Ihr Paket seit mehr als 14 Werktagen (innerhalb der EU) unterwegs ist, kontaktieren Sie uns. Wir untersuchen den Fall und organisieren bei Bedarf eine neue Lieferung.</p>
+    <p>&Uuml;berpr&uuml;fen Sie zun&auml;chst den Sendungsverfolgungscode in Ihrer Best&auml;tigungs-E-Mail. Sollte Ihr Paket nach mehr als 10 Werktagen nicht eingetroffen sein, kontaktieren Sie uns bitte unter <a href="mailto:buch@lasslosbuch.de" style="color: var(--cta);">buch@lasslosbuch.de</a>. Wir untersuchen den Fall und organisieren bei Bedarf eine Ersatzlieferung.</p>
    </div>
   </div>
 
-  <p style="margin-top: 16px;">Für Informationen zur Sendungsverfolgung, siehe unsere <a href="sendungsverfolgung.html" style="color: var(--cta); font-weight: 600;">Sendungsverfolgung</a>.</p>
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Kann ich meine Bestellung stornieren?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Ja, solange Ihre Bestellung noch nicht versandt wurde, k&ouml;nnen Sie diese kostenlos stornieren. Senden Sie uns einfach eine E-Mail an <a href="mailto:buch@lasslosbuch.de" style="color: var(--cta);">buch@lasslosbuch.de</a> mit Ihrer Bestellnummer. Wurde die Bestellung bereits versandt, k&ouml;nnen Sie von Ihrem 30-t&auml;gigen Widerrufsrecht Gebrauch machen.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Wie lange habe ich Zeit f&uuml;r eine R&uuml;ckgabe?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Sie haben <strong>30 Tage</strong> ab Erhalt der Ware Zeit, Ihren Kauf ohne Angabe von Gr&uuml;nden zu widerrufen. Senden Sie uns hierzu einfach eine E-Mail an <a href="mailto:buch@lasslosbuch.de" style="color: var(--cta);">buch@lasslosbuch.de</a>.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Wie schnell erhalte ich meine R&uuml;ckerstattung?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Nach Eingang und Pr&uuml;fung der zur&uuml;ckgesandten Ware erstatten wir den Kaufpreis innerhalb von <strong>14 Tagen</strong> auf das urspr&uuml;ngliche Zahlungsmittel. Je nach Zahlungsanbieter kann die Gutschrift weitere 5&ndash;10 Werktage in Anspruch nehmen.</p>
+   </div>
+  </div>
  </div>
 
  <!-- Cross-link note -->
  <div class="cross-link-note">
-  <p>Für Informationen zur Sendungsverfolgung, siehe unsere <a href="sendungsverfolgung.html">Sendungsverfolgung</a>.</p>
+  <p>Vollst&auml;ndige rechtliche Informationen finden Sie in unseren <a href="agb.html">Allgemeinen Gesch&auml;ftsbedingungen</a>.</p>
  </div>
 
  <!-- Unternehmensdaten -->
  <div class="company-info">
-  <h3>🏢 Unternehmensdaten</h3>
+  <h3>Herausgeber &amp; Verk&auml;ufer</h3>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, 110 00 Prag 1, Tschechien</p>
-  <p>Reg.Nr.: 06259928 | USt-IdNr: CZ06259928</p>
-  <p>E-Mail: <a href="mailto:buch@befreiungsbuch.de" style="color: var(--cta);">buch@befreiungsbuch.de</a></p>
+  <p>Rybn&aacute; 716/24, 110 00 Prag 1, Tschechische Republik</p>
+  <p>Reg.Nr.: 06259928 | USt-IdNr.: CZ06259928</p>
+  <p>E-Mail: <a href="mailto:buch@lasslosbuch.de" style="color: var(--cta);">buch@lasslosbuch.de</a></p>
+  <p style="margin-top: 8px; font-size: 14px; color: var(--muted);">Offizieller Herausgeber und alleiniger Distributor des Buches &bdquo;Lass los, was dich kaputt macht&ldquo;.</p>
  </div>
 
 </div>
@@ -449,19 +604,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
    <div class="footer-brand-text">Lass los, was dich<br>kaputt macht</div>
   </div>
   <div class="footer-links">
-   <a href="versand.html">Versand &amp; Rückgabe</a>
+   <a href="versand.html">Versand &amp; R&uuml;ckgabe</a>
    <a href="sendungsverfolgung.html">Sendungsverfolgung</a>
    <a href="agb.html">AGB</a>
    <a href="datenschutz.html">Datenschutz</a>
    <a href="kontakt.html">Kontakt</a>
   </div>
   <div class="footer-contact">
-   <a href="mailto:buch@befreiungsbuch.de">📧 buch@befreiungsbuch.de</a>
+   <a href="mailto:buch@lasslosbuch.de">📧 buch@lasslosbuch.de</a>
    <a href="tel:+420732915755">📞 +420 732 915 755</a>
   </div>
  </div>
  <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, 110 00 Prag • Reg.Nr.: 06259928 • USt-IdNr: CZ06259928</span>
+  <span>Performance Marketing Solution s.r.o. &bull; Rybn&aacute; 716/24, 110 00 Prag &bull; Reg.Nr.: 06259928 &bull; USt-IdNr.: CZ06259928</span>
   <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle Rechte vorbehalten.</span>
  </div>
 </footer>

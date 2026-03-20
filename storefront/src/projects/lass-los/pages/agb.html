@@ -316,6 +316,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  border-radius: 10px;
  flex-shrink: 0;
 }
+.section-block h3 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 17px;
+ font-weight: 700;
+ color: var(--heading);
+ margin: 20px 0 8px;
+}
+.section-block h3:first-of-type {
+ margin-top: 0;
+}
 .section-block p {
  font-family: 'DM Sans', sans-serif;
  font-size: 16px;
@@ -337,6 +347,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .section-block strong {
  color: var(--heading);
 }
+.section-block a {
+ color: var(--cta);
+ text-decoration: underline;
+ font-weight: 600;
+ transition: color 0.3s ease;
+}
+.section-block a:hover {
+ color: var(--cta-hover);
+}
 
 .highlight-box {
  background: linear-gradient(135deg, var(--light), var(--section));
@@ -348,6 +367,55 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .highlight-box p {
  margin: 0;
  font-size: 15px;
+}
+
+.retour-box {
+ background: linear-gradient(135deg, var(--light), var(--section));
+ border: 2px solid var(--cta);
+ border-radius: 16px;
+ padding: 24px;
+ margin: 20px 0;
+ text-align: center;
+}
+.retour-box h4 {
+ font-family: 'Recoleta', serif;
+ font-size: 17px;
+ font-weight: 600;
+ color: var(--heading);
+ margin-bottom: 12px;
+}
+.retour-box p {
+ font-size: 15px;
+ font-weight: 500;
+ color: var(--body);
+ margin: 4px 0;
+ line-height: 1.5;
+}
+
+.odr-box {
+ background: linear-gradient(135deg, var(--light), var(--section));
+ border: 2px solid var(--cta);
+ border-radius: 16px;
+ padding: 24px 28px;
+ text-align: center;
+ margin-top: 32px;
+}
+.odr-box h4 {
+ font-family: 'Recoleta', serif;
+ font-size: 18px;
+ font-weight: 600;
+ color: var(--heading);
+ margin-bottom: 8px;
+}
+.odr-box p {
+ font-size: 15px;
+ color: var(--body);
+ margin: 6px 0;
+}
+.odr-box a {
+ color: var(--cta);
+ font-weight: 700;
+ text-decoration: underline;
 }
 
 .divider {
@@ -456,7 +524,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
    <img src="/lass-los-logo.png" alt="Lass los, was dich kaputt macht" width="150" height="40">
-
   </a>
   <div class="nav-links">
    <a href="versand.html">Versand &amp; R&uuml;ckgabe</a>
@@ -483,157 +550,593 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">📋 Rechtliches</div>
- <h1>Allgemeine Geschäftsbedingungen</h1>
- <p>Bitte lesen Sie unsere Bedingungen sorgfältig durch, bevor Sie eine Bestellung aufgeben.</p>
+ <div class="badge">Rechtliches</div>
+ <h1>Allgemeine Gesch&auml;ftsbedingungen</h1>
+ <p>Bitte lesen Sie unsere Bedingungen sorgf&auml;ltig durch, bevor Sie eine Bestellung aufgeben.</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="page-content">
 
  <div class="info-box">
-  <h3>📌 Zusammenfassung</h3>
+  <h3>Zusammenfassung</h3>
   <ul>
-   <li>14 Tage Widerrufsrecht</li>
-   <li>Kostenloser Versand nach Deutschland, Österreich und Luxemburg</li>
-   <li>30 Tage Geld-zurück-Garantie</li>
-   <li>Sichere Zahlung via PayPal, Klarna, Karte</li>
-   <li>Digitale Produkte: kein Rückgaberecht nach Lieferung</li>
+   <li>30 Tage Widerrufsrecht</li>
+   <li>Kostenloser Versand nach Deutschland, &Ouml;sterreich und Luxemburg</li>
+   <li>30 Tage Geld-zur&uuml;ck-Garantie</li>
+   <li>Sichere Zahlung via PayPal, Klarna, Kreditkarte</li>
+   <li>Digitale Produkte: kein R&uuml;ckgaberecht nach Download</li>
+   <li>Lieferzeit: 3&ndash;4 Werktage</li>
   </ul>
  </div>
 
- <!-- Artikel 1 -->
+ <!-- ═══ 1. Allgemeine Bestimmungen ═══ -->
  <div class="section-block">
-  <h2><span class="section-num">1</span> Identität des Unternehmens</h2>
-  <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, 110 00 Prag 1, Tschechien</p>
-  <p>Handelsregisternr.: 06259928<br>USt-IdNr.: CZ06259928</p>
-  <p>E-Mail: <a href="mailto:buch@befreiungsbuch.de" style="color: var(--cta);">buch@befreiungsbuch.de</a><br>
-  Tel.: +420 732 915 755</p>
- </div>
+  <h2><span class="section-num">1</span> Allgemeine Bestimmungen</h2>
 
- <div class="divider"></div>
-
- <!-- Artikel 2 -->
- <div class="section-block">
-  <h2><span class="section-num">2</span> Anwendungsbereich</h2>
-  <p>Diese Allgemeinen Geschäftsbedingungen gelten für alle Angebote des Unternehmens und für jeden Fernabsatzvertrag, der zwischen dem Unternehmen und dem Verbraucher geschlossen wird.</p>
-  <p>Vor Abschluss des Fernabsatzvertrags wird dem Verbraucher der Text dieser Allgemeinen Geschäftsbedingungen zur Verfügung gestellt.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 3 -->
- <div class="section-block">
-  <h2><span class="section-num">3</span> Das Angebot</h2>
-  <p>Wenn ein Angebot eine begrenzte Gültigkeitsdauer hat oder an Bedingungen geknüpft ist, wird dies ausdrücklich im Angebot angegeben.</p>
-  <p>Das Angebot enthält eine vollständige und genaue Beschreibung der angebotenen Produkte und/oder Dienstleistungen. Die Beschreibung ist ausreichend detailliert, damit der Verbraucher das Angebot angemessen beurteilen kann.</p>
-  <p>Offensichtliche Irrtümer oder Fehler im Angebot sind für das Unternehmen nicht bindend.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 4 -->
- <div class="section-block">
-  <h2><span class="section-num">4</span> Der Vertrag</h2>
-  <p>Der Vertrag kommt zustande, sobald der Verbraucher das Angebot annimmt und die daran geknüpften Bedingungen erfüllt.</p>
-  <p>Hat der Verbraucher das Angebot auf elektronischem Wege angenommen, bestätigt das Unternehmen unverzüglich den Eingang der Annahme auf elektronischem Wege.</p>
+  <h3>1.1 Verk&auml;ufer und Herausgeber</h3>
+  <p>Diese Allgemeinen Gesch&auml;ftsbedingungen (nachfolgend &bdquo;AGB&ldquo;) gelten f&uuml;r den Verkauf des Buches <strong>&bdquo;Lass los, was dich kaputt macht&ldquo;</strong> und verwandter digitaler Produkte durch den Verk&auml;ufer:</p>
+  <p><strong>Performance Marketing Solution s.r.o.</strong><br>
+  Rybn&aacute; 716/24, Star&eacute; M&ecaron;sto<br>
+  110 00 Praha, Tschechische Republik<br>
+  Handelsregisternr.: 06259928<br>
+  USt-IdNr.: CZ06259928<br>
+  E-Mail: <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a><br>
+  Website: <a href="https://lasslosbuch.de" target="_blank">https://lasslosbuch.de</a></p>
 
   <div class="highlight-box">
-   <p><strong>Hinweis:</strong> Das Unternehmen trifft geeignete technische und organisatorische Maßnahmen zur Sicherung der elektronischen Datenübertragung und sorgt für eine sichere Webumgebung.</p>
+   <p><strong>Hinweis:</strong> Das Buch &bdquo;Lass los, was dich kaputt macht&ldquo; ist geistiges Eigentum der Performance Marketing Solution s.r.o. Unser Unternehmen ist der offizielle Herausgeber und alleinige Distributor dieses Werkes. Die Lagerhaltung, der Versand sowie die gesamte Auftragsabwicklung erfolgen &uuml;ber unser eigenes europ&auml;isches Logistikzentrum.</p>
   </div>
- </div>
 
- <div class="divider"></div>
+  <h3>1.2 Anwendungsbereich</h3>
+  <p>Diese AGB gelten f&uuml;r alle Bestellungen und Vertr&auml;ge zwischen dem Verk&auml;ufer und dem Kunden &uuml;ber die Website lasslosbuch.de und verwandte Verkaufsdomains. Der Geltungsbereich umfasst Deutschland, &Ouml;sterreich und Luxemburg.</p>
 
- <!-- Artikel 5 -->
- <div class="section-block">
-  <h2><span class="section-num">5</span> Widerrufsrecht</h2>
-  <p><strong>Physische Produkte:</strong></p>
-  <p>Beim Kauf von Produkten hat der Verbraucher das Recht, den Vertrag ohne Angabe von Gründen innerhalb von 14 Tagen zu widerrufen. Die Widerrufsfrist beginnt am Tag nach Erhalt des Produkts durch den Verbraucher.</p>
-  <p>Während der Widerrufsfrist ist der Verbraucher verpflichtet, sorgfältig mit dem Produkt und der Verpackung umzugehen. Das Produkt darf nur in dem Umfang ausgepackt oder verwendet werden, der erforderlich ist, um zu beurteilen, ob der Verbraucher es behalten möchte.</p>
-  <p><strong>Digitale Produkte (E-Books, PDF):</strong></p>
-  <p>Nach Lieferung digitaler Inhalte (Download) erlischt das Widerrufsrecht, sofern der Verbraucher ausdrücklich zugestimmt hat, auf sein Widerrufsrecht zu verzichten.</p>
- </div>
+  <h3>1.3 Rechte und Pflichten</h3>
+  <p>Die AGB spezifizieren und verdeutlichen die Rechte und Pflichten des Verk&auml;ufers und des K&auml;ufers (nachfolgend auch &bdquo;Kunde&ldquo; genannt). Die Bestimmungen dieser AGB sind integraler Bestandteil des Kaufvertrags.</p>
 
- <div class="divider"></div>
-
- <!-- Artikel 6 -->
- <div class="section-block">
-  <h2><span class="section-num">6</span> Der Preis</h2>
-  <p>Während der im Angebot genannten Gültigkeitsdauer werden die Preise der angebotenen Produkte und/oder Dienstleistungen nicht erhöht, mit Ausnahme von Preisänderungen aufgrund geänderter Mehrwertsteuersätze.</p>
-  <p>Alle Preise verstehen sich inklusive Mehrwertsteuer und inklusive Versandkosten (sofern nicht anders angegeben).</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Artikel 7 -->
- <div class="section-block">
-  <h2><span class="section-num">7</span> Zahlung</h2>
-  <p>Der Verbraucher kann über folgende Zahlungsmethoden bezahlen:</p>
+  <h3>1.4 Anwendbares Recht</h3>
+  <p>Wenn der K&auml;ufer Verbraucher ist, werden die in diesen AGB nicht geregelten Rechte und Pflichten geregelt durch:</p>
   <ul>
-   <li>PayPal</li>
-   <li>Klarna</li>
-   <li>Kreditkarte (Visa, Mastercard)</li>
-   <li>Apple Pay / Google Pay</li>
+   <li>Das Tschechische B&uuml;rgerliche Gesetzbuch (Ob&ccaron;ansk&yacute; z&aacute;kon&iacute;k)</li>
+   <li>Das Tschechische Verbraucherschutzgesetz (Z&aacute;kon o ochran&ecaron; spot&rcaron;ebitele)</li>
+   <li>EU-Richtlinie 2011/83/EU &uuml;ber Verbraucherrechte</li>
+   <li>F&uuml;r Kunden in Deutschland, &Ouml;sterreich und Luxemburg: zus&auml;tzlich die nationalen Verbraucherschutzgesetze, soweit diese g&uuml;nstiger sind</li>
   </ul>
-  <p>Die Zahlung wird zum Zeitpunkt der Bestellung verarbeitet. Nach erfolgreicher Zahlung erhält der Verbraucher eine Bestellbestätigung per E-Mail.</p>
+
+  <h3>1.5 Definitionen</h3>
+  <p><strong>Kunde/Verbraucher:</strong> Eine nat&uuml;rliche Person, die nicht im Rahmen einer gewerblichen oder selbst&auml;ndigen beruflichen T&auml;tigkeit handelt.<br>
+  <strong>Physisches Produkt:</strong> Das gedruckte Buch &bdquo;Lass los, was dich kaputt macht&ldquo;.<br>
+  <strong>Digitaler Inhalt:</strong> Die kostenlosen Bonus-E-Books, die beim Kauf angeboten werden.<br>
+  <strong>Widerrufsfrist:</strong> Die Frist, innerhalb derer der Verbraucher sein Widerrufsrecht aus&uuml;ben kann.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 8 -->
+ <!-- ═══ 2. Bestellung und Vertragsschluss ═══ -->
  <div class="section-block">
-  <h2><span class="section-num">8</span> Lieferung</h2>
-  <p>Das Unternehmen nimmt bei der Entgegennahme und Ausführung von Produktbestellungen größtmögliche Sorgfalt in Anspruch.</p>
-  <p>Die Lieferadresse ist die Adresse, die der Verbraucher dem Unternehmen mitgeteilt hat.</p>
-  <p>Die Lieferzeit beträgt durchschnittlich 5–10 Werktage für Deutschland, Österreich und Luxemburg. Für andere EU-Länder kann die Lieferzeit länger sein.</p>
+  <h2><span class="section-num">2</span> Bestellung und Zustandekommen des Vertrages</h2>
 
-  <div class="highlight-box">
-   <p><strong>Kostenloser Versand nach Deutschland, Österreich und Luxemburg.</strong> Für andere Länder können zusätzliche Versandkosten anfallen.</p>
+  <h3>2.1 Produktinformationen</h3>
+  <p>Informationen &uuml;ber das Buch, den Preis inkl. MwSt. und die Versandkosten werden deutlich auf der Website des Verk&auml;ufers und im Bestellformular angegeben. Alle Preise sind in Euro (&euro;) und enthalten die gesetzliche Mehrwertsteuer.</p>
+
+  <h3>2.2 Bestellvorgang</h3>
+  <p>Die Bestellung enth&auml;lt folgende Informationen:</p>
+  <ul>
+   <li>Produktbeschreibung (physisches Buch + digitale Boni)</li>
+   <li>Kundendaten (Name, Adresse, E-Mail)</li>
+   <li>Preis (&euro;35,- inkl. kostenlosem Versand)</li>
+   <li>Zahlungsart (Kreditkarte, PayPal, Klarna)</li>
+   <li>Lieferadresse und voraussichtliche Lieferzeit</li>
+  </ul>
+
+  <h3>2.3 Vertragsschluss</h3>
+  <p>Der Vertrag kommt zustande, sobald:</p>
+  <ol>
+   <li>Der Kunde auf die Schaltfl&auml;che &bdquo;Bestellen&ldquo; oder eine vergleichbare Best&auml;tigungsschaltfl&auml;che klickt</li>
+   <li>Der Kunde eine Best&auml;tigungs-E-Mail vom Verk&auml;ufer erh&auml;lt</li>
+  </ol>
+  <p>Durch die Bestellung best&auml;tigt der Kunde, dass er diese AGB gelesen hat und mit ihnen einverstanden ist.</p>
+
+  <h3>2.4 &Uuml;berpr&uuml;fung und Korrektur</h3>
+  <p>W&auml;hrend des Bestellvorgangs hat der Kunde die M&ouml;glichkeit, die Daten zu &uuml;berpr&uuml;fen und zu korrigieren, bevor die Bestellung aufgegeben wird. Der Verk&auml;ufer geht von der Richtigkeit der vom Kunden angegebenen Daten aus.</p>
+
+  <h3>2.5 Elektronische Kommunikation</h3>
+  <p>Der Kunde stimmt der Kommunikation &uuml;ber elektronische Mittel (E-Mail) zu. Alle Best&auml;tigungen, Rechnungen und sonstige Kommunikation werden elektronisch an die angegebene E-Mail-Adresse versendet.</p>
+
+  <h3>2.6 Aufbewahrungsfrist</h3>
+  <p>Der Vertrag wird in deutscher Sprache geschlossen. Dieser wird zusammen mit der Rechnung f&uuml;r sieben Jahre im elektronischen Archiv des Verk&auml;ufers gem&auml;&szlig; gesetzlicher Verpflichtungen gespeichert und ist nicht f&uuml;r Dritte au&szlig;erhalb der notwendigen Auftragsverarbeiter zug&auml;nglich.</p>
+
+  <h3>2.7 Pflichten der Parteien</h3>
+  <p>Der Verk&auml;ufer ist verpflichtet, das bestellte Produkt gem&auml;&szlig; dem Vertrag zu liefern. Der Kunde ist verpflichtet, das Produkt entgegenzunehmen und den vereinbarten Preis zu zahlen. Wenn das physische Buch vor&uuml;bergehend nicht verf&uuml;gbar ist, wird der Kunde innerhalb von 3 Werktagen dar&uuml;ber informiert und erh&auml;lt die M&ouml;glichkeit, die Bestellung mit vollst&auml;ndiger R&uuml;ckerstattung zu stornieren.</p>
+
+  <h3>2.8 Eigentums&uuml;bergang</h3>
+  <p>Das Eigentum am physischen Buch geht nach vollst&auml;ndiger Zahlung des Kaufpreises UND physischem Erhalt des Produkts auf den Kunden &uuml;ber.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ 3. Preis und Zahlung ═══ -->
+ <div class="section-block">
+  <h2><span class="section-num">3</span> Preis und Zahlung</h2>
+
+  <h3>3.1 Preis</h3>
+  <p>Der Verkaufspreis des Komplettpakets betr&auml;gt <strong>&euro;35,-</strong> und umfasst:</p>
+  <ul>
+   <li>1x physisches Buch &bdquo;Lass los, was dich kaputt macht&ldquo; (290 Seiten)</li>
+   <li>1x kostenloses E-Book &bdquo;Die Overthinking FIX&ldquo; (digital)</li>
+   <li>1x kostenloses E-Book &bdquo;Liebe ohne Unsinn&ldquo; (digital)</li>
+   <li>Kostenloser Versand nach Deutschland, &Ouml;sterreich und Luxemburg (im Wert von &euro;6,-)</li>
+  </ul>
+  <p>Alle Preise verstehen sich inklusive der gesetzlichen Mehrwertsteuer und exklusive eventueller Einfuhrz&ouml;lle f&uuml;r Bestellungen au&szlig;erhalb der EU.</p>
+
+  <h3>3.2 Versandkosten</h3>
+  <p>Die Versandkosten betragen <strong>&euro;0,-</strong> (kostenloser Versand) und sind bereits im Produktpreis enthalten. Es werden keine zus&auml;tzlichen Kosten an der Kasse berechnet.</p>
+
+  <h3>3.3 Rechnung</h3>
+  <p>Der Kunde erh&auml;lt automatisch eine digitale Rechnung per E-Mail direkt nach Zahlungsbest&auml;tigung. Diese Rechnung dient als Kaufnachweis und ist bei eventuellen R&uuml;cksendungen oder Reklamationen erforderlich.</p>
+
+  <h3>3.4 Zahlungsmethoden</h3>
+  <p>Die Zahlung muss im Voraus &uuml;ber eine der folgenden Methoden erfolgen:</p>
+  <ul>
+   <li><strong>Kreditkarte/Debitkarte:</strong> VISA, Mastercard, Maestro (&uuml;ber sicheres Stripe-Gateway)</li>
+   <li><strong>PayPal:</strong> Sichere Zahlung &uuml;ber Ihr PayPal-Konto</li>
+   <li><strong>Klarna:</strong> Sofortbezahlung oder Ratenzahlung</li>
+   <li><strong>Apple Pay / Google Pay</strong></li>
+  </ul>
+  <p>Alle Kartenzahlungen werden sicher von Stripe verarbeitet, einem PCI-DSS Level 1 zertifizierten Zahlungsanbieter. Der Verk&auml;ufer speichert keine Kreditkartendaten.</p>
+
+  <h3>3.5 Zahlungsbedingungen</h3>
+  <p>Die Zahlung erfolgt in einer Summe, sofern nicht schriftlich anders vereinbart. Der Kunde muss korrekte Zahlungsdaten verwenden. Die Zahlungsverpflichtung ist erf&uuml;llt, wenn der vollst&auml;ndige Betrag auf dem Konto des Verk&auml;ufers gutgeschrieben wurde.</p>
+
+  <h3>3.6 Nichtzahlung</h3>
+  <p>Bei Ablehnung der Zahlung durch die Bank oder den Zahlungsanbieter wird der Kunde per E-Mail dar&uuml;ber informiert. Die Bestellung wird erst nach erfolgreicher Zahlung bearbeitet. Bei wiederholten fehlgeschlagenen Zahlungsversuchen beh&auml;lt sich der Verk&auml;ufer das Recht vor, die Bestellung zu stornieren.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ 4. Lieferung und Versand ═══ -->
+ <div class="section-block">
+  <h2><span class="section-num">4</span> Lieferung und Versand</h2>
+
+  <h3>4.1 Lieferadresse</h3>
+  <p>Das physische Buch wird an die vom Kunden im Bestellformular angegebene Adresse geliefert. Der Kunde ist f&uuml;r die Angabe einer korrekten und vollst&auml;ndigen Lieferadresse verantwortlich. Der Verk&auml;ufer haftet nicht f&uuml;r Verlust oder Verz&ouml;gerung aufgrund falscher Adressangaben.</p>
+
+  <h3>4.2 Bearbeitungszeit und Lieferfristen</h3>
+  <p><strong>Bearbeitungszeit:</strong> Bestellungen werden innerhalb von 24&ndash;48 Stunden nach Zahlungsbest&auml;tigung versendet (Werktage: Montag bis Freitag, au&szlig;er Feiertage).</p>
+  <p><strong>Lieferzeiten ab Versand:</strong></p>
+  <ul>
+   <li><strong>Deutschland:</strong> 3&ndash;4 Werktage</li>
+   <li><strong>&Ouml;sterreich:</strong> 3&ndash;4 Werktage</li>
+   <li><strong>Luxemburg:</strong> 3&ndash;4 Werktage</li>
+  </ul>
+  <p>Die genannten Lieferzeiten sind Richtwerte und basieren auf normalen Umst&auml;nden. Der Verk&auml;ufer kann nicht f&uuml;r Verz&ouml;gerungen durch den Transporteur oder h&ouml;here Gewalt haftbar gemacht werden.</p>
+
+  <h3>4.3 Versand und Logistik</h3>
+  <p>S&auml;mtliche B&uuml;cher befinden sich in unserem eigenen Lager und werden von unserem europ&auml;ischen Logistikzentrum versendet:</p>
+  <p><strong>Performance Marketing Solution s.r.o.</strong><br>
+  Rybn&aacute; 716/24, Star&eacute; M&ecaron;sto<br>
+  110 00 Praha<br>
+  Tschechische Republik</p>
+  <p>Die Auftragsabwicklung und der Versand erfolgen &uuml;ber unseren Logistikpartner:</p>
+  <p><strong>Dextrum Fulfillment a.s.</strong><br>
+  Kirilovova 181<br>
+  739 21 Paskov<br>
+  Tschechische Republik</p>
+  <p><strong>Versanddienstleister:</strong> GLS (General Logistics Systems)<br>
+  <strong>Sendungsverfolgung:</strong> Nach dem Versand erh&auml;lt der Kunde automatisch eine Sendungsverfolgungsnummer per E-Mail, mit der die Sendung verfolgt werden kann.</p>
+
+  <h3>4.4 Digitaler Inhalt (Bonus-E-Books)</h3>
+  <p>Die kostenlosen Bonus-E-Books werden <strong>direkt nach Zahlungsbest&auml;tigung</strong> automatisch per E-Mail an die angegebene E-Mail-Adresse versendet. Der Download-Link bleibt 30 Tage g&uuml;ltig und kann maximal 3-mal heruntergeladen werden.</p>
+  <p><strong>Format:</strong> PDF (kompatibel mit allen Standard-PDF-Readern)<br>
+  <strong>Lieferzeit:</strong> Innerhalb weniger Minuten bis maximal 24 Stunden nach Zahlung</p>
+  <p><em>Bei Nichterhalt &uuml;berpr&uuml;fen Sie bitte Ihren Spam-/Junk-Ordner oder kontaktieren Sie uns unter <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a></em></p>
+
+  <h3>4.5 Lieferverz&ouml;gerung</h3>
+  <p>Wenn das physische Buch nicht innerhalb von 14 Tagen nach der voraussichtlichen Lieferzeit geliefert wurde, sollte der Kunde den Verk&auml;ufer unter <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a> kontaktieren. Bei einer Verz&ouml;gerung von mehr als 30 Tagen nach Bestelldatum hat der Kunde das Recht auf Stornierung der Bestellung und vollst&auml;ndige R&uuml;ckerstattung, es sei denn, die Verz&ouml;gerung ist auf h&ouml;here Gewalt zur&uuml;ckzuf&uuml;hren.</p>
+
+  <h3>4.6 Lieferung in mehreren Teilen</h3>
+  <p>Das physische Buch und die digitalen Boni k&ouml;nnen separat geliefert werden. Dies hat keinen Einfluss auf die Widerrufsfrist, die am Tag des Erhalts des physischen Produkts beginnt.</p>
+
+  <h3>4.7 H&ouml;here Gewalt</h3>
+  <p>Der Verk&auml;ufer haftet nicht f&uuml;r Verz&ouml;gerungen oder Nichtlieferung aufgrund von Umst&auml;nden au&szlig;erhalb seiner angemessenen Kontrolle, einschlie&szlig;lich aber nicht beschr&auml;nkt auf:</p>
+  <ul>
+   <li>Naturkatastrophen, Pandemien, Krieg, Terrorismus</li>
+   <li>Streiks bei Transporteuren oder Lieferanten</li>
+   <li>Zollprobleme oder Importbeschr&auml;nkungen</li>
+   <li>Technische St&ouml;rungen bei Systemen Dritter</li>
+   <li>Einschr&auml;nkende beh&ouml;rdliche Ma&szlig;nahmen</li>
+  </ul>
+  <p>Im Fall h&ouml;herer Gewalt wird der Kunde schnellstm&ouml;glich informiert und erh&auml;lt die M&ouml;glichkeit, die Bestellung mit vollst&auml;ndiger R&uuml;ckerstattung zu stornieren, wenn die Lieferung unm&ouml;glich oder unangemessen verz&ouml;gert erscheint.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ 5. Widerrufsrecht ═══ -->
+ <div class="section-block">
+  <h2><span class="section-num">5</span> Widerrufsrecht und R&uuml;ckgabebedingungen</h2>
+
+  <h3>5.1 Widerrufsfrist f&uuml;r physisches Buch</h3>
+  <p>Verbraucher haben das Recht, innerhalb von <strong>30 Tagen</strong> nach Erhalt des physischen Buches den Vertrag ohne Angabe von Gr&uuml;nden zu widerrufen. Dies ist eine erweiterte Frist gegen&uuml;ber den gesetzlich vorgeschriebenen 14 Tagen und gilt als zus&auml;tzlicher Service des Verk&auml;ufers.</p>
+
+  <h3>5.2 Widerruf mitteilen</h3>
+  <p>Um das Widerrufsrecht auszu&uuml;ben, muss der Kunde den Verk&auml;ufer innerhalb der Frist von 30 Tagen auf eindeutige Weise &uuml;ber die Entscheidung zum Widerruf des Vertrags informieren:</p>
+  <ul>
+   <li><strong>E-Mail:</strong> <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a></li>
+  </ul>
+  <p><strong>Erforderliche Angaben in Ihrer Widerrufs-E-Mail:</strong></p>
+  <ul>
+   <li>Ihr vollst&auml;ndiger Name und Lieferadresse</li>
+   <li>Bestellnummer (auf der Rechnung zu finden)</li>
+   <li>Datum des Buchempfangs</li>
+   <li>Anhang der digitalen Rechnung (PDF)</li>
+   <li>Bankverbindung (IBAN) f&uuml;r R&uuml;ckerstattung</li>
+  </ul>
+
+  <h3>5.3 Zustand des zur&uuml;ckgesendeten Buches</h3>
+  <p>Das physische Buch muss in <strong>neuem, unbenutztem Zustand</strong> zur&uuml;ckgesendet werden. Das bedeutet:</p>
+  <ul>
+   <li>Ungelesen (keine umgeknickten Seiten, keine Markierungen)</li>
+   <li>Unbesch&auml;digte Verpackung (falls zutreffend)</li>
+   <li>Keine Flecken, Kratzer, Knicke oder andere Gebrauchsspuren</li>
+   <li>Alle Originalteile vollst&auml;ndig</li>
+  </ul>
+  <p><strong>Achtung:</strong> B&uuml;cher, die gelesen, besch&auml;digt oder anderweitig benutzt wurden, sind <strong>nicht</strong> f&uuml;r R&uuml;cksendung und R&uuml;ckerstattung berechtigt.</p>
+
+  <h3>5.4 R&uuml;cksendeadresse</h3>
+  <p>Das Buch muss innerhalb von 14 Tagen nach Widerrufsmitteilung zur&uuml;ckgesendet werden an:</p>
+
+  <div class="retour-box">
+   <h4>R&uuml;cksendeadresse</h4>
+   <p><strong>Performance Marketing Solution s.r.o. &mdash; Retouren</strong></p>
+   <p>c/o Dextrum Fulfillment a.s.</p>
+   <p>Kirilovova 181</p>
+   <p>739 21 Paskov</p>
+   <p><strong>Tschechische Republik</strong></p>
+   <p style="margin-top: 12px; font-size: 13px; color: var(--muted);">Vermerk auf dem Paket: &bdquo;Retoure &mdash; Bestellnummer: [Ihre Bestellnummer]&ldquo;</p>
   </div>
+
+  <h3>5.5 R&uuml;cksendekosten</h3>
+  <p>Die <strong>direkten Kosten der R&uuml;cksendung tr&auml;gt der Kunde</strong>, es sei denn:</p>
+  <ul>
+   <li>Das Produkt weist einen Mangel auf, der bei Lieferung vorhanden war (siehe Abschnitt 6)</li>
+   <li>Der Verk&auml;ufer hat ein falsches Produkt geliefert</li>
+   <li>Das Produkt wurde durch Verschulden des Transporteurs besch&auml;digt geliefert</li>
+  </ul>
+  <p><strong>Richtwert f&uuml;r R&uuml;cksendekosten aus Deutschland in die Tschechische Republik:</strong> &euro;10&ndash;15 (GLS, DHL oder vergleichbar)<br>
+  <em>Wir empfehlen die Verwendung eines versicherten und nachverfolgbaren Versandverfahrens.</em></p>
+
+  <h3>5.6 R&uuml;ckerstattung</h3>
+  <p>Der Verk&auml;ufer erstattet den Kaufpreis (&euro;35,-) innerhalb von <strong>14 Tagen</strong> nach Erhalt des zur&uuml;ckgesendeten Buches in gutem Zustand &uuml;ber <strong>dieselbe Zahlungsmethode</strong>, die der Kunde f&uuml;r die Zahlung verwendet hat, es sei denn, der Kunde hat ausdr&uuml;cklich einer anderen Methode zugestimmt.</p>
+  <p>Der Verk&auml;ufer kann die R&uuml;ckerstattung aufschieben, bis das Produkt erhalten wurde oder der Kunde nachgewiesen hat, dass das Produkt zur&uuml;ckgesendet wurde, je nachdem, welcher Zeitpunkt fr&uuml;her liegt.</p>
+
+  <h3>5.7 Ausnahme: Digitaler Bonus-Inhalt</h3>
+  <div class="highlight-box">
+   <p><strong>Wichtig:</strong> F&uuml;r die kostenlosen Bonus-E-Books (&bdquo;Die Overthinking FIX&ldquo; und &bdquo;Liebe ohne Unsinn&ldquo;) gilt: Durch das Herunterladen der digitalen Bonus-E-Books erlischt das Widerrufsrecht f&uuml;r diesen digitalen Inhalt gem&auml;&szlig; <strong>Artikel 16(m) der EU-Richtlinie 2011/83/EU</strong>, da die Lieferung mit ausdr&uuml;cklicher vorheriger Zustimmung des Verbrauchers begonnen hat. Das Widerrufsrecht f&uuml;r das physische Buch bleibt vollst&auml;ndig bestehen.</p>
+  </div>
+
+  <h3>5.8 Kein Widerrufsrecht f&uuml;r gewerbliche K&auml;ufer</h3>
+  <p>Das Widerrufsrecht gilt ausschlie&szlig;lich f&uuml;r <strong>Verbraucher</strong> (nat&uuml;rliche Personen, die zu Zwecken handeln, die au&szlig;erhalb ihrer gewerblichen oder selbst&auml;ndigen beruflichen T&auml;tigkeit liegen). Gewerbliche K&auml;ufer haben kein gesetzliches Widerrufsrecht.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 9 -->
+ <!-- ═══ 6. Reklamationen ═══ -->
  <div class="section-block">
-  <h2><span class="section-num">9</span> Garantie</h2>
-  <p>Zusätzlich zum gesetzlichen Widerrufsrecht von 14 Tagen bieten wir eine <strong>erweiterte 30 Tage Geld-zurück-Garantie</strong>.</p>
-  <p>Wenn Sie mit dem Produkt nicht zufrieden sind, können Sie uns innerhalb von 30 Tagen nach Erhalt für eine vollständige Rückerstattung kontaktieren — ohne komplizierte Fragen.</p>
+  <h2><span class="section-num">6</span> Reklamationen, M&auml;ngel und Konformit&auml;t</h2>
+
+  <h3>6.1 Gesetzliche Gew&auml;hrleistung</h3>
+  <p>Der Verk&auml;ufer ist verantwortlich f&uuml;r M&auml;ngel am physischen Buch, die bei Lieferung vorhanden waren oder innerhalb von <strong>2 Jahren</strong> nach Lieferung manifest werden (gesetzliche Gew&auml;hrleistung gem&auml;&szlig; EU-Richtlinie 1999/44/EG).</p>
+
+  <h3>6.2 Was ist ein Mangel?</h3>
+  <p>Ein Produkt weist einen Mangel auf, wenn es nicht dem Vertrag entspricht, beispielsweise:</p>
+  <ul>
+   <li>Fehlende, lose oder besch&auml;digte Seiten</li>
+   <li>Unleserlicher Text durch Druckfehler</li>
+   <li>Falsches Buch geliefert</li>
+   <li>Schaden am Einband oder an der Bindung bei Erhalt</li>
+   <li>Produkt entspricht nicht der Beschreibung auf der Website</li>
+  </ul>
+
+  <h3>6.3 Reklamation einreichen</h3>
+  <p>Reklamationen &uuml;ber M&auml;ngel m&uuml;ssen <strong>innerhalb von 2 Monaten</strong> nach Entdeckung gemeldet werden, sp&auml;testens jedoch innerhalb von 2 Jahren nach Lieferung. Einreichung &uuml;ber:</p>
+  <ul>
+   <li><strong>E-Mail:</strong> <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a></li>
+  </ul>
+  <p><strong>Erforderliche Angaben bei Reklamation:</strong></p>
+  <ul>
+   <li>Klare Beschreibung des Mangels</li>
+   <li>Fotos des Mangels (falls zutreffend)</li>
+   <li>Bestellnummer und Bestelldatum</li>
+   <li>Kopie der Rechnung</li>
+   <li>Ihre Kontaktdaten</li>
+  </ul>
+
+  <h3>6.4 Bearbeitung von Reklamationen</h3>
+  <p>Der Verk&auml;ufer bearbeitet Reklamationen innerhalb von <strong>14 Tagen</strong> nach Erhalt. Sie erhalten innerhalb dieser Frist eine R&uuml;ckmeldung &uuml;ber die vorgeschlagene L&ouml;sung.</p>
+
+  <h3>6.5 L&ouml;sungen bei M&auml;ngeln</h3>
+  <p>Bei einem begr&uuml;ndeten Mangel kann der Kunde Anspruch erheben auf:</p>
+  <ul>
+   <li><strong>Kostenloser Ersatz</strong> durch ein neues Exemplar (falls vorr&auml;tig)</li>
+   <li><strong>Preisminderung</strong> proportional zur Schwere des Mangels</li>
+   <li><strong>Vollst&auml;ndige R&uuml;ckerstattung</strong> bei schwerwiegenden M&auml;ngeln, die nicht behoben werden k&ouml;nnen</li>
+  </ul>
+  <p>Bei begr&uuml;ndeten Reklamationen gehen die R&uuml;cksendekosten zu Lasten des Verk&auml;ufers.</p>
+
+  <h3>6.6 Ausgeschlossene F&auml;lle</h3>
+  <p>Der Verk&auml;ufer ist <strong>nicht verantwortlich</strong> f&uuml;r Sch&auml;den infolge von:</p>
+  <ul>
+   <li>Unsachgem&auml;&szlig;er oder fahrl&auml;ssiger Verwendung des Produkts</li>
+   <li>Normalem Verschlei&szlig; (z.B. bei intensiver Nutzung)</li>
+   <li>Nach Lieferung entstandenem Schaden</li>
+   <li>Eigenen &Auml;nderungen oder Reparaturen durch den Kunden</li>
+  </ul>
+
+  <h3>6.7 Digitaler Inhalt</h3>
+  <p>Bei technischen Problemen mit den digitalen Bonus-E-Books (besch&auml;digte Datei, Download nicht m&ouml;glich) kontaktieren Sie uns unter <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a>. Der Verk&auml;ufer wird das Problem innerhalb von 48 Stunden l&ouml;sen durch erneute Zusendung oder alternativen Download-Link.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 10 -->
+ <!-- ═══ 7. Geistiges Eigentum ═══ -->
  <div class="section-block">
-  <h2><span class="section-num">10</span> Beschwerdemanagement</h2>
-  <p>Beschwerden bezüglich der Vertragserfüllung sind dem Unternehmen innerhalb angemessener Frist, vollständig und klar beschrieben, mitzuteilen, nachdem der Verbraucher die Mängel festgestellt hat.</p>
-  <p>Beim Unternehmen eingereichte Beschwerden werden innerhalb von 14 Tagen ab Eingangsdatum beantwortet.</p>
-  <p>Kontaktieren Sie uns unter: <a href="mailto:buch@befreiungsbuch.de" style="color: var(--cta);">buch@befreiungsbuch.de</a></p>
+  <h2><span class="section-num">7</span> Urheberrecht und geistiges Eigentum</h2>
+
+  <h3>7.1 Schutz</h3>
+  <p>Das Buch &bdquo;Lass los, was dich kaputt macht&ldquo; und alle zugeh&ouml;rigen digitalen Inhalte (E-Books, Arbeitsbl&auml;tter) sind durch Urheberrecht und geistige Eigentumsrechte gesch&uuml;tzt. Alle Rechte sind der Performance Marketing Solution s.r.o. als Herausgeber und offiziellem Rechteinhaber vorbehalten.</p>
+
+  <h3>7.2 Erlaubte Nutzung</h3>
+  <p>Der Kunde erh&auml;lt <strong>ein Exemplar f&uuml;r streng pers&ouml;nliche, nicht-kommerzielle Nutzung</strong>. Dies bedeutet:</p>
+  <ul>
+   <li>Lesen und Studieren zur eigenen Entwicklung</li>
+   <li>Anfertigen handschriftlicher Notizen</li>
+   <li>Ausdrucken von Arbeitsbl&auml;ttern aus dem digitalen Bonus f&uuml;r eigene Nutzung</li>
+  </ul>
+
+  <h3>7.3 Verbotene Handlungen</h3>
+  <p>Es ist <strong>ausdr&uuml;cklich verboten</strong>, ohne schriftliche Genehmigung des Rechteinhabers:</p>
+  <ul>
+   <li>Das Buch oder Teile davon zu kopieren, zu scannen oder zu digitalisieren</li>
+   <li>Die digitalen E-Books zu teilen, zu verteilen oder &ouml;ffentlich zug&auml;nglich zu machen</li>
+   <li>Inhalte f&uuml;r kommerzielle Zwecke zu verwenden</li>
+   <li>Teile auf Websites, in sozialen Medien oder in anderen Publikationen zu ver&ouml;ffentlichen</li>
+   <li>Abgeleitete Werke auf Basis der Inhalte zu erstellen</li>
+  </ul>
+
+  <h3>7.4 Sanktionen bei Versto&szlig;</h3>
+  <p>Urheberrechtsverletzungen k&ouml;nnen zu einer Unterlassungsforderung, Schadensersatz gem&auml;&szlig; gesetzlicher Bestimmungen und strafrechtlicher Verfolgung f&uuml;hren.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 11 -->
+ <!-- ═══ 8. Datenschutz ═══ -->
  <div class="section-block">
-  <h2><span class="section-num">11</span> Geistiges Eigentum</h2>
-  <p>Alle geistigen Eigentumsrechte an den Produkten, einschließlich, aber nicht beschränkt auf Texte, Bilder, Design und Layouts, gehören dem Unternehmen oder seinen Lizenzgebern.</p>
-  <p>Es ist ohne vorherige schriftliche Zustimmung des Unternehmens nicht gestattet, die Produkte oder Teile davon zu vervielfältigen, in einer Datenbank zu speichern oder zu veröffentlichen.</p>
+  <h2><span class="section-num">8</span> Datenschutz und Schutz personenbezogener Daten (DSGVO)</h2>
+
+  <h3>8.1 Verantwortlicher</h3>
+  <p><strong>Performance Marketing Solution s.r.o.</strong><br>
+  Rybn&aacute; 716/24, Star&eacute; M&ecaron;sto<br>
+  110 00 Praha, Tschechische Republik<br>
+  E-Mail: <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a><br>
+  Handelsregisternr.: 06259928</p>
+
+  <h3>8.2 Welche personenbezogenen Daten verarbeiten wir?</h3>
+  <p>Bei der Aufgabe einer Bestellung erheben und verarbeiten wir folgende Daten:</p>
+  <ul>
+   <li><strong>Identifikationsdaten:</strong> Vor- und Nachname</li>
+   <li><strong>Kontaktdaten:</strong> E-Mail-Adresse, Telefonnummer (optional)</li>
+   <li><strong>Adressdaten:</strong> Stra&szlig;e, Hausnummer, Postleitzahl, Wohnort, Land</li>
+   <li><strong>Bestelldaten:</strong> Bestellnummer, Produktinformationen, Bestelldatum, Bestellwert</li>
+   <li><strong>Zahlungsdaten:</strong> Nur Zahlungsmethode (Kreditkartentyp); vollst&auml;ndige Zahlungsdaten werden ausschlie&szlig;lich von Stripe verarbeitet und NICHT von uns gespeichert</li>
+   <li><strong>Technische Daten:</strong> IP-Adresse, Browsertyp, Ger&auml;tetyp (&uuml;ber Cookies)</li>
+  </ul>
+
+  <h3>8.3 Zwecke der Verarbeitung</h3>
+  <p>Wir verarbeiten Ihre personenbezogenen Daten f&uuml;r folgende Zwecke:</p>
+  <ul>
+   <li><strong>Auftragsabwicklung:</strong> Ausf&uuml;hrung des Kaufvertrags, Versand und Lieferung</li>
+   <li><strong>Kundenservice:</strong> Beantwortung von Fragen, Bearbeitung von Reklamationen und R&uuml;cksendungen</li>
+   <li><strong>Rechnungsstellung und Buchhaltung:</strong> Erf&uuml;llung steuerlicher Verpflichtungen</li>
+   <li><strong>Marketingkommunikation:</strong> Versand von Newslettern und Produktinformationen (nur mit Ihrer Einwilligung)</li>
+   <li><strong>Website-Optimierung:</strong> Verbesserung der Benutzererfahrung &uuml;ber Facebook Meta Pixel</li>
+   <li><strong>Betrugspr&auml;vention:</strong> Verhinderung von Missbrauch und Betrug</li>
+  </ul>
+
+  <h3>8.4 Rechtsgrundlagen</h3>
+  <p>Wir verarbeiten Ihre personenbezogenen Daten auf Basis von:</p>
+  <ul>
+   <li><strong>Vertragserf&uuml;llung</strong> (DSGVO Art. 6 Abs. 1 lit. b): F&uuml;r Auftragsabwicklung und Lieferung</li>
+   <li><strong>Rechtliche Verpflichtung</strong> (DSGVO Art. 6 Abs. 1 lit. c): F&uuml;r Rechnungsstellung und Steuerzwecke</li>
+   <li><strong>Einwilligung</strong> (DSGVO Art. 6 Abs. 1 lit. a): F&uuml;r Marketing und Newsletter</li>
+   <li><strong>Berechtigtes Interesse</strong> (DSGVO Art. 6 Abs. 1 lit. f): F&uuml;r Betrugspr&auml;vention und Kundenservice</li>
+  </ul>
+
+  <h3>8.5 Speicherfristen</h3>
+  <ul>
+   <li><strong>Bestelldaten und Rechnungen:</strong> 10 Jahre (gesetzliche Aufbewahrungspflicht)</li>
+   <li><strong>Kundenkontodaten:</strong> Bis 2 Jahre nach letzter Aktivit&auml;t</li>
+   <li><strong>Marketingdaten:</strong> Bis zum Zeitpunkt der Abmeldung + 1 Monat</li>
+   <li><strong>Technische Logs:</strong> Maximal 12 Monate</li>
+  </ul>
+
+  <h3>8.6 Weitergabe an Dritte</h3>
+  <p>Wir geben Ihre Daten nur an folgende Parteien zur Ausf&uuml;hrung unserer Dienstleistung weiter:</p>
+  <ul>
+   <li><strong>Stripe:</strong> Zahlungsabwicklung (PCI-DSS Level 1 zertifiziert)</li>
+   <li><strong>PayPal:</strong> Zahlungsabwicklung</li>
+   <li><strong>Klarna:</strong> Zahlungsabwicklung</li>
+   <li><strong>Dextrum Fulfillment a.s.:</strong> Lagerung und Versand physischer Produkte</li>
+   <li><strong>GLS:</strong> Transporteur f&uuml;r Zustellung</li>
+   <li><strong>Meta (Facebook):</strong> Marketing-Analytics &uuml;ber Facebook Pixel (nur mit Ihrer Einwilligung)</li>
+  </ul>
+  <p>Alle Auftragsverarbeiter sind vertraglich verpflichtet, Ihre Daten ausschlie&szlig;lich f&uuml;r die vereinbarten Zwecke zu verwenden und angemessene Sicherheitsma&szlig;nahmen zu treffen.</p>
+
+  <h3>8.7 Ihre Rechte unter der DSGVO</h3>
+  <p>Sie haben jederzeit folgende Rechte:</p>
+  <ul>
+   <li><strong>Auskunftsrecht</strong> (Art. 15): Anfrage, welche Daten wir von Ihnen verarbeiten</li>
+   <li><strong>Recht auf Berichtigung</strong> (Art. 16): Korrektur unrichtiger oder unvollst&auml;ndiger Daten</li>
+   <li><strong>Recht auf L&ouml;schung</strong> (Art. 17): &bdquo;Recht auf Vergessenwerden&ldquo;</li>
+   <li><strong>Recht auf Einschr&auml;nkung</strong> (Art. 18): Einschr&auml;nkung der Verarbeitung unter bestimmten Umst&auml;nden</li>
+   <li><strong>Recht auf Daten&uuml;bertragbarkeit</strong> (Art. 20): &Uuml;bertragung von Daten an anderen Dienstleister</li>
+   <li><strong>Widerspruchsrecht</strong> (Art. 21): Widerspruch gegen Verarbeitung auf Basis berechtigten Interesses</li>
+   <li><strong>Recht auf Widerruf der Einwilligung</strong>: F&uuml;r Marketing oder Cookies</li>
+  </ul>
+  <p>Um diese Rechte auszu&uuml;ben, senden Sie eine E-Mail an: <strong><a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a></strong><br>
+  Wir reagieren innerhalb von <strong>30 Tagen</strong> auf Ihre Anfrage.</p>
+
+  <h3>8.8 Sicherheit</h3>
+  <p>Wir treffen angemessene technische und organisatorische Ma&szlig;nahmen zum Schutz Ihrer personenbezogenen Daten:</p>
+  <ul>
+   <li>SSL/TLS-Verschl&uuml;sselung f&uuml;r alle Daten&uuml;bertragungen</li>
+   <li>Gesicherte, zugriffsbeschr&auml;nkte Server</li>
+   <li>Regelm&auml;&szlig;ige Sicherheitsupdates und Monitoring</li>
+   <li>Strikte Zugriffskontrolle f&uuml;r Mitarbeiter</li>
+  </ul>
+
+  <h3>8.9 Beschwerde einreichen</h3>
+  <p>Sie haben das Recht, eine Beschwerde bei der Aufsichtsbeh&ouml;rde einzureichen:</p>
+  <p><strong>Tschechische Republik:</strong> &Uacute;&rcaron;ad pro ochranu osobn&iacute;ch &uacute;daj&uring; (&Uacute;OO&Uacute;) &mdash; <a href="https://www.uoou.cz" target="_blank">www.uoou.cz</a></p>
+  <p><strong>Deutschland:</strong> Der Bundesbeauftragte f&uuml;r den Datenschutz und die Informationsfreiheit &mdash; <a href="https://www.bfdi.bund.de" target="_blank">www.bfdi.bund.de</a></p>
+  <p><strong>&Ouml;sterreich:</strong> &Ouml;sterreichische Datenschutzbeh&ouml;rde &mdash; <a href="https://www.dsb.gv.at" target="_blank">www.dsb.gv.at</a></p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 12 -->
+ <!-- ═══ 9. Cookies ═══ -->
  <div class="section-block">
-  <h2><span class="section-num">12</span> Anwendbares Recht</h2>
-  <p>Auf alle Streitigkeiten im Zusammenhang mit diesem Vertrag findet tschechisches Recht Anwendung, unter Berücksichtigung der zwingenden Vorschriften des Landes, in dem der Verbraucher seinen Wohnsitz hat.</p>
-  <p>Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: <a href="https://ec.europa.eu/consumers/odr/" target="_blank" style="color: var(--cta);">https://ec.europa.eu/consumers/odr/</a></p>
+  <h2><span class="section-num">9</span> Cookies und Tracking-Technologien</h2>
+
+  <h3>9.1 Was sind Cookies?</h3>
+  <p>Cookies sind kleine Textdateien, die auf Ihrem Ger&auml;t gespeichert werden, wenn Sie unsere Website besuchen. Cookies helfen der Website, ordnungsgem&auml;&szlig; zu funktionieren und Ihre Benutzererfahrung zu verbessern.</p>
+
+  <h3>9.2 Welche Cookies verwenden wir?</h3>
+  <p><strong>A. Funktionale/Notwendige Cookies</strong> (keine Einwilligung erforderlich):</p>
+  <ul>
+   <li>Sitzungsverwaltung und Warenkorbfunktionalit&auml;t</li>
+   <li>Sicherheits-Cookies und Spracheinstellungen</li>
+  </ul>
+  <p><strong>Speicherdauer:</strong> Sitzung oder maximal 30 Tage</p>
+
+  <p><strong>B. Analytische/Tracking-Cookies</strong> (Einwilligung erforderlich):</p>
+  <p><strong>Facebook Meta Pixel:</strong></p>
+  <ul>
+   <li><strong>Zweck:</strong> Messung der Werbeeffektivit&auml;t, Retargeting, Conversion-Tracking</li>
+   <li><strong>Anbieter:</strong> Meta Platforms Ireland Limited</li>
+   <li><strong>Speicherdauer:</strong> Bis zu 2 Jahre</li>
+   <li><strong>Datenschutzerkl&auml;rung:</strong> <a href="https://www.facebook.com/privacy/explanation" target="_blank">facebook.com/privacy</a></li>
+  </ul>
+
+  <h3>9.3 Einwilligung verwalten</h3>
+  <p>Bei Ihrem ersten Besuch unserer Website erscheint ein Cookie-Banner, in dem Sie w&auml;hlen k&ouml;nnen:</p>
+  <ul>
+   <li><strong>Alle Cookies akzeptieren:</strong> Funktionale UND Tracking-Cookies</li>
+   <li><strong>Nur notwendige Cookies:</strong> Lehnt Tracking-Cookies ab</li>
+  </ul>
+  <p>Sie k&ouml;nnen Ihre Cookie-Einstellungen jederzeit &auml;ndern, indem Sie Ihre Browser-Cookies l&ouml;schen und die Website erneut besuchen.</p>
+
+  <h3>9.4 Do Not Track</h3>
+  <p>Unsere Website respektiert &bdquo;Do Not Track&ldquo; (DNT) Signale. Wenn Sie DNT in Ihrem Browser aktiviert haben, setzen wir keine Tracking-Cookies ohne Ihre ausdr&uuml;ckliche Einwilligung.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ 10. Streitbeilegung ═══ -->
+ <div class="section-block">
+  <h2><span class="section-num">10</span> Streitbeilegung und Beschwerden</h2>
+
+  <h3>10.1 Zun&auml;chst Kontakt aufnehmen</h3>
+  <p>Haben Sie eine Beschwerde oder einen Streitfall? Dann nehmen Sie bitte zun&auml;chst Kontakt mit uns auf. Wir streben danach, alle Beschwerden innerhalb von 14 Tagen in gegenseitigem Einvernehmen zu l&ouml;sen.</p>
+  <p><strong>Kontakt:</strong> <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a><br>
+  Erwartete Reaktionszeit: 1&ndash;2 Werktage</p>
+
+  <h3>10.2 EU Online-Streitbeilegung (OS)</h3>
+  <p>F&uuml;r Streitigkeiten, die nicht im gegenseitigen Einvernehmen gel&ouml;st werden k&ouml;nnen, k&ouml;nnen Sie die <strong>Europ&auml;ische Plattform zur Online-Streitbeilegung (OS)</strong> nutzen:</p>
+  <p><a href="https://ec.europa.eu/consumers/odr" target="_blank">https://ec.europa.eu/consumers/odr</a></p>
+
+  <h3>10.3 Schlichtungsstelle</h3>
+  <p>Als Verbraucher k&ouml;nnen Sie sich auch an eine anerkannte Schlichtungsstelle in Ihrem Land wenden. F&uuml;r deutsche Verbraucher:</p>
+  <p><strong>Allgemeine Verbraucherschlichtungsstelle:</strong><br>
+  Zentrum f&uuml;r Schlichtung e.V.<br>
+  Stra&szlig;burger Stra&szlig;e 8, 77694 Kehl am Rhein<br>
+  <a href="https://www.verbraucher-schlichter.de" target="_blank">www.verbraucher-schlichter.de</a></p>
+
+  <h3>10.4 Unsere Verpflichtung</h3>
+  <p>Performance Marketing Solution s.r.o. verpflichtet sich:</p>
+  <ul>
+   <li>Alle Beschwerden ernst zu nehmen und innerhalb von 14 Tagen zu reagieren</li>
+   <li>An au&szlig;ergerichtlicher Streitbeilegung mitzuwirken</li>
+   <li>Transparent &uuml;ber die L&ouml;sung zu kommunizieren</li>
+   <li>Bindende Entscheidungen von Schlichtungsstellen zu respektieren</li>
+  </ul>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ 11. Anwendbares Recht ═══ -->
+ <div class="section-block">
+  <h2><span class="section-num">11</span> Anwendbares Recht und zust&auml;ndiges Gericht</h2>
+
+  <h3>11.1 Anwendbares Recht</h3>
+  <p>F&uuml;r diese AGB und alle Vertr&auml;ge zwischen dem Verk&auml;ufer und dem Kunden gilt <strong>Tschechisches Recht</strong>, mit Ausnahme des UN-Kaufrechts (CISG).</p>
+
+  <h3>11.2 Verbraucherschutz EU</h3>
+  <p>F&uuml;r <strong>Verbraucher innerhalb der Europ&auml;ischen Union</strong> gilt, dass die Anwendung des Tschechischen Rechts den Schutz nicht ber&uuml;hrt, der durch zwingende Bestimmungen des Verbraucherschutzes im Land gew&auml;hrt wird, in dem der Verbraucher seinen gew&ouml;hnlichen Aufenthalt hat, wenn diese Bestimmungen g&uuml;nstiger sind.</p>
+  <p>Dies bedeutet, dass Verbraucher in Deutschland, &Ouml;sterreich und Luxemburg sich auch auf sch&uuml;tzende nationale Rechtsvorschriften berufen k&ouml;nnen, wenn diese weiter gehen als die tschechische oder europ&auml;ische Regelung.</p>
+
+  <h3>11.3 Zust&auml;ndiges Gericht f&uuml;r Verbraucher</h3>
+  <p>F&uuml;r <strong>Verbraucher</strong> gilt, dass Streitigkeiten vorgelegt werden k&ouml;nnen an:</p>
+  <ul>
+   <li>Das zust&auml;ndige Gericht in <strong>Tschechien (Praha)</strong>, ODER</li>
+   <li>Das zust&auml;ndige Gericht im Land, in dem der Verbraucher seinen <strong>Wohnsitz</strong> hat</li>
+  </ul>
+  <p>Der Verbraucher hat die Wahl, welches Gericht er anruft.</p>
+
+  <h3>11.4 Zust&auml;ndiges Gericht f&uuml;r gewerbliche Kunden</h3>
+  <p>F&uuml;r <strong>gewerbliche K&auml;ufer</strong> (Nicht-Verbraucher) gilt, dass alle Streitigkeiten ausschlie&szlig;lich dem zust&auml;ndigen Gericht in <strong>Praha, Tschechische Republik</strong> vorgelegt werden.</p>
+
+  <h3>11.5 Verfahrenssprache</h3>
+  <p>Bei Gerichtsverfahren wird vorzugsweise die <strong>deutsche oder englische</strong> Sprache f&uuml;r die Kommunikation mit Verbrauchern aus Deutschland, &Ouml;sterreich und Luxemburg verwendet, soweit das zust&auml;ndige Gericht dies zul&auml;sst.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ 12. Schlussbestimmungen ═══ -->
+ <div class="section-block">
+  <h2><span class="section-num">12</span> Schlussbestimmungen</h2>
+
+  <h3>12.1 &Auml;nderungen</h3>
+  <p>Der Verk&auml;ufer beh&auml;lt sich das Recht vor, diese AGB zu &auml;ndern. &Auml;nderungen werden ab dem Datum der Ver&ouml;ffentlichung auf der Website wirksam. Die aktuelle Version ist immer verf&uuml;gbar unter: <a href="https://lasslosbuch.de/agb" target="_blank">https://lasslosbuch.de/agb</a></p>
+  <p>F&uuml;r bereits geschlossene Vertr&auml;ge bleiben die Bedingungen g&uuml;ltig, die zum Zeitpunkt der Bestellung galten.</p>
+
+  <h3>12.2 Nichtigkeit von Bestimmungen</h3>
+  <p>Sollten eine oder mehrere Bestimmungen dieser AGB nichtig sein oder werden, bleiben die &uuml;brigen Bestimmungen vollst&auml;ndig in Kraft. Die ung&uuml;ltige Bestimmung wird durch eine g&uuml;ltige Bestimmung ersetzt, die der Absicht der urspr&uuml;nglichen Bestimmung so nahe wie m&ouml;glich kommt.</p>
+
+  <h3>12.3 Gesamtvereinbarung</h3>
+  <p>Diese AGB bilden zusammen mit der Auftragsbest&auml;tigung die gesamte Vereinbarung zwischen dem Verk&auml;ufer und dem Kunden.</p>
+
+  <h3>12.4 &Uuml;bertragung von Rechten</h3>
+  <p>Der Kunde darf seine Rechte und Pflichten aus dem Vertrag nicht ohne vorherige schriftliche Zustimmung des Verk&auml;ufers an Dritte &uuml;bertragen.</p>
+
+  <h3>12.5 Kontakt und Fragen</h3>
+  <p>Bei Fragen zu diesen AGB oder zu Ihrer Bestellung k&ouml;nnen Sie uns kontaktieren:</p>
+  <p><strong>Performance Marketing Solution s.r.o.</strong><br>
+  E-Mail: <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a><br>
+  Website: <a href="https://lasslosbuch.de" target="_blank">https://lasslosbuch.de</a></p>
+  <p><strong>Kundenservice-&Ouml;ffnungszeiten:</strong><br>
+  Montag bis Freitag: 9:00 &ndash; 17:00 MEZ<br>
+  Durchschnittliche Reaktionszeit: 1&ndash;2 Werktage</p>
  </div>
 
  <div class="info-box" style="margin-top: 48px; background: linear-gradient(135deg, var(--light), var(--section));">
-  <h3>📅 Zuletzt aktualisiert</h3>
-  <p>Diese Bedingungen wurden zuletzt am 9. März 2026 aktualisiert. Wir behalten uns das Recht vor, diese Bedingungen jederzeit zu ändern.</p>
+  <h3>Zuletzt aktualisiert</h3>
+  <p>Diese Bedingungen wurden zuletzt am 20. M&auml;rz 2026 aktualisiert. G&uuml;ltig ab 1. Dezember 2025.</p>
+ </div>
+
+ <div class="odr-box">
+  <h4>EU-Plattform zur Online-Streitbeilegung</h4>
+  <p>Die Europ&auml;ische Kommission bietet eine Plattform zur Online-Streitbeilegung (OS):</p>
+  <p><strong><a href="https://ec.europa.eu/consumers/odr" target="_blank">https://ec.europa.eu/consumers/odr</a></strong></p>
  </div>
 
 </div>
@@ -653,12 +1156,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
    <a href="kontakt.html">Kontakt</a>
   </div>
   <div class="footer-contact">
-   <a href="mailto:buch@befreiungsbuch.de">📧 buch@befreiungsbuch.de</a>
-   <a href="tel:+420732915755">📞 +420 732 915 755</a>
+   <a href="mailto:buch@lasslosbuch.de">buch@lasslosbuch.de</a>
   </div>
  </div>
  <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, 110 00 Praha • Handelsregisternr.: 06259928 • USt-IdNr.: CZ06259928</span>
+  <span>Performance Marketing Solution s.r.o. &bull; Rybn&aacute; 716/24, 110 00 Praha &bull; Handelsregisternr.: 06259928 &bull; USt-IdNr.: CZ06259928</span>
   <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle Rechte vorbehalten.</span>
  </div>
 </footer>
