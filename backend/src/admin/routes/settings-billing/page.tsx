@@ -592,6 +592,10 @@ function GatewaysTab() {
       ? form.project_slugs.split(",").map((s) => s.trim()).filter(Boolean)
       : []
 
+    // Collect metadata (P24 crc/pos_id, Mollie apple_pay, etc.)
+    const formMeta = (form as any).metadata || {}
+    const hasMetadata = Object.keys(formMeta).some((k) => formMeta[k])
+
     createMutation.mutate({
       provider: form.provider,
       display_name: form.display_name,
@@ -604,6 +608,7 @@ function GatewaysTab() {
       test_keys: form.test_keys,
       payment_methods: methods,
       project_slugs: slugsArray.length > 0 ? slugsArray : null,
+      ...(hasMetadata ? { metadata: formMeta } : {}),
     })
   }
 
@@ -778,9 +783,14 @@ function GatewaysTab() {
             <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase", marginBottom: "8px", display: "block" }}>
               {form.mode === "live" ? "Live" : "Test"} API Keys
             </label>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: form.provider === "stripe" ? "1fr 1fr" : "1fr 1fr 1fr", gap: "8px" }}>
               <div>
-                <label style={{ fontSize: "10px", color: "#8C9196" }}>{form.provider === "paypal" || form.provider === "airwallex" ? "Client ID" : form.provider === "stripe" ? "Secret Key (sk_...)" : "API Key"}</label>
+                <label style={{ fontSize: "10px", color: "#8C9196" }}>
+                  {form.provider === "paypal" || form.provider === "airwallex" ? "Client ID" : form.provider === "stripe" ? "Secret Key (sk_...)" : form.provider === "comgate" ? "Merchant ID" : form.provider === "przelewy24" ? "Merchant ID" : "API Key"}
+                  {form.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Client ID)</span>}
+                  {form.provider === "comgate" && <span style={{ color: "#B0B7BF" }}> (Comgate Portal → Merchant ID)</span>}
+                  {form.provider === "przelewy24" && <span style={{ color: "#B0B7BF" }}> (P24 Panel → Merchant ID)</span>}
+                </label>
                 <input
                   className="bp-input"
                   style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
@@ -789,11 +799,22 @@ function GatewaysTab() {
                     const keys = form.mode === "live" ? "live_keys" : "test_keys"
                     setForm({ ...form, [keys]: { ...form[keys], api_key: e.target.value } })
                   }}
-                  placeholder={form.provider === "paypal" ? (form.mode === "live" ? "AeLj..." : "AeSb...") : form.provider === "airwallex" ? "TdKbaP15STeWzSwX..." : form.provider === "stripe" ? (form.mode === "live" ? "sk_live_..." : "sk_test_...") : (form.mode === "live" ? "live_..." : "test_...")}
+                  placeholder={
+                    form.provider === "paypal" ? (form.mode === "live" ? "AeLj..." : "AeSb...") :
+                    form.provider === "airwallex" ? "TdKbaP15STeWzSwX..." :
+                    form.provider === "stripe" ? (form.mode === "live" ? "sk_live_..." : "sk_test_...") :
+                    form.provider === "comgate" ? "123456" :
+                    form.provider === "przelewy24" ? "123456" :
+                    form.provider === "klarna" ? (form.mode === "live" ? "K123456_abcdef..." : "K123456_abcdef...") :
+                    (form.mode === "live" ? "live_..." : "test_...")
+                  }
                 />
               </div>
               <div>
-                <label style={{ fontSize: "10px", color: "#8C9196" }}>{form.provider === "paypal" ? "Client Secret" : form.provider === "airwallex" ? "API Key" : form.provider === "stripe" ? "Webhook Secret (whsec_...)" : "Secret Key"}</label>
+                <label style={{ fontSize: "10px", color: "#8C9196" }}>
+                  {form.provider === "paypal" ? "Client Secret" : form.provider === "airwallex" ? "API Key" : form.provider === "stripe" ? "Webhook Secret (whsec_...)" : form.provider === "comgate" ? "Secret (Password)" : form.provider === "przelewy24" ? "API Key" : form.provider === "klarna" ? "API Secret" : "Secret Key"}
+                  {form.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Secret)</span>}
+                </label>
                 <input
                   className="bp-input"
                   style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
@@ -803,10 +824,44 @@ function GatewaysTab() {
                     const keys = form.mode === "live" ? "live_keys" : "test_keys"
                     setForm({ ...form, [keys]: { ...form[keys], secret_key: e.target.value } })
                   }}
-                  placeholder={form.provider === "paypal" ? "EKd8..." : form.provider === "airwallex" ? "e310add9dc32..." : form.provider === "stripe" ? "whsec_..." : "whsec_..."}
+                  placeholder={
+                    form.provider === "paypal" ? "EKd8..." :
+                    form.provider === "airwallex" ? "e310add9dc32..." :
+                    form.provider === "stripe" ? "whsec_..." :
+                    form.provider === "comgate" ? "aBcDeFgHiJ..." :
+                    form.provider === "przelewy24" ? "abcdef123456..." :
+                    form.provider === "klarna" ? "klarna_secret_..." :
+                    "secret_..."
+                  }
                 />
               </div>
+              {form.provider !== "stripe" && (
+              <div>
+                <label style={{ fontSize: "10px", color: "#8C9196" }}>
+                  {form.provider === "paypal" ? "Webhook ID" : "Webhook Secret"}
+                  {form.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Webhooks → Webhook ID)</span>}
+                  {form.provider === "mollie" && <span style={{ color: "#B0B7BF" }}> (optional)</span>}
+                </label>
+                <input
+                  className="bp-input"
+                  style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                  type="password"
+                  value={form.mode === "live" ? form.live_keys.webhook_secret : form.test_keys.webhook_secret}
+                  onChange={(e) => {
+                    const keys = form.mode === "live" ? "live_keys" : "test_keys"
+                    setForm({ ...form, [keys]: { ...form[keys], webhook_secret: e.target.value } })
+                  }}
+                  placeholder={
+                    form.provider === "paypal" ? "1AB23456CD789012E" :
+                    form.provider === "przelewy24" ? "crc_key_..." :
+                    form.provider === "comgate" ? "webhook_secret_..." :
+                    "whsec_..."
+                  }
+                />
+              </div>
+              )}
             </div>
+            {/* Airwallex: Account ID */}
             {form.provider === "airwallex" && (
               <div style={{ marginTop: "8px" }}>
                 <label style={{ fontSize: "10px", color: "#8C9196" }}>Account ID <span style={{ color: "#B0B7BF" }}>(Airwallex → Account Settings → Account ID)</span></label>
@@ -822,6 +877,7 @@ function GatewaysTab() {
                 />
               </div>
             )}
+            {/* Stripe: Publishable Key */}
             {form.provider === "stripe" && (
               <div style={{ marginTop: "8px" }}>
                 <label style={{ fontSize: "10px", color: "#8C9196" }}>Publishable Key <span style={{ color: "#B0B7BF" }}>(Stripe Dashboard → API Keys → Publishable key)</span></label>
@@ -835,6 +891,35 @@ function GatewaysTab() {
                   }}
                   placeholder={form.mode === "live" ? "pk_live_..." : "pk_test_..."}
                 />
+              </div>
+            )}
+            {/* Przelewy24: CRC Key + POS ID */}
+            {form.provider === "przelewy24" && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "8px" }}>
+                <div>
+                  <label style={{ fontSize: "10px", color: "#8C9196" }}>CRC Key <span style={{ color: "#B0B7BF" }}>(P24 Panel → Configuration → CRC)</span></label>
+                  <input
+                    className="bp-input"
+                    style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                    value={(form as any).metadata?.crc || ""}
+                    onChange={(e) => {
+                      setForm({ ...form, metadata: { ...(form as any).metadata, crc: e.target.value } })
+                    }}
+                    placeholder="abcdef123456..."
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: "10px", color: "#8C9196" }}>POS ID <span style={{ color: "#B0B7BF" }}>(P24 Panel → Configuration → Shop ID)</span></label>
+                  <input
+                    className="bp-input"
+                    style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                    value={(form as any).metadata?.pos_id || ""}
+                    onChange={(e) => {
+                      setForm({ ...form, metadata: { ...(form as any).metadata, pos_id: e.target.value } })
+                    }}
+                    placeholder="123456"
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -1108,9 +1193,14 @@ function GatewaysTab() {
                         <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase", marginBottom: "6px", display: "block" }}>
                           {editForm.mode === "live" ? "Live" : "Test"} API Keys
                         </label>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: editForm.provider === "stripe" ? "1fr 1fr" : "1fr 1fr 1fr", gap: "8px" }}>
                           <div>
-                            <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" || editForm.provider === "airwallex" ? "Client ID" : editForm.provider === "stripe" ? "Secret Key (sk_...)" : editForm.provider === "comgate" ? "Merchant ID" : "API Key"}</label>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>
+                              {editForm.provider === "paypal" || editForm.provider === "airwallex" ? "Client ID" : editForm.provider === "stripe" ? "Secret Key (sk_...)" : editForm.provider === "comgate" ? "Merchant ID" : editForm.provider === "przelewy24" ? "Merchant ID" : editForm.provider === "klarna" ? "API Key" : "API Key"}
+                              {editForm.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Client ID)</span>}
+                              {editForm.provider === "comgate" && <span style={{ color: "#B0B7BF" }}> (Comgate Portal)</span>}
+                              {editForm.provider === "przelewy24" && <span style={{ color: "#B0B7BF" }}> (P24 Panel)</span>}
+                            </label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? editForm.live_keys.api_key : editForm.test_keys.api_key}
                               onChange={(e) => {
@@ -1120,7 +1210,10 @@ function GatewaysTab() {
                             />
                           </div>
                           <div>
-                            <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" ? "Client Secret" : editForm.provider === "airwallex" ? "API Key" : editForm.provider === "stripe" ? "Webhook Secret (whsec_...)" : "Secret Key"}</label>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>
+                              {editForm.provider === "paypal" ? "Client Secret" : editForm.provider === "airwallex" ? "API Key" : editForm.provider === "stripe" ? "Webhook Secret (whsec_...)" : editForm.provider === "comgate" ? "Secret (Password)" : editForm.provider === "przelewy24" ? "API Key" : editForm.provider === "klarna" ? "API Secret" : "Secret Key"}
+                              {editForm.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Secret)</span>}
+                            </label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? editForm.live_keys.secret_key : editForm.test_keys.secret_key}
                               onChange={(e) => {
@@ -1131,7 +1224,11 @@ function GatewaysTab() {
                           </div>
                           {editForm.provider !== "stripe" && (
                           <div>
-                            <label style={{ fontSize: "10px", color: "#8C9196" }}>{editForm.provider === "paypal" ? "Webhook ID" : "Webhook Secret"}</label>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>
+                              {editForm.provider === "paypal" ? "Webhook ID" : "Webhook Secret"}
+                              {editForm.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Webhooks)</span>}
+                              {editForm.provider === "mollie" && <span style={{ color: "#B0B7BF" }}> (optional)</span>}
+                            </label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? editForm.live_keys.webhook_secret : editForm.test_keys.webhook_secret}
                               onChange={(e) => {
@@ -1142,8 +1239,9 @@ function GatewaysTab() {
                           </div>
                           )}
                         </div>
+                        {/* Airwallex: Account ID */}
                         {editForm.provider === "airwallex" && (
-                          <div style={{ marginTop: "8px", gridColumn: "1 / -1" }}>
+                          <div style={{ marginTop: "8px" }}>
                             <label style={{ fontSize: "10px", color: "#8C9196" }}>Account ID <span style={{ color: "#B0B7BF" }}>(Airwallex → Account Settings → Account ID)</span></label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? (editForm.live_keys as any).account_id || "" : (editForm.test_keys as any).account_id || ""}
@@ -1155,8 +1253,9 @@ function GatewaysTab() {
                             />
                           </div>
                         )}
+                        {/* Stripe: Publishable Key */}
                         {editForm.provider === "stripe" && (
-                          <div style={{ marginTop: "8px", gridColumn: "1 / -1" }}>
+                          <div style={{ marginTop: "8px" }}>
                             <label style={{ fontSize: "10px", color: "#8C9196" }}>Publishable Key <span style={{ color: "#B0B7BF" }}>(Stripe Dashboard → API Keys → Publishable key)</span></label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? (editForm.live_keys as any).publishable_key || "" : (editForm.test_keys as any).publishable_key || ""}
@@ -1166,6 +1265,27 @@ function GatewaysTab() {
                               }}
                               placeholder={editForm.mode === "live" ? "pk_live_..." : "pk_test_..."}
                             />
+                          </div>
+                        )}
+                        {/* Przelewy24: CRC Key + POS ID */}
+                        {editForm.provider === "przelewy24" && (
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "8px" }}>
+                            <div>
+                              <label style={{ fontSize: "10px", color: "#8C9196" }}>CRC Key <span style={{ color: "#B0B7BF" }}>(P24 Panel → Configuration → CRC)</span></label>
+                              <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                                value={(editForm as any).metadata?.crc || ""}
+                                onChange={(e) => setEditForm({ ...editForm, metadata: { ...(editForm as any).metadata, crc: e.target.value } } as any)}
+                                placeholder="abcdef123456..."
+                              />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: "10px", color: "#8C9196" }}>POS ID <span style={{ color: "#B0B7BF" }}>(P24 Panel → Configuration → Shop ID)</span></label>
+                              <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                                value={(editForm as any).metadata?.pos_id || ""}
+                                onChange={(e) => setEditForm({ ...editForm, metadata: { ...(editForm as any).metadata, pos_id: e.target.value } } as any)}
+                                placeholder="123456"
+                              />
+                            </div>
                           </div>
                         )}
                       </div>
