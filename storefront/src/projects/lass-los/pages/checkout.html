@@ -4881,13 +4881,11 @@ body {
         // Show/hide card fields — init the right provider's card elements
         var cardFields = document.getElementById('card-fields');
         if (cardFields) {
-          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal') {
-            // Stripe and PayPal use hosted checkout (redirect), no inline card fields
+          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal' && cardProvider !== 'airwallex') {
+            // Stripe, PayPal and Airwallex use hosted/drop-in checkout, no inline card fields
             cardFields.style.display = 'block';
             if (cardProvider === 'mollie') {
               initMollieComponents();
-            } else if (cardProvider === 'airwallex') {
-              initAirwallexCard();
             }
           } else {
             cardFields.style.display = 'none';
@@ -6821,47 +6819,8 @@ body {
           });
         }
 
-        // ─── AIRWALLEX CARD REDIRECT FLOW ───
-        // For credit cards on Airwallex: redirect to hosted payment page
-        if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1
-            && selectedMethod === 'creditcard' && providerData.intentId) {
-          return (async function() {
-            try {
-              // Wait for SDK
-              if (typeof window.AirwallexComponentsSDK === 'undefined') {
-                await new Promise(function(resolve, reject) {
-                  var attempts = 20;
-                  (function wait() {
-                    if (typeof window.AirwallexComponentsSDK !== 'undefined') return resolve();
-                    if (--attempts <= 0) return reject(new Error('Airwallex SDK niet geladen.'));
-                    setTimeout(wait, 300);
-                  })();
-                });
-              }
-
-              // Determine environment from provider data
-              var env = providerData.environment || 'demo';
-              await window.AirwallexComponentsSDK.init({ env: env, origin: window.location.origin });
-
-              // Build return URL for after payment
-              var returnPath = PROJECT_CONFIG.upsellEnabled === false || checkoutOrderBump
-                ? PROJECT_CONFIG.thankYouUrl
-                : PROJECT_CONFIG.upsellUrl;
-              var successUrl = window.location.origin + returnPath + '?payment_return=1';
-
-              // Redirect to Airwallex hosted payment page
-              await window.AirwallexComponentsSDK.redirectToCheckout({
-                intent_id: providerData.intentId,
-                client_secret: providerData.clientSecret,
-                currency: providerData.currency_code || providerData.currency || 'eur',
-                country_code: (document.getElementById('billing-country') || {}).value || 'NL',
-                successUrl: successUrl,
-              });
-            } catch (err) {
-              throw new Error(err.message || 'Kartenzahlung fehlgeschlagen');
-            }
-          })();
-        }
+        // ─── AIRWALLEX CARD: handled by Drop-in flow below ───
+        // Credit cards on Airwallex use the Drop-in element (inline form)
 
         // ─── STRIPE CARD: uses Checkout Session (redirect) ───
         // Stripe card payments redirect to Stripe's hosted checkout page via checkoutUrl
@@ -6873,16 +6832,17 @@ body {
         // (handled by the generic redirect logic below — providerData.approvalUrl)
 
         // ─── AIRWALLEX DROP-IN FLOW ───
-        // Airwallex uses Drop-in Element for non-card methods (Apple Pay, Google Pay etc.)
+        // Airwallex uses Drop-in Element for all methods: credit cards, Apple Pay, Google Pay
         // and redirect for iDEAL/Bancontact/BLIK/EPS
         if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1 && providerData.intentId) {
-          // For redirect-based methods, Airwallex service returns a redirect URL
-          if (redirectUrl) {
+          // For redirect-based methods (iDEAL, Bancontact, etc.), Airwallex service returns a redirect URL
+          // Credit cards always use inline Drop-in form
+          if (redirectUrl && selectedMethod !== 'creditcard') {
             window.location.href = redirectUrl;
             return;
           }
 
-          // For inline methods (Apple Pay, Google Pay): mount Drop-in
+          // For inline methods (credit card, Apple Pay, Google Pay): mount Drop-in
           // Uses AirwallexComponentsSDK (CDN global) — see https://github.com/airwallex/airwallex-payment-demo
           return new Promise(function(resolve, reject) {
             // Wait for SDK to load (async script)
