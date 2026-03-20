@@ -274,6 +274,22 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
           `[Stripe] Checkout Session created: ${session.id}, payment_intent: ${session.payment_intent}, url: ${session.url ? "yes" : "no"}`
         )
 
+        // Structured initiation log
+        this.logger_.info(JSON.stringify({
+          _tag: "PAYMENT_INITIATED",
+          provider: "stripe",
+          method: method,
+          stripe_method: "checkout_session",
+          amount: amount,
+          currency: currency_code,
+          customer_email: customerEmail || undefined,
+          session_id: session.id,
+          payment_intent_id: session.payment_intent || undefined,
+          redirect: true,
+          status: session.status,
+          timestamp: new Date().toISOString(),
+        }))
+
         return {
           id: session.id,
           data: {
@@ -341,6 +357,21 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
       this.logger_.info(
         `[Stripe] PaymentIntent created: ${paymentIntent.id}, status: ${paymentIntent.status}, redirect: ${checkoutUrl ? "yes" : "no"}`
       )
+
+      // Structured initiation log
+      this.logger_.info(JSON.stringify({
+        _tag: "PAYMENT_INITIATED",
+        provider: "stripe",
+        method: method,
+        stripe_method: stripeMethodType,
+        amount: amount,
+        currency: currency_code,
+        customer_email: customerEmail || undefined,
+        payment_intent_id: paymentIntent.id,
+        redirect: !!checkoutUrl,
+        status: paymentIntent.status,
+        timestamp: new Date().toISOString(),
+      }))
 
       return {
         id: paymentIntent.id,

@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
+import { emitPaymentLog } from "../../../utils/payment-logger"
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
@@ -50,18 +51,28 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(200).json({ received: true })
     }
 
-    const activityEntry = {
+    const isFailed = event_type.includes("failed") || event_type.includes("cancelled")
+    const latestAttempt = intentData.latest_payment_attempt
+    const activityEntry: any = {
       timestamp: new Date().toISOString(),
       event: mapAirwallexEventToActivityEvent(event_type),
       gateway: "airwallex",
-      payment_method: intentData.latest_payment_attempt?.payment_method?.type || intentData.payment_method_type || "card",
+      payment_method: latestAttempt?.payment_method?.type || intentData.payment_method_type || "card",
       status: ["payment_intent.succeeded"].includes(event_type)
         ? "success"
-        : "pending",
+        : isFailed ? "failed" : "pending",
       amount: intentData.amount,
       currency: intentData.currency,
       transaction_id: paymentIntentId,
+      webhook_event_type: event_type,
+      provider_raw_status: intentData.status,
+      customer_email: intentData.metadata?.customer_email || null,
       detail: `Airwallex event: ${event_type}`,
+    }
+
+    if (isFailed) {
+      activityEntry.error_code = latestAttempt?.status || intentData.status || "unknown"
+      activityEntry.decline_reason = latestAttempt?.failure_reason || intentData.failure_reason || "Payment failed"
     }
 
     // Update order metadata with activity log
@@ -89,6 +100,21 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     logger.info(
       `[Airwallex Webhook] Order ${order.id} updated with event: ${event_type}`
     )
+
+    emitPaymentLog(logger, {
+      provider: "airwallex",
+      event: event_type,
+      order_id: order.id,
+      transaction_id: paymentIntentId,
+      status: activityEntry.status,
+      amount: intentData.amount,
+      currency: intentData.currency?.toUpperCase(),
+      customer_email: activityEntry.customer_email,
+      payment_method: activityEntry.payment_method,
+      error_code: activityEntry.error_code,
+      decline_reason: activityEntry.decline_reason,
+      provider_raw_status: intentData.status,
+    })
 
     return res.status(200).json({ received: true })
   } catch (error: any) {

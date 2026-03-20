@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { emitPaymentLog } from "../../../utils/payment-logger"
 
 /**
  * Klarna webhook handler
@@ -106,7 +107,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     if (order) {
-      const activityEntry = {
+      const activityEntry: any = {
         timestamp: new Date().toISOString(),
         event: activityEvent,
         gateway: "klarna",
@@ -115,10 +116,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         amount: order.total || 0,
         currency: order.currency_code,
         transaction_id: klarnaOrderId,
+        webhook_event_type: event_type,
+        provider_raw_status: event_type,
         error_message: isFailEvent
           ? `Klarna event: ${event_type}`
           : undefined,
         detail: `Klarna event: ${event_type}`,
+      }
+
+      if (isFailEvent) {
+        activityEntry.error_code = event_type.split(".").pop()
+        activityEntry.decline_reason = `Klarna ${event_type.replace("order.", "")}`
       }
 
       const existingLog = order.metadata?.payment_activity_log || []
@@ -168,10 +176,32 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       logger.info(
         `[Klarna Webhook] Order ${order.id} updated with event: ${event_type}`
       )
+
+      emitPaymentLog(logger, {
+        provider: "klarna",
+        event: event_type,
+        order_id: order.id,
+        transaction_id: klarnaOrderId,
+        status: activityStatus as any,
+        amount: order.total || undefined,
+        currency: order.currency_code,
+        payment_method: "klarna",
+        error_code: activityEntry.error_code,
+        decline_reason: activityEntry.decline_reason,
+        provider_raw_status: event_type,
+      })
     } else {
       logger.warn(
         `[Klarna Webhook] No Medusa order found for Klarna ID: ${klarnaOrderId}`
       )
+      emitPaymentLog(logger, {
+        provider: "klarna",
+        event: event_type,
+        transaction_id: klarnaOrderId,
+        status: "pending",
+        payment_method: "klarna",
+        metadata: { order_not_found: true },
+      })
     }
 
     return res.status(200).json({ received: true })

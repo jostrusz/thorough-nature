@@ -2,6 +2,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { MollieApiClient } from "../../../modules/payment-mollie/api-client"
+import { emitPaymentLog } from "../../../utils/payment-logger"
 
 const GATEWAY_CONFIG_MODULE = "gatewayConfig"
 
@@ -59,6 +60,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     let mollieStatus: string
     let mollieMethod: string
     let mollieAmount: any
+    let mollieFailureReason: string | null = null
+    let mollieCustomerEmail: string | null = null
+    let mollieRawData: any = null
 
     if (isPayment) {
       const result = await mollieClient.getPayment(mollieId)
@@ -66,18 +70,24 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         logger.error(`[Mollie Webhook] Failed to fetch payment: ${result.error}`)
         return res.status(400).json({ error: "Failed to fetch Mollie payment status" })
       }
+      mollieRawData = result.data
       mollieStatus = result.data.status
       mollieMethod = result.data.method || "unknown"
       mollieAmount = result.data.amount
+      mollieFailureReason = result.data.failureReason || result.data.details?.failureReason || null
+      mollieCustomerEmail = result.data.metadata?.customer_email || null
     } else {
       const result = await mollieClient.getOrder(mollieId)
       if (!result.success) {
         logger.error(`[Mollie Webhook] Failed to fetch order: ${result.error}`)
         return res.status(400).json({ error: "Failed to fetch Mollie order status" })
       }
+      mollieRawData = result.data
       mollieStatus = result.data.status
       mollieMethod = result.data.method || "unknown"
       mollieAmount = result.data.amount
+      mollieFailureReason = result.data.failureReason || null
+      mollieCustomerEmail = result.data.metadata?.customer_email || null
     }
 
     const medusaStatus = mapMollieStatusToMedusa(mollieStatus)
@@ -141,16 +151,25 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       }
 
       if (order) {
-        const activityEntry = {
+        const isFailed = ["failed", "canceled", "expired"].includes(mollieStatus)
+        const activityEntry: any = {
           timestamp: new Date().toISOString(),
           event: "status_update",
           gateway: "mollie",
           payment_method: mollieMethod,
-          status: medusaStatus === "captured" ? "success" : "pending",
+          status: medusaStatus === "captured" ? "success" : isFailed ? "failed" : "pending",
           amount: mollieAmount?.value,
           currency: mollieAmount?.currency,
           transaction_id: mollieId,
+          webhook_event_type: `mollie.${mollieStatus}`,
+          provider_raw_status: mollieStatus,
+          customer_email: mollieCustomerEmail,
           detail: `Mollie ${isPayment ? "payment" : "order"} status: ${mollieStatus}`,
+        }
+
+        if (isFailed && mollieFailureReason) {
+          activityEntry.error_code = mollieStatus
+          activityEntry.decline_reason = mollieFailureReason
         }
 
         const existingLog = (order as any).metadata?.payment_activity_log || []
@@ -172,8 +191,32 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           logger.warn(`[Mollie Webhook] DB update failed: ${dbErr.message}`)
         }
         logger.info(`[Mollie Webhook] Order ${(order as any).id} updated with status: ${medusaStatus}`)
+
+        emitPaymentLog(logger, {
+          provider: "mollie",
+          event: `mollie.${mollieStatus}`,
+          order_id: (order as any).id,
+          transaction_id: mollieId,
+          status: activityEntry.status,
+          amount: parseFloat(mollieAmount?.value) || undefined,
+          currency: mollieAmount?.currency,
+          customer_email: mollieCustomerEmail || undefined,
+          payment_method: mollieMethod,
+          error_code: activityEntry.error_code,
+          decline_reason: activityEntry.decline_reason,
+          provider_raw_status: mollieStatus,
+        })
       } else {
         logger.warn(`[Mollie Webhook] No Medusa order found for Mollie ID: ${mollieId}`)
+        emitPaymentLog(logger, {
+          provider: "mollie",
+          event: `mollie.${mollieStatus}`,
+          transaction_id: mollieId,
+          status: "pending",
+          payment_method: mollieMethod,
+          provider_raw_status: mollieStatus,
+          metadata: { order_not_found: true },
+        })
       }
     } catch (orderErr: any) {
       logger.warn(`[Mollie Webhook] Order update failed: ${orderErr.message}`)

@@ -2,6 +2,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import Stripe from "stripe"
+import { emitPaymentLog } from "../../../utils/payment-logger"
 
 /**
  * POST /webhooks/stripe
@@ -143,12 +144,22 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       logger.warn(
         `[Stripe Webhook] No order found for payment intent: ${paymentIntentId}`
       )
+      emitPaymentLog(logger, {
+        provider: "stripe",
+        event: event.type,
+        transaction_id: paymentIntentId,
+        status: "pending",
+        customer_email: (event.data.object as any).metadata?.customer_email,
+        payment_method: (event.data.object as any).payment_method_types?.[0],
+        metadata: { order_not_found: true },
+      })
       return res.status(200).json({ received: true })
     }
 
-    // Build activity log entry
+    // Build activity log entry with failure details
     const paymentIntent = event.data.object as any
-    const activityEntry = {
+    const lastError = paymentIntent.last_payment_error
+    const activityEntry: any = {
       timestamp: new Date().toISOString(),
       event: mapStripeEventToActivity(event.type),
       gateway: "stripe",
@@ -159,7 +170,21 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       amount: paymentIntent.amount ? paymentIntent.amount / 100 : null,
       currency: paymentIntent.currency?.toUpperCase(),
       transaction_id: paymentIntentId,
+      webhook_event_type: event.type,
+      provider_raw_status: paymentIntent.status,
+      customer_email: paymentIntent.metadata?.customer_email || paymentIntent.receipt_email || null,
       detail: `Stripe event: ${event.type}`,
+    }
+
+    // Extract failure details for failed payments
+    if (event.type === "payment_intent.payment_failed" && lastError) {
+      activityEntry.error_code = lastError.decline_code || lastError.code || "unknown"
+      activityEntry.decline_reason = lastError.message || "Payment failed"
+      activityEntry.metadata = {
+        payment_method_type: lastError.payment_method?.type,
+        failure_reason: paymentIntent.cancellation_reason,
+        charge_id: lastError.charge,
+      }
     }
 
     // Update order metadata via direct DB query (orderModuleService not available in webhook context)
@@ -185,6 +210,22 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     logger.info(
       `[Stripe Webhook] Order ${(order as any).id} updated with event: ${event.type}`
     )
+
+    // Structured log for Railway filtering
+    emitPaymentLog(logger, {
+      provider: "stripe",
+      event: event.type,
+      order_id: (order as any).id,
+      transaction_id: paymentIntentId,
+      status: activityEntry.status === "refunded" ? "success" : activityEntry.status,
+      amount: activityEntry.amount,
+      currency: activityEntry.currency,
+      customer_email: activityEntry.customer_email,
+      payment_method: activityEntry.payment_method,
+      error_code: activityEntry.error_code,
+      decline_reason: activityEntry.decline_reason,
+      provider_raw_status: paymentIntent.status,
+    })
 
     return res.status(200).json({ received: true })
   } catch (error: any) {

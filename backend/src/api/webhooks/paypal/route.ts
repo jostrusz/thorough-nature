@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { emitPaymentLog } from "../../../utils/payment-logger"
 
 const GATEWAY_CONFIG_MODULE = "gatewayConfig"
 
@@ -188,7 +189,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     if (order) {
-      const activityEntry = {
+      const activityEntry: any = {
         timestamp: new Date().toISOString(),
         event: mapping.activityEvent,
         gateway: "paypal",
@@ -197,10 +198,20 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         amount: resource.amount?.value || order.total || 0,
         currency: resource.amount?.currency_code || order.currency_code,
         transaction_id: resource.id || paypalOrderId,
+        webhook_event_type: eventType,
+        provider_raw_status: resource.status || eventType,
         error_message: mapping.isFailEvent
           ? `PayPal event: ${eventType}`
           : undefined,
         detail: `PayPal event: ${eventType}`,
+      }
+
+      if (mapping.isFailEvent) {
+        const processorResponse = resource.processor_response || {}
+        activityEntry.error_code = processorResponse.response_code || resource.status || eventType
+        activityEntry.decline_reason = resource.status_details?.reason
+          || processorResponse.avs_code
+          || `PayPal ${mapping.activityEvent}`
       }
 
       const existingLog = order.metadata?.payment_activity_log || []
@@ -273,10 +284,32 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       logger.info(
         `[PayPal Webhook] Order ${order.id} updated with event: ${eventType}`
       )
+
+      emitPaymentLog(logger, {
+        provider: "paypal",
+        event: eventType,
+        order_id: order.id,
+        transaction_id: resource.id || paypalOrderId || undefined,
+        status: mapping.activityStatus as any,
+        amount: parseFloat(resource.amount?.value) || order.total || undefined,
+        currency: resource.amount?.currency_code || order.currency_code,
+        payment_method: "paypal",
+        error_code: activityEntry.error_code,
+        decline_reason: activityEntry.decline_reason,
+        provider_raw_status: resource.status || eventType,
+      })
     } else {
       logger.warn(
         `[PayPal Webhook] No Medusa order found for PayPal event: ${eventType}, resource: ${resource.id}, orderId: ${paypalOrderId}`
       )
+      emitPaymentLog(logger, {
+        provider: "paypal",
+        event: eventType,
+        transaction_id: resource.id || paypalOrderId || undefined,
+        status: "pending",
+        payment_method: "paypal",
+        metadata: { order_not_found: true },
+      })
     }
 
     return res.status(200).json({ received: true })

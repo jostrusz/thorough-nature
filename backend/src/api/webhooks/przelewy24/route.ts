@@ -3,6 +3,7 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { IPaymentModuleService } from "@medusajs/framework/types"
 import { PRZELEWY24_PROVIDER_ID } from "../../../modules/payment-przelewy24"
 import crypto from "crypto"
+import { emitPaymentLog } from "../../../utils/payment-logger"
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
@@ -71,16 +72,25 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       ? JSON.parse(order.metadata)
       : order.metadata || {}
 
-    const activityEntry = {
+    const isFailed = ["CANCELLED", "FAILED"].includes(transactionData.status)
+    const activityEntry: any = {
       timestamp: new Date().toISOString(),
       event: "status_update",
       gateway: "przelewy24",
       payment_method: transactionData.method || "bank_transfer",
-      status: medusaStatus === "captured" ? "success" : "pending",
+      status: medusaStatus === "captured" ? "success" : isFailed ? "failed" : "pending",
       amount: transactionData.amount || amount,
       currency: transactionData.currency || currency,
       transaction_id: orderId,
+      webhook_event_type: `p24.${transactionData.status}`,
+      provider_raw_status: transactionData.status,
+      customer_email: transactionData.email || meta.customer_email || null,
       detail: `P24 transaction verified: ${transactionData.status}`,
+    }
+
+    if (isFailed) {
+      activityEntry.error_code = transactionData.status
+      activityEntry.decline_reason = transactionData.error || `P24 ${transactionData.status.toLowerCase()}`
     }
 
     // Update order metadata with activity log via direct DB query
@@ -101,6 +111,21 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     logger.info(
       `[P24 Webhook] Order ${order.id} verified with status: ${medusaStatus}`
     )
+
+    emitPaymentLog(logger, {
+      provider: "przelewy24",
+      event: `p24.${transactionData.status}`,
+      order_id: order.id,
+      transaction_id: orderId,
+      status: activityEntry.status,
+      amount: transactionData.amount || amount,
+      currency: transactionData.currency || currency,
+      customer_email: activityEntry.customer_email,
+      payment_method: activityEntry.payment_method,
+      error_code: activityEntry.error_code,
+      decline_reason: activityEntry.decline_reason,
+      provider_raw_status: transactionData.status,
+    })
 
     return res.status(200).json({ received: true })
   } catch (error: any) {

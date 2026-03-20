@@ -2,6 +2,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ComgateApiClient } from "../../../modules/payment-comgate/api-client"
 import { Client } from "pg"
+import { emitPaymentLog } from "../../../utils/payment-logger"
 
 /**
  * Comgate push notification webhook.
@@ -82,7 +83,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           ? JSON.parse(matchingOrder.metadata)
           : matchingOrder.metadata || {}
 
-        const activityEntry = {
+        const isFailed = ["CANCELLED", "FAILED"].includes(comgateStatus)
+        const activityEntry: any = {
           timestamp: new Date().toISOString(),
           event: "webhook_status_update",
           gateway: "comgate",
@@ -91,7 +93,15 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           amount: statusResult.data?.price,
           currency: statusResult.data?.curr,
           transaction_id: transId,
+          webhook_event_type: `comgate.${comgateStatus}`,
+          provider_raw_status: comgateStatus,
+          customer_email: statusResult.data?.email || meta.customer_email || null,
           detail: `Comgate webhook: ${comgateStatus}`,
+        }
+
+        if (isFailed) {
+          activityEntry.error_code = comgateStatus
+          activityEntry.decline_reason = statusResult.data?.message || `Comgate ${comgateStatus.toLowerCase()}`
         }
 
         const existingLog = meta.payment_activity_log || []
@@ -106,8 +116,31 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         )
 
         logger.info(`[Comgate Webhook] Order ${matchingOrder.id} updated with status: ${medusaStatus}`)
+
+        emitPaymentLog(logger, {
+          provider: "comgate",
+          event: `comgate.${comgateStatus}`,
+          order_id: matchingOrder.id,
+          transaction_id: transId,
+          status: medusaStatus === "captured" ? "success" : isFailed ? "failed" : "pending",
+          amount: statusResult.data?.price,
+          currency: statusResult.data?.curr,
+          customer_email: activityEntry.customer_email,
+          payment_method: activityEntry.payment_method,
+          error_code: activityEntry.error_code,
+          decline_reason: activityEntry.decline_reason,
+          provider_raw_status: comgateStatus,
+        })
       } else {
         logger.info(`[Comgate Webhook] No order found for transId ${transId} (may not be completed yet)`)
+        emitPaymentLog(logger, {
+          provider: "comgate",
+          event: `comgate.${comgateStatus}`,
+          transaction_id: transId,
+          status: "pending",
+          provider_raw_status: comgateStatus,
+          metadata: { order_not_found: true },
+        })
       }
       await pool.end()
     } catch (orderErr: any) {

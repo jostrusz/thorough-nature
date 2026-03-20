@@ -33,8 +33,15 @@ export interface PaymentActivityEvent {
   transaction_id?: string
   payment_method?: string
   error_message?: string
+  error_code?: string
+  decline_reason?: string
+  customer_email?: string
+  provider_raw_status?: string
+  webhook_event_type?: string
+  processing_time_ms?: number
   tracking_sent?: boolean
   raw_response?: Record<string, any>
+  metadata?: Record<string, any>
 }
 
 /**
@@ -146,4 +153,38 @@ export function filterPaymentActivity(
     if (filter.status && event.status !== filter.status) return false
     return true
   })
+}
+
+/**
+ * Emit a structured JSON log line for Railway filtering.
+ * All payment events use _tag: "PAYMENT_EVENT" for easy search.
+ */
+export function emitPaymentLog(
+  logger: any,
+  data: {
+    provider: PaymentGateway
+    event: string
+    order_id?: string
+    transaction_id?: string
+    status: "success" | "failed" | "pending"
+    amount?: number
+    currency?: string
+    customer_email?: string
+    payment_method?: string
+    error_code?: string
+    decline_reason?: string
+    provider_raw_status?: string
+    metadata?: Record<string, any>
+  }
+): void {
+  const logLine = {
+    _tag: "PAYMENT_EVENT",
+    ...data,
+    timestamp: new Date().toISOString(),
+  }
+  if (data.status === "failed") {
+    logger.error(JSON.stringify(logLine))
+  } else {
+    logger.info(JSON.stringify(logLine))
+  }
 }
