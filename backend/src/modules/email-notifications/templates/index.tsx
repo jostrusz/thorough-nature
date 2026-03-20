@@ -29,7 +29,9 @@ import { OkAbandonedCheckout3Template, OK_ABANDONED_CHECKOUT_3, isOkAbandonedChe
 import { OkEbookDeliveryTemplate, OK_EBOOK_DELIVERY, isOkEbookDeliveryData } from './ok-ebook-delivery'
 import { OkShipmentNotificationTemplate, OK_SHIPMENT_NOTIFICATION, isOkShipmentNotificationData } from './ok-shipment-notification'
 // Lass los, was dich kaputt macht (lass-los) templates
+import { LlOrderPlacedTemplate, LL_ORDER_PLACED, isLlOrderPlacedTemplateData } from './ll-order-placed'
 import { LlEbookDeliveryTemplate, LL_EBOOK_DELIVERY, isLlEbookDeliveryData } from './ll-ebook-delivery'
+import { LlShipmentNotificationTemplate, LL_SHIPMENT_NOTIFICATION, isLlShipmentNotificationData } from './ll-shipment-notification'
 // Psí superživot (psi-superzivot) templates
 import { PsOrderPlacedTemplate, PS_ORDER_PLACED, isPsOrderPlacedTemplateData } from './ps-order-placed'
 import { PsShipmentNotificationTemplate, PS_SHIPMENT_NOTIFICATION, isPsShipmentNotificationData } from './ps-shipment-notification'
@@ -68,7 +70,9 @@ export const EmailTemplates = {
   OK_EBOOK_DELIVERY,
   OK_SHIPMENT_NOTIFICATION,
   // Lass los
+  LL_ORDER_PLACED,
   LL_EBOOK_DELIVERY,
+  LL_SHIPMENT_NOTIFICATION,
   // Psí superživot
   PS_ORDER_PLACED,
   PS_SHIPMENT_NOTIFICATION,
@@ -355,6 +359,15 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       return <OkAbandonedCheckout3Template {...data} />
 
     // ── Lass los templates ──────────────────────────────────
+    case EmailTemplates.LL_ORDER_PLACED:
+      if (!isLlOrderPlacedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.LL_ORDER_PLACED}"`
+        )
+      }
+      return <LlOrderPlacedTemplate {...data} />
+
     case EmailTemplates.LL_EBOOK_DELIVERY:
       if (!isLlEbookDeliveryData(data)) {
         throw new MedusaError(
@@ -363,6 +376,15 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
         )
       }
       return <LlEbookDeliveryTemplate {...data} />
+
+    case EmailTemplates.LL_SHIPMENT_NOTIFICATION:
+      if (!isLlShipmentNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.LL_SHIPMENT_NOTIFICATION}"`
+        )
+      }
+      return <LlShipmentNotificationTemplate {...data} />
 
     // ── Psí superživot templates ─────────────────────────────
     case EmailTemplates.PS_ORDER_PLACED:
@@ -441,7 +463,9 @@ export {
   OkEbookDeliveryTemplate,
   OkShipmentNotificationTemplate,
   // Lass los
+  LlOrderPlacedTemplate,
   LlEbookDeliveryTemplate,
+  LlShipmentNotificationTemplate,
   // Psí superživot
   PsOrderPlacedTemplate,
   PsShipmentNotificationTemplate,
