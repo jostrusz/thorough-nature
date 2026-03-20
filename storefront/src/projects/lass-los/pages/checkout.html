@@ -5952,8 +5952,16 @@ body {
           el.value = draft[f];
           // Trigger visual validation state
           if (el.value) el.classList.add('has-value');
-          // Run validation so the field gets .valid class (needed for submit check)
-          if (el.value.trim().length > 0) {
+          // For Foxentry-validated fields (email/tel): mark as valid if value looks correct
+          // (Foxentry only validates on user input events, not on programmatic value set)
+          var hasFox = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
+          if (hasFox && el.type === 'email' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim())) {
+            el.classList.add('valid');
+            el.classList.remove('invalid');
+          } else if (hasFox && el.type === 'tel' && /^[\+]?\d{8,}$/.test(el.value.replace(/[\s\-\(\)\.]/g, ''))) {
+            el.classList.add('valid');
+            el.classList.remove('invalid');
+          } else if (el.value.trim().length > 0) {
             validateField(el);
           }
         }
@@ -6090,9 +6098,19 @@ body {
 
   // Re-validate prefilled fields after a short delay (handles browser autocomplete)
   setTimeout(function() {
+    var hasFox = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
     fields.forEach(function(field) {
       if (field.value.trim().length > 0 && !field.classList.contains('valid')) {
-        validateField(field);
+        // For Foxentry fields: do basic format check since Foxentry won't fire on prefill
+        if (hasFox && field.type === 'email' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value.trim())) {
+          field.classList.add('valid');
+          field.classList.remove('invalid');
+        } else if (hasFox && field.type === 'tel' && /^[\+]?\d{8,}$/.test(field.value.replace(/[\s\-\(\)\.]/g, ''))) {
+          field.classList.add('valid');
+          field.classList.remove('invalid');
+        } else {
+          validateField(field);
+        }
       }
     });
   }, 500);

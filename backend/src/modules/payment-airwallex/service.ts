@@ -258,7 +258,15 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
           const paymentMethodPayload: Record<string, any> = { type: method }
           // Airwallex requires method-specific sub-object (e.g. bancontact: {}, ideal: {})
           if (["bancontact", "ideal", "eps", "blik", "przelewy24", "paypal", "klarna", "klarna_later", "klarna_slice"].includes(method)) {
-            paymentMethodPayload[method] = {}
+            const methodKey = method.startsWith("klarna") ? "klarna" : method
+            paymentMethodPayload[methodKey] = {}
+            // Klarna requires country_code in the payment method sub-object
+            if (method.startsWith("klarna")) {
+              const countryCode = data?.billing_address?.country_code?.toUpperCase()
+                || data?.shipping_address?.country_code?.toUpperCase()
+                || "DE"
+              paymentMethodPayload.klarna.country_code = countryCode
+            }
           }
           const confirmed = await client.confirmPaymentIntent(paymentIntent.id, {
             payment_method: paymentMethodPayload,
