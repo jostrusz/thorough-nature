@@ -46,7 +46,7 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: #f8f6f3;
+  background: #FAF5F8;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1479,7 +1479,7 @@ body {
   text-align: right;
   margin-top: 2px;
 }
-/* Kleines DHL-Badge in der Leiste */
+/* Kleines GLS-Badge in der Leiste */
 .msb-gls {
   display: inline-block;
   background: #003399;
@@ -2185,7 +2185,7 @@ body {
       </div>
       <!-- Versand -->
       <div class="msb-line shipping">
-        <span class="msb-line-label">Versand <span class="msb-gls">DHL</span></span>
+        <span class="msb-line-label">Versand <span class="msb-gls">GLS</span></span>
         <span class="msb-line-val">Kostenlos</span>
       </div>
       <!-- Gesamt -->
@@ -2525,13 +2525,13 @@ body {
             </div>
           </div>
 
-          <!-- DHL Kostenloser Versand info -->
+          <!-- GLS Kostenloser Versand info -->
           <div id="shipping-info" style="display:flex;align-items:center;gap:10px;margin-top:16px;padding:12px 16px;background:#f0faf4;border:1px solid #b8e6c8;border-radius:10px;">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMjQiIHdpZHRoPSI2NSIgaGVpZ2h0PSIxNSI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIyNCIgcng9IjMiIGZpbGw9IiNGRkNDMDAiLz48dGV4dCB4PSI1MCIgeT0iMTciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNENDA1MTEiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCI+REhMPC90ZXh0Pjwvc3ZnPg==" alt="DHL" style="flex-shrink:0;">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjE1Ij48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="flex-shrink:0;">
             <div style="flex:1;">
               <span style="font-weight:600;color:#1a1a2e;font-size:14px;">Kostenloser Versand</span>
               <span style="color:#27AE60;font-weight:700;font-size:14px;margin-left:6px;">0 &euro;</span>
-              <div style="color:#666;font-size:12px;margin-top:2px;">Versand innerhalb von 24 Stunden via DHL</div>
+              <div style="color:#666;font-size:12px;margin-top:2px;">Versand innerhalb von 24 Stunden via GLS</div>
             </div>
             <svg viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2.5" stroke-linecap="round" width="20" height="20"><path d="M20 6L9 17l-5-5"/></svg>
           </div>
@@ -2628,7 +2628,7 @@ body {
             </div>
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-              Kostenloser Versand in ganz Deutschland
+              Kostenloser Versand via GLS
             </div>
           </div>
         </div>
@@ -2681,7 +2681,7 @@ body {
       <div class="summary-line shipping" id="summary-shipping">
         <span style="display:flex;align-items:center;gap:6px;">
           Versand
-          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMjQiIHdpZHRoPSI1NiIgaGVpZ2h0PSIxMyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIyNCIgcng9IjMiIGZpbGw9IiNGRkNDMDAiLz48dGV4dCB4PSI1MCIgeT0iMTciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNENDA1MTEiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCI+REhMPC90ZXh0Pjwvc3ZnPg==" alt="DHL" style="vertical-align:middle;border-radius:2px;">
+          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="vertical-align:middle;border-radius:2px;">
         </span>
         <span style="color:#27AE60;font-weight:600;">Kostenlos</span>
       </div>
@@ -2708,7 +2708,7 @@ body {
       <div class="summary-shipping-info">
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          <span>Lieferung per <strong>DHL</strong> innerhalb von <strong>3&ndash;4 Werktagen</strong></span>
+          <span>Lieferung per <strong>GLS</strong> innerhalb von <strong>3&ndash;5 Werktagen</strong></span>
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
@@ -2770,7 +2770,7 @@ body {
     <strong>Lass los, was dich kaputt macht</strong> ist eine Ausgabe von Performance Marketing Solution s.r.o.<br>
     Rybná 716/24, Staré Město, 110 00 Prag, Tschechien<br>
     IČO: 06259928 · DIČ: CZ06259928<br>
-    Wir versenden aus unserem europäischen Distributionszentrum per DHL in die ganze DACH-Region.<br>
+    Wir versenden aus unserem europäischen Distributionszentrum per GLS in die ganze DACH-Region.<br>
     Fragen oder Probleme? Kontaktieren Sie uns gerne: <a href="mailto:support@lass-los.de"><strong>support@lass-los.de</strong></a><br>
     Wir antworten innerhalb von 24 Stunden und lösen jedes Problem persönlich.
   </div>
@@ -3086,7 +3086,7 @@ body {
     var shipEl = document.getElementById('summary-shipping');
     if (shipEl) {
       var shippingLabel = shippingTotal > 0 ? formatPrice(shippingTotal) : '<span style="color:#27AE60;font-weight:600;">Kostenlos</span>';
-      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Versand <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMjQiIHdpZHRoPSI1NiIgaGVpZ2h0PSIxMyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIyNCIgcng9IjMiIGZpbGw9IiNGRkNDMDAiLz48dGV4dCB4PSI1MCIgeT0iMTciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNENDA1MTEiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCI+REhMPC90ZXh0Pjwvc3ZnPg==" alt="DHL" style="vertical-align:middle;border-radius:2px;"></span><span>' + shippingLabel + '</span>';
+      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Versand <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="vertical-align:middle;border-radius:2px;"></span><span>' + shippingLabel + '</span>';
     }
 
     // Rabatt (Discount) — anzeigen, wenn Promo-Code angewendet
@@ -3776,7 +3776,7 @@ body {
     if (document.querySelector('.payment-preloader')) return;
     var el = document.createElement('div');
     el.className = 'payment-preloader';
-    el.innerHTML = '<div class="preloader-logo-wrap"><img src="/lass-los-white.png" alt="Laden..."><div class="preloader-shine"></div></div><p>Zahlung wird verarbeitet...</p><p class="sub">Bitte warten.</p>';
+    el.innerHTML = '<div class="preloader-logo-wrap"><img src="/lass-los-logo.png" alt="Laden..."><div class="preloader-shine"></div></div><p>Zahlung wird verarbeitet...</p><p class="sub">Bitte warten.</p>';
     document.body.insertBefore(el, document.body.firstChild);
   }
   function hideExpressPreloader() {
@@ -5097,6 +5097,28 @@ body {
   var phonePreview = document.getElementById('phone-preview');
   var countrySelect = document.getElementById('country');
   var COUNTRY_PHONE_PREFIX = { DE: '+49', AT: '+43', LU: '+352' };
+  var PHONE_PREFIX_TO_COUNTRY = { '+49': 'DE', '+43': 'AT', '+352': 'LU' };
+
+  // Land aus Telefoonnummer erkennen (z.B. +43... → AT)
+  function detectCountryFromPhone(val) {
+    var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
+    if (cleaned.startsWith('00')) cleaned = '+' + cleaned.substring(2);
+    if (!cleaned.startsWith('+')) return null;
+    var prefixes = Object.keys(PHONE_PREFIX_TO_COUNTRY).sort(function(a, b) { return b.length - a.length; });
+    for (var i = 0; i < prefixes.length; i++) {
+      if (cleaned.startsWith(prefixes[i])) return PHONE_PREFIX_TO_COUNTRY[prefixes[i]];
+    }
+    return null;
+  }
+
+  // Country-Dropdown aktualisieren, wenn Prefix erkannt wird
+  function syncCountryFromPhone(val) {
+    var detected = detectCountryFromPhone(val);
+    if (detected && countrySelect && countrySelect.value !== detected) {
+      countrySelect.value = detected;
+      countrySelect.dispatchEvent(new Event('change'));
+    }
+  }
 
   function formatPhoneNumber(raw, countryCode) {
     var cleaned = raw.replace(/[\s\-\(\)\.]/g, '');
@@ -5113,11 +5135,19 @@ body {
   }
 
   if (phoneField && phonePreview) {
+    // Bei Eingabe: Land aus Prefix erkennen und Country-Dropdown aktualisieren
+    phoneField.addEventListener('input', function() {
+      syncCountryFromPhone(phoneField.value.trim());
+      phonePreview.style.display = 'none';
+    });
+
     phoneField.addEventListener('blur', function() {
       // Wenn Foxentry aktiv ist, KEINE lokale Formatierung oder Validierung — alles über Foxentry
       if (hasFoxentryKey) return;
       var raw = phoneField.value.trim();
       if (!raw) { phonePreview.style.display = 'none'; return; }
+      // Country aus Prefix synchronisieren
+      syncCountryFromPhone(raw);
       var country = countrySelect ? countrySelect.value : 'DE';
       var formatted = formatPhoneNumber(raw, country);
       phoneField.value = formatted;
@@ -5128,9 +5158,6 @@ body {
         phonePreview.style.display = 'none';
       }
       validateField(phoneField);
-    });
-    phoneField.addEventListener('input', function() {
-      phonePreview.style.display = 'none';
     });
   }
 
@@ -6084,7 +6111,7 @@ body {
     if (!document.querySelector('.payment-preloader')) {
       var preloaderDiv = document.createElement('div');
       preloaderDiv.className = 'payment-preloader';
-      preloaderDiv.innerHTML = '<div class="preloader-logo-wrap"><img src="/lass-los-white.png" alt="Laden..."><div class="preloader-shine"></div></div><p>Zahlung wird verarbeitet...</p><p class="sub">Bitte warten.</p>';
+      preloaderDiv.innerHTML = '<div class="preloader-logo-wrap"><img src="/lass-los-logo.png" alt="Laden..."><div class="preloader-shine"></div></div><p>Zahlung wird verarbeitet...</p><p class="sub">Bitte warten.</p>';
       document.body.insertBefore(preloaderDiv, document.body.firstChild);
     }
 
@@ -6733,7 +6760,7 @@ body {
                   if (!document.querySelector('.payment-preloader')) {
                     var kPreloader = document.createElement('div');
                     kPreloader.className = 'payment-preloader';
-                    kPreloader.innerHTML = '<div class="preloader-logo-wrap"><img src="/lass-los-white.png" alt="Laden..."><div class="preloader-shine"></div></div><p>Zahlung wird verarbeitet...</p><p class="sub">Bitte warten.</p>';
+                    kPreloader.innerHTML = '<div class="preloader-logo-wrap"><img src="/lass-los-logo.png" alt="Laden..."><div class="preloader-shine"></div></div><p>Zahlung wird verarbeitet...</p><p class="sub">Bitte warten.</p>';
                     document.body.insertBefore(kPreloader, document.body.firstChild);
                   }
 
@@ -6912,7 +6939,7 @@ body {
                 if (!document.querySelector('.payment-preloader')) {
                   var awPreloader = document.createElement('div');
                   awPreloader.className = 'payment-preloader';
-                  awPreloader.innerHTML = '<div class="preloader-logo-wrap"><img src="/lass-los-white.png" alt="Laden..."><div class="preloader-shine"></div></div><p>Zahlung wird verarbeitet...</p><p class="sub">Bitte warten.</p>';
+                  awPreloader.innerHTML = '<div class="preloader-logo-wrap"><img src="/lass-los-logo.png" alt="Laden..."><div class="preloader-shine"></div></div><p>Zahlung wird verarbeitet...</p><p class="sub">Bitte warten.</p>';
                   document.body.insertBefore(awPreloader, document.body.firstChild);
                 }
 
@@ -6994,6 +7021,36 @@ body {
     var scrollY = window.scrollY;
     renderPaymentMethods(country);
     window.scrollTo(0, scrollY);
+
+    // Update phone prefix when country changes
+    var phoneField = document.getElementById('phone');
+    if (phoneField) {
+      var PREFIXES = { DE: '+49', AT: '+43', LU: '+352', NL: '+31', BE: '+32', PL: '+48', CZ: '+420', SE: '+46', HU: '+36' };
+      var newPrefix = PREFIXES[country];
+      var oldVal = phoneField.value.trim();
+      if (newPrefix) {
+        if (!oldVal || oldVal === '+49' || oldVal === '+43' || oldVal === '+352') {
+          // Leer oder nur Prefix — mit neuem Prefix ersetzen
+          phoneField.value = newPrefix;
+        } else {
+          // Vorhandenen Prefix mit neuem ersetzen
+          var prefixValues = Object.values(PREFIXES);
+          var replaced = false;
+          for (var i = 0; i < prefixValues.length; i++) {
+            if (oldVal.startsWith(prefixValues[i])) {
+              phoneField.value = newPrefix + oldVal.substring(prefixValues[i].length);
+              replaced = true;
+              break;
+            }
+          }
+          if (!replaced && !oldVal.startsWith('+')) {
+            // Kein Prefix — neuen voranstellen
+            var num = oldVal.startsWith('0') ? oldVal.substring(1) : oldVal;
+            phoneField.value = newPrefix + num;
+          }
+        }
+      }
+    }
   });
 
   /* ─── ANIMATION — Intersection Observer für Fade-in ─── */
