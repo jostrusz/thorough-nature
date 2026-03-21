@@ -972,11 +972,10 @@ body {
   margin-bottom: 14px;
 }
 .summary-product-img {
-  width: 100px;
-  height: 130px;
-  background: var(--light);
+  width: 120px;
+  height: 160px;
+  background: transparent;
   border-radius: 8px;
-  border: 1px solid var(--border);
   overflow: hidden;
   flex-shrink: 0;
   display: flex;
@@ -986,7 +985,9 @@ body {
 .summary-product-img img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 /* Mini-Buch Mockup */
 .mini-book {
