@@ -569,6 +569,7 @@ const SupportBoxDashboard = () => {
   return (
     <div ref={pageRef} style={{ maxWidth: "1140px", margin: "0 auto", padding: "24px 32px", background: BG_COLOR }}>
       <FullWidthStyles />
+      <SidebarBadgeProvider />
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <h1 style={{ fontSize: "20px", fontWeight: 600, color: C.text, margin: 0 }}>SupportBox</h1>
@@ -738,9 +739,64 @@ const SupportBoxDashboard = () => {
 }
 
 // ═══════════════════════════════════════════
-// SIDEBAR ICON WITH BADGE
+// SIDEBAR BADGE (injected via DOM)
 // ═══════════════════════════════════════════
-function SupportBoxIcon() {
+function useSidebarBadge(count: number) {
+  useEffect(() => {
+    const BADGE_ID = "supportbox-sidebar-badge"
+
+    // Find the sidebar link that contains "SupportBox" text
+    const links = document.querySelectorAll("a[href*='/supportbox']")
+    let targetLink: HTMLElement | null = null
+    links.forEach((link) => {
+      if (link.textContent?.includes("SupportBox") && !link.getAttribute("href")?.includes("/settings")) {
+        targetLink = link as HTMLElement
+      }
+    })
+
+    if (!targetLink) return
+
+    // Remove existing badge
+    const existing = document.getElementById(BADGE_ID)
+    if (existing) existing.remove()
+
+    if (count <= 0) return
+
+    // Create badge element
+    const badge = document.createElement("span")
+    badge.id = BADGE_ID
+    badge.textContent = count > 99 ? "99+" : String(count)
+    badge.style.cssText = `
+      margin-left: auto;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      background-color: #DC2626;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+      line-height: 1;
+      flex-shrink: 0;
+    `
+
+    // Make parent flex to push badge to right
+    targetLink.style.display = "flex"
+    targetLink.style.alignItems = "center"
+    targetLink.appendChild(badge)
+
+    return () => {
+      const el = document.getElementById(BADGE_ID)
+      if (el) el.remove()
+    }
+  }, [count])
+}
+
+// Global badge polling — runs even when not on SupportBox page
+function SidebarBadgeProvider() {
   const [newCount, setNewCount] = useState(0)
 
   useEffect(() => {
@@ -764,38 +820,14 @@ function SupportBoxIcon() {
     return () => { mounted = false; clearInterval(interval) }
   }, [])
 
-  return (
-    <div style={{ position: "relative", display: "inline-flex" }}>
-      <ChatBubbleLeftRight />
-      {newCount > 0 && (
-        <div style={{
-          position: "absolute",
-          top: "-4px",
-          right: "-6px",
-          minWidth: "16px",
-          height: "16px",
-          borderRadius: "8px",
-          backgroundColor: "#DC2626",
-          color: "#fff",
-          fontSize: "9px",
-          fontWeight: 700,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "0 3px",
-          lineHeight: 1,
-          boxShadow: "0 1px 3px rgba(220,38,38,0.4)",
-        }}>
-          {newCount > 99 ? "99+" : newCount}
-        </div>
-      )}
-    </div>
-  )
+  useSidebarBadge(newCount)
+
+  return null
 }
 
 export const config = defineRouteConfig({
   label: "SupportBox",
-  icon: SupportBoxIcon,
+  icon: ChatBubbleLeftRight,
   rank: 7,
 })
 
