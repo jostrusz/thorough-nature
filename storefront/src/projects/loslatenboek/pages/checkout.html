@@ -3962,6 +3962,17 @@ body {
               };
               customerData.billing_address = Object.assign({}, customerData.shipping_address);
 
+              // ─── Add project metadata (same as regular checkout) ───
+              customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'loslatenboek' };
+              if (window.AnalyticsTracker) {
+                customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
+                customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
+              }
+              if (typeof MetaTracker !== 'undefined') {
+                customerData.metadata.fbc = MetaTracker.getFbc() || '';
+                customerData.metadata.fbp = MetaTracker.getFbp() || '';
+              }
+
               // Save customer info for thank-you page
               localStorage.setItem('medusa_customer', JSON.stringify({
                 email: customerData.email,
@@ -4231,6 +4242,17 @@ body {
                 };
                 customerData.billing_address = Object.assign({}, customerData.shipping_address);
 
+                // ─── Add project metadata (same as regular checkout) ───
+                customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'loslatenboek' };
+                if (window.AnalyticsTracker) {
+                  customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
+                  customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
+                }
+                if (typeof MetaTracker !== 'undefined') {
+                  customerData.metadata.fbc = MetaTracker.getFbc() || '';
+                  customerData.metadata.fbp = MetaTracker.getFbp() || '';
+                }
+
                 localStorage.setItem('medusa_customer', JSON.stringify({
                   email: email,
                   first_name: customerData.shipping_address.first_name,
@@ -4397,6 +4419,17 @@ body {
                 }
               };
               customerData.billing_address = Object.assign({}, customerData.shipping_address);
+
+              // ─── Add project metadata (same as regular checkout) ───
+              customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'loslatenboek' };
+              if (window.AnalyticsTracker) {
+                customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
+                customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
+              }
+              if (typeof MetaTracker !== 'undefined') {
+                customerData.metadata.fbc = MetaTracker.getFbc() || '';
+                customerData.metadata.fbp = MetaTracker.getFbp() || '';
+              }
 
               localStorage.setItem('medusa_customer', JSON.stringify({
                 email: customerData.email,
