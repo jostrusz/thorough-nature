@@ -489,10 +489,12 @@ const SupportBoxDashboard = () => {
   const pageRef = useRef<HTMLDivElement>(null)
   useFullWidth(pageRef)
 
+  const qc = useQueryClient()
   const [selectedConfigId, setSelectedConfigId] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>("inbox")
   const [searchQuery, setSearchQuery] = useState("")
   const [showCompose, setShowCompose] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
 
   const { data: configs = [] } = useQuery({
     queryKey: ["supportbox-configs"],
@@ -571,6 +573,27 @@ const SupportBoxDashboard = () => {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <h1 style={{ fontSize: "20px", fontWeight: 600, color: C.text, margin: 0 }}>SupportBox</h1>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <button
+            onClick={async () => {
+              setRefreshing(true)
+              await qc.invalidateQueries({ queryKey: ["supportbox-tickets"] })
+              await qc.invalidateQueries({ queryKey: ["supportbox-tickets-counts"] })
+              setTimeout(() => setRefreshing(false), 600)
+            }}
+            style={{
+              width: "36px", height: "36px", borderRadius: "8px",
+              border: `1px solid ${C.border}`, backgroundColor: C.white,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", transition: "all 0.15s ease",
+            }}
+            title="Refresh"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.textSecondary} strokeWidth="2"
+              style={{ transition: "transform 0.6s ease", transform: refreshing ? "rotate(360deg)" : "rotate(0deg)" }}>
+              <path d="M21 2v6h-6M3 22v-6h6" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M21 13a9 9 0 0 1-15.36 5.64L3 16M3 11a9 9 0 0 1 15.36-5.64L21 8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
           <button
             onClick={() => setShowCompose(true)}
             style={{
