@@ -600,7 +600,7 @@ const SupportBoxDashboard = () => {
 
       <div style={{ display: "flex", gap: "28px" }}>
         {/* ═══ Left Sidebar — Inboxes ═══ */}
-        <div style={{ width: "280px", flexShrink: 0 }}>
+        <div style={{ width: "280px", minWidth: "280px", maxWidth: "280px", flexShrink: 0 }}>
           <div style={{ fontSize: "11px", fontWeight: 600, color: C.textMuted, textTransform: "uppercase", letterSpacing: "0.5px", padding: "0 14px", marginBottom: "8px" }}>
             Inboxes
           </div>

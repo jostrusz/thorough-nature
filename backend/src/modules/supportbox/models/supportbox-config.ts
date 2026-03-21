@@ -4,6 +4,7 @@ const SupportboxConfig = model.define("supportbox_config", {
   id: model.id().primaryKey(),
   email_address: model.text(),
   display_name: model.text(),
+  sender_name: model.text().nullable(),
   resend_api_key: model.text(),
   imap_host: model.text().nullable(),
   imap_port: model.number().nullable(),

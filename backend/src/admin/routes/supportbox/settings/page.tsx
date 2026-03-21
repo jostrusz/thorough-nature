@@ -139,6 +139,7 @@ function ConfigForm({ initialData, onSubmit, onCancel, isLoading }: {
   const [formData, setFormData] = useState({
     email_address: initialData?.email_address || "",
     display_name: initialData?.display_name || "",
+    sender_name: initialData?.sender_name || "",
     resend_api_key: initialData?.resend_api_key || "",
     imap_host: initialData?.imap_host || "",
     imap_port: initialData?.imap_port || "",
@@ -177,7 +178,14 @@ function ConfigForm({ initialData, onSubmit, onCancel, isLoading }: {
           <div>
             <label style={labelStyle}>Display Name *</label>
             <Input value={formData.display_name} onChange={(e) => handleChange("display_name", e.target.value)} placeholder="Support Team" required />
+            <div style={{ fontSize: "11px", color: C.textMuted, marginTop: "4px" }}>Internal label shown in sidebar</div>
           </div>
+        </div>
+
+        <div>
+          <label style={labelStyle}>Sender Name</label>
+          <Input value={formData.sender_name} onChange={(e) => handleChange("sender_name", e.target.value)} placeholder="e.g. De Hondenbijbel, Lass Los Buch" />
+          <div style={{ fontSize: "11px", color: C.textMuted, marginTop: "4px" }}>Name shown to recipients in their inbox (e.g. "De Hondenbijbel &lt;support@dehondenbijbel.nl&gt;")</div>
         </div>
 
         <div>

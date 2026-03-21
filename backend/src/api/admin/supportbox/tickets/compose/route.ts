@@ -70,11 +70,15 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       </div>
     `
 
-    // Send via Resend API
+    // Send via Resend API — use sender_name for friendly "from" display
+    const fromField = config.sender_name
+      ? `${config.sender_name} <${config.email_address}>`
+      : config.email_address
+
     const resendResponse = await axios.post(
       "https://api.resend.com/emails",
       {
-        from: config.email_address,
+        from: fromField,
         to: to_email,
         subject: subject,
         html: fullEmailHtml,

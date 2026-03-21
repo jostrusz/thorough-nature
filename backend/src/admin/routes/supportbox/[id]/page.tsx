@@ -840,7 +840,7 @@ const TicketDetailPage = () => {
 
   const msgs = [...(ticket?.messages || [])].sort((a: any, b: any) => +new Date(a.created_at) - +new Date(b.created_at))
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }) }, [msgs.length])
+  // No auto-scroll — user controls scroll position
 
   const send = () => {
     if (!reply.trim()) return
@@ -889,7 +889,7 @@ const TicketDetailPage = () => {
         <div style={{ flexShrink: 0, marginLeft: "16px", display: "flex", gap: "8px", alignItems: "center" }}>
           {/* Spam button */}
           {ticket.status !== "spam" && (
-            <button onClick={() => { if (window.confirm("Move this ticket to spam?")) spamMut.mutate() }} disabled={spamMut.isPending}
+            <button onClick={() => spamMut.mutate()} disabled={spamMut.isPending}
               style={{
                 padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: D.red,
                 backgroundColor: D.redLight, border: `1px solid ${D.red}25`,
