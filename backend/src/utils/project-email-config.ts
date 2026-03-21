@@ -105,16 +105,16 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
   },
   'lass-los': {
     replyTo: 'buch@lasslosbuch.de',
-    fromName: 'Lass los, was dich kaputt macht',
-    fromEmail: 'Lass los <buch@lasslosbuch.de>',
+    fromName: 'Joris de Vries - Lass los, was dich kaputt macht',
+    fromEmail: 'Joris de Vries - Lass los, was dich kaputt macht <buch@lasslosbuch.de>',
     project: 'lass-los',
     locale: 'de',
   },
   // Also match without hyphen (fallback)
   lasslos: {
     replyTo: 'buch@lasslosbuch.de',
-    fromName: 'Lass los, was dich kaputt macht',
-    fromEmail: 'Lass los <buch@lasslosbuch.de>',
+    fromName: 'Joris de Vries - Lass los, was dich kaputt macht',
+    fromEmail: 'Joris de Vries - Lass los, was dich kaputt macht <buch@lasslosbuch.de>',
     project: 'lass-los',
     locale: 'de',
   },

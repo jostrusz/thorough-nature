@@ -4643,6 +4643,13 @@ body {
       return true;
     });
 
+    // Exclude express-only methods (Google Pay, Apple Pay) from regular payment method list
+    // They are already shown in the express checkout section at the top
+    methods = methods.filter(function(m) {
+      if (m.code === 'googlepay' || m.code === 'applepay') return false;
+      return true;
+    });
+
     // Sort by sort_order
     methods.sort(function(a, b) { return a.sort_order - b.sort_order; });
 

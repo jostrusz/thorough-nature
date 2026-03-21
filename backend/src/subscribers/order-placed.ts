@@ -94,7 +94,22 @@ export default async function orderPlacedHandler({
     console.warn('[OrderPlaced] Could not detect payment method:', payErr.message)
   }
 
-  const displayId = (order as any).metadata?.custom_order_number || (order as any).display_id || order.id
+  // Generate custom order number inline (don't rely on custom-number subscriber which may not have run yet)
+  let displayId = (order as any).metadata?.custom_order_number
+  if (!displayId) {
+    try {
+      const countryCode = (
+        shippingAddress?.country_code ||
+        (order as any).shipping_address?.country_code ||
+        ''
+      ).toUpperCase() || 'XX'
+      const year = new Date().getFullYear()
+      const rawDisplayId = (order as any).display_id || order.id
+      displayId = `${countryCode}${year}-${rawDisplayId}`
+    } catch {
+      displayId = (order as any).display_id || order.id
+    }
+  }
 
   // Resolve billing entity for footer
   let billingEntity: any = null
