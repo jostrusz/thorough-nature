@@ -76,6 +76,7 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
       n.style.setProperty("padding-right", "0", "important")
       n.style.setProperty("margin", "0", "important")
       n.style.setProperty("overflow-x", "hidden", "important")
+      n.style.setProperty("overflow-y", "visible", "important")
       n = n.parentElement
     }
     return () => {
@@ -799,6 +800,17 @@ const TicketDetailPage = () => {
   const qc = useQueryClient()
   const [reply, setReply] = useState("")
   const endRef = useRef<HTMLDivElement>(null)
+
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    // Also scroll any parent containers to top
+    let n: HTMLElement | null = pageRef.current?.parentElement || null
+    while (n && n !== document.documentElement) {
+      n.scrollTop = 0
+      n = n.parentElement
+    }
+  }, [ticketId])
 
   const { data, isLoading } = useQuery({
     queryKey: ["supportbox-ticket-detail", ticketId],
