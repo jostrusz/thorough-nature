@@ -12,6 +12,7 @@ import { EmailTemplates, resolveTemplateKey } from "../modules/email-notificatio
  *   Step 3: 24h after step 2 sent      → "Laatste kans" (urgency/FOMO)
  *
  * De Hondenbijbel uses project-specific templates (dh-abandoned-checkout-1/2/3).
+ * Lass los uses project-specific templates (ll-abandoned-checkout-1/2/3).
  * Loslatenboek uses the original single template (abandoned-checkout).
  *
  * Tracking metadata on cart:
@@ -88,6 +89,34 @@ const ST_STEPS: StepConfig[] = [
     templateKey: EmailTemplates.ST_ABANDONED_CHECKOUT_3,
     subject: (name) => `Sista chansen, ${name} — din varukorg frigörs snart`,
     preview: "Ännu 24 timmar — sedan måste jag frigöra din varukorg.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
+  },
+]
+
+/** Lass los, was dich kaputt macht (lass-los) 3-step sequence */
+const LL_STEPS: StepConfig[] = [
+  {
+    step: 1,
+    templateKey: EmailTemplates.LL_ABANDONED_CHECKOUT_1,
+    subject: (name) => `Hallo ${name}, dein Paket steht bereit! 📦`,
+    preview: "Dein Buch liegt verpackt und wartet auf dich!",
+    delayMs: THIRTY_MINUTES_MS,
+    delayFrom: (_meta, abandonedAt) => abandonedAt,
+  },
+  {
+    step: 2,
+    templateKey: EmailTemplates.LL_ABANDONED_CHECKOUT_2,
+    subject: (name) => `${name}, die Geschichte hinter diesem Buch`,
+    preview: "Schon nach einer Woche fühlte ich mich leichter...",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
+  },
+  {
+    step: 3,
+    templateKey: EmailTemplates.LL_ABANDONED_CHECKOUT_3,
+    subject: (name) => `Letzte Chance, ${name} — dein Warenkorb wird freigegeben`,
+    preview: "Noch 24 Stunden — danach wird dein Warenkorb freigegeben.",
     delayMs: TWENTY_FOUR_HOURS_MS,
     delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
   },
@@ -309,6 +338,79 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         } catch (emailError: any) {
           logger.error(
             `[Abandoned Cart] Failed to send ST step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
+          )
+        }
+        continue
+      }
+
+      // ── Lass los, was dich kaputt macht: 3-step sequence ──
+      if (projectId === "lass-los") {
+        // All 3 steps sent? Done.
+        if (currentStep >= 3) {
+          skippedCount++
+          continue
+        }
+
+        const nextStepConfig = LL_STEPS[currentStep] // currentStep=0 → step 1, etc.
+
+        // Check if enough time has passed
+        const referenceTime = nextStepConfig.delayFrom(meta, abandonedAt)
+        if (isNaN(referenceTime.getTime())) continue // invalid date, skip
+        if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
+
+        // Extract customer data
+        const firstName = cart.shipping_address?.first_name || "dort"
+        const checkoutUrl = meta.checkout_url || "https://www.lasslosbuch.de/checkout"
+        const mainItem = (cart.items || [])[0]
+        const productName = mainItem?.variant?.product?.title || mainItem?.title || "Lass los, was dich kaputt macht"
+        // Calculate total price from all cart items (quantity × unit_price)
+        const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+        }, 0)
+        const productPrice = cartTotal > 0
+          ? cartTotal.toFixed(2).replace(".", ",")
+          : "35,00"
+        const productImage = mainItem?.variant?.product?.thumbnail || ""
+
+        try {
+          await notificationModuleService.createNotifications({
+            to: cart.email,
+            channel: "email",
+            template: nextStepConfig.templateKey,
+            from: "Joris de Vries - Lass los, was dich kaputt macht <buch@lasslosbuch.de>",
+            data: {
+              emailOptions: {
+                replyTo: "buch@lasslosbuch.de",
+                subject: nextStepConfig.subject(firstName),
+              },
+              firstName,
+              checkoutUrl,
+              productName,
+              productPrice,
+              productImage,
+              preview: nextStepConfig.preview,
+            },
+          })
+
+          // Update metadata with step tracking
+          await cartModuleService.updateCarts(cart.id, {
+            metadata: {
+              ...meta,
+              recovery_email_step: nextStepConfig.step,
+              [`recovery_email_step${nextStepConfig.step}_at`]: now.toISOString(),
+              // Legacy compat: mark as sent after step 1
+              recovery_email_sent: true,
+              recovery_email_sent_at: meta.recovery_email_sent_at || now.toISOString(),
+            },
+          })
+
+          sentCount++
+          logger.info(
+            `[Abandoned Cart] LL step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
+          )
+        } catch (emailError: any) {
+          logger.error(
+            `[Abandoned Cart] Failed to send LL step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
           )
         }
         continue
