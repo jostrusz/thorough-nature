@@ -829,6 +829,15 @@ const TicketDetailPage = () => {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] }); qc.invalidateQueries({ queryKey: ["supportbox-tickets"] }) },
   })
 
+  const spamMut = useMutation({
+    mutationFn: async () => sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/spam`, { method: "POST" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] })
+      qc.invalidateQueries({ queryKey: ["supportbox-tickets"] })
+      navigate("/supportbox")
+    },
+  })
+
   const msgs = [...(ticket?.messages || [])].sort((a: any, b: any) => +new Date(a.created_at) - +new Date(b.created_at))
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }) }, [msgs.length])
@@ -844,6 +853,7 @@ const TicketDetailPage = () => {
 
   const st = ticket.status === "solved" ? { label: "Solved", bg: D.greenLight, color: D.green }
     : ticket.status === "old" ? { label: "Old", bg: D.orangeLight, color: D.orange }
+    : ticket.status === "spam" ? { label: "Spam", bg: D.redLight, color: D.red }
     : { label: "New", bg: D.greenLight, color: D.green }
 
   return (
@@ -876,8 +886,32 @@ const TicketDetailPage = () => {
           </div>
         </div>
 
-        <div style={{ flexShrink: 0, marginLeft: "16px" }}>
-          {ticket.status !== "solved" ? (
+        <div style={{ flexShrink: 0, marginLeft: "16px", display: "flex", gap: "8px", alignItems: "center" }}>
+          {/* Spam button */}
+          {ticket.status !== "spam" && (
+            <button onClick={() => { if (window.confirm("Move this ticket to spam?")) spamMut.mutate() }} disabled={spamMut.isPending}
+              style={{
+                padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: D.red,
+                backgroundColor: D.redLight, border: `1px solid ${D.red}25`,
+                borderRadius: D.r8, cursor: "pointer", transition: "all 0.15s",
+                whiteSpace: "nowrap",
+              }}>
+              {spamMut.isPending ? "..." : "Spam"}
+            </button>
+          )}
+
+          {/* Solve / Reopen / Un-spam */}
+          {ticket.status === "spam" ? (
+            <button onClick={() => reopenMut.mutate()} disabled={reopenMut.isPending}
+              style={{
+                padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: D.orange,
+                backgroundColor: D.orangeLight, border: `1px solid ${D.orange}40`,
+                borderRadius: D.r8, cursor: "pointer", transition: "all 0.15s",
+                whiteSpace: "nowrap",
+              }}>
+              {reopenMut.isPending ? "..." : "Not spam"}
+            </button>
+          ) : ticket.status !== "solved" ? (
             <button onClick={() => solveMut.mutate()} disabled={solveMut.isPending}
               style={{
                 padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: "#fff",
