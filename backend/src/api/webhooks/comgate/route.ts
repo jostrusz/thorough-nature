@@ -105,10 +105,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         }
 
         const existingLog = meta.payment_activity_log || []
-        const updatedMetadata = {
+        const updatedMetadata: any = {
           ...meta,
           payment_activity_log: [...existingLog, activityEntry],
           comgateStatus: comgateStatus,
+        }
+
+        // Mark as captured when Comgate confirms payment
+        if (comgateStatus === "PAID") {
+          updatedMetadata.payment_captured = true
+          updatedMetadata.payment_captured_at = new Date().toISOString()
         }
         await pool.query(
           `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
@@ -116,6 +122,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         )
 
         logger.info(`[Comgate Webhook] Order ${matchingOrder.id} updated with status: ${medusaStatus}`)
+
+        if (comgateStatus === "PAID") {
+          try {
+            const { ContainerRegistrationKeys: CRK } = await import("@medusajs/framework/utils")
+            const eventBus = req.scope.resolve(CRK.EVENT_BUS)
+            await eventBus.emit("payment.captured", { id: matchingOrder.id })
+            logger.info(`[Comgate Webhook] Emitted payment.captured event for order ${matchingOrder.id}`)
+          } catch (e: any) {
+            logger.warn(`[Comgate Webhook] Failed to emit payment.captured: ${e.message}`)
+          }
+        }
 
         emitPaymentLog(logger, {
           provider: "comgate",

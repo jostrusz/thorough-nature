@@ -137,9 +137,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         klarnaStatus: event_type,
       }
 
-      // Mark as captured when Klarna confirms capture
-      if (event_type === "order.captured") {
+      // Mark as captured when Klarna confirms capture or authorization
+      if (event_type === "order.captured" || event_type === "order.authorized" || event_type === "order.payment_authorized") {
         updatedMetadata.payment_captured = true
+        updatedMetadata.payment_captured_at = new Date().toISOString()
         updatedMetadata.klarna_captured_at = new Date().toISOString()
       }
 
@@ -176,6 +177,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       logger.info(
         `[Klarna Webhook] Order ${order.id} updated with event: ${event_type}`
       )
+
+      if (event_type === "order.captured" || event_type === "order.authorized" || event_type === "order.payment_authorized") {
+        try {
+          const { ContainerRegistrationKeys: CRK } = await import("@medusajs/framework/utils")
+          const eventBus = req.scope.resolve(CRK.EVENT_BUS)
+          await eventBus.emit("payment.captured", { id: order.id })
+          logger.info(`[Klarna Webhook] Emitted payment.captured event for order ${order.id}`)
+        } catch (e: any) {
+          logger.warn(`[Klarna Webhook] Failed to emit payment.captured: ${e.message}`)
+        }
+      }
 
       emitPaymentLog(logger, {
         provider: "klarna",

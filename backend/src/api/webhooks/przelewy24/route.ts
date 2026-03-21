@@ -95,12 +95,18 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     // Update order metadata with activity log via direct DB query
     const existingLog = meta.payment_activity_log || []
-    const updatedMetadata = {
+    const updatedMetadata: any = {
       ...meta,
       payment_activity_log: [...existingLog, activityEntry],
       p24OrderId: orderId,
       p24SessionId: sessionId,
       p24Status: transactionData.status,
+    }
+
+    // Mark as captured when P24 confirms payment
+    if (transactionData.status === "COMPLETED") {
+      updatedMetadata.payment_captured = true
+      updatedMetadata.payment_captured_at = new Date().toISOString()
     }
     await pool.query(
       `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
@@ -111,6 +117,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     logger.info(
       `[P24 Webhook] Order ${order.id} verified with status: ${medusaStatus}`
     )
+
+    if (transactionData.status === "COMPLETED") {
+      try {
+        const { ContainerRegistrationKeys: CRK } = await import("@medusajs/framework/utils")
+        const eventBus = req.scope.resolve(CRK.EVENT_BUS)
+        await eventBus.emit("payment.captured", { id: order.id })
+        logger.info(`[P24 Webhook] Emitted payment.captured event for order ${order.id}`)
+      } catch (e: any) {
+        logger.warn(`[P24 Webhook] Failed to emit payment.captured: ${e.message}`)
+      }
+    }
 
     emitPaymentLog(logger, {
       provider: "przelewy24",

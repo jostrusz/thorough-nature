@@ -173,11 +173,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         }
 
         const existingLog = (order as any).metadata?.payment_activity_log || []
-        const updatedMetadata = {
+        const updatedMetadata: any = {
           ...(order as any).metadata,
           payment_activity_log: [...existingLog, activityEntry],
           mollieStatus,
           ...(isPayment ? { molliePaymentId: mollieId } : { mollieOrderId: mollieId }),
+        }
+
+        // Mark as captured when Mollie confirms payment
+        if (mollieStatus === "paid" || mollieStatus === "completed") {
+          updatedMetadata.payment_captured = true
+          updatedMetadata.payment_captured_at = new Date().toISOString()
         }
         try {
           const { Pool } = require("pg")
@@ -191,6 +197,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           logger.warn(`[Mollie Webhook] DB update failed: ${dbErr.message}`)
         }
         logger.info(`[Mollie Webhook] Order ${(order as any).id} updated with status: ${medusaStatus}`)
+
+        if (mollieStatus === "paid" || mollieStatus === "completed") {
+          try {
+            const { ContainerRegistrationKeys: CRK } = await import("@medusajs/framework/utils")
+            const eventBus = req.scope.resolve(CRK.EVENT_BUS)
+            await eventBus.emit("payment.captured", { id: (order as any).id })
+            logger.info(`[Mollie Webhook] Emitted payment.captured event for order ${(order as any).id}`)
+          } catch (e: any) {
+            logger.warn(`[Mollie Webhook] Failed to emit payment.captured: ${e.message}`)
+          }
+        }
 
         emitPaymentLog(logger, {
           provider: "mollie",
