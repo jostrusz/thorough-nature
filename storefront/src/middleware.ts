@@ -111,6 +111,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // ─── Admin shortcut: /admin → /{defaultRegion}/admin ───
+  if (pathname === "/admin" || pathname === "/admin/") {
+    const regionMap = await getRegionMap()
+    const countryCode = regionMap && (await getCountryCode(request, regionMap))
+    return NextResponse.redirect(
+      `${request.nextUrl.origin}/${countryCode || DEFAULT_REGION}/admin`,
+      307
+    )
+  }
+
   // ─── MarketingHQ: Project domain routing ───
   // If hostname matches a project domain, rewrite to /p/{slug}/...
   const projectSlug = PROJECT_DOMAINS[cleanHost]
