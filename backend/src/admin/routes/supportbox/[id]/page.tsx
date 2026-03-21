@@ -479,8 +479,9 @@ function DeliveryBadge({ status }: { status: string }) {
 /* ═══════════════════════════════════════════════════════════════
    REPLY COMPOSER
    ═══════════════════════════════════════════════════════════════ */
-function Composer({ text, setText, onSend, sending }: {
+function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen }: {
   text: string; setText: (v: string) => void; onSend: () => void; sending: boolean
+  keepOpen: boolean; setKeepOpen: (v: boolean) => void
 }) {
   const ref = useRef<HTMLTextAreaElement>(null)
 
@@ -519,9 +520,20 @@ function Composer({ text, setText, onSend, sending }: {
         padding: "12px 24px", borderTop: `1px solid ${D.borderSubtle}`,
         backgroundColor: D.inset,
       }}>
-        <span style={{ fontSize: "11px", color: D.textMuted }}>
-          {text.trim() ? `${text.trim().length} chars` : ""}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <span style={{ fontSize: "11px", color: D.textMuted }}>
+            {text.trim() ? `${text.trim().length} chars` : ""}
+          </span>
+          <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12px", color: D.textSec, cursor: "pointer", userSelect: "none" }}>
+            <input
+              type="checkbox"
+              checked={keepOpen}
+              onChange={(e) => setKeepOpen(e.target.checked)}
+              style={{ width: "14px", height: "14px", accentColor: D.brand, cursor: "pointer" }}
+            />
+            Keep in inbox
+          </label>
+        </div>
         <button
           onClick={onSend}
           disabled={!text.trim() || sending}
@@ -832,6 +844,7 @@ const TicketDetailPage = () => {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const [reply, setReply] = useState("")
+  const [keepOpen, setKeepOpen] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
 
   // Scroll to top on page load
@@ -855,8 +868,15 @@ const TicketDetailPage = () => {
   const orders = data?.allOrders || []
 
   const replyMut = useMutation({
-    mutationFn: async (html: string) => sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/reply`, { method: "POST", body: { body_html: html, body_text: reply } }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] }); setReply("") },
+    mutationFn: async (html: string) => sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/reply`, { method: "POST", body: { body_html: html, body_text: reply, keep_open: keepOpen } }),
+    onSuccess: () => {
+      setReply("")
+      qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] })
+      qc.invalidateQueries({ queryKey: ["supportbox-tickets"] })
+      if (!keepOpen) {
+        navigate("/supportbox")
+      }
+    },
   })
 
   const solveMut = useMutation({
@@ -1006,7 +1026,7 @@ const TicketDetailPage = () => {
           </div>
 
           {/* Composer */}
-          <Composer text={reply} setText={setReply} onSend={send} sending={replyMut.isPending} />
+          <Composer text={reply} setText={setReply} onSend={send} sending={replyMut.isPending} keepOpen={keepOpen} setKeepOpen={setKeepOpen} />
 
           {replyMut.isError && (
             <div style={{ padding: "12px 16px", backgroundColor: D.redLight, border: `1px solid ${D.red}30`, borderRadius: D.r12, fontSize: "13px", color: D.red }}>

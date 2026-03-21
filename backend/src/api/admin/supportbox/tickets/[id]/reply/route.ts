@@ -85,14 +85,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       delivery_status_at: new Date().toISOString(),
     })
 
-    // Auto-solve ticket after admin reply
-    await supportboxService.updateSupportboxTickets({
-      id,
-      status: "solved",
-      solved_at: new Date().toISOString(),
-    })
+    // Auto-solve ticket after admin reply (unless keep_open is set)
+    if (!body.keep_open) {
+      await supportboxService.updateSupportboxTickets({
+        id,
+        status: "solved",
+        solved_at: new Date().toISOString(),
+      })
+    }
 
-    res.json({ message })
+    res.json({ message, kept_open: !!body.keep_open })
   } catch (error: any) {
     res.status(400).json({ error: error.message })
   }
