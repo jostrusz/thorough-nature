@@ -285,6 +285,18 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         `[PayPal Webhook] Order ${order.id} updated with event: ${eventType}`
       )
 
+      // Emit custom event when payment is captured so subscribers can react (e-book delivery etc.)
+      if (eventType === "PAYMENT.CAPTURE.COMPLETED") {
+        try {
+          const { ContainerRegistrationKeys } = await import("@medusajs/framework/utils")
+          const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+          await eventBus.emit("payment.captured", { id: order.id })
+          logger.info(`[PayPal Webhook] Emitted payment.captured event for order ${order.id}`)
+        } catch (e: any) {
+          logger.warn(`[PayPal Webhook] Failed to emit payment.captured: ${e.message}`)
+        }
+      }
+
       emitPaymentLog(logger, {
         provider: "paypal",
         event: eventType,

@@ -104,6 +104,12 @@ export default async function orderPlacedDigitalDownloadHandler({
       relations: ['items', 'shipping_address'],
     })
 
+    // Guard: skip if e-books already sent (prevent duplicate sends from webhook retries)
+    if (order.metadata?.ebook_sent) {
+      console.log(`[digital-download] E-books already sent for order ${order.id}, skipping`)
+      return
+    }
+
     // Project-specific config
     const projectConfig = getProjectEmailConfig(order)
     const projectId = projectConfig.project
@@ -202,6 +208,20 @@ export default async function orderPlacedDigitalDownloadHandler({
       ...(htmlBody ? { html_body: htmlBody } : {}),
     }).catch((err) => console.warn('[digital-download] Could not log email activity:', err.message))
 
+    // Mark e-books as sent to prevent duplicate sends
+    try {
+      const { Pool } = require("pg")
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+      const existingMeta = order.metadata || {}
+      await pool.query(
+        `UPDATE "order" SET metadata = jsonb_set(COALESCE(metadata, '{}'), '{ebook_sent}', 'true'), updated_at = NOW() WHERE id = $1`,
+        [order.id]
+      )
+      await pool.end()
+    } catch (metaErr: any) {
+      console.warn(`[digital-download] Could not set ebook_sent flag: ${metaErr.message}`)
+    }
+
     console.log(`[digital-download] Created download token ${token} for order ${order.id}`)
   } catch (error: any) {
     console.error('[digital-download] Error creating digital download:', error)
@@ -216,5 +236,5 @@ export default async function orderPlacedDigitalDownloadHandler({
 }
 
 export const config: SubscriberConfig = {
-  event: 'order.placed',
+  event: 'payment.captured',
 }

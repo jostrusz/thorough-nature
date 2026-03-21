@@ -189,11 +189,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     // Update order metadata via direct DB query (orderModuleService not available in webhook context)
     const existingLog = (order as any).metadata?.payment_activity_log || []
-    const updatedMetadata = {
+    const updatedMetadata: any = {
       ...(order as any).metadata,
       payment_activity_log: [...existingLog, activityEntry],
       stripePaymentIntentId: paymentIntentId,
       stripeStatus: event.type,
+    }
+
+    // Mark as captured when Stripe confirms payment success
+    if (event.type === "payment_intent.succeeded") {
+      updatedMetadata.payment_captured = true
+      updatedMetadata.payment_captured_at = new Date().toISOString()
     }
     try {
       const { Pool } = require("pg")
@@ -210,6 +216,18 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     logger.info(
       `[Stripe Webhook] Order ${(order as any).id} updated with event: ${event.type}`
     )
+
+    // Emit custom event when payment is captured so subscribers can react (e-book delivery etc.)
+    if (event.type === "payment_intent.succeeded") {
+      try {
+        const { ContainerRegistrationKeys } = await import("@medusajs/framework/utils")
+        const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        await eventBus.emit("payment.captured", { id: (order as any).id })
+        logger.info(`[Stripe Webhook] Emitted payment.captured event for order ${(order as any).id}`)
+      } catch (e: any) {
+        logger.warn(`[Stripe Webhook] Failed to emit payment.captured: ${e.message}`)
+      }
+    }
 
     // Structured log for Railway filtering
     emitPaymentLog(logger, {
