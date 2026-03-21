@@ -368,18 +368,23 @@ function ComposeModal({ configs, onClose, defaultConfigId }: {
             <label style={{ fontSize: "12px", fontWeight: 600, color: C.textSecondary, display: "block", marginBottom: "6px" }}>
               From
             </label>
-            <Select value={configId} onValueChange={(v) => setConfigId(v)}>
-              <Select.Trigger>
-                <Select.Value placeholder="Select account..." />
-              </Select.Trigger>
-              <Select.Content>
-                {configs.map((c: any) => (
-                  <Select.Item key={c.id} value={c.id}>
-                    {c.display_name} ({c.email_address})
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select>
+            <select
+              value={configId}
+              onChange={(e) => setConfigId(e.target.value)}
+              style={{
+                width: "100%", padding: "8px 12px", fontSize: "13px",
+                border: `1px solid ${C.border}`, borderRadius: "8px",
+                backgroundColor: C.white, color: C.text,
+                outline: "none", cursor: "pointer",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+              }}
+            >
+              {configs.map((c: any) => (
+                <option key={c.id} value={c.id}>
+                  {c.sender_name ? `${c.sender_name} (${c.email_address})` : `${c.display_name} (${c.email_address})`}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* To */}
