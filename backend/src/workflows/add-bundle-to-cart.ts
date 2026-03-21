@@ -23,6 +23,13 @@ import {
  * extracts tax from within the price instead of adding it on top.
  */
 const BUNDLE_PRICING: Record<string, Record<number, number>> = {
+  // Lass Los Buch — "Lass los, was dich kaputt macht" (DE/AT/LU)
+  "lass-los-was-dich-kaputt-macht": {
+    1: 35,    // €35.00 incl. tax
+    2: 59,    // €59.00 incl. tax (save €11)
+    3: 79,    // €79.00 incl. tax (save €26)
+    4: 99,    // €99.00 incl. tax (save €41)
+  },
   // Loslatenboek — "Laat Los Wat Je Kapotmaakt"
   "laat-los-wat-je-kapotmaakt": {
     1: 35,    // €35.00 incl. tax
