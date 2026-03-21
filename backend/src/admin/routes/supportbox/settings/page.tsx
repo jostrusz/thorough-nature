@@ -62,10 +62,13 @@ function ConfirmDeleteModal({ name, onConfirm, onCancel }: { name: string; onCon
       position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
       backgroundColor: "rgba(0,0,0,0.4)", display: "flex",
       alignItems: "center", justifyContent: "center", zIndex: 9999,
+      backdropFilter: "blur(4px)",
+      animation: "fadeIn 0.2s ease-out",
     }}>
       <div style={{
-        backgroundColor: C.white, borderRadius: "12px", padding: "24px",
-        width: "400px", boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+        backgroundColor: C.white, borderRadius: "16px", padding: "24px",
+        width: "400px", boxShadow: "0 25px 80px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.08)",
+        animation: "fadeIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
       }}>
         <h3 style={{ fontSize: "16px", fontWeight: 600, color: C.text, marginBottom: "8px", marginTop: 0 }}>
           Delete Email Account
@@ -96,14 +99,16 @@ function ConfigCard({ config, onEdit, onDelete }: { config: any; onEdit: () => v
       style={{
         padding: "20px",
         backgroundColor: C.white,
-        border: `1px solid ${C.border}`,
-        borderRadius: "12px",
+        border: `1px solid ${hovered ? (config.is_active ? C.green + "50" : C.border) : C.border}`,
+        borderRadius: "14px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        transform: hovered ? "translateY(-1px)" : "translateY(0)",
-        boxShadow: hovered ? "0 4px 12px rgba(0,0,0,0.06)" : "0 1px 3px rgba(0,0,0,0.04)",
-        transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+        transform: hovered ? "translateY(-3px) scale(1.01)" : "translateY(0) scale(1)",
+        boxShadow: hovered
+          ? `0 8px 25px ${config.is_active ? C.green + "15" : "rgba(0,0,0,0.08)"}, 0 4px 12px rgba(0,0,0,0.04)`
+          : "0 1px 3px rgba(0,0,0,0.04)",
+        transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -112,6 +117,9 @@ function ConfigCard({ config, onEdit, onDelete }: { config: any; onEdit: () => v
           width: "8px", height: "8px", borderRadius: "50%",
           backgroundColor: config.is_active ? C.green : C.textMuted,
           flexShrink: 0,
+          boxShadow: config.is_active ? `0 0 8px ${C.green}50` : "none",
+          transform: hovered ? "scale(1.3)" : "scale(1)",
+          transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
         }} />
         <div>
           <div style={{ fontSize: "14px", fontWeight: 600, color: C.text, marginBottom: "2px" }}>
