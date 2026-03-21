@@ -45,6 +45,7 @@
     "datenschutz": "datenschutz.html",
     "agb": "agb.html",
     "versand": "versand.html",
-    "sendungsverfolgung": "sendungsverfolgung.html"
+    "sendungsverfolgung": "sendungsverfolgung.html",
+    "impressum": "impressum.html"
   }
 }
