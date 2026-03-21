@@ -405,9 +405,17 @@ function MessageBubble({ msg }: { msg: any }) {
   const inb = msg.direction === "inbound"
   const body = msg.body_html || msg.body_text || ""
   const has = f.strip(body).length > 0
+  const [hovered, setHovered] = useState(false)
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: inb ? "flex-start" : "flex-end" }}>
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "flex", flexDirection: "column", alignItems: inb ? "flex-start" : "flex-end",
+        animation: `msgSlide${inb ? "Left" : "Right"} 0.35s cubic-bezier(0.4, 0, 0.2, 1)`,
+      }}
+    >
       {/* Sender */}
       <div style={{
         fontSize: "11px", fontWeight: 600, color: inb ? D.textSec : D.green,
@@ -420,10 +428,14 @@ function MessageBubble({ msg }: { msg: any }) {
       <div style={{
         maxWidth: "88%",
         padding: "14px 18px",
-        borderRadius: inb ? "4px 16px 16px 16px" : "16px 4px 16px 16px",
+        borderRadius: inb ? "4px 18px 18px 18px" : "18px 4px 18px 18px",
         backgroundColor: inb ? D.card : D.greenLight,
         border: `1px solid ${inb ? D.border : D.greenBorder}`,
-        boxShadow: D.xs,
+        boxShadow: hovered
+          ? `0 4px 16px ${inb ? "rgba(0,0,0,0.08)" : D.green + "20"}`
+          : D.xs,
+        transform: hovered ? "scale(1.01)" : "scale(1)",
+        transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
       }}>
         {has ? (
           <div style={{ fontSize: "14px", lineHeight: 1.7, color: D.text, wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html: body }} />
@@ -437,6 +449,8 @@ function MessageBubble({ msg }: { msg: any }) {
         fontSize: "11px", color: D.textMuted, marginTop: "6px",
         paddingLeft: inb ? "2px" : 0, paddingRight: inb ? 0 : "2px",
         display: "flex", alignItems: "center", gap: "8px",
+        opacity: hovered ? 1 : 0.7,
+        transition: "opacity 0.2s ease",
       }}>
         <span>{f.dt(msg.created_at)}</span>
         {!inb && msg.delivery_status && (
@@ -484,6 +498,7 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen }: {
   keepOpen: boolean; setKeepOpen: (v: boolean) => void
 }) {
   const ref = useRef<HTMLTextAreaElement>(null)
+  const [focused, setFocused] = useState(false)
 
   useEffect(() => {
     const el = ref.current
@@ -495,7 +510,10 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen }: {
   return (
     <div style={{
       backgroundColor: D.card, borderRadius: D.r16,
-      border: `1px solid ${D.border}`, boxShadow: D.sm, overflow: "hidden",
+      border: `1px solid ${focused ? D.brand + "60" : D.border}`,
+      boxShadow: focused ? `0 0 0 3px ${D.brand}12, ${D.sm}` : D.sm,
+      overflow: "hidden",
+      transition: "border-color 0.3s ease, box-shadow 0.3s ease",
     }}>
       {/* Input area */}
       <div style={{ padding: "20px 24px 12px" }}>
@@ -503,6 +521,8 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen }: {
           ref={ref}
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           placeholder="Write your reply..."
           style={{
             width: "100%", minHeight: "80px", maxHeight: "300px",
@@ -535,15 +555,16 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen }: {
           </label>
         </div>
         <button
+          className={text.trim() ? "sb-action-btn" : ""}
           onClick={onSend}
           disabled={!text.trim() || sending}
           style={{
             padding: "8px 20px", fontSize: "13px", fontWeight: 600, color: "#fff",
             background: text.trim() ? D.brand : D.textFaint,
-            border: "none", borderRadius: D.r8,
+            border: "none", borderRadius: "10px",
             cursor: text.trim() ? "pointer" : "not-allowed",
-            boxShadow: text.trim() ? `0 1px 3px ${D.brand}44` : "none",
-            transition: "all 0.15s ease",
+            boxShadow: text.trim() ? `0 2px 8px ${D.brand}35` : "none",
+            transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
           }}
         >
           {sending ? "Sending..." : "Send reply"}
@@ -922,12 +943,21 @@ const TicketDetailPage = () => {
 
   return (
     <div ref={pageRef} style={{ width: "100%", padding: "24px 32px", background: PAGE_BG, boxSizing: "border-box", minHeight: "100vh", overflowX: "hidden" }}>
+      <style>{`
+        @keyframes msgSlideLeft { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes msgSlideRight { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .sb-action-btn { transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important; }
+        .sb-action-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important; }
+        .sb-back-btn { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+        .sb-back-btn:hover { background-color: #F3F4F6 !important; transform: scale(1.08) !important; border-color: #D1D5DB !important; }
+      `}</style>
 
       {/* ══════ HEADER ══════ */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: 0 }}>
           <Link to="/supportbox" style={{ textDecoration: "none", flexShrink: 0 }}>
-            <div style={{
+            <div className="sb-back-btn" style={{
               width: "34px", height: "34px", borderRadius: D.r8, backgroundColor: D.card,
               border: `1px solid ${D.border}`, display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", boxShadow: D.xs,
@@ -953,11 +983,11 @@ const TicketDetailPage = () => {
         <div style={{ flexShrink: 0, marginLeft: "16px", display: "flex", gap: "8px", alignItems: "center" }}>
           {/* Spam button */}
           {ticket.status !== "spam" && (
-            <button onClick={() => spamMut.mutate()} disabled={spamMut.isPending}
+            <button className="sb-action-btn" onClick={() => spamMut.mutate()} disabled={spamMut.isPending}
               style={{
                 padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: D.red,
                 backgroundColor: D.redLight, border: `1px solid ${D.red}25`,
-                borderRadius: D.r8, cursor: "pointer", transition: "all 0.15s",
+                borderRadius: D.r8, cursor: "pointer", transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
                 whiteSpace: "nowrap",
               }}>
               {spamMut.isPending ? "..." : "Spam"}
@@ -966,31 +996,31 @@ const TicketDetailPage = () => {
 
           {/* Solve / Reopen / Un-spam */}
           {ticket.status === "spam" ? (
-            <button onClick={() => reopenMut.mutate()} disabled={reopenMut.isPending}
+            <button className="sb-action-btn" onClick={() => reopenMut.mutate()} disabled={reopenMut.isPending}
               style={{
                 padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: D.orange,
                 backgroundColor: D.orangeLight, border: `1px solid ${D.orange}40`,
-                borderRadius: D.r8, cursor: "pointer", transition: "all 0.15s",
+                borderRadius: D.r8, cursor: "pointer", transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
                 whiteSpace: "nowrap",
               }}>
               {reopenMut.isPending ? "..." : "Not spam"}
             </button>
           ) : ticket.status !== "solved" ? (
-            <button onClick={() => solveMut.mutate()} disabled={solveMut.isPending}
+            <button className="sb-action-btn" onClick={() => solveMut.mutate()} disabled={solveMut.isPending}
               style={{
                 padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: "#fff",
                 backgroundColor: D.green, border: "none", borderRadius: D.r8,
-                cursor: "pointer", boxShadow: D.xs, transition: "all 0.15s",
+                cursor: "pointer", boxShadow: `0 2px 8px ${D.green}35`, transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
                 whiteSpace: "nowrap",
               }}>
               {solveMut.isPending ? "..." : "Mark solved"}
             </button>
           ) : (
-            <button onClick={() => reopenMut.mutate()} disabled={reopenMut.isPending}
+            <button className="sb-action-btn" onClick={() => reopenMut.mutate()} disabled={reopenMut.isPending}
               style={{
                 padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: D.orange,
                 backgroundColor: D.orangeLight, border: `1px solid ${D.orange}40`,
-                borderRadius: D.r8, cursor: "pointer", transition: "all 0.15s",
+                borderRadius: D.r8, cursor: "pointer", transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
                 whiteSpace: "nowrap",
               }}>
               {reopenMut.isPending ? "..." : "Reopen"}

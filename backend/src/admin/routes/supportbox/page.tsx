@@ -105,22 +105,28 @@ function StatCard({ label, count, color, bgColor, icon, isActive, onClick }: {
       onClick={onClick}
       style={{
         padding: "16px 20px",
-        backgroundColor: isActive ? bgColor : C.white,
-        border: `1px solid ${isActive ? color : C.border}`,
-        borderRadius: "12px",
+        backgroundColor: isActive ? bgColor : hovered ? bgColor + "80" : C.white,
+        border: `1px solid ${isActive ? color : hovered ? color + "60" : C.border}`,
+        borderRadius: "14px",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
         gap: "14px",
-        transform: hovered ? "translateY(-1px)" : "translateY(0)",
-        boxShadow: hovered ? "0 4px 12px rgba(0,0,0,0.06)" : "0 1px 3px rgba(0,0,0,0.04)",
-        transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+        transform: hovered ? "translateY(-3px) scale(1.02)" : "translateY(0) scale(1)",
+        boxShadow: hovered
+          ? `0 8px 25px ${color}22, 0 4px 12px rgba(0,0,0,0.06)`
+          : isActive
+            ? `0 2px 8px ${color}18`
+            : "0 1px 3px rgba(0,0,0,0.04)",
+        transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
       }}
     >
       <div style={{
-        width: "40px", height: "40px", borderRadius: "10px",
+        width: "42px", height: "42px", borderRadius: "12px",
         backgroundColor: bgColor, display: "flex", alignItems: "center",
         justifyContent: "center", fontSize: "18px", flexShrink: 0,
+        transform: hovered ? "scale(1.1) rotate(-3deg)" : "scale(1) rotate(0deg)",
+        transition: "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
       }}>
         {icon}
       </div>
@@ -153,14 +159,15 @@ function InboxItem({ label, email, newCount, isActive, isActiveStatus, onClick, 
         padding: "12px 14px",
         textAlign: "left",
         border: "none",
-        borderLeft: isActive ? `3px solid ${activeColor}` : "3px solid transparent",
-        borderRadius: "0 8px 8px 0",
+        borderLeft: isActive ? `3px solid ${activeColor}` : `3px solid ${hovered ? activeColor + "40" : "transparent"}`,
+        borderRadius: "0 10px 10px 0",
         backgroundColor: isActive ? activeBg : hovered ? "#F3F4F6" : C.white,
         cursor: "pointer",
-        transition: "all 0.15s ease",
+        transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
         display: "flex",
         alignItems: "center",
         gap: "10px",
+        transform: hovered && !isActive ? "translateX(4px)" : "translateX(0)",
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -169,6 +176,8 @@ function InboxItem({ label, email, newCount, isActive, isActiveStatus, onClick, 
             <div style={{
               width: "7px", height: "7px", borderRadius: "50%",
               backgroundColor: isActiveStatus ? C.green : C.textMuted, flexShrink: 0,
+              boxShadow: isActiveStatus ? `0 0 6px ${C.green}50` : "none",
+              transition: "box-shadow 0.3s ease",
             }} />
           )}
           <span style={{ fontSize: "13px", fontWeight: 600, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -188,6 +197,9 @@ function InboxItem({ label, email, newCount, isActive, isActiveStatus, onClick, 
           fontSize: "11px", fontWeight: 600,
           display: "flex", alignItems: "center", justifyContent: "center",
           padding: "0 6px", flexShrink: 0,
+          boxShadow: `0 2px 6px ${color || C.green}40`,
+          transform: hovered ? "scale(1.1)" : "scale(1)",
+          transition: "transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
         }}>
           {newCount}
         </div>
@@ -216,18 +228,23 @@ function TicketCard({ ticket }: { ticket: any }) {
         style={{
           padding: "14px 20px",
           borderBottom: `1px solid ${C.borderLight}`,
+          borderLeft: hovered ? `3px solid ${statusColor}` : "3px solid transparent",
           display: "flex",
           alignItems: "center",
           gap: "14px",
           cursor: "pointer",
-          backgroundColor: hovered ? "#F9FAFB" : "transparent",
-          transition: "background-color 0.15s ease",
+          backgroundColor: hovered ? `${statusColor}08` : "transparent",
+          transform: hovered ? "translateX(2px)" : "translateX(0)",
+          transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
         }}
       >
         {/* Status dot */}
         <div style={{
           width: "10px", height: "10px", borderRadius: "50%",
           backgroundColor: statusColor, flexShrink: 0,
+          boxShadow: hovered ? `0 0 8px ${statusColor}50` : "none",
+          transform: hovered ? "scale(1.2)" : "scale(1)",
+          transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
         }} />
 
         {/* Content */}
@@ -262,6 +279,8 @@ function TicketCard({ ticket }: { ticket: any }) {
             <div style={{
               width: "8px", height: "8px", borderRadius: "50%",
               backgroundColor: C.blue,
+              boxShadow: `0 0 6px ${C.blue}60`,
+              animation: "pulse 2s ease-in-out infinite",
             }} />
           )}
           <Badge color={badgeColor}>
@@ -326,7 +345,8 @@ function ComposeModal({ configs, onClose, defaultConfigId }: {
         onClick={onClose}
         style={{
           position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.4)",
-          zIndex: 9998, backdropFilter: "blur(2px)",
+          zIndex: 9998, backdropFilter: "blur(4px)",
+          animation: "fadeInScale 0.2s ease-out",
         }}
       />
 
@@ -335,10 +355,11 @@ function ComposeModal({ configs, onClose, defaultConfigId }: {
         position: "fixed", top: "50%", left: "50%",
         transform: "translate(-50%, -50%)",
         width: "640px", maxWidth: "90vw", maxHeight: "90vh",
-        backgroundColor: C.white, borderRadius: "16px",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+        backgroundColor: C.white, borderRadius: "20px",
+        boxShadow: "0 25px 80px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.08)",
         zIndex: 9999, display: "flex", flexDirection: "column",
         overflow: "hidden",
+        animation: "fadeInScale 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
       }}>
         {/* Header */}
         <div style={{
@@ -462,15 +483,16 @@ function ComposeModal({ configs, onClose, defaultConfigId }: {
               Cancel
             </Button>
             <button
+              className={canSend ? "sb-compose-btn" : ""}
               onClick={() => composeMut.mutate()}
               disabled={!canSend || composeMut.isPending}
               style={{
                 padding: "8px 20px", fontSize: "13px", fontWeight: 600, color: "#fff",
                 background: canSend ? C.blue : C.textMuted,
-                border: "none", borderRadius: "8px",
+                border: "none", borderRadius: "10px",
                 cursor: canSend ? "pointer" : "not-allowed",
-                boxShadow: canSend ? `0 1px 3px ${C.blue}44` : "none",
-                transition: "all 0.15s ease",
+                boxShadow: canSend ? `0 2px 8px ${C.blue}35` : "none",
+                transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
               }}
             >
               {composeMut.isPending ? "Sending..." : "Send email"}
@@ -492,9 +514,16 @@ const SupportBoxDashboard = () => {
   const qc = useQueryClient()
   const [selectedConfigId, setSelectedConfigId] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>("inbox")
+  const [searchInput, setSearchInput] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [showCompose, setShowCompose] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchQuery(searchInput), 350)
+    return () => clearTimeout(timer)
+  }, [searchInput])
 
   const { data: configs = [] } = useQuery({
     queryKey: ["supportbox-configs"],
@@ -568,6 +597,15 @@ const SupportBoxDashboard = () => {
 
   return (
     <div ref={pageRef} style={{ maxWidth: "1140px", margin: "0 auto", padding: "24px 32px", background: BG_COLOR }}>
+      <style>{`
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.3); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+        .sb-compose-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 6px 20px rgba(59,130,246,0.35) !important; }
+        .sb-refresh-btn:hover { background-color: #F3F4F6 !important; transform: scale(1.05) !important; }
+        .sb-settings-btn:hover { transform: translateY(-1px) !important; }
+      `}</style>
       <FullWidthStyles />
       <SidebarBadgeProvider />
       {/* Header */}
@@ -581,11 +619,12 @@ const SupportBoxDashboard = () => {
               await qc.invalidateQueries({ queryKey: ["supportbox-tickets-counts"] })
               setTimeout(() => setRefreshing(false), 600)
             }}
+            className="sb-refresh-btn"
             style={{
               width: "36px", height: "36px", borderRadius: "8px",
               border: `1px solid ${C.border}`, backgroundColor: C.white,
               display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", transition: "all 0.15s ease",
+              cursor: "pointer", transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
             title="Refresh"
           >
@@ -596,12 +635,13 @@ const SupportBoxDashboard = () => {
             </svg>
           </button>
           <button
+            className="sb-compose-btn"
             onClick={() => setShowCompose(true)}
             style={{
               padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: "#fff",
-              backgroundColor: C.blue, border: "none", borderRadius: "8px",
+              backgroundColor: C.blue, border: "none", borderRadius: "10px",
               cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
-              boxShadow: `0 1px 3px ${C.blue}44`, transition: "all 0.15s ease",
+              boxShadow: `0 2px 8px ${C.blue}35`, transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -681,13 +721,21 @@ const SupportBoxDashboard = () => {
             padding: "14px 20px", backgroundColor: C.white, border: `1px solid ${C.border}`,
             borderRadius: "12px 12px 0 0", borderBottom: "none",
           }}>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, position: "relative" }}>
               <Input
-                placeholder="Search by subject or email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search subject, email, message content..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 size="small"
               />
+              {searchInput && searchInput !== searchQuery && (
+                <div style={{
+                  position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)",
+                  width: "14px", height: "14px", borderRadius: "50%",
+                  border: "2px solid #D1D5DB", borderTopColor: C.blue,
+                  animation: "spin 0.6s linear infinite",
+                }} />
+              )}
             </div>
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
               <Select.Trigger>
