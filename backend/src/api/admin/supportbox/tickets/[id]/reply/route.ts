@@ -83,6 +83,13 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       resend_message_id: resendResponse.data.id,
     })
 
+    // Auto-solve ticket after admin reply
+    await supportboxService.updateSupportboxTickets({
+      id,
+      status: "solved",
+      solved_at: new Date().toISOString(),
+    })
+
     res.json({ message })
   } catch (error: any) {
     res.status(400).json({ error: error.message })
