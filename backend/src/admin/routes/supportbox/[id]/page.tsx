@@ -432,14 +432,47 @@ function MessageBubble({ msg }: { msg: any }) {
         )}
       </div>
 
-      {/* Timestamp */}
+      {/* Timestamp + Delivery status */}
       <div style={{
         fontSize: "11px", color: D.textMuted, marginTop: "6px",
         paddingLeft: inb ? "2px" : 0, paddingRight: inb ? 0 : "2px",
+        display: "flex", alignItems: "center", gap: "8px",
       }}>
-        {f.dt(msg.created_at)}
+        <span>{f.dt(msg.created_at)}</span>
+        {!inb && msg.delivery_status && (
+          <DeliveryBadge status={msg.delivery_status} />
+        )}
       </div>
     </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DELIVERY STATUS BADGE
+   ═══════════════════════════════════════════════════════════════ */
+function DeliveryBadge({ status }: { status: string }) {
+  const cfg: Record<string, { label: string; color: string; bg: string; icon: string }> = {
+    sent:              { label: "Sent",      color: D.blue,   bg: D.blueLight,   icon: "↗" },
+    delivered:         { label: "Delivered",  color: D.green,  bg: D.greenLight,  icon: "✓" },
+    opened:            { label: "Opened",    color: "#7C3AED", bg: D.purpleLight, icon: "👁" },
+    clicked:           { label: "Clicked",   color: "#7C3AED", bg: D.purpleLight, icon: "🔗" },
+    delivery_delayed:  { label: "Delayed",   color: D.orange, bg: D.orangeLight, icon: "⏳" },
+    bounced:           { label: "Bounced",   color: D.red,    bg: D.redLight,    icon: "✕" },
+    complained:        { label: "Spam",      color: D.red,    bg: D.redLight,    icon: "⚠" },
+  }
+  const c = cfg[status] || { label: status, color: D.textMuted, bg: D.inset, icon: "·" }
+
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: "3px",
+      padding: "1px 8px", borderRadius: "9999px",
+      fontSize: "10px", fontWeight: 600,
+      color: c.color, backgroundColor: c.bg,
+      letterSpacing: "0.01em",
+    }}>
+      <span style={{ fontSize: "9px" }}>{c.icon}</span>
+      {c.label}
+    </span>
   )
 }
 

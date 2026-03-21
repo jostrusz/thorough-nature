@@ -9,6 +9,8 @@ const SupportboxMessage = model.define("supportbox_message", {
   body_html: model.text(),
   body_text: model.text().nullable(),
   resend_message_id: model.text().nullable(),
+  delivery_status: model.text().nullable(), // sent, delivered, delivery_delayed, bounced, complained, opened, clicked
+  delivery_status_at: model.text().nullable(), // ISO timestamp of last status update
   metadata: model.json().nullable(),
 })
 

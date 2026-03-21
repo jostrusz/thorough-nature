@@ -101,6 +101,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       body_html,
       body_text: body_text || null,
       resend_message_id: resendResponse.data.id,
+      delivery_status: "sent",
+      delivery_status_at: new Date().toISOString(),
     })
 
     res.json({ ticket, message })
