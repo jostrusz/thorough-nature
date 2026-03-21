@@ -9,7 +9,7 @@ var PROJECT_CONFIG = {
     "variantId": "variant_01KKAXMK3JG00Y20C7DV5KZBC2",
     "price": 35,
     "currency": "EUR",
-    "thumbnail": ""
+    "thumbnail": "https://www.lasslosbuch.de/lass-los-was-dich-kaputt-macht-pichi.png"
   },
   "upsellProduct": {
     "name": "",

@@ -3032,14 +3032,15 @@ body {
     if (!cart) return;
     var item = (cart.items && cart.items.length > 0) ? cart.items[0] : null;
 
-    // --- Produktbild ---
-    if (item && item.thumbnail) {
-      var imgHtml = '<img src="' + item.thumbnail + '" alt="' + (item.product_title || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
+    // --- Produktbild (prefer high-res config thumbnail over Medusa's low-res) ---
+    var thumbSrc = (PROJECT_CONFIG.mainProduct.thumbnail) ? PROJECT_CONFIG.mainProduct.thumbnail : (item && item.thumbnail ? item.thumbnail : null);
+    if (thumbSrc) {
+      var imgHtml = '<img src="' + thumbSrc + '" alt="' + (item && item.product_title || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
       var desktopImg = document.getElementById('desktop-product-img');
       if (desktopImg) desktopImg.innerHTML = imgHtml;
       // Mobile sticky bar thumb
       var msbThumb = document.getElementById('msb-thumb');
-      if (msbThumb) msbThumb.innerHTML = '<img src="' + item.thumbnail + '" alt="' + (item.product_title || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">';
+      if (msbThumb) msbThumb.innerHTML = '<img src="' + thumbSrc + '" alt="' + (item && item.product_title || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">';
     }
 
     // --- Produktname ---
