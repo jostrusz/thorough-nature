@@ -714,9 +714,65 @@ const SupportBoxDashboard = () => {
   )
 }
 
+// ═══════════════════════════════════════════
+// SIDEBAR ICON WITH BADGE
+// ═══════════════════════════════════════════
+function SupportBoxIcon() {
+  const [newCount, setNewCount] = useState(0)
+
+  useEffect(() => {
+    let mounted = true
+
+    const fetchCount = async () => {
+      try {
+        const response = await fetch("/admin/supportbox/tickets?status=new", {
+          credentials: "include",
+        })
+        if (!response.ok) return
+        const data = await response.json()
+        if (mounted) {
+          setNewCount((data.tickets || []).length)
+        }
+      } catch {}
+    }
+
+    fetchCount()
+    const interval = setInterval(fetchCount, 15000)
+    return () => { mounted = false; clearInterval(interval) }
+  }, [])
+
+  return (
+    <div style={{ position: "relative", display: "inline-flex" }}>
+      <ChatBubbleLeftRight />
+      {newCount > 0 && (
+        <div style={{
+          position: "absolute",
+          top: "-4px",
+          right: "-6px",
+          minWidth: "16px",
+          height: "16px",
+          borderRadius: "8px",
+          backgroundColor: "#DC2626",
+          color: "#fff",
+          fontSize: "9px",
+          fontWeight: 700,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "0 3px",
+          lineHeight: 1,
+          boxShadow: "0 1px 3px rgba(220,38,38,0.4)",
+        }}>
+          {newCount > 99 ? "99+" : newCount}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export const config = defineRouteConfig({
   label: "SupportBox",
-  icon: ChatBubbleLeftRight,
+  icon: SupportBoxIcon,
   rank: 7,
 })
 
