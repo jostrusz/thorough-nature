@@ -496,6 +496,7 @@ function generateProjectConfigScript(
 ): string {
   const projectConfig = {
     slug: config.slug,
+    projectId: (config as any).projectId || config.slug,
     medusaUrl: config.medusaUrl,
     publishableApiKey: config.publishableApiKey,
     mainProduct: config.mainProduct,
@@ -505,6 +506,7 @@ function generateProjectConfigScript(
     paymentProviders: config.paymentProviders,
     mollieProfileId: (config as any).mollieProfileId || null,
     packetaApiKey: (config as any).packetaApiKey || null,
+    catalogContentIds: (config as any).catalogContentIds || null,
     // Feature toggles from admin
     orderBumpEnabled: toggles.orderBumpEnabled,
     upsellEnabled: toggles.upsellEnabled,

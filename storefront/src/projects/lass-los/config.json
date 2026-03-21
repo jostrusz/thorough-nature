@@ -35,6 +35,7 @@
     { "qty": 3, "price": 79, "label": "3 Bücher", "save": 26 },
     { "qty": 4, "price": 99, "label": "4 Bücher", "save": 41 }
   ],
+  "catalogContentIds": ["1azgp7ymuv", "82764876", "31epnhw6c4", "dnoiszdeax", "gh1u1icp8r"],
   "mollieProfileId": "",
   "paymentProviders": {},
   "pages": {
