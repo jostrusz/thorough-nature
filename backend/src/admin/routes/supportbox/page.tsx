@@ -418,12 +418,6 @@ function ComposeModal({ configs, onClose, defaultConfigId }: {
               ref={textareaRef}
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              onKeyDown={(e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && canSend) {
-                  e.preventDefault()
-                  composeMut.mutate()
-                }
-              }}
               placeholder="Write your email..."
               style={{
                 width: "100%", minHeight: "120px", maxHeight: "300px",
@@ -456,7 +450,7 @@ function ComposeModal({ configs, onClose, defaultConfigId }: {
           backgroundColor: "#FAFBFC",
         }}>
           <span style={{ fontSize: "11px", color: C.textMuted }}>
-            {body.trim() ? `${body.trim().length} chars` : ""} {canSend ? "· ⌘+Enter to send" : ""}
+            {body.trim() ? `${body.trim().length} chars` : ""}
           </span>
           <div style={{ display: "flex", gap: "10px" }}>
             <Button variant="secondary" size="small" onClick={onClose}>

@@ -468,7 +468,6 @@ function Composer({ text, setText, onSend, sending }: {
           ref={ref}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && text.trim()) { e.preventDefault(); onSend() } }}
           placeholder="Write your reply..."
           style={{
             width: "100%", minHeight: "80px", maxHeight: "300px",
@@ -487,7 +486,7 @@ function Composer({ text, setText, onSend, sending }: {
         backgroundColor: D.inset,
       }}>
         <span style={{ fontSize: "11px", color: D.textMuted }}>
-          {text.trim() ? `${text.trim().length} chars · ⌘+Enter` : "⌘+Enter to send"}
+          {text.trim() ? `${text.trim().length} chars` : ""}
         </span>
         <button
           onClick={onSend}
