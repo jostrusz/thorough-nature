@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Frakt- och leveranspolicy — Släpp taget om det som förstör dig</title>
-<meta name="description" content="Allt om frakt, leveranstider och leverans av Släpp taget om det som förstör dig.">
+<meta name="description" content="Komplett information om frakt, leveranstider, ångerrätt, returer, återbetalning och tvistlösning för Släpp taget om det som förstör dig.">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="/favicon.png" type="image/png">
 
@@ -21,7 +21,7 @@
 @font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
-/* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
+/* ═══ CSS VARIABLER — Velvet Dusk ═══ */
 :root {
  --bg: #FAF5F8;
  --heading: #2D1B3D;
@@ -42,7 +42,7 @@
 html { scroll-behavior: smooth; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
 
-/* ═══ NAVIGACE ═══ */
+/* ═══ NAVIGATION ═══ */
 .site-nav { background: var(--white); border-bottom: 1px solid var(--section); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(45, 27, 61, 0.06); }
 .nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
 .nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
@@ -78,7 +78,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 }
 
-/* ═══ CONTENT STRÁNKY ═══ */
+/* ═══ PAGE CONTENT ═══ */
 .page-header {
  background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
  padding: 56px 20px 48px;
@@ -90,7 +90,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 .page-content { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
 
-/* Informační boxy */
+/* Info-box */
 .info-box {
  background: var(--light);
  border: 1px solid var(--section);
@@ -102,9 +102,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .info-box p, .info-box li { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; }
 .info-box ul { list-style: none; padding: 0; }
 .info-box ul li { padding: 4px 0; }
-.info-box ul li::before { content: '→ '; color: var(--cta); font-weight: 700; }
+.info-box ul li::before { content: '\2192 '; color: var(--cta); font-weight: 700; }
 
-/* Sekce */
+/* Section blocks */
 .section-block { margin-bottom: 40px; }
 .section-block h2 {
  font-family: 'Recoleta', serif;
@@ -122,6 +122,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .section-block ul, .section-block ol { padding-left: 24px; margin-bottom: 12px; }
 .section-block li { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 6px; }
 .section-block strong { color: var(--heading); }
+.section-block a { color: var(--cta); font-weight: 600; text-decoration: underline; }
+.section-block a:hover { color: var(--cta-hover); }
 
 .highlight-box {
  background: linear-gradient(135deg, var(--light), var(--section));
@@ -132,7 +134,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .highlight-box p { margin: 0; font-size: 15px; }
 
-/* Tabulka levertijden */
+/* Delivery table */
 .delivery-table {
  width: 100%;
  border-collapse: collapse;
@@ -216,7 +218,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  transform: rotate(45deg);
 }
 .faq-item.active .faq-answer {
- max-height: 300px;
+ max-height: 500px;
 }
 
 .divider { height: 1px; background: var(--section); margin: 40px 0; }
@@ -303,7 +305,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  </div>
 </div>
 
-<!-- ═══ NAVIGACE ═══ -->
+<!-- ═══ NAVIGATION ═══ -->
 <nav class="site-nav">
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
@@ -337,7 +339,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <header class="page-header">
  <div class="badge">📦 Frakt &amp; Leverans</div>
  <h1>Frakt- och leveranspolicy</h1>
- <p>Allt om frakt, leveranstider och leverans</p>
+ <p>Komplett information om frakt, leverans, ångerrätt, returer, återbetalning och tvistlösning. Vi vill att du ska känna dig helt trygg med ditt köp.</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
@@ -347,16 +349,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   <h3>📌 Sammanfattning</h3>
   <ul>
    <li>Fri frakt till hela Sverige</li>
-   <li>Leveranstid: 5–10 arbetsdagar</li>
+   <li>Leveranstid: 2–4 arbetsdagar</li>
    <li>Spårningskod via e-post efter utskick</li>
    <li>Utskick inom 24–48 timmar efter betalning</li>
+   <li>30 dagars nöjd-kund-garanti med full återbetalning</li>
+   <li>14 dagars lagstadgad ångerrätt enligt EU-konsumentlagstiftning</li>
+   <li>Digitala produkter levereras direkt via e-post</li>
   </ul>
  </div>
 
- <!-- Frakt -->
+ <!-- ═══ SEKTION 1: FRAKT ═══ -->
  <div class="section-block">
-  <h2><span class="icon">📦</span> Frakt</h2>
-  <p>Vi skickar alla beställningar från vårt lager i Europa. Efter att din betalning har mottagits behandlas och skickas din beställning inom <strong>24–48 timmar</strong>.</p>
+  <h2><span class="icon">📦</span> 1. Frakt</h2>
+
+  <p>Vi skickar alla beställningar från vårt lager i Europa. Vi samarbetar med pålitliga fraktbolag för att säkerställa att ditt paket når dig snabbt och i perfekt skick. Alla fysiska produkter packas med omsorg i skyddande förpackningsmaterial för att minimera risken för skador under transporten.</p>
+
+  <p>Efter att din betalning har mottagits och bekräftats behandlas din beställning av vårt lagerteam. Beställningar som läggs innan klockan 14:00 på en arbetsdag behandlas normalt samma dag. Beställningar som inkommer efter klockan 14:00, under helger eller helgdagar behandlas nästföljande arbetsdag. Den totala hanteringstiden från bekräftad betalning till utskick är normalt <strong>24–48 timmar</strong>.</p>
+
+  <p>Under perioder med hög efterfrågan, till exempel runt julhelgerna, Black Friday eller andra kampanjperioder, kan hanteringstiden i undantagsfall vara längre. Vi meddelar alltid på vår webbplats om eventuella förseningar påverkar leveranstiderna.</p>
 
   <table class="delivery-table">
    <thead>
@@ -367,38 +377,224 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     </tr>
    </thead>
    <tbody>
-    <tr><td>🇸🇪 Sverige</td><td>5–10 arbetsdagar</td><td><span class="free-tag">GRATIS</span></td></tr>
+    <tr><td>🇸🇪 Sverige</td><td>2–4 arbetsdagar</td><td><span class="free-tag">GRATIS</span></td></tr>
    </tbody>
   </table>
 
+  <p>Leveranstiden på <strong>2–4 arbetsdagar</strong> avser den tid det tar från det att paketet lämnar vårt lager tills det levereras till din dörr. Arbetsdagar räknas som måndag till fredag, exklusive svenska helgdagar. Den totala tiden från beställning till leverans kan alltså vara upp till 6 arbetsdagar inklusive hanteringstiden.</p>
+
   <div class="highlight-box">
-   <p><strong>Digitala produkter (e-böcker, PDF):</strong> Direkt efter betalning får du en nedladdningslänk via e-post. Ingen väntetid!</p>
+   <p><strong>Digitala produkter (e-böcker, PDF-filer):</strong> Levereras direkt efter bekräftad betalning. Du får en nedladdningslänk via e-post till den adress du angav vid beställningen. Kontrollera din skräppost om du inte ser mailet inom några minuter. Ingen väntetid, ingen fraktkostnad!</p>
+  </div>
+
+  <p>Efter att din beställning har skickats från vårt lager får du ett e-postmeddelande med en <strong>unik spårningskod</strong>. Med denna kod kan du följa ditt pakets resa i realtid via transportörens webbplats eller app. Spårningskoden aktiveras vanligtvis inom 12–24 timmar efter att du fått mailet.</p>
+
+  <p>Frakten är <strong>helt kostnadsfri</strong> för alla leveranser inom Sverige. Det finns inget minimibelopp för att kvalificera sig för fri frakt. Oavsett om du beställer en bok eller flera produkter betalar du aldrig något extra för frakten. Fraktkostnaden täcks helt av oss som en del av vårt åtagande att erbjuda dig bästa möjliga köpupplevelse.</p>
+
+  <p>Alla fysiska produkter förpackas omsorgsfullt i robusta kartongförpackningar som är anpassade för att skydda innehållet under transporten. Böcker förpackas i stötsäkra kuvert eller kartonger med extra polstring för att säkerställa att de anländer i perfekt skick. Varje paket märks med rätt adressuppgifter och hanteras enligt transportörens riktlinjer för säker leverans.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ SEKTION 2: LEVERANS ═══ -->
+ <div class="section-block">
+  <h2><span class="icon">📍</span> 2. Leverans</h2>
+
+  <p>Din beställning levereras till den adress du angav vid beställningstillfället. Det är därför mycket viktigt att du dubbelkollar att leveransadressen är korrekt och komplett innan du slutför ditt köp. Se till att inkludera eventuellt våningsnummer, lägenhetsnummer, portkod eller andra uppgifter som kan behövas för en framgångsrik leverans.</p>
+
+  <p>Om du upptäcker att du har angett fel leveransadress, kontakta oss omedelbart via <a href="mailto:hej@slapptagetboken.se">hej@slapptagetboken.se</a>. Om paketet ännu inte har skickats kan vi uppdatera adressen utan extra kostnad. Om paketet redan har lämnat vårt lager kan vi tyvärr inte garantera en adressändring, men vi gör vårt bästa för att kontakta transportören och lösa situationen.</p>
+
+  <p>Efter att ditt paket har skickats får du ett bekräftelsemail med spårningsinformation. E-postmeddelandet skickas till den adress du registrerade vid köpet. <strong>Om du inte har fått något spårningsmail inom 48 timmar efter beställningen</strong>, rekommenderar vi att du:</p>
+
+  <ul>
+   <li>Kontrollerar din <strong>skräppost</strong> och <strong>kampanjmapp</strong> i din e-postklient</li>
+   <li>Söker efter avsändaren i din inkorg</li>
+   <li>Kontrollerar att du angav rätt e-postadress vid beställningen</li>
+   <li>Kontaktar oss via <a href="mailto:hej@slapptagetboken.se">hej@slapptagetboken.se</a> med ditt ordernummer så hjälper vi dig</li>
+  </ul>
+
+  <p>Leveranser sker till din hemadress, oavsett om du bor i en lägenhet, villa, radhus eller på annan adress. Transportören försöker leverera paketet direkt till din dörr under ordinarie leveranstider, vanligtvis mellan klockan 08:00 och 18:00 på arbetsdagar.</p>
+
+  <p><strong>Om du inte är hemma vid leveransförsöket</strong> lämnar transportören vanligtvis en avisering i din brevlåda eller skickar ett meddelande via SMS eller e-post. Paketet levereras då till närmaste utlämningsställe, exempelvis ett PostNord-ombud, där du kan hämta det inom den angivna tidsperioden (vanligtvis 14 dagar). Du behöver legitimation för att hämta paketet.</p>
+
+  <p>Om du inte hämtar ditt paket inom den angivna tidsperioden skickas det tillbaka till oss. I sådana fall kontaktar vi dig för att diskutera nästa steg, vilket kan innebära en ny leverans eller en återbetalning minus eventuella returkostnader.</p>
+
+  <p><strong>Skadade eller saknade paket:</strong> Om ditt paket anländer skadat eller om innehållet är skadat vid leverans, vänligen kontakta oss omedelbart. Det är viktigt att du meddelar oss så snart som möjligt, helst inom 48 timmar efter att du mottagit paketet. Vi ber dig att:</p>
+
+  <ul>
+   <li><strong>Ta tydliga foton</strong> av skadan på förpackningen och/eller produkten</li>
+   <li>Ange ditt <strong>ordernummer</strong> i meddelandet</li>
+   <li>Beskriv kort vad som är skadat eller saknas</li>
+   <li>Behåll det skadade paketet och allt förpackningsmaterial tills ärendet är löst</li>
+  </ul>
+
+  <p>Skicka all dokumentation till <a href="mailto:hej@slapptagetboken.se">hej@slapptagetboken.se</a> så hanterar vi ditt ärende med högsta prioritet. Vi ordnar kostnadsfritt en ersättningsprodukt eller full återbetalning beroende på situation och dina önskemål. Du behöver aldrig stå för kostnaden om felet ligger hos oss eller transportören.</p>
+
+  <p>Om ditt paket har försvunnit under transporten och spårningsinformationen inte har uppdaterats på mer än 7 arbetsdagar, kontakta oss. Vi inleder då en utredning med transportören och ser till att du antingen får en ny leverans eller full återbetalning.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ SEKTION 3: ÅNGERRÄTT ═══ -->
+ <div class="section-block">
+  <h2><span class="icon">↩️</span> 3. Ångerrätt</h2>
+
+  <p>Som konsument inom EU har du lagstadgad ångerrätt i enlighet med det svenska konsumentskyddet och EU:s konsumenträttsdirektiv (2011/83/EU). Detta innebär att du har rätt att ångra ditt köp inom <strong>14 dagar</strong> utan att behöva ange något skäl. Ångerrätten gäller från och med den dag du, eller en av dig utsedd person (som inte är transportören), fysiskt tar emot produkten.</p>
+
+  <p>Om din beställning består av flera varor som levereras vid olika tillfällen börjar ångerfristen löpa från den dag du tar emot den sista varan i beställningen. Detta säkerställer att du har möjlighet att utvärdera hela din beställning innan ångerfristen börjar ticka.</p>
+
+  <p><strong>Så utövar du din ångerrätt:</strong></p>
+
+  <ol>
+   <li>Skicka ett tydligt meddelande till oss via e-post till <a href="mailto:hej@slapptagetboken.se">hej@slapptagetboken.se</a> där du meddelar att du vill utöva din ångerrätt</li>
+   <li>Ange ditt <strong>ordernummer</strong>, ditt <strong>namn</strong> och <strong>datumet för mottagandet</strong> av produkten</li>
+   <li>Du behöver inte ange något specifikt skäl för din ånger, men vi uppskattar all feedback som kan hjälpa oss att förbättra våra produkter och tjänster</li>
+   <li>Vi bekräftar mottagandet av din ångeranmälan via e-post inom 24 timmar</li>
+  </ol>
+
+  <p>Det räcker att du skickar ditt meddelande om utövande av ångerrätten innan ångerfristen löper ut. Det är alltså datumet du skickade meddelandet som är avgörande, inte när vi tar emot det.</p>
+
+  <p><strong>Produktens skick vid retur:</strong> Produkten ska returneras i <strong>väsentligen oförändrat skick</strong> och i sin originalförpackning om möjligt. Du har rätt att hantera och inspektera produkten på samma sätt som du normalt skulle göra i en fysisk butik. Om produkten har hanterats mer än vad som är nödvändigt för att fastställa dess art, egenskaper och funktion, kan vi göra ett avdrag på återbetalningen som motsvarar produktens värdeminskning.</p>
+
+  <p><strong>Returfraktskostnad:</strong> Vid utövande av ångerrätten ansvarar du som konsument för kostnaden för returfrakten. Vi rekommenderar att du använder en spårbar frakttjänst vid returen, eftersom du ansvarar för paketet tills det når oss. Spara kvittot och spårningsinformationen tills vi har bekräftat att returen mottagits.</p>
+
+  <p><strong>Digitala produkter och ångerrätt:</strong> Enligt distansavtalslagen och EU:s konsumenträttsdirektiv gäller ångerrätten normalt inte för digitalt innehåll som har börjat levereras med konsumentens uttryckliga samtycke och med konsumentens bekräftelse att denne förstår att ångerrätten går förlorad. Vid köp av digitala produkter (e-böcker, PDF-filer) godkänner du vid beställningstillfället att leveransen påbörjas omedelbart och att du därmed avstår från din ångerrätt för dessa produkter när nedladdning eller åtkomst har skett.</p>
+
+  <div class="highlight-box">
+   <p><strong>Utökad 30-dagars nöjd-kund-garanti:</strong> Utöver den lagstadgade ångerrätten på 14 dagar erbjuder vi en <strong>utökad 30-dagars nöjd-kund-garanti</strong>. Om du av någon anledning inte är nöjd med ditt köp inom 30 dagar från mottagandet kan du kontakta oss för full återbetalning. Denna garanti gäller under samma villkor som den lagstadgade ångerrätten och är vårt sätt att visa att vi till 100% står bakom kvaliteten på våra produkter.</p>
+  </div>
+
+  <p>Om du har frågor om ångerrätten eller behöver hjälp med att utöva den, tveka inte att kontakta oss. Vi finns här för att hjälpa dig och vi strävar alltid efter att göra processen så enkel och smidig som möjligt för dig som kund.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- ═══ SEKTION 4: RETURNERA ═══ -->
+ <div class="section-block">
+  <h2><span class="icon">📋</span> 4. Returnera</h2>
+
+  <p>Vi vill att returprocessen ska vara så enkel och smidig som möjligt. Nedan hittar du en steg-för-steg-guide som beskriver exakt hur du går till väga om du vill returnera en produkt. Följ dessa steg noggrant för att säkerställa att din retur behandlas snabbt och korrekt.</p>
+
+  <p><strong>Steg 1 — Kontakta oss:</strong> Skicka ett e-postmeddelande till <a href="mailto:hej@slapptagetboken.se">hej@slapptagetboken.se</a> med ditt ordernummer och en kort beskrivning av anledningen till att du vill returnera produkten. Vi behöver denna information för att kunna förbereda mottagandet av din retur och ge dig rätt instruktioner. Du får en bekräftelse från oss inom 24 timmar.</p>
+
+  <p><strong>Steg 2 — Motta returinstruktioner:</strong> Efter att vi har mottagit ditt returbegäran skickar vi dig detaljerade returinstruktioner via e-post. Dessa inkluderar returadressen, eventuellt returnummer (RMA-nummer) som ska anges på paketet, och ytterligare anvisningar om hur returen ska hanteras. Vänligen påbörja inte returen innan du har fått dessa instruktioner från oss.</p>
+
+  <p><strong>Steg 3 — Paketera produkten:</strong> Förpacka produkten omsorgsfullt, helst i originalförpackningen, för att undvika skador under returtransporten. Se till att alla tillbehör, bilagor och eventuella gratispresenter som ingick i beställningen också inkluderas. Om originalförpackningen inte finns tillgänglig, använd en lämplig kartong med tillräckligt skyddsmaterial (bubbelplast, papper eller liknande) för att produkten ska vara skyddad under hela transporten.</p>
+
+  <p><strong>Steg 4 — Skicka returen:</strong> Skicka paketet till den returadress vi angivit i våra returinstruktioner. Vi rekommenderar starkt att du använder en spårbar frakttjänst och sparar kvittot samt spårningskoden. Du ansvarar för paketet under returtransporten tills det har anlänt och registrerats av oss. Vi kan inte ansvara för paket som försvinner under transporten utan spårning.</p>
+
+  <p><strong>Steg 5 — Inspektion och återbetalning:</strong> När vi har mottagit din retur inspekterar vi produkten för att verifiera att den uppfyller returvillkoren. Inspektionen genomförs normalt inom 3–5 arbetsdagar efter mottagande. Om allt ser bra ut processas din återbetalning omgående. Du får en bekräftelse via e-post när återbetalningen har genomförts.</p>
+
+  <p><strong>Villkor för retur:</strong> För att en retur ska godkännas måste följande villkor vara uppfyllda:</p>
+
+  <ul>
+   <li>Produkten ska vara <strong>oanvänd</strong> och i <strong>nyskick</strong>, utan synliga spår av användning eller slitage</li>
+   <li>Produkten ska vara i sin <strong>originalförpackning</strong> i den mån det är möjligt</li>
+   <li>Alla <strong>tillbehör, bilagor och bonusmaterial</strong> som ingick i leveransen ska returneras tillsammans med produkten</li>
+   <li>Returen ska ske <strong>inom den angivna ångerfristen</strong> (14 dagar lagstadgad ångerrätt, eller 30 dagar med vår utökade nöjd-kund-garanti)</li>
+   <li>Du ska ha kontaktat oss och fått <strong>returinstruktioner</strong> innan du skickar tillbaka produkten</li>
+  </ul>
+
+  <p><strong>Produkter som inte kan returneras:</strong> Vissa produkter kan av hygieniska, säkerhetsmässiga eller rättsliga skäl inte returneras. Dessa inkluderar:</p>
+
+  <ul>
+   <li><strong>Digitala produkter</strong> (e-böcker, PDF-filer) efter att nedladdning eller åtkomst har skett, i enlighet med konsumenträttsdirektivet</li>
+   <li><strong>Personligt anpassade produkter</strong> som har tillverkats eller modifierats efter dina specifika önskemål</li>
+   <li><strong>Hygienprodukter</strong> med bruten försegling där returen inte kan accepteras av hälso- och säkerhetsskäl</li>
+   <li><strong>Produkter som har skadats</strong> av kunden genom felaktig hantering</li>
+  </ul>
+
+  <div class="highlight-box">
+   <p><strong>30-dagars nöjd-kund-garanti:</strong> Vi erbjuder en generös 30-dagars pengarna-tillbaka-garanti som sträcker sig utöver den lagstadgade 14-dagars ångerrätten. Om du inte är helt nöjd med din produkt inom 30 dagar från mottagandet, kontakta oss så ordnar vi en full återbetalning. Vi tror på kvaliteten i våra produkter och vill att du ska vara 100% nöjd med ditt köp.</p>
   </div>
  </div>
 
  <div class="divider"></div>
 
- <!-- Följ din beställning -->
+ <!-- ═══ SEKTION 5: ÅTERBETALNING ═══ -->
  <div class="section-block">
-  <h2><span class="icon">📍</span> Följ din beställning</h2>
-  <p>Efter utskick får du ett e-postmeddelande med en <strong>spårningskod</strong>. Med den kan du följa ditt paket i realtid via transportörens webbplats.</p>
-  <p>Har du inte fått din spårningskod? Kontrollera din skräppost eller kontakta oss via <a href="mailto:devries@loslatenboek.nl" style="color: var(--cta);">devries@loslatenboek.nl</a>.</p>
+  <h2><span class="icon">💰</span> 5. Återbetalning</h2>
+
+  <p>När din retur har mottagits och inspekterats, eller när en återbetalning av annan anledning har beviljats, behandlar vi din återbetalning till <strong>samma betalningsmetod</strong> som du använde vid det ursprungliga köpet. Detta innebär att om du betalade med kreditkort återbetalas pengarna till samma kreditkort, om du betalade via PayPal återbetalas pengarna till ditt PayPal-konto, och så vidare.</p>
+
+  <p><strong>Handläggningstid:</strong> Vi förbinder oss att behandla din återbetalning <strong>inom 14 dagar</strong> efter att vi har mottagit den returnerade produkten, eller efter att du har visat att produkten har skickats tillbaka (beroende på vilket som inträffar först). I de flesta fall processas återbetalningen betydligt snabbare, ofta inom 5–7 arbetsdagar.</p>
+
+  <p>Observera att det kan ta ytterligare tid innan pengarna syns på ditt konto efter att vi har genomfört återbetalningen. Denna fördröjning beror på din bank eller betalningsleverantör och ligger utanför vår kontroll. Typiska handläggningstider efter att vi processat återbetalningen:</p>
+
+  <ul>
+   <li><strong>Kreditkort/Betalkort via Stripe:</strong> 5–10 arbetsdagar beroende på din bank</li>
+   <li><strong>PayPal:</strong> 3–5 arbetsdagar, ofta snabbare</li>
+   <li><strong>Swish:</strong> 1–3 arbetsdagar</li>
+   <li><strong>Banköverföring:</strong> 3–7 arbetsdagar</li>
+  </ul>
+
+  <p>Om du inte har sett din återbetalning inom den förväntade tidsramen rekommenderar vi att du först kontaktar din bank eller betaltjänstleverantör. Om du efter det fortfarande inte har fått din återbetalning, kontakta oss via <a href="mailto:hej@slapptagetboken.se">hej@slapptagetboken.se</a> med ditt ordernummer så utreder vi ärendet åt dig.</p>
+
+  <p><strong>Partiella återbetalningar:</strong> I vissa fall kan en partiell återbetalning tillämpas istället för en fullständig återbetalning. Situationer där detta kan bli aktuellt inkluderar:</p>
+
+  <ul>
+   <li>Produkten visar <strong>tydliga spår av användning</strong> som överstiger vad som är nödvändigt för att inspektera varan</li>
+   <li>Produkten returneras <strong>utan originalförpackning</strong> och värdet har påverkats av detta</li>
+   <li>Tillbehör, bilagor eller bonusmaterial som ingick i beställningen <strong>saknas</strong> vid returen</li>
+   <li>Produkten har <strong>skadats</strong> under kundens förvaring eller vid returtransporten på grund av otillräcklig förpackning</li>
+  </ul>
+
+  <p>Avdraget på återbetalningen motsvarar den faktiska värdeminskningen av produkten och fastställs efter inspektion. Vi informerar dig alltid om det belopp som kommer att återbetalas innan vi genomför återbetalningen, så att du har möjlighet att ta ställning.</p>
+
+  <p><strong>Fraktkostnader vid återbetalning:</strong> Om du utövar din ångerrätt eller vår 30-dagars nöjd-kund-garanti återbetalas produktens pris fullt ut. Eftersom vi erbjuder fri frakt finns ingen fraktkostnad att återbetala för den ursprungliga leveransen. Du som kund ansvarar dock för kostnaden för returfrakten om inte returen beror på ett fel från vår sida (till exempel felaktig produkt, skadad vara eller andra omständigheter som vi ansvarar för). Om returen beror på vårt misstag täcker vi naturligtvis returfraktkostnaden.</p>
+
+  <p>Vid ångerrätt har vi enligt lag rätt att vänta med återbetalningen tills vi har fått tillbaka produkten eller tills du har visat bevis på att varan har skickats tillbaka, beroende på vilket som inträffar först.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Skadat eller fel produkt -->
+ <!-- ═══ SEKTION 6: KLAGOMÅL OCH TVISTLÖSNING ═══ -->
  <div class="section-block">
-  <h2><span class="icon">⚠️</span> Skadat eller fel produkt?</h2>
-  <p>Har du fått en skadad eller felaktig produkt? Kontakta oss direkt. Vi ordnar kostnadsfritt en ersättning eller full återbetalning.</p>
-  <p>Skicka ett foto på den skadade produkten till <a href="mailto:devries@loslatenboek.nl" style="color: var(--cta);">devries@loslatenboek.nl</a> tillsammans med ditt ordernummer.</p>
+  <h2><span class="icon">⚖️</span> 6. Klagomål och tvistlösning</h2>
+
+  <p>Vi strävar alltid efter att erbjuda bästa möjliga kundupplevelse och produktkvalitet. Om du av någon anledning inte är nöjd med din beställning, en produkt eller vår service vill vi gärna höra från dig så att vi kan lösa problemet. Vi tar alla klagomål på största allvar och hanterar dem professionellt och rättvist.</p>
+
+  <p><strong>Så lämnar du ett klagomål:</strong> Kontakta oss via e-post till <a href="mailto:hej@slapptagetboken.se">hej@slapptagetboken.se</a> med en tydlig beskrivning av ditt ärende. Vänligen inkludera följande information för snabbast möjliga hantering:</p>
+
+  <ul>
+   <li>Ditt <strong>ordernummer</strong></li>
+   <li>Ditt <strong>fullständiga namn</strong> och kontaktuppgifter</li>
+   <li>En <strong>detaljerad beskrivning</strong> av problemet eller klagomålet</li>
+   <li>Eventuella <strong>foton eller dokumentation</strong> som stödjer ditt ärende</li>
+   <li>Vad du önskar som <strong>lösning</strong> (till exempel ersättning, återbetalning eller annan åtgärd)</li>
+  </ul>
+
+  <p>Vi bekräftar mottagandet av ditt klagomål inom 24 timmar och förbinder oss att ge dig ett fullständigt svar <strong>inom 14 dagar</strong>. I de flesta fall löser vi ärenden betydligt snabbare. Om ditt ärende kräver ytterligare utredning informerar vi dig om detta och ger dig en uppskattad tidsram för lösning.</p>
+
+  <p>Du kan även nå oss per telefon på <strong><a href="tel:+420732915755">+420 732 915 755</a></strong> under kontorstid om du föredrar att diskutera ditt ärende muntligt. Vi finns tillgängliga för att hjälpa dig på svenska och engelska.</p>
+
+  <p><strong>Allmänna reklamationsnämnden (ARN):</strong> Om vi inte lyckas lösa ditt ärende till din belåtenhet har du som svensk konsument möjlighet att vända dig till Allmänna reklamationsnämnden (ARN) för en opartisk prövning av tvisten. ARN är en statlig myndighet som prövar tvister mellan konsumenter och företag kostnadsfritt. Mer information och möjligheten att anmäla hittar du på deras webbplats: <a href="https://www.arn.se" target="_blank" rel="noopener">www.arn.se</a>.</p>
+
+  <p>ARN:s kontaktuppgifter:</p>
+  <ul>
+   <li>Webbplats: <a href="https://www.arn.se" target="_blank" rel="noopener">www.arn.se</a></li>
+   <li>Postadress: Allmänna reklamationsnämnden, Box 174, 101 23 Stockholm</li>
+  </ul>
+
+  <p><strong>EU:s plattform för tvistlösning online (ODR):</strong> Europeiska kommissionen tillhandahåller en plattform för onlinetvistlösning (ODR) som gör det möjligt för konsumenter och företag inom EU att lösa tvister relaterade till onlineköp utan att gå till domstol. Du kan nå ODR-plattformen via följande länk: <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">ec.europa.eu/consumers/odr/</a>. Vid användning av ODR-plattformen kan du ange vår e-postadress <a href="mailto:hej@slapptagetboken.se">hej@slapptagetboken.se</a> som kontaktpunkt för företaget.</p>
+
+  <p><strong>Tjeckiska handelsinspektionen (ČOI):</strong> Eftersom vårt företag är registrerat i Tjeckien kan du som konsument även vända dig till den tjeckiska handelsinspektionen (Česká obchodní inspekce, ČOI) vid eventuella tvister. ČOI är den tjeckiska statliga myndigheten som övervakar konsumenträttigheter och marknadstillsyn. Kontaktuppgifter:</p>
+
+  <ul>
+   <li>Webbplats: <a href="https://www.coi.cz" target="_blank" rel="noopener">www.coi.cz</a></li>
+   <li>Centralinspektoratet: Štěpánská 15, 120 00 Prag 2, Tjeckien</li>
+  </ul>
+
+  <p>Vi uppmuntrar dig alltid att först kontakta oss direkt innan du vänder dig till en extern tvistlösningsmyndighet. I de allra flesta fall kan vi hitta en tillfredsställande lösning snabbt och enkelt genom direkt kommunikation. Vi värdesätter våra kunders förtroende och gör allt vi kan för att överträffa dina förväntningar.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- FAQ -->
+ <!-- ═══ SEKTION 7: VANLIGA FRÅGOR ═══ -->
  <div class="section-block">
-  <h2><span class="icon">❓</span> Vanliga frågor</h2>
+  <h2><span class="icon">❓</span> 7. Vanliga frågor</h2>
+
+  <p>Här har vi samlat svar på de vanligaste frågorna vi får om frakt, leverans, returer och återbetalning. Klicka på en fråga för att visa svaret. Om du inte hittar svaret på din fråga är du alltid välkommen att kontakta oss via <a href="mailto:hej@slapptagetboken.se">hej@slapptagetboken.se</a>.</p>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
@@ -406,7 +602,27 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Beställningar behandlas och skickas inom 24–48 timmar efter betalning. Du får ett bekräftelsemail med spårningskod så snart ditt paket är på väg.</p>
+    <p>Beställningar behandlas och skickas inom 24–48 timmar efter att betalningen har bekräftats. Beställningar som läggs innan klockan 14:00 på en arbetsdag behandlas normalt samma dag. Du får ett bekräftelsemail med spårningskod så snart ditt paket är på väg från vårt lager. Under perioder med hög efterfrågan (exempelvis runt helger och kampanjer) kan hanteringstiden i undantagsfall vara något längre, men vi informerar alltid om detta på vår webbplats.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Hur lång tid tar leveransen?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Leveranstiden till Sverige är 2–4 arbetsdagar räknat från den dag paketet skickas från vårt lager i Europa. Arbetsdagar räknas som måndag till fredag, exklusive svenska helgdagar. Den totala tiden från beställning till leverans är alltså normalt 3–6 arbetsdagar inklusive hanteringstiden. Digitala produkter (e-böcker, PDF-filer) levereras direkt efter betalning via e-post utan någon väntetid.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Kan jag ändra min leveransadress?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Ja, om din beställning ännu inte har skickats kan vi ändra leveransadressen utan extra kostnad. Kontakta oss omedelbart via <a href="mailto:hej@slapptagetboken.se" style="color: var(--cta);">hej@slapptagetboken.se</a> med ditt ordernummer och den nya adressen. Om paketet redan har lämnat vårt lager kan vi tyvärr inte garantera en adressändring, men vi gör alltid vårt bästa för att kontakta transportören och hjälpa till.</p>
    </div>
   </div>
 
@@ -416,25 +632,67 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Kontrollera först spårningskoden i ditt bekräftelsemail. Om ditt paket har varit på väg i mer än 14 arbetsdagar (inom EU), kontakta oss. Vi utreder ärendet och ordnar vid behov en ny leverans.</p>
+    <p>Kontrollera först spårningskoden i ditt bekräftelsemail för att se var ditt paket befinner sig. Ibland kan leveranser försenas på grund av oförutsedda omständigheter. Om spårningsinformationen inte har uppdaterats på mer än 7 arbetsdagar, eller om leveranstiden har överskridit 14 arbetsdagar sedan utskick, kontakta oss via <a href="mailto:hej@slapptagetboken.se" style="color: var(--cta);">hej@slapptagetboken.se</a> med ditt ordernummer. Vi utreder ärendet med transportören och ordnar vid behov en ny leverans eller full återbetalning.</p>
    </div>
   </div>
 
-  <p style="margin-top: 16px;">För information om retur och garanti, se vår <a href="retur.html" style="color: var(--cta); font-weight: 600;">Retur- och garantipolicy</a>.</p>
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Kan jag returnera en e-bok?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Digitala produkter som e-böcker och PDF-filer kan tyvärr inte returneras efter att nedladdning eller åtkomst har skett. Detta är i enlighet med EU:s konsumenträttsdirektiv, och vid köpet godkänner du att leveransen påbörjas omedelbart samt att ångerrätten därmed upphör för dessa produkter. Om du däremot upplever tekniska problem med nedladdningen eller filen, kontakta oss omedelbart så hjälper vi dig att lösa problemet.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Hur lång tid tar återbetalningen?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Vi behandlar alla återbetalningar inom 14 dagar efter att vi har mottagit den returnerade produkten. I praktiken sker de flesta återbetalningar inom 5–7 arbetsdagar. Observera att det efter att vi har processat återbetalningen kan ta ytterligare 3–10 arbetsdagar innan pengarna syns på ditt konto, beroende på din bank eller betaltjänstleverantör. PayPal-återbetalningar syns vanligtvis snabbare (3–5 arbetsdagar) medan kreditkortsåterbetalningar kan ta längre tid.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Vad händer om produkten är skadad?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Om du mottar en skadad produkt, kontakta oss omedelbart via <a href="mailto:hej@slapptagetboken.se" style="color: var(--cta);">hej@slapptagetboken.se</a>. Ta tydliga foton av skadan på både förpackningen och produkten, och inkludera ditt ordernummer i meddelandet. Behåll det skadade paketet och allt förpackningsmaterial tills ärendet är löst. Vi erbjuder kostnadsfri ersättningsprodukt eller full återbetalning beroende på dina önskemål — du ska aldrig behöva stå för kostnaden när felet inte är ditt.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Erbjuder ni expressfrakt?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>För närvarande erbjuder vi standardfrakt med leveranstid på 2–4 arbetsdagar till Sverige, som är helt kostnadsfri. Vi erbjuder i dagsläget inte expressfrakt som ett separat alternativ. Vår standardleverans är dock snabb och pålitlig, och de flesta paket levereras inom 2–3 arbetsdagar. Om du har ett brådskande behov, kontakta oss så gör vi vårt bästa för att prioritera din beställning.</p>
+   </div>
+  </div>
+
  </div>
 
  <!-- Cross-link note -->
  <div class="cross-link-note">
-  <p>För information om retur och garanti, se vår <a href="retur.html">Retur- och garantipolicy</a>.</p>
+  <p>Vill du veta mer om returer och vår 30-dagars nöjd-kund-garanti? Besök vår <a href="retur.html">Retur- och garantipolicy</a> för fullständig information om returvillkor, garantier och reklamationsprocessen.</p>
  </div>
 
  <!-- Företagsuppgifter -->
  <div class="company-info">
   <h3>🏢 Företagsuppgifter</h3>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, 110 00 Prag 1, Tjeckien</p>
-  <p>Org.nr: 06259928 | Moms: CZ06259928</p>
-  <p>E-post: <a href="mailto:devries@loslatenboek.nl" style="color: var(--cta);">devries@loslatenboek.nl</a></p>
+  <p>Rybná 716/24, Staré Město, 110 00 Praha 1, Tjeckien</p>
+  <p>IČO/Org.nr: 06259928</p>
+  <p>DIČ/Moms: CZ06259928</p>
+  <p>E-post: <a href="mailto:hej@slapptagetboken.se" style="color: var(--cta);">hej@slapptagetboken.se</a></p>
+  <p>Telefon: <a href="tel:+420732915755" style="color: var(--cta);">+420 732 915 755</a></p>
+  <p>Webbplats: <a href="https://www.slapptagetboken.se" style="color: var(--cta);">www.slapptagetboken.se</a></p>
  </div>
 
 </div>
@@ -444,7 +702,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <div class="footer-inner">
   <div class="footer-brand">
    <img src="/slapp-taget-logo-white.png" alt="Släpp taget" class="footer-logo" width="210" height="56">
-   <div class="footer-brand-text">Släpp taget om det<br>som förstör dig</div>
   </div>
   <div class="footer-links">
    <a href="frakt.html">Frakt &amp; Leverans</a>
@@ -454,12 +711,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
    <a href="kontakt.html">Kundtjänst</a>
   </div>
   <div class="footer-contact">
-   <a href="mailto:devries@loslatenboek.nl">📧 devries@loslatenboek.nl</a>
+   <a href="mailto:hej@slapptagetboken.se">📧 hej@slapptagetboken.se</a>
    <a href="tel:+420732915755">📞 +420 732 915 755</a>
   </div>
  </div>
  <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, 110 00 Praha • Org.nr: 06259928 • Moms: CZ06259928</span>
+  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, Staré Město, 110 00 Praha 1, Tjeckien • Org.nr: 06259928 • Moms: CZ06259928</span>
   <span>&copy; 2026 Performance Marketing Solution s.r.o. Alla rättigheter förbehållna.</span>
  </div>
 </footer>

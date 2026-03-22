@@ -103,8 +103,11 @@ async function computeLiveStats(
 ) {
   const queryService = req.scope.resolve(ContainerRegistrationKeys.QUERY)
   const logger = req.scope.resolve("logger") as any
-  const todayStart = `${todayStr}T00:00:00.000Z`
-  const todayEnd = `${todayStr}T23:59:59.999Z`
+
+  // Convert Prague-local day boundaries to UTC for DB queries
+  const offsetMs = getPragueOffsetMs(todayStr)
+  const todayStart = new Date(new Date(`${todayStr}T00:00:00.000Z`).getTime() - offsetMs).toISOString()
+  const todayEnd = new Date(new Date(`${todayStr}T23:59:59.999Z`).getTime() - offsetMs).toISOString()
 
   const projectStats = await Promise.all(
     projects.map(async (project: any) => {
@@ -209,7 +212,8 @@ async function computeLiveStats(
  */
 function getDateRange(period: Period, dateFrom?: string, dateTo?: string): { from: string; to: string } {
   const now = new Date()
-  const fmt = (d: Date) => d.toISOString().split("T")[0]
+  // Use Europe/Prague timezone so "today" matches CET/CEST business hours
+  const fmt = (d: Date) => d.toLocaleDateString("sv-SE", { timeZone: "Europe/Prague" })
 
   switch (period) {
     case "today":
@@ -270,4 +274,15 @@ function aggregateStats(stats: any[]) {
     payment_fee_total: stats.reduce((sum, s) => sum + Number(s.payment_fee_total || 0), 0),
     net_profit: stats.reduce((sum, s) => sum + Number(s.net_profit || 0), 0),
   }
+}
+
+/**
+ * Get Europe/Prague timezone offset in milliseconds for a given date.
+ * Handles CET (UTC+1) and CEST (UTC+2) automatically.
+ */
+function getPragueOffsetMs(dateStr: string): number {
+  const d = new Date(`${dateStr}T12:00:00Z`)
+  const utcStr = d.toLocaleString("en-US", { timeZone: "UTC" })
+  const pragueStr = d.toLocaleString("en-US", { timeZone: "Europe/Prague" })
+  return new Date(pragueStr).getTime() - new Date(utcStr).getTime()
 }

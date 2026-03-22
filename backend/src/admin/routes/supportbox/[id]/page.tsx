@@ -438,7 +438,7 @@ function MessageBubble({ msg }: { msg: any }) {
         transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
       }}>
         {has ? (
-          <div style={{ fontSize: "14px", lineHeight: 1.7, color: D.text, wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html: body }} />
+          <div className="sb-msg-body" style={{ fontSize: "14px", lineHeight: 1.7, color: D.text, wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html: body }} />
         ) : (
           <div style={{ fontSize: "13px", color: D.textMuted, fontStyle: "italic" }}>(empty)</div>
         )}
@@ -493,19 +493,37 @@ function DeliveryBadge({ status }: { status: string }) {
 /* ═══════════════════════════════════════════════════════════════
    REPLY COMPOSER
    ═══════════════════════════════════════════════════════════════ */
-function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen }: {
+function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, editorRef }: {
   text: string; setText: (v: string) => void; onSend: () => void; sending: boolean
-  keepOpen: boolean; setKeepOpen: (v: boolean) => void
+  keepOpen: boolean; setKeepOpen: (v: boolean) => void; editorRef?: React.RefObject<HTMLDivElement>
 }) {
-  const ref = useRef<HTMLTextAreaElement>(null)
+  const ref = editorRef || useRef<HTMLDivElement>(null)
   const [focused, setFocused] = useState(false)
+  const [, forceUpdate] = useState(0)
 
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    el.style.height = "auto"
-    el.style.height = Math.max(80, el.scrollHeight) + "px"
-  }, [text])
+  const getHtml = () => ref.current?.innerHTML || ""
+  const getPlainText = () => ref.current?.innerText?.trim() || ""
+
+  const handleInput = () => {
+    setText(ref.current?.innerText?.trim() || "")
+    forceUpdate(n => n + 1)
+  }
+
+  const execCmd = (cmd: string) => {
+    document.execCommand(cmd, false)
+    ref.current?.focus()
+    forceUpdate(n => n + 1)
+  }
+
+  const isActive = (cmd: string) => document.queryCommandState(cmd)
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "b" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); execCmd("bold") }
+    if (e.key === "i" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); execCmd("italic") }
+    if (e.key === "u" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); execCmd("underline") }
+  }
+
+  const hasContent = text.length > 0
 
   return (
     <div style={{
@@ -515,21 +533,31 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen }: {
       overflow: "hidden",
       transition: "border-color 0.3s ease, box-shadow 0.3s ease",
     }}>
-      {/* Input area */}
+      {/* Toolbar */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: "4px",
+        padding: "8px 24px", borderBottom: `1px solid ${D.borderSubtle}`,
+        backgroundColor: D.inset,
+      }}>
+        <button type="button" className={`sb-toolbar-btn ${isActive("bold") ? "active" : ""}`} onMouseDown={e => { e.preventDefault(); execCmd("bold") }} title="Bold (Ctrl+B)"><b>B</b></button>
+        <button type="button" className={`sb-toolbar-btn ${isActive("italic") ? "active" : ""}`} onMouseDown={e => { e.preventDefault(); execCmd("italic") }} title="Italic (Ctrl+I)"><i>I</i></button>
+        <button type="button" className={`sb-toolbar-btn ${isActive("underline") ? "active" : ""}`} onMouseDown={e => { e.preventDefault(); execCmd("underline") }} title="Underline (Ctrl+U)"><u>U</u></button>
+      </div>
+
+      {/* Editor area */}
       <div style={{ padding: "20px 24px 12px" }}>
-        <textarea
+        <div
           ref={ref}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
+          className="sb-editor"
+          contentEditable
+          data-placeholder="Write your reply..."
+          onInput={handleInput}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder="Write your reply..."
+          onKeyDown={handleKeyDown}
           style={{
-            width: "100%", minHeight: "80px", maxHeight: "300px",
-            padding: 0, fontSize: "14px", lineHeight: 1.7, color: D.text,
-            backgroundColor: "transparent", border: "none", resize: "none", outline: "none",
             fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-            boxSizing: "border-box",
+            color: D.text,
           }}
         />
       </div>
@@ -542,7 +570,7 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen }: {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <span style={{ fontSize: "11px", color: D.textMuted }}>
-            {text.trim() ? `${text.trim().length} chars` : ""}
+            {hasContent ? `${text.length} chars` : ""}
           </span>
           <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12px", color: D.textSec, cursor: "pointer", userSelect: "none" }}>
             <input
@@ -555,15 +583,15 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen }: {
           </label>
         </div>
         <button
-          className={text.trim() ? "sb-action-btn" : ""}
+          className={hasContent ? "sb-action-btn" : ""}
           onClick={onSend}
-          disabled={!text.trim() || sending}
+          disabled={!hasContent || sending}
           style={{
             padding: "8px 20px", fontSize: "13px", fontWeight: 600, color: "#fff",
-            background: text.trim() ? D.brand : D.textFaint,
+            background: hasContent ? D.brand : D.textFaint,
             border: "none", borderRadius: "10px",
-            cursor: text.trim() ? "pointer" : "not-allowed",
-            boxShadow: text.trim() ? `0 2px 8px ${D.brand}35` : "none",
+            cursor: hasContent ? "pointer" : "not-allowed",
+            boxShadow: hasContent ? `0 2px 8px ${D.brand}35` : "none",
             transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
           }}
         >
@@ -867,6 +895,7 @@ const TicketDetailPage = () => {
   const [reply, setReply] = useState("")
   const [keepOpen, setKeepOpen] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
+  const editorRef = useRef<HTMLDivElement>(null)
 
   // Scroll to top on page load
   useEffect(() => {
@@ -889,9 +918,11 @@ const TicketDetailPage = () => {
   const orders = data?.allOrders || []
 
   const replyMut = useMutation({
-    mutationFn: async (html: string) => sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/reply`, { method: "POST", body: { body_html: html, body_text: reply, keep_open: keepOpen } }),
+    mutationFn: async ({ html, plainText }: { html: string; plainText: string }) =>
+      sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/reply`, { method: "POST", body: { body_html: html, body_text: plainText, keep_open: keepOpen } }),
     onSuccess: () => {
       setReply("")
+      if (editorRef.current) editorRef.current.innerHTML = ""
       qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] })
       qc.invalidateQueries({ queryKey: ["supportbox-tickets"] })
       if (!keepOpen) {
@@ -929,7 +960,9 @@ const TicketDetailPage = () => {
 
   const send = () => {
     if (!reply.trim()) return
-    replyMut.mutateAsync(reply.split("\n").map(l => `<p>${l}</p>`).join(""))
+    const html = editorRef.current?.innerHTML || ""
+    const plainText = editorRef.current?.innerText?.trim() || ""
+    replyMut.mutateAsync({ html, plainText })
   }
 
   // Loading / 404
@@ -951,6 +984,16 @@ const TicketDetailPage = () => {
         .sb-action-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important; }
         .sb-back-btn { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important; }
         .sb-back-btn:hover { background-color: #F3F4F6 !important; transform: scale(1.08) !important; border-color: #D1D5DB !important; }
+        .sb-msg-body p { margin: 0 0 10px 0; }
+        .sb-msg-body p:last-child { margin-bottom: 0; }
+        .sb-msg-body br + br { content: ''; display: block; margin-top: 10px; }
+        .sb-msg-body div { margin-bottom: 6px; }
+        .sb-msg-body div:last-child { margin-bottom: 0; }
+        .sb-editor { min-height: 80px; max-height: 300px; overflow-y: auto; outline: none; font-size: 14px; line-height: 1.7; word-break: break-word; white-space: pre-wrap; }
+        .sb-editor:empty:before { content: attr(data-placeholder); color: ${D.textMuted}; pointer-events: none; }
+        .sb-toolbar-btn { padding: 4px 10px; font-size: 13px; background: transparent; border: 1px solid ${D.border}; border-radius: 6px; cursor: pointer; color: ${D.textSec}; transition: all 0.15s ease; line-height: 1; }
+        .sb-toolbar-btn:hover { background: ${D.inset}; color: ${D.text}; border-color: ${D.textMuted}; }
+        .sb-toolbar-btn.active { background: ${D.brand}15; color: ${D.brand}; border-color: ${D.brand}50; }
       `}</style>
 
       {/* ══════ HEADER ══════ */}
@@ -1056,7 +1099,7 @@ const TicketDetailPage = () => {
           </div>
 
           {/* Composer */}
-          <Composer text={reply} setText={setReply} onSend={send} sending={replyMut.isPending} keepOpen={keepOpen} setKeepOpen={setKeepOpen} />
+          <Composer text={reply} setText={setReply} onSend={send} sending={replyMut.isPending} keepOpen={keepOpen} setKeepOpen={setKeepOpen} editorRef={editorRef} />
 
           {replyMut.isError && (
             <div style={{ padding: "12px 16px", backgroundColor: D.redLight, border: `1px solid ${D.red}30`, borderRadius: D.r12, fontSize: "13px", color: D.red }}>

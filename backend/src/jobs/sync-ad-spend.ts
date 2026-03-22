@@ -18,13 +18,14 @@ export default async function syncAdSpendJob(container: MedusaContainer) {
   const queryService = container.resolve(ContainerRegistrationKeys.QUERY)
 
   try {
-    // Calculate today and yesterday dates
+    // Calculate today and yesterday dates in Europe/Prague timezone
     const now = new Date()
-    const today = now.toISOString().split("T")[0]
+    const pragueFmt = (d: Date) => d.toLocaleDateString("sv-SE", { timeZone: "Europe/Prague" })
+    const today = pragueFmt(now)
 
     const yesterday = new Date(now)
     yesterday.setDate(yesterday.getDate() - 1)
-    const yesterdayStr = yesterday.toISOString().split("T")[0]
+    const yesterdayStr = pragueFmt(yesterday)
 
     const datesToSync = [today, yesterdayStr]
 
@@ -92,8 +93,10 @@ export async function syncProjectDay({
   logger: any
 }) {
   const p = project
-  const dayStart = `${date}T00:00:00.000Z`
-  const dayEnd = `${date}T23:59:59.999Z`
+  // Convert Prague-local day boundaries to UTC for DB queries
+  const offsetMs = getPragueOffsetMs(date)
+  const dayStart = new Date(new Date(`${date}T00:00:00.000Z`).getTime() - offsetMs).toISOString()
+  const dayEnd = new Date(new Date(`${date}T23:59:59.999Z`).getTime() - offsetMs).toISOString()
 
   // Fetch ad spend from Meta Ads API
   let adSpend = 0
@@ -206,6 +209,17 @@ export async function syncProjectDay({
       last_synced_at: new Date(),
     })
   }
+}
+
+/**
+ * Get Europe/Prague timezone offset in milliseconds for a given date.
+ * Handles CET (UTC+1) and CEST (UTC+2) automatically.
+ */
+function getPragueOffsetMs(dateStr: string): number {
+  const d = new Date(`${dateStr}T12:00:00Z`)
+  const utcStr = d.toLocaleString("en-US", { timeZone: "UTC" })
+  const pragueStr = d.toLocaleString("en-US", { timeZone: "Europe/Prague" })
+  return new Date(pragueStr).getTime() - new Date(utcStr).getTime()
 }
 
 export const config = {
