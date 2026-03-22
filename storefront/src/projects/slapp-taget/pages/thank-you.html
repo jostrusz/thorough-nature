@@ -659,7 +659,7 @@ body { background: var(--bg); }
       <div class="ty-support-title">Frågor eller problem?</div>
       <div class="ty-support-desc">Har du hittat ett fel, har en fråga om din beställning eller stöter du på problem? Kontakta oss gärna &mdash; vi hjälper dig med glädje!</div>
     </div>
-    <a href="mailto:bok@slapptagetboken.se?subject=Fr%C3%A5ga%20om%20best%C3%A4llning%20%23&body=Hej%2C%0A%0AJag%20har%20en%20fr%C3%A5ga%20om%20min%20best%C3%A4llning.%0A%0AOrdernummer%3A%20%0A%0AMin%20fr%C3%A5ga%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Skicka oss ett e-postmeddelande</a>
+    <a href="mailto:hej@slapptagetboken.se?subject=Fr%C3%A5ga%20om%20best%C3%A4llning%20%23&body=Hej%2C%0A%0AJag%20har%20en%20fr%C3%A5ga%20om%20min%20best%C3%A4llning.%0A%0AOrdernummer%3A%20%0A%0AMin%20fr%C3%A5ga%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Skicka oss ett e-postmeddelande</a>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -799,7 +799,7 @@ body { background: var(--bg); }
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
     var subject = encodeURIComponent('Fråga om beställning #' + orderNum);
     var body = encodeURIComponent('Hej,\n\nJag har en fråga om min beställning.\n\nOrdernummer: #' + orderNum + '\n\nMin fråga: ');
-    mailtoEl.href = 'mailto:bok@slapptagetboken.se?subject=' + subject + '&body=' + body;
+    mailtoEl.href = 'mailto:hej@slapptagetboken.se?subject=' + subject + '&body=' + body;
   }
 
   // 2d. Celková cena — bere v potaz bundle, order bump a upsell
