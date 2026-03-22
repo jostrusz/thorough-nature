@@ -109,7 +109,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'lass-los': 'dort',
 }
 
-async function sendEbookDelivery(orderId: string, container: any, eventName: string) {
+export async function sendEbookDelivery(orderId: string, container: any, eventName: string) {
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
   const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
   const downloadService = container.resolve(DIGITAL_DOWNLOAD_MODULE) as DigitalDownloadModuleService
