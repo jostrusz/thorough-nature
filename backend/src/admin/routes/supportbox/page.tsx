@@ -612,6 +612,22 @@ const SupportBoxDashboard = () => {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <h1 style={{ fontSize: "20px", fontWeight: 600, color: C.text, margin: 0 }}>SupportBox</h1>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <div style={{ position: "relative", width: "280px" }}>
+            <Input
+              placeholder="Search subject, email, content..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              size="small"
+            />
+            {searchInput && searchInput !== searchQuery && (
+              <div style={{
+                position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)",
+                width: "14px", height: "14px", borderRadius: "50%",
+                border: "2px solid #D1D5DB", borderTopColor: C.blue,
+                animation: "spin 0.6s linear infinite",
+              }} />
+            )}
+          </div>
           <button
             onClick={async () => {
               setRefreshing(true)
@@ -721,22 +737,7 @@ const SupportBoxDashboard = () => {
             padding: "14px 20px", backgroundColor: C.white, border: `1px solid ${C.border}`,
             borderRadius: "12px 12px 0 0", borderBottom: "none",
           }}>
-            <div style={{ flex: 1, position: "relative" }}>
-              <Input
-                placeholder="Search subject, email, message content..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                size="small"
-              />
-              {searchInput && searchInput !== searchQuery && (
-                <div style={{
-                  position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)",
-                  width: "14px", height: "14px", borderRadius: "50%",
-                  border: "2px solid #D1D5DB", borderTopColor: C.blue,
-                  animation: "spin 0.6s linear infinite",
-                }} />
-              )}
-            </div>
+            <div style={{ flex: 1 }} />
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
               <Select.Trigger>
                 <Select.Value placeholder="Inbox" />
