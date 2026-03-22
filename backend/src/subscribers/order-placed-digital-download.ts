@@ -91,22 +91,37 @@ const STOREFRONT_URLS: Record<string, string> = {
   'lass-los': process.env.LL_STOREFRONT_URL || "https://www.lasslosbuch.de",
 }
 
-export default async function orderPlacedDigitalDownloadHandler({
-  event: { data },
-  container,
-}: SubscriberArgs<any>) {
+// Localized email subjects per project
+const EMAIL_SUBJECTS: Record<string, string> = {
+  loslatenboek: 'Je e-books staan klaar! 📖',
+  dehondenbijbel: 'Je e-book staat klaar! 📖',
+  'slapp-taget': 'Dina e-böcker är redo! 📖',
+  'odpusc-ksiazka': 'Twoje e-booki są gotowe! 📖',
+  'lass-los': 'Deine E-Books sind bereit! 📖',
+}
+
+// Localized fallback first names
+const DEFAULT_FIRST_NAMES: Record<string, string> = {
+  loslatenboek: 'daar',
+  dehondenbijbel: 'daar',
+  'slapp-taget': 'där',
+  'odpusc-ksiazka': 'tam',
+  'lass-los': 'dort',
+}
+
+async function sendEbookDelivery(orderId: string, container: any, eventName: string) {
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
   const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
   const downloadService = container.resolve(DIGITAL_DOWNLOAD_MODULE) as DigitalDownloadModuleService
 
   try {
-    const order = await orderModuleService.retrieveOrder(data.id, {
+    const order = await orderModuleService.retrieveOrder(orderId, {
       relations: ['items', 'shipping_address'],
     })
 
-    // Guard: skip if e-books already sent (prevent duplicate sends from webhook retries)
+    // Guard: skip if e-books already sent (prevent duplicate sends from webhook retries or dual events)
     if (order.metadata?.ebook_sent) {
-      console.log(`[digital-download] E-books already sent for order ${order.id}, skipping`)
+      console.log(`[digital-download] E-books already sent for order ${order.id}, skipping (event: ${eventName})`)
       return
     }
 
@@ -144,31 +159,32 @@ export default async function orderPlacedDigitalDownloadHandler({
     const storefrontUrl = STOREFRONT_URLS[projectId] || STOREFRONT_URLS.loslatenboek
     const downloadUrl = `${storefrontUrl}/download/${token}`
 
-    // Get customer first name from shipping address
-    const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(
-      order.shipping_address.id
-    )
-    const firstName = shippingAddress?.first_name || 'daar'
+    // Get customer first name — safely handle missing shipping address
+    let firstName = DEFAULT_FIRST_NAMES[projectId] || 'daar'
+    try {
+      if (order.shipping_address?.id) {
+        const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(
+          order.shipping_address.id
+        )
+        if (shippingAddress?.first_name) {
+          firstName = shippingAddress.first_name
+        }
+      }
+    } catch (addrErr: any) {
+      console.warn(`[digital-download] Could not retrieve shipping address: ${addrErr.message}`)
+    }
 
     // Resolve billing entity for footer
     let billingEntity: any = null
     try {
-      billingEntity = await resolveBillingEntity(container, data.id)
+      billingEntity = await resolveBillingEntity(container, orderId)
     } catch (err: any) {
       console.warn('[digital-download] Could not resolve billing entity:', err.message)
     }
 
     // Send ebook delivery email (project-specific template)
     const templateKey = resolveTemplateKey(EmailTemplates.EBOOK_DELIVERY, projectConfig.project)
-    const emailSubject = projectId === 'dehondenbijbel'
-      ? 'Je e-book staat klaar! 📖'
-      : projectId === 'slapp-taget'
-        ? 'Dina e-böcker är redo! 📖'
-        : projectId === 'odpusc-ksiazka'
-          ? 'Twoje e-booki są gotowe! 📖'
-          : projectId === 'lass-los'
-            ? 'Deine E-Books sind bereit! 📖'
-            : 'Je e-books staan klaar! 📖'
+    const emailSubject = EMAIL_SUBJECTS[projectId] || EMAIL_SUBJECTS.loslatenboek
 
     await notificationModuleService.createNotifications({
       to: order.email,
@@ -200,7 +216,7 @@ export default async function orderPlacedDigitalDownloadHandler({
     }
     const htmlBody = await renderEmailToHtml(templateKey, emailData).catch(() => '')
 
-    await logEmailActivity(orderModuleService, data.id, {
+    await logEmailActivity(orderModuleService, orderId, {
       template: "ebook_delivery",
       subject: emailSubject,
       to: order.email,
@@ -212,7 +228,6 @@ export default async function orderPlacedDigitalDownloadHandler({
     try {
       const { Pool } = require("pg")
       const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
-      const existingMeta = order.metadata || {}
       await pool.query(
         `UPDATE "order" SET metadata = jsonb_set(COALESCE(metadata, '{}'), '{ebook_sent}', 'true'), updated_at = NOW() WHERE id = $1`,
         [order.id]
@@ -222,10 +237,10 @@ export default async function orderPlacedDigitalDownloadHandler({
       console.warn(`[digital-download] Could not set ebook_sent flag: ${metaErr.message}`)
     }
 
-    console.log(`[digital-download] Created download token ${token} for order ${order.id}`)
+    console.log(`[digital-download] Created download token ${token} for order ${order.id} (project: ${projectId}, trigger: ${eventName})`)
   } catch (error: any) {
-    console.error('[digital-download] Error creating digital download:', error)
-    await logEmailActivity(orderModuleService, data.id, {
+    console.error(`[digital-download] Error creating digital download (trigger: ${eventName}):`, error)
+    await logEmailActivity(orderModuleService, orderId, {
       template: "ebook_delivery",
       subject: "E-book delivery",
       to: "",
@@ -233,6 +248,14 @@ export default async function orderPlacedDigitalDownloadHandler({
       error_message: error.message,
     }).catch(() => {})
   }
+}
+
+// Handler for payment.captured (Stripe, PayPal, Mollie, Comgate, Airwallex, Klarna capture)
+export default async function orderPlacedDigitalDownloadHandler({
+  event: { data },
+  container,
+}: SubscriberArgs<any>) {
+  await sendEbookDelivery(data.id, container, 'payment.captured')
 }
 
 export const config: SubscriberConfig = {
