@@ -334,10 +334,8 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         if (method === "blik" && customerEmail) {
           apmPaymentSource.email = customerEmail
         }
-        // Swish does not use the name field
-        if (method === "swish") {
-          delete apmPaymentSource.name
-        }
+        // Swish requires name field (PayPal API validates it)
+        // No special handling needed for swish
 
         // APMs require experience_context INSIDE the payment_source (not top-level application_context)
         apmPaymentSource.experience_context = {
