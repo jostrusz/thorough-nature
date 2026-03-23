@@ -114,7 +114,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       city: addr.city || "",
       zip: addr.postal_code || "",
       country: addr.country_code?.toUpperCase() || "NL",
-      phone: addr.phone || "",
+      phone: addr.phone || "000",
       email: (order as any).email || "",
     }
 
