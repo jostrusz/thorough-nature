@@ -10,12 +10,12 @@ export default defineMiddlewares({
     {
       method: ["POST"],
       matcher: "/webhooks/mystock",
-      bodyParser: true,
+      bodyParser: { preserveRawBody: true },
     },
     {
       method: ["POST"],
       matcher: "/V1/event",
-      bodyParser: true,
+      bodyParser: { preserveRawBody: true },
     },
   ],
 })
