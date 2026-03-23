@@ -206,7 +206,7 @@ export const POST = async (
       }
 
       logger.info(
-        `[Capture] Klarna capture request: klarnaOrderId=${paymentData.klarnaOrderId}, captured_amount=${captureData.captured_amount}, has_shipping_info=${!!captureData.shipping_info}`
+        `[Capture] Klarna capture request: klarnaOrderId=${paymentData.klarnaOrderId}, captured_amount=${captureData.captured_amount}, has_shipping_info=${!!captureData.shipping_info}, isLive=${isLive}, baseURL=${isLive ? 'api.klarna.com' : 'api.playground.klarna.com'}, apiKeyPrefix=${(apiKey || '').substring(0, 8)}...`
       )
 
       const result = await client.captureOrder(
