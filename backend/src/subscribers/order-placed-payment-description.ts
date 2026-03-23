@@ -80,8 +80,22 @@ export default async function orderPlacedPaymentDescriptionHandler({
           }
 
           const keys = config.mode === "live" ? config.live_keys : config.test_keys
-          const secretKey = keys?.secret_key
-          if (!secretKey) continue
+          // Try secret_key first, fall back to api_key (some configs store it there)
+          let secretKey = keys?.secret_key || keys?.api_key || ""
+          // Validate it's actually a Stripe secret key, not a webhook secret
+          if (!secretKey.startsWith("sk_live_") && !secretKey.startsWith("sk_test_")) {
+            // Try all key fields to find the real secret key
+            for (const k of Object.values(keys || {})) {
+              if (typeof k === "string" && (k.startsWith("sk_live_") || k.startsWith("sk_test_"))) {
+                secretKey = k
+                break
+              }
+            }
+          }
+          if (!secretKey.startsWith("sk_")) {
+            console.warn(`[PaymentDescription] Stripe: no valid secret key found (got ${secretKey.substring(0, 8)}...)`)
+            continue
+          }
 
           const Stripe = require("stripe")
           const stripe = new Stripe(secretKey)
