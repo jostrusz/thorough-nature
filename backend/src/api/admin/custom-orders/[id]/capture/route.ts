@@ -205,12 +205,19 @@ export const POST = async (
         ]
       }
 
+      logger.info(
+        `[Capture] Klarna capture request: klarnaOrderId=${paymentData.klarnaOrderId}, captured_amount=${captureData.captured_amount}, has_shipping_info=${!!captureData.shipping_info}`
+      )
+
       const result = await client.captureOrder(
         paymentData.klarnaOrderId,
         captureData
       )
 
       if (!result.success) {
+        logger.error(
+          `[Capture] Klarna capture FAILED for order ${orderId}: ${result.error}`
+        )
         res
           .status(400)
           .json({ error: result.error || "Klarna capture failed" })
