@@ -217,12 +217,25 @@ export class MyStockApiClient {
   // STOCK CARD — Get inventory levels
   // ═══════════════════════════════════════════
   async getStockCard(warehouseCode: string, productCode?: string): Promise<any[]> {
-    let path = `/stockCard/${warehouseCode}/`
-    if (productCode) {
-      path += `?productCode=${encodeURIComponent(productCode)}`
-    }
+    const params = new URLSearchParams()
+    if (warehouseCode) params.set("warehouseCode", warehouseCode)
+    if (productCode) params.set("productCode", productCode)
+    const qs = params.toString()
+    const path = `/stockCard/${qs ? `?${qs}` : ""}`
     const result = await this.request("GET", path)
-    return Array.isArray(result.data) ? result.data : [result.data]
+    const data = result.data?.result || result.data
+    return Array.isArray(data) ? data : [data]
+  }
+
+  async getProductStockCard(warehouseCode: string, productCode?: string): Promise<any[]> {
+    const params = new URLSearchParams()
+    if (warehouseCode) params.set("warehouseCode", warehouseCode)
+    if (productCode) params.set("productCode", productCode)
+    const qs = params.toString()
+    const path = `/productStockCard/${qs ? `?${qs}` : ""}`
+    const result = await this.request("GET", path)
+    const data = result.data?.result || result.data
+    return Array.isArray(data) ? data : [data]
   }
 
   // ═══════════════════════════════════════════
