@@ -472,6 +472,67 @@ body {
 }
 @keyframes foxSpin { to { transform: translateY(-50%) rotate(360deg); } }
 
+/* ─── SMART FILL BANNER ─── */
+.smart-fill-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #F0F9FF 0%, #F5F3FF 100%);
+  border: 1px solid rgba(194, 123, 160, 0.10);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--muted);
+  animation: fadeIn 0.2s ease;
+}
+.smart-fill-banner .smart-fill-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.smart-fill-banner .smart-fill-text { line-height: 1.4; }
+.smart-fill-banner .smart-fill-text strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ─── PHONE WARNING (orange soft block) ─── */
+.phone-warning {
+  display: none;
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: rgba(230, 126, 34, 0.08);
+  border: 1px solid rgba(230, 126, 34, 0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #92400E;
+  line-height: 1.4;
+  animation: fadeIn 0.2s ease;
+}
+.phone-warning-text { margin-bottom: 8px; }
+.phone-warning-actions { display: flex; gap: 8px; }
+.phone-warning-actions button {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+.phone-warning-confirm {
+  background: #F59E0B;
+  color: #fff;
+}
+.phone-warning-confirm:hover { background: #D97706; }
+.phone-warning-edit {
+  background: transparent;
+  color: #92400E;
+  border: 1px solid rgba(230, 126, 34, 0.3) !important;
+}
+.phone-warning-edit:hover { background: rgba(230, 126, 34, 0.1); }
+
 /* ─── FIREMNÍ POLE (B2B) ─── */
 .company-toggle {
   display: flex; align-items: center; gap: 10px;
@@ -2132,11 +2193,11 @@ body {
       </div>
       <!-- Order bump (skrytý pokud není vybrán) -->
       <div class="msb-line bump" id="msb-bump-line" style="display:none;">
-        <span class="msb-line-label">
+        <span class="msb-line-label" id="msb-bump-name">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
           Het Leven Dat Je Verdient
         </span>
-        <span class="msb-line-val">&euro;23,00</span>
+        <span class="msb-line-val" id="msb-bump-price">&euro;23,00</span>
       </div>
       <!-- Mezisoučet -->
       <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(194,123,160,0.18);">
@@ -2207,13 +2268,13 @@ body {
             <div class="order-bump-header-text">
               <div class="order-bump-top-row">
                 <div class="order-bump-tag">Eenmalig aanbod</div>
-                <div class="order-bump-save-tag">-36%</div>
+                <div class="order-bump-save-tag" id="order-bump-pct-tag">-36%</div>
               </div>
-              <div class="order-bump-title">Voeg <em>Het Leven Dat Je Verdient</em> toe</div>
+              <div class="order-bump-title">Voeg <em id="order-bump-title-name">Het Leven Dat Je Verdient</em> toe</div>
               <div class="order-bump-prices-inline">
                 <span class="order-bump-old-price" id="order-bump-old-price">&euro;36,00</span>
                 <span class="order-bump-new-price" id="order-bump-new-price">&euro;23,00</span>
-                <span class="order-bump-inline-save">Bespaar &euro;13</span>
+                <span class="order-bump-inline-save" id="order-bump-inline-save">Bespaar &euro;13</span>
               </div>
             </div>
             <button type="button" class="order-bump-expand" id="order-bump-expand-btn" aria-expanded="false" aria-label="Meer informatie">
@@ -2240,9 +2301,9 @@ body {
                     <span>&#11088; 4.9/5 sterren</span>
                   </div>
                   <div class="order-bump-prices">
-                    <span class="order-bump-old-price">&euro;36,00</span>
-                    <span class="order-bump-new-price">&euro;23,00</span>
-                    <span class="order-bump-save">Bespaar &euro;13</span>
+                    <span class="order-bump-old-price" id="order-bump-detail-old">&euro;36,00</span>
+                    <span class="order-bump-new-price" id="order-bump-detail-new">&euro;23,00</span>
+                    <span class="order-bump-save" id="order-bump-detail-save">Bespaar &euro;13</span>
                   </div>
                 </div>
               </div>
@@ -2326,6 +2387,10 @@ body {
 
         <!-- ═══ SEKCE 1: KONTAKT ═══ -->
         <div class="checkout-card animate-in">
+          <div class="smart-fill-banner">
+            <span class="smart-fill-icon">⚡</span>
+            <span class="smart-fill-text"><strong>Snel invullen</strong> — we vullen je gegevens automatisch aan</span>
+          </div>
           <div class="section-header">
             <div class="section-number">1</div>
             <h2 class="section-title">Contact</h2>
@@ -2348,6 +2413,13 @@ body {
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             <div class="field-error">Vul een geldig telefoonnummer in</div>
             <div class="phone-preview" id="phone-preview"></div>
+            <div class="phone-warning" id="phone-warning">
+              <div class="phone-warning-text">⚠ Dit nummer lijkt niet geldig. Controleer of het correct is.</div>
+              <div class="phone-warning-actions">
+                <button type="button" class="phone-warning-confirm" id="phone-warning-confirm">Ja, dit klopt</button>
+                <button type="button" class="phone-warning-edit" id="phone-warning-edit">Aanpassen</button>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -2627,11 +2699,11 @@ body {
 
       <!-- Order bump řádek v summary (skrytý dokud nezaškrtne) -->
       <div class="summary-line" id="summary-order-bump" style="display:none;padding:8px 0;border-top:1px dashed rgba(194,123,160,0.2);">
-        <span style="font-size:13px;display:flex;align-items:center;gap:4px;">
+        <span id="summary-bump-name" style="font-size:13px;display:flex;align-items:center;gap:4px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
           Het Leven Dat Je Verdient
         </span>
-        <span style="font-weight:600;color:var(--cta);">&euro;23,00</span>
+        <span id="summary-bump-price" style="font-weight:600;color:var(--cta);">&euro;23,00</span>
       </div>
 
       <div class="summary-line" id="summary-subtotal">
@@ -2680,7 +2752,7 @@ body {
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Vragen? <strong>devries@loslatenboek.nl</strong></span>
+          <span>Vragen? <strong>devries@travelbible.nl</strong></span>
         </div>
       </div>
 
@@ -2726,16 +2798,19 @@ body {
 
 <!-- ═══ FOOTER ═══ -->
 <div class="checkout-footer">
-  <div class="checkout-footer-trust">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    Alle transacties worden beveiligd verwerkt via <strong>Mollie</strong> — een door DNB gereguleerde betaaldienstverlener.
+  <div class="checkout-footer-trust" style="flex-direction:column;gap:4px;">
+    <div style="display:flex;align-items:center;gap:6px;justify-content:center;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Betaling beveiligd via <strong>PayPal</strong>
+    </div>
+    <p style="font-size:11px;color:#999;line-height:1.4;margin:2px 0 0 0;text-align:center;">Door met uw kaart te betalen, erkent u dat uw gegevens worden verwerkt door PayPal in overeenstemming met het Privacybeleid van PayPal, beschikbaar op <a href="https://www.paypal.com/legalhub/privacy-full" target="_blank" rel="noopener" style="color:#999;text-decoration:underline;">PayPal.com</a>.</p>
   </div>
   <div class="checkout-footer-company">
     <strong>Laat Los Wat Je Kapotmaakt</strong> is een uitgave van Performance Marketing Solution s.r.o.<br>
     Rybná 716/24, Staré Město, 110 00 Praag, Tsjechië<br>
     IČO: 06259928 · DIČ: CZ06259928<br>
     Wij verzenden vanuit ons Europees distributiecentrum via GLS naar Nederland en België.<br>
-    Vragen of problemen? Neem gerust contact op: <a href="mailto:devries@loslatenboek.nl"><strong>devries@loslatenboek.nl</strong></a><br>
+    Vragen of problemen? Neem gerust contact op: <a href="mailto:devries@travelbible.nl"><strong>devries@travelbible.nl</strong></a><br>
     Wij reageren binnen 24 uur en lossen elk probleem persoonlijk op.
   </div>
   <div class="checkout-footer-links">
@@ -2759,6 +2834,17 @@ body {
   var selectedBundleQty = 1;       // Aktuálně vybraný počet knih (1-4)
   var selectedBundlePrice = PROJECT_CONFIG.bundleOptions[0].price; // Cena za bundle
   var orderBumpActive = false;      // Je order bump zaškrtnutý?
+
+  // FB Pixel + CAPI: InitiateCheckout on page load (skip on payment return to avoid double firing)
+  var isPaymentReturn = window.location.search.indexOf('payment_return=1') !== -1 || window.location.search.indexOf('redirect_status=') !== -1;
+  if (!isPaymentReturn && typeof MetaTracker !== 'undefined') {
+    MetaTracker.trackInitiateCheckout({
+      content_ids: PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle],
+      value: PROJECT_CONFIG.mainProduct.price,
+      currency: PROJECT_CONFIG.mainProduct.currency,
+      num_items: 1
+    });
+  }
 
   /* ─── FUNKCE PRO DYNAMICKÝ ORDER SUMMARY ─── */
   // Formátování cen v EU stylu (€32,11)
@@ -2972,6 +3058,53 @@ body {
       });
     }
   }
+
+  // ─── ORDER BUMP — dynamické ceny z config.json ───
+  (function populateOrderBumpFromConfig() {
+    var up = PROJECT_CONFIG.upsellProduct;
+    if (!up || !up.name) return;
+    var saveAmt = (up.originalPrice || 0) - (up.price || 0);
+    var savePct = up.originalPrice ? Math.round((saveAmt / up.originalPrice) * 100) : 0;
+
+    // Header
+    var titleEl = document.getElementById('order-bump-title-name');
+    if (titleEl) titleEl.textContent = up.name;
+    var pctTag = document.getElementById('order-bump-pct-tag');
+    if (pctTag) pctTag.textContent = '-' + savePct + '%';
+    var oldPrice = document.getElementById('order-bump-old-price');
+    if (oldPrice) oldPrice.innerHTML = '&euro;' + Number(up.originalPrice).toFixed(2).replace('.', ',');
+    var newPrice = document.getElementById('order-bump-new-price');
+    if (newPrice) newPrice.innerHTML = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
+    var inlineSave = document.getElementById('order-bump-inline-save');
+    if (inlineSave) inlineSave.innerHTML = 'Bespaar &euro;' + saveAmt.toFixed(0);
+
+    // Detail
+    var nameEl = document.getElementById('order-bump-name');
+    if (nameEl) nameEl.textContent = up.name;
+    var detailOld = document.getElementById('order-bump-detail-old');
+    if (detailOld) detailOld.innerHTML = '&euro;' + Number(up.originalPrice).toFixed(2).replace('.', ',');
+    var detailNew = document.getElementById('order-bump-detail-new');
+    if (detailNew) detailNew.innerHTML = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
+    var detailSave = document.getElementById('order-bump-detail-save');
+    if (detailSave) detailSave.innerHTML = 'Bespaar &euro;' + saveAmt.toFixed(0);
+
+    // Summary + Mobile sticky bar — aktualizuj název a cenu
+    var priceStr = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
+    var summaryBumpName = document.getElementById('summary-bump-name');
+    if (summaryBumpName) {
+      var svgHtml = summaryBumpName.querySelector('svg') ? summaryBumpName.querySelector('svg').outerHTML + ' ' : '';
+      summaryBumpName.innerHTML = svgHtml + up.name;
+    }
+    var summaryBumpPrice = document.getElementById('summary-bump-price');
+    if (summaryBumpPrice) summaryBumpPrice.innerHTML = priceStr;
+    var msbBumpName = document.getElementById('msb-bump-name');
+    if (msbBumpName) {
+      var msbSvg = msbBumpName.querySelector('svg') ? msbBumpName.querySelector('svg').outerHTML + ' ' : '';
+      msbBumpName.innerHTML = msbSvg + up.name;
+    }
+    var msbBumpPrice = document.getElementById('msb-bump-price');
+    if (msbBumpPrice) msbBumpPrice.innerHTML = priceStr;
+  })();
 
   // Inicializace — vygeneruj bundle, zobraz daně, načti obrázek
   renderBundleOptions();
@@ -4631,6 +4764,9 @@ body {
       if (m.code === 'applepay') {
         return window.ApplePaySession && ApplePaySession.canMakePayments();
       }
+      if (m.code === 'googlepay') {
+        return false;
+      }
       return true;
     });
 
@@ -5035,20 +5171,24 @@ body {
 
   /* ─── SMART EMAIL VALIDATIE — typfouten detectie ─── */
   var COMMON_DOMAINS = {
-    'gmail.com': ['gmial.com','gmai.com','gmal.com','gamil.com','gmail.nl','gmail.co','gnail.com','gmaill.com','gmali.com','gmaik.com','gmail.con','gmail.cmo','gmeil.com','gemail.com'],
-    'hotmail.com': ['hotmai.com','hotmal.com','homail.com','hotmail.co','hotamil.com','hotmaill.com','hotmial.com','hotmail.con','hotmail.nl'],
-    'outlook.com': ['outlok.com','outllook.com','outook.com','outlook.co','outlool.com','outlouk.com'],
-    'yahoo.com': ['yaho.com','yahooo.com','yahoo.co','yaahoo.com','yhoo.com','yahoo.nl'],
-    'live.nl': ['live.nl.com','lve.nl','live.n','live.nll'],
-    'ziggo.nl': ['zigo.nl','ziggo.n','ziggo.nll','zigggo.nl'],
-    'kpnmail.nl': ['kpnmal.nl','kpnmail.n','kpnmai.nl','kpnmail.nll'],
-    'upcmail.nl': ['upcmal.nl','upcmail.n'],
-    'hetnet.nl': ['hetnet.n','henet.nl'],
+    'gmail.com': ['gmial.com','gmai.com','gmal.com','gamil.com','gmail.nl','gmail.co','gnail.com','gmaill.com','gmali.com','gmaik.com','gmail.con','gmail.cmo','gmeil.com','gemail.com','gmai.c','gmail.c','gmal.c','gmil.com','g mail.com','gamail.com','gimail.com','gmsil.com','gmqil.com'],
+    'hotmail.com': ['hotmai.com','hotmal.com','homail.com','hotmail.co','hotamil.com','hotmaill.com','hotmial.com','hotmail.con','hotmail.nl','hotmail.c','hotmai.c','hotmal.c','htomail.com','htmail.com','hotmil.com'],
+    'outlook.com': ['outlok.com','outllook.com','outook.com','outlook.co','outlool.com','outlouk.com','outlook.c','outlok.c','outloook.com','outlokk.com'],
+    'yahoo.com': ['yaho.com','yahooo.com','yahoo.co','yaahoo.com','yhoo.com','yahoo.nl','yahoo.c','yaho.c','yaoo.com','yhaoo.com'],
+    'live.nl': ['live.nl.com','lve.nl','live.n','live.nll','live.l'],
+    'ziggo.nl': ['zigo.nl','ziggo.n','ziggo.nll','zigggo.nl','ziggo.l','zigo.n'],
+    'kpnmail.nl': ['kpnmal.nl','kpnmail.n','kpnmai.nl','kpnmail.nll','kpnmail.l','kpnmal.n'],
+    'upcmail.nl': ['upcmal.nl','upcmail.n','upcmail.l'],
+    'hetnet.nl': ['hetnet.n','henet.nl','hetnet.l'],
     'telenet.be': ['telenet.b','telnet.be','telenet.bee'],
     'skynet.be': ['skynet.b','sknet.be'],
     'proximus.be': ['proximus.b','proxmus.be'],
-    'icloud.com': ['iclod.com','icloud.co','icoud.com','icloud.con'],
-    'protonmail.com': ['protonmal.com','protonmail.co','protonmail.con'],
+    'icloud.com': ['iclod.com','icloud.co','icoud.com','icloud.con','icloud.c','iclod.c'],
+    'protonmail.com': ['protonmal.com','protonmail.co','protonmail.con','protonmail.c'],
+    'online.nl': ['online.n','onlne.nl','online.l'],
+    'xs4all.nl': ['xs4all.n','xs4al.nl','xs4all.l'],
+    'planet.nl': ['planet.n','plnet.nl','planet.l'],
+    'casema.nl': ['casema.n','casma.nl','casema.l'],
   };
   var TYPO_MAP = {};
   Object.keys(COMMON_DOMAINS).forEach(function(correct) {
@@ -5068,10 +5208,52 @@ body {
   // Foxentry flag — als key is ingesteld, worden email/phone uitsluitend door Foxentry gevalideerd
   var hasFoxentryKey = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
 
-  if (emailField && emailSuggestion && !hasFoxentryKey) {
-    // Alleen lokale typo-check als Foxentry NIET actief is
+  if (emailField && emailSuggestion) {
+    // FB Pixel + CAPI: AddPaymentInfo when customer fills in email (skip on payment return)
+    var addPaymentInfoFired = isPaymentReturn;  // Already true if payment return → won't fire
+    emailField.addEventListener('blur', function() {
+      var emailVal = emailField.value.trim();
+      if (emailVal && emailVal.includes('@') && !addPaymentInfoFired && typeof MetaTracker !== 'undefined') {
+        addPaymentInfoFired = true;
+        MetaTracker.trackAddPaymentInfo({
+          content_ids: PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle],
+          value: getCurrentTotal(),
+          currency: PROJECT_CONFIG.mainProduct.currency
+        }, { em: emailVal });
+        console.log('[Checkout] AddPaymentInfo fired — email entered');
+      }
+    });
+
+    // Lokale typo-check — altijd actief (ook naast Foxentry)
     emailField.addEventListener('blur', function() {
       var val = emailField.value.trim();
+      if (!val) return;
+
+      // 1. TLD lengte check — .c, .x etc. zijn geen geldige TLD's (min 2 tekens)
+      var atParts = val.split('@');
+      if (atParts.length === 2) {
+        var domainParts = atParts[1].split('.');
+        var tld = domainParts[domainParts.length - 1];
+        if (tld && tld.length < 2) {
+          emailField.classList.add('invalid');
+          emailField.classList.remove('valid');
+          // Probeer typo suggestie te geven
+          var tldSuggestion = checkEmailTypo(val);
+          if (tldSuggestion) {
+            emailSuggestion.innerHTML = 'Bedoelde je <strong>' + tldSuggestion + '</strong>? Klik om te corrigeren.';
+            emailSuggestion.style.display = 'block';
+            emailSuggestion.onclick = function() {
+              emailField.value = tldSuggestion;
+              emailSuggestion.style.display = 'none';
+              emailField.classList.add('valid');
+              emailField.classList.remove('invalid');
+            };
+          }
+          return; // Stop — ongeldige TLD
+        }
+      }
+
+      // 2. Typo check (gmail.co → gmail.com, hotmal.com → hotmail.com etc.)
       var suggestion = checkEmailTypo(val);
       if (suggestion) {
         emailSuggestion.innerHTML = 'Bedoelde je <strong>' + suggestion + '</strong>? Klik om te corrigeren.';
@@ -5079,7 +5261,8 @@ body {
         emailSuggestion.onclick = function() {
           emailField.value = suggestion;
           emailSuggestion.style.display = 'none';
-          validateField(emailField);
+          emailField.classList.add('valid');
+          emailField.classList.remove('invalid');
         };
       } else {
         emailSuggestion.style.display = 'none';
@@ -5095,6 +5278,29 @@ body {
   var phonePreview = document.getElementById('phone-preview');
   var countrySelect = document.getElementById('country');
   var COUNTRY_PHONE_PREFIX = { NL: '+31', BE: '+32' };
+  var PHONE_PREFIX_TO_COUNTRY = { '+31': 'NL', '+32': 'BE', '+49': 'DE', '+352': 'LU' };
+
+  // Detecteer land uit telefoonnummer (bijv. +32... → BE)
+  function detectCountryFromPhone(val) {
+    var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
+    if (cleaned.startsWith('00')) cleaned = '+' + cleaned.substring(2);
+    if (!cleaned.startsWith('+')) return null;
+    // Langste prefix eerst (+352 voor +35)
+    var prefixes = Object.keys(PHONE_PREFIX_TO_COUNTRY).sort(function(a, b) { return b.length - a.length; });
+    for (var i = 0; i < prefixes.length; i++) {
+      if (cleaned.startsWith(prefixes[i])) return PHONE_PREFIX_TO_COUNTRY[prefixes[i]];
+    }
+    return null;
+  }
+
+  // Update country dropdown als prefix gedetecteerd
+  function syncCountryFromPhone(val) {
+    var detected = detectCountryFromPhone(val);
+    if (detected && countrySelect && countrySelect.value !== detected) {
+      countrySelect.value = detected;
+      countrySelect.dispatchEvent(new Event('change'));
+    }
+  }
 
   function formatPhoneNumber(raw, countryCode) {
     var cleaned = raw.replace(/[\s\-\(\)\.]/g, '');
@@ -5111,11 +5317,19 @@ body {
   }
 
   if (phoneField && phonePreview) {
+    // Bij input: detecteer land uit prefix en update country dropdown
+    phoneField.addEventListener('input', function() {
+      syncCountryFromPhone(phoneField.value.trim());
+      phonePreview.style.display = 'none';
+    });
+
     phoneField.addEventListener('blur', function() {
       // Als Foxentry actief is, GEEN lokale formatting of validatie — alles via Foxentry
       if (hasFoxentryKey) return;
       var raw = phoneField.value.trim();
       if (!raw) { phonePreview.style.display = 'none'; return; }
+      // Sync country van prefix
+      syncCountryFromPhone(raw);
       var country = countrySelect ? countrySelect.value : 'NL';
       var formatted = formatPhoneNumber(raw, country);
       phoneField.value = formatted;
@@ -5467,6 +5681,17 @@ body {
         var val = foxEmailField.value.trim();
         if (!val || val.indexOf('@') === -1) return;
 
+        // Pre-check: TLD te kort (.c, .x) — niet naar Foxentry sturen
+        var _preParts = val.split('@');
+        if (_preParts.length === 2) {
+          var _preDomain = _preParts[1].split('.');
+          var _preTld = _preDomain[_preDomain.length - 1] || '';
+          if (_preTld.length > 0 && _preTld.length < 2) {
+            // TLD te kort (.c, .x) — lokale handler heeft al invalid gezet, niet overschrijven
+            return;
+          }
+        }
+
         showSpinner(foxEmailField);
         foxentryFetch('/email/validate', {
           query: { email: val },
@@ -5482,11 +5707,36 @@ body {
           // Verberg eerdere suggestie
           if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
 
+          // Extra veiligheid: TLD lengte check (Foxentry basic mist dit)
+          var _emailParts = val.split('@');
+          var _tld = '';
+          if (_emailParts.length === 2) {
+            var _dParts = _emailParts[1].split('.');
+            _tld = _dParts[_dParts.length - 1] || '';
+          }
+          var _tldTooShort = _tld.length > 0 && _tld.length < 2;
+
           switch (proposal) {
             case 'valid':
-              // Email is OK
-              foxEmailField.classList.add('valid');
-              foxEmailField.classList.remove('invalid');
+              // Email is OK — maar override als TLD te kort is
+              if (_tldTooShort) {
+                foxEmailField.classList.add('invalid');
+                foxEmailField.classList.remove('valid');
+                var _typoFix = checkEmailTypo(val);
+                if (_typoFix && foxEmailSuggestion) {
+                  foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + _typoFix + '</strong>? Klik om te corrigeren.';
+                  foxEmailSuggestion.style.display = 'block';
+                  foxEmailSuggestion.onclick = function() {
+                    foxEmailField.value = _typoFix;
+                    foxEmailSuggestion.style.display = 'none';
+                    foxEmailField.classList.add('valid');
+                    foxEmailField.classList.remove('invalid');
+                  };
+                }
+              } else {
+                foxEmailField.classList.add('valid');
+                foxEmailField.classList.remove('invalid');
+              }
               break;
 
             case 'invalid':
@@ -5599,6 +5849,58 @@ body {
     var foxPhoneField = document.getElementById('phone');
     var foxPhonePreview = document.getElementById('phone-preview');
 
+    // ─── Phone warning elements ───
+    var phoneWarning = document.getElementById('phone-warning');
+    var phoneWarningConfirm = document.getElementById('phone-warning-confirm');
+    var phoneWarningEdit = document.getElementById('phone-warning-edit');
+    var phoneConfirmedNumber = null; // Bewaar bevestigd nummer — geen herhaalde warning
+
+    function showPhoneWarning() {
+      if (phoneWarning) phoneWarning.style.display = 'block';
+      if (foxPhoneField) {
+        foxPhoneField.classList.remove('valid', 'invalid');
+        foxPhoneField.dataset.phoneWarning = 'true';
+      }
+      if (foxPhonePreview) foxPhonePreview.style.display = 'none';
+    }
+
+    function hidePhoneWarning() {
+      if (phoneWarning) phoneWarning.style.display = 'none';
+      if (foxPhoneField) delete foxPhoneField.dataset.phoneWarning;
+    }
+
+    // "Ja, dit klopt" — bevestig nummer als geldig
+    if (phoneWarningConfirm) {
+      phoneWarningConfirm.addEventListener('click', function() {
+        phoneConfirmedNumber = foxPhoneField ? foxPhoneField.value.trim() : '';
+        hidePhoneWarning();
+        if (foxPhoneField) {
+          foxPhoneField.classList.add('valid');
+          foxPhoneField.classList.remove('invalid');
+        }
+        if (foxPhonePreview) {
+          foxPhonePreview.style.color = '';
+          foxPhonePreview.textContent = '\u2713 Telefoonnummer bevestigd';
+          foxPhonePreview.style.display = 'block';
+        }
+      });
+    }
+
+    // "Aanpassen" — focus terug naar veld
+    if (phoneWarningEdit) {
+      phoneWarningEdit.addEventListener('click', function() {
+        hidePhoneWarning();
+        if (foxPhoneField) foxPhoneField.focus();
+      });
+    }
+
+    // Bij input: verberg warning + reset bevestiging als nummer verandert
+    if (foxPhoneField) {
+      foxPhoneField.addEventListener('input', function() {
+        hidePhoneWarning();
+      });
+    }
+
     if (foxPhoneField) {
       // Foxentry handelt ALLE telefoonvalidatie + formatting af
       foxPhoneField.addEventListener('blur', function() {
@@ -5628,28 +5930,34 @@ body {
             // Gebruik geformatteerd nummer van Foxentry
             var data = fx.result.data || {};
             var fmt = data.format || {};
+            var formattedFull = fmt.internationalFormatted || data.numberWithPrefix || cleaned;
             if (fmt.internationalFormatted) {
               foxPhoneField.value = fmt.internationalFormatted;
             } else if (data.numberWithPrefix) {
               foxPhoneField.value = data.numberWithPrefix;
             }
+            // Sync country dropdown op basis van Foxentry resultaat
+            syncCountryFromPhone(formattedFull);
 
             if (isValid) {
               foxPhoneField.classList.add('valid');
               foxPhoneField.classList.remove('invalid');
+              hidePhoneWarning();
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
                 foxPhonePreview.textContent = '\u2713 Geldig telefoonnummer';
                 foxPhonePreview.style.display = 'block';
               }
             } else {
-              foxPhoneField.classList.add('invalid');
-              foxPhoneField.classList.remove('valid');
-              if (foxPhonePreview) {
-                foxPhonePreview.textContent = '\u2717 Controleer je telefoonnummer';
-                foxPhonePreview.style.display = 'block';
-                foxPhonePreview.style.color = 'var(--error)';
+              // Al bevestigd door gebruiker? Niet opnieuw waarschuwen.
+              if (phoneConfirmedNumber === foxPhoneField.value.trim()) {
+                foxPhoneField.classList.add('valid');
+                foxPhoneField.classList.remove('invalid');
+                hidePhoneWarning();
+                return;
               }
+              // Toon oranje waarschuwing i.p.v. rode fout
+              showPhoneWarning();
             }
           })
           .catch(function(err) {
@@ -5662,19 +5970,21 @@ body {
             if (localValid) {
               foxPhoneField.classList.add('valid');
               foxPhoneField.classList.remove('invalid');
+              hidePhoneWarning();
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
                 foxPhonePreview.textContent = '';
                 foxPhonePreview.style.display = 'none';
               }
             } else {
-              foxPhoneField.classList.add('invalid');
-              foxPhoneField.classList.remove('valid');
-              if (foxPhonePreview) {
-                foxPhonePreview.textContent = '\u2717 Controleer je telefoonnummer';
-                foxPhonePreview.style.display = 'block';
-                foxPhonePreview.style.color = 'var(--error)';
+              // Lokale fallback: ook oranje warning
+              if (phoneConfirmedNumber === foxPhoneField.value.trim()) {
+                foxPhoneField.classList.add('valid');
+                foxPhoneField.classList.remove('invalid');
+                hidePhoneWarning();
+                return;
               }
+              showPhoneWarning();
             }
           });
       });

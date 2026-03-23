@@ -1,12 +1,12 @@
 {
   "slug": "loslatenboek",
   "name": "Laat Los Wat Je Kapotmaakt",
-  "domain": "loslatenboek.nl",
+  "domain": "travelbible.nl",
   "locale": "nl",
   "defaultCountry": "NL",
   "salesChannelName": "Loslatenboek",
   "medusaUrl": "",
-  "publishableApiKey": "",
+  "publishableApiKey": "pk_281b00d0f2041d1766215f0b4eae7b2a1348f0109116f6d86801f107845bb71c",
   "facebookPixelId": "",
   "regions": {
     "NL": "",
