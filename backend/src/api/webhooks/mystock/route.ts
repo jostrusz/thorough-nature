@@ -31,6 +31,9 @@ const EVENT_STATUS_MAP: Record<string, string> = {
   // Event 34 (allocation issue)
   "34": "ALLOCATION_ISSUE",
 
+  // Event 3 (location/warehouse change — triggers stock availability update)
+  "3": "STOCK_CHANGE",
+
   // Event 33 (stock level change)
   "33": "STOCK_CHANGE",
 }
@@ -257,7 +260,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     }
 
     // 5b. Handle stock change events
-    if (eventType === "33" || newStatus === "STOCK_CHANGE") {
+    if (eventType === "3" || eventType === "33" || newStatus === "STOCK_CHANGE") {
       const productCode = event.data?.productCode || event.productCode
       if (productCode) {
         try {
