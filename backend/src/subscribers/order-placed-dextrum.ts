@@ -23,7 +23,7 @@ export default async function orderPlacedDextrumHandler({
     // 2. Get order details
     const { data: [order] } = await query.graph({
       entity: "order",
-      fields: ["id", "display_id", "email", "metadata", "shipping_address.*"],
+      fields: ["id", "display_id", "email", "metadata", "shipping_address.*", "billing_address.*"],
       filters: { id: data.id },
     })
 
@@ -36,13 +36,22 @@ export default async function orderPlacedDextrumHandler({
     )
     if (existing[0]) return
 
-    // 4. Build order code
-    const countryCode = (order as any).shipping_address?.country_code?.toUpperCase() || "CZ"
+    // 4. Build order code — country from shipping address (customer selects in checkout)
+    const countryCode = (
+      (order as any).shipping_address?.country_code ||
+      (order as any).billing_address?.country_code ||
+      ""
+    ).toUpperCase()
+
+    if (!countryCode) {
+      console.error(`[Dextrum] Order ${data.id} has no country_code on shipping or billing address!`)
+    }
+
     const prefixMap: Record<string, string> = {
       NL: "NL", BE: "BE", DE: "DE", AT: "AT", LU: "LU",
       PL: "PL", CZ: "CZ", SK: "SK", SE: "SE", HU: "HU",
     }
-    const prefix = prefixMap[countryCode] || countryCode
+    const prefix = prefixMap[countryCode] || countryCode || "XX"
     const year = new Date().getFullYear()
     const orderCode = `${prefix}${year}-${(order as any).display_id}`
     const projectCode = (order as any).metadata?.project_code || "DEFAULT"

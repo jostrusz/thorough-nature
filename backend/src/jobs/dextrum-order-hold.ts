@@ -94,7 +94,8 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
 
         // 5. Build payload from FRESH data
         const addr = (order as any).shipping_address || {}
-        const countryCode = (addr.country_code || (order as any).billing_address?.country_code || "NL").toUpperCase()
+        const countryCode = (addr.country_code || (order as any).billing_address?.country_code || "").toUpperCase()
+        if (!countryCode) console.error(`[Dextrum Hold] Order ${orderMap.medusa_order_id} missing country_code!`)
         const prefixMap: Record<string, string> = {
           NL: "NL", BE: "BE", DE: "DE", AT: "AT", LU: "LU",
           PL: "PL", CZ: "CZ", SK: "SK", SE: "SE", HU: "HU",
