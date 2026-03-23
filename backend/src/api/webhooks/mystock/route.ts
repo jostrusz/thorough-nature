@@ -106,13 +106,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       newStatus = EVENT_STATUS_MAP[eventType]
     }
 
-    // Special handling for Event 29 (carrier updates)
+    // Special handling for Event 29 (carrier/delivery updates)
+    // Dextrum confirms: event 29 = "doručeno zákazníkovi" (delivered to customer)
     if (eventType === "29") {
       const carrierStatus = (event.data?.status || event.status || "").toLowerCase()
-      if (carrierStatus === "delivered" || carrierStatus === "doručeno") {
-        newStatus = "DELIVERED"
-      } else {
+      if (carrierStatus === "transit" || carrierStatus === "in_transit") {
         newStatus = "IN_TRANSIT"
+      } else {
+        // Default to DELIVERED (Dextrum sends event 29 when delivered)
+        newStatus = "DELIVERED"
       }
     }
 
