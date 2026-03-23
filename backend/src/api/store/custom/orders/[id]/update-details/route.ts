@@ -16,6 +16,7 @@ export async function POST(
         address_1?: string
         city?: string
         postal_code?: string
+        country_code?: string
         company?: string
       }
       metadata?: Record<string, unknown>
@@ -23,10 +24,10 @@ export async function POST(
 
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
-    // Verify order exists
+    // Verify order exists and get current shipping address
     const { data: orders } = await query.graph({
       entity: "order",
-      fields: ["id", "metadata", "created_at"],
+      fields: ["id", "metadata", "created_at", "shipping_address.*"],
       filters: { id: orderId },
     })
 
@@ -53,7 +54,14 @@ export async function POST(
 
     const updateData: Record<string, unknown> = {}
     if (email) updateData.email = email
-    if (shipping_address) updateData.shipping_address = shipping_address
+    if (shipping_address) {
+      // Preserve existing country_code if not provided in update
+      const existingAddr = (orders[0] as any).shipping_address || {}
+      if (!shipping_address.country_code && existingAddr.country_code) {
+        shipping_address.country_code = existingAddr.country_code
+      }
+      updateData.shipping_address = shipping_address
+    }
 
     // Build list of changed fields for audit log
     const changedFields: string[] = []
