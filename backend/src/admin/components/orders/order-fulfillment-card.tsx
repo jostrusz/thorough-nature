@@ -437,10 +437,18 @@ export function OrderFulfillmentCard({
             )}
             <div style={{ flex: 1, minWidth: 0 }}>
               <span style={{ fontSize: "13px", fontWeight: 600, color: colors.text }}>
-                {isFree ? "Gratis verzending" : "Verzending"}
+                {shippingMethod}
               </span>
               <div style={{ fontSize: "11px", color: colors.textMuted, marginTop: "1px" }}>
-                Verzonden binnen 24 uur via {isGLS ? "GLS" : isDHL ? "DHL" : isDPD ? "DPD" : "koerier"}
+                {(() => {
+                  const pid = order.metadata?.project_id || order.metadata?.tags || ""
+                  const carrier = isGLS ? "GLS" : isDHL ? "DHL" : isDPD ? "DPD" : "koerier"
+                  if (pid.includes("lass") || pid.includes("Lass")) return `Versand innerhalb von 24 Stunden per ${carrier}`
+                  if (pid.includes("slapp") || pid.includes("Släpp")) return `Skickas inom 24 timmar via ${carrier}`
+                  if (pid.includes("odpusc") || pid.includes("Odpuść")) return `Wysyłka w ciągu 24 godzin przez ${carrier}`
+                  if (pid.includes("psi") || pid.includes("Psí")) return `Odesláno do 24 hodin přes ${carrier}`
+                  return `Verzonden binnen 24 uur via ${carrier}`
+                })()}
               </div>
             </div>
             {shippingPrice && (
@@ -454,7 +462,14 @@ export function OrderFulfillmentCard({
                 fontWeight: 600,
                 color: "#27AE60",
               }}>
-                Gratis
+                {(() => {
+                  const pid = order.metadata?.project_id || ""
+                  if (pid.includes("lass")) return "Gratis"
+                  if (pid.includes("slapp")) return "Gratis"
+                  if (pid.includes("odpusc")) return "Gratis"
+                  if (pid.includes("psi")) return "Zdarma"
+                  return "Gratis"
+                })()}
               </span>
             )}
           </div>
