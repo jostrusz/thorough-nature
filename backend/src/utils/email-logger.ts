@@ -1,7 +1,8 @@
 // File: backend/src/utils/email-logger.ts
 // Logs email sending events to order.metadata.email_activity_log
-
-import { Modules } from "@medusajs/framework/utils"
+//
+// Uses delayed retry with fresh metadata reads to avoid race conditions
+// with other order.placed subscribers writing to metadata concurrently.
 
 export interface EmailActivityEvent {
   timestamp: string
@@ -16,29 +17,52 @@ export interface EmailActivityEvent {
 /**
  * Logs an email event to order metadata.
  * Stores in order.metadata.email_activity_log array.
+ *
+ * Waits 4 seconds before first attempt to let other order.placed
+ * subscribers finish their metadata writes, then retries with
+ * exponential backoff if there's a conflict.
  */
 export async function logEmailActivity(
   orderService: any,
   orderId: string,
   event: Omit<EmailActivityEvent, "timestamp">
 ): Promise<void> {
-  const maxRetries = 3
+  const maxRetries = 5
   let retries = 0
   let lastError: Error | null = null
 
+  // Wait 4s for other subscribers to finish writing metadata first
+  await new Promise((r) => setTimeout(r, 4000))
+
   while (retries < maxRetries) {
     try {
+      // Always re-read fresh metadata right before writing
       const order = await orderService.retrieveOrder(orderId, {
         select: ["id", "metadata"],
       })
 
       const currentMetadata = order.metadata || {}
       const emailLog: EmailActivityEvent[] =
-        currentMetadata.email_activity_log || []
+        Array.isArray(currentMetadata.email_activity_log)
+          ? [...currentMetadata.email_activity_log]
+          : []
+
+      // Check for duplicate (same template + to + status within 60s)
+      const newTimestamp = new Date().toISOString()
+      const isDuplicate = emailLog.some(
+        (e) =>
+          e.template === event.template &&
+          e.to === event.to &&
+          e.status === event.status &&
+          Math.abs(new Date(e.timestamp).getTime() - new Date(newTimestamp).getTime()) < 60000
+      )
+      if (isDuplicate) {
+        return // Already logged, skip
+      }
 
       emailLog.push({
         ...event,
-        timestamp: new Date().toISOString(),
+        timestamp: newTimestamp,
       })
 
       await orderService.updateOrders(orderId, {
@@ -53,13 +77,14 @@ export async function logEmailActivity(
       lastError = error as Error
       retries++
       if (retries < maxRetries) {
-        await new Promise((r) => setTimeout(r, Math.pow(2, retries - 1) * 100))
+        // Exponential backoff: 1s, 2s, 4s, 8s
+        await new Promise((r) => setTimeout(r, Math.pow(2, retries - 1) * 1000))
       }
     }
   }
 
   console.error(
     `[email-logger] Failed to log email activity for order ${orderId} after ${maxRetries} retries:`,
-    lastError
+    lastError?.message || lastError
   )
 }
