@@ -167,11 +167,29 @@ export const POST = async (
     else if (providerId.includes("klarna") && paymentData.klarnaOrderId) {
       const GATEWAY_CONFIG_MODULE = "gatewayConfig"
       const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
-      const configs = await gcService.listGatewayConfigs(
+
+      // Find the right Klarna gateway — prefer live mode, then match by project slug from order metadata
+      const allKlarnaConfigs = await gcService.listGatewayConfigs(
         { provider: "klarna", is_active: true },
-        { take: 1 }
+        { order: { priority: "ASC" } }
       )
-      const config = configs[0]
+
+      // Try to match by project slug first, then prefer live over test
+      const projectSlug = order.metadata?.project_slug || ""
+      let config = allKlarnaConfigs.find((c: any) => {
+        if (!projectSlug) return c.mode === "live"
+        const slugs = Array.isArray(c.project_slugs) ? c.project_slugs : []
+        return slugs.includes(projectSlug) && c.mode === "live"
+      })
+      // Fallback: any live Klarna gateway
+      if (!config) {
+        config = allKlarnaConfigs.find((c: any) => c.mode === "live")
+      }
+      // Fallback: first available Klarna gateway
+      if (!config) {
+        config = allKlarnaConfigs[0]
+      }
+
       if (!config) {
         res.status(400).json({ error: "Klarna gateway not configured" })
         return
