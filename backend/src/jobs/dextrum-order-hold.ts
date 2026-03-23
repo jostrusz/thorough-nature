@@ -52,7 +52,13 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         })
 
         if (!order) {
-          console.error(`[Dextrum Hold] Order ${orderMap.medusa_order_id} not found`)
+          // Order was deleted — mark as FAILED to stop retrying
+          await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+            delivery_status: "FAILED",
+            delivery_status_updated_at: now.toISOString(),
+            last_error: "Medusa order not found (deleted?)",
+          })
+          console.error(`[Dextrum Hold] Order ${orderMap.medusa_order_id} not found — marked FAILED`)
           continue
         }
 
