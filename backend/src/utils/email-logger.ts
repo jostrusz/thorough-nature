@@ -18,7 +18,7 @@ export interface EmailActivityEvent {
  * Logs an email event to order metadata.
  * Stores in order.metadata.email_activity_log array.
  *
- * Waits 4 seconds before first attempt to let other order.placed
+ * Waits 5 seconds before first attempt to let other order.placed
  * subscribers finish their metadata writes, then retries with
  * exponential backoff if there's a conflict.
  */
@@ -31,17 +31,27 @@ export async function logEmailActivity(
   let retries = 0
   let lastError: Error | null = null
 
-  // Wait 4s for other subscribers to finish writing metadata first
-  await new Promise((r) => setTimeout(r, 4000))
+  // Wait 5s for other subscribers to finish writing metadata first
+  await new Promise((r) => setTimeout(r, 5000))
 
   while (retries < maxRetries) {
     try {
-      // Always re-read fresh metadata right before writing
-      const order = await orderService.retrieveOrder(orderId, {
-        select: ["id", "metadata"],
-      })
+      // Re-read fresh metadata — try multiple approaches for compatibility
+      let currentMetadata: Record<string, any> = {}
+      try {
+        const order = await orderService.retrieveOrder(orderId)
+        currentMetadata = order?.metadata || {}
+      } catch {
+        // Fallback: try listOrders
+        try {
+          const [order] = await orderService.listOrders({ id: orderId }, { select: ["id", "metadata"], take: 1 })
+          currentMetadata = order?.metadata || {}
+        } catch {
+          // Last resort: just write without merging
+          console.warn(`[email-logger] Could not read order ${orderId} metadata, writing fresh`)
+        }
+      }
 
-      const currentMetadata = order.metadata || {}
       const emailLog: EmailActivityEvent[] =
         Array.isArray(currentMetadata.email_activity_log)
           ? [...currentMetadata.email_activity_log]

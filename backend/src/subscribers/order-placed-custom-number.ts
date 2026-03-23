@@ -53,8 +53,9 @@ export default async function orderPlacedCustomNumberHandler({
     const countryCode = (
       (order as any).shipping_address?.country_code ||
       (order as any).billing_address?.country_code ||
-      "nl"
+      ""
     ).toUpperCase()
+    if (!countryCode) console.error(`[CustomNumber] Order ${data.id} missing country_code!`)
     const year = new Date().getFullYear()
     const displayId = (order as any).display_id
     const customOrderNumber = `${countryCode}${year}-${displayId}`
