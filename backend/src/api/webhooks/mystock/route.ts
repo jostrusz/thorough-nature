@@ -51,11 +51,14 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
 
 // POST /webhooks/mystock — Receive mySTOCK webhook events
 export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
+  console.log(`[mySTOCK Webhook] Incoming POST /webhooks/mystock — body keys: ${Object.keys(req.body || {}).join(", ") || "empty"}`)
+
   try {
     const event = req.body as any
 
     if (!event || !event.eventId) {
-      res.status(400).json({ error: "Invalid event payload" })
+      console.warn(`[mySTOCK Webhook] Invalid payload — missing eventId. Body:`, JSON.stringify(req.body).slice(0, 500))
+      res.status(400).json({ data: null, errors: [{ code: "INVALID_PAYLOAD", message: "Missing eventId" }] })
       return
     }
 
@@ -306,7 +309,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     }
 
     // 6. Log the event
-    await dextrumService.createDextrumEventLogs({
+    const eventLog = await dextrumService.createDextrumEventLogs({
       event_id: event.eventId,
       event_type: eventType,
       event_subtype: eventSubtype || null,
@@ -319,10 +322,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       raw_payload: event,
     })
 
-    res.json({ ok: true, delivery_status: newStatus || "no_change" })
+    console.log(`[mySTOCK Webhook] Event ${event.eventId} type=${eventType} processed → ${newStatus || "no_change"}`)
+
+    // mySTOCK expects: { data: { id: "..." }, errors: [] }
+    res.json({ data: { id: eventLog?.id || event.eventId }, errors: [] })
   } catch (error: any) {
-    console.error("mySTOCK webhook error:", error)
+    console.error("[mySTOCK Webhook] Error:", error)
     // Always return 200 to prevent mySTOCK from retrying
-    res.json({ ok: false, error: error.message })
+    res.json({ data: { id: "error" }, errors: [{ code: "PROCESSING_ERROR", message: error.message }] })
   }
 }
