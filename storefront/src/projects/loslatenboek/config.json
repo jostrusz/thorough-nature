@@ -1,12 +1,12 @@
 {
   "slug": "loslatenboek",
   "name": "Laat Los Wat Je Kapotmaakt",
-  "domain": "loslatenboek.nl",
+  "domain": "travelbible.nl",
   "locale": "nl",
   "defaultCountry": "NL",
   "salesChannelName": "Loslatenboek",
   "medusaUrl": "",
-  "publishableApiKey": "",
+  "publishableApiKey": "pk_281b00d0f2041d1766215f0b4eae7b2a1348f0109116f6d86801f107845bb71c",
   "facebookPixelId": "",
   "regions": {
     "NL": "",
@@ -30,7 +30,7 @@
   },
   "bundleOptions": [
     { "qty": 1, "price": 35, "label": "1 boek", "save": 0 },
-    { "qty": 2, "price": 59, "label": "2 boeken", "save": 11 },
+    { "qty": 2, "price": 58, "label": "2 boeken", "save": 12 },
     { "qty": 3, "price": 79, "label": "3 boeken", "save": 26 },
     { "qty": 4, "price": 99, "label": "4 boeken", "save": 41 }
   ],
