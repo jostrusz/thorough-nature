@@ -1,9 +1,11 @@
 import { Modules } from "@medusajs/framework/utils"
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
+import { PROFITABILITY_MODULE } from "../modules/profitability/index.js"
 
 // Project display names for order tags
 const PROJECT_TAG_NAMES: Record<string, string> = {
   dehondenbijbel: "De Hondenbijbel",
+  loslatenboek: "De Hondenbijbel",
   odpusc: "Odpuść",
   "odpusc-ksiazka": "Odpuść",
   slapp: "Släpp taget",
@@ -17,7 +19,8 @@ const PROJECT_TAG_NAMES: Record<string, string> = {
  * in format: {COUNTRY}{YEAR}-{display_id}
  * e.g., NL2026-1111, BE2026-1112, SE2026-1113
  *
- * Also sets metadata.tags based on project_id for Orders HQ display.
+ * Also resolves project_id from sales_channel_id if missing,
+ * and sets metadata.tags for Orders HQ display.
  *
  * Runs with a 2s delay so other subscribers (payment-metadata, etc.)
  * finish their metadata writes first. Then reads the fresh metadata,
@@ -36,7 +39,7 @@ export default async function orderPlacedCustomNumberHandler({
 
     const { data: [order] } = await query.graph({
       entity: "order",
-      fields: ["id", "display_id", "metadata", "shipping_address.country_code", "billing_address.country_code"],
+      fields: ["id", "display_id", "metadata", "sales_channel_id", "shipping_address.country_code", "billing_address.country_code"],
       filters: { id: data.id },
     })
 
@@ -56,9 +59,26 @@ export default async function orderPlacedCustomNumberHandler({
     const displayId = (order as any).display_id
     const customOrderNumber = `${countryCode}${year}-${displayId}`
 
-    // Set project tag from project_id if not already set
-    const projectId = existingMeta.project_id || ""
-    const projectTag = !existingMeta.tags && projectId
+    // Resolve project_id: use existing metadata, or look up from sales_channel_id
+    let projectId = existingMeta.project_id || ""
+    if (!projectId && (order as any).sales_channel_id) {
+      try {
+        const profitService = container.resolve(PROFITABILITY_MODULE) as any
+        const configs = await profitService.listProjectConfigs(
+          { sales_channel_id: (order as any).sales_channel_id },
+          { take: 1 }
+        )
+        if (configs?.length > 0) {
+          projectId = configs[0].project_slug
+          console.log(`[CustomNumber] Resolved project_id from sales_channel: ${projectId}`)
+        }
+      } catch (e: any) {
+        console.warn(`[CustomNumber] Could not resolve project from sales_channel:`, e.message)
+      }
+    }
+
+    // Set project tag from project_id
+    const projectTag = projectId
       ? PROJECT_TAG_NAMES[projectId] || projectId
       : undefined
 
@@ -67,7 +87,8 @@ export default async function orderPlacedCustomNumberHandler({
       metadata: {
         ...existingMeta,
         custom_order_number: customOrderNumber,
-        ...(projectTag ? { tags: projectTag } : {}),
+        ...(projectId && !existingMeta.project_id ? { project_id: projectId } : {}),
+        ...(projectTag && !existingMeta.tags ? { tags: projectTag } : {}),
       },
     })
 
