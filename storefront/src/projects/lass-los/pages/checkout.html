@@ -4634,7 +4634,7 @@ body {
       console.log('[CardForm] Card provider detected:', cardProvider || 'none');
 
       if (allPaymentOptions.length === 0) {
-        try { fetch(MEDUSA_URL + '/store/checkout-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_slug: PROJECT_CONFIG.slug, payment_method: '_NO_METHODS', email: 'system' }) }).catch(function(){}); } catch(e) {}
+        try { fetch(MEDUSA_URL + '/checkout-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_slug: PROJECT_CONFIG.slug, payment_method: '_NO_METHODS', email: 'system' }) }).catch(function(){}); } catch(e) {}
         if (errorEl) {
           errorEl.innerHTML = '<p>Keine Zahlungsmethoden verfügbar.</p>';
           errorEl.style.display = 'block';
@@ -4644,7 +4644,7 @@ body {
 
       // Log successful load to backend
       var methodCodes = allPaymentOptions.map(function(m) { return m.code; }).join(',');
-      try { fetch(MEDUSA_URL + '/store/checkout-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_slug: PROJECT_CONFIG.slug, payment_method: '_LOADED:' + methodCodes, email: 'system' }) }).catch(function(){}); } catch(e) {}
+      try { fetch(MEDUSA_URL + '/checkout-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_slug: PROJECT_CONFIG.slug, payment_method: '_LOADED:' + methodCodes, email: 'system' }) }).catch(function(){}); } catch(e) {}
 
       // Render for current country
       var countrySelect = document.getElementById('country');
@@ -4654,7 +4654,7 @@ body {
     })
     .catch(function(err) {
       console.error('[PaymentOptions] Failed to load:', err);
-      try { fetch(MEDUSA_URL + '/store/checkout-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_slug: PROJECT_CONFIG.slug, payment_method: '_LOAD_FAILED:' + (err.message || err), email: 'system' }) }).catch(function(){}); } catch(e) {}
+      try { fetch(MEDUSA_URL + '/checkout-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_slug: PROJECT_CONFIG.slug, payment_method: '_LOAD_FAILED:' + (err.message || err), email: 'system' }) }).catch(function(){}); } catch(e) {}
       if (loadingEl) loadingEl.style.display = 'none';
       if (errorEl) errorEl.style.display = 'block';
     });
@@ -6394,7 +6394,7 @@ body {
 
     // ─── CHECKOUT SUBMIT LOG (fire-and-forget) ───
     try {
-      fetch(MEDUSA_URL + '/store/checkout-log', {
+      fetch(MEDUSA_URL + '/checkout-log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
