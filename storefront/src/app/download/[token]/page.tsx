@@ -485,23 +485,26 @@ export default async function DownloadPage({
           <h1 style={t.headerTitle}>
             {error
               ? expired
-                ? "Link verlopen"
-                : "Oeps..."
-              : projectId === "dehondenbijbel"
-                ? "Je e-books staan klaar!"
-                : "Je e-books staan klaar"}
+                ? projectId === "lass-los" ? "Link abgelaufen" : "Link verlopen"
+                : projectId === "lass-los" ? "Ups..." : "Oeps..."
+              : projectId === "lass-los"
+                ? "Deine E-Books sind bereit!"
+                : projectId === "dehondenbijbel"
+                  ? "Je e-books staan klaar!"
+                  : "Je e-books staan klaar"}
           </h1>
         </div>
 
         {/* Content */}
         <div style={{ padding: "36px 32px" }}>
           {error ? (
-            <ErrorState message={error} expired={expired} theme={t} />
+            <ErrorState message={error} expired={expired} theme={t} projectId={projectId} />
           ) : (
             <>
               <p style={t.intro}>
-                Hoi! Klik op de downloadknoppen hieronder om je e-books op te
-                slaan.
+                {projectId === "lass-los"
+                  ? "Hallo! Klicke auf die Download-Buttons unten, um deine E-Books zu speichern."
+                  : "Hoi! Klik op de downloadknoppen hieronder om je e-books op te slaan."}
               </p>
 
               {/* File cards */}
@@ -522,7 +525,7 @@ export default async function DownloadPage({
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Download &darr;
+                    {projectId === "lass-los" ? "Herunterladen" : "Download"} &darr;
                   </a>
                 </div>
               ))}
@@ -531,7 +534,9 @@ export default async function DownloadPage({
               {expiryDate && (
                 <div style={t.expiryNotice}>
                   <p style={t.expiryText}>
-                    &#x23F3; Link geldig tot {expiryDate}
+                    &#x23F3; {projectId === "lass-los"
+                      ? `Link gültig bis ${expiryDate}`
+                      : `Link geldig tot ${expiryDate}`}
                   </p>
                 </div>
               )}
@@ -539,9 +544,9 @@ export default async function DownloadPage({
               {/* Physical book note */}
               <div style={t.infoBox}>
                 <p style={t.infoText}>
-                  &#x1F4E6; Je fysieke boek is onderweg en wordt binnen{" "}
-                  <strong>4–7 werkdagen</strong> bezorgd. Je ontvangt apart een
-                  track &amp; trace code zodra het pakket is verzonden.
+                  {projectId === "lass-los"
+                    ? <>&#x1F4E6; Dein physisches Buch ist unterwegs und wird innerhalb von{" "}<strong>3–5 Werktagen</strong> zugestellt. Du erhältst separat eine Sendungsverfolgungsnummer per E-Mail.</>
+                    : <>&#x1F4E6; Je fysieke boek is onderweg en wordt binnen{" "}<strong>4–7 werkdagen</strong> bezorgd. Je ontvangt apart een track &amp; trace code zodra het pakket is verzonden.</>}
                 </p>
               </div>
 
@@ -553,10 +558,9 @@ export default async function DownloadPage({
           {/* Help */}
           <div style={t.helpBox}>
             <p style={t.helpText}>
-              Problemen met de download? Stuur een mailtje naar{" "}
-              <a href={`mailto:${t.supportEmail}`} style={t.helpLink}>
-                {t.supportEmail}
-              </a>
+              {projectId === "lass-los"
+                ? <>Probleme beim Download? Schreib uns eine E-Mail an{" "}<a href={`mailto:${t.supportEmail}`} style={t.helpLink}>{t.supportEmail}</a></>
+                : <>Problemen met de download? Stuur een mailtje naar{" "}<a href={`mailto:${t.supportEmail}`} style={t.helpLink}>{t.supportEmail}</a></>}
             </p>
           </div>
         </div>
@@ -579,11 +583,14 @@ function ErrorState({
   message,
   expired,
   theme: t,
+  projectId,
 }: {
   message: string
   expired: boolean
   theme: ProjectTheme
+  projectId?: string
 }) {
+  const isDE = projectId === "lass-los"
   return (
     <div style={{ textAlign: "center" as const, padding: "40px 0" }}>
       <p style={{ fontSize: "48px", marginBottom: "16px" }}>
@@ -592,11 +599,11 @@ function ErrorState({
       <p style={t.errorText}>{message}</p>
       {expired && (
         <p style={t.errorMuted}>
-          Neem contact op met{" "}
-          <a href={`mailto:${t.supportEmail}`} style={t.errorLink}>
-            {t.supportEmail}
-          </a>{" "}
-          voor een nieuwe download-link.
+          {isDE ? (
+            <>Kontaktiere uns unter{" "}<a href={`mailto:${t.supportEmail}`} style={t.errorLink}>{t.supportEmail}</a>{" "}für einen neuen Download-Link.</>
+          ) : (
+            <>Neem contact op met{" "}<a href={`mailto:${t.supportEmail}`} style={t.errorLink}>{t.supportEmail}</a>{" "}voor een nieuwe download-link.</>
+          )}
         </p>
       )}
     </div>
