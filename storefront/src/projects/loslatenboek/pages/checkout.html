@@ -4712,12 +4712,18 @@ body {
       console.log('[CardForm] Card provider detected:', cardProvider || 'none');
 
       if (allPaymentOptions.length === 0) {
+        // Log empty methods to backend
+        try { fetch(MEDUSA_URL + '/store/checkout-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_slug: PROJECT_CONFIG.slug, payment_method: '_NO_METHODS', email: 'system' }) }).catch(function(){}); } catch(e) {}
         if (errorEl) {
           errorEl.innerHTML = '<p>Geen betaalmethoden beschikbaar.</p>';
           errorEl.style.display = 'block';
         }
         return;
       }
+
+      // Log successful load to backend
+      var methodCodes = allPaymentOptions.map(function(m) { return m.code; }).join(',');
+      try { fetch(MEDUSA_URL + '/store/checkout-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_slug: PROJECT_CONFIG.slug, payment_method: '_LOADED:' + methodCodes, email: 'system' }) }).catch(function(){}); } catch(e) {}
 
       // Render for current country
       var countrySelect = document.getElementById('country');
@@ -4727,6 +4733,8 @@ body {
     })
     .catch(function(err) {
       console.error('[PaymentOptions] Failed to load:', err);
+      // Log failure to backend
+      try { fetch(MEDUSA_URL + '/store/checkout-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_slug: PROJECT_CONFIG.slug, payment_method: '_LOAD_FAILED:' + (err.message || err), email: 'system' }) }).catch(function(){}); } catch(e) {}
       if (loadingEl) loadingEl.style.display = 'none';
       if (errorEl) errorEl.style.display = 'block';
     });
@@ -6547,6 +6555,28 @@ body {
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
     errorEl.textContent = '';
+
+    // ─── CHECKOUT SUBMIT LOG (fire-and-forget) ───
+    try {
+      fetch(MEDUSA_URL + '/store/checkout-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_slug: PROJECT_CONFIG.slug,
+          email: (document.getElementById('email').value || '').trim(),
+          first_name: (document.getElementById('firstName').value || '').trim(),
+          last_name: (document.getElementById('lastName').value || '').trim(),
+          phone: (document.getElementById('phone').value || '').trim(),
+          city: (document.getElementById('city').value || '').trim(),
+          postal_code: (document.getElementById('postcode').value || '').trim(),
+          country_code: document.getElementById('country') ? document.getElementById('country').value : '',
+          payment_method: selectedMethod || 'none',
+          payment_provider: selectedProvider || '',
+          cart_total: selectedBundlePrice ? Math.round(selectedBundlePrice * 100) : null,
+          bundle_qty: selectedBundleQty || 1,
+        })
+      }).catch(function() {});
+    } catch(e) {}
 
     /*
      * ─── MEDUSA v2 CHECKOUT FLOW ───
