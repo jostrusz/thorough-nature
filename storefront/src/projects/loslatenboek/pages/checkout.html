@@ -7061,49 +7061,7 @@ body {
           });
         }
 
-        // ─── AIRWALLEX CARD REDIRECT FLOW ───
-        // For credit cards on Airwallex: redirect to hosted payment page
-        if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1
-            && selectedMethod === 'creditcard' && providerData.intentId) {
-          return (async function() {
-            try {
-              // Wait for SDK
-              if (typeof window.AirwallexComponentsSDK === 'undefined') {
-                await new Promise(function(resolve, reject) {
-                  var attempts = 20;
-                  (function wait() {
-                    if (typeof window.AirwallexComponentsSDK !== 'undefined') return resolve();
-                    if (--attempts <= 0) return reject(new Error('Airwallex SDK niet geladen.'));
-                    setTimeout(wait, 300);
-                  })();
-                });
-              }
-
-              // Determine environment from provider data
-              var env = providerData.environment || 'demo';
-              var sdkResult = await window.AirwallexComponentsSDK.init({ env: env, origin: window.location.origin, enabledElements: ['payments'] });
-
-              // Build return URL for after payment
-              var returnPath = PROJECT_CONFIG.upsellEnabled === false || checkoutOrderBump
-                ? PROJECT_CONFIG.thankYouUrl
-                : PROJECT_CONFIG.upsellUrl;
-              var successUrl = window.location.origin + returnPath + '?payment_return=1';
-
-              // Redirect to Airwallex hosted payment page
-              sdkResult.payments.redirectToCheckout({
-                env: env,
-                mode: 'payment',
-                intent_id: providerData.intentId,
-                client_secret: providerData.clientSecret,
-                currency: providerData.currency_code || providerData.currency || 'eur',
-                country_code: (document.getElementById('billing-country') || {}).value || 'NL',
-                successUrl: successUrl,
-              });
-            } catch (err) {
-              throw new Error(err.message || 'Kaartbetaling mislukt');
-            }
-          })();
-        }
+        // ─── AIRWALLEX CARD + BANCONTACT: handled by Drop-in below ───
 
         // ─── STRIPE CARD: uses Checkout Session (redirect) ───
         // Stripe card payments redirect to Stripe's hosted checkout page via checkoutUrl
@@ -7115,16 +7073,17 @@ body {
         // (handled by the generic redirect logic below — providerData.approvalUrl)
 
         // ─── AIRWALLEX DROP-IN FLOW ───
-        // Airwallex uses Drop-in Element for non-card methods (Apple Pay, Google Pay etc.)
-        // and redirect for iDEAL/Bancontact/BLIK/EPS
+        // Airwallex uses Drop-in Element for card, bancontact, and other methods
         if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1 && providerData.intentId) {
-          // For redirect-based methods, Airwallex service returns a redirect URL
-          if (redirectUrl) {
+          // Drop-in methods: creditcard and bancontact are handled inline (no redirect)
+          var DROPIN_METHODS = ['creditcard', 'bancontact'];
+          // For other redirect-based methods (iDEAL, BLIK, EPS), use the redirect URL
+          if (redirectUrl && DROPIN_METHODS.indexOf(selectedMethod) === -1) {
             window.location.href = redirectUrl;
             return;
           }
 
-          // For inline methods (Apple Pay, Google Pay): mount Drop-in
+          // Mount Drop-in element for card, bancontact, and other inline methods
           // Uses AirwallexComponentsSDK (CDN global) — see https://github.com/airwallex/airwallex-payment-demo
           return new Promise(function(resolve, reject) {
             // Wait for SDK to load (async script)
@@ -7143,6 +7102,7 @@ body {
               await window.AirwallexComponentsSDK.init({
                 env: providerData.environment || 'demo',
                 enabledElements: ['payments'],
+                locale: 'nl',
               });
 
               var dropInContainer = document.getElementById('airwallex-dropin-container');

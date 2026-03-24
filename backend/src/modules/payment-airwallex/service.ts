@@ -282,7 +282,12 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
       } catch {}
 
       // Redirect-based methods: confirm intent server-side → get redirect URL
-      const REDIRECT_METHODS = ["ideal", "bancontact", "eps", "blik", "przelewy24", "paypal", "klarna", "klarna_later", "klarna_slice"]
+      // Projects that use Drop-in for bancontact/card skip server-side confirm (drop-in handles it)
+      const DROPIN_PROJECTS = ["loslatenboek"]
+      const useDropin = DROPIN_PROJECTS.includes(projectSlug || "")
+      const REDIRECT_METHODS = useDropin
+        ? ["ideal", "eps", "blik", "przelewy24", "paypal", "klarna", "klarna_later", "klarna_slice"]
+        : ["ideal", "bancontact", "eps", "blik", "przelewy24", "paypal", "klarna", "klarna_later", "klarna_slice"]
       let checkoutUrl: string | null = null
 
       if (method && REDIRECT_METHODS.includes(method) && returnUrl) {
