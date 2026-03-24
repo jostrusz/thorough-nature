@@ -359,7 +359,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
         billing_address: billingAddress.given_name ? billingAddress : {
           given_name: customer?.first_name || billingAddress.first_name || "Customer",
           family_name: customer?.last_name || billingAddress.last_name || "",
-          email: customer?.email || context?.email || "customer@example.com",
+          email: data?.email || customer?.email || context?.email || billingAddress.email || "customer@example.com",
           phone: customer?.phone || billingAddress.phone || "",
           street_address: billingAddress.address_1 || "Street 1",
           street_address2: billingAddress.address_2 || "",
@@ -371,7 +371,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
         shipping_address: shippingAddress.given_name ? shippingAddress : {
           given_name: customer?.first_name || shippingAddress.first_name || "Customer",
           family_name: customer?.last_name || shippingAddress.last_name || "",
-          email: customer?.email || context?.email || "customer@example.com",
+          email: data?.email || customer?.email || context?.email || shippingAddress.email || "customer@example.com",
           phone: customer?.phone || shippingAddress.phone || "",
           street_address: shippingAddress.address_1 || "Street 1",
           street_address2: shippingAddress.address_2 || "",
