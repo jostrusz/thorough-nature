@@ -314,6 +314,66 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       logger.warn(
         `[PayPal Webhook] No Medusa order found for PayPal event: ${eventType}, resource: ${resource.id}, orderId: ${paypalOrderId}`
       )
+
+      // ─── SAFETY NET: Auto-complete cart when payment was captured but order doesn't exist ───
+      // This handles the case where PayPal express checkout captured payment client-side
+      // but the browser closed/errored before completing the cart on the backend.
+      if (eventType === "PAYMENT.CAPTURE.COMPLETED" && paypalOrderId) {
+        logger.info(`[PayPal Webhook] Safety net: attempting to find and complete cart for PayPal order ${paypalOrderId}`)
+        try {
+          // Search for cart with this PayPal order in payment session data
+          const { data: carts } = await query.graph({
+            entity: "cart",
+            fields: [
+              "id",
+              "completed_at",
+              "email",
+              "payment_collection.*",
+              "payment_collection.payment_sessions.*",
+            ],
+            filters: {},
+            pagination: { order: { created_at: "DESC" }, skip: 0, take: 50 },
+          })
+
+          let targetCart: any = null
+          for (const cart of carts || []) {
+            if (cart.completed_at) continue // skip already completed carts
+            const sessions = cart.payment_collection?.payment_sessions || []
+            for (const session of sessions) {
+              if (
+                session.data?.paypalOrderId === paypalOrderId ||
+                session.data?.id === paypalOrderId
+              ) {
+                targetCart = cart
+                break
+              }
+            }
+            if (targetCart) break
+          }
+
+          if (targetCart) {
+            logger.info(`[PayPal Webhook] Safety net: found uncompleted cart ${targetCart.id} — attempting to complete`)
+
+            // Complete the cart via Medusa's cart completion workflow
+            const { completeCartWorkflow } = await import("@medusajs/medusa/core-flows")
+            const result = await completeCartWorkflow(req.scope).run({
+              input: { id: targetCart.id },
+            })
+
+            const completedOrder = (result as any)?.result?.order || (result as any)?.order
+            if (completedOrder) {
+              logger.info(`[PayPal Webhook] Safety net: ✅ Cart ${targetCart.id} completed → order ${completedOrder.id} (display_id: ${completedOrder.display_id})`)
+            } else {
+              logger.info(`[PayPal Webhook] Safety net: Cart completion returned:`, JSON.stringify(result).slice(0, 500))
+            }
+          } else {
+            logger.warn(`[PayPal Webhook] Safety net: No uncompleted cart found for PayPal order ${paypalOrderId}`)
+          }
+        } catch (safetyErr: any) {
+          logger.error(`[PayPal Webhook] Safety net failed: ${safetyErr.message}`)
+        }
+      }
+
       emitPaymentLog(logger, {
         provider: "paypal",
         event: eventType,
