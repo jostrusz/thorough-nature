@@ -85,15 +85,26 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(500).json({ error: "Stripe webhook not configured" })
     }
 
+    // Debug: log key prefixes and raw body source to diagnose signature failures
+    const hasRawBody = !!(req as any).rawBody
+    const rawBody = hasRawBody ? (req as any).rawBody : JSON.stringify(req.body)
+    const rawBodyType = typeof rawBody
+    const rawBodyLen = rawBody ? (typeof rawBody === "string" ? rawBody.length : (rawBody as Buffer).length) : 0
+    const whSecPrefix = webhookSecret ? webhookSecret.substring(0, 10) + "..." : "null"
+    const skPrefix = secretKey ? secretKey.substring(0, 8) + "..." : "null"
+    logger.info(`[Stripe Webhook] Debug: hasRawBody=${hasRawBody}, bodyType=${rawBodyType}, bodyLen=${rawBodyLen}, whsec=${whSecPrefix}, sk=${skPrefix}, sig=${sig.substring(0, 30)}...`)
+
     // Verify signature using raw body
     const stripe = new Stripe(secretKey, { apiVersion: "2025-03-31.basil" as any })
     let event: Stripe.Event
 
     try {
-      const rawBody = (req as any).rawBody || JSON.stringify(req.body)
       event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret)
     } catch (err: any) {
       logger.error(`[Stripe Webhook] Signature verification failed: ${err.message}`)
+      // Log body sample to help debug (first 200 chars, no sensitive data in Stripe event bodies)
+      const bodySample = typeof rawBody === "string" ? rawBody.substring(0, 200) : rawBody.toString("utf8").substring(0, 200)
+      logger.error(`[Stripe Webhook] Body sample: ${bodySample}`)
       return res.status(400).json({ error: `Webhook signature verification failed` })
     }
 
