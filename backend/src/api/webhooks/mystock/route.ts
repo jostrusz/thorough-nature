@@ -93,7 +93,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       { take: 1 }
     )
     if (existingEvents[0]) {
-      res.json({ ok: true, message: "Event already processed" })
+      console.log(`[mySTOCK Webhook] Event ${event.eventId} already processed — returning success`)
+      res.json({ data: { id: existingEvents[0].id }, errors: [] })
       return
     }
 
