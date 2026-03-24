@@ -49,9 +49,32 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   }
 }
 
+// ═══════════════════════════════════════════
+// WEBHOOK BASIC AUTH CREDENTIALS
+// mySTOCK requires HTTP Basic Auth on webhook endpoints
+// ═══════════════════════════════════════════
+const WEBHOOK_USERNAME = process.env.MYSTOCK_WEBHOOK_USERNAME || "mystock"
+const WEBHOOK_PASSWORD = process.env.MYSTOCK_WEBHOOK_PASSWORD || "YTA2VdKNszJMdxnS1RKVNnntWBEurxY5"
+
+function validateBasicAuth(req: MedusaRequest): boolean {
+  const authHeader = req.headers["authorization"] as string
+  if (!authHeader || !authHeader.startsWith("Basic ")) return false
+  const decoded = Buffer.from(authHeader.slice(6), "base64").toString("utf-8")
+  const [username, password] = decoded.split(":")
+  return username === WEBHOOK_USERNAME && password === WEBHOOK_PASSWORD
+}
+
 // POST /webhooks/mystock — Receive mySTOCK webhook events
 export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   console.log(`[mySTOCK Webhook] Incoming POST /webhooks/mystock — body keys: ${Object.keys(req.body || {}).join(", ") || "empty"}`)
+
+  // Validate Basic Auth
+  if (!validateBasicAuth(req)) {
+    console.warn(`[mySTOCK Webhook] ❌ Basic Auth failed — missing or invalid credentials`)
+    res.status(401).json({ data: null, errors: [{ code: "UNAUTHORIZED", message: "Invalid credentials" }] })
+    return
+  }
+  console.log(`[mySTOCK Webhook] ✅ Basic Auth verified`)
 
   try {
     const event = req.body as any
