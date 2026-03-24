@@ -39,9 +39,23 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       })
       .join("")
 
+    // Normalize contenteditable HTML for email clients:
+    // Chrome wraps lines in <div>, Firefox uses <br>. Convert to <p> with spacing.
+    let replyHtml = (body.body_html || "").trim()
+    // Replace <div><br></div> (empty line from Chrome) with paragraph break
+    replyHtml = replyHtml.replace(/<div><br\s*\/?><\/div>/gi, '</p><p style="margin:0 0 12px 0;">&nbsp;</p><p style="margin:0 0 12px 0;">')
+    // Wrap remaining <div>...</div> blocks as paragraphs
+    replyHtml = replyHtml.replace(/<div>(.*?)<\/div>/gi, '<p style="margin:0 0 12px 0;">$1</p>')
+    // Convert double <br> to paragraph break
+    replyHtml = replyHtml.replace(/(<br\s*\/?>){2,}/gi, '</p><p style="margin:0 0 12px 0;">')
+    // Wrap in opening <p> if not already wrapped
+    if (!replyHtml.startsWith('<p')) {
+      replyHtml = `<p style="margin:0 0 12px 0;">${replyHtml}</p>`
+    }
+
     const fullEmailHtml = `
-      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        ${body.body_html}
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.6;color:#1a1a1a;">
+        ${replyHtml}
       </div>
       <br/>
       <div style="border-top:1px solid #E1E3E5;padding-top:12px;margin-top:16px;">
