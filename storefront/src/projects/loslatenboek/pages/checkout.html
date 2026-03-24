@@ -6205,6 +6205,13 @@ body {
       vat_number: (document.getElementById('vat_number') || {}).value || '',
       timestamp: Date.now()
     };
+    // Save validation state for Foxentry-managed fields
+    var validatedFields = {};
+    ['email', 'phone'].forEach(function(fid) {
+      var el = document.getElementById(fid);
+      if (el && el.classList.contains('valid')) validatedFields[fid] = true;
+    });
+    draft._validated = validatedFields;
     localStorage.setItem('checkout_draft', JSON.stringify(draft));
   }
 
@@ -6228,6 +6235,21 @@ body {
           if (el.value) el.classList.add('has-value');
         }
       });
+      // Restore validation state — skip re-validation for previously validated fields
+      if (draft._validated) {
+        Object.keys(draft._validated).forEach(function(fid) {
+          var el = document.getElementById(fid);
+          if (el && el.value && draft._validated[fid]) {
+            el.classList.add('valid');
+            el.classList.remove('invalid');
+          }
+        });
+      }
+      // Trigger country change to update phone prefix display
+      var countryEl = document.getElementById('country');
+      if (countryEl && draft.country) {
+        countryEl.dispatchEvent(new Event('change'));
+      }
       console.log('[Checkout Recovery] Form restored from localStorage');
     } catch (e) {
       console.warn('[Checkout Recovery] Restore failed:', e);
@@ -7220,6 +7242,32 @@ body {
 
     // Recalculate taxes in order summary
     updateTaxDisplay(country);
+
+    // Auto-update phone prefix when country changes
+    if (phoneField) {
+      var raw = phoneField.value.trim();
+      var newPrefix = COUNTRY_PHONE_PREFIX[country] || '+31';
+      if (!raw) {
+        // Empty field — pre-fill with prefix
+        phoneField.value = newPrefix;
+      } else {
+        // Replace existing prefix if it matches a known country prefix
+        var prefixes = Object.keys(PHONE_PREFIX_TO_COUNTRY);
+        var replaced = false;
+        for (var i = 0; i < prefixes.length; i++) {
+          if (raw.startsWith(prefixes[i])) {
+            phoneField.value = newPrefix + raw.substring(prefixes[i].length);
+            replaced = true;
+            break;
+          }
+        }
+        // If starts with 0, replace with new prefix
+        if (!replaced && raw.startsWith('0')) {
+          phoneField.value = newPrefix + raw.substring(1);
+        }
+      }
+      if (phonePreview) phonePreview.style.display = 'none';
+    }
 
     // Re-render payment methods for the new country (preserves scroll position)
     var scrollY = window.scrollY;
