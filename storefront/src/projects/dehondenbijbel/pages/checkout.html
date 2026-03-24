@@ -6215,6 +6215,13 @@ body {
       vat_number: (document.getElementById('vat_number') || {}).value || '',
       timestamp: Date.now()
     };
+    // Save validation state for Foxentry-managed fields
+    var validatedFields = {};
+    ['email', 'phone'].forEach(function(fid) {
+      var el = document.getElementById(fid);
+      if (el && el.classList.contains('valid')) validatedFields[fid] = true;
+    });
+    draft._validated = validatedFields;
     localStorage.setItem('checkout_draft', JSON.stringify(draft));
   }
 
@@ -6238,16 +6245,30 @@ body {
           if (el.value) el.classList.add('has-value');
         }
       });
-      // Trigger blur op velden met waarde zodat Foxentry/lokale validatie loopt
-      // en valid/invalid klasse wordt gezet (voorkomt submit-blokkade)
+      // Restore validation state — skip re-validation for previously validated fields
+      if (draft._validated) {
+        Object.keys(draft._validated).forEach(function(fid) {
+          var el = document.getElementById(fid);
+          if (el && el.value && draft._validated[fid]) {
+            el.classList.add('valid');
+            el.classList.remove('invalid');
+          }
+        });
+      }
+      // Run local validation on non-Foxentry fields to set valid/invalid classes
       setTimeout(function() {
-        ['email', 'phone', 'address', 'city', 'postal_code', 'first_name', 'last_name'].forEach(function(f) {
+        ['address', 'city', 'postal_code', 'first_name', 'last_name'].forEach(function(f) {
           var el = document.getElementById(f);
           if (el && el.value.trim()) {
             el.dispatchEvent(new Event('blur'));
           }
         });
-      }, 500);
+      }, 300);
+      // Trigger country change to update phone prefix display
+      var countryEl = document.getElementById('country');
+      if (countryEl && draft.country) {
+        countryEl.dispatchEvent(new Event('change'));
+      }
       console.log('[Checkout Recovery] Form restored from localStorage');
     } catch (e) {
       console.warn('[Checkout Recovery] Restore failed:', e);
