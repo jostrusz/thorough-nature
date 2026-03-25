@@ -2129,12 +2129,39 @@ body {
   border-color: rgba(107,33,168,0.35) !important;
 }
 
-/* ─── PRE-CHECKOUT: HEADING, IMAGE, BENEFITS, REVIEWS ─── */
-.pre-checkout-section {
-  max-width: 800px;
-  margin: 0 auto 32px;
-  padding: 0 16px;
+/* ─── TWO-COLUMN CHECKOUT LAYOUT ─── */
+.checkout-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  align-items: start;
 }
+.checkout-left-col {
+  position: sticky;
+  top: 20px;
+}
+.checkout-right-col {
+  min-width: 0;
+}
+.checkout-reviews-section {
+  max-width: 1200px;
+  margin: 48px auto 0;
+  padding: 0 20px 40px;
+}
+@media (max-width: 960px) {
+  .checkout-two-col {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .checkout-left-col {
+    position: static;
+  }
+}
+
+/* ─── PRE-CHECKOUT: HEADING, IMAGE, BENEFITS ─── */
 
 .nadpisekH2 {
   font-family: 'Inter', Arial, sans-serif !important;
@@ -2268,12 +2295,12 @@ body {
   50% { transform: scale(1.05); }
 }
 
-/* Reviews grid */
+/* Reviews grid — 3 per row */
 .reviews-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 30px;
-  margin: 0 0 28px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin: 0;
 }
 .review-card {
   background: #ffffff;
@@ -2347,7 +2374,7 @@ body {
 
 @media (max-width: 600px) {
   .nadpisekH2 { font-size: 28px !important; }
-  .reviews-grid { grid-template-columns: 1fr; }
+  .reviews-grid { grid-template-columns: 1fr; gap: 20px; }
   .product-hero-img { max-width: 320px; }
   .benefit-box { padding: 16px; border-width: 2px; }
   .benefit-box li { font-size: 14px !important; }
@@ -2449,15 +2476,18 @@ body {
     </div>
   </div>
 
-  <!-- ═══ PRE-CHECKOUT: HEADING, IMAGE, BENEFITS, REVIEWS ═══ -->
-  <div class="pre-checkout-section">
+  <!-- ═══ TWO-COLUMN LAYOUT: LEFT (info) + RIGHT (form) ═══ -->
+  <div class="checkout-two-col">
+
+  <!-- LEFT COLUMN: Heading, Image, Benefits -->
+  <div class="checkout-left-col">
 
     <h2 class="nadpisekH2">
       Bestel nu het boek <span class="highlight">"De Hondenbijbel"</span>
       <br>met <span class="highlight-yellow">gratis verzending en &euro;65 korting op het totale pakket</span>
     </h2>
 
-    <img class="product-hero-img" src="https://assets.lightfunnels.com/account-85759/images_library/a040645b-f252-41bc-95f8-8d8679be239f.lars%20vermeulen%20dehondenbijbel.webp" alt="De Hondenbijbel boekpakket" loading="eager">
+    <img class="product-hero-img" src="https://pub-12b44c5f496340f58ee64ff706fd23bf.r2.dev/dehondenbijbel-bundle-mockup.webp" alt="De Hondenbijbel boekpakket" loading="eager" onerror="this.src='https://assets.lightfunnels.com/account-85759/images_library/a040645b-f252-41bc-95f8-8d8679be239f.lars%20vermeulen%20dehondenbijbel.webp'">
 
     <div class="benefit-box">
       <ul>
@@ -2487,48 +2517,11 @@ body {
       </div>
     </div>
 
-    <div class="reviews-grid">
-      <div class="review-card">
-        <img src="https://assets.lightfunnels.com/account-85759/images_library/a386887e-bb5e-4a13-bb6c-d3e7dfb77f85.hondsagfsa-pichi.jpg" alt="Daan H." class="review-image">
-        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
-        <h4 class="reviewer-name">Daan H., Utrecht</h4>
-        <p class="review-text">"Wij hadden een husky-teefje, maar helaas <strong>overleed ze op 10-jarige leeftijd</strong> na een operatie. Dat verdriet begrijpt alleen iemand die ooit <em>afscheid heeft moeten nemen van zijn hond</em>. Juist daarom heb ik dit boek gekozen – om <strong>fouten te vermijden</strong> wanneer ik weer een nieuwe hond in mijn leven mag verwelkomen. Op basis van de inhoud lijkt het een <strong><u>zeer nuttig, leerzaam en tegelijkertijd liefdevol boek</u></strong>."</p>
-      </div>
-      <div class="review-card">
-        <img src="https://assets.lightfunnels.com/account-85759/images_library/1967eecc-1a18-42d6-b12d-b3dea3877350.jkshajks-pichi.jpg" alt="Lisa V." class="review-image">
-        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
-        <h4 class="reviewer-name">Lisa V., Utrecht</h4>
-        <p class="review-text">"Een fijn boek voor <strong>alle baasjes van viervoeters</strong>. Het neemt je stap voor stap mee in de vaardigheden, waarneming en zintuigen van je hond, <em>op een manier die je misschien nog niet kende</em>. Je zult zeker veel <strong>leerzame, nieuwe en ook grappige informatie</strong> ontdekken. Met een glimlach raad ik het <strong><u>aan iedereen die een hond heeft</u></strong>! 😊"</p>
-      </div>
-      <div class="review-card">
-        <img src="https://assets.lightfunnels.com/account-85759/images_library/024b1802-94c6-488e-b292-dd995734a675.john-hondenbijbel-vertical-pichi.jpg" alt="Tim R." class="review-image">
-        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
-        <h4 class="reviewer-name">Tim R., Haarlem</h4>
-        <p class="review-text">"Het boek is vandaag aangekomen en <strong>ik ben meteen begonnen met lezen</strong>. Pagina na pagina verslonden! Het boek is uitgebreid, maar <em>gaat diep genoeg in en blijft toch eenvoudig en overzichtelijk</em>. Zelfs na jarenlange ervaring met honden heb ik <strong>nieuwe technieken ontdekt</strong> – en ze werken echt! Van mij krijgt het <strong><u>1000% aanbeveling</u></strong>!"</p>
-      </div>
-      <div class="review-card">
-        <img src="https://assets.lightfunnels.com/account-85759/images_library/3cf087ba-0a12-4435-aa3b-1020bca0a508.honden-pichi.jpg" alt="Sanne T." class="review-image">
-        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
-        <h4 class="reviewer-name">Sanne T., Leiden</h4>
-        <p class="review-text">"Het boek is een <strong>geweldige hulp</strong> om je hond op een <em>eenvoudige en rustige manier</em> de basiscommando's aan te leren. Het is geschreven op een <strong>toegankelijke en duidelijke manier</strong>, met veel aandacht en gevoel. Voor mij persoonlijk is het een enorme steun geweest en heeft het <strong><u>mijn leven met honden naar een hoger niveau getild</u></strong>. Bedankt!"</p>
-      </div>
-      <div class="review-card">
-        <img src="https://assets.lightfunnels.com/account-85759/images_library/2fa247a6-a78c-4e9a-8b38-de4402268d4e.jhdgabjhsgakjs-pichi.jpg" alt="Mark V." class="review-image">
-        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
-        <h4 class="reviewer-name">Mark V., Amsterdam</h4>
-        <p class="review-text">"Volgens mij is dit <strong>het beste boek over hondentraining en -opvoeding</strong>! Voordat ik een hond nam, bekeek ik instructievideo's, luisterde naar podcasts, las boeken – maar dit boek <em>vat perfect samen wat ik twee maanden lang heb bestudeerd</em>. Op slechts enkele pagina's vind je <strong>alles wat je hond moet kunnen</strong>, met een duidelijke handleiding. <strong><u>Geen overbodige informatie, alleen wat je echt nodig hebt</u></strong>."</p>
-      </div>
-      <div class="review-card">
-        <img src="https://assets.lightfunnels.com/account-85759/images_library/d9c84e95-8504-4564-bfcf-47232646bf0e.lasja.jpg" alt="Jeroen B." class="review-image">
-        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
-        <h4 class="reviewer-name">Jeroen B., Maastricht</h4>
-        <p class="review-text">"Ik raad dit boek <strong>aan alle hondenbezitters aan</strong>. Het is <em>geweldig geschreven</em> en, in tegenstelling tot vergelijkbare vertaalde gidsen, is het <strong>gebaseerd op onze eigen omgeving</strong> – niet uit een onbereikbare buitenlandse bubbel. Eindelijk een boek dat <strong><u>écht aansluit bij hoe wij in Nederland met onze honden leven</u></strong>."</p>
-      </div>
-    </div>
+  </div><!-- /checkout-left-col -->
 
-  </div>
-
-  <div class="checkout-grid">
+  <!-- RIGHT COLUMN: Checkout form (unchanged) -->
+  <div class="checkout-right-col">
+  <div class="checkout-grid" style="display:block;max-width:none;">
 
     <!-- ── LEVÁ STRANA: FORMULÁŘ ── -->
     <div class="checkout-main">
@@ -3080,6 +3073,51 @@ body {
     <a href="voorwaarden.html">Algemene voorwaarden</a> · <a href="privacy.html">Privacybeleid</a> · <a href="retourbeleid.html">Retourbeleid</a> · <a href="verzending.html">Verzending &amp; Levering</a>
   </div>
 </div>
+  </div><!-- /checkout-grid -->
+  </div><!-- /checkout-right-col -->
+  </div><!-- /checkout-two-col -->
+
+  <!-- ═══ REVIEWS SECTION (full width, below form) ═══ -->
+  <div class="checkout-reviews-section">
+    <div class="reviews-grid">
+      <div class="review-card">
+        <img src="https://assets.lightfunnels.com/account-85759/images_library/a386887e-bb5e-4a13-bb6c-d3e7dfb77f85.hondsagfsa-pichi.jpg" alt="Daan H." class="review-image">
+        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
+        <h4 class="reviewer-name">Daan H., Utrecht</h4>
+        <p class="review-text">"Wij hadden een husky-teefje, maar helaas <strong>overleed ze op 10-jarige leeftijd</strong> na een operatie. Dat verdriet begrijpt alleen iemand die ooit <em>afscheid heeft moeten nemen van zijn hond</em>. Juist daarom heb ik dit boek gekozen – om <strong>fouten te vermijden</strong> wanneer ik weer een nieuwe hond in mijn leven mag verwelkomen. Op basis van de inhoud lijkt het een <strong><u>zeer nuttig, leerzaam en tegelijkertijd liefdevol boek</u></strong>."</p>
+      </div>
+      <div class="review-card">
+        <img src="https://assets.lightfunnels.com/account-85759/images_library/1967eecc-1a18-42d6-b12d-b3dea3877350.jkshajks-pichi.jpg" alt="Lisa V." class="review-image">
+        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
+        <h4 class="reviewer-name">Lisa V., Utrecht</h4>
+        <p class="review-text">"Een fijn boek voor <strong>alle baasjes van viervoeters</strong>. Het neemt je stap voor stap mee in de vaardigheden, waarneming en zintuigen van je hond, <em>op een manier die je misschien nog niet kende</em>. Je zult zeker veel <strong>leerzame, nieuwe en ook grappige informatie</strong> ontdekken. Met een glimlach raad ik het <strong><u>aan iedereen die een hond heeft</u></strong>! 😊"</p>
+      </div>
+      <div class="review-card">
+        <img src="https://assets.lightfunnels.com/account-85759/images_library/024b1802-94c6-488e-b292-dd995734a675.john-hondenbijbel-vertical-pichi.jpg" alt="Tim R." class="review-image">
+        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
+        <h4 class="reviewer-name">Tim R., Haarlem</h4>
+        <p class="review-text">"Het boek is vandaag aangekomen en <strong>ik ben meteen begonnen met lezen</strong>. Pagina na pagina verslonden! Het boek is uitgebreid, maar <em>gaat diep genoeg in en blijft toch eenvoudig en overzichtelijk</em>. Zelfs na jarenlange ervaring met honden heb ik <strong>nieuwe technieken ontdekt</strong> – en ze werken echt! Van mij krijgt het <strong><u>1000% aanbeveling</u></strong>!"</p>
+      </div>
+      <div class="review-card">
+        <img src="https://assets.lightfunnels.com/account-85759/images_library/3cf087ba-0a12-4435-aa3b-1020bca0a508.honden-pichi.jpg" alt="Sanne T." class="review-image">
+        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
+        <h4 class="reviewer-name">Sanne T., Leiden</h4>
+        <p class="review-text">"Het boek is een <strong>geweldige hulp</strong> om je hond op een <em>eenvoudige en rustige manier</em> de basiscommando's aan te leren. Het is geschreven op een <strong>toegankelijke en duidelijke manier</strong>, met veel aandacht en gevoel. Voor mij persoonlijk is het een enorme steun geweest en heeft het <strong><u>mijn leven met honden naar een hoger niveau getild</u></strong>. Bedankt!"</p>
+      </div>
+      <div class="review-card">
+        <img src="https://assets.lightfunnels.com/account-85759/images_library/2fa247a6-a78c-4e9a-8b38-de4402268d4e.jhdgabjhsgakjs-pichi.jpg" alt="Mark V." class="review-image">
+        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
+        <h4 class="reviewer-name">Mark V., Amsterdam</h4>
+        <p class="review-text">"Volgens mij is dit <strong>het beste boek over hondentraining en -opvoeding</strong>! Voordat ik een hond nam, bekeek ik instructievideo's, luisterde naar podcasts, las boeken – maar dit boek <em>vat perfect samen wat ik twee maanden lang heb bestudeerd</em>. Op slechts enkele pagina's vind je <strong>alles wat je hond moet kunnen</strong>, met een duidelijke handleiding. <strong><u>Geen overbodige informatie, alleen wat je echt nodig hebt</u></strong>."</p>
+      </div>
+      <div class="review-card">
+        <img src="https://assets.lightfunnels.com/account-85759/images_library/d9c84e95-8504-4564-bfcf-47232646bf0e.lasja.jpg" alt="Jeroen B." class="review-image">
+        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
+        <h4 class="reviewer-name">Jeroen B., Maastricht</h4>
+        <p class="review-text">"Ik raad dit boek <strong>aan alle hondenbezitters aan</strong>. Het is <em>geweldig geschreven</em> en, in tegenstelling tot vergelijkbare vertaalde gidsen, is het <strong>gebaseerd op onze eigen omgeving</strong> – niet uit een onbereikbare buitenlandse bubbel. Eindelijk een boek dat <strong><u>écht aansluit bij hoe wij in Nederland met onze honden leven</u></strong>."</p>
+      </div>
+    </div>
+  </div>
 
 <!-- ═══ JAVASCRIPT ═══ -->
 <script>
