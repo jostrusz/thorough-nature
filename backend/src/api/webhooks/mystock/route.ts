@@ -189,22 +189,30 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         delivery_status_updated_at: now,
       }
 
-      // Extract tracking info from event (mySTOCK uses fullTrackingNumber, logisticLabelCode, etc.)
+      // Extract tracking info from event
+      // mySTOCK event 12 structure: shippingLabel (top-level) + extensionData.transportInformation[].trackingNumbers[]
+      const transportInfo = event.extensionData?.transportInformation?.[0]
       const trackingFromEvent =
+        event.shippingLabel ||
+        transportInfo?.trackingNumbers?.[0]?.fullTrackingNumber ||
+        transportInfo?.trackingNumbers?.[0]?.trackingNumber ||
         event.fullTrackingNumber || event.data?.fullTrackingNumber ||
         event.trackingNumber || event.data?.trackingNumber ||
         event.logisticLabelCode || event.data?.logisticLabelCode || null
       if (trackingFromEvent) {
         updateData.tracking_number = trackingFromEvent
+        console.log(`[mySTOCK Webhook] Tracking number extracted: ${trackingFromEvent}`)
       }
-      if (event.data?.trackingUrl || event.trackingUrl) {
-        updateData.tracking_url = event.data?.trackingUrl || event.trackingUrl
-      }
+      // Extract carrier name from extensionData
       const carrierFromEvent =
+        transportInfo?.transportOperator ||
         event.carrierName || event.data?.carrierName ||
         event.carrierCode || event.data?.carrierCode || null
       if (carrierFromEvent) {
         updateData.carrier_name = carrierFromEvent
+      }
+      if (event.data?.trackingUrl || event.trackingUrl) {
+        updateData.tracking_url = event.data?.trackingUrl || event.trackingUrl
       }
       if (newStatus === "DISPATCHED") {
         updateData.dispatched_at = now
