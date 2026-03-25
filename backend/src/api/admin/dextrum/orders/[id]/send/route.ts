@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { DEXTRUM_MODULE } from "../../../../../../modules/dextrum"
 import { MyStockApiClient } from "../../../../../../modules/dextrum/api-client"
+import { normalizePhone } from "../../../../../../utils/normalize-phone"
 
 // POST /admin/dextrum/orders/:id/send — Manually send order to WMS
 export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
@@ -106,6 +107,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
     // 8. Build address (mySTOCK partyIdentification format)
     const addr = (order as any).shipping_address || {}
+    const addrCountry = addr.country_code?.toUpperCase() || "NL"
+    const phoneResult = normalizePhone(addr.phone, addrCountry)
+    if (phoneResult.warning) {
+      console.log(`[Dextrum Send] ${medusaOrderId}: ${phoneResult.warning}`)
+    }
     const deliveryAddress: any = {
       firstName: addr.first_name || "",
       lastName: addr.last_name || "",
@@ -113,9 +119,28 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       street: [addr.address_1, addr.address_2].filter(Boolean).join(", "),
       city: addr.city || "",
       zip: addr.postal_code || "",
-      country: addr.country_code?.toUpperCase() || "NL",
-      phone: addr.phone || "000",
+      country: addrCountry,
+      phone: phoneResult.normalized,
       email: (order as any).email || "",
+    }
+    // Log phone normalization in order metadata
+    if (phoneResult.changed || phoneResult.warning) {
+      try {
+        const existingMeta = (order as any).metadata || {}
+        await orderModuleService.updateOrders([{
+          id: medusaOrderId,
+          metadata: {
+            ...existingMeta,
+            phone_normalization: {
+              original: phoneResult.original,
+              normalized: phoneResult.normalized,
+              changed: phoneResult.changed,
+              warning: phoneResult.warning || null,
+              timestamp: new Date().toISOString(),
+            },
+          },
+        }])
+      } catch { /* non-critical */ }
     }
 
     // 9. Send to mySTOCK
