@@ -149,13 +149,24 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     }
 
     // Special handling for Event 29 (carrier/delivery updates)
-    // Dextrum confirms: event 29 = "doručeno zákazníkovi" (delivered to customer)
+    // Dextrum uses event 29 for TWO purposes:
+    //   - subtype empty/0 + note "Ostatní data přijata" = tracking assigned (NOT delivered) → DISPATCHED
+    //   - subtype 1 = actually delivered to customer → DELIVERED
     if (eventType === "29") {
       const carrierStatus = (event.data?.status || event.status || "").toLowerCase()
+      const eventNote = (event.note || event.data?.note || "").toLowerCase()
+      const sub = parseInt(eventSubtype, 10)
+
       if (carrierStatus === "transit" || carrierStatus === "in_transit") {
         newStatus = "IN_TRANSIT"
+      } else if (sub === 1) {
+        // Subtype 1 = confirmed delivery
+        newStatus = "DELIVERED"
+      } else if (eventNote.includes("ostatní data") || eventNote.includes("data přijata") || !eventSubtype || sub === 0) {
+        // No subtype or "Ostatní data přijata" = tracking data update, NOT delivery
+        newStatus = "DISPATCHED"
+        console.log(`[mySTOCK Webhook] Event 29 without subtype=1 (note: "${event.note || ""}") → treating as DISPATCHED, not DELIVERED`)
       } else {
-        // Default to DELIVERED (Dextrum sends event 29 when delivered)
         newStatus = "DELIVERED"
       }
     }
@@ -241,8 +252,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
           const meta = (order as any).metadata || {}
 
           // Auto-generate tracking URL if we have a tracking number but no URL
+          // IMPORTANT: Never overwrite existing tracking number or URL — keep the first one
+          const existingTracking = meta.dextrum_tracking_number
+          const existingTrackingUrl = meta.dextrum_tracking_url
+          if (existingTracking && updateData.tracking_number && existingTracking !== updateData.tracking_number) {
+            console.log(`[mySTOCK Webhook] Tracking already set (${existingTracking}), ignoring new tracking (${updateData.tracking_number})`)
+            delete updateData.tracking_number
+          }
+          if (existingTrackingUrl && updateData.tracking_url) {
+            delete updateData.tracking_url
+          }
+
           const trackingNum = updateData.tracking_number || meta.dextrum_tracking_number
-          let trackingUrl = updateData.tracking_url || meta.dextrum_tracking_url || ""
+          let trackingUrl = existingTrackingUrl || updateData.tracking_url || ""
           let carrierCode = updateData.carrier_name || meta.dextrum_carrier || ""
 
           if (trackingNum && !trackingUrl) {
