@@ -3834,6 +3834,45 @@ body {
       localStorage.removeItem('checkout_draft');
       localStorage.removeItem('background_cart_id');
 
+      // ─── EXPRESS CHECKOUT: Fire Purchase pixel + CAPI ───
+      try {
+        if (typeof MetaTracker !== 'undefined' && MetaTracker.trackPurchase) {
+          var bundleQty = parseInt(localStorage.getItem('medusa_bundle_qty') || '1');
+          var bumpActive = localStorage.getItem('medusa_order_bump') === 'true';
+          var checkoutTotal = parseFloat(localStorage.getItem('medusa_checkout_total') || '0');
+
+          var purchaseValue = checkoutTotal > 0 ? checkoutTotal : selectedBundlePrice;
+
+          var purchaseContentIds = PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle];
+          if (bumpActive && PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.handle) {
+            if (!PROJECT_CONFIG.catalogContentIds) {
+              purchaseContentIds = purchaseContentIds.concat([PROJECT_CONFIG.upsellProduct.handle]);
+            }
+          }
+
+          var purchaseEventId = 'purchase_' + order.id;
+
+          MetaTracker.trackPurchase({
+            content_ids: purchaseContentIds,
+            contents: purchaseContentIds.map(function(id) { return { id: id, quantity: 1 }; }),
+            value: purchaseValue,
+            currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
+            num_items: bundleQty + (bumpActive ? 1 : 0),
+            order_id: order.id
+          }, {
+            em: order.email || localStorage.getItem('medusa_customer_email') || '',
+            fn: (order.shipping_address && order.shipping_address.first_name) || '',
+            ln: (order.shipping_address && order.shipping_address.last_name) || '',
+            ph: (order.shipping_address && order.shipping_address.phone) || ''
+          }, { event_id: purchaseEventId });
+
+          localStorage.setItem('medusa_purchase_tracked', 'true');
+          console.log('[Express] Purchase tracked — €' + purchaseValue + ' event_id=' + purchaseEventId);
+        }
+      } catch (pixelErr) {
+        console.warn('[Express] Purchase tracking failed:', pixelErr);
+      }
+
       // Redirect to upsell or thank-you page
       if (PROJECT_CONFIG.upsellEnabled === false) {
         window.location.href = PROJECT_CONFIG.thankYouUrl;
