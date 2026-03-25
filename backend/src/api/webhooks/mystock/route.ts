@@ -182,15 +182,22 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         delivery_status_updated_at: now,
       }
 
-      // Extract tracking info from event
-      if (event.data?.trackingNumber || event.trackingNumber) {
-        updateData.tracking_number = event.data?.trackingNumber || event.trackingNumber
+      // Extract tracking info from event (mySTOCK uses fullTrackingNumber, logisticLabelCode, etc.)
+      const trackingFromEvent =
+        event.fullTrackingNumber || event.data?.fullTrackingNumber ||
+        event.trackingNumber || event.data?.trackingNumber ||
+        event.logisticLabelCode || event.data?.logisticLabelCode || null
+      if (trackingFromEvent) {
+        updateData.tracking_number = trackingFromEvent
       }
       if (event.data?.trackingUrl || event.trackingUrl) {
         updateData.tracking_url = event.data?.trackingUrl || event.trackingUrl
       }
-      if (event.data?.carrierName || event.carrierName) {
-        updateData.carrier_name = event.data?.carrierName || event.carrierName
+      const carrierFromEvent =
+        event.carrierName || event.data?.carrierName ||
+        event.carrierCode || event.data?.carrierCode || null
+      if (carrierFromEvent) {
+        updateData.carrier_name = carrierFromEvent
       }
       if (newStatus === "DISPATCHED") {
         updateData.dispatched_at = now
