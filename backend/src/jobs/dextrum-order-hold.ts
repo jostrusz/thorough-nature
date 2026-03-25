@@ -1,6 +1,7 @@
 import { MedusaContainer } from "@medusajs/framework/types"
 import { DEXTRUM_MODULE } from "../modules/dextrum"
 import { MyStockApiClient } from "../modules/dextrum/api-client"
+import { normalizePhone } from "../utils/normalize-phone"
 
 /**
  * Dextrum Order Hold Processor
@@ -200,6 +201,10 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         }
 
         // Build delivery address
+        const phoneResult = normalizePhone(addr.phone, countryCode)
+        if (phoneResult.warning) {
+          console.log(`[Dextrum Hold] ${orderCode}: ${phoneResult.warning}`)
+        }
         const deliveryAddress: any = {
           firstName: addr.first_name || "",
           lastName: addr.last_name || "",
@@ -207,8 +212,28 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           city: addr.city || "",
           zip: addr.postal_code || "",
           country: countryCode,
-          phone: addr.phone || "000",
+          phone: phoneResult.normalized,
           email: (order as any).email || "",
+        }
+        // Log phone normalization in order metadata for timeline
+        if (phoneResult.changed || phoneResult.warning) {
+          try {
+            const orderService = container.resolve("order") as any
+            const existingMeta = (order as any).metadata || {}
+            await orderService.updateOrders([{
+              id: (order as any).id,
+              metadata: {
+                ...existingMeta,
+                phone_normalization: {
+                  original: phoneResult.original,
+                  normalized: phoneResult.normalized,
+                  changed: phoneResult.changed,
+                  warning: phoneResult.warning || null,
+                  timestamp: new Date().toISOString(),
+                },
+              },
+            }])
+          } catch { /* non-critical */ }
         }
         if (addr.company) deliveryAddress.company = addr.company
         if (isPickup && orderMeta.packeta_point_id) {
