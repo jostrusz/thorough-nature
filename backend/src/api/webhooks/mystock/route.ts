@@ -1,7 +1,13 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Modules } from "@medusajs/framework/utils"
 import { DEXTRUM_MODULE } from "../../../modules/dextrum"
 import { generateTrackingUrl } from "../../../utils/tracking-url"
 import { Pool } from "pg"
+import { getProjectEmailConfig, getEmailSubject } from "../../../utils/project-email-config"
+import { EmailTemplates, resolveTemplateKey } from "../../../modules/email-notifications/templates"
+import { resolveBillingEntity } from "../../../utils/resolve-billing-entity"
+import { logEmailActivity } from "../../../utils/email-logger"
+import { renderEmailToHtml } from "../../../utils/render-email-html"
 
 // ═══════════════════════════════════════════
 // WEBHOOK EVENT → DELIVERY STATUS MAPPING
@@ -241,18 +247,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
           if (trackingNum && !trackingUrl) {
             try {
-              // Fetch shipping address to get country + zip via direct DB query
-              const addrPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
-              const addrResult = await addrPool.query(
-                `SELECT osa.country_code, osa.postal_code
-                 FROM order_shipping_address osa
-                 JOIN "order" o ON o.shipping_address_id = osa.id
-                 WHERE o.id = $1
-                 LIMIT 1`,
-                [orderMap.medusa_order_id]
-              )
-              await addrPool.end()
-              const shippingAddress = addrResult.rows[0]
+              // Fetch shipping address to get country + zip via orderModuleService
+              const orderModuleService = req.scope.resolve(Modules.ORDER) as any
+              const orderForAddr = await orderModuleService.retrieveOrder(orderMap.medusa_order_id, {
+                relations: ["shipping_address"],
+              })
+              let shippingAddress: any = orderForAddr?.shipping_address
+              try {
+                if (shippingAddress?.id) {
+                  shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(shippingAddress.id)
+                }
+              } catch { /* keep existing */ }
               const countryCode = shippingAddress?.country_code || ""
               const postalCode = shippingAddress?.postal_code || ""
 
@@ -333,6 +338,140 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
             } catch (fulfillErr: any) {
               console.error(`[Webhook] Auto-fulfill failed for ${orderMap.medusa_order_id}:`, fulfillErr.message)
             }
+          }
+
+          // ── Shipment notification email ──────────────────────────────
+          // After DISPATCHED status + tracking number are set, send shipment email to customer
+          // Uses 5-second delay to allow both pieces of data to settle
+          const shouldCheckEmail = (newStatus === "DISPATCHED" || updatedMeta.dextrum_status === "DISPATCHED") && !updatedMeta.shipment_email_sent
+          if (shouldCheckEmail) {
+            const capturedOrderId = orderMap.medusa_order_id
+            const capturedScope = req.scope
+            setTimeout(async () => {
+              try {
+                // Re-read order metadata from DB to get latest state
+                const emailPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                const emailResult = await emailPool.query(
+                  `SELECT metadata FROM "order" WHERE id = $1 LIMIT 1`,
+                  [capturedOrderId]
+                )
+                await emailPool.end()
+                const freshMeta = emailResult.rows[0]?.metadata || {}
+
+                // Check all conditions: DISPATCHED + tracking + not yet sent
+                if (freshMeta.dextrum_status !== "DISPATCHED") return
+                if (!freshMeta.dextrum_tracking_number) return
+                if (freshMeta.shipment_email_sent === true) {
+                  console.log(`[Webhook] Shipment email already sent for order ${capturedOrderId}, skipping`)
+                  return
+                }
+
+                // Mark email as sent FIRST to prevent duplicates (optimistic lock)
+                const markPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                const markResult = await markPool.query(
+                  `UPDATE "order" SET metadata = metadata || $1::jsonb, updated_at = NOW()
+                   WHERE id = $2 AND (metadata->>'shipment_email_sent' IS NULL OR metadata->>'shipment_email_sent' = 'false')
+                   RETURNING id`,
+                  [JSON.stringify({ shipment_email_sent: true, shipment_email_sent_at: new Date().toISOString() }), capturedOrderId]
+                )
+                await markPool.end()
+
+                if (markResult.rowCount === 0) {
+                  console.log(`[Webhook] Shipment email already sent (race condition) for order ${capturedOrderId}`)
+                  return
+                }
+
+                // Retrieve order with items + shipping_address for the email
+                const orderModuleSvc = capturedScope.resolve(Modules.ORDER) as any
+                const notificationSvc = capturedScope.resolve(Modules.NOTIFICATION) as any
+                const freshOrder = await orderModuleSvc.retrieveOrder(capturedOrderId, {
+                  relations: ["items", "shipping_address"],
+                })
+
+                if (!freshOrder || !freshOrder.email) {
+                  console.error(`[Webhook] Cannot send shipment email: order ${capturedOrderId} not found or has no email`)
+                  return
+                }
+
+                // Resolve shipping address
+                let shipAddr: any = freshOrder.shipping_address
+                try {
+                  if (shipAddr?.id) {
+                    shipAddr = await (orderModuleSvc as any).orderAddressService_.retrieve(shipAddr.id)
+                  }
+                } catch { /* keep existing */ }
+
+                // Build tracking info
+                const freshTracking = freshMeta.dextrum_tracking_number
+                const freshCarrier = freshMeta.dextrum_carrier || "GLS"
+                const freshTrackingUrl = freshMeta.dextrum_tracking_url || `https://gls-group.com/GROUP/en/parcel-tracking?match=${freshTracking}`
+
+                // Determine project-specific email config
+                const projectConfig = getProjectEmailConfig(freshOrder)
+                const templateKey = resolveTemplateKey(EmailTemplates.SHIPMENT_NOTIFICATION, projectConfig.project)
+                const displayId = freshMeta.custom_order_number || (freshOrder as any).display_id || freshOrder.id
+                const emailSubject = getEmailSubject(projectConfig, "shipmentSent", { id: String(displayId) })
+                const emailPreview = getEmailSubject(projectConfig, "shipmentPreview")
+
+                // Resolve billing entity for email footer
+                let billingEntity: any = null
+                try { billingEntity = await resolveBillingEntity(capturedScope, capturedOrderId) } catch { /* ok */ }
+
+                // Send the email
+                await notificationSvc.createNotifications({
+                  to: freshOrder.email,
+                  channel: "email",
+                  template: templateKey,
+                  ...(projectConfig.fromEmail ? { from: projectConfig.fromEmail } : {}),
+                  data: {
+                    emailOptions: { replyTo: projectConfig.replyTo, subject: emailSubject },
+                    order: freshOrder,
+                    shippingAddress: shipAddr,
+                    trackingNumber: freshTracking,
+                    trackingUrl: freshTrackingUrl,
+                    trackingCompany: freshCarrier,
+                    billingEntity,
+                    preview: emailPreview,
+                  },
+                })
+
+                // Render HTML for email log
+                const htmlBody = await renderEmailToHtml(templateKey, {
+                  emailOptions: { replyTo: projectConfig.replyTo, subject: emailSubject },
+                  order: freshOrder,
+                  shippingAddress: shipAddr,
+                  trackingNumber: freshTracking,
+                  trackingUrl: freshTrackingUrl,
+                  trackingCompany: freshCarrier,
+                  billingEntity,
+                  preview: emailPreview,
+                }).catch(() => "")
+
+                await logEmailActivity(orderModuleSvc, capturedOrderId, {
+                  template: "shipment_notification",
+                  subject: emailSubject,
+                  to: freshOrder.email,
+                  status: "sent",
+                  ...(htmlBody ? { html_body: htmlBody } : {}),
+                }).catch(() => {})
+
+                // Add timeline entry
+                const timelinePool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                await timelinePool.query(
+                  `UPDATE "order" SET metadata = jsonb_set(
+                    COALESCE(metadata, '{}'::jsonb),
+                    '{dextrum_timeline}',
+                    COALESCE(metadata->'dextrum_timeline', '[]'::jsonb) || $1::jsonb
+                  ), updated_at = NOW() WHERE id = $2`,
+                  [JSON.stringify([{ type: "email", status: "shipment_email_sent", date: new Date().toISOString(), detail: "Shipment notification sent" }]), capturedOrderId]
+                )
+                await timelinePool.end()
+
+                console.log(`[Webhook] Shipment email sent to ${freshOrder.email} for order ${displayId} (tracking: ${freshTracking})`)
+              } catch (emailErr: any) {
+                console.error(`[Webhook] Failed to send shipment email for order ${capturedOrderId}:`, emailErr.message)
+              }
+            }, 5000) // 5 second delay to wait for both DISPATCHED + tracking
           }
         }
       } catch (err: any) {
