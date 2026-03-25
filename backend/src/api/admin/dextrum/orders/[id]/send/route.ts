@@ -126,8 +126,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     // Log phone normalization in order metadata
     if (phoneResult.changed || phoneResult.warning) {
       try {
+        const orderService = req.scope.resolve(Modules.ORDER) as any
         const existingMeta = (order as any).metadata || {}
-        await orderModuleService.updateOrders([{
+        await orderService.updateOrders([{
           id: medusaOrderId,
           metadata: {
             ...existingMeta,
