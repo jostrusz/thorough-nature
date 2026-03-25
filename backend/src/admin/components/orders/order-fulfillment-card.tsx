@@ -229,6 +229,8 @@ export function OrderFulfillmentCard({
   const items = order.items || []
   const currency = order.currency_code
   const hasFulfillments = order.fulfillments && order.fulfillments.length > 0
+  const dextrumStatus = (order.metadata?.dextrum_status || "").toUpperCase()
+  const isDispatched = ["DISPATCHED", "IN_TRANSIT", "DELIVERED", "COMPLETED"].includes(dextrumStatus)
   const shippingMethod =
     order.shipping_methods?.[0]?.name ||
     order.shipping_methods?.[0]?.shipping_option_id ||
@@ -522,8 +524,8 @@ export function OrderFulfillmentCard({
         </div>
       )}
 
-      {/* Action buttons — premium row */}
-      {!hasFulfillments && (
+      {/* Action buttons — premium row (hidden when already dispatched via Dextrum or fulfilled via Medusa) */}
+      {!hasFulfillments && !isDispatched && (
         <div
           style={{
             display: "flex",
