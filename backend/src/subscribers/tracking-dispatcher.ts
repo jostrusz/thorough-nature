@@ -262,6 +262,102 @@ export default async function trackingDispatcherHandler({
     logger.info(
       `[Tracking Dispatcher] Order ${order.id} tracking dispatched to ${providerId}`
     )
+
+    // ─── Step 3: Send shipment notification email to customer ─────────
+    // Delay 5 seconds to allow all metadata to settle (multiple events may arrive close together)
+    if (!order.metadata?.shipment_email_sent && trackingNumber) {
+      setTimeout(async () => {
+        try {
+          // Re-read order to get latest metadata (may have been updated by concurrent events)
+          const freshOrder = await orderModuleService.retrieveOrder(orderId, {
+            relations: ["items", "shipping_address"],
+          })
+
+          // Double-check: status is DISPATCHED, tracking exists, email not yet sent
+          if (freshOrder.metadata?.shipment_email_sent) {
+            logger.info(`[Tracking Dispatcher] Shipment email already sent for order ${orderId}, skipping`)
+            return
+          }
+          if (freshOrder.metadata?.dextrum_status !== "DISPATCHED") return
+          const freshTracking = freshOrder.metadata?.dextrum_tracking_number
+          if (!freshTracking) return
+
+          // Mark email as sent FIRST to prevent duplicates
+          await orderModuleService.updateOrders([{
+            id: orderId,
+            metadata: { ...freshOrder.metadata, shipment_email_sent: true, shipment_email_sent_at: new Date().toISOString() },
+          }])
+
+          // Resolve shipping address
+          let shippingAddress: any = freshOrder.shipping_address
+          try {
+            if (shippingAddress?.id) {
+              shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(shippingAddress.id)
+            }
+          } catch { /* keep existing */ }
+
+          // Build tracking URL
+          const freshCarrier = freshOrder.metadata?.dextrum_carrier || "GLS"
+          const freshTrackingUrl = freshOrder.metadata?.dextrum_tracking_url || buildTrackingUrl(freshCarrier, freshTracking)
+
+          // Get project-specific email config
+          const { getProjectEmailConfig, getEmailSubject } = require("../utils/project-email-config")
+          const { EmailTemplates, resolveTemplateKey } = require("../modules/email-notifications/templates")
+          const { resolveBillingEntity } = require("../utils/resolve-billing-entity")
+          const { logEmailActivity } = require("../utils/email-logger")
+          const { renderEmailToHtml } = require("../utils/render-email-html")
+          const { Modules } = require("@medusajs/framework/utils")
+
+          const notificationService = container.resolve(Modules.NOTIFICATION) as any
+          const projectConfig = getProjectEmailConfig(freshOrder)
+          const templateKey = resolveTemplateKey(EmailTemplates.SHIPMENT_NOTIFICATION, projectConfig.project)
+          const displayId = freshOrder.metadata?.custom_order_number || freshOrder.display_id || freshOrder.id
+          const emailSubject = getEmailSubject(projectConfig, "shipmentSent", { id: String(displayId) })
+          const emailPreview = getEmailSubject(projectConfig, "shipmentPreview")
+
+          // Resolve billing entity for footer
+          let billingEntity: any = null
+          try { billingEntity = await resolveBillingEntity(container, orderId) } catch { /* ok */ }
+
+          // Send the email
+          await notificationService.createNotifications({
+            to: freshOrder.email,
+            channel: "email",
+            template: templateKey,
+            ...(projectConfig.fromEmail ? { from: projectConfig.fromEmail } : {}),
+            data: {
+              emailOptions: { replyTo: projectConfig.replyTo, subject: emailSubject },
+              order: freshOrder,
+              shippingAddress,
+              trackingNumber: freshTracking,
+              trackingUrl: freshTrackingUrl,
+              trackingCompany: freshCarrier,
+              billingEntity,
+              preview: emailPreview,
+            },
+          })
+
+          // Log email activity in order timeline
+          const htmlBody = await renderEmailToHtml(templateKey, {
+            order: freshOrder, shippingAddress, trackingNumber: freshTracking,
+            trackingUrl: freshTrackingUrl, trackingCompany: freshCarrier,
+            billingEntity, preview: emailPreview,
+          }).catch(() => "")
+
+          await logEmailActivity(orderModuleService, orderId, {
+            template: "shipment_notification",
+            subject: emailSubject,
+            to: freshOrder.email,
+            status: "sent",
+            ...(htmlBody ? { html_body: htmlBody } : {}),
+          }).catch(() => {})
+
+          logger.info(`[Tracking Dispatcher] ✅ Shipment email sent to ${freshOrder.email} for order ${displayId} (tracking: ${freshTracking})`)
+        } catch (emailErr: any) {
+          logger.error(`[Tracking Dispatcher] ❌ Failed to send shipment email for order ${orderId}: ${emailErr.message}`)
+        }
+      }, 5000) // 5 second delay
+    }
   } catch (error: any) {
     logger.error(`[Tracking Dispatcher] Error: ${error.message}`)
   }
