@@ -106,7 +106,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
     // Log full body for dispatch/delivery events to debug tracking info
     if (["12", "29"].includes(eventType)) {
-      console.log(`[mySTOCK Webhook] Event ${eventType} full body:`, JSON.stringify(event).slice(0, 1000))
+      console.log(`[mySTOCK Webhook] Event ${eventType} docCode=${documentCode} eventTime=${event.eventTime || "?"} full body:`, JSON.stringify(event).slice(0, 1000))
     }
 
     let orderMap = null
@@ -150,7 +150,32 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const previousStatus = orderMap?.delivery_status || null
     const now = new Date().toISOString()
 
-    // 4. Update dextrum_order_map
+    // 4. Validate status transition — prevent impossible jumps
+    const STATUS_ORDER: Record<string, number> = {
+      IMPORTED: 1, PROCESSED: 2, PACKED: 3, DISPATCHED: 4, IN_TRANSIT: 5, DELIVERED: 6, CANCELLED: 99,
+    }
+    const prevRank = STATUS_ORDER[previousStatus || ""] || 0
+    const newRank = STATUS_ORDER[newStatus] || 0
+
+    // Skip if new status is behind or equal to current (except CANCELLED which always applies)
+    if (orderMap && newStatus && newStatus !== "CANCELLED" && newRank <= prevRank) {
+      console.log(`[mySTOCK Webhook] Event ${event.eventId} type=${eventType} — skipping status ${newStatus} (rank ${newRank}), order ${orderMap.mystock_order_code} already at ${previousStatus} (rank ${prevRank})`)
+      // Still log the event but don't update the order
+      await dextrumService.createDextrumEventLogs({
+        event_id: event.eventId,
+        event_type: eventType,
+        event_subtype: eventSubtype || null,
+        document_code: documentCode || null,
+        document_id: documentId || null,
+        raw_payload: JSON.stringify(event).slice(0, 4000),
+        status: "SKIPPED",
+        processed_at: now,
+      })
+      res.json({ data: { id: event.eventId }, errors: [] })
+      return
+    }
+
+    // 5. Update dextrum_order_map
     if (orderMap && newStatus) {
       const updateData: any = {
         delivery_status: newStatus,
