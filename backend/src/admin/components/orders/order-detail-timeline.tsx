@@ -305,6 +305,8 @@ export function OrderDetailTimeline({
       CANCELLED: "Dextrum: Cancelled",
       RESENT: "Dextrum: Resent to warehouse",
       FAILED: "Dextrum: Failed",
+      PHONE_NORMALIZED: "📞 Phone normalized",
+      PHONE_MISSING: "⚠️ No phone number",
     }
     events.push({
       date: entry.date || order.updated_at || order.created_at,
