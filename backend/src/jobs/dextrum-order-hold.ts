@@ -215,11 +215,17 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           phone: phoneResult.normalized,
           email: (order as any).email || "",
         }
-        // Log phone normalization in order metadata for timeline
+        // Log phone normalization in order timeline
         if (phoneResult.changed || phoneResult.warning) {
           try {
             const orderService = container.resolve("order") as any
             const existingMeta = (order as any).metadata || {}
+            const dextrumTimeline = Array.isArray(existingMeta.dextrum_timeline) ? [...existingMeta.dextrum_timeline] : []
+            dextrumTimeline.push({
+              status: phoneResult.changed ? "PHONE_NORMALIZED" : "PHONE_MISSING",
+              date: new Date().toISOString(),
+              detail: phoneResult.warning || `Phone: ${phoneResult.normalized}`,
+            })
             await orderService.updateOrders([{
               id: (order as any).id,
               metadata: {
@@ -231,6 +237,7 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
                   warning: phoneResult.warning || null,
                   timestamp: new Date().toISOString(),
                 },
+                dextrum_timeline: dextrumTimeline,
               },
             }])
           } catch { /* non-critical */ }

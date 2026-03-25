@@ -123,11 +123,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       phone: phoneResult.normalized,
       email: (order as any).email || "",
     }
-    // Log phone normalization in order metadata
+    // Log phone normalization in order timeline
     if (phoneResult.changed || phoneResult.warning) {
       try {
         const orderService = req.scope.resolve(Modules.ORDER) as any
         const existingMeta = (order as any).metadata || {}
+        const dextrumTimeline = Array.isArray(existingMeta.dextrum_timeline) ? [...existingMeta.dextrum_timeline] : []
+        dextrumTimeline.push({
+          status: phoneResult.changed ? "PHONE_NORMALIZED" : "PHONE_MISSING",
+          date: new Date().toISOString(),
+          detail: phoneResult.warning || `Phone: ${phoneResult.normalized}`,
+        })
         await orderService.updateOrders([{
           id: medusaOrderId,
           metadata: {
@@ -139,6 +145,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
               warning: phoneResult.warning || null,
               timestamp: new Date().toISOString(),
             },
+            dextrum_timeline: dextrumTimeline,
           },
         }])
       } catch { /* non-critical */ }
