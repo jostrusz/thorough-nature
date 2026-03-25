@@ -1642,6 +1642,12 @@ body {
   background: rgba(39,174,96,0.08); padding: 1px 6px; border-radius: 4px;
   display: inline-block; margin-top: 2px;
 }
+.bundle-original-price {
+  font-size: 13px; color: var(--muted); text-decoration: line-through; margin-top: 2px;
+}
+.bundle-ebooks-note {
+  font-size: 11px; color: var(--muted); margin-top: 2px;
+}
 
 /* ─── ORDER BUMP — accordion ─── */
 .order-bump {
@@ -2548,7 +2554,7 @@ body {
         <div class="bundle-section animate-in" id="bundle-section">
           <div class="bundle-section-title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-            Kies je aantal
+            Kies je pakket
           </div>
           <div class="bundle-options" id="bundle-options">
             <!-- Dynamicky generováno z JS -->
@@ -3070,11 +3076,7 @@ body {
     </div>
     <p style="font-size:11px;color:#999;line-height:1.4;margin:2px 0 0 0;text-align:center;">Door met uw kaart te betalen, erkent u dat uw gegevens worden verwerkt door PayPal in overeenstemming met het Privacybeleid van PayPal, beschikbaar op <a href="https://www.paypal.com/legalhub/privacy-full" target="_blank" rel="noopener" style="color:#999;text-decoration:underline;">PayPal.com</a>.</p>
   </div>
-  <div class="checkout-footer-links">
-    &copy; 2026 De Hondenbijbel · Lars Vermeulen<br>
-    <a href="voorwaarden.html">Algemene voorwaarden</a> · <a href="privacy.html">Privacybeleid</a> · <a href="retourbeleid.html">Retourbeleid</a> · <a href="verzending.html">Verzending &amp; Levering</a>
   </div>
-</div>
   </div><!-- /checkout-grid -->
   </div><!-- /checkout-right-col -->
   </div><!-- /checkout-two-col -->
@@ -3120,6 +3122,14 @@ body {
       </div>
     </div>
   </div>
+
+  <!-- ═══ FOOTER ═══ -->
+  <div class="checkout-footer-links" style="max-width:1200px;margin:32px auto 0;padding:24px 20px;border-top:1px solid #E5E7EB;text-align:center;">
+    &copy; 2026 De Hondenbijbel · Lars Vermeulen<br>
+    <a href="voorwaarden.html">Algemene voorwaarden</a> · <a href="privacy.html">Privacybeleid</a> · <a href="retourbeleid.html">Retourbeleid</a> · <a href="verzending.html">Verzending &amp; Levering</a>
+  </div>
+
+</div><!-- /checkout-page -->
 
 <!-- ═══ JAVASCRIPT ═══ -->
 <script>
@@ -3279,8 +3289,8 @@ body {
       html += '</div>';
       html += '<div class="bundle-pricing">';
       html += '<div class="bundle-price">' + formatPrice(opt.price) + '</div>';
-      if (opt.qty > 1) html += '<div class="bundle-per-unit">€' + perUnit + ' per boek</div>';
-      if (opt.savings > 0) html += '<div class="bundle-savings">Bespaar ' + formatPrice(opt.savings) + '</div>';
+      var originalPrice = opt.qty * 35;
+      if (opt.savings > 0) html += '<div class="bundle-original-price">€' + originalPrice.toFixed(2).replace('.', ',') + '</div>';
       html += '</div>';
       html += '</label>';
     });
