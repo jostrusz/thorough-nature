@@ -66,3 +66,37 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     res.status(500).json({ error: error.message, path: req.query.path })
   }
 }
+
+/**
+ * POST /admin/dextrum/debug — Bulk fix order statuses and tracking
+ * Body: { fixes: [{ id: "orderMapId", delivery_status: "DELIVERED", tracking_number: "123" }] }
+ */
+export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
+  try {
+    const dextrumService = req.scope.resolve(DEXTRUM_MODULE) as any
+    const { fixes } = req.body as any
+    if (!fixes || !Array.isArray(fixes)) {
+      res.status(400).json({ error: "Missing fixes array" })
+      return
+    }
+    const results = []
+    for (const fix of fixes) {
+      try {
+        const updateData: any = {}
+        if (fix.delivery_status) updateData.delivery_status = fix.delivery_status
+        if (fix.tracking_number) updateData.tracking_number = fix.tracking_number
+        if (fix.carrier_name) updateData.carrier_name = fix.carrier_name
+        if (fix.delivery_status === "DELIVERED") updateData.delivered_at = new Date().toISOString()
+        if (fix.delivery_status === "DISPATCHED") updateData.dispatched_at = new Date().toISOString()
+        updateData.delivery_status_updated_at = new Date().toISOString()
+        await dextrumService.updateDextrumOrderMaps({ id: fix.id, ...updateData })
+        results.push({ id: fix.id, status: "ok" })
+      } catch (err: any) {
+        results.push({ id: fix.id, status: "error", message: err.message })
+      }
+    }
+    res.json({ fixed: results.length, results })
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+}
