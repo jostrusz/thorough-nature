@@ -104,18 +104,23 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const eventType = String(event.eventType || event.type || "")
     const eventSubtype = String(event.eventSubtype || event.subtype || "")
 
+    // Log ALL events with documentCode/documentId for matching debugging
+    console.log(`[mySTOCK Webhook] Event ${event.eventId} type=${eventType} sub=${eventSubtype || "-"} docCode=${documentCode || "?"} docId=${documentId || "?"} time=${event.eventTime || "?"}`)
+
     // Log full body for dispatch/delivery events to debug tracking info
     if (["12", "29"].includes(eventType)) {
-      console.log(`[mySTOCK Webhook] Event ${eventType} docCode=${documentCode} eventTime=${event.eventTime || "?"} full body:`, JSON.stringify(event).slice(0, 1000))
+      console.log(`[mySTOCK Webhook] Event ${eventType} FULL BODY:`, JSON.stringify(event).slice(0, 2000))
     }
 
     let orderMap = null
+    let matchedBy = "none"
     if (documentId) {
       const maps = await dextrumService.listDextrumOrderMaps(
         { mystock_order_id: documentId },
         { take: 1 }
       )
       orderMap = maps[0]
+      if (orderMap) matchedBy = "documentId"
     }
     if (!orderMap && documentCode) {
       const maps = await dextrumService.listDextrumOrderMaps(
@@ -123,7 +128,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         { take: 1 }
       )
       orderMap = maps[0]
+      if (orderMap) matchedBy = "documentCode"
     }
+    console.log(`[mySTOCK Webhook] Match: ${matchedBy} → order=${orderMap?.mystock_order_code || "NOT FOUND"} (medusa=${orderMap?.medusa_order_id || "?"}) currentStatus=${orderMap?.delivery_status || "?"}`)
 
     // 3. Determine new delivery status
     let newStatus = ""
