@@ -522,7 +522,7 @@ const DextrumPage = () => {
             <span style={labelStyle}>Webhook URL</span>
             <div style={{ flex: 1 }}>
               <code style={{ fontSize: "12px", color: "#3730A3", background: "#F6F6F7", padding: "6px 10px", borderRadius: "4px", display: "block" }}>
-                {typeof window !== "undefined" ? `${window.location.origin}/V1/event` : "/V1/event"}
+                https://backend-production-aefbc.up.railway.app/V1/event
               </code>
               <span style={{ fontSize: "11px", color: "#8C9196", marginTop: "4px", display: "block" }}>
                 Give this URL to mySTOCK as your event endpoint (must end with /V1/event per mySTOCK docs)
