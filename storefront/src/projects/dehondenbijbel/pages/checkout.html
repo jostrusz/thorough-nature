@@ -69,7 +69,7 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
 
 /* ─── DESIGN TOKENS — De Hondenbijbel (consistent with landing page) ─── */
 :root {
-  --bg: #FFFAF5;
+  --bg: #FFFFFF;
   --heading: #1A1A1A;
   --cta: #DC3522;
   --section: #F3E8FF;
@@ -98,7 +98,7 @@ html { scroll-behavior: smooth; }
 html, body { overflow-x: clip; max-width: 100vw; }
 body {
   font-family: 'Cabin', sans-serif;
-  background: linear-gradient(180deg, #FFF8F0 0%, #FFF3E8 50%, #FFEDDB 100%);
+  background: #ffffff;
   background-attachment: fixed;
   color: var(--body);
   min-height: 100vh;
@@ -2128,6 +2128,189 @@ body {
 .paypal-provider #card-holder iframe:hover {
   border-color: rgba(107,33,168,0.35) !important;
 }
+
+/* ─── PRE-CHECKOUT: HEADING, IMAGE, BENEFITS, REVIEWS ─── */
+.pre-checkout-section {
+  max-width: 800px;
+  margin: 0 auto 32px;
+  padding: 0 16px;
+}
+
+.nadpisekH2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #1A1A1A;
+  text-align: center;
+  margin-bottom: 24px;
+}
+.nadpisekH2 span {
+  color: var(--cta);
+}
+
+.product-hero-img {
+  display: block;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto 28px;
+  border-radius: 12px;
+}
+
+/* Benefit box */
+.benefit-box {
+  background: #FAFAFA;
+  border: 2px solid #E5E7EB;
+  border-radius: 14px;
+  padding: 28px 24px;
+  margin-bottom: 28px;
+}
+.benefit-box-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.benefit-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+}
+.benefit-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #F0F0F0;
+  font-size: 15px;
+  color: #374151;
+}
+.benefit-list li:last-child {
+  border-bottom: none;
+}
+.benefit-list li .benefit-check {
+  color: #27AE60;
+  font-size: 18px;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+.benefit-list li .benefit-name {
+  flex: 1;
+}
+.benefit-list li .benefit-price {
+  font-weight: 600;
+  color: #6B7280;
+  text-decoration: line-through;
+  margin-left: 12px;
+  white-space: nowrap;
+}
+.benefit-value-calc {
+  text-align: center;
+  padding: 18px 0 4px;
+  border-top: 2px dashed #E5E7EB;
+}
+.benefit-value-calc .original-price {
+  font-size: 16px;
+  color: #6B7280;
+  text-decoration: line-through;
+}
+.benefit-value-calc .sale-price {
+  font-family: 'Inter', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--cta);
+  display: block;
+  margin: 4px 0;
+}
+.benefit-value-calc .save-amount {
+  font-size: 15px;
+  font-weight: 600;
+  color: #27AE60;
+  background: #ECFDF5;
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+}
+
+/* Reviews grid */
+.reviews-section {
+  margin-bottom: 28px;
+}
+.reviews-section-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1A1A;
+  text-align: center;
+  margin-bottom: 18px;
+}
+.reviews-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.review-card {
+  background: #FAFAFA;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.review-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.review-card-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.review-card-name {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #1A1A1A;
+}
+.review-card-stars {
+  color: #F59E0B;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+.review-card-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4B5563;
+}
+.review-card-verified {
+  font-size: 12px;
+  color: #27AE60;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@media (max-width: 600px) {
+  .nadpisekH2 {
+    font-size: 22px;
+  }
+  .reviews-grid {
+    grid-template-columns: 1fr;
+  }
+  .product-hero-img {
+    max-width: 320px;
+  }
+  .benefit-box {
+    padding: 20px 16px;
+  }
+}
 </style>
 
 <!-- ═══ PROJEKT KONFIGURACE + FACEBOOK PIXEL ═══ -->
@@ -2215,6 +2398,153 @@ body {
       </div>
       <div class="msb-tax-note">Inclusief BTW</div>
     </div>
+  </div>
+
+  <!-- ═══ PRE-CHECKOUT: HEADING, IMAGE, BENEFITS, REVIEWS ═══ -->
+  <div class="pre-checkout-section">
+
+    <h2 class="nadpisekH2">Bestel nu het boek <span>"De Hondenbijbel"</span> met gratis verzending en &euro;65 korting op het totale pakket</h2>
+
+    <img class="product-hero-img" src="https://assets.lightfunnels.com/account-85759/images_library/a040645b-f252-41bc-95f8-8d8679be239f.lars%20vermeulen%20dehondenbijbel.webp" alt="De Hondenbijbel boekpakket" loading="eager">
+
+    <div class="benefit-box">
+      <div class="benefit-box-title">Wat zit er in het pakket?</div>
+      <ul class="benefit-list">
+        <li>
+          <span class="benefit-check">&#10003;</span>
+          <span class="benefit-name">De Hondenbijbel (fysiek boek, 247 pagina's)</span>
+          <span class="benefit-price">&euro;49,00</span>
+        </li>
+        <li>
+          <span class="benefit-check">&#10003;</span>
+          <span class="benefit-name">Bonus 1: Top 20 Hondenrassen Gids (e-book)</span>
+          <span class="benefit-price">&euro;30,00</span>
+        </li>
+        <li>
+          <span class="benefit-check">&#10003;</span>
+          <span class="benefit-name">Bonus 2: De 10 Grootste Hondenproblemen Opgelost (e-book)</span>
+          <span class="benefit-price">&euro;30,00</span>
+        </li>
+        <li>
+          <span class="benefit-check">&#10003;</span>
+          <span class="benefit-name">Bonus 3: Lang Leve Mijn Hond - Gezondheid &amp; Levensduur (e-book)</span>
+          <span class="benefit-price">&euro;30,00</span>
+        </li>
+        <li>
+          <span class="benefit-check">&#10003;</span>
+          <span class="benefit-name">Bonus 4: Puppy Checklist (e-book)</span>
+          <span class="benefit-price">&euro;30,00</span>
+        </li>
+        <li>
+          <span class="benefit-check">&#10003;</span>
+          <span class="benefit-name">Gratis verzending via GLS</span>
+          <span class="benefit-price">&euro;0,00</span>
+        </li>
+      </ul>
+      <div class="benefit-value-calc">
+        <span class="original-price">Totale waarde: &euro;169,00</span>
+        <span class="sale-price">Nu slechts &euro;35,00</span>
+        <span class="save-amount">Je bespaart &euro;134,00</span>
+      </div>
+    </div>
+
+    <div class="reviews-section">
+      <div class="reviews-section-title">Wat andere hondeneigenaren zeggen</div>
+      <div class="reviews-grid">
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <img class="review-card-avatar" src="/dehondenbijbel/images/review-honden-pichi.webp" alt="Sophie">
+            <div>
+              <div class="review-card-name">Sophie de Vries</div>
+              <div class="review-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            </div>
+          </div>
+          <div class="review-card-text">"Eindelijk een boek dat echt alles uitlegt! Mijn puppy luistert nu zoveel beter. De bonussen zijn ook super handig."</div>
+          <div class="review-card-verified">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#27AE60" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            Geverifieerde koper
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <img class="review-card-avatar" src="/dehondenbijbel/images/review-hondsagfsa-pichi.webp" alt="Mark">
+            <div>
+              <div class="review-card-name">Mark Jansen</div>
+              <div class="review-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            </div>
+          </div>
+          <div class="review-card-text">"Als eerste-keer hondeneigenaar was dit boek een redding. Duidelijke stappen en het werkt echt. Aanrader!"</div>
+          <div class="review-card-verified">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#27AE60" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            Geverifieerde koper
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <img class="review-card-avatar" src="/dehondenbijbel/images/review-jhdgabjhsgakjs-pichi.webp" alt="Lisa">
+            <div>
+              <div class="review-card-name">Lisa van den Berg</div>
+              <div class="review-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            </div>
+          </div>
+          <div class="review-card-text">"Mijn hond trok altijd aan de lijn. Na het lezen van De Hondenbijbel lopen we nu ontspannen. Heel blij mee!"</div>
+          <div class="review-card-verified">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#27AE60" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            Geverifieerde koper
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <img class="review-card-avatar" src="/dehondenbijbel/images/review-jkshajks-pichi.webp" alt="Tom">
+            <div>
+              <div class="review-card-name">Tom Bakker</div>
+              <div class="review-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            </div>
+          </div>
+          <div class="review-card-text">"De bonussen alleen zijn al het geld waard. De gezondheids-gids heeft me echt geholpen met de voeding van mijn hond."</div>
+          <div class="review-card-verified">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#27AE60" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            Geverifieerde koper
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <img class="review-card-avatar" src="/dehondenbijbel/images/review-john-hondenbijbel-vertical-pichi.webp" alt="Emma">
+            <div>
+              <div class="review-card-name">Emma Visser</div>
+              <div class="review-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            </div>
+          </div>
+          <div class="review-card-text">"Geweldig boek! Overzichtelijk en praktisch. Ik gebruik het elke dag als naslagwerk voor mijn twee honden."</div>
+          <div class="review-card-verified">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#27AE60" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            Geverifieerde koper
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <img class="review-card-avatar" src="/dehondenbijbel/images/review-lasja.webp" alt="Jasper">
+            <div>
+              <div class="review-card-name">Jasper de Groot</div>
+              <div class="review-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            </div>
+          </div>
+          <div class="review-card-text">"Na jaren worstelen met gedragsproblemen bracht dit boek de oplossing. Lars legt alles helder uit. Top!"</div>
+          <div class="review-card-verified">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#27AE60" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            Geverifieerde koper
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 
   <div class="checkout-grid">
