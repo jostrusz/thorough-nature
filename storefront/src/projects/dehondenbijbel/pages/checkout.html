@@ -2137,16 +2137,29 @@ body {
 }
 
 .nadpisekH2 {
-  font-family: 'Inter', sans-serif;
-  font-size: 28px;
-  font-weight: 800;
-  line-height: 1.25;
-  color: #1A1A1A;
-  text-align: center;
-  margin-bottom: 24px;
+  font-family: 'Inter', Arial, sans-serif !important;
+  font-size: 32px !important;
+  line-height: 1.4 !important;
+  font-weight: 400 !important;
+  color: #1a1a1a !important;
+  margin: 0 0 24px 0 !important;
+  text-align: center !important;
 }
-.nadpisekH2 span {
-  color: var(--cta);
+.nadpisekH2 .highlight {
+  background: linear-gradient(135deg, #E8EAF6 0%, #C5CAE9 100%) !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  color: #4A148C !important;
+  font-weight: 900 !important;
+  font-style: normal !important;
+}
+.nadpisekH2 .highlight-yellow {
+  background: linear-gradient(135deg, #FFD93D 0%, #F9C74F 100%) !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  color: #160926 !important;
+  font-weight: 900 !important;
+  font-style: italic !important;
 }
 
 .product-hero-img {
@@ -2159,157 +2172,193 @@ body {
 
 /* Benefit box */
 .benefit-box {
-  background: #FAFAFA;
-  border: 2px solid #E5E7EB;
-  border-radius: 14px;
-  padding: 28px 24px;
-  margin-bottom: 28px;
+  background: linear-gradient(180deg, #E8EAF6 0%, #F8F9FF 100%);
+  border: 3px dashed #C5CAE9;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(74, 20, 140, 0.1);
+  max-width: 800px;
+  margin: 0 auto 28px;
+  transition: all 0.3s ease;
 }
-.benefit-box-title {
-  font-family: 'Inter', sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  color: #1A1A1A;
-  margin-bottom: 16px;
-  text-align: center;
+.benefit-box:hover {
+  background: linear-gradient(180deg, #D1D5F0 0%, #E8EAF6 100%);
+  border-color: #4A148C;
+  box-shadow: 0 8px 28px rgba(74, 20, 140, 0.2);
+  transform: translateY(-2px);
 }
-.benefit-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 20px;
+.benefit-box ul {
+  margin: 0 !important;
+  padding: 0 0 0 4px !important;
+  list-style: none !important;
 }
-.benefit-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid #F0F0F0;
-  font-size: 15px;
-  color: #374151;
+.benefit-box li {
+  font-family: 'Inter', Arial, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: #1a1a1a !important;
+  margin-bottom: 14px !important;
 }
-.benefit-list li:last-child {
-  border-bottom: none;
+.benefit-box li strong {
+  font-weight: 700 !important;
+  color: #4A148C !important;
 }
-.benefit-list li .benefit-check {
-  color: #27AE60;
-  font-size: 18px;
-  margin-right: 10px;
-  flex-shrink: 0;
-}
-.benefit-list li .benefit-name {
-  flex: 1;
-}
-.benefit-list li .benefit-price {
-  font-weight: 600;
-  color: #6B7280;
-  text-decoration: line-through;
-  margin-left: 12px;
-  white-space: nowrap;
-}
-.benefit-value-calc {
-  text-align: center;
-  padding: 18px 0 4px;
-  border-top: 2px dashed #E5E7EB;
-}
-.benefit-value-calc .original-price {
-  font-size: 16px;
-  color: #6B7280;
-  text-decoration: line-through;
-}
-.benefit-value-calc .sale-price {
-  font-family: 'Inter', sans-serif;
-  font-size: 32px;
-  font-weight: 800;
-  color: var(--cta);
-  display: block;
-  margin: 4px 0;
-}
-.benefit-value-calc .save-amount {
-  font-size: 15px;
-  font-weight: 600;
-  color: #27AE60;
-  background: #ECFDF5;
+.benefit-box li:last-child { margin-bottom: 0 !important; }
+.price-tag {
   display: inline-block;
-  padding: 4px 14px;
+  background: linear-gradient(135deg, #4A148C 0%, #7B1FA2 100%);
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  padding: 4px 12px;
   border-radius: 20px;
+  margin-left: 8px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(74, 20, 140, 0.3);
+}
+.value-separator {
+  border-top: 2px solid #C5CAE9;
+  margin: 24px 0 20px 0;
+}
+.value-calculation {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 20px;
+}
+.total-value, .your-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-family: 'Inter', Arial, sans-serif !important;
+}
+.total-value .label, .your-price .label {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+}
+.total-value .amount {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  color: #666 !important;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+.your-price .amount {
+  font-size: 32px !important;
+  font-weight: 900 !important;
+  color: #4A148C !important;
+}
+.savings { text-align: center; margin-top: 16px; }
+.savings-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #1a1a1a !important;
+  font-family: 'Inter', Arial, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  padding: 12px 24px;
+  border-radius: 30px;
+  box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
+  animation: pulse-savings 2s ease-in-out infinite;
+}
+@keyframes pulse-savings {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 /* Reviews grid */
-.reviews-section {
-  margin-bottom: 28px;
-}
-.reviews-section-title {
-  font-family: 'Inter', sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  color: #1A1A1A;
-  text-align: center;
-  margin-bottom: 18px;
-}
 .reviews-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
+  margin: 0 0 28px;
 }
 .review-card {
-  background: #FAFAFA;
-  border: 1px solid #E5E7EB;
-  border-radius: 12px;
-  padding: 18px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-.review-card-header {
-  display: flex;
   align-items: center;
-  gap: 12px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
 }
-.review-card-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
+.review-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #4A148C, #7B1FA2, #9C27B0);
 }
-.review-card-name {
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  color: #1A1A1A;
+.review-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 30px rgba(74, 20, 140, 0.15);
 }
-.review-card-stars {
-  color: #F59E0B;
-  font-size: 14px;
-  letter-spacing: 1px;
+.review-image {
+  width: 120px !important;
+  height: 120px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 5px solid #E8EAF6 !important;
+  margin-bottom: 20px !important;
+  box-shadow: 0 4px 15px rgba(74, 20, 140, 0.2) !important;
 }
-.review-card-text {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #4B5563;
+.review-card:hover .review-image { transform: scale(1.05); border-color: #4A148C !important; }
+.stars { font-size: 22px; margin-bottom: 10px; letter-spacing: 2px; }
+.reviewer-name {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: #4A148C !important;
+  margin: 0 0 15px 0 !important;
 }
-.review-card-verified {
-  font-size: 12px;
-  color: #27AE60;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.review-text {
+  font-family: 'Inter', Arial, sans-serif !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  color: #2d3748 !important;
+  margin: 0 !important;
+  background: linear-gradient(135deg, rgba(232, 234, 246, 0.3), rgba(232, 234, 246, 0.1)) !important;
+  padding: 20px !important;
+  border-radius: 15px !important;
+  border-left: 4px solid #7B1FA2 !important;
+  text-align: left !important;
+  position: relative !important;
 }
+.review-text::before {
+  content: '\201C';
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  font-size: 60px;
+  color: #E8EAF6;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+.review-text strong { color: #4A148C; font-weight: 600; }
+.review-text em { font-style: italic; color: #5E35B1; }
+.review-text u { text-decoration: none; border-bottom: 2px solid #9C27B0; padding-bottom: 2px; }
 
 @media (max-width: 600px) {
-  .nadpisekH2 {
-    font-size: 22px;
-  }
-  .reviews-grid {
-    grid-template-columns: 1fr;
-  }
-  .product-hero-img {
-    max-width: 320px;
-  }
-  .benefit-box {
-    padding: 20px 16px;
-  }
+  .nadpisekH2 { font-size: 28px !important; }
+  .reviews-grid { grid-template-columns: 1fr; }
+  .product-hero-img { max-width: 320px; }
+  .benefit-box { padding: 16px; border-width: 2px; }
+  .benefit-box li { font-size: 14px !important; }
+  .price-tag { display: block; margin-left: 0; margin-top: 6px; width: fit-content; font-size: 12px !important; }
+  .total-value .label, .your-price .label { font-size: 15px !important; }
+  .your-price .amount { font-size: 24px !important; }
+  .savings-badge { font-size: 13px !important; padding: 10px 16px; }
+  .review-card { padding: 25px; }
+  .review-image { width: 110px !important; height: 110px !important; }
+  .reviewer-name { font-size: 18px !important; }
+  .review-text { font-size: 14px !important; padding: 18px !important; }
 }
 </style>
 
@@ -2403,145 +2452,77 @@ body {
   <!-- ═══ PRE-CHECKOUT: HEADING, IMAGE, BENEFITS, REVIEWS ═══ -->
   <div class="pre-checkout-section">
 
-    <h2 class="nadpisekH2">Bestel nu het boek <span>"De Hondenbijbel"</span> met gratis verzending en &euro;65 korting op het totale pakket</h2>
+    <h2 class="nadpisekH2">
+      Bestel nu het boek <span class="highlight">"De Hondenbijbel"</span>
+      <br>met <span class="highlight-yellow">gratis verzending en &euro;65 korting op het totale pakket</span>
+    </h2>
 
     <img class="product-hero-img" src="https://assets.lightfunnels.com/account-85759/images_library/a040645b-f252-41bc-95f8-8d8679be239f.lars%20vermeulen%20dehondenbijbel.webp" alt="De Hondenbijbel boekpakket" loading="eager">
 
     <div class="benefit-box">
-      <div class="benefit-box-title">Wat zit er in het pakket?</div>
-      <ul class="benefit-list">
-        <li>
-          <span class="benefit-check">&#10003;</span>
-          <span class="benefit-name">De Hondenbijbel (fysiek boek, 247 pagina's)</span>
-          <span class="benefit-price">&euro;49,00</span>
-        </li>
-        <li>
-          <span class="benefit-check">&#10003;</span>
-          <span class="benefit-name">Bonus 1: Top 20 Hondenrassen Gids (e-book)</span>
-          <span class="benefit-price">&euro;30,00</span>
-        </li>
-        <li>
-          <span class="benefit-check">&#10003;</span>
-          <span class="benefit-name">Bonus 2: De 10 Grootste Hondenproblemen Opgelost (e-book)</span>
-          <span class="benefit-price">&euro;30,00</span>
-        </li>
-        <li>
-          <span class="benefit-check">&#10003;</span>
-          <span class="benefit-name">Bonus 3: Lang Leve Mijn Hond - Gezondheid &amp; Levensduur (e-book)</span>
-          <span class="benefit-price">&euro;30,00</span>
-        </li>
-        <li>
-          <span class="benefit-check">&#10003;</span>
-          <span class="benefit-name">Bonus 4: Puppy Checklist (e-book)</span>
-          <span class="benefit-price">&euro;30,00</span>
-        </li>
-        <li>
-          <span class="benefit-check">&#10003;</span>
-          <span class="benefit-name">Gratis verzending via GLS</span>
-          <span class="benefit-price">&euro;0,00</span>
-        </li>
+      <ul>
+        <li>📖 Je ontvangt het fysieke boek <strong>"De Hondenbijbel"</strong> (270+ pagina's) – het complete 4-pijler systeem voor een rustige, gehoorzame hond <span class="price-tag">&euro;97</span></li>
+        <li>🎁 Je ontvangt in je e-mail <strong>Bonus e-book #1: "Langlevendheid begint in de voerbak"</strong> – ontdek hoe voeding het gedrag én de gezondheid van je hond beïnvloedt <span class="price-tag">&euro;22</span></li>
+        <li>🎁 Je ontvangt in je e-mail <strong>Bonus e-book #2: "Waarom Doet Hij Dat? – 100 Hondenproblemen"</strong> – eindelijk begrijp je waarom je hond doet wat hij doet <span class="price-tag">&euro;22</span></li>
+        <li>🎁 Je ontvangt in je e-mail <strong>Bonus e-book #3: "Top 20 Spelletjes die je hond écht moe maken"</strong> – leer spelletjes die je hond mentaal uitputten, zodat hij thuis rustig is <span class="price-tag">&euro;22</span></li>
+        <li>🚚 Je betaalt <strong>geen euro voor verzending</strong> – wij betalen de verzendkosten voor jou <span class="price-tag">&euro;6</span></li>
+        <li>🛡️ Je krijgt een <strong>uitgebreide 30 dagen geld-terug-garantie</strong> – zie je geen verbetering? Elke cent terug, zonder vragen, zonder gedoe</li>
+        <li>⚡ We verzenden binnen <strong>24 uur</strong> naar Nederland 🇳🇱 en België 🇧🇪</li>
+        <li>🐕 <strong>92% van de baasjes</strong> ziet al in de eerste maand echte verandering – minder trekken, minder blaffen en meer rust thuis</li>
+        <li>⭐ <strong>9.2/10 klanttevredenheid</strong> – meer dan 3000+ tevreden klanten</li>
       </ul>
-      <div class="benefit-value-calc">
-        <span class="original-price">Totale waarde: &euro;169,00</span>
-        <span class="sale-price">Nu slechts &euro;35,00</span>
-        <span class="save-amount">Je bespaart &euro;134,00</span>
+      <div class="value-separator"></div>
+      <div class="value-calculation">
+        <div class="total-value">
+          <span class="label">Totale waarde van dit pakket:</span>
+          <span class="amount">&euro;169</span>
+        </div>
+        <div class="your-price">
+          <span class="label">Jouw prijs vandaag:</span>
+          <span class="amount">&euro;35</span>
+        </div>
+        <div class="savings">
+          <span class="savings-badge">✨ JE BESPAART &euro;134 (79% KORTING!) ✨</span>
+        </div>
       </div>
     </div>
 
-    <div class="reviews-section">
-      <div class="reviews-section-title">Wat andere hondeneigenaren zeggen</div>
-      <div class="reviews-grid">
-
-        <div class="review-card">
-          <div class="review-card-header">
-            <img class="review-card-avatar" src="/dehondenbijbel/images/review-honden-pichi.webp" alt="Sophie">
-            <div>
-              <div class="review-card-name">Sophie de Vries</div>
-              <div class="review-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            </div>
-          </div>
-          <div class="review-card-text">"Eindelijk een boek dat echt alles uitlegt! Mijn puppy luistert nu zoveel beter. De bonussen zijn ook super handig."</div>
-          <div class="review-card-verified">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="#27AE60" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            Geverifieerde koper
-          </div>
-        </div>
-
-        <div class="review-card">
-          <div class="review-card-header">
-            <img class="review-card-avatar" src="/dehondenbijbel/images/review-hondsagfsa-pichi.webp" alt="Mark">
-            <div>
-              <div class="review-card-name">Mark Jansen</div>
-              <div class="review-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            </div>
-          </div>
-          <div class="review-card-text">"Als eerste-keer hondeneigenaar was dit boek een redding. Duidelijke stappen en het werkt echt. Aanrader!"</div>
-          <div class="review-card-verified">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="#27AE60" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            Geverifieerde koper
-          </div>
-        </div>
-
-        <div class="review-card">
-          <div class="review-card-header">
-            <img class="review-card-avatar" src="/dehondenbijbel/images/review-jhdgabjhsgakjs-pichi.webp" alt="Lisa">
-            <div>
-              <div class="review-card-name">Lisa van den Berg</div>
-              <div class="review-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            </div>
-          </div>
-          <div class="review-card-text">"Mijn hond trok altijd aan de lijn. Na het lezen van De Hondenbijbel lopen we nu ontspannen. Heel blij mee!"</div>
-          <div class="review-card-verified">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="#27AE60" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            Geverifieerde koper
-          </div>
-        </div>
-
-        <div class="review-card">
-          <div class="review-card-header">
-            <img class="review-card-avatar" src="/dehondenbijbel/images/review-jkshajks-pichi.webp" alt="Tom">
-            <div>
-              <div class="review-card-name">Tom Bakker</div>
-              <div class="review-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            </div>
-          </div>
-          <div class="review-card-text">"De bonussen alleen zijn al het geld waard. De gezondheids-gids heeft me echt geholpen met de voeding van mijn hond."</div>
-          <div class="review-card-verified">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="#27AE60" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            Geverifieerde koper
-          </div>
-        </div>
-
-        <div class="review-card">
-          <div class="review-card-header">
-            <img class="review-card-avatar" src="/dehondenbijbel/images/review-john-hondenbijbel-vertical-pichi.webp" alt="Emma">
-            <div>
-              <div class="review-card-name">Emma Visser</div>
-              <div class="review-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            </div>
-          </div>
-          <div class="review-card-text">"Geweldig boek! Overzichtelijk en praktisch. Ik gebruik het elke dag als naslagwerk voor mijn twee honden."</div>
-          <div class="review-card-verified">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="#27AE60" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            Geverifieerde koper
-          </div>
-        </div>
-
-        <div class="review-card">
-          <div class="review-card-header">
-            <img class="review-card-avatar" src="/dehondenbijbel/images/review-lasja.webp" alt="Jasper">
-            <div>
-              <div class="review-card-name">Jasper de Groot</div>
-              <div class="review-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            </div>
-          </div>
-          <div class="review-card-text">"Na jaren worstelen met gedragsproblemen bracht dit boek de oplossing. Lars legt alles helder uit. Top!"</div>
-          <div class="review-card-verified">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="#27AE60" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            Geverifieerde koper
-          </div>
-        </div>
-
+    <div class="reviews-grid">
+      <div class="review-card">
+        <img src="https://assets.lightfunnels.com/account-85759/images_library/a386887e-bb5e-4a13-bb6c-d3e7dfb77f85.hondsagfsa-pichi.jpg" alt="Daan H." class="review-image">
+        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
+        <h4 class="reviewer-name">Daan H., Utrecht</h4>
+        <p class="review-text">"Wij hadden een husky-teefje, maar helaas <strong>overleed ze op 10-jarige leeftijd</strong> na een operatie. Dat verdriet begrijpt alleen iemand die ooit <em>afscheid heeft moeten nemen van zijn hond</em>. Juist daarom heb ik dit boek gekozen – om <strong>fouten te vermijden</strong> wanneer ik weer een nieuwe hond in mijn leven mag verwelkomen. Op basis van de inhoud lijkt het een <strong><u>zeer nuttig, leerzaam en tegelijkertijd liefdevol boek</u></strong>."</p>
+      </div>
+      <div class="review-card">
+        <img src="https://assets.lightfunnels.com/account-85759/images_library/1967eecc-1a18-42d6-b12d-b3dea3877350.jkshajks-pichi.jpg" alt="Lisa V." class="review-image">
+        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
+        <h4 class="reviewer-name">Lisa V., Utrecht</h4>
+        <p class="review-text">"Een fijn boek voor <strong>alle baasjes van viervoeters</strong>. Het neemt je stap voor stap mee in de vaardigheden, waarneming en zintuigen van je hond, <em>op een manier die je misschien nog niet kende</em>. Je zult zeker veel <strong>leerzame, nieuwe en ook grappige informatie</strong> ontdekken. Met een glimlach raad ik het <strong><u>aan iedereen die een hond heeft</u></strong>! 😊"</p>
+      </div>
+      <div class="review-card">
+        <img src="https://assets.lightfunnels.com/account-85759/images_library/024b1802-94c6-488e-b292-dd995734a675.john-hondenbijbel-vertical-pichi.jpg" alt="Tim R." class="review-image">
+        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
+        <h4 class="reviewer-name">Tim R., Haarlem</h4>
+        <p class="review-text">"Het boek is vandaag aangekomen en <strong>ik ben meteen begonnen met lezen</strong>. Pagina na pagina verslonden! Het boek is uitgebreid, maar <em>gaat diep genoeg in en blijft toch eenvoudig en overzichtelijk</em>. Zelfs na jarenlange ervaring met honden heb ik <strong>nieuwe technieken ontdekt</strong> – en ze werken echt! Van mij krijgt het <strong><u>1000% aanbeveling</u></strong>!"</p>
+      </div>
+      <div class="review-card">
+        <img src="https://assets.lightfunnels.com/account-85759/images_library/3cf087ba-0a12-4435-aa3b-1020bca0a508.honden-pichi.jpg" alt="Sanne T." class="review-image">
+        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
+        <h4 class="reviewer-name">Sanne T., Leiden</h4>
+        <p class="review-text">"Het boek is een <strong>geweldige hulp</strong> om je hond op een <em>eenvoudige en rustige manier</em> de basiscommando's aan te leren. Het is geschreven op een <strong>toegankelijke en duidelijke manier</strong>, met veel aandacht en gevoel. Voor mij persoonlijk is het een enorme steun geweest en heeft het <strong><u>mijn leven met honden naar een hoger niveau getild</u></strong>. Bedankt!"</p>
+      </div>
+      <div class="review-card">
+        <img src="https://assets.lightfunnels.com/account-85759/images_library/2fa247a6-a78c-4e9a-8b38-de4402268d4e.jhdgabjhsgakjs-pichi.jpg" alt="Mark V." class="review-image">
+        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
+        <h4 class="reviewer-name">Mark V., Amsterdam</h4>
+        <p class="review-text">"Volgens mij is dit <strong>het beste boek over hondentraining en -opvoeding</strong>! Voordat ik een hond nam, bekeek ik instructievideo's, luisterde naar podcasts, las boeken – maar dit boek <em>vat perfect samen wat ik twee maanden lang heb bestudeerd</em>. Op slechts enkele pagina's vind je <strong>alles wat je hond moet kunnen</strong>, met een duidelijke handleiding. <strong><u>Geen overbodige informatie, alleen wat je echt nodig hebt</u></strong>."</p>
+      </div>
+      <div class="review-card">
+        <img src="https://assets.lightfunnels.com/account-85759/images_library/d9c84e95-8504-4564-bfcf-47232646bf0e.lasja.jpg" alt="Jeroen B." class="review-image">
+        <div class="stars">⭐️⭐️⭐️⭐️⭐️</div>
+        <h4 class="reviewer-name">Jeroen B., Maastricht</h4>
+        <p class="review-text">"Ik raad dit boek <strong>aan alle hondenbezitters aan</strong>. Het is <em>geweldig geschreven</em> en, in tegenstelling tot vergelijkbare vertaalde gidsen, is het <strong>gebaseerd op onze eigen omgeving</strong> – niet uit een onbereikbare buitenlandse bubbel. Eindelijk een boek dat <strong><u>écht aansluit bij hoe wij in Nederland met onze honden leven</u></strong>."</p>
       </div>
     </div>
 
