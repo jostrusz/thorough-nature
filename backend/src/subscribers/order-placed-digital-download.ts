@@ -65,7 +65,7 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
   ],
   'lass-los': [
     {
-      key: "e-books/Die Lösung für Überdenkerinnen.docx.pdf",
+      key: "e-books/Die Losung fur Uberdenkerinnen.pdf",
       title: "Die Lösung für Überdenkerinnen",
       description: "E-Book (PDF)",
       size: "1.4 MB",
