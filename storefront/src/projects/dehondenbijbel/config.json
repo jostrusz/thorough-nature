@@ -34,7 +34,7 @@
     { "qty": 1, "price": 35, "label": "1x Boek De Hondenbijbel", "save": 0, "badge": "VOOR JEZELF" },
     { "qty": 2, "price": 55, "label": "2x Boek De Hondenbijbel", "save": 15, "badge": "DEEL MET EEN VRIEND(IN)" },
     { "qty": 3, "price": 79, "label": "3x Boek De Hondenbijbel", "save": 26, "badge": "PERFECT ALS CADEAU" },
-    { "qty": 4, "price": 105, "label": "4x Boek De Hondenbijbel", "save": 35, "badge": "BESTE WAARDE – DEEL MET FAMILIE & VRIENDEN" }
+    { "qty": 4, "price": 105, "label": "4x Boek De Hondenbijbel", "save": 35, "badge": "BESTE WAARDE" }
   ],
   "mollieProfileId": "",
   "paymentProviders": {

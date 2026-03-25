@@ -3,6 +3,7 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { DEXTRUM_MODULE } from "../../../../../../modules/dextrum"
 import { MyStockApiClient } from "../../../../../../modules/dextrum/api-client"
 import { normalizePhone } from "../../../../../../utils/normalize-phone"
+import { normalizePostalCode } from "../../../../../../utils/normalize-postal-code"
 
 // POST /admin/dextrum/orders/:id/send — Manually send order to WMS
 export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
@@ -112,13 +113,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     if (phoneResult.warning) {
       console.log(`[Dextrum Send] ${medusaOrderId}: ${phoneResult.warning}`)
     }
+    const postalResult = normalizePostalCode(addr.postal_code, addrCountry)
+    if (postalResult.warning) {
+      console.log(`[Dextrum Send] ${medusaOrderId}: ${postalResult.warning}`)
+    }
     const deliveryAddress: any = {
       firstName: addr.first_name || "",
       lastName: addr.last_name || "",
       company: addr.company || undefined,
       street: [addr.address_1, addr.address_2].filter(Boolean).join(", "),
       city: addr.city || "",
-      zip: addr.postal_code || "",
+      zip: postalResult.normalized,
       country: addrCountry,
       phone: phoneResult.normalized,
       email: (order as any).email || "",

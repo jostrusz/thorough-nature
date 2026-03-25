@@ -307,6 +307,7 @@ export function OrderDetailTimeline({
       FAILED: "Dextrum: Failed",
       PHONE_NORMALIZED: "📞 Phone normalized",
       PHONE_MISSING: "⚠️ No phone number",
+      POSTAL_NORMALIZED: "📮 Postal code normalized",
     }
     events.push({
       date: entry.date || order.updated_at || order.created_at,

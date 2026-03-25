@@ -2,6 +2,7 @@ import { MedusaContainer } from "@medusajs/framework/types"
 import { DEXTRUM_MODULE } from "../modules/dextrum"
 import { MyStockApiClient } from "../modules/dextrum/api-client"
 import { normalizePhone } from "../utils/normalize-phone"
+import { normalizePostalCode } from "../utils/normalize-postal-code"
 
 /**
  * Dextrum Order Hold Processor
@@ -205,38 +206,51 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         if (phoneResult.warning) {
           console.log(`[Dextrum Hold] ${orderCode}: ${phoneResult.warning}`)
         }
+        const postalResult = normalizePostalCode(addr.postal_code, countryCode)
+        if (postalResult.warning) {
+          console.log(`[Dextrum Hold] ${orderCode}: ${postalResult.warning}`)
+        }
         const deliveryAddress: any = {
           firstName: addr.first_name || "",
           lastName: addr.last_name || "",
           street: [addr.address_1, addr.address_2].filter(Boolean).join(", "),
           city: addr.city || "",
-          zip: addr.postal_code || "",
+          zip: postalResult.normalized,
           country: countryCode,
           phone: phoneResult.normalized,
           email: (order as any).email || "",
         }
-        // Log phone normalization in order timeline
-        if (phoneResult.changed || phoneResult.warning) {
+        // Log normalizations in order timeline
+        if (phoneResult.changed || phoneResult.warning || postalResult.changed) {
           try {
             const orderService = container.resolve("order") as any
             const existingMeta = (order as any).metadata || {}
             const dextrumTimeline = Array.isArray(existingMeta.dextrum_timeline) ? [...existingMeta.dextrum_timeline] : []
-            dextrumTimeline.push({
-              status: phoneResult.changed ? "PHONE_NORMALIZED" : "PHONE_MISSING",
-              date: new Date().toISOString(),
-              detail: phoneResult.warning || `Phone: ${phoneResult.normalized}`,
-            })
+            if (phoneResult.changed || phoneResult.warning) {
+              dextrumTimeline.push({
+                status: phoneResult.changed ? "PHONE_NORMALIZED" : "PHONE_MISSING",
+                date: new Date().toISOString(),
+                detail: phoneResult.warning || `Phone: ${phoneResult.normalized}`,
+              })
+            }
+            if (postalResult.changed) {
+              dextrumTimeline.push({
+                status: "POSTAL_NORMALIZED",
+                date: new Date().toISOString(),
+                detail: postalResult.warning || `Postal: ${postalResult.normalized}`,
+              })
+            }
             await orderService.updateOrders([{
               id: (order as any).id,
               metadata: {
                 ...existingMeta,
-                phone_normalization: {
+                phone_normalization: phoneResult.changed ? {
                   original: phoneResult.original,
                   normalized: phoneResult.normalized,
                   changed: phoneResult.changed,
                   warning: phoneResult.warning || null,
                   timestamp: new Date().toISOString(),
-                },
+                } : existingMeta.phone_normalization,
                 dextrum_timeline: dextrumTimeline,
               },
             }])
