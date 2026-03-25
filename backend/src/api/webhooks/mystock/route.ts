@@ -104,6 +104,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const eventType = String(event.eventType || event.type || "")
     const eventSubtype = String(event.eventSubtype || event.subtype || "")
 
+    // Log full body for dispatch/delivery events to debug tracking info
+    if (["12", "29"].includes(eventType)) {
+      console.log(`[mySTOCK Webhook] Event ${eventType} full body:`, JSON.stringify(event).slice(0, 1000))
+    }
+
     let orderMap = null
     if (documentId) {
       const maps = await dextrumService.listDextrumOrderMaps(
