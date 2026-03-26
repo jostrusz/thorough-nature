@@ -973,7 +973,7 @@ h3 { font-size: 22px; font-weight: 700; line-height: 1.3; }
  .hero-inner { display: flex !important; flex-direction: column; align-items: center; text-align: center; gap: 0; }
  .hero-text { display: contents !important; }
  .hero-text h1 { order: 1; margin-bottom: 16px; width: 100%; }
- .hero-book-wrap { order: 2; margin-top: 0; margin-bottom: 20px; min-height: auto; }
+ .hero-book-wrap { order: 2; margin-top: 0; margin-bottom: 20px; min-height: auto; width: 100%; }
  .hero-body { order: 3; margin-bottom: 20px; width: 100%; }
  .btn-cta#heroCta { order: 4; }
  .hero-text > .payment-row { order: 5; margin-top: 10px; }
@@ -1220,10 +1220,12 @@ h2.h2, .h2 {
 .sticky-bottom-bar {
  position: fixed; bottom: 0; left: 0; right: 0; z-index: 999;
  background: linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.95) 60%, rgba(255,255,255,0) 100%);
- padding: 32px 20px 16px;
+ padding: 32px 20px calc(16px + env(safe-area-inset-bottom, 0px));
  transform: translateY(100%);
  transition: transform 0.4s cubic-bezier(.4,0,.2,1);
  display: flex; align-items: center; justify-content: center; gap: 14px;
+ -webkit-backface-visibility: hidden; backface-visibility: hidden;
+ will-change: transform;
 }
 .sticky-bottom-bar.visible { transform: translateY(0); }
 .sticky-bottom-text {
