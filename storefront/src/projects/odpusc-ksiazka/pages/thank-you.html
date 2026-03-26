@@ -659,7 +659,7 @@ body { background: var(--bg); }
       <div class="ty-support-title">Pytania lub problemy?</div>
       <div class="ty-support-desc">Znalazłeś błąd, masz pytanie dotyczące zamówienia lub napotkałeś problem? Skontaktuj się z nami &mdash; chętnie pomożemy!</div>
     </div>
-    <a href="mailto:support@odpusc-ksiazka.pl?subject=Pytanie%20o%20zam%C3%B3wienie%20%23&body=Cze%C5%9B%C4%87%2C%0A%0AMam%20pytanie%20dotycz%C4%85ce%20mojego%20zam%C3%B3wienia.%0A%0ANumer%20zam%C3%B3wienia%3A%20%0A%0AMoje%20pytanie%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Wyślij nam e-mail</a>
+    <a href="mailto:biuro@odpusc-ksiazka.pl?subject=Pytanie%20o%20zam%C3%B3wienie%20%23&body=Cze%C5%9B%C4%87%2C%0A%0AMam%20pytanie%20dotycz%C4%85ce%20mojego%20zam%C3%B3wienia.%0A%0ANumer%20zam%C3%B3wienia%3A%20%0A%0AMoje%20pytanie%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Wyślij nam e-mail</a>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -799,7 +799,7 @@ body { background: var(--bg); }
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
     var subject = encodeURIComponent('Pytanie o zamówienie #' + orderNum);
     var body = encodeURIComponent('Cześć,\n\nMam pytanie dotyczące mojego zamówienia.\n\nNumer zamówienia: #' + orderNum + '\n\nMoje pytanie: ');
-    mailtoEl.href = 'mailto:support@odpusc-ksiazka.pl?subject=' + subject + '&body=' + body;
+    mailtoEl.href = 'mailto:biuro@odpusc-ksiazka.pl?subject=' + subject + '&body=' + body;
   }
 
   // 2d. Celková cena — bere v potaz bundle, order bump a upsell
