@@ -5439,10 +5439,11 @@ body {
         selectedProviderId = method.getAttribute('data-provider-id') || ('pp_' + selectedProvider + '_' + selectedProvider);
 
         // Show/hide card fields — init the right provider's card elements
+        // Comgate, Stripe, PayPal use hosted checkout (redirect), no inline card fields
         var cardFields = document.getElementById('card-fields');
         if (cardFields) {
-          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal') {
-            // Stripe and PayPal use hosted checkout (redirect), no inline card fields
+          var redirectProviders = ['stripe', 'paypal', 'comgate'];
+          if (selectedMethod === 'creditcard' && redirectProviders.indexOf(cardProvider) === -1) {
             cardFields.style.display = 'block';
             if (cardProvider === 'mollie') {
               initMollieComponents();

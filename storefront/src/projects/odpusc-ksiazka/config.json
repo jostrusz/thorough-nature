@@ -33,6 +33,10 @@
     { "qty": 3, "price": 279, "label": "3 książki", "save": 108 },
     { "qty": 4, "price": 359, "label": "4 książki", "save": 157 }
   ],
+  "shippingOptions": {
+    "paczkomat": { "price": 0, "label": "Paczkomat InPost", "description": "Odbiór w wybranym Paczkomacie 24/7" },
+    "homeDelivery": { "price": 5, "label": "Dostawa do domu (Kurier)", "description": "Kurier dostarczy przesyłkę pod wskazany adres" }
+  },
   "mollieProfileId": "",
   "paymentProviders": {},
   "pages": {
