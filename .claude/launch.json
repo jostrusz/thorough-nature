@@ -24,8 +24,8 @@
     },
     {
       "name": "email-dev",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["email:dev"],
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["email", "dev", "--dir", "src/modules/email-notifications/templates", "--port", "3002"],
       "port": 3002,
       "cwd": "backend"
     },
