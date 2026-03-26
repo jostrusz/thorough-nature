@@ -94,8 +94,19 @@ export function normalizePhone(
     }
   }
 
-  // Number without 0 prefix and without + — prepend country prefix
+  // Number without 0 prefix and without + — check if it already starts with country code
   if (/^\d{7,}$/.test(cleaned)) {
+    const prefixDigits = prefix.substring(1) // e.g. "+49" → "49"
+    if (cleaned.startsWith(prefixDigits)) {
+      // Already contains country code without + (e.g. "4915155518039" for DE)
+      const result = "+" + cleaned
+      return {
+        normalized: result,
+        original,
+        changed: true,
+        warning: `Phone normalized: "${original}" → "${result}" (added + to existing ${cc} prefix)`,
+      }
+    }
     const result = prefix + cleaned
     return {
       normalized: result,
