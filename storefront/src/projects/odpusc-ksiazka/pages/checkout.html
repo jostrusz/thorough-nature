@@ -5034,9 +5034,18 @@ body {
       (data.gateways || []).forEach(function(gw) {
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
         (gw.methods || []).forEach(function(m) {
+          // Override display names for Polish checkout
+          var PL_NAMES = {
+            'blik': 'BLIK',
+            'przelew_bankowy': 'Przelew bankowy',
+            'creditcard': 'Karta płatnicza',
+            'bank_transfer': 'Przelew bankowy',
+            'applepay': 'Apple Pay',
+            'googlepay': 'Google Pay'
+          };
           allPaymentOptions.push({
             code: m.code,
-            display_name: m.display_name,
+            display_name: PL_NAMES[m.code] || m.display_name,
             icon: m.icon || m.code,
             provider: gw.provider,
             provider_id: m.provider_id || providerIdFull,
