@@ -38,7 +38,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const methods = [
       {
         code: "creditcard",
-        display_name: "Karta płatnicza",
+        display_name: "Karta płatnicza (Visa, Mastercard)",
         icon: "creditcard",
         available_countries: ["cz", "pl"],
         supported_currencies: ["CZK", "PLN"],
