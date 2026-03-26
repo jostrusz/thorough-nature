@@ -3272,13 +3272,14 @@ body {
         option.querySelector('input[type="radio"]').checked = true;
 
         // Update state
+        var shipOpts = PROJECT_CONFIG.shippingOptions || { paczkomat: { price: 0 }, homeDelivery: { price: 5 } };
         if (method === 'paczkomat') {
           selectedShippingMethod = 'paczkomat';
-          selectedShippingCost = PROJECT_CONFIG.shippingOptions.paczkomat.price;
+          selectedShippingCost = (shipOpts.paczkomat && shipOpts.paczkomat.price) || 0;
           if (paczkomatSelector) paczkomatSelector.style.display = '';
         } else {
           selectedShippingMethod = 'home_delivery';
-          selectedShippingCost = PROJECT_CONFIG.shippingOptions.homeDelivery.price;
+          selectedShippingCost = (shipOpts.homeDelivery && shipOpts.homeDelivery.price) || 5;
           if (paczkomatSelector) paczkomatSelector.style.display = 'none';
           if (paczkomatError) paczkomatError.style.display = 'none';
         }
@@ -4070,9 +4071,10 @@ body {
    * Paczkomat → match "InPost", Home delivery → match "Kurier".
    */
   function findShippingOptionId(options, method) {
+    var _shipOpts = PROJECT_CONFIG.shippingOptions || {};
     var matchName = method === 'paczkomat'
-      ? (PROJECT_CONFIG.shippingOptions.paczkomat.matchName || 'InPost')
-      : (PROJECT_CONFIG.shippingOptions.homeDelivery.matchName || 'Kurier');
+      ? ((_shipOpts.paczkomat && _shipOpts.paczkomat.matchName) || 'InPost')
+      : ((_shipOpts.homeDelivery && _shipOpts.homeDelivery.matchName) || 'Kurier');
     var matched = options.find(function(o) {
       return o.name && o.name.indexOf(matchName) !== -1;
     });
