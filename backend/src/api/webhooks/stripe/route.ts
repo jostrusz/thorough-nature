@@ -26,43 +26,53 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(400).json({ error: "Missing stripe-signature header" })
     }
 
-    // Resolve webhook secret from gateway_config DB table (direct query)
-    let webhookSecret: string | null = null
-    let secretKey: string | null = null
+    // Resolve ALL active Stripe gateway configs and try each webhook secret
+    const rawBody: string | Buffer = (req as any).rawBody ?? JSON.stringify(req.body)
+    if (!rawBody || (typeof rawBody === "object" && !Buffer.isBuffer(rawBody))) {
+      logger.error("[Stripe Webhook] No raw body available — signature verification will fail")
+      return res.status(400).json({ error: "Missing raw request body" })
+    }
+
+    type GatewayCandidate = { webhookSecret: string; secretKey: string; displayName: string }
+    const candidates: GatewayCandidate[] = []
 
     try {
-      // Try DI container first (works in request scope)
       const gatewayConfigService = req.scope.resolve("gatewayConfig")
       const configs = await gatewayConfigService.listGatewayConfigs(
         { provider: "stripe", is_active: true },
-        { take: 1, order: { priority: "ASC" } }
+        { take: 20, order: { priority: "ASC" } }
       )
-      const config = configs[0]
-      if (config) {
+      for (const config of configs) {
         const isLive = config.mode === "live"
         const keys = isLive ? config.live_keys : config.test_keys
-        webhookSecret = keys?.secret_key || null
-        secretKey = keys?.api_key || null
-        logger.info(`[Stripe Webhook] ✓ Using ${isLive ? "LIVE" : "TEST"} keys from admin gateway "${config.display_name}"`)
+        if (keys?.secret_key && keys?.api_key) {
+          candidates.push({
+            webhookSecret: keys.secret_key,
+            secretKey: keys.api_key,
+            displayName: `${config.display_name} (${isLive ? "LIVE" : "TEST"})`,
+          })
+        }
       }
     } catch (e: any) {
       logger.warn(`[Stripe Webhook] DI resolve failed: ${e.message}, trying direct DB`)
-      // Fallback: direct DB query
       try {
         const { Pool } = require("pg")
         const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
         const { rows } = await pool.query(
           `SELECT mode, live_keys, test_keys, display_name FROM gateway_config
            WHERE provider = 'stripe' AND is_active = true AND deleted_at IS NULL
-           ORDER BY priority ASC LIMIT 1`
+           ORDER BY priority ASC LIMIT 20`
         )
-        if (rows[0]) {
-          const config = rows[0]
+        for (const config of rows) {
           const isLive = config.mode === "live"
           const keys = isLive ? config.live_keys : config.test_keys
-          webhookSecret = keys?.secret_key || null
-          secretKey = keys?.api_key || null
-          logger.info(`[Stripe Webhook] ✓ Using ${isLive ? "LIVE" : "TEST"} keys from DB gateway "${config.display_name}"`)
+          if (keys?.secret_key && keys?.api_key) {
+            candidates.push({
+              webhookSecret: keys.secret_key,
+              secretKey: keys.api_key,
+              displayName: `${config.display_name} (${isLive ? "LIVE" : "TEST"})`,
+            })
+          }
         }
         await pool.end()
       } catch (dbErr: any) {
@@ -71,42 +81,43 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     // Env var fallback (last resort)
-    if (!webhookSecret) {
-      webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || null
-      if (webhookSecret) logger.warn("[Stripe Webhook] ⚠️ Using STRIPE_WEBHOOK_SECRET from env vars")
-    }
-    if (!secretKey) {
-      secretKey = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY || null
-      if (secretKey) logger.warn("[Stripe Webhook] ⚠️ Using STRIPE_SECRET_KEY from env vars")
+    if (candidates.length === 0) {
+      const whsec = process.env.STRIPE_WEBHOOK_SECRET
+      const sk = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY
+      if (whsec && sk) {
+        logger.warn("[Stripe Webhook] ⚠️ Using env var fallback")
+        candidates.push({ webhookSecret: whsec, secretKey: sk, displayName: "env vars" })
+      }
     }
 
-    if (!webhookSecret || !secretKey) {
+    if (candidates.length === 0) {
       logger.error("[Stripe Webhook] No webhook secret or secret key configured")
       return res.status(500).json({ error: "Stripe webhook not configured" })
     }
 
-    // Debug: log key prefixes and raw body source to diagnose signature failures
-    const hasRawBody = !!(req as any).rawBody
-    const rawBody = hasRawBody ? (req as any).rawBody : JSON.stringify(req.body)
-    const rawBodyType = typeof rawBody
-    const rawBodyLen = rawBody ? (typeof rawBody === "string" ? rawBody.length : (rawBody as Buffer).length) : 0
-    const whSecPrefix = webhookSecret ? webhookSecret.substring(0, 10) + "..." : "null"
-    const skPrefix = secretKey ? secretKey.substring(0, 8) + "..." : "null"
-    logger.info(`[Stripe Webhook] Debug: hasRawBody=${hasRawBody}, bodyType=${rawBodyType}, bodyLen=${rawBodyLen}, whsec=${whSecPrefix}, sk=${skPrefix}, sig=${sig.substring(0, 30)}...`)
+    // Try each gateway's webhook secret until one verifies successfully
+    let event: Stripe.Event | null = null
+    let matchedSecretKey: string | null = null
 
-    // Verify signature using raw body
-    const stripe = new Stripe(secretKey, { apiVersion: "2025-03-31.basil" as any })
-    let event: Stripe.Event
-
-    try {
-      event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret)
-    } catch (err: any) {
-      logger.error(`[Stripe Webhook] Signature verification failed: ${err.message}`)
-      // Log body sample to help debug (first 200 chars, no sensitive data in Stripe event bodies)
-      const bodySample = typeof rawBody === "string" ? rawBody.substring(0, 200) : rawBody.toString("utf8").substring(0, 200)
-      logger.error(`[Stripe Webhook] Body sample: ${bodySample}`)
-      return res.status(400).json({ error: `Webhook signature verification failed` })
+    for (const candidate of candidates) {
+      try {
+        const s = new Stripe(candidate.secretKey, { apiVersion: "2025-03-31.basil" as any })
+        event = s.webhooks.constructEvent(rawBody, sig, candidate.webhookSecret)
+        matchedSecretKey = candidate.secretKey
+        logger.info(`[Stripe Webhook] ✓ Signature verified via gateway "${candidate.displayName}"`)
+        break
+      } catch {
+        // Signature didn't match this gateway, try next
+      }
     }
+
+    if (!event || !matchedSecretKey) {
+      const triedNames = candidates.map(c => c.displayName).join(", ")
+      logger.error(`[Stripe Webhook] Signature verification failed against all ${candidates.length} gateway(s): ${triedNames}`)
+      return res.status(400).json({ error: "Webhook signature verification failed" })
+    }
+
+    const stripe = new Stripe(matchedSecretKey, { apiVersion: "2025-03-31.basil" as any })
 
     logger.info(`[Stripe Webhook] Received event: ${event.type}, id: ${event.id}`)
 

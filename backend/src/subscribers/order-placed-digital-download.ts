@@ -61,7 +61,18 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
     },
   ],
   'odpusc-ksiazka': [
-    // E-book files — upload to MinIO under e-books/ folder, then update here
+    {
+      key: "e-books/Koniec nadmiernym mysleniem.pdf",
+      title: "Koniec nadmiernym myśleniem",
+      description: "E-book (PDF)",
+      size: "1.2 MB",
+    },
+    {
+      key: "e-books/Milosc bez cenzury.pdf",
+      title: "Miłość bez cenzury",
+      description: "E-book (PDF)",
+      size: "14.5 MB",
+    },
   ],
   'lass-los': [
     {
