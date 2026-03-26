@@ -344,6 +344,14 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
             email: customerEmail || undefined,
           },
         }
+
+        // Set locale for redirect payment pages (iDEAL, Bancontact, etc.)
+        // Use project locale from checkout data, default to 'nl' for NL/BE projects
+        const projectLocale = (data?.locale || data?.language || "nl").toString().substring(0, 2).toLowerCase()
+        if (!piParams.payment_method_options) piParams.payment_method_options = {}
+        if (stripeMethodType === "ideal") {
+          (piParams as any).payment_method_options.ideal = { preferred_locale: projectLocale }
+        }
       }
 
       const paymentIntent = await stripe.paymentIntents.create(piParams)
