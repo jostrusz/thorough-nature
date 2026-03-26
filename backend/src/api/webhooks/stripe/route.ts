@@ -27,8 +27,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     // Resolve ALL active Stripe gateway configs and try each webhook secret
-    const hasRawBody = !!(req as any).rawBody
-    const rawBody = hasRawBody ? (req as any).rawBody : JSON.stringify(req.body)
+    const rawBody: string | Buffer = (req as any).rawBody ?? JSON.stringify(req.body)
+    if (!rawBody || (typeof rawBody === "object" && !Buffer.isBuffer(rawBody))) {
+      logger.error("[Stripe Webhook] No raw body available — signature verification will fail")
+      return res.status(400).json({ error: "Missing raw request body" })
+    }
 
     type GatewayCandidate = { webhookSecret: string; secretKey: string; displayName: string }
     const candidates: GatewayCandidate[] = []
