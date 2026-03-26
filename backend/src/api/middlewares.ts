@@ -1,16 +1,15 @@
 import { defineMiddlewares } from "@medusajs/medusa"
-import type { Request, Response, NextFunction } from "express"
-import { json } from "express"
 
 /**
  * Custom raw body capture middleware.
  * Medusa's preserveRawBody can be unreliable due to memoized json parser,
- * so we use our own express.json({ verify }) to capture the raw Buffer.
+ * so we use require("express").json({ verify }) to capture the raw Buffer.
  */
-function captureRawBody(req: Request, res: Response, next: NextFunction) {
+function captureRawBody(req: any, res: any, next: any) {
   if (req.headers["content-type"]?.includes("application/json")) {
+    const { json } = require("express")
     json({
-      verify: (r: any, _res, buf) => {
+      verify: (r: any, _res: any, buf: Buffer) => {
         r.rawBody = buf
       },
     })(req, res, next)
@@ -24,7 +23,7 @@ export default defineMiddlewares({
     {
       method: ["POST"],
       matcher: "/webhooks/stripe",
-      bodyParser: false, // disable default parser, we handle it ourselves
+      bodyParser: false,
       middlewares: [captureRawBody],
     },
     {
