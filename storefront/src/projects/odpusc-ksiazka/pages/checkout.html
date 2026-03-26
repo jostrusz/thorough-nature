@@ -3477,7 +3477,8 @@ body {
       var labels = {
         klarna: 'Zapłać przez Klarna',
         paypal: 'Zapłać przez PayPal',
-        blik: 'Zapłać przez BLIK'
+        blik: 'Zapłać przez BLIK',
+        przelew_bankowy: 'Zapłać przelewem',
       };
       btnText.textContent = (labels[selectedMethod] || 'Zamów teraz') + ' — ' + formatPrice(total);
     }
@@ -4896,10 +4897,23 @@ body {
     applepay: 'Zapłać przez Apple Pay',
     googlepay: 'Zapłać przez Google Pay',
     bank_transfer: 'Zapłać przelewem bankowym',
+    przelew_bankowy: 'Wybierz swój bank',
     sepa_debit: 'Polecenie zapłaty SEPA',
     swish: 'Zapłać przez Swish',
     revolut_pay: 'Zapłać przez Revolut',
   };
+
+  // Polish bank transfer sub-methods (Comgate bank codes)
+  var POLISH_BANKS = [
+    { code: 'bank_pl_mbank', name: 'mBank', icon: 'mbank' },
+    { code: 'bank_pl_pko', name: 'PKO Bank Polski', icon: 'pko' },
+    { code: 'bank_pl_ing', name: 'ING Bank Śląski', icon: 'ing' },
+    { code: 'bank_pl_santander', name: 'Santander', icon: 'santander' },
+    { code: 'bank_pl_pekao', name: 'Bank Pekao SA', icon: 'pekao' },
+    { code: 'bank_pl_bnp', name: 'BNP Paribas', icon: 'bnp' },
+    { code: 'bank_pl_alior', name: 'Alior Bank', icon: 'alior' },
+    { code: 'bank_pl_credit_agricole', name: 'Credit Agricole', icon: 'credit_agricole' },
+  ];
 
   // Klarna sub-method config: code → SDK payment_method_category + Polish labels
   var KLARNA_METHODS = {
@@ -4935,6 +4949,7 @@ body {
       riverty: { bg: '#69B32D', text: '#FFF', label: 'RIV' },
       trustly: { bg: '#0EE06E', text: '#FFF', label: 'TLY' },
       bank_transfer: { bg: '#F6F6F7', text: '#1A1A1A', label: 'Bank' },
+      przelew_bankowy: { bg: '#F6F6F7', text: '#1A1A1A', label: 'Bank' },
       sepa_debit: { bg: '#2B4C9B', text: '#FFF', label: 'SEPA' },
       /* revolut_pay: now uses SVG icon */
     };
@@ -5056,7 +5071,7 @@ body {
     var errorEl = document.getElementById('payment-methods-error');
 
     // Remove old dynamically rendered elements
-    var oldLabels = container.querySelectorAll('.payment-method, .klarna-parent, .klarna-sub-methods');
+    var oldLabels = container.querySelectorAll('.payment-method, .klarna-parent, .klarna-sub-methods, .bank-parent, .bank-sub-methods');
     oldLabels.forEach(function(el) { el.remove(); });
 
     // Reset Klarna state
@@ -5162,6 +5177,64 @@ body {
           parent.querySelector('.pm-radio-dot').style.transform = 'scale(1)';
           parent.querySelector('.pm-radio').style.borderColor = 'var(--cta)';
         }
+      } else if (item.data.code === 'przelew_bankowy') {
+        // Render "Przelew bankowy" as expandable parent with bank sub-methods
+        var m = item.data;
+        var isFirst = !isFirstSet;
+        var bankParent = document.createElement('div');
+        bankParent.className = 'klarna-parent bank-parent' + (isFirst ? ' expanded' : '');
+        bankParent.setAttribute('data-bank-parent', 'true');
+        bankParent.setAttribute('data-provider', m.provider);
+        bankParent.setAttribute('data-provider-id', m.provider_id);
+        bankParent.innerHTML =
+          '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
+          getMethodIconHTML('przelew_bankowy') +
+          '<div class="pm-info">' +
+            '<div class="pm-name">' + m.display_name + '</div>' +
+            '<div class="pm-desc">Wybierz swój bank</div>' +
+          '</div>' +
+          '<svg class="klarna-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+        container.appendChild(bankParent);
+
+        // Render bank sub-methods panel
+        var bankSubPanel = document.createElement('div');
+        bankSubPanel.className = 'klarna-sub-methods bank-sub-methods' + (isFirst ? ' open' : '');
+        bankSubPanel.id = 'bank-sub-methods';
+        bankSubPanel.setAttribute('data-provider', m.provider);
+        bankSubPanel.setAttribute('data-provider-id', m.provider_id);
+
+        POLISH_BANKS.forEach(function(bank, bi) {
+          var isSubFirst = isFirst && bi === 0;
+          var sub = document.createElement('label');
+          sub.className = 'klarna-sub-method bank-sub-method' + (isSubFirst ? ' selected' : '');
+          sub.setAttribute('data-method', bank.code);
+          sub.setAttribute('data-provider', m.provider);
+          sub.setAttribute('data-provider-id', m.provider_id);
+          sub.innerHTML =
+            '<input type="radio" name="payment_method" value="' + bank.code + '"' + (isSubFirst ? ' checked' : '') + '>' +
+            '<div class="klarna-sub-radio"><div class="klarna-sub-radio-dot"></div></div>' +
+            '<div class="klarna-sub-info">' +
+              '<div class="klarna-sub-name">' + bank.name + '</div>' +
+            '</div>';
+          bankSubPanel.appendChild(sub);
+
+          if (isSubFirst) {
+            selectedMethod = bank.code;
+            selectedProvider = m.provider;
+            selectedProviderId = m.provider_id;
+            klarnaSelectedCategory = null;
+            isFirstSet = true;
+          }
+        });
+
+        container.appendChild(bankSubPanel);
+
+        // If first, set parent radio dot visible
+        if (isFirst) {
+          bankParent.querySelector('.pm-radio-dot').style.transform = 'scale(1)';
+          bankParent.querySelector('.pm-radio').style.borderColor = 'var(--cta)';
+        }
       } else {
         // Regular payment method
         var m = item.data;
@@ -5235,11 +5308,21 @@ body {
    */
   function bindPaymentMethodEvents() {
     var regularMethods = document.querySelectorAll('.payment-method');
-    var klarnaParent = document.querySelector('.klarna-parent');
+    var klarnaParent = document.querySelector('.klarna-parent:not(.bank-parent)');
     var klarnaSubPanel = document.getElementById('klarna-sub-methods');
-    var klarnaSubMethods = document.querySelectorAll('.klarna-sub-method');
+    var klarnaSubMethods = document.querySelectorAll('.klarna-sub-method:not(.bank-sub-method)');
 
-    // Deselect all: regular methods + klarna
+    // Bank transfer parent/sub-methods
+    var bankParent = document.querySelector('.bank-parent');
+    var bankSubPanel = document.getElementById('bank-sub-methods');
+    var bankSubMethods = document.querySelectorAll('.bank-sub-method');
+
+    // Helper: check if method is a bank sub-method
+    function isBankMethod(code) {
+      return code && code.indexOf('bank_pl_') === 0;
+    }
+
+    // Deselect all: regular methods + klarna + bank
     function deselectAll() {
       regularMethods.forEach(function(m) { m.classList.remove('selected'); });
       if (klarnaParent) {
@@ -5247,6 +5330,11 @@ body {
         klarnaParent.querySelector('.pm-radio').style.borderColor = 'var(--border)';
       }
       klarnaSubMethods.forEach(function(sm) { sm.classList.remove('selected'); });
+      if (bankParent) {
+        bankParent.querySelector('.pm-radio-dot').style.transform = 'scale(0)';
+        bankParent.querySelector('.pm-radio').style.borderColor = 'var(--border)';
+      }
+      bankSubMethods.forEach(function(sm) { sm.classList.remove('selected'); });
       klarnaSelectedCategory = null;
     }
 
@@ -5270,11 +5358,32 @@ body {
       }
     }
 
+    // Collapse bank
+    function collapseBank() {
+      if (bankParent) bankParent.classList.remove('expanded');
+      if (bankSubPanel) bankSubPanel.classList.remove('open');
+    }
+
+    // Expand bank
+    function expandBank() {
+      if (bankParent) bankParent.classList.add('expanded');
+      if (bankSubPanel) bankSubPanel.classList.add('open');
+    }
+
+    // Select bank parent visuals (radio dot)
+    function selectBankParent() {
+      if (bankParent) {
+        bankParent.querySelector('.pm-radio-dot').style.transform = 'scale(1)';
+        bankParent.querySelector('.pm-radio').style.borderColor = 'var(--cta)';
+      }
+    }
+
     // Handle regular payment method click
     regularMethods.forEach(function(method) {
       method.addEventListener('click', function() {
         deselectAll();
         collapseKlarna();
+        collapseBank();
         method.classList.add('selected');
         method.querySelector('input').checked = true;
         selectedMethod = method.getAttribute('data-method');
@@ -5314,6 +5423,7 @@ body {
           if (!isKlarnaSelected) {
             // Clicked to select Klarna — select first sub-method
             deselectAll();
+            collapseBank();
             selectKlarnaParent();
             var firstSub = klarnaSubMethods[0];
             if (firstSub) {
@@ -5337,6 +5447,7 @@ body {
         } else {
           // Expand and select first sub-method
           deselectAll();
+          collapseBank();
           regularMethods.forEach(function(m) { m.classList.remove('selected'); });
           expandKlarna();
           selectKlarnaParent();
@@ -5363,6 +5474,7 @@ body {
       sub.addEventListener('click', function(e) {
         e.stopPropagation(); // Don't bubble to parent
         deselectAll();
+        collapseBank();
         regularMethods.forEach(function(m) { m.classList.remove('selected'); });
         selectKlarnaParent();
         sub.classList.add('selected');
@@ -5371,6 +5483,78 @@ body {
         selectedProvider = sub.getAttribute('data-provider');
         selectedProviderId = sub.getAttribute('data-provider-id');
         klarnaSelectedCategory = sub.getAttribute('data-klarna-category');
+
+        var cardFields = document.getElementById('card-fields');
+        if (cardFields) cardFields.style.display = 'none';
+        updateButtonText();
+        updateSubtext();
+        document.getElementById('payment-errors').textContent = '';
+      });
+    });
+
+    // Handle Bank parent click → expand/collapse + select first bank sub-method
+    if (bankParent) {
+      bankParent.addEventListener('click', function() {
+        var isExpanded = bankParent.classList.contains('expanded');
+
+        if (isExpanded) {
+          var isBankSelected = isBankMethod(selectedMethod);
+          if (!isBankSelected) {
+            deselectAll();
+            collapseKlarna();
+            selectBankParent();
+            var firstSub = bankSubMethods[0];
+            if (firstSub) {
+              firstSub.classList.add('selected');
+              firstSub.querySelector('input').checked = true;
+              selectedMethod = firstSub.getAttribute('data-method');
+              selectedProvider = firstSub.getAttribute('data-provider');
+              selectedProviderId = firstSub.getAttribute('data-provider-id');
+            }
+            var cardFields = document.getElementById('card-fields');
+            if (cardFields) cardFields.style.display = 'none';
+            updateButtonText();
+            updateSubtext();
+            document.getElementById('payment-errors').textContent = '';
+          } else {
+            collapseBank();
+          }
+        } else {
+          deselectAll();
+          collapseKlarna();
+          regularMethods.forEach(function(m) { m.classList.remove('selected'); });
+          expandBank();
+          selectBankParent();
+          var firstSub = bankSubMethods[0];
+          if (firstSub) {
+            firstSub.classList.add('selected');
+            firstSub.querySelector('input').checked = true;
+            selectedMethod = firstSub.getAttribute('data-method');
+            selectedProvider = firstSub.getAttribute('data-provider');
+            selectedProviderId = firstSub.getAttribute('data-provider-id');
+          }
+          var cardFields = document.getElementById('card-fields');
+          if (cardFields) cardFields.style.display = 'none';
+          updateButtonText();
+          updateSubtext();
+          document.getElementById('payment-errors').textContent = '';
+        }
+      });
+    }
+
+    // Handle Bank sub-method click
+    bankSubMethods.forEach(function(sub) {
+      sub.addEventListener('click', function(e) {
+        e.stopPropagation();
+        deselectAll();
+        collapseKlarna();
+        regularMethods.forEach(function(m) { m.classList.remove('selected'); });
+        selectBankParent();
+        sub.classList.add('selected');
+        sub.querySelector('input').checked = true;
+        selectedMethod = sub.getAttribute('data-method');
+        selectedProvider = sub.getAttribute('data-provider');
+        selectedProviderId = sub.getAttribute('data-provider-id');
 
         var cardFields = document.getElementById('card-fields');
         if (cardFields) cardFields.style.display = 'none';
@@ -6966,6 +7150,7 @@ body {
         providerId = selectedProviderId || 'pp_mollie_mollie';
         sessionData = {
           method: selectedMethod,
+          comgate_method: selectedMethod, // Comgate-specific: maps to BLIK_PL, BANK_PL_*, etc.
           return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
           project_slug: PROJECT_CONFIG.slug || '',
           // Pass addresses for Klarna (requires billing address via Mollie Orders API)
