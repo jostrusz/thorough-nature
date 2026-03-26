@@ -2805,7 +2805,7 @@ body {
           <div class="checkout-trust">
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-              <span id="trust-provider-text">Zabezpieczone przez Stripe</span>
+              <span id="trust-provider-text">Zabezpieczone przez Comgate</span>
             </div>
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -3507,8 +3507,11 @@ body {
         paypal: 'Zapłać przez PayPal',
         blik: 'Zapłać przez BLIK',
         przelew_bankowy: 'Zapłać przelewem',
+        creditcard: 'Zapłać kartą',
       };
-      btnText.textContent = (labels[selectedMethod] || 'Zamów teraz') + ' — ' + formatPrice(total);
+      var label = labels[selectedMethod];
+      if (!label && selectedMethod && selectedMethod.startsWith('bank_pl_')) label = 'Zapłać przelewem';
+      btnText.textContent = (label || 'Zamów teraz') + ' — ' + formatPrice(total);
     }
   }
 
@@ -5650,7 +5653,8 @@ body {
           : 'Mollie';
         trustText.textContent = 'Zabezpieczone przez ' + trustProvider;
       } else {
-        trustText.textContent = 'Zabezpieczone przez ' + (selectedProvider === 'paypal' ? 'PayPal' : selectedProvider === 'stripe' ? 'Stripe' : 'Mollie');
+        var _provName = selectedProvider === 'paypal' ? 'PayPal' : selectedProvider === 'stripe' ? 'Stripe' : selectedProvider === 'comgate' ? 'Comgate' : selectedProvider === 'airwallex' ? 'Airwallex' : 'Comgate';
+        trustText.textContent = 'Zabezpieczone przez ' + _provName;
       }
     }
   }
