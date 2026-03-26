@@ -4025,6 +4025,19 @@ body {
       }
     };
 
+    // ─── Meta Pixel: update advanced matching with all customer data ───
+    if (typeof MetaTracker !== 'undefined') {
+      MetaTracker.setUserData({
+        em: customerData.email,
+        ph: customerData.shipping_address.phone,
+        fn: customerData.shipping_address.first_name,
+        ln: customerData.shipping_address.last_name,
+        ct: customerData.shipping_address.city,
+        zp: customerData.shipping_address.postal_code,
+        country: customerData.shipping_address.country_code
+      });
+    }
+
     // ─── Analytics metadata ───
     customerData.metadata = {};
     if (window.AnalyticsTracker) {

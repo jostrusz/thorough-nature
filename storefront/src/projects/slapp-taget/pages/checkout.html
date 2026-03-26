@@ -5157,6 +5157,10 @@ body {
         phonePreview.style.display = 'none';
       }
       validateField(phoneField);
+      // Update MetaTracker advanced matching with phone number
+      if (formatted && typeof MetaTracker !== 'undefined') {
+        MetaTracker.setUserData({ ph: formatted });
+      }
     });
     phoneField.addEventListener('input', function() {
       phonePreview.style.display = 'none';
@@ -6072,6 +6076,10 @@ body {
   if (_apEmailField) {
     _apEmailField.addEventListener('blur', function() {
       var emailVal = _apEmailField.value.trim();
+      // Update MetaTracker advanced matching with email as soon as it's entered
+      if (emailVal && emailVal.includes('@') && typeof MetaTracker !== 'undefined') {
+        MetaTracker.setUserData({ em: emailVal });
+      }
       if (emailVal && emailVal.includes('@') && !addPaymentInfoFired && typeof MetaTracker !== 'undefined') {
         addPaymentInfoFired = true;
         MetaTracker.trackAddPaymentInfo({
@@ -6345,6 +6353,19 @@ body {
         phone: document.getElementById('phone').value.trim(),
       }
     };
+
+    // ─── Meta Pixel: update advanced matching with all customer data ───
+    if (typeof MetaTracker !== 'undefined') {
+      MetaTracker.setUserData({
+        em: customerData.email,
+        ph: customerData.shipping_address.phone,
+        fn: customerData.shipping_address.first_name,
+        ln: customerData.shipping_address.last_name,
+        ct: customerData.shipping_address.city,
+        zp: customerData.shipping_address.postal_code,
+        country: customerData.shipping_address.country_code
+      });
+    }
 
     // ─── Analytics metadata ───
     customerData.metadata = {};
