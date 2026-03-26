@@ -1123,20 +1123,11 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
  a.addEventListener('click', e => {
   e.preventDefault();
   const target = document.querySelector(a.getAttribute('href'));
-  if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); navLinks?.classList.remove('open'); }
+  if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
  });
 });
 
-// Preloader — fade out when page loads
-window.addEventListener('load', () => {
- const preloader = document.getElementById('preloader');
- if (preloader) {
-  setTimeout(() => {
-   preloader.style.opacity = '0';
-   setTimeout(() => { preloader.style.display = 'none'; }, 500);
-  }, 800);
- }
-});
+// Preloader is hidden via CSS (display:none!important) — no JS needed
 
 // Lazy-load R2 videos on scroll
 (function(){
@@ -1187,11 +1178,12 @@ document.querySelectorAll('a[href="checkout"], a[href="checkout/"]').forEach(fun
   });
 });
 
-// Sticky bottom CTA bar — inverse of navbar (show on scroll down, hide on scroll up)
+// Sticky bottom CTA bar — show on scroll down past hero, hide on scroll up
 (function() {
  var bar = document.getElementById('stickyBottomBar');
+ if (!bar) return;
  var lastY = 0;
- var threshold = 400; // show after scrolling past hero
+ var threshold = 400;
  window.addEventListener('scroll', function() {
   var y = window.scrollY;
   if (y > threshold && y > lastY) {
@@ -1200,7 +1192,7 @@ document.querySelectorAll('a[href="checkout"], a[href="checkout/"]').forEach(fun
    bar.classList.remove('visible');
   }
   lastY = y;
- });
+ }, { passive: true });
 })();
 </script>
 
