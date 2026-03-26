@@ -2,8 +2,8 @@
 import { ExecArgs } from "@medusajs/framework/types"
 
 /**
- * Seed Comgate payment methods for the psi-superzivot project.
- * Creates 4 PaymentMethodConfig records: creditcard, bank_transfer, applepay, googlepay.
+ * Seed Comgate payment methods for Czech + Polish projects.
+ * Creates PaymentMethodConfig records: creditcard, bank_transfer, applepay, googlepay, blik, przelew_bankowy.
  *
  * Usage: npx medusa exec src/scripts/seed-comgate-methods.ts
  */
@@ -27,29 +27,24 @@ export default async function seedComgateMethods({ container }: ExecArgs) {
   const gateway = gateways[0]
   logger.info(`[Seed] Found Comgate gateway: ${gateway.id} (${gateway.display_name})`)
 
-  // Idempotent: skip if methods already exist
+  // Delete existing methods (clean slate for re-seed)
   const existingMethods = gateway.payment_methods || []
-  if (existingMethods.length >= 4) {
-    logger.info(`[Seed] Comgate already has ${existingMethods.length} payment methods. Skipping.`)
-    return
-  }
-
-  // Delete any partial methods (clean slate for re-seed)
   if (existingMethods.length > 0) {
-    logger.info(`[Seed] Removing ${existingMethods.length} partial payment methods...`)
+    logger.info(`[Seed] Removing ${existingMethods.length} existing payment methods...`)
     await gatewayConfigService.deletePaymentMethodConfigs(
       existingMethods.map((m: any) => m.id)
     )
   }
 
-  // Define the 4 payment methods for Czech market
+  // Define payment methods for Czech + Polish markets
   const methods = [
+    // Czech market
     {
       code: "creditcard",
       display_name: "Platební karta",
       icon: "creditcard",
-      available_countries: ["cz"],
-      supported_currencies: ["CZK"],
+      available_countries: ["cz", "pl"],
+      supported_currencies: ["CZK", "PLN"],
       is_active: true,
       sort_order: 1,
       gateway_id: gateway.id,
@@ -84,6 +79,27 @@ export default async function seedComgateMethods({ container }: ExecArgs) {
       sort_order: 4,
       gateway_id: gateway.id,
     },
+    // Polish market
+    {
+      code: "blik",
+      display_name: "BLIK",
+      icon: "blik",
+      available_countries: ["pl"],
+      supported_currencies: ["PLN"],
+      is_active: true,
+      sort_order: 5,
+      gateway_id: gateway.id,
+    },
+    {
+      code: "przelew_bankowy",
+      display_name: "Przelew bankowy",
+      icon: "bank",
+      available_countries: ["pl"],
+      supported_currencies: ["PLN"],
+      is_active: true,
+      sort_order: 6,
+      gateway_id: gateway.id,
+    },
   ]
 
   // Create each method
@@ -93,5 +109,5 @@ export default async function seedComgateMethods({ container }: ExecArgs) {
   }
 
   logger.info("[Seed] Comgate payment methods seeded successfully!")
-  logger.info("[Seed] Methods: creditcard, bank_transfer, applepay, googlepay")
+  logger.info("[Seed] Methods: creditcard, bank_transfer, applepay, googlepay, blik, przelew_bankowy")
 }

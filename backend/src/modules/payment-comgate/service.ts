@@ -255,19 +255,43 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       const customerName = ((addr.first_name || "") + " " + (addr.last_name || "")).trim()
         || ((customer?.first_name || "") + " " + (customer?.last_name || "")).trim()
 
+      // Determine language based on currency/country
+      const curr = currency_code.toUpperCase()
+      const billingCountry = (sessionData?.billing_address?.country_code || customer?.billing_address?.country_code || "").toUpperCase()
+      let lang = "en"
+      if (curr === "PLN" || billingCountry === "PL") lang = "pl"
+      else if (curr === "CZK" || billingCountry === "CZ") lang = "cs"
+      else if (curr === "EUR" && billingCountry === "SK") lang = "sk"
+
+      // Determine country fallback based on currency
+      let countryFallback = "ALL"
+      if (curr === "PLN") countryFallback = "PL"
+      else if (curr === "CZK") countryFallback = "CZ"
+
+      // Map frontend method codes to Comgate method codes
+      const rawMethod = sessionData?.comgate_method || sessionData?.method || contextData?.comgate_method || "ALL"
+      let comgateMethod = "ALL"
+      if (rawMethod === "blik" || rawMethod === "blik_pl") comgateMethod = "BLIK_PL"
+      else if (rawMethod === "bank_transfer") comgateMethod = "BANK_ALL"
+      else if (rawMethod === "creditcard" || rawMethod === "card") comgateMethod = "CARD_ALL"
+      else if (rawMethod.startsWith("bank_pl_")) comgateMethod = rawMethod.toUpperCase()
+      else if (rawMethod === "przelew_bankowy") comgateMethod = "BANK_ALL"
+      else if (rawMethod === "ALL" || !rawMethod) comgateMethod = "ALL"
+      else comgateMethod = rawMethod.toUpperCase()
+
       const paymentParams = {
         merchant: config?.live_keys?.api_key || config?.test_keys?.api_key,
         price: priceInCents,
-        curr: currency_code.toUpperCase(),
+        curr: curr,
         label: descriptor,
         refId: cart?.id || `ref-${Date.now()}`,
         secret: config?.live_keys?.secret_key || config?.test_keys?.secret_key,
         email: customerEmail,
         name: customerName || undefined, // payer name (shown in Comgate admin)
-        lang: "cs", // Czech language for payment gateway UI
-        country: sessionData?.billing_address?.country_code?.toUpperCase() || customer?.billing_address?.country_code?.toUpperCase() || "CZ",
+        lang,
+        country: billingCountry || countryFallback,
         prepareOnly: true, // get transId + URL without redirect
-        method: sessionData?.comgate_method || contextData?.comgate_method || "ALL",
+        method: comgateMethod,
       }
 
       this.getLogger().info(`[Comgate] Creating payment: merchant=${paymentParams.merchant}, ` +
