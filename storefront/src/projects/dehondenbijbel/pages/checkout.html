@@ -6515,7 +6515,24 @@ body {
         return false;
       }
       // Behoud huidige valid/invalid status (gezet door Foxentry), niet overschrijven
-      return field.classList.contains('valid') || field.value.trim().length === 0;
+      if (field.classList.contains('valid')) return true;
+      if (field.classList.contains('invalid')) return false;
+      // Geen Foxentry status (bijv. na page refresh) — val terug op lokale regex validatie
+      var _val = field.value.trim();
+      if (!_val) return true; // leeg = skip
+      if (field.type === 'email') {
+        var _emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(_val);
+        field.classList.toggle('valid', _emailOk);
+        field.classList.toggle('invalid', !_emailOk);
+        return _emailOk;
+      }
+      if (field.type === 'tel') {
+        var _phoneOk = /^[\+]?\d{8,}$/.test(_val.replace(/[\s\-\(\)\.]/g, ''));
+        field.classList.toggle('valid', _phoneOk);
+        field.classList.toggle('invalid', !_phoneOk);
+        return _phoneOk;
+      }
+      return true;
     }
 
     var value = field.value.trim();
