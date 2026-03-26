@@ -1,21 +1,23 @@
 import { defineMiddlewares } from "@medusajs/medusa"
 
 /**
- * Custom raw body capture middleware.
- * Medusa's preserveRawBody can be unreliable due to memoized json parser,
- * so we use require("express").json({ verify }) to capture the raw Buffer.
+ * Capture raw request body as Buffer before any JSON parsing.
+ * Reads the raw stream directly to avoid memoized express.json() issues.
  */
 function captureRawBody(req: any, res: any, next: any) {
-  if (req.headers["content-type"]?.includes("application/json")) {
-    const { json } = require("express")
-    json({
-      verify: (r: any, _res: any, buf: Buffer) => {
-        r.rawBody = buf
-      },
-    })(req, res, next)
-  } else {
+  const chunks: Buffer[] = []
+  req.on("data", (chunk: Buffer) => chunks.push(chunk))
+  req.on("end", () => {
+    req.rawBody = Buffer.concat(chunks)
+    // Also parse JSON so req.body is available
+    try {
+      req.body = JSON.parse(req.rawBody.toString("utf8"))
+    } catch {
+      req.body = {}
+    }
     next()
-  }
+  })
+  req.on("error", (err: any) => next(err))
 }
 
 export default defineMiddlewares({
