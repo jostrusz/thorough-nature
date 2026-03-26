@@ -585,7 +585,8 @@ window.MetaTracker = (function() {
     try {
       var url = new URL(window.location.href);
       var fbclid = url.searchParams.get('fbclid');
-      if (fbclid && !getCookie('_fbc')) {
+      if (fbclid) {
+        // Always overwrite _fbc when fbclid is present in URL (fresh click)
         var fbc = 'fb.1.' + Date.now() + '.' + fbclid;
         setCookie('_fbc', fbc, 90);
         console.log('[MetaTracker] Captured fbclid → _fbc:', fbc.substring(0, 30) + '...');
@@ -593,8 +594,32 @@ window.MetaTracker = (function() {
     } catch(e) { /* ignore */ }
   }
 
-  function getFbc() { return getCookie('_fbc') || null; }
+  function getFbc() {
+    var fbc = getCookie('_fbc') || null;
+    // Fallback: if no _fbc cookie but fbclid in URL, construct on the fly
+    if (!fbc) {
+      try {
+        var fbclid = new URLSearchParams(window.location.search).get('fbclid');
+        if (fbclid) {
+          fbc = 'fb.1.' + Date.now() + '.' + fbclid;
+          setCookie('_fbc', fbc, 90);
+        }
+      } catch(e) { /* ignore */ }
+    }
+    return fbc;
+  }
   function getFbp() { return getCookie('_fbp') || null; }
+
+  /* ── external_id: persistent visitor identifier ─────────── */
+  function getExternalId() {
+    var eid = null;
+    try { eid = localStorage.getItem('meta_external_id'); } catch(e) {}
+    if (!eid) {
+      eid = 'v_' + Math.random().toString(36).substr(2, 12) + Math.random().toString(36).substr(2, 4);
+      try { localStorage.setItem('meta_external_id', eid); } catch(e) {}
+    }
+    return eid;
+  }
 
   /* ── UUID v4 generator (event_id) ───────────────────────── */
   function generateEventId() {
@@ -606,6 +631,32 @@ window.MetaTracker = (function() {
       var r = Math.random() * 16 | 0;
       return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
+  }
+
+  /* ── Advanced matching: reinit pixel with PII ──────────── */
+  var advancedMatchData = {};
+  function setUserData(data) {
+    if (data.em) advancedMatchData.em = data.em.toLowerCase().trim();
+    if (data.ph) advancedMatchData.ph = data.ph.replace(/[^0-9]/g, '');
+    if (data.fn) advancedMatchData.fn = data.fn.toLowerCase().trim();
+    if (data.ln) advancedMatchData.ln = data.ln.toLowerCase().trim();
+    if (data.ct) advancedMatchData.ct = data.ct.toLowerCase().trim();
+    if (data.zp) advancedMatchData.zp = data.zp.trim();
+    if (data.country) advancedMatchData.country = data.country.toLowerCase().trim();
+    if (data.external_id) advancedMatchData.external_id = data.external_id;
+    // Re-init pixel with advanced matching data for better browser-side matching
+    try {
+      var matchPayload = {};
+      if (advancedMatchData.em) matchPayload.em = advancedMatchData.em;
+      if (advancedMatchData.ph) matchPayload.ph = advancedMatchData.ph;
+      if (advancedMatchData.fn) matchPayload.fn = advancedMatchData.fn;
+      if (advancedMatchData.ln) matchPayload.ln = advancedMatchData.ln;
+      if (advancedMatchData.external_id) matchPayload.external_id = advancedMatchData.external_id;
+      if (Object.keys(matchPayload).length > 0) {
+        fbq('init', PIXEL_ID, matchPayload);
+        console.log('[MetaTracker] Advanced matching updated:', Object.keys(matchPayload).join(', '));
+      }
+    } catch(e) { /* ignore */ }
   }
 
   /* ── Dedup state: prevent same event_id firing twice ────── */
@@ -633,6 +684,7 @@ window.MetaTracker = (function() {
     }
 
     // Step 4: Fire CAPI with IDENTICAL event_id
+    var externalId = getExternalId();
     var capiPayload = {
       project_id: PROJECT_ID,
       event_name: eventName,
@@ -641,12 +693,23 @@ window.MetaTracker = (function() {
       event_source_url: window.location.href,
       user_data: {
         fbc: getFbc(),
-        fbp: getFbp()
+        fbp: getFbp(),
+        external_id: externalId,
+        client_user_agent: navigator.userAgent
       },
       custom_data: customData
     };
 
-    // Merge any additional user_data from caller
+    // Merge stored advanced matching data into every CAPI call
+    if (advancedMatchData.em) capiPayload.user_data.em = advancedMatchData.em;
+    if (advancedMatchData.ph) capiPayload.user_data.ph = advancedMatchData.ph;
+    if (advancedMatchData.fn) capiPayload.user_data.fn = advancedMatchData.fn;
+    if (advancedMatchData.ln) capiPayload.user_data.ln = advancedMatchData.ln;
+    if (advancedMatchData.ct) capiPayload.user_data.ct = advancedMatchData.ct;
+    if (advancedMatchData.zp) capiPayload.user_data.zp = advancedMatchData.zp;
+    if (advancedMatchData.country) capiPayload.user_data.country = advancedMatchData.country;
+
+    // Override with any explicit user_data from caller
     if (userData.em) capiPayload.user_data.em = userData.em;
     if (userData.ph) capiPayload.user_data.ph = userData.ph;
     if (userData.fn) capiPayload.user_data.fn = userData.fn;
@@ -752,6 +815,8 @@ window.MetaTracker = (function() {
     trackAddPaymentInfo: trackAddPaymentInfo,
     trackPurchase: trackPurchase,
     generateEventId: generateEventId,
+    setUserData: setUserData,
+    getExternalId: getExternalId,
     getFbc: getFbc,
     getFbp: getFbp,
     PIXEL_ID: PIXEL_ID,
