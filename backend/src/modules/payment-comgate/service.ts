@@ -237,9 +237,10 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       const client = await this.getComgateClient()
       const config = await this.getComgateConfig()
 
-      // Use statement descriptor if provided, otherwise use order ID
+      // Use statement descriptor if provided, otherwise use refId or generic label
+      const refId = sessionData?.refId || contextData?.refId || cart?.id || `ref-${Date.now()}`
       const descriptor = (
-        contextData?.statement_descriptor || `Order ${cart?.id}`
+        contextData?.statement_descriptor || sessionData?.label || "Zamowienie"
       ).substring(0, 16)
 
       // Comgate expects price in haléře (cents). Medusa stores CZK amounts as
@@ -271,7 +272,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       // Map frontend method codes to Comgate method codes
       const rawMethod = sessionData?.comgate_method || sessionData?.method || contextData?.comgate_method || "ALL"
       let comgateMethod = "ALL"
-      if (rawMethod === "blik" || rawMethod === "blik_pl") comgateMethod = "BLIK_PL"
+      if (rawMethod === "blik" || rawMethod === "blik_pl") comgateMethod = "BANK_PL_BL"
       else if (rawMethod === "bank_transfer") comgateMethod = "BANK_ALL"
       else if (rawMethod === "creditcard" || rawMethod === "card") comgateMethod = "CARD_ALL"
       else if (rawMethod.startsWith("bank_pl_")) comgateMethod = rawMethod.toUpperCase()
@@ -284,7 +285,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         price: priceInCents,
         curr: curr,
         label: descriptor,
-        refId: cart?.id || `ref-${Date.now()}`,
+        refId: refId,
         secret: config?.live_keys?.secret_key || config?.test_keys?.secret_key,
         email: customerEmail,
         name: customerName || undefined, // payer name (shown in Comgate admin)
