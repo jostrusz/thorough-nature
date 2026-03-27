@@ -72,7 +72,7 @@ export function normalizePhone(
       if (result.startsWith(kp) && result.length > kp.length && result[kp.length] === "0") {
         // Don't strip 0 for countries where local numbers genuinely start with 0 (e.g. +39 0xx in Italy)
         // For most countries (DE, AT, NL, BE, PL, etc.), 0 after prefix is wrong
-        const noStripCountries = ["+39"] // Italy uses 0 in local numbers even in international format
+        const noStripCountries = ["+39", "+352"] // Italy uses 0 in local numbers; Luxembourg has no trunk prefix so 0 can be part of number
         if (!noStripCountries.includes(kp)) {
           const fixed = kp + result.substring(kp.length + 1)
           return {
