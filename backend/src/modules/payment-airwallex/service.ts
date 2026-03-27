@@ -285,9 +285,10 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
       // Projects that use Drop-in for bancontact/card skip server-side confirm (drop-in handles it)
       const DROPIN_PROJECTS = ["loslatenboek"]
       const useDropin = DROPIN_PROJECTS.includes(projectSlug || "")
+      // Credit cards use Drop-in element (inline form) — Airwallex hosted page doesn't work (CSP blocks)
       const REDIRECT_METHODS = useDropin
-        ? ["ideal", "eps", "blik", "przelewy24", "p24", "payu", "paypal", "creditcard", "klarna", "klarna_later", "klarna_slice"]
-        : ["ideal", "bancontact", "eps", "blik", "przelewy24", "p24", "payu", "paypal", "creditcard", "klarna", "klarna_later", "klarna_slice"]
+        ? ["ideal", "eps", "blik", "przelewy24", "p24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice"]
+        : ["ideal", "bancontact", "eps", "blik", "przelewy24", "p24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice"]
       let checkoutUrl: string | null = null
 
       if (method && REDIRECT_METHODS.includes(method) && returnUrl) {
@@ -332,16 +333,9 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
               paymentMethodPayload.blik.shopper_email = data?.email || ""
             }
           }
-          // Credit card: use Airwallex hosted payment page (redirect, no inline form)
-          if (method === "creditcard") {
-            const encodedReturnUrl = encodeURIComponent(returnUrl || "")
-            const hostedPageUrl = `https://${environment === "prod" ? "checkout" : "checkout-demo"}.airwallex.com/#/standalone/payment?intent_id=${paymentIntent.id}&client_secret=${paymentIntent.client_secret}&currency=${currency_code}&mode=payment${returnUrl ? `&successUrl=${encodedReturnUrl}&failUrl=${encodedReturnUrl}` : ""}`
-            checkoutUrl = hostedPageUrl
-            this.logger_.info(
-              `[Airwallex] Credit card redirect to hosted page: ${paymentIntent.id}`
-            )
-          } else {
-            // Server-side confirm for redirect payment methods (BLIK, P24, PayU, etc.)
+          // Server-side confirm for redirect payment methods (BLIK, P24, PayU, etc.)
+          // Credit cards are NOT in REDIRECT_METHODS — they use Drop-in element on frontend
+          {
             const confirmed = await client.confirmPaymentIntent(paymentIntent.id, {
               payment_method: paymentMethodPayload,
               return_url: returnUrl,
