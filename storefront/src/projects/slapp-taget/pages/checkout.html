@@ -4594,9 +4594,26 @@ body {
       (data.gateways || []).forEach(function(gw) {
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
         (gw.methods || []).forEach(function(m) {
+          var SE_NAMES = {
+            'creditcard': 'Betalkort',
+            'ideal': 'iDEAL',
+            'bancontact': 'Bancontact',
+            'paypal': 'PayPal',
+            'klarna': 'Klarna',
+            'klarna_later': 'Klarna — betala senare',
+            'klarna_slice': 'Klarna — delbetala',
+            'eps': 'EPS',
+            'trustly': 'Trustly',
+            'applepay': 'Apple Pay',
+            'googlepay': 'Google Pay',
+            'bank_transfer': 'Banköverföring',
+            'sepa_debit': 'SEPA-autogiro',
+            'swish': 'Swish',
+            'revolut_pay': 'Revolut Pay',
+          };
           allPaymentOptions.push({
             code: m.code,
-            display_name: m.display_name,
+            display_name: SE_NAMES[m.code] || m.display_name,
             icon: m.icon || m.code,
             provider: gw.provider,
             provider_id: m.provider_id || providerIdFull,

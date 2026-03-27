@@ -4921,9 +4921,26 @@ body {
       (data.gateways || []).forEach(function(gw) {
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
         (gw.methods || []).forEach(function(m) {
+          var CZ_NAMES = {
+            'creditcard': 'Platební karta',
+            'ideal': 'iDEAL',
+            'bancontact': 'Bancontact',
+            'paypal': 'PayPal',
+            'klarna': 'Klarna',
+            'klarna_later': 'Klarna — zaplatit později',
+            'klarna_slice': 'Klarna — splátky',
+            'eps': 'EPS',
+            'trustly': 'Trustly',
+            'applepay': 'Apple Pay',
+            'googlepay': 'Google Pay',
+            'bank_transfer': 'Bankovní převod',
+            'sepa_debit': 'SEPA inkaso',
+            'swish': 'Swish',
+            'revolut_pay': 'Revolut Pay',
+          };
           allPaymentOptions.push({
             code: m.code,
-            display_name: m.display_name,
+            display_name: CZ_NAMES[m.code] || m.display_name,
             icon: m.icon || m.code,
             provider: gw.provider,
             provider_id: m.provider_id || providerIdFull,

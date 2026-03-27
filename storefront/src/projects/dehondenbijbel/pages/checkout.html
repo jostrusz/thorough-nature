@@ -5054,9 +5054,34 @@ body {
       (data.gateways || []).forEach(function(gw) {
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
         (gw.methods || []).forEach(function(m) {
+          // Override display names for Dutch checkout
+          var NL_NAMES = {
+            'creditcard': 'Creditcard',
+            'ideal': 'iDEAL',
+            'bancontact': 'Bancontact',
+            'paypal': 'PayPal',
+            'klarna': 'Klarna',
+            'klarna_later': 'Klarna — achteraf betalen',
+            'klarna_slice': 'Klarna — in termijnen',
+            'eps': 'EPS',
+            'blik': 'BLIK',
+            'przelewy24': 'Przelewy24',
+            'payu': 'PayU',
+            'in3': 'in3 — 3 termijnen',
+            'belfius': 'Belfius',
+            'kbc': 'KBC/CBC',
+            'riverty': 'Riverty',
+            'trustly': 'Trustly',
+            'applepay': 'Apple Pay',
+            'googlepay': 'Google Pay',
+            'bank_transfer': 'Bankoverschrijving',
+            'sepa_debit': 'SEPA automatische incasso',
+            'swish': 'Swish',
+            'revolut_pay': 'Revolut Pay',
+          };
           allPaymentOptions.push({
             code: m.code,
-            display_name: m.display_name,
+            display_name: NL_NAMES[m.code] || m.display_name,
             icon: m.icon || m.code,
             provider: gw.provider,
             provider_id: m.provider_id || providerIdFull,
