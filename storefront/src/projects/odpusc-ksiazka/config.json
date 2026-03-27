@@ -28,10 +28,10 @@
     "currency": "PLN"
   },
   "bundleOptions": [
-    { "qty": 1, "price": 129, "label": "1 książka", "save": 0 },
-    { "qty": 2, "price": 199, "label": "2 książki", "save": 59 },
-    { "qty": 3, "price": 279, "label": "3 książki", "save": 108 },
-    { "qty": 4, "price": 359, "label": "4 książki", "save": 157 }
+    { "qty": 1, "price": 129, "label": "1 książka + 2 darmowe e-booki", "save": 0 },
+    { "qty": 2, "price": 199, "label": "2 książki + 2 darmowe e-booki", "save": 59 },
+    { "qty": 3, "price": 279, "label": "3 książki + 2 darmowe e-booki", "save": 108 },
+    { "qty": 4, "price": 359, "label": "4 książki + 2 darmowe e-booki", "save": 157 }
   ],
   "shippingOptions": {
     "paczkomat": { "price": 0, "label": "Paczkomat InPost", "description": "Odbiór w wybranym Paczkomacie 24/7", "matchName": "Paczkomaty" },
