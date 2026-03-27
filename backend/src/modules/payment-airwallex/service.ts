@@ -286,17 +286,24 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
       const DROPIN_PROJECTS = ["loslatenboek"]
       const useDropin = DROPIN_PROJECTS.includes(projectSlug || "")
       const REDIRECT_METHODS = useDropin
-        ? ["ideal", "eps", "blik", "przelewy24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice"]
-        : ["ideal", "bancontact", "eps", "blik", "przelewy24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice"]
+        ? ["ideal", "eps", "blik", "przelewy24", "p24", "payu", "paypal", "creditcard", "klarna", "klarna_later", "klarna_slice"]
+        : ["ideal", "bancontact", "eps", "blik", "przelewy24", "p24", "payu", "paypal", "creditcard", "klarna", "klarna_later", "klarna_slice"]
       let checkoutUrl: string | null = null
 
       if (method && REDIRECT_METHODS.includes(method) && returnUrl) {
         try {
-          const paymentMethodPayload: Record<string, any> = { type: method }
+          // Map frontend method codes to Airwallex API type codes
+          const METHOD_TYPE_MAP: Record<string, string> = {
+            przelewy24: "p24",  // Airwallex API uses "p24" not "przelewy24"
+          }
+          const apiMethodType = METHOD_TYPE_MAP[method] || method
+          const paymentMethodPayload: Record<string, any> = { type: apiMethodType }
+
           // Airwallex requires method-specific sub-object (e.g. bancontact: {}, ideal: {})
-          if (["bancontact", "ideal", "eps", "blik", "przelewy24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice"].includes(method)) {
-            const methodKey = method.startsWith("klarna") ? "klarna" : method
-            paymentMethodPayload[methodKey] = {}
+          const METHODS_WITH_SUB_OBJECT = ["bancontact", "ideal", "eps", "blik", "p24", "przelewy24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice"]
+          if (METHODS_WITH_SUB_OBJECT.includes(method)) {
+            const subObjectKey = method.startsWith("klarna") ? "klarna" : apiMethodType
+            paymentMethodPayload[subObjectKey] = {}
             // Klarna requires country_code in the payment method sub-object
             if (method.startsWith("klarna")) {
               const countryCode = data?.billing_address?.country_code?.toUpperCase()
@@ -305,11 +312,11 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
               paymentMethodPayload.klarna.country_code = countryCode
             }
             // P24 requires shopper_name and shopper_email
-            if (method === "przelewy24") {
+            if (method === "przelewy24" || method === "p24") {
               const firstName = data?.shipping_address?.first_name || data?.billing_address?.first_name || ""
               const lastName = data?.shipping_address?.last_name || data?.billing_address?.last_name || ""
-              paymentMethodPayload.przelewy24.shopper_name = `${firstName} ${lastName}`.trim() || "Customer"
-              paymentMethodPayload.przelewy24.shopper_email = data?.email || ""
+              paymentMethodPayload.p24.shopper_name = `${firstName} ${lastName}`.trim() || "Customer"
+              paymentMethodPayload.p24.shopper_email = data?.email || ""
             }
             // PayU requires shopper_name
             if (method === "payu") {
@@ -317,15 +324,32 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
               const lastName = data?.shipping_address?.last_name || data?.billing_address?.last_name || ""
               paymentMethodPayload.payu.shopper_name = `${firstName} ${lastName}`.trim() || "Customer"
             }
+            // BLIK requires shopper_name and shopper_email
+            if (method === "blik") {
+              const firstName = data?.shipping_address?.first_name || data?.billing_address?.first_name || ""
+              const lastName = data?.shipping_address?.last_name || data?.billing_address?.last_name || ""
+              paymentMethodPayload.blik.shopper_name = `${firstName} ${lastName}`.trim() || "Customer"
+              paymentMethodPayload.blik.shopper_email = data?.email || ""
+            }
           }
-          const confirmed = await client.confirmPaymentIntent(paymentIntent.id, {
-            payment_method: paymentMethodPayload,
-            return_url: returnUrl,
-          })
-          checkoutUrl = confirmed.next_action?.url || null
-          this.logger_.info(
-            `[Airwallex] Redirect method ${method} confirmed: ${paymentIntent.id}, redirect: ${checkoutUrl ? "yes" : "no"}`
-          )
+          // Credit card: use Airwallex hosted payment page (redirect, no inline form)
+          if (method === "creditcard") {
+            const hostedPageUrl = `https://${environment === "prod" ? "checkout" : "checkout-demo"}.airwallex.com/#/standalone/payment?intent_id=${paymentIntent.id}&client_secret=${paymentIntent.client_secret}&currency=${currency_code}&mode=payment`
+            checkoutUrl = hostedPageUrl
+            this.logger_.info(
+              `[Airwallex] Credit card redirect to hosted page: ${paymentIntent.id}`
+            )
+          } else {
+            // Server-side confirm for redirect payment methods (BLIK, P24, PayU, etc.)
+            const confirmed = await client.confirmPaymentIntent(paymentIntent.id, {
+              payment_method: paymentMethodPayload,
+              return_url: returnUrl,
+            })
+            checkoutUrl = confirmed.next_action?.url || null
+            this.logger_.info(
+              `[Airwallex] Redirect method ${method} confirmed: ${paymentIntent.id}, redirect: ${checkoutUrl ? "yes" : "no"}`
+            )
+          }
         } catch (confirmErr: any) {
           // Non-fatal: fall back to Drop-in on frontend
           this.logger_.warn(

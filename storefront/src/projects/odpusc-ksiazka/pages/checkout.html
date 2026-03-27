@@ -3346,8 +3346,47 @@ body {
       if (nameEl) nameEl.textContent = selectedPaczkomatName;
       if (addressEl) addressEl.textContent = selectedPaczkomatAddress;
       if (errorEl) errorEl.style.display = 'none';
+
+      // Persist paczkomat selection in localStorage for page refresh
+      try {
+        localStorage.setItem('checkout_paczkomat', JSON.stringify({
+          name: selectedPaczkomatName,
+          address: selectedPaczkomatAddress,
+          id: point.id || '',
+        }));
+      } catch(e) {}
     }, { country: 'pl', language: 'pl', vendors: [{ carrierId: 3060 }] });
   }
+
+  // Restore paczkomat selection from localStorage on page load
+  (function restorePaczkomat() {
+    try {
+      var saved = localStorage.getItem('checkout_paczkomat');
+      if (!saved) return;
+      var data = JSON.parse(saved);
+      if (!data.name) return;
+
+      selectedPaczkomatName = data.name;
+      selectedPaczkomatAddress = data.address || '';
+
+      var nameField = document.getElementById('paczkomat_point_name');
+      var addrField = document.getElementById('paczkomat_point_address');
+      var idField = document.getElementById('packeta_point_id');
+      if (nameField) nameField.value = selectedPaczkomatName;
+      if (addrField) addrField.value = selectedPaczkomatAddress;
+      if (idField) idField.value = data.id || '';
+
+      var selectBtn = document.getElementById('paczkomat-select-btn');
+      var selectedDiv = document.getElementById('paczkomat-selected');
+      var nameEl = document.getElementById('paczkomat-name');
+      var addressEl = document.getElementById('paczkomat-address');
+
+      if (selectBtn) selectBtn.style.display = 'none';
+      if (selectedDiv) selectedDiv.style.display = '';
+      if (nameEl) nameEl.textContent = selectedPaczkomatName;
+      if (addressEl) addressEl.textContent = selectedPaczkomatAddress;
+    } catch(e) {}
+  })();
 
   // Aktualizuj order summary na základě cart dat z Medusa API
   function updateOrderSummary(cart) {
@@ -4888,6 +4927,7 @@ body {
     blik: 'Wpisz kod BLIK w aplikacji bankowej',
     przelewy24: 'Szybki przelew online',
     payu: 'Szybka płatność online',
+    creditcard: 'Visa, Mastercard, American Express',
   };
 
   // Polish bank transfer sub-methods (Comgate bank codes)
@@ -5419,13 +5459,11 @@ body {
         // Comgate, Stripe, PayPal use hosted checkout (redirect), no inline card fields
         var cardFields = document.getElementById('card-fields');
         if (cardFields) {
-          var redirectProviders = ['stripe', 'paypal', 'comgate'];
+          var redirectProviders = ['stripe', 'paypal', 'comgate', 'airwallex'];
           if (selectedMethod === 'creditcard' && redirectProviders.indexOf(cardProvider) === -1) {
             cardFields.style.display = 'block';
             if (cardProvider === 'mollie') {
               initMollieComponents();
-            } else if (cardProvider === 'airwallex') {
-              initAirwallexCard();
             }
           } else {
             cardFields.style.display = 'none';
@@ -7295,6 +7333,8 @@ body {
         var __packetaId = document.getElementById('packeta_point_id');
         if (__packetaId) localStorage.setItem('medusa_packeta_point_id', __packetaId.value);
       }
+      // Clear paczkomat session (order is being submitted)
+      localStorage.removeItem('checkout_paczkomat');
 
       // Analytics: Track initiate_checkout event
       if (window.AnalyticsTracker) {
