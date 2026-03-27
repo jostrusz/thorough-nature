@@ -7112,14 +7112,10 @@ body {
     })
     .then(function(cartId) {
       // Stap 3: Cart updaten met klantgegevens (must complete before shipping)
-      console.log('[Checkout] Updating cart with address — country_code:', customerData.shipping_address.country_code, 'region_id:', currentRegionId);
       return medusaFetch('/store/carts/' + cartId, {
         method: 'POST',
         body: JSON.stringify(customerData)
-      }).then(function(res) {
-        console.log('[Checkout] Cart updated — region_id:', res.cart && res.cart.region_id);
-        return cartId;
-      });
+      }).then(function() { return cartId; });
     })
     .then(function(cartId) {
       // Stap 3a: Promo code toepassen via Medusa Promotions API (opnieuw als cart hergebruikt wordt)
@@ -7157,17 +7153,14 @@ body {
     })
     .then(function(cartId) {
       // Stap 3b: Shipping method toevoegen
-      console.log('[Checkout] Fetching shipping options for cart:', cartId, 'method:', selectedShippingMethod);
       return medusaFetch('/store/shipping-options?cart_id=' + cartId, {
         method: 'GET'
       }).then(function(shipRes) {
         var options = shipRes.shipping_options || [];
-        console.log('[Checkout] Shipping options received:', options.length, options.map(function(o) { return o.name + ' (' + o.id + ')'; }));
         if (options.length === 0) {
           throw new Error('Brak dostępnych opcji wysyłki');
         }
         var optionId = findShippingOptionId(options, selectedShippingMethod);
-        console.log('[Checkout] Selected shipping option ID:', optionId);
         return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
           method: 'POST',
           body: JSON.stringify({ option_id: optionId })
@@ -7175,7 +7168,6 @@ body {
       }).then(function() {
         return medusaFetch('/store/carts/' + cartId, { method: 'GET' });
       }).then(function(cartRes) {
-        console.log('[Checkout] Cart after shipping — total:', cartRes.cart.total, 'shipping_total:', cartRes.cart.shipping_total);
         updateOrderSummary(cartRes.cart);
         return cartId;
       });
