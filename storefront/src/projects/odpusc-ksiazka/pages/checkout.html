@@ -6620,7 +6620,7 @@ body {
         address_1: (addr && addr.value) || '',
         city: (ct && ct.value) || '',
         postal_code: (pc && pc.value) || '',
-        country_code: (co && co.value) || 'pl',
+        country_code: ((co && co.value) || 'pl').toLowerCase(),
         phone: (ph && ph.value) || ''
       };
     }
