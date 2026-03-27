@@ -495,8 +495,8 @@ export function OrderFulfillmentCard({
         )
       })()}
 
-      {/* Pickup point info (Zásilkovna / Packeta) */}
-      {(order.metadata?.paczkomat_name || order.metadata?.packeta_point_name) && (
+      {/* Pickup point info (Zásilkovna / Packeta) — only for pickup orders, not home delivery */}
+      {(order.metadata?.paczkomat_name || order.metadata?.packeta_point_name) && order.metadata?.shipping_method !== "home_delivery" && (
         <div
           style={{
             padding: "10px 20px",
@@ -530,8 +530,8 @@ export function OrderFulfillmentCard({
         </div>
       )}
 
-      {/* Shipping method label for Zásilkovna orders without pickup point */}
-      {order.metadata?.shipping_method && !order.metadata?.paczkomat_name && !order.metadata?.packeta_point_name && (
+      {/* Shipping method label for Zásilkovna orders without pickup point (only for zasilkovna-specific methods) */}
+      {order.metadata?.shipping_method && ["zasilkovna_pickup", "zasilkovna_home"].includes(order.metadata.shipping_method) && !order.metadata?.paczkomat_name && !order.metadata?.packeta_point_name && (
         <div
           style={{
             padding: "8px 20px",
