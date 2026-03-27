@@ -558,7 +558,22 @@ t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window,document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 
-fbq('init', '${pixelId}');
+/* ── Init with advanced matching from localStorage (returning visitors) ── */
+var _initMatch = {};
+try {
+  var _sc = localStorage.getItem('medusa_customer');
+  if (_sc) {
+    var _c = JSON.parse(_sc);
+    if (_c.email) _initMatch.em = _c.email.toLowerCase().trim();
+    if (_c.phone) _initMatch.ph = _c.phone.replace(/[^0-9]/g, '');
+    if (_c.first_name) _initMatch.fn = _c.first_name.toLowerCase().trim();
+    if (_c.last_name) _initMatch.ln = _c.last_name.toLowerCase().trim();
+    if (_c.city) _initMatch.ct = _c.city.toLowerCase().trim();
+    if (_c.postal_code) _initMatch.zp = _c.postal_code.trim();
+    if (_c.country_code) _initMatch.country = _c.country_code.toLowerCase().trim();
+  }
+} catch(e) {}
+fbq('init', '${pixelId}', _initMatch);
 
 /* ── 2. MetaTracker namespace ────────────────────────────────── */
 window.MetaTracker = (function() {
@@ -802,8 +817,22 @@ window.MetaTracker = (function() {
     }, userData, options);
   }
 
-  /* ── Initialize: capture fbclid on every page ──────────── */
+  /* ── Initialize: capture fbclid + restore saved user data ── */
   captureFbclid();
+  // Pre-fill advancedMatchData from localStorage for CAPI calls
+  try {
+    var _saved = localStorage.getItem('medusa_customer');
+    if (_saved) {
+      var _sd = JSON.parse(_saved);
+      if (_sd.email) advancedMatchData.em = _sd.email.toLowerCase().trim();
+      if (_sd.phone) advancedMatchData.ph = _sd.phone.replace(/[^0-9]/g, '');
+      if (_sd.first_name) advancedMatchData.fn = _sd.first_name.toLowerCase().trim();
+      if (_sd.last_name) advancedMatchData.ln = _sd.last_name.toLowerCase().trim();
+      if (_sd.city) advancedMatchData.ct = _sd.city.toLowerCase().trim();
+      if (_sd.postal_code) advancedMatchData.zp = _sd.postal_code.trim();
+      if (_sd.country_code) advancedMatchData.country = _sd.country_code.toLowerCase().trim();
+    }
+  } catch(e) {}
 
   /* ── Public API ─────────────────────────────────────────── */
   return {
