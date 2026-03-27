@@ -286,15 +286,15 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
       const DROPIN_PROJECTS = ["loslatenboek"]
       const useDropin = DROPIN_PROJECTS.includes(projectSlug || "")
       const REDIRECT_METHODS = useDropin
-        ? ["ideal", "eps", "blik", "przelewy24", "paypal", "klarna", "klarna_later", "klarna_slice"]
-        : ["ideal", "bancontact", "eps", "blik", "przelewy24", "paypal", "klarna", "klarna_later", "klarna_slice"]
+        ? ["ideal", "eps", "blik", "przelewy24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice"]
+        : ["ideal", "bancontact", "eps", "blik", "przelewy24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice"]
       let checkoutUrl: string | null = null
 
       if (method && REDIRECT_METHODS.includes(method) && returnUrl) {
         try {
           const paymentMethodPayload: Record<string, any> = { type: method }
           // Airwallex requires method-specific sub-object (e.g. bancontact: {}, ideal: {})
-          if (["bancontact", "ideal", "eps", "blik", "przelewy24", "paypal", "klarna", "klarna_later", "klarna_slice"].includes(method)) {
+          if (["bancontact", "ideal", "eps", "blik", "przelewy24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice"].includes(method)) {
             const methodKey = method.startsWith("klarna") ? "klarna" : method
             paymentMethodPayload[methodKey] = {}
             // Klarna requires country_code in the payment method sub-object
@@ -303,6 +303,19 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
                 || data?.shipping_address?.country_code?.toUpperCase()
                 || "DE"
               paymentMethodPayload.klarna.country_code = countryCode
+            }
+            // P24 requires shopper_name and shopper_email
+            if (method === "przelewy24") {
+              const firstName = data?.shipping_address?.first_name || data?.billing_address?.first_name || ""
+              const lastName = data?.shipping_address?.last_name || data?.billing_address?.last_name || ""
+              paymentMethodPayload.przelewy24.shopper_name = `${firstName} ${lastName}`.trim() || "Customer"
+              paymentMethodPayload.przelewy24.shopper_email = data?.email || ""
+            }
+            // PayU requires shopper_name
+            if (method === "payu") {
+              const firstName = data?.shipping_address?.first_name || data?.billing_address?.first_name || ""
+              const lastName = data?.shipping_address?.last_name || data?.billing_address?.last_name || ""
+              paymentMethodPayload.payu.shopper_name = `${firstName} ${lastName}`.trim() || "Customer"
             }
           }
           const confirmed = await client.confirmPaymentIntent(paymentIntent.id, {

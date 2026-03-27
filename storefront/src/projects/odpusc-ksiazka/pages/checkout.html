@@ -4885,6 +4885,9 @@ body {
     sepa_debit: 'Polecenie zapłaty SEPA',
     swish: 'Zapłać przez Swish',
     revolut_pay: 'Zapłać przez Revolut',
+    blik: 'Wpisz kod BLIK w aplikacji bankowej',
+    przelewy24: 'Szybki przelew online',
+    payu: 'Szybka płatność online',
   };
 
   // Polish bank transfer sub-methods (Comgate bank codes)
@@ -4932,6 +4935,12 @@ body {
     // Methods with bank logo files
     if (code === 'blik') {
       return '<img src="/Loga%20komplet/PL/blik.svg" alt="BLIK" class="pm-icon" style="width:32px;height:24px;object-fit:contain;" onerror="this.style.display=\'none\'">';
+    }
+    if (code === 'przelewy24') {
+      return '<div class="pm-icon" style="width:32px;height:24px;border-radius:4px;background:#D13239;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#FFF;border:1px solid #B82A30;flex-shrink:0;">P24</div>';
+    }
+    if (code === 'payu') {
+      return '<div class="pm-icon" style="width:32px;height:24px;border-radius:4px;background:#A6C307;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#FFF;border:1px solid #8EA506;flex-shrink:0;">PayU</div>';
     }
     if (code === 'przelew_bankowy') {
       return '<img src="/Loga%20komplet/PL/bank_pl_or.png" alt="Przelew bankowy" class="pm-icon" style="width:32px;height:24px;object-fit:contain;" onerror="this.style.display=\'none\'">';
@@ -4996,7 +5005,9 @@ body {
             'creditcard': 'Karta płatnicza',
             'bank_transfer': 'Przelew bankowy',
             'applepay': 'Apple Pay',
-            'googlepay': 'Google Pay'
+            'googlepay': 'Google Pay',
+            'przelewy24': 'Przelewy24',
+            'payu': 'PayU',
           };
           allPaymentOptions.push({
             code: m.code,
