@@ -136,6 +136,24 @@ export async function sendEbookDelivery(orderId: string, container: any, eventNa
       return
     }
 
+    // Optimistic lock: set ebook_sent flag BEFORE sending to prevent race condition
+    // between payment.captured and order.placed-fallback subscribers
+    try {
+      const { Pool } = require("pg")
+      const lockPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+      const lockResult = await lockPool.query(
+        `UPDATE "order" SET metadata = jsonb_set(COALESCE(metadata, '{}'), '{ebook_sent}', 'true'), updated_at = NOW() WHERE id = $1 AND (metadata IS NULL OR NOT (metadata ? 'ebook_sent') OR metadata->>'ebook_sent' != 'true') RETURNING id`,
+        [order.id]
+      )
+      await lockPool.end()
+      if (lockResult.rowCount === 0) {
+        console.log(`[digital-download] E-books already claimed by another subscriber for order ${order.id}, skipping (event: ${eventName})`)
+        return
+      }
+    } catch (lockErr: any) {
+      console.warn(`[digital-download] Could not acquire lock for order ${order.id}: ${lockErr.message}, proceeding anyway`)
+    }
+
     // Project-specific config
     const projectConfig = getProjectEmailConfig(order)
     const projectId = projectConfig.project
@@ -234,19 +252,6 @@ export async function sendEbookDelivery(orderId: string, container: any, eventNa
       status: "sent",
       ...(htmlBody ? { html_body: htmlBody } : {}),
     }).catch((err) => console.warn('[digital-download] Could not log email activity:', err.message))
-
-    // Mark e-books as sent to prevent duplicate sends
-    try {
-      const { Pool } = require("pg")
-      const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
-      await pool.query(
-        `UPDATE "order" SET metadata = jsonb_set(COALESCE(metadata, '{}'), '{ebook_sent}', 'true'), updated_at = NOW() WHERE id = $1`,
-        [order.id]
-      )
-      await pool.end()
-    } catch (metaErr: any) {
-      console.warn(`[digital-download] Could not set ebook_sent flag: ${metaErr.message}`)
-    }
 
     console.log(`[digital-download] Created download token ${token} for order ${order.id} (project: ${projectId}, trigger: ${eventName})`)
   } catch (error: any) {
