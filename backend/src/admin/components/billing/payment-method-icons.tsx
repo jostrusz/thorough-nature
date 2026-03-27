@@ -85,6 +85,8 @@ export function PaymentMethodIcon({ code, size }: { code: string; size?: number 
       return <div style={{ ...style, background: "#D13239", color: "#FFFFFF" }}>P24</div>
     case "blik":
       return <div style={{ ...style, background: "#000000", color: "#FFFFFF" }}>BLIK</div>
+    case "payu":
+      return <div style={{ ...style, background: "#A6C307", color: "#FFFFFF" }}>PayU</div>
     case "applepay":
     case "apple_pay":
       return <div style={{ ...style, background: "#000000", color: "#FFFFFF" }}>{"\uF8FF"} Pay</div>
@@ -167,6 +169,8 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "ideal", name: "iDEAL", icon: "ideal", available_countries: ["nl"], supported_currencies: ["EUR"] },
     { code: "bancontact", name: "Bancontact", icon: "bancontact", available_countries: ["be"], supported_currencies: ["EUR"] },
     { code: "blik", name: "BLIK", icon: "blik", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    { code: "przelewy24", name: "Przelewy24", icon: "przelewy24", available_countries: ["pl"], supported_currencies: ["PLN", "EUR"] },
+    { code: "payu", name: "PayU", icon: "payu", available_countries: ["pl"], supported_currencies: ["PLN"] },
     { code: "eps", name: "EPS", icon: "eps", available_countries: ["at"], supported_currencies: ["EUR"] },
     { code: "klarna", name: "Klarna", icon: "klarna", available_countries: ["nl", "be", "de", "at", "fi", "fr", "it", "se", "es", "dk", "no", "gb", "ie"], supported_currencies: [] },
     { code: "paypal", name: "PayPal", icon: "paypal", available_countries: [], supported_currencies: ["EUR", "USD", "GBP", "AUD", "CAD", "JPY", "PLN", "SEK", "CZK", "HUF"] },
