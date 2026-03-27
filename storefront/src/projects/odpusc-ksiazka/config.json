@@ -6,10 +6,10 @@
   "defaultCountry": "PL",
   "salesChannelName": "Odpusc Ksiazka",
   "medusaUrl": "",
-  "publishableApiKey": "",
+  "publishableApiKey": "pk_1a3e60bc52d9ceb22d801a00512ffa1af3cac608f724fb8e27c9c78bc660f1ce",
   "facebookPixelId": "",
   "regions": {
-    "PL": ""
+    "PL": "reg_01KK8N9GTWQK7A55SXAH07KNK1"
   },
   "mainProduct": {
     "name": "Odpuść to, co cię niszczy",
