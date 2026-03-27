@@ -31,9 +31,8 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
 <!-- Stripe.js SDK -->
 <script src="https://js.stripe.com/v3/" async></script>
 
-<!-- InPost Geowidget v5 (Paczkomat picker) -->
-<link rel="stylesheet" href="https://geowidget.inpost.pl/inpost-geowidget.css"/>
-<script src="https://geowidget.inpost.pl/inpost-geowidget.js" defer></script>
+<!-- Packeta/Zásilkovna Geowidget v6 (Pickup point picker) -->
+<script src="https://widget.packeta.com/v6/www/js/library.js" defer></script>
 
 <style>
 /* ─── FONTS ─── */
@@ -2320,7 +2319,7 @@ body {
       </div>
       <!-- Verzending -->
       <div class="msb-line shipping" id="msb-shipping-line">
-        <span class="msb-line-label">Wysyłka <span class="msb-gls" id="msb-shipping-badge">InPost</span></span>
+        <span class="msb-line-label">Wysyłka <span class="msb-gls" id="msb-shipping-badge">Zásilkovna</span></span>
         <span class="msb-line-val" id="msb-shipping-price">Za darmo</span>
       </div>
       <!-- Totaal -->
@@ -2664,19 +2663,19 @@ body {
               Metoda dostawy
             </div>
             <div class="shipping-options" id="shipping-options">
-              <!-- Option 1: Paczkomat InPost (default, free) -->
+              <!-- Option 1: Zásilkovna / Packeta pickup (default, free) -->
               <label class="shipping-option selected" data-method="paczkomat" id="shipping-opt-paczkomat">
                 <input type="radio" name="shipping_method" value="paczkomat" checked>
                 <div class="shipping-radio"><div class="shipping-radio-dot"></div></div>
                 <div class="shipping-option-content">
                   <div class="shipping-option-row">
                     <div class="shipping-option-info">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 24" width="56" height="16" style="flex-shrink:0;vertical-align:middle;border-radius:2px;"><rect width="80" height="24" rx="4" fill="#FFCD00"/><text x="40" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#000">InPost</text></svg>
-                      <span class="shipping-option-name">Paczkomat InPost</span>
+                      <span style="display:inline-block;background:#BA1B02;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;vertical-align:middle;">Zásilkovna</span>
+                      <span class="shipping-option-name">Punkt odbioru Zásilkovna</span>
                     </div>
                     <span class="shipping-option-price" style="color:#27AE60;font-weight:700;">Za darmo</span>
                   </div>
-                  <div class="shipping-option-desc">Odbiór w wybranym Paczkomacie 24/7</div>
+                  <div class="shipping-option-desc">Odbiór w wybranym punkcie Zásilkovna</div>
                 </div>
               </label>
 
@@ -2684,7 +2683,7 @@ body {
               <div id="paczkomat-selector" class="paczkomat-selector">
                 <button type="button" id="paczkomat-select-btn" class="paczkomat-select-btn">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span id="paczkomat-btn-text">Wybierz Paczkomat</span>
+                  <span id="paczkomat-btn-text">Wybierz punkt odbioru</span>
                 </button>
                 <div id="paczkomat-selected" class="paczkomat-selected" style="display:none;">
                   <div class="paczkomat-selected-info">
@@ -2696,7 +2695,7 @@ body {
                   </div>
                   <button type="button" id="paczkomat-change-btn" class="paczkomat-change-btn">Zmień</button>
                 </div>
-                <div id="paczkomat-error" class="paczkomat-error" style="display:none;">Wybierz Paczkomat, aby kontynuować</div>
+                <div id="paczkomat-error" class="paczkomat-error" style="display:none;">Wybierz punkt odbioru, aby kontynuować</div>
               </div>
 
               <!-- Option 2: Home delivery (+5 PLN) -->
@@ -2717,9 +2716,10 @@ body {
             </div>
           </div>
 
-          <!-- Hidden fields for paczkomat data -->
+          <!-- Hidden fields for pickup point data -->
           <input type="hidden" id="paczkomat_point_name" name="paczkomat_point_name" value="">
           <input type="hidden" id="paczkomat_point_address" name="paczkomat_point_address" value="">
+          <input type="hidden" id="packeta_point_id" name="packeta_point_id" value="">
 
         </div>
 
@@ -2866,7 +2866,7 @@ body {
       <div class="summary-line shipping" id="summary-shipping">
         <span style="display:flex;align-items:center;gap:6px;">
           Wysyłka
-          <span id="summary-shipping-method-badge"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 24" width="56" height="13" style="vertical-align:middle;border-radius:2px;"><rect width="80" height="24" rx="4" fill="#FFCD00"/><text x="40" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#000">InPost</text></svg></span>
+          <span id="summary-shipping-method-badge"><span style="display:inline-block;background:#BA1B02;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;vertical-align:middle;">Zásilkovna</span></span>
         </span>
         <span id="summary-shipping-price" style="color:#27AE60;font-weight:600;">Za darmo</span>
       </div>
@@ -2893,7 +2893,7 @@ body {
       <div class="summary-shipping-info">
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          <span>Dostawa przez <strong>InPost</strong> w ciągu <strong>3–5 dni roboczych</strong></span>
+          <span>Dostawa przez <strong>Zásilkovna</strong> w ciągu <strong>3–5 dni roboczych</strong></span>
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
@@ -2955,7 +2955,7 @@ body {
     <strong>Odpuść to, co cię niszczy</strong> jest wydaniem Performance Marketing Solution s.r.o.<br>
     Rybná 716/24, Staré Město, 110 00 Praga, Czechy<br>
     IČO: 06259928 · DIČ: CZ06259928<br>
-    Wysyłamy z naszego europejskiego centrum dystrybucji przez InPost do całej Polski.<br>
+    Wysyłamy z naszego europejskiego centrum dystrybucji przez Zásilkovna do całej Polski.<br>
     Pytania lub problemy? Skontaktuj się z nami: <a href="mailto:biuro@odpusc-ksiazka.pl"><strong>biuro@odpusc-ksiazka.pl</strong></a><br>
     Odpowiadamy w ciągu 24 godzin i rozwiązujemy każdy problem osobiście.
   </div>
@@ -3089,13 +3089,13 @@ body {
     if (msbTotal) msbTotal.textContent = formatPrice(total);
 
     // ─── SHIPPING METHOD DISPLAY (desktop + mobile) ───
-    var inpostBadgeSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 24" width="56" height="13" style="vertical-align:middle;border-radius:2px;"><rect width="80" height="24" rx="4" fill="#FFCD00"/><text x="40" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#000">InPost</text></svg>';
+    var packetaBadge = '<span style="display:inline-block;background:#BA1B02;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;vertical-align:middle;">Zásilkovna</span>';
     var kurierBadge = '<span style="display:inline-block;background:#eee;color:#333;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;vertical-align:middle;">Kurier</span>';
 
     // Desktop summary shipping badge + price
     var ssmBadge = document.getElementById('summary-shipping-method-badge');
     var ssmPrice = document.getElementById('summary-shipping-price');
-    if (ssmBadge) ssmBadge.innerHTML = selectedShippingMethod === 'paczkomat' ? inpostBadgeSvg : kurierBadge;
+    if (ssmBadge) ssmBadge.innerHTML = selectedShippingMethod === 'paczkomat' ? packetaBadge : kurierBadge;
     if (ssmPrice) {
       if (selectedShippingCost > 0) {
         ssmPrice.textContent = '+' + formatPrice(selectedShippingCost);
@@ -3111,7 +3111,7 @@ body {
     // Mobile summary shipping badge + price
     var msbBadge = document.getElementById('msb-shipping-badge');
     var msbShipPrice = document.getElementById('msb-shipping-price');
-    if (msbBadge) msbBadge.textContent = selectedShippingMethod === 'paczkomat' ? 'InPost' : 'Kurier';
+    if (msbBadge) msbBadge.textContent = selectedShippingMethod === 'paczkomat' ? 'Zásilkovna' : 'Kurier';
     if (msbShipPrice) {
       if (selectedShippingCost > 0) {
         msbShipPrice.textContent = '+' + formatPrice(selectedShippingCost);
@@ -3293,7 +3293,7 @@ body {
       paczkomatSelectBtn.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        openGeowidgetModal();
+        openPacketaWidget();
       });
     }
 
@@ -3302,87 +3302,36 @@ body {
       paczkomatChangeBtn.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        openGeowidgetModal();
+        openPacketaWidget();
       });
     }
   })();
 
-  /* ─── InPost Geowidget — modal + point selection ─── */
-  function openGeowidgetModal() {
-    var modal = document.getElementById('geowidget-modal');
-    if (modal) {
-      modal.style.display = '';
-      document.body.style.overflow = 'hidden';
-      // Set token on the geowidget element
-      var geowidget = document.getElementById('inpost-geowidget');
-      if (geowidget && PROJECT_CONFIG.inpostGeowidgetToken) {
-        geowidget.setAttribute('token', PROJECT_CONFIG.inpostGeowidgetToken);
-      }
+  /* ─── Packeta/Zásilkovna Widget — point selection ─── */
+  function openPacketaWidget() {
+    var apiKey = PROJECT_CONFIG.packetaApiKey;
+    if (!apiKey || typeof Packeta === 'undefined') {
+      console.error('[Packeta] Widget not loaded or API key missing');
+      return;
     }
-  }
-
-  function closeGeowidgetModal() {
-    var modal = document.getElementById('geowidget-modal');
-    if (modal) {
-      modal.style.display = 'none';
-      document.body.style.overflow = '';
-    }
-  }
-
-  (function initGeowidget() {
-    // Close button
-    var closeBtn = document.getElementById('geowidget-close');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', function() { closeGeowidgetModal(); });
-    }
-
-    // Backdrop click
-    var backdrop = document.getElementById('geowidget-backdrop');
-    if (backdrop) {
-      backdrop.addEventListener('click', function() { closeGeowidgetModal(); });
-    }
-
-    // ESC key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        var modal = document.getElementById('geowidget-modal');
-        if (modal && modal.style.display !== 'none') {
-          closeGeowidgetModal();
-        }
-      }
-    });
-
-    // InPost Geowidget point selection event
-    // The geowidget fires 'onpointselect' when user picks a point
-    document.addEventListener('onpointselect', function(e) {
-      var point = e.detail;
-      if (!point) return;
+    Packeta.Widget.pick(apiKey, function(point) {
+      if (!point) return; // User closed widget without selecting
 
       // Save selected point data
-      selectedPaczkomatName = point.name || '';
-      selectedPaczkomatAddress = '';
-      if (point.address) {
-        var addr = point.address;
-        var parts = [];
-        if (addr.line1) parts.push(addr.line1);
-        if (addr.line2) parts.push(addr.line2);
-        selectedPaczkomatAddress = parts.join(', ');
-      }
-      if (!selectedPaczkomatAddress && point.address_details) {
-        var ad = point.address_details;
-        var adParts = [];
-        if (ad.street) adParts.push(ad.street);
-        if (ad.building_number) adParts.push(ad.building_number);
-        if (ad.post_code) adParts.push(ad.post_code);
-        if (ad.city) adParts.push(ad.city);
-        selectedPaczkomatAddress = adParts.join(', ');
-      }
+      selectedPaczkomatName = point.name || point.place || '';
+      var addrParts = [];
+      if (point.street) addrParts.push(point.street);
+      if (point.city) addrParts.push(point.city);
+      if (point.zip) addrParts.push(point.zip);
+      selectedPaczkomatAddress = addrParts.join(', ');
 
       // Update hidden fields
       var nameField = document.getElementById('paczkomat_point_name');
       var addrField = document.getElementById('paczkomat_point_address');
+      var idField = document.getElementById('packeta_point_id');
       if (nameField) nameField.value = selectedPaczkomatName;
       if (addrField) addrField.value = selectedPaczkomatAddress;
+      if (idField) idField.value = point.id || '';
 
       // Update UI — show selected, hide button
       var selectBtn = document.getElementById('paczkomat-select-btn');
@@ -3396,11 +3345,8 @@ body {
       if (nameEl) nameEl.textContent = selectedPaczkomatName;
       if (addressEl) addressEl.textContent = selectedPaczkomatAddress;
       if (errorEl) errorEl.style.display = 'none';
-
-      // Close the modal
-      closeGeowidgetModal();
-    });
-  })();
+    }, { country: 'pl', language: 'pl', appIdentity: 'odpusc-ksiazka' });
+  }
 
   // Aktualizuj order summary na základě cart dat z Medusa API
   function updateOrderSummary(cart) {
@@ -3467,7 +3413,7 @@ body {
     if (shipEl) {
       var shippingLabel = shippingTotal > 0 ? formatPrice(shippingTotal) : '<span style="color:#27AE60;font-weight:600;">Za darmo</span>';
       var shipBadge = selectedShippingMethod === 'paczkomat'
-        ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 24" width="56" height="13" style="vertical-align:middle;border-radius:2px;"><rect width="80" height="24" rx="4" fill="#FFCD00"/><text x="40" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#000">InPost</text></svg>'
+        ? '<span style="display:inline-block;background:#BA1B02;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;vertical-align:middle;">Zásilkovna</span>'
         : '<span style="display:inline-block;background:#eee;color:#333;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;vertical-align:middle;">Kurier</span>';
       shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Wysyłka ' + shipBadge + '</span><span>' + shippingLabel + '</span>';
     }
@@ -4071,12 +4017,12 @@ body {
    */
   /**
    * Find the matching shipping option ID based on selectedShippingMethod.
-   * Paczkomat → match "InPost", Home delivery → match "Kurier".
+   * Paczkomat → match "Zásilkovna" or "Zasilkovna", Home delivery → match "Kurier".
    */
   function findShippingOptionId(options, method) {
     var _shipOpts = PROJECT_CONFIG.shippingOptions || {};
     var matchName = method === 'paczkomat'
-      ? ((_shipOpts.paczkomat && _shipOpts.paczkomat.matchName) || 'InPost')
+      ? ((_shipOpts.paczkomat && _shipOpts.paczkomat.matchName) || 'silkovna')
       : ((_shipOpts.homeDelivery && _shipOpts.homeDelivery.matchName) || 'Kurier');
     var matched = options.find(function(o) {
       return o.name && o.name.indexOf(matchName) !== -1;
@@ -4137,10 +4083,12 @@ body {
     } else {
       localStorage.removeItem('medusa_order_bump');
     }
-    localStorage.setItem('medusa_shipping_method', selectedShippingMethod);
+    localStorage.setItem('medusa_shipping_method', selectedShippingMethod === 'paczkomat' ? 'zasilkovna_pickup' : 'home_delivery');
     if (selectedShippingMethod === 'paczkomat') {
       localStorage.setItem('medusa_paczkomat_name', selectedPaczkomatName);
       localStorage.setItem('medusa_paczkomat_address', selectedPaczkomatAddress);
+      var _packetaId = document.getElementById('packeta_point_id');
+      if (_packetaId) localStorage.setItem('medusa_packeta_point_id', _packetaId.value);
     }
 
     console.log('[Express] Completing cart:', cartId);
@@ -6508,7 +6456,7 @@ body {
     // Validate Paczkomat selection if Paczkomat shipping is chosen
     if (selectedShippingMethod === 'paczkomat' && !selectedPaczkomatName) {
       allValid = false;
-      missingFields.push('Paczkomat');
+      missingFields.push('Punkt odbioru');
       var paczkomatError = document.getElementById('paczkomat-error');
       if (paczkomatError) paczkomatError.style.display = '';
       // Scroll to shipping section
@@ -7035,11 +6983,13 @@ body {
       customerData.metadata.fbp = MetaTracker.getFbp() || '';
     }
 
-    // ─── Shipping method metadata (Paczkomat / Kurier) ───
-    customerData.metadata.shipping_method = selectedShippingMethod;
+    // ─── Shipping method metadata (Zásilkovna / Kurier) ───
+    customerData.metadata.shipping_method = selectedShippingMethod === 'paczkomat' ? 'zasilkovna_pickup' : 'home_delivery';
     if (selectedShippingMethod === 'paczkomat') {
       customerData.metadata.paczkomat_name = selectedPaczkomatName || '';
       customerData.metadata.paczkomat_address = selectedPaczkomatAddress || '';
+      var packetaId = document.getElementById('packeta_point_id');
+      customerData.metadata.packeta_point_id = packetaId ? packetaId.value : '';
     }
 
     // ─── Firemní údaje (B2B) ───
@@ -7319,10 +7269,12 @@ body {
       localStorage.setItem('medusa_bundle_price', checkoutBundlePrice);
       localStorage.setItem('medusa_order_bump', checkoutOrderBump ? 'true' : 'false');
       localStorage.setItem('medusa_checkout_total', checkoutTotal);
-      localStorage.setItem('medusa_shipping_method', selectedShippingMethod);
+      localStorage.setItem('medusa_shipping_method', selectedShippingMethod === 'paczkomat' ? 'zasilkovna_pickup' : 'home_delivery');
       if (selectedShippingMethod === 'paczkomat') {
         localStorage.setItem('medusa_paczkomat_name', selectedPaczkomatName);
         localStorage.setItem('medusa_paczkomat_address', selectedPaczkomatAddress);
+        var __packetaId = document.getElementById('packeta_point_id');
+        if (__packetaId) localStorage.setItem('medusa_packeta_point_id', __packetaId.value);
       }
 
       // Analytics: Track initiate_checkout event
@@ -7731,19 +7683,7 @@ window.addEventListener('load', function() {
 });
 </script>
 
-<!-- ═══ InPost Geowidget Modal (Paczkomat picker) ═══ -->
-<div id="geowidget-modal" class="geowidget-modal" style="display:none;">
-  <div class="geowidget-modal-backdrop" id="geowidget-backdrop"></div>
-  <div class="geowidget-modal-content">
-    <div class="geowidget-modal-header">
-      <span class="geowidget-modal-title">Wybierz Paczkomat</span>
-      <button type="button" class="geowidget-modal-close" id="geowidget-close" aria-label="Zamknij">&times;</button>
-    </div>
-    <div class="geowidget-modal-body">
-      <inpost-geowidget id="inpost-geowidget" language="pl" config="parcelCollect"></inpost-geowidget>
-    </div>
-  </div>
-</div>
+<!-- Packeta Widget opens its own fullscreen overlay — no modal needed -->
 
 </body>
 </html>
