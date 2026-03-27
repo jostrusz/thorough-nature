@@ -3456,7 +3456,10 @@ body {
         creditcard: 'Zapłać kartą',
       };
       var label = labels[selectedMethod];
-      if (!label && selectedMethod && selectedMethod.startsWith('bank_pl_')) label = 'Zapłać przelewem';
+      if (!label && selectedMethod && selectedMethod.startsWith('bank_pl_')) {
+        var bankMatch = POLISH_BANKS.find(function(b) { return b.code === selectedMethod; });
+        label = bankMatch ? 'Zapłać przez ' + bankMatch.name : 'Zapłać przelewem';
+      }
       btnText.textContent = (label || 'Zamów teraz') + ' — ' + formatPrice(total);
     }
   }
