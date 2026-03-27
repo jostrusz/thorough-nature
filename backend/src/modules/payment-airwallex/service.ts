@@ -334,7 +334,8 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
           }
           // Credit card: use Airwallex hosted payment page (redirect, no inline form)
           if (method === "creditcard") {
-            const hostedPageUrl = `https://${environment === "prod" ? "checkout" : "checkout-demo"}.airwallex.com/#/standalone/payment?intent_id=${paymentIntent.id}&client_secret=${paymentIntent.client_secret}&currency=${currency_code}&mode=payment`
+            const encodedReturnUrl = encodeURIComponent(returnUrl || "")
+            const hostedPageUrl = `https://${environment === "prod" ? "checkout" : "checkout-demo"}.airwallex.com/#/standalone/payment?intent_id=${paymentIntent.id}&client_secret=${paymentIntent.client_secret}&currency=${currency_code}&mode=payment${returnUrl ? `&successUrl=${encodedReturnUrl}&failUrl=${encodedReturnUrl}` : ""}`
             checkoutUrl = hostedPageUrl
             this.logger_.info(
               `[Airwallex] Credit card redirect to hosted page: ${paymentIntent.id}`
