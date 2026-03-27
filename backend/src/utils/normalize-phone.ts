@@ -64,7 +64,27 @@ export function normalizePhone(
 
   // Already has international prefix
   if (cleaned.startsWith("+")) {
-    const result = cleaned
+    // Fix: strip extra "0" after country code (e.g. "+430650..." → "+43650...")
+    // This happens when customer enters +43 + local 0650 format
+    let result = cleaned
+    const knownPrefixes = ["+420", "+421", "+352", "+351", "+49", "+48", "+46", "+44", "+43", "+39", "+36", "+34", "+33", "+32", "+31", "+1"]
+    for (const kp of knownPrefixes) {
+      if (result.startsWith(kp) && result.length > kp.length && result[kp.length] === "0") {
+        // Don't strip 0 for countries where local numbers genuinely start with 0 (e.g. +39 0xx in Italy)
+        // For most countries (DE, AT, NL, BE, PL, etc.), 0 after prefix is wrong
+        const noStripCountries = ["+39"] // Italy uses 0 in local numbers even in international format
+        if (!noStripCountries.includes(kp)) {
+          const fixed = kp + result.substring(kp.length + 1)
+          return {
+            normalized: fixed,
+            original,
+            changed: true,
+            warning: `Phone normalized: "${original}" → "${fixed}" (removed extra 0 after ${kp} prefix)`,
+          }
+        }
+        break
+      }
+    }
     return {
       normalized: result,
       original,
