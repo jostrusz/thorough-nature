@@ -3345,7 +3345,7 @@ body {
       if (nameEl) nameEl.textContent = selectedPaczkomatName;
       if (addressEl) addressEl.textContent = selectedPaczkomatAddress;
       if (errorEl) errorEl.style.display = 'none';
-    }, { country: 'pl', language: 'pl' });
+    }, { country: 'pl', language: 'pl', vendors: [{ carrierId: 3060 }] });
   }
 
   // Aktualizuj order summary na základě cart dat z Medusa API
