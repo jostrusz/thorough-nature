@@ -380,7 +380,8 @@ export function OrderFulfillmentCard({
       {shippingMethod && (() => {
         const isFree = !order.shipping_methods?.[0]?.amount || Number(order.shipping_methods[0].amount) === 0
         const methodLower = shippingMethod.toLowerCase()
-        const isGLS = methodLower.includes("gls")
+        const isInPost = methodLower.includes("inpost") || methodLower.includes("paczkomat") || order.metadata?.shipping_method === "zasilkovna_pickup"
+        const isGLS = !isInPost && methodLower.includes("gls")
         const isDHL = methodLower.includes("dhl")
         const isDPD = methodLower.includes("dpd")
         const shippingPrice = !isFree
@@ -398,6 +399,22 @@ export function OrderFulfillmentCard({
               background: isFree ? "#f0faf4" : "transparent",
             }}
           >
+            {/* InPost badge — yellow bg, black text */}
+            {isInPost && (
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "3px 8px",
+                  borderRadius: "3px",
+                  background: "#FFCD00",
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ fontSize: "10px", fontWeight: 700, color: "#000", letterSpacing: "0.04em", lineHeight: 1 }}>InPost</span>
+              </div>
+            )}
             {/* GLS badge — real branding: dark blue bg, yellow text */}
             {isGLS && (
               <div
@@ -431,7 +448,7 @@ export function OrderFulfillmentCard({
               </div>
             )}
             {/* Truck icon for unknown carriers */}
-            {!isGLS && !isDHL && !isDPD && (
+            {!isInPost && !isGLS && !isDHL && !isDPD && (
               <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={colors.textMuted} strokeWidth="1.5">
                 <rect x="1" y="6" width="12" height="9" rx="1" />
                 <path d="M13 9h4l2 3v3h-6V9zM4 18a2 2 0 104 0M14 18a2 2 0 104 0" />
@@ -478,38 +495,43 @@ export function OrderFulfillmentCard({
         )
       })()}
 
-      {/* Zásilkovna pickup point info */}
-      {order.metadata?.packeta_point_name && (
+      {/* Pickup point info (Zásilkovna / Packeta) */}
+      {(order.metadata?.paczkomat_name || order.metadata?.packeta_point_name) && (
         <div
           style={{
             padding: "10px 20px",
             borderTop: `1px solid ${colors.border}`,
-            background: "#f8f9ff",
+            background: "#fefcf0",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B21A8" strokeWidth="2" strokeLinecap="round">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
               <circle cx="12" cy="10" r="3" />
             </svg>
-            <span style={{ fontSize: "12px", fontWeight: 700, color: "#6B21A8" }}>Zásilkovna</span>
+            <span style={{ fontSize: "12px", fontWeight: 700, color: "#6B21A8" }}>Zásilkovna — Výdejní místo</span>
           </div>
-          <div style={{ fontSize: "12px", fontWeight: 600, color: colors.text }}>
-            {order.metadata.packeta_point_name}
+          <div style={{ fontSize: "12px", color: colors.textMuted, marginBottom: "4px" }}>
+            <span style={{ fontWeight: 600, color: colors.textSec }}>Pickup point name</span>
+            <div style={{ marginTop: "1px" }}>{order.metadata.paczkomat_name || order.metadata.packeta_point_name}</div>
           </div>
-          <div style={{ fontSize: "11px", color: colors.textMuted, marginTop: "1px" }}>
-            {order.metadata.packeta_point_address}
-          </div>
-          {order.metadata.packeta_point_id && (
-            <div style={{ fontSize: "10px", color: colors.textMuted, marginTop: "2px" }}>
-              ID: {order.metadata.packeta_point_id}
+          {(order.metadata?.packeta_point_id) && (
+            <div style={{ fontSize: "12px", color: colors.textMuted, marginBottom: "4px" }}>
+              <span style={{ fontWeight: 600, color: colors.textSec }}>Packeta ID</span>
+              <div style={{ marginTop: "1px" }}>{order.metadata.packeta_point_id}</div>
+            </div>
+          )}
+          {(order.metadata?.paczkomat_address || order.metadata?.packeta_point_address) && (
+            <div style={{ fontSize: "12px", color: colors.textMuted }}>
+              <span style={{ fontWeight: 600, color: colors.textSec }}>Pickup point address</span>
+              <div style={{ marginTop: "1px" }}>{order.metadata.paczkomat_address || order.metadata.packeta_point_address}</div>
             </div>
           )}
         </div>
       )}
 
-      {/* Shipping method label for Zásilkovna orders */}
-      {order.metadata?.shipping_method && !order.metadata?.packeta_point_name && (
+      {/* Shipping method label for Zásilkovna orders without pickup point */}
+      {order.metadata?.shipping_method && !order.metadata?.paczkomat_name && !order.metadata?.packeta_point_name && (
         <div
           style={{
             padding: "8px 20px",
