@@ -506,6 +506,7 @@ function generateProjectConfigScript(
     paymentProviders: config.paymentProviders,
     mollieProfileId: (config as any).mollieProfileId || null,
     packetaApiKey: (config as any).packetaApiKey || null,
+    shippingOptions: (config as any).shippingOptions || null,
     catalogContentIds: (config as any).catalogContentIds || null,
     // Feature toggles from admin
     orderBumpEnabled: toggles.orderBumpEnabled,
