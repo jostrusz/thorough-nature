@@ -34,7 +34,7 @@
     { "qty": 4, "price": 359, "label": "4 książki", "save": 157 }
   ],
   "shippingOptions": {
-    "paczkomat": { "price": 0, "label": "Punkt odbioru Zásilkovna", "description": "Odbiór w wybranym punkcie Zásilkovna", "matchName": "silkovna" },
+    "paczkomat": { "price": 0, "label": "Paczkomat InPost", "description": "Odbiór w wybranym Paczkomacie 24/7", "matchName": "silkovna" },
     "homeDelivery": { "price": 5, "label": "Dostawa do domu (Kurier)", "description": "Kurier dostarczy przesyłkę pod wskazany adres" }
   },
   "packetaApiKey": "cbb760f552ef87b3",

@@ -2319,7 +2319,7 @@ body {
       </div>
       <!-- Verzending -->
       <div class="msb-line shipping" id="msb-shipping-line">
-        <span class="msb-line-label">Wysyłka <span class="msb-gls" id="msb-shipping-badge">Zásilkovna</span></span>
+        <span class="msb-line-label">Wysyłka <span class="msb-gls" id="msb-shipping-badge">InPost</span></span>
         <span class="msb-line-val" id="msb-shipping-price">Za darmo</span>
       </div>
       <!-- Totaal -->
@@ -2663,19 +2663,19 @@ body {
               Metoda dostawy
             </div>
             <div class="shipping-options" id="shipping-options">
-              <!-- Option 1: Zásilkovna / Packeta pickup (default, free) -->
+              <!-- Option 1: Paczkomat InPost (default, free) — opens Packeta widget -->
               <label class="shipping-option selected" data-method="paczkomat" id="shipping-opt-paczkomat">
                 <input type="radio" name="shipping_method" value="paczkomat" checked>
                 <div class="shipping-radio"><div class="shipping-radio-dot"></div></div>
                 <div class="shipping-option-content">
                   <div class="shipping-option-row">
                     <div class="shipping-option-info">
-                      <span style="display:inline-block;background:#BA1B02;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;vertical-align:middle;">Zásilkovna</span>
-                      <span class="shipping-option-name">Punkt odbioru Zásilkovna</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 24" width="56" height="16" style="flex-shrink:0;vertical-align:middle;border-radius:2px;"><rect width="80" height="24" rx="4" fill="#FFCD00"/><text x="40" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#000">InPost</text></svg>
+                      <span class="shipping-option-name">Paczkomat InPost</span>
                     </div>
                     <span class="shipping-option-price" style="color:#27AE60;font-weight:700;">Za darmo</span>
                   </div>
-                  <div class="shipping-option-desc">Odbiór w wybranym punkcie Zásilkovna</div>
+                  <div class="shipping-option-desc">Odbiór w wybranym Paczkomacie 24/7</div>
                 </div>
               </label>
 
@@ -2683,7 +2683,7 @@ body {
               <div id="paczkomat-selector" class="paczkomat-selector">
                 <button type="button" id="paczkomat-select-btn" class="paczkomat-select-btn">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span id="paczkomat-btn-text">Wybierz punkt odbioru</span>
+                  <span id="paczkomat-btn-text">Wybierz Paczkomat</span>
                 </button>
                 <div id="paczkomat-selected" class="paczkomat-selected" style="display:none;">
                   <div class="paczkomat-selected-info">
@@ -2695,7 +2695,7 @@ body {
                   </div>
                   <button type="button" id="paczkomat-change-btn" class="paczkomat-change-btn">Zmień</button>
                 </div>
-                <div id="paczkomat-error" class="paczkomat-error" style="display:none;">Wybierz punkt odbioru, aby kontynuować</div>
+                <div id="paczkomat-error" class="paczkomat-error" style="display:none;">Wybierz Paczkomat, aby kontynuować</div>
               </div>
 
               <!-- Option 2: Home delivery (+5 PLN) -->
@@ -2866,7 +2866,7 @@ body {
       <div class="summary-line shipping" id="summary-shipping">
         <span style="display:flex;align-items:center;gap:6px;">
           Wysyłka
-          <span id="summary-shipping-method-badge"><span style="display:inline-block;background:#BA1B02;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;vertical-align:middle;">Zásilkovna</span></span>
+          <span id="summary-shipping-method-badge"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 24" width="56" height="13" style="vertical-align:middle;border-radius:2px;"><rect width="80" height="24" rx="4" fill="#FFCD00"/><text x="40" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#000">InPost</text></svg></span>
         </span>
         <span id="summary-shipping-price" style="color:#27AE60;font-weight:600;">Za darmo</span>
       </div>
@@ -2893,7 +2893,7 @@ body {
       <div class="summary-shipping-info">
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          <span>Dostawa przez <strong>Zásilkovna</strong> w ciągu <strong>3–5 dni roboczych</strong></span>
+          <span>Dostawa przez <strong>InPost</strong> w ciągu <strong>3–5 dni roboczych</strong></span>
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
@@ -2955,7 +2955,7 @@ body {
     <strong>Odpuść to, co cię niszczy</strong> jest wydaniem Performance Marketing Solution s.r.o.<br>
     Rybná 716/24, Staré Město, 110 00 Praga, Czechy<br>
     IČO: 06259928 · DIČ: CZ06259928<br>
-    Wysyłamy z naszego europejskiego centrum dystrybucji przez Zásilkovna do całej Polski.<br>
+    Wysyłamy z naszego europejskiego centrum dystrybucji przez InPost do całej Polski.<br>
     Pytania lub problemy? Skontaktuj się z nami: <a href="mailto:biuro@odpusc-ksiazka.pl"><strong>biuro@odpusc-ksiazka.pl</strong></a><br>
     Odpowiadamy w ciągu 24 godzin i rozwiązujemy każdy problem osobiście.
   </div>
@@ -3089,13 +3089,13 @@ body {
     if (msbTotal) msbTotal.textContent = formatPrice(total);
 
     // ─── SHIPPING METHOD DISPLAY (desktop + mobile) ───
-    var packetaBadge = '<span style="display:inline-block;background:#BA1B02;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;vertical-align:middle;">Zásilkovna</span>';
+    var inpostBadgeSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 24" width="56" height="13" style="vertical-align:middle;border-radius:2px;"><rect width="80" height="24" rx="4" fill="#FFCD00"/><text x="40" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#000">InPost</text></svg>';
     var kurierBadge = '<span style="display:inline-block;background:#eee;color:#333;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;vertical-align:middle;">Kurier</span>';
 
     // Desktop summary shipping badge + price
     var ssmBadge = document.getElementById('summary-shipping-method-badge');
     var ssmPrice = document.getElementById('summary-shipping-price');
-    if (ssmBadge) ssmBadge.innerHTML = selectedShippingMethod === 'paczkomat' ? packetaBadge : kurierBadge;
+    if (ssmBadge) ssmBadge.innerHTML = selectedShippingMethod === 'paczkomat' ? inpostBadgeSvg : kurierBadge;
     if (ssmPrice) {
       if (selectedShippingCost > 0) {
         ssmPrice.textContent = '+' + formatPrice(selectedShippingCost);
@@ -3111,7 +3111,7 @@ body {
     // Mobile summary shipping badge + price
     var msbBadge = document.getElementById('msb-shipping-badge');
     var msbShipPrice = document.getElementById('msb-shipping-price');
-    if (msbBadge) msbBadge.textContent = selectedShippingMethod === 'paczkomat' ? 'Zásilkovna' : 'Kurier';
+    if (msbBadge) msbBadge.textContent = selectedShippingMethod === 'paczkomat' ? 'InPost' : 'Kurier';
     if (msbShipPrice) {
       if (selectedShippingCost > 0) {
         msbShipPrice.textContent = '+' + formatPrice(selectedShippingCost);
@@ -3413,7 +3413,7 @@ body {
     if (shipEl) {
       var shippingLabel = shippingTotal > 0 ? formatPrice(shippingTotal) : '<span style="color:#27AE60;font-weight:600;">Za darmo</span>';
       var shipBadge = selectedShippingMethod === 'paczkomat'
-        ? '<span style="display:inline-block;background:#BA1B02;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;vertical-align:middle;">Zásilkovna</span>'
+        ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 24" width="56" height="13" style="vertical-align:middle;border-radius:2px;"><rect width="80" height="24" rx="4" fill="#FFCD00"/><text x="40" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#000">InPost</text></svg>'
         : '<span style="display:inline-block;background:#eee;color:#333;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;vertical-align:middle;">Kurier</span>';
       shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Wysyłka ' + shipBadge + '</span><span>' + shippingLabel + '</span>';
     }
@@ -6456,7 +6456,7 @@ body {
     // Validate Paczkomat selection if Paczkomat shipping is chosen
     if (selectedShippingMethod === 'paczkomat' && !selectedPaczkomatName) {
       allValid = false;
-      missingFields.push('Punkt odbioru');
+      missingFields.push('Paczkomat');
       var paczkomatError = document.getElementById('paczkomat-error');
       if (paczkomatError) paczkomatError.style.display = '';
       // Scroll to shipping section
