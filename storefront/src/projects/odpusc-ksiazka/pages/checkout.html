@@ -4017,7 +4017,7 @@ body {
    */
   /**
    * Find the matching shipping option ID based on selectedShippingMethod.
-   * Paczkomat → match "Zásilkovna" or "Zasilkovna", Home delivery → match "Kurier".
+   * Paczkomat → match "Paczkomaty", Home delivery → match "Dostawa do domu".
    */
   function findShippingOptionId(options, method) {
     var _shipOpts = PROJECT_CONFIG.shippingOptions || {};

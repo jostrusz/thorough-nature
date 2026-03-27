@@ -34,8 +34,8 @@
     { "qty": 4, "price": 359, "label": "4 książki", "save": 157 }
   ],
   "shippingOptions": {
-    "paczkomat": { "price": 0, "label": "Paczkomat InPost", "description": "Odbiór w wybranym Paczkomacie 24/7", "matchName": "silkovna" },
-    "homeDelivery": { "price": 5, "label": "Dostawa do domu (Kurier)", "description": "Kurier dostarczy przesyłkę pod wskazany adres" }
+    "paczkomat": { "price": 0, "label": "Paczkomat InPost", "description": "Odbiór w wybranym Paczkomacie 24/7", "matchName": "Paczkomaty" },
+    "homeDelivery": { "price": 5, "label": "Dostawa do domu (Kurier)", "description": "Kurier dostarczy przesyłkę pod wskazany adres", "matchName": "Dostawa do domu" }
   },
   "packetaApiKey": "cbb760f552ef87b3",
   "mollieProfileId": "",
