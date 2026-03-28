@@ -351,10 +351,13 @@ async function fetchAdvertorial(
   // Skip slugs that clearly aren't advertorials (contain dots = file extensions)
   if (slug.includes(".")) return null
 
+  // Use advertorialProjectId if set (handles slug mismatch between storefront and profitability DB)
+  const projectId = (config as any).advertorialProjectId || config.slug
+
   // Try /public/ first (no auth required), then fallback to /store/ (with API key)
   const endpoints = [
-    `${config.medusaUrl}/public/advertorials/${encodeURIComponent(slug)}?project_id=${config.slug}`,
-    `${config.medusaUrl}/store/advertorials/${encodeURIComponent(slug)}?project_id=${config.slug}`,
+    `${config.medusaUrl}/public/advertorials/${encodeURIComponent(slug)}?project_id=${projectId}`,
+    `${config.medusaUrl}/store/advertorials/${encodeURIComponent(slug)}?project_id=${projectId}`,
   ]
 
   for (const url of endpoints) {
