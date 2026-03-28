@@ -540,8 +540,7 @@ function generatePixelScript(config: ProjectConfig, pixelId: string): string {
   }
 
   // The pixel ID and project slug are embedded in the tracking library
-  // Use advertorialProjectId if set (handles slug mismatch between storefront and profitability DB)
-  const projectSlug = (config as any).advertorialProjectId || config.slug
+  const projectSlug = config.slug
 
   return `<script>
 /* ═══════════════════════════════════════════════════════════════════
