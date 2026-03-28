@@ -1642,5 +1642,35 @@ function toggleMobileMenu() {
 }
 </script>
 
+<script>
+// Catalog content IDs for DPA remarketing
+var LL_CATALOG_IDS = ['32a1orwxo6', '04sbhku9gu', '3ox80zb3w3', 'ovw9qrtu0h', 'coonabrkxh', 'dw9xqgils6', 'ldv9esmmfj'];
+
+// ViewContent: customer sees the product (fires on page load)
+if (typeof MetaTracker !== 'undefined') {
+  MetaTracker.trackViewContent({
+    content_name: 'Laat Los Wat Je Kapotmaakt',
+    content_ids: LL_CATALOG_IDS,
+    value: 35,
+    currency: 'EUR'
+  });
+}
+
+// AddToCart: customer clicks any CTA button to checkout
+document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="checkout/"], .floating-cta-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    if (typeof MetaTracker !== 'undefined') {
+      MetaTracker.trackAddToCart({
+        content_name: 'Laat Los Wat Je Kapotmaakt',
+        content_ids: LL_CATALOG_IDS,
+        value: 35,
+        currency: 'EUR',
+        num_items: 1
+      });
+    }
+  });
+});
+</script>
+
 </body>
 </html>

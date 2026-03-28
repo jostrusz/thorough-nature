@@ -1088,8 +1088,10 @@ body { background: var(--bg); }
   // 4. Facebook Pixel + CAPI — Purchase event (deduplicated via MetaTracker)
   // ────────────────────────────────────────────────────
   if (typeof MetaTracker !== 'undefined') {
-    var purchaseContentIds = [PROJECT_CONFIG.mainProduct.handle];
-    if (upsellPurchased || orderBumpActive) purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
+    var purchaseContentIds = PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle];
+    if ((upsellPurchased || orderBumpActive) && !PROJECT_CONFIG.catalogContentIds) {
+      purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
+    }
     var purchaseNumItems = bundleQty + ((upsellPurchased || orderBumpActive) ? 1 : 0);
 
     // Build user_data from customer info for maximum EMQ
