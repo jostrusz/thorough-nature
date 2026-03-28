@@ -6,7 +6,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
 const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "us"
 
-// MarketingHQ: Project domain mapping from env
+// MarketingHQ: Project domain mapping from env (static fallback)
 // Format: "loslatenboek.nl=loslatenboek,example.com=other-project"
 const PROJECT_DOMAINS: Record<string, string> = {}
 const domainMapping = process.env.PROJECT_DOMAIN_MAP || ""
@@ -14,6 +14,36 @@ domainMapping.split(",").filter(Boolean).forEach((entry) => {
   const [domain, slug] = entry.split("=")
   if (domain && slug) PROJECT_DOMAINS[domain.trim()] = slug.trim()
 })
+
+// Dynamic domain resolution cache (fetched from backend DB)
+const dynamicDomainCache: Map<string, { slug: string | null; resolvedAt: number }> = new Map()
+const DOMAIN_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+async function resolveDomainFromBackend(domain: string): Promise<string | null> {
+  const cached = dynamicDomainCache.get(domain)
+  if (cached && Date.now() - cached.resolvedAt < DOMAIN_CACHE_TTL) {
+    return cached.slug
+  }
+
+  try {
+    const res = await fetch(
+      `${BACKEND_URL}/public/domain-resolve?domain=${encodeURIComponent(domain)}`,
+      { next: { revalidate: 300 } }
+    )
+    if (!res.ok) {
+      dynamicDomainCache.set(domain, { slug: null, resolvedAt: Date.now() })
+      return null
+    }
+    const data = await res.json()
+    const slug = data.found ? data.project_slug : null
+    dynamicDomainCache.set(domain, { slug, resolvedAt: Date.now() })
+    return slug
+  } catch {
+    // On fetch error, cache null briefly (30s) to avoid hammering backend
+    dynamicDomainCache.set(domain, { slug: null, resolvedAt: Date.now() - DOMAIN_CACHE_TTL + 30_000 })
+    return null
+  }
+}
 
 const regionMapCache = {
   regionMap: new Map<string, HttpTypes.StoreRegion>(),
@@ -112,8 +142,11 @@ export async function middleware(request: NextRequest) {
   }
 
   // ─── MarketingHQ: Project domain routing ───
-  // If hostname matches a project domain, rewrite to /p/{slug}/...
-  const projectSlug = PROJECT_DOMAINS[cleanHost]
+  // 1. Check static env map first (instant), 2. Fallback to backend DB (cached)
+  let projectSlug = PROJECT_DOMAINS[cleanHost]
+  if (!projectSlug) {
+    projectSlug = (await resolveDomainFromBackend(cleanHost)) || ""
+  }
   if (projectSlug) {
     const projectPath = pathname === "/" ? "" : pathname.replace(/^\//, "")
     const rewriteUrl = new URL(`/p/${projectSlug}/${projectPath}`, request.url)

@@ -614,13 +614,92 @@ const AdvertorialsPage = () => {
           {"\u{1F4F0}"} Advertorials
         </h1>
         <div style={{ display: "flex", gap: "8px" }}>
-          <button className="adv-btn" style={{ ...btnOutline, padding: "8px 16px", fontSize: "13px" }} onClick={() => setShowDomains(!showDomains)}>
-            {showDomains ? "Hide Domains" : "Manage Domains"}
-          </button>
           <button className="adv-btn-primary" style={btnPrimary} onClick={() => setModalPage("new")}>
             + New Advertorial
           </button>
         </div>
+      </div>
+
+      {/* Domain Management — always visible */}
+      <div className="adv-card" style={{ ...sectionStyle, marginBottom: "20px" }}>
+        <div style={{ ...sectionHeaderStyle, cursor: "pointer", userSelect: "none" as const }} onClick={() => setShowDomains(!showDomains)}>
+          <span style={{ fontSize: "14px", fontWeight: 600, color: colors.text, display: "flex", alignItems: "center", gap: "8px" }}>
+            {"\u{1F310}"} Project Domains
+            <span style={{ fontSize: "11px", fontWeight: 400, color: colors.textMuted }}>
+              — Set the domain for each project. Advertorials are served on these domains.
+            </span>
+          </span>
+          <span style={{ fontSize: "12px", color: colors.textMuted, transition: "transform 0.2s", transform: showDomains ? "rotate(180deg)" : "rotate(0deg)" }}>
+            {"\u25BC"}
+          </span>
+        </div>
+        {!showDomains && (
+          <div style={{ padding: "10px 20px", display: "flex", flexWrap: "wrap" as const, gap: "8px" }}>
+            {projects.map((p) => (
+              <span key={p.id} style={{
+                display: "inline-flex", alignItems: "center", gap: "6px",
+                padding: "4px 12px", borderRadius: "6px", fontSize: "12px",
+                background: p.domain ? "#D4EDDA" : "#FFF3CD",
+                color: p.domain ? "#155724" : "#856404",
+                border: `1px solid ${p.domain ? "#C3E6CB" : "#FFEEBA"}`,
+              }}>
+                {p.flag_emoji} {p.project_name}: <strong>{p.domain || "no domain"}</strong>
+              </span>
+            ))}
+          </div>
+        )}
+        {showDomains && (
+          <div style={{ padding: "16px 20px" }}>
+            <div style={{ fontSize: "12px", color: colors.textMuted, marginBottom: "12px", lineHeight: "1.5" }}>
+              Set the domain for each project below. Make sure the domain is also added as a Custom Domain in Railway.
+              Changes take effect within 5 minutes (no redeploy needed).
+            </div>
+            {projects.map((p) => {
+              const editVal = editingDomains[p.id]
+              const currentDomain = editVal !== undefined ? editVal : (p.domain || "")
+              const isEditing = editVal !== undefined
+              const hasDomain = !!(p.domain)
+              return (
+                <div key={p.id} style={{
+                  display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px",
+                  padding: "8px 12px", borderRadius: "8px",
+                  background: hasDomain ? "#FAFFF9" : "#FFFDF5",
+                  border: `1px solid ${hasDomain ? "#E8F5E3" : "#FFF3CD"}`,
+                }}>
+                  <span style={{ fontSize: "13px", minWidth: "180px", color: colors.text, fontWeight: 500 }}>
+                    {p.flag_emoji} {p.project_name}
+                  </span>
+                  <input
+                    className="adv-input"
+                    style={{ ...inputStyle, flex: 1, marginBottom: 0, fontSize: "12px", padding: "6px 10px" }}
+                    value={currentDomain}
+                    placeholder="example.com"
+                    onChange={(e) => setEditingDomains((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                  />
+                  {isEditing && (
+                    <button
+                      className="adv-btn-primary"
+                      style={{ ...btnPrimary, padding: "6px 14px", fontSize: "11px" }}
+                      onClick={() => {
+                        updateDomainMutation.mutate({ id: p.id, domain: currentDomain })
+                        setEditingDomains((prev) => {
+                          const next = { ...prev }
+                          delete next[p.id]
+                          return next
+                        })
+                      }}
+                    >
+                      Save
+                    </button>
+                  )}
+                  <span style={{ fontSize: "11px", color: hasDomain ? "#28A745" : colors.textMuted, minWidth: "200px" }}>
+                    {hasDomain ? "\u2705" : "\u26A0\uFE0F"} https://{currentDomain || p.project_slug + ".com"}/
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Filters */}
@@ -649,57 +728,6 @@ const AdvertorialsPage = () => {
           <option value="draft">Draft</option>
         </select>
       </div>
-
-      {/* Domain Management */}
-      {showDomains && (
-        <div className="adv-card" style={{ ...sectionStyle, marginBottom: "16px" }}>
-          <div style={sectionHeaderStyle}>
-            <span style={{ fontSize: "14px", fontWeight: 600, color: colors.text }}>
-              Project Domains
-            </span>
-          </div>
-          <div style={{ padding: "12px 16px" }}>
-            {projects.map((p) => {
-              const editVal = editingDomains[p.id]
-              const currentDomain = editVal !== undefined ? editVal : (p.domain || "")
-              const isEditing = editVal !== undefined
-              return (
-                <div key={p.id} style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                  <span style={{ fontSize: "13px", minWidth: "180px", color: colors.text }}>
-                    {p.flag_emoji} {p.project_name}
-                  </span>
-                  <input
-                    className="adv-input"
-                    style={{ ...inputStyle, flex: 1, marginBottom: 0, fontSize: "12px", padding: "6px 10px" }}
-                    value={currentDomain}
-                    placeholder="example.com"
-                    onChange={(e) => setEditingDomains((prev) => ({ ...prev, [p.id]: e.target.value }))}
-                  />
-                  {isEditing && (
-                    <button
-                      className="adv-btn-primary"
-                      style={{ ...btnPrimary, padding: "6px 14px", fontSize: "11px" }}
-                      onClick={() => {
-                        updateDomainMutation.mutate({ id: p.id, domain: currentDomain })
-                        setEditingDomains((prev) => {
-                          const next = { ...prev }
-                          delete next[p.id]
-                          return next
-                        })
-                      }}
-                    >
-                      Save
-                    </button>
-                  )}
-                  <span style={{ fontSize: "11px", color: colors.textMuted, minWidth: "180px" }}>
-                    https://{currentDomain || p.project_slug + ".com"}/
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Pages List */}
       <div className="adv-card" style={sectionStyle}>
