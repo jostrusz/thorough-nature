@@ -5078,13 +5078,11 @@ body {
         // Show/hide card fields — init the right provider's card elements
         var cardFields = document.getElementById('card-fields');
         if (cardFields) {
-          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal') {
-            // Stripe and PayPal use hosted checkout (redirect), no inline card fields
+          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal' && cardProvider !== 'airwallex') {
+            // Stripe, PayPal, and Airwallex use hosted checkout (redirect/drop-in), no inline card fields
             cardFields.style.display = 'block';
             if (cardProvider === 'mollie') {
               initMollieComponents();
-            } else if (cardProvider === 'airwallex') {
-              initAirwallexCard();
             }
           } else {
             cardFields.style.display = 'none';
