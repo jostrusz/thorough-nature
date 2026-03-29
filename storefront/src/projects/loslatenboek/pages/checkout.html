@@ -3852,9 +3852,14 @@ body {
 
           var purchaseEventId = 'purchase_' + order.id;
 
+          var mainPrice = PROJECT_CONFIG.mainProduct.price || 0;
+          var upsellPriceVal = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.price) || 0;
           MetaTracker.trackPurchase({
             content_ids: purchaseContentIds,
-            contents: purchaseContentIds.map(function(id) { return { id: id, quantity: 1 }; }),
+            contents: purchaseContentIds.map(function(id, idx) {
+              var price = (idx === 0) ? mainPrice : upsellPriceVal;
+              return { id: id, quantity: 1, item_price: price };
+            }),
             value: purchaseValue,
             currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
             num_items: bundleQty + (bumpActive ? 1 : 0),
@@ -3863,7 +3868,11 @@ body {
             em: order.email || localStorage.getItem('medusa_customer_email') || '',
             fn: (order.shipping_address && order.shipping_address.first_name) || '',
             ln: (order.shipping_address && order.shipping_address.last_name) || '',
-            ph: (order.shipping_address && order.shipping_address.phone) || ''
+            ph: (order.shipping_address && order.shipping_address.phone) || '',
+            ct: (order.shipping_address && order.shipping_address.city) || '',
+            zp: (order.shipping_address && order.shipping_address.postal_code) || '',
+            st: (order.shipping_address && order.shipping_address.province) || '',
+            country: (order.shipping_address && order.shipping_address.country_code) || ''
           }, { event_id: purchaseEventId });
 
           localStorage.setItem('medusa_purchase_tracked', 'true');
@@ -4130,7 +4139,9 @@ body {
               if (typeof MetaTracker !== 'undefined') {
                 customerData.metadata.fbc = MetaTracker.getFbc() || '';
                 customerData.metadata.fbp = MetaTracker.getFbp() || '';
+                customerData.metadata.external_id = MetaTracker.getExternalId() || '';
               }
+              customerData.metadata.source_url = window.location.href;
 
               // Save customer info for thank-you page
               localStorage.setItem('medusa_customer', JSON.stringify({
@@ -4588,7 +4599,9 @@ body {
               if (typeof MetaTracker !== 'undefined') {
                 customerData.metadata.fbc = MetaTracker.getFbc() || '';
                 customerData.metadata.fbp = MetaTracker.getFbp() || '';
+                customerData.metadata.external_id = MetaTracker.getExternalId() || '';
               }
+              customerData.metadata.source_url = window.location.href;
 
               localStorage.setItem('medusa_customer', JSON.stringify({
                 email: customerData.email,
@@ -6737,6 +6750,12 @@ body {
       customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
       customerData.metadata.project_id = window.AnalyticsTracker.PROJECT_ID || '';
     }
+    if (typeof MetaTracker !== 'undefined') {
+      customerData.metadata.fbc = MetaTracker.getFbc() || '';
+      customerData.metadata.fbp = MetaTracker.getFbp() || '';
+      customerData.metadata.external_id = MetaTracker.getExternalId() || '';
+    }
+    customerData.metadata.source_url = window.location.href;
 
     // ─── Firemní údaje (B2B) ───
     var isCompany = document.getElementById('company-checkbox').checked;

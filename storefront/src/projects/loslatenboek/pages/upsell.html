@@ -983,16 +983,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
         localStorage.setItem('medusa_order_id', res.order.id);
         localStorage.setItem('medusa_order_display_id', res.order.display_id || '');
 
-        // FB Pixel + CAPI: Purchase event za hlavní produkt (deduplicated)
-        if (typeof MetaTracker !== 'undefined') {
-          MetaTracker.trackPurchase({
-            content_ids: [PROJECT_CONFIG.mainProduct.handle],
-            value: PROJECT_CONFIG.mainProduct.price,
-            currency: PROJECT_CONFIG.mainProduct.currency
-          });
-        }
-
-        // FB Pixel + CAPI: ViewContent pro upsell stránku (deduplicated)
+        // FB Pixel + CAPI: ViewContent for the upsell offer (NOT Purchase — that was already fired on checkout)
         if (typeof MetaTracker !== 'undefined') {
           MetaTracker.trackViewContent({
             content_ids: [PROJECT_CONFIG.upsellProduct.handle],
@@ -1062,6 +1053,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
     }
 
     console.log('Upsell: Přidávám upsell produkt do objednávky', orderId);
+
+    // FB Pixel + CAPI: AddToCart for the upsell product
+    if (typeof MetaTracker !== 'undefined') {
+      MetaTracker.trackAddToCart({
+        content_ids: [PROJECT_CONFIG.upsellProduct.handle],
+        content_name: PROJECT_CONFIG.upsellProduct.name,
+        value: PROJECT_CONFIG.upsellProduct.price,
+        currency: PROJECT_CONFIG.upsellProduct.currency || 'EUR',
+        num_items: 1
+      });
+    }
 
     // === NOVÝ FLOW: Order Edit ===
     // Místo vytváření nového cartu zavolej custom API route,

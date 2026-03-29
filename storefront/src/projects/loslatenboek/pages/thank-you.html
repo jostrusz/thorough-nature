@@ -1107,15 +1107,21 @@ body { background: var(--bg); }
       if (customer.region) purchaseUserData.st = customer.region;
     }
 
+    var purchaseEventId = 'purchase_' + orderId;
+    var mainPrice = PROJECT_CONFIG.mainProduct.price || 0;
+    var upsellPrice = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.price) || 0;
     MetaTracker.trackPurchase({
       content_ids: purchaseContentIds,
-      contents: purchaseContentIds.map(function(id) { return { id: id, quantity: 1 }; }),
+      contents: purchaseContentIds.map(function(id, idx) {
+        var price = (idx === 0) ? mainPrice : upsellPrice;
+        return { id: id, quantity: 1, item_price: price };
+      }),
       value: totalPrice,
       currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
       num_items: purchaseNumItems,
       order_id: orderId
-    }, purchaseUserData);
-    console.log('TY: Purchase event (browser + CAPI) — €' + totalPrice + ' (' + purchaseNumItems + ' items)');
+    }, purchaseUserData, { event_id: purchaseEventId });
+    console.log('TY: Purchase event (browser + CAPI) — €' + totalPrice + ' (' + purchaseNumItems + ' items) event_id=' + purchaseEventId);
   }
 
   // ────────────────────────────────────────────────────

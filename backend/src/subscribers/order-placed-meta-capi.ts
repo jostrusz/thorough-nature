@@ -98,8 +98,10 @@ export default async function orderPlacedMetaCAPIHandler({
       if (shippingAddress.country_code) userData.country = shippingAddress.country_code
     }
 
-    // Customer ID as external_id
-    if ((order as any).customer_id) {
+    // Customer ID as external_id (prefer frontend visitor ID for matching with browser pixel)
+    if ((order.metadata as any)?.external_id) {
+      userData.external_id = (order.metadata as any).external_id
+    } else if ((order as any).customer_id) {
       userData.external_id = (order as any).customer_id
     }
 
@@ -112,6 +114,7 @@ export default async function orderPlacedMetaCAPIHandler({
     const CATALOG_IDS: Record<string, string[]> = {
       dehondenbijbel: ["9hduqtwz07", "5e8vclt1pz", "5d5yd6u51i", "edr7gf3itr", "1emdl02y05", "lgn3th5xv4", "zjk1xb6h9u"],
       "lass-los": ["1azgp7ymuv", "82764876", "31epnhw6c4", "dnoiszdeax", "gh1u1icp8r"],
+      loslatenboek: ["32a1orwxo6", "04sbhku9gu", "3ox80zb3w3", "ovw9qrtu0h", "coonabrkxh", "dw9xqils6", "ldv9esmmfj"],
     }
 
     const items = order.items || []
