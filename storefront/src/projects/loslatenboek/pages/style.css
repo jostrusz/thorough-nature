@@ -1433,7 +1433,7 @@ h2 { font-size: 38px; }
 /* ═══ SEKCE 8: REVIEWS — photo slider ═══ */
 .reviews-section {
  background: var(--bg);
- padding: 96px 24px;
+ padding: 120px 24px 60px;
  position: relative;
  overflow: hidden;
 }

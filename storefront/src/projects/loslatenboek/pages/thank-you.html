@@ -644,7 +644,7 @@ body { background: var(--bg); }
       <div class="ty-support-title">Vragen of problemen?</div>
       <div class="ty-support-desc">Heb je een fout ontdekt, een vraag over je bestelling of loop je ergens tegenaan? Neem gerust contact met ons op &mdash; we helpen je met alle plezier!</div>
     </div>
-    <a href="mailto:devries@travelbible.nl?subject=Vraag%20over%20bestelling%20%23&body=Hallo%2C%0A%0AIk%20heb%20een%20vraag%20over%20mijn%20bestelling.%0A%0ABestelnummer%3A%20%0A%0AMijn%20vraag%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Stuur ons een e-mail</a>
+    <a href="mailto:boek@loslatenboek.nl?subject=Vraag%20over%20bestelling%20%23&body=Hallo%2C%0A%0AIk%20heb%20een%20vraag%20over%20mijn%20bestelling.%0A%0ABestelnummer%3A%20%0A%0AMijn%20vraag%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Stuur ons een e-mail</a>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -780,7 +780,7 @@ body { background: var(--bg); }
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
     var subject = encodeURIComponent('Vraag over bestelling #' + orderNum);
     var body = encodeURIComponent('Hallo,\n\nIk heb een vraag over mijn bestelling.\n\nBestelnummer: #' + orderNum + '\n\nMijn vraag: ');
-    mailtoEl.href = 'mailto:devries@travelbible.nl?subject=' + subject + '&body=' + body;
+    mailtoEl.href = 'mailto:boek@loslatenboek.nl?subject=' + subject + '&body=' + body;
   }
 
   // 2d. Celková cena — bere v potaz bundle, order bump a upsell
