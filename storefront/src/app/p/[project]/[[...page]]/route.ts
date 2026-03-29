@@ -454,6 +454,32 @@ async function serveAdvertorial(
     html = `${html}\n${analyticsScript}`
   }
 
+  // --- 4b. Inject ViewContent tracking with correct catalog IDs ---
+  // Advertorial HTML may contain custom fbq() calls with wrong product IDs.
+  // Inject a proper ViewContent via MetaTracker with catalog IDs for CAPI deduplication.
+  const catalogIds = (config as any).catalogContentIds || []
+  const productName = config.mainProduct?.name || config.name || ""
+  const productPrice = config.mainProduct?.price || 0
+  const productCurrency = config.mainProduct?.currency || "EUR"
+  if (catalogIds.length > 0) {
+    const viewContentScript = `<script>
+/* ── Advertorial ViewContent: fire with correct catalog IDs for CAPI ── */
+if (typeof MetaTracker !== 'undefined') {
+  MetaTracker.trackViewContent({
+    content_name: ${JSON.stringify(productName)},
+    content_ids: ${JSON.stringify(catalogIds)},
+    value: ${productPrice},
+    currency: ${JSON.stringify(productCurrency)}
+  });
+}
+</script>`
+    if (/<\/body>/i.test(html)) {
+      html = html.replace(/<\/body>/i, `${viewContentScript}\n</body>`)
+    } else {
+      html = `${html}\n${viewContentScript}`
+    }
+  }
+
   // --- 5. Optimize images: add lazy loading + decoding async ---
   // Skip the first image (likely hero/LCP) — lazy-load the rest
   let imgCount = 0
@@ -566,8 +592,12 @@ function generatePixelScript(config: ProjectConfig, pixelId: string): string {
     return "<!-- Facebook Pixel: not configured -->"
   }
 
-  // The pixel ID and project slug are embedded in the tracking library
+  // Embed all critical values directly — don't rely on PROJECT_CONFIG
+  // (advertorial pages don't get PROJECT_CONFIG injected)
   const projectSlug = config.slug
+  const medusaUrl = config.medusaUrl || ""
+  const publishableApiKey = config.publishableApiKey || ""
+  const catalogContentIds = (config as any).catalogContentIds || []
 
   return `<script>
 /* ═══════════════════════════════════════════════════════════════════
@@ -610,7 +640,10 @@ fbq('init', '${pixelId}', _initMatch);
 window.MetaTracker = (function() {
   var PIXEL_ID = '${pixelId}';
   var PROJECT_ID = '${projectSlug}';
-  var CAPI_URL = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.medusaUrl || '') + '/store/meta-capi';
+  var MEDUSA_URL = '${medusaUrl}';
+  var API_KEY = '${publishableApiKey}';
+  var CATALOG_CONTENT_IDS = ${JSON.stringify(catalogContentIds)};
+  var CAPI_URL = MEDUSA_URL + '/store/meta-capi';
 
   /* ── Cookie helpers ──────────────────────────────────────── */
   function getCookie(name) {
@@ -750,8 +783,8 @@ window.MetaTracker = (function() {
 
     // Step 4: Fire CAPI with IDENTICAL event_id
     var externalId = getExternalId();
-    var defaultCountry = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.defaultCountry) ? window.PROJECT_CONFIG.defaultCountry.toLowerCase() : null;
-    var defaultPhonePrefix = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.defaultPhonePrefix) || null;
+    var defaultCountry = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.defaultCountry) ? window.PROJECT_CONFIG.defaultCountry.toLowerCase() : '${((config as any).defaultCountry || "").toLowerCase()}';
+    var defaultPhonePrefix = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.defaultPhonePrefix) || '${(config as any).defaultPhonePrefix || ""}';
     var capiPayload = {
       project_id: PROJECT_ID,
       event_name: eventName,
@@ -796,7 +829,7 @@ window.MetaTracker = (function() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-publishable-api-key': (window.PROJECT_CONFIG && window.PROJECT_CONFIG.publishableApiKey) || ''
+          'x-publishable-api-key': API_KEY
         },
         body: JSON.stringify(capiPayload),
         keepalive: true
@@ -906,7 +939,8 @@ window.MetaTracker = (function() {
     getFbc: getFbc,
     getFbp: getFbp,
     PIXEL_ID: PIXEL_ID,
-    PROJECT_ID: PROJECT_ID
+    PROJECT_ID: PROJECT_ID,
+    CATALOG_CONTENT_IDS: CATALOG_CONTENT_IDS
   };
 })();
 

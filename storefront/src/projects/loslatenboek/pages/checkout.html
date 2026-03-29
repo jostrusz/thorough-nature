@@ -7024,8 +7024,7 @@ body {
 
       // FB Pixel + CAPI: InitiateCheckout (deduplicated via MetaTracker)
       if (typeof MetaTracker !== 'undefined') {
-        var contentIds = [PROJECT_CONFIG.mainProduct.handle];
-        if (checkoutOrderBump) contentIds.push(PROJECT_CONFIG.upsellProduct.handle);
+        var contentIds = PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle];
         MetaTracker.trackInitiateCheckout({
           content_ids: contentIds,
           value: checkoutTotal,
