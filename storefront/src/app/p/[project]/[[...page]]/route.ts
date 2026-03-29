@@ -37,13 +37,22 @@ export async function GET(
   const requestedPath = page?.join("/") || ""
   const ext = path.extname(requestedPath).toLowerCase()
   if (ext && ext !== ".html" && STATIC_MIME_TYPES[ext]) {
-    const assetPath = path.join(process.cwd(), "src", "projects", projectSlug, "pages", requestedPath)
-    // Prevent directory traversal
     const pagesDir = path.join(process.cwd(), "src", "projects", projectSlug, "pages")
-    if (!path.resolve(assetPath).startsWith(pagesDir) || !fs.existsSync(assetPath)) {
+    const assetPath = path.join(pagesDir, requestedPath)
+    // Prevent directory traversal
+    const resolvedAsset = path.resolve(assetPath)
+    const inProjectDir = resolvedAsset.startsWith(pagesDir) && fs.existsSync(assetPath)
+
+    // Fallback: if not in project dir, try public/ folder (for /images/, /icons/, logos etc.)
+    const publicDir = path.join(process.cwd(), "public")
+    const publicPath = path.join(publicDir, requestedPath)
+    const resolvedPublic = path.resolve(publicPath)
+    const inPublicDir = !inProjectDir && resolvedPublic.startsWith(publicDir) && fs.existsSync(publicPath)
+
+    if (!inProjectDir && !inPublicDir) {
       return new NextResponse("Not found", { status: 404 })
     }
-    const content = fs.readFileSync(assetPath)
+    const content = fs.readFileSync(inProjectDir ? assetPath : publicPath)
     // Fonts are immutable — cache 1 year; CSS/JS 1 hour; images 1 day
     const isFont = [".woff", ".woff2", ".ttf", ".eot"].includes(ext)
     const isCode = [".css", ".js"].includes(ext)
@@ -108,7 +117,7 @@ export async function GET(
 
   // Inject PROJECT_CONFIG (replace external script reference)
   html = html.replace(
-    /<script\s+src=["']js\/project-config\.js["']\s*><\/script>/gi,
+    /<script\s+src=["']js\/project-config\.js["'][^>]*><\/script>/gi,
     generateProjectConfigScript(config, basePath, projectToggles)
   )
 
@@ -117,7 +126,7 @@ export async function GET(
 
   // Inject Facebook Pixel + CAPI tracking library (replace external script reference)
   html = html.replace(
-    /<script\s+src=["']js\/pixel\.js["']\s*><\/script>/gi,
+    /<script\s+src=["']js\/pixel\.js["'][^>]*><\/script>/gi,
     generatePixelScript(config, pixelId)
   )
 
