@@ -381,7 +381,7 @@ async function fetchAdvertorial(
       }
       const res = await fetch(url, {
         headers,
-        next: { revalidate: 60 },
+        next: { revalidate: 300 },
       })
 
       if (!res.ok) {
@@ -454,12 +454,24 @@ async function serveAdvertorial(
     html = `${html}\n${analyticsScript}`
   }
 
+  // --- 5. Optimize images: add lazy loading + decoding async ---
+  // Skip the first image (likely hero/LCP) — lazy-load the rest
+  let imgCount = 0
+  html = html.replace(/<img\b([^>]*?)(\s*\/?)>/gi, (match, attrs, close) => {
+    imgCount++
+    // Skip first image (hero/above-fold) for LCP performance
+    if (imgCount === 1) return match
+    // Don't double-add if already has loading attribute
+    if (/loading\s*=/i.test(attrs)) return match
+    return `<img${attrs} loading="lazy" decoding="async"${close}>`
+  })
+
   // Gzip HTML for faster transfer
   const acceptGzip2 = (request.headers.get("accept-encoding") || "").includes("gzip")
   const htmlBody2 = acceptGzip2 ? gzipSync(Buffer.from(html, "utf-8")) : html
   const htmlHeaders2: Record<string, string> = {
     "Content-Type": "text/html; charset=utf-8",
-    "Cache-Control": "public, max-age=60, s-maxage=300",
+    "Cache-Control": "public, max-age=3600, s-maxage=86400",
   }
   if (acceptGzip2) htmlHeaders2["Content-Encoding"] = "gzip"
   return new NextResponse(htmlBody2, { status: 200, headers: htmlHeaders2 })
