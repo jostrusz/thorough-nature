@@ -162,6 +162,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // ─── Static assets: skip region resolution for image/font/css/js files ───
+  if (/\.(png|jpe?g|gif|svg|webp|ico|css|js|woff2?|ttf|eot)$/i.test(pathname)) {
+    return NextResponse.next()
+  }
+
   // ─── Existing Medusa storefront logic ───
   const searchParams = request.nextUrl.searchParams
   const isOnboarding = searchParams.get("onboarding") === "true"
@@ -217,5 +222,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|favicon.ico|\\.well-known|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.webp|.*\\.ico).*)"], // prevents redirecting on static files
+  matcher: ["/((?!api|_next/static|favicon.ico|\\.well-known).*)"],
 }
