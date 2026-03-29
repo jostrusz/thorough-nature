@@ -83,13 +83,15 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       }
     }
 
-    // Env var fallback (last resort)
-    if (candidates.length === 0) {
-      const whsec = process.env.STRIPE_WEBHOOK_SECRET
-      const sk = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY
-      if (whsec && sk) {
-        logger.warn("[Stripe Webhook] ⚠️ Using env var fallback")
-        candidates.push({ webhookSecret: whsec, secretKey: sk, displayName: "env vars" })
+    // ALWAYS add env var webhook secret as additional candidate
+    // (gateway_config DB values may be wrong/outdated)
+    const whsec = process.env.STRIPE_WEBHOOK_SECRET
+    const sk = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY
+    if (whsec && sk) {
+      // Check if this whsec isn't already in candidates (avoid duplicates)
+      const alreadyHas = candidates.some(c => c.webhookSecret === whsec)
+      if (!alreadyHas) {
+        candidates.push({ webhookSecret: whsec, secretKey: sk, displayName: "ENV vars fallback" })
       }
     }
 
@@ -102,6 +104,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     let event: Stripe.Event | null = null
     let matchedSecretKey: string | null = null
 
+    const failedReasons: string[] = []
     for (const candidate of candidates) {
       try {
         const s = new Stripe(candidate.secretKey, { apiVersion: "2025-03-31.basil" as any })
@@ -109,14 +112,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         matchedSecretKey = candidate.secretKey
         logger.info(`[Stripe Webhook] ✓ Signature verified via gateway "${candidate.displayName}"`)
         break
-      } catch {
-        // Signature didn't match this gateway, try next
+      } catch (verifyErr: any) {
+        failedReasons.push(`${candidate.displayName}: ${verifyErr.message}`)
       }
     }
 
     if (!event || !matchedSecretKey) {
       const triedNames = candidates.map(c => c.displayName).join(", ")
       logger.error(`[Stripe Webhook] Signature verification failed against all ${candidates.length} gateway(s): ${triedNames}`)
+      logger.error(`[Stripe Webhook] Failure details: ${failedReasons.join(" | ")}`)
+      logger.error(`[Stripe Webhook] rawBody type=${typeof rawBody}, length=${rawBody?.length}, sig=${sig?.substring(0, 30)}...`)
+      logger.error(`[Stripe Webhook] Webhook secrets tried: ${candidates.map(c => c.webhookSecret?.substring(0, 10) + '...').join(", ")}`)
       return res.status(400).json({ error: "Webhook signature verification failed" })
     }
 
