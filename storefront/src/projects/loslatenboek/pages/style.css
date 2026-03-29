@@ -227,7 +227,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  color: var(--white);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
  .nav-links { display: none; }
  .nav-hamburger { display: flex; }
  .nav-mobile-menu.open { display: flex; }
