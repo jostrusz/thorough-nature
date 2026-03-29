@@ -282,13 +282,8 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
       } catch {}
 
       // Redirect-based methods: confirm intent server-side → get redirect URL
-      // Projects that use Drop-in for bancontact/card skip server-side confirm (drop-in handles it)
-      const DROPIN_PROJECTS = ["loslatenboek"]
-      const useDropin = DROPIN_PROJECTS.includes(projectSlug || "")
       // Credit cards use Drop-in element (inline form) — Airwallex hosted page doesn't work (CSP blocks)
-      const REDIRECT_METHODS = useDropin
-        ? ["ideal", "eps", "blik", "przelewy24", "p24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice"]
-        : ["ideal", "bancontact", "eps", "blik", "przelewy24", "p24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice"]
+      const REDIRECT_METHODS = ["ideal", "bancontact", "eps", "blik", "przelewy24", "p24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice"]
       let checkoutUrl: string | null = null
 
       if (method && REDIRECT_METHODS.includes(method) && returnUrl) {
@@ -324,6 +319,12 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
               const firstName = data?.shipping_address?.first_name || data?.billing_address?.first_name || ""
               const lastName = data?.shipping_address?.last_name || data?.billing_address?.last_name || ""
               paymentMethodPayload.payu.shopper_name = `${firstName} ${lastName}`.trim() || "Customer"
+            }
+            // Bancontact requires shopper_name
+            if (method === "bancontact") {
+              const firstName = data?.shipping_address?.first_name || data?.billing_address?.first_name || ""
+              const lastName = data?.shipping_address?.last_name || data?.billing_address?.last_name || ""
+              paymentMethodPayload.bancontact.shopper_name = `${firstName} ${lastName}`.trim() || "Customer"
             }
             // BLIK requires shopper_name and shopper_email
             if (method === "blik") {

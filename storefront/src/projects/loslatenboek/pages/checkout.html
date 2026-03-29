@@ -7214,8 +7214,8 @@ body {
         // ─── AIRWALLEX DROP-IN FLOW ───
         // Airwallex uses Drop-in Element for card, bancontact, and other methods
         if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1 && providerData.intentId) {
-          // Drop-in methods: creditcard and bancontact are handled inline (no redirect)
-          var DROPIN_METHODS = ['creditcard', 'bancontact'];
+          // Drop-in methods: only creditcard is handled inline (bancontact uses direct redirect)
+          var DROPIN_METHODS = ['creditcard'];
           // For other redirect-based methods (iDEAL, BLIK, EPS), use the redirect URL
           if (redirectUrl && DROPIN_METHODS.indexOf(selectedMethod) === -1) {
             window.location.href = redirectUrl;
