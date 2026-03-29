@@ -105,7 +105,7 @@ const PROJECT_TAG_NAMES: Record<string, string> = {
   "slapp-taget": "Släpp taget",
   "psi-superzivot": "Psí superživot",
   "lass-los": "Lass los",
-  loslatenboek: "Laat los",
+  loslatenboek: "Laat Los Wat Je Kapotmaakt",
 }
 
 function getTag(order: any): string {

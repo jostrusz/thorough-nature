@@ -5,7 +5,7 @@ import { PROFITABILITY_MODULE } from "../modules/profitability/index.js"
 // Project display names for order tags
 const PROJECT_TAG_NAMES: Record<string, string> = {
   dehondenbijbel: "De Hondenbijbel",
-  loslatenboek: "De Hondenbijbel",
+  loslatenboek: "Laat Los Wat Je Kapotmaakt",
   odpusc: "Odpuść",
   "odpusc-ksiazka": "Odpuść",
   slapp: "Släpp taget",

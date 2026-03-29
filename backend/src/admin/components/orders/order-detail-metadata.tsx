@@ -183,7 +183,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
     "slapp-taget": "Släpp taget",
     "psi-superzivot": "Psí superživot",
     "lass-los": "Lass los",
-    loslatenboek: "Laat los",
+    loslatenboek: "Laat Los Wat Je Kapotmaakt",
   }
   const projectId = order.metadata?.project_id
   const displayTag =
