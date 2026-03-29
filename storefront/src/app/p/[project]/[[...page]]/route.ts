@@ -84,7 +84,10 @@ export async function GET(
   const htmlFile = config.pages[pageName]
   if (!htmlFile) {
     // Fallback: check for advertorial page in database
-    const advertorial = await fetchAdvertorial(config, pageName)
+    // For multi-segment paths (e.g. "prefix/slug"), use last segment as advertorial slug
+    const segments = pageName.split("/").filter(Boolean)
+    const advertorialSlug = segments[segments.length - 1] || pageName
+    const advertorial = await fetchAdvertorial(config, advertorialSlug)
     if (advertorial) {
       return serveAdvertorial(request, config, advertorial)
     }
@@ -341,6 +344,7 @@ interface AdvertorialPage {
   id: string
   title: string
   slug: string
+  url_prefix: string | null
   html_content: string
   meta_title: string | null
   meta_description: string | null

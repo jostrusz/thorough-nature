@@ -5,6 +5,7 @@ const AdvertorialPage = model.define("advertorial_page", {
   project_id: model.text(),
   title: model.text(),
   slug: model.text(),
+  url_prefix: model.text().nullable(),
   html_content: model.text(),
   meta_title: model.text().nullable(),
   meta_description: model.text().nullable(),

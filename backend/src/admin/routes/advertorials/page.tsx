@@ -45,6 +45,7 @@ interface AdvertorialPage {
   project_id: string
   title: string
   slug: string
+  url_prefix: string | null
   html_content: string
   meta_title: string | null
   meta_description: string | null
@@ -188,7 +189,8 @@ function PageRow({
 }) {
   const project = projects.find((p) => p.project_slug === page.project_id)
   const domain = project?.domain || page.project_id + ".com"
-  const fullUrl = `https://${domain}/${page.slug}`
+  const prefix = page.url_prefix ? `${page.url_prefix}/` : ""
+  const fullUrl = `https://${domain}/${prefix}${page.slug}`
 
   const handleCopyUrl = useCallback(() => {
     navigator.clipboard.writeText(fullUrl)
@@ -215,7 +217,7 @@ function PageRow({
           </span>
         </div>
         <div style={{ fontSize: "12px", color: colors.textMuted, marginBottom: "4px" }}>
-          {domain}/{page.slug}
+          {domain}/{prefix}{page.slug}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <span className={`adv-badge adv-badge-${page.status}`}>
@@ -281,11 +283,13 @@ function AdvertorialModal({
   const [metaDescription, setMetaDescription] = useState(page?.meta_description || "")
   const [ogImageUrl, setOgImageUrl] = useState(page?.og_image_url || "")
   const [facebookPixelId, setFacebookPixelId] = useState(page?.facebook_pixel_id || "")
+  const [urlPrefix, setUrlPrefix] = useState(page?.url_prefix || "")
   const [showSeo, setShowSeo] = useState(false)
 
   const selectedProject = projects.find((p) => p.project_slug === projectId)
   const domain = selectedProject?.domain || projectId + ".com"
-  const previewUrl = `https://${domain}/${slug || generateSlug(title)}`
+  const prefixPath = urlPrefix ? `${urlPrefix}/` : ""
+  const previewUrl = `https://${domain}/${prefixPath}${slug || generateSlug(title)}`
 
   const handleTitleChange = (val: string) => {
     setTitle(val)
@@ -308,6 +312,7 @@ function AdvertorialModal({
     const data: Record<string, any> = {
       title,
       slug: finalSlug,
+      url_prefix: urlPrefix || null,
       project_id: projectId,
       html_content: htmlContent,
       status,
@@ -369,6 +374,23 @@ function AdvertorialModal({
               ))}
             </select>
           </div>
+        </div>
+
+        {/* URL Prefix (optional) */}
+        <div style={{ marginBottom: "14px" }}>
+          <label style={labelStyle}>URL Prefix (optional)</label>
+          <input
+            className="adv-input"
+            style={inputStyle}
+            value={urlPrefix}
+            onChange={(e) => setUrlPrefix(
+              e.target.value.toLowerCase().replace(/[^a-z0-9-/]/g, "").replace(/\/{2,}/g, "/").replace(/^\/|\/$/g, "")
+            )}
+            placeholder="e.g. laat-los-wat-je-kapotmaakt"
+          />
+          <span style={{ fontSize: "11px", color: colors.textMuted, marginTop: "2px", display: "block" }}>
+            Optional path before the slug. Leave empty for root-level URL.
+          </span>
         </div>
 
         {/* URL Preview */}

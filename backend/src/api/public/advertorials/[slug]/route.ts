@@ -45,6 +45,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
         id: page.id,
         title: page.title,
         slug: page.slug,
+        url_prefix: page.url_prefix,
         html_content: page.html_content,
         meta_title: page.meta_title,
         meta_description: page.meta_description,
