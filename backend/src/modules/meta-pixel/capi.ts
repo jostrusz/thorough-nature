@@ -51,6 +51,7 @@ export interface CAPIEvent {
   event_id: string
   event_time: number        // Unix seconds
   event_source_url?: string
+  referrer_url?: string
   action_source?: string
   user_data: CAPIUserData
   custom_data?: CAPICustomData
@@ -92,14 +93,45 @@ export function hashPII(value: string | undefined | null): string | undefined {
  * Normalize a phone number before hashing:
  *  - Remove spaces, dashes, parentheses, dots
  *  - Remove leading +
- *  - Lowercase (no-op for digits, but safe)
  *  - SHA-256 hash
+ *
+ * Facebook requires digits only WITH country code (e.g. "48500123456" for Poland).
  */
 export function hashPhone(value: string | undefined | null): string | undefined {
   if (!value || value.trim() === "") return undefined
-  const cleaned = value.replace(/[\s\-().+]/g, "").trim().toLowerCase()
+  const cleaned = value.replace(/[\s\-().+]/g, "").trim()
   if (!cleaned) return undefined
   return sha256(cleaned)
+}
+
+/**
+ * Normalize city for Facebook matching:
+ *  - Lowercase
+ *  - Remove ALL spaces, punctuation, special characters
+ *  - Remove diacritics (ą→a, ć→c, ę→e, ł→l, ń→n, ó→o, ś→s, ź→z, ż→z, etc.)
+ *
+ * Facebook spec: "Lowercase, no punctuation/special characters/spaces"
+ */
+export function normalizeCity(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")                    // decompose diacritics (ą → a + combining mark)
+    .replace(/[\u0300-\u036f]/g, "")     // strip combining marks
+    .replace(/ł/g, "l")                  // NFD doesn't decompose ł
+    .replace(/[^a-z0-9]/g, "")           // remove spaces, punctuation, anything non-alphanumeric
+}
+
+/**
+ * Normalize ZIP/postal code:
+ *  - Remove spaces, hyphens
+ *  - Lowercase
+ *
+ * Facebook spec: "Lowercase, no spaces/hyphens"
+ * Polish "00-123" → "00123"
+ */
+export function normalizeZip(value: string): string {
+  return value.trim().toLowerCase().replace(/[\s\-]/g, "")
 }
 
 // ─── Build hashed user_data ─────────────────────────────────────
@@ -107,20 +139,23 @@ export function hashPhone(value: string | undefined | null): string | undefined 
 export function buildHashedUserData(raw: CAPIUserData): Record<string, any> {
   const hashed: Record<string, any> = {}
 
-  // Hashed PII fields
+  // Hashed PII fields (SHA-256 after normalization)
   if (raw.em) hashed.em = [hashPII(raw.em)]
   if (raw.ph) hashed.ph = [hashPhone(raw.ph)]
   if (raw.fn) hashed.fn = [hashPII(raw.fn)]
   if (raw.ln) hashed.ln = [hashPII(raw.ln)]
-  if (raw.ct) hashed.ct = [hashPII(raw.ct)]
+  if (raw.ct) hashed.ct = [sha256(normalizeCity(raw.ct))]
   if (raw.st) hashed.st = [hashPII(raw.st)]
-  if (raw.zp) hashed.zp = [hashPII(raw.zp)]
+  if (raw.zp) hashed.zp = [sha256(normalizeZip(raw.zp))]
   if (raw.country) hashed.country = [hashPII(raw.country)]
-  if (raw.external_id) hashed.external_id = [hashPII(raw.external_id)]
   if (raw.ge) hashed.ge = [hashPII(raw.ge)]
   if (raw.db) hashed.db = [hashPII(raw.db)]
 
-  // NOT hashed
+  // external_id: NOT hashed — must match browser pixel's unhashed value
+  // Browser pixel (fbq) hashes it internally; double-hashing breaks matching.
+  if (raw.external_id) hashed.external_id = [raw.external_id]
+
+  // NOT hashed (per Facebook spec)
   if (raw.client_ip_address) hashed.client_ip_address = raw.client_ip_address
   if (raw.client_user_agent) hashed.client_user_agent = raw.client_user_agent
   if (raw.fbc) hashed.fbc = raw.fbc
@@ -147,6 +182,7 @@ export async function sendCAPIEvents(
       event_id: ev.event_id,
       event_time: ev.event_time,
       event_source_url: ev.event_source_url || undefined,
+      referrer_url: ev.referrer_url || undefined,
       action_source: ev.action_source || "website",
       user_data: buildHashedUserData(ev.user_data),
       custom_data: ev.custom_data || undefined,

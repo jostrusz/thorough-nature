@@ -83,6 +83,7 @@ export async function POST(
       event_id,
       event_time: body.event_time || Math.floor(Date.now() / 1000),
       event_source_url: body.event_source_url || undefined,
+      referrer_url: body.referrer_url || undefined,
       action_source: "website",
       user_data: rawUserData,
       custom_data: customData,

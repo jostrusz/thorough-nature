@@ -511,6 +511,8 @@ function generateProjectConfigScript(
     packetaApiKey: (config as any).packetaApiKey || null,
     shippingOptions: (config as any).shippingOptions || null,
     catalogContentIds: (config as any).catalogContentIds || null,
+    defaultCountry: (config as any).defaultCountry || null,
+    defaultPhonePrefix: (config as any).defaultPhonePrefix || null,
     // Feature toggles from admin
     orderBumpEnabled: toggles.orderBumpEnabled,
     upsellEnabled: toggles.upsellEnabled,
@@ -640,6 +642,16 @@ window.MetaTracker = (function() {
     return eid;
   }
 
+  /* ── Phone number: ensure country code prefix ─────────── */
+  function ensurePhonePrefix(phone, prefix) {
+    if (!phone || !prefix) return phone;
+    // Already has country prefix
+    if (phone.indexOf(prefix) === 0) return phone;
+    // Remove leading 0 (local format) and prepend country code
+    if (phone.charAt(0) === '0') phone = phone.substring(1);
+    return prefix + phone;
+  }
+
   /* ── UUID v4 generator (event_id) ───────────────────────── */
   function generateEventId() {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -660,16 +672,25 @@ window.MetaTracker = (function() {
     if (data.fn) advancedMatchData.fn = data.fn.toLowerCase().trim();
     if (data.ln) advancedMatchData.ln = data.ln.toLowerCase().trim();
     if (data.ct) advancedMatchData.ct = data.ct.toLowerCase().trim();
+    if (data.st) advancedMatchData.st = data.st.toLowerCase().trim();
     if (data.zp) advancedMatchData.zp = data.zp.trim();
     if (data.country) advancedMatchData.country = data.country.toLowerCase().trim();
+    if (data.ge) advancedMatchData.ge = data.ge.toLowerCase().trim();
+    if (data.db) advancedMatchData.db = data.db.trim();
     if (data.external_id) advancedMatchData.external_id = data.external_id;
-    // Re-init pixel with advanced matching data for better browser-side matching
+    // Re-init pixel with ALL advanced matching data for browser-side matching
     try {
       var matchPayload = {};
       if (advancedMatchData.em) matchPayload.em = advancedMatchData.em;
       if (advancedMatchData.ph) matchPayload.ph = advancedMatchData.ph;
       if (advancedMatchData.fn) matchPayload.fn = advancedMatchData.fn;
       if (advancedMatchData.ln) matchPayload.ln = advancedMatchData.ln;
+      if (advancedMatchData.ct) matchPayload.ct = advancedMatchData.ct;
+      if (advancedMatchData.st) matchPayload.st = advancedMatchData.st;
+      if (advancedMatchData.zp) matchPayload.zp = advancedMatchData.zp;
+      if (advancedMatchData.country) matchPayload.country = advancedMatchData.country;
+      if (advancedMatchData.ge) matchPayload.ge = advancedMatchData.ge;
+      if (advancedMatchData.db) matchPayload.db = advancedMatchData.db;
       if (advancedMatchData.external_id) matchPayload.external_id = advancedMatchData.external_id;
       if (Object.keys(matchPayload).length > 0) {
         fbq('init', PIXEL_ID, matchPayload);
@@ -704,33 +725,38 @@ window.MetaTracker = (function() {
 
     // Step 4: Fire CAPI with IDENTICAL event_id
     var externalId = getExternalId();
+    var defaultCountry = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.defaultCountry) ? window.PROJECT_CONFIG.defaultCountry.toLowerCase() : null;
+    var defaultPhonePrefix = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.defaultPhonePrefix) || null;
     var capiPayload = {
       project_id: PROJECT_ID,
       event_name: eventName,
       event_id: eventId,
       event_time: Math.floor(Date.now() / 1000),
       event_source_url: window.location.href,
+      referrer_url: document.referrer || undefined,
       user_data: {
         fbc: getFbc(),
         fbp: getFbp(),
         external_id: externalId,
-        client_user_agent: navigator.userAgent
+        client_user_agent: navigator.userAgent,
+        country: defaultCountry || undefined
       },
       custom_data: customData
     };
 
     // Merge stored advanced matching data into every CAPI call
     if (advancedMatchData.em) capiPayload.user_data.em = advancedMatchData.em;
-    if (advancedMatchData.ph) capiPayload.user_data.ph = advancedMatchData.ph;
+    if (advancedMatchData.ph) capiPayload.user_data.ph = ensurePhonePrefix(advancedMatchData.ph, defaultPhonePrefix);
     if (advancedMatchData.fn) capiPayload.user_data.fn = advancedMatchData.fn;
     if (advancedMatchData.ln) capiPayload.user_data.ln = advancedMatchData.ln;
     if (advancedMatchData.ct) capiPayload.user_data.ct = advancedMatchData.ct;
     if (advancedMatchData.zp) capiPayload.user_data.zp = advancedMatchData.zp;
     if (advancedMatchData.country) capiPayload.user_data.country = advancedMatchData.country;
+    if (advancedMatchData.st) capiPayload.user_data.st = advancedMatchData.st;
 
     // Override with any explicit user_data from caller
     if (userData.em) capiPayload.user_data.em = userData.em;
-    if (userData.ph) capiPayload.user_data.ph = userData.ph;
+    if (userData.ph) capiPayload.user_data.ph = ensurePhonePrefix(userData.ph.replace(/[^0-9]/g, ''), defaultPhonePrefix);
     if (userData.fn) capiPayload.user_data.fn = userData.fn;
     if (userData.ln) capiPayload.user_data.ln = userData.ln;
     if (userData.ct) capiPayload.user_data.ct = userData.ct;
@@ -810,7 +836,7 @@ window.MetaTracker = (function() {
   }
 
   function trackPurchase(data, userData, options) {
-    return trackEvent('Purchase', {
+    var customData = {
       content_type: 'product',
       content_ids: data.content_ids || [],
       contents: data.contents || [],
@@ -818,7 +844,9 @@ window.MetaTracker = (function() {
       currency: data.currency || 'EUR',
       num_items: data.num_items || 1,
       order_id: data.order_id || ''
-    }, userData, options);
+    };
+    if (data.customer_segmentation) customData.customer_segmentation = data.customer_segmentation;
+    return trackEvent('Purchase', customData, userData, options);
   }
 
   /* ── Initialize: capture fbclid + restore saved user data ── */

@@ -1125,14 +1125,20 @@ body { background: var(--bg); }
     }
 
     var purchaseEventId = 'purchase_' + orderId;
+    // Detect new vs returning customer for Facebook optimization
+    var isReturningCustomer = false;
+    try { isReturningCustomer = localStorage.getItem('has_purchased_before') === 'true'; } catch(e) {}
     MetaTracker.trackPurchase({
       content_ids: purchaseContentIds,
       contents: purchaseContentIds.map(function(id) { return { id: id, quantity: 1 }; }),
       value: totalPrice,
       currency: PROJECT_CONFIG.mainProduct.currency || 'PLN',
       num_items: purchaseNumItems,
-      order_id: orderId
+      order_id: orderId,
+      customer_segmentation: isReturningCustomer ? 'existing_customer_to_business' : 'new_customer_to_business'
     }, purchaseUserData, { event_id: purchaseEventId });
+    // Mark as returning customer for future purchases
+    try { localStorage.setItem('has_purchased_before', 'true'); } catch(e) {}
     console.log('TY: Purchase event (browser + CAPI) — ' + totalPrice + ' zł (' + purchaseNumItems + ' items) event_id=' + purchaseEventId);
   }
 

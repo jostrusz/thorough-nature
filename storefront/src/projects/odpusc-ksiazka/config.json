@@ -5,6 +5,7 @@
   "domain": "odpusc-ksiazka.pl",
   "locale": "pl",
   "defaultCountry": "PL",
+  "defaultPhonePrefix": "48",
   "salesChannelName": "Odpusc Ksiazka",
   "medusaUrl": "",
   "publishableApiKey": "pk_1a3e60bc52d9ceb22d801a00512ffa1af3cac608f724fb8e27c9c78bc660f1ce",
