@@ -79,6 +79,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
   loslatenboek: {
     replyTo: 'devries@loslatenboek.nl',
     fromName: 'Laat Los Wat Je Kapotmaakt',
+    fromEmail: 'Laat Los Wat Je Kapotmaakt <devries@loslatenboek.nl>',
     project: 'loslatenboek',
   },
   'slapp-taget': {
