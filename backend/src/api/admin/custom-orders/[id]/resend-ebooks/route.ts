@@ -12,8 +12,8 @@ import crypto from "crypto"
 // Ebook files per project — must match order-placed-digital-download.ts
 const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string; description: string; size: string }>> = {
   loslatenboek: [
-    { key: "e-books/De Overthinking Oplossing.pdf", title: "De Overthinking Oplossing", description: "E-book (PDF)", size: "2.4 MB" },
-    { key: "e-books/Liefde zonder Onzin.pdf", title: "Liefde zonder Onzin", description: "E-book (PDF)", size: "1.8 MB" },
+    { key: "e-books/De Overthinking Oplossing.pdf", title: "De Overthinking Oplossing", description: "E-book (PDF)", size: "1.3 MB" },
+    { key: "e-books/Liefde zonder Onzin.pdf", title: "Liefde zonder Onzin", description: "E-book (PDF)", size: "13.8 MB" },
   ],
   dehondenbijbel: [
     { key: "e-books/Langlevendheid begint in de voerbak.pdf", title: "Langlevendheid begint in de voerbak", description: "E-book (PDF)", size: "3.7 MB" },
@@ -35,7 +35,7 @@ const DEFAULT_EBOOK_FILES = EBOOK_FILES_BY_PROJECT.loslatenboek
 
 // Storefront URLs per project
 const STOREFRONT_URLS: Record<string, string> = {
-  loslatenboek: process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_BASE_URL || "https://tijdomloslaten.nl",
+  loslatenboek: process.env.LLWJK_STOREFRONT_URL || "https://storefront-production-fccf.up.railway.app",
   dehondenbijbel: process.env.DH_STOREFRONT_URL || process.env.STOREFRONT_URL || "https://www.dehondenbijbel.nl",
   'slapp-taget': process.env.ST_STOREFRONT_URL || "https://www.slapptagetboken.se",
   'odpusc-ksiazka': process.env.OK_STOREFRONT_URL || "https://www.odpusc-ksiazka.pl",

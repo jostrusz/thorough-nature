@@ -17,13 +17,13 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       key: "e-books/De Overthinking Oplossing.pdf",
       title: "De Overthinking Oplossing",
       description: "E-book (PDF)",
-      size: "2.4 MB",
+      size: "1.3 MB",
     },
     {
       key: "e-books/Liefde zonder Onzin.pdf",
       title: "Liefde zonder Onzin",
       description: "E-book (PDF)",
-      size: "1.8 MB",
+      size: "13.8 MB",
     },
   ],
   dehondenbijbel: [
