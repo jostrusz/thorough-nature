@@ -95,7 +95,7 @@ const DEFAULT_EBOOK_FILES = EBOOK_FILES_BY_PROJECT.loslatenboek
 
 // Storefront URLs per project
 const STOREFRONT_URLS: Record<string, string> = {
-  loslatenboek: process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_BASE_URL || "https://tijdomloslaten.nl",
+  loslatenboek: process.env.LLWJK_STOREFRONT_URL || "https://www.loslatenboek.nl",
   dehondenbijbel: process.env.DH_STOREFRONT_URL || process.env.STOREFRONT_URL || "https://www.dehondenbijbel.nl",
   'slapp-taget': process.env.ST_STOREFRONT_URL || "https://www.slapptagetboken.se",
   'odpusc-ksiazka': process.env.OK_STOREFRONT_URL || "https://www.odpusc-ksiazka.pl",
