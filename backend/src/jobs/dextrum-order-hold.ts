@@ -113,12 +113,44 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
 
         const rawItems = (order as any).items || []
         console.log(`[Dextrum Hold] Order ${orderCode} items count: ${(order as any).items?.length ?? 'undefined'}, keys: ${Object.keys(order as any).join(', ')}`)
-        const orderItems = rawItems.map((item: any) => ({
-          productCode: item.variant?.sku || "UNKNOWN",
-          quantity: item.quantity || 1,
-          unitPrice: Number(item.unit_price) || 0,
-          productName: item.variant?.product?.title || item.title || "",
-        }))
+
+        /**
+         * SKU mapping for bundle variants → physical warehouse SKU.
+         * Loslatenboek uses per-bundle variants (LLWJK-1 to LLWJK-4) where the suffix
+         * encodes the number of physical books. The warehouse needs the real product SKU
+         * (LLWJK7824627392) with the correct quantity.
+         *
+         * Pattern: LLWJK-{N} → N × LLWJK7824627392
+         */
+        const BUNDLE_SKU_MAP: Record<string, { physicalSku: string; quantity: number }> = {
+          "LLWJK-1": { physicalSku: "LLWJK7824627392", quantity: 1 },
+          "LLWJK-2": { physicalSku: "LLWJK7824627392", quantity: 2 },
+          "LLWJK-3": { physicalSku: "LLWJK7824627392", quantity: 3 },
+          "LLWJK-4": { physicalSku: "LLWJK7824627392", quantity: 4 },
+        }
+
+        const orderItems = rawItems.map((item: any) => {
+          const sku = item.variant?.sku || "UNKNOWN"
+          const bundleMapping = BUNDLE_SKU_MAP[sku]
+
+          if (bundleMapping) {
+            // Bundle variant → map to physical warehouse SKU with correct quantity
+            console.log(`[Dextrum Hold] SKU mapping: ${sku} → ${bundleMapping.quantity}× ${bundleMapping.physicalSku}`)
+            return {
+              productCode: bundleMapping.physicalSku,
+              quantity: bundleMapping.quantity,
+              unitPrice: Number(item.unit_price) || 0,
+              productName: item.variant?.product?.title || item.title || "",
+            }
+          }
+
+          return {
+            productCode: sku,
+            quantity: item.quantity || 1,
+            unitPrice: Number(item.unit_price) || 0,
+            productName: item.variant?.product?.title || item.title || "",
+          }
+        })
 
         // 5b. Safety: do not send empty orders — retry later
         if (orderItems.length === 0) {

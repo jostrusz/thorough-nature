@@ -86,35 +86,77 @@ type AddBundleToCartInput = {
 }
 
 /**
+ * SKU-based bundle quantity map.
+ * For projects using per-bundle variants (e.g. loslatenboek), the SKU encodes the bundle qty.
+ * Pattern: BASE_SKU-{N} where N is the number of physical books.
+ * Example: LLWJK-2 → bundle of 2 books → use BUNDLE_PRICING[handle][2]
+ *
+ * This is only used when quantity=1 and the SKU matches a known bundle pattern.
+ * Other projects still send quantity > 1 and work as before.
+ */
+const BUNDLE_SKU_PATTERNS: RegExp[] = [
+  /^LLWJK-(\d+)$/,   // loslatenboek: LLWJK-1, LLWJK-2, LLWJK-3, LLWJK-4
+]
+
+function extractBundleQtyFromSku(sku: string | null): number | null {
+  if (!sku) return null
+  for (const pattern of BUNDLE_SKU_PATTERNS) {
+    const match = sku.match(pattern)
+    if (match) return parseInt(match[1], 10)
+  }
+  return null
+}
+
+/**
  * Step: Calculate bundle unit price
- * Resolves product handle from variant_id, looks up bundle total, computes per-unit price.
+ * Resolves product handle + SKU from variant_id, looks up bundle total, computes per-unit price.
+ *
+ * Two modes:
+ * 1. Per-bundle variant (loslatenboek): quantity=1, SKU encodes bundle qty (LLWJK-2 → 2 books)
+ *    → Price = BUNDLE_PRICING[handle][skuBundleQty], unitPrice = price (since qty=1)
+ * 2. Legacy (other projects): quantity=N, single variant
+ *    → Price = BUNDLE_PRICING[handle][N], unitPrice = price / N
  */
 const calculateBundlePriceStep = createStep(
   "calculate-bundle-price",
   async (input: { variant_id: string; quantity: number }, { container }) => {
     const { variant_id, quantity } = input
 
-    // Resolve product handle from variant_id
+    // Resolve product handle + SKU from variant_id
     const query = container.resolve("query") as any
     let productHandle: string | null = null
+    let variantSku: string | null = null
     try {
       const { data: variants } = await query.graph({
         entity: "product_variant",
-        fields: ["id", "product.handle"],
+        fields: ["id", "sku", "product.handle"],
         filters: { id: variant_id },
       })
       productHandle = variants?.[0]?.product?.handle || null
+      variantSku = variants?.[0]?.sku || null
     } catch {
       // Fallback: no handle found
     }
 
     if (productHandle) {
       const variantPricing = BUNDLE_PRICING[productHandle]
-      if (variantPricing && variantPricing[quantity] !== undefined) {
-        // Bundle price found — compute per-unit price
-        const totalPrice = variantPricing[quantity]
-        const unitPrice = totalPrice / quantity
-        return new StepResponse(unitPrice)
+      if (variantPricing) {
+        // Check if SKU encodes bundle quantity (per-bundle variant approach)
+        const skuBundleQty = extractBundleQtyFromSku(variantSku)
+
+        if (skuBundleQty && quantity === 1 && variantPricing[skuBundleQty] !== undefined) {
+          // Per-bundle variant: SKU tells us the real bundle qty, quantity=1
+          // Total price IS the unit price since we're adding 1 item
+          const totalPrice = variantPricing[skuBundleQty]
+          return new StepResponse(totalPrice)
+        }
+
+        if (variantPricing[quantity] !== undefined) {
+          // Legacy mode: quantity encodes bundle qty
+          const totalPrice = variantPricing[quantity]
+          const unitPrice = totalPrice / quantity
+          return new StepResponse(unitPrice)
+        }
       }
     }
 

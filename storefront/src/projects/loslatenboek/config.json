@@ -29,10 +29,10 @@
     "currency": "EUR"
   },
   "bundleOptions": [
-    { "qty": 1, "price": 35, "save": 0, "badge": "VOOR JEZELF" },
-    { "qty": 2, "price": 59, "save": 11, "badge": "DEEL MET EEN VRIEND(IN)" },
-    { "qty": 3, "price": 79, "save": 26, "badge": "PERFECT ALS CADEAU" },
-    { "qty": 4, "price": 99, "save": 41, "badge": "BESTE WAARDE" }
+    { "qty": 1, "price": 35, "save": 0, "badge": "VOOR JEZELF", "variantId": "variant_01KJYFMPYYH6PFK9XV5WJH0FM9" },
+    { "qty": 2, "price": 59, "save": 11, "badge": "DEEL MET EEN VRIEND(IN)", "variantId": "variant_01KJYFMPYYQQA8JK7JKAYE7PS8" },
+    { "qty": 3, "price": 79, "save": 26, "badge": "PERFECT ALS CADEAU", "variantId": "variant_01KJYFMPYYG0W3WC4EH5AD5PEE" },
+    { "qty": 4, "price": 99, "save": 41, "badge": "BESTE WAARDE", "variantId": "variant_01KJYFMPYY37ZSEXPDS9DD32DS" }
   ],
   "catalogContentIds": ["32a1orwxo6", "04sbhku9gu", "3ox80zb3w3", "ovw9qrtu0h", "coonabrkxh", "dw9xqgils6", "ldv9esmmfj"],
   "mollieProfileId": "",

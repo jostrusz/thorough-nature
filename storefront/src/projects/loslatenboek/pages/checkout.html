@@ -2813,13 +2813,14 @@ body {
 
   /* ─── CONFIGURATIE (z project-config.js) ─── */
   var MEDUSA_URL = PROJECT_CONFIG.medusaUrl;
-  var VARIANT_ID = PROJECT_CONFIG.mainProduct.variantId;
+  var VARIANT_ID = PROJECT_CONFIG.mainProduct.variantId; // Fallback pro projekty bez per-bundle variantId
   // Dynamický region ID — mění se podle vybrané země
   var currentRegionId = PROJECT_CONFIG.regions.NL; // Výchozí: NL
 
   /* ─── STAV: Bundle + Order Bump ─── */
   var selectedBundleQty = 1;       // Aktuálně vybraný počet knih (1-4)
   var selectedBundlePrice = PROJECT_CONFIG.bundleOptions[0].price; // Cena za bundle
+  var selectedBundleVariantId = PROJECT_CONFIG.bundleOptions[0].variantId || VARIANT_ID; // Variant ID pro vybraný bundle
   var orderBumpActive = false;      // Je order bump zaškrtnutý?
 
   // FB Pixel + CAPI: InitiateCheckout on page load (skip on payment return to avoid double firing)
@@ -2985,6 +2986,9 @@ body {
         // Aktualizuj stav
         selectedBundleQty = parseInt(option.getAttribute('data-qty'));
         selectedBundlePrice = parseFloat(option.getAttribute('data-price'));
+        // Aktualizuj variant ID pro vybraný bundle
+        var bundleOpt = PROJECT_CONFIG.bundleOptions.find(function(b) { return b.qty === selectedBundleQty; });
+        selectedBundleVariantId = (bundleOpt && bundleOpt.variantId) || VARIANT_ID;
         // Přepočítej celý souhrn
         recalculateOrderSummary();
       });
@@ -3729,7 +3733,8 @@ body {
     var isOrderBump = orderBumpActive;
     var promoCode = savedPromoCode;
 
-    console.log('[Express Cart] Creating cart — region:', currentRegionId, 'bundleQty:', bundleQty, 'variantId:', VARIANT_ID);
+    var bundleVariantId = selectedBundleVariantId;
+    console.log('[Express Cart] Creating cart — region:', currentRegionId, 'bundleQty:', bundleQty, 'variantId:', bundleVariantId);
     return medusaFetch('/store/carts', {
       method: 'POST',
       body: JSON.stringify({ region_id: currentRegionId })
@@ -3739,9 +3744,10 @@ body {
       console.log('[Express Cart] Cart created:', cartId, '→ adding line items');
 
       // Add main product via bundle endpoint (applies server-side pricing)
+      // Each bundle variant (LLWJK-1 to LLWJK-4) represents a specific bundle qty, so quantity is always 1
       return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
         method: 'POST',
-        body: JSON.stringify({ variant_id: VARIANT_ID, quantity: bundleQty })
+        body: JSON.stringify({ variant_id: bundleVariantId, quantity: 1 })
       }).then(function() {
         // Add order bump if active (uses bundle endpoint for tax-inclusive pricing + discounted price)
         if (isOrderBump && PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.variantId) {
@@ -6369,10 +6375,10 @@ body {
       localStorage.setItem('background_cart_id', backgroundCartId);
       console.log('[Checkout Recovery] Background cart created:', backgroundCartId);
 
-      // Add the main product
+      // Add the main product (bundle variant already encodes the qty, so quantity=1)
       return medusaFetch('/store/carts/' + backgroundCartId + '/line-items-bundle', {
         method: 'POST',
-        body: JSON.stringify({ variant_id: VARIANT_ID, quantity: selectedBundleQty })
+        body: JSON.stringify({ variant_id: selectedBundleVariantId, quantity: 1 })
       });
     }).then(function() {
       // Update with email + abandoned checkout metadata
@@ -6805,6 +6811,7 @@ body {
 
     // ─── Bundle + Order Bump stav v momentě odeslání ───
     var checkoutBundleQty = selectedBundleQty;
+    var checkoutBundleVariantId = selectedBundleVariantId;
     var checkoutBundlePrice = selectedBundlePrice;
     var checkoutOrderBump = orderBumpActive;
     var checkoutTotal = getCurrentTotal();
@@ -6844,12 +6851,12 @@ body {
     cartStep
     .then(function(cartId) {
       // Stap 2a: Hoofdproduct toevoegen via bundle endpoint (custom pricing)
-      // Uses /store/carts/{id}/line-items-bundle which applies bundle discount server-side
+      // Each bundle variant (LLWJK-1 to LLWJK-4) represents a specific bundle qty, so quantity is always 1
       return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
         method: 'POST',
         body: JSON.stringify({
-          variant_id: VARIANT_ID,
-          quantity: checkoutBundleQty
+          variant_id: checkoutBundleVariantId,
+          quantity: 1
         })
       }).then(function() {
         // Stap 2b: Order bump produkt toevoegen (bundle endpoint = tax-inclusive + discounted price)
