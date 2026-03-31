@@ -4,6 +4,11 @@
   "domain": "travelbible.nl",
   "locale": "nl",
   "defaultCountry": "NL",
+  "defaultPhonePrefix": "31",
+  "phonePrefixByCountry": {
+    "NL": "31",
+    "BE": "32"
+  },
   "salesChannelName": "Loslatenboek",
   "medusaUrl": "",
   "publishableApiKey": "pk_281b00d0f2041d1766215f0b4eae7b2a1348f0109116f6d86801f107845bb71c",

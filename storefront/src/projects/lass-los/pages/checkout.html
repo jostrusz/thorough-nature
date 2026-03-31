@@ -6536,7 +6536,10 @@ body {
     if (typeof MetaTracker !== 'undefined') {
       customerData.metadata.fbc = MetaTracker.getFbc() || '';
       customerData.metadata.fbp = MetaTracker.getFbp() || '';
+      customerData.metadata.external_id = MetaTracker.getExternalId() || '';
     }
+    customerData.metadata.source_url = window.location.href;
+    customerData.metadata.client_user_agent = navigator.userAgent || '';
 
     // ─── Firmendaten (B2B) ───
     var isCompany = document.getElementById('company-checkbox').checked;

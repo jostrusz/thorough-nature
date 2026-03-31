@@ -4,9 +4,15 @@
   "domain": "lasslosbuch.de",
   "locale": "de",
   "defaultCountry": "DE",
+  "defaultPhonePrefix": "49",
+  "phonePrefixByCountry": {
+    "DE": "49",
+    "AT": "43",
+    "LU": "352"
+  },
   "salesChannelName": "Lass Los",
   "medusaUrl": "",
-  "publishableApiKey": "",
+  "publishableApiKey": "pk_82c6a0ec955da2ad63fb19d2b2256bc80939c35e9881af7f66d6e813d14876a8",
   "facebookPixelId": "",
   "regions": {
     "DE": "",
@@ -37,7 +43,10 @@
   ],
   "catalogContentIds": ["1azgp7ymuv", "82764876", "31epnhw6c4", "dnoiszdeax", "gh1u1icp8r"],
   "mollieProfileId": "",
-  "paymentProviders": {},
+  "paymentProviders": {
+    "paypal": "pp_paypal_paypal",
+    "airwallex": "pp_airwallex_airwallex"
+  },
   "pages": {
     "": "index.html",
     "checkout": "checkout.html",

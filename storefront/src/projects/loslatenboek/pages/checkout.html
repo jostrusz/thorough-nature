@@ -6763,6 +6763,7 @@ body {
       customerData.metadata.external_id = MetaTracker.getExternalId() || '';
     }
     customerData.metadata.source_url = window.location.href;
+    customerData.metadata.client_user_agent = navigator.userAgent || '';
 
     // ─── Firemní údaje (B2B) ───
     var isCompany = document.getElementById('company-checkbox').checked;
