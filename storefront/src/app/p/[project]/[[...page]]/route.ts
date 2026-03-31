@@ -760,70 +760,25 @@ window.MetaTracker = (function() {
   /* ── Dedup state: prevent same event_id firing twice ────── */
   var firedEventIds = {};
 
-  /* ── Core tracking function ─────────────────────────────── */
-  function trackEvent(eventName, customData, userData, options) {
-    customData = customData || {};
-    userData = userData || {};
-    options = options || {};
+  /* ── Wait for _fbp cookie (set by fbevents.js async load) ── */
+  function waitForFbp(callback, maxWaitMs) {
+    maxWaitMs = maxWaitMs || 1000;
+    var interval = 50;
+    var elapsed = 0;
+    var fbp = getFbp();
+    if (fbp) { callback(fbp); return; }
+    var timer = setInterval(function() {
+      elapsed += interval;
+      fbp = getFbp();
+      if (fbp || elapsed >= maxWaitMs) {
+        clearInterval(timer);
+        callback(fbp);
+      }
+    }, interval);
+  }
 
-    // Step 1: Use provided event_id or generate a new one
-    var eventId = options.event_id || generateEventId();
-
-    // Step 2: Prevent duplicate firing
-    if (firedEventIds[eventId]) return eventId;
-    firedEventIds[eventId] = true;
-
-    // Step 3: Fire browser pixel FIRST
-    try {
-      fbq('track', eventName, customData, { eventID: eventId });
-      console.log('[MetaTracker] Browser pixel: ' + eventName + ' [' + eventId.substring(0,8) + ']');
-    } catch(e) {
-      console.warn('[MetaTracker] Browser pixel failed:', e);
-    }
-
-    // Step 4: Fire CAPI with IDENTICAL event_id
-    var externalId = getExternalId();
-    var defaultCountry = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.defaultCountry) ? window.PROJECT_CONFIG.defaultCountry.toLowerCase() : '${((config as any).defaultCountry || "").toLowerCase()}';
-    var defaultPhonePrefix = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.defaultPhonePrefix) || '${(config as any).defaultPhonePrefix || ""}';
-    var capiPayload = {
-      project_id: PROJECT_ID,
-      event_name: eventName,
-      event_id: eventId,
-      event_time: Math.floor(Date.now() / 1000),
-      event_source_url: window.location.href,
-      referrer_url: document.referrer || undefined,
-      user_data: {
-        fbc: getFbc(),
-        fbp: getFbp(),
-        external_id: externalId,
-        client_user_agent: navigator.userAgent,
-        country: defaultCountry || undefined
-      },
-      custom_data: customData
-    };
-
-    // Merge stored advanced matching data into every CAPI call
-    if (advancedMatchData.em) capiPayload.user_data.em = advancedMatchData.em;
-    if (advancedMatchData.ph) capiPayload.user_data.ph = ensurePhonePrefix(advancedMatchData.ph, defaultPhonePrefix);
-    if (advancedMatchData.fn) capiPayload.user_data.fn = advancedMatchData.fn;
-    if (advancedMatchData.ln) capiPayload.user_data.ln = advancedMatchData.ln;
-    if (advancedMatchData.ct) capiPayload.user_data.ct = advancedMatchData.ct;
-    if (advancedMatchData.zp) capiPayload.user_data.zp = advancedMatchData.zp;
-    if (advancedMatchData.country) capiPayload.user_data.country = advancedMatchData.country;
-    if (advancedMatchData.st) capiPayload.user_data.st = advancedMatchData.st;
-
-    // Override with any explicit user_data from caller
-    if (userData.em) capiPayload.user_data.em = userData.em;
-    if (userData.ph) capiPayload.user_data.ph = ensurePhonePrefix(userData.ph.replace(/[^0-9]/g, ''), defaultPhonePrefix);
-    if (userData.fn) capiPayload.user_data.fn = userData.fn;
-    if (userData.ln) capiPayload.user_data.ln = userData.ln;
-    if (userData.ct) capiPayload.user_data.ct = userData.ct;
-    if (userData.st) capiPayload.user_data.st = userData.st;
-    if (userData.zp) capiPayload.user_data.zp = userData.zp;
-    if (userData.country) capiPayload.user_data.country = userData.country;
-    if (userData.external_id) capiPayload.user_data.external_id = userData.external_id;
-
-    // Send CAPI asynchronously (don't block UI)
+  /* ── Send CAPI payload ─────────────────────────────────── */
+  function sendCAPI(capiPayload, eventName) {
     try {
       fetch(CAPI_URL, {
         method: 'POST',
@@ -845,6 +800,86 @@ window.MetaTracker = (function() {
     } catch(e) {
       console.warn('[MetaTracker] CAPI send error:', e);
     }
+  }
+
+  /* ── Core tracking function ─────────────────────────────── */
+  function trackEvent(eventName, customData, userData, options) {
+    customData = customData || {};
+    userData = userData || {};
+    options = options || {};
+
+    // Step 1: Use provided event_id or generate a new one
+    var eventId = options.event_id || generateEventId();
+
+    // Step 2: Prevent duplicate firing
+    if (firedEventIds[eventId]) return eventId;
+    firedEventIds[eventId] = true;
+
+    // Step 3: Fire browser pixel FIRST (queued if fbevents.js not loaded yet)
+    try {
+      fbq('track', eventName, customData, { eventID: eventId });
+      console.log('[MetaTracker] Browser pixel: ' + eventName + ' [' + eventId.substring(0,8) + ']');
+    } catch(e) {
+      console.warn('[MetaTracker] Browser pixel failed:', e);
+    }
+
+    // Step 4: Build CAPI payload
+    var externalId = getExternalId();
+    var defaultCountry = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.defaultCountry) ? window.PROJECT_CONFIG.defaultCountry.toLowerCase() : '${((config as any).defaultCountry || "").toLowerCase()}';
+    var defaultPhonePrefix = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.defaultPhonePrefix) || '${(config as any).defaultPhonePrefix || ""}';
+
+    function buildAndSendCAPI(fbpValue) {
+      var capiPayload = {
+        project_id: PROJECT_ID,
+        event_name: eventName,
+        event_id: eventId,
+        event_time: Math.floor(Date.now() / 1000),
+        event_source_url: window.location.href,
+        referrer_url: document.referrer || undefined,
+        user_data: {
+          fbc: getFbc(),
+          fbp: fbpValue || null,
+          external_id: externalId,
+          client_user_agent: navigator.userAgent,
+          country: defaultCountry || undefined
+        },
+        custom_data: customData
+      };
+
+      // Merge stored advanced matching data into every CAPI call
+      if (advancedMatchData.em) capiPayload.user_data.em = advancedMatchData.em;
+      if (advancedMatchData.ph) capiPayload.user_data.ph = ensurePhonePrefix(advancedMatchData.ph, defaultPhonePrefix);
+      if (advancedMatchData.fn) capiPayload.user_data.fn = advancedMatchData.fn;
+      if (advancedMatchData.ln) capiPayload.user_data.ln = advancedMatchData.ln;
+      if (advancedMatchData.ct) capiPayload.user_data.ct = advancedMatchData.ct;
+      if (advancedMatchData.zp) capiPayload.user_data.zp = advancedMatchData.zp;
+      if (advancedMatchData.country) capiPayload.user_data.country = advancedMatchData.country;
+      if (advancedMatchData.st) capiPayload.user_data.st = advancedMatchData.st;
+
+      // Override with any explicit user_data from caller
+      if (userData.em) capiPayload.user_data.em = userData.em;
+      if (userData.ph) capiPayload.user_data.ph = ensurePhonePrefix(userData.ph.replace(/[^0-9]/g, ''), defaultPhonePrefix);
+      if (userData.fn) capiPayload.user_data.fn = userData.fn;
+      if (userData.ln) capiPayload.user_data.ln = userData.ln;
+      if (userData.ct) capiPayload.user_data.ct = userData.ct;
+      if (userData.st) capiPayload.user_data.st = userData.st;
+      if (userData.zp) capiPayload.user_data.zp = userData.zp;
+      if (userData.country) capiPayload.user_data.country = userData.country;
+      if (userData.external_id) capiPayload.user_data.external_id = userData.external_id;
+
+      if (fbpValue) {
+        console.log('[MetaTracker] CAPI sending with fbp: ' + fbpValue.substring(0, 20) + '...');
+      } else {
+        console.log('[MetaTracker] CAPI sending without fbp (cookie not available)');
+      }
+
+      sendCAPI(capiPayload, eventName);
+    }
+
+    // Step 5: Wait for _fbp cookie before sending CAPI
+    // fbevents.js sets _fbp asynchronously — polling ensures we capture it
+    // for proper browser↔server event deduplication
+    waitForFbp(buildAndSendCAPI, 1000);
 
     return eventId;
   }
