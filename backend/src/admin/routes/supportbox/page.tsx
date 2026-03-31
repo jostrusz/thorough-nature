@@ -216,6 +216,13 @@ function TicketCard({ ticket }: { ticket: any }) {
   const unread = isUnread(ticket)
   const preview = getMessagePreview(ticket)
 
+  // Get the timestamp of the most recent message (or ticket creation if no messages)
+  const msgs = ticket.messages || []
+  const latestMsgDate = msgs.length > 0
+    ? msgs.reduce((latest: string, m: any) => m.created_at > latest ? m.created_at : latest, msgs[0].created_at)
+    : ticket.created_at
+  const msgCount = msgs.length
+
   const statusColor = ticket.status === "new" ? C.green : ticket.status === "solved" ? C.textMuted : ticket.status === "spam" ? C.red : C.orange
   const statusLabel = ticket.status === "new" ? "New" : ticket.status === "solved" ? "Solved" : ticket.status === "spam" ? "Spam" : "Old"
   const badgeColor = ticket.status === "new" ? "green" : ticket.status === "solved" ? "grey" : ticket.status === "spam" ? "red" : "orange"
@@ -257,11 +264,18 @@ function TicketCard({ ticket }: { ticket: any }) {
               {ticket.subject}
             </span>
             <span style={{ fontSize: "11px", color: C.textMuted, flexShrink: 0, marginLeft: "12px" }}>
-              {timeAgo(ticket.created_at)}
+              {timeAgo(latestMsgDate)}
             </span>
           </div>
-          <div style={{ fontSize: "12px", color: C.textSecondary, marginBottom: "2px" }}>
-            {ticket.from_name || ticket.from_email}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+            <span style={{ fontSize: "12px", color: C.textSecondary }}>
+              {ticket.from_name || ticket.from_email}
+            </span>
+            {msgCount > 1 && (
+              <span style={{ fontSize: "10px", color: C.textMuted, backgroundColor: C.borderLight, padding: "1px 6px", borderRadius: "9999px" }}>
+                {msgCount} msgs
+              </span>
+            )}
           </div>
           {preview && (
             <div style={{
@@ -578,13 +592,26 @@ const SupportBoxDashboard = () => {
   const spamCount = allTickets.filter((t: any) => t.status === "spam").length
 
   // Filtered tickets for display
-  const tickets = statusFilter === "spam"
+  const filteredTickets = statusFilter === "spam"
     ? allTickets // backend already filtered to spam only
     : statusFilter === "all"
       ? allTickets
       : statusFilter === "inbox"
         ? allTickets.filter((t: any) => t.status !== "solved")
         : allTickets.filter((t: any) => t.status === statusFilter)
+
+  // Sort tickets by most recent activity (latest message timestamp), newest first
+  const tickets = [...filteredTickets].sort((a: any, b: any) => {
+    const aMessages = a.messages || []
+    const bMessages = b.messages || []
+    const aLatest = aMessages.length > 0
+      ? Math.max(...aMessages.map((m: any) => +new Date(m.created_at)))
+      : +new Date(a.created_at)
+    const bLatest = bMessages.length > 0
+      ? Math.max(...bMessages.map((m: any) => +new Date(m.created_at)))
+      : +new Date(b.created_at)
+    return bLatest - aLatest
+  })
 
   // Count new tickets per config (from full dataset)
   const newPerConfig = (configId: string) =>

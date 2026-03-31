@@ -105,7 +105,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       delivery_status_at: new Date().toISOString(),
     })
 
-    res.json({ ticket, message })
+    // Auto-solve after composing — admin initiated, no reply expected yet
+    await supportboxService.updateSupportboxTickets({
+      id: ticket.id,
+      status: "solved",
+      solved_at: new Date().toISOString(),
+    })
+
+    // Return updated ticket with solved status
+    const updatedTicket = await supportboxService.retrieveSupportboxTicket(ticket.id)
+    res.json({ ticket: updatedTicket, message })
   } catch (error: any) {
     console.error("[Supportbox Compose] Error:", error.response?.data || error.message)
     res.status(400).json({ error: error.response?.data?.message || error.message })

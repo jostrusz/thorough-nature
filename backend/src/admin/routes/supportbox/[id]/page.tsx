@@ -406,6 +406,9 @@ function MessageBubble({ msg }: { msg: any }) {
   const body = msg.body_html || msg.body_text || ""
   const has = f.strip(body).length > 0
   const [hovered, setHovered] = useState(false)
+  const senderLabel = inb
+    ? (msg.from_name || msg.from_email || "Customer")
+    : `You (${msg.from_email || "Support"})`
 
   return (
     <div
@@ -416,12 +419,30 @@ function MessageBubble({ msg }: { msg: any }) {
         animation: `msgSlide${inb ? "Left" : "Right"} 0.35s cubic-bezier(0.4, 0, 0.2, 1)`,
       }}
     >
-      {/* Sender */}
+      {/* Sender + Timestamp header */}
       <div style={{
-        fontSize: "11px", fontWeight: 600, color: inb ? D.textSec : D.green,
+        display: "flex", alignItems: "center", gap: "8px",
         marginBottom: "6px", paddingLeft: inb ? "2px" : 0, paddingRight: inb ? 0 : "2px",
       }}>
-        {msg.from_name || msg.from_email || (inb ? "Customer" : "You")}
+        {/* Direction indicator */}
+        <span style={{
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          width: "20px", height: "20px", borderRadius: "50%",
+          backgroundColor: inb ? D.blueLight : D.greenLight,
+          fontSize: "10px", flexShrink: 0,
+        }}>
+          {inb ? "📩" : "📤"}
+        </span>
+        <span style={{ fontSize: "12px", fontWeight: 700, color: inb ? D.blue : D.green }}>
+          {senderLabel}
+        </span>
+        <span style={{ fontSize: "11px", color: D.textMuted }}>•</span>
+        <span style={{ fontSize: "11px", color: D.textMuted }}>
+          {f.dt(msg.created_at)}
+        </span>
+        {!inb && msg.delivery_status && (
+          <DeliveryBadge status={msg.delivery_status} />
+        )}
       </div>
 
       {/* Bubble */}
@@ -431,6 +452,8 @@ function MessageBubble({ msg }: { msg: any }) {
         borderRadius: inb ? "4px 18px 18px 18px" : "18px 4px 18px 18px",
         backgroundColor: inb ? D.card : D.greenLight,
         border: `1px solid ${inb ? D.border : D.greenBorder}`,
+        borderLeft: inb ? `3px solid ${D.blue}` : undefined,
+        borderRight: !inb ? `3px solid ${D.green}` : undefined,
         boxShadow: hovered
           ? `0 4px 16px ${inb ? "rgba(0,0,0,0.08)" : D.green + "20"}`
           : D.xs,
@@ -441,20 +464,6 @@ function MessageBubble({ msg }: { msg: any }) {
           <div className="sb-msg-body" style={{ fontSize: "14px", lineHeight: 1.7, color: D.text, wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html: body }} />
         ) : (
           <div style={{ fontSize: "13px", color: D.textMuted, fontStyle: "italic" }}>(empty)</div>
-        )}
-      </div>
-
-      {/* Timestamp + Delivery status */}
-      <div style={{
-        fontSize: "11px", color: D.textMuted, marginTop: "6px",
-        paddingLeft: inb ? "2px" : 0, paddingRight: inb ? 0 : "2px",
-        display: "flex", alignItems: "center", gap: "8px",
-        opacity: hovered ? 1 : 0.7,
-        transition: "opacity 0.2s ease",
-      }}>
-        <span>{f.dt(msg.created_at)}</span>
-        {!inb && msg.delivery_status && (
-          <DeliveryBadge status={msg.delivery_status} />
         )}
       </div>
     </div>
@@ -954,7 +963,8 @@ const TicketDetailPage = () => {
     },
   })
 
-  const msgs = [...(ticket?.messages || [])].sort((a: any, b: any) => +new Date(a.created_at) - +new Date(b.created_at))
+  // Sort messages newest first — most recent message at top
+  const msgs = [...(ticket?.messages || [])].sort((a: any, b: any) => +new Date(b.created_at) - +new Date(a.created_at))
 
   // No auto-scroll — user controls scroll position
 
