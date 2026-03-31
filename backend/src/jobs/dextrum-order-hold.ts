@@ -252,20 +252,25 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           phone: phoneResult.normalized,
           email: (order as any).email || "",
         }
-        // Log normalizations in order timeline
-        if (phoneResult.changed || phoneResult.warning || postalResult.changed) {
+        // Log normalizations in order timeline (ONLY ONCE — skip if already logged)
+        const existingMeta = (order as any).metadata || {}
+        const alreadyLoggedPhone = !!existingMeta.phone_normalization
+        const alreadyLoggedPostal = !!existingMeta.postal_normalization
+        const needsPhoneLog = (phoneResult.changed || phoneResult.warning) && !alreadyLoggedPhone
+        const needsPostalLog = postalResult.changed && !alreadyLoggedPostal
+
+        if (needsPhoneLog || needsPostalLog) {
           try {
             const orderService = container.resolve("order") as any
-            const existingMeta = (order as any).metadata || {}
             const dextrumTimeline = Array.isArray(existingMeta.dextrum_timeline) ? [...existingMeta.dextrum_timeline] : []
-            if (phoneResult.changed || phoneResult.warning) {
+            if (needsPhoneLog) {
               dextrumTimeline.push({
                 status: phoneResult.changed ? "PHONE_NORMALIZED" : "PHONE_MISSING",
                 date: new Date().toISOString(),
-                detail: phoneResult.warning || `Phone: ${phoneResult.normalized}`,
+                detail: phoneResult.warning || `Phone normalized: "${phoneResult.original}" → "${phoneResult.normalized}"`,
               })
             }
-            if (postalResult.changed) {
+            if (needsPostalLog) {
               dextrumTimeline.push({
                 status: "POSTAL_NORMALIZED",
                 date: new Date().toISOString(),
@@ -276,13 +281,19 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
               id: (order as any).id,
               metadata: {
                 ...existingMeta,
-                phone_normalization: phoneResult.changed ? {
+                phone_normalization: needsPhoneLog ? {
                   original: phoneResult.original,
                   normalized: phoneResult.normalized,
                   changed: phoneResult.changed,
                   warning: phoneResult.warning || null,
                   timestamp: new Date().toISOString(),
                 } : existingMeta.phone_normalization,
+                postal_normalization: needsPostalLog ? {
+                  original: postalResult.original,
+                  normalized: postalResult.normalized,
+                  changed: postalResult.changed,
+                  timestamp: new Date().toISOString(),
+                } : existingMeta.postal_normalization,
                 dextrum_timeline: dextrumTimeline,
               },
             }])
