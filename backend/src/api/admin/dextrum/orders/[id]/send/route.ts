@@ -93,13 +93,41 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     }
 
     // 7. Build items
+    /**
+     * SKU mapping for bundle variants → physical warehouse SKU.
+     * Loslatenboek uses per-bundle variants (LLWJK-1 to LLWJK-4) where the suffix
+     * encodes the number of physical books. The warehouse needs the real product SKU
+     * (LLWJK7824627392) with the correct quantity.
+     */
+    const BUNDLE_SKU_MAP: Record<string, { physicalSku: string; quantity: number }> = {
+      "LLWJK-1": { physicalSku: "LLWJK7824627392", quantity: 1 },
+      "LLWJK-2": { physicalSku: "LLWJK7824627392", quantity: 2 },
+      "LLWJK-3": { physicalSku: "LLWJK7824627392", quantity: 3 },
+      "LLWJK-4": { physicalSku: "LLWJK7824627392", quantity: 4 },
+    }
+
     console.log(`[Dextrum Send] Order ${medusaOrderId} items count: ${(order as any).items?.length ?? 'undefined'}, keys: ${Object.keys(order as any).join(', ')}`)
-    const orderItems = ((order as any).items || []).map((item: any) => ({
-      productCode: item.variant?.sku || item.variant?.product?.handle || "UNKNOWN",
-      quantity: item.quantity || 1,
-      unitPrice: Number(item.unit_price) || 0,
-      productName: item.variant?.product?.title || item.title || "",
-    }))
+    const orderItems = ((order as any).items || []).map((item: any) => {
+      const sku = item.variant?.sku || item.variant?.product?.handle || "UNKNOWN"
+      const bundleMapping = BUNDLE_SKU_MAP[sku]
+
+      if (bundleMapping) {
+        console.log(`[Dextrum Send] SKU mapping: ${sku} → ${bundleMapping.quantity}× ${bundleMapping.physicalSku}`)
+        return {
+          productCode: bundleMapping.physicalSku,
+          quantity: bundleMapping.quantity,
+          unitPrice: Number(item.unit_price) || 0,
+          productName: item.variant?.product?.title || item.title || "",
+        }
+      }
+
+      return {
+        productCode: sku,
+        quantity: item.quantity || 1,
+        unitPrice: Number(item.unit_price) || 0,
+        productName: item.variant?.product?.title || item.title || "",
+      }
+    })
 
     if (orderItems.length === 0) {
       res.status(400).json({ error: "Order has no items. Cannot send to WMS." })
