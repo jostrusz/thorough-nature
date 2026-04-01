@@ -13,7 +13,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const supportboxService = req.scope.resolve(SUPPORTBOX_MODULE) as any
   const body = req.body as any
 
-  const { config_id, to_email, to_name, subject, body_html, body_text } = body
+  const { config_id, to_email, to_name, subject, body_html, body_text, attachments } = body
 
   if (!config_id || !to_email || !subject || !body_html) {
     return res.status(400).json({
@@ -75,15 +75,35 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       ? `${config.sender_name} <${config.email_address}>`
       : config.email_address
 
+    // Build Resend payload
+    const resendPayload: any = {
+      from: fromField,
+      to: to_email,
+      subject: subject,
+      html: fullEmailHtml,
+      reply_to: config.email_address,
+    }
+
+    // Process attachments: array of { filename, content (base64), content_type }
+    const attachmentMeta: { filename: string; size: number; content_type: string }[] = []
+    if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+      resendPayload.attachments = attachments.map((att: any) => {
+        attachmentMeta.push({
+          filename: att.filename,
+          size: att.size || 0,
+          content_type: att.content_type || "application/octet-stream",
+        })
+        return {
+          filename: att.filename,
+          content: att.content, // base64 string
+          content_type: att.content_type || "application/octet-stream",
+        }
+      })
+    }
+
     const resendResponse = await axios.post(
       "https://api.resend.com/emails",
-      {
-        from: fromField,
-        to: to_email,
-        subject: subject,
-        html: fullEmailHtml,
-        reply_to: config.email_address,
-      },
+      resendPayload,
       {
         headers: {
           Authorization: `Bearer ${config.resend_api_key}`,
@@ -92,7 +112,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       }
     )
 
-    // Store outbound message
+    // Store outbound message with attachment metadata
+    const messageMeta: any = {}
+    if (attachmentMeta.length > 0) {
+      messageMeta.attachments = attachmentMeta
+    }
+
     const message = await supportboxService.createSupportboxMessages({
       ticket_id: ticket.id,
       direction: "outbound",
@@ -103,6 +128,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       resend_message_id: resendResponse.data.id,
       delivery_status: "sent",
       delivery_status_at: new Date().toISOString(),
+      metadata: Object.keys(messageMeta).length > 0 ? messageMeta : null,
     })
 
     // Auto-solve after composing — admin initiated, no reply expected yet

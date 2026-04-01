@@ -409,6 +409,7 @@ function MessageBubble({ msg }: { msg: any }) {
   const senderLabel = inb
     ? (msg.from_name || msg.from_email || "Customer")
     : `You (${msg.from_email || "Support"})`
+  const msgAttachments = msg.metadata?.attachments || []
 
   return (
     <div
@@ -465,6 +466,22 @@ function MessageBubble({ msg }: { msg: any }) {
         ) : (
           <div style={{ fontSize: "13px", color: D.textMuted, fontStyle: "italic" }}>(empty)</div>
         )}
+
+        {/* Attachments */}
+        {msgAttachments.length > 0 && (
+          <div style={{
+            display: "flex", flexWrap: "wrap", gap: "6px",
+            marginTop: "10px", paddingTop: "10px",
+            borderTop: `1px solid ${inb ? D.borderSubtle : D.greenBorder}`,
+          }}>
+            {msgAttachments.map((att: any, idx: number) => (
+              <AttachmentChip
+                key={idx}
+                file={{ name: att.filename, size: att.size || 0, type: att.content_type || "" }}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -502,11 +519,61 @@ function DeliveryBadge({ status }: { status: string }) {
 /* ═══════════════════════════════════════════════════════════════
    REPLY COMPOSER
    ═══════════════════════════════════════════════════════════════ */
-function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, editorRef }: {
+/* ═══════════════════════════════════════════════════════════════
+   ATTACHMENT CHIP — shows a single attached file
+   ═══════════════════════════════════════════════════════════════ */
+function AttachmentChip({ file, onRemove }: { file: { name: string; size: number; type: string }; onRemove?: () => void }) {
+  const sizeStr = file.size < 1024 ? `${file.size} B`
+    : file.size < 1048576 ? `${(file.size / 1024).toFixed(1)} KB`
+    : `${(file.size / 1048576).toFixed(1)} MB`
+
+  const icon = file.type.startsWith("image/") ? "🖼"
+    : file.type === "application/pdf" ? "📄"
+    : file.type.includes("spreadsheet") || file.type.includes("excel") ? "📊"
+    : file.type.includes("document") || file.type.includes("word") ? "📝"
+    : "📎"
+
+  return (
+    <div style={{
+      display: "inline-flex", alignItems: "center", gap: "8px",
+      padding: "6px 12px", borderRadius: "10px",
+      backgroundColor: D.blueLight, border: `1px solid ${D.blueBorder}`,
+      fontSize: "12px", color: D.text, maxWidth: "260px",
+    }}>
+      <span style={{ fontSize: "14px", flexShrink: 0 }}>{icon}</span>
+      <span style={{ fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        {file.name}
+      </span>
+      <span style={{ color: D.textMuted, fontSize: "11px", flexShrink: 0 }}>
+        {sizeStr}
+      </span>
+      {onRemove && (
+        <button
+          onClick={onRemove}
+          style={{
+            display: "flex", alignItems: "center", justifyContent: "center",
+            width: "18px", height: "18px", borderRadius: "50%",
+            border: "none", backgroundColor: D.red + "18", color: D.red,
+            cursor: "pointer", fontSize: "11px", fontWeight: 700, flexShrink: 0,
+            transition: "background-color 0.15s",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.backgroundColor = D.red + "30")}
+          onMouseLeave={e => (e.currentTarget.style.backgroundColor = D.red + "18")}
+        >
+          ✕
+        </button>
+      )}
+    </div>
+  )
+}
+
+function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, editorRef, attachments, setAttachments }: {
   text: string; setText: (v: string) => void; onSend: () => void; sending: boolean
   keepOpen: boolean; setKeepOpen: (v: boolean) => void; editorRef?: React.RefObject<HTMLDivElement>
+  attachments: { file: File; base64: string }[]; setAttachments: (v: { file: File; base64: string }[]) => void
 }) {
   const ref = editorRef || useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [focused, setFocused] = useState(false)
   const [, forceUpdate] = useState(0)
 
@@ -532,6 +599,30 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, edito
     if (e.key === "u" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); execCmd("underline") }
   }
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    const newAttachments: { file: File; base64: string }[] = []
+    for (const file of files) {
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader()
+        reader.onload = () => {
+          const result = reader.result as string
+          // Remove data:...;base64, prefix — Resend expects raw base64
+          resolve(result.split(",")[1] || result)
+        }
+        reader.readAsDataURL(file)
+      })
+      newAttachments.push({ file, base64 })
+    }
+    setAttachments([...attachments, ...newAttachments])
+    // Reset input so same file can be re-added
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  const removeAttachment = (idx: number) => {
+    setAttachments(attachments.filter((_, i) => i !== idx))
+  }
+
   const hasContent = text.length > 0
 
   return (
@@ -542,6 +633,15 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, edito
       overflow: "hidden",
       transition: "border-color 0.3s ease, box-shadow 0.3s ease",
     }}>
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        onChange={handleFileSelect}
+        style={{ display: "none" }}
+      />
+
       {/* Toolbar */}
       <div style={{
         display: "flex", alignItems: "center", gap: "4px",
@@ -551,6 +651,19 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, edito
         <button type="button" className={`sb-toolbar-btn ${isActive("bold") ? "active" : ""}`} onMouseDown={e => { e.preventDefault(); execCmd("bold") }} title="Bold (Ctrl+B)"><b>B</b></button>
         <button type="button" className={`sb-toolbar-btn ${isActive("italic") ? "active" : ""}`} onMouseDown={e => { e.preventDefault(); execCmd("italic") }} title="Italic (Ctrl+I)"><i>I</i></button>
         <button type="button" className={`sb-toolbar-btn ${isActive("underline") ? "active" : ""}`} onMouseDown={e => { e.preventDefault(); execCmd("underline") }} title="Underline (Ctrl+U)"><u>U</u></button>
+        <div style={{ width: "1px", height: "18px", backgroundColor: D.border, margin: "0 6px" }} />
+        <button
+          type="button"
+          className="sb-toolbar-btn"
+          onMouseDown={e => { e.preventDefault(); fileInputRef.current?.click() }}
+          title="Attach file"
+          style={{ display: "flex", alignItems: "center", gap: "4px" }}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M12.07 6.53L7.12 11.48a3.18 3.18 0 01-4.5-4.5l4.95-4.95a2.12 2.12 0 013 3L5.62 9.98a1.06 1.06 0 01-1.5-1.5l4.25-4.24" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span style={{ fontSize: "12px" }}>Attach</span>
+        </button>
       </div>
 
       {/* Editor area */}
@@ -569,6 +682,23 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, edito
             color: D.text,
           }}
         />
+
+        {/* Attachments preview */}
+        {attachments.length > 0 && (
+          <div style={{
+            display: "flex", flexWrap: "wrap", gap: "8px",
+            marginTop: "14px", paddingTop: "14px",
+            borderTop: `1px solid ${D.borderSubtle}`,
+          }}>
+            {attachments.map((att, idx) => (
+              <AttachmentChip
+                key={idx}
+                file={{ name: att.file.name, size: att.file.size, type: att.file.type }}
+                onRemove={() => removeAttachment(idx)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Action bar */}
@@ -580,6 +710,7 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, edito
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <span style={{ fontSize: "11px", color: D.textMuted }}>
             {hasContent ? `${text.length} chars` : ""}
+            {attachments.length > 0 ? ` · ${attachments.length} file${attachments.length > 1 ? "s" : ""}` : ""}
           </span>
           <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12px", color: D.textSec, cursor: "pointer", userSelect: "none" }}>
             <input
@@ -604,7 +735,7 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, edito
             transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
           }}
         >
-          {sending ? "Sending..." : "Send reply"}
+          {sending ? "Sending..." : attachments.length > 0 ? `Send reply + ${attachments.length} file${attachments.length > 1 ? "s" : ""}` : "Send reply"}
         </button>
       </div>
     </div>
@@ -903,6 +1034,7 @@ const TicketDetailPage = () => {
   const qc = useQueryClient()
   const [reply, setReply] = useState("")
   const [keepOpen, setKeepOpen] = useState(false)
+  const [attachments, setAttachments] = useState<{ file: File; base64: string }[]>([])
   const endRef = useRef<HTMLDivElement>(null)
   const editorRef = useRef<HTMLDivElement>(null)
 
@@ -927,10 +1059,26 @@ const TicketDetailPage = () => {
   const orders = data?.allOrders || []
 
   const replyMut = useMutation({
-    mutationFn: async ({ html, plainText }: { html: string; plainText: string }) =>
-      sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/reply`, { method: "POST", body: { body_html: html, body_text: plainText, keep_open: keepOpen } }),
+    mutationFn: async ({ html, plainText, atts }: { html: string; plainText: string; atts: { file: File; base64: string }[] }) => {
+      const attPayload = atts.map(a => ({
+        filename: a.file.name,
+        content: a.base64,
+        content_type: a.file.type || "application/octet-stream",
+        size: a.file.size,
+      }))
+      return sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/reply`, {
+        method: "POST",
+        body: {
+          body_html: html,
+          body_text: plainText,
+          keep_open: keepOpen,
+          ...(attPayload.length > 0 ? { attachments: attPayload } : {}),
+        },
+      })
+    },
     onSuccess: () => {
       setReply("")
+      setAttachments([])
       if (editorRef.current) editorRef.current.innerHTML = ""
       qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] })
       qc.invalidateQueries({ queryKey: ["supportbox-tickets"] })
@@ -972,7 +1120,7 @@ const TicketDetailPage = () => {
     if (!reply.trim()) return
     const html = editorRef.current?.innerHTML || ""
     const plainText = editorRef.current?.innerText?.trim() || ""
-    replyMut.mutateAsync({ html, plainText })
+    replyMut.mutateAsync({ html, plainText, atts: attachments })
   }
 
   // Loading / 404
@@ -1109,7 +1257,7 @@ const TicketDetailPage = () => {
           </div>
 
           {/* Composer */}
-          <Composer text={reply} setText={setReply} onSend={send} sending={replyMut.isPending} keepOpen={keepOpen} setKeepOpen={setKeepOpen} editorRef={editorRef} />
+          <Composer text={reply} setText={setReply} onSend={send} sending={replyMut.isPending} keepOpen={keepOpen} setKeepOpen={setKeepOpen} editorRef={editorRef} attachments={attachments} setAttachments={setAttachments} />
 
           {replyMut.isError && (
             <div style={{ padding: "12px 16px", backgroundColor: D.redLight, border: `1px solid ${D.red}30`, borderRadius: D.r12, fontSize: "13px", color: D.red }}>

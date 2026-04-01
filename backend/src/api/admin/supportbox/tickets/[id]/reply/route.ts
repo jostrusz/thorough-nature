@@ -69,15 +69,35 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       ? `${config.sender_name} <${config.email_address}>`
       : config.email_address
 
+    // Build Resend payload
+    const resendPayload: any = {
+      from: fromField,
+      to: ticket.from_email,
+      subject: `Re: ${ticket.subject}`,
+      html: fullEmailHtml,
+      reply_to: config.email_address,
+    }
+
+    // Process attachments: array of { filename, content (base64), content_type }
+    const attachmentMeta: { filename: string; size: number; content_type: string }[] = []
+    if (body.attachments && Array.isArray(body.attachments) && body.attachments.length > 0) {
+      resendPayload.attachments = body.attachments.map((att: any) => {
+        attachmentMeta.push({
+          filename: att.filename,
+          size: att.size || 0,
+          content_type: att.content_type || "application/octet-stream",
+        })
+        return {
+          filename: att.filename,
+          content: att.content, // base64 string
+          content_type: att.content_type || "application/octet-stream",
+        }
+      })
+    }
+
     const resendResponse = await axios.post(
       "https://api.resend.com/emails",
-      {
-        from: fromField,
-        to: ticket.from_email,
-        subject: `Re: ${ticket.subject}`,
-        html: fullEmailHtml,
-        reply_to: config.email_address,
-      },
+      resendPayload,
       {
         headers: {
           Authorization: `Bearer ${config.resend_api_key}`,
@@ -86,7 +106,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       }
     )
 
-    // Create outbound message (store only the new reply)
+    // Create outbound message with attachment metadata
+    const messageMeta: any = {}
+    if (attachmentMeta.length > 0) {
+      messageMeta.attachments = attachmentMeta
+    }
+
     const message = await supportboxService.createSupportboxMessages({
       ticket_id: id,
       direction: "outbound",
@@ -97,6 +122,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       resend_message_id: resendResponse.data.id,
       delivery_status: "sent",
       delivery_status_at: new Date().toISOString(),
+      metadata: Object.keys(messageMeta).length > 0 ? messageMeta : null,
     })
 
     // Auto-solve ticket after admin reply (unless keep_open is set)

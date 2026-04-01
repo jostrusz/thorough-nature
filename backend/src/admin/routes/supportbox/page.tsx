@@ -317,7 +317,9 @@ function ComposeModal({ configs, onClose, defaultConfigId }: {
   const [toEmail, setToEmail] = useState("")
   const [subject, setSubject] = useState("")
   const [body, setBody] = useState("")
+  const [attachments, setAttachments] = useState<{ file: File; base64: string }[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     textareaRef.current?.focus()
@@ -330,9 +332,43 @@ function ComposeModal({ configs, onClose, defaultConfigId }: {
     el.style.height = Math.max(120, el.scrollHeight) + "px"
   }, [body])
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    const newAttachments: { file: File; base64: string }[] = []
+    for (const file of files) {
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader()
+        reader.onload = () => {
+          const result = reader.result as string
+          resolve(result.split(",")[1] || result)
+        }
+        reader.readAsDataURL(file)
+      })
+      newAttachments.push({ file, base64 })
+    }
+    setAttachments(prev => [...prev, ...newAttachments])
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  const removeAttachment = (idx: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== idx))
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / 1048576).toFixed(1)} MB`
+  }
+
   const composeMut = useMutation({
     mutationFn: async () => {
       const bodyHtml = body.split("\n").map(l => `<p>${l}</p>`).join("")
+      const attPayload = attachments.map(a => ({
+        filename: a.file.name,
+        content: a.base64,
+        content_type: a.file.type || "application/octet-stream",
+        size: a.file.size,
+      }))
       return sdk.client.fetch("/admin/supportbox/tickets/compose", {
         method: "POST",
         body: {
@@ -341,6 +377,7 @@ function ComposeModal({ configs, onClose, defaultConfigId }: {
           subject,
           body_html: bodyHtml,
           body_text: body,
+          ...(attPayload.length > 0 ? { attachments: attPayload } : {}),
         },
       })
     },
@@ -471,6 +508,74 @@ function ComposeModal({ configs, onClose, defaultConfigId }: {
             />
           </div>
 
+          {/* Attachments */}
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              onChange={handleFileSelect}
+              style={{ display: "none" }}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: "6px",
+                padding: "7px 14px", fontSize: "12px", fontWeight: 600,
+                color: C.textSecondary, backgroundColor: C.bg,
+                border: `1px solid ${C.border}`, borderRadius: "8px",
+                cursor: "pointer", transition: "all 0.15s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = C.blue; e.currentTarget.style.color = C.blue }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.textSecondary }}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M12.07 6.53L7.12 11.48a3.18 3.18 0 01-4.5-4.5l4.95-4.95a2.12 2.12 0 013 3L5.62 9.98a1.06 1.06 0 01-1.5-1.5l4.25-4.24" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Attach files
+            </button>
+
+            {attachments.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
+                {attachments.map((att, idx) => {
+                  const icon = att.file.type.startsWith("image/") ? "🖼"
+                    : att.file.type === "application/pdf" ? "📄"
+                    : att.file.type.includes("spreadsheet") || att.file.type.includes("excel") ? "📊"
+                    : att.file.type.includes("document") || att.file.type.includes("word") ? "📝"
+                    : "📎"
+                  return (
+                    <div key={idx} style={{
+                      display: "inline-flex", alignItems: "center", gap: "8px",
+                      padding: "6px 12px", borderRadius: "10px",
+                      backgroundColor: "#EFF6FF", border: "1px solid #DBEAFE",
+                      fontSize: "12px", color: C.text, maxWidth: "240px",
+                    }}>
+                      <span style={{ fontSize: "14px", flexShrink: 0 }}>{icon}</span>
+                      <span style={{ fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {att.file.name}
+                      </span>
+                      <span style={{ color: C.textMuted, fontSize: "11px", flexShrink: 0 }}>
+                        {formatFileSize(att.file.size)}
+                      </span>
+                      <button
+                        onClick={() => removeAttachment(idx)}
+                        style={{
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          width: "18px", height: "18px", borderRadius: "50%",
+                          border: "none", backgroundColor: "rgba(220,38,38,0.1)", color: C.red,
+                          cursor: "pointer", fontSize: "11px", fontWeight: 700, flexShrink: 0,
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Error */}
           {composeMut.isError && (
             <div style={{
@@ -509,7 +614,7 @@ function ComposeModal({ configs, onClose, defaultConfigId }: {
                 transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
               }}
             >
-              {composeMut.isPending ? "Sending..." : "Send email"}
+              {composeMut.isPending ? "Sending..." : attachments.length > 0 ? `Send + ${attachments.length} file${attachments.length > 1 ? "s" : ""}` : "Send email"}
             </button>
           </div>
         </div>
