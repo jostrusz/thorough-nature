@@ -61,15 +61,27 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
     const saved: { el: HTMLElement; s: Record<string, string> }[] = []
     let n: HTMLElement | null = el.parentElement
     while (n && n !== document.documentElement) {
+      // Check if this element's parent is a multi-child flex/grid container
+      // (= the Medusa admin layout split between sidebar and content).
+      // If so, expand THIS element but don't go higher.
+      const parent = n.parentElement
+      let isLayoutBoundary = false
+      if (parent && parent !== document.documentElement) {
+        const parentDisplay = getComputedStyle(parent).display
+        if ((parentDisplay === "flex" || parentDisplay === "grid") && parent.children.length > 1) {
+          isLayoutBoundary = true
+        }
+      }
+
       saved.push({
         el: n,
         s: {
           bg: n.style.background, mw: n.style.maxWidth, w: n.style.width,
           pl: n.style.paddingLeft, pr: n.style.paddingRight, m: n.style.margin,
-          overflow: n.style.overflow, boxSizing: n.style.boxSizing,
-          flex: n.style.flex, minWidth: n.style.minWidth,
+          overflow: n.style.overflow, flex: n.style.flex, minWidth: n.style.minWidth,
         },
       })
+
       n.style.setProperty("background", PAGE_BG, "important")
       n.style.setProperty("max-width", "none", "important")
       n.style.setProperty("width", "100%", "important")
@@ -78,17 +90,21 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
       n.style.setProperty("margin", "0", "important")
       n.style.setProperty("overflow-x", "hidden", "important")
       n.style.setProperty("overflow-y", "visible", "important")
-      n.style.setProperty("box-sizing", "border-box", "important")
-      n.style.setProperty("flex", "1 1 0%", "important")
       n.style.setProperty("min-width", "0", "important")
+
+      if (isLayoutBoundary) {
+        // Expand content column to fill remaining space, then STOP
+        n.style.setProperty("flex", "1 1 0%", "important")
+        break
+      }
+
       n = n.parentElement
     }
     return () => {
       saved.forEach(({ el: x, s }) => {
         x.style.background = s.bg; x.style.maxWidth = s.mw; x.style.width = s.w
         x.style.paddingLeft = s.pl; x.style.paddingRight = s.pr; x.style.margin = s.m
-        x.style.overflow = s.overflow; x.style.boxSizing = s.boxSizing
-        x.style.flex = s.flex; x.style.minWidth = s.minWidth
+        x.style.overflow = s.overflow; x.style.flex = s.flex; x.style.minWidth = s.minWidth
       })
     }
   }, [ref])

@@ -19,6 +19,15 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
     const originals: { el: HTMLElement; s: Record<string, string> }[] = []
     let node: HTMLElement | null = el.parentElement
     while (node && node !== document.documentElement) {
+      const parent = node.parentElement
+      let isLayoutBoundary = false
+      if (parent && parent !== document.documentElement) {
+        const parentDisplay = getComputedStyle(parent).display
+        if ((parentDisplay === "flex" || parentDisplay === "grid") && parent.children.length > 1) {
+          isLayoutBoundary = true
+        }
+      }
+
       originals.push({
         el: node,
         s: {
@@ -32,9 +41,13 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
       node.style.setProperty("width", "100%", "important")
       node.style.setProperty("padding-left", "0", "important")
       node.style.setProperty("padding-right", "0", "important")
-      node.style.setProperty("flex", "1 1 0%", "important")
       node.style.setProperty("min-width", "0", "important")
-      node.style.setProperty("box-sizing", "border-box", "important")
+
+      if (isLayoutBoundary) {
+        node.style.setProperty("flex", "1 1 0%", "important")
+        break
+      }
+
       node = node.parentElement
     }
     return () => {
@@ -42,7 +55,6 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
         n.style.background = s.bg; n.style.maxWidth = s.mw; n.style.width = s.w
         n.style.paddingLeft = s.pl; n.style.paddingRight = s.pr
         n.style.flex = s.flex; n.style.minWidth = s.minWidth
-        n.style.removeProperty("box-sizing")
       })
     }
   }, [ref])
