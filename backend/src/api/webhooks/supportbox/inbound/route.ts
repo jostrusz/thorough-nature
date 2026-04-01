@@ -3,6 +3,11 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { SUPPORTBOX_MODULE } from "../../../../modules/supportbox"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import axios from "axios"
+import { generateAiLabels } from "../ai-label"
+
+function stripHtmlTags(html: string): string {
+  return html?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || ""
+}
 
 /**
  * Resend Inbound Webhook Handler
@@ -175,6 +180,28 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       body_html: emailHtml,
       body_text: emailText,
       metadata: { resend_email_id: emailId },
+    })
+
+    // Generate AI labels (non-blocking — don't delay webhook response)
+    generateAiLabels({
+      subject,
+      bodyText: emailText || stripHtmlTags(emailHtml),
+      emailAddress: toAddress,
+      configDisplayName: config.display_name,
+    }).then(async (labels) => {
+      if (labels) {
+        try {
+          const existingMeta = ticket.metadata || {}
+          await supportboxService.updateSupportboxTickets({
+            id: ticket.id,
+            metadata: { ...existingMeta, ai_labels: labels },
+          })
+        } catch (e) {
+          console.log(`[SupportBox] Failed to save AI labels: ${(e as Error).message}`)
+        }
+      }
+    }).catch((e) => {
+      console.log(`[SupportBox] AI label generation failed: ${(e as Error).message}`)
     })
 
     console.log(`[SupportBox] Inbound email processed: ticket=${ticket.id}, from=${cleanFrom}, subject=${subject}`)
