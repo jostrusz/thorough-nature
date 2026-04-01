@@ -111,6 +111,37 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   AI LABEL HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+function getCatColor(category: string): { color: string; bg: string } {
+  const map: Record<string, { color: string; bg: string }> = {
+    payment_issue: { color: "#DC2626", bg: "#FEF2F2" },
+    shipping: { color: "#2563EB", bg: "#EFF6FF" },
+    order_issue: { color: "#D97706", bg: "#FFFBEB" },
+    product_feedback: { color: "#059669", bg: "#ECFDF5" },
+    returns: { color: "#7C3AED", bg: "#F5F3FF" },
+    account: { color: "#6B7280", bg: "#F3F4F6" },
+    spam: { color: "#EF4444", bg: "#FEF2F2" },
+    other: { color: "#6B7280", bg: "#F3F4F6" },
+  }
+  return map[category] || map.other
+}
+
+function formatCat(category: string): string {
+  const map: Record<string, string> = {
+    payment_issue: "Payment",
+    shipping: "Shipping",
+    order_issue: "Order issue",
+    product_feedback: "Feedback",
+    returns: "Returns",
+    account: "Account",
+    spam: "Spam",
+    other: "Other",
+  }
+  return map[category] || category
+}
+
+/* ═══════════════════════════════════════════════════════════════
    HELPERS
    ═══════════════════════════════════════════════════════════════ */
 const f = {
@@ -1163,11 +1194,16 @@ const TicketDetailPage = () => {
         .sb-action-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important; }
         .sb-back-btn { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important; }
         .sb-back-btn:hover { background-color: #F3F4F6 !important; transform: scale(1.08) !important; border-color: #D1D5DB !important; }
-        .sb-msg-body p { margin: 0 0 10px 0; }
+        .sb-msg-body { white-space: pre-wrap; }
+        .sb-msg-body p { margin: 0 0 10px 0; white-space: normal; }
         .sb-msg-body p:last-child { margin-bottom: 0; }
         .sb-msg-body br + br { content: ''; display: block; margin-top: 10px; }
-        .sb-msg-body div { margin-bottom: 6px; }
+        .sb-msg-body div { margin-bottom: 6px; white-space: normal; }
         .sb-msg-body div:last-child { margin-bottom: 0; }
+        .sb-msg-body ul, .sb-msg-body ol { margin: 8px 0; padding-left: 24px; white-space: normal; }
+        .sb-msg-body li { margin-bottom: 4px; }
+        .sb-msg-body blockquote { border-left: 3px solid #E5E7EB; padding-left: 12px; margin: 8px 0; color: #6B7280; }
+        .sb-msg-body table { white-space: normal; }
         .sb-editor { min-height: 80px; max-height: 300px; overflow-y: auto; outline: none; font-size: 14px; line-height: 1.7; word-break: break-word; white-space: pre-wrap; }
         .sb-editor:empty:before { content: attr(data-placeholder); color: ${D.textMuted}; pointer-events: none; }
         .sb-toolbar-btn { padding: 4px 10px; font-size: 13px; background: transparent; border: 1px solid ${D.border}; border-radius: 6px; cursor: pointer; color: ${D.textSec}; transition: all 0.15s ease; line-height: 1; }
@@ -1199,6 +1235,35 @@ const TicketDetailPage = () => {
               <span style={{ color: D.textFaint, margin: "0 6px" }}>·</span>
               {f.dt(ticket.created_at)}
             </div>
+            {/* AI Labels */}
+            {ticket.metadata?.ai_labels && (
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
+                {ticket.metadata.ai_labels.project && (
+                  <span style={{
+                    fontSize: "11px", fontWeight: 600, color: "#4F46E5",
+                    backgroundColor: "#EEF2FF", padding: "2px 10px",
+                    borderRadius: "9999px", letterSpacing: "0.02em",
+                  }}>
+                    {ticket.metadata.ai_labels.project}
+                  </span>
+                )}
+                {ticket.metadata.ai_labels.category && (
+                  <span style={{
+                    fontSize: "11px", fontWeight: 600,
+                    color: getCatColor(ticket.metadata.ai_labels.category).color,
+                    backgroundColor: getCatColor(ticket.metadata.ai_labels.category).bg,
+                    padding: "2px 10px", borderRadius: "9999px",
+                  }}>
+                    {formatCat(ticket.metadata.ai_labels.category)}
+                  </span>
+                )}
+                {ticket.metadata.ai_labels.summary && (
+                  <span style={{ fontSize: "12px", color: "#6B7280", fontStyle: "italic" }}>
+                    {ticket.metadata.ai_labels.summary}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
