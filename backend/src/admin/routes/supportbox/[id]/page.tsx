@@ -66,7 +66,7 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
         s: {
           bg: n.style.background, mw: n.style.maxWidth, w: n.style.width,
           pl: n.style.paddingLeft, pr: n.style.paddingRight, m: n.style.margin,
-          overflow: n.style.overflow,
+          overflow: n.style.overflow, boxSizing: n.style.boxSizing,
         },
       })
       n.style.setProperty("background", PAGE_BG, "important")
@@ -77,13 +77,14 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
       n.style.setProperty("margin", "0", "important")
       n.style.setProperty("overflow-x", "hidden", "important")
       n.style.setProperty("overflow-y", "visible", "important")
+      n.style.setProperty("box-sizing", "border-box", "important")
       n = n.parentElement
     }
     return () => {
       saved.forEach(({ el: x, s }) => {
         x.style.background = s.bg; x.style.maxWidth = s.mw; x.style.width = s.w
         x.style.paddingLeft = s.pl; x.style.paddingRight = s.pr; x.style.margin = s.m
-        x.style.overflow = s.overflow
+        x.style.overflow = s.overflow; x.style.boxSizing = s.boxSizing
       })
     }
   }, [ref])
@@ -1155,8 +1156,8 @@ const TicketDetailPage = () => {
       `}</style>
 
       {/* ══════ HEADER ══════ */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: 0 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: "200px", flex: "1 1 auto" }}>
           <Link to="/supportbox" style={{ textDecoration: "none", flexShrink: 0 }}>
             <div className="sb-back-btn" style={{
               width: "34px", height: "34px", borderRadius: D.r8, backgroundColor: D.card,
@@ -1166,14 +1167,14 @@ const TicketDetailPage = () => {
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke={D.textSec} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
           </Link>
-          <div style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 0, flex: "1 1 auto" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-              <h1 style={{ fontSize: "18px", fontWeight: 700, color: D.text, margin: 0, lineHeight: 1.3 }}>
+              <h1 style={{ fontSize: "18px", fontWeight: 700, color: D.text, margin: 0, lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
                 {ticket.subject}
               </h1>
               <Pill bg={st.bg} color={st.color}>{st.label}</Pill>
             </div>
-            <div style={{ fontSize: "13px", color: D.textSec, marginTop: "3px" }}>
+            <div style={{ fontSize: "13px", color: D.textSec, marginTop: "3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {ticket.from_name ? `${ticket.from_name}` : ticket.from_email}
               <span style={{ color: D.textFaint, margin: "0 6px" }}>·</span>
               {f.dt(ticket.created_at)}
@@ -1181,7 +1182,7 @@ const TicketDetailPage = () => {
           </div>
         </div>
 
-        <div style={{ flexShrink: 0, marginLeft: "16px", display: "flex", gap: "8px", alignItems: "center" }}>
+        <div style={{ flexShrink: 0, display: "flex", gap: "8px", alignItems: "center" }}>
           {/* Spam button */}
           {ticket.status !== "spam" && (
             <button className="sb-action-btn" onClick={() => spamMut.mutate()} disabled={spamMut.isPending}
@@ -1231,10 +1232,10 @@ const TicketDetailPage = () => {
       </div>
 
       {/* ══════ LAYOUT: Conversation | Sidebar ══════ */}
-      <div style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "flex-start" }}>
 
         {/* Conversation (flex 7 = ~70%) */}
-        <div style={{ flex: 7, minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
+        <div style={{ flex: "7 1 500px", minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
           {/* Order context */}
           <OrderContextCard orders={orders} />
 
@@ -1266,9 +1267,9 @@ const TicketDetailPage = () => {
           )}
         </div>
 
-        {/* Sidebar (flex 3 = ~30%, responsive min) */}
+        {/* Sidebar (flex 3 = ~30%, wraps below on narrow screens) */}
         <div style={{
-          flex: 3, minWidth: "260px", maxWidth: "400px",
+          flex: "3 1 240px", maxWidth: "400px",
           position: "sticky", top: "24px",
           maxHeight: "calc(100vh - 80px)", overflowY: "auto",
         }}>
