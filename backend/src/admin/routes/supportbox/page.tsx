@@ -87,6 +87,34 @@ function getMessagePreview(ticket: any): string {
   return text.substring(0, 80) + (text.length > 80 ? "..." : "")
 }
 
+function getCategoryColor(category: string): { color: string; bg: string } {
+  const map: Record<string, { color: string; bg: string }> = {
+    payment_issue: { color: "#DC2626", bg: "#FEF2F2" },
+    shipping: { color: "#2563EB", bg: "#EFF6FF" },
+    order_issue: { color: "#D97706", bg: "#FFFBEB" },
+    product_feedback: { color: "#059669", bg: "#ECFDF5" },
+    returns: { color: "#7C3AED", bg: "#F5F3FF" },
+    account: { color: "#6B7280", bg: "#F3F4F6" },
+    spam: { color: "#EF4444", bg: "#FEF2F2" },
+    other: { color: "#6B7280", bg: "#F3F4F6" },
+  }
+  return map[category] || map.other
+}
+
+function formatCategory(category: string): string {
+  const map: Record<string, string> = {
+    payment_issue: "Payment",
+    shipping: "Shipping",
+    order_issue: "Order issue",
+    product_feedback: "Feedback",
+    returns: "Returns",
+    account: "Account",
+    spam: "Spam",
+    other: "Other",
+  }
+  return map[category] || category
+}
+
 function isUnread(ticket: any): boolean {
   if (ticket.status !== "new") return false
   const msgs = ticket.messages || []
@@ -302,14 +330,45 @@ function TicketCard({ ticket }: { ticket: any }) {
               </span>
             )}
           </div>
-          {preview && (
+          {/* AI Labels */}
+          {ticket.metadata?.ai_labels && (
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+              {ticket.metadata.ai_labels.project && (
+                <span style={{
+                  fontSize: "10px", fontWeight: 600, color: "#4F46E5",
+                  backgroundColor: "#EEF2FF", padding: "1px 8px",
+                  borderRadius: "9999px", letterSpacing: "0.02em",
+                }}>
+                  {ticket.metadata.ai_labels.project}
+                </span>
+              )}
+              {ticket.metadata.ai_labels.category && (
+                <span style={{
+                  fontSize: "10px", fontWeight: 600,
+                  color: getCategoryColor(ticket.metadata.ai_labels.category).color,
+                  backgroundColor: getCategoryColor(ticket.metadata.ai_labels.category).bg,
+                  padding: "1px 8px", borderRadius: "9999px",
+                }}>
+                  {formatCategory(ticket.metadata.ai_labels.category)}
+                </span>
+              )}
+            </div>
+          )}
+          {ticket.metadata?.ai_labels?.summary ? (
+            <div style={{
+              fontSize: "12px", color: C.textMuted, fontStyle: "italic",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
+              {"✨ "}{ticket.metadata.ai_labels.summary}
+            </div>
+          ) : preview ? (
             <div style={{
               fontSize: "12px", color: C.textMuted,
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>
               {preview}
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Badges */}
@@ -662,6 +721,8 @@ const SupportBoxDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const [showCompose, setShowCompose] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  const [projectFilter, setProjectFilter] = useState<string>("all")
+  const [categoryFilter, setCategoryFilter] = useState<string>("all")
 
   // Debounce search input
   useEffect(() => {
@@ -722,13 +783,23 @@ const SupportBoxDashboard = () => {
   const spamCount = allTickets.filter((t: any) => t.status === "spam").length
 
   // Filtered tickets for display
-  const filteredTickets = statusFilter === "spam"
+  const statusFiltered = statusFilter === "spam"
     ? allTickets // backend already filtered to spam only
     : statusFilter === "all"
       ? allTickets
       : statusFilter === "inbox"
         ? allTickets.filter((t: any) => t.status !== "solved")
         : allTickets.filter((t: any) => t.status === statusFilter)
+
+  const filteredTickets = statusFiltered.filter((t: any) => {
+    if (projectFilter !== "all") {
+      if (t.metadata?.ai_labels?.project !== projectFilter) return false
+    }
+    if (categoryFilter !== "all") {
+      if (t.metadata?.ai_labels?.category !== categoryFilter) return false
+    }
+    return true
+  })
 
   // Sort tickets by most recent activity (latest message timestamp), newest first
   const tickets = [...filteredTickets].sort((a: any, b: any) => {
@@ -895,6 +966,46 @@ const SupportBoxDashboard = () => {
             borderRadius: "12px 12px 0 0", borderBottom: "none",
           }}>
             <div style={{ flex: 1 }} />
+            <select
+              value={projectFilter}
+              onChange={(e) => setProjectFilter(e.target.value)}
+              style={{
+                padding: "6px 10px", fontSize: "12px", fontWeight: 500,
+                border: `1px solid ${C.border}`, borderRadius: "8px",
+                backgroundColor: C.white, color: C.text,
+                outline: "none", cursor: "pointer",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+              }}
+            >
+              <option value="all">All projects</option>
+              <option value="loslatenboek">loslatenboek</option>
+              <option value="dehondenbijbel">dehondenbijbel</option>
+              <option value="lass-los">lass-los</option>
+              <option value="psi-superzivot">psi-superzivot</option>
+              <option value="odpusc-ksiazka">odpusc-ksiazka</option>
+              <option value="slapp-taget">slapp-taget</option>
+            </select>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              style={{
+                padding: "6px 10px", fontSize: "12px", fontWeight: 500,
+                border: `1px solid ${C.border}`, borderRadius: "8px",
+                backgroundColor: C.white, color: C.text,
+                outline: "none", cursor: "pointer",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+              }}
+            >
+              <option value="all">All categories</option>
+              <option value="payment_issue">Payment</option>
+              <option value="shipping">Shipping</option>
+              <option value="order_issue">Order issue</option>
+              <option value="product_feedback">Feedback</option>
+              <option value="returns">Returns</option>
+              <option value="account">Account</option>
+              <option value="spam">Spam</option>
+              <option value="other">Other</option>
+            </select>
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
               <Select.Trigger>
                 <Select.Value placeholder="Inbox" />
