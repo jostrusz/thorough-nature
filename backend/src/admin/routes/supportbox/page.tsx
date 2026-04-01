@@ -16,20 +16,33 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    const originals: { el: HTMLElement; bg: string }[] = []
+    const originals: { el: HTMLElement; s: Record<string, string> }[] = []
     let node: HTMLElement | null = el.parentElement
     while (node && node !== document.documentElement) {
-      originals.push({ el: node, bg: node.style.background })
+      originals.push({
+        el: node,
+        s: {
+          bg: node.style.background, mw: node.style.maxWidth, w: node.style.width,
+          pl: node.style.paddingLeft, pr: node.style.paddingRight,
+          flex: node.style.flex, minWidth: node.style.minWidth,
+        },
+      })
       node.style.setProperty("background", BG_COLOR, "important")
       node.style.setProperty("max-width", "none", "important")
       node.style.setProperty("width", "100%", "important")
+      node.style.setProperty("padding-left", "0", "important")
+      node.style.setProperty("padding-right", "0", "important")
+      node.style.setProperty("flex", "1 1 0%", "important")
+      node.style.setProperty("min-width", "0", "important")
+      node.style.setProperty("box-sizing", "border-box", "important")
       node = node.parentElement
     }
     return () => {
-      originals.forEach(({ el: n, bg }) => {
-        n.style.background = bg
-        n.style.removeProperty("max-width")
-        n.style.removeProperty("width")
+      originals.forEach(({ el: n, s }) => {
+        n.style.background = s.bg; n.style.maxWidth = s.mw; n.style.width = s.w
+        n.style.paddingLeft = s.pl; n.style.paddingRight = s.pr
+        n.style.flex = s.flex; n.style.minWidth = s.minWidth
+        n.style.removeProperty("box-sizing")
       })
     }
   }, [ref])

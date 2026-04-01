@@ -67,6 +67,7 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
           bg: n.style.background, mw: n.style.maxWidth, w: n.style.width,
           pl: n.style.paddingLeft, pr: n.style.paddingRight, m: n.style.margin,
           overflow: n.style.overflow, boxSizing: n.style.boxSizing,
+          flex: n.style.flex, minWidth: n.style.minWidth,
         },
       })
       n.style.setProperty("background", PAGE_BG, "important")
@@ -78,6 +79,8 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
       n.style.setProperty("overflow-x", "hidden", "important")
       n.style.setProperty("overflow-y", "visible", "important")
       n.style.setProperty("box-sizing", "border-box", "important")
+      n.style.setProperty("flex", "1 1 0%", "important")
+      n.style.setProperty("min-width", "0", "important")
       n = n.parentElement
     }
     return () => {
@@ -85,6 +88,7 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
         x.style.background = s.bg; x.style.maxWidth = s.mw; x.style.width = s.w
         x.style.paddingLeft = s.pl; x.style.paddingRight = s.pr; x.style.margin = s.m
         x.style.overflow = s.overflow; x.style.boxSizing = s.boxSizing
+        x.style.flex = s.flex; x.style.minWidth = s.minWidth
       })
     }
   }, [ref])
