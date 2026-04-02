@@ -6,14 +6,22 @@ export async function POST(
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const { action, order_ids, payload } = req.body as {
+    const { action, order_ids, payload, date_from, date_to } = req.body as {
       action: string
-      order_ids: string[]
+      order_ids?: string[]
       payload?: Record<string, any>
+      date_from?: string
+      date_to?: string
     }
 
-    if (!action || !order_ids || !Array.isArray(order_ids) || order_ids.length === 0) {
-      res.status(400).json({ error: "action and order_ids are required" })
+    if (!action) {
+      res.status(400).json({ error: "action is required" })
+      return
+    }
+
+    // For export, allow either order_ids or date range
+    if (action !== "export" && (!order_ids || !Array.isArray(order_ids) || order_ids.length === 0)) {
+      res.status(400).json({ error: "order_ids are required for this action" })
       return
     }
 
@@ -60,6 +68,23 @@ export async function POST(
       }
 
       case "export": {
+        // Build filters: either by order_ids or date range
+        const exportFilters: Record<string, any> = {}
+        if (order_ids && order_ids.length > 0) {
+          exportFilters.id = order_ids
+        } else if (date_from || date_to) {
+          exportFilters.created_at = {}
+          if (date_from) exportFilters.created_at.$gte = new Date(date_from).toISOString()
+          if (date_to) {
+            const endDate = new Date(date_to)
+            endDate.setHours(23, 59, 59, 999)
+            exportFilters.created_at.$lte = endDate.toISOString()
+          }
+        } else {
+          res.status(400).json({ error: "Either order_ids or date_from/date_to is required for export" })
+          return
+        }
+
         // Fetch orders for export
         const { data: orders } = await query.graph({
           entity: "order",
@@ -75,7 +100,7 @@ export async function POST(
             "items.*",
             "items.variant.product.title",
           ],
-          filters: { id: order_ids },
+          filters: exportFilters,
         })
 
         // Generate CSV
