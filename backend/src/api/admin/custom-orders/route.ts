@@ -178,18 +178,79 @@ export async function GET(
 
     if (search) {
       const q = search.toLowerCase()
-      filteredOrders = filteredOrders.filter(
-        (o: any) =>
-          String(o.display_id).includes(q) ||
-          (o.email && o.email.toLowerCase().includes(q)) ||
-          (o.shipping_address?.first_name &&
-            o.shipping_address.first_name.toLowerCase().includes(q)) ||
-          (o.shipping_address?.last_name &&
-            o.shipping_address.last_name.toLowerCase().includes(q)) ||
-          (o.metadata?.tags && o.metadata.tags.toLowerCase().includes(q)) ||
-          (o.metadata?.custom_order_number &&
-            o.metadata.custom_order_number.toLowerCase().includes(q))
-      )
+      filteredOrders = filteredOrders.filter((o: any) => {
+        // Order identifiers
+        if (String(o.display_id).includes(q)) return true
+        if (o.id?.toLowerCase().includes(q)) return true
+
+        // Customer email
+        if (o.email?.toLowerCase().includes(q)) return true
+
+        // Shipping address fields
+        const sa = o.shipping_address
+        if (sa) {
+          if (sa.first_name?.toLowerCase().includes(q)) return true
+          if (sa.last_name?.toLowerCase().includes(q)) return true
+          if ((sa.first_name + " " + sa.last_name).toLowerCase().includes(q)) return true
+          if (sa.address_1?.toLowerCase().includes(q)) return true
+          if (sa.address_2?.toLowerCase().includes(q)) return true
+          if (sa.city?.toLowerCase().includes(q)) return true
+          if (sa.postal_code?.toLowerCase().includes(q)) return true
+          if (sa.country_code?.toLowerCase().includes(q)) return true
+          if (sa.phone?.includes(q)) return true
+          if (sa.company?.toLowerCase().includes(q)) return true
+        }
+
+        // Billing address fields
+        const ba = o.billing_address
+        if (ba) {
+          if (ba.first_name?.toLowerCase().includes(q)) return true
+          if (ba.last_name?.toLowerCase().includes(q)) return true
+          if (ba.company?.toLowerCase().includes(q)) return true
+        }
+
+        // Order items — product names, variant titles, SKUs
+        if (o.items) {
+          for (const item of o.items) {
+            if (item.title?.toLowerCase().includes(q)) return true
+            if (item.variant_title?.toLowerCase().includes(q)) return true
+            if (item.variant_sku?.toLowerCase().includes(q)) return true
+            if (item.variant?.sku?.toLowerCase().includes(q)) return true
+            if (item.variant?.product?.title?.toLowerCase().includes(q)) return true
+          }
+        }
+
+        // Payment info
+        if (o.payment_collections) {
+          for (const pc of o.payment_collections) {
+            if (pc.payments) {
+              for (const p of pc.payments) {
+                if (p.provider_id?.toLowerCase().includes(q)) return true
+                if (p.data?.id?.toLowerCase().includes(q)) return true
+              }
+            }
+          }
+        }
+
+        // Metadata — tags, custom order number, paypal ID, dextrum status, notes
+        const m = o.metadata
+        if (m) {
+          if (m.tags?.toLowerCase().includes(q)) return true
+          if (m.custom_order_number?.toLowerCase().includes(q)) return true
+          if (m.dextrum_status?.toLowerCase().includes(q)) return true
+          if (m.note?.toLowerCase().includes(q)) return true
+          if (m.paypal_transaction_id?.toLowerCase().includes(q)) return true
+          if (m.project?.toLowerCase().includes(q)) return true
+        }
+
+        // Currency
+        if (o.currency_code?.toLowerCase().includes(q)) return true
+
+        // Total as string (e.g. searching "35" finds €35 orders)
+        if (o.total != null && String(o.total).includes(q)) return true
+
+        return false
+      })
     }
 
     // Strip html_body from email_activity_log to keep list response lean
