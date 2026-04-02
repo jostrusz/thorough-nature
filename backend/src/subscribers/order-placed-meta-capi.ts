@@ -43,6 +43,14 @@ export default async function orderPlacedMetaCAPIHandler({
       return
     }
 
+    // ── Guard: skip Purchase event for empty/unpaid orders ──
+    const orderItems = order.items || []
+    const orderTotal = (order as any).total ?? (order.summary as any)?.raw_current_order_total ?? 0
+    if (orderItems.length === 0 || Number(orderTotal) <= 0) {
+      console.warn(`[META CAPI Subscriber] Skipping Purchase — order ${data.id} has ${orderItems.length} items, total: ${orderTotal}`)
+      return
+    }
+
     // ── Determine project_id from order metadata or sales channel ──
     // Strategy: check order.metadata.project_id first, then sales_channel
     const projectId =
