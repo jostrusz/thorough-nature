@@ -4004,17 +4004,24 @@ body {
           console.log('[Express PayPal] onApprove — orderId:', data.orderID);
 
           // Step 1: Capture the payment client-side (CAPTURE intent order)
-          var capturePromise;
+          // For APMs like iDEAL, payment may already be captured by PayPal automatically.
+          // We try capture first, fall back to get() on failure (ORDER_ALREADY_CAPTURED).
+          var detailsPromise;
           if (actions && actions.order && typeof actions.order.capture === 'function') {
-            capturePromise = actions.order.capture();
+            detailsPromise = actions.order.capture().catch(function(captureErr) {
+              console.warn('[Express PayPal] Capture failed (likely already captured):', captureErr.message || captureErr);
+              if (actions.order && typeof actions.order.get === 'function') {
+                return actions.order.get();
+              }
+              return Promise.resolve({});
+            });
           } else {
-            // Fallback: just get order details
-            capturePromise = (actions && actions.order && typeof actions.order.get === 'function')
+            detailsPromise = (actions && actions.order && typeof actions.order.get === 'function')
               ? actions.order.get()
               : Promise.resolve({});
           }
 
-          return capturePromise
+          return detailsPromise
             .then(function(details) {
               console.log('[Express PayPal] Captured/details:', details.status, '— payer:', details.payer && details.payer.email_address);
               var payer = details.payer || {};
