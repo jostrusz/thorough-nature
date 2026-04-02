@@ -42,6 +42,39 @@ export default async function orderPlacedHandler({
     // Will fall back to shipping address in template
   }
 
+  // ── Sync phone: billing → shipping → customer ──
+  try {
+    const shippingPhone = shippingAddress?.phone || order.shipping_address?.phone
+    const billingPhone = billingAddress?.phone || (order as any).billing_address?.phone
+    const bestPhone = shippingPhone || billingPhone
+
+    // If shipping address is missing phone but billing has it, copy it over
+    if (!shippingPhone && billingPhone && order.shipping_address?.id) {
+      await (orderModuleService as any).orderAddressService_.update(
+        order.shipping_address.id,
+        { phone: billingPhone }
+      )
+      if (shippingAddress) shippingAddress.phone = billingPhone
+      console.log(`[OrderPlaced] Synced phone from billing to shipping for order ${data.id}`)
+    }
+
+    // Update customer phone if missing
+    if (bestPhone && (order as any).customer_id) {
+      const customerModuleService = container.resolve(Modules.CUSTOMER)
+      try {
+        const customer = await (customerModuleService as any).retrieveCustomer((order as any).customer_id)
+        if (!customer.phone) {
+          await (customerModuleService as any).updateCustomers((order as any).customer_id, { phone: bestPhone })
+          console.log(`[OrderPlaced] Updated customer phone for ${(order as any).customer_id}`)
+        }
+      } catch (custErr: any) {
+        console.warn(`[OrderPlaced] Could not update customer phone: ${custErr.message}`)
+      }
+    }
+  } catch (syncErr: any) {
+    console.warn(`[OrderPlaced] Phone sync error: ${syncErr.message}`)
+  }
+
   // Detect payment method from payment collections
   let paymentMethod = 'Online betaling'
   try {
