@@ -48,6 +48,13 @@ export async function GET(
 
     const filters: Record<string, any> = {}
 
+    // When searching, use DB-level email filter if it looks like an email,
+    // and fetch more records to search through
+    const isSearching = !!search
+    if (isSearching && search.includes("@")) {
+      filters.email = { $like: `%${search}%` }
+    }
+
     const { data: orders, metadata } = await query.graph({
       entity: "order",
       fields: [
@@ -74,8 +81,8 @@ export async function GET(
       ],
       filters,
       pagination: {
-        skip: offset,
-        take: limit,
+        skip: isSearching ? 0 : offset,
+        take: isSearching ? 500 : limit,
         order: {
           [sortBy]: sortDir,
         },
