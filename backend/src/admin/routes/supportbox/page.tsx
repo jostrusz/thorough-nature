@@ -115,6 +115,20 @@ function formatCategory(category: string): string {
   return map[category] || category
 }
 
+function getCategoryEmoji(category: string): string {
+  const map: Record<string, string> = {
+    payment_issue: "\uD83D\uDCB3",
+    shipping: "\uD83D\uDE9A",
+    order_issue: "\u26A0\uFE0F",
+    product_feedback: "\uD83D\uDCAC",
+    returns: "\uD83D\uDD04",
+    account: "\uD83D\uDC64",
+    spam: "\uD83D\uDEAB",
+    other: "\uD83D\uDCCC",
+  }
+  return map[category] || "\uD83D\uDCCC"
+}
+
 function isUnread(ticket: any): boolean {
   if (ticket.status !== "new") return false
   const msgs = ticket.messages || []
@@ -332,11 +346,11 @@ function TicketCard({ ticket }: { ticket: any }) {
           </div>
           {/* AI Labels */}
           {ticket.metadata?.ai_labels && (
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px", flexWrap: "wrap" }}>
               {ticket.metadata.ai_labels.project && (
                 <span style={{
-                  fontSize: "10px", fontWeight: 600, color: "#4F46E5",
-                  backgroundColor: "#EEF2FF", padding: "1px 8px",
+                  fontSize: "11px", fontWeight: 600, color: "#4F46E5",
+                  backgroundColor: "#EEF2FF", padding: "2px 10px",
                   borderRadius: "9999px", letterSpacing: "0.02em",
                 }}>
                   {ticket.metadata.ai_labels.project}
@@ -344,22 +358,22 @@ function TicketCard({ ticket }: { ticket: any }) {
               )}
               {ticket.metadata.ai_labels.category && (
                 <span style={{
-                  fontSize: "10px", fontWeight: 600,
+                  fontSize: "11px", fontWeight: 600,
                   color: getCategoryColor(ticket.metadata.ai_labels.category).color,
                   backgroundColor: getCategoryColor(ticket.metadata.ai_labels.category).bg,
-                  padding: "1px 8px", borderRadius: "9999px",
+                  padding: "2px 10px", borderRadius: "9999px",
                 }}>
-                  {formatCategory(ticket.metadata.ai_labels.category)}
+                  {getCategoryEmoji(ticket.metadata.ai_labels.category)}{" "}{formatCategory(ticket.metadata.ai_labels.category)}
                 </span>
               )}
             </div>
           )}
           {ticket.metadata?.ai_labels?.summary ? (
             <div style={{
-              fontSize: "12px", color: C.textMuted, fontStyle: "italic",
+              fontSize: "12px", color: "#6B7280", fontStyle: "italic",
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>
-              {"✨ "}{ticket.metadata.ai_labels.summary}
+              {getCategoryEmoji(ticket.metadata.ai_labels.category || "other")}{" "}{ticket.metadata.ai_labels.summary}
             </div>
           ) : preview ? (
             <div style={{
@@ -826,7 +840,7 @@ const SupportBoxDashboard = () => {
   }
 
   return (
-    <div ref={pageRef} style={{ maxWidth: "1140px", margin: "0 auto", padding: "24px 32px", background: BG_COLOR }}>
+    <div ref={pageRef} style={{ maxWidth: "1200px", margin: "0 auto", padding: "24px 32px", background: BG_COLOR }}>
       <style>{`
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.3); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -835,10 +849,23 @@ const SupportBoxDashboard = () => {
         .sb-compose-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 6px 20px rgba(59,130,246,0.35) !important; }
         .sb-refresh-btn:hover { background-color: #F3F4F6 !important; transform: scale(1.05) !important; }
         .sb-settings-btn:hover { transform: translateY(-1px) !important; }
+        @media (max-width: 768px) {
+          .sb-main-layout { flex-direction: column !important; }
+          .sb-sidebar { width: 100% !important; min-width: 0 !important; max-width: 100% !important; margin-bottom: 16px !important; }
+          .sb-ticket-list { min-height: auto !important; }
+          .sb-stats-row { flex-wrap: wrap !important; }
+          .sb-stats-row > * { flex: 1 1 45% !important; min-width: 120px !important; }
+          .sb-header-row { flex-direction: column !important; gap: 12px !important; align-items: flex-start !important; }
+          .sb-search-box { width: 100% !important; }
+        }
+        @media (max-width: 480px) {
+          .sb-page-root { padding: 12px 12px !important; }
+          .sb-stats-row > * { flex: 1 1 100% !important; }
+        }
       `}</style>
       <FullWidthStyles />
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+      <div className="sb-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <h1 style={{ fontSize: "20px", fontWeight: 600, color: C.text, margin: 0 }}>SupportBox</h1>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <div style={{ position: "relative", width: "280px" }}>
@@ -936,9 +963,9 @@ const SupportBoxDashboard = () => {
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "28px" }}>
+      <div className="sb-main-layout" style={{ display: "flex", gap: "28px" }}>
         {/* ═══ Left Sidebar — Inboxes ═══ */}
-        <div style={{ width: "280px", minWidth: "280px", maxWidth: "280px", flexShrink: 0 }}>
+        <div className="sb-sidebar" style={{ width: "280px", minWidth: "280px", maxWidth: "280px", flexShrink: 0 }}>
           <div style={{ fontSize: "11px", fontWeight: 600, color: C.textMuted, textTransform: "uppercase", letterSpacing: "0.5px", padding: "0 14px", marginBottom: "8px" }}>
             Inboxes
           </div>
@@ -983,7 +1010,7 @@ const SupportBoxDashboard = () => {
         {/* ═══ Main Content ═══ */}
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Stat Cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "20px" }}>
+          <div className="sb-stats-row" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "20px" }}>
             <StatCard label="New" count={newCount} color={C.green} bgColor={C.greenBg} icon="📩" isActive={statusFilter === "new"} onClick={() => handleStatClick("new")} />
             <StatCard label="Solved" count={solvedCount} color={C.blue} bgColor={C.blueBg} icon="✅" isActive={statusFilter === "solved"} onClick={() => handleStatClick("solved")} />
             <StatCard label="Old" count={oldCount} color={C.orange} bgColor={C.orangeBg} icon="📂" isActive={statusFilter === "old"} onClick={() => handleStatClick("old")} />
