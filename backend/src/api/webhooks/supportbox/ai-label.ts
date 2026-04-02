@@ -40,8 +40,10 @@ Return ONLY valid JSON, no markdown, no explanation.`
       messages: [{ role: "user", content: userMessage }],
     })
 
-    const text =
+    let text =
       response.content[0].type === "text" ? response.content[0].text : ""
+    // Strip markdown code fences if present (```json ... ```)
+    text = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim()
     const parsed = JSON.parse(text)
 
     if (parsed.project && parsed.category && parsed.summary) {
