@@ -7,7 +7,7 @@ import { useElements, useStripe } from "@stripe/react-stripe-js"
 import React, { useState } from "react"
 import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
-import { placeOrder } from "@lib/data/cart"
+import { placeOrder, updateCartAddresses } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { isManual, isMollie, isPaypal, isStripe, isKlarna } from "@lib/constants"
 import { useMollie } from "../payment-wrapper/mollie-wrapper"
@@ -237,19 +237,84 @@ const PayPalPaymentButton = ({
     _data: OnApproveData,
     actions: OnApproveActions
   ) => {
-    actions?.order
-      ?.authorize()
-      .then((authorization) => {
-        if (authorization.status !== "COMPLETED") {
-          setErrorMessage(`An error occurred, status: ${authorization.status}`)
-          return
+    try {
+      const authorization = await actions?.order?.authorize()
+      if (!authorization || authorization.status !== "COMPLETED") {
+        setErrorMessage(
+          `An error occurred, status: ${authorization?.status}`
+        )
+        return
+      }
+
+      // Extract shipping and billing address from PayPal/Apple Pay payer data
+      const payer = authorization.payer
+      const shippingInfo =
+        (authorization as any).purchase_units?.[0]?.shipping
+      const payerAddress = payer?.address
+      const shippingAddress = shippingInfo?.address
+      const payerName = payer?.name
+      const shippingName = shippingInfo?.name?.full_name
+
+      // Use shipping address if available, otherwise fall back to payer address
+      const resolvedAddress = shippingAddress || payerAddress
+      if (resolvedAddress) {
+        // Parse name — shipping name is a single string, payer name is split
+        let firstName = ""
+        let lastName = ""
+        if (shippingName) {
+          const parts = shippingName.split(" ")
+          firstName = parts[0] || ""
+          lastName = parts.slice(1).join(" ") || ""
+        } else if (payerName) {
+          firstName = payerName.given_name || ""
+          lastName = payerName.surname || ""
         }
-        onPaymentCompleted()
-      })
-      .catch(() => {
-        setErrorMessage(`An unknown error occurred, please try again.`)
-        setSubmitting(false)
-      })
+
+        const mappedAddress = {
+          first_name: firstName,
+          last_name: lastName,
+          address_1: resolvedAddress.address_line_1 || "",
+          address_2: resolvedAddress.address_line_2 || "",
+          city: resolvedAddress.admin_area_2 || "",
+          province: resolvedAddress.admin_area_1 || "",
+          postal_code: resolvedAddress.postal_code || "",
+          country_code:
+            resolvedAddress.country_code?.toLowerCase() || "",
+          phone: (payer as any)?.phone?.phone_number?.national_number || "",
+        }
+
+        // Build billing address from payer address if different
+        const billingSource = payerAddress || shippingAddress
+        const billingAddress = billingSource
+          ? {
+              first_name: payerName?.given_name || firstName,
+              last_name: payerName?.surname || lastName,
+              address_1: billingSource.address_line_1 || "",
+              address_2: billingSource.address_line_2 || "",
+              city: billingSource.admin_area_2 || "",
+              province: billingSource.admin_area_1 || "",
+              postal_code: billingSource.postal_code || "",
+              country_code:
+                billingSource.country_code?.toLowerCase() || "",
+              phone:
+                (payer as any)?.phone?.phone_number?.national_number || "",
+            }
+          : mappedAddress
+
+        await updateCartAddresses({
+          shipping_address: mappedAddress,
+          billing_address: billingAddress,
+          email: payer?.email_address || undefined,
+        })
+      }
+
+      await onPaymentCompleted()
+    } catch (err: any) {
+      setErrorMessage(
+        err?.message || "An unknown error occurred, please try again."
+      )
+      setSubmitting(false)
+    }
   }
 
   const [{ isPending, isResolved }] = usePayPalScriptReducer()

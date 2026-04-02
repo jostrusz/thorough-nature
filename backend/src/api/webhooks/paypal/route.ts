@@ -354,6 +354,135 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           if (targetCart) {
             logger.info(`[PayPal Webhook] Safety net: found uncompleted cart ${targetCart.id} — attempting to complete`)
 
+            // Extract payer address from PayPal order and update the cart before completing
+            try {
+              const session = targetCart.payment_collection?.payment_sessions?.find(
+                (s: any) => s.data?.paypalOrderId === paypalOrderId || s.data?.id === paypalOrderId
+              )
+              const projectSlug = session?.data?.project_slug || null
+              const { PayPalApiClient } = await import("../../../modules/payment-paypal/api-client")
+
+              // Resolve PayPal credentials for this project
+              const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
+              const gcFilters: any = { provider: "paypal", is_active: true }
+              if (projectSlug) gcFilters.project_slug = projectSlug
+              const configs = await gcService.listGatewayConfigs(gcFilters, { take: 1 })
+              const config = configs[0]
+
+              if (config) {
+                const isLive = config.mode === "live"
+                const keys = isLive ? config.live_keys : config.test_keys
+                const client = new PayPalApiClient({
+                  client_id: keys?.client_id || keys?.api_key,
+                  client_secret: keys?.client_secret || keys?.secret_key,
+                  mode: isLive ? "live" : "test",
+                })
+
+                const ppOrder = await client.getOrder(paypalOrderId)
+                const payer = ppOrder?.payer
+                const shipping = ppOrder?.purchase_units?.[0]?.shipping
+                const payerAddr = payer?.address
+                const shippingAddr = shipping?.address
+                const resolved = shippingAddr || payerAddr
+
+                if (resolved) {
+                  let firstName = ""
+                  let lastName = ""
+                  const shippingName = shipping?.name?.full_name
+                  if (shippingName) {
+                    const parts = shippingName.split(" ")
+                    firstName = parts[0] || ""
+                    lastName = parts.slice(1).join(" ") || ""
+                  } else if (payer?.name) {
+                    firstName = payer.name.given_name || ""
+                    lastName = payer.name.surname || ""
+                  }
+
+                  const mappedShipping = {
+                    first_name: firstName,
+                    last_name: lastName,
+                    address_1: resolved.address_line_1 || "",
+                    address_2: resolved.address_line_2 || "",
+                    city: resolved.admin_area_2 || "",
+                    province: resolved.admin_area_1 || "",
+                    postal_code: resolved.postal_code || "",
+                    country_code: resolved.country_code?.toLowerCase() || "",
+                    phone: payer?.phone?.phone_number?.national_number || "",
+                  }
+
+                  const billingSource = payerAddr || shippingAddr
+                  const mappedBilling = billingSource ? {
+                    first_name: payer?.name?.given_name || firstName,
+                    last_name: payer?.name?.surname || lastName,
+                    address_1: billingSource.address_line_1 || "",
+                    address_2: billingSource.address_line_2 || "",
+                    city: billingSource.admin_area_2 || "",
+                    province: billingSource.admin_area_1 || "",
+                    postal_code: billingSource.postal_code || "",
+                    country_code: billingSource.country_code?.toLowerCase() || "",
+                    phone: payer?.phone?.phone_number?.national_number || "",
+                  } : mappedShipping
+
+                  // Update cart addresses via direct DB before completing
+                  const { Pool } = require("pg")
+                  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                  const addrFields = ["first_name", "last_name", "address_1", "address_2", "city", "province", "postal_code", "country_code", "phone"]
+                  const updateAddr = async (table: string, cartId: string, addr: any) => {
+                    // Check if address exists for this cart
+                    const existing = await pool.query(
+                      `SELECT id FROM "cart_address" WHERE cart_id = $1 AND address_name = $2 LIMIT 1`,
+                      [cartId, table]
+                    )
+                    if (existing.rows.length > 0) {
+                      const sets = addrFields.map((f, i) => `"${f}" = $${i + 1}`).join(", ")
+                      await pool.query(
+                        `UPDATE "cart_address" SET ${sets}, updated_at = NOW() WHERE cart_id = $${addrFields.length + 1} AND address_name = $${addrFields.length + 2}`,
+                        [...addrFields.map(f => addr[f] || ""), cartId, table]
+                      )
+                    }
+                  }
+
+                  // Use Medusa's cart service to update addresses properly
+                  try {
+                    const cartService = req.scope.resolve("cartModuleService") as any
+                    if (cartService?.updateCarts) {
+                      await cartService.updateCarts(targetCart.id, {
+                        shipping_address: mappedShipping,
+                        billing_address: mappedBilling,
+                        ...(payer?.email_address ? { email: payer.email_address } : {}),
+                      })
+                      logger.info(`[PayPal Webhook] Safety net: updated cart ${targetCart.id} addresses from PayPal payer data`)
+                    }
+                  } catch (addrErr: any) {
+                    logger.warn(`[PayPal Webhook] Safety net: cart address update via service failed: ${addrErr.message}, trying direct DB`)
+                    // Fallback: update via direct SQL on the cart table
+                    try {
+                      await pool.query(
+                        `UPDATE "cart" SET
+                          shipping_address = $1::jsonb,
+                          billing_address = $2::jsonb,
+                          ${payer?.email_address ? "email = $4," : ""}
+                          updated_at = NOW()
+                        WHERE id = $3`,
+                        [
+                          JSON.stringify(mappedShipping),
+                          JSON.stringify(mappedBilling),
+                          targetCart.id,
+                          ...(payer?.email_address ? [payer.email_address] : []),
+                        ]
+                      )
+                      logger.info(`[PayPal Webhook] Safety net: updated cart ${targetCart.id} addresses via direct DB`)
+                    } catch (sqlErr: any) {
+                      logger.warn(`[PayPal Webhook] Safety net: direct DB address update also failed: ${sqlErr.message}`)
+                    }
+                  }
+                  await pool.end()
+                }
+              }
+            } catch (addrExtractErr: any) {
+              logger.warn(`[PayPal Webhook] Safety net: failed to extract/update payer address: ${addrExtractErr.message}`)
+            }
+
             // Complete the cart via Medusa's cart completion workflow
             const { completeCartWorkflow } = await import("@medusajs/medusa/core-flows")
             const result = await completeCartWorkflow(req.scope).run({

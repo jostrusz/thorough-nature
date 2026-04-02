@@ -349,6 +349,55 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
   )
 }
 
+export async function updateCartAddresses(addresses: {
+  shipping_address: {
+    first_name: string
+    last_name: string
+    address_1: string
+    address_2?: string
+    company?: string
+    postal_code: string
+    city: string
+    country_code: string
+    province?: string
+    phone?: string
+  }
+  billing_address?: {
+    first_name: string
+    last_name: string
+    address_1: string
+    address_2?: string
+    company?: string
+    postal_code: string
+    city: string
+    country_code: string
+    province?: string
+    phone?: string
+  }
+  email?: string
+}) {
+  const cartId = await getCartId()
+  if (!cartId) {
+    throw new Error("No existing cart found when updating addresses")
+  }
+
+  const data: any = {
+    shipping_address: addresses.shipping_address,
+    billing_address: addresses.billing_address || addresses.shipping_address,
+  }
+  if (addresses.email) {
+    data.email = addresses.email
+  }
+
+  return sdk.store.cart
+    .update(cartId, data, {}, await getAuthHeaders())
+    .then(({ cart }) => {
+      revalidateTag("cart")
+      return cart
+    })
+    .catch(medusaError)
+}
+
 export async function placeOrder() {
   const cartId = await getCartId()
   if (!cartId) {
