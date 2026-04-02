@@ -290,9 +290,9 @@ function TicketCard({ ticket }: { ticket: any }) {
     : ticket.created_at
   const msgCount = msgs.length
 
-  const statusColor = ticket.status === "new" ? C.green : ticket.status === "solved" ? C.textMuted : ticket.status === "spam" ? C.red : C.orange
-  const statusLabel = ticket.status === "new" ? "New" : ticket.status === "solved" ? "Solved" : ticket.status === "spam" ? "Spam" : "Old"
-  const badgeColor = ticket.status === "new" ? "green" : ticket.status === "solved" ? "grey" : ticket.status === "spam" ? "red" : "orange"
+  const statusColor = ticket.status === "new" ? C.green : ticket.status === "solved" ? C.textMuted : ticket.status === "spam" ? C.red : ticket.status === "read" ? C.textSecondary : C.orange
+  const statusLabel = ticket.status === "new" ? "New" : ticket.status === "solved" ? "Solved" : ticket.status === "spam" ? "Spam" : ticket.status === "read" ? "" : "Old"
+  const badgeColor = ticket.status === "new" ? "green" : ticket.status === "solved" ? "grey" : ticket.status === "spam" ? "red" : ticket.status === "read" ? "" : "orange"
 
   return (
     <Link to={`/supportbox/${ticket.id}`} style={{ textDecoration: "none", color: "inherit" }}>
@@ -395,9 +395,11 @@ function TicketCard({ ticket }: { ticket: any }) {
               animation: "pulse 2s ease-in-out infinite",
             }} />
           )}
-          <Badge color={badgeColor}>
-            {statusLabel}
-          </Badge>
+          {statusLabel && (
+            <Badge color={badgeColor}>
+              {statusLabel}
+            </Badge>
+          )}
         </div>
       </div>
     </Link>
@@ -795,7 +797,7 @@ const SupportBoxDashboard = () => {
   // Counts always from non-spam dataset
   const newCount = countSource.filter((t: any) => t.status === "new").length
   const solvedCount = countSource.filter((t: any) => t.status === "solved").length
-  const oldCount = countSource.filter((t: any) => t.status !== "new" && t.status !== "solved").length
+  const oldCount = countSource.filter((t: any) => t.status !== "new" && t.status !== "solved" && t.status !== "read").length
   const spamCount = allTickets.filter((t: any) => t.status === "spam").length
 
   // Filtered tickets for display
