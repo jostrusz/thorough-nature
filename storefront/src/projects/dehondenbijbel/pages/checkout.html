@@ -6855,9 +6855,17 @@ body {
       document.body.insertBefore(preloaderDiv, document.body.firstChild);
     }
 
-    // Complete the cart via Medusa
-    medusaFetch('/store/carts/' + cartId + '/complete', {
+    // Sync PayPal/Apple Pay address before completing (handles redirect flows where
+    // customer paid via Apple Pay on PayPal's hosted page — address only lives in PayPal)
+    medusaFetch('/store/carts/' + cartId + '/sync-paypal-address', {
       method: 'POST'
+    }).catch(function(e) {
+      console.log('[Payment Return] PayPal address sync skipped:', e.message || e);
+    }).then(function() {
+      // Complete the cart via Medusa
+      return medusaFetch('/store/carts/' + cartId + '/complete', {
+        method: 'POST'
+      });
     }).then(function(res) {
       var order = res.order || res;
       localStorage.setItem('medusa_order_id', order.id || '');
