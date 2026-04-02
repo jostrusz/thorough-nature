@@ -346,10 +346,14 @@ function TicketCard({ ticket }: { ticket: any }) {
           </div>
           {/* AI Labels */}
           {ticket.metadata?.ai_labels && (
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px", flexWrap: "wrap" }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px", flexWrap: "wrap",
+              padding: "4px 8px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0",
+              borderRadius: "8px", marginTop: "2px",
+            }}>
               {ticket.metadata.ai_labels.project && (
                 <span style={{
-                  fontSize: "11px", fontWeight: 600, color: "#4F46E5",
+                  fontSize: "12px", fontWeight: 600, color: "#4F46E5",
                   backgroundColor: "#EEF2FF", padding: "2px 10px",
                   borderRadius: "9999px", letterSpacing: "0.02em",
                 }}>
@@ -358,7 +362,7 @@ function TicketCard({ ticket }: { ticket: any }) {
               )}
               {ticket.metadata.ai_labels.category && (
                 <span style={{
-                  fontSize: "11px", fontWeight: 600,
+                  fontSize: "12px", fontWeight: 600,
                   color: getCategoryColor(ticket.metadata.ai_labels.category).color,
                   backgroundColor: getCategoryColor(ticket.metadata.ai_labels.category).bg,
                   padding: "2px 10px", borderRadius: "9999px",
@@ -366,16 +370,17 @@ function TicketCard({ ticket }: { ticket: any }) {
                   {getCategoryEmoji(ticket.metadata.ai_labels.category)}{" "}{formatCategory(ticket.metadata.ai_labels.category)}
                 </span>
               )}
+              {ticket.metadata.ai_labels.summary && (
+                <span style={{
+                  fontSize: "12px", color: "#64748B", fontStyle: "italic",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0,
+                }}>
+                  {getCategoryEmoji(ticket.metadata.ai_labels.category || "other")}{" "}{ticket.metadata.ai_labels.summary}
+                </span>
+              )}
             </div>
           )}
-          {ticket.metadata?.ai_labels?.summary ? (
-            <div style={{
-              fontSize: "12px", color: "#6B7280", fontStyle: "italic",
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-            }}>
-              {getCategoryEmoji(ticket.metadata.ai_labels.category || "other")}{" "}{ticket.metadata.ai_labels.summary}
-            </div>
-          ) : preview ? (
+          {!ticket.metadata?.ai_labels && preview ? (
             <div style={{
               fontSize: "12px", color: C.textMuted,
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -795,7 +800,7 @@ const SupportBoxDashboard = () => {
   const countSource = statusFilter === "spam" ? nonSpamTickets : allTickets
 
   // Counts always from non-spam dataset
-  const newCount = countSource.filter((t: any) => t.status === "new").length
+  const newCount = countSource.filter((t: any) => t.status === "new" || t.status === "read").length
   const solvedCount = countSource.filter((t: any) => t.status === "solved").length
   const oldCount = countSource.filter((t: any) => t.status !== "new" && t.status !== "solved" && t.status !== "read").length
   const spamCount = allTickets.filter((t: any) => t.status === "spam").length
@@ -807,7 +812,9 @@ const SupportBoxDashboard = () => {
       ? allTickets
       : statusFilter === "inbox"
         ? allTickets.filter((t: any) => t.status !== "solved")
-        : allTickets.filter((t: any) => t.status === statusFilter)
+        : statusFilter === "new"
+          ? allTickets.filter((t: any) => t.status === "new" || t.status === "read")
+          : allTickets.filter((t: any) => t.status === statusFilter)
 
   const filteredTickets = statusFiltered.filter((t: any) => {
     if (projectFilter !== "all") {
@@ -834,7 +841,7 @@ const SupportBoxDashboard = () => {
 
   // Count new tickets per config (from full dataset)
   const newPerConfig = (configId: string) =>
-    countSource.filter((t: any) => t.config_id === configId && t.status === "new").length
+    countSource.filter((t: any) => t.config_id === configId && (t.status === "new" || t.status === "read")).length
 
   // Handle stat card click — toggle filter, inbox is the "off" state
   const handleStatClick = (status: string) => {

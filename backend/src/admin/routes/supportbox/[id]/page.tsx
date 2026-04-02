@@ -1217,7 +1217,7 @@ const TicketDetailPage = () => {
     : { label: "New", bg: D.greenLight, color: D.green }
 
   return (
-    <div ref={pageRef} style={{ width: "100%", padding: "24px 32px", background: PAGE_BG, boxSizing: "border-box", minHeight: "100vh", overflowX: "hidden" }}>
+    <div ref={pageRef} style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "24px 32px", background: PAGE_BG, boxSizing: "border-box", minHeight: "100vh", overflowX: "hidden" }}>
       <style>{`
         @keyframes msgSlideLeft { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes msgSlideRight { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
