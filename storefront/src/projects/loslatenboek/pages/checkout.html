@@ -6870,6 +6870,9 @@ body {
           variant_id: checkoutBundleVariantId,
           quantity: 1
         })
+      }).catch(function(err) {
+        console.error('[Checkout] Failed to add product to cart:', err.message || err);
+        throw new Error('Het product kon niet aan de winkelwagen worden toegevoegd. Probeer het opnieuw.');
       }).then(function() {
         // Stap 2b: Order bump produkt toevoegen (bundle endpoint = tax-inclusive + discounted price)
         if (checkoutOrderBump) {
@@ -6881,7 +6884,18 @@ body {
             })
           });
         }
-      }).then(function() { return cartId; });
+      }).then(function() {
+        // Verify cart has items before proceeding
+        return medusaFetch('/store/carts/' + cartId, { method: 'GET' }).then(function(cartRes) {
+          var cart = cartRes.cart;
+          if (!cart.items || cart.items.length === 0 || cart.total <= 0) {
+            console.error('[Checkout] Cart is empty after adding items — aborting checkout');
+            throw new Error('Er is een fout opgetreden bij het aanmaken van je bestelling. Probeer het opnieuw of neem contact met ons op.');
+          }
+          console.log('[Checkout] Cart verified: ' + cart.items.length + ' items, total: ' + cart.total);
+          return cartId;
+        });
+      });
     })
     .then(function(cartId) {
       // Stap 3: Cart updaten met klantgegevens (must complete before shipping)
