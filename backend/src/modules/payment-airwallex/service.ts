@@ -206,11 +206,13 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
         `[Airwallex] Creating payment intent: method=${method}, amount=${Number(amount).toFixed(2)} ${currency_code}, returnUrl=${returnUrl}`
       )
 
+      const productName = data?.product_name || "Order"
+
       const createPayload: any = {
         amount: Number(amount),
         currency: currency_code.toUpperCase(),
         merchant_order_id: merchantOrderId,
-        descriptor: "Medusa Order",
+        descriptor: productName,
         return_url: returnUrl,
         metadata: {
           customer_id: customer?.id,
@@ -230,10 +232,10 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
           products: [
             {
               type: "physical",
-              name: "Book Order",
+              name: productName,
               quantity: 1,
               unit_price: orderAmount,
-              desc: "Book order",
+              desc: productName,
               sku: "book-order",
             }
           ],

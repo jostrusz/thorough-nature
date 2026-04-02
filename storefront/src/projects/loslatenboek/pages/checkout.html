@@ -6986,6 +6986,8 @@ body {
           // Pass amount info for Klarna order lines
           amount: checkoutTotal,
           currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
+          // Product info for payment gateway descriptions
+          product_name: PROJECT_CONFIG.mainProduct.name || 'Book',
         };
       }
 
