@@ -14,7 +14,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     const ticket = await supportboxService.updateSupportboxTickets({
       id,
-      status: "old",
+      status: "read",
     })
     res.json({ ticket, changed: true })
   } catch (error: any) {

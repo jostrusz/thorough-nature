@@ -173,8 +173,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     let ticket
     if (existingTickets.length > 0) {
       ticket = existingTickets[0]
-      // Reopen if it was solved/old
-      if (ticket.status === "solved" || ticket.status === "old") {
+      // Reopen if it was solved/old/read
+      if (ticket.status === "solved" || ticket.status === "old" || ticket.status === "read") {
         await supportboxService.updateSupportboxTickets({
           id: ticket.id,
           status: "new",

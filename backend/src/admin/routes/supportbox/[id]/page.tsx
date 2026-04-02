@@ -1213,6 +1213,7 @@ const TicketDetailPage = () => {
   const st = ticket.status === "solved" ? { label: "Solved", bg: D.greenLight, color: D.green }
     : ticket.status === "old" ? { label: "Old", bg: D.orangeLight, color: D.orange }
     : ticket.status === "spam" ? { label: "Spam", bg: D.redLight, color: D.red }
+    : ticket.status === "read" ? { label: "", bg: "transparent", color: "transparent" }
     : { label: "New", bg: D.greenLight, color: D.green }
 
   return (
