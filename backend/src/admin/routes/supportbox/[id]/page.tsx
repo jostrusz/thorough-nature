@@ -1128,6 +1128,18 @@ const TicketDetailPage = () => {
   const ticket = data?.ticket
   const orders = data?.allOrders || []
 
+  // Auto-mark ticket as read when opened
+  useEffect(() => {
+    if (ticket?.status === "new" && ticketId) {
+      sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/read`, { method: "POST" })
+        .then(() => {
+          qc.invalidateQueries({ queryKey: ["supportbox-tickets"] })
+          qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] })
+        })
+        .catch(() => {})
+    }
+  }, [ticket?.status, ticketId])
+
   const replyMut = useMutation({
     mutationFn: async ({ html, plainText, atts }: { html: string; plainText: string; atts: { file: File; base64: string }[] }) => {
       const attPayload = atts.map(a => ({
