@@ -153,6 +153,10 @@ export async function POST(
             const payments = (o.payment_collections || [])
               .flatMap((pc: any) => pc.payments || [])
             for (const payment of payments) {
+              if (payment.data?.intentId) {
+                paymentId = String(payment.data.intentId)
+                break
+              }
               if (payment.data?.id) {
                 paymentId = String(payment.data.id)
                 break

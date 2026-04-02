@@ -151,6 +151,10 @@ export async function GET(
           const payments = ((order as any).payment_collections || [])
             .flatMap((pc: any) => pc.payments || [])
           for (const payment of payments) {
+            if (payment.data?.intentId) {
+              paymentId1 = String(payment.data.intentId)
+              break
+            }
             if (payment.data?.id) {
               paymentId1 = String(payment.data.id)
               break

@@ -111,6 +111,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
     payment?.data?.mollieOrderId ||
     payment?.data?.stripePaymentIntentId ||
     payment?.data?.payment_intent ||
+    payment?.data?.intentId ||
     payment?.data?.id ||
     payment?.data?.payment_id ||
     payment?.data?.transaction_id ||
