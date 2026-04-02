@@ -4165,6 +4165,11 @@ body {
                 email: customerData.email,
                 first_name: firstName,
                 last_name: lastName,
+                address_1: customerData.shipping_address.address_1,
+                city: customerData.shipping_address.city,
+                postal_code: customerData.shipping_address.postal_code,
+                country_code: customerData.shipping_address.country_code,
+                phone: customerData.shipping_address.phone,
               }));
 
               // Update Medusa cart with PayPal payer data
@@ -4444,6 +4449,11 @@ body {
                   email: email,
                   first_name: customerData.shipping_address.first_name,
                   last_name: customerData.shipping_address.last_name,
+                  address_1: customerData.shipping_address.address_1,
+                  city: customerData.shipping_address.city,
+                  postal_code: customerData.shipping_address.postal_code,
+                  country_code: customerData.shipping_address.country_code,
+                  phone: customerData.shipping_address.phone,
                 }));
 
                 // Update cart → add shipping → complete
@@ -4624,6 +4634,11 @@ body {
                 email: customerData.email,
                 first_name: customerData.shipping_address.first_name,
                 last_name: customerData.shipping_address.last_name,
+                address_1: customerData.shipping_address.address_1,
+                city: customerData.shipping_address.city,
+                postal_code: customerData.shipping_address.postal_code,
+                country_code: customerData.shipping_address.country_code,
+                phone: customerData.shipping_address.phone,
               }));
 
               return medusaFetch('/store/carts/' + expressCartId, {

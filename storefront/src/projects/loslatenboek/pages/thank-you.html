@@ -742,6 +742,34 @@ body { background: var(--bg); }
     try { customer = JSON.parse(customerStr); } catch(e) { console.warn('TY: Nelze parsovat zákaznická data'); }
   }
 
+  // Fetch real order data from API to override localStorage (which may have stale/wrong address)
+  if (orderId && PROJECT_CONFIG.medusaUrl) {
+    fetch(PROJECT_CONFIG.medusaUrl + '/store/custom/orders/' + orderId + '/details', {
+      headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success && data.order) {
+        var sa = data.order.shipping_address || {};
+        var updated = {
+          email: data.order.email || (customer && customer.email) || '',
+          first_name: sa.first_name || (customer && customer.first_name) || '',
+          last_name: sa.last_name || (customer && customer.last_name) || '',
+          address_1: sa.address_1 || (customer && customer.address_1) || '',
+          city: sa.city || (customer && customer.city) || '',
+          postal_code: sa.postal_code || (customer && customer.postal_code) || '',
+          country_code: sa.country_code || (customer && customer.country_code) || '',
+          phone: sa.phone || (customer && customer.phone) || '',
+        };
+        customer = updated;
+        localStorage.setItem('medusa_customer', JSON.stringify(updated));
+        updateDetailsDisplay();
+        console.log('TY: Customer data synced from order API (country: ' + updated.country_code + ')');
+      }
+    })
+    .catch(function(e) { console.warn('TY: Could not fetch order details:', e.message); });
+  }
+
   // Firemní údaje (B2B)
   var companyStr = localStorage.getItem('medusa_company');
   var companyData = null;
