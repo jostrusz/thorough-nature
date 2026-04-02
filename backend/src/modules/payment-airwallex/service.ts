@@ -219,6 +219,9 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
           customer_email: customer?.email || data?.email,
           session_id: data?.session_id,
           method: method,
+          product_name: productName,
+          quantity: String(data?.quantity || 1),
+          customer_name: [customer?.first_name, customer?.last_name].filter(Boolean).join(" ") || "",
         },
       }
 
