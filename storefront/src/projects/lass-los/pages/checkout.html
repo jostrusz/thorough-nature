@@ -3867,6 +3867,9 @@ body {
     // Filter out creditcard — not an express method
     expressMethods = expressMethods.filter(function(m) { return m.code !== 'creditcard'; });
 
+    // Hide PayPal express checkout entirely
+    expressMethods = expressMethods.filter(function(m) { return m.code !== 'paypal'; });
+
     // Apple Pay: device check
     expressMethods = expressMethods.filter(function(m) {
       if (m.code === 'applepay') {
