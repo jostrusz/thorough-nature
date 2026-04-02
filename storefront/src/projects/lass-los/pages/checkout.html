@@ -6281,6 +6281,39 @@ body {
     }).catch(function(e) {
       console.log('[Payment Return] PayPal address sync skipped:', e.message || e);
     }).then(function() {
+      // Verify cart before completing: must have items, total > 0, and payment authorized/captured
+      return medusaFetch('/store/carts/' + cartId, { method: 'GET' });
+    }).then(function(cartRes) {
+      var cart = cartRes.cart;
+
+      // Check cart has items
+      if (!cart.items || cart.items.length === 0) {
+        console.error('[Payment Return] Cart has no items — aborting completion');
+        throw new Error('Dein Warenkorb ist leer. Die Bestellung kann nicht abgeschlossen werden.');
+      }
+
+      // Check cart total > 0
+      if (cart.total <= 0) {
+        console.error('[Payment Return] Cart total is 0 — aborting completion');
+        throw new Error('Dein Warenkorb hat einen ungültigen Betrag. Bitte versuche es erneut.');
+      }
+
+      // Check payment status — at least one session must be authorized or captured
+      var paymentSessions = [];
+      if (cart.payment_collection && cart.payment_collection.payment_sessions) {
+        paymentSessions = cart.payment_collection.payment_sessions;
+      }
+      var hasAuthorized = paymentSessions.some(function(s) {
+        return s.status === 'authorized' || s.status === 'captured' || s.status === 'pending';
+      });
+
+      if (paymentSessions.length > 0 && !hasAuthorized) {
+        console.error('[Payment Return] No authorized payment session — payment likely failed. Sessions:', JSON.stringify(paymentSessions.map(function(s) { return { id: s.id, status: s.status }; })));
+        throw new Error('Deine Zahlung war nicht erfolgreich. Bitte versuche es erneut mit einer anderen Zahlungsmethode.');
+      }
+
+      console.log('[Payment Return] Cart verified: ' + cart.items.length + ' items, total: ' + cart.total + ', payment sessions: ' + paymentSessions.length);
+
       // Complete the cart via Medusa
       return medusaFetch('/store/carts/' + cartId + '/complete', {
         method: 'POST'
