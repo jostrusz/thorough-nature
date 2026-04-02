@@ -1123,7 +1123,10 @@ body { background: var(--bg); }
   // ────────────────────────────────────────────────────
   // 4. Facebook Pixel + CAPI — Purchase event (deduplicated via MetaTracker)
   // ────────────────────────────────────────────────────
-  if (typeof MetaTracker !== 'undefined') {
+  // Guard: skip Purchase event if order has no value (failed/empty orders)
+  if (!totalPrice || totalPrice <= 0 || !orderId) {
+    console.warn('TY: Skipping Purchase event — no valid order (totalPrice=' + totalPrice + ', orderId=' + orderId + ')');
+  } else if (typeof MetaTracker !== 'undefined') {
     var purchaseContentIds = PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle];
     if ((upsellPurchased || orderBumpActive) && !PROJECT_CONFIG.catalogContentIds) {
       purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
