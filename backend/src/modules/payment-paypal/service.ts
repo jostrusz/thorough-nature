@@ -267,15 +267,34 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
       const method = data?.method || ""
       const apmConfig = PayPalPaymentProviderService.APM_METHODS[method]
       const isAPM = !!apmConfig
+      const productName = data?.product_name || "Order"
 
       // Shared purchase_units
       const purchaseUnits = [
         {
           reference_id: context?.cart_id || `medusa-${Date.now()}`,
+          description: productName,
           amount: {
             currency_code: currency,
             value: totalValue,
+            breakdown: {
+              item_total: {
+                currency_code: currency,
+                value: totalValue,
+              },
+            },
           },
+          items: [
+            {
+              name: productName,
+              quantity: "1",
+              unit_amount: {
+                currency_code: currency,
+                value: totalValue,
+              },
+              category: "PHYSICAL_GOODS",
+            },
+          ],
         },
       ]
 
