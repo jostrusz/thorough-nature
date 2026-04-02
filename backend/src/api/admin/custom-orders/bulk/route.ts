@@ -157,6 +157,10 @@ export async function POST(
                 paymentId = String(payment.data.intentId)
                 break
               }
+              if (payment.data?.klarnaOrderId) {
+                paymentId = String(payment.data.klarnaOrderId)
+                break
+              }
               if (payment.data?.id) {
                 paymentId = String(payment.data.id)
                 break
