@@ -837,7 +837,6 @@ const SupportBoxDashboard = () => {
         .sb-settings-btn:hover { transform: translateY(-1px) !important; }
       `}</style>
       <FullWidthStyles />
-      <SidebarBadgeProvider />
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <h1 style={{ fontSize: "20px", fontWeight: 600, color: C.text, margin: 0 }}>SupportBox</h1>
@@ -1087,92 +1086,7 @@ const SupportBoxDashboard = () => {
   )
 }
 
-// ═══════════════════════════════════════════
-// SIDEBAR BADGE (injected via DOM)
-// ═══════════════════════════════════════════
-function useSidebarBadge(count: number) {
-  useEffect(() => {
-    const BADGE_ID = "supportbox-sidebar-badge"
-
-    // Find the sidebar link that contains "SupportBox" text
-    const links = document.querySelectorAll("a[href*='/supportbox']")
-    let targetLink: HTMLElement | null = null
-    links.forEach((link) => {
-      if (link.textContent?.includes("SupportBox") && !link.getAttribute("href")?.includes("/settings")) {
-        targetLink = link as HTMLElement
-      }
-    })
-
-    if (!targetLink) return
-
-    // Remove existing badge
-    const existing = document.getElementById(BADGE_ID)
-    if (existing) existing.remove()
-
-    if (count <= 0) return
-
-    // Create badge element
-    const badge = document.createElement("span")
-    badge.id = BADGE_ID
-    badge.textContent = count > 99 ? "99+" : String(count)
-    badge.style.cssText = `
-      margin-left: auto;
-      min-width: 18px;
-      height: 18px;
-      border-radius: 9px;
-      background-color: #DC2626;
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 5px;
-      line-height: 1;
-      flex-shrink: 0;
-    `
-
-    // Make parent flex to push badge to right
-    targetLink.style.display = "flex"
-    targetLink.style.alignItems = "center"
-    targetLink.appendChild(badge)
-
-    return () => {
-      const el = document.getElementById(BADGE_ID)
-      if (el) el.remove()
-    }
-  }, [count])
-}
-
-// Global badge polling — runs even when not on SupportBox page
-function SidebarBadgeProvider() {
-  const [newCount, setNewCount] = useState(0)
-
-  useEffect(() => {
-    let mounted = true
-
-    const fetchCount = async () => {
-      try {
-        const response = await fetch("/admin/supportbox/tickets?status=new", {
-          credentials: "include",
-        })
-        if (!response.ok) return
-        const data = await response.json()
-        if (mounted) {
-          setNewCount((data.tickets || []).length)
-        }
-      } catch {}
-    }
-
-    fetchCount()
-    const interval = setInterval(fetchCount, 15000)
-    return () => { mounted = false; clearInterval(interval) }
-  }, [])
-
-  useSidebarBadge(newCount)
-
-  return null
-}
+// Sidebar badge is now handled globally by widgets/supportbox-badge.tsx
 
 export const config = defineRouteConfig({
   label: "SupportBox",
