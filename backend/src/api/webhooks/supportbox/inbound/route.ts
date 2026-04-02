@@ -94,6 +94,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     let emailHtml = ""
     let emailText = ""
     let fromName = ""
+    let inboundAttachments: { filename: string; size: number; content_type: string; content?: string }[] = []
 
     if (config.resend_api_key) {
       try {
@@ -111,6 +112,45 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         // Try to extract name from "Name <email>" format in from
         const nameMatch = (emailData.from || fromAddress).match(/^(.+?)\s*</)
         fromName = nameMatch ? nameMatch[1].trim() : ""
+
+        // Fetch attachments from dedicated endpoint
+        if (emailData.attachments && emailData.attachments.length > 0) {
+          try {
+            const attResponse = await axios.get(
+              `https://api.resend.com/emails/receiving/${emailId}/attachments`,
+              {
+                headers: { Authorization: `Bearer ${config.resend_api_key}` },
+              }
+            )
+            const attList = attResponse.data?.data || []
+            for (const att of attList) {
+              if (att.download_url) {
+                try {
+                  const dlResponse = await axios.get(att.download_url, {
+                    responseType: "arraybuffer",
+                  })
+                  const base64 = Buffer.from(dlResponse.data).toString("base64")
+                  inboundAttachments.push({
+                    filename: att.filename || "attachment",
+                    size: att.size || dlResponse.data.byteLength,
+                    content_type: att.content_type || "application/octet-stream",
+                    content: base64,
+                  })
+                } catch (dlErr: any) {
+                  // Store metadata even if download fails
+                  inboundAttachments.push({
+                    filename: att.filename || "attachment",
+                    size: att.size || 0,
+                    content_type: att.content_type || "application/octet-stream",
+                  })
+                  console.log(`[SupportBox] Failed to download attachment ${att.filename}: ${dlErr.message}`)
+                }
+              }
+            }
+          } catch (attErr: any) {
+            console.log(`[SupportBox] Failed to fetch attachments: ${attErr.message}`)
+          }
+        }
       } catch (fetchError: any) {
         console.log(`[SupportBox] Failed to fetch email content: ${fetchError.message}`)
         // Continue without body — at least create the ticket
@@ -179,7 +219,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       from_name: fromName,
       body_html: emailHtml,
       body_text: emailText,
-      metadata: { resend_email_id: emailId },
+      metadata: {
+        resend_email_id: emailId,
+        ...(inboundAttachments.length > 0 ? { attachments: inboundAttachments } : {}),
+      },
     })
 
     // Generate AI labels (non-blocking — don't delay webhook response)

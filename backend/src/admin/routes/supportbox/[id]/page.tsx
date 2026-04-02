@@ -530,6 +530,7 @@ function MessageBubble({ msg }: { msg: any }) {
               <AttachmentChip
                 key={idx}
                 file={{ name: att.filename, size: att.size || 0, type: att.content_type || "" }}
+                content={att.content}
               />
             ))}
           </div>
@@ -574,7 +575,7 @@ function DeliveryBadge({ status }: { status: string }) {
 /* ═══════════════════════════════════════════════════════════════
    ATTACHMENT CHIP — shows a single attached file
    ═══════════════════════════════════════════════════════════════ */
-function AttachmentChip({ file, onRemove }: { file: { name: string; size: number; type: string }; onRemove?: () => void }) {
+function AttachmentChip({ file, onRemove, content }: { file: { name: string; size: number; type: string }; onRemove?: () => void; content?: string }) {
   const sizeStr = file.size < 1024 ? `${file.size} B`
     : file.size < 1048576 ? `${(file.size / 1024).toFixed(1)} KB`
     : `${(file.size / 1048576).toFixed(1)} MB`
@@ -585,13 +586,30 @@ function AttachmentChip({ file, onRemove }: { file: { name: string; size: number
     : file.type.includes("document") || file.type.includes("word") ? "📝"
     : "📎"
 
+  const handleDownload = () => {
+    if (!content) return
+    const byteChars = atob(content)
+    const byteArr = new Uint8Array(byteChars.length)
+    for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i)
+    const blob = new Blob([byteArr], { type: file.type || "application/octet-stream" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = file.name
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
-    <div style={{
-      display: "inline-flex", alignItems: "center", gap: "8px",
-      padding: "6px 12px", borderRadius: "10px",
-      backgroundColor: D.blueLight, border: `1px solid ${D.blueBorder}`,
-      fontSize: "12px", color: D.text, maxWidth: "260px",
-    }}>
+    <div
+      onClick={content ? handleDownload : undefined}
+      style={{
+        display: "inline-flex", alignItems: "center", gap: "8px",
+        padding: "6px 12px", borderRadius: "10px",
+        backgroundColor: D.blueLight, border: `1px solid ${D.blueBorder}`,
+        fontSize: "12px", color: D.text, maxWidth: "260px",
+        cursor: content ? "pointer" : "default",
+      }}>
       <span style={{ fontSize: "14px", flexShrink: 0 }}>{icon}</span>
       <span style={{ fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
         {file.name}
