@@ -501,6 +501,7 @@ function MessageBubble({ msg }: { msg: any }) {
       {/* Bubble */}
       <div style={{
         maxWidth: "88%",
+        overflow: "hidden",
         padding: "14px 18px",
         borderRadius: inb ? "4px 18px 18px 18px" : "18px 4px 18px 18px",
         backgroundColor: inb ? D.card : D.greenLight,
@@ -1224,7 +1225,7 @@ const TicketDetailPage = () => {
         .sb-action-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important; }
         .sb-back-btn { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important; }
         .sb-back-btn:hover { background-color: #F3F4F6 !important; transform: scale(1.08) !important; border-color: #D1D5DB !important; }
-        .sb-msg-body { white-space: pre-wrap; }
+        .sb-msg-body { white-space: pre-wrap; overflow: hidden; max-width: 100%; }
         .sb-msg-body p { margin: 0 0 10px 0; white-space: normal; }
         .sb-msg-body p:last-child { margin-bottom: 0; }
         .sb-msg-body br + br { content: ''; display: block; margin-top: 10px; }
@@ -1233,7 +1234,9 @@ const TicketDetailPage = () => {
         .sb-msg-body ul, .sb-msg-body ol { margin: 8px 0; padding-left: 24px; white-space: normal; }
         .sb-msg-body li { margin-bottom: 4px; }
         .sb-msg-body blockquote { border-left: 3px solid #E5E7EB; padding-left: 12px; margin: 8px 0; color: #6B7280; }
-        .sb-msg-body table { white-space: normal; }
+        .sb-msg-body table { white-space: normal; max-width: 100%; table-layout: fixed; }
+        .sb-msg-body img { max-width: 100%; height: auto; }
+        .sb-msg-body * { max-width: 100%; box-sizing: border-box; }
         .sb-editor { min-height: 80px; max-height: 300px; overflow-y: auto; outline: none; font-size: 14px; line-height: 1.7; word-break: break-word; white-space: pre-wrap; }
         .sb-editor:empty:before { content: attr(data-placeholder); color: ${D.textMuted}; pointer-events: none; }
         .sb-toolbar-btn { padding: 4px 10px; font-size: 13px; background: transparent; border: 1px solid ${D.border}; border-radius: 6px; cursor: pointer; color: ${D.textSec}; transition: all 0.15s ease; line-height: 1; }
