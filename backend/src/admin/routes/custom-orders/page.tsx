@@ -749,7 +749,7 @@ function ExportModal({ bulkActions, onClose, currentOrderIds }: {
     }} onClick={onClose}>
       <div style={{
         backgroundColor: "#fff", borderRadius: "12px", padding: "24px",
-        width: "400px", maxWidth: "90vw", boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+        width: "500px", maxWidth: "500px", boxSizing: "border-box", boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
       }} onClick={(e) => e.stopPropagation()}>
         <h2 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 600, color: "#111827", fontFamily: fontStack }}>
           Export Orders
