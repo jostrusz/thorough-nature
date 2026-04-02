@@ -842,7 +842,7 @@ const SupportBoxDashboard = () => {
   }
 
   return (
-    <div ref={pageRef} style={{ maxWidth: "1200px", margin: "0 auto", padding: "24px 32px", background: BG_COLOR }}>
+    <div ref={pageRef} style={{ maxWidth: "1400px", margin: "0 auto", padding: "24px 32px", background: BG_COLOR }}>
       <style>{`
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.3); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
