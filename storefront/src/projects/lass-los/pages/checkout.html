@@ -3843,6 +3843,10 @@ body {
     var section = document.getElementById('express-checkout');
     if (!topRow || !bottomRow || !section) return;
 
+    // Disable all express checkout methods (PayPal, Google Pay, Apple Pay)
+    section.style.display = 'none';
+    return;
+
     topRow.innerHTML = '';
     bottomRow.innerHTML = '';
 
