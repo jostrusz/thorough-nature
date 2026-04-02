@@ -622,6 +622,8 @@ s.parentNode.insertBefore(t,s)}(window,document,'script',
 /* ── Init with advanced matching from localStorage (returning visitors) ── */
 var _initMatch = {};
 try {
+  var _eid = localStorage.getItem('meta_external_id');
+  if (_eid) _initMatch.external_id = _eid;
   var _sc = localStorage.getItem('medusa_customer');
   if (_sc) {
     var _c = JSON.parse(_sc);
@@ -886,7 +888,10 @@ window.MetaTracker = (function() {
 
   /* ── Convenience methods ────────────────────────────────── */
   function trackPageView() {
-    return trackEvent('PageView', {});
+    return trackEvent('PageView', {
+      content_name: document.title || window.location.pathname,
+      content_category: PROJECT_ID
+    });
   }
 
   function trackViewContent(data) {
@@ -944,6 +949,8 @@ window.MetaTracker = (function() {
 
   /* ── Initialize: capture fbclid + restore saved user data ── */
   captureFbclid();
+  // Always set external_id in advanced matching
+  advancedMatchData.external_id = getExternalId();
   // Pre-fill advancedMatchData from localStorage for CAPI calls
   try {
     var _saved = localStorage.getItem('medusa_customer');
