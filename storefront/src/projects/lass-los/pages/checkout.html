@@ -6668,6 +6668,9 @@ body {
           variant_id: VARIANT_ID,
           quantity: checkoutBundleQty
         })
+      }).catch(function(err) {
+        console.error('[Checkout] Failed to add product to cart:', err.message || err);
+        throw new Error('Das Produkt konnte nicht zum Warenkorb hinzugefügt werden. Bitte versuche es erneut.');
       }).then(function() {
         // Schritt 2b: Order-Bump-Produkt hinzufügen (Bundle-Endpunkt = steuerinklusiv + reduzierter Preis)
         if (checkoutOrderBump) {
@@ -6679,7 +6682,18 @@ body {
             })
           });
         }
-      }).then(function() { return cartId; });
+      }).then(function() {
+        // Verify cart has items before proceeding
+        return medusaFetch('/store/carts/' + cartId, { method: 'GET' }).then(function(cartRes) {
+          var cart = cartRes.cart;
+          if (!cart.items || cart.items.length === 0 || cart.total <= 0) {
+            console.error('[Checkout] Cart is empty after adding items — aborting checkout');
+            throw new Error('Bei der Erstellung deiner Bestellung ist ein Fehler aufgetreten. Bitte versuche es erneut oder kontaktiere uns.');
+          }
+          console.log('[Checkout] Cart verified: ' + cart.items.length + ' items, total: ' + cart.total);
+          return cartId;
+        });
+      });
     })
     .then(function(cartId) {
       // Schritt 3: Cart mit Kundendaten aktualisieren (muss vor Versand abgeschlossen sein)
