@@ -849,7 +849,7 @@ const SupportBoxDashboard = () => {
   }
 
   return (
-    <div ref={pageRef} style={{ maxWidth: "1400px", margin: "0 auto", padding: "24px 32px", background: BG_COLOR }}>
+    <div ref={pageRef} style={{ width: "100%", maxWidth: "1400px", margin: "0 auto", padding: "24px 32px", background: BG_COLOR, boxSizing: "border-box" }}>
       <style>{`
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.3); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -973,7 +973,7 @@ const SupportBoxDashboard = () => {
         </div>
       </div>
 
-      <div className="sb-main-layout" style={{ display: "flex", gap: "28px" }}>
+      <div className="sb-main-layout" style={{ display: "flex", gap: "28px", width: "100%" }}>
         {/* ═══ Left Sidebar — Inboxes ═══ */}
         <div className="sb-sidebar" style={{ width: "280px", minWidth: "280px", maxWidth: "280px", flexShrink: 0 }}>
           <div style={{ fontSize: "11px", fontWeight: 600, color: C.textMuted, textTransform: "uppercase", letterSpacing: "0.5px", padding: "0 14px", marginBottom: "8px" }}>
@@ -1018,7 +1018,7 @@ const SupportBoxDashboard = () => {
         </div>
 
         {/* ═══ Main Content ═══ */}
-        <div className="sb-main-content" style={{ flex: 1, minWidth: "600px" }}>
+        <div className="sb-main-content" style={{ flex: "1 1 0%", minWidth: 0, width: "100%" }}>
           {/* Stat Cards */}
           <div className="sb-stats-row" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "20px" }}>
             <StatCard label="New" count={newCount} color={C.green} bgColor={C.greenBg} icon="📩" isActive={statusFilter === "new"} onClick={() => handleStatClick("new")} />
