@@ -99,6 +99,8 @@ export async function POST(
             "shipping_address.*",
             "items.*",
             "items.variant.product.title",
+            "payment_collections.payments.data",
+            "payment_collections.payments.provider_id",
           ],
           filters: exportFilters,
         })
@@ -134,7 +136,33 @@ export async function POST(
             .join(" ")
           const items = o.items?.length || 0
           const address = [o.shipping_address?.address_1, o.shipping_address?.city].filter(Boolean).join(", ")
-          const paymentId = o.metadata?.paypal_transaction_id || o.metadata?.payment_id || ""
+          // Extract payment ID from metadata or payment collections
+          const meta = o.metadata || {}
+          let paymentId =
+            meta.paypal_transaction_id ||
+            meta.molliePaymentId ||
+            meta.stripePaymentIntentId ||
+            meta.paypalOrderId ||
+            meta.comgateTransId ||
+            meta.p24SessionId ||
+            meta.airwallexPaymentIntentId ||
+            meta.klarnaOrderId ||
+            meta.payment_id ||
+            ""
+          if (!paymentId) {
+            const payments = (o.payment_collections || [])
+              .flatMap((pc: any) => pc.payments || [])
+            for (const payment of payments) {
+              if (payment.data?.id) {
+                paymentId = String(payment.data.id)
+                break
+              }
+              if (payment.data?.payment_intent) {
+                paymentId = String(payment.data.payment_intent)
+                break
+              }
+            }
+          }
           return [
             `#${o.display_id}`,
             new Date(o.created_at).toISOString().split("T")[0],
