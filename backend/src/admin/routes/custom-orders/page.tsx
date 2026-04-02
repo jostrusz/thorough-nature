@@ -349,6 +349,7 @@ const CustomOrdersPage = () => {
   const [sortField, setSortField] = useState("created_at")
   const [sortDir, setSortDir] = useState("DESC")
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set())
+  const [showExportModal, setShowExportModal] = useState(false)
 
   // New order celebration state
   const [celebrationOrder, setCelebrationOrder] = useState<any>(null)
@@ -555,26 +556,7 @@ const CustomOrdersPage = () => {
           <button
             className="dash-btn"
             style={btnOutline}
-            onClick={() => {
-              bulkActions.mutate(
-                {
-                  action: "export",
-                  order_ids: orders.map((o: any) => o.id),
-                },
-                {
-                  onSuccess: (data: any) => {
-                    const blob = new Blob([data.csv], { type: "text/csv" })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement("a")
-                    a.href = url
-                    a.download = `orders-export-${new Date().toISOString().split("T")[0]}.csv`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                    toast.success(`Exported ${data.count} orders`)
-                  },
-                }
-              )
-            }}
+            onClick={() => setShowExportModal(true)}
           >
             <svg
               width="15"
@@ -700,6 +682,130 @@ const CustomOrdersPage = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Export Modal */}
+      {showExportModal && (
+        <ExportModal
+          bulkActions={bulkActions}
+          onClose={() => setShowExportModal(false)}
+          currentOrderIds={orders.map((o: any) => o.id)}
+        />
+      )}
+    </div>
+  )
+}
+
+function ExportModal({ bulkActions, onClose, currentOrderIds }: {
+  bulkActions: any; onClose: () => void; currentOrderIds: string[]
+}) {
+  const today = new Date().toISOString().split("T")[0]
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0]
+  const [dateFrom, setDateFrom] = useState(thirtyDaysAgo)
+  const [dateTo, setDateTo] = useState(today)
+  const [exporting, setExporting] = useState(false)
+
+  const handleExport = (mode: "date" | "current") => {
+    setExporting(true)
+    const params: any = { action: "export" }
+    if (mode === "date") {
+      params.date_from = dateFrom
+      params.date_to = dateTo
+    } else {
+      params.order_ids = currentOrderIds
+    }
+
+    bulkActions.mutate(params, {
+      onSuccess: (data: any) => {
+        const blob = new Blob([data.csv], { type: "text/csv" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = `orders-export-${dateFrom}-to-${dateTo}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
+        toast.success(`Exported ${data.count} orders`)
+        setExporting(false)
+        onClose()
+      },
+      onError: () => {
+        toast.error("Export failed")
+        setExporting(false)
+      },
+    })
+  }
+
+  const inputStyle: React.CSSProperties = {
+    padding: "8px 12px", fontSize: "13px", border: "1px solid #D1D5DB",
+    borderRadius: "8px", outline: "none", fontFamily: fontStack, width: "100%",
+    backgroundColor: "#fff",
+  }
+
+  return (
+    <div style={{
+      position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center",
+      justifyContent: "center", zIndex: 9999,
+    }} onClick={onClose}>
+      <div style={{
+        backgroundColor: "#fff", borderRadius: "12px", padding: "24px",
+        width: "400px", maxWidth: "90vw", boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+      }} onClick={(e) => e.stopPropagation()}>
+        <h2 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 600, color: "#111827", fontFamily: fontStack }}>
+          Export Orders
+        </h2>
+
+        <div style={{ marginBottom: "16px" }}>
+          <label style={{ fontSize: "12px", fontWeight: 500, color: "#6B7280", display: "block", marginBottom: "6px", fontFamily: fontStack }}>
+            From
+          </label>
+          <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} style={inputStyle} />
+        </div>
+
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ fontSize: "12px", fontWeight: 500, color: "#6B7280", display: "block", marginBottom: "6px", fontFamily: fontStack }}>
+            To
+          </label>
+          <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} style={inputStyle} />
+        </div>
+
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button
+            onClick={() => handleExport("date")}
+            disabled={exporting}
+            style={{
+              flex: 1, padding: "10px", fontSize: "13px", fontWeight: 600,
+              backgroundColor: "#4F46E5", color: "#fff", border: "none",
+              borderRadius: "8px", cursor: exporting ? "not-allowed" : "pointer",
+              opacity: exporting ? 0.6 : 1, fontFamily: fontStack,
+            }}
+          >
+            {exporting ? "Exporting..." : "Export by Date"}
+          </button>
+          <button
+            onClick={() => handleExport("current")}
+            disabled={exporting}
+            style={{
+              flex: 1, padding: "10px", fontSize: "13px", fontWeight: 600,
+              backgroundColor: "#fff", color: "#374151", border: "1px solid #D1D5DB",
+              borderRadius: "8px", cursor: exporting ? "not-allowed" : "pointer",
+              opacity: exporting ? 0.6 : 1, fontFamily: fontStack,
+            }}
+          >
+            Export Current Page
+          </button>
+        </div>
+
+        <button
+          onClick={onClose}
+          style={{
+            width: "100%", marginTop: "10px", padding: "8px", fontSize: "12px",
+            color: "#9CA3AF", backgroundColor: "transparent", border: "none",
+            cursor: "pointer", fontFamily: fontStack,
+          }}
+        >
+          Cancel
+        </button>
       </div>
     </div>
   )

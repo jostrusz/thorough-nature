@@ -3,8 +3,10 @@ import { sdk } from "../lib/sdk"
 
 interface BulkActionParams {
   action: "update_metadata" | "export"
-  order_ids: string[]
+  order_ids?: string[]
   payload?: Record<string, any>
+  date_from?: string
+  date_to?: string
 }
 
 export function useBulkActions() {
