@@ -862,6 +862,7 @@ const SupportBoxDashboard = () => {
           .sb-main-layout { flex-direction: column !important; }
           .sb-sidebar { width: 100% !important; min-width: 0 !important; max-width: 100% !important; margin-bottom: 16px !important; }
           .sb-ticket-list { min-height: auto !important; }
+          .sb-main-content { min-width: 0 !important; }
           .sb-stats-row { flex-wrap: wrap !important; }
           .sb-stats-row > * { flex: 1 1 45% !important; min-width: 120px !important; }
           .sb-header-row { flex-direction: column !important; gap: 12px !important; align-items: flex-start !important; }
@@ -1017,7 +1018,7 @@ const SupportBoxDashboard = () => {
         </div>
 
         {/* ═══ Main Content ═══ */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="sb-main-content" style={{ flex: 1, minWidth: "600px" }}>
           {/* Stat Cards */}
           <div className="sb-stats-row" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "20px" }}>
             <StatCard label="New" count={newCount} color={C.green} bgColor={C.greenBg} icon="📩" isActive={statusFilter === "new"} onClick={() => handleStatClick("new")} />
@@ -1092,6 +1093,7 @@ const SupportBoxDashboard = () => {
             backgroundColor: C.white, border: `1px solid ${C.border}`,
             borderRadius: "0 0 12px 12px", overflow: "hidden",
             boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            minHeight: "200px",
           }}>
             {isLoading ? (
               <div style={{ padding: "48px", textAlign: "center", color: C.textSecondary, fontSize: "13px" }}>
