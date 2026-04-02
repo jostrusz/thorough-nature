@@ -723,6 +723,8 @@ const SupportBoxDashboard = () => {
   const [refreshing, setRefreshing] = useState(false)
   const [projectFilter, setProjectFilter] = useState<string>("all")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
+  const [backfilling, setBackfilling] = useState(false)
+  const [backfillResult, setBackfillResult] = useState<string | null>(null)
 
   // Debounce search input
   useEffect(() => {
@@ -893,6 +895,36 @@ const SupportBoxDashboard = () => {
             </svg>
             New Email
           </button>
+          <button
+            onClick={async () => {
+              setBackfilling(true)
+              setBackfillResult(null)
+              try {
+                const res = await sdk.client.fetch("/admin/supportbox/tickets/backfill-labels", { method: "POST" })
+                const r = res as any
+                setBackfillResult(`✅ ${r.processed || 0} labeled, ${r.failed || 0} failed`)
+                qc.invalidateQueries({ queryKey: ["supportbox-tickets"] })
+              } catch (e: any) {
+                setBackfillResult(`❌ ${e.message}`)
+              }
+              setBackfilling(false)
+            }}
+            disabled={backfilling}
+            style={{
+              padding: "8px 12px", fontSize: "12px", fontWeight: 500,
+              color: backfilling ? C.textMuted : "#4F46E5",
+              backgroundColor: backfilling ? C.inset : "#EEF2FF",
+              border: "1px solid #C7D2FE", borderRadius: "10px",
+              cursor: backfilling ? "wait" : "pointer",
+              display: "flex", alignItems: "center", gap: "6px",
+            }}
+            title="Generate AI labels for tickets without them"
+          >
+            ✨ {backfilling ? "Labeling..." : "AI Labels"}
+          </button>
+          {backfillResult && (
+            <span style={{ fontSize: "11px", color: C.textMuted }}>{backfillResult}</span>
+          )}
           <Link to="/supportbox/settings">
             <Button variant="secondary" size="small">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: "6px" }}>
