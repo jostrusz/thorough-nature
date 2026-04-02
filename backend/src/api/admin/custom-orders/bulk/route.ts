@@ -86,9 +86,16 @@ export async function POST(
           "Email",
           "Total",
           "Currency",
+          "Address",
+          "Postal Code",
           "Country",
+          "Phone",
+          "Company",
           "Tag",
           "Delivery Status",
+          "Payment ID",
+          "Fakturoid Invoice",
+          "QuickBooks Invoice",
           "Book Sent",
           "Items",
         ].join(",")
@@ -101,6 +108,8 @@ export async function POST(
             .filter(Boolean)
             .join(" ")
           const items = o.items?.length || 0
+          const address = [o.shipping_address?.address_1, o.shipping_address?.city].filter(Boolean).join(", ")
+          const paymentId = o.metadata?.paypal_transaction_id || o.metadata?.payment_id || ""
           return [
             `#${o.display_id}`,
             new Date(o.created_at).toISOString().split("T")[0],
@@ -108,9 +117,16 @@ export async function POST(
             o.email || "",
             o.total,
             o.currency_code?.toUpperCase() || "EUR",
+            `"${address}"`,
+            o.shipping_address?.postal_code || "",
             o.shipping_address?.country_code?.toUpperCase() || "",
+            o.shipping_address?.phone || "",
+            `"${o.shipping_address?.company || ""}"`,
             `"${o.metadata?.tags || ""}"`,
             o.metadata?.dextrum_status || "",
+            paymentId,
+            o.metadata?.fakturoid_invoice_id || "",
+            o.metadata?.quickbooks_invoice_id || "",
             o.metadata?.book_sent ? "Yes" : "No",
             items,
           ].join(",")
