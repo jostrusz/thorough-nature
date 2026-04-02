@@ -604,28 +604,28 @@ body { background: var(--bg); }
         <div class="ty-order-icon book">&#x1F4D6;</div>
         <div>
           <div class="ty-order-name">Laat Los Wat Je Kapotmaakt</div>
-          <div class="ty-order-desc">Fysiek boek &mdash; 270 pagina's &mdash; wordt bezorgd</div>
+          <div class="ty-order-desc">Fysiek boek &mdash; 290 pagina's &mdash; wordt bezorgd</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ebook">&#x1F4F1;</div>
         <div>
-          <div class="ty-order-name">De Stilte Binnenin</div>
-          <div class="ty-order-desc">E-book Meditatie &mdash; check je inbox</div>
+          <div class="ty-order-name">De Overdenkende Oplossing</div>
+          <div class="ty-order-desc">Gratis e-book &mdash; check je inbox</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ebook">&#x1F4F1;</div>
         <div>
-          <div class="ty-order-name">Emotionele Detox in 7 Dagen</div>
-          <div class="ty-order-desc">E-book Emoties &mdash; check je inbox</div>
+          <div class="ty-order-name">Liefde Zonder Onzin</div>
+          <div class="ty-order-desc">Gratis e-book &mdash; check je inbox</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ship">&#x1F69A;</div>
         <div>
           <div class="ty-order-name">Gratis verzending</div>
-          <div class="ty-order-desc">Binnen 3-5 werkdagen bezorgd</div>
+          <div class="ty-order-desc">Binnen 5 werkdagen bezorgd</div>
         </div>
       </div>
     </div>
@@ -657,13 +657,13 @@ body { background: var(--bg); }
         <div class="ty-step-num">1</div>
         <div class="ty-step-icon">&#x1F4E7;</div>
         <div class="ty-step-title">Check je inbox</div>
-        <div class="ty-step-desc">Je ontvangt binnen 2 minuten een bevestigingsmail met je twee gratis e-books als download.</div>
+        <div class="ty-step-desc">Je ontvangt binnen 2 minuten een bevestigingsmail met je gratis e-books: <em>De Overdenkende Oplossing</em> en <em>Liefde Zonder Onzin</em>.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">2</div>
         <div class="ty-step-icon">&#x1F4E6;</div>
         <div class="ty-step-title">Boek onderweg</div>
-        <div class="ty-step-desc">Je fysieke boek wordt binnen 24 uur verzonden. Je ontvangt een track &amp; trace link per e-mail.</div>
+        <div class="ty-step-desc">Je fysieke boek wordt binnen 24&ndash;48 uur verzonden en is binnen 5 werkdagen bezorgd. Je ontvangt een track &amp; trace link per e-mail.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">3</div>
@@ -784,16 +784,24 @@ body { background: var(--bg); }
   }
 
   // 2d. Celková cena — bere v potaz bundle, order bump a upsell
+  // Bundle price map: qty → price (from project config)
+  var bundlePriceMap = {};
+  if (PROJECT_CONFIG.bundleOptions) {
+    PROJECT_CONFIG.bundleOptions.forEach(function(opt) { bundlePriceMap[opt.qty] = opt.price; });
+  }
   var totalPrice;
   if (checkoutTotal > 0) {
-    // Máme uloženou celkovou cenu z checkoutu
     totalPrice = checkoutTotal;
-    // Pokud upsell byl přidán po checkoutu (ne přes order bump), přičti ho
     if (upsellPurchased && !orderBumpActive) {
       totalPrice += PROJECT_CONFIG.upsellProduct.price;
     }
+  } else if (bundlePriceMap[bundleQty]) {
+    // Use bundle pricing: 1=€35, 2=€59, 3=€79, 4=€99
+    totalPrice = bundlePriceMap[bundleQty];
+    if (upsellPurchased) {
+      totalPrice += PROJECT_CONFIG.upsellProduct.price;
+    }
   } else {
-    // Fallback — starý výpočet
     var mainPrice = PROJECT_CONFIG.mainProduct.price;
     var upsellPrice = PROJECT_CONFIG.upsellProduct.price;
     totalPrice = upsellPurchased ? (mainPrice + upsellPrice) : mainPrice;
@@ -812,7 +820,7 @@ body { background: var(--bg); }
     }
     var mainItemDesc = orderItemsEl.querySelector('.ty-order-desc');
     if (mainItemDesc) {
-      mainItemDesc.textContent = bundleQty + '\u00D7 fysiek boek \u2014 wordt bezorgd';
+      mainItemDesc.textContent = bundleQty + '\u00D7 fysiek boek \u2014 290 pagina\u2019s \u2014 wordt bezorgd';
     }
   }
 
