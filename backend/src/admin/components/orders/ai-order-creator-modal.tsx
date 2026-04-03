@@ -165,7 +165,7 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
       setVariantId(ext.variant_id || "")
       setProductTitle(ext.product_title || "")
       setQuantity(String(ext.quantity || 1))
-      setUnitPrice(ext.unit_price != null ? String(ext.unit_price) : "")
+      setUnitPrice(ext.unit_price != null ? String(ext.unit_price) : "")  // AI now returns EUR, not cents
       setCurrencyCode(ext.currency_code || "eur")
       setPaymentId(ext.payment_id || "")
       setPaymentMethod(ext.payment_method || "")
@@ -205,7 +205,7 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
           variant_id: variantId,
           product_title: productTitle,
           quantity: Number(quantity),
-          unit_price: Number(unitPrice),
+          unit_price: Math.round(Number(unitPrice) * 100),
           currency_code: currencyCode,
           payment_id: paymentId,
           payment_method: paymentMethod,
@@ -229,7 +229,7 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
 
   // ─── Price display ───
   const priceDisplay = unitPrice
-    ? `${(Number(unitPrice) / 100).toFixed(2)} ${currencyCode.toUpperCase()}`
+    ? `${Number(unitPrice).toFixed(2)} ${currencyCode.toUpperCase()}`
     : ""
 
   // ─── Country options ───
@@ -441,11 +441,11 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
                 </div>
                 <div style={{ flex: 1 }}>
                   <Field
-                    label="Price (cents)"
+                    label="Price (EUR)"
                     value={unitPrice}
                     onChange={setUnitPrice}
                     type="number"
-                    placeholder="e.g. 3500"
+                    placeholder="e.g. 35.00"
                   />
                 </div>
               </div>
