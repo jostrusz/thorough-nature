@@ -47,42 +47,56 @@ export async function GET(
     const sortDir = (req.query.sort_dir as string) || "DESC"
 
     const filters: Record<string, any> = {}
-
-    // When searching, use DB-level email filter if it looks like an email,
-    // and fetch more records to search through
     const isSearching = !!search
-    if (isSearching && search.includes("@")) {
-      filters.email = { $like: `%${search}%` }
-    }
 
     const { data: orders, metadata } = await query.graph({
       entity: "order",
-      fields: [
-        "id",
-        "display_id",
-        "created_at",
-        "updated_at",
-        "email",
-        "currency_code",
-        "total",
-        "subtotal",
-        "shipping_total",
-        "tax_total",
-        "status",
-        "metadata",
-        "items.*",
-        "items.variant.*",
-        "items.variant.product.*",
-        "shipping_address.*",
-        "billing_address.*",
-        "fulfillments.*",
-        "payment_collections.*",
-        "payment_collections.payments.*",
-      ],
+      fields: isSearching
+        ? [
+            // Lighter fields for search — skip heavy variant/product relations
+            "id",
+            "display_id",
+            "created_at",
+            "updated_at",
+            "email",
+            "currency_code",
+            "total",
+            "status",
+            "metadata",
+            "items.title",
+            "items.variant_sku",
+            "items.variant_title",
+            "shipping_address.*",
+            "billing_address.*",
+            "payment_collections.payments.provider_id",
+            "payment_collections.payments.data",
+          ]
+        : [
+            "id",
+            "display_id",
+            "created_at",
+            "updated_at",
+            "email",
+            "currency_code",
+            "total",
+            "subtotal",
+            "shipping_total",
+            "tax_total",
+            "status",
+            "metadata",
+            "items.*",
+            "items.variant.*",
+            "items.variant.product.*",
+            "shipping_address.*",
+            "billing_address.*",
+            "fulfillments.*",
+            "payment_collections.*",
+            "payment_collections.payments.*",
+          ],
       filters,
       pagination: {
         skip: isSearching ? 0 : offset,
-        take: isSearching ? 500 : limit,
+        take: isSearching ? 2000 : limit,
         order: {
           [sortBy]: sortDir,
         },
