@@ -17,6 +17,7 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
     const el = ref.current
     if (!el) return
     const originals: { el: HTMLElement; s: Record<string, string> }[] = []
+    const hiddenSiblings: { el: HTMLElement; display: string }[] = []
     let node: HTMLElement | null = el.parentElement
     while (node && node !== document.documentElement) {
       const parent = node.parentElement
@@ -43,9 +44,16 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
       node.style.setProperty("padding-right", "0", "important")
       node.style.setProperty("min-width", "0", "important")
 
-      if (isLayoutBoundary) {
+      if (isLayoutBoundary && parent) {
+        // SupportBox should be full-screen: hide sibling elements (sidebar)
         node.style.setProperty("flex", "1 1 0%", "important")
-        break
+        for (let i = 0; i < parent.children.length; i++) {
+          const sibling = parent.children[i] as HTMLElement
+          if (sibling !== node && sibling.style) {
+            hiddenSiblings.push({ el: sibling, display: sibling.style.display })
+            sibling.style.setProperty("display", "none", "important")
+          }
+        }
       }
 
       node = node.parentElement
@@ -55,6 +63,9 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
         n.style.background = s.bg; n.style.maxWidth = s.mw; n.style.width = s.w
         n.style.paddingLeft = s.pl; n.style.paddingRight = s.pr
         n.style.flex = s.flex; n.style.minWidth = s.minWidth
+      })
+      hiddenSiblings.forEach(({ el: x, display }) => {
+        x.style.display = display
       })
     }
   }, [ref])
