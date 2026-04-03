@@ -20,6 +20,7 @@ interface PaymentMatchRow {
   customer_name: string
   customer_email: string
   invoice_number: string | null
+  fakturoid_invoice_url: string | null
   payment_id_1: string | null
   payment_id_2: string | null
   payment_method: string
@@ -244,6 +245,7 @@ export async function GET(
         customer_name: customerName,
         customer_email: (order as any).email || "",
         invoice_number: invoiceNumber,
+        fakturoid_invoice_url: meta.fakturoid_invoice_url || null,
         payment_id_1: paymentId1,
         payment_id_2: paymentId2,
         payment_method: paymentMethod,

@@ -61,8 +61,10 @@ function PageStyles() {
 
       /* Cell helpers */
       .pm-mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; }
-      .pm-order-num { font-weight: 600; color: #4F46E5; }
-      .pm-invoice { font-weight: 500; color: #0D9488; }
+      .pm-order-num { font-weight: 600; color: #4F46E5; text-decoration: none; cursor: pointer; }
+      .pm-order-num:hover { text-decoration: underline; }
+      .pm-invoice { font-weight: 500; color: #0D9488; text-decoration: none; cursor: pointer; }
+      .pm-invoice:hover { text-decoration: underline; }
       .pm-pid { color: #7C3AED; background: #F5F3FF; padding: 2px 6px; border-radius: 4px; font-size: 11px; display: inline-block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: default; }
       .pm-pid2 { color: #C026D3; background: #FDF4FF; padding: 2px 6px; border-radius: 4px; font-size: 11px; display: inline-block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: default; }
       .pm-pid-cod { color: #92400E; background: #FFFBEB; }
@@ -123,6 +125,7 @@ interface PaymentMatchRow {
   customer_name: string
   customer_email: string
   invoice_number: string | null
+  fakturoid_invoice_url: string | null
   payment_id_1: string | null
   payment_id_2: string | null
   payment_method: string
@@ -378,7 +381,7 @@ const PaymentMatcherPage = () => {
                   return (
                     <tr key={row.order_id} className={rowClass}>
                       <td>
-                        <span className="pm-order-num">{row.order_number}</span>
+                        <a href={`/app/orders/${row.order_id}`} className="pm-order-num">{row.order_number}</a>
                         {row.is_upsell && <span className="pm-tag pm-tag-upsell">UPSELL</span>}
                         {row.is_cod && <span className="pm-tag pm-tag-cod">COD</span>}
                       </td>
@@ -389,7 +392,9 @@ const PaymentMatcherPage = () => {
                       </td>
                       <td>
                         {row.invoice_number
-                          ? <span className="pm-invoice pm-mono">{row.invoice_number}</span>
+                          ? row.fakturoid_invoice_url
+                            ? <a href={row.fakturoid_invoice_url} target="_blank" rel="noopener noreferrer" className="pm-invoice pm-mono">{row.invoice_number}</a>
+                            : <span className="pm-invoice pm-mono">{row.invoice_number}</span>
                           : <span style={{ color: "#EF4444", fontSize: 12 }}>Chybí</span>
                         }
                       </td>
