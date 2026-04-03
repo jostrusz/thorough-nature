@@ -117,7 +117,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       direction: "outbound",
       from_email: config.email_address,
       from_name: config.display_name,
-      body_html: body.body_html,
+      body_html: replyHtml,
       body_text: body.body_text,
       resend_message_id: resendResponse.data.id,
       delivery_status: "sent",
