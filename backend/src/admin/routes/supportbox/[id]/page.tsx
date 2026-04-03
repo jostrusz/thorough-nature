@@ -1274,6 +1274,31 @@ const TicketDetailPage = () => {
   // Sort messages newest first — most recent message at top
   const msgs = [...(ticket?.messages || [])].sort((a: any, b: any) => +new Date(b.created_at) - +new Date(a.created_at))
 
+  // Copy entire conversation as plain text
+  const [copied, setCopied] = useState(false)
+  const copyConversation = () => {
+    if (!ticket) return
+    const sortedAsc = [...(ticket.messages || [])].sort((a: any, b: any) => +new Date(a.created_at) - +new Date(b.created_at))
+    const lines = sortedAsc.map((m: any) => {
+      const sender = m.direction === "inbound" ? (m.from_name || m.from_email) : "You"
+      const date = new Date(m.created_at).toLocaleString()
+      let text = m.body_text || ""
+      if (!text && m.body_html) {
+        // Strip HTML tags for plain text
+        const tmp = document.createElement("div")
+        tmp.innerHTML = m.body_html
+        text = tmp.textContent || tmp.innerText || ""
+      }
+      return `--- ${sender} (${date}) ---\n${text.trim()}`
+    }).join("\n\n")
+
+    const header = `Subject: ${ticket.subject}\nFrom: ${ticket.from_email}\nDate: ${new Date(ticket.created_at).toLocaleString()}\n\n`
+    navigator.clipboard.writeText(header + lines).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
   // No auto-scroll — user controls scroll position
 
   const send = () => {
@@ -1379,6 +1404,20 @@ const TicketDetailPage = () => {
         </div>
 
         <div style={{ flexShrink: 0, display: "flex", gap: "8px", alignItems: "center" }}>
+          {/* Copy conversation */}
+          <button className="sb-action-btn" onClick={copyConversation}
+            style={{
+              padding: "8px 14px", fontSize: "13px", fontWeight: 600,
+              color: copied ? D.green : D.textSec,
+              backgroundColor: copied ? D.greenLight : D.card,
+              border: `1px solid ${copied ? D.green + "40" : D.border}`,
+              borderRadius: D.r8, cursor: "pointer",
+              transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px",
+            }}>
+            {copied ? "\u2705 Copied" : "\ud83d\udccb Copy all"}
+          </button>
+
           {/* Spam button */}
           {ticket.status !== "spam" && (
             <button className="sb-action-btn" onClick={() => spamMut.mutate()} disabled={spamMut.isPending}
