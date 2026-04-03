@@ -381,7 +381,7 @@ const PaymentMatcherPage = () => {
                   return (
                     <tr key={row.order_id} className={rowClass}>
                       <td>
-                        <a href={`/app/orders/${row.order_id}`} className="pm-order-num">{row.order_number}</a>
+                        <a href={`/app/custom-orders/${row.order_id}`} className="pm-order-num">{row.order_number}</a>
                         {row.is_upsell && <span className="pm-tag pm-tag-upsell">UPSELL</span>}
                         {row.is_cod && <span className="pm-tag pm-tag-cod">COD</span>}
                       </td>
