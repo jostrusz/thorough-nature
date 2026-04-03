@@ -22,6 +22,7 @@ import { useOrdersList } from "../../hooks/use-orders-list"
 import { useBulkActions } from "../../hooks/use-bulk-actions"
 import { useUpdateMetadata } from "../../hooks/use-update-metadata"
 import { colors, radii, shadows, fontStack, cardStyle as tokenCardStyle, btnOutline, btnPrimary } from "../../components/orders/design-tokens"
+import { AiOrderCreatorModal } from "../../components/orders/ai-order-creator-modal"
 
 // ═══════════════════════════════════════════
 // STYLES
@@ -382,6 +383,7 @@ const CustomOrdersPage = () => {
   const [sortDir, setSortDir] = useState("DESC")
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set())
   const [showExportModal, setShowExportModal] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   // New order celebration state
   const [celebrationOrder, setCelebrationOrder] = useState<any>(null)
@@ -602,7 +604,7 @@ const CustomOrdersPage = () => {
             </svg>
             Export
           </button>
-          <button className="dash-btn-primary" style={btnPrimary}>
+          <button className="dash-btn-primary" style={btnPrimary} onClick={() => setShowCreateModal(true)}>
             <svg
               width="15"
               height="15"
@@ -724,6 +726,16 @@ const CustomOrdersPage = () => {
           currentOrderIds={orders.map((o: any) => o.id)}
         />
       )}
+
+      {/* AI Order Creator Modal */}
+      <AiOrderCreatorModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreated={() => {
+          setShowCreateModal(false)
+          toast.success("Order created successfully!")
+        }}
+      />
     </div>
   )
 }
