@@ -481,6 +481,11 @@ function SandboxedEmailBody({ html, textColor }: { html: string; textColor: stri
         a { color: #2563EB; }
         table { max-width: 100% !important; }
         * { max-width: 100% !important; box-sizing: border-box; }
+        /* Paragraph spacing for contentEditable output (Chrome wraps lines in <div>) */
+        body > div { margin-bottom: 0.6em; }
+        body > div:last-child { margin-bottom: 0; }
+        p { margin: 0 0 0.6em 0; }
+        p:last-child { margin-bottom: 0; }
       </style></head><body>${html}</body></html>`)
       doc.close()
 
@@ -571,7 +576,7 @@ function MessageBubble({ msg }: { msg: any }) {
 
       {/* Bubble */}
       <div style={{
-        maxWidth: inb ? "100%" : "88%",
+        maxWidth: "100%",
         overflow: "hidden",
         padding: "14px 18px",
         borderRadius: inb ? "4px 18px 18px 18px" : "18px 4px 18px 18px",
