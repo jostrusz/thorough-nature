@@ -180,12 +180,36 @@ export async function GET(
         }
       }
 
-      // Payment ID 2 (upsell)
+      // Payment ID 2 (upsell or secondary transaction ID)
       let paymentId2: string | null = null
       const upsellPaymentId = meta.upsell_payment_id
       const isUpsell = !!meta.upsell_accepted && !!upsellPaymentId
       if (isUpsell && upsellPaymentId !== "cod" && upsellPaymentId !== "extraction_failed") {
         paymentId2 = upsellPaymentId
+      }
+      // If no upsell payment_id_2, fill with secondary transaction ID from payment.data
+      if (!paymentId2 && !cod) {
+        const payments = ((order as any).payment_collections || [])
+          .flatMap((pc: any) => pc.payments || [])
+        for (const payment of payments) {
+          const d = payment.data || {}
+          // Collect all available IDs
+          const candidates = [
+            d.id,
+            d.intentId,
+            d.paypalOrderId,
+            d.klarnaOrderId,
+            d.comgateTransId,
+            d.payment_intent,
+            d.transaction_id,
+          ].filter(Boolean).map(String)
+          // Pick the first one that differs from paymentId1
+          const secondary = candidates.find((c) => c !== paymentId1)
+          if (secondary) {
+            paymentId2 = secondary
+            break
+          }
+        }
       }
 
       // Invoice number
