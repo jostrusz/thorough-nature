@@ -35,6 +35,10 @@ import { LlShipmentNotificationTemplate, LL_SHIPMENT_NOTIFICATION, isLlShipmentN
 import { LlAbandonedCheckout1Template, LL_ABANDONED_CHECKOUT_1, isLlAbandonedCheckout1Data } from './ll-abandoned-checkout-1'
 import { LlAbandonedCheckout2Template, LL_ABANDONED_CHECKOUT_2, isLlAbandonedCheckout2Data } from './ll-abandoned-checkout-2'
 import { LlAbandonedCheckout3Template, LL_ABANDONED_CHECKOUT_3, isLlAbandonedCheckout3Data } from './ll-abandoned-checkout-3'
+// Loslatenboek abandoned checkout 3-step sequence
+import { LbAbandonedCheckout1Template, LB_ABANDONED_CHECKOUT_1, isLbAbandonedCheckout1Data } from './lb-abandoned-checkout-1'
+import { LbAbandonedCheckout2Template, LB_ABANDONED_CHECKOUT_2, isLbAbandonedCheckout2Data } from './lb-abandoned-checkout-2'
+import { LbAbandonedCheckout3Template, LB_ABANDONED_CHECKOUT_3, isLbAbandonedCheckout3Data } from './lb-abandoned-checkout-3'
 // Psí superživot (psi-superzivot) templates
 import { PsOrderPlacedTemplate, PS_ORDER_PLACED, isPsOrderPlacedTemplateData } from './ps-order-placed'
 import { PsShipmentNotificationTemplate, PS_SHIPMENT_NOTIFICATION, isPsShipmentNotificationData } from './ps-shipment-notification'
@@ -79,6 +83,10 @@ export const EmailTemplates = {
   LL_ABANDONED_CHECKOUT_1,
   LL_ABANDONED_CHECKOUT_2,
   LL_ABANDONED_CHECKOUT_3,
+  // Loslatenboek 3-step abandoned checkout
+  LB_ABANDONED_CHECKOUT_1,
+  LB_ABANDONED_CHECKOUT_2,
+  LB_ABANDONED_CHECKOUT_3,
   // Psí superživot
   PS_ORDER_PLACED,
   PS_SHIPMENT_NOTIFICATION,
@@ -418,6 +426,34 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
         )
       }
       return <LlAbandonedCheckout3Template {...data} />
+
+    // ── Loslatenboek 3-step abandoned checkout ──────────────
+    case EmailTemplates.LB_ABANDONED_CHECKOUT_1:
+      if (!isLbAbandonedCheckout1Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.LB_ABANDONED_CHECKOUT_1}"`
+        )
+      }
+      return <LbAbandonedCheckout1Template {...data} />
+
+    case EmailTemplates.LB_ABANDONED_CHECKOUT_2:
+      if (!isLbAbandonedCheckout2Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.LB_ABANDONED_CHECKOUT_2}"`
+        )
+      }
+      return <LbAbandonedCheckout2Template {...data} />
+
+    case EmailTemplates.LB_ABANDONED_CHECKOUT_3:
+      if (!isLbAbandonedCheckout3Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.LB_ABANDONED_CHECKOUT_3}"`
+        )
+      }
+      return <LbAbandonedCheckout3Template {...data} />
 
     // ── Psí superživot templates ─────────────────────────────
     case EmailTemplates.PS_ORDER_PLACED:

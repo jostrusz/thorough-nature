@@ -59,8 +59,6 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
     const el = ref.current
     if (!el) return
     const saved: { el: HTMLElement; s: Record<string, string> }[] = []
-    // Track hidden siblings (e.g. Medusa admin sidebar) to restore on cleanup
-    const hiddenSiblings: { el: HTMLElement; display: string }[] = []
     let n: HTMLElement | null = el.parentElement
 
     while (n && n !== document.documentElement) {
@@ -92,17 +90,10 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
       n.style.setProperty("overflow-y", "visible", "important")
       n.style.setProperty("min-width", "0", "important")
 
-      if (isLayoutBoundary && parent) {
-        // SupportBox detail should be full-screen: hide sibling elements (sidebar)
-        // and continue expanding upward
+      if (isLayoutBoundary) {
+        // Expand content column to fill remaining space, keep sidebar visible
         n.style.setProperty("flex", "1 1 0%", "important")
-        for (let i = 0; i < parent.children.length; i++) {
-          const sibling = parent.children[i] as HTMLElement
-          if (sibling !== n && sibling.style) {
-            hiddenSiblings.push({ el: sibling, display: sibling.style.display })
-            sibling.style.setProperty("display", "none", "important")
-          }
-        }
+        break
       }
 
       n = n.parentElement
@@ -112,10 +103,6 @@ function useFullWidth(ref: React.RefObject<HTMLDivElement | null>) {
         x.style.background = s.bg; x.style.maxWidth = s.mw; x.style.width = s.w
         x.style.paddingLeft = s.pl; x.style.paddingRight = s.pr; x.style.margin = s.m
         x.style.overflow = s.overflow; x.style.flex = s.flex; x.style.minWidth = s.minWidth
-      })
-      // Restore hidden siblings (sidebar)
-      hiddenSiblings.forEach(({ el: x, display }) => {
-        x.style.display = display
       })
     }
   }, [ref])
