@@ -248,26 +248,42 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
   if (!open) return null
 
   return (
+    <>
+    <style>{`
+      .ai-order-overlay {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 1000 !important;
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: center !important;
+        background: rgba(0,0,0,0.45) !important;
+        backdrop-filter: blur(4px) !important;
+        padding: 60px 24px 40px !important;
+        overflow-y: auto !important;
+      }
+      .ai-order-modal {
+        width: 900px !important;
+        max-width: calc(100vw - 48px) !important;
+        max-height: calc(100vh - 100px) !important;
+        flex: 0 0 auto !important;
+        box-sizing: border-box !important;
+        background: #fff !important;
+        border-radius: 16px !important;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        margin-bottom: 40px !important;
+      }
+    `}</style>
     <div
+      className="ai-order-overlay"
       onClick={onClose}
-      style={{
-        position: "fixed", inset: 0, zIndex: 1000,
-        display: "flex", alignItems: "flex-start", justifyContent: "center",
-        background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)",
-        paddingTop: "60px", padding: "60px 24px 40px", overflowY: "auto",
-      }}
     >
       <div
+        className="ai-order-modal"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          width: "900px", maxWidth: "calc(100vw - 48px)", maxHeight: "calc(100vh - 100px)",
-          flex: "0 0 auto", boxSizing: "border-box",
-          background: "#fff", borderRadius: "16px",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
-          display: "flex", flexDirection: "column",
-          animation: "modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-          marginBottom: "40px",
-        }}
       >
         {/* Header */}
         <div style={{
@@ -600,5 +616,6 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
         `}</style>
       </div>
     </div>
+    </>
   )
 }
