@@ -152,6 +152,11 @@ export async function GET(
           const payments = ((order as any).payment_collections || [])
             .flatMap((pc: any) => pc.payments || [])
           for (const payment of payments) {
+            // PayPal: captureId is the bank transaction reference
+            if (payment.data?.captureId) {
+              paymentId1 = String(payment.data.captureId)
+              break
+            }
             if (payment.data?.intentId) {
               paymentId1 = String(payment.data.intentId)
               break
@@ -195,6 +200,7 @@ export async function GET(
           const d = payment.data || {}
           // Collect all available IDs
           const candidates = [
+            d.captureId,
             d.id,
             d.intentId,
             d.paypalOrderId,
