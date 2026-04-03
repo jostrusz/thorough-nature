@@ -104,7 +104,7 @@ JSON SCHEMA:
     "variant_id": string | null,
     "product_title": string | null,
     "quantity": number,
-    "unit_price": number | null (in minor units, e.g. 3500 for €35.00),
+    "unit_price": number | null (in EUR, e.g. 35.00 for €35.00),
     "currency_code": string (default "eur"),
     "payment_id": string | null,
     "payment_method": string | null,
@@ -123,7 +123,7 @@ JSON SCHEMA:
 }`
 
     const response = await client.messages.create({
-      model: "claude-opus-4-20250514",
+      model: "claude-sonnet-4-20250514",
       max_tokens: 1500,
       system: systemPrompt,
       messages: [{ role: "user", content: text }],
