@@ -136,6 +136,7 @@ export async function GET(
       "Nazev uctu",
       "Cislo protiuctu",
       "Id transakce (cislo,reference)",
+      "Transaction ID",
       "Zauctovana castka",
       "Variabilni symbol",
       "Kod banky protistrany",
@@ -238,15 +239,14 @@ export async function GET(
       const amountForRow1 = isUpsell && upsellAmount > 0 ? mainAmount : totalAmount
       runningBalance += amountForRow1
 
-      const note1 = transactionId
-        ? `${orderNumber} / ${paymentMethod} / ${transactionId}`
-        : `${orderNumber} / ${paymentMethod}`
+      const note1 = `${orderNumber} / ${paymentMethod}`
 
       csvRows.push([
         accountNumber,                   // Cislo uctu
         stripDiacritics(accountName),    // Nazev uctu
         "",                              // Cislo protiuctu
         paymentId1,                      // Id transakce
+        transactionId,                   // Transaction ID
         formatAmount(amountForRow1),     // Zauctovana castka
         invoiceNumber,                   // Variabilni symbol
         "",                              // Kod banky protistrany
@@ -277,6 +277,7 @@ export async function GET(
           stripDiacritics(accountName),
           "",
           upsellPid,
+          "",                            // Transaction ID (empty for upsell)
           formatAmount(upsellAmount),
           invoiceNumber,                 // Same VS as main payment
           "",
