@@ -208,6 +208,11 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
 
       const productName = data?.product_name || "Order"
 
+      const customerEmail = customer?.email || data?.email || ""
+      const customerFirstName = customer?.first_name || data?.billing_address?.first_name || data?.shipping_address?.first_name || ""
+      const customerLastName = customer?.last_name || data?.billing_address?.last_name || data?.shipping_address?.last_name || ""
+      const customerPhone = customer?.phone || data?.billing_address?.phone || data?.shipping_address?.phone || ""
+
       const createPayload: any = {
         amount: Number(amount),
         currency: currency_code.toUpperCase(),
@@ -216,12 +221,18 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
         return_url: returnUrl,
         metadata: {
           customer_id: customer?.id,
-          customer_email: customer?.email || data?.email,
+          customer_email: customerEmail,
           session_id: data?.session_id,
           method: method,
           product_name: productName,
           quantity: String(data?.quantity || 1),
-          customer_name: [customer?.first_name, customer?.last_name].filter(Boolean).join(" ") || "",
+          customer_name: [customerFirstName, customerLastName].filter(Boolean).join(" ") || "",
+        },
+        customer: {
+          ...(customerEmail && { email: customerEmail }),
+          ...(customerFirstName && { first_name: customerFirstName }),
+          ...(customerLastName && { last_name: customerLastName }),
+          ...(customerPhone && { phone_number: customerPhone }),
         },
       }
 

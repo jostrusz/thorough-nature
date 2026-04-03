@@ -21,6 +21,12 @@ interface AirwallexPaymentIntentRequest {
   return_url?: string
   metadata?: Record<string, any>
   order?: Record<string, any>
+  customer?: {
+    email?: string
+    first_name?: string
+    last_name?: string
+    phone_number?: string
+  }
 }
 
 interface AirwallexPaymentIntentResponse {
