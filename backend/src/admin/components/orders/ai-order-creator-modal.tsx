@@ -260,7 +260,8 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: "900px", maxWidth: "100%", maxHeight: "calc(100vh - 100px)",
+          width: "900px", maxWidth: "calc(100vw - 48px)", maxHeight: "calc(100vh - 100px)",
+          flex: "0 0 auto", boxSizing: "border-box",
           background: "#fff", borderRadius: "16px",
           boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
           display: "flex", flexDirection: "column",
