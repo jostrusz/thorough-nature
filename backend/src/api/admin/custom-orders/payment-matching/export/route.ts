@@ -186,8 +186,9 @@ export async function GET(
 
       const dateStr = formatDate((order as any).created_at)
 
-      // Payment ID 1
+      // Payment ID 1 (primary — used for bank matching)
       let paymentId1 = ""
+      let transactionId = ""
       if (cod) {
         paymentId1 = invoiceNumber
       } else {
@@ -196,9 +197,26 @@ export async function GET(
           const payments = ((order as any).payment_collections || [])
             .flatMap((pc: any) => pc.payments || [])
           for (const payment of payments) {
+            if (payment.data?.captureId) { paymentId1 = String(payment.data.captureId); break }
+            if (payment.data?.intentId) { paymentId1 = String(payment.data.intentId); break }
+            if (payment.data?.klarnaOrderId) { paymentId1 = String(payment.data.klarnaOrderId); break }
+            if (payment.data?.paypalOrderId) { paymentId1 = String(payment.data.paypalOrderId); break }
+            if (payment.data?.comgateTransId) { paymentId1 = String(payment.data.comgateTransId); break }
             if (payment.data?.id) { paymentId1 = String(payment.data.id); break }
             if (payment.data?.payment_intent) { paymentId1 = String(payment.data.payment_intent); break }
           }
+        }
+        // Transaction ID (secondary — the other ID from payment.data)
+        const payments = ((order as any).payment_collections || [])
+          .flatMap((pc: any) => pc.payments || [])
+        for (const payment of payments) {
+          const d = payment.data || {}
+          const candidates = [
+            d.captureId, d.id, d.intentId, d.paypalOrderId,
+            d.klarnaOrderId, d.comgateTransId, d.payment_intent, d.transaction_id,
+          ].filter(Boolean).map(String)
+          const secondary = candidates.find((c) => c !== paymentId1)
+          if (secondary) { transactionId = secondary; break }
         }
       }
 
@@ -220,7 +238,9 @@ export async function GET(
       const amountForRow1 = isUpsell && upsellAmount > 0 ? mainAmount : totalAmount
       runningBalance += amountForRow1
 
-      const note1 = `${orderNumber} / ${paymentMethod}`
+      const note1 = transactionId
+        ? `${orderNumber} / ${paymentMethod} / ${transactionId}`
+        : `${orderNumber} / ${paymentMethod}`
 
       csvRows.push([
         accountNumber,                   // Cislo uctu
