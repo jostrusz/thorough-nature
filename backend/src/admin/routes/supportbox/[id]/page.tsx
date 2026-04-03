@@ -462,6 +462,79 @@ function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] 
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   SANDBOXED EMAIL BODY — renders HTML emails in an iframe to
+   prevent CSS/style leaking into the parent page
+   ═══════════════════════════════════════════════════════════════ */
+function SandboxedEmailBody({ html, textColor }: { html: string; textColor: string }) {
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const [height, setHeight] = useState(120)
+
+  useEffect(() => {
+    const iframe = iframeRef.current
+    if (!iframe) return
+
+    const resizeObserver = new ResizeObserver(() => {
+      const doc = iframe.contentDocument
+      if (doc?.body) {
+        const h = doc.body.scrollHeight
+        if (h > 0) setHeight(h + 16)
+      }
+    })
+
+    const onLoad = () => {
+      const doc = iframe.contentDocument
+      if (!doc) return
+      // Inject base styles into the iframe
+      doc.open()
+      doc.write(`<!DOCTYPE html><html><head><style>
+        body { margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif;
+               font-size: 14px; line-height: 1.7; color: ${textColor};
+               word-break: break-word; overflow-wrap: break-word; }
+        img { max-width: 100%; height: auto; }
+        a { color: #2563EB; }
+        table { max-width: 100% !important; }
+        * { max-width: 100% !important; box-sizing: border-box; }
+      </style></head><body>${html}</body></html>`)
+      doc.close()
+
+      // Observe body for size changes
+      if (doc.body) {
+        resizeObserver.observe(doc.body)
+        // Initial height
+        setTimeout(() => {
+          const h = doc.body.scrollHeight
+          if (h > 0) setHeight(h + 16)
+        }, 100)
+      }
+    }
+
+    iframe.addEventListener("load", onLoad)
+    // Trigger if already loaded
+    if (iframe.contentDocument?.readyState === "complete") onLoad()
+
+    return () => {
+      iframe.removeEventListener("load", onLoad)
+      resizeObserver.disconnect()
+    }
+  }, [html, textColor])
+
+  return (
+    <iframe
+      ref={iframeRef}
+      sandbox="allow-same-origin"
+      style={{
+        width: "100%",
+        height: `${height}px`,
+        border: "none",
+        overflow: "hidden",
+        display: "block",
+      }}
+      title="Email content"
+    />
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
    MESSAGE BUBBLE
    ═══════════════════════════════════════════════════════════════ */
 function MessageBubble({ msg }: { msg: any }) {
@@ -526,7 +599,7 @@ function MessageBubble({ msg }: { msg: any }) {
         transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
       }}>
         {has ? (
-          <div className="sb-msg-body" style={{ fontSize: "14px", lineHeight: 1.7, color: D.text, wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html: body }} />
+          <SandboxedEmailBody html={body} textColor={D.text} />
         ) : (
           <div style={{ fontSize: "13px", color: D.textMuted, fontStyle: "italic" }}>(empty)</div>
         )}
