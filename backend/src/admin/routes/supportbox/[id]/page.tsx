@@ -571,7 +571,7 @@ function MessageBubble({ msg }: { msg: any }) {
 
       {/* Bubble */}
       <div style={{
-        maxWidth: "88%",
+        maxWidth: inb ? "100%" : "88%",
         overflow: "hidden",
         padding: "14px 18px",
         borderRadius: inb ? "4px 18px 18px 18px" : "18px 4px 18px 18px",
