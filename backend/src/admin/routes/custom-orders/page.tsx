@@ -37,47 +37,68 @@ const dashboardStyle: React.CSSProperties = {
 
 /**
  * Hook that walks up the DOM, sets background, and forces width on ancestors.
- * Uses both inline styles AND injects a <style> tag with element-specific IDs
- * to guarantee overriding Medusa admin's layout constraints.
+ * Stops at the layout boundary (sidebar+content flex/grid split) to avoid
+ * breaking the Medusa admin sidebar layout.
  */
 function useFullPageBackground(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
 
-    const originals: { el: HTMLElement; bg: string }[] = []
+    const originals: { el: HTMLElement; s: Record<string, string> }[] = []
     let node: HTMLElement | null = el.parentElement
-    let depth = 0
-
-    // DEBUG: log each ancestor's constraints so we can see what's blocking
-    console.log("[Dashboard Width Debug] Starting ancestor walk...")
 
     while (node && node !== document.documentElement) {
-      const computed = window.getComputedStyle(node)
-      console.log(
-        `[Dashboard Width Debug] depth=${depth}`,
-        `tag=${node.tagName}`,
-        `class="${node.className}"`,
-        `maxWidth=${computed.maxWidth}`,
-        `width=${computed.width}`,
-        `display=${computed.display}`,
-        `flex=${computed.flex}`,
-        `gridTemplateColumns=${computed.gridTemplateColumns}`
-      )
+      // Check if this element's parent is a multi-child flex/grid container
+      // (= the Medusa admin layout split between sidebar and content).
+      // If so, expand THIS element but don't go higher — preserve sidebar.
+      const parent = node.parentElement
+      let isLayoutBoundary = false
+      if (parent && parent !== document.documentElement) {
+        const parentDisplay = getComputedStyle(parent).display
+        if ((parentDisplay === "flex" || parentDisplay === "grid") && parent.children.length > 1) {
+          isLayoutBoundary = true
+        }
+      }
 
-      originals.push({ el: node, bg: node.style.background })
+      originals.push({
+        el: node,
+        s: {
+          bg: node.style.background,
+          mw: node.style.maxWidth,
+          w: node.style.width,
+          pl: node.style.paddingLeft,
+          pr: node.style.paddingRight,
+          flex: node.style.flex,
+          minWidth: node.style.minWidth,
+        },
+      })
+
       node.style.setProperty("background", BG_COLOR, "important")
       node.style.setProperty("max-width", "none", "important")
       node.style.setProperty("width", "100%", "important")
+      node.style.setProperty("padding-left", "0", "important")
+      node.style.setProperty("padding-right", "0", "important")
+      node.style.setProperty("min-width", "0", "important")
+
+      if (isLayoutBoundary) {
+        // Expand content column to fill remaining space, then STOP
+        node.style.setProperty("flex", "1 1 0%", "important")
+        break
+      }
+
       node = node.parentElement
-      depth++
     }
 
     return () => {
-      originals.forEach(({ el: n, bg }) => {
-        n.style.background = bg
-        n.style.removeProperty("max-width")
-        n.style.removeProperty("width")
+      originals.forEach(({ el: n, s }) => {
+        n.style.background = s.bg
+        n.style.maxWidth = s.mw
+        n.style.width = s.w
+        n.style.paddingLeft = s.pl
+        n.style.paddingRight = s.pr
+        n.style.flex = s.flex
+        n.style.minWidth = s.minWidth
       })
     }
   }, [ref])
