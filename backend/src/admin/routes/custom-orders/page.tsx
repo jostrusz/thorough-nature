@@ -1,4 +1,14 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react"
+
+// Debounce hook — delays value updates to avoid excessive API calls
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(timer)
+  }, [value, delay])
+  return debouncedValue
+}
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { ShoppingBag } from "@medusajs/icons"
 import { toast } from "@medusajs/ui"
@@ -345,6 +355,7 @@ const CustomOrdersPage = () => {
   // State
   const [activeTab, setActiveTab] = useState("all")
   const [searchValue, setSearchValue] = useState("")
+  const debouncedSearch = useDebounce(searchValue, 400)
   const [page, setPage] = useState(0)
   const [sortField, setSortField] = useState("created_at")
   const [sortDir, setSortDir] = useState("DESC")
@@ -363,14 +374,14 @@ const CustomOrdersPage = () => {
     () => ({
       limit: PAGE_SIZE,
       offset: page * PAGE_SIZE,
-      q: searchValue || undefined,
+      q: debouncedSearch || undefined,
       delivery_status: activeTabDef?.deliveryStatus || undefined,
       country: activeTabDef?.country || undefined,
       payment_status: activeTabDef?.paymentStatus || undefined,
       sort_by: sortField,
       sort_dir: sortDir,
     }),
-    [page, searchValue, activeTabDef, sortField, sortDir]
+    [page, debouncedSearch, activeTabDef, sortField, sortDir]
   )
 
   // Data hooks
