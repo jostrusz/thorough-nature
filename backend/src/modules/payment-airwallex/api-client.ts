@@ -254,6 +254,37 @@ export class AirwallexApiClient {
   }
 
   /**
+   * Update a payment intent (metadata, merchant_order_id, customer, order, etc.)
+   * Only allowed while intent status is INITIAL or REQUIRES_PAYMENT_METHOD.
+   * For captured intents, only metadata can be updated.
+   */
+  async updatePaymentIntent(
+    intentId: string,
+    data: Partial<AirwallexPaymentIntentRequest>
+  ): Promise<AirwallexPaymentIntentResponse> {
+    await this.ensureToken()
+
+    try {
+      const response = await this.client.post<AirwallexPaymentIntentResponse>(
+        `/api/v1/pa/payment_intents/${intentId}`,
+        { ...data, request_id: this.generateRequestId() },
+        { headers: this.authHeaders() }
+      )
+
+      this.logger.info(
+        `[Airwallex] Payment intent updated: ${response.data.id}`
+      )
+      return response.data
+    } catch (error: any) {
+      const respData = error.response?.data
+      const message = respData?.message || error.message
+      const details = respData ? JSON.stringify(respData) : `status=${error.response?.status}`
+      this.logger.error(`[Airwallex] Update payment intent failed: ${message} | details: ${details}`)
+      throw new Error(`Failed to update payment intent: ${message}`)
+    }
+  }
+
+  /**
    * Confirm a payment intent with payment method
    */
   async confirmPaymentIntent(
