@@ -159,6 +159,14 @@ export async function GET(
               paymentId1 = String(payment.data.klarnaOrderId)
               break
             }
+            if (payment.data?.paypalOrderId) {
+              paymentId1 = String(payment.data.paypalOrderId)
+              break
+            }
+            if (payment.data?.comgateTransId) {
+              paymentId1 = String(payment.data.comgateTransId)
+              break
+            }
             if (payment.data?.id) {
               paymentId1 = String(payment.data.id)
               break
