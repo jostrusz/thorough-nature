@@ -254,13 +254,13 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
         position: "fixed", inset: 0, zIndex: 1000,
         display: "flex", alignItems: "flex-start", justifyContent: "center",
         background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)",
-        paddingTop: "60px", overflowY: "auto",
+        paddingTop: "60px", padding: "60px 24px 40px", overflowY: "auto",
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: "100%", maxWidth: "900px", maxHeight: "calc(100vh - 100px)",
+          width: "900px", maxWidth: "100%", maxHeight: "calc(100vh - 100px)",
           background: "#fff", borderRadius: "16px",
           boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
           display: "flex", flexDirection: "column",

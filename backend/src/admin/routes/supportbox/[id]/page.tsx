@@ -1274,26 +1274,99 @@ const TicketDetailPage = () => {
   // Sort messages newest first — most recent message at top
   const msgs = [...(ticket?.messages || [])].sort((a: any, b: any) => +new Date(b.created_at) - +new Date(a.created_at))
 
-  // Copy entire conversation as plain text
+  // Copy entire page content: ticket info, sidebar data, and all messages
   const [copied, setCopied] = useState(false)
   const copyConversation = () => {
     if (!ticket) return
+    const parts: string[] = []
+
+    // ─── Ticket header ───
+    parts.push(`TICKET: ${ticket.subject}`)
+    parts.push(`Status: ${ticket.status}`)
+    parts.push(`From: ${ticket.from_name ? `${ticket.from_name} <${ticket.from_email}>` : ticket.from_email}`)
+    parts.push(`Date: ${new Date(ticket.created_at).toLocaleString()}`)
+    if (ticket.metadata?.ai_labels) {
+      const ai = ticket.metadata.ai_labels
+      if (ai.project) parts.push(`Project: ${ai.project}`)
+      if (ai.category) parts.push(`Category: ${ai.category}`)
+      if (ai.summary) parts.push(`Summary: ${ai.summary}`)
+    }
+
+    // ─── Customer & orders info (sidebar data) ───
+    if (orders.length > 0) {
+      parts.push("")
+      parts.push("═══ CUSTOMER ORDERS ═══")
+      orders.forEach((order: any) => {
+        const addr = order.shipping_address
+        const meta = order.metadata || {}
+        parts.push("")
+        parts.push(`Order: ${meta.custom_order_number || `#${order.display_id}`}`)
+        parts.push(`  Status: ${order.status} | Payment: ${order.payment_status || "unknown"}`)
+        if (order.delivery_status) parts.push(`  Delivery: ${order.delivery_status}`)
+        parts.push(`  Total: ${(Number(order.total) / 100).toFixed(2)} ${(order.currency_code || "EUR").toUpperCase()}`)
+        parts.push(`  Date: ${new Date(order.created_at).toLocaleString()}`)
+        parts.push(`  Email: ${order.email}`)
+        if (meta.payment_method) parts.push(`  Payment method: ${meta.payment_method}`)
+        if (meta.payment_provider) parts.push(`  Payment provider: ${meta.payment_provider}`)
+        if (meta.airwallexPaymentIntentId) parts.push(`  Airwallex ID: ${meta.airwallexPaymentIntentId}`)
+        if (meta.molliePaymentId) parts.push(`  Mollie ID: ${meta.molliePaymentId}`)
+        if (meta.paypalOrderId) parts.push(`  PayPal ID: ${meta.paypalOrderId}`)
+        if (meta.project_id) parts.push(`  Project: ${meta.project_id}`)
+
+        // Items
+        if (order.items?.length > 0) {
+          parts.push(`  Items:`)
+          order.items.forEach((item: any) => {
+            parts.push(`    - ${item.title} x${item.quantity} (${(Number(item.unit_price) / 100).toFixed(2)} ${(order.currency_code || "EUR").toUpperCase()})`)
+          })
+        }
+
+        // Shipping address
+        if (addr) {
+          parts.push(`  Shipping address:`)
+          const name = [addr.first_name, addr.last_name].filter(Boolean).join(" ")
+          if (name) parts.push(`    ${name}`)
+          if (addr.company) parts.push(`    ${addr.company}`)
+          if (addr.address_1) parts.push(`    ${addr.address_1}`)
+          if (addr.address_2) parts.push(`    ${addr.address_2}`)
+          parts.push(`    ${[addr.postal_code, addr.city].filter(Boolean).join(" ")}`)
+          if (addr.country_code) parts.push(`    ${addr.country_code.toUpperCase()}`)
+          if (addr.phone) parts.push(`    Phone: ${addr.phone}`)
+        }
+
+        // Tracking
+        const trackingNumber = order.tracking_number || order.fulfillments?.[0]?.labels?.[0]?.tracking_number
+        if (trackingNumber) {
+          parts.push(`  Tracking: ${trackingNumber}`)
+          if (order.carrier) parts.push(`  Carrier: ${order.carrier}`)
+        }
+      })
+    } else {
+      parts.push("")
+      parts.push("═══ CUSTOMER INFO ═══")
+      parts.push(`Email: ${ticket.from_email}`)
+      parts.push("No orders found for this customer.")
+    }
+
+    // ─── Messages ───
+    parts.push("")
+    parts.push("═══ CONVERSATION ═══")
     const sortedAsc = [...(ticket.messages || [])].sort((a: any, b: any) => +new Date(a.created_at) - +new Date(b.created_at))
-    const lines = sortedAsc.map((m: any) => {
+    sortedAsc.forEach((m: any) => {
       const sender = m.direction === "inbound" ? (m.from_name || m.from_email) : "You"
       const date = new Date(m.created_at).toLocaleString()
       let text = m.body_text || ""
       if (!text && m.body_html) {
-        // Strip HTML tags for plain text
         const tmp = document.createElement("div")
         tmp.innerHTML = m.body_html
         text = tmp.textContent || tmp.innerText || ""
       }
-      return `--- ${sender} (${date}) ---\n${text.trim()}`
-    }).join("\n\n")
+      parts.push("")
+      parts.push(`--- ${sender} (${date}) ---`)
+      parts.push(text.trim())
+    })
 
-    const header = `Subject: ${ticket.subject}\nFrom: ${ticket.from_email}\nDate: ${new Date(ticket.created_at).toLocaleString()}\n\n`
-    navigator.clipboard.writeText(header + lines).then(() => {
+    navigator.clipboard.writeText(parts.join("\n")).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     })
