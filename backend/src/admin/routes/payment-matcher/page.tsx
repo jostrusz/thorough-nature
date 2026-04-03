@@ -350,8 +350,8 @@ const PaymentMatcherPage = () => {
                   <th>Datum</th>
                   <th>Zákazník</th>
                   <th>Číslo faktury (VS)</th>
-                  <th>Payment ID 1</th>
-                  <th>Payment ID 2</th>
+                  <th>Payment ID</th>
+                  <th>Transaction ID</th>
                   <th>Platební metoda</th>
                   <th style={{ textAlign: "right" }}>Částka</th>
                   <th style={{ textAlign: "right" }}>Celkem</th>
