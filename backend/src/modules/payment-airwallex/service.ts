@@ -236,10 +236,38 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
         },
       }
 
-      // Klarna requires order object on payment intent creation
+      // Add shipping address to order object for Airwallex dashboard
+      const shippingAddr = data?.shipping_address || data?.billing_address || {}
+      if (shippingAddr.first_name || shippingAddr.address_1) {
+        createPayload.order = {
+          type: "physical",
+          products: [
+            {
+              type: "physical",
+              name: productName,
+              quantity: Number(data?.quantity || 1),
+              unit_price: Number(amount),
+              desc: productName,
+              sku: "book-order",
+            }
+          ],
+          shipping: {
+            first_name: shippingAddr.first_name || "",
+            last_name: shippingAddr.last_name || "",
+            phone_number: shippingAddr.phone || customerPhone || "",
+            address: {
+              city: shippingAddr.city || "",
+              country_code: (shippingAddr.country_code || "NL").toUpperCase(),
+              postcode: shippingAddr.postal_code || "",
+              street: shippingAddr.address_1 || "",
+            },
+          },
+        }
+      }
+
+      // Klarna requires order object on payment intent creation — override with Klarna-specific format
       if (method && method.startsWith("klarna")) {
         const billingAddr = data?.billing_address || data?.shipping_address || {}
-        const shippingAddr = data?.shipping_address || data?.billing_address || {}
         const orderAmount = Number(amount)
         createPayload.order = {
           type: "physical",
