@@ -150,6 +150,34 @@ const OK_STEPS: StepConfig[] = [
   },
 ]
 
+/** Loslatenboek 3-step sequence */
+const LB_STEPS: StepConfig[] = [
+  {
+    step: 1,
+    templateKey: EmailTemplates.LB_ABANDONED_CHECKOUT_1,
+    subject: (name) => `Hoi ${name}, je boek staat klaar! 📦`,
+    preview: "Je boek ligt ingepakt en wacht op jou!",
+    delayMs: THIRTY_MINUTES_MS,
+    delayFrom: (_meta, abandonedAt) => abandonedAt,
+  },
+  {
+    step: 2,
+    templateKey: EmailTemplates.LB_ABANDONED_CHECKOUT_2,
+    subject: (name) => `${name}, het verhaal achter dit boek`,
+    preview: "Na 1 week voelde ik me al lichter dan in jaren...",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
+  },
+  {
+    step: 3,
+    templateKey: EmailTemplates.LB_ABANDONED_CHECKOUT_3,
+    subject: (name) => `Laatste kans, ${name} — je winkelwagen wordt vrijgegeven`,
+    preview: "Nog 24 uur — daarna moet ik je winkelwagen vrijgeven.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
+  },
+]
+
 export default async function abandonedCheckoutRecovery(container: MedusaContainer) {
   const notificationModuleService = container.resolve(Modules.NOTIFICATION) as any
   const query = container.resolve(ContainerRegistrationKeys.QUERY) as any
@@ -489,16 +517,21 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         continue
       }
 
-      // ── Loslatenboek: single email (original behavior) ──
-      if (meta.recovery_email_sent) {
+      // ── Loslatenboek: 3-step sequence ──
+      // All 3 steps sent? Done.
+      if (currentStep >= 3) {
         skippedCount++
         continue
       }
 
-      const ONE_HOUR_MS = 60 * 60 * 1000
-      if ((now.getTime() - abandonedAt.getTime()) < ONE_HOUR_MS) continue
-      if ((now.getTime() - abandonedAt.getTime()) > 48 * ONE_HOUR_MS) continue
+      const nextStepConfig = LB_STEPS[currentStep] // currentStep=0 → step 1, etc.
 
+      // Check if enough time has passed
+      const referenceTime = nextStepConfig.delayFrom(meta, abandonedAt)
+      if (isNaN(referenceTime.getTime())) continue // invalid date, skip
+      if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
+
+      // Extract customer data
       const firstName = cart.shipping_address?.first_name || "daar"
       const checkoutUrl = meta.checkout_url || "https://loslatenboek.nl/p/loslatenboek/checkout"
       const mainItem = (cart.items || [])[0]
@@ -511,42 +544,46 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         ? cartTotal.toFixed(2).replace(".", ",")
         : "35,00"
       const productImage = mainItem?.variant?.product?.thumbnail || ""
-      const templateKey = resolveTemplateKey(EmailTemplates.ABANDONED_CHECKOUT, projectId)
 
       try {
         await notificationModuleService.createNotifications({
           to: cart.email,
           channel: "email",
-          template: templateKey,
+          template: nextStepConfig.templateKey,
+          from: "Joris de Vries - Laat los wat je kapotmaakt <boek@loslatenboek.nl>",
           data: {
             emailOptions: {
-              replyTo: "devries@loslatenboek.nl",
-              subject: `Hoi ${firstName}, je bestelling wacht nog op je!`,
+              replyTo: "boek@loslatenboek.nl",
+              subject: nextStepConfig.subject(firstName),
             },
             firstName,
             checkoutUrl,
             productName,
             productPrice,
             productImage,
-            preview: "Je hebt nog iets in je winkelwagen laten liggen!",
+            preview: nextStepConfig.preview,
           },
         })
 
+        // Update metadata with step tracking
         await cartModuleService.updateCarts(cart.id, {
           metadata: {
             ...meta,
+            recovery_email_step: nextStepConfig.step,
+            [`recovery_email_step${nextStepConfig.step}_at`]: now.toISOString(),
+            // Legacy compat: mark as sent after step 1
             recovery_email_sent: true,
-            recovery_email_sent_at: now.toISOString(),
+            recovery_email_sent_at: meta.recovery_email_sent_at || now.toISOString(),
           },
         })
 
         sentCount++
         logger.info(
-          `[Abandoned Cart] Recovery email sent to ${cart.email} for cart ${cart.id}`
+          `[Abandoned Cart] LB step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
         )
       } catch (emailError: any) {
         logger.error(
-          `[Abandoned Cart] Failed to send email to ${cart.email}: ${emailError.message}`
+          `[Abandoned Cart] Failed to send LB step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
         )
       }
     }
