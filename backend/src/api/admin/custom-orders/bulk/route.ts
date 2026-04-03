@@ -161,6 +161,14 @@ export async function POST(
                 paymentId = String(payment.data.klarnaOrderId)
                 break
               }
+              if (payment.data?.paypalOrderId) {
+                paymentId = String(payment.data.paypalOrderId)
+                break
+              }
+              if (payment.data?.comgateTransId) {
+                paymentId = String(payment.data.comgateTransId)
+                break
+              }
               if (payment.data?.id) {
                 paymentId = String(payment.data.id)
                 break

@@ -113,6 +113,8 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
     payment?.data?.payment_intent ||
     payment?.data?.intentId ||
     payment?.data?.klarnaOrderId ||
+    payment?.data?.paypalOrderId ||
+    payment?.data?.comgateTransId ||
     payment?.data?.id ||
     payment?.data?.payment_id ||
     payment?.data?.transaction_id ||
