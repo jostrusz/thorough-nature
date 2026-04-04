@@ -1291,6 +1291,18 @@ const TicketDetailPage = () => {
     },
   })
 
+  const [slackSent, setSlackSent] = useState(false)
+  const slackMut = useMutation({
+    mutationFn: async () => {
+      const resp = await sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/summarize-slack`, { method: "POST" })
+      return resp
+    },
+    onSuccess: () => {
+      setSlackSent(true)
+      setTimeout(() => setSlackSent(false), 3000)
+    },
+  })
+
   // Sort messages newest first — most recent message at top
   const msgs = [...(ticket?.messages || [])].sort((a: any, b: any) => +new Date(b.created_at) - +new Date(a.created_at))
 
@@ -1425,6 +1437,20 @@ const TicketDetailPage = () => {
         </div>
 
         <div style={{ flexShrink: 0, display: "flex", gap: "8px", alignItems: "center" }}>
+          {/* Slack AI Summary */}
+          <button className="sb-action-btn" onClick={() => slackMut.mutate()} disabled={slackMut.isPending}
+            style={{
+              padding: "8px 14px", fontSize: "13px", fontWeight: 600,
+              color: slackSent ? D.green : "#611f69",
+              backgroundColor: slackSent ? D.greenLight : "#f4ede4",
+              border: `1px solid ${slackSent ? D.green + "40" : "#611f69" + "25"}`,
+              borderRadius: D.r8, cursor: "pointer",
+              transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px",
+            }}>
+            {slackMut.isPending ? "\u23f3 Sending..." : slackSent ? "\u2705 Sent to Slack" : "\ud83d\udce8 Slack summary"}
+          </button>
+
           {/* Copy conversation */}
           <button className="sb-action-btn" onClick={copyConversation}
             style={{
