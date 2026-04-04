@@ -177,7 +177,7 @@
 
     // Fire & forget — don't block the page
     try {
-      var capiUrl = MEDUSA_URL + '/store/meta-capi';
+      var capiUrl = MEDUSA_URL + '/public/meta-capi';
       fetch(capiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -331,7 +331,7 @@
   // ─── Initialize: fetch pixel config + load SDK ─────────────────
 
   function init() {
-    var configUrl = MEDUSA_URL + '/store/meta-pixel-config/' + PROJECT_ID;
+    var configUrl = MEDUSA_URL + '/public/meta-pixel-config/' + PROJECT_ID;
 
     fetch(configUrl)
       .then(function (res) { return res.json(); })
