@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "backend",
-      "runtimeExecutable": "pnpm",
+      "runtimeExecutable": "/opt/homebrew/bin/pnpm",
       "runtimeArgs": ["dev"],
       "port": 9000,
       "cwd": "backend"
@@ -24,10 +24,11 @@
     },
     {
       "name": "email-dev",
-      "runtimeExecutable": "npx",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
       "runtimeArgs": ["email", "dev", "--dir", "src/modules/email-notifications/templates", "--port", "3002"],
       "port": 3002,
-      "cwd": "backend"
+      "cwd": "backend",
+      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
     },
     {
       "name": "dashboard-preview",
@@ -37,9 +38,10 @@
     },
     {
       "name": "loslatenboek",
-      "runtimeExecutable": "npx",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
       "runtimeArgs": ["http-server", "storefront/src/projects/loslatenboek/pages", "-p", "8090", "-c-1"],
-      "port": 8090
+      "port": 8090,
+      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
     },
     {
       "name": "preview-html",
@@ -49,14 +51,15 @@
     },
     {
       "name": "slapp-taget",
-      "runtimeExecutable": "npx",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
       "runtimeArgs": ["http-server", "storefront/src/projects/slapp-taget/pages", "-p", "8096", "-c-1"],
-      "port": 8096
+      "port": 8096,
+      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
     },
     {
       "name": "email-preview",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["http-server", ".", "-p", "8097", "-c-1"],
+      "runtimeArgs": ["http-server", "email-previews", "-p", "8097", "-c-1"],
       "port": 8097
     },
     {
@@ -79,9 +82,10 @@
     },
     {
       "name": "dehondenbijbel",
-      "runtimeExecutable": "npx",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
       "runtimeArgs": ["http-server", "storefront/src/projects/dehondenbijbel/pages", "-p", "8101", "-c-1"],
-      "port": 8101
+      "port": 8101,
+      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
     }
   ]
 }
