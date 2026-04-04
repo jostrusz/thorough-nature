@@ -205,7 +205,7 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
           variant_id: variantId,
           product_title: productTitle,
           quantity: Number(quantity),
-          unit_price: Math.round(Number(unitPrice) * 100),
+          unit_price: Number(unitPrice),
           currency_code: currencyCode,
           payment_id: paymentId,
           payment_method: paymentMethod,
