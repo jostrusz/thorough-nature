@@ -206,6 +206,33 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
     let sentCount = 0
     let skippedCount = 0
 
+    // ── Build set of emails that already have a completed order ──
+    const abandonedEmails = [...new Set(
+      (carts || [])
+        .filter((c: any) => c.metadata?.abandoned_checkout && c.email && !c.completed_at)
+        .map((c: any) => c.email.toLowerCase())
+    )]
+
+    const purchasedEmails = new Set<string>()
+    if (abandonedEmails.length > 0) {
+      try {
+        const { data: completedOrders } = await query.graph({
+          entity: "order",
+          fields: ["email"],
+          filters: { email: abandonedEmails },
+          pagination: { skip: 0, take: 1000 },
+        })
+        for (const order of completedOrders || []) {
+          if (order.email) purchasedEmails.add(order.email.toLowerCase())
+        }
+        if (purchasedEmails.size > 0) {
+          logger.info(`[Abandoned Cart] Found ${purchasedEmails.size} emails with completed orders — will skip recovery emails for them`)
+        }
+      } catch (e: any) {
+        logger.warn(`[Abandoned Cart] Could not check completed orders: ${e.message}`)
+      }
+    }
+
     for (const cart of carts || []) {
       const meta = cart.metadata || {}
 
@@ -217,6 +244,9 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
 
       // Skip: cart was completed
       if (cart.completed_at) continue
+
+      // Skip: customer already purchased (has a completed order)
+      if (purchasedEmails.has(cart.email.toLowerCase())) continue
 
       const abandonedAt = new Date(meta.abandoned_at || cart.created_at)
 
