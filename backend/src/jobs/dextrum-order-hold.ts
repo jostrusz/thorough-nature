@@ -300,11 +300,17 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           } catch { /* non-critical */ }
         }
         if (addr.company) deliveryAddress.company = addr.company
-        if (isPickup && orderMeta.packeta_point_id) {
-          deliveryAddress.pickupPlaceCode = orderMeta.packeta_point_id
+        // Set pickupPlaceCode from any available metadata source
+        const pickupCode = orderMeta.packeta_point_id || orderMeta.paczkomat_id || orderMeta.pickup_place_code || ""
+        if (pickupCode) {
+          deliveryAddress.pickupPlaceCode = pickupCode
         }
         if (externalCarrierCode) {
           deliveryAddress.externalCarrierCode = externalCarrierCode
+          // If carrier requires pickup place code but none available, log warning
+          if (!pickupCode) {
+            console.warn(`[Dextrum Hold] ${orderCode}: Carrier ${externalCarrierCode} set but no pickupPlaceCode found in metadata`)
+          }
         }
 
         const wmsResult = await client.createOrder({

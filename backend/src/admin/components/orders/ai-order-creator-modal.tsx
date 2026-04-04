@@ -120,6 +120,10 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
   const [paymentMethod, setPaymentMethod] = useState("")
   const [paymentStatus, setPaymentStatus] = useState("paid")
   const [notes, setNotes] = useState("")
+  const [shippingOptionId, setShippingOptionId] = useState("")
+  const [shippingOptionName, setShippingOptionName] = useState("Standard Shipping")
+  const [shippingMethodType, setShippingMethodType] = useState("home_delivery")
+  const [availableShippingOptions, setAvailableShippingOptions] = useState<any[]>([])
 
   // Available options from API
   const [availableProjects, setAvailableProjects] = useState<any[]>([])
@@ -137,6 +141,30 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
       setTimeout(() => textareaRef.current?.focus(), 100)
     }
   }, [open])
+
+  // ─── Fetch shipping options when project changes ───
+  useEffect(() => {
+    if (!projectSlug || availableProjects.length === 0) {
+      setAvailableShippingOptions([])
+      return
+    }
+    const project = availableProjects.find((p: any) => p.slug === projectSlug)
+    if (!project?.sales_channel_id) return
+
+    sdk.client.fetch(`/admin/shipping-options?sales_channel_id=${project.sales_channel_id}&limit=50`, {
+      method: "GET",
+    }).then((res: any) => {
+      const options = res.shipping_options || []
+      setAvailableShippingOptions(options)
+      // Auto-select first option if none selected
+      if (options.length > 0 && !shippingOptionId) {
+        setShippingOptionId(options[0].id)
+        setShippingOptionName(options[0].name || "Standard Shipping")
+      }
+    }).catch(() => {
+      setAvailableShippingOptions([])
+    })
+  }, [projectSlug, availableProjects])
 
   // ─── Analyze with AI ───
   const handleAnalyze = async () => {
@@ -210,6 +238,9 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
           payment_id: paymentId,
           payment_method: paymentMethod,
           payment_status: paymentStatus,
+          shipping_option_id: shippingOptionId || undefined,
+          shipping_option_name: shippingOptionName,
+          shipping_method_type: shippingMethodType,
           notes,
         },
       }) as any
@@ -489,6 +520,36 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
                 onChange={setCountryCode}
                 badge={confidence.country}
                 options={countryOptions}
+              />
+
+              {/* Shipping */}
+              <SectionHeader icon="&#x1f69a;" label="Shipping" />
+              <Field
+                label="Method"
+                value={shippingOptionId}
+                onChange={(v) => {
+                  setShippingOptionId(v)
+                  const opt = availableShippingOptions.find((o: any) => o.id === v)
+                  if (opt) setShippingOptionName(opt.name || "Standard Shipping")
+                }}
+                options={
+                  availableShippingOptions.length > 0
+                    ? availableShippingOptions.map((o: any) => ({
+                        value: o.id,
+                        label: o.name || o.id,
+                      }))
+                    : [{ value: "", label: "Standard Shipping (default)" }]
+                }
+              />
+              <Field
+                label="Type"
+                value={shippingMethodType}
+                onChange={setShippingMethodType}
+                options={[
+                  { value: "home_delivery", label: "Home Delivery" },
+                  { value: "zasilkovna_pickup", label: "Pickup Point (Zásilkovna/InPost)" },
+                  { value: "zasilkovna_home", label: "Zásilkovna Home Delivery" },
+                ]}
               />
 
               {/* Payment */}
