@@ -142,29 +142,19 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
     }
   }, [open])
 
-  // ─── Fetch shipping options when project changes ───
+  // ─── Fetch all shipping options on mount ───
   useEffect(() => {
-    if (!projectSlug || availableProjects.length === 0) {
-      setAvailableShippingOptions([])
-      return
-    }
-    const project = availableProjects.find((p: any) => p.slug === projectSlug)
-    if (!project?.sales_channel_id) return
-
-    sdk.client.fetch(`/admin/shipping-options?sales_channel_id=${project.sales_channel_id}&limit=50`, {
+    if (!open) return
+    sdk.client.fetch("/admin/shipping-options?limit=100", {
       method: "GET",
     }).then((res: any) => {
       const options = res.shipping_options || []
       setAvailableShippingOptions(options)
-      // Auto-select first option if none selected
-      if (options.length > 0 && !shippingOptionId) {
-        setShippingOptionId(options[0].id)
-        setShippingOptionName(options[0].name || "Standard Shipping")
-      }
-    }).catch(() => {
+    }).catch((err: any) => {
+      console.warn("[AI Order Creator] Failed to fetch shipping options:", err)
       setAvailableShippingOptions([])
     })
-  }, [projectSlug, availableProjects])
+  }, [open])
 
   // ─── Analyze with AI ───
   const handleAnalyze = async () => {
