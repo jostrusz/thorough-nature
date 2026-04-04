@@ -2204,19 +2204,7 @@ body {
 
       <form id="checkout-form" novalidate>
 
-        <!-- ═══ EXPRESS CHECKOUT (dynamic — PayPal, Google Pay, Apple Pay) ═══ -->
-        <div class="express-checkout animate-in" id="express-checkout" style="display:none;">
-          <div class="express-checkout-label">Snabbkassa</div>
-          <div class="express-buttons-top" id="express-buttons-top">
-            <!-- Google Pay / Apple Pay — side by side -->
-          </div>
-          <div class="express-buttons-bottom" id="express-buttons-bottom">
-            <!-- PayPal — full width -->
-          </div>
-          <div class="express-checkout-divider">
-            <span>eller</span>
-          </div>
-        </div>
+        <!-- ═══ EXPRESS CHECKOUT — disabled for slapp-taget ═══ -->
 
         <!-- ═══ BUNDLE SELECTOR — nad formulářem ═══ -->
         <div class="bundle-section animate-in" id="bundle-section">
@@ -4658,7 +4646,8 @@ body {
       var countrySelect = document.getElementById('country');
       var country = countrySelect ? countrySelect.value : 'SE';
       renderPaymentMethods(country);
-      initExpressCheckout();
+      // Express checkout disabled for slapp-taget
+      // initExpressCheckout();
     })
     .catch(function(err) {
       console.error('[PaymentOptions] Failed to load:', err);
