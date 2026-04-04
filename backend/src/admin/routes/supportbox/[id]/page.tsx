@@ -482,10 +482,13 @@ function SandboxedEmailBody({ html, textColor }: { html: string; textColor: stri
         table { max-width: 100% !important; }
         * { max-width: 100% !important; box-sizing: border-box; }
         /* Paragraph spacing for contentEditable output (Chrome wraps lines in <div>) */
-        body > div { margin-bottom: 0.6em; }
+        body > div { margin-bottom: 0.8em; }
         body > div:last-child { margin-bottom: 0; }
-        p { margin: 0 0 0.6em 0; }
-        p:last-child { margin-bottom: 0; }
+        p { margin: 0 0 0.8em 0 !important; }
+        p:last-child { margin-bottom: 0 !important; }
+        /* Ensure paragraph spacing even with inline styles */
+        p + p { margin-top: 0; }
+        br + br { display: block; content: ""; margin-top: 0.6em; }
       </style></head><body>${html}</body></html>`)
       doc.close()
 
@@ -576,7 +579,7 @@ function MessageBubble({ msg }: { msg: any }) {
 
       {/* Bubble */}
       <div style={{
-        width: "80%",
+        width: "90%",
         maxWidth: "100%",
         overflow: "hidden",
         padding: "14px 18px",
@@ -586,23 +589,40 @@ function MessageBubble({ msg }: { msg: any }) {
         borderLeft: inb ? `3px solid ${D.blue}` : undefined,
         borderRight: !inb ? `3px solid ${D.green}` : undefined,
         boxShadow: hovered
-          ? `0 4px 16px ${inb ? "rgba(0,0,0,0.08)" : D.green + "20"}`
+          ? `0 2px 8px ${inb ? "rgba(0,0,0,0.06)" : D.green + "15"}`
           : D.xs,
-        transform: hovered ? "scale(1.01)" : "scale(1)",
-        transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+        transform: hovered ? "scale(1.003)" : "scale(1)",
+        transition: "all 0.2s ease",
       }}>
+        {/* Attachments above body for inbound messages */}
+        {inb && msgAttachments.length > 0 && (
+          <div style={{
+            display: "flex", flexWrap: "wrap", gap: "6px",
+            marginBottom: "10px", paddingBottom: "10px",
+            borderBottom: `1px solid ${D.borderSubtle}`,
+          }}>
+            {msgAttachments.map((att: any, idx: number) => (
+              <AttachmentChip
+                key={idx}
+                file={{ name: att.filename, size: att.size || 0, type: att.content_type || "" }}
+                content={att.content}
+              />
+            ))}
+          </div>
+        )}
+
         {has ? (
           <SandboxedEmailBody html={body} textColor={D.text} />
         ) : (
           <div style={{ fontSize: "13px", color: D.textMuted, fontStyle: "italic" }}>(empty)</div>
         )}
 
-        {/* Attachments */}
-        {msgAttachments.length > 0 && (
+        {/* Attachments below body for outbound messages */}
+        {!inb && msgAttachments.length > 0 && (
           <div style={{
             display: "flex", flexWrap: "wrap", gap: "6px",
             marginTop: "10px", paddingTop: "10px",
-            borderTop: `1px solid ${inb ? D.borderSubtle : D.greenBorder}`,
+            borderTop: `1px solid ${D.greenBorder}`,
           }}>
             {msgAttachments.map((att: any, idx: number) => (
               <AttachmentChip
