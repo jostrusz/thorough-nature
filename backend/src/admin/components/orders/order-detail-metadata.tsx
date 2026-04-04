@@ -132,9 +132,12 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
 
   // Payment Gateway name (e.g. "Mollie", "PayPal")
   const providerRaw = payment?.provider_id || ""
-  const paymentGateway = providerRaw
+  const paymentGatewayFromProvider = providerRaw
     ? providerRaw.replace(/^pp_/, "").replace(/_.*$/, "").replace(/^\w/, (c: string) => c.toUpperCase())
     : ""
+  // Fallback to metadata.payment_provider for manually created orders
+  const paymentGateway = paymentGatewayFromProvider
+    || (metadata.payment_provider ? metadata.payment_provider.charAt(0).toUpperCase() + metadata.payment_provider.slice(1) : "")
 
   // Payment Method (e.g. "ideal", "bancontact", "creditcard")
   const paymentMethodRaw =

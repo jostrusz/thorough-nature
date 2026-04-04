@@ -241,12 +241,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       externalCarrierCode = soMeta.mystock_external_carrier_code || ""
     }
 
-    // Add pickup place code for Zásilkovna
-    if (isPickup && orderMeta.packeta_point_id) {
-      deliveryAddress.pickupPlaceCode = orderMeta.packeta_point_id
+    // Set pickupPlaceCode from any available metadata source
+    const pickupCode = orderMeta.packeta_point_id || orderMeta.paczkomat_id || orderMeta.pickup_place_code || ""
+    if (pickupCode) {
+      deliveryAddress.pickupPlaceCode = pickupCode
     }
     if (externalCarrierCode) {
       deliveryAddress.externalCarrierCode = externalCarrierCode
+      if (!pickupCode) {
+        console.warn(`[Dextrum Send] ${orderCode}: Carrier ${externalCarrierCode} set but no pickupPlaceCode found in metadata`)
+      }
     }
 
     const wmsResult = await client.createOrder({

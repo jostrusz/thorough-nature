@@ -36,6 +36,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       payment_method,
       payment_status = "paid",
       notes,
+      shipping_option_id,
+      shipping_option_name,
+      shipping_method_type,
     } = body
 
     // Validate required fields
@@ -173,6 +176,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       metadata.payment_method = payment_method
     }
 
+    if (shipping_method_type) {
+      metadata.shipping_method = shipping_method_type
+    }
+
     if (notes) {
       metadata.manual_order_notes = notes
     }
@@ -187,8 +194,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       billing_address: address,
       items,
       shipping_methods: [{
-        name: "Standard Shipping",
+        name: shipping_option_name || "Standard Shipping",
         amount: 0,
+        ...(shipping_option_id && { shipping_option_id }),
       }],
       metadata,
     })
