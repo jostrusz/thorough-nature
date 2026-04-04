@@ -5,10 +5,196 @@ import Stripe from "stripe"
 import { emitPaymentLog } from "../../../utils/payment-logger"
 
 /**
+ * Helper: find order by Stripe payment intent ID via direct DB query
+ */
+async function findOrderByStripeIntentId(paymentIntentId: string, logger: any): Promise<any> {
+  try {
+    const { Pool } = require("pg")
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+    const { rows } = await pool.query(
+      `SELECT id, metadata FROM "order"
+       WHERE metadata->>'stripePaymentIntentId' = $1
+       LIMIT 1`,
+      [paymentIntentId]
+    )
+    await pool.end()
+    return rows[0] || null
+  } catch (dbErr: any) {
+    logger.warn(`[Stripe Webhook] DB query failed: ${dbErr.message}`)
+    return null
+  }
+}
+
+/**
+ * Safety net: auto-complete cart when Stripe payment succeeded but no order exists.
+ * This handles redirect methods (iDEAL, Bancontact, Klarna, etc.) where the customer
+ * pays but never returns to the checkout page (browser closed, connection lost, etc.).
+ *
+ * Flow:
+ * 1. Wait 30s to give the frontend return handler a chance to complete first
+ * 2. Re-check if an order was created during the delay (prevent duplicates)
+ * 3. Find uncompleted cart by matching payment intent ID in payment session data
+ * 4. Complete the cart via Medusa's completeCartWorkflow
+ */
+async function safetyNetCompleteCart(
+  paymentIntentId: string,
+  paymentIntent: any,
+  scope: any,
+  logger: any
+): Promise<void> {
+  const DELAY_MS = 30_000 // 30 seconds — give frontend time to complete
+
+  logger.info(
+    `[Stripe Webhook] Safety net: no order found for intent ${paymentIntentId}. ` +
+    `Waiting ${DELAY_MS / 1000}s before attempting cart completion...`
+  )
+
+  await new Promise((resolve) => setTimeout(resolve, DELAY_MS))
+
+  // Re-check: did the order get created during the delay?
+  const orderAfterDelay = await findOrderByStripeIntentId(paymentIntentId, logger)
+  if (orderAfterDelay) {
+    logger.info(
+      `[Stripe Webhook] Safety net: order ${orderAfterDelay.id} was created during delay — no action needed`
+    )
+    return
+  }
+
+  logger.info(
+    `[Stripe Webhook] Safety net: still no order after ${DELAY_MS / 1000}s delay. Searching for cart...`
+  )
+
+  try {
+    const query = scope.resolve(ContainerRegistrationKeys.QUERY)
+
+    // Search recent uncompleted carts for one with this Stripe intent ID
+    const { data: carts } = await query.graph({
+      entity: "cart",
+      fields: [
+        "id",
+        "completed_at",
+        "email",
+        "shipping_address.*",
+        "payment_collection.*",
+        "payment_collection.payment_sessions.*",
+      ],
+      filters: {},
+      pagination: { order: { created_at: "DESC" }, skip: 0, take: 80 },
+    })
+
+    let targetCart: any = null
+    for (const cart of carts || []) {
+      if (cart.completed_at) continue // skip already completed carts
+      const sessions = cart.payment_collection?.payment_sessions || []
+      for (const session of sessions) {
+        if (
+          session.data?.payment_intent === paymentIntentId ||
+          session.data?.stripePaymentIntentId === paymentIntentId ||
+          session.data?.intentId === paymentIntentId ||
+          session.data?.id === paymentIntentId
+        ) {
+          targetCart = cart
+          break
+        }
+      }
+      if (targetCart) break
+    }
+
+    if (!targetCart) {
+      logger.warn(
+        `[Stripe Webhook] Safety net: no uncompleted cart found for intent ${paymentIntentId}`
+      )
+      return
+    }
+
+    logger.info(
+      `[Stripe Webhook] Safety net: found uncompleted cart ${targetCart.id} (email: ${targetCart.email}) — attempting to complete`
+    )
+
+    // Final duplicate check right before completing: query order table one more time
+    const orderFinalCheck = await findOrderByStripeIntentId(paymentIntentId, logger)
+    if (orderFinalCheck) {
+      logger.info(
+        `[Stripe Webhook] Safety net: order ${orderFinalCheck.id} appeared just before completion — aborting (no duplicate)`
+      )
+      return
+    }
+
+    // Complete the cart via Medusa's cart completion workflow
+    const { completeCartWorkflow } = await import("@medusajs/medusa/core-flows")
+    const result = await completeCartWorkflow(scope).run({
+      input: { id: targetCart.id },
+    })
+
+    const completedOrder = (result as any)?.result?.order || (result as any)?.order
+    if (completedOrder) {
+      logger.info(
+        `[Stripe Webhook] Safety net: ✅ Cart ${targetCart.id} completed → order ${completedOrder.id} (display_id: ${completedOrder.display_id})`
+      )
+
+      // Update the new order's metadata with Stripe payment info
+      try {
+        const { Pool } = require("pg")
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+        const { rows: orderRows } = await pool.query(
+          `SELECT metadata FROM "order" WHERE id = $1 LIMIT 1`,
+          [completedOrder.id]
+        )
+        const existingMeta = orderRows[0]?.metadata || {}
+        const updatedMeta = {
+          ...existingMeta,
+          stripePaymentIntentId: paymentIntentId,
+          stripeStatus: "payment_intent.succeeded",
+          payment_captured: true,
+          payment_captured_at: new Date().toISOString(),
+          payment_method: paymentIntent.payment_method_types?.[0] || "card",
+          completed_by: "stripe_webhook_safety_net",
+          safety_net_completed_at: new Date().toISOString(),
+        }
+        await pool.query(
+          `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+          [JSON.stringify(updatedMeta), completedOrder.id]
+        )
+        await pool.end()
+        logger.info(
+          `[Stripe Webhook] Safety net: updated order ${completedOrder.id} metadata with Stripe payment data`
+        )
+      } catch (metaErr: any) {
+        logger.warn(
+          `[Stripe Webhook] Safety net: failed to update order metadata: ${metaErr.message}`
+        )
+      }
+
+      // Emit payment.captured event so subscribers (Fakturoid, Dextrum, etc.) can react
+      try {
+        const eventBus = scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        await eventBus.emit("payment.captured", { id: completedOrder.id })
+        logger.info(
+          `[Stripe Webhook] Safety net: emitted payment.captured for order ${completedOrder.id}`
+        )
+      } catch (e: any) {
+        logger.warn(
+          `[Stripe Webhook] Safety net: failed to emit payment.captured: ${e.message}`
+        )
+      }
+    } else {
+      logger.warn(
+        `[Stripe Webhook] Safety net: cart completion returned unexpected result: ${JSON.stringify(result).slice(0, 500)}`
+      )
+    }
+  } catch (safetyErr: any) {
+    logger.error(
+      `[Stripe Webhook] Safety net failed for intent ${paymentIntentId}: ${safetyErr.message}`
+    )
+  }
+}
+
+/**
  * POST /webhooks/stripe
  *
  * Handles Stripe webhook events with signature verification.
  * Dual credential resolution: DB gateway config → env vars fallback.
+ * Includes safety net: auto-completes cart if payment succeeded but no order exists.
  *
  * Required Stripe Dashboard webhook events:
  * - payment_intent.succeeded
@@ -184,6 +370,15 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         payment_method: (event.data.object as any).payment_method_types?.[0],
         metadata: { order_not_found: true },
       })
+
+      // ─── SAFETY NET: Auto-complete cart when payment succeeded but order doesn't exist ───
+      if (event.type === "payment_intent.succeeded" || event.type === "checkout.session.completed") {
+        const intentData = event.data.object as any
+        safetyNetCompleteCart(paymentIntentId, intentData, req.scope, logger).catch((err) => {
+          logger.error(`[Stripe Webhook] Safety net unhandled error: ${err.message}`)
+        })
+      }
+
       return res.status(200).json({ received: true })
     }
 
