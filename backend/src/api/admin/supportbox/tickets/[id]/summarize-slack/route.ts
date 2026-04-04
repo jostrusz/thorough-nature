@@ -99,14 +99,21 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     const systemPrompt = `You are a customer support analyst for an e-commerce company selling books across Europe (NL, DE, BE, SE, PL, CZ).
 
-Analyze the support ticket and produce a clear, actionable summary in Czech language (the business owner speaks Czech).
+Analyze the support ticket and produce a clear, actionable summary in ENGLISH.
 
 Return a JSON object with these fields:
-- "problem": 2-3 sentence description of the customer's problem (in Czech)
-- "customer": customer name, email, country, order number(s) — factual, concise
-- "action_needed": specific step-by-step recommendation what the support team should do to resolve this (in Czech)
+- "problem": 2-3 sentence description of the customer's problem
+- "customer_name": full name of the customer
+- "customer_email": email address
+- "customer_country": country (from shipping address or email domain or language)
+- "customer_orders": array of order numbers mentioned or related (e.g. ["#1234", "#5678"])
+- "customer_address": full shipping address if available, or "N/A"
+- "customer_payment_method": payment method used (e.g. "PayPal", "Credit Card", "iDEAL")
+- "customer_total_spent": total amount across all orders if available
+- "action_needed": specific step-by-step recommendation what the support team should do to resolve this
 - "urgency": "low" | "medium" | "high"
 - "category": one of: payment, shipping, refund, product_question, complaint, returns, technical, other
+- "delivery_status": current delivery status if known from order data
 
 Be specific and practical. Reference order numbers, dates, tracking links where relevant.
 Return ONLY valid JSON, no markdown, no explanation.`
@@ -140,7 +147,14 @@ ${orderContext || "No orders found for this email"}
 
     // ── 4. Send to Slack ──
     const urgencyEmoji = { low: ":large_blue_circle:", medium: ":large_yellow_circle:", high: ":red_circle:" }
+    const categoryEmoji: Record<string, string> = {
+      payment: ":credit_card:", shipping: ":package:", refund: ":money_with_wings:",
+      product_question: ":books:", complaint: ":warning:", returns: ":leftwards_arrow_with_hook:",
+      technical: ":wrench:", other: ":grey_question:",
+    }
     const adminUrl = process.env.MEDUSA_ADMIN_URL || "https://backend-production-aefbc.up.railway.app/app"
+
+    const ordersList = (summary.customer_orders || []).join(", ") || "N/A"
 
     const slackPayload = {
       blocks: [
@@ -148,7 +162,7 @@ ${orderContext || "No orders found for this email"}
           type: "header",
           text: {
             type: "plain_text",
-            text: `Support Ticket: ${ticket.subject}`,
+            text: `:ticket: ${ticket.subject}`,
             emoji: true,
           },
         },
@@ -157,10 +171,7 @@ ${orderContext || "No orders found for this email"}
           text: {
             type: "mrkdwn",
             text: [
-              `${urgencyEmoji[summary.urgency] || ":white_circle:"} *Urgency:* ${summary.urgency?.toUpperCase()}  |  *Category:* ${summary.category}`,
-              `*Customer:* ${summary.customer}`,
-              "",
-              `*Problem:*\n${summary.problem}`,
+              `${urgencyEmoji[summary.urgency] || ":white_circle:"} *Urgency:* \`${summary.urgency?.toUpperCase()}\`  ${categoryEmoji[summary.category] || ""} *Category:* \`${summary.category}\``,
             ].join("\n"),
           },
         },
@@ -169,15 +180,41 @@ ${orderContext || "No orders found for this email"}
           type: "section",
           text: {
             type: "mrkdwn",
-            text: `*Co je potreba udelat:*\n${summary.action_needed}`,
+            text: [
+              `:bust_in_silhouette: *Customer Info*`,
+              `>:person_frowning: *Name:* ${summary.customer_name || "N/A"}`,
+              `>:email: *Email:* ${summary.customer_email || ticket.from_email || "N/A"}`,
+              `>:earth_americas: *Country:* ${summary.customer_country || "N/A"}`,
+              `>:house: *Address:* ${summary.customer_address || "N/A"}`,
+              `>:shopping_trolley: *Orders:* ${ordersList}`,
+              `>:credit_card: *Payment:* ${summary.customer_payment_method || "N/A"}`,
+              `>:moneybag: *Total spent:* ${summary.customer_total_spent || "N/A"}`,
+              `>:truck: *Delivery status:* ${summary.delivery_status || "N/A"}`,
+            ].join("\n"),
           },
         },
+        { type: "divider" },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `:rotating_light: *Problem*\n${summary.problem}`,
+          },
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `:white_check_mark: *Action Needed*\n${summary.action_needed}`,
+          },
+        },
+        { type: "divider" },
         {
           type: "context",
           elements: [
             {
               type: "mrkdwn",
-              text: `Ticket ID: \`${id}\` | <${adminUrl}/supportbox/${id}|Otevrit v SupportBoxu>`,
+              text: `:link: Ticket \`${id}\` | <${adminUrl}/supportbox/${id}|Open in SupportBox>`,
             },
           ],
         },
