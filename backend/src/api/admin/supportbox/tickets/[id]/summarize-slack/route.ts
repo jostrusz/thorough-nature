@@ -102,18 +102,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 Analyze the support ticket and produce a clear, actionable summary in ENGLISH.
 
 Return a JSON object with these fields:
-- "problem": 2-3 sentence description of the customer's problem
-- "customer_name": full name of the customer
+- "problem": concise paragraph describing the customer's issue (2-3 sentences max)
+- "customer_name": full name
 - "customer_email": email address
-- "customer_country": country (from shipping address or email domain or language)
-- "customer_orders": array of order numbers mentioned or related (e.g. ["#1234", "#5678"])
-- "customer_address": full shipping address if available, or "N/A"
-- "customer_payment_method": payment method used (e.g. "PayPal", "Credit Card", "iDEAL")
-- "customer_total_spent": total amount across all orders if available
-- "action_needed": specific step-by-step recommendation what the support team should do to resolve this
+- "customer_country": country code or name
+- "customer_orders": array of order numbers (e.g. ["#1234"])
+- "customer_address": full shipping address or "N/A"
+- "customer_payment_method": payment method (e.g. "PayPal", "iDEAL")
+- "customer_total_spent": total amount with currency (e.g. "€35.00")
+- "delivery_status": current delivery status or "N/A"
+- "steps": array of strings — each string is one concrete action step to resolve the issue (3-6 steps)
 - "urgency": "low" | "medium" | "high"
-- "category": one of: payment, shipping, refund, product_question, complaint, returns, technical, other
-- "delivery_status": current delivery status if known from order data
 
 Be specific and practical. Reference order numbers, dates, tracking links where relevant.
 Return ONLY valid JSON, no markdown, no explanation.`
@@ -146,33 +145,39 @@ ${orderContext || "No orders found for this email"}
     const summary = JSON.parse(aiText)
 
     // ── 4. Send to Slack ──
-    const urgencyEmoji = { low: ":large_blue_circle:", medium: ":large_yellow_circle:", high: ":red_circle:" }
-    const categoryEmoji: Record<string, string> = {
-      payment: ":credit_card:", shipping: ":package:", refund: ":money_with_wings:",
-      product_question: ":books:", complaint: ":warning:", returns: ":leftwards_arrow_with_hook:",
-      technical: ":wrench:", other: ":grey_question:",
-    }
+    const urgencyDot = { low: ":large_blue_circle:", medium: ":large_yellow_circle:", high: ":red_circle:" }
     const adminUrl = process.env.MEDUSA_ADMIN_URL || "https://backend-production-aefbc.up.railway.app/app"
-
-    const ordersList = (summary.customer_orders || []).join(", ") || "N/A"
+    const ordersList = (summary.customer_orders || []).join(", ") || "—"
+    const steps = (summary.steps || []).map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")
 
     const slackPayload = {
       blocks: [
         {
-          type: "header",
+          type: "section",
           text: {
-            type: "plain_text",
-            text: `:ticket: ${ticket.subject}`,
-            emoji: true,
+            type: "mrkdwn",
+            text: `${urgencyDot[summary.urgency] || ":white_circle:"} *${ticket.subject}*`,
           },
         },
         {
           type: "section",
+          fields: [
+            { type: "mrkdwn", text: `*Customer*\n${summary.customer_name || "N/A"}` },
+            { type: "mrkdwn", text: `*Email*\n${summary.customer_email || ticket.from_email || "N/A"}` },
+            { type: "mrkdwn", text: `*Country*\n${summary.customer_country || "N/A"}` },
+            { type: "mrkdwn", text: `*Orders*\n${ordersList}` },
+            { type: "mrkdwn", text: `*Payment*\n${summary.customer_payment_method || "N/A"}` },
+            { type: "mrkdwn", text: `*Total spent*\n${summary.customer_total_spent || "N/A"}` },
+            { type: "mrkdwn", text: `*Address*\n${summary.customer_address || "N/A"}` },
+            { type: "mrkdwn", text: `*Delivery*\n${summary.delivery_status || "N/A"}` },
+          ],
+        },
+        { type: "divider" },
+        {
+          type: "section",
           text: {
             type: "mrkdwn",
-            text: [
-              `${urgencyEmoji[summary.urgency] || ":white_circle:"} *Urgency:* \`${summary.urgency?.toUpperCase()}\`  ${categoryEmoji[summary.category] || ""} *Category:* \`${summary.category}\``,
-            ].join("\n"),
+            text: `*Problem*\n${summary.problem}`,
           },
         },
         { type: "divider" },
@@ -180,41 +185,15 @@ ${orderContext || "No orders found for this email"}
           type: "section",
           text: {
             type: "mrkdwn",
-            text: [
-              `:bust_in_silhouette: *Customer Info*`,
-              `>:person_frowning: *Name:* ${summary.customer_name || "N/A"}`,
-              `>:email: *Email:* ${summary.customer_email || ticket.from_email || "N/A"}`,
-              `>:earth_americas: *Country:* ${summary.customer_country || "N/A"}`,
-              `>:house: *Address:* ${summary.customer_address || "N/A"}`,
-              `>:shopping_trolley: *Orders:* ${ordersList}`,
-              `>:credit_card: *Payment:* ${summary.customer_payment_method || "N/A"}`,
-              `>:moneybag: *Total spent:* ${summary.customer_total_spent || "N/A"}`,
-              `>:truck: *Delivery status:* ${summary.delivery_status || "N/A"}`,
-            ].join("\n"),
+            text: `*What to do*\n${steps}`,
           },
         },
-        { type: "divider" },
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: `:rotating_light: *Problem*\n${summary.problem}`,
-          },
-        },
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: `:white_check_mark: *Action Needed*\n${summary.action_needed}`,
-          },
-        },
-        { type: "divider" },
         {
           type: "context",
           elements: [
             {
               type: "mrkdwn",
-              text: `:link: Ticket \`${id}\` | <${adminUrl}/supportbox/${id}|Open in SupportBox>`,
+              text: `<${adminUrl}/supportbox/${id}|Open in SupportBox>`,
             },
           ],
         },
