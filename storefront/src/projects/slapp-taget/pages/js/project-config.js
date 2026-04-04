@@ -1,7 +1,7 @@
 var PROJECT_CONFIG = {
   "slug": "slapp-taget",
   "projectId": "slapp-taget",
-  "medusaUrl": "",
+  "medusaUrl": "https://backend-production-aefbc.up.railway.app",
   "publishableApiKey": "",
   "mainProduct": {
     "name": "Släpp taget om det som förstör dig",

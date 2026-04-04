@@ -22,7 +22,7 @@
 
   var MEDUSA_URL = (typeof PROJECT_CONFIG !== 'undefined' && PROJECT_CONFIG.medusaUrl)
     ? PROJECT_CONFIG.medusaUrl
-    : '';
+    : 'https://backend-production-aefbc.up.railway.app';
 
   // ─── State ──────────────────────────────────────────────────────
   var pixelId = null;
