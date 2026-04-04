@@ -70,9 +70,10 @@
     },
     {
       "name": "lass-los",
-      "runtimeExecutable": "npx",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
       "runtimeArgs": ["http-server", "storefront/src/projects/lass-los/pages", "-p", "8099", "-c-1"],
-      "port": 8099
+      "port": 8099,
+      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
     },
     {
       "name": "psi-superzivot",
