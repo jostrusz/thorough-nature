@@ -132,11 +132,11 @@ ${truncatedConversation}
 ${orderContext || "No orders found for this email"}
 `
 
-    // ── 3. Call Claude Sonnet ──
+    // ── 3. Call Claude Haiku ──
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
     const response = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 600,
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 800,
       system: systemPrompt,
       messages: [{ role: "user", content: userMessage }],
     })
