@@ -158,6 +158,15 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           provider_raw_status: comgateStatus,
           metadata: { order_not_found: true },
         })
+
+        // ── Safety net: auto-complete cart if payment was PAID but no order exists ──
+        if (comgateStatus === "PAID") {
+          await pool.end()
+          safetyNetCompleteCart(transId, statusResult.data, req.scope, logger)
+            .catch((e) => logger.warn(`[Comgate Webhook] Safety net error: ${e.message}`))
+          // Don't await — return 200 immediately so Comgate doesn't timeout
+          return res.status(200).send("OK")
+        }
       }
       await pool.end()
     } catch (orderErr: any) {
@@ -199,6 +208,156 @@ async function loadComgateConfig(logger: any): Promise<any> {
     if (pgClient) {
       try { await pgClient.end() } catch {}
     }
+  }
+}
+
+/**
+ * Safety net: auto-complete cart when Comgate payment succeeded but no order exists.
+ * This handles cases where the customer pays but never returns to the checkout page
+ * (browser closed, connection lost, etc.).
+ *
+ * Flow:
+ * 1. Wait 30s to give the frontend return handler a chance to complete first
+ * 2. Re-check if an order was created during the delay (prevent duplicates)
+ * 3. Find uncompleted cart by matching comgateTransId in payment session data
+ * 4. Complete the cart via Medusa's completeCartWorkflow
+ */
+async function safetyNetCompleteCart(
+  transId: string,
+  comgateData: any,
+  scope: any,
+  logger: any
+): Promise<void> {
+  const DELAY_MS = 30_000 // 30 seconds
+
+  logger.info(
+    `[Comgate Webhook] Safety net: no order found for transId ${transId}. ` +
+    `Waiting ${DELAY_MS / 1000}s before attempting cart completion...`
+  )
+
+  await new Promise((resolve) => setTimeout(resolve, DELAY_MS))
+
+  // Re-check: did the order get created during the delay?
+  const { Pool } = require("pg")
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+
+  try {
+    const { rows: orderCheck } = await pool.query(
+      `SELECT id FROM "order" WHERE metadata->>'comgateTransId' = $1 LIMIT 1`,
+      [transId]
+    )
+    if (orderCheck[0]) {
+      logger.info(
+        `[Comgate Webhook] Safety net: order ${orderCheck[0].id} was created during delay — no action needed`
+      )
+      return
+    }
+
+    logger.info(
+      `[Comgate Webhook] Safety net: still no order after ${DELAY_MS / 1000}s delay. Searching for cart...`
+    )
+
+    // Search recent uncompleted carts for one with this Comgate transaction ID
+    const { ContainerRegistrationKeys } = await import("@medusajs/framework/utils")
+    const query = scope.resolve(ContainerRegistrationKeys.QUERY)
+
+    const { data: carts } = await query.graph({
+      entity: "cart",
+      fields: [
+        "id",
+        "completed_at",
+        "email",
+        "payment_collection.*",
+        "payment_collection.payment_sessions.*",
+      ],
+      filters: {},
+      pagination: { order: { created_at: "DESC" }, skip: 0, take: 80 },
+    })
+
+    let targetCart: any = null
+    for (const cart of carts || []) {
+      if (cart.completed_at) continue
+      const sessions = cart.payment_collection?.payment_sessions || []
+      for (const session of sessions) {
+        if (session.data?.comgateTransId === transId) {
+          targetCart = cart
+          break
+        }
+      }
+      if (targetCart) break
+    }
+
+    if (!targetCart) {
+      logger.warn(
+        `[Comgate Webhook] Safety net: no uncompleted cart found for transId ${transId}`
+      )
+      return
+    }
+
+    logger.info(
+      `[Comgate Webhook] Safety net: found uncompleted cart ${targetCart.id} (email: ${targetCart.email}) — attempting to complete`
+    )
+
+    // Final duplicate check right before completing
+    const { rows: finalCheck } = await pool.query(
+      `SELECT id FROM "order" WHERE metadata->>'comgateTransId' = $1 LIMIT 1`,
+      [transId]
+    )
+    if (finalCheck[0]) {
+      logger.info(
+        `[Comgate Webhook] Safety net: order ${finalCheck[0].id} appeared just before completion — aborting (no duplicate)`
+      )
+      return
+    }
+
+    // Complete the cart via Medusa's cart completion workflow
+    const { completeCartWorkflow } = await import("@medusajs/medusa/core-flows")
+    const result = await completeCartWorkflow(scope).run({
+      input: { id: targetCart.id },
+    })
+
+    const completedOrder = (result as any)?.result?.order || (result as any)?.order
+    if (completedOrder) {
+      logger.info(
+        `[Comgate Webhook] Safety net: ✅ Cart ${targetCart.id} completed → order ${completedOrder.id}`
+      )
+
+      // Update the new order's metadata with Comgate payment info
+      try {
+        const { rows: orderRows } = await pool.query(
+          `SELECT metadata FROM "order" WHERE id = $1 LIMIT 1`,
+          [completedOrder.id]
+        )
+        const existingMeta = orderRows[0]?.metadata || {}
+        const updatedMeta = {
+          ...existingMeta,
+          comgateTransId: transId,
+          comgateStatus: "PAID",
+          payment_captured: true,
+          payment_captured_at: new Date().toISOString(),
+          payment_method: comgateData?.method || "comgate",
+          completed_by: "comgate_webhook_safety_net",
+          safety_net_completed_at: new Date().toISOString(),
+        }
+        await pool.query(
+          `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+          [JSON.stringify(updatedMeta), completedOrder.id]
+        )
+        logger.info(
+          `[Comgate Webhook] Safety net: updated order ${completedOrder.id} metadata with Comgate payment data`
+        )
+      } catch (metaErr: any) {
+        logger.warn(
+          `[Comgate Webhook] Safety net: failed to update order metadata: ${metaErr.message}`
+        )
+      }
+    } else {
+      logger.warn(`[Comgate Webhook] Safety net: cart completion returned no order`)
+    }
+  } catch (err: any) {
+    logger.error(`[Comgate Webhook] Safety net failed: ${err.message}`)
+  } finally {
+    await pool.end()
   }
 }
 

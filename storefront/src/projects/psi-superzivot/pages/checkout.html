@@ -6856,15 +6856,47 @@ body {
   restoreFormFromStorage();
 
   /* ─── PAYMENT RETURN HANDLER ───
-   * When customer returns from Mollie after paying,
+   * When customer returns from payment gateway,
    * URL has ?payment_return=1&cart_id=xxx
    * We complete the cart and redirect to upsell/thank-you.
+   *
+   * If comgate_status=cancelled or pending, show appropriate message.
    */
   (function() {
     var params = new URLSearchParams(window.location.search);
     if (params.get('payment_return') !== '1') return;
 
     var cartId = params.get('cart_id');
+    var comgateStatus = params.get('comgate_status');
+
+    // ── Comgate cancelled/pending: show message and let user retry ──
+    if (comgateStatus === 'cancelled' || comgateStatus === 'pending') {
+      // Clean URL without reloading
+      var cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+
+      // Show inline error banner at top of checkout
+      var banner = document.createElement('div');
+      banner.id = 'payment-status-banner';
+      banner.style.cssText = 'max-width:640px;margin:16px auto;padding:16px 20px;background:#FFF3F3;border:1px solid #E74C3C;border-radius:10px;display:flex;align-items:center;gap:12px;font-family:DM Sans,sans-serif;';
+      if (comgateStatus === 'cancelled') {
+        banner.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><div><div style="font-weight:600;color:#C0392B;">Platba byla zrušena</div><div style="font-size:13px;color:#666;margin-top:2px;">Vaše platba nebyla provedena. Můžete to zkusit znovu nebo zvolit jiný způsob platby.</div></div>';
+      } else {
+        banner.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F39C12" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div><div style="font-weight:600;color:#E67E22;">Platba čeká na zpracování</div><div style="font-size:13px;color:#666;margin-top:2px;">Vaše platba se stále zpracovává. Pokud nebude dokončena, zkuste to prosím znovu.</div></div>';
+      }
+      // Insert banner after the checkout heading
+      var formEl = document.getElementById('checkout-form');
+      if (formEl) formEl.parentNode.insertBefore(banner, formEl);
+
+      // Auto-hide after 15 seconds
+      setTimeout(function() {
+        var b = document.getElementById('payment-status-banner');
+        if (b) { b.style.opacity = '0'; b.style.transition = 'opacity 0.5s'; setTimeout(function() { b.remove(); }, 500); }
+      }, 15000);
+
+      return; // Don't try to complete cart — let user retry
+    }
+
     if (!cartId) return;
 
     // Show branded preloader (injected by head script, hides checkout form)
