@@ -343,9 +343,11 @@ export const StAbandonedCheckout3Template: React.FC<StAbandonedCheckout3Props> &
             lineHeight: '1.7',
             margin: '0 0 8px',
           }}>
-            EverChapter OÜ &bull; Tallinn, Estonia
+            Performance Marketing Solution s.r.o.
             <br />
-            Reg. nr: 16938029
+            Rybná 716/24, Prag, 110 00, Tjeckien
+            <br />
+            Org.nr: 06259928 &bull; Momsnr: CZ06259928
           </Text>
           <Text style={{
             fontFamily: font,

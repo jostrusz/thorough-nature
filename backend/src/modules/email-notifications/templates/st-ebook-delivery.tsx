@@ -55,11 +55,12 @@ export const StEbookDeliveryTemplate: React.FC<StEbookDeliveryTemplateProps> & {
     year: 'numeric',
   })
 
-  const entityName = billingEntity?.legal_name || 'EverChapter OÜ'
+  const entityName = billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'
   const entityAddress = billingEntity?.address
-    ? `${billingEntity.address.city || 'Tallinn'}, ${billingEntity.address.district || billingEntity.address.country_code?.toUpperCase() || 'Estonia'}`
-    : 'Tallinn, Estonia'
-  const entityRegId = billingEntity?.registration_id || '16938029'
+    ? `${billingEntity.address.street || 'Rybná 716/24'}, ${billingEntity.address.city || 'Prag'}, ${billingEntity.address.postal_code || '110 00'}, ${billingEntity.address.district || 'Tjeckien'}`
+    : 'Rybná 716/24, Prag, 110 00, Tjeckien'
+  const entityRegId = billingEntity?.registration_id || '06259928'
+  const entityVatId = billingEntity?.vat_id || 'CZ06259928'
 
   return (
     <Base preview={preview}>
@@ -184,7 +185,7 @@ export const StEbookDeliveryTemplate: React.FC<StEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              &#128230; Din fysiska bok är på väg och levereras inom <strong>4–7 arbetsdagar</strong>. Du får ett separat spårningsnummer via e-post.
+              &#128230; Din fysiska bok är på väg och levereras inom <strong>2–4 arbetsdagar</strong>. Du får ett separat spårningsnummer via e-post.
             </Text>
           </div>
         </div>
@@ -319,9 +320,11 @@ export const StEbookDeliveryTemplate: React.FC<StEbookDeliveryTemplateProps> & {
             lineHeight: '1.7',
             margin: '0 0 8px',
           }}>
-            {entityName} &bull; {entityAddress}
+            {entityName}
             <br />
-            Reg. nr: {entityRegId}
+            {entityAddress}
+            <br />
+            Org.nr: {entityRegId} &bull; Momsnr: {entityVatId}
           </Text>
           <Text style={{
             fontFamily: font,
@@ -343,9 +346,10 @@ StEbookDeliveryTemplate.PreviewProps = {
   downloadUrl: 'https://www.slapptagetboken.se/download/abc123-test-token',
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   billingEntity: {
-    legal_name: 'EverChapter OÜ',
-    registration_id: '16938029',
-    address: { city: 'Tallinn', district: 'Estonia' },
+    legal_name: 'Performance Marketing Solution s.r.o.',
+    registration_id: '06259928',
+    vat_id: 'CZ06259928',
+    address: { street: 'Rybná 716/24', city: 'Prag', postal_code: '110 00', district: 'Tjeckien' },
   },
 } as StEbookDeliveryTemplateProps
 

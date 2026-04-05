@@ -84,11 +84,12 @@ export const StShipmentNotificationTemplate: React.FC<StShipmentNotificationTemp
   const items = order.items || []
   const displayId = order.metadata?.custom_order_number || order.display_id || order.id
 
-  const entityName = billingEntity?.legal_name || 'EverChapter OÜ'
+  const entityName = billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'
   const entityAddress = billingEntity?.address
-    ? `${billingEntity.address.city || 'Tallinn'}, ${billingEntity.address.district || billingEntity.address.country_code?.toUpperCase() || 'Estonia'}`
-    : 'Tallinn, Estonia'
-  const entityRegId = billingEntity?.registration_id || '16938029'
+    ? `${billingEntity.address.street || 'Rybná 716/24'}, ${billingEntity.address.city || 'Prag'}, ${billingEntity.address.postal_code || '110 00'}, ${billingEntity.address.district || 'Tjeckien'}`
+    : 'Rybná 716/24, Prag, 110 00, Tjeckien'
+  const entityRegId = billingEntity?.registration_id || '06259928'
+  const entityVatId = billingEntity?.vat_id || 'CZ06259928'
 
   return (
     <Base preview={preview}>
@@ -254,7 +255,7 @@ export const StShipmentNotificationTemplate: React.FC<StShipmentNotificationTemp
               margin: '0',
               lineHeight: '1.5',
             }}>
-              &#128666; &nbsp;<strong>Beräknad leverans: 4–7 arbetsdagar</strong>
+              &#128666; &nbsp;<strong>Beräknad leverans: 2–4 arbetsdagar</strong>
             </Text>
             <Text style={{
               fontFamily: font,
@@ -263,7 +264,7 @@ export const StShipmentNotificationTemplate: React.FC<StShipmentNotificationTemp
               margin: '6px 0 0',
               lineHeight: '1.5',
             }}>
-              Våra böcker skickas från vårt centrallager i Tjeckien.
+              Våra böcker skickas från vårt centrallager i Polen via PostNord.
             </Text>
           </div>
         </div>
@@ -486,7 +487,7 @@ export const StShipmentNotificationTemplate: React.FC<StShipmentNotificationTemp
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Levererad</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Inom 4–7 arbetsdagar har du din bok hemma!</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Inom 2–4 arbetsdagar har du din bok hemma!</span>
                 </td>
               </tr>
             </tbody>
@@ -572,9 +573,11 @@ export const StShipmentNotificationTemplate: React.FC<StShipmentNotificationTemp
             lineHeight: '1.7',
             margin: '0 0 8px',
           }}>
-            {entityName} &bull; {entityAddress}
+            {entityName}
             <br />
-            Reg. nr: {entityRegId}
+            {entityAddress}
+            <br />
+            Org.nr: {entityRegId} &bull; Momsnr: {entityVatId}
           </Text>
           <Text style={{
             fontFamily: font,
@@ -619,13 +622,14 @@ StShipmentNotificationTemplate.PreviewProps = {
     postal_code: '111 34',
     country_code: 'se',
   },
-  trackingNumber: 'CZ9876543210',
-  trackingUrl: 'https://tracking.example.com/CZ9876543210',
-  trackingCompany: 'DHL',
+  trackingNumber: 'PL9876543210',
+  trackingUrl: 'https://tracking.postnord.com/PL9876543210',
+  trackingCompany: 'PostNord',
   billingEntity: {
-    legal_name: 'EverChapter OÜ',
-    registration_id: '16938029',
-    address: { city: 'Tallinn', district: 'Estonia' },
+    legal_name: 'Performance Marketing Solution s.r.o.',
+    registration_id: '06259928',
+    vat_id: 'CZ06259928',
+    address: { street: 'Rybná 716/24', city: 'Prag', postal_code: '110 00', district: 'Tjeckien' },
   },
 } as any
 
