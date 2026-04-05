@@ -2121,7 +2121,7 @@ function toggleMobileMenu() {
 if (typeof MetaTracker !== 'undefined') {
   MetaTracker.trackViewContent({
     content_name: 'Släpp taget om det som förstör dig',
-    content_ids: [PROJECT_CONFIG.mainProduct.handle],
+    content_ids: PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle],
     value: PROJECT_CONFIG.mainProduct.price,
     currency: PROJECT_CONFIG.mainProduct.currency || 'SEK'
   });
@@ -2133,7 +2133,7 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
     if (typeof MetaTracker !== 'undefined') {
       MetaTracker.trackAddToCart({
         content_name: 'Släpp taget om det som förstör dig',
-        content_ids: [PROJECT_CONFIG.mainProduct.handle],
+        content_ids: PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle],
         value: PROJECT_CONFIG.mainProduct.price,
         currency: PROJECT_CONFIG.mainProduct.currency || 'SEK',
         num_items: 1

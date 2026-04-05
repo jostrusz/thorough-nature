@@ -1110,8 +1110,10 @@ body { background: var(--bg); }
   if (!totalPrice || totalPrice <= 0 || !orderId) {
     console.warn('TY: Skipping Purchase event — no valid order (totalPrice=' + totalPrice + ', orderId=' + orderId + ')');
   } else if (typeof MetaTracker !== 'undefined') {
-    var purchaseContentIds = [PROJECT_CONFIG.mainProduct.handle];
-    if (upsellPurchased || orderBumpActive) purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
+    var purchaseContentIds = PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle];
+    if ((upsellPurchased || orderBumpActive) && !PROJECT_CONFIG.catalogContentIds) {
+      purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
+    }
     var purchaseNumItems = bundleQty + ((upsellPurchased || orderBumpActive) ? 1 : 0);
 
     // Build user_data from customer info for maximum EMQ

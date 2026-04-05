@@ -33,6 +33,7 @@
     { "qty": 3, "price": 949, "label": "3 böcker", "save": 248 },
     { "qty": 4, "price": 1199, "label": "4 böcker", "save": 397 }
   ],
+  "catalogContentIds": ["bp3ef7p7q1", "32e326gc2n", "oywrmkveck", "7xcfooy34r", "2l6u4i3e4i", "ew4v6gcy7v"],
   "mollieProfileId": "",
   "paymentProviders": {},
   "pages": {
