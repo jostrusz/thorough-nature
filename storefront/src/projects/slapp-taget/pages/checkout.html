@@ -5987,8 +5987,20 @@ body {
     emailField.addEventListener('blur', createBackgroundCart);
   }
 
-  // FB Pixel + CAPI: AddPaymentInfo when customer fills in email (skip on payment return)
+  // FB Pixel + CAPI: InitiateCheckout on page load (skip on payment return)
   var _isPaymentReturn = window.location.search.indexOf('payment_return=1') !== -1 || window.location.search.indexOf('redirect_status=') !== -1;
+  if (!_isPaymentReturn && typeof MetaTracker !== 'undefined') {
+    var icContentIds = PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle];
+    MetaTracker.trackInitiateCheckout({
+      content_ids: icContentIds,
+      value: getCurrentTotal(),
+      currency: PROJECT_CONFIG.mainProduct.currency,
+      num_items: selectedBundleQty
+    });
+    console.log('[Checkout] InitiateCheckout fired — page load');
+  }
+
+  // FB Pixel + CAPI: AddPaymentInfo when customer fills in email (skip on payment return)
   var addPaymentInfoFired = _isPaymentReturn;
   var _apEmailField = document.getElementById('email');
   if (_apEmailField) {
@@ -6456,18 +6468,7 @@ body {
       localStorage.setItem('medusa_order_bump', checkoutOrderBump ? 'true' : 'false');
       localStorage.setItem('medusa_checkout_total', checkoutTotal);
 
-      // FB Pixel + CAPI: InitiateCheckout (skip on payment return to avoid double firing)
-      var isPaymentReturn = window.location.search.indexOf('payment_return=1') !== -1 || window.location.search.indexOf('redirect_status=') !== -1;
-      if (!isPaymentReturn && typeof MetaTracker !== 'undefined') {
-        var contentIds = PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle];
-        if (!PROJECT_CONFIG.catalogContentIds && checkoutOrderBump) contentIds = contentIds.concat([PROJECT_CONFIG.upsellProduct.handle]);
-        MetaTracker.trackInitiateCheckout({
-          content_ids: contentIds,
-          value: checkoutTotal,
-          currency: PROJECT_CONFIG.mainProduct.currency,
-          num_items: checkoutBundleQty + (checkoutOrderBump ? 1 : 0)
-        });
-      }
+      // InitiateCheckout already fires on page load (see above)
 
       // Analytics: Track initiate_checkout event
       if (window.AnalyticsTracker) {
