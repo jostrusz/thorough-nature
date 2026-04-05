@@ -616,7 +616,7 @@ export const StOrderPlacedTemplate: React.FC<StOrderPlacedTemplateProps> & {
             color: colors.textDark,
             margin: '0 0 2px',
           }}>
-            Släpp Taget-teamet
+            Joris de Vries
           </Text>
           <Text style={{
             fontFamily: font,
