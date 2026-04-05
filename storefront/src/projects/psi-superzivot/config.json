@@ -6,15 +6,15 @@
   "defaultCountry": "CZ",
   "salesChannelName": "Psi Superzivot",
   "medusaUrl": "",
-  "publishableApiKey": "",
+  "publishableApiKey": "pk_07380c697f2bcf3ee607c76ff6a016da34e5efe75bd367f9a39f6015789b8c50",
   "facebookPixelId": "",
   "regions": {
-    "CZ": ""
+    "CZ": "reg_01KKB4EZN0CHFYDG64K4VP0J2A"
   },
   "mainProduct": {
     "name": "Psí superživot",
     "handle": "psi-superzivot",
-    "variantId": "",
+    "variantId": "variant_01KKB4EZYDYVTC1HM9R7VZ8NHW",
     "price": 550,
     "currency": "CZK",
     "thumbnail": ""
@@ -22,7 +22,7 @@
   "upsellProduct": {
     "name": "Kočičí bible",
     "handle": "kocici-bible",
-    "variantId": "",
+    "variantId": "variant_01KKBYC1TXAA6Z0XNMJKH0H61R",
     "price": 399,
     "originalPrice": 550,
     "currency": "CZK"
