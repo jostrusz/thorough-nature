@@ -588,71 +588,6 @@ body {
 .billing-fields .float-field { margin-bottom: 8px; }
 .billing-fields .float-field:last-child { margin-bottom: 0; }
 
-/* ─── PROMO / KUPÓN ─── */
-.promo-section { margin-top: 16px; }
-.promo-toggle {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 13px; color: var(--cta); cursor: pointer;
-  font-weight: 500; border: none; background: none;
-  padding: 0; font-family: inherit;
-  transition: color 0.2s ease;
-}
-.promo-toggle:hover { color: var(--cta-hover); text-decoration: underline; }
-.promo-toggle svg { width: 14px; height: 14px; transition: transform 0.3s ease; }
-.promo-toggle.is-open svg { transform: rotate(90deg); }
-.promo-form {
-  max-height: 0; overflow: hidden; opacity: 0;
-  transition: max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease, margin-top 0.25s ease;
-  margin-top: 0;
-}
-.promo-form.is-open { max-height: 120px; opacity: 1; margin-top: 10px; }
-.promo-input-row {
-  display: flex; gap: 8px; align-items: stretch;
-}
-.promo-input {
-  flex: 1; padding: 10px 14px; border: 1.5px solid var(--border);
-  border-radius: var(--radius); font-size: 14px;
-  font-family: 'DM Mono', monospace; letter-spacing: 0.05em;
-  text-transform: uppercase; color: var(--heading);
-  background: var(--white); transition: border-color 0.2s ease;
-  outline: none;
-}
-.promo-input:focus { border-color: var(--cta); }
-.promo-input::placeholder { text-transform: none; font-family: 'Cabin', sans-serif; letter-spacing: normal; color: var(--muted); }
-.promo-apply-btn {
-  padding: 10px 20px; border: none; border-radius: var(--radius);
-  background: var(--heading); color: var(--white);
-  font-size: 13px; font-weight: 600; cursor: pointer;
-  font-family: inherit; white-space: nowrap;
-  transition: background 0.2s ease, transform 0.15s ease;
-}
-.promo-apply-btn:hover { background: var(--dark); transform: scale(1.02); }
-.promo-apply-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.promo-message {
-  font-size: 12px; margin-top: 6px; display: none;
-  padding: 0 2px; animation: fadeIn 0.2s ease;
-}
-.promo-message.error { color: var(--error); display: block; }
-.promo-message.success { color: var(--success); display: block; }
-.promo-applied {
-  display: none; align-items: center; gap: 8px;
-  margin-top: 10px; padding: 8px 12px;
-  background: rgba(39, 174, 96, 0.06); border: 1px solid rgba(39, 174, 96, 0.2);
-  border-radius: var(--radius); font-size: 13px; color: var(--success);
-  animation: fadeIn 0.2s ease;
-}
-.promo-applied.is-visible { display: flex; }
-.promo-applied .promo-code-tag {
-  font-family: 'DM Mono', monospace; font-weight: 600;
-  letter-spacing: 0.05em; text-transform: uppercase;
-}
-.promo-remove {
-  margin-left: auto; border: none; background: none;
-  color: var(--muted); cursor: pointer; font-size: 12px;
-  padding: 2px 6px; border-radius: 4px;
-  transition: color 0.2s ease, background 0.2s ease;
-}
-.promo-remove:hover { color: var(--error); background: rgba(192, 57, 43, 0.06); }
 
 /* ─── PLATEBNÍ METODY ─── */
 .payment-methods {
@@ -1218,7 +1153,6 @@ body {
   margin-bottom: 8px;
 }
 .summary-line.shipping { color: var(--success); font-weight: 600; }
-.summary-line.discount { color: #27AE60; font-weight: 600; }
 .summary-line.total {
   font-size: 16px;
   font-weight: 700;
@@ -2720,27 +2654,6 @@ body {
 
         </div>
 
-        <!-- ═══ SLEVOVÉ KÓDY ═══ -->
-        <div class="checkout-card animate-in animate-in-delay-2" style="padding: 16px 20px;">
-          <div class="promo-section">
-            <button type="button" class="promo-toggle" id="promo-toggle">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
-              Máte slevový kód?
-            </button>
-            <div class="promo-form" id="promo-form">
-              <div class="promo-input-row">
-                <input type="text" class="promo-input" id="promo-input" placeholder="Zadejte kód" maxlength="30" autocomplete="off">
-                <button type="button" class="promo-apply-btn" id="promo-apply-btn">Použít</button>
-              </div>
-              <div class="promo-message" id="promo-message"></div>
-            </div>
-            <div class="promo-applied" id="promo-applied">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><path d="M20 6L9 17l-5-5"/></svg>
-              <span>Sleva: <span class="promo-code-tag" id="promo-code-tag"></span></span>
-              <button type="button" class="promo-remove" id="promo-remove">Odstranit</button>
-            </div>
-          </div>
-        </div>
 
         <!-- ═══ SEKCE 3: PLATEBNÍ METODA ═══ -->
         <div class="checkout-card animate-in animate-in-delay-2" style="border-radius:0;">
@@ -2873,10 +2786,6 @@ body {
       <div class="summary-line" id="summary-cod-fee" style="display:none;padding:4px 0;">
         <span style="font-size:13px;">Dobírka</span>
         <span style="font-weight:600;">+30&nbsp;Kč</span>
-      </div>
-      <div class="summary-line discount" id="summary-discount" style="display:none;">
-        <span style="display:flex;align-items:center;gap:6px;">Sleva <span id="discount-code-label" style="font-size:11px;background:rgba(39,174,96,0.1);color:#27AE60;padding:1px 6px;border-radius:4px;font-weight:600;"></span></span>
-        <span id="discount-value" style="color:#27AE60;font-weight:600;"></span>
       </div>
       <div class="summary-line total" id="summary-total">
         <span>Celkem</span>
@@ -3376,22 +3285,6 @@ body {
       shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Doprava</span><span>' + shippingLabel + '</span>';
     }
 
-    // Sleva (discount) — zobraz pokud je promo kód aplikován
-    var discountTotal = cart.discount_total || 0;
-    var discountEl = document.getElementById('summary-discount');
-    if (discountEl) {
-      if (discountTotal > 0) {
-        discountEl.style.display = '';
-        var discountCodeLabel = document.getElementById('discount-code-label');
-        if (discountCodeLabel && savedPromoCode) {
-          discountCodeLabel.textContent = savedPromoCode;
-        }
-        var discountValEl = document.getElementById('discount-value');
-        if (discountValEl) discountValEl.textContent = '-' + formatPrice(discountTotal);
-      } else {
-        discountEl.style.display = 'none';
-      }
-    }
 
     // Celkem
     var totalEl = document.getElementById('desktop-total-price');
@@ -3929,7 +3822,7 @@ body {
   function createExpressCart() {
     var bundleQty = selectedBundleQty;
     var isOrderBump = orderBumpActive;
-    var promoCode = savedPromoCode;
+    var promoCode = '';
 
     console.log('[Express Cart] Creating cart — region:', currentRegionId, 'bundleQty:', bundleQty, 'variantId:', VARIANT_ID);
     return medusaFetch('/store/carts', {
@@ -6863,7 +6756,6 @@ body {
     var emailEl = document.getElementById('email');
     if (!emailEl || !emailEl.value || emailEl.value.indexOf('@') === -1) return;
     if (backgroundCartId) return; // Already created
-    if (promoCartId) { backgroundCartId = promoCartId; return; } // Reuse promo cart
 
     medusaFetch('/store/carts', {
       method: 'POST',
@@ -7055,137 +6947,10 @@ body {
     });
   })();
 
-  /* ─── PROMO KÓDY — toggle + apply + remove ─── */
-  var promoToggle = document.getElementById('promo-toggle');
-  var promoForm = document.getElementById('promo-form');
-  var promoInput = document.getElementById('promo-input');
-  var promoApplyBtn = document.getElementById('promo-apply-btn');
-  var promoMessage = document.getElementById('promo-message');
-  var promoApplied = document.getElementById('promo-applied');
-  var promoCodeTag = document.getElementById('promo-code-tag');
-  var promoRemove = document.getElementById('promo-remove');
-
-  // Stav: uložený promo kód + sdílený cart pro promo validaci
+  /* ─── PROMO KÓDY — odstraněno ─── */
   var savedPromoCode = '';
   var promoAppliedToCart = false;
-  var promoCartId = null; // Cart vytvořený při validaci promo kódu — sdílený se submitem
-
-  if (promoToggle) {
-    promoToggle.addEventListener('click', function() {
-      var isOpen = promoForm.classList.contains('is-open');
-      if (isOpen) {
-        promoForm.classList.remove('is-open');
-        promoToggle.classList.remove('is-open');
-      } else {
-        promoForm.classList.add('is-open');
-        promoToggle.classList.add('is-open');
-        promoInput.focus();
-      }
-    });
-  }
-
-  if (promoApplyBtn) {
-    promoApplyBtn.addEventListener('click', function() {
-      var code = promoInput.value.trim().toUpperCase();
-      if (!code) {
-        promoMessage.textContent = 'Zadejte slevový kód.';
-        promoMessage.className = 'promo-message error';
-        return;
-      }
-      // Disable button + loading
-      promoApplyBtn.disabled = true;
-      promoApplyBtn.textContent = 'Ověřování...';
-      promoMessage.className = 'promo-message';
-
-      // Krok 1: Vytvoř cart (pokud ještě neexistuje)
-      var cartPromise;
-      if (promoCartId) {
-        cartPromise = Promise.resolve(promoCartId);
-      } else {
-        cartPromise = medusaFetch('/store/carts', {
-          method: 'POST',
-          body: JSON.stringify({ region_id: currentRegionId })
-        }).then(function(res) {
-          promoCartId = res.cart.id;
-          // Přidej hlavní produkt aby Medusa mohla vyhodnotit promo kódy
-          return medusaFetch('/store/carts/' + promoCartId + '/line-items', {
-            method: 'POST',
-            body: JSON.stringify({ variant_id: VARIANT_ID, quantity: selectedBundleQty })
-          }).then(function() { return promoCartId; });
-        });
-      }
-
-      // Krok 2: Použít promo kód přes Medusa
-      cartPromise.then(function(cartId) {
-        return medusaFetch('/store/carts/' + cartId + '/promotions', {
-          method: 'POST',
-          body: JSON.stringify({ promo_codes: [code] })
-        });
-      })
-      .then(function(promoRes) {
-        // Úspěch — kód je platný
-        savedPromoCode = code;
-        promoAppliedToCart = true;
-        promoCodeTag.textContent = code;
-        promoApplied.classList.add('is-visible');
-        promoForm.classList.remove('is-open');
-        promoToggle.classList.remove('is-open');
-        promoToggle.style.display = 'none';
-        promoMessage.className = 'promo-message';
-        promoInput.value = '';
-        // Aktualizovat souhrn objednávky se slevou
-        if (promoRes && promoRes.cart) {
-          updateOrderSummary(promoRes.cart);
-        }
-      })
-      .catch(function(err) {
-        // Chyba — kód je neplatný
-        console.warn('Promo kód odmítnut:', err.message || err);
-        promoMessage.textContent = 'Neplatný slevový kód';
-        promoMessage.className = 'promo-message error';
-        savedPromoCode = '';
-        promoAppliedToCart = false;
-      })
-      .then(function() {
-        // Reset button
-        promoApplyBtn.disabled = false;
-        promoApplyBtn.textContent = 'Použít';
-      });
-    });
-  }
-
-  // Enter v inputu = klik na Použít
-  if (promoInput) {
-    promoInput.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        promoApplyBtn.click();
-      }
-    });
-  }
-
-  if (promoRemove) {
-    promoRemove.addEventListener('click', function() {
-      var removedCode = savedPromoCode;
-      savedPromoCode = '';
-      promoAppliedToCart = false;
-      promoApplied.classList.remove('is-visible');
-      promoToggle.style.display = '';
-      promoMessage.className = 'promo-message';
-      // Odstraň promo z cartu pokud existuje
-      if (promoCartId && removedCode) {
-        medusaFetch('/store/carts/' + promoCartId + '/promotions', {
-          method: 'DELETE',
-          body: JSON.stringify({ promo_codes: [removedCode] })
-        }).then(function(res) {
-          if (res && res.cart) updateOrderSummary(res.cart);
-        }).catch(function() {});
-      }
-      // Skryj řádek slevy v souhrnu
-      var discountEl = document.getElementById('summary-discount');
-      if (discountEl) discountEl.style.display = 'none';
-    });
-  }
+  var promoCartId = null;
 
   /* ─── ODESLÁNÍ FORMULÁŘE ─── */
   var form = document.getElementById('checkout-form');
@@ -7325,7 +7090,7 @@ body {
     var checkoutTotal = getCurrentTotal();
 
     // Krok 1: Vytvořit nebo znovu použít cart (promo cart → background cart → nový)
-    var reuseCartId = promoCartId || backgroundCartId;
+    var reuseCartId = backgroundCartId;
     var cartStep;
     if (reuseCartId) {
       // Cart bestaat al (promo code validatie of background cart recovery)
@@ -7343,7 +7108,6 @@ body {
           // Načtení cartu selhalo — vytvoř nový
           reuseCartId = null;
           backgroundCartId = null;
-          promoCartId = null;
           return medusaFetch('/store/carts', {
             method: 'POST',
             body: JSON.stringify({ region_id: currentRegionId })
@@ -7385,40 +7149,6 @@ body {
         method: 'POST',
         body: JSON.stringify(customerData)
       }).then(function() { return cartId; });
-    })
-    .then(function(cartId) {
-      // Krok 3a: Aplikovat promo kód přes Medusa Promotions API (znovu pokud se cart znovupoužije)
-      if (savedPromoCode) {
-        return medusaFetch('/store/carts/' + cartId + '/promotions', {
-          method: 'POST',
-          body: JSON.stringify({ promo_codes: [savedPromoCode] })
-        }).then(function(promoRes) {
-          console.log('Promo code toegepast via Medusa:', savedPromoCode);
-          promoAppliedToCart = true;
-          if (promoRes && promoRes.cart) {
-            updateOrderSummary(promoRes.cart);
-          }
-          return cartId;
-        }).catch(function(err) {
-          // Medusa odmítlo kód — zobrazit chybu, skrýt badge, NEZASTAVOVAT objednávku
-          console.warn('Promo code geweigerd door Medusa:', err.message || err);
-          savedPromoCode = '';
-          promoAppliedToCart = false;
-          // Zobrazit chybovou hlášku
-          if (promoMessage) {
-            promoMessage.textContent = 'Neplatný slevový kód';
-            promoMessage.className = 'promo-message error';
-          }
-          // Skrýt badge, znovu zobrazit toggle
-          promoApplied.classList.remove('is-visible');
-          promoToggle.style.display = '';
-          // Skrýt slevu v souhrnu
-          var discountEl = document.getElementById('summary-discount');
-          if (discountEl) discountEl.style.display = 'none';
-          return cartId;
-        });
-      }
-      return cartId;
     })
     .then(function(cartId) {
       // Krok 3b: Přidat metodu dopravy
