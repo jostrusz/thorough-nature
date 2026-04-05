@@ -1393,111 +1393,115 @@ const TicketDetailPage = () => {
       `}</style>
 
       {/* ══════ HEADER ══════ */}
-      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: "200px", flex: "1 1 auto" }}>
+      <div style={{
+        backgroundColor: D.card, borderRadius: "12px", border: `1px solid ${D.border}`,
+        padding: "16px 20px", marginBottom: "20px", boxShadow: D.xs,
+      }}>
+        {/* Row 1: Back + Subject + Status */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
           <Link to="/supportbox" style={{ textDecoration: "none", flexShrink: 0 }}>
             <div className="sb-back-btn" style={{
-              width: "34px", height: "34px", borderRadius: D.r8, backgroundColor: D.card,
+              width: "30px", height: "30px", borderRadius: "6px", backgroundColor: D.inset,
               border: `1px solid ${D.border}`, display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", boxShadow: D.xs,
+              cursor: "pointer",
             }}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke={D.textSec} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke={D.textSec} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
           </Link>
-          <div style={{ minWidth: 0, flex: "1 1 auto" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-              <h1 style={{ fontSize: "18px", fontWeight: 700, color: D.text, margin: 0, lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
-                {ticket.subject}
-              </h1>
-              <Pill bg={st.bg} color={st.color}>{st.label}</Pill>
-            </div>
-            <div style={{ fontSize: "13px", color: D.textSec, marginTop: "3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {ticket.from_name ? `${ticket.from_name}` : ticket.from_email}
-              <span style={{ color: D.textFaint, margin: "0 6px" }}>·</span>
-              {f.dt(ticket.created_at)}
-            </div>
-            {/* AI Labels */}
-            {ticket.metadata?.ai_labels && (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
-                {ticket.metadata.ai_labels.project && (
-                  <span style={{
-                    fontSize: "11px", fontWeight: 600, color: "#4F46E5",
-                    backgroundColor: "#EEF2FF", padding: "2px 10px",
-                    borderRadius: "9999px", letterSpacing: "0.02em",
-                  }}>
-                    {ticket.metadata.ai_labels.project}
-                  </span>
-                )}
-                {ticket.metadata.ai_labels.category && (
-                  <span style={{
-                    fontSize: "11px", fontWeight: 600,
-                    color: getCatColor(ticket.metadata.ai_labels.category).color,
-                    backgroundColor: getCatColor(ticket.metadata.ai_labels.category).bg,
-                    padding: "2px 10px", borderRadius: "9999px",
-                  }}>
-                    {formatCat(ticket.metadata.ai_labels.category)}
-                  </span>
-                )}
-                {ticket.metadata.ai_labels.summary && (
-                  <span style={{ fontSize: "12px", color: "#6B7280", fontStyle: "italic" }}>
-                    {ticket.metadata.ai_labels.summary}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
+          <h1 style={{ fontSize: "16px", fontWeight: 700, color: D.text, margin: 0, lineHeight: 1.3, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {ticket.subject}
+          </h1>
+          {st.label && <Pill bg={st.bg} color={st.color}>{st.label}</Pill>}
         </div>
 
-        <div style={{ flexShrink: 0, display: "flex", gap: "8px", alignItems: "center" }}>
-          {/* Slack AI Summary */}
-          <button className="sb-action-btn" onClick={() => slackMut.mutate()} disabled={slackMut.isPending}
-            style={{
-              padding: "8px 14px", fontSize: "13px", fontWeight: 600,
-              color: slackSent ? D.green : "#611f69",
-              backgroundColor: slackSent ? D.greenLight : "#f4ede4",
-              border: `1px solid ${slackSent ? D.green + "40" : "#611f69" + "25"}`,
-              borderRadius: D.r8, cursor: "pointer",
-              transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px",
-            }}>
-            {slackMut.isPending ? "\u23f3 Sending..." : slackSent ? "\u2705 Sent to Slack" : "\ud83d\udce8 Send to Slack"}
-          </button>
+        {/* Row 2: Email | Date */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0", marginBottom: "6px", paddingLeft: "42px" }}>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: D.text }}>{ticket.from_email}</span>
+          <span style={{ color: D.textFaint, margin: "0 8px", fontSize: "13px" }}>|</span>
+          <span style={{ fontSize: "13px", color: D.textSec }}>{f.dt(ticket.created_at)}</span>
+        </div>
 
+        {/* Row 3: Project | AI label + summary */}
+        {ticket.metadata?.ai_labels && (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px", paddingLeft: "42px" }}>
+            {ticket.metadata.ai_labels.project && (
+              <span style={{
+                fontSize: "11px", fontWeight: 600, color: "#4F46E5",
+                backgroundColor: "#EEF2FF", padding: "2px 10px",
+                borderRadius: "9999px", letterSpacing: "0.02em",
+              }}>
+                {ticket.metadata.ai_labels.project}
+              </span>
+            )}
+            {ticket.metadata.ai_labels.category && (
+              <span style={{
+                fontSize: "11px", fontWeight: 600,
+                color: getCatColor(ticket.metadata.ai_labels.category).color,
+                backgroundColor: getCatColor(ticket.metadata.ai_labels.category).bg,
+                padding: "2px 10px", borderRadius: "9999px",
+              }}>
+                {formatCat(ticket.metadata.ai_labels.category)}
+              </span>
+            )}
+            {ticket.metadata.ai_labels.summary && (
+              <span style={{ fontSize: "12px", color: "#9CA3AF", fontStyle: "italic" }}>
+                {ticket.metadata.ai_labels.summary}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Row 4: Action buttons */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingLeft: "42px", flexWrap: "wrap" }}>
           {/* Ask Dextrum */}
           <button className="sb-action-btn" onClick={() => dextrumMut.mutate()} disabled={dextrumMut.isPending}
             style={{
-              padding: "8px 14px", fontSize: "13px", fontWeight: 600,
+              padding: "6px 14px", fontSize: "12px", fontWeight: 600,
               color: dextrumSent ? D.green : "#c2410c",
               backgroundColor: dextrumSent ? D.greenLight : "#fff7ed",
-              border: `1px solid ${dextrumSent ? D.green + "40" : "#c2410c" + "25"}`,
-              borderRadius: D.r8, cursor: "pointer",
-              transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px",
+              border: `1px solid ${dextrumSent ? D.green + "40" : "#c2410c" + "20"}`,
+              borderRadius: "6px", cursor: "pointer",
+              whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "5px",
             }}>
-            {dextrumMut.isPending ? "\u23f3 Sending..." : dextrumSent ? "\u2705 Sent to Dextrum" : "\ud83d\udce6 Ask Dextrum"}
+            {dextrumMut.isPending ? "\u23f3 Sending..." : dextrumSent ? "\u2705 Sent" : "Ask Dextrum"}
+          </button>
+
+          {/* Send to Slack */}
+          <button className="sb-action-btn" onClick={() => slackMut.mutate()} disabled={slackMut.isPending}
+            style={{
+              padding: "6px 14px", fontSize: "12px", fontWeight: 600,
+              color: slackSent ? D.green : "#611f69",
+              backgroundColor: slackSent ? D.greenLight : "#f4ede4",
+              border: `1px solid ${slackSent ? D.green + "40" : "#611f69" + "20"}`,
+              borderRadius: "6px", cursor: "pointer",
+              whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "5px",
+            }}>
+            {slackMut.isPending ? "\u23f3 Sending..." : slackSent ? "\u2705 Sent" : "Send to Slack"}
           </button>
 
           {/* Copy conversation */}
           <button className="sb-action-btn" onClick={copyConversation}
             style={{
-              padding: "8px 14px", fontSize: "13px", fontWeight: 600,
-              color: copied ? D.green : D.textSec,
-              backgroundColor: copied ? D.greenLight : D.card,
+              padding: "6px 14px", fontSize: "12px", fontWeight: 600,
+              color: copied ? D.green : D.textMuted,
+              backgroundColor: copied ? D.greenLight : "transparent",
               border: `1px solid ${copied ? D.green + "40" : D.border}`,
-              borderRadius: D.r8, cursor: "pointer",
-              transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px",
+              borderRadius: "6px", cursor: "pointer",
+              whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "5px",
             }}>
-            {copied ? "\u2705 Copied" : "\ud83d\udccb Copy all"}
+            {copied ? "\u2705 Copied" : "Copy all"}
           </button>
+
+          {/* Spacer */}
+          <div style={{ flex: 1 }} />
 
           {/* Spam button */}
           {ticket.status !== "spam" && (
             <button className="sb-action-btn" onClick={() => spamMut.mutate()} disabled={spamMut.isPending}
               style={{
-                padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: D.red,
-                backgroundColor: D.redLight, border: `1px solid ${D.red}25`,
-                borderRadius: D.r8, cursor: "pointer", transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                padding: "6px 14px", fontSize: "12px", fontWeight: 600, color: D.red,
+                backgroundColor: "transparent", border: `1px solid ${D.red}25`,
+                borderRadius: "6px", cursor: "pointer",
                 whiteSpace: "nowrap",
               }}>
               {spamMut.isPending ? "..." : "Spam"}
@@ -1508,9 +1512,9 @@ const TicketDetailPage = () => {
           {ticket.status === "spam" ? (
             <button className="sb-action-btn" onClick={() => reopenMut.mutate()} disabled={reopenMut.isPending}
               style={{
-                padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: D.orange,
-                backgroundColor: D.orangeLight, border: `1px solid ${D.orange}40`,
-                borderRadius: D.r8, cursor: "pointer", transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                padding: "6px 14px", fontSize: "12px", fontWeight: 600, color: D.orange,
+                backgroundColor: D.orangeLight, border: `1px solid ${D.orange}30`,
+                borderRadius: "6px", cursor: "pointer",
                 whiteSpace: "nowrap",
               }}>
               {reopenMut.isPending ? "..." : "Not spam"}
@@ -1518,9 +1522,9 @@ const TicketDetailPage = () => {
           ) : ticket.status !== "solved" ? (
             <button className="sb-action-btn" onClick={() => solveMut.mutate()} disabled={solveMut.isPending}
               style={{
-                padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: "#fff",
-                backgroundColor: D.green, border: "none", borderRadius: D.r8,
-                cursor: "pointer", boxShadow: `0 2px 8px ${D.green}35`, transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                padding: "6px 14px", fontSize: "12px", fontWeight: 600, color: "#fff",
+                backgroundColor: D.green, border: "none", borderRadius: "6px",
+                cursor: "pointer", boxShadow: `0 1px 4px ${D.green}30`,
                 whiteSpace: "nowrap",
               }}>
               {solveMut.isPending ? "..." : "Mark solved"}
@@ -1528,9 +1532,9 @@ const TicketDetailPage = () => {
           ) : (
             <button className="sb-action-btn" onClick={() => reopenMut.mutate()} disabled={reopenMut.isPending}
               style={{
-                padding: "8px 16px", fontSize: "13px", fontWeight: 600, color: D.orange,
-                backgroundColor: D.orangeLight, border: `1px solid ${D.orange}40`,
-                borderRadius: D.r8, cursor: "pointer", transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                padding: "6px 14px", fontSize: "12px", fontWeight: 600, color: D.orange,
+                backgroundColor: D.orangeLight, border: `1px solid ${D.orange}30`,
+                borderRadius: "6px", cursor: "pointer",
                 whiteSpace: "nowrap",
               }}>
               {reopenMut.isPending ? "..." : "Reopen"}
