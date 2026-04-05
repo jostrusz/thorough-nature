@@ -99,23 +99,23 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     const systemPrompt = `You are a customer support analyst for an e-commerce company selling books across Europe (NL, DE, BE, SE, PL, CZ).
 
-Analyze the support ticket and produce a clear, actionable summary in ENGLISH.
+Analyze the support ticket and produce a clear, actionable summary. Everything MUST be in English — translate any non-English content.
 
 Return a JSON object with these fields:
-- "problem": concise paragraph describing the customer's issue (2-3 sentences max)
+- "subject_en": translate the ticket subject to English (short, max 10 words)
+- "problem": concise description of the issue in 1-2 sentences. Be specific — mention product names, amounts, dates.
 - "customer_name": full name
 - "customer_email": email address
-- "customer_country": country code or name
-- "customer_orders": array of order numbers (e.g. ["#1234"])
-- "customer_address": full shipping address or "N/A"
-- "customer_payment_method": payment method (e.g. "PayPal", "iDEAL")
-- "customer_total_spent": total amount with currency (e.g. "€35.00")
+- "customer_country": 2-letter country code (e.g. "NL", "DE", "SE")
+- "order_number": most relevant order number as string (e.g. "#634") or "N/A"
+- "customer_address": one-line shipping address or "N/A"
+- "payment_info": payment method + amount (e.g. "PayPal — €35.00") or "N/A"
 - "delivery_status": current delivery status or "N/A"
-- "steps": array of strings — each string is one concrete action step to resolve the issue (3-6 steps)
+- "steps": array of 3-5 short action strings. Each step should be one clear sentence, max 15 words.
 - "urgency": "low" | "medium" | "high"
 
-Be specific and practical. Reference order numbers, dates, tracking links where relevant.
-Return ONLY valid JSON, no markdown, no explanation.`
+Be specific. Reference order numbers and dates. Keep steps actionable and concise.
+Return ONLY valid JSON, no markdown.`
 
     const userMessage = `=== TICKET INFO ===
 Subject: ${ticket.subject}
@@ -145,10 +145,21 @@ ${orderContext || "No orders found for this email"}
     const summary = JSON.parse(aiText)
 
     // ── 4. Send to Slack ──
-    const urgencyDot = { low: ":large_blue_circle:", medium: ":large_yellow_circle:", high: ":red_circle:" }
+    const urgencyDot: Record<string, string> = { low: ":large_blue_circle:", medium: ":large_yellow_circle:", high: ":red_circle:" }
     const adminUrl = process.env.MEDUSA_ADMIN_URL || "https://backend-production-aefbc.up.railway.app/app"
-    const ordersList = (summary.customer_orders || []).join(", ") || "—"
-    const steps = (summary.steps || []).map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")
+    const email = summary.customer_email || ticket.from_email || "N/A"
+    const steps = (summary.steps || []).map((s: string, i: number) => `    ${i + 1}. ${s}`).join("\n")
+
+    const customerLine = [
+      summary.customer_name,
+      summary.customer_country ? `(${summary.customer_country})` : null,
+    ].filter(Boolean).join(" ")
+
+    const detailParts = [
+      summary.order_number && summary.order_number !== "N/A" ? `Order ${summary.order_number}` : null,
+      summary.payment_info && summary.payment_info !== "N/A" ? summary.payment_info : null,
+      summary.delivery_status && summary.delivery_status !== "N/A" ? `Delivery: ${summary.delivery_status}` : null,
+    ].filter(Boolean).join("  ·  ")
 
     const slackPayload = {
       blocks: [
@@ -156,22 +167,20 @@ ${orderContext || "No orders found for this email"}
           type: "section",
           text: {
             type: "mrkdwn",
-            text: `${urgencyDot[summary.urgency] || ":white_circle:"} *${ticket.subject}*`,
+            text: `${urgencyDot[summary.urgency] || ":white_circle:"}  *${summary.subject_en || ticket.subject}*`,
           },
         },
         {
           type: "section",
-          fields: [
-            { type: "mrkdwn", text: `*Customer*\n${summary.customer_name || "N/A"}` },
-            { type: "mrkdwn", text: `*Email*\n${summary.customer_email || ticket.from_email || "N/A"}` },
-            { type: "mrkdwn", text: `*Country*\n${summary.customer_country || "N/A"}` },
-            { type: "mrkdwn", text: `*Orders*\n${ordersList}` },
-            { type: "mrkdwn", text: `*Payment*\n${summary.customer_payment_method || "N/A"}` },
-            { type: "mrkdwn", text: `*Total spent*\n${summary.customer_total_spent || "N/A"}` },
-            { type: "mrkdwn", text: `*Address*\n${summary.customer_address || "N/A"}` },
-            { type: "mrkdwn", text: `*Delivery*\n${summary.delivery_status || "N/A"}` },
-          ],
+          text: {
+            type: "mrkdwn",
+            text: `*${email}*\n${customerLine}${summary.customer_address && summary.customer_address !== "N/A" ? `\n${summary.customer_address}` : ""}`,
+          },
         },
+        ...(detailParts ? [{
+          type: "context" as const,
+          elements: [{ type: "mrkdwn" as const, text: detailParts }],
+        }] : []),
         { type: "divider" },
         {
           type: "section",
@@ -180,14 +189,14 @@ ${orderContext || "No orders found for this email"}
             text: `*Problem*\n${summary.problem}`,
           },
         },
-        { type: "divider" },
         {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: `*What to do*\n${steps}`,
+            text: `*Action*\n${steps}`,
           },
         },
+        { type: "divider" },
         {
           type: "context",
           elements: [
