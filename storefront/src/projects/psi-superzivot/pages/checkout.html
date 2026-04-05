@@ -5025,8 +5025,15 @@ body {
       return true;
     });
 
-    // Sort by sort_order
-    methods.sort(function(a, b) { return a.sort_order - b.sort_order; });
+    // Custom sort order for psi-superzivot
+    var METHOD_ORDER = ['creditcard', 'bank_transfer', 'paypal', 'googlepay', 'applepay', 'cod'];
+    methods.sort(function(a, b) {
+      var idxA = METHOD_ORDER.indexOf(a.code);
+      var idxB = METHOD_ORDER.indexOf(b.code);
+      if (idxA === -1) idxA = 99;
+      if (idxB === -1) idxB = 99;
+      return idxA - idxB;
+    });
 
     // Separate Klarna methods from the rest
     var klarnaMethods = methods.filter(function(m) { return KLARNA_CODES.indexOf(m.code) !== -1; });
