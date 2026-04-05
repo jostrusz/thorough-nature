@@ -103,7 +103,7 @@ Analyze the support ticket and produce a clear, actionable summary. Everything M
 
 Return a JSON object with these fields:
 - "subject_en": translate the ticket subject to English (short, max 10 words)
-- "problem": concise description of the issue in 1-2 sentences. Be specific — mention product names, amounts, dates.
+- "problem": concise description of the issue in 1-2 sentences. Be specific — mention product names, amounts, dates. Use Slack formatting: *bold* for key facts (order numbers, amounts, product names), _italic_ for context or nuance.
 - "customer_name": full name
 - "customer_email": email address
 - "customer_country": 2-letter country code (e.g. "NL", "DE", "SE")
@@ -111,7 +111,7 @@ Return a JSON object with these fields:
 - "customer_address": one-line shipping address or "N/A"
 - "payment_info": payment method + amount (e.g. "PayPal — €35.00") or "N/A"
 - "delivery_status": current delivery status or "N/A"
-- "steps": array of 3-5 short action strings. Each step should be one clear sentence, max 15 words.
+- "steps": array of 3-5 short action strings. Each step should be one clear sentence, max 15 words. Use *bold* for the key action verb or critical detail in each step.
 - "urgency": "low" | "medium" | "high"
 
 Be specific. Reference order numbers and dates. Keep steps actionable and concise.
