@@ -1292,6 +1292,7 @@ const TicketDetailPage = () => {
   })
 
   const [slackSent, setSlackSent] = useState(false)
+  const [slackError, setSlackError] = useState(false)
   const slackMut = useMutation({
     mutationFn: async () => {
       const resp = await sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/summarize-slack`, { method: "POST" })
@@ -1299,11 +1300,17 @@ const TicketDetailPage = () => {
     },
     onSuccess: () => {
       setSlackSent(true)
+      setSlackError(false)
       setTimeout(() => setSlackSent(false), 3000)
+    },
+    onError: () => {
+      setSlackError(true)
+      setTimeout(() => setSlackError(false), 4000)
     },
   })
 
   const [dextrumSent, setDextrumSent] = useState(false)
+  const [dextrumError, setDextrumError] = useState(false)
   const dextrumMut = useMutation({
     mutationFn: async () => {
       const resp = await sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/ask-dextrum`, { method: "POST" })
@@ -1311,7 +1318,12 @@ const TicketDetailPage = () => {
     },
     onSuccess: () => {
       setDextrumSent(true)
+      setDextrumError(false)
       setTimeout(() => setDextrumSent(false), 3000)
+    },
+    onError: () => {
+      setDextrumError(true)
+      setTimeout(() => setDextrumError(false), 4000)
     },
   })
 
@@ -1463,7 +1475,7 @@ const TicketDetailPage = () => {
               borderRadius: "6px", cursor: "pointer",
               whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "5px",
             }}>
-            {dextrumMut.isPending ? "\u23f3 Sending..." : dextrumSent ? "\u2705 Sent" : "Ask Dextrum"}
+            {dextrumMut.isPending ? "\u23f3 Sending..." : dextrumSent ? "\u2705 Sent" : dextrumError ? "\u274c Failed" : "Ask Dextrum"}
           </button>
 
           {/* Send to Slack */}
@@ -1476,7 +1488,7 @@ const TicketDetailPage = () => {
               borderRadius: "6px", cursor: "pointer",
               whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "5px",
             }}>
-            {slackMut.isPending ? "\u23f3 Sending..." : slackSent ? "\u2705 Sent" : "Send to Slack"}
+            {slackMut.isPending ? "\u23f3 Sending..." : slackSent ? "\u2705 Sent" : slackError ? "\u274c Failed" : "Send to Slack"}
           </button>
 
           {/* Copy conversation */}
