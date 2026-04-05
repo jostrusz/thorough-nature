@@ -49,7 +49,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
             "payment_collections.payments.refunds.*",
           ],
           filters: { email: ticket.from_email },
-          pagination: { order: { created_at: "DESC" } },
+          pagination: { order: { created_at: "DESC" }, skip: 0, take: 200 },
         })
         allOrders = orders || []
       } catch (e) {
