@@ -4082,9 +4082,12 @@ body {
    * Called after renderPaymentMethods() in loadPaymentMethods().
    */
   function initExpressCheckout() {
+    // Express checkout disabled for this project
+    var section = document.getElementById('express-checkout');
+    if (section) section.style.display = 'none';
+    return;
     var topRow = document.getElementById('express-buttons-top');
     var bottomRow = document.getElementById('express-buttons-bottom');
-    var section = document.getElementById('express-checkout');
     if (!topRow || !bottomRow || !section) return;
 
     topRow.innerHTML = '';
