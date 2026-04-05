@@ -2,6 +2,7 @@ import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
+import { shouldSkipDuplicate } from '../utils/idempotency-guard'
 
 /**
  * Admin Notification: New Order Placed
@@ -24,13 +25,17 @@ export default async function orderPlacedAdminNotificationHandler({
   const logger = container.resolve('logger') as any
 
   try {
+    const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
+
+    // ── Idempotency: prevent duplicate admin notifications after server restart ──
+    if (await shouldSkipDuplicate(orderModuleService, data.id, 'admin_notification_sent', 'AdminNotif')) return
+
     // Delay 3s to let other subscribers (custom order number, payment metadata)
     // finish writing to order metadata first. This ensures we have the full
     // custom_order_number (e.g. NL2026-84) instead of just display_id (84).
     await sleep(3000)
 
     const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
-    const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
 
     const order = await orderModuleService.retrieveOrder(data.id, {
       relations: ['items', 'summary', 'shipping_address'],

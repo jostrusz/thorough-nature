@@ -1,6 +1,7 @@
 import { Modules } from "@medusajs/framework/utils"
 import { IOrderModuleService } from "@medusajs/framework/types"
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
+import { shouldSkipDuplicate } from "../utils/idempotency-guard"
 
 const NTFY_TOPIC = "medusa-ntfy-obj-2026"
 const NTFY_URL = `https://ntfy.sh/${NTFY_TOPIC}`
@@ -37,6 +38,9 @@ export default async function orderPlacedNtfyHandler({
 }: SubscriberArgs<any>) {
   try {
     const orderService: IOrderModuleService = container.resolve(Modules.ORDER)
+
+    // ── Idempotency: prevent duplicate push notifications after server restart ──
+    if (await shouldSkipDuplicate(orderService, data.id, 'ntfy_notification_sent', 'ntfy')) return
 
     const order = await orderService.retrieveOrder(data.id, {
       relations: ["items", "summary", "shipping_address"],

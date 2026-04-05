@@ -9,6 +9,7 @@ import {
   type CAPIUserData,
   type CAPIConfig,
 } from "../modules/meta-pixel/capi"
+import { shouldSkipDuplicate } from "../utils/idempotency-guard"
 
 /**
  * Server-side BACKUP Purchase event via CAPI.
@@ -29,6 +30,10 @@ export default async function orderPlacedMetaCAPIHandler({
 }: SubscriberArgs<any>) {
   try {
     const orderService: IOrderModuleService = container.resolve(Modules.ORDER)
+
+    // ── Idempotency: prevent duplicate Purchase events after server restart ──
+    if (await shouldSkipDuplicate(orderService, data.id, 'meta_capi_purchase_sent', 'META CAPI Subscriber')) return
+
     const metaPixelService = container.resolve(
       META_PIXEL_MODULE
     ) as MetaPixelModuleService

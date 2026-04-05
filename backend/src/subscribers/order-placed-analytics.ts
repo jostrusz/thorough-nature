@@ -3,6 +3,7 @@ import { IOrderModuleService } from "@medusajs/framework/types"
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
 import { ANALYTICS_MODULE } from "../modules/analytics"
 import type AnalyticsModuleService from "../modules/analytics/service"
+import { shouldSkipDuplicate } from "../utils/idempotency-guard"
 
 /**
  * Subscriber: order.placed → Analytics Attribution
@@ -17,6 +18,10 @@ export default async function orderPlacedAnalyticsHandler({
 }: SubscriberArgs<any>) {
   try {
     const orderService: IOrderModuleService = container.resolve(Modules.ORDER)
+
+    // ── Idempotency: prevent duplicate attribution after server restart ──
+    if (await shouldSkipDuplicate(orderService, data.id, 'analytics_attribution_created', 'Analytics Subscriber')) return
+
     const analyticsService = container.resolve(
       ANALYTICS_MODULE
     ) as unknown as AnalyticsModuleService

@@ -6,6 +6,7 @@ import { resolveBillingEntity } from '../utils/resolve-billing-entity'
 import { logEmailActivity } from '../utils/email-logger'
 import { renderEmailToHtml } from '../utils/render-email-html'
 import { getProjectEmailConfig, getEmailSubject } from '../utils/project-email-config'
+import { shouldSkipDuplicate } from '../utils/idempotency-guard'
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -15,22 +16,7 @@ export default async function orderPlacedHandler({
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
 
   // ── Idempotency: prevent duplicate order confirmation emails (e.g. after server restart) ──
-  try {
-    const freshOrder = await orderModuleService.retrieveOrder(data.id)
-    if ((freshOrder as any).metadata?.order_confirmation_sent === true) {
-      console.log(`[OrderPlaced] Skipping duplicate order confirmation for ${data.id} — already sent`)
-      return
-    }
-    // Set flag immediately BEFORE sending to prevent race conditions
-    await (orderModuleService as any).updateOrders(data.id, {
-      metadata: {
-        ...((freshOrder as any).metadata || {}),
-        order_confirmation_sent: true,
-      },
-    })
-  } catch (idempErr: any) {
-    console.warn(`[OrderPlaced] Idempotency check failed for ${data.id}, proceeding anyway:`, idempErr.message)
-  }
+  if (await shouldSkipDuplicate(orderModuleService, data.id, 'order_confirmation_sent', 'OrderPlaced')) return
 
   const order = await orderModuleService.retrieveOrder(data.id, {
     relations: ['items', 'summary', 'shipping_address', 'billing_address'],

@@ -12,6 +12,7 @@ import {
   getInvoiceWithLink,
 } from "../modules/quickbooks/api-client"
 import { resolveInvoicingSystem } from "../utils/resolve-invoicing-system"
+import { shouldSkipDuplicate } from "../utils/idempotency-guard"
 
 /**
  * QuickBooks Invoice Subscriber
@@ -31,6 +32,10 @@ export default async function orderPlacedQuickBooksHandler({
 }: SubscriberArgs<any>) {
   try {
     const orderService: IOrderModuleService = container.resolve(Modules.ORDER)
+
+    // ── Idempotency: prevent duplicate invoices after server restart ──
+    if (await shouldSkipDuplicate(orderService, data.id, 'quickbooks_invoice_created', 'QuickBooks')) return
+
     const qbService = container.resolve(
       QUICKBOOKS_MODULE
     ) as unknown as QuickBooksModuleService

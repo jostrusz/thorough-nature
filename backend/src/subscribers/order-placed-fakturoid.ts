@@ -14,6 +14,7 @@ import {
   getOSSMode,
 } from "../modules/fakturoid/api-client"
 import { resolveInvoicingSystem } from "../utils/resolve-invoicing-system"
+import { shouldSkipDuplicate } from "../utils/idempotency-guard"
 
 /**
  * Fakturoid Invoice Subscriber
@@ -31,6 +32,10 @@ export default async function orderPlacedFakturoidHandler({
 }: SubscriberArgs<any>) {
   try {
     const orderService: IOrderModuleService = container.resolve(Modules.ORDER)
+
+    // ── Idempotency: prevent duplicate invoices after server restart ──
+    if (await shouldSkipDuplicate(orderService, data.id, 'fakturoid_invoice_created', 'Fakturoid')) return
+
     const fakturoidService = container.resolve(
       FAKTUROID_MODULE
     ) as unknown as FakturoidModuleService
