@@ -5002,8 +5002,12 @@ body {
     var container = document.getElementById('payment-methods');
     var country = (countryCode || 'CZ').toLowerCase();
 
+    // Hide methods not relevant for this project
+    var HIDDEN_METHODS = ['blik', 'przelew_bankowy'];
+
     // Filter methods by country availability
     var methods = allPaymentOptions.filter(function(m) {
+      if (HIDDEN_METHODS.indexOf(m.code) !== -1) return false;
       if (!m.available_countries || m.available_countries.length === 0) return true;
       return m.available_countries.indexOf(country) !== -1;
     });
