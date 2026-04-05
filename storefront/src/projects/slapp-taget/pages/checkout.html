@@ -553,71 +553,6 @@ body {
 .billing-fields .float-field { margin-bottom: 8px; }
 .billing-fields .float-field:last-child { margin-bottom: 0; }
 
-/* ─── PROMO / KUPÓN ─── */
-.promo-section { margin-top: 16px; }
-.promo-toggle {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 13px; color: var(--cta); cursor: pointer;
-  font-weight: 500; border: none; background: none;
-  padding: 0; font-family: inherit;
-  transition: color 0.2s ease;
-}
-.promo-toggle:hover { color: var(--cta-hover); text-decoration: underline; }
-.promo-toggle svg { width: 14px; height: 14px; transition: transform 0.3s ease; }
-.promo-toggle.is-open svg { transform: rotate(90deg); }
-.promo-form {
-  max-height: 0; overflow: hidden; opacity: 0;
-  transition: max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease, margin-top 0.25s ease;
-  margin-top: 0;
-}
-.promo-form.is-open { max-height: 120px; opacity: 1; margin-top: 10px; }
-.promo-input-row {
-  display: flex; gap: 8px; align-items: stretch;
-}
-.promo-input {
-  flex: 1; padding: 10px 14px; border: 1.5px solid var(--border);
-  border-radius: var(--radius); font-size: 14px;
-  font-family: 'DM Mono', monospace; letter-spacing: 0.05em;
-  text-transform: uppercase; color: var(--heading);
-  background: var(--white); transition: border-color 0.2s ease;
-  outline: none;
-}
-.promo-input:focus { border-color: var(--cta); }
-.promo-input::placeholder { text-transform: none; font-family: 'DM Sans', sans-serif; letter-spacing: normal; color: var(--muted); }
-.promo-apply-btn {
-  padding: 10px 20px; border: none; border-radius: var(--radius);
-  background: var(--heading); color: var(--white);
-  font-size: 13px; font-weight: 600; cursor: pointer;
-  font-family: inherit; white-space: nowrap;
-  transition: background 0.2s ease, transform 0.15s ease;
-}
-.promo-apply-btn:hover { background: var(--dark); transform: scale(1.02); }
-.promo-apply-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.promo-message {
-  font-size: 12px; margin-top: 6px; display: none;
-  padding: 0 2px; animation: fadeIn 0.2s ease;
-}
-.promo-message.error { color: var(--error); display: block; }
-.promo-message.success { color: var(--success); display: block; }
-.promo-applied {
-  display: none; align-items: center; gap: 8px;
-  margin-top: 10px; padding: 8px 12px;
-  background: rgba(39, 174, 96, 0.06); border: 1px solid rgba(39, 174, 96, 0.2);
-  border-radius: var(--radius); font-size: 13px; color: var(--success);
-  animation: fadeIn 0.2s ease;
-}
-.promo-applied.is-visible { display: flex; }
-.promo-applied .promo-code-tag {
-  font-family: 'DM Mono', monospace; font-weight: 600;
-  letter-spacing: 0.05em; text-transform: uppercase;
-}
-.promo-remove {
-  margin-left: auto; border: none; background: none;
-  color: var(--muted); cursor: pointer; font-size: 12px;
-  padding: 2px 6px; border-radius: 4px;
-  transition: color 0.2s ease, background 0.2s ease;
-}
-.promo-remove:hover { color: var(--error); background: rgba(192, 57, 43, 0.06); }
 
 /* ─── PLATEBNÍ METODY ─── */
 .payment-methods {
@@ -1070,7 +1005,6 @@ body {
   margin-bottom: 8px;
 }
 .summary-line.shipping { color: var(--success); font-weight: 600; }
-.summary-line.discount { color: #27AE60; font-weight: 600; }
 .summary-line.total {
   font-size: 16px;
   font-weight: 700;
@@ -2522,27 +2456,6 @@ body {
 
         </div>
 
-        <!-- ═══ PROMO KÓDY ═══ -->
-        <div class="checkout-card animate-in animate-in-delay-2" style="padding: 16px 20px;">
-          <div class="promo-section">
-            <button type="button" class="promo-toggle" id="promo-toggle">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
-              Har du en rabattkod?
-            </button>
-            <div class="promo-form" id="promo-form">
-              <div class="promo-input-row">
-                <input type="text" class="promo-input" id="promo-input" placeholder="Ange din kod" maxlength="30" autocomplete="off">
-                <button type="button" class="promo-apply-btn" id="promo-apply-btn">Använd</button>
-              </div>
-              <div class="promo-message" id="promo-message"></div>
-            </div>
-            <div class="promo-applied" id="promo-applied">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><path d="M20 6L9 17l-5-5"/></svg>
-              <span>Rabatt: <span class="promo-code-tag" id="promo-code-tag"></span></span>
-              <button type="button" class="promo-remove" id="promo-remove">Ta bort</button>
-            </div>
-          </div>
-        </div>
 
         <!-- ═══ SEKCE 3: BETAALMETHODE ═══ -->
         <div class="checkout-card animate-in animate-in-delay-2" style="border-radius:0;">
@@ -2604,7 +2517,7 @@ body {
           <div class="checkout-trust">
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-              <span id="trust-provider-text">Säkrad via Stripe</span>
+              <span id="trust-provider-text">Säkrad via Klarna &amp; PayPal</span>
             </div>
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -2668,10 +2581,6 @@ body {
           <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMjQiIHdpZHRoPSI1NiIgaGVpZ2h0PSIxMyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIyNCIgcng9IjMiIGZpbGw9IiMwMDMyYTAiLz48dGV4dCB4PSI1MCIgeT0iMTciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCI+UG9zdE5vcmQ8L3RleHQ+PC9zdmc+" alt="PostNord" style="vertical-align:middle;border-radius:2px;">
         </span>
         <span style="color:#27AE60;font-weight:600;">Gratis</span>
-      </div>
-      <div class="summary-line discount" id="summary-discount" style="display:none;">
-        <span style="display:flex;align-items:center;gap:6px;">Rabatt <span id="discount-code-label" style="font-size:11px;background:rgba(39,174,96,0.1);color:#27AE60;padding:1px 6px;border-radius:4px;font-weight:600;"></span></span>
-        <span id="discount-value" style="color:#27AE60;font-weight:600;"></span>
       </div>
       <div class="summary-line total" id="summary-total">
         <span>Totalt</span>
@@ -2748,15 +2657,7 @@ body {
 <div class="checkout-footer">
   <div class="checkout-footer-trust">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    Alla transaktioner behandlas säkert via <strong>Stripe</strong>.
-  </div>
-  <div class="checkout-footer-company">
-    <strong>Släpp taget om det som förstör dig</strong> är en utgåva av Performance Marketing Solution s.r.o.<br>
-    Rybná 716/24, Staré Město, 110 00 Prag, Tjeckien<br>
-    Org.nr: 06259928 · DIČ: CZ06259928<br>
-    Vi skickar från vårt europeiska distributionscenter via PostNord till hela Sverige.<br>
-    Frågor eller problem? Kontakta oss gärna: <a href="mailto:hej@slapptagetboken.se"><strong>hej@slapptagetboken.se</strong></a><br>
-    Vi svarar inom 24 timmar och löser varje problem personligen.
+    Alla transaktioner behandlas säkert via <strong>Klarna &amp; PayPal</strong>.
   </div>
   <div class="checkout-footer-links">
     &copy; 2026 Släpp taget om det som förstör dig · Joris De Vries<br>
@@ -3073,22 +2974,6 @@ body {
       shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Frakt <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMjQiIHdpZHRoPSI1NiIgaGVpZ2h0PSIxMyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIyNCIgcng9IjMiIGZpbGw9IiMwMDMyYTAiLz48dGV4dCB4PSI1MCIgeT0iMTciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCI+UG9zdE5vcmQ8L3RleHQ+PC9zdmc+" alt="PostNord" style="vertical-align:middle;border-radius:2px;"></span><span>' + shippingLabel + '</span>';
     }
 
-    // Korting (discount) — toon als promo kód is toegepast
-    var discountTotal = cart.discount_total || 0;
-    var discountEl = document.getElementById('summary-discount');
-    if (discountEl) {
-      if (discountTotal > 0) {
-        discountEl.style.display = '';
-        var discountCodeLabel = document.getElementById('discount-code-label');
-        if (discountCodeLabel && savedPromoCode) {
-          discountCodeLabel.textContent = savedPromoCode;
-        }
-        var discountValEl = document.getElementById('discount-value');
-        if (discountValEl) discountValEl.textContent = '-' + formatPrice(discountTotal);
-      } else {
-        discountEl.style.display = 'none';
-      }
-    }
 
     // Totaal
     var totalEl = document.getElementById('desktop-total-price');
@@ -5040,7 +4925,7 @@ body {
           : 'Mollie';
         trustText.textContent = 'Säkrad via ' + trustProvider;
       } else {
-        trustText.textContent = 'Säkrad via ' + (selectedProvider === 'paypal' ? 'PayPal' : selectedProvider === 'stripe' ? 'Stripe' : 'Mollie');
+        trustText.textContent = 'Säkrad via Klarna & PayPal';
       }
     }
   }
@@ -5933,9 +5818,11 @@ body {
 
   // Save all form fields to localStorage
   function saveFormToStorage() {
+    var emailEl = document.getElementById('email');
+    var phoneEl = document.getElementById('phone');
     var draft = {
-      email: (document.getElementById('email') || {}).value || '',
-      phone: (document.getElementById('phone') || {}).value || '',
+      email: (emailEl || {}).value || '',
+      phone: (phoneEl || {}).value || '',
       first_name: (document.getElementById('first_name') || {}).value || '',
       last_name: (document.getElementById('last_name') || {}).value || '',
       address: (document.getElementById('address') || {}).value || '',
@@ -5945,7 +5832,10 @@ body {
       company_name: (document.getElementById('company_name') || {}).value || '',
       kvk_number: (document.getElementById('kvk_number') || {}).value || '',
       vat_number: (document.getElementById('vat_number') || {}).value || '',
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      // Persist Foxentry validation state so fields stay valid after refresh
+      email_valid: emailEl ? emailEl.classList.contains('valid') : false,
+      phone_valid: phoneEl ? phoneEl.classList.contains('valid') : false
     };
     localStorage.setItem('checkout_draft', JSON.stringify(draft));
   }
@@ -5961,6 +5851,7 @@ body {
         localStorage.removeItem('checkout_draft');
         return;
       }
+      var _hasFox = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
       var fields = ['email', 'phone', 'first_name', 'last_name', 'address', 'city', 'postal_code', 'country', 'company_name', 'kvk_number', 'vat_number'];
       fields.forEach(function(f) {
         var el = document.getElementById(f);
@@ -5968,8 +5859,16 @@ body {
           el.value = draft[f];
           // Trigger visual validation state
           if (el.value) el.classList.add('has-value');
-          // Run validation so the field gets .valid class (needed for submit check)
-          if (el.value.trim().length > 0) {
+          // For Foxentry-managed fields (email, phone), restore saved validation state
+          // instead of re-validating (which would fail since Foxentry hasn't run yet)
+          if (_hasFox && (f === 'email' || f === 'phone')) {
+            var wasValid = f === 'email' ? draft.email_valid : draft.phone_valid;
+            if (wasValid) {
+              el.classList.add('valid');
+              el.classList.remove('invalid');
+            }
+          } else if (el.value.trim().length > 0) {
+            // Run local validation for non-Foxentry fields
             validateField(el);
           }
         }
@@ -6068,6 +5967,12 @@ body {
     if (el) {
       el.addEventListener('input', debouncedSave);
       el.addEventListener('input', updateBackgroundCart);
+      // Save after blur with delay — captures Foxentry validation state (async)
+      if (id === 'email' || id === 'phone') {
+        el.addEventListener('blur', function() {
+          setTimeout(saveFormToStorage, 1500); // Wait for Foxentry API to complete
+        });
+      }
     }
   });
   // Country is a select, use change event
@@ -6187,137 +6092,10 @@ body {
     if (msbThumb) msbThumb.innerHTML = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">';
   }
 
-  /* ─── PROMO KÓDY — toggle + apply + remove ─── */
-  var promoToggle = document.getElementById('promo-toggle');
-  var promoForm = document.getElementById('promo-form');
-  var promoInput = document.getElementById('promo-input');
-  var promoApplyBtn = document.getElementById('promo-apply-btn');
-  var promoMessage = document.getElementById('promo-message');
-  var promoApplied = document.getElementById('promo-applied');
-  var promoCodeTag = document.getElementById('promo-code-tag');
-  var promoRemove = document.getElementById('promo-remove');
-
-  // Stav: uložený promo kód + sdílený cart pro promo validaci
+  // Promo code variables (kept for cart creation compatibility)
   var savedPromoCode = '';
   var promoAppliedToCart = false;
-  var promoCartId = null; // Cart vytvořený při validaci promo kódu — sdílený se submitem
-
-  if (promoToggle) {
-    promoToggle.addEventListener('click', function() {
-      var isOpen = promoForm.classList.contains('is-open');
-      if (isOpen) {
-        promoForm.classList.remove('is-open');
-        promoToggle.classList.remove('is-open');
-      } else {
-        promoForm.classList.add('is-open');
-        promoToggle.classList.add('is-open');
-        promoInput.focus();
-      }
-    });
-  }
-
-  if (promoApplyBtn) {
-    promoApplyBtn.addEventListener('click', function() {
-      var code = promoInput.value.trim().toUpperCase();
-      if (!code) {
-        promoMessage.textContent = 'Ange en rabattkod.';
-        promoMessage.className = 'promo-message error';
-        return;
-      }
-      // Disable button + loading
-      promoApplyBtn.disabled = true;
-      promoApplyBtn.textContent = 'Kontrollerar...';
-      promoMessage.className = 'promo-message';
-
-      // Stap 1: Cart aanmaken (als die nog niet bestaat)
-      var cartPromise;
-      if (promoCartId) {
-        cartPromise = Promise.resolve(promoCartId);
-      } else {
-        cartPromise = medusaFetch('/store/carts', {
-          method: 'POST',
-          body: JSON.stringify({ region_id: currentRegionId })
-        }).then(function(res) {
-          promoCartId = res.cart.id;
-          // Voeg hoofdproduct toe zodat Medusa promotions kan evalueren
-          return medusaFetch('/store/carts/' + promoCartId + '/line-items', {
-            method: 'POST',
-            body: JSON.stringify({ variant_id: VARIANT_ID, quantity: selectedBundleQty })
-          }).then(function() { return promoCartId; });
-        });
-      }
-
-      // Stap 2: Promo code toepassen via Medusa
-      cartPromise.then(function(cartId) {
-        return medusaFetch('/store/carts/' + cartId + '/promotions', {
-          method: 'POST',
-          body: JSON.stringify({ promo_codes: [code] })
-        });
-      })
-      .then(function(promoRes) {
-        // Succes — code is geldig
-        savedPromoCode = code;
-        promoAppliedToCart = true;
-        promoCodeTag.textContent = code;
-        promoApplied.classList.add('is-visible');
-        promoForm.classList.remove('is-open');
-        promoToggle.classList.remove('is-open');
-        promoToggle.style.display = 'none';
-        promoMessage.className = 'promo-message';
-        promoInput.value = '';
-        // Update order summary met korting
-        if (promoRes && promoRes.cart) {
-          updateOrderSummary(promoRes.cart);
-        }
-      })
-      .catch(function(err) {
-        // Fout — code is ongeldig
-        console.warn('Promo code geweigerd:', err.message || err);
-        promoMessage.textContent = 'Ogiltig rabattkod';
-        promoMessage.className = 'promo-message error';
-        savedPromoCode = '';
-        promoAppliedToCart = false;
-      })
-      .then(function() {
-        // Reset button
-        promoApplyBtn.disabled = false;
-        promoApplyBtn.textContent = 'Använd';
-      });
-    });
-  }
-
-  // Enter v input = klik na Toepassen
-  if (promoInput) {
-    promoInput.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        promoApplyBtn.click();
-      }
-    });
-  }
-
-  if (promoRemove) {
-    promoRemove.addEventListener('click', function() {
-      var removedCode = savedPromoCode;
-      savedPromoCode = '';
-      promoAppliedToCart = false;
-      promoApplied.classList.remove('is-visible');
-      promoToggle.style.display = '';
-      promoMessage.className = 'promo-message';
-      // Verwijder promo van cart als die bestaat
-      if (promoCartId && removedCode) {
-        medusaFetch('/store/carts/' + promoCartId + '/promotions', {
-          method: 'DELETE',
-          body: JSON.stringify({ promo_codes: [removedCode] })
-        }).then(function(res) {
-          if (res && res.cart) updateOrderSummary(res.cart);
-        }).catch(function() {});
-      }
-      // Verberg korting regel in samenvatting
-      var discountEl = document.getElementById('summary-discount');
-      if (discountEl) discountEl.style.display = 'none';
-    });
-  }
+  var promoCartId = null;
 
   /* ─── FORMULIER SUBMIT ─── */
   var form = document.getElementById('checkout-form');
