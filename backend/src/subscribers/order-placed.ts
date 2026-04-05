@@ -14,6 +14,24 @@ export default async function orderPlacedHandler({
   const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
 
+  // ── Idempotency: prevent duplicate order confirmation emails (e.g. after server restart) ──
+  try {
+    const freshOrder = await orderModuleService.retrieveOrder(data.id)
+    if ((freshOrder as any).metadata?.order_confirmation_sent === true) {
+      console.log(`[OrderPlaced] Skipping duplicate order confirmation for ${data.id} — already sent`)
+      return
+    }
+    // Set flag immediately BEFORE sending to prevent race conditions
+    await (orderModuleService as any).updateOrders(data.id, {
+      metadata: {
+        ...((freshOrder as any).metadata || {}),
+        order_confirmation_sent: true,
+      },
+    })
+  } catch (idempErr: any) {
+    console.warn(`[OrderPlaced] Idempotency check failed for ${data.id}, proceeding anyway:`, idempErr.message)
+  }
+
   const order = await orderModuleService.retrieveOrder(data.id, {
     relations: ['items', 'summary', 'shipping_address', 'billing_address'],
   })
