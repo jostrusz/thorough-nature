@@ -263,7 +263,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       deliveryMethodId: (deliveryMethodId || "").trim() || undefined,
       paymentMethodId: (paymentMethodId || "").trim() || undefined,
       cashAmount: isCOD ? (Number((order as any).total) || 0) + (Number(orderMeta.cod_fee) || 0) + deliveryFee : undefined,
-      cashCurrencyCode: "EUR",
+      cashCurrencyCode: ((order as any).currency_code || "EUR").toUpperCase(),
       note: orderNote || undefined,
     })
 
