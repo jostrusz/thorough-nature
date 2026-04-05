@@ -87,7 +87,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const paymentStatus = getPaymentStatus(order as any)
     const isCOD = (order as any).metadata?.payment_method === "cod" ||
                   (order as any).shipping_methods?.[0]?.data?.is_cod === true
-    if (!isCOD && paymentStatus !== "paid" && paymentStatus !== "captured" && paymentStatus !== "authorized") {
+    const isManualOrder = (order as any).metadata?.created_by === "manual_ai_order_creator"
+    if (!isCOD && !isManualOrder && paymentStatus !== "paid" && paymentStatus !== "captured" && paymentStatus !== "authorized") {
       res.status(400).json({ error: "Order not paid. Only paid orders or COD can be sent to WMS." })
       return
     }
