@@ -1303,6 +1303,18 @@ const TicketDetailPage = () => {
     },
   })
 
+  const [dextrumSent, setDextrumSent] = useState(false)
+  const dextrumMut = useMutation({
+    mutationFn: async () => {
+      const resp = await sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/ask-dextrum`, { method: "POST" })
+      return resp
+    },
+    onSuccess: () => {
+      setDextrumSent(true)
+      setTimeout(() => setDextrumSent(false), 3000)
+    },
+  })
+
   // Sort messages newest first — most recent message at top
   const msgs = [...(ticket?.messages || [])].sort((a: any, b: any) => +new Date(b.created_at) - +new Date(a.created_at))
 
@@ -1449,6 +1461,20 @@ const TicketDetailPage = () => {
               whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px",
             }}>
             {slackMut.isPending ? "\u23f3 Sending..." : slackSent ? "\u2705 Sent to Slack" : "\ud83d\udce8 Send to Slack"}
+          </button>
+
+          {/* Ask Dextrum */}
+          <button className="sb-action-btn" onClick={() => dextrumMut.mutate()} disabled={dextrumMut.isPending}
+            style={{
+              padding: "8px 14px", fontSize: "13px", fontWeight: 600,
+              color: dextrumSent ? D.green : "#c2410c",
+              backgroundColor: dextrumSent ? D.greenLight : "#fff7ed",
+              border: `1px solid ${dextrumSent ? D.green + "40" : "#c2410c" + "25"}`,
+              borderRadius: D.r8, cursor: "pointer",
+              transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px",
+            }}>
+            {dextrumMut.isPending ? "\u23f3 Sending..." : dextrumSent ? "\u2705 Sent to Dextrum" : "\ud83d\udce6 Ask Dextrum"}
           </button>
 
           {/* Copy conversation */}
