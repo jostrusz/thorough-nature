@@ -7,11 +7,33 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/psisuperzivot/images/preloader.webp" type="image/webp">
 
-<!-- Zabránění probliknutí checkoutu při návratu z platby — formulář se ihned skryje (CSS v <style> níže) -->
+<!-- Zabránění probliknutí checkoutu při návratu z platby — formulář se ihned skryje -->
 <script>
-if (window.location.search.indexOf('payment_return=1') !== -1) {
+(function() {
+  var search = window.location.search;
+  if (search.indexOf('payment_return=1') === -1) return;
+  // Cancelled/pending: show full-page error immediately (no flash)
+  if (search.indexOf('comgate_status=cancelled') !== -1 || search.indexOf('comgate_status=pending') !== -1) {
+    var isCancelled = search.indexOf('comgate_status=cancelled') !== -1;
+    document.write('<style>.checkout-form,.content,.order-summary,.checkout-header,.breadcrumb-nav{display:none!important}</style>');
+    document.write('<div id="payment-failed-page" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFF5F5 0%,#FFF 50%,#FFF5F5 100%);font-family:DM Sans,Inter,sans-serif;padding:20px;">'
+      + '<div style="max-width:480px;width:100%;text-align:center;">'
+      + '<div style="width:80px;height:80px;margin:0 auto 24px;background:' + (isCancelled ? '#FEE2E2' : '#FEF3C7') + ';border-radius:50%;display:flex;align-items:center;justify-content:center;">'
+      + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="' + (isCancelled ? '#DC2626' : '#D97706') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+      + (isCancelled
+        ? '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>'
+        : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>')
+      + '</svg></div>'
+      + '<h1 style="font-size:24px;font-weight:700;color:#1a1a2e;margin:0 0 12px;">' + (isCancelled ? 'Platba byla zrušena' : 'Platba čeká na zpracování') + '</h1>'
+      + '<p style="font-size:16px;color:#666;margin:0 0 32px;line-height:1.5;">' + (isCancelled ? 'Vaše platba nebyla dokončena. Žádné peníze nebyly strženy. Můžete to zkusit znovu nebo zvolit jiný způsob platby.' : 'Vaše platba se stále zpracovává. Pokud nebude dokončena do několika minut, zkuste objednávku zadat znovu.') + '</p>'
+      + '<a href="' + window.location.pathname + '" style="display:inline-block;padding:16px 48px;background:linear-gradient(135deg,#6B21A8,#7C3AED);color:#fff;font-size:16px;font-weight:600;border-radius:12px;text-decoration:none;box-shadow:0 4px 14px rgba(107,33,168,0.3);transition:transform 0.15s;">Zkusit objednávku znovu</a>'
+      + '<p style="font-size:13px;color:#999;margin-top:20px;">Pokud problém přetrvává, kontaktujte nás na <a href="mailto:podpora@psi-superzivot.cz" style="color:#6B21A8;">podpora@psi-superzivot.cz</a></p>'
+      + '</div></div>');
+    return;
+  }
+  // Paid/success: hide checkout, show preloader
   document.write('<style>.checkout-form,.content,.order-summary{display:none!important}</style>');
-}
+})();
 </script>
 
 <!-- Mollie Components (platební karta) -->
@@ -6860,43 +6882,13 @@ body {
    * URL has ?payment_return=1&cart_id=xxx
    * We complete the cart and redirect to upsell/thank-you.
    *
-   * If comgate_status=cancelled or pending, show appropriate message.
    */
   (function() {
     var params = new URLSearchParams(window.location.search);
     if (params.get('payment_return') !== '1') return;
 
     var cartId = params.get('cart_id');
-    var comgateStatus = params.get('comgate_status');
-
-    // ── Comgate cancelled/pending: show message and let user retry ──
-    if (comgateStatus === 'cancelled' || comgateStatus === 'pending') {
-      // Clean URL without reloading
-      var cleanUrl = window.location.pathname;
-      window.history.replaceState({}, '', cleanUrl);
-
-      // Show inline error banner at top of checkout
-      var banner = document.createElement('div');
-      banner.id = 'payment-status-banner';
-      banner.style.cssText = 'max-width:640px;margin:16px auto;padding:16px 20px;background:#FFF3F3;border:1px solid #E74C3C;border-radius:10px;display:flex;align-items:center;gap:12px;font-family:DM Sans,sans-serif;';
-      if (comgateStatus === 'cancelled') {
-        banner.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><div><div style="font-weight:600;color:#C0392B;">Platba byla zrušena</div><div style="font-size:13px;color:#666;margin-top:2px;">Vaše platba nebyla provedena. Můžete to zkusit znovu nebo zvolit jiný způsob platby.</div></div>';
-      } else {
-        banner.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F39C12" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div><div style="font-weight:600;color:#E67E22;">Platba čeká na zpracování</div><div style="font-size:13px;color:#666;margin-top:2px;">Vaše platba se stále zpracovává. Pokud nebude dokončena, zkuste to prosím znovu.</div></div>';
-      }
-      // Insert banner after the checkout heading
-      var formEl = document.getElementById('checkout-form');
-      if (formEl) formEl.parentNode.insertBefore(banner, formEl);
-
-      // Auto-hide after 15 seconds
-      setTimeout(function() {
-        var b = document.getElementById('payment-status-banner');
-        if (b) { b.style.opacity = '0'; b.style.transition = 'opacity 0.5s'; setTimeout(function() { b.remove(); }, 500); }
-      }, 15000);
-
-      return; // Don't try to complete cart — let user retry
-    }
-
+    // Cancelled/pending payments are handled by the full-page error in <head> script
     if (!cartId) return;
 
     // Show branded preloader (injected by head script, hides checkout form)
