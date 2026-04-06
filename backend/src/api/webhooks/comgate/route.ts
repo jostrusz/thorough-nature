@@ -257,34 +257,66 @@ async function safetyNetCompleteCart(
       `[Comgate Webhook] Safety net: still no order after ${DELAY_MS / 1000}s delay. Searching for cart...`
     )
 
-    // Search recent uncompleted carts for one with this Comgate transaction ID
-    const { ContainerRegistrationKeys } = await import("@medusajs/framework/utils")
-    const query = scope.resolve(ContainerRegistrationKeys.QUERY)
-
-    const { data: carts } = await query.graph({
-      entity: "cart",
-      fields: [
-        "id",
-        "completed_at",
-        "email",
-        "payment_collection.*",
-        "payment_collection.payment_sessions.*",
-      ],
-      filters: {},
-      pagination: { order: { created_at: "DESC" }, skip: 0, take: 80 },
-    })
-
+    // Search for uncompleted cart with this Comgate transaction ID
+    // Strategy 1: Direct SQL query on payment_session.data (most reliable)
     let targetCart: any = null
-    for (const cart of carts || []) {
-      if (cart.completed_at) continue
-      const sessions = cart.payment_collection?.payment_sessions || []
-      for (const session of sessions) {
-        if (session.data?.comgateTransId === transId) {
-          targetCart = cart
-          break
-        }
+
+    try {
+      const { rows: cartRows } = await pool.query(
+        `SELECT c.id, c.completed_at, c.email
+         FROM cart c
+         JOIN payment_collection pc ON pc.id = c.payment_collection_id
+         JOIN payment_session ps ON ps.payment_collection_id = pc.id
+         WHERE c.completed_at IS NULL
+           AND (ps.data->>'transId' = $1 OR ps.data->>'comgateTransId' = $1)
+         ORDER BY c.created_at DESC
+         LIMIT 1`,
+        [transId]
+      )
+      if (cartRows[0]) {
+        targetCart = cartRows[0]
+        logger.info(
+          `[Comgate Webhook] Safety net: found cart via SQL: ${targetCart.id} (email: ${targetCart.email})`
+        )
       }
-      if (targetCart) break
+    } catch (sqlErr: any) {
+      logger.warn(`[Comgate Webhook] Safety net: SQL cart search failed: ${sqlErr.message}`)
+    }
+
+    // Strategy 2: Fallback to query.graph if SQL didn't find it
+    if (!targetCart) {
+      try {
+        const { ContainerRegistrationKeys } = await import("@medusajs/framework/utils")
+        const queryService = scope.resolve(ContainerRegistrationKeys.QUERY)
+
+        const { data: carts } = await queryService.graph({
+          entity: "cart",
+          fields: [
+            "id",
+            "completed_at",
+            "email",
+            "payment_collection.*",
+            "payment_collection.payment_sessions.*",
+          ],
+          filters: {},
+          pagination: { order: { created_at: "DESC" }, skip: 0, take: 80 },
+        })
+
+        for (const cart of carts || []) {
+          if (cart.completed_at) continue
+          const sessions = cart.payment_collection?.payment_sessions || []
+          for (const session of sessions) {
+            // Check both field names: "transId" (from initiatePayment) and "comgateTransId" (legacy)
+            if (session.data?.transId === transId || session.data?.comgateTransId === transId) {
+              targetCart = cart
+              break
+            }
+          }
+          if (targetCart) break
+        }
+      } catch (graphErr: any) {
+        logger.warn(`[Comgate Webhook] Safety net: query.graph fallback failed: ${graphErr.message}`)
+      }
     }
 
     if (!targetCart) {
