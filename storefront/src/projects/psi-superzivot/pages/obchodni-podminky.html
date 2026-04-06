@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kontakt — Psí Superživot | Zákaznická podpora</title>
-<meta name="description" content="Máte dotaz ohledně knihy Psí Superživot? Kontaktujte nás. Rádi vám pomůžeme s objednávkou, doručením nebo čímkoliv dalším.">
+<title>Obchodní podmínky — Psí Superživot</title>
+<meta name="description" content="Obchodní podmínky eshopu psi-superzivot.cz. Performance Marketing Solution s.r.o., IČO: 06259928.">
 <meta name="robots" content="noindex, follow">
-<link rel="canonical" href="https://www.psi-superzivot.cz/kontakt">
+<link rel="canonical" href="https://www.psi-superzivot.cz/obchodni-podminky">
 <link rel="icon" href="preloader.webp" type="image/webp">
 
 <!-- ═══ FONTS ═══ -->
@@ -15,8 +15,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-/* ═══ Psí Superživot Design ═══ */
-
 /* ═══ CSS PROMĚNNÉ — Psí Superživot Design ═══ */
 :root {
  --bg: #FFFFFF;
@@ -164,144 +162,104 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
  padding: 48px 20px 80px;
 }
 
-/* Hlavní kontaktní karta */
-.contact-card {
- background: var(--white);
- border: 1px solid var(--section);
- border-radius: 20px;
- padding: 40px;
- box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
- margin-bottom: 32px;
-}
-.contact-card h2 {
- font-family: 'Inter', sans-serif;
- font-size: 24px;
- color: var(--heading);
- margin-bottom: 24px;
-}
-.contact-item {
- display: flex;
- align-items: flex-start;
- gap: 16px;
- padding: 16px 0;
- border-bottom: 1px solid var(--section);
-}
-.contact-item:last-child { border-bottom: none; }
-.contact-icon {
- width: 48px;
- height: 48px;
- border-radius: 12px;
- background: var(--light);
- display: flex;
- align-items: center;
- justify-content: center;
- font-size: 22px;
- flex-shrink: 0;
-}
-.contact-info h3 {
- font-family: 'Cabin', sans-serif;
- font-size: 15px;
- font-weight: 600;
- color: var(--heading);
- margin-bottom: 4px;
-}
-.contact-info p {
- font-family: 'Cabin', sans-serif;
- font-size: 15px;
- color: var(--body);
- line-height: 1.6;
- margin: 0;
-}
-.contact-info a {
- color: var(--cta);
- text-decoration: none;
- font-weight: 500;
- transition: color 0.2s;
-}
-.contact-info a:hover { color: var(--cta-hover); }
-
-/* Upozornění */
-.notice-box {
- background: linear-gradient(135deg, var(--light), var(--section));
- border-left: 4px solid var(--cta);
- border-radius: 0 16px 16px 0;
- padding: 24px 28px;
- margin-bottom: 32px;
-}
-.notice-box h3 {
- font-family: 'Inter', sans-serif;
- font-size: 18px;
- color: var(--heading);
- margin-bottom: 8px;
-}
-.notice-box p {
- font-family: 'Cabin', sans-serif;
- font-size: 15px;
- color: var(--body);
- line-height: 1.7;
- margin: 0;
-}
-
-/* Servisní karty */
-.service-grid {
- display: grid;
- grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
- gap: 20px;
- margin-top: 32px;
-}
-.service-card {
- background: var(--white);
- border: 1px solid var(--section);
- border-radius: 16px;
- padding: 28px 24px;
- text-align: center;
- transition: all 0.3s ease;
-}
-.service-card:hover {
- transform: translateY(-3px);
- box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
- border-color: var(--highlight);
-}
-.service-card .icon {
- font-size: 32px;
- margin-bottom: 14px;
- display: block;
-}
-.service-card h3 {
- font-family: 'Cabin', sans-serif;
- font-size: 15px;
- font-weight: 700;
- color: var(--heading);
- margin-bottom: 8px;
-}
-.service-card p {
- font-family: 'Cabin', sans-serif;
- font-size: 14px;
- color: var(--muted);
- line-height: 1.6;
- margin: 0;
-}
-
-/* Firemní údaje */
-.company-info {
+.info-box {
  background: var(--light);
  border: 1px solid var(--section);
  border-radius: 16px;
  padding: 28px;
- margin-top: 40px;
+ margin-bottom: 40px;
 }
-.company-info h3 {
+.info-box h3 {
  font-family: 'Inter', sans-serif;
  font-size: 18px;
  color: var(--heading);
  margin-bottom: 12px;
 }
-.company-info p {
+.info-box p, .info-box li {
  font-family: 'Cabin', sans-serif;
  font-size: 15px;
  color: var(--body);
  line-height: 1.7;
- margin: 0 0 6px;
+}
+.info-box ul {
+ list-style: none;
+ padding: 0;
+}
+.info-box ul li {
+ padding: 4px 0;
+}
+.info-box ul li::before {
+ content: '→ ';
+ color: var(--cta);
+ font-weight: 700;
+}
+
+.section-block {
+ margin-bottom: 40px;
+}
+.section-block h2 {
+ font-family: 'Inter', sans-serif;
+ font-size: 24px;
+ font-weight: 600;
+ color: var(--heading);
+ margin-bottom: 16px;
+ line-height: 1.3;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+}
+.section-block h2 .section-num {
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ width: 36px;
+ height: 36px;
+ background: var(--cta);
+ color: var(--white);
+ font-family: 'Cabin', sans-serif;
+ font-size: 15px;
+ font-weight: 700;
+ border-radius: 10px;
+ flex-shrink: 0;
+}
+.section-block p {
+ font-family: 'Cabin', sans-serif;
+ font-size: 16px;
+ color: var(--body);
+ line-height: 1.75;
+ margin-bottom: 12px;
+}
+.section-block ul, .section-block ol {
+ padding-left: 24px;
+ margin-bottom: 12px;
+}
+.section-block li {
+ font-family: 'Cabin', sans-serif;
+ font-size: 16px;
+ color: var(--body);
+ line-height: 1.75;
+ margin-bottom: 6px;
+}
+.section-block strong {
+ color: var(--heading);
+}
+
+.highlight-box {
+ background: linear-gradient(135deg, var(--light), var(--section));
+ border-left: 4px solid var(--cta);
+ border-radius: 0 12px 12px 0;
+ padding: 20px 24px;
+ margin: 20px 0;
+}
+.highlight-box p {
+ margin: 0;
+ font-size: 15px;
+}
+
+.divider {
+ height: 1px;
+ background: var(--section);
+ margin: 40px 0;
 }
 
 /* ═══ FOOTER ═══ */
@@ -319,14 +277,22 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
  gap: 40px;
  flex-wrap: wrap;
 }
-.footer-brand { display: flex; align-items: center; gap: 16px; }
+.footer-brand {
+ display: flex;
+ align-items: center;
+ gap: 16px;
+}
 .footer-brand-text {
  font-family: 'Inter', sans-serif;
  font-size: 18px;
  color: var(--white);
  line-height: 1.3;
 }
-.footer-links { display: flex; flex-direction: column; gap: 10px; }
+.footer-links {
+ display: flex;
+ flex-direction: column;
+ gap: 10px;
+}
 .footer-links a {
  font-family: 'Cabin', sans-serif;
  font-size: 14px;
@@ -373,8 +339,7 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
  .navbar-hamburger.open span:nth-child(2) { opacity: 0; }
  .navbar-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
  .page-header h1 { font-size: 28px; }
- .contact-card { padding: 28px 20px; }
- .service-grid { grid-template-columns: 1fr; }
+ .section-block h2 { font-size: 20px; }
  .footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 32px; }
  .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
 }
@@ -408,13 +373,13 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 <!-- ═══ NAVBAR ═══ -->
 <nav class="navbar" id="navbar">
  <div class="navbar-inner">
-  <a href="." class="navbar-logo"><img src="psi-superzivot-logo.png" alt="Psí Superživot" width="160" height="40"></a>
+  <a href="." class="navbar-logo"><img src="/psisuperzivot/images/psi-superzivot-logo.png" alt="Psí Superživot" width="160" height="40"></a>
   <div class="navbar-links">
-   <a href="verzending">Doprava a doručení</a>
-   <a href="retourbeleid">Reklamace a vrácení</a>
-   <a href="voorwaarden">Obchodní podmínky</a>
-   <a href="privacy">Ochrana údajů</a>
-   <a href="contact">Kontakt</a>
+   <a href="doprava">Doprava a doručení</a>
+   <a href="reklamace">Reklamace a vrácení</a>
+   <a href="obchodni-podminky">Obchodní podmínky</a>
+   <a href="ochrana-udaju">Ochrana údajů</a>
+   <a href="kontakt">Kontakt</a>
    <a href="checkout" class="navbar-cta">Objednat &rarr;</a>
   </div>
   <button class="navbar-hamburger" id="navToggle" onclick="toggleMobileMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -422,90 +387,165 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 </nav>
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
- <a href="verzending" onclick="toggleMobileMenu()">Doprava a doručení</a>
- <a href="retourbeleid" onclick="toggleMobileMenu()">Reklamace a vrácení</a>
- <a href="voorwaarden" onclick="toggleMobileMenu()">Obchodní podmínky</a>
- <a href="privacy" onclick="toggleMobileMenu()">Ochrana údajů</a>
- <a href="contact" onclick="toggleMobileMenu()">Kontakt</a>
+ <a href="doprava" onclick="toggleMobileMenu()">Doprava a doručení</a>
+ <a href="reklamace" onclick="toggleMobileMenu()">Reklamace a vrácení</a>
+ <a href="obchodni-podminky" onclick="toggleMobileMenu()">Obchodní podmínky</a>
+ <a href="ochrana-udaju" onclick="toggleMobileMenu()">Ochrana údajů</a>
+ <a href="kontakt" onclick="toggleMobileMenu()">Kontakt</a>
  <a href="checkout" class="nav-cta-mobile" onclick="toggleMobileMenu()">Objednat &rarr;</a>
 </div>
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">💬 Zákaznická podpora</div>
- <h1>Kontakt</h1>
- <p>Máte dotaz ohledně vaší objednávky, knihy nebo reklamace? Rádi vám pomůžeme!</p>
+ <div class="badge">📋 Právní informace</div>
+ <h1>Obchodní podmínky</h1>
+ <p>Přečtěte si prosím naše obchodní podmínky před odesláním objednávky.</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="page-content">
 
- <!-- Kontaktní karta -->
- <div class="contact-card">
-  <h2>Napište nám nebo zavolejte</h2>
-
-  <div class="contact-item">
-   <div class="contact-icon">📧</div>
-   <div class="contact-info">
-    <h3>E-mail</h3>
-    <p><a href="mailto:podpora@psi-superzivot.cz">podpora@psi-superzivot.cz</a></p>
-    <p>Odpovídáme do 24 hodin v pracovní dny</p>
-   </div>
-  </div>
-
-  <div class="contact-item">
-   <div class="contact-icon">📞</div>
-   <div class="contact-info">
-    <h3>Telefon</h3>
-    <p><a href="tel:+420732915755">+420 732 915 755</a></p>
-    <p>Po–Pá: 9:00 – 17:00</p>
-   </div>
-  </div>
-
-  <div class="contact-item">
-   <div class="contact-icon">📍</div>
-   <div class="contact-info">
-    <h3>Adresa</h3>
-    <p>Performance Marketing Solution s.r.o.<br>
-    Rybná 716/24, Staré Město<br>
-    110 00 Praha, Česká republika</p>
-   </div>
-  </div>
+ <div class="info-box">
+  <h3>📌 Shrnutí</h3>
+  <ul>
+   <li>14 dnů na odstoupení od smlouvy (zákonné právo)</li>
+   <li>Doprava zdarma po celé České republice</li>
+   <li>30denní záruka vrácení peněz</li>
+   <li>Bezpečné platby přes Comgate (Visa, Mastercard, bankovní převod)</li>
+   <li>Digitální produkty: po doručení bez možnosti vrácení</li>
+  </ul>
  </div>
 
- <!-- Upozornění -->
- <div class="notice-box">
-  <h3>⏱ Doba odpovědi</h3>
-  <p>Snažíme se odpovědět na všechny dotazy do <strong>24 hodin</strong> v pracovní dny. O víkendech a svátcích může být doba odpovědi delší.</p>
- </div>
-
- <!-- Služby -->
- <div class="service-grid">
-  <div class="service-card">
-   <span class="icon">📦</span>
-   <h3>Sledování zásilky</h3>
-   <p>Obdrželi jste sledovací kód? Sledujte svůj balíček přes odkaz v potvrzovacím e-mailu.</p>
-  </div>
-  <div class="service-card">
-   <span class="icon">🔄</span>
-   <h3>Vrácení zboží</h3>
-   <p>Nejste spokojeni? Napište nám e-mail s číslem objednávky a důvodem vrácení.</p>
-  </div>
-  <div class="service-card">
-   <span class="icon">💳</span>
-   <h3>Platba a fakturace</h3>
-   <p>Máte dotaz k platbě nebo potřebujete fakturu? Kontaktujte nás s číslem objednávky.</p>
-  </div>
- </div>
-
- <!-- Firemní údaje -->
- <div class="company-info">
-  <h3>🏢 Firemní údaje</h3>
+ <!-- Článek 1 -->
+ <div class="section-block">
+  <h2><span class="section-num">1</span> Identifikace prodávajícího</h2>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, Staré Město, 110 00 Praha, Česká republika</p>
-  <p>IČO: 06259928</p>
-  <p>DIČ: CZ06259928</p>
-  <p>E-mail: <a href="mailto:podpora@psi-superzivot.cz" style="color: var(--cta);">podpora@psi-superzivot.cz</a></p>
+  <p>Rybná 716/24, Staré Město, 110 00 Praha</p>
+  <p>IČO: 06259928<br>DIČ: CZ06259928</p>
+  <p>E-mail: <a href="mailto:podpora@psi-superzivot.cz" style="color: var(--cta);">podpora@psi-superzivot.cz</a><br>
+  Telefon: +420 732 915 755</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Článek 2 -->
+ <div class="section-block">
+  <h2><span class="section-num">2</span> Platnost podmínek</h2>
+  <p>Tyto obchodní podmínky se vztahují na veškeré nabídky prodávajícího a na každou smlouvu uzavřenou na dálku mezi prodávajícím a spotřebitelem.</p>
+  <p>Před uzavřením smlouvy na dálku je spotřebiteli zpřístupněn text těchto obchodních podmínek.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Článek 3 -->
+ <div class="section-block">
+  <h2><span class="section-num">3</span> Nabídka</h2>
+  <p>Pokud má nabídka omezenou dobu platnosti nebo je podmíněna zvláštními podmínkami, je to v nabídce výslovně uvedeno.</p>
+  <p>Nabídka obsahuje úplný a přesný popis nabízených produktů a/nebo služeb. Popis je dostatečně podrobný, aby spotřebitel mohl nabídku řádně posoudit.</p>
+  <p>Zjevné omyly nebo chyby v nabídce prodávajícího nezavazují.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Článek 4 -->
+ <div class="section-block">
+  <h2><span class="section-num">4</span> Smlouva</h2>
+  <p>Smlouva je uzavřena okamžikem přijetí nabídky spotřebitelem a splněním stanovených podmínek.</p>
+  <p>Pokud spotřebitel přijal nabídku elektronickou cestou, prodávající neprodleně elektronicky potvrdí přijetí objednávky.</p>
+
+  <div class="highlight-box">
+   <p><strong>Upozornění:</strong> Prodávající zajišťuje technická a organizační opatření k zabezpečení elektronického přenosu dat a dbá na bezpečné webové prostředí.</p>
+  </div>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Článek 5 -->
+ <div class="section-block">
+  <h2><span class="section-num">5</span> Právo na odstoupení od smlouvy</h2>
+  <p><strong>U fyzických produktů:</strong></p>
+  <p>Při nákupu produktů má spotřebitel právo odstoupit od smlouvy bez udání důvodu ve lhůtě 14 dnů. Tato lhůta začíná běžet dnem následujícím po převzetí produktu spotřebitelem.</p>
+  <p>Během lhůty pro odstoupení spotřebitel zachází s produktem a jeho obalem pečlivě. Produkt rozbalí nebo použije pouze v rozsahu nezbytném pro posouzení, zda si jej přeje ponechat.</p>
+  <p><strong>U digitálních produktů (e-booky, PDF):</strong></p>
+  <p>Po dodání digitálního obsahu (stažení) zaniká právo na odstoupení od smlouvy, pokud spotřebitel výslovně souhlasil se vzdáním se tohoto práva.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Článek 6 -->
+ <div class="section-block">
+  <h2><span class="section-num">6</span> Cena</h2>
+  <p>Po dobu platnosti nabídky se ceny nabízených produktů a/nebo služeb nezvyšují, s výjimkou cenových změn vyplývajících ze změn sazeb DPH.</p>
+  <p>Všechny ceny jsou uvedeny včetně DPH a včetně nákladů na dopravu (není-li uvedeno jinak).</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Článek 7 -->
+ <div class="section-block">
+  <h2><span class="section-num">7</span> Platba</h2>
+  <p>Spotřebitel může platit následujícími způsoby:</p>
+  <ul>
+   <li>Platba kartou (Visa, Mastercard) přes Comgate</li>
+   <li>Bankovní převod (FIO, ČS, ČSOB)</li>
+  </ul>
+  <p>Platba je zpracována v okamžiku odeslání objednávky. Po úspěšné platbě obdrží spotřebitel potvrzení objednávky e-mailem.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Článek 8 -->
+ <div class="section-block">
+  <h2><span class="section-num">8</span> Dodání</h2>
+  <p>Prodávající dbá nejvyšší péče při přijímání a vyřizování objednávek produktů.</p>
+  <p>Místem dodání je adresa, kterou spotřebitel sdělil prodávajícímu.</p>
+  <p>Doba dodání činí zpravidla 1–3 pracovní dny v rámci České republiky. Zásilky jsou odesílány z českého skladu.</p>
+
+  <div class="highlight-box">
+   <p><strong>Doprava je zdarma</strong> po celé České republice.</p>
+  </div>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Článek 9 -->
+ <div class="section-block">
+  <h2><span class="section-num">9</span> Záruka</h2>
+  <p>Kromě zákonného práva na odstoupení od smlouvy ve lhůtě 14 dnů nabízíme <strong>rozšířenou 30denní záruku vrácení peněz</strong>.</p>
+  <p>Pokud nejste s produktem spokojeni, můžete nás do 30 dnů od převzetí kontaktovat a my vám vrátíme plnou částku bez zbytečných otázek.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Článek 10 -->
+ <div class="section-block">
+  <h2><span class="section-num">10</span> Reklamace</h2>
+  <p>Reklamace týkající se plnění smlouvy musí být podány u prodávajícího v přiměřené lhůtě, úplně a srozumitelně, poté co spotřebitel zjistil vady.</p>
+  <p>Reklamace podané u prodávajícího budou vyřízeny ve lhůtě 14 dnů ode dne jejich přijetí.</p>
+  <p>Kontaktujte nás na: <a href="mailto:podpora@psi-superzivot.cz" style="color: var(--cta);">podpora@psi-superzivot.cz</a></p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Článek 11 -->
+ <div class="section-block">
+  <h2><span class="section-num">11</span> Duševní vlastnictví</h2>
+  <p>Veškerá práva duševního vlastnictví k produktům, včetně, nikoliv však výlučně, textů, obrázků, návrhů a rozvržení, náležejí prodávajícímu nebo jeho poskytovatelům licencí.</p>
+  <p>Bez předchozího písemného souhlasu prodávajícího není dovoleno produkty nebo jakoukoli jejich část rozmnožovat, ukládat v databázi nebo zveřejňovat.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Článek 12 -->
+ <div class="section-block">
+  <h2><span class="section-num">12</span> Rozhodné právo</h2>
+  <p>Na veškeré spory vzniklé v souvislosti s touto smlouvou se vztahuje právo České republiky, s přihlédnutím k závazným právním předpisům země, v níž má spotřebitel bydliště.</p>
+  <p>Evropská komise poskytuje platformu pro řešení sporů online (ODR): <a href="https://ec.europa.eu/consumers/odr/" target="_blank" style="color: var(--cta);">https://ec.europa.eu/consumers/odr/</a></p>
+ </div>
+
+ <div class="info-box" style="margin-top: 48px; background: linear-gradient(135deg, var(--light), var(--section));">
+  <h3>📅 Poslední aktualizace</h3>
+  <p>Tyto obchodní podmínky byly naposledy aktualizovány 1. března 2026. Vyhrazujeme si právo tyto podmínky kdykoli změnit.</p>
  </div>
 
 </div>
@@ -514,26 +554,26 @@ body { font-family: 'Cabin', sans-serif; background: var(--bg); color: var(--bod
 <footer class="site-footer">
  <div class="footer-inner">
   <div class="footer-brand">
-   <img src="psi-superzivot-logo.png" alt="Psí Superživot" class="footer-logo">
+   <img src="/psisuperzivot/images/psi-superzivot-logo.png" alt="Psí Superživot" class="footer-logo">
   </div>
   <div class="footer-links">
-   <a href="voorwaarden">Obchodní podmínky</a>
-   <a href="verzending">Doprava</a>
-   <a href="retourbeleid">Reklamace</a>
-   <a href="privacy">Ochrana údajů</a>
-   <a href="contact">Kontakt</a>
+   <a href="obchodni-podminky">Obchodní podmínky</a>
+   <a href="doprava">Doprava a doručení</a>
+   <a href="reklamace">Reklamace a vrácení</a>
+   <a href="ochrana-udaju">Ochrana údajů</a>
+   <a href="kontakt">Kontakt</a>
   </div>
   <div class="footer-payments">
-   <img src="/Loga komplet/comgate/cg-hor.svg" alt="Comgate" class="pay-icon" height="22">
-   <img src="/Loga komplet/Visa_Brandmark_Blue_RGB_2021.svg" alt="Visa" class="pay-icon" height="22">
-   <img src="/Loga komplet/mc_symbol.svg" alt="Mastercard" class="pay-icon" height="24">
-   <img src="/Loga komplet/CZ/fb_new.svg" alt="FIO banka" class="pay-icon" height="22">
-   <img src="/Loga komplet/CZ/csas.svg" alt="Česká spořitelna" class="pay-icon" height="22">
-   <img src="/Loga komplet/CZ/csob.svg" alt="ČSOB" class="pay-icon" height="22">
+   <img src="/icons/comgate.svg" alt="Comgate" class="pay-icon" width="36" height="22">
+   <img src="/icons/visa.svg" alt="Visa" class="pay-icon" width="36" height="22">
+   <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="36" height="24">
+   <img src="/icons/fio.svg" alt="FIO banka" class="pay-icon" width="36" height="22">
+   <img src="/icons/cs.svg" alt="Česká spořitelna" class="pay-icon" width="36" height="22">
+   <img src="/icons/csob.svg" alt="ČSOB" class="pay-icon" width="36" height="22">
   </div>
  </div>
  <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. &bull; Rybn&aacute; 716/24, Star&eacute; Město, 110 00 Praha &bull; IČO: 06259928 &bull; DIČ: CZ06259928</span>
+  <span>Performance Marketing Solution s.r.o. &bull; Rybná 716/24, Staré Město, 110 00 Praha &bull; IČO: 06259928 &bull; DIČ: CZ06259928</span>
   <span>&copy; 2026 Performance Marketing Solution s.r.o. Všechna práva vyhrazena.</span>
  </div>
 </footer>
