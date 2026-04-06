@@ -116,7 +116,9 @@ function findPrimaryPayment(order: any): { providerId: string; method: string; d
       }
     }
   }
-  return { providerId: "", method: order.metadata?.payment_method || "", data: {} }
+  // Fallback for manually created orders: use metadata.payment_provider
+  const metaProvider = order.metadata?.payment_provider || ""
+  return { providerId: metaProvider ? `pp_${metaProvider}` : "", method: order.metadata?.payment_method || "", data: {} }
 }
 
 function isCODOrder(order: any): boolean {
