@@ -88,6 +88,26 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "14.3 MB",
     },
   ],
+  'psi-superzivot': [
+    {
+      key: "e-books/Dlouhovekost zacina v misce.pdf",
+      title: "Dlouhověkost začíná v misce",
+      description: "E-book (PDF)",
+      size: "4.3 MB",
+    },
+    {
+      key: "e-books/Proc to dela.pdf",
+      title: "Proč to dělá",
+      description: "E-book (PDF)",
+      size: "4.3 MB",
+    },
+    {
+      key: "e-books/TOP 20 her.pdf",
+      title: "TOP 20 her",
+      description: "E-book (PDF)",
+      size: "782 KB",
+    },
+  ],
 }
 
 // Fallback for unknown projects
@@ -100,6 +120,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'slapp-taget': process.env.ST_STOREFRONT_URL || "https://www.slapptagetboken.se",
   'odpusc-ksiazka': process.env.OK_STOREFRONT_URL || "https://www.odpusc-ksiazka.pl",
   'lass-los': process.env.LL_STOREFRONT_URL || "https://www.lasslosbuch.de",
+  'psi-superzivot': process.env.PS_STOREFRONT_URL || "https://www.psi-superzivot.cz",
 }
 
 // Localized email subjects per project
@@ -109,6 +130,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'slapp-taget': 'Dina e-böcker är redo! 📖',
   'odpusc-ksiazka': 'Twoje e-booki są gotowe! 📖',
   'lass-los': 'Deine E-Books sind bereit! 📖',
+  'psi-superzivot': 'Tvoje e-booky jsou připravené! 📖',
 }
 
 // Localized fallback first names
@@ -118,6 +140,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'slapp-taget': 'där',
   'odpusc-ksiazka': 'tam',
   'lass-los': 'dort',
+  'psi-superzivot': 'tam',
 }
 
 export async function sendEbookDelivery(orderId: string, container: any, eventName: string) {

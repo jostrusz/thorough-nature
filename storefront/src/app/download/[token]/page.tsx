@@ -398,10 +398,20 @@ const lassLosTheme: ProjectTheme = {
   supportEmail: "buch@lasslosbuch.de",
 }
 
+const psiSuperzivotTheme: ProjectTheme = {
+  ...dehondenbijbelTheme,
+  brandLabel: "PSÍ SUPERŽIVOT",
+  brandName: "Psí superživot",
+  supportEmail: "podpora@psi-superzivot.cz",
+  companyName: "Performance Marketing Solution s.r.o.",
+  companyLocation: "Rybná 716/24, 110 00 Praha",
+}
+
 const THEMES: Record<string, ProjectTheme> = {
   loslatenboek: loslatenboekTheme,
   dehondenbijbel: dehondenbijbelTheme,
   'lass-los': lassLosTheme,
+  'psi-superzivot': psiSuperzivotTheme,
 }
 
 function getTheme(projectId?: string): ProjectTheme {
@@ -463,7 +473,7 @@ export default async function DownloadPage({
   const { data, error, expired, projectId } = await getDownloadData(token)
   const t = getTheme(projectId)
 
-  const dateLocale = projectId === "lass-los" ? "de-DE" : projectId === "dehondenbijbel" ? "nl-NL" : "nl-NL"
+  const dateLocale = projectId === "lass-los" ? "de-DE" : projectId === "psi-superzivot" ? "cs-CZ" : "nl-NL"
   const expiryDate = data?.download?.expires_at
     ? new Date(data.download.expires_at).toLocaleDateString(dateLocale, {
         day: "numeric",
@@ -472,7 +482,8 @@ export default async function DownloadPage({
       })
     : null
 
-  const fileEmojis = projectId === "dehondenbijbel"
+  const isCS = projectId === "psi-superzivot"
+  const fileEmojis = (projectId === "dehondenbijbel" || isCS)
     ? ["\u{1F4D9}", "\u{1F43E}", "\u{1F3BE}"]  // 📙 🐾 🎾
     : ["\u{1F4D5}", "\u{1F4D3}"]                 // 📕 📓
 
@@ -485,13 +496,15 @@ export default async function DownloadPage({
           <h1 style={t.headerTitle}>
             {error
               ? expired
-                ? projectId === "lass-los" ? "Link abgelaufen" : "Link verlopen"
-                : projectId === "lass-los" ? "Ups..." : "Oeps..."
-              : projectId === "lass-los"
-                ? "Deine E-Books sind bereit!"
-                : projectId === "dehondenbijbel"
-                  ? "Je e-books staan klaar!"
-                  : "Je e-books staan klaar"}
+                ? isCS ? "Odkaz vypršel" : projectId === "lass-los" ? "Link abgelaufen" : "Link verlopen"
+                : isCS ? "Ups..." : projectId === "lass-los" ? "Ups..." : "Oeps..."
+              : isCS
+                ? "Tvoje e-booky jsou připravené!"
+                : projectId === "lass-los"
+                  ? "Deine E-Books sind bereit!"
+                  : projectId === "dehondenbijbel"
+                    ? "Je e-books staan klaar!"
+                    : "Je e-books staan klaar"}
           </h1>
         </div>
 
@@ -502,9 +515,11 @@ export default async function DownloadPage({
           ) : (
             <>
               <p style={t.intro}>
-                {projectId === "lass-los"
-                  ? "Hallo! Klicke auf die Download-Buttons unten, um deine E-Books zu speichern."
-                  : "Hoi! Klik op de downloadknoppen hieronder om je e-books op te slaan."}
+                {isCS
+                  ? "Ahoj! Klikni na tlačítka níže a stáhni si své e-booky."
+                  : projectId === "lass-los"
+                    ? "Hallo! Klicke auf die Download-Buttons unten, um deine E-Books zu speichern."
+                    : "Hoi! Klik op de downloadknoppen hieronder om je e-books op te slaan."}
               </p>
 
               {/* File cards */}
@@ -525,7 +540,7 @@ export default async function DownloadPage({
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {projectId === "lass-los" ? "Herunterladen" : "Download"} &darr;
+                    {isCS ? "Stáhnout" : projectId === "lass-los" ? "Herunterladen" : "Download"} &darr;
                   </a>
                 </div>
               ))}
@@ -534,9 +549,11 @@ export default async function DownloadPage({
               {expiryDate && (
                 <div style={t.expiryNotice}>
                   <p style={t.expiryText}>
-                    &#x23F3; {projectId === "lass-los"
-                      ? `Link gültig bis ${expiryDate}`
-                      : `Link geldig tot ${expiryDate}`}
+                    &#x23F3; {isCS
+                      ? `Odkaz platný do ${expiryDate}`
+                      : projectId === "lass-los"
+                        ? `Link gültig bis ${expiryDate}`
+                        : `Link geldig tot ${expiryDate}`}
                   </p>
                 </div>
               )}
@@ -544,9 +561,11 @@ export default async function DownloadPage({
               {/* Physical book note */}
               <div style={t.infoBox}>
                 <p style={t.infoText}>
-                  {projectId === "lass-los"
-                    ? <>&#x1F4E6; Dein physisches Buch ist unterwegs und wird innerhalb von{" "}<strong>3–5 Werktagen</strong> zugestellt. Du erhältst separat eine Sendungsverfolgungsnummer per E-Mail.</>
-                    : <>&#x1F4E6; Je fysieke boek is onderweg en wordt binnen{" "}<strong>4–7 werkdagen</strong> bezorgd. Je ontvangt apart een track &amp; trace code zodra het pakket is verzonden.</>}
+                  {isCS
+                    ? <>&#x1F4E6; Tvoje tištěná kniha je na cestě a dorazí během{" "}<strong>2–3 pracovních dnů</strong>. Sledovací číslo ti pošleme v samostatném e-mailu.</>
+                    : projectId === "lass-los"
+                      ? <>&#x1F4E6; Dein physisches Buch ist unterwegs und wird innerhalb von{" "}<strong>3–5 Werktagen</strong> zugestellt. Du erhältst separat eine Sendungsverfolgungsnummer per E-Mail.</>
+                      : <>&#x1F4E6; Je fysieke boek is onderweg en wordt binnen{" "}<strong>4–7 werkdagen</strong> bezorgd. Je ontvangt apart een track &amp; trace code zodra het pakket is verzonden.</>}
                 </p>
               </div>
 
@@ -558,9 +577,11 @@ export default async function DownloadPage({
           {/* Help */}
           <div style={t.helpBox}>
             <p style={t.helpText}>
-              {projectId === "lass-los"
-                ? <>Probleme beim Download? Schreib uns eine E-Mail an{" "}<a href={`mailto:${t.supportEmail}`} style={t.helpLink}>{t.supportEmail}</a></>
-                : <>Problemen met de download? Stuur een mailtje naar{" "}<a href={`mailto:${t.supportEmail}`} style={t.helpLink}>{t.supportEmail}</a></>}
+              {isCS
+                ? <>Máš problém se stahováním? Napiš nám na{" "}<a href={`mailto:${t.supportEmail}`} style={t.helpLink}>{t.supportEmail}</a></>
+                : projectId === "lass-los"
+                  ? <>Probleme beim Download? Schreib uns eine E-Mail an{" "}<a href={`mailto:${t.supportEmail}`} style={t.helpLink}>{t.supportEmail}</a></>
+                  : <>Problemen met de download? Stuur een mailtje naar{" "}<a href={`mailto:${t.supportEmail}`} style={t.helpLink}>{t.supportEmail}</a></>}
             </p>
           </div>
         </div>
@@ -591,6 +612,7 @@ function ErrorState({
   projectId?: string
 }) {
   const isDE = projectId === "lass-los"
+  const isCSErr = projectId === "psi-superzivot"
   return (
     <div style={{ textAlign: "center" as const, padding: "40px 0" }}>
       <p style={{ fontSize: "48px", marginBottom: "16px" }}>
@@ -599,7 +621,9 @@ function ErrorState({
       <p style={t.errorText}>{message}</p>
       {expired && (
         <p style={t.errorMuted}>
-          {isDE ? (
+          {isCSErr ? (
+            <>Napiš nám na{" "}<a href={`mailto:${t.supportEmail}`} style={t.errorLink}>{t.supportEmail}</a>{" "}a pošleme ti nový odkaz ke stažení.</>
+          ) : isDE ? (
             <>Kontaktiere uns unter{" "}<a href={`mailto:${t.supportEmail}`} style={t.errorLink}>{t.supportEmail}</a>{" "}für einen neuen Download-Link.</>
           ) : (
             <>Neem contact op met{" "}<a href={`mailto:${t.supportEmail}`} style={t.errorLink}>{t.supportEmail}</a>{" "}voor een nieuwe download-link.</>

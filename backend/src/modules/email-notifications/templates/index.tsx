@@ -42,6 +42,7 @@ import { LbAbandonedCheckout3Template, LB_ABANDONED_CHECKOUT_3, isLbAbandonedChe
 // Psí superživot (psi-superzivot) templates
 import { PsOrderPlacedTemplate, PS_ORDER_PLACED, isPsOrderPlacedTemplateData } from './ps-order-placed'
 import { PsShipmentNotificationTemplate, PS_SHIPMENT_NOTIFICATION, isPsShipmentNotificationData } from './ps-shipment-notification'
+import { PsEbookDeliveryTemplate, PS_EBOOK_DELIVERY, isPsEbookDeliveryData } from './ps-ebook-delivery'
 import { PsUpsellConfirmedTemplate, PS_UPSELL_CONFIRMED, isPsUpsellConfirmedData } from './ps-upsell-confirmed'
 // Admin notification
 import { AdminOrderNotificationTemplate, ADMIN_ORDER_NOTIFICATION, isAdminOrderNotificationData } from './admin-order-notification'
@@ -90,6 +91,7 @@ export const EmailTemplates = {
   // Psí superživot
   PS_ORDER_PLACED,
   PS_SHIPMENT_NOTIFICATION,
+  PS_EBOOK_DELIVERY,
   PS_UPSELL_CONFIRMED,
   // Admin notifications
   ADMIN_ORDER_NOTIFICATION,
@@ -474,6 +476,15 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <PsShipmentNotificationTemplate {...data} />
 
+    case EmailTemplates.PS_EBOOK_DELIVERY:
+      if (!isPsEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.PS_EBOOK_DELIVERY}"`
+        )
+      }
+      return <PsEbookDeliveryTemplate {...data} />
+
     case EmailTemplates.PS_UPSELL_CONFIRMED:
       if (!isPsUpsellConfirmedData(data)) {
         throw new MedusaError(
@@ -541,6 +552,7 @@ export {
   // Psí superživot
   PsOrderPlacedTemplate,
   PsShipmentNotificationTemplate,
+  PsEbookDeliveryTemplate,
   PsUpsellConfirmedTemplate,
   // Admin notification
   AdminOrderNotificationTemplate,
