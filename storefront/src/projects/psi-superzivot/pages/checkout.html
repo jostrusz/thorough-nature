@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Pokladna — Psí superživot</title>
 <meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://www.psi-superzivot.cz/checkout">
 <link rel="icon" href="/psisuperzivot/images/preloader.webp" type="image/webp">
 
 <!-- Zabránění probliknutí checkoutu při návratu z platby — formulář se ihned skryje -->
@@ -6818,7 +6819,7 @@ body {
             abandoned_checkout: true,
             abandoned_at: new Date().toISOString(),
             checkout_url: window.location.href.split('?')[0],
-            project_id: PROJECT_CONFIG.projectId || 'dehondenbijbel'
+            project_id: PROJECT_CONFIG.projectId || 'psisuperzivot'
           }
         })
       });
