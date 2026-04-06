@@ -7342,6 +7342,13 @@ body {
           // Pass amount info for Klarna order lines
           amount: checkoutTotal,
           currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
+          // Pass cart items for Klarna order lines (product name instead of "Order")
+          items: [{
+            id: PROJECT_CONFIG.mainProduct.variantId || 'main',
+            title: PROJECT_CONFIG.mainProduct.name || PROJECT_CONFIG.name || 'Product',
+            quantity: checkoutBundleQty || 1,
+            unit_price: checkoutBundlePrice / (checkoutBundleQty || 1),
+          }],
         };
       }
 

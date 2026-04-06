@@ -1521,8 +1521,10 @@ body {
 }
 .bundle-option.selected .bundle-radio-dot { transform: scale(1); }
 .bundle-option input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
-.bundle-info { flex: 1; display: flex; align-items: center; gap: 6px; min-width: 0; flex-wrap: nowrap; }
+.bundle-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bundle-info-row { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
 .bundle-label { font-size: 15px; font-weight: 600; color: var(--heading); white-space: nowrap; flex-shrink: 0; }
+.bundle-ebook-note { font-size: 11px; color: var(--cta); font-weight: 500; white-space: nowrap; }
 .bundle-badge {
   font-size: 9px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.04em; color: var(--white);
@@ -2804,8 +2806,11 @@ body {
       html += '<input type="radio" name="bundle" value="' + opt.qty + '"' + (isSelected ? ' checked' : '') + '>';
       html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
       html += '<div class="bundle-info">';
+      html += '<div class="bundle-info-row">';
       html += '<span class="bundle-label">' + opt.label + '</span>';
       if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
+      html += '</div>';
+      html += '<span class="bundle-ebook-note">+ 2 gratis e-b\u00f6cker inkluderade</span>';
       html += '</div>';
       html += '<div class="bundle-pricing">';
       html += '<div class="bundle-price">' + formatPrice(opt.price) + '</div>';
@@ -6390,6 +6395,13 @@ body {
           // Pass amount info for Klarna order lines
           amount: checkoutTotal,
           currency: (PROJECT_CONFIG.mainProduct.currency || 'SEK').toUpperCase(),
+          // Pass cart items for Klarna order lines (product name instead of "Order")
+          items: [{
+            id: PROJECT_CONFIG.mainProduct.variantId || 'main',
+            title: PROJECT_CONFIG.mainProduct.name || PROJECT_CONFIG.name || 'Product',
+            quantity: checkoutBundleQty || 1,
+            unit_price: checkoutBundlePrice / (checkoutBundleQty || 1),
+          }],
         };
       }
 

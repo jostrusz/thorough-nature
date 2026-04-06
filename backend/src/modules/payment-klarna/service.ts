@@ -290,7 +290,8 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       const shippingAddress = context?.shipping_address || data?.shipping_address || billingAddress
 
       // Build order lines from context items if available (buildOrderLines converts to minor units)
-      const items = context?.extra?.items || context?.items || []
+      // Items can come from context (Medusa internal), or from session data (storefront checkout)
+      const items = context?.extra?.items || context?.items || data?.items || []
       const orderLines = buildOrderLines(
         items,
         currencyUpper,
@@ -342,7 +343,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
           : [
               {
                 type: "physical",
-                name: "Order",
+                name: (data?.statement_descriptor || data?.product_name || "Product").substring(0, 255),
                 quantity: 1,
                 unit_price: amountMinor,
                 tax_rate: 0,
@@ -478,7 +479,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       const orderLines = storedSession.order_lines || [
         {
           type: "physical",
-          name: "Order",
+          name: sessionData?.product_name || "Product",
           quantity: 1,
           unit_price: fallbackAmountMinor,
           tax_rate: 0,
@@ -571,20 +572,24 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
         `[Klarna] capturePayment: medusa amount=${amount}, minor units=${amountMinor}, currency=${currencyUpper}`
       )
 
+      // Reuse stored order_lines from session (has actual product names from initiatePayment)
+      const storedOrderLines = sessionData?.klarnaSessionData?.order_lines
       const captureData = {
         captured_amount: amountMinor,
         description: "Capture",
-        order_lines: [
-          {
-            type: "physical",
-            name: "Order",
-            quantity: 1,
-            unit_price: amountMinor,
-            tax_rate: 0,
-            total_amount: amountMinor,
-            total_tax_amount: 0,
-          },
-        ],
+        order_lines: storedOrderLines && storedOrderLines.length > 0
+          ? storedOrderLines
+          : [
+              {
+                type: "physical",
+                name: sessionData?.product_name || "Order",
+                quantity: 1,
+                unit_price: amountMinor,
+                tax_rate: 0,
+                total_amount: amountMinor,
+                total_tax_amount: 0,
+              },
+            ],
       }
 
       const idempotencyKey = crypto.randomUUID()
