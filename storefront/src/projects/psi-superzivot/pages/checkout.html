@@ -6845,9 +6845,14 @@ body {
     var params = new URLSearchParams(window.location.search);
     if (params.get('payment_return') !== '1') return;
 
-    var cartId = params.get('cart_id');
+    // Get cart_id from URL params, or fallback to localStorage (Comgate doesn't pass cart_id in return URL)
+    var cartId = params.get('cart_id') || localStorage.getItem('medusa_cart_id') || localStorage.getItem('background_cart_id');
     // Cancelled/pending payments are handled by the full-page error in <head> script
-    if (!cartId) return;
+    if (!cartId) {
+      console.error('[Payment Return] No cart_id found in URL or localStorage');
+      return;
+    }
+    console.log('[Payment Return] Using cart_id:', cartId, '(source:', params.get('cart_id') ? 'URL' : 'localStorage', ')');
 
     // Show branded preloader (injected by head script, hides checkout form)
     // Add preloader element if not already present
