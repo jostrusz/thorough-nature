@@ -13,6 +13,7 @@ import { IOrderModuleService } from "@medusajs/framework/types"
 
 function extractPaymentId(meta: any): string | null {
   return (
+    meta?.payment_id_override ||
     meta?.molliePaymentId ||
     meta?.stripePaymentIntentId ||
     meta?.paypalOrderId ||
@@ -20,6 +21,7 @@ function extractPaymentId(meta: any): string | null {
     meta?.p24SessionId ||
     meta?.airwallexPaymentIntentId ||
     meta?.klarnaOrderId ||
+    meta?.payment_id ||
     null
   )
 }
