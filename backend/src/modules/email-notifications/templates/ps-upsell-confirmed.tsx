@@ -76,11 +76,9 @@ export const PsUpsellConfirmedTemplate: React.FC<PsUpsellConfirmedTemplateProps>
   const total = itemsTotal + codFee + shippingFee
 
   // Billing entity info
-  const entityName = billingEntity?.legal_name || 'EverChapter OÜ'
-  const entityAddress = billingEntity?.address
-    ? `${billingEntity.address.city || 'Tallinn'}, ${billingEntity.address.district || billingEntity.address.country_code?.toUpperCase() || 'Estonia'}`
-    : 'Tallinn, Estonia'
-  const entityRegId = billingEntity?.registration_id || '16938029'
+  const entityName = 'Performance Marketing Solution s.r.o.'
+  const entityAddress = 'Rybná 716/24, Staré Město, 110 00 Praha'
+  const entityRegId = 'IČO: 06259928 \u2022 DIČ: CZ06259928'
 
   // Items that were added via upsell
   const newItems = addedItems && addedItems.length > 0 ? addedItems : []
@@ -403,8 +401,8 @@ export const PsUpsellConfirmedTemplate: React.FC<PsUpsellConfirmedTemplateProps>
             }}>
               Máte dotaz k objednávce?
               <br />
-              <Link href="mailto:info@psisuperzivot.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                info@psisuperzivot.cz
+              <Link href="mailto:podpora@psi-superzivot.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                podpora@psi-superzivot.cz
               </Link>
             </Text>
           </div>
@@ -418,7 +416,7 @@ export const PsUpsellConfirmedTemplate: React.FC<PsUpsellConfirmedTemplateProps>
             color: colors.textBody,
             margin: '0 0 4px',
           }}>
-            S pozdravem,
+            Ať ti kniha udělá radost! 🐾
           </Text>
           <Text style={{
             fontFamily: font,
@@ -427,7 +425,7 @@ export const PsUpsellConfirmedTemplate: React.FC<PsUpsellConfirmedTemplateProps>
             color: colors.textDark,
             margin: '0 0 2px',
           }}>
-            Tým Psí superživot
+            Lars Vermeulen
           </Text>
           <Text style={{
             fontFamily: font,
@@ -435,8 +433,8 @@ export const PsUpsellConfirmedTemplate: React.FC<PsUpsellConfirmedTemplateProps>
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:info@psisuperzivot.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
-              info@psisuperzivot.cz
+            <Link href="mailto:podpora@psi-superzivot.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
+              podpora@psi-superzivot.cz
             </Link>
           </Text>
         </div>
@@ -466,7 +464,7 @@ export const PsUpsellConfirmedTemplate: React.FC<PsUpsellConfirmedTemplateProps>
           }}>
             {entityName} &bull; {entityAddress}
             <br />
-            Reg. č.: {entityRegId}
+            {entityRegId}
           </Text>
           <Text style={{
             fontFamily: font,
@@ -475,7 +473,7 @@ export const PsUpsellConfirmedTemplate: React.FC<PsUpsellConfirmedTemplateProps>
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail jste obdrželi, protože jste provedli objednávku na psisuperzivot.cz.
+            Tento e-mail ti přišel, protože jsi si objednal/a na psi-superzivot.cz.
           </Text>
         </div>
       </Section>

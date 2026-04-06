@@ -7,6 +7,7 @@ import { PsOrderPlacedTemplate } from './src/modules/email-notifications/templat
 import { PsShipmentNotificationTemplate } from './src/modules/email-notifications/templates/ps-shipment-notification'
 import { AdminOrderNotificationTemplate } from './src/modules/email-notifications/templates/admin-order-notification'
 import { PsEbookDeliveryTemplate } from './src/modules/email-notifications/templates/ps-ebook-delivery'
+import { PsUpsellConfirmedTemplate } from './src/modules/email-notifications/templates/ps-upsell-confirmed'
 
 // ── Variant 1: Home delivery + COD ──
 const orderHome = {
@@ -128,6 +129,26 @@ async function main() {
       downloadUrl: 'https://psi-superzivot.cz/download/abc123-test-token',
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     } as any) },
+    // Upsell confirmed
+    { name: 'ps-upsell-confirmed.html', el: React.createElement(PsUpsellConfirmedTemplate, {
+      order: {
+        id: 'order_01KNHJX7RQ',
+        display_id: '812',
+        metadata: { custom_order_number: 'CZ2026-812' },
+        created_at: '2026-04-06T14:23:00.000Z',
+        email: 'petra.svobodova@seznam.cz',
+        currency_code: 'czk',
+        items: [
+          { id: 'item-1', title: 'Psí superživot', product_title: 'Psí superživot', variant_title: 'Paperback', quantity: 1, unit_price: 550, thumbnail: null },
+          { id: 'item-2', title: 'Kočičí bible', product_title: 'Kočičí bible', variant_title: 'Paperback', quantity: 1, unit_price: 399, thumbnail: null },
+        ],
+        summary: { raw_current_order_total: { value: 949 } },
+      },
+      shippingAddress: { first_name: 'Petra', last_name: 'Svobodová', address_1: 'Korunní 810/104', city: 'Praha 10', postal_code: '101 00', country_code: 'cz' },
+      addedItems: [
+        { id: 'item-2', title: 'Kočičí bible', product_title: 'Kočičí bible', variant_title: 'Paperback', quantity: 1, unit_price: 399, thumbnail: null },
+      ],
+    } as any) },
     // Admin notification
     { name: 'admin-notification.html', el: React.createElement(AdminOrderNotificationTemplate, {
       order: {
@@ -186,6 +207,12 @@ async function main() {
   <a href="ps-order-pickup-cod.html">
     Vydejni misto + Dobirka <span class="tag pickup">Vydejni misto</span><span class="tag cod">Dobirka</span>
     <div class="desc">Martin Dvorak, 1x Psi superzivot + dobirka, Zasilkovna Albert</div>
+  </a>
+
+  <h2>Upsell potvrzení</h2>
+  <a href="ps-upsell-confirmed.html">
+    Upsell — Kočičí bible přidána <span class="tag paid">Upsell</span>
+    <div class="desc">Petra Svobodová, Psí superživot + Kočičí bible = 949 Kč</div>
   </a>
 
   <h2>Doručení e-booku</h2>
