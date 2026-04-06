@@ -58,9 +58,10 @@
     },
     {
       "name": "email-preview",
-      "runtimeExecutable": "npx",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
       "runtimeArgs": ["http-server", "email-previews", "-p", "8097", "-c-1"],
-      "port": 8097
+      "port": 8097,
+      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
     },
     {
       "name": "odpusc-ksiazka",
