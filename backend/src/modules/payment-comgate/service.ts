@@ -278,17 +278,32 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       // Priority: comgate_method (already mapped by frontend) > method (raw frontend code)
       const rawMethod = sessionData?.comgate_method || sessionData?.method || contextData?.comgate_method || "ALL"
       let comgateMethod = "ALL"
+
+      // Legacy → PSD2 upgrade map (old Comgate codes that no longer exist)
+      const LEGACY_TO_PSD2: Record<string, string> = {
+        "BANK_CZ_CS_P": "BANK_CZ_CS_PSD2",
+        "BANK_CZ_CSOB_P": "BANK_CZ_CSOB_PSD2",
+        "BANK_CZ_KB": "BANK_CZ_KB_PSD2",
+        "BANK_CZ_RB": "BANK_CZ_RB_PSD2",
+        "BANK_CZ_GE": "BANK_CZ_MO_PSD2",
+        "BANK_CZ_FB": "BANK_CZ_FB_PSD2",
+        "BANK_CZ_MB_P": "BANK_CZ_MB_PSD2",
+        "BANK_CZ_AB": "BANK_CZ_AB_PSD2",
+        "BANK_ALL": "BANK_CZ_OTHER",
+      }
+
       // If it already looks like a Comgate code (uppercase with underscores/digits), pass through
       if (/^[A-Z0-9_]+$/.test(rawMethod) && rawMethod !== "ALL") {
-        comgateMethod = rawMethod
+        // Upgrade legacy codes to PSD2 if needed
+        comgateMethod = LEGACY_TO_PSD2[rawMethod] || rawMethod
       }
       // Map legacy frontend codes
       else if (rawMethod === "blik" || rawMethod === "blik_pl") comgateMethod = "BANK_PL_BL"
-      else if (rawMethod === "bank_transfer") comgateMethod = "BANK_ALL"
+      else if (rawMethod === "bank_transfer") comgateMethod = "BANK_CZ_OTHER"
       else if (rawMethod === "creditcard" || rawMethod === "card") comgateMethod = "CARD_CZ_COMGATE"
       else if (rawMethod.startsWith("bank_pl_")) comgateMethod = rawMethod.toUpperCase()
-      else if (rawMethod.startsWith("bank_cz_")) comgateMethod = rawMethod.toUpperCase()
-      else if (rawMethod === "przelew_bankowy") comgateMethod = "BANK_ALL"
+      else if (rawMethod.startsWith("bank_cz_")) comgateMethod = LEGACY_TO_PSD2[rawMethod.toUpperCase()] || rawMethod.toUpperCase()
+      else if (rawMethod === "przelew_bankowy") comgateMethod = "BANK_CZ_OTHER"
       else if (rawMethod === "ALL" || !rawMethod) comgateMethod = "ALL"
       else comgateMethod = rawMethod.toUpperCase()
 
