@@ -321,7 +321,18 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           deliveryAddress,
           deliveryMethodId: (deliveryMethodId || "").trim() || undefined,
           paymentMethodId: (paymentMethodId || "").trim() || undefined,
-          cashAmount: isCOD ? (Number((order as any).total) || 0) + (Number(orderMeta.cod_fee) || 0) + deliveryFee : undefined,
+          cashAmount: isCOD ? (() => {
+            // New orders have fees as line items (in order.total).
+            // Old orders have fees only in metadata — add them manually.
+            const orderItems = (order as any).items || []
+            const hasFeeItems = orderItems.some((i: any) =>
+              i.product_handle === "doprava-na-adresu" || i.product_handle === "priplatek-za-dobirku"
+              || (i.variant_sku && (i.variant_sku === "FEE-DELIVERY-HOME" || i.variant_sku === "FEE-COD"))
+            )
+            const total = Number((order as any).total) || 0
+            if (hasFeeItems) return total
+            return total + (Number(orderMeta.cod_fee) || 0) + deliveryFee
+          })() : undefined,
           cashCurrencyCode: "EUR",
           note: orderNote || undefined,
         })

@@ -7123,6 +7123,26 @@ body {
             })
           });
         }
+      }).then(function() {
+        // Krok 2c: Přidat poplatky jako line items (doprava na adresu, dobírka)
+        var feePromise = Promise.resolve();
+        if (selectedShipping === 'home') {
+          feePromise = feePromise.then(function() {
+            return medusaFetch('/store/carts/' + cartId + '/add-fee', {
+              method: 'POST',
+              body: JSON.stringify({ type: 'delivery_fee' })
+            });
+          });
+        }
+        if (selectedMethod === 'cod') {
+          feePromise = feePromise.then(function() {
+            return medusaFetch('/store/carts/' + cartId + '/add-fee', {
+              method: 'POST',
+              body: JSON.stringify({ type: 'cod_fee' })
+            });
+          });
+        }
+        return feePromise;
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {

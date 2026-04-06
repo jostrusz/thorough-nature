@@ -274,6 +274,26 @@ export default async function orderPlacedFakturoidHandler({
       return line
     })
 
+    // Add shipping as a line item if shipping_total > 0
+    const shippingTotal = Number((order as any).shipping_total) || 0
+    if (shippingTotal > 0) {
+      const shippingLine: any = {
+        name: "Doprava",
+        quantity: 1,
+        unit_price: shippingTotal,
+        unit_name: "ks",
+      }
+      // Shipping VAT: use standard rate for the country (not reduced book rate)
+      const SHIPPING_VAT_RATES: Record<string, number> = {
+        nl: 21, be: 21, de: 19, at: 20, se: 25, pl: 23, cz: 21, sk: 20,
+        lu: 17, fr: 20, it: 22, es: 21, pt: 23, ie: 23, hu: 27,
+      }
+      if (SHIPPING_VAT_RATES[orderCountry] != null) {
+        shippingLine.vat_rate = SHIPPING_VAT_RATES[orderCountry]
+      }
+      lines.push(shippingLine)
+    }
+
     if (!lines.length) {
       console.warn("[Fakturoid] No line items for order:", data.id)
       return

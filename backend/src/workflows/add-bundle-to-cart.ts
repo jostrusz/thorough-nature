@@ -77,6 +77,13 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
   "kocici-bible": {
     1: 399,   // 399 Kč incl. DPH (upsell price, original 550 Kč)
   },
+  // Fee products (added as line items so they appear in order.total + invoices)
+  "doprava-na-adresu": {
+    1: 20,    // 20 Kč incl. DPH — home delivery surcharge
+  },
+  "priplatek-za-dobirku": {
+    1: 30,    // 30 Kč incl. DPH — COD payment surcharge
+  },
 }
 
 type AddBundleToCartInput = {
