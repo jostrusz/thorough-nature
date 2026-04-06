@@ -14,6 +14,9 @@ export interface IComgatePaymentParams {
   name?: string // payer full name
   lang?: string // gateway UI language: cs, en, sk, pl, etc.
   country?: string
+  url_ok?: string // URL to redirect after successful payment
+  url_cancel?: string // URL to redirect after cancelled payment
+  url_pending?: string // URL to redirect for pending payments
 }
 
 export interface IComgateStatusParams {
@@ -127,7 +130,18 @@ export class ComgateApiClient {
         formData.append("lang", params.lang)
       }
 
-      console.log(`[Comgate] Sending create request with params: merchant=${params.merchant}, price=${params.price}, curr=${params.curr}, method=${params.method}, prepareOnly=${params.prepareOnly}`)
+      // Return URLs — where Comgate redirects customer after payment
+      if (params.url_ok) {
+        formData.append("url_ok", params.url_ok)
+      }
+      if (params.url_cancel) {
+        formData.append("url_cancel", params.url_cancel)
+      }
+      if (params.url_pending) {
+        formData.append("url_pending", params.url_pending)
+      }
+
+      console.log(`[Comgate] Sending create request with params: merchant=${params.merchant}, price=${params.price}, curr=${params.curr}, method=${params.method}, prepareOnly=${params.prepareOnly}, url_ok=${params.url_ok}`)
 
       const response = await this.client.post(
         "/v1.0/create",

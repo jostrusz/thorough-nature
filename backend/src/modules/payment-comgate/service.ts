@@ -309,6 +309,13 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
       this.getLogger().info(`[Comgate] Method mapping: rawMethod=${rawMethod} → comgateMethod=${comgateMethod}`)
 
+      // Build return URLs for Comgate redirect after payment
+      // Frontend sends return_url in session data (e.g. "https://psi-superzivot.cz/p/psi-superzivot/checkout?payment_return=1&cart_id=xxx")
+      const returnUrl = sessionData?.return_url || contextData?.return_url || ""
+      // For cancelled/pending, append comgate_status so frontend can show appropriate UI
+      const cancelUrl = returnUrl ? returnUrl + (returnUrl.includes("?") ? "&" : "?") + "comgate_status=cancelled" : ""
+      const pendingUrl = returnUrl ? returnUrl + (returnUrl.includes("?") ? "&" : "?") + "comgate_status=pending" : ""
+
       const paymentParams = {
         merchant: config?.live_keys?.api_key || config?.test_keys?.api_key,
         price: priceInCents,
@@ -322,6 +329,9 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         country: billingCountry || countryFallback,
         prepareOnly: true, // get transId + URL without redirect
         method: comgateMethod,
+        url_ok: returnUrl || undefined,
+        url_cancel: cancelUrl || undefined,
+        url_pending: pendingUrl || undefined,
       }
 
       this.getLogger().info(`[Comgate] Creating payment: merchant=${paymentParams.merchant}, ` +
