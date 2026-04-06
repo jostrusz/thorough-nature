@@ -1695,9 +1695,10 @@ body {
 }
 .bundle-option.selected .bundle-radio-dot { transform: scale(1); }
 .bundle-option input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
-.bundle-info { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; min-width: 0; }
-.bundle-label { font-size: 15px; font-weight: 600; color: var(--heading); white-space: nowrap; flex-shrink: 0; }
-.bundle-sublabel { width: 100%; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: -2px; }
+.bundle-info { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.bundle-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.bundle-label { font-size: 15px; font-weight: 600; color: var(--heading); white-space: nowrap; }
+.bundle-sublabel { font-size: 12px; color: var(--muted); font-weight: 400; white-space: nowrap; }
 .bundle-badge {
   font-size: 9px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.04em; color: var(--white);
@@ -3111,8 +3112,9 @@ body {
       html += '<input type="radio" name="bundle" value="' + opt.qty + '"' + (isSelected ? ' checked' : '') + '>';
       html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
       html += '<div class="bundle-info">';
-      html += '<span class="bundle-label">' + opt.label + '</span>';
+      html += '<div class="bundle-text"><span class="bundle-label">' + opt.label + '</span>';
       if (opt.sublabel) html += '<span class="bundle-sublabel">' + opt.sublabel + '</span>';
+      html += '</div>';
       if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
       html += '</div>';
       html += '<div class="bundle-pricing">';
