@@ -6,6 +6,26 @@ import type ProfitabilityModuleService from "../../../../modules/profitability/s
 type Period = "today" | "yesterday" | "this_week" | "this_month" | "custom"
 
 /**
+ * Fixed exchange rates to EUR (updated manually as needed).
+ * Rate = how many EUR per 1 unit of foreign currency.
+ */
+const TO_EUR_RATES: Record<string, number> = {
+  EUR: 1,
+  SEK: 0.085,   // 1 SEK ≈ 0.085 EUR
+  CZK: 0.040,   // 1 CZK ≈ 0.040 EUR
+  PLN: 0.233,   // 1 PLN ≈ 0.233 EUR
+  USD: 0.92,    // 1 USD ≈ 0.92 EUR
+  GBP: 1.16,    // 1 GBP ≈ 1.16 EUR
+  HUF: 0.0025,  // 1 HUF ≈ 0.0025 EUR
+}
+
+/** Convert amount from a currency to EUR */
+function toEur(amount: number, currencyCode: string): number {
+  const rate = TO_EUR_RATES[(currencyCode || "EUR").toUpperCase()] ?? 1
+  return amount * rate
+}
+
+/**
  * GET /admin/profitability/stats?period=today|yesterday|this_week|this_month|custom&date_from=YYYY-MM-DD&date_to=YYYY-MM-DD
  * Returns profitability data for all active projects for the given period
  */
@@ -154,21 +174,27 @@ async function computeLiveStats(
         logger.warn(`[ProfitStats] Failed to query orders for ${project.project_slug}: ${err.message}`)
       }
 
-      // Use cached ad_spend from the cron job
+      // Convert revenue from project currency to EUR
+      const curr = (project.currency_code || "EUR").toUpperCase()
+      const revenueEur = toEur(revenue, curr)
+      const taxAmountEur = toEur(taxAmount, curr)
+      const refundAmountEur = toEur(refundAmount, curr)
+
+      // Use cached ad_spend from the cron job (already in EUR)
       const adSpend = cachedStats.length > 0
         ? Number((cachedStats[0] as any).ad_spend || 0)
         : 0
 
-      // Calculate costs
+      // Calculate costs (already defined in EUR in project config)
       const bookCostTotal = itemCount * Number(project.book_cost_eur || 1.80)
       const shippingCostTotal = orderCount * Number(project.shipping_cost_eur || 5.00)
       const pickPackTotal = orderCount * Number(project.pick_pack_cost_eur || 1.50)
-      const paymentFeeTotal = revenue * Number(project.payment_fee_rate || 0.03)
+      const paymentFeeTotal = revenueEur * Number(project.payment_fee_rate || 0.03)
 
-      const netProfit = revenue - taxAmount - refundAmount - adSpend
+      const netProfit = revenueEur - taxAmountEur - refundAmountEur - adSpend
         - bookCostTotal - shippingCostTotal - pickPackTotal - paymentFeeTotal
 
-      const profitMargin = revenue > 0 ? (netProfit / revenue) * 100 : 0
+      const profitMargin = revenueEur > 0 ? (netProfit / revenueEur) * 100 : 0
 
       return {
         project_id: project.id,
@@ -176,11 +202,12 @@ async function computeLiveStats(
         project_slug: project.project_slug,
         flag_emoji: project.flag_emoji,
         country_tag: project.country_tag,
-        revenue: Math.round(revenue * 100) / 100,
-        tax_amount: Math.round(taxAmount * 100) / 100,
+        currency_code: curr,
+        revenue: Math.round(revenueEur * 100) / 100,
+        tax_amount: Math.round(taxAmountEur * 100) / 100,
         order_count: orderCount,
         item_count: itemCount,
-        refund_amount: Math.round(refundAmount * 100) / 100,
+        refund_amount: Math.round(refundAmountEur * 100) / 100,
         ad_spend: Math.round(adSpend * 100) / 100,
         book_cost_total: Math.round(bookCostTotal * 100) / 100,
         shipping_cost_total: Math.round(shippingCostTotal * 100) / 100,

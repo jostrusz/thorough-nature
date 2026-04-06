@@ -57,6 +57,7 @@ interface ProjectConfig {
   shipping_cost_eur: number
   pick_pack_cost_eur: number
   payment_fee_rate: number
+  currency_code: string
   meta_ad_account_id: string | null
   domain: string | null
   is_active: boolean
@@ -265,6 +266,7 @@ function ProjectModal({
     shipping_cost_eur: project?.shipping_cost_eur ?? 5.00,
     pick_pack_cost_eur: project?.pick_pack_cost_eur ?? 1.50,
     payment_fee_rate: project?.payment_fee_rate ?? 0.03,
+    currency_code: project?.currency_code || "EUR",
     meta_ad_account_id: project?.meta_ad_account_id || "",
     domain: project?.domain || "",
     is_active: project?.is_active ?? true,
@@ -279,6 +281,7 @@ function ProjectModal({
         book_cost_eur: Number(form.book_cost_eur),
         shipping_cost_eur: Number(form.shipping_cost_eur),
         pick_pack_cost_eur: Number(form.pick_pack_cost_eur),
+        currency_code: form.currency_code,
         display_order: Number(form.display_order),
         sales_channel_id: form.sales_channel_id || null,
         meta_ad_account_id: form.meta_ad_account_id || null,
@@ -338,6 +341,14 @@ function ProjectModal({
           <div style={{ gridColumn: "1 / -1" }}>
             <label style={labelStyle}>Domain</label>
             <input className="pf-input" style={inputStyle} value={form.domain} onChange={(e) => set("domain", e.target.value)} placeholder="e.g. loslatenboek.nl" />
+          </div>
+          <div>
+            <label style={labelStyle}>Order Currency</label>
+            <select className="pf-input" style={inputStyle} value={form.currency_code} onChange={(e) => set("currency_code", e.target.value)}>
+              {["EUR", "CZK", "SEK", "PLN", "USD", "GBP", "HUF"].map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label style={labelStyle}>Book Cost (EUR)</label>
@@ -463,6 +474,7 @@ function ProjectsSection() {
                   )}
                 </div>
                 <div style={{ display: "flex", gap: "16px", fontSize: "11px", color: colors.textMuted, paddingLeft: "28px" }}>
+                  <span>Currency: {p.currency_code || "EUR"}</span>
                   <span>Sales: {channelMap.get(p.sales_channel_id || "") || "—"}</span>
                   <span>Book: {fmtEur(p.book_cost_eur)}</span>
                   <span>Ship: {fmtEur(p.shipping_cost_eur)}</span>

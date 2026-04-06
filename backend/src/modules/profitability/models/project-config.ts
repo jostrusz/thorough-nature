@@ -13,6 +13,7 @@ const ProjectConfig = model.define("project_config", {
   shipping_cost_eur: model.bigNumber().default(5.00),
   pick_pack_cost_eur: model.bigNumber().default(1.50),
   payment_fee_rate: model.bigNumber().default(0.03),
+  currency_code: model.text().default("EUR"),
   meta_ad_account_id: model.text().nullable(),
   is_active: model.boolean().default(true),
   display_order: model.number().default(0),

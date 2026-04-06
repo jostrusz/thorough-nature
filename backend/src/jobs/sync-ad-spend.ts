@@ -3,6 +3,14 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { PROFITABILITY_MODULE } from "../modules/profitability"
 import { getAccountSpend } from "../modules/profitability/services/meta-ads.service"
 
+/** Fixed exchange rates to EUR */
+const TO_EUR_RATES: Record<string, number> = {
+  EUR: 1, SEK: 0.085, CZK: 0.040, PLN: 0.233, USD: 0.92, GBP: 1.16, HUF: 0.0025,
+}
+function toEur(amount: number, currencyCode: string): number {
+  return amount * (TO_EUR_RATES[(currencyCode || "EUR").toUpperCase()] ?? 1)
+}
+
 /**
  * Sync Ad Spend Job
  *
@@ -156,11 +164,16 @@ export async function syncProjectDay({
     }
   }
 
-  // Calculate costs
+  // Convert revenue from project currency to EUR
+  const curr = ((p.currency_code as string) || "EUR").toUpperCase()
+  const revenueEur = toEur(revenue, curr)
+  const taxAmountEur = toEur(taxAmount, curr)
+
+  // Calculate costs (already in EUR from project config)
   const bookCostTotal = itemCount * Number(p.book_cost_eur || 1.80)
   const shippingCostTotal = orderCount * Number(p.shipping_cost_eur || 5.00)
   const pickPackTotal = orderCount * Number(p.pick_pack_cost_eur || 1.50)
-  const paymentFeeTotal = revenue * Number(p.payment_fee_rate || 0.03)
+  const paymentFeeTotal = revenueEur * Number(p.payment_fee_rate || 0.03)
 
   // Get existing stats row (preserve refund_amount)
   let refundAmount = 0
@@ -172,15 +185,15 @@ export async function syncProjectDay({
     refundAmount = Number((existing[0] as any).refund_amount || 0)
   }
 
-  const netProfit = revenue - taxAmount - refundAmount - adSpend
+  const netProfit = revenueEur - taxAmountEur - refundAmount - adSpend
     - bookCostTotal - shippingCostTotal - pickPackTotal - paymentFeeTotal
 
-  // Upsert daily stats
+  // Upsert daily stats (all values in EUR)
   if (existing.length > 0) {
     await profitService.updateDailyProjectStats({
       id: (existing[0] as any).id,
-      revenue,
-      tax_amount: taxAmount,
+      revenue: revenueEur,
+      tax_amount: taxAmountEur,
       order_count: orderCount,
       item_count: itemCount,
       ad_spend: adSpend,
@@ -195,8 +208,8 @@ export async function syncProjectDay({
     await profitService.createDailyProjectStats({
       project_id: p.id,
       date,
-      revenue,
-      tax_amount: taxAmount,
+      revenue: revenueEur,
+      tax_amount: taxAmountEur,
       order_count: orderCount,
       item_count: itemCount,
       refund_amount: refundAmount,
