@@ -188,20 +188,15 @@ export function getPaymentIconUrl(order: any): string {
 
   // Comgate — map method to specific icon
   if (providerId.includes("comgate")) {
-    const map: Record<string, string> = {
-      creditcard: "cards/visa.svg",
-      card: "cards/visa.svg",
-      CARD_CZ_CSOB_2: "cards/visa.svg",
-      CARD_ALL: "cards/visa.svg",
-      bank_transfer: "apm/sepa.svg",
-      BANK_CZ_FB: "apm/sepa.svg",
-      BANK_ALL: "apm/sepa.svg",
-      applepay: "wallets/apple-pay.svg",
-      APPLEPAY_REDIRECT: "wallets/apple-pay.svg",
-      googlepay: "wallets/google-pay.svg",
-      GPAY_REDIRECT: "wallets/google-pay.svg",
-    }
-    return `${ICON_BASE}/${map[method] || map[data?.comgate_method] || "cards/visa.svg"}`
+    // Check method against known patterns for icon selection
+    const m = method || data?.comgate_method || ""
+    if (m.includes("CARD") || m === "creditcard" || m === "card") return `${ICON_BASE}/cards/visa.svg`
+    if (m.includes("APPLEPAY") || m === "applepay") return `${ICON_BASE}/wallets/apple-pay.svg`
+    if (m.includes("GPAY") || m.includes("GOOGLEPAY") || m === "googlepay") return `${ICON_BASE}/wallets/google-pay.svg`
+    if (m.includes("BANK") || m === "bank_transfer") return `${ICON_BASE}/apm/sepa.svg`
+    if (m.includes("LATER") || m.includes("PART") || m.includes("LOAN")) return `${ICON_BASE}/apm/klarna.svg`
+    // Default: bank transfer icon for Comgate
+    return `${ICON_BASE}/apm/sepa.svg`
   }
 
   // Przelewy24
@@ -227,7 +222,48 @@ export function getPaymentMethodName(order: any): string {
   const { providerId, method } = findPrimaryPayment(order)
   if (providerId.includes("klarna")) return "Klarna"
   if (providerId.includes("paypal")) return "PayPal"
-  if (providerId.includes("comgate")) return "Comgate"
+  if (providerId.includes("comgate")) {
+    const m = method || ""
+    const names: Record<string, string> = {
+      // Card
+      "CARD_CZ_COMGATE": "Platba kartou",
+      "creditcard": "Platba kartou",
+      "card": "Platba kartou",
+      // Banks PSD2
+      "BANK_CZ_CS_PSD2": "Česká spořitelna",
+      "BANK_CZ_CSOB_PSD2": "ČSOB",
+      "BANK_CZ_KB_PSD2": "Komerční banka",
+      "BANK_CZ_RB_PSD2": "Raiffeisenbank",
+      "BANK_CZ_FB_PSD2": "Fio banka",
+      "BANK_CZ_MB_PSD2": "mBank",
+      "BANK_CZ_AB_PSD2": "Air Bank",
+      "BANK_CZ_AB_CVAK": "Air Bank Cvak",
+      "BANK_CZ_MO_PSD2": "Moneta Money Bank",
+      "BANK_CZ_UC_PSD2": "UniCredit Bank",
+      "BANK_CZ_PB_PSD2": "Partners Banka",
+      "BANK_CZ_OTHER": "Bankovní převod",
+      // Legacy codes (backwards compat)
+      "BANK_CZ_CS_P": "Česká spořitelna",
+      "BANK_CZ_CSOB_P": "ČSOB",
+      "BANK_CZ_KB": "Komerční banka",
+      "BANK_CZ_RB": "Raiffeisenbank",
+      "BANK_CZ_FB": "Fio banka",
+      "BANK_CZ_MB_P": "mBank",
+      "BANK_CZ_AB": "Air Bank",
+      "BANK_CZ_GE": "Moneta Money Bank",
+      "BANK_ALL": "Bankovní převod",
+      "bank_transfer": "Bankovní převod",
+      // Other
+      "APPLEPAY_REDIRECT": "Apple Pay",
+      "applepay": "Apple Pay",
+      "GPAY_REDIRECT": "Google Pay",
+      "googlepay": "Google Pay",
+      "LATER_TWISTO": "Twisto",
+      "LATER_SKIPPAY": "Skip Pay",
+      "LATER_PLATIMPAK": "PlatímPak",
+    }
+    return names[m] || "Comgate"
+  }
   if (providerId.includes("przelewy") || providerId.includes("p24")) return "Przelewy24"
 
   if (providerId.includes("stripe")) {

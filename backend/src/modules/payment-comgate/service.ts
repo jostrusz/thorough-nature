@@ -420,12 +420,19 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
       const status = mapComgateStatusToMedusa(result.data?.status || "PENDING")
 
+      // Use the method from Comgate API response, but also preserve the original
+      // frontend-selected method (comgate_method) for accurate icon/label display
+      const comgateApiMethod = result.data?.method || ""
+      const frontendMethod = paymentSessionData?.comgate_method || paymentSessionData?.method || ""
+
       return {
         data: {
           ...paymentSessionData,
           transId,
           status: result.data?.status,
-          method: result.data?.method,
+          method: frontendMethod || comgateApiMethod,
+          comgate_api_method: comgateApiMethod,
+          comgateTransId: transId,
         },
         status,
       }
