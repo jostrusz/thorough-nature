@@ -271,6 +271,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
     metadata.comgateTransId ||
     metadata.p24SessionId ||
     metadata.airwallexPaymentIntentId ||
+    metadata.payment_id ||
     ""
 
   // Payment Gateway name (e.g. "Mollie", "PayPal")

@@ -167,8 +167,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       } else if (payment_id.startsWith("ord_")) {
         metadata.mollieOrderId = payment_id
         metadata.payment_provider = "mollie"
+      } else if (payment_id.startsWith("pi_") || payment_id.startsWith("pm_") || payment_id.startsWith("cs_")) {
+        metadata.stripePaymentIntentId = payment_id
+        metadata.payment_provider = "stripe"
+      } else if (payment_id.startsWith("P24")) {
+        metadata.p24SessionId = payment_id
+        metadata.payment_provider = "przelewy24"
       } else {
+        // Fallback: store in both payment_id and payment_id_override so widget can read it
         metadata.payment_id = payment_id
+        metadata.payment_id_override = payment_id
       }
     }
 
