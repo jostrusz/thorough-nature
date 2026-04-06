@@ -306,7 +306,7 @@ export function OrdersTable({
 
   if (isLoading) {
     return (
-      <div style={{ overflowX: "auto" }}>
+      <div className="orders-desktop-table" style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr>
@@ -357,8 +357,85 @@ export function OrdersTable({
     )
   }
 
+  // ═══ Mobile Card Layout ═══
+  const mobileCards = (
+    <div className="orders-mobile-cards" style={{ display: "none" }}>
+      {orders.map((order) => {
+        const paymentStatus = getPaymentStatus(order)
+        const customerName = getCustomerName(order)
+        const countryCode = order.shipping_address?.country_code
+          || order.billing_address?.country_code
+          || (() => {
+            const num = order.metadata?.custom_order_number
+            if (num && typeof num === "string") {
+              const m = num.match(/^([A-Za-z]{2})\d/)
+              if (m) return m[1].toLowerCase()
+            }
+            return "nl"
+          })()
+        const deliveryStatus = order.metadata?.dextrum_status || (() => {
+          const fulfillments = order.fulfillments || []
+          const itemCount2 = order.items?.length || 0
+          if (fulfillments.length === 0) return "unfulfilled"
+          const fulfilledItemIds = new Set<string>()
+          fulfillments.forEach((f: any) => {
+            (f.items || []).forEach((fi: any) => {
+              fulfilledItemIds.add(fi.line_item_id)
+            })
+          })
+          if (itemCount2 > 0 && fulfilledItemIds.size < itemCount2) return "partially_fulfilled"
+          return "fulfilled"
+        })()
+        const itemCount = order.items?.length || 0
+        const total = (Number(order.total) || 0)
+          + (Number(order.metadata?.cod_fee) || 0)
+          + (Number(order.metadata?.shipping_fee) || 0)
+        const dt = formatDate(order.created_at)
+
+        return (
+          <div
+            key={order.id}
+            onClick={() => navigate(`/custom-orders/${order.id}`)}
+            style={{
+              padding: "14px 16px",
+              borderBottom: `1px solid ${colors.border}`,
+              cursor: "pointer",
+              background: selectedOrders.has(order.id) ? "rgba(108,92,231,0.05)" : "transparent",
+            }}
+          >
+            {/* Top row: order number + total */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+              <span style={{ color: colors.accent, fontWeight: 700, fontSize: "14px" }}>
+                {getOrderDisplayNumber(order)}
+              </span>
+              <span style={{ fontWeight: 700, fontSize: "14px", color: colors.text, fontVariantNumeric: "tabular-nums" }}>
+                {formatCurrency(total, order.currency_code)}
+              </span>
+            </div>
+            {/* Second row: customer + items + time */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px", fontSize: "13px", color: colors.textSec }}>
+              <span style={{ fontWeight: 500 }}>{customerName}</span>
+              <span style={{ color: colors.textMuted }}>&middot;</span>
+              <span style={{ color: colors.textMuted }}>{itemCount} item{itemCount !== 1 ? "s" : ""}</span>
+              <span style={{ color: colors.textMuted }}>&middot;</span>
+              <span style={{ color: colors.textMuted, fontSize: "12px" }}>{dt.label} {dt.time}</span>
+            </div>
+            {/* Third row: badges + country */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              <PaymentBadge status={paymentStatus} />
+              <DeliveryBadge status={deliveryStatus} />
+              <CountryFlag code={countryCode} />
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+
   return (
-    <div style={{ overflowX: "auto" }}>
+    <div>
+      {mobileCards}
+      <div className="orders-desktop-table" style={{ overflowX: "auto" }}>
       <style>{rowHoverStyles}</style>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
@@ -594,6 +671,7 @@ export function OrdersTable({
           })}
         </tbody>
       </table>
+      </div>
     </div>
   )
 }

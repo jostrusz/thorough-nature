@@ -83,6 +83,50 @@ function ProfitabilityStyles() {
         overflow: hidden;
         transition: max-height 0.2s ease, opacity 0.2s ease;
       }
+
+      /* ═══ Mobile Responsive ═══ */
+      @media (max-width: 768px) {
+        .profit-cards-grid {
+          grid-template-columns: repeat(2, 1fr) !important;
+        }
+        .profit-header {
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          gap: 12px !important;
+        }
+        .profit-header h2 {
+          font-size: 17px !important;
+        }
+        .profit-period-selector-wrap {
+          width: 100% !important;
+          overflow-x: auto !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+        .profit-period-selector {
+          flex-wrap: wrap !important;
+        }
+        .profit-period-btn {
+          padding: 5px 10px !important;
+          font-size: 11px !important;
+        }
+        .profit-total-bar {
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          gap: 12px !important;
+          padding: 12px 14px !important;
+        }
+        .profit-total-metrics {
+          width: 100% !important;
+          flex-wrap: wrap !important;
+          gap: 16px !important;
+        }
+        .profit-total-metrics > div {
+          align-items: flex-start !important;
+        }
+        .profit-custom-range {
+          flex-wrap: wrap !important;
+        }
+      }
     `}</style>
   )
 }
@@ -610,6 +654,7 @@ export function ProfitabilitySection() {
 
       {/* ═══ Header ═══ */}
       <div
+        className="profit-header"
         style={{
           display: "flex",
           alignItems: "center",
@@ -662,7 +707,7 @@ export function ProfitabilitySection() {
         </h2>
 
         {/* Right — Period selector */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div className="profit-period-selector-wrap" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {/* Custom range label */}
           {showCustomRange && customRangeLabel && (
             <span
@@ -679,7 +724,7 @@ export function ProfitabilitySection() {
             </span>
           )}
 
-          <div style={periodSelectorStyle}>
+          <div className="profit-period-selector" style={periodSelectorStyle}>
             {PERIODS.map((p) => (
               <button
                 key={p.id}
@@ -733,6 +778,7 @@ export function ProfitabilitySection() {
       {/* ═══ Project Cards Grid ═══ */}
       {isLoading ? (
         <div
+          className="profit-cards-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
@@ -746,6 +792,7 @@ export function ProfitabilitySection() {
         </div>
       ) : (
         <div
+          className="profit-cards-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
@@ -788,7 +835,7 @@ export function ProfitabilitySection() {
         </div>
 
         {/* Right metrics */}
-        <div style={totalMetricsStyle}>
+        <div className="profit-total-metrics" style={totalMetricsStyle}>
           <div style={totalItemStyle}>
             <span style={totalItemLabelStyle}>Revenue</span>
             <span style={{ ...totalItemValueStyle, color: "#1A1D2E" }}>

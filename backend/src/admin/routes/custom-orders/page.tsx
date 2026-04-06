@@ -356,6 +356,66 @@ function DashboardStyles() {
         .dash-animate-in {
           padding-left: 12px !important;
           padding-right: 12px !important;
+          padding-top: 12px !important;
+        }
+
+        /* Header: stack vertically */
+        .dash-header-row {
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          gap: 12px !important;
+        }
+        .dash-header-row h1 {
+          font-size: 20px !important;
+        }
+        .dash-header-buttons {
+          width: 100% !important;
+        }
+
+        /* Hide button text on small screens, keep icons */
+        .dash-btn-text {
+          display: none !important;
+        }
+
+        /* Search toolbar full width */
+        .dash-toolbar {
+          padding: 10px 12px !important;
+        }
+        .dash-search {
+          width: 100% !important;
+        }
+
+        /* Pagination: simplified on mobile */
+        .dash-pagination {
+          flex-direction: column !important;
+          gap: 10px !important;
+          padding: 12px !important;
+        }
+        .dash-pagination-pages .dash-page-num {
+          display: none !important;
+        }
+        .dash-pagination-pages {
+          gap: 8px !important;
+        }
+
+        /* Desktop table hidden on mobile */
+        .orders-desktop-table {
+          display: none !important;
+        }
+
+        /* Mobile cards visible on mobile */
+        .orders-mobile-cards {
+          display: block !important;
+        }
+      }
+
+      /* Desktop: hide mobile cards, show table */
+      @media (min-width: 769px) {
+        .orders-mobile-cards {
+          display: none !important;
+        }
+        .orders-desktop-table {
+          display: block !important;
         }
       }
     `}</style>
@@ -581,12 +641,12 @@ const CustomOrdersPage = () => {
       <ProfitabilitySection />
 
       {/* Page Header — between profitability and orders table */}
-      <div style={headerStyle}>
+      <div className="dash-header-row" style={headerStyle}>
         <h1 style={h1Style}>
           Orders
           <span style={countBadgeStyle}>{totalCount}</span>
         </h1>
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div className="dash-header-buttons" style={{ display: "flex", gap: "8px" }}>
           <button
             className="dash-btn"
             style={btnOutline}
@@ -602,7 +662,7 @@ const CustomOrdersPage = () => {
             >
               <path d="M3 14v3h14v-3M10 3v10M6 9l4 4 4-4" />
             </svg>
-            Export
+            <span className="dash-btn-text">Export</span>
           </button>
           <button className="dash-btn-primary" style={btnPrimary} onClick={() => setShowCreateModal(true)}>
             <svg
@@ -615,7 +675,7 @@ const CustomOrdersPage = () => {
             >
               <path d="M10 4v12M4 10h12" />
             </svg>
-            Create Order
+            <span className="dash-btn-text">Create Order</span>
           </button>
         </div>
       </div>
@@ -630,7 +690,7 @@ const CustomOrdersPage = () => {
         />
 
         {/* Toolbar */}
-        <div style={toolbarStyle}>
+        <div className="dash-toolbar" style={toolbarStyle}>
           <div className="dash-search" style={searchBoxStyle}>
             <svg
               width="16"
@@ -675,7 +735,7 @@ const CustomOrdersPage = () => {
         />
 
         {/* Pagination */}
-        <div style={paginationStyle}>
+        <div className="dash-pagination" style={paginationStyle}>
           <span style={paginationInfoStyle}>
             {orders.length > 0
               ? `Showing ${page * PAGE_SIZE + 1}-${Math.min(
@@ -684,7 +744,7 @@ const CustomOrdersPage = () => {
                 )} of ${totalCount} orders`
               : "0 orders"}
           </span>
-          <div style={{ display: "flex", gap: "4px", marginLeft: "16px" }}>
+          <div className="dash-pagination-pages" style={{ display: "flex", gap: "4px", marginLeft: "16px" }}>
             <button
               className="dash-page-btn"
               style={pageBtnStyle}
@@ -698,7 +758,7 @@ const CustomOrdersPage = () => {
               return (
                 <button
                   key={i}
-                  className="dash-page-btn"
+                  className="dash-page-btn dash-page-num"
                   style={page === pageNum ? pageBtnActiveStyle : pageBtnStyle}
                   onClick={() => setPage(pageNum)}
                 >
