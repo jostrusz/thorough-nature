@@ -21,10 +21,10 @@ var PROJECT_CONFIG = {
     "currency": "CZK"
   },
   "bundleOptions": [
-    { "qty": 1, "price": 550, "label": "1 kniha + 3× bonusy", "badge": "NEJPRODÁVANĚJŠÍ", "save": 0 },
-    { "qty": 2, "price": 899, "label": "2 knihy + 3× bonusy", "badge": "NEJOBLÍBENĚJŠÍ", "save": 201, "savings": 201 },
-    { "qty": 3, "price": 1199, "label": "3 knihy + 3× bonusy", "badge": null, "save": 451, "savings": 451 },
-    { "qty": 4, "price": 1499, "label": "4 knihy + 3× bonusy", "badge": "NEJLEPŠÍ HODNOTA", "save": 701, "savings": 701 }
+    { "qty": 1, "price": 550, "label": "1 kniha + 3× bonusy", "sublabel": "Pro sebe", "badge": "NEJPRODÁVANĚJŠÍ", "save": 0 },
+    { "qty": 2, "price": 899, "label": "2 knihy + 3× bonusy", "sublabel": "Pro mě a dárek pro blízké", "badge": "NEJOBLÍBENĚJŠÍ", "save": 201, "savings": 201 },
+    { "qty": 3, "price": 1199, "label": "3 knihy + 3× bonusy", "sublabel": "Pro celou rodinu pejskařů", "badge": "NEJVÍC UŠETŘÍTE", "save": 451, "savings": 451 },
+    { "qty": 4, "price": 1499, "label": "4 knihy + 3× bonusy", "sublabel": "Obdarujte všechny kámoše z venčáku", "badge": "NEJLEPŠÍ HODNOTA", "save": 701, "savings": 701 }
   ],
   "regions": {
     "CZ": "reg_01KKBXQSFW6CCV6MMZEYAAW0VA"
