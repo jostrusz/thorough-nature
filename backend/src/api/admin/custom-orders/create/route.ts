@@ -224,7 +224,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       },
     })
 
-    // Add tax lines (21% VAT for EU)
+    // Add tax lines (books have reduced VAT rates in most EU countries)
     try {
       const { data: [freshOrder] } = await query.graph({
         entity: "order",
@@ -233,11 +233,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       })
       const newItems = (freshOrder as any)?.items || []
       if (newItems.length > 0) {
-        const taxRate = ["nl", "be", "de", "at"].includes(country_code.toLowerCase()) ? 21
-          : ["se"].includes(country_code.toLowerCase()) ? 25
+        // Book VAT rates per country (reduced rates for physical books)
+        const taxRate = ["nl"].includes(country_code.toLowerCase()) ? 9
+          : ["be"].includes(country_code.toLowerCase()) ? 6
+          : ["de", "at"].includes(country_code.toLowerCase()) ? 7
+          : ["se"].includes(country_code.toLowerCase()) ? 6
           : ["pl"].includes(country_code.toLowerCase()) ? 5
           : ["cz"].includes(country_code.toLowerCase()) ? 12
-          : 21
+          : 0 // non-EU or unknown — no VAT
 
         await orderModuleService.createOrderLineItemTaxLines(
           orderId,

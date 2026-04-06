@@ -954,6 +954,7 @@ function OrderContextCard({ orders }: { orders: any[] }) {
           : paymentProvider.includes("mollie") ? "Mollie"
           : paymentProvider.includes("comgate") ? "Comgate"
           : paymentProvider.includes("cod") ? "COD"
+          : order.payment_provider ? order.payment_provider.charAt(0).toUpperCase() + order.payment_provider.slice(1)
           : paymentProvider || "—"
         const refunds = (order.payments || []).flatMap((p: any) => p.refunds || [])
         const totalRefunded = refunds.reduce((s: number, r: any) => s + (Number(r.amount) || 0), 0)
@@ -1113,6 +1114,30 @@ function OrderContextCard({ orders }: { orders: any[] }) {
                         </div>
                       )}
                     </div>
+
+                    {/* WMS / Dextrum info */}
+                    {order.wms_order_code && (
+                      <div style={{ marginTop: "6px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                        <div style={{ padding: "8px 12px", backgroundColor: D.inset, borderRadius: D.r8 }}>
+                          <div style={{ fontSize: "10px", fontWeight: 700, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>WMS Order</div>
+                          <div style={{ fontSize: "12px", fontWeight: 600, color: D.text, marginTop: "2px", fontFamily: "'SF Mono',Menlo,monospace" }}>{order.wms_order_code}</div>
+                        </div>
+                        {order.wms_sent_at && (
+                          <div style={{ padding: "8px 12px", backgroundColor: D.inset, borderRadius: D.r8 }}>
+                            <div style={{ fontSize: "10px", fontWeight: 700, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Sent to WMS</div>
+                            <div style={{ fontSize: "12px", fontWeight: 500, color: D.text, marginTop: "2px" }}>{f.dt(order.wms_sent_at)}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Payment ID */}
+                    {order.payment_id && (
+                      <div style={{ marginTop: "6px", padding: "8px 12px", backgroundColor: D.inset, borderRadius: D.r8 }}>
+                        <div style={{ fontSize: "10px", fontWeight: 700, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Payment ID</div>
+                        <div style={{ fontSize: "12px", fontWeight: 500, color: D.text, marginTop: "2px", fontFamily: "'SF Mono',Menlo,monospace", wordBreak: "break-all" }}>{order.payment_id}</div>
+                      </div>
+                    )}
 
                     {/* Tracking bar */}
                     {trackingNo && (

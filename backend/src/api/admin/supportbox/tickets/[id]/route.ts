@@ -89,9 +89,13 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
             payments,
             shipping_address: shippingAddr,
             delivery_status: order.metadata?.dextrum_status || null,
+            wms_order_code: order.metadata?.dextrum_order_code || null,
+            wms_sent_at: order.metadata?.dextrum_sent_at || null,
             tracking_number: order.metadata?.dextrum_tracking_number || null,
             tracking_link: order.metadata?.dextrum_tracking_link || null,
             carrier: order.metadata?.dextrum_carrier || null,
+            payment_provider: order.metadata?.payment_provider || null,
+            payment_id: order.metadata?.payment_id_override || order.metadata?.stripePaymentIntentId || order.metadata?.molliePaymentId || order.metadata?.airwallexPaymentIntentId || order.metadata?.paypalOrderId || order.metadata?.comgateTransId || null,
             fulfillments: (order.fulfillments || []).map((f: any) => ({
               id: f.id,
               created_at: f.created_at,

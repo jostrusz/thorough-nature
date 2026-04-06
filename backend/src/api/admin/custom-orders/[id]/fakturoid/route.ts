@@ -173,7 +173,18 @@ export async function POST(
         ""
     }
 
-    // ── Build invoice lines (with VAT rate from Medusa tax lines) ──
+    // ── Book VAT rates per country (reduced rates for physical books) ──
+    const BOOK_VAT_RATES: Record<string, number> = {
+      nl: 9, be: 6, de: 7, at: 7, se: 6, pl: 5, cz: 12, sk: 10,
+      lu: 3, fr: 5, it: 4, es: 4, pt: 6, ie: 0, hu: 5,
+    }
+    const orderCountry = (
+      invoiceAddress?.country_code ||
+      order.metadata?.country_code ||
+      ""
+    ).toLowerCase()
+
+    // ── Build invoice lines (with VAT rate from Medusa tax lines, fallback to book VAT) ──
     const items = order.items || []
     const lines = items.map((item: any) => {
       const line: any = {
@@ -188,6 +199,8 @@ export async function POST(
       if (taxLine?.rate != null) {
         const rate = Number(taxLine.rate)
         line.vat_rate = rate >= 1 ? Math.round(rate) : Math.round(rate * 100)
+      } else if (BOOK_VAT_RATES[orderCountry] != null) {
+        line.vat_rate = BOOK_VAT_RATES[orderCountry]
       }
       return line
     })

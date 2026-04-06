@@ -243,7 +243,19 @@ export default async function orderPlacedFakturoidHandler({
       console.warn("[Fakturoid] Could not fetch tax lines:", taxErr.message)
     }
 
-    // ── Build invoice lines (with VAT rate from Medusa tax lines) ──
+    // ── Book VAT rates per country (reduced rates for physical books) ──
+    const BOOK_VAT_RATES: Record<string, number> = {
+      nl: 9, be: 6, de: 7, at: 7, se: 6, pl: 5, cz: 12, sk: 10,
+      lu: 3, fr: 5, it: 4, es: 4, pt: 6, ie: 0, hu: 5,
+    }
+    const orderCountry = (
+      invoiceAddress?.country_code ||
+      shippingAddress?.country_code ||
+      (order.metadata as any)?.country_code ||
+      ""
+    ).toLowerCase()
+
+    // ── Build invoice lines (with VAT rate from Medusa tax lines, fallback to book VAT) ──
     const items = order.items || []
     const lines = items.map((item: any) => {
       const line: any = {
@@ -252,9 +264,12 @@ export default async function orderPlacedFakturoidHandler({
         unit_price: item.unit_price || 0,
         unit_name: "ks",
       }
-      // VAT rate from tax lines map (e.g. 21, 6, 19)
+      // VAT rate: prefer Medusa tax lines, fallback to book VAT rate for country
       if (itemTaxMap[item.id] != null) {
         line.vat_rate = itemTaxMap[item.id]
+      } else if (BOOK_VAT_RATES[orderCountry] != null) {
+        line.vat_rate = BOOK_VAT_RATES[orderCountry]
+        console.log(`[Fakturoid] No tax_lines for item ${item.id}, using book VAT rate ${line.vat_rate}% for ${orderCountry.toUpperCase()}`)
       }
       return line
     })
