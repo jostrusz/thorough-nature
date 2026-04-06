@@ -380,8 +380,9 @@ export function OrderFulfillmentCard({
       {shippingMethod && (() => {
         const isFree = !order.shipping_methods?.[0]?.amount || Number(order.shipping_methods[0].amount) === 0
         const methodLower = shippingMethod.toLowerCase()
-        const isInPost = methodLower.includes("inpost") || methodLower.includes("paczkomat") || order.metadata?.shipping_method === "zasilkovna_pickup"
-        const isGLS = !isInPost && methodLower.includes("gls")
+        const isZasilkovna = methodLower.includes("zásilkovna") || methodLower.includes("zasilkovna") || methodLower.includes("packeta")
+        const isInPost = !isZasilkovna && (methodLower.includes("inpost") || methodLower.includes("paczkomat"))
+        const isGLS = !isInPost && !isZasilkovna && methodLower.includes("gls")
         const isDHL = methodLower.includes("dhl")
         const isDPD = methodLower.includes("dpd")
         const shippingPrice = !isFree
@@ -399,6 +400,22 @@ export function OrderFulfillmentCard({
               background: isFree ? "#f0faf4" : "transparent",
             }}
           >
+            {/* Zásilkovna badge — red bg, white text */}
+            {isZasilkovna && (
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "3px 8px",
+                  borderRadius: "3px",
+                  background: "#BA1B02",
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ fontSize: "10px", fontWeight: 700, color: "#fff", letterSpacing: "0.04em", lineHeight: 1 }}>Zásilkovna</span>
+              </div>
+            )}
             {/* InPost badge — yellow bg, black text */}
             {isInPost && (
               <div
@@ -448,7 +465,7 @@ export function OrderFulfillmentCard({
               </div>
             )}
             {/* Truck icon for unknown carriers */}
-            {!isInPost && !isGLS && !isDHL && !isDPD && (
+            {!isZasilkovna && !isInPost && !isGLS && !isDHL && !isDPD && (
               <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={colors.textMuted} strokeWidth="1.5">
                 <rect x="1" y="6" width="12" height="9" rx="1" />
                 <path d="M13 9h4l2 3v3h-6V9zM4 18a2 2 0 104 0M14 18a2 2 0 104 0" />
@@ -461,7 +478,7 @@ export function OrderFulfillmentCard({
               <div style={{ fontSize: "11px", color: colors.textMuted, marginTop: "1px" }}>
                 {(() => {
                   const pid = order.metadata?.project_id || order.metadata?.tags || ""
-                  const carrier = isGLS ? "GLS" : isDHL ? "DHL" : isDPD ? "DPD" : "koerier"
+                  const carrier = isZasilkovna ? "Zásilkovnu" : isGLS ? "GLS" : isDHL ? "DHL" : isDPD ? "DPD" : "koerier"
                   if (pid.includes("lass") || pid.includes("Lass")) return `Versand innerhalb von 24 Stunden per ${carrier}`
                   if (pid.includes("slapp") || pid.includes("Släpp")) return `Skickas inom 24 timmar via ${carrier}`
                   if (pid.includes("odpusc") || pid.includes("Odpuść")) return `Wysyłka w ciągu 24 godzin przez ${carrier}`
