@@ -416,6 +416,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
           createdAt: Date.now(),
           project_slug: projectSlug,
           // Store session creation data for createOrder matching
+          product_name: data?.product_name || data?.statement_descriptor || sessionData.order_lines?.[0]?.name || "Product",
           klarnaSessionData: {
             purchase_country: sessionData.purchase_country,
             purchase_currency: sessionData.purchase_currency,
@@ -495,7 +496,7 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
         locale: locale,
         order_amount: storedSession.order_amount || fallbackAmountMinor,
         order_tax_amount: storedSession.order_tax_amount || 0,
-        description: "Order",
+        description: sessionData?.product_name || orderLines?.[0]?.name || "Product",
         merchant_reference: `medusa-${Date.now()}`,
         merchant_reference1: sessionId,
         order_lines: orderLines,
@@ -576,13 +577,13 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       const storedOrderLines = sessionData?.klarnaSessionData?.order_lines
       const captureData = {
         captured_amount: amountMinor,
-        description: "Capture",
+        description: sessionData?.product_name || storedOrderLines?.[0]?.name || "Product",
         order_lines: storedOrderLines && storedOrderLines.length > 0
           ? storedOrderLines
           : [
               {
                 type: "physical",
-                name: sessionData?.product_name || "Order",
+                name: sessionData?.product_name || "Product",
                 quantity: 1,
                 unit_price: amountMinor,
                 tax_rate: 0,

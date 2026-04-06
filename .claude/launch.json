@@ -77,9 +77,10 @@
     },
     {
       "name": "psi-superzivot",
-      "runtimeExecutable": "npx",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
       "runtimeArgs": ["http-server", "storefront/src/projects/psi-superzivot/pages", "-p", "8100", "-c-1"],
-      "port": 8100
+      "port": 8100,
+      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
     },
     {
       "name": "dehondenbijbel",

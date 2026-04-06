@@ -270,12 +270,13 @@ h3 { font-size: 22px; font-weight: 700; line-height: 1.3; }
 .btn-cta:hover { background: var(--cta-hover); box-shadow: 0 2px 0 rgba(0,0,0,0.2), 0 4px 15px var(--cta-shadow); transform: translateY(2px); }
 
 /* ═══ PAYMENT ICONS ═══ */
-.payment-row { display: flex; gap: 6px; align-items: center; justify-content: center; margin-top: 12px; flex-wrap: wrap; width: fit-content; margin-left: auto; margin-right: auto; }
+.payment-row { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 12px; flex-wrap: wrap; width: fit-content; margin-left: auto; margin-right: auto; }
 .payment-row.left { justify-content: flex-start; margin-left: 0; }
 .pay-icon {
- height: 28px; width: auto; transition: transform 0.3s ease;
- opacity: 1; filter: none; background: none;
+ height: 22px; width: auto; transition: transform 0.3s ease;
+ opacity: 0.7; filter: grayscale(0.3); background: none;
 }
+.pay-label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 8px; border: 1px solid #ccc; border-radius: 4px; line-height: 1; }
 .pay-icon:hover {
  transform: translateY(-2px);
 }
@@ -648,9 +649,9 @@ h3 { font-size: 22px; font-weight: 700; line-height: 1.3; }
 .method-item p { margin: 0; font-family: var(--font-body); font-size: 16px; line-height: 1.7; color: var(--dark); }
 
 /* ═══ QUALIFICATIONS & SOLUTIONS LISTS ═══ */
-.qualifications-list, .solutions-list { font-family: var(--font-body); font-size: 16px; line-height: 1.7; color: var(--dark); margin: 16px 0; padding-left: 0; text-align: left; }
-.list-item { display: flex; gap: 6px; margin-bottom: 0; align-items: flex-start; padding: 1px 0; }
-.list-item .arrow { font-size: 18px; font-weight: 700; color: var(--purple); flex-shrink: 0; margin-top: 2px; }
+.qualifications-list, .solutions-list { font-family: var(--font-body); font-size: 16px; line-height: 1.7; color: var(--dark); margin: 20px 0; padding-left: 20px; text-align: left; }
+.list-item { display: flex; gap: 10px; margin-bottom: 4px; align-items: flex-start; padding: 1px 0; }
+.list-item .arrow { font-size: 18px; font-weight: 700; color: var(--purple); flex-shrink: 0; min-width: 18px; margin-top: 2px; }
 .list-item p { margin: 0; font-family: var(--font-body); font-size: 16px; line-height: 1.7; color: var(--dark); text-align: left; }
 
 /* ═══ REVIEWS SLIDER ═══ */
@@ -731,6 +732,7 @@ h3 { font-size: 22px; font-weight: 700; line-height: 1.3; }
 .auteur-photo-wrap:last-child { transform: rotate(3deg); margin-left: -40px; }
 .auteur-photo-wrap img { width: 100%; height: auto; }
 .auteur-section p { font-size: 16px; line-height: 1.7; margin-bottom: 20px; max-width: 520px; margin-left: auto; margin-right: auto; }
+.auteur-section .list-item p { margin: 0; max-width: none; margin-left: 0; margin-right: 0; flex: 1; }
 .auteur-section strong { color: var(--dark); }
 .auteur-section em { font-style: italic; }
 .auteur-section u { text-decoration: underline; }
