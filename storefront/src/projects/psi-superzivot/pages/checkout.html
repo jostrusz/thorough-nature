@@ -4965,7 +4965,7 @@ body {
     });
 
     // Custom sort order for psi-superzivot
-    var METHOD_ORDER = ['creditcard', 'bank_transfer', 'paypal', 'googlepay', 'applepay', 'cod'];
+    var METHOD_ORDER = ['creditcard', 'bank_transfer', 'paypal', 'cod', 'googlepay', 'applepay'];
     methods.sort(function(a, b) {
       var idxA = METHOD_ORDER.indexOf(a.code);
       var idxB = METHOD_ORDER.indexOf(b.code);
