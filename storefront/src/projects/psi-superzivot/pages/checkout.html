@@ -7124,25 +7124,15 @@ body {
           });
         }
       }).then(function() {
-        // Krok 2c: Přidat poplatky jako line items (doprava na adresu, dobírka)
-        var feePromise = Promise.resolve();
-        if (selectedShipping === 'home') {
-          feePromise = feePromise.then(function() {
-            return medusaFetch('/store/carts/' + cartId + '/add-fee', {
-              method: 'POST',
-              body: JSON.stringify({ type: 'delivery_fee' })
-            });
-          });
-        }
+        // Krok 2c: Přidat poplatky jako line items
+        // Doprava na adresu se NEPŘIDÁVÁ — shipping option "Zásilkovna - Na adresu" už má cenu 20 Kč
+        // Dobírka se přidá jako line item (není jiný mechanismus v Meduse)
         if (selectedMethod === 'cod') {
-          feePromise = feePromise.then(function() {
-            return medusaFetch('/store/carts/' + cartId + '/add-fee', {
-              method: 'POST',
-              body: JSON.stringify({ type: 'cod_fee' })
-            });
+          return medusaFetch('/store/carts/' + cartId + '/add-fee', {
+            method: 'POST',
+            body: JSON.stringify({ type: 'cod_fee' })
           });
         }
-        return feePromise;
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
@@ -7248,10 +7238,9 @@ body {
       }
 
       return tokenPromise.then(function() {
-        // Build metadata: shipping + optional COD
+        // Build metadata: shipping info (fees are now in shipping options + line items, not metadata)
         var cartMeta = {
           shipping_method: selectedShipping === 'pickup' ? 'zasilkovna_pickup' : 'zasilkovna_home',
-          shipping_fee: selectedShipping === 'home' ? 20 : 0,
         };
         if (selectedShipping === 'pickup' && selectedPacketaPoint) {
           cartMeta.packeta_point_id = String(selectedPacketaPoint.id);
@@ -7260,7 +7249,6 @@ body {
         }
         if (selectedMethod === 'cod') {
           cartMeta.payment_method = 'cod';
-          cartMeta.cod_fee = 30;
         }
 
         // ── PARALLEL: metadata update + payment collection creation ──
