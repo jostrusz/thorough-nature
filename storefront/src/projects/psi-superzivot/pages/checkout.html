@@ -7161,9 +7161,22 @@ body {
         if (options.length === 0) {
           throw new Error('Žádné možnosti dopravy nejsou k dispozici');
         }
+        // Vyber správnou shipping option podle zvoleného způsobu doručení
+        var selectedOption = options[0]; // fallback
+        if (selectedShipping === 'home') {
+          var homeOpt = options.find(function(o) {
+            return o.name && o.name.toLowerCase().indexOf('adres') !== -1;
+          });
+          if (homeOpt) selectedOption = homeOpt;
+        } else {
+          var pickupOpt = options.find(function(o) {
+            return o.name && o.name.toLowerCase().indexOf('výdejní') !== -1;
+          });
+          if (pickupOpt) selectedOption = pickupOpt;
+        }
         return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
           method: 'POST',
-          body: JSON.stringify({ option_id: options[0].id })
+          body: JSON.stringify({ option_id: selectedOption.id })
         });
       }).then(function() {
         // Fire-and-forget: update order summary in background (don't block payment flow)
