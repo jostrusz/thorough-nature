@@ -11,6 +11,11 @@ export interface PsShipmentNotificationTemplateProps {
   trackingUrl?: string
   trackingCompany?: string
   billingEntity?: any
+  pickupPoint?: {
+    name: string
+    id?: string
+    address?: string
+  } | null
   preview?: string
 }
 
@@ -75,18 +80,26 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
   trackingUrl,
   trackingCompany,
   billingEntity,
+  pickupPoint,
   preview = 'Vaše objednávka byla odeslána!',
 }) => {
   const currency = order.currency_code || 'czk'
   const items = order.items || []
   const displayId = order.metadata?.custom_order_number || order.display_id || order.id
 
-  // Billing entity info
-  const entityName = billingEntity?.legal_name || 'EverChapter OÜ'
-  const entityAddress = billingEntity?.address
-    ? `${billingEntity.address.city || 'Tallinn'}, ${billingEntity.address.district || billingEntity.address.country_code?.toUpperCase() || 'Estonia'}`
-    : 'Tallinn, Estonia'
-  const entityRegId = billingEntity?.registration_id || '16938029'
+  // Detect pickup point from props or order metadata
+  const pickup = pickupPoint || (order.metadata?.pickup_point_name ? {
+    name: order.metadata.pickup_point_name,
+    id: order.metadata.pickup_point_id,
+    address: order.metadata.pickup_point_address,
+  } : null)
+  const isPickup = !!pickup
+
+  // Billing entity — Czech company
+  const entityName = billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'
+  const entityAddress = billingEntity?.address_line || 'Rybná 716/24, Staré Město, 110 00 Praha'
+  const entityIco = billingEntity?.ico || '06259928'
+  const entityDic = billingEntity?.dic || 'CZ06259928'
 
   return (
     <Base preview={preview}>
@@ -118,7 +131,7 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Vaše objednávka byla odeslána!
+            Tvoje objednávka je na cestě!
           </Text>
           <Text style={{
             fontFamily: font,
@@ -160,7 +173,7 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
             lineHeight: '1.7',
             margin: '0',
           }}>
-            Ahoj {shippingAddress?.first_name || 'tam'},
+            Ahoj {shippingAddress?.first_name || 'tam'} 👋,
           </Text>
           <Text style={{
             fontFamily: font,
@@ -169,7 +182,10 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
             lineHeight: '1.7',
             margin: '8px 0 0',
           }}>
-            Skvělá zpráva! Vaše objednávka byla zabalena a odeslána. Níže najdete podrobnosti o zásilce.
+            {isPickup
+              ? 'Skvělá zpráva! Tvoje objednávka byla zabalena a odeslána na výdejní místo. Jakmile bude připravena k vyzvednutí, dostaneš další upozornění.'
+              : 'Skvělá zpráva! Tvoje objednávka byla zabalena a už je na cestě k tobě. Níže najdeš podrobnosti o zásilce.'
+            }
           </Text>
         </div>
 
@@ -252,7 +268,10 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
               margin: '0',
               lineHeight: '1.5',
             }}>
-              &#128666; &nbsp;<strong>Očekávané doručení: 2–5 pracovních dnů</strong>
+              {isPickup
+                ? <><strong>&#128205; Doručení na výdejní místo</strong></>
+                : <><strong>&#128666; Očekávané doručení: 2–5 pracovních dnů</strong></>
+              }
             </Text>
             <Text style={{
               fontFamily: font,
@@ -261,7 +280,7 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
               margin: '6px 0 0',
               lineHeight: '1.5',
             }}>
-              Knihy odesíláme z našeho centrálního skladu v ČR.
+              {isPickup ? 'Zásilku si vyzvedneš na zvoleném výdejním místě.' : 'Knihy odesíláme z našeho centrálního skladu v ČR.'}
             </Text>
           </div>
         </div>
@@ -370,7 +389,7 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
             color: colors.accent,
             marginBottom: '10px',
           }}>
-            Doručovací adresa
+            {isPickup ? 'Výdejní místo' : 'Doručovací adresa'}
           </Text>
           <div style={{
             backgroundColor: colors.boxBg,
@@ -378,21 +397,35 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
             border: `1px solid ${colors.boxBorder}`,
             padding: '16px 20px',
           }}>
-            <Text style={{
-              fontFamily: font,
-              fontSize: '14px',
-              color: colors.textBody,
-              lineHeight: '1.7',
-              margin: '0',
-            }}>
-              {shippingAddress?.first_name} {shippingAddress?.last_name}
-              <br />
-              {shippingAddress?.address_1}
-              <br />
-              {shippingAddress?.postal_code} {shippingAddress?.city}
-              <br />
-              {formatCountry(shippingAddress?.country_code)}
-            </Text>
+            {isPickup && pickup ? (
+              <Text style={{
+                fontFamily: font,
+                fontSize: '14px',
+                color: colors.textBody,
+                lineHeight: '1.7',
+                margin: '0',
+              }}>
+                <strong>{pickup.name}</strong>
+                {pickup.id && <><br />ID: {pickup.id}</>}
+                {pickup.address && <><br />{pickup.address}</>}
+              </Text>
+            ) : (
+              <Text style={{
+                fontFamily: font,
+                fontSize: '14px',
+                color: colors.textBody,
+                lineHeight: '1.7',
+                margin: '0',
+              }}>
+                {shippingAddress?.first_name} {shippingAddress?.last_name}
+                <br />
+                {shippingAddress?.address_1}
+                <br />
+                {shippingAddress?.postal_code} {shippingAddress?.city}
+                <br />
+                {formatCountry(shippingAddress?.country_code)}
+              </Text>
+            )}
           </div>
         </div>
 
@@ -433,7 +466,7 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Odesláno</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Vaše objednávka byla zabalena a odeslána z našeho skladu.</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Tvoje objednávka byla zabalena a odeslána z našeho skladu.</span>
                 </td>
               </tr>
             </tbody>
@@ -460,7 +493,7 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Na cestě</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Dopravce doručuje zásilku na vaši adresu.</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásilka míří na tvoje výdejní místo.' : 'Dopravce doručuje zásilku na tvou adresu.'}</span>
                 </td>
               </tr>
             </tbody>
@@ -487,7 +520,7 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Doručeno</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Během 2–5 pracovních dnů budete mít knihu doma.</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásilku si vyzvedneš na výdejním místě.' : 'Během 2–5 pracovních dnů budeš mít knihu doma.'}</span>
                 </td>
               </tr>
             </tbody>
@@ -510,10 +543,10 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Máte dotaz k zásilce?
+              Máš dotaz k zásilce? Klidně napiš!
               <br />
-              <Link href="mailto:info@psisuperzivot.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                info@psisuperzivot.cz
+              <Link href="mailto:podpora@psi-superzivot.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                podpora@psi-superzivot.cz
               </Link>
             </Text>
           </div>
@@ -527,7 +560,7 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
             color: colors.textBody,
             margin: '0 0 4px',
           }}>
-            Přejeme hodně radosti s knihou!
+            Ať ti kniha udělá radost! 🐾
           </Text>
           <Text style={{
             fontFamily: font,
@@ -536,7 +569,7 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
             color: colors.textDark,
             margin: '0 0 2px',
           }}>
-            Tým Psí superživot
+            Lars Vermeulen
           </Text>
           <Text style={{
             fontFamily: font,
@@ -544,8 +577,8 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:info@psisuperzivot.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
-              info@psisuperzivot.cz
+            <Link href="mailto:podpora@psi-superzivot.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
+              podpora@psi-superzivot.cz
             </Link>
           </Text>
         </div>
@@ -573,9 +606,11 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
             lineHeight: '1.7',
             margin: '0 0 8px',
           }}>
-            {entityName} &bull; {entityAddress}
+            {entityName}
             <br />
-            Reg. č.: {entityRegId}
+            {entityAddress}
+            <br />
+            IČO: {entityIco} &bull; DIČ: {entityDic}
           </Text>
           <Text style={{
             fontFamily: font,
@@ -595,10 +630,10 @@ export const PsShipmentNotificationTemplate: React.FC<PsShipmentNotificationTemp
 PsShipmentNotificationTemplate.PreviewProps = {
   order: {
     id: 'test-order-id',
-    display_id: '48',
-    metadata: { custom_order_number: 'CZ2026-48' },
+    display_id: '812',
+    metadata: { custom_order_number: 'CZ2026-812' },
     created_at: new Date().toISOString(),
-    email: 'jan@priklad.cz',
+    email: 'petra.svobodova@seznam.cz',
     currency_code: 'czk',
     items: [
       {
@@ -606,28 +641,24 @@ PsShipmentNotificationTemplate.PreviewProps = {
         title: 'Psí superživot',
         product_title: 'Psí superživot',
         variant_title: null,
-        quantity: 1,
+        quantity: 2,
         unit_price: 550,
         thumbnail: null,
       },
     ],
   },
   shippingAddress: {
-    first_name: 'Jan',
-    last_name: 'Novák',
-    address_1: 'Václavské náměstí 1',
-    city: 'Praha',
-    postal_code: '110 00',
+    first_name: 'Petra',
+    last_name: 'Svobodová',
+    address_1: 'Korunní 810/104',
+    city: 'Praha 10',
+    postal_code: '101 00',
     country_code: 'cz',
   },
-  trackingNumber: 'CZ9876543210',
-  trackingUrl: 'https://tracking.example.com/CZ9876543210',
+  trackingNumber: 'Z10009876543',
+  trackingUrl: 'https://tracking.zasilkovna.cz/Z10009876543',
   trackingCompany: 'Zásilkovna',
-  billingEntity: {
-    legal_name: 'EverChapter OÜ',
-    registration_id: '16938029',
-    address: { city: 'Tallinn', district: 'Estonia' },
-  },
+  pickupPoint: null,
 } as any
 
 export default PsShipmentNotificationTemplate

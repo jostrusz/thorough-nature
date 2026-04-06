@@ -10,6 +10,11 @@ export interface PsOrderPlacedTemplateProps {
   billingAddress?: any
   paymentMethod?: string
   billingEntity?: any
+  pickupPoint?: {
+    name: string
+    id?: string
+    address?: string
+  } | null
   preview?: string
 }
 
@@ -96,6 +101,7 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
   billingAddress,
   paymentMethod,
   billingEntity,
+  pickupPoint,
   preview = 'Děkujeme za vaši objednávku!',
 }) => {
   const currency = order.currency_code || 'czk'
@@ -115,12 +121,28 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
 
   const invoiceAddress = billingAddress || shippingAddress
 
-  // Billing entity info
-  const entityName = billingEntity?.legal_name || 'EverChapter OÜ'
-  const entityAddress = billingEntity?.address
-    ? `${billingEntity.address.city || 'Tallinn'}, ${billingEntity.address.district || billingEntity.address.country_code?.toUpperCase() || 'Estonia'}`
-    : 'Tallinn, Estonia'
-  const entityRegId = billingEntity?.registration_id || '16938029'
+  // Detect pickup point from props or order metadata
+  const pickup = pickupPoint || (order.metadata?.pickup_point_name ? {
+    name: order.metadata.pickup_point_name,
+    id: order.metadata.pickup_point_id,
+    address: order.metadata.pickup_point_address,
+  } : null)
+  const isPickup = !!pickup
+  const isHomeDelivery = !isPickup
+
+  // Payment status — COD means not yet paid
+  const isCod = !!(paymentMethod && (
+    paymentMethod.toLowerCase().includes('dobírk') ||
+    paymentMethod.toLowerCase().includes('cod') ||
+    paymentMethod.toLowerCase().includes('cash')
+  )) || !!order.metadata?.cod_fee
+  const isPaid = !isCod
+
+  // Billing entity — Czech company
+  const entityName = billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'
+  const entityAddress = billingEntity?.address_line || 'Rybná 716/24, Staré Město, 110 00 Praha'
+  const entityIco = billingEntity?.ico || '06259928'
+  const entityDic = billingEntity?.dic || 'CZ06259928'
 
   return (
     <Base preview={preview}>
@@ -166,7 +188,7 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
           </Text>
         </div>
 
-        {/* ====== STATUS BADGE ====== */}
+        {/* ====== STATUS BADGES ====== */}
         <div style={{ padding: `24px ${pad} 0`, textAlign: 'center' as const }}>
           <div style={{
             display: 'inline-block',
@@ -174,6 +196,7 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
             border: `1px solid ${colors.greenBorder}`,
             borderRadius: '20px',
             padding: '6px 18px',
+            marginRight: '8px',
           }}>
             <Text style={{
               fontFamily: font,
@@ -183,6 +206,24 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
               margin: '0',
             }}>
               &#10003; Objednávka potvrzena
+            </Text>
+          </div>
+          <div style={{
+            display: 'inline-block',
+            backgroundColor: isPaid ? colors.greenBg : colors.amberBg,
+            border: `1px solid ${isPaid ? colors.greenBorder : colors.amberBorder}`,
+            borderRadius: '20px',
+            padding: '6px 18px',
+            marginTop: '8px',
+          }}>
+            <Text style={{
+              fontFamily: font,
+              fontSize: '13px',
+              fontWeight: 600,
+              color: isPaid ? colors.greenText : colors.amberText,
+              margin: '0',
+            }}>
+              {isPaid ? '✅ Zaplaceno' : '💰 Platba na dobírku'}
             </Text>
           </div>
         </div>
@@ -196,7 +237,7 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
             lineHeight: '1.7',
             margin: '0',
           }}>
-            Ahoj {shippingAddress?.first_name || 'tam'},
+            Ahoj {shippingAddress?.first_name || 'tam'} 👋,
           </Text>
           <Text style={{
             fontFamily: font,
@@ -205,7 +246,10 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
             lineHeight: '1.7',
             margin: '8px 0 0',
           }}>
-            Děkujeme za vaši objednávku! Objednávka je potvrzena a připravujeme ji k odeslání. Níže najdete přehled.
+            {isPaid
+              ? 'Moc děkujeme za tvou objednávku! Platba proběhla úspěšně a my se hned pouštíme do balení. Níže najdeš kompletní přehled.'
+              : 'Moc děkujeme za tvou objednávku! Připravujeme ji k odeslání a platbu uhradíš pohodlně při převzetí zásilky. Níže najdeš kompletní přehled.'
+            }
           </Text>
         </div>
 
@@ -374,7 +418,7 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
           </div>
         </div>
 
-        {/* ====== DELIVERY ESTIMATE ====== */}
+        {/* ====== DELIVERY INFO ====== */}
         <div style={{ padding: `24px ${pad} 0` }}>
           <div style={{
             backgroundColor: colors.amberBg,
@@ -390,7 +434,10 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
               margin: '0',
               lineHeight: '1.5',
             }}>
-              &#128230; &nbsp;<strong>Očekávané doručení: 2–5 pracovních dnů</strong>
+              {isPickup
+                ? <>&#128205; &nbsp;<strong>Doručení na výdejní místo</strong></>
+                : <>&#128230; &nbsp;<strong>Doručení na adresu — 2–5 pracovních dnů</strong></>
+              }
             </Text>
             <Text style={{
               fontFamily: font,
@@ -399,12 +446,15 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
               margin: '6px 0 0',
               lineHeight: '1.5',
             }}>
-              Knihy odesíláme z našeho centrálního skladu v ČR.
+              {isPickup
+                ? 'Až bude zásilka připravena k vyzvednutí, dáme ti vědět.'
+                : 'Knihy odesíláme z našeho centrálního skladu v ČR.'
+              }
             </Text>
           </div>
         </div>
 
-        {/* ====== ADDRESSES ====== */}
+        {/* ====== DELIVERY ADDRESS / PICKUP POINT ====== */}
         <div style={{ padding: `28px ${pad} 0` }}>
           <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>
             <tbody>
@@ -419,23 +469,37 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
                     color: colors.accent,
                     marginBottom: '10px',
                   }}>
-                    Doručovací adresa
+                    {isPickup ? 'Výdejní místo' : 'Doručovací adresa'}
                   </Text>
-                  <Text style={{
-                    fontFamily: font,
-                    fontSize: '13px',
-                    color: colors.textBody,
-                    lineHeight: '1.7',
-                    margin: '0',
-                  }}>
-                    {shippingAddress?.first_name} {shippingAddress?.last_name}
-                    <br />
-                    {shippingAddress?.address_1}
-                    <br />
-                    {shippingAddress?.postal_code} {shippingAddress?.city}
-                    <br />
-                    {formatCountry(shippingAddress?.country_code)}
-                  </Text>
+                  {isPickup && pickup ? (
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '13px',
+                      color: colors.textBody,
+                      lineHeight: '1.7',
+                      margin: '0',
+                    }}>
+                      <strong>{pickup.name}</strong>
+                      {pickup.id && <><br />ID: {pickup.id}</>}
+                      {pickup.address && <><br />{pickup.address}</>}
+                    </Text>
+                  ) : (
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '13px',
+                      color: colors.textBody,
+                      lineHeight: '1.7',
+                      margin: '0',
+                    }}>
+                      {shippingAddress?.first_name} {shippingAddress?.last_name}
+                      <br />
+                      {shippingAddress?.address_1}
+                      <br />
+                      {shippingAddress?.postal_code} {shippingAddress?.city}
+                      <br />
+                      {formatCountry(shippingAddress?.country_code)}
+                    </Text>
+                  )}
                 </td>
                 <td width="50%" valign="top" style={{ paddingLeft: '12px' }}>
                   <Text style={{
@@ -505,9 +569,9 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
                   }}>1</div>
                 </td>
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
-                  <strong style={{ color: colors.textDark }}>Objednávka zpracována</strong>
+                  <strong style={{ color: colors.textDark }}>Objednávka přijata</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Vaši objednávku připravujeme k odeslání.</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Tvou objednávku máme a právě ji chystáme k odeslání.</span>
                 </td>
               </tr>
             </tbody>
@@ -534,7 +598,7 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Odesláno</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Obdržíte e-mail s číslem pro sledování zásilky.</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Pošleme ti e-mail s číslem pro sledování zásilky.</span>
                 </td>
               </tr>
             </tbody>
@@ -561,7 +625,7 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Doručeno</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Během 2–5 pracovních dnů budete mít knihu doma.</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásilku si vyzvedneš na zvoleném výdejním místě.' : 'Během 2–5 pracovních dnů budeš mít knihu doma.'}</span>
                 </td>
               </tr>
             </tbody>
@@ -584,10 +648,10 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Máte dotaz k objednávce?
+              Máš dotaz k objednávce? Klidně napiš!
               <br />
-              <Link href="mailto:info@psisuperzivot.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                info@psisuperzivot.cz
+              <Link href="mailto:podpora@psi-superzivot.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                podpora@psi-superzivot.cz
               </Link>
             </Text>
           </div>
@@ -601,7 +665,7 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
             color: colors.textBody,
             margin: '0 0 4px',
           }}>
-            S pozdravem,
+            Ať ti kniha udělá radost! 🐾
           </Text>
           <Text style={{
             fontFamily: font,
@@ -610,7 +674,7 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
             color: colors.textDark,
             margin: '0 0 2px',
           }}>
-            Tým Psí superživot
+            Lars Vermeulen
           </Text>
           <Text style={{
             fontFamily: font,
@@ -618,8 +682,8 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:info@psisuperzivot.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
-              info@psisuperzivot.cz
+            <Link href="mailto:podpora@psi-superzivot.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
+              podpora@psi-superzivot.cz
             </Link>
           </Text>
         </div>
@@ -648,9 +712,11 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
             lineHeight: '1.7',
             margin: '0 0 8px',
           }}>
-            {entityName} &bull; {entityAddress}
+            {entityName}
             <br />
-            Reg. č.: {entityRegId}
+            {entityAddress}
+            <br />
+            IČO: {entityIco} &bull; DIČ: {entityDic}
           </Text>
           <Text style={{
             fontFamily: font,
@@ -670,10 +736,10 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
 PsOrderPlacedTemplate.PreviewProps = {
   order: {
     id: 'test-order-id',
-    display_id: '48',
-    metadata: { custom_order_number: 'CZ2026-48' },
+    display_id: '812',
+    metadata: { custom_order_number: 'CZ2026-812', cod_fee: 30 },
     created_at: new Date().toISOString(),
-    email: 'jan@priklad.cz',
+    email: 'petra.svobodova@seznam.cz',
     currency_code: 'czk',
     items: [
       {
@@ -681,39 +747,44 @@ PsOrderPlacedTemplate.PreviewProps = {
         title: 'Psí superživot',
         product_title: 'Psí superživot',
         variant_title: null,
-        quantity: 1,
+        quantity: 2,
         unit_price: 550,
+        thumbnail: null,
+      },
+      {
+        id: 'item-2',
+        title: 'Příplatek za dobírku',
+        product_title: 'Příplatek za dobírku',
+        variant_title: null,
+        quantity: 1,
+        unit_price: 30,
         thumbnail: null,
       },
     ],
     summary: {
-      raw_current_order_total: { value: 550 },
-      raw_shipping_total: { value: 0 },
-      raw_tax_total: { value: 0 },
+      raw_current_order_total: { value: 1150 },
+      raw_shipping_total: { value: 20 },
+      raw_tax_total: { value: 201 },
     },
   },
   shippingAddress: {
-    first_name: 'Jan',
-    last_name: 'Novák',
-    address_1: 'Václavské náměstí 1',
-    city: 'Praha',
-    postal_code: '110 00',
+    first_name: 'Petra',
+    last_name: 'Svobodová',
+    address_1: 'Korunní 810/104',
+    city: 'Praha 10',
+    postal_code: '101 00',
     country_code: 'cz',
   },
   billingAddress: {
-    first_name: 'Jan',
-    last_name: 'Novák',
-    address_1: 'Václavské náměstí 1',
-    city: 'Praha',
-    postal_code: '110 00',
+    first_name: 'Petra',
+    last_name: 'Svobodová',
+    address_1: 'Korunní 810/104',
+    city: 'Praha 10',
+    postal_code: '101 00',
     country_code: 'cz',
   },
-  paymentMethod: 'Comgate',
-  billingEntity: {
-    legal_name: 'EverChapter OÜ',
-    registration_id: '16938029',
-    address: { city: 'Tallinn', district: 'Estonia' },
-  },
+  paymentMethod: 'Dobírka (platba při převzetí)',
+  pickupPoint: null,
 } as any
 
 export default PsOrderPlacedTemplate

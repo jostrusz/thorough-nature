@@ -120,17 +120,17 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     locale: 'de',
   },
   'psi-superzivot': {
-    replyTo: 'info@psisuperzivot.cz',
-    fromName: 'Psí superživot',
-    fromEmail: 'Psí superživot <info@psisuperzivot.cz>',
+    replyTo: 'podpora@psi-superzivot.cz',
+    fromName: 'Lars Vermeulen - Psí superživot',
+    fromEmail: 'Lars Vermeulen - Psí superživot <podpora@psi-superzivot.cz>',
     project: 'psi-superzivot',
     locale: 'cs',
   },
   // Also match without hyphen
   psisuperzivot: {
-    replyTo: 'info@psisuperzivot.cz',
-    fromName: 'Psí superživot',
-    fromEmail: 'Psí superživot <info@psisuperzivot.cz>',
+    replyTo: 'podpora@psi-superzivot.cz',
+    fromName: 'Lars Vermeulen - Psí superživot',
+    fromEmail: 'Lars Vermeulen - Psí superživot <podpora@psi-superzivot.cz>',
     project: 'psi-superzivot',
     locale: 'cs',
   },
