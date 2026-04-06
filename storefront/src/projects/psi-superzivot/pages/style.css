@@ -560,7 +560,10 @@ h3 { font-size: 22px; font-weight: 700; line-height: 1.3; }
 }
 .pages-slide:hover { transform: scale(1.03); }
 .pages-slide img { width: 100%; height: auto; }
-.carousel-dots { display: flex; gap: 8px; justify-content: center; margin-top: 24px; }
+.pages-carousel-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 24px; }
+.pages-arrow { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--purple); background: var(--white); color: var(--purple); font-size: 22px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0; }
+.pages-arrow:hover { background: var(--purple); color: var(--white); }
+.carousel-dots { display: flex; gap: 8px; justify-content: center; }
 .carousel-dot {
  width: 12px; height: 12px; border-radius: 50%; background: #D1D5DB; border: none;
  cursor: pointer; transition: 0.3s;
@@ -615,7 +618,7 @@ h3 { font-size: 22px; font-weight: 700; line-height: 1.3; }
 
 /* ═══ STAT BANNER ═══ */
 .stat-banner {
- background: linear-gradient(180deg, #FAFBFF 0%, #F5F0FF 100%); padding: 72px 24px; text-align: center;
+ background: var(--white); padding: 72px 24px; text-align: center;
 }
 .stat-banner h2 { font-family: var(--font-heading); font-size: 34px; font-weight: 800; line-height: 1.25; margin-bottom: 8px; letter-spacing: -0.02em; }
 
@@ -701,7 +704,7 @@ h3 { font-size: 22px; font-weight: 700; line-height: 1.3; }
 .auteur-photo-single img { width: 100%; border-radius: var(--radius-sm); box-shadow: none; }
 
 /* ═══ REVIEWS (OLD — kept for backwards compat) ═══ */
-.reviews-section { background: linear-gradient(180deg, #FFFCF7 0%, #FFF5EB 100%); }
+.reviews-section { background: var(--white); }
 .reviews-heading { text-align: center; margin-bottom: 48px; }
 .reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto; }
 .review-card {
@@ -802,7 +805,7 @@ h3 { font-size: 22px; font-weight: 700; line-height: 1.3; }
 .bonus-check-item .check { flex-shrink: 0; }
 
 /* ═══ WAAROM (Why Different) ═══ */
-.waarom-section { background: linear-gradient(180deg, #FAFBFF 0%, #F5F0FF 100%); }
+.waarom-section { background: var(--white); }
 .waarom-heading { text-align: center; margin-bottom: 20px; }
 .waarom-subtext { text-align: center; max-width: 700px; margin: 0 auto 40px; font-family: var(--font-body); font-size: 16px; line-height: 1.7; }
 .waarom-items { display: flex; flex-direction: column; gap: 24px; max-width: 700px; margin: 0 auto; }
