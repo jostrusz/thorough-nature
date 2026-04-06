@@ -3282,71 +3282,9 @@ body {
     }
 
     // --- Ceny ---
-    var total = cart.total || 0;
-    var taxTotal = cart.tax_total || 0;
-    var subtotal = cart.subtotal || total;
-    var shippingTotal = cart.shipping_total || 0;
-    var isTaxInclusive = item ? item.is_tax_inclusive : false;
-
-    // Zjisti daňovou sazbu z poměru
-    var taxRate = 0;
-    if (subtotal > 0 && taxTotal > 0) {
-      if (isTaxInclusive) {
-        // tax_total / subtotal * 100 (subtotal je excl. DPH)
-        taxRate = Math.round(taxTotal / subtotal * 100);
-      } else {
-        taxRate = Math.round(taxTotal / (total - taxTotal) * 100);
-      }
-    }
-
-    // Cena za produkt (celkem) — desktop summary
-    var desktopPriceEl = document.getElementById('desktop-product-price');
-    if (desktopPriceEl) desktopPriceEl.textContent = formatPrice(total);
-
-    // Mobile sticky bar — celková cena
-    var msbPriceEl = document.getElementById('msb-price');
-    if (msbPriceEl) msbPriceEl.textContent = formatPrice(total);
-
-    // Mezisoučet (bez DPH)
-    var subtotalEl = document.getElementById('summary-subtotal');
-    if (subtotalEl) {
-      subtotalEl.innerHTML = '<span>Mezisoučet (bez DPH)</span><span>' + formatPrice(subtotal) + '</span>';
-    }
-
-    // DPH řádek
-    var taxEl = document.getElementById('summary-tax');
-    if (taxEl && taxTotal > 0) {
-      taxEl.style.display = '';
-      taxEl.innerHTML = '<span>DPH (' + taxRate + '%)</span><span>' + formatPrice(taxTotal) + '</span>';
-    }
-
-    // Shipping
-    var shipEl = document.getElementById('summary-shipping');
-    if (shipEl) {
-      var shippingLabel = shippingTotal > 0 ? formatPrice(shippingTotal) : '<span style="color:#27AE60;font-weight:600;">Zdarma</span>';
-      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Doprava</span><span>' + shippingLabel + '</span>';
-    }
-
-
-    // Celkem
-    var totalEl = document.getElementById('desktop-total-price');
-    if (totalEl) totalEl.textContent = formatPrice(total);
-
-    // DPH poznámka
-    var taxNote = document.getElementById('summary-tax-note');
-    if (taxNote && isTaxInclusive && taxTotal > 0) {
-      taxNote.style.display = '';
-    }
-
-    // Button text update
-    var btnText = document.querySelector('.btn-text');
-    if (btnText) {
-      var labels = {
-        klarna: 'Platba přes Klarna',
-        paypal: 'Platba přes PayPal'
-      };
-      btnText.textContent = (labels[selectedMethod] || 'Dokončit objednávku') + ' — ' + formatPrice(total);
-    }
+    // Nepřepisujeme ceny z Medusa cart.total — frontend už má správný breakdown
+    // (recalculateOrderSummary zahrnuje bundle cenu, COD fee, delivery fee).
+    // Cart.total z Medusa zahrnuje vše dohromady a přepsalo by to rozložení cen.
   }
 
   /* ─── MOBILE STICKY SUMMARY BAR — klik pro rozbalení + scroll shrink ─── */
