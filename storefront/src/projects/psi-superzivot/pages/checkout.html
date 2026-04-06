@@ -4677,32 +4677,32 @@ body {
   // Comgate method code mapping: our code → Comgate API method parameter
   var COMGATE_METHOD_MAP = {
     'creditcard': 'CARD_CZ_COMGATE',
-    'bank_transfer': 'BANK_ALL',
+    'bank_transfer': 'BANK_CZ_OTHER',
     'applepay': 'APPLEPAY_REDIRECT',
     'googlepay': 'GOOGLEPAY_REDIRECT',
-    // Individual bank codes — used when bank sub-method is selected
-    'bank_cz_cs': 'BANK_CZ_CS_P',
-    'bank_cz_csob': 'BANK_CZ_CSOB_P',
-    'bank_cz_kb': 'BANK_CZ_KB',
-    'bank_cz_rb': 'BANK_CZ_RB',
-    'bank_cz_ge': 'BANK_CZ_GE',
-    'bank_cz_fb': 'BANK_CZ_FB',
-    'bank_cz_mb': 'BANK_CZ_MB_P',
-    'bank_cz_ab': 'BANK_CZ_AB',
+    // Individual bank codes — PSD2 variants (enabled in Comgate merchant account)
+    'bank_cz_cs': 'BANK_CZ_CS_PSD2',
+    'bank_cz_csob': 'BANK_CZ_CSOB_PSD2',
+    'bank_cz_kb': 'BANK_CZ_KB_PSD2',
+    'bank_cz_rb': 'BANK_CZ_RB_PSD2',
+    'bank_cz_mo': 'BANK_CZ_MO_PSD2',
+    'bank_cz_fb': 'BANK_CZ_FB_PSD2',
+    'bank_cz_mb': 'BANK_CZ_MB_PSD2',
+    'bank_cz_ab': 'BANK_CZ_AB_PSD2',
     'bank_cz_other': 'BANK_CZ_OTHER',
   };
 
   // Czech bank sub-methods for "Bankovní převod" expandable group
   var BANK_METHODS = {
-    'bank_cz_cs':    { code: 'BANK_CZ_CS_P',   label: 'Česká spořitelna',   desc: 'Online převod', icon: '/icons/ceska-sporitelna.svg' },
-    'bank_cz_csob':  { code: 'BANK_CZ_CSOB_P', label: 'ČSOB',              desc: 'Online převod', icon: '/icons/csob.svg' },
-    'bank_cz_kb':    { code: 'BANK_CZ_KB',     label: 'Komerční banka',    desc: 'Online převod', icon: '/icons/komercni-banka.svg' },
-    'bank_cz_rb':    { code: 'BANK_CZ_RB',     label: 'Raiffeisenbank',    desc: 'Online převod', icon: '/icons/raiffeisenbank.svg' },
-    'bank_cz_ge':    { code: 'BANK_CZ_GE',     label: 'Moneta Money Bank', desc: 'Online převod', icon: '/icons/moneta.svg' },
-    'bank_cz_fb':    { code: 'BANK_CZ_FB',     label: 'Fio banka',         desc: 'Online převod', icon: '/icons/fio-banka.svg' },
-    'bank_cz_mb':    { code: 'BANK_CZ_MB_P',   label: 'mBank',             desc: 'Online převod', icon: '/icons/mbank.svg' },
-    'bank_cz_ab':    { code: 'BANK_CZ_AB',     label: 'Air Bank',          desc: 'Online převod', icon: '/icons/airbank.svg' },
-    'bank_cz_other': { code: 'BANK_CZ_OTHER',  label: 'Jiná banka',        desc: 'Bankovní převod', icon: '/icons/bank-generic.svg' },
+    'bank_cz_cs':    { code: 'BANK_CZ_CS_PSD2',   label: 'Česká spořitelna',   desc: 'Online převod', icon: '/icons/ceska-sporitelna.svg' },
+    'bank_cz_csob':  { code: 'BANK_CZ_CSOB_PSD2', label: 'ČSOB',              desc: 'Online převod', icon: '/icons/csob.svg' },
+    'bank_cz_kb':    { code: 'BANK_CZ_KB_PSD2',   label: 'Komerční banka',    desc: 'Online převod', icon: '/icons/komercni-banka.svg' },
+    'bank_cz_rb':    { code: 'BANK_CZ_RB_PSD2',   label: 'Raiffeisenbank',    desc: 'Online převod', icon: '/icons/raiffeisenbank.svg' },
+    'bank_cz_mo':    { code: 'BANK_CZ_MO_PSD2',   label: 'Moneta Money Bank', desc: 'Online převod', icon: '/icons/moneta.svg' },
+    'bank_cz_fb':    { code: 'BANK_CZ_FB_PSD2',   label: 'Fio banka',         desc: 'Online převod', icon: '/icons/fio-banka.svg' },
+    'bank_cz_mb':    { code: 'BANK_CZ_MB_PSD2',   label: 'mBank',             desc: 'Online převod', icon: '/icons/mbank.svg' },
+    'bank_cz_ab':    { code: 'BANK_CZ_AB_PSD2',   label: 'Air Bank',          desc: 'Online převod', icon: '/icons/airbank.svg' },
+    'bank_cz_other': { code: 'BANK_CZ_OTHER',     label: 'Jiná banka',        desc: 'Bankovní převod', icon: '/icons/bank-generic.svg' },
   };
   var BANK_CODES = Object.keys(BANK_METHODS);
 

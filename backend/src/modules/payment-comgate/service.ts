@@ -278,8 +278,8 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       // Priority: comgate_method (already mapped by frontend) > method (raw frontend code)
       const rawMethod = sessionData?.comgate_method || sessionData?.method || contextData?.comgate_method || "ALL"
       let comgateMethod = "ALL"
-      // If it already looks like a Comgate code (uppercase with underscores), pass through
-      if (/^[A-Z_]+$/.test(rawMethod) && rawMethod !== "ALL") {
+      // If it already looks like a Comgate code (uppercase with underscores/digits), pass through
+      if (/^[A-Z0-9_]+$/.test(rawMethod) && rawMethod !== "ALL") {
         comgateMethod = rawMethod
       }
       // Map legacy frontend codes
