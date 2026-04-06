@@ -334,6 +334,7 @@ export class ComgateApiClient {
 
   /**
    * Get available payment methods
+   * Requires merchant + secret authentication
    */
   async getMethods(params?: IComgateMethodsParams): Promise<{
     success: boolean
@@ -341,10 +342,30 @@ export class ComgateApiClient {
     error?: string
   }> {
     try {
-      const response = await this.client.get("/v1.0/methods", { params })
+      const formData = new URLSearchParams({
+        merchant: this.merchantId,
+        secret: this.secret,
+        type: "json",
+        lang: "cs",
+      })
+      if (params?.country) formData.append("country", params.country)
+      if (params?.curr) formData.append("curr", params.curr)
+
+      const response = await this.client.post("/v1.0/methods", formData.toString(), {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      })
+
+      // Try to parse as JSON
+      let data = response.data
+      if (typeof data === "string") {
+        try { data = JSON.parse(data) } catch { /* keep as string */ }
+      }
+
       return {
         success: true,
-        data: response.data,
+        data,
       }
     } catch (error: any) {
       return {

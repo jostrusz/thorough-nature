@@ -234,6 +234,11 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       // context.context only has { idempotency_key }
       const sessionData = context?.data || {}
 
+      // Debug: log what arrives in initiatePayment so we can trace method flow
+      this.getLogger().info(`[Comgate] initiatePayment input keys: ${Object.keys(context || {}).join(", ")}`)
+      this.getLogger().info(`[Comgate] sessionData (context.data) keys: ${Object.keys(sessionData).join(", ")}`)
+      this.getLogger().info(`[Comgate] sessionData.comgate_method=${sessionData?.comgate_method}, sessionData.method=${sessionData?.method}`)
+
       const client = await this.getComgateClient()
       const config = await this.getComgateConfig()
 
@@ -270,15 +275,24 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       else if (curr === "CZK") countryFallback = "CZ"
 
       // Map frontend method codes to Comgate method codes
+      // Priority: comgate_method (already mapped by frontend) > method (raw frontend code)
       const rawMethod = sessionData?.comgate_method || sessionData?.method || contextData?.comgate_method || "ALL"
       let comgateMethod = "ALL"
-      if (rawMethod === "blik" || rawMethod === "blik_pl") comgateMethod = "BANK_PL_BL"
+      // If it already looks like a Comgate code (uppercase with underscores), pass through
+      if (/^[A-Z_]+$/.test(rawMethod) && rawMethod !== "ALL") {
+        comgateMethod = rawMethod
+      }
+      // Map legacy frontend codes
+      else if (rawMethod === "blik" || rawMethod === "blik_pl") comgateMethod = "BANK_PL_BL"
       else if (rawMethod === "bank_transfer") comgateMethod = "BANK_ALL"
-      else if (rawMethod === "creditcard" || rawMethod === "card") comgateMethod = "CARD_ALL"
+      else if (rawMethod === "creditcard" || rawMethod === "card") comgateMethod = "CARD_CZ_COMGATE"
       else if (rawMethod.startsWith("bank_pl_")) comgateMethod = rawMethod.toUpperCase()
+      else if (rawMethod.startsWith("bank_cz_")) comgateMethod = rawMethod.toUpperCase()
       else if (rawMethod === "przelew_bankowy") comgateMethod = "BANK_ALL"
       else if (rawMethod === "ALL" || !rawMethod) comgateMethod = "ALL"
       else comgateMethod = rawMethod.toUpperCase()
+
+      this.getLogger().info(`[Comgate] Method mapping: rawMethod=${rawMethod} → comgateMethod=${comgateMethod}`)
 
       const paymentParams = {
         merchant: config?.live_keys?.api_key || config?.test_keys?.api_key,
@@ -345,18 +359,21 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Authorize payment — check Comgate payment status
+   * Medusa v2: receives AuthorizePaymentInput { data, context, ... }
    */
-  async authorizePayment(
-    paymentSessionData: IComgatePaymentSessionData,
-    context: any
-  ): Promise<any> {
+  async authorizePayment(input: any): Promise<any> {
     try {
+      // Medusa v2: session data is in input.data (not the input itself)
+      const paymentSessionData = input?.data || input
       const client = await this.getComgateClient()
       const config = await this.getComgateConfig()
       const keys = this.getKeysFromConfig(config)
-      const { transId } = paymentSessionData
+      const transId = paymentSessionData?.transId
+
+      this.getLogger().info(`[Comgate] authorizePayment: input keys=${Object.keys(input || {}).join(",")}, transId=${transId}`)
 
       if (!transId) {
+        this.getLogger().error(`[Comgate] authorizePayment: No transId found. input.data=${JSON.stringify(paymentSessionData).substring(0, 200)}`)
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "No Comgate transaction ID in session data"
@@ -395,16 +412,15 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Capture payment — Comgate auto-captures on successful payment, verify status
+   * Medusa v2: receives CapturePaymentInput { data, ... }
    */
-  async capturePayment(
-    paymentSessionData: IComgatePaymentSessionData,
-    context: any
-  ): Promise<any> {
+  async capturePayment(input: any): Promise<any> {
     try {
+      const paymentSessionData = input?.data || input
       const client = await this.getComgateClient()
       const config = await this.getComgateConfig()
       const keys = this.getKeysFromConfig(config)
-      const { transId } = paymentSessionData
+      const transId = paymentSessionData?.transId
 
       if (!transId) {
         throw new MedusaError(
@@ -445,17 +461,16 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Refund payment
+   * Medusa v2: receives RefundPaymentInput { data, amount, ... }
    */
-  async refundPayment(
-    paymentSessionData: IComgatePaymentSessionData,
-    refundAmount: number,
-    context: any
-  ): Promise<any> {
+  async refundPayment(input: any): Promise<any> {
     try {
+      const paymentSessionData = input?.data || input
+      const refundAmount = input?.amount || 0
       const client = await this.getComgateClient()
       const config = await this.getComgateConfig()
       const keys = this.getKeysFromConfig(config)
-      const { transId } = paymentSessionData
+      const transId = paymentSessionData?.transId
 
       if (!transId) {
         throw new MedusaError(
@@ -497,13 +512,12 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Cancel payment — no direct cancel API, just mark as cancelled
+   * Medusa v2: receives CancelPaymentInput { data, ... }
    */
-  async cancelPayment(
-    paymentSessionData: IComgatePaymentSessionData,
-    context: any
-  ): Promise<any> {
+  async cancelPayment(input: any): Promise<any> {
+    const paymentSessionData = input?.data || input
     this.getLogger().info(
-      `[Comgate] Transaction ${paymentSessionData.transId} marked for cancellation`
+      `[Comgate] Transaction ${paymentSessionData?.transId} marked for cancellation`
     )
 
     return {
@@ -514,11 +528,10 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Delete payment session
+   * Medusa v2: receives DeletePaymentInput { data, ... }
    */
-  async deletePayment(
-    paymentSessionData: IComgatePaymentSessionData,
-    context: any
-  ): Promise<any> {
+  async deletePayment(input: any): Promise<any> {
+    const paymentSessionData = input?.data || input
     // No-op for Comgate — cleanup handled server-side
     return {
       data: paymentSessionData,
@@ -528,16 +541,15 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Get payment status
+   * Medusa v2: receives RetrievePaymentInput { data, ... }
    */
-  async getPaymentStatus(
-    paymentSessionData: IComgatePaymentSessionData,
-    context: any
-  ): Promise<PaymentSessionStatus> {
+  async getPaymentStatus(input: any): Promise<PaymentSessionStatus> {
     try {
+      const paymentSessionData = input?.data || input
       const client = await this.getComgateClient()
       const config = await this.getComgateConfig()
       const keys = this.getKeysFromConfig(config)
-      const { transId } = paymentSessionData
+      const transId = paymentSessionData?.transId
 
       if (!transId) {
         return PaymentSessionStatus.PENDING
@@ -562,16 +574,15 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Retrieve payment data
+   * Medusa v2: receives RetrievePaymentInput { data, ... }
    */
-  async retrievePayment(
-    paymentSessionData: IComgatePaymentSessionData,
-    context: any
-  ): Promise<any> {
+  async retrievePayment(input: any): Promise<any> {
     try {
+      const paymentSessionData = input?.data || input
       const client = await this.getComgateClient()
       const config = await this.getComgateConfig()
       const keys = this.getKeysFromConfig(config)
-      const { transId } = paymentSessionData
+      const transId = paymentSessionData?.transId
 
       if (!transId) {
         throw new MedusaError(
@@ -612,9 +623,10 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Update payment session
+   * Medusa v2: receives UpdatePaymentInput { data, ... }
    */
-  async updatePayment(context: any): Promise<any> {
-    return await this.retrievePayment(context.paymentSessionData, context)
+  async updatePayment(input: any): Promise<any> {
+    return await this.retrievePayment(input)
   }
 
   /**

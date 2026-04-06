@@ -262,10 +262,12 @@ async function safetyNetCompleteCart(
     let targetCart: any = null
 
     try {
+      // Medusa v2: cart ↔ payment_collection linked via cart_payment_collection table
       const { rows: cartRows } = await pool.query(
         `SELECT c.id, c.completed_at, c.email
          FROM cart c
-         JOIN payment_collection pc ON pc.id = c.payment_collection_id
+         JOIN cart_payment_collection cpc ON cpc.cart_id = c.id
+         JOIN payment_collection pc ON pc.id = cpc.payment_collection_id
          JOIN payment_session ps ON ps.payment_collection_id = pc.id
          WHERE c.completed_at IS NULL
            AND (ps.data->>'transId' = $1 OR ps.data->>'comgateTransId' = $1)
