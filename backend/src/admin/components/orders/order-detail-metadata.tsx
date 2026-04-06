@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { toast } from "@medusajs/ui"
 import { BookSentToggle } from "./book-sent-toggle"
 import { DeliveryBadge } from "./order-badges"
@@ -81,6 +81,148 @@ const dashStyle: React.CSSProperties = {
   color: colors.textMuted,
 }
 
+const inputStyle: React.CSSProperties = {
+  fontSize: "12px",
+  padding: "4px 8px",
+  border: `1px solid ${colors.borderActive}`,
+  borderRadius: "6px",
+  background: colors.bgCard,
+  color: colors.text,
+  fontFamily: "monospace",
+  width: "160px",
+  outline: "none",
+}
+
+const iconBtnStyle: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  cursor: "pointer",
+  padding: "2px 4px",
+  fontSize: "13px",
+  color: colors.textMuted,
+  borderRadius: "4px",
+  transition: "color 0.12s, background 0.12s",
+}
+
+/** Inline-editable metadata field */
+function EditableField({
+  label,
+  value,
+  metadataKey,
+  orderId,
+  updateMetadata,
+  placeholder,
+  mono = false,
+}: {
+  label: string
+  value: string
+  metadataKey: string
+  orderId: string
+  updateMetadata: any
+  placeholder?: string
+  mono?: boolean
+}) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(value)
+  const [saving, setSaving] = useState(false)
+
+  function handleSave() {
+    setSaving(true)
+    updateMetadata.mutate(
+      { orderId, metadata: { [metadataKey]: draft.trim() || null } },
+      {
+        onSuccess: () => {
+          toast.success(`${label} updated`)
+          setEditing(false)
+          setSaving(false)
+        },
+        onError: () => {
+          toast.error(`Failed to update ${label}`)
+          setSaving(false)
+        },
+      }
+    )
+  }
+
+  function handleClear() {
+    setSaving(true)
+    updateMetadata.mutate(
+      { orderId, metadata: { [metadataKey]: null } },
+      {
+        onSuccess: () => {
+          toast.success(`${label} cleared`)
+          setDraft("")
+          setEditing(false)
+          setSaving(false)
+        },
+        onError: () => {
+          toast.error(`Failed to clear ${label}`)
+          setSaving(false)
+        },
+      }
+    )
+  }
+
+  if (editing) {
+    return (
+      <div className="od-row-hover" style={rowStyle}>
+        <span style={labelStyle}>{label}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+          <input
+            style={inputStyle}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={placeholder || label}
+            autoFocus
+            disabled={saving}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSave()
+              if (e.key === "Escape") { setDraft(value); setEditing(false) }
+            }}
+          />
+          <button
+            style={{ ...iconBtnStyle, color: colors.green }}
+            onClick={handleSave}
+            disabled={saving}
+            title="Save"
+          >✓</button>
+          <button
+            style={{ ...iconBtnStyle, color: colors.textMuted }}
+            onClick={() => { setDraft(value); setEditing(false) }}
+            disabled={saving}
+            title="Cancel"
+          >✕</button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="od-row-hover" style={rowStyle}>
+      <span style={labelStyle}>{label}</span>
+      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        {value ? (
+          mono ? <code style={codeStyle}>{value}</code> : <span style={valueStyle}>{value}</span>
+        ) : (
+          <span style={dashStyle}>&mdash;</span>
+        )}
+        <button
+          style={iconBtnStyle}
+          onClick={() => { setDraft(value); setEditing(true) }}
+          title={`Edit ${label}`}
+        >✏️</button>
+        {value && (
+          <button
+            style={{ ...iconBtnStyle, color: colors.red }}
+            onClick={handleClear}
+            title={`Clear ${label}`}
+          >🗑</button>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
   const updateMetadata = useUpdateMetadata()
   const metadata = order.metadata || {}
@@ -104,8 +246,9 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
   )
   const payment = payments[0]
 
-  // Payment ID — each gateway stores it differently
+  // Payment ID — manual override takes priority, then each gateway stores it differently
   const gatewayPaymentId =
+    metadata.payment_id_override ||
     // Direct from payment data
     payment?.data?.molliePaymentId ||
     payment?.data?.mollieOrderId ||
@@ -243,15 +386,74 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
         )}
       </div>
 
-      {/* Payment Gateway ID */}
-      <div className="od-row-hover" style={rowStyle}>
-        <span style={labelStyle}>Payment ID</span>
-        {gatewayPaymentId ? (
-          <code style={codeStyle}>{gatewayPaymentId}</code>
-        ) : (
-          <span style={dashStyle}>&mdash;</span>
-        )}
-      </div>
+      {/* Payment Gateway ID — editable */}
+      <EditableField
+        label="Payment ID"
+        value={gatewayPaymentId}
+        metadataKey="payment_id_override"
+        orderId={order.id}
+        updateMetadata={updateMetadata}
+        placeholder="e.g. tr_xxx or pi_xxx"
+        mono
+      />
+
+      {/* ═══════════ PICKUP POINT ═══════════ */}
+      {(() => {
+        const country = (order.shipping_address?.country_code || "").toUpperCase()
+        const isPL = country === "PL"
+        const isCZ = country === "CZ" || country === "SK"
+        // Show section for PL (Paczkomat/InPost) and CZ/SK (Zásilkovna) orders,
+        // or if any pickup metadata already exists
+        const hasPickupData = metadata.packeta_point_id || metadata.paczkomat_id || metadata.pickup_place_code
+        const isPickupShipping = metadata.shipping_method === "zasilkovna_pickup" ||
+          metadata.shipping_method === "inpost_paczkomaty" ||
+          (order.shipping_methods || []).some((sm: any) =>
+            (sm.name || "").toLowerCase().includes("paczkomat") ||
+            (sm.name || "").toLowerCase().includes("výdejní") ||
+            (sm.name || "").toLowerCase().includes("pickup")
+          )
+
+        if (!isPL && !isCZ && !hasPickupData && !isPickupShipping) return null
+
+        const sectionLabel = isPL ? "Paczkomat / InPost" : "Zásilkovna — Výdejní místo"
+        const idKey = isPL ? "paczkomat_id" : "packeta_point_id"
+        const nameKey = isPL ? "paczkomat_name" : "packeta_point_name"
+        const addressKey = isPL ? "paczkomat_address" : "packeta_point_address"
+        const currentId = metadata[idKey] || metadata.pickup_place_code || ""
+        const currentName = metadata[nameKey] || ""
+        const currentAddress = metadata[addressKey] || ""
+
+        return (
+          <>
+            <div style={groupTitleStyle}>{sectionLabel}</div>
+            <EditableField
+              label="Pickup Point ID"
+              value={currentId}
+              metadataKey={idKey}
+              orderId={order.id}
+              updateMetadata={updateMetadata}
+              placeholder={isPL ? "e.g. KRA04A" : "e.g. 15622"}
+              mono
+            />
+            <EditableField
+              label="Pickup Point Name"
+              value={currentName}
+              metadataKey={nameKey}
+              orderId={order.id}
+              updateMetadata={updateMetadata}
+              placeholder="Name of pickup point"
+            />
+            <EditableField
+              label="Pickup Point Address"
+              value={currentAddress}
+              metadataKey={addressKey}
+              orderId={order.id}
+              updateMetadata={updateMetadata}
+              placeholder="Full address"
+            />
+          </>
+        )
+      })()}
 
       {/* ═══════════ DEXTRUM WMS ═══════════ */}
       <div style={groupTitleStyle}>Dextrum WMS</div>
