@@ -48,13 +48,13 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
   ],
   'slapp-taget': [
     {
-      key: "e-books/Kärlek utan nonsens.pdf",
+      key: "e-books/Karlek utan nonsens.pdf",
       title: "Kärlek utan nonsens",
       description: "E-bok (PDF)",
       size: "13.9 MB",
     },
     {
-      key: "e-books/Lösningen på överanalysering.pdf",
+      key: "e-books/Losningen pa overanalysering.pdf",
       title: "Lösningen på överanalysering",
       description: "E-bok (PDF)",
       size: "1.3 MB",

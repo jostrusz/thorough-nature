@@ -21,8 +21,8 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
     { key: "e-books/Waroom Doet Hij Dat.pdf", title: "Waroom Doet Hij Dat", description: "E-book (PDF)", size: "4.0 MB" },
   ],
   'slapp-taget': [
-    { key: "e-books/Kärlek utan nonsens.pdf", title: "Kärlek utan nonsens", description: "E-bok (PDF)", size: "13.9 MB" },
-    { key: "e-books/Lösningen på överanalysering.pdf", title: "Lösningen på överanalysering", description: "E-bok (PDF)", size: "1.3 MB" },
+    { key: "e-books/Karlek utan nonsens.pdf", title: "Kärlek utan nonsens", description: "E-bok (PDF)", size: "13.9 MB" },
+    { key: "e-books/Losningen pa overanalysering.pdf", title: "Lösningen på överanalysering", description: "E-bok (PDF)", size: "1.3 MB" },
   ],
   'odpusc-ksiazka': [],
   'lass-los': [
