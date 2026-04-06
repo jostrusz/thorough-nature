@@ -269,34 +269,111 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
       const isAPM = !!apmConfig
       const productName = data?.product_name || "Order"
 
-      // Shared purchase_units
-      const purchaseUnits = [
-        {
-          reference_id: context?.cart_id || `medusa-${Date.now()}`,
-          description: productName,
-          amount: {
+      // Build real line items from data.items (sent by frontend) or fallback to single generic item
+      const dataItems = Array.isArray(data?.items) && data.items.length > 0
+        ? data.items
+        : null
+
+      let paypalItems: any[]
+      let itemTotalValue: string
+
+      if (dataItems) {
+        // Use real cart items from frontend
+        paypalItems = dataItems.map((item: any) => ({
+          name: String(item.title || item.name || "Product").substring(0, 127),
+          quantity: String(item.quantity || 1),
+          unit_amount: {
             currency_code: currency,
-            value: totalValue,
-            breakdown: {
-              item_total: {
-                currency_code: currency,
-                value: totalValue,
-              },
-            },
+            value: formatPayPalAmount(Number(item.unit_price || 0)),
           },
-          items: [
-            {
-              name: productName,
-              quantity: "1",
-              unit_amount: {
-                currency_code: currency,
-                value: totalValue,
-              },
-              category: "PHYSICAL_GOODS",
+          category: "PHYSICAL_GOODS" as const,
+        }))
+        // item_total = sum of (unit_amount * quantity) for each item
+        const computedItemTotal = dataItems.reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price || 0) * Number(item.quantity || 1))
+        }, 0)
+        itemTotalValue = formatPayPalAmount(computedItemTotal)
+      } else {
+        // Fallback: single generic item with the full amount
+        paypalItems = [
+          {
+            name: productName,
+            quantity: "1",
+            unit_amount: {
+              currency_code: currency,
+              value: totalValue,
             },
-          ],
+            category: "PHYSICAL_GOODS" as const,
+          },
+        ]
+        itemTotalValue = totalValue
+      }
+
+      // Build shipping info from data.shipping_address (sent by frontend)
+      const shippingAddr = data?.shipping_address
+      const billingAddr = data?.billing_address
+      const addr = shippingAddr || billingAddr
+      let shippingInfo: any = undefined
+      if (addr && (addr.address_1 || addr.address_line_1)) {
+        const fullName = [addr.first_name, addr.last_name].filter(Boolean).join(" ")
+        shippingInfo = {
+          name: { full_name: fullName || "Customer" },
+          address: {
+            address_line_1: (addr.address_1 || addr.address_line_1 || "").substring(0, 300),
+            address_line_2: (addr.address_2 || addr.address_line_2 || "").substring(0, 300) || undefined,
+            admin_area_2: (addr.city || addr.admin_area_2 || "").substring(0, 120),
+            admin_area_1: (addr.province || addr.admin_area_1 || "").substring(0, 300) || undefined,
+            postal_code: (addr.postal_code || "").substring(0, 60),
+            country_code: (addr.country_code || "").toUpperCase().substring(0, 2),
+          },
+        }
+        // Remove undefined fields to avoid PayPal validation errors
+        Object.keys(shippingInfo.address).forEach((k) => {
+          if (!shippingInfo.address[k]) delete shippingInfo.address[k]
+        })
+      }
+
+      // Calculate breakdown: if items don't sum to total, add shipping/discount difference
+      const itemTotalNum = Number(itemTotalValue)
+      const totalNum = Number(totalValue)
+      const difference = totalNum - itemTotalNum
+
+      const breakdown: any = {
+        item_total: {
+          currency_code: currency,
+          value: itemTotalValue,
         },
-      ]
+      }
+      // If total > item_total, the difference is shipping/handling
+      if (difference > 0.005) {
+        breakdown.shipping = {
+          currency_code: currency,
+          value: formatPayPalAmount(difference),
+        }
+      }
+      // If total < item_total, the difference is a discount
+      if (difference < -0.005) {
+        breakdown.discount = {
+          currency_code: currency,
+          value: formatPayPalAmount(Math.abs(difference)),
+        }
+      }
+
+      // Shared purchase_units
+      const purchaseUnit: any = {
+        reference_id: context?.cart_id || `medusa-${Date.now()}`,
+        description: productName,
+        amount: {
+          currency_code: currency,
+          value: totalValue,
+          breakdown,
+        },
+        items: paypalItems,
+      }
+      if (shippingInfo) {
+        purchaseUnit.shipping = shippingInfo
+      }
+      const purchaseUnits = [purchaseUnit]
 
       const isCard = method === "creditcard"
 
