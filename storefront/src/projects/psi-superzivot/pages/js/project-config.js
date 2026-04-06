@@ -27,7 +27,7 @@ var PROJECT_CONFIG = {
     { "qty": 4, "price": 1499, "label": "4 knihy + 3× bonusy", "badge": "NEJLEPŠÍ HODNOTA", "save": 701, "savings": 701 }
   ],
   "regions": {
-    "CZ": ""
+    "CZ": "reg_01KKBXQSFW6CCV6MMZEYAAW0VA"
   },
   "paymentProviders": {},
   "mollieProfileId": null,
