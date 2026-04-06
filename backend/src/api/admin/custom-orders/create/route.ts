@@ -234,13 +234,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       const newItems = (freshOrder as any)?.items || []
       if (newItems.length > 0) {
         // Book VAT rates per country (reduced rates for physical books)
-        const taxRate = ["nl"].includes(country_code.toLowerCase()) ? 9
-          : ["be"].includes(country_code.toLowerCase()) ? 6
-          : ["de", "at"].includes(country_code.toLowerCase()) ? 7
-          : ["se"].includes(country_code.toLowerCase()) ? 6
-          : ["pl"].includes(country_code.toLowerCase()) ? 5
-          : ["cz"].includes(country_code.toLowerCase()) ? 12
-          : 0 // non-EU or unknown — no VAT
+        const BOOK_VAT: Record<string, number> = {
+          nl: 9, be: 6, de: 7, at: 10, se: 6, pl: 5, cz: 0, sk: 10,
+          lu: 3, fr: 5, it: 4, es: 4, pt: 6, ie: 0, hu: 5,
+        }
+        const taxRate = BOOK_VAT[country_code.toLowerCase()] ?? 0
 
         await orderModuleService.createOrderLineItemTaxLines(
           orderId,
