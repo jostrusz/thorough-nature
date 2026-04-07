@@ -160,6 +160,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         postnord_sent_at: new Date().toISOString(),
         postnord_order_number: orderNumber,
         postnord_response: responseData,
+        dextrum_status: "IMPORTED",
       },
     }])
 
