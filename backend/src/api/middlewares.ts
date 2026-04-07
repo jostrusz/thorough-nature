@@ -20,6 +20,23 @@ function ensureRawBody(req: any, _res: any, next: any) {
 export default defineMiddlewares({
   routes: [
     {
+      method: ["GET", "POST", "OPTIONS"],
+      matcher: "/public/*",
+      middlewares: [
+        function publicCors(req: any, res: any, next: any) {
+          res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*")
+          res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+          res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+          res.setHeader("Access-Control-Allow-Credentials", "true")
+          if (req.method === "OPTIONS") {
+            res.status(204).end()
+            return
+          }
+          next()
+        },
+      ],
+    },
+    {
       method: ["POST"],
       matcher: "/webhooks/stripe",
       // Disable the default body parser entirely so we can read the raw stream
