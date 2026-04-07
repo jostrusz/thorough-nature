@@ -12,6 +12,7 @@ interface OrderDetailHeaderProps {
   onDuplicate: () => void
   onArchive: () => void
   onSendToDextrum: () => void
+  onSendToPostNord: () => void
   onFakturoidCreate: () => void
   onFakturoidOpen: () => void
   onFakturoidDelete: () => void
@@ -68,6 +69,7 @@ export function OrderDetailHeader({
   onDuplicate,
   onArchive,
   onSendToDextrum,
+  onSendToPostNord,
   onFakturoidCreate,
   onFakturoidOpen,
   onFakturoidDelete,
@@ -236,6 +238,7 @@ export function OrderDetailHeader({
               onCancel={onCancel}
               onArchive={onArchive}
               onSendToDextrum={onSendToDextrum}
+              onSendToPostNord={onSendToPostNord}
               onFakturoidCreate={onFakturoidCreate}
               onFakturoidOpen={onFakturoidOpen}
               onFakturoidDelete={onFakturoidDelete}
@@ -251,6 +254,7 @@ export function OrderDetailHeader({
               qbInvoiceUrl={qbInvoiceUrl}
               qbCreditMemoId={qbCreditMemoId}
               dextrumMystockId={dextrumMystockId}
+              postnordSent={!!order.metadata?.postnord_sent}
             />
           </div>
         </div>

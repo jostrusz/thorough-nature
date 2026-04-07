@@ -23,6 +23,7 @@ import {
   useCapturePayment,
   useDuplicateOrder,
   useSendToDextrum,
+  useSendToPostNord,
   useCreateFakturoidInvoice,
   useDeleteFakturoidInvoice,
   useCreateFakturoidCreditNote,
@@ -472,6 +473,7 @@ const OrderDetailPage = () => {
   const capturePayment = useCapturePayment()
   const duplicateOrder = useDuplicateOrder()
   const sendToDextrum = useSendToDextrum()
+  const sendToPostNord = useSendToPostNord()
   const createFakturoidInvoice = useCreateFakturoidInvoice()
   const deleteFakturoidInvoice = useDeleteFakturoidInvoice()
   const createFakturoidCreditNote = useCreateFakturoidCreditNote()
@@ -620,6 +622,22 @@ const OrderDetailPage = () => {
       },
     })
   }, [id, sendToDextrum])
+
+  const handleSendToPostNord = useCallback(() => {
+    if (!id) return
+    if (order?.metadata?.postnord_sent) {
+      const confirmed = window.confirm("This order was already sent to PostNord. Send again?")
+      if (!confirmed) return
+    }
+    sendToPostNord.mutate(id, {
+      onSuccess: () => {
+        toast.success("Order sent to PostNord WMS ✓")
+      },
+      onError: (err: any) => {
+        toast.error(err?.message || "Failed to send to PostNord")
+      },
+    })
+  }, [id, sendToPostNord, order])
 
   const handleResendEbooks = useCallback(() => {
     if (!id) return
@@ -812,6 +830,7 @@ const OrderDetailPage = () => {
         onDuplicate={() => setDuplicateModalOpen(true)}
         onArchive={handleArchive}
         onSendToDextrum={handleSendToDextrum}
+        onSendToPostNord={handleSendToPostNord}
         onFakturoidCreate={handleFakturoidCreate}
         onFakturoidOpen={handleFakturoidOpen}
         onFakturoidDelete={handleFakturoidDelete}

@@ -169,6 +169,25 @@ export function useSendToDextrum() {
 }
 
 // ═══════════════════════════════════════════
+// Send to PostNord (WMS via Linker)
+// ═══════════════════════════════════════════
+export function useSendToPostNord() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      return sdk.client.fetch(`/admin/postnord/orders/${orderId}/send`, {
+        method: "POST",
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["custom-order-detail"] })
+      queryClient.invalidateQueries({ queryKey: ["custom-orders-list"] })
+      queryClient.invalidateQueries({ queryKey: ["custom-order-stats"] })
+    },
+  })
+}
+
+// ═══════════════════════════════════════════
 // Create Fakturoid Invoice
 // ═══════════════════════════════════════════
 export function useCreateFakturoidInvoice() {
