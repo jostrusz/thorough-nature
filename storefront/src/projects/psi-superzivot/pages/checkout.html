@@ -62,32 +62,41 @@
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: #FFFFFF;
+  background: var(--white, #FFFFFF);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 99999;
+  transition: opacity 0.5s ease;
 }
-.payment-preloader img {
-  width: 120px;
+.payment-preloader .preloader-logo-wrap {
+  position: relative;
+  overflow: hidden;
+  width: 180px;
   height: auto;
-  animation: ppPulse 1.4s ease-in-out infinite;
 }
-.payment-preloader p {
-  margin-top: 24px;
-  font-family: "DM Sans", sans-serif;
-  font-size: 16px;
-  color: #333;
+.payment-preloader .preloader-logo {
+  width: 100%;
+  height: auto;
+  display: block;
+  animation: preloaderPulse 1.5s ease-in-out infinite;
 }
-.payment-preloader .sub {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #999;
+.payment-preloader .preloader-shine {
+  position: absolute;
+  top: -100%; left: 0;
+  width: 50%; height: 300%;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.6) 50%, transparent 60%);
+  animation: preloaderShine 2s ease-in-out infinite;
+  pointer-events: none;
+  will-change: transform;
 }
-@keyframes ppPulse {
-  0%, 100% { transform: scale(1); opacity: .85 }
-  50%       { transform: scale(1.08); opacity: 1 }
+@keyframes preloaderPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.04); opacity: 0.92; }
+}
+@keyframes preloaderShine {
+  0% { transform: translateX(-160%); }
+  100% { transform: translateX(320%); }
 }
 
 /* ─── DESIGN TOKENS — Psí superživot (shodné s hlavní stránkou) ─── */
@@ -2910,7 +2919,7 @@ body {
       <div class="summary-reviews">
         <div class="summary-review">
           <div class="summary-review-avatar">
-            <img src="/psisuperzivot/images/review-honden-pichi.webp" alt="Jana" loading="lazy">
+            <img src="/psisuperzivot/images/recenze-1-pichi.jpg" alt="Jana" loading="lazy">
           </div>
           <div class="summary-review-content">
             <div class="summary-review-stars">★★★★★</div>
@@ -2920,7 +2929,7 @@ body {
         </div>
         <div class="summary-review">
           <div class="summary-review-avatar">
-            <img src="/psisuperzivot/images/review-john-hondenbijbel-vertical-pichi.webp" alt="Petr" loading="lazy">
+            <img src="/psisuperzivot/images/recenze-2-pichi.jpg" alt="Petr" loading="lazy">
           </div>
           <div class="summary-review-content">
             <div class="summary-review-stars">★★★★★</div>
@@ -3987,7 +3996,7 @@ body {
     if (document.querySelector('.payment-preloader')) return;
     var el = document.createElement('div');
     el.className = 'payment-preloader';
-    el.innerHTML = '<img src="/psisuperzivot/images/preloader.webp" alt="Načítání..." width="120" height="110"><p>Platba se zpracovává...</p><p class="sub">Prosím, vyčkejte.</p>';
+    el.innerHTML = '<div class="preloader-logo-wrap"><img src="/psisuperzivot/images/preloader.webp" alt="Psí superživot" class="preloader-logo" width="180" height="180"><div class="preloader-shine"></div></div>';
     document.body.insertBefore(el, document.body.firstChild);
   }
   function hideExpressPreloader() {
@@ -6907,7 +6916,7 @@ body {
     if (!document.querySelector('.payment-preloader')) {
       var preloaderDiv = document.createElement('div');
       preloaderDiv.className = 'payment-preloader';
-      preloaderDiv.innerHTML = '<img src="/psisuperzivot/images/preloader.webp" alt="Načítání..." width="120" height="110"><p>Platba se zpracovává...</p><p class="sub">Prosím, vyčkejte.</p>';
+      preloaderDiv.innerHTML = '<div class="preloader-logo-wrap"><img src="/psisuperzivot/images/preloader.webp" alt="Psí superživot" class="preloader-logo" width="180" height="180"><div class="preloader-shine"></div></div>';
       document.body.insertBefore(preloaderDiv, document.body.firstChild);
     }
 
@@ -7487,7 +7496,7 @@ body {
                   if (!document.querySelector('.payment-preloader')) {
                     var kPreloader = document.createElement('div');
                     kPreloader.className = 'payment-preloader';
-                    kPreloader.innerHTML = '<img src="/psisuperzivot/images/preloader.webp" alt="Načítání..." width="120" height="110"><p>Platba se zpracovává...</p><p class="sub">Prosím, vyčkejte.</p>';
+                    kPreloader.innerHTML = '<div class="preloader-logo-wrap"><img src="/psisuperzivot/images/preloader.webp" alt="Psí superživot" class="preloader-logo" width="180" height="180"><div class="preloader-shine"></div></div>';
                     document.body.insertBefore(kPreloader, document.body.firstChild);
                   }
 
@@ -7663,7 +7672,7 @@ body {
                 if (!document.querySelector('.payment-preloader')) {
                   var awPreloader = document.createElement('div');
                   awPreloader.className = 'payment-preloader';
-                  awPreloader.innerHTML = '<img src="/psisuperzivot/images/preloader.webp" alt="Načítání..." width="120" height="110"><p>Platba se zpracovává...</p><p class="sub">Prosím, vyčkejte.</p>';
+                  awPreloader.innerHTML = '<div class="preloader-logo-wrap"><img src="/psisuperzivot/images/preloader.webp" alt="Psí superživot" class="preloader-logo" width="180" height="180"><div class="preloader-shine"></div></div>';
                   document.body.insertBefore(awPreloader, document.body.firstChild);
                 }
 
