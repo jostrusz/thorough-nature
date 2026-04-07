@@ -941,6 +941,54 @@ body {
   margin-top: 8px;
   min-height: 20px;
 }
+#payment-errors:not(:empty) {
+  background: #FEF2F2;
+  border: 1.5px solid #FECACA;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-top: 16px;
+  text-align: center;
+  animation: shakeError 0.4s ease;
+}
+#payment-errors .error-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #C0392B;
+  margin-bottom: 6px;
+  font-family: 'DM Sans', sans-serif;
+}
+#payment-errors .error-detail {
+  font-size: 13px;
+  color: #7F1D1D;
+  margin-bottom: 16px;
+  opacity: 0.8;
+}
+#payment-errors .error-retry-btn {
+  display: inline-block;
+  padding: 12px 32px;
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+#payment-errors .error-retry-btn:hover {
+  background: #111;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
 
 /* ─── SUBMIT VALIDATION MESSAGE ─── */
 .submit-validation-msg {
@@ -3926,7 +3974,7 @@ body {
       // Show error in preloader (same UX as regular flow)
       var preloader = document.querySelector('.payment-preloader');
       if (preloader) {
-        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Při zpracování platby došlo k chybě.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Zkuste to znovu nebo nás kontaktujte.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Zkusit znovu</a></div>';
+        preloader.innerHTML = '<div style="text-align:center;padding:40px 20px;max-width:420px;margin:0 auto;"><div style="width:56px;height:56px;margin:0 auto 20px;background:#FEF2F2;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><p style="font-size:20px;font-weight:600;color:#C0392B;font-family:DM Sans,sans-serif;margin:0 0 8px;">Při zpracování platby došlo k chybě</p><p style="font-size:14px;color:#666;margin:0 0 24px;font-family:DM Sans,sans-serif;line-height:1.5;">' + (err.message || 'Zkuste to znovu nebo nás kontaktujte.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;padding:14px 36px;background:#333;color:#fff;border-radius:10px;text-decoration:none;font-family:DM Sans,sans-serif;font-size:15px;font-weight:600;transition:all 0.2s;">Zkusit znovu</a></div>';
       } else {
         hideExpressPreloader();
         alert('Došlo k chybě. Zkuste to prosím znovu.');
@@ -6894,7 +6942,7 @@ body {
       console.error('[Payment Return] Cart completion failed:', err);
       var preloader = document.querySelector('.payment-preloader');
       if (preloader) {
-        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Při zpracování platby došlo k chybě.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Zkuste to znovu nebo nás kontaktujte.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Zkusit znovu</a></div>';
+        preloader.innerHTML = '<div style="text-align:center;padding:40px 20px;max-width:420px;margin:0 auto;"><div style="width:56px;height:56px;margin:0 auto 20px;background:#FEF2F2;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><p style="font-size:20px;font-weight:600;color:#C0392B;font-family:DM Sans,sans-serif;margin:0 0 8px;">Při zpracování platby došlo k chybě</p><p style="font-size:14px;color:#666;margin:0 0 24px;font-family:DM Sans,sans-serif;line-height:1.5;">' + (err.message || 'Zkuste to znovu nebo nás kontaktujte.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;padding:14px 36px;background:#333;color:#fff;border-radius:10px;text-decoration:none;font-family:DM Sans,sans-serif;font-size:15px;font-weight:600;transition:all 0.2s;">Zkusit znovu</a></div>';
       }
     });
 
@@ -7672,10 +7720,15 @@ body {
       }
     })
     .catch(function(err) {
-      // Zobrazit chybovou hlášku
-      errorEl.textContent = err.message || 'Něco se pokazilo. Zkuste to prosím znovu.';
+      // Zobrazit zvýrazněnou chybovou hlášku s retry tlačítkem
+      var errMsg = err.message || 'Něco se pokazilo. Zkuste to prosím znovu.';
+      errorEl.innerHTML = '<div class="error-title">Při zpracování platby došlo k chybě</div>'
+        + '<div class="error-detail">' + errMsg + '</div>'
+        + '<button class="error-retry-btn" type="button" onclick="document.getElementById(\'payment-errors\').innerHTML=\'\';document.getElementById(\'submit-btn\').click();">Zkusit znovu</button>';
       submitBtn.classList.remove('loading');
       submitBtn.disabled = false;
+      // Scroll k chybě
+      errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   });
 
