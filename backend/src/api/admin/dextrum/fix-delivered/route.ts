@@ -11,6 +11,11 @@ import { DEXTRUM_MODULE } from "../../../../modules/dextrum"
  *   ?dry_run=true  — only show what would be fixed, don't actually update (default)
  *   ?dry_run=false — actually fix the orders
  */
+// GET also works — so you can open it directly in browser
+export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
+  return POST(req, res)
+}
+
 export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   try {
     const dryRun = req.query.dry_run !== "false"
