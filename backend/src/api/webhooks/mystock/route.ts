@@ -151,9 +151,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     }
 
     // Special handling for Event 29 (carrier/delivery updates)
-    // Dextrum uses event 29 for TWO purposes:
-    //   - subtype empty/0 + note "Ostatní data přijata" = tracking assigned (NOT delivered) → DISPATCHED
-    //   - subtype 1 = actually delivered to customer → DELIVERED
+    // mySTOCK sends event 29 for multiple purposes — differentiated by note text:
+    //   - note "Ostatní data přijata" = tracking assigned (NOT delivered) → DISPATCHED
+    //   - note "Zásilka je u vás" / "doručena" = delivered → DELIVERED
+    //   - subtype 1 = confirmed delivery → DELIVERED
     if (eventType === "29") {
       const carrierStatus = (event.data?.status ?? event.status ?? "").toLowerCase()
       const eventNote = (event.note ?? event.data?.note ?? "").toLowerCase()
@@ -161,16 +162,33 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
       console.log(`[mySTOCK Webhook] Event 29 DEBUG — rawSubtype=${JSON.stringify(rawSubtype)} eventSubtype="${eventSubtype}" sub=${sub} carrierStatus="${carrierStatus}" note="${eventNote}" docCode=${documentCode || "?"}`)
 
+      // Delivery-related phrases in note (Czech carrier messages)
+      const isDeliveryNote = eventNote.includes("zásilka je u vás")
+        || eventNote.includes("doručen")
+        || eventNote.includes("delivered")
+        || eventNote.includes("převzat")
+        || eventNote.includes("vyzvednut")
+        || eventNote.includes("dodán")
+        || eventNote.includes("předán")
+
       if (sub === 1) {
-        // Subtype 1 = confirmed delivery — check FIRST before other conditions
+        // Subtype 1 = confirmed delivery
         newStatus = "DELIVERED"
         console.log(`[mySTOCK Webhook] Event 29 subtype=1 → DELIVERED for ${documentCode || documentId}`)
+      } else if (isDeliveryNote) {
+        // Note indicates package was delivered — regardless of subtype
+        newStatus = "DELIVERED"
+        console.log(`[mySTOCK Webhook] Event 29 delivery note detected ("${event.note || ""}") → DELIVERED for ${documentCode || documentId}`)
       } else if (carrierStatus === "transit" || carrierStatus === "in_transit") {
         newStatus = "IN_TRANSIT"
-      } else if (eventNote.includes("ostatní data") || eventNote.includes("data přijata") || eventSubtype === "" || eventSubtype === "0" || sub === 0) {
-        // No subtype or "Ostatní data přijata" = tracking data update, NOT delivery
+      } else if (eventNote.includes("ostatní data") || eventNote.includes("data přijata")) {
+        // "Ostatní data přijata" = tracking data assigned, NOT delivery
         newStatus = "DISPATCHED"
-        console.log(`[mySTOCK Webhook] Event 29 without subtype=1 (note: "${event.note || ""}") → treating as DISPATCHED, not DELIVERED`)
+        console.log(`[mySTOCK Webhook] Event 29 tracking assigned (note: "${event.note || ""}") → DISPATCHED`)
+      } else if (eventSubtype === "" || eventSubtype === "0" || sub === 0) {
+        // Empty/zero subtype without known note — default to DISPATCHED
+        newStatus = "DISPATCHED"
+        console.log(`[mySTOCK Webhook] Event 29 empty subtype, unknown note ("${event.note || ""}") → DISPATCHED`)
       } else {
         // Any other subtype — treat as delivered
         newStatus = "DELIVERED"
