@@ -4236,7 +4236,10 @@ body {
               if (typeof MetaTracker !== 'undefined') {
                 customerData.metadata.fbc = MetaTracker.getFbc() || '';
                 customerData.metadata.fbp = MetaTracker.getFbp() || '';
+                customerData.metadata.external_id = MetaTracker.getExternalId() || '';
               }
+              customerData.metadata.client_user_agent = navigator.userAgent || '';
+              customerData.metadata.source_url = window.location.href;
 
               // Save customer info for thank-you page
               localStorage.setItem('medusa_customer', JSON.stringify({
@@ -4516,7 +4519,10 @@ body {
                 if (typeof MetaTracker !== 'undefined') {
                   customerData.metadata.fbc = MetaTracker.getFbc() || '';
                   customerData.metadata.fbp = MetaTracker.getFbp() || '';
+                  customerData.metadata.external_id = MetaTracker.getExternalId() || '';
                 }
+                customerData.metadata.client_user_agent = navigator.userAgent || '';
+                customerData.metadata.source_url = window.location.href;
 
                 localStorage.setItem('medusa_customer', JSON.stringify({
                   email: email,
@@ -4694,7 +4700,10 @@ body {
               if (typeof MetaTracker !== 'undefined') {
                 customerData.metadata.fbc = MetaTracker.getFbc() || '';
                 customerData.metadata.fbp = MetaTracker.getFbp() || '';
+                customerData.metadata.external_id = MetaTracker.getExternalId() || '';
               }
+              customerData.metadata.client_user_agent = navigator.userAgent || '';
+              customerData.metadata.source_url = window.location.href;
 
               localStorage.setItem('medusa_customer', JSON.stringify({
                 email: customerData.email,
@@ -7081,6 +7090,13 @@ body {
       customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
       customerData.metadata.project_id = window.AnalyticsTracker.PROJECT_ID || '';
     }
+    if (typeof MetaTracker !== 'undefined') {
+      customerData.metadata.fbc = MetaTracker.getFbc() || '';
+      customerData.metadata.fbp = MetaTracker.getFbp() || '';
+      customerData.metadata.external_id = MetaTracker.getExternalId() || '';
+    }
+    customerData.metadata.client_user_agent = navigator.userAgent || '';
+    customerData.metadata.source_url = window.location.href;
 
     // ─── Firemní údaje (B2B) ───
     var isCompany = document.getElementById('company-checkbox').checked;
