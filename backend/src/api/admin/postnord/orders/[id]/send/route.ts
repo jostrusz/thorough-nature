@@ -57,11 +57,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     // 5. Calculate total quantity and total price
     const items = order.items || []
     const totalQuantity = items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0)
-    const totalPrice = (Number(order.total) || 0) / 100 // Convert from cents
+    const totalPrice = Number(order.total) || 0
 
     // 6. Build Linker API payload
     const payload = {
-      clientOrderNumber: `STO${orderNumber}`,
+      clientOrderNumber: orderNumber,
       externalId: orderNumber,
       additionalOrderNumber: orderNumber,
       paymentMethod: paymentMethod,
@@ -158,7 +158,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         ...order.metadata,
         postnord_sent: true,
         postnord_sent_at: new Date().toISOString(),
-        postnord_order_number: `STO${orderNumber}`,
+        postnord_order_number: orderNumber,
         postnord_response: responseData,
       },
     }])
@@ -166,7 +166,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     res.json({
       success: true,
       order_number: orderNumber,
-      postnord_order_number: `STO${orderNumber}`,
+      postnord_order_number: orderNumber,
       linker_response: responseData,
     })
   } catch (error: any) {
