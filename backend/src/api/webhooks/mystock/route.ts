@@ -107,8 +107,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     // 2. Find the Medusa order by documentId or documentCode
     const documentId = event.documentId || event.data?.documentId
     const documentCode = event.documentCode || event.data?.documentCode
-    const eventType = String(event.eventType || event.type || "")
-    const eventSubtype = String(event.eventSubtype || event.subtype || "")
+    const eventType = String(event.eventType ?? event.type ?? "")
+    // Handle eventSubtype carefully — 0 is a valid value, don't treat as falsy
+    const rawSubtype = event.eventSubtype ?? event.subtype ?? event.data?.eventSubtype ?? event.data?.subtype ?? ""
+    const eventSubtype = String(rawSubtype)
 
     // Log ALL events with documentCode/documentId for matching debugging
     console.log(`[mySTOCK Webhook] Event ${event.eventId} type=${eventType} sub=${eventSubtype || "-"} docCode=${documentCode || "?"} docId=${documentId || "?"} time=${event.eventTime || "?"}`)
@@ -153,21 +155,26 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     //   - subtype empty/0 + note "Ostatní data přijata" = tracking assigned (NOT delivered) → DISPATCHED
     //   - subtype 1 = actually delivered to customer → DELIVERED
     if (eventType === "29") {
-      const carrierStatus = (event.data?.status || event.status || "").toLowerCase()
-      const eventNote = (event.note || event.data?.note || "").toLowerCase()
+      const carrierStatus = (event.data?.status ?? event.status ?? "").toLowerCase()
+      const eventNote = (event.note ?? event.data?.note ?? "").toLowerCase()
       const sub = parseInt(eventSubtype, 10)
 
-      if (carrierStatus === "transit" || carrierStatus === "in_transit") {
-        newStatus = "IN_TRANSIT"
-      } else if (sub === 1) {
-        // Subtype 1 = confirmed delivery
+      console.log(`[mySTOCK Webhook] Event 29 DEBUG — rawSubtype=${JSON.stringify(rawSubtype)} eventSubtype="${eventSubtype}" sub=${sub} carrierStatus="${carrierStatus}" note="${eventNote}" docCode=${documentCode || "?"}`)
+
+      if (sub === 1) {
+        // Subtype 1 = confirmed delivery — check FIRST before other conditions
         newStatus = "DELIVERED"
-      } else if (eventNote.includes("ostatní data") || eventNote.includes("data přijata") || !eventSubtype || sub === 0) {
+        console.log(`[mySTOCK Webhook] Event 29 subtype=1 → DELIVERED for ${documentCode || documentId}`)
+      } else if (carrierStatus === "transit" || carrierStatus === "in_transit") {
+        newStatus = "IN_TRANSIT"
+      } else if (eventNote.includes("ostatní data") || eventNote.includes("data přijata") || eventSubtype === "" || eventSubtype === "0" || sub === 0) {
         // No subtype or "Ostatní data přijata" = tracking data update, NOT delivery
         newStatus = "DISPATCHED"
         console.log(`[mySTOCK Webhook] Event 29 without subtype=1 (note: "${event.note || ""}") → treating as DISPATCHED, not DELIVERED`)
       } else {
+        // Any other subtype — treat as delivered
         newStatus = "DELIVERED"
+        console.log(`[mySTOCK Webhook] Event 29 subtype=${eventSubtype} (unknown) → treating as DELIVERED for ${documentCode || documentId}`)
       }
     }
 
@@ -182,7 +189,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const newRank = STATUS_ORDER[newStatus] || 0
 
     // Skip if new status is behind or equal to current (except CANCELLED which always applies)
-    if (orderMap && newStatus && newStatus !== "CANCELLED" && newRank <= prevRank) {
+    // But allow DELIVERED to always go through (rank 6) since it's the final state
+    if (orderMap && newStatus && newStatus !== "CANCELLED" && newStatus !== "DELIVERED" && newRank <= prevRank) {
       console.log(`[mySTOCK Webhook] Event ${event.eventId} type=${eventType} — skipping status ${newStatus} (rank ${newRank}), order ${orderMap.mystock_order_code} already at ${previousStatus} (rank ${prevRank})`)
       // Still log the event but don't update the order
       await dextrumService.createDextrumEventLogs({
