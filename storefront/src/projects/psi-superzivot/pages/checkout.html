@@ -2998,7 +2998,7 @@ body {
   var isPaymentReturn = window.location.search.indexOf('payment_return=1') !== -1 || window.location.search.indexOf('redirect_status=') !== -1;
   if (!isPaymentReturn && typeof MetaTracker !== 'undefined') {
     MetaTracker.trackInitiateCheckout({
-      content_ids: [PROJECT_CONFIG.mainProduct.handle],
+      content_ids: ['dq1pbx9h7a', '2o99o4u5wa', '0e0rq03y7v', 'bap43l83n0', 'zotl3ua4f8'],
       value: PROJECT_CONFIG.mainProduct.price,
       currency: PROJECT_CONFIG.mainProduct.currency,
       num_items: 1
@@ -5716,7 +5716,7 @@ body {
       if (emailVal && emailVal.includes('@') && !addPaymentInfoFired && typeof MetaTracker !== 'undefined') {
         addPaymentInfoFired = true;
         MetaTracker.trackAddPaymentInfo({
-          content_ids: [PROJECT_CONFIG.mainProduct.handle],
+          content_ids: ['dq1pbx9h7a', '2o99o4u5wa', '0e0rq03y7v', 'bap43l83n0', 'zotl3ua4f8'],
           value: getCurrentTotal(),
           currency: PROJECT_CONFIG.mainProduct.currency
         }, { em: emailVal });

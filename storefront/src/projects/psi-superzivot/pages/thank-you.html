@@ -1115,8 +1115,7 @@ body { background: var(--bg); }
     console.warn('TY: Skipping Purchase event — no valid order (totalPrice=' + totalPrice + ', orderId=' + orderId + ')');
   } else if (!alreadyTracked && typeof MetaTracker !== 'undefined') {
     // This fires ONLY for order bump flow (customer skipped upsell page, came directly here)
-    var purchaseContentIds = [PROJECT_CONFIG.mainProduct.handle];
-    if (orderBumpActive) purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
+    var purchaseContentIds = ['dq1pbx9h7a', '2o99o4u5wa', '0e0rq03y7v', 'bap43l83n0', 'zotl3ua4f8'];
     var purchaseNumItems = bundleQty + (orderBumpActive ? 1 : 0);
     var purchaseEventId = 'purchase_' + orderId;
 

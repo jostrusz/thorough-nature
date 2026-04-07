@@ -136,7 +136,7 @@ export default async function orderPlacedMetaCAPIHandler({
       dehondenbijbel: ["9hduqtwz07", "5e8vclt1pz", "5d5yd6u51i", "edr7gf3itr", "1emdl02y05", "lgn3th5xv4", "zjk1xb6h9u"],
       "lass-los": ["1azgp7ymuv", "82764876", "31epnhw6c4", "dnoiszdeax", "gh1u1icp8r"],
       loslatenboek: ["32a1orwxo6", "04sbhku9gu", "3ox80zb3w3", "ovw9qrtu0h", "coonabrkxh", "dw9xqils6", "ldv9esmmfj"],
-      // psi-superzivot: no DPA catalog yet — falls back to order item IDs automatically
+      "psi-superzivot": ["dq1pbx9h7a", "2o99o4u5wa", "0e0rq03y7v", "bap43l83n0", "zotl3ua4f8"],
     }
 
     const items = order.items || []
