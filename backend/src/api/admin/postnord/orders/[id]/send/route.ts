@@ -150,17 +150,27 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
     console.log(`[PostNord] Order ${orderNumber} sent successfully`, responseData)
 
-    // 8. Update order metadata
+    // 8. Update order metadata + timeline
+    const now = new Date().toISOString()
     const orderService = req.scope.resolve("order") as any
+    const existingTimeline = Array.isArray(order.metadata?.dextrum_timeline) ? [...order.metadata.dextrum_timeline] : []
+    existingTimeline.push({
+      type: "postnord",
+      status: "IMPORTED",
+      date: now,
+      detail: `Order sent to PostNord WMS (Linker) — ${orderNumber}`,
+    })
+
     await orderService.updateOrders([{
       id: medusaOrderId,
       metadata: {
         ...order.metadata,
         postnord_sent: true,
-        postnord_sent_at: new Date().toISOString(),
+        postnord_sent_at: now,
         postnord_order_number: orderNumber,
         postnord_response: responseData,
         dextrum_status: "IMPORTED",
+        dextrum_timeline: existingTimeline,
       },
     }])
 
