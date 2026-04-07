@@ -163,13 +163,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       console.log(`[mySTOCK Webhook] Event 29 DEBUG — rawSubtype=${JSON.stringify(rawSubtype)} eventSubtype="${eventSubtype}" sub=${sub} carrierStatus="${carrierStatus}" note="${eventNote}" docCode=${documentCode || "?"}`)
 
       // Delivery-related phrases in note (Czech carrier messages)
+      // NOTE: "předán" excluded — "připravena k předání dopravci" = handoff to courier, NOT delivery
       const isDeliveryNote = eventNote.includes("zásilka je u vás")
         || eventNote.includes("doručen")
         || eventNote.includes("delivered")
         || eventNote.includes("převzat")
         || eventNote.includes("vyzvednut")
         || eventNote.includes("dodán")
-        || eventNote.includes("předán")
 
       if (sub === 1) {
         // Subtype 1 = confirmed delivery
