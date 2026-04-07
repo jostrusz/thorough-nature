@@ -580,7 +580,6 @@ const CustomOrdersPage = () => {
   const handleSwedishExport = useCallback(() => {
     if (selectedOrders.size === 0) return
     const selected = orders.filter((o: any) => selectedOrders.has(o.id))
-    const header = "Order number;Jméno;Příjmení;Adresa;PSČ;Město"
     const rows = selected.map((o: any) => {
       const orderNum = o.metadata?.custom_order_number || o.display_id || ""
       const firstName = o.shipping_address?.first_name || ""
@@ -590,7 +589,7 @@ const CustomOrdersPage = () => {
       const city = o.shipping_address?.city || ""
       return [orderNum, firstName, lastName, address, postalCode, city].join(";")
     })
-    const csv = [header, ...rows].join("\n")
+    const csv = rows.join("\n")
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
