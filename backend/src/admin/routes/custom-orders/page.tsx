@@ -572,6 +572,31 @@ const CustomOrdersPage = () => {
     )
   }, [selectedOrders, bulkActions])
 
+  const handleSwedishExport = useCallback(() => {
+    if (selectedOrders.size === 0) return
+    const selected = orders.filter((o: any) => selectedOrders.has(o.id))
+    const header = "Order number;Jméno;Příjmení;Adresa;PSČ;Město"
+    const rows = selected.map((o: any) => {
+      const orderNum = o.metadata?.custom_order_number || o.display_id || ""
+      const firstName = o.shipping_address?.first_name || ""
+      const lastName = o.shipping_address?.last_name || ""
+      const address = o.shipping_address?.address_1 || ""
+      const postalCode = o.shipping_address?.postal_code || ""
+      const city = o.shipping_address?.city || ""
+      return [orderNum, firstName, lastName, address, postalCode, city].join(";")
+    })
+    const csv = [header, ...rows].join("\n")
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `swedish-export-${new Date().toISOString().split("T")[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success(`Swedish export: ${selected.length} orders`)
+    setSelectedOrders(new Set())
+  }, [selectedOrders, orders])
+
   const handleMarkFulfilled = useCallback(() => {
     if (selectedOrders.size === 0) return
     bulkActions.mutate(
@@ -663,6 +688,20 @@ const CustomOrdersPage = () => {
               <path d="M3 14v3h14v-3M10 3v10M6 9l4 4 4-4" />
             </svg>
             <span className="dash-btn-text">Export</span>
+          </button>
+          <button
+            className="dash-btn"
+            style={{
+              ...btnOutline,
+              opacity: selectedOrders.size === 0 ? 0.5 : 1,
+              cursor: selectedOrders.size === 0 ? "not-allowed" : "pointer",
+            }}
+            onClick={handleSwedishExport}
+            disabled={selectedOrders.size === 0}
+            title={selectedOrders.size === 0 ? "Select orders first" : `Swedish export ${selectedOrders.size} orders`}
+          >
+            🇸🇪
+            <span className="dash-btn-text">Swedish Export</span>
           </button>
           <button className="dash-btn-primary" style={btnPrimary} onClick={() => setShowCreateModal(true)}>
             <svg
