@@ -572,6 +572,11 @@ const CustomOrdersPage = () => {
     )
   }, [selectedOrders, bulkActions])
 
+  // Derived data — must be before useCallback hooks that reference `orders`
+  const orders = ordersData?.orders || []
+  const totalCount = ordersData?.count || 0
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+
   const handleSwedishExport = useCallback(() => {
     if (selectedOrders.size === 0) return
     const selected = orders.filter((o: any) => selectedOrders.has(o.id))
@@ -647,10 +652,6 @@ const CustomOrdersPage = () => {
       }
     )
   }, [selectedOrders, bulkActions])
-
-  const orders = ordersData?.orders || []
-  const totalCount = ordersData?.count || 0
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
   return (
     <div ref={pageRef} style={dashboardStyle} className="dash-animate-in">
