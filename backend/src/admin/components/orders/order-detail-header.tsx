@@ -160,6 +160,7 @@ export function OrderDetailHeader({
 
       {/* Title row with actions */}
       <div
+        className="od-header-title-row"
         style={{
           display: "flex",
           alignItems: "flex-start",
@@ -170,6 +171,7 @@ export function OrderDetailHeader({
         {/* Left: Order number + badges */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
           <h1
+            className="od-order-title"
             style={{
               fontSize: "22px",
               fontWeight: 600,
@@ -185,7 +187,7 @@ export function OrderDetailHeader({
         </div>
 
         {/* Right: Action buttons */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className="od-header-actions" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           {!isRefunded && (
             <button
               onClick={onRefund}
@@ -262,6 +264,7 @@ export function OrderDetailHeader({
 
       {/* Date subtitle */}
       <p
+        className="od-date-subtitle"
         style={{
           fontSize: "14px",
           fontFamily: fontStack,

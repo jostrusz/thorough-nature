@@ -50,7 +50,7 @@ export function CancelOrderModal({
   if (!open) return null
 
   return (
-    <div style={overlayStyle} onClick={onClose}>
+    <div className="od-modal-overlay" style={overlayStyle} onClick={onClose}>
       <div style={cardStyle} onClick={(e) => e.stopPropagation()}>
         <h3
           style={{

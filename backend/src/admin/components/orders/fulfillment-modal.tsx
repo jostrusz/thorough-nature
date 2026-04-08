@@ -230,7 +230,7 @@ export function FulfillmentModal({
   const detectedCarrierLabel = cc ? COUNTRY_CARRIER_MAP[cc] : null
 
   return (
-    <div style={overlayStyle} onClick={onClose}>
+    <div className="od-modal-overlay" style={overlayStyle} onClick={onClose}>
       <div style={cardStyle} onClick={(e) => e.stopPropagation()}>
         <h3 style={{ fontSize: "16px", fontWeight: 600, color: colors.text, margin: "0 0 4px" }}>
           Fulfill order #{orderDisplayId}

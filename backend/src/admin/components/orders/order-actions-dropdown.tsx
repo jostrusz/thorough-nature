@@ -88,7 +88,7 @@ export function OrderActionsDropdown({
   return (
     <div
       ref={ref}
-      className="od-section-enter"
+      className="od-section-enter od-actions-dropdown"
       style={{
         position: "absolute",
         top: "100%",

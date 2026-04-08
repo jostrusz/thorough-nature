@@ -251,6 +251,146 @@ function OrderDetailStyles() {
       .od-section-animate {
         animation: odSlideIn 0.35s ease;
       }
+
+      /* ═══ RESPONSIVE / MOBILE ═══ */
+
+      /* Tablet & below: collapse grid to single column */
+      @media (max-width: 860px) {
+        .od-page-container {
+          padding: 16px 16px !important;
+          width: 100% !important;
+        }
+        .od-main-grid {
+          grid-template-columns: 1fr !important;
+          gap: 16px !important;
+        }
+        .od-health-bar {
+          padding: 12px 14px !important;
+          margin-bottom: 16px !important;
+        }
+        .od-health-labels span {
+          font-size: 10px !important;
+        }
+      }
+
+      /* Mobile: header layout adjustments */
+      @media (max-width: 640px) {
+        .od-page-container {
+          padding: 12px 12px !important;
+        }
+        .od-header-title-row {
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          gap: 12px !important;
+        }
+        .od-header-actions {
+          width: 100%;
+          display: flex !important;
+          gap: 6px !important;
+        }
+        .od-header-actions button {
+          flex: 1;
+          justify-content: center !important;
+          font-size: 12px !important;
+          padding: 8px 10px !important;
+        }
+        .od-order-title {
+          font-size: 19px !important;
+        }
+        .od-date-subtitle {
+          font-size: 12px !important;
+        }
+
+        /* Cards: tighter padding */
+        .od-card {
+          border-radius: 12px !important;
+          margin-bottom: 12px !important;
+        }
+        .od-card > div:first-child {
+          padding: 12px 14px !important;
+        }
+
+        /* Health bar: smaller text */
+        .od-health-labels span {
+          font-size: 9px !important;
+          letter-spacing: -0.2px;
+        }
+
+        /* Modals: full width on mobile */
+        .od-modal-overlay > div {
+          width: 95vw !important;
+          max-width: 95vw !important;
+          margin: 16px !important;
+          max-height: 90vh !important;
+          overflow-y: auto !important;
+        }
+      }
+
+      /* Small mobile: extra compact */
+      @media (max-width: 400px) {
+        .od-page-container {
+          padding: 8px 8px !important;
+        }
+        .od-header-actions {
+          flex-wrap: wrap !important;
+        }
+        .od-order-title {
+          font-size: 17px !important;
+        }
+      }
+
+      /* ═══ Component-level responsive fixes ═══ */
+
+      /* Metadata rows: wrap long values */
+      @media (max-width: 860px) {
+        .od-card [style*="justifyContent"] {
+          flex-wrap: wrap;
+        }
+      }
+
+      /* Action button rows on mobile */
+      @media (max-width: 640px) {
+        /* Fulfillment card action buttons stack vertically */
+        .od-card > div:last-child {
+          flex-direction: column !important;
+        }
+        .od-card > div:last-child > button,
+        .od-card > div:last-child > div > button {
+          width: 100% !important;
+          justify-content: center !important;
+        }
+
+        /* Payment card: tighter layout */
+        .od-card table {
+          font-size: 12px !important;
+        }
+
+        /* Timeline entries: tighter */
+        .od-card .od-link {
+          font-size: 12px !important;
+        }
+
+        /* Dropdown: position fixed on mobile for better UX */
+        .od-actions-dropdown {
+          position: fixed !important;
+          top: auto !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          width: 100vw !important;
+          max-height: 70vh !important;
+          overflow-y: auto !important;
+          border-radius: 16px 16px 0 0 !important;
+          box-shadow: 0 -4px 24px rgba(0,0,0,0.12) !important;
+          z-index: 1000 !important;
+          animation: odSlideUp 0.25s ease !important;
+        }
+
+        @keyframes odSlideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+      }
     `}</style>
   )
 }
@@ -373,6 +513,7 @@ function OrderHealthBar({ order }: { order: any }) {
 
   return (
     <div
+      className="od-health-bar"
       style={{
         background: colors.bgCard,
         border: `1px solid ${colors.border}`,
@@ -399,7 +540,7 @@ function OrderHealthBar({ order }: { order: any }) {
         ))}
       </div>
       {/* Labels */}
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <div className="od-health-labels" style={{ display: "flex", justifyContent: "space-between" }}>
         {HEALTH_STEPS.map((label, idx) => (
           <span
             key={idx}
@@ -818,7 +959,7 @@ const OrderDetailPage = () => {
   const maxRefundable = totalPaid || Number(order.total) || 0
 
   return (
-    <div ref={pageRef} style={pageStyle} className="od-section-animate">
+    <div ref={pageRef} style={pageStyle} className="od-section-animate od-page-container">
       <OrderDetailStyles />
 
       {/* Header with Shopify-style actions */}
@@ -846,6 +987,7 @@ const OrderDetailPage = () => {
 
       {/* Two-column layout */}
       <div
+        className="od-main-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 340px",

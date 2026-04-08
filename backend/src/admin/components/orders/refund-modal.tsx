@@ -83,7 +83,7 @@ export function RefundModal({
   const provider = payments[0]?.provider_id?.replace("pp_", "").replace(/_/g, " ") || "Payment provider"
 
   return (
-    <div style={overlayStyle} onClick={onClose}>
+    <div className="od-modal-overlay" style={overlayStyle} onClick={onClose}>
       <div style={cardStyle} onClick={(e) => e.stopPropagation()}>
         <h3
           style={{
