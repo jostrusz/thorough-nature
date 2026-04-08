@@ -263,11 +263,11 @@ export function OrdersTable({
 
   const handleOrderClick = (e: React.MouseEvent, orderId: string) => {
     onBeforeNavigate?.()
-    const url = `/custom-orders/${orderId}`
+    const path = `/custom-orders/${orderId}`
     if (e.metaKey || e.ctrlKey) {
-      window.open(url, "_blank")
+      window.open(`/app${path}`, "_blank")
     } else {
-      navigate(url)
+      navigate(path)
     }
   }
 
