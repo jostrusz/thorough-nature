@@ -755,7 +755,7 @@ async function sendTrackingToPayPalFromWebhook(
   }
 
   // 2. Create PayPal client
-  const { PayPalApiClient } = await import("../../../modules/payment-paypal/api-client")
+  const { PayPalApiClient } = await import("../../../modules/payment-paypal/api-client.js")
   const client = new PayPalApiClient({ client_id: clientId, client_secret: clientSecret, mode })
 
   // 3. Get capture_id — from metadata or by fetching from PayPal
