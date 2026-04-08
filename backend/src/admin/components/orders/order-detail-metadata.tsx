@@ -420,9 +420,10 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
         const idKey = isPL ? "paczkomat_id" : "packeta_point_id"
         const nameKey = isPL ? "paczkomat_name" : "packeta_point_name"
         const addressKey = isPL ? "paczkomat_address" : "packeta_point_address"
-        const currentId = metadata[idKey] || metadata.pickup_place_code || ""
-        const currentName = metadata[nameKey] || ""
-        const currentAddress = metadata[addressKey] || ""
+        // Fallback: PL checkout stores under packeta_point_* keys, CZ under paczkomat_* keys
+        const currentId = metadata[idKey] || metadata.packeta_point_id || metadata.paczkomat_id || metadata.pickup_place_code || ""
+        const currentName = metadata[nameKey] || metadata.packeta_point_name || metadata.paczkomat_name || ""
+        const currentAddress = metadata[addressKey] || metadata.packeta_point_address || metadata.paczkomat_address || ""
 
         return (
           <>

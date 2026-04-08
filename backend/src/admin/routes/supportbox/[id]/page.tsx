@@ -329,10 +329,10 @@ function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] 
         {/* Address + Pickup point */}
         {(() => {
           const firstOrder = allOrders[0]
-          const isPickup = firstOrder?.shipping_method === "zasilkovna_pickup" || !!firstOrder?.paczkomat_name
-          const pickupName = firstOrder?.paczkomat_name || ""
-          const pickupAddr = firstOrder?.paczkomat_address || ""
-          const pickupId = firstOrder?.paczkomat_id || ""
+          const isPickup = firstOrder?.shipping_method === "zasilkovna_pickup" || !!firstOrder?.paczkomat_name || !!firstOrder?.packeta_point_name
+          const pickupName = firstOrder?.paczkomat_name || firstOrder?.packeta_point_name || ""
+          const pickupAddr = firstOrder?.paczkomat_address || firstOrder?.packeta_point_address || ""
+          const pickupId = firstOrder?.paczkomat_id || firstOrder?.packeta_point_id || ""
 
           return (
             <>
