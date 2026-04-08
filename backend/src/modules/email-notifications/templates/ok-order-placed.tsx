@@ -83,6 +83,12 @@ export const OkOrderPlacedTemplate: React.FC<OkOrderPlacedTemplateProps> & {
   const displayId = order.metadata?.custom_order_number || order.display_id || order.id
   const orderDate = formatDate(order.created_at)
 
+  // Detect pickup point (Paczkomat) vs home delivery
+  const isPaczkomat = order.metadata?.shipping_method === 'zasilkovna_pickup'
+    || !!(order.metadata?.paczkomat_name)
+  const paczkomatName = order.metadata?.paczkomat_name || ''
+  const paczkomatAddress = order.metadata?.paczkomat_address || ''
+
   // Calculate totals
   const subtotal = items.reduce(
     (sum: number, item: any) => sum + (item.unit_price || 0) * (item.quantity || 1),
@@ -333,7 +339,7 @@ export const OkOrderPlacedTemplate: React.FC<OkOrderPlacedTemplateProps> & {
             backgroundColor: '#FFF8E1',
             borderRadius: '8px',
             border: '1px solid #FFE082',
-            padding: '12px 16px',
+            padding: '14px 16px',
             textAlign: 'center' as const,
           }}>
             <Text style={{
@@ -343,17 +349,37 @@ export const OkOrderPlacedTemplate: React.FC<OkOrderPlacedTemplateProps> & {
               margin: '0',
               lineHeight: '1.5',
             }}>
-              📦 &nbsp; <strong>Przewidywana dostawa:</strong> 4–7 dni roboczych
+              📦 &nbsp; <strong>Przewidywana dostawa:</strong> 2–3 dni roboczych
             </Text>
-            <Text style={{
-              fontFamily: font,
-              fontSize: '12px',
-              color: '#9e9e9e',
-              margin: '4px 0 0',
-              lineHeight: '1.5',
-            }}>
-              Nasze książki wysyłamy z centralnego magazynu w Czechach, skąd obsługujemy całą Europę.
-            </Text>
+            {isPaczkomat ? (
+              <Text style={{
+                fontFamily: font,
+                fontSize: '12px',
+                color: '#795548',
+                margin: '6px 0 0',
+                lineHeight: '1.5',
+              }}>
+                Twoja przesyłka zostanie doręczona do <strong>Paczkomatu InPost</strong>:
+                <br />
+                <span style={{ color: '#2D1B3D', fontWeight: 600 }}>{paczkomatName}</span>
+                {paczkomatAddress && (
+                  <>
+                    <br />
+                    <span style={{ color: '#9e9e9e', fontSize: '11px' }}>{paczkomatAddress}</span>
+                  </>
+                )}
+              </Text>
+            ) : (
+              <Text style={{
+                fontFamily: font,
+                fontSize: '12px',
+                color: '#795548',
+                margin: '6px 0 0',
+                lineHeight: '1.5',
+              }}>
+                Twoja przesyłka zostanie doręczona na adres podany w zamówieniu.
+              </Text>
+            )}
           </div>
         </div>
 
@@ -372,23 +398,43 @@ export const OkOrderPlacedTemplate: React.FC<OkOrderPlacedTemplateProps> & {
                     color: '#9B7AAD',
                     marginBottom: '8px',
                   }}>
-                    Adres dostawy
+                    {isPaczkomat ? 'Paczkomat InPost' : 'Adres dostawy'}
                   </Text>
-                  <Text style={{
-                    fontFamily: font,
-                    fontSize: '13px',
-                    color: '#5A3D6B',
-                    lineHeight: '1.6',
-                    margin: '0',
-                  }}>
-                    {shippingAddress?.first_name} {shippingAddress?.last_name}
-                    <br />
-                    {shippingAddress?.address_1}
-                    <br />
-                    {shippingAddress?.postal_code} {shippingAddress?.city}
-                    <br />
-                    {formatCountry(shippingAddress?.country_code)}
-                  </Text>
+                  {isPaczkomat ? (
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '13px',
+                      color: '#5A3D6B',
+                      lineHeight: '1.6',
+                      margin: '0',
+                    }}>
+                      <strong style={{ color: '#2D1B3D' }}>{paczkomatName}</strong>
+                      {paczkomatAddress && (
+                        <>
+                          <br />
+                          {paczkomatAddress}
+                        </>
+                      )}
+                      <br />
+                      {formatCountry(shippingAddress?.country_code)}
+                    </Text>
+                  ) : (
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '13px',
+                      color: '#5A3D6B',
+                      lineHeight: '1.6',
+                      margin: '0',
+                    }}>
+                      {shippingAddress?.first_name} {shippingAddress?.last_name}
+                      <br />
+                      {shippingAddress?.address_1}
+                      <br />
+                      {shippingAddress?.postal_code} {shippingAddress?.city}
+                      <br />
+                      {formatCountry(shippingAddress?.country_code)}
+                    </Text>
+                  )}
                 </td>
                 <td width="50%" valign="top" style={{ paddingLeft: '10px' }}>
                   <Text style={{
@@ -511,7 +557,10 @@ export const OkOrderPlacedTemplate: React.FC<OkOrderPlacedTemplateProps> & {
                 <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#2D1B3D' }}>Dostarczono</strong>
                   <br />
-                  W ciągu 4–7 dni roboczych otrzymasz swoją książkę.
+                  {isPaczkomat
+                    ? `W ciągu 2–3 dni roboczych Twoja książka będzie czekać w wybranym Paczkomacie.`
+                    : `W ciągu 2–3 dni roboczych otrzymasz swoją książkę na podany adres.`
+                  }
                 </td>
               </tr>
             </tbody>
