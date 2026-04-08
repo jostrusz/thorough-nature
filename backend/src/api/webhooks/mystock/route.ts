@@ -388,6 +388,37 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
             }
           }
 
+          // ── PayPal tracking ──────────────────────────────────────────
+          // Send tracking info to PayPal so customer sees it in their PayPal app
+          if (newStatus === "DISPATCHED" && trackingNum && updatedMeta.paypalOrderId && !updatedMeta.tracking_sent_to_gateway?.paypal) {
+            try {
+              await sendTrackingToPayPalFromWebhook(
+                updatedMeta.paypalOrderId,
+                updatedMeta.paypalCaptureId,
+                trackingNum,
+                carrierCode,
+                orderMap.medusa_order_id,
+                req.scope
+              )
+              // Mark as sent in metadata
+              updatedMeta.tracking_sent_to_gateway = {
+                ...(updatedMeta.tracking_sent_to_gateway || {}),
+                paypal: true,
+                paypal_timestamp: new Date().toISOString(),
+              }
+              // Save updated metadata with tracking_sent flag
+              const ppPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+              await ppPool.query(
+                `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+                [JSON.stringify(updatedMeta), orderMap.medusa_order_id]
+              )
+              await ppPool.end()
+              console.log(`[mySTOCK Webhook] ✅ PayPal tracking sent for order ${orderMap.medusa_order_id}`)
+            } catch (ppErr: any) {
+              console.error(`[mySTOCK Webhook] ❌ PayPal tracking failed for order ${orderMap.medusa_order_id}:`, ppErr.message)
+            }
+          }
+
           // ── Shipment notification email ──────────────────────────────
           // After DISPATCHED status + tracking number are set, send shipment email to customer
           // Uses 5-second delay to allow both pieces of data to settle
@@ -596,4 +627,198 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     // Always return 200 to prevent mySTOCK from retrying
     res.json({ data: { id: "error" }, errors: [{ code: "PROCESSING_ERROR", message: error.message }] })
   }
+}
+
+// ═══════════════════════════════════════════
+// PAYPAL TRACKING HELPER
+// ═══════════════════════════════════════════
+
+/**
+ * Map internal carrier code to PayPal carrier enum.
+ * PayPal has country-specific carrier codes for better tracking.
+ * Falls back to generic code or "OTHER" if unknown.
+ */
+function mapCarrierToPayPal(carrier: string, countryCode?: string): { carrier: string; carrier_name_other?: string } {
+  const cc = (countryCode || "").toLowerCase()
+  const c = (carrier || "").toLowerCase()
+
+  // GLS — country-specific codes
+  if (c.includes("gls")) {
+    const glsMap: Record<string, string> = {
+      cz: "GLS_CZ", nl: "NLD_GLS", de: "GLS_DE", hu: "GLS_HUN", sk: "GLS_SLOV",
+    }
+    return { carrier: glsMap[cc] || "GLS" }
+  }
+
+  // Packeta / Zásilkovna
+  if (c.includes("packeta") || c.includes("zasilkovna") || c.includes("zásilkovna")) {
+    return { carrier: "PACKETA" }
+  }
+
+  // InPost
+  if (c.includes("inpost")) {
+    return { carrier: "INPOST_PACZKOMATY" }
+  }
+
+  // PPL (Czech)
+  if (c.includes("ppl")) {
+    return { carrier: "PPL" }
+  }
+
+  // PostNL
+  if (c.includes("postnl")) {
+    return { carrier: "NLD_POSTNL" }
+  }
+
+  // PostNord
+  if (c.includes("postnord")) {
+    return { carrier: "OTHER", carrier_name_other: "PostNord" }
+  }
+
+  // DHL — country-specific
+  if (c.includes("dhl")) {
+    const dhlMap: Record<string, string> = {
+      de: "DE_DHL", nl: "NLD_DHL", pl: "DHL_PL",
+    }
+    return { carrier: dhlMap[cc] || "DHL" }
+  }
+
+  // DPD — country-specific
+  if (c.includes("dpd")) {
+    const dpdMap: Record<string, string> = {
+      pl: "DPD_POLAND", de: "DPD_DE", nl: "DPD_NL", hu: "DPD_HGRY", sk: "DPD_SK_SFTP",
+    }
+    return { carrier: dpdMap[cc] || "DPD" }
+  }
+
+  // Česká pošta
+  if (c.includes("ceska") || c.includes("česká") || c.includes("cpost")) {
+    return { carrier: "CESKA_CZ" }
+  }
+
+  // Poczta Polska
+  if (c.includes("poczta")) {
+    return { carrier: "PL_POCZTA_POLSKA" }
+  }
+
+  // Fallback: use carrier name as-is with OTHER
+  if (carrier) {
+    return { carrier: "OTHER", carrier_name_other: carrier }
+  }
+
+  return { carrier: "OTHER", carrier_name_other: "Unknown" }
+}
+
+/**
+ * Send tracking info to PayPal for a dispatched order.
+ * If captureId is not available, fetches it from PayPal order details.
+ */
+async function sendTrackingToPayPalFromWebhook(
+  paypalOrderId: string,
+  captureId: string | undefined,
+  trackingNumber: string,
+  carrier: string,
+  medusaOrderId: string,
+  scope: any
+): Promise<void> {
+  // 1. Get PayPal credentials from gateway config or env vars
+  let clientId: string | undefined
+  let clientSecret: string | undefined
+  let mode: "live" | "test" = "test"
+
+  try {
+    const pgPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+    const { rows } = await pgPool.query(
+      `SELECT mode, live_keys, test_keys FROM gateway_config
+       WHERE provider = 'paypal' AND is_active = true AND deleted_at IS NULL
+       ORDER BY priority ASC LIMIT 1`
+    )
+    await pgPool.end()
+    if (rows[0]) {
+      const isLive = rows[0].mode === "live"
+      const keys = isLive ? rows[0].live_keys : rows[0].test_keys
+      clientId = keys?.client_id || keys?.api_key
+      clientSecret = keys?.client_secret || keys?.secret_key
+      mode = isLive ? "live" : "test"
+    }
+  } catch (e: any) {
+    console.warn(`[PayPal Tracking] DB query failed: ${e.message}`)
+  }
+
+  if (!clientId) clientId = process.env.PAYPAL_CLIENT_ID
+  if (!clientSecret) clientSecret = process.env.PAYPAL_CLIENT_SECRET
+  if (process.env.PAYPAL_MODE === "live") mode = "live"
+
+  if (!clientId || !clientSecret) {
+    console.warn(`[PayPal Tracking] No credentials configured, skipping tracking for ${medusaOrderId}`)
+    return
+  }
+
+  // 2. Create PayPal client
+  const { PayPalApiClient } = await import("../../../modules/payment-paypal/api-client")
+  const client = new PayPalApiClient({ client_id: clientId, client_secret: clientSecret, mode })
+
+  // 3. Get capture_id — from metadata or by fetching from PayPal
+  let resolvedCaptureId = captureId
+  if (!resolvedCaptureId) {
+    console.log(`[PayPal Tracking] No captureId in metadata, fetching from PayPal order ${paypalOrderId}`)
+    try {
+      const orderDetails = await client.getOrder(paypalOrderId)
+      resolvedCaptureId = orderDetails.purchase_units?.[0]?.payments?.captures?.[0]?.id
+      if (resolvedCaptureId) {
+        console.log(`[PayPal Tracking] Found captureId: ${resolvedCaptureId}`)
+        // Save it to metadata for future use
+        const savePool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+        await savePool.query(
+          `UPDATE "order" SET metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{paypalCaptureId}', $1::jsonb), updated_at = NOW() WHERE id = $2`,
+          [JSON.stringify(resolvedCaptureId), medusaOrderId]
+        )
+        await savePool.end()
+      }
+    } catch (fetchErr: any) {
+      console.error(`[PayPal Tracking] Failed to fetch order: ${fetchErr.message}`)
+    }
+  }
+
+  if (!resolvedCaptureId) {
+    console.warn(`[PayPal Tracking] No capture_id found for PayPal order ${paypalOrderId} — payment may not be captured yet. Skipping tracking.`)
+    return
+  }
+
+  // 4. Get country code for carrier mapping
+  let countryCode = ""
+  try {
+    const addrPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+    const addrResult = await addrPool.query(
+      `SELECT oa.country_code FROM order_address oa
+       JOIN "order" o ON o.shipping_address_id = oa.id
+       WHERE o.id = $1 LIMIT 1`,
+      [medusaOrderId]
+    )
+    await addrPool.end()
+    countryCode = addrResult.rows[0]?.country_code || ""
+  } catch { /* ok */ }
+
+  // 5. Map carrier to PayPal enum
+  const paypalCarrier = mapCarrierToPayPal(carrier, countryCode)
+
+  // 6. Send tracking to PayPal
+  console.log(`[PayPal Tracking] Sending tracking to PayPal: order=${paypalOrderId} capture=${resolvedCaptureId} tracking=${trackingNumber} carrier=${paypalCarrier.carrier}`)
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  }
+
+  // Use the client's addTracking, but we need carrier_name_other support
+  // The existing addTracking doesn't support carrier_name_other, so we call the API directly
+  // Actually let me check... the existing method just sends carrier uppercase.
+  // For "OTHER" carrier, we need to also send carrier_name_other.
+  await client.addTracking(
+    paypalOrderId,
+    resolvedCaptureId,
+    trackingNumber,
+    paypalCarrier.carrier,
+    true,
+    paypalCarrier.carrier_name_other
+  )
 }

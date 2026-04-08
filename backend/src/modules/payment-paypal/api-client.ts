@@ -313,17 +313,22 @@ export class PayPalApiClient {
     captureId: string,
     trackingNumber: string,
     carrier: string,
-    notifyPayer: boolean = true
+    notifyPayer: boolean = true,
+    carrierNameOther?: string
   ): Promise<any> {
     const headers = await this.authHeaders()
+    const body: any = {
+      tracking_number: trackingNumber,
+      carrier: carrier.toUpperCase(),
+      capture_id: captureId,
+      notify_payer: notifyPayer,
+    }
+    if (carrier.toUpperCase() === "OTHER" && carrierNameOther) {
+      body.carrier_name_other = carrierNameOther
+    }
     const response = await this.httpClient.post(
       `/v2/checkout/orders/${orderId}/track`,
-      {
-        tracking_number: trackingNumber,
-        carrier: carrier.toUpperCase(),
-        capture_id: captureId,
-        notify_payer: notifyPayer,
-      },
+      body,
       { headers }
     )
     return response.data

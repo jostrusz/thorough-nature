@@ -685,11 +685,23 @@ async function sendTrackingToPayPal(
     )
   }
 
+  // Get country code for better carrier mapping
+  let countryCode = ""
+  try {
+    const orderModuleService = container.resolve("order") as any
+    const orderForAddr = await orderModuleService.retrieveOrder(order.id, { relations: ["shipping_address"] })
+    let shipAddr: any = orderForAddr?.shipping_address
+    try {
+      if (shipAddr?.id) shipAddr = await (orderModuleService as any).orderAddressService_.retrieve(shipAddr.id)
+    } catch {}
+    countryCode = shipAddr?.country_code || ""
+  } catch {}
+
   await client.addTracking(
     paypalOrderId,
     captureId,
     trackingNumber,
-    normalizePayPalCarrier(trackingCarrier),
+    normalizePayPalCarrier(trackingCarrier, countryCode),
     true
   )
 
@@ -792,20 +804,33 @@ async function sendTrackingToKlarna(
 }
 
 // ─── Carrier Normalization ─────────────────────────────────────────────
-function normalizePayPalCarrier(carrier: string): string {
-  const carrierMap: Record<string, string> = {
-    dhl: "DHL",
-    "dhl-parcel": "DHL",
-    dpd: "DPD",
-    fedex: "FEDEX",
-    ups: "UPS",
-    usps: "USPS",
-    dpe: "DPE",
-    postnl: "TNT",
-    gls: "GLS",
-    other: "OTHER",
+function normalizePayPalCarrier(carrier: string, countryCode?: string): string {
+  const c = (carrier || "").toLowerCase()
+  const cc = (countryCode || "").toLowerCase()
+
+  if (c.includes("gls")) {
+    const glsMap: Record<string, string> = { cz: "GLS_CZ", nl: "NLD_GLS", de: "GLS_DE", hu: "GLS_HUN", sk: "GLS_SLOV" }
+    return glsMap[cc] || "GLS"
   }
-  return carrierMap[carrier.toLowerCase()] || "OTHER"
+  if (c.includes("packeta") || c.includes("zasilkovna")) return "PACKETA"
+  if (c.includes("inpost")) return "INPOST_PACZKOMATY"
+  if (c.includes("ppl")) return "PPL"
+  if (c.includes("postnl")) return "NLD_POSTNL"
+  if (c.includes("dhl")) {
+    const dhlMap: Record<string, string> = { de: "DE_DHL", nl: "NLD_DHL", pl: "DHL_PL" }
+    return dhlMap[cc] || "DHL"
+  }
+  if (c.includes("dpd")) {
+    const dpdMap: Record<string, string> = { pl: "DPD_POLAND", de: "DPD_DE", nl: "DPD_NL", hu: "DPD_HGRY" }
+    return dpdMap[cc] || "DPD"
+  }
+  if (c.includes("ceska") || c.includes("cpost")) return "CESKA_CZ"
+  if (c.includes("poczta")) return "PL_POCZTA_POLSKA"
+
+  const fallbackMap: Record<string, string> = {
+    fedex: "FEDEX", ups: "UPS", usps: "USPS",
+  }
+  return fallbackMap[c] || "OTHER"
 }
 
 function normalizeMollieCarrier(carrier: string): string {
