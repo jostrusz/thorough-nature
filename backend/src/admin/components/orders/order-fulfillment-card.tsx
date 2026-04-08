@@ -566,6 +566,7 @@ export function OrderFulfillmentCard({
       {/* Action buttons — premium row (hidden when already dispatched via Dextrum or fulfilled via Medusa) */}
       {!hasFulfillments && !isDispatched && (
         <div
+          className="od-action-row"
           style={{
             display: "flex",
             justifyContent: "flex-end",
@@ -605,6 +606,7 @@ export function OrderFulfillmentCard({
 
       {/* Invoice & ebook action buttons — premium row */}
       <div
+        className="od-action-row"
         style={{
           display: "flex",
           justifyContent: "flex-end",

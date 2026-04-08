@@ -351,11 +351,12 @@ function OrderDetailStyles() {
       /* Action button rows on mobile */
       @media (max-width: 640px) {
         /* Fulfillment card action buttons stack vertically */
-        .od-card > div:last-child {
+        .od-action-row {
           flex-direction: column !important;
+          align-items: stretch !important;
         }
-        .od-card > div:last-child > button,
-        .od-card > div:last-child > div > button {
+        .od-action-row > button,
+        .od-action-row > div > button {
           width: 100% !important;
           justify-content: center !important;
         }
