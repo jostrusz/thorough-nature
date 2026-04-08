@@ -88,6 +88,13 @@ export const btnPrimary: React.CSSProperties = {
 
 const ICON_BASE = "https://raw.githubusercontent.com/datatrans/payment-logos/master/assets"
 
+// Custom SVG badges for payment methods not available in datatrans repo
+const BLIK_SVG = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 28"><rect width="48" height="28" rx="4" fill="%23000"/><text x="24" y="18.5" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="0.5">BLIK</text></svg>')}`
+const PAYU_SVG = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 28"><rect width="48" height="28" rx="4" fill="%23A6C307"/><text x="24" y="18.5" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">PayU</text></svg>')}`
+const P24_SVG = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 28"><rect width="48" height="28" rx="4" fill="%23D13239"/><text x="24" y="18.5" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="bold" fill="white" text-anchor="middle">P24</text></svg>')}`
+const TRUSTLY_SVG = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 28"><rect width="48" height="28" rx="4" fill="%230EE06E"/><text x="24" y="18.5" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle">Trustly</text></svg>')}`
+const BANK_CZ_SVG = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 28"><rect width="48" height="28" rx="4" fill="%232563EB"/><text x="24" y="18.5" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle">BANK</text></svg>')}`
+
 // Robust payment detection — prefers non-canceled payment collections after order edits
 function findPrimaryPayment(order: any): { providerId: string; method: string; data: any } {
   const pcs = order.payment_collections || []
@@ -145,6 +152,10 @@ export function getPaymentIconUrl(order: any): string {
 
   // Stripe — map method to specific icon
   if (providerId.includes("stripe")) {
+    const m = (method || "").toLowerCase()
+    if (m === "blik") return BLIK_SVG
+    if (m === "przelewy24") return P24_SVG
+
     const map: Record<string, string> = {
       card: "cards/visa.svg",
       creditcard: "cards/visa.svg",
@@ -154,49 +165,72 @@ export function getPaymentIconUrl(order: any): string {
       eps: "apm/eps.svg",
       p24: "apm/przelewy24.svg",
       sepa_debit: "apm/sepa.svg",
+      sofort: "apm/sofort.svg",
       applepay: "wallets/apple-pay.svg",
       googlepay: "wallets/google-pay.svg",
       revolut_pay: "apm/revolut.svg",
+      paypal: "apm/paypal.svg",
     }
-    return `${ICON_BASE}/${map[method] || "cards/visa.svg"}`
+    return `${ICON_BASE}/${map[m] || "cards/visa.svg"}`
   }
 
   // Airwallex — map method to specific icon
   if (providerId.includes("airwallex")) {
+    // Methods that use custom SVGs (not in datatrans repo)
+    const m = (method || "").toLowerCase()
+    if (m === "blik") return BLIK_SVG
+    if (m === "przelewy24" || m === "p24") return P24_SVG
+    if (m === "payu") return PAYU_SVG
+    if (m === "trustly") return TRUSTLY_SVG
+
     const map: Record<string, string> = {
       card: "cards/visa.svg",
       creditcard: "cards/visa.svg",
       ideal: "apm/ideal.svg",
       bancontact: "apm/bancontact.svg",
+      eps: "apm/eps.svg",
+      klarna: "apm/klarna.svg",
+      paypal: "apm/paypal.svg",
       applepay: "wallets/apple-pay.svg",
       googlepay: "wallets/google-pay.svg",
+      sofort: "apm/sofort.svg",
     }
-    return `${ICON_BASE}/${map[method] || "cards/visa.svg"}`
+    return `${ICON_BASE}/${map[m] || "cards/visa.svg"}`
   }
 
   // Mollie — map method to specific icon
   if (providerId.includes("mollie")) {
+    const m = (method || "").toLowerCase()
+    if (m === "blik") return BLIK_SVG
+    if (m === "przelewy24" || m === "p24") return P24_SVG
+
     const map: Record<string, string> = {
       ideal: "apm/ideal.svg",
       bancontact: "apm/bancontact.svg",
       creditcard: "cards/visa.svg",
+      card: "cards/visa.svg",
+      eps: "apm/eps.svg",
+      klarna: "apm/klarna.svg",
+      sofort: "apm/sofort.svg",
       applepay: "wallets/apple-pay.svg",
       googlepay: "wallets/google-pay.svg",
+      paypal: "apm/paypal.svg",
     }
-    return `${ICON_BASE}/${map[method] || "apm/ideal.svg"}`
+    return `${ICON_BASE}/${map[m] || "apm/ideal.svg"}`
   }
 
   // Comgate — map method to specific icon
   if (providerId.includes("comgate")) {
-    // Check method against known patterns for icon selection
     const m = method || data?.comgate_method || ""
     if (m.includes("CARD") || m === "creditcard" || m === "card") return `${ICON_BASE}/cards/visa.svg`
     if (m.includes("APPLEPAY") || m === "applepay") return `${ICON_BASE}/wallets/apple-pay.svg`
     if (m.includes("GPAY") || m.includes("GOOGLEPAY") || m === "googlepay") return `${ICON_BASE}/wallets/google-pay.svg`
-    if (m.includes("BANK") || m === "bank_transfer") return `${ICON_BASE}/apm/sepa.svg`
-    if (m.includes("LATER") || m.includes("PART") || m.includes("LOAN")) return `${ICON_BASE}/apm/klarna.svg`
-    // Default: bank transfer icon for Comgate
-    return `${ICON_BASE}/apm/sepa.svg`
+    if (m.includes("BANK")) return BANK_CZ_SVG
+    if (m === "bank_transfer") return BANK_CZ_SVG
+    if (m.includes("LATER") || m.includes("PART") || m.includes("LOAN") || m.includes("SKIPPAY") || m.includes("PLATIMPAK")) return `${ICON_BASE}/apm/klarna.svg`
+    if (m.includes("TWISTO")) return `${ICON_BASE}/apm/klarna.svg`
+    // Default: bank icon for Comgate
+    return BANK_CZ_SVG
   }
 
   // Przelewy24
@@ -289,6 +323,15 @@ export function getPaymentMethodName(order: any): string {
       creditcard: "Credit Card",
       ideal: "iDEAL",
       bancontact: "Bancontact",
+      blik: "BLIK",
+      przelewy24: "Przelewy24",
+      p24: "Przelewy24",
+      payu: "PayU",
+      eps: "EPS",
+      klarna: "Klarna",
+      paypal: "PayPal",
+      trustly: "Trustly",
+      sofort: "Sofort",
       applepay: "Apple Pay",
       googlepay: "Google Pay",
     }
