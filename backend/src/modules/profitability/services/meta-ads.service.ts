@@ -40,36 +40,48 @@ export async function getAdAccounts(accessToken: string): Promise<MetaAdAccount[
 
 /**
  * Fetch ad spend for a specific ad account within a date range
- * Returns spend in the account's currency (usually matches EUR for our accounts)
+ * Returns spend amount and the account's currency code
  */
 export async function getAccountSpend(
   accessToken: string,
   adAccountId: string,
   dateFrom: string,
   dateTo: string
-): Promise<number> {
+): Promise<{ spend: number; currency: string }> {
+  // Fetch spend + account currency in parallel
   const timeRange = JSON.stringify({ since: dateFrom, until: dateTo })
-  const url = `${META_API_BASE}/${adAccountId}/insights?fields=spend&time_range=${encodeURIComponent(timeRange)}&level=account&access_token=${encodeURIComponent(accessToken)}`
+  const insightsUrl = `${META_API_BASE}/${adAccountId}/insights?fields=spend&time_range=${encodeURIComponent(timeRange)}&level=account&access_token=${encodeURIComponent(accessToken)}`
+  const accountUrl = `${META_API_BASE}/${adAccountId}?fields=currency&access_token=${encodeURIComponent(accessToken)}`
 
-  const response = await fetch(url)
-  if (!response.ok) {
-    const errorData = await response.json()
-    // Handle rate limiting
-    if (response.status === 429) {
+  const [insightsRes, accountRes] = await Promise.all([
+    fetch(insightsUrl),
+    fetch(accountUrl),
+  ])
+
+  if (!insightsRes.ok) {
+    const errorData = await insightsRes.json()
+    if (insightsRes.status === 429) {
       throw new Error("Meta Ads API rate limit reached. Will retry next cycle.")
     }
-    throw new Error(errorData?.error?.message || `Meta API error: ${response.status}`)
+    throw new Error(errorData?.error?.message || `Meta API error: ${insightsRes.status}`)
   }
 
-  const data = await response.json()
-  const insights = data.data || []
+  const insightsData = await insightsRes.json()
+  const insights = insightsData.data || []
+  const spend = insights.reduce((total: number, row: any) => total + parseFloat(row.spend || "0"), 0)
 
-  if (insights.length === 0) {
-    return 0
+  // Get account currency (default to EUR if fetch fails)
+  let currency = "EUR"
+  try {
+    if (accountRes.ok) {
+      const accountData = await accountRes.json()
+      currency = accountData.currency || "EUR"
+    }
+  } catch {
+    // fallback to EUR
   }
 
-  // Sum spend across all returned insight rows
-  return insights.reduce((total: number, row: any) => total + parseFloat(row.spend || "0"), 0)
+  return { spend, currency }
 }
 
 /**

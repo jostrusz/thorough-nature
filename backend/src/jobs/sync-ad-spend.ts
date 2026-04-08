@@ -106,16 +106,18 @@ export async function syncProjectDay({
   const dayStart = new Date(new Date(`${date}T00:00:00.000Z`).getTime() - offsetMs).toISOString()
   const dayEnd = new Date(new Date(`${date}T23:59:59.999Z`).getTime() - offsetMs).toISOString()
 
-  // Fetch ad spend from Meta Ads API
+  // Fetch ad spend from Meta Ads API (returns spend in ad account's native currency)
   let adSpend = 0
   if (hasValidToken && p.meta_ad_account_id) {
     try {
-      adSpend = await getAccountSpend(
+      const spendResult = await getAccountSpend(
         metaConfig.access_token,
         p.meta_ad_account_id,
         date,
         date
       )
+      // Convert ad spend from account currency to EUR
+      adSpend = toEur(spendResult.spend, spendResult.currency)
     } catch (err: any) {
       logger.warn(`[SyncAdSpend] Failed to fetch ad spend for ${p.project_slug} (${date}): ${err.message}`)
 
