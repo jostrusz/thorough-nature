@@ -63,10 +63,20 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       })
     }
 
+    // Normalize HTML: convert plain \n to <br> for proper formatting
+    let normalizedHtml = (body_html || "").trim()
+    normalizedHtml = normalizedHtml.replace(/<div><br\s*\/?><\/div>/gi, '</p><p style="margin:0 0 12px 0;">&nbsp;</p><p style="margin:0 0 12px 0;">')
+    normalizedHtml = normalizedHtml.replace(/<div>(.*?)<\/div>/gi, '<p style="margin:0 0 12px 0;">$1</p>')
+    normalizedHtml = normalizedHtml.replace(/(<br\s*\/?>){2,}/gi, '</p><p style="margin:0 0 12px 0;">')
+    normalizedHtml = normalizedHtml.replace(/\n/g, '<br>')
+    if (!normalizedHtml.startsWith('<p')) {
+      normalizedHtml = `<p style="margin:0 0 12px 0;">${normalizedHtml}</p>`
+    }
+
     // Build the email HTML
     const fullEmailHtml = `
-      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        ${body_html}
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.6;color:#1a1a1a;">
+        ${normalizedHtml}
       </div>
     `
 
@@ -123,7 +133,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       direction: "outbound",
       from_email: config.email_address,
       from_name: config.display_name,
-      body_html,
+      body_html: normalizedHtml,
       body_text: body_text || null,
       resend_message_id: resendResponse.data.id,
       delivery_status: "sent",

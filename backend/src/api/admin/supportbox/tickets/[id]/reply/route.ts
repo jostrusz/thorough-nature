@@ -48,6 +48,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     replyHtml = replyHtml.replace(/<div>(.*?)<\/div>/gi, '<p style="margin:0 0 12px 0;">$1</p>')
     // Convert double <br> to paragraph break
     replyHtml = replyHtml.replace(/(<br\s*\/?>){2,}/gi, '</p><p style="margin:0 0 12px 0;">')
+    // Convert plain \n newlines to <br> (handles AI-generated or pasted text)
+    replyHtml = replyHtml.replace(/\n/g, '<br>')
     // Wrap in opening <p> if not already wrapped
     if (!replyHtml.startsWith('<p')) {
       replyHtml = `<p style="margin:0 0 12px 0;">${replyHtml}</p>`
