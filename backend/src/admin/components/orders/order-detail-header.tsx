@@ -127,7 +127,10 @@ export function OrderDetailHeader({
     <div style={{ marginBottom: "24px" }}>
       {/* Breadcrumb */}
       <button
-        onClick={() => navigate("/custom-orders")}
+        onClick={() => {
+          // Navigate back — list page will restore state from sessionStorage
+          navigate("/custom-orders")
+        }}
         className="od-btn"
         style={{
           display: "inline-flex",

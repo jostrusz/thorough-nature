@@ -435,15 +435,36 @@ const CustomOrdersPage = () => {
   useFullPageBackground(pageRef)
 
   // State
-  const [activeTab, setActiveTab] = useState("all")
-  const [searchValue, setSearchValue] = useState("")
+  // Restore list state from sessionStorage (when returning from order detail)
+  const savedState = useMemo(() => {
+    try {
+      const raw = sessionStorage.getItem("ordersHQ_listState")
+      if (raw) {
+        sessionStorage.removeItem("ordersHQ_listState")
+        return JSON.parse(raw)
+      }
+    } catch {}
+    return null
+  }, [])
+
+  const [activeTab, setActiveTab] = useState(savedState?.activeTab || "all")
+  const [searchValue, setSearchValue] = useState(savedState?.searchValue || "")
   const debouncedSearch = useDebounce(searchValue, 400)
-  const [page, setPage] = useState(0)
-  const [sortField, setSortField] = useState("created_at")
-  const [sortDir, setSortDir] = useState("DESC")
+  const [page, setPage] = useState(savedState?.page || 0)
+  const [sortField, setSortField] = useState(savedState?.sortField || "created_at")
+  const [sortDir, setSortDir] = useState(savedState?.sortDir || "DESC")
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set())
   const [showExportModal, setShowExportModal] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
+
+  // Save current list state to sessionStorage (called before navigating to order detail)
+  const saveListState = useCallback(() => {
+    try {
+      sessionStorage.setItem("ordersHQ_listState", JSON.stringify({
+        activeTab, page, sortField, sortDir, searchValue,
+      }))
+    } catch {}
+  }, [activeTab, page, sortField, sortDir, searchValue])
 
   // New order celebration state
   const [celebrationOrder, setCelebrationOrder] = useState<any>(null)
@@ -733,6 +754,7 @@ const CustomOrdersPage = () => {
           sortField={sortField}
           sortDir={sortDir}
           onSort={handleSort}
+          onBeforeNavigate={saveListState}
         />
 
         {/* Pagination */}

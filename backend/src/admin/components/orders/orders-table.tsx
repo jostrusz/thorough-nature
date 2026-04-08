@@ -17,6 +17,7 @@ interface OrdersTableProps {
   sortField: string
   sortDir: string
   onSort: (field: string) => void
+  onBeforeNavigate?: () => void
 }
 
 // ═══════════════════════════════════════════
@@ -255,9 +256,20 @@ export function OrdersTable({
   sortField,
   sortDir,
   onSort,
+  onBeforeNavigate,
 }: OrdersTableProps) {
   const navigate = useNavigate()
   const updateMetadata = useUpdateMetadata()
+
+  const handleOrderClick = (e: React.MouseEvent, orderId: string) => {
+    onBeforeNavigate?.()
+    const url = `/custom-orders/${orderId}`
+    if (e.metaKey || e.ctrlKey) {
+      window.open(url, "_blank")
+    } else {
+      navigate(url)
+    }
+  }
 
   const allSelected = orders.length > 0 && orders.every((o) => selectedOrders.has(o.id))
   const someSelected = orders.some((o) => selectedOrders.has(o.id))
@@ -395,7 +407,7 @@ export function OrdersTable({
         return (
           <div
             key={order.id}
-            onClick={() => navigate(`/custom-orders/${order.id}`)}
+            onClick={(e: React.MouseEvent) => handleOrderClick(e, order.id)}
             style={{
               padding: "14px 16px",
               borderBottom: `1px solid ${colors.border}`,
@@ -512,7 +524,7 @@ export function OrdersTable({
                   background: isSelected ? "rgba(108,92,231,0.05)" : "transparent",
                   cursor: "pointer",
                 }}
-                onClick={() => navigate(`/custom-orders/${order.id}`)}
+                onClick={(e: React.MouseEvent) => handleOrderClick(e, order.id)}
               >
                 {/* 1. Checkbox */}
                 <td
