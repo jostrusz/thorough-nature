@@ -96,6 +96,10 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
             carrier: order.metadata?.dextrum_carrier || null,
             payment_provider: order.metadata?.payment_provider || null,
             payment_id: order.metadata?.payment_id_override || order.metadata?.stripePaymentIntentId || order.metadata?.molliePaymentId || order.metadata?.airwallexPaymentIntentId || order.metadata?.paypalOrderId || order.metadata?.comgateTransId || null,
+            shipping_method: order.metadata?.shipping_method || null,
+            paczkomat_name: order.metadata?.paczkomat_name || order.metadata?.packeta_point_name || null,
+            paczkomat_address: order.metadata?.paczkomat_address || order.metadata?.packeta_point_address || null,
+            paczkomat_id: order.metadata?.paczkomat_id || order.metadata?.packeta_point_id || null,
             fulfillments: (order.fulfillments || []).map((f: any) => ({
               id: f.id,
               created_at: f.created_at,

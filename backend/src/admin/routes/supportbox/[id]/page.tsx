@@ -326,23 +326,47 @@ function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] 
           {customer?.created_at && <Row k="Customer since" v={f.date(customer.created_at)} />}
         </Section>
 
-        {/* Address */}
-        {addr && (
-          <Section label="Shipping address">
-            <div style={{ fontSize: "13px", color: D.text, lineHeight: 1.6 }}>
-              {[addr.first_name, addr.last_name].filter(Boolean).join(" ") && (
-                <div style={{ fontWeight: 600 }}>{[addr.first_name, addr.last_name].filter(Boolean).join(" ")}</div>
+        {/* Address + Pickup point */}
+        {(() => {
+          const firstOrder = allOrders[0]
+          const isPickup = firstOrder?.shipping_method === "zasilkovna_pickup" || !!firstOrder?.paczkomat_name
+          const pickupName = firstOrder?.paczkomat_name || ""
+          const pickupAddr = firstOrder?.paczkomat_address || ""
+          const pickupId = firstOrder?.paczkomat_id || ""
+
+          return (
+            <>
+              {/* Pickup point (Paczkomat / Zásilkovna) */}
+              {isPickup && pickupName && (
+                <Section label="Pickup point">
+                  <div style={{ fontSize: "13px", color: D.text, lineHeight: 1.6 }}>
+                    <div style={{ fontWeight: 600 }}>{pickupName}</div>
+                    {pickupAddr && <div style={{ color: D.textSec }}>{pickupAddr}</div>}
+                    {pickupId && <div style={{ color: D.textMuted, fontSize: "12px", marginTop: "2px" }}>ID: {pickupId}</div>}
+                  </div>
+                </Section>
               )}
-              {addr.company && <div>{addr.company}</div>}
-              {addr.address_1 && <div>{addr.address_1}</div>}
-              {addr.address_2 && <div>{addr.address_2}</div>}
-              <div>{[addr.postal_code, addr.city].filter(Boolean).join(" ")}</div>
-              {addr.province && <div>{addr.province}</div>}
-              {addr.country_code && <div>{addr.country_code.toUpperCase()}</div>}
-              {addr.phone && <div style={{ color: D.textSec, marginTop: "4px", fontSize: "12px" }}>Tel: {addr.phone}</div>}
-            </div>
-          </Section>
-        )}
+
+              {/* Shipping / delivery address */}
+              {addr && (
+                <Section label={isPickup ? "Customer address" : "Shipping address"}>
+                  <div style={{ fontSize: "13px", color: D.text, lineHeight: 1.6 }}>
+                    {[addr.first_name, addr.last_name].filter(Boolean).join(" ") && (
+                      <div style={{ fontWeight: 600 }}>{[addr.first_name, addr.last_name].filter(Boolean).join(" ")}</div>
+                    )}
+                    {addr.company && <div>{addr.company}</div>}
+                    {addr.address_1 && <div>{addr.address_1}</div>}
+                    {addr.address_2 && <div>{addr.address_2}</div>}
+                    <div>{[addr.postal_code, addr.city].filter(Boolean).join(" ")}</div>
+                    {addr.province && <div>{addr.province}</div>}
+                    {addr.country_code && <div>{addr.country_code.toUpperCase()}</div>}
+                    {addr.phone && <div style={{ color: D.textSec, marginTop: "4px", fontSize: "12px" }}>Tel: {addr.phone}</div>}
+                  </div>
+                </Section>
+              )}
+            </>
+          )
+        })()}
 
         {/* Orders */}
         {allOrders.map((order: any, idx: number) => (
