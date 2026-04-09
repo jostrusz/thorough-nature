@@ -113,11 +113,12 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
     (sum: number, item: any) => sum + (item.unit_price || 0) * (item.quantity || 1),
     0
   )
-  const shippingTotal = order.summary?.raw_shipping_total?.value ?? order.summary?.shipping_total ?? 0
-  const taxTotal = order.summary?.raw_tax_total?.value ?? order.summary?.tax_total ?? 0
+  // Use non-raw summary values (major units like 550 Kč), NOT raw values (minor units like 55000 haléřů)
+  const shippingTotal = order.summary?.shipping_total ?? 0
+  const taxTotal = order.summary?.tax_total ?? 0
   const codFee = Number(order.metadata?.cod_fee) || 0
   const shippingFee = Number(order.metadata?.shipping_fee) || 0
-  const total = (order.summary?.raw_current_order_total?.value ?? order.summary?.current_order_total ?? subtotal + shippingTotal) + codFee + shippingFee
+  const total = (order.summary?.current_order_total ?? subtotal + shippingTotal) + codFee + shippingFee
 
   const invoiceAddress = billingAddress || shippingAddress
 
