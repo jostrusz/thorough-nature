@@ -444,6 +444,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
               orderId={order.id}
               updateMetadata={updateMetadata}
               placeholder="Name of pickup point"
+              mono
             />
             <EditableField
               label="Pickup Point Address"
@@ -452,6 +453,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
               orderId={order.id}
               updateMetadata={updateMetadata}
               placeholder="Full address"
+              mono
             />
           </>
         )
