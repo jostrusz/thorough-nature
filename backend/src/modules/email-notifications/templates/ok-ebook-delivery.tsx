@@ -148,7 +148,7 @@ export const OkEbookDeliveryTemplate: React.FC<OkEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              📦 Twoja fizyczna książka jest w drodze i zostanie dostarczona w ciągu <strong>4–7 dni roboczych</strong>. Osobno otrzymasz numer śledzenia przesyłki.
+              📦 Twoja fizyczna książka jest w drodze i zostanie dostarczona w ciągu <strong>2–3 dni roboczych</strong>. Osobno otrzymasz numer śledzenia przesyłki.
             </Text>
           </div>
 
