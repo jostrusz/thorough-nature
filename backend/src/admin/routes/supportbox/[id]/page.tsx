@@ -252,12 +252,12 @@ function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] 
   const isUnknown = !custLoading && !customer && allOrders.length === 0
 
   return (
-    <div style={{
+    <div className="sb-customer-card" style={{
       backgroundColor: D.card, borderRadius: D.r16, border: `1px solid ${D.border}`,
       boxShadow: D.sm, overflow: "hidden",
     }}>
       {/* Profile header */}
-      <div style={{ padding: "24px 24px 20px" }}>
+      <div className="sb-customer-header" style={{ padding: "24px 24px 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: isUnknown ? "0" : "20px" }}>
           <div style={{
             width: "44px", height: "44px", borderRadius: "50%",
@@ -304,13 +304,13 @@ function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] 
 
         {/* Stats strip — only show when we have data */}
         {!isUnknown && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-            <div style={{ textAlign: "center", padding: "12px 8px", borderRadius: D.r12, backgroundColor: D.brandLight }}>
-              <div style={{ fontSize: "20px", fontWeight: 800, color: D.brand, lineHeight: 1 }}>{allOrders.length}</div>
+          <div className="sb-stats-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+            <div className="sb-stats-cell" style={{ textAlign: "center", padding: "12px 8px", borderRadius: D.r12, backgroundColor: D.brandLight }}>
+              <div className="sb-stats-value" style={{ fontSize: "20px", fontWeight: 800, color: D.brand, lineHeight: 1 }}>{allOrders.length}</div>
               <div style={{ fontSize: "10px", fontWeight: 600, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "4px" }}>orders</div>
             </div>
-            <div style={{ textAlign: "center", padding: "12px 8px", borderRadius: D.r12, backgroundColor: D.greenLight }}>
-              <div style={{ fontSize: "20px", fontWeight: 800, color: D.green, lineHeight: 1 }}>{f.money(spent, curr)}</div>
+            <div className="sb-stats-cell" style={{ textAlign: "center", padding: "12px 8px", borderRadius: D.r12, backgroundColor: D.greenLight }}>
+              <div className="sb-stats-value" style={{ fontSize: "20px", fontWeight: 800, color: D.green, lineHeight: 1 }}>{f.money(spent, curr)}</div>
               <div style={{ fontSize: "10px", fontWeight: 600, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "4px" }}>total spent</div>
             </div>
           </div>
@@ -318,7 +318,7 @@ function CustomerSidebar({ ticket, allOrders }: { ticket: any; allOrders: any[] 
       </div>
 
       {/* Detail sections */}
-      <div style={{ padding: "0 24px 8px" }}>
+      <div className="sb-customer-sections" style={{ padding: "0 24px 8px" }}>
         {/* Contact */}
         <Section label="Contact details">
           <Row k="Email" v={email} />
@@ -576,7 +576,7 @@ function MessageBubble({ msg }: { msg: any }) {
       }}
     >
       {/* Sender + Timestamp header */}
-      <div style={{
+      <div className="sb-msg-header" style={{
         display: "flex", alignItems: "center", gap: "8px",
         marginBottom: "6px", paddingLeft: inb ? "2px" : 0, paddingRight: inb ? 0 : "2px",
       }}>
@@ -589,11 +589,11 @@ function MessageBubble({ msg }: { msg: any }) {
         }}>
           {inb ? "📩" : "📤"}
         </span>
-        <span style={{ fontSize: "12px", fontWeight: 700, color: inb ? D.blue : D.green }}>
+        <span className="sb-msg-header-name" style={{ fontSize: "12px", fontWeight: 700, color: inb ? D.blue : D.green }}>
           {senderLabel}
         </span>
         <span style={{ fontSize: "11px", color: D.textMuted }}>•</span>
-        <span style={{ fontSize: "11px", color: D.textMuted }}>
+        <span className="sb-msg-header-time" style={{ fontSize: "11px", color: D.textMuted }}>
           {f.dt(msg.created_at)}
         </span>
         {!inb && msg.delivery_status && (
@@ -602,7 +602,7 @@ function MessageBubble({ msg }: { msg: any }) {
       </div>
 
       {/* Bubble */}
-      <div style={{
+      <div className={`sb-msg-bubble ${inb ? "" : "sb-msg-bubble-out"}`} style={{
         width: "90%",
         maxWidth: "100%",
         overflow: "hidden",
@@ -725,6 +725,7 @@ function AttachmentChip({ file, onRemove, content }: { file: { name: string; siz
   return (
     <div
       onClick={content ? handleDownload : undefined}
+      className="sb-attach-chip"
       style={{
         display: "inline-flex", alignItems: "center", gap: "8px",
         padding: "6px 12px", borderRadius: "10px",
@@ -835,7 +836,7 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, edito
       />
 
       {/* Toolbar */}
-      <div style={{
+      <div className="sb-composer-toolbar" style={{
         display: "flex", alignItems: "center", gap: "4px",
         padding: "8px 24px", borderBottom: `1px solid ${D.borderSubtle}`,
         backgroundColor: D.inset,
@@ -859,7 +860,7 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, edito
       </div>
 
       {/* Editor area */}
-      <div style={{ padding: "20px 24px 12px" }}>
+      <div className="sb-composer-editor" style={{ padding: "20px 24px 12px" }}>
         <div
           ref={ref}
           className="sb-editor"
@@ -894,7 +895,7 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, edito
       </div>
 
       {/* Action bar */}
-      <div style={{
+      <div className="sb-composer-actions" style={{
         display: "flex", justifyContent: "space-between", alignItems: "center",
         padding: "12px 24px", borderTop: `1px solid ${D.borderSubtle}`,
         backgroundColor: D.inset,
@@ -948,7 +949,7 @@ function OrderContextCard({ orders }: { orders: any[] }) {
       overflow: "hidden",
     }}>
       {/* Header */}
-      <div style={{
+      <div className="sb-order-ctx-header" style={{
         padding: "14px 20px",
         borderBottom: `1px solid ${D.borderSubtle}`,
         display: "flex", alignItems: "center", gap: "10px",
@@ -1037,12 +1038,13 @@ function OrderContextCard({ orders }: { orders: any[] }) {
             {/* Order toggle header */}
             <button
               onClick={() => setExpanded(isOpen ? null : order.order_id)}
+              className="sb-order-ctx-toggle"
               style={{
                 width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
                 padding: "12px 20px", border: "none", background: "none", cursor: "pointer",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
                 <span style={{ fontSize: "13px", fontWeight: 700, color: D.text }}>
                   Order #{order.display_id}
                 </span>
@@ -1067,7 +1069,7 @@ function OrderContextCard({ orders }: { orders: any[] }) {
                   </Pill>
                 )}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div className="sb-order-ctx-toggle-right" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <span style={{ fontSize: "14px", fontWeight: 700, color: D.text }}>
                   {f.money(order.total, order.currency_code)}
                 </span>
@@ -1079,8 +1081,8 @@ function OrderContextCard({ orders }: { orders: any[] }) {
 
             {/* Expanded content */}
             {isOpen && (
-              <div style={{ padding: "0 20px 20px" }}>
-                <div style={{ display: "flex", gap: "20px" }}>
+              <div className="sb-order-ctx-content" style={{ padding: "0 20px 20px" }}>
+                <div className="sb-order-ctx-expanded" style={{ display: "flex", gap: "20px" }}>
                   {/* Left: Products + Details */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     {/* Products */}
@@ -1114,7 +1116,7 @@ function OrderContextCard({ orders }: { orders: any[] }) {
                     </div>
 
                     {/* Quick info grid */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                    <div className="sb-info-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
                       <div style={{ padding: "8px 12px", backgroundColor: D.inset, borderRadius: D.r8 }}>
                         <div style={{ fontSize: "10px", fontWeight: 700, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Payment</div>
                         <div style={{ fontSize: "12px", fontWeight: 600, color: D.text, marginTop: "2px" }}>{providerLabel}</div>
@@ -1191,7 +1193,7 @@ function OrderContextCard({ orders }: { orders: any[] }) {
                   </div>
 
                   {/* Right: Timeline */}
-                  <div style={{ width: "240px", flexShrink: 0 }}>
+                  <div className="sb-order-ctx-timeline" style={{ width: "240px", flexShrink: 0 }}>
                     <div style={{ fontSize: "10px", fontWeight: 700, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "10px" }}>
                       Timeline
                     </div>
@@ -1425,7 +1427,7 @@ const TicketDetailPage = () => {
     : { label: "New", bg: D.greenLight, color: D.green }
 
   return (
-    <div ref={pageRef} style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "24px 32px", background: PAGE_BG, boxSizing: "border-box", minHeight: "100vh", overflowX: "hidden" }}>
+    <div ref={pageRef} className="sb-page-root" style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "24px 32px", background: PAGE_BG, boxSizing: "border-box", minHeight: "100vh", overflowX: "hidden" }}>
       <style>{`
         @keyframes msgSlideLeft { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes msgSlideRight { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
@@ -1451,10 +1453,64 @@ const TicketDetailPage = () => {
         .sb-toolbar-btn { padding: 4px 10px; font-size: 13px; background: transparent; border: 1px solid ${D.border}; border-radius: 6px; cursor: pointer; color: ${D.textSec}; transition: all 0.15s ease; line-height: 1; }
         .sb-toolbar-btn:hover { background: ${D.inset}; color: ${D.text}; border-color: ${D.textMuted}; }
         .sb-toolbar-btn.active { background: ${D.brand}15; color: ${D.brand}; border-color: ${D.brand}50; }
+
+        /* ── Mobile responsive ── */
+        @media (max-width: 768px) {
+          .sb-page-root { padding: 12px 10px !important; max-width: 100% !important; }
+          .sb-header-card { padding: 12px 14px !important; border-radius: 10px !important; margin-bottom: 14px !important; }
+          .sb-header-subject { font-size: 14px !important; white-space: normal !important; }
+          .sb-header-meta { padding-left: 0 !important; flex-wrap: wrap !important; }
+          .sb-header-ai { padding-left: 0 !important; flex-wrap: wrap !important; gap: 6px !important; }
+          .sb-header-ai-summary { display: block !important; margin-top: 4px !important; font-size: 11px !important; }
+          .sb-header-actions { padding-left: 0 !important; gap: 6px !important; }
+          .sb-header-actions button { padding: 7px 12px !important; font-size: 11px !important; }
+          .sb-layout { flex-direction: column !important; gap: 16px !important; }
+          .sb-conversation { flex: 1 1 auto !important; min-width: 0 !important; }
+          .sb-sidebar { flex: 1 1 auto !important; max-width: 100% !important; position: static !important; max-height: none !important; order: -1 !important; }
+          .sb-messages-card { padding: 14px 12px !important; border-radius: 12px !important; }
+          .sb-messages-list { gap: 18px !important; }
+          .sb-msg-bubble { width: 100% !important; padding: 10px 12px !important; border-radius: 4px 14px 14px 14px !important; }
+          .sb-msg-bubble-out { border-radius: 14px 4px 14px 14px !important; }
+          .sb-msg-header { flex-wrap: wrap !important; gap: 4px !important; }
+          .sb-msg-header-name { font-size: 11px !important; }
+          .sb-msg-header-time { font-size: 10px !important; }
+          .sb-order-ctx-expanded { flex-direction: column !important; gap: 14px !important; }
+          .sb-order-ctx-timeline { width: 100% !important; }
+          .sb-order-ctx-toggle { padding: 10px 14px !important; flex-wrap: wrap !important; gap: 6px !important; }
+          .sb-order-ctx-toggle-right { gap: 8px !important; }
+          .sb-order-ctx-content { padding: 0 14px 14px !important; }
+          .sb-order-ctx-header { padding: 10px 14px !important; }
+          .sb-info-grid { grid-template-columns: 1fr 1fr !important; }
+          .sb-composer-toolbar { padding: 8px 12px !important; gap: 3px !important; overflow-x: auto !important; }
+          .sb-composer-editor { padding: 14px 12px 8px !important; }
+          .sb-composer-actions { padding: 10px 12px !important; flex-wrap: wrap !important; gap: 8px !important; }
+          .sb-composer-actions button { padding: 8px 16px !important; font-size: 12px !important; width: 100% !important; text-align: center !important; justify-content: center !important; }
+          .sb-composer-actions > div:first-child { width: 100% !important; }
+          .sb-customer-card { border-radius: 12px !important; }
+          .sb-customer-header { padding: 16px 14px 14px !important; }
+          .sb-customer-sections { padding: 0 14px 8px !important; }
+          .sb-stats-grid { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+          .sb-stats-cell { padding: 10px 6px !important; }
+          .sb-stats-value { font-size: 16px !important; }
+          .sb-attach-chip { max-width: 100% !important; }
+        }
+        @media (max-width: 480px) {
+          .sb-page-root { padding: 8px 6px !important; }
+          .sb-header-card { padding: 10px 12px !important; }
+          .sb-header-subject { font-size: 13px !important; }
+          .sb-header-actions { gap: 4px !important; }
+          .sb-header-actions button { padding: 6px 10px !important; font-size: 10px !important; }
+          .sb-header-actions .sb-spacer { display: none !important; }
+          .sb-messages-card { padding: 10px 8px !important; }
+          .sb-msg-bubble { padding: 8px 10px !important; }
+          .sb-order-ctx-toggle { padding: 8px 10px !important; }
+          .sb-order-ctx-content { padding: 0 10px 10px !important; }
+          .sb-info-grid { grid-template-columns: 1fr !important; }
+        }
       `}</style>
 
       {/* ══════ HEADER ══════ */}
-      <div style={{
+      <div className="sb-header-card" style={{
         backgroundColor: D.card, borderRadius: "12px", border: `1px solid ${D.border}`,
         padding: "16px 20px", marginBottom: "20px", boxShadow: D.xs,
       }}>
@@ -1469,14 +1525,14 @@ const TicketDetailPage = () => {
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke={D.textSec} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
           </Link>
-          <h1 style={{ fontSize: "16px", fontWeight: 700, color: D.text, margin: 0, lineHeight: 1.3, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <h1 className="sb-header-subject" style={{ fontSize: "16px", fontWeight: 700, color: D.text, margin: 0, lineHeight: 1.3, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {ticket.subject}
           </h1>
           {st.label && <Pill bg={st.bg} color={st.color}>{st.label}</Pill>}
         </div>
 
         {/* Row 2: Email | Date */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0", marginBottom: "6px", paddingLeft: "42px" }}>
+        <div className="sb-header-meta" style={{ display: "flex", alignItems: "center", gap: "0", marginBottom: "6px", paddingLeft: "42px" }}>
           <span style={{ fontSize: "13px", fontWeight: 600, color: D.text }}>{ticket.from_email}</span>
           <span style={{ color: D.textFaint, margin: "0 8px", fontSize: "13px" }}>|</span>
           <span style={{ fontSize: "13px", color: D.textSec }}>{f.dt(ticket.created_at)}</span>
@@ -1484,7 +1540,7 @@ const TicketDetailPage = () => {
 
         {/* Row 3: Project | AI label + summary */}
         {ticket.metadata?.ai_labels && (
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px", paddingLeft: "42px" }}>
+          <div className="sb-header-ai" style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px", paddingLeft: "42px" }}>
             {ticket.metadata.ai_labels.project && (
               <span style={{
                 fontSize: "11px", fontWeight: 600, color: "#4F46E5",
@@ -1505,7 +1561,7 @@ const TicketDetailPage = () => {
               </span>
             )}
             {ticket.metadata.ai_labels.summary && (
-              <span style={{ fontSize: "12px", color: "#9CA3AF", fontStyle: "italic" }}>
+              <span className="sb-header-ai-summary" style={{ fontSize: "12px", color: "#9CA3AF", fontStyle: "italic" }}>
                 {ticket.metadata.ai_labels.summary}
               </span>
             )}
@@ -1513,7 +1569,7 @@ const TicketDetailPage = () => {
         )}
 
         {/* Row 4: Action buttons */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingLeft: "42px", flexWrap: "wrap" }}>
+        <div className="sb-header-actions" style={{ display: "flex", alignItems: "center", gap: "8px", paddingLeft: "42px", flexWrap: "wrap" }}>
           {/* Ask Dextrum */}
           <button className="sb-action-btn" onClick={() => dextrumMut.mutate()} disabled={dextrumMut.isPending}
             style={{
@@ -1554,7 +1610,7 @@ const TicketDetailPage = () => {
           </button>
 
           {/* Spacer */}
-          <div style={{ flex: 1 }} />
+          <div className="sb-spacer" style={{ flex: 1 }} />
 
           {/* Spam button */}
           {ticket.status !== "spam" && (
@@ -1605,15 +1661,15 @@ const TicketDetailPage = () => {
       </div>
 
       {/* ══════ LAYOUT: Conversation | Sidebar ══════ */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "flex-start" }}>
+      <div className="sb-layout" style={{ display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "flex-start" }}>
 
         {/* Conversation (flex 7 = ~70%) */}
-        <div style={{ flex: "7 1 500px", minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
+        <div className="sb-conversation" style={{ flex: "7 1 500px", minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
           {/* Order context */}
           <OrderContextCard orders={orders} />
 
           {/* Messages card */}
-          <div style={{
+          <div className="sb-messages-card" style={{
             backgroundColor: D.card, borderRadius: D.r16,
             border: `1px solid ${D.border}`, boxShadow: D.sm,
             padding: "24px 28px",
@@ -1623,7 +1679,7 @@ const TicketDetailPage = () => {
                 No messages yet
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+              <div className="sb-messages-list" style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
                 {msgs.map((m: any) => <MessageBubble key={m.id} msg={m} />)}
                 <div ref={endRef} />
               </div>
@@ -1641,7 +1697,7 @@ const TicketDetailPage = () => {
         </div>
 
         {/* Sidebar (flex 3 = ~30%, wraps below on narrow screens) */}
-        <div style={{
+        <div className="sb-sidebar" style={{
           flex: "3 1 240px", maxWidth: "400px",
           position: "sticky", top: "24px",
           maxHeight: "calc(100vh - 80px)", overflowY: "auto",
