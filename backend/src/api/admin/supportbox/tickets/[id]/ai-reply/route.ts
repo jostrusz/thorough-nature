@@ -287,12 +287,24 @@ ${orderContext || "Žádné objednávky nenalezeny pro tento e-mail"}
 `
 
     // ── 6. Call Claude Opus ──
+    const additionalInstructions = (req.body as any)?.instructions || ""
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+    const aiMessages: any[] = [{ role: "user", content: userMessage }]
+
+    // If additional instructions provided, add them as a follow-up
+    if (additionalInstructions.trim()) {
+      aiMessages.push(
+        { role: "assistant", content: "I'll generate the response now." },
+        { role: "user", content: `ADDITIONAL INSTRUCTIONS FROM THE SUPPORT AGENT — follow these instructions to refine the reply:\n\n${additionalInstructions}\n\nGenerate the complete JSON response again with the refined reply and all translations.` }
+      )
+    }
+
     const response = await client.messages.create({
       model: "claude-opus-4-20250514",
       max_tokens: 2000,
       system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userMessage }],
+      messages: aiMessages,
     })
 
     let aiText = response.content[0].type === "text" ? response.content[0].text : ""

@@ -1382,10 +1382,13 @@ const TicketDetailPage = () => {
   const [aiReply, setAiReply] = useState<{ identification: string; timeline: string; problem: string; reply: string; translation_cs: string; translation_th: string; translation_en: string } | null>(null)
   const [aiPanelOpen, setAiPanelOpen] = useState(false)
   const [aiCopied, setAiCopied] = useState<"reply" | "cs" | "th" | "en" | null>(null)
+  const [aiInstructions, setAiInstructions] = useState("")
 
   const aiReplyMut = useMutation({
-    mutationFn: async () => {
-      const resp = await sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/ai-reply`, { method: "POST" }) as any
+    mutationFn: async (vars?: { instructions?: string }) => {
+      const body: any = {}
+      if (vars?.instructions) body.instructions = vars.instructions
+      const resp = await sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/ai-reply`, { method: "POST", body }) as any
       return resp
     },
     onSuccess: (data: any) => {
@@ -1394,7 +1397,7 @@ const TicketDetailPage = () => {
     },
   })
 
-  const copyAiText = (text: string, type: "reply" | "translation") => {
+  const copyAiText = (text: string, type: "reply" | "cs" | "th" | "en") => {
     navigator.clipboard.writeText(text).then(() => {
       setAiCopied(type)
       setTimeout(() => setAiCopied(null), 2000)
@@ -1634,7 +1637,7 @@ const TicketDetailPage = () => {
           </button>
 
           {/* Generate AI Answer */}
-          <button className="sb-action-btn" onClick={() => { if (!aiReply && !aiReplyMut.isPending) { aiReplyMut.mutate() } else { setAiPanelOpen(!aiPanelOpen) } }} disabled={aiReplyMut.isPending}
+          <button className="sb-action-btn" onClick={() => { if (!aiReply && !aiReplyMut.isPending) { aiReplyMut.mutate({}) } else { setAiPanelOpen(!aiPanelOpen) } }} disabled={aiReplyMut.isPending}
             style={{
               padding: "6px 14px", fontSize: "12px", fontWeight: 600,
               color: aiReplyMut.isPending ? D.purple : aiReply ? (aiPanelOpen ? "#fff" : D.purple) : D.purple,
@@ -1643,7 +1646,7 @@ const TicketDetailPage = () => {
               borderRadius: "6px", cursor: aiReplyMut.isPending ? "wait" : "pointer",
               whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "5px",
             }}>
-            {aiReplyMut.isPending ? "\u23f3 Generating..." : aiReply ? (aiPanelOpen ? "\u2705 AI Answer" : "\U0001f916 AI Answer") : "\U0001f916 Generate AI answer"}
+            {aiReplyMut.isPending ? "\u23f3 Generating..." : aiReply ? (aiPanelOpen ? "\u2705 AI Answer" : "\u{1F916} AI Answer") : "\u{1F916} Generate AI answer"}
           </button>
 
           {/* Spacer */}
@@ -1842,17 +1845,54 @@ const TicketDetailPage = () => {
               )}
             </div>
 
-            {/* Regenerate button */}
-            <div style={{ marginTop: "16px", display: "flex", justifyContent: "flex-end" }}>
-              <button type="button" onClick={() => aiReplyMut.mutate()} disabled={aiReplyMut.isPending}
+            {/* Refine / Regenerate section */}
+            <div style={{
+              marginTop: "20px", padding: "16px 20px",
+              backgroundColor: D.inset, borderRadius: D.r12,
+              border: `1px solid ${D.borderSubtle}`,
+            }}>
+              <div style={{ fontSize: "11px", fontWeight: 600, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "10px" }}>
+                Refine answer
+              </div>
+              <textarea
+                value={aiInstructions}
+                onChange={(e) => setAiInstructions(e.target.value)}
+                placeholder="Add instructions to refine the answer (e.g. 'make it shorter', 'mention the tracking number', 'apologize for the delay')..."
                 style={{
-                  padding: "6px 14px", fontSize: "12px", fontWeight: 500,
-                  color: D.textSec, backgroundColor: "transparent",
+                  width: "100%", minHeight: "60px", maxHeight: "150px", resize: "vertical",
+                  padding: "10px 14px", fontSize: "13px", lineHeight: "1.5",
+                  color: D.text, backgroundColor: D.card,
                   border: `1px solid ${D.border}`, borderRadius: "8px",
-                  cursor: aiReplyMut.isPending ? "wait" : "pointer", transition: "all 0.2s ease",
-                }}>
-                {aiReplyMut.isPending ? "\u23f3 Regenerating..." : "Regenerate"}
-              </button>
+                  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                  outline: "none", boxSizing: "border-box",
+                }}
+                onFocus={(e) => { e.target.style.borderColor = D.purple + "60"; e.target.style.boxShadow = `0 0 0 3px ${D.purple}12` }}
+                onBlur={(e) => { e.target.style.borderColor = D.border; e.target.style.boxShadow = "none" }}
+              />
+              <div style={{ marginTop: "10px", display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                <button type="button" onClick={() => { setAiInstructions(""); aiReplyMut.mutate({}) }} disabled={aiReplyMut.isPending}
+                  style={{
+                    padding: "6px 14px", fontSize: "12px", fontWeight: 500,
+                    color: D.textSec, backgroundColor: "transparent",
+                    border: `1px solid ${D.border}`, borderRadius: "8px",
+                    cursor: aiReplyMut.isPending ? "wait" : "pointer", transition: "all 0.2s ease",
+                  }}>
+                  {aiReplyMut.isPending && !aiInstructions ? "\u23f3 Regenerating..." : "Regenerate"}
+                </button>
+                {aiInstructions.trim() && (
+                  <button type="button" onClick={() => { aiReplyMut.mutate({ instructions: aiInstructions }); setAiInstructions("") }} disabled={aiReplyMut.isPending}
+                    style={{
+                      padding: "6px 14px", fontSize: "12px", fontWeight: 600,
+                      color: "#fff", backgroundColor: D.purple,
+                      border: "none", borderRadius: "8px",
+                      cursor: aiReplyMut.isPending ? "wait" : "pointer",
+                      boxShadow: `0 1px 4px ${D.purple}30`,
+                      transition: "all 0.2s ease",
+                    }}>
+                    {aiReplyMut.isPending ? "\u23f3 Refining..." : "Refine answer"}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
