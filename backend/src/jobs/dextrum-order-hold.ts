@@ -496,7 +496,7 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
             if (hasFeeItems) return total
             return total + (Number(orderMeta.cod_fee) || 0) + deliveryFee
           })() : undefined,
-          cashCurrencyCode: "EUR",
+          cashCurrencyCode: ((order as any).currency_code || "EUR").toUpperCase(),
           note: orderNote || undefined,
         })
 
