@@ -164,12 +164,20 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
       // Delivery-related phrases in note (Czech carrier messages)
       // NOTE: "předán" excluded — "připravena k předání dopravci" = handoff to courier, NOT delivery
-      const isDeliveryNote = eventNote.includes("zásilka je u vás")
-        || eventNote.includes("doručen")
+      // NOTE: "doručení na adresu" excluded — it's a delivery TYPE name (home delivery), not confirmation
+      // NOTE: "připravena k předání" excluded — handoff to courier, NOT delivery
+      const isPreparedForHandoff = eventNote.includes("připravena k předání")
+        || eventNote.includes("předání externímu dopravci")
+        || eventNote.includes("předání dopravci")
+      const isDeliveryNote = !isPreparedForHandoff && (
+        eventNote.includes("zásilka je u vás")
+        || eventNote.includes("doručena")
+        || eventNote.includes("bylo doručeno")
         || eventNote.includes("delivered")
         || eventNote.includes("převzat")
         || eventNote.includes("vyzvednut")
         || eventNote.includes("dodán")
+      )
 
       if (sub === 1) {
         // Subtype 1 = confirmed delivery
@@ -181,10 +189,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         console.log(`[mySTOCK Webhook] Event 29 delivery note detected ("${event.note || ""}") → DELIVERED for ${documentCode || documentId}`)
       } else if (carrierStatus === "transit" || carrierStatus === "in_transit") {
         newStatus = "IN_TRANSIT"
-      } else if (eventNote.includes("ostatní data") || eventNote.includes("data přijata")) {
-        // "Ostatní data přijata" = tracking data assigned, NOT delivery
+      } else if (isPreparedForHandoff || eventNote.includes("ostatní data") || eventNote.includes("data přijata")) {
+        // Handoff to courier or tracking data assigned = DISPATCHED, NOT delivery
         newStatus = "DISPATCHED"
-        console.log(`[mySTOCK Webhook] Event 29 tracking assigned (note: "${event.note || ""}") → DISPATCHED`)
+        console.log(`[mySTOCK Webhook] Event 29 tracking/handoff (note: "${event.note || ""}") → DISPATCHED`)
       } else if (eventSubtype === "" || eventSubtype === "0" || sub === 0) {
         // Empty/zero subtype without known note — default to DISPATCHED
         newStatus = "DISPATCHED"
