@@ -94,9 +94,10 @@ export const OkOrderPlacedTemplate: React.FC<OkOrderPlacedTemplateProps> & {
     (sum: number, item: any) => sum + (item.unit_price || 0) * (item.quantity || 1),
     0
   )
-  const shippingTotal = order.summary?.raw_shipping_total?.value ?? order.summary?.shipping_total ?? 0
-  const taxTotal = order.summary?.raw_tax_total?.value ?? order.summary?.tax_total ?? 0
-  const total = order.summary?.raw_current_order_total?.value ?? order.summary?.current_order_total ?? subtotal + shippingTotal
+  // Use non-raw summary values (major units) — raw_* values can be in minor units (cents/haléře)
+  const shippingTotal = order.summary?.shipping_total ?? 0
+  const taxTotal = order.summary?.tax_total ?? 0
+  const total = order.summary?.current_order_total ?? subtotal + shippingTotal
 
   const invoiceAddress = billingAddress || shippingAddress
 
