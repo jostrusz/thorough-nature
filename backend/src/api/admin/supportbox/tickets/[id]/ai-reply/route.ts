@@ -27,24 +27,26 @@ Jsi AI asistent zákaznické podpory pro e-commerce s knihami a e-booky. Zpracov
 → chronologický přehled komunikace (česky)
 
 ### 3 PROBLÉM
-→ stručný popis (česky)
+→ stručný popis (in English)
 
 ### 4 ODPOVĚĎ
 → v jazyce zákazníka
 → NEPOUŽÍVEJ markdown formátování (žádné **, __, ##, atd.)
 
-### 5 PŘEKLAD
-→ český překlad odpovědi
+### 5 PŘEKLADY
+→ překlad odpovědi do češtiny, thajštiny a angličtiny
 → NEPOUŽÍVEJ markdown formátování
 
 ## Výstupní formát
 
 IMPORTANT: Return a valid JSON object with the following fields:
-- "identification": string with language, gender, project info
-- "timeline": string with chronological overview in Czech
-- "problem": string with problem description in Czech
+- "identification": string with language, gender, project info (in English)
+- "timeline": string with chronological overview (in English)
+- "problem": string with problem description (in English)
 - "reply": string with the reply for the customer in their language, plain text without markdown
-- "reply_translation": string with Czech translation of the reply, plain text without markdown
+- "translation_cs": string with Czech translation of the reply, plain text without markdown
+- "translation_th": string with Thai translation of the reply, plain text without markdown
+- "translation_en": string with English translation of the reply, plain text without markdown
 
 Return ONLY valid JSON, no markdown code blocks.
 
@@ -308,7 +310,9 @@ ${orderContext || "Žádné objednávky nenalezeny pro tento e-mail"}
         timeline: "",
         problem: "",
         reply: aiText,
-        reply_translation: "",
+        translation_cs: "",
+        translation_th: "",
+        translation_en: "",
       }
     }
 
@@ -321,7 +325,9 @@ ${orderContext || "Žádné objednávky nenalezeny pro tento e-mail"}
         timeline: parsed.timeline || "",
         problem: parsed.problem || "",
         reply: parsed.reply || "",
-        reply_translation: parsed.reply_translation || "",
+        translation_cs: parsed.translation_cs || "",
+        translation_th: parsed.translation_th || "",
+        translation_en: parsed.translation_en || "",
       },
     })
   } catch (error: any) {
