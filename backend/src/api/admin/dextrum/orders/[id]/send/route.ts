@@ -107,8 +107,18 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       "LLWJK-4": { physicalSku: "LLWJK7824627392", quantity: 4 },
     }
 
+    // Filter out non-physical items (e.g. COD fee) that don't exist in the warehouse
+    const SKIP_SKUS = new Set(["FEE-COD"])
+
     console.log(`[Dextrum Send] Order ${medusaOrderId} items count: ${(order as any).items?.length ?? 'undefined'}, keys: ${Object.keys(order as any).join(', ')}`)
-    const orderItems = ((order as any).items || []).map((item: any) => {
+    const orderItems = ((order as any).items || []).filter((item: any) => {
+      const sku = item.variant?.sku || item.variant?.product?.handle || "UNKNOWN"
+      if (SKIP_SKUS.has(sku)) {
+        console.log(`[Dextrum Send] Skipping non-physical item: ${sku} (${item.title || item.variant?.product?.title})`)
+        return false
+      }
+      return true
+    }).map((item: any) => {
       const sku = item.variant?.sku || item.variant?.product?.handle || "UNKNOWN"
       const bundleMapping = BUNDLE_SKU_MAP[sku]
 

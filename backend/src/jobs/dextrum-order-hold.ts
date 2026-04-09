@@ -134,7 +134,10 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
             return orderMeta.payment_method || "unknown"
           })()
 
-          const items = (order as any).items || []
+          const items = ((order as any).items || []).filter((item: any) => {
+            const sku = item.variant?.sku || "UNKNOWN"
+            return sku !== "FEE-COD"
+          })
           const totalQuantity = items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0)
           const totalPrice = Number((order as any).total) || 0
 
@@ -292,7 +295,18 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           "LLWJK-4": { physicalSku: "LLWJK7824627392", quantity: 4 },
         }
 
-        const orderItems = rawItems.map((item: any) => {
+        // Filter out non-physical items (e.g. COD fee) that don't exist in the warehouse
+        const SKIP_SKUS = new Set(["FEE-COD"])
+        const physicalItems = rawItems.filter((item: any) => {
+          const sku = item.variant?.sku || "UNKNOWN"
+          if (SKIP_SKUS.has(sku)) {
+            console.log(`[Dextrum Hold] Skipping non-physical item: ${sku} (${item.title || item.variant?.product?.title})`)
+            return false
+          }
+          return true
+        })
+
+        const orderItems = physicalItems.map((item: any) => {
           const sku = item.variant?.sku || "UNKNOWN"
           const bundleMapping = BUNDLE_SKU_MAP[sku]
 
