@@ -792,6 +792,15 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, edito
     if (e.key === "u" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); execCmd("underline") }
   }
 
+  // Paste as plain text to avoid carrying over formatting from AI panel or external sources
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault()
+    const plainText = e.clipboardData.getData("text/plain")
+    if (plainText) {
+      document.execCommand("insertText", false, plainText)
+    }
+  }
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     const newAttachments: { file: File; base64: string }[] = []
@@ -870,6 +879,7 @@ function Composer({ text, setText, onSend, sending, keepOpen, setKeepOpen, edito
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           style={{
             fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
             color: D.text,
