@@ -191,6 +191,7 @@ export class MyStockApiClient {
       body.paymentInformation = {
         cashAmount: payload.cashAmount,
         currencyCode: payload.cashCurrencyCode || "EUR",
+        variableSymbol: payload.orderCode,
       }
     }
     if (payload.note) {
