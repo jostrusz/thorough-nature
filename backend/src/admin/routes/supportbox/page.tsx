@@ -171,6 +171,7 @@ function StatCard({ label, count, color, bgColor, icon, isActive, onClick }: {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={onClick}
+      className="sb-stat-card"
       style={{
         padding: "16px 20px",
         backgroundColor: isActive ? bgColor : hovered ? bgColor + "80" : C.white,
@@ -189,7 +190,7 @@ function StatCard({ label, count, color, bgColor, icon, isActive, onClick }: {
         transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
       }}
     >
-      <div style={{
+      <div className="sb-stat-icon" style={{
         width: "42px", height: "42px", borderRadius: "12px",
         backgroundColor: bgColor, display: "flex", alignItems: "center",
         justifyContent: "center", fontSize: "18px", flexShrink: 0,
@@ -199,10 +200,10 @@ function StatCard({ label, count, color, bgColor, icon, isActive, onClick }: {
         {icon}
       </div>
       <div>
-        <div style={{ fontSize: "24px", fontWeight: 700, color: C.text, lineHeight: 1.1, marginBottom: "2px" }}>
+        <div className="sb-stat-count" style={{ fontSize: "24px", fontWeight: 700, color: C.text, lineHeight: 1.1, marginBottom: "2px" }}>
           {count}
         </div>
-        <div style={{ fontSize: "12px", fontWeight: 500, color: C.textSecondary }}>{label}</div>
+        <div className="sb-stat-label" style={{ fontSize: "12px", fontWeight: 500, color: C.textSecondary }}>{label}</div>
       </div>
     </div>
   )
@@ -300,6 +301,7 @@ function TicketCard({ ticket }: { ticket: any }) {
       <div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        className="sb-ticket-card"
         style={{
           padding: "14px 20px",
           borderBottom: `1px solid ${C.borderLight}`,
@@ -325,7 +327,7 @@ function TicketCard({ ticket }: { ticket: any }) {
         {/* Content */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3px" }}>
-            <span style={{
+            <span className="sb-ticket-subject" style={{
               fontSize: "13px", fontWeight: unread ? 700 : 500, color: C.text,
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>
@@ -347,7 +349,7 @@ function TicketCard({ ticket }: { ticket: any }) {
           </div>
           {/* AI Labels */}
           {ticket.metadata?.ai_labels && (
-            <div style={{
+            <div className="sb-ticket-labels" style={{
               display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px", flexWrap: "wrap",
               padding: "4px 8px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0",
               borderRadius: "8px", marginTop: "2px",
@@ -850,7 +852,7 @@ const SupportBoxDashboard = () => {
   }
 
   return (
-    <div ref={pageRef} style={{ width: "100%", maxWidth: "1400px", margin: "0 auto", padding: "24px 32px", background: BG_COLOR, boxSizing: "border-box" }}>
+    <div ref={pageRef} className="sb-page-root" style={{ width: "100%", maxWidth: "1400px", margin: "0 auto", padding: "24px 32px", background: BG_COLOR, boxSizing: "border-box" }}>
       <style>{`
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.3); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -860,25 +862,46 @@ const SupportBoxDashboard = () => {
         .sb-refresh-btn:hover { background-color: #F3F4F6 !important; transform: scale(1.05) !important; }
         .sb-settings-btn:hover { transform: translateY(-1px) !important; }
         @media (max-width: 768px) {
-          .sb-main-layout { flex-direction: column !important; }
-          .sb-sidebar { width: 100% !important; min-width: 0 !important; max-width: 100% !important; margin-bottom: 16px !important; }
+          .sb-page-root { padding: 16px 12px !important; }
+          .sb-main-layout { flex-direction: column !important; gap: 16px !important; }
+          .sb-sidebar { width: 100% !important; min-width: 0 !important; max-width: 100% !important; }
+          .sb-sidebar > div:first-child + div { display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; gap: 4px !important; }
+          .sb-sidebar button { border-radius: 8px !important; border-left: none !important; border: 1px solid ${C.border} !important; padding: 8px 12px !important; }
           .sb-ticket-list { min-height: auto !important; }
           .sb-main-content { min-width: 0 !important; }
-          .sb-stats-row { flex-wrap: wrap !important; }
-          .sb-stats-row > * { flex: 1 1 45% !important; min-width: 120px !important; }
-          .sb-header-row { flex-direction: column !important; gap: 12px !important; align-items: flex-start !important; }
-          .sb-search-box { width: 100% !important; }
+          .sb-stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+          .sb-stat-card { padding: 12px 14px !important; gap: 10px !important; }
+          .sb-stat-icon { width: 34px !important; height: 34px !important; font-size: 15px !important; border-radius: 10px !important; }
+          .sb-stat-count { font-size: 20px !important; }
+          .sb-header-row { flex-direction: column !important; gap: 10px !important; align-items: stretch !important; }
+          .sb-header-row h1 { font-size: 18px !important; }
+          .sb-header-buttons { flex-wrap: wrap !important; width: 100% !important; }
+          .sb-header-buttons > div { width: 100% !important; }
+          .sb-header-buttons > div input { width: 100% !important; }
+          .sb-filter-bar { flex-wrap: wrap !important; padding: 10px 12px !important; gap: 8px !important; }
+          .sb-filter-bar > div:first-child { display: none !important; }
+          .sb-filter-bar select { font-size: 11px !important; padding: 6px 8px !important; flex: 1 1 auto !important; min-width: 0 !important; }
+          .sb-ticket-card { padding: 12px 14px !important; gap: 10px !important; }
+          .sb-ticket-subject { font-size: 12px !important; }
+          .sb-ticket-labels { padding: 3px 6px !important; gap: 4px !important; }
+          .sb-ticket-labels span { font-size: 10px !important; padding: 1px 7px !important; }
+          .sb-ticket-labels span:last-child { display: none !important; }
         }
         @media (max-width: 480px) {
-          .sb-page-root { padding: 12px 12px !important; }
-          .sb-stats-row > * { flex: 1 1 100% !important; }
+          .sb-page-root { padding: 8px 6px !important; }
+          .sb-stats-row { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+          .sb-stat-card { padding: 10px 10px !important; }
+          .sb-stat-count { font-size: 18px !important; }
+          .sb-stat-label { font-size: 10px !important; }
+          .sb-header-buttons button { font-size: 11px !important; padding: 6px 10px !important; }
+          .sb-ticket-card { padding: 10px 10px !important; }
         }
       `}</style>
       <FullWidthStyles />
       {/* Header */}
       <div className="sb-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <h1 style={{ fontSize: "20px", fontWeight: 600, color: C.text, margin: 0 }}>SupportBox</h1>
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+        <div className="sb-header-buttons" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <div style={{ position: "relative", width: "280px" }}>
             <Input
               placeholder="Search subject, email, content..."
@@ -1029,7 +1052,7 @@ const SupportBoxDashboard = () => {
           </div>
 
           {/* Filters */}
-          <div style={{
+          <div className="sb-filter-bar" style={{
             display: "flex", gap: "12px", alignItems: "center",
             padding: "14px 20px", backgroundColor: C.white, border: `1px solid ${C.border}`,
             borderRadius: "12px 12px 0 0", borderBottom: "none",
