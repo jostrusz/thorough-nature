@@ -1378,6 +1378,29 @@ const TicketDetailPage = () => {
     },
   })
 
+  // ── AI Reply generation ──
+  const [aiReply, setAiReply] = useState<{ identification: string; timeline: string; problem: string; reply: string; reply_translation: string } | null>(null)
+  const [aiPanelOpen, setAiPanelOpen] = useState(false)
+  const [aiCopied, setAiCopied] = useState<"reply" | "translation" | null>(null)
+
+  const aiReplyMut = useMutation({
+    mutationFn: async () => {
+      const resp = await sdk.client.fetch(`/admin/supportbox/tickets/${ticketId}/ai-reply`, { method: "POST" }) as any
+      return resp
+    },
+    onSuccess: (data: any) => {
+      setAiReply(data.data)
+      setAiPanelOpen(true)
+    },
+  })
+
+  const copyAiText = (text: string, type: "reply" | "translation") => {
+    navigator.clipboard.writeText(text).then(() => {
+      setAiCopied(type)
+      setTimeout(() => setAiCopied(null), 2000)
+    })
+  }
+
   // Sort messages newest first — most recent message at top
   const msgs = [...(ticket?.messages || [])].sort((a: any, b: any) => +new Date(b.created_at) - +new Date(a.created_at))
 
@@ -1432,6 +1455,7 @@ const TicketDetailPage = () => {
         @keyframes msgSlideLeft { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes msgSlideRight { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .sb-action-btn { transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important; }
         .sb-action-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important; }
         .sb-back-btn { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important; }
@@ -1688,6 +1712,186 @@ const TicketDetailPage = () => {
 
           {/* Composer */}
           <Composer text={reply} setText={setReply} onSend={send} sending={replyMut.isPending} keepOpen={keepOpen} setKeepOpen={setKeepOpen} editorRef={editorRef} attachments={attachments} setAttachments={setAttachments} />
+
+          {/* AI Reply Panel */}
+          <div style={{
+            backgroundColor: D.card, borderRadius: D.r16,
+            border: `1px solid ${aiPanelOpen ? D.purple + "40" : D.border}`,
+            boxShadow: aiPanelOpen ? `0 0 0 3px ${D.purple}08, ${D.sm}` : D.sm,
+            overflow: "hidden",
+            transition: "all 0.3s ease",
+          }}>
+            {/* AI Button / Header */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!aiReply && !aiReplyMut.isPending) {
+                  aiReplyMut.mutate()
+                } else {
+                  setAiPanelOpen(!aiPanelOpen)
+                }
+              }}
+              disabled={aiReplyMut.isPending}
+              style={{
+                width: "100%",
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "14px 24px",
+                backgroundColor: aiReplyMut.isPending ? D.purpleLight : aiPanelOpen ? D.purpleLight : "transparent",
+                border: "none", cursor: aiReplyMut.isPending ? "wait" : "pointer",
+                transition: "background-color 0.2s ease",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span style={{ fontSize: "18px" }}>{aiReplyMut.isPending ? "⏳" : "🤖"}</span>
+                <span style={{
+                  fontSize: "13px", fontWeight: 600,
+                  color: aiReplyMut.isPending ? D.purple : aiReply ? D.purple : D.textSec,
+                }}>
+                  {aiReplyMut.isPending ? "Generuji odpověď..." : aiReply ? "AI odpověď" : "Generovat AI odpověď"}
+                </span>
+                {aiReplyMut.isPending && (
+                  <div style={{
+                    width: "14px", height: "14px",
+                    border: `2px solid ${D.purple}30`,
+                    borderTopColor: D.purple,
+                    borderRadius: "50%",
+                    animation: "spin 1s linear infinite",
+                  }} />
+                )}
+              </div>
+              {aiReply && (
+                <span style={{ fontSize: "12px", color: D.textMuted }}>
+                  {aiPanelOpen ? "▲ Skrýt" : "▼ Zobrazit"}
+                </span>
+              )}
+            </button>
+
+            {/* Expanded AI content */}
+            {aiPanelOpen && aiReply && (
+              <div style={{ padding: "0 24px 24px", borderTop: `1px solid ${D.borderSubtle}` }}>
+                {/* Context section: identification + timeline + problem */}
+                <div style={{
+                  marginTop: "20px", padding: "16px 20px",
+                  backgroundColor: D.inset, borderRadius: D.r12,
+                  border: `1px solid ${D.borderSubtle}`,
+                  marginBottom: "20px",
+                }}>
+                  <div style={{ fontSize: "11px", fontWeight: 600, color: D.textMuted, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "10px" }}>
+                    Kontext
+                  </div>
+                  {aiReply.identification && (
+                    <div style={{ fontSize: "13px", color: D.textSec, marginBottom: "8px", lineHeight: "1.5" }}>
+                      {aiReply.identification}
+                    </div>
+                  )}
+                  {aiReply.timeline && (
+                    <div style={{ fontSize: "13px", color: D.textSec, marginBottom: "8px", lineHeight: "1.5", whiteSpace: "pre-wrap" }}>
+                      <span style={{ fontWeight: 600, color: D.text }}>Timeline:</span>{"\n"}{aiReply.timeline}
+                    </div>
+                  )}
+                  {aiReply.problem && (
+                    <div style={{ fontSize: "13px", color: D.text, lineHeight: "1.5" }}>
+                      <span style={{ fontWeight: 600 }}>Problém:</span> {aiReply.problem}
+                    </div>
+                  )}
+                </div>
+
+                {/* Reply for customer */}
+                <div style={{ marginBottom: "16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 600, color: D.purple }}>💬 Odpověď pro zákazníka</span>
+                    <button
+                      type="button"
+                      onClick={() => copyAiText(aiReply.reply, "reply")}
+                      style={{
+                        padding: "4px 12px", fontSize: "11px", fontWeight: 600,
+                        color: aiCopied === "reply" ? "#fff" : D.purple,
+                        backgroundColor: aiCopied === "reply" ? D.green : D.purpleLight,
+                        border: `1px solid ${aiCopied === "reply" ? D.green : D.purple + "30"}`,
+                        borderRadius: "6px", cursor: "pointer",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      {aiCopied === "reply" ? "✅ Zkopírováno" : "📋 Kopírovat"}
+                    </button>
+                  </div>
+                  <div style={{
+                    padding: "16px 20px",
+                    backgroundColor: "#FAFAFE",
+                    borderRadius: D.r12,
+                    border: `1px solid ${D.purple}20`,
+                    fontSize: "13px", lineHeight: "1.7",
+                    color: D.text, whiteSpace: "pre-wrap",
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                  }}>
+                    {aiReply.reply}
+                  </div>
+                </div>
+
+                {/* Czech translation */}
+                {aiReply.reply_translation && (
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span style={{ fontSize: "12px", fontWeight: 600, color: D.textSec }}>🇨🇿 Překlad</span>
+                      <button
+                        type="button"
+                        onClick={() => copyAiText(aiReply.reply_translation, "translation")}
+                        style={{
+                          padding: "4px 12px", fontSize: "11px", fontWeight: 600,
+                          color: aiCopied === "translation" ? "#fff" : D.textSec,
+                          backgroundColor: aiCopied === "translation" ? D.green : D.inset,
+                          border: `1px solid ${aiCopied === "translation" ? D.green : D.border}`,
+                          borderRadius: "6px", cursor: "pointer",
+                          transition: "all 0.2s ease",
+                        }}
+                      >
+                        {aiCopied === "translation" ? "✅ Zkopírováno" : "📋 Kopírovat"}
+                      </button>
+                    </div>
+                    <div style={{
+                      padding: "16px 20px",
+                      backgroundColor: D.inset,
+                      borderRadius: D.r12,
+                      border: `1px solid ${D.borderSubtle}`,
+                      fontSize: "13px", lineHeight: "1.7",
+                      color: D.textSec, whiteSpace: "pre-wrap",
+                      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                    }}>
+                      {aiReply.reply_translation}
+                    </div>
+                  </div>
+                )}
+
+                {/* Regenerate button */}
+                <div style={{ marginTop: "16px", display: "flex", justifyContent: "flex-end" }}>
+                  <button
+                    type="button"
+                    onClick={() => aiReplyMut.mutate()}
+                    disabled={aiReplyMut.isPending}
+                    style={{
+                      padding: "6px 14px", fontSize: "12px", fontWeight: 500,
+                      color: D.textSec, backgroundColor: "transparent",
+                      border: `1px solid ${D.border}`, borderRadius: "8px",
+                      cursor: aiReplyMut.isPending ? "wait" : "pointer",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    🔄 Regenerovat
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Error state */}
+            {aiReplyMut.isError && (
+              <div style={{
+                padding: "12px 24px", borderTop: `1px solid ${D.borderSubtle}`,
+                fontSize: "13px", color: D.red, backgroundColor: D.redLight,
+              }}>
+                Chyba: {(aiReplyMut.error as any)?.message || "Nepodařilo se vygenerovat odpověď"}
+              </div>
+            )}
+          </div>
 
           {replyMut.isError && (
             <div style={{ padding: "12px 16px", backgroundColor: D.redLight, border: `1px solid ${D.red}30`, borderRadius: D.r12, fontSize: "13px", color: D.red }}>
