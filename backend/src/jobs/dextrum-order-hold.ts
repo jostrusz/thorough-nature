@@ -4,6 +4,9 @@ import { MyStockApiClient } from "../modules/dextrum/api-client"
 import { normalizePhone } from "../utils/normalize-phone"
 import { normalizePostalCode } from "../utils/normalize-postal-code"
 
+const LINKER_API_URL = "https://api-platform.linker.shop/public-api/v1/orders"
+const LINKER_API_KEY = "f9bc589f47ddaee80e9aa3abb4fd40ed"
+
 /**
  * Dextrum Order Hold Processor
  * Runs every minute — checks for orders past their hold_until time
@@ -100,10 +103,170 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           continue
         }
 
-        // 5. Build payload from FRESH data
+        // 5. Detect country and route SE orders to PostNord/Linker
         const addr = (order as any).shipping_address || {}
         const countryCode = (addr.country_code || (order as any).billing_address?.country_code || "").toUpperCase()
         if (!countryCode) console.error(`[Dextrum Hold] Order ${orderMap.medusa_order_id} missing country_code!`)
+
+        // ── PostNord route for Swedish orders ──
+        if (countryCode === "SE") {
+          const orderMeta = (order as any).metadata || {}
+          if (orderMeta.postnord_sent) {
+            console.log(`[Dextrum Hold] SE order ${orderMap.mystock_order_code} already sent to PostNord, skipping`)
+            await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+              delivery_status: "IMPORTED",
+              delivery_status_updated_at: now.toISOString(),
+            })
+            continue
+          }
+
+          const orderNumber = orderMeta.custom_order_number || orderMap.mystock_order_code || `SE${new Date().getFullYear()}-${(order as any).display_id}`
+          const billingAddr = (order as any).billing_address || addr
+
+          // Determine payment method
+          const paymentMethod = (() => {
+            const pcs = (order as any).payment_collections || []
+            for (const pc of pcs as any[]) {
+              if (pc.status === "canceled") continue
+              const payments = pc.payments || []
+              if (payments.length > 0) return payments[0].provider_id || "unknown"
+            }
+            return orderMeta.payment_method || "unknown"
+          })()
+
+          const items = (order as any).items || []
+          const totalQuantity = items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0)
+          const totalPrice = Number((order as any).total) || 0
+
+          const linkerPayload = {
+            clientOrderNumber: orderNumber,
+            externalId: orderNumber,
+            additionalOrderNumber: orderNumber,
+            paymentMethod,
+            orderDate: new Date().toISOString(),
+            executionDate: new Date().toISOString(),
+            carrier: "PostNord - MyPack Home",
+            deliveryCompany: "",
+            deliveryRecipient: [addr.first_name, addr.last_name].filter(Boolean).join(" "),
+            deliveryPhone: addr.phone || "",
+            deliveryEmail: (order as any).email || "",
+            deliveryStreet: addr.address_1 || "",
+            deliveryPostCode: addr.postal_code || "",
+            deliveryCity: addr.city || "",
+            deliveryCountry: addr.country_code?.toUpperCase() || "SE",
+            codAmount: 0,
+            shipmentPrice: 0,
+            shipmentPriceNet: 0,
+            discount: 0,
+            items: [
+              {
+                id: "682ae62586557238590dff34",
+                externalId: "SE9287962270",
+                productExternalId: "SE9287962270",
+                vat_code: "6",
+                quantity: String(totalQuantity),
+                price_gross: String(totalPrice),
+                price_net: String(totalPrice),
+                unit: "PMS",
+                description: "Släpp taget om det som förstör dig",
+                sku: "SE9287962270",
+                weight: "0.1",
+              },
+            ],
+            priceGross: String(totalPrice),
+            priceNet: String(totalPrice),
+            currencySymbol: (order as any).currency_code?.toUpperCase() || "SEK",
+            billingCompany: "",
+            billingVatId: "0",
+            billingFirstName: billingAddr.first_name || "",
+            billingLastName: billingAddr.last_name || "",
+            billingEmail: (order as any).email || "",
+            billingPhone: billingAddr.phone || addr.phone || "",
+            billingStreet1: billingAddr.address_1 || "",
+            billingStreet2: billingAddr.address_2 || "",
+            billingPostCode: billingAddr.postal_code || "",
+            billingCity: billingAddr.city || "",
+            billingState: billingAddr.country_code?.toUpperCase() || "SE",
+            billingCountry: billingAddr.country_code?.toUpperCase() || "SE",
+            billingCountryCode: billingAddr.country_code?.toUpperCase() || "SE",
+            comments: "Order created via API (auto-hold)",
+            internalDeliveryMethod: "",
+            deliveryMethodMap: "",
+            numberOfPackages: 1,
+            deliveryConfiguration: {},
+            paymentTransactionId: "",
+          }
+
+          console.log(`[PostNord Auto] Sending SE order ${orderNumber} to Linker API...`)
+
+          const response = await fetch(LINKER_API_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": LINKER_API_KEY,
+            },
+            body: JSON.stringify(linkerPayload),
+          })
+
+          const responseText = await response.text()
+          let responseData: any
+          try { responseData = JSON.parse(responseText) } catch { responseData = { raw: responseText } }
+
+          if (!response.ok) {
+            console.error(`[PostNord Auto] Linker API error for ${orderNumber}: ${response.status}`, responseData)
+            await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+              retry_count: (orderMap.retry_count || 0) + 1,
+              last_error: `Linker API ${response.status}: ${JSON.stringify(responseData).slice(0, 200)}`,
+              hold_until: new Date(now.getTime() + (config.retry_interval_minutes || 5) * 60 * 1000).toISOString(),
+            })
+            continue
+          }
+
+          console.log(`[PostNord Auto] Order ${orderNumber} sent successfully`, responseData)
+
+          // Update dextrum_order_map
+          const sentAt = now.toISOString()
+          await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+            mystock_order_id: responseData?.id || `postnord-${orderNumber}`,
+            delivery_status: "IMPORTED",
+            delivery_status_updated_at: sentAt,
+            sent_to_wms_at: sentAt,
+            last_error: null,
+            retry_count: 0,
+          })
+
+          // Update order metadata
+          const existingTimeline = Array.isArray(orderMeta.dextrum_timeline) ? [...orderMeta.dextrum_timeline] : []
+          existingTimeline.push({
+            type: "postnord",
+            status: "IMPORTED",
+            date: sentAt,
+            detail: `Order auto-sent to PostNord WMS (Linker) — ${orderNumber}`,
+          })
+
+          const { Pool: PgPoolSE } = require("pg")
+          const pgPoolSE = new PgPoolSE({ connectionString: process.env.DATABASE_URL, max: 2 })
+          await pgPoolSE.query(
+            `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+            [JSON.stringify({
+              ...orderMeta,
+              dextrum_status: "IMPORTED",
+              dextrum_order_code: orderNumber,
+              dextrum_sent_at: sentAt,
+              postnord_sent: true,
+              postnord_sent_at: sentAt,
+              postnord_order_number: orderNumber,
+              postnord_response: responseData,
+              dextrum_timeline: existingTimeline,
+            }), orderMap.medusa_order_id]
+          )
+          await pgPoolSE.end()
+
+          console.log(`[PostNord Auto] SE order ${orderNumber} processed successfully`)
+          continue
+        }
+        // ── End PostNord route ──
+
         const prefixMap: Record<string, string> = {
           NL: "NL", BE: "BE", DE: "DE", AT: "AT", LU: "LU",
           PL: "PL", CZ: "CZ", SK: "SK", SE: "SE", HU: "HU",
