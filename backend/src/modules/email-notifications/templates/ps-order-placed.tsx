@@ -122,13 +122,17 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
 
   const invoiceAddress = billingAddress || shippingAddress
 
-  // Detect pickup point from props or order metadata
-  const pickup = pickupPoint || (order.metadata?.pickup_point_name ? {
-    name: order.metadata.pickup_point_name,
-    id: order.metadata.pickup_point_id,
-    address: order.metadata.pickup_point_address,
-  } : null)
-  const isPickup = !!pickup
+  // Detect pickup point from props or order metadata (supports both packeta_point_* and paczkomat_* keys)
+  const pickup = pickupPoint || (() => {
+    const name = order.metadata?.pickup_point_name || order.metadata?.packeta_point_name || order.metadata?.paczkomat_name
+    if (!name) return null
+    return {
+      name,
+      id: order.metadata?.pickup_point_id || order.metadata?.packeta_point_id || order.metadata?.paczkomat_id || '',
+      address: order.metadata?.pickup_point_address || order.metadata?.packeta_point_address || order.metadata?.paczkomat_address || '',
+    }
+  })()
+  const isPickup = !!pickup || order.metadata?.shipping_method === 'zasilkovna_pickup'
   const isHomeDelivery = !isPickup
 
   // Payment status — COD means not yet paid
@@ -137,7 +141,30 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
     paymentMethod.toLowerCase().includes('cod') ||
     paymentMethod.toLowerCase().includes('cash')
   )) || !!order.metadata?.cod_fee
+    || order.metadata?.payment_method === 'cod'
+    || order.metadata?.payment_provider === 'cod'
   const isPaid = !isCod
+
+  // Payment method display name
+  const paymentMethodDisplay = (() => {
+    if (paymentMethod) return paymentMethod
+    if (isCod) return 'Dobírka (platba při převzetí)'
+    const method = order.metadata?.payment_method || ''
+    if (method === 'blik') return 'BLIK'
+    if (method === 'card' || method === 'creditcard') return 'Platební karta'
+    if (method === 'ideal') return 'iDEAL'
+    if (method === 'bancontact') return 'Bancontact'
+    if (method === 'p24' || method === 'przelewy24') return 'Przelewy24'
+    if (method === 'eps') return 'EPS'
+    if (method === 'paypal') return 'PayPal'
+    if (method === 'klarna') return 'Klarna'
+    const provider = order.metadata?.payment_provider || ''
+    if (provider === 'comgate') return 'Online platba'
+    if (provider === 'stripe') return 'Platební karta'
+    if (provider === 'airwallex') return 'Online platba'
+    if (provider) return 'Online platba'
+    return 'Online platba'
+  })()
 
   // Billing entity — Czech company
   const entityName = billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'
@@ -272,12 +299,10 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
                   <td style={{ fontFamily: font, fontSize: '13px', color: colors.textMuted, padding: '3px 0' }}>Datum</td>
                   <td align="right" style={{ fontFamily: font, fontSize: '13px', color: colors.textDark, padding: '3px 0' }}>{orderDate}</td>
                 </tr>
-                {paymentMethod && (
-                  <tr>
-                    <td style={{ fontFamily: font, fontSize: '13px', color: colors.textMuted, padding: '3px 0' }}>Platební metoda</td>
-                    <td align="right" style={{ fontFamily: font, fontSize: '13px', color: colors.textDark, padding: '3px 0' }}>{paymentMethod}</td>
-                  </tr>
-                )}
+                <tr>
+                  <td style={{ fontFamily: font, fontSize: '13px', color: colors.textMuted, padding: '3px 0' }}>Platební metoda</td>
+                  <td align="right" style={{ fontFamily: font, fontSize: '13px', fontWeight: 600, color: colors.textDark, padding: '3px 0' }}>{paymentMethodDisplay}</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -425,7 +450,7 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
             backgroundColor: colors.amberBg,
             borderRadius: '12px',
             border: `1px solid ${colors.amberBorder}`,
-            padding: '14px 18px',
+            padding: '16px 18px',
             textAlign: 'center' as const,
           }}>
             <Text style={{
@@ -436,22 +461,35 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
               lineHeight: '1.5',
             }}>
               {isPickup
-                ? <>&#128205; &nbsp;<strong>Doručení na výdejní místo</strong></>
-                : <>&#128230; &nbsp;<strong>Doručení na adresu — 2–5 pracovních dnů</strong></>
+                ? <>&#128205; &nbsp;<strong>Doručení na výdejní místo — 2–3 pracovní dny</strong></>
+                : <>&#128230; &nbsp;<strong>Doručení na adresu — 2–3 pracovní dny</strong></>
               }
             </Text>
-            <Text style={{
-              fontFamily: font,
-              fontSize: '12px',
-              color: colors.textMuted,
-              margin: '6px 0 0',
-              lineHeight: '1.5',
-            }}>
-              {isPickup
-                ? 'Až bude zásilka připravena k vyzvednutí, dáme ti vědět.'
-                : 'Knihy odesíláme z našeho centrálního skladu v ČR.'
-              }
-            </Text>
+            {isPickup && pickup ? (
+              <div style={{ marginTop: '10px', textAlign: 'left' as const }}>
+                <Text style={{
+                  fontFamily: font,
+                  fontSize: '13px',
+                  color: colors.textBody,
+                  margin: '0',
+                  lineHeight: '1.6',
+                }}>
+                  <strong>{pickup.name}</strong>
+                  {pickup.address && <><br />{pickup.address}</>}
+                  {pickup.id && <><br /><span style={{ color: colors.textMuted, fontSize: '12px' }}>ID výdejního místa: {pickup.id}</span></>}
+                </Text>
+              </div>
+            ) : (
+              <Text style={{
+                fontFamily: font,
+                fontSize: '12px',
+                color: colors.textMuted,
+                margin: '6px 0 0',
+                lineHeight: '1.5',
+              }}>
+                Zásilku odesíláme do 24 hodin z našeho centrálního skladu.
+              </Text>
+            )}
           </div>
         </div>
 
@@ -626,7 +664,12 @@ export const PsOrderPlacedTemplate: React.FC<PsOrderPlacedTemplateProps> & {
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Doručeno</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásilku si vyzvedneš na zvoleném výdejním místě.' : 'Během 2–5 pracovních dnů budeš mít knihu doma.'}</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>
+                    {isPickup
+                      ? `Zásilku si vyzvedneš na výdejním místě${pickup?.name ? ` ${pickup.name}` : ''} do 2–3 pracovních dnů.`
+                      : 'Během 2–3 pracovních dnů budeš mít knihu doma.'
+                    }
+                  </span>
                 </td>
               </tr>
             </tbody>
@@ -738,7 +781,16 @@ PsOrderPlacedTemplate.PreviewProps = {
   order: {
     id: 'test-order-id',
     display_id: '812',
-    metadata: { custom_order_number: 'CZ2026-812', cod_fee: 30 },
+    metadata: {
+      custom_order_number: 'CZ2026-812',
+      cod_fee: 30,
+      payment_method: 'cod',
+      payment_provider: 'cod',
+      shipping_method: 'zasilkovna_pickup',
+      packeta_point_id: '15680',
+      packeta_point_name: 'Hrdějovice, Těšínská 9',
+      packeta_point_address: 'Potraviny Flop Kaňka, 373 61 Hrdějovice',
+    },
     created_at: new Date().toISOString(),
     email: 'petra.svobodova@seznam.cz',
     currency_code: 'czk',
@@ -747,8 +799,8 @@ PsOrderPlacedTemplate.PreviewProps = {
         id: 'item-1',
         title: 'Psí superživot',
         product_title: 'Psí superživot',
-        variant_title: null,
-        quantity: 2,
+        variant_title: 'Paperback',
+        quantity: 1,
         unit_price: 550,
         thumbnail: null,
       },
@@ -763,9 +815,9 @@ PsOrderPlacedTemplate.PreviewProps = {
       },
     ],
     summary: {
-      raw_current_order_total: { value: 1150 },
-      raw_shipping_total: { value: 20 },
-      raw_tax_total: { value: 201 },
+      current_order_total: 580,
+      shipping_total: 0,
+      tax_total: 101,
     },
   },
   shippingAddress: {
@@ -784,7 +836,7 @@ PsOrderPlacedTemplate.PreviewProps = {
     postal_code: '101 00',
     country_code: 'cz',
   },
-  paymentMethod: 'Dobírka (platba při převzetí)',
+  paymentMethod: null,
   pickupPoint: null,
 } as any
 
