@@ -556,15 +556,37 @@ function SandboxedEmailBody({ html, textColor }: { html: string; textColor: stri
 /* ═══════════════════════════════════════════════════════════════
    MESSAGE BUBBLE
    ═══════════════════════════════════════════════════════════════ */
-function MessageBubble({ msg }: { msg: any }) {
+function MessageBubble({ msg, ticketId }: { msg: any; ticketId: string }) {
   const inb = msg.direction === "inbound"
   const body = msg.body_html || msg.body_text || ""
   const has = f.strip(body).length > 0
   const [hovered, setHovered] = useState(false)
+  const queryClient = useQueryClient()
   const senderLabel = inb
     ? (msg.from_name || msg.from_email || "Customer")
     : `You (${msg.from_email || "Support"})`
   const msgAttachments = msg.metadata?.attachments || []
+
+  // Detect a fetch-failed inbound message (webhook fired before Resend indexed the email)
+  const bodyFetchFailed =
+    inb &&
+    (msg.metadata?.body_fetch_failed === true ||
+      body === "(email body could not be loaded)" ||
+      body === "(email body could not be loaded — will retry)" ||
+      (!has && !!msg.metadata?.resend_email_id))
+
+  const refetchMut = useMutation({
+    mutationFn: async () => {
+      const resp = await sdk.client.fetch(
+        `/admin/supportbox/tickets/${ticketId}/refetch-body`,
+        { method: "POST", body: { message_id: msg.id } }
+      ) as any
+      return resp
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] })
+    },
+  })
 
   return (
     <div
@@ -635,7 +657,38 @@ function MessageBubble({ msg }: { msg: any }) {
           </div>
         )}
 
-        {has ? (
+        {bodyFetchFailed ? (
+          <div style={{
+            display: "flex", flexDirection: "column", gap: "10px",
+            padding: "12px 14px", borderRadius: "8px",
+            backgroundColor: D.orangeLight, border: `1px solid #FCD34D`,
+          }}>
+            <div style={{ fontSize: "13px", color: "#92400E", fontWeight: 600 }}>
+              ⚠ Email body couldn't be loaded when it arrived
+            </div>
+            <div style={{ fontSize: "12px", color: "#78350F" }}>
+              Resend's API was still indexing the email when the webhook fired.
+              Click below to fetch it now.
+            </div>
+            <button
+              onClick={() => refetchMut.mutate()}
+              disabled={refetchMut.isPending}
+              style={{
+                alignSelf: "flex-start",
+                padding: "7px 14px", fontSize: "12px", fontWeight: 600,
+                border: "none", borderRadius: "6px", cursor: refetchMut.isPending ? "wait" : "pointer",
+                backgroundColor: D.brand, color: "#fff",
+              }}
+            >
+              {refetchMut.isPending ? "Fetching…" : "↻ Reload email body"}
+            </button>
+            {(refetchMut.error as any) && (
+              <div style={{ fontSize: "11px", color: D.red }}>
+                {(refetchMut.error as any)?.message || "Failed to reload"}
+              </div>
+            )}
+          </div>
+        ) : has ? (
           <SandboxedEmailBody html={body} textColor={D.text} />
         ) : (
           <div style={{ fontSize: "13px", color: D.textMuted, fontStyle: "italic" }}>(empty)</div>
@@ -1928,7 +1981,7 @@ const TicketDetailPage = () => {
               </div>
             ) : (
               <div className="sb-messages-list" style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
-                {msgs.map((m: any) => <MessageBubble key={m.id} msg={m} />)}
+                {msgs.map((m: any) => <MessageBubble key={m.id} msg={m} ticketId={ticketId} />)}
                 <div ref={endRef} />
               </div>
             )}

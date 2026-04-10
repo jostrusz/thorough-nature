@@ -9,6 +9,54 @@ function stripHtmlTags(html: string): string {
   return html?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || ""
 }
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+/**
+ * Fetch an inbound email from Resend with retry/backoff.
+ * Resend's webhook occasionally fires BEFORE the email is indexed in their API,
+ * so the first GET may 404. We retry up to maxAttempts times with increasing delay.
+ */
+async function fetchResendInboundWithRetry(
+  emailId: string,
+  apiKey: string,
+  maxAttempts: number = 5,
+  initialDelayMs: number = 1500
+): Promise<{ html: string; text: string; from: string; attachments: any[] }> {
+  let lastError: any = null
+  let delay = initialDelayMs
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const emailResponse = await axios.get(
+        `https://api.resend.com/emails/receiving/${emailId}`,
+        { headers: { Authorization: `Bearer ${apiKey}` } }
+      )
+      const emailData = emailResponse.data
+      return {
+        html: emailData.html || "",
+        text: emailData.text || "",
+        from: emailData.from || "",
+        attachments: emailData.attachments || [],
+      }
+    } catch (err: any) {
+      lastError = err
+      const status = err?.response?.status
+      // Retry on 404 (not yet indexed) and 5xx. Fail fast on 401/403.
+      if (status === 401 || status === 403) {
+        throw err
+      }
+      if (attempt < maxAttempts) {
+        console.log(
+          `[SupportBox] Resend API fetch attempt ${attempt}/${maxAttempts} failed (status=${status || "n/a"}), retrying in ${delay}ms...`
+        )
+        await sleep(delay)
+        delay = Math.min(delay * 2, 15_000)
+      }
+    }
+  }
+  throw lastError
+}
+
 /**
  * Resend Inbound Webhook Handler
  *
@@ -94,26 +142,20 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     let emailHtml = ""
     let emailText = ""
     let fromName = ""
+    let bodyFetchFailed = false
     let inboundAttachments: { filename: string; size: number; content_type: string; content?: string }[] = []
 
     if (config.resend_api_key) {
       try {
-        const emailResponse = await axios.get(
-          `https://api.resend.com/emails/receiving/${emailId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${config.resend_api_key}`,
-            },
-          }
-        )
-        const emailData = emailResponse.data
-        emailHtml = emailData.html || ""
-        emailText = emailData.text || ""
+        const fetched = await fetchResendInboundWithRetry(emailId, config.resend_api_key)
+        emailHtml = fetched.html
+        emailText = fetched.text
         // Try to extract name from "Name <email>" format in from
-        const nameMatch = (emailData.from || fromAddress).match(/^(.+?)\s*</)
+        const nameMatch = (fetched.from || fromAddress).match(/^(.+?)\s*</)
         fromName = nameMatch ? nameMatch[1].trim() : ""
 
         // Fetch attachments from dedicated endpoint
+        const emailData = { attachments: fetched.attachments }
         if (emailData.attachments && emailData.attachments.length > 0) {
           try {
             const attResponse = await axios.get(
@@ -152,9 +194,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           }
         }
       } catch (fetchError: any) {
-        console.log(`[SupportBox] Failed to fetch email content: ${fetchError.message}`)
-        // Continue without body — at least create the ticket
-        emailText = "(email body could not be loaded)"
+        const status = fetchError?.response?.status
+        console.log(
+          `[SupportBox] Failed to fetch email content after retries for email_id=${emailId}: status=${status || "n/a"} message=${fetchError.message}`
+        )
+        // Continue without body — at least create the ticket so it's visible.
+        // The ticket is marked body_fetch_failed so it can be re-fetched later.
+        bodyFetchFailed = true
+        emailText = "(email body could not be loaded — will retry)"
       }
     }
 
@@ -221,6 +268,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       body_text: emailText,
       metadata: {
         resend_email_id: emailId,
+        ...(bodyFetchFailed ? { body_fetch_failed: true, body_fetch_failed_at: new Date().toISOString() } : {}),
         ...(inboundAttachments.length > 0 ? { attachments: inboundAttachments } : {}),
       },
     })
