@@ -124,51 +124,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         logger.info(`[Comgate Webhook] Order ${matchingOrder.id} updated with status: ${medusaStatus}`)
 
         if (comgateStatus === "PAID") {
-          // Capture payment collection through Medusa so PC status changes to "captured"
-          try {
-            const { Modules } = await import("@medusajs/framework/utils")
-            const paymentModule = req.scope.resolve(Modules.PAYMENT) as any
-
-            // Find payment collections for this order
-            const { rows: pcRows } = await pool.query(
-              `SELECT pc.id, pc.status FROM payment_collection pc
-               JOIN order_payment_collection opc ON opc.payment_collection_id = pc.id
-               WHERE opc.order_id = $1 AND pc.status = 'authorized'
-               LIMIT 1`,
-              [matchingOrder.id]
-            )
-
-            if (pcRows.length > 0) {
-              const pcId = pcRows[0].id
-
-              // Find the payment within this collection
-              const { rows: payRows } = await pool.query(
-                `SELECT id FROM payment WHERE payment_collection_id = $1 LIMIT 1`,
-                [pcId]
-              )
-
-              if (payRows.length > 0) {
-                await paymentModule.capturePayment({ payment_id: payRows[0].id })
-                logger.info(`[Comgate Webhook] Payment ${payRows[0].id} captured via Medusa for order ${matchingOrder.id}`)
-              } else {
-                logger.warn(`[Comgate Webhook] No payment found in collection ${pcId} for order ${matchingOrder.id}`)
-              }
-            } else {
-              logger.info(`[Comgate Webhook] No authorized payment collection found for order ${matchingOrder.id} (may already be captured)`)
-            }
-          } catch (captureErr: any) {
-            logger.warn(`[Comgate Webhook] Medusa capture failed for order ${matchingOrder.id}: ${captureErr.message}`)
-          }
-
-          // Also emit event for other subscribers
-          try {
-            const { ContainerRegistrationKeys: CRK } = await import("@medusajs/framework/utils")
-            const eventBus = req.scope.resolve(CRK.EVENT_BUS)
-            await eventBus.emit("payment.captured", { id: matchingOrder.id })
-            logger.info(`[Comgate Webhook] Emitted payment.captured event for order ${matchingOrder.id}`)
-          } catch (e: any) {
-            logger.warn(`[Comgate Webhook] Failed to emit payment.captured: ${e.message}`)
-          }
+          await captureOrderPayment(matchingOrder.id, pool, req.scope, logger)
         }
 
         emitPaymentLog(logger, {
@@ -285,8 +241,9 @@ async function safetyNetCompleteCart(
     )
     if (orderCheck[0]) {
       logger.info(
-        `[Comgate Webhook] Safety net: order ${orderCheck[0].id} was created during delay — no action needed`
+        `[Comgate Webhook] Safety net: order ${orderCheck[0].id} was created during delay — capturing payment`
       )
+      await captureOrderPayment(orderCheck[0].id, pool, scope, logger)
       return
     }
 
@@ -429,6 +386,60 @@ async function safetyNetCompleteCart(
     logger.error(`[Comgate Webhook] Safety net failed: ${err.message}`)
   } finally {
     await pool.end()
+  }
+}
+
+/**
+ * Capture an order's payment via Medusa (so PC status changes from authorized → captured),
+ * and emit the payment.captured event for downstream subscribers.
+ * Used when Comgate confirms PAID and we have a matching order.
+ */
+async function captureOrderPayment(
+  orderId: string,
+  pool: any,
+  scope: any,
+  logger: any
+): Promise<void> {
+  try {
+    const { Modules } = await import("@medusajs/framework/utils")
+    const paymentModule = scope.resolve(Modules.PAYMENT) as any
+
+    const { rows: pcRows } = await pool.query(
+      `SELECT pc.id, pc.status FROM payment_collection pc
+       JOIN order_payment_collection opc ON opc.payment_collection_id = pc.id
+       WHERE opc.order_id = $1 AND pc.status = 'authorized'
+       LIMIT 1`,
+      [orderId]
+    )
+
+    if (pcRows.length > 0) {
+      const pcId = pcRows[0].id
+
+      const { rows: payRows } = await pool.query(
+        `SELECT id FROM payment WHERE payment_collection_id = $1 LIMIT 1`,
+        [pcId]
+      )
+
+      if (payRows.length > 0) {
+        await paymentModule.capturePayment({ payment_id: payRows[0].id })
+        logger.info(`[Comgate Webhook] Payment ${payRows[0].id} captured via Medusa for order ${orderId}`)
+      } else {
+        logger.warn(`[Comgate Webhook] No payment found in collection ${pcId} for order ${orderId}`)
+      }
+    } else {
+      logger.info(`[Comgate Webhook] No authorized payment collection found for order ${orderId} (may already be captured)`)
+    }
+  } catch (captureErr: any) {
+    logger.warn(`[Comgate Webhook] Medusa capture failed for order ${orderId}: ${captureErr.message}`)
+  }
+
+  try {
+    const { ContainerRegistrationKeys: CRK } = await import("@medusajs/framework/utils")
+    const eventBus = scope.resolve(CRK.EVENT_BUS)
+    await eventBus.emit("payment.captured", { id: orderId })
+    logger.info(`[Comgate Webhook] Emitted payment.captured event for order ${orderId}`)
+  } catch (e: any) {
+    logger.warn(`[Comgate Webhook] Failed to emit payment.captured: ${e.message}`)
   }
 }
 

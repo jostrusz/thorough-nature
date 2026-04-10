@@ -200,20 +200,24 @@ function EditableField({
   return (
     <div className="od-row-hover" style={rowStyle}>
       <span style={labelStyle}>{label}</span>
-      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "6px", justifyContent: "flex-end", flex: 1, minWidth: 0, marginLeft: "8px" }}>
         {value ? (
-          mono ? <code style={codeStyle}>{value}</code> : <span style={valueStyle}>{value}</span>
+          mono ? (
+            <code style={{ ...codeStyle, textAlign: "right", whiteSpace: "normal", wordBreak: "break-word", maxWidth: "100%" }}>{value}</code>
+          ) : (
+            <span style={{ ...valueStyle, textAlign: "right" }}>{value}</span>
+          )
         ) : (
           <span style={dashStyle}>&mdash;</span>
         )}
         <button
-          style={iconBtnStyle}
+          style={{ ...iconBtnStyle, flexShrink: 0 }}
           onClick={() => { setDraft(value); setEditing(true) }}
           title={`Edit ${label}`}
         >✏️</button>
         {value && (
           <button
-            style={{ ...iconBtnStyle, color: colors.red }}
+            style={{ ...iconBtnStyle, color: colors.red, flexShrink: 0 }}
             onClick={handleClear}
             title={`Clear ${label}`}
           >🗑</button>
@@ -296,15 +300,52 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
     klarna: "Klarna",
     paypal: "PayPal",
     applepay: "Apple Pay",
+    googlepay: "Google Pay",
     eps: "EPS",
     giropay: "Giropay",
     przelewy24: "Przelewy24",
+    p24: "Przelewy24",
     sofort: "SOFORT",
     belfius: "Belfius",
     kbc: "KBC",
     mybank: "MyBank",
+    blik: "BLIK",
+    trustly: "Trustly",
+    swish: "Swish",
+    twint: "TWINT",
+    cod: "Cash on Delivery",
+    // Comgate bank transfer methods
+    BANK_CZ_OTHER: "Bank Transfer (CZ)",
+    BANK_CZ_KB: "Komerční banka",
+    BANK_CZ_CS: "Česká spořitelna",
+    BANK_CZ_RB: "Raiffeisenbank",
+    BANK_CZ_FIO: "Fio banka",
+    BANK_CZ_CSOB: "ČSOB",
+    BANK_CZ_GE: "MONETA Money Bank",
+    BANK_CZ_AIR: "Air Bank",
+    BANK_CZ_MB: "mBank",
+    BANK_CZ_UCB: "UniCredit Bank",
+    BANK_CZ_SBCZ: "Sberbank",
+    BANK_SK_OTHER: "Bank Transfer (SK)",
+    BANK_SK_TB: "Tatra banka",
+    BANK_SK_VUB: "VÚB banka",
+    BANK_SK_SLSP: "Slovenská sporiteľňa",
+    CARD_CZ: "Credit Card",
+    CARD_CZ_C: "Credit Card",
+    CARD_SK: "Credit Card",
+    CARD_PL: "Credit Card",
+    GPAY: "Google Pay",
+    APPLEPAY: "Apple Pay",
+    PAYPAL: "PayPal",
+    BTCPAY: "Bitcoin",
   }
-  const paymentMethodLabel = PAYMENT_METHOD_LABELS[paymentMethodRaw] || paymentMethodRaw || ""
+  // Try the raw value, then uppercase variant (Comgate methods are uppercase)
+  const paymentMethodLabel =
+    PAYMENT_METHOD_LABELS[paymentMethodRaw] ||
+    PAYMENT_METHOD_LABELS[paymentMethodRaw?.toUpperCase?.()] ||
+    PAYMENT_METHOD_LABELS[paymentMethodRaw?.toLowerCase?.()] ||
+    paymentMethodRaw ||
+    ""
 
   function handleBookSentToggle() {
     updateMetadata.mutate(
