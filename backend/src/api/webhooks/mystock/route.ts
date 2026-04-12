@@ -460,6 +460,37 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
               )
               await klarnaPool.end()
               console.log(`[mySTOCK Webhook] ✅ Klarna captured + tracking sent for order ${orderMap.medusa_order_id}`)
+
+              // Update Medusa internal payment status so admin shows "Paid"
+              try {
+                const paymentModuleService = req.scope.resolve(Modules.PAYMENT) as any
+                const queryService = req.scope.resolve("query") as any
+                const { data: [orderWithPayments] } = await queryService.graph({
+                  entity: "order",
+                  fields: ["id", "payment_collections.payments.*"],
+                  filters: { id: orderMap.medusa_order_id },
+                })
+                const payments = orderWithPayments?.payment_collections?.flatMap((pc: any) => pc.payments || []) || []
+                const payment = payments[0]
+                if (payment?.id && payment.captured_at == null) {
+                  // Fetch order total from order_summary
+                  const totalPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                  const totalResult = await totalPool.query(
+                    `SELECT totals->>'current_order_total' as order_total FROM order_summary WHERE order_id = $1 LIMIT 1`,
+                    [orderMap.medusa_order_id]
+                  )
+                  await totalPool.end()
+                  const orderTotal = Number(totalResult.rows[0]?.order_total || 0)
+                  await paymentModuleService.capturePayment({
+                    payment_id: payment.id,
+                    amount: orderTotal,
+                  })
+                  console.log(`[mySTOCK Webhook] ✅ Medusa payment ${payment.id} marked as captured (Paid) for order ${orderMap.medusa_order_id}`)
+                }
+              } catch (medusaPayErr: any) {
+                // Non-fatal: Klarna capture succeeded, just Medusa status update failed
+                console.warn(`[mySTOCK Webhook] ⚠️ Could not update Medusa payment status for order ${orderMap.medusa_order_id}: ${medusaPayErr.message}`)
+              }
             } catch (klarnaErr: any) {
               console.error(`[mySTOCK Webhook] ❌ Klarna capture/tracking failed for order ${orderMap.medusa_order_id}:`, klarnaErr.message)
             }
