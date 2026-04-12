@@ -25,8 +25,16 @@ async function getAccessToken(): Promise<string> {
     throw new Error("GOSMS_CLIENT_ID and GOSMS_CLIENT_SECRET must be set")
   }
 
-  const url = `${TOKEN_URL}?client_id=${encodeURIComponent(clientId)}&client_secret=${encodeURIComponent(clientSecret)}&grant_type=client_credentials`
-  const res = await fetch(url, { method: "GET" })
+  const body = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    grant_type: "client_credentials",
+  })
+  const res = await fetch(TOKEN_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  })
 
   if (!res.ok) {
     const text = await res.text()
