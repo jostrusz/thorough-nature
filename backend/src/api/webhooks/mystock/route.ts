@@ -9,6 +9,7 @@ import { EmailTemplates, resolveTemplateKey } from "../../../modules/email-notif
 import { resolveBillingEntity } from "../../../utils/resolve-billing-entity"
 import { logEmailActivity } from "../../../utils/email-logger"
 import { renderEmailToHtml } from "../../../utils/render-email-html"
+import { normalizePhone } from "../../../utils/normalize-phone"
 
 // ═══════════════════════════════════════════
 // WEBHOOK EVENT → DELIVERY STATUS MAPPING
@@ -678,13 +679,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
                 })
 
                 let phone: string | undefined
+                let countryCode = ""
                 try {
                   if (smsOrder?.shipping_address?.id) {
                     const addr = await (orderModSvc as any).orderAddressService_.retrieve(smsOrder.shipping_address.id)
                     phone = addr?.phone
+                    countryCode = addr?.country_code || ""
                   }
                 } catch {
                   phone = smsOrder?.shipping_address?.phone
+                  countryCode = smsOrder?.shipping_address?.country_code || ""
                 }
 
                 if (!phone) {
@@ -692,10 +696,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
                   return
                 }
 
-                // Ensure phone starts with + (international format)
-                let formattedPhone = phone.replace(/\s+/g, "")
-                if (!formattedPhone.startsWith("+")) {
-                  formattedPhone = `+${formattedPhone}`
+                // Normalize phone to international format using country code
+                const phoneResult = normalizePhone(phone, countryCode)
+                const formattedPhone = phoneResult.normalized
+
+                if (formattedPhone === "000") {
+                  console.log(`[GoSMS] No valid phone number for order ${smsOrderId}, skipping SMS`)
+                  return
+                }
+
+                if (phoneResult.warning) {
+                  console.log(`[GoSMS] Phone normalization for order ${smsOrderId}: ${phoneResult.warning}`)
                 }
 
                 // Build SMS text from project config
