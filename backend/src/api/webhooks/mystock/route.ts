@@ -166,16 +166,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       // NOTE: "předán" excluded — "připravena k předání dopravci" = handoff to courier, NOT delivery
       // NOTE: "doručení na adresu" excluded — it's a delivery TYPE name (home delivery), not confirmation
       // NOTE: "připravena k předání" excluded — handoff to courier, NOT delivery
+      // NOTE: "vyzvednut" = courier picked up from warehouse → DISPATCHED, NOT delivery
       const isPreparedForHandoff = eventNote.includes("připravena k předání")
         || eventNote.includes("předání externímu dopravci")
         || eventNote.includes("předání dopravci")
+        || eventNote.includes("vyzvednut")
       const isDeliveryNote = !isPreparedForHandoff && (
         eventNote.includes("zásilka je u vás")
         || eventNote.includes("doručena")
         || eventNote.includes("bylo doručeno")
         || eventNote.includes("delivered")
         || eventNote.includes("převzat")
-        || eventNote.includes("vyzvednut")
         || eventNote.includes("dodán")
       )
 
