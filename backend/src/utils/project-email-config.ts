@@ -14,6 +14,8 @@ export interface ProjectEmailConfig {
   project: string
   /** Locale code for email subjects (default: "nl") */
   locale?: string
+  /** SMS dispatch template (GSM 03.38, ≤160 chars). Placeholders: {url}, {email} */
+  smsDispatchTemplate?: string
 }
 
 /** Localized email subject strings */
@@ -75,12 +77,14 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromName: 'De Hondenbijbel',
     fromEmail: 'De Hondenbijbel <support@dehondenbijbel.nl>',
     project: 'dehondenbijbel',
+    smsDispatchTemplate: 'Bestelling verzonden. Track: {url} support@dehondenbijbel.nl',
   },
   loslatenboek: {
-    replyTo: 'devries@loslatenboek.nl',
+    replyTo: 'boek@loslatenboek.nl',
     fromName: 'Laat Los Wat Je Kapotmaakt',
-    fromEmail: 'Laat Los Wat Je Kapotmaakt <devries@loslatenboek.nl>',
+    fromEmail: 'Laat Los Wat Je Kapotmaakt <boek@loslatenboek.nl>',
     project: 'loslatenboek',
+    smsDispatchTemplate: 'Bestelling verzonden. Track: {url} boek@loslatenboek.nl',
   },
   'slapp-taget': {
     replyTo: 'hej@slapptagetboken.se',
@@ -95,6 +99,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Odpuść to, co cię niszczy <biuro@odpusc-ksiazka.pl>',
     project: 'odpusc-ksiazka',
     locale: 'pl',
+    smsDispatchTemplate: 'Zamowienie wyslane. Sledzenie: {url} biuro@odpusc-ksiazka.pl',
   },
   // Also match without hyphen (fallback)
   slapptaget: {
@@ -110,6 +115,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Joris de Vries - Lass los, was dich kaputt macht <buch@lasslosbuch.de>',
     project: 'lass-los',
     locale: 'de',
+    smsDispatchTemplate: 'Bestellung versendet. Tracking: {url} buch@lasslosbuch.de',
   },
   // Also match without hyphen (fallback)
   lasslos: {
@@ -118,6 +124,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Joris de Vries - Lass los, was dich kaputt macht <buch@lasslosbuch.de>',
     project: 'lass-los',
     locale: 'de',
+    smsDispatchTemplate: 'Bestellung versendet. Tracking: {url} buch@lasslosbuch.de',
   },
   'psi-superzivot': {
     replyTo: 'podpora@psi-superzivot.cz',
@@ -125,6 +132,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Lars Vermeulen - Psí superživot <podpora@psi-superzivot.cz>',
     project: 'psi-superzivot',
     locale: 'cs',
+    smsDispatchTemplate: 'Objednavka odeslana. Sledovani: {url} podpora@psi-superzivot.cz',
   },
   // Also match without hyphen
   psisuperzivot: {
@@ -133,11 +141,24 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Lars Vermeulen - Psí superživot <podpora@psi-superzivot.cz>',
     project: 'psi-superzivot',
     locale: 'cs',
+    smsDispatchTemplate: 'Objednavka odeslana. Sledovani: {url} podpora@psi-superzivot.cz',
   },
 }
 
 /** Default config (Loslatenboek) when project_id is missing or unknown */
 const DEFAULT_CONFIG: ProjectEmailConfig = PROJECT_CONFIGS.loslatenboek
+
+/**
+ * Build dispatch SMS text for a given project config and tracking URL.
+ * Returns null if SMS is not configured for this project.
+ */
+export function buildDispatchSms(
+  config: ProjectEmailConfig,
+  trackingUrl: string
+): string | null {
+  if (!config.smsDispatchTemplate) return null
+  return config.smsDispatchTemplate.replace('{url}', trackingUrl)
+}
 
 /**
  * Resolve email config for a given order.

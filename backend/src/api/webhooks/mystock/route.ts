@@ -3,7 +3,8 @@ import { Modules } from "@medusajs/framework/utils"
 import { DEXTRUM_MODULE } from "../../../modules/dextrum"
 import { generateTrackingUrl } from "../../../utils/tracking-url"
 import { Pool } from "pg"
-import { getProjectEmailConfig, getEmailSubject } from "../../../utils/project-email-config"
+import { getProjectEmailConfig, getEmailSubject, buildDispatchSms } from "../../../utils/project-email-config"
+import { sendSms, isGoSmsConfigured } from "../../../utils/gosms-client"
 import { EmailTemplates, resolveTemplateKey } from "../../../modules/email-notifications/templates"
 import { resolveBillingEntity } from "../../../utils/resolve-billing-entity"
 import { logEmailActivity } from "../../../utils/email-logger"
@@ -560,6 +561,95 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
                 console.error(`[Webhook] Failed to send shipment email for order ${capturedOrderId}:`, emailErr.message)
               }
             }, 5000) // 5 second delay to wait for both DISPATCHED + tracking
+          }
+
+          // ── SMS dispatch notification (GoSMS) ─────────────────────────
+          // Send SMS when DISPATCHED + tracking available, with deduplication
+          const shouldCheckSms = isGoSmsConfigured()
+            && (newStatus === "DISPATCHED" || updatedMeta.dextrum_status === "DISPATCHED")
+            && !updatedMeta.sms_dispatch_sent
+          if (shouldCheckSms) {
+            const smsOrderId = orderMap.medusa_order_id
+            const smsScope = req.scope
+            setTimeout(async () => {
+              try {
+                // Re-read metadata for latest state
+                const smsPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                const smsResult = await smsPool.query(
+                  `SELECT metadata FROM "order" WHERE id = $1 LIMIT 1`,
+                  [smsOrderId]
+                )
+                await smsPool.end()
+                const smsMeta = smsResult.rows[0]?.metadata || {}
+
+                if (smsMeta.dextrum_status !== "DISPATCHED") return
+                if (!smsMeta.dextrum_tracking_url) return
+                if (smsMeta.sms_dispatch_sent === true) {
+                  console.log(`[GoSMS] SMS already sent for order ${smsOrderId}, skipping`)
+                  return
+                }
+
+                // Mark SMS as sent FIRST to prevent duplicates (optimistic lock)
+                const markSmsPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                const markSmsResult = await markSmsPool.query(
+                  `UPDATE "order" SET metadata = metadata || $1::jsonb, updated_at = NOW()
+                   WHERE id = $2 AND (metadata->>'sms_dispatch_sent' IS NULL OR metadata->>'sms_dispatch_sent' = 'false')
+                   RETURNING id`,
+                  [JSON.stringify({ sms_dispatch_sent: true, sms_dispatch_sent_at: new Date().toISOString() }), smsOrderId]
+                )
+                await markSmsPool.end()
+
+                if (markSmsResult.rowCount === 0) {
+                  console.log(`[GoSMS] SMS already sent (race condition) for order ${smsOrderId}`)
+                  return
+                }
+
+                // Get order shipping address for phone number
+                const orderModSvc = smsScope.resolve(Modules.ORDER) as any
+                const smsOrder = await orderModSvc.retrieveOrder(smsOrderId, {
+                  relations: ["shipping_address"],
+                })
+
+                let phone: string | undefined
+                try {
+                  if (smsOrder?.shipping_address?.id) {
+                    const addr = await (orderModSvc as any).orderAddressService_.retrieve(smsOrder.shipping_address.id)
+                    phone = addr?.phone
+                  }
+                } catch {
+                  phone = smsOrder?.shipping_address?.phone
+                }
+
+                if (!phone) {
+                  console.log(`[GoSMS] No phone number for order ${smsOrderId}, skipping SMS`)
+                  return
+                }
+
+                // Ensure phone starts with + (international format)
+                let formattedPhone = phone.replace(/\s+/g, "")
+                if (!formattedPhone.startsWith("+")) {
+                  formattedPhone = `+${formattedPhone}`
+                }
+
+                // Build SMS text from project config
+                const smsProjectConfig = getProjectEmailConfig(smsOrder)
+                const smsText = buildDispatchSms(smsProjectConfig, smsMeta.dextrum_tracking_url)
+
+                if (!smsText) {
+                  console.log(`[GoSMS] No SMS template for project ${smsProjectConfig.project}, skipping`)
+                  return
+                }
+
+                const sent = await sendSms(formattedPhone, smsText)
+                if (sent) {
+                  console.log(`[GoSMS] SMS sent to ${formattedPhone} for order ${smsOrderId}`)
+                } else {
+                  console.warn(`[GoSMS] SMS failed/skipped for order ${smsOrderId}`)
+                }
+              } catch (smsErr: any) {
+                console.error(`[GoSMS] Failed to send SMS for order ${smsOrderId}:`, smsErr.message)
+              }
+            }, 7000) // 7 second delay (after email's 5s)
           }
         }
       } catch (err: any) {
