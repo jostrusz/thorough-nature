@@ -67,6 +67,11 @@ export default defineMiddlewares({
     },
     {
       method: ["POST"],
+      matcher: "/webhooks/marketing/resend",
+      bodyParser: { preserveRawBody: true },
+    },
+    {
+      method: ["POST"],
       matcher: "/V1/event",
       bodyParser: { preserveRawBody: true },
     },
