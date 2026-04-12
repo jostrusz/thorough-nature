@@ -429,6 +429,42 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
             }
           }
 
+          // ── Klarna capture + tracking ─────────────────────────────────
+          // Capture Klarna payment and send tracking info when order is dispatched
+          if (newStatus === "DISPATCHED" && trackingNum && updatedMeta.klarnaOrderId
+              && updatedMeta.payment_provider === "klarna"
+              && !updatedMeta.tracking_sent_to_gateway?.klarna) {
+            try {
+              await captureAndTrackKlarnaFromWebhook(
+                updatedMeta.klarnaOrderId,
+                updatedMeta.klarnaCaptureId,
+                trackingNum,
+                carrierCode,
+                trackingUrl,
+                orderMap.medusa_order_id,
+                req.scope
+              )
+              // Mark as sent + captured in metadata
+              updatedMeta.tracking_sent_to_gateway = {
+                ...(updatedMeta.tracking_sent_to_gateway || {}),
+                klarna: true,
+                klarna_timestamp: new Date().toISOString(),
+              }
+              updatedMeta.payment_captured = true
+              updatedMeta.payment_captured_at = updatedMeta.payment_captured_at || new Date().toISOString()
+              // Save updated metadata
+              const klarnaPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+              await klarnaPool.query(
+                `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+                [JSON.stringify(updatedMeta), orderMap.medusa_order_id]
+              )
+              await klarnaPool.end()
+              console.log(`[mySTOCK Webhook] ✅ Klarna captured + tracking sent for order ${orderMap.medusa_order_id}`)
+            } catch (klarnaErr: any) {
+              console.error(`[mySTOCK Webhook] ❌ Klarna capture/tracking failed for order ${orderMap.medusa_order_id}:`, klarnaErr.message)
+            }
+          }
+
           // ── Shipment notification email ──────────────────────────────
           // After DISPATCHED status + tracking number are set, send shipment email to customer
           // Uses 5-second delay to allow both pieces of data to settle
@@ -920,4 +956,151 @@ async function sendTrackingToPayPalFromWebhook(
     true,
     paypalCarrier.carrier_name_other
   )
+}
+
+// ═══════════════════════════════════════════
+// KLARNA CAPTURE + TRACKING HELPER
+// ═══════════════════════════════════════════
+
+/**
+ * Capture Klarna payment and send tracking info.
+ * If already captured (captureId exists), just adds shipping info.
+ * If not yet captured, captures with shipping_info in one call.
+ */
+async function captureAndTrackKlarnaFromWebhook(
+  klarnaOrderId: string,
+  existingCaptureId: string | undefined,
+  trackingNumber: string,
+  carrier: string,
+  trackingUrl: string,
+  medusaOrderId: string,
+  scope: any
+): Promise<void> {
+  // 1. Get Klarna credentials from gateway config or env vars
+  let apiKey: string | undefined
+  let secretKey: string | undefined
+  let testMode = true
+
+  try {
+    const pgPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+    const { rows } = await pgPool.query(
+      `SELECT mode, live_keys, test_keys FROM gateway_config
+       WHERE provider = 'klarna' AND is_active = true AND deleted_at IS NULL
+       ORDER BY priority ASC LIMIT 1`
+    )
+    await pgPool.end()
+    if (rows[0]) {
+      const isLive = rows[0].mode === "live"
+      const keys = isLive ? rows[0].live_keys : rows[0].test_keys
+      apiKey = keys?.api_key
+      secretKey = keys?.secret_key
+      testMode = !isLive
+    }
+  } catch (e: any) {
+    console.warn(`[Klarna Tracking] DB query failed: ${e.message}`)
+  }
+
+  if (!apiKey) apiKey = process.env.KLARNA_API_KEY
+  if (!secretKey) secretKey = process.env.KLARNA_SECRET_KEY
+  if (process.env.KLARNA_TEST_MODE === "false") testMode = false
+
+  if (!apiKey || !secretKey) {
+    console.warn(`[Klarna Tracking] No credentials configured, skipping for ${medusaOrderId}`)
+    return
+  }
+
+  // 2. Create Klarna client
+  const { KlarnaApiClient } = await import("../../../modules/payment-klarna/api-client.js")
+  const client = new KlarnaApiClient(apiKey, secretKey, testMode)
+
+  // Normalize carrier name for Klarna
+  const klarnaCarrier = carrier || "GLS"
+
+  // Build tracking URI
+  const trackingUri = trackingUrl || undefined
+
+  if (existingCaptureId) {
+    // 3a. Already captured — just add shipping info
+    console.log(`[Klarna Tracking] Adding shipping info to existing capture ${existingCaptureId} for order ${klarnaOrderId}`)
+    const result = await client.addShippingInfo(klarnaOrderId, existingCaptureId, {
+      shipping_company: klarnaCarrier,
+      tracking_number: trackingNumber,
+      tracking_uri: trackingUri,
+    })
+    if (!result.success) {
+      throw new Error(result.error || "Failed to add shipping info to Klarna")
+    }
+    console.log(`[Klarna Tracking] ✅ Shipping info added to capture ${existingCaptureId}`)
+  } else {
+    // 3b. Not yet captured — get order from Klarna to determine amount, then capture with shipping_info
+    console.log(`[Klarna Tracking] Fetching Klarna order ${klarnaOrderId} for capture...`)
+    const orderDetails = await client.getOrder(klarnaOrderId)
+    if (!orderDetails.success || !orderDetails.data) {
+      throw new Error(orderDetails.error || `Failed to get Klarna order ${klarnaOrderId}`)
+    }
+
+    const klarnaOrder = orderDetails.data
+    const remainingAmount = klarnaOrder.remaining_authorized_amount
+    const orderAmount = klarnaOrder.order_amount
+
+    // Check if already fully captured
+    if (klarnaOrder.status === "CAPTURED" || remainingAmount === 0) {
+      // Already captured, try to find capture_id and add shipping info
+      const captures = klarnaOrder.captures || []
+      const captureId = captures[0]?.capture_id
+      if (captureId) {
+        console.log(`[Klarna Tracking] Order already captured (${captureId}), adding shipping info`)
+        const result = await client.addShippingInfo(klarnaOrderId, captureId, {
+          shipping_company: klarnaCarrier,
+          tracking_number: trackingNumber,
+          tracking_uri: trackingUri,
+        })
+        if (!result.success) {
+          throw new Error(result.error || "Failed to add shipping info")
+        }
+        // Save capture ID to metadata
+        const savePool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+        await savePool.query(
+          `UPDATE "order" SET metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{klarnaCaptureId}', $1::jsonb), updated_at = NOW() WHERE id = $2`,
+          [JSON.stringify(captureId), medusaOrderId]
+        )
+        await savePool.end()
+        console.log(`[Klarna Tracking] ✅ Shipping info added to already-captured order`)
+      } else {
+        console.warn(`[Klarna Tracking] Order already captured but no capture_id found`)
+      }
+      return
+    }
+
+    // Capture the full remaining amount with shipping info
+    const captureAmount = remainingAmount || orderAmount
+    console.log(`[Klarna Tracking] Capturing ${captureAmount} (minor units) with tracking for order ${klarnaOrderId}`)
+
+    const captureResult = await client.captureOrder(klarnaOrderId, {
+      captured_amount: captureAmount,
+      description: `Shipment dispatched — order ${medusaOrderId}`,
+      shipping_info: [
+        {
+          shipping_company: klarnaCarrier,
+          tracking_number: trackingNumber,
+          tracking_uri: trackingUri,
+        },
+      ],
+    })
+
+    if (!captureResult.success) {
+      throw new Error(captureResult.error || "Klarna capture failed")
+    }
+
+    const captureId = captureResult.data?.capture_id || "unknown"
+    console.log(`[Klarna Tracking] ✅ Captured + tracking sent: capture_id=${captureId}`)
+
+    // Save capture ID to metadata
+    const savePool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+    await savePool.query(
+      `UPDATE "order" SET metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{klarnaCaptureId}', $1::jsonb), updated_at = NOW() WHERE id = $2`,
+      [JSON.stringify(captureId), medusaOrderId]
+    )
+    await savePool.end()
+  }
 }
