@@ -79,7 +79,7 @@ export async function sendSms(phoneNumber: string, message: string): Promise<boo
     },
     body: JSON.stringify({
       message,
-      recipients: phoneNumber,
+      recipients: [phoneNumber],
       channel: Number(channelId),
     }),
   })
