@@ -157,7 +157,16 @@ export function buildDispatchSms(
   trackingUrl: string
 ): string | null {
   if (!config.smsDispatchTemplate) return null
-  return config.smsDispatchTemplate.replace('{url}', trackingUrl)
+  // Strip URL query params that bloat the SMS (e.g. &postalCode=12345)
+  // Keep only the base tracking URL with the main match/id parameter
+  let smsUrl = trackingUrl
+  try {
+    const u = new URL(smsUrl)
+    const keysToRemove = [...u.searchParams.keys()].filter(k => k !== 'match' && k !== 'id' && k !== 'number')
+    keysToRemove.forEach(k => u.searchParams.delete(k))
+    smsUrl = u.toString()
+  } catch { /* not a valid URL, use as-is */ }
+  return config.smsDispatchTemplate.replace('{url}', smsUrl)
 }
 
 /**
