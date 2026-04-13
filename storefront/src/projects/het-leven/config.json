@@ -1,0 +1,47 @@
+{
+  "slug": "het-leven",
+  "name": "Het Leven Dat Je Verdient",
+  "domain": "pakjeleventerug.nl",
+  "domainAliases": ["www.pakjeleventerug.nl"],
+  "locale": "nl",
+  "defaultCountry": "NL",
+  "defaultPhonePrefix": "31",
+  "phonePrefixByCountry": {
+    "NL": "31",
+    "BE": "32"
+  },
+  "salesChannelName": "Het Leven",
+  "medusaUrl": "",
+  "publishableApiKey": "pk_a3616ab4b62995958f9a2413b9e6e185704d4162b8600510ab618bc24250ed6e",
+  "facebookPixelId": "",
+  "regions": {
+    "NL": "",
+    "BE": ""
+  },
+  "mainProduct": {
+    "name": "Het Leven Dat Je Verdient",
+    "handle": "het-leven-dat-je-verdient",
+    "variantId": "",
+    "price": 36,
+    "currency": "EUR",
+    "thumbnail": ""
+  },
+  "bundleOptions": [
+    { "qty": 1, "price": 36, "save": 0, "badge": "VOOR JEZELF", "variantId": "variant_01KP3WW3ZGQG8Q195T7FR7WW1H" },
+    { "qty": 2, "price": 59, "save": 13, "badge": "DEEL MET EEN VRIEND(IN)", "variantId": "variant_01KP3WW5TBGHPHMGR9TSFRHAJH" },
+    { "qty": 3, "price": 79, "save": 29, "badge": "PERFECT ALS CADEAU", "variantId": "variant_01KP3WW77H93NRJ163R9ZGAD3M" },
+    { "qty": 4, "price": 99, "save": 45, "badge": "BESTE WAARDE", "variantId": "variant_01KP3WW91RR2Z6X81VF4RGQGH1" }
+  ],
+  "catalogContentIds": [],
+  "mollieProfileId": "",
+  "paymentProviders": {
+    "mollie": "pp_mollie_mollie",
+    "paypal": "pp_paypal_paypal",
+    "airwallex": "pp_airwallex_airwallex"
+  },
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "thank-you": "thank-you.html"
+  }
+}
