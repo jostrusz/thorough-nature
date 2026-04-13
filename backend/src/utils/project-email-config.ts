@@ -143,6 +143,21 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     locale: 'cs',
     smsDispatchTemplate: 'Psi superzivot: Zasilka odeslana. Sledovaci odkaz: {url} podpora@psi-superzivot.cz',
   },
+  'het-leven': {
+    replyTo: 'annadevries@pakjeleventerug.nl',
+    fromName: 'Het Leven Dat Je Verdient',
+    fromEmail: 'Het Leven Dat Je Verdient <annadevries@pakjeleventerug.nl>',
+    project: 'het-leven',
+    smsDispatchTemplate: 'Het Leven Dat Je Verdient: Bestelling verzonden. Track & trace: {url} annadevries@pakjeleventerug.nl',
+  },
+  // Also match without hyphen
+  hetleven: {
+    replyTo: 'annadevries@pakjeleventerug.nl',
+    fromName: 'Het Leven Dat Je Verdient',
+    fromEmail: 'Het Leven Dat Je Verdient <annadevries@pakjeleventerug.nl>',
+    project: 'het-leven',
+    smsDispatchTemplate: 'Het Leven Dat Je Verdient: Bestelling verzonden. Track & trace: {url} annadevries@pakjeleventerug.nl',
+  },
 }
 
 /** Default config (Loslatenboek) when project_id is missing or unknown */
