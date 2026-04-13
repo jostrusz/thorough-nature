@@ -657,18 +657,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
                   return
                 }
 
-                // Mark SMS as sent FIRST to prevent duplicates (optimistic lock)
+                // Claim this SMS with optimistic lock (prevents duplicate attempts)
                 const markSmsPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
                 const markSmsResult = await markSmsPool.query(
                   `UPDATE "order" SET metadata = metadata || $1::jsonb, updated_at = NOW()
                    WHERE id = $2 AND (metadata->>'sms_dispatch_sent' IS NULL OR metadata->>'sms_dispatch_sent' = 'false')
+                     AND (metadata->>'sms_dispatch_attempting' IS NULL OR metadata->>'sms_dispatch_attempting' = 'false')
                    RETURNING id`,
-                  [JSON.stringify({ sms_dispatch_sent: true, sms_dispatch_sent_at: new Date().toISOString() }), smsOrderId]
+                  [JSON.stringify({ sms_dispatch_attempting: true }), smsOrderId]
                 )
                 await markSmsPool.end()
 
                 if (markSmsResult.rowCount === 0) {
-                  console.log(`[GoSMS] SMS already sent (race condition) for order ${smsOrderId}`)
+                  console.log(`[GoSMS] SMS already sent or in progress for order ${smsOrderId}`)
                   return
                 }
 
@@ -693,6 +694,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
                 if (!phone) {
                   console.log(`[GoSMS] No phone number for order ${smsOrderId}, skipping SMS`)
+                  // Release lock so it can retry
+                  const relPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                  await relPool.query(`UPDATE "order" SET metadata = metadata - 'sms_dispatch_attempting', updated_at = NOW() WHERE id = $1`, [smsOrderId])
+                  await relPool.end()
                   return
                 }
 
@@ -702,6 +707,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
                 if (formattedPhone === "000") {
                   console.log(`[GoSMS] No valid phone number for order ${smsOrderId}, skipping SMS`)
+                  const relPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                  await relPool.query(`UPDATE "order" SET metadata = metadata - 'sms_dispatch_attempting', updated_at = NOW() WHERE id = $1`, [smsOrderId])
+                  await relPool.end()
                   return
                 }
 
@@ -715,17 +723,43 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
                 if (!smsText) {
                   console.log(`[GoSMS] No SMS template for project ${smsProjectConfig.project}, skipping`)
+                  const relPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                  await relPool.query(`UPDATE "order" SET metadata = metadata - 'sms_dispatch_attempting', updated_at = NOW() WHERE id = $1`, [smsOrderId])
+                  await relPool.end()
                   return
                 }
 
                 const sent = await sendSms(formattedPhone, smsText)
                 if (sent) {
-                  console.log(`[GoSMS] SMS sent to ${formattedPhone} for order ${smsOrderId}`)
+                  // Mark as successfully sent AFTER confirmed delivery
+                  const successPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                  await successPool.query(
+                    `UPDATE "order" SET metadata = metadata || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+                    [JSON.stringify({ sms_dispatch_sent: true, sms_dispatch_sent_at: new Date().toISOString(), sms_dispatch_attempting: false }), smsOrderId]
+                  )
+                  await successPool.end()
+                  console.log(`[GoSMS] ✅ SMS sent to ${formattedPhone} for order ${smsOrderId}`)
                 } else {
-                  console.warn(`[GoSMS] SMS failed/skipped for order ${smsOrderId}`)
+                  // Release lock so it can retry on next event
+                  const relPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                  await relPool.query(
+                    `UPDATE "order" SET metadata = metadata || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+                    [JSON.stringify({ sms_dispatch_attempting: false, sms_dispatch_last_error: "sendSms returned false" }), smsOrderId]
+                  )
+                  await relPool.end()
+                  console.warn(`[GoSMS] ⚠️ SMS failed/skipped for order ${smsOrderId}`)
                 }
               } catch (smsErr: any) {
-                console.error(`[GoSMS] Failed to send SMS for order ${smsOrderId}:`, smsErr.message)
+                console.error(`[GoSMS] ❌ Failed to send SMS for order ${smsOrderId}:`, smsErr.message)
+                // Release lock so it can retry on next event
+                try {
+                  const errPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+                  await errPool.query(
+                    `UPDATE "order" SET metadata = metadata || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+                    [JSON.stringify({ sms_dispatch_attempting: false, sms_dispatch_last_error: smsErr.message }), smsOrderId]
+                  )
+                  await errPool.end()
+                } catch { /* ignore */ }
               }
             }, 7000) // 7 second delay (after email's 5s)
           }
