@@ -219,7 +219,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
     // Skip if new status is behind or equal to current (except CANCELLED which always applies)
     // But allow DELIVERED to always go through (rank 6) since it's the final state
-    if (orderMap && newStatus && newStatus !== "CANCELLED" && newStatus !== "DELIVERED" && newRank <= prevRank) {
+    // Also allow DISPATCHED duplicates through — the action blocks (Klarna capture, PayPal tracking,
+    // SMS, email) have their own deduplication guards and need to run even on repeated DISPATCHED events
+    // (e.g. Event 29 carrier handoff arriving after Event 12 initial dispatch)
+    const isDispatchedDuplicate = newStatus === "DISPATCHED" && newRank <= prevRank
+    if (orderMap && newStatus && newStatus !== "CANCELLED" && newStatus !== "DELIVERED" && newStatus !== "DISPATCHED" && newRank <= prevRank) {
       console.log(`[mySTOCK Webhook] Event ${event.eventId} type=${eventType} — skipping status ${newStatus} (rank ${newRank}), order ${orderMap.mystock_order_code} already at ${previousStatus} (rank ${prevRank})`)
       // Still log the event but don't update the order
       await dextrumService.createDextrumEventLogs({
@@ -234,6 +238,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       })
       res.json({ data: { id: event.eventId }, errors: [] })
       return
+    }
+    if (isDispatchedDuplicate) {
+      console.log(`[mySTOCK Webhook] Event ${event.eventId} type=${eventType} — duplicate DISPATCHED for ${orderMap?.mystock_order_code}, allowing through for action blocks (Klarna/PayPal/SMS/email)`)
     }
 
     // 5. Update dextrum_order_map
