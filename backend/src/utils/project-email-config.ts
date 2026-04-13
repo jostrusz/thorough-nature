@@ -77,14 +77,14 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromName: 'De Hondenbijbel',
     fromEmail: 'De Hondenbijbel <support@dehondenbijbel.nl>',
     project: 'dehondenbijbel',
-    smsDispatchTemplate: 'Bestelling verzonden. Track: {url} support@dehondenbijbel.nl',
+    smsDispatchTemplate: 'De Hondenbijbel: Bestelling verzonden. Track & trace: {url} support@dehondenbijbel.nl',
   },
   loslatenboek: {
     replyTo: 'boek@loslatenboek.nl',
     fromName: 'Laat Los Wat Je Kapotmaakt',
     fromEmail: 'Laat Los Wat Je Kapotmaakt <boek@loslatenboek.nl>',
     project: 'loslatenboek',
-    smsDispatchTemplate: 'Bestelling verzonden. Track: {url} boek@loslatenboek.nl',
+    smsDispatchTemplate: 'Laat los wat je kapotmaakt: Bestelling verzonden. Track & trace: {url} boek@loslatenboek.nl',
   },
   'slapp-taget': {
     replyTo: 'hej@slapptagetboken.se',
@@ -99,7 +99,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Odpuść to, co cię niszczy <biuro@odpusc-ksiazka.pl>',
     project: 'odpusc-ksiazka',
     locale: 'pl',
-    smsDispatchTemplate: 'Zamowienie wyslane. Sledzenie: {url} biuro@odpusc-ksiazka.pl',
+    smsDispatchTemplate: 'Odpusc to, co cie niszczy: Zamowienie wyslane. Sledzenie: {url} biuro@odpusc-ksiazka.pl',
   },
   // Also match without hyphen (fallback)
   slapptaget: {
@@ -115,7 +115,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Joris de Vries - Lass los, was dich kaputt macht <buch@lasslosbuch.de>',
     project: 'lass-los',
     locale: 'de',
-    smsDispatchTemplate: 'Bestellung versendet. Tracking: {url} buch@lasslosbuch.de',
+    smsDispatchTemplate: 'Lass los, was dich kaputt macht: Bestellung versandt. Sendungsverfolgung: {url} buch@lasslosbuch.de',
   },
   // Also match without hyphen (fallback)
   lasslos: {
@@ -124,7 +124,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Joris de Vries - Lass los, was dich kaputt macht <buch@lasslosbuch.de>',
     project: 'lass-los',
     locale: 'de',
-    smsDispatchTemplate: 'Bestellung versendet. Tracking: {url} buch@lasslosbuch.de',
+    smsDispatchTemplate: 'Lass los, was dich kaputt macht: Bestellung versandt. Sendungsverfolgung: {url} buch@lasslosbuch.de',
   },
   'psi-superzivot': {
     replyTo: 'podpora@psi-superzivot.cz',
@@ -132,7 +132,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Lars Vermeulen - Psí superživot <podpora@psi-superzivot.cz>',
     project: 'psi-superzivot',
     locale: 'cs',
-    smsDispatchTemplate: 'Objednavka odeslana. Sledovani: {url} podpora@psi-superzivot.cz',
+    smsDispatchTemplate: 'Psi superzivot: Zasilka odeslana. Sledovaci odkaz: {url} podpora@psi-superzivot.cz',
   },
   // Also match without hyphen
   psisuperzivot: {
@@ -141,7 +141,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Lars Vermeulen - Psí superživot <podpora@psi-superzivot.cz>',
     project: 'psi-superzivot',
     locale: 'cs',
-    smsDispatchTemplate: 'Objednavka odeslana. Sledovani: {url} podpora@psi-superzivot.cz',
+    smsDispatchTemplate: 'Psi superzivot: Zasilka odeslana. Sledovaci odkaz: {url} podpora@psi-superzivot.cz',
   },
 }
 
