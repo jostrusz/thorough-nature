@@ -6617,14 +6617,33 @@ body {
   })();
 
   /* ─── OBRÁZEK PRODUKTU ─── */
-  if (PROJECT_CONFIG.mainProduct.thumbnail) {
-    var thumbUrl = PROJECT_CONFIG.mainProduct.thumbnail.indexOf('http') === 0 ? PROJECT_CONFIG.mainProduct.thumbnail : MEDUSA_URL + PROJECT_CONFIG.mainProduct.thumbnail;
-    var imgHtml = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
+  function applyMainProductThumb(thumbUrl, altName) {
+    if (!thumbUrl) return;
+    var full = thumbUrl.indexOf('http') === 0 ? thumbUrl : MEDUSA_URL + thumbUrl;
+    var imgHtml = '<img src="' + full + '" alt="' + (altName || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
     var desktopImg = document.getElementById('desktop-product-img');
     if (desktopImg) desktopImg.innerHTML = imgHtml;
-    // Obrázek v mobilním sticky baru
     var msbThumb = document.getElementById('msb-thumb');
-    if (msbThumb) msbThumb.innerHTML = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">';
+    if (msbThumb) msbThumb.innerHTML = '<img src="' + full + '" alt="' + (altName || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">';
+  }
+
+  if (PROJECT_CONFIG.mainProduct.thumbnail) {
+    applyMainProductThumb(PROJECT_CONFIG.mainProduct.thumbnail, PROJECT_CONFIG.mainProduct.name);
+  } else if (PROJECT_CONFIG.mainProduct.handle) {
+    // Fallback — fetch thumbnail z Medusa admin podle handle
+    medusaFetch('/store/products?handle=' + PROJECT_CONFIG.mainProduct.handle, {
+      method: 'GET',
+      headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
+    }).then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }).then(function(data) {
+      var product = data.products && data.products[0];
+      var thumb = product && (product.thumbnail || (product.images && product.images[0] && product.images[0].url));
+      if (thumb) applyMainProductThumb(thumb, product.title || PROJECT_CONFIG.mainProduct.name);
+    }).catch(function(err) {
+      console.warn('[Checkout] Kon hoofdproduct thumbnail niet laden:', err);
+    });
   }
 
   /* ─── PROMO KÓDY — toggle + apply + remove ─── */
