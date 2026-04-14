@@ -124,6 +124,9 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
   const [shippingOptionName, setShippingOptionName] = useState("Standard Shipping")
   const [shippingMethodType, setShippingMethodType] = useState("home_delivery")
   const [availableShippingOptions, setAvailableShippingOptions] = useState<any[]>([])
+  // Paczkomat / Pickup point fields
+  const [pickupPointId, setPickupPointId] = useState("")
+  const [pickupPointName, setPickupPointName] = useState("")
 
   // Available options from API
   const [availableProjects, setAvailableProjects] = useState<any[]>([])
@@ -231,6 +234,8 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
           shipping_option_id: shippingOptionId || undefined,
           shipping_option_name: shippingOptionName,
           shipping_method_type: shippingMethodType,
+          pickup_point_id: pickupPointId || undefined,
+          pickup_point_name: pickupPointName || undefined,
           notes,
         },
       }) as any
@@ -541,6 +546,13 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
                   { value: "zasilkovna_home", label: "Zásilkovna Home Delivery" },
                 ]}
               />
+              {/* Paczkomat / Pickup point fields — shown when pickup type selected */}
+              {shippingMethodType === "zasilkovna_pickup" && (
+                <>
+                  <Field label="Pickup ID" value={pickupPointId} onChange={setPickupPointId} placeholder="e.g. 35779 (Paczkomat/Zásilkovna ID)" />
+                  <Field label="Pickup name" value={pickupPointName} onChange={setPickupPointName} placeholder="e.g. InPost Kraków Główny" />
+                </>
+              )}
 
               {/* Payment */}
               <SectionHeader icon="&#x1f4b3;" label="Payment" />
@@ -620,17 +632,24 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
             >
               Cancel
             </button>
+            {/* Missing fields hint */}
+            {!creating && (!firstName || !lastName || !email || !address1) && (
+              <span style={{ fontSize: "11px", color: colors.red, maxWidth: "200px", textAlign: "center" }}>
+                Missing: {[!firstName && "first name", !lastName && "last name", !email && "email", !address1 && "street address"].filter(Boolean).join(", ")}
+              </span>
+            )}
             <button
               onClick={handleCreate}
               disabled={creating || !firstName || !lastName || !email || !address1}
               style={{
                 padding: "9px 24px", fontSize: "13px", fontWeight: 700,
                 color: "#fff", border: "none", borderRadius: radii.xs,
-                cursor: creating ? "not-allowed" : "pointer",
-                background: creating
+                cursor: (creating || !firstName || !lastName || !email || !address1) ? "not-allowed" : "pointer",
+                opacity: (!creating && (!firstName || !lastName || !email || !address1)) ? 0.45 : 1,
+                background: (creating || !firstName || !lastName || !email || !address1)
                   ? colors.textMuted
                   : `linear-gradient(135deg, ${colors.green}, #00D68F)`,
-                boxShadow: creating ? "none" : `0 2px 8px ${colors.green}40`,
+                boxShadow: (creating || !firstName || !lastName || !email || !address1) ? "none" : `0 2px 8px ${colors.green}40`,
                 transition: "all 0.2s",
                 display: "flex", alignItems: "center", gap: "8px",
               }}
