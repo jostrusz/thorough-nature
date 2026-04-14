@@ -673,7 +673,7 @@ h3 { font-size: 26px; }
 /* ─── INTERACTIVE MODULE 1: REVEALER ─── */
 .revealer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
 .reveal-card {
- perspective: 1000px; height: 280px; cursor: pointer;
+ perspective: 1000px; height: 380px; cursor: pointer;
 }
 .reveal-card-inner {
  position: relative; width: 100%; height: 100%;
@@ -683,8 +683,9 @@ h3 { font-size: 26px; }
 .reveal-card.flipped .reveal-card-inner { transform: rotateY(180deg); }
 .reveal-front, .reveal-back {
  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
- backface-visibility: hidden; border-radius: 16px; padding: 28px 24px;
- display: flex; flex-direction: column; justify-content: center;
+ backface-visibility: hidden; border-radius: 16px; padding: 24px 22px;
+ display: flex; flex-direction: column; justify-content: flex-start;
+ overflow: hidden;
 }
 .reveal-front {
  background: linear-gradient(145deg, rgba(184,92,74,0.06), rgba(184,92,74,0.02));
@@ -824,7 +825,7 @@ h3 { font-size: 26px; }
  border-radius: 0 0 20px 20px !important;
  padding: 28px 20px !important;
  }
- .reveal-card { height: 260px; }
+ .reveal-card { height: 360px; }
  .mirror-icon { width: 34px; height: 34px; }
  .mirror-icon svg { width: 18px; height: 18px; }
 }
@@ -1186,7 +1187,7 @@ img, video, iframe {
 
  /* ▸ REVEALER CARDS */
  .revealer-grid { grid-template-columns: 1fr !important; }
- .reveal-card { height: 260px !important; }
+ .reveal-card { height: 400px !important; }
  .reveal-front, .reveal-back { padding: 22px 18px !important; }
  .reveal-front h4, .reveal-back h4 { font-size: 17px !important; }
  .reveal-front p, .reveal-back p { font-size: 14px !important; line-height: 1.6 !important; }
@@ -1553,7 +1554,7 @@ setTimeout(function() {
       "name": "Waar wordt het boek naartoe verzonden?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Het boek wordt gratis verzonden naar Nederland en Belgie. Verzending naar Duitsland, Oostenrijk en Luxemburg is ook mogelijk. De levertijd is 2-4 werkdagen via GLS."
+        "text": "Het boek wordt gratis verzonden naar Nederland en Belgie. De levertijd is 2-4 werkdagen via GLS."
       }
     }
   ]
@@ -2340,7 +2341,7 @@ width="380" height="543" loading="eager" fetchpriority="high" alt="The Art of Li
  </div>
  <div style="display: flex; align-items: center; gap: 10px;">
  <span style="font-size: 18px; flex-shrink: 0;">🚚</span>
- <span style="color: rgba(255,255,255,0.85); font-size: 14.5px;"><strong style="color: #fff;">Gratis verzending</strong> · NL / BE / DE / AT / LU</span>
+ <span style="color: rgba(255,255,255,0.85); font-size: 14.5px;"><strong style="color: #fff;">Gratis verzending</strong> · Nederland &amp; België</span>
  </div>
  <div style="display: flex; align-items: center; gap: 10px;">
  <span style="font-size: 18px; flex-shrink: 0;">🛡️</span>
@@ -2363,12 +2364,14 @@ width="380" height="543" loading="eager" fetchpriority="high" alt="The Art of Li
 
  <!-- Betaalmethoden -->
  <div class="payment-row" style="margin-top: 16px;">
- <div class="pay-icon ideal">iDEAL</div>
- <div class="pay-icon bancontact">Banc.</div>
- <div class="pay-icon visa">VISA</div>
- <div class="pay-icon mc">MC</div>
- <div class="pay-icon paypal">PayPal</div>
- <div class="pay-icon klarna">Klarna</div>
+ <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" loading="lazy">
+ <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" loading="lazy">
+ <img src="/icons/visa.svg" alt="VISA" class="pay-icon" loading="lazy">
+ <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" loading="lazy">
+ <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" loading="lazy">
+ <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" loading="lazy">
+ <img src="/icons/applepay.svg" alt="Apple Pay" class="pay-icon" loading="lazy">
+ <img src="/icons/googlepay.svg" alt="Google Pay" class="pay-icon" loading="lazy">
  </div>
 
  </div>
@@ -3602,12 +3605,14 @@ width="380" height="543" loading="eager" fetchpriority="high" alt="The Art of Li
  <span class="final-badge urgency">✦ Gelimiteerde oplage — 500 stuks</span>
  </div>
  <div class="payment-row" style="justify-content: center; margin-top: 12px;">
- <div class="pay-icon ideal">iDEAL</div>
- <div class="pay-icon bancontact">Banc.</div>
- <div class="pay-icon visa">VISA</div>
- <div class="pay-icon mc">MC</div>
- <div class="pay-icon paypal">PayPal</div>
- <div class="pay-icon klarna">Klarna</div>
+ <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" loading="lazy">
+ <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" loading="lazy">
+ <img src="/icons/visa.svg" alt="VISA" class="pay-icon" loading="lazy">
+ <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" loading="lazy">
+ <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" loading="lazy">
+ <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" loading="lazy">
+ <img src="/icons/applepay.svg" alt="Apple Pay" class="pay-icon" loading="lazy">
+ <img src="/icons/googlepay.svg" alt="Google Pay" class="pay-icon" loading="lazy">
  </div>
  </div>
  </div>

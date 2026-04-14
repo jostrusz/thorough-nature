@@ -84,6 +84,13 @@
       "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
     },
     {
+      "name": "het-leven",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
+      "runtimeArgs": ["http-server", "storefront/src/projects/het-leven/pages", "-p", "8102", "-c-1"],
+      "port": 8102,
+      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+    },
+    {
       "name": "dehondenbijbel",
       "runtimeExecutable": "/opt/homebrew/bin/npx",
       "runtimeArgs": ["http-server", "storefront/src/projects/dehondenbijbel/pages", "-p", "8101", "-c-1"],
