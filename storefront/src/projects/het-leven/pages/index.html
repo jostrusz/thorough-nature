@@ -296,17 +296,12 @@ h3 { font-size: 26px; }
  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px;
 }
 .pay-icon {
- width: 42px; height: 28px; background: var(--white); border: 1px solid rgba(240,213,196,0.5);
- border-radius: 4px; display: flex; align-items: center; justify-content: center;
- font-size: 9px; font-weight: 700; color: var(--body); transition: all 0.2s ease;
+ height: 28px; width: auto; background: #fff; border: 1px solid rgba(74,26,46,0.08);
+ border-radius: 6px; padding: 4px 8px; box-sizing: border-box;
+ display: inline-flex; align-items: center; justify-content: center;
+ object-fit: contain; transition: all 0.2s ease;
 }
 .pay-icon:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.08); }
-.pay-icon.ideal { background: #CC0066; color: white; font-size: 8px; }
-.pay-icon.bancontact { background: #005498; color: white; font-size: 7px; }
-.pay-icon.visa { background: #1A1F71; color: white; }
-.pay-icon.mc { background: #EB001B; color: white; font-size: 8px; }
-.pay-icon.paypal { background: #003087; color: white; font-size: 7px; }
-.pay-icon.klarna { background: #FFB3C7; color: #0A0B09; font-size: 7px; font-weight: 800; }
 
 /* ─── MIRROR ─── */
 .mirror-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
@@ -995,9 +990,8 @@ img, video, iframe {
  gap: 6px !important;
  }
  .pay-icon {
- width: 44px !important;
- height: 30px !important;
- font-size: 9px !important;
+ height: 26px !important;
+ padding: 3px 6px !important;
  }
 
  /* ▸ MIRROR CARDS */
@@ -1725,10 +1719,10 @@ setTimeout(function() {
 
  <!-- Menu links - desktop -->
  <div class="nav-links" style="display: flex; align-items: center; gap: 24px;">
- <a href="https://www.pakjeleventerug.nl/hetlevendatjeverdient/verzend-retourbeleid" style="font-size: 13.5px; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.2s;">Verzending</a>
- <a href="https://www.pakjeleventerug.nl/hetlevendatjeverdient/algemene-voorwaarden" style="font-size: 13.5px; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.2s;">Voorwaarden</a>
- <a href="https://www.pakjeleventerug.nl/hetlevendatjeverdient/privacybeleid" style="font-size: 13.5px; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.2s;">Privacy</a>
- <a href="https://www.pakjeleventerug.nl/hetlevendatjeverdient/contact-pagina" style="font-size: 13.5px; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.2s;">Contact</a>
+ <a href="/verzending" style="font-size: 13.5px; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.2s;">Verzending</a>
+ <a href="/voorwaarden" style="font-size: 13.5px; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.2s;">Voorwaarden</a>
+ <a href="/privacy" style="font-size: 13.5px; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.2s;">Privacy</a>
+ <a href="/contact" style="font-size: 13.5px; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.2s;">Contact</a>
  <a href="/checkout" style="display: inline-flex; align-items: center; gap: 6px; background: var(--cta); color: #fff; font-size: 13.5px; font-weight: 600; padding: 8px 18px; border-radius: 8px; text-decoration: none; transition: background 0.2s; white-space: nowrap;">Bestel nu →</a>
  </div>
 
@@ -1740,10 +1734,10 @@ setTimeout(function() {
 
  <!-- Mobiel menu -->
  <div id="nav-mobile-menu" style="display: none; padding: 0 0 16px; border-top: 1px solid rgba(74,26,46,0.06);">
- <a href="https://www.pakjeleventerug.nl/hetlevendatjeverdient/verzend-retourbeleid" style="display: block; padding: 12px 0; font-size: 14.5px; color: var(--body); text-decoration: none; border-bottom: 1px solid rgba(74,26,46,0.04);">Verzending</a>
- <a href="https://www.pakjeleventerug.nl/hetlevendatjeverdient/algemene-voorwaarden" style="display: block; padding: 12px 0; font-size: 14.5px; color: var(--body); text-decoration: none; border-bottom: 1px solid rgba(74,26,46,0.04);">Voorwaarden</a>
- <a href="https://www.pakjeleventerug.nl/hetlevendatjeverdient/privacybeleid" style="display: block; padding: 12px 0; font-size: 14.5px; color: var(--body); text-decoration: none; border-bottom: 1px solid rgba(74,26,46,0.04);">Privacy</a>
- <a href="https://www.pakjeleventerug.nl/hetlevendatjeverdient/contact-pagina" style="display: block; padding: 12px 0; font-size: 14.5px; color: var(--body); text-decoration: none; border-bottom: 1px solid rgba(74,26,46,0.04);">Contact</a>
+ <a href="/verzending" style="display: block; padding: 12px 0; font-size: 14.5px; color: var(--body); text-decoration: none; border-bottom: 1px solid rgba(74,26,46,0.04);">Verzending</a>
+ <a href="/voorwaarden" style="display: block; padding: 12px 0; font-size: 14.5px; color: var(--body); text-decoration: none; border-bottom: 1px solid rgba(74,26,46,0.04);">Voorwaarden</a>
+ <a href="/privacy" style="display: block; padding: 12px 0; font-size: 14.5px; color: var(--body); text-decoration: none; border-bottom: 1px solid rgba(74,26,46,0.04);">Privacy</a>
+ <a href="/contact" style="display: block; padding: 12px 0; font-size: 14.5px; color: var(--body); text-decoration: none; border-bottom: 1px solid rgba(74,26,46,0.04);">Contact</a>
  <a href="/checkout" style="display: block; text-align: center; margin-top: 12px; background: var(--cta); color: #fff; font-size: 14.5px; font-weight: 600; padding: 12px 18px; border-radius: 8px; text-decoration: none;">Bestel nu →</a>
  </div>
 </nav>
@@ -1874,12 +1868,14 @@ document.querySelectorAll('#nav-mobile-menu a').forEach(function(a) {
  </div>
 
  <div class="payment-row anim d5" style="margin-top: 16px;">
- <div class="pay-icon ideal">iDEAL</div>
- <div class="pay-icon bancontact">Banc.</div>
- <div class="pay-icon visa">VISA</div>
- <div class="pay-icon mc">MC</div>
- <div class="pay-icon paypal">PayPal</div>
- <div class="pay-icon klarna">Klarna</div>
+ <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" loading="lazy">
+ <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" loading="lazy">
+ <img src="/icons/visa.svg" alt="VISA" class="pay-icon" loading="lazy">
+ <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" loading="lazy">
+ <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" loading="lazy">
+ <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" loading="lazy">
+ <img src="/icons/applepay.svg" alt="Apple Pay" class="pay-icon" loading="lazy">
+ <img src="/icons/googlepay.svg" alt="Google Pay" class="pay-icon" loading="lazy">
  </div>
  </div>
  </div>
@@ -3571,8 +3567,8 @@ width="380" height="543" loading="eager" fetchpriority="high" alt="The Art of Li
  <div style="font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #C9A96E; margin-bottom: 12px;">Klantenservice</div>
  <div style="display: flex; flex-direction: column; gap: 8px;">
  <a href="mailto:annadevries@pakjeleventerug.nl" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">annadevries@pakjeleventerug.nl</a>
- <a href="https://www.pakjeleventerug.nl/hetlevendatjeverdient/verzend-retourbeleid" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Verzend- en retourbeleid</a>
- <a href="https://www.pakjeleventerug.nl/hetlevendatjeverdient/contact-pagina" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Contact</a>
+ <a href="/verzending" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Verzend- en retourbeleid</a>
+ <a href="/contact" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Contact</a>
  </div>
  </div>
 
@@ -3580,9 +3576,9 @@ width="380" height="543" loading="eager" fetchpriority="high" alt="The Art of Li
  <div>
  <div style="font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #C9A96E; margin-bottom: 12px;">Juridisch</div>
  <div style="display: flex; flex-direction: column; gap: 8px;">
- <a href="https://www.pakjeleventerug.nl/hetlevendatjeverdient/algemene-voorwaarden" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Algemene voorwaarden</a>
- <a href="https://www.pakjeleventerug.nl/hetlevendatjeverdient/privacybeleid" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Privacybeleid</a>
- <a href="https://www.pakjeleventerug.nl/hetlevendatjeverdient/verzend-retourbeleid" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Retourbeleid</a>
+ <a href="/voorwaarden" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Algemene voorwaarden</a>
+ <a href="/privacy" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Privacybeleid</a>
+ <a href="/retourbeleid" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Retourbeleid</a>
  </div>
  </div>
 

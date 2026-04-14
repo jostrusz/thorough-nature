@@ -42,6 +42,11 @@
   "pages": {
     "": "index.html",
     "checkout": "checkout.html",
-    "thank-you": "thank-you.html"
+    "thank-you": "thank-you.html",
+    "contact": "contact.html",
+    "privacy": "privacy.html",
+    "voorwaarden": "voorwaarden.html",
+    "verzending": "verzending.html",
+    "retourbeleid": "retourbeleid.html"
   }
 }
