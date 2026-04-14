@@ -1742,11 +1742,11 @@ setTimeout(function() {
 <style>
 /* ═══ Site nav (gedeeld met sub-pages) ═══ */
 .site-nav { background: var(--white, #FFF8F3); border-bottom: 1px solid rgba(74, 26, 46, 0.08); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(74, 26, 46, 0.06); }
-.nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.nav-inner { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 20px; height: 64px; }
 .nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
 .nav-logo img { height: 40px; width: auto; }
 .nav-links { display: flex; align-items: center; gap: 28px; }
-.nav-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--body); text-decoration: none; transition: color 0.2s; position: relative; }
+.nav-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--body); text-decoration: none; transition: color 0.2s; position: relative; white-space: nowrap; }
 .nav-links a:hover { color: var(--heading); }
 .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--cta); transition: width 0.3s ease; }
 .nav-links a:hover::after { width: 100%; }
@@ -1764,6 +1764,7 @@ setTimeout(function() {
 .nav-mobile-menu a:hover { color: var(--heading); }
 .nav-mobile-menu .nav-cta-mobile { display: inline-block; font-weight: 700; color: #fff; background: var(--cta); padding: 14px 28px; border-radius: 10px; text-align: center; margin-top: 16px; border-bottom: none; }
 .nav-mobile-menu .nav-cta-mobile:hover { background: var(--cta-hover, #a04a3e); color: #fff; }
+@media (max-width: 1100px) { .nav-links { gap: 18px; } .nav-links a { font-size: 13px; } }
 @media (max-width: 768px) {
  .nav-links { display: none; }
  .nav-hamburger { display: flex; }
@@ -2336,7 +2337,9 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Li
 .ukazka-slide.is-active::after{content:"🔍";position:absolute;top:12px;right:12px;background:rgba(255,255,255,.95);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.15);opacity:0;transition:opacity .3s}
 .ukazka-slide.is-active:hover::after{opacity:1}
 .ukazka-arrow{width:48px;height:48px;border-radius:50%;border:1px solid rgba(201,169,110,.3);background:rgba(255,255,255,.9);color:#2A2520;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;backdrop-filter:blur(8px);flex-shrink:0;z-index:3}
-.ukazka-arrow:hover{background:#C9A96E;color:#fff;transform:scale(1.08)}
+@media (hover:hover){.ukazka-arrow:hover{background:#C9A96E;color:#fff;transform:scale(1.08)}}
+.ukazka-arrow:active{background:#C9A96E;color:#fff}
+.ukazka-arrow{-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
 .ukazka-swipe-hint{position:absolute;bottom:-36px;left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:11px;color:#8B6F47;opacity:0;transition:opacity .4s;pointer-events:none;letter-spacing:1px}
 .ukazka-swipe-hint.is-visible{opacity:.7}
 .ukazka-caption{text-align:center;max-width:640px;margin:0 auto 32px;padding:0 16px;min-height:90px}
@@ -2465,12 +2468,19 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Li
    cTit.textContent='Klaar voor de overige '+(100-pct)+'%?';
    cTxt.textContent='Het complete boek bevat 5 hoofdstukken, 340 pagina\u2019s, 12 concrete werkboeken en de volledige LIFE RESET™-methode.';
   }
-  // scroll thumb into view
-  const at=thumbs.children[idx];if(at)at.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  // scroll thumb into view (container-only, no page scroll)
+  const at=thumbs.children[idx];
+  if(at){const target=at.offsetLeft-(thumbs.clientWidth/2)+(at.offsetWidth/2);thumbs.scrollTo({left:Math.max(0,target),behavior:'smooth'});}
  }
- function go(i){idx=Math.max(0,Math.min(PAGES.length-1,i));render();}
- $('ukazkaPrev').onclick=()=>go(idx-1);
- $('ukazkaNext').onclick=()=>go(idx+1);
+ let locked=false;
+ function go(i){
+  const next=Math.max(0,Math.min(PAGES.length-1,i));
+  if(next===idx||locked)return;
+  locked=true;idx=next;render();
+  setTimeout(()=>{locked=false;},350);
+ }
+ $('ukazkaPrev').addEventListener('click',e=>{e.preventDefault();go(idx-1);});
+ $('ukazkaNext').addEventListener('click',e=>{e.preventDefault();go(idx+1);});
 
  // swipe
  let sx=0,st=0;
