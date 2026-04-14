@@ -296,17 +296,12 @@ h3 { font-size: 26px; }
  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px;
 }
 .pay-icon {
- width: 42px; height: 28px; background: var(--white); border: 1px solid rgba(240,213,196,0.5);
- border-radius: 4px; display: flex; align-items: center; justify-content: center;
- font-size: 9px; font-weight: 700; color: var(--body); transition: all 0.2s ease;
+ height: 28px; width: auto; background: #fff; border: 1px solid rgba(74,26,46,0.08);
+ border-radius: 6px; padding: 4px 8px; box-sizing: border-box;
+ display: inline-flex; align-items: center; justify-content: center;
+ object-fit: contain; transition: all 0.2s ease;
 }
 .pay-icon:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.08); }
-.pay-icon.ideal { background: #CC0066; color: white; font-size: 8px; }
-.pay-icon.bancontact { background: #005498; color: white; font-size: 7px; }
-.pay-icon.visa { background: #1A1F71; color: white; }
-.pay-icon.mc { background: #EB001B; color: white; font-size: 8px; }
-.pay-icon.paypal { background: #003087; color: white; font-size: 7px; }
-.pay-icon.klarna { background: #FFB3C7; color: #0A0B09; font-size: 7px; font-weight: 800; }
 
 /* ─── MIRROR ─── */
 .mirror-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
@@ -995,9 +990,8 @@ img, video, iframe {
  gap: 6px !important;
  }
  .pay-icon {
- width: 44px !important;
- height: 30px !important;
- font-size: 9px !important;
+ height: 26px !important;
+ padding: 3px 6px !important;
  }
 
  /* ▸ MIRROR CARDS */
@@ -1874,12 +1868,14 @@ document.querySelectorAll('#nav-mobile-menu a').forEach(function(a) {
  </div>
 
  <div class="payment-row anim d5" style="margin-top: 16px;">
- <div class="pay-icon ideal">iDEAL</div>
- <div class="pay-icon bancontact">Banc.</div>
- <div class="pay-icon visa">VISA</div>
- <div class="pay-icon mc">MC</div>
- <div class="pay-icon paypal">PayPal</div>
- <div class="pay-icon klarna">Klarna</div>
+ <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" loading="lazy">
+ <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" loading="lazy">
+ <img src="/icons/visa.svg" alt="VISA" class="pay-icon" loading="lazy">
+ <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" loading="lazy">
+ <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" loading="lazy">
+ <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" loading="lazy">
+ <img src="/icons/applepay.svg" alt="Apple Pay" class="pay-icon" loading="lazy">
+ <img src="/icons/googlepay.svg" alt="Google Pay" class="pay-icon" loading="lazy">
  </div>
  </div>
  </div>
