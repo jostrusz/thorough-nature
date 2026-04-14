@@ -7,20 +7,39 @@ import { emitPaymentLog } from "../../../utils/payment-logger"
  * Helper: find order by Airwallex payment intent ID via direct DB query
  */
 async function findOrderByIntentId(paymentIntentId: string, logger: any): Promise<any> {
+  const { Pool } = require("pg")
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
   try {
-    const { Pool } = require("pg")
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
-    const { rows } = await pool.query(
+    // 1) Fast path: order metadata already enriched with intent ID (set by previous webhook)
+    const direct = await pool.query(
       `SELECT id, metadata FROM "order"
        WHERE metadata->>'airwallexPaymentIntentId' = $1
        LIMIT 1`,
       [paymentIntentId]
     )
-    await pool.end()
-    return rows[0] || null
+    if (direct.rows[0]) return direct.rows[0]
+
+    // 2) Fallback: order linked to a payment_session whose data contains this intent ID.
+    // Required because metadata->>'airwallexPaymentIntentId' is set only AFTER the first
+    // successful webhook lookup — without this fallback the very first webhook for a new
+    // order returns null and the safety net runs unnecessarily.
+    const linked = await pool.query(
+      `SELECT o.id, o.metadata
+       FROM "order" o
+       JOIN order_payment_collection opc ON opc.order_id = o.id
+       JOIN payment_collection pc ON pc.id = opc.payment_collection_id
+       JOIN payment_session ps ON ps.payment_collection_id = pc.id
+       WHERE ps.data::text LIKE '%' || $1 || '%'
+       ORDER BY o.created_at DESC
+       LIMIT 1`,
+      [paymentIntentId]
+    )
+    return linked.rows[0] || null
   } catch (dbErr: any) {
     logger.warn(`[Airwallex Webhook] DB query failed: ${dbErr.message}`)
     return null
+  } finally {
+    await pool.end().catch(() => {})
   }
 }
 
@@ -64,45 +83,36 @@ async function safetyNetCompleteCart(
   )
 
   try {
-    const query = scope.resolve(ContainerRegistrationKeys.QUERY)
-
-    // Search recent uncompleted carts for one with this Airwallex intent ID
-    const { data: carts } = await query.graph({
-      entity: "cart",
-      fields: [
-        "id",
-        "completed_at",
-        "email",
-        "shipping_address.*",
-        "payment_collection.*",
-        "payment_collection.payment_sessions.*",
-      ],
-      filters: {},
-      pagination: { order: { created_at: "DESC" }, skip: 0, take: 80 },
-    })
-
-    let targetCart: any = null
-    for (const cart of carts || []) {
-      if (cart.completed_at) continue // skip already completed carts
-      const sessions = cart.payment_collection?.payment_sessions || []
-      for (const session of sessions) {
-        if (
-          session.data?.intentId === paymentIntentId ||
-          session.data?.airwallexPaymentIntentId === paymentIntentId
-        ) {
-          targetCart = cart
-          break
-        }
-      }
-      if (targetCart) break
+    // Find the uncompleted cart via raw SQL on payment_session.data — reliable regardless
+    // of cart volume and not dependent on graph-query JSONB serialization quirks.
+    const { Pool } = require("pg")
+    const cartPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+    let cartRow: any = null
+    try {
+      const { rows } = await cartPool.query(
+        `SELECT c.id, c.email
+         FROM cart c
+         JOIN cart_payment_collection cpc ON cpc.cart_id = c.id
+         JOIN payment_collection pc ON pc.id = cpc.payment_collection_id
+         JOIN payment_session ps ON ps.payment_collection_id = pc.id
+         WHERE ps.data::text LIKE '%' || $1 || '%'
+           AND c.completed_at IS NULL
+         ORDER BY c.created_at DESC
+         LIMIT 1`,
+        [paymentIntentId]
+      )
+      cartRow = rows[0] || null
+    } finally {
+      await cartPool.end().catch(() => {})
     }
 
-    if (!targetCart) {
+    if (!cartRow) {
       logger.warn(
         `[Airwallex Webhook] Safety net: no uncompleted cart found for intent ${paymentIntentId}`
       )
       return
     }
+    const targetCart = cartRow
 
     logger.info(
       `[Airwallex Webhook] Safety net: found uncompleted cart ${targetCart.id} (email: ${targetCart.email}) — attempting to complete`
@@ -123,10 +133,21 @@ async function safetyNetCompleteCart(
       input: { id: targetCart.id },
     })
 
-    const completedOrder = (result as any)?.result?.order || (result as any)?.order
-    if (completedOrder) {
+    // Medusa v2's completeCartWorkflow returns { result: { id: orderId } } — not a nested
+    // `order` object. Check every plausible shape so we don't false-negative when the order
+    // was actually created (the previous shape-check was the cause of "unexpected result"
+    // warnings + duplicate safety-net runs).
+    const r: any = result as any
+    const completedOrderId =
+      r?.result?.id ||
+      r?.result?.order?.id ||
+      r?.id ||
+      r?.order?.id ||
+      null
+
+    if (completedOrderId) {
       logger.info(
-        `[Airwallex Webhook] Safety net: ✅ Cart ${targetCart.id} completed → order ${completedOrder.id} (display_id: ${completedOrder.display_id})`
+        `[Airwallex Webhook] Safety net: ✅ Cart ${targetCart.id} completed → order ${completedOrderId}`
       )
 
       // Update the new order's metadata with Airwallex payment info
@@ -135,7 +156,7 @@ async function safetyNetCompleteCart(
         const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
         const { rows: orderRows } = await pool.query(
           `SELECT metadata FROM "order" WHERE id = $1 LIMIT 1`,
-          [completedOrder.id]
+          [completedOrderId]
         )
         const existingMeta = orderRows[0]?.metadata || {}
         const updatedMeta = {
@@ -151,11 +172,11 @@ async function safetyNetCompleteCart(
         }
         await pool.query(
           `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
-          [JSON.stringify(updatedMeta), completedOrder.id]
+          [JSON.stringify(updatedMeta), completedOrderId]
         )
         await pool.end()
         logger.info(
-          `[Airwallex Webhook] Safety net: updated order ${completedOrder.id} metadata with Airwallex payment data`
+          `[Airwallex Webhook] Safety net: updated order ${completedOrderId} metadata with Airwallex payment data`
         )
       } catch (metaErr: any) {
         logger.warn(
@@ -166,9 +187,9 @@ async function safetyNetCompleteCart(
       // Emit payment.captured event so subscribers (Fakturoid, Dextrum, etc.) can react
       try {
         const eventBus = scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
-        await eventBus.emit("payment.captured", { id: completedOrder.id })
+        await eventBus.emit("payment.captured", { id: completedOrderId })
         logger.info(
-          `[Airwallex Webhook] Safety net: emitted payment.captured for order ${completedOrder.id}`
+          `[Airwallex Webhook] Safety net: emitted payment.captured for order ${completedOrderId}`
         )
       } catch (e: any) {
         logger.warn(
