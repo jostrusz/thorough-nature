@@ -3068,6 +3068,7 @@ body {
     var imgContainer = document.getElementById('order-bump-img');      // Velký v detailu
 
     // Zkus načíst obrázek z Medusa API
+    if (!PROJECT_CONFIG.upsellProduct) return;
     var upsellHandle = PROJECT_CONFIG.upsellProduct.handle;
     if (upsellHandle) {
       medusaFetch('/store/products?handle=' + upsellHandle, {
