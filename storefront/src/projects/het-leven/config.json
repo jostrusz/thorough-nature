@@ -21,7 +21,8 @@
   "mainProduct": {
     "name": "Het Leven Dat Je Verdient",
     "handle": "het-leven-dat-je-verdient",
-    "variantId": "",
+    "productId": "prod_01KJYFMR0NA2282B9726AAMAVD",
+    "variantId": "variant_01KP3WW3ZGQG8Q195T7FR7WW1H",
     "price": 36,
     "currency": "EUR",
     "thumbnail": ""
