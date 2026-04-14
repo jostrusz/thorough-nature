@@ -2326,9 +2326,12 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Li
 .ukazka-progress-bar{height:100%;background:linear-gradient(90deg,#C9A96E,#8B6F47);transition:width .5s cubic-bezier(.4,0,.2,1);width:10%}
 .ukazka-chapter{font-family:'DM Sans',sans-serif;font-size:12px;color:#6B5D4E;background:rgba(255,255,255,.7);padding:6px 12px;border-radius:999px;white-space:nowrap;border:1px solid rgba(201,169,110,.2)}
 .ukazka-stage{position:relative;display:flex;align-items:center;gap:16px;margin:0 auto 28px;max-width:1100px}
-.ukazka-track{flex:1;display:flex;gap:clamp(12px,2vw,28px);align-items:center;justify-content:center;perspective:1400px;min-height:clamp(340px,52vw,620px)}
-.ukazka-slide{position:relative;flex:0 0 auto;width:clamp(200px,30vw,380px);aspect-ratio:3/4;border-radius:12px;overflow:hidden;cursor:pointer;transform:scale(.88);opacity:.55;filter:blur(1px);transition:all .6s cubic-bezier(.4,0,.2,1);box-shadow:0 20px 40px -20px rgba(42,37,32,.25)}
-.ukazka-slide.is-active{transform:scale(1);opacity:1;filter:none;box-shadow:0 40px 80px -20px rgba(42,37,32,.4),0 16px 32px -12px rgba(201,169,110,.3);z-index:2;cursor:zoom-in}
+.ukazka-track{flex:1;position:relative;height:clamp(340px,52vw,620px);perspective:1400px}
+.ukazka-slide{position:absolute;top:50%;left:50%;width:clamp(200px,30vw,380px);aspect-ratio:3/4;border-radius:12px;overflow:hidden;cursor:pointer;transform:translate(-50%,-50%) scale(.88);opacity:0;filter:blur(1px);transition:transform .55s cubic-bezier(.4,0,.2,1),opacity .45s ease,filter .45s ease,box-shadow .45s ease;box-shadow:0 20px 40px -20px rgba(42,37,32,.25);pointer-events:none;will-change:transform,opacity}
+.ukazka-slide.is-prev{transform:translate(calc(-50% - clamp(210px,22vw,280px)),-50%) scale(.88);opacity:.5;pointer-events:auto}
+.ukazka-slide.is-next{transform:translate(calc(-50% + clamp(210px,22vw,280px)),-50%) scale(.88);opacity:.5;pointer-events:auto}
+.ukazka-slide.is-active{transform:translate(-50%,-50%) scale(1);opacity:1;filter:none;box-shadow:0 40px 80px -20px rgba(42,37,32,.4),0 16px 32px -12px rgba(201,169,110,.3);z-index:2;cursor:zoom-in;pointer-events:auto}
+.ukazka-arrow:disabled,.ukazka-arrow[aria-disabled="true"]{opacity:.35;cursor:not-allowed;pointer-events:none}
 .ukazka-slide img{width:100%;height:100%;object-fit:cover;display:block}
 .ukazka-slide.is-active::after{content:"🔍";position:absolute;top:12px;right:12px;background:rgba(255,255,255,.95);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.15);opacity:0;transition:opacity .3s}
 .ukazka-slide.is-active:hover::after{opacity:1}
@@ -2437,11 +2440,13 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Li
  function render(){
   const pct=Math.round(((idx+1)/PAGES.length)*100);
   [...track.children].forEach((el,i)=>{
-   el.classList.toggle('is-active',i===idx);
-   const offset=i-idx;
-   el.style.order=Math.abs(offset)*10+(offset<0?0:1);
-   el.style.display=Math.abs(offset)>1?'none':'';
+   el.classList.remove('is-active','is-prev','is-next');
+   if(i===idx)el.classList.add('is-active');
+   else if(i===idx-1)el.classList.add('is-prev');
+   else if(i===idx+1)el.classList.add('is-next');
   });
+  $('ukazkaPrev').toggleAttribute('disabled',idx===0);
+  $('ukazkaNext').toggleAttribute('disabled',idx===PAGES.length-1);
   [...thumbs.children].forEach((el,i)=>el.classList.toggle('is-active',i===idx));
   const p=PAGES[idx];
   cap.innerHTML=`<h4>${p.title}</h4><p>"${p.emotion}"</p><div class="ukazka-caption-meta">${p.page} · Leestijd ± 3 min · 🔍 Klik om te vergroten</div>`;
@@ -2463,7 +2468,7 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Li
   // scroll thumb into view
   const at=thumbs.children[idx];if(at)at.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
  }
- function go(i){idx=(i+PAGES.length)%PAGES.length;render();}
+ function go(i){idx=Math.max(0,Math.min(PAGES.length-1,i));render();}
  $('ukazkaPrev').onclick=()=>go(idx-1);
  $('ukazkaNext').onclick=()=>go(idx+1);
 
