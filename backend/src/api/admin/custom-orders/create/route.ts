@@ -39,6 +39,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       shipping_option_id,
       shipping_option_name,
       shipping_method_type,
+      pickup_point_id,
+      pickup_point_name,
     } = body
 
     // Validate required fields
@@ -186,6 +188,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
     if (shipping_method_type) {
       metadata.shipping_method = shipping_method_type
+    }
+
+    if (pickup_point_id) {
+      metadata.pickup_point_id = pickup_point_id
+      metadata.pickup_point_name = pickup_point_name || ""
     }
 
     if (notes) {
