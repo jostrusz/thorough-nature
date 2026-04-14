@@ -737,33 +737,86 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
                 }
 
                 const sent = await sendSms(formattedPhone, smsText)
+                const smsTimestamp = new Date().toISOString()
                 if (sent) {
                   // Mark as successfully sent AFTER confirmed delivery
+                  // Also append entry to sms_activity_log for the order timeline
+                  const logEntry = {
+                    timestamp: smsTimestamp,
+                    to: formattedPhone,
+                    text: smsText,
+                    status: "sent",
+                    gateway: "gosms",
+                  }
                   const successPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
                   await successPool.query(
-                    `UPDATE "order" SET metadata = metadata || $1::jsonb, updated_at = NOW() WHERE id = $2`,
-                    [JSON.stringify({ sms_dispatch_sent: true, sms_dispatch_sent_at: new Date().toISOString(), sms_dispatch_attempting: false }), smsOrderId]
+                    `UPDATE "order" SET
+                       metadata = (metadata || $1::jsonb) || jsonb_build_object(
+                         'sms_activity_log',
+                         COALESCE(metadata->'sms_activity_log', '[]'::jsonb) || $2::jsonb
+                       ),
+                       updated_at = NOW()
+                     WHERE id = $3`,
+                    [
+                      JSON.stringify({ sms_dispatch_sent: true, sms_dispatch_sent_at: smsTimestamp, sms_dispatch_attempting: false }),
+                      JSON.stringify([logEntry]),
+                      smsOrderId,
+                    ]
                   )
                   await successPool.end()
                   console.log(`[GoSMS] ✅ SMS sent to ${formattedPhone} for order ${smsOrderId}`)
                 } else {
-                  // Release lock so it can retry on next event
+                  // Release lock so it can retry on next event, and log failure to timeline
+                  const logEntry = {
+                    timestamp: smsTimestamp,
+                    to: formattedPhone,
+                    text: smsText,
+                    status: "failed",
+                    gateway: "gosms",
+                    error_message: "sendSms returned false",
+                  }
                   const relPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
                   await relPool.query(
-                    `UPDATE "order" SET metadata = metadata || $1::jsonb, updated_at = NOW() WHERE id = $2`,
-                    [JSON.stringify({ sms_dispatch_attempting: false, sms_dispatch_last_error: "sendSms returned false" }), smsOrderId]
+                    `UPDATE "order" SET
+                       metadata = (metadata || $1::jsonb) || jsonb_build_object(
+                         'sms_activity_log',
+                         COALESCE(metadata->'sms_activity_log', '[]'::jsonb) || $2::jsonb
+                       ),
+                       updated_at = NOW()
+                     WHERE id = $3`,
+                    [
+                      JSON.stringify({ sms_dispatch_attempting: false, sms_dispatch_last_error: "sendSms returned false" }),
+                      JSON.stringify([logEntry]),
+                      smsOrderId,
+                    ]
                   )
                   await relPool.end()
                   console.warn(`[GoSMS] ⚠️ SMS failed/skipped for order ${smsOrderId}`)
                 }
               } catch (smsErr: any) {
                 console.error(`[GoSMS] ❌ Failed to send SMS for order ${smsOrderId}:`, smsErr.message)
-                // Release lock so it can retry on next event
+                // Release lock so it can retry on next event, and log failure to timeline
                 try {
+                  const logEntry = {
+                    timestamp: new Date().toISOString(),
+                    status: "failed",
+                    gateway: "gosms",
+                    error_message: smsErr.message,
+                  }
                   const errPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
                   await errPool.query(
-                    `UPDATE "order" SET metadata = metadata || $1::jsonb, updated_at = NOW() WHERE id = $2`,
-                    [JSON.stringify({ sms_dispatch_attempting: false, sms_dispatch_last_error: smsErr.message }), smsOrderId]
+                    `UPDATE "order" SET
+                       metadata = (metadata || $1::jsonb) || jsonb_build_object(
+                         'sms_activity_log',
+                         COALESCE(metadata->'sms_activity_log', '[]'::jsonb) || $2::jsonb
+                       ),
+                       updated_at = NOW()
+                     WHERE id = $3`,
+                    [
+                      JSON.stringify({ sms_dispatch_attempting: false, sms_dispatch_last_error: smsErr.message }),
+                      JSON.stringify([logEntry]),
+                      smsOrderId,
+                    ]
                   )
                   await errPool.end()
                 } catch { /* ignore */ }

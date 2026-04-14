@@ -196,6 +196,14 @@ function EventIconCircle({ icon }: { icon: EventIcon }) {
           </svg>
         </div>
       )
+    case "sms":
+      return (
+        <div style={{ ...base, background: colors.accentBg }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={colors.accent} strokeWidth="1.5">
+            <rect x="5" y="2" width="10" height="16" rx="2" /><line x1="9" y1="15" x2="11" y2="15" />
+          </svg>
+        </div>
+      )
     case "archive":
       return (
         <div style={{ ...base, background: colors.bgHover }}>
@@ -604,6 +612,23 @@ function buildTimelineEvents(order: any): TimelineEvent[] {
         emailTo: email.to || order.email,
       })
     }
+  }
+
+  // ─── 7b. SMS dispatch notifications (GoSMS) ───
+  const smsActivityLog: any[] = meta.sms_activity_log || []
+  for (const entry of smsActivityLog) {
+    const isFailed = entry.status === "failed"
+    events.push({
+      date: entry.timestamp,
+      label: isFailed ? "SMS failed: Dispatch notification" : "SMS sent: Dispatch notification",
+      detail: isFailed
+        ? entry.error_message || "Sending failed"
+        : entry.text || undefined,
+      icon: isFailed ? "cancel" : "sms",
+      status: isFailed ? "error" : "info",
+      emailTo: entry.to,
+      errorMessage: isFailed ? (entry.error_message || "Sending failed") : undefined,
+    })
   }
 
   // ─── 8. Integrations (Fakturoid, QuickBooks) ───

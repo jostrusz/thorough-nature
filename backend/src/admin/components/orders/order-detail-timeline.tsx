@@ -103,6 +103,14 @@ function EventIcon({ icon, color }: { icon?: string; color: string }) {
           </svg>
         </div>
       )
+    case "sms":
+      return (
+        <div style={{ ...style, background: colors.accentBg }}>
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke={colors.accent} strokeWidth="1.5">
+            <rect x="5" y="2" width="10" height="16" rx="2" /><line x1="9" y1="15" x2="11" y2="15" />
+          </svg>
+        </div>
+      )
     case "archive":
       return (
         <div style={{ ...style, background: colors.bgHover }}>
@@ -402,6 +410,22 @@ export function OrderDetailTimeline({
       color: isFailed ? "#9E2B25" : "#4338CA",
       type: "event",
       icon: isFailed ? "cancel" : "email",
+    })
+  }
+
+  // 10c. SMS activity log (GoSMS dispatch notifications)
+  const smsActivityLog: any[] = order.metadata?.sms_activity_log || []
+  for (const entry of smsActivityLog) {
+    const isFailed = entry.status === "failed"
+    events.push({
+      date: entry.timestamp,
+      label: isFailed ? "SMS failed: Dispatch notification" : "SMS sent: Dispatch notification",
+      detail: isFailed
+        ? entry.error_message || "Sending failed"
+        : `to ${entry.to}${entry.text ? ` · "${entry.text}"` : ""}`,
+      color: isFailed ? "#9E2B25" : "#4338CA",
+      type: "event",
+      icon: isFailed ? "cancel" : "sms",
     })
   }
 
