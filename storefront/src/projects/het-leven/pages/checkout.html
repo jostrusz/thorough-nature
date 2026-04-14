@@ -154,15 +154,47 @@ body {
 }
 .checkout-logo {
   font-family: 'Recoleta', serif;
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--heading);
   text-decoration: none;
   letter-spacing: -0.02em;
   display: inline-block;
   transition: opacity 0.2s ease;
+  line-height: 1.15;
 }
-.checkout-logo:hover { opacity: 0.8; }
+.checkout-logo:hover { opacity: 0.85; }
+.checkout-brand-author {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; font-weight: 700;
+  color: var(--cta);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.checkout-brand-author::before,
+.checkout-brand-author::after {
+  content: '·'; margin: 0 10px; color: var(--highlight); font-weight: 400;
+}
+.checkout-trust-strip {
+  display: inline-flex; gap: 18px; flex-wrap: wrap; justify-content: center;
+  margin-top: 14px; padding: 8px 18px;
+  background: rgba(184,92,74,0.05);
+  border: 1px solid rgba(184,92,74,0.12);
+  border-radius: 999px;
+}
+.checkout-trust-strip span {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; font-weight: 600;
+  color: var(--body); letter-spacing: 0.04em;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.checkout-trust-strip svg { width: 13px; height: 13px; color: var(--cta); flex-shrink: 0; }
+@media (max-width: 520px) {
+  .checkout-logo { font-size: 22px; }
+  .checkout-trust-strip { gap: 10px; padding: 7px 12px; }
+  .checkout-trust-strip span { font-size: 10px; }
+}
 
 .breadcrumb {
   display: flex;
@@ -2146,6 +2178,12 @@ body {
 <!-- ═══ HEADER + BREADCRUMB ═══ -->
 <div class="checkout-header">
   <a href="/" class="checkout-logo">Het Leven Dat Je Verdient</a>
+  <div class="checkout-brand-author">Anna de Vries &nbsp;·&nbsp; LIFE RESET&trade; Methode</div>
+  <div class="checkout-trust-strip">
+    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Veilig betalen</span>
+    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h13l5 5v5h-2a3 3 0 11-6 0H9a3 3 0 11-6 0V7z"/></svg>Snelle verzending NL &amp; BE</span>
+    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1018 0 9 9 0 00-18 0z"/><path d="M12 7v5l3 2"/></svg>14 dagen bedenktijd</span>
+  </div>
   <div class="breadcrumb">
     <span class="breadcrumb-step done">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>

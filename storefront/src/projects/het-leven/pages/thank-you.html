@@ -74,7 +74,7 @@ body { background: var(--bg); }
   background: linear-gradient(135deg, var(--cta), var(--accent));
   display: flex; align-items: center; justify-content: center;
   animation: ty-pop 0.6s cubic-bezier(.16,1,.3,1) 0.3s both;
-  box-shadow: 0 8px 32px rgba(194,123,160,0.3);
+  box-shadow: 0 8px 32px rgba(184,92,74,0.3);
 }
 .ty-check-circle svg { width: 36px; height: 36px; color: #fff; stroke-dasharray: 50; stroke-dashoffset: 50; animation: ty-draw 0.8s ease 0.7s forwards; }
 @keyframes ty-pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
@@ -92,6 +92,18 @@ body { background: var(--bg); }
 .ty-title .accent { font-style: italic; color: var(--cta); }
 .ty-subtitle { font-size: 17px; color: var(--body); line-height: 1.65; max-width: 560px; margin: 0 auto; }
 .ty-subtitle strong { color: var(--heading); font-weight: 600; }
+.ty-brand-eyebrow {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; font-weight: 700;
+  color: var(--cta); letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.ty-signature {
+  font-family: 'Recoleta', serif;
+  font-size: 16px; font-style: italic;
+  color: var(--heading); margin-top: 18px; opacity: 0.85;
+}
 
 /* ══ 2. Address verification alert ══ */
 .ty-address-alert {
@@ -116,9 +128,9 @@ body { background: var(--bg); }
 
 /* ══ 3. Customer details card ══ */
 .ty-details-card {
-  background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  background: var(--white); border: 1.5px solid rgba(74,26,46,0.08);
   border-radius: 20px; padding: 28px 32px; margin-bottom: 24px;
-  box-shadow: 0 2px 12px rgba(45,27,61,0.04);
+  box-shadow: 0 2px 12px rgba(74,26,46,0.04);
 }
 .ty-details-header {
   display: flex; justify-content: space-between; align-items: center;
@@ -161,7 +173,7 @@ body { background: var(--bg); }
 .ty-edit-form-inner {
   background: var(--white); border: 2px solid var(--cta);
   border-radius: 20px; padding: 28px 32px;
-  box-shadow: 0 4px 24px rgba(194,123,160,0.12);
+  box-shadow: 0 4px 24px rgba(184,92,74,0.12);
 }
 .ty-edit-form-title {
   font-family: 'Recoleta', serif; font-weight: 600;
@@ -179,7 +191,7 @@ body { background: var(--bg); }
   font-family: 'DM Sans', sans-serif;
   font-size: 15px; font-weight: 400;
   color: var(--heading); background: var(--white);
-  border: 1px solid rgba(45,27,61,0.18);
+  border: 1px solid rgba(74,26,46,0.18);
   border-radius: 10px; outline: none;
   -webkit-appearance: none; appearance: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -206,7 +218,7 @@ body { background: var(--bg); }
 /* Focus stav */
 .ty-float-field input:focus {
   border-color: var(--cta);
-  box-shadow: 0 0 0 3px rgba(194,123,160,0.12);
+  box-shadow: 0 0 0 3px rgba(184,92,74,0.12);
   background: var(--white);
 }
 .ty-form-actions {
@@ -218,19 +230,19 @@ body { background: var(--bg); }
   font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
   padding: 14px 24px; border-radius: 12px; border: none;
   cursor: pointer; transition: all 0.3s cubic-bezier(.16,1,.3,1);
-  box-shadow: 0 3px 12px rgba(194,123,160,0.25);
+  box-shadow: 0 3px 12px rgba(184,92,74,0.25);
 }
-.ty-form-save:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(194,123,160,0.35); }
-.ty-form-save:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(194,123,160,0.2); }
+.ty-form-save:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(184,92,74,0.35); }
+.ty-form-save:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(184,92,74,0.2); }
 .ty-form-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 .ty-form-cancel {
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--light); color: var(--body);
   font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
-  padding: 14px 20px; border-radius: 12px; border: 1.5px solid rgba(45,27,61,0.1);
+  padding: 14px 20px; border-radius: 12px; border: 1.5px solid rgba(74,26,46,0.1);
   cursor: pointer; transition: all 0.3s cubic-bezier(.16,1,.3,1);
 }
-.ty-form-cancel:hover { background: rgba(45,27,61,0.06); transform: translateY(-1px); }
+.ty-form-cancel:hover { background: rgba(74,26,46,0.06); transform: translateY(-1px); }
 
 /* Feedback zprávy */
 .ty-feedback {
@@ -249,9 +261,9 @@ body { background: var(--bg); }
 
 /* ══ 5. Order summary ══ */
 .ty-order-box {
-  background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  background: var(--white); border: 1.5px solid rgba(74,26,46,0.08);
   border-radius: 20px; padding: 28px 32px; margin-bottom: 28px;
-  box-shadow: 0 2px 12px rgba(45,27,61,0.04);
+  box-shadow: 0 2px 12px rgba(74,26,46,0.04);
 }
 .ty-order-label {
   font-size: 13px; font-weight: 700; text-transform: uppercase;
@@ -264,9 +276,9 @@ body { background: var(--bg); }
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; font-size: 20px;
 }
-.ty-order-icon.book { background: rgba(194,123,160,0.12); }
+.ty-order-icon.book { background: rgba(184,92,74,0.12); }
 .ty-order-icon.ebook { background: rgba(212,152,181,0.15); }
-.ty-order-icon.ship { background: rgba(45,27,61,0.06); }
+.ty-order-icon.ship { background: rgba(74,26,46,0.06); }
 .ty-order-name { font-size: 15px; font-weight: 600; color: var(--heading); }
 .ty-order-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .ty-order-total {
@@ -279,13 +291,13 @@ body { background: var(--bg); }
 
 /* ══ 5b. Support contact box ══ */
 .ty-support {
-  background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  background: var(--white); border: 1.5px solid rgba(74,26,46,0.08);
   border-radius: 20px; padding: 26px 28px; margin-bottom: 28px;
   display: flex; align-items: center; gap: 20px;
-  box-shadow: 0 2px 12px rgba(45,27,61,0.04);
+  box-shadow: 0 2px 12px rgba(74,26,46,0.04);
   transition: all 0.35s cubic-bezier(.16,1,.3,1);
 }
-.ty-support:hover { border-color: var(--highlight); box-shadow: 0 8px 32px rgba(45,27,61,0.08); transform: translateY(-2px); }
+.ty-support:hover { border-color: var(--highlight); box-shadow: 0 8px 32px rgba(74,26,46,0.08); transform: translateY(-2px); }
 .ty-support-icon {
   width: 54px; height: 54px; border-radius: 16px;
   background: linear-gradient(135deg, var(--section), var(--light));
@@ -304,7 +316,7 @@ body { background: var(--bg); }
   padding: 13px 24px; border-radius: 12px; border: none;
   cursor: pointer; text-decoration: none;
   transition: all 0.35s cubic-bezier(.16,1,.3,1); flex-shrink: 0;
-  box-shadow: 0 3px 12px rgba(194,123,160,0.25);
+  box-shadow: 0 3px 12px rgba(184,92,74,0.25);
   position: relative; overflow: hidden;
 }
 .ty-support-btn::after {
@@ -313,8 +325,8 @@ body { background: var(--bg); }
   opacity: 0; transition: opacity 0.3s ease;
 }
 .ty-support-btn:hover::after { opacity: 1; }
-.ty-support-btn:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(194,123,160,0.35); }
-.ty-support-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(194,123,160,0.2); }
+.ty-support-btn:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(184,92,74,0.35); }
+.ty-support-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(184,92,74,0.2); }
 @media (max-width: 600px) {
   .ty-support { flex-direction: column; text-align: center; padding: 24px 20px; }
   .ty-support-btn { width: 100%; justify-content: center; }
@@ -328,11 +340,11 @@ body { background: var(--bg); }
 }
 .ty-steps-grid { display: flex; gap: 16px; }
 .ty-step {
-  flex: 1; background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  flex: 1; background: var(--white); border: 1.5px solid rgba(74,26,46,0.08);
   border-radius: 18px; padding: 24px 20px; text-align: center;
   transition: transform 0.4s cubic-bezier(.16,1,.3,1), box-shadow 0.4s ease;
 }
-.ty-step:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(45,27,61,0.1); }
+.ty-step:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(74,26,46,0.1); }
 .ty-step-num {
   width: 36px; height: 36px; border-radius: 50%;
   background: linear-gradient(135deg, var(--cta), var(--accent));
@@ -352,11 +364,11 @@ body { background: var(--bg); }
 }
 .ty-review-cards { display: flex; gap: 16px; }
 .ty-review {
-  flex: 1; background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  flex: 1; background: var(--white); border: 1.5px solid rgba(74,26,46,0.08);
   border-radius: 16px; padding: 22px;
   transition: transform 0.35s cubic-bezier(.16,1,.3,1), box-shadow 0.35s ease;
 }
-.ty-review:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(45,27,61,0.08); }
+.ty-review:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(74,26,46,0.08); }
 .ty-review-stars { color: var(--cta); font-size: 14px; letter-spacing: 2px; margin-bottom: 10px; }
 .ty-review-text { font-size: 14px; color: var(--body); line-height: 1.6; font-style: italic; margin-bottom: 12px; }
 .ty-review-author { font-size: 13px; font-weight: 600; color: var(--heading); }
@@ -366,7 +378,7 @@ body { background: var(--bg); }
 .ty-share {
   text-align: center; background: var(--light);
   border-radius: 20px; padding: 32px; margin-bottom: 32px;
-  border: 1px solid rgba(45,27,61,0.04);
+  border: 1px solid rgba(74,26,46,0.04);
 }
 .ty-share-title {
   font-family: 'Recoleta', serif; font-size: 22px;
@@ -453,12 +465,14 @@ body { background: var(--bg); }
        1. HERO — bevestiging
        ═══════════════════════════════════════ -->
   <div class="ty-hero ty-reveal">
+    <div class="ty-brand-eyebrow">Het Leven Dat Je Verdient &nbsp;·&nbsp; LIFE RESET&trade;</div>
     <div class="ty-check-circle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <div class="ty-eyebrow">&#x2705; Bestelling bevestigd</div>
-    <h1 class="ty-title" id="ty-main-title">Bedankt voor je <span class="accent">bestelling!</span></h1>
-    <p class="ty-subtitle">Je bestelling is succesvol afgerond. We gaan je pakket zo snel mogelijk klaarmaken en versturen.</p>
+    <h1 class="ty-title" id="ty-main-title">Fijn dat je <span class="accent">meedoet.</span></h1>
+    <p class="ty-subtitle">Je bestelling is binnen &mdash; hij staat netjes genoteerd. We maken je pakket zo snel mogelijk klaar en je ontvangt het binnen enkele werkdagen. Ondertussen: zet alvast een kop thee. Je hebt de eerste stap gezet.</p>
+    <p class="ty-signature">&mdash; Anna de Vries</p>
   </div>
 
   <!-- ═══════════════════════════════════════
