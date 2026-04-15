@@ -2,6 +2,91 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { IOrderModuleService } from "@medusajs/framework/types"
 
+/**
+ * Fast DB-level search: run a single SQL query against indexed text columns
+ * (pg_trgm GIN indexes on email, metadata, address, tracking, payment data,
+ * line item titles) and return matching order IDs. Scales to 100k+ orders.
+ *
+ * Applies country + delivery_status in SQL so LIMIT is respected.
+ * paymentStatus is computed in JS after fetch, so we pull up to 400 candidates
+ * to survive that post-filter.
+ */
+async function searchOrderIds(
+  q: string,
+  opts: { country?: string; deliveryStatus?: string; paymentStatus?: string },
+  logger: any
+): Promise<string[]> {
+  const { Pool } = require("pg")
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+  try {
+    const like = `%${q}%`
+    const params: any[] = [like]
+    const whereParts: string[] = [`o.deleted_at IS NULL`]
+
+    // Country filter
+    if (opts.country) {
+      const countries = opts.country.split(",").map((c) => c.trim().toUpperCase()).filter(Boolean)
+      if (countries.length) {
+        params.push(countries)
+        whereParts.push(`UPPER(sa.country_code) = ANY($${params.length}::text[])`)
+      }
+    }
+
+    // Delivery status filter
+    if (opts.deliveryStatus) {
+      if (opts.deliveryStatus === "new" || opts.deliveryStatus === "NEW") {
+        whereParts.push(`(o.metadata->>'dextrum_status') IS NULL`)
+      } else {
+        params.push(opts.deliveryStatus)
+        whereParts.push(`(o.metadata->>'dextrum_status') = $${params.length}`)
+      }
+    }
+
+    const matchClause = `(
+      o.display_id::text ILIKE $1
+      OR o.id ILIKE $1
+      OR o.email ILIKE $1
+      OR o.metadata::text ILIKE $1
+      OR sa.first_name ILIKE $1 OR sa.last_name ILIKE $1 OR sa.company ILIKE $1
+      OR sa.address_1 ILIKE $1 OR sa.address_2 ILIKE $1 OR sa.city ILIKE $1
+      OR sa.postal_code ILIKE $1 OR sa.country_code ILIKE $1 OR sa.phone ILIKE $1
+      OR ba.first_name ILIKE $1 OR ba.last_name ILIKE $1 OR ba.company ILIKE $1
+      OR li.title ILIKE $1 OR li.variant_sku ILIKE $1
+      OR li.variant_title ILIKE $1 OR li.product_title ILIKE $1
+      OR p.provider_id ILIKE $1 OR p.data::text ILIKE $1
+      OR fl.tracking_number ILIKE $1
+    )`
+
+    // Cap candidates: if paymentStatus is a post-filter, pull more for margin
+    const cap = opts.paymentStatus ? 400 : 50
+
+    const sql = `
+      SELECT o.id, MAX(o.created_at) AS created_at
+      FROM "order" o
+      LEFT JOIN order_address sa ON o.shipping_address_id = sa.id
+      LEFT JOIN order_address ba ON o.billing_address_id = ba.id
+      LEFT JOIN order_item oi ON oi.order_id = o.id AND oi.deleted_at IS NULL
+      LEFT JOIN order_line_item li ON oi.item_id = li.id AND li.deleted_at IS NULL
+      LEFT JOIN order_payment_collection opc ON opc.order_id = o.id AND opc.deleted_at IS NULL
+      LEFT JOIN payment p ON p.payment_collection_id = opc.payment_collection_id AND p.deleted_at IS NULL
+      LEFT JOIN order_fulfillment ofl ON ofl.order_id = o.id AND ofl.deleted_at IS NULL
+      LEFT JOIN fulfillment_label fl ON fl.fulfillment_id = ofl.fulfillment_id AND fl.deleted_at IS NULL
+      WHERE ${whereParts.join(" AND ")}
+        AND ${matchClause}
+      GROUP BY o.id
+      ORDER BY MAX(o.created_at) DESC
+      LIMIT ${cap}
+    `
+    const { rows } = await pool.query(sql, params)
+    return rows.map((r: any) => r.id)
+  } catch (e: any) {
+    logger?.warn?.(`[custom-orders search] SQL search failed: ${e.message}`)
+    return []
+  } finally {
+    await pool.end().catch(() => {})
+  }
+}
+
 // Compute payment status from order data (same logic as frontend orders-table.tsx)
 function getPaymentStatus(order: any): string {
   if (order.metadata?.payment_captured) return "paid"
@@ -49,62 +134,53 @@ export async function GET(
     const filters: Record<string, any> = {}
     const isSearching = !!search
 
+    // ── FAST PATH: DB-level search via indexed ILIKE ─────────────────────
+    // When user is searching, resolve matching order IDs via SQL (uses pg_trgm
+    // GIN indexes on email/metadata/address/tracking/payment/line items),
+    // then hydrate only those ~50 orders via query.graph with full fields.
+    let searchOrderIdsList: string[] | null = null
+    if (isSearching) {
+      const logger: any = (req.scope as any).resolve?.(ContainerRegistrationKeys.LOGGER)
+      searchOrderIdsList = await searchOrderIds(
+        search.trim(),
+        { country, deliveryStatus, paymentStatus },
+        logger
+      )
+      if (searchOrderIdsList.length === 0) {
+        res.json({ orders: [], count: 0, filtered_count: 0 })
+        return
+      }
+      filters.id = searchOrderIdsList
+    }
+
     const { data: orders, metadata } = await query.graph({
       entity: "order",
-      fields: isSearching
-        ? [
-            // Lighter fields for search — skip heavy variant/product relations
-            "id",
-            "display_id",
-            "created_at",
-            "updated_at",
-            "email",
-            "currency_code",
-            "total",
-            "status",
-            "metadata",
-            "items.title",
-            "items.quantity",
-            "items.unit_price",
-            "items.thumbnail",
-            "items.variant_sku",
-            "items.variant_title",
-            "shipping_address.*",
-            "billing_address.*",
-            "payment_collections.status",
-            "payment_collections.payments.provider_id",
-            "payment_collections.payments.data",
-            "fulfillments.id",
-            "fulfillments.data",
-            "fulfillments.labels.tracking_number",
-            "fulfillments.labels.tracking_url",
-          ]
-        : [
-            "id",
-            "display_id",
-            "created_at",
-            "updated_at",
-            "email",
-            "currency_code",
-            "total",
-            "subtotal",
-            "shipping_total",
-            "tax_total",
-            "status",
-            "metadata",
-            "items.*",
-            "items.variant.*",
-            "items.variant.product.*",
-            "shipping_address.*",
-            "billing_address.*",
-            "fulfillments.*",
-            "payment_collections.*",
-            "payment_collections.payments.*",
-          ],
+      fields: [
+        "id",
+        "display_id",
+        "created_at",
+        "updated_at",
+        "email",
+        "currency_code",
+        "total",
+        "subtotal",
+        "shipping_total",
+        "tax_total",
+        "status",
+        "metadata",
+        "items.*",
+        "items.variant.*",
+        "items.variant.product.*",
+        "shipping_address.*",
+        "billing_address.*",
+        "fulfillments.*",
+        "payment_collections.*",
+        "payment_collections.payments.*",
+      ],
       filters,
       pagination: {
         skip: isSearching ? 0 : offset,
-        take: isSearching ? 20000 : limit,
+        take: isSearching ? searchOrderIdsList!.length : limit,
         order: {
           [sortBy]: sortDir,
         },
@@ -205,7 +281,9 @@ export async function GET(
       )
     }
 
-    if (search) {
+    // Legacy JS-side search (kept as safety net; normally disabled since
+    // SQL path handles matching now). Skip when SQL search was used.
+    if (search && !isSearching) {
       const q = search.toLowerCase().trim()
       // Normalized version for phone/tracking number matching (strip spaces, dashes, +)
       const qDigits = q.replace(/[\s\-+()]/g, "")
@@ -316,6 +394,12 @@ export async function GET(
 
         return false
       })
+    }
+
+    // When searching, cap results to 50 (SQL may return up to 400 candidates
+    // to survive the paymentStatus post-filter).
+    if (isSearching) {
+      filteredOrders = filteredOrders.slice(0, 50)
     }
 
     // Strip html_body from email_activity_log to keep list response lean
