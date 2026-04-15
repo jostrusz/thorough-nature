@@ -367,44 +367,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
           )
           await metaPool.end()
 
-          // Auto-fulfill on DISPATCHED — mark order as fulfilled with tracking
-          if (newStatus === "DISPATCHED") {
-            try {
-              const existingFulfillments = (order as any).fulfillments || []
-              const alreadyFulfilled = existingFulfillments.length > 0
-
-              if (!alreadyFulfilled) {
-                const items = ((order as any).items || []).map((item: any) => ({
-                  id: item.id,
-                  quantity: item.quantity || 1,
-                }))
-
-                if (items.length > 0) {
-                  // Create fulfillment via direct DB insert (orderModuleService not available in webhook context)
-                  const fulfillPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
-                  const fulfillmentId = `ful_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
-                  await fulfillPool.query(
-                    `INSERT INTO order_fulfillment (id, order_id, metadata, created_at, updated_at)
-                     VALUES ($1, $2, $3::jsonb, NOW(), NOW())`,
-                    [
-                      fulfillmentId,
-                      orderMap.medusa_order_id,
-                      JSON.stringify({
-                        tracking_number: updateData.tracking_number || null,
-                        tracking_url: updateData.tracking_url || null,
-                        carrier: updateData.carrier_name || null,
-                        source: "dextrum_wms",
-                      }),
-                    ]
-                  )
-                  await fulfillPool.end()
-                  console.log(`[Webhook] Auto-fulfilled order ${orderMap.medusa_order_id} on DISPATCHED`)
-                }
-              }
-            } catch (fulfillErr: any) {
-              console.error(`[Webhook] Auto-fulfill failed for ${orderMap.medusa_order_id}:`, fulfillErr.message)
-            }
-          }
+          // Auto-fulfill on DISPATCHED — DISABLED.
+          // The previous implementation did a raw INSERT into the order_fulfillment
+          // PIVOT table (id, order_id, fulfillment_id) with a non-existent `metadata`
+          // column, so every DISPATCHED event logged:
+          //   `column "metadata" of relation "order_fulfillment" does not exist`
+          // Tracking, delivery-status, and timeline data is already persisted on
+          // order.metadata (dextrum_tracking_number/tracking_url/carrier/timeline),
+          // which is what the custom admin UI renders. A proper Medusa fulfillment
+          // record would need fulfillment + fulfillment_item + fulfillment_label +
+          // order_fulfillment pivot, plus a mandatory location_id — wiring that up
+          // belongs in a followup. For now, silence the noise.
 
           // ── PayPal tracking ──────────────────────────────────────────
           // Send tracking info to PayPal so customer sees it in their PayPal app
