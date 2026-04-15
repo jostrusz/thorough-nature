@@ -28,25 +28,34 @@ if (fs.existsSync(envPath)) {
 // Medusa ships admin HTML with `<link rel="icon" href="data:," data-placeholder-favicon />`.
 // Copy our favicon into .medusa/client and rewrite the placeholder so the
 // browser tab shows our icon when using the admin.
-const MEDUSA_CLIENT_PATH = path.join(process.cwd(), '.medusa', 'client');
 const FAVICON_SRC = path.join(process.cwd(), 'public', 'faviconnnnn.jpg');
-const FAVICON_DEST = path.join(MEDUSA_CLIENT_PATH, 'faviconnnnn.jpg');
-const INDEX_HTML = path.join(MEDUSA_CLIENT_PATH, 'index.html');
+// Admin build lives in two places:
+//  - .medusa/client           (source template, used in dev)
+//  - .medusa/server/public/admin  (bundled build served in production)
+// Patch both so either path works.
+const ADMIN_DIRS = [
+  path.join(process.cwd(), '.medusa', 'client'),
+  path.join(process.cwd(), '.medusa', 'server', 'public', 'admin'),
+];
 
 try {
-  if (fs.existsSync(FAVICON_SRC) && fs.existsSync(MEDUSA_CLIENT_PATH)) {
-    fs.copyFileSync(FAVICON_SRC, FAVICON_DEST);
-    if (fs.existsSync(INDEX_HTML)) {
-      const html = fs.readFileSync(INDEX_HTML, 'utf8');
-      const replaced = html.replace(
-        /<link\s+rel="icon"[^>]*data-placeholder-favicon[^>]*\/?>/i,
-        '<link rel="icon" type="image/jpeg" href="./faviconnnnn.jpg" />'
-      );
-      fs.writeFileSync(INDEX_HTML, replaced, 'utf8');
-      console.log('✓ Admin favicon injected (faviconnnnn.jpg)');
-    }
+  if (!fs.existsSync(FAVICON_SRC)) {
+    console.warn('⚠ Admin favicon source not found:', FAVICON_SRC);
   } else {
-    console.warn('⚠ Admin favicon skipped — source or client dir missing');
+    for (const dir of ADMIN_DIRS) {
+      if (!fs.existsSync(dir)) continue;
+      fs.copyFileSync(FAVICON_SRC, path.join(dir, 'faviconnnnn.jpg'));
+      const idx = path.join(dir, 'index.html');
+      if (fs.existsSync(idx)) {
+        const html = fs.readFileSync(idx, 'utf8');
+        const replaced = html.replace(
+          /<link\s+rel="icon"[^>]*data-placeholder-favicon[^>]*\/?>/i,
+          '<link rel="icon" type="image/jpeg" href="/app/faviconnnnn.jpg" />'
+        );
+        fs.writeFileSync(idx, replaced, 'utf8');
+        console.log(`✓ Admin favicon injected into ${dir}`);
+      }
+    }
   }
 } catch (e) {
   console.warn('⚠ Admin favicon injection failed:', e.message);
