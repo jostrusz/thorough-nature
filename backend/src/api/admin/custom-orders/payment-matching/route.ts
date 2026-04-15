@@ -49,6 +49,80 @@ function extractPaymentId(meta: any): string | null {
   )
 }
 
+/**
+ * Detect the payment GATEWAY (not method) for an order.
+ * Priority:
+ *   1. COD check (metadata + provider_id)
+ *   2. Metadata keys set by order-placed-payment-metadata subscriber
+ *   3. Pattern-based fallback on the extracted Payment ID (for legacy orders)
+ * Returns one of: "airwallex" | "stripe" | "paypal" | "klarna" | "comgate" | "cod" | "mollie" | "przelewy24" | "unknown"
+ */
+function detectPaymentGateway(
+  order: any,
+  paymentId: string | null,
+  isCod: boolean
+): string {
+  if (isCod) return "cod"
+
+  const meta = order?.metadata || {}
+
+  // 1. Explicit metadata from subscriber
+  const explicit = (meta.payment_provider || "").toString().toLowerCase()
+  const explicitMap: Record<string, string> = {
+    airwallex: "airwallex",
+    stripe: "stripe",
+    paypal: "paypal",
+    klarna: "klarna",
+    comgate: "comgate",
+    mollie: "mollie",
+    przelewy24: "przelewy24",
+    p24: "przelewy24",
+    cod: "cod",
+  }
+  if (explicitMap[explicit]) return explicitMap[explicit]
+
+  // 2. Metadata keys set by subscriber
+  if (meta.airwallexPaymentIntentId) return "airwallex"
+  if (meta.stripePaymentIntentId || meta.stripeCheckoutSessionId) return "stripe"
+  if (meta.paypalOrderId) return "paypal"
+  if (meta.klarnaOrderId) return "klarna"
+  if (meta.comgateTransId) return "comgate"
+  if (meta.molliePaymentId || meta.mollieOrderId) return "mollie"
+  if (meta.p24SessionId) return "przelewy24"
+
+  // 3. Payment collection provider_id
+  const pcs = order?.payment_collections || []
+  for (const pc of pcs) {
+    for (const p of pc.payments || []) {
+      const pid = (p.provider_id || "").toLowerCase()
+      if (pid.includes("airwallex")) return "airwallex"
+      if (pid.includes("stripe")) return "stripe"
+      if (pid.includes("paypal")) return "paypal"
+      if (pid.includes("klarna")) return "klarna"
+      if (pid.includes("comgate")) return "comgate"
+      if (pid.includes("mollie")) return "mollie"
+      if (pid.includes("przelewy") || pid.includes("p24")) return "przelewy24"
+    }
+  }
+
+  // 4. Pattern-based fallback on Payment ID (legacy orders)
+  if (paymentId) {
+    if (/^int_/i.test(paymentId)) return "airwallex"
+    if (/^(pi|pm|cs|ch|py)_/i.test(paymentId)) return "stripe"
+    if (/^tr_|^ord_/i.test(paymentId)) return "mollie"
+    if (/^P24/i.test(paymentId)) return "przelewy24"
+    // Klarna: UUID v4-ish format
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(paymentId)) return "klarna"
+    // PayPal capture: 17 uppercase alphanumeric chars
+    if (/^[A-Z0-9]{17}$/.test(paymentId)) return "paypal"
+    // Comgate: short alphanumeric code with dashes (e.g. ABCD-EFGH-1234) or pure numeric
+    if (/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/i.test(paymentId)) return "comgate"
+    if (/^\d{6,12}$/.test(paymentId)) return "comgate"
+  }
+
+  return "unknown"
+}
+
 function isCodOrder(order: any): boolean {
   const meta = order.metadata || {}
   if (meta.payment_provider === "cod" || meta.payment_method === "cod") return true
@@ -226,13 +300,15 @@ export async function GET(
         meta.quickbooks_invoice_number ||
         null
 
-      // Payment method
-      const paymentMethod = meta.payment_method || meta.payment_provider || "unknown"
+      // Payment gateway (brána) — detected from metadata, provider_id, or Payment ID pattern
+      const paymentGateway = detectPaymentGateway(order as any, paymentId1, cod)
+      // Kept for backwards compatibility; now holds the gateway, not the payment method
+      const paymentMethod = paymentGateway
 
-      // Payment method filter
+      // Payment gateway filter
       if (paymentMethodFilter) {
         if (paymentMethodFilter === "cod" && !cod) continue
-        if (paymentMethodFilter !== "cod" && paymentMethod !== paymentMethodFilter && !cod) continue
+        if (paymentMethodFilter !== "cod" && paymentGateway !== paymentMethodFilter) continue
       }
 
       // Customer name
@@ -281,7 +357,7 @@ export async function GET(
         payment_id_1: paymentId1,
         payment_id_2: paymentId2,
         payment_method: paymentMethod,
-        payment_provider: meta.payment_provider || "",
+        payment_provider: paymentGateway,
         amount_1: amount1,
         amount_2: amount2,
         total: totalAmount,

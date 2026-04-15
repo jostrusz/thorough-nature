@@ -73,14 +73,14 @@ function PageStyles() {
 
       /* Badges */
       .pm-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; display: inline-block; white-space: nowrap; }
-      .pm-badge-ideal { background: #FCE7F3; color: #BE185D; }
-      .pm-badge-bancontact { background: #DBEAFE; color: #1D4ED8; }
-      .pm-badge-card, .pm-badge-creditcard { background: #F3F4F6; color: #374151; }
-      .pm-badge-klarna { background: #FEF3C7; color: #92400E; }
+      .pm-badge-airwallex { background: #E0E7FF; color: #3730A3; }
+      .pm-badge-stripe { background: #EDE9FE; color: #5B21B6; }
       .pm-badge-paypal { background: #DBEAFE; color: #1E40AF; }
+      .pm-badge-klarna { background: #FCE7F3; color: #9D174D; }
+      .pm-badge-comgate { background: #CCFBF1; color: #115E59; }
       .pm-badge-cod { background: #FEF9C3; color: #854D0E; }
-      .pm-badge-sofort { background: #EDE9FE; color: #6D28D9; }
-      .pm-badge-przelewy24, .pm-badge-p24 { background: #FCE7F3; color: #9D174D; }
+      .pm-badge-mollie { background: #F3F4F6; color: #374151; }
+      .pm-badge-przelewy24, .pm-badge-p24 { background: #FEF3C7; color: #92400E; }
       .pm-badge-unknown { background: #F3F4F6; color: #6B7280; }
 
       .pm-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
@@ -177,18 +177,15 @@ function getDefaultTo(): string {
 }
 
 const METHOD_LABELS: Record<string, string> = {
-  ideal: "iDEAL",
-  bancontact: "Bancontact",
-  card: "Karta",
-  creditcard: "Karta",
-  klarna: "Klarna",
+  airwallex: "Airwallex",
+  stripe: "Stripe",
   paypal: "PayPal",
+  klarna: "Klarna",
+  comgate: "Comgate",
   cod: "Dobírka",
-  sofort: "Sofort",
+  mollie: "Mollie",
   przelewy24: "Przelewy24",
-  p24: "Przelewy24",
-  giropay: "Giropay",
-  eps: "EPS",
+  unknown: "Neznámá",
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -352,7 +349,7 @@ const PaymentMatcherPage = () => {
                   <th>Číslo faktury (VS)</th>
                   <th>Payment ID</th>
                   <th>Transaction ID</th>
-                  <th>Platební metoda</th>
+                  <th>Platební brána</th>
                   <th style={{ textAlign: "right" }}>Částka</th>
                   <th style={{ textAlign: "right" }}>Celkem</th>
                   <th>Měna</th>
