@@ -765,6 +765,58 @@ body { background: var(--bg); }
         localStorage.setItem('medusa_customer', JSON.stringify(updated));
         updateDetailsDisplay();
         console.log('TY: Customer data synced from order API (country: ' + updated.country_code + ')');
+
+        // ─── Authoritative fix for book count + total price ───
+        // localStorage (medusa_bundle_qty / medusa_checkout_total) is unreliable:
+        // it can be wiped by browser restarts, cross-domain checkout, or edge
+        // cases in the checkout flow. The order itself is source of truth —
+        // derive the real book count from the bundle SKU LLWJK-{N} and use
+        // the actual order total.
+        try {
+          var orderItems = data.order.items || [];
+          var mainItem = null;
+          var derivedBookCount = 0;
+          for (var i = 0; i < orderItems.length; i++) {
+            var it = orderItems[i];
+            var sku = (it.sku || '').toUpperCase();
+            var m = /^LLWJK-([1-4])$/.exec(sku);
+            if (m) {
+              mainItem = it;
+              derivedBookCount = parseInt(m[1], 10) * (it.quantity || 1);
+              break;
+            }
+          }
+          if (mainItem && derivedBookCount > 0) {
+            // Override bundleQty so downstream code uses the correct value
+            bundleQty = derivedBookCount;
+            var nameEl = orderItemsEl && orderItemsEl.querySelector('.ty-order-name');
+            var descEl = orderItemsEl && orderItemsEl.querySelector('.ty-order-desc');
+            if (nameEl) {
+              nameEl.textContent = derivedBookCount > 1
+                ? (derivedBookCount + '\u00D7 Laat Los Wat Je Kapotmaakt')
+                : 'Laat Los Wat Je Kapotmaakt';
+            }
+            if (descEl) {
+              descEl.textContent = derivedBookCount > 1
+                ? (derivedBookCount + '\u00D7 fysiek boek \u2014 290 pagina\u2019s \u2014 wordt bezorgd')
+                : 'Fysiek boek \u2014 290 pagina\u2019s \u2014 wordt bezorgd';
+            }
+          }
+          // Authoritative total from the order
+          if (data.order.total != null) {
+            var totalEl = document.getElementById('ty-total-price');
+            if (totalEl) {
+              var cur = (data.order.currency_code || 'eur').toLowerCase();
+              var symbol = cur === 'eur' ? '\u20AC' : cur === 'sek' ? 'kr' : cur === 'pln' ? 'z\u0142' : cur === 'czk' ? 'K\u010D' : '\u20AC';
+              var amt = Number(data.order.total) || 0;
+              var formatted = amt.toFixed(2).replace('.', ',').replace(/,00$/, '');
+              totalEl.textContent = symbol + ' ' + formatted;
+            }
+          }
+          console.log('TY: Order items synced (books: ' + derivedBookCount + ', total: ' + data.order.total + ')');
+        } catch (e) {
+          console.warn('TY: Could not sync order items:', e && e.message);
+        }
       }
     })
     .catch(function(e) { console.warn('TY: Could not fetch order details:', e.message); });

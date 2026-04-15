@@ -1,6 +1,7 @@
 import { Text, Section, Hr, Link } from '@react-email/components'
 import * as React from 'react'
 import { Base } from './base'
+import { getBundleBookLabel } from '../../../utils/bundle-quantity'
 
 export const ORDER_PLACED = 'order-placed'
 
@@ -220,7 +221,13 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             Je bestelling
           </Text>
 
-          {items.map((item: any) => (
+          {items.map((item: any) => {
+            // Loslatenboek bundle SKUs (LLWJK-1/2/3/4) encode N books into one
+            // line item with quantity=1. Show the real book count instead of
+            // the meaningless "Aantal: 1", which confuses customers.
+            const sku = item.variant_sku || item.variant?.sku || item.sku || null
+            const bundleLabel = getBundleBookLabel(sku, item.quantity || 1, 'nl')
+            return (
             <div key={item.id} style={{
               marginBottom: '10px',
               backgroundColor: '#FAF5F8',
@@ -276,7 +283,9 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                         color: '#9B7AAD',
                         margin: '0',
                       }}>
-                        {item.variant_title ? `${item.variant_title} \u2022 ` : ''}Aantal: {item.quantity || 1}
+                        {bundleLabel
+                          ? `Aantal: ${bundleLabel}`
+                          : `${item.variant_title ? `${item.variant_title} \u2022 ` : ''}Aantal: ${item.quantity || 1}`}
                       </Text>
                     </td>
                     <td width="70" align="right" valign="top">
@@ -294,7 +303,8 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                 </tbody>
               </table>
             </div>
-          ))}
+            )
+          })}
 
           {/* Totals */}
           <div style={{ marginTop: '14px', borderTop: '2px solid #EDD9E5', paddingTop: '12px' }}>
