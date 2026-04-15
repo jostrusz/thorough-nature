@@ -176,7 +176,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       const isDeliveryNote = !isPreparedForHandoff && (
         eventNote.includes("zásilka je u vás")
         || eventNote.includes("doručena")
-        || eventNote.includes("bylo doručeno")
+        || eventNote.includes("doručeno")
         || eventNote.includes("delivered")
         || eventNote.includes("převzat")
         || eventNote.includes("dodán")
