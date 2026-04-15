@@ -74,6 +74,10 @@ export async function GET(
             "payment_collections.status",
             "payment_collections.payments.provider_id",
             "payment_collections.payments.data",
+            "fulfillments.id",
+            "fulfillments.data",
+            "fulfillments.labels.tracking_number",
+            "fulfillments.labels.tracking_url",
           ]
         : [
             "id",
@@ -100,7 +104,7 @@ export async function GET(
       filters,
       pagination: {
         skip: isSearching ? 0 : offset,
-        take: isSearching ? 2000 : limit,
+        take: isSearching ? 20000 : limit,
         order: {
           [sortBy]: sortDir,
         },
@@ -202,7 +206,9 @@ export async function GET(
     }
 
     if (search) {
-      const q = search.toLowerCase()
+      const q = search.toLowerCase().trim()
+      // Normalized version for phone/tracking number matching (strip spaces, dashes, +)
+      const qDigits = q.replace(/[\s\-+()]/g, "")
       filteredOrders = filteredOrders.filter((o: any) => {
         // Order identifiers
         if (String(o.display_id).includes(q)) return true
@@ -223,6 +229,7 @@ export async function GET(
           if (sa.postal_code?.toLowerCase().includes(q)) return true
           if (sa.country_code?.toLowerCase().includes(q)) return true
           if (sa.phone?.includes(q)) return true
+          if (qDigits && sa.phone?.replace(/[\s\-+()]/g, "").includes(qDigits)) return true
           if (sa.company?.toLowerCase().includes(q)) return true
         }
 
@@ -257,15 +264,48 @@ export async function GET(
           }
         }
 
-        // Metadata — tags, custom order number, paypal ID, dextrum status, notes
+        // Metadata — tags, custom/mystock order number, tracking, payment IDs, notes
         const m = o.metadata
         if (m) {
-          if (m.tags?.toLowerCase().includes(q)) return true
-          if (m.custom_order_number?.toLowerCase().includes(q)) return true
-          if (m.dextrum_status?.toLowerCase().includes(q)) return true
-          if (m.note?.toLowerCase().includes(q)) return true
-          if (m.paypal_transaction_id?.toLowerCase().includes(q)) return true
-          if (m.project?.toLowerCase().includes(q)) return true
+          // Generic fallback: stringify entire metadata and substring match.
+          // Catches any *_id / tracking / payment ref / custom key we haven't
+          // explicitly listed below.
+          try {
+            if (JSON.stringify(m).toLowerCase().includes(q)) return true
+          } catch {}
+          if (m.tags?.toString().toLowerCase().includes(q)) return true
+          if (m.custom_order_number?.toString().toLowerCase().includes(q)) return true
+          if (m.mystock_order_code?.toString().toLowerCase().includes(q)) return true
+          if (m.dextrum_status?.toString().toLowerCase().includes(q)) return true
+          if (m.note?.toString().toLowerCase().includes(q)) return true
+          if (m.project?.toString().toLowerCase().includes(q)) return true
+          // Tracking numbers
+          if (m.dextrum_tracking_number?.toString().toLowerCase().includes(q)) return true
+          if (m.tracking_number?.toString().toLowerCase().includes(q)) return true
+          // Payment gateway IDs
+          if (m.paypal_transaction_id?.toString().toLowerCase().includes(q)) return true
+          if (m.paypalOrderId?.toString().toLowerCase().includes(q)) return true
+          if (m.paypalCaptureId?.toString().toLowerCase().includes(q)) return true
+          if (m.stripePaymentIntentId?.toString().toLowerCase().includes(q)) return true
+          if (m.airwallexPaymentIntentId?.toString().toLowerCase().includes(q)) return true
+          if (m.klarnaOrderId?.toString().toLowerCase().includes(q)) return true
+        }
+
+        // Fulfillments — tracking numbers from shipment labels
+        if (o.fulfillments) {
+          for (const f of o.fulfillments) {
+            if (f.labels) {
+              for (const l of f.labels) {
+                if (l.tracking_number?.toLowerCase().includes(q)) return true
+              }
+            }
+            // Some providers stash tracking in fulfillment.data
+            if (f.data) {
+              try {
+                if (JSON.stringify(f.data).toLowerCase().includes(q)) return true
+              } catch {}
+            }
+          }
         }
 
         // Currency
