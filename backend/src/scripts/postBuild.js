@@ -24,6 +24,34 @@ if (fs.existsSync(envPath)) {
   );
 }
 
+// ── Admin favicon injection ─────────────────────────────────────────
+// Medusa ships admin HTML with `<link rel="icon" href="data:," data-placeholder-favicon />`.
+// Copy our favicon into .medusa/client and rewrite the placeholder so the
+// browser tab shows our icon when using the admin.
+const MEDUSA_CLIENT_PATH = path.join(process.cwd(), '.medusa', 'client');
+const FAVICON_SRC = path.join(process.cwd(), 'public', 'faviconnnnn.jpg');
+const FAVICON_DEST = path.join(MEDUSA_CLIENT_PATH, 'faviconnnnn.jpg');
+const INDEX_HTML = path.join(MEDUSA_CLIENT_PATH, 'index.html');
+
+try {
+  if (fs.existsSync(FAVICON_SRC) && fs.existsSync(MEDUSA_CLIENT_PATH)) {
+    fs.copyFileSync(FAVICON_SRC, FAVICON_DEST);
+    if (fs.existsSync(INDEX_HTML)) {
+      const html = fs.readFileSync(INDEX_HTML, 'utf8');
+      const replaced = html.replace(
+        /<link\s+rel="icon"[^>]*data-placeholder-favicon[^>]*\/?>/i,
+        '<link rel="icon" type="image/jpeg" href="./faviconnnnn.jpg" />'
+      );
+      fs.writeFileSync(INDEX_HTML, replaced, 'utf8');
+      console.log('✓ Admin favicon injected (faviconnnnn.jpg)');
+    }
+  } else {
+    console.warn('⚠ Admin favicon skipped — source or client dir missing');
+  }
+} catch (e) {
+  console.warn('⚠ Admin favicon injection failed:', e.message);
+}
+
 // Install dependencies
 console.log('Installing dependencies in .medusa/server...');
 execSync('pnpm i --prod --frozen-lockfile', { 
