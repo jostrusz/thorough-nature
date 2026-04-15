@@ -38,7 +38,7 @@ export default function OrderCompletedTemplate({
           <Heading level="h2" className="flex flex-row text-3xl-regular">
             Summary
           </Heading>
-          <Items items={order.items} />
+          <Items items={order.items} currencyCode={order.currency_code} />
           <CartTotals totals={order} />
           <ShippingDetails order={order} />
           <PaymentDetails order={order} />
