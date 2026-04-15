@@ -21,7 +21,7 @@ interface OrdersListResponse {
 export function useOrdersList(params: OrdersListParams) {
   return useQuery<OrdersListResponse>({
     queryKey: ["custom-orders-list", params],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const searchParams = new URLSearchParams()
       if (params.limit) searchParams.set("limit", String(params.limit))
       if (params.offset) searchParams.set("offset", String(params.offset))
@@ -35,13 +35,20 @@ export function useOrdersList(params: OrdersListParams) {
       if (params.sort_dir) searchParams.set("sort_dir", params.sort_dir)
 
       const qs = searchParams.toString()
+      // Pass the AbortSignal so stale requests get cancelled when the user
+      // keeps typing (React Query aborts on queryKey change).
       const response = await sdk.client.fetch<OrdersListResponse>(
-        `/admin/custom-orders${qs ? `?${qs}` : ""}`
+        `/admin/custom-orders${qs ? `?${qs}` : ""}`,
+        { signal } as any
       )
       return response
     },
     placeholderData: keepPreviousData,
-    refetchInterval: 10000,
+    // Don't auto-refetch while actively searching — it blows away results
+    // as the user types. Only poll on the default (unsearched) list.
+    refetchInterval: params.q ? false : 10000,
     refetchIntervalInBackground: false,
+    // Keep previous results visible during refetch → no flicker to empty state
+    staleTime: params.q ? 30_000 : 0,
   })
 }

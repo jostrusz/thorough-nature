@@ -449,7 +449,7 @@ const CustomOrdersPage = () => {
 
   const [activeTab, setActiveTab] = useState(savedState?.activeTab || "all")
   const [searchValue, setSearchValue] = useState(savedState?.searchValue || "")
-  const debouncedSearch = useDebounce(searchValue, 400)
+  const debouncedSearch = useDebounce(searchValue, 200)
   const [page, setPage] = useState(savedState?.page || 0)
   const [sortField, setSortField] = useState(savedState?.sortField || "created_at")
   const [sortDir, setSortDir] = useState(savedState?.sortDir || "DESC")
