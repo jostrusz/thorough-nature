@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "../../../lib/sdk"
@@ -505,12 +505,15 @@ function SandboxedEmailBody({ html, textColor }: { html: string; textColor: stri
         a { color: #2563EB; }
         table { max-width: 100% !important; }
         * { max-width: 100% !important; box-sizing: border-box; }
-        /* Paragraph spacing for contentEditable output (Chrome wraps lines in <div>) */
-        body > div { margin-bottom: 0.8em; }
-        body > div:last-child { margin-bottom: 0; }
+        /* Paragraph spacing for contentEditable output AND Gmail-style nested divs */
+        body > div,
+        body > div > div,
+        body > div > div > div { margin-bottom: 0.8em; }
+        body > div:last-child,
+        body > div > div:last-child,
+        body > div > div > div:last-child { margin-bottom: 0; }
         p { margin: 0 0 0.8em 0 !important; }
         p:last-child { margin-bottom: 0 !important; }
-        /* Ensure paragraph spacing even with inline styles */
         p + p { margin-top: 0; }
         br + br { display: block; content: ""; margin-top: 0.6em; }
       </style></head><body>${html}</body></html>`)
@@ -556,10 +559,58 @@ function SandboxedEmailBody({ html, textColor }: { html: string; textColor: stri
 /* ═══════════════════════════════════════════════════════════════
    MESSAGE BUBBLE
    ═══════════════════════════════════════════════════════════════ */
+/**
+ * Normalize a message body so paragraphs render with visible spacing.
+ * - If body_html exists and has block-level tags → trust it, return as-is
+ *   (CSS handles paragraph spacing).
+ * - If body is plaintext (no tags) or only has <br>s → convert blank lines
+ *   to <p> and single newlines to <br>, so CSS paragraph rules apply.
+ *
+ * Only normalizes when needed → won't duplicate spacing on already-structured
+ * HTML emails (Gmail, Outlook etc.).
+ */
+function normalizeMessageBody(html: string, text: string): string {
+  const h = (html || "").trim()
+  const hasBlockTags = /<(p|div|table|ul|ol|blockquote|h[1-6])\b/i.test(h)
+  if (h && hasBlockTags) return h
+
+  // Source: prefer text (cleaner), fall back to stripping tags from HTML
+  let src = (text || "").trim()
+  if (!src && h) {
+    src = h
+      .replace(/<br\s*\/?>(\r?\n)?/gi, "\n")
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&quot;/gi, '"')
+      .trim()
+  }
+  if (!src) return h
+
+  const escape = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+
+  // Split on 2+ newlines → paragraphs, single newline → <br>
+  const paragraphs = src
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0)
+    .map((p) => `<p style="margin:0 0 0.8em 0;">${escape(p).replace(/\n/g, "<br>")}</p>`)
+    .join("")
+
+  return paragraphs || escape(src)
+}
+
 function MessageBubble({ msg, ticketId }: { msg: any; ticketId: string }) {
   const inb = msg.direction === "inbound"
-  const body = msg.body_html || msg.body_text || ""
-  const has = f.strip(body).length > 0
+  const rawBody = msg.body_html || msg.body_text || ""
+  const body = useMemo(
+    () => normalizeMessageBody(msg.body_html || "", msg.body_text || ""),
+    [msg.body_html, msg.body_text]
+  )
+  const has = f.strip(rawBody).length > 0
   const [hovered, setHovered] = useState(false)
   const queryClient = useQueryClient()
   const senderLabel = inb
