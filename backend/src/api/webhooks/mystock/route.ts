@@ -416,7 +416,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
                 trackingNum,
                 carrierCode,
                 orderMap.medusa_order_id,
-                req.scope
+                req.scope,
+                updatedMeta.project_id
               )
               // Mark as sent in metadata
               updatedMeta.tracking_sent_to_gateway = {
@@ -450,7 +451,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
                 carrierCode,
                 trackingUrl,
                 orderMap.medusa_order_id,
-                req.scope
+                req.scope,
+                updatedMeta.project_id
               )
               // Mark as sent + captured in metadata
               updatedMeta.tracking_sent_to_gateway = {
@@ -990,9 +992,12 @@ async function sendTrackingToPayPalFromWebhook(
   trackingNumber: string,
   carrier: string,
   medusaOrderId: string,
-  scope: any
+  scope: any,
+  projectSlug?: string
 ): Promise<void> {
   // 1. Get PayPal credentials from gateway config or env vars
+  // Match by project_slug so we pick the right merchant account when multiple
+  // gateway_config rows exist (one per brand).
   let clientId: string | undefined
   let clientSecret: string | undefined
   let mode: "live" | "test" = "test"
@@ -1000,14 +1005,28 @@ async function sendTrackingToPayPalFromWebhook(
   try {
     const pgPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
     const { rows } = await pgPool.query(
-      `SELECT mode, live_keys, test_keys FROM gateway_config
+      `SELECT id, display_name, mode, live_keys, test_keys, project_slugs FROM gateway_config
        WHERE provider = 'paypal' AND is_active = true AND deleted_at IS NULL
-       ORDER BY priority ASC LIMIT 1`
+       ORDER BY priority ASC`
     )
     await pgPool.end()
-    if (rows[0]) {
-      const isLive = rows[0].mode === "live"
-      const keys = isLive ? rows[0].live_keys : rows[0].test_keys
+    let config: any = null
+    if (rows.length > 0) {
+      if (projectSlug) {
+        config = rows.find((r: any) => Array.isArray(r.project_slugs) && r.project_slugs.includes(projectSlug)) || null
+      }
+      if (!config) {
+        config = rows.find((r: any) => !r.project_slugs || r.project_slugs.length === 0) || rows[0]
+        if (projectSlug) {
+          console.warn(`[PayPal Tracking] No gateway_config matched project "${projectSlug}", falling back to "${config.display_name || config.id}"`)
+        }
+      } else {
+        console.log(`[PayPal Tracking] Matched gateway_config "${config.display_name || config.id}" for project "${projectSlug}"`)
+      }
+    }
+    if (config) {
+      const isLive = config.mode === "live"
+      const keys = isLive ? config.live_keys : config.test_keys
       clientId = keys?.client_id || keys?.api_key
       clientSecret = keys?.client_secret || keys?.secret_key
       mode = isLive ? "live" : "test"
@@ -1110,9 +1129,13 @@ async function captureAndTrackKlarnaFromWebhook(
   carrier: string,
   trackingUrl: string,
   medusaOrderId: string,
-  scope: any
+  scope: any,
+  projectSlug?: string
 ): Promise<void> {
   // 1. Get Klarna credentials from gateway config or env vars
+  // Match by project_slug so we pick the right merchant account when multiple
+  // gateway_config rows exist (one per brand). Without this, we'd always pick
+  // the first row and hit "NO_SUCH_ORDER" for orders placed on other merchants.
   let apiKey: string | undefined
   let secretKey: string | undefined
   let testMode = true
@@ -1120,14 +1143,28 @@ async function captureAndTrackKlarnaFromWebhook(
   try {
     const pgPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
     const { rows } = await pgPool.query(
-      `SELECT mode, live_keys, test_keys FROM gateway_config
+      `SELECT id, display_name, mode, live_keys, test_keys, project_slugs FROM gateway_config
        WHERE provider = 'klarna' AND is_active = true AND deleted_at IS NULL
-       ORDER BY priority ASC LIMIT 1`
+       ORDER BY priority ASC`
     )
     await pgPool.end()
-    if (rows[0]) {
-      const isLive = rows[0].mode === "live"
-      const keys = isLive ? rows[0].live_keys : rows[0].test_keys
+    let config: any = null
+    if (rows.length > 0) {
+      if (projectSlug) {
+        config = rows.find((r: any) => Array.isArray(r.project_slugs) && r.project_slugs.includes(projectSlug)) || null
+      }
+      if (!config) {
+        config = rows.find((r: any) => !r.project_slugs || r.project_slugs.length === 0) || rows[0]
+        if (projectSlug) {
+          console.warn(`[Klarna Tracking] No gateway_config matched project "${projectSlug}", falling back to "${config.display_name || config.id}"`)
+        }
+      } else {
+        console.log(`[Klarna Tracking] Matched gateway_config "${config.display_name || config.id}" for project "${projectSlug}"`)
+      }
+    }
+    if (config) {
+      const isLive = config.mode === "live"
+      const keys = isLive ? config.live_keys : config.test_keys
       apiKey = keys?.api_key
       secretKey = keys?.secret_key
       testMode = !isLive
