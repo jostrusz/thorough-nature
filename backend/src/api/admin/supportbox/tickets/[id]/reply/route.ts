@@ -40,18 +40,25 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       .join("")
 
     // Normalize contenteditable HTML for email clients:
-    // Chrome wraps lines in <div>, Firefox uses <br>. Convert to <p> with spacing.
+    // Chrome wraps lines in <div>, Firefox uses <br>. One <div> = one paragraph.
+    // The <p> margin alone provides the visual line spacing; we must NOT insert
+    // extra empty paragraphs or convert stray whitespace newlines to <br>, or
+    // every line ends up with a blank line after it.
     let replyHtml = (body.body_html || "").trim()
-    // Replace <div><br></div> (empty line from Chrome) with paragraph break
-    replyHtml = replyHtml.replace(/<div><br\s*\/?><\/div>/gi, '</p><p style="margin:0 0 12px 0;">&nbsp;</p><p style="margin:0 0 12px 0;">')
-    // Wrap remaining <div>...</div> blocks as paragraphs
+    // 1. Strip empty lines (Chrome's <div><br></div> / <div></div>) — the <p>
+    //    margin already gives breathing room, no need for an empty paragraph.
+    replyHtml = replyHtml.replace(/<div>\s*(<br\s*\/?>)?\s*<\/div>/gi, "")
+    // 2. Convert plain \n that appears INSIDE text (pasted plaintext, AI output)
+    //    to <br>. Do this BEFORE wrapping divs so newlines between converted
+    //    paragraphs don't pollute the output.
+    replyHtml = replyHtml.replace(/\n/g, "<br>")
+    // 3. Wrap remaining <div>...</div> blocks as paragraphs
     replyHtml = replyHtml.replace(/<div>(.*?)<\/div>/gi, '<p style="margin:0 0 12px 0;">$1</p>')
-    // Convert double <br> to paragraph break
-    replyHtml = replyHtml.replace(/(<br\s*\/?>){2,}/gi, '</p><p style="margin:0 0 12px 0;">')
-    // Convert plain \n newlines to <br> (handles AI-generated or pasted text)
-    replyHtml = replyHtml.replace(/\n/g, '<br>')
-    // Wrap in opening <p> if not already wrapped
-    if (!replyHtml.startsWith('<p')) {
+    // 4. Collapse runs of <br> (shouldn't happen after step 1, but safety net
+    //    for pasted content). Keep a single <br>; don't insert paragraph breaks.
+    replyHtml = replyHtml.replace(/(<br\s*\/?>\s*){2,}/gi, "<br>")
+    // 5. Wrap in opening <p> if not already wrapped
+    if (!/^<p/i.test(replyHtml)) {
       replyHtml = `<p style="margin:0 0 12px 0;">${replyHtml}</p>`
     }
 
