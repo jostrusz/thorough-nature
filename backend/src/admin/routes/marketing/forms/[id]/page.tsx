@@ -87,6 +87,7 @@ function FormDetailPage() {
     queryKey: ["mkt-lists", brandId],
     queryFn: () =>
       sdk.client.fetch<{ lists: any[] }>(`/admin/marketing/lists${bQs}`, { method: "GET" }),
+    enabled: !!brandId,
   })
   const lists: any[] = ((listsQ.data as any)?.lists) || []
 

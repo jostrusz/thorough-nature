@@ -36,7 +36,7 @@ function ContactsPage() {
   const qs = useMemo(() => {
     const p: string[] = []
     if (brandId) p.push(`brand_id=${encodeURIComponent(brandId)}`)
-    if (debounced) p.push(`q=${encodeURIComponent(debounced)}`)
+    if (debounced) p.push(`email=${encodeURIComponent(debounced)}`)
     if (statusFilter) p.push(`status=${encodeURIComponent(statusFilter)}`)
     return p.length ? `?${p.join("&")}` : ""
   }, [brandId, debounced, statusFilter])
@@ -45,6 +45,7 @@ function ContactsPage() {
     queryKey: ["mkt-contacts", brandId, debounced, statusFilter],
     queryFn: () =>
       sdk.client.fetch<{ contacts: any[] }>(`/admin/marketing/contacts${qs}`, { method: "GET" }),
+    enabled: !!brandId,
   })
   const contacts: any[] = ((data as any)?.contacts) || []
 
@@ -64,7 +65,9 @@ function ContactsPage() {
       sdk.client.fetch("/admin/marketing/contacts/import", { method: "POST", body }),
     onSuccess: (resp: any) => {
       qc.invalidateQueries({ queryKey: ["mkt-contacts"] })
-      toast.success(`Imported ${resp?.imported ?? 0} contact(s)`)
+      const total = (resp?.created ?? 0) + (resp?.updated ?? 0)
+      const errMsg = resp?.errors?.length ? ` with ${resp.errors.length} errors` : ""
+      toast.success(`Imported ${total}${errMsg}`)
       setShowImport(false)
     },
     onError: (e: any) => toast.error("Failed: " + (e?.message || "unknown")),

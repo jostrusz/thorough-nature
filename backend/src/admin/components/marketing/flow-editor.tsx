@@ -49,6 +49,7 @@ export function FlowEditor({ flowId }: { flowId?: string }) {
     queryKey: ["mkt-templates-ready", brandId],
     queryFn: () =>
       sdk.client.fetch<{ templates: any[] }>(`/admin/marketing/templates${bQs}${bQs ? "&" : "?"}status=ready`, { method: "GET" }),
+    enabled: !!brandId,
   })
   const templates: any[] = ((templatesQ.data as any)?.templates) || []
 
@@ -67,7 +68,8 @@ export function FlowEditor({ flowId }: { flowId?: string }) {
     setName(f.name || "")
     setDescription(f.description || "")
     setTrigger(f.trigger?.type ? `${f.trigger.type}${f.trigger.event ? `:${f.trigger.event}` : ""}` : "event:order.placed")
-    setNodes(Array.isArray(f.nodes) ? f.nodes : [])
+    const def = f.definition || {}
+    setNodes(Array.isArray(def.nodes) ? def.nodes : [])
     setStatus(f.status || "draft")
     setVersion(f.version || 1)
     setStats(f.stats || {})
@@ -81,7 +83,7 @@ export function FlowEditor({ flowId }: { flowId?: string }) {
         name,
         description,
         trigger: tevent ? { type: ttype, event: tevent } : { type: ttype },
-        nodes,
+        definition: { nodes, edges: [] },
         status: overrideStatus || status,
       }
       if (currentId) {

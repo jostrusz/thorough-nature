@@ -31,6 +31,7 @@ function MarketingDashboardPage() {
       sdk.client
         .fetch<any>(`/admin/marketing/summary${qs}`, { method: "GET" })
         .catch(() => ({ summary: null })),
+    enabled: !!brandId,
   })
 
   const recentCampaigns = useQuery({
@@ -42,6 +43,7 @@ function MarketingDashboardPage() {
           { method: "GET" }
         )
         .catch(() => ({ campaigns: [] })),
+    enabled: !!brandId,
   })
 
   const s: any = (summary.data as any)?.summary || {}

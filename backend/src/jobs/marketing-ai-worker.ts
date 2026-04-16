@@ -17,13 +17,14 @@ import type MarketingModuleService from "../modules/marketing/service"
  *   - segment_from_prompt     → { natural_language }                    → segment DSL JSON
  *   - brand_voice_training    → { samples: string[] }                   → voice profile JSON
  *
- * Model ID: "claude-opus-4-5" (alias — resolves to the latest 4.5 snapshot).
+ * Model ID: configurable via MARKETING_AI_MODEL env. Default is the stable
+ * "claude-3-5-sonnet-latest" alias (verified Anthropic alias, stable since 2024).
  * Never hardcoded into persisted state — we store the exact ID on the job
  * row so historical jobs remain reproducible.
  */
 
 const MAX_JOBS_PER_TICK = 3
-const ANTHROPIC_MODEL = process.env.MARKETING_AI_MODEL || "claude-opus-4-5"
+const ANTHROPIC_MODEL = process.env.MARKETING_AI_MODEL || "claude-3-5-sonnet-latest"
 
 export default async function marketingAiWorker(container: MedusaContainer) {
   const logger = (container.resolve("logger") as any) || console

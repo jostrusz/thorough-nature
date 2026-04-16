@@ -25,6 +25,7 @@ function ListsPage() {
     queryKey: ["mkt-lists", brandId],
     queryFn: () =>
       sdk.client.fetch<{ lists: any[] }>(`/admin/marketing/lists${qs}`, { method: "GET" }),
+    enabled: !!brandId,
   })
   const lists: any[] = ((data as any)?.lists) || []
 

@@ -55,6 +55,7 @@ function SegmentsPage() {
     queryKey: ["mkt-segments", brandId],
     queryFn: () =>
       sdk.client.fetch<{ segments: any[] }>(`/admin/marketing/segments${qs}`, { method: "GET" }),
+    enabled: !!brandId,
   })
   const segments: any[] = ((data as any)?.segments) || []
 

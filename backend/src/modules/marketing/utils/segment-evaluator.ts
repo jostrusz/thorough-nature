@@ -75,6 +75,8 @@ type BuildCtx = {
   brandId: string
   // placeholder index for brand_id — all brand-scoped subqueries use this
   brandParamIndex: number
+  // optional project_id for scoping cross-module queries (e.g. "order")
+  projectId: string | null
 }
 
 function push(ctx: BuildCtx, value: any): string {
@@ -89,6 +91,11 @@ function compileNode(node: SegmentNode, ctx: BuildCtx): string {
   }
   if ((node as any).any) {
     const parts = (node as any).any.map((n: SegmentNode) => compileNode(n, ctx))
+    // NOTE: empty `any: []` compiles to "FALSE" (no conditions = no match).
+    // This is the technically-correct behavior for OR semantics, BUT beware:
+    // when wrapped in a suppression `NOT(...)` context, NOT(FALSE) = TRUE,
+    // which would suppress EVERY recipient. Callers MUST validate queries
+    // are non-trivial before storing them — see `isNonTrivialQuery` below.
     return parts.length ? `(${parts.join(" OR ")})` : "FALSE"
   }
   if ((node as any).not) {
@@ -143,7 +150,14 @@ function compileLeaf(cond: LeafCondition, ctx: BuildCtx): string {
       ? "COALESCE(SUM(total),0)"
       : "MAX(created_at)"
     // We join on orders by email match — marketing_contact.email = order.email
-    const subquery = `(SELECT ${agg} FROM "order" o WHERE o.deleted_at IS NULL AND lower(o.email) = lower(c.email))`
+    // If a project_id is available on the ctx, scope orders by metadata.project_id
+    // to prevent cross-brand data leakage. If null, keep legacy behavior.
+    let orderWhere = `o.deleted_at IS NULL AND lower(o.email) = lower(c.email)`
+    if (ctx.projectId) {
+      const pp = push(ctx, ctx.projectId)
+      orderWhere += ` AND (o.metadata->>'project_id') = ${pp}`
+    }
+    const subquery = `(SELECT ${agg} FROM "order" o WHERE ${orderWhere})`
     return applyOp(subquery, op, value, ctx)
   }
 
@@ -234,11 +248,16 @@ function applyOp(sqlCol: string, op: string, value: any, ctx: BuildCtx): string 
  *                       AND ${sql}`
  *   pool.query(finalSql, params)
  */
-export function compileSegment(query: SegmentNode, brandId: string): CompiledSegment {
+export function compileSegment(
+  query: SegmentNode,
+  brandId: string,
+  projectId?: string | null
+): CompiledSegment {
   const ctx: BuildCtx = {
     params: [brandId], // $1 is always brand_id
     brandId,
     brandParamIndex: 1,
+    projectId: projectId ?? null,
   }
   const sql = compileNode(query, ctx) || "TRUE"
   return {
@@ -246,4 +265,36 @@ export function compileSegment(query: SegmentNode, brandId: string): CompiledSeg
     params: ctx.params,
     brandParamIndex: ctx.brandParamIndex,
   }
+}
+
+/**
+ * Walk a segment query tree and return true iff at least one leaf condition
+ * exists. An empty `{}`, `{ all: [] }`, `{ any: [] }`, or deeply nested
+ * empty combinators all return false.
+ *
+ * Use at the API validation layer to reject trivial queries that would
+ * either match everyone (AND with no conditions) or no one (OR with no
+ * conditions). Both cases are almost always user error, and in the NOT /
+ * suppression context they cause dangerous unintended behaviors
+ * (e.g. NOT(FALSE) = TRUE suppresses everyone).
+ */
+export function isNonTrivialQuery(query: any): boolean {
+  if (!query || typeof query !== "object") return false
+  if (Array.isArray(query)) return false
+  if (Array.isArray(query.all)) {
+    return query.all.some((n: any) => isNonTrivialQuery(n))
+  }
+  if (Array.isArray(query.any)) {
+    return query.any.some((n: any) => isNonTrivialQuery(n))
+  }
+  if (query.not) {
+    return isNonTrivialQuery(query.not)
+  }
+  // Leaf: must have at least one key whose value is an object (an op record)
+  const keys = Object.keys(query)
+  if (!keys.length) return false
+  return keys.some((k) => {
+    const v = (query as any)[k]
+    return v && typeof v === "object" && !Array.isArray(v) && Object.keys(v).length > 0
+  })
 }

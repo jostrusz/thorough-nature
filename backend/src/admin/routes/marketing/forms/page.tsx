@@ -33,6 +33,7 @@ function FormsPage() {
     queryKey: ["mkt-forms", brandId],
     queryFn: () =>
       sdk.client.fetch<{ forms: any[] }>(`/admin/marketing/forms${qs}`, { method: "GET" }),
+    enabled: !!brandId,
   })
   const forms: any[] = ((data as any)?.forms) || []
 
@@ -132,7 +133,10 @@ function FormsPage() {
               <button
                 className="mkt-btn-primary"
                 disabled={!newName || createMut.isPending}
-                onClick={() => createMut.mutate({ brand_id: brandId || undefined, name: newName, type: newType })}
+                onClick={() => {
+                  const slug = newName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+                  createMut.mutate({ brand_id: brandId || undefined, name: newName, slug, type: newType })
+                }}
                 style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF", opacity: !newName ? 0.5 : 1 }}
               >
                 {createMut.isPending ? "Creating…" : "Create"}

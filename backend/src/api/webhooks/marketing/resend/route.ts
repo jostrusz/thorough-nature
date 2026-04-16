@@ -21,12 +21,25 @@ import type MarketingModuleService from "../../../../modules/marketing/service"
 
 function verifySignature(req: MedusaRequest, rawBody: string): boolean {
   const secret = process.env.MARKETING_RESEND_WEBHOOK_SECRET
-  if (!secret) return true // not enforced unless configured
+  if (!secret) {
+    // Fail-closed in production: a missing secret in prod is a misconfiguration
+    // that would otherwise let anyone post fake webhook events. Allow only
+    // during local development for setup convenience.
+    if (process.env.NODE_ENV === "production") return false
+    return true
+  }
 
   const id = req.headers["svix-id"] as string | undefined
   const timestamp = req.headers["svix-timestamp"] as string | undefined
   const signatureHeader = req.headers["svix-signature"] as string | undefined
   if (!id || !timestamp || !signatureHeader) return false
+
+  // Timestamp freshness check (5-minute window) to prevent replay attacks
+  // on old/leaked signed payloads.
+  const tsSeconds = Number(timestamp)
+  if (!Number.isFinite(tsSeconds)) return false
+  const skewMs = Math.abs(Date.now() - tsSeconds * 1000)
+  if (skewMs > 5 * 60 * 1000) return false
 
   try {
     const secretBytes = Buffer.from(secret.replace(/^whsec_/, ""), "base64")

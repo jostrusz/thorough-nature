@@ -1,5 +1,8 @@
 import { signToken } from "./tokens"
 
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000
+const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000
+
 /**
  * Tracking injector — post-processes compiled HTML to:
  *   1. Rewrite every <a href="..."> to go through our click tracker
@@ -53,6 +56,7 @@ export function buildClickUrl(
     u: targetUrl,
     m: opts.messageId,
     b: opts.brandId,
+    exp: Date.now() + NINETY_DAYS_MS,
   })
   const base = opts.baseUrl.replace(/\/+$/, "")
   return `${base}/public/marketing/c/${token}`
@@ -65,6 +69,7 @@ export function buildOpenPixelUrl(opts: { messageId: string; brandId: string; ba
     t: "pixel",
     m: opts.messageId,
     b: opts.brandId,
+    exp: Date.now() + NINETY_DAYS_MS,
   })
   const base = opts.baseUrl.replace(/\/+$/, "")
   return `${base}/public/marketing/o/${token}`
@@ -80,6 +85,7 @@ export function buildUnsubscribeUrl(opts: {
     t: "unsub",
     c: opts.contactId,
     b: opts.brandId,
+    exp: Date.now() + ONE_YEAR_MS,
   })
   const base = opts.baseUrl.replace(/\/+$/, "")
   return `${base}/public/marketing/u/${token}`

@@ -130,7 +130,7 @@ export function TemplateEditor({ templateId }: { templateId?: string }) {
       setCustomHtml(t.custom_html || "")
     } else {
       setEditorType("blocks")
-      setBlocks(Array.isArray(t.blocks) ? t.blocks : [])
+      setBlocks(t.block_json?.blocks || [])
       setCustomHtml(t.custom_html || "")
     }
   }, [tplData])
@@ -162,7 +162,7 @@ export function TemplateEditor({ templateId }: { templateId?: string }) {
         from_email: fromEmail || undefined,
         reply_to: replyTo || undefined,
         editor_type: editorType,
-        blocks: editorType === "blocks" ? blocks : undefined,
+        block_json: editorType === "blocks" ? { blocks } : undefined,
         custom_html: editorType === "html" ? customHtml : undefined,
         status: overrideStatus || status,
       }
@@ -189,7 +189,7 @@ export function TemplateEditor({ templateId }: { templateId?: string }) {
     mutationFn: (to: string) =>
       sdk.client.fetch(`/admin/marketing/templates/${currentId}/test-send`, {
         method: "POST",
-        body: { to },
+        body: { to_email: to, brand_id: brandId || undefined },
       }),
     onSuccess: () => {
       toast.success("Test email sent")

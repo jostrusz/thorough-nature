@@ -37,11 +37,11 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
     if (!c) return
     setName(c.name || "")
     setTemplateId(c.template_id || "")
-    setListIds(c.list_ids || [])
-    setSegmentIds(c.segment_ids || [])
+    setListIds([c.list_id].filter(Boolean) as string[])
+    setSegmentIds([c.segment_id].filter(Boolean) as string[])
     setSuppressionSegmentIds(c.suppression_segment_ids || [])
     setAbTest(!!c.ab_test)
-    setScheduleAt(c.scheduled_at ? new Date(c.scheduled_at).toISOString().slice(0, 16) : "")
+    setScheduleAt(c.send_at ? new Date(c.send_at).toISOString().slice(0, 16) : "")
     setStatus(c.status || "draft")
     setSentAt(c.sent_at || null)
     setMetrics(c.metrics || {})
@@ -52,16 +52,19 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
     queryKey: ["mkt-templates-ready", brandId],
     queryFn: () =>
       sdk.client.fetch<{ templates: any[] }>(`/admin/marketing/templates${bQs}${bQs ? "&" : "?"}status=ready`, { method: "GET" }),
+    enabled: !!brandId,
   })
   const listsQ = useQuery({
     queryKey: ["mkt-lists", brandId],
     queryFn: () =>
       sdk.client.fetch<{ lists: any[] }>(`/admin/marketing/lists${bQs}`, { method: "GET" }),
+    enabled: !!brandId,
   })
   const segmentsQ = useQuery({
     queryKey: ["mkt-segments", brandId],
     queryFn: () =>
       sdk.client.fetch<{ segments: any[] }>(`/admin/marketing/segments${bQs}`, { method: "GET" }),
+    enabled: !!brandId,
   })
 
   const templates: any[] = ((templatesQ.data as any)?.templates) || []
@@ -69,16 +72,16 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
   const segments: any[] = ((segmentsQ.data as any)?.segments) || []
 
   const saveMut = useMutation({
-    mutationFn: async (overrides?: { status?: string; scheduled_at?: string | null }) => {
+    mutationFn: async (overrides?: { status?: string; send_at?: string | null }) => {
       const body: any = {
         brand_id: brandId || undefined,
         name,
         template_id: templateId || undefined,
-        list_ids: listIds,
-        segment_ids: segmentIds,
+        list_id: listIds[0] || null,
+        segment_id: segmentIds[0] || null,
         suppression_segment_ids: suppressionSegmentIds,
         ab_test: abTest,
-        scheduled_at: overrides?.scheduled_at !== undefined ? overrides.scheduled_at : (scheduleAt ? new Date(scheduleAt).toISOString() : null),
+        send_at: overrides?.send_at !== undefined ? overrides.send_at : (scheduleAt ? new Date(scheduleAt).toISOString() : null),
         status: overrides?.status || status,
       }
       if (currentId) {
@@ -102,7 +105,7 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
 
   const sendNowMut = useMutation({
     mutationFn: () =>
-      sdk.client.fetch(`/admin/marketing/campaigns/${currentId}/send`, { method: "POST" }),
+      sdk.client.fetch(`/admin/marketing/campaigns/${currentId}/send-now`, { method: "POST" }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["mkt-campaigns"] })
       qc.invalidateQueries({ queryKey: ["mkt-campaign", currentId] })

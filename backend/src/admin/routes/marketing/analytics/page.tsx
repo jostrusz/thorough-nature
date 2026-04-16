@@ -23,6 +23,7 @@ function AnalyticsPage() {
     queryKey: ["mkt-analytics", brandId],
     queryFn: () =>
       sdk.client.fetch<{ campaigns: any[] }>(`/admin/marketing/campaigns${qs}${qs ? "&" : "?"}limit=50&order=-sent_at`, { method: "GET" }),
+    enabled: !!brandId,
   })
   const campaigns: any[] = ((data as any)?.campaigns) || []
 

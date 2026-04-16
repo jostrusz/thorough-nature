@@ -26,6 +26,7 @@ function TemplatesPage() {
     queryKey: ["mkt-templates", brandId, statusFilter],
     queryFn: () =>
       sdk.client.fetch<{ templates: any[] }>(`/admin/marketing/templates${qs}`, { method: "GET" }),
+    enabled: !!brandId,
   })
   const templates: any[] = ((data as any)?.templates) || []
 

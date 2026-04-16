@@ -2,6 +2,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MARKETING_MODULE } from "../../../../modules/marketing"
 import type MarketingModuleService from "../../../../modules/marketing/service"
+import { isNonTrivialQuery } from "../../../../modules/marketing/utils/segment-evaluator"
 
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   try {
@@ -30,6 +31,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         res.status(400).json({ error: `${key} is required` })
         return
       }
+    }
+
+    // Reject trivial queries: a query with no leaf conditions would either
+    // match everyone (AND/empty) or no one (OR/empty). In the suppression
+    // context NOT(FALSE) = TRUE also suppresses everyone. Always require
+    // at least one real condition.
+    if (!isNonTrivialQuery(body.query)) {
+      res.status(400).json({ error: "Segment query must contain at least one condition" })
+      return
     }
 
     const data: any = {

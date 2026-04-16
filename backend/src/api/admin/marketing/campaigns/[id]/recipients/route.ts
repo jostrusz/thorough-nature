@@ -25,11 +25,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
 
     res.json({
       count: recipients.length,
-      recipients: recipients.slice(0, 100).map((r: any) => ({
-        id: r.id,
-        email: r.email,
-        first_name: r.first_name,
-      })),
+      sample: recipients.slice(0, 100).map((r: any) => r.email),
     })
   } catch (err: any) {
     res.status(500).json({ error: err?.message || "internal_error" })

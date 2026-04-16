@@ -154,7 +154,7 @@ function BrandsPage() {
     </div>
   )
 
-  const canSave = !!(form.slug && form.display_name && form.marketing_from_email)
+  const canSave = !!(form.slug && form.display_name && form.marketing_from_email && form.marketing_from_name && form.project_id)
 
   return (
     <MarketingShell

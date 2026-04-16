@@ -22,8 +22,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       "https://www.marketing-hq.eu"
 
     const script_snippet =
-      `<script async src="${baseUrl}/public/marketing/form.js" ` +
-      `data-brand="${brandSlug}" data-form="${id}"></script>`
+      `<script async src="${baseUrl}/public/marketing/marketing-forms.js" ` +
+      `data-brand="${brandSlug}" data-form="${id}" data-api="${baseUrl}"></script>`
 
     const form_config = {
       id,

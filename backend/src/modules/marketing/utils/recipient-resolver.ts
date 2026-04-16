@@ -45,6 +45,21 @@ export class RecipientResolver {
   async resolve(input: RecipientInput): Promise<Recipient[]> {
     const { brandId, listId, segmentId, suppressionSegmentIds } = input
 
+    // Load brand's project_id so segment subqueries can scope cross-module
+    // data (e.g. the "order" table) to just this brand's project. Without
+    // this, an email-match join would leak orders across brands that share
+    // the same customer email.
+    let projectId: string | null = null
+    try {
+      const { rows: brandRows } = await this.pool.query(
+        `SELECT project_id FROM marketing_brand WHERE id = $1 LIMIT 1`,
+        [brandId]
+      )
+      projectId = (brandRows[0]?.project_id as string | undefined) ?? null
+    } catch {
+      projectId = null
+    }
+
     // Load segment query if present
     let segmentQuery: SegmentNode | null = null
     if (segmentId) {
@@ -86,7 +101,7 @@ export class RecipientResolver {
 
     // Segment query (optional)
     if (segmentQuery) {
-      const compiled = compileSegment(segmentQuery, brandId)
+      const compiled = compileSegment(segmentQuery, brandId, projectId)
       // compiled.params[0] = brandId — already in our baseParams as $1,
       // so we need to remap compiled placeholders to continue from our current count.
       // Easiest: drop compiled.params[0] and re-number remaining to start at baseParams.length + 1
@@ -110,7 +125,7 @@ export class RecipientResolver {
         )
         const suppQuery = rows[0]?.query
         if (!suppQuery) continue
-        const compiled = compileSegment(suppQuery, brandId)
+        const compiled = compileSegment(suppQuery, brandId, projectId)
         const remaining = compiled.params.slice(1)
         const offset = baseParams.length - 1
         const remapped = compiled.sql.replace(/\$(\d+)/g, (_, d) => {
