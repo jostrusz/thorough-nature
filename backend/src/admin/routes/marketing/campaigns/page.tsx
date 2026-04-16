@@ -1,4 +1,5 @@
 import React from "react"
+import { Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@medusajs/ui"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
@@ -6,9 +7,11 @@ import { sdk } from "../../../lib/sdk"
 import {
   MarketingShell,
   StatusBadge,
+  EmptyState,
   useSelectedBrand,
   brandQs,
   fmt,
+  tokens,
 } from "../../../components/marketing/shared"
 
 function CampaignsPage() {
@@ -58,24 +61,32 @@ function CampaignsPage() {
     <MarketingShell
       title="Campaigns"
       subtitle="One-off broadcasts to lists and segments"
-      active="/marketing/campaigns"
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Campaigns" },
+      ]}
       right={
-        <a
-          className="mkt-btn-primary"
-          href="#/marketing/campaigns/new"
-          style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF", textDecoration: "none" }}
-        >
-          + New Campaign
-        </a>
+        <Link className="mkt-btn-primary" to="/marketing/campaigns/new">
+          New campaign
+        </Link>
       }
     >
-      <div className="mkt-card" style={{ overflow: "hidden" }}>
+      <div className="mkt-card" style={{ overflow: "hidden", padding: 0 }}>
         {isLoading ? (
-          <div style={{ padding: "24px", color: "#8C9196", fontSize: "13px" }}>Loading…</div>
-        ) : campaigns.length === 0 ? (
-          <div style={{ padding: "40px", textAlign: "center", color: "#8C9196", fontSize: "13px" }}>
-            No campaigns yet.
+          <div style={{ padding: "32px", color: tokens.fgSecondary, fontSize: "13px", textAlign: "center" }}>
+            Loading…
           </div>
+        ) : campaigns.length === 0 ? (
+          <EmptyState
+            icon="🚀"
+            title="No campaigns yet"
+            description="Create your first campaign to broadcast to lists or segments."
+            action={
+              <Link to="/marketing/campaigns/new" className="mkt-btn-primary">
+                Create campaign
+              </Link>
+            }
+          />
         ) : (
           <table className="mkt-table">
             <thead>
@@ -94,33 +105,32 @@ function CampaignsPage() {
                 return (
                   <tr key={c.id} className="mkt-row">
                     <td>
-                      <a href={`#/marketing/campaigns/${c.id}`} className="mkt-link" style={{ fontWeight: 500 }}>
+                      <Link to={`/marketing/campaigns/${c.id}`} className="mkt-link" style={{ fontWeight: 500 }}>
                         {c.name || "Untitled"}
-                      </a>
+                      </Link>
                     </td>
-                    <td style={{ color: "#6D7175" }}>{c.template?.name || c.template_name || "—"}</td>
+                    <td style={{ color: tokens.fgSecondary }}>{c.template?.name || c.template_name || "—"}</td>
                     <td>{fmt(m.recipients ?? m.sent)}</td>
                     <td><StatusBadge status={c.status || "draft"} /></td>
-                    <td style={{ color: "#6D7175", fontSize: "12px" }}>
+                    <td style={{ color: tokens.fgSecondary, fontSize: "13px" }}>
                       {c.sent_at ? new Date(c.sent_at).toLocaleString() : "—"}
                     </td>
                     <td style={{ textAlign: "right" }}>
-                      <div style={{ display: "inline-flex", gap: "4px" }}>
-                        <a href={`#/marketing/campaigns/${c.id}`} className="mkt-btn" style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A", textDecoration: "none" }}>
+                      <div style={{ display: "inline-flex", gap: "6px" }}>
+                        <Link to={`/marketing/campaigns/${c.id}`} className="mkt-btn mkt-btn-xs">
                           View
-                        </a>
-                        <button className="mkt-btn" onClick={() => duplicateMut.mutate(c.id)} style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A" }}>
+                        </Link>
+                        <button className="mkt-btn mkt-btn-xs" onClick={() => duplicateMut.mutate(c.id)}>
                           Duplicate
                         </button>
                         {(c.status === "sending" || c.status === "scheduled") && (
-                          <button className="mkt-btn" onClick={() => pauseMut.mutate(c.id)} style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A" }}>
+                          <button className="mkt-btn mkt-btn-xs" onClick={() => pauseMut.mutate(c.id)}>
                             Pause
                           </button>
                         )}
                         <button
-                          className="mkt-btn"
+                          className="mkt-btn-danger-ghost"
                           onClick={() => { if (confirm(`Delete campaign "${c.name}"?`)) deleteMut.mutate(c.id) }}
-                          style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", border: "1px solid #FED3D1", background: "#FFF", color: "#D72C0D" }}
                         >
                           Delete
                         </button>

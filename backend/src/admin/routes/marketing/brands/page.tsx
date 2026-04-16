@@ -7,8 +7,9 @@ import {
   MarketingShell,
   Modal,
   Toggle,
-  lblStyle,
+  EmptyState,
   PROJECT_SLUGS,
+  tokens,
 } from "../../../components/marketing/shared"
 
 const emptyForm = {
@@ -18,7 +19,7 @@ const emptyForm = {
   marketing_from_email: "",
   marketing_from_name: "",
   marketing_reply_to: "",
-  primary_color: "#008060",
+  primary_color: "#15803D",
   logo_url: "",
   locale: "en",
   timezone: "Europe/Prague",
@@ -84,7 +85,7 @@ function BrandsPage() {
       marketing_from_email: b.marketing_from_email || "",
       marketing_from_name: b.marketing_from_name || "",
       marketing_reply_to: b.marketing_reply_to || "",
-      primary_color: b.primary_color || "#008060",
+      primary_color: b.primary_color || "#15803D",
       logo_url: b.logo_url || "",
       locale: b.locale || "en",
       timezone: b.timezone || "Europe/Prague",
@@ -94,62 +95,62 @@ function BrandsPage() {
   }
 
   const renderForm = () => (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
       <div>
-        <label style={lblStyle}>Slug *</label>
+        <label className="mkt-label">Slug *</label>
         <input className="mkt-input" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="loslatenboek" />
       </div>
       <div>
-        <label style={lblStyle}>Display name *</label>
+        <label className="mkt-label">Display name *</label>
         <input className="mkt-input" value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })} placeholder="Laat los" />
       </div>
       <div>
-        <label style={lblStyle}>Project</label>
+        <label className="mkt-label">Project</label>
         <select className="mkt-input" value={form.project_id} onChange={(e) => setForm({ ...form, project_id: e.target.value })}>
-          <option value="">— Select project —</option>
+          <option value="">Select project</option>
           {PROJECT_SLUGS.map((p) => (
             <option key={p} value={p}>{p}</option>
           ))}
         </select>
       </div>
       <div>
-        <label style={lblStyle}>From email *</label>
+        <label className="mkt-label">From email *</label>
         <input className="mkt-input" type="email" value={form.marketing_from_email} onChange={(e) => setForm({ ...form, marketing_from_email: e.target.value })} placeholder="hello@laatlos.nl" />
       </div>
       <div>
-        <label style={lblStyle}>From name</label>
+        <label className="mkt-label">From name</label>
         <input className="mkt-input" value={form.marketing_from_name} onChange={(e) => setForm({ ...form, marketing_from_name: e.target.value })} placeholder="Laat los" />
       </div>
       <div>
-        <label style={lblStyle}>Reply-to</label>
+        <label className="mkt-label">Reply-to</label>
         <input className="mkt-input" type="email" value={form.marketing_reply_to} onChange={(e) => setForm({ ...form, marketing_reply_to: e.target.value })} placeholder="reply@laatlos.nl" />
       </div>
       <div>
-        <label style={lblStyle}>Primary color</label>
-        <div style={{ display: "flex", gap: "6px" }}>
+        <label className="mkt-label">Primary color</label>
+        <div style={{ display: "flex", gap: "8px" }}>
           <input className="mkt-input" value={form.primary_color} onChange={(e) => setForm({ ...form, primary_color: e.target.value })} />
-          <input type="color" value={form.primary_color} onChange={(e) => setForm({ ...form, primary_color: e.target.value })} style={{ width: "40px", height: "34px", border: "1px solid #E1E3E5", borderRadius: "6px", padding: 0 }} />
+          <input type="color" value={form.primary_color} onChange={(e) => setForm({ ...form, primary_color: e.target.value })} style={{ width: "48px", height: "40px", border: `1px solid ${tokens.borderStrong}`, borderRadius: tokens.rMd, padding: "2px", cursor: "pointer", flexShrink: 0 }} />
         </div>
       </div>
       <div>
-        <label style={lblStyle}>Logo URL</label>
+        <label className="mkt-label">Logo URL</label>
         <input className="mkt-input" value={form.logo_url} onChange={(e) => setForm({ ...form, logo_url: e.target.value })} placeholder="https://…" />
       </div>
       <div>
-        <label style={lblStyle}>Locale</label>
+        <label className="mkt-label">Locale</label>
         <input className="mkt-input" value={form.locale} onChange={(e) => setForm({ ...form, locale: e.target.value })} placeholder="en, nl, cs, de, pl, sv" />
       </div>
       <div>
-        <label style={lblStyle}>Timezone</label>
+        <label className="mkt-label">Timezone</label>
         <input className="mkt-input" value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} placeholder="Europe/Prague" />
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", gridColumn: "span 2", paddingTop: "4px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", gridColumn: "span 2", paddingTop: "8px" }}>
         <Toggle checked={form.double_opt_in_enabled} onChange={() => setForm({ ...form, double_opt_in_enabled: !form.double_opt_in_enabled })} />
-        <span style={{ fontSize: "13px", color: "#1A1A1A" }}>Double opt-in enabled</span>
+        <span style={{ fontSize: "14px", color: tokens.fg }}>Double opt-in enabled</span>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", gridColumn: "span 2" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", gridColumn: "span 2" }}>
         <Toggle checked={form.enabled} onChange={() => setForm({ ...form, enabled: !form.enabled })} />
-        <span style={{ fontSize: "13px", color: "#1A1A1A" }}>Brand enabled</span>
+        <span style={{ fontSize: "14px", color: tokens.fg }}>Brand enabled</span>
       </div>
     </div>
   )
@@ -160,35 +161,44 @@ function BrandsPage() {
     <MarketingShell
       title="Brands"
       subtitle="Per-project sender identities, branding and opt-in settings"
-      active="/marketing/brands"
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Brands" },
+      ]}
       right={
-        <button
-          className="mkt-btn-primary"
-          onClick={() => { setForm(emptyForm); setShowForm(true) }}
-          style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF" }}
-        >
-          + New Brand
+        <button className="mkt-btn-primary" onClick={() => { setForm(emptyForm); setShowForm(true) }}>
+          New brand
         </button>
       }
     >
       {isLoading ? (
-        <p style={{ color: "#8C9196", fontSize: "13px" }}>Loading…</p>
+        <div className="mkt-card" style={{ padding: "24px", color: tokens.fgSecondary, fontSize: "13px", textAlign: "center" }}>
+          Loading…
+        </div>
       ) : brands.length === 0 ? (
-        <div className="mkt-card" style={{ padding: "40px", textAlign: "center", color: "#8C9196" }}>
-          <p style={{ fontSize: "14px" }}>No brands yet</p>
-          <p style={{ fontSize: "12px" }}>Create your first brand to start sending marketing emails</p>
+        <div className="mkt-card">
+          <EmptyState
+            icon="🎨"
+            title="No brands yet"
+            description="Create your first brand to start sending marketing emails."
+            action={
+              <button className="mkt-btn-primary" onClick={() => { setForm(emptyForm); setShowForm(true) }}>
+                Create brand
+              </button>
+            }
+          />
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "12px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "16px" }}>
           {brands.map((b: any) => (
-            <div key={b.id} className="mkt-card" style={{ padding: "16px 18px" }}>
-              <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
+            <div key={b.id} className="mkt-card mkt-card-hover" style={{ padding: "20px" }}>
+              <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
                 <div
                   style={{
-                    width: "42px",
-                    height: "42px",
-                    borderRadius: "8px",
-                    background: b.primary_color || "#E4E5E7",
+                    width: "44px",
+                    height: "44px",
+                    borderRadius: tokens.rMd,
+                    background: b.primary_color || tokens.borderSubtle,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -199,36 +209,31 @@ function BrandsPage() {
                   {b.logo_url ? (
                     <img src={b.logo_url} alt="" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
                   ) : (
-                    <span style={{ color: "#FFF", fontSize: "16px", fontWeight: 700 }}>
+                    <span style={{ color: "#FFFFFF", fontSize: "15px", fontWeight: 600 }}>
                       {(b.display_name || b.slug || "?").slice(0, 2).toUpperCase()}
                     </span>
                   )}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ fontSize: "14px", fontWeight: 600 }}>{b.display_name || b.slug}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg }}>{b.display_name || b.slug}</span>
                     <Toggle checked={!!b.enabled} onChange={() => toggleEnabled(b)} disabled={updateMut.isPending} />
                   </div>
-                  <div style={{ fontSize: "12px", color: "#6D7175", marginTop: "2px", wordBreak: "break-all" }}>
+                  <div style={{ fontSize: "13px", color: tokens.fgSecondary, marginTop: "4px", wordBreak: "break-all" }}>
                     {b.marketing_from_email || "—"}
                   </div>
                   {b.project_id && (
-                    <div style={{ fontSize: "11px", color: "#8C9196", marginTop: "2px" }}>Project: {b.project_id}</div>
+                    <div style={{ fontSize: "12px", color: tokens.fgMuted, marginTop: "4px" }}>Project: {b.project_id}</div>
                   )}
                 </div>
               </div>
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "6px", marginTop: "12px" }}>
-                <button
-                  className="mkt-btn"
-                  onClick={() => openEdit(b)}
-                  style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A" }}
-                >
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "16px" }}>
+                <button className="mkt-btn mkt-btn-sm" onClick={() => openEdit(b)}>
                   Edit
                 </button>
                 <button
-                  className="mkt-btn"
+                  className="mkt-btn-danger-ghost"
                   onClick={() => { if (confirm(`Delete brand "${b.display_name || b.slug}"?`)) deleteMut.mutate(b.id) }}
-                  style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #FED3D1", background: "#FFF", color: "#D72C0D" }}
                 >
                   Delete
                 </button>
@@ -240,12 +245,12 @@ function BrandsPage() {
 
       {(showForm || editing) && (
         <Modal
-          title={editing ? `Edit brand: ${editing.display_name || editing.slug}` : "New brand"}
+          title={editing ? `Edit brand` : "New brand"}
           onClose={() => { setShowForm(false); setEditing(null) }}
-          width={640}
+          width={720}
           footer={
             <>
-              <button className="mkt-btn" onClick={() => { setShowForm(false); setEditing(null) }} style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #E1E3E5", background: "#FFF", color: "#6D7175" }}>
+              <button className="mkt-btn" onClick={() => { setShowForm(false); setEditing(null) }}>
                 Cancel
               </button>
               <button
@@ -255,7 +260,6 @@ function BrandsPage() {
                   if (editing) updateMut.mutate({ id: editing.id, body: form })
                   else createMut.mutate(form)
                 }}
-                style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF", opacity: !canSave ? 0.5 : 1 }}
               >
                 {editing ? (updateMut.isPending ? "Saving…" : "Save changes") : (createMut.isPending ? "Creating…" : "Create brand")}
               </button>

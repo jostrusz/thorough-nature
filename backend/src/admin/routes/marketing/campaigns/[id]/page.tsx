@@ -1,24 +1,21 @@
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { useParams } from "react-router-dom"
 import { MarketingShell } from "../../../../components/marketing/shared"
 import { CampaignEditor } from "../../../../components/marketing/campaign-editor"
 
 function EditCampaignPage() {
   const params = useParams()
-  const [id, setId] = useState<string | undefined>(params.id)
-
-  useEffect(() => {
-    if (!id && typeof window !== "undefined") {
-      const m = window.location.hash.match(/#\/marketing\/campaigns\/([^/?#]+)/)
-      if (m && m[1] !== "new") setId(m[1])
-    }
-  }, [id])
+  const id = params.id
 
   return (
     <MarketingShell
       title="Campaign"
       subtitle="Configure or view campaign"
-      active="/marketing/campaigns"
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Campaigns", to: "/marketing/campaigns" },
+        { label: "Detail" },
+      ]}
     >
       <CampaignEditor campaignId={id} />
     </MarketingShell>

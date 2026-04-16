@@ -1,27 +1,21 @@
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@medusajs/ui"
 import { useParams } from "react-router-dom"
 import { sdk } from "../../../../lib/sdk"
 import {
   MarketingShell,
-  lblStyle,
+  EmptyState,
   fmt,
+  tokens,
 } from "../../../../components/marketing/shared"
 
 function ListDetailPage() {
   const params = useParams()
   const qc = useQueryClient()
-  const [id, setId] = useState<string | undefined>(params.id)
+  const id = params.id
   const [page, setPage] = useState(0)
   const [emailsText, setEmailsText] = useState("")
-
-  useEffect(() => {
-    if (!id && typeof window !== "undefined") {
-      const m = window.location.hash.match(/#\/marketing\/lists\/([^/?#]+)/)
-      if (m) setId(m[1])
-    }
-  }, [id])
 
   const { data: listData } = useQuery({
     queryKey: ["mkt-list", id],
@@ -87,41 +81,62 @@ function ListDetailPage() {
     <MarketingShell
       title={list?.name || "List"}
       subtitle={list?.description}
-      active="/marketing/lists"
-      right={<a href="#/marketing/lists" className="mkt-link" style={{ fontSize: "12px" }}>← Back to lists</a>}
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Lists", to: "/marketing/lists" },
+        { label: list?.name || "Detail" },
+      ]}
     >
-      <div className="mkt-card" style={{ padding: "16px 18px", marginBottom: "12px" }}>
-        <div style={{ fontSize: "11px", fontWeight: 700, color: "#6D7175", textTransform: "uppercase", marginBottom: "8px" }}>Add members</div>
-        <label style={lblStyle}>Emails (comma, space or newline separated)</label>
+      <div className="mkt-card" style={{ padding: "24px", marginBottom: "16px" }}>
+        <div
+          style={{
+            fontSize: "11px",
+            fontWeight: 600,
+            color: tokens.fgSecondary,
+            textTransform: "uppercase",
+            letterSpacing: "0.04em",
+            marginBottom: "12px",
+          }}
+        >
+          Add members
+        </div>
+        <label className="mkt-label">Emails (comma, space or newline separated)</label>
         <textarea
           className="mkt-input"
-          style={{ minHeight: "70px", fontFamily: "monospace", fontSize: "12px" }}
+          style={{ minHeight: "90px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: "13px" }}
           value={emailsText}
           onChange={(e) => setEmailsText(e.target.value)}
           placeholder="alice@example.com, bob@example.com"
         />
-        <div style={{ marginTop: "8px", display: "flex", justifyContent: "flex-end" }}>
+        <div style={{ marginTop: "12px", display: "flex", justifyContent: "flex-end" }}>
           <button
             className="mkt-btn-primary"
             disabled={!emailsText.trim() || addMut.isPending}
             onClick={submitAdd}
-            style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF" }}
           >
             {addMut.isPending ? "Adding…" : "Add"}
           </button>
         </div>
       </div>
 
-      <div className="mkt-card" style={{ overflow: "hidden" }}>
-        <div style={{ padding: "14px 18px", borderBottom: "1px solid #F1F2F4", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontSize: "13px", fontWeight: 600 }}>Members ({fmt(count)})</div>
+      <div className="mkt-card" style={{ overflow: "hidden", padding: 0 }}>
+        <div
+          style={{
+            padding: "16px 20px",
+            borderBottom: `1px solid ${tokens.borderSubtle}`,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div style={{ fontSize: "14px", fontWeight: 600, color: tokens.fg }}>Members ({fmt(count)})</div>
         </div>
         {isLoading ? (
-          <div style={{ padding: "20px", color: "#8C9196", fontSize: "13px" }}>Loading…</div>
-        ) : members.length === 0 ? (
-          <div style={{ padding: "30px", textAlign: "center", color: "#8C9196", fontSize: "13px" }}>
-            No members yet.
+          <div style={{ padding: "32px", color: tokens.fgSecondary, fontSize: "13px", textAlign: "center" }}>
+            Loading…
           </div>
+        ) : members.length === 0 ? (
+          <EmptyState icon="👥" title="No members yet" description="Add contacts above to populate this list." />
         ) : (
           <>
             <table className="mkt-table">
@@ -136,14 +151,13 @@ function ListDetailPage() {
               <tbody>
                 {members.map((m: any) => (
                   <tr key={m.id || m.contact_id} className="mkt-row">
-                    <td>{m.email}</td>
-                    <td style={{ color: "#6D7175" }}>{[m.first_name, m.last_name].filter(Boolean).join(" ") || "—"}</td>
-                    <td style={{ color: "#6D7175", fontSize: "12px" }}>{m.added_at ? new Date(m.added_at).toLocaleDateString() : "—"}</td>
+                    <td style={{ fontWeight: 500 }}>{m.email}</td>
+                    <td style={{ color: tokens.fgSecondary }}>{[m.first_name, m.last_name].filter(Boolean).join(" ") || "—"}</td>
+                    <td style={{ color: tokens.fgSecondary, fontSize: "13px" }}>{m.added_at ? new Date(m.added_at).toLocaleDateString() : "—"}</td>
                     <td style={{ textAlign: "right" }}>
                       <button
-                        className="mkt-btn"
+                        className="mkt-btn-danger-ghost"
                         onClick={() => { if (confirm(`Remove ${m.email}?`)) removeMut.mutate(m.contact_id || m.id) }}
-                        style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", border: "1px solid #FED3D1", background: "#FFF", color: "#D72C0D" }}
                       >
                         Remove
                       </button>
@@ -153,12 +167,12 @@ function ListDetailPage() {
               </tbody>
             </table>
             {count > limit && (
-              <div style={{ padding: "10px 14px", display: "flex", justifyContent: "flex-end", gap: "8px", borderTop: "1px solid #F1F2F4" }}>
-                <button disabled={page === 0} onClick={() => setPage(page - 1)} className="mkt-btn" style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A", opacity: page === 0 ? 0.5 : 1 }}>
+              <div style={{ padding: "14px 20px", display: "flex", justifyContent: "flex-end", gap: "10px", alignItems: "center", borderTop: `1px solid ${tokens.borderSubtle}` }}>
+                <button disabled={page === 0} onClick={() => setPage(page - 1)} className="mkt-btn mkt-btn-sm">
                   Previous
                 </button>
-                <span style={{ fontSize: "12px", color: "#6D7175", alignSelf: "center" }}>Page {page + 1}</span>
-                <button disabled={(page + 1) * limit >= count} onClick={() => setPage(page + 1)} className="mkt-btn" style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A", opacity: (page + 1) * limit >= count ? 0.5 : 1 }}>
+                <span style={{ fontSize: "13px", color: tokens.fgSecondary }}>Page {page + 1}</span>
+                <button disabled={(page + 1) * limit >= count} onClick={() => setPage(page + 1)} className="mkt-btn mkt-btn-sm">
                   Next
                 </button>
               </div>

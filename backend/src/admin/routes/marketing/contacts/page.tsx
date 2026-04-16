@@ -6,11 +6,11 @@ import { sdk } from "../../../lib/sdk"
 import {
   MarketingShell,
   StatusBadge,
+  EmptyState,
   useSelectedBrand,
-  brandQs,
   Modal,
   SlideOver,
-  lblStyle,
+  tokens,
 } from "../../../components/marketing/shared"
 
 function useDebounced<T>(value: T, delay = 300) {
@@ -77,29 +77,32 @@ function ContactsPage() {
     <MarketingShell
       title="Contacts"
       subtitle="Subscribers, leads and customers"
-      active="/marketing/contacts"
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Contacts" },
+      ]}
       right={
         <>
-          <button className="mkt-btn" onClick={() => setShowImport(true)} style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A" }}>
+          <button className="mkt-btn" onClick={() => setShowImport(true)}>
             Import
           </button>
-          <button className="mkt-btn-primary" onClick={() => setShowNew(true)} style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF" }}>
-            + New Contact
+          <button className="mkt-btn-primary" onClick={() => setShowNew(true)}>
+            New contact
           </button>
         </>
       }
     >
-      <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+      <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
         <input
           className="mkt-input"
-          style={{ maxWidth: "320px" }}
+          style={{ maxWidth: "360px", height: "36px", fontSize: "13px" }}
           placeholder="Search email, name…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <select
           className="mkt-input"
-          style={{ width: "auto", minWidth: "180px" }}
+          style={{ width: "auto", minWidth: "200px", height: "36px", fontSize: "13px" }}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -111,13 +114,22 @@ function ContactsPage() {
         </select>
       </div>
 
-      <div className="mkt-card" style={{ overflow: "hidden" }}>
+      <div className="mkt-card" style={{ overflow: "hidden", padding: 0 }}>
         {isLoading ? (
-          <div style={{ padding: "24px", color: "#8C9196", fontSize: "13px" }}>Loading…</div>
-        ) : contacts.length === 0 ? (
-          <div style={{ padding: "40px", textAlign: "center", color: "#8C9196", fontSize: "13px" }}>
-            No contacts.
+          <div style={{ padding: "32px", color: tokens.fgSecondary, fontSize: "13px", textAlign: "center" }}>
+            Loading…
           </div>
+        ) : contacts.length === 0 ? (
+          <EmptyState
+            icon="👤"
+            title="No contacts yet"
+            description="Add individual contacts or import a CSV to get started."
+            action={
+              <button className="mkt-btn-primary" onClick={() => setShowNew(true)}>
+                Add contact
+              </button>
+            }
+          />
         ) : (
           <table className="mkt-table">
             <thead>
@@ -133,12 +145,12 @@ function ContactsPage() {
               {contacts.map((c: any) => (
                 <tr key={c.id} className="mkt-row" style={{ cursor: "pointer" }} onClick={() => setOpenContact(c)}>
                   <td style={{ fontWeight: 500 }}>{c.email}</td>
-                  <td style={{ color: "#6D7175" }}>
+                  <td style={{ color: tokens.fgSecondary }}>
                     {[c.first_name, c.last_name].filter(Boolean).join(" ") || "—"}
                   </td>
                   <td><StatusBadge status={c.status || "subscribed"} /></td>
-                  <td style={{ color: "#6D7175", fontSize: "12px" }}>{c.source || "—"}</td>
-                  <td style={{ color: "#6D7175", fontSize: "12px" }}>{c.created_at ? new Date(c.created_at).toLocaleDateString() : "—"}</td>
+                  <td style={{ color: tokens.fgSecondary, fontSize: "13px" }}>{c.source || "—"}</td>
+                  <td style={{ color: tokens.fgSecondary, fontSize: "13px" }}>{c.created_at ? new Date(c.created_at).toLocaleDateString() : "—"}</td>
                 </tr>
               ))}
             </tbody>
@@ -175,35 +187,32 @@ function NewContactModal({
       onClose={onClose}
       footer={
         <>
-          <button className="mkt-btn" onClick={onClose} style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #E1E3E5", background: "#FFF", color: "#6D7175" }}>
-            Cancel
-          </button>
+          <button className="mkt-btn" onClick={onClose}>Cancel</button>
           <button
             className="mkt-btn-primary"
             disabled={!valid || saving}
             onClick={() => onSave({ brand_id: brandId || undefined, email, first_name: firstName || undefined, last_name: lastName || undefined, status })}
-            style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF", opacity: !valid ? 0.5 : 1 }}
           >
             {saving ? "Creating…" : "Create"}
           </button>
         </>
       }
     >
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
         <div style={{ gridColumn: "span 2" }}>
-          <label style={lblStyle}>Email *</label>
+          <label className="mkt-label">Email *</label>
           <input className="mkt-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" autoFocus />
         </div>
         <div>
-          <label style={lblStyle}>First name</label>
+          <label className="mkt-label">First name</label>
           <input className="mkt-input" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
         </div>
         <div>
-          <label style={lblStyle}>Last name</label>
+          <label className="mkt-label">Last name</label>
           <input className="mkt-input" value={lastName} onChange={(e) => setLastName(e.target.value)} />
         </div>
         <div>
-          <label style={lblStyle}>Status</label>
+          <label className="mkt-label">Status</label>
           <select className="mkt-input" value={status} onChange={(e) => setStatus(e.target.value)}>
             <option value="subscribed">Subscribed</option>
             <option value="unconfirmed">Unconfirmed</option>
@@ -251,41 +260,38 @@ function ImportContactsModal({
     <Modal
       title="Import contacts"
       onClose={onClose}
-      width={640}
+      width={720}
       footer={
         <>
-          <button className="mkt-btn" onClick={onClose} style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #E1E3E5", background: "#FFF", color: "#6D7175" }}>
-            Cancel
-          </button>
+          <button className="mkt-btn" onClick={onClose}>Cancel</button>
           <button
             className="mkt-btn-primary"
             disabled={parsed.length === 0 || importing}
             onClick={() => onImport({ brand_id: brandId || undefined, status: defaultStatus, contacts: parsed })}
-            style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF", opacity: parsed.length === 0 ? 0.5 : 1 }}
           >
             {importing ? "Importing…" : `Import ${parsed.length}`}
           </button>
         </>
       }
     >
-      <p style={{ fontSize: "12px", color: "#6D7175", marginTop: 0 }}>
-        Paste one email per line, or <code>email,first_name,last_name</code>.
+      <p style={{ fontSize: "13px", color: tokens.fgSecondary, marginTop: 0, marginBottom: "16px" }}>
+        Paste one email per line, or <code style={{ background: tokens.borderSubtle, padding: "2px 6px", borderRadius: tokens.rSm, fontSize: "12px" }}>email,first_name,last_name</code>.
       </p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "8px", alignItems: "end" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "16px", alignItems: "end" }}>
         <div>
-          <label style={lblStyle}>Default status</label>
+          <label className="mkt-label">Default status</label>
           <select className="mkt-input" value={defaultStatus} onChange={(e) => setDefaultStatus(e.target.value)}>
             <option value="subscribed">Subscribed</option>
             <option value="unconfirmed">Unconfirmed</option>
           </select>
         </div>
-        <div style={{ fontSize: "12px", color: "#8C9196", paddingBottom: "9px" }}>
-          Valid rows: {parsed.length}
+        <div style={{ fontSize: "13px", color: tokens.fgSecondary, paddingBottom: "12px" }}>
+          Valid rows: <strong style={{ color: tokens.fg }}>{parsed.length}</strong>
         </div>
       </div>
       <textarea
         className="mkt-input"
-        style={{ minHeight: "220px", marginTop: "10px", fontFamily: "monospace", fontSize: "12px" }}
+        style={{ minHeight: "220px", marginTop: "12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: "13px" }}
         placeholder={"alice@example.com\nbob@example.com,Bob,Smith"}
         value={csv}
         onChange={(e) => setCsv(e.target.value)}
@@ -330,42 +336,48 @@ function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () =
       title={c.email}
       onClose={onClose}
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
         <div>
-          <label style={lblStyle}>Status</label>
+          <label className="mkt-label">Status</label>
           <div><StatusBadge status={c.status || "subscribed"} /></div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
           <div>
-            <label style={lblStyle}>First name</label>
-            <div style={{ fontSize: "13px" }}>{c.first_name || "—"}</div>
+            <label className="mkt-label">First name</label>
+            <div style={{ fontSize: "14px", color: tokens.fg }}>{c.first_name || "—"}</div>
           </div>
           <div>
-            <label style={lblStyle}>Last name</label>
-            <div style={{ fontSize: "13px" }}>{c.last_name || "—"}</div>
+            <label className="mkt-label">Last name</label>
+            <div style={{ fontSize: "14px", color: tokens.fg }}>{c.last_name || "—"}</div>
           </div>
           <div>
-            <label style={lblStyle}>Source</label>
-            <div style={{ fontSize: "13px" }}>{c.source || "—"}</div>
+            <label className="mkt-label">Source</label>
+            <div style={{ fontSize: "14px", color: tokens.fg }}>{c.source || "—"}</div>
           </div>
           <div>
-            <label style={lblStyle}>Created</label>
-            <div style={{ fontSize: "13px" }}>{c.created_at ? new Date(c.created_at).toLocaleString() : "—"}</div>
+            <label className="mkt-label">Created</label>
+            <div style={{ fontSize: "14px", color: tokens.fg }}>{c.created_at ? new Date(c.created_at).toLocaleString() : "—"}</div>
           </div>
         </div>
 
         <div>
-          <label style={lblStyle}>Tags</label>
-          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "6px" }}>
+          <label className="mkt-label">Tags</label>
+          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "10px" }}>
             {tags.map((t) => (
-              <span key={t} className="mkt-badge" style={{ background: "#E4E5E7", color: "#4A4A4A" }}>
-                {t}{" "}
-                <button onClick={() => setTags(tags.filter((x) => x !== t))} style={{ border: "none", background: "none", cursor: "pointer", color: "#D72C0D", marginLeft: "2px" }}>×</button>
+              <span key={t} className="mkt-badge" style={{ background: tokens.borderSubtle, color: tokens.fgSecondary }}>
+                {t}
+                <button
+                  onClick={() => setTags(tags.filter((x) => x !== t))}
+                  style={{ border: "none", background: "none", cursor: "pointer", color: tokens.dangerFg, marginLeft: "2px", fontSize: "14px", padding: 0, lineHeight: 1 }}
+                  aria-label={`Remove tag ${t}`}
+                >
+                  ×
+                </button>
               </span>
             ))}
-            {tags.length === 0 && <span style={{ fontSize: "12px", color: "#8C9196" }}>No tags</span>}
+            {tags.length === 0 && <span style={{ fontSize: "13px", color: tokens.fgMuted }}>No tags</span>}
           </div>
-          <div style={{ display: "flex", gap: "6px" }}>
+          <div style={{ display: "flex", gap: "8px" }}>
             <input
               className="mkt-input"
               placeholder="Add tag…"
@@ -382,7 +394,6 @@ function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () =
               className="mkt-btn-primary"
               disabled={saveTagsMut.isPending}
               onClick={() => saveTagsMut.mutate(tags)}
-              style={{ padding: "6px 12px", borderRadius: "6px", fontSize: "12px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF" }}
             >
               Save tags
             </button>
@@ -390,11 +401,11 @@ function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () =
         </div>
 
         <div>
-          <label style={lblStyle}>List memberships</label>
+          <label className="mkt-label">List memberships</label>
           {lists.length === 0 ? (
-            <div style={{ fontSize: "12px", color: "#8C9196" }}>Not on any lists</div>
+            <div style={{ fontSize: "13px", color: tokens.fgMuted }}>Not on any lists</div>
           ) : (
-            <ul style={{ margin: 0, padding: "0 0 0 16px", fontSize: "13px" }}>
+            <ul style={{ margin: 0, padding: "0 0 0 20px", fontSize: "14px", color: tokens.fg }}>
               {lists.map((l: any) => (
                 <li key={l.id || l.list_id}>{l.name || l.list_name || l.list_id}</li>
               ))}

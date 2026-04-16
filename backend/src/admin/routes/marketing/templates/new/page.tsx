@@ -7,7 +7,11 @@ function NewTemplatePage() {
     <MarketingShell
       title="New template"
       subtitle="Design and save an email template"
-      active="/marketing/templates"
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Templates", to: "/marketing/templates" },
+        { label: "New" },
+      ]}
     >
       <TemplateEditor />
     </MarketingShell>

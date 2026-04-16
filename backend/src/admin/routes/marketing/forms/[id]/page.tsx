@@ -9,7 +9,7 @@ import {
   useSelectedBrand,
   brandQs,
   Modal,
-  lblStyle,
+  tokens,
 } from "../../../../components/marketing/shared"
 
 const FORM_TYPES = [
@@ -37,16 +37,9 @@ function FormDetailPage() {
   const qc = useQueryClient()
   const { brandId } = useSelectedBrand()
   const bQs = brandQs(brandId)
-  const [id, setId] = useState<string | undefined>(params.id)
+  const id = params.id
   const [showEmbed, setShowEmbed] = useState(false)
   const [embedCode, setEmbedCode] = useState("")
-
-  useEffect(() => {
-    if (!id && typeof window !== "undefined") {
-      const m = window.location.hash.match(/#\/marketing\/forms\/([^/?#]+)/)
-      if (m) setId(m[1])
-    }
-  }, [id])
 
   const [name, setName] = useState("")
   const [type, setType] = useState("popup")
@@ -142,89 +135,121 @@ function FormDetailPage() {
     <MarketingShell
       title={name || "Form"}
       subtitle="Edit form configuration and publish"
-      active="/marketing/forms"
-      right={
-        <>
-          <a href="#/marketing/forms" className="mkt-link" style={{ fontSize: "12px" }}>← Back</a>
-          <StatusBadge status={status} />
-        </>
-      }
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Forms", to: "/marketing/forms" },
+        { label: name || "Detail" },
+      ]}
+      right={<StatusBadge status={status} />}
     >
-      <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end", marginBottom: "12px" }}>
-        <button className="mkt-btn" disabled={!id} onClick={() => embedMut.mutate()} style={{ padding: "6px 12px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A" }}>
+      <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginBottom: "16px" }}>
+        <button className="mkt-btn mkt-btn-sm" disabled={!id} onClick={() => embedMut.mutate()}>
           Get embed code
         </button>
-        <button className="mkt-btn" onClick={() => saveMut.mutate("draft")} disabled={saveMut.isPending} style={{ padding: "6px 12px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A" }}>
-          {saveMut.isPending ? "Saving…" : "Save Draft"}
+        <button className="mkt-btn mkt-btn-sm" onClick={() => saveMut.mutate("draft")} disabled={saveMut.isPending}>
+          {saveMut.isPending ? "Saving…" : "Save draft"}
         </button>
-        <button className="mkt-btn-primary" onClick={() => saveMut.mutate("published")} disabled={saveMut.isPending} style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF" }}>
+        <button className="mkt-btn-primary" onClick={() => saveMut.mutate("published")} disabled={saveMut.isPending}>
           Publish
         </button>
       </div>
 
-      <div className="mkt-card" style={{ padding: "16px 18px", marginBottom: "12px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+      <div className="mkt-card" style={{ padding: "20px", marginBottom: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
           <div>
-            <label style={lblStyle}>Name *</label>
+            <label className="mkt-label">Name *</label>
             <input className="mkt-input" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div>
-            <label style={lblStyle}>Type</label>
+            <label className="mkt-label">Type</label>
             <select className="mkt-input" value={type} onChange={(e) => setType(e.target.value)}>
               {FORM_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
           </div>
           <div>
-            <label style={lblStyle}>Slug</label>
+            <label className="mkt-label">Slug</label>
             <input className="mkt-input" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="newsletter-popup" />
           </div>
         </div>
 
-        <div style={{ marginTop: "12px" }}>
-          <div style={{ fontSize: "11px", fontWeight: 700, color: "#6D7175", textTransform: "uppercase", marginBottom: "8px" }}>Fields</div>
+        <div style={{ marginTop: "24px" }}>
+          <div
+            style={{
+              fontSize: "11px",
+              fontWeight: 600,
+              color: tokens.fgSecondary,
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+              marginBottom: "12px",
+            }}
+          >
+            Fields
+          </div>
           {fields.map((f, idx) => (
-            <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 100px 28px", gap: "6px", marginBottom: "6px" }}>
+            <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 110px 40px", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
               <input className="mkt-input" value={f.name} onChange={(e) => updateField(idx, { name: e.target.value })} placeholder="name (snake_case)" />
               <input className="mkt-input" value={f.label} onChange={(e) => updateField(idx, { label: e.target.value })} placeholder="Label" />
               <select className="mkt-input" value={f.type} onChange={(e) => updateField(idx, { type: e.target.value })}>
                 {FIELD_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
-              <label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: tokens.fg, userSelect: "none" }}>
                 <input type="checkbox" checked={f.required} onChange={(e) => updateField(idx, { required: e.target.checked })} />
                 Required
               </label>
-              <button onClick={() => removeField(idx)} style={{ border: "1px solid #FED3D1", background: "#FFF", color: "#D72C0D", borderRadius: "6px", cursor: "pointer" }}>×</button>
+              <button
+                onClick={() => removeField(idx)}
+                className="mkt-btn-danger-ghost"
+                style={{ border: `1px solid ${tokens.borderStrong}`, height: "40px", justifyContent: "center" }}
+                aria-label="Remove field"
+              >
+                ×
+              </button>
             </div>
           ))}
-          <button className="mkt-btn" onClick={addField} style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A", marginTop: "4px" }}>
+          <button className="mkt-btn mkt-btn-sm" onClick={addField} style={{ marginTop: "4px" }}>
             + Add field
           </button>
         </div>
       </div>
 
-      <div className="mkt-card" style={{ padding: "16px 18px", marginBottom: "12px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+      <div className="mkt-card" style={{ padding: "20px", marginBottom: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
           <div>
-            <label style={lblStyle}>Styling (JSON)</label>
-            <textarea className="mkt-input" style={{ minHeight: "140px", fontFamily: "monospace", fontSize: "12px" }} value={stylingText} onChange={(e) => setStylingText(e.target.value)} />
+            <label className="mkt-label">Styling (JSON)</label>
+            <textarea className="mkt-input" style={{ minHeight: "160px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: "13px" }} value={stylingText} onChange={(e) => setStylingText(e.target.value)} />
           </div>
           <div>
-            <label style={lblStyle}>Success action (JSON)</label>
-            <textarea className="mkt-input" style={{ minHeight: "140px", fontFamily: "monospace", fontSize: "12px" }} value={successActionText} onChange={(e) => setSuccessActionText(e.target.value)} />
+            <label className="mkt-label">Success action (JSON)</label>
+            <textarea className="mkt-input" style={{ minHeight: "160px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: "13px" }} value={successActionText} onChange={(e) => setSuccessActionText(e.target.value)} />
           </div>
         </div>
 
-        <div style={{ marginTop: "12px", display: "grid", gridTemplateColumns: "1fr 240px", gap: "12px" }}>
+        <div style={{ marginTop: "20px", display: "grid", gridTemplateColumns: "1fr 260px", gap: "20px" }}>
           <div>
-            <label style={lblStyle}>Target lists</label>
+            <label className="mkt-label">Target lists</label>
             {lists.length === 0 ? (
-              <div style={{ fontSize: "12px", color: "#8C9196" }}>No lists available</div>
+              <div style={{ fontSize: "13px", color: tokens.fgMuted }}>No lists available</div>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
                 {lists.map((l: any) => {
                   const on = targetListIds.includes(l.id)
                   return (
-                    <label key={l.id} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 8px", borderRadius: "6px", border: on ? "1.5px solid #008060" : "1px solid #E1E3E5", background: on ? "#F0FFF8" : "#FFF", fontSize: "12px", cursor: "pointer" }}>
+                    <label
+                      key={l.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "8px 12px",
+                        borderRadius: tokens.rMd,
+                        border: on ? `1.5px solid ${tokens.primary}` : `1px solid ${tokens.borderStrong}`,
+                        background: on ? tokens.primarySoft : tokens.surface,
+                        fontSize: "13px",
+                        color: tokens.fg,
+                        cursor: "pointer",
+                        transition: "background 120ms ease-out, border-color 120ms ease-out",
+                      }}
+                    >
                       <input type="checkbox" checked={on} onChange={() => toggleList(l.id)} />
                       {l.name}
                     </label>
@@ -234,7 +259,7 @@ function FormDetailPage() {
             )}
           </div>
           <div>
-            <label style={lblStyle}>Double opt-in (override)</label>
+            <label className="mkt-label">Double opt-in (override)</label>
             <select className="mkt-input" value={doubleOptIn} onChange={(e) => setDoubleOptIn(e.target.value)}>
               <option value="inherit">Inherit from brand</option>
               <option value="yes">Force on</option>
@@ -248,28 +273,25 @@ function FormDetailPage() {
         <Modal
           title="Embed code"
           onClose={() => setShowEmbed(false)}
-          width={640}
+          width={720}
           footer={
             <>
-              <button className="mkt-btn" onClick={() => setShowEmbed(false)} style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #E1E3E5", background: "#FFF", color: "#6D7175" }}>
-                Close
-              </button>
+              <button className="mkt-btn" onClick={() => setShowEmbed(false)}>Close</button>
               <button
                 className="mkt-btn-primary"
                 onClick={() => { navigator.clipboard.writeText(embedCode); toast.success("Copied") }}
-                style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF" }}
               >
                 Copy
               </button>
             </>
           }
         >
-          <p style={{ fontSize: "12px", color: "#6D7175", marginTop: 0 }}>
+          <p style={{ fontSize: "13px", color: tokens.fgSecondary, marginTop: 0 }}>
             Paste this into your site where you want the form to appear.
           </p>
           <textarea
             className="mkt-input"
-            style={{ minHeight: "220px", fontFamily: "monospace", fontSize: "12px" }}
+            style={{ minHeight: "240px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: "12px" }}
             readOnly
             value={embedCode}
           />

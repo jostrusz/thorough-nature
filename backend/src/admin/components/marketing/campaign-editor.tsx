@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@medusajs/ui"
 import { sdk } from "../../lib/sdk"
-import { useSelectedBrand, lblStyle, StatusBadge, brandQs, fmt } from "./shared"
+import { useSelectedBrand, StatusBadge, brandQs, fmt, tokens } from "./shared"
 
 export function CampaignEditor({ campaignId }: { campaignId?: string }) {
   const qc = useQueryClient()
+  const navigate = useNavigate()
   const { brandId } = useSelectedBrand()
   const bQs = brandQs(brandId)
 
@@ -93,7 +95,7 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
       const c = resp?.campaign
       if (c?.id && !currentId) {
         setCurrentId(c.id)
-        try { window.location.hash = `#/marketing/campaigns/${c.id}` } catch { /* ignore */ }
+        navigate(`/marketing/campaigns/${c.id}`, { replace: true })
       }
       if (c?.status) setStatus(c.status)
       qc.invalidateQueries({ queryKey: ["mkt-campaigns"] })
@@ -131,11 +133,10 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
 
   return (
     <>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", flexWrap: "wrap", gap: "10px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <a href="#/marketing/campaigns" className="mkt-link" style={{ fontSize: "12px" }}>← Back</a>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <StatusBadge status={status} />
-          {sentAt && <span style={{ fontSize: "12px", color: "#8C9196" }}>Sent {new Date(sentAt).toLocaleString()}</span>}
+          {sentAt && <span style={{ fontSize: "13px", color: tokens.fgSecondary }}>Sent {new Date(sentAt).toLocaleString()}</span>}
         </div>
       </div>
 
@@ -146,30 +147,30 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
           metrics={metrics}
         />
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "12px", alignItems: "flex-start" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "16px", alignItems: "flex-start" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {/* 1. Name + Template */}
-            <div className="mkt-card" style={{ padding: "16px 18px" }}>
-              <div style={{ fontSize: "11px", fontWeight: 700, color: "#6D7175", textTransform: "uppercase", marginBottom: "8px" }}>1. Basics</div>
-              <label style={lblStyle}>Campaign name *</label>
+            <div className="mkt-card" style={{ padding: "20px" }}>
+              <SectionTitle step={1} title="Basics" />
+              <label className="mkt-label">Campaign name *</label>
               <input className="mkt-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Spring promo 2026" />
-              <label style={{ ...lblStyle, marginTop: "10px" }}>Template *</label>
+              <label className="mkt-label" style={{ marginTop: "14px" }}>Template *</label>
               <select className="mkt-input" value={templateId} onChange={(e) => setTemplateId(e.target.value)}>
-                <option value="">— Select a ready template —</option>
+                <option value="">Select a ready template</option>
                 {templates.map((t: any) => (
                   <option key={t.id} value={t.id}>{t.name}</option>
                 ))}
               </select>
               {templates.length === 0 && (
-                <p style={{ fontSize: "12px", color: "#8C9196", marginTop: "6px" }}>
-                  No templates in status “ready”. <a href="#/marketing/templates" className="mkt-link">Create one</a>.
+                <p style={{ fontSize: "13px", color: tokens.fgSecondary, marginTop: "10px", marginBottom: 0 }}>
+                  No templates in status "ready". <Link to="/marketing/templates" className="mkt-link">Create one</Link>.
                 </p>
               )}
             </div>
 
             {/* 2. Recipients */}
-            <div className="mkt-card" style={{ padding: "16px 18px" }}>
-              <div style={{ fontSize: "11px", fontWeight: 700, color: "#6D7175", textTransform: "uppercase", marginBottom: "8px" }}>2. Recipients</div>
+            <div className="mkt-card" style={{ padding: "20px" }}>
+              <SectionTitle step={2} title="Recipients" />
               <Checklist
                 label="Lists"
                 items={lists}
@@ -181,31 +182,46 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                 items={segments}
                 selected={segmentIds}
                 onChange={(id) => toggleSel(segmentIds, setSegmentIds, id)}
-                style={{ marginTop: "10px" }}
+                style={{ marginTop: "16px" }}
               />
               <Checklist
                 label="Suppression segments (exclude)"
                 items={segments}
                 selected={suppressionSegmentIds}
                 onChange={(id) => toggleSel(suppressionSegmentIds, setSuppressionSegmentIds, id)}
-                style={{ marginTop: "10px" }}
+                style={{ marginTop: "16px" }}
               />
-              <div style={{ marginTop: "12px", display: "flex", gap: "8px", alignItems: "center" }}>
+              <div style={{ marginTop: "16px", display: "flex", gap: "10px", alignItems: "center" }}>
                 <button
-                  className="mkt-btn"
+                  className="mkt-btn mkt-btn-sm"
                   onClick={() => previewMut.mutate()}
                   disabled={!currentId || previewMut.isPending}
-                  style={{ padding: "5px 12px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A", opacity: !currentId ? 0.5 : 1 }}
                 >
                   {previewMut.isPending ? "Counting…" : "Preview recipients"}
                 </button>
-                {!currentId && <span style={{ fontSize: "11px", color: "#8C9196" }}>Save draft first</span>}
+                {!currentId && <span style={{ fontSize: "12px", color: tokens.fgMuted }}>Save draft first</span>}
               </div>
               {preview && (
-                <div style={{ marginTop: "10px", padding: "10px 12px", background: "#F6F6F7", borderRadius: "8px" }}>
-                  <div style={{ fontSize: "13px", fontWeight: 600 }}>{fmt(preview.count)} recipient(s)</div>
+                <div
+                  style={{
+                    marginTop: "12px",
+                    padding: "12px 14px",
+                    background: tokens.borderSubtle,
+                    borderRadius: tokens.rMd,
+                  }}
+                >
+                  <div style={{ fontSize: "14px", fontWeight: 600, color: tokens.fg }}>{fmt(preview.count)} recipient(s)</div>
                   {preview.sample.length > 0 && (
-                    <div style={{ fontSize: "11px", color: "#6D7175", marginTop: "4px", maxHeight: "120px", overflow: "auto", fontFamily: "monospace" }}>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: tokens.fgSecondary,
+                        marginTop: "6px",
+                        maxHeight: "140px",
+                        overflow: "auto",
+                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                      }}
+                    >
                       {preview.sample.slice(0, 100).join(", ")}
                     </div>
                   )}
@@ -214,20 +230,20 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
             </div>
 
             {/* 3. A/B placeholder */}
-            <div className="mkt-card" style={{ padding: "16px 18px" }}>
-              <div style={{ fontSize: "11px", fontWeight: 700, color: "#6D7175", textTransform: "uppercase", marginBottom: "8px" }}>3. A/B test</div>
-              <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#8C9196" }}>
+            <div className="mkt-card" style={{ padding: "20px" }}>
+              <SectionTitle step={3} title="A/B test" />
+              <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", color: tokens.fg }}>
                 <input type="checkbox" checked={abTest} onChange={(e) => setAbTest(e.target.checked)} />
-                Enable A/B test (setup coming soon)
+                <span>Enable A/B test <span style={{ color: tokens.fgMuted }}>(setup coming soon)</span></span>
               </label>
             </div>
 
             {/* 4. Schedule */}
-            <div className="mkt-card" style={{ padding: "16px 18px" }}>
-              <div style={{ fontSize: "11px", fontWeight: 700, color: "#6D7175", textTransform: "uppercase", marginBottom: "8px" }}>4. Schedule</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "8px", alignItems: "end" }}>
+            <div className="mkt-card" style={{ padding: "20px" }}>
+              <SectionTitle step={4} title="Schedule" />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "10px", alignItems: "end" }}>
                 <div>
-                  <label style={lblStyle}>Send at</label>
+                  <label className="mkt-label">Send at</label>
                   <input
                     className="mkt-input"
                     type="datetime-local"
@@ -238,7 +254,6 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                 <button
                   className="mkt-btn"
                   onClick={() => setScheduleAt("")}
-                  style={{ padding: "7px 12px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#6D7175" }}
                 >
                   Clear
                 </button>
@@ -247,22 +262,31 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
           </div>
 
           {/* RIGHT: actions sidebar */}
-          <div className="mkt-card" style={{ padding: "16px 18px", position: "sticky", top: "12px" }}>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "#6D7175", textTransform: "uppercase", marginBottom: "10px" }}>Actions</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div className="mkt-card" style={{ padding: "20px", position: "sticky", top: "16px" }}>
+            <div
+              style={{
+                fontSize: "11px",
+                fontWeight: 600,
+                color: tokens.fgSecondary,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+                marginBottom: "12px",
+              }}
+            >
+              Actions
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <button
                 className="mkt-btn"
                 onClick={() => saveMut.mutate({ status: "draft" })}
                 disabled={saveMut.isPending}
-                style={{ padding: "8px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A" }}
               >
-                {saveMut.isPending ? "Saving…" : "Save Draft"}
+                {saveMut.isPending ? "Saving…" : "Save draft"}
               </button>
               <button
                 className="mkt-btn-primary"
                 disabled={!name || !templateId || saveMut.isPending || !scheduleAt}
                 onClick={() => saveMut.mutate({ status: "scheduled" })}
-                style={{ padding: "8px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF", opacity: (!name || !templateId || !scheduleAt) ? 0.5 : 1 }}
               >
                 Schedule
               </button>
@@ -270,25 +294,64 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                 className="mkt-btn-primary"
                 disabled={!currentId || sendNowMut.isPending}
                 onClick={() => { if (confirm("Send this campaign now?")) sendNowMut.mutate() }}
-                style={{ padding: "8px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#D72C0D", color: "#FFF", opacity: !currentId ? 0.5 : 1 }}
+                style={{ background: tokens.danger }}
               >
-                {sendNowMut.isPending ? "Starting…" : "Send Now"}
+                {sendNowMut.isPending ? "Starting…" : "Send now"}
               </button>
             </div>
             {currentId && metrics && Object.keys(metrics).length > 0 && (
-              <div style={{ marginTop: "16px", fontSize: "12px", color: "#6D7175" }}>
-                <div style={{ fontSize: "11px", fontWeight: 700, color: "#6D7175", textTransform: "uppercase", marginBottom: "6px" }}>Metrics</div>
-                <div>Sent: {fmt(metrics.sent)}</div>
-                <div>Delivered: {fmt(metrics.delivered)}</div>
-                <div>Opened: {fmt(metrics.opened)}</div>
-                <div>Clicked: {fmt(metrics.clicked)}</div>
-                <div>Bounced: {fmt(metrics.bounced)}</div>
+              <div style={{ marginTop: "20px", fontSize: "13px", color: tokens.fg }}>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    color: tokens.fgSecondary,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.04em",
+                    marginBottom: "8px",
+                  }}
+                >
+                  Metrics
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div>Sent: <strong>{fmt(metrics.sent)}</strong></div>
+                  <div>Delivered: <strong>{fmt(metrics.delivered)}</strong></div>
+                  <div>Opened: <strong>{fmt(metrics.opened)}</strong></div>
+                  <div>Clicked: <strong>{fmt(metrics.clicked)}</strong></div>
+                  <div>Bounced: <strong>{fmt(metrics.bounced)}</strong></div>
+                </div>
               </div>
             )}
           </div>
         </div>
       )}
     </>
+  )
+}
+
+function SectionTitle({ step, title }: { step: number; title: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+      <div
+        style={{
+          width: "24px",
+          height: "24px",
+          borderRadius: "50%",
+          background: tokens.primarySoft,
+          color: tokens.primary,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "12px",
+          fontWeight: 600,
+        }}
+      >
+        {step}
+      </div>
+      <h3 style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, margin: 0, letterSpacing: "-0.005em" }}>
+        {title}
+      </h3>
+    </div>
   )
 }
 
@@ -307,11 +370,11 @@ function Checklist({
 }) {
   return (
     <div style={style}>
-      <label style={lblStyle}>{label}</label>
+      <label className="mkt-label">{label}</label>
       {items.length === 0 ? (
-        <div style={{ fontSize: "12px", color: "#8C9196" }}>None available</div>
+        <div style={{ fontSize: "13px", color: tokens.fgMuted }}>None available</div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
           {items.map((it: any) => {
             const on = selected.includes(it.id)
             return (
@@ -320,13 +383,15 @@ function Checklist({
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "6px",
-                  padding: "5px 8px",
-                  borderRadius: "6px",
-                  border: on ? "1.5px solid #008060" : "1px solid #E1E3E5",
-                  background: on ? "#F0FFF8" : "#FFF",
-                  fontSize: "12px",
+                  gap: "8px",
+                  padding: "8px 12px",
+                  borderRadius: tokens.rMd,
+                  border: on ? `1.5px solid ${tokens.primary}` : `1px solid ${tokens.borderStrong}`,
+                  background: on ? tokens.primarySoft : tokens.surface,
+                  fontSize: "13px",
+                  color: tokens.fg,
                   cursor: "pointer",
+                  transition: "background 120ms ease-out, border-color 120ms ease-out",
                 }}
               >
                 <input type="checkbox" checked={on} onChange={() => onChange(it.id)} />
@@ -342,28 +407,28 @@ function Checklist({
 
 function ReadOnlyView({ name, templateName, metrics }: { name: string; templateName?: string; metrics: any }) {
   const bars: { label: string; key: string; color: string }[] = [
-    { label: "Sent", key: "sent", color: "#6D7175" },
-    { label: "Delivered", key: "delivered", color: "#008060" },
-    { label: "Opened", key: "opened", color: "#1D4ED8" },
-    { label: "Clicked", key: "clicked", color: "#7C3AED" },
-    { label: "Bounced", key: "bounced", color: "#D72C0D" },
+    { label: "Sent", key: "sent", color: tokens.fgSecondary },
+    { label: "Delivered", key: "delivered", color: tokens.primary },
+    { label: "Opened", key: "opened", color: tokens.info },
+    { label: "Clicked", key: "clicked", color: tokens.purple },
+    { label: "Bounced", key: "bounced", color: tokens.dangerFg },
   ]
   const max = Math.max(1, ...bars.map((b) => Number(metrics?.[b.key]) || 0))
   return (
-    <div className="mkt-card" style={{ padding: "18px 22px" }}>
-      <div style={{ fontSize: "16px", fontWeight: 600, marginBottom: "4px" }}>{name}</div>
-      {templateName && <div style={{ fontSize: "12px", color: "#6D7175", marginBottom: "14px" }}>Template: {templateName}</div>}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+    <div className="mkt-card" style={{ padding: "24px" }}>
+      <div style={{ fontSize: "18px", fontWeight: 600, marginBottom: "4px", color: tokens.fg, letterSpacing: "-0.005em" }}>{name}</div>
+      {templateName && <div style={{ fontSize: "13px", color: tokens.fgSecondary, marginBottom: "20px" }}>Template: {templateName}</div>}
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {bars.map((b) => {
           const v = Number(metrics?.[b.key]) || 0
           const pc = (v / max) * 100
           return (
-            <div key={b.key} style={{ display: "grid", gridTemplateColumns: "90px 1fr 60px", alignItems: "center", gap: "10px" }}>
-              <div style={{ fontSize: "12px", color: "#6D7175" }}>{b.label}</div>
-              <div style={{ background: "#F1F2F4", borderRadius: "4px", overflow: "hidden", height: "16px" }}>
-                <div style={{ width: `${pc}%`, height: "100%", background: b.color, transition: "width 0.3s" }} />
+            <div key={b.key} style={{ display: "grid", gridTemplateColumns: "100px 1fr 80px", alignItems: "center", gap: "12px" }}>
+              <div style={{ fontSize: "13px", color: tokens.fgSecondary, fontWeight: 500 }}>{b.label}</div>
+              <div style={{ background: tokens.borderSubtle, borderRadius: "6px", overflow: "hidden", height: "12px" }}>
+                <div style={{ width: `${pc}%`, height: "100%", background: b.color, transition: "width 300ms ease-out", borderRadius: "6px" }} />
               </div>
-              <div style={{ fontSize: "12px", textAlign: "right" }}>{v.toLocaleString()}</div>
+              <div style={{ fontSize: "13px", textAlign: "right", color: tokens.fg, fontVariantNumeric: "tabular-nums" }}>{v.toLocaleString()}</div>
             </div>
           )
         })}

@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@medusajs/ui"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
@@ -6,8 +7,9 @@ import { sdk } from "../../../lib/sdk"
 import {
   MarketingShell,
   StatusBadge,
+  EmptyState,
   useSelectedBrand,
-  brandQs,
+  tokens,
 } from "../../../components/marketing/shared"
 
 function TemplatesPage() {
@@ -54,21 +56,20 @@ function TemplatesPage() {
     <MarketingShell
       title="Templates"
       subtitle="Reusable email templates"
-      active="/marketing/templates"
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Templates" },
+      ]}
       right={
-        <a
-          className="mkt-btn-primary"
-          href="#/marketing/templates/new"
-          style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF", textDecoration: "none" }}
-        >
-          + New Template
-        </a>
+        <Link className="mkt-btn-primary" to="/marketing/templates/new">
+          New template
+        </Link>
       }
     >
-      <div style={{ marginBottom: "12px", display: "flex", gap: "8px" }}>
+      <div style={{ marginBottom: "16px", display: "flex", gap: "12px" }}>
         <select
           className="mkt-input"
-          style={{ width: "auto", minWidth: "160px" }}
+          style={{ width: "auto", minWidth: "180px", height: "36px", fontSize: "13px" }}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -79,13 +80,22 @@ function TemplatesPage() {
         </select>
       </div>
 
-      <div className="mkt-card" style={{ overflow: "hidden" }}>
+      <div className="mkt-card" style={{ overflow: "hidden", padding: 0 }}>
         {isLoading ? (
-          <div style={{ padding: "24px", color: "#8C9196", fontSize: "13px" }}>Loading…</div>
-        ) : templates.length === 0 ? (
-          <div style={{ padding: "40px", textAlign: "center", color: "#8C9196", fontSize: "13px" }}>
-            No templates yet. Create your first template to get started.
+          <div style={{ padding: "32px", color: tokens.fgSecondary, fontSize: "13px", textAlign: "center" }}>
+            Loading…
           </div>
+        ) : templates.length === 0 ? (
+          <EmptyState
+            icon="📧"
+            title="No templates yet"
+            description="Create your first email template to get started."
+            action={
+              <Link to="/marketing/templates/new" className="mkt-btn-primary">
+                Create template
+              </Link>
+            }
+          />
         ) : (
           <table className="mkt-table">
             <thead>
@@ -101,31 +111,29 @@ function TemplatesPage() {
               {templates.map((t: any) => (
                 <tr key={t.id} className="mkt-row">
                   <td>
-                    <a href={`#/marketing/templates/${t.id}`} className="mkt-link" style={{ fontWeight: 500 }}>
+                    <Link to={`/marketing/templates/${t.id}`} className="mkt-link" style={{ fontWeight: 500 }}>
                       {t.name || "Untitled"}
-                    </a>
+                    </Link>
                   </td>
-                  <td style={{ color: "#6D7175" }}>{t.subject || "—"}</td>
+                  <td style={{ color: tokens.fgSecondary }}>{t.subject || "—"}</td>
                   <td><StatusBadge status={t.status || "draft"} /></td>
-                  <td style={{ color: "#6D7175", fontSize: "12px" }}>
+                  <td style={{ color: tokens.fgSecondary, fontSize: "13px" }}>
                     {t.updated_at ? new Date(t.updated_at).toLocaleString() : "—"}
                   </td>
                   <td style={{ textAlign: "right" }}>
-                    <div style={{ display: "inline-flex", gap: "4px" }}>
-                      <a href={`#/marketing/templates/${t.id}`} className="mkt-btn" style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A", textDecoration: "none" }}>
+                    <div style={{ display: "inline-flex", gap: "6px" }}>
+                      <Link to={`/marketing/templates/${t.id}`} className="mkt-btn mkt-btn-xs">
                         Edit
-                      </a>
+                      </Link>
                       <button
-                        className="mkt-btn"
+                        className="mkt-btn mkt-btn-xs"
                         onClick={() => duplicateMut.mutate(t.id)}
-                        style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A" }}
                       >
                         Duplicate
                       </button>
                       <button
-                        className="mkt-btn"
+                        className="mkt-btn-danger-ghost"
                         onClick={() => { if (confirm(`Delete template "${t.name}"?`)) deleteMut.mutate(t.id) }}
-                        style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", border: "1px solid #FED3D1", background: "#FFF", color: "#D72C0D" }}
                       >
                         Delete
                       </button>
