@@ -136,6 +136,18 @@ export default async function orderPlacedPaymentMetadataHandler({
         break
       }
 
+      // Novalnet
+      if (paymentData.novalnetTid || paymentData.tid || providerId.includes("novalnet")) {
+        const tid = paymentData.novalnetTid || paymentData.tid
+        if (tid) {
+          newMetadata.novalnetTid = String(tid)
+        }
+        newMetadata.payment_method = paymentData.method || paymentData.payment_type || "novalnet"
+        newMetadata.payment_provider = "novalnet"
+        found = true
+        break
+      }
+
       // COD (Cash on Delivery / Dobírka)
       if (providerId.includes("cod") || paymentData.method === "cod") {
         newMetadata.payment_method = "cod"
@@ -175,6 +187,7 @@ export default async function orderPlacedPaymentMetadataHandler({
       newMetadata.p24SessionId ||
       newMetadata.airwallexPaymentIntentId ||
       newMetadata.stripePaymentIntentId ||
+      newMetadata.novalnetTid ||
       "n/a"
 
     console.log(

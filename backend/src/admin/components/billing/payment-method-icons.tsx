@@ -206,6 +206,24 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "klarna_later", name: "Klarna Pay Later", icon: "klarna", available_countries: ["nl", "be", "de", "at", "fi", "fr", "it", "se", "es", "dk", "no", "gb", "ie"], supported_currencies: [] },
     { code: "klarna_slice", name: "Klarna Slice It", icon: "klarna", available_countries: ["nl", "be", "de", "at", "fi", "fr", "it", "se", "es", "dk", "no", "gb", "ie"], supported_currencies: [] },
   ],
+  novalnet: [
+    { code: "creditcard", name: "Credit/Debit Card", icon: "card", available_countries: [], supported_currencies: [] },
+    { code: "sepa", name: "SEPA Direct Debit", icon: "sepa", available_countries: ["nl", "be", "de", "at", "fi", "fr", "it", "es", "ie", "pt", "lu", "sk"], supported_currencies: ["EUR"] },
+    { code: "ideal", name: "iDEAL", icon: "ideal", available_countries: ["nl"], supported_currencies: ["EUR"] },
+    { code: "bancontact", name: "Bancontact", icon: "bancontact", available_countries: ["be"], supported_currencies: ["EUR"] },
+    { code: "eps", name: "EPS", icon: "eps", available_countries: ["at"], supported_currencies: ["EUR"] },
+    { code: "paypal", name: "PayPal", icon: "paypal", available_countries: [], supported_currencies: [] },
+    { code: "przelewy24", name: "Przelewy24", icon: "przelewy24", available_countries: ["pl"], supported_currencies: ["PLN", "EUR"] },
+    { code: "giropay", name: "Giropay", icon: "giropay", available_countries: ["de"], supported_currencies: ["EUR"] },
+    { code: "online_transfer", name: "Sofort / Online Bank Transfer", icon: "bank_transfer", available_countries: ["de", "at", "ch", "be", "nl", "it", "es", "pl"], supported_currencies: ["EUR", "PLN"] },
+    { code: "trustly", name: "Trustly", icon: "trustly", available_countries: ["nl", "be", "de", "fr", "fi", "se", "no", "dk", "ee", "lt", "lv"], supported_currencies: ["EUR"] },
+    { code: "postfinance", name: "PostFinance E-Finance", icon: "bank_transfer", available_countries: ["ch"], supported_currencies: ["CHF", "EUR"] },
+    { code: "postfinance_card", name: "PostFinance Card", icon: "card", available_countries: ["ch"], supported_currencies: ["CHF", "EUR"] },
+    { code: "multibanco", name: "Multibanco", icon: "bank_transfer", available_countries: ["pt"], supported_currencies: ["EUR"] },
+    { code: "invoice", name: "Invoice (Pay later)", icon: "bank_transfer", available_countries: ["de", "at", "ch"], supported_currencies: ["EUR", "CHF"] },
+    { code: "prepayment", name: "Prepayment", icon: "bank_transfer", available_countries: ["de", "at", "ch"], supported_currencies: ["EUR", "CHF"] },
+    { code: "cashpayment", name: "Barzahlen / viacash", icon: "bank_transfer", available_countries: ["de", "at"], supported_currencies: ["EUR"] },
+  ],
 }
 
 export const SUPPORTED_PROVIDERS = [
@@ -216,6 +234,7 @@ export const SUPPORTED_PROVIDERS = [
   { code: "przelewy24", name: "Przelewy24" },
   { code: "paypal", name: "PayPal" },
   { code: "klarna", name: "Klarna" },
+  { code: "novalnet", name: "Novalnet" },
 ]
 
 export const SUPPORTED_CURRENCIES = ["EUR", "CZK", "PLN", "SEK", "HUF"]

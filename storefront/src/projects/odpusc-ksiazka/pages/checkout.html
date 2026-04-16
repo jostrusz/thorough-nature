@@ -7708,6 +7708,27 @@ body {
           });
         }
 
+        // ─── NOVALNET INLINE / POST-PAYMENT (no redirect) ───
+        // For Novalnet Invoice, Prepayment, Multibanco, inline CreditCard without 3DS, etc.
+        // Backend returned a TID but no redirectUrl → complete cart and proceed.
+        if (!redirectUrl && selectedProviderId && selectedProviderId.indexOf('novalnet') !== -1 && providerData.tid) {
+          return medusaFetch('/store/carts/' + result.cartId + '/complete', {
+            method: 'POST'
+          }).then(function(completeRes) {
+            var order = completeRes.order || completeRes;
+            localStorage.setItem('medusa_order_id', order.id || '');
+            localStorage.setItem('medusa_order_display_id', order.display_id || '');
+            if (PROJECT_CONFIG.upsellEnabled === false) {
+              window.location.href = PROJECT_CONFIG.thankYouUrl;
+            } else if (checkoutOrderBump) {
+              localStorage.setItem('medusa_upsell_purchased', 'true');
+              window.location.href = PROJECT_CONFIG.thankYouUrl;
+            } else {
+              window.location.href = PROJECT_CONFIG.upsellUrl;
+            }
+          });
+        }
+
         if (redirectUrl) {
           window.location.href = redirectUrl;
         } else if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1) {

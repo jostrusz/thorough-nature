@@ -235,6 +235,11 @@ const medusaConfig = {
             id: 'przelewy24',
             options: {},
           },
+          {
+            resolve: './src/modules/payment-novalnet',
+            id: 'novalnet',
+            options: {},
+          },
         ],
       },
     }
