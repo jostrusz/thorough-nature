@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@medusajs/ui"
 import { sdk } from "../../lib/sdk"
-import { useSelectedBrand, lblStyle, StatusBadge, brandQs, fmt } from "./shared"
+import { useSelectedBrand, StatusBadge, brandQs, fmt, tokens } from "./shared"
 
 type NodeType = "delay" | "email" | "tag" | "condition" | "exit"
 
@@ -33,6 +34,7 @@ function blankNode(type: NodeType): FlowNode {
 
 export function FlowEditor({ flowId }: { flowId?: string }) {
   const qc = useQueryClient()
+  const navigate = useNavigate()
   const { brandId } = useSelectedBrand()
   const bQs = brandQs(brandId)
 
@@ -95,7 +97,7 @@ export function FlowEditor({ flowId }: { flowId?: string }) {
       const f = resp?.flow
       if (f?.id && !currentId) {
         setCurrentId(f.id)
-        try { window.location.hash = `#/marketing/flows/${f.id}` } catch { /* ignore */ }
+        navigate(`/marketing/flows/${f.id}`, { replace: true })
       }
       if (f?.status) setStatus(f.status)
       qc.invalidateQueries({ queryKey: ["mkt-flows"] })
@@ -122,54 +124,76 @@ export function FlowEditor({ flowId }: { flowId?: string }) {
 
   return (
     <>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", flexWrap: "wrap", gap: "10px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <a href="#/marketing/flows" className="mkt-link" style={{ fontSize: "12px" }}>← Back to flows</a>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <StatusBadge status={status} />
-          <span style={{ fontSize: "12px", color: "#8C9196" }}>v{version}</span>
+          <span style={{ fontSize: "13px", color: tokens.fgSecondary }}>v{version}</span>
         </div>
-        <div style={{ display: "flex", gap: "6px" }}>
-          <button className="mkt-btn" onClick={() => saveMut.mutate("draft")} disabled={saveMut.isPending} style={{ padding: "6px 12px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A" }}>
-            {saveMut.isPending ? "Saving…" : "Save Draft"}
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button className="mkt-btn mkt-btn-sm" onClick={() => saveMut.mutate("draft")} disabled={saveMut.isPending}>
+            {saveMut.isPending ? "Saving…" : "Save draft"}
           </button>
           {status === "live" ? (
-            <button className="mkt-btn" onClick={() => saveMut.mutate("paused")} style={{ padding: "6px 12px", borderRadius: "6px", fontSize: "12px", border: "1px solid #FED7AA", background: "#FFF", color: "#9A3412" }}>
+            <button
+              className="mkt-btn mkt-btn-sm"
+              onClick={() => saveMut.mutate("paused")}
+              style={{ borderColor: tokens.warning, color: tokens.warningFg }}
+            >
               Pause
             </button>
           ) : (
-            <button className="mkt-btn-primary" onClick={() => saveMut.mutate("live")} disabled={saveMut.isPending} style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF" }}>
+            <button className="mkt-btn-primary" onClick={() => saveMut.mutate("live")} disabled={saveMut.isPending}>
               Publish
             </button>
           )}
         </div>
       </div>
 
-      <div className="mkt-card" style={{ padding: "16px 18px", marginBottom: "12px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+      <div className="mkt-card" style={{ padding: "20px", marginBottom: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
           <div>
-            <label style={lblStyle}>Name *</label>
+            <label className="mkt-label">Name *</label>
             <input className="mkt-input" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div>
-            <label style={lblStyle}>Trigger *</label>
+            <label className="mkt-label">Trigger *</label>
             <select className="mkt-input" value={trigger} onChange={(e) => setTrigger(e.target.value)}>
               {TRIGGER_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
           </div>
           <div style={{ gridColumn: "span 2" }}>
-            <label style={lblStyle}>Description</label>
-            <textarea className="mkt-input" style={{ minHeight: "50px", fontFamily: "inherit" }} value={description} onChange={(e) => setDescription(e.target.value)} />
+            <label className="mkt-label">Description</label>
+            <textarea className="mkt-input" style={{ minHeight: "70px" }} value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
         </div>
       </div>
 
-      <div className="mkt-card" style={{ padding: "16px 18px", marginBottom: "12px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-          <div style={{ fontSize: "11px", fontWeight: 700, color: "#6D7175", textTransform: "uppercase" }}>Nodes ({nodes.length})</div>
+      <div className="mkt-card" style={{ padding: "20px", marginBottom: "16px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+          <div
+            style={{
+              fontSize: "11px",
+              fontWeight: 600,
+              color: tokens.fgSecondary,
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+            }}
+          >
+            Nodes ({nodes.length})
+          </div>
         </div>
         {nodes.length === 0 ? (
-          <div style={{ padding: "16px", textAlign: "center", color: "#8C9196", fontSize: "12px", border: "1px dashed #E1E3E5", borderRadius: "8px" }}>
-            No nodes yet.
+          <div
+            style={{
+              padding: "32px",
+              textAlign: "center",
+              color: tokens.fgSecondary,
+              fontSize: "13px",
+              border: `1px dashed ${tokens.borderStrong}`,
+              borderRadius: tokens.rMd,
+            }}
+          >
+            No nodes yet — add your first one below.
           </div>
         ) : (
           nodes.map((node, idx) => (
@@ -187,12 +211,28 @@ export function FlowEditor({ flowId }: { flowId?: string }) {
             />
           ))
         )}
-        <div style={{ borderTop: "1px solid #E1E3E5", marginTop: "10px", paddingTop: "10px" }}>
-          <div style={{ fontSize: "11px", color: "#6D7175", textTransform: "uppercase", fontWeight: 600, marginBottom: "6px" }}>+ Add node</div>
-          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+        <div style={{ borderTop: `1px solid ${tokens.borderSubtle}`, marginTop: "14px", paddingTop: "14px" }}>
+          <div
+            style={{
+              fontSize: "11px",
+              color: tokens.fgSecondary,
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+              fontWeight: 600,
+              marginBottom: "8px",
+            }}
+          >
+            Add node
+          </div>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             {(["delay", "email", "tag", "condition", "exit"] as NodeType[]).map((t) => (
-              <button key={t} onClick={() => addNode(t)} className="mkt-btn" style={{ padding: "6px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A", textTransform: "capitalize" }}>
-                {t}
+              <button
+                key={t}
+                onClick={() => addNode(t)}
+                className="mkt-btn mkt-btn-sm"
+                style={{ textTransform: "capitalize" }}
+              >
+                + {t}
               </button>
             ))}
           </div>
@@ -200,12 +240,23 @@ export function FlowEditor({ flowId }: { flowId?: string }) {
       </div>
 
       {stats && Object.keys(stats).length > 0 && (
-        <div className="mkt-card" style={{ padding: "16px 18px" }}>
-          <div style={{ fontSize: "11px", fontWeight: 700, color: "#6D7175", textTransform: "uppercase", marginBottom: "8px" }}>Stats</div>
-          <div style={{ display: "flex", gap: "20px", fontSize: "13px" }}>
+        <div className="mkt-card" style={{ padding: "20px" }}>
+          <div
+            style={{
+              fontSize: "11px",
+              fontWeight: 600,
+              color: tokens.fgSecondary,
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+              marginBottom: "12px",
+            }}
+          >
+            Stats
+          </div>
+          <div style={{ display: "flex", gap: "32px", fontSize: "14px", flexWrap: "wrap" }}>
             <div>Runs started: <strong>{fmt(stats.runs_started)}</strong></div>
             <div>Completed: <strong>{fmt(stats.runs_completed)}</strong></div>
-            <div>Errored: <strong style={{ color: "#D72C0D" }}>{fmt(stats.runs_errored)}</strong></div>
+            <div>Errored: <strong style={{ color: tokens.dangerFg }}>{fmt(stats.runs_errored)}</strong></div>
           </div>
         </div>
       )}
@@ -227,36 +278,36 @@ function NodeCard({
   isLast: boolean
 }) {
   return (
-    <div style={{ border: "1px solid #E1E3E5", borderRadius: "8px", padding: "10px 14px", marginBottom: "8px", background: "#FAFAFA" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "11px", color: "#8C9196" }}>#{idx + 1}</span>
-          <span style={{ fontSize: "12px", fontWeight: 700, color: "#1A1A1A", textTransform: "uppercase" }}>{node.type}</span>
+    <div style={{ border: `1px solid ${tokens.border}`, borderRadius: tokens.rMd, padding: "14px 16px", marginBottom: "10px", background: tokens.bg }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <span style={{ fontSize: "12px", color: tokens.fgMuted, fontVariantNumeric: "tabular-nums" }}>#{idx + 1}</span>
+          <span style={{ fontSize: "12px", fontWeight: 600, color: tokens.fg, textTransform: "uppercase", letterSpacing: "0.04em" }}>{node.type}</span>
         </div>
         <div style={{ display: "flex", gap: "2px" }}>
-          <button disabled={isFirst} onClick={onUp} style={{ border: "none", background: "none", cursor: isFirst ? "default" : "pointer", opacity: isFirst ? 0.3 : 1, fontSize: "12px", padding: "2px 4px" }}>▲</button>
-          <button disabled={isLast} onClick={onDown} style={{ border: "none", background: "none", cursor: isLast ? "default" : "pointer", opacity: isLast ? 0.3 : 1, fontSize: "12px", padding: "2px 4px" }}>▼</button>
-          <button onClick={onDelete} style={{ border: "none", background: "none", cursor: "pointer", color: "#D72C0D", fontSize: "12px", padding: "2px 4px" }}>✕</button>
+          <button disabled={isFirst} onClick={onUp} style={{ border: "none", background: "none", cursor: isFirst ? "default" : "pointer", opacity: isFirst ? 0.3 : 1, fontSize: "12px", padding: "2px 6px", color: tokens.fgSecondary, borderRadius: tokens.rSm }}>▲</button>
+          <button disabled={isLast} onClick={onDown} style={{ border: "none", background: "none", cursor: isLast ? "default" : "pointer", opacity: isLast ? 0.3 : 1, fontSize: "12px", padding: "2px 6px", color: tokens.fgSecondary, borderRadius: tokens.rSm }}>▼</button>
+          <button onClick={onDelete} style={{ border: "none", background: "none", cursor: "pointer", color: tokens.dangerFg, fontSize: "12px", padding: "2px 6px", borderRadius: tokens.rSm }}>✕</button>
         </div>
       </div>
       {node.type === "delay" && (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <label style={{ fontSize: "11px", color: "#6D7175" }}>Wait</label>
-          <input className="mkt-input" style={{ width: "90px" }} type="number" min={1} value={node.config.minutes ?? 60} onChange={(e) => onChange({ minutes: parseInt(e.target.value) || 0 })} />
-          <span style={{ fontSize: "11px", color: "#6D7175" }}>minutes</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <label style={{ fontSize: "13px", color: tokens.fgSecondary }}>Wait</label>
+          <input className="mkt-input" style={{ width: "100px", height: "36px", fontSize: "13px" }} type="number" min={1} value={node.config.minutes ?? 60} onChange={(e) => onChange({ minutes: parseInt(e.target.value) || 0 })} />
+          <span style={{ fontSize: "13px", color: tokens.fgSecondary }}>minutes</span>
         </div>
       )}
       {node.type === "email" && (
         <>
-          <label style={lblStyle}>Template</label>
+          <label className="mkt-label">Template</label>
           <select className="mkt-input" value={node.config.template_id || ""} onChange={(e) => onChange({ template_id: e.target.value })}>
-            <option value="">— Select template —</option>
+            <option value="">Select template</option>
             {templates.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
         </>
       )}
       {node.type === "tag" && (
-        <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", gap: "6px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "160px 1fr", gap: "8px" }}>
           <select className="mkt-input" value={node.config.action || "add"} onChange={(e) => onChange({ action: e.target.value })}>
             <option value="add">Add tag</option>
             <option value="remove">Remove tag</option>
@@ -265,7 +316,7 @@ function NodeCard({
         </div>
       )}
       {node.type === "condition" && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
           <input className="mkt-input" value={node.config.field || ""} onChange={(e) => onChange({ field: e.target.value })} placeholder="field" />
           <select className="mkt-input" value={node.config.op || "eq"} onChange={(e) => onChange({ op: e.target.value })}>
             <option value="eq">equals</option>
@@ -278,7 +329,7 @@ function NodeCard({
         </div>
       )}
       {node.type === "exit" && (
-        <div style={{ fontSize: "12px", color: "#8C9196" }}>Ends the flow for this contact.</div>
+        <div style={{ fontSize: "13px", color: tokens.fgSecondary }}>Ends the flow for this contact.</div>
       )}
     </div>
   )

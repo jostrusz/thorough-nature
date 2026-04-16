@@ -1,4 +1,5 @@
 import React from "react"
+import { Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@medusajs/ui"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
@@ -6,9 +7,11 @@ import { sdk } from "../../../lib/sdk"
 import {
   MarketingShell,
   StatusBadge,
+  EmptyState,
   useSelectedBrand,
   brandQs,
   fmt,
+  tokens,
 } from "../../../components/marketing/shared"
 
 function FlowsPage() {
@@ -48,20 +51,32 @@ function FlowsPage() {
     <MarketingShell
       title="Flows"
       subtitle="Automations triggered by events or schedules"
-      active="/marketing/flows"
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Flows" },
+      ]}
       right={
-        <a className="mkt-btn-primary" href="#/marketing/flows/new" style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF", textDecoration: "none" }}>
-          + New Flow
-        </a>
+        <Link className="mkt-btn-primary" to="/marketing/flows/new">
+          New flow
+        </Link>
       }
     >
-      <div className="mkt-card" style={{ overflow: "hidden" }}>
+      <div className="mkt-card" style={{ overflow: "hidden", padding: 0 }}>
         {isLoading ? (
-          <div style={{ padding: "24px", color: "#8C9196", fontSize: "13px" }}>Loading…</div>
-        ) : flows.length === 0 ? (
-          <div style={{ padding: "40px", textAlign: "center", color: "#8C9196", fontSize: "13px" }}>
-            No flows yet.
+          <div style={{ padding: "32px", color: tokens.fgSecondary, fontSize: "13px", textAlign: "center" }}>
+            Loading…
           </div>
+        ) : flows.length === 0 ? (
+          <EmptyState
+            icon="⚡"
+            title="No flows yet"
+            description="Automate drip sequences triggered by events or schedules."
+            action={
+              <Link to="/marketing/flows/new" className="mkt-btn-primary">
+                Create flow
+              </Link>
+            }
+          />
         ) : (
           <table className="mkt-table">
             <thead>
@@ -82,33 +97,32 @@ function FlowsPage() {
                 return (
                   <tr key={f.id} className="mkt-row">
                     <td>
-                      <a href={`#/marketing/flows/${f.id}`} className="mkt-link" style={{ fontWeight: 500 }}>
+                      <Link to={`/marketing/flows/${f.id}`} className="mkt-link" style={{ fontWeight: 500 }}>
                         {f.name || "Untitled"}
-                      </a>
+                      </Link>
                     </td>
                     <td><StatusBadge status={f.status || "draft"} /></td>
-                    <td style={{ color: "#6D7175" }}>v{f.version ?? 1}</td>
-                    <td style={{ color: "#6D7175", fontSize: "12px" }}>
+                    <td style={{ color: tokens.fgSecondary, fontSize: "13px" }}>v{f.version ?? 1}</td>
+                    <td style={{ color: tokens.fgSecondary, fontSize: "13px" }}>
                       {f.trigger?.type || f.trigger_type || "—"}
                       {f.trigger?.event ? `: ${f.trigger.event}` : ""}
                     </td>
                     <td>{fmt(s.runs_started)}</td>
                     <td>{fmt(s.runs_completed)}</td>
-                    <td>{fmt(s.runs_errored)}</td>
+                    <td style={{ color: s.runs_errored ? tokens.dangerFg : undefined }}>{fmt(s.runs_errored)}</td>
                     <td style={{ textAlign: "right" }}>
-                      <div style={{ display: "inline-flex", gap: "4px" }}>
-                        <a href={`#/marketing/flows/${f.id}`} className="mkt-btn" style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A", textDecoration: "none" }}>
+                      <div style={{ display: "inline-flex", gap: "6px" }}>
+                        <Link to={`/marketing/flows/${f.id}`} className="mkt-btn mkt-btn-xs">
                           Edit
-                        </a>
+                        </Link>
                         {f.status === "live" && (
-                          <button className="mkt-btn" onClick={() => pauseMut.mutate(f.id)} style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A" }}>
+                          <button className="mkt-btn mkt-btn-xs" onClick={() => pauseMut.mutate(f.id)}>
                             Pause
                           </button>
                         )}
                         <button
-                          className="mkt-btn"
+                          className="mkt-btn-danger-ghost"
                           onClick={() => { if (confirm(`Delete flow "${f.name}"?`)) deleteMut.mutate(f.id) }}
-                          style={{ padding: "4px 8px", borderRadius: "6px", fontSize: "11px", border: "1px solid #FED3D1", background: "#FFF", color: "#D72C0D" }}
                         >
                           Delete
                         </button>

@@ -7,7 +7,11 @@ function NewFlowPage() {
     <MarketingShell
       title="New flow"
       subtitle="Configure trigger and node sequence"
-      active="/marketing/flows"
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Flows", to: "/marketing/flows" },
+        { label: "New" },
+      ]}
     >
       <FlowEditor />
     </MarketingShell>

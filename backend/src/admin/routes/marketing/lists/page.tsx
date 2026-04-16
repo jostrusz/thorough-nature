@@ -1,15 +1,17 @@
 import React, { useState } from "react"
+import { Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@medusajs/ui"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { sdk } from "../../../lib/sdk"
 import {
   MarketingShell,
+  EmptyState,
   useSelectedBrand,
   brandQs,
   Modal,
-  lblStyle,
   fmt,
+  tokens,
 } from "../../../components/marketing/shared"
 
 function ListsPage() {
@@ -57,38 +59,59 @@ function ListsPage() {
     <MarketingShell
       title="Lists"
       subtitle="Static or dynamic contact lists"
-      active="/marketing/lists"
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Lists" },
+      ]}
       right={
-        <button
-          className="mkt-btn-primary"
-          onClick={() => setShowNew(true)}
-          style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF" }}
-        >
-          + New List
+        <button className="mkt-btn-primary" onClick={() => setShowNew(true)}>
+          New list
         </button>
       }
     >
       {isLoading ? (
-        <p style={{ color: "#8C9196", fontSize: "13px" }}>Loading…</p>
+        <div className="mkt-card" style={{ padding: "32px", color: tokens.fgSecondary, fontSize: "13px", textAlign: "center" }}>
+          Loading…
+        </div>
       ) : lists.length === 0 ? (
-        <div className="mkt-card" style={{ padding: "40px", textAlign: "center", color: "#8C9196" }}>
-          <p style={{ fontSize: "14px" }}>No lists yet</p>
+        <div className="mkt-card">
+          <EmptyState
+            icon="📋"
+            title="No lists yet"
+            description="Create your first list to group contacts for campaigns."
+            action={
+              <button className="mkt-btn-primary" onClick={() => setShowNew(true)}>
+                Create list
+              </button>
+            }
+          />
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "12px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
           {lists.map((l: any) => (
-            <a key={l.id} href={`#/marketing/lists/${l.id}`} className="mkt-card" style={{ padding: "16px 18px", display: "block", textDecoration: "none", color: "inherit" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+            <Link
+              key={l.id}
+              to={`/marketing/lists/${l.id}`}
+              className="mkt-tile"
+              style={{ display: "block" }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: "14px", fontWeight: 600, color: "#1A1A1A" }}>{l.name}</div>
-                  {l.description && <div style={{ fontSize: "12px", color: "#6D7175", marginTop: "2px" }}>{l.description}</div>}
+                  <div style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, letterSpacing: "-0.005em" }}>{l.name}</div>
+                  {l.description && <div style={{ fontSize: "13px", color: tokens.fgSecondary, marginTop: "4px", lineHeight: 1.4 }}>{l.description}</div>}
                 </div>
-                <span className="mkt-badge" style={{ background: l.type === "dynamic" ? "#DBEAFE" : "#E4E5E7", color: l.type === "dynamic" ? "#1D4ED8" : "#4A4A4A" }}>
-                  {(l.type || "static").toUpperCase()}
+                <span
+                  className="mkt-badge"
+                  style={{
+                    background: l.type === "dynamic" ? tokens.infoSoft : tokens.borderSubtle,
+                    color: l.type === "dynamic" ? tokens.info : tokens.fgSecondary,
+                  }}
+                >
+                  {l.type || "static"}
                 </span>
               </div>
-              <div style={{ marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "12px", color: "#6D7175" }}>
+              <div style={{ marginTop: "14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: "13px", color: tokens.fgSecondary }}>
                   {fmt(l.member_count)} members
                 </span>
                 <button
@@ -97,13 +120,12 @@ function ListsPage() {
                     e.stopPropagation()
                     if (confirm(`Delete list "${l.name}"?`)) deleteMut.mutate(l.id)
                   }}
-                  className="mkt-btn"
-                  style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "11px", border: "1px solid #FED3D1", background: "#FFF", color: "#D72C0D" }}
+                  className="mkt-btn-danger-ghost"
                 >
                   Delete
                 </button>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       )}
@@ -114,25 +136,22 @@ function ListsPage() {
           onClose={() => setShowNew(false)}
           footer={
             <>
-              <button className="mkt-btn" onClick={() => setShowNew(false)} style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #E1E3E5", background: "#FFF", color: "#6D7175" }}>
-                Cancel
-              </button>
+              <button className="mkt-btn" onClick={() => setShowNew(false)}>Cancel</button>
               <button
                 className="mkt-btn-primary"
                 disabled={!name || createMut.isPending}
                 onClick={() => createMut.mutate({ brand_id: brandId || undefined, name, description, type })}
-                style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF", opacity: !name ? 0.5 : 1 }}
               >
                 {createMut.isPending ? "Creating…" : "Create list"}
               </button>
             </>
           }
         >
-          <label style={lblStyle}>Name *</label>
+          <label className="mkt-label">Name *</label>
           <input className="mkt-input" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
-          <label style={{ ...lblStyle, marginTop: "10px" }}>Description</label>
-          <textarea className="mkt-input" style={{ minHeight: "60px", fontFamily: "inherit" }} value={description} onChange={(e) => setDescription(e.target.value)} />
-          <label style={{ ...lblStyle, marginTop: "10px" }}>Type</label>
+          <label className="mkt-label" style={{ marginTop: "16px" }}>Description</label>
+          <textarea className="mkt-input" style={{ minHeight: "80px" }} value={description} onChange={(e) => setDescription(e.target.value)} />
+          <label className="mkt-label" style={{ marginTop: "16px" }}>Type</label>
           <select className="mkt-input" value={type} onChange={(e) => setType(e.target.value as "static" | "dynamic")}>
             <option value="static">Static</option>
             <option value="dynamic">Dynamic (segment-backed)</option>

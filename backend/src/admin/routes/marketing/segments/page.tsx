@@ -6,10 +6,11 @@ import { sdk } from "../../../lib/sdk"
 import {
   MarketingShell,
   Modal,
-  lblStyle,
+  EmptyState,
   fmt,
   useSelectedBrand,
   brandQs,
+  tokens,
 } from "../../../components/marketing/shared"
 
 const FIELD_OPTIONS = [
@@ -73,45 +74,50 @@ function SegmentsPage() {
     <MarketingShell
       title="Segments"
       subtitle="Dynamic contact slices based on rules"
-      active="/marketing/segments"
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Segments" },
+      ]}
       right={
-        <button
-          className="mkt-btn-primary"
-          onClick={() => { setEditing(null); setShowModal(true) }}
-          style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF" }}
-        >
-          + New Segment
+        <button className="mkt-btn-primary" onClick={() => { setEditing(null); setShowModal(true) }}>
+          New segment
         </button>
       }
     >
       {isLoading ? (
-        <p style={{ color: "#8C9196", fontSize: "13px" }}>Loading…</p>
+        <div className="mkt-card" style={{ padding: "32px", color: tokens.fgSecondary, fontSize: "13px", textAlign: "center" }}>
+          Loading…
+        </div>
       ) : segments.length === 0 ? (
-        <div className="mkt-card" style={{ padding: "40px", textAlign: "center", color: "#8C9196" }}>
-          <p style={{ fontSize: "14px" }}>No segments yet</p>
+        <div className="mkt-card">
+          <EmptyState
+            icon="🔍"
+            title="No segments yet"
+            description="Create rule-based slices of your contacts to target them precisely."
+            action={
+              <button className="mkt-btn-primary" onClick={() => { setEditing(null); setShowModal(true) }}>
+                Create segment
+              </button>
+            }
+          />
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "12px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
           {segments.map((s: any) => (
-            <div key={s.id} className="mkt-card" style={{ padding: "16px 18px" }}>
-              <div style={{ fontSize: "14px", fontWeight: 600 }}>{s.name}</div>
-              {s.description && <div style={{ fontSize: "12px", color: "#6D7175", marginTop: "2px" }}>{s.description}</div>}
-              <div style={{ marginTop: "10px", fontSize: "12px", color: "#6D7175" }}>
-                Cached: {fmt(s.cached_count)} members
-                {s.cached_at && <span style={{ marginLeft: "8px", color: "#8C9196" }}>({new Date(s.cached_at).toLocaleString()})</span>}
+            <div key={s.id} className="mkt-card mkt-card-hover" style={{ padding: "20px" }}>
+              <div style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, letterSpacing: "-0.005em" }}>{s.name}</div>
+              {s.description && <div style={{ fontSize: "13px", color: tokens.fgSecondary, marginTop: "4px", lineHeight: 1.4 }}>{s.description}</div>}
+              <div style={{ marginTop: "14px", fontSize: "13px", color: tokens.fgSecondary }}>
+                Cached: <strong style={{ color: tokens.fg }}>{fmt(s.cached_count)}</strong> members
+                {s.cached_at && <div style={{ marginTop: "4px", color: tokens.fgMuted, fontSize: "12px" }}>Updated {new Date(s.cached_at).toLocaleString()}</div>}
               </div>
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "6px", marginTop: "10px" }}>
-                <button
-                  className="mkt-btn"
-                  onClick={() => { setEditing(s); setShowModal(true) }}
-                  style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "11px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A" }}
-                >
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "14px" }}>
+                <button className="mkt-btn mkt-btn-sm" onClick={() => { setEditing(s); setShowModal(true) }}>
                   Edit
                 </button>
                 <button
-                  className="mkt-btn"
+                  className="mkt-btn-danger-ghost"
                   onClick={() => { if (confirm(`Delete segment "${s.name}"?`)) deleteMut.mutate(s.id) }}
-                  style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "11px", border: "1px solid #FED3D1", background: "#FFF", color: "#D72C0D" }}
                 >
                   Delete
                 </button>
@@ -190,19 +196,17 @@ function SegmentModal({ brandId, initial, onClose }: { brandId: string | null; i
 
   return (
     <Modal
-      title={initial ? `Edit segment: ${initial.name}` : "New segment"}
+      title={initial ? `Edit segment` : "New segment"}
       onClose={onClose}
-      width={720}
+      width={840}
       footer={
         <>
-          <button className="mkt-btn" onClick={onClose} style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #E1E3E5", background: "#FFF", color: "#6D7175" }}>
-            Cancel
-          </button>
+          <button className="mkt-btn" onClick={onClose}>Cancel</button>
           <button
             className="mkt-btn"
             onClick={() => previewMut.mutate(buildBody())}
             disabled={previewMut.isPending || !name}
-            style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #008060", background: "#FFF", color: "#008060" }}
+            style={{ borderColor: tokens.primary, color: tokens.primary }}
           >
             {previewMut.isPending ? "Counting…" : "Preview"}
           </button>
@@ -210,34 +214,33 @@ function SegmentModal({ brandId, initial, onClose }: { brandId: string | null; i
             className="mkt-btn-primary"
             onClick={() => saveMut.mutate(buildBody())}
             disabled={!name || saveMut.isPending}
-            style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF", opacity: !name ? 0.5 : 1 }}
           >
             {saveMut.isPending ? "Saving…" : (initial ? "Save" : "Create")}
           </button>
         </>
       }
     >
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
         <div>
-          <label style={lblStyle}>Name *</label>
+          <label className="mkt-label">Name *</label>
           <input className="mkt-input" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div>
-          <label style={lblStyle}>Description</label>
+          <label className="mkt-label">Description</label>
           <input className="mkt-input" value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
       </div>
 
-      <div style={{ marginTop: "16px" }}>
-        <label style={lblStyle}>Match</label>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+      <div style={{ marginTop: "20px" }}>
+        <label className="mkt-label">Match</label>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
           <select className="mkt-input" style={{ width: "auto" }} value={query.combinator} onChange={(e) => setQuery({ ...query, combinator: e.target.value as any })}>
             <option value="all">All conditions (AND)</option>
             <option value="any">Any condition (OR)</option>
           </select>
         </div>
         {query.conditions.map((c, idx) => (
-          <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 28px", gap: "6px", marginBottom: "6px" }}>
+          <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 40px", gap: "8px", marginBottom: "8px" }}>
             <select className="mkt-input" value={c.field} onChange={(e) => {
               const arr = [...query.conditions]
               arr[idx] = { ...arr[idx], field: e.target.value }
@@ -269,28 +272,47 @@ function SegmentModal({ brandId, initial, onClose }: { brandId: string | null; i
                 const arr = query.conditions.filter((_, i) => i !== idx)
                 setQuery({ ...query, conditions: arr.length === 0 ? [{ field: "", op: "eq", value: "" }] : arr })
               }}
-              style={{ border: "1px solid #FED3D1", background: "#FFF", color: "#D72C0D", borderRadius: "6px", cursor: "pointer", fontSize: "14px" }}
+              className="mkt-btn-danger-ghost"
+              style={{ border: `1px solid ${tokens.borderStrong}`, height: "40px" }}
+              aria-label="Remove condition"
             >
               ×
             </button>
           </div>
         ))}
         <button
-          className="mkt-btn"
+          className="mkt-btn mkt-btn-sm"
           onClick={() => setQuery({ ...query, conditions: [...query.conditions, { field: "", op: "eq", value: "" }] })}
-          style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A", marginTop: "4px" }}
+          style={{ marginTop: "4px" }}
         >
           + Add condition
         </button>
       </div>
 
       {previewResult && (
-        <div style={{ marginTop: "16px", padding: "10px 12px", background: "#F0FFF8", border: "1px solid #AEE9D1", borderRadius: "8px" }}>
-          <div style={{ fontSize: "13px", fontWeight: 600, color: "#0D5740" }}>
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "14px 16px",
+            background: tokens.successSoft,
+            border: `1px solid #A7F3D0`,
+            borderRadius: tokens.rMd,
+          }}
+        >
+          <div style={{ fontSize: "14px", fontWeight: 600, color: tokens.successFg }}>
             {fmt(previewResult.count)} matching contact(s)
           </div>
           {previewResult.sample.length > 0 && (
-            <div style={{ fontSize: "11px", color: "#0D5740", marginTop: "4px", fontFamily: "monospace", maxHeight: "100px", overflow: "auto" }}>
+            <div
+              style={{
+                fontSize: "12px",
+                color: tokens.successFg,
+                marginTop: "6px",
+                fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                maxHeight: "120px",
+                overflow: "auto",
+              }}
+            >
               {previewResult.sample.slice(0, 50).join(", ")}
             </div>
           )}

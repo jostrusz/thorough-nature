@@ -1,14 +1,17 @@
 import React from "react"
+import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { sdk } from "../../../lib/sdk"
 import {
   MarketingShell,
   StatusBadge,
+  EmptyState,
   useSelectedBrand,
   brandQs,
   useBrands,
   fmt,
+  tokens,
 } from "../../../components/marketing/shared"
 
 function AnalyticsPage() {
@@ -55,13 +58,22 @@ function AnalyticsPage() {
     <MarketingShell
       title="Analytics"
       subtitle="Campaign performance grouped by brand"
-      active="/marketing/analytics"
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Analytics" },
+      ]}
     >
       {isLoading ? (
-        <p style={{ color: "#8C9196", fontSize: "13px" }}>Loading…</p>
+        <div className="mkt-card" style={{ padding: "32px", color: tokens.fgSecondary, fontSize: "13px", textAlign: "center" }}>
+          Loading…
+        </div>
       ) : Object.keys(grouped).length === 0 ? (
-        <div className="mkt-card" style={{ padding: "40px", textAlign: "center", color: "#8C9196" }}>
-          <p style={{ fontSize: "14px" }}>No campaigns yet</p>
+        <div className="mkt-card">
+          <EmptyState
+            icon="📊"
+            title="No campaigns yet"
+            description="Send your first campaign to see analytics here."
+          />
         </div>
       ) : (
         Object.keys(grouped).map((brandKey) => {
@@ -71,31 +83,51 @@ function AnalyticsPage() {
           const totals = agg(list)
           const max = Math.max(1, totals.sent, totals.delivered, totals.opened, totals.clicked, totals.bounced)
           const bars = [
-            { k: "sent", label: "Sent", color: "#6D7175" },
-            { k: "delivered", label: "Delivered", color: "#008060" },
-            { k: "opened", label: "Opened", color: "#1D4ED8" },
-            { k: "clicked", label: "Clicked", color: "#7C3AED" },
-            { k: "bounced", label: "Bounced", color: "#D72C0D" },
+            { k: "sent", label: "Sent", color: tokens.fgSecondary },
+            { k: "delivered", label: "Delivered", color: tokens.primary },
+            { k: "opened", label: "Opened", color: tokens.info },
+            { k: "clicked", label: "Clicked", color: tokens.purple },
+            { k: "bounced", label: "Bounced", color: tokens.dangerFg },
           ]
 
           return (
-            <div key={brandKey} className="mkt-card" style={{ padding: "0", marginBottom: "16px" }}>
-              <div style={{ padding: "14px 20px", borderBottom: "1px solid #F1F2F4", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div key={brandKey} className="mkt-card" style={{ padding: 0, marginBottom: "20px", overflow: "hidden" }}>
+              <div
+                style={{
+                  padding: "20px 24px",
+                  borderBottom: `1px solid ${tokens.borderSubtle}`,
+                  display: "flex",
+                  alignItems: "flex-start",
+                  justifyContent: "space-between",
+                  gap: "24px",
+                  flexWrap: "wrap",
+                }}
+              >
                 <div>
-                  <div style={{ fontSize: "14px", fontWeight: 600 }}>{label}</div>
-                  <div style={{ fontSize: "12px", color: "#8C9196" }}>{list.length} campaign{list.length !== 1 ? "s" : ""}</div>
+                  <div style={{ fontSize: "16px", fontWeight: 600, color: tokens.fg, letterSpacing: "-0.005em" }}>{label}</div>
+                  <div style={{ fontSize: "13px", color: tokens.fgSecondary, marginTop: "4px" }}>
+                    {list.length} campaign{list.length !== 1 ? "s" : ""}
+                  </div>
                 </div>
-                <div style={{ flex: 1, maxWidth: "540px", display: "flex", flexDirection: "column", gap: "4px", marginLeft: "24px" }}>
+                <div style={{ flex: 1, maxWidth: "600px", minWidth: "300px", display: "flex", flexDirection: "column", gap: "6px" }}>
                   {bars.map((bar) => {
                     const v = (totals as any)[bar.k] as number
                     const pc = (v / max) * 100
                     return (
-                      <div key={bar.k} style={{ display: "grid", gridTemplateColumns: "70px 1fr 60px", alignItems: "center", gap: "8px" }}>
-                        <span style={{ fontSize: "11px", color: "#6D7175" }}>{bar.label}</span>
-                        <div style={{ background: "#F1F2F4", borderRadius: "4px", overflow: "hidden", height: "10px" }}>
-                          <div style={{ width: `${pc}%`, height: "100%", background: bar.color, transition: "width 0.3s" }} />
+                      <div key={bar.k} style={{ display: "grid", gridTemplateColumns: "80px 1fr 70px", alignItems: "center", gap: "12px" }}>
+                        <span style={{ fontSize: "12px", color: tokens.fgSecondary, fontWeight: 500 }}>{bar.label}</span>
+                        <div style={{ background: tokens.borderSubtle, borderRadius: "6px", overflow: "hidden", height: "10px" }}>
+                          <div
+                            style={{
+                              width: `${pc}%`,
+                              height: "100%",
+                              background: bar.color,
+                              transition: "width 300ms ease-out",
+                              borderRadius: "6px",
+                            }}
+                          />
                         </div>
-                        <span style={{ fontSize: "11px", textAlign: "right" }}>{fmt(v)}</span>
+                        <span style={{ fontSize: "13px", textAlign: "right", color: tokens.fg, fontVariantNumeric: "tabular-nums" }}>{fmt(v)}</span>
                       </div>
                     )
                   })}
@@ -120,7 +152,9 @@ function AnalyticsPage() {
                     return (
                       <tr key={c.id} className="mkt-row">
                         <td>
-                          <a href={`#/marketing/campaigns/${c.id}`} className="mkt-link">{c.name || "Untitled"}</a>
+                          <Link to={`/marketing/campaigns/${c.id}`} className="mkt-link" style={{ fontWeight: 500 }}>
+                            {c.name || "Untitled"}
+                          </Link>
                         </td>
                         <td><StatusBadge status={c.status || "draft"} /></td>
                         <td>{fmt(m.sent)}</td>
@@ -128,7 +162,7 @@ function AnalyticsPage() {
                         <td>{fmt(m.opened)}</td>
                         <td>{fmt(m.clicked)}</td>
                         <td>{fmt(m.bounced)}</td>
-                        <td style={{ color: "#6D7175", fontSize: "12px" }}>
+                        <td style={{ color: tokens.fgSecondary, fontSize: "13px" }}>
                           {c.sent_at ? new Date(c.sent_at).toLocaleString() : "—"}
                         </td>
                       </tr>

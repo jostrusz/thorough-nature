@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@medusajs/ui"
 import { sdk } from "../../lib/sdk"
-import { useSelectedBrand, lblStyle, StatusBadge, Modal } from "./shared"
+import { useSelectedBrand, StatusBadge, Modal, tokens } from "./shared"
 
 // ═══════════════════════════════════════════
 // BLOCK TYPES
@@ -86,6 +87,7 @@ ${blockHtml}
 
 export function TemplateEditor({ templateId }: { templateId?: string }) {
   const qc = useQueryClient()
+  const navigate = useNavigate()
   const { brandId } = useSelectedBrand()
   const isNew = !templateId
 
@@ -175,7 +177,7 @@ export function TemplateEditor({ templateId }: { templateId?: string }) {
       const t = resp?.template
       if (t?.id && !currentId) {
         setCurrentId(t.id)
-        try { window.location.hash = `#/marketing/templates/${t.id}` } catch { /* ignore */ }
+        navigate(`/marketing/templates/${t.id}`, { replace: true })
       }
       if (t?.status) setStatus(t.status)
       qc.invalidateQueries({ queryKey: ["mkt-templates"] })
@@ -219,99 +221,93 @@ export function TemplateEditor({ templateId }: { templateId?: string }) {
 
   return (
     <>
-      {/* Header */}
+      {/* Header actions */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: "10px",
-          marginBottom: "12px",
+          gap: "12px",
+          marginBottom: "16px",
           flexWrap: "wrap",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <a href="#/marketing/templates" className="mkt-link" style={{ fontSize: "12px" }}>← Back to templates</a>
           <span>{statusBadge}</span>
         </div>
-        <div style={{ display: "flex", gap: "6px" }}>
-          <button
-            className="mkt-btn"
-            disabled={!currentId}
-            onClick={() => setShowTestSend(true)}
-            style={{ padding: "6px 12px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A", opacity: !currentId ? 0.5 : 1 }}
-          >
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button className="mkt-btn mkt-btn-sm" disabled={!currentId} onClick={() => setShowTestSend(true)}>
             Test send to me
           </button>
-          <button
-            className="mkt-btn"
-            onClick={() => saveMut.mutate("draft")}
-            disabled={saveMut.isPending}
-            style={{ padding: "6px 12px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A" }}
-          >
-            {saveMut.isPending ? "Saving…" : "Save Draft"}
+          <button className="mkt-btn mkt-btn-sm" onClick={() => saveMut.mutate("draft")} disabled={saveMut.isPending}>
+            {saveMut.isPending ? "Saving…" : "Save draft"}
           </button>
-          <button
-            className="mkt-btn-primary"
-            onClick={() => saveMut.mutate("ready")}
-            disabled={saveMut.isPending}
-            style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF" }}
-          >
-            Mark Ready
+          <button className="mkt-btn-primary" onClick={() => saveMut.mutate("ready")} disabled={saveMut.isPending}>
+            Mark ready
           </button>
         </div>
       </div>
 
       {/* Template meta */}
-      <div className="mkt-card" style={{ padding: "14px 18px", marginBottom: "12px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+      <div className="mkt-card" style={{ padding: "20px", marginBottom: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
           <div>
-            <label style={lblStyle}>Name *</label>
+            <label className="mkt-label">Name *</label>
             <input className="mkt-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Welcome email" />
           </div>
           <div>
-            <label style={lblStyle}>Subject *</label>
+            <label className="mkt-label">Subject *</label>
             <input className="mkt-input" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Welcome to Laat los" />
           </div>
           <div style={{ gridColumn: "span 2" }}>
-            <label style={lblStyle}>Preheader (hidden preview text)</label>
+            <label className="mkt-label">Preheader (hidden preview text)</label>
             <input className="mkt-input" value={preheader} onChange={(e) => setPreheader(e.target.value)} placeholder="Start your journey" />
           </div>
           <div>
-            <label style={lblStyle}>From name (override)</label>
+            <label className="mkt-label">From name (override)</label>
             <input className="mkt-input" value={fromName} onChange={(e) => setFromName(e.target.value)} placeholder="Optional" />
           </div>
           <div>
-            <label style={lblStyle}>From email (override)</label>
+            <label className="mkt-label">From email (override)</label>
             <input className="mkt-input" type="email" value={fromEmail} onChange={(e) => setFromEmail(e.target.value)} placeholder="Optional" />
           </div>
           <div>
-            <label style={lblStyle}>Reply-to (override)</label>
+            <label className="mkt-label">Reply-to (override)</label>
             <input className="mkt-input" type="email" value={replyTo} onChange={(e) => setReplyTo(e.target.value)} placeholder="Optional" />
           </div>
         </div>
       </div>
 
       {/* Split pane */}
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(360px, 420px) 1fr", gap: "12px", alignItems: "flex-start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(360px, 440px) 1fr", gap: "16px", alignItems: "flex-start" }}>
         {/* LEFT: block list */}
-        <div className="mkt-card" style={{ padding: "14px 16px", position: "sticky", top: "12px" }}>
-          <div style={{ display: "flex", gap: "2px", background: "#F6F6F7", borderRadius: "8px", padding: "3px", marginBottom: "12px" }}>
+        <div className="mkt-card" style={{ padding: "20px", position: "sticky", top: "16px" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "4px",
+              background: tokens.borderSubtle,
+              borderRadius: tokens.rMd,
+              padding: "4px",
+              marginBottom: "16px",
+            }}
+          >
             {(["blocks", "html"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setEditorType(t)}
                 style={{
                   flex: 1,
-                  padding: "6px",
-                  borderRadius: "6px",
-                  fontSize: "12px",
+                  padding: "7px",
+                  borderRadius: tokens.rSm,
+                  fontSize: "13px",
                   fontWeight: editorType === t ? 600 : 500,
                   cursor: "pointer",
                   border: "none",
-                  background: editorType === t ? "#FFFFFF" : "transparent",
-                  color: editorType === t ? "#1A1A1A" : "#6D7175",
-                  boxShadow: editorType === t ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+                  background: editorType === t ? tokens.surface : "transparent",
+                  color: editorType === t ? tokens.fg : tokens.fgSecondary,
+                  boxShadow: editorType === t ? tokens.shadowSm : "none",
+                  transition: "background 150ms ease-out",
                 }}
               >
                 {t === "blocks" ? "Blocks" : "HTML"}
@@ -321,10 +317,10 @@ export function TemplateEditor({ templateId }: { templateId?: string }) {
 
           {editorType === "html" ? (
             <div>
-              <label style={lblStyle}>Custom HTML</label>
+              <label className="mkt-label">Custom HTML</label>
               <textarea
                 className="mkt-input"
-                style={{ minHeight: "400px", fontFamily: "monospace", fontSize: "12px" }}
+                style={{ minHeight: "420px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: "13px" }}
                 value={customHtml}
                 onChange={(e) => setCustomHtml(e.target.value)}
                 placeholder="<html>…</html>"
@@ -333,11 +329,21 @@ export function TemplateEditor({ templateId }: { templateId?: string }) {
           ) : (
             <>
               {isLoading && currentId ? (
-                <p style={{ color: "#8C9196", fontSize: "13px" }}>Loading…</p>
+                <p style={{ color: tokens.fgSecondary, fontSize: "13px" }}>Loading…</p>
               ) : (
                 <>
                   {blocks.length === 0 && (
-                    <div style={{ padding: "20px", textAlign: "center", color: "#8C9196", fontSize: "12px", border: "1px dashed #E1E3E5", borderRadius: "8px", marginBottom: "10px" }}>
+                    <div
+                      style={{
+                        padding: "24px",
+                        textAlign: "center",
+                        color: tokens.fgSecondary,
+                        fontSize: "13px",
+                        border: `1px dashed ${tokens.borderStrong}`,
+                        borderRadius: tokens.rMd,
+                        marginBottom: "12px",
+                      }}
+                    >
                       No blocks yet — add one below.
                     </div>
                   )}
@@ -354,17 +360,28 @@ export function TemplateEditor({ templateId }: { templateId?: string }) {
                     />
                   ))}
 
-                  <div style={{ borderTop: "1px solid #E1E3E5", marginTop: "10px", paddingTop: "10px" }}>
-                    <div style={{ fontSize: "11px", color: "#6D7175", textTransform: "uppercase", fontWeight: 600, marginBottom: "6px" }}>+ Add block</div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px" }}>
+                  <div style={{ borderTop: `1px solid ${tokens.borderSubtle}`, marginTop: "12px", paddingTop: "12px" }}>
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: tokens.fgSecondary,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.04em",
+                        fontWeight: 600,
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Add block
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
                       {BLOCK_TYPES.map((t) => (
                         <button
                           key={t.type}
                           onClick={() => addBlock(t.type)}
-                          className="mkt-btn"
-                          style={{ padding: "6px 10px", borderRadius: "6px", fontSize: "12px", border: "1px solid #E1E3E5", background: "#FFF", color: "#1A1A1A", textAlign: "left" }}
+                          className="mkt-btn mkt-btn-sm"
+                          style={{ justifyContent: "flex-start" }}
                         >
-                          {t.label}
+                          + {t.label}
                         </button>
                       ))}
                     </div>
@@ -376,14 +393,25 @@ export function TemplateEditor({ templateId }: { templateId?: string }) {
         </div>
 
         {/* RIGHT: preview */}
-        <div className="mkt-card" style={{ padding: "0", overflow: "hidden" }}>
-          <div style={{ padding: "10px 14px", borderBottom: "1px solid #E1E3E5", fontSize: "12px", color: "#6D7175", fontWeight: 600 }}>
+        <div className="mkt-card" style={{ padding: 0, overflow: "hidden" }}>
+          <div
+            style={{
+              padding: "12px 16px",
+              borderBottom: `1px solid ${tokens.borderSubtle}`,
+              fontSize: "12px",
+              color: tokens.fgSecondary,
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+              background: tokens.bg,
+            }}
+          >
             Preview
           </div>
           <iframe
             title="template-preview"
             srcDoc={previewHtml}
-            style={{ width: "100%", height: "720px", border: "none", background: "#f6f6f7" }}
+            style={{ width: "100%", height: "720px", border: "none", background: tokens.bg }}
             sandbox=""
           />
         </div>
@@ -395,21 +423,18 @@ export function TemplateEditor({ templateId }: { templateId?: string }) {
           onClose={() => setShowTestSend(false)}
           footer={
             <>
-              <button className="mkt-btn" onClick={() => setShowTestSend(false)} style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #E1E3E5", background: "#FFF", color: "#6D7175" }}>
-                Cancel
-              </button>
+              <button className="mkt-btn" onClick={() => setShowTestSend(false)}>Cancel</button>
               <button
                 className="mkt-btn-primary"
                 disabled={!testEmail || testSendMut.isPending}
                 onClick={() => testSendMut.mutate(testEmail)}
-                style={{ padding: "6px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, border: "none", background: "#008060", color: "#FFF", opacity: !testEmail ? 0.5 : 1 }}
               >
                 {testSendMut.isPending ? "Sending…" : "Send test"}
               </button>
             </>
           }
         >
-          <label style={lblStyle}>Email address</label>
+          <label className="mkt-label">Email address</label>
           <input
             className="mkt-input"
             type="email"
@@ -418,7 +443,7 @@ export function TemplateEditor({ templateId }: { templateId?: string }) {
             placeholder="you@example.com"
             autoFocus
           />
-          <p style={{ fontSize: "12px", color: "#8C9196", marginTop: "8px" }}>
+          <p style={{ fontSize: "13px", color: tokens.fgSecondary, marginTop: "12px", marginBottom: 0 }}>
             Saves current draft and sends a test copy.
           </p>
         </Modal>
@@ -448,13 +473,13 @@ function BlockCard({
   isLast: boolean
 }) {
   return (
-    <div style={{ border: "1px solid #E1E3E5", borderRadius: "8px", padding: "10px 12px", marginBottom: "8px", background: "#FAFAFA" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-        <span style={{ fontSize: "11px", fontWeight: 700, color: "#6D7175", textTransform: "uppercase" }}>{block.type}</span>
+    <div style={{ border: `1px solid ${tokens.border}`, borderRadius: tokens.rMd, padding: "12px 14px", marginBottom: "8px", background: tokens.bg }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+        <span style={{ fontSize: "11px", fontWeight: 600, color: tokens.fgSecondary, textTransform: "uppercase", letterSpacing: "0.04em" }}>{block.type}</span>
         <div style={{ display: "flex", gap: "2px" }}>
-          <button disabled={isFirst} onClick={onUp} style={{ border: "none", background: "none", cursor: isFirst ? "default" : "pointer", opacity: isFirst ? 0.3 : 1, fontSize: "12px", padding: "2px 4px" }}>▲</button>
-          <button disabled={isLast} onClick={onDown} style={{ border: "none", background: "none", cursor: isLast ? "default" : "pointer", opacity: isLast ? 0.3 : 1, fontSize: "12px", padding: "2px 4px" }}>▼</button>
-          <button onClick={onDelete} style={{ border: "none", background: "none", cursor: "pointer", color: "#D72C0D", fontSize: "12px", padding: "2px 4px" }}>✕</button>
+          <button disabled={isFirst} onClick={onUp} style={{ border: "none", background: "none", cursor: isFirst ? "default" : "pointer", opacity: isFirst ? 0.3 : 1, fontSize: "12px", padding: "2px 6px", color: tokens.fgSecondary, borderRadius: tokens.rSm }}>▲</button>
+          <button disabled={isLast} onClick={onDown} style={{ border: "none", background: "none", cursor: isLast ? "default" : "pointer", opacity: isLast ? 0.3 : 1, fontSize: "12px", padding: "2px 6px", color: tokens.fgSecondary, borderRadius: tokens.rSm }}>▼</button>
+          <button onClick={onDelete} style={{ border: "none", background: "none", cursor: "pointer", color: tokens.dangerFg, fontSize: "12px", padding: "2px 6px", borderRadius: tokens.rSm }}>✕</button>
         </div>
       </div>
       {block.type === "text" && (
@@ -466,9 +491,9 @@ function BlockCard({
       {block.type === "heading" && (
         <>
           <input className="mkt-input" value={block.content} onChange={(e) => onChange({ content: e.target.value })} />
-          <div style={{ display: "flex", gap: "8px", marginTop: "6px", alignItems: "center" }}>
-            <label style={{ fontSize: "11px", color: "#6D7175" }}>Level:</label>
-            <select className="mkt-input" style={{ width: "auto" }} value={block.level} onChange={(e) => onChange({ level: parseInt(e.target.value) })}>
+          <div style={{ display: "flex", gap: "10px", marginTop: "8px", alignItems: "center" }}>
+            <label style={{ fontSize: "12px", color: tokens.fgSecondary }}>Level:</label>
+            <select className="mkt-input" style={{ width: "auto", height: "36px", fontSize: "13px" }} value={block.level} onChange={(e) => onChange({ level: parseInt(e.target.value) })}>
               <option value={1}>H1</option>
               <option value={2}>H2</option>
               <option value={3}>H3</option>
@@ -479,29 +504,29 @@ function BlockCard({
       )}
       {block.type === "image" && (
         <>
-          <label style={lblStyle}>Image URL</label>
+          <label className="mkt-label">Image URL</label>
           <input className="mkt-input" value={block.src} onChange={(e) => onChange({ src: e.target.value })} placeholder="https://…" />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginTop: "6px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "8px" }}>
             <input className="mkt-input" value={block.alt || ""} onChange={(e) => onChange({ alt: e.target.value })} placeholder="Alt text" />
             <input className="mkt-input" value={block.href || ""} onChange={(e) => onChange({ href: e.target.value })} placeholder="Link URL (optional)" />
           </div>
-          <input className="mkt-input" style={{ marginTop: "6px" }} value={block.width || ""} onChange={(e) => onChange({ width: e.target.value })} placeholder="Width (e.g. 300px)" />
+          <input className="mkt-input" style={{ marginTop: "8px" }} value={block.width || ""} onChange={(e) => onChange({ width: e.target.value })} placeholder="Width (e.g. 300px)" />
         </>
       )}
       {block.type === "button" && (
         <>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
             <input className="mkt-input" value={block.label} onChange={(e) => onChange({ label: e.target.value })} placeholder="Label" />
             <input className="mkt-input" value={block.href} onChange={(e) => onChange({ href: e.target.value })} placeholder="https://" />
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px", marginTop: "6px", alignItems: "center" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginTop: "8px", alignItems: "flex-end" }}>
             <div>
-              <label style={{ fontSize: "10px", color: "#8C9196" }}>BG</label>
-              <input type="color" value={block.bgColor || "#008060"} onChange={(e) => onChange({ bgColor: e.target.value })} style={{ width: "100%", height: "32px", padding: 0, border: "1px solid #E1E3E5", borderRadius: "6px" }} />
+              <label style={{ fontSize: "11px", color: tokens.fgSecondary, display: "block", marginBottom: "4px" }}>BG</label>
+              <input type="color" value={block.bgColor || "#15803D"} onChange={(e) => onChange({ bgColor: e.target.value })} style={{ width: "100%", height: "36px", padding: "2px", border: `1px solid ${tokens.borderStrong}`, borderRadius: tokens.rMd, cursor: "pointer" }} />
             </div>
             <div>
-              <label style={{ fontSize: "10px", color: "#8C9196" }}>Text</label>
-              <input type="color" value={block.textColor || "#FFFFFF"} onChange={(e) => onChange({ textColor: e.target.value })} style={{ width: "100%", height: "32px", padding: 0, border: "1px solid #E1E3E5", borderRadius: "6px" }} />
+              <label style={{ fontSize: "11px", color: tokens.fgSecondary, display: "block", marginBottom: "4px" }}>Text</label>
+              <input type="color" value={block.textColor || "#FFFFFF"} onChange={(e) => onChange({ textColor: e.target.value })} style={{ width: "100%", height: "36px", padding: "2px", border: `1px solid ${tokens.borderStrong}`, borderRadius: tokens.rMd, cursor: "pointer" }} />
             </div>
             <div>
               <AlignPicker value={block.align || "center"} onChange={(v) => onChange({ align: v })} />
@@ -510,19 +535,19 @@ function BlockCard({
         </>
       )}
       {block.type === "divider" && (
-        <div style={{ fontSize: "12px", color: "#8C9196" }}>A horizontal line.</div>
+        <div style={{ fontSize: "13px", color: tokens.fgSecondary }}>A horizontal line.</div>
       )}
       {block.type === "spacer" && (
-        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-          <label style={{ fontSize: "11px", color: "#6D7175" }}>Height</label>
-          <input className="mkt-input" style={{ width: "90px" }} type="number" min={4} value={block.height} onChange={(e) => onChange({ height: parseInt(e.target.value) || 0 })} />
-          <span style={{ fontSize: "11px", color: "#8C9196" }}>px</span>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <label style={{ fontSize: "12px", color: tokens.fgSecondary }}>Height</label>
+          <input className="mkt-input" style={{ width: "100px", height: "36px", fontSize: "13px" }} type="number" min={4} value={block.height} onChange={(e) => onChange({ height: parseInt(e.target.value) || 0 })} />
+          <span style={{ fontSize: "12px", color: tokens.fgMuted }}>px</span>
         </div>
       )}
       {block.type === "footer" && (
         <>
-          <textarea className="mkt-input" style={{ minHeight: "50px", fontFamily: "inherit" }} value={block.content} onChange={(e) => onChange({ content: e.target.value })} />
-          <input className="mkt-input" style={{ marginTop: "6px" }} value={block.unsubscribe_url || ""} onChange={(e) => onChange({ unsubscribe_url: e.target.value })} placeholder="{{unsubscribe_url}}" />
+          <textarea className="mkt-input" style={{ minHeight: "60px" }} value={block.content} onChange={(e) => onChange({ content: e.target.value })} />
+          <input className="mkt-input" style={{ marginTop: "8px" }} value={block.unsubscribe_url || ""} onChange={(e) => onChange({ unsubscribe_url: e.target.value })} placeholder="{{unsubscribe_url}}" />
         </>
       )}
     </div>
@@ -531,17 +556,18 @@ function BlockCard({
 
 function AlignPicker({ value, onChange }: { value: string; onChange: (v: "left" | "center" | "right") => void }) {
   return (
-    <div style={{ display: "inline-flex", border: "1px solid #E1E3E5", borderRadius: "6px", overflow: "hidden", marginTop: "6px" }}>
+    <div style={{ display: "inline-flex", border: `1px solid ${tokens.borderStrong}`, borderRadius: tokens.rMd, overflow: "hidden" }}>
       {(["left", "center", "right"] as const).map((v) => (
         <button
           key={v}
           onClick={() => onChange(v)}
           style={{
-            padding: "4px 10px",
-            fontSize: "11px",
+            padding: "6px 12px",
+            fontSize: "12px",
+            fontWeight: 500,
             border: "none",
-            background: value === v ? "#008060" : "#FFF",
-            color: value === v ? "#FFF" : "#6D7175",
+            background: value === v ? tokens.primary : tokens.surface,
+            color: value === v ? "#FFFFFF" : tokens.fgSecondary,
             cursor: "pointer",
           }}
         >

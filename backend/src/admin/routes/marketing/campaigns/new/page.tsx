@@ -7,7 +7,11 @@ function NewCampaignPage() {
     <MarketingShell
       title="New campaign"
       subtitle="Broadcast to lists and segments"
-      active="/marketing/campaigns"
+      breadcrumbs={[
+        { label: "Marketing", to: "/marketing" },
+        { label: "Campaigns", to: "/marketing/campaigns" },
+        { label: "New" },
+      ]}
     >
       <CampaignEditor />
     </MarketingShell>
