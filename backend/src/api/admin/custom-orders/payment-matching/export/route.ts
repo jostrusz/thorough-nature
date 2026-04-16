@@ -26,6 +26,76 @@ function extractPaymentId(meta: any): string | null {
   )
 }
 
+/**
+ * Detect the payment GATEWAY for an order — same logic as the matcher UI route
+ * (/admin/custom-orders/payment-matching/route.ts → detectPaymentGateway).
+ * Keep these two in sync if you update one.
+ * Returns: "airwallex" | "stripe" | "paypal" | "klarna" | "comgate" | "cod"
+ *        | "mollie" | "przelewy24" | "unknown"
+ */
+function detectPaymentGateway(
+  order: any,
+  paymentId: string | null,
+  isCod: boolean
+): string {
+  if (isCod) return "cod"
+
+  const meta = order?.metadata || {}
+
+  // 1. Explicit metadata from order-placed-payment-metadata subscriber
+  const explicit = (meta.payment_provider || "").toString().toLowerCase()
+  const explicitMap: Record<string, string> = {
+    airwallex: "airwallex",
+    stripe: "stripe",
+    paypal: "paypal",
+    klarna: "klarna",
+    comgate: "comgate",
+    mollie: "mollie",
+    przelewy24: "przelewy24",
+    p24: "przelewy24",
+    cod: "cod",
+  }
+  if (explicitMap[explicit]) return explicitMap[explicit]
+
+  // 2. Gateway-specific metadata keys
+  if (meta.airwallexPaymentIntentId) return "airwallex"
+  if (meta.stripePaymentIntentId || meta.stripeCheckoutSessionId) return "stripe"
+  if (meta.paypalOrderId) return "paypal"
+  if (meta.klarnaOrderId) return "klarna"
+  if (meta.comgateTransId) return "comgate"
+  if (meta.molliePaymentId || meta.mollieOrderId) return "mollie"
+  if (meta.p24SessionId) return "przelewy24"
+
+  // 3. Payment collection provider_id
+  const pcs = order?.payment_collections || []
+  for (const pc of pcs) {
+    for (const p of pc.payments || []) {
+      const pid = (p.provider_id || "").toLowerCase()
+      if (pid.includes("airwallex")) return "airwallex"
+      if (pid.includes("stripe")) return "stripe"
+      if (pid.includes("paypal")) return "paypal"
+      if (pid.includes("klarna")) return "klarna"
+      if (pid.includes("comgate")) return "comgate"
+      if (pid.includes("mollie")) return "mollie"
+      if (pid.includes("przelewy") || pid.includes("p24")) return "przelewy24"
+    }
+  }
+
+  // 4. Pattern-based fallback on Payment ID (legacy orders without metadata)
+  if (paymentId) {
+    if (/^int_/i.test(paymentId)) return "airwallex"
+    if (/^(pi|pm|cs|ch|py)_/i.test(paymentId)) return "stripe"
+    if (/^tr_|^ord_/i.test(paymentId)) return "mollie"
+    if (/^P24/i.test(paymentId)) return "przelewy24"
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(paymentId)) return "klarna"
+    if (/^[A-Z0-9]{17}$/.test(paymentId)) return "paypal"
+    if (/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/i.test(paymentId)) return "comgate"
+    if (/^\d{6,12}$/.test(paymentId)) return "comgate"
+  }
+
+  return "unknown"
+}
+
 function isCodOrder(order: any): boolean {
   const meta = order.metadata || {}
   if (meta.payment_provider === "cod" || meta.payment_method === "cod") return true
@@ -133,6 +203,8 @@ export async function GET(
     const periodStart = from ? formatDate(new Date(from).toISOString()) : formatDate(new Date().toISOString())
 
     // CSV header
+    // NOTE: "Platebni brana" added as the LAST column (#21) so the original
+    // 20-column GPC layout used by existing bank importers stays intact.
     const header = [
       "Cislo uctu",
       "Nazev uctu",
@@ -154,6 +226,7 @@ export async function GET(
       "Obraty DEBET",
       "Obraty KREDIT",
       "Iban protistrany",
+      "Platebni brana",
     ].join(";")
 
     // Build CSV rows
@@ -223,6 +296,9 @@ export async function GET(
         }
       }
 
+      // Detect payment gateway (same logic as the matcher UI route)
+      const paymentGateway = detectPaymentGateway(order as any, paymentId1, cod)
+
       // Upsell check
       const upsellPaymentId = meta.upsell_payment_id
       const isUpsell = !!meta.upsell_accepted && !!upsellPaymentId
@@ -264,6 +340,7 @@ export async function GET(
         "",                              // Obraty DEBET
         formatAmount(amountForRow1),     // Obraty KREDIT
         "",                              // Iban protistrany
+        paymentGateway,                  // Platebni brana
       ].join(";"))
 
       // === ROW 2: Upsell payment (if applicable, non-COD) ===
@@ -295,6 +372,7 @@ export async function GET(
           "",
           formatAmount(upsellAmount),
           "",
+          paymentGateway,                // Platebni brana — same gateway as main payment
         ].join(";"))
       }
     }
