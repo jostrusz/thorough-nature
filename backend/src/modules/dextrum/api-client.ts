@@ -77,7 +77,20 @@ export class MyStockApiClient {
       fetchOptions.body = JSON.stringify(body)
     }
 
-    const response = await undiciFetch(url, fetchOptions)
+    let response: Awaited<ReturnType<typeof undiciFetch>>
+    try {
+      response = await undiciFetch(url, fetchOptions)
+    } catch (err: any) {
+      // undici wraps the underlying network error as `TypeError: fetch failed`
+      // with the real error in `.cause` (ETIMEDOUT / ECONNREFUSED / CERT_* / ...).
+      // Surface it so we can actually diagnose outages instead of staring at
+      // "fetch failed" in last_error forever.
+      const cause = err?.cause
+      const causeInfo = cause
+        ? `${cause.code || cause.name || "Error"}: ${cause.message || cause.toString()}${cause.errno ? ` (errno=${cause.errno})` : ""}${cause.syscall ? ` syscall=${cause.syscall}` : ""}${cause.address ? ` address=${cause.address}:${cause.port || ""}` : ""}`
+        : err?.message || String(err)
+      throw new Error(`mySTOCK API ${method} ${path} network error → ${causeInfo}`)
+    }
 
     if (!response.ok) {
       const text = await response.text().catch(() => "")
