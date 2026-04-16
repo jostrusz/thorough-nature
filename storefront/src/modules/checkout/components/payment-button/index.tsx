@@ -9,7 +9,7 @@ import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { placeOrder, updateCartAddresses } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { isManual, isMollie, isPaypal, isStripe, isKlarna } from "@lib/constants"
+import { isManual, isMollie, isPaypal, isStripe, isKlarna, isNovalnet } from "@lib/constants"
 import { useMollie } from "../payment-wrapper/mollie-wrapper"
 import { KlarnaPaymentButton } from "../klarna-payment-button"
 
@@ -71,6 +71,14 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     case isKlarna(paymentSession?.provider_id):
       return (
         <KlarnaPaymentButton
+          notReady={notReady}
+          cart={cart}
+          data-testid={dataTestId}
+        />
+      )
+    case isNovalnet(paymentSession?.provider_id):
+      return (
+        <NovalnetPaymentButton
           notReady={notReady}
           cart={cart}
           data-testid={dataTestId}
@@ -461,6 +469,86 @@ const MolliePaymentButton = ({
       <ErrorMessage
         error={errorMessage}
         data-testid="mollie-payment-error-message"
+      />
+    </>
+  )
+}
+
+/**
+ * Novalnet payment button.
+ *
+ * Behaviour:
+ *   - Redirect methods (iDEAL, Bancontact, PayPal, Przelewy24, eps, Trustly, …):
+ *     payment session data carries `redirectUrl` / `checkoutUrl` returned by
+ *     Novalnet → we send the customer there. They come back to our return URL
+ *     (`?payment_return=1&cart_id=…`) where the cart is then completed.
+ *   - Inline methods (CreditCard via Drop-in, SEPA): no redirectUrl → call
+ *     `placeOrder()` directly. Future: add Novalnet Seamless Form iframe for
+ *     PCI-compliant card collection.
+ *   - Post-payment (Invoice, Prepayment, Multibanco): `placeOrder()` directly,
+ *     order created as authorized; customer pays later from email instructions.
+ */
+const NovalnetPaymentButton = ({
+  cart,
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  cart: HttpTypes.StoreCart
+  notReady: boolean
+  "data-testid"?: string
+}) => {
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const session = cart.payment_collection?.payment_sessions?.find(
+    (s) => s.status === "pending"
+  )
+
+  const onPaymentCompleted = async () => {
+    await placeOrder()
+      .catch((err) => {
+        setErrorMessage(err.message)
+      })
+      .finally(() => {
+        setSubmitting(false)
+      })
+  }
+
+  const handlePayment = async () => {
+    setSubmitting(true)
+    setErrorMessage(null)
+
+    try {
+      const sessionData = session?.data as any
+      // Redirect methods carry `redirectUrl` (or `checkoutUrl` alias) from
+      // the Novalnet `result.redirect_url` field returned at /v2/payment.
+      const redirectUrl = sessionData?.redirectUrl || sessionData?.checkoutUrl
+      if (redirectUrl) {
+        window.location.href = redirectUrl
+        return
+      }
+      // Inline / post-payment methods → complete cart directly.
+      await onPaymentCompleted()
+    } catch (err: any) {
+      setErrorMessage(err.message || "Payment failed")
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <>
+      <Button
+        disabled={notReady}
+        onClick={handlePayment}
+        size="large"
+        isLoading={submitting}
+        data-testid={dataTestId}
+      >
+        Place order
+      </Button>
+      <ErrorMessage
+        error={errorMessage}
+        data-testid="novalnet-payment-error-message"
       />
     </>
   )

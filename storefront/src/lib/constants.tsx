@@ -54,6 +54,10 @@ export const paymentInfoMap: Record<
     title: "Airwallex",
     icon: <CreditCard />,
   },
+  pp_novalnet_novalnet: {
+    title: "Novalnet",
+    icon: <CreditCard />,
+  },
 }
 
 /**
@@ -110,8 +114,14 @@ export const isKlarna = (providerId?: string) => {
 export const isAirwallex = (providerId?: string) => {
   return providerId?.startsWith("pp_airwallex")
 }
+export const isNovalnet = (providerId?: string) => {
+  return providerId?.startsWith("pp_novalnet")
+}
 export const isRedirectPayment = (providerId?: string) => {
-  return isMollie(providerId) || isComgate(providerId) || isP24(providerId)
+  // Novalnet methods are mostly redirect-based (iDEAL, Bancontact, PayPal,
+  // Przelewy24, eps, Trustly, ...) — the redirect URL comes back in
+  // payment session data as `redirectUrl`. CreditCard + SEPA are inline.
+  return isMollie(providerId) || isComgate(providerId) || isP24(providerId) || isNovalnet(providerId)
   // Klarna is NOT a redirect method — it has its own widget flow (init → load → authorize)
 }
 

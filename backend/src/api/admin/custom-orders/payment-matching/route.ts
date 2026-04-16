@@ -44,6 +44,7 @@ function extractPaymentId(meta: any): string | null {
     meta?.p24SessionId ||
     meta?.airwallexPaymentIntentId ||
     meta?.klarnaOrderId ||
+    meta?.novalnetTid ||
     meta?.payment_id ||
     null
   )
@@ -77,6 +78,7 @@ function detectPaymentGateway(
     mollie: "mollie",
     przelewy24: "przelewy24",
     p24: "przelewy24",
+    novalnet: "novalnet",
     cod: "cod",
   }
   if (explicitMap[explicit]) return explicitMap[explicit]
@@ -89,6 +91,7 @@ function detectPaymentGateway(
   if (meta.comgateTransId) return "comgate"
   if (meta.molliePaymentId || meta.mollieOrderId) return "mollie"
   if (meta.p24SessionId) return "przelewy24"
+  if (meta.novalnetTid) return "novalnet"
 
   // 3. Payment collection provider_id
   const pcs = order?.payment_collections || []
@@ -102,6 +105,7 @@ function detectPaymentGateway(
       if (pid.includes("comgate")) return "comgate"
       if (pid.includes("mollie")) return "mollie"
       if (pid.includes("przelewy") || pid.includes("p24")) return "przelewy24"
+      if (pid.includes("novalnet")) return "novalnet"
     }
   }
 
@@ -115,6 +119,8 @@ function detectPaymentGateway(
     if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(paymentId)) return "klarna"
     // PayPal capture: 17 uppercase alphanumeric chars
     if (/^[A-Z0-9]{17}$/.test(paymentId)) return "paypal"
+    // Novalnet TID: exactly 17 digits (must come BEFORE Comgate's \d{6,12} check)
+    if (/^\d{17}$/.test(paymentId)) return "novalnet"
     // Comgate: short alphanumeric code with dashes (e.g. ABCD-EFGH-1234) or pure numeric
     if (/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/i.test(paymentId)) return "comgate"
     if (/^\d{6,12}$/.test(paymentId)) return "comgate"
