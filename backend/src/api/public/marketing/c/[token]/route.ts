@@ -16,6 +16,20 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     return
   }
 
+  // Validate redirect target: only allow http(s) schemes. Reject javascript:,
+  // data:, file:, or anything else that could be used for XSS/phishing if
+  // an attacker ever managed to mint a signed token with a malicious URL.
+  try {
+    const target = new URL(payload.u)
+    if (target.protocol !== "http:" && target.protocol !== "https:") {
+      res.status(400).send("Invalid redirect target")
+      return
+    }
+  } catch {
+    res.status(400).send("Invalid redirect target")
+    return
+  }
+
   // Record the click (best-effort)
   if (payload.m && payload.b) {
     try {

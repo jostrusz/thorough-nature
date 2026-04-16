@@ -10,10 +10,13 @@ import crypto from "crypto"
  */
 
 function getSecret(): string {
+  // Only accept marketing-scoped secrets. Do NOT fall back to COOKIE_SECRET:
+  // rotating the session cookie secret would invalidate every outstanding
+  // unsubscribe/click/pixel token, which is a very different blast radius
+  // than what a cookie rotation is intended to accomplish.
   const s =
     process.env.MARKETING_TOKEN_SECRET ||
-    process.env.MARKETING_KEYSTORE_SECRET ||
-    process.env.COOKIE_SECRET
+    process.env.MARKETING_KEYSTORE_SECRET
   if (!s) {
     throw new Error(
       "MARKETING_TOKEN_SECRET (or MARKETING_KEYSTORE_SECRET) must be set for signed tokens."
