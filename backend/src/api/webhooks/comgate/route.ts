@@ -436,7 +436,7 @@ async function captureOrderPayment(
   try {
     const { ContainerRegistrationKeys: CRK } = await import("@medusajs/framework/utils")
     const eventBus = scope.resolve(CRK.EVENT_BUS)
-    await eventBus.emit("payment.captured", { id: orderId })
+    await eventBus.emit({ name: "payment.captured", data: { id: orderId } })
     logger.info(`[Comgate Webhook] Emitted payment.captured event for order ${orderId}`)
   } catch (e: any) {
     logger.warn(`[Comgate Webhook] Failed to emit payment.captured: ${e.message}`)

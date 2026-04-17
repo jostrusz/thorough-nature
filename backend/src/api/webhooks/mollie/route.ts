@@ -202,7 +202,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           try {
             const { ContainerRegistrationKeys: CRK } = await import("@medusajs/framework/utils")
             const eventBus = req.scope.resolve(CRK.EVENT_BUS)
-            await eventBus.emit("payment.captured", { id: (order as any).id })
+            await eventBus.emit({ name: "payment.captured", data: { id: (order as any).id } })
             logger.info(`[Mollie Webhook] Emitted payment.captured event for order ${(order as any).id}`)
           } catch (e: any) {
             logger.warn(`[Mollie Webhook] Failed to emit payment.captured: ${e.message}`)

@@ -122,7 +122,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       try {
         const { ContainerRegistrationKeys: CRK } = await import("@medusajs/framework/utils")
         const eventBus = req.scope.resolve(CRK.EVENT_BUS)
-        await eventBus.emit("payment.captured", { id: order.id })
+        await eventBus.emit({ name: "payment.captured", data: { id: order.id } })
         logger.info(`[P24 Webhook] Emitted payment.captured event for order ${order.id}`)
       } catch (e: any) {
         logger.warn(`[P24 Webhook] Failed to emit payment.captured: ${e.message}`)

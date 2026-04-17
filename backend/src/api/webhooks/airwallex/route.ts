@@ -187,7 +187,7 @@ async function safetyNetCompleteCart(
       // Emit payment.captured event so subscribers (Fakturoid, Dextrum, etc.) can react
       try {
         const eventBus = scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
-        await eventBus.emit("payment.captured", { id: completedOrderId })
+        await eventBus.emit({ name: "payment.captured", data: { id: completedOrderId } })
         logger.info(
           `[Airwallex Webhook] Safety net: emitted payment.captured for order ${completedOrderId}`
         )
@@ -319,7 +319,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     if (event_type === "payment_intent.succeeded") {
       try {
         const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
-        await eventBus.emit("payment.captured", { id: order.id })
+        await eventBus.emit({ name: "payment.captured", data: { id: order.id } })
         logger.info(`[Airwallex Webhook] Emitted payment.captured event for order ${order.id}`)
       } catch (e: any) {
         logger.warn(`[Airwallex Webhook] Failed to emit payment.captured: ${e.message}`)

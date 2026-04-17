@@ -164,7 +164,7 @@ async function safetyNetCompleteCart(tid: string, txData: any, scope: any, logge
       // Emit payment.captured for downstream subscribers (Fakturoid, Dextrum, e-book email)
       try {
         const eventBus = scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
-        await eventBus.emit("payment.captured", { id: completedOrderId })
+        await eventBus.emit({ name: "payment.captured", data: { id: completedOrderId } })
         logger.info(`[Novalnet Webhook] Safety net: emitted payment.captured for order ${completedOrderId}`)
       } catch (e: any) {
         logger.warn(`[Novalnet Webhook] Safety net: failed to emit payment.captured: ${e.message}`)
@@ -335,7 +335,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     if (action === "captured") {
       try {
         const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
-        await eventBus.emit("payment.captured", { id: order.id })
+        await eventBus.emit({ name: "payment.captured", data: { id: order.id } })
         logger.info(`[Novalnet Webhook] Emitted payment.captured for order ${order.id}`)
       } catch (e: any) {
         logger.warn(`[Novalnet Webhook] Failed to emit payment.captured: ${e.message}`)
