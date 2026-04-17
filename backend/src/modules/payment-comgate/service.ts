@@ -33,7 +33,7 @@ export interface IComgatePaymentSessionData {
 function mapComgateStatusToMedusa(comgateStatus: string): PaymentSessionStatus {
   switch (comgateStatus) {
     case "PAID":
-      return PaymentSessionStatus.AUTHORIZED
+      return PaymentSessionStatus.CAPTURED
     case "AUTHORIZED":
       return PaymentSessionStatus.AUTHORIZED
     case "PENDING":
