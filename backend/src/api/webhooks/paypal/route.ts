@@ -290,7 +290,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         try {
           const { ContainerRegistrationKeys } = await import("@medusajs/framework/utils")
           const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
-          await eventBus.emit("payment.captured", { id: order.id })
+          await eventBus.emit({ name: "payment.captured", data: { id: order.id } })
           logger.info(`[PayPal Webhook] Emitted payment.captured event for order ${order.id}`)
         } catch (e: any) {
           logger.warn(`[PayPal Webhook] Failed to emit payment.captured: ${e.message}`)

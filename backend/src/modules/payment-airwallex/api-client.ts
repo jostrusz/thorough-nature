@@ -266,7 +266,7 @@ export class AirwallexApiClient {
 
     try {
       const response = await this.client.post<AirwallexPaymentIntentResponse>(
-        `/api/v1/pa/payment_intents/${intentId}`,
+        `/api/v1/pa/payment_intents/${intentId}/update`,
         { ...data, request_id: this.generateRequestId() },
         { headers: this.authHeaders() }
       )

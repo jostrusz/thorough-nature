@@ -82,11 +82,10 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
 
   /**
    * Get the active Comgate gateway config from the database.
-   * Uses a 3-level fallback strategy because payment providers run in a scoped
+   * Uses a 2-level fallback strategy because payment providers run in a scoped
    * container that may not have access to custom standalone modules:
    *   1. gatewayConfig module service (ideal, may not resolve)
-   *   2. __pg_connection__ Knex instance (shared resource, may not resolve)
-   *   3. Raw pg Client via DATABASE_URL (always works, independent of container)
+   *   2. Raw pg Client via DATABASE_URL (always works, independent of container)
    * Results are cached for 5 minutes to avoid repeated DB connections.
    */
   private async getComgateConfig(): Promise<any> {
@@ -114,25 +113,9 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       }
     }
 
-    // Method 2: Direct DB query via Knex (__pg_connection__)
-    try {
-      const knex = this.container_.resolve("__pg_connection__")
-      const rows = await knex("gateway_config")
-        .where({ provider: "comgate", is_active: true })
-        .whereNull("deleted_at")
-        .limit(1)
-
-      if (rows && rows[0]) {
-        this.getLogger().info("[Comgate] Config loaded via __pg_connection__")
-        _comgateConfigCache = rows[0]
-        _comgateConfigCacheTime = Date.now()
-        return rows[0]
-      }
-    } catch (e: any) {
-      this.getLogger().warn(`[Comgate] __pg_connection__ query failed: ${e.message}`)
-    }
-
-    // Method 3: Raw pg Client via DATABASE_URL (ultimate fallback)
+    // Method 2 (__pg_connection__ via scoped container) removed — never resolves
+    // reliably inside payment provider DI scope and just polluted logs. Method 3
+    // (raw pg Client) is always available and is the canonical fallback.
     const dbUrl = process.env.DATABASE_URL
     if (dbUrl) {
       let pgClient: Client | null = null
