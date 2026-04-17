@@ -340,24 +340,11 @@ h2 { font-size: 38px; }
 .hero-section {
  padding-top: 72px; padding-bottom: 72px;
  position: relative; overflow: hidden;
+ background: #ffffff;
 }
-.hero-section::before {
- content: '';
- position: absolute;
- top: -20%; right: -10%;
- width: 600px; height: 600px;
- background: radial-gradient(circle, rgba(194,123,160,0.12) 0%, rgba(194,123,160,0) 70%);
- border-radius: 50%;
- pointer-events: none;
-}
+.hero-section::before,
 .hero-section::after {
- content: '';
- position: absolute;
- bottom: -30%; left: -15%;
- width: 500px; height: 500px;
- background: radial-gradient(circle, rgba(123,94,167,0.08) 0%, transparent 70%);
- border-radius: 50%;
- pointer-events: none;
+ display: none;
 }
 
 .hero {
