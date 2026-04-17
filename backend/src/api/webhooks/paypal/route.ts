@@ -362,12 +362,25 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
               const projectSlug = session?.data?.project_slug || null
               const { PayPalApiClient } = await import("../../../modules/payment-paypal/api-client")
 
-              // Resolve PayPal credentials for this project
+              // Resolve PayPal credentials for this project. The model field
+              // is `project_slugs` (PLURAL — JSON array). Load all + filter
+              // in JS, same pattern as Airwallex / Mollie / Comgate.
               const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
-              const gcFilters: any = { provider: "paypal", is_active: true }
-              if (projectSlug) gcFilters.project_slug = projectSlug
-              const configs = await gcService.listGatewayConfigs(gcFilters, { take: 1 })
-              const config = configs[0]
+              const allConfigs = await gcService.listGatewayConfigs(
+                { provider: "paypal", is_active: true },
+                { take: 50, order: { priority: "ASC" } }
+              )
+              let config: any = null
+              if (projectSlug) {
+                config = allConfigs.find((r: any) => {
+                  const slugs = Array.isArray(r.project_slugs) ? r.project_slugs : []
+                  return slugs.includes(projectSlug)
+                })
+              }
+              if (!config) {
+                config = allConfigs.find((r: any) => !r.project_slugs || r.project_slugs.length === 0)
+                  || allConfigs[0]
+              }
 
               if (config) {
                 const isLive = config.mode === "live"
