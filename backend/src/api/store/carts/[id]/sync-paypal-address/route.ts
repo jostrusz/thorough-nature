@@ -50,12 +50,27 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     const paypalOrderId = paypalSession.data.paypalOrderId
     const projectSlug = paypalSession.data.project_slug || null
 
-    // Get PayPal credentials
+    // Get PayPal credentials. The model field is `project_slugs` (PLURAL,
+    // a JSON array). MikroORM list filter doesn't support "array contains"
+    // queries, so we load ALL active paypal configs and pick in JS — same
+    // pattern as Airwallex / Mollie / Comgate providers.
     const gcService = req.scope.resolve(GATEWAY_CONFIG_MODULE)
-    const gcFilters: any = { provider: "paypal", is_active: true }
-    if (projectSlug) gcFilters.project_slug = projectSlug
-    const configs = await gcService.listGatewayConfigs(gcFilters, { take: 1 })
-    const config = configs[0]
+    const allConfigs = await gcService.listGatewayConfigs(
+      { provider: "paypal", is_active: true },
+      { take: 50, order: { priority: "ASC" } }
+    )
+    let config: any = null
+    if (projectSlug) {
+      config = allConfigs.find((r: any) => {
+        const slugs = Array.isArray(r.project_slugs) ? r.project_slugs : []
+        return slugs.includes(projectSlug)
+      })
+    }
+    // Fall back to a catch-all gateway (empty project_slugs), then any
+    if (!config) {
+      config = allConfigs.find((r: any) => !r.project_slugs || r.project_slugs.length === 0)
+        || allConfigs[0]
+    }
 
     if (!config) {
       return res.status(200).json({ synced: false, reason: "No PayPal config found" })
