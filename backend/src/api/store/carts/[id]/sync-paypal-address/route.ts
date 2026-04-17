@@ -79,7 +79,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     const isLive = config.mode === "live"
     const keys = isLive ? config.live_keys : config.test_keys
     const { PayPalApiClient } = await import(
-      "../../../../../modules/payment-paypal/api-client"
+      "../../../../../modules/payment-paypal/api-client.js"
     )
     const client = new PayPalApiClient({
       client_id: keys?.client_id || keys?.api_key,

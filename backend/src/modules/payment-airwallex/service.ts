@@ -545,10 +545,19 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
       const intentId = sessionData.intentId
 
       if (intentId) {
-        await client.cancelPaymentIntent(intentId)
+        const intent = await client.getPaymentIntent(intentId).catch(() => null)
+        const status = intent?.status
+        const terminal = ["CANCELLED", "SUCCEEDED", "EXPIRED", "FAILED"]
+        if (intent && terminal.includes(status)) {
+          this.logger_.info(`[Airwallex] Cancel no-op: ${intentId} already in terminal state ${status}`)
+        } else {
+          await client.cancelPaymentIntent(intentId)
+          this.logger_.info(`[Airwallex] Cancel: ${intentId}`)
+        }
+      } else {
+        this.logger_.info(`[Airwallex] Cancel: no ID`)
       }
 
-      this.logger_.info(`[Airwallex] Cancel: ${intentId || "no ID"}`)
       return {
         data: { ...sessionData, status: "CANCELLED" },
       }
