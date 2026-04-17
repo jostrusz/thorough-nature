@@ -54,8 +54,9 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
   z-index: 99999;
 }
 .payment-preloader img {
-  width: 120px;
-  height: auto;
+  width: auto;
+  height: 180px;
+  aspect-ratio: 500 / 225;
   animation: ppPulse 1.4s ease-in-out infinite;
 }
 .payment-preloader p {
@@ -3890,7 +3891,7 @@ body {
     if (document.querySelector('.payment-preloader')) return;
     var el = document.createElement('div');
     el.className = 'payment-preloader';
-    el.innerHTML = '<img src="/kocici-bible-logo.png" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+    el.innerHTML = '<img src="/kocici-bible-logo.png" alt="Načítání..." width="400" height="180"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
     document.body.insertBefore(el, document.body.firstChild);
   }
   function hideExpressPreloader() {
@@ -6477,7 +6478,7 @@ body {
     if (!document.querySelector('.payment-preloader')) {
       var preloaderDiv = document.createElement('div');
       preloaderDiv.className = 'payment-preloader';
-      preloaderDiv.innerHTML = '<img src="/kocici-bible-logo.png" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+      preloaderDiv.innerHTML = '<img src="/kocici-bible-logo.png" alt="Načítání..." width="400" height="180"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
       document.body.insertBefore(preloaderDiv, document.body.firstChild);
     }
 
@@ -7216,7 +7217,7 @@ body {
                   if (!document.querySelector('.payment-preloader')) {
                     var kPreloader = document.createElement('div');
                     kPreloader.className = 'payment-preloader';
-                    kPreloader.innerHTML = '<img src="/kocici-bible-logo.png" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+                    kPreloader.innerHTML = '<img src="/kocici-bible-logo.png" alt="Načítání..." width="400" height="180"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
                     document.body.insertBefore(kPreloader, document.body.firstChild);
                   }
 
@@ -7354,7 +7355,7 @@ body {
                 if (!document.querySelector('.payment-preloader')) {
                   var awPreloader = document.createElement('div');
                   awPreloader.className = 'payment-preloader';
-                  awPreloader.innerHTML = '<img src="/kocici-bible-logo.png" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+                  awPreloader.innerHTML = '<img src="/kocici-bible-logo.png" alt="Načítání..." width="400" height="180"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
                   document.body.insertBefore(awPreloader, document.body.firstChild);
                 }
 

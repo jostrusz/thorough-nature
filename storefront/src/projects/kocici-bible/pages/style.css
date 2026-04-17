@@ -42,8 +42,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  opacity: 0; visibility: hidden; pointer-events: none;
 }
 .preloader-logo {
- width: 120px; height: 110px;
- aspect-ratio: 300 / 276;
+ width: auto;
+ height: 180px;
+ aspect-ratio: 500 / 225;
  animation: preloaderPulse 1.4s ease-in-out infinite;
 }
 @keyframes preloaderPulse {
