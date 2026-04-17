@@ -133,6 +133,15 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
       return psKey
     }
   }
+  // Kočičí bible falls back to Psí superživot templates (same locale `cs`, same flow)
+  // until dedicated kb-* templates are created
+  if (project === 'kocici-bible') {
+    const psKey = `ps-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(psKey)) {
+      return psKey
+    }
+  }
   if (project === 'lass-los') {
     const llKey = `ll-${templateKey}`
     const allKeys = Object.values(EmailTemplates) as string[]

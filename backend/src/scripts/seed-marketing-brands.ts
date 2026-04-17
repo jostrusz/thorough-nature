@@ -90,6 +90,18 @@ export default async function seedMarketingBrands({ container }: ExecArgs) {
       locale: "cs",
       timezone: "Europe/Prague",
     },
+    {
+      slug: "kocici-bible",
+      display_name: "Kočičí bible Oficial",
+      project_id: "kocici-bible",
+      storefront_domain: "kocici-bible.cz",
+      marketing_from_email: "news@news.kocici-bible.cz",
+      marketing_from_name: "Kočičí bible",
+      marketing_reply_to: "peterka@kocicibible.cz",
+      primary_color: "#b45309",
+      locale: "cs",
+      timezone: "Europe/Prague",
+    },
   ]
 
   let created = 0

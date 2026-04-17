@@ -1,0 +1,54 @@
+{
+  "slug": "kocici-bible",
+  "name": "Kočičí bible Oficial",
+  "domain": "kocici-bible.cz",
+  "locale": "cs",
+  "defaultCountry": "CZ",
+  "defaultPhonePrefix": "420",
+  "phonePrefixByCountry": {
+    "CZ": "420"
+  },
+  "salesChannelName": "Kocici Bible",
+  "medusaUrl": "",
+  "publishableApiKey": "",
+  "facebookPixelId": "",
+  "regions": {
+    "CZ": "reg_01KKB4EZN0CHFYDG64K4VP0J2A"
+  },
+  "mainProduct": {
+    "name": "Kočičí bible Oficial",
+    "handle": "kocici-bible-oficial",
+    "variantId": "",
+    "price": 550,
+    "currency": "CZK",
+    "thumbnail": ""
+  },
+  "upsellProduct": {
+    "name": "Psí superživot",
+    "handle": "psi-superzivot",
+    "variantId": "variant_01KKB4EZYDYVTC1HM9R7VZ8NHW",
+    "price": 399,
+    "originalPrice": 550,
+    "currency": "CZK"
+  },
+  "bundleOptions": [
+    { "qty": 1, "price": 550, "label": "1 kniha + 3× bonusy", "sublabel": "Pro sebe", "badge": "NEJPRODÁVANĚJŠÍ", "save": 0 },
+    { "qty": 2, "price": 899, "label": "2 knihy + 3× bonusy", "sublabel": "Pro mě a dárek pro blízké", "badge": "NEJOBLÍBENĚJŠÍ", "save": 201, "savings": 201 },
+    { "qty": 3, "price": 1199, "label": "3 knihy + 3× bonusy", "sublabel": "Pro celou rodinu koťátkářů", "badge": "NEJVÍC UŠETŘÍTE", "save": 451, "savings": 451 },
+    { "qty": 4, "price": 1499, "label": "4 knihy + 3× bonusy", "sublabel": "Obdarujte všechny kočičí kámoše", "badge": "NEJLEPŠÍ HODNOTA", "save": 701, "savings": 701 }
+  ],
+  "mollieProfileId": "",
+  "packetaApiKey": "cbb760f552ef87b3",
+  "paymentProviders": {},
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "upsell": "upsell.html",
+    "thank-you": "thank-you.html",
+    "contact": "contact.html",
+    "privacy": "privacy.html",
+    "voorwaarden": "voorwaarden.html",
+    "verzending": "verzending.html",
+    "retourbeleid": "retourbeleid.html"
+  }
+}
