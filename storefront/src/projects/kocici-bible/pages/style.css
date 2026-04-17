@@ -87,9 +87,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  gap: 10px;
 }
 .nav-logo img {
- height: 40px;
- width: 150px;
- aspect-ratio: 600 / 160;
+ height: 56px;
+ width: auto;
+ aspect-ratio: 400 / 195;
 }
 .nav-logo-text {
  font-family: 'Recoleta', serif;
