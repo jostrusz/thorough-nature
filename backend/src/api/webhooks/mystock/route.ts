@@ -427,19 +427,31 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
                 req.scope,
                 updatedMeta.project_id
               )
-              // Mark as sent + captured in metadata
+              // Mark as sent + captured in metadata.
+              // Use merge (||) with jsonb_build_object so we don't clobber fields
+              // written concurrently by captureAndTrackKlarnaFromWebhook (klarnaCaptureId)
+              // or by other webhook handlers (paypal flags, shipment_email_sent, etc.).
+              const nowIso = new Date().toISOString()
               updatedMeta.tracking_sent_to_gateway = {
                 ...(updatedMeta.tracking_sent_to_gateway || {}),
                 klarna: true,
-                klarna_timestamp: new Date().toISOString(),
+                klarna_timestamp: nowIso,
               }
               updatedMeta.payment_captured = true
-              updatedMeta.payment_captured_at = updatedMeta.payment_captured_at || new Date().toISOString()
-              // Save updated metadata
+              updatedMeta.payment_captured_at = updatedMeta.payment_captured_at || nowIso
               const klarnaPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
               await klarnaPool.query(
-                `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
-                [JSON.stringify(updatedMeta), orderMap.medusa_order_id]
+                `UPDATE "order" SET metadata = metadata
+                   || jsonb_build_object(
+                        'payment_captured', true,
+                        'payment_captured_at', $1::text,
+                        'tracking_sent_to_gateway',
+                          COALESCE(metadata->'tracking_sent_to_gateway', '{}'::jsonb)
+                          || jsonb_build_object('klarna', true, 'klarna_timestamp', $1::text)
+                      ),
+                   updated_at = NOW()
+                 WHERE id = $2`,
+                [nowIso, orderMap.medusa_order_id]
               )
               await klarnaPool.end()
               console.log(`[mySTOCK Webhook] ✅ Klarna captured + tracking sent for order ${orderMap.medusa_order_id}`)
@@ -1159,8 +1171,11 @@ async function captureAndTrackKlarnaFromWebhook(
   const { KlarnaApiClient } = await import("../../../modules/payment-klarna/api-client.js")
   const client = new KlarnaApiClient(apiKey, secretKey, testMode)
 
-  // Normalize carrier name for Klarna
-  const klarnaCarrier = carrier || "GLS"
+  // Normalize carrier name for Klarna. Uppercase for consistent display in
+  // Klarna Merchant Portal (e.g. "gls" → "GLS"). Klarna's portal renders
+  // shipping_info fields inline (no newlines), so the best we can do is make
+  // the carrier label look proper.
+  const klarnaCarrier = (carrier || "GLS").toUpperCase()
 
   // Build tracking URI
   const trackingUri = trackingUrl || undefined
