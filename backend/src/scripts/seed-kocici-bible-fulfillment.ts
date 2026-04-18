@@ -115,7 +115,9 @@ export default async function seedKociciBibleFulfillment({ container }: ExecArgs
       type: "shipping",
       service_zones: [
         {
-          name: "Czech rep",
+          // Service zone name must be globally unique; psi-superzivot already
+          // owns "Czech rep", so we append the project slug.
+          name: "Czech rep (Kocici Bible)",
           geo_zones: [{ country_code: "cz", type: "country" as const }],
         },
       ],
