@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="cs">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bedankt voor je bestelling!</title>
-  <link rel="icon" href="/kocici-bible-logo.png" type="image/png">
+  <title>Děkujeme za objednávku!</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://www.kocicibible.cz/thank-you">
+  <link rel="icon" href="preloader.webp" type="image/webp">
 
   <!-- Sdílená konfigurace projektu -->
   <script src="js/project-config.js"></script>
@@ -12,31 +14,27 @@
   <script src="js/pixel.js"></script>
 
 <!-- ═══════════════════════════════════════════════════════════
-     BEDANKPAGINA — Velvet Dusk Design
-     Objednávkový souhrn + kontrola adresy + edit formulář
+     DĚKOVACÍ STRÁNKA — Kočičí bible Oficial Design
+     Souhrn objednávky + kontrola adresy + editační formulář
      ═══════════════════════════════════════════════════════════ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* DM Sans — self-hosted */
-@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
-@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; }
-@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
-
-/* ══ Velvet Dusk barvy ══ */
+/* ══ Kočičí bible Oficial Design System ══ */
 :root {
-  --bg: #FAF5F8;
-  --heading: #2D1B3D;
-  --cta: #C27BA0;
-  --section: #EDD9E5;
-  --body: #5A3D6B;
-  --highlight: #D9A4C0;
-  --dark: #1A1028;
+  --bg: #FFFFFF;
+  --heading: #1A1A1A;
+  --cta: #DC3522;
+  --section: #F3E8FF;
+  --body: #374151;
+  --highlight: #C4B5FD;
+  --dark: #1A1A1A;
   --white: #FFFFFF;
-  --light: #F5EDF2;
-  --muted: #9B7AAD;
-  --cta-hover: #A8628A;
-  --accent: #D498B5;
+  --light: #F9FAFB;
+  --muted: #6B7280;
+  --cta-hover: #C62E1C;
+  --accent: #6B21A8;
   --success: #27AE60;
   --warning: #E67E22;
   --error: #E74C3C;
@@ -46,7 +44,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); }
 .ty-page {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Cabin', sans-serif;
   color: var(--body);
   max-width: 720px;
   margin: 0 auto;
@@ -74,7 +72,7 @@ body { background: var(--bg); }
   background: linear-gradient(135deg, var(--cta), var(--accent));
   display: flex; align-items: center; justify-content: center;
   animation: ty-pop 0.6s cubic-bezier(.16,1,.3,1) 0.3s both;
-  box-shadow: 0 8px 32px rgba(194,123,160,0.3);
+  box-shadow: 0 8px 32px rgba(107,33,168,0.3);
 }
 .ty-check-circle svg { width: 36px; height: 36px; color: #fff; stroke-dasharray: 50; stroke-dashoffset: 50; animation: ty-draw 0.8s ease 0.7s forwards; }
 @keyframes ty-pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
@@ -86,14 +84,14 @@ body { background: var(--bg); }
   background: rgba(39,174,96,0.08); padding: 6px 14px; border-radius: 8px;
 }
 .ty-title {
-  font-family: 'Recoleta', serif; font-weight: 600;
+  font-family: 'Inter', sans-serif; font-weight: 600;
   font-size: 34px; line-height: 1.18; color: var(--heading); margin-bottom: 12px;
 }
 .ty-title .accent { font-style: italic; color: var(--cta); }
 .ty-subtitle { font-size: 17px; color: var(--body); line-height: 1.65; max-width: 560px; margin: 0 auto; }
 .ty-subtitle strong { color: var(--heading); font-weight: 600; }
 
-/* ══ 2. Address verification alert ══ */
+/* ══ 2. Upozornění na ověření adresy ══ */
 .ty-address-alert {
   background: linear-gradient(135deg, #FFF3E0, #FFF8E1);
   border: 2px solid #FFB74D;
@@ -114,11 +112,11 @@ body { background: var(--bg); }
 }
 .ty-address-alert-desc { font-size: 14px; color: #6D4C41; line-height: 1.5; }
 
-/* ══ 3. Customer details card ══ */
+/* ══ 3. Karta údajů zákazníka ══ */
 .ty-details-card {
-  background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
   border-radius: 20px; padding: 28px 32px; margin-bottom: 24px;
-  box-shadow: 0 2px 12px rgba(45,27,61,0.04);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
 .ty-details-header {
   display: flex; justify-content: space-between; align-items: center;
@@ -126,7 +124,7 @@ body { background: var(--bg); }
   border-bottom: 1.5px solid var(--light);
 }
 .ty-details-title {
-  font-family: 'Recoleta', serif; font-weight: 600;
+  font-family: 'Inter', sans-serif; font-weight: 600;
   font-size: 18px; color: var(--heading);
   display: flex; align-items: center; gap: 8px;
 }
@@ -151,7 +149,7 @@ body { background: var(--bg); }
 .ty-detail-value { font-size: 15px; font-weight: 500; color: var(--heading); line-height: 1.45; }
 .ty-detail-full { grid-column: 1 / -1; }
 
-/* ══ 4. Edit form (skrytý) ══ */
+/* ══ 4. Editační formulář (skrytý) ══ */
 .ty-edit-form { display: none; margin-bottom: 24px; }
 .ty-edit-form.is-open { display: block; animation: ty-slideDown 0.35s cubic-bezier(.16,1,.3,1); }
 @keyframes ty-slideDown {
@@ -161,25 +159,25 @@ body { background: var(--bg); }
 .ty-edit-form-inner {
   background: var(--white); border: 2px solid var(--cta);
   border-radius: 20px; padding: 28px 32px;
-  box-shadow: 0 4px 24px rgba(194,123,160,0.12);
+  box-shadow: 0 4px 24px rgba(107,33,168,0.12);
 }
 .ty-edit-form-title {
-  font-family: 'Recoleta', serif; font-weight: 600;
+  font-family: 'Inter', sans-serif; font-weight: 600;
   font-size: 18px; color: var(--heading); margin-bottom: 20px;
   display: flex; align-items: center; gap: 8px;
 }
 .ty-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 0; }
 .ty-form-group { position: relative; margin-bottom: 14px; }
 .ty-form-group.full { grid-column: 1 / -1; }
-/* Shopify floating label styl */
+/* Plovoucí label styl */
 .ty-float-field { position: relative; }
 .ty-float-field input {
   width: 100%; height: 54px;
   padding: 22px 16px 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Cabin', sans-serif;
   font-size: 15px; font-weight: 400;
   color: var(--heading); background: var(--white);
-  border: 1px solid rgba(45,27,61,0.18);
+  border: 1px solid rgba(0,0,0,0.18);
   border-radius: 10px; outline: none;
   -webkit-appearance: none; appearance: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -206,7 +204,7 @@ body { background: var(--bg); }
 /* Focus stav */
 .ty-float-field input:focus {
   border-color: var(--cta);
-  box-shadow: 0 0 0 3px rgba(194,123,160,0.12);
+  box-shadow: 0 0 0 3px rgba(107,33,168,0.12);
   background: var(--white);
 }
 .ty-form-actions {
@@ -215,24 +213,24 @@ body { background: var(--bg); }
 .ty-form-save {
   flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   background: var(--cta); color: var(--white);
-  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
+  font-family: 'Cabin', sans-serif; font-size: 15px; font-weight: 700;
   padding: 14px 24px; border-radius: 12px; border: none;
   cursor: pointer; transition: all 0.3s cubic-bezier(.16,1,.3,1);
-  box-shadow: 0 3px 12px rgba(194,123,160,0.25);
+  box-shadow: 0 3px 12px rgba(107,33,168,0.25);
 }
-.ty-form-save:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(194,123,160,0.35); }
-.ty-form-save:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(194,123,160,0.2); }
+.ty-form-save:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(107,33,168,0.35); }
+.ty-form-save:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(107,33,168,0.2); }
 .ty-form-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 .ty-form-cancel {
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--light); color: var(--body);
-  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
-  padding: 14px 20px; border-radius: 12px; border: 1.5px solid rgba(45,27,61,0.1);
+  font-family: 'Cabin', sans-serif; font-size: 14px; font-weight: 600;
+  padding: 14px 20px; border-radius: 12px; border: 1.5px solid rgba(0,0,0,0.1);
   cursor: pointer; transition: all 0.3s cubic-bezier(.16,1,.3,1);
 }
-.ty-form-cancel:hover { background: rgba(45,27,61,0.06); transform: translateY(-1px); }
+.ty-form-cancel:hover { background: rgba(0,0,0,0.06); transform: translateY(-1px); }
 
-/* Feedback zprávy */
+/* Zpětná vazba */
 .ty-feedback {
   display: none; padding: 14px 18px; border-radius: 12px;
   margin-bottom: 24px; font-size: 14px; font-weight: 500;
@@ -247,11 +245,11 @@ body { background: var(--bg); }
 .btn-spinner { display: inline-block; width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ══ 5. Order summary ══ */
+/* ══ 5. Souhrn objednávky ══ */
 .ty-order-box {
-  background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
   border-radius: 20px; padding: 28px 32px; margin-bottom: 28px;
-  box-shadow: 0 2px 12px rgba(45,27,61,0.04);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
 .ty-order-label {
   font-size: 13px; font-weight: 700; text-transform: uppercase;
@@ -264,9 +262,9 @@ body { background: var(--bg); }
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; font-size: 20px;
 }
-.ty-order-icon.book { background: rgba(194,123,160,0.12); }
+.ty-order-icon.book { background: rgba(107,33,168,0.12); }
 .ty-order-icon.ebook { background: rgba(212,152,181,0.15); }
-.ty-order-icon.ship { background: rgba(45,27,61,0.06); }
+.ty-order-icon.ship { background: rgba(0,0,0,0.06); }
 .ty-order-name { font-size: 15px; font-weight: 600; color: var(--heading); }
 .ty-order-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .ty-order-total {
@@ -274,18 +272,18 @@ body { background: var(--bg); }
   margin-top: 16px; padding-top: 16px;
   border-top: 2px solid var(--light);
 }
-.ty-order-total-label { font-family: 'Recoleta', serif; font-size: 17px; font-weight: 600; color: var(--heading); }
-.ty-order-total-price { font-family: 'Recoleta', serif; font-size: 28px; font-weight: 700; color: var(--cta); }
+.ty-order-total-label { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 600; color: var(--heading); }
+.ty-order-total-price { font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 700; color: var(--cta); }
 
-/* ══ 5b. Support contact box ══ */
+/* ══ 5b. Kontakt na podporu ══ */
 .ty-support {
-  background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
   border-radius: 20px; padding: 26px 28px; margin-bottom: 28px;
   display: flex; align-items: center; gap: 20px;
-  box-shadow: 0 2px 12px rgba(45,27,61,0.04);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
   transition: all 0.35s cubic-bezier(.16,1,.3,1);
 }
-.ty-support:hover { border-color: var(--highlight); box-shadow: 0 8px 32px rgba(45,27,61,0.08); transform: translateY(-2px); }
+.ty-support:hover { border-color: var(--highlight); box-shadow: 0 8px 32px rgba(0,0,0,0.08); transform: translateY(-2px); }
 .ty-support-icon {
   width: 54px; height: 54px; border-radius: 16px;
   background: linear-gradient(135deg, var(--section), var(--light));
@@ -300,11 +298,11 @@ body { background: var(--bg); }
 .ty-support-btn {
   display: inline-flex; align-items: center; gap: 8px;
   background: var(--cta); color: var(--white);
-  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+  font-family: 'Cabin', sans-serif; font-size: 14px; font-weight: 700;
   padding: 13px 24px; border-radius: 12px; border: none;
   cursor: pointer; text-decoration: none;
   transition: all 0.35s cubic-bezier(.16,1,.3,1); flex-shrink: 0;
-  box-shadow: 0 3px 12px rgba(194,123,160,0.25);
+  box-shadow: 0 3px 12px rgba(107,33,168,0.25);
   position: relative; overflow: hidden;
 }
 .ty-support-btn::after {
@@ -313,26 +311,26 @@ body { background: var(--bg); }
   opacity: 0; transition: opacity 0.3s ease;
 }
 .ty-support-btn:hover::after { opacity: 1; }
-.ty-support-btn:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(194,123,160,0.35); }
-.ty-support-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(194,123,160,0.2); }
+.ty-support-btn:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(107,33,168,0.35); }
+.ty-support-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(107,33,168,0.2); }
 @media (max-width: 600px) {
   .ty-support { flex-direction: column; text-align: center; padding: 24px 20px; }
   .ty-support-btn { width: 100%; justify-content: center; }
 }
 
-/* ══ 6. What happens now — 3 steps ══ */
+/* ══ 6. Co se stane dál — 3 kroky ══ */
 .ty-steps { margin-bottom: 32px; }
 .ty-steps-title {
-  font-family: 'Recoleta', serif; font-size: 24px;
+  font-family: 'Inter', sans-serif; font-size: 24px;
   font-weight: 600; color: var(--heading); margin-bottom: 20px; text-align: center;
 }
 .ty-steps-grid { display: flex; gap: 16px; }
 .ty-step {
-  flex: 1; background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  flex: 1; background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
   border-radius: 18px; padding: 24px 20px; text-align: center;
   transition: transform 0.4s cubic-bezier(.16,1,.3,1), box-shadow 0.4s ease;
 }
-.ty-step:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(45,27,61,0.1); }
+.ty-step:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(0,0,0,0.1); }
 .ty-step-num {
   width: 36px; height: 36px; border-radius: 50%;
   background: linear-gradient(135deg, var(--cta), var(--accent));
@@ -344,32 +342,32 @@ body { background: var(--bg); }
 .ty-step-title { font-size: 15px; font-weight: 700; color: var(--heading); margin-bottom: 6px; }
 .ty-step-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
 
-/* ══ 7. Social proof ══ */
+/* ══ 7. Recenze ══ */
 .ty-reviews { margin-bottom: 32px; }
 .ty-reviews-title {
-  font-family: 'Recoleta', serif; font-size: 22px;
+  font-family: 'Inter', sans-serif; font-size: 22px;
   font-weight: 600; color: var(--heading); margin-bottom: 16px; text-align: center;
 }
 .ty-review-cards { display: flex; gap: 16px; }
 .ty-review {
-  flex: 1; background: var(--white); border: 1.5px solid rgba(45,27,61,0.08);
+  flex: 1; background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
   border-radius: 16px; padding: 22px;
   transition: transform 0.35s cubic-bezier(.16,1,.3,1), box-shadow 0.35s ease;
 }
-.ty-review:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(45,27,61,0.08); }
+.ty-review:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,0.08); }
 .ty-review-stars { color: var(--cta); font-size: 14px; letter-spacing: 2px; margin-bottom: 10px; }
 .ty-review-text { font-size: 14px; color: var(--body); line-height: 1.6; font-style: italic; margin-bottom: 12px; }
 .ty-review-author { font-size: 13px; font-weight: 600; color: var(--heading); }
 .ty-review-loc { font-size: 12px; color: var(--muted); }
 
-/* ══ 8. Share ══ */
+/* ══ 8. Sdílení ══ */
 .ty-share {
   text-align: center; background: var(--light);
   border-radius: 20px; padding: 32px; margin-bottom: 32px;
-  border: 1px solid rgba(45,27,61,0.04);
+  border: 1px solid rgba(0,0,0,0.04);
 }
 .ty-share-title {
-  font-family: 'Recoleta', serif; font-size: 22px;
+  font-family: 'Inter', sans-serif; font-size: 22px;
   font-weight: 600; color: var(--heading); margin-bottom: 8px;
 }
 .ty-share-desc { font-size: 15px; color: var(--body); margin-bottom: 20px; line-height: 1.55; }
@@ -444,273 +442,296 @@ body { background: var(--bg); }
 </head>
 <body>
 
+<!-- ═══ PRELOADER ═══ -->
+<style>
+.preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 99999; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
+.preloader-logo-wrap { position: relative; overflow: hidden; width: 180px; height: auto; }
+.preloader-logo { width: 100%; height: auto; display: block; animation: preloaderPulse 1.5s ease-in-out infinite; }
+.preloader-shine { position: absolute; top: -100%; left: 0; width: 50%; height: 300%; background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.6) 50%, transparent 60%); animation: preloaderShine 2s ease-in-out infinite; pointer-events: none; will-change: transform; }
+@keyframes preloaderPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.04); opacity: 0.92; } }
+@keyframes preloaderShine { 0% { transform: translateX(-160%); } 100% { transform: translateX(320%); } }
+</style>
+<div class="preloader" id="preloader">
+ <div class="preloader-logo-wrap">
+  <img src="preloader.webp" alt="Kočičí bible Oficial" class="preloader-logo" width="180" height="180">
+  <div class="preloader-shine"></div>
+ </div>
+</div>
+
 <!-- Confetti burst -->
 <div class="ty-confetti" id="ty-confetti"></div>
 
 <div class="ty-page">
 
   <!-- ═══════════════════════════════════════
-       1. HERO — bevestiging
+       1. HERO — potvrzení
        ═══════════════════════════════════════ -->
   <div class="ty-hero ty-reveal">
     <div class="ty-check-circle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <div class="ty-eyebrow">&#x2705; Bestelling bevestigd</div>
-    <h1 class="ty-title" id="ty-main-title">Bedankt voor je <span class="accent">bestelling!</span></h1>
-    <p class="ty-subtitle">Je bestelling is succesvol afgerond. We gaan je pakket zo snel mogelijk klaarmaken en versturen.</p>
+    <div class="ty-eyebrow">&#x2705; Objednávka potvrzena</div>
+    <h1 class="ty-title" id="ty-main-title">Děkujeme za <span class="accent">objednávku!</span></h1>
+    <p class="ty-subtitle">Tvoje objednávka je potvrzená. Balíček ti co nejdříve připravíme a pošleme.</p>
   </div>
 
   <!-- ═══════════════════════════════════════
-       2. ADDRESS VERIFICATION ALERT
+       2. OVĚŘENÍ DORUČOVACÍ ADRESY
        ═══════════════════════════════════════ -->
   <div class="ty-address-alert ty-reveal ty-d1">
     <div class="ty-address-alert-icon">&#x26A0;&#xFE0F;</div>
     <div class="ty-address-alert-text">
-      <div class="ty-address-alert-title">Controleer je bezorggegevens</div>
-      <div class="ty-address-alert-desc">We willen je bestelling zo snel mogelijk versturen. Controleer hieronder of je <strong>adres</strong>, <strong>e-mailadres</strong> en <strong>telefoonnummer</strong> kloppen.</div>
+      <div class="ty-address-alert-title">Zkontroluj si doručovací údaje</div>
+      <div class="ty-address-alert-desc">Chceme ti objednávku odeslat co nejdříve. Zkontroluj prosím, jestli je tvoje <strong>adresa</strong>, <strong>e-mail</strong> a <strong>telefon</strong> správně.</div>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════
-       3. CUSTOMER DETAILS CARD
+       3. KARTA ÚDAJŮ ZÁKAZNÍKA
        ═══════════════════════════════════════ -->
   <div class="ty-details-card ty-reveal ty-d2" id="ty-details-card">
     <div class="ty-details-header">
       <div class="ty-details-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Jouw gegevens
+        Tvoje údaje
       </div>
       <button class="ty-edit-btn" id="ty-edit-toggle" onclick="toggleEditForm()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Gegevens wijzigen
+        Upravit údaje
       </button>
     </div>
     <div class="ty-details-grid" id="ty-details-grid">
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Voornaam</div>
+        <div class="ty-detail-label">Jméno</div>
         <div class="ty-detail-value" id="ty-show-firstname">—</div>
       </div>
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Achternaam</div>
+        <div class="ty-detail-label">Příjmení</div>
         <div class="ty-detail-value" id="ty-show-lastname">—</div>
       </div>
       <div class="ty-detail-item">
-        <div class="ty-detail-label">E-mailadres</div>
+        <div class="ty-detail-label">E-mailová adresa</div>
         <div class="ty-detail-value" id="ty-show-email">—</div>
       </div>
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Telefoonnummer</div>
+        <div class="ty-detail-label">Telefonní číslo</div>
         <div class="ty-detail-value" id="ty-show-phone">—</div>
       </div>
       <div class="ty-detail-item ty-detail-full">
-        <div class="ty-detail-label">Bezorgadres</div>
+        <div class="ty-detail-label">Doručovací adresa</div>
         <div class="ty-detail-value" id="ty-show-address">—</div>
       </div>
       <div class="ty-detail-item ty-detail-full" id="ty-company-row" style="display:none;">
-        <div class="ty-detail-label">Bedrijfsgegevens</div>
+        <div class="ty-detail-label">Firemní údaje</div>
         <div class="ty-detail-value" id="ty-show-company">—</div>
       </div>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════
-       4. EDIT FORM (standaard verborgen)
+       4. EDITAČNÍ FORMULÁŘ (ve výchozím stavu skrytý)
        ═══════════════════════════════════════ -->
   <div class="ty-edit-form" id="ty-edit-form">
     <div class="ty-edit-form-inner">
       <div class="ty-edit-form-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Gegevens aanpassen
+        Upravit údaje
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-firstname" placeholder=" ">
-          <label for="edit-firstname">Voornaam</label>
+          <label for="edit-firstname">Jméno</label>
         </div>
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-lastname" placeholder=" ">
-          <label for="edit-lastname">Achternaam</label>
+          <label for="edit-lastname">Příjmení</label>
         </div>
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field">
           <input type="email" id="edit-email" placeholder=" ">
-          <label for="edit-email">E-mailadres</label>
+          <label for="edit-email">E-mailová adresa</label>
         </div>
         <div class="ty-form-group ty-float-field">
           <input type="tel" id="edit-phone" placeholder=" ">
-          <label for="edit-phone">Telefoonnummer</label>
+          <label for="edit-phone">Telefonní číslo</label>
         </div>
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field full">
           <input type="text" id="edit-address" placeholder=" ">
-          <label for="edit-address">Straat + huisnummer</label>
+          <label for="edit-address">Ulice + číslo popisné</label>
         </div>
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-postal" placeholder=" ">
-          <label for="edit-postal">Postcode</label>
+          <label for="edit-postal">PSČ</label>
         </div>
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-city" placeholder=" ">
-          <label for="edit-city">Stad</label>
+          <label for="edit-city">Město</label>
         </div>
       </div>
       <!-- Firemní pole (B2B) -->
       <div id="ty-edit-company-section" style="display:none; margin-top:4px;">
-        <div style="font-size:12px;font-weight:600;color:#9B7AAD;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Bedrijfsgegevens</div>
+        <div style="font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Firemní údaje</div>
         <div class="ty-form-row">
           <div class="ty-form-group ty-float-field full">
             <input type="text" id="edit-company" placeholder=" ">
-            <label for="edit-company">Bedrijfsnaam</label>
+            <label for="edit-company">Název firmy</label>
           </div>
         </div>
         <div class="ty-form-row">
           <div class="ty-form-group ty-float-field">
             <input type="text" id="edit-kvk" placeholder=" ">
-            <label for="edit-kvk">KVK / Ondernemingsnr.</label>
+            <label for="edit-kvk">IČO</label>
           </div>
           <div class="ty-form-group ty-float-field">
             <input type="text" id="edit-vat" placeholder=" ">
-            <label for="edit-vat">BTW-nummer</label>
+            <label for="edit-vat">DIČ</label>
           </div>
         </div>
       </div>
       <div class="ty-form-actions">
         <button class="ty-form-save" id="ty-save-btn" onclick="saveDetails()">
-          Opslaan
+          Uložit
         </button>
-        <button class="ty-form-cancel" onclick="toggleEditForm()">Annuleren</button>
+        <button class="ty-form-cancel" onclick="toggleEditForm()">Zrušit</button>
       </div>
     </div>
   </div>
 
-  <!-- Feedback bericht (na opslaan) -->
+  <!-- Zpětná vazba (po uložení) -->
   <div class="ty-feedback" id="ty-feedback">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
     <span id="ty-feedback-text"></span>
   </div>
 
   <!-- ═══════════════════════════════════════
-       5. ORDER SUMMARY
+       5. SOUHRN OBJEDNÁVKY
        ═══════════════════════════════════════ -->
   <div class="ty-order-box ty-reveal ty-d3">
-    <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Jouw bestelling</div>
+    <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Tvoje objednávka</div>
     <div class="ty-order-items" id="ty-order-items">
       <div class="ty-order-item">
         <div class="ty-order-icon book">&#x1F4D6;</div>
         <div>
-          <div class="ty-order-name">Laat Los Wat Je Kapotmaakt</div>
-          <div class="ty-order-desc">Fysiek boek &mdash; 290 pagina's &mdash; wordt bezorgd</div>
+          <div class="ty-order-name">Kočičí bible Oficial</div>
+          <div class="ty-order-desc">Fyzická kniha &mdash; 270 stran &mdash; doručení domů</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ebook">&#x1F4F1;</div>
         <div>
-          <div class="ty-order-name">De Overdenkende Oplossing</div>
-          <div class="ty-order-desc">Gratis e-book &mdash; check je inbox</div>
+          <div class="ty-order-name">Dlouhověkost začíná v misce</div>
+          <div class="ty-order-desc">E-book Výživa &mdash; zkontrolujte svůj e-mail</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ebook">&#x1F4F1;</div>
         <div>
-          <div class="ty-order-name">Liefde Zonder Onzin</div>
-          <div class="ty-order-desc">Gratis e-book &mdash; check je inbox</div>
+          <div class="ty-order-name">TOP 20 her</div>
+          <div class="ty-order-desc">E-book Aktivity &mdash; zkontrolujte svůj e-mail</div>
+        </div>
+      </div>
+      <div class="ty-order-item">
+        <div class="ty-order-icon ebook">&#x1F4F1;</div>
+        <div>
+          <div class="ty-order-name">Proč to dělá</div>
+          <div class="ty-order-desc">E-book Chování &mdash; zkontrolujte svůj e-mail</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ship">&#x1F69A;</div>
         <div>
-          <div class="ty-order-name">Gratis verzending</div>
-          <div class="ty-order-desc">Binnen 5 werkdagen bezorgd</div>
+          <div class="ty-order-name">Doprava zdarma</div>
+          <div class="ty-order-desc">Doručení do 1–3 pracovních dnů</div>
         </div>
       </div>
     </div>
     <div class="ty-order-total">
-      <span class="ty-order-total-label">Betaald</span>
-      <span class="ty-order-total-price" id="ty-total-price">&euro; 35</span>
+      <span class="ty-order-total-label">Zaplaceno</span>
+      <span class="ty-order-total-price" id="ty-total-price">550 Kč</span>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════
-       5b. SUPPORT CONTACT
+       5b. KONTAKT NA PODPORU
        ═══════════════════════════════════════ -->
   <div class="ty-support ty-reveal ty-d4">
     <div class="ty-support-icon">&#x1F4E9;</div>
     <div class="ty-support-text">
-      <div class="ty-support-title">Vragen of problemen?</div>
-      <div class="ty-support-desc">Heb je een fout ontdekt, een vraag over je bestelling of loop je ergens tegenaan? Neem gerust contact met ons op &mdash; we helpen je met alle plezier!</div>
+      <div class="ty-support-title">Máš dotaz?</div>
+      <div class="ty-support-desc">Něco nesedí nebo potřebuješ poradit s objednávkou? Neváhej se ozvat &mdash; rádi pomůžeme!</div>
     </div>
-    <a href="mailto:boek@loslatenboek.nl?subject=Vraag%20over%20bestelling%20%23&body=Hallo%2C%0A%0AIk%20heb%20een%20vraag%20over%20mijn%20bestelling.%0A%0ABestelnummer%3A%20%0A%0AMijn%20vraag%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Stuur ons een e-mail</a>
+    <a href="mailto:podpora@kocicibible.cz?subject=Dotaz%20k%20objedn%C3%A1vce%20%23&body=Ahoj%2C%0A%0Am%C3%A1m%20dotaz%20k%20objedn%C3%A1vce.%0A%0A%C4%8C%C3%ADslo%20objedn%C3%A1vky%3A%20%0A%0AM%C5%AFj%20dotaz%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Napiš nám</a>
   </div>
 
   <!-- ═══════════════════════════════════════
-       6. WHAT HAPPENS NOW — 3 stappen
+       6. CO SE STANE DÁL — 3 kroky
        ═══════════════════════════════════════ -->
   <div class="ty-steps ty-reveal ty-d5">
-    <div class="ty-steps-title">Wat gebeurt er nu?</div>
+    <div class="ty-steps-title">Co se stane dál?</div>
     <div class="ty-steps-grid">
       <div class="ty-step">
         <div class="ty-step-num">1</div>
         <div class="ty-step-icon">&#x1F4E7;</div>
-        <div class="ty-step-title">Check je inbox</div>
-        <div class="ty-step-desc">Je ontvangt binnen 2 minuten een bevestigingsmail met je gratis e-books: <em>De Overdenkende Oplossing</em> en <em>Liefde Zonder Onzin</em>.</div>
+        <div class="ty-step-title">Zkontroluj e-mail</div>
+        <div class="ty-step-desc">Do pár minut ti přijde e-mail se třemi bonusovými e-booky ke stažení.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">2</div>
         <div class="ty-step-icon">&#x1F4E6;</div>
-        <div class="ty-step-title">Boek onderweg</div>
-        <div class="ty-step-desc">Je fysieke boek wordt binnen 24&ndash;48 uur verzonden en is binnen 5 werkdagen bezorgd. Je ontvangt een track &amp; trace link per e-mail.</div>
+        <div class="ty-step-title">Kniha na cestě</div>
+        <div class="ty-step-desc">Tvoje kniha bude odeslána do 24 hodin. Sledovací odkaz ti pošleme e-mailem.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">3</div>
         <div class="ty-step-icon">&#x1F680;</div>
-        <div class="ty-step-title">Begin met loslaten</div>
-        <div class="ty-step-desc">Begin vandaag al met de e-books. Zodra je boek arriveert, start je met de oefeningen.</div>
+        <div class="ty-step-title">Pusť se do tréninku</div>
+        <div class="ty-step-desc">Začni ještě dnes s e-booky. Jakmile dorazí knížka, pusť se do cvičení.</div>
       </div>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════
-       7. SOCIAL PROOF
+       7. RECENZE
        ═══════════════════════════════════════ -->
   <div class="ty-reviews ty-reveal ty-d5">
-    <div class="ty-reviews-title">Zij gingen je voor</div>
+    <div class="ty-reviews-title">Co říkají naši čtenáři</div>
     <div class="ty-review-cards">
       <div class="ty-review">
         <div class="ty-review-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
-        <div class="ty-review-text">&ldquo;Al jaren droeg ik spanning in mijn borst mee. Dit boek liet me zien dat het onverwerkt schuldgevoel was. Na 3 weken voelde ik letterlijk hoe het wegsmolt.&rdquo;</div>
-        <div class="ty-review-author">Marieke V.</div>
-        <div class="ty-review-loc">Amsterdam</div>
+        <div class="ty-review-text">&ldquo;Náš pes táhal na vodítku a neposlechl na povel. Po 3 týdnech s touto knihou se úplně změnil. Konečně si užíváme společné procházky!&rdquo;</div>
+        <div class="ty-review-author">Jana M.</div>
+        <div class="ty-review-loc">Praha</div>
       </div>
       <div class="ty-review">
         <div class="ty-review-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
-        <div class="ty-review-text">&ldquo;Ik sliep voor het eerst in jaren door. De oefeningen zijn zo concreet &mdash; geen zweverig gedoe maar &eacute;chte stappen. Mijn kinderen merkten het verschil al na een week.&rdquo;</div>
-        <div class="ty-review-author">Linda K.</div>
-        <div class="ty-review-loc">Rotterdam</div>
+        <div class="ty-review-text">&ldquo;Cvičení jsou tak konkrétní &mdash; žádné obecné fráze, ale skutečné kroky. Naše štěně se za týden naučilo víc než za měsíce předtím. Skvělá kniha!&rdquo;</div>
+        <div class="ty-review-author">Petr K.</div>
+        <div class="ty-review-loc">Brno</div>
       </div>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════
-       8. SHARE
+       8. SDÍLENÍ
        ═══════════════════════════════════════ -->
   <div class="ty-share ty-reveal ty-d6">
-    <div class="ty-share-title">Ken je iemand die dit ook nodig heeft?</div>
-    <div class="ty-share-desc">Deel deze pagina met een vriendin en help haar ook aan een frisse start.</div>
+    <div class="ty-share-title">Znáš někoho, kdo to taky potřebuje?</div>
+    <div class="ty-share-desc">Máš kamaráda se psem? Pošli mu odkaz a pomoz i jeho pejskovi žít lepší život.</div>
     <div class="ty-share-buttons">
-      <a href="https://wa.me/?text=Ik%20heb%20net%20Laat%20Los%20Wat%20Je%20Kapotmaakt%20besteld%20en%20ik%20denk%20dat%20jij%20het%20ook%20nodig%20hebt%20%F0%9F%92%9B" target="_blank" class="ty-share-btn wa">
+      <a href="https://wa.me/?text=Pr%C3%A1v%C4%9B%20jsem%20si%20objednal%2Fa%20knihu%20Ps%C3%AD%20super%C5%BEivot%20a%20mysl%C3%ADm%2C%20%C5%BEe%20by%20se%20ti%20taky%20hodila%20%F0%9F%90%B6" target="_blank" class="ty-share-btn wa">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.67-1.413A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.312-.727-5.994-1.96l-.418-.312-2.774.84.893-2.89-.338-.44A9.958 9.958 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
         WhatsApp
       </a>
-      <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Ftijdomloslaten.nl" target="_blank" class="ty-share-btn fb">
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fpsisuperzivot.cz" target="_blank" class="ty-share-btn fb">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
         Facebook
       </a>
-      <a href="mailto:?subject=Dit%20boek%20moet%20je%20lezen&body=Ik%20heb%20net%20Laat%20Los%20Wat%20Je%20Kapotmaakt%20besteld" class="ty-share-btn mail">
+      <a href="mailto:?subject=Tuhle%20knihu%20mus%C3%AD%C5%A1%20%C4%8D%C3%ADst&body=Pr%C3%A1v%C4%9B%20jsem%20si%20objednal%2Fa%20knihu%20Ps%C3%AD%20super%C5%BEivot" class="ty-share-btn mail">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
         E-mail
       </a>
@@ -742,86 +763,6 @@ body { background: var(--bg); }
     try { customer = JSON.parse(customerStr); } catch(e) { console.warn('TY: Nelze parsovat zákaznická data'); }
   }
 
-  // Fetch real order data from API to override localStorage (which may have stale/wrong address)
-  if (orderId && PROJECT_CONFIG.medusaUrl) {
-    fetch(PROJECT_CONFIG.medusaUrl + '/store/custom/orders/' + orderId + '/details', {
-      headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data.success && data.order) {
-        var sa = data.order.shipping_address || {};
-        var updated = {
-          email: data.order.email || (customer && customer.email) || '',
-          first_name: sa.first_name || (customer && customer.first_name) || '',
-          last_name: sa.last_name || (customer && customer.last_name) || '',
-          address_1: sa.address_1 || (customer && customer.address_1) || '',
-          city: sa.city || (customer && customer.city) || '',
-          postal_code: sa.postal_code || (customer && customer.postal_code) || '',
-          country_code: sa.country_code || (customer && customer.country_code) || '',
-          phone: sa.phone || (customer && customer.phone) || '',
-        };
-        customer = updated;
-        localStorage.setItem('medusa_customer', JSON.stringify(updated));
-        updateDetailsDisplay();
-        console.log('TY: Customer data synced from order API (country: ' + updated.country_code + ')');
-
-        // ─── Authoritative fix for book count + total price ───
-        // localStorage (medusa_bundle_qty / medusa_checkout_total) is unreliable:
-        // it can be wiped by browser restarts, cross-domain checkout, or edge
-        // cases in the checkout flow. The order itself is source of truth —
-        // derive the real book count from the bundle SKU LLWJK-{N} and use
-        // the actual order total.
-        try {
-          var orderItems = data.order.items || [];
-          var mainItem = null;
-          var derivedBookCount = 0;
-          for (var i = 0; i < orderItems.length; i++) {
-            var it = orderItems[i];
-            var sku = (it.sku || '').toUpperCase();
-            var m = /^LLWJK-([1-4])$/.exec(sku);
-            if (m) {
-              mainItem = it;
-              derivedBookCount = parseInt(m[1], 10) * (it.quantity || 1);
-              break;
-            }
-          }
-          if (mainItem && derivedBookCount > 0) {
-            // Override bundleQty so downstream code uses the correct value
-            bundleQty = derivedBookCount;
-            var nameEl = orderItemsEl && orderItemsEl.querySelector('.ty-order-name');
-            var descEl = orderItemsEl && orderItemsEl.querySelector('.ty-order-desc');
-            if (nameEl) {
-              nameEl.textContent = derivedBookCount > 1
-                ? (derivedBookCount + '\u00D7 Laat Los Wat Je Kapotmaakt')
-                : 'Laat Los Wat Je Kapotmaakt';
-            }
-            if (descEl) {
-              descEl.textContent = derivedBookCount > 1
-                ? (derivedBookCount + '\u00D7 fysiek boek \u2014 290 pagina\u2019s \u2014 wordt bezorgd')
-                : 'Fysiek boek \u2014 290 pagina\u2019s \u2014 wordt bezorgd';
-            }
-          }
-          // Authoritative total from the order
-          if (data.order.total != null) {
-            var totalEl = document.getElementById('ty-total-price');
-            if (totalEl) {
-              var cur = (data.order.currency_code || 'eur').toLowerCase();
-              var symbol = cur === 'eur' ? '\u20AC' : cur === 'sek' ? 'kr' : cur === 'pln' ? 'z\u0142' : cur === 'czk' ? 'K\u010D' : '\u20AC';
-              var amt = Number(data.order.total) || 0;
-              var formatted = amt.toFixed(2).replace('.', ',').replace(/,00$/, '');
-              totalEl.textContent = symbol + ' ' + formatted;
-            }
-          }
-          console.log('TY: Order items synced (books: ' + derivedBookCount + ', total: ' + data.order.total + ')');
-        } catch (e) {
-          console.warn('TY: Could not sync order items:', e && e.message);
-        }
-      }
-    })
-    .catch(function(e) { console.warn('TY: Could not fetch order details:', e.message); });
-  }
-
   // Firemní údaje (B2B)
   var companyStr = localStorage.getItem('medusa_company');
   var companyData = null;
@@ -831,8 +772,8 @@ body { background: var(--bg); }
 
   // Mapování country kódů na názvy
   var countryNames = {
-    NL: 'Nederland', BE: 'België', LU: 'Luxemburg',
-    DE: 'Duitsland', AT: 'Oostenrijk', CZ: 'Tsjechië',
+    CZ: 'Česká republika', SK: 'Slovensko',
+    DE: 'Německo', AT: 'Rakousko', PL: 'Polsko',
   };
 
   // ────────────────────────────────────────────────────
@@ -842,53 +783,45 @@ body { background: var(--bg); }
   // 2a. Personalizovaný heading
   var titleEl = document.getElementById('ty-main-title');
   if (titleEl && customer && customer.first_name) {
-    titleEl.innerHTML = 'Bedankt, <span class="accent">' + customer.first_name + '!</span>';
+    titleEl.innerHTML = 'Děkujeme, <span class="accent">' + customer.first_name + '!</span>';
   }
 
   // 2b. Objednávkové číslo
   var orderLabelEl = document.getElementById('ty-order-label');
   if (orderLabelEl && displayId) {
-    orderLabelEl.textContent = '\uD83D\uDCE6 Bestelling #' + displayId;
+    orderLabelEl.textContent = '\uD83D\uDCE6 Objednávka #' + displayId;
   } else if (orderLabelEl && orderId) {
     var shortId = orderId.replace('order_', '').substring(0, 8).toUpperCase();
-    orderLabelEl.textContent = '\uD83D\uDCE6 Bestelling #' + shortId;
+    orderLabelEl.textContent = '\uD83D\uDCE6 Objednávka #' + shortId;
   }
 
   // 2c. Mailto link — doplň číslo objednávky
   var mailtoEl = document.getElementById('ty-support-mailto');
   if (mailtoEl) {
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
-    var subject = encodeURIComponent('Vraag over bestelling #' + orderNum);
-    var body = encodeURIComponent('Hallo,\n\nIk heb een vraag over mijn bestelling.\n\nBestelnummer: #' + orderNum + '\n\nMijn vraag: ');
-    mailtoEl.href = 'mailto:boek@loslatenboek.nl?subject=' + subject + '&body=' + body;
+    var subject = encodeURIComponent('Dotaz k objednávce #' + orderNum);
+    var body = encodeURIComponent('Ahoj,\n\nmám dotaz k objednávce.\n\nČíslo objednávky: #' + orderNum + '\n\nMůj dotaz: ');
+    mailtoEl.href = 'mailto:podpora@kocicibible.cz?subject=' + subject + '&body=' + body;
   }
 
   // 2d. Celková cena — bere v potaz bundle, order bump a upsell
-  // Bundle price map: qty → price (from project config)
-  var bundlePriceMap = {};
-  if (PROJECT_CONFIG.bundleOptions) {
-    PROJECT_CONFIG.bundleOptions.forEach(function(opt) { bundlePriceMap[opt.qty] = opt.price; });
-  }
   var totalPrice;
   if (checkoutTotal > 0) {
+    // Máme uloženou celkovou cenu z checkoutu
     totalPrice = checkoutTotal;
+    // Pokud upsell byl přidán po checkoutu (ne přes order bump), přičti ho
     if (upsellPurchased && !orderBumpActive) {
       totalPrice += PROJECT_CONFIG.upsellProduct.price;
     }
-  } else if (bundlePriceMap[bundleQty]) {
-    // Use bundle pricing: 1=€35, 2=€59, 3=€79, 4=€99
-    totalPrice = bundlePriceMap[bundleQty];
-    if (upsellPurchased) {
-      totalPrice += PROJECT_CONFIG.upsellProduct.price;
-    }
   } else {
+    // Fallback — starý výpočet
     var mainPrice = PROJECT_CONFIG.mainProduct.price;
     var upsellPrice = PROJECT_CONFIG.upsellProduct.price;
     totalPrice = upsellPurchased ? (mainPrice + upsellPrice) : mainPrice;
   }
   var totalPriceEl = document.getElementById('ty-total-price');
   if (totalPriceEl) {
-    totalPriceEl.textContent = '\u20AC ' + totalPrice.toFixed(0).replace('.', ',');
+    totalPriceEl.textContent = totalPrice.toFixed(0) + ' K\u010D';
   }
 
   // 2e. Aktualizuj hlavní položku s bundle qty
@@ -896,11 +829,11 @@ body { background: var(--bg); }
   if (orderItemsEl && bundleQty > 1) {
     var mainItemName = orderItemsEl.querySelector('.ty-order-name');
     if (mainItemName) {
-      mainItemName.textContent = bundleQty + '\u00D7 Laat Los Wat Je Kapotmaakt';
+      mainItemName.textContent = bundleQty + '\u00D7 Kočičí bible Oficial';
     }
     var mainItemDesc = orderItemsEl.querySelector('.ty-order-desc');
     if (mainItemDesc) {
-      mainItemDesc.textContent = bundleQty + '\u00D7 fysiek boek \u2014 290 pagina\u2019s \u2014 wordt bezorgd';
+      mainItemDesc.textContent = bundleQty + '\u00D7 fyzická kniha \u2014 doručení domů';
     }
   }
 
@@ -908,7 +841,7 @@ body { background: var(--bg); }
   if (upsellPurchased || orderBumpActive) {
     if (orderItemsEl) {
       var upsellName = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.name) || 'Upsell Product';
-      var extraLabel = orderBumpActive ? 'Fysiek boek \u2014 toegevoegd bij bestelling' : 'Fysiek boek \u2014 upsell bestelling';
+      var extraLabel = orderBumpActive ? 'Fyzická kniha \u2014 přidáno k objednávce' : 'Fyzická kniha \u2014 doplňková objednávka';
       var upsellItemHtml = '<div class="ty-order-item">' +
         '<div class="ty-order-icon book">\uD83D\uDCD6</div>' +
         '<div>' +
@@ -949,8 +882,8 @@ body { background: var(--bg); }
       if (companyRow && companyVal) {
         companyRow.style.display = '';
         var cParts = [companyData.company_name];
-        if (companyData.kvk_number) cParts.push('KVK: ' + companyData.kvk_number);
-        if (companyData.vat_number) cParts.push('BTW: ' + companyData.vat_number);
+        if (companyData.kvk_number) cParts.push('IČO: ' + companyData.kvk_number);
+        if (companyData.vat_number) cParts.push('DIČ: ' + companyData.vat_number);
         companyVal.innerHTML = cParts.join('<br>');
       }
       // Ukaž company sekci v edit formuláři
@@ -1045,13 +978,13 @@ body { background: var(--bg); }
 
     // Validace — alespoň email a jméno
     if (!newData.email || !newData.first_name) {
-      showFeedback('Vul ten minste je voornaam en e-mailadres in.', 'error');
+      showFeedback('Vyplň prosím alespoň jméno a e-mail.', 'error');
       return;
     }
 
     // Loading stav
     btn.disabled = true;
-    btn.innerHTML = '<span class="btn-spinner"></span> Opslaan...';
+    btn.innerHTML = '<span class="btn-spinner"></span> Ukládám...';
 
     // Aktualizuj lokální data ihned (pro lepší UX)
     customer = {
@@ -1062,7 +995,7 @@ body { background: var(--bg); }
       address_1: newData.address_1,
       city: newData.city,
       postal_code: newData.postal_code,
-      country_code: customer ? customer.country_code : 'NL',
+      country_code: customer ? customer.country_code : 'CZ',
     };
 
     // Aktualizuj localStorage
@@ -1130,20 +1063,20 @@ body { background: var(--bg); }
       } else {
         console.warn('TY: API vrátilo chybu:', data.message);
         // Data jsou uložená lokálně, ale API selhalo
-        finishSave(true, 'Gegevens lokaal opgeslagen. Neem contact op als het probleem aanhoudt.');
+        finishSave(true, 'Údaje uloženy. Pokud problém přetrvává, napiš nám.');
       }
     })
     .catch(function(err) {
       console.error('TY: Chyba při API volání:', err);
       // Lokální data jsou uložená, API nedostupné
-      finishSave(true, 'Gegevens lokaal opgeslagen. De server is momenteel niet bereikbaar.');
+      finishSave(true, 'Údaje uloženy. Server je momentálně nedostupný.');
     });
   };
 
   function finishSave(success, customMessage) {
     var btn = document.getElementById('ty-save-btn');
     btn.disabled = false;
-    btn.innerHTML = 'Opslaan';
+    btn.innerHTML = 'Uložit';
 
     // Zavři formulář, ukaž kartu
     document.getElementById('ty-edit-form').classList.remove('is-open');
@@ -1151,9 +1084,9 @@ body { background: var(--bg); }
 
     // Ukáž feedback
     if (success) {
-      showFeedback(customMessage || 'Je gegevens zijn bijgewerkt! We sturen je pakket naar het juiste adres.', 'success');
+      showFeedback(customMessage || 'Údaje aktualizovány! Balíček odešleme na správnou adresu.', 'success');
     } else {
-      showFeedback(customMessage || 'Er ging iets mis. Probeer het opnieuw.', 'error');
+      showFeedback(customMessage || 'Něco se pokazilo. Zkus to prosím znovu.', 'error');
     }
   }
 
@@ -1173,46 +1106,43 @@ body { background: var(--bg); }
   }
 
   // ────────────────────────────────────────────────────
-  // 4. Facebook Pixel + CAPI — Purchase event (deduplicated via MetaTracker)
+  // 4. Facebook Pixel + CAPI — Purchase event (only if not already tracked on upsell page)
   // ────────────────────────────────────────────────────
+  var alreadyTracked = localStorage.getItem('medusa_purchase_tracked') === 'true';
+
   // Guard: skip Purchase event if order has no value (failed/empty orders)
   if (!totalPrice || totalPrice <= 0 || !orderId) {
     console.warn('TY: Skipping Purchase event — no valid order (totalPrice=' + totalPrice + ', orderId=' + orderId + ')');
-  } else if (typeof MetaTracker !== 'undefined') {
-    var purchaseContentIds = PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle];
-    if ((upsellPurchased || orderBumpActive) && !PROJECT_CONFIG.catalogContentIds) {
-      purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
-    }
-    var purchaseNumItems = bundleQty + ((upsellPurchased || orderBumpActive) ? 1 : 0);
+  } else if (!alreadyTracked && typeof MetaTracker !== 'undefined') {
+    // This fires ONLY for order bump flow (customer skipped upsell page, came directly here)
+    var purchaseContentIds = ['dq1pbx9h7a', '2o99o4u5wa', '0e0rq03y7v', 'bap43l83n0', 'zotl3ua4f8'];
+    var purchaseNumItems = bundleQty + (orderBumpActive ? 1 : 0);
+    var purchaseEventId = 'purchase_' + orderId;
 
     // Build user_data from customer info for maximum EMQ
     var purchaseUserData = {};
     if (customer) {
       if (customer.email) purchaseUserData.em = customer.email;
-      if (customer.firstName) purchaseUserData.fn = customer.firstName;
-      if (customer.lastName) purchaseUserData.ln = customer.lastName;
+      if (customer.firstName || customer.first_name) purchaseUserData.fn = customer.firstName || customer.first_name;
+      if (customer.lastName || customer.last_name) purchaseUserData.ln = customer.lastName || customer.last_name;
       if (customer.phone) purchaseUserData.ph = customer.phone;
       if (customer.city) purchaseUserData.ct = customer.city;
-      if (customer.postalCode) purchaseUserData.zp = customer.postalCode;
-      if (customer.country) purchaseUserData.country = customer.country;
+      if (customer.postalCode || customer.postal_code) purchaseUserData.zp = customer.postalCode || customer.postal_code;
+      if (customer.country || customer.country_code) purchaseUserData.country = customer.country || customer.country_code;
       if (customer.region) purchaseUserData.st = customer.region;
     }
 
-    var purchaseEventId = 'purchase_' + orderId;
-    var mainPrice = PROJECT_CONFIG.mainProduct.price || 0;
-    var upsellPrice = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.price) || 0;
     MetaTracker.trackPurchase({
       content_ids: purchaseContentIds,
-      contents: purchaseContentIds.map(function(id, idx) {
-        var price = (idx === 0) ? mainPrice : upsellPrice;
-        return { id: id, quantity: 1, item_price: price };
-      }),
+      contents: purchaseContentIds.map(function(id) { return { id: id, quantity: 1 }; }),
       value: totalPrice,
-      currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
+      currency: PROJECT_CONFIG.mainProduct.currency || 'CZK',
       num_items: purchaseNumItems,
       order_id: orderId
     }, purchaseUserData, { event_id: purchaseEventId });
-    console.log('TY: Purchase event (browser + CAPI) — €' + totalPrice + ' (' + purchaseNumItems + ' items) event_id=' + purchaseEventId);
+    console.log('TY: Purchase event (order bump flow) — ' + totalPrice + ' Kč event_id=' + purchaseEventId);
+  } else if (alreadyTracked) {
+    console.log('TY: Purchase already tracked on upsell page, skipping');
   }
 
   // ────────────────────────────────────────────────────
@@ -1231,6 +1161,7 @@ body { background: var(--bg); }
     localStorage.removeItem('medusa_bundle_price');
     localStorage.removeItem('medusa_order_bump');
     localStorage.removeItem('medusa_checkout_total');
+    localStorage.removeItem('medusa_purchase_tracked');
     console.log('TY: localStorage vyčištěn (po 5 min)');
   }, 5 * 60 * 1000);
 
@@ -1239,7 +1170,7 @@ body { background: var(--bg); }
   // ────────────────────────────────────────────────────
   var confettiEl = document.getElementById('ty-confetti');
   if (confettiEl && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    var colors = ['#C27BA0','#D498B5','#2D1B3D','#EDD9E5','#5A3D6B','#D9A4C0','#fff'];
+    var colors = ['#6B21A8','#C4B5FD','#1A1A1A','#F3E8FF','#374151','#A78BFA','#fff'];
     var shapes = ['circle','square','triangle'];
     for (var i = 0; i < 60; i++) {
       var piece = document.createElement('div');
@@ -1276,6 +1207,17 @@ body { background: var(--bg); }
     document.querySelectorAll('.ty-reveal').forEach(function(el){ el.classList.add('is-visible'); });
   }
 })();
+</script>
+<script>
+window.addEventListener('load', function() {
+ var preloader = document.getElementById('preloader');
+ if (preloader) {
+  setTimeout(function() {
+   preloader.style.opacity = '0';
+   setTimeout(function() { preloader.style.display = 'none'; }, 500);
+  }, 300);
+ }
+});
 </script>
 
 </body>
