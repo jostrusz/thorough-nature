@@ -134,6 +134,23 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     locale: 'cs',
     smsDispatchTemplate: 'Psi superzivot: Zasilka odeslana. Sledovaci odkaz: {url} podpora@psi-superzivot.cz',
   },
+  'kocici-bible': {
+    replyTo: 'peterka@kocicibible.cz',
+    fromName: 'Michal Peterka - Kočičí bible',
+    fromEmail: 'Michal Peterka - Kočičí bible <peterka@kocicibible.cz>',
+    project: 'kocici-bible',
+    locale: 'cs',
+    smsDispatchTemplate: 'Kocici bible: Zasilka odeslana. Sledovaci odkaz: {url} peterka@kocicibible.cz',
+  },
+  // Also match without hyphen
+  kocicibible: {
+    replyTo: 'peterka@kocicibible.cz',
+    fromName: 'Michal Peterka - Kočičí bible',
+    fromEmail: 'Michal Peterka - Kočičí bible <peterka@kocicibible.cz>',
+    project: 'kocici-bible',
+    locale: 'cs',
+    smsDispatchTemplate: 'Kocici bible: Zasilka odeslana. Sledovaci odkaz: {url} peterka@kocicibible.cz',
+  },
   // Also match without hyphen
   psisuperzivot: {
     replyTo: 'podpora@psi-superzivot.cz',
