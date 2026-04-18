@@ -1,20 +1,9 @@
-{
+var PROJECT_CONFIG = {
   "slug": "kocici-bible",
-  "name": "Kočičí bible Oficial",
-  "domain": "kocicibible.cz",
-  "locale": "cs",
-  "defaultCountry": "CZ",
-  "defaultPhonePrefix": "420",
-  "phonePrefixByCountry": {
-    "CZ": "420"
-  },
-  "salesChannelName": "Kocici Bible",
+  "projectId": "kocici-bible",
+  "domain": "www.kocicibible.cz",
   "medusaUrl": "https://www.marketing-hq.eu",
   "publishableApiKey": "pk_5f6d223af5e4a06268b3845132ece0bc81528095902c7b381dd1339ed085811b",
-  "facebookPixelId": "",
-  "regions": {
-    "CZ": "reg_01KKB4EZN0CHFYDG64K4VP0J2A"
-  },
   "mainProduct": {
     "name": "Kočičí bible Oficial",
     "handle": "kocici-bible-oficial",
@@ -37,18 +26,19 @@
     { "qty": 3, "price": 1199, "label": "3 knihy + 3× bonusy", "sublabel": "Pro celou rodinu koťátkářů", "badge": "NEJVÍC UŠETŘÍTE", "save": 451, "savings": 451 },
     { "qty": 4, "price": 1499, "label": "4 knihy + 3× bonusy", "sublabel": "Obdarujte všechny kočičí kámoše", "badge": "NEJLEPŠÍ HODNOTA", "save": 701, "savings": 701 }
   ],
-  "mollieProfileId": "",
-  "packetaApiKey": "cbb760f552ef87b3",
+  "regions": {
+    "CZ": "reg_01KKB4EZN0CHFYDG64K4VP0J2A"
+  },
   "paymentProviders": {},
-  "pages": {
-    "": "index.html",
-    "checkout": "checkout.html",
-    "upsell": "upsell.html",
-    "thank-you": "thank-you.html",
-    "contact": "contact.html",
-    "privacy": "privacy.html",
-    "voorwaarden": "voorwaarden.html",
-    "verzending": "verzending.html",
-    "retourbeleid": "retourbeleid.html"
-  }
-}
+  "mollieProfileId": null,
+  "packetaApiKey": "cbb760f552ef87b3",
+  "orderBumpEnabled": true,
+  "upsellEnabled": true,
+  "foxentryApiKey": null,
+  "homeUrl": "/",
+  "checkoutUrl": "/checkout.html",
+  "thankYouUrl": "/thank-you.html"
+};
+PROJECT_CONFIG.getRegionId = function(countryCode) {
+  return PROJECT_CONFIG.regions[countryCode] || Object.values(PROJECT_CONFIG.regions)[0];
+};
