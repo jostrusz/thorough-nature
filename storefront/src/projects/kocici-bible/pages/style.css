@@ -503,7 +503,7 @@ h2 { font-size: 38px; }
  overflow: hidden;
 }
 .redenen-video video {
- display: block; width: 100%; height: auto; border-radius: 16px; object-fit: cover; aspect-ratio: 3 / 2;
+ display: block; width: 100%; height: auto; border-radius: 16px;
 }
 
 /* 9 benefitů — seznam s šipkami */
