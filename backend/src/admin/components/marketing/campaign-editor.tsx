@@ -1,10 +1,23 @@
 import React, { useEffect, useMemo, useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@medusajs/ui"
 import { sdk } from "../../lib/sdk"
 import { useSelectedBrand, StatusBadge, brandQs, fmt, tokens } from "./shared"
 
+/**
+ * Campaign editor — single-page layout.
+ *
+ * Fields in order (user-facing):
+ *   1. Campaign name
+ *   2. Subject
+ *   3. Preheader
+ *   4. Sender name + sender email
+ *   5. Recipients (lists, segments, suppression segments)
+ *   6. Email HTML + live preview (side-by-side)
+ *
+ * Templates are NOT part of this flow. Each campaign carries its own HTML.
+ */
 export function CampaignEditor({ campaignId }: { campaignId?: string }) {
   const qc = useQueryClient()
   const navigate = useNavigate()
@@ -13,18 +26,23 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
 
   const [currentId, setCurrentId] = useState<string | undefined>(campaignId)
   const [name, setName] = useState("")
-  const [templateId, setTemplateId] = useState("")
+  const [subject, setSubject] = useState("")
+  const [preheader, setPreheader] = useState("")
+  const [fromName, setFromName] = useState("")
+  const [fromEmail, setFromEmail] = useState("")
+  const [replyTo, setReplyTo] = useState("")
+  const [customHtml, setCustomHtml] = useState("")
   const [listIds, setListIds] = useState<string[]>([])
   const [segmentIds, setSegmentIds] = useState<string[]>([])
   const [suppressionSegmentIds, setSuppressionSegmentIds] = useState<string[]>([])
-  const [abTest, setAbTest] = useState(false)
   const [scheduleAt, setScheduleAt] = useState("")
   const [preview, setPreview] = useState<{ count: number; sample: string[] } | null>(null)
   const [status, setStatus] = useState<string>("draft")
   const [sentAt, setSentAt] = useState<string | null>(null)
   const [metrics, setMetrics] = useState<any>({})
+  const [brand, setBrand] = useState<any>(null)
 
-  // Load existing
+  // Load existing campaign
   const { data: cData } = useQuery({
     queryKey: ["mkt-campaign", currentId],
     queryFn: () =>
@@ -38,24 +56,39 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
     const c = (cData as any)?.campaign
     if (!c) return
     setName(c.name || "")
-    setTemplateId(c.template_id || "")
+    setSubject(c.subject || "")
+    setPreheader(c.preheader || "")
+    setFromName(c.from_name || "")
+    setFromEmail(c.from_email || "")
+    setReplyTo(c.reply_to || "")
+    setCustomHtml(c.custom_html || "")
     setListIds([c.list_id].filter(Boolean) as string[])
     setSegmentIds([c.segment_id].filter(Boolean) as string[])
     setSuppressionSegmentIds(c.suppression_segment_ids || [])
-    setAbTest(!!c.ab_test)
     setScheduleAt(c.send_at ? new Date(c.send_at).toISOString().slice(0, 16) : "")
     setStatus(c.status || "draft")
     setSentAt(c.sent_at || null)
     setMetrics(c.metrics || {})
   }, [cData])
 
-  // Load lookups
-  const templatesQ = useQuery({
-    queryKey: ["mkt-templates-ready", brandId],
+  // Brand — for from-email defaults
+  const brandsQ = useQuery({
+    queryKey: ["mkt-brand-for-campaign", brandId],
     queryFn: () =>
-      sdk.client.fetch<{ templates: any[] }>(`/admin/marketing/templates${bQs}${bQs ? "&" : "?"}status=ready`, { method: "GET" }),
+      sdk.client.fetch<{ brands: any[] }>(`/admin/marketing/brands`, { method: "GET" }),
     enabled: !!brandId,
   })
+  useEffect(() => {
+    const b = (brandsQ.data as any)?.brands?.find((x: any) => x.id === brandId)
+    if (b) {
+      setBrand(b)
+      if (!fromName && !currentId) setFromName(b.marketing_from_name || "")
+      if (!fromEmail && !currentId) setFromEmail(b.marketing_from_email || "")
+      if (!replyTo && !currentId) setReplyTo(b.marketing_reply_to || "")
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brandsQ.data, brandId])
+
   const listsQ = useQuery({
     queryKey: ["mkt-lists", brandId],
     queryFn: () =>
@@ -69,7 +102,6 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
     enabled: !!brandId,
   })
 
-  const templates: any[] = ((templatesQ.data as any)?.templates) || []
   const lists: any[] = ((listsQ.data as any)?.lists) || []
   const segments: any[] = ((segmentsQ.data as any)?.segments) || []
 
@@ -78,11 +110,15 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
       const body: any = {
         brand_id: brandId || undefined,
         name,
-        template_id: templateId || undefined,
+        subject: subject || null,
+        preheader: preheader || null,
+        from_name: fromName || null,
+        from_email: fromEmail || null,
+        reply_to: replyTo || null,
+        custom_html: customHtml || null,
         list_id: listIds[0] || null,
         segment_id: segmentIds[0] || null,
         suppression_segment_ids: suppressionSegmentIds,
-        ab_test: abTest,
         send_at: overrides?.send_at !== undefined ? overrides.send_at : (scheduleAt ? new Date(scheduleAt).toISOString() : null),
         status: overrides?.status || status,
       }
@@ -126,10 +162,14 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
   })
 
   const readOnly = status === "sent" || status === "sending"
+  const canSchedule = !!(name && subject && customHtml && fromEmail && scheduleAt)
+  const canSendNow = !!(currentId && name && subject && customHtml && fromEmail)
 
   const toggleSel = (arr: string[], set: (v: string[]) => void, id: string) => {
     set(arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id])
   }
+
+  const previewHtml = useMemo(() => buildPreviewDocument(customHtml, preheader), [customHtml, preheader])
 
   return (
     <>
@@ -141,36 +181,72 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
       </div>
 
       {readOnly ? (
-        <ReadOnlyView
-          name={name}
-          templateName={templates.find((t) => t.id === templateId)?.name}
-          metrics={metrics}
-        />
+        <ReadOnlyView name={name} subject={subject} metrics={metrics} />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "16px", alignItems: "flex-start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            {/* 1. Name + Template */}
+            {/* Basics */}
             <div className="mkt-card" style={{ padding: "20px" }}>
-              <SectionTitle step={1} title="Basics" />
-              <label className="mkt-label">Campaign name *</label>
-              <input className="mkt-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Spring promo 2026" />
-              <label className="mkt-label" style={{ marginTop: "14px" }}>Template *</label>
-              <select className="mkt-input" value={templateId} onChange={(e) => setTemplateId(e.target.value)}>
-                <option value="">Select a ready template</option>
-                {templates.map((t: any) => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-              </select>
-              {templates.length === 0 && (
-                <p style={{ fontSize: "13px", color: tokens.fgSecondary, marginTop: "10px", marginBottom: 0 }}>
-                  No templates in status "ready". <Link to="/marketing/templates" className="mkt-link">Create one</Link>.
-                </p>
-              )}
+              <label className="mkt-label">Campaign name</label>
+              <input
+                className="mkt-input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Spring promo 2026"
+              />
+
+              <label className="mkt-label" style={{ marginTop: "14px" }}>Subject</label>
+              <input
+                className="mkt-input"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="The line that decides whether they open it"
+              />
+
+              <label className="mkt-label" style={{ marginTop: "14px" }}>Preheader</label>
+              <input
+                className="mkt-input"
+                value={preheader}
+                onChange={(e) => setPreheader(e.target.value)}
+                placeholder="Preview text shown next to the subject in the inbox"
+              />
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "14px" }}>
+                <div>
+                  <label className="mkt-label">Sender name</label>
+                  <input
+                    className="mkt-input"
+                    value={fromName}
+                    onChange={(e) => setFromName(e.target.value)}
+                    placeholder={brand?.marketing_from_name || "Your name"}
+                  />
+                </div>
+                <div>
+                  <label className="mkt-label">Sender email</label>
+                  <input
+                    className="mkt-input"
+                    type="email"
+                    value={fromEmail}
+                    onChange={(e) => setFromEmail(e.target.value)}
+                    placeholder={brand?.marketing_from_email || "news@yourdomain.com"}
+                  />
+                </div>
+              </div>
+              <label className="mkt-label" style={{ marginTop: "14px" }}>Reply-to <span style={{ color: tokens.fgMuted, fontWeight: 400 }}>(optional)</span></label>
+              <input
+                className="mkt-input"
+                type="email"
+                value={replyTo}
+                onChange={(e) => setReplyTo(e.target.value)}
+                placeholder={brand?.marketing_reply_to || "Leave empty to use sender email"}
+              />
             </div>
 
-            {/* 2. Recipients */}
+            {/* Recipients */}
             <div className="mkt-card" style={{ padding: "20px" }}>
-              <SectionTitle step={2} title="Recipients" />
+              <div style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, marginBottom: "14px", letterSpacing: "-0.005em" }}>
+                Recipients
+              </div>
               <Checklist
                 label="Lists"
                 items={lists}
@@ -229,18 +305,87 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
               )}
             </div>
 
-            {/* 3. A/B placeholder */}
+            {/* Email — HTML editor + live preview */}
             <div className="mkt-card" style={{ padding: "20px" }}>
-              <SectionTitle step={3} title="A/B test" />
-              <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", color: tokens.fg }}>
-                <input type="checkbox" checked={abTest} onChange={(e) => setAbTest(e.target.checked)} />
-                <span>Enable A/B test <span style={{ color: tokens.fgMuted }}>(setup coming soon)</span></span>
-              </label>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+                <div style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, letterSpacing: "-0.005em" }}>
+                  Email
+                </div>
+                <span style={{ fontSize: "12px", color: tokens.fgMuted }}>
+                  Supports <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ contact.first_name }}"}</code>, <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ unsubscribe_url }}"}</code>
+                </span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", minHeight: "560px" }}>
+                <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                  <label className="mkt-label">Custom HTML</label>
+                  <textarea
+                    value={customHtml}
+                    onChange={(e) => setCustomHtml(e.target.value)}
+                    placeholder={"<html>…</html>"}
+                    spellCheck={false}
+                    style={{
+                      flex: 1,
+                      minHeight: "520px",
+                      padding: "12px 14px",
+                      fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                      fontSize: "13px",
+                      lineHeight: "1.5",
+                      border: `1px solid ${tokens.borderStrong}`,
+                      borderRadius: tokens.rMd,
+                      resize: "vertical",
+                      color: tokens.fg,
+                      background: tokens.surface,
+                    }}
+                  />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                  <label className="mkt-label">Preview</label>
+                  <div
+                    style={{
+                      flex: 1,
+                      minHeight: "520px",
+                      border: `1px solid ${tokens.borderStrong}`,
+                      borderRadius: tokens.rMd,
+                      background: "#f6f6f7",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {customHtml ? (
+                      <iframe
+                        title="email-preview"
+                        srcDoc={previewHtml}
+                        sandbox=""
+                        style={{
+                          width: "100%",
+                          height: "520px",
+                          border: "0",
+                          background: "#fff",
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: "520px",
+                          color: tokens.fgMuted,
+                          fontSize: "14px",
+                        }}
+                      >
+                        Empty HTML
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* 4. Schedule */}
+            {/* Schedule */}
             <div className="mkt-card" style={{ padding: "20px" }}>
-              <SectionTitle step={4} title="Schedule" />
+              <div style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, marginBottom: "14px", letterSpacing: "-0.005em" }}>
+                Schedule
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "10px", alignItems: "end" }}>
                 <div>
                   <label className="mkt-label">Send at</label>
@@ -251,10 +396,7 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                     onChange={(e) => setScheduleAt(e.target.value)}
                   />
                 </div>
-                <button
-                  className="mkt-btn"
-                  onClick={() => setScheduleAt("")}
-                >
+                <button className="mkt-btn" onClick={() => setScheduleAt("")}>
                   Clear
                 </button>
               </div>
@@ -279,20 +421,20 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
               <button
                 className="mkt-btn"
                 onClick={() => saveMut.mutate({ status: "draft" })}
-                disabled={saveMut.isPending}
+                disabled={saveMut.isPending || !name}
               >
                 {saveMut.isPending ? "Saving…" : "Save draft"}
               </button>
               <button
                 className="mkt-btn-primary"
-                disabled={!name || !templateId || saveMut.isPending || !scheduleAt}
+                disabled={!canSchedule || saveMut.isPending}
                 onClick={() => saveMut.mutate({ status: "scheduled" })}
               >
                 Schedule
               </button>
               <button
                 className="mkt-btn-primary"
-                disabled={!currentId || sendNowMut.isPending}
+                disabled={!canSendNow || sendNowMut.isPending}
                 onClick={() => { if (confirm("Send this campaign now?")) sendNowMut.mutate() }}
                 style={{ background: tokens.danger }}
               >
@@ -329,30 +471,27 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
   )
 }
 
-function SectionTitle({ step, title }: { step: number; title: string }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-      <div
-        style={{
-          width: "24px",
-          height: "24px",
-          borderRadius: "50%",
-          background: tokens.primarySoft,
-          color: tokens.primary,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "12px",
-          fontWeight: 600,
-        }}
-      >
-        {step}
-      </div>
-      <h3 style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, margin: 0, letterSpacing: "-0.005em" }}>
-        {title}
-      </h3>
-    </div>
-  )
+/**
+ * Build the srcdoc for the preview iframe. Adds a hidden preheader node and
+ * strips <script> tags defensively (the sandbox attr also blocks scripts).
+ */
+function buildPreviewDocument(html: string, preheader: string): string {
+  const safe = (html || "").replace(/<script[\s\S]*?<\/script>/gi, "")
+  const preheaderNode = preheader
+    ? `<div style="display:none;max-height:0;overflow:hidden;color:transparent;visibility:hidden;mso-hide:all">${escapeHtml(preheader)}</div>`
+    : ""
+  if (/<body[\s>]/i.test(safe)) {
+    return safe.replace(/<body([^>]*)>/i, (m) => `${m}${preheaderNode}`)
+  }
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>${preheaderNode}${safe}</body></html>`
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
 }
 
 function Checklist({
@@ -405,7 +544,7 @@ function Checklist({
   )
 }
 
-function ReadOnlyView({ name, templateName, metrics }: { name: string; templateName?: string; metrics: any }) {
+function ReadOnlyView({ name, subject, metrics }: { name: string; subject: string; metrics: any }) {
   const bars: { label: string; key: string; color: string }[] = [
     { label: "Sent", key: "sent", color: tokens.fgSecondary },
     { label: "Delivered", key: "delivered", color: tokens.primary },
@@ -417,7 +556,7 @@ function ReadOnlyView({ name, templateName, metrics }: { name: string; templateN
   return (
     <div className="mkt-card" style={{ padding: "24px" }}>
       <div style={{ fontSize: "18px", fontWeight: 600, marginBottom: "4px", color: tokens.fg, letterSpacing: "-0.005em" }}>{name}</div>
-      {templateName && <div style={{ fontSize: "13px", color: tokens.fgSecondary, marginBottom: "20px" }}>Template: {templateName}</div>}
+      {subject && <div style={{ fontSize: "13px", color: tokens.fgSecondary, marginBottom: "20px" }}>Subject: {subject}</div>}
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {bars.map((b) => {
           const v = Number(metrics?.[b.key]) || 0

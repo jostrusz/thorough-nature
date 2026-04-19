@@ -40,7 +40,8 @@ export default async function marketingCampaignDispatcher(container: MedusaConta
 
     // Fetch campaigns ready to dispatch
     const { rows: campaigns } = await pool.query(
-      `SELECT id, brand_id, name, template_id, template_version, list_id, segment_id,
+      `SELECT id, brand_id, name, subject, preheader, from_name, from_email, reply_to, custom_html,
+              template_id, template_version, list_id, segment_id,
               suppression_segment_ids, send_at, status, metrics
        FROM marketing_campaign
        WHERE deleted_at IS NULL
@@ -97,45 +98,78 @@ async function dispatchCampaign(
   if (!brand) throw new Error(`Brand ${campaign.brand_id} not found`)
   if (!brand.enabled) throw new Error(`Brand ${brand.slug} is disabled`)
 
-  const { rows: templateRows } = await pool.query(
-    `SELECT * FROM marketing_template WHERE id = $1 AND brand_id = $2 AND deleted_at IS NULL LIMIT 1`,
-    [campaign.template_id, campaign.brand_id]
-  )
-  const template = templateRows[0]
-  if (!template) throw new Error(`Template ${campaign.template_id} not found`)
+  // Prefer inline campaign content; fall back to legacy template (only for
+  // old campaigns still linked to a template_id).
+  const hasInlineContent =
+    !!(campaign.subject && (campaign.custom_html || campaign.custom_html === ""))
 
-  // Snapshot the template version onto the campaign if not yet done
-  let templateVersion = campaign.template_version
-  if (!templateVersion) {
-    // ensure a version row exists for current template
-    await pool.query(
-      `INSERT INTO marketing_template_version
-        (id, template_id, brand_id, version, subject, preheader, from_name, from_email, reply_to,
-         block_json, custom_html, compiled_html, compiled_text, editor_type, created_at, updated_at)
-       VALUES (gen_random_uuid()::text, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
-       ON CONFLICT DO NOTHING`,
-      [
-        template.id,
-        template.brand_id,
-        template.version,
-        template.subject,
-        template.preheader,
-        template.from_name,
-        template.from_email,
-        template.reply_to,
-        template.block_json,
-        template.custom_html,
-        template.compiled_html,
-        template.compiled_text,
-        template.editor_type,
-      ]
+  let template: any = null
+  let templateVersion: number | null = campaign.template_version ?? null
+
+  if (!hasInlineContent) {
+    if (!campaign.template_id) {
+      throw new Error(`Campaign ${campaign.id} has no subject/custom_html and no template_id`)
+    }
+    const { rows: templateRows } = await pool.query(
+      `SELECT * FROM marketing_template WHERE id = $1 AND brand_id = $2 AND deleted_at IS NULL LIMIT 1`,
+      [campaign.template_id, campaign.brand_id]
     )
-    templateVersion = template.version
-    await pool.query(`UPDATE marketing_campaign SET template_version = $2 WHERE id = $1`, [
-      campaign.id,
-      templateVersion,
-    ])
+    template = templateRows[0]
+    if (!template) throw new Error(`Template ${campaign.template_id} not found`)
+
+    if (!templateVersion) {
+      await pool.query(
+        `INSERT INTO marketing_template_version
+          (id, template_id, brand_id, version, subject, preheader, from_name, from_email, reply_to,
+           block_json, custom_html, compiled_html, compiled_text, editor_type, created_at, updated_at)
+         VALUES (gen_random_uuid()::text, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
+         ON CONFLICT DO NOTHING`,
+        [
+          template.id,
+          template.brand_id,
+          template.version,
+          template.subject,
+          template.preheader,
+          template.from_name,
+          template.from_email,
+          template.reply_to,
+          template.block_json,
+          template.custom_html,
+          template.compiled_html,
+          template.compiled_text,
+          template.editor_type,
+        ]
+      )
+      templateVersion = template.version
+      await pool.query(`UPDATE marketing_campaign SET template_version = $2 WHERE id = $1`, [
+        campaign.id,
+        templateVersion,
+      ])
+    }
   }
+
+  // Unified email-spec object consumed by the per-recipient send loop.
+  const email = hasInlineContent
+    ? {
+        subject: campaign.subject || "",
+        preheader: campaign.preheader || "",
+        editor_type: "html" as const,
+        block_json: null,
+        custom_html: campaign.custom_html || "",
+        from_email: campaign.from_email || null,
+        from_name: campaign.from_name || null,
+        reply_to: campaign.reply_to || null,
+      }
+    : {
+        subject: template.subject,
+        preheader: template.preheader,
+        editor_type: template.editor_type,
+        block_json: template.block_json,
+        custom_html: template.custom_html,
+        from_email: template.from_email,
+        from_name: template.from_name,
+        reply_to: template.reply_to,
+      }
 
   // Resolve recipients
   const recipients = await resolver.resolve({
@@ -192,9 +226,9 @@ async function dispatchCampaign(
       ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN_VALUE}`
       : "http://localhost:9000")
 
-  const fromEmail = template.from_email || brand.marketing_from_email
-  const fromName = template.from_name || brand.marketing_from_name
-  const replyTo = template.reply_to || brand.marketing_reply_to || null
+  const fromEmail = email.from_email || brand.marketing_from_email
+  const fromName = email.from_name || brand.marketing_from_name
+  const replyTo = email.reply_to || brand.marketing_reply_to || null
   const fromLine = `${fromName} <${fromEmail}>`
 
   // Send in chunks
@@ -210,16 +244,16 @@ async function dispatchCampaign(
             brand_id: campaign.brand_id,
             contact_id: r.id,
             campaign_id: campaign.id,
-            template_id: template.id,
+            template_id: template?.id ?? null,
             template_version: templateVersion,
             to_email: r.email,
             from_email: fromEmail,
-            subject_snapshot: template.subject,
+            subject_snapshot: email.subject,
             status: "queued",
           } as any)
           const messageId = (msg as any).id
 
-          // 2. Compile template with contact context
+          // 2. Compile email body with contact context
           const unsubscribe_url = buildUnsubscribeUrl({
             contactId: r.id,
             brandId: campaign.brand_id,
@@ -227,11 +261,11 @@ async function dispatchCampaign(
           })
           const compiled = compileTemplate(
             {
-              subject: template.subject,
-              preheader: template.preheader,
-              editor_type: template.editor_type,
-              block_json: template.block_json,
-              custom_html: template.custom_html,
+              subject: email.subject,
+              preheader: email.preheader,
+              editor_type: email.editor_type,
+              block_json: email.block_json,
+              custom_html: email.custom_html,
             },
             {
               contact: {

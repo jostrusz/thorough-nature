@@ -27,7 +27,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const service = req.scope.resolve(MARKETING_MODULE) as unknown as MarketingModuleService
     const body = (req.body as any) || {}
 
-    const required = ["brand_id", "name", "template_id"]
+    const required = ["brand_id", "name"]
     for (const key of required) {
       if (!body[key]) {
         res.status(400).json({ error: `${key} is required` })
@@ -38,7 +38,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const data: any = {
       brand_id: body.brand_id,
       name: body.name,
-      template_id: body.template_id,
+      subject: body.subject ?? null,
+      preheader: body.preheader ?? null,
+      from_name: body.from_name ?? null,
+      from_email: body.from_email ?? null,
+      reply_to: body.reply_to ?? null,
+      custom_html: body.custom_html ?? null,
+      template_id: body.template_id ?? null,
       list_id: body.list_id ?? null,
       segment_id: body.segment_id ?? null,
       suppression_segment_ids: body.suppression_segment_ids ?? null,
