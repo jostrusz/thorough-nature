@@ -191,6 +191,58 @@ function compileLeaf(cond: LeafCondition, ctx: BuildCtx): string {
     return `EXISTS (SELECT 1 FROM marketing_list_membership m WHERE m.list_id = ${p} AND m.contact_id = c.id AND m.deleted_at IS NULL)`
   }
 
+  // ───────────────────────────────────────────────────────────
+  // flow.in_any_run — contact has an active (running|waiting) run in ANY flow
+  // flow.in_run    — contact has an active run in a SPECIFIC flow (value=flow_id)
+  //
+  // Usage examples:
+  //   { "flow.in_any_run": { "eq": true } }   → contact is currently enrolled in any flow
+  //   { "flow.in_any_run": { "eq": false } }  → contact is NOT in any active flow
+  //   { "flow.in_run":    { "eq": "flw_xyz" } } → contact is in that specific flow
+  //   { "flow.in_run":    { "ne": "flw_xyz" } } → contact is not in that flow
+  //
+  // Combine with { not: ... } combinator for "NOT in any flow":
+  //   { "not": { "flow.in_any_run": { "eq": true } } }
+  //
+  // "Active" is defined as state IN ('running', 'waiting').
+  // ───────────────────────────────────────────────────────────
+  if (field === "flow.in_any_run") {
+    const brandP = `$${ctx.brandParamIndex}`
+    const exists = `EXISTS (
+      SELECT 1 FROM marketing_flow_run fr
+      WHERE fr.contact_id = c.id
+        AND fr.brand_id = ${brandP}
+        AND fr.state IN ('running','waiting')
+    )`
+    if (op === "eq") {
+      return value === false ? `NOT ${exists}` : exists
+    }
+    if (op === "ne") {
+      return value === false ? exists : `NOT ${exists}`
+    }
+    if (op === "exists") {
+      return value === false ? `NOT ${exists}` : exists
+    }
+    return "TRUE"
+  }
+
+  if (field === "flow.in_run") {
+    const brandP = `$${ctx.brandParamIndex}`
+    const flowId = String(value || "")
+    if (!flowId) return "TRUE"
+    const p = push(ctx, flowId)
+    const exists = `EXISTS (
+      SELECT 1 FROM marketing_flow_run fr
+      WHERE fr.contact_id = c.id
+        AND fr.brand_id = ${brandP}
+        AND fr.flow_id = ${p}
+        AND fr.state IN ('running','waiting')
+    )`
+    if (op === "eq") return exists
+    if (op === "ne") return `NOT ${exists}`
+    return exists
+  }
+
   return "TRUE"
 }
 
