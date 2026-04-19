@@ -80,6 +80,24 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const formId = String(body.form_id || "").trim()
     const email = String(body.email || "").trim().toLowerCase()
     const properties = body.properties && typeof body.properties === "object" ? body.properties : {}
+    const acquisition = body.acquisition && typeof body.acquisition === "object" ? body.acquisition : {}
+
+    // Acquisition signals sent by the storefront snippet. All fields
+    // optional — we accept whatever the client sends.
+    const pickStr = (v: any) => (typeof v === "string" && v.length ? v.slice(0, 512) : null)
+    const acq = {
+      source: pickStr(acquisition.source) || "form",
+      medium: pickStr(acquisition.medium) || pickStr(acquisition.utm_medium),
+      campaign: pickStr(acquisition.campaign) || pickStr(acquisition.utm_campaign),
+      content: pickStr(acquisition.content) || pickStr(acquisition.utm_content),
+      term: pickStr(acquisition.term) || pickStr(acquisition.utm_term),
+      landing_url: pickStr(acquisition.landing_url),
+      referrer: pickStr(acquisition.referrer),
+      lead_magnet: pickStr(acquisition.lead_magnet),
+      device: pickStr(acquisition.device),
+      fbc: pickStr(acquisition.fbc),
+      fbp: pickStr(acquisition.fbp),
+    }
 
     if (!brandSlug || !formId || !email) {
       res.status(400).json({ error: "missing_fields" })
@@ -140,6 +158,23 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         consent_at: newStatus === "subscribed" ? now : null,
         consent_text_snapshot: form.consent_text || null,
         properties,
+        // Acquisition block — only written on first contact creation.
+        // Subsequent re-submits don't overwrite original attribution.
+        acquisition_source: acq.source,
+        acquisition_medium: acq.medium,
+        acquisition_campaign: acq.campaign,
+        acquisition_content: acq.content,
+        acquisition_term: acq.term,
+        acquisition_landing_url: acq.landing_url,
+        acquisition_referrer: acq.referrer,
+        acquisition_form_id: form.id,
+        acquisition_lead_magnet: acq.lead_magnet,
+        acquisition_device: acq.device,
+        acquisition_fbc: acq.fbc,
+        acquisition_fbp: acq.fbp,
+        acquisition_at: now,
+        lifecycle_stage: "lead",
+        lifecycle_entered_at: now,
       } as any)
     } else {
       // Revive contact if previously unsubscribed only when they re-opt-in intentionally

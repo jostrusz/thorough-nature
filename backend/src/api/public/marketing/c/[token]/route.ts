@@ -5,7 +5,13 @@ import { verifyToken } from "../../../../../modules/marketing/utils/tokens"
 
 /**
  * Click redirect: GET /public/marketing/c/:token
- * Token payload.u is the target URL (signed so it can't be rewritten).
+ *
+ * Click tracking here serves two purposes:
+ *   1. Analytics (opens/clicks counters on marketing_message).
+ *   2. Attribution — the marketing_event row with type='email_clicked' for
+ *      this (brand_id, contact_id) is what the order.placed subscriber reads
+ *      to create a marketing_attribution row inside a 30-day last-click
+ *      window. No cookie needed: contact_id is on both sides of the join.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const token = String((req.params as any).token || "")
@@ -16,9 +22,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     return
   }
 
-  // Validate redirect target: only allow http(s) schemes. Reject javascript:,
-  // data:, file:, or anything else that could be used for XSS/phishing if
-  // an attacker ever managed to mint a signed token with a malicious URL.
   try {
     const target = new URL(payload.u)
     if (target.protocol !== "http:" && target.protocol !== "https:") {
@@ -30,7 +33,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     return
   }
 
-  // Record the click (best-effort)
   if (payload.m && payload.b) {
     try {
       const service = req.scope.resolve(MARKETING_MODULE) as unknown as MarketingModuleService
@@ -48,18 +50,26 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
               ? "clicked"
               : (msg as any).status,
         } as any)
+        // Event row — the attribution system reads this on order.placed
         await service.createMarketingEvents({
           brand_id: payload.b,
           contact_id: (msg as any).contact_id,
           email: (msg as any).to_email,
           type: "email_clicked",
-          payload: { message_id: msg.id, url: payload.u, user_agent: req.headers["user-agent"] },
+          payload: {
+            message_id: msg.id,
+            campaign_id: (msg as any).campaign_id || null,
+            flow_id: (msg as any).flow_id || null,
+            flow_run_id: (msg as any).flow_run_id || null,
+            url: payload.u,
+            user_agent: req.headers["user-agent"],
+          },
           occurred_at: now,
           source: "click_tracker",
         } as any)
       }
     } catch {
-      // swallow
+      // swallow — click tracking must never break the redirect
     }
   }
 
