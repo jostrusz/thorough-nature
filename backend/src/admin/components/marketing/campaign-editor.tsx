@@ -161,6 +161,42 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
     onError: () => toast.error("Failed to preview recipients"),
   })
 
+  // Live recipient count — hits the ad-hoc preview endpoint as lists/segments
+  // change. Debounced to avoid spamming the DB while the user ticks boxes.
+  // Works before the campaign is saved (no currentId required).
+  const [liveCount, setLiveCount] = useState<{ count: number; loading: boolean; error: boolean }>({
+    count: 0, loading: false, error: false,
+  })
+  useEffect(() => {
+    if (!brandId) return
+    const hasAnyFilter = listIds.length > 0 || segmentIds.length > 0 || suppressionSegmentIds.length > 0
+    if (!hasAnyFilter) {
+      setLiveCount({ count: 0, loading: false, error: false })
+      return
+    }
+    setLiveCount((s) => ({ ...s, loading: true, error: false }))
+    const handle = setTimeout(async () => {
+      try {
+        const resp = await sdk.client.fetch<{ count: number; sample: string[] }>(
+          `/admin/marketing/preview-recipients`,
+          {
+            method: "POST",
+            body: {
+              brand_id: brandId,
+              list_id: listIds[0] || null,
+              segment_id: segmentIds[0] || null,
+              suppression_segment_ids: suppressionSegmentIds,
+            },
+          }
+        )
+        setLiveCount({ count: (resp as any)?.count ?? 0, loading: false, error: false })
+      } catch {
+        setLiveCount({ count: 0, loading: false, error: true })
+      }
+    }, 400)
+    return () => clearTimeout(handle)
+  }, [brandId, JSON.stringify(listIds), JSON.stringify(segmentIds), JSON.stringify(suppressionSegmentIds)])
+
   const readOnly = status === "sent" || status === "sending"
   const canSchedule = !!(name && subject && customHtml && fromEmail && scheduleAt)
   const canSendNow = !!(currentId && name && subject && customHtml && fromEmail)
@@ -244,8 +280,11 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
 
             {/* Recipients */}
             <div className="mkt-card" style={{ padding: "20px" }}>
-              <div style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, marginBottom: "14px", letterSpacing: "-0.005em" }}>
-                Recipients
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+                <div style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, letterSpacing: "-0.005em" }}>
+                  Recipients
+                </div>
+                <LiveCountBadge state={liveCount} hasFilter={listIds.length + segmentIds.length + suppressionSegmentIds.length > 0} />
               </div>
               <Checklist
                 label="Lists"
@@ -492,6 +531,51 @@ function escapeHtml(s: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
+}
+
+function LiveCountBadge({
+  state,
+  hasFilter,
+}: {
+  state: { count: number; loading: boolean; error: boolean }
+  hasFilter: boolean
+}) {
+  if (!hasFilter) {
+    return (
+      <span style={{ fontSize: "12px", color: tokens.fgMuted }}>
+        Select a list or segment
+      </span>
+    )
+  }
+  if (state.loading) {
+    return (
+      <span style={{ fontSize: "12px", color: tokens.fgMuted }}>
+        Counting…
+      </span>
+    )
+  }
+  if (state.error) {
+    return (
+      <span style={{ fontSize: "12px", color: tokens.dangerFg }}>
+        Count failed
+      </span>
+    )
+  }
+  return (
+    <span
+      style={{
+        fontSize: "13px",
+        fontWeight: 600,
+        color: state.count > 0 ? tokens.successFg : tokens.fgMuted,
+        background: state.count > 0 ? tokens.successSoft : tokens.borderSubtle,
+        padding: "4px 10px",
+        borderRadius: "999px",
+        fontVariantNumeric: "tabular-nums",
+      }}
+    >
+      {fmt(state.count)} recipient{state.count === 1 ? "" : "s"}
+    </span>
+  )
 }
 
 function Checklist({

@@ -13,34 +13,81 @@ import {
   tokens,
 } from "../../../components/marketing/shared"
 
-const FIELD_OPTIONS = [
-  { value: "email", label: "Email" },
-  { value: "first_name", label: "First name" },
-  { value: "last_name", label: "Last name" },
-  { value: "status", label: "Status" },
-  { value: "source", label: "Source" },
-  { value: "created_at", label: "Created at" },
-  { value: "tag", label: "Tag" },
-  { value: "list", label: "List membership" },
-  { value: "last_opened_at", label: "Last opened at" },
-  { value: "last_clicked_at", label: "Last clicked at" },
-  { value: "country", label: "Country" },
+/**
+ * Field catalogue. Each UI field maps to an evaluator DSL key via `dsl_field`.
+ * `value_kind` drives the value-input widget:
+ *   - text   → plain <input>
+ *   - list   → <select> filled from `listsQ`
+ *   - flow   → <select> filled from `flowsQ`
+ *   - bool   → Yes/No select (for flow.in_any_run)
+ *   - date   → datetime-local
+ *   - empty  → no value input (exists-only operators)
+ */
+const FIELD_OPTIONS: {
+  value: string
+  label: string
+  dsl_field: string
+  value_kind: "text" | "list" | "flow" | "bool" | "date" | "empty"
+  ops?: string[]
+}[] = [
+  { value: "status", label: "Status", dsl_field: "contact.status", value_kind: "text" },
+  { value: "source", label: "Source", dsl_field: "contact.source", value_kind: "text" },
+  { value: "country", label: "Country", dsl_field: "contact.country_code", value_kind: "text" },
+  { value: "locale", label: "Locale", dsl_field: "contact.locale", value_kind: "text" },
+  { value: "created_at", label: "Created at", dsl_field: "contact.created_at", value_kind: "date" },
+  { value: "subscribed_at", label: "Subscribed at", dsl_field: "contact.subscribed_at", value_kind: "date" },
+  { value: "tag", label: "Tag", dsl_field: "contact.tags", value_kind: "text", ops: ["has"] },
+  { value: "list_member", label: "List membership", dsl_field: "list.member", value_kind: "list", ops: ["eq", "ne"] },
+  { value: "flow_in_any", label: "In any active flow", dsl_field: "flow.in_any_run", value_kind: "bool", ops: ["eq"] },
+  { value: "flow_in", label: "In specific flow", dsl_field: "flow.in_run", value_kind: "flow", ops: ["eq", "ne"] },
+  { value: "order_count", label: "Order count (total)", dsl_field: "order.count", value_kind: "text", ops: ["eq", "ne", "gt", "gte", "lt", "lte"] },
+  { value: "order_total_sum", label: "Order total sum", dsl_field: "order.total_sum", value_kind: "text", ops: ["eq", "gt", "gte", "lt", "lte"] },
+  { value: "order_last_at", label: "Last order at", dsl_field: "order.last_at", value_kind: "date", ops: ["before", "after", "exists"] },
 ]
 
 const OP_OPTIONS = [
   { value: "eq", label: "equals" },
-  { value: "neq", label: "not equal to" },
+  { value: "ne", label: "not equal to" },
   { value: "contains", label: "contains" },
-  { value: "not_contains", label: "does not contain" },
-  { value: "starts_with", label: "starts with" },
+  { value: "starts", label: "starts with" },
+  { value: "ends", label: "ends with" },
   { value: "gt", label: "greater than" },
   { value: "gte", label: "≥" },
   { value: "lt", label: "less than" },
   { value: "lte", label: "≤" },
+  { value: "before", label: "before" },
+  { value: "after", label: "after" },
   { value: "in", label: "in (comma-sep)" },
+  { value: "nin", label: "not in" },
+  { value: "has", label: "has" },
   { value: "exists", label: "exists" },
-  { value: "not_exists", label: "does not exist" },
 ]
+
+/**
+ * Convert a UI condition into an evaluator DSL leaf:
+ *   { field: "status", op: "eq", value: "subscribed" }
+ *     →  { "contact.status": { eq: "subscribed" } }
+ *
+ * Returns null for invalid/empty rows (caller filters them out).
+ */
+function toDslLeaf(c: { field: string; op: string; value: string }): any {
+  const meta = FIELD_OPTIONS.find((f) => f.value === c.field)
+  if (!meta) return null
+  const dslField = meta.dsl_field
+
+  let val: any = c.value
+  if (meta.value_kind === "bool") {
+    val = c.value === "true" || c.value === "yes" || c.value === "1"
+  } else if (c.op === "in" || c.op === "nin") {
+    val = String(c.value || "").split(",").map((v) => v.trim()).filter(Boolean)
+  } else if (["gt", "gte", "lt", "lte"].includes(c.op) && c.value !== "" && !isNaN(Number(c.value))) {
+    val = Number(c.value)
+  } else if (c.op === "exists") {
+    val = !(c.value === "false" || c.value === "no" || c.value === "0")
+  }
+
+  return { [dslField]: { [c.op]: val } }
+}
 
 type Condition = { field: string; op: string; value: string }
 type Query = { combinator: "all" | "any"; conditions: Condition[] }
@@ -138,19 +185,69 @@ function SegmentsPage() {
   )
 }
 
+/**
+ * Parse an evaluator DSL leaf back into the UI's flat shape.
+ * Inverse of toDslLeaf. Returns null if the leaf can't be matched.
+ */
+function fromDslLeaf(leaf: any): { field: string; op: string; value: string } | null {
+  if (!leaf || typeof leaf !== "object") return null
+  const [dslField, opRec] = Object.entries(leaf)[0] || []
+  if (!dslField || !opRec || typeof opRec !== "object") return null
+  const [op, val] = Object.entries(opRec as any)[0] || []
+  if (!op) return null
+  const meta = FIELD_OPTIONS.find((f) => f.dsl_field === dslField)
+  if (!meta) return null
+  let value = ""
+  if (Array.isArray(val)) value = val.join(",")
+  else if (typeof val === "boolean") value = val ? "true" : "false"
+  else if (val != null) value = String(val)
+  return { field: meta.value, op: String(op), value }
+}
+
 function SegmentModal({ brandId, initial, onClose }: { brandId: string | null; initial: any | null; onClose: () => void }) {
   const qc = useQueryClient()
+  const bQs = brandQs(brandId)
   const [name, setName] = useState(initial?.name || "")
   const [description, setDescription] = useState(initial?.description || "")
   const [query, setQuery] = useState<Query>(() => {
     if (initial?.query) {
       const q = initial.query
-      if (q.all) return { combinator: "all", conditions: (q.all || []).map((c: any) => ({ field: c.field || "", op: c.op || "eq", value: String(c.value ?? "") })) }
-      if (q.any) return { combinator: "any", conditions: (q.any || []).map((c: any) => ({ field: c.field || "", op: c.op || "eq", value: String(c.value ?? "") })) }
+      if (q.all || q.any) {
+        const combinator = q.all ? "all" : "any"
+        const list = (q.all || q.any) as any[]
+        const parsed = list
+          .map((leaf: any) => {
+            // Legacy rows stored as { field, op, value } — read them back as-is
+            if (leaf && leaf.field && leaf.op !== undefined) {
+              return { field: leaf.field, op: leaf.op, value: String(leaf.value ?? "") }
+            }
+            return fromDslLeaf(leaf)
+          })
+          .filter(Boolean) as any[]
+        return {
+          combinator,
+          conditions: parsed.length ? parsed : [{ field: "status", op: "eq", value: "subscribed" }],
+        }
+      }
     }
     return { combinator: "all", conditions: [{ field: "status", op: "eq", value: "subscribed" }] }
   })
   const [previewResult, setPreviewResult] = useState<{ count: number; sample: string[] } | null>(null)
+
+  const listsQ = useQuery({
+    queryKey: ["mkt-lists-for-segment", brandId],
+    queryFn: () =>
+      sdk.client.fetch<{ lists: any[] }>(`/admin/marketing/lists${bQs}`, { method: "GET" }),
+    enabled: !!brandId,
+  })
+  const flowsQ = useQuery({
+    queryKey: ["mkt-flows-for-segment", brandId],
+    queryFn: () =>
+      sdk.client.fetch<{ flows: any[] }>(`/admin/marketing/flows${bQs}`, { method: "GET" }),
+    enabled: !!brandId,
+  })
+  const lists: any[] = ((listsQ.data as any)?.lists) || []
+  const flows: any[] = ((flowsQ.data as any)?.flows) || []
 
   const saveMut = useMutation({
     mutationFn: (body: any) => {
@@ -180,12 +277,8 @@ function SegmentModal({ brandId, initial, onClose }: { brandId: string | null; i
   function buildBody() {
     const conds = query.conditions
       .filter((c) => c.field)
-      .map((c) => {
-        let val: any = c.value
-        if (c.op === "in") val = c.value.split(",").map((v) => v.trim()).filter(Boolean)
-        else if (["gt", "gte", "lt", "lte"].includes(c.op) && !isNaN(Number(c.value)) && c.value !== "") val = Number(c.value)
-        return { field: c.field, op: c.op, value: val }
-      })
+      .map(toDslLeaf)
+      .filter(Boolean)
     return {
       brand_id: brandId || undefined,
       name,
@@ -239,47 +332,73 @@ function SegmentModal({ brandId, initial, onClose }: { brandId: string | null; i
             <option value="any">Any condition (OR)</option>
           </select>
         </div>
-        {query.conditions.map((c, idx) => (
-          <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 40px", gap: "8px", marginBottom: "8px" }}>
-            <select className="mkt-input" value={c.field} onChange={(e) => {
-              const arr = [...query.conditions]
-              arr[idx] = { ...arr[idx], field: e.target.value }
-              setQuery({ ...query, conditions: arr })
-            }}>
-              <option value="">— field —</option>
-              {FIELD_OPTIONS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
-            </select>
-            <select className="mkt-input" value={c.op} onChange={(e) => {
-              const arr = [...query.conditions]
-              arr[idx] = { ...arr[idx], op: e.target.value }
-              setQuery({ ...query, conditions: arr })
-            }}>
-              {OP_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-            <input
-              className="mkt-input"
-              value={c.value}
-              disabled={c.op === "exists" || c.op === "not_exists"}
-              onChange={(e) => {
-                const arr = [...query.conditions]
-                arr[idx] = { ...arr[idx], value: e.target.value }
-                setQuery({ ...query, conditions: arr })
-              }}
-              placeholder="value"
-            />
-            <button
-              onClick={() => {
-                const arr = query.conditions.filter((_, i) => i !== idx)
-                setQuery({ ...query, conditions: arr.length === 0 ? [{ field: "", op: "eq", value: "" }] : arr })
-              }}
-              className="mkt-btn-danger-ghost"
-              style={{ border: `1px solid ${tokens.borderStrong}`, height: "40px" }}
-              aria-label="Remove condition"
-            >
-              ×
-            </button>
-          </div>
-        ))}
+        {query.conditions.map((c, idx) => {
+          const meta = FIELD_OPTIONS.find((f) => f.value === c.field)
+          const ops = meta?.ops ? OP_OPTIONS.filter((o) => meta.ops!.includes(o.value)) : OP_OPTIONS
+          const updateField = (patch: Partial<Condition>) => {
+            const arr = [...query.conditions]
+            arr[idx] = { ...arr[idx], ...patch }
+            setQuery({ ...query, conditions: arr })
+          }
+          return (
+            <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 40px", gap: "8px", marginBottom: "8px" }}>
+              <select className="mkt-input" value={c.field} onChange={(e) => {
+                const newMeta = FIELD_OPTIONS.find((f) => f.value === e.target.value)
+                const defaultOp = newMeta?.ops?.[0] || "eq"
+                updateField({ field: e.target.value, op: defaultOp, value: "" })
+              }}>
+                <option value="">— field —</option>
+                {FIELD_OPTIONS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+              </select>
+              <select className="mkt-input" value={c.op} onChange={(e) => updateField({ op: e.target.value })}>
+                {ops.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+              {meta?.value_kind === "list" ? (
+                <select className="mkt-input" value={c.value} onChange={(e) => updateField({ value: e.target.value })}>
+                  <option value="">— select list —</option>
+                  {lists.map((l: any) => <option key={l.id} value={l.id}>{l.name}</option>)}
+                </select>
+              ) : meta?.value_kind === "flow" ? (
+                <select className="mkt-input" value={c.value} onChange={(e) => updateField({ value: e.target.value })}>
+                  <option value="">— select flow —</option>
+                  {flows.map((f: any) => <option key={f.id} value={f.id}>{f.name}</option>)}
+                </select>
+              ) : meta?.value_kind === "bool" ? (
+                <select className="mkt-input" value={c.value || "true"} onChange={(e) => updateField({ value: e.target.value })}>
+                  <option value="true">Yes (is in a flow)</option>
+                  <option value="false">No (not in any flow)</option>
+                </select>
+              ) : meta?.value_kind === "date" ? (
+                <input
+                  className="mkt-input"
+                  type="datetime-local"
+                  value={c.value}
+                  disabled={c.op === "exists"}
+                  onChange={(e) => updateField({ value: e.target.value })}
+                />
+              ) : (
+                <input
+                  className="mkt-input"
+                  value={c.value}
+                  disabled={c.op === "exists"}
+                  onChange={(e) => updateField({ value: e.target.value })}
+                  placeholder="value"
+                />
+              )}
+              <button
+                onClick={() => {
+                  const arr = query.conditions.filter((_, i) => i !== idx)
+                  setQuery({ ...query, conditions: arr.length === 0 ? [{ field: "", op: "eq", value: "" }] : arr })
+                }}
+                className="mkt-btn-danger-ghost"
+                style={{ border: `1px solid ${tokens.borderStrong}`, height: "40px" }}
+                aria-label="Remove condition"
+              >
+                ×
+              </button>
+            </div>
+          )
+        })}
         <button
           className="mkt-btn mkt-btn-sm"
           onClick={() => setQuery({ ...query, conditions: [...query.conditions, { field: "", op: "eq", value: "" }] })}
