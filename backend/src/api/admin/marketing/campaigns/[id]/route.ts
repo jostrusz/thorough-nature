@@ -5,6 +5,12 @@ import type MarketingModuleService from "../../../../../modules/marketing/servic
 
 const UPDATABLE_FIELDS = [
   "name",
+  "subject",
+  "preheader",
+  "from_name",
+  "from_email",
+  "reply_to",
+  "custom_html",
   "template_id",
   "list_id",
   "segment_id",

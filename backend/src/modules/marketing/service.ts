@@ -15,6 +15,7 @@ import MarketingSuppression from "./models/suppression"
 import MarketingForm from "./models/form"
 import MarketingConsentLog from "./models/consent-log"
 import MarketingAiJob from "./models/ai-job"
+import MarketingAttribution from "./models/attribution"
 
 class MarketingModuleService extends MedusaService({
   MarketingBrand,
@@ -33,6 +34,7 @@ class MarketingModuleService extends MedusaService({
   MarketingForm,
   MarketingConsentLog,
   MarketingAiJob,
+  MarketingAttribution,
 }) {}
 
 export default MarketingModuleService
