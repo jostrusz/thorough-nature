@@ -89,6 +89,10 @@ export default async function marketingEventIngestor({
     let contactId: string | undefined = existing?.[0]?.id
     const now = new Date()
 
+    // Order total in EUR for real-time rollup (FX snapshot).
+    const orderTotal = Number(order.total) || 0
+    const orderCurrency = order.currency_code || "EUR"
+
     if (!contactId) {
       const created = await marketing.createMarketingContacts({
         brand_id: brand.id,
@@ -111,17 +115,31 @@ export default async function marketingEventIngestor({
         acquisition_fbc: acqFromCheckout.fbc,
         acquisition_fbp: acqFromCheckout.fbp,
         acquisition_at: now,
+        // Real-time purchase rollup — nightly cron reconciles if drift.
+        total_orders: 1,
+        first_order_at: now,
+        last_order_at: now,
         lifecycle_stage: "new_customer",
         lifecycle_entered_at: now,
       } as any)
       contactId = (created as any).id
-    } else if (optInFlag && existing[0].status !== "subscribed") {
-      await marketing.updateMarketingContacts({
-        id: contactId,
-        status: "subscribed",
-        consent_at: now,
-        source: existing[0].source || "checkout",
-      } as any)
+    } else {
+      const patch: any = { id: contactId }
+      if (optInFlag && existing[0].status !== "subscribed") {
+        patch.status = "subscribed"
+        patch.consent_at = now
+        patch.source = existing[0].source || "checkout"
+      }
+      // Always bump order counter + last_order_at. first_order_at only if null.
+      patch.total_orders = (Number(existing[0].total_orders) || 0) + 1
+      patch.last_order_at = now
+      if (!existing[0].first_order_at) patch.first_order_at = now
+      // Advance lifecycle if lead → new_customer on first purchase.
+      if (!existing[0].lifecycle_stage || existing[0].lifecycle_stage === "lead") {
+        patch.lifecycle_stage = "new_customer"
+        patch.lifecycle_entered_at = now
+      }
+      await marketing.updateMarketingContacts(patch)
     }
 
     // ── 2. Event row ─────────────────────────────────────────────────────
