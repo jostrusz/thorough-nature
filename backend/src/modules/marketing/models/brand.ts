@@ -31,6 +31,14 @@ const MarketingBrand = model.define("marketing_brand", {
   brand_voice_profile: model.json().nullable(),
   abandoned_cart_owner: model.text().default("transactional_legacy"), // "transactional_legacy" | "marketing_flow" | "none"
   enabled: model.boolean().default(true),
+  /**
+   * HTML block auto-injected by the dispatcher before </body> when the
+   * user's campaign HTML does not contain an unsubscribe placeholder.
+   * Guarantees legal disclosures (company ID, address, unsubscribe, privacy)
+   * on every outgoing marketing email. Interpolation syntaxes supported:
+   *   {{ unsubscribe_url }}, {$unsubscribe_url}, ${unsubscribe_url}, <%= unsubscribe_url %>
+   */
+  compliance_footer_html: model.text().nullable(),
   metadata: model.json().nullable(),
 })
 

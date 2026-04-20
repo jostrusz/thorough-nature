@@ -25,6 +25,7 @@ const emptyForm = {
   timezone: "Europe/Prague",
   double_opt_in_enabled: true,
   enabled: true,
+  compliance_footer_html: "",
 }
 
 function BrandsPage() {
@@ -91,6 +92,7 @@ function BrandsPage() {
       timezone: b.timezone || "Europe/Prague",
       double_opt_in_enabled: !!b.double_opt_in_enabled,
       enabled: !!b.enabled,
+      compliance_footer_html: b.compliance_footer_html || "",
     })
   }
 
@@ -151,6 +153,35 @@ function BrandsPage() {
       <div style={{ display: "flex", alignItems: "center", gap: "12px", gridColumn: "span 2" }}>
         <Toggle checked={form.enabled} onChange={() => setForm({ ...form, enabled: !form.enabled })} />
         <span style={{ fontSize: "14px", color: tokens.fg }}>Brand enabled</span>
+      </div>
+      <div style={{ gridColumn: "span 2", marginTop: "8px", padding: "16px", background: tokens.bg, borderRadius: tokens.rMd, border: `1px solid ${tokens.borderSubtle}` }}>
+        <label className="mkt-label">Compliance footer HTML</label>
+        <p style={{ fontSize: "12px", color: tokens.fgSecondary, margin: "0 0 8px 0", lineHeight: 1.5 }}>
+          Legally required block (company ID, address, unsubscribe link, privacy policy).
+          Dispatcher <strong>auto-injects</strong> this into every campaign whose HTML doesn't
+          already contain an <code>{"{{ unsubscribe_url }}"}</code> placeholder.
+          Supports all template syntaxes (<code>{"{{ }}"}</code>, <code>{"{$name}"}</code>, <code>{"${name}"}</code>).
+        </p>
+        <textarea
+          value={form.compliance_footer_html}
+          onChange={(e) => setForm({ ...form, compliance_footer_html: e.target.value })}
+          placeholder={"<table>… Uitschrijven: <a href=\"{{ unsubscribe_url }}\">…</a> … Performance Marketing Solution s.r.o. · IČO … </table>"}
+          spellCheck={false}
+          style={{
+            width: "100%",
+            minHeight: "160px",
+            padding: "10px 12px",
+            fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+            fontSize: "12px",
+            lineHeight: "1.5",
+            border: `1px solid ${tokens.borderStrong}`,
+            borderRadius: tokens.rSm,
+            resize: "vertical",
+            color: tokens.fg,
+            background: tokens.surface,
+            boxSizing: "border-box",
+          }}
+        />
       </div>
     </div>
   )

@@ -46,6 +46,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       tracking_enabled: body.tracking_enabled ?? true,
       abandoned_cart_owner: body.abandoned_cart_owner ?? "transactional_legacy",
       enabled: body.enabled ?? true,
+      compliance_footer_html: body.compliance_footer_html ?? null,
       metadata: body.metadata ?? null,
     }
 
