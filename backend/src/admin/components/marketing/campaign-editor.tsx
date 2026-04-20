@@ -367,7 +367,7 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                   Email
                 </div>
                 <span style={{ fontSize: "12px", color: tokens.fgMuted }}>
-                  Supports <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ contact.first_name }}"}</code>, <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ unsubscribe_url }}"}</code>
+                  Supports <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ first_name }}"}</code>, <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ first_name|default:\"vriend\" }}"}</code>, <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ unsubscribe_url }}"}</code>
                 </span>
               </div>
               {/* Stacked layout: HTML editor on top, full-width preview below */}
