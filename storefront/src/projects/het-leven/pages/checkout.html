@@ -2829,6 +2829,138 @@ body {
 
 <!-- ═══ JAVASCRIPT ═══ -->
 <script>
+/* ═══════════════════════════════════════════════════════════════════
+ * PAYMENT JOURNEY TRACKER (installed on every checkout page)
+ *
+ * Emits telemetry events to /api/payment-event (same-origin proxy).
+ * Survives ad-blockers, DNS-level filters, tracking protection.
+ * ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  if (window.PaymentTracker) return; // idempotent
+
+  var PROJECT = (window.PROJECT_CONFIG && PROJECT_CONFIG.slug) || null;
+
+  function track(eventType, data) {
+    try {
+      var payload = {
+        event_type: eventType,
+        project_slug: PROJECT,
+        email: (data && data.email) || (window.PaymentTracker && PaymentTracker._email) || null,
+        cart_id: (data && data.cart_id) || window.localStorage.getItem('medusa_cart_id') || null,
+        intent_id: (data && data.intent_id) || null,
+        event_data: (data && data.payload) || null,
+        error_code: (data && data.error_code) || null,
+        user_agent: navigator.userAgent,
+        referrer: document.referrer || null,
+        occurred_at: new Date().toISOString()
+      };
+      var body = JSON.stringify(payload);
+      // Prefer sendBeacon where available (survives navigation/unload)
+      if (navigator.sendBeacon && navigator.sendBeacon('/api/payment-event', new Blob([body], {type:'application/json'}))) {
+        return;
+      }
+      fetch('/api/payment-event', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: body,
+        keepalive: true
+      }).catch(function(){});
+    } catch(e) { /* never break the page */ }
+  }
+
+  window.PaymentTracker = {
+    track: track,
+    _email: null,
+    setEmail: function(e){ this._email = e; }
+  };
+
+  // Auto-emit on page load
+  function onReady() {
+    // ─ checkout_viewed ─
+    var totalEl = document.querySelector('[data-cart-total], .order-total-amount, .cart-total');
+    track('checkout_viewed', { payload: {
+      url: location.href,
+      title: document.title,
+      viewport: window.innerWidth + 'x' + window.innerHeight
+    }});
+
+    // ─ payment_return ─ (customer came back from bank)
+    try {
+      var qs = new URLSearchParams(location.search);
+      if (qs.get('payment_return') === '1') {
+        var params = {};
+        qs.forEach(function(v,k){ params[k] = v; });
+        track('payment_return', { payload: { query: params } });
+      }
+    } catch(e) {}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', onReady);
+  } else {
+    onReady();
+  }
+
+  // Intercept fetch() to capture payment-options response + submit_clicked
+  var origFetch = window.fetch;
+  window.fetch = function(url, opts) {
+    var p = origFetch.apply(this, arguments);
+    try {
+      var urlStr = typeof url === 'string' ? url : (url && url.url) || '';
+      // payment-options loaded
+      if (/\/store\/payment-options/.test(urlStr)) {
+        p.then(function(res){
+          if (!res || !res.ok) return;
+          res.clone().json().then(function(data){
+            var gws = (data && data.gateways) || [];
+            var methods = [];
+            gws.forEach(function(g){ (g.methods||[]).forEach(function(m){ methods.push({ code: m.code, provider: g.provider }); }); });
+            track('payment_methods_loaded', { payload: {
+              gateway_count: gws.length,
+              method_count: methods.length,
+              methods: methods
+            }});
+          }).catch(function(){});
+        }).catch(function(){});
+      }
+      // payment session creation → submit_clicked equivalent
+      if (/\/store\/payment-collections\/[^\/]+\/payment-sessions$/.test(urlStr)) {
+        try {
+          var body = opts && opts.body ? JSON.parse(opts.body) : {};
+          track('submit_clicked', { payload: {
+            provider_id: body.provider_id,
+            method: body.data && body.data.method,
+            amount: body.data && body.data.amount,
+            currency: body.data && body.data.currency
+          }});
+        } catch(e) {}
+      }
+    } catch(e) {}
+    return p;
+  };
+
+  // Click-based event: payment_method_selected
+  document.addEventListener('click', function(ev){
+    var pm = ev.target && ev.target.closest && ev.target.closest('.payment-method, [data-method]');
+    if (!pm) return;
+    var method = pm.getAttribute('data-method') || null;
+    var provider = pm.getAttribute('data-provider') || null;
+    if (!method) return;
+    track('payment_method_selected', { payload: { method: method, provider: provider } });
+  }, { capture: true });
+
+  // Capture email when entered (attach once, silently re-read on later typing)
+  document.addEventListener('change', function(ev){
+    var t = ev.target;
+    if (t && t.type === 'email' && t.value) {
+      window.PaymentTracker.setEmail(String(t.value).toLowerCase().trim());
+    }
+  });
+})();
+</script>
+
+<script>
 (function() {
   'use strict';
 
