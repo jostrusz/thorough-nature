@@ -2415,11 +2415,6 @@ body {
             </div>
           </div>
 
-          <!-- ─── Marketing opt-in (GDPR: default off, explicit opt-in) ─── -->
-          <label class="form-group" for="marketing_opt_in" style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#555;margin:16px 0 0;line-height:1.4;cursor:pointer;">
-            <input type="checkbox" id="marketing_opt_in" name="marketing_opt_in" style="margin-top:2px;flex-shrink:0;">
-            <span>Ja, ik wil af en toe e-mails ontvangen met tips en updates.</span>
-          </label>
 
         </div>
 
@@ -6801,8 +6796,6 @@ body {
       customerData.metadata.project_id = window.AnalyticsTracker.PROJECT_ID || '';
     }
     // ─── Marketing opt-in (GDPR) ───
-    var _mktOptInEl = document.getElementById('marketing_opt_in');
-    customerData.metadata.marketing_opt_in = !!(_mktOptInEl && _mktOptInEl.checked);
     if (typeof MetaTracker !== 'undefined') {
       customerData.metadata.fbc = MetaTracker.getFbc() || '';
       customerData.metadata.fbp = MetaTracker.getFbp() || '';
