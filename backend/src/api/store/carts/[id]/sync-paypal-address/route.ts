@@ -148,18 +148,93 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       updateData.email = payer.email_address
     }
 
-    const cartService = req.scope.resolve("cartModuleService") as any
-    if (cartService?.updateCarts) {
-      await cartService.updateCarts(cartId, updateData)
-    } else {
-      // Fallback: direct HTTP call to Medusa cart update
+    // Primary path: try Medusa cart module service (future-proof if DI becomes
+    // available in store route scope in a later Medusa version). Today it throws
+    // "Could not resolve 'cartModuleService'" — we swallow and fall through.
+    let updateOk = false
+    try {
+      const cartService = req.scope.resolve("cartModuleService") as any
+      if (cartService?.updateCarts) {
+        await cartService.updateCarts(cartId, updateData)
+        updateOk = true
+      }
+    } catch {
+      // DI unavailable in this scope — fall through to SQL path
+    }
+
+    // Reliable path: direct SQL on cart_address + cart. The cart already has
+    // shipping/billing address rows (customer filled the form before hitting
+    // PayPal) — we overwrite them with the payer/shipping data PayPal returned.
+    if (!updateOk) {
       const { Pool } = require("pg")
       const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
-      await pool.query(
-        `UPDATE "cart" SET updated_at = NOW() WHERE id = $1`,
-        [cartId]
-      )
-      await pool.end()
+      try {
+        const { rows: cartRows } = await pool.query(
+          `SELECT shipping_address_id, billing_address_id
+             FROM cart WHERE id = $1 AND deleted_at IS NULL LIMIT 1`,
+          [cartId]
+        )
+        if (!cartRows.length) {
+          throw new Error(`Cart ${cartId} not found`)
+        }
+        const { shipping_address_id, billing_address_id } = cartRows[0]
+
+        if (shipping_address_id) {
+          await pool.query(
+            `UPDATE cart_address SET
+               first_name = $1, last_name = $2, address_1 = $3, address_2 = $4,
+               city = $5, province = $6, postal_code = $7, country_code = $8,
+               phone = $9, updated_at = NOW()
+             WHERE id = $10`,
+            [
+              mappedShipping.first_name, mappedShipping.last_name,
+              mappedShipping.address_1, mappedShipping.address_2,
+              mappedShipping.city, mappedShipping.province,
+              mappedShipping.postal_code, mappedShipping.country_code,
+              mappedShipping.phone, shipping_address_id,
+            ]
+          )
+        } else {
+          logger.warn(
+            `[Sync PayPal Address] Cart ${cartId}: no shipping_address_id, skipping shipping sync`
+          )
+        }
+
+        if (billing_address_id) {
+          await pool.query(
+            `UPDATE cart_address SET
+               first_name = $1, last_name = $2, address_1 = $3, address_2 = $4,
+               city = $5, province = $6, postal_code = $7, country_code = $8,
+               phone = $9, updated_at = NOW()
+             WHERE id = $10`,
+            [
+              mappedBilling.first_name, mappedBilling.last_name,
+              mappedBilling.address_1, mappedBilling.address_2,
+              mappedBilling.city, mappedBilling.province,
+              mappedBilling.postal_code, mappedBilling.country_code,
+              mappedBilling.phone, billing_address_id,
+            ]
+          )
+        } else {
+          logger.warn(
+            `[Sync PayPal Address] Cart ${cartId}: no billing_address_id, skipping billing sync`
+          )
+        }
+
+        if (updateData.email) {
+          await pool.query(
+            `UPDATE cart SET email = $1, updated_at = NOW() WHERE id = $2`,
+            [updateData.email, cartId]
+          )
+        } else {
+          await pool.query(
+            `UPDATE cart SET updated_at = NOW() WHERE id = $1`,
+            [cartId]
+          )
+        }
+      } finally {
+        await pool.end()
+      }
     }
 
     logger.info(
