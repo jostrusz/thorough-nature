@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@medusajs/ui"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
@@ -16,52 +16,119 @@ import {
 /**
  * Field catalogue. Each UI field maps to an evaluator DSL key via `dsl_field`.
  * `value_kind` drives the value-input widget:
- *   - text   → plain <input>
- *   - list   → <select> filled from `listsQ`
- *   - flow   → <select> filled from `flowsQ`
- *   - bool   → Yes/No select (for flow.in_any_run)
- *   - date   → datetime-local
- *   - empty  → no value input (exists-only operators)
+ *   - text        → plain <input>
+ *   - number      → <input type="number">
+ *   - date        → datetime-local
+ *   - bool        → Yes/No select
+ *   - list        → <select> filled from listsQ
+ *   - flow        → <select> filled from flowsQ
+ *   - project     → <select> of brand slugs (for primary_book / purchased_books)
+ *   - lifecycle   → <select> of 8 lifecycle stages
+ *   - rfm_segment → <select> of 7 RFM segments
+ *   - empty       → no value input (for exists/not_exists)
+ *
+ * `ops` is REQUIRED — defines exactly which operators appear. Must be a subset
+ * of what the evaluator can compile for this field type. If omitted, UI
+ * defaults to a safe text-op set.
  */
-const FIELD_OPTIONS: {
+type ValueKind =
+  | "text" | "number" | "date" | "bool"
+  | "list" | "flow" | "project" | "lifecycle" | "rfm_segment"
+
+type FieldOption = {
   value: string
   label: string
   dsl_field: string
-  value_kind: "text" | "list" | "flow" | "bool" | "date" | "empty"
-  ops?: string[]
-}[] = [
-  { value: "status", label: "Status", dsl_field: "contact.status", value_kind: "text" },
-  { value: "source", label: "Source", dsl_field: "contact.source", value_kind: "text" },
-  { value: "country", label: "Country", dsl_field: "contact.country_code", value_kind: "text" },
-  { value: "locale", label: "Locale", dsl_field: "contact.locale", value_kind: "text" },
-  { value: "created_at", label: "Created at", dsl_field: "contact.created_at", value_kind: "date" },
-  { value: "subscribed_at", label: "Subscribed at", dsl_field: "contact.subscribed_at", value_kind: "date" },
-  { value: "tag", label: "Tag", dsl_field: "contact.tags", value_kind: "text", ops: ["has"] },
-  { value: "list_member", label: "List membership", dsl_field: "list.member", value_kind: "list", ops: ["eq", "ne"] },
-  { value: "flow_in_any", label: "In any active flow", dsl_field: "flow.in_any_run", value_kind: "bool", ops: ["eq"] },
-  { value: "flow_in", label: "In specific flow", dsl_field: "flow.in_run", value_kind: "flow", ops: ["eq", "ne"] },
-  { value: "order_count", label: "Order count (total)", dsl_field: "order.count", value_kind: "text", ops: ["eq", "ne", "gt", "gte", "lt", "lte"] },
-  { value: "order_total_sum", label: "Order total sum", dsl_field: "order.total_sum", value_kind: "text", ops: ["eq", "gt", "gte", "lt", "lte"] },
-  { value: "order_last_at", label: "Last order at", dsl_field: "order.last_at", value_kind: "date", ops: ["before", "after", "exists"] },
+  value_kind: ValueKind
+  ops: string[]
+  group?: string
+}
+
+// Op groups — each field picks the relevant ones.
+const OPS = {
+  text: ["eq", "ne", "contains", "starts", "ends", "in", "nin", "exists", "not_exists"],
+  textExact: ["eq", "ne", "in", "nin", "exists", "not_exists"],
+  number: ["eq", "ne", "gt", "gte", "lt", "lte", "exists", "not_exists"],
+  date: ["before", "after", "exists", "not_exists"],
+  days: ["gt", "gte", "lt", "lte", "exists", "not_exists"],
+  bool: ["eq"],
+  arrayContains: ["has", "not_has", "exists", "not_exists"],
+  membership: ["eq", "ne"],
+}
+
+const FIELD_OPTIONS: FieldOption[] = [
+  // ─ Identity / status ─
+  { group: "Identity", value: "status",        label: "Status",          dsl_field: "contact.status",        value_kind: "text",   ops: OPS.text },
+  { group: "Identity", value: "source",        label: "Source",          dsl_field: "contact.source",        value_kind: "text",   ops: OPS.text },
+  { group: "Identity", value: "country",       label: "Country (2-letter)", dsl_field: "contact.country_code", value_kind: "text", ops: OPS.textExact },
+  { group: "Identity", value: "locale",        label: "Locale",          dsl_field: "contact.locale",        value_kind: "text",   ops: OPS.textExact },
+  { group: "Identity", value: "created_at",    label: "Created at",      dsl_field: "contact.created_at",    value_kind: "date",   ops: OPS.date },
+  { group: "Identity", value: "subscribed_at", label: "Subscribed at",   dsl_field: "contact.subscribed_at", value_kind: "date",   ops: OPS.date },
+
+  // ─ Lists / tags ─
+  { group: "Lists & tags", value: "tag",         label: "Tag",             dsl_field: "contact.tags",     value_kind: "text", ops: ["has", "not_has"] },
+  { group: "Lists & tags", value: "list_member", label: "List membership", dsl_field: "list.member",      value_kind: "list", ops: OPS.membership },
+
+  // ─ Flows ─
+  { group: "Flows", value: "flow_in_any", label: "In any active flow",  dsl_field: "flow.in_any_run", value_kind: "bool", ops: OPS.bool },
+  { group: "Flows", value: "flow_in",     label: "In specific flow",    dsl_field: "flow.in_run",     value_kind: "flow", ops: OPS.membership },
+
+  // ─ Purchases (real-time + pre-computed) ─
+  { group: "Purchases", value: "total_orders",       label: "Total orders",              dsl_field: "contact.total_orders",       value_kind: "number", ops: OPS.number },
+  { group: "Purchases", value: "total_revenue",      label: "Total revenue (EUR)",       dsl_field: "contact.total_revenue_eur",  value_kind: "number", ops: OPS.number },
+  { group: "Purchases", value: "avg_order_value",    label: "Avg order value (EUR)",     dsl_field: "contact.avg_order_value_eur",value_kind: "number", ops: OPS.number },
+  { group: "Purchases", value: "first_order_at",     label: "First order at",            dsl_field: "contact.first_order_at",     value_kind: "date",   ops: OPS.date },
+  { group: "Purchases", value: "last_order_at",      label: "Last order at",             dsl_field: "contact.last_order_at",      value_kind: "date",   ops: OPS.date },
+  { group: "Purchases", value: "days_since_order",   label: "Days since last order",     dsl_field: "contact.days_since_last_order", value_kind: "number", ops: OPS.days },
+  { group: "Purchases", value: "email_attr_orders",  label: "Email-attributed orders",   dsl_field: "contact.email_attributed_orders", value_kind: "number", ops: OPS.number },
+  { group: "Purchases", value: "email_attr_revenue", label: "Email-attributed revenue (EUR)", dsl_field: "contact.email_attributed_revenue_eur", value_kind: "number", ops: OPS.number },
+
+  // ─ Project affinity (per-project purchase filters) ─
+  { group: "Projects", value: "primary_book",   label: "Primary project",          dsl_field: "contact.primary_book",    value_kind: "project", ops: OPS.textExact },
+  { group: "Projects", value: "purchased_book", label: "Purchased in project",     dsl_field: "contact.purchased_books", value_kind: "project", ops: OPS.arrayContains },
+
+  // ─ Segmentation (pre-computed by nightly cron) ─
+  { group: "Segmentation", value: "lifecycle_stage", label: "Lifecycle stage", dsl_field: "contact.lifecycle_stage", value_kind: "lifecycle",   ops: OPS.textExact },
+  { group: "Segmentation", value: "rfm_segment",     label: "RFM segment",     dsl_field: "contact.rfm_segment",     value_kind: "rfm_segment", ops: OPS.textExact },
+  { group: "Segmentation", value: "rfm_score",       label: "RFM score (111–555)", dsl_field: "contact.rfm_score",   value_kind: "number",      ops: OPS.number },
+
+  // ─ Engagement ─
+  { group: "Engagement", value: "engagement_score",  label: "Engagement score (0–100)", dsl_field: "contact.engagement_score",   value_kind: "number", ops: OPS.number },
+  { group: "Engagement", value: "emails_sent",       label: "Emails sent (total)",      dsl_field: "contact.emails_sent_total",  value_kind: "number", ops: OPS.number },
+  { group: "Engagement", value: "emails_opened",     label: "Emails opened (total)",    dsl_field: "contact.emails_opened_total",value_kind: "number", ops: OPS.number },
+  { group: "Engagement", value: "last_email_opened", label: "Last email opened at",     dsl_field: "contact.last_email_opened_at", value_kind: "date", ops: OPS.date },
+  { group: "Engagement", value: "last_email_clicked",label: "Last email clicked at",    dsl_field: "contact.last_email_clicked_at", value_kind: "date", ops: OPS.date },
+
+  // ─ Acquisition ─
+  { group: "Acquisition", value: "acq_source",       label: "Acquisition source",       dsl_field: "contact.acquisition_source",   value_kind: "text", ops: OPS.text },
+  { group: "Acquisition", value: "acq_medium",       label: "Acquisition medium",       dsl_field: "contact.acquisition_medium",   value_kind: "text", ops: OPS.text },
+  { group: "Acquisition", value: "acq_campaign",     label: "Acquisition campaign",     dsl_field: "contact.acquisition_campaign", value_kind: "text", ops: OPS.text },
+  { group: "Acquisition", value: "acq_at",           label: "Acquisition date",         dsl_field: "contact.acquisition_at",       value_kind: "date", ops: OPS.date },
+  { group: "Acquisition", value: "days_since_acq",   label: "Days since acquisition",   dsl_field: "contact.days_since_acquisition", value_kind: "number", ops: OPS.days },
 ]
 
-const OP_OPTIONS = [
-  { value: "eq", label: "equals" },
-  { value: "ne", label: "not equal to" },
-  { value: "contains", label: "contains" },
-  { value: "starts", label: "starts with" },
-  { value: "ends", label: "ends with" },
-  { value: "gt", label: "greater than" },
-  { value: "gte", label: "≥" },
-  { value: "lt", label: "less than" },
-  { value: "lte", label: "≤" },
-  { value: "before", label: "before" },
-  { value: "after", label: "after" },
-  { value: "in", label: "in (comma-sep)" },
-  { value: "nin", label: "not in" },
-  { value: "has", label: "has" },
-  { value: "exists", label: "exists" },
-]
+const OP_OPTIONS: Record<string, string> = {
+  eq:         "equals",
+  ne:         "not equal to",
+  contains:   "contains",
+  starts:     "starts with",
+  ends:       "ends with",
+  gt:         "greater than",
+  gte:        "≥",
+  lt:         "less than",
+  lte:        "≤",
+  before:     "before",
+  after:      "after",
+  in:         "in (comma-sep)",
+  nin:        "not in",
+  has:        "has",
+  not_has:    "does not have",
+  exists:     "is set",
+  not_exists: "is not set",
+}
+
+const LIFECYCLE_STAGES = ["lead", "new_customer", "active", "loyal", "at_risk", "dormant", "sunset", "churned"]
+const RFM_SEGMENTS = ["champion", "loyal", "potential_loyal", "at_risk", "cant_lose", "hibernating", "lost"]
 
 /**
  * Convert a UI condition into an evaluator DSL leaf:
@@ -75,15 +142,21 @@ function toDslLeaf(c: { field: string; op: string; value: string }): any {
   if (!meta) return null
   const dslField = meta.dsl_field
 
+  // exists / not_exists ignore value.
+  if (c.op === "exists") return { [dslField]: { exists: true } }
+  if (c.op === "not_exists") return { [dslField]: { not_exists: true } }
+
   let val: any = c.value
   if (meta.value_kind === "bool") {
     val = c.value === "true" || c.value === "yes" || c.value === "1"
   } else if (c.op === "in" || c.op === "nin") {
     val = String(c.value || "").split(",").map((v) => v.trim()).filter(Boolean)
-  } else if (["gt", "gte", "lt", "lte"].includes(c.op) && c.value !== "" && !isNaN(Number(c.value))) {
+  } else if (
+    meta.value_kind === "number" ||
+    ["gt", "gte", "lt", "lte"].includes(c.op)
+  ) {
+    if (c.value === "" || isNaN(Number(c.value))) return null
     val = Number(c.value)
-  } else if (c.op === "exists") {
-    val = !(c.value === "false" || c.value === "no" || c.value === "0")
   }
 
   return { [dslField]: { [c.op]: val } }
@@ -246,8 +319,26 @@ function SegmentModal({ brandId, initial, onClose }: { brandId: string | null; i
       sdk.client.fetch<{ flows: any[] }>(`/admin/marketing/flows${bQs}`, { method: "GET" }),
     enabled: !!brandId,
   })
+  const brandsQ = useQuery({
+    queryKey: ["mkt-all-brands-for-segment"],
+    queryFn: () =>
+      sdk.client.fetch<{ brands: any[] }>(`/admin/marketing/brands`, { method: "GET" }),
+  })
   const lists: any[] = ((listsQ.data as any)?.lists) || []
   const flows: any[] = ((flowsQ.data as any)?.flows) || []
+  const allBrands: any[] = ((brandsQ.data as any)?.brands) || []
+  // Projects are brand.project_id — one-to-one with brand.
+  const projects = useMemo(() => {
+    const out: { id: string; label: string }[] = []
+    const seen = new Set<string>()
+    for (const b of allBrands) {
+      const pid = b.project_id || b.slug
+      if (!pid || seen.has(pid)) continue
+      seen.add(pid)
+      out.push({ id: pid, label: b.display_name ? `${b.display_name} (${pid})` : pid })
+    }
+    return out
+  }, [allBrands])
 
   const saveMut = useMutation({
     mutationFn: (body: any) => {
@@ -334,7 +425,9 @@ function SegmentModal({ brandId, initial, onClose }: { brandId: string | null; i
         </div>
         {query.conditions.map((c, idx) => {
           const meta = FIELD_OPTIONS.find((f) => f.value === c.field)
-          const ops = meta?.ops ? OP_OPTIONS.filter((o) => meta.ops!.includes(o.value)) : OP_OPTIONS
+          // Operators are always filtered by field.ops (no field selected = empty).
+          const ops = meta?.ops || []
+          const valueless = c.op === "exists" || c.op === "not_exists"
           const updateField = (patch: Partial<Condition>) => {
             const arr = [...query.conditions]
             arr[idx] = { ...arr[idx], ...patch }
@@ -348,41 +441,87 @@ function SegmentModal({ brandId, initial, onClose }: { brandId: string | null; i
                 updateField({ field: e.target.value, op: defaultOp, value: "" })
               }}>
                 <option value="">— field —</option>
-                {FIELD_OPTIONS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+                {(() => {
+                  // Render grouped options (optgroup per group)
+                  const groups: Record<string, FieldOption[]> = {}
+                  for (const f of FIELD_OPTIONS) {
+                    const g = f.group || "Other"
+                    if (!groups[g]) groups[g] = []
+                    groups[g].push(f)
+                  }
+                  return Object.entries(groups).map(([g, list]) => (
+                    <optgroup key={g} label={g}>
+                      {list.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+                    </optgroup>
+                  ))
+                })()}
               </select>
-              <select className="mkt-input" value={c.op} onChange={(e) => updateField({ op: e.target.value })}>
-                {ops.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              <select className="mkt-input" value={c.op} onChange={(e) => updateField({ op: e.target.value })} disabled={!meta}>
+                {ops.map((o) => <option key={o} value={o}>{OP_OPTIONS[o] || o}</option>)}
               </select>
-              {meta?.value_kind === "list" ? (
+              {!meta ? (
+                <input className="mkt-input" value="" disabled placeholder="— select field first —" />
+              ) : valueless ? (
+                <input className="mkt-input" value="" disabled placeholder="(no value needed)" />
+              ) : meta.value_kind === "list" ? (
                 <select className="mkt-input" value={c.value} onChange={(e) => updateField({ value: e.target.value })}>
                   <option value="">— select list —</option>
                   {lists.map((l: any) => <option key={l.id} value={l.id}>{l.name}</option>)}
                 </select>
-              ) : meta?.value_kind === "flow" ? (
+              ) : meta.value_kind === "flow" ? (
                 <select className="mkt-input" value={c.value} onChange={(e) => updateField({ value: e.target.value })}>
                   <option value="">— select flow —</option>
                   {flows.map((f: any) => <option key={f.id} value={f.id}>{f.name}</option>)}
                 </select>
-              ) : meta?.value_kind === "bool" ? (
-                <select className="mkt-input" value={c.value || "true"} onChange={(e) => updateField({ value: e.target.value })}>
-                  <option value="true">Yes (is in a flow)</option>
-                  <option value="false">No (not in any flow)</option>
+              ) : meta.value_kind === "project" ? (
+                <select className="mkt-input" value={c.value} onChange={(e) => updateField({ value: e.target.value })}>
+                  <option value="">— select project —</option>
+                  {projects.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
                 </select>
-              ) : meta?.value_kind === "date" ? (
+              ) : meta.value_kind === "lifecycle" ? (
+                c.op === "in" || c.op === "nin" ? (
+                  <input className="mkt-input" value={c.value} onChange={(e) => updateField({ value: e.target.value })} placeholder="e.g. active,loyal,new_customer" />
+                ) : (
+                  <select className="mkt-input" value={c.value} onChange={(e) => updateField({ value: e.target.value })}>
+                    <option value="">— select stage —</option>
+                    {LIFECYCLE_STAGES.map((s) => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                )
+              ) : meta.value_kind === "rfm_segment" ? (
+                c.op === "in" || c.op === "nin" ? (
+                  <input className="mkt-input" value={c.value} onChange={(e) => updateField({ value: e.target.value })} placeholder="e.g. champion,loyal" />
+                ) : (
+                  <select className="mkt-input" value={c.value} onChange={(e) => updateField({ value: e.target.value })}>
+                    <option value="">— select RFM segment —</option>
+                    {RFM_SEGMENTS.map((s) => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                )
+              ) : meta.value_kind === "bool" ? (
+                <select className="mkt-input" value={c.value || "true"} onChange={(e) => updateField({ value: e.target.value })}>
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              ) : meta.value_kind === "number" ? (
+                <input
+                  className="mkt-input"
+                  type="number"
+                  value={c.value}
+                  onChange={(e) => updateField({ value: e.target.value })}
+                  placeholder="e.g. 90"
+                />
+              ) : meta.value_kind === "date" ? (
                 <input
                   className="mkt-input"
                   type="datetime-local"
                   value={c.value}
-                  disabled={c.op === "exists"}
                   onChange={(e) => updateField({ value: e.target.value })}
                 />
               ) : (
                 <input
                   className="mkt-input"
                   value={c.value}
-                  disabled={c.op === "exists"}
                   onChange={(e) => updateField({ value: e.target.value })}
-                  placeholder="value"
+                  placeholder={c.op === "in" || c.op === "nin" ? "comma-separated values" : "value"}
                 />
               )}
               <button
