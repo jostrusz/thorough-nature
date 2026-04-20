@@ -80,35 +80,35 @@ export type CompiledTemplate = {
 }
 
 /**
- * Resolve {{ path }} and {{ path|default:"fallback" }} placeholders.
+ * Resolve template placeholders from context. Supports multiple common
+ * syntaxes so campaign editors coming from different tools all "just work":
  *
- * Supported syntax:
- *   {{ contact.first_name }}                    explicit dotted path
+ *   {{ contact.first_name }}                    Liquid / Handlebars (preferred)
  *   {{ first_name }}                            auto-fallback to ctx.contact.*
- *   {{ first_name|default:"vriend" }}           default filter (double quotes)
- *   {{ first_name|default:'vriend' }}           default filter (single quotes)
- *   {{ brand.name|default:"onze club" }}        works on any path
+ *   {{ first_name|default:"vriend" }}           Liquid default filter
+ *   {$unsubscribe_url}                          PHP-style / Resend-style
+ *   ${unsubscribe_url}                          JS template-literal-style
+ *   <%= unsubscribe_url %>                      ERB/EJS-style
  *
- * Missing / empty values become empty string (never leak template syntax
- * into production emails) — unless a `default` filter is supplied, in which
- * case the fallback string is used.
+ * Missing / empty values become empty string — NEVER leak raw template
+ * syntax into a sent email. With the default filter, the fallback is used.
+ *
+ * Resolution rules per match:
+ *  1. Try ctx[part0][part1]... for dotted paths.
+ *  2. If not found and path is single-segment, try ctx.contact[part0]
+ *     (so `{{ first_name }}` works without the `contact.` prefix).
+ *  3. Fallback to default string (or empty).
  */
 export function interpolate(input: string, ctx: CompileContext): string {
   if (!input) return ""
-  // Regex captures: path (group 1), optional default string (group 2 or 3)
-  // path: [a-zA-Z0-9_.]+  — same as before
-  // filter: |default:"..."  or  |default:'...'
-  const re = /\{\{\s*([a-zA-Z0-9_.]+)(?:\s*\|\s*default\s*:\s*(?:"([^"]*)"|'([^']*)'))?\s*\}\}/g
-  return input.replace(re, (_, path, dqDefault, sqDefault) => {
-    const fallback = dqDefault != null ? dqDefault : (sqDefault != null ? sqDefault : "")
-    const parts = String(path).split(".")
-    // First try exact path from root ctx
+
+  const resolve = (rawPath: string, fallback: string): string => {
+    const parts = String(rawPath).split(".")
     let cur: any = ctx
     for (const p of parts) {
       if (cur == null) { cur = undefined; break }
       cur = cur[p]
     }
-    // If nothing found and path is single-segment, auto-fallback to ctx.contact.<name>
     if ((cur == null || cur === "") && parts.length === 1) {
       const contact: any = (ctx as any).contact
       if (contact && contact[parts[0]] != null && contact[parts[0]] !== "") {
@@ -117,7 +117,24 @@ export function interpolate(input: string, ctx: CompileContext): string {
     }
     if (cur == null || cur === "") return fallback
     return String(cur)
+  }
+
+  // ── 1. {{ path }} and {{ path|default:"fallback" }} ────────────────────
+  const handlebars = /\{\{\s*([a-zA-Z0-9_.]+)(?:\s*\|\s*default\s*:\s*(?:"([^"]*)"|'([^']*)'))?\s*\}\}/g
+  let out = input.replace(handlebars, (_, path, dq, sq) => {
+    return resolve(path, dq != null ? dq : (sq != null ? sq : ""))
   })
+
+  // ── 2. {$path} — PHP / Resend legacy ─────────────────────────────────
+  out = out.replace(/\{\$\s*([a-zA-Z0-9_.]+)\s*\}/g, (_, path) => resolve(path, ""))
+
+  // ── 3. ${path} — JS template-literal style ────────────────────────────
+  out = out.replace(/\$\{\s*([a-zA-Z0-9_.]+)\s*\}/g, (_, path) => resolve(path, ""))
+
+  // ── 4. <%= path %> — ERB / EJS style ─────────────────────────────────
+  out = out.replace(/<%=\s*([a-zA-Z0-9_.]+)\s*%>/g, (_, path) => resolve(path, ""))
+
+  return out
 }
 
 /** Render a single block into HTML. */

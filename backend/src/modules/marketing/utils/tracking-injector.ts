@@ -37,13 +37,23 @@ const SKIP_HREF_PREFIXES = [
   "javascript:",
   "data:",
   "#",
-  "{{", // unresolved template variable — don't wrap it
+  "{{",   // Liquid / Handlebars placeholder
+  "{$",   // PHP / Resend-style placeholder
+  "${",   // JS template-literal placeholder
+  "<%",   // ERB / EJS placeholder
 ]
+
+// Any URL that contains an unresolved template placeholder anywhere in its
+// body (not just prefix) should be skipped — otherwise we wrap a broken URL
+// into our tracker, and the customer gets a redirect to junk.
+const UNRESOLVED_PATTERNS = [/\{\{/, /\{\$/, /\$\{/, /<%/]
 
 function isTrackableHref(href: string): boolean {
   if (!href) return false
   const lower = href.trim().toLowerCase()
-  return !SKIP_HREF_PREFIXES.some((p) => lower.startsWith(p))
+  if (SKIP_HREF_PREFIXES.some((p) => lower.startsWith(p))) return false
+  if (UNRESOLVED_PATTERNS.some((re) => re.test(href))) return false
+  return true
 }
 
 /** Return a tracked URL for a given target. */
