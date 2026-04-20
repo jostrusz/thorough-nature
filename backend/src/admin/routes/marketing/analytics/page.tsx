@@ -180,6 +180,7 @@ function AnalyticsPage() {
 
 export const config = defineRouteConfig({
   label: "Analytics",
+  rank: 50,
 })
 
 export default AnalyticsPage

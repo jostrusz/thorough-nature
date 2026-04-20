@@ -443,6 +443,7 @@ function SegmentModal({ brandId, initial, onClose }: { brandId: string | null; i
 
 export const config = defineRouteConfig({
   label: "Segments",
+  rank: 90,
 })
 
 export default SegmentsPage

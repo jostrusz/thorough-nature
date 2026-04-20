@@ -149,6 +149,7 @@ function CampaignsPage() {
 
 export const config = defineRouteConfig({
   label: "Campaigns",
+  rank: 10,
 })
 
 export default CampaignsPage

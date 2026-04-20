@@ -419,6 +419,7 @@ function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () =
 
 export const config = defineRouteConfig({
   label: "Contacts",
+  rank: 20,
 })
 
 export default ContactsPage

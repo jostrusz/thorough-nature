@@ -164,6 +164,7 @@ function ListsPage() {
 
 export const config = defineRouteConfig({
   label: "Lists",
+  rank: 80,
 })
 
 export default ListsPage

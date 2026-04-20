@@ -275,6 +275,7 @@ function BrandsPage() {
 
 export const config = defineRouteConfig({
   label: "Brands",
+  rank: 60,
 })
 
 export default BrandsPage
