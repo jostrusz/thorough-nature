@@ -75,5 +75,17 @@ export default defineMiddlewares({
       matcher: "/V1/event",
       bodyParser: { preserveRawBody: true },
     },
+    // Raise body size limit for contact import (CSV-derived JSON can easily
+    // exceed the default ~1MB for lists of a few thousand rows).
+    {
+      method: ["POST"],
+      matcher: "/admin/marketing/contacts/import",
+      bodyParser: { sizeLimit: "25mb" },
+    },
+    {
+      method: ["POST"],
+      matcher: "/admin/marketing/contacts/bulk",
+      bodyParser: { sizeLimit: "5mb" },
+    },
   ],
 })
