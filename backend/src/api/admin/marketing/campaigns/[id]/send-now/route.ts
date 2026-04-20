@@ -14,8 +14,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       return
     }
 
-    if (!(campaign as any).template_id) {
-      res.status(400).json({ error: "template_id is not set" })
+    // Campaign must have EITHER inline content (new flow) OR a template_id
+    // (legacy flow). Both missing = nothing to send.
+    const c = campaign as any
+    const hasInline = !!(c.subject && c.custom_html)
+    const hasTemplate = !!c.template_id
+    if (!hasInline && !hasTemplate) {
+      res.status(400).json({ error: "campaign has no subject/custom_html and no template_id" })
+      return
+    }
+    if (hasInline && !c.from_email) {
+      res.status(400).json({ error: "from_email is required" })
       return
     }
 

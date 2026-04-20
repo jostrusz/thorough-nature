@@ -138,7 +138,15 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
       qc.invalidateQueries({ queryKey: ["mkt-campaign", c?.id] })
       toast.success("Campaign saved")
     },
-    onError: (e: any) => toast.error("Failed: " + (e?.message || "unknown")),
+    onError: (e: any) => {
+      const msg =
+        e?.response?.data?.error ||
+        e?.body?.error ||
+        e?.error ||
+        e?.message ||
+        "unknown"
+      toast.error("Failed: " + msg)
+    },
   })
 
   const sendNowMut = useMutation({
@@ -149,7 +157,15 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
       qc.invalidateQueries({ queryKey: ["mkt-campaign", currentId] })
       toast.success("Campaign send started")
     },
-    onError: (e: any) => toast.error("Failed: " + (e?.message || "unknown")),
+    onError: (e: any) => {
+      const msg =
+        e?.response?.data?.error ||
+        e?.body?.error ||
+        e?.error ||
+        e?.message ||
+        "unknown"
+      toast.error("Failed: " + msg)
+    },
   })
 
   const previewMut = useMutation({
