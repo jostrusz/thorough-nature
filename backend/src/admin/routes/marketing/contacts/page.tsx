@@ -1095,7 +1095,14 @@ function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () =
     queryFn: () =>
       sdk.client.fetch<{ contact: any }>(`/admin/marketing/contacts/${contact.id}`, { method: "GET" }),
   })
+  const { data: activityData } = useQuery({
+    queryKey: ["mkt-contact-activity", contact.id],
+    queryFn: () =>
+      sdk.client.fetch<{ events: any[] }>(`/admin/marketing/contacts/${contact.id}/activity`, { method: "GET" }),
+  })
   const c = (data as any)?.contact || contact
+  const events: any[] = ((activityData as any)?.events) || []
+
   const [tags, setTags] = useState<string[]>(contact.tags || [])
   const [newTag, setNewTag] = useState("")
 
@@ -1118,29 +1125,122 @@ function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () =
   })
 
   const lists = c.list_memberships || c.lists || []
+  const money = (v: any) => (v != null && !isNaN(Number(v)) ? `€ ${Number(v).toFixed(2)}` : null)
+  const pct = (v: any) => (v != null && !isNaN(Number(v)) ? `${(Number(v) * 100).toFixed(1)} %` : null)
+  const dt = (v: any) => (v ? new Date(v).toLocaleString() : null)
 
   return (
     <SlideOver title={c.email} onClose={onClose}>
-      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        <div>
-          <label className="mkt-label">Status</label>
-          <div><StatusBadge status={c.status || "subscribed"} /></div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        {/* Status + headline */}
+        <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
+          <StatusBadge status={c.status || "subscribed"} />
+          {c.lifecycle_stage && (
+            <span className="mkt-badge" style={{ background: tokens.borderSubtle, color: tokens.fgSecondary }}>
+              {c.lifecycle_stage}
+            </span>
+          )}
+          {c.rfm_segment && (
+            <span className="mkt-badge" style={{ background: tokens.primarySoft, color: tokens.primary }}>
+              RFM: {c.rfm_segment}
+            </span>
+          )}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+
+        {/* KPI tiles — Orders / Revenue / Engagement */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
+          <KpiTile label="Orders" value={c.total_orders ?? 0} />
+          <KpiTile label="Revenue" value={money(c.total_revenue_eur) ?? "€ 0.00"} />
+          <KpiTile label="Engagement" value={c.engagement_score != null ? `${c.engagement_score}/100` : "—"} />
+        </div>
+
+        <Section title="Identity">
           <Detail label="First name" value={c.first_name} />
           <Detail label="Last name" value={c.last_name} />
           <Detail label="Phone" value={c.phone} />
           <Detail label="Company" value={c.company} />
+          <Detail label="Source" value={c.source} />
+          <Detail label="Project" value={c.project_id || c.brand_display_name} />
+          <Detail label="Created" value={dt(c.created_at)} />
+          <Detail label="Locale" value={c.locale} />
+        </Section>
+
+        <Section title="Address">
+          <Detail label="Street" value={c.address_line1} span={2} />
           <Detail label="City" value={c.city} />
           <Detail label="Postal code" value={c.postal_code} />
           <Detail label="Country" value={c.country_code} />
-          <Detail label="Locale" value={c.locale} />
-          <Detail label="Source" value={c.source} />
-          <Detail label="Project" value={c.project_id || c.brand_display_name} />
-          <Detail label="Created" value={c.created_at ? new Date(c.created_at).toLocaleString() : null} />
-          <Detail label="Lifecycle" value={c.lifecycle_stage} />
-        </div>
+          <Detail label="Timezone" value={c.timezone} />
+        </Section>
 
+        {(c.total_orders > 0 || c.email_attributed_orders > 0 || c.first_order_at) && (
+          <Section title="Purchases">
+            <Detail label="Total orders" value={c.total_orders ?? 0} />
+            <Detail label="Total revenue (EUR)" value={money(c.total_revenue_eur)} />
+            <Detail label="Avg order value" value={money(c.avg_order_value_eur)} />
+            <Detail label="First order" value={dt(c.first_order_at)} />
+            <Detail label="Last order" value={dt(c.last_order_at)} />
+            <Detail label="Days to first purchase" value={c.days_to_first_purchase} />
+            <Detail label="Email-attributed orders" value={c.email_attributed_orders ?? 0} />
+            <Detail label="Email-attributed revenue" value={money(c.email_attributed_revenue_eur)} />
+            <Detail label="First purchase source" value={c.first_purchase_source} span={2} />
+            <Detail label="Primary book" value={c.primary_book} />
+            <Detail label="Purchased books" value={Array.isArray(c.purchased_books) ? c.purchased_books.join(", ") : null} span={2} />
+          </Section>
+        )}
+
+        <Section title="Engagement">
+          <Detail label="Engagement score" value={c.engagement_score != null ? `${c.engagement_score} / 100` : null} />
+          <Detail label="Emails sent" value={c.emails_sent_total ?? 0} />
+          <Detail label="Opened" value={c.emails_opened_total ?? 0} />
+          <Detail label="Clicked" value={c.emails_clicked_total ?? 0} />
+          <Detail label="Open rate 30d" value={pct(c.open_rate_30d)} />
+          <Detail label="Click rate 30d" value={pct(c.click_rate_30d)} />
+          <Detail label="Last sent" value={dt(c.last_email_sent_at)} />
+          <Detail label="Last opened" value={dt(c.last_email_opened_at)} />
+          <Detail label="Last clicked" value={dt(c.last_email_clicked_at)} />
+        </Section>
+
+        {c.rfm_score != null && (
+          <Section title="RFM">
+            <Detail label="R (Recency)" value={c.rfm_recency} />
+            <Detail label="F (Frequency)" value={c.rfm_frequency} />
+            <Detail label="M (Monetary)" value={c.rfm_monetary} />
+            <Detail label="Score" value={c.rfm_score} />
+            <Detail label="Segment" value={c.rfm_segment} />
+            <Detail label="Lifecycle" value={c.lifecycle_stage} />
+            <Detail label="Lifecycle entered" value={dt(c.lifecycle_entered_at)} span={2} />
+          </Section>
+        )}
+
+        {c.acquisition_source && (
+          <Section title="Acquisition">
+            <Detail label="Source" value={c.acquisition_source} />
+            <Detail label="Medium" value={c.acquisition_medium} />
+            <Detail label="Campaign" value={c.acquisition_campaign} span={2} />
+            <Detail label="Content" value={c.acquisition_content} />
+            <Detail label="Term" value={c.acquisition_term} />
+            <Detail label="Device" value={c.acquisition_device} />
+            <Detail label="Lead magnet" value={c.acquisition_lead_magnet} />
+            <Detail label="Landing URL" value={c.acquisition_landing_url} span={2} />
+            <Detail label="Referrer" value={c.acquisition_referrer} span={2} />
+            <Detail label="FBC" value={c.acquisition_fbc} />
+            <Detail label="FBP" value={c.acquisition_fbp} />
+            <Detail label="Acquired at" value={dt(c.acquisition_at)} />
+            <Detail label="CAC (EUR)" value={money(c.acquisition_cost_eur)} />
+          </Section>
+        )}
+
+        {(c.delivery_issues_count > 0 || c.complaint_at || c.last_bounce_type) && (
+          <Section title="Deliverability">
+            <Detail label="Delivery issues" value={c.delivery_issues_count ?? 0} />
+            <Detail label="Last bounce" value={c.last_bounce_type} />
+            <Detail label="Complaint at" value={dt(c.complaint_at)} />
+            <Detail label="Unsubscribed at" value={dt(c.unsubscribed_at)} />
+          </Section>
+        )}
+
+        {/* Tags */}
         <div>
           <label className="mkt-label">Tags</label>
           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "10px" }}>
@@ -1193,18 +1293,157 @@ function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () =
             </ul>
           )}
         </div>
+
+        {/* Activity timeline */}
+        <div>
+          <label className="mkt-label">Activity</label>
+          {events.length === 0 ? (
+            <div style={{ fontSize: "13px", color: tokens.fgMuted }}>No recorded activity yet</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0", marginTop: "6px" }}>
+              {events.map((ev, i) => (
+                <ActivityRow key={i} event={ev} isLast={i === events.length - 1} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </SlideOver>
   )
 }
 
-function Detail({ label, value }: { label: string; value: any }) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="mkt-label">{label}</label>
-      <div style={{ fontSize: "14px", color: tokens.fg }}>{value || "—"}</div>
+      <div
+        style={{
+          fontSize: "11px",
+          fontWeight: 600,
+          color: tokens.fgSecondary,
+          letterSpacing: "0.04em",
+          textTransform: "uppercase",
+          marginBottom: "8px",
+        }}
+      >
+        {title}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 16px" }}>
+        {children}
+      </div>
     </div>
   )
+}
+
+function Detail({ label, value, span }: { label: string; value: any; span?: number }) {
+  return (
+    <div style={span ? { gridColumn: `span ${span}` } : undefined}>
+      <label className="mkt-label">{label}</label>
+      <div style={{ fontSize: "14px", color: tokens.fg, wordBreak: "break-word" }}>{value != null && value !== "" ? String(value) : "—"}</div>
+    </div>
+  )
+}
+
+function KpiTile({ label, value }: { label: string; value: any }) {
+  return (
+    <div
+      style={{
+        padding: "12px 14px",
+        background: tokens.bg,
+        border: `1px solid ${tokens.borderSubtle}`,
+        borderRadius: tokens.rMd,
+      }}
+    >
+      <div style={{ fontSize: "11px", color: tokens.fgSecondary, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "4px" }}>{label}</div>
+      <div style={{ fontSize: "18px", fontWeight: 600, color: tokens.fg, fontVariantNumeric: "tabular-nums" }}>{value}</div>
+    </div>
+  )
+}
+
+// Activity row — renders an event kind with icon, title, time and payload details.
+function ActivityRow({ event, isLast }: { event: any; isLast: boolean }) {
+  const { icon, color, title, detail } = describeActivity(event)
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "28px 1fr", gap: "10px", position: "relative" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div
+          style={{
+            width: "28px",
+            height: "28px",
+            borderRadius: "50%",
+            background: color,
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "13px",
+          }}
+        >
+          {icon}
+        </div>
+        {!isLast && (
+          <div style={{ flex: 1, width: "2px", background: tokens.borderSubtle, marginTop: "4px", minHeight: "18px" }} />
+        )}
+      </div>
+      <div style={{ paddingBottom: "14px" }}>
+        <div style={{ fontSize: "13px", color: tokens.fg, fontWeight: 500 }}>{title}</div>
+        {detail && <div style={{ fontSize: "12px", color: tokens.fgSecondary, marginTop: "2px" }}>{detail}</div>}
+        <div style={{ fontSize: "11px", color: tokens.fgMuted, marginTop: "3px" }}>
+          {event.occurred_at ? new Date(event.occurred_at).toLocaleString() : ""}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function describeActivity(event: any): { icon: string; color: string; title: string; detail: string | null } {
+  const t = event.type || ""
+  const p = event.payload || {}
+  switch (t) {
+    case "order_placed":
+    case "order": {
+      const total = p.total != null ? `${Number(p.total).toFixed(2)} ${p.currency_code || "EUR"}` : ""
+      const id = p.custom_display_id || p.display_id || p.order_id
+      return {
+        icon: "€",
+        color: "#15803D",
+        title: `Order placed${id ? ` · ${id}` : ""}`,
+        detail: [total, p.item_count ? `${p.item_count} item(s)` : null].filter(Boolean).join(" · ") || null,
+      }
+    }
+    case "email_attributed_order":
+      return {
+        icon: "✓",
+        color: "#2E5CE6",
+        title: `Email-attributed order${p.display_id ? ` · ${p.display_id}` : ""}`,
+        detail: [
+          p.total_eur != null ? `€ ${Number(p.total_eur).toFixed(2)}` : null,
+          p.campaign_id ? `campaign ${p.campaign_id}` : null,
+          p.flow_id ? `flow ${p.flow_id}` : null,
+        ].filter(Boolean).join(" · ") || null,
+      }
+    case "email_sent":
+      return { icon: "→", color: "#6B7280", title: "Email sent", detail: p.subject_snapshot || p.message_id || null }
+    case "email_opened":
+      return { icon: "👁", color: "#0EA5E9", title: "Email opened", detail: p.message_id || null }
+    case "email_clicked":
+      return { icon: "↗", color: "#7C3AED", title: "Email clicked", detail: p.url || null }
+    case "email_bounced":
+      return { icon: "!", color: "#DC2626", title: "Email bounced", detail: p.reason || null }
+    case "email_complained":
+      return { icon: "!", color: "#DC2626", title: "Email complaint", detail: null }
+    case "form_submitted":
+      return { icon: "+", color: "#15803D", title: "Form submitted (opt-in)", detail: p.form_slug || p.form_id || null }
+    case "cart_updated":
+      return { icon: "…", color: "#D97706", title: "Cart updated", detail: p.item_count ? `${p.item_count} item(s)` : null }
+    case "consent_subscribed":
+      return { icon: "+", color: "#15803D", title: "Consent: subscribed", detail: p.source || null }
+    case "consent_confirmed":
+      return { icon: "✓", color: "#15803D", title: "Consent: confirmed", detail: p.source || null }
+    case "consent_unsubscribed":
+      return { icon: "−", color: "#DC2626", title: "Consent: unsubscribed", detail: p.source || null }
+    default:
+      return { icon: "•", color: "#6B7280", title: t, detail: null }
+  }
 }
 
 export const config = defineRouteConfig({
