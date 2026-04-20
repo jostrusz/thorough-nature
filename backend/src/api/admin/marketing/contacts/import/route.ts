@@ -3,21 +3,67 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MARKETING_MODULE } from "../../../../../modules/marketing"
 import type MarketingModuleService from "../../../../../modules/marketing/service"
 
+/**
+ * Bulk import contacts.
+ *
+ * Body:
+ *   {
+ *     brand_ids: string[]              // required — one or more brands
+ *     contacts: Row[]                  // required
+ *     default_status?: string           // fallback status if row doesn't set one
+ *   }
+ *
+ *   Row: {
+ *     email: string (required)
+ *     first_name?, last_name?, phone?, address_line1?, city?,
+ *     postal_code?, company?, country_code?, locale?,
+ *     external_id?, status?, source?,
+ *     tags?: string[] | string,        // array or comma-separated
+ *     properties?: Record<string, any> // any leftover CSV columns
+ *   }
+ *
+ * Same email is imported once per selected brand (1 contact row per brand).
+ * Per-brand scoping preserves GDPR consent isolation — unsubscribing from
+ * Brand A doesn't affect Brand B.
+ */
+
+const IMPORTABLE_FIELDS = [
+  "phone",
+  "first_name",
+  "last_name",
+  "address_line1",
+  "city",
+  "postal_code",
+  "company",
+  "country_code",
+  "locale",
+  "external_id",
+  "source",
+]
+
 export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   try {
     const service = req.scope.resolve(MARKETING_MODULE) as unknown as MarketingModuleService
     const body = (req.body as any) || {}
 
-    if (!body.brand_id) {
-      res.status(400).json({ error: "brand_id is required" })
+    // Accept brand_ids (new) or brand_id (back-compat).
+    let brandIds: string[] = []
+    if (Array.isArray(body.brand_ids)) {
+      brandIds = body.brand_ids.filter((id: any) => typeof id === "string" && id.length > 0)
+    } else if (typeof body.brand_id === "string" && body.brand_id.length > 0) {
+      brandIds = [body.brand_id]
+    }
+    if (!brandIds.length) {
+      res.status(400).json({ error: "brand_ids (array) or brand_id is required" })
       return
     }
-    if (!Array.isArray(body.contacts)) {
+    if (!Array.isArray(body.contacts) || body.contacts.length === 0) {
       res.status(400).json({ error: "contacts array is required" })
       return
     }
 
-    const brand_id = body.brand_id
+    const defaultStatus = body.default_status || body.status || "unconfirmed"
+
     let created = 0
     let updated = 0
     const errors: any[] = []
@@ -30,45 +76,50 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         }
         const email = String(row.email).toLowerCase().trim()
 
-        const existing = await service.listMarketingContacts({ brand_id, email })
+        // Normalize tags: accept array or comma-separated string.
+        let tags: string[] | null = null
+        if (Array.isArray(row.tags)) {
+          tags = row.tags.map((t: any) => String(t).trim()).filter(Boolean)
+        } else if (typeof row.tags === "string" && row.tags.length) {
+          tags = row.tags.split(",").map((t: string) => t.trim()).filter(Boolean)
+        }
 
-        if (existing && existing.length > 0) {
-          const update: any = { id: (existing[0] as any).id }
-          if (row.first_name != null) update.first_name = row.first_name
-          if (row.last_name != null) update.last_name = row.last_name
-          if (row.phone != null) update.phone = row.phone
-          if (row.locale != null) update.locale = row.locale
-          if (row.country_code != null) update.country_code = row.country_code
-          if (row.status != null) update.status = row.status
-          if (row.tags != null) update.tags = row.tags
-          if (row.properties != null) update.properties = row.properties
-          if (row.source != null) update.source = row.source
-          if (row.external_id != null) update.external_id = row.external_id
-          await service.updateMarketingContacts(update)
-          updated++
-        } else {
-          await service.createMarketingContacts({
-            brand_id,
-            email,
-            phone: row.phone ?? null,
-            first_name: row.first_name ?? null,
-            last_name: row.last_name ?? null,
-            locale: row.locale ?? null,
-            country_code: row.country_code ?? null,
-            status: row.status ?? "unconfirmed",
-            source: row.source ?? "import",
-            tags: row.tags ?? null,
-            properties: row.properties ?? null,
-            external_id: row.external_id ?? null,
-          })
-          created++
+        // Process per brand — each brand gets its own contact row.
+        for (const brand_id of brandIds) {
+          const existing = await service.listMarketingContacts({ brand_id, email })
+
+          if (existing && existing.length > 0) {
+            const update: any = { id: (existing[0] as any).id }
+            for (const f of IMPORTABLE_FIELDS) {
+              if (row[f] != null) update[f] = row[f]
+            }
+            if (row.status != null) update.status = row.status
+            if (tags != null) update.tags = tags
+            if (row.properties != null) update.properties = row.properties
+            await service.updateMarketingContacts(update)
+            updated++
+          } else {
+            const data: any = {
+              brand_id,
+              email,
+              status: row.status ?? defaultStatus,
+              source: row.source ?? "import",
+              tags,
+              properties: row.properties ?? null,
+            }
+            for (const f of IMPORTABLE_FIELDS) {
+              if (row[f] != null) data[f] = row[f]
+            }
+            await service.createMarketingContacts(data)
+            created++
+          }
         }
       } catch (e: any) {
         errors.push({ row, error: e?.message || String(e) })
       }
     }
 
-    res.json({ created, updated, errors })
+    res.json({ created, updated, errors, brands_count: brandIds.length })
   } catch (err: any) {
     res.status(500).json({ error: err?.message || "internal_error" })
   }
