@@ -194,6 +194,56 @@ Klíčové (často používané):
 4. **Verifikuj fix** — po opravě znovu zkontroluj logy / data
 5. **Říkej co reálně víš** vs co hádáš
 
+### Diagnostika plateb — **payment_journey_log** (Payment Journey Debugger)
+
+Na každé platbě jsou zachyceny chronologické události pro forensic debugging
+INCOMPLETE / failed / CREATED-but-abandoned plateb. Zdroj pravdy pro diagnózu:
+
+**Tabulka:** `payment_journey_log` (columns: `intent_id`, `cart_id`, `email`,
+`project_slug`, `event_type`, `event_data` jsonb, `error_code`, `occurred_at`).
+
+**Event typy** (chronologicky v typickém flow):
+- `checkout_viewed` → `payment_methods_loaded` → `payment_method_selected`
+  → `submit_clicked` → `airwallex_intent_created` → `airwallex_confirm_request`
+  → `airwallex_confirm_response` → `payment_return` → `airwallex_webhook_received`
+
+**Workflow při diagnóze zákaznické stížnosti / INCOMPLETE platby:**
+
+1. Admin endpoint (JSON timeline, vyžaduje admin cookie):
+   ```
+   GET /admin/payment-debug?intent_id=int_XXX
+   GET /admin/payment-debug?email=customer@example.com
+   GET /admin/payment-debug?cart_id=cart_XXX
+   GET /admin/payment-debug?hours=24[&project_slug=loslatenboek]  ← funnel mode
+   ```
+2. Nebo přímo SQL:
+   ```sql
+   SELECT occurred_at, event_type, error_code, event_data
+   FROM payment_journey_log
+   WHERE lower(email) = lower('customer@example.com')
+   ORDER BY occurred_at DESC LIMIT 50;
+   ```
+3. **Kde funnel typicky odpadá** — porovnat `count(event_type)` za stejné okno:
+   - `checkout_viewed > payment_methods_loaded` → ad-blocker / CORS
+   - `submit_clicked > airwallex_intent_created` → backend crash
+   - `airwallex_confirm_response.error_code` → Airwallex rejection reason
+   - `payment_return` chybí → zákazník se nevrátil z banky
+   - `airwallex_webhook_received` má `failure_code` / `failure_reason`
+
+**Kód:**
+- Backend log helper: `backend/src/modules/payment-debug/utils/log.ts`
+  (`logPaymentEvent()` — fire-and-forget, never throws)
+- Instrumentace: `payment-airwallex/service.ts` (intent_created, confirm_*),
+  `webhooks/airwallex/route.ts` (webhook_received)
+- Public endpoint: `backend/src/api/public/payment-event/route.ts` (přijímá z frontendu)
+- Storefront proxy: `storefront/src/app/api/payment-event/route.ts`
+  (same-origin proti ad-blockerům)
+- Checkout HTML trackery: `window.PaymentTracker` injected v každém
+  `storefront/src/projects/*/pages/checkout.html`
+- Admin query endpoint: `backend/src/api/admin/payment-debug/route.ts`
+
+**Retention:** zatím žádný cleanup cron — do ~3 měsíců doplnit (TODO).
+
 ### Implementace nové fíčury
 
 1. Pokud komplexní → **napsat plán první** (2-3 hodiny+ práce)
