@@ -259,13 +259,31 @@ async function dispatchCampaign(
             brandId: campaign.brand_id,
             baseUrl,
           })
+
+          // Auto-inject compliance footer when the author's HTML does not
+          // already include an unsubscribe placeholder. Guarantees every
+          // outgoing marketing email carries required legal disclosures
+          // (company ID, address, unsubscribe, privacy) even if the author
+          // forgets to add them manually.
+          let htmlToCompile = email.custom_html || ""
+          const hasUnsubMarker = /\{\{\s*unsubscribe_url\s*\}\}|\{\$\s*unsubscribe(_url)?\s*\}|\$\{\s*unsubscribe_url\s*\}|<%=\s*unsubscribe_url\s*%>|\/public\/marketing\/u\//.test(htmlToCompile)
+          const footerTpl = (brand as any).compliance_footer_html as string | null | undefined
+          if (!hasUnsubMarker && footerTpl && htmlToCompile && email.editor_type === "html") {
+            // Inject before </body> if present, otherwise append at end.
+            if (/<\/body>/i.test(htmlToCompile)) {
+              htmlToCompile = htmlToCompile.replace(/<\/body>/i, `${footerTpl}\n</body>`)
+            } else {
+              htmlToCompile = htmlToCompile + "\n" + footerTpl
+            }
+          }
+
           const compiled = compileTemplate(
             {
               subject: email.subject,
               preheader: email.preheader,
               editor_type: email.editor_type,
               block_json: email.block_json,
-              custom_html: email.custom_html,
+              custom_html: htmlToCompile,
             },
             {
               contact: {

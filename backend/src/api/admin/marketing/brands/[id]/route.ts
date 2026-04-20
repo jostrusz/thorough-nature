@@ -34,6 +34,7 @@ const UPDATABLE_FIELDS = [
   "brand_voice_profile",
   "abandoned_cart_owner",
   "enabled",
+  "compliance_footer_html",
   "metadata",
   "resend_domain_id",
   "resend_audience_id",
