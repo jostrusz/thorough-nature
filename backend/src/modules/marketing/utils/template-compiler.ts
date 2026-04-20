@@ -80,19 +80,42 @@ export type CompiledTemplate = {
 }
 
 /**
- * Resolve {{ path }} placeholders from context. Missing values become empty
- * strings (never leak the template syntax into production emails).
+ * Resolve {{ path }} and {{ path|default:"fallback" }} placeholders.
+ *
+ * Supported syntax:
+ *   {{ contact.first_name }}                    explicit dotted path
+ *   {{ first_name }}                            auto-fallback to ctx.contact.*
+ *   {{ first_name|default:"vriend" }}           default filter (double quotes)
+ *   {{ first_name|default:'vriend' }}           default filter (single quotes)
+ *   {{ brand.name|default:"onze club" }}        works on any path
+ *
+ * Missing / empty values become empty string (never leak template syntax
+ * into production emails) — unless a `default` filter is supplied, in which
+ * case the fallback string is used.
  */
 export function interpolate(input: string, ctx: CompileContext): string {
   if (!input) return ""
-  return input.replace(/\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g, (_, path) => {
+  // Regex captures: path (group 1), optional default string (group 2 or 3)
+  // path: [a-zA-Z0-9_.]+  — same as before
+  // filter: |default:"..."  or  |default:'...'
+  const re = /\{\{\s*([a-zA-Z0-9_.]+)(?:\s*\|\s*default\s*:\s*(?:"([^"]*)"|'([^']*)'))?\s*\}\}/g
+  return input.replace(re, (_, path, dqDefault, sqDefault) => {
+    const fallback = dqDefault != null ? dqDefault : (sqDefault != null ? sqDefault : "")
     const parts = String(path).split(".")
+    // First try exact path from root ctx
     let cur: any = ctx
     for (const p of parts) {
-      if (cur == null) return ""
+      if (cur == null) { cur = undefined; break }
       cur = cur[p]
     }
-    if (cur == null) return ""
+    // If nothing found and path is single-segment, auto-fallback to ctx.contact.<name>
+    if ((cur == null || cur === "") && parts.length === 1) {
+      const contact: any = (ctx as any).contact
+      if (contact && contact[parts[0]] != null && contact[parts[0]] !== "") {
+        cur = contact[parts[0]]
+      }
+    }
+    if (cur == null || cur === "") return fallback
     return String(cur)
   })
 }
