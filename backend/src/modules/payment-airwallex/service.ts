@@ -6,6 +6,7 @@ import {
 } from "@medusajs/framework/utils"
 import { AirwallexApiClient } from "./api-client"
 import { Pool } from "pg"
+import { logPaymentEvent } from "../payment-debug/utils/log"
 
 type Options = {
   clientId?: string
@@ -300,6 +301,22 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
         `[Airwallex] Payment intent created: ${paymentIntent.id}, status: ${paymentIntent.status}`
       )
 
+      // Journey log — intent creation (observability, never throws)
+      logPaymentEvent({
+        intent_id: paymentIntent.id,
+        email: data?.email || null,
+        project_slug: projectSlug,
+        event_type: "airwallex_intent_created",
+        event_data: {
+          status: paymentIntent.status,
+          amount: createPayload.amount,
+          currency: createPayload.currency,
+          method,
+          request_id: createPayload.request_id,
+          return_url: returnUrl || null,
+        },
+      }).catch(() => {})
+
       // Determine environment for frontend SDK via direct DB query
       let environment = "demo"
       try {
@@ -381,6 +398,17 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
           // Server-side confirm for redirect payment methods (BLIK, P24, PayU, etc.)
           // Credit cards are NOT in REDIRECT_METHODS — they use Drop-in element on frontend
           {
+            // Journey log — confirm request (strip sensitive blik_code before logging)
+            const safePayload = JSON.parse(JSON.stringify(paymentMethodPayload))
+            if (safePayload?.blik?.blik_code) safePayload.blik.blik_code = "[REDACTED]"
+            logPaymentEvent({
+              intent_id: paymentIntent.id,
+              email: data?.email || null,
+              project_slug: projectSlug,
+              event_type: "airwallex_confirm_request",
+              event_data: { method, payload: safePayload, return_url: returnUrl },
+            }).catch(() => {})
+
             const confirmed = await client.confirmPaymentIntent(paymentIntent.id, {
               payment_method: paymentMethodPayload,
               return_url: returnUrl,
@@ -389,12 +417,38 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
             this.logger_.info(
               `[Airwallex] Redirect method ${method} confirmed: ${paymentIntent.id}, redirect: ${checkoutUrl ? "yes" : "no"}`
             )
+
+            logPaymentEvent({
+              intent_id: paymentIntent.id,
+              email: data?.email || null,
+              project_slug: projectSlug,
+              event_type: "airwallex_confirm_response",
+              event_data: {
+                method,
+                status: confirmed.status,
+                next_action_type: confirmed.next_action?.type || null,
+                next_action_url: checkoutUrl,
+                latest_payment_attempt_id: confirmed.latest_payment_attempt?.id || null,
+              },
+            }).catch(() => {})
           }
         } catch (confirmErr: any) {
           // Non-fatal: fall back to Drop-in on frontend
           this.logger_.warn(
             `[Airwallex] Server-side confirm for ${method} failed (will use Drop-in): ${confirmErr.message}`
           )
+          logPaymentEvent({
+            intent_id: paymentIntent.id,
+            email: data?.email || null,
+            project_slug: projectSlug,
+            event_type: "airwallex_confirm_response",
+            error_code: confirmErr?.code || "confirm_failed",
+            event_data: {
+              method,
+              error_message: String(confirmErr?.message || confirmErr),
+              error_detail: confirmErr?.response?.data || null,
+            },
+          }).catch(() => {})
         }
       }
 

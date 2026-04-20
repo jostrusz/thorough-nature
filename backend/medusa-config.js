@@ -91,6 +91,7 @@ const medusaConfig = {
     { resolve: "./src/modules/profitability" },
     { resolve: "./src/modules/advertorial" },
     { resolve: "./src/modules/marketing" },
+    { resolve: "./src/modules/payment-debug" },
     // NOTE: payment-comgate, payment-przelewy24, payment-klarna & payment-airwallex are registered as proper payment providers below
     // ═══ Core modules ═══
     {

@@ -2,6 +2,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { emitPaymentLog } from "../../../utils/payment-logger"
+import { logPaymentEvent } from "../../../modules/payment-debug/utils/log"
 
 /**
  * Helper: find order by Airwallex payment intent ID via direct DB query
@@ -228,6 +229,26 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     logger.info(`[Airwallex Webhook] Received event: ${event_type}, intent: ${paymentIntentId}`)
+
+    // Journey log — webhook event (async status update from Airwallex).
+    // Captures final status + failure reasons for forensic debugging.
+    logPaymentEvent({
+      intent_id: paymentIntentId,
+      event_type: "airwallex_webhook_received",
+      event_data: {
+        airwallex_event: event_type,
+        status: intentData.status || null,
+        amount: intentData.amount || null,
+        currency: intentData.currency || null,
+        payment_method_type: intentData?.latest_payment_attempt?.payment_method?.type
+          || intentData?.payment_method?.type
+          || null,
+        failure_code: intentData?.latest_payment_attempt?.failure_code || null,
+        failure_reason: intentData?.latest_payment_attempt?.failure_reason || null,
+        captured_amount: intentData.captured_amount || null,
+      },
+      error_code: intentData?.latest_payment_attempt?.failure_code || null,
+    }).catch(() => {})
 
     // Find the order with this Airwallex payment intent ID via direct DB query
     const order = await findOrderByIntentId(paymentIntentId, logger)
