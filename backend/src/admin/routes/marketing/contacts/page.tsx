@@ -77,6 +77,8 @@ function ContactsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [showCols, setShowCols] = useState(false)
   const [visibleCols, setVisibleCols] = useVisibleColumns()
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(100)
 
   const debounced = useDebounced(search, 300)
 
@@ -85,23 +87,26 @@ function ContactsPage() {
     if (brandId) p.push(`brand_id=${encodeURIComponent(brandId)}`)
     if (debounced) p.push(`email=${encodeURIComponent(debounced)}`)
     if (statusFilter) p.push(`status=${encodeURIComponent(statusFilter)}`)
-    p.push(`limit=500`)
+    p.push(`limit=${pageSize}`)
+    p.push(`offset=${page * pageSize}`)
     return p.length ? `?${p.join("&")}` : ""
-  }, [brandId, debounced, statusFilter])
+  }, [brandId, debounced, statusFilter, page, pageSize])
 
   const { data, isLoading } = useQuery({
-    queryKey: ["mkt-contacts", brandId, debounced, statusFilter],
+    queryKey: ["mkt-contacts", brandId, debounced, statusFilter, page, pageSize],
     queryFn: () =>
       sdk.client.fetch<{ contacts: any[]; count?: number }>(`/admin/marketing/contacts${qs}`, { method: "GET" }),
     enabled: !!brandId,
   })
   const contacts: any[] = ((data as any)?.contacts) || []
   const totalCount: number = ((data as any)?.count) ?? contacts.length
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
 
-  // Clear selection when brand or filters change.
+  // Reset to first page + clear selection when brand or filters change.
   useEffect(() => {
     setSelectedIds(new Set())
-  }, [brandId, debounced, statusFilter])
+    setPage(0)
+  }, [brandId, debounced, statusFilter, pageSize])
 
   const createMut = useMutation({
     mutationFn: (body: any) =>
@@ -321,6 +326,87 @@ function ContactsPage() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalCount > 0 && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: "14px",
+            padding: "10px 14px",
+            background: tokens.surface,
+            border: `1px solid ${tokens.borderSubtle}`,
+            borderRadius: tokens.rMd,
+            flexWrap: "wrap",
+            gap: "12px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: tokens.fgSecondary }}>
+            <span>
+              Showing <strong style={{ color: tokens.fg, fontVariantNumeric: "tabular-nums" }}>{fmt(page * pageSize + 1)}</strong>–
+              <strong style={{ color: tokens.fg, fontVariantNumeric: "tabular-nums" }}>{fmt(Math.min((page + 1) * pageSize, totalCount))}</strong>
+              {" "}of <strong style={{ color: tokens.fg, fontVariantNumeric: "tabular-nums" }}>{fmt(totalCount)}</strong>
+            </span>
+            <div style={{ height: "16px", width: "1px", background: tokens.borderStrong }} />
+            <label style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span>Per page:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                style={{
+                  border: `1px solid ${tokens.borderStrong}`,
+                  borderRadius: tokens.rSm,
+                  padding: "4px 8px",
+                  fontSize: "13px",
+                  background: tokens.surface,
+                  color: tokens.fg,
+                  cursor: "pointer",
+                }}
+              >
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={250}>250</option>
+                <option value={500}>500</option>
+              </select>
+            </label>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <button
+              className="mkt-btn mkt-btn-sm"
+              disabled={page === 0}
+              onClick={() => setPage(0)}
+            >
+              « First
+            </button>
+            <button
+              className="mkt-btn mkt-btn-sm"
+              disabled={page === 0}
+              onClick={() => setPage(page - 1)}
+            >
+              ‹ Prev
+            </button>
+            <div style={{ fontSize: "13px", color: tokens.fg, padding: "0 10px", fontVariantNumeric: "tabular-nums" }}>
+              Page <strong>{page + 1}</strong> of <strong>{fmt(totalPages)}</strong>
+            </div>
+            <button
+              className="mkt-btn mkt-btn-sm"
+              disabled={page + 1 >= totalPages}
+              onClick={() => setPage(page + 1)}
+            >
+              Next ›
+            </button>
+            <button
+              className="mkt-btn mkt-btn-sm"
+              disabled={page + 1 >= totalPages}
+              onClick={() => setPage(totalPages - 1)}
+            >
+              Last »
+            </button>
+          </div>
+        </div>
+      )}
 
       {showNew && <NewContactModal brandId={brandId} onClose={() => setShowNew(false)} onSave={(body) => createMut.mutate(body)} saving={createMut.isPending} />}
       {showImport && <ImportContactsModal defaultBrandId={brandId} onClose={() => setShowImport(false)} onImport={(body) => importMut.mutate(body)} importing={importMut.isPending} />}
