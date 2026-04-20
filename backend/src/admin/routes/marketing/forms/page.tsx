@@ -190,6 +190,7 @@ function FormsPage() {
 
 export const config = defineRouteConfig({
   label: "Forms",
+  rank: 70,
 })
 
 export default FormsPage

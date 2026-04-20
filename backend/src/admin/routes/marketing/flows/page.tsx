@@ -141,6 +141,7 @@ function FlowsPage() {
 
 export const config = defineRouteConfig({
   label: "Flows",
+  rank: 30,
 })
 
 export default FlowsPage

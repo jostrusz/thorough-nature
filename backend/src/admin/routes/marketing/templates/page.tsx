@@ -151,6 +151,7 @@ function TemplatesPage() {
 
 export const config = defineRouteConfig({
   label: "Templates",
+  rank: 40,
 })
 
 export default TemplatesPage
