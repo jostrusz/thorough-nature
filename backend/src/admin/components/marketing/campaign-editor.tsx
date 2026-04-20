@@ -354,8 +354,9 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                   Supports <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ contact.first_name }}"}</code>, <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ unsubscribe_url }}"}</code>
                 </span>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", minHeight: "560px" }}>
-                <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+              {/* Stacked layout: HTML editor on top, full-width preview below */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+                <div style={{ display: "flex", flexDirection: "column" }}>
                   <label className="mkt-label">Custom HTML</label>
                   <textarea
                     value={customHtml}
@@ -363,8 +364,7 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                     placeholder={"<html>…</html>"}
                     spellCheck={false}
                     style={{
-                      flex: 1,
-                      minHeight: "520px",
+                      minHeight: "420px",
                       padding: "12px 14px",
                       fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
                       fontSize: "13px",
@@ -377,16 +377,21 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                     }}
                   />
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                  <label className="mkt-label">Preview</label>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
+                    <label className="mkt-label" style={{ margin: 0 }}>Preview</label>
+                    <span style={{ fontSize: "11px", color: tokens.fgMuted }}>
+                      Rendered at ~640px, like an inbox client
+                    </span>
+                  </div>
                   <div
                     style={{
-                      flex: 1,
-                      minHeight: "520px",
+                      minHeight: "800px",
                       border: `1px solid ${tokens.borderStrong}`,
                       borderRadius: tokens.rMd,
-                      background: "#f6f6f7",
+                      background: "#F3F2EE",
                       overflow: "hidden",
+                      padding: "16px 0",
                     }}
                   >
                     {customHtml ? (
@@ -395,10 +400,15 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                         srcDoc={previewHtml}
                         sandbox=""
                         style={{
+                          display: "block",
                           width: "100%",
-                          height: "520px",
+                          maxWidth: "680px",
+                          height: "900px",
+                          margin: "0 auto",
                           border: "0",
                           background: "#fff",
+                          borderRadius: "6px",
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
                         }}
                       />
                     ) : (
@@ -407,12 +417,12 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          height: "520px",
+                          height: "800px",
                           color: tokens.fgMuted,
                           fontSize: "14px",
                         }}
                       >
-                        Empty HTML
+                        Empty HTML — start typing above to see preview
                       </div>
                     )}
                   </div>
