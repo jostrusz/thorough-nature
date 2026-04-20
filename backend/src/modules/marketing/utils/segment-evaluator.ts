@@ -121,6 +121,27 @@ function compileLeaf(cond: LeafCondition, ctx: BuildCtx): string {
       source: "c.source",
       subscribed_at: "c.consent_at",
       created_at: "c.created_at",
+      // Computed / intelligence columns (populated by nightly cron + live subscriber)
+      lifecycle_stage: "c.lifecycle_stage",
+      rfm_segment: "c.rfm_segment",
+      rfm_score: "c.rfm_score",
+      total_orders: "c.total_orders",
+      total_revenue_eur: "c.total_revenue_eur",
+      avg_order_value_eur: "c.avg_order_value_eur",
+      email_attributed_orders: "c.email_attributed_orders",
+      email_attributed_revenue_eur: "c.email_attributed_revenue_eur",
+      engagement_score: "c.engagement_score",
+      emails_sent_total: "c.emails_sent_total",
+      emails_opened_total: "c.emails_opened_total",
+      primary_book: "c.primary_book",
+      first_order_at: "c.first_order_at",
+      last_order_at: "c.last_order_at",
+      last_email_opened_at: "c.last_email_opened_at",
+      last_email_clicked_at: "c.last_email_clicked_at",
+      acquisition_source: "c.acquisition_source",
+      acquisition_medium: "c.acquisition_medium",
+      acquisition_campaign: "c.acquisition_campaign",
+      acquisition_at: "c.acquisition_at",
     }
     const sqlCol = COLUMN_MAP[col]
     if (!sqlCol) return "TRUE"
@@ -128,13 +149,40 @@ function compileLeaf(cond: LeafCondition, ctx: BuildCtx): string {
   }
 
   // ───────────────────────────────────────────────────────────
-  // contact.tags (JSONB array)
+  // contact.tags / contact.purchased_books (JSONB array of text)
+  // Ops: has, not_has, exists, not_exists
   // ───────────────────────────────────────────────────────────
-  if (field === "contact.tags") {
+  if (field === "contact.tags" || field === "contact.purchased_books") {
+    const col = field === "contact.tags" ? "c.tags" : "c.purchased_books"
     if (op === "has") {
       const p = push(ctx, value)
-      return `(c.tags IS NOT NULL AND c.tags::jsonb @> to_jsonb(ARRAY[${p}]::text[]))`
+      return `(${col} IS NOT NULL AND ${col}::jsonb @> to_jsonb(ARRAY[${p}]::text[]))`
     }
+    if (op === "not_has") {
+      const p = push(ctx, value)
+      return `(${col} IS NULL OR NOT (${col}::jsonb @> to_jsonb(ARRAY[${p}]::text[])))`
+    }
+    if (op === "exists") return `${col} IS NOT NULL AND jsonb_array_length(${col}::jsonb) > 0`
+    if (op === "not_exists") return `(${col} IS NULL OR jsonb_array_length(${col}::jsonb) = 0)`
+    return "TRUE"
+  }
+
+  // ───────────────────────────────────────────────────────────
+  // contact.days_since_last_order / contact.days_since_acquisition
+  // Numeric helper — op value is number of days.
+  //   gt X  → field is older than X days (or null for acquisition)
+  //   lt X  → field is within the last X days
+  // ───────────────────────────────────────────────────────────
+  if (field === "contact.days_since_last_order" || field === "contact.days_since_acquisition") {
+    const col = field === "contact.days_since_last_order" ? "c.last_order_at" : "c.acquisition_at"
+    const n = Number(value)
+    if (!Number.isFinite(n) || n < 0) return "TRUE"
+    if (op === "gt") return `(${col} IS NOT NULL AND ${col} < NOW() - INTERVAL '${n} days')`
+    if (op === "gte") return `(${col} IS NOT NULL AND ${col} <= NOW() - INTERVAL '${n} days')`
+    if (op === "lt") return `(${col} IS NOT NULL AND ${col} > NOW() - INTERVAL '${n} days')`
+    if (op === "lte") return `(${col} IS NOT NULL AND ${col} >= NOW() - INTERVAL '${n} days')`
+    if (op === "exists") return `${col} IS NOT NULL`
+    if (op === "not_exists") return `${col} IS NULL`
     return "TRUE"
   }
 
@@ -282,6 +330,8 @@ function applyOp(sqlCol: string, op: string, value: any, ctx: BuildCtx): string 
       return `${sqlCol} > ${push(ctx, value)}`
     case "exists":
       return value === false ? `${sqlCol} IS NULL` : `${sqlCol} IS NOT NULL`
+    case "not_exists":
+      return `${sqlCol} IS NULL`
     default:
       return "TRUE"
   }
