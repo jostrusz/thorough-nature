@@ -2793,6 +2793,27 @@ body {
           <!-- Airwallex Drop-in container (hidden, shown only when Airwallex payment method selected) -->
           <div id="airwallex-dropin-container" style="display:none; padding: 16px; animation: fadeIn 0.3s ease;"></div>
 
+          <!-- BLIK code input (shown only when BLIK selected — Airwallex needs the 6-digit code BEFORE confirm) -->
+          <div id="blik-fields" style="display:none; padding: 4px 16px 12px 48px; animation: fadeIn 0.3s ease;">
+            <label for="blik_code" style="display:block;font-size:13px;color:#555;margin-bottom:6px;">
+              Kod BLIK (6 cyfr z Twojej aplikacji bankowej)
+            </label>
+            <input
+              type="text"
+              id="blik_code"
+              inputmode="numeric"
+              pattern="[0-9]{6}"
+              maxlength="6"
+              autocomplete="off"
+              placeholder="••• •••"
+              style="width:100%;max-width:220px;padding:12px 14px;font-size:20px;font-weight:600;letter-spacing:8px;text-align:center;border:1px solid #D0D5DD;border-radius:6px;background:#fff;font-variant-numeric:tabular-nums;"
+            >
+            <div id="blik-error" style="font-size:12px;color:var(--error);margin-top:6px;min-height:16px;"></div>
+            <p style="font-size:12px;color:#666;margin:8px 0 0 0;line-height:1.4;">
+              Otwórz aplikację swojego banku → BLIK → Wygeneruj kod. Po zatwierdzeniu zamówienia potwierdź płatność w aplikacji (masz 60 sekund).
+            </p>
+          </div>
+
           <div id="payment-errors" role="alert"></div>
         </div>
 
@@ -5530,11 +5551,36 @@ body {
           }
         }
 
+        // Show/hide BLIK code input — Airwallex BLIK requires the 6-digit code
+        // to be collected BEFORE confirming the payment intent server-side.
+        var blikFields = document.getElementById('blik-fields');
+        if (blikFields) {
+          if (selectedMethod === 'blik') {
+            blikFields.style.display = 'block';
+            var blikInput = document.getElementById('blik_code');
+            if (blikInput) setTimeout(function() { blikInput.focus(); }, 100);
+          } else {
+            blikFields.style.display = 'none';
+            var blikErr = document.getElementById('blik-error');
+            if (blikErr) blikErr.textContent = '';
+          }
+        }
+
         updateButtonText();
         updateSubtext();
         document.getElementById('payment-errors').textContent = '';
       });
     });
+
+    // BLIK input: numeric-only, auto-trim
+    var blikInputEl = document.getElementById('blik_code');
+    if (blikInputEl) {
+      blikInputEl.addEventListener('input', function(e) {
+        e.target.value = (e.target.value || '').replace(/\D/g, '').slice(0, 6);
+        var errEl = document.getElementById('blik-error');
+        if (errEl) errEl.textContent = '';
+      });
+    }
 
     // Handle Klarna parent click → expand/collapse + select first sub-method
     if (klarnaParent) {
@@ -7309,11 +7355,29 @@ body {
       } else {
         // Use dynamic provider_id from selected payment method
         providerId = selectedProviderId || 'pp_mollie_mollie';
+        // BLIK: validate 6-digit code BEFORE creating payment session,
+        // otherwise Airwallex has nothing to push to the bank app.
+        if (selectedMethod === 'blik') {
+          var blikCodeEl = document.getElementById('blik_code');
+          var blikCodeVal = blikCodeEl ? (blikCodeEl.value || '').replace(/\D/g, '') : '';
+          if (blikCodeVal.length !== 6) {
+            var blikErrEl = document.getElementById('blik-error');
+            if (blikErrEl) blikErrEl.textContent = 'Wpisz 6-cyfrowy kod BLIK z Twojej aplikacji bankowej.';
+            if (blikCodeEl) blikCodeEl.focus();
+            throw new Error('BLIK_CODE_REQUIRED');
+          }
+        }
+
         sessionData = {
           method: selectedMethod,
           comgate_method: selectedMethod, // Comgate-specific: maps to BLIK_PL, BANK_PL_*, etc.
           return_url: window.location.href.split('?')[0] + '?payment_return=1&cart_id=' + cartId,
           project_slug: PROJECT_CONFIG.slug || '',
+          // BLIK 6-digit code — consumed by Airwallex backend service, placed in
+          // payment_method.blik.blik_code when confirming the intent.
+          blik_code: selectedMethod === 'blik'
+            ? (document.getElementById('blik_code') || {}).value || null
+            : null,
           // Pass addresses for Klarna (requires billing address via Mollie Orders API)
           billing_address: customerData.billing_address,
           shipping_address: customerData.shipping_address,
