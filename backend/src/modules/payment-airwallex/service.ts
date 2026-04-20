@@ -370,27 +370,12 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
               const lastName = data?.shipping_address?.last_name || data?.billing_address?.last_name || ""
               paymentMethodPayload.bancontact.shopper_name = `${firstName} ${lastName}`.trim() || "Customer"
             }
-            // BLIK requires shopper_name, shopper_email AND the 6-digit
-            // blik_code customer just generated in their banking app.
-            // Without blik_code Airwallex CAN'T push the approval prompt to
-            // the bank, and the hosted redirect page has no UI to collect
-            // it (it's a status-polling page, not a payment form).
+            // BLIK requires shopper_name and shopper_email
             if (method === "blik") {
               const firstName = data?.shipping_address?.first_name || data?.billing_address?.first_name || ""
               const lastName = data?.shipping_address?.last_name || data?.billing_address?.last_name || ""
               paymentMethodPayload.blik.shopper_name = `${firstName} ${lastName}`.trim() || "Customer"
               paymentMethodPayload.blik.shopper_email = data?.email || ""
-              const blikCode = typeof data?.blik_code === "string"
-                ? data.blik_code.replace(/\D/g, "").slice(0, 6)
-                : ""
-              if (blikCode.length === 6) {
-                paymentMethodPayload.blik.blik_code = blikCode
-              } else {
-                this.logger_.warn(
-                  `[Airwallex] BLIK confirmation missing 6-digit blik_code — payment will fail. ` +
-                  `Collect the code on the frontend before submitting the payment session.`
-                )
-              }
             }
           }
           // Server-side confirm for redirect payment methods (BLIK, P24, PayU, etc.)
