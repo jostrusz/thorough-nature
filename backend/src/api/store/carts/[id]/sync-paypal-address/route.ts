@@ -148,24 +148,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       updateData.email = payer.email_address
     }
 
-    // Primary path: try Medusa cart module service (future-proof if DI becomes
-    // available in store route scope in a later Medusa version). Today it throws
-    // "Could not resolve 'cartModuleService'" — we swallow and fall through.
-    let updateOk = false
-    try {
-      const cartService = req.scope.resolve("cartModuleService") as any
-      if (cartService?.updateCarts) {
-        await cartService.updateCarts(cartId, updateData)
-        updateOk = true
-      }
-    } catch {
-      // DI unavailable in this scope — fall through to SQL path
-    }
-
-    // Reliable path: direct SQL on cart_address + cart. The cart already has
-    // shipping/billing address rows (customer filled the form before hitting
-    // PayPal) — we overwrite them with the payer/shipping data PayPal returned.
-    if (!updateOk) {
+    // Direct SQL on cart_address + cart. The cart already has shipping/billing
+    // address rows (customer filled the form before PayPal redirect) — overwrite
+    // with the payer/shipping data PayPal returned.
+    {
       const { Pool } = require("pg")
       const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
       try {
