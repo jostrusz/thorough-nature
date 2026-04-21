@@ -1088,6 +1088,50 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
 }
 
 // ─── Contact details slide-over ──────────────────────────────────────────
+const STATUS_OPTIONS = [
+  { value: "subscribed", label: "Subscribed" },
+  { value: "unconfirmed", label: "Unconfirmed" },
+  { value: "unsubscribed", label: "Unsubscribed" },
+  { value: "bounced", label: "Bounced" },
+  { value: "complained", label: "Complained" },
+  { value: "suppressed", label: "Suppressed" },
+]
+const SOURCE_OPTIONS = [
+  { value: "", label: "—" },
+  { value: "popup", label: "Popup" },
+  { value: "checkout", label: "Checkout" },
+  { value: "manual", label: "Manual" },
+  { value: "import", label: "Import" },
+  { value: "api", label: "API" },
+]
+const LIFECYCLE_OPTIONS = [
+  { value: "", label: "—" },
+  { value: "lead", label: "Lead" },
+  { value: "new_customer", label: "New customer" },
+  { value: "active", label: "Active" },
+  { value: "loyal", label: "Loyal" },
+  { value: "at_risk", label: "At risk" },
+  { value: "dormant", label: "Dormant" },
+  { value: "sunset", label: "Sunset" },
+  { value: "churned", label: "Churned" },
+]
+const RFM_OPTIONS = [
+  { value: "", label: "—" },
+  { value: "champion", label: "Champion" },
+  { value: "loyal", label: "Loyal" },
+  { value: "potential_loyal", label: "Potential loyal" },
+  { value: "at_risk", label: "At risk" },
+  { value: "cant_lose", label: "Can't lose" },
+  { value: "hibernating", label: "Hibernating" },
+  { value: "lost", label: "Lost" },
+]
+
+const EDITABLE_FIELDS = [
+  "email", "first_name", "last_name", "phone", "company", "source", "locale",
+  "address_line1", "city", "postal_code", "country_code", "timezone",
+  "status", "lifecycle_stage", "rfm_segment",
+]
+
 function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () => void }) {
   const qc = useQueryClient()
   const { data } = useQuery({
@@ -1103,12 +1147,49 @@ function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () =
   const c = (data as any)?.contact || contact
   const events: any[] = ((activityData as any)?.events) || []
 
+  const [editing, setEditing] = useState(false)
+  const [form, setForm] = useState<Record<string, any>>({})
   const [tags, setTags] = useState<string[]>(contact.tags || [])
   const [newTag, setNewTag] = useState("")
 
   useEffect(() => {
     setTags(c.tags || [])
   }, [c.tags])
+
+  // Initialize / reset form whenever contact data refreshes and we're not editing.
+  useEffect(() => {
+    if (!editing) {
+      const initial: Record<string, any> = {}
+      for (const k of EDITABLE_FIELDS) initial[k] = c[k] ?? ""
+      setForm(initial)
+    }
+  }, [c, editing])
+
+  const updateMut = useMutation({
+    mutationFn: (patch: Record<string, any>) =>
+      sdk.client.fetch(`/admin/marketing/contacts/${contact.id}`, {
+        method: "POST",
+        body: patch,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["mkt-contacts"] })
+      qc.invalidateQueries({ queryKey: ["mkt-contact", contact.id] })
+      setEditing(false)
+      toast.success("Contact saved")
+    },
+    onError: (e: any) => toast.error("Save failed: " + (e?.message || "unknown")),
+  })
+
+  const deleteMut = useMutation({
+    mutationFn: () =>
+      sdk.client.fetch(`/admin/marketing/contacts/${contact.id}`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["mkt-contacts"] })
+      toast.success("Contact deleted")
+      onClose()
+    },
+    onError: (e: any) => toast.error("Delete failed: " + (e?.message || "unknown")),
+  })
 
   const saveTagsMut = useMutation({
     mutationFn: (tags: string[]) =>
@@ -1124,6 +1205,29 @@ function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () =
     onError: () => toast.error("Failed to update tags"),
   })
 
+  const updateForm = (k: string, v: any) => setForm((prev) => ({ ...prev, [k]: v }))
+
+  const handleSave = () => {
+    // Send only changed fields. Empty string → null (clears value).
+    const patch: Record<string, any> = {}
+    for (const k of EDITABLE_FIELDS) {
+      const newVal = form[k] === "" ? null : form[k]
+      const oldVal = c[k] ?? null
+      if (newVal !== oldVal) patch[k] = newVal
+    }
+    if (Object.keys(patch).length === 0) {
+      setEditing(false)
+      toast.info?.("No changes to save")
+      return
+    }
+    updateMut.mutate(patch)
+  }
+
+  const handleDelete = () => {
+    if (!confirm(`Delete contact ${c.email}? This cannot be undone.`)) return
+    deleteMut.mutate()
+  }
+
   const lists = c.list_memberships || c.lists || []
   const money = (v: any) => (v != null && !isNaN(Number(v)) ? `€ ${Number(v).toFixed(2)}` : null)
   const pct = (v: any) => (v != null && !isNaN(Number(v)) ? `${(Number(v) * 100).toFixed(1)} %` : null)
@@ -1132,20 +1236,58 @@ function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () =
   return (
     <SlideOver title={c.email} onClose={onClose}>
       <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-        {/* Status + headline */}
-        <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
-          <StatusBadge status={c.status || "subscribed"} />
-          {c.lifecycle_stage && (
-            <span className="mkt-badge" style={{ background: tokens.borderSubtle, color: tokens.fgSecondary }}>
-              {c.lifecycle_stage}
-            </span>
-          )}
-          {c.rfm_segment && (
-            <span className="mkt-badge" style={{ background: tokens.primarySoft, color: tokens.primary }}>
-              RFM: {c.rfm_segment}
-            </span>
+        {/* Top toolbar — Edit / Save / Cancel / Delete */}
+        <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+          {!editing ? (
+            <>
+              <button className="mkt-btn-primary mkt-btn-sm" onClick={() => setEditing(true)}>
+                Edit
+              </button>
+              <button
+                className="mkt-btn mkt-btn-sm"
+                style={{ marginLeft: "auto", color: tokens.dangerFg, borderColor: tokens.dangerFg }}
+                onClick={handleDelete}
+                disabled={deleteMut.isPending}
+              >
+                {deleteMut.isPending ? "Deleting…" : "Delete contact"}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="mkt-btn-primary mkt-btn-sm"
+                onClick={handleSave}
+                disabled={updateMut.isPending}
+              >
+                {updateMut.isPending ? "Saving…" : "Save changes"}
+              </button>
+              <button
+                className="mkt-btn mkt-btn-sm"
+                onClick={() => setEditing(false)}
+                disabled={updateMut.isPending}
+              >
+                Cancel
+              </button>
+            </>
           )}
         </div>
+
+        {/* Status + headline (read-only mode) */}
+        {!editing && (
+          <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
+            <StatusBadge status={c.status || "subscribed"} />
+            {c.lifecycle_stage && (
+              <span className="mkt-badge" style={{ background: tokens.borderSubtle, color: tokens.fgSecondary }}>
+                {c.lifecycle_stage}
+              </span>
+            )}
+            {c.rfm_segment && (
+              <span className="mkt-badge" style={{ background: tokens.primarySoft, color: tokens.primary }}>
+                RFM: {c.rfm_segment}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* KPI tiles — Orders / Revenue / Engagement */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
@@ -1155,22 +1297,53 @@ function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () =
         </div>
 
         <Section title="Identity">
-          <Detail label="First name" value={c.first_name} />
-          <Detail label="Last name" value={c.last_name} />
-          <Detail label="Phone" value={c.phone} />
-          <Detail label="Company" value={c.company} />
-          <Detail label="Source" value={c.source} />
-          <Detail label="Project" value={c.project_id || c.brand_display_name} />
-          <Detail label="Created" value={dt(c.created_at)} />
-          <Detail label="Locale" value={c.locale} />
+          {editing ? (
+            <>
+              <EditableField label="Email" value={form.email} onChange={(v) => updateForm("email", v)} span={2} />
+              <EditableField label="First name" value={form.first_name} onChange={(v) => updateForm("first_name", v)} />
+              <EditableField label="Last name" value={form.last_name} onChange={(v) => updateForm("last_name", v)} />
+              <EditableField label="Phone" value={form.phone} onChange={(v) => updateForm("phone", v)} />
+              <EditableField label="Company" value={form.company} onChange={(v) => updateForm("company", v)} />
+              <EditableSelect label="Status" value={form.status} onChange={(v) => updateForm("status", v)} options={STATUS_OPTIONS} />
+              <EditableSelect label="Source" value={form.source} onChange={(v) => updateForm("source", v)} options={SOURCE_OPTIONS} />
+              <EditableField label="Locale" value={form.locale} onChange={(v) => updateForm("locale", v)} />
+              <EditableSelect label="Lifecycle stage" value={form.lifecycle_stage} onChange={(v) => updateForm("lifecycle_stage", v)} options={LIFECYCLE_OPTIONS} />
+              <EditableSelect label="RFM segment" value={form.rfm_segment} onChange={(v) => updateForm("rfm_segment", v)} options={RFM_OPTIONS} />
+              <Detail label="Project" value={c.project_id || c.brand_display_name} />
+              <Detail label="Created" value={dt(c.created_at)} />
+            </>
+          ) : (
+            <>
+              <Detail label="First name" value={c.first_name} />
+              <Detail label="Last name" value={c.last_name} />
+              <Detail label="Phone" value={c.phone} />
+              <Detail label="Company" value={c.company} />
+              <Detail label="Source" value={c.source} />
+              <Detail label="Project" value={c.project_id || c.brand_display_name} />
+              <Detail label="Created" value={dt(c.created_at)} />
+              <Detail label="Locale" value={c.locale} />
+            </>
+          )}
         </Section>
 
         <Section title="Address">
-          <Detail label="Street" value={c.address_line1} span={2} />
-          <Detail label="City" value={c.city} />
-          <Detail label="Postal code" value={c.postal_code} />
-          <Detail label="Country" value={c.country_code} />
-          <Detail label="Timezone" value={c.timezone} />
+          {editing ? (
+            <>
+              <EditableField label="Street" value={form.address_line1} onChange={(v) => updateForm("address_line1", v)} span={2} />
+              <EditableField label="City" value={form.city} onChange={(v) => updateForm("city", v)} />
+              <EditableField label="Postal code" value={form.postal_code} onChange={(v) => updateForm("postal_code", v)} />
+              <EditableField label="Country code" value={form.country_code} onChange={(v) => updateForm("country_code", v.toUpperCase().slice(0, 2))} />
+              <EditableField label="Timezone" value={form.timezone} onChange={(v) => updateForm("timezone", v)} />
+            </>
+          ) : (
+            <>
+              <Detail label="Street" value={c.address_line1} span={2} />
+              <Detail label="City" value={c.city} />
+              <Detail label="Postal code" value={c.postal_code} />
+              <Detail label="Country" value={c.country_code} />
+              <Detail label="Timezone" value={c.timezone} />
+            </>
+          )}
         </Section>
 
         {(c.total_orders > 0 || c.email_attributed_orders > 0 || c.first_order_at) && (
@@ -1339,6 +1512,38 @@ function Detail({ label, value, span }: { label: string; value: any; span?: numb
     <div style={span ? { gridColumn: `span ${span}` } : undefined}>
       <label className="mkt-label">{label}</label>
       <div style={{ fontSize: "14px", color: tokens.fg, wordBreak: "break-word" }}>{value != null && value !== "" ? String(value) : "—"}</div>
+    </div>
+  )
+}
+
+function EditableField({
+  label, value, onChange, span,
+}: { label: string; value: any; onChange: (v: string) => void; span?: number }) {
+  return (
+    <div style={span ? { gridColumn: `span ${span}` } : undefined}>
+      <label className="mkt-label">{label}</label>
+      <input className="mkt-input" value={value ?? ""} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  )
+}
+
+function EditableSelect({
+  label, value, onChange, options, span,
+}: {
+  label: string
+  value: any
+  onChange: (v: string) => void
+  options: { value: string; label: string }[]
+  span?: number
+}) {
+  return (
+    <div style={span ? { gridColumn: `span ${span}` } : undefined}>
+      <label className="mkt-label">{label}</label>
+      <select className="mkt-input" value={value ?? ""} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
     </div>
   )
 }
