@@ -119,6 +119,22 @@ export function buildOpenPixelUrl(opts: { messageId: string; brandId: string; ba
   return `${base}/public/marketing/o/${token}`
 }
 
+/** Build the "view email in browser" URL for a given message. */
+export function buildViewInBrowserUrl(opts: {
+  messageId: string
+  brandId: string
+  baseUrl: string
+}): string {
+  const token = signToken({
+    t: "view",
+    m: opts.messageId,
+    b: opts.brandId,
+    exp: Date.now() + ONE_YEAR_MS,
+  })
+  const base = opts.baseUrl.replace(/\/+$/, "")
+  return `${base}/public/marketing/view/${token}`
+}
+
 /** Build the unsubscribe URL (used by compiler/footer). */
 export function buildUnsubscribeUrl(opts: {
   contactId: string
