@@ -7,6 +7,7 @@ import { ResendMarketingClient } from "../modules/marketing/services/resend-clie
 import { compileTemplate } from "../modules/marketing/utils/template-compiler"
 import { injectTracking, buildUnsubscribeUrl, buildViewInBrowserUrl } from "../modules/marketing/utils/tracking-injector"
 import { getViewInBrowserStrings } from "../modules/marketing/utils/view-in-browser-i18n"
+import { generateAiEmail } from "../modules/marketing/utils/ai-email-generator"
 
 /**
  * Marketing Flow Executor
@@ -177,9 +178,9 @@ async function executeRun(
     throw new Error(`Flow ${flow.id} has empty definition`)
   }
 
-  // Load contact
+  // Load contact (include properties so AI email generator can use quiz_*)
   const { rows: contactRows } = await pool.query(
-    `SELECT id, brand_id, email, first_name, last_name, locale, country_code, tags, status
+    `SELECT id, brand_id, email, first_name, last_name, locale, country_code, tags, status, properties
      FROM marketing_contact
      WHERE id = $1 AND deleted_at IS NULL
      LIMIT 1`,
@@ -520,6 +521,54 @@ async function sendFlowEmail(args: {
       reply_to: node.config?.reply_to || null,
     }
   }
+
+  // AI generation — overrides subject/preheader/html when node.config.ai_generate=true.
+  // Contact's form-submit properties (quiz_category/subcategory/intensity/emotion)
+  // are fed into a day-template prompt to produce a personalized email body.
+  let aiGeneratedMeta: any = null
+  if (node.config?.ai_generate === true) {
+    try {
+      const gen = await generateAiEmail({
+        contact: {
+          first_name: contact.first_name,
+          email: contact.email,
+          locale: contact.locale,
+          properties: contact.properties || {},
+        },
+        brand: {
+          id: brand.id,
+          slug: brand.slug,
+          display_name: brand.display_name,
+          locale: brand.locale,
+          brand_voice_profile: brand.brand_voice_profile,
+          marketing_from_name: brand.marketing_from_name,
+        },
+        dayTemplate: (node.config?.ai_day_template as any) || "day1",
+        model: node.config?.ai_model as any,
+      })
+      tpl.subject = gen.subject
+      tpl.preheader = gen.preheader
+      tpl.custom_html = gen.html
+      aiGeneratedMeta = {
+        ai_generated: true,
+        day_template: node.config.ai_day_template || "day1",
+        model_used: gen.model_used,
+        generated_at: gen.generated_at,
+        body_markdown: gen.body_markdown,
+      }
+      logger.info(`[Marketing Flow AI] Generated ${aiGeneratedMeta.day_template} email for contact=${contact.id} via ${gen.model_used}`)
+    } catch (err: any) {
+      logger.error(`[Marketing Flow AI] Generation failed for contact=${contact.id}, node=${node.id}: ${err?.message}`)
+      // Hard fallback — if AI fails AND node has no static content, skip the email
+      // to avoid sending an empty shell. Flow continues to next node.
+      if (!tpl.subject || !tpl.custom_html) {
+        logger.warn(`[Marketing Flow AI] Skipping email node ${node.id} — no fallback content`)
+        return
+      }
+      // Otherwise fall through to the static content as a safety net.
+    }
+  }
+
   if (!tpl.subject) {
     throw new Error(`Email node ${node.id} has no subject / template`)
   }
@@ -543,6 +592,7 @@ async function sendFlowEmail(args: {
     from_email: fromEmail,
     subject_snapshot: tpl.subject,
     status: "queued",
+    metadata: aiGeneratedMeta || null,
   } as any)
   const messageId = (msg as any).id
 
