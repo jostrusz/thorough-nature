@@ -636,6 +636,8 @@ function EmailHoverPreview({ html, anchorX, anchorY }: { html: string; anchorX: 
 // ═══════════════════════════════════════════════════════════════════════
 // Email editor slide-over — same fields as campaigns, scoped to this node
 // ═══════════════════════════════════════════════════════════════════════
+const TEST_EMAIL_TO = "jaroslavostruszka@gmail.com"
+
 function EmailEditorSlideOver({
   node, brand, onClose, onSave,
 }: {
@@ -655,6 +657,26 @@ function EmailEditorSlideOver({
 
   const previewDoc = useMemo(() => buildPreviewDocument(html, preheader), [html, preheader])
   const canSave = !!subject && !!html
+  const brandId = brand?.id
+
+  const testSendMut = useMutation({
+    mutationFn: () =>
+      sdk.client.fetch(`/admin/marketing/email/test-send`, {
+        method: "POST",
+        body: {
+          brand_id: brandId,
+          to_email: TEST_EMAIL_TO,
+          subject,
+          preheader,
+          from_name: fromName,
+          from_email: fromEmail,
+          reply_to: replyTo,
+          html,
+        },
+      }),
+    onSuccess: () => toast.success(`Test email sent to ${TEST_EMAIL_TO}`),
+    onError: (e: any) => toast.error("Test send failed: " + (e?.message || "unknown")),
+  })
 
   return (
     <SlideOver
@@ -662,6 +684,14 @@ function EmailEditorSlideOver({
       onClose={onClose}
       footer={
         <>
+          <button
+            className="mkt-btn"
+            disabled={!canSave || !brandId || testSendMut.isPending}
+            onClick={() => testSendMut.mutate()}
+            title={brandId ? `Send test to ${TEST_EMAIL_TO}` : "Select a brand first"}
+          >
+            {testSendMut.isPending ? "Sending test…" : "📧 Send test"}
+          </button>
           <button className="mkt-btn" onClick={onClose}>Cancel</button>
           <button
             className="mkt-btn-primary"

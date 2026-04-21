@@ -490,6 +490,15 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
               >
                 {saveMut.isPending ? "Saving…" : "Save draft"}
               </button>
+              <TestSendButton
+                brandId={brandId}
+                subject={subject}
+                preheader={preheader}
+                fromName={fromName}
+                fromEmail={fromEmail}
+                replyTo={replyTo}
+                html={customHtml}
+              />
               <button
                 className="mkt-btn-primary"
                 disabled={!canSchedule || saveMut.isPending}
@@ -511,6 +520,50 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
         </div>
       )}
     </>
+  )
+}
+
+const TEST_EMAIL_TO = "jaroslavostruszka@gmail.com"
+
+function TestSendButton({
+  brandId, subject, preheader, fromName, fromEmail, replyTo, html,
+}: {
+  brandId: string | null
+  subject: string
+  preheader: string
+  fromName: string
+  fromEmail: string
+  replyTo: string
+  html: string
+}) {
+  const canSend = !!brandId && !!subject && !!html
+  const testSendMut = useMutation({
+    mutationFn: () =>
+      sdk.client.fetch(`/admin/marketing/email/test-send`, {
+        method: "POST",
+        body: {
+          brand_id: brandId,
+          to_email: TEST_EMAIL_TO,
+          subject,
+          preheader,
+          from_name: fromName,
+          from_email: fromEmail,
+          reply_to: replyTo,
+          html,
+        },
+      }),
+    onSuccess: () => toast.success(`Test email sent to ${TEST_EMAIL_TO}`),
+    onError: (e: any) => toast.error("Test send failed: " + (e?.message || "unknown")),
+  })
+  return (
+    <button
+      className="mkt-btn"
+      onClick={() => testSendMut.mutate()}
+      disabled={!canSend || testSendMut.isPending}
+      title={canSend ? `Send test to ${TEST_EMAIL_TO}` : "Fill in brand, subject, and HTML first"}
+    >
+      {testSendMut.isPending ? "Sending test…" : "📧 Send test"}
+    </button>
   )
 }
 
