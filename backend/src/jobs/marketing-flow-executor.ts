@@ -206,8 +206,47 @@ async function executeRun(
   let shouldWait = false
   let waitUntil: Date | null = null
   let completed = false
+  let exitReason: string | null = null
+  let goalId: string | null = null
+  let visited: string[] = Array.isArray(run.visited_node_ids) ? [...run.visited_node_ids] : []
+
+  // ── Pre-execution exit checks ────────────────────────────────────────
+  // 1. Contact status hygiene — always auto-exit, not opt-in.
+  const HYGIENE_EXIT_STATUSES = new Set(["unsubscribed", "bounced", "complained", "suppressed"])
+  if (HYGIENE_EXIT_STATUSES.has(String(contact.status))) {
+    await pool.query(
+      `UPDATE marketing_flow_run
+       SET state = 'exited', completed_at = NOW(), current_node_id = NULL,
+           next_run_at = NULL, exit_reason = $2, visited_node_ids = $3::jsonb
+       WHERE id = $1`,
+      [run.id, String(contact.status), JSON.stringify(visited)]
+    )
+    return
+  }
+
+  // 2. Goal evaluation — if any flow goal matches, exit early as "completed".
+  if (Array.isArray(flow.goals) && flow.goals.length > 0) {
+    const matched = await evaluateFlowGoals({
+      goals: flow.goals,
+      contact,
+      flow,
+      pool,
+      runStartedAt: run.started_at,
+    })
+    if (matched) {
+      await pool.query(
+        `UPDATE marketing_flow_run
+         SET state = 'completed', completed_at = NOW(), current_node_id = NULL,
+             next_run_at = NULL, exit_reason = $2, goal_id = $3, visited_node_ids = $4::jsonb
+         WHERE id = $1`,
+        [run.id, `goal:${matched.id}`, matched.id, JSON.stringify(visited)]
+      )
+      return
+    }
+  }
 
   while (currentNodeId && advanced < MAX_NODES_PER_RUN && !shouldWait && !completed) {
+    if (currentNodeId) visited.push(currentNodeId)
     const node = findNode(def, currentNodeId)
     if (!node) {
       throw new Error(`Node ${currentNodeId} not found in flow ${flow.id}`)
@@ -295,6 +334,7 @@ async function executeRun(
       case "exit":
       case "end": {
         completed = true
+        exitReason = "exit_node"
         break
       }
 
@@ -307,6 +347,7 @@ async function executeRun(
 
     if (!currentNodeId && !shouldWait) {
       completed = true
+      if (!exitReason) exitReason = "flow_end"
       break
     }
   }
@@ -315,27 +356,114 @@ async function executeRun(
     await pool.query(
       `UPDATE marketing_flow_run
        SET state = 'completed', completed_at = NOW(), current_node_id = NULL,
-           next_run_at = NULL, context = $2::jsonb
+           next_run_at = NULL, context = $2::jsonb, exit_reason = $3,
+           visited_node_ids = $4::jsonb
        WHERE id = $1`,
-      [run.id, JSON.stringify(ctx)]
+      [run.id, JSON.stringify(ctx), exitReason, JSON.stringify(visited)]
     )
   } else if (shouldWait) {
     await pool.query(
       `UPDATE marketing_flow_run
-       SET state = 'waiting', current_node_id = $2, next_run_at = $3, context = $4::jsonb
+       SET state = 'waiting', current_node_id = $2, next_run_at = $3, context = $4::jsonb,
+           visited_node_ids = $5::jsonb
        WHERE id = $1`,
-      [run.id, currentNodeId, waitUntil, JSON.stringify(ctx)]
+      [run.id, currentNodeId, waitUntil, JSON.stringify(ctx), JSON.stringify(visited)]
     )
   } else {
     // Hit node cap — stay running, pick up next tick
     await pool.query(
       `UPDATE marketing_flow_run
        SET state = 'running', current_node_id = $2, next_run_at = NOW() + INTERVAL '1 minute',
-           context = $3::jsonb
+           context = $3::jsonb, visited_node_ids = $4::jsonb
        WHERE id = $1`,
-      [run.id, currentNodeId, JSON.stringify(ctx)]
+      [run.id, currentNodeId, JSON.stringify(ctx), JSON.stringify(visited)]
     )
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Exit goals — evaluate whether a contact has matched any of the flow's
+// exit goals since the run started. Returns the matching goal or null.
+// ═══════════════════════════════════════════════════════════════════════
+type GoalType = "event" | "product_purchase" | "segment_match" | "tag_added"
+type FlowGoal = {
+  id: string
+  name?: string
+  type: GoalType
+  config?: Record<string, any>
+  count_as_completed?: boolean
+}
+
+async function evaluateFlowGoals(args: {
+  goals: FlowGoal[]
+  contact: any
+  flow: any
+  pool: Pool
+  runStartedAt: Date
+}): Promise<FlowGoal | null> {
+  const { goals, contact, flow, pool, runStartedAt } = args
+  const since = runStartedAt instanceof Date ? runStartedAt.toISOString() : new Date(runStartedAt).toISOString()
+
+  for (const goal of goals) {
+    try {
+      switch (goal.type) {
+        case "event": {
+          const eventType = String(goal.config?.event_type || "")
+          if (!eventType) break
+          const { rows } = await pool.query(
+            `SELECT 1 FROM marketing_event
+             WHERE contact_id = $1 AND event_type = $2 AND occurred_at >= $3
+             LIMIT 1`,
+            [contact.id, eventType, since]
+          )
+          if (rows.length) return goal
+          break
+        }
+        case "product_purchase": {
+          // Match against Medusa orders: order.email = contact.email, placed after runStartedAt,
+          // optionally filter by product title keyword (LIKE) and/or project_slug (metadata.project_id).
+          const keyword = String(goal.config?.product_keyword || "").trim()
+          const projectSlug = String(goal.config?.project_slug || "").trim()
+          const params: any[] = [String(contact.email || "").toLowerCase(), since]
+          let extra = ""
+          if (projectSlug) {
+            params.push(projectSlug)
+            extra += ` AND (o.metadata->>'project_id') = $${params.length}`
+          }
+          if (keyword) {
+            params.push(`%${keyword.toLowerCase()}%`)
+            extra += ` AND EXISTS (
+              SELECT 1 FROM order_line_item li WHERE li.order_id = o.id
+                AND (LOWER(li.title) LIKE $${params.length} OR LOWER(COALESCE(li.product_title,'')) LIKE $${params.length})
+            )`
+          }
+          const sql = `SELECT 1 FROM "order" o
+                       WHERE LOWER(o.email) = $1 AND o.created_at >= $2 AND o.deleted_at IS NULL
+                         ${extra}
+                       LIMIT 1`
+          const { rows } = await pool.query(sql, params)
+          if (rows.length) return goal
+          break
+        }
+        case "segment_match": {
+          // Delegate to segment-evaluator by checking if contact.id is in the segment's preview SQL.
+          // For simplicity we check a segment membership cache if present; otherwise skip.
+          // TODO: wire to segment-evaluator compile once segment engine exposes a check-one helper.
+          break
+        }
+        case "tag_added": {
+          const tag = String(goal.config?.tag || "")
+          if (!tag) break
+          const tags: string[] = Array.isArray(contact.tags) ? contact.tags : []
+          if (tags.includes(tag)) return goal
+          break
+        }
+      }
+    } catch {
+      // Never let goal evaluation errors break the whole run
+    }
+  }
+  return null
 }
 
 function getNextEdge(def: FlowDefinition, nodeId: string): string | null {
@@ -408,6 +536,7 @@ async function sendFlowEmail(args: {
     contact_id: contact.id,
     flow_id: flow.id,
     flow_run_id: run.id,
+    flow_node_id: node.id,
     template_id: tpl.id,
     template_version: tpl.version,
     to_email: contact.email,
@@ -459,11 +588,13 @@ async function sendFlowEmail(args: {
     }
   )
 
+  const flowSlug = String(flow.name || flow.id).toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 40) || flow.id
   const trackedHtml = brand.tracking_enabled
     ? injectTracking(compiled.html, {
         messageId,
         brandId: flow.brand_id,
         baseUrl,
+        utmCampaign: `flow_${flowSlug}_${node.id}`,
       })
     : compiled.html
 

@@ -319,6 +319,7 @@ async function dispatchCampaign(
             messageId,
             brandId: campaign.brand_id,
             baseUrl,
+            utmCampaign: `campaign_${String(campaign.name || campaign.id).toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 60) || campaign.id}`,
           })
 
           // 4. Send via Resend

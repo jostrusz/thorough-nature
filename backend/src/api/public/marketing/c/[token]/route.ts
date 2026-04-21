@@ -1,4 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import crypto from "crypto"
 import { MARKETING_MODULE } from "../../../../../modules/marketing"
 import type MarketingModuleService from "../../../../../modules/marketing/service"
 import { verifyToken } from "../../../../../modules/marketing/utils/tokens"
@@ -62,10 +63,29 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
             flow_id: (msg as any).flow_id || null,
             flow_run_id: (msg as any).flow_run_id || null,
             url: payload.u,
+            link_label: payload.l || null,
             user_agent: req.headers["user-agent"],
           },
           occurred_at: now,
           source: "click_tracker",
+        } as any)
+        // Detailed click row — one per click, used by link-performance dashboards
+        const ipRaw = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || (req as any).ip || ""
+        const ipSalt = process.env.MARKETING_TOKEN_SECRET || "marketing-ip-salt"
+        const ip_hash = ipRaw ? crypto.createHash("sha256").update(`${ipRaw}|${ipSalt}`).digest("hex").slice(0, 32) : null
+        await service.createMarketingClicks({
+          brand_id: payload.b,
+          message_id: msg.id,
+          contact_id: (msg as any).contact_id || null,
+          campaign_id: (msg as any).campaign_id || null,
+          flow_id: (msg as any).flow_id || null,
+          flow_run_id: (msg as any).flow_run_id || null,
+          flow_node_id: (msg as any).flow_node_id || null,
+          link_label: payload.l || null,
+          target_url: payload.u,
+          clicked_at: now,
+          user_agent: (req.headers["user-agent"] as string) || null,
+          ip_hash,
         } as any)
       }
     } catch {

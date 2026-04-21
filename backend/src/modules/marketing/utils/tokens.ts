@@ -40,6 +40,7 @@ export type TokenPayload = {
   c?: string     // contact_id
   m?: string     // message_id
   u?: string     // url (for click)
+  l?: string     // link label (for click — e.g. "cta_main")
   exp?: number   // unix ms expiry
   n?: string     // nonce (for DOI confirmation)
 }

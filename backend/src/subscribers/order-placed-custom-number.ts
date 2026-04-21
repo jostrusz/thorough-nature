@@ -1,6 +1,6 @@
 import { Modules } from "@medusajs/framework/utils"
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
-import { PROFITABILITY_MODULE } from "../modules/profitability/index.js"
+import { PROFITABILITY_MODULE } from "../modules/profitability"
 
 // Project display names for order tags
 const PROJECT_TAG_NAMES: Record<string, string> = {
