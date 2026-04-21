@@ -21,7 +21,7 @@ import { useSelectedBrand, StatusBadge, brandQs, fmt, tokens } from "./shared"
 export function CampaignEditor({ campaignId }: { campaignId?: string }) {
   const qc = useQueryClient()
   const navigate = useNavigate()
-  const { brandId } = useSelectedBrand()
+  const { brandId, setBrandId } = useSelectedBrand()
   const bQs = brandQs(brandId)
 
   const [currentId, setCurrentId] = useState<string | undefined>(campaignId)
@@ -82,9 +82,13 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
     const b = (brandsQ.data as any)?.brands?.find((x: any) => x.id === brandId)
     if (b) {
       setBrand(b)
-      if (!fromName && !currentId) setFromName(b.marketing_from_name || "")
-      if (!fromEmail && !currentId) setFromEmail(b.marketing_from_email || "")
-      if (!replyTo && !currentId) setReplyTo(b.marketing_reply_to || "")
+      // Prefill sender fields from the newly selected brand, but only on new
+      // campaigns (don't trample an already-saved draft).
+      if (!currentId) {
+        setFromName(b.marketing_from_name || "")
+        setFromEmail(b.marketing_from_email || "")
+        setReplyTo(b.marketing_reply_to || "")
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [brandsQ.data, brandId])
@@ -237,6 +241,54 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "16px", alignItems: "flex-start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {/* Brand selector — prominent, drives all defaults below */}
+            <div
+              className="mkt-card"
+              style={{
+                padding: "18px 20px",
+                border: `2px solid ${tokens.primary}`,
+                background: tokens.primarySoft,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
+                <div style={{ flex: "0 0 auto" }}>
+                  <div style={{ fontSize: "11px", fontWeight: 700, color: tokens.primary, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>
+                    Brand
+                  </div>
+                  <div style={{ fontSize: "12px", color: tokens.fgSecondary }}>
+                    Determines footer, from-email, recipients & tracking
+                  </div>
+                </div>
+                <div style={{ flex: 1, minWidth: "240px" }}>
+                  <select
+                    className="mkt-input"
+                    value={brandId || ""}
+                    onChange={(e) => setBrandId(e.target.value || null)}
+                    style={{
+                      height: "44px",
+                      fontSize: "15px",
+                      fontWeight: 600,
+                      borderColor: tokens.primary,
+                      background: "#fff",
+                    }}
+                  >
+                    <option value="">— Select brand —</option>
+                    {((brandsQ.data as any)?.brands || []).map((b: any) => (
+                      <option key={b.id} value={b.id}>{b.display_name || b.slug}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {brand && (
+                <div style={{ marginTop: "10px", fontSize: "12px", color: tokens.fgSecondary, display: "flex", gap: "14px", flexWrap: "wrap" }}>
+                  <span>📧 {brand.marketing_from_email || "—"}</span>
+                  <span>🌐 {brand.storefront_domain || "—"}</span>
+                  <span>🌍 {(brand.locale || "en").toUpperCase()}</span>
+                  <span>{brand.compliance_footer_html ? "✅ Footer set" : "⚠️ No footer"}</span>
+                </div>
+              )}
+            </div>
+
             {/* Basics */}
             <div className="mkt-card" style={{ padding: "20px" }}>
               <label className="mkt-label">Campaign name</label>
