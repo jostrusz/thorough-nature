@@ -81,13 +81,19 @@ export async function DELETE(req: MedusaRequest, res: MedusaResponse): Promise<v
       res.status(404).json({ error: "not_found" })
       return
     }
-    if ((existing as any).status !== "draft") {
-      res.status(400).json({ error: "only draft campaigns can be deleted" })
-      return
-    }
 
-    await service.deleteMarketingCampaigns(id)
-    res.status(200).json({ id, deleted: true })
+    // Draft → hard delete (no attribution / messages to preserve).
+    // Anything else (scheduled / sending / sent / cancelled) → soft-hide:
+    // set deleted_at so the list view filters it out, but marketing_message,
+    // marketing_attribution, and analytics history stay intact.
+    const status = String((existing as any).status || "")
+    if (status === "draft") {
+      await service.deleteMarketingCampaigns(id)
+      res.status(200).json({ id, deleted: true, hidden: false })
+    } else {
+      await service.updateMarketingCampaigns({ id, deleted_at: new Date() } as any)
+      res.status(200).json({ id, deleted: false, hidden: true })
+    }
   } catch (err: any) {
     res.status(500).json({ error: err?.message || "internal_error" })
   }

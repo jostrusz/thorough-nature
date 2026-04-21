@@ -7,16 +7,11 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   try {
     const service = req.scope.resolve(MARKETING_MODULE) as unknown as MarketingModuleService
     const q = (req.query as any) || {}
-    const brand_id = q.brand_id
-    if (!brand_id) {
-      res.status(400).json({ error: "brand_id is required" })
-      return
-    }
-
     const limit = Math.min(500, Math.max(1, Number(q.limit ?? 50)))
     const offset = Math.max(0, Number(q.offset ?? 0))
 
-    const filters: any = { brand_id }
+    const filters: any = {}
+    if (q.brand_id) filters.brand_id = q.brand_id
     if (q.campaign_id) filters.campaign_id = q.campaign_id
     if (q.flow_id) filters.flow_id = q.flow_id
     if (q.contact_id) filters.contact_id = q.contact_id
