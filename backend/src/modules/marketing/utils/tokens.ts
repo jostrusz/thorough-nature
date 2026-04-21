@@ -35,7 +35,7 @@ function b64urlDecode(str: string): Buffer {
 }
 
 export type TokenPayload = {
-  t: string      // token type: "unsub", "pixel", "click", "confirm"
+  t: string      // token type: "unsub", "pixel", "click", "confirm", "view"
   b: string      // brand_id
   c?: string     // contact_id
   m?: string     // message_id

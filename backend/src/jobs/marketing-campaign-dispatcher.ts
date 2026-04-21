@@ -4,7 +4,7 @@ import { MARKETING_MODULE } from "../modules/marketing"
 import type MarketingModuleService from "../modules/marketing/service"
 import { ResendMarketingClient } from "../modules/marketing/services/resend-client"
 import { compileTemplate } from "../modules/marketing/utils/template-compiler"
-import { injectTracking, buildUnsubscribeUrl } from "../modules/marketing/utils/tracking-injector"
+import { injectTracking, buildUnsubscribeUrl, buildViewInBrowserUrl } from "../modules/marketing/utils/tracking-injector"
 import { RecipientResolver } from "../modules/marketing/utils/recipient-resolver"
 import { getViewInBrowserStrings } from "../modules/marketing/utils/view-in-browser-i18n"
 
@@ -299,16 +299,18 @@ async function dispatchCampaign(
                 from_email: fromEmail,
               },
               unsubscribe_url,
-              // View-in-browser fallback — localized per brand.locale.
-              // URL defaults to brand storefront (no dedicated web-view endpoint yet).
+              // View-in-browser fallback — localized text + real per-message
+              // web-view URL that re-renders this exact email on our domain.
               ...(() => {
                 const vib = getViewInBrowserStrings((brand as any).locale)
-                const domain = (brand as any).storefront_domain
-                const url = domain ? `https://${String(domain).replace(/^https?:\/\//, "")}` : "#"
                 return {
                   view_in_browser_text: vib.text,
                   view_in_browser_label: vib.label,
-                  view_in_browser_url: url,
+                  view_in_browser_url: buildViewInBrowserUrl({
+                    messageId,
+                    brandId: campaign.brand_id,
+                    baseUrl,
+                  }),
                 }
               })(),
             }

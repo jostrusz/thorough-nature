@@ -5,6 +5,7 @@ import type MarketingModuleService from "../../../../../modules/marketing/servic
 import { compileTemplate } from "../../../../../modules/marketing/utils/template-compiler"
 import { ResendMarketingClient } from "../../../../../modules/marketing/services/resend-client"
 import { getViewInBrowserStrings } from "../../../../../modules/marketing/utils/view-in-browser-i18n"
+import { buildViewInBrowserUrl } from "../../../../../modules/marketing/utils/tracking-injector"
 
 /**
  * POST /admin/marketing/email/test-send
@@ -46,15 +47,51 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     if (!brand) { res.status(404).json({ error: "brand_not_found" }); return }
 
     const vib = getViewInBrowserStrings((brand as any).locale)
-    const domain = (brand as any).storefront_domain
-    const viewInBrowserUrl = domain ? `https://${String(domain).replace(/^https?:\/\//, "")}` : "#"
+    // Create a preview marketing_message up-front so the test email has a
+    // real web-view URL (re-renders via /public/marketing/view/:token).
+    // HTML is stored in metadata.preview_html for the view endpoint shortcut.
+    const previewMsg = await service.createMarketingMessages({
+      brand_id: brandId,
+      to_email: toEmail,
+      from_email: body.from_email || (brand as any).marketing_from_email,
+      subject_snapshot: `[TEST] ${subject}`,
+      status: "preview",
+      metadata: { preview: true, created_via: "test-send" },
+    } as any)
+    const previewMessageId = (previewMsg as any).id
+    const baseUrl =
+      process.env.MARKETING_PUBLIC_URL ||
+      process.env.BACKEND_PUBLIC_URL ||
+      (process.env.RAILWAY_PUBLIC_DOMAIN_VALUE
+        ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN_VALUE.replace(/^https?:\/\//, "")}`
+        : "http://localhost:9000")
+    const viewInBrowserUrl = buildViewInBrowserUrl({
+      messageId: previewMessageId,
+      brandId,
+      baseUrl,
+    })
+
+    // Mirror dispatcher behavior: if the email HTML doesn't already contain an
+    // unsubscribe placeholder, auto-inject the brand's compliance_footer_html
+    // before </body>. Same rules as marketing-campaign-dispatcher.ts so the
+    // test email looks identical to a real send.
+    let htmlToCompile = html
+    const hasUnsubMarker = /\{\{\s*unsubscribe_url\s*\}\}|\{\$\s*unsubscribe(_url)?\s*\}|\$\{\s*unsubscribe_url\s*\}|<%=\s*unsubscribe_url\s*%>|\/public\/marketing\/u\//.test(htmlToCompile)
+    const footerTpl = (brand as any).compliance_footer_html as string | null | undefined
+    if (!hasUnsubMarker && footerTpl && htmlToCompile) {
+      if (/<\/body>/i.test(htmlToCompile)) {
+        htmlToCompile = htmlToCompile.replace(/<\/body>/i, `${footerTpl}\n</body>`)
+      } else {
+        htmlToCompile = htmlToCompile + "\n" + footerTpl
+      }
+    }
 
     const compiled = compileTemplate(
       {
         subject,
         preheader: body.preheader || "",
         editor_type: "html",
-        custom_html: html,
+        custom_html: htmlToCompile,
       },
       {
         contact: { first_name: "Test", last_name: "User", email: toEmail },
@@ -85,11 +122,20 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       replyTo: replyTo || undefined,
     })
 
+    // Store compiled HTML in the preview message so web-view can serve it
+    // verbatim. Fire-and-forget — a failure here should not break the test.
+    try {
+      await service.updateMarketingMessages({
+        id: previewMessageId,
+        metadata: { preview: true, created_via: "test-send", preview_html: compiled.html },
+      } as any)
+    } catch { /* swallow */ }
+
     if (!result.ok) {
       res.status(500).json({ ok: false, error: result.error || "send_failed" })
       return
     }
-    res.json({ ok: true, resend_id: result.resend_id })
+    res.json({ ok: true, resend_id: result.resend_id, preview_url: viewInBrowserUrl })
   } catch (err: any) {
     res.status(500).json({ error: err?.message || "internal_error" })
   }

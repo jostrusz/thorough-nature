@@ -5,7 +5,7 @@ import { MARKETING_MODULE } from "../modules/marketing"
 import type MarketingModuleService from "../modules/marketing/service"
 import { ResendMarketingClient } from "../modules/marketing/services/resend-client"
 import { compileTemplate } from "../modules/marketing/utils/template-compiler"
-import { injectTracking, buildUnsubscribeUrl } from "../modules/marketing/utils/tracking-injector"
+import { injectTracking, buildUnsubscribeUrl, buildViewInBrowserUrl } from "../modules/marketing/utils/tracking-injector"
 import { getViewInBrowserStrings } from "../modules/marketing/utils/view-in-browser-i18n"
 
 /**
@@ -574,15 +574,17 @@ async function sendFlowEmail(args: {
       },
       flow_context: ctx,
       unsubscribe_url,
-      // View-in-browser fallback — localized per brand.locale.
+      // View-in-browser fallback — localized text + real web-view URL per message.
       ...(() => {
         const vib = getViewInBrowserStrings((brand as any).locale)
-        const domain = (brand as any).storefront_domain
-        const url = domain ? `https://${String(domain).replace(/^https?:\/\//, "")}` : "#"
         return {
           view_in_browser_text: vib.text,
           view_in_browser_label: vib.label,
-          view_in_browser_url: url,
+          view_in_browser_url: buildViewInBrowserUrl({
+            messageId,
+            brandId: flow.brand_id,
+            baseUrl,
+          }),
         }
       })(),
     }
