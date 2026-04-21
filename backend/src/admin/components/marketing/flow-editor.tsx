@@ -36,6 +36,9 @@ type EmailConfig = {
   reply_to?: string
   html?: string
   editor_type?: "html" | "blocks"
+  ai_generate?: boolean
+  ai_day_template?: "day1" | "day2" | "day3"
+  ai_model?: "claude-sonnet-4-6" | "claude-opus-4-7" | "claude-haiku-4-5-20251001"
 }
 
 type FlowNode = {
@@ -526,13 +529,32 @@ function EmailNodeBody({ node, onEdit }: { node: FlowNode; onEdit: () => void })
   }
   const onLeave = () => { setHovered(false); setHoverPos(null) }
 
+  const isAi = cfg.ai_generate === true
+  const dayLabel = cfg.ai_day_template ? { day1: "Day 1 — validation", day2: "Day 2 — story + tool", day3: "Day 3 — book bridge" }[cfg.ai_day_template] : ""
+  const modelLabel = cfg.ai_model ? { "claude-sonnet-4-6": "Sonnet 4.6", "claude-opus-4-7": "Opus 4.7", "claude-haiku-4-5-20251001": "Haiku 4.5" }[cfg.ai_model] : ""
+
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 160px", gap: "16px", alignItems: "stretch" }}>
       <div style={{ display: "flex", flexDirection: "column", gap: "10px", minWidth: 0 }}>
+        {isAi && (
+          <div
+            style={{
+              padding: "8px 10px",
+              background: tokens.primarySoft,
+              border: `1px solid ${tokens.primary}`,
+              borderRadius: tokens.rSm,
+              fontSize: "12px", color: tokens.primary, fontWeight: 600,
+              display: "flex", alignItems: "center", gap: "6px",
+            }}
+          >
+            <span>✨ AI-generated per recipient</span>
+            <span style={{ color: tokens.fgSecondary, fontWeight: 400 }}>· {dayLabel} · {modelLabel}</span>
+          </div>
+        )}
         <div>
-          <div style={{ fontSize: "10px", color: tokens.fgMuted, letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "2px" }}>Subject</div>
+          <div style={{ fontSize: "10px", color: tokens.fgMuted, letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "2px" }}>Subject{isAi ? " (fallback)" : ""}</div>
           <div style={{ fontSize: "14px", color: cfg.subject ? tokens.fg : tokens.fgMuted, fontWeight: cfg.subject ? 500 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {cfg.subject || "— not set —"}
+            {cfg.subject || (isAi ? "— generated at send —" : "— not set —")}
           </div>
         </div>
         <div>
@@ -654,9 +676,13 @@ function EmailEditorSlideOver({
   const [replyTo, setReplyTo] = useState(initial.reply_to || "")
   const [html, setHtml] = useState(initial.html || "")
   const [activeTab, setActiveTab] = useState<"html" | "preview">("preview")
+  const [aiGenerate, setAiGenerate] = useState<boolean>(initial.ai_generate === true)
+  const [aiDayTemplate, setAiDayTemplate] = useState<"day1" | "day2" | "day3">(initial.ai_day_template || "day1")
+  const [aiModel, setAiModel] = useState<EmailConfig["ai_model"]>(initial.ai_model || (initial.ai_day_template === "day3" ? "claude-opus-4-7" : "claude-sonnet-4-6"))
 
   const previewDoc = useMemo(() => buildPreviewDocument(html, preheader), [html, preheader])
-  const canSave = !!subject && !!html
+  // When AI generation is enabled, subject/html aren't required upfront (generated per-send).
+  const canSave = aiGenerate ? true : (!!subject && !!html)
   const brandId = brand?.id
 
   const testSendMut = useMutation({
@@ -705,6 +731,9 @@ function EmailEditorSlideOver({
                 from_email: fromEmail,
                 reply_to: replyTo,
                 html,
+                ai_generate: aiGenerate || undefined,
+                ai_day_template: aiGenerate ? aiDayTemplate : undefined,
+                ai_model: aiGenerate ? aiModel : undefined,
               })
             }
           >
@@ -714,9 +743,86 @@ function EmailEditorSlideOver({
       }
     >
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px" }}>
+        {/* ─── AI generation panel ──────────────────────────────────────── */}
+        <div
+          style={{
+            border: `1.5px solid ${aiGenerate ? tokens.primary : tokens.borderStrong}`,
+            background: aiGenerate ? tokens.primarySoft : "#fff",
+            borderRadius: tokens.rMd,
+            padding: "14px 16px",
+          }}
+        >
+          <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={aiGenerate}
+              onChange={(e) => setAiGenerate(e.target.checked)}
+              style={{ width: 18, height: 18, accentColor: tokens.primary, cursor: "pointer" }}
+            />
+            <div>
+              <div style={{ fontSize: "14px", fontWeight: 600, color: tokens.fg }}>
+                ✨ Generate with AI per recipient
+              </div>
+              <div style={{ fontSize: "12px", color: tokens.fgSecondary, marginTop: "2px" }}>
+                Subject + body are generated fresh for each contact based on their form-submit answers (quiz path).
+              </div>
+            </div>
+          </label>
+          {aiGenerate && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "12px" }}>
+              <div>
+                <label className="mkt-label">Day template</label>
+                <select
+                  className="mkt-input"
+                  value={aiDayTemplate}
+                  onChange={(e) => {
+                    const v = e.target.value as "day1" | "day2" | "day3"
+                    setAiDayTemplate(v)
+                    // Auto-bump to Opus for day 3 (first soft pitch = revenue-critical)
+                    if (v === "day3" && aiModel !== "claude-opus-4-7") setAiModel("claude-opus-4-7")
+                    if (v !== "day3" && aiModel === "claude-opus-4-7") setAiModel("claude-sonnet-4-6")
+                  }}
+                >
+                  <option value="day1">Day 1 — validation + reframe</option>
+                  <option value="day2">Day 2 — story + micro-tool</option>
+                  <option value="day3">Day 3 — soft book bridge (pitch)</option>
+                </select>
+              </div>
+              <div>
+                <label className="mkt-label">Model</label>
+                <select
+                  className="mkt-input"
+                  value={aiModel}
+                  onChange={(e) => setAiModel(e.target.value as EmailConfig["ai_model"])}
+                >
+                  <option value="claude-sonnet-4-6">Sonnet 4.6 (recommended)</option>
+                  <option value="claude-opus-4-7">Opus 4.7 (best, 3× cost)</option>
+                  <option value="claude-haiku-4-5-20251001">Haiku 4.5 (fastest, cheap)</option>
+                </select>
+              </div>
+              <div style={{ gridColumn: "span 2", fontSize: "11px", color: tokens.fgMuted, lineHeight: 1.5 }}>
+                Uses contact.properties from the triggering form: <code>quiz_category</code>, <code>quiz_subcategory</code>, <code>quiz_intensity</code>, <code>quiz_emotion</code>. Voice is pulled from the brand's <code>brand_voice_profile</code>.
+              </div>
+            </div>
+          )}
+        </div>
+
+        {aiGenerate && (
+          <div
+            style={{
+              padding: "14px 16px",
+              background: tokens.infoSoft,
+              borderRadius: tokens.rMd,
+              fontSize: "12px", color: tokens.fgSecondary, lineHeight: 1.5,
+            }}
+          >
+            When AI is on, Subject / Preheader / HTML below are ignored at send-time — fresh content is generated per recipient. Fields are left visible for optional fallback if AI generation fails.
+          </div>
+        )}
+
         <div>
-          <label className="mkt-label">Subject *</label>
-          <input className="mkt-input" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Eye-catching subject line" />
+          <label className="mkt-label">Subject{aiGenerate ? " (fallback)" : " *"}</label>
+          <input className="mkt-input" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder={aiGenerate ? "Optional — used only if AI fails" : "Eye-catching subject line"} />
         </div>
         <div>
           <label className="mkt-label">Preheader</label>
