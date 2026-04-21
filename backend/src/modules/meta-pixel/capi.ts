@@ -221,8 +221,13 @@ export async function sendCAPIEvents(
 
       // 4xx = client error, don't retry
       if (response.status >= 400 && response.status < 500) {
-        const errMsg =
-          body?.error?.message || body?.error?.error_user_msg || JSON.stringify(body)
+        const errParts = [
+          body?.error?.message,
+          body?.error?.error_user_msg,
+          body?.error?.error_subcode ? `subcode:${body.error.error_subcode}` : null,
+          body?.error?.fbtrace_id ? `fbtrace:${body.error.fbtrace_id}` : null,
+        ].filter(Boolean)
+        const errMsg = errParts.join(" | ") || JSON.stringify(body)
         console.error(
           `[META CAPI] ✗ Client error (${response.status}) for pixel ${config.pixel_id}:`,
           errMsg

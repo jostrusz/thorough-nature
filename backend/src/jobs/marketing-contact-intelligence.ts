@@ -117,11 +117,12 @@ async function processBrand(pool: Pool, brand: { id: string; slug: string }, log
       SELECT
         o.id AS order_id,
         o.email,
-        o.total,
+        COALESCE((os.totals->>'paid_total')::numeric, 0) AS total,
         o.currency_code,
         (o.created_at) AS placed_at,
         (o.metadata->>'project_id') AS project_id
       FROM "order" o
+      LEFT JOIN order_summary os ON os.order_id = o.id
       WHERE LOWER(o.email) IS NOT NULL
         AND o.metadata->>'project_id' IS NOT NULL
     ),
