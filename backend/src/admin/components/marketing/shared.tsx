@@ -357,6 +357,83 @@ export function StatusBadge({ status }: { status?: string }) {
 }
 
 // ═══════════════════════════════════════════
+// PROJECT BADGE — colored label per project
+// ═══════════════════════════════════════════
+// Deterministic color per project slug — gives admins fast visual identification
+// of which brand a contact belongs to in cross-brand views.
+const PROJECT_COLORS: Record<string, { bg: string; fg: string; label: string }> = {
+  loslatenboek:   { bg: "#DCFCE7", fg: "#166534", label: "Loslatenboek" },
+  "het-leven":    { bg: "#E0F2FE", fg: "#075985", label: "Het Leven" },
+  dehondenbijbel: { bg: "#FFEDD5", fg: "#9A3412", label: "De Hondenbijbel" },
+  "lass-los":     { bg: "#FEF9C3", fg: "#854D0E", label: "Lass los" },
+  "odpusc-ksiazka": { bg: "#FCE7F3", fg: "#9D174D", label: "Odpuść" },
+  "slapp-taget":  { bg: "#E0E7FF", fg: "#3730A3", label: "Släpp taget" },
+  "psi-superzivot": { bg: "#F3E8FF", fg: "#6B21A8", label: "Psí superživot" },
+  "kocici-bible": { bg: "#FCE7F3", fg: "#831843", label: "Kočičí bible" },
+}
+
+export function ProjectBadge({ slug, fallbackLabel }: { slug?: string | null; fallbackLabel?: string | null }) {
+  if (!slug && !fallbackLabel) return <span style={{ color: tokens.fgMuted }}>—</span>
+  const colors = (slug && PROJECT_COLORS[slug]) || { bg: tokens.borderSubtle, fg: tokens.fgSecondary, label: slug || fallbackLabel || "—" }
+  return (
+    <span
+      className="mkt-badge"
+      style={{ background: colors.bg, color: colors.fg, fontWeight: 500 }}
+    >
+      {colors.label}
+    </span>
+  )
+}
+
+// ═══════════════════════════════════════════
+// ORDER STATUS BADGE — Buyer / Non-buyer
+// ═══════════════════════════════════════════
+export function OrderStatusBadge({ totalOrders }: { totalOrders?: number | null }) {
+  const isBuyer = (totalOrders ?? 0) > 0
+  return (
+    <span
+      className="mkt-badge"
+      style={{
+        background: isBuyer ? tokens.successSoft : tokens.borderSubtle,
+        color: isBuyer ? tokens.successFg : tokens.fgSecondary,
+        fontWeight: 500,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "4px",
+      }}
+      title={isBuyer ? `${totalOrders} order(s)` : "No orders"}
+    >
+      <span aria-hidden style={{ fontSize: "10px" }}>{isBuyer ? "●" : "○"}</span>
+      {isBuyer ? "Buyer" : "Non-buyer"}
+    </span>
+  )
+}
+
+// ═══════════════════════════════════════════
+// FLOW ACTIVITY BADGE — Yes / No
+// ═══════════════════════════════════════════
+export function FlowActivityBadge({ active }: { active?: boolean | null }) {
+  const yes = !!active
+  return (
+    <span
+      className="mkt-badge"
+      style={{
+        background: yes ? tokens.infoSoft : tokens.borderSubtle,
+        color: yes ? tokens.info : tokens.fgSecondary,
+        fontWeight: 500,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "4px",
+      }}
+      title={yes ? "In an active flow" : "Not in any flow"}
+    >
+      <span aria-hidden style={{ fontSize: "10px" }}>{yes ? "▶" : "■"}</span>
+      {yes ? "Yes" : "No"}
+    </span>
+  )
+}
+
+// ═══════════════════════════════════════════
 // BRAND CONTEXT (localStorage)
 // ═══════════════════════════════════════════
 const BRAND_KEY = "mkt_selected_brand"

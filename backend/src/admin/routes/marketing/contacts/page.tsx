@@ -6,6 +6,9 @@ import { sdk } from "../../../lib/sdk"
 import {
   MarketingShell,
   StatusBadge,
+  ProjectBadge,
+  OrderStatusBadge,
+  FlowActivityBadge,
   EmptyState,
   useSelectedBrand,
   Modal,
@@ -29,7 +32,9 @@ const ALL_COLUMNS: Col[] = [
   { key: "email", label: "Email", default: true, render: (c) => <span style={{ fontWeight: 500 }}>{c.email}</span> },
   { key: "name", label: "Name", default: true, render: (c) => <span style={{ color: tokens.fgSecondary }}>{[c.first_name, c.last_name].filter(Boolean).join(" ") || "—"}</span> },
   { key: "status", label: "Status", default: true, render: (c) => <StatusBadge status={c.status || "subscribed"} /> },
-  { key: "project", label: "Project", default: true, render: (c) => <span style={{ color: tokens.fgSecondary, fontSize: "13px" }}>{c.project_id || c.brand_display_name || "—"}</span> },
+  { key: "project", label: "Project", default: true, render: (c) => <ProjectBadge slug={c.project_id} fallbackLabel={c.brand_display_name} /> },
+  { key: "order_status", label: "Order status", default: true, render: (c) => <OrderStatusBadge totalOrders={c.total_orders} /> },
+  { key: "flow_activity", label: "Flow activity", default: true, render: (c) => <FlowActivityBadge active={c.is_in_active_flow} /> },
   { key: "source", label: "Source", default: true, render: (c) => <span style={{ color: tokens.fgSecondary, fontSize: "13px" }}>{c.source || "—"}</span> },
   { key: "created", label: "Created", default: true, render: (c) => <span style={{ color: tokens.fgSecondary, fontSize: "13px" }}>{c.created_at ? new Date(c.created_at).toLocaleDateString() : "—"}</span> },
   { key: "phone", label: "Phone", default: false, render: (c) => <span style={{ color: tokens.fgSecondary, fontSize: "13px" }}>{c.phone || "—"}</span> },
@@ -1274,8 +1279,11 @@ function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () =
 
         {/* Status + headline (read-only mode) */}
         {!editing && (
-          <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
             <StatusBadge status={c.status || "subscribed"} />
+            <ProjectBadge slug={c.project_id} fallbackLabel={c.brand_display_name} />
+            <OrderStatusBadge totalOrders={c.total_orders} />
+            <FlowActivityBadge active={c.is_in_active_flow} />
             {c.lifecycle_stage && (
               <span className="mkt-badge" style={{ background: tokens.borderSubtle, color: tokens.fgSecondary }}>
                 {c.lifecycle_stage}
