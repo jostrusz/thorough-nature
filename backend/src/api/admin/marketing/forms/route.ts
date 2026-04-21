@@ -7,12 +7,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   try {
     const service = req.scope.resolve(MARKETING_MODULE) as unknown as MarketingModuleService
     const q = (req.query as any) || {}
-    const brand_id = q.brand_id
-    if (!brand_id) {
-      res.status(400).json({ error: "brand_id is required" })
-      return
-    }
-    const filters: any = { brand_id }
+    const filters: any = {}
+    if (q.brand_id) filters.brand_id = q.brand_id
     if (q.status) filters.status = q.status
     if (q.type) filters.type = q.type
 

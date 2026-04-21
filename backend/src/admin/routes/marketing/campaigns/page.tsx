@@ -49,12 +49,12 @@ function CampaignsPage() {
 
   const deleteMut = useMutation({
     mutationFn: (id: string) =>
-      sdk.client.fetch(`/admin/marketing/campaigns/${id}`, { method: "DELETE" }),
-    onSuccess: () => {
+      sdk.client.fetch<{ hidden?: boolean; deleted?: boolean }>(`/admin/marketing/campaigns/${id}`, { method: "DELETE" }),
+    onSuccess: (resp: any) => {
       qc.invalidateQueries({ queryKey: ["mkt-campaigns"] })
-      toast.success("Campaign deleted")
+      toast.success(resp?.hidden ? "Campaign hidden" : "Campaign deleted")
     },
-    onError: () => toast.error("Failed to delete"),
+    onError: (e: any) => toast.error("Failed: " + (e?.message || "unknown")),
   })
 
   return (
@@ -130,9 +130,16 @@ function CampaignsPage() {
                         )}
                         <button
                           className="mkt-btn-danger-ghost"
-                          onClick={() => { if (confirm(`Delete campaign "${c.name}"?`)) deleteMut.mutate(c.id) }}
+                          onClick={() => {
+                            const isDraft = c.status === "draft"
+                            const label = isDraft ? "Delete" : "Hide"
+                            const msg = isDraft
+                              ? `Delete draft "${c.name}"? This cannot be undone.`
+                              : `Hide "${c.name}" from the list? Attribution and message history are preserved.`
+                            if (confirm(msg)) deleteMut.mutate(c.id)
+                          }}
                         >
-                          Delete
+                          {c.status === "draft" ? "Delete" : "Hide"}
                         </button>
                       </div>
                     </td>

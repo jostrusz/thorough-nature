@@ -8,12 +8,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   try {
     const service = req.scope.resolve(MARKETING_MODULE) as unknown as MarketingModuleService
     const q = (req.query as any) || {}
-    const brand_id = q.brand_id
-    if (!brand_id) {
-      res.status(400).json({ error: "brand_id is required" })
-      return
-    }
-    const segments = await service.listMarketingSegments({ brand_id })
+    const filters: any = {}
+    if (q.brand_id) filters.brand_id = q.brand_id
+    const segments = await service.listMarketingSegments(filters)
     res.json({ segments })
   } catch (err: any) {
     res.status(500).json({ error: err?.message || "internal_error" })

@@ -7,20 +7,20 @@ import type MarketingModuleService from "../../../../modules/marketing/service"
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const q = (req.query as any) || {}
   const brand_id = q.brand_id
-  if (!brand_id) {
-    res.status(400).json({ error: "brand_id is required" })
-    return
-  }
-
   const limit = Math.min(500, Math.max(1, Number(q.limit ?? 50)))
   const offset = Math.max(0, Number(q.offset ?? 0))
 
   // Always use pg for consistent shape (brand join for Project column).
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
   try {
-    const where: string[] = ["c.brand_id = $1", "c.deleted_at IS NULL"]
-    const params: any[] = [brand_id]
+    // brand_id is optional — "All brands" view returns cross-brand contacts.
+    const where: string[] = ["c.deleted_at IS NULL"]
+    const params: any[] = []
 
+    if (brand_id) {
+      params.push(brand_id)
+      where.push(`c.brand_id = $${params.length}`)
+    }
     if (q.email) {
       params.push(`%${q.email}%`)
       where.push(`(c.email ILIKE $${params.length} OR c.first_name ILIKE $${params.length} OR c.last_name ILIKE $${params.length})`)
