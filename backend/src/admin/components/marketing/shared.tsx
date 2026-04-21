@@ -378,7 +378,7 @@ export function ProjectBadge({ slug, fallbackLabel }: { slug?: string | null; fa
   return (
     <span
       className="mkt-badge"
-      style={{ background: colors.bg, color: colors.fg, fontWeight: 500 }}
+      style={{ background: colors.bg, color: colors.fg, fontWeight: 500, whiteSpace: "nowrap" }}
     >
       {colors.label}
     </span>
@@ -400,6 +400,7 @@ export function OrderStatusBadge({ totalOrders }: { totalOrders?: number | null 
         display: "inline-flex",
         alignItems: "center",
         gap: "4px",
+        whiteSpace: "nowrap",
       }}
       title={isBuyer ? `${totalOrders} order(s)` : "No orders"}
     >
@@ -424,6 +425,7 @@ export function FlowActivityBadge({ active }: { active?: boolean | null }) {
         display: "inline-flex",
         alignItems: "center",
         gap: "4px",
+        whiteSpace: "nowrap",
       }}
       title={yes ? "In an active flow" : "Not in any flow"}
     >

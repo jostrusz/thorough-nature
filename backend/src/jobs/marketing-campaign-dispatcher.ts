@@ -6,6 +6,7 @@ import { ResendMarketingClient } from "../modules/marketing/services/resend-clie
 import { compileTemplate } from "../modules/marketing/utils/template-compiler"
 import { injectTracking, buildUnsubscribeUrl } from "../modules/marketing/utils/tracking-injector"
 import { RecipientResolver } from "../modules/marketing/utils/recipient-resolver"
+import { getViewInBrowserStrings } from "../modules/marketing/utils/view-in-browser-i18n"
 
 /**
  * Marketing campaign dispatcher
@@ -298,6 +299,18 @@ async function dispatchCampaign(
                 from_email: fromEmail,
               },
               unsubscribe_url,
+              // View-in-browser fallback — localized per brand.locale.
+              // URL defaults to brand storefront (no dedicated web-view endpoint yet).
+              ...(() => {
+                const vib = getViewInBrowserStrings((brand as any).locale)
+                const domain = (brand as any).storefront_domain
+                const url = domain ? `https://${String(domain).replace(/^https?:\/\//, "")}` : "#"
+                return {
+                  view_in_browser_text: vib.text,
+                  view_in_browser_label: vib.label,
+                  view_in_browser_url: url,
+                }
+              })(),
             }
           )
 
