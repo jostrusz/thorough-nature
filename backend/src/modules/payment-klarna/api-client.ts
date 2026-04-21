@@ -283,7 +283,7 @@ export class KlarnaApiClient {
     try {
       const response = await this.client.post(
         `/ordermanagement/v1/orders/${orderId}/captures/${captureId}/shipping-info`,
-        shippingInfo
+        { shipping_info: [shippingInfo] }
       )
       return {
         success: true,
