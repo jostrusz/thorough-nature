@@ -33,7 +33,7 @@ import {
  */
 type ValueKind =
   | "text" | "number" | "date" | "bool"
-  | "list" | "flow" | "project" | "lifecycle" | "rfm_segment"
+  | "list" | "flow" | "project" | "lifecycle" | "rfm_segment" | "order_status"
 
 type FieldOption = {
   value: string
@@ -74,6 +74,7 @@ const FIELD_OPTIONS: FieldOption[] = [
   { group: "Flows", value: "flow_in",     label: "In specific flow",    dsl_field: "flow.in_run",     value_kind: "flow", ops: OPS.membership },
 
   // ─ Purchases (real-time + pre-computed) ─
+  { group: "Purchases", value: "order_status",       label: "Order status (Buyer / Non-buyer)", dsl_field: "contact.order_status", value_kind: "order_status", ops: ["eq", "ne"] },
   { group: "Purchases", value: "total_orders",       label: "Total orders",              dsl_field: "contact.total_orders",       value_kind: "number", ops: OPS.number },
   { group: "Purchases", value: "total_revenue",      label: "Total revenue (EUR)",       dsl_field: "contact.total_revenue_eur",  value_kind: "number", ops: OPS.number },
   { group: "Purchases", value: "avg_order_value",    label: "Avg order value (EUR)",     dsl_field: "contact.avg_order_value_eur",value_kind: "number", ops: OPS.number },
@@ -500,6 +501,11 @@ function SegmentModal({ brandId, initial, onClose }: { brandId: string | null; i
                 <select className="mkt-input" value={c.value || "true"} onChange={(e) => updateField({ value: e.target.value })}>
                   <option value="true">Yes</option>
                   <option value="false">No</option>
+                </select>
+              ) : meta.value_kind === "order_status" ? (
+                <select className="mkt-input" value={c.value || "buyer"} onChange={(e) => updateField({ value: e.target.value })}>
+                  <option value="buyer">Buyer (1+ orders)</option>
+                  <option value="non_buyer">Non-buyer (0 orders)</option>
                 </select>
               ) : meta.value_kind === "number" ? (
                 <input

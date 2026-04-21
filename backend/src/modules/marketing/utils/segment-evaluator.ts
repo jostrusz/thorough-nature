@@ -230,6 +230,23 @@ function compileLeaf(cond: LeafCondition, ctx: BuildCtx): string {
   }
 
   // ───────────────────────────────────────────────────────────
+  // contact.order_status — friendly enum derived from total_orders.
+  //   value: "buyer"     → c.total_orders > 0
+  //   value: "non_buyer" → c.total_orders = 0 OR NULL
+  // Ops: eq, ne
+  // ───────────────────────────────────────────────────────────
+  if (field === "contact.order_status") {
+    const v = String(value || "").toLowerCase()
+    const isBuyer = v === "buyer"
+    const expr = isBuyer
+      ? `(c.total_orders IS NOT NULL AND c.total_orders > 0)`
+      : `(c.total_orders IS NULL OR c.total_orders = 0)`
+    if (op === "eq") return expr
+    if (op === "ne") return `NOT ${expr}`
+    return "TRUE"
+  }
+
+  // ───────────────────────────────────────────────────────────
   // list.member(list_id)
   // ───────────────────────────────────────────────────────────
   if (field === "list.member") {

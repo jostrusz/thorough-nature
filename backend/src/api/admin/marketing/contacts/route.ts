@@ -36,7 +36,17 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
 
     params.push(limit, offset)
     const sql = `
-      SELECT c.*, b.display_name AS brand_display_name, b.slug AS brand_slug, b.project_id
+      SELECT
+        c.*,
+        b.display_name AS brand_display_name,
+        b.slug AS brand_slug,
+        b.project_id,
+        EXISTS (
+          SELECT 1 FROM marketing_flow_run fr
+          WHERE fr.contact_id = c.id
+            AND fr.brand_id = c.brand_id
+            AND fr.state IN ('running','waiting')
+        ) AS is_in_active_flow
       FROM marketing_contact c
       LEFT JOIN marketing_brand b ON b.id = c.brand_id AND b.deleted_at IS NULL
       WHERE ${where.join(" AND ")}
