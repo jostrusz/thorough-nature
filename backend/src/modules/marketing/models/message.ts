@@ -7,6 +7,7 @@ const MarketingMessage = model.define("marketing_message", {
   campaign_id: model.text().nullable(),
   flow_id: model.text().nullable(),
   flow_run_id: model.text().nullable(),
+  flow_node_id: model.text().nullable(),          // which email node inside the flow (for per-node analytics)
   template_id: model.text().nullable(),
   template_version: model.number().nullable(),
   resend_email_id: model.text().nullable(),

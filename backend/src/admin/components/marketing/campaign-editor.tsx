@@ -506,33 +506,85 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                 {sendNowMut.isPending ? "Starting…" : "Send now"}
               </button>
             </div>
-            {currentId && metrics && Object.keys(metrics).length > 0 && (
-              <div style={{ marginTop: "20px", fontSize: "13px", color: tokens.fg }}>
-                <div
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: 600,
-                    color: tokens.fgSecondary,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.04em",
-                    marginBottom: "8px",
-                  }}
-                >
-                  Metrics
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                  <div>Sent: <strong>{fmt(metrics.sent)}</strong></div>
-                  <div>Delivered: <strong>{fmt(metrics.delivered)}</strong></div>
-                  <div>Opened: <strong>{fmt(metrics.opened)}</strong></div>
-                  <div>Clicked: <strong>{fmt(metrics.clicked)}</strong></div>
-                  <div>Bounced: <strong>{fmt(metrics.bounced)}</strong></div>
-                </div>
-              </div>
-            )}
+            {currentId && <CampaignAnalyticsPanel campaignId={currentId} />}
           </div>
         </div>
       )}
     </>
+  )
+}
+
+function CampaignAnalyticsPanel({ campaignId }: { campaignId: string }) {
+  const { data } = useQuery({
+    queryKey: ["mkt-campaign-analytics", campaignId],
+    queryFn: () =>
+      sdk.client.fetch<{
+        funnel: any
+        revenue: any
+        links: Array<{ link_label: string; clicks: number; unique_clickers: number }>
+      }>(`/admin/marketing/campaigns/${campaignId}/analytics`, { method: "GET" }),
+    refetchInterval: 30000,
+  })
+  if (!data) return null
+  const f = (data as any).funnel
+  const r = (data as any).revenue
+  const links = (data as any).links as Array<{ link_label: string; clicks: number; unique_clickers: number }>
+  return (
+    <div style={{ marginTop: "20px", fontSize: "13px", color: tokens.fg }}>
+      <div
+        style={{
+          fontSize: "11px",
+          fontWeight: 600,
+          color: tokens.fgSecondary,
+          textTransform: "uppercase",
+          letterSpacing: "0.04em",
+          marginBottom: "8px",
+        }}
+      >
+        Performance
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
+        <div>Sent: <strong>{fmt(f.sent)}</strong></div>
+        <div>Delivered: <strong>{fmt(f.delivered)}</strong></div>
+        <div>Opened (unique): <strong>{fmt(f.opened_unique)}</strong> <span style={{ color: tokens.fgMuted }}>({(f.open_rate * 100).toFixed(1)}%)</span></div>
+        <div>Clicked (unique): <strong>{fmt(f.clicked_unique)}</strong> <span style={{ color: tokens.fgMuted }}>({(f.ctr * 100).toFixed(1)}%)</span></div>
+        <div>CTOR: <strong>{(f.ctor * 100).toFixed(1)}%</strong></div>
+        <div>Bounced: <strong>{fmt(f.bounced)}</strong></div>
+      </div>
+      <div
+        style={{
+          marginTop: "14px",
+          padding: "10px 14px",
+          background: tokens.successSoft,
+          borderRadius: tokens.rMd,
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "8px",
+        }}
+      >
+        <div>Orders: <strong style={{ color: tokens.successFg }}>{fmt(r.orders)}</strong></div>
+        <div>Revenue: <strong style={{ color: tokens.successFg }}>€ {Number(r.revenue_eur).toFixed(2)}</strong></div>
+        <div>Conversion: <strong>{(r.conversion_rate * 100).toFixed(2)}%</strong></div>
+        <div>RPE: <strong>€ {Number(r.rpe).toFixed(3)}</strong></div>
+      </div>
+      {links.length > 0 && (
+        <div style={{ marginTop: "14px" }}>
+          <div style={{ fontSize: "11px", fontWeight: 600, color: tokens.fgSecondary, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "6px" }}>
+            Link performance
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "12px" }}>
+            {links.map((l) => (
+              <div key={l.link_label} style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: tokens.bg, borderRadius: tokens.rSm }}>
+                <span style={{ fontFamily: "ui-monospace, monospace", color: tokens.fgSecondary }}>{l.link_label}</span>
+                <span>
+                  <strong>{fmt(l.clicks)}</strong> clicks <span style={{ color: tokens.fgMuted }}>/ {fmt(l.unique_clickers)} unique</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 

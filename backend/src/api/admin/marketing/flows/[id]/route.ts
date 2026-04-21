@@ -11,6 +11,8 @@ const UPDATABLE_FIELDS = [
   "status",
   "stats",
   "metadata",
+  "goals",
+  "re_entry_policy",
 ]
 
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {

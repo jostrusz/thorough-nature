@@ -45,6 +45,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       version: 1,
       stats: body.stats ?? null,
       metadata: body.metadata ?? null,
+      goals: body.goals ?? null,
+      re_entry_policy: body.re_entry_policy ?? null,
     }
 
     const flow = await service.createMarketingFlows(data)
