@@ -740,7 +740,7 @@ const SupportBoxDashboard = () => {
 
   const qc = useQueryClient()
   const [selectedConfigId, setSelectedConfigId] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<string>("inbox")
+  const [statusFilter, setStatusFilter] = useState<string>("new")
   const [searchInput, setSearchInput] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [showCompose, setShowCompose] = useState(false)
@@ -749,6 +749,11 @@ const SupportBoxDashboard = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [backfilling, setBackfilling] = useState(false)
   const [backfillResult, setBackfillResult] = useState<string | null>(null)
+  const [page, setPage] = useState(0)
+  const PAGE_SIZE = 50
+
+  // Reset page when filters change so user doesn't land on an empty page.
+  useEffect(() => { setPage(0) }, [selectedConfigId, statusFilter, searchQuery, projectFilter, categoryFilter])
 
   // Debounce search input
   useEffect(() => {
@@ -764,49 +769,60 @@ const SupportBoxDashboard = () => {
     },
   })
 
-  // Fetch tickets — for spam view, pass status=spam so backend returns spam tickets
-  const { data: allTickets = [], isLoading } = useQuery({
-    queryKey: ["supportbox-tickets", selectedConfigId, searchQuery, statusFilter],
+  // ─── Counts (lightweight, always loaded) ───────────────────────────────
+  // Lives in its own query so the header cards always show real numbers
+  // regardless of which tab is currently selected. Endpoint runs ~50ms.
+  const { data: countsResp = { counts: { new: 0, solved: 0, old: 0, spam: 0, total: 0 }, per_config: {} } } = useQuery({
+    queryKey: ["supportbox-counts", selectedConfigId],
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (selectedConfigId) params.append("config_id", selectedConfigId)
+      const response = await sdk.client.fetch(
+        `/admin/supportbox/tickets/counts?${params.toString()}`,
+        { method: "GET" }
+      )
+      return response as any
+    },
+    refetchInterval: 10000,
+  })
+  const counts = countsResp.counts || { new: 0, solved: 0, old: 0, spam: 0, total: 0 }
+  const perConfigCounts = (countsResp.per_config || {}) as Record<string, number>
+  const newCount = counts.new
+  const solvedCount = counts.solved
+  const oldCount = counts.old
+  const spamCount = counts.spam
+
+  // Map UI tab → backend status filter (single status or comma-list).
+  const backendStatusForTab = (tab: string): string | null => {
+    if (tab === "new") return "new,read"
+    if (tab === "solved") return "solved"
+    if (tab === "spam") return "spam"
+    if (tab === "old") return null  // backend has no "old" status — handled JS-side
+    return null  // "inbox" / "all" → no filter
+  }
+
+  // ─── Tickets (paginated, only the active tab) ──────────────────────────
+  const { data: ticketsResp, isLoading } = useQuery({
+    queryKey: ["supportbox-tickets", selectedConfigId, searchQuery, statusFilter, page],
     queryFn: async () => {
       const params = new URLSearchParams()
       if (selectedConfigId) params.append("config_id", selectedConfigId)
       if (searchQuery) params.append("q", searchQuery)
-      // When viewing spam, tell backend to return spam tickets
-      if (statusFilter === "spam") params.append("status", "spam")
+      const backendStatus = backendStatusForTab(statusFilter)
+      if (backendStatus) params.append("status", backendStatus)
+      params.append("limit", String(PAGE_SIZE))
+      params.append("offset", String(page * PAGE_SIZE))
       const response = await sdk.client.fetch(
         `/admin/supportbox/tickets?${params.toString()}`,
         { method: "GET" }
       )
-      return (response as any).tickets || []
+      return response as any
     },
     refetchInterval: 10000,
+    keepPreviousData: true,
   })
-
-  // For spam view we also need non-spam tickets for counts
-  const { data: nonSpamTickets = [] } = useQuery({
-    queryKey: ["supportbox-tickets-counts", selectedConfigId, searchQuery],
-    queryFn: async () => {
-      const params = new URLSearchParams()
-      if (selectedConfigId) params.append("config_id", selectedConfigId)
-      if (searchQuery) params.append("q", searchQuery)
-      const response = await sdk.client.fetch(
-        `/admin/supportbox/tickets?${params.toString()}`,
-        { method: "GET" }
-      )
-      return (response as any).tickets || []
-    },
-    refetchInterval: 10000,
-    enabled: statusFilter === "spam",
-  })
-
-  // Use correct source for counts (non-spam always)
-  const countSource = statusFilter === "spam" ? nonSpamTickets : allTickets
-
-  // Counts always from non-spam dataset
-  const newCount = countSource.filter((t: any) => t.status === "new" || t.status === "read").length
-  const solvedCount = countSource.filter((t: any) => t.status === "solved").length
-  const oldCount = countSource.filter((t: any) => t.status !== "new" && t.status !== "solved" && t.status !== "read").length
-  const spamCount = allTickets.filter((t: any) => t.status === "spam").length
+  const allTickets: any[] = ticketsResp?.tickets || []
+  const totalForFilter: number = ticketsResp?.total_count ?? allTickets.length
 
   // Filtered tickets for display
   const statusFiltered = statusFilter === "spam"
@@ -842,9 +858,8 @@ const SupportBoxDashboard = () => {
     return bLatest - aLatest
   })
 
-  // Count new tickets per config (from full dataset)
-  const newPerConfig = (configId: string) =>
-    countSource.filter((t: any) => t.config_id === configId && (t.status === "new" || t.status === "read")).length
+  // Count new tickets per config — comes from /counts per_config breakdown.
+  const newPerConfig = (configId: string) => perConfigCounts[configId] || 0
 
   // Handle stat card click — toggle filter, inbox is the "off" state
   const handleStatClick = (status: string) => {
@@ -1048,7 +1063,7 @@ const SupportBoxDashboard = () => {
             <StatCard label="New" count={newCount} color={C.green} bgColor={C.greenBg} icon="📩" isActive={statusFilter === "new"} onClick={() => handleStatClick("new")} />
             <StatCard label="Solved" count={solvedCount} color={C.blue} bgColor={C.blueBg} icon="✅" isActive={statusFilter === "solved"} onClick={() => handleStatClick("solved")} />
             <StatCard label="Old" count={oldCount} color={C.orange} bgColor={C.orangeBg} icon="📂" isActive={statusFilter === "old"} onClick={() => handleStatClick("old")} />
-            <StatCard label="Total" count={countSource.length} color={C.textMuted} bgColor={C.bg} icon="📊" isActive={statusFilter === "all"} onClick={() => setStatusFilter(statusFilter === "all" ? "inbox" : "all")} />
+            <StatCard label="Total" count={counts.total} color={C.textMuted} bgColor={C.bg} icon="📊" isActive={statusFilter === "all"} onClick={() => setStatusFilter(statusFilter === "all" ? "inbox" : "all")} />
           </div>
 
           {/* Filters */}
@@ -1133,6 +1148,63 @@ const SupportBoxDashboard = () => {
               ))
             )}
           </div>
+
+          {/* Pagination — shown only when there are more tickets than fit on this page */}
+          {totalForFilter > PAGE_SIZE && (
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "12px 16px", marginTop: "12px",
+              background: "#fff", border: `1px solid ${C.border}`, borderRadius: "8px",
+              fontSize: "13px", color: C.textSecondary, flexWrap: "wrap", gap: "8px",
+            }}>
+              <div>
+                Showing <strong style={{ color: C.text }}>{page * PAGE_SIZE + 1}</strong>–
+                <strong style={{ color: C.text }}>{Math.min((page + 1) * PAGE_SIZE, totalForFilter)}</strong>
+                {" "}of <strong style={{ color: C.text }}>{totalForFilter}</strong>
+              </div>
+              <div style={{ display: "flex", gap: "6px" }}>
+                <button
+                  onClick={() => setPage(0)}
+                  disabled={page === 0}
+                  style={{
+                    padding: "6px 10px", border: `1px solid ${C.border}`, borderRadius: "6px",
+                    background: "#fff", cursor: page === 0 ? "default" : "pointer",
+                    opacity: page === 0 ? 0.4 : 1, fontSize: "12px", color: C.text,
+                  }}
+                >« First</button>
+                <button
+                  onClick={() => setPage((p: number) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  style={{
+                    padding: "6px 10px", border: `1px solid ${C.border}`, borderRadius: "6px",
+                    background: "#fff", cursor: page === 0 ? "default" : "pointer",
+                    opacity: page === 0 ? 0.4 : 1, fontSize: "12px", color: C.text,
+                  }}
+                >‹ Prev</button>
+                <div style={{ padding: "6px 10px", fontSize: "12px", color: C.text }}>
+                  Page <strong>{page + 1}</strong> of <strong>{Math.max(1, Math.ceil(totalForFilter / PAGE_SIZE))}</strong>
+                </div>
+                <button
+                  onClick={() => setPage((p: number) => p + 1)}
+                  disabled={(page + 1) * PAGE_SIZE >= totalForFilter}
+                  style={{
+                    padding: "6px 10px", border: `1px solid ${C.border}`, borderRadius: "6px",
+                    background: "#fff", cursor: (page + 1) * PAGE_SIZE >= totalForFilter ? "default" : "pointer",
+                    opacity: (page + 1) * PAGE_SIZE >= totalForFilter ? 0.4 : 1, fontSize: "12px", color: C.text,
+                  }}
+                >Next ›</button>
+                <button
+                  onClick={() => setPage(Math.max(0, Math.ceil(totalForFilter / PAGE_SIZE) - 1))}
+                  disabled={(page + 1) * PAGE_SIZE >= totalForFilter}
+                  style={{
+                    padding: "6px 10px", border: `1px solid ${C.border}`, borderRadius: "6px",
+                    background: "#fff", cursor: (page + 1) * PAGE_SIZE >= totalForFilter ? "default" : "pointer",
+                    opacity: (page + 1) * PAGE_SIZE >= totalForFilter ? 0.4 : 1, fontSize: "12px", color: C.text,
+                  }}
+                >Last »</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

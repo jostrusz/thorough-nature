@@ -36,12 +36,19 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       params.push(configId)
       where.push(`t.config_id = $${params.length}`)
     }
-    // Spam is shown ONLY when explicitly requested. All other views exclude it.
+    // Status filter — supports a single status OR comma-separated list
+    // ("new,read"). Spam is excluded from all non-spam views.
     if (status === "spam") {
       where.push(`t.status = 'spam'`)
     } else if (status && status !== "all" && status !== "inbox") {
-      params.push(status)
-      where.push(`t.status = $${params.length}`)
+      const statusList = status.split(",").map((s) => s.trim()).filter(Boolean)
+      if (statusList.length === 1) {
+        params.push(statusList[0])
+        where.push(`t.status = $${params.length}`)
+      } else if (statusList.length > 1) {
+        params.push(statusList)
+        where.push(`t.status = ANY($${params.length}::text[])`)
+      }
       where.push(`t.status <> 'spam'`)
     } else {
       where.push(`t.status <> 'spam'`)
@@ -60,6 +67,11 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         )
       )`)
     }
+
+    // Total count for the current filter — used by frontend pagination.
+    const countSql = `SELECT COUNT(*)::int AS c FROM supportbox_ticket t WHERE ${where.join(" AND ")}`
+    const totalRes = await pool.query(countSql, params)
+    const totalCount = totalRes.rows[0]?.c ?? 0
 
     params.push(limit, offset)
     const ticketsSql = `
@@ -99,7 +111,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       messages: messagesByTicket[t.id] || [],
     }))
 
-    res.json({ tickets: enriched, limit, offset })
+    res.json({ tickets: enriched, total_count: totalCount, limit, offset })
   } catch (err: any) {
     res.status(500).json({ error: err?.message || "internal_error" })
   } finally {
