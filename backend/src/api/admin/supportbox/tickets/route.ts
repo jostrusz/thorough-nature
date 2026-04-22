@@ -81,8 +81,8 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       const msgSql = `
         SELECT id, ticket_id, direction, from_email, from_name,
                LEFT(COALESCE(body_text, ''), 300) AS body_text,
-               created_at, sent_at, in_reply_to,
-               jsonb_array_length(COALESCE(attachments::jsonb, '[]'::jsonb)) AS attachment_count
+               resend_message_id, delivery_status, delivery_status_at,
+               metadata, created_at, updated_at
         FROM supportbox_message
         WHERE ticket_id = ANY($1::text[]) AND deleted_at IS NULL
         ORDER BY ticket_id, created_at ASC
