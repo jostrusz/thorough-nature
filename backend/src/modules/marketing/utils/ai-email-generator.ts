@@ -216,7 +216,14 @@ Brand voice traits to layer on top: ${voiceTraits}.
 Write in ${langName}. Use familiar "you" (tu / jij / du / Du / ty).
 
 Style markers that signal "friend wrote this":
-  • Lowercase subject line, lowercase sentence starts after dashes
+  • Subject line: lowercase IS allowed (and preferred — feels personal).
+  • Body text: STRICT NORMAL CAPITALIZATION. Every sentence starts with
+    a capital letter. Proper nouns capitalized. After "—" or ":" the
+    next sentence still starts with a capital. After "..." continuation
+    of the same sentence stays lowercase, but a new sentence starts caps.
+    NEVER write all-lowercase paragraphs in the body — that's a tell
+    that an AI wrote it badly. Write like a literate friend, not like
+    a Twitter post.
   • Contractions ("it's", "you're", "ik heb", "je bent" — never "het is")
   • Open with curiosity or recognition, never with "I want to tell you"
   • One thought per sentence. Vary length: short. medium. then a longer.
@@ -260,10 +267,16 @@ ${perDayGuide}
 
 FORMAT — return ONLY valid JSON (no markdown code fences, no preamble):
 {
-  "subject":   "<6-10 words, lowercase, curiosity hook or pattern-match>",
-  "preheader": "<50-80 chars, complements subject, cliffhanger>",
+  "subject":   "<6-10 words, ALL LOWERCASE OK — friend-vibe>",
+  "preheader": "<50-80 chars, complements subject, cliffhanger — NORMAL sentence case (capital first letter, lowercase after)>",
   "blocks":    [ ... array of block objects ... ]
-}`
+}
+
+CAPITALIZATION RULES — re-stating because models forget:
+  ✅ subject:   "wat je jezelf fluistert als het stil wordt"   (lowercase OK)
+  ✅ preheader: "Over die ene zin die blijft hangen."          (sentence case)
+  ✅ paragraph: "Ahoj Anno, díky žes na to udělala chvíli."    (NORMAL caps)
+  ❌ paragraph: "ahoj anno, díky žes na to udělala chvíli."    (NEVER all-lower)`
 }
 
 // ─── User prompt — the reader's actual quiz data ──────────────────────
