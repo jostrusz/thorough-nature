@@ -3,8 +3,22 @@ import Anthropic from "@anthropic-ai/sdk"
 /**
  * AI email generator — used by the flow executor when a flow node has
  * config.ai_generate=true. Generates a fully-personalized email (subject +
- * preheader + HTML body) for the given contact using their quiz answers +
- * the brand's author voice profile.
+ * preheader + brand-template HTML body) for the given contact using their
+ * quiz answers + the brand's author voice profile.
+ *
+ * ARCHITECTURE
+ * ────────────
+ * 1. Sonnet 4.6 (or Opus 4.7 for day 3) is given the contact's quiz path
+ *    + the brand voice profile + a list of structural BLOCK TYPES that
+ *    map 1:1 to the brand template (paragraph / inline_quote / tile_quote /
+ *    atmosphere / numbered_list / cta / signature / ps / pps).
+ * 2. Sonnet returns JSON with `subject`, `preheader`, and `blocks[]`.
+ * 3. `renderBlocks()` turns each block into the exact HTML snippet defined
+ *    by `email-previews/BRAND-TEMPLATE.html` — so every AI-generated email
+ *    inherits brand colors / fonts / spacing automatically.
+ * 4. `wrapInBrandShell()` wraps everything in the deliverability-hardened
+ *    shell (head, MSO conditional, dark-mode overrides, role=article,
+ *    hidden preheader, view-in-browser, secondary CTA).
  *
  * Three "day templates" map to the psychological arc of the popup-quiz
  * nurture sequence:
@@ -15,10 +29,6 @@ import Anthropic from "@anthropic-ai/sdk"
  * Model recommendation:
  *   day1 / day2 → claude-sonnet-4-6  (good balance, cheaper)
  *   day3        → claude-opus-4-7    (revenue-critical, worth extra tokens)
- *
- * Output is a simple but styled email body wrapped in the brand's standard
- * email shell (rose/mauve palette). Full Gmail/Outlook-safe HTML, not a
- * plain snippet.
  */
 
 export type DayTemplate = "day1" | "day2" | "day3"
@@ -43,11 +53,31 @@ export type GenerateArgs = {
   model?: AiModel
 }
 
+// ── Block schema returned by Sonnet ────────────────────────────────────
+// Maps 1:1 to a section in email-previews/BRAND-TEMPLATE.html.
+
+export type Block =
+  | { type: "greeting"; text: string }
+  | { type: "paragraph"; text: string; highlight?: { phrase: string; color?: "yellow" | "red" } }
+  | { type: "inline_quote"; text: string }
+  | { type: "tile_quote"; text: string; attribution?: string }
+  | { type: "atmosphere"; emoji: string }
+  | { type: "numbered_list"; intro: string; items: { lead: string; body: string }[] }
+  | { type: "cta"; label?: string; url?: string }
+  | { type: "ps"; text: string }
+  | { type: "pps"; text: string }
+
+export type AiResponse = {
+  subject: string
+  preheader: string
+  blocks: Block[]
+}
+
 export type GeneratedEmail = {
   subject: string
   preheader: string
-  html: string        // full HTML doc with brand shell + tracking-ready placeholders
-  body_markdown: string // raw body (saved to metadata for debugging / regeneration)
+  html: string
+  blocks: Block[]            // raw blocks, saved to metadata for re-rendering / debugging
   model_used: string
   generated_at: string
 }
@@ -58,7 +88,7 @@ const DEFAULT_MODELS: Record<DayTemplate, AiModel> = {
   day3: "claude-opus-4-7",
 }
 
-// ─── System prompts per day ───────────────────────────────────────────
+// ─── System prompt — teach Sonnet the block grammar ──────────────────
 
 function systemPrompt(brand: GenerateArgs["brand"], locale: string, day: DayTemplate): string {
   const voice = brand.brand_voice_profile || {}
@@ -72,87 +102,109 @@ function systemPrompt(brand: GenerateArgs["brand"], locale: string, day: DayTemp
 
   const perDayGuide = {
     day1: `
-DAY 1 — VALIDATION + REFRAME (no sell).
-Your job: make them feel deeply seen. Acknowledge their specific quiz answers,
-reframe their pain as a learned pattern (not weakness), and leave one open
-loop (the book won't be mentioned).
+DAY 1 — VALIDATION + REFRAME (no sell, NO cta block).
+Your job: make them feel deeply seen. Quote their own sentence verbatim,
+reframe their pain as a learned pattern (not weakness), leave one open
+loop. The book is NOT mentioned.
 
-Structure:
-  - Opening: reference their specific quiz answer (the subcategory / emotion)
-  - Middle: one reframe insight, concrete and memorable, 2-3 paragraphs
-  - End: one reflective question for tomorrow + your signature
+Structure (use these blocks in this order):
+  greeting → 3-4 paragraph blocks → inline_quote (their own words OR a
+  reframe quote) → 1-2 paragraphs → atmosphere (one emoji) → 2-3 final
+  paragraphs (one with a highlight phrase) → ps → pps
+NO cta, NO numbered_list, NO tile_quote on day 1.
 
-Length: 280-350 words body, 4-6 short paragraphs.`,
+Length: 280-350 words across all paragraph blocks combined.`,
 
     day2: `
-DAY 2 — STORY + MICRO-TOOL (still no sell).
-Your job: tell a short client story (anonymized or invented) that rhymes
-with their situation, then give one 90-second technique they can do today.
+DAY 2 — STORY + 90-SECOND TOOL (still no sell, NO cta block).
+Your job: tell one short client story that rhymes with their situation,
+then give exactly ONE numbered tool with 2-3 steps.
 
 Structure:
-  - Opening: callback to yesterday's email (1 line)
-  - Main: client story, 40-60% of email, with specific details
-  - Tool: ONE concrete 90-second exercise, numbered steps
-  - End: invite them to try it, mention tomorrow's email softly
+  greeting → 1-line callback to day 1 → 4-5 story paragraphs → atmosphere
+  → numbered_list (2-3 items) → 2 reflective paragraphs → ps → pps
+NO cta on day 2.
 
-Length: 320-400 words body, 5-7 short paragraphs.`,
+Length: 320-400 words across all paragraph blocks combined.`,
 
     day3: `
-DAY 3 — SOFT BOOK BRIDGE (first pitch, risk-reversed).
-Your job: reflect the 2-day arc, name the pattern they've been showing,
-and introduce the book as the "natural next step" — not as a product sell.
+DAY 3 — SOFT BOOK BRIDGE (first pitch, risk-reversed, INCLUDE cta).
+Your job: reflect the 2-day arc, name their pattern, introduce the book
+as the natural next step. End with a real CTA block.
 
 Structure:
-  - Opening: quick reflection of days 1-2
-  - Bridge: "If what we've talked about resonates, this book is where I
-    took this exact theme and went 40 pages deeper on [their category]"
-  - Social proof: 1 short reader testimonial (quote + first name)
-  - Risk reversal: 30-day money back
-  - CTA: link to book page (use placeholder {{ cta_url }})
+  greeting → 2-3 reflection paragraphs → tile_quote (1 line from book +
+  attribution) → 2 bridge paragraphs (why this book, for them specifically)
+  → cta block → 1-2 closing paragraphs → ps → pps
 
-Length: 320-400 words body, 5-7 paragraphs. Include CTA.`,
+Length: 320-400 words across paragraphs combined. CTA is mandatory.`,
   }[day]
 
   return `You are ${authorName}, author of "${bookTitle}".
 
 You are writing the ${day.toUpperCase()} email in a 3-day personalized
-nurture sequence for a reader who took a self-reflection quiz on your
-website and opted in for a personal insight.
+nurture sequence for a reader who took a self-reflection quiz on the website.
 
 VOICE: ${voiceTraits}. Speak as warm mentor, never as copywriter.
 Use familiar "you" (tu / jij / du). Write in ${langName}.
 
-CONSTRAINTS:
+CONSTRAINTS
+───────────
 - NEVER use: ${avoid}
 - No diagnostic labels (PTSD, depression, anxiety)
 - No imperatives ("you must", "you should")
 - No generic sayings ("time heals", "everyone feels this")
 - Specific > vague. Sensory over abstract.
+- Em-dash (—) preferred over hyphen, smart quotes preferred over straight.
 
-SIGNATURE: Sign as "${signature}" in italics at the end of the body.
+SIGNATURE: A signature block is added automatically as "${signature}" — do
+NOT include a signature block yourself.
 
 ${perDayGuide}
 
+═══ AVAILABLE BLOCK TYPES (compose only from these) ═════════════════════
+{ "type": "greeting",      "text": "Hoi {first_name}," }
+{ "type": "paragraph",     "text": "...", "highlight"?: { "phrase": "<exact substring of text>", "color"?: "yellow"|"red" } }
+{ "type": "inline_quote",  "text": "<1-2 sentences, no surrounding quotes>" }
+{ "type": "tile_quote",    "text": "<1-2 sentences>", "attribution"?: "uit ${bookTitle}" }
+{ "type": "atmosphere",    "emoji": "😶" }                    // single emoji visual breath
+{ "type": "numbered_list", "intro": "...", "items": [ { "lead": "...", "body": "..." }, ... ] }   // max 3 items
+{ "type": "cta",           "label"?: "<button text>", "url"?: "<defaults to brand book URL>" }
+{ "type": "ps",            "text": "..." }
+{ "type": "pps",           "text": "..." }
+
+═══ STYLE RULES ════════════════════════════════════════════════════════
+- "highlight" should be used 1-3× per email max — only the lines that LAND
+- Atmosphere emoji: max 1 per email
+- All paragraphs: 1-3 sentences each, never wall-of-text
+- pps is great for "reply to me with one word" — high engagement signal
+
 FORMAT — return ONLY valid JSON (no markdown code fences, no preamble):
 {
-  "subject": "<6-10 words, lowercase, curiosity hook or pattern-match>",
-  "preheader": "<50-80 characters, complements subject, cliffhanger>",
-  "body_markdown": "<body in markdown — use **bold** for 1-2 phrases, italics for emphasis, > for pull quotes, line breaks for paragraphs>"
+  "subject":   "<6-10 words, lowercase, curiosity hook or pattern-match>",
+  "preheader": "<50-80 chars, complements subject, cliffhanger>",
+  "blocks":    [ ... array of block objects ... ]
 }`
 }
 
-// ─── User prompt construction ─────────────────────────────────────────
+// ─── User prompt — the reader's actual quiz data ──────────────────────
 
 function userPrompt(args: GenerateArgs): string {
   const { contact, brand, dayTemplate } = args
   const props = contact.properties || {}
-  const path = [
-    props.quiz_category,
-    props.quiz_subcategory,
-    props.quiz_intensity,
-    props.quiz_emotion,
-  ].filter(Boolean)
 
+  const area      = props.quiz_area         ?? props.quiz_category
+  const target    = props.quiz_target       ?? props.quiz_subcategory
+  const trigger   = props.quiz_trigger      ?? props.quiz_intensity
+  const sentence  = props.quiz_own_sentence ?? props.quiz_emotion
+
+  const clean = (v: any): string => {
+    if (!v) return "(unknown)"
+    const s = String(v)
+    return s.startsWith("custom:") ? s.slice(7) : s
+  }
+
+  const path = [area, target, trigger, sentence].filter(Boolean).map(clean)
   const locale = (contact.locale || brand.locale || "nl").slice(0, 2).toLowerCase()
 
   return `Write the ${dayTemplate} email for this reader:
@@ -162,31 +214,28 @@ Reader:
 - Locale: ${locale}
 
 Their quiz answers:
-- Primary area: ${props.quiz_category || "(unknown)"}
-- Specific focus: ${props.quiz_subcategory || "(unknown)"}
-- Duration / intensity: ${props.quiz_intensity || "(unknown)"}
-- Dominant feeling: ${props.quiz_emotion || "(unknown)"}
+- Broad area of struggle:        ${clean(area)}
+- Specific person / thing / focus: ${clean(target)}
+- When it most surfaces (trigger): ${clean(trigger)}
+- The sentence they keep telling themselves: "${clean(sentence)}"
 
-The reader's full quiz path: [${path.join(" → ")}]
+Their full quiz path: [${path.join(" → ")}]
 
-Use their first name naturally in the opening (do not start with "Hi" or
-"Hello" — instead weave it in: "${contact.first_name || "Dear"}, I thought
-about what you wrote...").
-
-Reflect their specific path — the combination of subcategory + emotion
-should be visible in at least one reframe or story beat.`
+CRITICAL personalization rules:
+1. Quote their "sentence" VERBATIM in the first 3 sentences — either as
+   the greeting body or in an inline_quote block right after greeting.
+2. Name the specific target by what it is — write "tvůj táta" not
+   "tvůj rodič", "tvůj bývalý" not "tvůj partner".
+3. Reference the trigger moment ("ve 3 ráno", "v autě", "po probuzení")
+   at least once — readers experience it as mind-reading.
+4. Greeting is always: { "type": "greeting", "text": "Hoi ${contact.first_name || "Friend"}," }
+   (or locale-equivalent: "Ahoj" for cs, "Hallo" for de, etc.)`
 }
 
-// ─── Email shell wrapper ──────────────────────────────────────────────
-//
-// Wraps the AI-generated markdown body in the brand's standard email HTML
-// skeleton (rose/mauve, Georgia, compliance-ready). We inject author name,
-// book title, and the tracking-injected placeholders the dispatcher will
-// later resolve per-send.
-//
-// The body is emitted from a very small markdown subset: paragraphs,
-// **bold**, *italic*, > quote, numbered lists (1. ... 2. ...).
-// Anything else is passed through as text.
+// ═══ RENDERER ══════════════════════════════════════════════════════════
+// Each Block type maps to an HTML snippet whose styling is locked to
+// email-previews/BRAND-TEMPLATE.html. Renderer guarantees output looks
+// like a hand-written brand email regardless of what Sonnet returns.
 
 function escapeHtml(s: string): string {
   return String(s)
@@ -197,114 +246,227 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#39;")
 }
 
-function mdInline(s: string): string {
-  return escapeHtml(s)
-    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#1F1B16;">$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em style="font-style:italic;">$1</em>')
+// Convert "—" to em-dash entity, smart-quote curly quotes around the
+// content of the email (only used inside paragraph text, not inside HTML).
+function smartTypography(s: string): string {
+  return escapeHtml(s).replace(/--/g, "&mdash;").replace(/\.\.\./g, "&hellip;")
 }
 
-function markdownToHtml(md: string): string {
-  const lines = md.split(/\r?\n/)
+// Apply a single highlight inside a paragraph's text. Looks for an exact
+// substring match (post-escape) and wraps it in the .hl-yellow / .hl-red
+// span. If the phrase isn't found, paragraph is rendered unchanged.
+function applyHighlight(escapedText: string, hl?: { phrase: string; color?: "yellow" | "red" }): string {
+  if (!hl || !hl.phrase) return escapedText
+  const phraseEsc = escapeHtml(hl.phrase)
+  const cls = hl.color === "red" ? "hl-red" : "hl-yellow"
+  if (!escapedText.includes(phraseEsc)) return escapedText
+  return escapedText.replace(phraseEsc, `<span class="${cls}">${phraseEsc}</span>`)
+}
+
+function renderParagraph(text: string, hl?: { phrase: string; color?: "yellow" | "red" }): string {
+  const safe = applyHighlight(smartTypography(text), hl)
+  return `<p style="margin:0 0 22px 0;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#1F1B16;">${safe}</p>`
+}
+
+function renderGreeting(text: string): string {
+  return `<p style="margin:0 0 22px 0;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#1F1B16;">${smartTypography(text)}</p>`
+}
+
+function renderInlineQuote(text: string): string {
+  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:6px 0 22px 0;">
+    <tr><td style="border-left:3px solid #C89BA5;padding:8px 0 8px 20px;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:17px;line-height:1.6;color:#3A2530;">&ldquo;${smartTypography(text)}&rdquo;</td></tr>
+  </table>`
+}
+
+function renderTileQuote(text: string, attribution?: string): string {
+  const attr = attribution
+    ? `<br><br><span style="font-size:13px;font-style:normal;color:#9C6B74;letter-spacing:1px;text-transform:uppercase;">— ${smartTypography(attribution)}</span>`
+    : ""
+  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:6px 0 22px 0;">
+    <tr><td style="background:#F4E8EE;border-left:3px solid #C89BA5;padding:22px 26px;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:17px;line-height:1.65;color:#2E1F25;">&ldquo;${smartTypography(text)}&rdquo;${attr}</td></tr>
+  </table>`
+}
+
+function renderAtmosphere(emoji: string): string {
+  return `<p style="margin:0 0 22px 0;font-size:24px;line-height:1.2;">${escapeHtml(emoji)}</p>`
+}
+
+function renderNumberedList(intro: string, items: { lead: string; body: string }[]): string {
+  const trimmedItems = (items || []).slice(0, 3)
+  const rows = trimmedItems.map((it, idx) => {
+    const num = idx + 1
+    const sep = idx < trimmedItems.length - 1
+      ? `<tr><td colspan="2" style="height:18px;line-height:18px;">&nbsp;</td></tr>`
+      : ""
+    return `<tr>
+      <td width="34" valign="top" style="padding:0 12px 0 0;">
+        <div style="width:30px;height:30px;line-height:30px;text-align:center;background:#1F1B16;color:#FFFFFF;border-radius:50%;font-family:Georgia,serif;font-size:15px;font-weight:700;">${num}</div>
+      </td>
+      <td valign="top" style="padding-top:4px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#1F1B16;">
+        <strong>${smartTypography(it.lead)}</strong><br>
+        ${smartTypography(it.body)}
+      </td>
+    </tr>${sep}`
+  }).join("")
+  return `<p style="margin:0 0 18px 0;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#1F1B16;">${smartTypography(intro)}</p>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 22px 0;">${rows}</table>`
+}
+
+function renderCta(label: string, url: string, displayUrl: string): string {
+  return `<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:14px auto 6px auto;">
+    <tr><td align="center" style="border-radius:4px;background:#1F1B16;">
+      <a href="${escapeHtml(url)}" data-link-label="cta_main" class="em-cta" title="${escapeHtml(label)}" style="display:inline-block;padding:18px 38px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;letter-spacing:0.3px;color:#FFFFFF;text-decoration:none;border-radius:4px;">
+        ${escapeHtml(label)}
+      </a>
+    </td></tr>
+  </table>
+  <p style="margin:6px 0 22px 0;text-align:center;font-family:-apple-system,'Segoe UI',sans-serif;font-size:13px;color:#8A7884;">${escapeHtml(displayUrl)}</p>`
+}
+
+function renderSignature(name: string): string {
+  return `<p style="margin:6px 0 0 0;font-style:italic;font-family:Georgia,serif;font-size:20px;color:#1F1B16;">${escapeHtml(name)}</p>`
+}
+
+function renderPsBlock(ps?: string, pps?: string): string {
+  if (!ps && !pps) return ""
+  const psLine = ps
+    ? `<p style="margin:0 0 14px 0;font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:1.65;color:#3A2D33;"><strong style="letter-spacing:0.5px;">P.S.</strong>&nbsp;&nbsp;${smartTypography(ps)}</p>`
+    : ""
+  const ppsLine = pps
+    ? `<p style="margin:0;font-style:italic;font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:1.65;color:#3A2D33;"><strong style="font-style:normal;letter-spacing:0.5px;">P.P.S.</strong>&nbsp;&nbsp;${smartTypography(pps)}</p>`
+    : ""
+  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:18px 0 0 0;">
+    <tr><td style="border-top:1px dashed #E8D7DE;padding-top:22px;">${psLine}${ppsLine}</td></tr>
+  </table>`
+}
+
+// Walk the block array → emit ordered HTML. PS / PPS are pulled out and
+// rendered last (always inside the dashed-divider P.S. block).
+function renderBlocks(
+  blocks: Block[],
+  ctx: { authorName: string; ctaUrl: string; ctaLabel: string }
+): string {
+  let psText: string | undefined
+  let ppsText: string | undefined
   const out: string[] = []
-  let inList = false
-  let listBuf: string[] = []
 
-  const flushList = () => {
-    if (listBuf.length) {
-      out.push(
-        '<ol style="margin:0 0 22px 24px;padding:0;font-family:Georgia,serif;font-size:16px;line-height:1.65;color:#1F1B16;">' +
-          listBuf.map(li => `<li style="margin:0 0 10px 0;">${li}</li>`).join("") +
-          "</ol>"
-      )
-      listBuf = []
+  for (const b of blocks || []) {
+    switch (b.type) {
+      case "greeting":     out.push(renderGreeting(b.text)); break
+      case "paragraph":    out.push(renderParagraph(b.text, b.highlight)); break
+      case "inline_quote": out.push(renderInlineQuote(b.text)); break
+      case "tile_quote":   out.push(renderTileQuote(b.text, b.attribution)); break
+      case "atmosphere":   out.push(renderAtmosphere(b.emoji)); break
+      case "numbered_list":out.push(renderNumberedList(b.intro, b.items)); break
+      case "cta":          out.push(renderCta(b.label || ctx.ctaLabel, b.url || ctx.ctaUrl, displayHost(b.url || ctx.ctaUrl))); break
+      case "ps":           psText = b.text; break
+      case "pps":          ppsText = b.text; break
     }
-    inList = false
   }
 
-  for (const rawLine of lines) {
-    const line = rawLine.trim()
-    if (!line) { flushList(); continue }
-
-    const num = line.match(/^\d+\.\s+(.+)$/)
-    if (num) {
-      inList = true
-      listBuf.push(mdInline(num[1]))
-      continue
-    }
-    if (inList) flushList()
-
-    if (line.startsWith("> ")) {
-      out.push(
-        `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 22px 0;">` +
-          `<tr><td style="border-left:3px solid #C89BA5;padding:8px 0 8px 20px;font-family:Georgia,serif;font-style:italic;font-size:17px;line-height:1.6;color:#3A2530;">` +
-          mdInline(line.slice(2)) +
-          `</td></tr></table>`
-      )
-      continue
-    }
-
-    out.push(
-      `<p style="margin:0 0 22px 0;font-family:Georgia,serif;font-size:16px;line-height:1.65;color:#1F1B16;">${mdInline(line)}</p>`
-    )
-  }
-  flushList()
+  // Signature is always last in the card, before the P.S. block.
+  out.push(renderSignature(ctx.authorName))
+  out.push(renderPsBlock(psText, ppsText))
   return out.join("\n")
 }
 
-function wrapInEmailShell(args: {
+function displayHost(url: string): string {
+  try { return new URL(url).host.replace(/^www\./, "") } catch { return url }
+}
+
+// ═══ BRAND SHELL ═══════════════════════════════════════════════════════
+// Mirrors email-previews/BRAND-TEMPLATE.html exactly. Only the
+// `{{ inner }}` slot is replaced with renderBlocks() output.
+
+function wrapInBrandShell(args: {
   subject: string
   preheader: string
-  bodyHtml: string
-  signature: string
+  innerHtml: string
   locale: string
-  includeCta?: boolean
-  ctaLabel?: string
-  ctaUrl?: string
+  ctaUrl: string
+  secondaryCtaLabel: string
 }): string {
-  const { subject, preheader, bodyHtml, signature, locale, includeCta, ctaLabel, ctaUrl } = args
-  const ctaBlock = includeCta
-    ? `<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:18px auto 14px auto;">
-         <tr><td align="center" style="border-radius:4px;background:#1F1B16;">
-           <a href="${escapeHtml(ctaUrl || "{{ cta_url }}")}" data-link-label="cta_main" style="display:inline-block;padding:16px 32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;font-weight:700;letter-spacing:0.3px;color:#FFFFFF;text-decoration:none;border-radius:4px;">
-             ${escapeHtml(ctaLabel || "Bekijk het boek →")}
-           </a>
-         </td></tr>
-       </table>`
-    : ""
-
+  const { subject, preheader, innerHtml, locale, ctaUrl, secondaryCtaLabel } = args
+  const subjEsc = escapeHtml(subject)
+  const localeEsc = escapeHtml(locale)
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="${escapeHtml(locale)}" style="background:#faf5f8;">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="${localeEsc}" style="background:#faf5f8;">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="x-apple-disable-message-reformatting">
 <meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
 <base target="_blank">
-<title>${escapeHtml(subject)}</title>
-<style>
+<title>${subjEsc}</title>
+<!--[if mso]><style type="text/css">body, table, td { font-family: Georgia, 'Times New Roman', serif !important; }</style><![endif]-->
+<style type="text/css">
+  html { background:#faf5f8; }
   body { margin:0 !important; padding:0 !important; width:100% !important; background:#faf5f8 !important; }
-  table, td { border-collapse:collapse; }
+  table, td { border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; }
+  img { display:block; border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; max-width:100%; height:auto; }
+  a { color:#8C2E54; }
+  a:hover { color:#6B2240; }
+  .hl-yellow { background: linear-gradient(180deg, transparent 55%, #FFE66D 55%); padding: 0 2px; font-weight: 600; }
+  .hl-red { background: linear-gradient(180deg, transparent 55%, #F4A9A9 55%); padding: 0 2px; font-weight: 600; }
+  @media only screen and (max-width:640px) {
+    .em-container { width:100% !important; max-width:100% !important; }
+    .em-pad { padding-left:22px !important; padding-right:22px !important; }
+    .em-body-text { font-size:16px !important; line-height:1.6 !important; }
+    .em-cta { display:block !important; width:100% !important; box-sizing:border-box !important; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .em-bg { background:#faf5f8 !important; }
+    .em-card { background:#FFFFFF !important; }
+    .em-text { color:#1F1B16 !important; }
+  }
+  [data-ogsc] .em-bg { background:#faf5f8 !important; }
+  [data-ogsc] .em-card { background:#FFFFFF !important; }
+  [data-ogsc] .em-text { color:#1F1B16 !important; }
 </style>
 </head>
 <body bgcolor="#faf5f8" style="margin:0;padding:0;background:#faf5f8;font-family:Georgia,'Times New Roman',serif;color:#1F1B16;">
-<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#faf5f8;opacity:0;">${escapeHtml(preheader)}</div>
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#faf5f8" style="background:#faf5f8;">
-<tr><td align="center" style="padding:28px 14px 40px;">
-  <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:100%;background:#FFFFFF;border-radius:4px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-    <tr><td style="padding:40px 44px 8px 44px;">
-${bodyHtml}
-${ctaBlock}
-      <p style="margin:26px 0 0 0;font-family:Georgia,serif;font-style:italic;font-size:20px;color:#1F1B16;">${escapeHtml(signature)}</p>
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#faf5f8;opacity:0;">${escapeHtml(preheader)}
+&#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847;
+</div>
+<div role="article" aria-roledescription="email" aria-label="${subjEsc}" lang="${localeEsc}">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#faf5f8" class="em-bg" style="background:#faf5f8;">
+<tr><td bgcolor="#faf5f8" align="center" class="em-bg" style="background:#faf5f8;padding:28px 14px 40px 14px;">
+
+  <!-- View-in-browser strip (dispatcher fills in localized vars) -->
+  <table role="presentation" class="em-container" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:100%;">
+    <tr><td align="center" style="padding:0 14px 12px 14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;color:#8A7884;">
+      {{ view_in_browser_text }}
+      <a href="{{ view_in_browser_url }}" title="{{ view_in_browser_label }}" style="color:#8A7884;text-decoration:underline;">{{ view_in_browser_label }}</a>.
     </td></tr>
   </table>
+
+  <!-- Main card -->
+  <table role="presentation" class="em-container em-card" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:100%;background:#FFFFFF;border-radius:4px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+    <tr><td class="em-pad em-body-text em-text" style="padding:48px 44px 36px 44px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#1F1B16;">
+${innerHtml}
+    </td></tr>
+  </table>
+
+  <!-- Secondary text CTA (always present, links back to brand site) -->
+  <table role="presentation" class="em-container" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:100%;margin-top:22px;">
+    <tr><td align="center" style="padding:0 8px;">
+      <a href="${escapeHtml(ctaUrl)}" data-link-label="cta_secondary" title="${escapeHtml(secondaryCtaLabel)}" style="display:inline-block;font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;color:#8C2E54;text-decoration:underline;letter-spacing:0.3px;">
+        ${escapeHtml(secondaryCtaLabel)}
+      </a>
+    </td></tr>
+  </table>
+
 </td></tr>
 </table>
+</div>
 </body>
 </html>`
 }
 
-// ─── Public API ───────────────────────────────────────────────────────
+// ═══ PUBLIC API ════════════════════════════════════════════════════════
 
 export async function generateAiEmail(args: GenerateArgs): Promise<GeneratedEmail> {
   const apiKey = process.env.ANTHROPIC_API_KEY
@@ -316,36 +478,39 @@ export async function generateAiEmail(args: GenerateArgs): Promise<GeneratedEmai
 
   const resp = await client.messages.create({
     model,
-    max_tokens: 2500,
+    max_tokens: 3500,
     system: systemPrompt(args.brand, locale, args.dayTemplate),
     messages: [{ role: "user", content: userPrompt(args) }],
   })
 
   const raw = (resp.content?.[0] as any)?.text || ""
   const cleaned = raw.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim()
-  const parsed = JSON.parse(cleaned) as { subject: string; preheader: string; body_markdown: string }
-  if (!parsed.subject || !parsed.body_markdown) throw new Error("ai_response_incomplete")
+  const parsed = JSON.parse(cleaned) as AiResponse
+  if (!parsed.subject || !Array.isArray(parsed.blocks) || parsed.blocks.length === 0) {
+    throw new Error("ai_response_incomplete")
+  }
 
   const voice = args.brand.brand_voice_profile || {}
-  const signature = voice.signature || (voice.author_name || args.brand.marketing_from_name || "Joris").split(" ")[0]
+  const authorName = voice.signature || (voice.author_name || args.brand.marketing_from_name || "Joris").split(" ")[0]
+  const ctaUrl = voice.cta_url || `https://${args.brand.slug}.nl`
+  const ctaLabel = voice.cta_label || "Bekijk het boek →"
+  const secondaryCtaLabel = voice.secondary_cta_label || `Bekijk ${voice.book_title || "het boek"} →`
 
-  const bodyHtml = markdownToHtml(parsed.body_markdown)
-  const html = wrapInEmailShell({
+  const innerHtml = renderBlocks(parsed.blocks, { authorName, ctaUrl, ctaLabel })
+  const html = wrapInBrandShell({
     subject: parsed.subject,
     preheader: parsed.preheader || "",
-    bodyHtml,
-    signature,
+    innerHtml,
     locale,
-    includeCta: args.dayTemplate === "day3",
-    ctaLabel: voice.cta_label || "Bekijk het boek →",
-    ctaUrl: voice.cta_url || undefined,
+    ctaUrl,
+    secondaryCtaLabel,
   })
 
   return {
     subject: parsed.subject,
     preheader: parsed.preheader || "",
     html,
-    body_markdown: parsed.body_markdown,
+    blocks: parsed.blocks,
     model_used: model,
     generated_at: new Date().toISOString(),
   }

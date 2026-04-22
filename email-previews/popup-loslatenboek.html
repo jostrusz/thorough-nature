@@ -227,6 +227,58 @@
     transform: rotate(45deg);
   }
 
+  /* Custom write-your-own-answer option ─────────────────────────
+     Appears as the last choice in each of steps 1-4. Other options
+     auto-advance on click; this one requires the user to type and
+     confirm before advancing. */
+  .option.option-custom { border-style: dashed; }
+  .option.option-custom .option-icon { background: #fff; border: 1px dashed var(--rose-300); }
+  .option-custom-input {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: var(--rose-50);
+    border: 1.5px solid var(--rose-300);
+    border-radius: 12px;
+    padding: 6px 6px 6px 14px;
+    margin-top: -4px;
+    animation: customSlide 0.22s ease-out;
+  }
+  .option-custom-input.open { display: flex; }
+  .option-custom-input input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 0;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    color: var(--ink);
+    outline: none;
+    min-width: 0;
+  }
+  .option-custom-input input::placeholder { color: var(--muted); font-style: italic; }
+  .custom-confirm {
+    flex: 0 0 auto;
+    border: none;
+    background: var(--rose-500);
+    color: #fff;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.18s, opacity 0.18s;
+    white-space: nowrap;
+  }
+  .custom-confirm:disabled { background: var(--muted); cursor: not-allowed; opacity: 0.55; }
+  .custom-confirm:not(:disabled):hover { background: var(--rose-600); transform: translateY(-1px); }
+  @keyframes customSlide {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   /* Footer */
   .popup-footer {
     padding: 16px 28px 22px 28px;
@@ -602,6 +654,18 @@
           </span>
           <span class="option-check"></span>
         </button>
+        <button class="option option-compact option-custom" data-value="__custom__" data-custom="1">
+          <span class="option-icon">✍️</span>
+          <span class="option-text">
+            <span class="option-title">Napsat vlastní odpověď</span>
+            <span class="option-hint">Popiš to svými slovy</span>
+          </span>
+          <span class="option-check"></span>
+        </button>
+        <div class="option-custom-input">
+          <input type="text" maxlength="200" placeholder="Napiš to vlastními slovy…" />
+          <button type="button" class="custom-confirm" disabled>Potvrdit →</button>
+        </div>
       </div>
       <!-- step 1 footer removed — auto-advance on click, no back available -->
       <div class="popup-footer auto-advance" style="display:none;">
@@ -774,117 +838,128 @@
 // where we either call a real AI endpoint or use a deterministic
 // fallback message.
 
+// ── STEP 2 — "Kdo / co konkrétně" ────────────────────────────────
+// Purpose: give the AI a specific TARGET (person, event, domain) to
+// name in the email. Generic buckets aren't enough — we need "tvůj
+// táta" vs "tvůj bývalý", not just "Vztahy".
 const BRANCH_TREE = {
-  // LEVEL 1 → LEVEL 2 map
   relaties: {
-    q: "Který <em>vztah</em> bolí nejvíc?",
-    sub: "Jde o vztah, který ti bere energii nebo klid.",
+    q: "Kdo v tom <em>vystupuje</em>?",
+    sub: "Na koho myslíš nejvíc, když o tom mluvíš?",
     options: [
-      { v: "partner",   i: "💔", t: "(Ex-)partner",        h: "Někdo, s kým jsi měl/a nebo máš vztah" },
-      { v: "familie",   i: "🏠", t: "Rodina",              h: "Rodič, sourozenec, rodinný konflikt" },
-      { v: "vriend",    i: "🤝", t: "Přátelství",          h: "Zrada, vzdálili jste se" },
-      { v: "werk",      i: "💼", t: "Práce / kolega",      h: "Překračování hranic, šéf" },
+      { v: "partner",  i: "💔", t: "Partner nebo bývalý",   h: "Někdo, s kým jsem (byl/a)" },
+      { v: "parent",   i: "👵", t: "Máma nebo táta",         h: "Někdo, kdo mě vychoval" },
+      { v: "sibling",  i: "👫", t: "Sourozenec",             h: "Brácha, sestra" },
+      { v: "friend",   i: "🤝", t: "Přítel, který selhal",   h: "Někdo blízký mě ranil" },
+      { v: "boss",     i: "💼", t: "Šéf nebo kolega",        h: "V práci" },
+      { v: "self",     i: "🪞", t: "Já sám/a se sebou",      h: "Ten vztah je se mnou" },
     ],
   },
   verleden: {
-    q: "Co z <em>minulosti</em> se stále vrací?",
-    sub: "To, co tě v noci budí nebo najednou znova cítíš.",
+    q: "Co přesně se <em>vrací</em>?",
+    sub: "Ta jedna věc, co se pořád připomíná.",
     options: [
-      { v: "trauma",    i: "⚡", t: "Něco traumatického",   h: "Událost, která se drží" },
-      { v: "spijt",     i: "😞", t: "Lítost",               h: "Něco, co jsem měl/a udělat — nebo neudělat" },
-      { v: "verraad",   i: "🗡", t: "Zrada",                h: "Někdo mě hluboce ranil" },
-      { v: "verlies",   i: "🕯", t: "Ztráta",               h: "Někdo nebo něco, co jsem ztratil/a" },
+      { v: "childhood", i: "🧒", t: "Něco z dětství",             h: "To, co mě formovalo" },
+      { v: "breakup",   i: "💔", t: "Vztah, který skončil",       h: "Rozchod, rozvod, odchod" },
+      { v: "event",     i: "⚡", t: "Jedna konkrétní událost",    h: "Vím přesně kdy a co" },
+      { v: "did",       i: "🙈", t: "Něco, co jsem udělal/a",     h: "Lítost, vina" },
+      { v: "happened",  i: "💧", t: "Něco, co mi někdo udělal",   h: "Zrada, křivda, zranění" },
+      { v: "loss",      i: "🕯",  t: "Ztráta někoho",              h: "Někdo, kdo už tu není" },
     ],
   },
   gedachten: {
-    q: "Jak tě tvoje myšlenky <em>trápí</em>?",
-    sub: "Vyber, co tě nejvíc vystihuje.",
+    q: "Na co <em>myslíš</em> nejčastěji?",
+    sub: "O čem nedokážeš přestat přemýšlet.",
     options: [
-      { v: "rumineren", i: "🔁", t: "Přemílám stále to samé", h: "Stejná scéna v hlavě" },
-      { v: "wat_als",   i: "❓", t: "Scénáře co kdyby",       h: "Nekonečné budoucí strachy" },
-      { v: "oordeel",   i: "⚖️", t: "Vnitřní kritik",         h: "Mluvím na sebe tvrdě" },
-      { v: "slaap",     i: "🌙", t: "V noci nevypnu",         h: "Přemýšlení mě drží vzhůru" },
+      { v: "work",     i: "💼", t: "Práce / výkon",               h: "Jestli to stačím, jestli zvládnu" },
+      { v: "money",    i: "💰", t: "Peníze",                      h: "Bezpečí, dluhy, jistota" },
+      { v: "relation", i: "❤️", t: "Jeden konkrétní vztah",       h: "Ten člověk a co je mezi námi" },
+      { v: "health",   i: "🫀", t: "Zdraví",                      h: "Moje nebo někoho blízkého" },
+      { v: "future",   i: "🔮", t: "Budoucnost obecně",           h: "Co přijde, co se stane" },
+      { v: "past",     i: "🕰", t: "Něco z minulosti",             h: "Scéna, co se točí dokola" },
     ],
   },
   emoties: {
     q: "Která <em>emoce</em> tě přebírá?",
-    sub: "To, co nedokážeš potlačit.",
+    sub: "Ta, kterou nedokážeš zastavit.",
     options: [
-      { v: "woede",     i: "🔥", t: "Hněv",       h: "Rozčílím se kvůli věcem — někdy moc rychle" },
-      { v: "verdriet",  i: "💧", t: "Smutek",     h: "Tíha, která neodchází" },
-      { v: "schaamte",  i: "🙈", t: "Stud",       h: "Něco je na mně špatně" },
-      { v: "schuld",    i: "🔒", t: "Pocit viny", h: "Udělal/a jsem něco špatně" },
+      { v: "anger",   i: "😤", t: "Hněv",             h: "Vzteká mě to a nejde to" },
+      { v: "sadness", i: "😢", t: "Smutek",           h: "Tíha, která neodchází" },
+      { v: "shame",   i: "😔", t: "Stud",             h: "Něco je se mnou špatně" },
+      { v: "guilt",   i: "🔒", t: "Vina",             h: "Je to moje chyba" },
+      { v: "anxiety", i: "😰", t: "Úzkost / strach",   h: "Svírá mě to v břiše" },
+      { v: "empty",   i: "💀", t: "Prázdnota",        h: "Necítím nic, ani smutek" },
     ],
   },
   zelfbeeld: {
-    q: "Co říká tvůj <em>vnitřní hlas</em>?",
-    sub: "Zpráva, která se vrací, když je ti zle.",
+    q: "Co o sobě <em>nejvíc pochybuješ</em>?",
+    sub: "Tam, kde se cítíš nejmíň bezpečně.",
     options: [
-      { v: "niet_genoeg", i: "⚖️", t: "Nejsem dost",               h: "Srovnávám se, cítím se malý/á" },
-      { v: "liefde",      i: "💔", t: "Nezasloužím si lásku",      h: "Nikdo si mě opravdu nevybere" },
-      { v: "mislukt",     i: "🎭", t: "Jsem neúspěch",              h: "Můj život měl být jiný" },
-      { v: "masker",      i: "🎭", t: "Nikdo nezná pravého mě",     h: "Hraju roli, abych byl/a přijatý/á" },
+      { v: "body",     i: "🪞", t: "Moje tělo",                   h: "Jak vypadám, jak stárnu" },
+      { v: "ability",  i: "🧠", t: "Moje schopnosti",             h: "Jestli to umím, jestli stačím" },
+      { v: "worth",    i: "💔", t: "Jestli si zasloužím",         h: "Lásku, úspěch, klid" },
+      { v: "voice",    i: "💬", t: "Jak mluvím a jednám",          h: "Říkám hlouposti, trapno" },
+      { v: "weakness", i: "🥀", t: "Že jsem slabý/á",              h: "Jiní to zvládnou líp" },
+      { v: "real",     i: "🎭", t: "Kdo doopravdy jsem",           h: "Hraju roli, aby mě přijali" },
     ],
   },
   toekomst: {
-    q: "Co tě nejvíc <em>ochromuje</em>?",
-    sub: "Strach, který zmenšuje to, co si troufneš.",
+    q: "Čeho se <em>nejvíc bojíš</em>?",
+    sub: "To, co ti nedá v noci usnout.",
     options: [
-      { v: "alleen",    i: "🪑", t: "Zůstat sám/sama",         h: "Bojím se, že nikoho nenajdu" },
-      { v: "verkeerd",  i: "🔀", t: "Špatné rozhodnutí",       h: "Zůstávám ze strachu" },
-      { v: "oordeel",   i: "👁", t: "Co si myslí ostatní",     h: "Odmítnutí je bolestivé" },
-      { v: "herhaling", i: "🌀", t: "Opakovat stejné chyby",   h: "Vzorec, který neumím prolomit" },
+      { v: "alone",    i: "🪑", t: "Že zůstanu sám/sama",          h: "Nikoho nenajdu / ztratím blízké" },
+      { v: "money",    i: "💸", t: "Peníze / bezpečí",             h: "Finančně to nezvládnu" },
+      { v: "latetime", i: "⏳", t: "Že už je pozdě",                h: "Promarnil/a jsem roky" },
+      { v: "fail",     i: "🎯", t: "Že to nedokážu",                h: "Ať udělám cokoli, nevyjde to" },
+      { v: "death",    i: "🌑", t: "Smrt / konec",                  h: "Moje nebo někoho blízkého" },
+      { v: "stuck",    i: "🌊", t: "Že se to nikdy nezmění",        h: "Zůstanu v tom zaseknutý/á" },
+    ],
+  },
+  // Fallback pro custom K1 — generický "kdo/co je v tom"
+  __generic__: {
+    q: "Kdo nebo <em>co</em> je v tom zapletený?",
+    sub: "Na koho nebo na co myslíš nejvíc?",
+    options: [
+      { v: "person",   i: "👤", t: "Konkrétní člověk",             h: "Někdo, koho znám" },
+      { v: "myself",   i: "🪞", t: "Já sám/a",                     h: "Jsem to já" },
+      { v: "past",     i: "🕰", t: "Věc z minulosti",               h: "Něco, co se stalo" },
+      { v: "work",     i: "💼", t: "Práce / peníze",                h: "Výkon, bezpečí" },
+      { v: "future",   i: "🔮", t: "Budoucnost / neznámo",          h: "Co přijde" },
+      { v: "body",     i: "🫀", t: "Tělo / zdraví",                 h: "Moje nebo někoho blízkého" },
     ],
   },
 };
 
-// LEVEL 3 & 4 — kept concise (similar structure for all paths; here one full
-// example "relaties/partner" and one-size-fits-all fallback for others).
-const LEVEL_3 = {
-  "relaties.partner": {
-    q: "Jak dlouho <em>to už trvá</em>?",
-    sub: "Čas hodně napoví o vzorci.",
-    options: [
-      { v: "<6m",   i: "🌱", t: "Méně než 6 měsíců" },
-      { v: "6-24m", i: "🌿", t: "6 měsíců – 2 roky" },
-      { v: "2-5y",  i: "🌳", t: "2 až 5 let" },
-      { v: "5+y",   i: "🌲", t: "Déle než 5 let" },
-    ],
-  },
-  // Generic level-3 for the other paths — intensity question
-  "generic.intensity": {
-    q: "Jak <em>intenzivní</em> to je?",
-    sub: "Víš to jen ty.",
-    options: [
-      { v: "soms",      i: "🌤", t: "Občas — ale odchází to" },
-      { v: "vaak",      i: "⛅", t: "Často — několikrát týdně" },
-      { v: "dagelijks", i: "🌧", t: "Denně" },
-      { v: "altijd",    i: "⛈", t: "Prakticky pořád" },
-    ],
-  },
+// ── STEP 3 — "Kdy se to vrací" (UNIVERZÁLNÍ, stejné pro všechny cesty) ──
+// Purpose: give AI the trigger moment — when/where the pain surfaces.
+// AI can then open with "Víš co je zvláštní? Vrací se ti to právě v [X]."
+const LEVEL_3_UNIVERSAL = {
+  q: "Kdy se ti to <em>nejvíc vrací</em>?",
+  sub: "Ten moment, kdy to přijde naplno.",
+  options: [
+    { v: "3am",     i: "🌙", t: "Ve 3 ráno",                       h: "Probudím se a už to jede" },
+    { v: "morning", i: "☕", t: "Hned po probuzení",               h: "Ještě než stihnu kávu" },
+    { v: "alone",   i: "🚗", t: "Když jsem sám/a",                 h: "V autě, doma, při procházce" },
+    { v: "people",  i: "👥", t: "S lidmi — tvářím se v pohodě",    h: "Zatímco vevnitř řvu" },
+    { v: "trigger", i: "⚡", t: "Když mi to něco připomene",        h: "Věta, vůně, písnička, místo" },
+    { v: "always",  i: "🔄", t: "Prakticky pořád",                 h: "Je to pozadí všeho" },
+  ],
 };
 
-const LEVEL_4 = {
-  "relaties.partner": {
-    q: "Jak se <em>teď cítíš</em>, když na to myslíš?",
-    sub: "Vyber dominantní pocit.",
-    options: [
-      { v: "boos",       i: "🔥", t: "Naštvaný/á",   h: "Hněv na něj/ni, na sebe" },
-      { v: "verdrietig", i: "💧", t: "Smutný/á",     h: "Chybění, prázdnota, slzy" },
-      { v: "vast",       i: "🔒", t: "Zaseknutý/á", h: "Nemůžu dál, nemůžu pustit" },
-      { v: "verward",    i: "🌫", t: "Zmatený/á",   h: "Už nevím, co cítím" },
-    ],
-  },
-  "generic.block": {
-    q: "Co tě nejvíc <em>blokuje</em>?",
-    sub: "Hlavní blokáda, která všechno drží na místě.",
-    options: [
-      { v: "angst",     i: "😨", t: "Strach",              h: "Bojím se toho, co přijde, když to pustím" },
-      { v: "gewoonte",  i: "🔁", t: "Zvyk",                h: "Jsem takhle tak dlouho, že mi to přijde normální" },
-      { v: "niet_wil",  i: "✋", t: "Nevědomky nechci",    h: "Něco ve mně se toho drží" },
-      { v: "niet_weet", i: "🗝", t: "Nevím jak",           h: "Chtěl/a bych, ale nevím jak" },
-    ],
-  },
+// ── STEP 4 — "Věta, kterou si říkáš" (UNIVERZÁLNÍ) ─────────────────
+// 🔥 NEJCENNĚJŠÍ VSTUP PRO AI — vnitřní hlas čtenáře doslova.
+// AI pak v emailu může citovat jeho vlastní slova → šok z poznání.
+const LEVEL_4_UNIVERSAL = {
+  q: "Kterou <em>větu</em> si v tom pořád říkáš?",
+  sub: "Ta, co se vrací, když jsi sám/a se sebou.",
+  options: [
+    { v: "not_enough", i: "⚖️",  t: "„Nejsem dost.",                         h: "Nestačím, jiní jsou lepší" },
+    { v: "too_late",   i: "⏳", t: "„Už je pozdě.",                           h: "Promarnil/a jsem to" },
+    { v: "my_fault",   i: "🔒", t: "„Je to moje chyba.",                      h: "Měl/a jsem to udělat jinak" },
+    { v: "lose_all",   i: "😰", t: "„Kdybych to pustil/a, ztratím všechno.",  h: "Bojím se, co přijde" },
+    { v: "like_this",  i: "🎭", t: "„Prostě takový/á jsem.",                  h: "Už se nezměním" },
+    { v: "no_one",     i: "🪑", t: "„Nikdo mě nepochopí.",                    h: "Sám/a v tom zůstávám" },
+  ],
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -914,20 +989,75 @@ function closePopup() {
 function selectOption(btn) {
   const parentOptions = btn.closest(".options");
   parentOptions.querySelectorAll(".option").forEach(b => b.classList.remove("selected"));
+  // Collapse any previously opened custom-input row in this step
+  parentOptions.querySelectorAll(".option-custom-input.open").forEach(row => {
+    row.classList.remove("open");
+    const inp = row.querySelector("input");
+    if (inp) inp.value = "";
+    const cb = row.querySelector(".custom-confirm");
+    if (cb) cb.disabled = true;
+  });
   btn.classList.add("selected");
   const stepEl = btn.closest(".step");
   const nextBtn = stepEl.querySelector(".next-btn");
   if (nextBtn) nextBtn.disabled = false;
 
   const stepN = parseInt(stepEl.dataset.step, 10);
+  const isCustom = btn.dataset.custom === "1";
+
+  if (isCustom) {
+    // Custom "write your own" — expand input row, DO NOT auto-advance.
+    // User must type + click the Potvrdit button (or press Enter).
+    const inputRow = btn.nextElementSibling;
+    if (inputRow && inputRow.classList.contains("option-custom-input")) {
+      inputRow.classList.add("open");
+      const inp = inputRow.querySelector("input");
+      setTimeout(() => inp && inp.focus(), 140);
+    }
+    return;
+  }
+
   if (stepN >= 1 && stepN <= 4) {
     setTimeout(() => nextStep(stepN + 1), 500);
   }
 }
 
 document.addEventListener("click", (e) => {
+  // Custom-answer confirm button → advance with typed text
+  const confirmBtn = e.target.closest(".custom-confirm");
+  if (confirmBtn) {
+    const row = confirmBtn.closest(".option-custom-input");
+    const input = row && row.querySelector("input");
+    const text = (input && input.value || "").trim();
+    if (text.length < 2) return;
+    const optionBtn = row.previousElementSibling;
+    optionBtn.dataset.value = "custom:" + text;
+    const stepEl = optionBtn.closest(".step");
+    const stepN = parseInt(stepEl.dataset.step, 10);
+    if (stepN >= 1 && stepN <= 4) nextStep(stepN + 1);
+    return;
+  }
   const opt = e.target.closest(".option");
   if (opt) selectOption(opt);
+});
+
+// Enable/disable confirm button as user types (≥ 2 chars)
+document.addEventListener("input", (e) => {
+  if (e.target.matches && e.target.matches(".option-custom-input input")) {
+    const row = e.target.closest(".option-custom-input");
+    const cb = row.querySelector(".custom-confirm");
+    cb.disabled = e.target.value.trim().length < 2;
+  }
+});
+
+// Enter in the custom input triggers the confirm button
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  if (e.target.matches && e.target.matches(".option-custom-input input")) {
+    e.preventDefault();
+    const cb = e.target.closest(".option-custom-input").querySelector(".custom-confirm");
+    if (cb && !cb.disabled) cb.click();
+  }
 });
 
 // Move to next step — stores selection + renders next step dynamically
@@ -967,29 +1097,45 @@ function renderOptions(container, options) {
       </span>
       <span class="option-check"></span>
     </button>
-  `).join("");
+  `).join("") + `
+    <button class="option option-custom" data-value="__custom__" data-custom="1">
+      <span class="option-icon">✍️</span>
+      <span class="option-text">
+        <span class="option-title">Napsat vlastní odpověď</span>
+        <span class="option-hint">Popiš to svými slovy</span>
+      </span>
+      <span class="option-check"></span>
+    </button>
+    <div class="option-custom-input">
+      <input type="text" maxlength="200" placeholder="Napiš to vlastními slovy…" />
+      <button type="button" class="custom-confirm" disabled>Potvrdit →</button>
+    </div>
+  `;
 }
 
+// Step 2 — pick branch by K1 selection. If K1 is custom (starts with
+// "custom:" or unknown key), fall back to __generic__ branch so the
+// user is never stranded on an empty step.
 function buildStep2() {
-  const cat = state.path[0];
-  const branch = BRANCH_TREE[cat];
-  if (!branch) return;
+  const cat = state.path[0] || "";
+  const branch = BRANCH_TREE[cat] || BRANCH_TREE.__generic__;
   $("#q2").innerHTML = branch.q;
   $("#q2sub").textContent = branch.sub;
   renderOptions($("#options-2"), branch.options);
 }
 
+// Step 3 — universal: same "when does it surface" question for every path.
 function buildStep3() {
-  const key = `${state.path[0]}.${state.path[1]}`;
-  const branch = LEVEL_3[key] || LEVEL_3["generic.intensity"];
+  const branch = LEVEL_3_UNIVERSAL;
   $("#q3").innerHTML = branch.q;
   $("#q3sub").textContent = branch.sub;
   renderOptions($("#options-3"), branch.options);
 }
 
+// Step 4 — universal: same "your inner sentence" question for every path.
+// This is the highest-signal input for the AI email.
 function buildStep4() {
-  const key = `${state.path[0]}.${state.path[1]}`;
-  const branch = LEVEL_4[key] || LEVEL_4["generic.block"];
+  const branch = LEVEL_4_UNIVERSAL;
   $("#q4").innerHTML = branch.q;
   $("#q4sub").textContent = branch.sub;
   renderOptions($("#options-4"), branch.options);
@@ -1270,17 +1416,25 @@ async function submitForm(e) {
   $("#success-name").textContent = firstName;
   showStep(6);
 
+  // Semantic field names so AI prompt can read them directly.
+  // quiz_path keeps the raw value array for forensic / debugging.
+  // "custom:..." prefix on a value means the user typed their own answer.
   const payload = {
     form_id: "popup_quiz_loslatenboek",
     brand_slug: "loslatenboek",
     email,
     first_name: firstName,
     properties: {
-      quiz_path: state.path,
-      quiz_category: state.path[0],
-      quiz_subcategory: state.path[1],
-      quiz_intensity: state.path[2],
-      quiz_emotion: state.path[3],
+      quiz_path:         state.path,
+      quiz_area:         state.path[0],   // K1 — broad area (relaties / verleden / ...)
+      quiz_target:       state.path[1],   // K2 — specific person/thing (parent / breakup / ...)
+      quiz_trigger:      state.path[2],   // K3 — when it surfaces (3am / morning / ...)
+      quiz_own_sentence: state.path[3],   // K4 — inner voice / their own sentence
+      // Backwards-compat for the previous AI generator field names.
+      quiz_category:     state.path[0],
+      quiz_subcategory:  state.path[1],
+      quiz_intensity:    state.path[2],
+      quiz_emotion:      state.path[3],
     },
   };
 
@@ -1306,6 +1460,9 @@ async function submitForm(e) {
 function resetQuiz() {
   state = { path: [], currentStep: 1 };
   $$(".option.selected").forEach(o => o.classList.remove("selected"));
+  $$(".option-custom-input.open").forEach(r => r.classList.remove("open"));
+  $$(".option-custom-input input").forEach(i => { i.value = ""; });
+  $$(".custom-confirm").forEach(b => { b.disabled = true; });
   $$(".next-btn").forEach(b => b.disabled = true);
   showStep(1);
   $("#ai-thinking").style.display = "block";
