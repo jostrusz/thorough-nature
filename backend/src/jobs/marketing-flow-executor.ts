@@ -554,7 +554,7 @@ async function sendFlowEmail(args: {
         day_template: node.config.ai_day_template || "day1",
         model_used: gen.model_used,
         generated_at: gen.generated_at,
-        body_markdown: gen.body_markdown,
+        blocks: gen.blocks,
       }
       logger.info(`[Marketing Flow AI] Generated ${aiGeneratedMeta.day_template} email for contact=${contact.id} via ${gen.model_used}`)
     } catch (err: any) {

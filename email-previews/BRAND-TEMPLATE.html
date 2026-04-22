@@ -1,0 +1,462 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="{{ locale }}" style="background:#faf5f8;">
+<!--
+  ════════════════════════════════════════════════════════════════════════════
+  BRAND EMAIL TEMPLATE — Loslatenboek / Laat los wat je kapotmaakt
+  ════════════════════════════════════════════════════════════════════════════
+
+  PURPOSE
+  ───────
+  Master template for ALL marketing emails on the loslatenboek brand
+  (campaigns, flows, transactional confirmations, AI-generated nurture).
+  Every email starts as a copy of this file — only the content blocks
+  change. Layout / typography / palette / spacing / dark-mode / Outlook
+  hardening are LOCKED.
+
+  FILE PATH
+  ─────────
+  email-previews/BRAND-TEMPLATE.html (this file = source of truth)
+  Used by:
+    - admin email-editor "Load sample" button (sample-email-html.ts)
+    - AI email generator wrapInEmailShell() in ai-email-generator.ts
+    - Manual campaign writers (copy-paste into Marketing → Campaigns)
+
+  ════════════════════════════════════════════════════════════════════════════
+  DESIGN TOKENS — never invent new values, always reuse from this list
+  ════════════════════════════════════════════════════════════════════════════
+
+  COLORS
+  ──────
+  Background outer (rose mauve)    #faf5f8   ← body, table bgcolor, dark-mode override
+  Card background                  #FFFFFF   ← .em-card
+  Body text (ink)                  #1F1B16   ← all body copy
+  Body text muted                  #3A2D33   ← P.S./P.P.S. block, captions
+  Meta text (tertiary)             #8A7884   ← view-in-browser, footer link
+  Brand primary (rose)             #8C2E54   ← inline links, secondary CTA
+  Brand primary hover              #6B2240   ← link:hover
+  Brand accent                     #C89BA5   ← pull-quote left border
+  Pull-quote bg                    #F4E8EE   ← full quote-block tile
+  Pull-quote text                  #2E1F25   ← inside pull-quote tile
+  Quote attribution                #9C6B74   ← "— from book title" caption
+  Highlight yellow                 #FFE66D   ← .hl-yellow underline
+  Highlight red                    #F4A9A9   ← .hl-red underline
+  CTA button bg (ink black)        #1F1B16   ← primary CTA
+  CTA button text                  #FFFFFF
+  Divider dashed                   #E8D7DE   ← P.S. block top border
+
+  TYPOGRAPHY
+  ──────────
+  PRIMARY FONT       Georgia, 'Times New Roman', serif
+                     → ALL body text, headings, quotes, signatures
+  UI FONT            -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                     Helvetica, Arial, sans-serif
+                     → CTA button labels, view-in-browser, footer link, captions
+
+  Body paragraph     16px / line-height 1.65    (mobile bumps to 16px / 1.6)
+  Pull-quote inline  17px / line-height 1.6     italic
+  Pull-quote tile    17px / line-height 1.65    italic
+  Number circles     15px bold (numbered list)
+  CTA button         16px / 700 / letter-spacing 0.3px
+  Signature          20px / italic / Georgia
+  P.S. / P.P.S.      15px / line-height 1.65
+  Caption / muted    13px (footer link is 14px, view-in-browser is 12px)
+  Quote attribution  13px / uppercase / letter-spacing 1px
+  Emoji single block 24px (for atmospheric "😶" between sections)
+  Mobile hero        24px / line-height 1.3 (.em-heading)
+
+  SPACING SYSTEM
+  ──────────────
+  Outer padding (table)        28px 14px 40px 14px
+  Card horizontal padding      44px desktop / 22px mobile (.em-pad)
+  Card top padding             48px (first row of card)
+  Card bottom padding          36px (last row before close)
+  Paragraph margin-bottom      22px standard / 14px before tight follow / 26px before signature
+  Pull-quote outer padding     10px 44px (vertical compress)
+  Quote tile outer padding     6px 44px
+  Quote tile inner padding     22px 26px
+  CTA row outer padding        14px 44px 10px
+  CTA button inner padding     18px 38px (primary) / 12px 28px (secondary)
+  Numbered list row gap        18px (spacer row between items)
+  P.S. block top divider gap   22px after dashed border-top
+  Card gap below (secondary)   22px from main card to secondary CTA
+
+  CARD CONTAINER
+  ──────────────
+  Width                        600px max (mobile fluid 100%)
+  Background                   #FFFFFF
+  Border-radius                4px
+  Box-shadow                   0 1px 3px rgba(0,0,0,0.04)
+
+  CTA BUTTONS
+  ───────────
+  Primary (dark, in card)      bg #1F1B16, text #FFFFFF, padding 18px 38px,
+                               radius 4px, UI font 16px/700
+                               → use exactly ONCE per email
+  Secondary text-only (under)  rose #8C2E54, underlined, UI font 14px,
+                               separated by 22px from main card
+  Mobile                       Both stretch full-width via .em-cta class
+
+  AVAILABLE BLOCKS (compose any subset, in any order)
+  ──────────────────────────────────────────────────
+   1. View-in-browser strip    (always first, above main card)
+   2. Greeting + opening       (always first row inside card)
+   3. Inline pull-quote        (3px rose left border, italic)
+   4. Body paragraphs          (16px Georgia)
+   5. Atmospheric emoji        (single 24px emoji as visual breath)
+   6. Highlight phrase         (.hl-yellow / .hl-red — use 1-3× max per email)
+   7. Full quote tile          (rose bg, optional attribution caption)
+   8. Numbered list            (1-3 items max, bold lead-in + body)
+   9. Primary CTA              (one per email, only on selling/action emails)
+  10. Closing paragraphs       (after CTA or as ending without CTA)
+  11. Signature                (always present, italic 20px first name)
+  12. P.S. + P.P.S.            (top dashed divider, optional, max 2 lines each)
+  13. Secondary text CTA       (under main card, optional repeat of CTA)
+
+  PERSONALIZATION VARIABLES (Liquid-style, replaced by dispatcher)
+  ───────────────────────────────────────────────────────────────
+  {{ first_name }}             reader's first name
+  {{ subject }}                email subject (also used in <title>)
+  {{ preheader }}              50-80 char preheader text
+  {{ locale }}                 ISO 2-letter (nl / cs / de / pl / sv / en)
+  {{ author_name }}            "Joris" / "Anna" / etc — italic signature
+  {{ book_title }}             "Laat los wat je kapotmaakt"
+  {{ cta_url }}                primary CTA destination (always brand domain)
+  {{ cta_label }}              "Bekijk het boek →"
+  {{ secondary_cta_label }}    longer underlined link text
+  {{ view_in_browser_text }}   localized prefix ("Mail niet goed leesbaar?")
+  {{ view_in_browser_label }}  localized link text ("Bekijk in browser")
+  {{ view_in_browser_url }}    /public/marketing/view/<token>
+
+  TRACKING (auto-injected, do not add manually)
+  ─────────────────────────────────────────────
+  - All <a href> get UTM params + click-tracking redirect
+  - data-link-label="<label>" attribute → marketing_click.link_label
+  - <img> open-pixel injected at end of body
+  - Unsubscribe footer auto-appended in production
+
+  DELIVERABILITY HARDENING (already in this template — never remove)
+  ─────────────────────────────────────────────────────────────────
+  - x-apple-disable-message-reformatting
+  - color-scheme + supported-color-schemes meta = light only
+  - <base target="_blank">
+  - role="article" + aria-roledescription="email" + lang attribute
+  - Hidden preheader div (display:none + zero-width chars to fill 100 chars)
+  - MSO conditional CSS (Outlook fallback to Georgia)
+  - Dark-mode override block (.em-bg / .em-card / .em-text)
+  - Outlook.com [data-ogsc] override (separate from prefers-color-scheme)
+  - All <table> have role="presentation" (screen-reader skip)
+  - All <img> have display:block + max-width:100% + height:auto
+
+  CONTENT LENGTH GUIDELINES
+  ─────────────────────────
+  Story / value email          750-850 words body
+  Day 1 nurture (validation)   280-350 words body
+  Day 2 nurture (story+tool)   320-400 words body
+  Day 3 nurture (book bridge)  320-400 words body + CTA
+  Newsletter                   500-700 words body
+  Transactional                ≤300 words body
+  Subject line                 6-10 words, lowercase, lead with hook
+  Preheader                    50-80 chars, complement (don't repeat) subject
+
+  RULES OF THUMB — when composing
+  ───────────────────────────────
+  • Use highlight phrases (.hl-yellow) sparingly: 1-3× per email max,
+    always on a single phrase that pays off the story beat
+  • Pull-quotes (inline or tile) work best mid-story, NOT at top
+  • Numbered lists must have ≤3 items — more = unread
+  • Primary CTA ONCE per email. Secondary text link below = repeat reminder
+  • Atmospheric emoji (24px standalone) creates pacing — use 1× max
+  • Signature is ALWAYS present, even on "no-CTA" validation emails
+  • P.S. is the second-most-read line — put a question or curiosity there
+  • Never use bullet lists (•) — use numbered or paragraphs
+  • Em-dash (—) preferred over hyphen, smart quotes preferred over straight
+  ════════════════════════════════════════════════════════════════════════════
+-->
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<base target="_blank">
+<title>{{ subject }}</title>
+
+<!--[if mso]>
+<style type="text/css">
+  body, table, td { font-family: Georgia, 'Times New Roman', serif !important; }
+</style>
+<![endif]-->
+
+<style type="text/css">
+  /* ── RESET ───────────────────────────────────────────────────── */
+  html { background:#faf5f8; }
+  body { margin:0 !important; padding:0 !important; width:100% !important; background:#faf5f8 !important; }
+  table, td { border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; }
+  img { display:block; border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; max-width:100%; height:auto; }
+
+  /* ── INLINE LINKS ────────────────────────────────────────────── */
+  a { color:#8C2E54; }
+  a:hover { color:#6B2240; }
+
+  /* ── HIGHLIGHT PHRASES (use sparingly, 1-3× per email) ───────── */
+  .hl-yellow {
+    background: linear-gradient(180deg, transparent 55%, #FFE66D 55%);
+    padding: 0 2px;
+    font-weight: 600;
+  }
+  .hl-red {
+    background: linear-gradient(180deg, transparent 55%, #F4A9A9 55%);
+    padding: 0 2px;
+    font-weight: 600;
+  }
+
+  /* ── MOBILE BREAKPOINT (640px) ───────────────────────────────── */
+  @media only screen and (max-width:640px) {
+    .em-container { width:100% !important; max-width:100% !important; }
+    .em-pad { padding-left:22px !important; padding-right:22px !important; }
+    .em-body-text { font-size:16px !important; line-height:1.6 !important; }
+    .em-heading { font-size:24px !important; line-height:1.3 !important; }
+    .em-cta { display:block !important; width:100% !important; box-sizing:border-box !important; }
+    .em-hide-mobile { display:none !important; }
+  }
+
+  /* ── DARK-MODE PRESERVATION (forces light palette) ───────────── */
+  @media (prefers-color-scheme: dark) {
+    .em-bg { background:#faf5f8 !important; }
+    .em-card { background:#FFFFFF !important; }
+    .em-text { color:#1F1B16 !important; }
+  }
+  /* Outlook.com dark-mode override (separate selector) */
+  [data-ogsc] .em-bg { background:#faf5f8 !important; }
+  [data-ogsc] .em-card { background:#FFFFFF !important; }
+  [data-ogsc] .em-text { color:#1F1B16 !important; }
+</style>
+</head>
+
+<body bgcolor="#faf5f8" style="margin:0;padding:0;background:#faf5f8;font-family:Georgia,'Times New Roman',serif;color:#1F1B16;">
+
+<!-- ═══ PREHEADER ═══════════════════════════════════════════════════════
+     Hidden 50-100 char teaser shown next to subject in inbox preview.
+     Trailing zero-width-space + combining-dot chars push out Gmail's
+     "...rest of message body" snippet leak. Always include both. -->
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#faf5f8;opacity:0;">
+  {{ preheader }}
+  &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847; &#8203;&#847;
+</div>
+
+<!-- ═══ ARTICLE WRAPPER (a11y) ═══════════════════════════════════════ -->
+<div role="article" aria-roledescription="email" aria-label="{{ subject }}" lang="{{ locale }}">
+
+<!-- ═══ OUTER BACKGROUND TABLE (rose mauve, full-bleed) ═════════════ -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#faf5f8" class="em-bg" style="background:#faf5f8;">
+<tr>
+<td bgcolor="#faf5f8" align="center" class="em-bg" style="background:#faf5f8;padding:28px 14px 40px 14px;">
+
+  <!-- ─── BLOCK 1 · VIEW-IN-BROWSER STRIP ────────────────────────────
+       Localized per brand.locale by dispatcher. Always rendered.
+       Never remove (deliverability + accessibility expectation). -->
+  <table role="presentation" class="em-container" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:100%;">
+    <tr>
+      <td align="center" style="padding:0 14px 12px 14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;color:#8A7884;">
+        {{ view_in_browser_text }}
+        <a href="{{ view_in_browser_url }}" title="{{ view_in_browser_label }}" style="color:#8A7884;text-decoration:underline;">{{ view_in_browser_label }}</a>.
+      </td>
+    </tr>
+  </table>
+
+  <!-- ═══ MAIN CARD (white, 600×, 4px radius, soft shadow) ═════════ -->
+  <table role="presentation" class="em-container em-card" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:100%;background:#FFFFFF;border-radius:4px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+
+    <!-- ─── BLOCK 2 · GREETING + OPENING (4-6 short paragraphs) ─────
+         Always the first row. 48px top padding only on first row.
+         Open with a story moment, NOT "I hope you're well". -->
+    <tr>
+      <td class="em-pad em-body-text em-text" style="padding:48px 44px 0 44px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#1F1B16;">
+        <p style="margin:0 0 22px 0;">Hoi {{ first_name }},</p>
+
+        <p style="margin:0 0 22px 0;">
+          {{ opening_paragraph_1 }}
+        </p>
+
+        <p style="margin:0 0 22px 0;">
+          {{ opening_paragraph_2 }}
+        </p>
+
+        <p style="margin:0 0 22px 0;">
+          {{ opening_paragraph_3 }}
+        </p>
+      </td>
+    </tr>
+
+    <!-- ─── BLOCK 3 · INLINE PULL-QUOTE (optional, mid-narrative) ───
+         Use to break up a story beat. 3px rose left border + italic.
+         Keep to 1-2 sentences max. -->
+    <tr>
+      <td class="em-pad" style="padding:10px 44px 10px 44px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+          <tr>
+            <td style="border-left:3px solid #C89BA5;padding:8px 0 8px 20px;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:17px;line-height:1.6;color:#3A2530;">
+              &ldquo;{{ inline_quote_text }}&rdquo;
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- ─── BLOCK 4 · BODY (with optional atmospheric emoji + highlight) ─ -->
+    <tr>
+      <td class="em-pad em-body-text em-text" style="padding:10px 44px 0 44px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#1F1B16;">
+
+        <!-- Atmospheric emoji as visual breath (24px, standalone). Use 1× max. -->
+        <p style="margin:0 0 22px 0;font-size:24px;">{{ atmosphere_emoji }}</p>
+
+        <p style="margin:0 0 22px 0;">{{ body_paragraph_1 }}</p>
+
+        <p style="margin:0 0 22px 0;">{{ body_paragraph_2 }}</p>
+
+        <p style="margin:0 0 22px 0;">{{ body_paragraph_3 }}</p>
+
+        <!-- Highlight phrase example (use .hl-yellow for the one line that lands) -->
+        <p style="margin:0 0 22px 0;">
+          {{ body_with_highlight_lead_in }} <span class="hl-yellow">{{ highlight_phrase }}</span>
+        </p>
+
+        <p style="margin:0 0 14px 0;">{{ transition_to_quote }}</p>
+      </td>
+    </tr>
+
+    <!-- ─── BLOCK 5 · FULL QUOTE TILE (rose bg, optional attribution) ─
+         Best for 1 quote per email. Caption = small uppercase rose. -->
+    <tr>
+      <td class="em-pad" style="padding:6px 44px 6px 44px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+          <tr>
+            <td style="background:#F4E8EE;border-left:3px solid #C89BA5;padding:22px 26px;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:17px;line-height:1.65;color:#2E1F25;">
+              &ldquo;{{ tile_quote_text }}&rdquo;
+              <br><br>
+              <span style="font-size:13px;font-style:normal;color:#9C6B74;letter-spacing:1px;text-transform:uppercase;">— {{ tile_quote_attribution }}</span>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- ─── BLOCK 6 · TEACHING + NUMBERED LIST (1-3 items max) ─────
+         Black circle numerals (30px), bold lead-in, then 1-line tool. -->
+    <tr>
+      <td class="em-pad em-body-text em-text" style="padding:10px 44px 0 44px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#1F1B16;">
+        <p style="margin:0 0 18px 0;">{{ list_intro }}</p>
+
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 12px 0;">
+          <tr>
+            <td width="34" valign="top" style="padding:0 12px 0 0;">
+              <div style="width:30px;height:30px;line-height:30px;text-align:center;background:#1F1B16;color:#FFFFFF;border-radius:50%;font-family:Georgia,serif;font-size:15px;font-weight:700;">1</div>
+            </td>
+            <td valign="top" style="padding-top:4px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#1F1B16;">
+              <strong>{{ list_item_1_lead }}</strong><br>
+              {{ list_item_1_body }}
+            </td>
+          </tr>
+          <tr><td colspan="2" style="height:18px;line-height:18px;">&nbsp;</td></tr>
+          <tr>
+            <td width="34" valign="top" style="padding:0 12px 0 0;">
+              <div style="width:30px;height:30px;line-height:30px;text-align:center;background:#1F1B16;color:#FFFFFF;border-radius:50%;font-family:Georgia,serif;font-size:15px;font-weight:700;">2</div>
+            </td>
+            <td valign="top" style="padding-top:4px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#1F1B16;">
+              <strong>{{ list_item_2_lead }}</strong><br>
+              {{ list_item_2_body }}
+            </td>
+          </tr>
+        </table>
+
+        <p style="margin:22px 0 22px 0;">{{ post_list_payoff }}</p>
+
+        <p style="margin:0 0 22px 0;">{{ post_list_paragraph_1 }}</p>
+
+        <p style="margin:0 0 22px 0;">{{ post_list_paragraph_2 }}</p>
+
+        <p style="margin:0 0 22px 0;">{{ post_list_paragraph_3 }}</p>
+      </td>
+    </tr>
+
+    <!-- ─── BLOCK 7 · PRIMARY CTA (use ONCE per email; OMIT for validation-only) ─
+         Black ink button, 18px 38px padding, UI font, full-width on mobile. -->
+    <tr>
+      <td class="em-pad" align="center" style="padding:14px 44px 10px 44px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;">
+          <tr>
+            <td align="center" style="border-radius:4px;background:#1F1B16;">
+              <a href="{{ cta_url }}" data-link-label="cta_main" class="em-cta" title="{{ cta_label }}" style="display:inline-block;padding:18px 38px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;letter-spacing:0.3px;color:#FFFFFF;text-decoration:none;border-radius:4px;">
+                {{ cta_label }}
+              </a>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:12px 0 0 0;font-family:-apple-system,'Segoe UI',sans-serif;font-size:13px;color:#8A7884;">
+          {{ cta_url_display }}
+        </p>
+      </td>
+    </tr>
+
+    <!-- ─── BLOCK 8 · CLOSING PARAGRAPHS ─────────────────────────── -->
+    <tr>
+      <td class="em-pad em-body-text em-text" style="padding:18px 44px 0 44px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#1F1B16;">
+        <p style="margin:0 0 22px 0;">{{ closing_paragraph_1 }}</p>
+
+        <p style="margin:0 0 26px 0;">
+          {{ closing_paragraph_2_lead_in }} <span class="hl-yellow">{{ closing_highlight }}</span>
+        </p>
+      </td>
+    </tr>
+
+    <!-- ─── BLOCK 9 · SIGNATURE (ALWAYS present, italic 20px) ──── -->
+    <tr>
+      <td class="em-pad" style="padding:6px 44px 22px 44px;font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#1F1B16;">
+        <p style="margin:0;font-style:italic;font-family:Georgia,serif;font-size:20px;">{{ author_name }}</p>
+      </td>
+    </tr>
+
+    <!-- ─── BLOCK 10 · P.S. + P.P.S. (optional, top dashed divider) ─
+         P.S. = second-most-read line in email — use a question or hook.
+         P.P.S. = direct invitation to reply (boosts deliverability). -->
+    <tr>
+      <td class="em-pad" style="padding:8px 44px 36px 44px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+          <tr>
+            <td style="border-top:1px dashed #E8D7DE;padding-top:22px;font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:1.65;color:#3A2D33;">
+              <p style="margin:0 0 14px 0;">
+                <strong style="letter-spacing:0.5px;">P.S.</strong>&nbsp;&nbsp;{{ ps_text }}
+              </p>
+              <p style="margin:0;font-style:italic;">
+                <strong style="font-style:normal;letter-spacing:0.5px;">P.P.S.</strong>&nbsp;&nbsp;{{ pps_text }}
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+  </table><!-- /Main card -->
+
+  <!-- ─── BLOCK 11 · SECONDARY TEXT CTA (optional, under main card) ─
+       Repeats primary CTA as a low-friction text link. 22px gap above. -->
+  <table role="presentation" class="em-container" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:100%;margin-top:22px;">
+    <tr>
+      <td align="center" style="padding:0 8px;">
+        <a href="{{ cta_url }}" data-link-label="cta_secondary" title="{{ secondary_cta_label }}" style="display:inline-block;font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;color:#8C2E54;text-decoration:underline;letter-spacing:0.3px;">
+          {{ secondary_cta_label }}
+        </a>
+      </td>
+    </tr>
+  </table>
+
+</td>
+</tr>
+</table>
+
+</div><!-- /role=article -->
+
+</body>
+</html>
