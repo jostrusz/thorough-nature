@@ -200,6 +200,20 @@ FORMATTING:
 - Use local quote marks (cs: „" / nl: „" / de: „" / pl: „" / sv: "")
 - ONE idea per sentence. No em-dash comma-stacking.
 
+CZECH-SPECIFIC GRAMMAR (when language is Czech):
+- AVOID gender slashes like "slabý/á", "udělal/a", "sám/sama" — they
+  read awkwardly. Prefer one of these gender-neutral patterns:
+    1. Use the masculine form alone (Czech default for unknown gender)
+    2. Use plural / impersonal: "lidé, kteří…", "to bolí", "dá se to"
+    3. Restructure to avoid past participles: "Cítíš se zaseknutě"
+       instead of "Cítíš se zaseknutý/á"
+    4. Use noun forms: "ten zmatek", "ta tíha"
+- Punctuation: use em-dash with spaces (— not -), Czech quote marks „"
+- Verb forms: prefer present tense over past where possible
+- Avoid translated/stilted constructions that smell like English
+- Read aloud test: it should sound like a Czech person talking, not
+  a translation
+
 FORBIDDEN:
 - Book references or selling
 - Imperatives ("you should", "try to")
