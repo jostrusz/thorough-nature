@@ -87,5 +87,60 @@ export default defineMiddlewares({
       matcher: "/admin/marketing/contacts/bulk",
       bodyParser: { sizeLimit: "5mb" },
     },
+    // Marketing flow definitions can grow large — every email node carries
+    // its own full HTML body, and a 20-node nurture sequence with rich
+    // sample HTML easily blows past the default ~1 MB. Without this users
+    // see a generic "Failed: An unknown error occurred." toast and lose
+    // their work. 25 MB is well above realistic flow size.
+    {
+      method: ["POST"],
+      matcher: "/admin/marketing/flows",
+      bodyParser: { sizeLimit: "25mb" },
+    },
+    {
+      method: ["POST"],
+      matcher: "/admin/marketing/flows/*",
+      bodyParser: { sizeLimit: "25mb" },
+    },
+    // Same reason for campaign editor — full HTML body in payload.
+    {
+      method: ["POST"],
+      matcher: "/admin/marketing/campaigns",
+      bodyParser: { sizeLimit: "25mb" },
+    },
+    {
+      method: ["POST"],
+      matcher: "/admin/marketing/campaigns/*",
+      bodyParser: { sizeLimit: "25mb" },
+    },
+    // Email templates also store full HTML.
+    {
+      method: ["POST"],
+      matcher: "/admin/marketing/templates",
+      bodyParser: { sizeLimit: "25mb" },
+    },
+    {
+      method: ["POST"],
+      matcher: "/admin/marketing/templates/*",
+      bodyParser: { sizeLimit: "25mb" },
+    },
+    // Test-send endpoint also receives full compiled HTML.
+    {
+      method: ["POST"],
+      matcher: "/admin/marketing/email/test-send",
+      bodyParser: { sizeLimit: "25mb" },
+    },
+    // Supportbox replies / compose — base64 attachments inflate ×1.33,
+    // so 50 MB body ≈ 35 MB raw files (under Resend's 40 MB cap).
+    {
+      method: ["POST"],
+      matcher: "/admin/supportbox/tickets/*/reply",
+      bodyParser: { sizeLimit: "50mb" },
+    },
+    {
+      method: ["POST"],
+      matcher: "/admin/supportbox/tickets/compose",
+      bodyParser: { sizeLimit: "50mb" },
+    },
   ],
 })

@@ -176,7 +176,22 @@ export function FlowEditor({ flowId }: { flowId?: string }) {
       qc.invalidateQueries({ queryKey: ["mkt-flows"] })
       toast.success("Flow saved")
     },
-    onError: (e: any) => toast.error("Failed: " + (e?.message || "unknown")),
+    onError: (e: any) => {
+      // Surface the most useful detail we can find — 413 = body too large
+      // (raise sizeLimit in middlewares.ts), 4xx text usually carries a
+      // validation reason. "unknown" was hiding everything before.
+      const status = e?.status || e?.response?.status
+      const msg = e?.message || e?.response?.data?.message || e?.body?.message || ""
+      let label = msg || "unknown error"
+      if (status === 413 || /payload too large|request entity too large/i.test(msg)) {
+        label = "Flow je příliš velký pro uložení (>25 MB). Zkraťte HTML emailů nebo rozdělte do víc flow."
+      } else if (status) {
+        label = `[${status}] ${msg || "request failed"}`
+      }
+      toast.error("Save failed: " + label)
+      // Always log full error to console so we don't lose detail
+      console.error("[FlowEditor] save error", e)
+    },
   })
 
   const addNode = (type: NodeType) =>
