@@ -1,5 +1,6 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Pool } from "pg"
 import { MARKETING_MODULE } from "../../../../modules/marketing"
 import type MarketingModuleService from "../../../../modules/marketing/service"
 import { hashEmail } from "../../../../modules/marketing/utils/crypto"
@@ -258,6 +259,32 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       source: "public:form-submit",
     } as any)
 
+    // ───────────────────────────────────────────────────────────────────
+    // Enroll into matching live flows.
+    // We don't have a separate event bus subscriber for form_submitted
+    // (Medusa events from public routes don't propagate the same way as
+    // workflow events), so we do the enrollment inline.
+    //
+    // Skipped when DOI is required — we wait for /confirm to fire enrollment
+    // so unconfirmed contacts don't enter nurture sequences.
+    // ───────────────────────────────────────────────────────────────────
+    if (!requiresDoi) {
+      try {
+        await enrollContactInMatchingFlows({
+          contact,
+          brand,
+          form,
+          logger,
+        })
+      } catch (e: any) {
+        // Never fail the form submission because of enrollment problems —
+        // the contact is created and consent is logged regardless.
+        logger.warn(
+          `[Marketing Tracking] flow enrollment failed for contact=${contact.id}: ${e?.message || e}`
+        )
+      }
+    }
+
     res.status(200).json({
       ok: true,
       requires_confirmation: requiresDoi,
@@ -265,6 +292,128 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
   } catch (err: any) {
     logger.error(`[Marketing Tracking] form-submit error: ${err?.message || err}`)
     res.status(500).json({ error: "internal_error" })
+  }
+}
+
+/**
+ * Find every live flow on this brand whose trigger matches form_submitted
+ * (optionally also filtered to this specific form_id) and create a flow_run
+ * for the new contact. Idempotent — if a non-completed run already exists
+ * for this contact+flow, it's skipped (re_entry_policy=once).
+ *
+ * Direct pg.Pool because Medusa list filters on JSON columns are awkward
+ * and this needs to be fast.
+ */
+async function enrollContactInMatchingFlows(args: {
+  contact: any
+  brand: any
+  form: any
+  logger: any
+}): Promise<void> {
+  const { contact, brand, form, logger } = args
+  if (!process.env.DATABASE_URL) return
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+  try {
+    const { rows: flows } = await pool.query(
+      `SELECT id, brand_id, name, definition, trigger, re_entry_policy, status
+       FROM marketing_flow
+       WHERE brand_id = $1
+         AND status = 'live'
+         AND deleted_at IS NULL`,
+      [brand.id]
+    )
+
+    const matching = flows.filter((f: any) => {
+      const t = f.trigger || {}
+      if (t.type !== "event") return false
+      const eventName = t.config?.event || t.event
+      if (eventName !== "form_submitted") return false
+      // Optional filter — flow can scope to one specific form via
+      // trigger.config.form_id or trigger.config.form_slug.
+      const fid = t.config?.form_id
+      const fslug = t.config?.form_slug
+      if (fid && fid !== form.id) return false
+      if (fslug && fslug !== form.slug) return false
+      return true
+    })
+
+    if (!matching.length) {
+      logger.info(
+        `[Marketing Tracking] form_submitted for ${form.slug}: no live flows match for brand ${brand.slug}`
+      )
+      return
+    }
+
+    for (const flow of matching) {
+      // Re-entry policy: "once" (default) skips if a non-completed run exists,
+      // "always" creates a new run on every submit, "always_after_complete"
+      // allows re-entry only if previous run completed.
+      const policy = flow.re_entry_policy || "once"
+      if (policy === "once") {
+        const { rows: existing } = await pool.query(
+          `SELECT id FROM marketing_flow_run
+           WHERE flow_id = $1 AND contact_id = $2
+             AND state IN ('running', 'waiting')
+             AND deleted_at IS NULL
+           LIMIT 1`,
+          [flow.id, contact.id]
+        )
+        if (existing.length) {
+          logger.info(
+            `[Marketing Tracking] flow ${flow.id} skipped — contact ${contact.id} already in active run`
+          )
+          continue
+        }
+      } else if (policy === "always_after_complete") {
+        const { rows: existing } = await pool.query(
+          `SELECT id FROM marketing_flow_run
+           WHERE flow_id = $1 AND contact_id = $2
+             AND state IN ('running', 'waiting')
+             AND deleted_at IS NULL
+           LIMIT 1`,
+          [flow.id, contact.id]
+        )
+        if (existing.length) continue
+      }
+
+      const firstNode = flow.definition?.nodes?.[0]?.id
+      if (!firstNode) {
+        logger.warn(
+          `[Marketing Tracking] flow ${flow.id} (${flow.name}) has empty definition; skip`
+        )
+        continue
+      }
+
+      // Insert flow_run directly via SQL — we don't have a service handle here
+      // and Medusa createX would require module resolution we already have via
+      // service, but SQL is faster and lets us include `started_at + next_run_at`
+      // in one shot for the cron to pick up immediately.
+      await pool.query(
+        `INSERT INTO marketing_flow_run
+           (id, flow_id, brand_id, contact_id, current_node_id, state,
+            started_at, next_run_at, context, visited_node_ids, created_at, updated_at)
+         VALUES
+           ('mfr_' || substr(md5(random()::text || clock_timestamp()::text), 1, 24),
+            $1, $2, $3, $4, 'running', NOW(), NOW(), $5::jsonb, '[]'::jsonb, NOW(), NOW())`,
+        [
+          flow.id,
+          brand.id,
+          contact.id,
+          firstNode,
+          JSON.stringify({
+            trigger_event: "form_submitted",
+            form_id: form.id,
+            form_slug: form.slug,
+          }),
+        ]
+      )
+
+      logger.info(
+        `[Marketing Tracking] enrolled contact ${contact.id} into flow "${flow.name}" (${flow.id})`
+      )
+    }
+  } finally {
+    await pool.end().catch(() => {})
   }
 }
 
