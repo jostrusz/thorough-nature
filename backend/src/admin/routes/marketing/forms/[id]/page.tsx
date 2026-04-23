@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@medusajs/ui"
 import { useParams } from "react-router-dom"
@@ -58,11 +58,22 @@ function FormDetailPage() {
         ? sdk.client.fetch<{ form: any }>(`/admin/marketing/forms/${id}`, { method: "GET" })
         : Promise.resolve({ form: null } as any),
     enabled: !!id,
+    // Stop background refetches from clobbering in-flight edits (window
+    // focus / network reconnect would otherwise reset the editor mid-edit).
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
   })
 
+  // Hydrate local form state ONCE per form id — defensively guarded with a
+  // ref so background React-Query refetches (window focus, etc.) cannot
+  // overwrite in-progress edits. Same fix applied earlier to flow-editor.
+  const hydratedForRef = useRef<string | null>(null)
   useEffect(() => {
     const f = (fData as any)?.form
     if (!f) return
+    if (hydratedForRef.current === f.id) return
+    hydratedForRef.current = f.id
     setName(f.name || "")
     setType(f.type || "popup")
     setSlug(f.slug || "")
