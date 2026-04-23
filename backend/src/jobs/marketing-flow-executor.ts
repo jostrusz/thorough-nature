@@ -434,8 +434,14 @@ async function evaluateFlowGoals(args: {
           }
           if (keyword) {
             params.push(`%${keyword.toLowerCase()}%`)
+            // order_line_item is linked to "order" via the order_item junction table
+            // (Medusa v2 schema). order_line_item has no order_id directly.
             extra += ` AND EXISTS (
-              SELECT 1 FROM order_line_item li WHERE li.order_id = o.id
+              SELECT 1 FROM order_item oi
+              JOIN order_line_item li ON li.id = oi.item_id
+              WHERE oi.order_id = o.id
+                AND oi.deleted_at IS NULL
+                AND li.deleted_at IS NULL
                 AND (LOWER(li.title) LIKE $${params.length} OR LOWER(COALESCE(li.product_title,'')) LIKE $${params.length})
             )`
           }
