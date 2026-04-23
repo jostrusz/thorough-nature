@@ -37,19 +37,60 @@ export function extractLegalMarker(footerHtml: string | null | undefined): strin
 }
 
 /**
- * Inject brand.compliance_footer_html into the candidate HTML if the
- * legal marker isn't already present. Idempotent — calling twice with
- * the same input returns identical output.
+ * Strip any "inline minimal footer" tables from the candidate HTML before
+ * we inject the brand's legal footer.
  *
- * Returns the (possibly augmented) HTML.
+ * What counts as an inline minimal footer:
+ *   - A <table> block that contains an unsubscribe placeholder
+ *     ({{ unsubscribe_url }} / /public/marketing/u/ / etc.)
+ *   - AND does NOT contain the brand's legal marker (company name)
+ *
+ * Why: many authors / AI generators include a one-line "Unsubscribe"
+ * footer in their email body. The brand-level compliance_footer_html is
+ * the single source of truth for the legal block, so we want exactly one
+ * footer per email — the brand one.
+ *
+ * If the inline table already includes the brand legal marker, we leave
+ * it alone (author intentionally pasted the full footer).
+ */
+function stripInlineUnsubFooters(html: string, legalMarker: string): string {
+  // Match <table ...>...</table> blocks. Multi-line, lazy (non-greedy)
+  // closing tag, case-insensitive on tags.
+  const tableRe = /<table\b[^>]*>[\s\S]*?<\/table>/gi
+  return html.replace(tableRe, (match) => {
+    const hasUnsub = /\{\{\s*unsubscribe_url\s*\}\}|\{\$\s*unsubscribe(_url)?\s*\}|\$\{\s*unsubscribe_url\s*\}|<%=\s*unsubscribe_url\s*%>|\/public\/marketing\/u\//.test(match)
+    if (!hasUnsub) return match
+    // If this block already carries the brand legal marker, it IS the
+    // brand footer (author pasted it manually) — keep it.
+    if (legalMarker !== "__no_marker__" && match.includes(legalMarker)) return match
+    // Otherwise, strip it. The brand footer will be injected next.
+    return ""
+  })
+}
+
+/**
+ * Inject brand.compliance_footer_html into the candidate HTML.
+ *
+ * Behaviour:
+ *   1. First strips any "inline minimal footer" (small <table> blocks with
+ *      an unsub link but no legal marker — usually leftovers from authoring).
+ *   2. If the brand legal marker is already present after stripping,
+ *      no-op — author pasted the full legal footer themselves.
+ *   3. Otherwise appends complianceFooterHtml before </body> (or at end
+ *      if there's no </body>).
+ *
+ * Idempotent — calling twice returns identical output.
  */
 export function injectLegalFooter(html: string, complianceFooterHtml: string | null | undefined): string {
   if (!html) return html
   if (!complianceFooterHtml) return html
   const marker = extractLegalMarker(complianceFooterHtml)
-  if (html.includes(marker)) return html
-  if (/<\/body>/i.test(html)) {
-    return html.replace(/<\/body>/i, `${complianceFooterHtml}\n</body>`)
+  // Strip any redundant inline unsub-only footers first.
+  const stripped = stripInlineUnsubFooters(html, marker)
+  // If after stripping, the legal marker is already present, we're done.
+  if (stripped.includes(marker)) return stripped
+  if (/<\/body>/i.test(stripped)) {
+    return stripped.replace(/<\/body>/i, `${complianceFooterHtml}\n</body>`)
   }
-  return html + "\n" + complianceFooterHtml
+  return stripped + "\n" + complianceFooterHtml
 }
