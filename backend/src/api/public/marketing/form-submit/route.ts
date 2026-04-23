@@ -117,16 +117,26 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       return
     }
 
-    const [form] = (await service.listMarketingForms({
-      id: formId,
-      brand_id: brand.id,
-    } as any)) as any[]
+    // Resolve form by ID first, fall back to slug, then to name. The popup
+    // historically sent the human-readable name as `form_id`, which never
+    // matched the actual ID, causing 404s. Now we accept any of the three.
+    let form: any =
+      (await service.listMarketingForms({ id: formId, brand_id: brand.id } as any))?.[0]
+    if (!form) {
+      form = (await service.listMarketingForms({ slug: formId, brand_id: brand.id } as any))?.[0]
+    }
+    if (!form) {
+      form = (await service.listMarketingForms({ name: formId, brand_id: brand.id } as any))?.[0]
+    }
     if (!form) {
       res.status(404).json({ error: "form_not_found" })
       return
     }
-    if (form.status !== "live") {
-      res.status(409).json({ error: "form_not_live" })
+    // Accept both "live" and "published" — admin UI uses "published" but
+    // earlier code checked only for "live". They're semantically the same:
+    // the form is publicly accepting submissions.
+    if (form.status !== "live" && form.status !== "published") {
+      res.status(409).json({ error: "form_not_live", current_status: form.status })
       return
     }
 
