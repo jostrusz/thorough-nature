@@ -111,11 +111,25 @@ export function FlowEditor({ flowId }: { flowId?: string }) {
         ? sdk.client.fetch<{ flow: any }>(`/admin/marketing/flows/${currentId}`, { method: "GET" })
         : Promise.resolve({ flow: null } as any),
     enabled: !!currentId,
+    // CRITICAL — never refetch in the background once the editor is hydrated.
+    // Background refetches (window focus, reconnect, polling) would overwrite
+    // the user's in-progress edits via the useEffect below. Save is the only
+    // path that touches local state after initial load.
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
   })
 
+  // Hydrate local form state from the server flow ONCE per flow id.
+  // Subsequent refetches (which shouldn't happen given the query opts above,
+  // but defensively…) must NOT overwrite local edits — that's how users lost
+  // a sequence of newly-added emails when the window refocused.
+  const hydratedForRef = useRef<string | null>(null)
   useEffect(() => {
     const f = (fData as any)?.flow
     if (!f) return
+    if (hydratedForRef.current === f.id) return  // already hydrated this flow — keep local edits
+    hydratedForRef.current = f.id
     setName(f.name || "")
     setDescription(f.description || "")
     setTrigger(f.trigger?.type ? `${f.trigger.type}${f.trigger.event ? `:${f.trigger.event}` : ""}` : "event:order.placed")
@@ -147,11 +161,19 @@ export function FlowEditor({ flowId }: { flowId?: string }) {
       const f = resp?.flow
       if (f?.id && !currentId) {
         setCurrentId(f.id)
+        // Mark this flow as already hydrated so the upcoming useEffect run
+        // (triggered by react-query cache write) does NOT overwrite the
+        // local state we just sent to the server.
+        hydratedForRef.current = f.id
         navigate(`/marketing/flows/${f.id}`, { replace: true })
       }
       if (f?.status) setStatus(f.status)
+      if (typeof f?.version === "number") setVersion(f.version)
+      // Refresh the flows LIST so card stats / status badge update,
+      // but DO NOT invalidate this flow's detail query — that would
+      // refetch and trigger the hydration effect, blowing away in-flight
+      // edits the user might already be making post-save.
       qc.invalidateQueries({ queryKey: ["mkt-flows"] })
-      qc.invalidateQueries({ queryKey: ["mkt-flow", f?.id] })
       toast.success("Flow saved")
     },
     onError: (e: any) => toast.error("Failed: " + (e?.message || "unknown")),
@@ -184,7 +206,15 @@ export function FlowEditor({ flowId }: { flowId?: string }) {
 
   return (
     <>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
+      {/* Sticky action bar — Save / Publish are always visible on scroll
+          so the editor never feels like changes are stranded. */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        marginBottom: "16px", flexWrap: "wrap", gap: "12px",
+        position: "sticky", top: 0, zIndex: 30,
+        background: tokens.bg, padding: "12px 0",
+        borderBottom: `1px solid ${tokens.border}`,
+      }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <StatusBadge status={status} />
           <span style={{ fontSize: "13px", color: tokens.fgSecondary }}>v{version}</span>
