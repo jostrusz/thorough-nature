@@ -469,9 +469,20 @@ async function evaluateFlowGoals(args: {
 }
 
 function getNextEdge(def: FlowDefinition, nodeId: string): string | null {
-  if (!def.edges) return null
-  const e = def.edges.find((x) => x.from === nodeId)
-  return e?.to || null
+  // Explicit graph edges win — for branching flows with conditions etc.
+  if (def.edges?.length) {
+    const e = def.edges.find((x) => x.from === nodeId)
+    if (e?.to) return e.to
+  }
+  // Sequential fallback: most flows (welcome series, nurture sequences) are
+  // a linear chain saved as nodes[]. The editor doesn't write `next` on each
+  // node nor build an edges array, so without this fallback the executor
+  // stops after the first node and marks the flow as completed.
+  // → If no explicit edge, return the next node in array order.
+  const nodes = def.nodes || []
+  const idx = nodes.findIndex((n) => n.id === nodeId)
+  if (idx >= 0 && idx + 1 < nodes.length) return nodes[idx + 1].id
+  return null
 }
 
 async function sendFlowEmail(args: {
