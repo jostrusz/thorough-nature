@@ -7,6 +7,7 @@ import { compileTemplate } from "../modules/marketing/utils/template-compiler"
 import { injectTracking, buildUnsubscribeUrl, buildViewInBrowserUrl } from "../modules/marketing/utils/tracking-injector"
 import { RecipientResolver } from "../modules/marketing/utils/recipient-resolver"
 import { getViewInBrowserStrings } from "../modules/marketing/utils/view-in-browser-i18n"
+import { injectLegalFooter } from "../modules/marketing/utils/legal-footer"
 
 /**
  * Marketing campaign dispatcher
@@ -261,22 +262,12 @@ async function dispatchCampaign(
             baseUrl,
           })
 
-          // Auto-inject compliance footer when the author's HTML does not
-          // already include an unsubscribe placeholder. Guarantees every
-          // outgoing marketing email carries required legal disclosures
-          // (company ID, address, unsubscribe, privacy) even if the author
-          // forgets to add them manually.
-          let htmlToCompile = email.custom_html || ""
-          const hasUnsubMarker = /\{\{\s*unsubscribe_url\s*\}\}|\{\$\s*unsubscribe(_url)?\s*\}|\$\{\s*unsubscribe_url\s*\}|<%=\s*unsubscribe_url\s*%>|\/public\/marketing\/u\//.test(htmlToCompile)
-          const footerTpl = (brand as any).compliance_footer_html as string | null | undefined
-          if (!hasUnsubMarker && footerTpl && htmlToCompile && email.editor_type === "html") {
-            // Inject before </body> if present, otherwise append at end.
-            if (/<\/body>/i.test(htmlToCompile)) {
-              htmlToCompile = htmlToCompile.replace(/<\/body>/i, `${footerTpl}\n</body>`)
-            } else {
-              htmlToCompile = htmlToCompile + "\n" + footerTpl
-            }
-          }
+          // Auto-inject brand compliance footer (legal identity, IČO, BTW,
+          // address, unsubscribe). Skipped only if the body already has the
+          // brand's company-name fingerprint. See utils/legal-footer.ts.
+          const htmlToCompile = email.editor_type === "html"
+            ? injectLegalFooter(email.custom_html || "", (brand as any).compliance_footer_html)
+            : (email.custom_html || "")
 
           const compiled = compileTemplate(
             {

@@ -8,6 +8,7 @@ import { compileTemplate } from "../modules/marketing/utils/template-compiler"
 import { injectTracking, buildUnsubscribeUrl, buildViewInBrowserUrl } from "../modules/marketing/utils/tracking-injector"
 import { getViewInBrowserStrings } from "../modules/marketing/utils/view-in-browser-i18n"
 import { generateAiEmail } from "../modules/marketing/utils/ai-email-generator"
+import { injectLegalFooter } from "../modules/marketing/utils/legal-footer"
 
 /**
  * Marketing Flow Executor
@@ -602,13 +603,20 @@ async function sendFlowEmail(args: {
     baseUrl,
   })
 
+  // Inject brand legal footer (company name, IČO, BTW, address, unsubscribe).
+  // Required by EU PECR / GDPR / Czech Act 480/2004 / Gmail bulk sender 2024.
+  // Idempotent — skipped if the body already contains the brand legal marker.
+  const htmlWithFooter = tpl.editor_type === "html"
+    ? injectLegalFooter(tpl.custom_html || "", (brand as any).compliance_footer_html)
+    : (tpl.custom_html || "")
+
   const compiled = compileTemplate(
     {
       subject: tpl.subject,
       preheader: tpl.preheader,
       editor_type: tpl.editor_type,
       block_json: tpl.block_json,
-      custom_html: tpl.custom_html,
+      custom_html: htmlWithFooter,
     },
     {
       contact: {

@@ -6,6 +6,7 @@ import { compileTemplate } from "../../../../../modules/marketing/utils/template
 import { ResendMarketingClient } from "../../../../../modules/marketing/services/resend-client"
 import { getViewInBrowserStrings } from "../../../../../modules/marketing/utils/view-in-browser-i18n"
 import { buildViewInBrowserUrl } from "../../../../../modules/marketing/utils/tracking-injector"
+import { injectLegalFooter } from "../../../../../modules/marketing/utils/legal-footer"
 
 /**
  * POST /admin/marketing/email/test-send
@@ -71,20 +72,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       baseUrl,
     })
 
-    // Mirror dispatcher behavior: if the email HTML doesn't already contain an
-    // unsubscribe placeholder, auto-inject the brand's compliance_footer_html
-    // before </body>. Same rules as marketing-campaign-dispatcher.ts so the
-    // test email looks identical to a real send.
-    let htmlToCompile = html
-    const hasUnsubMarker = /\{\{\s*unsubscribe_url\s*\}\}|\{\$\s*unsubscribe(_url)?\s*\}|\$\{\s*unsubscribe_url\s*\}|<%=\s*unsubscribe_url\s*%>|\/public\/marketing\/u\//.test(htmlToCompile)
-    const footerTpl = (brand as any).compliance_footer_html as string | null | undefined
-    if (!hasUnsubMarker && footerTpl && htmlToCompile) {
-      if (/<\/body>/i.test(htmlToCompile)) {
-        htmlToCompile = htmlToCompile.replace(/<\/body>/i, `${footerTpl}\n</body>`)
-      } else {
-        htmlToCompile = htmlToCompile + "\n" + footerTpl
-      }
-    }
+    // Auto-inject brand's compliance_footer_html (legal identity, IČO, BTW,
+    // address, unsubscribe). Skipped only if the body already contains the
+    // brand's company-name fingerprint. See utils/legal-footer.ts.
+    const htmlToCompile = injectLegalFooter(html, (brand as any).compliance_footer_html)
 
     const compiled = compileTemplate(
       {
