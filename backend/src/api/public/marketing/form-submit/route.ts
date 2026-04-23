@@ -81,6 +81,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const formId = String(body.form_id || "").trim()
     const email = String(body.email || "").trim().toLowerCase()
     const properties = body.properties && typeof body.properties === "object" ? body.properties : {}
+    // The popup sends first_name / last_name at top level of the payload,
+    // not nested in properties. Fall back to properties.first_name for any
+    // legacy callers that nest them inside.
+    const topFirstName = body.first_name ? String(body.first_name).trim() : null
+    const topLastName  = body.last_name  ? String(body.last_name).trim()  : null
+    if (topFirstName && !properties.first_name) properties.first_name = topFirstName
+    if (topLastName  && !properties.last_name)  properties.last_name  = topLastName
     const acquisition = body.acquisition && typeof body.acquisition === "object" ? body.acquisition : {}
 
     // Acquisition signals sent by the storefront snippet. All fields
