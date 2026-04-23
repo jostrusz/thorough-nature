@@ -153,9 +153,13 @@ async function executeRun(
 ): Promise<void> {
   const { pool, service, logger } = deps
 
-  // Load flow definition
+  // Load flow definition. Must include `goals` and `re_entry_policy` —
+  // goals were missing from this SELECT, which silently disabled all
+  // exit-goal evaluation (flow.goals was undefined → Array.isArray check
+  // skipped the whole block → goals never matched → contacts kept getting
+  // emails after they bought the book).
   const { rows: flowRows } = await pool.query(
-    `SELECT id, brand_id, name, definition, status
+    `SELECT id, brand_id, name, definition, status, goals, re_entry_policy
      FROM marketing_flow
      WHERE id = $1 AND deleted_at IS NULL
      LIMIT 1`,
