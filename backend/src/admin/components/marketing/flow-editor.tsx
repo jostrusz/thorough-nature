@@ -189,22 +189,84 @@ export function FlowEditor({ flowId }: { flowId?: string }) {
           <StatusBadge status={status} />
           <span style={{ fontSize: "13px", color: tokens.fgSecondary }}>v{version}</span>
         </div>
+        {/*
+          Save vs Publish vs Status-changing actions.
+          Plain "Save" preserves the current status — so a live flow stays live
+          when you tweak nodes, and a draft stays draft. Status transitions
+          (Publish / Pause / Resume / Unpublish) are explicit.
+        */}
         <div style={{ display: "flex", gap: "8px" }}>
-          <button className="mkt-btn mkt-btn-sm" onClick={() => saveMut.mutate("draft")} disabled={saveMut.isPending}>
-            {saveMut.isPending ? "Saving…" : "Save draft"}
+          {/* Save — always present, never changes status */}
+          <button
+            className="mkt-btn mkt-btn-sm"
+            onClick={() => saveMut.mutate(status)}
+            disabled={saveMut.isPending}
+            title="Uloží změny, status zůstane stejný"
+          >
+            {saveMut.isPending
+              ? "Saving…"
+              : status === "live" ? "Save changes" : "Save"}
           </button>
-          {status === "live" ? (
+
+          {/* Status transitions per current state */}
+          {status === "draft" && (
             <button
-              className="mkt-btn mkt-btn-sm"
-              onClick={() => saveMut.mutate("paused")}
-              style={{ borderColor: tokens.warning, color: tokens.warningFg }}
+              className="mkt-btn-primary"
+              onClick={() => saveMut.mutate("live")}
+              disabled={saveMut.isPending}
+              title="Uloží + aktivuje flow — začne přijímat nové enrollments"
             >
-              Pause
+              Publish →
             </button>
-          ) : (
-            <button className="mkt-btn-primary" onClick={() => saveMut.mutate("live")} disabled={saveMut.isPending}>
-              Publish
-            </button>
+          )}
+
+          {status === "live" && (
+            <>
+              <button
+                className="mkt-btn mkt-btn-sm"
+                onClick={() => saveMut.mutate("paused")}
+                disabled={saveMut.isPending}
+                style={{ borderColor: tokens.warning, color: tokens.warningFg }}
+                title="Pozastaví flow — žádné nové enrollments, běžící runs pokračují"
+              >
+                Pause
+              </button>
+              <button
+                className="mkt-btn mkt-btn-sm"
+                onClick={() => {
+                  if (confirm("Vrátit flow do draftu? Žádné nové enrollments a běžící runs zůstanou v aktuálním stavu.")) {
+                    saveMut.mutate("draft")
+                  }
+                }}
+                disabled={saveMut.isPending}
+                title="Demotuje na draft — pro bezpečnou strukturní editaci"
+              >
+                Unpublish
+              </button>
+            </>
+          )}
+
+          {status === "paused" && (
+            <>
+              <button
+                className="mkt-btn-primary"
+                onClick={() => saveMut.mutate("live")}
+                disabled={saveMut.isPending}
+                title="Obnoví flow — opět začne přijímat enrollments"
+              >
+                Resume →
+              </button>
+              <button
+                className="mkt-btn mkt-btn-sm"
+                onClick={() => {
+                  if (confirm("Vrátit flow do draftu?")) saveMut.mutate("draft")
+                }}
+                disabled={saveMut.isPending}
+                title="Demotuje na draft — pro strukturní editaci"
+              >
+                Unpublish
+              </button>
+            </>
           )}
         </div>
       </div>
