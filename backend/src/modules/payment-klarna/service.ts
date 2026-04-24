@@ -555,7 +555,6 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
   async capturePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const client = await this.getKlarnaClient(sessionData?.project_slug)
       const { klarnaOrderId, amount, currency } = sessionData
       const currencyUpper = (currency || "EUR").toUpperCase()
 
@@ -565,6 +564,18 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
           "No Klarna order ID in session data"
         )
       }
+
+      // Idempotency: if already captured by direct webhook path (mystock DISPATCHED),
+      // skip duplicate Klarna API call. Medusa invokes this via paymentModuleService.capturePayment
+      // to flip admin status to "Paid", but tracking-dispatcher / mystock webhook already did it.
+      if (sessionData.status === "CAPTURED" || sessionData.captureId) {
+        this.logger_.info(
+          `[Klarna] capturePayment: already captured (captureId=${sessionData.captureId}), skipping API call`
+        )
+        return { data: sessionData }
+      }
+
+      const client = await this.getKlarnaClient(sessionData?.project_slug)
 
       // Convert Medusa amount (major units) to Klarna minor units (cents)
       const amountMinor = toMinorUnits(amount, currencyUpper)
