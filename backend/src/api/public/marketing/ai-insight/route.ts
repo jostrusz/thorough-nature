@@ -256,7 +256,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     return
   }
 
-  try {
+  // Retry up to 3 times before falling back. tool_use guarantees the
+  // SHAPE of the response, but Opus can still emit malformed JSON
+  // inside the tool_use argument blob (Anthropic SDK throws SyntaxError
+  // before we see it). One retry with a fresh sample usually succeeds —
+  // model variability is on our side here.
+  const MAX_ATTEMPTS = 3
+  let lastErr: any = null
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+   try {
     const client = new Anthropic({ apiKey })
     // Use tool_use to force structured output. With plain text JSON the
     // model would occasionally emit unescaped quotes inside string
@@ -315,39 +324,46 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     }
 
     cacheSet(cacheKey, parsed)
-    res.json({ ...parsed, cached: false })
-  } catch (err: any) {
-    // Log the actual error so future failures show up in Railway logs.
-    // The previous version silently swallowed it, which made debugging
-    // the "everyone gets the same fallback" symptom impossible.
-    console.error("[ai-insight] Anthropic call failed, returning fallback:", {
+    res.json({ ...parsed, cached: false, attempt })
+    return
+   } catch (err: any) {
+    lastErr = err
+    console.warn(`[ai-insight] attempt ${attempt}/${MAX_ATTEMPTS} failed:`, {
       message: err?.message,
       name: err?.name,
-      status: err?.status,
-      type: err?.type,
-      path,
-      texts: texts.map((t: string) => (t || "").slice(0, 60)),
-      locale,
     })
-    // Graceful fallback — deterministic but still sophisticated reframe
-    // if Sonnet errors (e.g. API outage or network). Structured so the
-    // popup still delivers a recognition-quality experience, not a
-    // generic validation.
-    const labels = CATEGORY_LABELS[locale] || CATEGORY_LABELS.nl
-    const area = labels[path[0]] || path[0]
-    const byLocale: Record<string, { message: string; headline: string; sub: string }> = {
-      cs: {
-        message: `To, co v sobě neseš kolem ${area}, není slabost. Je to jako taška, kterou sis zabalil/a, když jsi ji potřeboval/a. Problém není ta taška. Je v tom, že ses do ní dlouho nepodíval/a. **Kdy ses do ní naposledy opravdu podíval/a?**`,
-        headline: "Co v sobě nosíš a ani o tom nevíš?",
-        sub: "Pošlu ti krátký dopis. Ukážu ti jednu věc o tobě, kterou ještě nikdo nepojmenoval.",
-      },
-      nl: {
-        message: `Wat jij draagt rond ${area} is geen zwakte. Het is als een tas die je ooit inpakte toen je hem nodig had. De tas is niet het probleem. Je hebt er alleen al heel lang niet meer in gekeken. **Wanneer keek je er voor het laatst echt in?**`,
-        headline: "Wat draag je in jezelf zonder het te weten?",
-        sub: "Ik stuur je een korte brief. Ik laat je één ding over jezelf zien dat nog niemand benoemde.",
-      },
-    }
-    const fb = byLocale[locale] || byLocale.nl
-    res.json({ ...fb, fallback: true })
+    if (attempt === MAX_ATTEMPTS) break
+    // Small backoff before retry — model sampling is the variability,
+    // a brief wait also lets transient API blips clear.
+    await new Promise((r) => setTimeout(r, 250))
+   }
   }
+
+  // All attempts exhausted — log the final error and return the
+  // deterministic fallback so the popup never shows a broken state.
+  console.error("[ai-insight] all attempts failed, returning fallback:", {
+    message: lastErr?.message,
+    name: lastErr?.name,
+    status: lastErr?.status,
+    type: lastErr?.type,
+    path,
+    texts: texts.map((t: string) => (t || "").slice(0, 60)),
+    locale,
+  })
+  const labels = CATEGORY_LABELS[locale] || CATEGORY_LABELS.nl
+  const area = labels[path[0]] || path[0]
+  const byLocale: Record<string, { message: string; headline: string; sub: string }> = {
+    cs: {
+      message: `To, co v sobě neseš kolem ${area}, není slabost. Je to jako taška, kterou sis zabalil/a, když jsi ji potřeboval/a. Problém není ta taška. Je v tom, že ses do ní dlouho nepodíval/a. **Kdy ses do ní naposledy opravdu podíval/a?**`,
+      headline: "Co v sobě nosíš a ani o tom nevíš?",
+      sub: "Pošlu ti krátký dopis. Ukážu ti jednu věc o tobě, kterou ještě nikdo nepojmenoval.",
+    },
+    nl: {
+      message: `Wat jij draagt rond ${area} is geen zwakte. Het is als een tas die je ooit inpakte toen je hem nodig had. De tas is niet het probleem. Je hebt er alleen al heel lang niet meer in gekeken. **Wanneer keek je er voor het laatst echt in?**`,
+      headline: "Wat draag je in jezelf zonder het te weten?",
+      sub: "Ik stuur je een korte brief. Ik laat je één ding over jezelf zien dat nog niemand benoemde.",
+    },
+  }
+  const fb = byLocale[locale] || byLocale.nl
+  res.json({ ...fb, fallback: true })
 }
