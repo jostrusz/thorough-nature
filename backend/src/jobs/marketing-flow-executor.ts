@@ -721,5 +721,9 @@ async function sendFlowEmail(args: {
 
 export const config = {
   name: "marketing-flow-executor",
-  schedule: "* * * * *", // every minute
+  // Every 10 seconds (6-field cron via cron-parser). Forms enrolled by
+  // the popup quiz set next_run_at=NOW(), so the first email fires
+  // within ~10s of submit. Empty ticks (no due runs) hit one indexed
+  // SELECT and return — negligible DB load (~8.6k extra queries/day).
+  schedule: "*/10 * * * * *",
 }
