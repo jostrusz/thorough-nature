@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Loslatenboek — Quiz Popup Preview</title>
+<style>
+  :root {
+    --rose-50: #faf5f8;
+    --rose-100: #F4E8EE;
+    --rose-200: #E8D7DE;
+    --rose-300: #C89BA5;
+    --rose-500: #8C2E54;
+    --rose-600: #6B2240;
+    --rose-700: #4A1630;
+    --ink: #1F1B16;
+    --ink-soft: #3A2D33;
+    --muted: #8A7884;
+    --gold: #C9A961;
+    --yellow: #FFE66D;
+    --card: #FFFFFF;
+    --backdrop: rgba(31, 20, 30, 0.55);
+    --success: #16a34a;
+  }
+
+  * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  html, body { margin: 0; padding: 0; font-family: Georgia, 'Times New Roman', serif; color: var(--ink); background: #e8dce2; }
+
+  /* Když je stránka načtena v iframe (= embedded na reálné sales page),
+     skryjeme fake landing pozadí i dev panel, takže vidíme jen popup card. */
+  html.embedded, html.embedded body { background: transparent !important; }
+  html.embedded .site-bg,
+  html.embedded .dev-panel { display: none !important; }
+
+  /* Fake site behind popup — pro preview context */
+  .site-bg {
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 600px at 70% -10%, #f7e5ec 0%, transparent 60%),
+      radial-gradient(900px 500px at -10% 80%, #f0dae3 0%, transparent 55%),
+      #e8dce2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .site-ghost {
+    max-width: 720px;
+    text-align: center;
+    color: #9b8691;
+    font-family: Georgia, serif;
+  }
+  .site-ghost h1 { font-size: 48px; margin: 0 0 12px 0; color: #6e5a65; letter-spacing: -0.02em; }
+  .site-ghost p { font-size: 18px; line-height: 1.6; }
+
+  /* Popup */
+  .popup-overlay {
+    position: fixed; inset: 0;
+    background: var(--backdrop);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    z-index: 100;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .popup-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .popup {
+    background: var(--card);
+    width: 100%;
+    max-width: 560px;
+    max-height: calc(100vh - 40px);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(74, 22, 48, 0.35), 0 2px 0 rgba(255,255,255,0.6) inset;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(20px) scale(0.98);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .popup-overlay.open .popup { transform: translateY(0) scale(1); }
+
+  /* Close button */
+  .popup-close {
+    position: absolute; top: 16px; right: 16px;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(31, 20, 30, 0.08);
+    border: none;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+    transition: background 0.2s;
+  }
+  .popup-close:hover { background: rgba(31, 20, 30, 0.14); }
+
+  /* Header / progress */
+  .popup-header {
+    padding: 26px 28px 0 28px;
+    background: linear-gradient(180deg, var(--rose-50) 0%, transparent 100%);
+  }
+  .progress-wrap {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 18px;
+    padding-right: 44px;   /* clear space for the × close button */
+  }
+  .progress-dots { display: flex; gap: 6px; }
+  .progress-dot {
+    width: 26px; height: 4px;
+    border-radius: 2px;
+    background: var(--rose-200);
+    transition: background 0.3s, width 0.3s;
+  }
+  .progress-dot.done { background: var(--rose-500); }
+  .progress-dot.active { background: var(--rose-500); width: 34px; }
+  .progress-label { font-family: -apple-system, system-ui, sans-serif; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+  .social-proof {
+    font-family: -apple-system, system-ui, sans-serif; font-size: 12px;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 6px;
+  }
+  .social-proof .pulse {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--success);
+    position: relative;
+  }
+  .social-proof .pulse::before {
+    content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--success);
+    animation: pulse 1.6s ease-out infinite;
+    opacity: 0;
+  }
+  @keyframes pulse {
+    0% { transform: scale(0.5); opacity: 0.7; }
+    80%, 100% { transform: scale(1.8); opacity: 0; }
+  }
+
+  /* Question */
+  .question {
+    font-size: 28px; line-height: 1.25; font-weight: 700;
+    color: var(--ink); letter-spacing: -0.02em;
+    margin: 4px 0 6px 0;
+  }
+  .question em { font-style: italic; font-weight: 400; color: var(--rose-600); }
+  .question-sub {
+    font-family: -apple-system, system-ui, sans-serif; font-size: 14px; color: var(--muted);
+    line-height: 1.5; margin: 0 0 20px 0;
+  }
+
+  /* ═══ Options — jednotný styl pro všechny kroky (mobile-first UX) ═══ */
+  .options {
+    display: grid;
+    gap: 7px;
+    padding: 4px 24px 24px 24px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .options-grid-2 { grid-template-columns: 1fr 1fr; }
+
+  .option {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%;
+    min-height: 54px;
+    padding: 10px 14px;
+    background: #fff;
+    border: 1.5px solid var(--rose-200);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    text-align: left;
+    font-family: Georgia, serif;
+    font-size: 16px;
+    color: var(--ink);
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+  /* Hover jen na zařízení s přesným pointerem (desktop) */
+  @media (hover: hover) and (pointer: fine) {
+    .option:hover {
+      transform: translateY(-1px);
+      border-color: var(--rose-300);
+      background: linear-gradient(180deg, #fff 0%, #fdf7fa 100%);
+      box-shadow: 0 4px 14px rgba(140, 46, 84, 0.08);
+    }
+  }
+  /* Active feedback na touch — okamžitý press state */
+  .option:active { transform: scale(0.985); background: var(--rose-50); }
+  .option.selected {
+    border-color: var(--rose-500);
+    background: var(--rose-100);
+    box-shadow: 0 0 0 3px rgba(140, 46, 84, 0.12);
+    animation: selectedBounce 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes selectedBounce {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+  .option-icon {
+    flex: 0 0 34px; width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    line-height: 1;
+    background: var(--rose-100);
+    border-radius: 10px;
+    transition: background 0.2s ease;
+  }
+  .option.selected .option-icon { background: #fff; }
+  .option-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .option-title {
+    font-weight: 600;
+    line-height: 1.2;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+  }
+  .option-quote {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 16px;
+    line-height: 1.35;
+    color: var(--ink);
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    display: block;
+  }
+  .option.selected .option-quote { color: var(--rose-700); }
+  .option-hint {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.3;
+    /* Clamp na 1 řádek s ellipsis — všechny karty mají stejnou výšku
+       bez ohledu na délku hint textu */
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .option-check {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1.5px solid var(--rose-300);
+    flex: 0 0 18px;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  .option.selected .option-check {
+    border-color: var(--rose-500); background: var(--rose-500);
+  }
+  .option.selected .option-check::after {
+    content: ""; position: absolute; left: 5px; top: 1.5px;
+    width: 4px; height: 8px;
+    border: solid #fff; border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  /* Custom write-your-own-answer option ─────────────────────────
+     Appears as the last choice in each of steps 1-4. Other options
+     auto-advance on click; this one requires the user to type and
+     confirm before advancing. */
+  .option.option-custom { border-style: dashed; }
+  .option.option-custom .option-icon { background: #fff; border: 1px dashed var(--rose-300); }
+  .option-custom-input {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: var(--rose-50);
+    border: 1.5px solid var(--rose-300);
+    border-radius: 12px;
+    padding: 6px 6px 6px 14px;
+    margin-top: -4px;
+    animation: customSlide 0.22s ease-out;
+  }
+  .option-custom-input.open { display: flex; }
+  .option-custom-input input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 0;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    color: var(--ink);
+    outline: none;
+    min-width: 0;
+  }
+  .option-custom-input input::placeholder { color: var(--muted); font-style: italic; }
+  .custom-confirm {
+    flex: 0 0 auto;
+    border: none;
+    background: var(--rose-500);
+    color: #fff;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.18s, opacity 0.18s;
+    white-space: nowrap;
+  }
+  .custom-confirm:disabled { background: var(--muted); cursor: not-allowed; opacity: 0.55; }
+  .custom-confirm:not(:disabled):hover { background: var(--rose-600); transform: translateY(-1px); }
+  @keyframes customSlide {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Footer */
+  .popup-footer {
+    padding: 16px 28px 22px 28px;
+    border-top: 1px solid var(--rose-200);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    background: #fff;
+  }
+  /* Full-width CTA variant — used on step 1 (no back button shown) */
+  .popup-footer.full-cta { justify-content: center; }
+  .popup-footer.full-cta .back-btn { display: none; }
+  .popup-footer.full-cta .next-btn { width: 100%; padding: 14px 24px; font-size: 16px; }
+
+  /* Auto-advance footers: hide next button on steps 1-4, keep back link minimal */
+  .popup-footer.auto-advance { justify-content: flex-start; padding-top: 10px; padding-bottom: 14px; border-top: 1px dashed var(--rose-200); background: transparent; }
+  .popup-footer.auto-advance .next-btn { display: none; }
+  .popup-footer.auto-advance .back-btn { font-size: 13px; color: var(--rose-500); }
+  .popup-footer.auto-advance .back-btn:hover { color: var(--rose-700); text-decoration: underline; }
+  .popup-footer.auto-advance .back-btn:disabled { display: none; }
+  .back-btn {
+    background: none; border: none;
+    color: var(--muted); font-family: -apple-system, system-ui, sans-serif;
+    font-size: 14px; cursor: pointer; padding: 6px 0;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--ink-soft); }
+  .back-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .next-btn {
+    background: var(--ink);
+    color: #fff; border: none;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 15px; font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    transition: transform 0.15s, background 0.2s;
+  }
+  .next-btn:hover { background: var(--rose-700); transform: translateY(-1px); }
+  .next-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; background: var(--muted); }
+
+  /* Step transitions */
+  .step { display: none; animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  .step.active { display: block; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(24px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* AI step */
+  .ai-thinking {
+    text-align: center;
+    padding: 40px 28px;
+    font-family: Georgia, serif;
+  }
+  .ai-thinking .dots {
+    display: inline-flex; gap: 6px;
+    margin-bottom: 16px;
+  }
+  .ai-thinking .dots span {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--rose-500);
+    animation: thinkDot 1.4s infinite ease-in-out;
+  }
+  .ai-thinking .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .ai-thinking .dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes thinkDot {
+    0%, 40%, 100% { transform: translateY(0); opacity: 0.4; }
+    20% { transform: translateY(-6px); opacity: 1; }
+  }
+  .ai-thinking-label {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 13px; color: var(--muted); letter-spacing: 0.04em;
+  }
+
+  .ai-insight {
+    padding: 14px 28px 0 28px;
+  }
+  .ai-avatar {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+  }
+  .ai-avatar-name {
+    font-weight: 600; font-size: 14px;
+  }
+  .ai-avatar-role {
+    font-family: -apple-system, system-ui, sans-serif; font-size: 11px; color: var(--muted);
+  }
+  .ai-message {
+    background: var(--rose-100);
+    border-left: 3px solid var(--rose-500);
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+  .ai-message strong { color: var(--ink); font-style: normal; }
+
+  .benefits {
+    margin: 0 0 14px 0;
+    padding: 0;
+    list-style: none;
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .benefits li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 13px; line-height: 1.45;
+    color: var(--ink-soft);
+  }
+  .benefits li::before {
+    content: "✓";
+    flex: 0 0 18px; width: 18px; height: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    background: var(--rose-500);
+    color: #fff;
+    border-radius: 50%;
+    margin-top: 1px;
+  }
+  .benefits li strong { color: var(--ink); font-weight: 600; }
+
+  .email-form {
+    padding: 0 28px 18px 28px;
+  }
+  .email-form h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px; line-height: 1.3; font-weight: 700; color: var(--ink); letter-spacing: -0.01em;
+  }
+  .email-form .sub { display: none; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .form-field { margin-bottom: 8px; }
+  .form-field label {
+    display: block; font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11px; font-weight: 600; color: var(--ink-soft);
+    letter-spacing: 0.02em; margin-bottom: 4px;
+  }
+  .form-field input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--rose-200);
+    border-radius: 10px;
+    font-family: Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-field input:focus {
+    outline: none;
+    border-color: var(--rose-500);
+    box-shadow: 0 0 0 3px rgba(140, 46, 84, 0.12);
+  }
+  .submit-btn {
+    width: 100%;
+    background: var(--ink);
+    color: #fff; border: none;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 15px; font-weight: 700;
+    padding: 13px;
+    border-radius: 10px;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    transition: transform 0.15s, background 0.2s;
+    margin-top: 8px;
+  }
+  .submit-btn:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
+  .gdpr {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 9px 12px;
+    background: var(--rose-50);
+    border: 1px solid var(--rose-200);
+    border-radius: 8px;
+    margin-top: 4px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11px; line-height: 1.4;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .gdpr:hover { border-color: var(--rose-300); }
+  .gdpr input[type="checkbox"] {
+    flex: 0 0 18px; width: 18px; height: 18px;
+    margin-top: 2px;
+    accent-color: var(--rose-500);
+    cursor: pointer;
+  }
+  .gdpr-text { flex: 1; }
+  .gdpr-text a { color: var(--rose-500); text-decoration: underline; }
+  .submit-btn:hover { background: var(--rose-700); transform: translateY(-1px); }
+  .privacy {
+    font-family: -apple-system, system-ui, sans-serif; font-size: 11px;
+    color: var(--muted); text-align: center; line-height: 1.5;
+    margin: 12px 0 0 0;
+  }
+
+  /* Success step */
+  .success {
+    text-align: center; padding: 28px 28px;
+  }
+  .success-icon {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--rose-500), var(--rose-700));
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 26px; margin-bottom: 12px;
+    box-shadow: 0 10px 28px rgba(140, 46, 84, 0.35);
+    animation: successPop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes successPop {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  .success-kicker {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--rose-500); font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .success-title {
+    margin: 0 0 10px 0; font-size: 24px; line-height: 1.2; color: var(--ink);
+    letter-spacing: -0.02em; font-weight: 700;
+  }
+  .success-title em { font-style: italic; font-weight: 400; color: var(--rose-600); }
+  .success-lead {
+    font-family: Georgia, serif;
+    font-size: 14.5px; color: var(--ink-soft); line-height: 1.55;
+    max-width: 380px; margin: 0 auto 14px auto;
+  }
+  .success-lead strong { color: var(--ink); font-weight: 600; }
+  .success-timeline {
+    display: flex; flex-direction: column; gap: 6px;
+    background: var(--rose-100);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 0 auto 12px auto;
+    max-width: 360px;
+    text-align: left;
+  }
+  .timeline-row {
+    display: flex; align-items: baseline; gap: 10px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 12.5px;
+  }
+  .timeline-row .t-day {
+    font-weight: 700; color: var(--rose-600);
+    min-width: 68px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .timeline-row .t-text { color: var(--ink-soft); }
+  .success-tip {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11.5px; color: var(--muted); line-height: 1.5;
+    max-width: 360px; margin: 0 auto;
+    padding-top: 10px; border-top: 1px dashed var(--rose-200);
+  }
+
+  /* Mobile — floating popup (NOT full-screen) so it's clearly an overlay */
+  @media (max-width: 560px) {
+    .popup-overlay {
+      padding: 20px 12px;
+      align-items: flex-start;
+    }
+    .popup {
+      max-width: 100%;
+      max-height: calc(100dvh - 40px);  /* dvh = dynamic viewport, iOS Safari fix */
+      border-radius: 20px;
+    }
+    .question { font-size: 21px; line-height: 1.2; }
+    .question-sub { font-size: 14px; }
+    .options-grid-2 { grid-template-columns: 1fr; }
+    .popup-header { padding: 20px 20px 4px 20px; }
+    .options { padding: 0 16px 16px 16px; gap: 8px; }
+    .option { min-height: 60px; padding: 12px 14px; gap: 12px; border-radius: 12px; }
+    .option-icon { flex: 0 0 40px; width: 40px; height: 40px; font-size: 20px; border-radius: 10px; }
+    .option-title { font-size: 15.5px; }
+    .option-hint { font-size: 12.5px; }
+    .popup-footer { padding: 14px 20px 18px 20px; }
+    .ai-insight, .email-form { padding-left: 20px; padding-right: 20px; }
+    .popup-close { top: 10px; right: 10px; }
+  }
+  /* Ultra-small (≤360px) — ještě těsnější */
+  @media (max-width: 360px) {
+    .option { padding: 11px 12px; gap: 10px; min-height: 56px; }
+    .option-icon { flex: 0 0 36px; width: 36px; height: 36px; font-size: 18px; }
+    .option-title { font-size: 15px; }
+    .option-hint { font-size: 12px; }
+    .question { font-size: 20px; }
+  }
+
+  /* Dev controls (smaže v produkci) */
+  .dev-panel {
+    position: fixed; bottom: 20px; left: 20px; z-index: 50;
+    background: rgba(31, 20, 22, 0.9); color: #fff; padding: 10px 14px;
+    border-radius: 8px; font-family: -apple-system, system-ui, sans-serif;
+    font-size: 12px; display: flex; gap: 10px; align-items: center;
+    backdrop-filter: blur(8px);
+  }
+  .dev-panel button {
+    background: var(--rose-500); color: #fff; border: none;
+    padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
+  }
+</style>
+<script>
+  // Detect iframe embedding — skryj fake landing pozadí + dev panel
+  // a auto-otevři popup (na reálné sales page je iframe mount = trigger).
+  (function () {
+    let isEmbedded = false;
+    try { isEmbedded = window.self !== window.top; }
+    catch (e) { isEmbedded = true; }
+    if (!isEmbedded) return;
+    document.documentElement.classList.add('embedded');
+    // Počkáme na DOM + openPopup() definici (na konci souboru)
+    document.addEventListener('DOMContentLoaded', () => {
+      requestAnimationFrame(() => {
+        if (typeof openPopup === 'function') openPopup();
+        else document.getElementById('overlay')?.classList.add('open');
+      });
+    });
+  })();
+</script>
+</head>
+<body>
+
+<!-- Fake site background -->
+<div class="site-bg">
+  <div class="site-ghost">
+    <h1>loslatenboek.nl</h1>
+    <p>(Landing page — popup se otevře po 5s nebo při kliku na tlačítko vlevo dole)</p>
+  </div>
+</div>
+
+<!-- Popup -->
+<div class="popup-overlay" id="overlay">
+  <div class="popup" role="dialog" aria-labelledby="popup-q">
+
+    <button class="popup-close" onclick="closePopup()" aria-label="Sluiten">×</button>
+
+    <!-- STEP 1: Pain category -->
+    <div class="step active" data-step="1">
+      <div class="popup-header">
+        <div class="social-proof"><span class="pulse"></span> <span><strong>2 341 lidí</strong> tento měsíc objevilo svůj vzorec</span></div>
+        <div class="progress-wrap">
+          <div class="progress-dots">
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+          </div>
+          <span class="progress-label">Krok 1 / 5</span>
+        </div>
+        <h2 class="question" id="popup-q">Poznáš se v jedné z těchto <em>vět</em>?</h2>
+        <p class="question-sub">Klikni na tu svou. Za 60 sekund pochopíš, proč se to pořád vrací.</p>
+      </div>
+      <div class="options">
+        <button class="option" data-value="gedachten">
+          <span class="option-icon">🌀</span>
+          <span class="option-text">
+            <span class="option-quote">„V hlavě mi to nepřestává jet. Nemůžu to vypnout."</span>
+          </span>
+          <span class="option-check"></span>
+        </button>
+        <button class="option" data-value="verleden">
+          <span class="option-icon">💔</span>
+          <span class="option-text">
+            <span class="option-quote">„Někoho — nebo něco — pořád neumím pustit."</span>
+          </span>
+          <span class="option-check"></span>
+        </button>
+        <button class="option" data-value="zelfbeeld">
+          <span class="option-icon">🪞</span>
+          <span class="option-text">
+            <span class="option-quote">„Připadám si málo. Pořád."</span>
+          </span>
+          <span class="option-check"></span>
+        </button>
+        <button class="option" data-value="toekomst">
+          <span class="option-icon">🌫</span>
+          <span class="option-text">
+            <span class="option-quote">„Chci jít dál, ale nedokážu se hnout."</span>
+          </span>
+          <span class="option-check"></span>
+        </button>
+        <button class="option option-custom" data-value="__custom__" data-custom="1">
+          <span class="option-icon">✍️</span>
+          <span class="option-text">
+            <span class="option-quote">Mám to v sobě jinak — řeknu to po svém</span>
+          </span>
+          <span class="option-check"></span>
+        </button>
+        <div class="option-custom-input">
+          <input type="text" maxlength="200" placeholder="Napiš to klidně jen jednou větou…" />
+          <button type="button" class="custom-confirm" disabled>Potvrdit →</button>
+        </div>
+      </div>
+      <!-- step 1 footer removed — auto-advance on click, no back available -->
+      <div class="popup-footer auto-advance" style="display:none;">
+        <button class="back-btn" disabled>← Zpět</button>
+        <button class="next-btn" disabled onclick="nextStep(2)">Pokračovat →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Sub-category (dynamic per step 1) -->
+    <div class="step" data-step="2">
+      <div class="popup-header">
+        <div class="progress-wrap">
+          <div class="progress-dots">
+            <div class="progress-dot done"></div>
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+          </div>
+          <span class="progress-label">Krok 2 / 5</span>
+        </div>
+        <h2 class="question" id="q2"></h2>
+        <p class="question-sub" id="q2sub">Klikni na to, co je ti nejbližší.</p>
+      </div>
+      <div class="options" id="options-2"></div>
+      <div class="popup-footer auto-advance">
+        <button class="back-btn" onclick="prevStep()">← Zpět</button>
+        <button class="next-btn" disabled onclick="nextStep(3)">Pokračovat →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" data-step="3">
+      <div class="popup-header">
+        <div class="progress-wrap">
+          <div class="progress-dots">
+            <div class="progress-dot done"></div>
+            <div class="progress-dot done"></div>
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+          </div>
+          <span class="progress-label">Krok 3 / 5</span>
+        </div>
+        <h2 class="question" id="q3"></h2>
+        <p class="question-sub" id="q3sub"></p>
+      </div>
+      <div class="options" id="options-3"></div>
+      <div class="popup-footer auto-advance">
+        <button class="back-btn" onclick="prevStep()">← Zpět</button>
+        <button class="next-btn" disabled onclick="nextStep(4)">Pokračovat →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step" data-step="4">
+      <div class="popup-header">
+        <div class="progress-wrap">
+          <div class="progress-dots">
+            <div class="progress-dot done"></div>
+            <div class="progress-dot done"></div>
+            <div class="progress-dot done"></div>
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+          </div>
+          <span class="progress-label">Krok 4 / 5</span>
+        </div>
+        <h2 class="question" id="q4"></h2>
+        <p class="question-sub" id="q4sub"></p>
+      </div>
+      <div class="options" id="options-4"></div>
+      <div class="popup-footer auto-advance">
+        <button class="back-btn" onclick="prevStep()">← Zpět</button>
+        <button class="next-btn" disabled onclick="nextStep(5)">Ukaž mi můj vhled →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: AI insight + email capture -->
+    <div class="step" data-step="5">
+      <div class="popup-header" style="padding-top:18px;padding-bottom:0;">
+        <div class="progress-wrap" style="margin-bottom:10px;">
+          <div class="progress-dots">
+            <div class="progress-dot done"></div>
+            <div class="progress-dot done"></div>
+            <div class="progress-dot done"></div>
+            <div class="progress-dot done"></div>
+            <div class="progress-dot active"></div>
+          </div>
+          <span class="progress-label">Krok 5 / 5 — Tvůj vhled</span>
+        </div>
+      </div>
+
+      <!-- AI thinking animation -->
+      <div id="ai-thinking" class="ai-thinking">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="ai-thinking-label">Joris přemýšlí nad tvými odpověďmi…</div>
+      </div>
+
+      <!-- AI insight card (hidden until thinking done) -->
+      <div id="ai-result" style="display:none;">
+        <div class="ai-insight">
+          <div class="ai-avatar">
+            <div>
+              <div class="ai-avatar-name">Joris de Vries</div>
+              <div class="ai-avatar-role">Autor, <em>Laat los wat je kapotmaakt</em></div>
+            </div>
+          </div>
+          <div class="ai-message" id="ai-message"></div>
+        </div>
+        <form class="email-form" id="emailForm" onsubmit="return submitForm(event)">
+          <h3 id="cta-title"></h3>
+          <p class="sub" id="cta-sub"></p>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="first_name">Jméno</label>
+              <input type="text" id="first_name" name="first_name" required placeholder="Tvé jméno">
+            </div>
+            <div class="form-field">
+              <label for="email">E-mail</label>
+              <input type="email" id="email" name="email" required placeholder="tvuj@email.cz">
+            </div>
+          </div>
+          <label class="gdpr">
+            <input type="checkbox" id="gdpr_consent" required>
+            <span class="gdpr-text">
+              Ano, souhlasím, že mi Joris může poslat osobní vhled + 3 dny reflexí. <strong>Kdykoliv se můžu odhlásit</strong> jedním kliknutím. Žádný spam. <a href="https://www.loslatenboek.nl/privacy" target="_blank">Privacy</a>.
+            </span>
+          </label>
+          <button type="submit" class="submit-btn" id="submitBtn" disabled>Poslat můj vhled →</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="step" data-step="6">
+      <div class="success">
+        <div class="success-icon">✉</div>
+        <div class="success-kicker">Právě jsem ti napsal, <span id="success-name">kamaráde</span>.</div>
+        <h3 class="success-title">Tvůj <em>osobní vhled</em> už letí k tobě.</h3>
+        <p class="success-lead">
+          Za <strong>méně než 30 sekund</strong> bude ve tvé schránce. Přečti si ho hned.
+          Napsal jsem ho přesně pro tebe — na základě toho, co jsi mi teď řekl/a.
+        </p>
+        <div class="success-timeline">
+          <div class="timeline-row"><span class="t-day">Dnes</span> <span class="t-text">osobní vhled o tvé situaci</span></div>
+          <div class="timeline-row"><span class="t-day">Zítra</span> <span class="t-text">první reflexní otázka</span></div>
+          <div class="timeline-row"><span class="t-day">Za 3 dny</span> <span class="t-text">nástroj, co zvládneš za 10 minut</span></div>
+        </div>
+        <p class="success-tip">
+          💡 <strong>Tip:</strong> pokud e-mail do 2 minut nedorazí, podívej se do <em>Promotions</em> nebo <em>Hromadná pošta</em> — a přesuň ho do hlavní schránky.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Dev reopener -->
+<div class="dev-panel">
+  <span>Preview dev:</span>
+  <button onclick="openPopup()">Otevřít popup</button>
+  <button onclick="resetQuiz()">Reset</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  POPUP QUIZ ENGINE — Loslatenboek
+// ═══════════════════════════════════════════════════════════════
+// Branching tree of questions/options. Each path ends at step 5
+// where we either call a real AI endpoint or use a deterministic
+// fallback message.
+
+// ── STEP 2 — "Kdo / co konkrétně" ────────────────────────────────
+// Purpose: give the AI a specific TARGET (person, event, domain) to
+// name in the email. Generic buckets aren't enough — we need "tvůj
+// táta" vs "tvůj bývalý", not just "Vztahy".
+const BRANCH_TREE = {
+  relaties: {
+    q: "O <em>kom</em> to je nejvíc?",
+    sub: "Klikni na toho, kdo ti pořád prochází hlavou.",
+    options: [
+      { v: "partner", i: "💔", t: "„Někdo, koho jsem miloval/a — a možná pořád miluju." },
+      { v: "parent",  i: "👵", t: "„Někdo z mojí rodiny — máma, táta, sourozenec." },
+      { v: "friend",  i: "🤝", t: "„Někdo, komu jsem věřil/a — a zradil mě." },
+      { v: "self",    i: "🪞", t: "„Já sám/a se sebou. Ten vztah mě bolí nejvíc." },
+    ],
+  },
+  verleden: {
+    q: "Co přesně se <em>vrací</em>?",
+    sub: "Ta jedna věc, co tě v noci nepouští.",
+    options: [
+      { v: "childhood", i: "🧒", t: "„Něco z dětství. Něco, co mě formovalo." },
+      { v: "breakup",   i: "💔", t: "„Vztah, který skončil — ale neuzavřel se." },
+      { v: "did",       i: "🙈", t: "„Něco, co jsem udělal/a a nemůžu si to odpustit." },
+      { v: "happened",  i: "💧", t: "„Něco, co mi udělal někdo druhý." },
+    ],
+  },
+  gedachten: {
+    q: "O čem ta hlava <em>nepřestává</em>?",
+    sub: "Co se točí dokola, i když si přeješ klid.",
+    options: [
+      { v: "work",     i: "💼", t: "„Práce a výkon — jestli to vůbec stačím." },
+      { v: "money",    i: "💰", t: "„Peníze a bezpečí — co když to nestačí." },
+      { v: "relation", i: "❤️", t: "„Jeden konkrétní člověk — a co je mezi námi." },
+      { v: "future",   i: "🔮", t: "„Budoucnost — co přijde, jak to dopadne." },
+    ],
+  },
+  emoties: {
+    q: "Která <em>emoce</em> tě přebírá?",
+    sub: "Ta, kterou nedokážeš zastavit.",
+    options: [
+      { v: "anger",   i: "😤", t: "„Hněv. Vzteká mě to a nejde to ven." },
+      { v: "sadness", i: "😢", t: "„Smutek. Tíha, která prostě neodchází." },
+      { v: "shame",   i: "😔", t: "„Stud. Jako by se mnou bylo něco špatně." },
+      { v: "anxiety", i: "😰", t: "„Úzkost. Svírá mě to v břiše a nejde se nadechnout." },
+    ],
+  },
+  zelfbeeld: {
+    q: "Co o sobě <em>zpochybňuješ</em> nejvíc?",
+    sub: "Tam, kde se cítíš nejmíň v bezpečí.",
+    options: [
+      { v: "body",    i: "🪞", t: "„Jak vypadám. Tělo, jak stárnu." },
+      { v: "ability", i: "🧠", t: "„Jestli to umím. Jestli vůbec stačím." },
+      { v: "worth",   i: "💔", t: "„Jestli si vůbec zasloužím lásku a klid." },
+      { v: "real",    i: "🎭", t: "„Kdo jsem doopravdy — pod tou maskou." },
+    ],
+  },
+  toekomst: {
+    q: "Čeho se <em>nejvíc bojíš</em>?",
+    sub: "Toho, co ti v noci nedá usnout.",
+    options: [
+      { v: "alone",    i: "🪑", t: "„Že zůstanu sám/a. Nikoho nenajdu." },
+      { v: "money",    i: "💸", t: "„Že to finančně neutáhnu." },
+      { v: "latetime", i: "⏳", t: "„Že už je pozdě. Promarnil/a jsem roky." },
+      { v: "stuck",    i: "🌊", t: "„Že se to nikdy nezmění. Že v tom zůstanu." },
+    ],
+  },
+  // Fallback pro custom K1 — generický "kdo/co je v tom"
+  __generic__: {
+    q: "S <em>kým</em> nebo s <em>čím</em> to nejvíc souvisí?",
+    sub: "Klikni na to, co tomu nejblíž odpovídá.",
+    options: [
+      { v: "person", i: "👤", t: "„S konkrétním člověkem v mém životě." },
+      { v: "myself", i: "🪞", t: "„Sám/a se sebou. Jsem to já." },
+      { v: "past",   i: "🕰", t: "„S něčím, co se stalo dřív." },
+      { v: "future", i: "🔮", t: "„S tím, co teprve přijde." },
+    ],
+  },
+};
+
+// ── STEP 3 — "Kdy se to vrací" (UNIVERZÁLNÍ, stejné pro všechny cesty) ──
+// Purpose: give AI the trigger moment — when/where the pain surfaces.
+// AI can then open with "Víš co je zvláštní? Vrací se ti to právě v [X]."
+const LEVEL_3_UNIVERSAL = {
+  q: "Kdy se ti to <em>vrací nejvíc</em>?",
+  sub: "Ten moment, kdy tě to udeří naplno.",
+  options: [
+    { v: "3am",     i: "🌙", t: "„V noci. Probudím se a už to jede." },
+    { v: "alone",   i: "🚗", t: "„Když jsem sám/a — v autě, doma, na procházce." },
+    { v: "people",  i: "👥", t: "„Mezi lidmi. Tvářím se v pohodě, vevnitř ne." },
+    { v: "always",  i: "🔄", t: "„Prakticky pořád. Je to pozadí všeho." },
+  ],
+};
+
+// ── STEP 4 — "Věta, kterou si říkáš" (UNIVERZÁLNÍ) ─────────────────
+// 🔥 NEJCENNĚJŠÍ VSTUP PRO AI — vnitřní hlas čtenáře doslova.
+// AI pak v emailu může citovat jeho vlastní slova → šok z poznání.
+const LEVEL_4_UNIVERSAL = {
+  q: "Kterou <em>větu</em> si pořád opakuješ?",
+  sub: "Tu, co se ti vrací, když jsi sám/a se sebou.",
+  options: [
+    { v: "not_enough", i: "⚖️", t: "„Nejsem dost. Jiní to mají lepší." },
+    { v: "too_late",   i: "⏳", t: "„Už je pozdě. Promarnil/a jsem to." },
+    { v: "my_fault",   i: "🔒", t: "„Je to moje chyba. Měl/a jsem to vědět." },
+    { v: "like_this",  i: "🎭", t: "„Prostě takový/á jsem. Už se nezměním." },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let state = {
+  path: [],        // selected slugs per step (e.g. ["verleden","breakup","3am","not_enough"])
+  texts: [],       // human-readable sentence per step — what the AI sees
+  currentStep: 1,
+};
+
+function $(sel) { return document.querySelector(sel); }
+function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
+
+function openPopup() {
+  $("#overlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closePopup() {
+  $("#overlay").classList.remove("open");
+  document.body.style.overflow = "";
+  // Notify parent page (když je popup embedován v iframe) že se zavřel,
+  // aby parent uvolnil scroll lock.
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: "popup_closed" }, "*");
+    }
+  } catch (e) {}
+}
+
+// Selection handler for all step options.
+// Auto-advance on steps 1–4 after a 500ms delay so the user sees the "selected"
+// pulse before the slide transition. Industry benchmark: +18% completion rate
+// vs requiring a manual Next click (Typeform 2024 / Perspective 2026).
+function selectOption(btn) {
+  const parentOptions = btn.closest(".options");
+  parentOptions.querySelectorAll(".option").forEach(b => b.classList.remove("selected"));
+  // Collapse any previously opened custom-input row in this step
+  parentOptions.querySelectorAll(".option-custom-input.open").forEach(row => {
+    row.classList.remove("open");
+    const inp = row.querySelector("input");
+    if (inp) inp.value = "";
+    const cb = row.querySelector(".custom-confirm");
+    if (cb) cb.disabled = true;
+  });
+  btn.classList.add("selected");
+  const stepEl = btn.closest(".step");
+  const nextBtn = stepEl.querySelector(".next-btn");
+  if (nextBtn) nextBtn.disabled = false;
+
+  const stepN = parseInt(stepEl.dataset.step, 10);
+  const isCustom = btn.dataset.custom === "1";
+
+  if (isCustom) {
+    // Custom "write your own" — expand input row, DO NOT auto-advance.
+    // User must type + click the Potvrdit button (or press Enter).
+    const inputRow = btn.nextElementSibling;
+    if (inputRow && inputRow.classList.contains("option-custom-input")) {
+      inputRow.classList.add("open");
+      const inp = inputRow.querySelector("input");
+      setTimeout(() => inp && inp.focus(), 140);
+    }
+    return;
+  }
+
+  if (stepN >= 1 && stepN <= 4) {
+    setTimeout(() => nextStep(stepN + 1), 500);
+  }
+}
+
+document.addEventListener("click", (e) => {
+  // Custom-answer confirm button → advance with typed text
+  const confirmBtn = e.target.closest(".custom-confirm");
+  if (confirmBtn) {
+    const row = confirmBtn.closest(".option-custom-input");
+    const input = row && row.querySelector("input");
+    const text = (input && input.value || "").trim();
+    if (text.length < 2) return;
+    const optionBtn = row.previousElementSibling;
+    optionBtn.dataset.value = "custom:" + text;
+    const stepEl = optionBtn.closest(".step");
+    const stepN = parseInt(stepEl.dataset.step, 10);
+    if (stepN >= 1 && stepN <= 4) nextStep(stepN + 1);
+    return;
+  }
+  const opt = e.target.closest(".option");
+  if (opt) selectOption(opt);
+});
+
+// Enable/disable confirm button as user types (≥ 2 chars)
+document.addEventListener("input", (e) => {
+  if (e.target.matches && e.target.matches(".option-custom-input input")) {
+    const row = e.target.closest(".option-custom-input");
+    const cb = row.querySelector(".custom-confirm");
+    cb.disabled = e.target.value.trim().length < 2;
+  }
+});
+
+// Enter in the custom input triggers the confirm button
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  if (e.target.matches && e.target.matches(".option-custom-input input")) {
+    e.preventDefault();
+    const cb = e.target.closest(".option-custom-input").querySelector(".custom-confirm");
+    if (cb && !cb.disabled) cb.click();
+  }
+});
+
+// Move to next step — stores selection + renders next step dynamically
+function nextStep(n) {
+  const current = document.querySelector(`.step[data-step="${state.currentStep}"]`);
+  const selected = current.querySelector(".option.selected");
+  if (!selected) return;
+  const idx = state.currentStep - 1;
+  state.path[idx] = selected.dataset.value;
+  // Capture the human-readable sentence the user actually saw / typed.
+  // For custom answers, dataset.value is "custom:<typed text>" — use the
+  // typed text directly so the AI gets exactly what the user wrote.
+  let txt = "";
+  if (selected.dataset.value && selected.dataset.value.startsWith("custom:")) {
+    txt = selected.dataset.value.slice(7).trim();
+  } else {
+    const q = selected.querySelector(".option-quote");
+    txt = q ? q.textContent.trim() : selected.textContent.trim();
+  }
+  state.texts[idx] = txt;
+
+  // Build dynamic content for the upcoming step
+  if (n === 2) buildStep2();
+  else if (n === 3) buildStep3();
+  else if (n === 4) buildStep4();
+  else if (n === 5) runStep5();
+
+  showStep(n);
+}
+
+function prevStep() {
+  if (state.currentStep <= 1) return;
+  showStep(state.currentStep - 1);
+}
+
+function showStep(n) {
+  $$(".step").forEach(s => s.classList.remove("active"));
+  document.querySelector(`.step[data-step="${n}"]`).classList.add("active");
+  state.currentStep = n;
+}
+
+function renderOptions(container, options) {
+  container.innerHTML = options.map(o => `
+    <button class="option" data-value="${o.v}">
+      <span class="option-icon">${o.i}</span>
+      <span class="option-text">
+        <span class="option-quote">${o.t}</span>
+      </span>
+      <span class="option-check"></span>
+    </button>
+  `).join("") + `
+    <button class="option option-custom" data-value="__custom__" data-custom="1">
+      <span class="option-icon">✍️</span>
+      <span class="option-text">
+        <span class="option-quote">Mám to v sobě jinak — řeknu to po svém</span>
+      </span>
+      <span class="option-check"></span>
+    </button>
+    <div class="option-custom-input">
+      <input type="text" maxlength="200" placeholder="Napiš to klidně jen jednou větou…" />
+      <button type="button" class="custom-confirm" disabled>Potvrdit →</button>
+    </div>
+  `;
+}
+
+// Step 2 — pick branch by K1 selection. If K1 is custom (starts with
+// "custom:" or unknown key), fall back to __generic__ branch so the
+// user is never stranded on an empty step.
+function buildStep2() {
+  const cat = state.path[0] || "";
+  const branch = BRANCH_TREE[cat] || BRANCH_TREE.__generic__;
+  $("#q2").innerHTML = branch.q;
+  $("#q2sub").textContent = branch.sub;
+  renderOptions($("#options-2"), branch.options);
+}
+
+// Step 3 — universal: same "when does it surface" question for every path.
+function buildStep3() {
+  const branch = LEVEL_3_UNIVERSAL;
+  $("#q3").innerHTML = branch.q;
+  $("#q3sub").textContent = branch.sub;
+  renderOptions($("#options-3"), branch.options);
+}
+
+// Step 4 — universal: same "your inner sentence" question for every path.
+// This is the highest-signal input for the AI email.
+function buildStep4() {
+  const branch = LEVEL_4_UNIVERSAL;
+  $("#q4").innerHTML = branch.q;
+  $("#q4sub").textContent = branch.sub;
+  renderOptions($("#options-4"), branch.options);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  STEP 5 — AI insight + email capture
+// ═══════════════════════════════════════════════════════════════
+// In production this calls:
+//   POST /public/marketing/ai-insight  { path: [...] }
+//   → returns { message: "...", headline: "...", cta: "..." }
+//   Backend uses Claude Haiku with a persona prompt (Joris).
+//
+// For the preview we use a deterministic local generator so the
+// popup is usable offline.
+async function runStep5() {
+  showStep(5);
+  $("#ai-thinking").style.display = "block";
+  $("#ai-result").style.display = "none";
+
+  // Real Sonnet call when API_BASE is set; deterministic mock otherwise.
+  // Min wait 1.2s so the "thinking" animation always has breathing room,
+  // even if Sonnet responds in 300ms — too-fast replies feel suspicious.
+  const [insight] = await Promise.all([
+    fetchInsightFromBackend(state.path, "cs", "popup_quiz_loslatenboek", state.texts),
+    new Promise(r => setTimeout(r, 1200)),
+  ]);
+  $("#ai-message").innerHTML = insight.message;
+  $("#cta-title").textContent = insight.headline;
+  $("#cta-sub").textContent = insight.sub;
+  const bEl = $("#benefits"); if (bEl) bEl.innerHTML = (insight.benefits || []).map(b => `<li>${b}</li>`).join("");
+
+  $("#ai-thinking").style.display = "none";
+  $("#ai-result").style.display = "block";
+}
+
+// API base URL — set to your Medusa backend public URL (marketing-hq.eu) when
+// embedded on loslatenboek.nl. For local dev preview, leave empty to trigger
+// the mock fallback in generateInsightMock.
+const API_BASE = "https://www.marketing-hq.eu"  // e.g. "https://www.marketing-hq.eu"
+
+/**
+ * Fetch personalized insight from Sonnet 4.6 via backend.
+ * Falls back to deterministic mock when offline / no API_BASE set.
+ */
+async function fetchInsightFromBackend(path, locale = "nl", formId = "popup_quiz_loslatenboek", texts = []) {
+  if (!API_BASE) return generateInsightMock(path)
+  try {
+    const res = await fetch(`${API_BASE}/public/marketing/ai-insight`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ form_id: formId, path, texts, locale }),
+    })
+    if (!res.ok) throw new Error(`http ${res.status}`)
+    const json = await res.json()
+    return { message: json.message, headline: json.headline, sub: json.sub }
+  } catch {
+    return generateInsightMock(path)
+  }
+}
+
+/**
+ * Mock generator for offline preview. In production the real Sonnet-powered
+ * endpoint at /public/marketing/ai-insight returns fresh per-user insights.
+ */
+function generateInsightMock(path) {
+  const [cat, sub, intensity, emotion] = path;
+
+  // Path-specific WOW insights. Each template uses multiple path variables
+  // so the reader feels "this was written for me". In production the backend
+  // passes the same path to Claude Haiku which produces a single bespoke
+  // response per user.
+  const insights = {
+    // ─── RELATIES ─────────────────────────────────────────────
+    "relaties.partner": {
+      boos: `Když se na někoho pořád zlobíš, není to proto, že mu chceš ublížit. Je to proto, že ti to pořád není jedno. A mozek to nepustí, dokud si nepřizná, co ti ten člověk znamenal. <strong>Co dokážeš pojmenovat, to nad tebou ztratí moc.</strong>`,
+      verdrietig: `Smutek, co se vrací ve vlnách — hlavně ráno nebo v neděli večer — není slabost. Je to mozek, co pořád dokola hledá <strong>to, co po tom všem zbylo</strong>. Dokud nenajde odpověď, nedá ti pokoj.`,
+      vast: `Zaseknutý nejsi proto, že jsi něco zkazil. Jsi zaseknutý proto, že ten člověk pořád <strong>žije ve tvé hlavě</strong> — jako kdyby se měl vrátit. Až ho uvidíš jako uzavřenou kapitolu, mysl tě pustí dál.`,
+      verward: `Ten zmatek je dobré znamení. Říká, že <strong>cítíš dvě pravdy najednou</strong> — a mozek neví, jak to obě může být pravda. Lidé, co tohle umí cítit, bývají ti nejhlubší. Jen jim nikdo neřekl, že zmatek je začátek pochopení.`,
+    },
+    "relaties.familie": {
+      default: `Rodinné rány mají jedno pravidlo: nejvíc bolí tam, kde čekáš <strong>bezpečí</strong>. Pokud tě dlouho zraňuje někdo, kdo tě měl chránit, není to tvoje vina. A dá se to řešit — jen jinak, než ti to říká hlava.`,
+    },
+    "relaties.vriend": {
+      default: `Zranil tě někdo, koho sis <strong>sám vybral</strong>. To bolí jinak než zrada od rodiče — protože tomu člověku jsi věřil jako dospělý. Teď zpochybňuješ vlastní úsudek. Je to normální fáze, <strong>ne trvalý stav.</strong>`,
+    },
+    "relaties.werk": {
+      default: `Hranice v práci jsou nejtěžší, protože se mísí strach (peníze) a lidskost. Lidé, co uvíznou v toxické práci, nejsou slabí. Jsou <strong>loajální k systému, co jim nic nedává</strong>. A tohle se dá obrátit.`,
+    },
+
+    // ─── VERLEDEN ─────────────────────────────────────────────
+    "verleden.trauma": {
+      default: `Špatná vzpomínka se vrací ne proto, že jsi slabý. Vrací se proto, že ji mozek <strong>nikdy úplně neuložil pryč</strong>. Zůstala jako by se to dělo teď. Proto to pořád cítíš, jako by to bylo včera. A to se dá změnit.`,
+    },
+    "verleden.spijt": {
+      default: `Lítost, co nejde pryč, ti říká jednu věc: tehdy jsi mohl rozhodnout líp. Ale tehdejší ty věděl jen tolik, kolik věděl. <strong>Soudit toho mladšího sebe z dnešní pozice je nefér.</strong>`,
+    },
+    "verleden.verraad": {
+      default: `Zrada bolí jinak než ztráta. Ztráta ti vezme druhého. <strong>Zrada ti vezme důvěru sám sobě.</strong> Proto to trvá dýl. Ne kvůli tomu druhému — kvůli tomu, co to udělalo s tvým vnitřním kompasem. Ten se dá nastavit zpátky.`,
+    },
+    "verleden.verlies": {
+      default: `Když ztrácíš někoho, ztrácíš taky <strong>kus sebe</strong> — toho, kým jsi s ním byl. Smutek není jen po něm. Je i po tobě. To, co zbývá, je postavit novou verzi sebe.`,
+    },
+
+    // ─── GEDACHTEN ────────────────────────────────────────────
+    "gedachten.rumineren": {
+      default: `Pořád dokola myslet na stejnou věc není chyba mozku. Je to mozek, co <strong>hledá konec, který nedostal</strong>. Jakmile mu dáš jasné uzavření — třeba napíšeš dopis, co nikdy neodešleš — smyčka se zlomí. Není to otázka týdnů. Jsou to minuty, když se to udělá správně.`,
+    },
+    "gedachten.wat_als": {
+      default: `Scénáře „co kdyby" nejsou strach z budoucnosti. Jsou to <strong>stará nezpracovaná trápení</strong>, co se přesunula vpřed, protože v přítomnosti nemají kam. Mozek hledá kontrolu tam, kde mu chyběla.`,
+    },
+    "gedachten.oordeel": {
+      default: `Ten kritik v tvé hlavě <strong>není tvůj</strong>. Je to hlas někoho, koho jsi slyšel jako dítě — rodič, učitel, někdo. Ten hlas se v tobě usadil. Ale jakmile ho slyšíš jako <em>cizí hlas</em>, ztratí moc.`,
+    },
+    "gedachten.slaap": {
+      default: `V noci nemůžeš usnout, protože den <strong>zůstal otevřený</strong>. Mozek tě nepustí spát, dokud nevyřeší, co zbylo. Řešení není snažit se víc „přestat myslet". Řešení je dát dnu uzavření ještě než si lehneš.`,
+    },
+
+    // ─── EMOTIES ──────────────────────────────────────────────
+    "emoties.woede": {
+      default: `Vztek je <strong>strážce</strong>, ne problém. Říká, že někdo překročil tvoji hranici — a nikdo jiný to za tebe řešit nebude. Lidé, jejichž hranice se v dětství nerespektovaly, mívají vztek, co <em>přichází pozdě</em>. Ale poslechnout ho lze i pozdě.`,
+    },
+    "emoties.verdriet": {
+      default: `Smutek „bez důvodu" nikdy není bez důvodu. Mysl ho jen tehdy schovala, protože ho nesnesla. Teď se vrací — ne aby tě zničil, ale <strong>aby byl konečně dovolen</strong>. Pustit ho je rychlejší než s ním bojovat.`,
+    },
+    "emoties.schaamte": {
+      default: `Stud ti říká: „něco se mnou není v pořádku." Ale to není fakt. Je to <strong>závěr</strong>, který sis udělal moc brzy a z malé informace. Když se podíváš, kdo ti ho tehdy předal, často zjistíš, že <em>on sám neměl právo soudit</em>.`,
+    },
+    "emoties.schuld": {
+      default: `Vina je dvojí. <strong>Aktivní</strong> — ublížil jsem někomu, dá se to napravit. <strong>Cizí</strong> — nosím vinu, která mi nepatří. Většina lidí uvízne v té druhé a myslí si, že je ta první. Rozeznat to mění všechno.`,
+    },
+
+    // ─── ZELFBEELD ────────────────────────────────────────────
+    "zelfbeeld.niet_genoeg": {
+      default: `„Nejsem dost" není pravda. Je to <strong>trik</strong>, který tvoje mysl použila jako dítě. Když nikdy nebudeš dost, nemůžeš být zklamaný, když tě někdo odmítne — protože jsi to <em>už čekal</em>. Tehdy tě to zachránilo. Dnes ti to bere život.`,
+    },
+    "zelfbeeld.liefde": {
+      default: `Pocit „nezasloužím lásku" má skoro vždycky <strong>jeden konkrétní zdroj</strong> — moment, kdy jsi tu zprávu dostal od někoho, komu jsi věřil. Možná si ten moment pamatuješ, možná ne. Ale tělo ho pamatuje. A dá se to odemknout.`,
+    },
+    "zelfbeeld.mislukt": {
+      default: `Když se cítíš jako „selhání", měříš se <strong>měřítkem někoho jiného</strong> — rodičů, společnosti, ideálu. Tvůj skutečný život do toho nezapadá. Otázka není „kde jsem selhal" — ale <em>„čí měřítko mě určuje?"</em>`,
+    },
+    "zelfbeeld.masker": {
+      default: `Maska tě vyčerpává ne proto, že bys byl falešný. Je to proto, že <strong>to skutečné v tobě je samo</strong> — i když jsi mezi lidmi. Ti, kdo masku nosí nejlépe, se cítí nejvíc sami. A právě proto musí být první, co pustíš, ta maska — ne vztahy.`,
+    },
+
+    // ─── TOEKOMST ─────────────────────────────────────────────
+    "toekomst.alleen": {
+      default: `Strach „zůstat sám" málokdy bývá o samotě. Je o <strong>pocitu, že tě nikdo neuvidí</strong> — ani když u sebe někoho budeš mít. To je jiná bolest. A má jiné řešení než „najít někoho".`,
+    },
+    "toekomst.verkeerd": {
+      default: `Strach z „špatného rozhodnutí" není nerozhodnost. Je to <strong>strach o sebe</strong> — kdo budu, když to dopadne špatně? Lidé, co někdy špatně rozhodli, paralyzovaní nezůstávají. Paralyzovaní jsou ti, kdo byli <em>za rozhodnutí potrestáni</em>. Často za rozhodnutí, které ani nebylo jejich.`,
+    },
+    "toekomst.oordeel": {
+      default: `Strach z toho, co si myslí druzí, je <strong>přežití</strong>, ne slabost. Mozek si kdysi spojil: být souzený = být vyloučený = nebezpečí. Dnes už to neplatí, ale tělo to ještě neví. <strong>Dá se to přeučit rychleji, než si myslíš.</strong>`,
+    },
+    "toekomst.herhaling": {
+      default: `Když se ti pořád opakuje stejný vzorec, <strong>není to tvoje povaha</strong>. Je to cestička v mozku, postavená dávno předtím, než jsi pro to měl slovo. Změna není o vůli. Je o <em>nové cestě</em>. A ta se staví opakováním jiného kroku, ne uvědoměním.`,
+    },
+  };
+
+  // Resolve: try "cat.sub.emotion" → "cat.sub.default" → "cat.default" → universal fallback
+  const key = `${cat}.${sub}`;
+  const block = insights[key];
+  let message;
+  if (block && emotion && block[emotion]) {
+    message = block[emotion];
+  } else if (block && block.default) {
+    message = block.default;
+  } else {
+    message = `To, co v sobě neseš, není tvoje chyba. Je to stará reakce, co ti kdysi pomohla přežít — a dnes ti spíš překáží. Mysl pustí až to, co <strong>vidí</strong>. A teď, když to vidíš ty, vidí to i ona.`;
+  }
+
+  return {
+    message,
+    headline: "Chceš vědět, proč to přetrvává — a jak to pustit?",
+    sub: `Pošlu ti osobní vhled na základě tvých odpovědí + první 3 dny mé reflexní série. Žádný spam. Jen odpovědi.`,
+    benefits: generateBenefits(path),
+  };
+}
+
+/**
+ * Personalized value bullets based on user's path. Each bullet references
+ * the specific problem area they selected so it feels individualized.
+ */
+function generateBenefits(path) {
+  const [cat, sub, intensity, emotion] = path;
+
+  // Day 1 email title — deeply specific to their path
+  const day1Titles = {
+    "relaties.partner": "Proč tě (ex-)partner stále drží v hlavě",
+    "relaties.familie": "Proč rodinné rány bolí nejhlouběji",
+    "relaties.vriend":  "Co dělá zrada přítele s tvou důvěrou",
+    "relaties.werk":    "Proč je těžké odejít z toxického pracovního vztahu",
+    "verleden.trauma":  "Jak tělo pamatuje to, co mysl zapomíná",
+    "verleden.spijt":   "Proč tě lítost trestá víc, než zasloužíš",
+    "verleden.verraad": "Jak znovu věřit svému vnitřnímu kompasu",
+    "verleden.verlies": "Proč ztráta bere i kus tebe — a jak ho získat zpět",
+    "gedachten.rumineren": "Proč se mysl vrací k stejné scéně",
+    "gedachten.wat_als":   "Jak mozek hledá kontrolu přes scénáře co kdyby",
+    "gedachten.oordeel":   "Čí hlas je ten vnitřní kritik — a jak ho ztišit",
+    "gedachten.slaap":     "Proč nemůžeš usnout, i když jsi unavený/á",
+    "emoties.woede":    "Proč je tvůj hněv strážce, ne problém",
+    "emoties.verdriet": "Kdy je smutek bez důvodu — a kdy má hluboký důvod",
+    "emoties.schaamte": "Stud není fakt — je to závěr. A dá se přehodnotit",
+    "emoties.schuld":   "Aktivní vs. adoptovaná vina — rozlišení, které mění vše",
+    "zelfbeeld.niet_genoeg": "Proč nejsem dost není pravda — je to strategie",
+    "zelfbeeld.liefde":      "Odkud se bere pocit, že nezasloužíš lásku",
+    "zelfbeeld.mislukt":     "Čí měřítkem se necháváš definovat",
+    "zelfbeeld.masker":      "Proč nošení masky vyčerpává víc než cokoliv",
+    "toekomst.alleen":    "Strach ze samoty — často není o samotě",
+    "toekomst.verkeerd":  "Paralýza z rozhodnutí — a kdo ti ji naočkoval",
+    "toekomst.oordeel":   "Proč mozek stále považuje odmítnutí za smrt",
+    "toekomst.herhaling": "Vzorce se nezmění vůlí — ale opakováním jiného kroku",
+  };
+  const key = `${cat}.${sub}`;
+  const day1 = day1Titles[key] || "Co ti mozek nedovolí pustit";
+
+  // Worksheet/tool name — path-specific
+  const toolLabels = {
+    relaties:  "Pracovní list — Mapování vazby",
+    verleden:  "Cvičení — Dopis, který nikdy neodešleš",
+    gedachten: "Stop-loop technika v 3 krocích",
+    emoties:   "Deník Pojmenuj to — 5 minut denně",
+    zelfbeeld: "Cvičení — Kdo ti to řekl poprvé?",
+    toekomst:  "Reflexní list — Nejhorší scénář",
+  };
+  const tool = toolLabels[cat] || "Reflexivní pracovní list";
+
+  return [
+    `<strong>Osobní vhled</strong> napsaný přesně pro tvou situaci — ne obecné rady`,
+    `<strong>3-denní sérii</strong> začínající „${day1}"`,
+    `<strong>${tool}</strong> — nástroj, co zvládneš za 10 minut denně`,
+  ];
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  EMAIL SUBMIT
+// ═══════════════════════════════════════════════════════════════
+// In production this calls:
+//   POST /public/marketing/form-submit
+//   body: {
+//     form_id: "popup_quiz_loslatenboek",
+//     email, first_name,
+//     properties: { path, quiz_answers: {...} }
+//   }
+// The form.default_list is added to the contact + a matching flow
+// (trigger=event:form_submitted filter=form_id=popup_quiz_loslatenboek)
+// enrolls the new contact automatically.
+// Enable submit only when all 3 fields valid (first_name, email, gdpr)
+document.addEventListener("input", (e) => {
+  const form = document.getElementById("emailForm");
+  if (!form) return;
+  const fn = $("#first_name")?.value.trim() || "";
+  const em = $("#email")?.value.trim() || "";
+  const gdpr = $("#gdpr_consent")?.checked || false;
+  const valid = fn.length > 0 && /.+@.+\..+/.test(em) && gdpr;
+  const btn = $("#submitBtn");
+  if (btn) btn.disabled = !valid;
+});
+document.addEventListener("change", (e) => {
+  if (e.target && e.target.id === "gdpr_consent") {
+    const ev = new Event("input", { bubbles: true });
+    document.dispatchEvent(ev);
+  }
+});
+
+async function submitForm(e) {
+  e.preventDefault();
+  const email = $("#email").value.trim();
+  const firstName = $("#first_name").value.trim();
+  const gdpr = $("#gdpr_consent").checked;
+  if (!email || !firstName || !gdpr) return false;
+
+  // Optimistic UI: show success first, submit in background. If submit fails
+  // in production we'll still have logged it; failing silently is less bad
+  // than blocking the user on a spinner.
+  $("#success-name").textContent = firstName;
+  showStep(6);
+
+  // Semantic field names so AI prompt can read them directly.
+  // quiz_path keeps the raw value array for forensic / debugging.
+  // "custom:..." prefix on a value means the user typed their own answer.
+  const payload = {
+    form_id: "popup_quiz_loslatenboek",
+    brand_slug: "loslatenboek",
+    email,
+    first_name: firstName,
+    properties: {
+      quiz_path:         state.path,
+      quiz_area:         state.path[0],   // K1 — broad area (relaties / verleden / ...)
+      quiz_target:       state.path[1],   // K2 — specific person/thing (parent / breakup / ...)
+      quiz_trigger:      state.path[2],   // K3 — when it surfaces (3am / morning / ...)
+      quiz_own_sentence: state.path[3],   // K4 — inner voice / their own sentence
+      // Backwards-compat for the previous AI generator field names.
+      quiz_category:     state.path[0],
+      quiz_subcategory:  state.path[1],
+      quiz_intensity:    state.path[2],
+      quiz_emotion:      state.path[3],
+    },
+  };
+
+  if (API_BASE) {
+    try {
+      await fetch(`${API_BASE}/public/marketing/form-submit`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      console.warn("form-submit failed:", err);
+    }
+  } else {
+    console.log("[DEV] form-submit payload:", payload);
+  }
+  return false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DEV HELPERS
+// ═══════════════════════════════════════════════════════════════
+function resetQuiz() {
+  state = { path: [], texts: [], currentStep: 1 };
+  $$(".option.selected").forEach(o => o.classList.remove("selected"));
+  $$(".option-custom-input.open").forEach(r => r.classList.remove("open"));
+  $$(".option-custom-input input").forEach(i => { i.value = ""; });
+  $$(".custom-confirm").forEach(b => { b.disabled = true; });
+  $$(".next-btn").forEach(b => b.disabled = true);
+  showStep(1);
+  $("#ai-thinking").style.display = "block";
+  $("#ai-result").style.display = "none";
+}
+
+// Auto-open popup když je soubor embedovaný v iframe (= real sales page trigger).
+// Tohle je POSLEDNÍ skript v souboru, takže openPopup je jistě definovaný.
+if (document.documentElement.classList.contains('embedded')) {
+  openPopup();
+}
+</script>
+
+</body>
+</html>
