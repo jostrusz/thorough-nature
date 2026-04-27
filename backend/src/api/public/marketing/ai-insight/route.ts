@@ -23,9 +23,11 @@ import Anthropic from "@anthropic-ai/sdk"
  *     sub: string          // one-line incentive below headline
  *   }
  *
- * Model: Sonnet 4.6 (claude-sonnet-4-6). Chosen because the emotional
- * nuance of a 50-80 word reframe is worth ~$5/month extra over Haiku on
- * expected traffic, and output quality translates directly to opt-in rate.
+ * Model: Opus 4.7 (claude-opus-4-7). Chosen for top-tier emotional nuance
+ * on the 70-95 word reframe — this short paragraph is the entire pitch
+ * for the email opt-in, so output quality translates directly into
+ * opt-in rate. Opus is ~5× the cost of Sonnet ($15/$75 vs $3/$15 per
+ * MTok) so the in-memory + Anthropic prompt cache layers matter more.
  *
  * Basic in-memory cache (15m TTL) keyed by form_id + path + locale to
  * reduce cost on hot paths. Bounded to 500 entries, LRU-evicted.
@@ -33,7 +35,7 @@ import Anthropic from "@anthropic-ai/sdk"
  * Rate-limit: 30 calls / minute / IP (popup bursts allowed).
  */
 
-const MODEL = "claude-sonnet-4-6"
+const MODEL = "claude-opus-4-7"
 const CACHE_TTL_MS = 15 * 60 * 1000
 const CACHE_MAX = 500
 const RATE_WINDOW_MS = 60 * 1000
@@ -112,149 +114,61 @@ function buildSystemPrompt(locale: string): string {
   const persona = PERSONAS[locale] || PERSONAS.nl
   const langName = { nl: "Dutch", cs: "Czech", de: "German", pl: "Polish", sv: "Swedish" }[locale] || "Dutch"
 
-  return `You are ${persona.name}, author of "${persona.book}".
+  return `Posílám ti 4 odpovědi z dotazníku. Čtenář v něm říká, co ho drží
+zpátky a co se mu vrací do hlavy.
 
-Someone just finished a 4-question quiz about what's holding them back.
-You have their four answers. Write ONE short insight.
+Tvůj úkol: napiš mu krátkou odpověď ve 3 větách. Mluv přímo k němu,
+tykej. Z jeho odpovědí ukaž, že to, co teď cítí, má kořeny v jeho
+minulosti — a propoj to konkrétně s tím, co napsal. Ne obecně.
 
-YOUR JOB: make them stop and think "oh. I never saw it like that."
-Not "that was nice to read."
+Třetí věta ať je krátká otázka, na kterou si může v duchu odpovědět.
 
-CRITICAL — write like you're talking to a friend at a kitchen table, not
-like a therapist at a conference. Every sentence must be understandable
-by an average 10-year-old. But the IDEA underneath has to be deep.
-Simple words. Big truth.
+Piš obyčejnou mluvenou ${langName === "Czech" ? "češtinou" : langName}. Žádný terapeutický slang.
+Žádné fráze typu „nejsi v tom sám" nebo „dej si svolení".
+Vyhni se gender slashům (slabý/á, udělal/a) — použij mužský rod nebo
+přeformuluj přes přítomný čas a podstatná jména.
 
-READ-ALOUD TEST: Read your draft aloud. If any sentence makes you stop
-to parse it, rewrite it shorter. A 10-year-old reading it should never
-need to back up to understand what comes next.
+Vrať POUZE validní JSON, žádné markdown fence, žádný úvod:
 
-This is the hardest part. Most people either:
-  (A) Write sophisticated ideas with complicated words — reader bounces
-  (B) Write simple words with empty ideas — reader feels patronized
-You need BOTH: deep insight + plain words.
-
-LANGUAGE RULES — strict:
-- Average sentence length: 8-12 words. NEVER more than 16.
-- Simple everyday words only. If a word feels fancy or formal, cut it.
-- Concrete images ok: door, key, coat, dog, window, rain, bag, mirror,
-  wound, road, house, ghost, suitcase, glass, voice, weight
-- NO psychology words: mechanism, pattern (as noun), cognitive,
-  attachment, identity, trauma, processed, activated, regulated,
-  integrated, dynamics, projection, internalize
-- NO self-help words: journey, growth, authentic, empowered, unpacking,
-  space, vibration, energy, mindful, intentional, conscious
-- NO corporate words: impact, leverage, optimize, efficient
-- NO formal connectors: moreover, therefore, however, nevertheless
-  → use simple "and", "but", "because"
-- NO multi-clause sentences with semi-colons or em-dash chains
-
-PROHIBITED PHRASES (Claude defaults to these — stop yourself):
-- "You are not alone"
-- "This is more common than you think"
-- "Your brain is trying to protect you"
-- "It's okay to feel this way"
-- "Give yourself permission"
-- "Trust the process"
-- "Healing takes time"
-- "Honor your feelings"
-- "You've got this"
-
-STRUCTURE (3 moves, 70-95 words total, PLAIN language):
-
-1. NAME (1-2 short sentences)
-   Tell them what's really happening — in everyday words.
-   Use format: "What you call X is really Y." where Y is a concrete
-   image or plain-language truth. Not jargon.
-
-2. PIVOT (1 sentence, the heart)
-   The twist. What looks wrong is actually doing its job. Something that
-   seems broken isn't. Simple words, but the IDEA should make them pause
-   and read it twice.
-
-3. OPENING (1 sentence, ends with ?)
-   A short, pointed question. Never yes/no. Always forces them to think
-   about their specific situation. 8-12 words max.
-
-EXAMPLES — read these aloud. Notice the rhythm. Short. Clear. Direct:
-
-"To, co v sobě nosíš, je jako taška, kterou sis kdysi zabalil. Tehdy
-jsi ji potřeboval. Problém není ta taška. Problém je, že ses do ní
-dlouho nepodíval. **Kdy ses do ní podíval naposledy?**"
-
-"Mysl se pořád vrací k tomu jednomu okamžiku. Není to chyba. Je to jako
-pes, co čeká u dveří na někoho, kdo se nevrátí. Bude tam čekat tak
-dlouho, dokud mu neřekneš, že čekání skončilo. **Co bys mu řekl dnes,
-kdybys mohl?**"
-
-"Hněv, co tě budí v noci, je ten samý hněv, co byl ve dne moc tichý.
-Nejsi naštvaný moc. Byl jsi moc dlouho zticha. **Jak by zněl tvůj hlas,
-kdyby konečně promluvil — jen pro tebe?**"
-
-"Vinu, co v sobě nosíš, jsi z větší části nevybral. Někdo ti ji dal,
-když jsi byl malý — místo aby si ji nesl sám. Od té doby ji neseš ty.
-**Čí vina v tobě je, ale neměla v tobě nikdy být?**"
-
-Notice: short words, clear images, one pivot, one question. The voice
-of a wise friend, not a textbook.
-
-FORMATTING:
-- Bold EXACTLY 1 key phrase with **markdown bold** — usually the final
-  question, sometimes a key image
-- No headings, no bullets, no lists
-- Write in ${langName}
-- Use local quote marks (cs: „" / nl: „" / de: „" / pl: „" / sv: "")
-- ONE idea per sentence. No em-dash comma-stacking.
-
-CZECH-SPECIFIC GRAMMAR (when language is Czech):
-- AVOID gender slashes like "slabý/á", "udělal/a", "sám/sama" — they
-  read awkwardly. Prefer one of these gender-neutral patterns:
-    1. Use the masculine form alone (Czech default for unknown gender)
-    2. Use plural / impersonal: "lidé, kteří…", "to bolí", "dá se to"
-    3. Restructure to avoid past participles: "Cítíš se zaseknutě"
-       instead of "Cítíš se zaseknutý/á"
-    4. Use noun forms: "ten zmatek", "ta tíha"
-- Punctuation: use em-dash with spaces (— not -), Czech quote marks „"
-- Verb forms: prefer present tense over past where possible
-- Avoid translated/stilted constructions that smell like English
-- Read aloud test: it should sound like a Czech person talking, not
-  a translation
-
-FORBIDDEN:
-- Book references or selling
-- Imperatives ("you should", "try to")
-- Diagnostic labels
-- Any of the prohibited phrases above
-- More than 1 question
-- Words longer than 3 syllables unless absolutely needed
-
-OUTPUT — ONLY valid JSON, no markdown fences, no preamble:
 {
-  "message": "<70-95 words, 3-move structure, plain language, **bold** exactly 1 phrase>",
-  "headline": "<a short question that makes them pause — 6-10 words, plain words>",
-  "sub": "<one line about what they receive in the email, 15-22 words, plain and specific>"
+  "message":  "<3 věty pro čtenáře, končí otázkou>",
+  "headline": "<5–9 slov, otázka která ho přiměje číst dál>",
+  "sub":      "<12–20 slov: co konkrétně dostane v emailu>"
 }`
 }
 
-function buildUserPrompt(path: string[], locale: string): string {
-  const [cat, sub, intensity, emotion] = path
+function buildUserPrompt(path: string[], texts: string[], locale: string): string {
+  const [cat, sub, trigger, sentence] = path
+  const [tArea, tSpecific, tTrigger, tSentence] = texts
   const labels = CATEGORY_LABELS[locale] || CATEGORY_LABELS.nl
   const mainArea = labels[cat] || cat
 
-  return `The reader gave exactly these four answers:
+  // Each slot now carries TWO things: a short slug (stable identifier) and
+  // the full sentence the reader actually clicked on (or typed). The full
+  // sentences are the highest-signal input — they're literally the
+  // reader's inner voice. Slugs stay for category-level reasoning.
+  const line = (label: string, slug: string, text: string) =>
+    text && text.trim() ? `  ${label.padEnd(18)}: "${text}"  [${slug}]`
+                        : `  ${label.padEnd(18)}: ${slug}`
 
-  Area         : ${cat}  (${mainArea})
-  Specific     : ${sub}
-  Duration     : ${intensity}
-  Dominant feel: ${emotion}
+  return `The reader just finished a 4-step quiz. Each answer is a sentence
+they recognized as their own thought (or wrote themselves). Treat the
+quoted sentences as the reader's own words — your insight should feel
+like you actually heard what they said.
 
-The combination that needs recognition is: "${sub}" inside "${cat}",
-present for "${intensity}", felt primarily as "${emotion}".
+  ${line("Area",          `${cat} (${mainArea})`, tArea)}
+  ${line("Specific",      sub,                    tSpecific)}
+  ${line("When it returns", trigger,              tTrigger)}
+  ${line("Inner sentence", sentence,              tSentence)}
 
-Now write the insight. Before you write, ask yourself silently:
-  1. What is the precise mechanism beneath "${sub} + ${emotion}"?
-  2. What does "${intensity}" reveal about the function of this pattern?
-  3. What is the counterintuitive truth about why this lasted this long?
+The most important slot is the inner sentence — that's the voice that
+runs in their head when they're alone. Your reframe must speak directly
+to it without quoting it back verbatim.
+
+Before you write, ask yourself silently:
+  1. What is the precise mechanism beneath "${tSpecific || sub}" inside "${tArea || mainArea}"?
+  2. What does the moment "${tTrigger || trigger}" reveal about the function of this pattern?
+  3. Why has the inner sentence "${tSentence || sentence}" lasted this long — what was it protecting?
   4. What question would reorient them without offering false comfort?
 
 Only write the JSON after you can answer those four. One try. No preamble.`
@@ -274,10 +188,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     res.status(400).json({ error: "path must be array of 4 strings" })
     return
   }
+  // texts[] is optional — full sentence the user saw/typed for each step.
+  // Truncate each to 240 chars defensively (UI cap is 200) to bound prompt.
+  const texts: string[] = Array.isArray(body.texts)
+    ? body.texts.slice(0, 4).map((t: any) => (typeof t === "string" ? t.slice(0, 240) : ""))
+    : []
   const locale = typeof body.locale === "string" ? body.locale.toLowerCase().slice(0, 2) : "nl"
   const formId = typeof body.form_id === "string" ? body.form_id : "popup"
 
-  const cacheKey = `${formId}|${locale}|${path.join(".")}`
+  // Cache key includes texts so custom answers don't collide with same slugs.
+  const cacheKey = `${formId}|${locale}|${path.join(".")}|${texts.join("§")}`
   const cached = cacheGet(cacheKey)
   if (cached) {
     res.json({ ...cached, cached: true })
@@ -295,21 +215,57 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const resp = await client.messages.create({
       model: MODEL,
       max_tokens: 500,
-      system: buildSystemPrompt(locale),
-      messages: [{ role: "user", content: buildUserPrompt(path, locale) }],
+      // 0.85 / 0.92 — sweet spot for "human-sounding". Default temperature
+      // 1.0 lets Opus drift into rare/formal vocabulary; top_p caps the
+      // tail so the output stays in everyday spoken Czech/Dutch.
+      temperature: 0.85,
+      top_p: 0.92,
+      // System prompt is identical for every reader of a given locale —
+      // mark it cache_control: ephemeral so Anthropic caches the input
+      // tokens for 5 min. After the first call in a window, subsequent
+      // calls pay 10% input cost (cache read) instead of 100%. With Opus
+      // this saves ~60% per request during burst traffic.
+      system: [{
+        type: "text",
+        text: buildSystemPrompt(locale),
+        cache_control: { type: "ephemeral" },
+      }],
+      messages: [{ role: "user", content: buildUserPrompt(path, texts, locale) }],
     })
 
     const raw = (resp.content?.[0] as any)?.text || ""
-    // Strip any accidental markdown wrapping the model might emit.
-    const cleaned = raw.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim()
+    // Robust JSON extraction — Opus/Sonnet sometimes wrap the JSON with
+    // a preamble ("Here is the…"), trailing commentary, or markdown
+    // fences. Strip fences first, then extract the first balanced
+    // {...} block. Naive .trim() + JSON.parse was the silent failure
+    // mode that pushed every call into the fallback branch.
+    const stripFences = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim()
+    const start = stripFences.indexOf("{")
+    const end = stripFences.lastIndexOf("}")
+    if (start === -1 || end === -1 || end <= start) {
+      throw new Error(`no_json_object_in_response: ${stripFences.slice(0, 200)}`)
+    }
+    const cleaned = stripFences.slice(start, end + 1)
     const parsed = JSON.parse(cleaned)
     if (!parsed.message || !parsed.headline || !parsed.sub) {
-      throw new Error("incomplete_response")
+      throw new Error(`incomplete_response: keys=${Object.keys(parsed).join(",")}`)
     }
 
     cacheSet(cacheKey, parsed)
     res.json({ ...parsed, cached: false })
   } catch (err: any) {
+    // Log the actual error so future failures show up in Railway logs.
+    // The previous version silently swallowed it, which made debugging
+    // the "everyone gets the same fallback" symptom impossible.
+    console.error("[ai-insight] Anthropic call failed, returning fallback:", {
+      message: err?.message,
+      name: err?.name,
+      status: err?.status,
+      type: err?.type,
+      path,
+      texts: texts.map((t: string) => (t || "").slice(0, 60)),
+      locale,
+    })
     // Graceful fallback — deterministic but still sophisticated reframe
     // if Sonnet errors (e.g. API outage or network). Structured so the
     // popup still delivers a recognition-quality experience, not a
