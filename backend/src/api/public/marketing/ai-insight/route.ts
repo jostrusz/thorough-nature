@@ -127,7 +127,9 @@ PRAVIDLA:
   co napsal, ne obecně.
 • Poslední věta = krátká otázka. Ne ano/ne. Otázka, na které musí
   myslet.
-• Vrať POUZE JSON, bez markdown fence a bez úvodu.
+• Odpověď posíláš zavoláním nástroje send_insight — vyplň jeho
+  3 pole (message, headline, sub). Žádný preamble, žádný komentář
+  mimo nástroj.
 
 JAK MÁ VÝSLEDEK ZNÍT — TŘI UKÁZKY:
 
@@ -175,13 +177,10 @@ Proč je špatný:
 JAZYK: ${langName === "Czech" ? "česky, mluvená řeč" : langName}.
 Uvozovky: „"  Em-dash: — (s mezerami, ale šetřivě).
 
-VÝSTUP — POUZE validní JSON:
-
-{
-  "message":  "<3 věty, mluvený rytmus, končí otázkou>",
-  "headline": "<5–9 slov, otázka co ho přiměje číst dál>",
-  "sub":      "<12–20 slov: co konkrétně dostane v emailu>"
-}`
+VÝSTUP: zavolej nástroj send_insight s těmito argumenty:
+  • message  — 3 věty, mluvený rytmus, končí otázkou
+  • headline — 5–9 slov, otázka co ho přiměje číst dál
+  • sub      — 12–20 slov: co konkrétně dostane v emailu`
 }
 
 function buildUserPrompt(path: string[], texts: string[], locale: string): string {
@@ -218,7 +217,7 @@ Before you write, ask yourself silently:
   3. Why has the inner sentence "${tSentence || sentence}" lasted this long — what was it protecting?
   4. What question would reorient them without offering false comfort?
 
-Only write the JSON after you can answer those four. One try. No preamble.`
+Only call the send_insight tool after you can answer those four. One try. No preamble.`
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────
@@ -259,6 +258,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
   try {
     const client = new Anthropic({ apiKey })
+    // Use tool_use to force structured output. With plain text JSON the
+    // model would occasionally emit unescaped quotes inside string
+    // values (Czech „" mixing with JSON ASCII "), or stray newlines,
+    // breaking JSON.parse. The tool API gives us validated, parsed
+    // arguments with zero string surgery.
     const resp = await client.messages.create({
       model: MODEL,
       max_tokens: 500,
@@ -275,25 +279,39 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         text: buildSystemPrompt(locale),
         cache_control: { type: "ephemeral" },
       }],
+      tools: [{
+        name: "send_insight",
+        description: "Send the 3-sentence insight, headline, and sub line to the reader.",
+        input_schema: {
+          type: "object",
+          properties: {
+            message: {
+              type: "string",
+              description: "3 sentences (max 4) in spoken Czech. Tykání. Last sentence is a short open question. Connects past to current feeling. No gender slashes.",
+            },
+            headline: {
+              type: "string",
+              description: "5–9 words. A curious open question that hooks them.",
+            },
+            sub: {
+              type: "string",
+              description: "12–20 words. One line about what they receive in the email. Concrete, no marketing voice.",
+            },
+          },
+          required: ["message", "headline", "sub"],
+        },
+      }],
+      tool_choice: { type: "tool", name: "send_insight" },
       messages: [{ role: "user", content: buildUserPrompt(path, texts, locale) }],
     })
 
-    const raw = (resp.content?.[0] as any)?.text || ""
-    // Robust JSON extraction — Opus/Sonnet sometimes wrap the JSON with
-    // a preamble ("Here is the…"), trailing commentary, or markdown
-    // fences. Strip fences first, then extract the first balanced
-    // {...} block. Naive .trim() + JSON.parse was the silent failure
-    // mode that pushed every call into the fallback branch.
-    const stripFences = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim()
-    const start = stripFences.indexOf("{")
-    const end = stripFences.lastIndexOf("}")
-    if (start === -1 || end === -1 || end <= start) {
-      throw new Error(`no_json_object_in_response: ${stripFences.slice(0, 200)}`)
-    }
-    const cleaned = stripFences.slice(start, end + 1)
-    const parsed = JSON.parse(cleaned)
+    // With tool_choice forced to a specific tool, Anthropic guarantees
+    // the response contains exactly one tool_use block with parsed
+    // arguments — no string surgery needed.
+    const toolUse = (resp.content || []).find((b: any) => b?.type === "tool_use") as any
+    const parsed = toolUse?.input || {}
     if (!parsed.message || !parsed.headline || !parsed.sub) {
-      throw new Error(`incomplete_response: keys=${Object.keys(parsed).join(",")}`)
+      throw new Error(`incomplete_tool_response: keys=${Object.keys(parsed).join(",")}, stop_reason=${resp.stop_reason}`)
     }
 
     cacheSet(cacheKey, parsed)
