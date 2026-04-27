@@ -215,11 +215,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const resp = await client.messages.create({
       model: MODEL,
       max_tokens: 500,
-      // 0.85 / 0.92 — sweet spot for "human-sounding". Default temperature
-      // 1.0 lets Opus drift into rare/formal vocabulary; top_p caps the
-      // tail so the output stays in everyday spoken Czech/Dutch.
-      temperature: 0.85,
-      top_p: 0.92,
+      // NOTE: temperature and top_p are DEPRECATED on Opus 4.7 — passing
+      // them returns 400 invalid_request_error. The model handles
+      // sampling internally with its extended-thinking pipeline.
       // System prompt is identical for every reader of a given locale —
       // mark it cache_control: ephemeral so Anthropic caches the input
       // tokens for 5 min. After the first call in a window, subsequent
