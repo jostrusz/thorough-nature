@@ -174,7 +174,36 @@ Uvozovky: „"  Em-dash: — (s mezerami, ale šetřivě).
 VÝSTUP: zavolej nástroj send_insight s těmito argumenty:
   • message  — 3 věty, mluvený rytmus, končí otázkou
   • headline — 5–9 slov, otázka co ho přiměje číst dál
-  • sub      — 12–20 slov: co konkrétně dostane v emailu`
+  • sub      — 18–28 slov. CTA, která ho táhne vyplnit jméno + email.
+
+JAK NAPSAT SUB (CTA pod headline) — Sabri Suby + NLP styl:
+
+Začni rovnou výzvou („Napiš sem", „Nech mi tu", „Dej mi"), pak slib
+co konkrétně dostane a do kdy. Drž otevřenou smyčku — nikdy neprozraď
+odpověď, jen naznač, že odpověď v mailu je. Žádné „naučíš se",
+„získáš tipy", „pomůže ti".
+
+NLP techniky které používej:
+• Presupozice: „až si to přečteš" (ne „pokud"), „když ten dopis
+  otevřeš" (ne „kdybys"). Předpokládáš, že to udělá.
+• Embedded command: „uvidíš", „všimneš si", „pochopíš", „ucítíš".
+• Časová specifika: „do minuty", „za 60 sekund", „dnes večer",
+  „zítra ráno". Konkrétno > vágno.
+• Open loop: slib jednu konkrétní věc („jednu otázku", „jednu větu",
+  „tři slova") — ale nesděl ji.
+• Návaz na headline (tu otázku, co jsi napsal výš): sub musí slíbit,
+  že právě na ni odpoví dopis.
+
+✅ Příklady dobrého sub (používej tenhle tvar):
+
+„Napiš sem jméno a email. Do minuty ti pošlu krátký dopis, kde
+uvidíš, odkud ten hlas v hlavě vzal sílu — a komu doopravdy patří."
+
+„Nech mi tu jméno a email. Pošlu ti tři věty, po kterých ten šepot
+ve tři ráno ztratí půl objemu. Bez kurzu, bez webináře — jeden mail."
+
+„Dej mi tvoje jméno a email. Za pár minut ti dorazí dopis s jednou
+otázkou. Až si na ni ráno odpovíš, ten kruh povolí."`
 }
 
 function buildUserPrompt(path: string[], texts: string[], locale: string): string {
@@ -298,7 +327,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
             },
             sub: {
               type: "string",
-              description: "12–20 words. One line about what they receive in the email. Concrete, no marketing voice.",
+              description: "18–28 words. CTA that pulls reader to fill the form. Starts with imperative ('Napiš sem', 'Nech mi tu'). Promises one specific thing in the email + concrete timeframe. NLP: presupposition + embedded command + open loop. No marketing voice.",
             },
           },
           required: ["message", "headline", "sub"],
