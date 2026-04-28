@@ -455,7 +455,14 @@
     margin: 0 0 10px 0;
     font-size: 18px; line-height: 1.3; font-weight: 700; color: var(--ink); letter-spacing: -0.01em;
   }
-  .email-form .sub { display: none; }
+  .email-form .sub {
+    margin: 0 0 14px 0;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+  .email-form .sub:empty { display: none; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .form-field { margin-bottom: 8px; }
   .form-field label {
