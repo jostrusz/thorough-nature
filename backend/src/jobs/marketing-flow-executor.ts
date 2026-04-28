@@ -112,7 +112,8 @@ export default async function marketingFlowExecutor(container: MedusaContainer) 
     pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 3 })
 
     const { rows: runs } = await pool.query(
-      `SELECT id, flow_id, brand_id, contact_id, current_node_id, state, context
+      `SELECT id, flow_id, brand_id, contact_id, current_node_id, state, context,
+              started_at, visited_node_ids
        FROM marketing_flow_run
        WHERE deleted_at IS NULL
          AND state IN ('running','waiting')
