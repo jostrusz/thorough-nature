@@ -1636,14 +1636,23 @@ function describeActivity(event: any): { icon: string; color: string; title: str
       }
     case "email_sent":
       return { icon: "→", color: "#6B7280", title: "Email sent", detail: p.subject_snapshot || p.message_id || null }
-    case "email_opened":
-      return { icon: "👁", color: "#0EA5E9", title: "Email opened", detail: p.message_id || null }
-    case "email_clicked":
-      return { icon: "↗", color: "#7C3AED", title: "Email clicked", detail: p.url || null }
+    case "email_opened": {
+      const subj = p.subject_snapshot
+      const opens = Number(p.opens_count || 0)
+      const opensLabel = opens > 1 ? ` · ${opens}× opened` : ""
+      return { icon: "👁", color: "#0EA5E9", title: "Email opened", detail: subj ? `${subj}${opensLabel}` : (p.message_id || null) }
+    }
+    case "email_clicked": {
+      const subj = p.subject_snapshot
+      const clicks = Number(p.clicks_count || 0)
+      const clicksLabel = clicks > 1 ? ` · ${clicks} clicks` : ""
+      const trail = p.url ? ` · ${p.url}` : clicksLabel
+      return { icon: "↗", color: "#7C3AED", title: "Email clicked", detail: subj ? `${subj}${trail}` : (p.url || null) }
+    }
     case "email_bounced":
-      return { icon: "!", color: "#DC2626", title: "Email bounced", detail: p.reason || null }
+      return { icon: "!", color: "#DC2626", title: "Email bounced", detail: [p.subject_snapshot, p.reason].filter(Boolean).join(" · ") || null }
     case "email_complained":
-      return { icon: "!", color: "#DC2626", title: "Email complaint", detail: null }
+      return { icon: "!", color: "#DC2626", title: "Email complaint", detail: p.subject_snapshot || null }
     case "form_submitted":
       return { icon: "+", color: "#15803D", title: "Form submitted (opt-in)", detail: p.form_slug || p.form_id || null }
     case "cart_updated":
