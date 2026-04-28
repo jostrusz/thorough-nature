@@ -362,9 +362,12 @@ async function enrollContactInMatchingFlows(args: {
     }
 
     for (const flow of matching) {
-      // Re-entry policy: "once" (default) skips if a non-completed run exists,
-      // "always" creates a new run on every submit, "always_after_complete"
-      // allows re-entry only if previous run completed.
+      // Re-entry policy:
+      //   "once" (default)        skips if a non-completed run exists
+      //   "always"                creates a new run on every submit (parallel runs allowed)
+      //   "always_after_complete" allows re-entry only if previous run completed
+      //   "restart"               cancels any active run, then starts fresh — used when
+      //                           re-submitting the form should start the journey over
       const policy = flow.re_entry_policy || "once"
       if (policy === "once") {
         const { rows: existing } = await pool.query(
@@ -391,6 +394,27 @@ async function enrollContactInMatchingFlows(args: {
           [flow.id, contact.id]
         )
         if (existing.length) continue
+      } else if (policy === "restart") {
+        // Cancel any in-flight runs for this contact+flow before creating a new one.
+        // Marked as state='exited' with exit_reason='re_enrolled' so the executor
+        // (which only picks state IN ('running','waiting')) ignores them, and the
+        // admin UI can attribute the stop to a re-submission.
+        const { rowCount } = await pool.query(
+          `UPDATE marketing_flow_run
+             SET state = 'exited',
+                 exit_reason = 're_enrolled',
+                 completed_at = NOW(),
+                 updated_at = NOW()
+           WHERE flow_id = $1 AND contact_id = $2
+             AND state IN ('running', 'waiting')
+             AND deleted_at IS NULL`,
+          [flow.id, contact.id]
+        )
+        if (rowCount && rowCount > 0) {
+          logger.info(
+            `[Marketing Tracking] flow ${flow.id} restart — cancelled ${rowCount} active run(s) for contact ${contact.id}`
+          )
+        }
       }
 
       const firstNode = flow.definition?.nodes?.[0]?.id
