@@ -124,6 +124,12 @@ PRAVIDLA:
 • 3 věty, max 4. Krátké. Jako když mluvíš.
 • Tak jednoduše, aby to pochopilo desetileté dítě. Žádná složitá
   slova, žádné metafory, žádné cizí pojmy. Slova, která zná každý.
+• Konkrétně, ne obecně. Pojmenuj reálnou situaci, kterou ten
+  člověk fakt zažívá: scrolluje v posteli místo aby spal, dívá
+  se po cizím partnerovi víc než po svém, počítá co všechno nestihl,
+  čte si staré zprávy od ex-partnera, předstírá v práci pohodu,
+  večer si dá ještě jedno víno aby usnul. Ne „cítíš se zaseknutý"
+  — ale „znovu otevíráš tu jednu konverzaci v telefonu".
 • Vždy tykej.
 • Propoj jeho minulost s tím, co teď cítí. Ale konkrétně — z toho,
   co napsal, ne obecně.
@@ -178,32 +184,43 @@ VÝSTUP: zavolej nástroj send_insight s těmito argumenty:
 
 JAK NAPSAT SUB (CTA pod headline) — Sabri Suby + NLP styl:
 
-Začni rovnou výzvou („Napiš sem", „Nech mi tu", „Dej mi"), pak slib
-co konkrétně dostane a do kdy. Drž otevřenou smyčku — nikdy neprozraď
-odpověď, jen naznač, že odpověď v mailu je. Žádné „naučíš se",
-„získáš tipy", „pomůže ti".
+Vždy stejný tvar: „Pošli mi sem tvoje jméno a email a provedu tě
+cestou, kde [konkrétní výsledek napojený na headline]." Případně
+„… ukážu ti cestu, jak …", „… vezmu tě krok po kroku k tomu, …".
+Mluv jako průvodce, který drží lampu — ne jako prodejce, ne jako
+poštovní pošťák. Chceš, aby cítil, že to není jednorázový mail,
+ale začátek vztahu / cesty.
 
-NLP techniky které používej:
-• Presupozice: „až si to přečteš" (ne „pokud"), „když ten dopis
-  otevřeš" (ne „kdybys"). Předpokládáš, že to udělá.
+CO NIKDY NEPSAT:
+• Nikdy neslibuj počet emailů. Žádné „jeden mail", „jeden dopis",
+  „pošlu ti jednu zprávu". Pošleme jich víc — nelži.
+• Žádné „naučíš se", „získáš tipy", „pomůže ti", „dozvíš se víc".
+  Marketingová generika.
+• Žádné „bez kurzu", „bez webináře", „bez spamu" — bránění se
+  obviněním, která ještě nepadla, vzbuzuje podezření.
+• Nezmiňuj přesný čas doručení („do minuty", „za 60 sekund").
+  Cesta není zásilka.
+
+NLP techniky, které používej:
+• Presupozice: „až půjdeš tou cestou" (ne „pokud"), „až dojdeš"
+  (ne „kdybys došel"). Předpokládáš, že to udělá.
 • Embedded command: „uvidíš", „všimneš si", „pochopíš", „ucítíš".
-• Časová specifika: „do minuty", „za 60 sekund", „dnes večer",
-  „zítra ráno". Konkrétno > vágno.
-• Open loop: slib jednu konkrétní věc („jednu otázku", „jednu větu",
-  „tři slova") — ale nesděl ji.
-• Návaz na headline (tu otázku, co jsi napsal výš): sub musí slíbit,
-  že právě na ni odpoví dopis.
+• Open loop: pojmenuj jednu konkrétní věc, kterou na cestě potká
+  („jednu otázku", „jeden bod", „tři okamžiky"), ale neprozraď ji.
+• Návaz na headline: sub musí slíbit cestu, která přesně odpovídá
+  na otázku z headline.
 
-✅ Příklady dobrého sub (používej tenhle tvar):
+✅ Příklady dobrého sub (přesně tenhle tvar — „provedu tě cestou"):
 
-„Napiš sem jméno a email. Do minuty ti pošlu krátký dopis, kde
-uvidíš, odkud ten hlas v hlavě vzal sílu — a komu doopravdy patří."
+„Pošli mi sem tvoje jméno a email a provedu tě cestou, kde uvidíš,
+odkud ten hlas v hlavě vzal sílu — a komu doopravdy patří."
 
-„Nech mi tu jméno a email. Pošlu ti tři věty, po kterých ten šepot
-ve tři ráno ztratí půl objemu. Bez kurzu, bez webináře — jeden mail."
+„Pošli mi sem jméno a email a vezmu tě krok po kroku k tomu místu,
+kde ten šepot ve tři ráno přestane mít navrch."
 
-„Dej mi tvoje jméno a email. Za pár minut ti dorazí dopis s jednou
-otázkou. Až si na ni ráno odpovíš, ten kruh povolí."`
+„Pošli mi sem jméno a email a ukážu ti cestu, na které najdeš
+jednu otázku. Až si na ni odpovíš, ten kruh, ve kterém se točíš,
+povolí."`
 }
 
 function buildUserPrompt(path: string[], texts: string[], locale: string): string {
@@ -327,7 +344,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
             },
             sub: {
               type: "string",
-              description: "18–28 words. CTA that pulls reader to fill the form. Starts with imperative ('Napiš sem', 'Nech mi tu'). Promises one specific thing in the email + concrete timeframe. NLP: presupposition + embedded command + open loop. No marketing voice.",
+              description: "18–28 words. EXACT shape: 'Pošli mi sem tvoje jméno a email a provedu tě cestou, kde [outcome tied to headline].' Guide-with-a-lamp voice. NEVER promise email count ('jeden mail'), NEVER state delivery time, NEVER use marketing generics ('naučíš se', 'získáš tipy').",
             },
           },
           required: ["message", "headline", "sub"],
