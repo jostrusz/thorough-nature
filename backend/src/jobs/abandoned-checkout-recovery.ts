@@ -13,7 +13,8 @@ import { EmailTemplates, resolveTemplateKey } from "../modules/email-notificatio
  *
  * De Hondenbijbel uses project-specific templates (dh-abandoned-checkout-1/2/3).
  * Lass los uses project-specific templates (ll-abandoned-checkout-1/2/3).
- * Loslatenboek uses the original single template (abandoned-checkout).
+ * Het Leven Dat Je Verdient uses project-specific templates (hl-abandoned-checkout-1/2/3).
+ * Loslatenboek uses the lb-abandoned-checkout-1/2/3 sequence (default fallback).
  *
  * Tracking metadata on cart:
  *   - recovery_email_step: number (0 = none sent, 1/2/3 = last step sent)
@@ -145,6 +146,34 @@ const OK_STEPS: StepConfig[] = [
     templateKey: EmailTemplates.OK_ABANDONED_CHECKOUT_3,
     subject: (name) => `Ostatnia szansa, ${name} — Twój koszyk zostanie zwolniony`,
     preview: "Jeszcze 24 godziny — potem muszę zwolnić Twój koszyk.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
+  },
+]
+
+/** Het Leven Dat Je Verdient 3-step sequence (Anna de Vries) */
+const HL_STEPS: StepConfig[] = [
+  {
+    step: 1,
+    templateKey: EmailTemplates.HL_ABANDONED_CHECKOUT_1,
+    subject: (name) => `Hoi ${name}, je boek staat klaar 📦`,
+    preview: "Je boek ligt klaar — je hoeft alleen nog op verzenden te drukken.",
+    delayMs: THIRTY_MINUTES_MS,
+    delayFrom: (_meta, abandonedAt) => abandonedAt,
+  },
+  {
+    step: 2,
+    templateKey: EmailTemplates.HL_ABANDONED_CHECKOUT_2,
+    subject: (name) => `${name}, het verhaal achter dit boek`,
+    preview: "Het verhaal achter dit boek — en waarom ik het móést schrijven.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
+  },
+  {
+    step: 3,
+    templateKey: EmailTemplates.HL_ABANDONED_CHECKOUT_3,
+    subject: (name) => `Laatste kans, ${name} — je winkelwagen wordt vrijgegeven`,
+    preview: "Nog 24 uur — daarna moet ik je winkelwagen vrijgeven.",
     delayMs: TWENTY_FOUR_HOURS_MS,
     delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
   },
@@ -542,6 +571,73 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         } catch (emailError: any) {
           logger.error(
             `[Abandoned Cart] Failed to send OK step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
+          )
+        }
+        continue
+      }
+
+      // ── Het Leven Dat Je Verdient: 3-step sequence ──
+      if (projectId === "het-leven") {
+        if (currentStep >= 3) {
+          skippedCount++
+          continue
+        }
+
+        const nextStepConfig = HL_STEPS[currentStep]
+
+        const referenceTime = nextStepConfig.delayFrom(meta, abandonedAt)
+        if (isNaN(referenceTime.getTime())) continue
+        if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
+
+        const firstName = cart.shipping_address?.first_name || "daar"
+        const checkoutUrl = meta.checkout_url || "https://www.pakjeleventerug.nl/checkout"
+        const mainItem = (cart.items || [])[0]
+        const productName = mainItem?.variant?.product?.title || mainItem?.title || "Het Leven Dat Je Verdient"
+        const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+        }, 0)
+        const productPrice = cartTotal > 0
+          ? cartTotal.toFixed(2).replace(".", ",")
+          : "36,00"
+        const productImage = mainItem?.variant?.product?.thumbnail || ""
+
+        try {
+          await notificationModuleService.createNotifications({
+            to: cart.email,
+            channel: "email",
+            template: nextStepConfig.templateKey,
+            from: "Het Leven Dat Je Verdient <annadevries@pakjeleventerug.nl>",
+            data: {
+              emailOptions: {
+                replyTo: "annadevries@pakjeleventerug.nl",
+                subject: nextStepConfig.subject(firstName),
+              },
+              firstName,
+              checkoutUrl,
+              productName,
+              productPrice,
+              productImage,
+              preview: nextStepConfig.preview,
+            },
+          })
+
+          await cartModuleService.updateCarts(cart.id, {
+            metadata: {
+              ...meta,
+              recovery_email_step: nextStepConfig.step,
+              [`recovery_email_step${nextStepConfig.step}_at`]: now.toISOString(),
+              recovery_email_sent: true,
+              recovery_email_sent_at: meta.recovery_email_sent_at || now.toISOString(),
+            },
+          })
+
+          sentCount++
+          logger.info(
+            `[Abandoned Cart] HL step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
+          )
+        } catch (emailError: any) {
+          logger.error(
+            `[Abandoned Cart] Failed to send HL step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
           )
         }
         continue
