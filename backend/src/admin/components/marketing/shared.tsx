@@ -796,8 +796,8 @@ export function SlideOver({
   footer?: React.ReactNode
 }) {
   return (
-    <div className="mkt-modal-backdrop" onClick={onClose}>
-      <div className="mkt-slideover" onClick={(e) => e.stopPropagation()}>
+    <div className="mkt-modal-backdrop">
+      <div className="mkt-slideover">
         <div
           style={{
             padding: "20px 24px",
