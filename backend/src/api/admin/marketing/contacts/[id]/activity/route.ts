@@ -38,12 +38,17 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     const events: any[] = []
 
     // ── 1. marketing_event rows for this contact ─────────────────────────
+    // Skip email_opened / email_clicked here — they come from open-pixel /
+    // click-redirect handlers and fire on every render/click, polluting the
+    // timeline with duplicates. The marketing_message-based query below emits
+    // ONE row per message with first_opened_at + opens_count summary instead.
     try {
       const { rows } = await pool.query(
         `SELECT id, type, payload, occurred_at, source
          FROM marketing_event
          WHERE brand_id = $1 AND (contact_id = $2 OR lower(email) = lower($3))
            AND deleted_at IS NULL
+           AND type NOT IN ('email_opened', 'email_clicked', 'email_sent', 'email_delivered', 'email_bounced', 'email_complained')
          ORDER BY occurred_at DESC
          LIMIT 500`,
         [contact.brand_id, contact.id, contact.email]
@@ -56,6 +61,69 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
           payload: r.payload || {},
           source: r.source,
         })
+      }
+    } catch {}
+
+    // ── 1b. marketing_message — source of truth for sent/opened/clicked ──
+    // One marketing_message row produces up to 5 timeline entries:
+    //   sent_at         → email_sent
+    //   first_opened_at → email_opened (with opens_count summary)
+    //   first_clicked_at → email_clicked (with clicks_count summary)
+    //   bounced_at      → email_bounced
+    //   complained_at   → email_complained
+    // subject_snapshot is included in payload so the timeline shows the
+    // human-readable email title instead of a cryptic message ID.
+    try {
+      const { rows } = await pool.query(
+        `SELECT m.id, m.subject_snapshot, m.sent_at, m.delivered_at,
+                m.first_opened_at, m.opens_count,
+                m.first_clicked_at, m.clicks_count,
+                m.bounced_at, m.bounce_reason, m.complained_at,
+                m.flow_id, m.campaign_id, m.flow_node_id
+         FROM marketing_message m
+         WHERE m.contact_id = $1 AND m.deleted_at IS NULL
+         ORDER BY m.created_at DESC
+         LIMIT 200`,
+        [contact.id]
+      )
+      for (const m of rows) {
+        const base = {
+          message_id: m.id,
+          subject_snapshot: m.subject_snapshot,
+          flow_id: m.flow_id,
+          campaign_id: m.campaign_id,
+          flow_node_id: m.flow_node_id,
+        }
+        if (m.sent_at) {
+          events.push({ kind: "message", type: "email_sent", occurred_at: m.sent_at, payload: { ...base } })
+        }
+        if (m.first_opened_at) {
+          events.push({
+            kind: "message",
+            type: "email_opened",
+            occurred_at: m.first_opened_at,
+            payload: { ...base, opens_count: Number(m.opens_count || 1) },
+          })
+        }
+        if (m.first_clicked_at) {
+          events.push({
+            kind: "message",
+            type: "email_clicked",
+            occurred_at: m.first_clicked_at,
+            payload: { ...base, clicks_count: Number(m.clicks_count || 1) },
+          })
+        }
+        if (m.bounced_at) {
+          events.push({
+            kind: "message",
+            type: "email_bounced",
+            occurred_at: m.bounced_at,
+            payload: { ...base, reason: m.bounce_reason || "unknown" },
+          })
+        }
+        if (m.complained_at) {
+          events.push({ kind: "message", type: "email_complained", occurred_at: m.complained_at, payload: base })
+        }
       }
     } catch {}
 
