@@ -44,6 +44,13 @@ import { PsOrderPlacedTemplate, PS_ORDER_PLACED, isPsOrderPlacedTemplateData } f
 import { PsShipmentNotificationTemplate, PS_SHIPMENT_NOTIFICATION, isPsShipmentNotificationData } from './ps-shipment-notification'
 import { PsEbookDeliveryTemplate, PS_EBOOK_DELIVERY, isPsEbookDeliveryData } from './ps-ebook-delivery'
 import { PsUpsellConfirmedTemplate, PS_UPSELL_CONFIRMED, isPsUpsellConfirmedData } from './ps-upsell-confirmed'
+// Het Leven Dat Je Verdient (het-leven) templates
+import { HlOrderPlacedTemplate, HL_ORDER_PLACED, isHlOrderPlacedTemplateData } from './hl-order-placed'
+import { HlEbookDeliveryTemplate, HL_EBOOK_DELIVERY, isHlEbookDeliveryData } from './hl-ebook-delivery'
+import { HlShipmentNotificationTemplate, HL_SHIPMENT_NOTIFICATION, isHlShipmentNotificationData } from './hl-shipment-notification'
+import { HlAbandonedCheckout1Template, HL_ABANDONED_CHECKOUT_1, isHlAbandonedCheckout1Data } from './hl-abandoned-checkout-1'
+import { HlAbandonedCheckout2Template, HL_ABANDONED_CHECKOUT_2, isHlAbandonedCheckout2Data } from './hl-abandoned-checkout-2'
+import { HlAbandonedCheckout3Template, HL_ABANDONED_CHECKOUT_3, isHlAbandonedCheckout3Data } from './hl-abandoned-checkout-3'
 // Admin notification
 import { AdminOrderNotificationTemplate, ADMIN_ORDER_NOTIFICATION, isAdminOrderNotificationData } from './admin-order-notification'
 
@@ -93,6 +100,13 @@ export const EmailTemplates = {
   PS_SHIPMENT_NOTIFICATION,
   PS_EBOOK_DELIVERY,
   PS_UPSELL_CONFIRMED,
+  // Het Leven Dat Je Verdient
+  HL_ORDER_PLACED,
+  HL_EBOOK_DELIVERY,
+  HL_SHIPMENT_NOTIFICATION,
+  HL_ABANDONED_CHECKOUT_1,
+  HL_ABANDONED_CHECKOUT_2,
+  HL_ABANDONED_CHECKOUT_3,
   // Admin notifications
   ADMIN_ORDER_NOTIFICATION,
 } as const
@@ -147,6 +161,13 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
     const allKeys = Object.values(EmailTemplates) as string[]
     if (allKeys.includes(llKey)) {
       return llKey
+    }
+  }
+  if (project === 'het-leven') {
+    const hlKey = `hl-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(hlKey)) {
+      return hlKey
     }
   }
   return templateKey
@@ -503,6 +524,61 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <PsUpsellConfirmedTemplate {...data} />
 
+    // ── Het Leven Dat Je Verdient templates ──────────────────
+    case EmailTemplates.HL_ORDER_PLACED:
+      if (!isHlOrderPlacedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.HL_ORDER_PLACED}"`
+        )
+      }
+      return <HlOrderPlacedTemplate {...data} />
+
+    case EmailTemplates.HL_EBOOK_DELIVERY:
+      if (!isHlEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.HL_EBOOK_DELIVERY}"`
+        )
+      }
+      return <HlEbookDeliveryTemplate {...data} />
+
+    case EmailTemplates.HL_SHIPMENT_NOTIFICATION:
+      if (!isHlShipmentNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.HL_SHIPMENT_NOTIFICATION}"`
+        )
+      }
+      return <HlShipmentNotificationTemplate {...data} />
+
+    case EmailTemplates.HL_ABANDONED_CHECKOUT_1:
+      if (!isHlAbandonedCheckout1Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.HL_ABANDONED_CHECKOUT_1}"`
+        )
+      }
+      return <HlAbandonedCheckout1Template {...data} />
+
+    case EmailTemplates.HL_ABANDONED_CHECKOUT_2:
+      if (!isHlAbandonedCheckout2Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.HL_ABANDONED_CHECKOUT_2}"`
+        )
+      }
+      return <HlAbandonedCheckout2Template {...data} />
+
+    case EmailTemplates.HL_ABANDONED_CHECKOUT_3:
+      if (!isHlAbandonedCheckout3Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.HL_ABANDONED_CHECKOUT_3}"`
+        )
+      }
+      return <HlAbandonedCheckout3Template {...data} />
+
     // ── Admin notification ───────────────────────────────────
     case EmailTemplates.ADMIN_ORDER_NOTIFICATION:
       if (!isAdminOrderNotificationData(data)) {
@@ -563,6 +639,13 @@ export {
   PsShipmentNotificationTemplate,
   PsEbookDeliveryTemplate,
   PsUpsellConfirmedTemplate,
+  // Het Leven Dat Je Verdient
+  HlOrderPlacedTemplate,
+  HlEbookDeliveryTemplate,
+  HlShipmentNotificationTemplate,
+  HlAbandonedCheckout1Template,
+  HlAbandonedCheckout2Template,
+  HlAbandonedCheckout3Template,
   // Admin notification
   AdminOrderNotificationTemplate,
 }

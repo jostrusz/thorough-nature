@@ -1,14 +1,16 @@
 /**
- * Loslatenboek bundle variants:
- *   LLWJK-1, LLWJK-2, LLWJK-3, LLWJK-4  → 1/2/3/4 physical books
+ * Bundle variants — one line item (quantity=1) but represents N physical copies.
+ * Warehouse ships N books per bundle; display surfaces (emails, thank-you page)
+ * must use this mapping too, otherwise the customer sees "Aantal: 1" even
+ * though they ordered multiple books.
  *
- * Each bundle is sold as one line item (quantity=1) but represents N physical
- * copies. Warehouse uses this mapping to ship correct number of books; display
- * surfaces (emails, thank-you page) must use it too, otherwise the customer
- * sees "Aantal: 1" even though they ordered multiple books.
+ *   Loslatenboek:           LLWJK-1, LLWJK-2, LLWJK-3, LLWJK-4
+ *   Het Leven Dat Je Verdient: HLDV-1, HLDV-2, HLDV-3, HLDV-4
+ *
+ * Add new project SKU prefixes to BUNDLE_RE alternation as projects launch.
  */
 
-const LLWJK_BUNDLE_RE = /^LLWJK-([1-4])$/i
+const BUNDLE_RE = /^(?:LLWJK|HLDV)-([1-4])$/i
 
 /**
  * If the SKU is a Loslatenboek bundle, returns the physical book count
@@ -20,7 +22,7 @@ export function getBundleBookCount(
   lineQuantity: number = 1
 ): number | null {
   if (!sku) return null
-  const m = LLWJK_BUNDLE_RE.exec(sku)
+  const m = BUNDLE_RE.exec(sku)
   if (!m) return null
   const perBundle = parseInt(m[1], 10)
   return perBundle * Math.max(1, lineQuantity)
