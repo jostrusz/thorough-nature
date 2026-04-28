@@ -624,14 +624,14 @@ body { background: var(--bg); }
       <div class="ty-order-item">
         <div class="ty-order-icon ebook">&#x1F4F1;</div>
         <div>
-          <div class="ty-order-name">De Overdenkende Oplossing</div>
+          <div class="ty-order-name">Verschuif Eén Ding, Verander Alles</div>
           <div class="ty-order-desc">Gratis e-book &mdash; check je inbox</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ebook">&#x1F4F1;</div>
         <div>
-          <div class="ty-order-name">Liefde Zonder Onzin</div>
+          <div class="ty-order-name">Niet Alles Verdient Een Plek</div>
           <div class="ty-order-desc">Gratis e-book &mdash; check je inbox</div>
         </div>
       </div>
@@ -671,7 +671,7 @@ body { background: var(--bg); }
         <div class="ty-step-num">1</div>
         <div class="ty-step-icon">&#x1F4E7;</div>
         <div class="ty-step-title">Check je inbox</div>
-        <div class="ty-step-desc">Je ontvangt binnen 2 minuten een bevestigingsmail met je gratis e-books: <em>De Overdenkende Oplossing</em> en <em>Liefde Zonder Onzin</em>.</div>
+        <div class="ty-step-desc">Je ontvangt binnen 2 minuten een bevestigingsmail met je gratis e-books: <em>Verschuif Eén Ding, Verander Alles</em> en <em>Niet Alles Verdient Een Plek</em>.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">2</div>
@@ -696,15 +696,13 @@ body { background: var(--bg); }
     <div class="ty-review-cards">
       <div class="ty-review">
         <div class="ty-review-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
-        <div class="ty-review-text">&ldquo;Al jaren droeg ik spanning in mijn borst mee. Dit boek liet me zien dat het onverwerkt schuldgevoel was. Na 3 weken voelde ik letterlijk hoe het wegsmolt.&rdquo;</div>
-        <div class="ty-review-author">Marieke V.</div>
-        <div class="ty-review-loc">Amsterdam</div>
+        <div class="ty-review-text">&bdquo;Van 347 kledingstukken hield ik er 73 over. En voor het eerst weet ik wat ik aan kan doen.&rdquo;</div>
+        <div class="ty-review-author">Femke, 38</div>
       </div>
       <div class="ty-review">
         <div class="ty-review-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
-        <div class="ty-review-text">&ldquo;Ik sliep voor het eerst in jaren door. De oefeningen zijn zo concreet &mdash; geen zweverig gedoe maar &eacute;chte stappen. Mijn kinderen merkten het verschil al na een week.&rdquo;</div>
-        <div class="ty-review-author">Linda K.</div>
-        <div class="ty-review-loc">Rotterdam</div>
+        <div class="ty-review-text">&bdquo;Ik heb mijn bed verplaatst. Ik slaap voor het eerst in maanden de hele nacht door.&rdquo;</div>
+        <div class="ty-review-author">Marieke, 41</div>
       </div>
     </div>
   </div>
@@ -779,6 +777,60 @@ body { background: var(--bg); }
         localStorage.setItem('medusa_customer', JSON.stringify(updated));
         updateDetailsDisplay();
         console.log('TY: Customer data synced from order API (country: ' + updated.country_code + ')');
+
+        // ─── Authoritative fix for book count + total price ───
+        // localStorage (medusa_bundle_qty / medusa_checkout_total) is unreliable:
+        // it can be wiped by browser restarts, cross-domain checkout, or edge
+        // cases. The order itself is source of truth — derive the real book
+        // count from the bundle SKU HLDV-{N} (where N = 1..4) and use the
+        // actual order total for the price.
+        try {
+          var orderItems = data.order.items || [];
+          var mainItem = null;
+          var derivedBookCount = 0;
+          for (var i = 0; i < orderItems.length; i++) {
+            var it = orderItems[i];
+            var sku = (it.sku || '').toUpperCase();
+            var m = /^HLDV-([1-4])$/.exec(sku);
+            if (m) {
+              mainItem = it;
+              derivedBookCount = parseInt(m[1], 10) * (it.quantity || 1);
+              break;
+            }
+          }
+          if (mainItem && derivedBookCount > 0) {
+            // Override bundleQty so any downstream code uses the correct value
+            bundleQty = derivedBookCount;
+            // Update main item display (name + desc with N×)
+            var orderItemsRoot = document.getElementById('ty-order-items');
+            var nameEl = orderItemsRoot && orderItemsRoot.querySelector('.ty-order-name');
+            var descEl = orderItemsRoot && orderItemsRoot.querySelector('.ty-order-desc');
+            if (nameEl) {
+              nameEl.textContent = derivedBookCount > 1
+                ? (derivedBookCount + '× Het Leven Dat Je Verdient')
+                : 'Het Leven Dat Je Verdient';
+            }
+            if (descEl) {
+              descEl.textContent = derivedBookCount > 1
+                ? (derivedBookCount + '× fysiek boek — 290 pagina’s — wordt bezorgd')
+                : 'Fysiek boek — 290 pagina’s — wordt bezorgd';
+            }
+          }
+          // Authoritative total from the order itself
+          if (data.order.total != null) {
+            var totalEl = document.getElementById('ty-total-price');
+            if (totalEl) {
+              var cur = (data.order.currency_code || 'eur').toLowerCase();
+              var symbol = cur === 'eur' ? '€' : cur === 'sek' ? 'kr' : cur === 'pln' ? 'zł' : cur === 'czk' ? 'Kč' : '€';
+              var amt = Number(data.order.total) || 0;
+              var formatted = amt.toFixed(2).replace('.', ',').replace(/,00$/, '');
+              totalEl.textContent = symbol + ' ' + formatted;
+            }
+          }
+          console.log('TY: Order items synced (books: ' + derivedBookCount + ', total: ' + data.order.total + ')');
+        } catch (e) {
+          console.warn('TY: Could not sync order items:', e && e.message);
+        }
       }
     })
     .catch(function(e) { console.warn('TY: Could not fetch order details:', e.message); });

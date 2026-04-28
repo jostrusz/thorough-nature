@@ -1317,13 +1317,17 @@ img, video, iframe {
  contain-intrinsic-size: auto 600px;
 }
 /* ─── LOADER KEYFRAMES ─── */
-@keyframes loaderPulse {
- 0%, 100% { transform: scale(1); }
- 50% { transform: scale(1.06); }
+@keyframes loaderBreathe {
+ 0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 6px 16px rgba(74,26,46,0.15)); }
+ 50% { transform: scale(1.05) translateY(-4px); filter: drop-shadow(0 14px 28px rgba(74,26,46,0.25)); }
 }
-@keyframes loaderOrbit {
- 0% { transform: rotate(0deg) translateX(0); }
- 100% { transform: rotate(360deg) translateX(0); }
+@keyframes loaderGlow {
+ 0%, 100% { opacity: 0.35; transform: scale(1); }
+ 50% { opacity: 0.75; transform: scale(1.15); }
+}
+@keyframes loaderRing {
+ 0% { transform: rotate(0deg); }
+ 100% { transform: rotate(360deg); }
 }
 @keyframes loaderProgress {
  0% { width: 0%; background-position: 0% 0; }
@@ -1649,30 +1653,30 @@ setTimeout(function() {
  transition: opacity 0.5s ease, visibility 0.5s ease;
 ">
  <!-- Geanimeerd logo -->
- <div style="position: relative; width: 72px; height: 72px; margin-bottom: 28px;">
+ <div style="position: relative; width: 180px; height: 180px; margin-bottom: 28px; display:flex; align-items:center; justify-content:center;">
+ <!-- Zachte gloed -->
  <div style="
- width: 72px; height: 72px;
- background: linear-gradient(135deg, #4A1A2E, #5A2D3E);
- border-radius: 18px;
- display: flex; align-items: center; justify-content: center;
- animation: loaderPulse 1.8s ease-in-out infinite;
- box-shadow: 0 8px 32px rgba(74,26,46,0.18);
- ">
- <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
- <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
- <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
- </svg>
- </div>
- <!-- Draaiende stip -->
- <div style="
- position: absolute; top: -6px; left: 50%;
- width: 10px; height: 10px;
- background: #C9A96E;
+ position: absolute; inset: 20px;
+ background: radial-gradient(circle, rgba(201,169,110,0.45) 0%, rgba(201,169,110,0) 70%);
  border-radius: 50%;
- transform-origin: 50% 42px;
- animation: loaderOrbit 1.4s linear infinite;
- box-shadow: 0 0 8px rgba(201,169,110,0.5);
+ animation: loaderGlow 2.4s ease-in-out infinite;
  "></div>
+ <!-- Draaiende ring -->
+ <div style="
+ position: absolute; inset: 0;
+ border-radius: 50%;
+ border: 2px solid transparent;
+ border-top-color: #C9A96E;
+ border-right-color: rgba(201,169,110,0.4);
+ animation: loaderRing 1.8s linear infinite;
+ "></div>
+ <!-- Logo -->
+ <img src="/het-leven-logo.png" alt="Het Leven Dat Je Verdient" width="140" height="140" style="
+ position: relative;
+ width: 140px; height: auto;
+ object-fit: contain;
+ animation: loaderBreathe 2.4s ease-in-out infinite;
+ ">
  </div>
 
  <!-- Merktekst -->
@@ -1830,16 +1834,16 @@ document.querySelectorAll('.nav-mobile-menu a').forEach(function(a) {
  <div class="hero-left">
  <!-- Deel A: eyebrow + kop (mobiel: boven afbeelding) -->
  <div class="hero-top-text">
- <div class="eyebrow anim">✦ LIFE RESET™ · Voor de vrouw die alles dragen kan — behalve haar eigen leven</div>
+ <div class="eyebrow anim">✦ LIFE RESET™ · Voor de vrouw die alles dragen kan, behalve haar eigen leven</div>
  <h1 class="anim d1">
- Van buiten lijk je het prima te redden. Vanbinnen val je stilletjes uit elkaar — <span class="accent">en niemand ziet het.</span>
+ Van buiten lijk je het prima te redden. Vanbinnen val je stilletjes uit elkaar <span class="accent">en niemand ziet het.</span>
  </h1>
  </div>
 
  <!-- Deel B: tekst + CTA (mobiel: onder afbeelding) -->
  <div class="hero-bottom-text">
  <p class="body-text anim d2" style="font-size: 18px; max-width: 540px; margin-bottom: 8px;">
- De kast die uitpuilt — en toch niks om aan te trekken. Het hoofd dat nooit stilstaat. Die ene relatie die altijd iets van je kost. Het schuldgevoel, telkens als je iets voor jezelf doet. Dit boek gaat niet over "denk positief". Het gaat over vijf dingen die écht je leven vastzetten — en hoe je ze in dertig dagen één voor één losmaakt. Eén la. Eén nee. Eén ademhaling tegelijk.
+ De kast die uitpuilt en toch heb je niets om aan te trekken. Het hoofd dat nooit stilstaat. Die ene relatie die altijd iets van je vraagt. Het schuldgevoel, telkens als je iets voor jezelf doet. Dit boek gaat niet over "denk positief". Het gaat over vijf pijlers die daadwerkelijk je leven beïnvloeden, en hoe je ze in 30 dagen stap voor stap kunt loslaten. Eén la. Eén nee. Eén ademhaling tegelijk.
  </p>
 
  <!-- DROOMRESULTAAT BULLETS -->
@@ -1854,7 +1858,7 @@ document.querySelectorAll('.nav-mobile-menu a').forEach(function(a) {
  </div>
  <div style="display: flex; align-items: center; gap: 10px;">
  <span style="width: 24px; height: 24px; background: rgba(184,92,74,0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; color: var(--cta);">✓</span>
- <span style="font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body);">Je huis opendoen zonder die knoop in je buik als er bezoek komt</span>
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body);">De deur openen zonder je te schamen als er bezoek komt</span>
  </div>
  <div style="display: flex; align-items: center; gap: 10px;">
  <span style="width: 24px; height: 24px; background: rgba(184,92,74,0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; color: var(--cta);">✓</span>
@@ -1864,7 +1868,7 @@ document.querySelectorAll('.nav-mobile-menu a').forEach(function(a) {
 
  <div class="hero-buttons anim d3">
  <a href="/checkout" class="btn-cta">Ik wil mijn rust terug →</a>
- <a href="#ukazka" class="btn-ghost">Lees een gratis fragment →</a>
+ <a href="#ukazkaStage" class="btn-ghost">Lees gratis een stukje →</a>
  </div>
 
  <div class="trust-row anim d4" style="margin-top: 20px;">
@@ -1911,19 +1915,19 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Li
  ═══════════════════════════════════════════ -->
 <div class="micro-strip">
  <div class="micro-track">
- <span class="micro-quote"><span class="stars">★★★★★</span> „Van 347 kledingstukken hield ik er 73 over. En voor het eerst weet ik wat ik aan moet." — Femke, 38</span>
- <span class="micro-quote"><span class="stars">★★★★★</span> „Ik heb mijn bed verplaatst. Voor het eerst in maanden slaap ik de hele nacht door." — Marieke, 41</span>
- <span class="micro-quote"><span class="stars">★★★★★</span> „Ik heb geleerd om NEE te zeggen zonder schuldgevoel. Voor het eerst heb ik tijd voor mezelf." — Sanne, 39</span>
- <span class="micro-quote"><span class="stars">★★★★★</span> „Ik ben gestopt met elke gedachte in mijn hoofd te geloven. De rust is onbeschrijflijk." — Lotte, 37</span>
- <span class="micro-quote"><span class="stars">★★★★★</span> „Een bosje bloemen van 4 € op tafel veranderde meer dan een maand mediteren met een app." — Anouk, 34</span>
- <span class="micro-quote"><span class="stars">★★★★★</span> „Ik ben gestopt zijn moeder te zijn. Ik ben zijn partner geworden." — Ingrid, 52</span>
+ <span class="micro-quote"><span class="stars">★★★★★</span> „Van 347 kledingstukken hield ik er 73 over. En voor het eerst weet ik wat ik aan kan doen." — Femke, 38</span>
+ <span class="micro-quote"><span class="stars">★★★★★</span> „Ik heb mijn bed verplaatst. Ik slaap voor het eerst in maanden de hele nacht door." — Marieke, 41</span>
+ <span class="micro-quote"><span class="stars">★★★★★</span> „Ik heb geleerd om zonder schuldgevoel NEE te zeggen. Voor het eerst heb ik tijd voor mezelf." — Sanne, 39</span>
+ <span class="micro-quote"><span class="stars">★★★★★</span> „Ik ben gestopt met het geloven van elke gedachte in mijn hoofd. De rust is onbeschrijflijk." — Lotte, 37</span>
+ <span class="micro-quote"><span class="stars">★★★★★</span> „Een bosje bloemen van € 4 op tafel veranderde meer dan een maand mediteren met een app." — Anouk, 34</span>
+ <span class="micro-quote"><span class="stars">★★★★★</span> „Ik ben gestopt met zijn moeder te zijn. Ik ben zijn partner geworden." — Ingrid, 52</span>
  <!-- Duplicaat voor naadloze loop -->
- <span class="micro-quote"><span class="stars">★★★★★</span> „Van 347 kledingstukken hield ik er 73 over. En voor het eerst weet ik wat ik aan moet." — Femke, 38</span>
- <span class="micro-quote"><span class="stars">★★★★★</span> „Ik heb mijn bed verplaatst. Voor het eerst in maanden slaap ik de hele nacht door." — Marieke, 41</span>
- <span class="micro-quote"><span class="stars">★★★★★</span> „Ik heb geleerd om NEE te zeggen zonder schuldgevoel. Voor het eerst heb ik tijd voor mezelf." — Sanne, 39</span>
- <span class="micro-quote"><span class="stars">★★★★★</span> „Ik ben gestopt met elke gedachte in mijn hoofd te geloven. De rust is onbeschrijflijk." — Lotte, 37</span>
- <span class="micro-quote"><span class="stars">★★★★★</span> „Een bosje bloemen van 4 € op tafel veranderde meer dan een maand mediteren met een app." — Anouk, 34</span>
- <span class="micro-quote"><span class="stars">★★★★★</span> „Ik ben gestopt zijn moeder te zijn. Ik ben zijn partner geworden." — Ingrid, 52</span>
+ <span class="micro-quote"><span class="stars">★★★★★</span> „Van 347 kledingstukken hield ik er 73 over. En voor het eerst weet ik wat ik aan kan doen." — Femke, 38</span>
+ <span class="micro-quote"><span class="stars">★★★★★</span> „Ik heb mijn bed verplaatst. Ik slaap voor het eerst in maanden de hele nacht door." — Marieke, 41</span>
+ <span class="micro-quote"><span class="stars">★★★★★</span> „Ik heb geleerd om zonder schuldgevoel NEE te zeggen. Voor het eerst heb ik tijd voor mezelf." — Sanne, 39</span>
+ <span class="micro-quote"><span class="stars">★★★★★</span> „Ik ben gestopt met het geloven van elke gedachte in mijn hoofd. De rust is onbeschrijflijk." — Lotte, 37</span>
+ <span class="micro-quote"><span class="stars">★★★★★</span> „Een bosje bloemen van € 4 op tafel veranderde meer dan een maand mediteren met een app." — Anouk, 34</span>
+ <span class="micro-quote"><span class="stars">★★★★★</span> „Ik ben gestopt met zijn moeder te zijn. Ik ben zijn partner geworden." — Ingrid, 52</span>
  </div>
 </div>
 
@@ -1934,10 +1938,10 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Li
  <div style="max-width: 720px; margin: 0 auto;" class="anim">
  <div style="display: inline-block; background: linear-gradient(135deg, #B85C4A, #D4916A); color: white; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; padding: 8px 24px; border-radius: 30px; margin-bottom: 24px;">De belofte van dit boek</div>
  <h2 style="font-family: 'Recoleta', serif; font-size: 30px; color: var(--heading); line-height: 1.35; margin: 0 0 20px;">
- Over dertig dagen voel je jezelf weer. Niet harder. Niet sterker. <span class="accent">Gewoon — aanwezig.</span> De onrust die altijd ergens op de achtergrond aan stond, staat er niet meer. En ergens diep vanbinnen is er weer iets wat van jou is. Wat alleen van jou is.
+ Over 30 dagen voel je jezelf weer. Niet harder. Niet sterker. <span class="accent">Je mag er zijn.</span> De onrust die vroeger op de achtergrond aanwezig was, is er niet meer. En ergens diep vanbinnen is er weer iets wat van jou is. Wat alleen van jou is.
  </h2>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--muted); line-height: 1.7; max-width: 580px; margin: 0 auto;">
- Niet omdat je er hard voor hebt gevochten. Gewoon omdat er, stukje bij beetje, iets is losgelaten. Iets wat al veel te lang om je heen zat. En wat je eigenlijk nooit had hoeven dragen.
+ Niet omdat je er hard voor hebt gevochten. Gewoon omdat je, beetje bij beetje, iets hebt losgelaten. Iets wat al veel te lang aanwezig was. En wat je eigenlijk nooit had hoeven dragen.
  </p>
  </div>
 </div>
@@ -2045,12 +2049,12 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Li
 
 <div class="video-reveal">
  <div class="section-inner">
- <div class="vid-eyebrow">✦ Neem even de tijd — één minuutje</div>
+ <div class="vid-eyebrow">✦ Neem even de tijd. één minuutje</div>
  <h2>
  Kom, ik laat je iets zien.<br><em>Je bent niet de enige.</em>
  </h2>
  <p class="vid-sub">
- Duizenden vrouwen in Nederland en België lopen hier tegenaan. Elke dag. En bijna niemand zegt het hardop. Druk op play — en je zult zien waarom je niet gek bent. Je hebt gewoon te lang, te veel gedragen. In stilte.
+ Duizenden vrouwen in Nederland en België lopen hier tegenaan. Elke dag. En bijna niemand zegt het hardop. Druk op start en je zult zien waarom je niet gek bent. Je hebt gewoon te lang, te veel gedragen. In stilte.
  </p>
 
  <div class="vid-container" style="aspect-ratio: 1.3714 / 1; background: #000; position: relative;">
@@ -2102,7 +2106,7 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Li
  ═══════════════════════════════════════════ -->
 <div class="section" style="background: var(--white);">
  <div class="section-inner">
- <div class="eyebrow center anim">Vertel eens — ken je dit?</div>
+ <div class="eyebrow center anim">Vertel, herken je dit?</div>
  <h2 class="anim d1" style="text-align: center; max-width: 660px; margin: 0 auto 16px;">
  Herken je <span class="accent">jezelf?</span>
  </h2>
@@ -2115,32 +2119,32 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Li
  <div class="mirror-grid">
  <div class="mirror-card anim d1">
  <div class="mirror-icon"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="4" y1="8" x2="20" y2="8"/><line x1="10" y1="8" x2="10" y2="22"/><path d="M14 12c0 1.5-1 3-2 3s-2-1.5-2-3"/></svg></div>
- <div class="mirror-text">Kijk even naar je kast. Puilt uit. En 's ochtends sta je ervoor en denkt: <strong>„ik heb niks om aan te trekken"</strong>. Zeg eerlijk — klopt toch?</div>
+ <div class="mirror-text">Bekijk je eigen kast eens. Het puilt uit. En 's ochtends sta je voor je kast en denkt: <strong>„ik heb niets om aan te trekken"</strong>. Klopt dat?</div>
  </div>
  <div class="mirror-card anim d2">
  <div class="mirror-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="7"/><path d="M8 8l1.5 1.5M16 8l-1.5 1.5M9 13c1 1 5 1 6 0"/><line x1="12" y1="17" x2="12" y2="20"/><line x1="8" y1="20" x2="16" y2="20"/><path d="M3 3l2 2M21 3l-2 2"/></svg></div>
- <div class="mirror-text">Merk eens hoe je hoofd blijft draaien. Midden in een gesprek, onder de douche, in de auto. Het stopt nooit: <strong>tandarts, cadeau, dat rapport, die kapotte kraan…</strong></div>
+ <div class="mirror-text">Besef eens hoe je hoofd blijft malen. Tijdens een gesprek, onder de douche, in de auto. Het stopt nooit: <strong>de tandarts, een verjaardag, dat rapport, die kapotte kraan…</strong></div>
  </div>
  <div class="mirror-card anim d3">
  <div class="mirror-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="7" r="2.5"/><path d="M3 21v-2a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v2"/><line x1="17" y1="11" x2="17" y2="17"/><line x1="14" y1="14" x2="20" y2="14"/></svg></div>
- <div class="mirror-text">Kijk even om je heen. Iedereen denkt dat je het prima doet. En jij denkt stiekem: <strong>„voor anderen lijkt dit toch heel gewoon?"</strong></div>
+ <div class="mirror-text">Kijk om je heen. Iedereen denkt dat je het prima doet. En jij denkt: <strong>„voor anderen lijkt dit toch heel normaal?"</strong></div>
  </div>
  <div class="mirror-card anim d4">
  <div class="mirror-icon"><svg viewBox="0 0 24 24"><rect x="2" y="10" width="8" height="8" rx="1"/><rect x="14" y="10" width="8" height="8" rx="1"/><rect x="8" y="3" width="8" height="8" rx="1"/><path d="M12 11v7" stroke-dasharray="2 2"/></svg></div>
- <div class="mirror-text">Probeer eens NEE te zeggen. Lukt niet, hè? En als het één keer lukt, <strong>loop je de rest van de dag rond met een knoop in je buik</strong>.</div>
+ <div class="mirror-text">Probeer eens NEE te zeggen. Dat lukt niet, hè? En als het één keer lukt, <strong>loop je de rest van de dag rond met een knoop in je maag</strong>.</div>
  </div>
  <div class="mirror-card anim d6">
  <div class="mirror-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="8" x2="15" y2="14"/><line x1="15" y1="8" x2="9" y2="14"/></svg></div>
- <div class="mirror-text">Voel even hoe moe je bent. En weet je waarom? Omdat <strong>alles op jouw schouders staat</strong>. De kinderen, het huishouden, het werk, de familie — en ja, ook hem. Als jij het niet doet, gebeurt het niet.</div>
+ <div class="mirror-text">Voel hoe moe je bent. En weet je waarom? Omdat <strong>er een last op je ligt</strong>. De kinderen, het huishouden, je werk, de familie en ja, ook je partner. Als jij het niet doet, gebeurt het niet.</div>
  </div>
  <div class="mirror-card anim d6">
  <div class="mirror-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="21" x2="12" y2="16"/><line x1="16" y1="21" x2="12" y2="16"/><circle cx="5" cy="10" r="1.5" fill="var(--highlight)" stroke="none"/><circle cx="19" cy="10" r="1.5" fill="var(--highlight)" stroke="none"/><circle cx="5" cy="16" r="1.5" fill="var(--highlight)" stroke="none"/><circle cx="19" cy="16" r="1.5" fill="var(--highlight)" stroke="none"/></svg></div>
- <div class="mirror-text">Stel je eens een hele dag voor — alleen voor jezelf. Geen kinderen, geen werk, niemand die iets van je nodig heeft. En dan merk je het: <strong>je weet niet eens meer wat je dan zou doen</strong>.</div>
+ <div class="mirror-text">Verbeeld je eens een hele dag alleen voor jezelf. Geen kinderen, geen werk, niemand die iets van je nodig heeft. En dan merk je het: <strong>je weet niet eens meer wat je dan zou doen</strong>.</div>
  </div>
  </div>
 
  <div class="mirror-cta anim">
- <p>Tel eens voor jezelf hoeveel van deze zes van <strong>jou</strong> zijn.<br>
+ <p>Tel eens voor jezelf hoeveel van deze zes op <strong>jou</strong> van toepassing zijn.<br>
  <span style="font-size: 16px; color: var(--muted); font-style: normal;">De meeste vrouwen herkennen zich in minstens vier. Je bent niet alleen.</span><br>
  <span class="highlight"><strong>En precies daarom bestaat dit boek.</strong></span></p>
  </div>
@@ -2155,14 +2159,14 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Li
  <div class="ukazka-bg-blob ukazka-bg-blob--2" aria-hidden="true"></div>
  <div class="ukazka-inner">
   <div class="ukazka-header">
-   <div class="ukazka-eyebrow"><span class="ukazka-pulse"></span>Blader eerst even mee door het boek</div>
-   <h2 class="ukazka-title">Lees eerst — bestel daarna pas.</h2>
-   <p class="ukazka-sub">Laat me je gewoon tien echte pagina's uit het boek zien. Geen mooie praatjes, geen reclamehapjes — precies hetzelfde als wat je straks vanaf je eigen bank leest. Met een kopje thee erbij.</p>
-   <div class="ukazka-social"><span class="ukazka-dot"></span>Heel veel vrouwen sloegen deze pagina's al open · Alle 10 erbij, gratis</div>
+   <div class="ukazka-eyebrow"><span class="ukazka-pulse"></span>Blader eerst door het boek</div>
+   <h2 class="ukazka-title">Eerst lezen, en daarna pas bestellen.</h2>
+   <p class="ukazka-sub">Ik laat je 10 pagina's uit het boek lezen. Geen mooie praatjes, geen reclame. Precies hetzelfde als wat je straks vanaf je eigen bank leest. Met een kopje thee erbij.</p>
+   <div class="ukazka-social"><span class="ukazka-dot"></span>Heel veel vrouwen sloegen deze pagina's al open · Alle 10, gratis</div>
   </div>
 
   <div class="ukazka-meta">
-   <div class="ukazka-counter"><span id="ukazkaCurrent">1</span>/10 pagina's gratis</div>
+   <div class="ukazka-counter"><span id="ukazkaCurrent">1</span>/10 gratis pagina's</div>
    <div class="ukazka-progress"><div class="ukazka-progress-bar" id="ukazkaProgress"></div></div>
    <div class="ukazka-chapter" id="ukazkaChapter">Hoofdstuk 1 · Spullen</div>
   </div>
@@ -2181,19 +2185,19 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Li
   <div class="ukazka-convert">
    <div class="ukazka-convert-left">
     <div class="ukazka-convert-eyebrow" id="ukazkaConvertEyebrow">✦ Je hebt 10% van het boek gelezen</div>
-    <h3 class="ukazka-convert-title" id="ukazkaConvertTitle">Klaar voor de rest?</h3>
-    <p class="ukazka-convert-text" id="ukazkaConvertText">Het hele boek wacht op je — 5 hoofdstukken, 340 pagina's, 12 werkboeken en de complete LIFE RESET™-methode.</p>
+    <h3 class="ukazka-convert-title" id="ukazkaConvertTitle">Benieuwd naar de rest?</h3>
+    <p class="ukazka-convert-text" id="ukazkaConvertText">Het hele boek wacht op je. 5 hoofdstukken, 340 pagina's, 12 werkboeken en de complete LIFE RESET™-methode.</p>
     <div class="ukazka-trust">
-     <div class="ukazka-trust-item"><div class="ukazka-trust-icon">📦</div><div><strong>Gratis verzending</strong><span>Vanaf €35</span></div></div>
-     <div class="ukazka-trust-item"><div class="ukazka-trust-icon">↩️</div><div><strong>14 dagen retour</strong><span>Zonder vragen</span></div></div>
+     <div class="ukazka-trust-item"><div class="ukazka-trust-icon">📦</div><div><strong>Gratis verzending</strong><span>Vanaf € 35</span></div></div>
+     <div class="ukazka-trust-item"><div class="ukazka-trust-icon">↩️</div><div><strong>Retourperiode van 14 dagen</strong><span>zonder vragen.</span></div></div>
      <div class="ukazka-trust-item"><div class="ukazka-trust-icon">🚚</div><div><strong>3–5 werkdagen</strong><span>NL &amp; BE</span></div></div>
     </div>
    </div>
    <div class="ukazka-convert-right">
-    <div class="ukazka-price-anchor"><span class="ukazka-price-old">€42</span><span class="ukazka-price-new">€36</span></div>
-    <div class="ukazka-price-note">Tijdelijke introductieprijs — morgen kan dit verdwijnen.</div>
-    <a href="/checkout" class="ukazka-cta"><span>Bestel nu voor €36 →</span></a>
-    <div class="ukazka-micro">🔒 Vandaag besteld = binnen 3–5 werkdagen bij je thuis</div>
+    <div class="ukazka-price-anchor"><span class="ukazka-price-old">€ 42</span><span class="ukazka-price-new">€ 36</span></div>
+    <div class="ukazka-price-note">Tijdelijke introductieprijs – dit kan morgen voorbij zijn.</div>
+    <a href="/checkout" class="ukazka-cta"><span>Bestel nu voor € 36 →</span></a>
+    <div class="ukazka-micro">🔒 Vandaag besteld = binnen 3–5 werkdagen in huis</div>
    </div>
   </div>
  </div>
@@ -2213,6 +2217,7 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Li
 <style>
 html,body{overflow-x:clip}
 .ukazka-section{position:relative;padding:clamp(64px,9vw,120px) 20px;background:linear-gradient(180deg,#FFF8F3 0%,#F5EDE3 50%,#EFE4D6 100%);overflow:hidden;max-width:100vw}
+#ukazkaStage{scroll-margin-top:90px}
 .ukazka-bg-blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;pointer-events:none;z-index:0}
 .ukazka-bg-blob--1{width:420px;height:420px;background:#E8C9A0;top:-120px;left:-80px}
 .ukazka-bg-blob--2{width:360px;height:360px;background:#D9B88A;bottom:-100px;right:-60px}
@@ -2367,10 +2372,10 @@ html,body{overflow-x:clip}
    cTxt.textContent='De overige 330 pagina\u2019s — Femke\u2019s complete transformatie, de 5 pijlers, alle werkboeken — lees je alleen in het fysieke boek.';
   }else if(idx>=PAGES.length-3){
    cTit.textContent='Nog '+(PAGES.length-idx-1)+' voorbeeld-pagina'+(PAGES.length-idx-1===1?'':'s')+' — daarna stopt het gratis gedeelte.';
-   cTxt.textContent='Het hele boek wacht op je — 5 hoofdstukken, 340 pagina\u2019s, 12 werkboeken en de complete LIFE RESET™-methode.';
+   cTxt.textContent='Het hele boek wacht op je. 5 hoofdstukken, 340 pagina\u2019s, 12 werkboeken en de complete LIFE RESET™-methode.';
   }else{
    cTit.textContent='Klaar voor de rest?';
-   cTxt.textContent='Het hele boek wacht op je — 5 hoofdstukken, 340 pagina\u2019s, 12 werkboeken en de complete LIFE RESET™-methode.';
+   cTxt.textContent='Het hele boek wacht op je. 5 hoofdstukken, 340 pagina\u2019s, 12 werkboeken en de complete LIFE RESET™-methode.';
   }
   // scroll thumb into view (container-only, no page scroll)
   const at=thumbs.children[idx];
@@ -2425,7 +2430,7 @@ html,body{overflow-x:clip}
  ═══════════════════════════════════════════ -->
 <div class="section" style="background: var(--white);">
  <div class="section-inner">
- <div class="eyebrow center anim">Ken je dit gevoel?</div>
+ <div class="eyebrow center anim">Herken je dit gevoel?</div>
  <h2 class="anim d1" style="text-align: center; max-width: 700px; margin: 0 auto 24px;">
  Ik zat op de keukenvloer.<br><span class="accent">En ik huilde.</span>
  </h2>
@@ -2437,45 +2442,45 @@ html,body{overflow-x:clip}
  <div class="divider"></div>
 
  <div class="discovery-text">
- <p class="anim"><em>Drie vuile mokken naast me. Mijn telefoon trilde — alweer iemand die iets van me wilde. En in mijn hoofd liep dat lijstje van dingen die ik nog moest doen. Eindeloos. En elke keer als ik er een afvinkte, kwamen er twee bij. Ik werd er gek van. Het hield gewoon nooit op.</em></p>
+ <p class="anim"><em>Drie vieze mokken naast me. Mijn telefoon ging over. Alweer iemand die iets van me wilde. En in mijn gedachten kwam dat lijstje van taken die ik nog moest uitvoeren. Eindeloos. En elke keer als ik er een afvinkte, kwamen er twee bij. Ik werd er gek van. Het hield gewoon nooit op.</em></p>
 
- <p class="anim"><em>En weet je wat het ergste was? Iedereen dacht dat ik het aankon. Niemand — <strong>niemand</strong> — zag dat ik vanbinnen in stukken viel.</em></p>
+ <p class="anim"><em>En weet je wat het ergste was? Iedereen dacht dat ik het aankon. <strong>Niemand. Niemand</strong> merkte op dat ik van binnen gebroken was.</em></p>
 
  <p class="anim" style="font-family: 'Recoleta', serif; font-size: 24px; font-weight: 600; color: var(--heading); text-align: center; padding: 16px 0;">
  Ik kreeg geen lucht meer.
  </p>
 
- <p class="anim"><em>Mijn benen begaven het en ik gleed langs het keukenkastje op de grond. En ik huilde. Niet omdat ik zwak ben. Maar omdat ik jarenlang ALLES deed — boodschappen, dokter, zwemles, de was, koken, papierwerk, de hele organisatie van het gezin — en het was nooit genoeg.</em></p>
+ <p class="anim"><em>Mijn benen begaven het en ik gleed langs het keukenkastje op de grond. En ik huilde. Niet omdat ik zwak ben. Maar omdat ik jarenlang ALLES heb gedaan.</em></p>
 
- <p class="anim"><em>Mijn man kwam thuis en vroeg: <strong>„Wat is er?"</strong> En ik kon het niet eens uitleggen.</em></p>
+ <p class="anim"><em>Mijn man kwam thuis en vroeg: <strong>„Wat is er aan de hand?"</strong> En ik kon het niet uitleggen.</em></p>
 
- <p class="anim"><em>Hoe leg je iemand uit dat je kapotgaat aan een leven dat er van buitenaf perfect uitziet?</em></p>
+ <p class="anim"><em>Hoe kan je iemand vertellen dat je kapotgaat aan een leven dat van buitenaf perfect lijkt?</em></p>
 
  <p class="anim" style="font-family: 'Recoleta', serif; font-size: 22px; font-weight: 600; color: var(--heading); text-align: center; padding: 16px 0;">
- Ik was niet depressief.<br>Ik was <span class="accent">uitgeput. Van alles onder controle moeten houden.</span>
+ Ik was niet depressief.<br>Ik was <span class="accent">uitgeput. Door alles onder controle te moeten houden.</span>
  </p>
 
- <p class="anim"><em>Ik regelde alles. Het huishouden. De planning. De gevoelens van iedereen. Het boodschappenlijstje. De verjaardagen. De tandartsen. De was. Het eten. Zelfs de sfeer in huis.</em></p>
+ <p class="anim"><em>Ik regelde alles. Het huishouden. De planning. De gevoelens van iedereen. Het boodschappenlijstje. De verjaardagen. De tandarts. De was. Het eten. Zelfs de sfeer in huis.</em></p>
 
- <p class="anim"><em><strong>Alles draaide om mij — en toch heeft nooit iemand me een arm om me heen geslagen en gezegd: „Wat doe je het toch geweldig. Wat ben je sterk."</strong></em></p>
+ <p class="anim"><em><strong>Alles draaide om mij en toch heeft nooit iemand een arm om me heen geslagen en gezegd: „Wat doe je het toch goed. Wat ben je sterk."</strong></em></p>
 
- <p class="anim"><em>Die avond bestelde ik tien boeken. Tien toonaangevende boeken over loslaten, grenzen stellen, rust vinden en energie terugkrijgen — boeken die je al jaren in elke goede boekenwinkel ziet liggen.</em></p>
+ <p class="anim"><em>Die avond bestelde ik tien boeken. Tien toonaangevende boeken over loslaten, grenzen stellen, rust vinden en energie terugkrijgen. Boeken die je al jaren in elke goede boekenwinkel ziet liggen.</em></p>
 
  <p class="anim"><em>Ik las ze allemaal. In vier maanden. Met een potlood, een markeerstift en een schriftje ernaast.</em></p>
 
  <p class="anim"><em>En weet je wat ik ontdekte?</em></p>
 
  <p class="anim" style="font-family: 'Recoleta', serif; font-size: 22px; color: var(--heading); text-align: center; padding: 12px 0;">
- <span class="highlight">Ze zeiden eigenlijk allemaal hetzelfde. Alleen met andere woorden.</span>
+ <span class="highlight">Elk boek vertelde in feite hetzelfde. Alleen met andere woorden.</span>
  </p>
 
  <p class="anim"><em>De één zei: gooi weg wat je niet blij maakt. De ander: stop met leven voor anderen. Weer een ander: niet elke gedachte is waar. En: doe minder, maar doe het goed.</em></p>
 
- <p class="anim"><em>Ze hadden het allemaal over hetzelfde probleem — alleen ieder vanuit een andere hoek.</em></p>
+ <p class="anim"><em>Ze hadden het allemaal over hetzelfde probleem. Alleen vanuit een andere hoek.</em></p>
 
- <p class="anim"><em>En toen zag ik het. Een patroon. Een verborgen rode draad door al die boeken heen. <strong>Vijf gebieden van je leven die je tegelijk moet aanpakken. Want als je er maar één doet, verandert er niets echt.</strong></em></p>
+ <p class="anim"><em>En toen zag ik het. Een patroon. Een verborgen rode draad door al die boeken heen. <strong>5 gebieden van je leven die je tegelijk moet aanpakken. Want als je er maar één doet, verandert het niet.</strong></em></p>
 
- <p class="anim"><em>Ik probeerde het eerst zelf. Eén la per dag opruimen. Eén keer per week 'nee' zeggen. Tien minuten stilte 's ochtends.</em></p>
+ <p class="anim"><em>Ik probeerde het eerst zelf. Eén la per dag opruimen. Eén keer per week 'nee' zeggen. Tien minuten stilte in de ochtend.</em></p>
 
  <p class="anim"><em>Na twee weken zei mijn man: <strong>„Je bent anders."</strong></em></p>
 
@@ -2483,15 +2488,15 @@ html,body{overflow-x:clip}
 
  <p class="anim"><em>Na drie maanden herkende ik mezelf bijna niet meer. <strong>Op een goede manier.</strong></em></p>
 
- <p class="anim"><em>Toen vertelde ik het aan vriendinnen. Aan collega's. Aan de buurvrouw. En steeds kreeg ik dezelfde reactie: <strong>„Waarom heeft niemand me dit eerder verteld?"</strong></em></p>
+ <p class="anim"><em>Toen vertelde ik het aan vriendinnen. Aan collega's. Aan de buurvrouw. Iedere keer kreeg ik dezelfde reactie: <strong>„Waarom heeft niemand me dit eerder verteld?"</strong></em></p>
 
  <p class="anim" style="font-family: 'Recoleta', serif; font-size: 22px; font-weight: 600; color: var(--heading); text-align: center; padding: 16px 0;">
  En zo is dit boek ontstaan.
  </p>
 
- <p class="anim"><em>Niet omdat ik een expert ben. Maar omdat ik precies stond waar jij nu staat. Omdat ik weet hoe het voelt om alles te geven — en zelf leeg achter te blijven.</em></p>
+ <p class="anim"><em>Niet omdat ik een expert ben. Maar omdat ik precies stond waar jij nu staat. Omdat ik weet hoe het voelt om alles te geven en zelf leeg achter te blijven.</em></p>
 
- <p class="anim"><em>En omdat ik een weg heb gevonden die élke vrouw kan lopen. Zonder therapeut. Zonder coach. Zonder dat je je hele leven op z'n kop hoeft te zetten.</em></p>
+ <p class="anim"><em>En omdat ik een weg heb gevonden die élke vrouw kan bewandelen. Zonder therapeut. Zonder coach. Zonder dat je je hele leven op zijn kop hoeft te zetten.</em></p>
 
  <p class="anim" style="font-weight: 700; color: var(--heading); text-align: center; font-size: 18px; margin-top: 8px;">— Anna de Vries</p>
  <p class="anim" style="font-size: 14px; color: var(--muted); text-align: center; margin-top: 4px;"><em>Moeder. Partner. Ondernemer. En de vrouw die op haar keukenvloer besloot dat het anders moest.</em></p>
@@ -2500,13 +2505,13 @@ html,body{overflow-x:clip}
  <div class="divider"></div>
 
  <div class="discovery-box anim">
- <p>Uit die tien boeken haalde ik één ding wat alle anderen hadden gemist: <strong style="color: var(--heading);">één verborgen patroon</strong>. Iets wat alle auteurs op hun eigen manier beschreven — maar wat steeds naar <strong>hetzelfde</strong> wees.</p>
- <p>Ik bracht het samen in één systeem met vijf pilaren. Niemand had het ooit zó bij elkaar gezet. Het werkt stil. Het werkt snel. En het mooiste — <span class="highlight"><strong>het werkt zelfs als je niet precies weet waarom.</strong></span></p>
+ <p>Uit die tien boeken ontdekte ik iets wat de anderen hadden overgeslagen: <strong style="color: var(--heading);">een verborgen eigenschap</strong>. Alle auteurs hebben het op hun eigen wijze geschilderd, maar het bood telkens dezelfde boodschap.</p>
+ <p>Ik bracht het samen in één systeem met vijf pijlers. Niemand had het ooit zó samen gebracht. Het werkt stil. Het werkt snel. En het mooiste is dat <span class="highlight"><strong>het effectief is, zelfs als je niet precies begrijpt waarom.</strong></span></p>
  <div class="discovery-brand" style="position: relative;">
  <span style="display: block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--muted); margin-bottom: 4px;">✦ Mijn methode ✦</span>
  LIFE RESET™
  </div>
- <p style="font-size: 13px; color: var(--muted); margin-top: 8px;">Vrouwen vragen me steeds: <em>„Wat ís LIFE RESET™ nu eigenlijk?"</em> En mijn antwoord is altijd hetzelfde: <em>dat snap je pas als je het zelf voelt.</em></p>
+ <p style="font-size: 13px; color: var(--muted); margin-top: 8px;">Vrouwen vragen me steeds: <em>„Wat ís LIFE RESET™ nu eigenlijk?"</em> En mijn antwoord is altijd hetzelfde: <em>dat snap je pas als je het zelf ervaart.</em></p>
  </div>
  </div>
 </div>
@@ -2527,15 +2532,15 @@ html,body{overflow-x:clip}
  <div class="eyebrow" style="color: var(--highlight);">✦ Dit is het moment</div>
 
  <h2 style="font-family: 'Recoleta', serif; font-size: 36px; color: #FFFFFF; line-height: 1.25; margin-bottom: 16px;">
- Ken je dat gevoel dat het<br><span style="color: var(--highlight);">zo niet verder kan?</span>
+ Heb je het gevoel dat het<br><span style="color: var(--highlight);">zo niet verder kan?</span>
  </h2>
 
  <p class="body-text" style="font-size: 17px; color: rgba(255,255,255,0.75); line-height: 1.7; margin-bottom: 8px; max-width: 540px;">
- Elke dag sta je op in dezelfde molen. Je ruimt op, kookt, regelt, zorgt — en aan het einde van de dag? Niets over voor jou. Je lichaam doet pijn. Je hoofd stopt niet. En die ene persoon die je steun zou moeten zijn, kost je de meeste energie.
+ Dagelijks sta je op in dezelfde molen. Je ruimt op, kookt, regelt, zorgt en aan het einde van de dag? Is er niets voor jou over. Je lichaam doet pijn. Je hoofd stopt niet. En die ene persoon die je steun zou moeten zijn, kost je de meeste energie.
  </p>
 
  <p class="body-text" style="font-size: 15.5px; color: rgba(255,255,255,0.55); line-height: 1.7; margin-bottom: 20px; max-width: 540px;">
- Dit boek zegt niet „hou van jezelf". Het geeft je een <strong style="color: rgba(255,255,255,0.85);">concreet mechanisme</strong> dat in 30 dagen je huis, hoofd, relaties én energie verandert. Stap voor stap. Zonder zweverigheid.
+ Dit boek zegt niet „hou van jezelf". Het geeft je een <strong style="color: rgba(255,255,255,0.85);">concreet mechanisme</strong> dat in 30 dagen je huis, hoofd, relaties én energie verandert. Stap voor stap. Zonder zweverig gedoe.
  </p>
 
  <!-- Wat je krijgt - compact -->
@@ -2550,11 +2555,11 @@ html,body{overflow-x:clip}
  </div>
  <div style="display: flex; align-items: center; gap: 10px;">
  <span style="font-size: 18px; flex-shrink: 0;">🚚</span>
- <span style="color: rgba(255,255,255,0.85); font-size: 14.5px;"><strong style="color: #fff;">Gratis verzending</strong> · Nederland &amp; België</span>
+ <span style="color: rgba(255,255,255,0.85); font-size: 14.5px;"><strong style="color: #fff;">Gratis verzending</strong> binnen Nederland &amp; België</span>
  </div>
  <div style="display: flex; align-items: center; gap: 10px;">
  <span style="font-size: 18px; flex-shrink: 0;">🛡️</span>
- <span style="color: rgba(255,255,255,0.85); font-size: 14.5px;"><strong style="color: #fff;">30 dagen geld-terug-garantie</strong> · Geen risico</span>
+ <span style="color: rgba(255,255,255,0.85); font-size: 14.5px;"><strong style="color: #fff;">30 dagen geld-terug-garantie</strong>, Zonder risico</span>
  </div>
  </div>
 
@@ -2567,8 +2572,8 @@ html,body{overflow-x:clip}
 
  <!-- CTA + ghost -->
  <div class="hero-buttons">
- <a href="/checkout" class="btn-cta">Ja, ik wil het complete pakket — € 36 →</a>
- <a href="#ukazka" class="btn-ghost" style="color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.2);">Lees een gratis fragment →</a>
+ <a href="/checkout" class="btn-cta">Ja, ik wil het complete pakket voor € 36 →</a>
+ <a href="#ukazkaStage" class="btn-ghost" style="color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.2);">Lees een gratis stukje →</a>
  </div>
 
  <!-- Betaalmethoden -->
@@ -2625,12 +2630,12 @@ html,body{overflow-x:clip}
  ═══════════════════════════════════════════ -->
 <div class="section" style="background: var(--bg); padding: 56px 20px;">
  <div class="section-inner">
- <div class="eyebrow center anim">Wat vrouwen merken</div>
+ <div class="eyebrow center anim">Wat vrouwen merken.</div>
  <h2 class="anim d1" style="text-align: center; max-width: 640px; margin: 0 auto 16px;">
  Geen theorie.<br><span class="accent">Gewoon vrouwen die opeens iets anders voelden.</span>
  </h2>
  <p class="body-text center anim d2" style="max-width: 540px; margin: 0 auto 48px; color: var(--muted);">
- Geen percentages. Geen mooie grafieken. Gewoon vrouwen zoals jij — die op een dag zeiden: „Zo wil ik niet langer leven" — en het anders gingen doen.
+ Geen percentages. Geen mooie grafieken. Gewoon vrouwen zoals jij, die op een dag zeiden: „Zo wil ik niet langer leven" en het anders gingen doen.
  </p>
 
  <!-- Visuele transformatiepad -->
@@ -2639,12 +2644,12 @@ html,body{overflow-x:clip}
  <!-- VOOR -->
  <div class="transform-before">
  <div style="font-size: 32px; margin-bottom: 12px;">😔</div>
- <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); font-weight: 600; margin-bottom: 16px;">Hoe het voelde</div>
+ <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); font-weight: 600; margin-bottom: 16px;">Hoe het voelde:</div>
  <div style="display: flex; flex-direction: column; gap: 8px;">
- <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--text); line-height: 1.4;">„Ik word wakker en ben al op."</div>
+ <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--text); line-height: 1.4;">„Ik word wakker en ben al uitgeput."</div>
  <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--text); line-height: 1.4;">„Ik doe alles. En toch is het nooit genoeg."</div>
  <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--text); line-height: 1.4;">„Na elk gesprek met haar ben ik helemaal leeg."</div>
- <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--text); line-height: 1.4;">„Ik krijg geen NEE over mijn lippen — ook al weet ik dat het me kapotmaakt."</div>
+ <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--text); line-height: 1.4;">„Ik krijg geen NEE over mijn lippen, ook al weet ik dat het me kapotmaakt."</div>
  <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--text); line-height: 1.4;">„Zelfs als ik iets voor mezelf wil, voel ik me schuldig."</div>
  </div>
  </div>
@@ -2657,13 +2662,13 @@ html,body{overflow-x:clip}
  <!-- NA -->
  <div class="transform-after">
  <div style="font-size: 32px; margin-bottom: 12px;">✨</div>
- <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: #4a8c5c; font-weight: 600; margin-bottom: 16px;">Hoe het nu voelt</div>
+ <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: #4a8c5c; font-weight: 600; margin-bottom: 16px;">Hoe het nu voelt:</div>
  <div style="display: flex; flex-direction: column; gap: 8px;">
  <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--text); line-height: 1.4;">„'s Ochtends kijk ik weer uit naar mijn dag."</div>
  <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--text); line-height: 1.4;">„Ik zei NEE. En weet je wat? De wereld stortte niet in."</div>
  <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--text); line-height: 1.4;">„Ik heb afstand genomen van mensen die me steeds opnieuw pijn deden."</div>
  <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--text); line-height: 1.4;">„Ik neem tijd voor mezelf. Zonder me daar nog schuldig over te voelen."</div>
- <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--text); line-height: 1.4;">„Het is stil thuis. En vanbinnen ook."</div>
+ <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--text); line-height: 1.4;">„Het is stil in huis. En vanbinnen ook."</div>
  </div>
  </div>
  </div>
@@ -2672,10 +2677,10 @@ html,body{overflow-x:clip}
  <div style="text-align: center; max-width: 520px; margin: 0 auto;" class="anim d3">
  <p style="font-size: 17px; line-height: 1.7; color: var(--text); margin-bottom: 20px;">
  Het gaat niet om cijfers.<br>
- Het gaat om wat je <strong>voelt</strong> als je eindelijk stilstaat — en jezelf toestaat om op jouw manier te leven.
+ Het gaat om wat je <strong>voelt</strong> als je eindelijk stilstaat en jezelf toestaat om op jouw manier te leven.
  </p>
  <p style="font-size: 15px; color: var(--muted); line-height: 1.6; font-style: italic;">
- Dit boek brengt de kern samen van tien toonaangevende boeken over zelfkennis, minimalisme, feng shui, grenzen stellen en productiviteit. Het zijn geen eigen theorieën. Het zijn methodes die hun waarde al lang hebben bewezen. En voor het eerst staan ze bij elkaar, in één systeem, in één boek — voor vrouwen in Nederland en België.
+ Dit boek bundelt de essentie van tien boeken over zelfkennis, minimalisme, feng shui, het stellen van grenzen en productiviteit. Het zijn geen eigen theorieën. Het zijn methodes die hun waarde al lang hebben bewezen. En voor het eerst zijn ze samengebundeld, in één systeem, in één boek. Voor vrouwen in Nederland en België.
  </p>
  </div>
 
@@ -2689,7 +2694,7 @@ html,body{overflow-x:clip}
  „Ze zeiden eigenlijk allemaal hetzelfde. Alleen met andere woorden."
  </p>
  <p class="anim d1" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); margin-top: 12px;">
- Elke vrouw die dit boek opensloeg, dacht in stilte: „Ja maar bij mij is het anders." En weet je wat? Bij niemand bleek dat zo te zijn.
+ Elke vrouw die dit boek opensloeg, dacht: „Ja maar bij mij is het anders." En weet je wat? Bij niemand bleek dat zo te zijn.
  </p>
  </div>
 </div>
@@ -2701,10 +2706,10 @@ html,body{overflow-x:clip}
  <div class="section-inner">
  <div class="eyebrow center anim">✦ Kijk wat er in de vijf pilaren verborgen zit</div>
  <h2 class="anim d1" style="text-align: center; max-width: 720px; margin: 0 auto 12px;">
- Dit is wat er in het boek staat — <span class="accent">en waarom vrouwen het in één adem uitlezen.</span>
+ Dit is wat er in het boek staat <span class="accent">en waarom vrouwen het in één adem uitlezen.</span>
  </h2>
  <p class="body-text center anim d2" style="margin-bottom: 48px; color: var(--muted);">
- Geen samenvatting. Geen inhoudsopgave. Vijftien dingen die je gaat ontdekken — en die je niet meer uit je hoofd krijgt.
+ Geen samenvatting. Geen inhoudsopgave. Vijftien dingen die je gaat ontdekken en die je niet meer kan vergeten.
  </p>
 
  <!-- Pijler 01 -->
@@ -2715,23 +2720,23 @@ html,body{overflow-x:clip}
  <div class="pillar-header"><span class="icon">🏠</span><span class="label">PIJLER 01</span></div>
  <h3>SPULLEN</h3>
  <p class="pillar-subtitle" style="font-family: 'Recoleta', serif; font-size: 15px; color: var(--highlight); margin: -8px 0 12px; font-style: italic;">We ruimen je verleden op</p>
- <p class="pillar-problem">Die jurk van 120 € die je één keer hebt gedragen. Kindertekeningen die je niet weg kunt gooien. Papieren die zich opstapelen. En die vaas van je schoonmoeder.</p>
- <div class="pillar-learn"><span class="arrow">→</span><span>Waarom een volle kast je leger laat voelen dan een halfvolle — en de drie seconden waarin je lichaam het al weet, terwijl je hoofd nog twijfelt.</span></div>
- <div class="pillar-learn"><span class="arrow">→</span><span>Het venster van 48 uur waarna elke donate-box wordt leeggeroofd door je eigen brein — en het ene gebaar dat die spiraal definitief breekt.</span></div>
- <div class="pillar-learn"><span class="arrow">→</span><span>Waarom de cadeaus die je al jaren verschuift geen liefde beschermen, maar een leugen die niemand van je verwacht.</span></div>
+ <p class="pillar-problem">Die jurk van € 120 die je maar één keer hebt gedragen. Kindertekeningen die je niet weg kunt gooien. Papieren die zich opstapelen. En die vaas van je schoonmoeder.</p>
+ <div class="pillar-learn"><span class="arrow">→</span><span>Waarom een volle kast je leger laat voelen dan een halfvolle en de drie seconden waarin je lichaam het al weet, terwijl je hoofd nog twijfelt.</span></div>
+ <div class="pillar-learn"><span class="arrow">→</span><span>Het venster van 48 uur waarna elke donatiedoos wordt leeggeroofd door je eigen brein en het ene gebaar dat die spiraal definitief breekt.</span></div>
+ <div class="pillar-learn"><span class="arrow">→</span><span>Waarom zijn de geschenken die je al jarenlang alleen verplaatst, geen bescherming van liefde, maar een leugen die niemand van je verwacht?</span></div>
  </div>
  <div class="pillar-right">
  <div class="pillar-before-after">
  <div class="pillar-ba-box before">
  <div class="pillar-ba-label">Voor</div>
- <div class="pillar-ba-text">347 stuks. 15 minuten ’s ochtends voor de kast. Paniek als een vriendin langskomt.</div>
+ <div class="pillar-ba-text">347 stuks. Elke ochtend 15 minuten voor de kast. Paniek als er een vriendin langskomt.</div>
  </div>
  <div class="pillar-ba-box after">
  <div class="pillar-ba-label">Na</div>
- <div class="pillar-ba-text">73 stuks. 3 minuten. „Ik voelde me fysiek lichter na één zak oude kleren.“</div>
+ <div class="pillar-ba-text">73 stuks. Nog maar 3 minuten voor de kast. „Ik voelde me fysiek lichter na één zak oude kleren.“</div>
  </div>
  </div>
- <div class="pillar-quote">„Ik kocht opbergdozen en dacht dat organiseren het antwoord was. Dat was het niet.“</div>
+ <div class="pillar-quote">„Ik kocht opbergdozen en dacht dat ordenen het antwoord was. Dat was het niet.“</div>
  </div>
  </div>
  </div>
@@ -2743,11 +2748,11 @@ html,body{overflow-x:clip}
  <div class="pillar-left">
  <div class="pillar-header"><span class="icon">✨</span><span class="label">PIJLER 02</span></div>
  <h3>RUIMTE</h3>
- <p class="pillar-subtitle" style="font-family: 'Recoleta', serif; font-size: 15px; color: var(--highlight); margin: -8px 0 12px; font-style: italic;">Eeuwenoude Chinese wijsheid die je huis verandert in één middag</p>
- <p class="pillar-problem">Bed met de rug naar de deur. Thuiskantoor in de slaapkamer. Grijze muren. Je huis ziet er leuk uit op Pinterest — maar thuis word je er verdrietig van.</p>
- <div class="pillar-learn"><span class="arrow">→</span><span>Het detail in je slaapkamer dat bepaalt of je brein 's nachts ontspant of gewapend op wacht blijft staan — en dat de meeste vrouwen pas zien als iemand het aanwijst.</span></div>
- <div class="pillar-learn"><span class="arrow">→</span><span>Waarom een bosje bloemen van € 4 meer verandert dan een maand mediteren met een app — en dat is geen metafoor, maar aantoonbare neurobiologie.</span></div>
- <div class="pillar-learn"><span class="arrow">→</span><span>De ene oppervlakte in huis die je brein binnen twee seconden scant als je thuiskomt — en waarom ze de toon zet voor alles wat daarna volgt.</span></div>
+ <p class="pillar-subtitle" style="font-family: 'Recoleta', serif; font-size: 15px; color: var(--highlight); margin: -8px 0 12px; font-style: italic;">Eeuwenoude Chinese wijsheid die je huis in één middag verandert.</p>
+ <p class="pillar-problem">Het bed met de achterkant tegen de muur. Werkgerelateerde zaken in de slaapkamer. Grijze muren. Je huis ziet er leuk uit op Pinterest, maar thuis word je er verdrietig van.</p>
+ <div class="pillar-learn"><span class="arrow">→</span><span>Het detail in je slaapkamer dat bepaalt of je brein 's nachts ontspant of alert blijft en dat de meeste vrouwen pas zien als iemand het benoemd.</span></div>
+ <div class="pillar-learn"><span class="arrow">→</span><span>Waarom een bosje bloemen van € 4 meer verandert dan een maand mediteren met een app en dat is geen metafoor, maar aantoonbare neurobiologie.</span></div>
+ <div class="pillar-learn"><span class="arrow">→</span><span>De ene oppervlakte in huis die je brein binnen twee seconden scant als je thuiskomt en waarom het de toon zet voor alles wat daarna volgt.</span></div>
  </div>
  <div class="pillar-right">
  <div class="pillar-before-after">
@@ -2757,7 +2762,7 @@ html,body{overflow-x:clip}
  </div>
  <div class="pillar-ba-box after">
  <div class="pillar-ba-label">Na</div>
- <div class="pillar-ba-text">Zelfde huis. Andere positie van het bed. Bloemen. Ik slaap de hele nacht door.</div>
+ <div class="pillar-ba-text">Hetzelfde huis. Andere positie van het bed. Bloemen. Ik slaap de hele nacht door.</div>
  </div>
  </div>
  <div class="pillar-quote">„Ik dacht dat ik therapie nodig had. Het bleek dat ik een andere kleur muren nodig had.“</div>
@@ -2773,10 +2778,10 @@ html,body{overflow-x:clip}
  <div class="pillar-header"><span class="icon">🤝</span><span class="label">PIJLER 03</span></div>
  <h3>MENSEN</h3>
  <p class="pillar-subtitle" style="font-family: 'Recoleta', serif; font-size: 15px; color: var(--highlight); margin: -8px 0 12px; font-style: italic;">Ik leer je twee woorden die je nooit meer vergeet. En je wereld verandert.</p>
- <p class="pillar-problem">Mama belt elke dag. Je man zegt „als je het vraagt, help ik“ (maar je WILT NIET VRAGEN). Een vriendin put je uit na elke afspraak. En voor jezelf is er nooit tijd.</p>
- <div class="pillar-learn"><span class="arrow">→</span><span>De twee woorden die Lieke vijftien jaar niet kon uitspreken — en die haar moeder, na drie maanden, dankbaar maakten dat ze dat eindelijk wel deed.</span></div>
- <div class="pillar-learn"><span class="arrow">→</span><span>Waarom je niet moe bent van het zorgen voor anderen, maar van de stille pogingen hen te veranderen — en de zin die die poging in één ochtend laat verdwijnen.</span></div>
- <div class="pillar-learn"><span class="arrow">→</span><span>De zes behoeften die iedere relatie sturen — en waarom je, zodra je herkent welke je mist, nooit meer hetzelfde naar je relaties kijkt.</span></div>
+ <p class="pillar-problem">Mama belt elke dag. Je man zegt „als je het vraagt, help ik“ (maar je WILT HET NIET VRAGEN). Een vriendin put je na elke afspraak uit. En voor jezelf is er nooit tijd.</p>
+ <div class="pillar-learn"><span class="arrow">→</span><span>De twee woorden die Lieke vijftien jaar niet kon uitspreken en die haar moeder, na drie maanden, dankbaar maakten dat ze dat eindelijk wel deed.</span></div>
+ <div class="pillar-learn"><span class="arrow">→</span><span>Waarom je niet moe bent van het zorgen voor anderen, maar van de stille pogingen hen te veranderen en de zin die die poging in één ochtend laat verdwijnen.</span></div>
+ <div class="pillar-learn"><span class="arrow">→</span><span>De zes behoeften die iedere relatie sturen en waarom je, zodra je herkent welke je mist, nooit meer hetzelfde naar je relaties kijkt.</span></div>
  </div>
  <div class="pillar-right">
  <div class="pillar-before-after">
@@ -2789,7 +2794,7 @@ html,body{overflow-x:clip}
  <div class="pillar-ba-text">Eén NEE. De wereld stortte niet in. „Die twee woorden redden mijn huwelijk.“</div>
  </div>
  </div>
- <div class="pillar-quote">„20 jaar lang regelde ik ieders gevoelens. Voor het eerst vroeg ik: en die van mij?“</div>
+ <div class="pillar-quote">„20 jaar lang hield ik rekening met ieders gevoel. Voor het eerst vroeg ik: en mijn gevoel?“</div>
  </div>
  </div>
  </div>
@@ -2802,23 +2807,23 @@ html,body{overflow-x:clip}
  <div class="pillar-header"><span class="icon">🧠</span><span class="label">PIJLER 04</span></div>
  <h3>GEEST</h3>
  <p class="pillar-subtitle" style="font-family: 'Recoleta', serif; font-size: 15px; color: var(--highlight); margin: -8px 0 12px; font-style: italic;">5 woorden die de spiraal om drie uur ’s nachts stoppen</p>
- <p class="pillar-problem">Om 3 uur ’s nachts word je wakker. Je hoofd begint: wat zei ik tegen mijn baas. Wat denkt de buurvrouw. Wat als mijn kind te laat thuiskomt. Je draait één gesprek 47× af. Je kaak klemt. Je maag knijpt.</p>
- <div class="pillar-learn"><span class="arrow">→</span><span>Het verschil tussen gedachten en denken — en waarom daarin het verschil ligt tussen lijden en vrijheid.</span></div>
- <div class="pillar-learn"><span class="arrow">→</span><span>Het perron-principe dat Danique na één week voor het eerst in jaren liet doorslapen — en dat je vandaag al kunt toepassen, zonder meditatie, zonder app.</span></div>
- <div class="pillar-learn"><span class="arrow">→</span><span>Wat psychologen „somatische markers" noemen — je lichaam weet het juiste antwoord al vóór je hoofd de vraag afmaakt, mits je leert het te horen.</span></div>
+ <p class="pillar-problem">Om 3 uur ’s nachts word je wakker. Je hoofd begint te malen: wat zei ik tegen mijn baas. Wat denkt de buurvrouw. Wat als mijn kind te laat thuiskomt. Je draait één gesprek 47× af. Je klemt je kaken op elkaar. Je maag knijpt zich bij elkaar.</p>
+ <div class="pillar-learn"><span class="arrow">→</span><span>Het verschil tussen gedachten en denken en waarom daarin het verschil ligt tussen lijden en vrijheid.</span></div>
+ <div class="pillar-learn"><span class="arrow">→</span><span>Het perron-principe dat Danique na één week voor het eerst in jaren liet doorslapen en dat je vandaag al kunt toepassen, zonder meditatie, zonder app.</span></div>
+ <div class="pillar-learn"><span class="arrow">→</span><span>Wat psychologen „somatische markers" noemen, geeft aan dat je lichaam het juiste antwoord al weet voordat je gedachten de vraag beantwoorden, op voorwaarde dat je het leert te horen.</span></div>
  </div>
  <div class="pillar-right">
  <div class="pillar-before-after">
  <div class="pillar-ba-box before">
  <div class="pillar-ba-label">Voor</div>
- <div class="pillar-ba-text">Om drie uur ’s nachts wakker worden. Kaken op elkaar. „Mijn hoofd is mijn vijand.“</div>
+ <div class="pillar-ba-text">Om drie uur ’s nachts wakker worden. Kaken op elkaar geklemd. „Mijn hoofd is mijn vijand.“</div>
  </div>
  <div class="pillar-ba-box after">
  <div class="pillar-ba-label">Na</div>
- <div class="pillar-ba-text">Gedachten komen. Ik laat ze gaan. Ik val weer in slaap.</div>
+ <div class="pillar-ba-text">De gedachten komen weer. Ik laat ze gaan. Ik val weer in slaap.</div>
  </div>
  </div>
- <div class="pillar-quote">„Eén angstige gedachte sluipt binnen — en dan begint de spiraal. Nu weet ik hoe ik hem stop.“</div>
+ <div class="pillar-quote">„Eén angstige gedachte sluipt binnen en dan begint de spiraal opnieuw. Nu weet ik hoe ik hem moet stoppen.“</div>
  </div>
  </div>
  </div>
@@ -2830,11 +2835,11 @@ html,body{overflow-x:clip}
  <div class="pillar-left">
  <div class="pillar-header"><span class="icon">⚡</span><span class="label">PIJLER 05</span></div>
  <h3>ENERGIE</h3>
- <p class="pillar-subtitle" style="font-family: 'Recoleta', serif; font-size: 15px; color: var(--highlight); margin: -8px 0 12px; font-style: italic;">De audit waardoor je ontdekt waar je leven naartoe lekt</p>
- <p class="pillar-problem">Je komt thuis van werk → koken, opruimen, huiswerk, kinderen in bad → om 23:00 val je om. Weekend zonder plannen? Paniek. Vakantie? Je komt nog vermoeider terug. En je kunt niet stoppen met werken, want „ze hebben me nodig“.</p>
- <div class="pillar-learn"><span class="arrow">→</span><span>Waarom een vrij weekend of een massage precies achtenveertig uur houdt — en waar het echte energielek dan wél zit.</span></div>
+ <p class="pillar-subtitle" style="font-family: 'Recoleta', serif; font-size: 15px; color: var(--highlight); margin: -8px 0 12px; font-style: italic;">De audit die je helpt te achterhalen waar je leven naartoe leidt.</p>
+ <p class="pillar-problem">Je komt thuis van werk → gaat koken, opruimen, huiswerk, kinderen in bad → om 23:00 val je om. Een weekend zonder plannen? Paniek. Vakantie? Je komt nog vermoeider terug. En je kunt niet stoppen met werken, want „ze hebben me nodig“.</p>
+ <div class="pillar-learn"><span class="arrow">→</span><span>Waarom een vrij weekend of een massage precies achtenveertig uur duurt en waar het ware energielek zich dan daadwerkelijk bevindt?</span></div>
  <div class="pillar-learn"><span class="arrow">→</span><span>De audit waarmee Femke op één zondagmiddag ontdekte dat ze vier uur per week besteedde aan dingen die niemand van haar vroeg.</span></div>
- <div class="pillar-learn"><span class="arrow">→</span><span>Eén zin van Greg McKeown die tien uur per week in je agenda terugvindt — mits je weet wanneer je haar moet gebruiken.</span></div>
+ <div class="pillar-learn"><span class="arrow">→</span><span>Er is één zin van Greg McKeown die tien uur per week in je agenda te vinden is, op voorwaarde dat je weet wanneer je haar moet inzetten.</span></div>
  </div>
  <div class="pillar-right">
  <div class="pillar-before-after">
@@ -2844,10 +2849,10 @@ html,body{overflow-x:clip}
  </div>
  <div class="pillar-ba-box after">
  <div class="pillar-ba-label">Na</div>
- <div class="pillar-ba-text">NEE gezegd tegen mijn baas. Geluncht met mijn dochter. Voor het eerst in 5 jaar gelezen voor mijn plezier.</div>
+ <div class="pillar-ba-text">NEE gezegd tegen mijn baas. Geluncht met mijn dochter. Voor het eerst in 5 jaar voor mijn plezier gelezen.</div>
  </div>
  </div>
- <div class="pillar-quote">„Geen tijd voor slaap, eten, je gezin? Dan heb je dit boek nodig.“</div>
+ <div class="pillar-quote">„Geen tijd om te slapen, eten, je gezin? Dan heb je dit boek nodig.“</div>
  </div>
  </div>
  </div>
@@ -2864,7 +2869,7 @@ html,body{overflow-x:clip}
  Vreugde &nbsp;<span style="color: #E8A88C;">+</span>&nbsp; Realiteit &nbsp;<span style="color: #E8A88C;">=</span>&nbsp; <span style="color: #E8A88C;">Vrijheid</span>
  </h2>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 17px; line-height: 1.7; color: rgba(255,255,255,0.85); max-width: 560px; margin: 0 auto;">
- Bij elke jurk in je kast, elk appje dat binnenkomt, elke ja die je bijna geeft. Eén zin die je weer terugbrengt bij jezelf. Meer heb je echt niet nodig.
+ Bij elke jurk in je kast, elk appje dat binnenkomt, elke ja, die je bijna geeft. Eén zin die je opnieuw bij jezelf brengt. Meer heb je echt niet nodig.
  </p>
  </div>
 </div>
@@ -2879,7 +2884,7 @@ html,body{overflow-x:clip}
  Acht minuten. <span class="accent">Eén la.</span> Eén keer per dag.
  </h2>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 17px; line-height: 1.7; color: var(--muted); max-width: 600px; margin: 0 auto;">
- Geen weekend vrijhouden. Geen dagen blokkeren in je agenda. Geen cursus. Geen retreat. Geen coach.<br><br>Acht minuutjes tussen het ontbijt en je eerste mail. Of 's avonds, als de kinderen eindelijk slapen. Dat is het. Meer vraag ik niet van je.
+ Geen weekend vrijhouden. Geen dagen blokkeren in je agenda. Geen cursus. Geen retreat. Geen coach.<br><br>Acht minuutjes tussen het ontbijt en je eerste mail. Of 's avonds, als de kinderen eindelijk slapen. Alleen dat. Meer vraag ik niet van je.
  </p>
  </div>
 </div>
@@ -2909,18 +2914,18 @@ html,body{overflow-x:clip}
  </div>
  <div class="counter-card anim d2">
  <div class="counter-num" data-target="5" data-suffix="">5</div>
- <div class="counter-sub">pilaren · één systeem</div>
+ <div class="counter-sub">pijlers · één systeem</div>
  <div class="counter-label">dat élk gebied van je leven tegelijk aanpakt</div>
  </div>
  <div class="counter-card anim d3">
  <div class="counter-num" data-target="8" data-suffix=" min">8 min</div>
  <div class="counter-sub">per dag is genoeg</div>
- <div class="counter-label">de oefeningen passen in je drukste ochtend</div>
+ <div class="counter-label">de oefeningen zijn geschikt voor je drukste ochtend.</div>
  </div>
  <div class="counter-card anim d4">
  <div class="counter-num" data-target="7" data-suffix="">7</div>
  <div class="counter-sub">dagen</div>
- <div class="counter-label">tot je het eerste verschil voelt — en anderen het merken</div>
+ <div class="counter-label">tot je het eerste verschil voelt en anderen het merken</div>
  </div>
  </div>
  </div>
@@ -2934,7 +2939,7 @@ html,body{overflow-x:clip}
  <div style="display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap;">
  <div style="flex: 1; min-width: 240px;">
  <h2 style="font-family: 'Recoleta', serif; font-size: 26px; color: #FFFFFF; line-height: 1.3; margin: 0 0 6px;">
- Acht minuutjes per dag. <span style="color: var(--highlight);">Echt — meer is het niet.</span>
+ Acht minuutjes per dag. <span style="color: var(--highlight);">Echt. Meer is het niet.</span>
  </h2>
  <p style="font-size: 15px; color: rgba(255,255,255,0.75); margin: 0; line-height: 1.5;">
  📖 Het boek (340 p.)  +  🎁 2 bonus-e-books  +  🚚 gratis verzending
@@ -2968,35 +2973,35 @@ html,body{overflow-x:clip}
  <div style="max-width: 620px; margin: 0 auto; padding: 24px 0; display: flex; flex-direction: column; gap: 18px;" class="anim d3">
 
  <p style="font-style: italic; color: var(--body); line-height: 1.9;">
- Op een ochtend word je wakker — en je wekker is nog niet gegaan. En je merkt: het is geen onrust dit keer. Je ligt gewoon te denken: fijn dat het ochtend is. En dat klinkt als niks, ik weet het. Maar als je het al jaren niet hebt gevoeld, <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">is het iets héél groots.</strong>
+ Op een ochtend word je wakker en je wekker is nog niet gegaan. Het is duidelijk: dit keer is er geen onrust. Je ligt gewoon te denken: fijn dat het ochtend is. En dat klinkt als niet, ik weet het. Maar als je het al jaren niet hebt gevoeld, <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">is het iets héél groots.</strong>
  </p>
 
  <p style="font-style: italic; color: var(--body); line-height: 1.9;">
- Je opent je kast en je weet meteen wat je vandaag aandoet. Geen tien minuten staren. Geen „ik heb niks om aan te trekken". Alles wat erin hangt, hangt erin omdat jij het mooi vindt. En dat verandert <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">hoe je de hele dag in je vel zit.</strong>
+ Je opent je kast en je weet meteen wat je vandaag aandoet. Geen tien minuten staren. Geen „ik heb niets om aan te trekken". Alles wat erin hangt, hangt erin omdat jij het mooi vindt. <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">Dat heeft invloed op de manier waarop je de hele dag in je vel zit.</strong>
  </p>
 
  <p style="font-style: italic; color: var(--body); line-height: 1.9;">
- En dan komt het moment dat ik echt aan je gun. Mama belt. Ze vraagt iets waar je gewoon geen ruimte voor hebt. En je zegt: „Vandaag niet, mam." Vroeger? Dan liep je daarna een halve dag rond met dat knagende gevoel. Nu? <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">Je legt op, je haalt adem, je gaat verder. Klaar.</strong>
+ En dan komt het moment dat ik echt aan je gun. Mama belt. Ze vraagt iets waar je gewoon geen ruimte voor hebt. En je zegt: „Vandaag niet, mam." Vroeger? Dan liep je daarna een halve dag rond met een schuldgevoel. Nu? <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">Je hangt op, je haalt adem, je gaat verder. Klaar.</strong>
  </p>
 
  <p style="font-style: italic; color: var(--body); line-height: 1.9;">
- Op een avond zit je op de bank en doet… niets. Geen telefoon. Geen wasje meer doen. Gewoon zitten. En weet je wat er níét gebeurt? Die stem die altijd zegt „je zou toch moeten…" — die zegt niks. Voor het eerst in lange tijd is het stil. <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">Lekker stil.</strong>
+ Op een avond zit je op de bank en doet… niets. Geen telefoon. Geen wasje meer. Gewoon zitten. En weet je wat er níét gebeurt? Die stem die altijd zegt „je zou toch moeten…" en die zegt niets. Voor het eerst in lange tijd is het stil. <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">Heerlijk stil.</strong>
  </p>
 
  <p style="font-style: italic; color: var(--body); line-height: 1.9;">
- En je kijkt naar je partner — en je hoeft hem niks te zeggen. Niet wijzen op iets wat hij vergeten is. Niet sturen. Niet redden. Hij is er gewoon. Jij bent er. En <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">het hoeft niet meer te worden dan dat.</strong>
+ En je kijkt naar je partner en je hoeft hem niks te zeggen. Niet wijzen op iets wat hij vergeten is. Niet sturen. Niet redden. Hij is er gewoon. Jij bent er. En <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">het hoeft niet meer te worden dan dat.</strong>
  </p>
 
  <p style="font-style: italic; color: var(--body); line-height: 1.9;">
- En dan is er die ene dag dat je langs de spiegel loopt en blijft staan. Niet om iets te checken. Niet om iets te corrigeren. Je staat er gewoon — en je denkt: <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">ik mag haar wel.</strong> Die vrouw daar in de spiegel. Voor het eerst in héél lang.
+ En dan is er die ene dag dat je langs de spiegel loopt en blijft staan. Niet om iets te checken. Niet om iets te corrigeren. Je staat er en je denkt: <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">ik mag haar wel.</strong> Die vrouw daar in de spiegel. Voor het eerst in lange tijd.
  </p>
 
  <p style="font-style: italic; color: var(--body); line-height: 1.9;">
- En 's avonds, als je het licht uitdoet, val je in slaap met dat ene gevoel: deze dag deed ertoe. Niet omdat je je hele lijstje afhad. Maar omdat er ergens in die dag, ook al was het maar even, <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">iets zat dat van jou was.</strong>
+ En 's avonds, als je het licht uitdoet, val je in slaap met dat ene gevoel: deze dag deed ertoe. Je had je hele lijst niet afgerond. Toch was er ergens op die dag, ook al was het maar voor een korte duur, <strong style="color: var(--heading); background: linear-gradient(to top, rgba(232,168,140,0.18) 40%, transparent 40%); padding: 0 2px;">iets dat van jou was.</strong>
  </p>
 
  <p style="font-family: 'Recoleta', serif; font-size: 21px; font-weight: 600; color: var(--heading); text-align: center; padding: 20px 0 0;">
- En weet je wat het mooie is? Dit komt niet van één geweldig weekend.<br>Het komt van dertig dagen, beetje bij beetje. Eén la. Eén NEE. Eén ademhaling — telkens als het te veel wordt.
+ En weet je wat het mooie is? Dit komt niet door één geweldig weekend.<br>Het komt van dertig dagen, beetje bij beetje. Eén la. Eén NEE. Eén ademhaling en telkens als het te veel wordt.
  </p>
  </div>
 
@@ -3017,7 +3022,7 @@ html,body{overflow-x:clip}
  <span class="accent">Dit is een plan.</span>
  </h2>
  <p class="body-text center anim d2" style="margin-bottom: 48px; max-width: 640px; margin-left: auto; margin-right: auto;">
- Geen mooie citaten om bij te zuchten. Geen theorie die „diep" klinkt en je twee weken later niks meer zegt. Dit boek brengt je meteen in beweging — in je huis, in je hoofd, in wat je voor jezelf durft op te eisen.<br><br>
+ Geen mooie citaten om bij te zuchten. Geen theorie die „diep" klinkt en je twee weken later niks meer zegt. Dit boek brengt je meteen in beweging, in je huis, in je hoofd, in wat je voor jezelf durft op te eisen.<br><br>
  En ik zeg het je eerlijk: sommige stukken raken iets aan wat je al jaren met je meedraagt. Er kan iets loskomen. Je kunt huilen. Misschien zelfs hard. En weet je wat? <strong>Dat is precies de bedoeling. Pas dán begint het echt te werken.</strong>
  </p>
 
@@ -3030,7 +3035,7 @@ html,body{overflow-x:clip}
  <div class="feature-card anim d2">
  <div class="feature-icon">📚</div>
  <div class="feature-num">10</div>
- <div class="feature-label">bestsellers samengebracht in dit ene boek</div>
+ <div class="feature-label">bestsellers samengebracht in een enkel boek</div>
  </div>
  <div class="feature-card anim d3">
  <div class="feature-icon">🎯</div>
@@ -3040,12 +3045,12 @@ html,body{overflow-x:clip}
  <div class="feature-card anim d4">
  <div class="feature-icon">🔥</div>
  <div class="feature-num">30</div>
- <div class="feature-label">dagen, stap voor stap — geen overweldiging</div>
+ <div class="feature-label">dagen, stap voor stap – geen overweldiging</div>
  </div>
  <div class="feature-card anim d5">
  <div class="feature-icon">🏛️</div>
  <div class="feature-num">5</div>
- <div class="feature-label">pilaren — élk gebied van je leven</div>
+ <div class="feature-label">pijlers – élk gebied van je leven</div>
  </div>
  <div class="feature-card anim d6">
  <div class="feature-icon">🌍</div>
@@ -3056,9 +3061,9 @@ html,body{overflow-x:clip}
 
  <div class="price-compare anim">
  <p>
- Wil je die tien boeken apart kopen? Reken op <span style="text-decoration: line-through; opacity: 0.6;">200+ €</span> en vier maanden lezen.<br>
- Het complete LIFE RESET™-pakket? <strong style="color: var(--heading); font-size: 20px;">€ 36</strong>. Dertig dagen.
- <br><br><em style="font-size: 14px; color: var(--muted);">Dat is minder dan een Rituals-kaars die je in twee weken opbrandt. Minder dan dat ene H&M-rokje dat je twee keer draagt en dan vergeet. Het verschil? Een kaars geeft je één avond. Een rokje misschien een seizoen. <strong style="color: var(--heading);">Dit boek geeft je iets terug waarvan je dacht dat je het kwijt was.</strong></em>
+ Wil je die 10 boeken apart kopen? Reken dan op <span style="text-decoration: line-through; opacity: 0.6;">meer dan € 200</span> en 4 maanden lezen.<br>
+ Het complete LIFE RESET™-pakket voor <strong style="color: var(--heading); font-size: 20px;">€ 36</strong>. 30 dagen.
+ <br><br><em style="font-size: 14px; color: var(--muted);">Dat is minder dan een Rituals-kaars die je in 2 weken opbrandt. Minder dan dat ene H&M-rokje dat je 2 keer draagt en dan vergeet. Het verschil? Een kaars geeft je één avond. Een rokje misschien een seizoen. <strong style="color: var(--heading);">Dit boek geeft je iets terug waarvan je dacht dat je het kwijt was.</strong></em>
  </p>
  </div>
  </div>
@@ -3068,14 +3073,14 @@ html,body{overflow-x:clip}
 <div style="background: var(--bg); padding: 48px 20px; text-align: center;">
  <div style="max-width: 560px; margin: 0 auto;">
  <p class="anim" style="font-family: 'Recoleta', serif; font-size: 20px; color: var(--heading); margin-bottom: 24px;">
- Wat je anders nodig zou hebben
+ Wat je nodig zou hebben
  </p>
  <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
  <div class="anim d1" style="flex: 1; min-width: 220px; background: var(--white); border: 1.5px solid var(--border); border-radius: 16px; padding: 28px 20px;">
  <div style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Alternatief</div>
  <div style="font-family: 'Recoleta', serif; font-size: 32px; color: var(--heading); margin-bottom: 8px;">10 boeken</div>
  <div style="font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text); line-height: 1.6;">
- 200+ € · 4 maanden lezen<br>
+ Meer dan € 200 · 4 maanden lezen<br>
  <span style="font-size: 13px; color: var(--muted);">Zonder structuur. Zonder plan. Elk boek zegt iets anders.</span>
  </div>
  </div>
@@ -3083,8 +3088,8 @@ html,body{overflow-x:clip}
  <div style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: rgba(245,237,227,0.6); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">LIFE RESET™</div>
  <div style="font-family: 'Recoleta', serif; font-size: 32px; color: #F5EDE3; margin-bottom: 8px;">1 boek</div>
  <div style="font-family: 'DM Sans', sans-serif; font-size: 15px; color: rgba(245,237,227,0.85); line-height: 1.6;">
- € 36 · 30 dagen programma<br>
- <span style="font-size: 13px; color: rgba(245,237,227,0.6);">5 pijlers. Helder systeem. Alles op één plek.</span>
+ € 36 · 30 dagen programma met 5 pijlers.<br>
+ <span style="font-size: 13px; color: rgba(245,237,227,0.6);">Duidelijk systeem. Alles op één plek.</span>
  </div>
  </div>
  </div>
@@ -3101,22 +3106,22 @@ html,body{overflow-x:clip}
  <div style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Een vraag die ik vaak krijg</div>
  <h3>„Maar Anna… waarom maar € 36?"</h3>
  <p>
- Eerlijke vraag. En ik wil je een eerlijk antwoord geven.
+ Een eerlijke vraag. En ik wil je een eerlijk antwoord geven.
  </p>
  <p>
- In dit boek heb ik de kern samengebracht van <strong>tien toonaangevende boeken</strong> over zelfkennis, minimalisme, feng shui, grenzen stellen en productiviteit. Als je ze allemaal apart zou kopen — wat ik zelf deed — ben je meer dan € 200 kwijt. En vier maanden van je leven aan lezen.
+ In dit boek heb ik de kern samengebracht van <strong>tien toonaangevende boeken</strong> over zelfkennis, minimalisme, feng shui, grenzen stellen en productiviteit. Als je ze allemaal apart zou kopen, wat ik zelf deed, ben je meer dan € 200 kwijt. En je bent vier maanden van je leven aan het lezen.
  </p>
  <p>
- Eerlijk gezegd? Ik had dit boek voor € 97 kunnen verkopen. En het zou het waard zijn. Mijn uitgever zei het ook.
+ Eerlijk? Ik had dit boek voor € 97 kunnen verkopen. En het zou het waard zijn. Mijn uitgever zei het ook.
  </p>
  <p>
- Maar telkens als ik aan die prijs dacht, zag ik vrouwen voor me die het dán niet zouden kopen. Vrouwen die het juist het hardst nodig hebben. <strong style="color: var(--heading);">Vrouwen die maandelijks elke euro omdraaien — vaak omdat ze álles voor iedereen om hen heen betalen, behalve voor zichzelf.</strong>
+ Maar telkens als ik aan die prijs dacht, zag ik vrouwen voor me die het dán niet zouden kopen. Vrouwen die het juist het hardst nodig hebben. <strong style="color: var(--heading);">Vrouwen die maandelijks elke euro omdraaien omdat ze vaak álles voor iedereen om hen heen betalen, behalve voor zichzelf.</strong>
  </p>
  <p>
- Daarom kost het complete pakket — het boek, de twee bonus-e-books en gratis verzending — € 36.
+ Het volledige pakket, dat bestaat uit het boek, de twee bonus-e-books en gratis verzending, kost € 36.
  </p>
  <p style="font-size: 14px; color: var(--muted); margin-bottom: 0;">
- Dat is minder dan één bezoek aan een coach. Minder dan dat ene cadeau dat je laatst voor iemand anders kocht. Maar het kan voor jou het begin zijn van iets compleet anders.
+ Dat is minder dan één bezoek aan een specialist. Minder dan dat ene cadeau dat je laatst voor iemand anders kocht. Maar het kan voor jou het begin zijn van iets compleet anders.
  </p>
  <div class="wp-sig">— Anna de Vries</div>
  </div>
@@ -3136,25 +3141,25 @@ html,body{overflow-x:clip}
  <div class="cost-timeline">
  <div class="cost-item anim d1">
  <div class="cost-label" style="color: var(--highlight);">OVER EEN WEEK</div>
- <div class="cost-text" style="color: #D4B8A8;">Je sluit deze pagina. Je zegt: „volgende keer dan." En morgen — morgen sta je weer op met datzelfde lijstje in je hoofd. Diezelfde knoop in je buik. Diezelfde kast die uitpuilt. Niks veranderd. Weer een week.</div>
+ <div class="cost-text" style="color: #D4B8A8;">Je leest deze pagina af. Je zegt: „volgende keer dan." En morgen? Morgen sta je weer op met datzelfde lijstje in je hoofd. Diezelfde knoop in je buik. Diezelfde kast die uitpuilt. Niets veranderd. Weer een week.</div>
  </div>
  <div class="cost-item anim d2">
  <div class="cost-label" style="color: var(--highlight);">OVER EEN MAAND</div>
- <div class="cost-text" style="color: #D4B8A8;">Je hebt weer een opbergdoos gekocht. Weer een meditatie-app gedownload die je twee keer hebt gebruikt. Weer een artikel gelezen — „5 tips voor minder stress" — en het meteen weer vergeten. Je staat nog op precies dezelfde plek. Alleen met meer rommel om je heen.</div>
+ <div class="cost-text" style="color: #D4B8A8;">Je hebt weer een opbergdoos gekocht. Weer een meditatie-app gedownload die je twee keer hebt gebruikt. Weer een artikel gelezen genaamd „5 tips voor minder stress" en je bent het meteen weer vergeten. Je staat nog op precies dezelfde plek. Alleen met meer rommel om je heen.</div>
  </div>
  <div class="cost-item anim d3">
  <div class="cost-label" style="color: var(--highlight);">OVER EEN JAAR</div>
- <div class="cost-text" style="color: #D4B8A8;">Je kast is voller. Je hoofd is luider. Je energie is lager. Je doet nog steeds álles voor iedereen — en niemand merkt het echt op. En je telefoon? Die houd je nu drie uur per dag vast in plaats van twee. Want vluchten in een schermpje kost ieder jaar wat meer tijd.</div>
+ <div class="cost-text" style="color: #D4B8A8;">Je kast is voller. Je hoofd is luider. Je energie is lager. Je doet nog steeds álles voor iedereen en niemand merkt het echt op. En je telefoon? Die houd je nu drie uur per dag vast in plaats van twee. Want vluchten in een schermpje kost ieder jaar wat meer tijd.</div>
  </div>
  <div class="cost-item anim d4">
  <div class="cost-label" style="color: rgba(232,168,140,0.5);">OVER 5 JAAR</div>
- <div class="cost-text" style="color: rgba(212,184,168,0.5);">Sanne probeerde haar man vijftien jaar lang te veranderen — voor ze ontdekte dat het niet aan hem lag. Ingrid kreeg een burn-out na tien jaar signalen negeren. En zij zijn niet de enigen — bijna één op de drie vrouwen in Nederland kampt nu met burn-outklachten.<br><br>Elk jaar wachten heeft een prijs. En die prijs betaal je niet met geld — maar met je gezondheid, je energie, en die rust van binnen die je nooit meer kunt terugkopen.</div>
+ <div class="cost-text" style="color: rgba(212,184,168,0.5);">Sanne probeerde haar man 15 jaar lang te veranderen totdat ze ontdekte dat het niet aan hem lag. Ingrid kreeg een burn-out na het tien jaar negeren van de signalen. En zij zijn niet de enigen want bijna één op de drie vrouwen in Nederland kampt nu met burn-outklachten.<br><br>Elk jaar wachten heeft een prijs. En die prijs betaal je niet met geld maar met je gezondheid, je energie, en die rust van binnen die je nooit meer kunt terugkopen.</div>
  </div>
  </div>
 
  <div style="text-align: center; margin-top: 40px;" class="anim d5">
  <p style="font-family: 'Recoleta', serif; font-size: 20px; color: #F2E4D8; margin-bottom: 24px;">
- Of… je begint. <span style="color: var(--highlight);">Vandaag. Met iets heel kleins.</span>
+ Of… je begint er gewoon aan. <span style="color: var(--highlight);">Vandaag. Met iets heel kleins.</span>
  </p>
  <a href="/checkout" class="btn-cta" style="font-size: 18px;">Ik wil geen jaar meer verliezen →</a>
  </div>
@@ -3167,10 +3172,10 @@ html,body{overflow-x:clip}
 <div style="background: var(--bg); padding: 56px 20px; text-align: center; border-top: 1px solid var(--border);">
  <div style="max-width: 680px; margin: 0 auto;" class="anim">
  <p style="font-family: 'Recoleta', serif; font-size: clamp(22px, 4vw, 28px); line-height: 1.45; color: var(--heading); font-style: italic; margin: 0 0 20px;">
- Elke dag dat je het uitstelt, is weer een avond met <span class="accent">dat zware gevoel op je borst</span> — en de stille angst dat dit gewoon je leven is.
+ Elke dag dat je het uitstelt, is weer een avond met <span class="accent">dat zware gevoel op je borst</span> en de angst dat dit gewoon je leven is.
  </p>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 17px; line-height: 1.7; color: var(--muted); margin: 0 0 28px;">
- Weet je wat? Begin gewoon vanavond. Eén la. Acht minuten. Meer hoeft het niet te zijn. Zo is het bij iedereen begonnen.
+ Weet je wat? Begin vanavond. Eén la. Acht minuten. Meer hoeft het niet te zijn. Zo is het bij iedereen begonnen.
  </p>
  <a href="/checkout" class="btn-cta" style="font-size: 17px;">Ik wil vanavond beginnen →</a>
  </div>
@@ -3181,9 +3186,9 @@ html,body{overflow-x:clip}
  ═══════════════════════════════════════════ -->
 <div class="section" style="background: var(--light);">
  <div class="section-inner">
- <div class="eyebrow center anim">✦ Ik ken die stem in je hoofd</div>
+ <div class="eyebrow center anim">✦ Ik herken die stem in je hoofd</div>
  <h2 class="anim d1" style="text-align: center; max-width: 640px; margin: 0 auto 16px;">
- <span class="accent">„Ja maar…"</span> — zeg het maar.<br>Ik beantwoord ze één voor één.
+ <span class="accent">„Ja maar…"</span><br>Ik beantwoord ze één voor één.
  </h2>
 
  <div class="anim d1" style="text-align: center; margin: 0 auto 32px; max-width: 560px;">
@@ -3193,47 +3198,47 @@ html,body{overflow-x:clip}
  <div style="max-width: 660px; margin: 0 auto;">
  <div class="objection-card anim">
  <p class="objection-q">„Is dit weer zo'n opruim-boek?"</p>
- <p class="objection-a">Nee. Opruimen is maar één van de vijf pilaren. De andere vier gaan over je huis, de mensen om je heen, je gedachten en je energie. Daar zit het echte werk.</p>
+ <p class="objection-a">Nee. Opruimen is maar één van de 5 pilaren. De andere 4 gaan over je huis, de mensen om je heen, je gedachten en je energie. Daar zit het echte werk.</p>
  </div>
  <div class="objection-card anim">
  <p class="objection-q">„Ik heb geen tijd voor nog een zelfhulpboek."</p>
- <p class="objection-a">Dat snap ik. Daarom begint de methode met acht minuutjes per dag. Tussen je ontbijt en je eerste mail. Of 's avonds als de kinderen slapen. Meer hoef je echt niet vrij te maken.</p>
+ <p class="objection-a">Dat snap ik. Daarom begint de methode met 8 minuutjes per dag. Tussen je ontbijt en je eerste mail. Of 's avonds als de kinderen slapen. Meer hoef je echt niet vrij te maken.</p>
  </div>
  <div class="objection-card anim">
  <p class="objection-q">„Werkt het ook met kinderen en een fulltime baan?"</p>
- <p class="objection-a">Ja — sterker nog, het boek is juist voor vrouwen met een vol leven geschreven. Ik schreef het zelf met twee kinderen, een bedrijf en een huishouden om me heen. Geen enkele stap vraagt tijd die je niet hebt.</p>
+ <p class="objection-a">Ja en sterker nog, het boek is juist voor vrouwen met een vol leven geschreven. Ik schreef het zelf met 2 kinderen, een bedrijf en een huishouden om me heen. Geen enkele stap vraagt tijd die je niet hebt.</p>
  </div>
  <div class="objection-card anim">
- <p class="objection-q">„Wanneer is het boek bij me?"</p>
- <p class="objection-a">Binnen 3–5 werkdagen in Nederland en België — via koerier GLS, met track & trace.</p>
+ <p class="objection-q">„Wanneer ontvang ik het boek?"</p>
+ <p class="objection-a">Binnen 3–5 werkdagen in Nederland en België via GLS, met een track & trace.</p>
  </div>
  <div class="objection-card anim">
  <p class="objection-q">„En als het toch niets voor me is?"</p>
- <p class="objection-a">Geen probleem. Je hebt 30 dagen om het rustig uit te proberen. Niet jouw ding? Stuur het terug en je krijgt elke cent terug. Geen vragen, geen gedoe.</p>
+ <p class="objection-a">Geen probleem. Je hebt 30 dagen om het rustig uit te proberen. Is het niets voor jou? Retourneer het en ontvang je geld terug. Geen vragen, geen gedoe.</p>
  </div>
  <div class="objection-card anim">
  <p class="objection-q">„Wat als ik het na een paar dagen weer laat liggen, zoals al die andere boeken?"</p>
- <p class="objection-a">Eerlijk? Dat is precies waarom dit boek anders is opgezet. Geen lange hoofdstukken, geen huiswerk, geen schuldgevoel als je een dag overslaat. Eén la, één gedachte, één ademhaling — en de volgende dag pak je gewoon weer op. Het werkt ook in stukjes.</p>
+ <p class="objection-a">Eerlijk? Dat is precies waarom dit boek anders is opgezet. Geen lange hoofdstukken, geen huiswerk, geen schuldgevoel als je een dag overslaat. Eén la, één gedachte, één ademhaling en de volgende dag pak je het gewoon weer op. Het werkt ook in delen.</p>
  </div>
  <div class="objection-card anim">
- <p class="objection-q">„Ik ben niet zo'n type voor zelfhulp. Werkt het ook voor mij?"</p>
- <p class="objection-a">Goed nieuws: ik ook niet. Daarom staat er geen woord „manifesteer" in dit boek. Geen mantra's. Geen zweverigheid. Gewoon concrete dingen die werken — of je er nu in gelooft of niet. Sceptici doen het vaak het beste.</p>
+ <p class="objection-q">„Ik ben niet zo'n type voor zelfhulp. Werkt het dan ook voor mij?"</p>
+ <p class="objection-a">Goed nieuws: ik ook niet. Daarom staat er geen woord „manifesteer" in dit boek. Geen mantra's. Geen zweverig gedoe. Gewoon concrete dingen die werken of je er nu in gelooft of niet. Sceptici doen het vaak het beste.</p>
  </div>
  <div class="objection-card anim">
  <p class="objection-q">„Ik heb geen kinderen / geen partner. Is dit boek dan ook voor mij?"</p>
- <p class="objection-a">Absoluut. De vijf pilaren — je huis, je ruimte, de mensen om je heen, je gedachten, je energie — gelden voor élke vrouw. Of je nu single bent, samenwoont, kinderen hebt of niet. Het patroon van „voor iedereen zorgen behalve jezelf" kent geen levensfase.</p>
+ <p class="objection-a">Absoluut. De vijf pijlers: je huis, je ruimte, de mensen om je heen, je gedachten, je energie — gelden voor élke vrouw. Of je nu single bent, samenwoont, kinderen hebt of niet. Het patroon van „voor iedereen zorgen behalve jezelf" kent geen levensfase.</p>
  </div>
  <div class="objection-card anim">
  <p class="objection-q">„Ik zit eigenlijk al in een burn-out. Is dit boek dan nog wel iets voor mij?"</p>
- <p class="objection-a">Dit boek is geen vervanging voor professionele hulp — als je dat nodig hebt, zoek het. Maar veel vrouwen lezen het naast hun begeleiding, omdat het rust geeft op de dagelijkse momenten waarop ze het moeilijk hebben. Soms helpt iets klein meer dan iets groot.</p>
+ <p class="objection-a">Zoek professionele hulp als je dat nodig hebt, dit boek is geen vervanging. Veel vrouwen lezen het echter naast hun begeleiding, omdat het hen kalmte biedt op de dagelijkse tijden waarin ze het moeilijk hebben. Soms biedt iets kleins meer waarde dan iets groots.</p>
  </div>
  <div class="objection-card anim">
  <p class="objection-q">„Waarom is het maar € 36? Klinkt bijna te goedkoop."</p>
  <p class="objection-a">Omdat ik wil dat élke vrouw dit kan kopen — ook als ze normaal alles voor anderen uitgeeft. Ik had het boek voor € 97 kunnen verkopen. Maar dán hadden de vrouwen die het 't hardst nodig hebben, het niet besteld. En precies voor hén schreef ik het.</p>
  </div>
  <div class="objection-card anim">
- <p class="objection-q">„Is betalen veilig? Wat als ik het later wil terugsturen?"</p>
- <p class="objection-a">Helemaal veilig. Je betaalt met iDEAL, Bancontact, creditcard, PayPal, Klarna, Apple Pay of Google Pay — wat jij prettig vindt. En als je het terug wilt sturen binnen 30 dagen, krijg je je geld volledig terug op dezelfde manier waarop je betaalde. Geen kleine lettertjes.</p>
+ <p class="objection-q">„Is betalen veilig? en wat als ik het later wil terugsturen?"</p>
+ <p class="objection-a">Helemaal veilig. Betalen kan met iDEAL, Bancontact, creditcard, PayPal, Klarna, Apple Pay of Google Pay, zoals jij het prettig vindt. En als je het terug wilt sturen binnen 30 dagen, krijg je je geld volledig terug op dezelfde manier waarop je betaalde. Geen kleine lettertjes.</p>
  </div>
  </div>
  </div>
@@ -3249,7 +3254,7 @@ html,body{overflow-x:clip}
  <div class="section-inner">
  <div class="eyebrow center anim">✦ Even voorstellen</div>
  <h2 class="anim d1" style="text-align: center; max-width: 700px; margin: 0 auto 32px;">
- Wie ik ben — <span class="accent">en waarom ik dit boek wel móést schrijven</span>
+ Wie ik ben <span class="accent">en waarom ik dit boek wel móést schrijven</span>
  </h2>
 
  <div class="author-flex anim d2" style="align-items: flex-start; gap: 40px;">
@@ -3258,36 +3263,36 @@ html,body{overflow-x:clip}
  </div>
  <div class="author-bio" style="flex: 1;">
  <p class="body-text" style="font-size: 17px; line-height: 1.8; margin-bottom: 16px;">
- <em>Hoi, ik ben Anna. 38, moeder van twee, partner, ondernemer. Maar dat zijn allemaal woordjes op papier.</em>
+ <em>Hoi, ik ben Anna. 38, moeder van 2 kinderen, partner, ondernemer. Maar dat zijn allemaal woorden op papier.</em>
  </p>
  <p class="body-text" style="font-size: 16px; line-height: 1.8; margin-bottom: 16px;">
- <em>De waarheid? Vijf jaar geleden zat ik op de vloer van mijn eigen keuken te huilen. Met een huis vol spullen die ik niet meer kon zien. Een agenda die altijd vol was. En een hoofd dat 's nachts gewoon niet meer wilde stoppen.</em>
+ <em>De waarheid? 5 jaar geleden zat ik op mijn eigen keukenvloer te huilen. Met een huis vol spullen die ik niet meer kon zien. Een agenda die voortdurend gevuld bleef. En een hoofd dat 's nachts gewoon niet meer wilde stoppen met malen.</em>
  </p>
  <p class="body-text" style="font-size: 16px; line-height: 1.8; margin-bottom: 16px;">
- <em>Van buiten zag het er prima uit. Het huis was schoon. De kinderen op tijd op school. De verjaardagskaartjes verstuurd. Iedereen dacht: „zij heeft het wel op orde." Maar 's nachts lag ik wakker met dat eindeloze lijstje in mijn hoofd dat maar niet stilviel.</em>
+ <em>Van buiten zag het er prima uit. Het huis was schoon. De kinderen op tijd op school. De verjaardagskaartjes verstuurd. Iedereen dacht: „zij heeft het wel op orde." Toch werd ik 's nachts wakker met dat eindeloos lange lijstje in mijn hoofd dat niet stopte.</em>
  </p>
  <p class="body-text" style="font-size: 16px; line-height: 1.8; margin-bottom: 16px;">
  <em>Tot ik bijna instortte.</em>
  </p>
  <p class="body-text" style="font-size: 16px; line-height: 1.8; margin-bottom: 16px;">
- <em>Toen heb ik tien boeken gekocht. Tien wereldwijd geprezen titels over loslaten, grenzen stellen, opruimen, rust en energie. Ik las ze allemaal — en ontdekte iets vreemds: ze zeiden eigenlijk allemaal hetzelfde. Alleen ieder vanuit een andere hoek.</em>
+ <em>Toen heb ik 10 boeken gekocht. 10 wereldwijd geprezen titels over loslaten, grenzen stellen, opruimen, rust en energie. Ik las ze allemaal en ik ontdekte iets vreemds: ze zeiden eigenlijk allemaal hetzelfde. Alleen ieder vanuit een andere hoek.</em>
  </p>
 
  <div style="background: var(--light); border-radius: 14px; padding: 24px 28px; margin: 24px 0;" class="anim d3">
  <p style="font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); line-height: 1.6; margin-bottom: 12px;">
- „Ik ben geen psycholoog. Geen therapeut. Geen goeroe.<br>Ik ben jou — drie jaar later."
+ „Ik ben geen psycholoog. Geen therapeut. Geen goeroe.<br>Ik ben jou precies drie jaar later."
  </p>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--muted);">— Anna</p>
  </div>
 
  <p class="body-text anim d3" style="font-size: 16px; line-height: 1.8; margin-bottom: 16px;">
- <em>Ik bracht de kern van die tien boeken samen in één systeem: LIFE RESET™. Vijf pilaren. Dertig dagen. Geen theorie, geen weekendretreats — alleen oefeningen die je nog dezelfde dag kunt doen.</em>
+ <em>Ik bracht de kern van die 10 boeken samen in één systeem: LIFE RESET™. 5 pilaren. 30 dagen. Geen theorie, geen weekendretreats. Alleen oefeningen die je nog dezelfde dag kunt doen.</em>
  </p>
  <p class="body-text anim d3" style="font-size: 16px; line-height: 1.8; margin-bottom: 16px;">
- <em>Ik testte het eerst op mezelf. Toen op vriendinnen. Toen op honderden vrouwen in Nederland en België. En de berichten die ik nu krijg? „Ik slaap weer door." „Ik heb voor het eerst nee gezegd." „Mijn huis is stil — en ik voel me niet meer schuldig."</em>
+ <em>Ik testte het eerst op mezelf. Toen op vriendinnen. Toen op honderden vrouwen in Nederland en België. En de berichten die ik nu krijg: „Ik slaap weer door." „Ik heb voor het eerst nee gezegd." „Mijn huis is stil en ik voel me niet meer schuldig."</em>
  </p>
  <p class="body-text anim d4" style="font-size: 16px; line-height: 1.8; margin-bottom: 0;">
- <em>Eerlijk? Soms lig ik 's nachts nog wakker. Maar nu weet ik dat ik dat lijstje in mijn hoofd <span class="highlight">niet meer serieus hoef te nemen</span>. En dat verschil — dat is alles.</em>
+ <em>Eerlijk? Soms lig ik 's nachts nog wakker. Ik ben me nu ervan bewust dat ik dat lijstje in mijn gedachten <span class="highlight">niet langer serieus hoef te nemen</span>. Dat verschil is het belangrijkste.</em>
  </p>
 
  </div>
@@ -3303,10 +3308,10 @@ html,body{overflow-x:clip}
 
  <div class="eyebrow center anim" style="color: var(--highlight);">✦ Wat je er nog gratis bij krijgt</div>
  <h2 class="anim d1" style="text-align: center; font-size: 32px; margin-bottom: 12px; max-width: 720px; margin-left: auto; margin-right: auto;">
- Twee e-books die nergens los te koop zijn — <span class="accent">alleen bij dit pakket</span>
+ Twee e-books die nergens los te koop zijn <span class="accent">alleen bij dit pakket</span>
  </h2>
  <p class="anim d2" style="text-align: center; font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); max-width: 640px; margin: 0 auto 56px; line-height: 1.7;">
- Het boek geeft je de methode. Deze twee e-books zorgen dat je het verschil al meteen voelt — in je huis en in je hoofd. Niet later. Vandaag.
+ Het boek geeft je de methode. Deze 2 e-books zorgen dat je het verschil al meteen voelt. In je huis en in je hoofd. Niet later. Vandaag.
  </p>
 
  <!-- ─── E-BOOK 1: FENG SHUI ─── -->
@@ -3319,14 +3324,14 @@ html,body{overflow-x:clip}
  <div class="ebook-showcase-text" style="flex: 1;">
  <p style="font-family: 'DM Sans', sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: #C9A96E; font-weight: 600; margin-bottom: 8px;">Bonus E-book #1</p>
  <h3 style="font-family: 'Recoleta', serif; font-size: 24px; color: var(--heading); margin-bottom: 6px;">Verschuif Eén Ding, Verander Alles</h3>
- <p style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--accent); font-weight: 500; margin-bottom: 16px; font-style: italic;">De simpele Feng Shui-methode voor mensen die niet in mystiek geloven</p>
+ <p style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--accent); font-weight: 500; margin-bottom: 16px; font-style: italic;">De simpele Feng Shui-methode voor mensen die niet in mystiek geloven.</p>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.75; margin-bottom: 16px;">
- Eén consult bij een Feng Shui-specialist kost je tussen de <strong style="color: var(--heading);">€ 150 en € 400</strong>. En dan heb je advies voor één kamer.<br><br>Dit e-book geeft je het hele systeem — slaapkamer, woonkamer, keuken én werkplek. In een kwartiertje weet je wat er anders moet. Geen mystiek. Geen wierook. Gewoon logica die werkt — ook als je nergens in gelooft.
+ Eén consult bij een Feng Shui-specialist kost je tussen de <strong style="color: var(--heading);">€ 150 en € 400</strong>. En dan heb je advies voor één kamer.<br><br>Dit e-book geeft je het hele systeem van de slaapkamer, woonkamer, keuken tot de werkplek. In een kwartiertje weet je wat er anders moet. Geen mystiek. Geen wierook. Gewoon logica die werkt, zelfs als je nergens in gelooft.
  </p>
  <div style="display: flex; flex-direction: column; gap: 10px;">
  <div style="display: flex; align-items: center; gap: 10px;">
  <span style="width: 28px; height: 28px; background: rgba(26,74,74,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px;">🛏️</span>
- <span style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--body);">Beter slapen door één detail in je slaapkamer te verschuiven</span>
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--body);">Beter slapen door één detail in je slaapkamer te veranderen</span>
  </div>
  <div style="display: flex; align-items: center; gap: 10px;">
  <span style="width: 28px; height: 28px; background: rgba(26,74,74,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px;">⚡</span>
@@ -3334,7 +3339,7 @@ html,body{overflow-x:clip}
  </div>
  <div style="display: flex; align-items: center; gap: 10px;">
  <span style="width: 28px; height: 28px; background: rgba(26,74,74,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px;">🧘</span>
- <span style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--body);">Inclusief de 15-minuten plattegrondoefening — die je vandaag nog kunt doen</span>
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--body);">Inclusief de 15-minuten plattegrondoefening die je vandaag nog kunt doen</span>
  </div>
  </div>
  </div>
@@ -3353,14 +3358,14 @@ html,body{overflow-x:clip}
  <div class="ebook-showcase-text" style="flex: 1;">
  <p style="font-family: 'DM Sans', sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: #C9A96E; font-weight: 600; margin-bottom: 8px;">Bonus E-book #2</p>
  <h3 style="font-family: 'Recoleta', serif; font-size: 24px; color: var(--heading); margin-bottom: 6px;">Niet Alles Verdient Een Plek</h3>
- <p style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--accent); font-weight: 500; margin-bottom: 16px; font-style: italic;">Opruimen als daad van zelfliefde — niet als straf</p>
+ <p style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--accent); font-weight: 500; margin-bottom: 16px; font-style: italic;">Opruimen als daad van zelfliefde. Niet als straf</p>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.75; margin-bottom: 16px;">
- Een professionele opruimcoach kost je <strong style="color: var(--heading);">€ 75 tot € 120 per uur</strong>. Na drie sessies heb je een opgeruimde kast — en een lege portemonnee.<br><br>Dit e-book geeft je hetzelfde resultaat, maar dan zonder iemand naast je. Met het 4-dozen-systeem beslis je in dertig seconden per voorwerp wat blijft en wat gaat — zonder schuldgevoel, zonder later spijt. Inclusief kant-en-klare zinnetjes voor als iemand zegt: <em>„Maar dat kun je toch niet weggooien?"</em>
+ Een professionele opruimcoach kost je <strong style="color: var(--heading);">€ 75 tot € 120 per uur</strong>. Na drie sessies heb je een opgeruimde kast en een lege portemonnee.<br><br>Dit e-book geeft je hetzelfde resultaat, maar dan zonder iemand naast je. Met het 4-dozen-systeem beslis je in 30 seconden per voorwerp wat blijft en wat weg gaat. Zonder schuldgevoel, zonder spijt. Inclusief kant-en-klare zinnetjes voor als iemand zegt: <em>„Maar dat kun je toch niet weggooien?"</em>
  </p>
  <div style="display: flex; flex-direction: column; gap: 10px;">
  <div style="display: flex; align-items: center; gap: 10px;">
  <span style="width: 28px; height: 28px; background: rgba(139,94,60,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px;">📦</span>
- <span style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--body);">Het 4-dozen-systeem — beslis in dertig seconden, twijfel niet meer</span>
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--body);">Het 4-dozen-systeem: beslis in 30 seconden, twijfel niet meer</span>
  </div>
  <div style="display: flex; align-items: center; gap: 10px;">
  <span style="width: 28px; height: 28px; background: rgba(139,94,60,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px;">💬</span>
@@ -3378,14 +3383,14 @@ html,body{overflow-x:clip}
  <div class="anim d5" style="margin-top: 56px; background: linear-gradient(135deg, #3D1E2A, #5A2D3E); border-radius: 18px; padding: 32px 36px; text-align: center; position: relative; overflow: hidden;">
  <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 30% 50%, rgba(201,169,110,0.08) 0%, transparent 60%);"></div>
  <div style="position: relative; z-index: 1;">
- <p style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: rgba(245,237,227,0.6); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px;">Samen € 53,98 — vandaag gratis bij je bestelling</p>
+ <p style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: rgba(245,237,227,0.6); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px;">Samen € 53,98 en vandaag gratis bij je bestelling</p>
  <div style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
  <span style="font-family: 'Recoleta', serif; font-size: 32px; color: rgba(245,237,227,0.4); text-decoration: line-through;">€ 53,98</span>
  <span style="font-family: 'DM Mono', monospace; font-size: 16px; color: rgba(245,237,227,0.4);">→</span>
  <span style="font-family: 'Recoleta', serif; font-size: 38px; color: #C9A96E; font-weight: 700;">GRATIS</span>
  </div>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 15px; color: rgba(245,237,227,0.7); margin-top: 12px; line-height: 1.6;">
- Geen upsell op de checkout. Geen verborgen kosten. Geen „helaas, deze actie is verlopen"-trucjes.<br><strong style="color: #F5EDE3;">Gewoon alles in één pakket — zoals het hoort.</strong>
+ Geen verborgen kosten. Geen „helaas, deze actie is verlopen"-trucjes.<br><strong style="color: #F5EDE3;">Gewoon alles in één pakket precies zoals het hoort.</strong>
  </p>
  </div>
  </div>
@@ -3400,7 +3405,7 @@ html,body{overflow-x:clip}
  <div class="section-inner" style="max-width: 900px;">
 
  <!-- === EMOTIONELE INTRO === -->
- <div class="eyebrow center anim" style="color: var(--highlight);">✦ Je hebt alles gezien — hier is het in één oogopslag</div>
+ <div class="eyebrow center anim" style="color: var(--highlight);">✦ Je hebt alles gezien en hier is het in één oogopslag</div>
  <h2 class="anim d1" style="text-align: center; font-size: 34px; margin-bottom: 16px;">
  Klaar om <span class="accent">voor jezelf te kiezen?</span>
  </h2>
@@ -3409,7 +3414,7 @@ html,body{overflow-x:clip}
  Hier is alles wat je in handen krijgt. Het boek. De twee bonus-e-books. De verzending. De garantie. Alles bij elkaar, voor één eerlijke prijs.
  </p>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--heading); line-height: 1.8; font-weight: 500;">
- Geen kleine lettertjes. Geen „geldt alleen voor de eerste honderd"-trucs. Gewoon een compleet pakket dat je helpt te beginnen — vandaag nog.
+ Geen kleine lettertjes. Geen „geldt alleen voor de eerste honderd"-trucs. Een volledig pakket dat je helpt om te starten – vandaag nog!
  </p>
  </div>
 
@@ -3455,7 +3460,7 @@ html,body{overflow-x:clip}
  <span style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--muted);">waarde € 34,95</span>
  </div>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--body); line-height: 1.6; margin-top: 6px;">
- 340 pagina's. Tien bestsellers samengebracht in één systeem. Vijf pijlers met concrete oefeningen op bijna elke pagina. Geen boek om te lezen — een boek om te <em>doen</em>.
+ 340 pagina's. 10 bestsellers samengebracht in één systeem. 5 pijlers met concrete oefeningen op bijna elke pagina. Geen boek om te lezen maar een boek om te <em>doen</em>.
  </p>
  </div>
  </div>
@@ -3470,7 +3475,7 @@ html,body{overflow-x:clip}
  </div>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--accent); font-weight: 500; margin: 4px 0 0;">De Simpele Feng Shui Methode</p>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--body); line-height: 1.6; margin-top: 4px;">
- Ontdek hoe één meubel op een andere plek je slaap, je energie en je stemming kan veranderen. Geen esoterisch gedoe — gewoon kleine verschuivingen met direct merkbaar effect. Inclusief de 15-minuten-plattegrondoefening.
+ Ontdek hoe één meubel op een andere plek je slaap, je energie en je stemming kan veranderen. Geen esoterisch gedoe. Alleen kleine verschuivingen met direct merkbaar effect. Inclusief de 15-minuten-plattegrondoefening.
  </p>
  <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
  <span style="font-size: 11px; background: rgba(26,74,74,0.08); color: #1A4A4A; padding: 3px 10px; border-radius: 20px;">Betere slaap</span>
@@ -3488,9 +3493,9 @@ html,body{overflow-x:clip}
  <h3 style="font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin: 0;">Niet Alles Verdient Een Plek</h3>
  <span style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--muted);"><s>€ 26,99</s> <span style="color: #C9A96E; font-weight: 600;">GRATIS</span></span>
  </div>
- <p style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--accent); font-weight: 500; margin: 4px 0 0;">Opruimen als daad van zelfliefde — niet als straf</p>
+ <p style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--accent); font-weight: 500; margin: 4px 0 0;">Opruimen als daad van zelfliefde. Niet als straf</p>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--body); line-height: 1.6; margin-top: 4px;">
- Leer loslaten zonder de herinnering kwijt te raken. Met het 4-dozen-systeem beslis je in dertig seconden per voorwerp — zonder spijt. Inclusief zinnetjes voor als iemand zegt: „Maar dat kun je toch niet weggooien?"
+ Leer loslaten zonder de herinnering kwijt te raken. Met het 4-dozen-systeem beslis je in 30 seconden per voorwerp. Zonder spijt. Inclusief zinnetjes voor als iemand zegt: „Maar dat kun je toch niet weggooien?"
  </p>
  <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
  <span style="font-size: 11px; background: rgba(139,94,60,0.08); color: #8B5E3C; padding: 3px 10px; border-radius: 20px;">Loslaten zonder schuld</span>
@@ -3514,7 +3519,7 @@ html,body{overflow-x:clip}
  <div style="font-size: 28px; flex-shrink: 0;">🛡️</div>
  <div>
  <h4 style="font-family: 'Recoleta', serif; font-size: 15px; color: var(--heading); margin: 0 0 2px;">30 dagen garantie</h3>
- <p style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); margin: 0;">Niets voor je? Geld terug. Geen vragen, geen gedoe.</p>
+ <p style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); margin: 0;">Is het toch niets voor je? Geld terug. Geen vragen, geen gedoe.</p>
  </div>
  </div>
  </div>
@@ -3526,16 +3531,16 @@ html,body{overflow-x:clip}
  <span style="font-family: 'Recoleta', serif; font-size: 36px; color: #C9A96E; font-weight: 700;">€ 36</span>
  </div>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); margin-bottom: 2px;">
- Je bespaart meer dan € 90 — dat is <strong style="color: #C9A96E;">72% korting</strong>
+ Je bespaart meer dan € 90, dat is <strong style="color: #C9A96E;">72% korting</strong>
  </p>
  </div>
 
  <!-- CTA -->
  <div style="text-align: center;">
- <a href="/checkout" class="btn-cta" style="font-size: 18px; padding: 20px 48px; width: 100%; max-width: 480px; display: inline-block;">Ja, dit kies ik voor mezelf — € 36 →</a>
+ <a href="/checkout" class="btn-cta" style="font-size: 18px; padding: 20px 48px; width: 100%; max-width: 480px; display: inline-block;">Ja, dit kies ik voor mezelf, € 36 →</a>
 
  <div style="margin-top: 12px;">
- <a href="#ukazka" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--accent); text-decoration: underline; text-underline-offset: 3px;">Eerst nog een fragment lezen →</a>
+ <a href="#ukazka" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--accent); text-decoration: underline; text-underline-offset: 3px;">Eerst nog een stukje lezen →</a>
  </div>
  <div class="final-badges" style="margin-top: 16px;">
  <span class="final-badge">✓ Gratis verzending</span>
@@ -3559,7 +3564,7 @@ html,body{overflow-x:clip}
  <!-- SOCIAL PROOF onder aanbieding -->
  <div class="anim d4" style="text-align: center; max-width: 560px; margin: 0 auto;">
  <p style="font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin-bottom: 16px;">
- „Je hebt geen extra kracht nodig. Geen extra tijd. Je hebt een systeem nodig dat werkt — en één klein stapje vandaag."
+ „Je hebt geen extra kracht nodig. Geen extra tijd. Je hebt een systeem nodig dat werkt en één klein duwtje in de goede richting."
  </p>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--muted);">— Anna de Vries</p>
  </div>
@@ -3577,7 +3582,7 @@ html,body{overflow-x:clip}
  <!-- Bovenste rij: logo + tagline -->
  <div style="text-align: center; margin-bottom: 32px;">
  <div style="font-family: 'Recoleta', serif; font-size: 22px; color: #F5EDE3; font-weight: 700; margin-bottom: 6px;">Het Leven Dat Je Verdient</div>
- <div style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.55);">De LIFE RESET™ methode — door Anna de Vries</div>
+ <div style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.55);">De LIFE RESET™ methode geschreven door Anna de Vries</div>
  </div>
 
  <!-- Links raster -->
@@ -3662,7 +3667,7 @@ html,body{overflow-x:clip}
  </span>
  </span>
  </div>
- <a href="/checkout" class="btn-cta" style="padding: 12px 32px; font-size: 15px;">Bestel nu — gratis verzending →</a>
+ <a href="/checkout" class="btn-cta" style="padding: 12px 32px; font-size: 15px;">Bestel nu en krijg gratis verzending →</a>
  </div>
 </div>
 
