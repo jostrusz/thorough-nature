@@ -20,10 +20,10 @@ var PROJECT_CONFIG = {
     "currency": "EUR"
   },
   "bundleOptions": [
-    { "qty": 1, "price": 35, "label": "1 Buch", "save": 0 },
-    { "qty": 2, "price": 59, "label": "2 Bücher", "save": 11 },
-    { "qty": 3, "price": 79, "label": "3 Bücher", "save": 26 },
-    { "qty": 4, "price": 99, "label": "4 Bücher", "save": 41 }
+    { "qty": 1, "price": 35, "originalPrice": 0,   "label": "1× Lass los, was dich kaputt macht", "sublabel": "+ 2 Boni", "badge": "FÜR DICH SELBST",       "savings": 0 },
+    { "qty": 2, "price": 59, "originalPrice": 70,  "label": "2× Lass los, was dich kaputt macht", "sublabel": "+ 2 Boni", "badge": "MIT FREUND(IN) TEILEN", "savings": 11 },
+    { "qty": 3, "price": 79, "originalPrice": 105, "label": "3× Lass los, was dich kaputt macht", "sublabel": "+ 2 Boni", "badge": "PERFEKT ALS GESCHENK", "savings": 26 },
+    { "qty": 4, "price": 99, "originalPrice": 140, "label": "4× Lass los, was dich kaputt macht", "sublabel": "+ 2 Boni", "badge": "BESTPREIS",             "savings": 41 }
   ],
   "regions": {
     "DE": "reg_01KKAXMJP7NJDD196M0BJC4Y4F",
