@@ -1596,17 +1596,19 @@ body {
 }
 .bundle-option.selected .bundle-radio-dot { transform: scale(1); }
 .bundle-option input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
-.bundle-info { flex: 1; display: flex; align-items: center; gap: 6px; min-width: 0; flex-wrap: nowrap; }
-.bundle-label { font-size: 15px; font-weight: 600; color: var(--heading); white-space: nowrap; flex-shrink: 0; }
+.bundle-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bundle-label { font-size: 14px; font-weight: 600; color: var(--heading); line-height: 1.25; }
+.bundle-sublabel { font-size: 12px; color: var(--muted); line-height: 1.2; }
 .bundle-badge {
   font-size: 9px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.04em; color: var(--white);
   background: linear-gradient(135deg, var(--cta), var(--accent));
   padding: 2px 6px; border-radius: 5px; line-height: 1.5;
-  white-space: nowrap; flex-shrink: 0;
+  white-space: nowrap; align-self: flex-end; margin-bottom: 2px;
 }
-.bundle-pricing { text-align: right; flex-shrink: 0; }
-.bundle-price { font-size: 16px; font-weight: 700; color: var(--heading); }
+.bundle-pricing { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; gap: 1px; }
+.bundle-price { font-size: 16px; font-weight: 700; color: var(--heading); line-height: 1.1; }
+.bundle-original-price { font-size: 12px; color: var(--muted); text-decoration: line-through; line-height: 1.1; }
 .bundle-per-unit { font-size: 11px; color: var(--muted); margin-top: 1px; }
 .bundle-savings {
   font-size: 11px; font-weight: 600; color: var(--success);
@@ -3069,12 +3071,12 @@ body {
       html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
       html += '<div class="bundle-info">';
       html += '<span class="bundle-label">' + opt.label + '</span>';
-      if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
+      if (opt.sublabel) html += '<span class="bundle-sublabel">' + opt.sublabel + '</span>';
       html += '</div>';
       html += '<div class="bundle-pricing">';
+      if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
       html += '<div class="bundle-price">' + formatPrice(opt.price) + '</div>';
-      if (opt.qty > 1) html += '<div class="bundle-per-unit">' + Math.round(opt.price / opt.qty) + ' € pro Buch</div>';
-      if (opt.savings > 0) html += '<div class="bundle-savings">Sparen Sie ' + formatPrice(opt.savings) + '</div>';
+      if (opt.originalPrice && opt.originalPrice > opt.price) html += '<div class="bundle-original-price">' + formatPrice(opt.originalPrice) + '</div>';
       html += '</div>';
       html += '</label>';
     });
