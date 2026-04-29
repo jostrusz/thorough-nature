@@ -3829,6 +3829,44 @@ if (scarcityBar) {
 
 <!-- Afbeeldingen direct geserveerd vanaf Cloudinary CDN -->
 
+<script>
+// ───────────────────────────────────────────────────────────
+// META PIXEL — ViewContent + AddToCart (PageView fires automatically)
+// Mirrors the loslatenboek pattern; reads catalog IDs from PROJECT_CONFIG
+// so admin-managed values flow through without code changes.
+// ───────────────────────────────────────────────────────────
+(function() {
+  var CATALOG_IDS = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.catalogContentIds) || [];
+  var PRODUCT_NAME = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.mainProduct && window.PROJECT_CONFIG.mainProduct.name) || 'Het Leven Dat Je Verdient';
+  var PRODUCT_PRICE = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.mainProduct && window.PROJECT_CONFIG.mainProduct.price) || 36;
+  var CURRENCY = (window.PROJECT_CONFIG && window.PROJECT_CONFIG.mainProduct && window.PROJECT_CONFIG.mainProduct.currency) || 'EUR';
+
+  // ViewContent — fires on page load (visitor sees the product)
+  if (typeof MetaTracker !== 'undefined') {
+    MetaTracker.trackViewContent({
+      content_name: PRODUCT_NAME,
+      content_ids: CATALOG_IDS,
+      value: PRODUCT_PRICE,
+      currency: CURRENCY
+    });
+  }
+
+  // AddToCart — fires when visitor clicks any checkout CTA
+  document.querySelectorAll('a[href="/checkout"], a[href="checkout"], a[href="checkout.html"], a[href="checkout/"]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (typeof MetaTracker !== 'undefined') {
+        MetaTracker.trackAddToCart({
+          content_name: PRODUCT_NAME,
+          content_ids: CATALOG_IDS,
+          value: PRODUCT_PRICE,
+          currency: CURRENCY,
+          num_items: 1
+        });
+      }
+    });
+  });
+})();
+</script>
 
 </body>
 </html>
