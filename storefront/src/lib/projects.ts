@@ -28,7 +28,7 @@ export interface ProjectConfig {
     originalPrice: number
     currency: string
   }
-  bundleOptions: Array<{ qty: number; price: number; label: string; save: number }>
+  bundleOptions: Array<{ qty: number; price: number; label: string; save?: number; savings?: number; originalPrice?: number; sublabel?: string; badge?: string }>
   paymentProviders: Record<string, string>
   pages: Record<string, string>
 }
