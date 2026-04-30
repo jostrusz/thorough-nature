@@ -821,6 +821,11 @@ body {
   object-fit: contain;
   border: 1px solid rgba(184,92,74,0.12);
 }
+/* iDEAL → Wero co-branded logo má aspect ratio 2.64:1, potřebuje širší slot
+   než ostatní 1.53:1 pay icons, jinak je zmenšený a nečitelný. */
+.pm-icon[src*="ideal"] {
+  width: 79px;
+}
 
 .pm-info { flex: 1; }
 .pm-name {
