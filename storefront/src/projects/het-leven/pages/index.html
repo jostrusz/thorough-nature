@@ -2358,14 +2358,19 @@ html,body{overflow-x:clip}
 @media (max-width:1024px){.ukazka-convert{grid-template-columns:1fr;text-align:center}.ukazka-trust{max-width:400px;margin:0 auto}.ukazka-slide{width:clamp(220px,45vw,320px)}}
 @media (max-width:640px){
  .ukazka-section{padding:56px 12px}
- .ukazka-stage{gap:6px}
- .ukazka-arrow{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;font-size:20px;background:rgba(255,255,255,.95);box-shadow:0 4px 12px rgba(0,0,0,.15)}
- .ukazka-arrow--prev{left:4px}
- .ukazka-arrow--next{right:4px}
- .ukazka-track{min-height:62vw}
- .ukazka-slide{width:62vw}
+ .ukazka-stage{gap:6px;display:block}
+ .ukazka-arrow{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;font-size:20px;background:rgba(255,255,255,.95);box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:3}
+ .ukazka-arrow--prev{left:8px}
+ .ukazka-arrow--next{right:8px}
+ /* Track tall enough to fit a 2:3 portrait slide (≈ width × 1.5) plus some breathing room */
+ .ukazka-track{height:auto;min-height:96vw;width:100%;perspective:none}
+ .ukazka-slide{width:62vw;height:auto}
+ /* Push prev/next fully off-screen on mobile — single-slide UX, swipe + arrows handle nav */
+ .ukazka-slide.is-prev{transform:translate(calc(-50% - 90vw),-50%) scale(.88);opacity:0;pointer-events:none}
+ .ukazka-slide.is-next{transform:translate(calc(-50% + 90vw),-50%) scale(.88);opacity:0;pointer-events:none}
  .ukazka-thumb{width:54px}
- .ukazka-trust{grid-template-columns:1fr}
+ .ukazka-trust{grid-template-columns:1fr;justify-items:center;max-width:none}
+ .ukazka-trust-item{justify-content:center;text-align:left;width:auto}
  .ukazka-meta{flex-wrap:wrap;gap:10px}
  .ukazka-chapter{order:-1;margin:0 auto}
  .ukazka-lightbox-arrow{width:42px;height:42px;font-size:22px}
