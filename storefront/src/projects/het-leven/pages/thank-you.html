@@ -638,7 +638,7 @@ body { background: var(--bg); }
         <div class="ty-order-icon book">&#x1F4D6;</div>
         <div>
           <div class="ty-order-name">Het Leven Dat Je Verdient</div>
-          <div class="ty-order-desc">Fysiek boek &mdash; 290 pagina's &mdash; wordt bezorgd</div>
+          <div class="ty-order-desc">Fysiek boek &mdash; 350 pagina's &mdash; wordt bezorgd</div>
         </div>
       </div>
       <div class="ty-order-item">
@@ -782,6 +782,18 @@ body { background: var(--bg); }
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.success && data.order) {
+        // Prefer custom_display_id (NL2026-XXXX) over numeric display_id when available
+        var prettyId = data.order.custom_display_id || displayId || ('' + (data.order.display_id || ''));
+        var orderLabelEl2 = document.getElementById('ty-order-label');
+        if (orderLabelEl2 && prettyId) {
+          orderLabelEl2.textContent = '📦 Bestelling ' + (prettyId.indexOf('-') > -1 ? prettyId : '#' + prettyId);
+        }
+        var mailtoEl2 = document.getElementById('ty-support-mailto');
+        if (mailtoEl2 && prettyId) {
+          var subj2 = encodeURIComponent('Vraag over bestelling ' + (prettyId.indexOf('-') > -1 ? prettyId : '#' + prettyId));
+          var body2 = encodeURIComponent('Hallo,\n\nIk heb een vraag over mijn bestelling.\n\nBestelnummer: ' + prettyId + '\n\nMijn vraag: ');
+          mailtoEl2.href = 'mailto:annadevries@pakjeleventerug.nl?subject=' + subj2 + '&body=' + body2;
+        }
         var sa = data.order.shipping_address || {};
         var updated = {
           email: data.order.email || (customer && customer.email) || '',
@@ -832,8 +844,8 @@ body { background: var(--bg); }
             }
             if (descEl) {
               descEl.textContent = derivedBookCount > 1
-                ? (derivedBookCount + '× fysiek boek — 290 pagina’s — wordt bezorgd')
-                : 'Fysiek boek — 290 pagina’s — wordt bezorgd';
+                ? (derivedBookCount + '× fysiek boek — 350 pagina’s — wordt bezorgd')
+                : 'Fysiek boek — 350 pagina’s — wordt bezorgd';
             }
           }
           // Authoritative total from the order itself
@@ -934,7 +946,7 @@ body { background: var(--bg); }
     }
     var mainItemDesc = orderItemsEl.querySelector('.ty-order-desc');
     if (mainItemDesc) {
-      mainItemDesc.textContent = bundleQty + '\u00D7 fysiek boek \u2014 290 pagina\u2019s \u2014 wordt bezorgd';
+      mainItemDesc.textContent = bundleQty + '\u00D7 fysiek boek \u2014 350 pagina\u2019s \u2014 wordt bezorgd';
     }
   }
 
@@ -999,10 +1011,14 @@ body { background: var(--bg); }
   // ────────────────────────────────────────────────────
   (function() {
     var EDIT_WINDOW_MS = 5 * 60 * 1000; // 5 minuten — moet matchen met backend window
-    if (!localStorage.getItem('medusa_edit_started_at')) {
-      localStorage.setItem('medusa_edit_started_at', new Date().toISOString());
+    // Tie timer to the specific order so a fresh order resets the window
+    // (without this, a 2nd test order would arrive on thank-you with the timer
+    // already expired from the previous one).
+    var EDIT_KEY = orderId ? 'medusa_edit_started_at_' + orderId : 'medusa_edit_started_at';
+    if (!localStorage.getItem(EDIT_KEY)) {
+      localStorage.setItem(EDIT_KEY, new Date().toISOString());
     }
-    var editStarted = new Date(localStorage.getItem('medusa_edit_started_at')).getTime();
+    var editStarted = new Date(localStorage.getItem(EDIT_KEY)).getTime();
     var editBtn = document.getElementById('ty-edit-toggle');
     var editForm = document.getElementById('ty-edit-form');
     var windowEl = document.getElementById('ty-edit-window');
