@@ -48,9 +48,14 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
   "laat-los-wat-je-kapotmaakt-dh": {
     1: 25,    // €25.00 incl. tax (upsell price, original €35)
   },
-  // Loslatenboek Upsell — "Het Leven Dat Je Verdient"
+  // Het Leven Dat Je Verdient — main checkout (pakjeleventerug.nl)
+  // (Post-purchase upsell flow uses /store/custom/orders/:id/upsell-accept with explicit unit_price=23,
+  //  not BUNDLE_PRICING — so this map only governs the main checkout.)
   "het-leven-dat-je-verdient": {
-    1: 23,    // €23.00 incl. tax (upsell price, original €36)
+    1: 36,    // €36.00 incl. tax
+    2: 59,    // €59.00 incl. tax (save €13)
+    3: 79,    // €79.00 incl. tax (save €29)
+    4: 99,    // €99.00 incl. tax (save €45)
   },
   // Slapp Taget — "Släpp taget om det som förstör dig"
   "slapp-taget-om-det-som-forstor-dig": {
@@ -103,10 +108,17 @@ type AddBundleToCartInput = {
  */
 const BUNDLE_SKU_PATTERNS: RegExp[] = [
   /^LLWJK-(\d+)$/,   // loslatenboek: LLWJK-1, LLWJK-2, LLWJK-3, LLWJK-4
+  /^HLDV-(\d+)$/,    // het-leven: HLDV-2, HLDV-3, HLDV-4 (1-boek uses official barcode below)
 ]
+
+// Explicit SKU → bundle qty for non-pattern SKUs (official barcodes / EAN-style).
+const BUNDLE_SKU_OVERRIDES: Record<string, number> = {
+  "HLDV62786284629": 1,  // het-leven "1 Boek" — official barcode SKU
+}
 
 function extractBundleQtyFromSku(sku: string | null): number | null {
   if (!sku) return null
+  if (BUNDLE_SKU_OVERRIDES[sku] !== undefined) return BUNDLE_SKU_OVERRIDES[sku]
   for (const pattern of BUNDLE_SKU_PATTERNS) {
     const match = sku.match(pattern)
     if (match) return parseInt(match[1], 10)
