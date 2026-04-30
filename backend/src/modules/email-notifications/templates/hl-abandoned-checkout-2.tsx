@@ -23,16 +23,16 @@ const colors = {
   headerBg: '#4A1A2E',
   headerGradient: 'linear-gradient(135deg, #5A2D3E 0%, #4A1A2E 50%, #3D1E2A 100%)',
   accent: '#B85C4A',
-  accentSoft: '#FAF5F8',
+  accentSoft: '#FFF8F3',
   textDark: '#2D1B26',
   textBody: '#5A3D40',
   textMuted: '#8A7884',
-  boxBorder: '#EDD9E5',
+  boxBorder: '#F0DCC4',
   starColor: '#F59E0B',
   footerBg: '#3D1E2A',
   footerText: '#9B7889',
   footerAccent: '#C9A96E',
-  divider: '#EDD9E5',
+  divider: '#F0DCC4',
   guaranteeBg: '#F0FDF4',
   guaranteeBorder: '#BBF7D0',
   guaranteeText: '#166534',
@@ -347,9 +347,9 @@ export const HlAbandonedCheckout2Template: React.FC<HlAbandonedCheckout2Props> &
             lineHeight: '1.7',
             margin: '0 0 8px',
           }}>
-            EverChapter OÜ &bull; Tallinn, Estonia
+            Performance Marketing Solution s.r.o. &bull; Rybná 716/24, 110 00 Staré Město, Praha, CZ
             <br />
-            Reg. nr: 16938029
+            IČ: 06259928 &bull; DIČ: CZ06259928
           </Text>
           <Text style={{
             fontFamily: font,
