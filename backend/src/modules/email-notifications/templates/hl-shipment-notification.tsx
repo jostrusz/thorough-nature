@@ -82,6 +82,15 @@ export const HlShipmentNotificationTemplate: React.FC<HlShipmentNotificationTemp
   const items = order.items || []
   const displayId = order.metadata?.custom_order_number || order.display_id || order.id
 
+  // Totals — what the customer actually paid (matches order-placed email).
+  const subtotal = items.reduce(
+    (sum: number, item: any) => sum + (item.unit_price || 0) * (item.quantity || 1),
+    0
+  )
+  const shippingTotal = order.summary?.shipping_total ?? 0
+  const taxTotal = order.summary?.tax_total ?? 0
+  const total = order.summary?.current_order_total ?? subtotal + shippingTotal
+
   return (
     <Base preview={preview}>
       <Section>
@@ -339,6 +348,34 @@ export const HlShipmentNotificationTemplate: React.FC<HlShipmentNotificationTemp
               </div>
             )
           })}
+
+          {/* Totals — what the customer actually paid */}
+          <div style={{ marginTop: '14px', borderTop: `2px solid ${colors.boxBorder}`, paddingTop: '12px' }}>
+            <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>
+              <tbody>
+                <tr>
+                  <td style={{ fontFamily: font, fontSize: '13px', color: colors.textBody, padding: '3px 0' }}>Subtotaal</td>
+                  <td align="right" style={{ fontFamily: font, fontSize: '13px', color: colors.textBody, padding: '3px 0' }}>{formatPrice(subtotal, currency)}</td>
+                </tr>
+                <tr>
+                  <td style={{ fontFamily: font, fontSize: '13px', color: colors.textBody, padding: '3px 0' }}>Verzendkosten</td>
+                  <td align="right" style={{ fontFamily: font, fontSize: '13px', color: shippingTotal > 0 ? colors.textBody : '#2e7d32', padding: '3px 0' }}>
+                    {shippingTotal > 0 ? formatPrice(shippingTotal, currency) : 'Gratis'}
+                  </td>
+                </tr>
+                {taxTotal > 0 && (
+                  <tr>
+                    <td style={{ fontFamily: font, fontSize: '12px', color: colors.textMuted, padding: '3px 0' }}>Waarvan BTW</td>
+                    <td align="right" style={{ fontFamily: font, fontSize: '12px', color: colors.textMuted, padding: '3px 0' }}>{formatPrice(taxTotal, currency)}</td>
+                  </tr>
+                )}
+                <tr>
+                  <td style={{ fontFamily: font, fontSize: '17px', fontWeight: 700, color: colors.textDark, padding: '10px 0 0', borderTop: `1px solid ${colors.boxBorder}` }}>Betaald</td>
+                  <td align="right" style={{ fontFamily: font, fontSize: '17px', fontWeight: 700, color: colors.textDark, padding: '10px 0 0', borderTop: `1px solid ${colors.boxBorder}` }}>{formatPrice(total, currency)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* SHIPPING ADDRESS */}
@@ -541,9 +578,14 @@ HlShipmentNotificationTemplate.PreviewProps = {
         variant_sku: 'HLDV-2',
         quantity: 1,
         unit_price: 59,
-        thumbnail: null,
+        thumbnail: 'https://www.pakjeleventerug.nl/het-leven-dat-je-verdient-380w.webp',
       },
     ],
+    summary: {
+      current_order_total: 59,
+      shipping_total: 0,
+      tax_total: 4.87,
+    },
   },
   shippingAddress: {
     first_name: 'Sophie',
