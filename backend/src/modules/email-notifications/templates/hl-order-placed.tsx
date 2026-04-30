@@ -21,22 +21,24 @@ const font = "'Inter', Arial, sans-serif"
 const pad = '24px'
 const padLR = `0 ${pad}`
 
-// Het Leven Dat Je Verdient brand palette — warm rose/burgundy (matches site)
+// Het Leven Dat Je Verdient brand palette — matches index page CSS variables
+// (--bg #FFF8F3, --heading #4A1A2E, --cta #B85C4A, gold #C9A96E)
 const colors = {
   headerBg: '#4A1A2E',
   headerGradient: 'linear-gradient(135deg, #5A2D3E 0%, #4A1A2E 50%, #3D1E2A 100%)',
-  accent: '#B85C4A',
+  accent: '#B85C4A',           // --cta on the site
   accentLight: '#D4916A',
-  accentSoft: '#FAF5F8',
+  accentSoft: '#FFF8F3',       // --bg cream (matches the section bg on the site)
+  boxBg: '#FCF1E6',            // soft warm tint for highlight cards (vs accentSoft)
   cream: '#FFF8F3',
   textDark: '#2D1B26',
   textBody: '#5A3D40',
   textMuted: '#8A7884',
-  boxBorder: '#EDD9E5',
+  boxBorder: '#F0DCC4',        // warm cream border (matches gold accent family)
   footerBg: '#3D1E2A',
-  footerAccent: '#C9A96E',
+  footerAccent: '#C9A96E',     // brand gold
   footerText: '#9B7889',
-  divider: '#EDD9E5',
+  divider: '#F0DCC4',
   okBg: '#E8F5E9',
   okBorder: '#A5D6A7',
   okText: '#2E7D32',
@@ -606,21 +608,17 @@ export const HlOrderPlacedTemplate: React.FC<HlOrderPlacedTemplateProps> & {
             lineHeight: '1.6',
             marginBottom: '6px',
           }}>
-            {billingEntity?.legal_name || 'EverChapter OÜ'}
+            {billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'}
             {' '}&bull;{' '}
             {billingEntity?.address
               ? `${billingEntity.address.address_1 || ''}, ${billingEntity.address.postal_code || ''} ${billingEntity.address.city || ''}${billingEntity.address.district ? ', ' + billingEntity.address.district : ''}`
-              : 'Tallinn, Estonia'}
-            {billingEntity?.registration_id && (
+              : 'Rybná 716/24, 110 00 Staré Město, Praha, CZ'}
+            <br />
+            IČ: {billingEntity?.registration_id || '06259928'}
+            {(billingEntity?.vat_id || !billingEntity) && (
               <>
-                <br />
-                Reg. nr: {billingEntity.registration_id}
-              </>
-            )}
-            {!billingEntity && (
-              <>
-                <br />
-                Reg. nr: 16938029
+                {' '}&bull;{' '}
+                DIČ: {billingEntity?.vat_id || 'CZ06259928'}
               </>
             )}
           </Text>
@@ -655,7 +653,7 @@ HlOrderPlacedTemplate.PreviewProps = {
         variant_sku: 'HLDV-2',
         quantity: 1,
         unit_price: 59,
-        thumbnail: null,
+        thumbnail: 'https://www.pakjeleventerug.nl/het-leven-dat-je-verdient-380w.webp',
       },
     ],
     summary: {
