@@ -10,6 +10,7 @@ export interface HlAbandonedCheckout1Props {
   productName: string
   productPrice: string
   productImage?: string
+  billingEntity?: any
   preview?: string
 }
 
@@ -19,19 +20,21 @@ export const isHlAbandonedCheckout1Data = (data: any): data is HlAbandonedChecko
 const font = "'Inter', 'Segoe UI', Arial, sans-serif"
 const pad = '28px'
 
+// Het Leven Dat Je Verdient brand palette — matches index page CSS variables
+// (--bg #FFF8F3, --heading #4A1A2E, --cta #B85C4A, gold #C9A96E)
 const colors = {
   headerBg: '#4A1A2E',
   headerGradient: 'linear-gradient(135deg, #5A2D3E 0%, #4A1A2E 50%, #3D1E2A 100%)',
-  accent: '#B85C4A',
-  accentSoft: '#FAF5F8',
+  accent: '#B85C4A',           // --cta on the site
+  accentSoft: '#FFF8F3',       // --bg cream
   textDark: '#2D1B26',
   textBody: '#5A3D40',
   textMuted: '#8A7884',
-  boxBorder: '#EDD9E5',
+  boxBorder: '#F0DCC4',        // warm gold border (matches site)
   footerBg: '#3D1E2A',
   footerText: '#9B7889',
-  footerAccent: '#C9A96E',
-  divider: '#EDD9E5',
+  footerAccent: '#C9A96E',     // brand gold
+  divider: '#F0DCC4',
 }
 
 export const HlAbandonedCheckout1Template: React.FC<HlAbandonedCheckout1Props> & {
@@ -42,6 +45,7 @@ export const HlAbandonedCheckout1Template: React.FC<HlAbandonedCheckout1Props> &
   productName,
   productPrice,
   productImage,
+  billingEntity,
   preview = 'Je boek ligt klaar — je hoeft alleen nog op verzenden te drukken.',
 }) => {
   return (
@@ -253,9 +257,19 @@ export const HlAbandonedCheckout1Template: React.FC<HlAbandonedCheckout1Props> &
             lineHeight: '1.7',
             margin: '0 0 8px',
           }}>
-            EverChapter OÜ &bull; Tallinn, Estonia
+            {billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'}
+            {' '}&bull;{' '}
+            {billingEntity?.address
+              ? `${billingEntity.address.address_1 || ''}, ${billingEntity.address.postal_code || ''} ${billingEntity.address.city || ''}${billingEntity.address.district ? ', ' + billingEntity.address.district : ''}`
+              : 'Rybná 716/24, 110 00 Staré Město, Praha, CZ'}
             <br />
-            Reg. nr: 16938029
+            IČ: {billingEntity?.registration_id || '06259928'}
+            {(billingEntity?.vat_id || !billingEntity) && (
+              <>
+                {' '}&bull;{' '}
+                DIČ: {billingEntity?.vat_id || 'CZ06259928'}
+              </>
+            )}
           </Text>
           <Text style={{
             fontFamily: font,
@@ -277,7 +291,7 @@ HlAbandonedCheckout1Template.PreviewProps = {
   checkoutUrl: 'https://www.pakjeleventerug.nl/checkout',
   productName: 'Het Leven Dat Je Verdient',
   productPrice: '36,00',
-  productImage: '',
+  productImage: 'https://www.pakjeleventerug.nl/het-leven-dat-je-verdient-380w.webp',
   preview: 'Je boek ligt klaar — je hoeft alleen nog op verzenden te drukken.',
 } as HlAbandonedCheckout1Props
 

@@ -25,15 +25,15 @@ const colors = {
   headerBg: '#4A1A2E',
   headerGradient: 'linear-gradient(135deg, #5A2D3E 0%, #4A1A2E 50%, #3D1E2A 100%)',
   accent: '#B85C4A',
-  accentSoft: '#FAF5F8',
+  accentSoft: '#FFF8F3',
   textDark: '#2D1B26',
   textBody: '#5A3D40',
   textMuted: '#8A7884',
-  boxBorder: '#EDD9E5',
+  boxBorder: '#F0DCC4',
   footerBg: '#3D1E2A',
   footerText: '#9B7889',
   footerAccent: '#C9A96E',
-  divider: '#EDD9E5',
+  divider: '#F0DCC4',
 }
 
 function formatPrice(amount: number, currencyCode: string): string {
@@ -503,15 +503,17 @@ export const HlShipmentNotificationTemplate: React.FC<HlShipmentNotificationTemp
             lineHeight: '1.6',
             margin: '0',
           }}>
-            {billingEntity?.legal_name || 'EverChapter OÜ'}
+            {billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'}
             {' '}&bull;{' '}
             {billingEntity?.address
               ? `${billingEntity.address.address_1 || ''}, ${billingEntity.address.postal_code || ''} ${billingEntity.address.city || ''}`
-              : 'Tallinn, Estonia'}
-            {billingEntity?.registration_id && (
+              : 'Rybná 716/24, 110 00 Staré Město, Praha, CZ'}
+            <br />
+            IČ: {billingEntity?.registration_id || '06259928'}
+            {(billingEntity?.vat_id || !billingEntity) && (
               <>
-                <br />
-                Reg. nr: {billingEntity.registration_id}
+                {' '}&bull;{' '}
+                DIČ: {billingEntity?.vat_id || 'CZ06259928'}
               </>
             )}
             <br />
