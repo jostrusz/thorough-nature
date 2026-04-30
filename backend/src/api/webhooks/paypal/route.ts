@@ -455,16 +455,36 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
                     }
                   }
 
+                  // Don't overwrite addresses the customer already entered on the
+                  // checkout form. The customer's input is authoritative; PayPal
+                  // payer data (especially in sandbox: "John Doe, Poland") should
+                  // only fill in fields the frontend left blank.
+                  const existingShipping = (targetCart as any).shipping_address || {}
+                  const existingBilling = (targetCart as any).billing_address || {}
+                  const hasFrontendShipping = !!(existingShipping.address_1 && existingShipping.postal_code)
+                  const hasFrontendBilling = !!(existingBilling.address_1 && existingBilling.postal_code)
+
+                  // If the frontend already populated the billing address, keep it.
+                  // Otherwise mirror shipping (preferring the frontend's shipping over PayPal's payer data).
+                  const finalShipping = hasFrontendShipping ? existingShipping : mappedShipping
+                  const finalBilling = hasFrontendBilling
+                    ? existingBilling
+                    : (hasFrontendShipping ? existingShipping : mappedBilling)
+
                   // Use Medusa's cart service to update addresses properly
                   try {
                     const cartService = req.scope.resolve("cartModuleService") as any
                     if (cartService?.updateCarts) {
                       await cartService.updateCarts(targetCart.id, {
-                        shipping_address: mappedShipping,
-                        billing_address: mappedBilling,
-                        ...(payer?.email_address ? { email: payer.email_address } : {}),
+                        shipping_address: finalShipping,
+                        billing_address: finalBilling,
+                        ...(payer?.email_address && !targetCart.email ? { email: payer.email_address } : {}),
                       })
-                      logger.info(`[PayPal Webhook] Safety net: updated cart ${targetCart.id} addresses from PayPal payer data`)
+                      logger.info(
+                        `[PayPal Webhook] Safety net: cart ${targetCart.id} addresses ` +
+                        `(shipping_from=${hasFrontendShipping ? "frontend" : "paypal"}, ` +
+                        `billing_from=${hasFrontendBilling ? "frontend" : (hasFrontendShipping ? "shipping" : "paypal")})`
+                      )
                     }
                   } catch (addrErr: any) {
                     logger.warn(`[PayPal Webhook] Safety net: cart address update via service failed: ${addrErr.message}, trying direct DB`)

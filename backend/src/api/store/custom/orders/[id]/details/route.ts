@@ -10,8 +10,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     const { data: orders } = await query.graph({
       entity: "order",
       fields: [
-        "id", "display_id", "email", "created_at", "currency_code",
+        "id", "display_id", "custom_display_id", "email", "created_at", "currency_code", "metadata",
         "total", "subtotal", "tax_total", "shipping_total", "discount_total",
+        "summary.*",
         "shipping_address.*",
         "items.id", "items.title", "items.product_title", "items.variant_title",
         "items.variant_sku", "items.quantity", "items.unit_price", "items.total",
@@ -28,14 +29,24 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     const order = orders[0] as any
     const sa = order.shipping_address || {}
 
+    // Medusa v2 sometimes returns order.total = 0 even when subtotal+tax > 0
+    // (computed field doesn't resolve reliably). Fall back to summary or recomputed sum.
+    const summaryTotal = Number(order?.summary?.totals?.current_order_total) || 0
+    const computed = (Number(order.subtotal) || 0)
+                   + (Number(order.tax_total) || 0)
+                   + (Number(order.shipping_total) || 0)
+                   - (Number(order.discount_total) || 0)
+    const totalResolved = Number(order.total) || summaryTotal || computed || 0
+
     res.json({
       success: true,
       order: {
         id: order.id,
         display_id: order.display_id,
+        custom_display_id: order.custom_display_id || (order.metadata && order.metadata.custom_order_number) || null,
         email: order.email,
         currency_code: order.currency_code,
-        total: Number(order.total) || 0,
+        total: totalResolved,
         subtotal: Number(order.subtotal) || 0,
         tax_total: Number(order.tax_total) || 0,
         shipping_total: Number(order.shipping_total) || 0,
