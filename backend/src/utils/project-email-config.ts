@@ -165,7 +165,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromName: 'Het Leven Dat Je Verdient',
     fromEmail: 'Het Leven Dat Je Verdient <annadevries@pakjeleventerug.nl>',
     project: 'het-leven',
-    smsDispatchTemplate: 'Het Leven Dat Je Verdient: Bestelling verzonden. Track & trace: {url} annadevries@pakjeleventerug.nl',
+    smsDispatchTemplate: 'Het Leven Dat Je Verdient: je boek is onderweg. Track: {url} Vragen? annadevries@pakjeleventerug.nl',
   },
   // Also match without hyphen
   hetleven: {
@@ -173,7 +173,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromName: 'Het Leven Dat Je Verdient',
     fromEmail: 'Het Leven Dat Je Verdient <annadevries@pakjeleventerug.nl>',
     project: 'het-leven',
-    smsDispatchTemplate: 'Het Leven Dat Je Verdient: Bestelling verzonden. Track & trace: {url} annadevries@pakjeleventerug.nl',
+    smsDispatchTemplate: 'Het Leven Dat Je Verdient: je boek is onderweg. Track: {url} Vragen? annadevries@pakjeleventerug.nl',
   },
 }
 
