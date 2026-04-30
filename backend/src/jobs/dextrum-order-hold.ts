@@ -282,17 +282,23 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
 
         /**
          * SKU mapping for bundle variants → physical warehouse SKU.
+         *
          * Loslatenboek uses per-bundle variants (LLWJK-1 to LLWJK-4) where the suffix
          * encodes the number of physical books. The warehouse needs the real product SKU
          * (LLWJK7824627392) with the correct quantity.
          *
-         * Pattern: LLWJK-{N} → N × LLWJK7824627392
+         * Het-leven follows the same pattern with HLDV-{N} bundles → HLDV62786284629
+         * (the official barcode SKU for the physical book at Dextrum).
          */
         const BUNDLE_SKU_MAP: Record<string, { physicalSku: string; quantity: number }> = {
           "LLWJK-1": { physicalSku: "LLWJK7824627392", quantity: 1 },
           "LLWJK-2": { physicalSku: "LLWJK7824627392", quantity: 2 },
           "LLWJK-3": { physicalSku: "LLWJK7824627392", quantity: 3 },
           "LLWJK-4": { physicalSku: "LLWJK7824627392", quantity: 4 },
+          "HLDV-1": { physicalSku: "HLDV62786284629", quantity: 1 },
+          "HLDV-2": { physicalSku: "HLDV62786284629", quantity: 2 },
+          "HLDV-3": { physicalSku: "HLDV62786284629", quantity: 3 },
+          "HLDV-4": { physicalSku: "HLDV62786284629", quantity: 4 },
         }
 
         // Filter out non-physical items (e.g. COD fee) that don't exist in the warehouse
