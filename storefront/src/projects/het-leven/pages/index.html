@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Het Leven Dat Je Verdient — LIFE RESET™ Methode | Anna de Vries</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/life-reset-favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/life-reset-favicon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/life-reset-favicon-180.png">
+<link rel="shortcut icon" href="/life-reset-favicon.png">
 
 <!-- ═══ SEO META TAGS ═══ -->
 <meta name="description" content="Ontdek de LIFE RESET™ methode: het 350-pagina boek dat je in 30 dagen helpt om je huis op te ruimen, grenzen te stellen, rust in je hoofd te vinden en weer energie te voelen. Door Anna de Vries. Gratis verzending NL &amp; BE.">
@@ -63,6 +67,7 @@
 <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
 <link rel="preload" href="https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" as="image" fetchpriority="high" imagesrcset="/het-leven-dat-je-verdient-380w.webp 380w, /het-leven-dat-je-verdient-490w.webp 490w, /het-leven-dat-je-verdient-640w.webp 640w, /het-leven-dat-je-verdient-800w.webp 800w" imagesizes="(max-width: 600px) 320px, (max-width: 960px) 460px, 620px">
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400&display=swap" rel="stylesheet"></noscript>
 <style>
@@ -214,6 +219,8 @@ h3 { font-size: 26px; }
 .micro-strip {
  background: var(--light); padding: 16px 0; overflow: hidden; border-top: 1px solid rgba(240,213,196,0.3);
  border-bottom: 1px solid rgba(240,213,196,0.3);
+ min-height: 50px; /* reserve space to prevent CLS while track populates */
+ contain: layout paint;
 }
 .micro-track {
  display: flex; gap: 48px; animation: scrollProof 30s linear infinite; width: max-content;
@@ -1671,9 +1678,9 @@ setTimeout(function() {
  animation: loaderRing 1.8s linear infinite;
  "></div>
  <!-- Logo -->
- <img src="/het-leven-logo.png" alt="Het Leven Dat Je Verdient" width="140" height="140" style="
+ <img src="/life-reset-favicon-200.png" alt="LIFE RESET™" width="140" height="140" style="
  position: relative;
- width: 140px; height: auto;
+ width: 140px; height: 140px;
  object-fit: contain;
  animation: loaderBreathe 2.4s ease-in-out infinite;
  ">
@@ -1718,7 +1725,7 @@ setTimeout(function() {
 <nav class="site-nav" aria-label="Hoofdnavigatie" role="navigation">
  <div class="nav-inner">
   <a href="/" class="nav-logo">
-   <img src="/het-leven-logo.png" alt="Het Leven Dat Je Verdient" width="500" height="98">
+   <img src="/het-leven-logo.webp" alt="Het Leven Dat Je Verdient" width="360" height="70" fetchpriority="high">
   </a>
   <div class="nav-links">
    <a href="/verzending">Verzending &amp; Levering</a>
@@ -1842,7 +1849,7 @@ document.querySelectorAll('.nav-mobile-menu a').forEach(function(a) {
 
  <!-- Deel B: tekst + CTA (mobiel: onder afbeelding) -->
  <div class="hero-bottom-text">
- <p class="body-text anim d2" style="font-size: 18px; max-width: 540px; margin-bottom: 8px;">
+ <p class="body-text anim d2" style="font-size: 16px; max-width: 540px; margin-bottom: 8px;">
  De kast die uitpuilt en toch heb je niets om aan te trekken. Het hoofd dat nooit stilstaat. Die ene relatie die altijd iets van je vraagt. Het schuldgevoel, telkens als je iets voor jezelf doet. Dit boek gaat niet over "denk positief". Het gaat over vijf pijlers die daadwerkelijk je leven beïnvloeden, en hoe je ze in 30 dagen stap voor stap kunt loslaten. Eén la. Eén nee. Eén ademhaling tegelijk.
  </p>
 
@@ -1887,23 +1894,23 @@ document.querySelectorAll('.nav-mobile-menu a').forEach(function(a) {
  </div>
 
  <div class="payment-row anim d5" style="margin-top: 16px;">
- <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" loading="lazy">
- <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" loading="lazy">
- <img src="/icons/visa.svg" alt="VISA" class="pay-icon" loading="lazy">
- <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" loading="lazy">
- <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" loading="lazy">
- <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" loading="lazy">
- <img src="/icons/applepay.svg" alt="Apple Pay" class="pay-icon" loading="lazy">
- <img src="/icons/googlepay.svg" alt="Google Pay" class="pay-icon" loading="lazy">
+ <img src="/icons/ideal.svg" alt="iDEAL Wero" class="pay-icon pay-icon--ideal" loading="lazy" width="74" height="28">
+ <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/visa.svg" alt="VISA" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/applepay.svg" alt="Apple Pay" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/googlepay.svg" alt="Google Pay" class="pay-icon" loading="lazy" width="44" height="28">
  </div>
  </div>
  </div>
 
  <div class="hero-right anim-right d2" style="display: flex; align-items: center; justify-content: center;">
- <img src="https://res.cloudinary.com/dckynhswz/image/upload/q_auto,w_490/v1771309763/bec190da-db05-409e-901b-17847974a11a.Het-Leven-Dat-Je-Verdient_yqqgc6.webp"
-srcset="https://res.cloudinary.com/dckynhswz/image/upload/q_auto,w_380/v1771309763/bec190da-db05-409e-901b-17847974a11a.Het-Leven-Dat-Je-Verdient_yqqgc6.webp 380w, https://res.cloudinary.com/dckynhswz/image/upload/q_auto,w_490/v1771309763/bec190da-db05-409e-901b-17847974a11a.Het-Leven-Dat-Je-Verdient_yqqgc6.webp 490w, https://res.cloudinary.com/dckynhswz/image/upload/q_auto,w_640/v1771309763/bec190da-db05-409e-901b-17847974a11a.Het-Leven-Dat-Je-Verdient_yqqgc6.webp 640w"
+ <img src="/het-leven-dat-je-verdient-490w.webp"
+srcset="/het-leven-dat-je-verdient-380w.webp 380w, /het-leven-dat-je-verdient-490w.webp 490w, /het-leven-dat-je-verdient-640w.webp 640w, /het-leven-dat-je-verdient-800w.webp 800w"
 sizes="(max-width: 600px) 320px, (max-width: 960px) 460px, 620px"
-width="432" height="617" loading="eager" fetchpriority="high" alt="The Art of Life — Anna de Vries" style="width: 432px; max-width: 100%; height: auto; border-radius: 6px; animation: float 5s ease-in-out infinite; filter: drop-shadow(0 6px 12px rgba(74,26,46,0.14)) drop-shadow(0 18px 40px rgba(74,26,46,0.22)) drop-shadow(0 32px 70px rgba(184,92,74,0.18)) drop-shadow(0 2px 4px rgba(74,26,46,0.10));">
+width="432" height="617" loading="eager" fetchpriority="high" alt="Het Leven Dat Je Verdient — Anna de Vries" style="width: 432px; max-width: 100%; height: auto; border-radius: 6px; animation: float 5s ease-in-out infinite; filter: drop-shadow(0 6px 12px rgba(74,26,46,0.14)) drop-shadow(0 18px 40px rgba(74,26,46,0.22)) drop-shadow(0 32px 70px rgba(184,92,74,0.18)) drop-shadow(0 2px 4px rgba(74,26,46,0.10));">
  </div>
  </div>
  </div>
@@ -2253,7 +2260,7 @@ html,body{overflow-x:clip}
 .ukazka-swipe-hint{position:absolute;bottom:-36px;left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:11px;color:#8B6F47;opacity:0;transition:opacity .4s;pointer-events:none;letter-spacing:1px}
 .ukazka-swipe-hint.is-visible{opacity:.7}
 .ukazka-caption{text-align:center;max-width:640px;margin:0 auto 32px;padding:0 16px;min-height:90px}
-.ukazka-caption h4{font-family:'Recoleta',serif;font-size:clamp(18px,2.4vw,22px);color:#2A2520;margin:0 0 8px;font-weight:500}
+.ukazka-caption h4,.ukazka-caption .ukazka-caption-title{font-family:'Recoleta',serif;font-size:clamp(18px,2.4vw,22px);color:#2A2520;margin:0 0 8px;font-weight:500;line-height:1.2}
 .ukazka-caption p{font-family:'DM Sans',sans-serif;font-size:clamp(14px,1.8vw,16px);color:#6B5D4E;line-height:1.6;margin:0 0 10px;font-style:italic}
 .ukazka-caption .ukazka-caption-meta{font-family:'DM Mono',monospace;font-size:11px;color:#8B6F47;letter-spacing:1px;font-style:normal}
 .ukazka-thumbs{display:flex;gap:10px;overflow-x:auto;padding:12px 4px 16px;max-width:880px;margin:0 auto 48px;scroll-snap-type:x mandatory;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
@@ -2322,15 +2329,15 @@ html,body{overflow-x:clip}
 <script>
 (function(){
  const PAGES=[
-  {src:'/ukazky/het-leven-dat-je-verdient-neurowetenschap-vreugde.jpg',chapter:'Hoofdstuk 1 · Spullen',title:'De neurowetenschap van vreugde — wanneer je lichaam meer weet dan je hoofd',page:'Pagina 65',emotion:'Vraag niet of je het nodig hebt — vraag of het je blij maakt. Dopamine en oxytocine liegen niet.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-verzadigingspunt.jpg',chapter:'Hoofdstuk 1 · Spullen',title:'Het verzadigingspunt — precies de juiste hoeveelheid',page:'Pagina 77',emotion:'Niet maximum, niet minimum. Het punt waarop dingen aanvoelen als deel van je leven, niet als een last.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-slaapkamer-veranderen.jpg',chapter:'Hoofdstuk 2 · Ruimte',title:'Hoe Femke haar slaapkamer veranderde — in 30 minuten',page:'Pagina 100',emotion:'Ze kocht geen nieuw meubilair. Ze verplaatste alleen wat er al was. En sliep voor het eerst in maanden door.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-grenzen-thuis.jpg',chapter:'Hoofdstuk 2 · Ruimte',title:'Grenzen in huis — de psychologie van opbergen',page:'Pagina 150',emotion:'Elk voorwerp heeft een thuis nodig. Anders neemt het er een in jouw brein — en daar kost het je rust.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-vier-mythes-grenzen.jpg',chapter:'Hoofdstuk 3 · Mensen',title:'Vier mythes over grenzen — en wat een gezonde grens écht is',page:'Pagina 179',emotion:'Wanneer ik nee zeg, zeg ik niet „ik hou niet van je." Ik zeg „ik hou van mezelf."'},
-  {src:'/ukazky/het-leven-dat-je-verdient-vier-weken-gewoonte.jpg',chapter:'Hoofdstuk 3 · Mensen',title:'Vier weken om grenzen tot een gewoonte te maken',page:'Pagina 201',emotion:'Het is geen eenmalige zaak. Het is een gewoonte die je opbouwt — week na week, persoon na persoon.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-drieminutentechniek.jpg',chapter:'Hoofdstuk 4 · Geest',title:'De drieminutentechniek — voor wanneer paniek je overspoelt',page:'Pagina 232',emotion:'Een paniekaanval overwin je niet met een gedachte. Je overwint hem met het lichaam: met adem, aanraking, aanwezigheid.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-slaap-en-geest.jpg',chapter:'Hoofdstuk 4 · Geest',title:'Slaap en geest — waarom je brein \'s nachts weigert uit te schakelen',page:'Pagina 273',emotion:'Slechte slaap verzwakt de prefrontale cortex. En weet je wat sterker wordt? De amygdala. Het centrum van angst.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-essentialisme-thuis.jpg',chapter:'Hoofdstuk 5 · Energie',title:'Essentialisme thuis — minder, maar beter',page:'Pagina 330',emotion:'Vijf maaltijden per week. Eén boodschappenrun. Nul beslissingsmoeheid. Zoveel verandert er door één regel.'}
+  {src:'/ukazky/het-leven-dat-je-verdient-neurowetenschap-vreugde.webp',chapter:'Hoofdstuk 1 · Spullen',title:'De neurowetenschap van vreugde — wanneer je lichaam meer weet dan je hoofd',page:'Pagina 65',emotion:'Vraag niet of je het nodig hebt — vraag of het je blij maakt. Dopamine en oxytocine liegen niet.'},
+  {src:'/ukazky/het-leven-dat-je-verdient-verzadigingspunt.webp',chapter:'Hoofdstuk 1 · Spullen',title:'Het verzadigingspunt — precies de juiste hoeveelheid',page:'Pagina 77',emotion:'Niet maximum, niet minimum. Het punt waarop dingen aanvoelen als deel van je leven, niet als een last.'},
+  {src:'/ukazky/het-leven-dat-je-verdient-slaapkamer-veranderen.webp',chapter:'Hoofdstuk 2 · Ruimte',title:'Hoe Femke haar slaapkamer veranderde — in 30 minuten',page:'Pagina 100',emotion:'Ze kocht geen nieuw meubilair. Ze verplaatste alleen wat er al was. En sliep voor het eerst in maanden door.'},
+  {src:'/ukazky/het-leven-dat-je-verdient-grenzen-thuis.webp',chapter:'Hoofdstuk 2 · Ruimte',title:'Grenzen in huis — de psychologie van opbergen',page:'Pagina 150',emotion:'Elk voorwerp heeft een thuis nodig. Anders neemt het er een in jouw brein — en daar kost het je rust.'},
+  {src:'/ukazky/het-leven-dat-je-verdient-vier-mythes-grenzen.webp',chapter:'Hoofdstuk 3 · Mensen',title:'Vier mythes over grenzen — en wat een gezonde grens écht is',page:'Pagina 179',emotion:'Wanneer ik nee zeg, zeg ik niet „ik hou niet van je." Ik zeg „ik hou van mezelf."'},
+  {src:'/ukazky/het-leven-dat-je-verdient-vier-weken-gewoonte.webp',chapter:'Hoofdstuk 3 · Mensen',title:'Vier weken om grenzen tot een gewoonte te maken',page:'Pagina 201',emotion:'Het is geen eenmalige zaak. Het is een gewoonte die je opbouwt — week na week, persoon na persoon.'},
+  {src:'/ukazky/het-leven-dat-je-verdient-drieminutentechniek.webp',chapter:'Hoofdstuk 4 · Geest',title:'De drieminutentechniek — voor wanneer paniek je overspoelt',page:'Pagina 232',emotion:'Een paniekaanval overwin je niet met een gedachte. Je overwint hem met het lichaam: met adem, aanraking, aanwezigheid.'},
+  {src:'/ukazky/het-leven-dat-je-verdient-slaap-en-geest.webp',chapter:'Hoofdstuk 4 · Geest',title:'Slaap en geest — waarom je brein \'s nachts weigert uit te schakelen',page:'Pagina 273',emotion:'Slechte slaap verzwakt de prefrontale cortex. En weet je wat sterker wordt? De amygdala. Het centrum van angst.'},
+  {src:'/ukazky/het-leven-dat-je-verdient-essentialisme-thuis.webp',chapter:'Hoofdstuk 5 · Energie',title:'Essentialisme thuis — minder, maar beter',page:'Pagina 330',emotion:'Vijf maaltijden per week. Eén boodschappenrun. Nul beslissingsmoeheid. Zoveel verandert er door één regel.'}
  ];
  let idx=0;
  const $=id=>document.getElementById(id);
@@ -2361,7 +2368,7 @@ html,body{overflow-x:clip}
   $('ukazkaNext').toggleAttribute('disabled',idx===PAGES.length-1);
   [...thumbs.children].forEach((el,i)=>el.classList.toggle('is-active',i===idx));
   const p=PAGES[idx];
-  cap.innerHTML=`<h4>${p.title}</h4><p>"${p.emotion}"</p><div class="ukazka-caption-meta">${p.page} · Leestijd ± 3 min · 🔍 Klik om te vergroten</div>`;
+  cap.innerHTML=`<h3 class="ukazka-caption-title">${p.title}</h3><p>"${p.emotion}"</p><div class="ukazka-caption-meta">${p.page} · Leestijd ± 3 min · 🔍 Klik om te vergroten</div>`;
   chap.textContent=p.chapter;
   cur.textContent=idx+1;
   prog.style.width=pct+'%';
@@ -2578,14 +2585,14 @@ html,body{overflow-x:clip}
 
  <!-- Betaalmethoden -->
  <div class="payment-row" style="margin-top: 16px;">
- <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" loading="lazy">
- <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" loading="lazy">
- <img src="/icons/visa.svg" alt="VISA" class="pay-icon" loading="lazy">
- <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" loading="lazy">
- <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" loading="lazy">
- <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" loading="lazy">
- <img src="/icons/applepay.svg" alt="Apple Pay" class="pay-icon" loading="lazy">
- <img src="/icons/googlepay.svg" alt="Google Pay" class="pay-icon" loading="lazy">
+ <img src="/icons/ideal.svg" alt="iDEAL Wero" class="pay-icon pay-icon--ideal" loading="lazy" width="74" height="28">
+ <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/visa.svg" alt="VISA" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/applepay.svg" alt="Apple Pay" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/googlepay.svg" alt="Google Pay" class="pay-icon" loading="lazy" width="44" height="28">
  </div>
 
  </div>
@@ -2594,7 +2601,7 @@ html,body{overflow-x:clip}
  <div class="hero-right" style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px;">
 
  <!-- Hoofdboek -->
- <img src="https://res.cloudinary.com/dckynhswz/image/upload/q_auto,w_760/v1771309763/bec190da-db05-409e-901b-17847974a11a.Het-Leven-Dat-Je-Verdient_yqqgc6.webp" loading="lazy" alt="Het Leven Dat Je Verdient" style="width: 260px; height: auto; border-radius: 4px; animation: float 5s ease-in-out infinite; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)) drop-shadow(0 12px 28px rgba(0,0,0,0.25)) drop-shadow(0 24px 50px rgba(232,168,140,0.15));" width="260" height="182">
+ <img src="/het-leven-dat-je-verdient-640w.webp" loading="lazy" alt="Het Leven Dat Je Verdient" style="width: 260px; height: auto; border-radius: 4px; animation: float 5s ease-in-out infinite; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)) drop-shadow(0 12px 28px rgba(0,0,0,0.25)) drop-shadow(0 24px 50px rgba(232,168,140,0.15));" width="260" height="371">
 
  <!-- E-books onder het hoofdboek -->
  <div style="display: flex; gap: 16px; justify-content: center; align-items: flex-start;">
@@ -3422,7 +3429,7 @@ html,body{overflow-x:clip}
  <div class="anim d3" style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 48px; max-width: 700px; margin-left: auto; margin-right: auto;">
  <!-- Hoofdboek - groter -->
  <div style="text-align: center; flex-shrink: 0;">
- <img src="https://res.cloudinary.com/dckynhswz/image/upload/q_auto,w_760/v1771309763/bec190da-db05-409e-901b-17847974a11a.Het-Leven-Dat-Je-Verdient_yqqgc6.webp" loading="lazy" alt="Het Leven Dat Je Verdient — het boek" style="width: 180px; height: auto; filter: drop-shadow(0 8px 24px rgba(74,26,46,0.2)); transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05) rotate(-1deg)'" onmouseout="this.style.transform='scale(1)'" width="180" height="126">
+ <img src="/het-leven-dat-je-verdient-640w.webp" loading="lazy" alt="Het Leven Dat Je Verdient — het boek" style="width: 180px; height: auto; filter: drop-shadow(0 8px 24px rgba(74,26,46,0.2)); transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05) rotate(-1deg)'" onmouseout="this.style.transform='scale(1)'" width="180" height="257">
  <p style="font-family: 'Recoleta', serif; font-size: 14px; color: var(--heading); margin-top: 12px;">Het boek</p>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted);">waarde € 34,95</p>
  </div>
@@ -3453,7 +3460,7 @@ html,body{overflow-x:clip}
 
  <!-- ITEM 1: Fysiek boek -->
  <div style="display: flex; gap: 20px; align-items: center; padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px;">
- <img src="https://res.cloudinary.com/dckynhswz/image/upload/q_auto,w_760/v1771309763/bec190da-db05-409e-901b-17847974a11a.Het-Leven-Dat-Je-Verdient_yqqgc6.webp" loading="lazy" alt="Het boek" style="width: 80px; height: auto; flex-shrink: 0; filter: drop-shadow(0 4px 12px rgba(74,26,46,0.15));" width="80" height="56">
+ <img src="/het-leven-dat-je-verdient-640w.webp" loading="lazy" alt="Het boek" style="width: 80px; height: auto; flex-shrink: 0; filter: drop-shadow(0 4px 12px rgba(74,26,46,0.15));" width="80" height="114">
  <div style="flex: 1;">
  <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
  <h3 style="font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin: 0;">Het Leven Dat Je Verdient</h3>
@@ -3467,7 +3474,7 @@ html,body{overflow-x:clip}
 
  <!-- ITEM 2: E-book Feng Shui -->
  <div style="display: flex; gap: 20px; align-items: center; padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px;">
- <img src="https://res.cloudinary.com/dckynhswz/image/upload/q_auto,w_440/v1771309762/bfdba097-266d-497d-8d83-f61f39ced8cf.feng_ot1u4g.webp" loading="lazy" alt="Feng Shui e-book" style="width: 80px; height: auto; flex-shrink: 0; filter: drop-shadow(0 4px 12px rgba(26,74,74,0.15));" width="80" height="56">
+ <img src="https://res.cloudinary.com/dckynhswz/image/upload/q_auto,w_440/v1771309762/bfdba097-266d-497d-8d83-f61f39ced8cf.feng_ot1u4g.webp" loading="lazy" alt="Feng Shui e-book" style="width: 80px; height: auto; flex-shrink: 0; filter: drop-shadow(0 4px 12px rgba(26,74,74,0.15));" width="80" height="114">
  <div style="flex: 1;">
  <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
  <h3 style="font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin: 0;">Verschuif Eén Ding, Verander Alles</h3>
@@ -3487,7 +3494,7 @@ html,body{overflow-x:clip}
 
  <!-- ITEM 3: E-book Opruimen -->
  <div style="display: flex; gap: 20px; align-items: center; padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px;">
- <img src="https://res.cloudinary.com/dckynhswz/image/upload/q_auto,w_440/v1771309763/8420ec77-0be6-41e0-8913-a4e3a98a19ff.decluterring_n0mi9j.webp" loading="lazy" alt="Opruimen e-book" style="width: 80px; height: auto; flex-shrink: 0; filter: drop-shadow(0 4px 12px rgba(139,94,60,0.15));" width="80" height="56">
+ <img src="https://res.cloudinary.com/dckynhswz/image/upload/q_auto,w_440/v1771309763/8420ec77-0be6-41e0-8913-a4e3a98a19ff.decluterring_n0mi9j.webp" loading="lazy" alt="Opruimen e-book" style="width: 80px; height: auto; flex-shrink: 0; filter: drop-shadow(0 4px 12px rgba(139,94,60,0.15));" width="80" height="114">
  <div style="flex: 1;">
  <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
  <h3 style="font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin: 0;">Niet Alles Verdient Een Plek</h3>
@@ -3548,14 +3555,14 @@ html,body{overflow-x:clip}
  <span class="final-badge">✓ Veilig betalen</span>
  </div>
  <div class="payment-row" style="justify-content: center; margin-top: 12px;">
- <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" loading="lazy">
- <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" loading="lazy">
- <img src="/icons/visa.svg" alt="VISA" class="pay-icon" loading="lazy">
- <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" loading="lazy">
- <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" loading="lazy">
- <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" loading="lazy">
- <img src="/icons/applepay.svg" alt="Apple Pay" class="pay-icon" loading="lazy">
- <img src="/icons/googlepay.svg" alt="Google Pay" class="pay-icon" loading="lazy">
+ <img src="/icons/ideal.svg" alt="iDEAL Wero" class="pay-icon pay-icon--ideal" loading="lazy" width="74" height="28">
+ <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/visa.svg" alt="VISA" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/applepay.svg" alt="Apple Pay" class="pay-icon" loading="lazy" width="44" height="28">
+ <img src="/icons/googlepay.svg" alt="Google Pay" class="pay-icon" loading="lazy" width="44" height="28">
  </div>
  </div>
  </div>
