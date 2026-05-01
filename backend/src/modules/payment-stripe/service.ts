@@ -300,6 +300,7 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
             method: method,
             session_id: data?.session_id,
             currency_code,
+            project_slug: projectSlug,
           },
         }
       }
@@ -386,6 +387,7 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
           checkoutUrl: checkoutUrl,
           session_id: data?.session_id,
           currency_code,
+          project_slug: projectSlug,
         },
       }
     } catch (error: any) {
@@ -403,7 +405,7 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
   async authorizePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const stripe = await this.getStripeClient()
+      const stripe = await this.getStripeClient(sessionData?.project_slug)
 
       // If we used Checkout Session, resolve the PaymentIntent from it
       if (sessionData.stripeCheckoutSessionId && !sessionData.stripePaymentIntentId) {
@@ -451,7 +453,7 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
   async capturePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const stripe = await this.getStripeClient()
+      const stripe = await this.getStripeClient(sessionData?.project_slug)
       const piId = sessionData.stripePaymentIntentId
 
       if (!piId) {
@@ -481,7 +483,7 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
     const sessionData = input.data || input
     const refundAmount = input.amount
     try {
-      const stripe = await this.getStripeClient()
+      const stripe = await this.getStripeClient(sessionData?.project_slug)
       const piId = sessionData.stripePaymentIntentId
 
       if (!piId) {
@@ -526,7 +528,7 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
   async cancelPayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const stripe = await this.getStripeClient()
+      const stripe = await this.getStripeClient(sessionData?.project_slug)
       const piId = sessionData.stripePaymentIntentId
 
       if (piId) {
@@ -561,7 +563,7 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
    */
   async getPaymentStatus(data: any): Promise<PaymentSessionStatus> {
     try {
-      const stripe = await this.getStripeClient()
+      const stripe = await this.getStripeClient(data?.project_slug)
       const piId = data.stripePaymentIntentId
 
       if (!piId) return PaymentSessionStatus.PENDING
@@ -579,7 +581,7 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
   async retrievePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
-      const stripe = await this.getStripeClient()
+      const stripe = await this.getStripeClient(sessionData?.project_slug)
       const piId = sessionData.stripePaymentIntentId
 
       if (!piId) {
