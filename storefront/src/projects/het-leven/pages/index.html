@@ -2088,44 +2088,64 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="Het Leven Dat
  </svg>
  </span>
  </button>
+ <div id="hetlevenControls" style="position: absolute; bottom: 12px; right: 12px; display: none; gap: 8px; z-index: 2;">
  <button
  id="hetlevenUnmuteBtn"
  type="button"
  aria-label="Geluid aan / uit"
- style="position: absolute; bottom: 12px; right: 12px; width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 0; cursor: pointer; display: none; align-items: center; justify-content: center; padding: 0; z-index: 2;">
+ style="width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
  <svg id="hetlevenMuteIcon" width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
- <path d="M3 9v6h4l5 5V4L7 9H3zm13.59 3L19 9.41 17.59 8 15 10.59 12.41 8 11 9.41 13.59 12 11 14.59 12.41 16 15 13.41 17.59 16 19 14.59 16.59 12z"/>
+ <path d="M3 9v6h4l5 5V4L7 9H3zm10.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
  </svg>
  </button>
+ <button
+ id="hetlevenFullscreenBtn"
+ type="button"
+ aria-label="Volledig scherm"
+ style="width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+ <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+ </svg>
+ </button>
+ </div>
  <script>
  (function(){
  var v=document.getElementById('hetlevenVideo');
  var b=document.getElementById('hetlevenPlayOverlay');
+ var ctrls=document.getElementById('hetlevenControls');
  var u=document.getElementById('hetlevenUnmuteBtn');
+ var fs=document.getElementById('hetlevenFullscreenBtn');
  var muteIcon=document.getElementById('hetlevenMuteIcon');
 
- // Sync overlay with playback state — only hide when video actually plays.
- v.addEventListener('play', function(){ b.style.opacity='0'; b.style.pointerEvents='none'; });
+ var MUTED_PATH='<path d="M3 9v6h4l5 5V4L7 9H3zm13.59 3L19 9.41 17.59 8 15 10.59 12.41 8 11 9.41 13.59 12 11 14.59 12.41 16 15 13.41 17.59 16 19 14.59 16.59 12z"/>';
+ var SOUND_PATH='<path d="M3 9v6h4l5 5V4L7 9H3zm10.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+
+ function refreshMuteIcon(){ muteIcon.innerHTML = v.muted ? MUTED_PATH : SOUND_PATH; }
+
+ // Sync overlay + controls with playback state.
+ v.addEventListener('play', function(){
+   b.style.opacity='0'; b.style.pointerEvents='none';
+   ctrls.style.display='flex';
+   refreshMuteIcon();
+ });
  v.addEventListener('pause', function(){ b.style.opacity='1'; b.style.pointerEvents='auto'; });
- v.addEventListener('ended', function(){ b.style.opacity='1'; b.style.pointerEvents='auto'; u.style.display='none'; });
+ v.addEventListener('ended', function(){ b.style.opacity='1'; b.style.pointerEvents='auto'; ctrls.style.display='none'; });
+ v.addEventListener('volumechange', refreshMuteIcon);
 
  function attemptPlay(){
-   // First try with current muted state (preserves user's last choice)
+   // User clicked → start with sound on. Browsers normally allow this after user gesture.
+   v.muted = false;
    var p = v.play();
    if (p && typeof p.then === 'function'){
      p.catch(function(){
-       // Browser blocked playback — usually means audio policy on iOS.
-       // Force-mute and retry; show the unmute button so user can enable sound.
+       // Audio policy blocked playback (rare on click; common on iOS for autoplay).
+       // Fallback: mute + retry. User can re-enable sound via the unmute button.
        v.muted = true;
-       u.style.display = 'flex';
        v.play().catch(function(err){
-         // Hard failure: log + leave overlay visible so user knows it didn't start.
          console.warn('[HetLeven Video] Playback blocked:', err && err.message);
        });
      });
    }
-   // Show unmute control as soon as we attempt (user may want sound at any time)
-   if (v.muted){ u.style.display = 'flex'; }
  }
 
  function togglePlay(){
@@ -2137,14 +2157,27 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="Het Leven Dat
  b.addEventListener('click', function(e){ e.stopPropagation(); togglePlay(); });
  v.addEventListener('click', function(){ togglePlay(); });
 
- // Unmute button: enable sound, hide control
+ // Unmute toggle
  u.addEventListener('click', function(e){
    e.stopPropagation();
    v.muted = !v.muted;
-   muteIcon.innerHTML = v.muted
-     ? '<path d="M3 9v6h4l5 5V4L7 9H3zm13.59 3L19 9.41 17.59 8 15 10.59 12.41 8 11 9.41 13.59 12 11 14.59 12.41 16 15 13.41 17.59 16 19 14.59 16.59 12z"/>'
-     : '<path d="M3 9v6h4l5 5V4L7 9H3zm10.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
-   if (!v.muted){ /* user wants sound — hide button after unmute */ u.style.display='none'; }
+   refreshMuteIcon();
+ });
+
+ // Fullscreen toggle (iOS Safari only supports it on the video element)
+ fs.addEventListener('click', function(e){
+   e.stopPropagation();
+   var inFs = document.fullscreenElement || document.webkitFullscreenElement;
+   if (inFs){
+     (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+     return;
+   }
+   if (v.requestFullscreen)              { v.requestFullscreen(); }
+   else if (v.webkitEnterFullscreen)      { v.webkitEnterFullscreen(); /* iOS native */ }
+   else if (v.webkitRequestFullscreen)    { v.webkitRequestFullscreen(); }
+   else if (v.parentElement && v.parentElement.requestFullscreen){
+     v.parentElement.requestFullscreen();
+   }
  });
  })();
  </script>
