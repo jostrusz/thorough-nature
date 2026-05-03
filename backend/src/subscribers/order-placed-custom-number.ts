@@ -84,10 +84,11 @@ export default async function orderPlacedCustomNumberHandler({
       ? PROJECT_TAG_NAMES[projectId] || projectId
       : undefined
 
-    // Merge with existing metadata to avoid overwriting other subscribers' fields
+    // Pass ONLY new fields — Medusa merges metadata at DB level.
+    // Spreading existingMeta snapshot races with other order.placed subscribers
+    // (payment-metadata, dextrum) and overwrites their concurrently-written fields.
     await orderModuleService.updateOrders(data.id, {
       metadata: {
-        ...existingMeta,
         custom_order_number: customOrderNumber,
         ...(projectId && !existingMeta.project_id ? { project_id: projectId } : {}),
         ...(projectTag && !existingMeta.tags ? { tags: projectTag } : {}),
