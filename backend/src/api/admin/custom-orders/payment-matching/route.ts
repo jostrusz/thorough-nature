@@ -234,13 +234,28 @@ export async function GET(
           const payments = ((order as any).payment_collections || [])
             .flatMap((pc: any) => pc.payments || [])
           for (const payment of payments) {
+            // Stripe: stripePaymentIntentId (set by our payment-stripe service)
+            if (payment.data?.stripePaymentIntentId) {
+              paymentId1 = String(payment.data.stripePaymentIntentId)
+              break
+            }
+            if (payment.data?.stripeCheckoutSessionId) {
+              paymentId1 = String(payment.data.stripeCheckoutSessionId)
+              break
+            }
             // PayPal: captureId is the bank transaction reference
             if (payment.data?.captureId) {
               paymentId1 = String(payment.data.captureId)
               break
             }
+            // Airwallex
             if (payment.data?.intentId) {
               paymentId1 = String(payment.data.intentId)
+              break
+            }
+            // Airwallex (alternative key) and Stripe (legacy)
+            if (payment.data?.airwallexPaymentIntentId) {
+              paymentId1 = String(payment.data.airwallexPaymentIntentId)
               break
             }
             if (payment.data?.klarnaOrderId) {
@@ -253,6 +268,16 @@ export async function GET(
             }
             if (payment.data?.comgateTransId) {
               paymentId1 = String(payment.data.comgateTransId)
+              break
+            }
+            // Mollie
+            if (payment.data?.molliePaymentId) {
+              paymentId1 = String(payment.data.molliePaymentId)
+              break
+            }
+            // Novalnet
+            if (payment.data?.novalnetTid || payment.data?.tid) {
+              paymentId1 = String(payment.data.novalnetTid || payment.data.tid)
               break
             }
             if (payment.data?.id) {
