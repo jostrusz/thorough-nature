@@ -168,13 +168,11 @@ export default async function orderPlacedPaymentMetadataHandler({
 
     if (!found) return
 
-    // Read existing metadata and merge to avoid overwriting other subscribers' fields
-    const existingMeta = (order as any).metadata || {}
+    // Pass ONLY new fields — Medusa merges metadata at DB level.
+    // Spreading existingMetadata snapshot races with other order.placed subscribers
+    // (custom-number, dextrum, etc.) and overwrites their concurrently-written fields.
     await orderModuleService.updateOrders(data.id, {
-      metadata: {
-        ...existingMeta,
-        ...newMetadata,
-      },
+      metadata: newMetadata,
     })
 
     const provider = newMetadata.payment_method || "unknown"

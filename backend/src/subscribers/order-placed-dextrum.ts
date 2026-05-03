@@ -71,11 +71,10 @@ export default async function orderPlacedDextrumHandler({
       hold_until: holdUntil,
     })
 
-    // 7. Update order metadata
-    const meta = (order as any).metadata || {}
+    // 7. Update order metadata — pass ONLY new fields, Medusa merges at DB level.
+    // Spreading existing meta snapshot races with other order.placed subscribers.
     await orderModuleService.updateOrders(data.id, {
       metadata: {
-        ...meta,
         dextrum_status: "WAITING",
         dextrum_order_code: orderCode,
         dextrum_hold_until: holdUntil,
