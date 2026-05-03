@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import { CrossPromoSection } from "./cross-promo"
 import { CrossPromoHL } from "./cross-promo-hl"
+import { CrossPromoLB } from "./cross-promo-lb"
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
@@ -739,6 +740,9 @@ export default async function DownloadPage({
 
               {/* Cross-promo: small Laat Los banner on het-leven downloads */}
               {projectId === "het-leven" && <CrossPromoHL />}
+
+              {/* Cross-promo: small Het Leven banner on loslatenboek downloads */}
+              {projectId === "loslatenboek" && <CrossPromoLB />}
             </>
           )}
 

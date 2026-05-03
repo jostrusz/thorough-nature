@@ -1,4 +1,4 @@
-import { Text, Section, Hr, Link, Button } from '@react-email/components'
+import { Text, Section, Hr, Link, Button, Img } from '@react-email/components'
 import * as React from 'react'
 import { Base } from './base'
 
@@ -117,7 +117,7 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
             padding: '12px 16px',
             textAlign: 'center' as const,
             border: '1px solid #FFE082',
-            marginBottom: '24px',
+            marginBottom: '20px',
           }}>
             <Text style={{
               fontFamily: font,
@@ -128,6 +128,75 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
               ⏳ Deze download-link is geldig tot <strong>{expiryDate}</strong>. Sla de bestanden op na het downloaden.
             </Text>
           </div>
+
+          {/* CROSS-SELL: Het Leven Dat Je Verdient */}
+          <Text style={{
+            fontFamily: font,
+            fontSize: '11px',
+            fontWeight: 600,
+            textTransform: 'uppercase' as const,
+            letterSpacing: '1.5px',
+            color: '#9B7AAD',
+            marginBottom: '12px',
+            textAlign: 'center' as const,
+          }}>
+            ✦ De volgende stap voor jou
+          </Text>
+
+          <Link
+            href="https://www.pakjeleventerug.nl"
+            style={{ textDecoration: 'none', display: 'block', marginBottom: '24px' }}
+          >
+            <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{
+              backgroundColor: '#FAF5F8',
+              borderRadius: '12px',
+              border: '1px solid #EDD9E5',
+              borderCollapse: 'separate' as const,
+            }}>
+              <tbody>
+                <tr>
+                  <td width="110" style={{ padding: '16px 0 16px 16px', verticalAlign: 'middle' as const }}>
+                    <Img
+                      src="https://www.pakjeleventerug.nl/het-leven-dat-je-verdient-380w.webp"
+                      alt="Het Leven Dat Je Verdient"
+                      width="94"
+                      style={{ display: 'block', borderRadius: '6px', maxWidth: '94px' }}
+                    />
+                  </td>
+                  <td style={{ padding: '16px 18px 16px 14px', verticalAlign: 'middle' as const }}>
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '15px',
+                      fontWeight: 700,
+                      color: '#2D1B3D',
+                      margin: '0 0 4px',
+                      lineHeight: '1.3',
+                    }}>
+                      Het Leven Dat Je Verdient
+                    </Text>
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '12px',
+                      color: '#5A3D6B',
+                      margin: '0 0 8px',
+                      lineHeight: '1.5',
+                    }}>
+                      Loslaten was de eerste stap. Nu is het tijd om je leven terug te pakken — met de LIFE RESET™ methode in 5 pijlers.
+                    </Text>
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: '#C27BA0',
+                      margin: '0',
+                    }}>
+                      Ontdek het boek →
+                    </Text>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </Link>
 
           <Hr style={{ borderColor: '#EDD9E5', margin: '4px 0' }} />
 
