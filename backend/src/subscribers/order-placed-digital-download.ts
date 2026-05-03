@@ -108,6 +108,20 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "782 KB",
     },
   ],
+  'het-leven': [
+    {
+      key: "e-books/Verschuif Een Ding Verander Alles.pdf",
+      title: "Verschuif Eén Ding, Verander Alles",
+      description: "E-book (PDF)",
+      size: "3.2 MB",
+    },
+    {
+      key: "e-books/Niet Alles Verdient Een Plek.pdf",
+      title: "Niet Alles Verdient Een Plek",
+      description: "E-book (PDF)",
+      size: "1.1 MB",
+    },
+  ],
 }
 
 // Fallback for unknown projects
@@ -121,6 +135,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'odpusc-ksiazka': process.env.OK_STOREFRONT_URL || "https://www.odpusc-ksiazka.pl",
   'lass-los': process.env.LL_STOREFRONT_URL || "https://www.lasslosbuch.de",
   'psi-superzivot': process.env.PS_STOREFRONT_URL || "https://www.psi-superzivot.cz",
+  'het-leven': process.env.HL_STOREFRONT_URL || "https://www.pakjeleventerug.nl",
 }
 
 // Localized email subjects per project
@@ -131,6 +146,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'odpusc-ksiazka': 'Twoje e-booki są gotowe! 📖',
   'lass-los': 'Deine E-Books sind bereit! 📖',
   'psi-superzivot': 'Tvoje e-booky jsou připravené! 📖',
+  'het-leven': 'Je 2 gratis e-books staan klaar! 📖',
 }
 
 // Localized fallback first names
@@ -141,6 +157,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'odpusc-ksiazka': 'tam',
   'lass-los': 'dort',
   'psi-superzivot': 'tam',
+  'het-leven': 'daar',
 }
 
 export async function sendEbookDelivery(orderId: string, container: any, eventName: string) {

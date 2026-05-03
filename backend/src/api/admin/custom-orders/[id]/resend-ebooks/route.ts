@@ -29,6 +29,10 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
     { key: "e-books/Die Lösung für Überdenkerinnen.docx.pdf", title: "Die Lösung für Überdenkerinnen", description: "E-Book (PDF)", size: "1.4 MB" },
     { key: "e-books/LIEBE OHNE UNSINN.pdf", title: "Liebe ohne Unsinn", description: "E-Book (PDF)", size: "14.3 MB" },
   ],
+  'het-leven': [
+    { key: "e-books/Verschuif Een Ding Verander Alles.pdf", title: "Verschuif Eén Ding, Verander Alles", description: "E-book (PDF)", size: "3.2 MB" },
+    { key: "e-books/Niet Alles Verdient Een Plek.pdf", title: "Niet Alles Verdient Een Plek", description: "E-book (PDF)", size: "1.1 MB" },
+  ],
 }
 
 const DEFAULT_EBOOK_FILES = EBOOK_FILES_BY_PROJECT.loslatenboek
@@ -40,6 +44,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'slapp-taget': process.env.ST_STOREFRONT_URL || "https://www.slapptagetboken.se",
   'odpusc-ksiazka': process.env.OK_STOREFRONT_URL || "https://www.odpusc-ksiazka.pl",
   'lass-los': process.env.LL_STOREFRONT_URL || "https://www.lasslosbuch.de",
+  'het-leven': process.env.HL_STOREFRONT_URL || "https://www.pakjeleventerug.nl",
 }
 
 // Localized email subjects per project
@@ -49,6 +54,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'slapp-taget': 'Dina e-böcker är redo! 📖',
   'odpusc-ksiazka': 'Twoje e-booki są gotowe! 📖',
   'lass-los': 'Deine E-Books sind bereit! 📖',
+  'het-leven': 'Je 2 gratis e-books staan klaar! 📖',
 }
 
 // Localized fallback first name per project
@@ -58,6 +64,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'slapp-taget': 'där',
   'odpusc-ksiazka': 'tam',
   'lass-los': 'dort',
+  'het-leven': 'daar',
 }
 
 export async function POST(

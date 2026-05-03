@@ -1,4 +1,4 @@
-import { Text, Section, Hr, Link, Button } from '@react-email/components'
+import { Text, Section, Hr, Link, Button, Img } from '@react-email/components'
 import * as React from 'react'
 import { Base } from './base'
 
@@ -143,7 +143,7 @@ export const HlEbookDeliveryTemplate: React.FC<HlEbookDeliveryTemplateProps> & {
             padding: '12px 16px',
             textAlign: 'center' as const,
             border: '1px solid #FFE082',
-            marginBottom: '24px',
+            marginBottom: '20px',
           }}>
             <Text style={{
               fontFamily: font,
@@ -154,6 +154,75 @@ export const HlEbookDeliveryTemplate: React.FC<HlEbookDeliveryTemplateProps> & {
               ⏳ Deze download-link is geldig tot <strong>{expiryDate}</strong>. Sla de bestanden op na het downloaden.
             </Text>
           </div>
+
+          {/* CROSS-SELL: Laat los wat je kapotmaakt */}
+          <Text style={{
+            fontFamily: font,
+            fontSize: '11px',
+            fontWeight: 600,
+            textTransform: 'uppercase' as const,
+            letterSpacing: '1.5px',
+            color: colors.textMuted,
+            marginBottom: '12px',
+            textAlign: 'center' as const,
+          }}>
+            ✦ Misschien ook iets voor jou
+          </Text>
+
+          <Link
+            href="https://loslatenboek.nl"
+            style={{ textDecoration: 'none', display: 'block', marginBottom: '24px' }}
+          >
+            <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{
+              backgroundColor: colors.accentSoft,
+              borderRadius: '12px',
+              border: `1px solid ${colors.boxBorder}`,
+              borderCollapse: 'separate' as const,
+            }}>
+              <tbody>
+                <tr>
+                  <td width="110" style={{ padding: '16px 0 16px 16px', verticalAlign: 'middle' as const }}>
+                    <Img
+                      src="https://www.loslatenboek.nl/Laat-los-wat-je-kapotmaakt-book-pichi.png"
+                      alt="Laat los wat je kapotmaakt"
+                      width="94"
+                      style={{ display: 'block', borderRadius: '6px', maxWidth: '94px' }}
+                    />
+                  </td>
+                  <td style={{ padding: '16px 18px 16px 14px', verticalAlign: 'middle' as const }}>
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '15px',
+                      fontWeight: 700,
+                      color: colors.textDark,
+                      margin: '0 0 4px',
+                      lineHeight: '1.3',
+                    }}>
+                      Laat los wat je kapotmaakt
+                    </Text>
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '12px',
+                      color: colors.textBody,
+                      margin: '0 0 8px',
+                      lineHeight: '1.5',
+                    }}>
+                      Stop met overdenken. Kalmeer je emoties. Vind innerlijke rust — in 290 pagina's praktisch werkboek.
+                    </Text>
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: colors.accent,
+                      margin: '0',
+                    }}>
+                      Ontdek het boek →
+                    </Text>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </Link>
 
           <Hr style={{ borderColor: colors.divider, margin: '4px 0' }} />
 

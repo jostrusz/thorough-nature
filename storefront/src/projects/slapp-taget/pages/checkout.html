@@ -3994,6 +3994,24 @@ body {
               var firstName = payerName.given_name || shippingFullName.split(' ')[0] || '';
               var lastName = payerName.surname || shippingFullName.split(' ').slice(1).join(' ') || '';
 
+              var paypalPhone = (payer.phone && payer.phone.phone_number && payer.phone.phone_number.national_number) || '';
+
+              // Phone is required for PostNord delivery + Fakturoid invoicing.
+              // PayPal Express may return no phone — prompt user to fill it in before completing.
+              if (!paypalPhone || paypalPhone.replace(/[^0-9]/g, '').length < 8) {
+                hideExpressPreloader();
+                var promptedPhone = window.prompt(
+                  'Vi behöver ditt telefonnummer för leveransen.\n\nFyll i ditt mobilnummer (t.ex. 0701234567):',
+                  ''
+                );
+                if (!promptedPhone || promptedPhone.replace(/[^0-9]/g, '').length < 8) {
+                  alert('Telefonnummer krävs för att slutföra beställningen. Försök igen och fyll i ett giltigt telefonnummer.');
+                  throw new Error('Phone number required');
+                }
+                paypalPhone = promptedPhone.trim();
+                showExpressPreloader();
+              }
+
               var customerData = {
                 email: payer.email_address || '',
                 shipping_address: {
@@ -4003,7 +4021,7 @@ body {
                   city: address.admin_area_2 || '',
                   postal_code: address.postal_code || '',
                   country_code: (address.country_code || 'SE').toLowerCase(),
-                  phone: (payer.phone && payer.phone.phone_number && payer.phone.phone_number.national_number) || '',
+                  phone: paypalPhone,
                 }
               };
               customerData.billing_address = Object.assign({}, customerData.shipping_address);
@@ -4238,6 +4256,11 @@ body {
                 },
                 merchantInfo: googlePayConfig.merchantInfo,
                 callbackIntents: ['PAYMENT_AUTHORIZATION'],
+                emailRequired: true,
+                shippingAddressRequired: true,
+                shippingAddressParameters: {
+                  phoneNumberRequired: true
+                }
               };
 
               return paymentsClient.loadPaymentData(paymentDataRequest);
@@ -4273,6 +4296,23 @@ body {
                 // Extract payer info from Google Pay paymentData
                 var contact = paymentData.shippingAddress || {};
                 var email = paymentData.email || '';
+                var gpayPhone = contact.phoneNumber || '';
+
+                // Phone is required for PostNord delivery + Fakturoid invoicing.
+                if (!gpayPhone || gpayPhone.replace(/[^0-9]/g, '').length < 8) {
+                  hideExpressPreloader();
+                  var promptedPhone = window.prompt(
+                    'Vi behöver ditt telefonnummer för leveransen.\n\nFyll i ditt mobilnummer (t.ex. 0701234567):',
+                    ''
+                  );
+                  if (!promptedPhone || promptedPhone.replace(/[^0-9]/g, '').length < 8) {
+                    alert('Telefonnummer krävs för att slutföra beställningen.');
+                    resolve({ transactionState: 'ERROR', error: { intent: 'PAYMENT_AUTHORIZATION', message: 'Phone number required', reason: 'OTHER_ERROR' } });
+                    return;
+                  }
+                  gpayPhone = promptedPhone.trim();
+                  showExpressPreloader();
+                }
 
                 var customerData = {
                   email: email,
@@ -4283,7 +4323,7 @@ body {
                     city: contact.locality || '',
                     postal_code: contact.postalCode || '',
                     country_code: (contact.countryCode || 'SE').toLowerCase(),
-                    phone: contact.phoneNumber || '',
+                    phone: gpayPhone,
                   }
                 };
                 customerData.billing_address = Object.assign({}, customerData.shipping_address);
@@ -4398,7 +4438,7 @@ body {
             merchantCapabilities: applepayConfig.merchantCapabilities || ['supports3DS'],
             supportedNetworks: applepayConfig.supportedNetworks || ['visa', 'masterCard', 'amex'],
             currencyCode: 'SEK',
-            requiredShippingContactFields: ['name', 'email', 'postalAddress'],
+            requiredShippingContactFields: ['name', 'email', 'postalAddress', 'phone'],
             requiredBillingContactFields: ['postalAddress'],
             total: {
               label: PROJECT_CONFIG.name || 'Beställning',
@@ -4452,6 +4492,25 @@ body {
 
               // Extract customer data from Apple Pay
               var shipping = event.payment.shippingContact || {};
+              var applePhone = shipping.phoneNumber || '';
+
+              // Phone is required for PostNord delivery + Fakturoid invoicing.
+              // Apple Pay 'phone' is in requiredShippingContactFields, but safety-net just in case.
+              if (!applePhone || applePhone.replace(/[^0-9]/g, '').length < 8) {
+                hideExpressPreloader();
+                var promptedPhone = window.prompt(
+                  'Vi behöver ditt telefonnummer för leveransen.\n\nFyll i ditt mobilnummer (t.ex. 0701234567):',
+                  ''
+                );
+                if (!promptedPhone || promptedPhone.replace(/[^0-9]/g, '').length < 8) {
+                  alert('Telefonnummer krävs för att slutföra beställningen.');
+                  session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+                  return;
+                }
+                applePhone = promptedPhone.trim();
+                showExpressPreloader();
+              }
+
               var customerData = {
                 email: shipping.emailAddress || '',
                 shipping_address: {
@@ -4461,7 +4520,7 @@ body {
                   city: shipping.locality || '',
                   postal_code: shipping.postalCode || '',
                   country_code: (shipping.countryCode || 'SE').toLowerCase(),
-                  phone: shipping.phoneNumber || '',
+                  phone: applePhone,
                 }
               };
               customerData.billing_address = Object.assign({}, customerData.shipping_address);
