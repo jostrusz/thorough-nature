@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import { CrossPromoSection } from "./cross-promo"
+import { CrossPromoHL } from "./cross-promo-hl"
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
@@ -407,11 +408,175 @@ const psiSuperzivotTheme: ProjectTheme = {
   companyLocation: "Rybná 716/24, 110 00 Praha",
 }
 
+const hetLevenTheme: ProjectTheme = {
+  brandLabel: "HET LEVEN DAT JE VERDIENT",
+  brandName: "Het Leven Dat Je Verdient",
+  supportEmail: "annadevries@pakjeleventerug.nl",
+  companyName: "Performance Marketing Solution s.r.o.",
+  companyLocation: "Rybná 716/24, 110 00 Praha",
+  page: {
+    minHeight: "100vh",
+    backgroundColor: "#FFF8F3",
+    fontFamily: "'Inter', Arial, Helvetica, sans-serif",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "32px 16px",
+  },
+  container: {
+    maxWidth: "520px",
+    width: "100%",
+    backgroundColor: "#ffffff",
+    borderRadius: "12px",
+    overflow: "hidden",
+    boxShadow: "0 2px 16px rgba(74, 26, 46, 0.10)",
+  },
+  header: {
+    background: "linear-gradient(135deg, #5A2D3E 0%, #4A1A2E 50%, #3D1E2A 100%)",
+    padding: "36px 40px",
+    textAlign: "center" as const,
+  },
+  brandLabelStyle: {
+    fontFamily: "'Inter', Arial, sans-serif",
+    fontSize: "11px",
+    fontWeight: 500,
+    letterSpacing: "3px",
+    textTransform: "uppercase" as const,
+    color: "#C9A96E",
+    margin: "0 0 10px 0",
+  },
+  headerTitle: {
+    fontFamily: "'Inter', Arial, sans-serif",
+    fontSize: "22px",
+    fontWeight: 700,
+    color: "#ffffff",
+    margin: "0",
+    lineHeight: "1.3",
+  },
+  intro: {
+    fontFamily: "'Inter', Arial, sans-serif",
+    fontSize: "15px",
+    color: "#5A3D40",
+    lineHeight: "1.6",
+    margin: "0 0 28px 0",
+  },
+  fileCard: {
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: "#FFF8F3",
+    borderRadius: "10px",
+    border: "1px solid #F0DCC4",
+    padding: "20px",
+    marginBottom: "16px",
+    gap: "16px",
+  },
+  fileTitle: {
+    fontFamily: "'Inter', Arial, sans-serif",
+    fontSize: "15px",
+    fontWeight: 600,
+    color: "#2D1B26",
+    margin: "0 0 4px 0",
+    lineHeight: "1.3",
+  },
+  fileMeta: {
+    fontFamily: "'Inter', Arial, sans-serif",
+    fontSize: "12px",
+    color: "#8A7884",
+    margin: "0",
+  },
+  downloadButton: {
+    display: "inline-block",
+    backgroundColor: "#B85C4A",
+    color: "#ffffff",
+    fontFamily: "'Inter', Arial, sans-serif",
+    fontSize: "14px",
+    fontWeight: 600,
+    textDecoration: "none",
+    padding: "10px 20px",
+    borderRadius: "8px",
+    flexShrink: 0,
+    whiteSpace: "nowrap" as const,
+  },
+  expiryNotice: {
+    backgroundColor: "#FFF8E1",
+    borderRadius: "8px",
+    padding: "12px 16px",
+    textAlign: "center" as const,
+    border: "1px solid #FFE082",
+    marginBottom: "20px",
+    marginTop: "8px",
+  },
+  expiryText: {
+    fontFamily: "'Inter', Arial, sans-serif",
+    fontSize: "13px",
+    color: "#795548",
+    margin: "0",
+  },
+  infoBox: {
+    backgroundColor: "#FFF8F3",
+    borderRadius: "10px",
+    border: "1px solid #F0DCC4",
+    padding: "16px 20px",
+    textAlign: "center" as const,
+    marginBottom: "20px",
+  },
+  infoText: {
+    fontFamily: "'Inter', Arial, sans-serif",
+    fontSize: "14px",
+    color: "#5A3D40",
+    lineHeight: "1.6",
+    margin: "0",
+  },
+  helpBox: {
+    textAlign: "center" as const,
+    paddingTop: "16px",
+    borderTop: "1px solid #F0DCC4",
+  },
+  helpText: {
+    fontFamily: "'Inter', Arial, sans-serif",
+    fontSize: "13px",
+    color: "#8A7884",
+    margin: "0",
+  },
+  helpLink: { color: "#B85C4A", textDecoration: "underline" },
+  footer: {
+    backgroundColor: "#3D1E2A",
+    padding: "24px 40px",
+    textAlign: "center" as const,
+  },
+  footerBrand: {
+    fontFamily: "'Inter', Arial, sans-serif",
+    fontSize: "12px",
+    color: "#C9A96E",
+    margin: "0 0 6px 0",
+  },
+  footerCompany: {
+    fontFamily: "'Inter', Arial, sans-serif",
+    fontSize: "11px",
+    color: "#9B7889",
+    margin: "0",
+  },
+  errorText: {
+    fontFamily: "'Inter', Arial, sans-serif",
+    fontSize: "16px",
+    color: "#5A3D40",
+    lineHeight: "1.6",
+    marginBottom: "24px",
+  },
+  errorMuted: {
+    fontFamily: "'Inter', Arial, sans-serif",
+    fontSize: "14px",
+    color: "#8A7884",
+  },
+  errorLink: { color: "#B85C4A", textDecoration: "underline" },
+}
+
 const THEMES: Record<string, ProjectTheme> = {
   loslatenboek: loslatenboekTheme,
   dehondenbijbel: dehondenbijbelTheme,
   'lass-los': lassLosTheme,
   'psi-superzivot': psiSuperzivotTheme,
+  'het-leven': hetLevenTheme,
 }
 
 function getTheme(projectId?: string): ProjectTheme {
@@ -571,6 +736,9 @@ export default async function DownloadPage({
 
               {/* Cross-promo: show Laat Los on dehondenbijbel downloads */}
               {projectId === "dehondenbijbel" && <CrossPromoSection />}
+
+              {/* Cross-promo: small Laat Los banner on het-leven downloads */}
+              {projectId === "het-leven" && <CrossPromoHL />}
             </>
           )}
 
