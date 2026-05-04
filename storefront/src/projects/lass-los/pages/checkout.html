@@ -2941,6 +2941,21 @@ body {
 </script>
 
 <script>
+
+/* ─── PURCHASE EVENT GUARD: validate cart-complete response ─── */
+/* Prevents firing Purchase pixel when /store/carts/:id/complete returns      */
+/* {type: "cart"} (payment not authorized) — Medusa silently keeps the cart   */
+/* uncompleted in that case, but old code spread completeRes as if it was the */
+/* order object, sending Purchase events with garbage IDs and no dedup.       */
+window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(completeRes){
+  var o = (completeRes && completeRes.order) ? completeRes.order : completeRes;
+  if (!o || typeof o.id !== 'string' || o.id.indexOf('order_') !== 0) {
+    throw new Error('Cart completion did not return a valid order — payment may not be complete');
+  }
+  return o;
+};
+
+
 (function() {
   'use strict';
 
@@ -3902,7 +3917,7 @@ body {
     return medusaFetch('/store/carts/' + cartId + '/complete', {
       method: 'POST'
     }).then(function(completeRes) {
-      var order = completeRes.order || completeRes;
+      var order = window.__extractOrderOrThrow(completeRes);
       console.log('[Express] Order completed:', order.id, 'display_id:', order.display_id);
 
       localStorage.setItem('medusa_order_id', order.id || '');
@@ -7079,7 +7094,7 @@ body {
         return medusaFetch('/store/carts/' + result.cartId + '/complete', {
           method: 'POST'
         }).then(function(completeRes) {
-          var order = completeRes.order || completeRes;
+          var order = window.__extractOrderOrThrow(completeRes);
           localStorage.setItem('medusa_order_id', order.id || '');
           localStorage.setItem('medusa_order_display_id', order.display_id || '');
 
@@ -7108,7 +7123,7 @@ body {
           return medusaFetch('/store/carts/' + result.cartId + '/complete', {
             method: 'POST'
           }).then(function(completeRes) {
-            var order = completeRes.order || completeRes;
+            var order = window.__extractOrderOrThrow(completeRes);
             localStorage.setItem('medusa_order_id', order.id || '');
             localStorage.setItem('medusa_order_display_id', order.display_id || '');
             if (PROJECT_CONFIG.upsellEnabled === false) {
@@ -7198,7 +7213,7 @@ body {
                     });
                   })
                   .then(function(completeRes) {
-                    var order = completeRes.order || completeRes;
+                    var order = window.__extractOrderOrThrow(completeRes);
                     localStorage.setItem('medusa_order_id', order.id || '');
                     localStorage.setItem('medusa_order_display_id', order.display_id || '');
                     // Cleanup abandoned checkout recovery data
@@ -7326,7 +7341,7 @@ body {
                 // Complete the cart
                 medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' })
                   .then(function(completeRes) {
-                    var order = completeRes.order || completeRes;
+                    var order = window.__extractOrderOrThrow(completeRes);
                     localStorage.setItem('medusa_order_id', order.id || '');
                     localStorage.setItem('medusa_order_display_id', order.display_id || '');
                     // Cleanup abandoned checkout recovery data
@@ -7375,7 +7390,7 @@ body {
           return medusaFetch('/store/carts/' + result.cartId + '/complete', {
             method: 'POST'
           }).then(function(completeRes) {
-            var order = completeRes.order || completeRes;
+            var order = window.__extractOrderOrThrow(completeRes);
             localStorage.setItem('medusa_order_id', order.id || '');
             localStorage.setItem('medusa_order_display_id', order.display_id || '');
             if (PROJECT_CONFIG.upsellEnabled === false) {

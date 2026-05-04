@@ -1122,6 +1122,11 @@ body { background: var(--bg); }
       if (customer.region) purchaseUserData.st = customer.region;
     }
 
+    /* Reload guard: skip Purchase if already fired for this order (page reload safe) */
+    if (orderId && localStorage.getItem('meta_purchase_fired_' + orderId) === 'true') {
+      console.log('TY: Purchase already fired for ' + orderId + ' — skipping (likely page reload)');
+    } else {
+      if (orderId) localStorage.setItem('meta_purchase_fired_' + orderId, 'true');
     MetaTracker.trackPurchase({
       content_ids: purchaseContentIds,
       contents: purchaseContentIds.map(function(id) { return { id: id, quantity: 1 }; }),
@@ -1130,6 +1135,7 @@ body { background: var(--bg); }
       num_items: purchaseNumItems,
       order_id: orderId
     }, purchaseUserData, { event_id: purchaseEventId });
+    }
     console.log('TY: Purchase event (order bump flow) — €' + totalPrice + ' event_id=' + purchaseEventId);
   } else if (alreadyTracked) {
     console.log('TY: Purchase already tracked on upsell page, skipping');

@@ -1289,6 +1289,11 @@ body { background: var(--bg); }
     var purchaseEventId = 'purchase_' + orderId;
     var mainPrice = PROJECT_CONFIG.mainProduct.price || 0;
     var upsellPrice = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.price) || 0;
+    /* Reload guard: skip Purchase if already fired for this order (page reload safe) */
+    if (orderId && localStorage.getItem('meta_purchase_fired_' + orderId) === 'true') {
+      console.log('TY: Purchase already fired for ' + orderId + ' — skipping (likely page reload)');
+    } else {
+      if (orderId) localStorage.setItem('meta_purchase_fired_' + orderId, 'true');
     MetaTracker.trackPurchase({
       content_ids: purchaseContentIds,
       contents: purchaseContentIds.map(function(id, idx) {
@@ -1300,6 +1305,7 @@ body { background: var(--bg); }
       num_items: purchaseNumItems,
       order_id: orderId
     }, purchaseUserData, { event_id: purchaseEventId });
+    }
     console.log('TY: Purchase event (browser + CAPI) — €' + totalPrice + ' (' + purchaseNumItems + ' items) event_id=' + purchaseEventId);
   }
 

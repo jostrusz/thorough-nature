@@ -27,10 +27,15 @@ export async function shouldSkipDuplicate(
       return true
     }
 
-    // Set flag immediately BEFORE processing to prevent race conditions
+    // Set flag immediately BEFORE processing to prevent race conditions.
+    // Pass ONLY the new field — Medusa merges metadata at DB level. Spreading
+    // the snapshot races with other order.placed subscribers writing concurrently
+    // and silently overwrites their fields (fixed in commit 3d905ab9 for the
+    // individual subscribers, but the guard itself was missed). Empty result on
+    // re-read means the flag got wiped, which is what allowed the same Meta
+    // Purchase event to be sent twice for the same order in rare cases.
     await orderModuleService.updateOrders(orderId, {
       metadata: {
-        ...metadata,
         [flagName]: true,
       },
     })
