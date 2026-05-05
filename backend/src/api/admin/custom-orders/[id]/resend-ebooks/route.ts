@@ -24,7 +24,10 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
     { key: "e-books/Karlek utan nonsens.pdf", title: "Kärlek utan nonsens", description: "E-bok (PDF)", size: "13.9 MB" },
     { key: "e-books/Losningen pa overanalysering.pdf", title: "Lösningen på överanalysering", description: "E-bok (PDF)", size: "1.3 MB" },
   ],
-  'odpusc-ksiazka': [],
+  'odpusc-ksiazka': [
+    { key: "e-books/Koniec nadmiernym mysleniem.pdf", title: "Koniec nadmiernym myśleniem", description: "E-book (PDF)", size: "1.2 MB" },
+    { key: "e-books/Milosc bez cenzury.pdf", title: "Miłość bez cenzury", description: "E-book (PDF)", size: "14.5 MB" },
+  ],
   'lass-los': [
     { key: "e-books/Die Lösung für Überdenkerinnen.docx.pdf", title: "Die Lösung für Überdenkerinnen", description: "E-Book (PDF)", size: "1.4 MB" },
     { key: "e-books/LIEBE OHNE UNSINN.pdf", title: "Liebe ohne Unsinn", description: "E-Book (PDF)", size: "14.3 MB" },
