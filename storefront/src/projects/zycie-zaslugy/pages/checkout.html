@@ -2986,15 +2986,8 @@ body {
         </div>
       </div>
 
-      <!-- Payment icons (real SVGs) -->
-      <div class="summary-payments">
-        <img src="/icons/blik-pl.svg" alt="BLIK" style="height:26px;width:auto;border-radius:4px;border:1px solid rgba(184,92,74,0.12);">
-        <img src="/icons/przelewy24-real.png" alt="Przelewy24" style="height:26px;width:auto;border-radius:4px;border:1px solid rgba(184,92,74,0.12);">
-        <img src="/icons/payu.svg" alt="PayU" style="height:26px;width:auto;border-radius:4px;border:1px solid rgba(184,92,74,0.12);">
-        <img src="/icons/pko-bp.svg" alt="PKO BP" style="height:26px;width:auto;border-radius:4px;border:1px solid rgba(184,92,74,0.12);">
-        <img src="/icons/santander-pl.svg" alt="Santander" style="height:26px;width:auto;border-radius:4px;border:1px solid rgba(184,92,74,0.12);">
-        <img src="/icons/mbank.svg" alt="mBank" style="height:26px;width:auto;border-radius:4px;border:1px solid rgba(184,92,74,0.12);">
-      </div>
+      <!-- Payment icons — populated dynamically from configured gateways -->
+      <div class="summary-payments" id="summary-payments"></div>
 
       <!-- Return policy link -->
       <div class="summary-return-link">
@@ -5109,6 +5102,51 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   }
 
   /**
+   * Populate the order-summary payment icons strip from the actually
+   * configured methods (allPaymentOptions). Mirrors what's rendered in
+   * the payment-methods list, deduplicated by code.
+   */
+  function renderSummaryPaymentIcons() {
+    var host = document.getElementById('summary-payments');
+    if (!host || !allPaymentOptions || !allPaymentOptions.length) return;
+    // Card brand pseudo-icons rendered when 'creditcard' is available
+    var CARD_BRANDS = ['visa', 'mastercard'];
+    // Direct mapping code → icon file (lives in /icons/<file>)
+    var ICON_MAP = {
+      blik:        'blik-pl.svg',
+      przelewy24:  'przelewy24-real.png',
+      payu:        'payu.svg',
+      paypal:      'paypal.svg',
+      applepay:    'applepay.svg',
+      googlepay:   'googlepay.svg',
+      ideal:       'ideal.svg',
+      bancontact:  'bancontact.svg',
+      klarna:      'klarna.svg',
+      revolut_pay: 'revolut_pay.svg',
+      swish:       'swish.svg',
+      bank_transfer: 'bank_transfer.svg',
+      cod:         'cod.svg'
+    };
+    var seen = {};
+    var html = '';
+    var sorted = allPaymentOptions.slice().sort(function(a,b){ return (a.sort_order||0) - (b.sort_order||0); });
+    sorted.forEach(function(m){
+      if (seen[m.code]) return;
+      seen[m.code] = true;
+      if (m.code === 'creditcard') {
+        CARD_BRANDS.forEach(function(brand){
+          html += '<img src="/icons/' + brand + '.svg" alt="' + brand.toUpperCase() + '" style="height:26px;width:auto;border-radius:4px;border:1px solid rgba(184,92,74,0.12);">';
+        });
+        return;
+      }
+      var icon = ICON_MAP[m.code];
+      if (!icon) return;
+      html += '<img src="/icons/' + icon + '" alt="' + (m.display_name || m.code) + '" style="height:26px;width:auto;border-radius:4px;border:1px solid rgba(184,92,74,0.12);">';
+    });
+    host.innerHTML = html;
+  }
+
+  /**
    * Fetch payment options from admin API
    */
   function loadPaymentMethods() {
@@ -5203,6 +5241,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var countrySelect = document.getElementById('country');
       var country = countrySelect ? countrySelect.value : 'PL';
       renderPaymentMethods(country);
+      renderSummaryPaymentIcons();
       initExpressCheckout();
     })
     .catch(function(err) {
