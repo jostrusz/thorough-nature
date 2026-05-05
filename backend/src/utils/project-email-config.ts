@@ -167,6 +167,23 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     project: 'het-leven',
     smsDispatchTemplate: 'Het Leven Dat Je Verdient: je boek is onderweg. Track: {url} Vragen? annadevries@pakjeleventerug.nl',
   },
+  'zycie-zaslugy': {
+    replyTo: 'anna@najpierw-ja.pl',
+    fromName: 'Anna de Vries — Życie, jakiego nigdy sobie nie pozwoliłaś',
+    fromEmail: 'Anna de Vries <anna@najpierw-ja.pl>',
+    project: 'zycie-zaslugy',
+    locale: 'pl',
+    smsDispatchTemplate: 'Zycie, jakiego nigdy sobie nie pozwolilas: Twoje zamowienie zostalo wyslane. Sledzenie: {url} anna@najpierw-ja.pl',
+  },
+  // Also match without hyphen
+  zyciezaslugy: {
+    replyTo: 'anna@najpierw-ja.pl',
+    fromName: 'Anna de Vries — Życie, jakiego nigdy sobie nie pozwoliłaś',
+    fromEmail: 'Anna de Vries <anna@najpierw-ja.pl>',
+    project: 'zycie-zaslugy',
+    locale: 'pl',
+    smsDispatchTemplate: 'Zycie, jakiego nigdy sobie nie pozwolilas: Twoje zamowienie zostalo wyslane. Sledzenie: {url} anna@najpierw-ja.pl',
+  },
   // Also match without hyphen
   hetleven: {
     replyTo: 'annadevries@pakjeleventerug.nl',

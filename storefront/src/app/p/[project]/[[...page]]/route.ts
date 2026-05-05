@@ -543,6 +543,23 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#039;")
 }
 
+/**
+ * Resolve a page URL from config.pages. Tries each candidate page-key in order,
+ * falls back to the first one if none exist (preserves legacy behavior).
+ */
+function pageUrl(
+  config: ProjectConfig,
+  basePath: string,
+  fallback: string,
+  candidates: string[]
+): string {
+  const pages = (config as any).pages || {}
+  for (const key of candidates) {
+    if (key && pages[key]) return `${basePath}/${key}`
+  }
+  return `${basePath}/${fallback}`
+}
+
 function generateProjectConfigScript(
   config: ProjectConfig,
   basePath: string,
@@ -568,15 +585,16 @@ function generateProjectConfigScript(
     orderBumpEnabled: toggles.orderBumpEnabled,
     upsellEnabled: toggles.upsellEnabled,
     foxentryApiKey: toggles.foxentryApiKey,
-    // URLs with correct base path
+    // URLs with correct base path — resolve from config.pages so localized projects
+    // (e.g. zycie-zaslugy uses /prywatnosc not /privacy) get the right slugs.
     homeUrl: `${basePath}/`,
-    checkoutUrl: `${basePath}/checkout`,
-    upsellUrl: `${basePath}/upsell`,
-    thankYouUrl: `${basePath}/thank-you`,
-    contactUrl: `${basePath}/contact`,
-    privacyUrl: `${basePath}/privacy`,
-    termsUrl: `${basePath}/voorwaarden`,
-    shippingUrl: `${basePath}/verzending`,
+    checkoutUrl: pageUrl(config, basePath, 'checkout', ['checkout']),
+    upsellUrl: pageUrl(config, basePath, 'upsell', ['upsell']),
+    thankYouUrl: pageUrl(config, basePath, 'thank-you', ['thank-you', 'dziekujemy', 'bedankt']),
+    contactUrl: pageUrl(config, basePath, 'contact', ['contact', 'kontakt']),
+    privacyUrl: pageUrl(config, basePath, 'privacy', ['privacy', 'prywatnosc', 'datenschutz', 'integritet']),
+    termsUrl: pageUrl(config, basePath, 'voorwaarden', ['voorwaarden', 'regulamin', 'agb', 'villkor', 'terms']),
+    shippingUrl: pageUrl(config, basePath, 'verzending', ['verzending', 'wysylka', 'versand', 'shipping', 'frakt']),
   }
 
   return `<script>

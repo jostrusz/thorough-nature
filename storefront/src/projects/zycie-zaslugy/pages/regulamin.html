@@ -23,18 +23,18 @@
 
 /* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
 :root {
- --bg: #FAF5F8;
- --heading: #2D1B3D;
- --cta: #C27BA0;
- --section: #EDD9E5;
- --body: #5A3D6B;
- --highlight: #D9A4C0;
- --dark: #1A1028;
+ --bg: #FFF8F3;
+ --heading: #4A1A2E;
+ --cta: #B85C4A;
+ --section: #F0D5C4;
+ --body: #6B3344;
+ --highlight: #E8A88C;
+ --dark: #3D1E2A;
  --white: #FFFFFF;
- --light: #F5EDF2;
- --muted: #9B7AAD;
- --cta-hover: #A8628A;
- --accent: #D498B5;
+ --light: #FDF5EF;
+ --muted: #9B6B7A;
+ --cta-hover: #A04A38;
+ --accent: #D4916A;
 }
 
 /* ═══ RESET ═══ */
@@ -50,7 +50,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  position: sticky;
  top: 0;
  z-index: 1000;
- box-shadow: 0 2px 12px rgba(45, 27, 61, 0.06);
+ box-shadow: 0 2px 12px rgba(74,26,46, 0.06);
 }
 .nav-inner {
  max-width: 1050px;
@@ -124,13 +124,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  border-radius: 8px;
  text-decoration: none !important;
  transition: all 0.25s ease;
- box-shadow: 0 3px 12px rgba(194, 123, 160, 0.2);
+ box-shadow: 0 3px 12px rgba(184,92,74, 0.2);
 }
 .nav-cta:hover {
  background: var(--cta-hover) !important;
  color: var(--white) !important;
  transform: translateY(-1px);
- box-shadow: 0 5px 18px rgba(194, 123, 160, 0.35);
+ box-shadow: 0 5px 18px rgba(184,92,74, 0.35);
 }
 .nav-cta::after {
  display: none !important;
@@ -159,7 +159,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  left: 0;
  right: 0;
  bottom: 0;
- background: rgba(26, 16, 40, 0.5);
+ background: rgba(61,30,42, 0.5);
  z-index: 999;
 }
 .nav-mobile-menu {
@@ -170,7 +170,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  right: 0;
  background: var(--white);
  padding: 24px 20px;
- box-shadow: 0 8px 24px rgba(45, 27, 61, 0.12);
+ box-shadow: 0 8px 24px rgba(74,26,46, 0.12);
  z-index: 1000;
  flex-direction: column;
  gap: 0;
@@ -217,7 +217,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 /* ═══ CONTENT STRÁNKY ═══ */
 .page-header {
- background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
+ background: linear-gradient(135deg, var(--dark) 0%, #4A1A2E 50%, #5C1F35 100%);
  padding: 56px 20px 48px;
  text-align: center;
 }
@@ -239,7 +239,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .page-header .badge {
  display: inline-block;
- background: rgba(194, 123, 160, 0.2);
+ background: rgba(184,92,74, 0.2);
  color: var(--accent);
  font-family: 'DM Sans', sans-serif;
  font-size: 13px;
@@ -437,7 +437,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.6s cubic-bezier(.4,0,.2,1), visibility 0.6s; }
 .preloader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
 .preloader-logo-container { position: relative; display: inline-block; overflow: hidden; border-radius: 16px; }
-.preloader-logo-container img { max-width: 280px; width: auto; height: auto; object-fit: contain; display: block; filter: drop-shadow(0 4px 20px rgba(194, 123, 160, 0.25)); }
+.preloader-logo-container img { max-width: 280px; width: auto; height: auto; object-fit: contain; display: block; filter: drop-shadow(0 4px 20px rgba(184,92,74, 0.25)); }
 .preloader-logo-container::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0) 70%, transparent 100%); animation: preloaderShine 2s ease-in-out infinite; }
 @keyframes preloaderShine { 0% { left: -100%; } 60% { left: 150%; } 100% { left: 150%; } }
 </style>
@@ -464,7 +464,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <nav class="site-nav">
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
-   <img src="/najpierw-ja-logo.png" alt="Życie, jakiego nigdy sobie nie pozwoliłaś" width="150" height="40">
+   <img src="/het-leven-logo.webp" alt="Życie, jakiego nigdy sobie nie pozwoliłaś" width="150" height="40">
 
   </a>
   <div class="nav-links">
