@@ -2,6 +2,13 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "storefront-only",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev", "-p", "8000"],
+      "port": 8000,
+      "cwd": "storefront"
+    },
+    {
       "name": "backend",
       "runtimeExecutable": "/opt/homebrew/bin/pnpm",
       "runtimeArgs": ["dev"],
@@ -12,13 +19,6 @@
       "name": "storefront",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "port": 8000,
-      "cwd": "storefront"
-    },
-    {
-      "name": "storefront-only",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["next", "dev", "-p", "8000"],
       "port": 8000,
       "cwd": "storefront"
     },
@@ -95,6 +95,13 @@
       "runtimeExecutable": "/opt/homebrew/bin/npx",
       "runtimeArgs": ["http-server", "storefront/src/projects/dehondenbijbel/pages", "-p", "8101", "-c-1"],
       "port": 8101,
+      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+    },
+    {
+      "name": "zycie-zaslugy",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
+      "runtimeArgs": ["http-server", "storefront/src/projects/zycie-zaslugy/pages", "-p", "8103", "-c-1"],
+      "port": 8103,
       "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
     }
   ]

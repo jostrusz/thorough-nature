@@ -1,0 +1,56 @@
+{
+  "slug": "zycie-zaslugy",
+  "advertorialProjectId": "zycie-zaslugy",
+  "name": "Życie, jakiego nigdy sobie nie pozwoliłaś",
+  "domain": "najpierw-ja.pl",
+  "domainAliases": ["www.najpierw-ja.pl"],
+  "locale": "pl",
+  "defaultCountry": "PL",
+  "defaultPhonePrefix": "48",
+  "phonePrefixByCountry": {
+    "PL": "48"
+  },
+  "salesChannelName": "Zycie Zaslugy",
+  "medusaUrl": "",
+  "publishableApiKey": "pk_13e2df6c79525d7473a12c4c9f272a97c9b08b9bb814a5b0f612927fd4013ccc",
+  "facebookPixelId": "",
+  "regions": {
+    "PL": "reg_01KK8N9GTWQK7A55SXAH07KNK1"
+  },
+  "mainProduct": {
+    "name": "Życie, jakiego nigdy sobie nie pozwoliłaś",
+    "handle": "zycie-jakiego-nigdy-sobie-nie-pozwolilas",
+    "productId": "prod_01KQV9KVNC2FT39B2S8HNHHKRV",
+    "variantId": "variant_01KQV9KVNCAMM8902RFHKFV20Q",
+    "price": 129,
+    "currency": "PLN",
+    "thumbnail": "https://bucket-production-b93e.up.railway.app:443/medusa-media/Zycie-jakiego-nigdy-sobie-nie-pozwolilas-pichi-01KQV9FJE4MMTVEDQ4TSG7AGG9.png"
+  },
+  "bundleOptions": [
+    { "qty": 1, "price": 129, "save": 0,   "badge": "DLA SIEBIE",                   "variantId": "variant_01KQV9KVNCAMM8902RFHKFV20Q" },
+    { "qty": 2, "price": 199, "save": 59,  "badge": "PODZIEL SIĘ Z PRZYJACIÓŁKĄ",   "variantId": "variant_01KQV9KVNCT4K11RVHTMK1WYNF" },
+    { "qty": 3, "price": 279, "save": 108, "badge": "IDEALNY PREZENT",              "variantId": "variant_01KQV9KVNCTYFY398M4QY0SQXW" },
+    { "qty": 4, "price": 359, "save": 157, "badge": "NAJLEPSZA WARTOŚĆ",            "variantId": "variant_01KQV9KVNCMS6B8FW8NTNAPKMZ" }
+  ],
+  "shippingOptions": {
+    "paczkomat": { "price": 0, "label": "Paczkomat InPost", "description": "Odbiór w wybranym Paczkomacie 24/7", "matchName": "Paczkomaty" },
+    "homeDelivery": { "price": 5, "label": "Dostawa do domu (Kurier)", "description": "Kurier dostarczy przesyłkę pod wskazany adres", "matchName": "Dostawa do domu" }
+  },
+  "packetaApiKey": "cbb760f552ef87b3",
+  "catalogContentIds": [],
+  "mollieProfileId": "",
+  "paymentProviders": {
+    "paypal": "pp_paypal_paypal",
+    "airwallex": "pp_airwallex_airwallex"
+  },
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "thank-you": "thank-you.html",
+    "contact": "contact.html",
+    "privacy": "privacy.html",
+    "voorwaarden": "voorwaarden.html",
+    "verzending": "verzending.html",
+    "retourbeleid": "retourbeleid.html"
+  }
+}
