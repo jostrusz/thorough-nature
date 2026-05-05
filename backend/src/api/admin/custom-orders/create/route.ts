@@ -193,6 +193,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     if (pickup_point_id) {
       metadata.pickup_point_id = pickup_point_id
       metadata.pickup_point_name = pickup_point_name || ""
+      metadata.pickup_place_code = pickup_point_id
+
+      const smt = String(shipping_method_type || "").toLowerCase()
+      if (smt.includes("paczkomat") || smt.includes("inpost")) {
+        metadata.paczkomat_id = pickup_point_id
+      }
+      if (smt.includes("packeta") || smt.includes("zasilkovna") || smt.includes("zásilkovna")) {
+        metadata.packeta_point_id = pickup_point_id
+      }
     }
 
     if (notes) {
