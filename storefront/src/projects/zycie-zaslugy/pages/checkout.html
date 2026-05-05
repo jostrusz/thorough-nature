@@ -5239,13 +5239,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return true;
     });
 
-    // PL-specific priority: BLIK (#1 in PL) → P24 → PayU → karta → Apple/Google Pay → PayPal
-    var PL_PRIORITY = { blik: 1, przelewy24: 2, payu: 3, creditcard: 4, applepay: 5, googlepay: 6, paypal: 99 };
-    methods.sort(function(a, b) {
-      var pa = PL_PRIORITY[a.code] != null ? PL_PRIORITY[a.code] : (50 + (a.sort_order || 0));
-      var pb = PL_PRIORITY[b.code] != null ? PL_PRIORITY[b.code] : (50 + (b.sort_order || 0));
-      return pa - pb;
-    });
+    // Sort by sort_order from backend
+    methods.sort(function(a, b) { return a.sort_order - b.sort_order; });
 
     // Separate Klarna methods from the rest
     var klarnaMethods = methods.filter(function(m) { return KLARNA_CODES.indexOf(m.code) !== -1; });
