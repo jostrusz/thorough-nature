@@ -68,6 +68,18 @@ body { background: var(--bg); }
 .ty-d6 { transition-delay: 0.36s; }
 
 /* ══ 1. Hero ══ */
+.ty-brand-eyebrow {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; font-weight: 700;
+  color: var(--cta); letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.ty-signature {
+  font-family: 'Recoleta', serif;
+  font-size: 16px; font-style: italic;
+  color: var(--heading); margin-top: 18px; opacity: 0.85;
+}
 .ty-hero { text-align: center; margin-bottom: 36px; }
 .ty-check-circle {
   width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 24px;
@@ -475,12 +487,14 @@ body { background: var(--bg); }
        1. HERO — bevestiging
        ═══════════════════════════════════════ -->
   <div class="ty-hero ty-reveal">
+    <div class="ty-brand-eyebrow">Życie, jakiego nigdy sobie nie pozwoliłaś &nbsp;·&nbsp; Metoda LIFE RESET&trade;</div>
     <div class="ty-check-circle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <div class="ty-eyebrow">&#x2705; Zamówienie potwierdzone</div>
     <h1 class="ty-title" id="ty-main-title">Dziękujemy za <span class="accent">zamówienie!</span></h1>
-    <p class="ty-subtitle">Twoje zamówienie zostało złożone. Przygotowujemy i wysyłamy Twoją paczkę najszybciej jak to możliwe.</p>
+    <p class="ty-subtitle">Twoje zamówienie zostało zapisane &mdash; przygotowujemy paczkę i wyślemy ją w ciągu kilku dni roboczych. W tym czasie zaparz sobie herbatę. Zrobiłaś pierwszy krok.</p>
+    <p class="ty-signature">&mdash; Anna de Vries</p>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -626,28 +640,28 @@ body { background: var(--bg); }
         <div class="ty-order-icon book">&#x1F4D6;</div>
         <div>
           <div class="ty-order-name">Życie, jakiego nigdy sobie nie pozwoliłaś</div>
-          <div class="ty-order-desc">Książka fizyczna &mdash; 270 stron &mdash; dostawa do domu</div>
+          <div class="ty-order-desc">Książka fizyczna &mdash; 340 stron &mdash; 5 filarów &mdash; Metoda LIFE RESET&trade;</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ebook">&#x1F4F1;</div>
         <div>
-          <div class="ty-order-name">Miłość bez cenzury</div>
-          <div class="ty-order-desc">Darmowy e-book &mdash; sprawdź swoją skrzynkę</div>
+          <div class="ty-order-name">Przesuń jedną rzecz, zmień wszystko</div>
+          <div class="ty-order-desc">Bonus e-book &middot; Prosta metoda Feng Shui &mdash; wysyłka na e-mail</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ebook">&#x1F4F1;</div>
         <div>
-          <div class="ty-order-name">Koniec z nadmiernym myśleniem</div>
-          <div class="ty-order-desc">Darmowy e-book &mdash; sprawdź swoją skrzynkę</div>
+          <div class="ty-order-name">Nie wszystko zasługuje na miejsce</div>
+          <div class="ty-order-desc">Bonus e-book &middot; System 4 pudełek &mdash; wysyłka na e-mail</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ship">&#x1F69A;</div>
         <div>
           <div class="ty-order-name">Darmowa wysyłka</div>
-          <div class="ty-order-desc">Dostawa w ciągu 3–5 dni roboczych</div>
+          <div class="ty-order-desc">Dostawa w ciągu 2–4 dni roboczych</div>
         </div>
       </div>
     </div>
@@ -838,7 +852,7 @@ body { background: var(--bg); }
     }
     var mainItemDesc = orderItemsEl.querySelector('.ty-order-desc');
     if (mainItemDesc) {
-      mainItemDesc.textContent = bundleQty + '\u00D7 książka fizyczna \u2014 dostawa do domu';
+      mainItemDesc.textContent = bundleQty + '\u00D7 książka fizyczna \u2014 340 stron \u2014 Metoda LIFE RESET\u2122';
     }
   }
 
