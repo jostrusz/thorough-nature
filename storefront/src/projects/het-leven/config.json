@@ -33,7 +33,7 @@
     { "qty": 3, "price": 79, "save": 29, "badge": "PERFECT ALS CADEAU", "variantId": "variant_01KP3WW77H93NRJ163R9ZGAD3M" },
     { "qty": 4, "price": 99, "save": 45, "badge": "BESTE WAARDE", "variantId": "variant_01KP3WW91RR2Z6X81VF4RGQGH1" }
   ],
-  "catalogContentIds": [],
+  "catalogContentIds": ["rgb8djtri5", "7cyvirbe1p", "rdwtz3abog", "i8r1n5aaxi", "54s8q8i2tb", "htrutjkaib", "mbn82nnojd", "utt85x0pq4", "57kljuzi9i", "a2armodc5w"],
   "mollieProfileId": "",
   "paymentProviders": {
     "mollie": "pp_mollie_mollie",
