@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Retour- en Garantiebeleid — Het Leven Dat Je Verdient</title>
-<meta name="description" content="Retour- en garantiebeleid van Het Leven Dat Je Verdient. 30 dagen geld-terug-garantie, retourprocedure en uw rechten.">
+<title>Zasady zwrot&oacute;w i gwarancji &mdash; Życie, jakiego nigdy sobie nie pozwoliłaś</title>
+<meta name="description" content="Zasady zwrot&oacute;w i gwarancji dla ksi&#261;&#380;ki Życie, jakiego nigdy sobie nie pozwoliłaś. 30-dniowa gwarancja zwrotu pieni&#281;dzy, proces zwrotu i Twoje prawa.">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" type="image/png" sizes="32x32" href="/life-reset-favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="/life-reset-favicon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/life-reset-favicon-180.png"><link rel="shortcut icon" href="/life-reset-favicon.png">
+<link rel="icon" href="/favicon.png" type="image/png">
 
 <!-- ═══ FONTS ═══ -->
 <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
@@ -23,18 +23,18 @@
 
 /* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
 :root {
- --bg: #FFF8F3;
- --heading: #4A1A2E;
- --cta: #B85C4A;
- --section: #F0D5C4;
- --body: #6B3344;
- --highlight: #E8A88C;
- --dark: #3D1E2A;
+ --bg: #FAF5F8;
+ --heading: #2D1B3D;
+ --cta: #C27BA0;
+ --section: #EDD9E5;
+ --body: #5A3D6B;
+ --highlight: #D9A4C0;
+ --dark: #1A1028;
  --white: #FFFFFF;
- --light: #FDF5EF;
- --muted: #9B6B7A;
- --cta-hover: #A04A38;
- --accent: #D4916A;
+ --light: #F5EDF2;
+ --muted: #9B7AAD;
+ --cta-hover: #A8628A;
+ --accent: #D498B5;
 }
 
 /* ═══ RESET ═══ */
@@ -43,7 +43,7 @@ html { scroll-behavior: smooth; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
 
 /* ═══ NAVIGACE ═══ */
-.site-nav { background: var(--white); border-bottom: 1px solid var(--section); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(74, 26, 46, 0.06); }
+.site-nav { background: var(--white); border-bottom: 1px solid var(--section); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(45, 27, 61, 0.06); }
 .nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
 .nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
 .nav-logo img { height: 40px; width: auto; }
@@ -55,13 +55,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .nav-links a:hover::after { width: 100%; }
 .nav-links a.active { color: var(--heading); font-weight: 600; }
 .nav-links a.active::after { width: 100%; }
-.nav-cta { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--white) !important; background: var(--cta); padding: 10px 22px; border-radius: 8px; text-decoration: none !important; transition: all 0.25s ease; box-shadow: 0 3px 12px rgba(184, 92, 74, 0.2); }
-.nav-cta:hover { background: var(--cta-hover) !important; color: var(--white) !important; transform: translateY(-1px); box-shadow: 0 5px 18px rgba(184, 92, 74, 0.35); }
+.nav-cta { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--white) !important; background: var(--cta); padding: 10px 22px; border-radius: 8px; text-decoration: none !important; transition: all 0.25s ease; box-shadow: 0 3px 12px rgba(194, 123, 160, 0.2); }
+.nav-cta:hover { background: var(--cta-hover) !important; color: var(--white) !important; transform: translateY(-1px); box-shadow: 0 5px 18px rgba(194, 123, 160, 0.35); }
 .nav-cta::after { display: none !important; }
 .nav-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-direction: column; gap: 5px; }
 .nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--heading); border-radius: 2px; transition: all 0.3s ease; }
 .nav-mobile-overlay { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background: rgba(26, 16, 40, 0.5); z-index: 999; }
-.nav-mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--white); padding: 24px 20px; box-shadow: 0 8px 24px rgba(74, 26, 46, 0.12); z-index: 1000; flex-direction: column; gap: 0; border-bottom: 2px solid var(--section); }
+.nav-mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--white); padding: 24px 20px; box-shadow: 0 8px 24px rgba(45, 27, 61, 0.12); z-index: 1000; flex-direction: column; gap: 0; border-bottom: 2px solid var(--section); }
 .nav-mobile-menu a { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500; color: var(--body); text-decoration: none; padding: 14px 0; border-bottom: 1px solid var(--section); display: block; transition: color 0.2s; }
 .nav-mobile-menu a:last-child { border-bottom: none; }
 .nav-mobile-menu a:hover { color: var(--heading); }
@@ -80,13 +80,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 /* ═══ CONTENT STRÁNKY ═══ */
 .page-header {
- background: linear-gradient(135deg, var(--dark) 0%, #4A1A2E 50%, #5C2838 100%);
+ background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
  padding: 56px 20px 48px;
  text-align: center;
 }
 .page-header h1 { font-family: 'Recoleta', serif; font-size: 36px; font-weight: 600; color: var(--white); margin-bottom: 12px; line-height: 1.2; }
 .page-header p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: rgba(255, 255, 255, 0.7); max-width: 600px; margin: 0 auto; line-height: 1.6; }
-.page-header .badge { display: inline-block; background: rgba(184, 92, 74, 0.2); color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 16px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 0.5px; }
+.page-header .badge { display: inline-block; background: rgba(194, 123, 160, 0.2); color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 16px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 0.5px; }
 
 .page-content { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
 
@@ -202,7 +202,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .step:hover {
  transform: translateY(-3px);
- box-shadow: 0 8px 24px rgba(74, 26, 46, 0.08);
+ box-shadow: 0 8px 24px rgba(45, 27, 61, 0.08);
  border-color: var(--highlight);
 }
 .step-num {
@@ -251,7 +251,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .condition-item:hover {
  border-color: var(--highlight);
- box-shadow: 0 4px 16px rgba(74, 26, 46, 0.06);
+ box-shadow: 0 4px 16px rgba(45, 27, 61, 0.06);
 }
 .condition-icon { font-size: 24px; margin-bottom: 8px; }
 .condition-item strong {
@@ -369,25 +369,47 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .page-content { padding: 32px 16px 60px; }
  .conditions-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* ═══ PRELOADER ═══ */
+.preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.6s cubic-bezier(.4,0,.2,1), visibility 0.6s; }
+.preloader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
+.preloader-logo-container { position: relative; display: inline-block; overflow: hidden; border-radius: 16px; }
+.preloader-logo-container img { max-width: 280px; width: auto; height: auto; object-fit: contain; display: block; filter: drop-shadow(0 4px 20px rgba(194, 123, 160, 0.25)); }
+.preloader-logo-container::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0) 70%, transparent 100%); animation: preloaderShine 2s ease-in-out infinite; }
+@keyframes preloaderShine { 0% { left: -100%; } 60% { left: 150%; } 100% { left: 150%; } }
 </style>
 <script src="js/project-config.js"></script>
 <script src="js/pixel.js"></script>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "wegrfpuy1j");
+</script>
 </head>
 <body>
+
+<!-- ═══ PRELOADER ═══ -->
+<div class="preloader" id="preloader">
+ <div class="preloader-logo-container">
+  <img src="/slapp-taget-preloader.png" alt="&#321;adowanie..." class="preloader-logo">
+ </div>
+</div>
 
 <!-- ═══ NAVIGACE ═══ -->
 <nav class="site-nav">
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
-   <img src="/het-leven-logo.png" alt="Het Leven Dat Je Verdient" width="150" height="40">
+   <img src="/najpierw-ja-logo.png" alt="Życie, jakiego nigdy sobie nie pozwoliłaś" width="150" height="40">
   </a>
   <div class="nav-links">
-   <a href="verzending.html">Verzending &amp; Levering</a>
-   <a href="retourbeleid.html" class="active">Retour &amp; Garantie</a>
-   <a href="voorwaarden.html">Voorwaarden</a>
-   <a href="privacy.html">Privacy</a>
-   <a href="contact.html">Contact</a>
-   <a href="index.html" class="nav-cta">Bestel nu &rarr;</a>
+   <a href="wysylka.html">Wysy&#322;ka &amp; Dostawa</a>
+   <a href="zwroty.html" class="active">Zwroty &amp; Gwarancja</a>
+   <a href="regulamin.html">Regulamin</a>
+   <a href="prywatnosc.html">Polityka prywatno&sacute;ci</a>
+   <a href="kontakt.html">Kontakt</a>
+   <a href="index.html" class="nav-cta">Zam&oacute;w teraz &rarr;</a>
   </div>
   <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
    <span></span><span></span><span></span>
@@ -396,282 +418,283 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </nav>
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
- <a href="verzending.html">Verzending &amp; Levering</a>
- <a href="retourbeleid.html">Retour &amp; Garantie</a>
- <a href="voorwaarden.html">Algemene Voorwaarden</a>
- <a href="privacy.html">Privacybeleid</a>
- <a href="contact.html">Klantenservice</a>
- <a href="index.html" class="nav-cta-mobile">Bestel nu &rarr;</a>
+ <a href="wysylka.html">Wysy&#322;ka &amp; Dostawa</a>
+ <a href="zwroty.html">Zwroty &amp; Gwarancja</a>
+ <a href="regulamin.html">Regulamin</a>
+ <a href="prywatnosc.html">Polityka prywatno&sacute;ci</a>
+ <a href="kontakt.html">Kontakt</a>
+ <a href="index.html" class="nav-cta-mobile">Zam&oacute;w teraz &rarr;</a>
 </div>
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">Retour &amp; Garantie</div>
- <h1>Retour- en Garantiebeleid</h1>
- <p>Uw rechten en onze belofte van tevredenheid</p>
+ <div class="badge">Zwroty &amp; Gwarancja</div>
+ <h1>Zasady zwrot&oacute;w i gwarancji</h1>
+ <p>Twoje prawa i nasza gwarancja satysfakcji</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="page-content">
 
- <!-- Samenvatting -->
+ <!-- Podsumowanie -->
  <div class="info-box">
-  <h3>Samenvatting</h3>
+  <h3>Podsumowanie</h3>
   <ul>
-   <li>30 dagen verlengde geld-terug-garantie</li>
-   <li>14 dagen wettelijk herroepingsrecht</li>
-   <li>100% terugbetaling bij ontevredenheid</li>
-   <li>Retourprocedure in 5 eenvoudige stappen</li>
+   <li>30-dniowa rozszerzona gwarancja zwrotu pieni&#281;dzy</li>
+   <li>30-dniowe prawo do odst&#261;pienia od umowy</li>
+   <li>100% zwrotu pieni&#281;dzy w przypadku niezadowolenia</li>
+   <li>Proces zwrotu w 5 prostych krokach</li>
   </ul>
  </div>
 
- <!-- Garantie -->
+ <!-- Gwarancja -->
  <div class="guarantee-box">
   <div class="guarantee-seal">30</div>
-  <h3>30 Dagen Geld-Terug-Garantie</h3>
-  <p>Niet tevreden? U krijgt uw geld terug. <strong>Zonder vragen. Zonder gedoe.</strong> Wettelijk heeft u recht op 14 dagen bedenktijd. Wij bieden u 30 dagen na ontvangst van het boek.</p>
+  <h3>30-dniowa gwarancja zwrotu pieni&#281;dzy</h3>
+  <p>Niezadowolony? Otrzymasz zwrot pieni&#281;dzy. <strong>Bez pyta&#324;. Bez komplikacji.</strong> Masz 30 dni od otrzymania ksi&#261;&#380;ki na odst&#261;pienie od umowy.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sectie 1: Herroepingsrecht -->
+ <!-- Sekcja 1: Prawo do odstąpienia -->
  <div class="section-block">
-  <h2><span class="icon">1.</span> Herroepingsrecht (Bedenktijd)</h2>
+  <h2><span class="icon">1.</span> Prawo do odst&#261;pienia od umowy</h2>
 
-  <h3>1.1 Uw wettelijke rechten</h3>
-  <p>Op grond van de Europese consumentenwetgeving heeft u het recht om uw aankoop binnen <strong>14 dagen</strong> na ontvangst zonder opgaaf van reden te annuleren. Wij gaan echter een stap verder en bieden u een verlengde bedenktijd van <strong>30 dagen</strong>.</p>
+  <h3>1.1 Twoje prawa ustawowe</h3>
+  <p>Masz prawo odst&#261;pi&#263; od zakupu w ci&#261;gu <strong>30 dni</strong> od otrzymania przesy&#322;ki bez podawania przyczyny.</p>
 
-  <h3>1.2 Voorwaarden voor retour</h3>
-  <p>Om in aanmerking te komen voor een volledige terugbetaling, moet het boek aan de volgende voorwaarden voldoen:</p>
+  <h3>1.2 Warunki zwrotu</h3>
+  <p>Aby kwalifikowa&#263; si&#281; do pe&#322;nego zwrotu pieni&#281;dzy, ksi&#261;&#380;ka musi spe&#322;nia&#263; nast&#281;puj&#261;ce warunki:</p>
 
   <div class="conditions-grid">
    <div class="condition-item">
     <div class="condition-icon">&#128214;</div>
-    <strong>Ongelezen</strong>
-    <span>Niet gelezen of doorgebladerd</span>
+    <strong>Nieczytana</strong>
+    <span>Nieprzeczytana ani nieprzekartkowana</span>
    </div>
    <div class="condition-item">
     <div class="condition-icon">&#9989;</div>
-    <strong>Onbeschadigd</strong>
-    <span>Geen vouwen, krassen of vlekken</span>
+    <strong>Nieuszkodzona</strong>
+    <span>Bez zagi&#281;&#263;, zadrapa&#324; i plam</span>
    </div>
    <div class="condition-item">
     <div class="condition-icon">&#9998;</div>
-    <strong>Ongemarkeerd</strong>
-    <span>Geen aantekeningen of markeringen</span>
+    <strong>Bez oznacze&#324;</strong>
+    <span>Bez notatek i zaznacze&#324;</span>
    </div>
    <div class="condition-item">
     <div class="condition-icon">&#128230;</div>
-    <strong>Compleet</strong>
-    <span>Alle onderdelen aanwezig</span>
+    <strong>Kompletna</strong>
+    <span>Wszystkie elementy do&#322;&#261;czone</span>
    </div>
    <div class="condition-item">
     <div class="condition-icon">&#10024;</div>
-    <strong>Originele staat</strong>
-    <span>Zoals u het heeft ontvangen</span>
+    <strong>Stan oryginalny</strong>
+    <span>Taki jak w momencie odbioru</span>
    </div>
   </div>
 
   <div class="warning-box">
-   <p><strong>Let op:</strong> Boeken die duidelijk gelezen of gebruikt zijn, komen <strong>niet</strong> in aanmerking voor een volledige terugbetaling.</p>
+   <p><strong>Uwaga:</strong> Ksi&#261;&#380;ki, kt&oacute;re zosta&#322;y wyra&#378;nie przeczytane lub u&#380;yte, <strong>nie</strong> kwalifikuj&#261; si&#281; do pe&#322;nego zwrotu pieni&#281;dzy.</p>
   </div>
 
-  <h3>1.3 Digitale producten (e-books)</h3>
-  <p>Door het downloaden van digitale producten stemt u ermee in dat u afstand doet van uw herroepingsrecht (conform EU-richtlijn 2011/83/EU, artikel 16m). Dit geldt uitsluitend voor de digitale producten.</p>
-  <p>Dit heeft <strong>geen invloed</strong> op uw recht om het fysieke boek te retourneren. De waarde van eventuele gratis bonussen wordt niet in mindering gebracht op uw terugbetaling.</p>
+  <h3>1.3 Produkty cyfrowe (e-booki)</h3>
+  <p>Pobieraj&#261;c produkty cyfrowe, wyra&#380;asz zgod&#281; na rezygnacj&#281; z prawa do odst&#261;pienia od umowy (zgodnie z dyrektyw&#261; UE 2011/83/UE, artyku&#322; 16m). Dotyczy to wy&#322;&#261;cznie produkt&oacute;w cyfrowych.</p>
+  <p>Nie wp&#322;ywa to <strong>w &#380;aden spos&oacute;b</strong> na Twoje prawo do zwrotu ksi&#261;&#380;ki fizycznej. Warto&sacute;&#263; ewentualnych darmowych bonus&oacute;w nie jest odliczana od kwoty zwrotu.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sectie 2: Retourneren -->
+ <!-- Sekcja 2: Zwrot — krok po kroku -->
  <div class="section-block">
-  <h2><span class="icon">2.</span> Retourneren &mdash; Stap voor Stap</h2>
+  <h2><span class="icon">2.</span> Zwrot &mdash; krok po kroku</h2>
 
-  <h3>2.1 Zo retourneert u in 5 stappen</h3>
+  <h3>2.1 Jak dokona&#263; zwrotu w 5 krokach</h3>
 
   <div class="steps">
    <div class="step">
     <div class="step-num">1</div>
-    <h4>E-mail ons</h4>
-    <p>Stuur een e-mail naar annadevries@pakjeleventerug.nl met uw naam, bestelnummer en reden voor retour.</p>
+    <h4>Napisz do nas</h4>
+    <p>Wy&sacute;lij e-mail na adres anna@najpierw-ja.pl ze swoim imieniem i nazwiskiem, numerem zam&oacute;wienia oraz powodem zwrotu.</p>
    </div>
    <div class="step">
     <div class="step-num">2</div>
-    <h4>Bevestiging</h4>
-    <p>U ontvangt binnen 1-2 werkdagen een bevestiging met retourinstructies.</p>
+    <h4>Potwierdzenie</h4>
+    <p>W ci&#261;gu 1&ndash;2 dni roboczych otrzymasz potwierdzenie z instrukcjami dotycz&#261;cymi zwrotu.</p>
    </div>
    <div class="step">
     <div class="step-num">3</div>
-    <h4>Verpak zorgvuldig</h4>
-    <p>Verpak het boek zorgvuldig om beschadiging tijdens transport te voorkomen.</p>
+    <h4>Zapakuj starannie</h4>
+    <p>Zapakuj ksi&#261;&#380;k&#281; starannie, aby unikn&#261;&#263; uszkodze&#324; podczas transportu.</p>
    </div>
    <div class="step">
     <div class="step-num">4</div>
-    <h4>Verstuur</h4>
-    <p>Verstuur het pakket binnen 14 dagen naar het retouradres.</p>
+    <h4>Wy&sacute;lij</h4>
+    <p>Wy&sacute;lij paczk&#281; w ci&#261;gu 30 dni od otrzymania ksi&#261;&#380;ki na adres zwrotu.</p>
    </div>
    <div class="step">
     <div class="step-num">5</div>
-    <h4>Terugbetaling</h4>
-    <p>U ontvangt uw terugbetaling binnen 14 dagen na ontvangst van het boek.</p>
+    <h4>Zwrot pieni&#281;dzy</h4>
+    <p>Otrzymasz zwrot pieni&#281;dzy w ci&#261;gu 14 dni od momentu, gdy otrzymamy ksi&#261;&#380;k&#281;.</p>
    </div>
   </div>
 
-  <h3>2.2 Retouradres</h3>
+  <h3>2.2 Adres do zwrotu</h3>
   <div class="highlight-box">
-   <p><strong>Performance Marketing Solution s.r.o. &mdash; Retourzendingen</strong><br>
+   <p><strong>Performance Marketing Solution s.r.o. &mdash; Zwroty</strong><br>
    c/o Dextrum Fulfillment a.s.<br>
    Kirilovova 181<br>
    739 21 Paskov<br>
-   Tsjechi&euml;</p>
+   Czechy</p>
   </div>
 
   <div class="warning-box">
-   <p><strong>Belangrijk:</strong> Vermeld altijd <strong>&quot;Retour &mdash; Bestelnummer: [uw bestelnummer]&quot;</strong> op de buitenkant van het pakket.</p>
+   <p><strong>Wa&#380;ne:</strong> Zawsze umie&sacute;&#263; na paczce napis <strong>&quot;Zwrot &mdash; Numer zam&oacute;wienia: [Tw&oacute;j numer zam&oacute;wienia]&quot;</strong>.</p>
   </div>
 
-  <h3>2.3 Retourkosten</h3>
-  <p>De retourkosten zijn voor rekening van de klant, <strong>tenzij</strong>:</p>
+  <h3>2.3 Koszty zwrotu</h3>
+  <p>Koszty zwrotu ponosi klient, <strong>chyba &#380;e</strong>:</p>
   <ul>
-   <li>Het product defect is</li>
-   <li>U een verkeerd product heeft ontvangen</li>
-   <li>Het product beschadigd is door de vervoerder</li>
+   <li>Produkt jest wadliwy</li>
+   <li>Otrzyma&#322;e&sacute;/otrzyma&#322;a&sacute; niew&#322;a&sacute;ciwy produkt</li>
+   <li>Produkt zosta&#322; uszkodzony podczas transportu</li>
   </ul>
-  <p>Geschatte verzendkosten: <strong>&euro;10-15</strong> (aangetekend naar Tsjechi&euml;).</p>
+  <p>Szacunkowe koszty przesy&#322;ki: <strong>~30&ndash;50 z&#322;</strong> (list polecony do Czech).</p>
 
   <div class="highlight-box">
-   <p><strong>Tip:</strong> Gebruik altijd een verzendmethode met Track &amp; Trace, zodat u kunt aantonen dat het pakket is verzonden en afgeleverd.</p>
+   <p><strong>Wskaz&oacute;wka:</strong> Zawsze korzystaj z metody wysy&#322;ki ze &sacute;ledzeniem, aby m&oacute;c udowodni&#263;, &#380;e paczka zosta&#322;a wys&#322;ana i dostarczona.</p>
   </div>
 
-  <h3>2.4 Wat vermelden in uw retour-e-mail?</h3>
+  <h3>2.4 Co nale&#380;y poda&#263; w e-mailu dotycz&#261;cym zwrotu?</h3>
   <ul>
-   <li>Uw volledige naam</li>
-   <li>Bestelnummer</li>
-   <li>Datum van ontvangst</li>
-   <li>Reden voor retour (optioneel)</li>
-   <li>IBAN-nummer voor terugbetaling</li>
+   <li>Imi&#281; i nazwisko</li>
+   <li>Numer zam&oacute;wienia</li>
+   <li>Data odbioru przesy&#322;ki</li>
+   <li>Pow&oacute;d zwrotu (opcjonalnie)</li>
+   <li>Dane bankowe do zwrotu pieni&#281;dzy</li>
   </ul>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sectie 3: Terugbetaling -->
+ <!-- Sekcja 3: Zwrot pieniędzy -->
  <div class="section-block">
-  <h2><span class="icon">3.</span> Terugbetaling</h2>
+  <h2><span class="icon">3.</span> Zwrot pieni&#281;dzy</h2>
 
-  <h3>3.1 Wanneer ontvangt u uw terugbetaling?</h3>
-  <p>Binnen <strong>14 dagen</strong> na ontvangst van het geretourneerde boek verwerken wij uw terugbetaling van <strong>&euro;35,-</strong>.</p>
+  <h3>3.1 Kiedy otrzymasz zwrot pieni&#281;dzy?</h3>
+  <p>W ci&#261;gu <strong>14 dni</strong> od momentu otrzymania zwr&oacute;conej ksi&#261;&#380;ki przetwarzamy zwrot w wysoko&sacute;ci <strong>129 z&#322;</strong>.</p>
 
-  <h3>3.2 Hoe wordt terugbetaald?</h3>
-  <p>De terugbetaling geschiedt via dezelfde betaalmethode die u bij de bestelling heeft gebruikt:</p>
+  <h3>3.2 W jaki spos&oacute;b nast&#281;puje zwrot pieni&#281;dzy?</h3>
+  <p>Zwrot pieni&#281;dzy nast&#281;puje za po&sacute;rednictwem tej samej metody p&#322;atno&sacute;ci, kt&oacute;rej u&#380;y&#322;e&sacute;/u&#380;y&#322;a&sacute; przy sk&#322;adaniu zam&oacute;wienia:</p>
   <ul>
-   <li><strong>iDEAL</strong> &rarr; terugbetaling op uw bankrekening</li>
-   <li><strong>Creditcard</strong> &rarr; terugbetaling op uw creditcard</li>
-   <li><strong>Bancontact</strong> &rarr; terugbetaling op uw Belgische rekening</li>
+   <li><strong>Przelewy24</strong> &rarr; zwrot na Twoje konto bankowe</li>
+   <li><strong>BLIK</strong> &rarr; zwrot na Twoje konto bankowe</li>
+   <li><strong>Karta</strong> &rarr; zwrot na Twoj&#261; kart&#281;</li>
+   <li><strong>PayPal</strong> &rarr; zwrot na Twoje konto PayPal</li>
   </ul>
-  <p>Na verwerking kan het <strong>3-5 werkdagen</strong> duren voordat het bedrag op uw rekening wordt bijgeschreven, afhankelijk van uw bank.</p>
+  <p>Po przetworzeniu mo&#380;e min&#261;&#263; <strong>3&ndash;5 dni roboczych</strong>, zanim kwota pojawi si&#281; na Twoim koncie, w zale&#380;no&sacute;ci od banku.</p>
 
-  <h3>3.3 Gedeeltelijke terugbetaling</h3>
-  <p>In de volgende gevallen kan een gedeeltelijke terugbetaling van toepassing zijn:</p>
+  <h3>3.3 Cz&#281;&sacute;ciowy zwrot pieni&#281;dzy</h3>
+  <p>W nast&#281;puj&#261;cych przypadkach mo&#380;e mie&#263; zastosowanie cz&#281;&sacute;ciowy zwrot pieni&#281;dzy:</p>
   <ul>
-   <li>Het boek vertoont gebruikssporen</li>
-   <li>Het boek is beschadigd door de klant</li>
-   <li>Er ontbreken onderdelen</li>
+   <li>Ksi&#261;&#380;ka nosi &sacute;lady u&#380;ytkowania</li>
+   <li>Ksi&#261;&#380;ka zosta&#322;a uszkodzona przez klienta</li>
+   <li>Brakuje element&oacute;w</li>
   </ul>
-  <p>De waardevermindering wordt vastgesteld en u wordt hierover ge&iuml;nformeerd v&oacute;&oacute;r de terugbetaling wordt verwerkt.</p>
+  <p>Zmniejszenie warto&sacute;ci zostanie okre&sacute;lone, a Ty zostaniesz poinformowany/poinformowana przed przetworzeniem zwrotu.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sectie 4: Klachten en Productgarantie -->
+ <!-- Sekcja 4: Reklamacje i gwarancja produktu -->
  <div class="section-block">
-  <h2><span class="icon">4.</span> Klachten en Productgarantie</h2>
+  <h2><span class="icon">4.</span> Reklamacje i gwarancja produktu</h2>
 
-  <h3>4.1 Wanneer kunt u een klacht indienen?</h3>
-  <p>U kunt een klacht indienen wanneer:</p>
+  <h3>4.1 Kiedy mo&#380;esz z&#322;o&#380;y&#263; reklamacj&#281;?</h3>
+  <p>Mo&#380;esz z&#322;o&#380;y&#263; reklamacj&#281;, gdy:</p>
   <ul>
-   <li>Het product beschadigd is aangekomen</li>
-   <li>Het product niet overeenkomt met de beschrijving</li>
-   <li>Er drukfouten of productiefouten zijn</li>
-   <li>Er pagina's ontbreken</li>
-   <li>U een verkeerd product heeft ontvangen</li>
+   <li>Produkt dotar&#322; uszkodzony</li>
+   <li>Produkt nie odpowiada opisowi</li>
+   <li>Wyst&#281;puj&#261; b&#322;&#281;dy druku lub wady produkcyjne</li>
+   <li>Brakuje stron</li>
+   <li>Otrzyma&#322;e&sacute;/otrzyma&#322;a&sacute; niew&#322;a&sacute;ciwy produkt</li>
   </ul>
 
-  <h3>4.2 Hoe dient u een klacht in?</h3>
-  <p>Stuur een e-mail naar <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a> met:</p>
+  <h3>4.2 Jak z&#322;o&#380;y&#263; reklamacj&#281;?</h3>
+  <p>Wy&sacute;lij e-mail na adres <a href="mailto:anna@najpierw-ja.pl" style="color: var(--cta);">anna@najpierw-ja.pl</a> zawieraj&#261;cy:</p>
   <ul>
-   <li>Uw naam en bestelnummer</li>
-   <li>Beschrijving van het probleem</li>
-   <li>Foto's van het beschadigde of defecte product</li>
+   <li>Twoje imi&#281; i nazwisko oraz numer zam&oacute;wienia</li>
+   <li>Opis problemu</li>
+   <li>Zdj&#281;cia uszkodzonego lub wadliwego produktu</li>
   </ul>
-  <p>Wij reageren binnen <strong>48 uur</strong> op uw klacht.</p>
+  <p>Odpowiemy na Twoj&#261; reklamacj&#281; w ci&#261;gu <strong>48 godzin</strong>.</p>
 
-  <h3>4.3 Wettelijke garantie</h3>
+  <h3>4.3 Gwarancja ustawowa</h3>
   <div class="highlight-box">
-   <p>U heeft recht op <strong>2 jaar wettelijke garantie</strong> voor gebreken die al bij levering aanwezig waren. Bij een geldige klacht ontvangt u een <strong>gratis vervanging</strong> of <strong>volledige terugbetaling</strong>. De retourkosten zijn in dat geval voor onze rekening.</p>
+   <p>Przys&#322;uguje Ci <strong>2-letnia gwarancja ustawowa</strong> na wady istniej&#261;ce w momencie dostawy. W przypadku uzasadnionej reklamacji otrzymasz <strong>bezp&#322;atny zamiennik</strong> lub <strong>pe&#322;ny zwrot pieni&#281;dzy</strong>. Koszty przesy&#322;ki zwrotnej w takim przypadku ponosimy my.</p>
   </div>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sectie 5: Veelgestelde vragen -->
+ <!-- Sekcja 5: Często zadawane pytania -->
  <div class="section-block">
-  <h2><span class="icon">5.</span> Veelgestelde vragen</h2>
+  <h2><span class="icon">5.</span> Cz&#281;sto zadawane pytania</h2>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Kan ik mijn bestelling annuleren?</h3>
+    <h3>Czy mog&#281; anulowa&#263; zam&oacute;wienie?</h3>
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Ja, als uw bestelling nog niet is verzonden, kunt u deze kosteloos annuleren. Stuur zo snel mogelijk een e-mail naar <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a> met uw bestelnummer.</p>
+    <p>Tak, je&sacute;li Twoje zam&oacute;wienie nie zosta&#322;o jeszcze wys&#322;ane, mo&#380;esz je anulowa&#263; bezp&#322;atnie. Wy&sacute;lij jak najszybciej e-mail na adres <a href="mailto:anna@najpierw-ja.pl" style="color: var(--cta);">anna@najpierw-ja.pl</a> z numerem zam&oacute;wienia.</p>
    </div>
   </div>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Ik heb de digitale e-books niet ontvangen, wat nu?</h3>
+    <h3>Nie otrzyma&#322;em/otrzyma&#322;am cyfrowych e-book&oacute;w, co robi&#263;?</h3>
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Controleer eerst uw spammap of ongewenste e-mail. Heeft u de e-books nog steeds niet ontvangen? Stuur dan een e-mail naar <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a> met uw bestelnummer, dan sturen wij de downloadlinks opnieuw.</p>
+    <p>Najpierw sprawd&#378; folder spam lub niechcian&#261; poczt&#281;. Nadal nie otrzyma&#322;e&sacute;/otrzyma&#322;a&sacute; e-book&oacute;w? Wy&sacute;lij e-mail na adres <a href="mailto:anna@najpierw-ja.pl" style="color: var(--cta);">anna@najpierw-ja.pl</a> z numerem zam&oacute;wienia, a wy&sacute;lemy linki do pobrania ponownie.</p>
    </div>
   </div>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Kan ik het boek ruilen voor een ander product?</h3>
+    <h3>Czy mog&#281; wymieni&#263; ksi&#261;&#380;k&#281; na inny produkt?</h3>
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Helaas is omruilen niet mogelijk. U kunt het boek wel retourneren conform ons retourbeleid en vervolgens een nieuwe bestelling plaatsen.</p>
+    <p>Niestety wymiana nie jest mo&#380;liwa. Mo&#380;esz jednak zwr&oacute;ci&#263; ksi&#261;&#380;k&#281; zgodnie z nasz&#261; polityk&#261; zwrot&oacute;w, a nast&#281;pnie z&#322;o&#380;y&#263; nowe zam&oacute;wienie.</p>
    </div>
   </div>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Wat als mijn pakket kwijt is geraakt?</h3>
+    <h3>Co si&#281; stanie, je&sacute;li moja paczka zaginie?</h3>
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Neem contact met ons op met uw Track &amp; Trace-code. Wij starten een onderzoek bij de vervoerder. Afhankelijk van het resultaat sturen wij u een nieuw exemplaar of verwerken wij een volledige terugbetaling.</p>
+    <p>Skontaktuj si&#281; z nami, podaj&#261;c numer &sacute;ledzenia przesy&#322;ki. Rozpoczniemy dochodzenie u przewo&#378;nika. W zale&#380;no&sacute;ci od wyniku wy&sacute;lemy nowy egzemplarz lub przetworzymy pe&#322;ny zwrot pieni&#281;dzy.</p>
    </div>
   </div>
  </div>
 
- <!-- Bedrijfsgegevens -->
+ <!-- Dane firmy -->
  <div class="company-info">
-  <h3>Bedrijfsgegevens</h3>
+  <h3>Dane firmy</h3>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybn&aacute; 716/24, Star&eacute; M&#283;sto, 110 00 Praha, Tsjechi&euml;</p>
-  <p>I&#268;O: 06259928</p>
-  <p>DIČ: CZ06259928</p>
-  <p>Klantenservice: <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a></p>
+  <p>Rybn&aacute; 716/24, 110 00 Praga 1, Czechy</p>
+  <p>NIP: CZ06259928</p>
+  <p>VAT: CZ06259928</p>
+  <p>Kontakt: <a href="mailto:anna@najpierw-ja.pl" style="color: var(--cta);">anna@najpierw-ja.pl</a></p>
  </div>
 
- <!-- Laatst bijgewerkt -->
+ <!-- Ostatnia aktualizacja -->
  <div class="last-updated">
-  Laatst bijgewerkt: 26 februari 2026
+  Ostatnia aktualizacja: 8 marca 2026
  </div>
 
 </div>
@@ -680,21 +703,23 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <footer class="site-footer">
  <div class="footer-inner">
   <div class="footer-brand">
+   <img src="/najpierw-ja-logo-white.png" alt="Życie, jakiego nigdy sobie nie pozwoliłaś" height="40">
+   <div class="footer-brand-text">Życie, jakiego nigdy<br>sobie nie pozwoliłaś</div>
   </div>
   <div class="footer-links">
-   <a href="verzending.html">Verzending &amp; Levering</a>
-   <a href="retourbeleid.html">Retour &amp; Garantie</a>
-   <a href="voorwaarden.html">Algemene Voorwaarden</a>
-   <a href="privacy.html">Privacybeleid</a>
-   <a href="contact.html">Klantenservice</a>
+   <a href="wysylka.html">Wysy&#322;ka &amp; Dostawa</a>
+   <a href="zwroty.html">Zwroty &amp; Gwarancja</a>
+   <a href="regulamin.html">Regulamin</a>
+   <a href="prywatnosc.html">Polityka prywatno&sacute;ci</a>
+   <a href="kontakt.html">Kontakt</a>
   </div>
   <div class="footer-contact">
-   <a href="mailto:annadevries@pakjeleventerug.nl">annadevries@pakjeleventerug.nl</a>
+   <a href="mailto:anna@najpierw-ja.pl">anna@najpierw-ja.pl</a>
   </div>
  </div>
  <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. &bull; Rybn&aacute; 716/24, 110 00 Praha &bull; I&#268;O: 06259928 &bull; DIČ: CZ06259928</span>
-  <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle rechten voorbehouden.</span>
+  <span>Performance Marketing Solution s.r.o. &bull; Rybn&aacute; 716/24, 110 00 Praga 1 &bull; NIP: CZ06259928</span>
+  <span>&copy; 2026 Performance Marketing Solution s.r.o. Wszelkie prawa zastrze&#380;one.</span>
  </div>
 </footer>
 
@@ -712,6 +737,12 @@ function toggleMobileMenu() {
  document.querySelector('.nav-mobile-menu').classList.toggle('open');
  document.querySelector('.nav-mobile-overlay').classList.toggle('open');
 }
+</script>
+<script>
+window.addEventListener('load', function() {
+ var preloader = document.getElementById('preloader');
+ if (preloader) { setTimeout(function() { preloader.classList.add('loaded'); }, 400); }
+});
 </script>
 </body>
 </html>

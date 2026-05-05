@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Algemene Voorwaarden — Het Leven Dat Je Verdient</title>
-<meta name="description" content="Lees onze algemene voorwaarden voor bestellingen van Het Leven Dat Je Verdient.">
+<title>Regulamin — Życie, jakiego nigdy sobie nie pozwoliłaś</title>
+<meta name="description" content="Zapoznaj się z regulaminem zamówień książki Życie, jakiego nigdy sobie nie pozwoliłaś.">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" type="image/png" sizes="32x32" href="/life-reset-favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="/life-reset-favicon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/life-reset-favicon-180.png"><link rel="shortcut icon" href="/life-reset-favicon.png">
+<link rel="icon" href="/favicon.png" type="image/png">
 
 <!-- ═══ FONTS ═══ -->
 <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
@@ -23,18 +23,18 @@
 
 /* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
 :root {
- --bg: #FFF8F3;
- --heading: #4A1A2E;
- --cta: #B85C4A;
- --section: #F0D5C4;
- --body: #6B3344;
- --highlight: #E8A88C;
- --dark: #3D1E2A;
+ --bg: #FAF5F8;
+ --heading: #2D1B3D;
+ --cta: #C27BA0;
+ --section: #EDD9E5;
+ --body: #5A3D6B;
+ --highlight: #D9A4C0;
+ --dark: #1A1028;
  --white: #FFFFFF;
- --light: #FDF5EF;
- --muted: #9B6B7A;
- --cta-hover: #A04A38;
- --accent: #D4916A;
+ --light: #F5EDF2;
+ --muted: #9B7AAD;
+ --cta-hover: #A8628A;
+ --accent: #D498B5;
 }
 
 /* ═══ RESET ═══ */
@@ -50,7 +50,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  position: sticky;
  top: 0;
  z-index: 1000;
- box-shadow: 0 2px 12px rgba(74, 26, 46, 0.06);
+ box-shadow: 0 2px 12px rgba(45, 27, 61, 0.06);
 }
 .nav-inner {
  max-width: 1050px;
@@ -124,13 +124,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  border-radius: 8px;
  text-decoration: none !important;
  transition: all 0.25s ease;
- box-shadow: 0 3px 12px rgba(184, 92, 74, 0.2);
+ box-shadow: 0 3px 12px rgba(194, 123, 160, 0.2);
 }
 .nav-cta:hover {
  background: var(--cta-hover) !important;
  color: var(--white) !important;
  transform: translateY(-1px);
- box-shadow: 0 5px 18px rgba(184, 92, 74, 0.35);
+ box-shadow: 0 5px 18px rgba(194, 123, 160, 0.35);
 }
 .nav-cta::after {
  display: none !important;
@@ -170,7 +170,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  right: 0;
  background: var(--white);
  padding: 24px 20px;
- box-shadow: 0 8px 24px rgba(74, 26, 46, 0.12);
+ box-shadow: 0 8px 24px rgba(45, 27, 61, 0.12);
  z-index: 1000;
  flex-direction: column;
  gap: 0;
@@ -217,7 +217,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 /* ═══ CONTENT STRÁNKY ═══ */
 .page-header {
- background: linear-gradient(135deg, var(--dark) 0%, #4A1A2E 50%, #5C2838 100%);
+ background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
  padding: 56px 20px 48px;
  text-align: center;
 }
@@ -239,7 +239,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .page-header .badge {
  display: inline-block;
- background: rgba(184, 92, 74, 0.2);
+ background: rgba(194, 123, 160, 0.2);
  color: var(--accent);
  font-family: 'DM Sans', sans-serif;
  font-size: 13px;
@@ -283,7 +283,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  padding: 4px 0;
 }
 .info-box ul li::before {
- content: '→ ';
+ content: '\2192 ';
  color: var(--cta);
  font-weight: 700;
 }
@@ -432,25 +432,48 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .page-header { padding: 40px 16px 36px; }
  .page-content { padding: 32px 16px 60px; }
 }
+
+/* ═══ PRELOADER ═══ */
+.preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.6s cubic-bezier(.4,0,.2,1), visibility 0.6s; }
+.preloader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
+.preloader-logo-container { position: relative; display: inline-block; overflow: hidden; border-radius: 16px; }
+.preloader-logo-container img { max-width: 280px; width: auto; height: auto; object-fit: contain; display: block; filter: drop-shadow(0 4px 20px rgba(194, 123, 160, 0.25)); }
+.preloader-logo-container::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0) 70%, transparent 100%); animation: preloaderShine 2s ease-in-out infinite; }
+@keyframes preloaderShine { 0% { left: -100%; } 60% { left: 150%; } 100% { left: 150%; } }
 </style>
 <script src="js/project-config.js"></script>
 <script src="js/pixel.js"></script>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "wegrfpuy1j");
+</script>
 </head>
 <body>
+
+<!-- ═══ PRELOADER ═══ -->
+<div class="preloader" id="preloader">
+ <div class="preloader-logo-container">
+  <img src="/slapp-taget-preloader.png" alt="Ładowanie..." class="preloader-logo">
+ </div>
+</div>
 
 <!-- ═══ NAVIGACE ═══ -->
 <nav class="site-nav">
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
-   <img src="het-leven-logo.png" alt="Het Leven Dat Je Verdient" width="150" height="40">
+   <img src="/najpierw-ja-logo.png" alt="Życie, jakiego nigdy sobie nie pozwoliłaś" width="150" height="40">
 
   </a>
   <div class="nav-links">
-   <a href="verzending.html">Verzending</a>
-   <a href="voorwaarden.html" class="active">Voorwaarden</a>
-   <a href="privacy.html">Privacy</a>
-   <a href="contact.html">Contact</a>
-   <a href="index.html" class="nav-cta">Bestel nu &rarr;</a>
+   <a href="wysylka.html">Wysyłka &amp; Dostawa</a>
+   <a href="zwroty.html">Zwroty &amp; Gwarancja</a>
+   <a href="regulamin.html" class="active">Regulamin</a>
+   <a href="prywatnosc.html">Polityka prywatności</a>
+   <a href="kontakt.html">Kontakt</a>
+   <a href="index.html" class="nav-cta">Zamów teraz &rarr;</a>
   </div>
   <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
    <span></span><span></span><span></span>
@@ -459,168 +482,168 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </nav>
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
- <a href="verzending.html">Verzending</a>
- <a href="voorwaarden.html">Voorwaarden</a>
- <a href="privacy.html">Privacy</a>
- <a href="contact.html">Contact</a>
- <a href="index.html" class="nav-cta-mobile">Bestel nu &rarr;</a>
+ <a href="wysylka.html">Wysyłka &amp; Dostawa</a>
+ <a href="zwroty.html">Zwroty &amp; Gwarancja</a>
+ <a href="regulamin.html">Regulamin</a>
+ <a href="prywatnosc.html">Polityka prywatności</a>
+ <a href="kontakt.html">Kontakt</a>
+ <a href="index.html" class="nav-cta-mobile">Zamów teraz &rarr;</a>
 </div>
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">📋 Juridisch</div>
- <h1>Algemene Voorwaarden</h1>
- <p>Lees onze voorwaarden zorgvuldig door voordat je een bestelling plaatst.</p>
+ <div class="badge">📋 Dokumenty prawne</div>
+ <h1>Regulamin</h1>
+ <p>Prosimy o zapoznanie się z regulaminem przed złożeniem zamówienia.</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="page-content">
 
  <div class="info-box">
-  <h3>📌 Samenvatting</h3>
+  <h3>📌 Podsumowanie</h3>
   <ul>
-   <li>14 dagen bedenktijd (herroepingsrecht)</li>
-   <li>Gratis verzending naar Nederland en België</li>
-   <li>30 dagen geld-terug-garantie</li>
-   <li>Veilig betalen via iDEAL, Bancontact, creditcard</li>
-   <li>Digitale producten: geen retourrecht na levering</li>
+   <li>30 dni na odstąpienie od umowy</li>
+   <li>Darmowa wysyłka do Polski</li>
+   <li>30-dniowa gwarancja zwrotu pieniędzy</li>
+   <li>Bezpieczna płatność przez Przelewy24, BLIK, kartę, PayPal</li>
+   <li>Produkty cyfrowe: brak prawa zwrotu po dostarczeniu</li>
   </ul>
  </div>
 
- <!-- Artikel 1 -->
+ <!-- Artykuł 1 -->
  <div class="section-block">
-  <h2><span class="section-num">1</span> Identiteit van de ondernemer</h2>
+  <h2><span class="section-num">1</span> Dane firmy</h2>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, Staré Město, 110 00 Praha, Tsjechische Republiek</p>
-  <p>IČO: 06259928<br>DIČ: CZ06259928</p>
-  <p>E-mail: <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a><br>
-  Telefoon: +420 732 915 755</p>
+  <p>Rybná 716/24, 110 00 Praga 1, Czechy</p>
+  <p>NIP: CZ06259928<br>IČO: 06259928</p>
+  <p>E-mail: <a href="mailto:anna@najpierw-ja.pl" style="color: var(--cta);">anna@najpierw-ja.pl</a><br>
+  Tel: +420 732 915 755</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 2 -->
+ <!-- Artykuł 2 -->
  <div class="section-block">
-  <h2><span class="section-num">2</span> Toepasselijkheid</h2>
-  <p>Deze algemene voorwaarden zijn van toepassing op elk aanbod van de ondernemer en op elke tot stand gekomen overeenkomst op afstand tussen ondernemer en consument.</p>
-  <p>Voordat de overeenkomst op afstand wordt gesloten, wordt de tekst van deze algemene voorwaarden aan de consument beschikbaar gesteld.</p>
+  <h2><span class="section-num">2</span> Zastosowanie</h2>
+  <p>Niniejszy regulamin ma zastosowanie do wszystkich ofert przedsiębiorcy oraz do każdej umowy zawartej na odległość między przedsiębiorcą a konsumentem.</p>
+  <p>Przed zawarciem umowy na odległość treść niniejszego regulaminu jest udostępniana konsumentowi.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 3 -->
+ <!-- Artykuł 3 -->
  <div class="section-block">
-  <h2><span class="section-num">3</span> Het aanbod</h2>
-  <p>Indien een aanbod een beperkte geldigheidsduur heeft of onder voorwaarden geschiedt, wordt dit nadrukkelijk in het aanbod vermeld.</p>
-  <p>Het aanbod bevat een volledige en nauwkeurige omschrijving van de aangeboden producten en/of diensten. De beschrijving is voldoende gedetailleerd om een goede beoordeling van het aanbod door de consument mogelijk te maken.</p>
-  <p>Kennelijke vergissingen of fouten in het aanbod binden de ondernemer niet.</p>
+  <h2><span class="section-num">3</span> Oferta</h2>
+  <p>Jeżeli oferta ma ograniczony okres ważności lub jest obwarowana warunkami, zostanie to wyraźnie wskazane w ofercie.</p>
+  <p>Oferta zawiera pełny i dokładny opis oferowanych produktów i/lub usług. Opis jest wystarczająco szczegółowy, aby umożliwić konsumentowi właściwą ocenę oferty.</p>
+  <p>Oczywiste pomyłki lub błędy w ofercie nie są wiążące dla przedsiębiorcy.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 4 -->
+ <!-- Artykuł 4 -->
  <div class="section-block">
-  <h2><span class="section-num">4</span> De overeenkomst</h2>
-  <p>De overeenkomst komt tot stand op het moment van aanvaarding door de consument van het aanbod en het voldoen aan de daarbij gestelde voorwaarden.</p>
-  <p>Indien de consument het aanbod langs elektronische weg heeft aanvaard, bevestigt de ondernemer onverwijld langs elektronische weg de ontvangst van de aanvaarding van het aanbod.</p>
+  <h2><span class="section-num">4</span> Umowa</h2>
+  <p>Umowa zostaje zawarta w momencie przyjęcia oferty przez konsumenta i spełnienia określonych w niej warunków.</p>
+  <p>Jeżeli konsument przyjął ofertę drogą elektroniczną, przedsiębiorca niezwłocznie potwierdza otrzymanie akceptacji drogą elektroniczną.</p>
 
   <div class="highlight-box">
-   <p><strong>Let op:</strong> De ondernemer treft passende technische en organisatorische maatregelen ter beveiliging van de elektronische overdracht van data en zorgt voor een veilige webomgeving.</p>
+   <p><strong>Uwaga:</strong> Przedsiębiorca podejmuje odpowiednie środki techniczne i organizacyjne w celu zabezpieczenia elektronicznej transmisji danych oraz zapewnienia bezpiecznego środowiska internetowego.</p>
   </div>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 5 -->
+ <!-- Artykuł 5 -->
  <div class="section-block">
-  <h2><span class="section-num">5</span> Herroepingsrecht</h2>
-  <p><strong>Bij fysieke producten:</strong></p>
-  <p>Bij de aankoop van producten heeft de consument de mogelijkheid de overeenkomst zonder opgave van redenen te ontbinden gedurende 14 dagen. Deze bedenktermijn gaat in op de dag na ontvangst van het product door de consument.</p>
-  <p>Tijdens de bedenktijd zal de consument zorgvuldig omgaan met het product en de verpakking. Hij zal het product slechts in die mate uitpakken of gebruiken voor zover dat nodig is om te kunnen beoordelen of hij het product wenst te behouden.</p>
-  <p><strong>Bij digitale producten (e-books, PDF):</strong></p>
-  <p>Na levering van digitale inhoud (download) vervalt het herroepingsrecht, mits de consument uitdrukkelijk heeft ingestemd met het afstand doen van zijn herroepingsrecht.</p>
+  <h2><span class="section-num">5</span> Prawo do odstąpienia od umowy</h2>
+  <p><strong>Produkty fizyczne:</strong></p>
+  <p>W przypadku zakupu produktów konsument ma prawo odstąpić od umowy bez podania przyczyny w ciągu 30 dni od otrzymania produktu. Okres odstąpienia rozpoczyna się następnego dnia po otrzymaniu produktu przez konsumenta.</p>
+  <p>W okresie odstąpienia konsument powinien obchodzić się z produktem i opakowaniem ostrożnie. Produkt może być rozpakowany lub użyty jedynie w zakresie niezbędnym do oceny, czy konsument chce go zatrzymać.</p>
+  <p><strong>Produkty cyfrowe (e-booki, PDF):</strong></p>
+  <p>Po dostarczeniu treści cyfrowej (pobraniu) prawo do odstąpienia od umowy wygasa, pod warunkiem że konsument wyraźnie wyraził zgodę na rezygnację z prawa do odstąpienia od umowy.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 6 -->
+ <!-- Artykuł 6 -->
  <div class="section-block">
-  <h2><span class="section-num">6</span> De prijs</h2>
-  <p>Gedurende de in het aanbod vermelde geldigheidsduur worden de prijzen van de aangeboden producten en/of diensten niet verhoogd, behoudens prijswijzigingen als gevolg van veranderingen in btw-tarieven.</p>
-  <p>Alle prijzen zijn inclusief btw en inclusief verzendkosten (tenzij anders vermeld).</p>
+  <h2><span class="section-num">6</span> Cena</h2>
+  <p>W okresie ważności wskazanym w ofercie ceny oferowanych produktów i/lub usług nie ulegają podwyższeniu, z wyjątkiem zmian cen wynikających ze zmiany stawek VAT.</p>
+  <p>Wszystkie ceny zawierają podatek VAT oraz koszty wysyłki (chyba że zaznaczono inaczej).</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 7 -->
+ <!-- Artykuł 7 -->
  <div class="section-block">
-  <h2><span class="section-num">7</span> Betaling</h2>
-  <p>De consument kan betalen via de volgende betaalmethoden:</p>
+  <h2><span class="section-num">7</span> Płatność</h2>
+  <p>Konsument może dokonać płatności za pomocą następujących metod:</p>
   <ul>
-   <li>iDEAL (Nederland)</li>
-   <li>Bancontact (België)</li>
-   <li>Creditcard (Visa, Mastercard)</li>
+   <li>Przelewy24</li>
+   <li>BLIK</li>
+   <li>Karta płatnicza (Visa, Mastercard)</li>
    <li>Apple Pay / Google Pay</li>
    <li>PayPal</li>
-   <li>Klarna</li>
   </ul>
-  <p>De betaling wordt verwerkt op het moment van bestelling. Na succesvolle betaling ontvangt de consument een orderbevestiging per e-mail.</p>
+  <p>Płatność jest realizowana w momencie składania zamówienia. Po zatwierdzeniu płatności konsument otrzymuje potwierdzenie zamówienia drogą e-mail.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 8 -->
+ <!-- Artykuł 8 -->
  <div class="section-block">
-  <h2><span class="section-num">8</span> Levering</h2>
-  <p>De ondernemer zal de grootst mogelijke zorgvuldigheid in acht nemen bij het in ontvangst nemen en bij de uitvoering van bestellingen van producten.</p>
-  <p>Als plaats van levering geldt het adres dat de consument aan het bedrijf kenbaar heeft gemaakt.</p>
-  <p>De levertijd bedraagt gemiddeld 3-5 werkdagen voor Nederland en België. Voor overige EU-landen kan de levertijd langer zijn.</p>
+  <h2><span class="section-num">8</span> Dostawa</h2>
+  <p>Przedsiębiorca dokłada najwyższej staranności przy przyjmowaniu i realizacji zamówień produktów.</p>
+  <p>Adresem dostawy jest adres podany przez konsumenta przedsiębiorcy.</p>
+  <p>Wysyłka następuje w ciągu 1–2 dni roboczych od momentu płatności. Czas dostawy wynosi średnio 3–4 dni robocze na terenie Polski. W przypadku pozostałych krajów UE czas dostawy może być dłuższy.</p>
 
   <div class="highlight-box">
-   <p><strong>Verzending is gratis</strong> naar Nederland en België. Voor andere landen kunnen extra verzendkosten van toepassing zijn.</p>
+   <p><strong>Darmowa wysyłka do Polski.</strong> W przypadku innych krajów mogą obowiązywać dodatkowe koszty wysyłki.</p>
   </div>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 9 -->
+ <!-- Artykuł 9 -->
  <div class="section-block">
-  <h2><span class="section-num">9</span> Garantie</h2>
-  <p>Naast het wettelijke herroepingsrecht van 14 dagen bieden wij een <strong>uitgebreide 30 dagen geld-terug-garantie</strong>.</p>
-  <p>Indien je niet tevreden bent met het product, kun je binnen 30 dagen na ontvangst van het boek contact met ons opnemen voor een volledige terugbetaling, zonder lastige vragen.</p>
+  <h2><span class="section-num">9</span> Gwarancja</h2>
+  <p>Oferujemy <strong>30-dniową gwarancję zwrotu pieniędzy</strong> od momentu otrzymania produktu.</p>
+  <p>Jeśli nie jesteś zadowolony z produktu, możesz w ciągu 30 dni od jego otrzymania skontaktować się z nami w celu uzyskania pełnego zwrotu pieniędzy, bez zbędnych pytań.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 10 -->
+ <!-- Artykuł 10 -->
  <div class="section-block">
-  <h2><span class="section-num">10</span> Klachtenregeling</h2>
-  <p>Klachten over de uitvoering van de overeenkomst moeten binnen bekwame tijd, volledig en duidelijk omschreven worden ingediend bij de ondernemer, nadat de consument de gebreken heeft geconstateerd.</p>
-  <p>Bij de ondernemer ingediende klachten worden binnen een termijn van 14 dagen gerekend vanaf de datum van ontvangst beantwoord.</p>
-  <p>Neem contact op via: <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a></p>
+  <h2><span class="section-num">10</span> Reklamacje</h2>
+  <p>Reklamacje dotyczące realizacji umowy powinny być składane przedsiębiorcy w rozsądnym terminie, w sposób pełny i jasny, po wykryciu wad przez konsumenta.</p>
+  <p>Reklamacje złożone u przedsiębiorcy są rozpatrywane w ciągu 14 dni od daty ich otrzymania.</p>
+  <p>Skontaktuj się z nami: <a href="mailto:anna@najpierw-ja.pl" style="color: var(--cta);">anna@najpierw-ja.pl</a></p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 11 -->
+ <!-- Artykuł 11 -->
  <div class="section-block">
-  <h2><span class="section-num">11</span> Intellectueel eigendom</h2>
-  <p>Alle intellectuele eigendomsrechten op de producten, waaronder maar niet beperkt tot teksten, afbeeldingen, ontwerpen en lay-outs, berusten bij de ondernemer of diens licentiegevers.</p>
-  <p>Het is niet toegestaan om zonder voorafgaande schriftelijke toestemming van de ondernemer de producten of enig onderdeel daarvan te verveelvoudigen, op te slaan in een gegevensbestand, of openbaar te maken.</p>
+  <h2><span class="section-num">11</span> Prawa własności intelektualnej</h2>
+  <p>Wszelkie prawa własności intelektualnej do produktów, w tym między innymi teksty, obrazy, projekty graficzne i układy, należą do przedsiębiorcy lub jego licencjodawców.</p>
+  <p>Bez uprzedniej pisemnej zgody przedsiębiorcy zabronione jest powielanie, przechowywanie w bazie danych lub publikowanie produktów lub jakiejkolwiek ich części.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 12 -->
+ <!-- Artykuł 12 -->
  <div class="section-block">
-  <h2><span class="section-num">12</span> Toepasselijk recht</h2>
-  <p>Op alle geschillen met betrekking tot deze overeenkomst is het recht van de Tsjechische Republiek van toepassing, met inachtneming van de dwingendrechtelijke bepalingen van het land waar de consument woonachtig is.</p>
-  <p>De Europese Commissie biedt een platform voor onlinegeschillenbeslechting (ODR): <a href="https://ec.europa.eu/consumers/odr/" target="_blank" style="color: var(--cta);">https://ec.europa.eu/consumers/odr/</a></p>
+  <h2><span class="section-num">12</span> Prawo właściwe</h2>
+  <p>Do wszelkich sporów wynikających z niniejszej umowy stosuje się prawo czeskie, z uwzględnieniem bezwzględnie obowiązujących przepisów prawa kraju zamieszkania konsumenta.</p>
+  <p>Komisja Europejska udostępnia platformę do internetowego rozstrzygania sporów (ODR): <a href="https://ec.europa.eu/consumers/odr/" target="_blank" style="color: var(--cta);">https://ec.europa.eu/consumers/odr/</a></p>
  </div>
 
  <div class="info-box" style="margin-top: 48px; background: linear-gradient(135deg, var(--light), var(--section));">
-  <h3>📅 Laatste update</h3>
-  <p>Deze voorwaarden zijn voor het laatst bijgewerkt op 29 maart 2026. Wij behouden ons het recht voor deze voorwaarden te allen tijde te wijzigen.</p>
+  <h3>📅 Ostatnia aktualizacja</h3>
+  <p>Niniejszy regulamin został ostatnio zaktualizowany 8 marca 2026. Zastrzegamy sobie prawo do zmiany niniejszego regulaminu w dowolnym momencie.</p>
  </div>
 
 </div>
@@ -629,21 +652,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <footer class="site-footer">
  <div class="footer-inner">
   <div class="footer-brand">
+   <img src="/najpierw-ja-logo-white.png" alt="Życie, jakiego nigdy sobie nie pozwoliłaś" class="footer-logo" width="210" height="56">
+   <div class="footer-brand-text">Życie, jakiego nigdy<br>sobie nie pozwoliłaś</div>
   </div>
   <div class="footer-links">
-   <a href="voorwaarden.html">Algemene Voorwaarden</a>
-   <a href="verzending.html">Verzending &amp; Retour</a>
-   <a href="privacy.html">Privacybeleid</a>
-   <a href="contact.html">Contact</a>
+   <a href="wysylka.html">Wysyłka &amp; Dostawa</a>
+   <a href="zwroty.html">Zwroty &amp; Gwarancja</a>
+   <a href="regulamin.html">Regulamin</a>
+   <a href="prywatnosc.html">Polityka prywatności</a>
+   <a href="kontakt.html">Kontakt</a>
   </div>
   <div class="footer-contact">
-   <a href="mailto:annadevries@pakjeleventerug.nl">📧 annadevries@pakjeleventerug.nl</a>
+   <a href="mailto:anna@najpierw-ja.pl">📧 anna@najpierw-ja.pl</a>
    <a href="tel:+420732915755">📞 +420 732 915 755</a>
   </div>
  </div>
  <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, Staré Město, 110 00 Praha • IČO: 06259928 • DIČ: CZ06259928</span>
-  <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle rechten voorbehouden.</span>
+  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, 110 00 Praga 1, Czechy • NIP: CZ06259928</span>
+  <span>&copy; 2026 Performance Marketing Solution s.r.o. Wszelkie prawa zastrzeżone.</span>
  </div>
 </footer>
 
@@ -653,6 +679,12 @@ function toggleMobileMenu() {
  document.querySelector('.nav-mobile-menu').classList.toggle('open');
  document.querySelector('.nav-mobile-overlay').classList.toggle('open');
 }
+</script>
+<script>
+window.addEventListener('load', function() {
+ var preloader = document.getElementById('preloader');
+ if (preloader) { setTimeout(function() { preloader.classList.add('loaded'); }, 400); }
+});
 </script>
 </body>
 </html>

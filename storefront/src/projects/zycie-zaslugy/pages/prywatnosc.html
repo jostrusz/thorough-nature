@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacybeleid — Het Leven Dat Je Verdient</title>
-<meta name="description" content="Lees hoe wij omgaan met je persoonsgegevens bij bestellingen van Het Leven Dat Je Verdient.">
+<title>Polityka prywatności — Życie, jakiego nigdy sobie nie pozwoliłaś</title>
+<meta name="description" content="Dowiedz się, jak przetwarzamy Twoje dane osobowe przy zamówieniach książki Życie, jakiego nigdy sobie nie pozwoliłaś.">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" type="image/png" sizes="32x32" href="/life-reset-favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="/life-reset-favicon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/life-reset-favicon-180.png"><link rel="shortcut icon" href="/life-reset-favicon.png">
+<link rel="icon" href="/favicon.png" type="image/png">
 
 <!-- ═══ FONTS ═══ -->
 <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
@@ -23,18 +23,18 @@
 
 /* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
 :root {
- --bg: #FFF8F3;
- --heading: #4A1A2E;
- --cta: #B85C4A;
- --section: #F0D5C4;
- --body: #6B3344;
- --highlight: #E8A88C;
- --dark: #3D1E2A;
+ --bg: #FAF5F8;
+ --heading: #2D1B3D;
+ --cta: #C27BA0;
+ --section: #EDD9E5;
+ --body: #5A3D6B;
+ --highlight: #D9A4C0;
+ --dark: #1A1028;
  --white: #FFFFFF;
- --light: #FDF5EF;
- --muted: #9B6B7A;
- --cta-hover: #A04A38;
- --accent: #D4916A;
+ --light: #F5EDF2;
+ --muted: #9B7AAD;
+ --cta-hover: #A8628A;
+ --accent: #D498B5;
 }
 
 /* ═══ RESET ═══ */
@@ -43,7 +43,7 @@ html { scroll-behavior: smooth; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
 
 /* ═══ NAVIGACE ═══ */
-.site-nav { background: var(--white); border-bottom: 1px solid var(--section); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(74, 26, 46, 0.06); }
+.site-nav { background: var(--white); border-bottom: 1px solid var(--section); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(45, 27, 61, 0.06); }
 .nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
 .nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
 .nav-logo img { height: 40px; width: auto; }
@@ -55,13 +55,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .nav-links a:hover::after { width: 100%; }
 .nav-links a.active { color: var(--heading); font-weight: 600; }
 .nav-links a.active::after { width: 100%; }
-.nav-cta { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--white) !important; background: var(--cta); padding: 10px 22px; border-radius: 8px; text-decoration: none !important; transition: all 0.25s ease; box-shadow: 0 3px 12px rgba(184, 92, 74, 0.2); }
-.nav-cta:hover { background: var(--cta-hover) !important; color: var(--white) !important; transform: translateY(-1px); box-shadow: 0 5px 18px rgba(184, 92, 74, 0.35); }
+.nav-cta { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--white) !important; background: var(--cta); padding: 10px 22px; border-radius: 8px; text-decoration: none !important; transition: all 0.25s ease; box-shadow: 0 3px 12px rgba(194, 123, 160, 0.2); }
+.nav-cta:hover { background: var(--cta-hover) !important; color: var(--white) !important; transform: translateY(-1px); box-shadow: 0 5px 18px rgba(194, 123, 160, 0.35); }
 .nav-cta::after { display: none !important; }
 .nav-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-direction: column; gap: 5px; }
 .nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--heading); border-radius: 2px; transition: all 0.3s ease; }
 .nav-mobile-overlay { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background: rgba(26, 16, 40, 0.5); z-index: 999; }
-.nav-mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--white); padding: 24px 20px; box-shadow: 0 8px 24px rgba(74, 26, 46, 0.12); z-index: 1000; flex-direction: column; gap: 0; border-bottom: 2px solid var(--section); }
+.nav-mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--white); padding: 24px 20px; box-shadow: 0 8px 24px rgba(45, 27, 61, 0.12); z-index: 1000; flex-direction: column; gap: 0; border-bottom: 2px solid var(--section); }
 .nav-mobile-menu a { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500; color: var(--body); text-decoration: none; padding: 14px 0; border-bottom: 1px solid var(--section); display: block; transition: color 0.2s; }
 .nav-mobile-menu a:last-child { border-bottom: none; }
 .nav-mobile-menu a:hover { color: var(--heading); }
@@ -80,13 +80,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 /* ═══ CONTENT STRÁNKY ═══ */
 .page-header {
- background: linear-gradient(135deg, var(--dark) 0%, #4A1A2E 50%, #5C2838 100%);
+ background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
  padding: 56px 20px 48px;
  text-align: center;
 }
 .page-header h1 { font-family: 'Recoleta', serif; font-size: 36px; font-weight: 600; color: var(--white); margin-bottom: 12px; line-height: 1.2; }
 .page-header p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: rgba(255, 255, 255, 0.7); max-width: 600px; margin: 0 auto; line-height: 1.6; }
-.page-header .badge { display: inline-block; background: rgba(184, 92, 74, 0.2); color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 16px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 0.5px; }
+.page-header .badge { display: inline-block; background: rgba(194, 123, 160, 0.2); color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 16px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 0.5px; }
 
 .page-content { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
 
@@ -212,6 +212,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .site-footer { background: var(--dark); padding: 48px 24px 24px; color: rgba(255, 255, 255, 0.7); }
 .footer-inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
 .footer-brand { display: flex; align-items: center; gap: 16px; }
+.footer-brand img { height: 48px; width: auto; }
 .footer-brand-text { font-family: 'Recoleta', serif; font-size: 18px; color: var(--white); line-height: 1.3; }
 .footer-links { display: flex; flex-direction: column; gap: 10px; }
 .footer-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(255, 255, 255, 0.7); text-decoration: none; transition: color 0.2s; }
@@ -235,25 +236,48 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .page-content { padding: 32px 16px 60px; }
  .data-table { display: block; overflow-x: auto; }
 }
+
+/* ═══ PRELOADER ═══ */
+.preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.6s cubic-bezier(.4,0,.2,1), visibility 0.6s; }
+.preloader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
+.preloader-logo-container { position: relative; display: inline-block; overflow: hidden; border-radius: 16px; }
+.preloader-logo-container img { max-width: 280px; width: auto; height: auto; object-fit: contain; display: block; filter: drop-shadow(0 4px 20px rgba(194, 123, 160, 0.25)); }
+.preloader-logo-container::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0) 70%, transparent 100%); animation: preloaderShine 2s ease-in-out infinite; }
+@keyframes preloaderShine { 0% { left: -100%; } 60% { left: 150%; } 100% { left: 150%; } }
 </style>
 <script src="js/project-config.js"></script>
 <script src="js/pixel.js"></script>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "wegrfpuy1j");
+</script>
 </head>
 <body>
+
+<!-- ═══ PRELOADER ═══ -->
+<div class="preloader" id="preloader">
+ <div class="preloader-logo-container">
+  <img src="/slapp-taget-preloader.png" alt="Ładowanie..." class="preloader-logo">
+ </div>
+</div>
 
 <!-- ═══ NAVIGACE ═══ -->
 <nav class="site-nav">
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
-   <img src="het-leven-logo.png" alt="Het Leven Dat Je Verdient" width="150" height="40">
+   <img src="/najpierw-ja-logo.png" alt="Życie, jakiego nigdy sobie nie pozwoliłaś" width="150" height="40">
 
   </a>
   <div class="nav-links">
-   <a href="verzending.html">Verzending</a>
-   <a href="voorwaarden.html">Voorwaarden</a>
-   <a href="privacy.html" class="active">Privacy</a>
-   <a href="contact.html">Contact</a>
-   <a href="index.html" class="nav-cta">Bestel nu &rarr;</a>
+   <a href="wysylka.html">Wysyłka i Dostawa</a>
+   <a href="zwroty.html">Zwroty i Gwarancja</a>
+   <a href="regulamin.html">Regulamin</a>
+   <a href="prywatnosc.html" class="active">Polityka prywatności</a>
+   <a href="kontakt.html">Kontakt</a>
+   <a href="index.html" class="nav-cta">Zamów teraz &rarr;</a>
   </div>
   <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
    <span></span><span></span><span></span>
@@ -262,207 +286,207 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </nav>
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
- <a href="verzending.html">Verzending</a>
- <a href="voorwaarden.html">Voorwaarden</a>
- <a href="privacy.html">Privacy</a>
- <a href="contact.html">Contact</a>
- <a href="index.html" class="nav-cta-mobile">Bestel nu &rarr;</a>
+ <a href="wysylka.html">Wysyłka i Dostawa</a>
+ <a href="zwroty.html">Zwroty i Gwarancja</a>
+ <a href="regulamin.html">Regulamin</a>
+ <a href="prywatnosc.html">Polityka prywatności</a>
+ <a href="kontakt.html">Kontakt</a>
+ <a href="index.html" class="nav-cta-mobile">Zamów teraz &rarr;</a>
 </div>
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">🔒 AVG / GDPR</div>
- <h1>Privacybeleid</h1>
- <p>Hoe wij omgaan met je persoonsgegevens — transparant en volgens de wet.</p>
+ <div class="badge">🔒 RODO</div>
+ <h1>Polityka prywatności</h1>
+ <p>Jak przetwarzamy Twoje dane osobowe — przejrzyście i zgodnie z prawem.</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="page-content">
 
  <div class="info-box">
-  <h3>📌 Samenvatting</h3>
+  <h3>📌 Podsumowanie</h3>
   <ul>
-   <li>We verzamelen alleen gegevens die nodig zijn voor je bestelling</li>
-   <li>We delen je gegevens niet met derden voor marketingdoeleinden</li>
-   <li>Je hebt recht op inzage, correctie en verwijdering van je gegevens</li>
-   <li>We gebruiken cookies voor analyse en advertenties (Facebook Pixel)</li>
-   <li>Je gegevens worden beveiligd opgeslagen</li>
+   <li>Zbieramy tylko dane niezbędne do realizacji Twojego zamówienia</li>
+   <li>Nie udostępniamy Twoich danych podmiotom trzecim w celach marketingowych</li>
+   <li>Masz prawo do wglądu, poprawiania i usunięcia swoich danych</li>
+   <li>Używamy plików cookies do analityki i reklamy (Facebook Pixel)</li>
+   <li>Twoje dane są przechowywane w bezpieczny sposób</li>
   </ul>
  </div>
 
- <!-- Artikel 1 -->
+ <!-- Artykuł 1 -->
  <div class="section-block">
-  <h2><span class="section-num">1</span> Verwerkingsverantwoordelijke</h2>
+  <h2><span class="section-num">1</span> Administrator danych osobowych</h2>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, Staré Město, 110 00 Praha, Tsjechische Republiek</p>
-  <p>IČO: 06259928 | DIČ: CZ06259928</p>
-  <p>E-mail: <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a></p>
+  <p>Rybná 716/24, 110 00 Praga 1, Czechy</p>
+  <p>NIP: 06259928</p>
+  <p>E-mail: <a href="mailto:anna@najpierw-ja.pl" style="color: var(--cta);">anna@najpierw-ja.pl</a></p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 2 -->
+ <!-- Artykuł 2 -->
  <div class="section-block">
-  <h2><span class="section-num">2</span> Welke gegevens verzamelen wij?</h2>
-  <p>Wij verzamelen de volgende persoonsgegevens wanneer je een bestelling plaatst:</p>
+  <h2><span class="section-num">2</span> Jakie dane zbieramy?</h2>
+  <p>Zbieramy następujące dane osobowe podczas składania zamówienia:</p>
 
   <table class="data-table">
    <thead>
     <tr>
-     <th>Gegeven</th>
-     <th>Doel</th>
-     <th>Bewaartermijn</th>
+     <th>Dane</th>
+     <th>Cel</th>
+     <th>Okres przechowywania</th>
     </tr>
    </thead>
    <tbody>
-    <tr><td>Naam (voor- en achternaam)</td><td>Verzending &amp; facturatie</td><td>7 jaar (fiscaal)</td></tr>
-    <tr><td>E-mailadres</td><td>Orderbevestiging, klantenservice</td><td>Tot uitschrijving</td></tr>
-    <tr><td>Telefoonnummer</td><td>Verzending (koerier)</td><td>30 dagen na levering</td></tr>
-    <tr><td>Adresgegevens</td><td>Verzending &amp; facturatie</td><td>7 jaar (fiscaal)</td></tr>
-    <tr><td>Betaalgegevens</td><td>Verwerking betaling</td><td>Niet opgeslagen*</td></tr>
-    <tr><td>IP-adres</td><td>Fraude-preventie, analyse</td><td>90 dagen</td></tr>
+    <tr><td>Imię i nazwisko</td><td>Wysyłka i fakturowanie</td><td>7 lat (podatki)</td></tr>
+    <tr><td>Adres e-mail</td><td>Potwierdzenie zamówienia, obsługa klienta</td><td>Do wypisania się</td></tr>
+    <tr><td>Numer telefonu</td><td>Wysyłka (kurier)</td><td>30 dni po dostawie</td></tr>
+    <tr><td>Adres dostawy</td><td>Wysyłka i fakturowanie</td><td>7 lat (podatki)</td></tr>
+    <tr><td>Dane płatności</td><td>Obsługa płatności</td><td>Nie przechowujemy*</td></tr>
+    <tr><td>Adres IP</td><td>Zapobieganie oszustwom, analityka</td><td>90 dni</td></tr>
    </tbody>
   </table>
 
-  <p style="font-size: 14px; color: var(--muted);">* Betaalgegevens worden verwerkt door onze payment providers (Stripe/Mollie) en worden niet op onze servers opgeslagen.</p>
+  <p style="font-size: 14px; color: var(--muted);">* Dane płatności są przetwarzane przez Stripe i nie są przechowywane na naszych serwerach.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 3 -->
+ <!-- Artykuł 3 -->
  <div class="section-block">
-  <h2><span class="section-num">3</span> Waarvoor gebruiken wij je gegevens?</h2>
+  <h2><span class="section-num">3</span> Do czego wykorzystujemy Twoje dane?</h2>
   <ul>
-   <li>Het verwerken en verzenden van je bestelling</li>
-   <li>Het sturen van orderbevestigingen en verzendupdates</li>
-   <li>Klantenservice en het beantwoorden van je vragen</li>
-   <li>Wettelijke verplichtingen (facturatie, belastingaangifte)</li>
-   <li>Verbetering van onze website en diensten (analyse)</li>
-   <li>Marketing via e-mail (alleen met je expliciete toestemming)</li>
+   <li>Realizacja i dostarczenie Twojego zamówienia</li>
+   <li>Wysyłanie potwierdzeń zamówień i informacji o dostawie</li>
+   <li>Obsługa klienta i odpowiedzi na Twoje pytania</li>
+   <li>Obowiązki prawne (fakturowanie, rozliczenia podatkowe)</li>
+   <li>Ulepszanie naszej strony internetowej i usług (analityka)</li>
+   <li>Marketing e-mailowy (wyłącznie za Twoją wyraźną zgodą)</li>
   </ul>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 4 -->
+ <!-- Artykuł 4 -->
  <div class="section-block">
-  <h2><span class="section-num">4</span> Cookies &amp; tracking</h2>
-  <p>Onze website maakt gebruik van de volgende cookies en trackingtools:</p>
+  <h2><span class="section-num">4</span> Pliki cookies i śledzenie</h2>
+  <p>Nasza strona internetowa wykorzystuje następujące pliki cookies i narzędzia śledzące:</p>
 
   <table class="data-table">
    <thead>
     <tr>
-     <th>Tool</th>
-     <th>Doel</th>
-     <th>Type</th>
+     <th>Narzędzie</th>
+     <th>Cel</th>
+     <th>Typ</th>
     </tr>
    </thead>
    <tbody>
-    <tr><td>Facebook Pixel (Meta)</td><td>Advertentiemeting &amp; remarketing</td><td>Marketing</td></tr>
-    <tr><td>Stripe</td><td>Betalingsverwerking</td><td>Noodzakelijk</td></tr>
-    <tr><td>Mollie</td><td>Betalingsverwerking</td><td>Noodzakelijk</td></tr>
-    <tr><td>Sessie-cookie</td><td>Winkelwagen onthouden</td><td>Functioneel</td></tr>
+    <tr><td>Facebook Pixel (Meta)</td><td>Pomiar reklam i remarketing</td><td>Marketingowy</td></tr>
+    <tr><td>Stripe</td><td>Obsługa płatności</td><td>Niezbędny</td></tr>
+    <tr><td>Cookie sesji</td><td>Zapamiętanie koszyka</td><td>Funkcjonalny</td></tr>
    </tbody>
   </table>
 
   <div class="highlight-box">
-   <p><strong>Marketing cookies:</strong> Facebook Pixel wordt alleen geplaatst als je hiermee instemt via de cookiemelding. Je kunt je toestemming op elk moment intrekken.</p>
+   <p><strong>Pliki cookies marketingowe:</strong> Facebook Pixel jest umieszczany tylko po wyrażeniu zgody za pomocą komunikatu o plikach cookies. Możesz w każdej chwili wycofać swoją zgodę.</p>
   </div>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 5 -->
+ <!-- Artykuł 5 -->
  <div class="section-block">
-  <h2><span class="section-num">5</span> Delen met derden</h2>
-  <p>Wij delen je gegevens uitsluitend met de volgende partijen, voor de hieronder genoemde doeleinden:</p>
+  <h2><span class="section-num">5</span> Udostępnianie danych podmiotom trzecim</h2>
+  <p>Udostępniamy Twoje dane wyłącznie następującym podmiotom, w celach wskazanych poniżej:</p>
   <ul>
-   <li><strong>Stripe / Mollie</strong> — betalingsverwerking</li>
-   <li><strong>Verzendpartner (Dextrum)</strong> — bezorging van je bestelling</li>
-   <li><strong>MailerLite</strong> — e-mailmarketing (alleen met jouw toestemming)</li>
-   <li><strong>Facebook (Meta)</strong> — advertentiemeting (via Pixel, met cookie-toestemming)</li>
-   <li><strong>Fakturoid</strong> — facturatie en boekhouding</li>
+   <li><strong>Stripe</strong> — obsługa płatności</li>
+   <li><strong>Partner kurierski (Dextrum)</strong> — dostarczenie Twojego zamówienia</li>
+   <li><strong>MailerLite</strong> — marketing e-mailowy (wyłącznie za Twoją zgodą)</li>
+   <li><strong>Facebook (Meta)</strong> — pomiar reklam (przez Pixel, za zgodą na cookies)</li>
+   <li><strong>Fakturoid</strong> — fakturowanie i księgowość</li>
   </ul>
-  <p>Wij verkopen je gegevens <strong>nooit</strong> aan derden.</p>
+  <p><strong>Nigdy</strong> nie sprzedajemy Twoich danych podmiotom trzecim.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 6 -->
+ <!-- Artykuł 6 -->
  <div class="section-block">
-  <h2><span class="section-num">6</span> Beveiliging</h2>
-  <p>Wij nemen de bescherming van je gegevens serieus en treffen passende maatregelen:</p>
+  <h2><span class="section-num">6</span> Bezpieczeństwo</h2>
+  <p>Poważnie podchodzimy do ochrony Twoich danych i stosujemy odpowiednie środki zabezpieczające:</p>
   <ul>
-   <li>SSL/TLS-versleuteling op alle pagina's</li>
-   <li>Veilige opslag van gegevens in EU-datacenters</li>
-   <li>Beperkte toegang tot persoonsgegevens (need-to-know basis)</li>
-   <li>Regelmatige beveiligingsupdates</li>
-   <li>PCI DSS-conforme betalingsverwerking via Stripe/Mollie</li>
+   <li>Szyfrowanie SSL/TLS na wszystkich stronach</li>
+   <li>Bezpieczne przechowywanie danych w centrach danych w UE</li>
+   <li>Ograniczony dostęp do danych osobowych (zasada need-to-know)</li>
+   <li>Regularne aktualizacje bezpieczeństwa</li>
+   <li>Obsługa płatności zgodna z PCI DSS przez Stripe</li>
   </ul>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 7 -->
+ <!-- Artykuł 7 -->
  <div class="section-block">
-  <h2><span class="section-num">7</span> Jouw rechten (AVG/GDPR)</h2>
+  <h2><span class="section-num">7</span> Twoje prawa (RODO/GDPR)</h2>
 
   <div class="rights-box">
-   <h3>Je hebt de volgende rechten:</h3>
+   <h3>Przysługują Ci następujące prawa:</h3>
    <ul class="rights-list">
-    <li><span class="icon">👁</span> <strong>Recht op inzage</strong> — Je kunt opvragen welke gegevens wij van je hebben</li>
-    <li><span class="icon">✏️</span> <strong>Recht op correctie</strong> — Je kunt onjuiste gegevens laten aanpassen</li>
-    <li><span class="icon">🗑</span> <strong>Recht op verwijdering</strong> — Je kunt vragen om verwijdering van je gegevens</li>
-    <li><span class="icon">📦</span> <strong>Recht op overdracht</strong> — Je kunt een kopie van je gegevens opvragen</li>
-    <li><span class="icon">🚫</span> <strong>Recht op bezwaar</strong> — Je kunt bezwaar maken tegen bepaalde verwerkingen</li>
-    <li><span class="icon">⏸</span> <strong>Recht op beperking</strong> — Je kunt vragen om beperking van de verwerking</li>
+    <li><span class="icon">👁</span> <strong>Prawo dostępu</strong> — Możesz zażądać informacji o tym, jakie dane o Tobie posiadamy</li>
+    <li><span class="icon">✏️</span> <strong>Prawo do sprostowania</strong> — Możesz zażądać poprawienia nieprawidłowych danych</li>
+    <li><span class="icon">🗑</span> <strong>Prawo do usunięcia</strong> — Możesz zażądać usunięcia swoich danych</li>
+    <li><span class="icon">📦</span> <strong>Prawo do przenoszenia danych</strong> — Możesz zażądać kopii swoich danych</li>
+    <li><span class="icon">🚫</span> <strong>Prawo do sprzeciwu</strong> — Możesz sprzeciwić się przetwarzaniu swoich danych w określonych celach</li>
+    <li><span class="icon">⏸</span> <strong>Prawo do ograniczenia przetwarzania</strong> — Możesz zażądać ograniczenia przetwarzania danych</li>
    </ul>
   </div>
 
-  <p>Om je rechten uit te oefenen, stuur een e-mail naar <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a>. We reageren binnen 30 dagen.</p>
+  <p>Aby skorzystać ze swoich praw, wyślij wiadomość e-mail na adres <a href="mailto:anna@najpierw-ja.pl" style="color: var(--cta);">anna@najpierw-ja.pl</a>. Odpowiemy w ciągu 30 dni.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 8 -->
+ <!-- Artykuł 8 -->
  <div class="section-block">
-  <h2><span class="section-num">8</span> E-mailmarketing</h2>
-  <p>Als je je hebt aangemeld voor onze nieuwsbrief of toestemming hebt gegeven bij het afrekenen, kun je e-mails van ons ontvangen over:</p>
+  <h2><span class="section-num">8</span> Marketing e-mailowy</h2>
+  <p>Jeśli zapisałeś/aś się do naszego newslettera lub wyraziłeś/aś zgodę przy składaniu zamówienia, możesz otrzymywać od nas wiadomości e-mail dotyczące:</p>
   <ul>
-   <li>Nieuwe boeken en producten</li>
-   <li>Exclusieve aanbiedingen en kortingen</li>
-   <li>Tips en inspiratie gerelateerd aan onze boeken</li>
+   <li>Nowych książek i produktów</li>
+   <li>Ekskluzywnych ofert i rabatów</li>
+   <li>Wskazówek i inspiracji związanych z naszymi książkami</li>
   </ul>
-  <p>Je kunt je op elk moment uitschrijven via de link onderaan elke e-mail. Na uitschrijving verwijderen we je e-mailadres uit onze marketinglijst.</p>
+  <p>W każdej chwili możesz wypisać się za pomocą linku na dole każdej wiadomości e-mail. Po wypisaniu się usuniemy Twój adres e-mail z naszej listy marketingowej.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 9 -->
+ <!-- Artykuł 9 -->
  <div class="section-block">
-  <h2><span class="section-num">9</span> Toezichthouder</h2>
-  <p>Als je een klacht hebt over de verwerking van je persoonsgegevens, kun je contact opnemen met de toezichthoudende autoriteit:</p>
+  <h2><span class="section-num">9</span> Organ nadzorczy</h2>
+  <p>Jeśli masz skargę dotyczącą przetwarzania Twoich danych osobowych, możesz skontaktować się z organem nadzorczym:</p>
   <div class="highlight-box">
-   <p><strong>Autoriteit Persoonsgegevens (NL)</strong><br>
-   Website: <a href="https://autoriteitpersoonsgegevens.nl" target="_blank" style="color: var(--cta);">autoriteitpersoonsgegevens.nl</a></p>
+   <p><strong>Urząd Ochrony Danych Osobowych (UODO)</strong><br>
+   Strona internetowa: <a href="https://www.uodo.gov.pl" target="_blank" style="color: var(--cta);">uodo.gov.pl</a></p>
   </div>
   <div class="highlight-box" style="margin-top: 12px;">
-   <p><strong>ÚOOÚ (Tsjechische Republiek)</strong><br>
-   Website: <a href="https://www.uoou.cz" target="_blank" style="color: var(--cta);">uoou.cz</a></p>
+   <p><strong>ÚOOÚ (Czechy)</strong><br>
+   Strona internetowa: <a href="https://www.uoou.cz" target="_blank" style="color: var(--cta);">uoou.cz</a></p>
   </div>
  </div>
 
  <div class="divider"></div>
 
- <!-- Artikel 10 -->
+ <!-- Artykuł 10 -->
  <div class="section-block">
-  <h2><span class="section-num">10</span> Wijzigingen</h2>
-  <p>Wij behouden ons het recht voor dit privacybeleid te wijzigen. De meest recente versie is altijd beschikbaar op deze pagina.</p>
+  <h2><span class="section-num">10</span> Zmiany</h2>
+  <p>Zastrzegamy sobie prawo do zmiany niniejszej polityki prywatności. Najnowsza wersja jest zawsze dostępna na tej stronie.</p>
  </div>
 
  <div class="info-box" style="margin-top: 48px; background: linear-gradient(135deg, var(--light), var(--section));">
-  <h3>📅 Laatste update</h3>
-  <p>Dit privacybeleid is voor het laatst bijgewerkt op 29 maart 2026.</p>
+  <h3>📅 Ostatnia aktualizacja</h3>
+  <p>Ostatnia aktualizacja: 8 marca 2026.</p>
  </div>
 
 </div>
@@ -471,21 +495,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <footer class="site-footer">
  <div class="footer-inner">
   <div class="footer-brand">
+   <img src="/najpierw-ja-logo-white.png" alt="Życie, jakiego nigdy sobie nie pozwoliłaś" height="48">
+   <div class="footer-brand-text">Życie, jakiego nigdy<br>sobie nie pozwoliłaś</div>
   </div>
   <div class="footer-links">
-   <a href="voorwaarden.html">Algemene Voorwaarden</a>
-   <a href="verzending.html">Verzending &amp; Retour</a>
-   <a href="privacy.html">Privacybeleid</a>
-   <a href="contact.html">Contact</a>
+   <a href="regulamin.html">Regulamin</a>
+   <a href="wysylka.html">Wysyłka i Dostawa</a>
+   <a href="zwroty.html">Zwroty i Gwarancja</a>
+   <a href="prywatnosc.html">Polityka prywatności</a>
+   <a href="kontakt.html">Kontakt</a>
   </div>
   <div class="footer-contact">
-   <a href="mailto:annadevries@pakjeleventerug.nl">📧 annadevries@pakjeleventerug.nl</a>
+   <a href="mailto:anna@najpierw-ja.pl">📧 anna@najpierw-ja.pl</a>
    <a href="tel:+420732915755">📞 +420 732 915 755</a>
   </div>
  </div>
  <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, Staré Město, 110 00 Praha • IČO: 06259928 • DIČ: CZ06259928</span>
-  <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle rechten voorbehouden.</span>
+  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, 110 00 Praga 1, Czechy • NIP: 06259928</span>
+  <span>&copy; 2026 Performance Marketing Solution s.r.o. Wszelkie prawa zastrzeżone.</span>
  </div>
 </footer>
 
@@ -495,6 +522,12 @@ function toggleMobileMenu() {
  document.querySelector('.nav-mobile-menu').classList.toggle('open');
  document.querySelector('.nav-mobile-overlay').classList.toggle('open');
 }
+</script>
+<script>
+window.addEventListener('load', function() {
+ var preloader = document.getElementById('preloader');
+ if (preloader) { setTimeout(function() { preloader.classList.add('loaded'); }, 400); }
+});
 </script>
 </body>
 </html>
