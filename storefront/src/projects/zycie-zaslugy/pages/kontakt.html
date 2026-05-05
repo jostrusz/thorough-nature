@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact — Het Leven Dat Je Verdient</title>
-<meta name="description" content="Neem contact met ons op voor vragen over je bestelling, het boek of ons retourbeleid.">
+<title>Kontakt — Życie, jakiego nigdy sobie nie pozwoliłaś</title>
+<meta name="description" content="Skontaktuj się z nami w sprawie zamówienia, książki lub naszej polityki zwrotów.">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" type="image/png" sizes="32x32" href="/life-reset-favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="/life-reset-favicon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/life-reset-favicon-180.png"><link rel="shortcut icon" href="/life-reset-favicon.png">
+<link rel="icon" href="/favicon.png" type="image/png">
 
 <!-- ═══ FONTS ═══ -->
 <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
@@ -23,18 +23,18 @@
 
 /* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
 :root {
- --bg: #FFF8F3;
- --heading: #4A1A2E;
- --cta: #B85C4A;
- --section: #F0D5C4;
- --body: #6B3344;
- --highlight: #E8A88C;
- --dark: #3D1E2A;
+ --bg: #FAF5F8;
+ --heading: #2D1B3D;
+ --cta: #C27BA0;
+ --section: #EDD9E5;
+ --body: #5A3D6B;
+ --highlight: #D9A4C0;
+ --dark: #1A1028;
  --white: #FFFFFF;
- --light: #FDF5EF;
- --muted: #9B6B7A;
- --cta-hover: #A04A38;
- --accent: #D4916A;
+ --light: #F5EDF2;
+ --muted: #9B7AAD;
+ --cta-hover: #A8628A;
+ --accent: #D498B5;
 }
 
 /* ═══ RESET ═══ */
@@ -50,7 +50,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  position: sticky;
  top: 0;
  z-index: 1000;
- box-shadow: 0 2px 12px rgba(74, 26, 46, 0.06);
+ box-shadow: 0 2px 12px rgba(45, 27, 61, 0.06);
 }
 .nav-inner {
  max-width: 1050px;
@@ -112,13 +112,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  border-radius: 8px;
  text-decoration: none !important;
  transition: all 0.25s ease;
- box-shadow: 0 3px 12px rgba(184, 92, 74, 0.2);
+ box-shadow: 0 3px 12px rgba(194, 123, 160, 0.2);
 }
 .nav-cta:hover {
  background: var(--cta-hover) !important;
  color: var(--white) !important;
  transform: translateY(-1px);
- box-shadow: 0 5px 18px rgba(184, 92, 74, 0.35);
+ box-shadow: 0 5px 18px rgba(194, 123, 160, 0.35);
 }
 .nav-cta::after { display: none !important; }
 .nav-hamburger {
@@ -156,7 +156,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  right: 0;
  background: var(--white);
  padding: 24px 20px;
- box-shadow: 0 8px 24px rgba(74, 26, 46, 0.12);
+ box-shadow: 0 8px 24px rgba(45, 27, 61, 0.12);
  z-index: 1000;
  flex-direction: column;
  gap: 0;
@@ -203,7 +203,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 /* ═══ CONTENT STRÁNKY ═══ */
 .page-header {
- background: linear-gradient(135deg, var(--dark) 0%, #4A1A2E 50%, #5C2838 100%);
+ background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
  padding: 56px 20px 48px;
  text-align: center;
 }
@@ -225,7 +225,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .page-header .badge {
  display: inline-block;
- background: rgba(184, 92, 74, 0.2);
+ background: rgba(194, 123, 160, 0.2);
  color: var(--accent);
  font-family: 'DM Sans', sans-serif;
  font-size: 13px;
@@ -248,7 +248,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  border: 1px solid var(--section);
  border-radius: 20px;
  padding: 40px;
- box-shadow: 0 4px 20px rgba(74, 26, 46, 0.06);
+ box-shadow: 0 4px 20px rgba(45, 27, 61, 0.06);
  margin-bottom: 32px;
 }
 .contact-card h2 {
@@ -337,7 +337,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .service-card:hover {
  transform: translateY(-3px);
- box-shadow: 0 8px 24px rgba(74, 26, 46, 0.08);
+ box-shadow: 0 8px 24px rgba(45, 27, 61, 0.08);
  border-color: var(--highlight);
 }
 .service-card .icon {
@@ -451,25 +451,48 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .page-header { padding: 40px 16px 36px; }
  .page-content { padding: 32px 16px 60px; }
 }
+
+/* ═══ PRELOADER ═══ */
+.preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.6s cubic-bezier(.4,0,.2,1), visibility 0.6s; }
+.preloader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
+.preloader-logo-container { position: relative; display: inline-block; overflow: hidden; border-radius: 16px; }
+.preloader-logo-container img { max-width: 280px; width: auto; height: auto; object-fit: contain; display: block; filter: drop-shadow(0 4px 20px rgba(194, 123, 160, 0.25)); }
+.preloader-logo-container::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0) 70%, transparent 100%); animation: preloaderShine 2s ease-in-out infinite; }
+@keyframes preloaderShine { 0% { left: -100%; } 60% { left: 150%; } 100% { left: 150%; } }
 </style>
 <script src="js/project-config.js"></script>
 <script src="js/pixel.js"></script>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "wegrfpuy1j");
+</script>
 </head>
 <body>
+
+<!-- ═══ PRELOADER ═══ -->
+<div class="preloader" id="preloader">
+ <div class="preloader-logo-container">
+  <img src="/slapp-taget-preloader.png" alt="Ładowanie..." class="preloader-logo">
+ </div>
+</div>
 
 <!-- ═══ NAVIGACE ═══ -->
 <nav class="site-nav">
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
-   <img src="het-leven-logo.png" alt="Het Leven Dat Je Verdient" width="150" height="40">
+   <img src="/najpierw-ja-logo.png" alt="Życie, jakiego nigdy sobie nie pozwoliłaś" width="150" height="40">
 
   </a>
   <div class="nav-links">
-   <a href="verzending.html">Verzending</a>
-   <a href="voorwaarden.html">Voorwaarden</a>
-   <a href="privacy.html">Privacy</a>
-   <a href="contact.html" class="active">Contact</a>
-   <a href="index.html" class="nav-cta">Bestel nu &rarr;</a>
+   <a href="wysylka.html">Wysyłka i Dostawa</a>
+   <a href="zwroty.html">Zwroty i Gwarancja</a>
+   <a href="regulamin.html">Regulamin</a>
+   <a href="prywatnosc.html">Polityka prywatności</a>
+   <a href="kontakt.html" class="active">Kontakt</a>
+   <a href="index.html" class="nav-cta">Zamów teraz &rarr;</a>
   </div>
   <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
    <span></span><span></span><span></span>
@@ -478,18 +501,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </nav>
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
- <a href="verzending.html">Verzending</a>
- <a href="voorwaarden.html">Voorwaarden</a>
- <a href="privacy.html">Privacy</a>
- <a href="contact.html">Contact</a>
- <a href="index.html" class="nav-cta-mobile">Bestel nu &rarr;</a>
+ <a href="wysylka.html">Wysyłka i Dostawa</a>
+ <a href="zwroty.html">Zwroty i Gwarancja</a>
+ <a href="regulamin.html">Regulamin</a>
+ <a href="prywatnosc.html">Polityka prywatności</a>
+ <a href="kontakt.html">Kontakt</a>
+ <a href="index.html" class="nav-cta-mobile">Zamów teraz &rarr;</a>
 </div>
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">💬 Klantenservice</div>
- <h1>Contact</h1>
- <p>Heb je een vraag over je bestelling, het boek of ons retourbeleid? We helpen je graag!</p>
+ <div class="badge">💬 Obsługa klienta</div>
+ <h1>Kontakt</h1>
+ <p>Masz pytanie dotyczące zamówienia, książki lub naszej polityki zwrotów? Chętnie pomożemy!</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
@@ -497,23 +521,23 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
  <!-- Kontaktní karta -->
  <div class="contact-card">
-  <h2>Neem contact met ons op</h2>
+  <h2>Skontaktuj się z nami</h2>
 
   <div class="contact-item">
    <div class="contact-icon">📧</div>
    <div class="contact-info">
     <h3>E-mail</h3>
-    <p><a href="mailto:annadevries@pakjeleventerug.nl">annadevries@pakjeleventerug.nl</a></p>
-    <p>Reactie binnen 24 uur op werkdagen</p>
+    <p><a href="mailto:anna@najpierw-ja.pl">anna@najpierw-ja.pl</a></p>
+    <p>Odpowiedź w ciągu 24 godzin w dni robocze</p>
    </div>
   </div>
 
   <div class="contact-item">
    <div class="contact-icon">📞</div>
    <div class="contact-info">
-    <h3>Telefoon</h3>
+    <h3>Telefon</h3>
     <p><a href="tel:+420732915755">+420 732 915 755</a></p>
-    <p>Ma–vr: 9:00 – 17:00 (CET)</p>
+    <p>Pon-Pt: 9:00 – 17:00 (CET)</p>
    </div>
   </div>
 
@@ -522,45 +546,44 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
    <div class="contact-info">
     <h3>Adres</h3>
     <p>Performance Marketing Solution s.r.o.<br>
-    Rybná 716/24, Staré Město<br>
-    110 00 Praha, Tsjechische Republiek</p>
+    Rybná 716/24<br>
+    110 00 Praga 1, Czechy</p>
    </div>
   </div>
  </div>
 
  <!-- Upozornění -->
  <div class="notice-box">
-  <h3>⏱ Reactietijd</h3>
-  <p>We doen ons best om alle vragen binnen <strong>24 uur</strong> te beantwoorden op werkdagen. In het weekend en op feestdagen kan de reactietijd iets langer zijn.</p>
+  <h3>⏱ Czas odpowiedzi</h3>
+  <p>Dokładamy wszelkich starań, aby odpowiedzieć na wszystkie pytania w ciągu <strong>24 godzin</strong> w dni robocze. W weekendy czas odpowiedzi może być nieco dłuższy.</p>
  </div>
 
  <!-- Služby -->
  <div class="service-grid">
   <div class="service-card">
    <span class="icon">📦</span>
-   <h3>Bestelling volgen</h3>
-   <p>Heb je je trackingcode ontvangen? Volg je pakket via de link in je bevestigingsmail.</p>
+   <h3>Śledź swoje zamówienie</h3>
+   <p>Otrzymałeś numer śledzenia? Sprawdź status swojej przesyłki za pomocą linku w e-mailu potwierdzającym.</p>
   </div>
   <div class="service-card">
    <span class="icon">🔄</span>
-   <h3>Retour aanvragen</h3>
-   <p>Niet tevreden? Stuur ons een e-mail met je ordernummer en reden voor retour.</p>
+   <h3>Złóż zwrot</h3>
+   <p>Nie jesteś zadowolony? Wyślij do nas e-mail z numerem zamówienia i powodem zwrotu.</p>
   </div>
   <div class="service-card">
    <span class="icon">💳</span>
-   <h3>Betaling &amp; Factuur</h3>
-   <p>Vragen over je betaling of een factuur nodig? Neem contact op met je ordernummer.</p>
+   <h3>Płatność i faktura</h3>
+   <p>Masz pytania dotyczące płatności lub potrzebujesz faktury? Skontaktuj się z nami, podając numer zamówienia.</p>
   </div>
  </div>
 
  <!-- Firemní údaje -->
  <div class="company-info">
-  <h3>🏢 Bedrijfsgegevens</h3>
+  <h3>🏢 Dane firmy</h3>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, Staré Město, 110 00 Praha, Tsjechische Republiek</p>
-  <p>IČO: 06259928</p>
-  <p>DIČ: CZ06259928</p>
-  <p>E-mail: <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a></p>
+  <p>Rybná 716/24, 110 00 Praga 1, Czechy</p>
+  <p>NIP: CZ06259928</p>
+  <p>E-mail: <a href="mailto:anna@najpierw-ja.pl" style="color: var(--cta);">anna@najpierw-ja.pl</a></p>
  </div>
 
 </div>
@@ -569,21 +592,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <footer class="site-footer">
  <div class="footer-inner">
   <div class="footer-brand">
+   <img src="/najpierw-ja-logo-white.png" alt="Życie, jakiego nigdy sobie nie pozwoliłaś" class="footer-logo" width="210" height="56">
+   <div class="footer-brand-text">Życie, jakiego nigdy<br>sobie nie pozwoliłaś</div>
   </div>
   <div class="footer-links">
-   <a href="voorwaarden.html">Algemene Voorwaarden</a>
-   <a href="verzending.html">Verzending &amp; Retour</a>
-   <a href="privacy.html">Privacybeleid</a>
-   <a href="contact.html">Contact</a>
+   <a href="wysylka.html">Wysyłka i Dostawa</a>
+   <a href="zwroty.html">Zwroty i Gwarancja</a>
+   <a href="regulamin.html">Regulamin</a>
+   <a href="prywatnosc.html">Polityka prywatności</a>
+   <a href="kontakt.html">Kontakt</a>
   </div>
   <div class="footer-contact">
-   <a href="mailto:annadevries@pakjeleventerug.nl">📧 annadevries@pakjeleventerug.nl</a>
+   <a href="mailto:anna@najpierw-ja.pl">📧 anna@najpierw-ja.pl</a>
    <a href="tel:+420732915755">📞 +420 732 915 755</a>
   </div>
  </div>
  <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, Staré Město, 110 00 Praha • IČO: 06259928 • DIČ: CZ06259928</span>
-  <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle rechten voorbehouden.</span>
+  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, 110 00 Praga 1, Czechy • NIP: CZ06259928</span>
+  <span>&copy; 2026 Performance Marketing Solution s.r.o. Wszelkie prawa zastrzeżone.</span>
  </div>
 </footer>
 
@@ -593,6 +619,12 @@ function toggleMobileMenu() {
  document.querySelector('.nav-mobile-menu').classList.toggle('open');
  document.querySelector('.nav-mobile-overlay').classList.toggle('open');
 }
+</script>
+<script>
+window.addEventListener('load', function() {
+ var preloader = document.getElementById('preloader');
+ if (preloader) { setTimeout(function() { preloader.classList.add('loaded'); }, 400); }
+});
 </script>
 </body>
 </html>

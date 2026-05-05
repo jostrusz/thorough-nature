@@ -47,10 +47,10 @@
     "": "index.html",
     "checkout": "checkout.html",
     "thank-you": "thank-you.html",
-    "contact": "contact.html",
-    "privacy": "privacy.html",
-    "voorwaarden": "voorwaarden.html",
-    "verzending": "verzending.html",
-    "retourbeleid": "retourbeleid.html"
+    "kontakt": "kontakt.html",
+    "prywatnosc": "prywatnosc.html",
+    "regulamin": "regulamin.html",
+    "wysylka": "wysylka.html",
+    "zwroty": "zwroty.html"
   }
 }
