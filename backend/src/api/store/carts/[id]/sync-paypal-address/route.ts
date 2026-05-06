@@ -149,8 +149,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     // Direct SQL on cart_address + cart. The cart already has shipping/billing
-    // address rows (customer filled the form before PayPal redirect) — overwrite
-    // with the payer/shipping data PayPal returned.
+    // address rows (customer filled the form before PayPal redirect). MERGE —
+    // never overwrite a non-empty existing field with an empty PayPal value.
+    // Customer-typed form data is more reliable than PayPal payer info, which
+    // is often partial for APMs like iDEAL/Bancontact (no phone, sometimes no
+    // address). The form data is the source of truth; PayPal only fills gaps.
     {
       const { Pool } = require("pg")
       const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
@@ -165,7 +168,22 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         }
         const { shipping_address_id, billing_address_id } = cartRows[0]
 
+        // Prefer existing (form-typed) value; fall back to PayPal value
+        const merge = (existing: any, ppValue: any) => {
+          const e = existing == null ? "" : String(existing).trim()
+          if (e) return existing
+          const p = ppValue == null ? "" : String(ppValue).trim()
+          return p || existing || ""
+        }
+
         if (shipping_address_id) {
+          const { rows: existingRows } = await pool.query(
+            `SELECT first_name, last_name, address_1, address_2, city, province,
+                    postal_code, country_code, phone
+               FROM cart_address WHERE id = $1`,
+            [shipping_address_id]
+          )
+          const existing = existingRows[0] || {}
           await pool.query(
             `UPDATE cart_address SET
                first_name = $1, last_name = $2, address_1 = $3, address_2 = $4,
@@ -173,11 +191,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
                phone = $9, updated_at = NOW()
              WHERE id = $10`,
             [
-              mappedShipping.first_name, mappedShipping.last_name,
-              mappedShipping.address_1, mappedShipping.address_2,
-              mappedShipping.city, mappedShipping.province,
-              mappedShipping.postal_code, mappedShipping.country_code,
-              mappedShipping.phone, shipping_address_id,
+              merge(existing.first_name, mappedShipping.first_name),
+              merge(existing.last_name, mappedShipping.last_name),
+              merge(existing.address_1, mappedShipping.address_1),
+              merge(existing.address_2, mappedShipping.address_2),
+              merge(existing.city, mappedShipping.city),
+              merge(existing.province, mappedShipping.province),
+              merge(existing.postal_code, mappedShipping.postal_code),
+              merge(existing.country_code, mappedShipping.country_code),
+              merge(existing.phone, mappedShipping.phone),
+              shipping_address_id,
             ]
           )
         } else {
@@ -187,6 +210,13 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         }
 
         if (billing_address_id) {
+          const { rows: existingRows } = await pool.query(
+            `SELECT first_name, last_name, address_1, address_2, city, province,
+                    postal_code, country_code, phone
+               FROM cart_address WHERE id = $1`,
+            [billing_address_id]
+          )
+          const existing = existingRows[0] || {}
           await pool.query(
             `UPDATE cart_address SET
                first_name = $1, last_name = $2, address_1 = $3, address_2 = $4,
@@ -194,11 +224,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
                phone = $9, updated_at = NOW()
              WHERE id = $10`,
             [
-              mappedBilling.first_name, mappedBilling.last_name,
-              mappedBilling.address_1, mappedBilling.address_2,
-              mappedBilling.city, mappedBilling.province,
-              mappedBilling.postal_code, mappedBilling.country_code,
-              mappedBilling.phone, billing_address_id,
+              merge(existing.first_name, mappedBilling.first_name),
+              merge(existing.last_name, mappedBilling.last_name),
+              merge(existing.address_1, mappedBilling.address_1),
+              merge(existing.address_2, mappedBilling.address_2),
+              merge(existing.city, mappedBilling.city),
+              merge(existing.province, mappedBilling.province),
+              merge(existing.postal_code, mappedBilling.postal_code),
+              merge(existing.country_code, mappedBilling.country_code),
+              merge(existing.phone, mappedBilling.phone),
+              billing_address_id,
             ]
           )
         } else {
@@ -207,9 +242,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           )
         }
 
+        // Email — only overwrite if the cart didn't already have one
         if (updateData.email) {
           await pool.query(
-            `UPDATE cart SET email = $1, updated_at = NOW() WHERE id = $2`,
+            `UPDATE cart SET email = COALESCE(NULLIF(email, ''), $1),
+                              updated_at = NOW()
+              WHERE id = $2`,
             [updateData.email, cartId]
           )
         } else {
