@@ -165,6 +165,9 @@ function FormDetailPage() {
         </button>
       </div>
 
+      <FormStatsCard formId={id} />
+
+
       <div className="mkt-card" style={{ padding: "20px", marginBottom: "16px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
           <div>
@@ -310,6 +313,151 @@ function FormDetailPage() {
       )}
     </MarketingShell>
   )
+}
+
+// ─── Funnel stats card ────────────────────────────────────────────────
+// Shown at the top of the form detail page. Pulls from
+// /admin/marketing/forms/:id/stats and renders a simple horizontal bar
+// chart for the K1→submit funnel + biggest drop-off + top custom answers.
+type StatsResponse = {
+  totals: {
+    views: number
+    step_1: number
+    step_2: number
+    step_3: number
+    step_4: number
+    submitted: number
+    conversion_rate: number
+  }
+  biggest_drop?: { from: string; to: string; dropoff_rate: number; dropped: number } | null
+  top_custom_answers?: Array<{ text: string; count: number }>
+  window: { days: number; since: string; until: string }
+}
+
+function FormStatsCard({ formId }: { formId: string | null }) {
+  const [days, setDays] = useState(30)
+  const { data, isLoading } = useQuery<StatsResponse>({
+    queryKey: ["mkt-form-stats", formId, days],
+    queryFn: () =>
+      sdk.client.fetch<StatsResponse>(`/admin/marketing/forms/${formId}/stats?days=${days}`, { method: "GET" }),
+    enabled: !!formId,
+    refetchInterval: 60_000,
+  })
+
+  if (!formId) return null
+
+  const t = data?.totals
+  const stages = t
+    ? [
+        { label: "Viewed", value: t.views },
+        { label: "K1 done", value: t.step_1 },
+        { label: "K2 done", value: t.step_2 },
+        { label: "K3 done", value: t.step_3 },
+        { label: "K4 done", value: t.step_4 },
+        { label: "Submitted", value: t.submitted },
+      ]
+    : []
+  const max = Math.max(1, ...stages.map((s) => s.value))
+  const conv = t && t.views > 0 ? `${(t.conversion_rate * 100).toFixed(2)} %` : "—"
+  const drop = data?.biggest_drop
+
+  return (
+    <div className="mkt-card" style={{ padding: "20px", marginBottom: "16px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+        <div>
+          <div style={{ fontSize: "13px", fontWeight: 700, color: tokens.fg }}>Funnel — last {days} days</div>
+          <div style={{ fontSize: "11px", color: tokens.fgSecondary, marginTop: "2px" }}>
+            {data?.window ? `${data.window.since} → ${data.window.until}` : " "}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: "6px" }}>
+          {[7, 30, 90].map((d) => (
+            <button
+              key={d}
+              className={d === days ? "mkt-btn-primary mkt-btn-sm" : "mkt-btn mkt-btn-sm"}
+              onClick={() => setDays(d)}
+            >
+              {d}d
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div style={{ color: tokens.fgSecondary, fontSize: "12px" }}>Loading stats…</div>
+      ) : !t ? (
+        <div style={{ color: tokens.fgSecondary, fontSize: "12px" }}>No data yet.</div>
+      ) : (
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+            <KpiBox label="Views" value={fmtNum(t.views)} />
+            <KpiBox label="Submissions" value={fmtNum(t.submitted)} sub={conv !== "—" ? conv : undefined} />
+            <KpiBox
+              label="Biggest drop"
+              value={drop ? `${(drop.dropoff_rate * 100).toFixed(0)} %` : "—"}
+              sub={drop ? `${drop.from} → ${drop.to}` : undefined}
+              warn={!!drop && drop.dropoff_rate > 0.5}
+            />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "16px" }}>
+            {stages.map((s) => {
+              const pct = (s.value / max) * 100
+              return (
+                <div key={s.label} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "12px" }}>
+                  <div style={{ width: "90px", color: tokens.fgSecondary, fontWeight: 600 }}>{s.label}</div>
+                  <div style={{ flex: 1, background: "#F1ECF0", borderRadius: "4px", height: "18px", overflow: "hidden" }}>
+                    <div
+                      style={{
+                        width: `${pct}%`,
+                        height: "100%",
+                        background: "linear-gradient(90deg, #8C2E54, #C9577A)",
+                        transition: "width 0.4s ease",
+                      }}
+                    />
+                  </div>
+                  <div style={{ width: "60px", textAlign: "right", fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
+                    {fmtNum(s.value)}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {data?.top_custom_answers && data.top_custom_answers.length > 0 && (
+            <div style={{ borderTop: `1px dashed ${tokens.border}`, paddingTop: "12px" }}>
+              <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: tokens.fgSecondary, marginBottom: "8px" }}>
+                Top custom K1 answers (✍️)
+              </div>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "4px" }}>
+                {data.top_custom_answers.map((row, i) => (
+                  <li key={i} style={{ display: "flex", justifyContent: "space-between", gap: "8px", fontSize: "12.5px", color: tokens.fg }}>
+                    <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>"{row.text}"</span>
+                    <span style={{ color: tokens.fgSecondary, fontVariantNumeric: "tabular-nums" }}>{row.count}×</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+function KpiBox({ label, value, sub, warn }: { label: string; value: string; sub?: string; warn?: boolean }) {
+  return (
+    <div style={{ background: warn ? "#FFF4F2" : "#FAF6F8", border: `1px solid ${warn ? "#F5C2BA" : tokens.border}`, borderRadius: "8px", padding: "12px 14px" }}>
+      <div style={{ fontSize: "10.5px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: tokens.fgSecondary }}>{label}</div>
+      <div style={{ fontSize: "22px", fontWeight: 700, color: warn ? "#A1281A" : tokens.fg, marginTop: "2px" }}>{value}</div>
+      {sub && <div style={{ fontSize: "11px", color: tokens.fgSecondary, marginTop: "2px" }}>{sub}</div>}
+    </div>
+  )
+}
+
+function fmtNum(n: number): string {
+  if (!Number.isFinite(n)) return "0"
+  return n.toLocaleString("nl-NL").replace(/,/g, " ")
 }
 
 export default FormDetailPage

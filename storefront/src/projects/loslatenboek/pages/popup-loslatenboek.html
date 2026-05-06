@@ -1232,9 +1232,59 @@ let state = {
 function $(sel) { return document.querySelector(sel); }
 function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
 
+// ─── Funnel tracking ─────────────────────────────────────────────────
+// Anonymous session id so the same visitor only counts once per popup
+// view. Stored in localStorage, regenerated when popup is reset.
+const POPUP_FORM_SLUG = "popup_quiz_loslatenboek";
+const POPUP_BRAND_SLUG = "loslatenboek";
+
+function getOrCreatePopupSession() {
+  try {
+    let sid = localStorage.getItem("popup_session_id");
+    if (!sid) {
+      sid = "ps_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      localStorage.setItem("popup_session_id", sid);
+    }
+    return sid;
+  } catch (e) {
+    return "ps_" + Math.random().toString(36).slice(2, 10);
+  }
+}
+
+// Fire-and-forget — never blocks the UI, never throws.
+// Each event carries form_slug so /admin/.../stats can aggregate by form.
+function trackPopupEvent(eventType, extraProps) {
+  if (!API_BASE) return;
+  try {
+    const body = JSON.stringify({
+      brand_slug: POPUP_BRAND_SLUG,
+      event_type: eventType,
+      properties: {
+        form_slug: POPUP_FORM_SLUG,
+        session_id: getOrCreatePopupSession(),
+        ...(extraProps || {}),
+      },
+    });
+    // keepalive: true ensures the request still goes out if the user
+    // navigates away immediately after triggering the event.
+    fetch(`${API_BASE}/public/marketing/track`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body,
+      keepalive: true,
+    }).catch(() => {});
+  } catch (e) { /* ignore */ }
+}
+
+let popupViewTracked = false;
+
 function openPopup() {
   $("#overlay").classList.add("open");
   document.body.style.overflow = "hidden";
+  if (!popupViewTracked) {
+    popupViewTracked = true;
+    trackPopupEvent("popup_viewed");
+  }
 }
 function closePopup() {
   $("#overlay").classList.remove("open");
@@ -1344,6 +1394,22 @@ function nextStep(n) {
     txt = q ? q.textContent.trim() : selected.textContent.trim();
   }
   state.texts[idx] = txt;
+
+  // Funnel beacon — fires when the user completes the CURRENT step
+  // (state.currentStep), not the upcoming one. Steps 1–4 only; the final
+  // submission is already recorded as form_submitted via /form-submit.
+  if (state.currentStep >= 1 && state.currentStep <= 4) {
+    const isCustom = (selected.dataset.value || "").startsWith("custom:") || selected.dataset.custom === "1";
+    trackPopupEvent(`popup_step_${state.currentStep}_completed`, {
+      step: state.currentStep,
+      slug: state.path[idx],
+      // Only include text on K1 — that's the highest-signal "what people
+      // actually wrote" data, especially for custom answers. Truncate
+      // defensively so the event payload stays small.
+      text: state.currentStep === 1 ? String(txt || "").slice(0, 240) : undefined,
+      is_custom: isCustom,
+    });
+  }
 
   // Build dynamic content for the upcoming step
   if (n === 2) buildStep2();
