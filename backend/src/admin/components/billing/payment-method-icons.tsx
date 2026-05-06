@@ -145,6 +145,7 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "sepa_debit", name: "SEPA Direct Debit", icon: "sepa", available_countries: [], supported_currencies: ["EUR"] },
     { code: "klarna", name: "Klarna", icon: "klarna", available_countries: ["nl", "be", "de", "at", "fi", "fr", "it", "se", "es", "dk", "no", "gb", "ie", "pt", "pl", "cz"], supported_currencies: [] },
     { code: "przelewy24", name: "Przelewy24", icon: "przelewy24", available_countries: ["pl"], supported_currencies: ["PLN", "EUR"] },
+    { code: "blik", name: "BLIK", icon: "blik", available_countries: ["pl"], supported_currencies: ["PLN"] },
     { code: "applepay", name: "Apple Pay", icon: "applepay", available_countries: [], supported_currencies: [] },
     { code: "googlepay", name: "Google Pay", icon: "googlepay", available_countries: [], supported_currencies: [] },
     { code: "revolut_pay", name: "Revolut Pay", icon: "revolut", available_countries: ["nl","be","de","at","fr","gb","ie","es","it","pt","fi","se","dk","no","pl","cz","ro","hu"], supported_currencies: ["EUR","GBP","PLN","RON","HUF","DKK","SEK","NOK","CZK"] },

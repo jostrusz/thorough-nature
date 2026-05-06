@@ -7752,6 +7752,153 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         // On the hosted page, guests see "Pay with Debit or Credit Card".
         // (handled by the generic redirect logic below — providerData.approvalUrl)
 
+        // ─── STRIPE BLIK INLINE FLOW ───
+        // BLIK on Stripe is inline (not redirect): customer enters 6-digit code,
+        // authorizes via push notification in their bank app. We then poll the
+        // PaymentIntent until 'succeeded' (max 90s) and complete the cart.
+        if (
+          selectedProviderId &&
+          selectedProviderId.indexOf('stripe') !== -1 &&
+          selectedMethod === 'blik' &&
+          providerData.clientSecret
+        ) {
+          return new Promise(function(resolve, reject) {
+            var pubKey = providerData.publishableKey;
+            if (!pubKey) {
+              var ccOpt = allPaymentOptions.find(function(m) { return m.code === 'creditcard' && m.provider === 'stripe'; });
+              pubKey = ccOpt && ccOpt.client_key;
+            }
+            if (!pubKey) { reject(new Error('Brak klucza publicznego Stripe.')); return; }
+
+            function ready() {
+              if (typeof window.Stripe === 'undefined') return setTimeout(ready, 300);
+              var stripe = window.Stripe(pubKey);
+              renderBlikModal(stripe);
+            }
+            ready();
+
+            function renderBlikModal(stripe) {
+              var modal = document.createElement('div');
+              modal.id = 'stripe-blik-modal';
+              modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;';
+              modal.innerHTML = '<div style="background:#fff;border-radius:12px;padding:32px;max-width:400px;width:90%;text-align:center;font-family:inherit;box-shadow:0 20px 60px rgba(0,0,0,0.3);">' +
+                '<img src="/Loga%20komplet/PL/blik.svg" alt="BLIK" style="height:36px;margin-bottom:16px;">' +
+                '<h3 style="margin:0 0 8px;font-size:20px;color:#1a1a1a;">Wpisz kod BLIK</h3>' +
+                '<p style="margin:0 0 20px;color:#666;font-size:14px;line-height:1.4;">Otwórz aplikację bankową, wygeneruj 6-cyfrowy kod BLIK i wpisz go poniżej.</p>' +
+                '<input type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" id="blik-code-input" placeholder="000000" autocomplete="off" style="width:100%;padding:14px;font-size:24px;text-align:center;letter-spacing:8px;border:2px solid #e1e3e5;border-radius:8px;margin-bottom:16px;font-family:monospace;box-sizing:border-box;">' +
+                '<button type="button" id="blik-submit" style="width:100%;padding:14px;background:#000;color:#fff;border:0;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;">Zapłać przez BLIK</button>' +
+                '<button type="button" id="blik-cancel" style="width:100%;padding:10px;background:transparent;color:#666;border:0;font-size:14px;cursor:pointer;margin-top:8px;">Anuluj</button>' +
+                '<div id="blik-status" style="margin-top:16px;font-size:14px;color:#666;display:none;line-height:1.4;"></div>' +
+                '</div>';
+              document.body.appendChild(modal);
+
+              var codeInput = document.getElementById('blik-code-input');
+              var submitBlik = document.getElementById('blik-submit');
+              var cancelBlik = document.getElementById('blik-cancel');
+              var statusEl = document.getElementById('blik-status');
+              codeInput.focus();
+              codeInput.addEventListener('input', function() { this.value = this.value.replace(/\D/g, ''); });
+
+              cancelBlik.addEventListener('click', function() {
+                modal.remove();
+                reject(new Error('Anulowano płatność BLIK.'));
+              });
+
+              function setStatus(text, isError) {
+                statusEl.style.display = 'block';
+                statusEl.style.color = isError ? '#c0392b' : '#666';
+                statusEl.textContent = text;
+              }
+
+              submitBlik.addEventListener('click', async function() {
+                var code = (codeInput.value || '').trim();
+                if (!/^[0-9]{6}$/.test(code)) {
+                  setStatus('Wpisz prawidłowy 6-cyfrowy kod BLIK.', true);
+                  return;
+                }
+                submitBlik.disabled = true;
+                submitBlik.textContent = 'Trwa przetwarzanie...';
+                setStatus('Wysyłanie kodu BLIK...', false);
+
+                var ba = customerData.billing_address || customerData.shipping_address || {};
+                var billingName = ((ba.first_name || '') + ' ' + (ba.last_name || '')).trim() || customerData.email || 'Customer';
+
+                try {
+                  var confirmRes = await stripe.confirmBlikPayment(providerData.clientSecret, {
+                    payment_method: {
+                      billing_details: { name: billingName, email: customerData.email },
+                    },
+                    payment_method_options: {
+                      blik: { code: code },
+                    },
+                  });
+
+                  if (confirmRes.error) {
+                    throw new Error(confirmRes.error.message || 'Płatność BLIK nie powiodła się.');
+                  }
+
+                  setStatus('Otwórz aplikację bankową i potwierdź płatność. Masz około 60 sekund.', false);
+
+                  var attempts = 0;
+                  var maxAttempts = 45; // 45 × 2s = 90s
+                  var poll = setInterval(async function() {
+                    attempts++;
+                    try {
+                      var pi = await stripe.retrievePaymentIntent(providerData.clientSecret);
+                      var s = pi.paymentIntent && pi.paymentIntent.status;
+                      if (s === 'succeeded') {
+                        clearInterval(poll);
+                        statusEl.style.color = '#16a34a';
+                        statusEl.textContent = 'Płatność zatwierdzona. Finalizujemy zamówienie...';
+                        if (!document.querySelector('.payment-preloader')) {
+                          var pre = document.createElement('div');
+                          pre.className = 'payment-preloader';
+                          pre.innerHTML = '<div class="pp-logowrap"><div class="pp-glow"></div><div class="pp-ring"></div><img src="/life-reset-preloader.webp" alt="LIFE RESET™" width="140" height="140"></div><div class="pp-brand">Życie, jakiego nigdy sobie nie pozwoliłaś</div><div class="pp-bar"><span></span></div><p>Trwa przetwarzanie płatności...</p>';
+                          document.body.insertBefore(pre, document.body.firstChild);
+                        }
+                        modal.remove();
+                        try {
+                          var completeRes = await medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' });
+                          var order = window.__extractOrderOrThrow(completeRes);
+                          localStorage.setItem('medusa_order_id', order.id || '');
+                          localStorage.setItem('medusa_order_display_id', order.display_id || '');
+                          if (PROJECT_CONFIG.upsellEnabled === false) {
+                            window.location.href = PROJECT_CONFIG.thankYouUrl;
+                          } else if (checkoutOrderBump) {
+                            localStorage.setItem('medusa_upsell_purchased', 'true');
+                            window.location.href = PROJECT_CONFIG.thankYouUrl;
+                          } else {
+                            window.location.href = PROJECT_CONFIG.upsellUrl;
+                          }
+                          resolve();
+                        } catch (e) { reject(e); }
+                        return;
+                      }
+                      if (s === 'requires_payment_method' || s === 'canceled') {
+                        clearInterval(poll);
+                        setStatus('Płatność BLIK nie powiodła się lub została anulowana.', true);
+                        submitBlik.disabled = false;
+                        submitBlik.textContent = 'Spróbuj ponownie';
+                        return;
+                      }
+                      if (attempts >= maxAttempts) {
+                        clearInterval(poll);
+                        setStatus('Czas na potwierdzenie minął. Spróbuj ponownie.', true);
+                        submitBlik.disabled = false;
+                        submitBlik.textContent = 'Spróbuj ponownie';
+                      }
+                    } catch (e) { /* keep polling on transient errors */ }
+                  }, 2000);
+                } catch (err) {
+                  setStatus(err.message || 'Błąd płatności BLIK.', true);
+                  submitBlik.disabled = false;
+                  submitBlik.textContent = 'Spróbuj ponownie';
+                }
+              });
+            }
+          });
+        }
+
         // ─── AIRWALLEX DROP-IN FLOW ───
         // Airwallex uses Drop-in Element for card, bancontact, and other methods
         if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1 && providerData.intentId) {

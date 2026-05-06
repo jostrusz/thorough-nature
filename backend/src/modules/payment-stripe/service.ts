@@ -29,6 +29,7 @@ const METHOD_MAP: Record<string, string> = {
   klarna: "klarna",
   eps: "eps",
   przelewy24: "p24",
+  blik: "blik",
   applepay: "card",
   googlepay: "card",
   revolut_pay: "revolut_pay",
@@ -39,6 +40,12 @@ const METHOD_MAP: Record<string, string> = {
  * Redirect-based methods that require server-side confirm
  */
 const REDIRECT_METHODS = ["ideal", "bancontact", "klarna", "eps", "p24", "revolut_pay"]
+
+/**
+ * Inline methods — created without confirm, finished by client-side stripe.confirmXxxPayment.
+ * BLIK: customer enters 6-digit code, then authorizes in bank app push notification.
+ */
+const INLINE_CONFIRM_METHODS = ["blik"]
 
 /**
  * Maps Stripe PaymentIntent statuses to Medusa payment session statuses
@@ -323,10 +330,32 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
         },
       }
 
+      const isInlineConfirmMethod = INLINE_CONFIRM_METHODS.includes(stripeMethodType)
+
+      // BLIK: PLN only per Stripe spec — fail fast with clear error
+      if (stripeMethodType === "blik" && currency_code.toLowerCase() !== "pln") {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `BLIK only supports PLN currency, got ${currency_code.toUpperCase()}`
+        )
+      }
+
+      // For inline-confirm methods (BLIK), create PaymentIntent WITHOUT confirm.
+      // Frontend completes via stripe.confirmBlikPayment(clientSecret, { ...code }).
+      // No return_url, no payment_method_data — client provides those at confirm time.
+
       // For redirect methods, add return_url and confirm server-side
       const isRedirectMethod = REDIRECT_METHODS.includes(stripeMethodType)
 
       if (isRedirectMethod && returnUrl) {
+        // P24 requires email per Stripe spec — fail fast with clear error
+        if (stripeMethodType === "p24" && !customerEmail) {
+          throw new MedusaError(
+            MedusaError.Types.INVALID_DATA,
+            "Przelewy24 (P24) payment requires customer email"
+          )
+        }
+
         piParams.confirm = true
         piParams.return_url = returnUrl
 
@@ -344,6 +373,17 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
             name: billingName,
             email: customerEmail || undefined,
           },
+        }
+
+        // P24-specific: Stripe requires tos_shown_and_accepted=true (regulatory consent).
+        // Without this, PaymentIntent confirmation fails per:
+        // https://docs.stripe.com/payments/p24/accept-a-payment
+        // The TOS notice must be displayed to the buyer on the storefront checkout
+        // (Polish: "Oświadczam, że zapoznałem się z regulaminem ... serwisu Przelewy24.").
+        if (stripeMethodType === "p24") {
+          piParams.payment_method_options = {
+            p24: { tos_shown_and_accepted: true },
+          }
         }
 
         // Note: preferred_locale for iDEAL was removed from Stripe API
