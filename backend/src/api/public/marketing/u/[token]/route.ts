@@ -1,4 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Pool } from "pg"
 import { MARKETING_MODULE } from "../../../../../modules/marketing"
 import type MarketingModuleService from "../../../../../modules/marketing/service"
 import { verifyToken } from "../../../../../modules/marketing/utils/tokens"
@@ -112,6 +113,36 @@ async function unsubscribe(
       logger.warn(`[Unsubscribe] suppression insert failed for ${email}: ${err?.message || err}`)
     }
     // either way, continue — desired state is already in place if dup
+  }
+
+  // ─── 2b. Eagerly exit any active flow runs for this contact ──────────
+  // The flow-executor already has a hygiene check ([marketing-flow-executor
+  // .ts]) that exits runs whose contact is unsubscribed/bounced/etc. — but
+  // it only fires on the next tick (when next_run_at elapses). Without
+  // this eager update, the admin contact detail shows "in flow" + status
+  // "unsubscribed" simultaneously for up to 24h, which is confusing.
+  // Direct SQL — service has no listMarketingFlowRuns by contact filter
+  // and this is a hot path we want to keep simple.
+  if (process.env.DATABASE_URL) {
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+    try {
+      await pool.query(
+        `UPDATE marketing_flow_run
+           SET state = 'exited',
+               exit_reason = 'unsubscribed',
+               completed_at = NOW(),
+               next_run_at = NULL,
+               updated_at = NOW()
+         WHERE contact_id = $1
+           AND state IN ('running', 'waiting')
+           AND deleted_at IS NULL`,
+        [contact.id]
+      )
+    } catch (err: any) {
+      logger.warn(`[Unsubscribe] flow-run eager exit failed for ${contact.id}: ${err?.message || err}`)
+    } finally {
+      await pool.end().catch(() => {})
+    }
   }
 
   // ─── 3. Consent log (append-only audit trail) ─────────────────────────
