@@ -26,6 +26,13 @@ const ALLOWED_EVENTS = new Set([
   "product_viewed",
   "subscribed_via_form",
   "form_submitted",
+  // Funnel events for popup / multi-step forms. The form id is carried in
+  // payload.form_id so /admin/marketing/forms/:id/stats can aggregate by form.
+  "popup_viewed",
+  "popup_step_1_completed",
+  "popup_step_2_completed",
+  "popup_step_3_completed",
+  "popup_step_4_completed",
 ])
 
 // ── Rate limit bucket: ip → { count, resetAt } ──
