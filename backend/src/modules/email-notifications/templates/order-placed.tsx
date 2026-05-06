@@ -386,6 +386,110 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
           </div>
         </div>
 
+        {/* CROSS-SELL BANNER — Het Leven, jen pro loslatenboek brand */}
+        {order?.metadata?.project_id === 'loslatenboek' && (
+          <div style={{ padding: `28px ${pad} 0 ${pad}` }}>
+            <Text style={{
+              fontFamily: font,
+              fontSize: '11px',
+              fontWeight: 600,
+              textTransform: 'uppercase' as const,
+              letterSpacing: '1.5px',
+              color: '#9B7AAD',
+              margin: '0 0 12px',
+            }}>
+              Wanneer je klaar bent voor de volgende stap
+            </Text>
+            <div style={{
+              background: '#FAF6F2',
+              border: '1px solid #ECE2D6',
+              borderRadius: '10px',
+              padding: '24px',
+            }}>
+            <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{
+              borderCollapse: 'collapse' as const,
+            }}>
+              <tbody>
+                <tr>
+                  <td width="38%" valign="middle" style={{ paddingRight: '20px' }}>
+                    <a href="https://www.marketing-hq.eu/public/marketing/cx/het-leven-from-loslatenboek" style={{ display: 'block', textDecoration: 'none' }}>
+                      <img
+                        src="https://bucket-production-b93e.up.railway.app/medusa-media/Het-Leven-Dat-Je-Verdient-pichi-01KP5C4SYJB70KKQGNGJQKB9MT.png"
+                        alt="Het Leven Dat Je Verdient"
+                        width="180"
+                        style={{
+                          width: '100%',
+                          maxWidth: '180px',
+                          height: 'auto',
+                          display: 'block',
+                          borderRadius: '4px',
+                        }}
+                      />
+                    </a>
+                  </td>
+                  <td width="62%" valign="middle">
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '18px',
+                      fontWeight: 700,
+                      color: '#3a2d33',
+                      margin: '0 0 8px',
+                      lineHeight: '1.25',
+                    }}>
+                      Het Leven Dat Je Verdient
+                    </Text>
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '14px',
+                      color: '#6b5560',
+                      margin: '0 0 14px',
+                      lineHeight: '1.5',
+                      fontStyle: 'italic' as const,
+                    }}>
+                      Wat blijft er over als je hebt losgelaten?
+                    </Text>
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '13.5px',
+                      color: '#3a2d33',
+                      margin: '0 0 16px',
+                      lineHeight: '1.6',
+                    }}>
+                      Anna de Vries schreef dit boek over die ene vraag — hoe je de leegte vult met wat van <em>jóu</em> is, en welke stap je morgen kunt zetten.
+                    </Text>
+                    <Text style={{
+                      fontFamily: font,
+                      fontSize: '13px',
+                      color: '#3a2d33',
+                      margin: '0 0 16px',
+                      lineHeight: '1.5',
+                    }}>
+                      <strong>€35</strong> &middot; gratis verzending &middot; 30 dagen garantie
+                    </Text>
+                    <a
+                      href="https://www.marketing-hq.eu/public/marketing/cx/het-leven-from-loslatenboek"
+                      style={{
+                        display: 'inline-block',
+                        background: '#3a2d33',
+                        color: '#FFFFFF',
+                        textDecoration: 'none',
+                        padding: '11px 20px',
+                        borderRadius: '6px',
+                        fontFamily: font,
+                        fontSize: '13px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Lees verder →
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            </div>
+          </div>
+        )}
+
         {/* ADDRESSES */}
         <div style={{ padding: `24px ${pad} 0 ${pad}` }}>
           <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>

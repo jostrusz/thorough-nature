@@ -1640,6 +1640,40 @@ setTimeout(function() {
 <!-- Meta Pixel + CAPI tracking — script src is replaced by route.ts at request time with inline pixel -->
 <script src="js/project-config.js" defer></script>
 <script src="js/pixel.js" defer></script>
+
+<!-- ═══ UTM capture — saves utm_* params to localStorage on first visit ═══
+     Used by checkout to attribute order.metadata. 30-day persistence;
+     refreshed on every visit that contains utm_*. -->
+<script>
+(function () {
+  try {
+    var p = new URLSearchParams(window.location.search);
+    var keys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
+    var captured = {};
+    keys.forEach(function (k) { var v = p.get(k); if (v) captured[k] = v; });
+    if (Object.keys(captured).length > 0) {
+      captured.captured_at = Date.now();
+      captured.captured_url = window.location.href;
+      localStorage.setItem('hl_utm', JSON.stringify(captured));
+    }
+    window.lhUtm = {
+      get: function () {
+        try {
+          var raw = localStorage.getItem('hl_utm');
+          if (!raw) return {};
+          var data = JSON.parse(raw);
+          // 30-day expiry
+          if (!data.captured_at || Date.now() - data.captured_at > 30 * 86400000) {
+            localStorage.removeItem('hl_utm');
+            return {};
+          }
+          return data;
+        } catch (_) { return {}; }
+      },
+    };
+  } catch (_) { /* ignore */ }
+})();
+</script>
 </head>
 <body>
 <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;padding:8px 16px;background:var(--cta);color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;text-decoration:none;border-radius:4px;" onfocus="this.style.position='fixed';this.style.left='16px';this.style.top='16px';this.style.width='auto';this.style.height='auto';this.style.overflow='visible'" onblur="this.style.position='absolute';this.style.left='-9999px';this.style.width='1px';this.style.height='1px';this.style.overflow='hidden'">Ga naar inhoud</a>
