@@ -446,14 +446,22 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         ).slice(0, 127)
 
         if (method === "p24") {
-          // P24 uses LEGACY top-level application_context (per PayPal P24 Orders v2 docs).
-          // Putting redirect URLs inside payment_source.p24.experience_context causes
-          // PayPal to drop them silently → "payment_source_cannot_be_used" on redirect.
-          // See: https://developer.paypal.com/docs/checkout/apm/przelewy24/orders-api/
+          // P24 — MINIMAL payload per PayPal Orders v2 docs example
+          // (https://developer.paypal.com/docs/checkout/apm/przelewy24/orders-api/).
+          // Strips items, breakdown, shipping, description from purchase_units
+          // because P24 redirect rejected them with "payment_source_cannot_be_used"
+          // even with correct application_context structure.
+          const p24PurchaseUnits = [{
+            reference_id: purchaseUnit.reference_id,
+            amount: {
+              currency_code: currency,
+              value: totalValue,
+            },
+          }]
           orderData = {
             intent: "CAPTURE",
             processing_instruction: "ORDER_COMPLETE_ON_PAYMENT_APPROVAL",
-            purchase_units: purchaseUnits,
+            purchase_units: p24PurchaseUnits,
             payment_source: { p24: apmPaymentSource },
             application_context: {
               brand_name: brandName,
