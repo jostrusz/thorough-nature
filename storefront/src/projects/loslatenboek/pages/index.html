@@ -131,6 +131,7 @@
      <a href="checkout.html" class="btn-cta">Stuur boek + bonussen →</a>
     </div>
 
+
     <!-- Platební ikony -->
     <div class="payment-row anim d4">
      <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" width="40" height="32">
@@ -255,6 +256,55 @@
  </div>
 </div>
 
+<style>
+ .quiz-text-link-row { text-align: center; margin: 14px auto 0; font-size: 14px; color: #6b5560; font-family: Georgia, 'Times New Roman', serif; line-height: 1.5; max-width: 540px; }
+ .quiz-text-link-row > span { opacity: 0.8; }
+ .quiz-text-link {
+  background: none;
+  border: none;
+  padding: 0 0 2px 0;
+  margin-left: 6px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: #8C2E54;
+  cursor: pointer;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid rgba(140, 46, 84, 0.35);
+  transition: color 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
+ }
+ .quiz-text-link:hover { color: #6B2240; border-bottom-color: #6B2240; }
+ .quiz-text-link .quiz-arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+  animation: quiz-arrow-nudge 2.8s ease-in-out infinite;
+ }
+ .quiz-text-link:hover .quiz-arrow { transform: translateX(4px); animation: none; }
+ @keyframes quiz-arrow-nudge {
+  0%, 70%, 100% { transform: translateX(0); }
+  80% { transform: translateX(5px); }
+  90% { transform: translateX(2px); }
+ }
+ .quiz-text-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(140, 46, 84, 0.14) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: quiz-shimmer 5s ease-in-out infinite;
+  pointer-events: none;
+ }
+ @keyframes quiz-shimmer {
+  0%, 55% { transform: translateX(-100%); }
+  75% { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+ }
+</style>
+
 <!-- ═══════════════════════════════════════════
  SEKCE 3: 9 REDENEN WAAROM DIT BOEK JE LEVEN KAN VERANDEREN
  ═══════════════════════════════════════════ -->
@@ -315,6 +365,13 @@
   <!-- CTA + platební ikony -->
   <div class="redenen-cta">
    <a href="checkout.html" class="btn-cta">Krijg nu jouw exemplaar →</a>
+   <p class="quiz-text-link-row">
+    <span>Niet zeker of dit boek voor jou is?</span>
+    <button type="button" class="quiz-trigger quiz-text-link" data-source="after_cta_9redenen">
+     Doe de 2-minuten test
+     <span class="quiz-arrow">→</span>
+    </button>
+   </p>
    <div class="payment-row">
     <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" width="40" height="32">
     <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" width="40" height="32">
@@ -664,6 +721,13 @@
   <!-- CTA tlačítko -->
   <div class="verhaal-cta">
    <a href="checkout.html" class="btn-cta">Bezorg mij het boek →</a>
+   <p class="quiz-text-link-row">
+    <span>Niet zeker of dit boek voor jou is?</span>
+    <button type="button" class="quiz-trigger quiz-text-link" data-source="after_cta_verhaal">
+     Doe de 2-minuten test
+     <span class="quiz-arrow">→</span>
+    </button>
+   </p>
    <div class="payment-row">
     <img src="/icons/ideal.svg" alt="iDEAL" class="pay-icon" width="40" height="32">
     <img src="/icons/bancontact.svg" alt="Bancontact" class="pay-icon" width="40" height="32">
@@ -1771,6 +1835,112 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
     }
   });
 });
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     POPUP QUIZ EMBED — Loslatenboek
+     Triggery (whichever fires first):
+       1. CLICK   — element s class="quiz-trigger" / [data-quiz-trigger] (vždy, force=true)
+       2. SCROLL  — 50 % stránky (armed 1.5s po load, vyžaduje user-initiated scroll)
+       3. TIME    — 25s po loadu
+     Session-once: po prvním zobrazení v session další triggery nestřílí (popupShown).
+     Frequency cap: 3 dny v localStorage('lh_popup_seen').
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  const POPUP_URL  = '/popup-loslatenboek.html';
+  const COOKIE_KEY = 'lh_popup_seen';
+  const COOKIE_DAYS = 3;
+  const TIME_DELAY = 25000;
+  const SCROLL_PCT = 50;
+
+  let popupShown = false;
+  let popupIframe = null;
+
+  function hasSeen() {
+    try {
+      const raw = localStorage.getItem(COOKIE_KEY);
+      if (!raw) return false;
+      const ageDays = (Date.now() - JSON.parse(raw).ts) / 86400000;
+      return ageDays < COOKIE_DAYS;
+    } catch { return false; }
+  }
+  function markSeen() {
+    try { localStorage.setItem(COOKIE_KEY, JSON.stringify({ ts: Date.now() })); } catch {}
+  }
+  function closePopup(shouldMark) {
+    if (shouldMark) markSeen();
+    if (popupIframe) { popupIframe.remove(); popupIframe = null; }
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    document.removeEventListener('keydown', escHandler);
+  }
+  function escHandler(e) { if (e.key === 'Escape') closePopup(true); }
+  function showPopup(source, force) {
+    if (popupShown && !force) return;
+    if (hasSeen() && !force) return;
+    popupShown = true;
+    popupIframe = document.createElement('iframe');
+    popupIframe.src = POPUP_URL + '?src=' + encodeURIComponent(source);
+    popupIframe.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;border:none;z-index:99999;';
+    popupIframe.setAttribute('title', 'Quiz popup');
+    document.body.appendChild(popupIframe);
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', escHandler);
+    window.addEventListener('message', function handler(e) {
+      if (e.data && (e.data.type === 'popup_closed' || e.data.type === 'popup_submitted')) {
+        closePopup(true);
+        window.removeEventListener('message', handler);
+      }
+    });
+  }
+  // Safety: pokud někdo odstraní iframe manuálně (devtools / eval),
+  // uvolni scroll lock, aby se stránka nezasekla
+  new MutationObserver(() => {
+    if (popupIframe && !document.body.contains(popupIframe)) {
+      popupIframe = null;
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+  }).observe(document.body, { childList: true });
+  // expose for manual triggering from console / other scripts
+  window.lhShowPopup = (source) => showPopup(source || 'manual', true);
+
+  // 1. CLICK on .quiz-trigger / [data-quiz-trigger] — always force
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('.quiz-trigger, [data-quiz-trigger]');
+    if (t) {
+      e.preventDefault();
+      showPopup('button:' + (t.dataset.source || 'click'), true);
+    }
+  });
+
+  // 2. SCROLL — 50 % page height
+  // Zakážeme auto-restore scrollu, aby po reloadu nespustil popup okamžitě
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  let scrollFired = false;
+  let scrollArmed = false;
+  window.addEventListener('load', () => {
+    // Arm až 1.5s po load — vyhneme se trigger z restored scrollu po reloadu.
+    setTimeout(() => { scrollArmed = true; }, 1500);
+  });
+  document.addEventListener('scroll', () => {
+    if (!scrollArmed || scrollFired) return;
+    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    if (pct >= SCROLL_PCT) {
+      scrollFired = true;
+      showPopup('scroll_' + SCROLL_PCT + 'pct');
+    }
+  }, { passive: true });
+
+  // 3. TIME — 25s po loadu (whichever fires first; popupShown guard zajistí
+  //    že nestřílíme dvakrát pokud už scroll zavolal showPopup)
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      showPopup('time_' + Math.round(TIME_DELAY / 1000) + 's');
+    }, TIME_DELAY);
+  });
+})();
 </script>
 
 </body>
