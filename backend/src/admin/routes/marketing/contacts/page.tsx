@@ -1475,6 +1475,8 @@ function ContactDetailsPanel({ contact, onClose }: { contact: any; onClose: () =
           )}
         </div>
 
+        <ContactFlowRuns contactId={c.id} contactStatus={c.status} />
+
         {/* Activity timeline */}
         <div>
           <label className="mkt-label">Activity</label>
@@ -1666,6 +1668,161 @@ function describeActivity(event: any): { icon: string; color: string; title: str
     default:
       return { icon: "•", color: "#6B7280", title: t, detail: null }
   }
+}
+
+// ─── Flow runs widget for contact detail slide-over ───────────────────
+// Shows two things the admin previously couldn't tell:
+//   1. Which flows the contact is currently enrolled in (active runs)
+//   2. The next scheduled email (subject + when + flow), so you don't
+//      have to dig into the flow definition manually.
+//
+// When the contact is unsubscribed/bounced/etc., active waiting runs are
+// flagged — they'll auto-exit on the next executor tick (hygiene check
+// in marketing-flow-executor.ts), and we annotate that visibly so the
+// admin understands why "in flow" + "unsubscribed" can coexist briefly.
+type FlowRunActive = {
+  run_id: string
+  flow_id: string
+  flow_name: string
+  state: string
+  current_node_id: string | null
+  current_node_type: string | null
+  next_email_node_id: string | null
+  next_email_subject: string | null
+  next_run_at: string | null
+  started_at: string
+}
+type FlowRunHistory = {
+  run_id: string
+  flow_id: string
+  flow_name: string
+  state: string
+  exit_reason: string | null
+  started_at: string
+  completed_at: string | null
+}
+
+function ContactFlowRuns({ contactId, contactStatus }: { contactId: string; contactStatus: string }) {
+  const { data, isLoading } = useQuery<{ active: FlowRunActive[]; history: FlowRunHistory[] }>({
+    queryKey: ["mkt-contact-flow-runs", contactId],
+    queryFn: () =>
+      sdk.client.fetch<{ active: FlowRunActive[]; history: FlowRunHistory[] }>(
+        `/admin/marketing/contacts/${contactId}/flow-runs`,
+        { method: "GET" }
+      ),
+    enabled: !!contactId,
+  })
+
+  if (!contactId) return null
+  const active = data?.active || []
+  const history = data?.history || []
+  const isHygienable = ["unsubscribed", "bounced", "complained", "suppressed"].includes(contactStatus)
+
+  return (
+    <div>
+      <label className="mkt-label">Flow enrollment</label>
+      {isLoading ? (
+        <div style={{ fontSize: "13px", color: tokens.fgMuted }}>Loading…</div>
+      ) : active.length === 0 ? (
+        <div style={{ fontSize: "13px", color: tokens.fgMuted }}>Not enrolled in any active flow</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "4px" }}>
+          {active.map((run) => (
+            <div
+              key={run.run_id}
+              style={{
+                border: `1px solid ${tokens.border}`,
+                borderRadius: "8px",
+                padding: "12px 14px",
+                background: isHygienable ? "#FFF7F4" : "#FAF6F8",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                <span style={{ fontWeight: 700, color: tokens.fg, fontSize: "13.5px" }}>{run.flow_name || "Flow"}</span>
+                <span
+                  style={{
+                    fontSize: "10.5px",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    color: run.state === "waiting" ? "#8C2E54" : tokens.fgSecondary,
+                  }}
+                >
+                  {run.state}
+                </span>
+              </div>
+
+              {run.next_email_subject ? (
+                <div style={{ fontSize: "12.5px", color: tokens.fg, lineHeight: 1.45 }}>
+                  📨 <strong>Next email:</strong> „{run.next_email_subject}"
+                  {run.next_run_at && (
+                    <span style={{ color: tokens.fgSecondary, marginLeft: "6px" }}>
+                      · {fmtRelative(run.next_run_at)}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <div style={{ fontSize: "12px", color: tokens.fgSecondary }}>
+                  No upcoming email in this run.
+                </div>
+              )}
+
+              {isHygienable && (
+                <div
+                  style={{
+                    marginTop: "8px",
+                    fontSize: "11.5px",
+                    color: "#A1281A",
+                    background: "#FFF1ED",
+                    border: "1px solid #F5C2BA",
+                    borderRadius: "6px",
+                    padding: "6px 8px",
+                  }}
+                >
+                  ⚠️ Contact is <strong>{contactStatus}</strong> — this run will auto-exit on next executor tick. No further emails will be sent.
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {history.length > 0 && (
+        <details style={{ marginTop: "10px" }}>
+          <summary style={{ cursor: "pointer", fontSize: "12px", color: tokens.fgSecondary }}>
+            Flow history ({history.length})
+          </summary>
+          <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0 0", fontSize: "12px", color: tokens.fgSecondary }}>
+            {history.slice(0, 10).map((h) => (
+              <li key={h.run_id} style={{ padding: "4px 0", borderBottom: `1px dashed ${tokens.border}` }}>
+                <span style={{ color: tokens.fg, fontWeight: 600 }}>{h.flow_name || "Flow"}</span>
+                {" · "}
+                <span>{h.state}</span>
+                {h.exit_reason && <span> ({h.exit_reason})</span>}
+                {" · "}
+                <span>{new Date(h.started_at).toLocaleString()}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
+  )
+}
+
+function fmtRelative(iso: string): string {
+  const date = new Date(iso)
+  const ms = date.getTime() - Date.now()
+  const abs = Math.abs(ms)
+  const min = Math.round(abs / 60000)
+  const hr = Math.round(abs / 3600000)
+  const day = Math.round(abs / 86400000)
+  let rel: string
+  if (abs < 60_000) rel = ms > 0 ? "in a moment" : "just now"
+  else if (min < 60) rel = ms > 0 ? `in ${min} min` : `${min} min ago`
+  else if (hr < 24) rel = ms > 0 ? `in ${hr} h` : `${hr} h ago`
+  else rel = ms > 0 ? `in ${day} d` : `${day} d ago`
+  return `${rel} (${date.toLocaleString()})`
 }
 
 export const config = defineRouteConfig({
