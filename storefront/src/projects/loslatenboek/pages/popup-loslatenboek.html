@@ -692,7 +692,7 @@
         <button class="option" data-value="gedachten">
           <span class="option-icon">🌀</span>
           <span class="option-text">
-            <span class="option-quote">„V hlavě mi to nepřestává jet. Nemůžu to vypnout."</span>
+            <span class="option-quote">„Stále si přehrávám situaci z minulosti a nemůžu přestat."</span>
           </span>
           <span class="option-check"></span>
         </button>
@@ -706,7 +706,7 @@
         <button class="option" data-value="zelfbeeld">
           <span class="option-icon">🪞</span>
           <span class="option-text">
-            <span class="option-quote">„Připadám si málo. Pořád."</span>
+            <span class="option-quote">„Ať dělám cokoliv, nikdy to nestačí."</span>
           </span>
           <span class="option-check"></span>
         </button>
@@ -1493,6 +1493,14 @@ async function submitForm(e) {
       quiz_target:       state.path[1],   // K2 — specific person/thing (parent / breakup / ...)
       quiz_trigger:      state.path[2],   // K3 — when it surfaces (3am / morning / ...)
       quiz_own_sentence: state.path[3],   // K4 — inner voice / their own sentence
+      // Full human-readable sentences the user actually saw or typed.
+      // These are what we display in admin / use as inputs for AI prompts —
+      // slugs alone are unreadable and lose custom answers entirely.
+      quiz_texts:             state.texts,
+      quiz_area_text:         state.texts[0] || null,
+      quiz_target_text:       state.texts[1] || null,
+      quiz_trigger_text:      state.texts[2] || null,
+      quiz_own_sentence_text: state.texts[3] || null,
       // Backwards-compat for the previous AI generator field names.
       quiz_category:     state.path[0],
       quiz_subcategory:  state.path[1],
