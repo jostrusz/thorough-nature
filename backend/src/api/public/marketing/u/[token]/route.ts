@@ -42,63 +42,81 @@ async function unsubscribe(
   req: MedusaRequest,
   token: string
 ): Promise<{ ok: boolean; brandId?: string; contactEmail?: string; locale?: string | null; error?: string }> {
+  const logger = (req.scope.resolve("logger") as any) || console
   const payload = verifyToken(token, "unsub")
   if (!payload?.b || !payload?.c) {
     return { ok: false, error: "invalid_token" }
   }
-  // Always try to load locale from the brand referenced in the token, even on
-  // error paths — otherwise the user sees an English error on a Dutch / Czech
-  // / Polish brand. Locale resolution must not block the unsubscribe action,
-  // so wrap it defensively.
+  // Always load locale up front so error responses can be localized.
+  // Defensive — never let locale resolution block the unsubscribe action.
   const locale = await loadBrandLocale(req, payload.b)
+
+  let contact: any = null
+  let email = ""
   try {
     const service = req.scope.resolve(MARKETING_MODULE) as unknown as MarketingModuleService
-    const [contact] = await service.listMarketingContacts({ id: payload.c })
-    if (!contact || (contact as any).brand_id !== payload.b) {
-      return { ok: false, locale, error: "not_found" }
-    }
-    const email = (contact as any).email as string
-    const now = new Date()
+    const found = await service.listMarketingContacts({ id: payload.c })
+    contact = found?.[0] || null
+  } catch (err: any) {
+    logger.warn(`[Unsubscribe] contact lookup failed: ${err?.message || err}`)
+  }
+  if (!contact || contact.brand_id !== payload.b) {
+    return { ok: false, locale, error: "not_found" }
+  }
+  email = String(contact.email || "")
+  const now = new Date()
 
-    // ─── Idempotent contact update ───────────────────────────────────
-    // If the user has already been unsubscribed, skip the contact update
-    // (it would be a no-op anyway, but the explicit guard makes the
-    // intent clear and avoids a needless DB round-trip).
-    if ((contact as any).status !== "unsubscribed") {
+  // The unsubscribe handler does THREE writes:
+  //   1. set marketing_contact.status = "unsubscribed"
+  //   2. add a marketing_suppression row (idempotent — UNIQUE index)
+  //   3. append a marketing_consent_log row (audit trail)
+  //
+  // These are independent. Wrap each one in its own try/catch and only fail
+  // the request when step 1 fails (the actual user-visible state). Audit
+  // failures (steps 2 & 3) get logged and swallowed — losing an audit row
+  // is bad, but showing the user "your link doesn't work" when their
+  // unsubscribe IS in effect is worse.
+
+  // ─── 1. Contact status (skip if already unsubscribed) ─────────────────
+  let contactUpdateOk = contact.status === "unsubscribed"
+  if (!contactUpdateOk) {
+    try {
+      const service = req.scope.resolve(MARKETING_MODULE) as unknown as MarketingModuleService
       await service.updateMarketingContacts({
         id: contact.id,
         status: "unsubscribed",
         unsubscribed_at: now,
       } as any)
-    }
-
-    // ─── Idempotent suppression insert ──────────────────────────────
-    // marketing_suppression has a UNIQUE index on (brand_id, lower(email))
-    // WHERE deleted_at IS NULL. A repeated unsubscribe (second click,
-    // re-subscribe → unsubscribe loop, native Gmail "Unsubscribe" hit
-    // after a manual prior click) used to throw a duplicate-key error
-    // and surface as "this link is no longer valid", which is wrong —
-    // the user is in fact already unsubscribed. We swallow that
-    // specific error and continue.
-    try {
-      await service.createMarketingSuppressions({
-        brand_id: payload.b,
-        email,
-        reason: "unsubscribed",
-        suppressed_at: now,
-      } as any)
+      contactUpdateOk = true
     } catch (err: any) {
-      const msg = String(err?.message || err || "").toLowerCase()
-      const isDuplicate =
-        msg.includes("duplicate key") ||
-        msg.includes("unique constraint") ||
-        err?.code === "23505"
-      if (!isDuplicate) throw err
-      // already suppressed — that's fine, the desired state is already met
+      logger.warn(`[Unsubscribe] contact update failed for ${contact.id}: ${err?.message || err}`)
     }
+  }
 
-    // Consent log is append-only; record every unsubscribe attempt for
-    // the GDPR/CAN-SPAM audit trail, even on second-click no-ops.
+  // ─── 2. Suppression insert (swallow duplicate-key) ────────────────────
+  try {
+    const service = req.scope.resolve(MARKETING_MODULE) as unknown as MarketingModuleService
+    await service.createMarketingSuppressions({
+      brand_id: payload.b,
+      email,
+      reason: "unsubscribed",
+      suppressed_at: now,
+    } as any)
+  } catch (err: any) {
+    const msg = String(err?.message || err || "").toLowerCase()
+    const isDuplicate =
+      msg.includes("duplicate key") ||
+      msg.includes("unique constraint") ||
+      err?.code === "23505"
+    if (!isDuplicate) {
+      logger.warn(`[Unsubscribe] suppression insert failed for ${email}: ${err?.message || err}`)
+    }
+    // either way, continue — desired state is already in place if dup
+  }
+
+  // ─── 3. Consent log (append-only audit trail) ─────────────────────────
+  try {
+    const service = req.scope.resolve(MARKETING_MODULE) as unknown as MarketingModuleService
     await service.createMarketingConsentLogs({
       brand_id: payload.b,
       contact_id: contact.id,
@@ -110,10 +128,14 @@ async function unsubscribe(
       user_agent: (req.headers["user-agent"] as string) || null,
       occurred_at: now,
     } as any)
-    return { ok: true, brandId: payload.b, contactEmail: email, locale }
   } catch (err: any) {
-    return { ok: false, locale, error: err?.message || "internal_error" }
+    logger.warn(`[Unsubscribe] consent log insert failed for ${email}: ${err?.message || err}`)
   }
+
+  if (!contactUpdateOk) {
+    return { ok: false, locale, error: "update_failed" }
+  }
+  return { ok: true, brandId: payload.b, contactEmail: email, locale }
 }
 
 function renderConfirmPage(t: UnsubStrings): string {
