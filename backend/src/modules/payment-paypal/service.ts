@@ -392,7 +392,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
             paypal: {
               experience_context: {
                 payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
-                brand_name: process.env.STORE_NAME || "Performance Marketing Solution",
+                brand_name: String(data?.brand_name || process.env.STORE_NAME || "Shop").slice(0, 127),
                 user_action: "PAY_NOW",
                 return_url: returnUrl,
                 cancel_url: cancelUrl,
@@ -411,19 +411,25 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
           data?.billing_address?.last_name || data?.shipping_address?.last_name || "",
         ].filter(Boolean).join(" ") || "Customer"
 
-        const countryCode = (
-          data?.billing_address?.country_code || apmConfig.country_code
-        ).toUpperCase()
+        // P24 is Poland-only — hardcode PL regardless of buyer's billing address
+        // (PayPal rejects P24 with non-PL country_code)
+        const countryCode = method === "p24"
+          ? "PL"
+          : (data?.billing_address?.country_code || apmConfig.country_code).toUpperCase()
 
         const customerEmail = data?.email || ""
+
+        // P24 requires email per PayPal spec — fail fast with a clear error
+        if (method === "p24" && !customerEmail) {
+          throw new Error("P24 payment requires customer email")
+        }
 
         const apmPaymentSource: any = {
           country_code: countryCode,
           name: customerName,
         }
 
-        // P24 requires email
-        if (method === "p24" && customerEmail) {
+        if (method === "p24") {
           apmPaymentSource.email = customerEmail
         }
         // BLIK can optionally include email
@@ -433,11 +439,22 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         // Swish requires name field (PayPal API validates it)
         // No special handling needed for swish
 
+        // brand_name from storefront (per-project, e.g. "najpierw-ja.pl")
+        // Falls back to env STORE_NAME or generic "Shop". Truncate to 127 chars (PayPal limit).
+        const brandName = String(
+          data?.brand_name || process.env.STORE_NAME || "Shop"
+        ).slice(0, 127)
+
         // APMs require experience_context INSIDE the payment_source (not top-level application_context)
         apmPaymentSource.experience_context = {
           payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
+          brand_name: brandName,
           return_url: returnUrl,
           cancel_url: cancelUrl,
+        }
+        // P24 — explicit Polish locale for buyer-facing redirect page
+        if (method === "p24") {
+          apmPaymentSource.experience_context.locale = "pl-PL"
         }
 
         orderData = {
@@ -477,7 +494,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
             paypal: {
               experience_context: {
                 payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
-                brand_name: process.env.STORE_NAME || "Performance Marketing Solution",
+                brand_name: String(data?.brand_name || process.env.STORE_NAME || "Shop").slice(0, 127),
                 user_action: "PAY_NOW",
                 return_url: returnUrl,
                 cancel_url: cancelUrl,
