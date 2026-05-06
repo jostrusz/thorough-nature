@@ -46,27 +46,59 @@ async function unsubscribe(
   if (!payload?.b || !payload?.c) {
     return { ok: false, error: "invalid_token" }
   }
+  // Always try to load locale from the brand referenced in the token, even on
+  // error paths — otherwise the user sees an English error on a Dutch / Czech
+  // / Polish brand. Locale resolution must not block the unsubscribe action,
+  // so wrap it defensively.
+  const locale = await loadBrandLocale(req, payload.b)
   try {
     const service = req.scope.resolve(MARKETING_MODULE) as unknown as MarketingModuleService
     const [contact] = await service.listMarketingContacts({ id: payload.c })
     if (!contact || (contact as any).brand_id !== payload.b) {
-      return { ok: false, error: "not_found" }
+      return { ok: false, locale, error: "not_found" }
     }
-    const [brand] = await service.listMarketingBrands({ id: payload.b })
-    const locale = (brand as any)?.locale ?? null
     const email = (contact as any).email as string
     const now = new Date()
-    await service.updateMarketingContacts({
-      id: contact.id,
-      status: "unsubscribed",
-      unsubscribed_at: now,
-    } as any)
-    await service.createMarketingSuppressions({
-      brand_id: payload.b,
-      email,
-      reason: "unsubscribed",
-      suppressed_at: now,
-    } as any)
+
+    // ─── Idempotent contact update ───────────────────────────────────
+    // If the user has already been unsubscribed, skip the contact update
+    // (it would be a no-op anyway, but the explicit guard makes the
+    // intent clear and avoids a needless DB round-trip).
+    if ((contact as any).status !== "unsubscribed") {
+      await service.updateMarketingContacts({
+        id: contact.id,
+        status: "unsubscribed",
+        unsubscribed_at: now,
+      } as any)
+    }
+
+    // ─── Idempotent suppression insert ──────────────────────────────
+    // marketing_suppression has a UNIQUE index on (brand_id, lower(email))
+    // WHERE deleted_at IS NULL. A repeated unsubscribe (second click,
+    // re-subscribe → unsubscribe loop, native Gmail "Unsubscribe" hit
+    // after a manual prior click) used to throw a duplicate-key error
+    // and surface as "this link is no longer valid", which is wrong —
+    // the user is in fact already unsubscribed. We swallow that
+    // specific error and continue.
+    try {
+      await service.createMarketingSuppressions({
+        brand_id: payload.b,
+        email,
+        reason: "unsubscribed",
+        suppressed_at: now,
+      } as any)
+    } catch (err: any) {
+      const msg = String(err?.message || err || "").toLowerCase()
+      const isDuplicate =
+        msg.includes("duplicate key") ||
+        msg.includes("unique constraint") ||
+        err?.code === "23505"
+      if (!isDuplicate) throw err
+      // already suppressed — that's fine, the desired state is already met
+    }
+
+    // Consent log is append-only; record every unsubscribe attempt for
+    // the GDPR/CAN-SPAM audit trail, even on second-click no-ops.
     await service.createMarketingConsentLogs({
       brand_id: payload.b,
       contact_id: contact.id,
@@ -80,7 +112,7 @@ async function unsubscribe(
     } as any)
     return { ok: true, brandId: payload.b, contactEmail: email, locale }
   } catch (err: any) {
-    return { ok: false, error: err?.message || "internal_error" }
+    return { ok: false, locale, error: err?.message || "internal_error" }
   }
 }
 
