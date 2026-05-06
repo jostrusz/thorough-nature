@@ -327,6 +327,33 @@ export function FlowEditor({ flowId }: { flowId?: string }) {
             <select className="mkt-input" value={trigger} onChange={(e) => setTrigger(e.target.value)}>
               {TRIGGER_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
+            {/* Implicit brand filter — flow.brand_id scopes which orders trigger
+                this flow. The marketing-flow-trigger subscriber resolves the
+                order's metadata.project_id → brand → only that brand's flows
+                fire. So saying "this fires only for <brand> orders" makes the
+                otherwise-invisible filter explicit. */}
+            <div style={{
+              fontSize: "11.5px",
+              color: tokens.fgSecondary,
+              marginTop: "6px",
+              lineHeight: 1.5,
+              padding: "8px 10px",
+              background: "#FAF6F8",
+              border: `1px solid ${tokens.border}`,
+              borderRadius: "6px",
+            }}>
+              {brand?.display_name || brand?.slug ? (
+                <>
+                  ⓘ Fires only for orders on the <strong>{brand.display_name || brand.slug}</strong> brand.
+                  <br />
+                  <span style={{ color: tokens.fgMuted }}>
+                    To target a different brand, switch the brand selector at the top of the page before saving.
+                  </span>
+                </>
+              ) : (
+                <>⚠️ Select a brand at the top of the page so this flow knows which orders to listen for.</>
+              )}
+            </div>
           </div>
           <div style={{ gridColumn: "span 2" }}>
             <label className="mkt-label">Description</label>
