@@ -63,6 +63,15 @@ function stripInlineUnsubFooters(html: string, legalMarker: string): string {
     // If this block already carries the brand legal marker, it IS the
     // brand footer (author pasted it manually) — keep it.
     if (legalMarker !== "__no_marker__" && match.includes(legalMarker)) return match
+    // Size guard: a real "inline minimal unsub footer" is a small table
+    // (one row, one link, a sentence or two — typically 100-400 chars).
+    // If the match is larger, this is almost certainly a body-wrapping
+    // table that happens to contain an unsubscribe link in a child cell
+    // — stripping it would delete the entire email body. Threshold of
+    // 1500 chars is generous enough to catch any "real" inline footer
+    // (including styled ones with multiple lines) while preserving any
+    // non-trivial body wrapper.
+    if (match.length > 1500) return match
     // Otherwise, strip it. The brand footer will be injected next.
     return ""
   })
