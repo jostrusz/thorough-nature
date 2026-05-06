@@ -392,7 +392,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
             paypal: {
               experience_context: {
                 payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
-                brand_name: String(data?.brand_name || process.env.STORE_NAME || "Shop").slice(0, 127),
+                brand_name: String(data?.brand_name || process.env.STORE_NAME || "Performance Marketing Solution").slice(0, 127),
                 user_action: "PAY_NOW",
                 return_url: returnUrl,
                 cancel_url: cancelUrl,
@@ -440,30 +440,44 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         // No special handling needed for swish
 
         // brand_name from storefront (per-project, e.g. "najpierw-ja.pl")
-        // Falls back to env STORE_NAME or generic "Shop". Truncate to 127 chars (PayPal limit).
+        // Falls back to env STORE_NAME or legacy default. Truncate to 127 chars (PayPal limit).
         const brandName = String(
-          data?.brand_name || process.env.STORE_NAME || "Shop"
+          data?.brand_name || process.env.STORE_NAME || "Performance Marketing Solution"
         ).slice(0, 127)
 
-        // APMs require experience_context INSIDE the payment_source (not top-level application_context)
-        apmPaymentSource.experience_context = {
-          payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
-          brand_name: brandName,
-          return_url: returnUrl,
-          cancel_url: cancelUrl,
-        }
-        // P24 — explicit Polish locale for buyer-facing redirect page
         if (method === "p24") {
-          apmPaymentSource.experience_context.locale = "pl-PL"
-        }
+          // P24 uses LEGACY top-level application_context (per PayPal P24 Orders v2 docs).
+          // Putting redirect URLs inside payment_source.p24.experience_context causes
+          // PayPal to drop them silently → "payment_source_cannot_be_used" on redirect.
+          // See: https://developer.paypal.com/docs/checkout/apm/przelewy24/orders-api/
+          orderData = {
+            intent: "CAPTURE",
+            processing_instruction: "ORDER_COMPLETE_ON_PAYMENT_APPROVAL",
+            purchase_units: purchaseUnits,
+            payment_source: { p24: apmPaymentSource },
+            application_context: {
+              brand_name: brandName,
+              locale: "pl-PL",
+              return_url: returnUrl,
+              cancel_url: cancelUrl,
+            },
+          }
+        } else {
+          // BLIK / iDEAL / Bancontact / EPS / Swish — newer experience_context pattern
+          // INSIDE payment_source.{method} (per PayPal docs for those APMs).
+          apmPaymentSource.experience_context = {
+            payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
+            brand_name: brandName,
+            return_url: returnUrl,
+            cancel_url: cancelUrl,
+          }
 
-        orderData = {
-          intent: "CAPTURE",
-          processing_instruction: "ORDER_COMPLETE_ON_PAYMENT_APPROVAL",
-          purchase_units: purchaseUnits,
-          payment_source: {
-            [method]: apmPaymentSource,
-          },
+          orderData = {
+            intent: "CAPTURE",
+            processing_instruction: "ORDER_COMPLETE_ON_PAYMENT_APPROVAL",
+            purchase_units: purchaseUnits,
+            payment_source: { [method]: apmPaymentSource },
+          }
         }
 
         this.logger_.info(
@@ -494,7 +508,7 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
             paypal: {
               experience_context: {
                 payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
-                brand_name: String(data?.brand_name || process.env.STORE_NAME || "Shop").slice(0, 127),
+                brand_name: String(data?.brand_name || process.env.STORE_NAME || "Performance Marketing Solution").slice(0, 127),
                 user_action: "PAY_NOW",
                 return_url: returnUrl,
                 cancel_url: cancelUrl,
