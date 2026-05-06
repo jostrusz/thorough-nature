@@ -31,11 +31,51 @@ type CrossSell = {
 }
 
 const SLUG_MAP: Record<string, CrossSell> = {
+  // Cross-sell banner inside the order-placed confirmation email.
   "het-leven-from-loslatenboek": {
     source_brand: "loslatenboek",
     target_brand: "het-leven",
     target_url:
-      "https://www.pakjeleventerug.nl/?utm_source=loslatenboek_confirmation&utm_medium=email&utm_campaign=cross_sell_het_leven",
+      "https://www.pakjeleventerug.nl/?utm_source=loslatenboek_confirmation&utm_medium=email&utm_campaign=cross_sell_het_leven&utm_content=order_confirmation_banner",
+  },
+  // Per-email slugs for the 8-mail post-purchase nurture flow. Each carries
+  // a distinct utm_content so that order.metadata.utm_content tells us
+  // which email actually closed the sale (E3 vs E5 vs E8 etc.).
+  "het-leven-from-lb-e3": {
+    source_brand: "loslatenboek",
+    target_brand: "het-leven",
+    target_url:
+      "https://www.pakjeleventerug.nl/?utm_source=loslatenboek_postpurchase&utm_medium=email&utm_campaign=cross_sell_het_leven&utm_content=email_3",
+  },
+  "het-leven-from-lb-e4": {
+    source_brand: "loslatenboek",
+    target_brand: "het-leven",
+    target_url:
+      "https://www.pakjeleventerug.nl/?utm_source=loslatenboek_postpurchase&utm_medium=email&utm_campaign=cross_sell_het_leven&utm_content=email_4",
+  },
+  "het-leven-from-lb-e5": {
+    source_brand: "loslatenboek",
+    target_brand: "het-leven",
+    target_url:
+      "https://www.pakjeleventerug.nl/?utm_source=loslatenboek_postpurchase&utm_medium=email&utm_campaign=cross_sell_het_leven&utm_content=email_5",
+  },
+  "het-leven-from-lb-e6": {
+    source_brand: "loslatenboek",
+    target_brand: "het-leven",
+    target_url:
+      "https://www.pakjeleventerug.nl/?utm_source=loslatenboek_postpurchase&utm_medium=email&utm_campaign=cross_sell_het_leven&utm_content=email_6",
+  },
+  "het-leven-from-lb-e7": {
+    source_brand: "loslatenboek",
+    target_brand: "het-leven",
+    target_url:
+      "https://www.pakjeleventerug.nl/?utm_source=loslatenboek_postpurchase&utm_medium=email&utm_campaign=cross_sell_het_leven&utm_content=email_7",
+  },
+  "het-leven-from-lb-e8": {
+    source_brand: "loslatenboek",
+    target_brand: "het-leven",
+    target_url:
+      "https://www.pakjeleventerug.nl/?utm_source=loslatenboek_postpurchase&utm_medium=email&utm_campaign=cross_sell_het_leven&utm_content=email_8",
   },
 }
 
