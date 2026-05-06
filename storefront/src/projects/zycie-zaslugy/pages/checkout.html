@@ -3479,13 +3479,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var item = (cart.items && cart.items.length > 0) ? cart.items[0] : null;
 
     // --- Obrázek produktu ---
-    if (item && item.thumbnail) {
-      var imgHtml = '<img src="' + item.thumbnail + '" alt="' + (item.product_title || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
+    if (item) {
+      var hiResThumb = '/%C5%BBycie%2C-jakiego-nigdy-sobie-nie-pozwoli%C5%82a%C5%9B-pichi.png';
+      var altText = item.product_title || 'Życie, jakiego nigdy sobie nie pozwoliłaś';
+      var imgHtml = '<img src="' + hiResThumb + '" alt="' + altText + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
       var desktopImg = document.getElementById('desktop-product-img');
       if (desktopImg) desktopImg.innerHTML = imgHtml;
       // Mobile sticky bar thumb
       var msbThumb = document.getElementById('msb-thumb');
-      if (msbThumb) msbThumb.innerHTML = '<img src="' + item.thumbnail + '" alt="' + (item.product_title || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">';
+      if (msbThumb) msbThumb.innerHTML = '<img src="' + hiResThumb + '" alt="' + altText + '" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">';
     }
 
     // --- Název produktu ---
@@ -7472,7 +7474,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           amount: checkoutTotal,
           currency: (PROJECT_CONFIG.mainProduct.currency || 'PLN').toUpperCase(),
           // Product info for payment gateway descriptions
-          product_name: PROJECT_CONFIG.mainProduct.name || 'Book',
+          product_name: 'Zycie jakiego nigdy - ksiazka',
           // Pass cart items for Klarna order lines (product name instead of "Order")
           items: [{
             id: PROJECT_CONFIG.mainProduct.variantId || 'main',
