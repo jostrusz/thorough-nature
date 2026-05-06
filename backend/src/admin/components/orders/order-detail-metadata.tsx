@@ -377,6 +377,9 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
     "psi-superzivot": "Psí superživot",
     "lass-los": "Lass los",
     loslatenboek: "Laat Los Wat Je Kapotmaakt",
+    "het-leven": "Het Leven Dat Je Verdient",
+    "kocici-bible": "Kočičí bible",
+    "zycie-zaslugy": "Życie na które zasługujesz",
   }
   const projectId = order.metadata?.project_id
   const displayTag =
