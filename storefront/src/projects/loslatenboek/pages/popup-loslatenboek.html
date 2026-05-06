@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Loslatenboek — Quiz Popup Preview</title>
 <style>
+  /* DM Sans — self-hosted, matches the index page (latin + latin-ext) */
+  @font-face { font-family: 'DM Sans'; src: url(fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: 'DM Sans'; src: url(fonts/dm-sans-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+  @font-face { font-family: 'DM Sans'; src: url(fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: 'DM Sans'; src: url(fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
   :root {
     --rose-50: #faf5f8;
     --rose-100: #F4E8EE;
@@ -231,9 +237,9 @@
     letter-spacing: -0.005em;
   }
   .option-quote {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 16px;
-    line-height: 1.35;
+    font-family: 'DM Sans', -apple-system, system-ui, sans-serif;
+    font-size: 15.5px;
+    line-height: 1.4;
     color: var(--ink);
     font-weight: 500;
     letter-spacing: -0.005em;
@@ -589,6 +595,188 @@
     max-width: 360px; margin: 0 auto;
     padding-top: 10px; border-top: 1px dashed var(--rose-200);
   }
+  /* ── Inbox preview card (success step) ───────────────────────── */
+  .inbox-card {
+    background: #fff;
+    border: 1px solid var(--rose-200);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin: 16px auto 14px auto;
+    max-width: 380px;
+    text-align: left;
+    box-shadow: 0 10px 28px rgba(140, 46, 84, 0.10);
+    animation: inboxSlide 0.6s 0.15s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  @keyframes inboxSlide {
+    from { transform: translateY(10px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .inbox-meta {
+    display: flex; align-items: center; gap: 10px;
+    font-family: -apple-system, system-ui, sans-serif;
+  }
+  .inbox-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--rose-500), var(--rose-700));
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+    flex-shrink: 0;
+  }
+  .inbox-from {
+    font-size: 13px; font-weight: 600; color: var(--ink);
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .inbox-time {
+    font-size: 11px; color: var(--muted); font-weight: 500;
+    white-space: nowrap;
+  }
+  .inbox-subject {
+    margin-top: 10px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 14.5px; font-weight: 600; color: var(--ink);
+    line-height: 1.35;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .inbox-badge {
+    background: var(--rose-500); color: #fff;
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 4px;
+    flex-shrink: 0;
+  }
+  /* ── Success page conversion blocks ──────────────────────────── */
+  /* Directional pulsing arrow that draws the eye downward to the
+     inbox card. Animation runs forever — arrows attract attention even
+     when they're small. */
+  .success-arrow {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 22px; color: var(--rose-500);
+    margin: 4px auto 4px auto;
+    line-height: 1; text-align: center;
+    animation: arrowPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes arrowPulse {
+    0%, 100% { transform: translateY(0); opacity: 0.45; }
+    50%      { transform: translateY(5px); opacity: 1; }
+  }
+  /* Glow ring on the inbox card — makes it feel "active / unread / new". */
+  .inbox-card.guide {
+    animation: inboxSlide 0.6s 0.15s cubic-bezier(0.16, 1, 0.3, 1) backwards,
+               inboxGlow 2.4s 1.0s ease-in-out infinite;
+  }
+  @keyframes inboxGlow {
+    0%, 100% { box-shadow: 0 10px 28px rgba(140, 46, 84, 0.10); }
+    50%      { box-shadow: 0 10px 28px rgba(140, 46, 84, 0.12),
+                           0 0 0 5px rgba(217, 110, 154, 0.22); }
+  }
+  /* CTA-styled action callout — looks button-like but isn't clickable.
+     This is the eye's "next step" anchor. Single dominant action. */
+  .action-callout {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: linear-gradient(135deg, var(--rose-500), var(--rose-700));
+    color: #fff;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 14px; font-weight: 700;
+    padding: 13px 20px;
+    border-radius: 10px;
+    max-width: 380px; margin: 0 auto 14px auto;
+    box-shadow: 0 10px 24px rgba(140, 46, 84, 0.30);
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+  .action-callout .arrow {
+    font-size: 18px; line-height: 1; transform: translateY(-1px);
+  }
+  .success-loop {
+    font-family: Georgia, serif;
+    font-size: 13.5px; color: var(--ink-soft); line-height: 1.55;
+    font-style: italic;
+    max-width: 380px; margin: 0 auto 18px auto;
+    text-align: center;
+  }
+  .success-loop strong { color: var(--rose-700); font-style: normal; font-weight: 700; }
+  /* Step 2 — deliverability fix. Heading + 3 numbered circles. */
+  .success-instructions {
+    background: var(--rose-100);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 0 auto 14px auto;
+    max-width: 380px;
+    text-align: left;
+  }
+  .success-instructions-title {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--rose-700);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .success-instructions ol {
+    margin: 0; padding: 0;
+    list-style: none;
+    counter-reset: step;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 13px; color: var(--ink); line-height: 1.5;
+  }
+  .success-instructions ol li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 8px;
+  }
+  .success-instructions ol li:last-child { margin-bottom: 0; }
+  .success-instructions ol li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0; top: 0;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--rose-500);
+    color: #fff;
+    font-size: 11px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(140, 46, 84, 0.25);
+  }
+  .success-instructions ol li strong { font-weight: 600; color: var(--rose-700); }
+  /* Email pill — highlights the user's actual address inside step 1
+     so they immediately recognize "this is MY inbox to open". */
+  .success-email-pill {
+    display: inline-block;
+    background: #fff;
+    border: 1px solid var(--rose-300, #e8b4cd);
+    border-radius: 5px;
+    padding: 1px 7px;
+    font-family: -apple-system, ui-monospace, monospace;
+    font-size: 12.5px;
+    color: var(--ink) !important;
+    font-weight: 600;
+    word-break: break-all;
+  }
+  .success-signature {
+    font-family: Georgia, serif;
+    font-size: 13.5px; color: var(--ink-soft); line-height: 1.45;
+    max-width: 380px; margin: 14px auto 6px auto;
+    text-align: left;
+    padding-top: 12px;
+    border-top: 1px dashed var(--rose-200);
+  }
+  .success-signature .sig-name {
+    font-weight: 700; color: var(--ink); font-style: italic;
+  }
+  .success-signature .sig-role {
+    display: block;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11.5px; color: var(--muted); margin-top: 2px;
+  }
+  .success-social {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11.5px; color: var(--muted);
+    text-align: center;
+    margin-top: 10px;
+  }
+  .success-social strong { color: var(--rose-700); font-weight: 700; }
 
   /* Mobile — floating popup (NOT full-screen) so it's clearly an overlay */
   @media (max-width: 560px) {
@@ -661,7 +849,7 @@
 <div class="site-bg">
   <div class="site-ghost">
     <h1>loslatenboek.nl</h1>
-    <p>(Landing page — popup se otevře po 5s nebo při kliku na tlačítko vlevo dole)</p>
+    <p>(Landingspagina — de pop-up opent na 5 sec, of als je linksonder klikt)</p>
   </div>
 </div>
 
@@ -674,7 +862,7 @@
     <!-- STEP 1: Pain category -->
     <div class="step active" data-step="1">
       <div class="popup-header">
-        <div class="social-proof"><span class="pulse"></span> <span><strong>2 341 lidí</strong> tento měsíc objevilo svůj vzorec</span></div>
+        <div class="social-proof"><span class="pulse"></span> <span><strong>2.341 mensen</strong> ontdekten deze maand hun patroon</span></div>
         <div class="progress-wrap">
           <div class="progress-dots">
             <div class="progress-dot active"></div>
@@ -683,56 +871,56 @@
             <div class="progress-dot"></div>
             <div class="progress-dot"></div>
           </div>
-          <span class="progress-label">Krok 1 / 5</span>
+          <span class="progress-label">Stap 1 / 5</span>
         </div>
-        <h2 class="question" id="popup-q">Poznáš se v jedné z těchto <em>vět</em>?</h2>
-        <p class="question-sub">Klikni na tu svou. Za 60 sekund pochopíš, proč se to pořád vrací.</p>
+        <h2 class="question" id="popup-q">Herken jij jezelf in een van deze <em>zinnen</em>?</h2>
+        <p class="question-sub">Klik op de zin die bij jou past. In 60 seconden snap je waarom het steeds terugkomt.</p>
       </div>
       <div class="options">
         <button class="option" data-value="gedachten">
           <span class="option-icon">🌀</span>
           <span class="option-text">
-            <span class="option-quote">„Stále si přehrávám situaci z minulosti a nemůžu přestat."</span>
+            <span class="option-quote">„Ik blijf maar terugdenken aan iets uit het verleden — ik kan er niet mee stoppen."</span>
           </span>
           <span class="option-check"></span>
         </button>
         <button class="option" data-value="verleden">
           <span class="option-icon">💔</span>
           <span class="option-text">
-            <span class="option-quote">„Někoho — nebo něco — pořád neumím pustit."</span>
+            <span class="option-quote">„Ik kan iemand — of iets — gewoon niet loslaten."</span>
           </span>
           <span class="option-check"></span>
         </button>
         <button class="option" data-value="zelfbeeld">
           <span class="option-icon">🪞</span>
           <span class="option-text">
-            <span class="option-quote">„Ať dělám cokoliv, nikdy to nestačí."</span>
+            <span class="option-quote">„Wat ik ook doe, het is nooit genoeg."</span>
           </span>
           <span class="option-check"></span>
         </button>
         <button class="option" data-value="toekomst">
           <span class="option-icon">🌫</span>
           <span class="option-text">
-            <span class="option-quote">„Chci jít dál, ale nedokážu se hnout."</span>
+            <span class="option-quote">„Ik wil verder, maar ik kom niet vooruit."</span>
           </span>
           <span class="option-check"></span>
         </button>
         <button class="option option-custom" data-value="__custom__" data-custom="1">
           <span class="option-icon">✍️</span>
           <span class="option-text">
-            <span class="option-quote">Mám to v sobě jinak — řeknu to po svém</span>
+            <span class="option-quote">Bij mij voelt het anders — ik zeg het zelf</span>
           </span>
           <span class="option-check"></span>
         </button>
         <div class="option-custom-input">
-          <input type="text" maxlength="200" placeholder="Napiš to klidně jen jednou větou…" />
-          <button type="button" class="custom-confirm" disabled>Potvrdit →</button>
+          <input type="text" maxlength="200" placeholder="Schrijf het rustig in één zin…" />
+          <button type="button" class="custom-confirm" disabled>Bevestigen →</button>
         </div>
       </div>
       <!-- step 1 footer removed — auto-advance on click, no back available -->
       <div class="popup-footer auto-advance" style="display:none;">
-        <button class="back-btn" disabled>← Zpět</button>
-        <button class="next-btn" disabled onclick="nextStep(2)">Pokračovat →</button>
+        <button class="back-btn" disabled>← Terug</button>
+        <button class="next-btn" disabled onclick="nextStep(2)">Verder →</button>
       </div>
     </div>
 
@@ -747,15 +935,15 @@
             <div class="progress-dot"></div>
             <div class="progress-dot"></div>
           </div>
-          <span class="progress-label">Krok 2 / 5</span>
+          <span class="progress-label">Stap 2 / 5</span>
         </div>
         <h2 class="question" id="q2"></h2>
-        <p class="question-sub" id="q2sub">Klikni na to, co je ti nejbližší.</p>
+        <p class="question-sub" id="q2sub">Klik op wat het dichtst bij jou komt.</p>
       </div>
       <div class="options" id="options-2"></div>
       <div class="popup-footer auto-advance">
-        <button class="back-btn" onclick="prevStep()">← Zpět</button>
-        <button class="next-btn" disabled onclick="nextStep(3)">Pokračovat →</button>
+        <button class="back-btn" onclick="prevStep()">← Terug</button>
+        <button class="next-btn" disabled onclick="nextStep(3)">Verder →</button>
       </div>
     </div>
 
@@ -770,15 +958,15 @@
             <div class="progress-dot"></div>
             <div class="progress-dot"></div>
           </div>
-          <span class="progress-label">Krok 3 / 5</span>
+          <span class="progress-label">Stap 3 / 5</span>
         </div>
         <h2 class="question" id="q3"></h2>
         <p class="question-sub" id="q3sub"></p>
       </div>
       <div class="options" id="options-3"></div>
       <div class="popup-footer auto-advance">
-        <button class="back-btn" onclick="prevStep()">← Zpět</button>
-        <button class="next-btn" disabled onclick="nextStep(4)">Pokračovat →</button>
+        <button class="back-btn" onclick="prevStep()">← Terug</button>
+        <button class="next-btn" disabled onclick="nextStep(4)">Verder →</button>
       </div>
     </div>
 
@@ -793,15 +981,15 @@
             <div class="progress-dot active"></div>
             <div class="progress-dot"></div>
           </div>
-          <span class="progress-label">Krok 4 / 5</span>
+          <span class="progress-label">Stap 4 / 5</span>
         </div>
         <h2 class="question" id="q4"></h2>
         <p class="question-sub" id="q4sub"></p>
       </div>
       <div class="options" id="options-4"></div>
       <div class="popup-footer auto-advance">
-        <button class="back-btn" onclick="prevStep()">← Zpět</button>
-        <button class="next-btn" disabled onclick="nextStep(5)">Ukaž mi můj vhled →</button>
+        <button class="back-btn" onclick="prevStep()">← Terug</button>
+        <button class="next-btn" disabled onclick="nextStep(5)">Laat mijn inzicht zien →</button>
       </div>
     </div>
 
@@ -816,14 +1004,14 @@
             <div class="progress-dot done"></div>
             <div class="progress-dot active"></div>
           </div>
-          <span class="progress-label">Krok 5 / 5 — Tvůj vhled</span>
+          <span class="progress-label">Stap 5 / 5 — Jouw inzicht</span>
         </div>
       </div>
 
       <!-- AI thinking animation -->
       <div id="ai-thinking" class="ai-thinking">
         <div class="dots"><span></span><span></span><span></span></div>
-        <div class="ai-thinking-label">Joris přemýšlí nad tvými odpověďmi…</div>
+        <div class="ai-thinking-label">Joris denkt na over jouw antwoorden…</div>
       </div>
 
       <!-- AI insight card (hidden until thinking done) -->
@@ -832,7 +1020,7 @@
           <div class="ai-avatar">
             <div>
               <div class="ai-avatar-name">Joris de Vries</div>
-              <div class="ai-avatar-role">Autor, <em>Laat los wat je kapotmaakt</em></div>
+              <div class="ai-avatar-role">Auteur, <em>Laat los wat je kapotmaakt</em></div>
             </div>
           </div>
           <div class="ai-message" id="ai-message"></div>
@@ -842,21 +1030,21 @@
           <p class="sub" id="cta-sub"></p>
           <div class="form-row">
             <div class="form-field">
-              <label for="first_name">Jméno</label>
-              <input type="text" id="first_name" name="first_name" required placeholder="Tvé jméno">
+              <label for="first_name">Voornaam</label>
+              <input type="text" id="first_name" name="first_name" required placeholder="Jouw voornaam">
             </div>
             <div class="form-field">
               <label for="email">E-mail</label>
-              <input type="email" id="email" name="email" required placeholder="tvuj@email.cz">
+              <input type="email" id="email" name="email" required placeholder="jouw@email.nl">
             </div>
           </div>
           <label class="gdpr">
             <input type="checkbox" id="gdpr_consent" required>
             <span class="gdpr-text">
-              Ano, souhlasím, že mi Joris může poslat osobní vhled + 3 dny reflexí. <strong>Kdykoliv se můžu odhlásit</strong> jedním kliknutím. Žádný spam. <a href="https://www.loslatenboek.nl/privacy" target="_blank">Privacy</a>.
+              Ja, Joris mag me het persoonlijke inzicht sturen plus een paar dagen kleine reflecties. <strong>Ik kan me altijd uitschrijven</strong> met één klik. Geen spam. <a href="https://www.loslatenboek.nl/privacy" target="_blank">Privacy</a>.
             </span>
           </label>
-          <button type="submit" class="submit-btn" id="submitBtn" disabled>Poslat můj vhled →</button>
+          <button type="submit" class="submit-btn" id="submitBtn" disabled>Stuur mijn inzicht →</button>
         </form>
       </div>
     </div>
@@ -864,22 +1052,47 @@
     <!-- Success -->
     <div class="step" data-step="6">
       <div class="success">
-        <div class="success-icon">✉</div>
-        <div class="success-kicker">Právě jsem ti napsal, <span id="success-name">kamaráde</span>.</div>
-        <h3 class="success-title">Tvůj <em>osobní vhled</em> už letí k tobě.</h3>
-        <p class="success-lead">
-          Za <strong>méně než 30 sekund</strong> bude první dopis ve tvé schránce.
-          Během následujících <strong>12 dní</strong> ti pošlu sérii dalších — každý navazuje na ten předchozí. Krok za krokem.
-        </p>
-        <div class="success-timeline">
-          <div class="timeline-row"><span class="t-day">Dnes</span> <span class="t-text">tvůj první vhled — odkud ten hlas v hlavě vzal sílu</span></div>
-          <div class="timeline-row"><span class="t-day">Zítra</span> <span class="t-text">otázka věku — jedna otázka, tři vteřiny</span></div>
-          <div class="timeline-row"><span class="t-day">Pozítří</span> <span class="t-text">rozpoznat nestačí — co s tím dál</span></div>
-          <div class="timeline-row"><span class="t-day">…</span> <span class="t-text">a 9 dalších dopisů — příběhy, neurověda, otázky čtenářů</span></div>
+        <div class="success-icon">✓</div>
+        <div class="success-kicker">Bezorgd</div>
+        <h3 class="success-title">Bedankt, <span id="success-name">vriend</span> — het is <em>gelukt</em>.</h3>
+
+        <div class="success-arrow" aria-hidden="true">↓</div>
+
+        <div class="inbox-card guide">
+          <div class="inbox-meta">
+            <div class="inbox-avatar">J</div>
+            <div class="inbox-from">Joris de Vries</div>
+            <div class="inbox-time">zojuist</div>
+          </div>
+          <div class="inbox-subject">
+            <span class="inbox-badge">Nieuw</span>
+            welkom — lees dit eerst
+          </div>
         </div>
-        <p class="success-tip">
-          💡 <strong>Tip:</strong> pokud e-mail do 2 minut nedorazí, podívej se do <em>Promotions</em> nebo <em>Hromadná pošta</em> — a přesuň ho do hlavní schránky.
+
+        <div class="success-instructions">
+          <div class="success-instructions-title">→ Wat doe je nu (30 seconden)</div>
+          <ol>
+            <li>Open je inbox <strong id="success-email" class="success-email-pill">jouw@email.nl</strong></li>
+            <li>Zoek de e-mail met het onderwerp <strong>„welkom — lees dit eerst"</strong></li>
+            <li>Sleep hem naar je <strong>hoofdpostvak</strong> — de volgende brieven komen dan vanzelf goed binnen</li>
+          </ol>
+        </div>
+
+        <p class="success-loop">
+          Je vindt erin <strong>één concrete zin over jezelf</strong> —
+          een zin die nog niemand zo voor je heeft opgeschreven.
         </p>
+
+        <div class="success-signature">
+          Tot zo in je inbox,<br>
+          <span class="sig-name">— Joris de Vries</span>
+          <span class="sig-role">auteur van <em>Laat los wat je kapotmaakt</em></span>
+        </div>
+
+        <div class="success-social">
+          Je sluit je aan bij <strong>2.341 mensen</strong> die deze maand hun eerste brief kregen.
+        </div>
       </div>
     </div>
 
@@ -889,7 +1102,7 @@
 <!-- Dev reopener -->
 <div class="dev-panel">
   <span>Preview dev:</span>
-  <button onclick="openPopup()">Otevřít popup</button>
+  <button onclick="openPopup()">Open pop-up</button>
   <button onclick="resetQuiz()">Reset</button>
 </div>
 
@@ -907,74 +1120,74 @@
 // táta" vs "tvůj bývalý", not just "Vztahy".
 const BRANCH_TREE = {
   relaties: {
-    q: "O <em>kom</em> to je nejvíc?",
-    sub: "Klikni na toho, kdo ti pořád prochází hlavou.",
+    q: "Over <em>wie</em> gaat het vooral?",
+    sub: "Klik op de persoon aan wie je steeds denkt.",
     options: [
-      { v: "partner", i: "💔", t: "„Někdo, koho jsem miloval/a — a možná pořád miluju." },
-      { v: "parent",  i: "👵", t: "„Někdo z mojí rodiny — máma, táta, sourozenec." },
-      { v: "friend",  i: "🤝", t: "„Někdo, komu jsem věřil/a — a zradil mě." },
-      { v: "self",    i: "🪞", t: "„Já sám/a se sebou. Ten vztah mě bolí nejvíc." },
+      { v: "partner", i: "💔", t: "„Ik ben iemand verloren van wie ik hield." },
+      { v: "parent",  i: "👵", t: "„Het gaat om iemand uit mijn familie — vader, moeder, broer of zus." },
+      { v: "friend",  i: "🤝", t: "„Ik vertrouwde iemand — en die heeft me verraden." },
+      { v: "self",    i: "🪞", t: "„Ik vecht met mezelf. Die band doet het meeste pijn." },
     ],
   },
   verleden: {
-    q: "Co přesně se <em>vrací</em>?",
-    sub: "Ta jedna věc, co tě v noci nepouští.",
+    q: "Wat komt er precies <em>terug</em>?",
+    sub: "Dat ene wat je 's nachts niet loslaat.",
     options: [
-      { v: "childhood", i: "🧒", t: "„Něco z dětství. Něco, co mě formovalo." },
-      { v: "breakup",   i: "💔", t: "„Vztah, který skončil — ale neuzavřel se." },
-      { v: "did",       i: "🙈", t: "„Něco, co jsem udělal/a a nemůžu si to odpustit." },
-      { v: "happened",  i: "💧", t: "„Něco, co mi udělal někdo druhý." },
+      { v: "childhood", i: "🧒", t: "„Ik draag iets mee uit mijn jeugd. Iets wat me heeft gevormd." },
+      { v: "breakup",   i: "💔", t: "„Er sleept een relatie achter me aan die voorbij is — maar nooit echt is afgesloten." },
+      { v: "did",       i: "🙈", t: "„Ik heb iets gedaan en ik kan het mezelf niet vergeven." },
+      { v: "happened",  i: "💧", t: "„Het doet pijn wat iemand anders me heeft aangedaan." },
     ],
   },
   gedachten: {
-    q: "O čem ta hlava <em>nepřestává</em>?",
-    sub: "Co se točí dokola, i když si přeješ klid.",
+    q: "Waar blijft je hoofd <em>over malen</em>?",
+    sub: "Wat blijft draaien, ook als je rust wilt.",
     options: [
-      { v: "work",     i: "💼", t: "„Práce a výkon — jestli to vůbec stačím." },
-      { v: "money",    i: "💰", t: "„Peníze a bezpečí — co když to nestačí." },
-      { v: "relation", i: "❤️", t: "„Jeden konkrétní člověk — a co je mezi námi." },
-      { v: "future",   i: "🔮", t: "„Budoucnost — co přijde, jak to dopadne." },
+      { v: "work",     i: "💼", t: "„Ik pieker over werk — of ik het wel aankan." },
+      { v: "money",    i: "💰", t: "„Ik maak me zorgen om geld — wat als het niet genoeg is." },
+      { v: "relation", i: "❤️", t: "„Ik denk aan één iemand — en aan wat er tussen ons is." },
+      { v: "future",   i: "🔮", t: "„Ik denk aan de toekomst — wat er komt, hoe het afloopt." },
     ],
   },
   emoties: {
-    q: "Která <em>emoce</em> tě přebírá?",
-    sub: "Ta, kterou nedokážeš zastavit.",
+    q: "Welk <em>gevoel</em> neemt het over?",
+    sub: "Het gevoel dat je niet kunt stoppen.",
     options: [
-      { v: "anger",   i: "😤", t: "„Hněv. Vzteká mě to a nejde to ven." },
-      { v: "sadness", i: "😢", t: "„Smutek. Tíha, která prostě neodchází." },
-      { v: "shame",   i: "😔", t: "„Stud. Jako by se mnou bylo něco špatně." },
-      { v: "anxiety", i: "😰", t: "„Úzkost. Svírá mě to v břiše a nejde se nadechnout." },
+      { v: "anger",   i: "😤", t: "„Ik ben boos. De boosheid kan er niet uit." },
+      { v: "sadness", i: "😢", t: "„Ik voel verdriet. Een last die niet weggaat." },
+      { v: "shame",   i: "😔", t: "„Ik schaam me. Alsof er iets mis is met mij." },
+      { v: "anxiety", i: "😰", t: "„Ik voel angst in mijn buik. Ik kan bijna niet ademen." },
     ],
   },
   zelfbeeld: {
-    q: "Co o sobě <em>zpochybňuješ</em> nejvíc?",
-    sub: "Tam, kde se cítíš nejmíň v bezpečí.",
+    q: "Waar <em>twijfel</em> je het meest aan jezelf?",
+    sub: "Daar waar je je het minst veilig voelt.",
     options: [
-      { v: "body",    i: "🪞", t: "„Jak vypadám. Tělo, jak stárnu." },
-      { v: "ability", i: "🧠", t: "„Jestli to umím. Jestli vůbec stačím." },
-      { v: "worth",   i: "💔", t: "„Jestli si vůbec zasloužím lásku a klid." },
-      { v: "real",    i: "🎭", t: "„Kdo jsem doopravdy — pod tou maskou." },
+      { v: "body",    i: "🪞", t: "„Ik pieker over hoe ik eruitzie. Mijn lichaam, ouder worden." },
+      { v: "ability", i: "🧠", t: "„Ik twijfel of ik het wel kan. Of ik wel goed genoeg ben." },
+      { v: "worth",   i: "💔", t: "„Ik twijfel of ik liefde en rust verdien." },
+      { v: "real",    i: "🎭", t: "„Ik zoek wie ik echt ben — onder dat masker." },
     ],
   },
   toekomst: {
-    q: "Čeho se <em>nejvíc bojíš</em>?",
-    sub: "Toho, co ti v noci nedá usnout.",
+    q: "Waar ben je het <em>bangst voor</em>?",
+    sub: "Datgene wat je 's nachts wakker houdt.",
     options: [
-      { v: "alone",    i: "🪑", t: "„Že zůstanu sám/a. Nikoho nenajdu." },
-      { v: "money",    i: "💸", t: "„Že to finančně neutáhnu." },
-      { v: "latetime", i: "⏳", t: "„Že už je pozdě. Promarnil/a jsem roky." },
-      { v: "stuck",    i: "🌊", t: "„Že se to nikdy nezmění. Že v tom zůstanu." },
+      { v: "alone",    i: "🪑", t: "„Ik ben bang dat ik alleen blijf. Dat ik niemand vind." },
+      { v: "money",    i: "💸", t: "„Ik ben bang dat ik het financieel niet ga redden." },
+      { v: "latetime", i: "⏳", t: "„Ik voel dat het al te laat is. Dat ik jaren heb verspild." },
+      { v: "stuck",    i: "🌊", t: "„Ik heb het gevoel dat het nooit verandert. Dat ik er nooit uit kom." },
     ],
   },
   // Fallback pro custom K1 — generický "kdo/co je v tom"
   __generic__: {
-    q: "S <em>kým</em> nebo s <em>čím</em> to nejvíc souvisí?",
-    sub: "Klikni na to, co tomu nejblíž odpovídá.",
+    q: "Met <em>wie</em> of <em>wat</em> heeft het te maken?",
+    sub: "Klik op wat er het dichtst bij komt.",
     options: [
-      { v: "person", i: "👤", t: "„S konkrétním člověkem v mém životě." },
-      { v: "myself", i: "🪞", t: "„Sám/a se sebou. Jsem to já." },
-      { v: "past",   i: "🕰", t: "„S něčím, co se stalo dřív." },
-      { v: "future", i: "🔮", t: "„S tím, co teprve přijde." },
+      { v: "person", i: "👤", t: "„Het heeft te maken met één bepaald iemand in mijn leven." },
+      { v: "myself", i: "🪞", t: "„Ik vecht met mezelf. Ik ben het zelf." },
+      { v: "past",   i: "🕰", t: "„Er komt steeds iets terug wat eerder is gebeurd." },
+      { v: "future", i: "🔮", t: "„Ik ben bang voor wat nog komen gaat." },
     ],
   },
 };
@@ -983,13 +1196,13 @@ const BRANCH_TREE = {
 // Purpose: give AI the trigger moment — when/where the pain surfaces.
 // AI can then open with "Víš co je zvláštní? Vrací se ti to právě v [X]."
 const LEVEL_3_UNIVERSAL = {
-  q: "Kdy se ti to <em>vrací nejvíc</em>?",
-  sub: "Ten moment, kdy tě to udeří naplno.",
+  q: "Wanneer komt het het <em>meest terug</em>?",
+  sub: "Het moment dat het je vol raakt.",
   options: [
-    { v: "3am",     i: "🌙", t: "„V noci. Probudím se a už to jede." },
-    { v: "alone",   i: "🚗", t: "„Když jsem sám/a — v autě, doma, na procházce." },
-    { v: "people",  i: "👥", t: "„Mezi lidmi. Tvářím se v pohodě, vevnitř ne." },
-    { v: "always",  i: "🔄", t: "„Prakticky pořád. Je to pozadí všeho." },
+    { v: "3am",     i: "🌙", t: "„Ik word 's nachts wakker en het draait meteen weer." },
+    { v: "alone",   i: "🚗", t: "„Het komt terug als ik alleen ben — in de auto, thuis, op een wandeling." },
+    { v: "people",  i: "👥", t: "„Ik doe alsof ik oké ben tussen mensen. Vanbinnen niet." },
+    { v: "always",  i: "🔄", t: "„Het is er altijd. Het zit op de achtergrond van alles." },
   ],
 };
 
@@ -997,13 +1210,13 @@ const LEVEL_3_UNIVERSAL = {
 // 🔥 NEJCENNĚJŠÍ VSTUP PRO AI — vnitřní hlas čtenáře doslova.
 // AI pak v emailu může citovat jeho vlastní slova → šok z poznání.
 const LEVEL_4_UNIVERSAL = {
-  q: "Kterou <em>větu</em> si pořád opakuješ?",
-  sub: "Tu, co se ti vrací, když jsi sám/a se sebou.",
+  q: "Welke <em>zin</em> zeg je steeds tegen jezelf?",
+  sub: "De zin die terugkomt als je alleen bent met jezelf.",
   options: [
-    { v: "not_enough", i: "⚖️", t: "„Nejsem dost. Jiní to mají lepší." },
-    { v: "too_late",   i: "⏳", t: "„Už je pozdě. Promarnil/a jsem to." },
-    { v: "my_fault",   i: "🔒", t: "„Je to moje chyba. Měl/a jsem to vědět." },
-    { v: "like_this",  i: "🎭", t: "„Prostě takový/á jsem. Už se nezměním." },
+    { v: "not_enough", i: "⚖️", t: "„Ik zeg tegen mezelf dat ik niet genoeg ben. Dat anderen het beter hebben." },
+    { v: "too_late",   i: "⏳", t: "„Ik zeg tegen mezelf dat het al te laat is. Dat ik het verprutst heb." },
+    { v: "my_fault",   i: "🔒", t: "„Ik verwijt mezelf dat het mijn schuld is. Dat ik het had moeten weten." },
+    { v: "like_this",  i: "🎭", t: "„Ik denk dat ik gewoon zo ben. Ik verander toch niet meer." },
   ],
 };
 
@@ -1165,13 +1378,13 @@ function renderOptions(container, options) {
     <button class="option option-custom" data-value="__custom__" data-custom="1">
       <span class="option-icon">✍️</span>
       <span class="option-text">
-        <span class="option-quote">Mám to v sobě jinak — řeknu to po svém</span>
+        <span class="option-quote">Bij mij voelt het anders — ik zeg het zelf</span>
       </span>
       <span class="option-check"></span>
     </button>
     <div class="option-custom-input">
-      <input type="text" maxlength="200" placeholder="Napiš to klidně jen jednou větou…" />
-      <button type="button" class="custom-confirm" disabled>Potvrdit →</button>
+      <input type="text" maxlength="200" placeholder="Schrijf het rustig in één zin…" />
+      <button type="button" class="custom-confirm" disabled>Bevestigen →</button>
     </div>
   `;
 }
@@ -1223,7 +1436,7 @@ async function runStep5() {
   // Min wait 1.2s so the "thinking" animation always has breathing room,
   // even if Sonnet responds in 300ms — too-fast replies feel suspicious.
   const [insight] = await Promise.all([
-    fetchInsightFromBackend(state.path, "cs", "popup_quiz_loslatenboek", state.texts),
+    fetchInsightFromBackend(state.path, "nl", "popup_quiz_loslatenboek", state.texts),
     new Promise(r => setTimeout(r, 1200)),
   ]);
   $("#ai-message").innerHTML = insight.message;
@@ -1261,178 +1474,16 @@ async function fetchInsightFromBackend(path, locale = "nl", formId = "popup_quiz
 }
 
 /**
- * Mock generator for offline preview. In production the real Sonnet-powered
- * endpoint at /public/marketing/ai-insight returns fresh per-user insights.
+ * Lokale fallback voor offline preview / API-storing. In productie levert
+ * /public/marketing/ai-insight een vers AI-bericht per pad — deze fallback
+ * is een veilig vangnet als die call faalt.
  */
 function generateInsightMock(path) {
-  const [cat, sub, intensity, emotion] = path;
-
-  // Path-specific WOW insights. Each template uses multiple path variables
-  // so the reader feels "this was written for me". In production the backend
-  // passes the same path to Claude Haiku which produces a single bespoke
-  // response per user.
-  const insights = {
-    // ─── RELATIES ─────────────────────────────────────────────
-    "relaties.partner": {
-      boos: `Když se na někoho pořád zlobíš, není to proto, že mu chceš ublížit. Je to proto, že ti to pořád není jedno. A mozek to nepustí, dokud si nepřizná, co ti ten člověk znamenal. <strong>Co dokážeš pojmenovat, to nad tebou ztratí moc.</strong>`,
-      verdrietig: `Smutek, co se vrací ve vlnách — hlavně ráno nebo v neděli večer — není slabost. Je to mozek, co pořád dokola hledá <strong>to, co po tom všem zbylo</strong>. Dokud nenajde odpověď, nedá ti pokoj.`,
-      vast: `Zaseknutý nejsi proto, že jsi něco zkazil. Jsi zaseknutý proto, že ten člověk pořád <strong>žije ve tvé hlavě</strong> — jako kdyby se měl vrátit. Až ho uvidíš jako uzavřenou kapitolu, mysl tě pustí dál.`,
-      verward: `Ten zmatek je dobré znamení. Říká, že <strong>cítíš dvě pravdy najednou</strong> — a mozek neví, jak to obě může být pravda. Lidé, co tohle umí cítit, bývají ti nejhlubší. Jen jim nikdo neřekl, že zmatek je začátek pochopení.`,
-    },
-    "relaties.familie": {
-      default: `Rodinné rány mají jedno pravidlo: nejvíc bolí tam, kde čekáš <strong>bezpečí</strong>. Pokud tě dlouho zraňuje někdo, kdo tě měl chránit, není to tvoje vina. A dá se to řešit — jen jinak, než ti to říká hlava.`,
-    },
-    "relaties.vriend": {
-      default: `Zranil tě někdo, koho sis <strong>sám vybral</strong>. To bolí jinak než zrada od rodiče — protože tomu člověku jsi věřil jako dospělý. Teď zpochybňuješ vlastní úsudek. Je to normální fáze, <strong>ne trvalý stav.</strong>`,
-    },
-    "relaties.werk": {
-      default: `Hranice v práci jsou nejtěžší, protože se mísí strach (peníze) a lidskost. Lidé, co uvíznou v toxické práci, nejsou slabí. Jsou <strong>loajální k systému, co jim nic nedává</strong>. A tohle se dá obrátit.`,
-    },
-
-    // ─── VERLEDEN ─────────────────────────────────────────────
-    "verleden.trauma": {
-      default: `Špatná vzpomínka se vrací ne proto, že jsi slabý. Vrací se proto, že ji mozek <strong>nikdy úplně neuložil pryč</strong>. Zůstala jako by se to dělo teď. Proto to pořád cítíš, jako by to bylo včera. A to se dá změnit.`,
-    },
-    "verleden.spijt": {
-      default: `Lítost, co nejde pryč, ti říká jednu věc: tehdy jsi mohl rozhodnout líp. Ale tehdejší ty věděl jen tolik, kolik věděl. <strong>Soudit toho mladšího sebe z dnešní pozice je nefér.</strong>`,
-    },
-    "verleden.verraad": {
-      default: `Zrada bolí jinak než ztráta. Ztráta ti vezme druhého. <strong>Zrada ti vezme důvěru sám sobě.</strong> Proto to trvá dýl. Ne kvůli tomu druhému — kvůli tomu, co to udělalo s tvým vnitřním kompasem. Ten se dá nastavit zpátky.`,
-    },
-    "verleden.verlies": {
-      default: `Když ztrácíš někoho, ztrácíš taky <strong>kus sebe</strong> — toho, kým jsi s ním byl. Smutek není jen po něm. Je i po tobě. To, co zbývá, je postavit novou verzi sebe.`,
-    },
-
-    // ─── GEDACHTEN ────────────────────────────────────────────
-    "gedachten.rumineren": {
-      default: `Pořád dokola myslet na stejnou věc není chyba mozku. Je to mozek, co <strong>hledá konec, který nedostal</strong>. Jakmile mu dáš jasné uzavření — třeba napíšeš dopis, co nikdy neodešleš — smyčka se zlomí. Není to otázka týdnů. Jsou to minuty, když se to udělá správně.`,
-    },
-    "gedachten.wat_als": {
-      default: `Scénáře „co kdyby" nejsou strach z budoucnosti. Jsou to <strong>stará nezpracovaná trápení</strong>, co se přesunula vpřed, protože v přítomnosti nemají kam. Mozek hledá kontrolu tam, kde mu chyběla.`,
-    },
-    "gedachten.oordeel": {
-      default: `Ten kritik v tvé hlavě <strong>není tvůj</strong>. Je to hlas někoho, koho jsi slyšel jako dítě — rodič, učitel, někdo. Ten hlas se v tobě usadil. Ale jakmile ho slyšíš jako <em>cizí hlas</em>, ztratí moc.`,
-    },
-    "gedachten.slaap": {
-      default: `V noci nemůžeš usnout, protože den <strong>zůstal otevřený</strong>. Mozek tě nepustí spát, dokud nevyřeší, co zbylo. Řešení není snažit se víc „přestat myslet". Řešení je dát dnu uzavření ještě než si lehneš.`,
-    },
-
-    // ─── EMOTIES ──────────────────────────────────────────────
-    "emoties.woede": {
-      default: `Vztek je <strong>strážce</strong>, ne problém. Říká, že někdo překročil tvoji hranici — a nikdo jiný to za tebe řešit nebude. Lidé, jejichž hranice se v dětství nerespektovaly, mívají vztek, co <em>přichází pozdě</em>. Ale poslechnout ho lze i pozdě.`,
-    },
-    "emoties.verdriet": {
-      default: `Smutek „bez důvodu" nikdy není bez důvodu. Mysl ho jen tehdy schovala, protože ho nesnesla. Teď se vrací — ne aby tě zničil, ale <strong>aby byl konečně dovolen</strong>. Pustit ho je rychlejší než s ním bojovat.`,
-    },
-    "emoties.schaamte": {
-      default: `Stud ti říká: „něco se mnou není v pořádku." Ale to není fakt. Je to <strong>závěr</strong>, který sis udělal moc brzy a z malé informace. Když se podíváš, kdo ti ho tehdy předal, často zjistíš, že <em>on sám neměl právo soudit</em>.`,
-    },
-    "emoties.schuld": {
-      default: `Vina je dvojí. <strong>Aktivní</strong> — ublížil jsem někomu, dá se to napravit. <strong>Cizí</strong> — nosím vinu, která mi nepatří. Většina lidí uvízne v té druhé a myslí si, že je ta první. Rozeznat to mění všechno.`,
-    },
-
-    // ─── ZELFBEELD ────────────────────────────────────────────
-    "zelfbeeld.niet_genoeg": {
-      default: `„Nejsem dost" není pravda. Je to <strong>trik</strong>, který tvoje mysl použila jako dítě. Když nikdy nebudeš dost, nemůžeš být zklamaný, když tě někdo odmítne — protože jsi to <em>už čekal</em>. Tehdy tě to zachránilo. Dnes ti to bere život.`,
-    },
-    "zelfbeeld.liefde": {
-      default: `Pocit „nezasloužím lásku" má skoro vždycky <strong>jeden konkrétní zdroj</strong> — moment, kdy jsi tu zprávu dostal od někoho, komu jsi věřil. Možná si ten moment pamatuješ, možná ne. Ale tělo ho pamatuje. A dá se to odemknout.`,
-    },
-    "zelfbeeld.mislukt": {
-      default: `Když se cítíš jako „selhání", měříš se <strong>měřítkem někoho jiného</strong> — rodičů, společnosti, ideálu. Tvůj skutečný život do toho nezapadá. Otázka není „kde jsem selhal" — ale <em>„čí měřítko mě určuje?"</em>`,
-    },
-    "zelfbeeld.masker": {
-      default: `Maska tě vyčerpává ne proto, že bys byl falešný. Je to proto, že <strong>to skutečné v tobě je samo</strong> — i když jsi mezi lidmi. Ti, kdo masku nosí nejlépe, se cítí nejvíc sami. A právě proto musí být první, co pustíš, ta maska — ne vztahy.`,
-    },
-
-    // ─── TOEKOMST ─────────────────────────────────────────────
-    "toekomst.alleen": {
-      default: `Strach „zůstat sám" málokdy bývá o samotě. Je o <strong>pocitu, že tě nikdo neuvidí</strong> — ani když u sebe někoho budeš mít. To je jiná bolest. A má jiné řešení než „najít někoho".`,
-    },
-    "toekomst.verkeerd": {
-      default: `Strach z „špatného rozhodnutí" není nerozhodnost. Je to <strong>strach o sebe</strong> — kdo budu, když to dopadne špatně? Lidé, co někdy špatně rozhodli, paralyzovaní nezůstávají. Paralyzovaní jsou ti, kdo byli <em>za rozhodnutí potrestáni</em>. Často za rozhodnutí, které ani nebylo jejich.`,
-    },
-    "toekomst.oordeel": {
-      default: `Strach z toho, co si myslí druzí, je <strong>přežití</strong>, ne slabost. Mozek si kdysi spojil: být souzený = být vyloučený = nebezpečí. Dnes už to neplatí, ale tělo to ještě neví. <strong>Dá se to přeučit rychleji, než si myslíš.</strong>`,
-    },
-    "toekomst.herhaling": {
-      default: `Když se ti pořád opakuje stejný vzorec, <strong>není to tvoje povaha</strong>. Je to cestička v mozku, postavená dávno předtím, než jsi pro to měl slovo. Změna není o vůli. Je o <em>nové cestě</em>. A ta se staví opakováním jiného kroku, ne uvědoměním.`,
-    },
-  };
-
-  // Resolve: try "cat.sub.emotion" → "cat.sub.default" → "cat.default" → universal fallback
-  const key = `${cat}.${sub}`;
-  const block = insights[key];
-  let message;
-  if (block && emotion && block[emotion]) {
-    message = block[emotion];
-  } else if (block && block.default) {
-    message = block.default;
-  } else {
-    message = `To, co v sobě neseš, není tvoje chyba. Je to stará reakce, co ti kdysi pomohla přežít — a dnes ti spíš překáží. Mysl pustí až to, co <strong>vidí</strong>. A teď, když to vidíš ty, vidí to i ona.`;
-  }
-
   return {
-    message,
-    headline: "Chceš vědět, proč to přetrvává — a jak to pustit?",
-    sub: `Pošlu ti osobní vhled na základě tvých odpovědí + první 3 dny mé reflexní série. Žádný spam. Jen odpovědi.`,
-    benefits: generateBenefits(path),
+    message: `Wat jij meedraagt is geen zwakte. Het is een oude reactie die je ooit hielp overleven — en die je nu eerder in de weg zit. De geest laat los wat hij <strong>ziet</strong>. En nu jij het ziet, ziet hij het ook.`,
+    headline: "Wat draag je in jezelf zonder het te weten?",
+    sub: `Ik stuur je een persoonlijk inzicht op basis van jouw antwoorden. Geen spam — alleen antwoorden.`,
   };
-}
-
-/**
- * Personalized value bullets based on user's path. Each bullet references
- * the specific problem area they selected so it feels individualized.
- */
-function generateBenefits(path) {
-  const [cat, sub, intensity, emotion] = path;
-
-  // Day 1 email title — deeply specific to their path
-  const day1Titles = {
-    "relaties.partner": "Proč tě (ex-)partner stále drží v hlavě",
-    "relaties.familie": "Proč rodinné rány bolí nejhlouběji",
-    "relaties.vriend":  "Co dělá zrada přítele s tvou důvěrou",
-    "relaties.werk":    "Proč je těžké odejít z toxického pracovního vztahu",
-    "verleden.trauma":  "Jak tělo pamatuje to, co mysl zapomíná",
-    "verleden.spijt":   "Proč tě lítost trestá víc, než zasloužíš",
-    "verleden.verraad": "Jak znovu věřit svému vnitřnímu kompasu",
-    "verleden.verlies": "Proč ztráta bere i kus tebe — a jak ho získat zpět",
-    "gedachten.rumineren": "Proč se mysl vrací k stejné scéně",
-    "gedachten.wat_als":   "Jak mozek hledá kontrolu přes scénáře co kdyby",
-    "gedachten.oordeel":   "Čí hlas je ten vnitřní kritik — a jak ho ztišit",
-    "gedachten.slaap":     "Proč nemůžeš usnout, i když jsi unavený/á",
-    "emoties.woede":    "Proč je tvůj hněv strážce, ne problém",
-    "emoties.verdriet": "Kdy je smutek bez důvodu — a kdy má hluboký důvod",
-    "emoties.schaamte": "Stud není fakt — je to závěr. A dá se přehodnotit",
-    "emoties.schuld":   "Aktivní vs. adoptovaná vina — rozlišení, které mění vše",
-    "zelfbeeld.niet_genoeg": "Proč nejsem dost není pravda — je to strategie",
-    "zelfbeeld.liefde":      "Odkud se bere pocit, že nezasloužíš lásku",
-    "zelfbeeld.mislukt":     "Čí měřítkem se necháváš definovat",
-    "zelfbeeld.masker":      "Proč nošení masky vyčerpává víc než cokoliv",
-    "toekomst.alleen":    "Strach ze samoty — často není o samotě",
-    "toekomst.verkeerd":  "Paralýza z rozhodnutí — a kdo ti ji naočkoval",
-    "toekomst.oordeel":   "Proč mozek stále považuje odmítnutí za smrt",
-    "toekomst.herhaling": "Vzorce se nezmění vůlí — ale opakováním jiného kroku",
-  };
-  const key = `${cat}.${sub}`;
-  const day1 = day1Titles[key] || "Co ti mozek nedovolí pustit";
-
-  // Worksheet/tool name — path-specific
-  const toolLabels = {
-    relaties:  "Pracovní list — Mapování vazby",
-    verleden:  "Cvičení — Dopis, který nikdy neodešleš",
-    gedachten: "Stop-loop technika v 3 krocích",
-    emoties:   "Deník Pojmenuj to — 5 minut denně",
-    zelfbeeld: "Cvičení — Kdo ti to řekl poprvé?",
-    toekomst:  "Reflexní list — Nejhorší scénář",
-  };
-  const tool = toolLabels[cat] || "Reflexivní pracovní list";
-
-  return [
-    `<strong>Osobní vhled</strong> napsaný přesně pro tvou situaci — ne obecné rady`,
-    `<strong>3-denní sérii</strong> začínající „${day1}"`,
-    `<strong>${tool}</strong> — nástroj, co zvládneš za 10 minut denně`,
-  ];
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1477,6 +1528,8 @@ async function submitForm(e) {
   // in production we'll still have logged it; failing silently is less bad
   // than blocking the user on a spinner.
   $("#success-name").textContent = firstName;
+  const successEmail = $("#success-email");
+  if (successEmail) successEmail.textContent = email;
   showStep(6);
 
   // Semantic field names so AI prompt can read them directly.
