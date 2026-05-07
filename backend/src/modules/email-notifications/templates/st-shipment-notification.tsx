@@ -255,7 +255,7 @@ export const StShipmentNotificationTemplate: React.FC<StShipmentNotificationTemp
               margin: '0',
               lineHeight: '1.5',
             }}>
-              &#128666; &nbsp;<strong>Beräknad leverans: 2–4 arbetsdagar</strong>
+              &#128666; &nbsp;<strong>Beräknad leverans: 4–5 arbetsdagar</strong>
             </Text>
             <Text style={{
               fontFamily: font,
@@ -487,7 +487,7 @@ export const StShipmentNotificationTemplate: React.FC<StShipmentNotificationTemp
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Levererad</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Inom 2–4 arbetsdagar har du din bok hemma!</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Inom 4–5 arbetsdagar har du din bok hemma!</span>
                 </td>
               </tr>
             </tbody>
