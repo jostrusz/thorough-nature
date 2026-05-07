@@ -2422,14 +2422,14 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="Życie, jakie
   <div class="ukazka-header">
    <div class="ukazka-eyebrow"><span class="ukazka-pulse"></span>Najpierw zajrzyj do książki</div>
    <h2 class="ukazka-title">Najpierw poczytaj, dopiero potem zamawiaj.</h2>
-   <p class="ukazka-sub">Pokażę Ci 9 stron z książki. Bez pustych słów, bez reklamy. Dokładnie to samo, co przeczytasz potem na własnej kanapie. Z filiżanką herbaty obok.</p>
-   <div class="ukazka-social"><span class="ukazka-dot"></span>Tysiące kobiet już otworzyło te strony · Wszystkie 9, za darmo</div>
+   <p class="ukazka-sub">Pokażę Ci 8 stron z książki. Bez pustych słów, bez reklamy. Dokładnie to samo, co przeczytasz potem na własnej kanapie. Z filiżanką herbaty obok.</p>
+   <div class="ukazka-social"><span class="ukazka-dot"></span>Tysiące kobiet już otworzyło te strony · Wszystkie 8, za darmo</div>
   </div>
 
   <div class="ukazka-meta">
-   <div class="ukazka-counter"><span id="ukazkaCurrent">1</span>/9 darmowych stron</div>
+   <div class="ukazka-counter"><span id="ukazkaCurrent">1</span>/8 darmowych stron</div>
    <div class="ukazka-progress"><div class="ukazka-progress-bar" id="ukazkaProgress"></div></div>
-   <div class="ukazka-chapter" id="ukazkaChapter">Rozdział 1 · Rzeczy</div>
+   <div class="ukazka-chapter" id="ukazkaChapter">Filar 1 · Rzeczy</div>
   </div>
 
   <div class="ukazka-stage" id="ukazkaStage">
@@ -2498,13 +2498,12 @@ html,body{overflow-x:clip}
 .ukazka-chapter{font-family:'DM Sans',sans-serif;font-size:12px;color:#6B5D4E;background:rgba(255,255,255,.7);padding:6px 12px;border-radius:999px;white-space:nowrap;border:1px solid rgba(201,169,110,.2)}
 .ukazka-stage{position:relative;display:flex;align-items:center;gap:16px;margin:0 auto 28px;max-width:1100px}
 .ukazka-track{flex:1;position:relative;height:clamp(340px,52vw,620px);perspective:1400px;overflow:hidden}
-.ukazka-slide{position:absolute;top:50%;left:50%;width:clamp(220px,32vw,400px);aspect-ratio:2/3;border-radius:12px;overflow:hidden;cursor:pointer;transform:translate(-50%,-50%) scale(.88);opacity:0;filter:blur(1px);transition:transform .55s cubic-bezier(.4,0,.2,1),opacity .45s ease,filter .45s ease,box-shadow .45s ease;box-shadow:0 20px 40px -20px rgba(42,37,32,.25);pointer-events:none;will-change:transform,opacity;background:#FFF8F3}
-.ukazka-slide::after{content:"";position:absolute;left:0;right:0;bottom:0;height:14%;pointer-events:none;background:linear-gradient(to bottom,rgba(255,248,243,0) 0%,rgba(255,248,243,.65) 60%,rgba(255,248,243,1) 100%);z-index:1}
+.ukazka-slide{position:absolute;top:50%;left:50%;width:clamp(240px,36vw,460px);aspect-ratio:559/794;border-radius:12px;overflow:hidden;cursor:pointer;transform:translate(-50%,-50%) scale(.88);opacity:0;filter:blur(1px);transition:transform .55s cubic-bezier(.4,0,.2,1),opacity .45s ease,filter .45s ease,box-shadow .45s ease;box-shadow:0 20px 40px -20px rgba(42,37,32,.25);pointer-events:none;will-change:transform,opacity;background:#FFF8F3}
 .ukazka-slide.is-prev{transform:translate(calc(-50% - clamp(210px,22vw,280px)),-50%) scale(.88);opacity:.5;pointer-events:auto}
 .ukazka-slide.is-next{transform:translate(calc(-50% + clamp(210px,22vw,280px)),-50%) scale(.88);opacity:.5;pointer-events:auto}
 .ukazka-slide.is-active{transform:translate(-50%,-50%) scale(1);opacity:1;filter:none;box-shadow:0 40px 80px -20px rgba(42,37,32,.4),0 16px 32px -12px rgba(201,169,110,.3);z-index:2;cursor:zoom-in;pointer-events:auto}
 .ukazka-arrow:disabled,.ukazka-arrow[aria-disabled="true"]{opacity:.35;cursor:not-allowed;pointer-events:none}
-.ukazka-slide img{width:100%;height:100%;object-fit:cover;display:block}
+.ukazka-slide img{width:100%;height:100%;object-fit:contain;display:block;background:#FFF8F3}
 .ukazka-slide.is-active::after{content:"🔍";position:absolute;top:12px;right:12px;background:rgba(255,255,255,.95);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.15);opacity:0;transition:opacity .3s}
 .ukazka-slide.is-active:hover::after{opacity:1}
 .ukazka-arrow{width:48px;height:48px;border-radius:50%;border:1px solid rgba(201,169,110,.3);background:rgba(255,255,255,.9);color:#2A2520;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;backdrop-filter:blur(8px);flex-shrink:0;z-index:3}
@@ -2588,15 +2587,14 @@ html,body{overflow-x:clip}
 <script>
 (function(){
  const PAGES=[
-  {src:'/ukazky/het-leven-dat-je-verdient-neurowetenschap-vreugde.webp',chapter:'Rozdział 1 · Rzeczy',title:'Neuronauka radości — kiedy ciało wie więcej niż głowa',page:'Strona 65',emotion:'Nie pytaj, czy tego potrzebujesz — pytaj, czy daje Ci to radość. Dopamina i oksytocyna nie kłamią.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-verzadigingspunt.webp',chapter:'Rozdział 1 · Rzeczy',title:'Punkt sytości — dokładnie tyle, ile potrzeba',page:'Strona 77',emotion:'Nie maksimum, nie minimum. Ten moment, gdy rzeczy są częścią Twojego życia, a nie ciężarem.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-slaapkamer-veranderen.webp',chapter:'Rozdział 2 · Przestrzeń',title:'Jak Karolina zmieniła swoją sypialnię — w 30 minut',page:'Strona 100',emotion:'Nie kupiła nowych mebli. Po prostu przesunęła to, co miała. I po raz pierwszy od miesięcy przespała całą noc.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-grenzen-thuis.webp',chapter:'Rozdział 2 · Przestrzeń',title:'Granice w domu — psychologia porządku',page:'Strona 150',emotion:'Każdy przedmiot potrzebuje swojego miejsca. Inaczej zabiera je w Twojej głowie — i tam kradnie Ci spokój.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-vier-mythes-grenzen.webp',chapter:'Rozdział 3 · Ludzie',title:'Cztery mity o granicach — i czym naprawdę jest zdrowa granica',page:'Strona 179',emotion:'Gdy mówię „nie", nie mówię „nie kocham Cię". Mówię „kocham siebie".'},
-  {src:'/ukazky/het-leven-dat-je-verdient-vier-weken-gewoonte.webp',chapter:'Rozdział 3 · Ludzie',title:'Cztery tygodnie, by granice stały się nawykiem',page:'Strona 201',emotion:'To nie jest jednorazowy akt. To nawyk, który budujesz — tydzień po tygodniu, osoba po osobie.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-drieminutentechniek.webp',chapter:'Rozdział 4 · Umysł',title:'Technika trzech minut — gdy panika Cię zalewa',page:'Strona 232',emotion:'Ataku paniki nie pokonasz myślą. Pokonasz go ciałem: oddechem, dotykiem, obecnością.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-slaap-en-geest.webp',chapter:'Rozdział 4 · Umysł',title:'Sen i umysł — dlaczego mózg w nocy nie chce się wyłączyć',page:'Strona 273',emotion:'Zły sen osłabia korę przedczołową. A wiesz, co staje się silniejsze? Ciało migdałowate. Ośrodek lęku.'},
-  {src:'/ukazky/het-leven-dat-je-verdient-essentialisme-thuis.webp',chapter:'Rozdział 5 · Energia',title:'Esencjalizm w domu — mniej, ale lepiej',page:'Strona 330',emotion:'Pięć posiłków tygodniowo. Jedno wyjście na zakupy. Zero zmęczenia decyzjami. Tyle zmienia jedna zasada.'}
+  {src:'/ukazky/01-filar-rzeczy-przestrzen.jpg',chapter:'Filar 1 · Rzeczy',title:'Dlaczego się ich trzymasz i dlaczego cię to wykańcza',page:'Strona 13',emotion:'347 sztuk ubrań w szafie — a ty stoisz przed nią piętnaście minut bez pomysłu, co założyć. To nie jest kwestia układania. To jest kwestia tożsamości.'},
+  {src:'/ukazky/02-mieszkanie-w-ktorym-sie-dusilam.jpg',chapter:'Filar 2 · Przestrzeń',title:'Mieszkanie, w którym się dusiłam',page:'Strona 83',emotion:'Czwarta nad ranem, wrzesień. Leżę i wpatruję się w sufit. Każdy przedmiot w tym domu zabrałam ze sobą z małżeństwa — i każdy z nich coś mi zabiera z powrotem.'},
+  {src:'/ukazky/03-bezpieczna-pozycja-lozka.jpg',chapter:'Filar 2 · Przestrzeń',title:'Bezpieczna pozycja — to, gdzie stoi twoje łóżko, decyduje o twoim śnie',page:'Strona 89',emotion:'„Aniu, nie daję rady. Budzę się o trzeciej w nocy i potem zaczyna się piekło." Femke nie zmieniła mebli. Tylko ich pozycję.'},
+  {src:'/ukazky/04-plan-na-czternascie-dni.jpg',chapter:'Filar 2 · Przestrzeń',title:'Prosty plan na czternaście dni — od dnia 1 do dnia 14',page:'Strona 147',emotion:'Bez dramatów, bez rewolucji. Małe kroczki, dzień po dniu — od jednego pomieszczenia do całej sypialni, w której pierwszy raz od miesięcy przespisz noc.'},
+  {src:'/ukazky/05-kiedy-odpuszczanie-nie-dziala.jpg',chapter:'Filar 3 · Ludzie',title:'Kiedy „odpuszczanie" nie działa — wyjątki, o których musisz wiedzieć',page:'Strona 186',emotion:'Twoich dzieci nie „odpuszczasz". Bezpieczeństwa nie „odpuszczasz". Granicy zdrady nie „odpuszczasz". Są sytuacje, w których trzeba zareagować — nie wycofać się.'},
+  {src:'/ukazky/06-neuroplastycznosc-mozgu.jpg',chapter:'Filar 4 · Umysł',title:'Twój mózg się zmienia — nauka o neuroplastyczności',page:'Strona 218',emotion:'„Zawsze byłam lękowa, tego się nie da zmienić." Ja też tak myślałam. Ale osiem tygodni medytacji w mierzalny sposób zmienia aktywność kory przedczołowej.'},
+  {src:'/ukazky/07-mity-o-medytacji.jpg',chapter:'Filar 4 · Umysł',title:'Siedem mitów o medytacji — których czas się pozbyć',page:'Strona 259',emotion:'Pięć minut dziennie. Na krześle, w samochodzie, w kolejce w Biedronce. Bez czakr i pozycji lotosu. Mindfulness dopasowuje się do twojego życia — nie odwrotnie.'},
+  {src:'/ukazky/08-czas-pieniadze-energia.jpg',chapter:'Filar 5 · Energia',title:'Czas, pieniądze, energia — trzy waluty twojego życia',page:'Strona 303',emotion:'Większość ludzi myśli w kategoriach czasu i pieniędzy. Ale jest trzecia waluta, cenniejsza od obu — energia. Bez niej wolny weekend i pieniądze są ci na nic.'}
  ];
  let idx=0;
  const $=id=>document.getElementById(id);
