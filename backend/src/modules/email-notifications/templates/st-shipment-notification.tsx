@@ -264,7 +264,7 @@ export const StShipmentNotificationTemplate: React.FC<StShipmentNotificationTemp
               margin: '6px 0 0',
               lineHeight: '1.5',
             }}>
-              Våra böcker skickas från vårt centrallager i Polen via PostNord.
+              Våra böcker skickas från vårt centrallager i Tjeckien via GLS.
             </Text>
           </div>
         </div>
@@ -622,9 +622,9 @@ StShipmentNotificationTemplate.PreviewProps = {
     postal_code: '111 34',
     country_code: 'se',
   },
-  trackingNumber: 'PL9876543210',
-  trackingUrl: 'https://tracking.postnord.com/PL9876543210',
-  trackingCompany: 'PostNord',
+  trackingNumber: 'GLS123456789SE',
+  trackingUrl: 'https://gls-group.com/SE/sv/foljpaket?match=GLS123456789SE',
+  trackingCompany: 'GLS',
   billingEntity: {
     legal_name: 'Performance Marketing Solution s.r.o.',
     registration_id: '06259928',
