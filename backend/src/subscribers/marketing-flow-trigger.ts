@@ -63,7 +63,11 @@ export default async function marketingFlowTrigger({
     const matching = flows.filter((f: any) => {
       const t = f.trigger || {}
       if (t.type !== "event") return false
-      return t.config?.event === name || t.config?.event === "order.placed"
+      // Editor saves trigger as { type:"event", event:"order.placed" } (flat),
+      // but legacy code expected { type:"event", config:{ event:"..." } }.
+      // Accept BOTH shapes for backward compatibility.
+      const ev = t.config?.event ?? t.event
+      return ev === name || ev === "order.placed"
     })
     if (!matching.length) return
 
