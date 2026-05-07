@@ -113,6 +113,21 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         // sales_channel + shipping_option in the dextrum_delivery_mapping table
         // (set up in Dextrum admin UI).
 
+        // Defensive guard: legacy SE orders that were already shipped via
+        // PostNord must NEVER be re-sent to Dextrum. We mark them IMPORTED
+        // and skip permanently. (Belt-and-suspenders — cron filter already
+        // excludes non-WAITING, but in case someone resets status manually.)
+        const _orderMetaEarly = (order as any).metadata || {}
+        if (_orderMetaEarly.postnord_sent === true || _orderMetaEarly.postnord_sent === "true") {
+          console.log(`[Dextrum Hold] ${orderMap.mystock_order_code}: already sent to PostNord, skipping`)
+          await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+            delivery_status: "IMPORTED",
+            delivery_status_updated_at: now.toISOString(),
+            last_error: null,
+          })
+          continue
+        }
+
         const prefixMap: Record<string, string> = {
           NL: "NL", BE: "BE", DE: "DE", AT: "AT", LU: "LU",
           PL: "PL", CZ: "CZ", SK: "SK", SE: "SE", HU: "HU",
