@@ -15,7 +15,7 @@ export const COUNTRY_CARRIER_MAP: Record<string, string> = {
   sk: "packeta",
   pl: "packeta",
   hu: "packeta",
-  se: "postnord",
+  se: "gls",
 }
 
 // Packeta language codes per country
