@@ -92,6 +92,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Släpp Taget <hej@slapptagetboken.se>',
     project: 'slapp-taget',
     locale: 'sv',
+    smsDispatchTemplate: 'Slapp taget om det som forstor dig: Din bestallning ar pa vag. Spara: {url} hej@slapptagetboken.se',
   },
   'odpusc-ksiazka': {
     replyTo: 'biuro@odpusc-ksiazka.pl',
@@ -108,6 +109,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Släpp Taget <hej@slapptagetboken.se>',
     project: 'slapp-taget',
     locale: 'sv',
+    smsDispatchTemplate: 'Slapp taget om det som forstor dig: Din bestallning ar pa vag. Spara: {url} hej@slapptagetboken.se',
   },
   'lass-los': {
     replyTo: 'buch@lasslosbuch.de',
