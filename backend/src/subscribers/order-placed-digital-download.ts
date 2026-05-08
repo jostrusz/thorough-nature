@@ -210,9 +210,9 @@ export async function sendEbookDelivery(orderId: string, container: any, eventNa
     // Generate unique token
     const token = crypto.randomUUID()
 
-    // Set expiry to 7 days from now
+    // Set expiry to 30 days from now
     const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 7)
+    expiresAt.setDate(expiresAt.getDate() + 30)
 
     // Create digital download record (store project_id in metadata for frontend theming)
     await downloadService.createDigitalDownloads({

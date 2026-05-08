@@ -341,7 +341,7 @@ export const LlEbookDeliveryTemplate: React.FC<LlEbookDeliveryTemplateProps> & {
 LlEbookDeliveryTemplate.PreviewProps = {
   firstName: 'Maria',
   downloadUrl: 'https://www.lasslosbuch.de/download/abc123-test-token',
-  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+  expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
   billingEntity: {
     legal_name: 'Performance Marketing Solution s.r.o.',
     registration_id: '17255679',
