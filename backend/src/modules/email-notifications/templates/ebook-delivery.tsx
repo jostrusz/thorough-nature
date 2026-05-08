@@ -358,7 +358,7 @@ export const EbookDeliveryTemplate: React.FC<EbookDeliveryTemplateProps> & {
 EbookDeliveryTemplate.PreviewProps = {
   firstName: 'Emma',
   downloadUrl: 'https://tijdomloslaten.nl/download/abc123-test-token',
-  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+  expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
 } as EbookDeliveryTemplateProps
 
 export default EbookDeliveryTemplate

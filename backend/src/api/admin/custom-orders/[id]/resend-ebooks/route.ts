@@ -126,10 +126,10 @@ export async function POST(
     })
 
     if (existing && existing.length > 0) {
-      // Reuse existing token, extend expiry by 7 days
+      // Reuse existing token, extend expiry by 30 days
       token = (existing[0] as any).token
       const newExpiry = new Date()
-      newExpiry.setDate(newExpiry.getDate() + 7)
+      newExpiry.setDate(newExpiry.getDate() + 30)
       await downloadService.updateDigitalDownloads({
         selector: { id: (existing[0] as any).id },
         data: {
@@ -142,7 +142,7 @@ export async function POST(
       // Create new download record
       token = crypto.randomUUID()
       const expiresAt = new Date()
-      expiresAt.setDate(expiresAt.getDate() + 7)
+      expiresAt.setDate(expiresAt.getDate() + 30)
       await downloadService.createDigitalDownloads({
         order_id: id,
         token,

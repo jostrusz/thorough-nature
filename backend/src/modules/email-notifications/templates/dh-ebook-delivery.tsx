@@ -343,7 +343,7 @@ export const DhEbookDeliveryTemplate: React.FC<DhEbookDeliveryTemplateProps> & {
 DhEbookDeliveryTemplate.PreviewProps = {
   firstName: 'Jan',
   downloadUrl: 'https://dehondenbijbel.nl/download/abc123-test-token',
-  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+  expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
   billingEntity: {
     legal_name: 'EverChapter OÜ',
     registration_id: '16938029',
