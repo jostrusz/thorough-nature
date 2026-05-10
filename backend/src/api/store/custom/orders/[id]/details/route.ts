@@ -17,6 +17,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
         "items.id", "items.title", "items.product_title", "items.variant_title",
         "items.variant_sku", "items.quantity", "items.unit_price", "items.total",
         "items.thumbnail",
+        // quantity lives on the order_item join row in Medusa v2, not on the line_item —
+        // request both so the fallback (i.detail?.quantity ?? i.quantity) always resolves
+        "items.detail.quantity",
       ],
       filters: { id: orderId },
     })
@@ -44,9 +47,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
                    + (Number(order.tax_total) || 0)
                    + (Number(order.shipping_total) || 0)
                    - (Number(order.discount_total) || 0)
+    const itemQty = (i: any) => Number(i?.detail?.quantity ?? i?.quantity) || 0
     const itemsTotal = (order.items || []).reduce(
       (sum: number, i: any) =>
-        sum + (Number(i.total) || (Number(i.unit_price) || 0) * (Number(i.quantity) || 0)),
+        sum + (Number(i.total) || (Number(i.unit_price) || 0) * itemQty(i)),
       0
     )
     const totalResolved = Number(order.total) || summaryTotal || computed || itemsTotal || 0
@@ -70,9 +74,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
           product_title: i.product_title,
           variant_title: i.variant_title,
           sku: i.variant_sku,
-          quantity: i.quantity,
+          quantity: itemQty(i),
           unit_price: Number(i.unit_price) || 0,
-          total: Number(i.total) || (Number(i.unit_price) || 0) * (Number(i.quantity) || 0),
+          total: Number(i.total) || (Number(i.unit_price) || 0) * itemQty(i),
           thumbnail: i.thumbnail,
         })),
         shipping_address: {

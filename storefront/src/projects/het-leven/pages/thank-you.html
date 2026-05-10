@@ -822,13 +822,24 @@ body { background: var(--bg); }
           var derivedBookCount = 0;
           for (var i = 0; i < orderItems.length; i++) {
             var it = orderItems[i];
+            var title = (it.product_title || it.title || '').toLowerCase();
+            // Skip non-main items (e-book bumps, upsells)
+            if (title.indexOf('het leven dat je verdient') === -1) continue;
+
+            // Try multiple sources for bundle size, in order of reliability:
+            //  1. SKU pattern HLDV-{1..4}
+            //  2. variant_title "1 Boek" / "2 Boeken" / "3 Boeken" / "4 Boeken"
+            //  3. fallback to 1
             var sku = (it.sku || '').toUpperCase();
-            var m = /^HLDV-([1-4])$/.exec(sku);
-            if (m) {
-              mainItem = it;
-              derivedBookCount = parseInt(m[1], 10) * (it.quantity || 1);
-              break;
-            }
+            var skuMatch = /^HLDV-([1-4])$/.exec(sku);
+            var variantTitle = (it.variant_title || '').toLowerCase();
+            var titleMatch = /^([1-4])\s*boek/.exec(variantTitle);
+            var bundleSize = skuMatch ? parseInt(skuMatch[1], 10)
+                            : titleMatch ? parseInt(titleMatch[1], 10)
+                            : 1;
+            mainItem = it;
+            derivedBookCount = bundleSize * (it.quantity || 1);
+            break;
           }
           if (mainItem && derivedBookCount > 0) {
             // Override bundleQty so any downstream code uses the correct value
