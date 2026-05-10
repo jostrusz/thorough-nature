@@ -30,13 +30,26 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     const sa = order.shipping_address || {}
 
     // Medusa v2 sometimes returns order.total = 0 even when subtotal+tax > 0
-    // (computed field doesn't resolve reliably). Fall back to summary or recomputed sum.
-    const summaryTotal = Number(order?.summary?.totals?.current_order_total) || 0
+    // (computed field doesn't resolve reliably). Fall back through every shape
+    // the summary relation can take (flat object, nested .totals, array of versions),
+    // then to a recomputed sum, then finally to sum(items.unit_price × quantity)
+    // — which is the only thing guaranteed to be non-zero on a real paid order.
+    const summaryRaw = order?.summary
+    const summaryRow = Array.isArray(summaryRaw) ? summaryRaw[summaryRaw.length - 1] : summaryRaw
+    const summaryTotal =
+        Number(summaryRow?.totals?.current_order_total)
+      || Number(summaryRow?.current_order_total)
+      || 0
     const computed = (Number(order.subtotal) || 0)
                    + (Number(order.tax_total) || 0)
                    + (Number(order.shipping_total) || 0)
                    - (Number(order.discount_total) || 0)
-    const totalResolved = Number(order.total) || summaryTotal || computed || 0
+    const itemsTotal = (order.items || []).reduce(
+      (sum: number, i: any) =>
+        sum + (Number(i.total) || (Number(i.unit_price) || 0) * (Number(i.quantity) || 0)),
+      0
+    )
+    const totalResolved = Number(order.total) || summaryTotal || computed || itemsTotal || 0
 
     res.json({
       success: true,
@@ -59,7 +72,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
           sku: i.variant_sku,
           quantity: i.quantity,
           unit_price: Number(i.unit_price) || 0,
-          total: Number(i.total) || 0,
+          total: Number(i.total) || (Number(i.unit_price) || 0) * (Number(i.quantity) || 0),
           thumbnail: i.thumbnail,
         })),
         shipping_address: {
