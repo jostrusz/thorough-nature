@@ -27,10 +27,10 @@
   },
   "upsellProduct": {
     "name": "Het Leven Dat Je Verdient",
-    "handle": "het-leven-dat-je-verdient",
+    "handle": "het-leven-dat-je-verdient-upsell",
     "variantId": "",
-    "price": 23,
-    "originalPrice": 36,
+    "price": 25,
+    "originalPrice": 35,
     "currency": "EUR"
   },
   "bundleOptions": [
