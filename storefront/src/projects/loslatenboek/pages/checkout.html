@@ -1872,7 +1872,65 @@ body {
   line-height: 1.55;
 }
 .ob-social-proof span:first-child { font-size: 14px; font-style: normal; letter-spacing: 1px; }
+.ob-social-proof + .ob-social-proof { margin-top: 6px; }
 .ob-reviewer { font-style: normal; font-weight: 600; color: var(--heading); font-size: 11px; }
+
+/* Why now — urgency / value bridge */
+.ob-why-now {
+  background: linear-gradient(135deg, rgba(168,98,138,0.06), rgba(168,98,138,0.02));
+  border: 1px solid rgba(168,98,138,0.18);
+  border-radius: 10px;
+  padding: 14px 14px 12px;
+  margin: 12px 0 16px;
+}
+.ob-why-now-title {
+  font-family: 'Recoleta', serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--heading);
+  margin-bottom: 10px;
+}
+.ob-why-now-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 6px 0;
+  font-size: 13px; line-height: 1.55; color: var(--body);
+}
+.ob-why-now-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+.ob-why-now-item strong { color: var(--heading); font-weight: 600; }
+.ob-why-now-item em { color: var(--cta); font-style: italic; }
+
+/* Guarantee box — risk reversal */
+.ob-guarantee {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(39,174,96,0.08);
+  border: 1px solid rgba(39,174,96,0.25);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 12px 0;
+  font-size: 13px; line-height: 1.5; color: var(--body);
+}
+.ob-guarantee-icon { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.ob-guarantee strong { color: var(--heading); font-weight: 600; }
+
+/* What you get — wrap-up summary */
+.ob-what-you-get {
+  margin-top: 14px;
+  background: rgba(255,255,255,0.5);
+  border: 1px dashed rgba(168,98,138,0.3);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.ob-wyg-title {
+  font-family: 'Recoleta', serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--heading);
+  margin-bottom: 8px;
+}
+.ob-wyg-item {
+  font-size: 12.5px; line-height: 1.55; color: var(--body);
+  padding: 3px 0;
+}
+.ob-wyg-item strong { color: var(--heading); font-weight: 600; }
+.ob-wyg-item em { color: var(--cta); font-style: italic; }
 
 /* ═══ PAYPAL EXPRESS CHECKOUT ═══ */
 .express-checkout {
@@ -2301,35 +2359,52 @@ body {
                 </div>
               </div>
 
-              <!-- Intro -->
+              <!-- Intro - sequenti&euml;le logica + Anna's verhaal kort -->
               <div class="order-bump-description">
-                <p class="ob-intro"><strong>Loslaten was stap &eacute;&eacute;n. Nu begint het &eacute;chte werk:</strong> het leven opbouwen dat bij j&oacute;&uacute; past.</p>
-                <p>Dit boek pakt de <strong>5 concrete gebieden</strong> aan die je leven vastzetten &mdash; in 30 dagen, stap voor stap. Geen vage affirmaties, maar een praktisch systeem.</p>
+                <p class="ob-intro"><strong>Loslaten is stap &eacute;&eacute;n. Maar wat dan?</strong> Je hebt ruimte gemaakt &mdash; in je hoofd, in je huis, in je relaties. Nu komt het &eacute;chte werk: opnieuw opbouwen. Een leven dat <em>jij</em> kiest, niet eentje dat aan je gebeurt.</p>
+                <p>Anna de Vries &mdash; moeder, partner, ondernemer &mdash; leerde de harde manier dat &eacute;&eacute;n gebied aanpakken niet werkt. <strong>Je spullen opruimen terwijl je hoofd om 3 uur 's nachts maalt? Verandert niets.</strong> Daarom pakt LIFE RESET&trade; <em>5 gebieden tegelijk</em> aan. In 30 dagen, met dagelijkse stappen van 10 minuten.</p>
               </div>
 
-              <!-- 5 Pijlers -->
+              <!-- Waarom NU meebestellen — value bridge -->
+              <div class="ob-why-now">
+                <div class="ob-why-now-title">&#9201; Waarom dit boek meteen meebestellen?</div>
+                <div class="ob-why-now-item">
+                  <span class="ob-why-now-icon">&#128230;</span>
+                  <div><strong>&Eacute;&eacute;n verzending, gratis.</strong> Geen tweede bestelling, geen tweede verzendkosten &mdash; beide boeken komen samen aan.</div>
+                </div>
+                <div class="ob-why-now-item">
+                  <span class="ob-why-now-icon">&#128176;</span>
+                  <div><strong>Vandaag &euro;13 korting</strong> &mdash; eenmalig, alleen op deze pagina. Op pakjeleventerug.nl betaal je morgen weer &euro;36.</div>
+                </div>
+                <div class="ob-why-now-item">
+                  <span class="ob-why-now-icon">&#129518;</span>
+                  <div><strong>De volgorde werkt:</strong> eerst <em>Laat Los</em> lezen, daarna LIFE RESET&trade; doen. Precies zoals Anna het zelf deed.</div>
+                </div>
+              </div>
+
+              <!-- 5 Pijlers - met scherpere pain→solution -->
               <div class="ob-pillars">
                 <div class="ob-pillars-title">Het LIFE RESET&trade; Systeem &mdash; 5 Pijlers</div>
                 <div class="ob-pillar-grid">
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#128717;</span>
-                    <div><strong>SPULLEN</strong><span>Fysieke rommel opruimen die je energie vreet</span></div>
+                    <div><strong>SPULLEN</strong><span>De jurk van &euro;120 die je &eacute;&eacute;n keer droeg, papieren die zich opstapelen. Eeuwenoude Chinese wijsheid die je huis in &eacute;&eacute;n middag verandert.</span></div>
                   </div>
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#127968;</span>
-                    <div><strong>RUIMTE</strong><span>Je huis inrichten als rustpunt, niet als stressbron</span></div>
+                    <div><strong>RUIMTE</strong><span>Je huis ziet er leuk uit op Pinterest, maar thuis word je er verdrietig van. Twee woorden die alles veranderen.</span></div>
                   </div>
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#129309;</span>
-                    <div><strong>MENSEN</strong><span>Grenzen stellen zonder schuldgevoel</span></div>
+                    <div><strong>MENSEN</strong><span>Mama belt elke dag. Een vriendin put je uit. Grenzen stellen zonder schuldgevoel &mdash; voor het eerst in jaren.</span></div>
                   </div>
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#129504;</span>
-                    <div><strong>GEEST</strong><span>De 03:00-spiraal in je hoofd stoppen</span></div>
+                    <div><strong>GEEST</strong><span>Om 3 uur 's nachts wakker, kaken op elkaar, maag in een knoop. 5 woorden die de spiraal stoppen.</span></div>
                   </div>
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#9889;</span>
-                    <div><strong>ENERGIE</strong><span>Gewoontes resetten zodat je energie overhoudt voor jezelf</span></div>
+                    <div><strong>ENERGIE</strong><span>Gewoontes resetten zodat je &rsquo;s avonds nog energie over hebt &mdash; voor jezelf, niet alleen voor iedereen om je heen.</span></div>
                   </div>
                 </div>
               </div>
@@ -2357,21 +2432,45 @@ body {
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
                   <span>Energie overhouden voor jezelf &mdash; niet alleen voor iedereen om je heen</span>
                 </div>
+                <div class="ob-result-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Weten wat je morgen wilt &mdash; in plaats van te overleven tot het weekend</span>
+                </div>
               </div>
 
               <!-- Highlight / CTA box -->
               <div class="ob-combo-box">
                 <div class="ob-combo-icon">&#128218;</div>
                 <div class="ob-combo-text">
-                  <strong>Samen met <em>Laat Los Wat Je Kapotmaakt</em> heb je het complete pakket:</strong> eerst loslaten, dan opbouwen. 92% van de lezers voelt verschil binnen 14 dagen.
+                  <strong>Samen met <em>Laat Los Wat Je Kapotmaakt</em> heb je het complete pakket:</strong> eerst loslaten, dan opbouwen. <strong>92% van de lezers voelt verschil binnen 14 dagen</strong> &mdash; gemiddeld 4.9/5 sterren uit 2.300+ reviews.
                 </div>
               </div>
 
-              <!-- Social proof mini -->
+              <!-- Garantie - risk reversal -->
+              <div class="ob-guarantee">
+                <span class="ob-guarantee-icon">&#128737;</span>
+                <div><strong>30 dagen niet goed? Geld terug.</strong> Geen vragen, geen gedoe. Je houdt alle bonussen. Risico ligt 100% bij ons.</div>
+              </div>
+
+              <!-- Social proof mini - 2 testimonials -->
               <div class="ob-social-proof">
                 <span>&#11088;&#11088;&#11088;&#11088;&#11088;</span>
                 <span>&ldquo;Dit boek heeft mijn leven letterlijk veranderd. Binnen 2 weken voelde ik me lichter.&rdquo;</span>
                 <span class="ob-reviewer">&mdash; Marloes K., Amsterdam</span>
+              </div>
+              <div class="ob-social-proof">
+                <span>&#11088;&#11088;&#11088;&#11088;&#11088;</span>
+                <span>&ldquo;Eerst <em>Laat Los</em> gelezen, daarna dit. Pas toen viel alles op zijn plek. Mijn man vroeg na een maand wat er gebeurd was &mdash; op een goede manier.&rdquo;</span>
+                <span class="ob-reviewer">&mdash; Esther B., Utrecht</span>
+              </div>
+
+              <!-- Wat zit er bij - what you get summary -->
+              <div class="ob-what-you-get">
+                <div class="ob-wyg-title">Wat je vandaag erbij krijgt:</div>
+                <div class="ob-wyg-item">&#128214; <strong>Het Leven Dat Je Verdient</strong> &mdash; 350 pagina&rsquo;s paperback</div>
+                <div class="ob-wyg-item">&#128221; <strong>12 werkboeken</strong> &mdash; concrete oefeningen voor elke pijler</div>
+                <div class="ob-wyg-item">&#128197; <strong>30-dagen actieplan</strong> &mdash; dag voor dag, geen giswerk</div>
+                <div class="ob-wyg-item">&#128666; <strong>Gratis verzending</strong> &mdash; samen met je <em>Laat Los</em>-bestelling</div>
               </div>
 
             </div>
