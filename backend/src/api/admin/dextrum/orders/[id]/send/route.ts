@@ -96,15 +96,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     // 7. Build items
     /**
      * SKU mapping for bundle variants → physical warehouse SKU.
-     * Loslatenboek uses per-bundle variants (LLWJK-1 to LLWJK-4) where the suffix
-     * encodes the number of physical books. The warehouse needs the real product SKU
-     * (LLWJK7824627392) with the correct quantity.
+     * Kept in sync with jobs/dextrum-order-hold.ts — any new bundle
+     * or upsell variant must be added in BOTH places.
      */
     const BUNDLE_SKU_MAP: Record<string, { physicalSku: string; quantity: number }> = {
       "LLWJK-1": { physicalSku: "LLWJK7824627392", quantity: 1 },
       "LLWJK-2": { physicalSku: "LLWJK7824627392", quantity: 2 },
       "LLWJK-3": { physicalSku: "LLWJK7824627392", quantity: 3 },
       "LLWJK-4": { physicalSku: "LLWJK7824627392", quantity: 4 },
+      "HLDV-1": { physicalSku: "HLDV62786284629", quantity: 1 },
+      "HLDV-2": { physicalSku: "HLDV62786284629", quantity: 2 },
+      "HLDV-3": { physicalSku: "HLDV62786284629", quantity: 3 },
+      "HLDV-4": { physicalSku: "HLDV62786284629", quantity: 4 },
+      "HLDV62786284629-2": { physicalSku: "HLDV62786284629", quantity: 1 },
     }
 
     // Filter out non-physical items (e.g. COD fee) that don't exist in the warehouse

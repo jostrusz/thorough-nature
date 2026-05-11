@@ -157,6 +157,10 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           "HLDV-2": { physicalSku: "HLDV62786284629", quantity: 2 },
           "HLDV-3": { physicalSku: "HLDV62786284629", quantity: 3 },
           "HLDV-4": { physicalSku: "HLDV62786284629", quantity: 4 },
+          // Order-bump upsell variant (Loslatenboek → Het Leven cross-sell).
+          // Admin SKU has -2 suffix to distinguish from the main het-leven 1-book
+          // SKU, but Dextrum holds only the parent barcode HLDV62786284629.
+          "HLDV62786284629-2": { physicalSku: "HLDV62786284629", quantity: 1 },
         }
 
         // Filter out non-physical items (e.g. COD fee) that don't exist in the warehouse
