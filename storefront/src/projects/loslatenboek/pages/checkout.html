@@ -7284,13 +7284,24 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
           // Product info for payment gateway descriptions
           product_name: PROJECT_CONFIG.mainProduct.name || 'Book',
-          // Pass cart items for Klarna order lines (product name instead of "Order")
-          items: [{
-            id: PROJECT_CONFIG.mainProduct.variantId || 'main',
-            title: PROJECT_CONFIG.mainProduct.name || PROJECT_CONFIG.name || 'Product',
-            quantity: checkoutBundleQty || 1,
-            unit_price: checkoutBundlePrice / (checkoutBundleQty || 1),
-          }],
+          // Pass cart items for Klarna order lines + PayPal item_total breakdown
+          items: (function() {
+            var lines = [{
+              id: PROJECT_CONFIG.mainProduct.variantId || 'main',
+              title: PROJECT_CONFIG.mainProduct.name || PROJECT_CONFIG.name || 'Product',
+              quantity: checkoutBundleQty || 1,
+              unit_price: checkoutBundlePrice / (checkoutBundleQty || 1),
+            }];
+            if (checkoutOrderBump && PROJECT_CONFIG.upsellProduct) {
+              lines.push({
+                id: PROJECT_CONFIG.upsellProduct.variantId || 'upsell',
+                title: PROJECT_CONFIG.upsellProduct.name || 'Upsell',
+                quantity: 1,
+                unit_price: PROJECT_CONFIG.upsellProduct.price || 0,
+              });
+            }
+            return lines;
+          })(),
         };
       }
 
