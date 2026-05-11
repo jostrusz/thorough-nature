@@ -72,17 +72,23 @@ export default async function marketingFlowTrigger({
     if (!matching.length) return
 
     // Find the contact (marketing-event-ingestor will have created it)
-    const [contact] = (await service.listMarketingContacts({
-      brand_id: brand.id,
-      email,
-    } as any)) as any[]
+    // Subscriber execution order is not guaranteed — marketing-event-ingestor
+    // and this subscriber both fire on order.placed. Empirically the ingestor
+    // wins ~25% of the time, leaving 75% of buyers permanently un-enrolled.
+    // Retry the lookup with backoff to give the ingestor time to finish.
+    let contact: any = null
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const rows = (await service.listMarketingContacts({
+        brand_id: brand.id,
+        email,
+      } as any)) as any[]
+      if (rows?.[0]) { contact = rows[0]; break }
+      // 500ms, 1s, 2s, 4s — ingestor's listMarketingContacts+create takes ~1s
+      await new Promise(r => setTimeout(r, 500 * Math.pow(2, attempt)))
+    }
     if (!contact) {
-      // Subscriber order is not guaranteed — if event ingestor hasn't run yet,
-      // we skip this trigger. A future event (or the cron-driven resolver) can
-      // replay; we don't create contacts here because the trigger context
-      // doesn't include enough consent info.
-      logger.info(
-        `[Marketing Flow Trigger] No contact yet for ${email}@${brand.slug}; skipping ${matching.length} flow(s)`
+      logger.warn(
+        `[Marketing Flow Trigger] No contact for ${email}@${brand.slug} after 5 attempts; skipping ${matching.length} flow(s)`
       )
       return
     }
