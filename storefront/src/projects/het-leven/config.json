@@ -27,6 +27,14 @@
     "currency": "EUR",
     "thumbnail": ""
   },
+  "upsellProduct": {
+    "name": "Laat Los Wat Je Kapotmaakt",
+    "handle": "laat-los-wat-je-kapotmaakt-upsell",
+    "variantId": "variant_01KRB6ZGJ2BXNSGF64V4GJAG1F",
+    "price": 25,
+    "originalPrice": 35,
+    "currency": "EUR"
+  },
   "bundleOptions": [
     { "qty": 1, "price": 36, "save": 0, "badge": "VOOR JEZELF", "variantId": "variant_01KP3WW3ZGQG8Q195T7FR7WW1H" },
     { "qty": 2, "price": 59, "save": 13, "badge": "DEEL MET EEN VRIEND(IN)", "variantId": "variant_01KP3WW5TBGHPHMGR9TSFRHAJH" },

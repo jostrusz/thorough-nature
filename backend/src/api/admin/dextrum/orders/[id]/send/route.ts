@@ -109,6 +109,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       "HLDV-3": { physicalSku: "HLDV62786284629", quantity: 3 },
       "HLDV-4": { physicalSku: "HLDV62786284629", quantity: 4 },
       "HLDV62786284629-2": { physicalSku: "HLDV62786284629", quantity: 1 },
+      "LLWJK7824627392-2": { physicalSku: "LLWJK7824627392", quantity: 1 },
     }
 
     // Filter out non-physical items (e.g. COD fee) that don't exist in the warehouse

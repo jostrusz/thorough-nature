@@ -1983,6 +1983,47 @@ body {
 .ob-social-proof span:first-child { font-size: 14px; font-style: normal; letter-spacing: 1px; }
 .ob-reviewer { font-style: normal; font-weight: 600; color: var(--heading); font-size: 11px; }
 
+/* CTA - decision affirmation at the end of expanded section */
+.ob-cta {
+  margin-top: 14px;
+  background: linear-gradient(135deg, var(--cta), #8E4D70);
+  border-radius: 12px;
+  padding: 16px 16px 14px;
+  color: #fff;
+  text-align: center;
+}
+.ob-cta-headline {
+  font-family: 'Recoleta', serif;
+  font-size: 18px; font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.ob-cta-body {
+  font-size: 13px; line-height: 1.55;
+  color: rgba(255,255,255,0.95);
+  margin: 0 0 8px;
+}
+.ob-cta-body strong { color: #fff; font-weight: 700; }
+.ob-cta-body em { color: rgba(255,255,255,0.95); font-style: italic; font-weight: 500; }
+.ob-cta-tag {
+  font-size: 12.5px; line-height: 1.5;
+  color: rgba(255,255,255,0.88);
+  margin: 0 0 10px;
+  font-style: italic;
+}
+.ob-cta-tag strong { color: #fff; font-weight: 600; font-style: normal; }
+.ob-cta-arrow {
+  display: inline-block;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 999px;
+  padding: 6px 14px;
+  text-transform: uppercase;
+}
+
 /* ═══ PAYPAL EXPRESS CHECKOUT ═══ */
 .express-checkout {
   margin-bottom: 8px;
@@ -2342,9 +2383,9 @@ body {
       <div class="msb-line bump" id="msb-bump-line" style="display:none;">
         <span class="msb-line-label" id="msb-bump-name">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Het Leven Dat Je Verdient
+          Laat Los Wat Je Kapotmaakt
         </span>
-        <span class="msb-line-val" id="msb-bump-price">&euro;23,00</span>
+        <span class="msb-line-val" id="msb-bump-price">&euro;25,00</span>
       </div>
       <!-- Mezisoučet -->
       <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(184,92,74,0.18);">
@@ -2388,8 +2429,8 @@ body {
           </div>
         </div>
 
-        <!-- ═══ ORDER BUMP — disabled for het-leven (no upsell product yet) ═══ -->
-        <div class="order-bump animate-in" id="order-bump" style="display:none !important"
+        <!-- ═══ ORDER BUMP — cross-sell Laat Los Wat Je Kapotmaakt ═══ -->
+        <div class="order-bump animate-in" id="order-bump">
           <!-- Hlavička — obrázek + checkbox + info + šipka (vždy viditelné) -->
           <div class="order-bump-header" id="order-bump-header">
             <div class="order-bump-checkbox" id="order-bump-check">
@@ -2426,76 +2467,76 @@ body {
                   <!-- Obrázek z Medusa admin -->
                 </div>
                 <div class="order-bump-detail-info">
-                  <div class="order-bump-name" id="order-bump-name">Het Leven Dat Je Verdient</div>
-                  <div class="order-bump-author">Anna de Vries</div>
+                  <div class="order-bump-name" id="order-bump-name">Laat Los Wat Je Kapotmaakt</div>
+                  <div class="order-bump-author">Joris de Vries</div>
                   <div class="order-bump-meta">
-                    <span>&#128214; 350 pagina&rsquo;s</span>
-                    <span>&#128197; 30-dagen plan</span>
+                    <span>&#128214; 290 pagina&rsquo;s</span>
+                    <span>&#128221; 14 hoofdstukken + werkboek</span>
                     <span>&#11088; 4.9/5 sterren</span>
                   </div>
                   <div class="order-bump-prices">
-                    <span class="order-bump-old-price" id="order-bump-detail-old">&euro;36,00</span>
-                    <span class="order-bump-new-price" id="order-bump-detail-new">&euro;23,00</span>
-                    <span class="order-bump-save" id="order-bump-detail-save">Bespaar &euro;13</span>
+                    <span class="order-bump-old-price" id="order-bump-detail-old">&euro;35,00</span>
+                    <span class="order-bump-new-price" id="order-bump-detail-new">&euro;25,00</span>
+                    <span class="order-bump-save" id="order-bump-detail-save">Bespaar &euro;10</span>
                   </div>
                 </div>
               </div>
 
               <!-- Intro -->
               <div class="order-bump-description">
-                <p class="ob-intro"><strong>Loslaten was stap &eacute;&eacute;n. Nu begint het &eacute;chte werk:</strong> het leven opbouwen dat bij j&oacute;&uacute; past.</p>
-                <p>Dit boek pakt de <strong>5 concrete gebieden</strong> aan die je leven vastzetten &mdash; in 30 dagen, stap voor stap. Geen vage affirmaties, maar een praktisch systeem.</p>
+                <p class="ob-intro"><strong>Voordat je opbouwt, moet je loslaten wat je kapotmaakt.</strong> Dit boek legt de fundering onder <em>Het Leven Dat Je Verdient</em>.</p>
+                <p>Joris de Vries schreef het voor wie 's nachts wakker ligt met gedachten die maar blijven malen. Voor wie vasthoudt aan pijn, schuld of woede die al jaren niets meer brengt. <strong>Geen theorie, geen spirituele praat</strong> &mdash; concrete oefeningen en een werkboek waarmee je direct aan de slag kunt.</p>
               </div>
 
-              <!-- 5 Pijlers -->
+              <!-- Voor wie dit boek is -->
               <div class="ob-pillars">
-                <div class="ob-pillars-title">Het LIFE RESET&trade; Systeem &mdash; 5 Pijlers</div>
+                <div class="ob-pillars-title">Dit boek is voor jou als&hellip;</div>
                 <div class="ob-pillar-grid">
                   <div class="ob-pillar">
-                    <span class="ob-pillar-icon">&#128717;</span>
-                    <div><strong>SPULLEN</strong><span>Fysieke rommel opruimen die je energie vreet</span></div>
+                    <span class="ob-pillar-icon">&#127769;</span>
+                    <div><strong>'s NACHTS</strong><span>Je niet kunt slapen omdat je gedachten blijven malen</span></div>
                   </div>
                   <div class="ob-pillar">
-                    <span class="ob-pillar-icon">&#127968;</span>
-                    <div><strong>RUIMTE</strong><span>Je huis inrichten als rustpunt, niet als stressbron</span></div>
+                    <span class="ob-pillar-icon">&#128148;</span>
+                    <div><strong>EX OF VERLIES</strong><span>Je niet kunt stoppen met denken aan iemand die weg is</span></div>
                   </div>
                   <div class="ob-pillar">
-                    <span class="ob-pillar-icon">&#129309;</span>
-                    <div><strong>MENSEN</strong><span>Grenzen stellen zonder schuldgevoel</span></div>
+                    <span class="ob-pillar-icon">&#128591;</span>
+                    <div><strong>SCHULD</strong><span>Je jezelf blijft straffen voor wat je hebt gezegd of gedaan</span></div>
                   </div>
                   <div class="ob-pillar">
-                    <span class="ob-pillar-icon">&#129504;</span>
-                    <div><strong>GEEST</strong><span>De 03:00-spiraal in je hoofd stoppen</span></div>
+                    <span class="ob-pillar-icon">&#128293;</span>
+                    <div><strong>WOEDE</strong><span>Je woede of wrok voelt naar iemand die je pijn heeft gedaan</span></div>
                   </div>
                   <div class="ob-pillar">
-                    <span class="ob-pillar-icon">&#9889;</span>
-                    <div><strong>ENERGIE</strong><span>Gewoontes resetten zodat je energie overhoudt voor jezelf</span></div>
+                    <span class="ob-pillar-icon">&#129512;</span>
+                    <div><strong>LEEGTE</strong><span>Je vanbinnen leegte voelt en niet weet wie je bent zonder die pijn</span></div>
                   </div>
                 </div>
               </div>
 
               <!-- Wat je bereikt -->
               <div class="ob-results">
-                <div class="ob-results-title">Na 30 dagen zul je&hellip;</div>
+                <div class="ob-results-title">Wat dit boek je geeft&hellip;</div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Weer slapen zonder de 03:00-spiraal in je hoofd</span>
+                  <span>Eindelijk slapen zonder de gedachten die maar blijven rondrazen</span>
                 </div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>&lsquo;Nee&rsquo; zeggen zonder schuldgevoel &mdash; voor het eerst in jaren</span>
+                  <span>Loskomen van iemand of iets dat je kapotmaakt</span>
                 </div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Weten wie je bent als niemand iets van je nodig heeft</span>
+                  <span>Stoppen met jezelf te straffen voor het verleden</span>
                 </div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Een huis dat rust geeft in plaats van stress</span>
+                  <span>De ketens van woede, schuld en angst doorbreken</span>
                 </div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Energie overhouden voor jezelf &mdash; niet alleen voor iedereen om je heen</span>
+                  <span>De fundering leggen waarop je Het Leven Dat Je Verdient kunt opbouwen</span>
                 </div>
               </div>
 
@@ -2503,15 +2544,27 @@ body {
               <div class="ob-combo-box">
                 <div class="ob-combo-icon">&#128218;</div>
                 <div class="ob-combo-text">
-                  <strong>Samen met <em>Het Leven Dat Je Verdient</em> heb je het complete pakket:</strong> eerst loslaten, dan opbouwen. 92% van de lezers voelt verschil binnen 14 dagen.
+                  <strong>Samen met <em>Het Leven Dat Je Verdient</em> heb je het complete pakket:</strong> eerst loslaten met Joris, dan opbouwen met Anna. Twee boeken, &eacute;&eacute;n pad terug naar jezelf.
                 </div>
               </div>
 
               <!-- Social proof mini -->
               <div class="ob-social-proof">
                 <span>&#11088;&#11088;&#11088;&#11088;&#11088;</span>
-                <span>&ldquo;Dit boek heeft mijn leven letterlijk veranderd. Binnen 2 weken voelde ik me lichter.&rdquo;</span>
-                <span class="ob-reviewer">&mdash; Marloes K., Amsterdam</span>
+                <span>&ldquo;Mijn gedachten bleven maar rondrazen &mdash; als een eindeloze lus die nooit stopt. Dit boek liet me eindelijk de weg terug naar mezelf zien.&rdquo;</span>
+                <span class="ob-reviewer">&mdash; Lezer van Laat Los Wat Je Kapotmaakt</span>
+              </div>
+
+              <!-- CTA - decision affirmation -->
+              <div class="ob-cta">
+                <div class="ob-cta-headline">Klaar voor stap 1?</div>
+                <p class="ob-cta-body">
+                  <strong>Vink het vakje bovenaan aan</strong> om <em>Laat Los Wat Je Kapotmaakt</em> toe te voegen aan je bestelling. Beide boeken worden samen bezorgd &mdash; geen tweede bestelling, geen tweede verzending, geen &lsquo;ik doe het later wel&rsquo;.
+                </p>
+                <p class="ob-cta-tag">
+                  Opbouwen is wat je al gekozen hebt. Loslaten is de fundering eronder. <strong>Samen is dat het complete traject &mdash; precies wat je nodig hebt.</strong>
+                </p>
+                <div class="ob-cta-arrow">&uarr; Vink aan om toe te voegen voor &euro;25</div>
               </div>
 
             </div>
@@ -2815,9 +2868,9 @@ body {
       <div class="summary-line" id="summary-order-bump" style="display:none;padding:8px 0;border-top:1px dashed rgba(184,92,74,0.2);">
         <span id="summary-bump-name" style="font-size:13px;display:flex;align-items:center;gap:4px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Het Leven Dat Je Verdient
+          Laat Los Wat Je Kapotmaakt
         </span>
-        <span id="summary-bump-price" style="font-weight:600;color:var(--cta);">&euro;23,00</span>
+        <span id="summary-bump-price" style="font-weight:600;color:var(--cta);">&euro;25,00</span>
       </div>
 
       <div class="summary-line" id="summary-subtotal">
@@ -3140,7 +3193,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var msbSubtitle = document.getElementById('msb-subtitle');
     if (msbSubtitle) {
       var parts = ['Paperback · ' + selectedBundleQty + '× boek'];
-      if (orderBumpActive) parts.push('+ Het Leven');
+      if (orderBumpActive) parts.push('+ Laat Los');
       msbSubtitle.textContent = parts.join(' ');
     }
 
