@@ -3283,17 +3283,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var thumbContainer = document.getElementById('order-bump-thumb');  // Malý v headeru
     var imgContainer = document.getElementById('order-bump-img');      // Velký v detailu
 
-    // Zkus načíst obrázek z Medusa API
+    // medusaFetch already parses JSON — treat its resolve value as `data`, not Response.
     var upsellHandle = PROJECT_CONFIG.upsellProduct.handle;
     if (upsellHandle) {
-      medusaFetch('/store/products?handle=' + upsellHandle, {
+      medusaFetch('/store/products?handle=' + encodeURIComponent(upsellHandle), {
         method: 'GET',
-        headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
-      }).then(function(res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
       }).then(function(data) {
-        var product = data.products && data.products[0];
+        var product = data && data.products && data.products[0];
         if (product && product.thumbnail) {
           var imgTag = '<img src="' + product.thumbnail + '" alt="' + (product.title || 'Het Leven Dat Je Verdient') + '">';
           if (thumbContainer) thumbContainer.innerHTML = imgTag;
