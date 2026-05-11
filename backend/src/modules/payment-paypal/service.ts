@@ -5,6 +5,7 @@ import {
   PaymentSessionStatus,
 } from "@medusajs/framework/utils"
 import { PayPalApiClient } from "./api-client"
+import { logPaymentEvent } from "../payment-debug/utils/log"
 
 type Options = {
   clientId?: string
@@ -278,7 +279,12 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
       let itemTotalValue: string
 
       if (dataItems) {
-        // Use real cart items from frontend
+        // Use real cart items from frontend.
+        // CRITICAL: PayPal validates `item_total === Σ(rounded_unit_amount × quantity)` to 2 decimals.
+        // If we compute item_total from raw unit_price (e.g. 79 / 3 = 26.333...) but each line's
+        // unit_amount gets rounded to 26.33, PayPal sees 26.33 × 3 = 78.99 ≠ 79.00 and rejects
+        // with ITEM_TOTAL_MISMATCH. So compute item_total from the SAME rounded values PayPal sees,
+        // then let the breakdown reconciliation (below) add the rounding remainder as shipping.
         paypalItems = dataItems.map((item: any) => ({
           name: String(item.title || item.name || "Product").substring(0, 127),
           quantity: String(item.quantity || 1),
@@ -288,9 +294,9 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
           },
           category: "PHYSICAL_GOODS" as const,
         }))
-        // item_total = sum of (unit_amount * quantity) for each item
         const computedItemTotal = dataItems.reduce((sum: number, item: any) => {
-          return sum + (Number(item.unit_price || 0) * Number(item.quantity || 1))
+          const roundedUnit = Number(formatPayPalAmount(Number(item.unit_price || 0)))
+          return sum + (roundedUnit * Number(item.quantity || 1))
         }, 0)
         itemTotalValue = formatPayPalAmount(computedItemTotal)
       } else {
@@ -542,6 +548,23 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         `[PayPal] Order created: ${result.id}, status: ${result.status}, approvalUrl: ${approvalUrl ? "yes" : "none"}`
       )
 
+      // Journey log — order creation (observability, never throws)
+      logPaymentEvent({
+        intent_id: result.id,
+        email: data?.email || null,
+        project_slug: projectSlug,
+        event_type: "paypal_order_created",
+        event_data: {
+          status: result.status,
+          amount: totalValue,
+          currency,
+          method,
+          isAPM,
+          isCard,
+          has_approval_url: !!approvalUrl,
+        },
+      }).catch(() => {})
+
       // Return format required by Medusa v2: { id, data }
       // approvalUrl is used by the checkout to redirect the customer to PayPal/bank
       return {
@@ -574,6 +597,23 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
       this.logger_.error(
         `[PayPal] Request payload was: ${JSON.stringify(orderData || {})}`
       )
+
+      // Journey log — failure visible to /admin/payment-debug timeline
+      logPaymentEvent({
+        intent_id: `paypal-failed-${Date.now()}`,
+        email: data?.email || null,
+        project_slug: data?.project_slug || context?.project_slug || null,
+        event_type: "paypal_initiation_failed",
+        error_code: paypalError?.details?.[0]?.issue || paypalError?.name || "UNKNOWN",
+        event_data: {
+          message: errorMsg,
+          debug_id: debugId,
+          details: paypalError?.details || null,
+          method: data?.method || null,
+          amount: data?.amount || null,
+          currency: currency_code,
+        },
+      }).catch(() => {})
 
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,

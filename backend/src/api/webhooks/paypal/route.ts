@@ -2,6 +2,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { emitPaymentLog } from "../../../utils/payment-logger"
+import { PayPalApiClient } from "../../../modules/payment-paypal/api-client"
 
 const GATEWAY_CONFIG_MODULE = "gatewayConfig"
 
@@ -59,9 +60,6 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         const cfgClientSecret = keys?.client_secret || keys?.secret_key
 
         if (webhookId && cfgClientId && cfgClientSecret) {
-          const { PayPalApiClient } = await import(
-            "../../../modules/payment-paypal/api-client"
-          )
           const client = new PayPalApiClient({
             client_id: cfgClientId,
             client_secret: cfgClientSecret,
@@ -360,7 +358,6 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
                 (s: any) => s.data?.paypalOrderId === paypalOrderId || s.data?.id === paypalOrderId
               )
               const projectSlug = session?.data?.project_slug || null
-              const { PayPalApiClient } = await import("../../../modules/payment-paypal/api-client")
 
               // Resolve PayPal credentials for this project. The model field
               // is `project_slugs` (PLURAL — JSON array). Load all + filter
