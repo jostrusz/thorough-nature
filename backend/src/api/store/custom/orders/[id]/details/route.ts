@@ -32,11 +32,12 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     const order = orders[0] as any
     const sa = order.shipping_address || {}
 
-    // Medusa v2 sometimes returns order.total = 0 even when subtotal+tax > 0
-    // (computed field doesn't resolve reliably). Fall back through every shape
-    // the summary relation can take (flat object, nested .totals, array of versions),
-    // then to a recomputed sum, then finally to sum(items.unit_price × quantity)
-    // — which is the only thing guaranteed to be non-zero on a real paid order.
+    // Medusa v2's order.total is unreliable: it can be 0 (computed field
+    // doesn't resolve), OR it can over-apply region tax on top of a unit_price
+    // that was already marked is_tax_inclusive=true (seen for BE 6% — €36
+    // stored tax-inclusive surfaces back as €38.16). order_summary stores the
+    // authoritative final amount that matches the captured payment, so prefer
+    // that first. Fall back through computed → items only when summary missing.
     const summaryRaw = order?.summary
     const summaryRow = Array.isArray(summaryRaw) ? summaryRaw[summaryRaw.length - 1] : summaryRaw
     const summaryTotal =
@@ -53,7 +54,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
         sum + (Number(i.total) || (Number(i.unit_price) || 0) * itemQty(i)),
       0
     )
-    const totalResolved = Number(order.total) || summaryTotal || computed || itemsTotal || 0
+    const totalResolved = summaryTotal || Number(order.total) || computed || itemsTotal || 0
 
     res.json({
       success: true,
