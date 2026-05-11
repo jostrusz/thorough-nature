@@ -267,6 +267,8 @@ body { background: var(--bg); }
 .ty-order-icon.book { background: rgba(194,123,160,0.12); }
 .ty-order-icon.ebook { background: rgba(212,152,181,0.15); }
 .ty-order-icon.ship { background: rgba(45,27,61,0.06); }
+.ty-order-icon.with-img { background: transparent; padding: 0; overflow: hidden; }
+.ty-order-icon.with-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .ty-order-name { font-size: 15px; font-weight: 600; color: var(--heading); }
 .ty-order-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .ty-order-total {
@@ -927,8 +929,10 @@ body { background: var(--bg); }
     if (orderItemsEl) {
       var upsellName = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.name) || 'Upsell Product';
       var extraLabel = orderBumpActive ? 'Fysiek boek \u2014 toegevoegd bij bestelling' : 'Fysiek boek \u2014 upsell bestelling';
-      var upsellItemHtml = '<div class="ty-order-item">' +
-        '<div class="ty-order-icon book">\uD83D\uDCD6</div>' +
+      // Insert with emoji placeholder; async-replace with real thumbnail from Medusa
+      var iconId = 'ty-upsell-icon-' + Date.now();
+      var upsellItemHtml = '<div class="ty-order-item ty-upsell-item">' +
+        '<div class="ty-order-icon book" id="' + iconId + '">\uD83D\uDCD6</div>' +
         '<div>' +
           '<div class="ty-order-name">' + upsellName + '</div>' +
           '<div class="ty-order-desc">' + extraLabel + '</div>' +
@@ -937,6 +941,26 @@ body { background: var(--bg); }
       var items = orderItemsEl.querySelectorAll('.ty-order-item');
       var lastItem = items[items.length - 1];
       if (lastItem) lastItem.insertAdjacentHTML('beforebegin', upsellItemHtml);
+
+      // Fetch upsell product thumbnail from Medusa and swap emoji for real image
+      try {
+        var upsellHandle = PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.handle;
+        if (upsellHandle && PROJECT_CONFIG.medusaUrl) {
+          fetch(PROJECT_CONFIG.medusaUrl + '/store/products?handle=' + encodeURIComponent(upsellHandle) + '&fields=thumbnail,title', {
+            headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
+          })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            var product = data.products && data.products[0];
+            var iconEl = document.getElementById(iconId);
+            if (product && product.thumbnail && iconEl) {
+              iconEl.className = 'ty-order-icon with-img';
+              iconEl.innerHTML = '<img src="' + product.thumbnail + '" alt="' + (product.title || upsellName) + '">';
+            }
+          })
+          .catch(function() { /* fallback: emoji stays */ });
+        }
+      } catch(e) { /* never block TY render */ }
     }
   }
 
