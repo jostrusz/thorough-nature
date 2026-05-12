@@ -1,13 +1,15 @@
 {
   "slug": "slipp-taket",
   "name": "Slipp taket på det som ødelegger deg",
-  "domain": "",
+  "domain": "slipptaket.com",
+  "domainAliases": ["www.slipptaket.com"],
   "locale": "nb",
   "defaultCountry": "NO",
   "defaultPhonePrefix": "47",
   "phonePrefixByCountry": {
     "NO": "47"
   },
+  "orderBumpEnabled": false,
   "salesChannelName": "Slipp Taket",
   "medusaUrl": "",
   "publishableApiKey": "pk_29da1d7f22fd5266b2bb29f93c36f1eb17546583fca7669d9dde29f27e475fd9",
@@ -46,8 +48,8 @@
     "thank-you": "thank-you.html",
     "contact": "contact.html",
     "privacy": "privacy.html",
-    "voorwaarden": "voorwaarden.html",
-    "verzending": "verzending.html",
-    "retourbeleid": "retourbeleid.html"
+    "vilkar": "vilkar.html",
+    "frakt": "frakt.html",
+    "retur": "retur.html"
   }
 }

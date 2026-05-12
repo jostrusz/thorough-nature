@@ -103,6 +103,13 @@
       "runtimeArgs": ["http-server", "storefront/src/projects/zycie-zaslugy/pages", "-p", "8103", "-c-1"],
       "port": 8103,
       "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+    },
+    {
+      "name": "slipp-taket",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
+      "runtimeArgs": ["http-server", "storefront/src/projects/slipp-taket/pages", "-p", "8104", "-c-1"],
+      "port": 8104,
+      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
     }
   ]
 }
