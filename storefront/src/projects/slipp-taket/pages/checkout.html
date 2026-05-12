@@ -1651,20 +1651,31 @@ body {
 }
 .bundle-option.selected .bundle-radio-dot { transform: scale(1); }
 .bundle-option input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
-.bundle-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.bundle-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .bundle-label { font-size: 14px; font-weight: 600; color: var(--heading); line-height: 1.3; }
-.bundle-bonus { font-size: 11px; color: var(--muted); font-weight: 500; }
-.bundle-pricing { text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.bundle-bonus { font-size: 12px; color: var(--cta); font-weight: 600; }
+.bundle-pricing { text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
 .bundle-badge {
-  font-size: 8px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.04em; color: var(--white);
-  background: var(--cta);
-  padding: 3px 8px; border-radius: 4px; line-height: 1.4;
+  display: inline-block; align-self: flex-start;
+  font-size: 9px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--white);
+  background: linear-gradient(135deg, var(--cta), #A8628A);
+  padding: 4px 10px; border-radius: 4px; line-height: 1.4;
   white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(194,123,160,0.25);
+  margin-bottom: 2px;
 }
+.bundle-option:nth-child(2) .bundle-badge { background: linear-gradient(135deg, #4DAEDB, #2E8FBF); box-shadow: 0 2px 6px rgba(77,174,219,0.25); }
+.bundle-option:nth-child(3) .bundle-badge { background: linear-gradient(135deg, #E8A06A, #C97F4A); box-shadow: 0 2px 6px rgba(232,160,106,0.25); }
+.bundle-option:nth-child(4) .bundle-badge { background: linear-gradient(135deg, #27AE60, #1E8E4D); box-shadow: 0 2px 6px rgba(39,174,96,0.3); }
 .bundle-price { font-size: 16px; font-weight: 700; color: var(--heading); }
 .bundle-original-price {
   font-size: 13px; color: var(--muted); text-decoration: line-through; line-height: 1;
+}
+.bundle-save {
+  font-size: 11px; font-weight: 700; color: #27AE60;
+  background: rgba(39,174,96,0.1); padding: 2px 8px; border-radius: 4px;
+  white-space: nowrap;
 }
 
 /* ─── ORDER BUMP — accordion ─── */
@@ -3094,18 +3105,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     PROJECT_CONFIG.bundleOptions.forEach(function(opt, idx) {
       var isSelected = (idx === 0);
       var originalPrice = opt.qty * unitPrice;
-      var label = opt.label || (opt.qty + '× ' + productName);
+      var qtyLabel = opt.qty === 1 ? '1 bok' : opt.qty + ' bøker';
       html += '<label class="bundle-option' + (isSelected ? ' selected' : '') + '" data-qty="' + opt.qty + '" data-price="' + opt.price + '">';
       html += '<input type="radio" name="bundle" value="' + opt.qty + '"' + (isSelected ? ' checked' : '') + '>';
       html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
       html += '<div class="bundle-info">';
-      html += '<span class="bundle-label">' + opt.qty + '× ' + productName + '</span>';
-      html += '<span class="bundle-bonus">+ 2 bonussen</span>';
+      if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
+      html += '<span class="bundle-label">' + qtyLabel + ' — ' + productName + '</span>';
+      html += '<span class="bundle-bonus">🎁 + 2 gratis bonus e-bøker inkludert</span>';
       html += '</div>';
       html += '<div class="bundle-pricing">';
-      if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
       html += '<div class="bundle-price">' + formatPrice(opt.price) + '</div>';
       if (opt.qty > 1) html += '<div class="bundle-original-price">' + formatPrice(originalPrice) + '</div>';
+      if (opt.save) html += '<div class="bundle-save">Spar ' + opt.save + ' kr</div>';
       html += '</div>';
       html += '</label>';
     });
