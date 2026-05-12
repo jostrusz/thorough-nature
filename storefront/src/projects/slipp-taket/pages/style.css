@@ -2002,3 +2002,28 @@ h2 { font-size: 38px; }
 .verhaal, .auteur, .final-cta, .bonuses, .waarom, .reviews-section, .final-offer, .faq-section {
  will-change: auto;
 }
+
+
+/* ═══ Transparency note under reviews — explains why Dutch reviews ═══ */
+.reviews-transparency {
+ max-width: 880px;
+ margin: 20px auto 36px;
+ padding: 18px 22px;
+ background: rgba(194, 123, 160, 0.08);
+ border: 1.5px dashed rgba(194, 123, 160, 0.4);
+ border-radius: 14px;
+ display: flex;
+ align-items: flex-start;
+ gap: 14px;
+}
+.reviews-transparency-icon { font-size: 22px; flex-shrink: 0; }
+.reviews-transparency-text {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14.5px;
+ line-height: 1.6;
+ color: var(--heading);
+}
+.reviews-transparency-text strong { display: block; margin-bottom: 4px; font-weight: 700; }
+@media (max-width: 600px) {
+ .reviews-transparency { flex-direction: column; gap: 8px; padding: 16px 18px; }
+}
