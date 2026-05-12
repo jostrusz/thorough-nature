@@ -1,0 +1,53 @@
+{
+  "slug": "slipp-taket",
+  "name": "Slipp taket på det som ødelegger deg",
+  "domain": "",
+  "locale": "nb",
+  "defaultCountry": "NO",
+  "defaultPhonePrefix": "47",
+  "phonePrefixByCountry": {
+    "NO": "47"
+  },
+  "salesChannelName": "Slipp Taket",
+  "medusaUrl": "",
+  "publishableApiKey": "pk_29da1d7f22fd5266b2bb29f93c36f1eb17546583fca7669d9dde29f27e475fd9",
+  "facebookPixelId": "",
+  "regions": {
+    "NO": "reg_01KRD3ABWEDY16N07ST8PNJ9XZ"
+  },
+  "mainProduct": {
+    "name": "Slipp taket på det som ødelegger deg",
+    "handle": "slipp-taket-pa-det-som-odelegger-deg",
+    "variantId": "variant_01KRD3ABWEJWTH929A5N938K0D",
+    "price": 399,
+    "currency": "NOK",
+    "thumbnail": ""
+  },
+  "upsellProduct": {
+    "name": "",
+    "handle": "",
+    "variantId": "",
+    "price": 0,
+    "originalPrice": 0,
+    "currency": "NOK"
+  },
+  "bundleOptions": [
+    { "qty": 1, "price": 399, "save": 0, "badge": "FOR DEG SELV", "label": "1 bok" },
+    { "qty": 2, "price": 699, "save": 99, "badge": "DEL MED EN VENN", "label": "2 bøker" },
+    { "qty": 3, "price": 949, "save": 248, "badge": "PERFEKT SOM GAVE", "label": "3 bøker" },
+    { "qty": 4, "price": 1199, "save": 397, "badge": "BESTE VERDI", "label": "4 bøker" }
+  ],
+  "catalogContentIds": [],
+  "mollieProfileId": "",
+  "paymentProviders": {},
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "thank-you": "thank-you.html",
+    "contact": "contact.html",
+    "privacy": "privacy.html",
+    "voorwaarden": "voorwaarden.html",
+    "verzending": "verzending.html",
+    "retourbeleid": "retourbeleid.html"
+  }
+}
