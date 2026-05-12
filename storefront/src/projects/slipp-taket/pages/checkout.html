@@ -1618,28 +1618,50 @@ body {
   align-items: center;
   gap: 8px;
 }
-.bundle-options { display: flex; flex-direction: column; gap: 8px; }
+.bundle-options { display: flex; flex-direction: column; gap: 10px; }
 .bundle-option {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 14px;
+  padding: 16px 18px;
   border: 1.5px solid rgba(194,123,160,0.18);
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(.22,1,.36,1);
   position: relative;
   background: var(--white);
 }
-.bundle-option:hover { border-color: var(--highlight); background: var(--light); }
+.bundle-option:hover {
+  border-color: var(--highlight);
+  background: linear-gradient(135deg, rgba(194,123,160,0.03), rgba(212,152,181,0.02));
+  transform: translateY(-1px);
+}
 .bundle-option.selected {
   border-color: var(--cta);
-  background: linear-gradient(135deg, rgba(194,123,160,0.06), rgba(212,152,181,0.04));
-  box-shadow: 0 0 0 3px rgba(194,123,160,0.10);
+  background: linear-gradient(135deg, rgba(194,123,160,0.07), rgba(212,152,181,0.04));
+  box-shadow: 0 0 0 3px rgba(194,123,160,0.12);
+}
+/* Highlighted recommended option (BESTE VERDI = 4 bøker) */
+.bundle-option.recommended {
+  border-color: var(--cta);
+  background: linear-gradient(135deg, rgba(194,123,160,0.06), rgba(245,237,242,0.6));
+}
+.bundle-option.recommended::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: 12px;
+  padding: 1.5px;
+  background: linear-gradient(135deg, var(--cta), var(--highlight));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.7;
 }
 .bundle-radio {
   width: 20px; height: 20px; border-radius: 50%;
-  border: 2px solid var(--muted);
+  border: 2px solid rgba(155,122,173,0.4);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; transition: border-color 0.2s ease;
 }
@@ -1651,31 +1673,74 @@ body {
 }
 .bundle-option.selected .bundle-radio-dot { transform: scale(1); }
 .bundle-option input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
-.bundle-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-.bundle-label { font-size: 14px; font-weight: 600; color: var(--heading); line-height: 1.3; }
-.bundle-bonus { font-size: 12px; color: var(--cta); font-weight: 600; }
-.bundle-pricing { text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
-.bundle-badge {
-  display: inline-block; align-self: flex-start;
-  font-size: 9px; font-weight: 800; text-transform: uppercase;
-  letter-spacing: 0.06em; color: var(--white);
-  background: linear-gradient(135deg, var(--cta), #A8628A);
-  padding: 4px 10px; border-radius: 4px; line-height: 1.4;
-  white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(194,123,160,0.25);
-  margin-bottom: 2px;
+.bundle-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.bundle-qty {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--heading);
+  line-height: 1.35;
 }
-.bundle-option:nth-child(2) .bundle-badge { background: linear-gradient(135deg, #4DAEDB, #2E8FBF); box-shadow: 0 2px 6px rgba(77,174,219,0.25); }
-.bundle-option:nth-child(3) .bundle-badge { background: linear-gradient(135deg, #E8A06A, #C97F4A); box-shadow: 0 2px 6px rgba(232,160,106,0.25); }
-.bundle-option:nth-child(4) .bundle-badge { background: linear-gradient(135deg, #27AE60, #1E8E4D); box-shadow: 0 2px 6px rgba(39,174,96,0.3); }
-.bundle-price { font-size: 16px; font-weight: 700; color: var(--heading); }
+.bundle-qty strong {
+  font-family: 'Recoleta', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--heading);
+}
+.bundle-bonus {
+  font-size: 11.5px;
+  color: var(--cta);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+.bundle-badge {
+  position: absolute;
+  top: -8px; left: 16px;
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--cta);
+  background: var(--white);
+  padding: 3px 9px; border-radius: 4px;
+  border: 1px solid rgba(194,123,160,0.25);
+  white-space: nowrap;
+}
+.bundle-option.recommended .bundle-badge {
+  background: var(--cta);
+  color: var(--white);
+  border-color: var(--cta);
+  box-shadow: 0 3px 10px rgba(194,123,160,0.3);
+}
+.bundle-pricing {
+  text-align: right;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 95px;
+}
+.bundle-price {
+  font-family: 'Recoleta', serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--heading);
+  line-height: 1;
+}
 .bundle-original-price {
-  font-size: 13px; color: var(--muted); text-decoration: line-through; line-height: 1;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: line-through;
+  line-height: 1;
 }
 .bundle-save {
-  font-size: 11px; font-weight: 700; color: #27AE60;
-  background: rgba(39,174,96,0.1); padding: 2px 8px; border-radius: 4px;
-  white-space: nowrap;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #1E8E4D;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-top: 2px;
 }
 
 /* ─── ORDER BUMP — accordion ─── */
@@ -3102,17 +3167,20 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var unitPrice = PROJECT_CONFIG.mainProduct.price || 35;
     var productName = PROJECT_CONFIG.mainProduct.name || 'Boek';
     var html = '';
+    var totalBundles = PROJECT_CONFIG.bundleOptions.length;
     PROJECT_CONFIG.bundleOptions.forEach(function(opt, idx) {
       var isSelected = (idx === 0);
+      var isRecommended = (idx === totalBundles - 1); // Last = best value
       var originalPrice = opt.qty * unitPrice;
       var qtyLabel = opt.qty === 1 ? '1 bok' : opt.qty + ' bøker';
-      html += '<label class="bundle-option' + (isSelected ? ' selected' : '') + '" data-qty="' + opt.qty + '" data-price="' + opt.price + '">';
+      var classes = 'bundle-option' + (isSelected ? ' selected' : '') + (isRecommended ? ' recommended' : '');
+      html += '<label class="' + classes + '" data-qty="' + opt.qty + '" data-price="' + opt.price + '">';
+      if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
       html += '<input type="radio" name="bundle" value="' + opt.qty + '"' + (isSelected ? ' checked' : '') + '>';
       html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
       html += '<div class="bundle-info">';
-      if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
-      html += '<span class="bundle-label">' + qtyLabel + ' — ' + productName + '</span>';
-      html += '<span class="bundle-bonus">🎁 + 2 gratis bonus e-bøker inkludert</span>';
+      html += '<span class="bundle-qty"><strong>' + qtyLabel + '</strong> — ' + productName + '</span>';
+      html += '<span class="bundle-bonus">🎁 + 2 gratis e-bøker inkludert</span>';
       html += '</div>';
       html += '<div class="bundle-pricing">';
       html += '<div class="bundle-price">' + formatPrice(opt.price) + '</div>';
