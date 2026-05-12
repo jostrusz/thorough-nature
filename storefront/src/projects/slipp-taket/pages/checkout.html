@@ -3904,7 +3904,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var components = getPayPalSdkComponents();
     if (components.length === 0) components = ['buttons'];
 
-    var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
+    var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'NOK').toUpperCase();
     // PayPal SDK always uses the same domain — sandbox/live is determined by client_id
     var sdkUrl = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(clientId.trim())
       + '&components=' + components.join(',')
@@ -4083,7 +4083,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               return { id: id, quantity: 1, item_price: price };
             }),
             value: purchaseValue,
-            currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
+            currency: PROJECT_CONFIG.mainProduct.currency || 'NOK',
             num_items: bundleQty + (bumpActive ? 1 : 0),
             order_id: order.id
           }, {
@@ -4584,7 +4584,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               console.log('[Express Google Pay] PayPal order:', expressOrderId);
 
               var totalPrice = sessionData.amount || '35.00';
-              var currencyCode = sessionData.currency_code || 'EUR';
+              var currencyCode = sessionData.currency_code || 'NOK';
 
               var paymentDataRequest = {
                 apiVersion: 2,
@@ -4761,7 +4761,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             countryCode: applepayConfig.countryCode || 'NO',
             merchantCapabilities: applepayConfig.merchantCapabilities || ['supports3DS'],
             supportedNetworks: applepayConfig.supportedNetworks || ['visa', 'masterCard', 'amex'],
-            currencyCode: 'EUR',
+            currencyCode: 'NOK',
             requiredShippingContactFields: ['name', 'email', 'postalAddress'],
             requiredBillingContactFields: ['postalAddress'],
             total: {
@@ -4963,7 +4963,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (loadingEl) loadingEl.style.display = 'block';
     if (errorEl) errorEl.style.display = 'none';
 
-    var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
+    var currency = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency || 'NOK').toUpperCase();
     var slug = PROJECT_CONFIG.slug || '';
     var apiUrl = MEDUSA_URL + '/store/payment-options?currency=' + currency;
     if (slug) apiUrl += '&project_slug=' + encodeURIComponent(slug);
@@ -7246,7 +7246,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           email: customerData.email,
           // Pass amount info for Klarna order lines
           amount: checkoutTotal,
-          currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
+          currency: (PROJECT_CONFIG.mainProduct.currency || 'NOK').toUpperCase(),
           // Product info for payment gateway descriptions
           product_name: PROJECT_CONFIG.mainProduct.name || 'Book',
           // Pass cart items for Klarna order lines + PayPal item_total breakdown
@@ -7585,7 +7585,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               var dropInOptions = {
                 intent_id: providerData.intentId,
                 client_secret: providerData.clientSecret,
-                currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
+                currency: (PROJECT_CONFIG.mainProduct.currency || 'NOK').toUpperCase(),
                 country_code: (countrySelect.value || 'NO').toUpperCase(),
                 autoCapture: true,
                 withBilling: false,
