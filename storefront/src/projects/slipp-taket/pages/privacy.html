@@ -6,7 +6,7 @@
 <title>Personvern — Slipp taket på det som ødelegger deg</title>
 <meta name="description" content="Lees hoe wij omgaan met je personopplysninger bij bestillingen van Laat Los Wat Je Kapotmaakt.">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" href="/laat-los-logo-logo.png" type="image/png">
+<link rel="icon" href="/Slipp-taket-på-det-som-ødelegger-deg-logo.png" type="image/png">
 
 <!-- ═══ FONTS ═══ -->
 <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
@@ -235,6 +235,27 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .page-content { padding: 32px 16px 60px; }
  .data-table { display: block; overflow-x: auto; }
 }
+
+/* ═══ PRELOADER ═══ */
+.preloader {
+ position: fixed;
+ top: 0; left: 0; width: 100%; height: 100%;
+ background: var(--bg);
+ display: flex; align-items: center; justify-content: center;
+ z-index: 9999;
+ transition: opacity 0.6s cubic-bezier(.4,0,.2,1), visibility 0.6s;
+}
+.preloader.loaded {
+ opacity: 0; visibility: hidden; pointer-events: none;
+}
+.preloader-logo {
+ animation: preloaderPulse 1.4s ease-in-out infinite;
+}
+@keyframes preloaderPulse {
+ 0%, 100% { transform: scale(1); opacity: 0.85; }
+ 50% { transform: scale(1.08); opacity: 1; }
+}
+
 </style>
 <script src="js/project-config.js"></script>
 <script src="js/pixel.js"></script>
@@ -248,11 +269,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </head>
 <body>
 
+<!-- ═══ PRELOADER ═══ -->
+<div class="preloader" id="preloader">
+ <img src="/Slipp-taket-på-det-som-ødelegger-deg-logo.png" alt="Laster..." class="preloader-logo" height="60" style="height:60px;width:auto;">
+</div>
+
+
 <!-- ═══ NAVIGACE ═══ -->
 <nav class="site-nav">
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
-   <img src="Slipp-taket-på-det-som-ødelegger-deg-logo.png" alt="Slipp taket på det som ødelegger deg" width="150" height="40">
+   <img src="Slipp-taket-på-det-som-ødelegger-deg-logo.png" alt="Slipp taket på det som ødelegger deg" height="40" style="height:40px;width:auto;">
 
   </a>
   <div class="nav-links">
@@ -426,7 +453,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
    </ul>
   </div>
 
-  <p>Om je rechten uit te oefenen, stuur een e-post naar <a href="mailto:bok@slipptaket.com" style="color: var(--cta);">bok@slipptaket.com</a>. We reageren binnen 30 dagen.</p>
+  <p>For å utøve rettighetene dine, send en e-post til <a href="mailto:bok@slipptaket.com" style="color: var(--cta);">bok@slipptaket.com</a>. Vi svarer innen 30 dager.</p>
  </div>
 
  <div class="divider"></div>
@@ -434,11 +461,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <!-- Artikel 8 -->
  <div class="section-block">
   <h2><span class="section-num">8</span> E-postmarketing</h2>
-  <p>Als je je hebt aangemeld voor onze nieuwsbrief of toestemming hebt gegeven bij het afrekenen, kun je e-posts van ons ontvangen over:</p>
+  <p>Hvis du har meldt deg på nyhetsbrevet vårt eller gitt samtykke ved kassen, kan du motta e-poster fra oss om:</p>
   <ul>
    <li>Nieuwe boeken en producten</li>
    <li>Exclusieve aanbiedingen en kortingen</li>
-   <li>Tips en inspiratie gerelateerd aan onze boeken</li>
+   <li>Tips og inspirasjon knyttet til bøkene våre</li>
   </ul>
   <p>Je kunt je op elk moment uitschrijven via de link onderaan elke e-post. Na uitschrijving verwijderen we je e-postadres uit onze marketinglijst.</p>
  </div>
@@ -447,15 +474,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
  <!-- Artikel 9 -->
  <div class="section-block">
-  <h2><span class="section-num">9</span> Toezichthouder</h2>
-  <p>Als je een klacht hebt over de verwerking van je personopplysninger, kun je contact opnemen met de toezichthoudende autoriteit:</p>
+  <h2><span class="section-num">9</span> Tilsynsmyndighet</h2>
+  <p>Hvis du har en klage over behandlingen av personopplysningene dine, kan du kontakte tilsynsmyndigheten:</p>
   <div class="highlight-box">
-   <p><strong>Autoriteit Personopplysninger (NL)</strong><br>
-   Website: <a href="https://autoriteitpersonopplysninger.nl" target="_blank" style="color: var(--cta);">autoriteitpersonopplysninger.nl</a></p>
+   <p><strong>Datatilsynet (Norge)</strong><br>
+   Nettside: <a href="https://www.datatilsynet.no" target="_blank" style="color: var(--cta);">datatilsynet.no</a></p>
   </div>
   <div class="highlight-box" style="margin-top: 12px;">
-   <p><strong>ÚOOÚ (Tsjekkia)</strong><br>
-   Website: <a href="https://www.uoou.cz" target="_blank" style="color: var(--cta);">uoou.cz</a></p>
+   <p><strong>ÚOOÚ (Tsjekkia — tilsynsmyndighet for selskapets hjemland)</strong><br>
+   Nettside: <a href="https://www.uoou.cz" target="_blank" style="color: var(--cta);">uoou.cz</a></p>
   </div>
  </div>
 
@@ -478,21 +505,22 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <footer class="site-footer">
  <div class="footer-inner">
   <div class="footer-brand">
+   <img src="/slapp-takett.png" alt="Slipp taket på det som ødelegger deg" class="footer-logo" height="56" style="height:56px;width:auto;">
   </div>
   <div class="footer-links">
+   <a href="frakt.html">Frakt &amp; Levering</a>
+   <a href="retur.html">Retur &amp; Garanti</a>
    <a href="vilkar.html">Vilkår</a>
-   <a href="frakt.html">Frakt &amp; Retur</a>
    <a href="privacy.html">Personvern</a>
-   <a href="contact.html">Kontakt</a>
+   <a href="contact.html">Kundeservice</a>
   </div>
   <div class="footer-contact">
    <a href="mailto:bok@slipptaket.com">📧 bok@slipptaket.com</a>
-   <a href="tel:+420732915755">📞 +420 732 915 755</a>
-  </div>
+   </div>
  </div>
  <div class="footer-bottom">
   <span>Performance Marketing Solution s.r.o. • Rybná 716/24, Staré Město, 110 00 Praha • IČO: 06259928 • DIČ: CZ06259928</span>
-  <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle rettigheter forbeholdt.</span>
+  <span>&copy; 2026 Slipp taket på det som ødelegger deg. Alle rettigheter forbeholdt.</span>
  </div>
 </footer>
 
@@ -503,5 +531,18 @@ function toggleMobileMenu() {
  document.querySelector('.nav-mobile-overlay').classList.toggle('open');
 }
 </script>
+
+<!-- ═══ Preloader — skjul etter load ═══ -->
+<script>
+window.addEventListener('load', function() {
+ var preloader = document.getElementById('preloader');
+ if (preloader) {
+  setTimeout(function() {
+   preloader.classList.add('loaded');
+  }, 400);
+ }
+});
+</script>
+
 </body>
 </html>

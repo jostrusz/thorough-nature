@@ -88,8 +88,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .nav-logo img {
  height: 40px;
- width: 150px;
- aspect-ratio: 600 / 160;
+ width: auto;
 }
 .nav-logo-text {
  font-family: 'Recoleta', serif;
@@ -391,10 +390,10 @@ h2 { font-size: 38px; }
  gap: 0; flex-wrap: wrap;
 }
 .trust-bar-item {
- font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
+ font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
  color: #2D1B3D; display: flex; align-items: center; gap: 8px;
  white-space: nowrap;
- padding: 0 32px;
+ padding: 0 20px;
  position: relative;
 }
 .trust-bar-item:not(:last-child)::after {
@@ -406,6 +405,7 @@ h2 { font-size: 38px; }
  background: rgba(45, 27, 61, 0.2);
 }
 .trust-bar-item .icon { font-size: 18px; }
+.trust-bar-item .trust-flags { font-size: 16px; letter-spacing: -2px; margin-right: 4px; }
 
 /* ═══ SEKCE "DIT BOEK IS VOOR JOU" — karusel karet ═══ */
 .voor-jou { padding: 80px 20px; background: var(--white); position: relative; }
@@ -1720,8 +1720,7 @@ h2 { font-size: 38px; }
 }
 .footer-logo {
  height: 56px;
- width: 210px;
- aspect-ratio: 600 / 160;
+ width: auto;
 }
 .footer-brand-text {
  font-family: 'Recoleta', serif;

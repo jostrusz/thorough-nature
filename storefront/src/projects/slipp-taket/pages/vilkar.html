@@ -6,7 +6,7 @@
 <title>Vilkår — Slipp taket på det som ødelegger deg</title>
 <meta name="description" content="Lees onze algemene voorwaarden voor bestillingen van Laat Los Wat Je Kapotmaakt.">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" href="/laat-los-logo-logo.png" type="image/png">
+<link rel="icon" href="/Slipp-taket-på-det-som-ødelegger-deg-logo.png" type="image/png">
 
 <!-- ═══ FONTS ═══ -->
 <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
@@ -432,6 +432,27 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .page-header { padding: 40px 16px 36px; }
  .page-content { padding: 32px 16px 60px; }
 }
+
+/* ═══ PRELOADER ═══ */
+.preloader {
+ position: fixed;
+ top: 0; left: 0; width: 100%; height: 100%;
+ background: var(--bg);
+ display: flex; align-items: center; justify-content: center;
+ z-index: 9999;
+ transition: opacity 0.6s cubic-bezier(.4,0,.2,1), visibility 0.6s;
+}
+.preloader.loaded {
+ opacity: 0; visibility: hidden; pointer-events: none;
+}
+.preloader-logo {
+ animation: preloaderPulse 1.4s ease-in-out infinite;
+}
+@keyframes preloaderPulse {
+ 0%, 100% { transform: scale(1); opacity: 0.85; }
+ 50% { transform: scale(1.08); opacity: 1; }
+}
+
 </style>
 <script src="js/project-config.js"></script>
 <script src="js/pixel.js"></script>
@@ -445,11 +466,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </head>
 <body>
 
+<!-- ═══ PRELOADER ═══ -->
+<div class="preloader" id="preloader">
+ <img src="/Slipp-taket-på-det-som-ødelegger-deg-logo.png" alt="Laster..." class="preloader-logo" height="60" style="height:60px;width:auto;">
+</div>
+
+
 <!-- ═══ NAVIGACE ═══ -->
 <nav class="site-nav">
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
-   <img src="Slipp-taket-på-det-som-ødelegger-deg-logo.png" alt="Slipp taket på det som ødelegger deg" width="150" height="40">
+   <img src="Slipp-taket-på-det-som-ødelegger-deg-logo.png" alt="Slipp taket på det som ødelegger deg" height="40" style="height:40px;width:auto;">
 
   </a>
   <div class="nav-links">
@@ -545,7 +572,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   <p>Ved kjøp av produkter har forbrukeren mulighet til å angre på avtalen uten å oppgi grunn innen 14 dager. Denne angrefristen begynner dagen etter at forbrukeren har mottatt produktet.</p>
   <p>I løpet av angrefristen skal forbrukeren behandle produktet og emballasjen med omhu. Forbrukeren skal kun pakke ut eller bruke produktet i den grad det er nødvendig for å vurdere om hen ønsker å beholde det.</p>
   <p><strong>Ved digitale produkter (e-bøker, PDF):</strong></p>
-  <p>Na levering van digitalt innhold (download) vervalt het angrerett, mits de forbruker uitdrukkelijk heeft ingestemd met het afstand doen van zijn angrerett.</p>
+  <p>Etter levering av digitalt innhold (nedlasting) bortfaller angreretten, forutsatt at forbrukeren uttrykkelig har samtykket i å gi avkall på den.</p>
  </div>
 
  <div class="divider"></div>
@@ -553,8 +580,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <!-- Artikel 6 -->
  <div class="section-block">
   <h2><span class="section-num">6</span> De prijs</h2>
-  <p>Gedurende de in het aanbod vermelde geldigheidsduur worden de prijzen van de aangeboden producten en/of diensten niet verhoogd, behoudens prijswijzigingen als gevolg van veranderingen in btw-tarieven.</p>
-  <p>Alle prijzen zijn inclusief btw en inclusief verzendkosten (tenzij anders vermeld).</p>
+  <p>I tilbudets oppgitte gyldighetsperiode økes ikke prisene på produkter og/eller tjenester som tilbys, med unntak av prisendringer som følge av endringer i mva-satser.</p>
+  <p>Alle priser er inkludert mva. og inkludert frakt (med mindre annet er oppgitt). Bøker har 0 % mva. i Norge.</p>
  </div>
 
  <div class="divider"></div>
@@ -564,8 +591,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   <h2><span class="section-num">7</span> Betaling</h2>
   <p>Forbrukeren kan betale via følgende betalingsmåter:</p>
   <ul>
-   <li>iDEAL (Nederland)</li>
-   <li>Bancontact (België)</li>
+   <li>Visa &amp; Mastercard</li>
+   <li>Klarna</li>
+   <li>Trustly (bankoverføring)</li>
    <li>Creditcard (Visa, Mastercard)</li>
    <li>Apple Pay / Google Pay</li>
    <li>PayPal</li>
@@ -584,7 +612,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   <p>Leveringstiden er i gjennomsnitt 3-5 virkedager til Norge. For andre EU-land kan leveringstiden være lengre.</p>
 
   <div class="highlight-box">
-   <p><strong>Frakt is gratis</strong> naar Norge. Voor andere landen kunnen extra verzendkosten van toepassing zijn.</p>
+   <p><strong>Frakt er gratis</strong> til Norge. For andre land kan ekstra fraktkostnader påløpe.</p>
   </div>
  </div>
 
@@ -603,7 +631,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <div class="section-block">
   <h2><span class="section-num">10</span> Klagerregeling</h2>
   <p>Klager over gjennomføringen av avtalen må fremmes til selskapet innen rimelig tid, fullstendig og tydelig beskrevet, etter at forbrukeren har konstatert manglene.</p>
-  <p>Bij de selskapet ingediende klager worden binnen een termijn van 14 dagen gerekend vanaf de datum van ontvangst beantwoord.</p>
+  <p>Klager som sendes til selskapet besvares innen 14 dager regnet fra mottaksdatoen.</p>
   <p>Ta kontakt op via: <a href="mailto:bok@slipptaket.com" style="color: var(--cta);">bok@slipptaket.com</a></p>
  </div>
 
@@ -613,7 +641,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <div class="section-block">
   <h2><span class="section-num">11</span> Intellectueel eigendom</h2>
   <p>Alle immaterielle rettigheter til produktene, inkludert men ikke begrenset til tekster, bilder, design og layout, tilhører selskapet eller deres lisensgivere.</p>
-  <p>Het is niet toegestaan om zonder voorafgaande schriftelijke toestemming van de selskapet de producten of enig onderdeel daarvan te verveelvoudigen, op te slaan in een opplysningerbestand, of openbaar te maken.</p>
+  <p>Det er ikke tillatt å reprodusere, lagre i en database eller offentliggjøre produktene eller noen del av dem uten skriftlig forhåndssamtykke fra selskapet.</p>
  </div>
 
  <div class="divider"></div>
@@ -622,7 +650,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <div class="section-block">
   <h2><span class="section-num">12</span> Gjeldende rett</h2>
   <p>På alle tvister knyttet til denne avtalen gjelder tsjekkisk rett, med forbehold om ufravikelige bestemmelser i landet hvor forbrukeren bor.</p>
-  <p>De Europese Commissie biedt een platform voor onlinegeschillenbeslechting (ODR): <a href="https://ec.europa.eu/consumers/odr/" target="_blank" style="color: var(--cta);">https://ec.europa.eu/consumers/odr/</a></p>
+  <p>EU-kommisjonen tilbyr en plattform for nettbasert tvisteløsning (ODR): <a href="https://ec.europa.eu/consumers/odr/" target="_blank" style="color: var(--cta);">https://ec.europa.eu/consumers/odr/</a></p>
  </div>
 
  <div class="info-box" style="margin-top: 48px; background: linear-gradient(135deg, var(--light), var(--section));">
@@ -636,21 +664,22 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <footer class="site-footer">
  <div class="footer-inner">
   <div class="footer-brand">
+   <img src="/slapp-takett.png" alt="Slipp taket på det som ødelegger deg" class="footer-logo" height="56" style="height:56px;width:auto;">
   </div>
   <div class="footer-links">
+   <a href="frakt.html">Frakt &amp; Levering</a>
+   <a href="retur.html">Retur &amp; Garanti</a>
    <a href="vilkar.html">Vilkår</a>
-   <a href="frakt.html">Frakt &amp; Retur</a>
    <a href="privacy.html">Personvern</a>
-   <a href="contact.html">Kontakt</a>
+   <a href="contact.html">Kundeservice</a>
   </div>
   <div class="footer-contact">
    <a href="mailto:bok@slipptaket.com">📧 bok@slipptaket.com</a>
-   <a href="tel:+420732915755">📞 +420 732 915 755</a>
-  </div>
+   </div>
  </div>
  <div class="footer-bottom">
   <span>Performance Marketing Solution s.r.o. • Rybná 716/24, Staré Město, 110 00 Praha • IČO: 06259928 • DIČ: CZ06259928</span>
-  <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle rettigheter forbeholdt.</span>
+  <span>&copy; 2026 Slipp taket på det som ødelegger deg. Alle rettigheter forbeholdt.</span>
  </div>
 </footer>
 
@@ -661,5 +690,18 @@ function toggleMobileMenu() {
  document.querySelector('.nav-mobile-overlay').classList.toggle('open');
 }
 </script>
+
+<!-- ═══ Preloader — skjul etter load ═══ -->
+<script>
+window.addEventListener('load', function() {
+ var preloader = document.getElementById('preloader');
+ if (preloader) {
+  setTimeout(function() {
+   preloader.classList.add('loaded');
+  }, 400);
+ }
+});
+</script>
+
 </body>
 </html>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Takk for bestillingen!</title>
-  <link rel="icon" href="/laat-los-logo-logo.png" type="image/png">
+  <link rel="icon" href="/Slipp-taket-på-det-som-ødelegger-deg-logo.png" type="image/png">
 
   <!-- Sdílená konfigurace projektu -->
   <script src="js/project-config.js"></script>
@@ -442,6 +442,27 @@ body { background: var(--bg); }
   .ty-title { font-size: 23px; }
   .ty-order-total-price { font-size: 24px; }
 }
+
+/* ═══ PRELOADER ═══ */
+.preloader {
+ position: fixed;
+ top: 0; left: 0; width: 100%; height: 100%;
+ background: var(--bg);
+ display: flex; align-items: center; justify-content: center;
+ z-index: 9999;
+ transition: opacity 0.6s cubic-bezier(.4,0,.2,1), visibility 0.6s;
+}
+.preloader.loaded {
+ opacity: 0; visibility: hidden; pointer-events: none;
+}
+.preloader-logo {
+ animation: preloaderPulse 1.4s ease-in-out infinite;
+}
+@keyframes preloaderPulse {
+ 0%, 100% { transform: scale(1); opacity: 0.85; }
+ 50% { transform: scale(1.08); opacity: 1; }
+}
+
 </style>
 <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
@@ -452,6 +473,12 @@ body { background: var(--bg); }
 </script>
 </head>
 <body>
+
+<!-- ═══ PRELOADER ═══ -->
+<div class="preloader" id="preloader">
+ <img src="/Slipp-taket-på-det-som-ødelegger-deg-logo.png" alt="Laster..." class="preloader-logo" height="60" style="height:60px;width:auto;">
+</div>
+
 
 <!-- Confetti burst -->
 <div class="ty-confetti" id="ty-confetti"></div>
@@ -851,7 +878,7 @@ body { background: var(--bg); }
 
   // Mapování country kódů na názvy
   var countryNames = {
-    NL: 'Nederland', BE: 'België', LU: 'Luxemburg',
+    NO: 'Norge',
     DE: 'Duitsland', AT: 'Oostenrijk', CZ: 'Tsjechië',
   };
 
@@ -880,7 +907,7 @@ body { background: var(--bg); }
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
     var subject = encodeURIComponent('Vraag over bestelling #' + orderNum);
     var body = encodeURIComponent('Hei,\n\nJeg har et spørsmål om bestillingen min.\n\nBestillingsnummer: #' + orderNum + '\n\nMitt spørsmål: ');
-    mailtoEl.href = 'mailto:boek@loslatenboek.nl?subject=' + subject + '&body=' + body;
+    mailtoEl.href = 'mailto:bok@slipptaket.com?subject=' + subject + '&body=' + body;
   }
 
   // 2d. Celková cena — bere v potaz bundle, order bump a upsell
@@ -1104,7 +1131,7 @@ body { background: var(--bg); }
       address_1: newData.address_1,
       city: newData.city,
       postal_code: newData.postal_code,
-      country_code: customer ? customer.country_code : 'NL',
+      country_code: customer ? customer.country_code : 'NO',
     };
 
     // Aktualizuj localStorage
@@ -1324,6 +1351,19 @@ body { background: var(--bg); }
     document.querySelectorAll('.ty-reveal').forEach(function(el){ el.classList.add('is-visible'); });
   }
 })();
+</script>
+
+
+<!-- ═══ Preloader — skjul etter load ═══ -->
+<script>
+window.addEventListener('load', function() {
+ var preloader = document.getElementById('preloader');
+ if (preloader) {
+  setTimeout(function() {
+   preloader.classList.add('loaded');
+  }, 400);
+ }
+});
 </script>
 
 </body>
