@@ -122,6 +122,10 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "1.1 MB",
     },
   ],
+  // zycie-zaslugy: ebook delivery temporarily disabled (empty array →
+  // guard at line ~205 returns early without sending or touching metadata).
+  // Re-enable by populating with the same shape as other projects.
+  'zycie-zaslugy': [],
 }
 
 // Fallback for unknown projects
