@@ -179,6 +179,34 @@ const HL_STEPS: StepConfig[] = [
   },
 ]
 
+/** Życie, jakiego nigdy sobie nie pozwoliłaś (zycie-zaslugy) 3-step sequence */
+const ZZ_STEPS: StepConfig[] = [
+  {
+    step: 1,
+    templateKey: EmailTemplates.ZZ_ABANDONED_CHECKOUT_1,
+    subject: (name) => `Cześć ${name}, Twoja książka czeka na Ciebie! 📦`,
+    preview: "Twoja książka jest zapakowana i czeka na Ciebie!",
+    delayMs: THIRTY_MINUTES_MS,
+    delayFrom: (_meta, abandonedAt) => abandonedAt,
+  },
+  {
+    step: 2,
+    templateKey: EmailTemplates.ZZ_ABANDONED_CHECKOUT_2,
+    subject: (name) => `${name}, historia stojąca za tą książką`,
+    preview: "Już po tygodniu poczułam się lżejsza niż od dawna...",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
+  },
+  {
+    step: 3,
+    templateKey: EmailTemplates.ZZ_ABANDONED_CHECKOUT_3,
+    subject: (name) => `Ostatnia szansa, ${name} — Twój koszyk zostanie zwolniony`,
+    preview: "Jeszcze 24 godziny — potem muszę zwolnić Twój koszyk.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
+  },
+]
+
 /** Loslatenboek 3-step sequence */
 const LB_STEPS: StepConfig[] = [
   {
@@ -638,6 +666,73 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         } catch (emailError: any) {
           logger.error(
             `[Abandoned Cart] Failed to send HL step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
+          )
+        }
+        continue
+      }
+
+      // ── Życie, jakiego nigdy sobie nie pozwoliłaś: 3-step sequence ──
+      if (projectId === "zycie-zaslugy") {
+        if (currentStep >= 3) {
+          skippedCount++
+          continue
+        }
+
+        const nextStepConfig = ZZ_STEPS[currentStep]
+
+        const referenceTime = nextStepConfig.delayFrom(meta, abandonedAt)
+        if (isNaN(referenceTime.getTime())) continue
+        if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
+
+        const firstName = cart.shipping_address?.first_name || "tam"
+        const checkoutUrl = meta.checkout_url || "https://www.najpierw-ja.pl/checkout"
+        const mainItem = (cart.items || [])[0]
+        const productName = mainItem?.variant?.product?.title || mainItem?.title || "Życie, jakiego nigdy sobie nie pozwoliłaś"
+        const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+        }, 0)
+        const productPrice = cartTotal > 0
+          ? cartTotal.toFixed(0)
+          : "129"
+        const productImage = mainItem?.variant?.product?.thumbnail || ""
+
+        try {
+          await notificationModuleService.createNotifications({
+            to: cart.email,
+            channel: "email",
+            template: nextStepConfig.templateKey,
+            from: "Anna de Vries <anna@najpierw-ja.pl>",
+            data: {
+              emailOptions: {
+                replyTo: "anna@najpierw-ja.pl",
+                subject: nextStepConfig.subject(firstName),
+              },
+              firstName,
+              checkoutUrl,
+              productName,
+              productPrice,
+              productImage,
+              preview: nextStepConfig.preview,
+            },
+          })
+
+          await cartModuleService.updateCarts(cart.id, {
+            metadata: {
+              ...meta,
+              recovery_email_step: nextStepConfig.step,
+              [`recovery_email_step${nextStepConfig.step}_at`]: now.toISOString(),
+              recovery_email_sent: true,
+              recovery_email_sent_at: meta.recovery_email_sent_at || now.toISOString(),
+            },
+          })
+
+          sentCount++
+          logger.info(
+            `[Abandoned Cart] ZZ step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
+          )
+        } catch (emailError: any) {
+          logger.error(
+            `[Abandoned Cart] Failed to send ZZ step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
           )
         }
         continue
