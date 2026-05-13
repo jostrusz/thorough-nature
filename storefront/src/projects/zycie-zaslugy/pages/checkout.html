@@ -2516,7 +2516,7 @@ body {
               <!-- Intro -->
               <div class="order-bump-description">
                 <p class="ob-intro"><strong>Odpuszczanie było krokiem pierwszym. Teraz zaczyna się prawdziwa praca:</strong> zbudować życie, które naprawdę pasuje do Ciebie.</p>
-                <p>Ta książka rozprawia się z <strong>5 concrete gebieden</strong> które blokują Twoje życie &mdash; w 30 dni, krok po kroku. Bez ogólników, tylko praktyczny system.</p>
+                <p>Ta książka rozprawia się z <strong>5 konkretnymi obszarami</strong>, które blokują Twoje życie &mdash; w 30 dni, krok po kroku. Bez ogólników, tylko praktyczny system.</p>
               </div>
 
               <!-- 5 Pijlers -->
@@ -2582,8 +2582,8 @@ body {
               <!-- Social proof mini -->
               <div class="ob-social-proof">
                 <span>&#11088;&#11088;&#11088;&#11088;&#11088;</span>
-                <span>&ldquo;Dit boek heeft mijn leven letterlijk veranderd. Binnen 2 weken voelde ik me lichter.&rdquo;</span>
-                <span class="ob-reviewer">&mdash; Marloes K., Amsterdam</span>
+                <span>&bdquo;Ta książka dosłownie zmieniła moje życie. W ciągu 2 tygodni poczułam się lżejsza.&rdquo;</span>
+                <span class="ob-reviewer">&mdash; Marta K., Warszawa</span>
               </div>
 
             </div>
@@ -3159,7 +3159,7 @@ body {
 window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(completeRes){
   var o = (completeRes && completeRes.order) ? completeRes.order : completeRes;
   if (!o || typeof o.id !== 'string' || o.id.indexOf('order_') !== 0) {
-    throw new Error('Cart completion did not return a valid order — payment may not be complete');
+    throw new Error('Zamówienie nie zostało prawidłowo utworzone — płatność mogła nie zostać dokończona. Spróbuj ponownie.');
   }
   return o;
 };
@@ -5653,9 +5653,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           : cardProvider === 'airwallex' ? 'Airwallex'
           : cardProvider === 'paypal' ? 'PayPal'
           : 'Mollie';
-        trustText.textContent = 'Beveiligd via ' + trustProvider;
+        trustText.textContent = 'Zabezpieczone przez ' + trustProvider;
       } else {
-        trustText.textContent = 'Beveiligd via ' + (selectedProvider === 'paypal' ? 'PayPal' : selectedProvider === 'stripe' ? 'Stripe' : 'Mollie');
+        trustText.textContent = 'Zabezpieczone przez ' + (selectedProvider === 'paypal' ? 'PayPal' : selectedProvider === 'stripe' ? 'Stripe' : 'Mollie');
       }
     }
   }
@@ -6703,7 +6703,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // Show/hide submit validation message
     if (!allValid && submitValidationMsg) {
-      submitValidationMsg.textContent = 'Controleer de volgende velden: ' + missingFields.join(', ');
+      submitValidationMsg.textContent = 'Sprawdź następujące pola: ' + missingFields.join(', ');
       submitValidationMsg.style.display = '';
     } else if (submitValidationMsg) {
       submitValidationMsg.style.display = 'none';
@@ -7185,6 +7185,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return;
     }
 
+    // Paczkomat: jeśli wybrano Paczkomat InPost, musi być wybrany konkretny punkt
+    var __selShipOpt = document.querySelector('.shipping-option.selected');
+    var __shipMethod = __selShipOpt ? __selShipOpt.getAttribute('data-method') : 'paczkomat';
+    var __paczkomatNameField = document.getElementById('paczkomat_point_name');
+    var __paczkomatPointName = (__paczkomatNameField ? __paczkomatNameField.value : '') || '';
+    if (__shipMethod === 'paczkomat' && !__paczkomatPointName.trim()) {
+      var __pErr = document.getElementById('paczkomat-error');
+      var __pSel = document.getElementById('paczkomat-selector');
+      if (__pErr) __pErr.style.display = '';
+      if (__pSel) __pSel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     // Toon laadstatus
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
@@ -7654,7 +7667,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               });
               console.log('[Klarna] SDK initialized with client_token');
             } catch (initErr) {
-              reject(new Error('Klarna SDK initialisatie mislukt: ' + initErr.message));
+              reject(new Error('Inicjalizacja Klarna SDK nie powiodła się: ' + initErr.message));
               return;
             }
 
@@ -7734,7 +7747,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 } else {
                   // Declined or cancelled
                   var reason = klarnaRes.error ? klarnaRes.error.invalid_fields?.join(', ') : '';
-                  reject(new Error('Płatność Klarna nie została zaakceptowana.' + (reason ? ' Controleer: ' + reason : ' Probeer een andere betaalmethode.')));
+                  reject(new Error('Płatność Klarna nie została zaakceptowana.' + (reason ? ' Sprawdź: ' + reason : ' Spróbuj innej metody płatności.')));
                 }
               }
             );
@@ -8013,7 +8026,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 submitBtn.disabled = false;
               });
             } catch (awErr) {
-              reject(new Error('Airwallex initialisatie mislukt: ' + awErr.message));
+              reject(new Error('Inicjalizacja Airwallex nie powiodła się: ' + awErr.message));
             }
             } // end initAirwallex
           });
