@@ -1,4 +1,4 @@
-import { Text, Section, Button, Hr, Link } from '@react-email/components'
+import { Text, Section, Button, Img, Hr, Link } from '@react-email/components'
 import * as React from 'react'
 import { ZzBase } from './zz-base'
 
@@ -41,6 +41,8 @@ const colors = {
   futureText: '#78350F',
   futureHeading: '#92400E',
 }
+
+const DEFAULT_PRODUCT_IMAGE = 'https://www.najpierw-ja.pl/%C5%BBycie%2C-jakiego-nigdy-sobie-nie-pozwoli%C5%82a%C5%9B-pichi.png'
 
 export const ZzAbandonedCheckout3Template: React.FC<ZzAbandonedCheckout3Props> & {
   PreviewProps: ZzAbandonedCheckout3Props
@@ -200,14 +202,21 @@ export const ZzAbandonedCheckout3Template: React.FC<ZzAbandonedCheckout3Props> &
         </Text>
       </Section>
 
-      {/* ====== PRODUCT CARD ====== */}
-      <Section style={{ padding: `22px ${pad} 0` }}>
+      {/* ====== PRODUCT CARD + IMAGE ====== */}
+      <Section style={{ padding: `22px ${pad} 0`, textAlign: 'center' as const }}>
+        <Img
+          src={productImage || DEFAULT_PRODUCT_IMAGE}
+          alt={productName}
+          width="220"
+          style={{ display: 'block', margin: '0 auto', maxWidth: '100%', borderRadius: '12px' }}
+        />
         <div style={{
           backgroundColor: colors.light,
           borderRadius: '14px',
           border: `1px solid ${colors.section}`,
           padding: '22px 26px',
           textAlign: 'center' as const,
+          marginTop: '22px',
         }}>
           <Text style={{
             fontFamily: fontSerif,
