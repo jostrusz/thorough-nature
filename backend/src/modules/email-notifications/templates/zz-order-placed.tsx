@@ -644,21 +644,22 @@ export const ZzOrderPlacedTemplate: React.FC<ZzOrderPlacedTemplateProps> & {
             lineHeight: '1.6',
             marginBottom: '6px',
           }}>
-            {billingEntity?.legal_name || 'EverChapter OÜ'}
+            {billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'}
             {' '}&bull;{' '}
             {billingEntity?.address
               ? `${billingEntity.address.address_1 || ''}, ${billingEntity.address.postal_code || ''} ${billingEntity.address.city || ''}${billingEntity.address.district ? ', ' + billingEntity.address.district : ''}`
-              : 'Tallinn, Estonia'}
+              : 'Rybná 716/24, 110 00 Praha, Staré Město'}
             {billingEntity?.registration_id && (
               <>
                 <br />
-                Nr rej.: {billingEntity.registration_id}
+                IČO: {billingEntity.registration_id}
+                {billingEntity.vat_id && ` · DIČ: ${billingEntity.vat_id}`}
               </>
             )}
             {!billingEntity && (
               <>
                 <br />
-                Nr rej.: 16938029
+                IČO: 06259928 · DIČ: CZ06259928
               </>
             )}
           </Text>
