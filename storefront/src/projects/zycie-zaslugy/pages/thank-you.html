@@ -272,13 +272,15 @@ body { background: var(--bg); }
 .ty-order-items { display: flex; flex-direction: column; gap: 12px; }
 .ty-order-item { display: flex; align-items: center; gap: 14px; padding: 10px; border-radius: 12px; }
 .ty-order-icon {
-  width: 42px; height: 42px; border-radius: 12px;
+  width: 56px; height: 56px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; font-size: 20px;
+  flex-shrink: 0; font-size: 20px; overflow: hidden;
 }
 .ty-order-icon.book { background: rgba(184,92,74,0.12); }
 .ty-order-icon.ebook { background: rgba(212,145,106,0.15); }
 .ty-order-icon.ship { background: rgba(74,26,46,0.06); }
+.ty-order-icon img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+.ty-order-icon.book img { object-fit: cover; padding: 0; }
 .ty-order-name { font-size: 15px; font-weight: 600; color: var(--heading); }
 .ty-order-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .ty-order-total {
@@ -648,21 +650,21 @@ body { background: var(--bg); }
     <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Twoje zamówienie</div>
     <div class="ty-order-items" id="ty-order-items">
       <div class="ty-order-item">
-        <div class="ty-order-icon book">&#x1F4D6;</div>
+        <div class="ty-order-icon book"><img src="/%C5%BBycie%2C-jakiego-nigdy-sobie-nie-pozwoli%C5%82a%C5%9B-pichi.png" alt="Życie, jakiego nigdy sobie nie pozwoliłaś" loading="lazy"></div>
         <div>
           <div class="ty-order-name">Życie, jakiego nigdy sobie nie pozwoliłaś</div>
           <div class="ty-order-desc">Książka fizyczna &mdash; 340 stron &mdash; 5 filarów &mdash; Metoda LIFE RESET&trade;</div>
         </div>
       </div>
       <div class="ty-order-item">
-        <div class="ty-order-icon ebook">&#x1F4F1;</div>
+        <div class="ty-order-icon ebook"><img src="/Przesu%C5%84-Jedn%C4%85-Rzecz%2C-Zmie%C5%84-Wszystko-pichi.png" alt="Przesuń jedną rzecz, zmień wszystko" loading="lazy"></div>
         <div>
           <div class="ty-order-name">Przesuń jedną rzecz, zmień wszystko</div>
           <div class="ty-order-desc">Bonus e-book &middot; Prosta metoda Feng Shui &mdash; wysyłka na e-mail</div>
         </div>
       </div>
       <div class="ty-order-item">
-        <div class="ty-order-icon ebook">&#x1F4F1;</div>
+        <div class="ty-order-icon ebook"><img src="/Nie-Wszystko-Zas%C5%82uguje-na-Miejsce-pichi.png" alt="Nie wszystko zasługuje na miejsce" loading="lazy"></div>
         <div>
           <div class="ty-order-name">Nie wszystko zasługuje na miejsce</div>
           <div class="ty-order-desc">Bonus e-book &middot; System 4 pudełek &mdash; wysyłka na e-mail</div>
