@@ -7287,6 +7287,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     customerData.metadata.source_url = window.location.href;
     customerData.metadata.client_user_agent = navigator.userAgent || '';
 
+    // ─── Shipping method metadata (Paczkomat InPost / Kurier) ───
+    var __selShipOptMeta = document.querySelector('.shipping-option.selected');
+    var __shipMethodMeta = __selShipOptMeta ? __selShipOptMeta.getAttribute('data-method') : 'paczkomat';
+    customerData.metadata.shipping_method = __shipMethodMeta === 'paczkomat' ? 'zasilkovna_pickup' : 'home_delivery';
+    if (__shipMethodMeta === 'paczkomat') {
+      var __pName = document.getElementById('paczkomat_point_name');
+      var __pAddr = document.getElementById('paczkomat_point_address');
+      var __pId = document.getElementById('packeta_point_id');
+      customerData.metadata.paczkomat_name = __pName ? __pName.value : '';
+      customerData.metadata.paczkomat_address = __pAddr ? __pAddr.value : '';
+      customerData.metadata.packeta_point_id = __pId ? __pId.value : '';
+    }
+
     // ─── Firemní údaje (B2B) ───
     var isCompany = document.getElementById('company-checkbox').checked;
     if (isCompany) {

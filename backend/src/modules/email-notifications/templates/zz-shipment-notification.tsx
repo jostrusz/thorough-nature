@@ -66,6 +66,12 @@ export const ZzShipmentNotificationTemplate: React.FC<ZzShipmentNotificationTemp
   const items = order.items || []
   const displayId = order.metadata?.custom_order_number || order.display_id || order.id
 
+  // Detect pickup point (Paczkomat) vs home delivery
+  const isPaczkomat = order.metadata?.shipping_method === 'zasilkovna_pickup'
+    || !!(order.metadata?.paczkomat_name)
+  const paczkomatName = order.metadata?.paczkomat_name || ''
+  const paczkomatAddress = order.metadata?.paczkomat_address || ''
+
   return (
     <Base preview={preview}>
       <Section>
@@ -330,7 +336,7 @@ export const ZzShipmentNotificationTemplate: React.FC<ZzShipmentNotificationTemp
             color: '#9B6B7A',
             marginBottom: '8px',
           }}>
-            Adres dostawy
+            {isPaczkomat ? 'Paczkomat InPost' : 'Adres dostawy'}
           </Text>
           <div style={{
             backgroundColor: '#FDF5EF',
@@ -338,21 +344,41 @@ export const ZzShipmentNotificationTemplate: React.FC<ZzShipmentNotificationTemp
             border: '1px solid #F0D5C4',
             padding: '14px 18px',
           }}>
-            <Text style={{
-              fontFamily: font,
-              fontSize: '13px',
-              color: '#6B3344',
-              lineHeight: '1.6',
-              margin: '0',
-            }}>
-              {shippingAddress?.first_name} {shippingAddress?.last_name}
-              <br />
-              {shippingAddress?.address_1}
-              <br />
-              {shippingAddress?.postal_code} {shippingAddress?.city}
-              <br />
-              {formatCountry(shippingAddress?.country_code)}
-            </Text>
+            {isPaczkomat ? (
+              <Text style={{
+                fontFamily: font,
+                fontSize: '13px',
+                color: '#6B3344',
+                lineHeight: '1.6',
+                margin: '0',
+              }}>
+                <strong style={{ color: '#4A1A2E' }}>{paczkomatName}</strong>
+                {paczkomatAddress && (
+                  <>
+                    <br />
+                    {paczkomatAddress}
+                  </>
+                )}
+                <br />
+                {formatCountry(shippingAddress?.country_code)}
+              </Text>
+            ) : (
+              <Text style={{
+                fontFamily: font,
+                fontSize: '13px',
+                color: '#6B3344',
+                lineHeight: '1.6',
+                margin: '0',
+              }}>
+                {shippingAddress?.first_name} {shippingAddress?.last_name}
+                <br />
+                {shippingAddress?.address_1}
+                <br />
+                {shippingAddress?.postal_code} {shippingAddress?.city}
+                <br />
+                {formatCountry(shippingAddress?.country_code)}
+              </Text>
+            )}
           </div>
         </div>
 
@@ -418,7 +444,9 @@ export const ZzShipmentNotificationTemplate: React.FC<ZzShipmentNotificationTemp
                 <td style={{ fontFamily: font, fontSize: '13px', color: '#6B3344', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#4A1A2E' }}>W drodze</strong>
                   <br />
-                  Przewoźnik dostarcza paczkę pod wskazany adres.
+                  {isPaczkomat
+                    ? 'Przewoźnik dostarcza paczkę do wybranego Paczkomatu InPost.'
+                    : 'Przewoźnik dostarcza paczkę pod wskazany adres.'}
                 </td>
               </tr>
             </tbody>
@@ -444,7 +472,9 @@ export const ZzShipmentNotificationTemplate: React.FC<ZzShipmentNotificationTemp
                 <td style={{ fontFamily: font, fontSize: '13px', color: '#6B3344', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#4A1A2E' }}>Dostarczono</strong>
                   <br />
-                  W ciągu 4–7 dni roboczych otrzymasz swoją książkę!
+                  {isPaczkomat
+                    ? 'Otrzymasz SMS i e-mail z kodem odbioru, gdy paczka będzie czekać w Paczkomacie. Masz 48 godzin na odbiór.'
+                    : 'W ciągu 4–7 dni roboczych otrzymasz swoją książkę!'}
                 </td>
               </tr>
             </tbody>
