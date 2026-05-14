@@ -421,6 +421,78 @@ body {
 .email-suggestion:hover { background: rgba(230, 126, 34, 0.14); }
 .email-suggestion strong { color: #D35400; text-decoration: underline; text-underline-offset: 2px; }
 
+/* ─── PHONE WARNING (orange soft block — blockt submit nicht, nur Hinweis) ─── */
+.phone-warning {
+  display: none;
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: rgba(230, 126, 34, 0.08);
+  border: 1px solid rgba(230, 126, 34, 0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #92400E;
+  line-height: 1.4;
+  animation: fadeIn 0.2s ease;
+}
+.phone-warning-text { margin-bottom: 8px; }
+.phone-warning-actions { display: flex; gap: 8px; }
+.phone-warning-actions button {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+.phone-warning-confirm {
+  background: #F59E0B;
+  color: #fff;
+}
+.phone-warning-confirm:hover { background: #D97706; }
+.phone-warning-edit {
+  background: transparent;
+  color: #92400E;
+  border: 1px solid rgba(230, 126, 34, 0.3) !important;
+}
+.phone-warning-edit:hover { background: rgba(230, 126, 34, 0.1); }
+
+/* ─── EMAIL WARNING (orange soft block — blockt submit nicht, nur Hinweis) ─── */
+.email-warning {
+  display: none;
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: rgba(230, 126, 34, 0.08);
+  border: 1px solid rgba(230, 126, 34, 0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #92400E;
+  line-height: 1.4;
+  animation: fadeIn 0.2s ease;
+}
+.email-warning-text { margin-bottom: 8px; }
+.email-warning-text strong { color: #D35400; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.email-warning-actions { display: flex; gap: 8px; }
+.email-warning-actions button {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+.email-warning-confirm { background: #F59E0B; color: #fff; }
+.email-warning-confirm:hover { background: #D97706; }
+.email-warning-edit {
+  background: transparent;
+  color: #92400E;
+  border: 1px solid rgba(230, 126, 34, 0.3) !important;
+}
+.email-warning-edit:hover { background: rgba(230, 126, 34, 0.1); }
+
 /* ─── PHONE FORMAT PREVIEW ─── */
 .phone-preview {
   display: none;
@@ -2399,6 +2471,13 @@ body {
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             <div class="field-error">Bitte geben Sie eine gültige E-Mail-Adresse ein</div>
             <div class="email-suggestion" id="email-suggestion"></div>
+            <div class="email-warning" id="email-warning">
+              <div class="email-warning-text" id="email-warning-text">⚠ Diese E-Mail-Adresse scheint nicht gültig zu sein. Bitte überprüfen.</div>
+              <div class="email-warning-actions">
+                <button type="button" class="email-warning-confirm" id="email-warning-confirm">Ja, das stimmt</button>
+                <button type="button" class="email-warning-edit" id="email-warning-edit">Bearbeiten</button>
+              </div>
+            </div>
             <div class="foxentry-dropdown" id="foxentry-email-dropdown"></div>
           </div>
 
@@ -2409,6 +2488,13 @@ body {
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             <div class="field-error">Bitte geben Sie eine gültige Telefonnummer ein</div>
             <div class="phone-preview" id="phone-preview"></div>
+            <div class="phone-warning" id="phone-warning">
+              <div class="phone-warning-text">⚠ Diese Telefonnummer scheint nicht gültig zu sein. Bitte überprüfen.</div>
+              <div class="phone-warning-actions">
+                <button type="button" class="phone-warning-confirm" id="phone-warning-confirm">Ja, das stimmt</button>
+                <button type="button" class="phone-warning-edit" id="phone-warning-edit">Bearbeiten</button>
+              </div>
+            </div>
           </div>
 
 
@@ -5715,13 +5801,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     /* ════════════════════════════════════════
      *  2a. E-MAIL DOMAIN AUTOCOMPLETE (/email/search)
-     *  Zeigt Dropdown mit gängigen Domains nach @ (Debounce 250ms)
+     *  DEAKTIVIERT — /email/search benötigt ein separates "Email Search" Credit-Paket
+     *  das NICHT in unserem "Validate Basic 25K" Abo enthalten ist. Aktivieren würde
+     *  402/403 Errors pro Tastendruck verursachen. Zum Reaktivieren: Email Search Paket
+     *  in Foxentry Dashboard kaufen UND `false &&` Guard unten entfernen.
      * ════════════════════════════════════════ */
     var foxEmailField = document.getElementById('email');
     var foxEmailSuggestion = document.getElementById('email-suggestion');
     var foxEmailDropdown = document.getElementById('foxentry-email-dropdown');
 
-    if (foxEmailField && foxEmailDropdown) {
+    if (false && foxEmailField && foxEmailDropdown) {
       foxEmailField.addEventListener('input', debounce(function() {
         var val = foxEmailField.value.trim();
         var atIdx = val.indexOf('@');
@@ -5783,13 +5872,86 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
 
     /* ════════════════════════════════════════
-     *  2b. E-MAIL-VALIDIERUNG — Basic + Full Proposal Handling
-     *  Entscheidet auf Basis des Proposals (nicht nur isValid)
+     *  2b. E-MAIL-VALIDIERUNG — warn-only (blockiert submit nicht, nur Hinweis)
+     *  Reagiert auf alle 6 Foxentry-Proposals: valid, invalid, invalidWithCorrection,
+     *  invalidWithSuggestions, validWithSuggestion, validWithCorrection.
      * ════════════════════════════════════════ */
+    var emailWarningEl = document.getElementById('email-warning');
+    var emailWarningTextEl = document.getElementById('email-warning-text');
+    var emailWarningConfirmEl = document.getElementById('email-warning-confirm');
+    var emailWarningEditEl = document.getElementById('email-warning-edit');
+    var emailConfirmedAddress = null; // bestätigte Adresse → keine wiederholte Warnung
+
+    function showEmailWarning(messageHtml) {
+      if (!emailWarningEl || !foxEmailField) return;
+      if (emailWarningTextEl) emailWarningTextEl.innerHTML = messageHtml || '⚠ Diese E-Mail-Adresse scheint nicht gültig zu sein. Bitte überprüfen.';
+      emailWarningEl.style.display = 'block';
+      foxEmailField.classList.remove('valid', 'invalid');
+      foxEmailField.dataset.emailWarning = 'true';
+      if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
+    }
+    function hideEmailWarning() {
+      if (emailWarningEl) emailWarningEl.style.display = 'none';
+      if (foxEmailField) delete foxEmailField.dataset.emailWarning;
+    }
+
+    // "Ja, das stimmt" — E-Mail als gültig bestätigen
+    if (emailWarningConfirmEl) {
+      emailWarningConfirmEl.addEventListener('click', function() {
+        emailConfirmedAddress = foxEmailField ? foxEmailField.value.trim() : '';
+        hideEmailWarning();
+        if (foxEmailField) {
+          foxEmailField.classList.add('valid');
+          foxEmailField.classList.remove('invalid');
+        }
+      });
+    }
+    // "Bearbeiten" — Fokus zurück auf Feld
+    if (emailWarningEditEl) {
+      emailWarningEditEl.addEventListener('click', function() {
+        hideEmailWarning();
+        if (foxEmailField) foxEmailField.focus();
+      });
+    }
+    // Bei Eingabe: Warnung verbergen + Bestätigung zurücksetzen, wenn E-Mail sich ändert
+    if (foxEmailField) {
+      foxEmailField.addEventListener('input', function() { hideEmailWarning(); });
+    }
+
+    // Klick-Handler auf Vorschlag innerhalb Warning-Text (für invalidWithCorrection / invalidWithSuggestions)
+    function wireWarningSuggestionClicks() {
+      if (!emailWarningTextEl) return;
+      emailWarningTextEl.onclick = function(e) {
+        var target = e.target.closest('[data-email-fix]');
+        if (!target || !foxEmailField) return;
+        foxEmailField.value = target.getAttribute('data-email-fix');
+        hideEmailWarning();
+        foxEmailField.classList.add('valid');
+        foxEmailField.classList.remove('invalid');
+      };
+    }
+    wireWarningSuggestionClicks();
+
     if (foxEmailField) {
       foxEmailField.addEventListener('blur', function() {
         var val = foxEmailField.value.trim();
         if (!val || val.indexOf('@') === -1) return;
+
+        // Pre-check: TLD zu kurz (.c, .x) — kein API call, direkt warn
+        var _preParts = val.split('@');
+        if (_preParts.length === 2) {
+          var _preDomain = _preParts[1].split('.');
+          var _preTld = _preDomain[_preDomain.length - 1] || '';
+          if (_preTld.length > 0 && _preTld.length < 2) {
+            if (emailConfirmedAddress === val) {
+              foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning(); return;
+            }
+            var _typoFix = checkEmailTypo(val);
+            if (_typoFix) showEmailWarning('Meintest du <strong data-email-fix="' + _typoFix + '">' + _typoFix + '</strong>? Klicke zum Korrigieren.');
+            else showEmailWarning('⚠ Die Domain "' + _preParts[1] + '" scheint nicht gültig zu sein.');
+            return;
+          }
+        }
 
         showSpinner(foxEmailField);
         foxentryFetch('/email/validate', {
@@ -5803,82 +5965,63 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           var correctedEmail = (fx.corrected && fx.corrected.data && fx.corrected.data.email) || null;
           var suggestions = fx.suggestions || [];
 
-          // Vorherigen Vorschlag ausblenden
+          // Vorherigen Soft-Vorschlag ausblenden
           if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
+
+          // Hat Nutzer diese Adresse bereits bestätigt? Keine Warnung mehr.
+          var alreadyConfirmed = emailConfirmedAddress === val;
 
           switch (proposal) {
             case 'valid':
-              // Email is OK
-              foxEmailField.classList.add('valid');
-              foxEmailField.classList.remove('invalid');
+              foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+              hideEmailWarning();
               break;
 
             case 'invalid':
-              // E-Mail ungültig, keine Korrektur verfügbar
-              foxEmailField.classList.add('invalid');
-              foxEmailField.classList.remove('valid');
+              if (alreadyConfirmed) {
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
+              } else {
+                showEmailWarning('⚠ Diese E-Mail-Adresse scheint nicht gültig zu sein. Bitte überprüfen.');
+              }
               break;
 
             case 'invalidWithCorrection':
-              // Ungültig, aber Foxentry kennt die Korrektur (z.B. gamil.com → gmail.com)
-              foxEmailField.classList.add('invalid');
-              foxEmailField.classList.remove('valid');
-              if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Meinten Sie <strong>' + correctedEmail + '</strong>? Klicken Sie hier, um zu korrigieren.';
-                foxEmailSuggestion.style.display = 'block';
-                foxEmailSuggestion.onclick = function() {
-                  foxEmailField.value = correctedEmail;
-                  foxEmailSuggestion.style.display = 'none';
-                  foxEmailField.classList.add('valid');
-                  foxEmailField.classList.remove('invalid');
-                };
+              if (alreadyConfirmed) {
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
+              } else if (correctedEmail && correctedEmail !== val) {
+                showEmailWarning('Meintest du <strong data-email-fix="' + correctedEmail + '">' + correctedEmail + '</strong>? Klicke zum Korrigieren.');
+              } else {
+                showEmailWarning('⚠ Diese E-Mail-Adresse scheint nicht gültig zu sein. Bitte überprüfen.');
               }
               break;
 
             case 'invalidWithSuggestions':
-              // Ungültig, mehrere Alternativen verfügbar
-              foxEmailField.classList.add('invalid');
-              foxEmailField.classList.remove('valid');
-              if (suggestions.length > 0 && foxEmailSuggestion) {
-                var sugHtml = 'Meinten Sie: ';
+              if (alreadyConfirmed) {
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
+              } else if (suggestions.length > 0) {
+                var sugHtml = 'Meintest du: ';
                 suggestions.forEach(function(s, idx) {
                   var sEmail = (s.data && s.data.email) || '';
                   if (!sEmail) return;
-                  if (idx > 0) sugHtml += ' oder';
-                  sugHtml += '<strong data-email="' + sEmail + '">' + sEmail + '</strong>';
+                  if (idx > 0) sugHtml += ' oder ';
+                  sugHtml += '<strong data-email-fix="' + sEmail + '">' + sEmail + '</strong>';
                 });
-                sugHtml += '? Klicken Sie hier, um zu korrigieren.';
-                foxEmailSuggestion.innerHTML = sugHtml;
-                foxEmailSuggestion.style.display = 'block';
-                foxEmailSuggestion.onclick = function(e) {
-                  var target = e.target.closest('[data-email]');
-                  if (target) {
-                    foxEmailField.value = target.getAttribute('data-email');
-                    foxEmailSuggestion.style.display = 'none';
-                    foxEmailField.classList.add('valid');
-                    foxEmailField.classList.remove('invalid');
-                  }
-                };
-              } else if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
-                // Fallback auf corrected, wenn suggestions leer
-                foxEmailSuggestion.innerHTML = 'Meinten Sie <strong>' + correctedEmail + '</strong>? Klicken Sie hier, um zu korrigieren.';
-                foxEmailSuggestion.style.display = 'block';
-                foxEmailSuggestion.onclick = function() {
-                  foxEmailField.value = correctedEmail;
-                  foxEmailSuggestion.style.display = 'none';
-                  foxEmailField.classList.add('valid');
-                  foxEmailField.classList.remove('invalid');
-                };
+                sugHtml += '?';
+                showEmailWarning(sugHtml);
+              } else if (correctedEmail && correctedEmail !== val) {
+                showEmailWarning('Meintest du <strong data-email-fix="' + correctedEmail + '">' + correctedEmail + '</strong>? Klicke zum Korrigieren.');
+              } else {
+                showEmailWarning('⚠ Diese E-Mail-Adresse scheint nicht gültig zu sein. Bitte überprüfen.');
               }
               break;
 
             case 'validWithSuggestion':
-              // Technisch gültig, aber bessere Option verfügbar (z.B. gmai.com → gmail.com)
-              foxEmailField.classList.add('valid');
-              foxEmailField.classList.remove('invalid');
+              // Technisch gültig + Soft-Tipp (gmai → gmail)
+              foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+              hideEmailWarning();
               var betterEmail = correctedEmail || (suggestions[0] && suggestions[0].data && suggestions[0].data.email) || null;
               if (betterEmail && betterEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Meinten Sie vielleicht <strong>' + betterEmail + '</strong>? Klicken Sie hier, um zu korrigieren.';
+                foxEmailSuggestion.innerHTML = 'Meintest du vielleicht <strong>' + betterEmail + '</strong>? Klicke zum Korrigieren.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = betterEmail;
@@ -5887,32 +6030,47 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               }
               break;
 
+            case 'validWithCorrection':
+              // Technisch gültig + Foxentry kennt exakte Korrektur (z.B. seznma.cz → seznam.cz)
+              foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+              hideEmailWarning();
+              if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
+                foxEmailSuggestion.innerHTML = 'Meintest du vielleicht <strong>' + correctedEmail + '</strong>? Klicke zum Korrigieren.';
+                foxEmailSuggestion.style.display = 'block';
+                foxEmailSuggestion.onclick = function() {
+                  foxEmailField.value = correctedEmail;
+                  foxEmailSuggestion.style.display = 'none';
+                };
+              }
+              break;
+
             default:
               // Unbekanntes Proposal — auf isValid zurückfallen
               if (fx.result.isValid === true) {
-                foxEmailField.classList.add('valid');
-                foxEmailField.classList.remove('invalid');
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+                hideEmailWarning();
+              } else if (alreadyConfirmed) {
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
               } else {
-                foxEmailField.classList.add('invalid');
-                foxEmailField.classList.remove('valid');
+                showEmailWarning('⚠ Diese E-Mail-Adresse scheint nicht gültig zu sein. Bitte überprüfen.');
               }
               break;
           }
         })
         .catch(function() {
           hideSpinner(foxEmailField);
-          // Fallback auf lokale Validierung bei API-Fehler
+          // Foxentry API error (network/429/etc.) — Fallback auf lokale Regex, warn-only
+          var basicOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
           var localSuggestion = checkEmailTypo(val);
-          if (localSuggestion && foxEmailSuggestion) {
-            foxEmailSuggestion.innerHTML = 'Meinten Sie <strong>' + localSuggestion + '</strong>? Klicken Sie hier, um zu korrigieren.';
-            foxEmailSuggestion.style.display = 'block';
-            foxEmailSuggestion.onclick = function() {
-              foxEmailField.value = localSuggestion;
-              foxEmailSuggestion.style.display = 'none';
-              validateField(foxEmailField);
-            };
+          if (basicOk && !localSuggestion) {
+            // Syntax OK + kein Typo → als valid markieren (gracefully degraded)
+            foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+            hideEmailWarning();
+          } else if (localSuggestion) {
+            showEmailWarning('Meintest du <strong data-email-fix="' + localSuggestion + '">' + localSuggestion + '</strong>? Klicke zum Korrigieren.');
+          } else {
+            showEmailWarning('⚠ Diese E-Mail-Adresse scheint nicht gültig zu sein. Bitte überprüfen.');
           }
-          validateField(foxEmailField);
         });
       });
     }
@@ -5922,6 +6080,58 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
      * ════════════════════════════════════════ */
     var foxPhoneField = document.getElementById('phone');
     var foxPhonePreview = document.getElementById('phone-preview');
+
+    // ─── Phone warning elements ───
+    var phoneWarning = document.getElementById('phone-warning');
+    var phoneWarningConfirm = document.getElementById('phone-warning-confirm');
+    var phoneWarningEdit = document.getElementById('phone-warning-edit');
+    var phoneConfirmedNumber = null; // Bestätigte Nummer merken — keine wiederholte Warnung
+
+    function showPhoneWarning() {
+      if (phoneWarning) phoneWarning.style.display = 'block';
+      if (foxPhoneField) {
+        foxPhoneField.classList.remove('valid', 'invalid');
+        foxPhoneField.dataset.phoneWarning = 'true';
+      }
+      if (foxPhonePreview) foxPhonePreview.style.display = 'none';
+    }
+
+    function hidePhoneWarning() {
+      if (phoneWarning) phoneWarning.style.display = 'none';
+      if (foxPhoneField) delete foxPhoneField.dataset.phoneWarning;
+    }
+
+    // "Ja, das stimmt" — Nummer als gültig bestätigen
+    if (phoneWarningConfirm) {
+      phoneWarningConfirm.addEventListener('click', function() {
+        phoneConfirmedNumber = foxPhoneField ? foxPhoneField.value.trim() : '';
+        hidePhoneWarning();
+        if (foxPhoneField) {
+          foxPhoneField.classList.add('valid');
+          foxPhoneField.classList.remove('invalid');
+        }
+        if (foxPhonePreview) {
+          foxPhonePreview.style.color = '';
+          foxPhonePreview.textContent = '\u2713 Telefonnummer bestätigt';
+          foxPhonePreview.style.display = 'block';
+        }
+      });
+    }
+
+    // "Bearbeiten" — Fokus zurück auf Feld
+    if (phoneWarningEdit) {
+      phoneWarningEdit.addEventListener('click', function() {
+        hidePhoneWarning();
+        if (foxPhoneField) foxPhoneField.focus();
+      });
+    }
+
+    // Bei Eingabe: Warnung verbergen
+    if (foxPhoneField) {
+      foxPhoneField.addEventListener('input', function() {
+        hidePhoneWarning();
+      });
+    }
 
     if (foxPhoneField) {
       // Foxentry übernimmt ALLE Telefonvalidierung + Formatierung
@@ -5952,28 +6162,34 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             // Formatierte Nummer von Foxentry verwenden
             var data = fx.result.data || {};
             var fmt = data.format || {};
+            var formattedFull = fmt.internationalFormatted || data.numberWithPrefix || cleaned;
             if (fmt.internationalFormatted) {
               foxPhoneField.value = fmt.internationalFormatted;
             } else if (data.numberWithPrefix) {
               foxPhoneField.value = data.numberWithPrefix;
             }
+            // Country-Dropdown auf Basis von Foxentry-Ergebnis synchronisieren
+            syncCountryFromPhone(formattedFull);
 
             if (isValid) {
               foxPhoneField.classList.add('valid');
               foxPhoneField.classList.remove('invalid');
+              hidePhoneWarning();
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
                 foxPhonePreview.textContent = '\u2713 Gültige Telefonnummer';
                 foxPhonePreview.style.display = 'block';
               }
             } else {
-              foxPhoneField.classList.add('invalid');
-              foxPhoneField.classList.remove('valid');
-              if (foxPhonePreview) {
-                foxPhonePreview.textContent = '\u2717 Bitte überprüfen Sie Ihre Telefonnummer';
-                foxPhonePreview.style.display = 'block';
-                foxPhonePreview.style.color = 'var(--error)';
+              // Bereits vom Nutzer bestätigt? Nicht erneut warnen.
+              if (phoneConfirmedNumber === foxPhoneField.value.trim()) {
+                foxPhoneField.classList.add('valid');
+                foxPhoneField.classList.remove('invalid');
+                hidePhoneWarning();
+                return;
               }
+              // Orange Warnung statt rotem Fehler anzeigen
+              showPhoneWarning();
             }
           })
           .catch(function(err) {
@@ -5986,19 +6202,21 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             if (localValid) {
               foxPhoneField.classList.add('valid');
               foxPhoneField.classList.remove('invalid');
+              hidePhoneWarning();
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
                 foxPhonePreview.textContent = '';
                 foxPhonePreview.style.display = 'none';
               }
             } else {
-              foxPhoneField.classList.add('invalid');
-              foxPhoneField.classList.remove('valid');
-              if (foxPhonePreview) {
-                foxPhonePreview.textContent = '\u2717 Bitte überprüfen Sie Ihre Telefonnummer';
-                foxPhonePreview.style.display = 'block';
-                foxPhonePreview.style.color = 'var(--error)';
+              // Lokaler Fallback: ebenfalls orange Warnung
+              if (phoneConfirmedNumber === foxPhoneField.value.trim()) {
+                foxPhoneField.classList.add('valid');
+                foxPhoneField.classList.remove('invalid');
+                hidePhoneWarning();
+                return;
               }
+              showPhoneWarning();
             }
           });
       });
@@ -6006,13 +6224,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     /* ════════════════════════════════════════
      *  4. FIRMEN-AUTOCOMPLETE (Handelsregisternummer)
+     *  DEAKTIVIERT — /company/search benötigt ein separates "Company Search" Credit-Paket
+     *  das NICHT in unserem aktuellen Foxentry-Abo enthalten ist. Zum Reaktivieren:
+     *  Company Search Paket kaufen UND `false &&` Guard unten entfernen.
      * ════════════════════════════════════════ */
     var companyInput = document.getElementById('company_name');
     var companyDropdown = document.getElementById('foxentry-company-dropdown');
     var kvkInput = document.getElementById('kvk_number');
     var vatInput = document.getElementById('vat_number');
 
-    if (companyInput && companyDropdown) {
+    if (false && companyInput && companyDropdown) {
       companyInput.addEventListener('input', debounce(function() {
         var query = companyInput.value.trim();
         if (query.length < 2) { hideDropdown(companyDropdown); return; }
@@ -6127,6 +6348,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         field.classList.add('invalid');
         field.classList.remove('valid');
         return false;
+      }
+      // Warn-only state (Foxentry hat Problem gefunden, aber Nutzer entscheidet) → submit zulassen
+      if (field.dataset.emailWarning === 'true' || field.dataset.phoneWarning === 'true') {
+        return true;
       }
       // Aktuellen valid/invalid-Status beibehalten (von Foxentry gesetzt), nicht überschreiben
       return field.classList.contains('valid') || field.value.trim().length === 0;

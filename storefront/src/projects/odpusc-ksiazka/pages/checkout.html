@@ -430,6 +430,78 @@ body {
   animation: fadeIn 0.2s ease;
 }
 
+/* ─── PHONE WARNING (orange soft block) ─── */
+.phone-warning {
+  display: none;
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: rgba(230, 126, 34, 0.08);
+  border: 1px solid rgba(230, 126, 34, 0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #92400E;
+  line-height: 1.4;
+  animation: fadeIn 0.2s ease;
+}
+.phone-warning-text { margin-bottom: 8px; }
+.phone-warning-actions { display: flex; gap: 8px; }
+.phone-warning-actions button {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+.phone-warning-confirm {
+  background: #F59E0B;
+  color: #fff;
+}
+.phone-warning-confirm:hover { background: #D97706; }
+.phone-warning-edit {
+  background: transparent;
+  color: #92400E;
+  border: 1px solid rgba(230, 126, 34, 0.3) !important;
+}
+.phone-warning-edit:hover { background: rgba(230, 126, 34, 0.1); }
+
+/* ─── EMAIL WARNING (orange soft block — neblokuje submit, jen upozorňuje) ─── */
+.email-warning {
+  display: none;
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: rgba(230, 126, 34, 0.08);
+  border: 1px solid rgba(230, 126, 34, 0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #92400E;
+  line-height: 1.4;
+  animation: fadeIn 0.2s ease;
+}
+.email-warning-text { margin-bottom: 8px; }
+.email-warning-text strong { color: #D35400; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.email-warning-actions { display: flex; gap: 8px; }
+.email-warning-actions button {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+.email-warning-confirm { background: #F59E0B; color: #fff; }
+.email-warning-confirm:hover { background: #D97706; }
+.email-warning-edit {
+  background: transparent;
+  color: #92400E;
+  border: 1px solid rgba(230, 126, 34, 0.3) !important;
+}
+.email-warning-edit:hover { background: rgba(230, 126, 34, 0.1); }
+
 /* ─── ADDRESS WARNING (chybí číslo domu) ─── */
 .field-warning {
   font-size: 12px;
@@ -2511,6 +2583,13 @@ body {
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             <div class="field-error">Wpisz prawidłowy adres e-mail</div>
             <div class="email-suggestion" id="email-suggestion"></div>
+            <div class="email-warning" id="email-warning">
+              <div class="email-warning-text" id="email-warning-text">⚠ Ten adres email wygląda na nieprawidłowy. Sprawdź, czy jest poprawny.</div>
+              <div class="email-warning-actions">
+                <button type="button" class="email-warning-confirm" id="email-warning-confirm">Tak, jest poprawny</button>
+                <button type="button" class="email-warning-edit" id="email-warning-edit">Edytuj</button>
+              </div>
+            </div>
             <div class="foxentry-dropdown" id="foxentry-email-dropdown"></div>
           </div>
 
@@ -2521,6 +2600,13 @@ body {
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             <div class="field-error">Wpisz prawidłowy numer telefonu</div>
             <div class="phone-preview" id="phone-preview"></div>
+            <div class="phone-warning" id="phone-warning">
+              <div class="phone-warning-text">⚠ Ten numer wygląda na nieprawidłowy. Sprawdź, czy jest poprawny.</div>
+              <div class="phone-warning-actions">
+                <button type="button" class="phone-warning-confirm" id="phone-warning-confirm">Tak, jest poprawny</button>
+                <button type="button" class="phone-warning-edit" id="phone-warning-edit">Edytuj</button>
+              </div>
+            </div>
           </div>
 
 
@@ -6260,13 +6346,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     /* ════════════════════════════════════════
      *  2a. E-MAIL DOMAIN AUTOCOMPLETE (/email/search)
-     *  Toont dropdown met populaire domeinen na @ (debounce 250ms)
+     *  UITGESCHAKELD — /email/search heeft een aparte "Email Search" credit pakket nodig
+     *  dat NIET in onze "Validate Basic 25K" subscription zit. Inschakelen zou 402/403
+     *  errors per keystroke veroorzaken. Voor heractivatie: koop Email Search pakket
+     *  in Foxentry dashboard EN verwijder de `false &&` guard hieronder.
      * ════════════════════════════════════════ */
     var foxEmailField = document.getElementById('email');
     var foxEmailSuggestion = document.getElementById('email-suggestion');
     var foxEmailDropdown = document.getElementById('foxentry-email-dropdown');
 
-    if (foxEmailField && foxEmailDropdown) {
+    if (false && foxEmailField && foxEmailDropdown) {
       foxEmailField.addEventListener('input', debounce(function() {
         var val = foxEmailField.value.trim();
         var atIdx = val.indexOf('@');
@@ -6328,13 +6417,86 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
 
     /* ════════════════════════════════════════
-     *  2b. E-MAIL VALIDATIE — basic + full proposal handling
-     *  Beslist op basis van proposal (niet alleen isValid)
+     *  2b. E-MAIL VALIDATIE — warn-only (NEblokuje submit, jen upozorňuje)
+     *  Reaguje na všech 6 Foxentry proposals: valid, invalid, invalidWithCorrection,
+     *  invalidWithSuggestions, validWithSuggestion, validWithCorrection.
      * ════════════════════════════════════════ */
+    var emailWarningEl = document.getElementById('email-warning');
+    var emailWarningTextEl = document.getElementById('email-warning-text');
+    var emailWarningConfirmEl = document.getElementById('email-warning-confirm');
+    var emailWarningEditEl = document.getElementById('email-warning-edit');
+    var emailConfirmedAddress = null; // bevestigd adres → geen herhaalde warning
+
+    function showEmailWarning(messageHtml) {
+      if (!emailWarningEl || !foxEmailField) return;
+      if (emailWarningTextEl) emailWarningTextEl.innerHTML = messageHtml || '\u26a0 Ten adres email wygląda na nieprawidłowy. Sprawdź, czy jest poprawny.';
+      emailWarningEl.style.display = 'block';
+      foxEmailField.classList.remove('valid', 'invalid');
+      foxEmailField.dataset.emailWarning = 'true';
+      if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
+    }
+    function hideEmailWarning() {
+      if (emailWarningEl) emailWarningEl.style.display = 'none';
+      if (foxEmailField) delete foxEmailField.dataset.emailWarning;
+    }
+
+    // "Tak, jest poprawny" — bevestig email als geldig
+    if (emailWarningConfirmEl) {
+      emailWarningConfirmEl.addEventListener('click', function() {
+        emailConfirmedAddress = foxEmailField ? foxEmailField.value.trim() : '';
+        hideEmailWarning();
+        if (foxEmailField) {
+          foxEmailField.classList.add('valid');
+          foxEmailField.classList.remove('invalid');
+        }
+      });
+    }
+    // "Edytuj" — terug focus op veld
+    if (emailWarningEditEl) {
+      emailWarningEditEl.addEventListener('click', function() {
+        hideEmailWarning();
+        if (foxEmailField) foxEmailField.focus();
+      });
+    }
+    // Bij input: verberg warning + reset bevestiging als email verandert
+    if (foxEmailField) {
+      foxEmailField.addEventListener('input', function() { hideEmailWarning(); });
+    }
+
+    // Klik-handler op suggestie binnen warning text (voor invalidWithCorrection / invalidWithSuggestions)
+    function wireWarningSuggestionClicks() {
+      if (!emailWarningTextEl) return;
+      emailWarningTextEl.onclick = function(e) {
+        var target = e.target.closest('[data-email-fix]');
+        if (!target || !foxEmailField) return;
+        foxEmailField.value = target.getAttribute('data-email-fix');
+        hideEmailWarning();
+        foxEmailField.classList.add('valid');
+        foxEmailField.classList.remove('invalid');
+      };
+    }
+    wireWarningSuggestionClicks();
+
     if (foxEmailField) {
       foxEmailField.addEventListener('blur', function() {
         var val = foxEmailField.value.trim();
         if (!val || val.indexOf('@') === -1) return;
+
+        // Pre-check: TLD te kort (.c, .x) — geen API call, direct warn
+        var _preParts = val.split('@');
+        if (_preParts.length === 2) {
+          var _preDomain = _preParts[1].split('.');
+          var _preTld = _preDomain[_preDomain.length - 1] || '';
+          if (_preTld.length > 0 && _preTld.length < 2) {
+            if (emailConfirmedAddress === val) {
+              foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning(); return;
+            }
+            var _typoFix = checkEmailTypo(val);
+            if (_typoFix) showEmailWarning('Czy chodziło Ci o <strong data-email-fix="' + _typoFix + '">' + _typoFix + '</strong>? Kliknij, aby poprawić.');
+            else showEmailWarning('\u26a0 Domena "' + _preParts[1] + '" wygląda na nieprawidłową.');
+            return;
+          }
+        }
 
         showSpinner(foxEmailField);
         foxentryFetch('/email/validate', {
@@ -6348,82 +6510,63 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           var correctedEmail = (fx.corrected && fx.corrected.data && fx.corrected.data.email) || null;
           var suggestions = fx.suggestions || [];
 
-          // Verberg eerdere suggestie
+          // Verberg eerdere soft suggestie
           if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
+
+          // Heeft user dit adres al bevestigd? Geen warning meer.
+          var alreadyConfirmed = emailConfirmedAddress === val;
 
           switch (proposal) {
             case 'valid':
-              // Email is OK
-              foxEmailField.classList.add('valid');
-              foxEmailField.classList.remove('invalid');
+              foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+              hideEmailWarning();
               break;
 
             case 'invalid':
-              // Email is fout, geen correctie beschikbaar
-              foxEmailField.classList.add('invalid');
-              foxEmailField.classList.remove('valid');
+              if (alreadyConfirmed) {
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
+              } else {
+                showEmailWarning('\u26a0 Ten adres email wygląda na nieprawidłowy. Sprawdź, czy jest poprawny.');
+              }
               break;
 
             case 'invalidWithCorrection':
-              // Fout maar Foxentry kent de correctie (bv. gamil.com → gmail.com)
-              foxEmailField.classList.add('invalid');
-              foxEmailField.classList.remove('valid');
-              if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Czy chodziło Ci o <strong>' + correctedEmail + '</strong>? Kliknij, aby poprawić.';
-                foxEmailSuggestion.style.display = 'block';
-                foxEmailSuggestion.onclick = function() {
-                  foxEmailField.value = correctedEmail;
-                  foxEmailSuggestion.style.display = 'none';
-                  foxEmailField.classList.add('valid');
-                  foxEmailField.classList.remove('invalid');
-                };
+              if (alreadyConfirmed) {
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
+              } else if (correctedEmail && correctedEmail !== val) {
+                showEmailWarning('Czy chodziło Ci o <strong data-email-fix="' + correctedEmail + '">' + correctedEmail + '</strong>? Kliknij, aby poprawić.');
+              } else {
+                showEmailWarning('\u26a0 Ten adres email wygląda na nieprawidłowy. Sprawdź, czy jest poprawny.');
               }
               break;
 
             case 'invalidWithSuggestions':
-              // Fout, meerdere alternatieven beschikbaar
-              foxEmailField.classList.add('invalid');
-              foxEmailField.classList.remove('valid');
-              if (suggestions.length > 0 && foxEmailSuggestion) {
+              if (alreadyConfirmed) {
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
+              } else if (suggestions.length > 0) {
                 var sugHtml = 'Czy chodziło Ci o: ';
                 suggestions.forEach(function(s, idx) {
                   var sEmail = (s.data && s.data.email) || '';
                   if (!sEmail) return;
-                  if (idx > 0) sugHtml += ' lub';
-                  sugHtml += '<strong data-email="' + sEmail + '">' + sEmail + '</strong>';
+                  if (idx > 0) sugHtml += ' lub ';
+                  sugHtml += '<strong data-email-fix="' + sEmail + '">' + sEmail + '</strong>';
                 });
                 sugHtml += '? Kliknij, aby poprawić.';
-                foxEmailSuggestion.innerHTML = sugHtml;
-                foxEmailSuggestion.style.display = 'block';
-                foxEmailSuggestion.onclick = function(e) {
-                  var target = e.target.closest('[data-email]');
-                  if (target) {
-                    foxEmailField.value = target.getAttribute('data-email');
-                    foxEmailSuggestion.style.display = 'none';
-                    foxEmailField.classList.add('valid');
-                    foxEmailField.classList.remove('invalid');
-                  }
-                };
-              } else if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
-                // Fallback naar corrected als suggestions leeg
-                foxEmailSuggestion.innerHTML = 'Czy chodziło Ci o <strong>' + correctedEmail + '</strong>? Kliknij, aby poprawić.';
-                foxEmailSuggestion.style.display = 'block';
-                foxEmailSuggestion.onclick = function() {
-                  foxEmailField.value = correctedEmail;
-                  foxEmailSuggestion.style.display = 'none';
-                  foxEmailField.classList.add('valid');
-                  foxEmailField.classList.remove('invalid');
-                };
+                showEmailWarning(sugHtml);
+              } else if (correctedEmail && correctedEmail !== val) {
+                showEmailWarning('Czy chodziło Ci o <strong data-email-fix="' + correctedEmail + '">' + correctedEmail + '</strong>? Kliknij, aby poprawić.');
+              } else {
+                showEmailWarning('\u26a0 Ten adres email wygląda na nieprawidłowy. Sprawdź, czy jest poprawny.');
               }
               break;
 
             case 'validWithSuggestion':
-              // Technisch geldig maar betere optie beschikbaar (bv. gmai.com → gmail.com)
-              foxEmailField.classList.add('valid');
-              foxEmailField.classList.remove('invalid');
+              // Technisch geldig + soft tip (gmai → gmail)
+              foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+              hideEmailWarning();
               var betterEmail = correctedEmail || (suggestions[0] && suggestions[0].data && suggestions[0].data.email) || null;
               if (betterEmail && betterEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Czy może chodziło Ci o <strong>' + betterEmail + '</strong>? Kliknij, aby poprawić.';
+                foxEmailSuggestion.innerHTML = 'Może chodziło Ci o <strong>' + betterEmail + '</strong>? Kliknij, aby poprawić.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = betterEmail;
@@ -6432,32 +6575,47 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               }
               break;
 
+            case 'validWithCorrection':
+              // Technisch geldig + Foxentry kent přesnou opravu (např. seznma.cz → seznam.cz)
+              foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+              hideEmailWarning();
+              if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
+                foxEmailSuggestion.innerHTML = 'Może chodziło Ci o <strong>' + correctedEmail + '</strong>? Kliknij, aby poprawić.';
+                foxEmailSuggestion.style.display = 'block';
+                foxEmailSuggestion.onclick = function() {
+                  foxEmailField.value = correctedEmail;
+                  foxEmailSuggestion.style.display = 'none';
+                };
+              }
+              break;
+
             default:
               // Onbekend proposal — val terug op isValid
               if (fx.result.isValid === true) {
-                foxEmailField.classList.add('valid');
-                foxEmailField.classList.remove('invalid');
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+                hideEmailWarning();
+              } else if (alreadyConfirmed) {
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
               } else {
-                foxEmailField.classList.add('invalid');
-                foxEmailField.classList.remove('valid');
+                showEmailWarning('\u26a0 Ten adres email wygląda na nieprawidłowy. Sprawdź, czy jest poprawny.');
               }
               break;
           }
         })
         .catch(function() {
           hideSpinner(foxEmailField);
-          // Fallback naar lokale validatie bij API error
+          // Foxentry API error (network/429/etc.) — fall back op lokale regex, warn-only
+          var basicOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
           var localSuggestion = checkEmailTypo(val);
-          if (localSuggestion && foxEmailSuggestion) {
-            foxEmailSuggestion.innerHTML = 'Czy chodziło Ci o <strong>' + localSuggestion + '</strong>? Kliknij, aby poprawić.';
-            foxEmailSuggestion.style.display = 'block';
-            foxEmailSuggestion.onclick = function() {
-              foxEmailField.value = localSuggestion;
-              foxEmailSuggestion.style.display = 'none';
-              validateField(foxEmailField);
-            };
+          if (basicOk && !localSuggestion) {
+            // Syntax OK + geen typo → markeer als valid (gracefully degraded)
+            foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+            hideEmailWarning();
+          } else if (localSuggestion) {
+            showEmailWarning('Czy chodziło Ci o <strong data-email-fix="' + localSuggestion + '">' + localSuggestion + '</strong>? Kliknij, aby poprawić.');
+          } else {
+            showEmailWarning('\u26a0 Ten adres email wygląda na nieprawidłowy. Sprawdź, czy jest poprawny.');
           }
-          validateField(foxEmailField);
         });
       });
     }
@@ -6467,6 +6625,55 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
      * ════════════════════════════════════════ */
     var foxPhoneField = document.getElementById('phone');
     var foxPhonePreview = document.getElementById('phone-preview');
+
+    // ─── Phone warning elements (warn-only — niet blokkeren) ───
+    var phoneWarning = document.getElementById('phone-warning');
+    var phoneWarningConfirm = document.getElementById('phone-warning-confirm');
+    var phoneWarningEdit = document.getElementById('phone-warning-edit');
+    var phoneConfirmedNumber = null;
+
+    function showPhoneWarning() {
+      if (phoneWarning) phoneWarning.style.display = 'block';
+      if (foxPhoneField) {
+        foxPhoneField.classList.remove('valid', 'invalid');
+        foxPhoneField.dataset.phoneWarning = 'true';
+      }
+      if (foxPhonePreview) foxPhonePreview.style.display = 'none';
+    }
+
+    function hidePhoneWarning() {
+      if (phoneWarning) phoneWarning.style.display = 'none';
+      if (foxPhoneField) delete foxPhoneField.dataset.phoneWarning;
+    }
+
+    if (phoneWarningConfirm) {
+      phoneWarningConfirm.addEventListener('click', function() {
+        phoneConfirmedNumber = foxPhoneField ? foxPhoneField.value.trim() : '';
+        hidePhoneWarning();
+        if (foxPhoneField) {
+          foxPhoneField.classList.add('valid');
+          foxPhoneField.classList.remove('invalid');
+        }
+        if (foxPhonePreview) {
+          foxPhonePreview.style.color = '';
+          foxPhonePreview.textContent = '✓ Numer telefonu potwierdzony';
+          foxPhonePreview.style.display = 'block';
+        }
+      });
+    }
+
+    if (phoneWarningEdit) {
+      phoneWarningEdit.addEventListener('click', function() {
+        hidePhoneWarning();
+        if (foxPhoneField) foxPhoneField.focus();
+      });
+    }
+
+    if (foxPhoneField) {
+      foxPhoneField.addEventListener('input', function() {
+        hidePhoneWarning();
+      });
+    }
 
     if (foxPhoneField) {
       // Foxentry handelt ALLE telefoonvalidatie + formatting af
@@ -6506,19 +6713,22 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             if (isValid) {
               foxPhoneField.classList.add('valid');
               foxPhoneField.classList.remove('invalid');
+              hidePhoneWarning();
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
-                foxPhonePreview.textContent = '\u2713 Geldig telefoonnummer';
+                foxPhonePreview.textContent = '\u2713 Prawid\u0142owy numer telefonu';
                 foxPhonePreview.style.display = 'block';
               }
             } else {
-              foxPhoneField.classList.add('invalid');
-              foxPhoneField.classList.remove('valid');
-              if (foxPhonePreview) {
-                foxPhonePreview.textContent = '\u2717 Sprawdź swój numer telefonu';
-                foxPhonePreview.style.display = 'block';
-                foxPhonePreview.style.color = 'var(--error)';
+              // Al bevestigd door gebruiker? Niet opnieuw waarschuwen.
+              if (phoneConfirmedNumber === foxPhoneField.value.trim()) {
+                foxPhoneField.classList.add('valid');
+                foxPhoneField.classList.remove('invalid');
+                hidePhoneWarning();
+                return;
               }
+              // Toon oranje waarschuwing i.p.v. rode fout (warn-only)
+              showPhoneWarning();
             }
           })
           .catch(function(err) {
@@ -6531,19 +6741,21 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             if (localValid) {
               foxPhoneField.classList.add('valid');
               foxPhoneField.classList.remove('invalid');
+              hidePhoneWarning();
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
                 foxPhonePreview.textContent = '';
                 foxPhonePreview.style.display = 'none';
               }
             } else {
-              foxPhoneField.classList.add('invalid');
-              foxPhoneField.classList.remove('valid');
-              if (foxPhonePreview) {
-                foxPhonePreview.textContent = '\u2717 Sprawdź swój numer telefonu';
-                foxPhonePreview.style.display = 'block';
-                foxPhonePreview.style.color = 'var(--error)';
+              // Lokale fallback: ook oranje warning (warn-only)
+              if (phoneConfirmedNumber === foxPhoneField.value.trim()) {
+                foxPhoneField.classList.add('valid');
+                foxPhoneField.classList.remove('invalid');
+                hidePhoneWarning();
+                return;
               }
+              showPhoneWarning();
             }
           });
       });
@@ -6551,13 +6763,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     /* ════════════════════════════════════════
      *  4. BEDRIJF AUTOCOMPLETE (KVK / Ondernemingsnummer)
+     *  UITGESCHAKELD — /company/search vereist een aparte "Company Search" credit pakket
+     *  dat NIET in onze huidige Foxentry subscription zit. Voor heractivatie: koop
+     *  Company Search pakket EN verwijder de `false &&` guard hieronder.
      * ════════════════════════════════════════ */
     var companyInput = document.getElementById('company_name');
     var companyDropdown = document.getElementById('foxentry-company-dropdown');
     var kvkInput = document.getElementById('kvk_number');
     var vatInput = document.getElementById('vat_number');
 
-    if (companyInput && companyDropdown) {
+    if (false && companyInput && companyDropdown) {
       companyInput.addEventListener('input', debounce(function() {
         var query = companyInput.value.trim();
         if (query.length < 2) { hideDropdown(companyDropdown); return; }
@@ -6672,6 +6887,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         field.classList.add('invalid');
         field.classList.remove('valid');
         return false;
+      }
+      // Warn-only state (Foxentry vond probleem maar laat user beslissen) → submit toestaan
+      if (field.dataset.emailWarning === 'true' || field.dataset.phoneWarning === 'true') {
+        return true;
       }
       // Behoud huidige valid/invalid status (gezet door Foxentry), niet overschrijven
       return field.classList.contains('valid') || field.value.trim().length === 0;

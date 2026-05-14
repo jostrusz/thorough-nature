@@ -558,6 +558,41 @@ body {
 }
 .phone-warning-edit:hover { background: rgba(230, 126, 34, 0.1); }
 
+/* ─── EMAIL WARNING (oranžový soft block — neblokuje submit, jen upozorňuje) ─── */
+.email-warning {
+  display: none;
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: rgba(230, 126, 34, 0.08);
+  border: 1px solid rgba(230, 126, 34, 0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #92400E;
+  line-height: 1.4;
+  animation: fadeIn 0.2s ease;
+}
+.email-warning-text { margin-bottom: 8px; }
+.email-warning-text strong { color: #D35400; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.email-warning-actions { display: flex; gap: 8px; }
+.email-warning-actions button {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+.email-warning-confirm { background: #F59E0B; color: #fff; }
+.email-warning-confirm:hover { background: #D97706; }
+.email-warning-edit {
+  background: transparent;
+  color: #92400E;
+  border: 1px solid rgba(230, 126, 34, 0.3) !important;
+}
+.email-warning-edit:hover { background: rgba(230, 126, 34, 0.1); }
+
 /* ─── FIREMNÍ POLE (B2B) ─── */
 .company-toggle {
   display: flex; align-items: center; gap: 10px;
@@ -2549,6 +2584,13 @@ body {
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             <div class="field-error">Zadejte platnou e-mailovou adresu</div>
             <div class="email-suggestion" id="email-suggestion"></div>
+            <div class="email-warning" id="email-warning">
+              <div class="email-warning-text" id="email-warning-text">⚠ Tato e-mailová adresa se nezdá být platná. Zkontrolujte, zda je správná.</div>
+              <div class="email-warning-actions">
+                <button type="button" class="email-warning-confirm" id="email-warning-confirm">Ano, je správná</button>
+                <button type="button" class="email-warning-edit" id="email-warning-edit">Upravit</button>
+              </div>
+            </div>
             <div class="foxentry-dropdown" id="foxentry-email-dropdown"></div>
           </div>
 
@@ -5873,8 +5915,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }
     });
 
-    // Lokální kontrola překlepů — vždy aktivní (i vedle Foxentry)
+    // Lokální kontrola překlepů — pouze pokud Foxentry NENÍ aktivní (jinak Foxentry IIFE řídí vše, warn-only)
     emailField.addEventListener('blur', function() {
+      if (hasFoxentryKey) return;
       var val = emailField.value.trim();
       if (!val) return;
 
@@ -6255,13 +6298,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     /* ════════════════════════════════════════
      *  2a. E-MAIL DOMÉNOVÝ AUTOCOMPLETE (/email/search)
-     *  Zobrazí dropdown s populárními doménami po @ (debounce 250ms)
+     *  VYPNUTO — /email/search vyžaduje samostatný "Email Search" credit balíček,
+     *  který NENÍ součástí naší "Validate Basic 25K" subscription. Zapnutí by generovalo
+     *  402/403 chyby per keystroke. Pro reaktivaci: koupit Email Search balíček
+     *  v Foxentry dashboardu A odstranit `false &&` guard níže.
      * ════════════════════════════════════════ */
     var foxEmailField = document.getElementById('email');
     var foxEmailSuggestion = document.getElementById('email-suggestion');
     var foxEmailDropdown = document.getElementById('foxentry-email-dropdown');
 
-    if (foxEmailField && foxEmailDropdown) {
+    if (false && foxEmailField && foxEmailDropdown) {
       foxEmailField.addEventListener('input', debounce(function() {
         var val = foxEmailField.value.trim();
         var atIdx = val.indexOf('@');
@@ -6323,21 +6369,83 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
 
     /* ════════════════════════════════════════
-     *  2b. E-MAIL VALIDATIE — basic + full proposal handling
-     *  Beslist op basis van proposal (niet alleen isValid)
+     *  2b. E-MAIL VALIDACE — warn-only (NEblokuje submit, jen upozorňuje)
+     *  Reaguje na všech 6 Foxentry proposals: valid, invalid, invalidWithCorrection,
+     *  invalidWithSuggestions, validWithSuggestion, validWithCorrection.
      * ════════════════════════════════════════ */
+    var emailWarningEl = document.getElementById('email-warning');
+    var emailWarningTextEl = document.getElementById('email-warning-text');
+    var emailWarningConfirmEl = document.getElementById('email-warning-confirm');
+    var emailWarningEditEl = document.getElementById('email-warning-edit');
+    var emailConfirmedAddress = null; // potvrzená adresa → žádné opakované varování
+
+    function showEmailWarning(messageHtml) {
+      if (!emailWarningEl || !foxEmailField) return;
+      if (emailWarningTextEl) emailWarningTextEl.innerHTML = messageHtml || '⚠ Tato e-mailová adresa se nezdá být platná. Zkontrolujte, zda je správná.';
+      emailWarningEl.style.display = 'block';
+      foxEmailField.classList.remove('valid', 'invalid');
+      foxEmailField.dataset.emailWarning = 'true';
+      if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
+    }
+    function hideEmailWarning() {
+      if (emailWarningEl) emailWarningEl.style.display = 'none';
+      if (foxEmailField) delete foxEmailField.dataset.emailWarning;
+    }
+
+    // "Ano, je správná" — potvrď e-mail jako platný
+    if (emailWarningConfirmEl) {
+      emailWarningConfirmEl.addEventListener('click', function() {
+        emailConfirmedAddress = foxEmailField ? foxEmailField.value.trim() : '';
+        hideEmailWarning();
+        if (foxEmailField) {
+          foxEmailField.classList.add('valid');
+          foxEmailField.classList.remove('invalid');
+        }
+      });
+    }
+    // "Upravit" — focus zpět na pole
+    if (emailWarningEditEl) {
+      emailWarningEditEl.addEventListener('click', function() {
+        hideEmailWarning();
+        if (foxEmailField) foxEmailField.focus();
+      });
+    }
+    // Při vstupu: skrýt varování + reset potvrzení pokud se e-mail změní
+    if (foxEmailField) {
+      foxEmailField.addEventListener('input', function() { hideEmailWarning(); });
+    }
+
+    // Klik-handler na návrh uvnitř warning textu (pro invalidWithCorrection / invalidWithSuggestions)
+    function wireWarningSuggestionClicks() {
+      if (!emailWarningTextEl) return;
+      emailWarningTextEl.onclick = function(e) {
+        var target = e.target.closest('[data-email-fix]');
+        if (!target || !foxEmailField) return;
+        foxEmailField.value = target.getAttribute('data-email-fix');
+        hideEmailWarning();
+        foxEmailField.classList.add('valid');
+        foxEmailField.classList.remove('invalid');
+      };
+    }
+    wireWarningSuggestionClicks();
+
     if (foxEmailField) {
       foxEmailField.addEventListener('blur', function() {
         var val = foxEmailField.value.trim();
         if (!val || val.indexOf('@') === -1) return;
 
-        // Pre-check: TLD musí mít minimálně 2 znaky — přeskočit Foxentry pokud neplatné
+        // Pre-check: TLD příliš krátká (.c, .x) — žádný API call, rovnou warn
         var _preParts = val.split('@');
         if (_preParts.length === 2) {
           var _preDomain = _preParts[1].split('.');
           var _preTld = _preDomain[_preDomain.length - 1] || '';
           if (_preTld.length > 0 && _preTld.length < 2) {
-            // TLD příliš krátká (.c, .x) — lokální handler již nastavil invalid, nepřepisovat
+            if (emailConfirmedAddress === val) {
+              foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning(); return;
+            }
+            var _typoFix = checkEmailTypo(val);
+            if (_typoFix) showEmailWarning('Měl(a) jsi na mysli <strong data-email-fix="' + _typoFix + '">' + _typoFix + '</strong>? Klikněte pro opravu.');
+            else showEmailWarning('⚠ Doména "' + _preParts[1] + '" nevypadá platná.');
             return;
           }
         }
@@ -6354,107 +6462,63 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           var correctedEmail = (fx.corrected && fx.corrected.data && fx.corrected.data.email) || null;
           var suggestions = fx.suggestions || [];
 
-          // Skrýt předchozí návrh
+          // Skrýt předchozí soft suggestion
           if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
 
-          // Extra veiligheid: TLD lengte check (Foxentry basic mist dit)
-          var _emailParts = val.split('@');
-          var _tld = '';
-          if (_emailParts.length === 2) {
-            var _dParts = _emailParts[1].split('.');
-            _tld = _dParts[_dParts.length - 1] || '';
-          }
-          var _tldTooShort = _tld.length > 0 && _tld.length < 2;
+          // Potvrdil už user tuto adresu? Žádné varování.
+          var alreadyConfirmed = emailConfirmedAddress === val;
 
           switch (proposal) {
             case 'valid':
-              // E-mail je OK — ale přepsat pokud je TLD příliš krátká
-              if (_tldTooShort) {
-                foxEmailField.classList.add('invalid');
-                foxEmailField.classList.remove('valid');
-                var _typoFix = checkEmailTypo(val);
-                if (_typoFix && foxEmailSuggestion) {
-                  foxEmailSuggestion.innerHTML = 'Mysleli jste <strong>' + _typoFix + '</strong>? Klikněte pro opravu.';
-                  foxEmailSuggestion.style.display = 'block';
-                  foxEmailSuggestion.onclick = function() {
-                    foxEmailField.value = _typoFix;
-                    foxEmailSuggestion.style.display = 'none';
-                    foxEmailField.classList.add('valid');
-                    foxEmailField.classList.remove('invalid');
-                  };
-                }
-              } else {
-                foxEmailField.classList.add('valid');
-                foxEmailField.classList.remove('invalid');
-              }
+              foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+              hideEmailWarning();
               break;
 
             case 'invalid':
-              // E-mail je chybný, žádná oprava není k dispozici
-              foxEmailField.classList.add('invalid');
-              foxEmailField.classList.remove('valid');
+              if (alreadyConfirmed) {
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
+              } else {
+                showEmailWarning('⚠ Tato e-mailová adresa se nezdá být platná. Zkontrolujte, zda je správná.');
+              }
               break;
 
             case 'invalidWithCorrection':
-              // Chyba ale Foxentry zná opravu (např. gamil.com → gmail.com)
-              foxEmailField.classList.add('invalid');
-              foxEmailField.classList.remove('valid');
-              if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Mysleli jste <strong>' + correctedEmail + '</strong>? Klikněte pro opravu.';
-                foxEmailSuggestion.style.display = 'block';
-                foxEmailSuggestion.onclick = function() {
-                  foxEmailField.value = correctedEmail;
-                  foxEmailSuggestion.style.display = 'none';
-                  foxEmailField.classList.add('valid');
-                  foxEmailField.classList.remove('invalid');
-                };
+              if (alreadyConfirmed) {
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
+              } else if (correctedEmail && correctedEmail !== val) {
+                showEmailWarning('Měl(a) jsi na mysli <strong data-email-fix="' + correctedEmail + '">' + correctedEmail + '</strong>? Klikněte pro opravu.');
+              } else {
+                showEmailWarning('⚠ Tato e-mailová adresa se nezdá být platná. Zkontrolujte, zda je správná.');
               }
               break;
 
             case 'invalidWithSuggestions':
-              // Chyba, k dispozici více alternativ
-              foxEmailField.classList.add('invalid');
-              foxEmailField.classList.remove('valid');
-              if (suggestions.length > 0 && foxEmailSuggestion) {
-                var sugHtml = 'Mysleli jste: ';
+              if (alreadyConfirmed) {
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
+              } else if (suggestions.length > 0) {
+                var sugHtml = 'Měl(a) jsi na mysli: ';
                 suggestions.forEach(function(s, idx) {
                   var sEmail = (s.data && s.data.email) || '';
                   if (!sEmail) return;
-                  if (idx > 0) sugHtml += ' of ';
-                  sugHtml += '<strong data-email="' + sEmail + '">' + sEmail + '</strong>';
+                  if (idx > 0) sugHtml += ' nebo ';
+                  sugHtml += '<strong data-email-fix="' + sEmail + '">' + sEmail + '</strong>';
                 });
                 sugHtml += '? Klikněte pro opravu.';
-                foxEmailSuggestion.innerHTML = sugHtml;
-                foxEmailSuggestion.style.display = 'block';
-                foxEmailSuggestion.onclick = function(e) {
-                  var target = e.target.closest('[data-email]');
-                  if (target) {
-                    foxEmailField.value = target.getAttribute('data-email');
-                    foxEmailSuggestion.style.display = 'none';
-                    foxEmailField.classList.add('valid');
-                    foxEmailField.classList.remove('invalid');
-                  }
-                };
-              } else if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
-                // Fallback na corrected pokud jsou suggestions prázdné
-                foxEmailSuggestion.innerHTML = 'Mysleli jste <strong>' + correctedEmail + '</strong>? Klikněte pro opravu.';
-                foxEmailSuggestion.style.display = 'block';
-                foxEmailSuggestion.onclick = function() {
-                  foxEmailField.value = correctedEmail;
-                  foxEmailSuggestion.style.display = 'none';
-                  foxEmailField.classList.add('valid');
-                  foxEmailField.classList.remove('invalid');
-                };
+                showEmailWarning(sugHtml);
+              } else if (correctedEmail && correctedEmail !== val) {
+                showEmailWarning('Měl(a) jsi na mysli <strong data-email-fix="' + correctedEmail + '">' + correctedEmail + '</strong>? Klikněte pro opravu.');
+              } else {
+                showEmailWarning('⚠ Tato e-mailová adresa se nezdá být platná. Zkontrolujte, zda je správná.');
               }
               break;
 
             case 'validWithSuggestion':
-              // Technicky platné ale lepší varianta k dispozici (např. gmai.com → gmail.com)
-              foxEmailField.classList.add('valid');
-              foxEmailField.classList.remove('invalid');
+              // Technicky platné + soft tip (gmai → gmail)
+              foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+              hideEmailWarning();
               var betterEmail = correctedEmail || (suggestions[0] && suggestions[0].data && suggestions[0].data.email) || null;
               if (betterEmail && betterEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Nemysleli jste <strong>' + betterEmail + '</strong>? Klikněte pro opravu.';
+                foxEmailSuggestion.innerHTML = 'Možná jsi měl(a) na mysli <strong>' + betterEmail + '</strong>? Klikněte pro opravu.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = betterEmail;
@@ -6463,65 +6527,46 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               }
               break;
 
+            case 'validWithCorrection':
+              // Technicky platné + Foxentry zná přesnou opravu (např. seznma.cz → seznam.cz)
+              foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+              hideEmailWarning();
+              if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
+                foxEmailSuggestion.innerHTML = 'Možná jsi měl(a) na mysli <strong>' + correctedEmail + '</strong>? Klikněte pro opravu.';
+                foxEmailSuggestion.style.display = 'block';
+                foxEmailSuggestion.onclick = function() {
+                  foxEmailField.value = correctedEmail;
+                  foxEmailSuggestion.style.display = 'none';
+                };
+              }
+              break;
+
             default:
               // Neznámý proposal — fallback na isValid
               if (fx.result.isValid === true) {
-                foxEmailField.classList.add('valid');
-                foxEmailField.classList.remove('invalid');
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+                hideEmailWarning();
+              } else if (alreadyConfirmed) {
+                foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
               } else {
-                foxEmailField.classList.add('invalid');
-                foxEmailField.classList.remove('valid');
+                showEmailWarning('⚠ Tato e-mailová adresa se nezdá být platná. Zkontrolujte, zda je správná.');
               }
               break;
           }
-
-          // Po zpracování Foxentry: obnovit lokální návrh překlepu pokud Foxentry nezobrazilo vlastní návrh
-          if (foxEmailSuggestion && foxEmailSuggestion.style.display === 'none') {
-            var _localTypo = checkEmailTypo(val);
-            if (_localTypo) {
-              foxEmailSuggestion.innerHTML = 'Mysleli jste <strong>' + _localTypo + '</strong>? Klikněte pro opravu.';
-              foxEmailSuggestion.style.display = 'block';
-              foxEmailSuggestion.onclick = function() {
-                foxEmailField.value = _localTypo;
-                foxEmailSuggestion.style.display = 'none';
-                foxEmailField.classList.add('valid');
-                foxEmailField.classList.remove('invalid');
-              };
-            }
-          }
         })
-        .catch(function(err) {
+        .catch(function() {
           hideSpinner(foxEmailField);
-          // Foxentry selhalo (400/429/network) — lokální regex + TLD validace jako fallback
-          console.warn('[Foxentry] Email validation failed, using local fallback:', err.message || err);
-          var localValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
-
-          // Extra: TLD lengte check
-          var _catchParts = val.split('@');
-          if (_catchParts.length === 2) {
-            var _catchDomain = _catchParts[1].split('.');
-            var _catchTld = _catchDomain[_catchDomain.length - 1] || '';
-            if (_catchTld.length < 2) localValid = false;
-          }
-
-          if (localValid) {
-            foxEmailField.classList.add('valid');
-            foxEmailField.classList.remove('invalid');
-          } else {
-            foxEmailField.classList.add('invalid');
-            foxEmailField.classList.remove('valid');
-          }
-          // Zobrazit návrh překlepu pokud je k dispozici
+          // Foxentry API error (network/429/etc.) — fallback na lokální regex, warn-only
+          var basicOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
           var localSuggestion = checkEmailTypo(val);
-          if (localSuggestion && foxEmailSuggestion) {
-            foxEmailSuggestion.innerHTML = 'Mysleli jste <strong>' + localSuggestion + '</strong>? Klikněte pro opravu.';
-            foxEmailSuggestion.style.display = 'block';
-            foxEmailSuggestion.onclick = function() {
-              foxEmailField.value = localSuggestion;
-              foxEmailSuggestion.style.display = 'none';
-              foxEmailField.classList.add('valid');
-              foxEmailField.classList.remove('invalid');
-            };
+          if (basicOk && !localSuggestion) {
+            // Syntax OK + žádný typo → označit jako valid (gracefully degraded)
+            foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
+            hideEmailWarning();
+          } else if (localSuggestion) {
+            showEmailWarning('Měl(a) jsi na mysli <strong data-email-fix="' + localSuggestion + '">' + localSuggestion + '</strong>? Klikněte pro opravu.');
+          } else {
+            showEmailWarning('⚠ Tato e-mailová adresa se nezdá být platná. Zkontrolujte, zda je správná.');
           }
         });
       });
@@ -6677,12 +6722,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     /* ════════════════════════════════════════
      *  4. FIREMNÍ AUTOCOMPLETE (IČO / Identifikační číslo)
      * ════════════════════════════════════════ */
+    /* ════════════════════════════════════════
+     *  4. FIRMA AUTOCOMPLETE (IČO / VAT)
+     *  VYPNUTO — /company/search vyžaduje samostatný "Company Search" credit balíček,
+     *  který NENÍ součástí naší aktuální Foxentry subscription. Pro reaktivaci: koupit
+     *  Company Search balíček A odstranit `false &&` guard níže.
+     * ════════════════════════════════════════ */
     var companyInput = document.getElementById('company_name');
     var companyDropdown = document.getElementById('foxentry-company-dropdown');
     var kvkInput = document.getElementById('kvk_number');
     var vatInput = document.getElementById('vat_number');
 
-    if (companyInput && companyDropdown) {
+    if (false && companyInput && companyDropdown) {
       companyInput.addEventListener('input', debounce(function() {
         var query = companyInput.value.trim();
         if (query.length < 2) { hideDropdown(companyDropdown); return; }
@@ -6798,9 +6849,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         field.classList.remove('valid');
         return false;
       }
-      // Telefon: pokud je aktivní oranžové varování (nepotvrzeno), blokovat odeslání
-      if (field.type === 'tel' && field.dataset.phoneWarning === 'true') {
-        return false;
+      // Warn-only stav (Foxentry našlo problém ale nechá usera rozhodnout) → povolit odeslání
+      if (field.dataset.emailWarning === 'true' || field.dataset.phoneWarning === 'true') {
+        return true;
       }
       // Zachovat aktuální valid/invalid stav (nastavený Foxentry), nepřepisovat
       return field.classList.contains('valid') || field.value.trim().length === 0;
