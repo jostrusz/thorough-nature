@@ -3741,6 +3741,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         },
         onError: function(err) {
           console.error('[PayPal Card] onError:', err);
+          if (window.PaymentTracker) {
+            var _raw; try { _raw = JSON.stringify(err, Object.getOwnPropertyNames(err || {})); } catch (e) { _raw = String(err); }
+            PaymentTracker.track('paypal_cardfields_onerror', {
+              error_code: (err && (err.name || err.code)) || 'CARDFIELDS_ERROR',
+              payload: { message: (err && err.message) || String(err), raw: _raw }
+            });
+          }
           if (cardErrorsEl) cardErrorsEl.textContent = err.message || 'Kortbetaling mislyktes';
           if (window._paypalCardReject) {
             window._paypalCardReject(err);
@@ -3777,6 +3784,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
       if (!paypalCardFieldsInstance.isEligible()) {
         console.warn('[PayPal Card] CardFields not eligible — Advanced Card Payments may not be enabled');
+        if (window.PaymentTracker) PaymentTracker.track('paypal_cardfields_not_eligible', { error_code: 'NOT_ELIGIBLE' });
         if (cardErrorsEl) cardErrorsEl.textContent = 'Kortbetaling er ikke tilgjengelig. Kontroller PayPal-innstillingene.';
         paypalCardMounting = false;
         return;
@@ -3857,6 +3865,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         })
         .catch(function(err) {
           console.error('[PayPal Card] Field render failed:', err.message || err);
+          if (window.PaymentTracker) {
+            var _raw; try { _raw = JSON.stringify(err, Object.getOwnPropertyNames(err || {})); } catch (e) { _raw = String(err); }
+            PaymentTracker.track('paypal_cardfields_render_failed', {
+              error_code: (err && (err.name || err.code)) || 'RENDER_FAILED',
+              payload: { message: (err && err.message) || String(err), raw: _raw }
+            });
+          }
           paypalCardMounting = false;
           paypalCardFieldsInstance = null;
 
@@ -7610,8 +7625,24 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         // logic below handles it (graceful fallback).
         if (selectedMethod === 'creditcard' && cardProvider === 'paypal'
             && providerData.paypalOrderId && !redirectUrl) {
+          // ─── DIAGNOSTIC: serialise any error shape into payment_journey_log ───
+          var _ppErr = function(err) {
+            try { return JSON.stringify(err, Object.getOwnPropertyNames(err || {})); }
+            catch (e) { return String(err); }
+          };
+          var _ppTrack = function(ev, err) {
+            if (!window.PaymentTracker) return;
+            PaymentTracker.track(ev, {
+              cart_id: result.cartId,
+              intent_id: providerData.paypalOrderId,
+              error_code: (err && (err.name || err.code)) || null,
+              payload: { message: (err && err.message) || (err ? String(err) : null), raw: err ? _ppErr(err) : null }
+            });
+          };
+          _ppTrack('paypal_inline_start', null);
           return new Promise(function(resolve, reject) {
             if (!paypalCardFieldsInstance || !paypalCardReady) {
+              _ppTrack('paypal_inline_not_ready', new Error('paypalCardReady=' + paypalCardReady + ' hasInstance=' + !!paypalCardFieldsInstance));
               reject(new Error('Kortbetaling er ikke klar. Last siden på nytt og prøv igjen.'));
               return;
             }
@@ -7619,6 +7650,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             window._paypalCardOrderId = providerData.paypalOrderId;
             // onApprove (in mountPayPalCardFields) calls this after 3DS/approval
             window._paypalCardResolve = function() {
+              _ppTrack('paypal_inline_onapprove', null);
               medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' })
                 .then(function(completeRes) {
                   var order = window.__extractOrderOrThrow(completeRes);
@@ -7634,13 +7666,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                   }
                   resolve();
                 })
-                .catch(function(err) { reject(err); });
+                .catch(function(err) { _ppTrack('paypal_inline_complete_error', err); reject(err); });
             };
             window._paypalCardReject = function(err) {
+              _ppTrack('paypal_inline_onerror', err);
               reject(new Error((err && err.message) || 'Kortbetaling mislyktes. Prøv igjen.'));
             };
             // Triggers card processing + 3DS against the server-created order
             paypalCardFieldsInstance.submit().catch(function(err) {
+              _ppTrack('paypal_inline_submit_error', err);
               reject(new Error((err && err.message) || 'Kortbetaling mislyktes. Sjekk kortopplysningene.'));
             });
           });
