@@ -148,7 +148,7 @@ export const SlEbookDeliveryTemplate: React.FC<SlEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              📦 Den fysiske boken din er på vei og leveres innen <strong>4–7 virkedager</strong>. Du mottar et eget sporingsnummer per e-post.
+              📦 Den fysiske boken din er på vei og leveres innen <strong>4–7 dager</strong>. Du mottar et eget sporingsnummer per e-post.
             </Text>
           </div>
 
@@ -210,8 +210,8 @@ export const SlEbookDeliveryTemplate: React.FC<SlEbookDeliveryTemplateProps> & {
               margin: '0',
             }}>
               Problemer med nedlastingen? Send oss en e-post på{' '}
-              <Link href="mailto:bok@slipptaket.com" style={{ color: '#C27BA0', textDecoration: 'underline' }}>
-                bok@slipptaket.com
+              <Link href="mailto:bok@slipptaketboken.no" style={{ color: '#C27BA0', textDecoration: 'underline' }}>
+                bok@slipptaketboken.no
               </Link>
             </Text>
           </div>
@@ -239,8 +239,8 @@ export const SlEbookDeliveryTemplate: React.FC<SlEbookDeliveryTemplateProps> & {
             fontSize: '12px',
             color: '#9B7AAD',
           }}>
-            <Link href="mailto:bok@slipptaket.com" style={{ color: '#C27BA0', textDecoration: 'none' }}>
-              bok@slipptaket.com
+            <Link href="mailto:bok@slipptaketboken.no" style={{ color: '#C27BA0', textDecoration: 'none' }}>
+              bok@slipptaketboken.no
             </Link>
           </Text>
         </div>

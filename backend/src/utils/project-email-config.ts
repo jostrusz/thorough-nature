@@ -50,6 +50,12 @@ const EMAIL_SUBJECTS: Record<string, Record<string, string>> = {
     shipmentSent: 'Deine Bestellung {id} wurde versendet! 📦',
     shipmentPreview: 'Deine Bestellung wurde versendet!',
   },
+  no: {
+    orderPlaced: 'Takk for bestillingen din {id}!',
+    orderPlacedPreview: 'Takk for bestillingen din!',
+    shipmentSent: 'Bestillingen din {id} er sendt! 📦',
+    shipmentPreview: 'Bestillingen din er sendt!',
+  },
 }
 
 /**
@@ -85,6 +91,23 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'Laat Los Wat Je Kapotmaakt <boek@loslatenboek.nl>',
     project: 'loslatenboek',
     smsDispatchTemplate: 'Laat los wat je kapotmaakt: Bestelling verzonden. Track & trace: {url} boek@loslatenboek.nl',
+  },
+  'slipp-taket': {
+    replyTo: 'bok@slipptaketboken.no',
+    fromName: 'Slipp taket på det som ødelegger deg',
+    fromEmail: 'Slipp taket på det som ødelegger deg <bok@slipptaketboken.no>',
+    project: 'slipp-taket',
+    locale: 'no',
+    smsDispatchTemplate: 'Slipp taket pa det som odelegger deg: Bestillingen din er pa vei. Sporing: {url} bok@slipptaketboken.no',
+  },
+  // Also match without hyphen (fallback)
+  slipptaket: {
+    replyTo: 'bok@slipptaketboken.no',
+    fromName: 'Slipp taket på det som ødelegger deg',
+    fromEmail: 'Slipp taket på det som ødelegger deg <bok@slipptaketboken.no>',
+    project: 'slipp-taket',
+    locale: 'no',
+    smsDispatchTemplate: 'Slipp taket pa det som odelegger deg: Bestillingen din er pa vei. Sporing: {url} bok@slipptaketboken.no',
   },
   'slapp-taget': {
     replyTo: 'hej@slapptagetboken.se',

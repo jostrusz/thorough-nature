@@ -375,7 +375,7 @@ export const SlOrderPlacedTemplate: React.FC<SlOrderPlacedTemplateProps> & {
               margin: '0',
               lineHeight: '1.5',
             }}>
-              📦 &nbsp; <strong>Forventet levering:</strong> 4–7 virkedager
+              📦 &nbsp; <strong>Forventet levering:</strong> 4–7 dager
             </Text>
             <Text style={{
               fontFamily: font,
@@ -543,7 +543,7 @@ export const SlOrderPlacedTemplate: React.FC<SlOrderPlacedTemplateProps> & {
                 <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#2D1B3D' }}>Levert</strong>
                   <br />
-                  Innen 4–7 virkedager har du boken din hjemme.
+                  Innen 4–7 dager har du boken din hjemme.
                 </td>
               </tr>
             </tbody>
@@ -568,8 +568,8 @@ export const SlOrderPlacedTemplate: React.FC<SlOrderPlacedTemplateProps> & {
             }}>
               Spørsmål om bestillingen din? Send oss en e-post på
               <br />
-              <Link href="mailto:bok@slipptaket.com" style={{ color: '#C27BA0', textDecoration: 'underline', fontWeight: 600 }}>
-                bok@slipptaket.com
+              <Link href="mailto:bok@slipptaketboken.no" style={{ color: '#C27BA0', textDecoration: 'underline', fontWeight: 600 }}>
+                bok@slipptaketboken.no
               </Link>
             </Text>
           </div>
@@ -599,8 +599,8 @@ export const SlOrderPlacedTemplate: React.FC<SlOrderPlacedTemplateProps> & {
             fontSize: '12px',
             color: '#9B7AAD',
           }}>
-            <Link href="mailto:bok@slipptaket.com" style={{ color: '#C27BA0', textDecoration: 'none' }}>
-              bok@slipptaket.com
+            <Link href="mailto:bok@slipptaketboken.no" style={{ color: '#C27BA0', textDecoration: 'none' }}>
+              bok@slipptaketboken.no
             </Link>
           </Text>
         </div>
