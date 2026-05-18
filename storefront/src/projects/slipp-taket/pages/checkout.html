@@ -2676,7 +2676,7 @@ body {
 
         <!-- ═══ PROMO KÓDY — REMOVED ═══ -->
 
-        <!-- ═══ SEKCE 3: BETAALMETHODE ═══ -->
+        <!-- ═══ SEKCE 3: BETALINGSMÅTE ═══ -->
         <div class="checkout-card animate-in animate-in-delay-2" style="border-radius:0;">
           <div class="section-header">
             <div class="section-number">3</div>
@@ -3570,7 +3570,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // For name field: replace Mollie cardHolder component with plain text input
       var holderDiv = document.getElementById('card-holder');
       if (holderDiv) {
-        holderDiv.innerHTML = '<input type="text" id="aw-card-name" placeholder="Naam op kaart" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
+        holderDiv.innerHTML = '<input type="text" id="aw-card-name" placeholder="Navn på kortet" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
       }
 
       // Error handling
@@ -3651,7 +3651,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // For name field: replace with plain text input (same as Airwallex)
       var holderDiv = document.getElementById('card-holder');
       if (holderDiv) {
-        holderDiv.innerHTML = '<input type="text" id="stripe-card-name" placeholder="Naam op kaart" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
+        holderDiv.innerHTML = '<input type="text" id="stripe-card-name" placeholder="Navn på kortet" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
       }
 
       // Error handling
@@ -4061,7 +4061,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       method: 'GET'
     }).then(function(shipRes) {
       var options = shipRes.shipping_options || [];
-      if (options.length === 0) throw new Error('Geen verzendopties beschikbaar');
+      if (options.length === 0) throw new Error('Ingen fraktalternativer tilgjengelig');
       return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
         method: 'POST',
         body: JSON.stringify({ option_id: options[0].id })
@@ -4185,10 +4185,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // Show error in preloader (same UX as regular flow)
       var preloader = document.querySelector('.payment-preloader');
       if (preloader) {
-        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Er ging iets mis bij het verwerken van je betaling.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Probeer het opnieuw of neem contact met ons op.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Opnieuw proberen</a></div>';
+        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Noe gikk galt under behandlingen av betalingen din.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Prøv igjen eller kontakt oss.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Prøv igjen</a></div>';
       } else {
         hideExpressPreloader();
-        alert('Er is een fout opgetreden. Probeer het opnieuw.');
+        alert('Det oppstod en feil. Prøv igjen.');
       }
     });
   }
@@ -4356,7 +4356,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               );
               if (!orderId) {
                 console.error('[Express PayPal] No order ID in session data:', JSON.stringify(sessionData));
-                throw new Error('PayPal order ID niet ontvangen van server');
+                throw new Error('PayPal-ordre-ID ble ikke mottatt fra serveren');
               }
               console.log('[Express PayPal] Order created:', orderId);
               return orderId;
@@ -4460,10 +4460,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               console.error('[Express PayPal] Completion error:', err);
               var preloader = document.querySelector('.payment-preloader');
               if (preloader) {
-                preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Er ging iets mis bij het verwerken van je PayPal-betaling.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Probeer het opnieuw of gebruik het formulier hieronder.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Opnieuw proberen</a></div>';
+                preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Noe gikk galt under behandlingen av PayPal-betalingen din.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Prøv igjen eller bruk skjemaet nedenfor.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Prøv igjen</a></div>';
               } else {
                 hideExpressPreloader();
-                alert('Er is een fout opgetreden bij het afronden van je PayPal-betaling.');
+                alert('Det oppstod en feil under fullføringen av PayPal-betalingen din.');
               }
             });
         },
@@ -4520,13 +4520,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           if (redirectUrl) {
             window.location.href = redirectUrl;
           } else {
-            throw new Error('Geen redirect URL ontvangen van betaalprovider');
+            throw new Error('Ingen videresendings-URL mottatt fra betalingsleverandøren');
           }
         })
         .catch(function(err) {
           btn.classList.remove('loading');
           console.error('[Express ' + method.code + '] Error:', err);
-          alert('Er is een fout opgetreden. Probeer het opnieuw of gebruik het formulier hieronder.');
+          alert('Det oppstod en feil. Prøv igjen eller bruk skjemaet nedenfor.');
         });
     });
   }
@@ -4820,7 +4820,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             requiredShippingContactFields: ['name', 'email', 'postalAddress'],
             requiredBillingContactFields: ['postalAddress'],
             total: {
-              label: PROJECT_CONFIG.name || 'Bestelling',
+              label: PROJECT_CONFIG.name || 'Bestilling',
               type: 'final',
               amount: String(selectedBundlePrice || 35),
             }
@@ -4912,36 +4912,36 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   }
 
-  // Method descriptions (Dutch)
+  // Method descriptions (Norwegian)
   var METHOD_DESCRIPTIONS = {
-    ideal: 'Betaal direct via je eigen bank',
-    bancontact: 'Belgisch betaalsysteem',
-    klarna: 'Betaal direct via Klarna',
-    klarna_later: 'Ontvang eerst, betaal later',
-    klarna_slice: 'Betaal in termijnen',
+    ideal: 'Betal direkte via din egen bank',
+    bancontact: 'Belgisk betalingssystem',
+    klarna: 'Betal direkte via Klarna',
+    klarna_later: 'Få varen først, betal senere',
+    klarna_slice: 'Betal i avdrag',
     creditcard: 'Visa, Mastercard, American Express',
-    paypal: 'Betaal met je PayPal-account',
-    eps: 'Betaal via je Oostenrijkse bank',
+    paypal: 'Betal med PayPal-kontoen din',
+    eps: 'Betal via din østerrikske bank',
     przelewy24: 'Polski system platnosci',
     blik: 'Szybka platnosc mobilna',
-    in3: 'Betaal in 3 termijnen',
-    belfius: 'Betaal via Belfius',
-    kbc: 'Betaal via KBC/CBC',
-    riverty: 'Achteraf betalen',
-    trustly: 'Online bankbetaling',
-    applepay: 'Betaal met Apple Pay',
-    googlepay: 'Betaal met Google Pay',
-    bank_transfer: 'Betaal via bankoverschrijving',
-    sepa_debit: 'SEPA automatische incasso',
-    swish: 'Betaal met Swish (Zweden)',
-    revolut_pay: 'Betaal met Revolut',
+    in3: 'Betal i 3 avdrag',
+    belfius: 'Betal via Belfius',
+    kbc: 'Betal via KBC/CBC',
+    riverty: 'Betal senere',
+    trustly: 'Nettbankbetaling',
+    applepay: 'Betal med Apple Pay',
+    googlepay: 'Betal med Google Pay',
+    bank_transfer: 'Betal via bankoverføring',
+    sepa_debit: 'SEPA automatisk trekk',
+    swish: 'Betal med Swish (Sverige)',
+    revolut_pay: 'Betal med Revolut',
   };
 
-  // Klarna sub-method config: code → SDK payment_method_category + Dutch labels
+  // Klarna sub-method config: code → SDK payment_method_category + Norwegian labels
   var KLARNA_METHODS = {
-    klarna:       { category: 'pay_now',       label: 'Betaal direct',        desc: 'Betaal nu via Klarna' },
-    klarna_later: { category: 'pay_later',     label: 'Achteraf betalen',     desc: 'Ontvang eerst, betaal later' },
-    klarna_slice: { category: 'pay_over_time', label: 'Gespreid betalen',     desc: 'Betaal in termijnen' },
+    klarna:       { category: 'pay_now',       label: 'Betal nå',             desc: 'Betal nå via Klarna' },
+    klarna_later: { category: 'pay_later',     label: 'Betal senere',         desc: 'Få varen først, betal senere' },
+    klarna_slice: { category: 'pay_over_time', label: 'Betal i avdrag',       desc: 'Betal i avdrag' },
   };
   var KLARNA_CODES = Object.keys(KLARNA_METHODS);
 
@@ -5015,17 +5015,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             'bancontact': 'Bancontact',
             'paypal': 'PayPal',
             'klarna': 'Klarna',
-            'klarna_later': 'Klarna — achteraf betalen',
-            'klarna_slice': 'Klarna — in termijnen',
+            'klarna_later': 'Klarna — betal senere',
+            'klarna_slice': 'Klarna — i avdrag',
             'eps': 'EPS',
-            'in3': 'in3 — 3 termijnen',
+            'in3': 'in3 — 3 avdrag',
             'belfius': 'Belfius',
             'kbc': 'KBC/CBC',
             'riverty': 'Riverty',
             'trustly': 'Trustly',
             'applepay': 'Apple Pay',
             'googlepay': 'Google Pay',
-            'bank_transfer': 'Bankoverschrijving',
+            'bank_transfer': 'Bankoverføring',
             'sepa_debit': 'SEPA automatische incasso',
             'swish': 'Swish',
             'revolut_pay': 'Revolut Pay',
@@ -5062,7 +5062,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         // Log empty methods to backend
         try { fetch(MEDUSA_URL + '/checkout-log', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }, body: JSON.stringify({ project_slug: PROJECT_CONFIG.slug, payment_method: '_NO_METHODS', email: 'system' }) }).catch(function(){}); } catch(e) {}
         if (errorEl) {
-          errorEl.innerHTML = '<p>Geen betaalmethoden beschikbaar.</p>';
+          errorEl.innerHTML = '<p>Ingen betalingsmåter tilgjengelig.</p>';
           errorEl.style.display = 'block';
         }
         return;
@@ -5169,7 +5169,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     if (totalVisible === 0) {
       if (errorEl) {
-        errorEl.innerHTML = '<p>Geen betaalmethoden beschikbaar voor dit land.</p>';
+        errorEl.innerHTML = '<p>Ingen betalingsmåter tilgjengelig for dette landet.</p>';
         errorEl.style.display = 'block';
       }
       return;
@@ -5209,7 +5209,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           '<img src="/icons/klarna.svg" alt="Klarna" class="pm-icon" onerror="this.style.display=\'none\'">' +
           '<div class="pm-info">' +
             '<div class="pm-name">Klarna</div>' +
-            '<div class="pm-desc">Betaal direct, later of in termijnen</div>' +
+            '<div class="pm-desc">Betal nå, senere eller i avdrag</div>' +
           '</div>' +
           '<svg class="klarna-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
@@ -5615,7 +5615,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var val = emailField.value.trim();
       if (!val) return;
 
-      // 1. TLD lengte check — .c, .x etc. zijn geen geldige TLD's (min 2 tekens)
+      // 1. TLD length check — .c, .x etc. are not valid TLDs (min 2 chars)
       var atParts = val.split('@');
       if (atParts.length === 2) {
         var domainParts = atParts[1].split('.');
@@ -5623,7 +5623,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (tld && tld.length < 2) {
           emailField.classList.add('invalid');
           emailField.classList.remove('valid');
-          // Probeer typo suggestie te geven
+          // Try to give a typo suggestion
           var tldSuggestion = checkEmailTypo(val);
           if (tldSuggestion) {
             emailSuggestion.innerHTML = 'Bedoelde je <strong>' + tldSuggestion + '</strong>? Klik om te corrigeren.';
@@ -5710,7 +5710,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
 
     phoneField.addEventListener('blur', function() {
-      // Als Foxentry actief is, GEEN lokale formatting of validatie — alles via Foxentry
+      // If Foxentry is active, NO local formatting or validation — all via Foxentry
       if (hasFoxentryKey) return;
       var raw = phoneField.value.trim();
       if (!raw) { phonePreview.style.display = 'none'; return; }
@@ -5757,7 +5757,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   }
 
-  /* ─── ADRES VALIDATIE — straatnaam + huisnummer ─── */
+  /* ─── ADDRESS VALIDATION — street name + house number ─── */
   var addressField = document.getElementById('address');
   var addressWarning = document.getElementById('address-warning');
   var addressWarningText = document.getElementById('address-warning-text');
@@ -5768,10 +5768,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var hasLetter = /[a-zA-Z\u00C0-\u024F]/.test(val);
       var hasDigit = /\d/.test(val);
       if (!hasDigit && hasLetter) {
-        addressWarningText.textContent = 'Vergeet niet je huisnummer toe te voegen';
+        addressWarningText.textContent = 'Husk å legge til husnummeret ditt';
         addressWarning.style.display = 'block';
       } else if (!hasLetter && hasDigit) {
-        addressWarningText.textContent = 'Vul ook je straatnaam in';
+        addressWarningText.textContent = 'Fyll også inn gatenavnet ditt';
         addressWarning.style.display = 'block';
       } else {
         addressWarning.style.display = 'none';
@@ -5816,13 +5816,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   /* ═══════════════════════════════════════════════════════════════════
    *  FOXENTRY SMART VALIDATIE — adres autocomplete, e-mail, telefoon, bedrijf
    *  Alleen actief als PROJECT_CONFIG.foxentryApiKey is ingesteld.
-   *  Werkt samen met bestaande validateField / checkEmailTypo / formatPhoneNumber.
+   *  Works together with existing validateField / checkEmailTypo / formatPhoneNumber.
    * ═══════════════════════════════════════════════════════════════════ */
   (function() {
     var FOXENTRY_KEY = (typeof PROJECT_CONFIG !== 'undefined' && PROJECT_CONFIG.foxentryApiKey) || null;
-    if (!FOXENTRY_KEY) return; // Geen key → alles blijft bij de lokale validatie
+    if (!FOXENTRY_KEY) return; // No key → everything stays with local validation
 
-    // Markeer email en telefoon velden als Foxentry-managed (verbergt lokale .field-error via CSS)
+    // Mark email and phone fields as Foxentry-managed (hides local .field-error via CSS)
     var _emailEl = document.getElementById('email');
     var _phoneEl = document.getElementById('phone');
     if (_emailEl) _emailEl.classList.add('foxentry-managed');
@@ -5887,7 +5887,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         fg.appendChild(sp);
       }
       sp.style.display = 'block';
-      // Markeer veld als "Foxentry bezig" — verberg bestaande check/cross
+      // Mark field as "Foxentry busy" — hide existing check/cross
       if (field.id) window.__foxentryPending[field.id] = true;
       field.classList.remove('valid', 'invalid');
     }
@@ -6064,20 +6064,20 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     /* ════════════════════════════════════════
      *  2b. E-MAIL VALIDATIE — basic + full proposal handling
-     *  Beslist op basis van proposal (niet alleen isValid)
+     *  Decides based on proposal (not only isValid)
      * ════════════════════════════════════════ */
     if (foxEmailField) {
       foxEmailField.addEventListener('blur', function() {
         var val = foxEmailField.value.trim();
         if (!val || val.indexOf('@') === -1) return;
 
-        // Pre-check: TLD te kort (.c, .x) — niet naar Foxentry sturen
+        // Pre-check: TLD too short (.c, .x) — do not send to Foxentry
         var _preParts = val.split('@');
         if (_preParts.length === 2) {
           var _preDomain = _preParts[1].split('.');
           var _preTld = _preDomain[_preDomain.length - 1] || '';
           if (_preTld.length > 0 && _preTld.length < 2) {
-            // TLD te kort (.c, .x) — lokale handler heeft al invalid gezet, niet overschrijven
+            // TLD too short (.c, .x) — local handler already set invalid, do not overwrite
             return;
           }
         }
@@ -6130,7 +6130,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               break;
 
             case 'invalid':
-              // Email is fout, geen correctie beschikbaar
+              // Email is wrong, no correction available
               foxEmailField.classList.add('invalid');
               foxEmailField.classList.remove('valid');
               break;
@@ -6234,7 +6234,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
 
     /* ════════════════════════════════════════
-     *  3. TELEFOON VALIDATIE (versterkt bestaande formatting)
+     *  3. PHONE VALIDATION (enhances existing formatting)
      * ════════════════════════════════════════ */
     var foxPhoneField = document.getElementById('phone');
     var foxPhonePreview = document.getElementById('phone-preview');
@@ -6243,7 +6243,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var phoneWarning = document.getElementById('phone-warning');
     var phoneWarningConfirm = document.getElementById('phone-warning-confirm');
     var phoneWarningEdit = document.getElementById('phone-warning-edit');
-    var phoneConfirmedNumber = null; // Bewaar bevestigd nummer — geen herhaalde warning
+    var phoneConfirmedNumber = null; // Keep confirmed number — no repeated warning
 
     function showPhoneWarning() {
       if (phoneWarning) phoneWarning.style.display = 'block';
@@ -6339,7 +6339,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 foxPhonePreview.style.display = 'block';
               }
             } else {
-              // Al bevestigd door gebruiker? Niet opnieuw waarschuwen.
+              // Already confirmed by user? Do not warn again.
               if (phoneConfirmedNumber === foxPhoneField.value.trim()) {
                 foxPhoneField.classList.add('valid');
                 foxPhoneField.classList.remove('invalid');
@@ -6504,7 +6504,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         field.classList.remove('valid');
         return false;
       }
-      // Behoud huidige valid/invalid status (gezet door Foxentry), niet overschrijven
+      // Keep current valid/invalid status (set by Foxentry), do not overwrite
       if (field.classList.contains('valid')) return true;
       if (field.classList.contains('invalid')) return false;
       var _val = field.value.trim();
@@ -6562,7 +6562,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // Show/hide submit validation message
     if (!allValid && submitValidationMsg) {
-      submitValidationMsg.textContent = 'Controleer de volgende velden: ' + missingFields.join(', ');
+      submitValidationMsg.textContent = 'Kontroller følgende felter: ' + missingFields.join(', ');
       submitValidationMsg.style.display = '';
     } else if (submitValidationMsg) {
       submitValidationMsg.style.display = 'none';
@@ -6808,7 +6808,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // Check cart has items
       if (!cart.items || cart.items.length === 0) {
         console.error('[Payment Return] Cart has no items — aborting completion');
-        throw new Error('Je winkelwagen is leeg. De bestelling kan niet worden afgerond.');
+        throw new Error('Handlekurven din er tom. Bestillingen kan ikke fullføres.');
       }
 
       // Check cart total > 0
@@ -6828,7 +6828,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
       if (paymentSessions.length > 0 && !hasAuthorized) {
         console.error('[Payment Return] No authorized payment session — payment likely failed. Sessions:', JSON.stringify(paymentSessions.map(function(s) { return { id: s.id, status: s.status }; })));
-        throw new Error('Je betaling is niet gelukt. Probeer het opnieuw met een andere betaalmethode.');
+        throw new Error('Betalingen din mislyktes. Prøv igjen med en annen betalingsmåte.');
       }
 
       console.log('[Payment Return] Cart verified: ' + cart.items.length + ' items, total: ' + cart.total + ', payment sessions: ' + paymentSessions.length);
@@ -6857,7 +6857,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       console.error('[Payment Return] Cart completion failed:', err);
       var preloader = document.querySelector('.payment-preloader');
       if (preloader) {
-        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Er ging iets mis bij het verwerken van je betaling.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Probeer het opnieuw of neem contact met ons op.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Opnieuw proberen</a></div>';
+        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Noe gikk galt under behandlingen av betalingen din.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Prøv igjen eller kontakt oss.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Prøv igjen</a></div>';
       }
     });
 
@@ -6917,7 +6917,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       promoApplyBtn.textContent = 'Controleren...';
       promoMessage.className = 'promo-message';
 
-      // Stap 1: Cart aanmaken (als die nog niet bestaat)
+      // Step 1: Create cart (if it does not exist yet)
       var cartPromise;
       if (promoCartId) {
         cartPromise = Promise.resolve(promoCartId);
@@ -6992,7 +6992,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       promoApplied.classList.remove('is-visible');
       promoToggle.style.display = '';
       promoMessage.className = 'promo-message';
-      // Verwijder promo van cart als die bestaat
+      // Remove promo from cart if it exists
       if (promoCartId && removedCode) {
         medusaFetch('/store/carts/' + promoCartId + '/promotions', {
           method: 'DELETE',
@@ -7015,7 +7015,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   form.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Valideer alle velden
+    // Validate all fields
     if (!validateAllFields()) {
       var firstError = form.querySelector('.invalid');
       if (firstError) {
@@ -7065,7 +7065,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
      * 4b. Initialiseer payment session (POST /store/payment-collections/{id}/payment-sessions)
      *    → Medusa roept initiatePayment aan op de geselecteerde provider
      *    → Provider (Mollie/PayPal) retourneert checkout/approval URL
-     * 5. Redirect klant naar betaalpagina (Mollie of PayPal)
+     * 5. Redirect customer to payment page (Mollie or PayPal)
      * 6. Na betaling keert klant terug → cart voltooien (POST /store/carts/{id}/complete)
      *
      * Hieronder staat de implementatie:
@@ -7140,7 +7140,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // ─── Factuuradres (billing address) ───
     var isBillingDifferent = document.getElementById('billing-checkbox').checked;
     if (isBillingDifferent) {
-      // Gebruiker heeft een ander factuuradres opgegeven
+      // User has provided a different billing address
       customerData.billing_address = {
         first_name: document.getElementById('billing_first_name').value.trim() || customerData.shipping_address.first_name,
         last_name: document.getElementById('billing_last_name').value.trim() || customerData.shipping_address.last_name,
@@ -7150,7 +7150,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         country_code: document.getElementById('billing_country').value.toLowerCase(),
         phone: customerData.shipping_address.phone,
       };
-      // B2B: company toevoegen aan billing address
+      // B2B: add company to billing address
       if (isCompany && companyName) {
         customerData.billing_address.company = companyName;
       }
@@ -7166,23 +7166,23 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var checkoutOrderBump = orderBumpActive;
     var checkoutTotal = getCurrentTotal();
 
-    // Stap 1: Cart aanmaken of hergebruiken (promo cart → background cart → nieuw)
+    // Step 1: Create or reuse cart (promo cart → background cart → new)
     var reuseCartId = promoCartId || backgroundCartId;
     var cartStep;
     if (reuseCartId) {
       // Cart bestaat al (promo code validatie of background cart recovery)
-      // Verwijder bestaande line items en voeg opnieuw toe (bundle/qty kan veranderd zijn)
+      // Remove existing line items and add again (bundle/qty may have changed)
       cartStep = medusaFetch('/store/carts/' + reuseCartId, { method: 'GET' })
         .then(function(cartRes) {
           var cart = cartRes.cart;
-          // Verwijder alle bestaande line items
+          // Remove all existing line items
           var deletePromises = (cart.items || []).map(function(item) {
             return medusaFetch('/store/carts/' + reuseCartId + '/line-items/' + item.id, { method: 'DELETE' });
           });
           return Promise.all(deletePromises).then(function() { return reuseCartId; });
         })
         .catch(function() {
-          // Cart ophalen mislukt — maak een nieuwe aan
+          // Cart retrieval failed — create a new one
           reuseCartId = null;
           backgroundCartId = null;
           promoCartId = null;
@@ -7200,7 +7200,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     cartStep
     .then(function(cartId) {
-      // Stap 2a: Hoofdproduct toevoegen via bundle endpoint (custom pricing)
+      // Step 2a: Add main product via bundle endpoint (custom pricing)
       // Each bundle variant (LLWJK-1 to LLWJK-4) represents a specific bundle qty, so quantity is always 1
       return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
         method: 'POST',
@@ -7210,9 +7210,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         })
       }).catch(function(err) {
         console.error('[Checkout] Failed to add product to cart:', err.message || err);
-        throw new Error('Het product kon niet aan de winkelwagen worden toegevoegd. Probeer het opnieuw.');
+        throw new Error('Produktet kunne ikke legges i handlekurven. Prøv igjen.');
       }).then(function() {
-        // Stap 2b: Order bump produkt toevoegen (bundle endpoint = tax-inclusive + discounted price)
+        // Step 2b: Add order bump product (bundle endpoint = tax-inclusive + discounted price)
         if (checkoutOrderBump) {
           return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
             method: 'POST',
@@ -7228,7 +7228,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           var cart = cartRes.cart;
           if (!cart.items || cart.items.length === 0 || cart.total <= 0) {
             console.error('[Checkout] Cart is empty after adding items — aborting checkout');
-            throw new Error('Er is een fout opgetreden bij het aanmaken van je bestelling. Probeer het opnieuw of neem contact met ons op.');
+            throw new Error('Det oppstod en feil under opprettelsen av bestillingen din. Prøv igjen eller kontakt oss.');
           }
           console.log('[Checkout] Cart verified: ' + cart.items.length + ' items, total: ' + cart.total);
           return cartId;
@@ -7243,7 +7243,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
-      // Stap 3a: Promo code toepassen via Medusa Promotions API (opnieuw als cart hergebruikt wordt)
+      // Step 3a: Apply promo code via Medusa Promotions API (again if cart is reused)
       if (savedPromoCode) {
         return medusaFetch('/store/carts/' + cartId + '/promotions', {
           method: 'POST',
@@ -7256,7 +7256,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           }
           return cartId;
         }).catch(function(err) {
-          // Medusa weigert de code — toon fout, verberg badge, stop NIET de bestelling
+          // Medusa rejects the code — show error, hide badge, do NOT stop the order
           console.warn('Promo code geweigerd door Medusa:', err.message || err);
           savedPromoCode = '';
           promoAppliedToCart = false;
@@ -7277,13 +7277,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return cartId;
     })
     .then(function(cartId) {
-      // Stap 3b: Shipping method toevoegen
+      // Step 3b: Add shipping method
       return medusaFetch('/store/shipping-options?cart_id=' + cartId, {
         method: 'GET'
       }).then(function(shipRes) {
         var options = shipRes.shipping_options || [];
         if (options.length === 0) {
-          throw new Error('Geen verzendopties beschikbaar');
+          throw new Error('Ingen fraktalternativer tilgjengelig');
         }
         return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
           method: 'POST',
@@ -7348,7 +7348,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           // Mollie: tokenize card → send token in session data
           tokenPromise = mollieInstance.createToken().then(function(tokenResult) {
             if (tokenResult.error) {
-              throw new Error(tokenResult.error.message || 'Creditcard verificatie mislukt');
+              throw new Error(tokenResult.error.message || 'Kortverifisering mislyktes');
             }
             sessionData.cardToken = tokenResult.token;
             console.log('[Mollie Components] Token created');
@@ -7463,7 +7463,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           }
         });
       } else {
-        // PRODUKCE: Redirect naar betaalpagina of Klarna SDK flow
+        // PRODUKCE: Redirect to payment page or Klarna SDK flow
         var sessions = result.paymentCollection?.payment_sessions || [];
         var lastSession = sessions[sessions.length - 1] || {};
         var providerData = lastSession.data || {};
@@ -7499,7 +7499,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           return new Promise(function(resolve, reject) {
             // Initialize Klarna Payments SDK
             if (typeof Klarna === 'undefined' || !Klarna.Payments) {
-              reject(new Error('Klarna Payments SDK niet geladen. Probeer het opnieuw.'));
+              reject(new Error('Klarna Payments SDK ble ikke lastet. Prøv igjen.'));
               return;
             }
 
@@ -7509,7 +7509,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               });
               console.log('[Klarna] SDK initialized with client_token');
             } catch (initErr) {
-              reject(new Error('Klarna SDK initialisatie mislukt: ' + initErr.message));
+              reject(new Error('Klarna SDK-initialisering mislyktes: ' + initErr.message));
               return;
             }
 
@@ -7585,11 +7585,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                   });
                 } else if (klarnaRes.show_form) {
                   // Klarna needs more info — customer should retry
-                  reject(new Error('Klarna heeft meer informatie nodig. Controleer je gegevens en probeer het opnieuw.'));
+                  reject(new Error('Klarna trenger mer informasjon. Kontroller opplysningene dine og prøv igjen.'));
                 } else {
                   // Declined or cancelled
                   var reason = klarnaRes.error ? klarnaRes.error.invalid_fields?.join(', ') : '';
-                  reject(new Error('Klarna betaling niet goedgekeurd.' + (reason ? ' Controleer: ' + reason : ' Probeer een andere betaalmethode.')));
+                  reject(new Error('Klarna-betaling ikke godkjent.' + (reason ? ' Kontroller: ' + reason : ' Prøv en annen betalingsmåte.')));
                 }
               }
             );
@@ -7664,7 +7664,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             function waitForSDK(attempts) {
               if (typeof window.AirwallexComponentsSDK !== 'undefined') return initAirwallex();
               if (attempts <= 0) {
-                reject(new Error('Airwallex SDK niet geladen. Probeer het opnieuw.'));
+                reject(new Error('Airwallex SDK ble ikke lastet. Prøv igjen.'));
                 return;
               }
               setTimeout(function() { waitForSDK(attempts - 1); }, 300);
@@ -7751,7 +7751,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               dropIn.on('error', function(event) {
                 var error = event.detail && event.detail.error ? event.detail.error : event.detail || {};
                 submitBtn.style.display = '';
-                reject(new Error(error.message || 'Airwallex betaling mislukt.'));
+                reject(new Error(error.message || 'Airwallex-betaling mislyktes.'));
               });
 
               dropIn.on('ready', function() {
@@ -7760,7 +7760,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 submitBtn.disabled = false;
               });
             } catch (awErr) {
-              reject(new Error('Airwallex initialisatie mislukt: ' + awErr.message));
+              reject(new Error('Airwallex-initialisering mislyktes: ' + awErr.message));
             }
             } // end initAirwallex
           });
@@ -7791,21 +7791,21 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           window.location.href = redirectUrl;
         } else if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1) {
           // Airwallex without intentId — payment session not created properly
-          throw new Error('Airwallex betalingssessie niet correct aangemaakt. Probeer het opnieuw.');
+          throw new Error('Airwallex-betalingsøkten ble ikke opprettet riktig. Prøv igjen.');
         } else {
-          throw new Error('Geen redirect URL ontvangen van betaalprovider');
+          throw new Error('Ingen videresendings-URL mottatt fra betalingsleverandøren');
         }
       }
     })
     .catch(function(err) {
       // Toon foutmelding
-      errorEl.textContent = err.message || 'Er ging iets mis. Probeer het opnieuw.';
+      errorEl.textContent = err.message || 'Noe gikk galt. Prøv igjen.';
       submitBtn.classList.remove('loading');
       submitBtn.disabled = false;
     });
   });
 
-  /* ─── LAND SELECTIE — region + betaalmethoden ─── */
+  /* ─── COUNTRY SELECTION — region + payment methods ─── */
   var countrySelect = document.getElementById('country');
   countrySelect.addEventListener('change', function() {
     var country = countrySelect.value;
