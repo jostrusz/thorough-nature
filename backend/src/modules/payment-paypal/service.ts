@@ -709,6 +709,63 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         }
       }
 
+      // ── Inline Card (Advanced Card Payments / CardFields) ──
+      // After cardFields.submit() + 3DS the PayPal order stays CREATED with
+      // payment_source.card attached — there is NO "APPROVED" state for direct
+      // card orders. The merchant must capture the order directly.
+      if (
+        status === "CREATED" &&
+        order.payment_source?.card &&
+        captures.length === 0 &&
+        authorizations.length === 0
+      ) {
+        const card = order.payment_source.card
+        const auth3ds = card.authentication_result?.three_d_secure
+        this.logger_.info(
+          `[PayPal] Inline card order ${paypalOrderId}: capturing directly ` +
+            `(3DS enrollment=${auth3ds?.enrollment_status || "n/a"}, ` +
+            `auth=${auth3ds?.authentication_status || "n/a"}, ` +
+            `liabilityShift=${card.authentication_result?.liability_shift || "n/a"})`
+        )
+        try {
+          const capturedOrder = await client.captureOrder(paypalOrderId)
+          const newCaptures =
+            capturedOrder.purchase_units?.[0]?.payments?.captures || []
+          if (newCaptures.length > 0) {
+            this.logger_.info(
+              `[PayPal] Inline card captured: order=${paypalOrderId}, ` +
+                `captureId=${newCaptures[0].id}, status=${newCaptures[0].status}`
+            )
+            return {
+              status: PaymentSessionStatus.AUTHORIZED,
+              data: {
+                ...sessionData,
+                paypalOrderId,
+                captureId: newCaptures[0].id,
+                captureStatus: newCaptures[0].status,
+                status: "CAPTURED",
+                payer: capturedOrder.payer,
+              },
+            }
+          }
+        } catch (cardCaptureErr: any) {
+          const ppErr = cardCaptureErr.response?.data
+          this.logger_.error(
+            `[PayPal] Inline card capture failed for ${paypalOrderId}: ` +
+              `${ppErr?.message || cardCaptureErr.message} | ` +
+              `debug_id=${ppErr?.debug_id || "none"} | ` +
+              `details=${ppErr?.details ? JSON.stringify(ppErr.details) : "none"}`
+          )
+          throw new MedusaError(
+            MedusaError.Types.UNEXPECTED_STATE,
+            ppErr?.details?.[0]?.description ||
+              ppErr?.message ||
+              cardCaptureErr.message ||
+              "PayPal card capture failed"
+          )
+        }
+      }
+
       // Auto-capture: if order is APPROVED and intent was CAPTURE, capture now
       if (status === "APPROVED") {
         try {
