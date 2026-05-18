@@ -2713,6 +2713,8 @@ body {
             </div>
             <div id="card-errors" style="font-size:12px;color:var(--error);margin-top:6px;min-height:16px;"></div>
           </div>
+          <!-- Wallet button container (hidden, shown only when Google Pay / Apple Pay selected) -->
+          <div id="wallet-button" style="display:none; padding: 14px 16px 4px 48px;"></div>
           <!-- Airwallex Drop-in container (hidden, shown only when Airwallex payment method selected) -->
           <div id="airwallex-dropin-container" style="display:none; padding: 16px; animation: fadeIn 0.3s ease;"></div>
 
@@ -4198,17 +4200,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     expressMethods = Object.keys(deduped).map(function(k) { return deduped[k]; });
 
     // Filter out creditcard — not an express method
-    expressMethods = expressMethods.filter(function(m) { return m.code !== 'creditcard'; });
-
-    // Apple Pay: device check
+    // Also exclude googlepay & applepay — they now render as regular radio methods
     expressMethods = expressMethods.filter(function(m) {
-      if (m.code === 'applepay') {
-        var hasSession = !!window.ApplePaySession;
-        var canPay = hasSession && ApplePaySession.canMakePayments();
-        console.log('[Express Apple Pay] Device check — ApplePaySession:', hasSession, 'canMakePayments:', canPay);
-        return canPay;
-      }
-      return true;
+      return m.code !== 'creditcard' && m.code !== 'googlepay' && m.code !== 'applepay';
     });
 
     if (expressMethods.length === 0) {
@@ -5086,6 +5080,40 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
    * Render payment methods filtered by country.
    * Klarna methods (klarna, klarna_later, klarna_slice) are grouped under one parent.
    */
+  /**
+   * Show/hide the native wallet button (#wallet-button) vs the generic
+   * submit button (#submit-btn) based on the currently selected method.
+   * Called whenever selectedMethod changes.
+   */
+  function updateWalletUI() {
+    var walletEl = document.getElementById('wallet-button');
+    var submitBtnEl = document.getElementById('submit-btn');
+    var cardFieldsEl = document.getElementById('card-fields');
+
+    if (selectedMethod === 'googlepay' || selectedMethod === 'applepay') {
+      var method = allPaymentOptions.find(function(m) { return m.code === selectedMethod; });
+      if (walletEl) {
+        walletEl.innerHTML = '';
+        walletEl.style.display = 'block';
+        if (method) {
+          if (selectedMethod === 'googlepay') {
+            renderGooglePayExpressNative(walletEl, method);
+          } else {
+            renderApplePayExpressNative(walletEl, method);
+          }
+        }
+      }
+      if (cardFieldsEl) cardFieldsEl.style.display = 'none';
+      if (submitBtnEl) submitBtnEl.style.display = 'none';
+    } else {
+      if (walletEl) {
+        walletEl.style.display = 'none';
+        walletEl.innerHTML = '';
+      }
+      if (submitBtnEl) submitBtnEl.style.display = '';
+    }
+  }
+
   function renderPaymentMethods(countryCode) {
     var container = document.getElementById('payment-methods');
     var country = (countryCode || 'NO').toLowerCase();
@@ -5096,13 +5124,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return m.available_countries.indexOf(country) !== -1;
     });
 
-    // Apple Pay: only show if device supports it
+    // Apple Pay: only show if device supports it (Google Pay renders as a regular radio)
     methods = methods.filter(function(m) {
       if (m.code === 'applepay') {
         return window.ApplePaySession && ApplePaySession.canMakePayments();
-      }
-      if (m.code === 'googlepay') {
-        return false;
       }
       return true;
     });
@@ -5291,6 +5316,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // Update button text
     updateButtonText();
+
+    // Show wallet button / submit button based on initial selection
+    updateWalletUI();
   }
 
   /**
@@ -5364,6 +5392,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
         updateButtonText();
         updateSubtext();
+        updateWalletUI();
         document.getElementById('payment-errors').textContent = '';
       });
     });
@@ -5394,6 +5423,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             if (cardFields) cardFields.style.display = 'none';
             updateButtonText();
             updateSubtext();
+            updateWalletUI();
             document.getElementById('payment-errors').textContent = '';
           } else {
             // Already selected → toggle collapse
@@ -5418,6 +5448,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           if (cardFields) cardFields.style.display = 'none';
           updateButtonText();
           updateSubtext();
+          updateWalletUI();
           document.getElementById('payment-errors').textContent = '';
         }
       });
@@ -5441,6 +5472,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (cardFields) cardFields.style.display = 'none';
         updateButtonText();
         updateSubtext();
+        updateWalletUI();
         document.getElementById('payment-errors').textContent = '';
       });
     });
