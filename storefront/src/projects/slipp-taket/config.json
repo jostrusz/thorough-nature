@@ -21,7 +21,7 @@
     "name": "Slipp taket på det som ødelegger deg",
     "handle": "slipp-taket-pa-det-som-odelegger-deg",
     "variantId": "variant_01KRD3ABWEJWTH929A5N938K0D",
-    "price": 399,
+    "price": 699,
     "currency": "NOK",
     "thumbnail": ""
   },
@@ -34,10 +34,10 @@
     "currency": "NOK"
   },
   "bundleOptions": [
-    { "qty": 1, "price": 399, "save": 0, "badge": "FOR DEG SELV", "label": "1 bok" },
-    { "qty": 2, "price": 699, "save": 99, "badge": "DEL MED EN VENN", "label": "2 bøker" },
-    { "qty": 3, "price": 949, "save": 248, "badge": "PERFEKT SOM GAVE", "label": "3 bøker" },
-    { "qty": 4, "price": 1199, "save": 397, "badge": "BESTE VERDI", "label": "4 bøker" }
+    { "qty": 1, "price": 699, "save": 0, "badge": "FOR DEG SELV", "label": "1 bok" },
+    { "qty": 2, "price": 1199, "save": 199, "badge": "DEL MED EN VENN", "label": "2 bøker" },
+    { "qty": 3, "price": 1599, "save": 498, "badge": "PERFEKT SOM GAVE", "label": "3 bøker" },
+    { "qty": 4, "price": 1999, "save": 797, "badge": "BESTE VERDI", "label": "4 bøker" }
   ],
   "catalogContentIds": [],
   "mollieProfileId": "",

@@ -64,6 +64,14 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 949,   // 949 kr incl. moms (save 248 kr)
     4: 1199,  // 1199 kr incl. moms (save 397 kr)
   },
+  // Slipp Taket — "Slipp taket på det som ødelegger deg" (Norway, NOK)
+  // Norway: 0% MVA on books — prices are final customer prices.
+  "slipp-taket-pa-det-som-odelegger-deg": {
+    1: 699,   // 699 kr
+    2: 1199,  // 1199 kr (save 199 kr)
+    3: 1599,  // 1599 kr (save 498 kr)
+    4: 1999,  // 1999 kr (save 797 kr)
+  },
   // Odpusc Ksiazka — "Odpuść to, co cię niszczy"
   "odpusc-to-co-cie-niszczy": {
     1: 129,   // 129 zł incl. VAT (23%)
