@@ -2358,8 +2358,7 @@ body {
    aby nevznikl dvojitý rámeček. Container jen drží minimální výšku. */
 .paypal-provider #card-number iframe,
 .paypal-provider #expiry-date iframe,
-.paypal-provider #verification-code iframe,
-.paypal-provider #card-holder iframe {
+.paypal-provider #verification-code iframe {
   width: 100% !important;
   min-height: 54px !important;
   border: none !important;
@@ -2711,10 +2710,6 @@ body {
                 <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">CVC</label>
                 <div id="verification-code" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
               </div>
-            </div>
-            <div style="margin-bottom:6px;">
-              <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">Navn på kortet</label>
-              <div id="card-holder" style="height:42px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 12px;background:var(--white);display:flex;align-items:center;"></div>
             </div>
             <div id="card-errors" style="font-size:12px;color:var(--error);margin-top:6px;min-height:16px;"></div>
           </div>
@@ -3787,10 +3782,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
       // Individual field rendering — same layout as Mollie/Stripe/Airwallex
       // Norske placeholdere — uavhengig av SDK-locale
+      // NameField (jméno na kartě) ZÁMĚRNĚ nerenderujeme — je u PayPalu
+      // nepovinné a nižší počet polí = nižší tření v checkoutu.
       var numberField = paypalCardFieldsInstance.NumberField({ placeholder: 'Kortnummer' });
       var expiryField = paypalCardFieldsInstance.ExpiryField({ placeholder: 'MM / ÅÅ' });
       var cvvField    = paypalCardFieldsInstance.CVVField({ placeholder: 'CVC' });
-      var nameField   = paypalCardFieldsInstance.NameField({ placeholder: 'Navn på kortet' });
 
       // Add .paypal-provider class to scope PayPal-specific CSS
       var cardFieldsWrapper = document.getElementById('card-fields');
@@ -3798,7 +3794,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
       // Strip our container styling — PayPal iframe becomes the visible input
       // (our containers have border/padding/background that creates a "double frame")
-      var fieldIds = ['card-number', 'expiry-date', 'verification-code', 'card-holder'];
+      var fieldIds = ['card-number', 'expiry-date', 'verification-code'];
       fieldIds.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) {
@@ -3813,7 +3809,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
       console.log('[PayPal Card] Rendering individual fields...');
 
-      // Render all 4 fields sequentially to avoid zoid race conditions
+      // Render all 3 fields sequentially to avoid zoid race conditions
       numberField.render('#card-number')
         .then(function() {
           console.log('[PayPal Card] NumberField rendered');
@@ -3825,9 +3821,6 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         })
         .then(function() {
           console.log('[PayPal Card] CVVField rendered');
-          return nameField.render('#card-holder');
-        })
-        .then(function() {
           paypalCardReady = true;
           paypalCardMounting = false;
           console.log('[PayPal Card] All fields rendered successfully');
