@@ -3964,6 +3964,47 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   /* ─── EXPRESS CHECKOUT: Shared utilities ─── */
 
   /**
+   * Build the customerData object from the checkout FORM fields
+   * (same shape as the regular submit handler). Used by the in-list
+   * wallet buttons (Google Pay / Apple Pay) so the order uses the
+   * address the customer typed, not the wallet's address.
+   */
+  function buildFormCustomerData() {
+    var customerData = {
+      email: document.getElementById('email').value.trim(),
+      shipping_address: {
+        first_name: document.getElementById('first_name').value.trim(),
+        last_name: document.getElementById('last_name').value.trim(),
+        address_1: document.getElementById('address').value.trim(),
+        city: document.getElementById('city').value.trim(),
+        postal_code: document.getElementById('postal_code').value.trim(),
+        country_code: document.getElementById('country').value.toLowerCase(),
+        phone: document.getElementById('phone').value.trim(),
+      }
+    };
+    customerData.billing_address = Object.assign({}, customerData.shipping_address);
+
+    // ─── Metadata (mirrors regular submit handler) ───
+    customerData.metadata = {};
+    if (window.AnalyticsTracker) {
+      customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
+      customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
+      customerData.metadata.project_id = window.AnalyticsTracker.PROJECT_ID || '';
+    }
+    if (!customerData.metadata.project_id) {
+      customerData.metadata.project_id = PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || '';
+    }
+    if (typeof MetaTracker !== 'undefined') {
+      customerData.metadata.fbc = MetaTracker.getFbc() || '';
+      customerData.metadata.fbp = MetaTracker.getFbp() || '';
+      customerData.metadata.external_id = MetaTracker.getExternalId() || '';
+    }
+    customerData.metadata.source_url = window.location.href;
+    customerData.metadata.client_user_agent = navigator.userAgent || '';
+    return customerData;
+  }
+
+  /**
    * Create a fresh cart with current bundle + order bump + promo.
    * Returns a Promise that resolves to the cartId.
    */
@@ -4588,6 +4629,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               console.log('[Express Google Pay] Already in progress, ignoring click');
               return;
             }
+
+            // Validate the checkout form BEFORE opening the Google Pay sheet
+            if (!validateAllFields()) {
+              var firstError = document.querySelector('#checkout-form .invalid, form .invalid');
+              if (firstError) {
+                firstError.focus();
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+              return;
+            }
+
             gpayBusy = true;
             console.log('[Express Google Pay] Button clicked — creating cart + order');
 
@@ -4647,37 +4699,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                   // TODO: handle 3DS if needed
                 }
 
-                // Extract payer info from Google Pay paymentData
-                var contact = paymentData.shippingAddress || {};
-                var email = paymentData.email || '';
-
-                var customerData = {
-                  email: email,
-                  shipping_address: {
-                    first_name: (contact.name || '').split(' ')[0] || '',
-                    last_name: (contact.name || '').split(' ').slice(1).join(' ') || '',
-                    address_1: contact.address1 || '',
-                    city: contact.locality || '',
-                    postal_code: contact.postalCode || '',
-                    country_code: (contact.countryCode || 'NO').toLowerCase(),
-                    phone: contact.phoneNumber || '',
-                  }
-                };
-                customerData.billing_address = Object.assign({}, customerData.shipping_address);
-
-                // ─── Add project metadata (same as regular checkout) ───
-                customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'loslatenboek' };
-                if (window.AnalyticsTracker) {
-                  customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
-                  customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
-                }
-                if (typeof MetaTracker !== 'undefined') {
-                  customerData.metadata.fbc = MetaTracker.getFbc() || '';
-                  customerData.metadata.fbp = MetaTracker.getFbp() || '';
-                }
+                // Build customer data from the checkout FORM (not the wallet)
+                var customerData = buildFormCustomerData();
 
                 localStorage.setItem('medusa_customer', JSON.stringify({
-                  email: email,
+                  email: customerData.email,
                   first_name: customerData.shipping_address.first_name,
                   last_name: customerData.shipping_address.last_name,
                   address_1: customerData.shipping_address.address_1,
@@ -4774,6 +4800,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         apBtn.addEventListener('click', function() {
           console.log('[Express Apple Pay] Button clicked — starting session');
 
+          // Validate the checkout form BEFORE opening the Apple Pay sheet.
+          // Runs synchronously so the user gesture is preserved for ApplePaySession.
+          if (!validateAllFields()) {
+            var firstError = document.querySelector('#checkout-form .invalid, form .invalid');
+            if (firstError) {
+              firstError.focus();
+              firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+          }
+
           // Create Apple Pay payment request
           var paymentRequest = {
             countryCode: applepayConfig.countryCode || 'NO',
@@ -4832,34 +4869,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
               session.completePayment(ApplePaySession.STATUS_SUCCESS);
 
-              // Extract customer data from Apple Pay
-              var shipping = event.payment.shippingContact || {};
-              var customerData = {
-                email: shipping.emailAddress || '',
-                shipping_address: {
-                  first_name: shipping.givenName || '',
-                  last_name: shipping.familyName || '',
-                  address_1: (shipping.addressLines || [])[0] || '',
-                  city: shipping.locality || '',
-                  postal_code: shipping.postalCode || '',
-                  country_code: (shipping.countryCode || 'NO').toLowerCase(),
-                  phone: shipping.phoneNumber || '',
-                }
-              };
-              customerData.billing_address = Object.assign({}, customerData.shipping_address);
-
-              // ─── Add project metadata (same as regular checkout) ───
-              customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'loslatenboek' };
-              if (window.AnalyticsTracker) {
-                customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
-                customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
-              }
-              if (typeof MetaTracker !== 'undefined') {
-                customerData.metadata.fbc = MetaTracker.getFbc() || '';
-                customerData.metadata.fbp = MetaTracker.getFbp() || '';
-                customerData.metadata.external_id = MetaTracker.getExternalId() || '';
-              }
-              customerData.metadata.source_url = window.location.href;
+              // Build customer data from the checkout FORM (not the wallet)
+              var customerData = buildFormCustomerData();
 
               localStorage.setItem('medusa_customer', JSON.stringify({
                 email: customerData.email,
