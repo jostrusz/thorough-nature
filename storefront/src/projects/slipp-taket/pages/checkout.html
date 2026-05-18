@@ -5245,17 +5245,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (!hasCreditCard) {
         cardFieldsEl.style.display = 'none';
       } else if (selectedMethod === 'creditcard') {
-        // Stripe, PayPal, and Airwallex use hosted checkout (redirect), no inline card fields needed
-        if (cardProvider === 'stripe' || cardProvider === 'paypal' || cardProvider === 'airwallex') {
+        // Stripe & Airwallex use hosted/drop-in checkout, no inline card fields here
+        if (cardProvider === 'stripe' || cardProvider === 'airwallex') {
           cardFieldsEl.style.display = 'none';
+        } else if (cardProvider === 'paypal') {
+          // PayPal Advanced Card Payments — inline hosted CardFields
+          cardFieldsEl.style.display = 'block';
+          initPayPalCard();
         } else {
           cardFieldsEl.style.display = 'block';
           // Init the correct card provider's form
-          if (cardProvider === 'mollie') {
-            initMollieComponents();
-          } else {
-            initMollieComponents(); // fallback
-          }
+          initMollieComponents();
         }
       } else {
         cardFieldsEl.style.display = 'none';
@@ -5323,8 +5323,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         // Show/hide card fields — init the right provider's card elements
         var cardFields = document.getElementById('card-fields');
         if (cardFields) {
-          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal' && cardProvider !== 'airwallex') {
-            // Stripe, PayPal, and Airwallex use hosted checkout (redirect/drop-in), no inline card fields
+          if (selectedMethod === 'creditcard' && cardProvider === 'paypal') {
+            // PayPal Advanced Card Payments — inline hosted CardFields
+            cardFields.style.display = 'block';
+            initPayPalCard();
+          } else if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'airwallex') {
+            // Mollie inline card fields (Stripe/Airwallex use hosted/drop-in)
             cardFields.style.display = 'block';
             if (cardProvider === 'mollie') {
               initMollieComponents();
@@ -7292,8 +7296,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           sessionData.method = 'creditcard';
           tokenPromise = Promise.resolve(cartId);
         } else if (cardProvider === 'paypal') {
-          // PayPal: no tokenization needed — CardFields.submit() happens after order creation
+          // PayPal: no tokenization needed — CardFields.submit() happens after order creation.
+          // Request the inline CardFields order ONLY when the hosted fields actually
+          // mounted (Advanced Card Payments enabled on the account); otherwise leave
+          // the flag off so the backend returns a hosted redirect URL as fallback.
           sessionData.method = 'creditcard';
+          if (paypalCardReady) {
+            sessionData.card_flow = 'inline';
+          }
           tokenPromise = Promise.resolve(cartId);
         } else {
           tokenPromise = Promise.resolve(cartId);
@@ -7525,10 +7535,49 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         // Stripe card payments redirect to Stripe's hosted checkout page via checkoutUrl
         // (handled by the generic redirect logic below — providerData.checkoutUrl)
 
-        // ─── PAYPAL CARD: uses hosted PayPal page (redirect) ───
-        // PayPal card payments redirect to PayPal's hosted checkout page via approvalUrl.
-        // On the hosted page, guests see "Pay with Debit or Credit Card".
-        // (handled by the generic redirect logic below — providerData.approvalUrl)
+        // ─── PAYPAL CARD: inline Advanced Card Payments (CardFields) ───
+        // When the hosted CardFields mounted (Advanced Card Payments enabled),
+        // the backend created a plain order with no approvalUrl. Submit the card
+        // via CardFields, then complete the cart in-page. If CardFields was not
+        // eligible, the backend returned an approvalUrl and the generic redirect
+        // logic below handles it (graceful fallback).
+        if (selectedMethod === 'creditcard' && cardProvider === 'paypal'
+            && providerData.paypalOrderId && !redirectUrl) {
+          return new Promise(function(resolve, reject) {
+            if (!paypalCardFieldsInstance || !paypalCardReady) {
+              reject(new Error('Kortbetaling er ikke klar. Last siden på nytt og prøv igjen.'));
+              return;
+            }
+            // CardFields.createOrder() returns this id (order already created server-side)
+            window._paypalCardOrderId = providerData.paypalOrderId;
+            // onApprove (in mountPayPalCardFields) calls this after 3DS/approval
+            window._paypalCardResolve = function() {
+              medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' })
+                .then(function(completeRes) {
+                  var order = window.__extractOrderOrThrow(completeRes);
+                  localStorage.setItem('medusa_order_id', order.id || '');
+                  localStorage.setItem('medusa_order_display_id', order.display_id || '');
+                  if (PROJECT_CONFIG.upsellEnabled === false) {
+                    window.location.href = PROJECT_CONFIG.thankYouUrl;
+                  } else if (checkoutOrderBump) {
+                    localStorage.setItem('medusa_upsell_purchased', 'true');
+                    window.location.href = PROJECT_CONFIG.thankYouUrl;
+                  } else {
+                    window.location.href = PROJECT_CONFIG.upsellUrl;
+                  }
+                  resolve();
+                })
+                .catch(function(err) { reject(err); });
+            };
+            window._paypalCardReject = function(err) {
+              reject(new Error((err && err.message) || 'Kortbetaling mislyktes. Prøv igjen.'));
+            };
+            // Triggers card processing + 3DS against the server-created order
+            paypalCardFieldsInstance.submit().catch(function(err) {
+              reject(new Error((err && err.message) || 'Kortbetaling mislyktes. Sjekk kortopplysningene.'));
+            });
+          });
+        }
 
         // ─── AIRWALLEX DROP-IN FLOW ───
         // Airwallex uses Drop-in Element for card, bancontact, and other methods

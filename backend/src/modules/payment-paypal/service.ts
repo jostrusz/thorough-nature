@@ -382,8 +382,28 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
       const purchaseUnits = [purchaseUnit]
 
       const isCard = method === "creditcard"
+      // Inline card = PayPal Advanced Card Payments (CardFields hosted fields).
+      // The storefront sets data.card_flow='inline' only when CardFields mounted
+      // successfully; otherwise we fall back to the hosted redirect card flow.
+      const isInlineCard = isCard && data?.card_flow === "inline"
 
-      if (isCard) {
+      if (isInlineCard) {
+        // ── Inline Card Flow: PayPal Advanced Card Payments (CardFields) ──
+        // Create a PLAIN order with NO payment_source — the storefront
+        // CardFields component attaches the card as the payment source when
+        // the buyer submits. intent=CAPTURE so the order is captured
+        // server-side (see authorizePayment) once the card is approved.
+        // No return_url/cancel_url → PayPal returns no approve link → the
+        // checkout stays on-page instead of redirecting.
+        orderData = {
+          intent: "CAPTURE",
+          purchase_units: purchaseUnits,
+        }
+
+        this.logger_.info(
+          `[PayPal] Creating inline card order (CardFields): amount=${totalValue} ${currency}`
+        )
+      } else if (isCard) {
         // ── Card Flow: Redirect to PayPal hosted page ──
         // Create order WITH payment_source.paypal + experience_context so PayPal
         // returns an approvalUrl. On the hosted page guests see "Pay with Debit
@@ -572,7 +592,9 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
         data: {
           paypalOrderId: result.id,
           status: result.status,
-          approvalUrl,
+          // Inline CardFields orders are completed in-page — never expose an
+          // approve URL (would otherwise trigger a redirect on the storefront).
+          approvalUrl: isInlineCard ? null : approvalUrl,
           client_id: clientIdForFrontend,
           currency_code: currency,
           amount: totalValue,
