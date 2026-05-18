@@ -241,6 +241,11 @@ const medusaConfig = {
             id: 'novalnet',
             options: {},
           },
+          {
+            resolve: './src/modules/payment-revolut',
+            id: 'revolut',
+            options: {},
+          },
         ],
       },
     }
