@@ -682,7 +682,7 @@ body { background: var(--bg); }
       <div class="ty-support-title">Spørsmål eller problemer?</div>
       <div class="ty-support-desc">Har du oppdaget en feil, et spørsmål om bestillingen din eller har du støtt på noe? Ta gjerne kontakt med oss &mdash; vi hjelper deg gjerne!</div>
     </div>
-    <a href="mailto:bok@slipptaket.com?subject=Spørsmål%20om%20bestilling%20%23&body=Hei%2C%0A%0AJeg%20har%20et%20spørsmål%20om%20bestillingen%20min.%0A%0ABestillingsnummer%3A%20%0A%0AMitt%20spørsmål%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Send oss en e-post</a>
+    <a href="mailto:bok@slipptaketboken.no?subject=Spørsmål%20om%20bestilling%20%23&body=Hei%2C%0A%0AJeg%20har%20et%20spørsmål%20om%20bestillingen%20min.%0A%0ABestillingsnummer%3A%20%0A%0AMitt%20spørsmål%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Send oss en e-post</a>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -909,7 +909,7 @@ body { background: var(--bg); }
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
     var subject = encodeURIComponent('Spørsmål om bestilling #' + orderNum);
     var body = encodeURIComponent('Hei,\n\nJeg har et spørsmål om bestillingen min.\n\nBestillingsnummer: #' + orderNum + '\n\nMitt spørsmål: ');
-    mailtoEl.href = 'mailto:bok@slipptaket.com?subject=' + subject + '&body=' + body;
+    mailtoEl.href = 'mailto:bok@slipptaketboken.no?subject=' + subject + '&body=' + body;
   }
 
   // 2d. Celková cena — bere v potaz bundle, order bump a upsell
