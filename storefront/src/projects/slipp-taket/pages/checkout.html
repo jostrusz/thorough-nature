@@ -3784,7 +3784,35 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // Norske placeholdere — uavhengig av SDK-locale
       // NameField (jméno na kartě) ZÁMĚRNĚ nerenderujeme — je u PayPalu
       // nepovinné a nižší počet polí = nižší tření v checkoutu.
-      var numberField = paypalCardFieldsInstance.NumberField({ placeholder: 'Kortnummer' });
+      //
+      // NumberField — per-field styl s velkým levým paddingem (48px), aby text
+      // (placeholder i číslice) začínal AŽ za ikonkou karty, kterou PayPal
+      // renderuje vlevo v poli. Per-field styl přepisuje parent styl jen pro
+      // toto pole, proto musí obsahovat celou `input` definici.
+      var numberFieldStyle = {
+        'input': {
+          'font-family': '"DM Sans", sans-serif',
+          'font-size': '15px',
+          'font-weight': '400',
+          'color': '#2D1B3D',
+          'background': '#FFFFFF',
+          'border': '1px solid rgba(194,123,160,0.18)',
+          'border-radius': '8px',
+          'height': '54px',
+          'padding': '0 16px 0 48px',
+          'transition': 'border-color 0.2s ease, box-shadow 0.2s ease',
+        },
+        'input:focus': {
+          'border': '1px solid #C27BA0',
+          'box-shadow': '0 0 0 3px rgba(194,123,160,0.12)',
+        },
+        '.invalid': {
+          'border': '1px solid #C0392B',
+          'background': '#FFF8F7',
+          'color': '#C0392B',
+        },
+      };
+      var numberField = paypalCardFieldsInstance.NumberField({ placeholder: 'Kortnummer', style: numberFieldStyle });
       var expiryField = paypalCardFieldsInstance.ExpiryField({ placeholder: 'MM / ÅÅ' });
       var cvvField    = paypalCardFieldsInstance.CVVField({ placeholder: 'CVC' });
 
