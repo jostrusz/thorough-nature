@@ -30,7 +30,7 @@ export async function POST(
     const location = [city, postal_code, (country_code || "").toUpperCase()].filter(Boolean).join(", ")
     const method = payment_method || "none"
     const provider = payment_provider ? `(${payment_provider})` : ""
-    const total = cart_total != null ? `€${(Number(cart_total) / 100).toFixed(2)}` : ""
+    const total = cart_total != null ? Number(cart_total).toFixed(2) : ""
     const qty = bundle_qty ? `${bundle_qty}x` : ""
 
     console.log(
