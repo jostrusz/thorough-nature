@@ -257,7 +257,7 @@ export const SlEbookDeliveryTemplate: React.FC<SlEbookDeliveryTemplateProps> & {
             color: '#C27BA0',
             marginBottom: '6px',
           }}>
-            Slipp Taket
+            Slipp taket på det som ødelegger deg
           </Text>
           <Text style={{
             fontFamily: font,

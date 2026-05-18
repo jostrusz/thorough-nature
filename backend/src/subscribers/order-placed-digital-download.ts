@@ -126,6 +126,9 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
   // guard at line ~205 returns early without sending or touching metadata).
   // Re-enable by populating with the same shape as other projects.
   'zycie-zaslugy': [],
+  // slipp-taket: e-books do not exist for this project yet — empty array
+  // disables the e-book delivery email. Re-enable by populating the files.
+  'slipp-taket': [],
 }
 
 // Fallback for unknown projects

@@ -617,7 +617,7 @@ export const SlOrderPlacedTemplate: React.FC<SlOrderPlacedTemplateProps> & {
             color: '#C27BA0',
             marginBottom: '6px',
           }}>
-            Slipp Taket
+            Slipp taket på det som ødelegger deg
           </Text>
           <Text style={{
             fontFamily: font,
