@@ -3744,7 +3744,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         },
         onError: function(err) {
           console.error('[PayPal Card] onError:', err);
-          if (cardErrorsEl) cardErrorsEl.textContent = err.message || 'Kaartbetaling mislukt';
+          if (cardErrorsEl) cardErrorsEl.textContent = err.message || 'Kortbetaling mislyktes';
           if (window._paypalCardReject) {
             window._paypalCardReject(err);
           }
@@ -3780,16 +3780,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
       if (!paypalCardFieldsInstance.isEligible()) {
         console.warn('[PayPal Card] CardFields not eligible — Advanced Card Payments may not be enabled');
-        if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetalingen zijn niet beschikbaar. Controleer de PayPal-instellingen.';
+        if (cardErrorsEl) cardErrorsEl.textContent = 'Kortbetaling er ikke tilgjengelig. Kontroller PayPal-innstillingene.';
         paypalCardMounting = false;
         return;
       }
 
       // Individual field rendering — same layout as Mollie/Stripe/Airwallex
-      var numberField = paypalCardFieldsInstance.NumberField();
-      var expiryField = paypalCardFieldsInstance.ExpiryField();
-      var cvvField    = paypalCardFieldsInstance.CVVField();
-      var nameField   = paypalCardFieldsInstance.NameField();
+      // Norske placeholdere — uavhengig av SDK-locale
+      var numberField = paypalCardFieldsInstance.NumberField({ placeholder: 'Kortnummer' });
+      var expiryField = paypalCardFieldsInstance.ExpiryField({ placeholder: 'MM / ÅÅ' });
+      var cvvField    = paypalCardFieldsInstance.CVVField({ placeholder: 'CVC' });
+      var nameField   = paypalCardFieldsInstance.NameField({ placeholder: 'Navn på kortet' });
 
       // Add .paypal-provider class to scope PayPal-specific CSS
       var cardFieldsWrapper = document.getElementById('card-fields');
@@ -3850,7 +3851,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             }
           });
 
-          if (cardErrorsEl) cardErrorsEl.textContent = 'Kaartbetaling niet beschikbaar. Neem contact op met de beheerder.';
+          if (cardErrorsEl) cardErrorsEl.textContent = 'Kortbetaling er ikke tilgjengelig. Kontakt administrator.';
         });
 
     } catch (e) {
@@ -3911,7 +3912,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var sdkUrl = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(clientId.trim())
       + '&components=' + components.join(',')
       + '&currency=' + currency
-      + '&locale=nl_NL';
+      + '&locale=no_NO';
 
     console.log('[PayPal SDK] Loading URL:', sdkUrl);
 
@@ -5432,11 +5433,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         : cardProvider === 'airwallex' ? 'Airwallex'
         : cardProvider === 'paypal' ? 'PayPal'
         : 'Mollie';
-      subtext.textContent = 'Je kaartgegevens worden beveiligd verwerkt via ' + providerName + '.';
+      subtext.textContent = 'Kortopplysningene dine behandles sikkert via ' + providerName + '.';
     } else if (KLARNA_CODES.indexOf(selectedMethod) !== -1) {
-      subtext.textContent = 'Je wordt doorgestuurd naar Klarna om de betaling af te ronden.';
+      subtext.textContent = 'Du blir videresendt til Klarna for å fullføre betalingen.';
     } else {
-      subtext.textContent = 'Je wordt doorgestuurd naar een beveiligde betaalpagina.';
+      subtext.textContent = 'Du blir videresendt til en sikker betalingsside.';
     }
 
     // Update trust badge provider text
@@ -5447,9 +5448,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           : cardProvider === 'airwallex' ? 'Airwallex'
           : cardProvider === 'paypal' ? 'PayPal'
           : 'Mollie';
-        trustText.textContent = 'Beveiligd via ' + trustProvider;
+        trustText.textContent = 'Sikret via ' + trustProvider;
       } else {
-        trustText.textContent = 'Beveiligd via ' + (selectedProvider === 'paypal' ? 'PayPal' : selectedProvider === 'stripe' ? 'Stripe' : 'Mollie');
+        trustText.textContent = 'Sikret via ' + (selectedProvider === 'paypal' ? 'PayPal' : selectedProvider === 'stripe' ? 'Stripe' : 'Mollie');
       }
     }
   }
