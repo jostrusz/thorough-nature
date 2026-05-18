@@ -2439,7 +2439,7 @@ body {
       <div class="msb-line bump" id="msb-bump-line" style="display:none;">
         <span class="msb-line-label" id="msb-bump-name">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Het Leven Dat Je Verdient
+          Livet Du Fortjener
         </span>
         <span class="msb-line-val" id="msb-bump-price">&euro;23,00</span>
       </div>
@@ -3246,7 +3246,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }).then(function(data) {
         var product = data && data.products && data.products[0];
         if (product && product.thumbnail) {
-          var imgTag = '<img src="' + product.thumbnail + '" alt="' + (product.title || 'Het Leven Dat Je Verdient') + '">';
+          var imgTag = '<img src="' + product.thumbnail + '" alt="' + (product.title || 'Livet Du Fortjener') + '">';
           if (thumbContainer) thumbContainer.innerHTML = imgTag;
           if (imgContainer) imgContainer.innerHTML = imgTag;
         }
@@ -3380,10 +3380,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var shipEl = document.getElementById('summary-shipping');
     if (shipEl) {
       var shippingLabel = shippingTotal > 0 ? formatPrice(shippingTotal) : '<span style="color:#27AE60;font-weight:600;">Gratis</span>';
-      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Verzending <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="vertical-align:middle;border-radius:2px;"></span><span>' + shippingLabel + '</span>';
+      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Frakt <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="vertical-align:middle;border-radius:2px;"></span><span>' + shippingLabel + '</span>';
     }
 
-    // Korting (discount) — toon als promo kód is toegepast
+    // Discount — show when a promo code is applied
     var discountTotal = cart.discount_total || 0;
     var discountEl = document.getElementById('summary-discount');
     if (discountEl) {
@@ -4922,8 +4922,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     creditcard: 'Visa, Mastercard, American Express',
     paypal: 'Betal med PayPal-kontoen din',
     eps: 'Betal via din østerrikske bank',
-    przelewy24: 'Polski system platnosci',
-    blik: 'Szybka platnosc mobilna',
+    przelewy24: 'Polsk betalingssystem',
+    blik: 'Rask mobilbetaling',
     in3: 'Betal i 3 avdrag',
     belfius: 'Betal via Belfius',
     kbc: 'Betal via KBC/CBC',
@@ -5626,7 +5626,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           // Try to give a typo suggestion
           var tldSuggestion = checkEmailTypo(val);
           if (tldSuggestion) {
-            emailSuggestion.innerHTML = 'Bedoelde je <strong>' + tldSuggestion + '</strong>? Klik om te corrigeren.';
+            emailSuggestion.innerHTML = 'Mente du <strong>' + tldSuggestion + '</strong>? Klikk for å korrigere.';
             emailSuggestion.style.display = 'block';
             emailSuggestion.onclick = function() {
               emailField.value = tldSuggestion;
@@ -5635,14 +5635,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               emailField.classList.remove('invalid');
             };
           }
-          return; // Stop — ongeldige TLD
+          return; // Stop — ugyldig TLD
         }
       }
 
       // 2. Typo check (gmail.co → gmail.com, hotmal.com → hotmail.com etc.)
       var suggestion = checkEmailTypo(val);
       if (suggestion) {
-        emailSuggestion.innerHTML = 'Bedoelde je <strong>' + suggestion + '</strong>? Klik om te corrigeren.';
+        emailSuggestion.innerHTML = 'Mente du <strong>' + suggestion + '</strong>? Klikk for å korrigere.';
         emailSuggestion.style.display = 'block';
         emailSuggestion.onclick = function() {
           emailField.value = suggestion;
@@ -6114,7 +6114,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 foxEmailField.classList.remove('valid');
                 var _typoFix = checkEmailTypo(val);
                 if (_typoFix && foxEmailSuggestion) {
-                  foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + _typoFix + '</strong>? Klik om te corrigeren.';
+                  foxEmailSuggestion.innerHTML = 'Mente du <strong>' + _typoFix + '</strong>? Klikk for å korrigere.';
                   foxEmailSuggestion.style.display = 'block';
                   foxEmailSuggestion.onclick = function() {
                     foxEmailField.value = _typoFix;
@@ -6140,7 +6140,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               foxEmailField.classList.add('invalid');
               foxEmailField.classList.remove('valid');
               if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + correctedEmail + '</strong>? Klik om te corrigeren.';
+                foxEmailSuggestion.innerHTML = 'Mente du <strong>' + correctedEmail + '</strong>? Klikk for å korrigere.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = correctedEmail;
@@ -6156,14 +6156,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               foxEmailField.classList.add('invalid');
               foxEmailField.classList.remove('valid');
               if (suggestions.length > 0 && foxEmailSuggestion) {
-                var sugHtml = 'Bedoelde je: ';
+                var sugHtml = 'Mente du: ';
                 suggestions.forEach(function(s, idx) {
                   var sEmail = (s.data && s.data.email) || '';
                   if (!sEmail) return;
-                  if (idx > 0) sugHtml += ' of ';
+                  if (idx > 0) sugHtml += ' eller ';
                   sugHtml += '<strong data-email="' + sEmail + '">' + sEmail + '</strong>';
                 });
-                sugHtml += '? Klik om te corrigeren.';
+                sugHtml += '? Klikk for å korrigere.';
                 foxEmailSuggestion.innerHTML = sugHtml;
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function(e) {
@@ -6177,7 +6177,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 };
               } else if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
                 // Fallback naar corrected als suggestions leeg
-                foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + correctedEmail + '</strong>? Klik om te corrigeren.';
+                foxEmailSuggestion.innerHTML = 'Mente du <strong>' + correctedEmail + '</strong>? Klikk for å korrigere.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = correctedEmail;
@@ -6194,7 +6194,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               foxEmailField.classList.remove('invalid');
               var betterEmail = correctedEmail || (suggestions[0] && suggestions[0].data && suggestions[0].data.email) || null;
               if (betterEmail && betterEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Bedoelde je misschien <strong>' + betterEmail + '</strong>? Klik om te corrigeren.';
+                foxEmailSuggestion.innerHTML = 'Mente du kanskje <strong>' + betterEmail + '</strong>? Klikk for å korrigere.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = betterEmail;
@@ -6220,7 +6220,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           // Fallback naar lokale validatie bij API error
           var localSuggestion = checkEmailTypo(val);
           if (localSuggestion && foxEmailSuggestion) {
-            foxEmailSuggestion.innerHTML = 'Bedoelde je <strong>' + localSuggestion + '</strong>? Klik om te corrigeren.';
+            foxEmailSuggestion.innerHTML = 'Mente du <strong>' + localSuggestion + '</strong>? Klikk for å korrigere.';
             foxEmailSuggestion.style.display = 'block';
             foxEmailSuggestion.onclick = function() {
               foxEmailField.value = localSuggestion;
@@ -7249,7 +7249,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           method: 'POST',
           body: JSON.stringify({ promo_codes: [savedPromoCode] })
         }).then(function(promoRes) {
-          console.log('Promo code toegepast via Medusa:', savedPromoCode);
+          console.log('Promo code applied via Medusa:', savedPromoCode);
           promoAppliedToCart = true;
           if (promoRes && promoRes.cart) {
             updateOrderSummary(promoRes.cart);

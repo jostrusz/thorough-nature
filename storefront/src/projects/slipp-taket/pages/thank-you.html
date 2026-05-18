@@ -559,7 +559,7 @@ body { background: var(--bg); }
     <div class="ty-edit-form-inner">
       <div class="ty-edit-form-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Gegevens aanpassen
+        Endre opplysninger
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field">
@@ -737,10 +737,10 @@ body { background: var(--bg); }
        8. SHARE
        ═══════════════════════════════════════ -->
   <div class="ty-share ty-reveal ty-d6">
-    <div class="ty-share-title">Ken je iemand die dit ook nodig heeft?</div>
+    <div class="ty-share-title">Kjenner du noen som også trenger dette?</div>
     <div class="ty-share-desc">Del denne siden med en venn og hjelp henne også til en frisk start.</div>
     <div class="ty-share-buttons">
-      <a href="https://wa.me/?text=Ik%20heb%20net%20Laat%20Los%20Wat%20Je%20Kapotmaakt%20besteld%20en%20ik%20denk%20dat%20jij%20het%20ook%20nodig%20hebt%20%F0%9F%92%9B" target="_blank" class="ty-share-btn wa">
+      <a href="https://wa.me/?text=Jeg%20har%20nettopp%20bestilt%20Slipp%20taket%20p%C3%A5%20det%20som%20%C3%B8delegger%20deg%20og%20jeg%20tror%20du%20ogs%C3%A5%20trenger%20det%20%F0%9F%92%9B" target="_blank" class="ty-share-btn wa">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.67-1.413A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.312-.727-5.994-1.96l-.418-.312-2.774.84.893-2.89-.338-.44A9.958 9.958 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
         WhatsApp
       </a>
@@ -748,7 +748,7 @@ body { background: var(--bg); }
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
         Facebook
       </a>
-      <a href="mailto:?subject=Dit%20boek%20moet%20je%20lezen&body=Ik%20heb%20net%20Laat%20Los%20Wat%20Je%20Kapotmaakt%20besteld" class="ty-share-btn mail">
+      <a href="mailto:?subject=Denne%20boken%20m%C3%A5%20du%20lese&body=Jeg%20har%20nettopp%20bestilt%20Slipp%20taket%20p%C3%A5%20det%20som%20%C3%B8delegger%20deg" class="ty-share-btn mail">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
         E-mail
       </a>
@@ -842,8 +842,8 @@ body { background: var(--bg); }
             var descEl = orderItemsEl && orderItemsEl.querySelector('.ty-order-desc');
             if (nameEl) {
               nameEl.textContent = derivedBookCount > 1
-                ? (derivedBookCount + '\u00D7 Laat Los Wat Je Kapotmaakt')
-                : 'Laat Los Wat Je Kapotmaakt';
+                ? (derivedBookCount + '\u00D7 Slipp taket p\u00E5 det som \u00F8delegger deg')
+                : 'Slipp taket p\u00E5 det som \u00F8delegger deg';
             }
             if (descEl) {
               descEl.textContent = derivedBookCount > 1
@@ -881,7 +881,7 @@ body { background: var(--bg); }
   // Mapování country kódů na názvy
   var countryNames = {
     NO: 'Norge',
-    DE: 'Duitsland', AT: 'Oostenrijk', CZ: 'Tsjechië',
+    DE: 'Tyskland', AT: 'Østerrike', CZ: 'Tsjekkia',
   };
 
   // ────────────────────────────────────────────────────
@@ -897,17 +897,17 @@ body { background: var(--bg); }
   // 2b. Objednávkové číslo
   var orderLabelEl = document.getElementById('ty-order-label');
   if (orderLabelEl && displayId) {
-    orderLabelEl.textContent = '\uD83D\uDCE6 Bestelling #' + displayId;
+    orderLabelEl.textContent = '\uD83D\uDCE6 Bestilling #' + displayId;
   } else if (orderLabelEl && orderId) {
     var shortId = orderId.replace('order_', '').substring(0, 8).toUpperCase();
-    orderLabelEl.textContent = '\uD83D\uDCE6 Bestelling #' + shortId;
+    orderLabelEl.textContent = '\uD83D\uDCE6 Bestilling #' + shortId;
   }
 
   // 2c. Mailto link — doplň číslo objednávky
   var mailtoEl = document.getElementById('ty-support-mailto');
   if (mailtoEl) {
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
-    var subject = encodeURIComponent('Vraag over bestelling #' + orderNum);
+    var subject = encodeURIComponent('Spørsmål om bestilling #' + orderNum);
     var body = encodeURIComponent('Hei,\n\nJeg har et spørsmål om bestillingen min.\n\nBestillingsnummer: #' + orderNum + '\n\nMitt spørsmål: ');
     mailtoEl.href = 'mailto:bok@slipptaket.com?subject=' + subject + '&body=' + body;
   }
@@ -945,7 +945,7 @@ body { background: var(--bg); }
   if (orderItemsEl && bundleQty > 1) {
     var mainItemName = orderItemsEl.querySelector('.ty-order-name');
     if (mainItemName) {
-      mainItemName.textContent = bundleQty + '\u00D7 Laat Los Wat Je Kapotmaakt';
+      mainItemName.textContent = bundleQty + '\u00D7 Slipp taket p\u00E5 det som \u00F8delegger deg';
     }
     var mainItemDesc = orderItemsEl.querySelector('.ty-order-desc');
     if (mainItemDesc) {
@@ -1116,7 +1116,7 @@ body { background: var(--bg); }
 
     // Validace — alespoň email a jméno
     if (!newData.email || !newData.first_name) {
-      showFeedback('Vul ten minste je voornaam en e-mailadres in.', 'error');
+      showFeedback('Fyll inn minst fornavnet og e-postadressen din.', 'error');
       return;
     }
 
@@ -1201,13 +1201,13 @@ body { background: var(--bg); }
       } else {
         console.warn('TY: API vrátilo chybu:', data.message);
         // Data jsou uložená lokálně, ale API selhalo
-        finishSave(true, 'Gegevens lokaal opgeslagen. Neem contact op als het probleem aanhoudt.');
+        finishSave(true, 'Opplysningene er lagret lokalt. Ta kontakt med oss hvis problemet vedvarer.');
       }
     })
     .catch(function(err) {
       console.error('TY: Chyba při API volání:', err);
       // Lokální data jsou uložená, API nedostupné
-      finishSave(true, 'Gegevens lokaal opgeslagen. De server is momenteel niet bereikbaar.');
+      finishSave(true, 'Opplysningene er lagret lokalt. Serveren er for øyeblikket ikke tilgjengelig.');
     });
   };
 
@@ -1222,9 +1222,9 @@ body { background: var(--bg); }
 
     // Ukáž feedback
     if (success) {
-      showFeedback(customMessage || 'Je gegevens zijn bijgewerkt! We sturen je pakket naar het juiste adres.', 'success');
+      showFeedback(customMessage || 'Opplysningene dine er oppdatert! Vi sender pakken til riktig adresse.', 'success');
     } else {
-      showFeedback(customMessage || 'Er ging iets mis. Probeer het opnieuw.', 'error');
+      showFeedback(customMessage || 'Noe gikk galt. Prøv igjen.', 'error');
     }
   }
 
