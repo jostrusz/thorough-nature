@@ -238,4 +238,4 @@ export const SUPPORTED_PROVIDERS = [
   { code: "novalnet", name: "Novalnet" },
 ]
 
-export const SUPPORTED_CURRENCIES = ["EUR", "CZK", "PLN", "SEK", "HUF"]
+export const SUPPORTED_CURRENCIES = ["EUR", "CZK", "PLN", "SEK", "NOK", "HUF"]

@@ -1,6 +1,6 @@
 /**
  * Shared multi-currency formatting utility
- * Supports: EUR, CZK, PLN, SEK, HUF
+ * Supports: EUR, CZK, PLN, SEK, NOK, HUF
  */
 
 interface CurrencyConfig {
@@ -16,6 +16,7 @@ const CURRENCY_CONFIG: Record<string, CurrencyConfig> = {
   CZK: { symbol: "K\u010D", position: "after", decimals: 2, thousandSep: "\u00A0", decimalSep: "," },
   PLN: { symbol: "z\u0142", position: "after", decimals: 2, thousandSep: "\u00A0", decimalSep: "," },
   SEK: { symbol: "kr", position: "after", decimals: 2, thousandSep: "\u00A0", decimalSep: "," },
+  NOK: { symbol: "kr", position: "after", decimals: 2, thousandSep: "\u00A0", decimalSep: "," },
   HUF: { symbol: "Ft", position: "after", decimals: 0, thousandSep: "\u00A0", decimalSep: "," },
   USD: { symbol: "$", position: "before", decimals: 2, thousandSep: ",", decimalSep: "." },
   GBP: { symbol: "\u00A3", position: "before", decimals: 2, thousandSep: ",", decimalSep: "." },
