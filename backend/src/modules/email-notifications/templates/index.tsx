@@ -21,6 +21,9 @@ import { StAbandonedCheckout2Template, ST_ABANDONED_CHECKOUT_2, isStAbandonedChe
 import { StAbandonedCheckout3Template, ST_ABANDONED_CHECKOUT_3, isStAbandonedCheckout3Data } from './st-abandoned-checkout-3'
 import { StEbookDeliveryTemplate, ST_EBOOK_DELIVERY, isStEbookDeliveryData } from './st-ebook-delivery'
 import { StShipmentNotificationTemplate, ST_SHIPMENT_NOTIFICATION, isStShipmentNotificationData } from './st-shipment-notification'
+// Slipp taket (slipp-taket) templates
+import { SlOrderPlacedTemplate, SL_ORDER_PLACED, isSlOrderPlacedTemplateData } from './sl-order-placed'
+import { SlEbookDeliveryTemplate, SL_EBOOK_DELIVERY, isSlEbookDeliveryData } from './sl-ebook-delivery'
 // Odpuść to, co cię niszczy (odpusc-ksiazka) templates
 import { OkOrderPlacedTemplate, OK_ORDER_PLACED, isOkOrderPlacedTemplateData } from './ok-order-placed'
 import { OkAbandonedCheckout1Template, OK_ABANDONED_CHECKOUT_1, isOkAbandonedCheckout1Data } from './ok-abandoned-checkout-1'
@@ -83,6 +86,9 @@ export const EmailTemplates = {
   ST_ABANDONED_CHECKOUT_3,
   ST_EBOOK_DELIVERY,
   ST_SHIPMENT_NOTIFICATION,
+  // Slipp taket
+  SL_ORDER_PLACED,
+  SL_EBOOK_DELIVERY,
   // Odpuść to, co cię niszczy
   OK_ORDER_PLACED,
   OK_ABANDONED_CHECKOUT_1,
@@ -143,6 +149,13 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
     const allKeys = Object.values(EmailTemplates) as string[]
     if (allKeys.includes(stKey)) {
       return stKey
+    }
+  }
+  if (project === 'slipp-taket') {
+    const slKey = `sl-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(slKey)) {
+      return slKey
     }
   }
   if (project === 'odpusc-ksiazka') {
@@ -367,6 +380,25 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
         )
       }
       return <StShipmentNotificationTemplate {...data} />
+
+    // ── Slipp taket templates ──────────────────────────────────
+    case EmailTemplates.SL_ORDER_PLACED:
+      if (!isSlOrderPlacedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.SL_ORDER_PLACED}"`
+        )
+      }
+      return <SlOrderPlacedTemplate {...data} />
+
+    case EmailTemplates.SL_EBOOK_DELIVERY:
+      if (!isSlEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.SL_EBOOK_DELIVERY}"`
+        )
+      }
+      return <SlEbookDeliveryTemplate {...data} />
 
     // ── Odpuść to, co cię niszczy templates ────────────────────
     case EmailTemplates.OK_ORDER_PLACED:
@@ -685,6 +717,9 @@ export {
   StAbandonedCheckout3Template,
   StEbookDeliveryTemplate,
   StShipmentNotificationTemplate,
+  // Slipp taket
+  SlOrderPlacedTemplate,
+  SlEbookDeliveryTemplate,
   // Odpuść to, co cię niszczy
   OkOrderPlacedTemplate,
   OkAbandonedCheckout1Template,
