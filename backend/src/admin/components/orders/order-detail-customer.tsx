@@ -23,6 +23,7 @@ const FLAGS: Record<string, string> = {
   LU: "\u{1F1F1}\u{1F1FA}",
   DK: "\u{1F1E9}\u{1F1F0}",
   EE: "\u{1F1EA}\u{1F1EA}",
+  NO: "\u{1F1F3}\u{1F1F4}",
 }
 
 const COUNTRY_NAMES: Record<string, string> = {
@@ -38,6 +39,7 @@ const COUNTRY_NAMES: Record<string, string> = {
   LU: "Luxembourg",
   DK: "Denmark",
   EE: "Estonia",
+  NO: "Norway",
 }
 
 const COUNTRY_OPTIONS = Object.entries(COUNTRY_NAMES)
