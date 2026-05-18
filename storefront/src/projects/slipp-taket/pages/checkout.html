@@ -2353,24 +2353,18 @@ body {
 }
 
 /* ─── PAYPAL CARD FIELDS — match our form design ─── */
-/* Scoped to .paypal-provider so it doesn't affect Mollie/Stripe/Airwallex */
+/* Veškerý styling (border, background, focus, invalid) řeší `style` objekt
+   přímo na PayPal inputu. Iframe element necháváme PRŮHLEDNÝ a bez rámečku,
+   aby nevznikl dvojitý rámeček. Container jen drží minimální výšku. */
 .paypal-provider #card-number iframe,
 .paypal-provider #expiry-date iframe,
 .paypal-provider #verification-code iframe,
 .paypal-provider #card-holder iframe {
-  border: 1.5px solid rgba(194,123,160,0.18) !important;
-  border-radius: 8px !important;
-  height: 42px !important;
-  background: #FFFFFF !important;
   width: 100% !important;
+  min-height: 54px !important;
+  border: none !important;
+  background: transparent !important;
   box-sizing: border-box !important;
-  transition: border-color 0.2s ease !important;
-}
-.paypal-provider #card-number iframe:hover,
-.paypal-provider #expiry-date iframe:hover,
-.paypal-provider #verification-code iframe:hover,
-.paypal-provider #card-holder iframe:hover {
-  border-color: rgba(194,123,160,0.35) !important;
 }
 </style>
 
@@ -3755,21 +3749,29 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             window._paypalCardReject(err);
           }
         },
+        // MATCH styling — 1:1 podle .float-field input v tomto checkoutu.
+        // 'padding' ZÁMĚRNĚ nenastavujeme — přepsalo by PayPalův icon-aware
+        // padding a placeholder by se posunul pod ikonku detekované karty.
         style: {
           'input': {
-            'font-size': '14px',
             'font-family': '"DM Sans", sans-serif',
-            'color': '#1A1A1A',
-            'padding': '0 12px',
+            'font-size': '15px',
+            'font-weight': '400',
+            'color': '#2D1B3D',
+            'background': '#FFFFFF',
+            'border': '1px solid rgba(194,123,160,0.18)',
+            'border-radius': '8px',
+            'height': '54px',
+            'transition': 'border-color 0.2s ease, box-shadow 0.2s ease',
           },
           'input:focus': {
-            'color': '#1A1A1A',
+            'border': '1px solid #C27BA0',
+            'box-shadow': '0 0 0 3px rgba(194,123,160,0.12)',
           },
           '.invalid': {
-            'color': '#DC2626',
-          },
-          'body': {
-            'padding': '0',
+            'border': '1px solid #C0392B',
+            'background': '#FFF8F7',
+            'color': '#C0392B',
           },
         },
       });
@@ -3803,7 +3805,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           el.style.padding = '0';
           el.style.background = 'transparent';
           el.style.height = 'auto';
-          el.style.minHeight = '42px';
+          el.style.minHeight = '54px';
           el.style.display = 'block';
         }
       });
