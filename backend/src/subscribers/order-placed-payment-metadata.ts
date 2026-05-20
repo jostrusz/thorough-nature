@@ -10,7 +10,7 @@ import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
  * (molliePaymentId, klarnaOrderId, etc.). This subscriber copies them into order
  * metadata so webhooks can find the order later.
  *
- * Supported providers: Mollie, Klarna, PayPal, Comgate, Przelewy24, Airwallex, Stripe
+ * Supported providers: Mollie, Klarna, PayPal, Comgate, Przelewy24, Airwallex, Stripe, Revolut
  */
 export default async function orderPlacedPaymentMetadataHandler({
   event: { data },
@@ -136,6 +136,19 @@ export default async function orderPlacedPaymentMetadataHandler({
         break
       }
 
+      // Revolut (Pay by Bank)
+      if (paymentData.revolutOrderId || (providerId.includes("revolut") && paymentData.id)) {
+        const revolutOrderId = paymentData.revolutOrderId || paymentData.id
+        if (revolutOrderId) {
+          newMetadata.revolutOrderId = revolutOrderId
+          newMetadata.payment_revolut_order_id = revolutOrderId
+        }
+        newMetadata.payment_method = paymentData.method || "pay_by_bank"
+        newMetadata.payment_provider = "revolut"
+        found = true
+        break
+      }
+
       // Novalnet
       if (paymentData.novalnetTid || paymentData.tid || providerId.includes("novalnet")) {
         const tid = paymentData.novalnetTid || paymentData.tid
@@ -186,6 +199,7 @@ export default async function orderPlacedPaymentMetadataHandler({
       newMetadata.airwallexPaymentIntentId ||
       newMetadata.stripePaymentIntentId ||
       newMetadata.novalnetTid ||
+      newMetadata.revolutOrderId ||
       "n/a"
 
     console.log(

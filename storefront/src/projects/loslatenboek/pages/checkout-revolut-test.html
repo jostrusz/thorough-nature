@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Revolut Pay by Bank — Test Checkout</title>
+<style>
+  :root {
+    --heading: #2D1B3D;
+    --body: #4A4458;
+    --accent: #C27BA0;
+    --accent-dark: #A85C84;
+    --bg: #FBF7FA;
+    --ok: #2E7D32;
+    --err: #C0392B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--body);
+    line-height: 1.6;
+    padding: 32px 16px;
+  }
+  .wrap { max-width: 520px; margin: 0 auto; }
+  h1 { font-size: 22px; color: var(--heading); margin-bottom: 4px; }
+  .sub { font-size: 13px; color: #8A8195; margin-bottom: 24px; }
+  .card {
+    background: #fff;
+    border: 1px solid rgba(194,123,160,0.18);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 24px rgba(45,27,61,0.05);
+  }
+  .product-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 14px; margin-bottom: 14px;
+    border-bottom: 1px solid rgba(194,123,160,0.14);
+  }
+  .product-row strong { color: var(--heading); }
+  .total-row { display: flex; justify-content: space-between; font-size: 18px; }
+  .total-row strong { color: var(--heading); }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--heading); margin: 12px 0 5px; }
+  input, select {
+    width: 100%; height: 48px; padding: 0 14px;
+    font-family: inherit; font-size: 15px; color: var(--heading);
+    border: 1px solid rgba(194,123,160,0.22); border-radius: 9px; background: #fff;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--accent); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .pay-btn {
+    width: 100%; height: 56px; margin-top: 20px;
+    background: var(--accent); color: #fff; border: none; border-radius: 11px;
+    font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer;
+    transition: background .2s ease;
+  }
+  .pay-btn:hover { background: var(--accent-dark); }
+  .pay-btn:disabled { opacity: .55; cursor: not-allowed; }
+  .log {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px; background: #1E1426; color: #E8DDF0;
+    border-radius: 10px; padding: 14px; margin-top: 18px;
+    max-height: 260px; overflow-y: auto; white-space: pre-wrap; word-break: break-word;
+  }
+  .log .ok { color: #8BE9A0; }
+  .log .err { color: #FF8A80; }
+  .log .step { color: #C9A4DD; }
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .04em;
+    background: #FCEDF4; color: var(--accent-dark);
+    padding: 3px 9px; border-radius: 20px; margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">TEST · REVOLUT PAY BY BANK</span>
+  <h1>Revolut Pay by Bank — Test Checkout</h1>
+  <p class="sub">Reálná platba přes Medusa backend. Pay by Bank nefunguje v sandboxu — jde o skutečnou transakci (refundovatelnou).</p>
+
+  <div class="card">
+    <div class="product-row">
+      <span id="product-name"><strong>Laat Los Wat Je Kapotmaakt</strong></span>
+      <span id="product-price">€35,00</span>
+    </div>
+    <div class="total-row"><span>Totaal</span><strong id="total-amount">€35,00</strong></div>
+  </div>
+
+  <div class="card">
+    <label for="email">E-mail</label>
+    <input id="email" type="email" value="test@example.com" />
+    <div class="grid2">
+      <div><label for="first_name">Voornaam</label><input id="first_name" value="Test" /></div>
+      <div><label for="last_name">Achternaam</label><input id="last_name" value="Koper" /></div>
+    </div>
+    <label for="address">Adres</label>
+    <input id="address" value="Teststraat 1" />
+    <div class="grid2">
+      <div><label for="postal_code">Postcode</label><input id="postal_code" value="1011AB" /></div>
+      <div><label for="city">Plaats</label><input id="city" value="Amsterdam" /></div>
+    </div>
+    <div class="grid2">
+      <div>
+        <label for="country">Land</label>
+        <select id="country"><option value="nl">Nederland</option><option value="be">België</option></select>
+      </div>
+      <div><label for="phone">Telefoon</label><input id="phone" value="+31612345678" /></div>
+    </div>
+
+    <button id="pay-btn" class="pay-btn">🏦 Betaal met je bank</button>
+  </div>
+
+  <div id="log" class="log">Klaar. Klik op "Betaal met je bank" om de testbetaling te starten.\n</div>
+</div>
+
+<script type="module">
+  import RevolutCheckout from "https://unpkg.com/@revolut/checkout/esm";
+
+  // PROJECT_CONFIG is injected by the storefront server (loslatenboek/config.json)
+  const CFG = window.PROJECT_CONFIG || {};
+  const MEDUSA_URL = CFG.medusaUrl || "";
+  const PUBLISHABLE_KEY = CFG.publishableApiKey;
+  // First bundle option = single book
+  const VARIANT_ID = (CFG.bundleOptions && CFG.bundleOptions[0] && CFG.bundleOptions[0].variantId) || "";
+  const PRODUCT_NAME = (CFG.mainProduct && CFG.mainProduct.name) || "Boek";
+  const CURRENCY = ((CFG.mainProduct && CFG.mainProduct.currency) || "EUR").toUpperCase();
+  // Medusa provider_id for our new module: pp_<configId>_<identifier>
+  const REVOLUT_PROVIDER_ID = "pp_revolut_revolut";
+
+  const logEl = document.getElementById("log");
+  const payBtn = document.getElementById("pay-btn");
+
+  function log(msg, cls) {
+    const line = cls ? `<span class="${cls}">${msg}</span>` : msg;
+    logEl.innerHTML += line + "\n";
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  const step = (m) => log("▸ " + m, "step");
+  const ok = (m) => log("✓ " + m, "ok");
+  const fail = (m) => log("✗ " + m, "err");
+
+  function medusaFetch(path, options) {
+    options = options || {};
+    options.headers = Object.assign(
+      { "Content-Type": "application/json", "x-publishable-api-key": PUBLISHABLE_KEY },
+      options.headers || {}
+    );
+    return fetch(MEDUSA_URL + path, options).then(async (res) => {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || data.error || ("API " + res.status));
+      return data;
+    });
+  }
+
+  function customer() {
+    const v = (id) => (document.getElementById(id).value || "").trim();
+    const country = v("country");
+    return {
+      email: v("email"),
+      address: {
+        first_name: v("first_name"),
+        last_name: v("last_name"),
+        address_1: v("address"),
+        city: v("city"),
+        postal_code: v("postal_code"),
+        country_code: country,
+        phone: v("phone"),
+      },
+    };
+  }
+
+  async function runCheckout() {
+    payBtn.disabled = true;
+    logEl.innerHTML = "";
+    try {
+      if (!VARIANT_ID) throw new Error("Geen variantId in config.json (bundleOptions[0])");
+      const cust = customer();
+
+      // 1. Region — match the customer's country
+      step("Region ophalen...");
+      const { regions } = await medusaFetch("/store/regions", { method: "GET" });
+      let region = null;
+      for (const r of regions || []) {
+        if ((r.countries || []).some((c) => c.iso_2 === cust.address.country_code)) { region = r; break; }
+      }
+      if (!region) region = (regions || [])[0];
+      if (!region) throw new Error("Geen region gevonden");
+      ok("Region: " + region.name + " (" + region.id + ")");
+
+      // 2. Create cart
+      step("Cart aanmaken...");
+      const { cart: c0 } = await medusaFetch("/store/carts", {
+        method: "POST",
+        body: JSON.stringify({ region_id: region.id, email: cust.email }),
+      });
+      const cartId = c0.id;
+      ok("Cart: " + cartId);
+
+      // 3. Add line item
+      step("Product toevoegen...");
+      await medusaFetch("/store/carts/" + cartId + "/line-items", {
+        method: "POST",
+        body: JSON.stringify({ variant_id: VARIANT_ID, quantity: 1 }),
+      });
+      ok("Line item toegevoegd");
+
+      // 4. Set email + addresses
+      step("Adresgegevens instellen...");
+      await medusaFetch("/store/carts/" + cartId, {
+        method: "POST",
+        body: JSON.stringify({
+          email: cust.email,
+          shipping_address: cust.address,
+          billing_address: cust.address,
+        }),
+      });
+      ok("Adres ingesteld");
+
+      // 5. Shipping method
+      step("Verzendmethode toevoegen...");
+      const { shipping_options } = await medusaFetch("/store/shipping-options?cart_id=" + cartId, { method: "GET" });
+      if (!shipping_options || !shipping_options.length) throw new Error("Geen verzendopties");
+      await medusaFetch("/store/carts/" + cartId + "/shipping-methods", {
+        method: "POST",
+        body: JSON.stringify({ option_id: shipping_options[0].id }),
+      });
+      ok("Verzendmethode: " + shipping_options[0].name);
+
+      // 6. Read cart total
+      const { cart } = await medusaFetch("/store/carts/" + cartId, { method: "GET" });
+      const total = cart.total;
+      document.getElementById("total-amount").textContent = "€" + Number(total).toFixed(2).replace(".", ",");
+      ok("Cart totaal: " + total + " " + CURRENCY);
+
+      // 7. Payment collection
+      step("Payment collection aanmaken...");
+      const { payment_collection } = await medusaFetch("/store/payment-collections", {
+        method: "POST",
+        body: JSON.stringify({ cart_id: cartId }),
+      });
+      ok("Payment collection: " + payment_collection.id);
+
+      // 8. Payment session for Revolut Pay by Bank
+      step("Revolut payment session aanmaken (" + REVOLUT_PROVIDER_ID + ")...");
+      const sessionRes = await medusaFetch(
+        "/store/payment-collections/" + payment_collection.id + "/payment-sessions",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            provider_id: REVOLUT_PROVIDER_ID,
+            data: {
+              method: "pay_by_bank",
+              project_slug: CFG.slug || "loslatenboek",
+              product_name: PRODUCT_NAME,
+              email: cust.email,
+              amount: total,
+              currency: CURRENCY,
+              cart_id: cartId,
+              billing_address: cust.address,
+              shipping_address: cust.address,
+            },
+          }),
+        }
+      );
+      const sessions = (sessionRes.payment_collection || {}).payment_sessions || [];
+      const session = sessions.find((s) => (s.provider_id || "").includes("revolut")) || sessions[0];
+      if (!session) throw new Error("Geen payment session aangemaakt");
+      const sd = session.data || {};
+      if (!sd.revolutPublicToken || !sd.revolutPublicKey) {
+        throw new Error("Session mist revolutPublicToken/revolutPublicKey — controleer gateway_config");
+      }
+      ok("Revolut order: " + sd.revolutOrderId + " (" + sd.environment + ")");
+
+      // 9. Mount the Pay by Bank widget
+      step("Pay by Bank widget laden...");
+      const { payByBank } = await RevolutCheckout.payments({
+        locale: CFG.locale || "nl",
+        publicToken: sd.revolutPublicKey,
+      });
+
+      const instance = payByBank({
+        createOrder: async () => ({ publicId: sd.revolutPublicToken }),
+        onSuccess: async () => {
+          ok("Betaling geslaagd — cart afronden...");
+          try {
+            const completeRes = await medusaFetch("/store/carts/" + cartId + "/complete", { method: "POST" });
+            const order = completeRes.order || completeRes;
+            if (order && typeof order.id === "string" && order.id.indexOf("order_") === 0) {
+              ok("✅ ORDER AANGEMAAKT: " + order.id + (order.display_id ? " (#" + order.display_id + ")" : ""));
+            } else {
+              fail("Cart-complete gaf geen geldige order terug — webhook safety-net neemt het over.");
+            }
+          } catch (e) {
+            fail("Cart-complete fout: " + e.message + " — webhook safety-net neemt het over.");
+          }
+          payBtn.disabled = false;
+        },
+        onError: (err) => {
+          fail("Pay by Bank fout: " + ((err && err.message) || err));
+          payBtn.disabled = false;
+        },
+        onCancel: () => {
+          log("⊘ Betaling geannuleerd door gebruiker", "err");
+          payBtn.disabled = false;
+        },
+      });
+
+      ok("Widget klaar — bankselectie wordt geopend.");
+      instance.show();
+    } catch (err) {
+      fail("FOUT: " + (err.message || err));
+      console.error(err);
+      payBtn.disabled = false;
+    }
+  }
+
+  payBtn.addEventListener("click", runCheckout);
+
+  // Sanity check on load
+  if (!PUBLISHABLE_KEY) log("⚠ PROJECT_CONFIG.publishableApiKey ontbreekt", "err");
+</script>
+</body>
+</html>
