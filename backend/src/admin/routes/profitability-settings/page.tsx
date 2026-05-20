@@ -345,7 +345,7 @@ function ProjectModal({
           <div>
             <label style={labelStyle}>Order Currency</label>
             <select className="pf-input" style={inputStyle} value={form.currency_code} onChange={(e) => set("currency_code", e.target.value)}>
-              {["EUR", "CZK", "SEK", "PLN", "USD", "GBP", "HUF"].map((c) => (
+              {["EUR", "CZK", "SEK", "NOK", "PLN", "USD", "GBP", "HUF"].map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
