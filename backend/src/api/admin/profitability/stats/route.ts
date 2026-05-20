@@ -12,6 +12,7 @@ type Period = "today" | "yesterday" | "this_week" | "this_month" | "custom"
 const TO_EUR_RATES: Record<string, number> = {
   EUR: 1,
   SEK: 0.085,   // 1 SEK ≈ 0.085 EUR
+  NOK: 0.086,   // 1 NOK ≈ 0.086 EUR
   CZK: 0.040,   // 1 CZK ≈ 0.040 EUR
   PLN: 0.233,   // 1 PLN ≈ 0.233 EUR
   USD: 0.92,    // 1 USD ≈ 0.92 EUR
