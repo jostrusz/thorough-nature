@@ -149,6 +149,21 @@ export default async function orderPlacedPaymentMetadataHandler({
         break
       }
 
+      // PayU
+      if (paymentData.payuOrderId || (providerId.includes("payu") && (paymentData.payuOrderId || paymentData.extOrderId))) {
+        if (paymentData.payuOrderId) {
+          newMetadata.payu_order_id = paymentData.payuOrderId
+          newMetadata.payuOrderId = paymentData.payuOrderId
+        }
+        if (paymentData.extOrderId) {
+          newMetadata.payu_ext_order_id = paymentData.extOrderId
+        }
+        newMetadata.payment_method = paymentData.method || "payu"
+        newMetadata.payment_provider = "payu"
+        found = true
+        break
+      }
+
       // Novalnet
       if (paymentData.novalnetTid || paymentData.tid || providerId.includes("novalnet")) {
         const tid = paymentData.novalnetTid || paymentData.tid
@@ -200,6 +215,7 @@ export default async function orderPlacedPaymentMetadataHandler({
       newMetadata.stripePaymentIntentId ||
       newMetadata.novalnetTid ||
       newMetadata.revolutOrderId ||
+      newMetadata.payuOrderId ||
       "n/a"
 
     console.log(

@@ -207,6 +207,27 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "klarna_later", name: "Klarna Pay Later", icon: "klarna", available_countries: ["nl", "be", "de", "at", "fi", "fr", "it", "se", "es", "dk", "no", "gb", "ie"], supported_currencies: [] },
     { code: "klarna_slice", name: "Klarna Slice It", icon: "klarna", available_countries: ["nl", "be", "de", "at", "fi", "fr", "it", "se", "es", "dk", "no", "gb", "ie"], supported_currencies: [] },
   ],
+  payu: [
+    // BLIK & cards (always-on highlights for PL)
+    { code: "blik", name: "BLIK", icon: "blik", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    { code: "c", name: "Credit/Debit Card", icon: "card", available_countries: [], supported_currencies: ["PLN", "EUR", "CZK", "RON", "HUF", "BGN", "USD", "GBP"] },
+    // Wallets
+    { code: "jp", name: "Google Pay", icon: "googlepay", available_countries: ["pl"], supported_currencies: ["PLN", "EUR"] },
+    { code: "ap", name: "Apple Pay", icon: "applepay", available_countries: ["pl"], supported_currencies: ["PLN", "EUR"] },
+    // Polish Pay-By-Link bank methods
+    { code: "m", name: "mBank (mTransfer)", icon: "bank_transfer", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    { code: "i", name: "ING Bank Śląski", icon: "bank_transfer", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    { code: "o", name: "Pekao24", icon: "bank_transfer", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    { code: "s", name: "Santander", icon: "bank_transfer", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    { code: "pkb", name: "PKO BP (iPKO)", icon: "bank_transfer", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    { code: "inteligo", name: "Inteligo", icon: "bank_transfer", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    { code: "bos", name: "BOŚ Bank", icon: "bank_transfer", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    { code: "dpt", name: "Traditional Transfer", icon: "bank_transfer", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    // Installments / BNPL
+    { code: "ai", name: "Raty PayU (Installments)", icon: "klarna", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    { code: "twi", name: "Twisto / PayPo (BNPL)", icon: "klarna", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    { code: "wt", name: "PayU Pay Later", icon: "klarna", available_countries: ["pl"], supported_currencies: ["PLN"] },
+  ],
   novalnet: [
     { code: "creditcard", name: "Credit/Debit Card", icon: "card", available_countries: [], supported_currencies: [] },
     { code: "sepa", name: "SEPA Direct Debit", icon: "sepa", available_countries: ["nl", "be", "de", "at", "fi", "fr", "it", "es", "ie", "pt", "lu", "sk"], supported_currencies: ["EUR"] },
@@ -233,6 +254,7 @@ export const SUPPORTED_PROVIDERS = [
   { code: "airwallex", name: "Airwallex" },
   { code: "comgate", name: "Comgate" },
   { code: "przelewy24", name: "Przelewy24" },
+  { code: "payu", name: "PayU" },
   { code: "paypal", name: "PayPal" },
   { code: "klarna", name: "Klarna" },
   { code: "novalnet", name: "Novalnet" },

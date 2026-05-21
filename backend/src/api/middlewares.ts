@@ -66,6 +66,30 @@ export default defineMiddlewares({
       bodyParser: { preserveRawBody: true },
     },
     {
+      // PayU IPN: signature is computed over the RAW body, so we need the
+      // un-parsed buffer alongside the parsed JSON. Same pattern as Stripe.
+      method: ["POST"],
+      matcher: "/webhooks/payu",
+      bodyParser: false,
+      middlewares: [
+        function rawBodyReader(req: any, _res: any, next: any) {
+          const chunks: Buffer[] = []
+          req.on("data", (chunk: Buffer) => chunks.push(chunk))
+          req.on("end", () => {
+            const raw = Buffer.concat(chunks)
+            req.rawBody = raw
+            try {
+              req.body = JSON.parse(raw.toString("utf8"))
+            } catch {
+              req.body = {}
+            }
+            next()
+          })
+          req.on("error", next)
+        },
+      ],
+    },
+    {
       method: ["POST"],
       matcher: "/webhooks/marketing/resend",
       bodyParser: { preserveRawBody: true },

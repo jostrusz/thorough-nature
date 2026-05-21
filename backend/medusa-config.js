@@ -237,6 +237,11 @@ const medusaConfig = {
             options: {},
           },
           {
+            resolve: './src/modules/payment-payu',
+            id: 'payu',
+            options: {},
+          },
+          {
             resolve: './src/modules/payment-novalnet',
             id: 'novalnet',
             options: {},

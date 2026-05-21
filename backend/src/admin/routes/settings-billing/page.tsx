@@ -786,11 +786,12 @@ function GatewaysTab() {
             <div style={{ display: "grid", gridTemplateColumns: form.provider === "stripe" ? "1fr 1fr" : "1fr 1fr 1fr", gap: "8px" }}>
               <div>
                 <label style={{ fontSize: "10px", color: "#8C9196" }}>
-                  {form.provider === "paypal" || form.provider === "airwallex" ? "Client ID" : form.provider === "stripe" ? "Secret Key (sk_...)" : form.provider === "comgate" ? "Merchant ID" : form.provider === "przelewy24" ? "Merchant ID" : form.provider === "novalnet" ? "Vendor ID (MID)" : "API Key"}
+                  {form.provider === "paypal" || form.provider === "airwallex" ? "Client ID" : form.provider === "stripe" ? "Secret Key (sk_...)" : form.provider === "comgate" ? "Merchant ID" : form.provider === "przelewy24" ? "Merchant ID" : form.provider === "novalnet" ? "Vendor ID (MID)" : form.provider === "payu" ? "POS ID (Client ID)" : "API Key"}
                   {form.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Client ID)</span>}
                   {form.provider === "comgate" && <span style={{ color: "#B0B7BF" }}> (Comgate Portal → Merchant ID)</span>}
                   {form.provider === "przelewy24" && <span style={{ color: "#B0B7BF" }}> (P24 Panel → Merchant ID)</span>}
                   {form.provider === "novalnet" && <span style={{ color: "#B0B7BF" }}> (Novalnet Admin → Account → MID)</span>}
+                  {form.provider === "payu" && <span style={{ color: "#B0B7BF" }}> (PayU Merchant Panel → My shops → POS → POS ID)</span>}
                 </label>
                 <input
                   className="bp-input"
@@ -808,15 +809,17 @@ function GatewaysTab() {
                     form.provider === "przelewy24" ? "123456" :
                     form.provider === "klarna" ? (form.mode === "live" ? "K123456_abcdef..." : "K123456_abcdef...") :
                     form.provider === "novalnet" ? "14838" :
+                    form.provider === "payu" ? "300746" :
                     (form.mode === "live" ? "live_..." : "test_...")
                   }
                 />
               </div>
               <div>
                 <label style={{ fontSize: "10px", color: "#8C9196" }}>
-                  {form.provider === "paypal" ? "Client Secret" : form.provider === "airwallex" ? "API Key" : form.provider === "stripe" ? "Webhook Secret (whsec_...)" : form.provider === "comgate" ? "Secret (Password)" : form.provider === "przelewy24" ? "API Key" : form.provider === "klarna" ? "API Secret" : form.provider === "novalnet" ? "Product Activation Key" : "Secret Key"}
+                  {form.provider === "paypal" ? "Client Secret" : form.provider === "airwallex" ? "API Key" : form.provider === "stripe" ? "Webhook Secret (whsec_...)" : form.provider === "comgate" ? "Secret (Password)" : form.provider === "przelewy24" ? "API Key" : form.provider === "klarna" ? "API Secret" : form.provider === "novalnet" ? "Product Activation Key" : form.provider === "payu" ? "OAuth Client Secret" : "Secret Key"}
                   {form.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Secret)</span>}
                   {form.provider === "novalnet" && <span style={{ color: "#B0B7BF" }}> (Novalnet Admin → Project → API Credentials)</span>}
+                  {form.provider === "payu" && <span style={{ color: "#B0B7BF" }}> (POS → OAuth → Client Secret)</span>}
                 </label>
                 <input
                   className="bp-input"
@@ -835,6 +838,7 @@ function GatewaysTab() {
                     form.provider === "przelewy24" ? "abcdef123456..." :
                     form.provider === "klarna" ? "klarna_secret_..." :
                     form.provider === "novalnet" ? "7ibc7ob5|tactvi8VnVrxV..." :
+                    form.provider === "payu" ? "OAuth client secret" :
                     "secret_..."
                   }
                 />
@@ -842,10 +846,11 @@ function GatewaysTab() {
               {form.provider !== "stripe" && (
               <div>
                 <label style={{ fontSize: "10px", color: "#8C9196" }}>
-                  {form.provider === "paypal" ? "Webhook ID" : form.provider === "novalnet" ? "Payment Access Key" : "Webhook Secret"}
+                  {form.provider === "paypal" ? "Webhook ID" : form.provider === "novalnet" ? "Payment Access Key" : form.provider === "payu" ? "Second Key (MD5 / SHA-256)" : "Webhook Secret"}
                   {form.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Webhooks → Webhook ID)</span>}
                   {form.provider === "mollie" && <span style={{ color: "#B0B7BF" }}> (optional)</span>}
                   {form.provider === "novalnet" && <span style={{ color: "#B0B7BF" }}> (used as X-NN-Access-Key + webhook signature)</span>}
+                  {form.provider === "payu" && <span style={{ color: "#B0B7BF" }}> (POS → Keys → Second key — verifies OpenPayu-Signature)</span>}
                 </label>
                 <input
                   className="bp-input"
@@ -861,6 +866,7 @@ function GatewaysTab() {
                     form.provider === "przelewy24" ? "crc_key_..." :
                     form.provider === "comgate" ? "webhook_secret_..." :
                     form.provider === "novalnet" ? "a8b2f...payment-access-key..." :
+                    form.provider === "payu" ? "32 hex chars (MD5 key)" :
                     "whsec_..."
                   }
                 />
@@ -1202,11 +1208,12 @@ function GatewaysTab() {
                         <div style={{ display: "grid", gridTemplateColumns: editForm.provider === "stripe" ? "1fr 1fr" : "1fr 1fr 1fr", gap: "8px" }}>
                           <div>
                             <label style={{ fontSize: "10px", color: "#8C9196" }}>
-                              {editForm.provider === "paypal" || editForm.provider === "airwallex" ? "Client ID" : editForm.provider === "stripe" ? "Secret Key (sk_...)" : editForm.provider === "comgate" ? "Merchant ID" : editForm.provider === "przelewy24" ? "Merchant ID" : editForm.provider === "klarna" ? "API Key" : editForm.provider === "novalnet" ? "Vendor ID (MID)" : "API Key"}
+                              {editForm.provider === "paypal" || editForm.provider === "airwallex" ? "Client ID" : editForm.provider === "stripe" ? "Secret Key (sk_...)" : editForm.provider === "comgate" ? "Merchant ID" : editForm.provider === "przelewy24" ? "Merchant ID" : editForm.provider === "klarna" ? "API Key" : editForm.provider === "novalnet" ? "Vendor ID (MID)" : editForm.provider === "payu" ? "POS ID (Client ID)" : "API Key"}
                               {editForm.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Client ID)</span>}
                               {editForm.provider === "comgate" && <span style={{ color: "#B0B7BF" }}> (Comgate Portal)</span>}
                               {editForm.provider === "przelewy24" && <span style={{ color: "#B0B7BF" }}> (P24 Panel)</span>}
                               {editForm.provider === "novalnet" && <span style={{ color: "#B0B7BF" }}> (Novalnet Admin → MID)</span>}
+                              {editForm.provider === "payu" && <span style={{ color: "#B0B7BF" }}> (PayU → My shops → POS → POS ID)</span>}
                             </label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? editForm.live_keys.api_key : editForm.test_keys.api_key}
@@ -1218,9 +1225,10 @@ function GatewaysTab() {
                           </div>
                           <div>
                             <label style={{ fontSize: "10px", color: "#8C9196" }}>
-                              {editForm.provider === "paypal" ? "Client Secret" : editForm.provider === "airwallex" ? "API Key" : editForm.provider === "stripe" ? "Webhook Secret (whsec_...)" : editForm.provider === "comgate" ? "Secret (Password)" : editForm.provider === "przelewy24" ? "API Key" : editForm.provider === "klarna" ? "API Secret" : editForm.provider === "novalnet" ? "Product Activation Key" : "Secret Key"}
+                              {editForm.provider === "paypal" ? "Client Secret" : editForm.provider === "airwallex" ? "API Key" : editForm.provider === "stripe" ? "Webhook Secret (whsec_...)" : editForm.provider === "comgate" ? "Secret (Password)" : editForm.provider === "przelewy24" ? "API Key" : editForm.provider === "klarna" ? "API Secret" : editForm.provider === "novalnet" ? "Product Activation Key" : editForm.provider === "payu" ? "OAuth Client Secret" : "Secret Key"}
                               {editForm.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Secret)</span>}
                               {editForm.provider === "novalnet" && <span style={{ color: "#B0B7BF" }}> (used as merchant.signature)</span>}
+                              {editForm.provider === "payu" && <span style={{ color: "#B0B7BF" }}> (POS → OAuth → Client Secret)</span>}
                             </label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? editForm.live_keys.secret_key : editForm.test_keys.secret_key}
@@ -1233,10 +1241,11 @@ function GatewaysTab() {
                           {editForm.provider !== "stripe" && (
                           <div>
                             <label style={{ fontSize: "10px", color: "#8C9196" }}>
-                              {editForm.provider === "paypal" ? "Webhook ID" : editForm.provider === "novalnet" ? "Payment Access Key" : "Webhook Secret"}
+                              {editForm.provider === "paypal" ? "Webhook ID" : editForm.provider === "novalnet" ? "Payment Access Key" : editForm.provider === "payu" ? "Second Key (MD5 / SHA-256)" : "Webhook Secret"}
                               {editForm.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Webhooks)</span>}
                               {editForm.provider === "mollie" && <span style={{ color: "#B0B7BF" }}> (optional)</span>}
                               {editForm.provider === "novalnet" && <span style={{ color: "#B0B7BF" }}> (X-NN-Access-Key + webhook signature)</span>}
+                              {editForm.provider === "payu" && <span style={{ color: "#B0B7BF" }}> (POS → Keys → Second key)</span>}
                             </label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? editForm.live_keys.webhook_secret : editForm.test_keys.webhook_secret}
