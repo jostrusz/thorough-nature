@@ -23,7 +23,6 @@ function FlowsPage() {
     queryKey: ["mkt-flows", brandId],
     queryFn: () =>
       sdk.client.fetch<{ flows: any[] }>(`/admin/marketing/flows${qs}`, { method: "GET" }),
-    enabled: !!brandId,
   })
   const flows: any[] = ((data as any)?.flows) || []
 
