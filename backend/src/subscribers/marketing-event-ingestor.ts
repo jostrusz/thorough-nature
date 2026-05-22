@@ -64,6 +64,10 @@ export default async function marketingEventIngestor({
 
     const meta = (order.metadata as any) || {}
     const optInFlag = meta.marketing_opt_in === true
+    // Brand-level fallback: when double opt-in is OFF, treat purchase as
+    // implicit subscription (EU soft opt-in for existing customers of similar
+    // products). When ON, require explicit checkout checkbox.
+    const shouldSubscribe = optInFlag || !brand.double_opt_in_enabled
 
     // Acquisition signals from cart → order metadata. Storefront writes these
     // onto cart.metadata when the user lands with UTM params.
@@ -100,10 +104,10 @@ export default async function marketingEventIngestor({
         first_name: order.shipping_address?.first_name || null,
         last_name: order.shipping_address?.last_name || null,
         country_code: order.shipping_address?.country_code || null,
-        status: optInFlag ? "subscribed" : "unconfirmed",
+        status: shouldSubscribe ? "subscribed" : "unconfirmed",
         source: "checkout",
         external_id: (order as any).customer_id || null,
-        consent_at: optInFlag ? now : null,
+        consent_at: shouldSubscribe ? now : null,
         acquisition_source: acqFromCheckout.source,
         acquisition_medium: acqFromCheckout.medium,
         acquisition_campaign: acqFromCheckout.campaign,
@@ -125,7 +129,7 @@ export default async function marketingEventIngestor({
       contactId = (created as any).id
     } else {
       const patch: any = { id: contactId }
-      if (optInFlag && existing[0].status !== "subscribed") {
+      if (shouldSubscribe && existing[0].status !== "subscribed") {
         patch.status = "subscribed"
         patch.consent_at = now
         patch.source = existing[0].source || "checkout"
