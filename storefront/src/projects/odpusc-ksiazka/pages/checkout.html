@@ -6048,8 +6048,29 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var countrySelect = document.getElementById('country');
   var COUNTRY_PHONE_PREFIX = { PL: '+48' };
 
+  /**
+   * Normalize phone input. PL gets aware handling:
+   *  - 0048XXXXXXXXX → +48XXXXXXXXX
+   *  - +4848XXXXXXXXX (duplicated CC) → +48XXXXXXXXX
+   *  - 48XXXXXXXXX (no +) → +48XXXXXXXXX
+   *  - 0XXXXXXXXX (leading trunk 0, PL doesn't use it) → +48XXXXXXXXX
+   *  - XXXXXXXXX (9 digits) → +48XXXXXXXXX
+   */
   function formatPhoneNumber(raw, countryCode) {
-    var cleaned = raw.replace(/[\s\-\(\)\.]/g, '');
+    if (!raw) return '';
+    var cleaned = raw.replace(/[\s\-\(\)\.]/g, '').trim();
+
+    if (countryCode === 'PL') {
+      if (cleaned.indexOf('0048') === 0) cleaned = '+48' + cleaned.slice(4);
+      else if (cleaned.indexOf('+4848') === 0) cleaned = '+48' + cleaned.slice(5);
+      else if (/^48\d{9}$/.test(cleaned)) cleaned = '+' + cleaned;
+      else if (/^0\d{9}$/.test(cleaned)) cleaned = '+48' + cleaned.slice(1);
+      else if (/^\d{9}$/.test(cleaned)) cleaned = '+48' + cleaned;
+      // anything else — let it through; validation step decides if warning shows
+      return cleaned;
+    }
+
+    // Other countries — old generic behavior
     if (cleaned.startsWith('+')) return cleaned;
     if (cleaned.startsWith('00')) return '+' + cleaned.substring(2);
     if (cleaned.startsWith('0')) {
@@ -6062,15 +6083,127 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     return cleaned;
   }
 
+  /**
+   * Strict-but-WARN-ONLY PL mobile-number check.
+   * Returns { ok, reason }. NEVER blocks submit — only triggers the orange
+   * .phone-warning block (same UI Foxentry uses), which lets the user click
+   * "Tak, jest poprawny" to proceed regardless.
+   */
+  function validatePLPhone(normalized) {
+    if (!normalized) return { ok: false, reason: null }; // empty handled by `required`
+    if (/^\+48[4-8]\d{8}$/.test(normalized)) return { ok: true, reason: null };
+
+    var digits = normalized.replace(/\D/g, '');
+    if (digits.length < 9) {
+      return { ok: false, reason: 'Numer wydaje się za krótki. Polskie numery mają 9 cyfr (np. 600 123 456).' };
+    }
+    if (digits.length > 11) {
+      return { ok: false, reason: 'Numer wydaje się za długi. Sprawdź, czy nie ma dodatkowych cyfr.' };
+    }
+    if (normalized.indexOf('+') === 0 && normalized.indexOf('+48') !== 0) {
+      return { ok: false, reason: 'Akceptujemy tylko polskie numery telefonu (+48). Sprawdź numer.' };
+    }
+    return { ok: false, reason: 'Numer wygląda nietypowo. Sprawdź, czy jest poprawny (np. +48 600 123 456).' };
+  }
+
   if (phoneField && phonePreview) {
+    // Once user clicks "Tak, jest poprawny" we remember the exact string so we
+    // don't re-warn on the next blur. Submit is NEVER blocked by this validation.
+    var _localPhoneConfirmed = null;
+
+    var phoneWarningEl = document.getElementById('phone-warning');
+    var phoneWarningTextEl = phoneWarningEl ? phoneWarningEl.querySelector('.phone-warning-text') : null;
+    var phoneWarningConfirmBtn = document.getElementById('phone-warning-confirm');
+    var phoneWarningEditBtn = document.getElementById('phone-warning-edit');
+
+    function showLocalPhoneWarning(reason) {
+      if (phoneWarningTextEl && reason) phoneWarningTextEl.textContent = '\u26a0 ' + reason;
+      if (phoneWarningEl) phoneWarningEl.style.display = 'block';
+      if (phoneField) {
+        phoneField.classList.remove('valid', 'invalid');
+        phoneField.dataset.phoneWarning = 'true'; // tells validateField() this is warn-only
+      }
+      if (phonePreview) phonePreview.style.display = 'none';
+    }
+    function hideLocalPhoneWarning() {
+      if (phoneWarningEl) phoneWarningEl.style.display = 'none';
+      if (phoneField) delete phoneField.dataset.phoneWarning;
+    }
+
+    // Wire confirm/edit buttons only if Foxentry block didn't already wire them
+    if (phoneWarningConfirmBtn && !phoneWarningConfirmBtn.dataset.wired) {
+      phoneWarningConfirmBtn.dataset.wired = 'local';
+      phoneWarningConfirmBtn.addEventListener('click', function() {
+        _localPhoneConfirmed = phoneField ? phoneField.value.trim() : '';
+        hideLocalPhoneWarning();
+        if (phoneField) { phoneField.classList.add('valid'); phoneField.classList.remove('invalid'); }
+        if (phonePreview) {
+          phonePreview.style.color = '';
+          phonePreview.textContent = '\u2713 Numer telefonu potwierdzony';
+          phonePreview.style.display = 'block';
+        }
+      });
+    }
+    if (phoneWarningEditBtn && !phoneWarningEditBtn.dataset.wired) {
+      phoneWarningEditBtn.dataset.wired = 'local';
+      phoneWarningEditBtn.addEventListener('click', function() {
+        hideLocalPhoneWarning();
+        if (phoneField) phoneField.focus();
+      });
+    }
+
     phoneField.addEventListener('blur', function() {
-      // Als Foxentry actief is, GEEN lokale formatting of validatie — alles via Foxentry
+      // If Foxentry is active, ALL phone validation is handled by the Foxentry block below
       if (hasFoxentryKey) return;
+
       var raw = phoneField.value.trim();
-      if (!raw) { phonePreview.style.display = 'none'; return; }
+      if (!raw) {
+        phonePreview.style.display = 'none';
+        hideLocalPhoneWarning();
+        return;
+      }
+
       var country = countrySelect ? countrySelect.value : 'PL';
       var formatted = formatPhoneNumber(raw, country);
       phoneField.value = formatted;
+
+      // MetaTracker advanced matching
+      if (formatted && typeof MetaTracker !== 'undefined') {
+        MetaTracker.setUserData({ ph: formatted });
+      }
+
+      // -- PL: warn-only validation (never blocks submit) --
+      if (country === 'PL') {
+        if (_localPhoneConfirmed === formatted) {
+          hideLocalPhoneWarning();
+          phoneField.classList.add('valid');
+          phoneField.classList.remove('invalid');
+          if (formatted !== raw) {
+            phonePreview.textContent = '\u2713 Zapisano jako ' + formatted;
+            phonePreview.style.display = 'block';
+          }
+          return;
+        }
+
+        var v = validatePLPhone(formatted);
+        if (v.ok) {
+          hideLocalPhoneWarning();
+          phoneField.classList.add('valid');
+          phoneField.classList.remove('invalid');
+          if (formatted !== raw) {
+            phonePreview.textContent = '\u2713 Zapisano jako ' + formatted;
+            phonePreview.style.display = 'block';
+          } else {
+            phonePreview.style.display = 'none';
+          }
+        } else if (v.reason) {
+          // Bad format -> orange warning. Submit still goes through.
+          showLocalPhoneWarning(v.reason);
+        }
+        return;
+      }
+
+      // Non-PL -- old generic behavior
       if (formatted !== raw) {
         phonePreview.textContent = '\u2713 Zapisano jako ' + formatted;
         phonePreview.style.display = 'block';
@@ -6078,13 +6211,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         phonePreview.style.display = 'none';
       }
       validateField(phoneField);
-      // Update MetaTracker advanced matching with phone number
-      if (formatted && typeof MetaTracker !== 'undefined') {
-        MetaTracker.setUserData({ ph: formatted });
-      }
     });
     phoneField.addEventListener('input', function() {
       phonePreview.style.display = 'none';
+      hideLocalPhoneWarning();
     });
   }
 
@@ -6902,8 +7032,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (field.type === 'email') {
       isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
     } else if (field.type === 'tel') {
-      var stripped = value.replace(/[\s\-\(\)\.]/g, '');
-      isValid = /^[\+]?\d{8,}$/.test(stripped);
+      // PL: warn-only — only EMPTY blocks submit. Bad format shows orange .phone-warning
+      // (already set by blur handler) but doesn't fail validation.
+      var _country = (typeof countrySelect !== 'undefined' && countrySelect) ? countrySelect.value : 'PL';
+      if (_country === 'PL') {
+        // Treat any non-empty value as valid for submit purposes.
+        // The blur-handler warning UI already informs the user; we never block them.
+        isValid = value.length > 0;
+      } else {
+        var stripped = value.replace(/[\s\-\(\)\.]/g, '');
+        isValid = /^[\+]?\d{8,}$/.test(stripped);
+      }
     } else if (field.id === 'postal_code') {
       isValid = value.length >= 4;
     } else if (field.id === 'address') {
