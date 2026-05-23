@@ -158,6 +158,7 @@ async function computeLiveStats(
             filters: {
               sales_channel_id: project.sales_channel_id,
               created_at: { $gte: todayStart, $lte: todayEnd },
+              status: { $ne: "canceled" },
             },
           })
 

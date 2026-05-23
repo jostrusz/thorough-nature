@@ -55,6 +55,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
               filters: {
                 sales_channel_id: p.sales_channel_id,
                 created_at: { $gte: todayStart, $lte: todayEnd },
+                status: { $ne: "canceled" },
               },
             })
 
