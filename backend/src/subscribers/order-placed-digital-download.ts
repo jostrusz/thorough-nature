@@ -122,10 +122,20 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "1.1 MB",
     },
   ],
-  // zycie-zaslugy: ebook delivery temporarily disabled (empty array →
-  // guard at line ~205 returns early without sending or touching metadata).
-  // Re-enable by populating with the same shape as other projects.
-  'zycie-zaslugy': [],
+  'zycie-zaslugy': [
+    {
+      key: "e-books/przesun-jedna-rzecz-zmien-wszystko.pdf",
+      title: "Przesuń jedną rzecz, zmień wszystko",
+      description: "E-book (PDF)",
+      size: "13.2 MB",
+    },
+    {
+      key: "e-books/nie-wszystko-zasluguje-na-miejsce.pdf",
+      title: "Nie wszystko zasługuje na miejsce",
+      description: "E-book (PDF)",
+      size: "18.5 MB",
+    },
+  ],
   // slipp-taket: e-books do not exist for this project yet — empty array
   // disables the e-book delivery email. Re-enable by populating the files.
   'slipp-taket': [],
@@ -143,6 +153,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'lass-los': process.env.LL_STOREFRONT_URL || "https://www.lasslosbuch.de",
   'psi-superzivot': process.env.PS_STOREFRONT_URL || "https://www.psi-superzivot.cz",
   'het-leven': process.env.HL_STOREFRONT_URL || "https://www.pakjeleventerug.nl",
+  'zycie-zaslugy': process.env.ZZ_STOREFRONT_URL || "https://www.najpierw-ja.pl",
 }
 
 // Localized email subjects per project
@@ -154,6 +165,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'lass-los': 'Deine E-Books sind bereit! 📖',
   'psi-superzivot': 'Tvoje e-booky jsou připravené! 📖',
   'het-leven': 'Je 2 gratis e-books staan klaar! 📖',
+  'zycie-zaslugy': 'Twoje 2 darmowe e-booki są gotowe! 📖',
 }
 
 // Localized fallback first names
@@ -165,6 +177,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'lass-los': 'dort',
   'psi-superzivot': 'tam',
   'het-leven': 'daar',
+  'zycie-zaslugy': 'tam',
 }
 
 export async function sendEbookDelivery(orderId: string, container: any, eventName: string) {

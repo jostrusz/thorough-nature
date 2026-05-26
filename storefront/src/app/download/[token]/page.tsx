@@ -572,12 +572,23 @@ const hetLevenTheme: ProjectTheme = {
   errorLink: { color: "#B85C4A", textDecoration: "underline" },
 }
 
+// zycie-zaslugy reuses het-leven palette (same Anna de Vries brand world, vínová + terracotta)
+const zycieZaslugyTheme: ProjectTheme = {
+  ...hetLevenTheme,
+  brandLabel: "ŻYCIE, JAKIEGO NIGDY SOBIE NIE POZWOLIŁAŚ",
+  brandName: "Życie, jakiego nigdy sobie nie pozwoliłaś",
+  supportEmail: "anna@najpierw-ja.pl",
+  companyName: "Performance Marketing Solution s.r.o.",
+  companyLocation: "Rybná 716/24, 110 00 Praha",
+}
+
 const THEMES: Record<string, ProjectTheme> = {
   loslatenboek: loslatenboekTheme,
   dehondenbijbel: dehondenbijbelTheme,
   'lass-los': lassLosTheme,
   'psi-superzivot': psiSuperzivotTheme,
   'het-leven': hetLevenTheme,
+  'zycie-zaslugy': zycieZaslugyTheme,
 }
 
 function getTheme(projectId?: string): ProjectTheme {
@@ -630,16 +641,58 @@ async function getDownloadData(
 
 // ── Page component ──────────────────────────────────────────────────────
 
+// Dev-only mock data so the page can be previewed without a real backend token.
+// Triggered by ?preview=<projectId> in the URL.
+function getMockData(projectId: string): DownloadData {
+  const filesByProject: Record<string, DownloadFile[]> = {
+    'zycie-zaslugy': [
+      { title: 'Przesuń jedną rzecz, zmień wszystko', description: 'E-book (PDF)', size: '13.2 MB', download_url: '#' },
+      { title: 'Nie wszystko zasługuje na miejsce', description: 'E-book (PDF)', size: '18.5 MB', download_url: '#' },
+    ],
+  }
+  return {
+    download: {
+      order_id: 'preview',
+      email: 'preview@example.com',
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      download_count: 0,
+      project_id: projectId,
+      files: filesByProject[projectId] || filesByProject['zycie-zaslugy'],
+    },
+  }
+}
+
 export default async function DownloadPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>
+  searchParams?: Promise<{ preview?: string }>
 }) {
   const { token } = await params
-  const { data, error, expired, projectId } = await getDownloadData(token)
+  const sp = (await searchParams) || {}
+  const previewProject = sp.preview
+
+  let data: DownloadData | null
+  let error: string | null
+  let expired: boolean
+  let projectId: string
+
+  if (previewProject) {
+    data = getMockData(previewProject)
+    error = null
+    expired = false
+    projectId = previewProject
+  } else {
+    const r = await getDownloadData(token)
+    data = r.data
+    error = r.error
+    expired = r.expired
+    projectId = r.projectId
+  }
   const t = getTheme(projectId)
 
-  const dateLocale = projectId === "lass-los" ? "de-DE" : projectId === "psi-superzivot" ? "cs-CZ" : "nl-NL"
+  const dateLocale = projectId === "lass-los" ? "de-DE" : projectId === "psi-superzivot" ? "cs-CZ" : projectId === "zycie-zaslugy" ? "pl-PL" : "nl-NL"
   const expiryDate = data?.download?.expires_at
     ? new Date(data.download.expires_at).toLocaleDateString(dateLocale, {
         day: "numeric",
@@ -649,6 +702,7 @@ export default async function DownloadPage({
     : null
 
   const isCS = projectId === "psi-superzivot"
+  const isPL = projectId === "zycie-zaslugy"
   const fileEmojis = (projectId === "dehondenbijbel" || isCS)
     ? ["\u{1F4D9}", "\u{1F43E}", "\u{1F3BE}"]  // 📙 🐾 🎾
     : ["\u{1F4D5}", "\u{1F4D3}"]                 // 📕 📓
@@ -662,15 +716,17 @@ export default async function DownloadPage({
           <h1 style={t.headerTitle}>
             {error
               ? expired
-                ? isCS ? "Odkaz vypršel" : projectId === "lass-los" ? "Link abgelaufen" : "Link verlopen"
-                : isCS ? "Ups..." : projectId === "lass-los" ? "Ups..." : "Oeps..."
+                ? isCS ? "Odkaz vypršel" : isPL ? "Link wygasł" : projectId === "lass-los" ? "Link abgelaufen" : "Link verlopen"
+                : isCS ? "Ups..." : isPL ? "Ups..." : projectId === "lass-los" ? "Ups..." : "Oeps..."
               : isCS
                 ? "Tvoje e-booky jsou připravené!"
-                : projectId === "lass-los"
-                  ? "Deine E-Books sind bereit!"
-                  : projectId === "dehondenbijbel"
-                    ? "Je e-books staan klaar!"
-                    : "Je e-books staan klaar"}
+                : isPL
+                  ? "Twoje e-booki są gotowe!"
+                  : projectId === "lass-los"
+                    ? "Deine E-Books sind bereit!"
+                    : projectId === "dehondenbijbel"
+                      ? "Je e-books staan klaar!"
+                      : "Je e-books staan klaar"}
           </h1>
         </div>
 
@@ -683,9 +739,11 @@ export default async function DownloadPage({
               <p style={t.intro}>
                 {isCS
                   ? "Ahoj! Klikni na tlačítka níže a stáhni si své e-booky."
-                  : projectId === "lass-los"
-                    ? "Hallo! Klicke auf die Download-Buttons unten, um deine E-Books zu speichern."
-                    : "Hoi! Klik op de downloadknoppen hieronder om je e-books op te slaan."}
+                  : isPL
+                    ? "Cześć! Kliknij przyciski poniżej, aby pobrać swoje e-booki."
+                    : projectId === "lass-los"
+                      ? "Hallo! Klicke auf die Download-Buttons unten, um deine E-Books zu speichern."
+                      : "Hoi! Klik op de downloadknoppen hieronder om je e-books op te slaan."}
               </p>
 
               {/* File cards */}
@@ -706,7 +764,7 @@ export default async function DownloadPage({
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {isCS ? "Stáhnout" : projectId === "lass-los" ? "Herunterladen" : "Download"} &darr;
+                    {isCS ? "Stáhnout" : isPL ? "Pobierz" : projectId === "lass-los" ? "Herunterladen" : "Download"} &darr;
                   </a>
                 </div>
               ))}
@@ -717,9 +775,11 @@ export default async function DownloadPage({
                   <p style={t.expiryText}>
                     &#x23F3; {isCS
                       ? `Odkaz platný do ${expiryDate}`
-                      : projectId === "lass-los"
-                        ? `Link gültig bis ${expiryDate}`
-                        : `Link geldig tot ${expiryDate}`}
+                      : isPL
+                        ? `Link ważny do ${expiryDate}`
+                        : projectId === "lass-los"
+                          ? `Link gültig bis ${expiryDate}`
+                          : `Link geldig tot ${expiryDate}`}
                   </p>
                 </div>
               )}
@@ -729,9 +789,11 @@ export default async function DownloadPage({
                 <p style={t.infoText}>
                   {isCS
                     ? <>&#x1F4E6; Tvoje tištěná kniha je na cestě a dorazí během{" "}<strong>2–3 pracovních dnů</strong>. Sledovací číslo ti pošleme v samostatném e-mailu.</>
-                    : projectId === "lass-los"
-                      ? <>&#x1F4E6; Dein physisches Buch ist unterwegs und wird innerhalb von{" "}<strong>3–5 Werktagen</strong> zugestellt. Du erhältst separat eine Sendungsverfolgungsnummer per E-Mail.</>
-                      : <>&#x1F4E6; Je fysieke boek is onderweg en wordt binnen{" "}<strong>4–7 werkdagen</strong> bezorgd. Je ontvangt apart een track &amp; trace code zodra het pakket is verzonden.</>}
+                    : isPL
+                      ? <>&#x1F4E6; Twoja papierowa książka jest już w drodze i zostanie dostarczona w ciągu{" "}<strong>3–5 dni roboczych</strong> przez InPost. Numer do śledzenia otrzymasz osobnym mailem.</>
+                      : projectId === "lass-los"
+                        ? <>&#x1F4E6; Dein physisches Buch ist unterwegs und wird innerhalb von{" "}<strong>3–5 Werktagen</strong> zugestellt. Du erhältst separat eine Sendungsverfolgungsnummer per E-Mail.</>
+                        : <>&#x1F4E6; Je fysieke boek is onderweg en wordt binnen{" "}<strong>4–7 werkdagen</strong> bezorgd. Je ontvangt apart een track &amp; trace code zodra het pakket is verzonden.</>}
                 </p>
               </div>
 
@@ -751,9 +813,11 @@ export default async function DownloadPage({
             <p style={t.helpText}>
               {isCS
                 ? <>Máš problém se stahováním? Napiš nám na{" "}<a href={`mailto:${t.supportEmail}`} style={t.helpLink}>{t.supportEmail}</a></>
-                : projectId === "lass-los"
-                  ? <>Probleme beim Download? Schreib uns eine E-Mail an{" "}<a href={`mailto:${t.supportEmail}`} style={t.helpLink}>{t.supportEmail}</a></>
-                  : <>Problemen met de download? Stuur een mailtje naar{" "}<a href={`mailto:${t.supportEmail}`} style={t.helpLink}>{t.supportEmail}</a></>}
+                : isPL
+                  ? <>Masz problem z pobraniem? Napisz do nas na{" "}<a href={`mailto:${t.supportEmail}`} style={t.helpLink}>{t.supportEmail}</a></>
+                  : projectId === "lass-los"
+                    ? <>Probleme beim Download? Schreib uns eine E-Mail an{" "}<a href={`mailto:${t.supportEmail}`} style={t.helpLink}>{t.supportEmail}</a></>
+                    : <>Problemen met de download? Stuur een mailtje naar{" "}<a href={`mailto:${t.supportEmail}`} style={t.helpLink}>{t.supportEmail}</a></>}
             </p>
           </div>
         </div>
