@@ -13,12 +13,14 @@ var PROJECT_CONFIG = {
     "thumbnail": "https://bucket-production-b93e.up.railway.app:443/medusa-media/Zycie-jakiego-nigdy-sobie-nie-pozwolilas-pichi-01KQV9FJE4MMTVEDQ4TSG7AGG9.png"
   },
   "upsellProduct": {
-    "name": "",
-    "handle": "",
-    "variantId": "",
-    "price": 0,
-    "originalPrice": 0,
-    "currency": "PLN"
+    "name": "Odpuść to, co cię niszczy",
+    "handle": "odpusc-to-co-cie-niszczy-zycie-zaslugi",
+    "productId": "prod_01KSHDKV49Q294Q1VYY5EJXNWH",
+    "variantId": "variant_01KSHDKV4BE5P8MYTSSY8HMX1K",
+    "price": 99,
+    "originalPrice": 109,
+    "currency": "PLN",
+    "thumbnail": "https://bucket-production-b93e.up.railway.app:443/medusa-media/odpusc-ksiazka-thumbnail-01KK8RBZFKFSMZJJDDRR82PJ1D.png"
   },
   "bundleOptions": [
     { "qty": 1, "price": 129, "label": "1 książka",  "save": 0,   "badge": "DLA SIEBIE",                 "variantId": "variant_01KQV9KVNCAMM8902RFHKFV20Q" },
@@ -39,7 +41,7 @@ var PROJECT_CONFIG = {
     "airwallex": "pp_airwallex_airwallex"
   },
   "mollieProfileId": null,
-  "orderBumpEnabled": false,
+  "orderBumpEnabled": true,
   "upsellEnabled": false,
   "foxentryApiKey": null,
   "homeUrl": "/",
