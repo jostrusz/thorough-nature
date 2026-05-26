@@ -7747,7 +7747,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           body: JSON.stringify(sessionBody)
         });
       }).then(function(sessionRes) {
-        return { cartId: cartId, paymentCollection: sessionRes.payment_collection, testMode: USE_TEST_MODE };
+        return { cartId: cartId, paymentCollection: sessionRes.payment_collection, testMode: USE_TEST_MODE, isInlinePayPalWallet: isInlinePayPalWallet };
       });
     })
     .then(function(result) {
@@ -8083,7 +8083,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         // Backend created a PayPal order via express:true branch — no approvalUrl.
         // We open the wallet sheet using the on-page form data (no wallet address prompt),
         // confirm the order via PayPal SDK, then complete the cart.
-        if (isInlinePayPalWallet && providerData.paypalOrderId) {
+        if (result.isInlinePayPalWallet && providerData.paypalOrderId) {
           var walletMethod = allPaymentOptions.find(function(m) {
             return m.code === selectedMethod && m.provider === 'paypal';
           });
