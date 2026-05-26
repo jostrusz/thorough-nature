@@ -110,6 +110,11 @@ export function PaymentMethodIcon({ code, size }: { code: string; size?: number 
       return <div style={{ ...style, background: "#2B4C9B", color: "#FFFFFF" }}>SEPA</div>
     case "bank_transfer":
       return <div style={{ ...style, background: "#F6F6F7", color: "#1A1A1A" }}>Bank</div>
+    case "pay_by_bank":
+    case "brite":
+      return <div style={{ ...style, background: "#FFE600", color: "#0A0B09" }}>Brite</div>
+    case "swish":
+      return <div style={{ ...style, background: "#EB4B97", color: "#FFFFFF" }}>Swish</div>
     default:
       return <div style={{ ...style, background: "#F6F6F7", color: "#6D7175" }}>{code.slice(0, 4).toUpperCase()}</div>
   }
@@ -246,12 +251,22 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "prepayment", name: "Prepayment", icon: "bank_transfer", available_countries: ["de", "at", "ch"], supported_currencies: ["EUR", "CHF"] },
     { code: "cashpayment", name: "Barzahlen / viacash", icon: "bank_transfer", available_countries: ["de", "at"], supported_currencies: ["EUR"] },
   ],
+  brite: [
+    // Brite is "Pay by Bank" — a single logical method that fans out into per-bank
+    // tiles on the storefront. We surface the umbrella method here so admins can
+    // enable it; the actual bank list is sourced from the Brite Service
+    // Presentation API and cached in `brite_bank_logo`.
+    { code: "pay_by_bank", name: "Pay by Bank (Open Banking)", icon: "bank_transfer", available_countries: ["nl", "be", "de", "lu", "se", "no", "gb", "fi", "dk", "ee", "lt", "lv", "ie", "fr", "it", "es", "pt", "at", "pl"], supported_currencies: ["EUR", "SEK", "NOK", "DKK", "GBP", "PLN"] },
+    { code: "swish", name: "Swish (SE)", icon: "swish", available_countries: ["se"], supported_currencies: ["SEK"] },
+    { code: "ideal", name: "iDEAL (NL via Brite)", icon: "ideal", available_countries: ["nl"], supported_currencies: ["EUR"] },
+  ],
 }
 
 export const SUPPORTED_PROVIDERS = [
   { code: "stripe", name: "Stripe" },
   { code: "mollie", name: "Mollie" },
   { code: "airwallex", name: "Airwallex" },
+  { code: "brite", name: "Brite Payments (Pay by Bank)" },
   { code: "comgate", name: "Comgate" },
   { code: "przelewy24", name: "Przelewy24" },
   { code: "payu", name: "PayU" },

@@ -786,12 +786,13 @@ function GatewaysTab() {
             <div style={{ display: "grid", gridTemplateColumns: form.provider === "stripe" ? "1fr 1fr" : "1fr 1fr 1fr", gap: "8px" }}>
               <div>
                 <label style={{ fontSize: "10px", color: "#8C9196" }}>
-                  {form.provider === "paypal" || form.provider === "airwallex" ? "Client ID" : form.provider === "stripe" ? "Secret Key (sk_...)" : form.provider === "comgate" ? "Merchant ID" : form.provider === "przelewy24" ? "Merchant ID" : form.provider === "novalnet" ? "Vendor ID (MID)" : form.provider === "payu" ? "POS ID (Client ID)" : "API Key"}
+                  {form.provider === "paypal" || form.provider === "airwallex" ? "Client ID" : form.provider === "brite" ? "Client ID (OAuth)" : form.provider === "stripe" ? "Secret Key (sk_...)" : form.provider === "comgate" ? "Merchant ID" : form.provider === "przelewy24" ? "Merchant ID" : form.provider === "novalnet" ? "Vendor ID (MID)" : form.provider === "payu" ? "POS ID (Client ID)" : "API Key"}
                   {form.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Client ID)</span>}
                   {form.provider === "comgate" && <span style={{ color: "#B0B7BF" }}> (Comgate Portal → Merchant ID)</span>}
                   {form.provider === "przelewy24" && <span style={{ color: "#B0B7BF" }}> (P24 Panel → Merchant ID)</span>}
                   {form.provider === "novalnet" && <span style={{ color: "#B0B7BF" }}> (Novalnet Admin → Account → MID)</span>}
                   {form.provider === "payu" && <span style={{ color: "#B0B7BF" }}> (PayU Merchant Panel → My shops → POS → POS ID)</span>}
+                  {form.provider === "brite" && <span style={{ color: "#B0B7BF" }}> (Brite Merchant Portal → API → Client ID)</span>}
                 </label>
                 <input
                   className="bp-input"
@@ -810,16 +811,18 @@ function GatewaysTab() {
                     form.provider === "klarna" ? (form.mode === "live" ? "K123456_abcdef..." : "K123456_abcdef...") :
                     form.provider === "novalnet" ? "14838" :
                     form.provider === "payu" ? "300746" :
+                    form.provider === "brite" ? "client_xxxxxxxxxxxx" :
                     (form.mode === "live" ? "live_..." : "test_...")
                   }
                 />
               </div>
               <div>
                 <label style={{ fontSize: "10px", color: "#8C9196" }}>
-                  {form.provider === "paypal" ? "Client Secret" : form.provider === "airwallex" ? "API Key" : form.provider === "stripe" ? "Webhook Secret (whsec_...)" : form.provider === "comgate" ? "Secret (Password)" : form.provider === "przelewy24" ? "API Key" : form.provider === "klarna" ? "API Secret" : form.provider === "novalnet" ? "Product Activation Key" : form.provider === "payu" ? "OAuth Client Secret" : "Secret Key"}
+                  {form.provider === "paypal" ? "Client Secret" : form.provider === "airwallex" ? "API Key" : form.provider === "brite" ? "Client Secret (OAuth)" : form.provider === "stripe" ? "Webhook Secret (whsec_...)" : form.provider === "comgate" ? "Secret (Password)" : form.provider === "przelewy24" ? "API Key" : form.provider === "klarna" ? "API Secret" : form.provider === "novalnet" ? "Product Activation Key" : form.provider === "payu" ? "OAuth Client Secret" : "Secret Key"}
                   {form.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Secret)</span>}
                   {form.provider === "novalnet" && <span style={{ color: "#B0B7BF" }}> (Novalnet Admin → Project → API Credentials)</span>}
                   {form.provider === "payu" && <span style={{ color: "#B0B7BF" }}> (POS → OAuth → Client Secret)</span>}
+                  {form.provider === "brite" && <span style={{ color: "#B0B7BF" }}> (Brite Merchant Portal → API → Client Secret)</span>}
                 </label>
                 <input
                   className="bp-input"
@@ -839,6 +842,7 @@ function GatewaysTab() {
                     form.provider === "klarna" ? "klarna_secret_..." :
                     form.provider === "novalnet" ? "7ibc7ob5|tactvi8VnVrxV..." :
                     form.provider === "payu" ? "OAuth client secret" :
+                    form.provider === "brite" ? "secret_xxxxxxxxxxxx" :
                     "secret_..."
                   }
                 />
@@ -886,6 +890,22 @@ function GatewaysTab() {
                     setForm({ ...form, [keys]: { ...form[keys], account_id: e.target.value } })
                   }}
                   placeholder="acct_xxxxxxxxxxxxxxxx"
+                />
+              </div>
+            )}
+            {/* Brite: Merchant ID (used by Service Presentation API for bank logos) */}
+            {form.provider === "brite" && (
+              <div style={{ marginTop: "8px" }}>
+                <label style={{ fontSize: "10px", color: "#8C9196" }}>Merchant ID <span style={{ color: "#B0B7BF" }}>(Brite Merchant Portal → Account → Merchant ID — used by Service Presentation API for bank logos)</span></label>
+                <input
+                  className="bp-input"
+                  style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                  value={form.mode === "live" ? (form.live_keys as any).account_id || "" : (form.test_keys as any).account_id || ""}
+                  onChange={(e) => {
+                    const keys = form.mode === "live" ? "live_keys" : "test_keys"
+                    setForm({ ...form, [keys]: { ...form[keys], account_id: e.target.value } })
+                  }}
+                  placeholder="merch_xxxxxxxxxxxxxxxx"
                 />
               </div>
             )}
@@ -1208,12 +1228,13 @@ function GatewaysTab() {
                         <div style={{ display: "grid", gridTemplateColumns: editForm.provider === "stripe" ? "1fr 1fr" : "1fr 1fr 1fr", gap: "8px" }}>
                           <div>
                             <label style={{ fontSize: "10px", color: "#8C9196" }}>
-                              {editForm.provider === "paypal" || editForm.provider === "airwallex" ? "Client ID" : editForm.provider === "stripe" ? "Secret Key (sk_...)" : editForm.provider === "comgate" ? "Merchant ID" : editForm.provider === "przelewy24" ? "Merchant ID" : editForm.provider === "klarna" ? "API Key" : editForm.provider === "novalnet" ? "Vendor ID (MID)" : editForm.provider === "payu" ? "POS ID (Client ID)" : "API Key"}
+                              {editForm.provider === "paypal" || editForm.provider === "airwallex" ? "Client ID" : editForm.provider === "brite" ? "Client ID (OAuth)" : editForm.provider === "stripe" ? "Secret Key (sk_...)" : editForm.provider === "comgate" ? "Merchant ID" : editForm.provider === "przelewy24" ? "Merchant ID" : editForm.provider === "klarna" ? "API Key" : editForm.provider === "novalnet" ? "Vendor ID (MID)" : editForm.provider === "payu" ? "POS ID (Client ID)" : "API Key"}
                               {editForm.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Client ID)</span>}
                               {editForm.provider === "comgate" && <span style={{ color: "#B0B7BF" }}> (Comgate Portal)</span>}
                               {editForm.provider === "przelewy24" && <span style={{ color: "#B0B7BF" }}> (P24 Panel)</span>}
                               {editForm.provider === "novalnet" && <span style={{ color: "#B0B7BF" }}> (Novalnet Admin → MID)</span>}
                               {editForm.provider === "payu" && <span style={{ color: "#B0B7BF" }}> (PayU → My shops → POS → POS ID)</span>}
+                              {editForm.provider === "brite" && <span style={{ color: "#B0B7BF" }}> (Brite Merchant Portal → API → Client ID)</span>}
                             </label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? editForm.live_keys.api_key : editForm.test_keys.api_key}
@@ -1225,10 +1246,11 @@ function GatewaysTab() {
                           </div>
                           <div>
                             <label style={{ fontSize: "10px", color: "#8C9196" }}>
-                              {editForm.provider === "paypal" ? "Client Secret" : editForm.provider === "airwallex" ? "API Key" : editForm.provider === "stripe" ? "Webhook Secret (whsec_...)" : editForm.provider === "comgate" ? "Secret (Password)" : editForm.provider === "przelewy24" ? "API Key" : editForm.provider === "klarna" ? "API Secret" : editForm.provider === "novalnet" ? "Product Activation Key" : editForm.provider === "payu" ? "OAuth Client Secret" : "Secret Key"}
+                              {editForm.provider === "paypal" ? "Client Secret" : editForm.provider === "airwallex" ? "API Key" : editForm.provider === "brite" ? "Client Secret (OAuth)" : editForm.provider === "stripe" ? "Webhook Secret (whsec_...)" : editForm.provider === "comgate" ? "Secret (Password)" : editForm.provider === "przelewy24" ? "API Key" : editForm.provider === "klarna" ? "API Secret" : editForm.provider === "novalnet" ? "Product Activation Key" : editForm.provider === "payu" ? "OAuth Client Secret" : "Secret Key"}
                               {editForm.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Secret)</span>}
                               {editForm.provider === "novalnet" && <span style={{ color: "#B0B7BF" }}> (used as merchant.signature)</span>}
                               {editForm.provider === "payu" && <span style={{ color: "#B0B7BF" }}> (POS → OAuth → Client Secret)</span>}
+                              {editForm.provider === "brite" && <span style={{ color: "#B0B7BF" }}> (Brite Merchant Portal → API → Client Secret)</span>}
                             </label>
                             <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
                               value={editForm.mode === "live" ? editForm.live_keys.secret_key : editForm.test_keys.secret_key}
@@ -1268,6 +1290,20 @@ function GatewaysTab() {
                                 setEditForm({ ...editForm, [k]: { ...editForm[k], account_id: e.target.value } })
                               }}
                               placeholder="acct_xxxxxxxxxxxxxxxx"
+                            />
+                          </div>
+                        )}
+                        {/* Brite: Merchant ID (Service Presentation API for bank logos) */}
+                        {editForm.provider === "brite" && (
+                          <div style={{ marginTop: "8px" }}>
+                            <label style={{ fontSize: "10px", color: "#8C9196" }}>Merchant ID <span style={{ color: "#B0B7BF" }}>(Brite Merchant Portal → Account → Merchant ID — used by Service Presentation API for bank logos)</span></label>
+                            <input className="bp-input" style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                              value={editForm.mode === "live" ? (editForm.live_keys as any).account_id || "" : (editForm.test_keys as any).account_id || ""}
+                              onChange={(e) => {
+                                const k = editForm.mode === "live" ? "live_keys" : "test_keys"
+                                setEditForm({ ...editForm, [k]: { ...editForm[k], account_id: e.target.value } })
+                              }}
+                              placeholder="merch_xxxxxxxxxxxxxxxx"
                             />
                           </div>
                         )}

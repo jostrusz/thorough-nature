@@ -92,6 +92,7 @@ const medusaConfig = {
     { resolve: "./src/modules/advertorial" },
     { resolve: "./src/modules/marketing" },
     { resolve: "./src/modules/payment-debug" },
+    { resolve: "./src/modules/brite-bank-logos" },
     // NOTE: payment-comgate, payment-przelewy24, payment-klarna & payment-airwallex are registered as proper payment providers below
     // ═══ Core modules ═══
     {
@@ -249,6 +250,11 @@ const medusaConfig = {
           {
             resolve: './src/modules/payment-revolut',
             id: 'revolut',
+            options: {},
+          },
+          {
+            resolve: './src/modules/payment-brite',
+            id: 'brite',
             options: {},
           },
         ],

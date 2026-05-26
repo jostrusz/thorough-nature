@@ -164,6 +164,26 @@ export default async function orderPlacedPaymentMetadataHandler({
         break
       }
 
+      // Brite (Pay by Bank)
+      if (paymentData.briteSessionId || (providerId.includes("brite") && paymentData.intentId)) {
+        const briteSessionId = paymentData.briteSessionId || paymentData.intentId
+        if (briteSessionId) {
+          newMetadata.briteSessionId = briteSessionId
+          newMetadata.brite_session_id = briteSessionId
+          newMetadata.payment_brite_session_id = briteSessionId
+        }
+        if (paymentData.merchant_reference) {
+          newMetadata.brite_merchant_reference = paymentData.merchant_reference
+        }
+        if (paymentData.preselected_bank) {
+          newMetadata.payment_brite_bank_id = paymentData.preselected_bank
+        }
+        newMetadata.payment_method = "pay_by_bank"
+        newMetadata.payment_provider = "brite"
+        found = true
+        break
+      }
+
       // Novalnet
       if (paymentData.novalnetTid || paymentData.tid || providerId.includes("novalnet")) {
         const tid = paymentData.novalnetTid || paymentData.tid
@@ -216,6 +236,7 @@ export default async function orderPlacedPaymentMetadataHandler({
       newMetadata.novalnetTid ||
       newMetadata.revolutOrderId ||
       newMetadata.payuOrderId ||
+      newMetadata.briteSessionId ||
       "n/a"
 
     console.log(

@@ -1,0 +1,445 @@
+// @ts-nocheck
+import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { emitPaymentLog } from "../../../utils/payment-logger"
+import { logPaymentEvent } from "../../../modules/payment-debug/utils/log"
+import { BriteApiClient } from "../../../modules/payment-brite/api-client"
+
+const SAFETY_NET_NTFY_URL = "https://ntfy.sh/medusa-ntfy-obj-2026"
+
+async function alertSafetyNet(
+  title: string,
+  message: string,
+  priority: "default" | "high" = "high"
+): Promise<void> {
+  try {
+    await fetch(SAFETY_NET_NTFY_URL, {
+      method: "POST",
+      headers: {
+        "Title": Buffer.from(title, "utf-8").toString("base64"),
+        "X-Title-Encoding": "base64",
+        "Priority": priority,
+        "Tags": "warning,brite,safety_net",
+      },
+      body: message,
+    })
+  } catch {
+    // alerting must never break webhook flow
+  }
+}
+
+async function getCartLiveTotal(cartId: string): Promise<{ total: number; currency: string } | null> {
+  const { Pool } = require("pg")
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+  try {
+    const { rows } = await pool.query(
+      `SELECT
+         COALESCE((SELECT SUM(quantity * unit_price)
+                   FROM cart_line_item
+                   WHERE cart_id = $1 AND deleted_at IS NULL), 0)::numeric AS items_total,
+         COALESCE((SELECT SUM(amount)
+                   FROM cart_shipping_method
+                   WHERE cart_id = $1 AND deleted_at IS NULL), 0)::numeric AS shipping_total,
+         (SELECT currency_code FROM cart WHERE id = $1) AS currency
+       FROM (SELECT 1) AS dummy`,
+      [cartId]
+    )
+    if (!rows[0]) return null
+    return {
+      total: Number(rows[0].items_total || 0) + Number(rows[0].shipping_total || 0),
+      currency: rows[0].currency || "",
+    }
+  } catch {
+    return null
+  } finally {
+    await pool.end().catch(() => {})
+  }
+}
+
+async function findOrderByBriteId(briteSessionId: string, logger: any): Promise<any> {
+  const { Pool } = require("pg")
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+  try {
+    // Fast path: metadata already enriched
+    const direct = await pool.query(
+      `SELECT id, metadata FROM "order"
+       WHERE metadata->>'briteSessionId' = $1
+          OR metadata->>'brite_session_id' = $1
+       LIMIT 1`,
+      [briteSessionId]
+    )
+    if (direct.rows[0]) return direct.rows[0]
+
+    // Fallback: via payment_session.data substring
+    const linked = await pool.query(
+      `SELECT o.id, o.metadata
+       FROM "order" o
+       JOIN order_payment_collection opc ON opc.order_id = o.id
+       JOIN payment_collection pc ON pc.id = opc.payment_collection_id
+       JOIN payment_session ps ON ps.payment_collection_id = pc.id
+       WHERE ps.data::text LIKE '%' || $1 || '%'
+       ORDER BY o.created_at DESC
+       LIMIT 1`,
+      [briteSessionId]
+    )
+    return linked.rows[0] || null
+  } catch (dbErr: any) {
+    logger.warn(`[Brite Webhook] DB query failed: ${dbErr.message}`)
+    return null
+  } finally {
+    await pool.end().catch(() => {})
+  }
+}
+
+/**
+ * Safety net for the redirect open-banking flow: customer paid at the bank
+ * but never returned to the storefront (closed browser, lost mobile flow,
+ * etc.). Identical pattern to webhooks/airwallex/route.ts.
+ */
+async function safetyNetCompleteCart(
+  briteSessionId: string,
+  txData: any,
+  scope: any,
+  logger: any
+): Promise<void> {
+  const DELAY_MS = 30_000
+
+  logger.info(
+    `[Brite Webhook] Safety net: no order for ${briteSessionId}. Waiting ${DELAY_MS / 1000}s before completing cart...`
+  )
+  await new Promise((resolve) => setTimeout(resolve, DELAY_MS))
+
+  const orderAfterDelay = await findOrderByBriteId(briteSessionId, logger)
+  if (orderAfterDelay) {
+    logger.info(`[Brite Webhook] Safety net: order ${orderAfterDelay.id} appeared during delay`)
+    return
+  }
+
+  let cartRow: any = null
+  try {
+    const { Pool } = require("pg")
+    const cartPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+    try {
+      const { rows } = await cartPool.query(
+        `SELECT c.id, c.email
+         FROM cart c
+         JOIN cart_payment_collection cpc ON cpc.cart_id = c.id
+         JOIN payment_collection pc ON pc.id = cpc.payment_collection_id
+         JOIN payment_session ps ON ps.payment_collection_id = pc.id
+         WHERE ps.data::text LIKE '%' || $1 || '%'
+           AND c.completed_at IS NULL
+         ORDER BY c.created_at DESC
+         LIMIT 1`,
+        [briteSessionId]
+      )
+      cartRow = rows[0] || null
+    } finally {
+      await cartPool.end().catch(() => {})
+    }
+
+    if (!cartRow) {
+      logger.warn(`[Brite Webhook] Safety net: no uncompleted cart for ${briteSessionId}`)
+      logPaymentEvent({
+        intent_id: briteSessionId,
+        event_type: "safety_net_no_cart",
+        event_data: { provider: "brite" },
+        error_code: "no_cart",
+      }).catch(() => {})
+      alertSafetyNet(
+        "Brite safety-net: cart not found",
+        `Session ${briteSessionId} completed but no uncompleted cart matches.`
+      )
+      return
+    }
+    const targetCart = cartRow
+
+    // Final duplicate check
+    const orderFinalCheck = await findOrderByBriteId(briteSessionId, logger)
+    if (orderFinalCheck) {
+      logger.info(`[Brite Webhook] Safety net: order ${orderFinalCheck.id} appeared just before completion`)
+      return
+    }
+
+    // Amount validation
+    const cartTotals = await getCartLiveTotal(targetCart.id)
+    const paidAmount = Number(txData?.amount || 0)
+    if (cartTotals && paidAmount > 0) {
+      if (Math.abs(cartTotals.total - paidAmount) > 0.02) {
+        const msg =
+          `Brite session ${briteSessionId} paid ${paidAmount} ${(txData?.currency || cartTotals.currency || "").toUpperCase()} ` +
+          `but cart ${targetCart.id} (${targetCart.email}) total is ${cartTotals.total}. Manual recovery required.`
+        logger.error(`[Brite Webhook] Safety net amount mismatch: ${msg}`)
+        logPaymentEvent({
+          intent_id: briteSessionId,
+          cart_id: targetCart.id,
+          email: targetCart.email,
+          event_type: "safety_net_amount_mismatch",
+          event_data: { paid: paidAmount, cart_total: cartTotals.total, provider: "brite" },
+          error_code: "amount_mismatch",
+        }).catch(() => {})
+        alertSafetyNet("Brite safety-net: amount mismatch", msg)
+        return
+      }
+    }
+
+    const { completeCartWorkflow } = await import("@medusajs/medusa/core-flows")
+    const result = await completeCartWorkflow(scope).run({
+      input: { id: targetCart.id },
+    })
+
+    const r: any = result
+    const completedOrderId =
+      r?.result?.id || r?.result?.order?.id || r?.id || r?.order?.id || null
+
+    if (completedOrderId) {
+      logger.info(`[Brite Webhook] Safety net: ✅ cart ${targetCart.id} → order ${completedOrderId}`)
+      logPaymentEvent({
+        intent_id: briteSessionId,
+        cart_id: targetCart.id,
+        email: targetCart.email,
+        event_type: "safety_net_completed",
+        event_data: { order_id: completedOrderId, paid: paidAmount, provider: "brite" },
+      }).catch(() => {})
+
+      // Patch order metadata with Brite identifiers
+      try {
+        const { Pool } = require("pg")
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+        const { rows: orderRows } = await pool.query(
+          `SELECT metadata FROM "order" WHERE id = $1 LIMIT 1`,
+          [completedOrderId]
+        )
+        const existingMeta = orderRows[0]?.metadata || {}
+        const updatedMeta = {
+          ...existingMeta,
+          briteSessionId,
+          brite_session_id: briteSessionId,
+          briteStatus: txData?.state || txData?.status || "COMPLETED",
+          payment_captured: true,
+          payment_captured_at: new Date().toISOString(),
+          payment_provider: "brite",
+          payment_method: "pay_by_bank",
+          payment_brite_bank_id: txData?.bank?.id || null,
+          payment_brite_bank_name: txData?.bank?.name || null,
+          completed_by: "brite_webhook_safety_net",
+          safety_net_completed_at: new Date().toISOString(),
+        }
+        await pool.query(
+          `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+          [JSON.stringify(updatedMeta), completedOrderId]
+        )
+        await pool.end()
+      } catch (metaErr: any) {
+        logger.warn(`[Brite Webhook] Safety net: metadata update failed: ${metaErr.message}`)
+      }
+
+      try {
+        const eventBus = scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        await eventBus.emit({ name: "payment.captured", data: { id: completedOrderId } })
+      } catch (e: any) {
+        logger.warn(`[Brite Webhook] Safety net: failed to emit payment.captured: ${e.message}`)
+      }
+    } else {
+      const msg = `Brite safety net: completeCartWorkflow unexpected result for cart ${targetCart.id} / session ${briteSessionId}`
+      logger.warn(`[Brite Webhook] ${msg}`)
+      alertSafetyNet("Brite safety-net: unexpected result", msg)
+    }
+  } catch (safetyErr: any) {
+    const msg = `Brite safety net failed for ${briteSessionId} (cart ${cartRow?.id ?? "?"}): ${safetyErr?.message || safetyErr}`
+    logger.error(`[Brite Webhook] ${msg}`)
+    alertSafetyNet("Brite safety-net: completion threw", msg)
+  }
+}
+
+/**
+ * Look up the webhook secret from gateway_config (DB).
+ * Stored under live_keys.webhook_secret / test_keys.webhook_secret.
+ */
+async function getWebhookSecret(): Promise<string | null> {
+  const { Pool } = require("pg")
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+  try {
+    const { rows } = await pool.query(
+      `SELECT mode, live_keys, test_keys
+       FROM gateway_config
+       WHERE provider = 'brite' AND is_active = true AND deleted_at IS NULL
+       ORDER BY priority ASC LIMIT 1`
+    )
+    if (!rows[0]) return null
+    const keys = rows[0].mode === "live" ? rows[0].live_keys : rows[0].test_keys
+    return keys?.webhook_secret || null
+  } catch {
+    return null
+  } finally {
+    await pool.end().catch(() => {})
+  }
+}
+
+export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
+  const logger = req.scope.resolve("logger")
+  try {
+    // Signature verification (HMAC-SHA256 over raw body)
+    // Header name not yet documented publicly — we accept the three most
+    // common variants and skip verification only when no secret is configured
+    // yet (sandbox bootstrap; tighten once merchant is live).
+    const signatureHeader =
+      (req.headers["x-brite-signature"] as string) ||
+      (req.headers["brite-signature"] as string) ||
+      (req.headers["x-signature"] as string) ||
+      ""
+
+    const webhookSecret = await getWebhookSecret()
+    if (webhookSecret) {
+      const rawBody = JSON.stringify(req.body)
+      const ok = BriteApiClient.verifySignature(rawBody, signatureHeader, webhookSecret)
+      if (!ok) {
+        logger.warn(`[Brite Webhook] Signature mismatch (header present: ${!!signatureHeader})`)
+        // Return 200 to avoid Brite retry storms; log + drop instead.
+        return res.status(200).json({ received: true, ignored: "signature_mismatch" })
+      }
+    } else {
+      logger.warn(`[Brite Webhook] No webhook_secret configured in gateway_config — accepting unverified payload (sandbox mode)`)
+    }
+
+    const event_type =
+      req.body?.event || req.body?.type || req.body?.name || "unknown"
+    const txData =
+      req.body?.data?.transaction ||
+      req.body?.transaction ||
+      req.body?.data ||
+      req.body
+
+    const briteSessionId =
+      txData?.id || txData?.transaction_id || txData?.session_id
+
+    if (!briteSessionId) {
+      logger.warn(`[Brite Webhook] No transaction id in payload`)
+      return res.status(200).json({ received: true })
+    }
+
+    const state = (txData?.state || txData?.status || "").toUpperCase()
+    const isSuccess = ["COMPLETED", "SETTLED", "SUCCEEDED"].includes(state)
+    const isFailed = ["FAILED", "DECLINED", "CANCELLED", "EXPIRED"].includes(state)
+
+    logger.info(`[Brite Webhook] Event: ${event_type}, tx: ${briteSessionId}, state: ${state}`)
+
+    logPaymentEvent({
+      intent_id: briteSessionId,
+      event_type: "brite_webhook_received",
+      event_data: {
+        brite_event: event_type,
+        state,
+        amount: txData?.amount ?? null,
+        currency: txData?.currency ?? null,
+        bank_id: txData?.bank?.id || null,
+        bank_name: txData?.bank?.name || null,
+        failure_reason: txData?.failure_reason || null,
+      },
+      error_code: isFailed ? (txData?.failure_reason || state || "failed") : null,
+    }).catch(() => {})
+
+    const order = await findOrderByBriteId(briteSessionId, logger)
+
+    if (!order) {
+      logger.warn(`[Brite Webhook] No order for ${briteSessionId}`)
+
+      if (isSuccess) {
+        // Fire and forget — must not block 200 response
+        safetyNetCompleteCart(briteSessionId, txData, req.scope, logger).catch((err) => {
+          logger.error(`[Brite Webhook] Safety net unhandled error: ${err.message}`)
+        })
+      }
+
+      emitPaymentLog(logger, {
+        provider: "brite",
+        event: event_type,
+        transaction_id: briteSessionId,
+        status: "pending",
+        payment_method: "pay_by_bank",
+        metadata: { order_not_found: true, state },
+      })
+
+      return res.status(200).json({ received: true })
+    }
+
+    // Build activity log entry
+    const activityEntry: any = {
+      timestamp: new Date().toISOString(),
+      event: isSuccess ? "capture" : isFailed ? "failure" : "status_update",
+      gateway: "brite",
+      payment_method: "pay_by_bank",
+      status: isSuccess ? "success" : isFailed ? "failed" : "pending",
+      amount: txData?.amount,
+      currency: txData?.currency,
+      transaction_id: briteSessionId,
+      webhook_event_type: event_type,
+      provider_raw_status: state,
+      bank_id: txData?.bank?.id || null,
+      bank_name: txData?.bank?.name || null,
+      detail: `Brite event: ${event_type} (${state})`,
+    }
+    if (isFailed) {
+      activityEntry.error_code = state
+      activityEntry.decline_reason = txData?.failure_reason || "Payment failed"
+    }
+
+    const existingMeta = order.metadata || {}
+    const existingLog = existingMeta.payment_activity_log || []
+    const updatedMetadata: any = {
+      ...existingMeta,
+      payment_activity_log: [...existingLog, activityEntry],
+      briteSessionId,
+      brite_session_id: briteSessionId,
+      briteStatus: state,
+    }
+
+    if (isSuccess) {
+      updatedMetadata.payment_captured = true
+      updatedMetadata.payment_captured_at = new Date().toISOString()
+      updatedMetadata.payment_brite_session_id = briteSessionId
+      if (txData?.bank?.id) updatedMetadata.payment_brite_bank_id = txData.bank.id
+      if (txData?.bank?.name) updatedMetadata.payment_brite_bank_name = txData.bank.name
+    }
+
+    try {
+      const { Pool } = require("pg")
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+      await pool.query(
+        `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+        [JSON.stringify(updatedMetadata), order.id]
+      )
+      await pool.end()
+    } catch (dbErr: any) {
+      logger.warn(`[Brite Webhook] DB update failed: ${dbErr.message}`)
+    }
+
+    if (isSuccess) {
+      try {
+        const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        await eventBus.emit({ name: "payment.captured", data: { id: order.id } })
+        logger.info(`[Brite Webhook] Emitted payment.captured for order ${order.id}`)
+      } catch (e: any) {
+        logger.warn(`[Brite Webhook] Failed to emit payment.captured: ${e.message}`)
+      }
+    }
+
+    emitPaymentLog(logger, {
+      provider: "brite",
+      event: event_type,
+      order_id: order.id,
+      transaction_id: briteSessionId,
+      status: activityEntry.status,
+      amount: txData?.amount,
+      currency: (txData?.currency || "").toUpperCase(),
+      payment_method: "pay_by_bank",
+      error_code: activityEntry.error_code,
+      decline_reason: activityEntry.decline_reason,
+      provider_raw_status: state,
+    })
+
+    return res.status(200).json({ received: true })
+  } catch (error: any) {
+    logger.error(`[Brite Webhook] Error: ${error.message}`)
+    return res.status(200).json({ error: error.message })
+  }
+}
