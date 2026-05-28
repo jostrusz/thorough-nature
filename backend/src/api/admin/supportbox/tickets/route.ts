@@ -1,6 +1,6 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { Pool } from "pg"
+import { getSharedPgPool } from "../../../../utils/pg-pool"
 
 /**
  * GET /admin/supportbox/tickets
@@ -27,7 +27,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const limit = Math.min(500, Math.max(1, Number(q.limit ?? 200)))
   const offset = Math.max(0, Number(q.offset ?? 0))
 
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+  const pool = getSharedPgPool()
   try {
     const where: string[] = ["t.deleted_at IS NULL"]
     const params: any[] = []
@@ -87,17 +87,25 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
 
     // Slim message payload — return up to last 10 messages per ticket on this
     // page. body_html omitted, body_text trimmed to 300 chars (preview only).
+    // LATERAL keeps the LIMIT per-ticket; outer ORDER reorders ASC so the
+    // frontend preview logic (`messages[0]` = first inbound) keeps working.
     let messagesByTicket: Record<string, any[]> = {}
     if (tickets.length > 0) {
       const ticketIds = tickets.map((t: any) => t.id)
       const msgSql = `
-        SELECT id, ticket_id, direction, from_email, from_name,
-               LEFT(COALESCE(body_text, ''), 300) AS body_text,
-               resend_message_id, delivery_status, delivery_status_at,
-               metadata, created_at, updated_at
-        FROM supportbox_message
-        WHERE ticket_id = ANY($1::text[]) AND deleted_at IS NULL
-        ORDER BY ticket_id, created_at ASC
+        SELECT m.id, m.ticket_id, m.direction, m.from_email, m.from_name,
+               LEFT(COALESCE(m.body_text, ''), 300) AS body_text,
+               m.resend_message_id, m.delivery_status, m.delivery_status_at,
+               m.metadata, m.created_at, m.updated_at
+        FROM unnest($1::text[]) AS t(id)
+        CROSS JOIN LATERAL (
+          SELECT *
+          FROM supportbox_message
+          WHERE ticket_id = t.id AND deleted_at IS NULL
+          ORDER BY created_at DESC
+          LIMIT 10
+        ) m
+        ORDER BY m.ticket_id, m.created_at ASC
       `
       const { rows: msgs } = await pool.query(msgSql, [ticketIds])
       for (const m of msgs) {
@@ -114,7 +122,5 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     res.json({ tickets: enriched, total_count: totalCount, limit, offset })
   } catch (err: any) {
     res.status(500).json({ error: err?.message || "internal_error" })
-  } finally {
-    await pool.end()
   }
 }

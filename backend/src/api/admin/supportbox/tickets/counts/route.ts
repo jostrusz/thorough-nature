@@ -1,6 +1,6 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { Pool } from "pg"
+import { getSharedPgPool } from "../../../../../utils/pg-pool"
 
 /**
  * GET /admin/supportbox/tickets/counts
@@ -15,7 +15,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const q = (req.query as any) || {}
   const configId = q.config_id ? String(q.config_id) : null
 
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+  const pool = getSharedPgPool()
   try {
     const where: string[] = ["deleted_at IS NULL"]
     const params: any[] = []
@@ -59,7 +59,5 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     res.json({ counts, per_config: perConfig })
   } catch (err: any) {
     res.status(500).json({ error: err?.message || "internal_error" })
-  } finally {
-    await pool.end()
   }
 }
