@@ -28,6 +28,8 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const offset = Math.max(0, Number(q.offset ?? 0))
 
   const pool = getSharedPgPool()
+  const t0 = Date.now()
+  const ts: Record<string, number> = {}
   try {
     const where: string[] = ["t.deleted_at IS NULL"]
     const params: any[] = []
@@ -70,7 +72,9 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
 
     // Total count for the current filter — used by frontend pagination.
     const countSql = `SELECT COUNT(*)::int AS c FROM supportbox_ticket t WHERE ${where.join(" AND ")}`
+    const tCountStart = Date.now()
     const totalRes = await pool.query(countSql, params)
+    ts.count_ms = Date.now() - tCountStart
     const totalCount = totalRes.rows[0]?.c ?? 0
 
     params.push(limit, offset)
@@ -83,7 +87,9 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       ORDER BY t.created_at DESC
       LIMIT $${params.length - 1} OFFSET $${params.length}
     `
+    const tTicketsStart = Date.now()
     const { rows: tickets } = await pool.query(ticketsSql, params)
+    ts.tickets_ms = Date.now() - tTicketsStart
 
     // Slim message payload — return up to last 10 messages per ticket on this
     // page. body_html omitted, body_text trimmed to 300 chars (preview only).
@@ -107,7 +113,9 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         ) m
         ORDER BY m.ticket_id, m.created_at ASC
       `
+      const tMsgsStart = Date.now()
       const { rows: msgs } = await pool.query(msgSql, [ticketIds])
+      ts.messages_ms = Date.now() - tMsgsStart
       for (const m of msgs) {
         if (!messagesByTicket[m.ticket_id]) messagesByTicket[m.ticket_id] = []
         messagesByTicket[m.ticket_id].push(m)
@@ -119,6 +127,8 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       messages: messagesByTicket[t.id] || [],
     }))
 
+    ts.total_ms = Date.now() - t0
+    console.log(`[supportbox/tickets] timing`, JSON.stringify(ts))
     res.json({ tickets: enriched, total_count: totalCount, limit, offset })
   } catch (err: any) {
     res.status(500).json({ error: err?.message || "internal_error" })
