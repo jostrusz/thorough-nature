@@ -1,5 +1,6 @@
 import { Text, Section, Hr, Link, Img } from '@react-email/components'
 import * as React from 'react'
+import { cleanItemTitle } from '../../../utils/clean-item-title'
 import { Base } from './base'
 
 export const PS_UPSELL_CONFIRMED = 'ps-upsell-confirmed'
@@ -233,7 +234,7 @@ export const PsUpsellConfirmedTemplate: React.FC<PsUpsellConfirmedTemplateProps>
                           margin: '0 0 4px',
                           lineHeight: '1.3',
                         }}>
-                          {item.product_title || item.title || 'Položka'}
+                          {cleanItemTitle(item.product_title || item.title) || 'Položka'}
                         </Text>
                         <Text style={{
                           fontFamily: font,
@@ -296,7 +297,7 @@ export const PsUpsellConfirmedTemplate: React.FC<PsUpsellConfirmedTemplateProps>
                         color: colors.textDark,
                         margin: '0',
                       }}>
-                        {item.product_title || item.title || 'Položka'}
+                        {cleanItemTitle(item.product_title || item.title) || 'Položka'}
                       </Text>
                       <Text style={{
                         fontFamily: font,

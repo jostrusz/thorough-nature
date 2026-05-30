@@ -1,5 +1,6 @@
 import { Text, Section, Hr, Link } from '@react-email/components'
 import * as React from 'react'
+import { cleanItemTitle } from '../../../utils/clean-item-title'
 import { Base } from './base'
 import { getBundleBookLabel } from '../../../utils/bundle-quantity'
 
@@ -278,7 +279,7 @@ export const SlOrderPlacedTemplate: React.FC<SlOrderPlacedTemplateProps> & {
                         margin: '0 0 2px',
                         lineHeight: '1.3',
                       }}>
-                        {item.product_title || item.title || 'Vare'}
+                        {cleanItemTitle(item.product_title || item.title) || 'Vare'}
                       </Text>
                       <Text style={{
                         fontFamily: font,

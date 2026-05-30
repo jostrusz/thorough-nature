@@ -1,5 +1,6 @@
 import { Text, Section, Hr, Link, Img } from '@react-email/components'
 import * as React from 'react'
+import { cleanItemTitle } from '../../../utils/clean-item-title'
 import { Base } from './base'
 
 export const DH_ORDER_PLACED = 'dh-order-placed'
@@ -312,7 +313,7 @@ export const DhOrderPlacedTemplate: React.FC<DhOrderPlacedTemplateProps> & {
                         margin: '0 0 4px',
                         lineHeight: '1.3',
                       }}>
-                        {item.product_title || item.title || 'Item'}
+                        {cleanItemTitle(item.product_title || item.title) || 'Item'}
                       </Text>
                       <Text style={{
                         fontFamily: font,

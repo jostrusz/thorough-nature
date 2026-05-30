@@ -1,5 +1,6 @@
 import { Text, Section, Hr, Link } from '@react-email/components'
 import * as React from 'react'
+import { cleanItemTitle } from '../../../utils/clean-item-title'
 import { Base } from './base'
 
 export const OK_SHIPMENT_NOTIFICATION = 'ok-shipment-notification'
@@ -290,7 +291,7 @@ export const OkShipmentNotificationTemplate: React.FC<OkShipmentNotificationTemp
                         margin: '0 0 2px',
                         lineHeight: '1.3',
                       }}>
-                        {item.product_title || item.title || 'Produkt'}
+                        {cleanItemTitle(item.product_title || item.title) || 'Produkt'}
                       </Text>
                       <Text style={{
                         fontFamily: font,
