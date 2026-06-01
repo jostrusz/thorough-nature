@@ -212,7 +212,7 @@ const PaymentMatcherPage = () => {
       if (from) params.set("from", from)
       if (to) params.set("to", to)
       if (project) params.set("project", project)
-      params.set("limit", "2000")
+      // No limit — backend returns ALL orders in the selected interval
 
       const response = await sdk.client.fetch<PaymentMatchResponse>(
         `/admin/custom-orders/payment-matching?${params.toString()}`

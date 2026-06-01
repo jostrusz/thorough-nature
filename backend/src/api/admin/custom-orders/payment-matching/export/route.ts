@@ -1,6 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { IOrderModuleService } from "@medusajs/framework/types"
+import { buildDateFilters, fetchAllOrders } from "../fetch-all-orders"
 
 /**
  * GET /admin/custom-orders/payment-matching/export
@@ -144,66 +143,15 @@ export async function GET(
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const queryService = req.scope.resolve(ContainerRegistrationKeys.QUERY)
-    const orderModuleService: IOrderModuleService = req.scope.resolve(Modules.ORDER)
-
     const from = (req.query.from as string) || ""
     const to = (req.query.to as string) || ""
     const project = (req.query.project as string) || ""
     const accountNumber = (req.query.account_number as string) || ""
     const accountName = (req.query.account_name as string) || "PMS s.r.o."
 
-    // Build date filters
-    const filters: Record<string, any> = {}
-    if (from || to) {
-      filters.created_at = {}
-      if (from) filters.created_at.$gte = new Date(from).toISOString()
-      if (to) {
-        const toDate = new Date(to)
-        toDate.setDate(toDate.getDate() + 1)
-        filters.created_at.$lt = toDate.toISOString()
-      }
-    }
-
-    // Fetch all orders in the period (up to 5000)
-    const { data: orders } = await queryService.graph({
-      entity: "order",
-      fields: [
-        "id",
-        "display_id",
-        "created_at",
-        "email",
-        "currency_code",
-        "total",
-        "metadata",
-        "shipping_address.*",
-        "payment_collections.*",
-        "payment_collections.payments.*",
-      ],
-      filters,
-      pagination: {
-        skip: 0,
-        take: 5000,
-        order: { created_at: "ASC" },
-      },
-    })
-
-    // Resolve addresses
-    const addressCache: Record<string, any> = {}
-    for (const order of orders) {
-      if ((order as any).shipping_address?.id) {
-        const addrId = (order as any).shipping_address.id
-        if (!addressCache[addrId]) {
-          try {
-            addressCache[addrId] = await (
-              orderModuleService as any
-            ).orderAddressService_.retrieve(addrId)
-          } catch {
-            addressCache[addrId] = (order as any).shipping_address
-          }
-        }
-      }
-    }
+    // Fetch ALL orders in the period (paginated, no fixed cap)
+    const filters = buildDateFilters(from, to)
+    const orders = await fetchAllOrders(req.scope, filters, "ASC")
 
     // Period start date for "Datum starého zůstatku"
     const periodStart = from ? formatDate(new Date(from).toISOString()) : formatDate(new Date().toISOString())
@@ -246,9 +194,7 @@ export async function GET(
       if (project && meta.project_id !== project) continue
 
       const cod = isCodOrder(order as any)
-      const addr = (order as any).shipping_address?.id
-        ? addressCache[(order as any).shipping_address.id] || (order as any).shipping_address
-        : null
+      const addr = (order as any).shipping_address || null
 
       const orderNumber = meta.custom_order_number ||
         ((order as any).display_id ? `ORD-${(order as any).display_id}` : (order as any).id)
