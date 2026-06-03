@@ -18,7 +18,7 @@ var PROJECT_CONFIG = {
     "productId": "prod_01KSHDKV49Q294Q1VYY5EJXNWH",
     "variantId": "variant_01KSHDKV4BE5P8MYTSSY8HMX1K",
     "price": 99,
-    "originalPrice": 109,
+    "originalPrice": 129,
     "currency": "PLN",
     "thumbnail": "https://bucket-production-b93e.up.railway.app:443/medusa-media/odpusc-ksiazka-thumbnail-01KK8RBZFKFSMZJJDDRR82PJ1D.png"
   },
