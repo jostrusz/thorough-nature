@@ -24,9 +24,11 @@ import { Logger } from "@medusajs/framework/logger"
 
 interface BriteTokenResponse {
   access_token: string
-  token_type: string
+  token_type?: string
+  expires?: number          // unix epoch seconds (Brite's actual field)
   expires_in?: number
   expires_at?: string
+  refresh_token?: string
 }
 
 /**
@@ -132,6 +134,7 @@ export class BriteApiClient {
   private clientId: string
   private clientSecret: string
   private accessToken: string | null = null
+  private refreshToken_: string | null = null
   private tokenExpiresAt: Date | null = null
   private logger: Logger
   private isRefreshing = false
@@ -202,11 +205,14 @@ export class BriteApiClient {
    */
   async authenticate(): Promise<void> {
     try {
+      // VERIFIED LIVE against sandbox: Brite expects { public_key, secret }
+      // (NOT client_id/client_secret). clientId/clientSecret are our internal
+      // names — clientId holds the public key, clientSecret holds the secret.
       const response = await axios.post<BriteTokenResponse>(
         `${this.baseUrl}/api/merchant.authorize`,
         {
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
+          public_key: this.clientId,
+          secret: this.clientSecret,
         },
         {
           headers: { "Content-Type": "application/json" },
@@ -215,12 +221,17 @@ export class BriteApiClient {
       )
 
       this.accessToken = response.data.access_token
-      if (response.data.expires_at) {
+      // Response: { access_token, expires (unix epoch seconds), refresh_token }.
+      const expires = (response.data as any).expires
+      if (typeof expires === "number") {
+        this.tokenExpiresAt = new Date(expires * 1000)
+      } else if (response.data.expires_at) {
         this.tokenExpiresAt = new Date(response.data.expires_at)
       } else {
-        const expiresInSec = response.data.expires_in || 3600
+        const expiresInSec = response.data.expires_in || 21600 // ~6h default
         this.tokenExpiresAt = new Date(Date.now() + expiresInSec * 1000)
       }
+      this.refreshToken_ = (response.data as any).refresh_token || null
 
       this.logger.info(
         `[Brite] Authenticated. Token expires at ${this.tokenExpiresAt.toISOString()}`
