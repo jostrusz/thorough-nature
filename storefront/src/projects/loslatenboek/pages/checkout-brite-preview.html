@@ -2325,9 +2325,10 @@ body {
 </script>
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   BRITE BANK PICKER — demo overlay (active only with ?demo_brite=1).
-   Identical to /checkout-brite-preview.html. Uses existing CSS vars.
+   BRITE BANK PICKER — preview overlay (uses existing CSS variables)
    ═══════════════════════════════════════════════════════════════ */
+
+/* Country quick-switcher (above payment methods, demo only) */
 .brite-country-switcher {
   display: flex; align-items: center; flex-wrap: wrap;
   gap: 6px; padding: 8px 10px; margin-bottom: 12px;
@@ -2338,17 +2339,22 @@ body {
 .brite-country-switcher button {
   font: inherit; font-size: 12px; padding: 5px 9px;
   border: 1px solid var(--border); border-radius: 5px;
-  background: var(--white); cursor: pointer; transition: all .15s ease;
+  background: var(--white); cursor: pointer;
+  transition: all 0.15s ease;
 }
 .brite-country-switcher button:hover { background: #F4F5F7; }
 .brite-country-switcher button.active {
   background: var(--heading, #1A1A1A); color: #FFF;
   border-color: var(--heading, #1A1A1A); font-weight: 600;
 }
+
+/* Brite card (umbrella PM for bank picker) */
 .brite-card {
-  background: var(--white); border: 1.5px solid var(--border);
-  border-radius: var(--radius); overflow: hidden;
-  transition: all .25s cubic-bezier(.22,1,.36,1); margin-bottom: 8px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .brite-card:hover { border-color: var(--highlight); box-shadow: var(--shadow-sm); }
 .brite-card.selected {
@@ -2356,6 +2362,7 @@ body {
   background: rgba(194,123,160,0.04);
   box-shadow: 0 0 0 3px rgba(194,123,160,0.1);
 }
+/* Radio fill when Brite card is selected (matches .payment-method.selected behavior) */
 .brite-card.selected .pm-radio { border-color: var(--cta); }
 .brite-card.selected .pm-radio-dot { transform: scale(1); }
 .brite-card-head {
@@ -2368,17 +2375,29 @@ body {
   font-size: 15px;
 }
 .pm-name-text { font-weight: 700; color: var(--heading); }
-.pm-name-divider { color: var(--border); font-weight: 400; user-select: none; }
+.pm-name-divider {
+  color: var(--border);
+  font-weight: 400;
+  user-select: none;
+}
 .pm-name-brite {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 13px; color: var(--muted); font-weight: 500;
 }
 .pm-name-brite-prefix { white-space: nowrap; }
-.pm-brite-inline-logo { height: 20px; width: auto; display: inline-block; vertical-align: middle; }
+.pm-brite-inline-logo {
+  height: 20px; width: auto;
+  display: inline-block;
+  vertical-align: middle;
+}
 .pm-brite-inline-fallback {
   background: #FFE600; color: #0A0B09;
   padding: 2px 7px; border-radius: 3px;
   font-size: 11px; font-weight: 700; letter-spacing: 0.2px;
+}
+.brite-recommended {
+  /* Retained class for graceful removal — no longer rendered */
+  display: none;
 }
 .brite-card-body {
   padding: 4px 16px 14px;
@@ -2386,31 +2405,48 @@ body {
   background: #FCFCFD;
 }
 .brite-card:not(.selected) .brite-card-body { display: none; }
+
+/* Trust micro-strip above bank grid */
 .brite-trust-strip {
   display: flex; align-items: center; justify-content: center;
   flex-wrap: wrap; gap: 12px;
-  margin: 8px 0 10px; padding: 8px 12px;
+  margin: 8px 0 10px;
+  padding: 8px 12px;
   background: rgba(46,160,67,0.05);
   border: 1px solid rgba(46,160,67,0.15);
   border-radius: var(--radius);
-  font-size: 11px; color: #1a6e2e; font-weight: 600;
+  font-size: 11px; color: #1a6e2e;
+  font-weight: 600;
 }
 .brite-trust-strip span { display: inline-flex; align-items: center; gap: 4px; }
 .brite-trust-strip svg { width: 11px; height: 11px; }
+
+/* Bank grid — auto-fill so any number of banks looks balanced */
 .brite-bank-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 6px; margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+@media (max-width: 520px) {
+  .brite-bank-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; }
 }
 .brite-bank-tile {
   position: relative;
-  background: var(--white); border: 1.5px solid var(--border);
-  border-radius: var(--radius); padding: 8px 4px 6px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 4px 6px;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   gap: 3px; cursor: pointer;
-  transition: border-color .18s ease, background .18s ease,
-              box-shadow .18s ease, transform .12s ease;
-  min-height: 58px; text-align: center;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.12s ease;
+  min-height: 58px;
+  text-align: center;
   -webkit-tap-highlight-color: transparent;
 }
 .brite-bank-tile:hover {
@@ -2418,38 +2454,228 @@ body {
   background: rgba(194,123,160,0.025);
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
-.brite-bank-tile:active { transform: scale(.98); transition-duration: .08s; }
+.brite-bank-tile:active {
+  transform: scale(0.98);
+  transition-duration: 0.08s;
+}
+/* SELECTED — clean, serious, unambiguous.
+   2px solid CTA border + soft inset shadow + subtle background tint.
+   No checkmark, no glow halo, no ambient pulse — the border is the signal. */
 .brite-bank-tile.selected {
-  border-color: var(--cta); border-width: 2px;
-  padding: 7.5px 3.5px 5.5px;
+  border-color: var(--cta);
+  border-width: 2px;
+  padding: 7.5px 3.5px 5.5px; /* -0.5px to compensate for the extra border */
   background: rgba(194,123,160,0.04);
   box-shadow:
     inset 0 0 0 1px rgba(194,123,160,0.18),
     0 1px 3px rgba(0,0,0,0.04);
 }
+.brite-bank-tile.more {
+  background: #F7F7F9;
+  border-style: dashed;
+  color: var(--muted);
+}
+/* "Meest gekozen" sticker on first tile (top-right corner) */
 .brite-popular-badge {
-  position: absolute; top: -7px; right: -4px;
-  background: var(--cta); color: #FFF;
+  position: absolute;
+  top: -7px; right: -4px;
+  background: var(--cta);
+  color: #FFF;
   font-size: 8px; font-weight: 800;
-  padding: 2px 6px; border-radius: 8px;
-  letter-spacing: 0.3px; text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 8px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
   box-shadow: 0 2px 4px rgba(194,123,160,0.35);
   white-space: nowrap;
 }
+/* Uniform logo box — every bank logo renders at the SAME visual size,
+   regardless of SVG quirks (no viewBox, oversized native dimensions, etc.).
+   The flex box clamps height to 24px exactly; object-fit preserves aspect. */
 .brite-logo {
-  height: 24px; width: 100%;
+  height: 24px;
+  width: 100%;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
-.brite-logo img { height: 24px; width: auto; max-width: 92%; object-fit: contain; display: block; }
+.brite-logo img {
+  height: 24px;
+  width: auto;
+  max-width: 92%;
+  object-fit: contain;
+  display: block;
+}
 .brite-logo .brite-fallback {
   display: inline-flex; align-items: center; justify-content: center;
   height: 22px; padding: 0 8px;
   font-weight: 700; font-size: 11px;
   border-radius: 4px; letter-spacing: 0.2px;
-  min-width: 48px; line-height: 1;
+  min-width: 48px; text-align: center;
+  line-height: 1;
 }
-.brite-bank-name { font-size: 10px; font-weight: 500; color: var(--muted); line-height: 1.1; }
+.brite-bank-name {
+  font-size: 10px; font-weight: 500; color: var(--muted);
+  line-height: 1.1;
+}
+
+/* Pulse animation on the AANBEVOLEN badge — subtle, draws eye */
+@keyframes brite-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+.brite-recommended { animation: brite-pulse 2.2s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE OPTIMIZATION (≤ 520px) — maximize conversion on touch
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 520px) {
+
+  /* Country switcher: horizontal scroll strip instead of wrap (LU wrapping = wasted space) */
+  .brite-country-switcher {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 8px;
+  }
+  .brite-country-switcher::-webkit-scrollbar { display: none; }
+  .brite-country-switcher button { flex-shrink: 0; padding: 7px 11px; font-size: 13px; }
+  .brite-cs-label { display: none; } /* save horizontal space */
+
+  /* Brite header: compact, no description on mobile (trust strip says the same) */
+  .brite-card-head { padding: 14px 14px 10px; gap: 10px; }
+  .brite-card-head .pm-desc { display: none; }
+  .brite-card-head .brite-thumbs { display: none; } /* too small to be useful on phone */
+  .brite-card-head .pm-name {
+    font-size: 15px;
+    line-height: 1.3;
+    gap: 6px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .pm-name-text { font-size: 15px; font-weight: 700; }
+  .pm-name-divider { display: none; }
+  .pm-name-brite { font-size: 12px; gap: 5px; }
+  .pm-brite-inline-logo { height: 18px; }
+
+  /* HERO MESSAGE — clearer "instant" promise above the bank grid */
+  .brite-instant-hero {
+    display: block;
+    background: linear-gradient(135deg, rgba(46,160,67,0.08) 0%, rgba(194,123,160,0.05) 100%);
+    border: 1.5px solid rgba(46,160,67,0.22);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin: 4px 0 10px;
+    text-align: center;
+  }
+  .brite-instant-hero .ih-headline {
+    font-size: 15px; font-weight: 800;
+    color: #1a6e2e;
+    margin: 0 0 4px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .brite-instant-hero .ih-sub {
+    font-size: 12px; color: var(--text, #444);
+    line-height: 1.35;
+  }
+  .brite-instant-hero .ih-sub strong { color: var(--heading); }
+
+  /* Bank grid stays at 3 cols, but bigger touch targets + bigger logos */
+  .brite-bank-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+  }
+  .brite-bank-tile {
+    min-height: 70px;
+    padding: 10px 6px 8px;
+    border-width: 1.5px;
+    /* Active feedback on tap */
+    -webkit-tap-highlight-color: transparent;
+  }
+  .brite-bank-tile:active {
+    transform: scale(0.97);
+    background: rgba(194,123,160,0.08);
+  }
+  .brite-logo { height: 28px; }
+  .brite-logo img { height: 28px; max-width: 92%; }
+  .brite-logo .brite-fallback { height: 24px; font-size: 12px; padding: 0 10px; min-width: 54px; }
+  .brite-bank-name { font-size: 11px; font-weight: 600; }
+  .brite-popular-badge {
+    font-size: 7px; padding: 2px 5px; top: -6px; right: -3px;
+  }
+
+  /* Trust strip: stack on mobile, bigger icons, left-aligned for scanning */
+  .brite-trust-strip {
+    /* Hidden — replaced by the hero banner above which says the same thing more punchily */
+    display: none;
+  }
+
+  /* Secured-by row: smaller, more compact */
+  .brite-secured {
+    font-size: 10px;
+    padding: 8px 10px;
+    margin-top: 10px;
+    gap: 5px;
+    justify-content: center;
+  }
+  .brite-badge { height: 16px; }
+  .brite-secured .brite-reg { font-size: 10px; }
+
+  /* Card body padding */
+  .brite-card-body { padding: 4px 12px 12px; }
+
+  /* Alternative payment methods (card/paypal/klarna) — make them more compact on mobile */
+  .payment-method { padding: 12px 14px; gap: 10px; }
+  .payment-method .pm-desc { display: none; }
+  .payment-method .pm-name { font-size: 14px; }
+
+  /* Brite-mini-thumbs on the card/paypal/klarna rows — keep small but visible */
+  .brite-mini-thumb { font-size: 8px; height: 16px; padding: 0 5px; }
+}
+
+/* Desktop: hide the mobile-only hero banner */
+@media (min-width: 521px) {
+  .brite-instant-hero { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAY BUTTON — gentle invitation pulse when Brite + bank are chosen
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes brite-cta-breathe {
+  0%, 100% { box-shadow: 0 4px 12px rgba(194,123,160,0.30), 0 0 0 0 rgba(194,123,160,0.45); }
+  50%      { box-shadow: 0 6px 18px rgba(194,123,160,0.40), 0 0 0 8px rgba(194,123,160,0); }
+}
+body.brite-ready .checkout-btn,
+body.brite-ready #submit-btn {
+  animation: brite-cta-breathe 2.6s ease-in-out infinite;
+}
+/* When user is hovering the pay button, suspend the pulse — they're already engaged */
+body.brite-ready .checkout-btn:hover,
+body.brite-ready #submit-btn:hover {
+  animation-play-state: paused;
+  box-shadow: 0 6px 20px rgba(194,123,160,0.45);
+}
+
+/* Mini-thumbs row in PM headers (right side) */
+.brite-thumbs {
+  display: flex; gap: 3px; margin-left: auto; flex-shrink: 0;
+}
+.brite-mini-thumb {
+  font-size: 8px; font-weight: 700;
+  height: 18px; padding: 0 5px;
+  border-radius: 3px;
+  display: inline-flex; align-items: center;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.brite-mini-thumb.logo {
+  padding: 2px;
+  background: var(--white);
+}
+.brite-mini-thumb.logo img {
+  height: 14px; max-width: 30px; object-fit: contain;
+}
+
+/* Secured-by row */
 .brite-secured {
   display: flex; align-items: center; gap: 6px;
   margin-top: 14px; padding: 10px 12px;
@@ -2459,48 +2685,13 @@ body {
   font-size: 11px; color: var(--muted);
 }
 .brite-lock { font-size: 13px; }
-.brite-badge { height: 18px; vertical-align: middle; }
-@media (max-width: 520px) {
-  .brite-country-switcher { flex-wrap: nowrap; overflow-x: auto; padding: 8px; }
-  .brite-country-switcher::-webkit-scrollbar { display: none; }
-  .brite-country-switcher button { flex-shrink: 0; padding: 7px 11px; font-size: 13px; }
-  .brite-cs-label { display: none; }
-  .brite-card-head { padding: 14px 14px 10px; gap: 10px; }
-  .brite-card-head .pm-name {
-    font-size: 15px; line-height: 1.3; gap: 6px;
-    flex-direction: column; align-items: flex-start;
-  }
-  .pm-name-divider { display: none; }
-  .pm-name-brite { font-size: 12px; gap: 5px; }
-  .pm-brite-inline-logo { height: 18px; }
-  .brite-instant-hero {
-    display: block;
-    background: linear-gradient(135deg, rgba(46,160,67,0.08), rgba(194,123,160,0.05));
-    border: 1.5px solid rgba(46,160,67,0.22);
-    border-radius: var(--radius);
-    padding: 12px 14px; margin: 4px 0 10px; text-align: center;
-  }
-  .brite-instant-hero .ih-headline {
-    font-size: 15px; font-weight: 800; color: #1a6e2e;
-    margin: 0 0 4px; display: flex; align-items: center;
-    justify-content: center; gap: 6px;
-  }
-  .brite-instant-hero .ih-sub { font-size: 12px; color: var(--text, #444); line-height: 1.35; }
-  .brite-instant-hero .ih-sub strong { color: var(--heading); }
-  .brite-bank-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
-  .brite-bank-tile { min-height: 70px; padding: 10px 6px 8px; }
-  .brite-bank-tile:active { transform: scale(0.97); background: rgba(194,123,160,0.08); }
-  .brite-logo { height: 28px; }
-  .brite-logo img { height: 28px; max-width: 92%; }
-  .brite-logo .brite-fallback { height: 24px; font-size: 12px; padding: 0 10px; min-width: 54px; }
-  .brite-bank-name { font-size: 11px; font-weight: 600; }
-  .brite-popular-badge { font-size: 7px; padding: 2px 5px; top: -6px; right: -3px; }
-  .brite-trust-strip { display: none; }
-  .brite-secured { font-size: 10px; padding: 8px 10px; margin-top: 10px; gap: 5px; justify-content: center; }
-  .brite-badge { height: 16px; }
-  .brite-card-body { padding: 4px 12px 12px; }
+.brite-badge {
+  height: 18px; vertical-align: middle;
 }
-@media (min-width: 521px) { .brite-instant-hero { display: none; } }
+.brite-reg { color: var(--muted); }
+
+/* Hide secured/grid for non-selected Brite */
+.brite-card:not(.selected) .brite-card-body { padding: 0; border-top: none; }
 </style>
 </head>
 
@@ -2929,15 +3120,96 @@ body {
             <h2 class="section-title">Betaalmethode</h2>
           </div>
 
+          <!-- Country quick-switcher for demo (in production: synced with address country selector above) -->
+          <div class="brite-country-switcher" id="brite-country-switcher">
+            <span class="brite-cs-label">Demo · land:</span>
+            <button type="button" data-c="NL" class="active">🇳🇱 NL</button>
+            <button type="button" data-c="BE">🇧🇪 BE</button>
+            <button type="button" data-c="DE">🇩🇪 DE</button>
+            <button type="button" data-c="SE">🇸🇪 SE</button>
+            <button type="button" data-c="NO">🇳🇴 NO</button>
+            <button type="button" data-c="GB">🇬🇧 GB</button>
+            <button type="button" data-c="LU">🇱🇺 LU</button>
+          </div>
+
           <div class="payment-methods" id="payment-methods">
-            <!-- Payment methods are loaded dynamically from admin settings -->
-            <div id="payment-methods-loading" style="text-align:center;padding:20px 0;color:var(--muted);font-size:13px;">
-              <div style="width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.6s linear infinite;margin:0 auto 8px;"></div>
-              Betaalmethoden laden...
+            <!-- ═══ 1. BRITE — PAY BY BANK (vždy první, recommended) ═══ -->
+            <div class="brite-card selected" id="brite-card">
+              <div class="brite-card-head">
+                <div class="pm-radio"><div class="pm-radio-dot"></div></div>
+                <div class="pm-info">
+                  <div class="pm-name">
+                    <span class="pm-name-text">Betalen met je bank</span>
+                    <span class="pm-name-divider" aria-hidden="true">·</span>
+                    <span class="pm-name-brite">
+                      <span class="pm-name-brite-prefix">Directe betaling met</span>
+                      <img class="pm-brite-inline-logo" src="https://ext-assets.britepayments.com/assets/brite_badges/brite_badge_primary.svg" alt="Brite Payments" onerror="this.outerHTML='&lt;strong class=&quot;pm-brite-inline-fallback&quot;&gt;Brite Payments&lt;/strong&gt;'">
+                    </span>
+                  </div>
+                </div>
+                <div class="brite-thumbs" id="brite-thumbs"></div>
+              </div>
+
+              <div class="brite-card-body">
+                <!-- Mobile-only hero banner: punchy "instant" promise -->
+                <div class="brite-instant-hero">
+                  <div class="ih-headline">⚡ Direct geboekt via je bank-app</div>
+                  <div class="ih-sub">Geen kaartgegevens · geen account aanmaken · <strong>klaar in 30 seconden</strong></div>
+                </div>
+                <!-- Trust micro-strip: 3 quick reassurances (desktop) -->
+                <div class="brite-trust-strip">
+                  <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> Direct geboekt</span>
+                  <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Geen kaartgegevens</span>
+                  <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> &lt; 30 seconden</span>
+                </div>
+                <div class="brite-bank-grid" id="brite-bank-grid">
+                  <!-- populated by JS -->
+                </div>
+                <div class="brite-secured">
+                  <span class="brite-lock">🔒</span>
+                  <span>Secured by</span>
+                  <img class="brite-badge" src="https://ext-assets.britepayments.com/assets/brite_badges/brite_badge_primary.svg" alt="Brite Payments" onerror="this.outerHTML='&lt;strong style=&quot;color:#0A0B09;background:#FFE600;padding:2px 8px;border-radius:4px;font-weight:700;letter-spacing:0.3px;&quot;&gt;Brite Payments&lt;/strong&gt;'">
+                  <span class="brite-reg">— PSD2-gereguleerd, EU</span>
+                </div>
+              </div>
             </div>
-            <div id="payment-methods-error" style="display:none;text-align:center;padding:20px 0;color:var(--error);font-size:13px;">
-              <p>Betaalmethoden konden niet geladen worden.</p>
-              <button onclick="loadPaymentMethods()" style="margin-top:8px;padding:6px 16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);cursor:pointer;font-size:13px;">Opnieuw proberen</button>
+
+            <!-- ═══ 2. CARD ═══ -->
+            <div class="payment-method" data-pm="card">
+              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
+              <div class="pm-info">
+                <div class="pm-name">Creditcard / Debetkaart</div>
+                <div class="pm-desc">Visa, Mastercard, American Express</div>
+              </div>
+              <div class="brite-thumbs">
+                <span class="brite-mini-thumb" style="background:#1A1F71;color:#FFF;">VISA</span>
+                <span class="brite-mini-thumb" style="background:#EB001B;color:#FFF;">MC</span>
+                <span class="brite-mini-thumb" style="background:#006FCF;color:#FFF;">AMEX</span>
+              </div>
+            </div>
+
+            <!-- ═══ 3. PAYPAL ═══ -->
+            <div class="payment-method" data-pm="paypal">
+              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
+              <div class="pm-info">
+                <div class="pm-name">PayPal</div>
+                <div class="pm-desc">Betaal met je PayPal-saldo of gekoppelde rekening</div>
+              </div>
+              <div class="brite-thumbs">
+                <span class="brite-mini-thumb" style="background:#003087;color:#FFF;">PayPal</span>
+              </div>
+            </div>
+
+            <!-- ═══ 4. KLARNA ═══ -->
+            <div class="payment-method" data-pm="klarna">
+              <div class="pm-radio"><div class="pm-radio-dot"></div></div>
+              <div class="pm-info">
+                <div class="pm-name">Klarna <span style="color:var(--muted);font-weight:400;font-size:12px;">— achteraf betalen (30 dagen)</span></div>
+                <div class="pm-desc">Eerst ontvangen, daarna betalen. Renteloos.</div>
+              </div>
+              <div class="brite-thumbs">
+                <span class="brite-mini-thumb" style="background:#FFB3C7;color:#0A0B09;">Klarna</span>
+              </div>
             </div>
           </div>
 
@@ -8057,358 +8329,238 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 </script>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════════════════
-   BRITE DEMO EMULATOR — only when ?demo_brite=1 in URL.
-   Stubs /store/payment-options to inject a Brite gateway, stubs /store/banks
-   to return per-country bank lists, then replaces the pay_by_bank radio
-   rendered by the default flow with the custom Brite picker UI.
-
-   Zero impact when query param is absent — fetch is not patched.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ═══ BRITE BANK PICKER — demo data + interaction (preview only) ═══
+   Production: BANKS by replaced by fetch('/store/banks?country=' + c). */
 (function(){
-  // ── GATE ──────────────────────────────────────────────────────────────────
-  // Activates ONLY when the URL carries the Brite preview identifier:
-  //   ?brite=1   (or legacy ?demo_brite=1)
-  // Without it this IIFE returns immediately and the checkout behaves byte-for-
-  // byte like production — fetch is never patched, no DOM is touched.
-  // This is a sales-demo mockup (no real Brite credentials). Safe to ship live.
-  var params = new URLSearchParams(window.location.search);
-  var briteDemo = params.get('brite') === '1' || params.get('demo_brite') === '1';
-  if (!briteDemo) return;
+  // Wikimedia Special:FilePath URLs redirect to upload.wikimedia.org.
+  // `fallback` is shown as a colored label if the SVG fails to load.
+  /* In production replaced by: const banks = await fetch('/store/banks?country=' + c).then(r => r.json());
+     The Brite Service Presentation API returns the canonical, up-to-date logo set per locale.
 
-  console.log('[Brite Demo] Emulator enabled via ?brite=1 (mockup, no real credentials)');
-
+     URLs below are curl-verified Wikimedia Commons files (Special:FilePath → 200) at time of build.
+     Where Wikimedia has no SVG for a bank, the entry intentionally points to a non-existent
+     filename so the <img onerror> fallback renders the brand-colored badge instead. */
   var WM = "https://commons.wikimedia.org/wiki/Special:FilePath/";
   var BANKS = {
     NL: [
-      { id:"ING_NL",     name:"ING",          logo: WM + "ING_logo.svg",                       fallback:{label:"ING",   bg:"#FF6200", fg:"#FFF"} },
-      { id:"RABO_NL",    name:"Rabobank",     logo: WM + "Rabobank_text_logo.svg",             fallback:{label:"Rabo",  bg:"#003D6A", fg:"#FFF"} },
-      { id:"ABN_NL",     name:"ABN AMRO",     logo: WM + "ABN-AMRO_Logo_new_colors.svg",       fallback:{label:"ABN",   bg:"#009A44", fg:"#FFF"} },
-      { id:"SNS_NL",     name:"SNS",          logo: WM + "De_Volksbank_logo.svg",              fallback:{label:"SNS",   bg:"#005EB8", fg:"#FFF"} },
-      { id:"BUNQ_NL",    name:"Bunq",         logo: WM + "Bunq_(bank)_company_logo_2017.svg",  fallback:{label:"Bunq",  bg:"#FFE800", fg:"#1A1A1A"} },
-      { id:"KNAB_NL",    name:"Knab",         logo: WM + "Knab_logo.svg",                      fallback:{label:"Knab",  bg:"#E5007D", fg:"#FFF"} },
-      { id:"ASN_NL",     name:"ASN Bank",     logo: WM + "ASN_Bank_unverified.svg",            fallback:{label:"ASN",   bg:"#7AB800", fg:"#FFF"} },
-      { id:"REGIO_NL",   name:"RegioBank",    logo: WM + "Regiobank_Logo.svg",                 fallback:{label:"Regio", bg:"#0066B3", fg:"#FFF"} },
-      { id:"TRIODOS_NL", name:"Triodos",      logo: WM + "Triodos_Bank_textlogo.svg",          fallback:{label:"Triodos", bg:"#005E50", fg:"#FFF"} },
-      { id:"REVOLUT_NL", name:"Revolut",      logo: WM + "Revolut_logo.svg",                   fallback:{label:"Revolut", bg:"#0666EB", fg:"#FFF"} },
-      { id:"N26_NL",     name:"N26",          logo: WM + "N26_logo.svg",                       fallback:{label:"N26",   bg:"#1A1A1A", fg:"#FFF"} },
-      { id:"WISE_NL",    name:"Wise",         logo: WM + "Wise_Logo_512x124.svg",              fallback:{label:"Wise",  bg:"#163300", fg:"#9FE870"} },
+      { id:"ING_NL",     name:"ING",          logo: WM + "ING_logo.svg",                                fallback:{label:"ING",     bg:"#FF6200", fg:"#FFF"} },
+      { id:"RABO_NL",    name:"Rabobank",     logo: WM + "Rabobank_text_logo.svg",                      fallback:{label:"Rabo",    bg:"#003D6A", fg:"#FFF"} },
+      { id:"ABN_NL",     name:"ABN AMRO",     logo: WM + "ABN-AMRO_Logo_new_colors.svg",                fallback:{label:"ABN",     bg:"#009A44", fg:"#FFF"} },
+      { id:"SNS_NL",     name:"SNS",          logo: WM + "De_Volksbank_logo.svg",                       fallback:{label:"SNS",     bg:"#005EB8", fg:"#FFF"} },
+      { id:"BUNQ_NL",    name:"Bunq",         logo: WM + "Bunq_(bank)_company_logo_2017.svg",           fallback:{label:"Bunq",    bg:"#FFE800", fg:"#1A1A1A"} },
+      { id:"KNAB_NL",    name:"Knab",         logo: WM + "Knab_logo.svg",                               fallback:{label:"Knab",    bg:"#E5007D", fg:"#FFF"} },
+      { id:"ASN_NL",     name:"ASN Bank",     logo: WM + "ASN_Bank_unverified.svg",                     fallback:{label:"ASN",     bg:"#7AB800", fg:"#FFF"} },
+      { id:"REGIO_NL",   name:"RegioBank",    logo: WM + "Regiobank_Logo.svg",                          fallback:{label:"Regio",   bg:"#0066B3", fg:"#FFF"} },
+      { id:"TRIODOS_NL", name:"Triodos",      logo: WM + "Triodos_Bank_textlogo.svg",                   fallback:{label:"Triodos", bg:"#005E50", fg:"#FFF"} },
+      { id:"REVOLUT_NL", name:"Revolut",      logo: WM + "Revolut_logo.svg",                            fallback:{label:"Revolut", bg:"#0666EB", fg:"#FFF"} },
+      { id:"N26_NL",     name:"N26",          logo: WM + "N26_logo.svg",                                fallback:{label:"N26",     bg:"#1A1A1A", fg:"#FFF"} },
+      { id:"WISE_NL",    name:"Wise",         logo: WM + "Wise_Logo_512x124.svg",                       fallback:{label:"Wise",    bg:"#163300", fg:"#9FE870"} },
     ],
     BE: [
-      { id:"KBC_BE",     name:"KBC",          logo: WM + "KBC_logo.svg",                       fallback:{label:"KBC",   bg:"#003B6F", fg:"#FFF"} },
-      { id:"BNP_BE",     name:"BNP Fortis",   logo: WM + "BNP_Paribas_logo.svg",               fallback:{label:"BNP",   bg:"#00915A", fg:"#FFF"} },
-      { id:"BELFIUS_BE", name:"Belfius",      logo: WM + "Belfius.svg",                        fallback:{label:"Belfius", bg:"#E60028", fg:"#FFF"} },
-      { id:"ING_BE",     name:"ING België",   logo: WM + "ING_logo.svg",                       fallback:{label:"ING",   bg:"#FF6200", fg:"#FFF"} },
-      { id:"ARGENTA_BE", name:"Argenta",      logo: WM + "Argenta_logo.svg",                   fallback:{label:"Argenta", bg:"#00A859", fg:"#FFF"} },
-      { id:"CRELAN_BE",  name:"Crelan",       logo: WM + "Crelan_logo.svg",                    fallback:{label:"Crelan", bg:"#005CA9", fg:"#FFF"} },
-      { id:"AXA_BE",     name:"AXA Bank",     logo: WM + "AXA_Logo.svg",                       fallback:{label:"AXA",   bg:"#00008F", fg:"#FFF"} },
-      { id:"BEOBANK_BE", name:"Beobank",      logo: WM + "Beobank_logo.svg",                   fallback:{label:"Beobank", bg:"#E60028", fg:"#FFF"} },
+      { id:"KBC_BE",     name:"KBC",          logo: WM + "KBC_logo.svg",                                fallback:{label:"KBC",     bg:"#003B6F", fg:"#FFF"} },
+      { id:"BNP_BE",     name:"BNP Fortis",   logo: WM + "BNP_Paribas_logo.svg",                        fallback:{label:"BNP",     bg:"#00915A", fg:"#FFF"} },
+      { id:"BELFIUS_BE", name:"Belfius",      logo: WM + "Belfius.svg",                                 fallback:{label:"Belfius", bg:"#E60028", fg:"#FFF"} },
+      { id:"ING_BE",     name:"ING België",   logo: WM + "ING_logo.svg",                                fallback:{label:"ING",     bg:"#FF6200", fg:"#FFF"} },
+      { id:"ARGENTA_BE", name:"Argenta",      logo: WM + "Argenta_logo.svg",                            fallback:{label:"Argenta", bg:"#00A859", fg:"#FFF"} },
+      { id:"CRELAN_BE",  name:"Crelan",       logo: WM + "Crelan_logo.svg",                             fallback:{label:"Crelan",  bg:"#005CA9", fg:"#FFF"} },
+      { id:"AXA_BE",     name:"AXA Bank",     logo: WM + "AXA_Logo.svg",                                fallback:{label:"AXA",     bg:"#00008F", fg:"#FFF"} },
+      { id:"BEOBANK_BE", name:"Beobank",      logo: WM + "Beobank_logo.svg",                            fallback:{label:"Beobank", bg:"#E60028", fg:"#FFF"} },
+      { id:"VDK_BE",     name:"vdk bank",     logo: WM + "Vdk_Bank_unverified.svg",                     fallback:{label:"vdk",     bg:"#00A0E0", fg:"#FFF"} },
+      { id:"REVOLUT_BE", name:"Revolut",      logo: WM + "Revolut_logo.svg",                            fallback:{label:"Revolut", bg:"#0666EB", fg:"#FFF"} },
     ],
     DE: [
-      { id:"SPARK_DE",   name:"Sparkasse",    logo: WM + "Sparkasse.svg",                      fallback:{label:"S",     bg:"#FF0000", fg:"#FFF"} },
-      { id:"VOLKS_DE",   name:"Volksbank",    logo: WM + "Volksbank_Logo.svg",                 fallback:{label:"VR",    bg:"#F39200", fg:"#FFF"} },
-      { id:"DB_DE",      name:"Deutsche Bank",logo: WM + "Deutsche_Bank-Logo.svg",             fallback:{label:"DB",    bg:"#0018A8", fg:"#FFF"} },
-      { id:"COBA_DE",    name:"Commerzbank",  logo: WM + "Commerzbank-Logo.svg",               fallback:{label:"Co",    bg:"#FFCC00", fg:"#1A1A1A"} },
-      { id:"ING_DE",     name:"ING-DiBa",     logo: WM + "ING_logo.svg",                       fallback:{label:"ING",   bg:"#FF6200", fg:"#FFF"} },
-      { id:"DKB_DE",     name:"DKB",          logo: WM + "DKB_Logo.svg",                       fallback:{label:"DKB",   bg:"#14143C", fg:"#FFF"} },
-      { id:"POST_DE",    name:"Postbank",     logo: WM + "Postbank-Logo.svg",                  fallback:{label:"Post",  bg:"#FFCC00", fg:"#1A1A1A"} },
-      { id:"COMDIR_DE",  name:"Comdirect",    logo: WM + "Comdirect_logo.svg",                 fallback:{label:"Comdir.", bg:"#FFD000", fg:"#1A1A1A"} },
+      { id:"SPARK_DE",   name:"Sparkasse",    logo: WM + "Sparkasse.svg",                               fallback:{label:"S",       bg:"#FF0000", fg:"#FFF"} },
+      { id:"VOLKS_DE",   name:"Volksbank",    logo: WM + "Volksbank_Logo.svg",                          fallback:{label:"VR",      bg:"#F39200", fg:"#FFF"} },
+      { id:"DB_DE",      name:"Deutsche Bank",logo: WM + "Deutsche_Bank-Logo.svg",                      fallback:{label:"DB",      bg:"#0018A8", fg:"#FFF"} },
+      { id:"COBA_DE",    name:"Commerzbank",  logo: WM + "Commerzbank-Logo.svg",                        fallback:{label:"Co",      bg:"#FFCC00", fg:"#1A1A1A"} },
+      { id:"ING_DE",     name:"ING-DiBa",     logo: WM + "ING_logo.svg",                                fallback:{label:"ING",     bg:"#FF6200", fg:"#FFF"} },
+      { id:"DKB_DE",     name:"DKB",          logo: WM + "DKB_Logo.svg",                                fallback:{label:"DKB",     bg:"#14143C", fg:"#FFF"} },
+      { id:"POST_DE",    name:"Postbank",     logo: WM + "Postbank-Logo.svg",                           fallback:{label:"Post",    bg:"#FFCC00", fg:"#1A1A1A"} },
+      { id:"HVB_DE",     name:"HypoVereinsbank", logo: WM + "HypoVereinsbank_logo.svg",                 fallback:{label:"HVB",     bg:"#E2001A", fg:"#FFF"} },
+      { id:"COMDIR_DE",  name:"Comdirect",    logo: WM + "Comdirect_logo.svg",                          fallback:{label:"Comdir.", bg:"#FFD000", fg:"#1A1A1A"} },
+      { id:"N26_DE",     name:"N26",          logo: WM + "N26_logo.svg",                                fallback:{label:"N26",     bg:"#1A1A1A", fg:"#FFF"} },
+      { id:"TARGO_DE",   name:"Targobank",    logo: WM + "Targobank_logo.svg",                          fallback:{label:"Targo",   bg:"#0066B3", fg:"#FFF"} },
+      { id:"SANT_DE",    name:"Santander",    logo: WM + "Banco_Santander_Logotipo.svg",                fallback:{label:"Sant",    bg:"#EC0000", fg:"#FFF"} },
     ],
     SE: [
-      { id:"SWED_SE",    name:"Swedbank",     logo: WM + "Swedbank_wordmark.svg",              fallback:{label:"Swed",  bg:"#F65A1F", fg:"#FFF"} },
-      { id:"SHB_SE",     name:"Handelsbanken",logo: WM + "Handelsbanken_logo.svg",             fallback:{label:"SHB",   bg:"#005AA0", fg:"#FFF"} },
-      { id:"SEB_SE",     name:"SEB",          logo: WM + "SEB_logo.svg",                       fallback:{label:"SEB",   bg:"#5F9E31", fg:"#FFF"} },
-      { id:"NORDEA_SE",  name:"Nordea",       logo: WM + "Nordea.svg",                         fallback:{label:"Nordea",bg:"#00005E", fg:"#FFF"} },
-      { id:"ICA_SE",     name:"ICA Banken",   logo: WM + "ICA_Banken_logo.svg",                fallback:{label:"ICA",   bg:"#E60012", fg:"#FFF"} },
-      { id:"LFS_SE",     name:"Länsförsäkr.", logo: WM + "Länsförsäkringar_logo.svg",          fallback:{label:"LF",    bg:"#005AA0", fg:"#FFF"} },
-      { id:"DANSKE_SE",  name:"Danske Bank",  logo: WM + "Danske_Bank_logo.svg",               fallback:{label:"Danske",bg:"#003755", fg:"#FFF"} },
+      // Note: Swish removed — Brite is open-banking (A2A via PSD2). Swish runs on a
+      // separate rail (BankID + phone) and Brite does NOT support it. For Swish
+      // we'd need Adyen/Mollie/Stripe as a separate provider.
+      { id:"SWED_SE",    name:"Swedbank",     logo: WM + "Swedbank_wordmark.svg",                       fallback:{label:"Swed",    bg:"#F65A1F", fg:"#FFF"} },
+      { id:"SHB_SE",     name:"Handelsbanken",logo: WM + "Handelsbanken_logo.svg",                      fallback:{label:"SHB",     bg:"#005AA0", fg:"#FFF"} },
+      { id:"SEB_SE",     name:"SEB",          logo: WM + "SEB_logo.svg",                                fallback:{label:"SEB",     bg:"#5F9E31", fg:"#FFF"} },
+      { id:"NORDEA_SE",  name:"Nordea",       logo: WM + "Nordea.svg",                                  fallback:{label:"Nordea",  bg:"#00005E", fg:"#FFF"} },
+      { id:"ICA_SE",     name:"ICA Banken",   logo: WM + "ICA_Banken_logo.svg",                         fallback:{label:"ICA",     bg:"#E60012", fg:"#FFF"} },
+      { id:"LFS_SE",     name:"Länsförsäkr.", logo: WM + "Länsförsäkringar_logo.svg",                   fallback:{label:"LF",      bg:"#005AA0", fg:"#FFF"} },
+      { id:"DANSKE_SE",  name:"Danske Bank",  logo: WM + "Danske_Bank_logo.svg",                        fallback:{label:"Danske",  bg:"#003755", fg:"#FFF"} },
+      { id:"SKB_SE",     name:"Skandiabanken",logo: WM + "Skandiabanken_unverified.svg",                fallback:{label:"Skandia", bg:"#003F87", fg:"#FFF"} },
+      { id:"SBAB_SE",    name:"SBAB",         logo: WM + "SBAB_unverified.svg",                         fallback:{label:"SBAB",    bg:"#E40520", fg:"#FFF"} },
+      { id:"REVOLUT_SE", name:"Revolut",      logo: WM + "Revolut_logo.svg",                            fallback:{label:"Revolut", bg:"#0666EB", fg:"#FFF"} },
+      { id:"FOREX_SE",   name:"Forex Bank",   logo: WM + "Forex_Bank_unverified.svg",                   fallback:{label:"Forex",   bg:"#0066B3", fg:"#FFF"} },
     ],
     NO: [
-      { id:"DNB_NO",     name:"DNB",          logo: WM + "DNB_Logo.svg",                       fallback:{label:"DNB",   bg:"#007A33", fg:"#FFF"} },
-      { id:"SB1_NO",     name:"SpareBank 1",  logo: WM + "SpareBank1.svg",                     fallback:{label:"SB1",   bg:"#C8102E", fg:"#FFF"} },
-      { id:"NORDEA_NO",  name:"Nordea",       logo: WM + "Nordea.svg",                         fallback:{label:"Nordea",bg:"#00005E", fg:"#FFF"} },
-      { id:"DANSKE_NO",  name:"Danske Bank",  logo: WM + "Danske_Bank_logo.svg",               fallback:{label:"Danske",bg:"#003755", fg:"#FFF"} },
-      { id:"SHB_NO",     name:"Handelsbanken",logo: WM + "Handelsbanken_logo.svg",             fallback:{label:"SHB",   bg:"#005AA0", fg:"#FFF"} },
+      { id:"DNB_NO",     name:"DNB",          logo: WM + "DNB_Logo.svg",                                fallback:{label:"DNB",     bg:"#007A33", fg:"#FFF"} },
+      { id:"SB1_NO",     name:"SpareBank 1",  logo: WM + "SpareBank1.svg",                              fallback:{label:"SB1",     bg:"#C8102E", fg:"#FFF"} },
+      { id:"NORDEA_NO",  name:"Nordea",       logo: WM + "Nordea.svg",                                  fallback:{label:"Nordea",  bg:"#00005E", fg:"#FFF"} },
+      { id:"DANSKE_NO",  name:"Danske Bank",  logo: WM + "Danske_Bank_logo.svg",                        fallback:{label:"Danske",  bg:"#003755", fg:"#FFF"} },
+      { id:"SHB_NO",     name:"Handelsbanken",logo: WM + "Handelsbanken_logo.svg",                      fallback:{label:"SHB",     bg:"#005AA0", fg:"#FFF"} },
+      { id:"SPV_NO",     name:"Sparebanken Vest", logo: WM + "Sparebanken_Vest_unverified.svg",         fallback:{label:"Vest",    bg:"#00833E", fg:"#FFF"} },
+      { id:"SR_NO",      name:"SR-Bank",      logo: WM + "Sparebank_1_SR-Bank.svg",                     fallback:{label:"SR",      bg:"#C8102E", fg:"#FFF"} },
+      { id:"BNN_NO",     name:"SpareBank 1 Nord-Norge", logo: WM + "SpareBank_1_Nord-Norge_logo.svg",   fallback:{label:"SNN",     bg:"#005AA0", fg:"#FFF"} },
+      { id:"VIPPS_NO",   name:"Vipps",        logo: WM + "Vipps_unverified.svg",                        fallback:{label:"Vipps",   bg:"#FF5B24", fg:"#FFF"} },
     ],
     GB: [
-      { id:"BARCLAYS_GB",name:"Barclays",     logo: WM + "Barclays-Logo.svg",                  fallback:{label:"Barclays",bg:"#00AEEF", fg:"#FFF"} },
-      { id:"HSBC_GB",    name:"HSBC",         logo: WM + "HSBC_logo_(2018).svg",               fallback:{label:"HSBC",  bg:"#DB0011", fg:"#FFF"} },
-      { id:"NW_GB",      name:"NatWest",      logo: WM + "NatWest_wordmark.svg",               fallback:{label:"NatWest", bg:"#5A287D", fg:"#FFF"} },
-      { id:"SAN_GB",     name:"Santander",    logo: WM + "Banco_Santander_Logotipo.svg",       fallback:{label:"Sant",  bg:"#EC0000", fg:"#FFF"} },
-      { id:"MONZO_GB",   name:"Monzo",        logo: WM + "Monzo_2022_logo.svg",                fallback:{label:"Monzo", bg:"#FF3464", fg:"#FFF"} },
-      { id:"STARLING_GB",name:"Starling",     logo: WM + "Starling_Bank_Logo.svg",             fallback:{label:"Starling",bg:"#7D2BE5", fg:"#FFF"} },
-      { id:"TSB_GB",     name:"TSB",          logo: WM + "TSB_logo.svg",                       fallback:{label:"TSB",   bg:"#001E62", fg:"#FFF"} },
+      { id:"BARCLAYS_GB",name:"Barclays",     logo: WM + "Barclays-Logo.svg",                           fallback:{label:"Barclays",bg:"#00AEEF", fg:"#FFF"} },
+      { id:"HSBC_GB",    name:"HSBC",         logo: WM + "HSBC_logo_(2018).svg",                        fallback:{label:"HSBC",    bg:"#DB0011", fg:"#FFF"} },
+      { id:"LLOYDS_GB",  name:"Lloyds",       logo: WM + "Lloyds_Bank_unverified.svg",                  fallback:{label:"Lloyds",  bg:"#024731", fg:"#FFF"} },
+      { id:"NW_GB",      name:"NatWest",      logo: WM + "NatWest_wordmark.svg",                        fallback:{label:"NatWest", bg:"#5A287D", fg:"#FFF"} },
+      { id:"SAN_GB",     name:"Santander",    logo: WM + "Banco_Santander_Logotipo.svg",                fallback:{label:"Sant",    bg:"#EC0000", fg:"#FFF"} },
+      { id:"MONZO_GB",   name:"Monzo",        logo: WM + "Monzo_2022_logo.svg",                         fallback:{label:"Monzo",   bg:"#FF3464", fg:"#FFF"} },
+      { id:"STARLING_GB",name:"Starling",     logo: WM + "Starling_Bank_Logo.svg",                      fallback:{label:"Starling",bg:"#7D2BE5", fg:"#FFF"} },
+      { id:"NATION_GB",  name:"Nationwide",   logo: WM + "Nationwide_unverified.svg",                   fallback:{label:"Nation.", bg:"#002F87", fg:"#FFF"} },
+      { id:"HALIFAX_GB", name:"Halifax",      logo: WM + "Halifax_unverified.svg",                      fallback:{label:"Halifax", bg:"#005EB8", fg:"#FFF"} },
+      { id:"TSB_GB",     name:"TSB",          logo: WM + "TSB_logo.svg",                                fallback:{label:"TSB",     bg:"#001E62", fg:"#FFF"} },
+      { id:"COOP_GB",    name:"Co-op Bank",   logo: WM + "Co-operative_Bank_unverified.svg",            fallback:{label:"Co-op",   bg:"#00B0EB", fg:"#FFF"} },
+      { id:"REV_GB",     name:"Revolut",      logo: WM + "Revolut_logo.svg",                            fallback:{label:"Revolut", bg:"#0666EB", fg:"#FFF"} },
     ],
+    LU: [
+      /* Wikimedia has no SVG logos for Luxembourg banks — all entries below trigger
+         the brand-colored fallback badge until we switch to Brite CDN in production. */
+      { id:"BGL_LU",     name:"BGL BNP Paribas", logo: WM + "BGL_BNP_Paribas_unverified.svg",           fallback:{label:"BGL",     bg:"#00915A", fg:"#FFF"} },
+      { id:"BCEE_LU",    name:"Spuerkees",    logo: WM + "BCEE_unverified.svg",                         fallback:{label:"BCEE",    bg:"#E40520", fg:"#FFF"} },
+      { id:"BIL_LU",     name:"BIL",          logo: WM + "BIL_unverified.svg",                          fallback:{label:"BIL",     bg:"#003B71", fg:"#FFF"} },
+      { id:"BDL_LU",     name:"Banque de Lux.", logo: WM + "Banque_de_Luxembourg_unverified.svg",       fallback:{label:"BdL",     bg:"#1F3864", fg:"#FFF"} },
+      { id:"ING_LU",     name:"ING Lux.",     logo: WM + "ING_logo.svg",                                fallback:{label:"ING",     bg:"#FF6200", fg:"#FFF"} },
+      { id:"RAIFF_LU",   name:"Raiffeisen",   logo: WM + "Raiffeisen_LU_unverified.svg",                fallback:{label:"RAI",     bg:"#FFD400", fg:"#1A1A1A"} },
+      { id:"POSTLU_LU",  name:"POST Finance", logo: WM + "POST_Luxembourg_unverified.svg",              fallback:{label:"POST",    bg:"#FFD400", fg:"#1A1A1A"} },
+      { id:"REVOLUT_LU", name:"Revolut",      logo: WM + "Revolut_logo.svg",                            fallback:{label:"Revolut", bg:"#0666EB", fg:"#FFF"} },
+    ]
   };
 
-  /* ─── 1) Monkey-patch fetch to inject Brite into /store/payment-options ─── */
-  var originalFetch = window.fetch.bind(window);
-  window.fetch = function(input, init) {
-    var url = typeof input === 'string' ? input : input.url;
+  var grid       = document.getElementById("brite-bank-grid");
+  var thumbsBox  = document.getElementById("brite-thumbs");
+  var briteCard  = document.getElementById("brite-card");
+  var switcher   = document.getElementById("brite-country-switcher");
+  var submitBtn  = document.getElementById("submit-btn");
 
-    // /store/payment-options → fully mocked response (no backend call).
-    // Brite as priority 0 + iDEAL/Bancontact/Card/PayPal/Klarna as fallbacks.
-    if (/\/store\/payment-options/.test(url)) {
-      var mock = {
-        gateways: [
-          {
-            id: 'demo_brite_001', provider: 'brite', display_name: 'Brite Payments',
-            mode: 'test', environment: 'sandbox', priority: 0,
-            methods: [{
-              code: 'pay_by_bank', display_name: 'Betalen met je bank',
-              icon: 'pay_by_bank', sort_order: 0,
-              available_countries: ['nl','be','de','se','no','gb','lu','fi','dk','ie'],
-              supported_currencies: ['EUR','SEK','NOK','GBP'],
-              provider_id: 'pp_brite_brite',
-            }]
-          },
-          {
-            id: 'demo_mollie_001', provider: 'mollie', display_name: 'Mollie',
-            mode: 'test', environment: 'test', priority: 1,
-            methods: [
-              { code: 'ideal',      display_name: 'iDEAL',      icon: 'ideal',      sort_order: 1, available_countries: ['nl'], supported_currencies: ['EUR'], provider_id: 'pp_mollie_mollie' },
-              { code: 'bancontact', display_name: 'Bancontact', icon: 'bancontact', sort_order: 2, available_countries: ['be'], supported_currencies: ['EUR'], provider_id: 'pp_mollie_mollie' },
-              { code: 'creditcard', display_name: 'Creditcard', icon: 'card',       sort_order: 3, available_countries: [],     supported_currencies: ['EUR'], provider_id: 'pp_mollie_mollie' },
-            ]
-          },
-          {
-            id: 'demo_paypal_001', provider: 'paypal', display_name: 'PayPal',
-            mode: 'test', environment: 'sandbox', priority: 2,
-            methods: [{
-              code: 'paypal', display_name: 'PayPal', icon: 'paypal', sort_order: 4,
-              available_countries: [], supported_currencies: [],
-              provider_id: 'pp_paypal_paypal', express: false,
-            }]
-          },
-          {
-            id: 'demo_klarna_001', provider: 'klarna', display_name: 'Klarna',
-            mode: 'test', environment: 'playground', priority: 3,
-            methods: [
-              { code: 'klarna',       display_name: 'Klarna — Pay now',     icon: 'klarna', sort_order: 5, available_countries: ['nl','be','de','at','fi','fr','it','se','es','dk','no','gb','ie'], supported_currencies: [], provider_id: 'pp_klarna_klarna' },
-              { code: 'klarna_later', display_name: 'Klarna — Pay later',   icon: 'klarna', sort_order: 6, available_countries: ['nl','be','de','at','fi','fr','it','se','es','dk','no','gb','ie'], supported_currencies: [], provider_id: 'pp_klarna_klarna' },
-              { code: 'klarna_slice', display_name: 'Klarna — Pay in 3',    icon: 'klarna', sort_order: 7, available_countries: ['nl','be','de','at','fi','fr','it','se','es','dk','no','gb','ie'], supported_currencies: [], provider_id: 'pp_klarna_klarna' },
-            ]
-          },
-        ]
-      };
-      console.log('[Brite Demo] Returning fully mocked /store/payment-options (backend not called)');
-      return Promise.resolve(new Response(JSON.stringify(mock), {
-        status: 200, headers: { 'Content-Type': 'application/json' }
-      }));
-    }
+  var state = { country: "NL", bank: null, pm: "brite" };
 
-    // /store/banks?country=XX → mock per-country bank list
-    if (/\/store\/banks/.test(url)) {
-      var qs = url.split('?')[1] || '';
-      var country = (new URLSearchParams(qs).get('country') || 'NL').toUpperCase();
-      var banks = BANKS[country] || [];
-      var payload = {
-        country: country,
-        count: banks.length,
-        banks: banks.map(function(b, i){
-          return { bank_id: b.id, name: b.name, logo_url: b.logo, sort_order: i, _fallback: b.fallback };
-        })
-      };
-      console.log('[Brite Demo] Mocked /store/banks?country=' + country + ' →', banks.length, 'banks');
-      return Promise.resolve(new Response(JSON.stringify(payload), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      }));
-    }
-
-    return originalFetch(input, init);
-  };
-
-  /* ─── 2) Replace the default pay_by_bank radio with the Brite picker ─── */
   function fallbackHTML(fb){
     return '<span class="brite-fallback" style="background:' + fb.bg + ';color:' + fb.fg + '">' + fb.label + '</span>';
   }
 
-  function buildBriteCard() {
-    var card = document.createElement('div');
-    card.className = 'brite-card selected';
-    card.id = 'brite-card';
-    card.setAttribute('data-method', 'pay_by_bank');
-    card.setAttribute('data-provider', 'brite');
-    card.setAttribute('data-provider-id', 'pp_brite_brite');
-    card.innerHTML = '' +
-      '<div class="brite-card-head">' +
-        '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
-        '<div class="pm-info">' +
-          '<div class="pm-name">' +
-            '<span class="pm-name-text">Betalen met je bank</span>' +
-            '<span class="pm-name-divider" aria-hidden="true">·</span>' +
-            '<span class="pm-name-brite">' +
-              '<span class="pm-name-brite-prefix">Directe betaling met</span>' +
-              '<img class="pm-brite-inline-logo" src="https://ext-assets.britepayments.com/assets/brite_badges/brite_badge_primary.svg" alt="Brite Payments" onerror="this.outerHTML=&apos;<strong class=&quot;pm-brite-inline-fallback&quot;>Brite Payments</strong>&apos;">' +
-            '</span>' +
-          '</div>' +
+  function renderBanks(country) {
+    var banks = BANKS[country] || [];
+    state.country = country;
+    state.bank = banks[0] ? banks[0].id : null;
+
+    // Bank tiles
+    grid.innerHTML = "";
+    banks.forEach(function(b, idx){
+      var tile = document.createElement("div");
+      tile.className = "brite-bank-tile" + (idx === 0 ? " selected" : "");
+      tile.setAttribute("data-bank", b.id);
+      var popularSticker = idx === 0 ? '<span class="brite-popular-badge">Meest gekozen</span>' : '';
+      var fb = JSON.stringify(fallbackHTML(b.fallback)).replace(/"/g,'&quot;');
+      tile.innerHTML =
+        popularSticker +
+        '<div class="brite-logo">' +
+          '<img src="' + b.logo + '" alt="' + b.name + '" ' +
+          // Catches SVGs that load but have no intrinsic dimensions (transparent /
+          // missing viewBox — Bunq, Revolut, N26 on Wikimedia behave this way).
+          'onload="if(!this.naturalWidth||!this.naturalHeight){this.outerHTML=' + fb + '}" ' +
+          'onerror="this.outerHTML=' + fb + '">' +
         '</div>' +
-      '</div>' +
-      '<div class="brite-card-body">' +
-        '<div class="brite-instant-hero">' +
-          '<div class="ih-headline">⚡ Direct geboekt via je bank-app</div>' +
-          '<div class="ih-sub">Geen kaartgegevens · geen account aanmaken · <strong>klaar in 30 seconden</strong></div>' +
-        '</div>' +
-        '<div class="brite-trust-strip">' +
-          '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> Direct geboekt</span>' +
-          '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Geen kaartgegevens</span>' +
-          '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> &lt; 30 seconden</span>' +
-        '</div>' +
-        '<div class="brite-bank-grid" id="brite-bank-grid"></div>' +
-        '<div class="brite-secured">' +
-          '<span class="brite-lock">🔒</span>' +
-          '<span>Secured by</span>' +
-          '<img class="brite-badge" src="https://ext-assets.britepayments.com/assets/brite_badges/brite_badge_primary.svg" alt="Brite Payments" onerror="this.outerHTML=&apos;<strong style=&quot;color:#0A0B09;background:#FFE600;padding:2px 8px;border-radius:4px;font-weight:700;letter-spacing:0.3px;&quot;>Brite Payments</strong>&apos;">' +
-          '<span class="brite-reg">— PSD2-gereguleerd, EU</span>' +
-        '</div>' +
-      '</div>';
-    return card;
+        '<div class="brite-bank-name">' + b.name + '</div>';
+      tile.addEventListener("click", function(){
+        state.bank = b.id;
+        [].forEach.call(grid.children, function(c){ c.classList.remove("selected"); });
+        tile.classList.add("selected");
+        selectPM("brite");
+        updateSubmitText();
+      });
+      grid.appendChild(tile);
+    });
+
+    // No "more" tile — Brite API returns the full bank list per country
+    // and we render all of them; storefront grid wraps automatically.
+
+    // Mini-thumbs in header (top 4 banks)
+    thumbsBox.innerHTML = banks.slice(0, 4).map(function(b){
+      return '<span class="brite-mini-thumb logo"><img src="' + b.logo + '" alt="' + b.name + '" onerror="this.parentNode.outerHTML=' + JSON.stringify('<span class="brite-mini-thumb" style="background:' + b.fallback.bg + ';color:' + b.fallback.fg + '">' + b.fallback.label.slice(0,5) + '</span>').replace(/"/g,'&quot;') + '"></span>';
+    }).join("");
+
+    updateSubmitText();
   }
 
-  function renderBanksForCountry(country, country_iso) {
-    var grid = document.getElementById('brite-bank-grid');
-    if (!grid) return;
-    fetch('/store/banks?country=' + (country_iso || country)).then(function(r){ return r.json(); }).then(function(data){
-      var banks = data.banks || [];
-      grid.innerHTML = '';
-      banks.forEach(function(b, idx){
-        var tile = document.createElement('div');
-        tile.className = 'brite-bank-tile' + (idx === 0 ? ' selected' : '');
-        tile.setAttribute('data-bank', b.bank_id);
-        var fb = JSON.stringify(fallbackHTML(b._fallback || {label:b.name.slice(0,5),bg:'#CCC',fg:'#000'})).replace(/"/g,'&quot;');
-        var popular = idx === 0 ? '<span class="brite-popular-badge">Meest gekozen</span>' : '';
-        tile.innerHTML =
-          popular +
-          '<div class="brite-logo">' +
-            '<img src="' + b.logo_url + '" alt="' + b.name + '" ' +
-            'onload="if(!this.naturalWidth||!this.naturalHeight){this.outerHTML=' + fb + '}" ' +
-            'onerror="this.outerHTML=' + fb + '">' +
-          '</div>' +
-          '<div class="brite-bank-name">' + b.name + '</div>';
-        tile.addEventListener('click', function(){
-          [].forEach.call(grid.children, function(c){ c.classList.remove('selected'); });
-          tile.classList.add('selected');
-          // Set globals so the existing submit flow picks it up
-          if (typeof window.selectedMethod !== 'undefined' || true) window.selectedMethod = 'pay_by_bank';
-          if (typeof window.selectedProvider !== 'undefined' || true) window.selectedProvider = 'brite';
-          if (typeof window.selectedProviderId !== 'undefined' || true) window.selectedProviderId = 'pp_brite_brite';
-          // Mark Brite card as the selected payment method
-          var briteCard = document.getElementById('brite-card');
-          briteCard.classList.add('selected');
-          [].forEach.call(document.querySelectorAll('.payment-method.selected, .klarna-parent.expanded'), function(el){
-            el.classList.remove('selected');
-            el.classList.remove('expanded');
-          });
+  function selectPM(pm) {
+    state.pm = pm;
+    briteCard.classList.toggle("selected", pm === "brite");
+    [].forEach.call(document.querySelectorAll(".payment-method"), function(el){
+      el.classList.toggle("selected", el.getAttribute("data-pm") === pm);
+    });
+    // Body flag: pulse the pay button only when Brite + a bank are both chosen
+    var readyForBrite = (pm === "brite") && !!state.bank;
+    document.body.classList.toggle("brite-ready", readyForBrite || pm !== "brite");
+    updateSubmitText();
+  }
+
+  function updateSubmitText() {
+    if (!submitBtn) return;
+    var label = submitBtn.querySelector(".btn-text");
+    if (!label) return;
+    var amount = "€35,00";
+    if (state.pm === "brite") {
+      var bankObj = (BANKS[state.country] || []).find(function(b){ return b.id === state.bank; });
+      var bankName = bankObj ? bankObj.name : "bank";
+      label.textContent = "🔒 Betaal " + amount + " direct via " + bankName;
+    } else if (state.pm === "card") {
+      label.textContent = "🔒 Betaal " + amount + " met kaart";
+    } else if (state.pm === "paypal") {
+      label.textContent = "🔒 Betaal " + amount + " met PayPal";
+    } else if (state.pm === "klarna") {
+      label.textContent = "🔒 Betaal " + amount + " via Klarna";
+    }
+  }
+
+  // Country switcher buttons
+  if (switcher) {
+    [].forEach.call(switcher.querySelectorAll("button"), function(btn){
+      btn.addEventListener("click", function(){
+        [].forEach.call(switcher.querySelectorAll("button"), function(b){ b.classList.remove("active"); });
+        btn.classList.add("active");
+        renderBanks(btn.getAttribute("data-c"));
+        selectPM("brite");
+      });
+    });
+  }
+
+  // Also listen to the real country dropdown in the address form, if present
+  var addrCountry = document.querySelector('[name="country"], #country, select[id*="country" i]');
+  if (addrCountry) {
+    addrCountry.addEventListener("change", function(e){
+      var c = (e.target.value || "").toUpperCase();
+      if (BANKS[c]) {
+        renderBanks(c);
+        selectPM("brite");
+        [].forEach.call(switcher.querySelectorAll("button"), function(b){
+          b.classList.toggle("active", b.getAttribute("data-c") === c);
         });
-        grid.appendChild(tile);
-      });
-    }).catch(function(err){
-      console.warn('[Brite Demo] banks fetch failed:', err);
+      }
     });
   }
 
-  /* ─── 3) Render the Brite card + simple mock alternative rows directly into #payment-methods ───
-     The page's real loadPaymentMethods is inside an IIFE (not accessible via window),
-     so we render the whole payment section ourselves. */
-  function buildAltMethod(opts) {
-    var label = document.createElement('label');
-    label.className = 'payment-method';
-    label.setAttribute('data-method', opts.code);
-    label.setAttribute('data-provider', opts.provider);
-    label.innerHTML =
-      '<input type="radio" name="payment_method" value="' + opts.code + '">' +
-      '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
-      '<div class="pm-info">' +
-        '<div class="pm-name">' + opts.name + '</div>' +
-        (opts.desc ? '<div class="pm-desc">' + opts.desc + '</div>' : '') +
-      '</div>' +
-      (opts.thumbs || '');
-    label.addEventListener('click', function(){
-      // Deselect Brite + all PM rows
-      var briteCard = document.getElementById('brite-card');
-      if (briteCard) briteCard.classList.remove('selected');
-      [].forEach.call(document.querySelectorAll('.payment-method.selected'), function(el){ el.classList.remove('selected'); });
-      label.classList.add('selected');
-    });
-    return label;
-  }
+  // Click on Brite header expands selection
+  briteCard.querySelector(".brite-card-head").addEventListener("click", function(){ selectPM("brite"); });
 
-  function renderEverything() {
-    var container = document.getElementById('payment-methods');
-    if (!container) return;
+  // Other PM cards
+  [].forEach.call(document.querySelectorAll(".payment-method"), function(el){
+    el.addEventListener("click", function(){ selectPM(el.getAttribute("data-pm")); });
+  });
 
-    // Hide the loader / error placeholders
-    var loadingEl = document.getElementById('payment-methods-loading');
-    var errorEl = document.getElementById('payment-methods-error');
-    if (loadingEl) loadingEl.style.display = 'none';
-    if (errorEl) errorEl.style.display = 'none';
-
-    // Clear any previously rendered methods (idempotent on hot-reload)
-    [].forEach.call(container.querySelectorAll('.brite-card, .payment-method'), function(el){ el.remove(); });
-
-    // 1. Brite card (always first, recommended)
-    var briteCard = buildBriteCard();
-    container.appendChild(briteCard);
-
-    // 2. Alternative payment methods (mocked rows)
-    container.appendChild(buildAltMethod({
-      code: 'creditcard', provider: 'mollie',
-      name: 'Creditcard / Debetkaart',
-      desc: 'Visa, Mastercard, American Express',
-      thumbs: '<div class="brite-thumbs">' +
-        '<span class="brite-mini-thumb" style="background:#1A1F71;color:#FFF;font-size:8px;font-weight:700;height:18px;padding:0 5px;border-radius:3px;display:inline-flex;align-items:center;">VISA</span>' +
-        '<span class="brite-mini-thumb" style="background:#EB001B;color:#FFF;font-size:8px;font-weight:700;height:18px;padding:0 5px;border-radius:3px;display:inline-flex;align-items:center;">MC</span>' +
-        '<span class="brite-mini-thumb" style="background:#006FCF;color:#FFF;font-size:8px;font-weight:700;height:18px;padding:0 5px;border-radius:3px;display:inline-flex;align-items:center;">AMEX</span>' +
-      '</div>'
-    }));
-    container.appendChild(buildAltMethod({
-      code: 'paypal', provider: 'paypal',
-      name: 'PayPal',
-      desc: 'Betaal met je PayPal-saldo of gekoppelde rekening',
-      thumbs: '<div class="brite-thumbs"><span class="brite-mini-thumb" style="background:#003087;color:#FFF;font-size:8px;font-weight:700;height:18px;padding:0 5px;border-radius:3px;display:inline-flex;align-items:center;">PayPal</span></div>'
-    }));
-    container.appendChild(buildAltMethod({
-      code: 'klarna', provider: 'klarna',
-      name: 'Klarna — achteraf betalen (30 dagen)',
-      desc: 'Eerst ontvangen, daarna betalen. Renteloos.',
-      thumbs: '<div class="brite-thumbs"><span class="brite-mini-thumb" style="background:#FFB3C7;color:#0A0B09;font-size:8px;font-weight:700;height:18px;padding:0 5px;border-radius:3px;display:inline-flex;align-items:center;">Klarna</span></div>'
-    }));
-
-    // Wire up Brite header click → Brite is selected, alts get deselected
-    briteCard.querySelector('.brite-card-head').addEventListener('click', function(){
-      briteCard.classList.add('selected');
-      [].forEach.call(document.querySelectorAll('.payment-method.selected'), function(el){ el.classList.remove('selected'); });
-    });
-
-    // Render banks for default country (NL or from address form)
-    var countrySelect = document.querySelector('[name="country"], #country, select[id*="country" i]');
-    var country = 'NL';
-    if (countrySelect && countrySelect.value) {
-      var v = (countrySelect.value || '').toUpperCase();
-      if (BANKS[v]) country = v;
-    }
-    renderBanksForCountry(country);
-
-    if (countrySelect && !countrySelect.__briteHooked) {
-      countrySelect.__briteHooked = true;
-      countrySelect.addEventListener('change', function(e){
-        var c = (e.target.value || '').toUpperCase();
-        if (BANKS[c]) renderBanksForCountry(c);
-      });
-    }
-  }
-
-  function start() {
-    var target = document.getElementById('payment-methods');
-    if (!target) { setTimeout(start, 100); return; }
-    renderEverything();
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start);
-  } else {
-    start();
-  }
+  // Initial render
+  renderBanks("NL");
+  selectPM("brite");
 })();
 </script>
 </body>
