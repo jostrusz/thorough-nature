@@ -7285,6 +7285,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return;
     }
 
+    // ── BRITE DEMO SELECTION OVERRIDE ──
+    // The ?brite=1 picker drives selection via window globals (separate from the
+    // page's local selectedMethod/Provider vars). When a Brite bank is chosen,
+    // force the local selection to Brite so the session is created with the Brite
+    // provider — otherwise submit falls through to the page's default (PayPal/Card).
+    if (window.__briteSelected === true) {
+      selectedMethod = window.__briteMethod || 'pay_by_bank';
+      selectedProvider = 'brite';
+      selectedProviderId = 'pp_brite_brite';
+    }
+
     // Toon laadstatus
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
@@ -8463,6 +8474,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             window.selectedProviderId = 'pp_brite_brite';
             window.__briteBankId = b.bank_id;     // selected opaque bank_id → session + Web SDK
             window.__briteMethod = 'pay_by_bank';
+            window.__briteSelected = true;          // submit handler uses Brite
             var briteCard = document.getElementById('brite-card');
             briteCard.classList.add('selected');
             [].forEach.call(document.querySelectorAll('.payment-method.selected, .klarna-parent.expanded'), function(el){
@@ -8474,7 +8486,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         grid.appendChild(tile);
       });
       // Default selection = first bank (so submit works even without an explicit click)
-      if (banks[0]) { window.__briteBankId = banks[0].bank_id; window.__briteMethod = 'pay_by_bank'; }
+      if (banks[0]) {
+        window.__briteBankId = banks[0].bank_id; window.__briteMethod = 'pay_by_bank';
+        // If the Brite card is the active method, mark Brite as selected by default.
+        var bc = document.getElementById('brite-card');
+        if (bc && bc.classList.contains('selected')) window.__briteSelected = true;
+      }
     }).catch(function(err){
       console.warn('[Brite Demo] banks fetch failed:', err);
     });
@@ -8502,6 +8519,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (briteCard) briteCard.classList.remove('selected');
         [].forEach.call(document.querySelectorAll('.payment-method.selected'), function(el){ el.classList.remove('selected'); });
         label.classList.add('selected');
+        window.__briteSelected = false;  // alt method chosen → submit no longer forces Brite
       });
     });
     return label;
@@ -8553,6 +8571,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       keepScroll(function(){
         briteCard.classList.add('selected');
         [].forEach.call(document.querySelectorAll('.payment-method.selected'), function(el){ el.classList.remove('selected'); });
+        window.selectedMethod = 'pay_by_bank';
+        window.selectedProvider = 'brite';
+        window.selectedProviderId = 'pp_brite_brite';
+        window.__briteSelected = true;  // Brite chosen → submit uses Brite
       });
     });
 
