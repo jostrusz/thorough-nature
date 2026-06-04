@@ -22,30 +22,27 @@ type InjectedDependencies = {
 }
 
 /**
- * Maps Brite transaction states → Medusa payment session statuses.
- * Brite uses different vocabularies depending on endpoint; we accept both
- * `state` and `status` payload fields and normalise here.
+ * Maps Brite states → Medusa payment session statuses.
+ *
+ * IMPORTANT: Brite's SESSION states and TRANSACTION states share the same
+ * numbers but mean DIFFERENT things, so they must NOT be mapped with one table.
+ *   SESSION states (session.get / Web SDK onState — in-depth-knowledge-session-states):
+ *     0 CREATED · 1 AUTH_STARTED · 2 AUTH_COMPLETED · 3 BANK_SELECT_STARTED ·
+ *     4 BANK_SELECT_COMPLETED · 5 DEPOSIT_STARTED · 6 RECIPIENT_APPROVAL_STARTED ·
+ *     7 RECIPIENT_APPROVAL_COMPLETED · 8 TX_APPROVAL_STARTED · 9 TX_APPROVAL_COMPLETED ·
+ *     10 ABORTED · 11 FAILED · 12 COMPLETED.  → only 12 is success; 10/11 fail; 0–9 pending.
+ *   TRANSACTION states (transaction.get / callbacks — in-depth-knowledge-transaction-states):
+ *     0 CREATED · 1 PENDING · 2 ABORTED · 3 FAILED · 4 COMPLETED · 5 CREDIT ·
+ *     6 SETTLED · 7 DEBIT.  → 4/5/6 success (6 = definitively settled); 2/3/7 fail; 0/1 pending.
  */
-function mapBriteStateToMedusa(state: any): PaymentSessionStatus {
-  // Brite session.get / transaction.get return NUMERIC states — calling
-  // .toUpperCase() on a number throws, which previously crashed authorize.
-  //   session_state:     10 ABORTED, 11 FAILED, 12 COMPLETED
-  //   transaction_state: 0 CREATED, 1 PENDING, 2 ABORTED, 3 FAILED,
-  //                      4 COMPLETED, 5 CREDIT, 6 SETTLED, 7 DEBIT
-  const numeric =
-    typeof state === "number"
-      ? state
-      : /^\d+$/.test(String(state ?? "").trim())
-        ? Number(state)
-        : null
-  if (numeric !== null) {
-    if ([4, 5, 6, 12].includes(numeric)) return PaymentSessionStatus.CAPTURED
-    if ([2, 10].includes(numeric)) return PaymentSessionStatus.CANCELED
-    if ([3, 11].includes(numeric)) return PaymentSessionStatus.ERROR
-    return PaymentSessionStatus.PENDING // 0, 1, 7, 8, …
-  }
-  const s = String(state || "").toUpperCase()
-  switch (s) {
+function toNumericState(state: any): number | null {
+  if (typeof state === "number") return state
+  const s = String(state ?? "").trim()
+  return /^\d+$/.test(s) ? Number(s) : null
+}
+
+function mapBriteStringState(state: any): PaymentSessionStatus {
+  switch (String(state || "").toUpperCase()) {
     case "INITIATED":
     case "PENDING":
     case "PENDING_PROCESSING":
@@ -67,6 +64,29 @@ function mapBriteStateToMedusa(state: any): PaymentSessionStatus {
     default:
       return PaymentSessionStatus.PENDING
   }
+}
+
+/** SESSION state → Medusa status. Only 12 = success; 10/11 = fail; 0–9 = pending. */
+function mapBriteSessionState(state: any): PaymentSessionStatus {
+  const n = toNumericState(state)
+  if (n !== null) {
+    if (n === 12) return PaymentSessionStatus.CAPTURED
+    if (n === 10) return PaymentSessionStatus.CANCELED
+    if (n === 11) return PaymentSessionStatus.ERROR
+    return PaymentSessionStatus.PENDING
+  }
+  return mapBriteStringState(state)
+}
+
+/** TRANSACTION state → Medusa status. 4/5/6 = success; 2/3/7 = fail; 0/1 = pending. */
+function mapBriteTransactionState(state: any): PaymentSessionStatus {
+  const n = toNumericState(state)
+  if (n !== null) {
+    if ([4, 5, 6].includes(n)) return PaymentSessionStatus.CAPTURED
+    if ([2, 3, 7].includes(n)) return PaymentSessionStatus.ERROR
+    return PaymentSessionStatus.PENDING
+  }
+  return mapBriteStringState(state)
 }
 
 /**
@@ -280,6 +300,7 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
         { url: cbUrl, transaction_state: 2 },  // ABORTED
         { url: cbUrl, transaction_state: 3 },  // FAILED
         { url: cbUrl, transaction_state: 7 },  // DEBIT (terminal fail)
+        { url: cbUrl, session_state: 10 },     // session ABORTED
         { url: cbUrl, session_state: 11 },     // session FAILED
         { url: cbUrl, session_state: 12 },     // session COMPLETED
       ]
@@ -392,7 +413,7 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
 
       const session = await client.getSession(sessionId)
       const raw = session.state
-      const mapped = mapBriteStateToMedusa(raw)
+      const mapped = mapBriteSessionState(raw)
 
       this.logger_.info(`[Brite] Authorize: session ${sessionId} → state ${raw} → ${mapped}`)
 
@@ -504,7 +525,7 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
       const sessionId = data.briteSessionId || data.intentId
       if (!sessionId) return PaymentSessionStatus.PENDING
       const session = await client.getSession(sessionId)
-      return mapBriteStateToMedusa(session.state)
+      return mapBriteSessionState(session.state)
     } catch {
       return PaymentSessionStatus.ERROR
     }

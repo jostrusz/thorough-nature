@@ -290,14 +290,17 @@ export class BriteApiClient {
   /**
    * Create an iDEAL payment session (NL only).
    * Brite requires iDEAL to be presented as its own payment method.
-   * Endpoint: POST /api/session.create_iDEAL_payment
+   * Endpoint: POST /api/session.create_ideal_payment  (lowercase — the camelCase
+   *   "create_iDEAL_payment" from the docs returns METHOD_NOT_FOUND in the live API).
    * Mandatory: country_id="nl", currency_id="eur".
+   * NOTE: requires iDEAL to be enabled on the Brite merchant account, otherwise
+   *   Brite returns "Merchant does not have iDEAL payments enabled in NL".
    */
   async createIdealSession(data: BriteSessionRequest): Promise<BriteSessionResponse> {
     await this.ensureToken()
     try {
       const response = await this.client.post<BriteSessionResponse>(
-        "/api/session.create_iDEAL_payment",
+        "/api/session.create_ideal_payment",
         { ...data, country_id: "nl", currency_id: "eur" },
         { headers: this.authHeaders() }
       )
@@ -314,9 +317,12 @@ export class BriteApiClient {
   /**
    * Create a Swish payment session (SE only).
    * Brite requires Swish to be presented as its own payment method.
-   * Endpoint: POST /api/session.create_swish_payment
+   * Endpoint: POST /api/session.create_swish_payment  (lowercase — verified against
+   *   the live API; "create_Swish_payment" returns METHOD_NOT_FOUND).
    * Mandatory: country_id="se", currency_id="sek", statement_reference (max 50 chars).
    * No customer_id (no returning-user concept for Swish).
+   * NOTE: requires Swish to be enabled on the Brite merchant account, otherwise
+   *   Brite returns "Session TYPE_SWISH is disabled in Sweden".
    */
   async createSwishSession(data: BriteSessionRequest): Promise<BriteSessionResponse> {
     await this.ensureToken()
