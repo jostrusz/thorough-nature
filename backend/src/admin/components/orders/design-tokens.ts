@@ -150,6 +150,14 @@ export function getPaymentIconUrl(order: any): string {
   if (providerId.includes("klarna")) return `${ICON_BASE}/apm/klarna.svg`
   if (providerId.includes("paypal")) return `${ICON_BASE}/apm/paypal.svg`
 
+  // Brite (Pay by Bank) — show the paying bank's OWN logo, served by bank_id from
+  // the cached Brite bank list. The endpoint always returns an image (bank logo,
+  // or a "Brite" badge when the bank is unknown), so the icon never breaks.
+  if (providerId.includes("brite") || order.metadata?.payment_provider === "brite") {
+    const bankId = order.metadata?.payment_brite_bank_id || data?.preselected_bank || ""
+    return `/public/brite-bank-logo?bank_id=${encodeURIComponent(bankId)}`
+  }
+
   // Stripe — map method to specific icon
   if (providerId.includes("stripe")) {
     const m = (method || "").toLowerCase()
@@ -246,6 +254,7 @@ export function getPaymentFallback(order: any): { letter: string; bg: string; co
   const { providerId } = findPrimaryPayment(order)
   if (providerId.includes("stripe")) return { letter: "S", bg: "#635BFF", color: "#fff" }
   if (providerId.includes("airwallex")) return { letter: "AW", bg: "#FF5100", color: "#fff" }
+  if (providerId.includes("brite") || order.metadata?.payment_provider === "brite") return { letter: "B", bg: "#FFE600", color: "#0A0B09" }
   if (providerId.includes("comgate")) return { letter: "C", bg: "#444", color: "#fff" }
   if (providerId.includes("przelewy") || providerId.includes("p24")) return { letter: "P24", bg: "#D40E2F", color: "#fff" }
   return { letter: "?", bg: colors.textMuted, color: "#fff" }
@@ -256,6 +265,10 @@ export function getPaymentMethodName(order: any): string {
   const { providerId, method } = findPrimaryPayment(order)
   if (providerId.includes("klarna")) return "Klarna"
   if (providerId.includes("paypal")) return "PayPal"
+  if (providerId.includes("brite") || order.metadata?.payment_provider === "brite") {
+    const bank = order.metadata?.payment_brite_bank_name
+    return bank ? `${bank} · Brite` : "Brite (Pay by Bank)"
+  }
   if (providerId.includes("comgate")) {
     const m = method || ""
     const names: Record<string, string> = {

@@ -177,6 +177,23 @@ export default async function orderPlacedPaymentMetadataHandler({
         }
         if (paymentData.preselected_bank) {
           newMetadata.payment_brite_bank_id = paymentData.preselected_bank
+          // Resolve the human bank name from the cached Brite bank list (best effort)
+          // so the admin can label the order with the actual bank.
+          try {
+            const { Pool } = require("pg")
+            const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+            try {
+              const { rows } = await pool.query(
+                `SELECT name FROM brite_bank_logo
+                 WHERE bank_id = $1 AND name IS NOT NULL
+                 ORDER BY updated_at DESC LIMIT 1`,
+                [paymentData.preselected_bank]
+              )
+              if (rows[0]?.name) newMetadata.payment_brite_bank_name = rows[0].name
+            } finally {
+              await pool.end().catch(() => {})
+            }
+          } catch { /* best effort — name is non-critical */ }
         }
         newMetadata.payment_method = "pay_by_bank"
         newMetadata.payment_provider = "brite"
