@@ -59,6 +59,7 @@ export default async function refreshBriteBankLogos(container: any) {
     return
   }
 
+  const mode = isTest ? "test" : "live"
   const client = new BriteApiClient(clientId, clientSecret, isTest, logger, baseUrl)
   try {
     await client.authenticate()
@@ -84,25 +85,27 @@ export default async function refreshBriteBankLogos(container: any) {
       const tx = await pool.connect()
       try {
         await tx.query("BEGIN")
-        await tx.query(`DELETE FROM brite_bank_logo WHERE country = $1`, [country.toUpperCase()])
+        // Scope by mode — sandbox + production bank_ids coexist for the same country
+        await tx.query(`DELETE FROM brite_bank_logo WHERE country = $1 AND mode = $2`, [country.toUpperCase(), mode])
         let inserted = 0
         let sort = 0
         for (const b of banks) {
           if (b.enabled === false) continue
           if (!b.id || !b.name) continue
-          const id = `bbl_${country}_${b.id}`
+          const id = `bbl_${mode}_${country}_${b.id}`
             .toLowerCase()
             .replace(/[^a-z0-9_]/g, "_")
-            .slice(0, 120)
+            .slice(0, 150)
 
           await tx.query(
             `INSERT INTO brite_bank_logo
-               (id, country, locale, bank_id, name, logo_url, sort_order, is_active, metadata, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8::jsonb, now(), now())
+               (id, country, locale, bank_id, name, logo_url, sort_order, is_active, mode, metadata, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, $9::jsonb, now(), now())
              ON CONFLICT (id) DO UPDATE SET
                name = EXCLUDED.name, logo_url = EXCLUDED.logo_url,
                sort_order = EXCLUDED.sort_order, bank_id = EXCLUDED.bank_id,
-               metadata = EXCLUDED.metadata, updated_at = now(), deleted_at = null`,
+               mode = EXCLUDED.mode, metadata = EXCLUDED.metadata,
+               updated_at = now(), deleted_at = null`,
             [
               id,
               country.toUpperCase(),
@@ -111,6 +114,7 @@ export default async function refreshBriteBankLogos(container: any) {
               b.name,
               b.logo || "",                    // base64 data URI
               sort++,
+              mode,
               JSON.stringify({ enabled: b.enabled !== false, source: "bank.list" }),
             ]
           )
@@ -119,7 +123,7 @@ export default async function refreshBriteBankLogos(container: any) {
         await tx.query("COMMIT")
         totalRows += inserted
         totalCountries++
-        logger.info(`[Brite Refresh] ${country.toUpperCase()}: ${inserted} banks cached (real bank_id)`)
+        logger.info(`[Brite Refresh] ${country.toUpperCase()} (${mode}): ${inserted} banks cached (real bank_id)`)
       } catch (txErr: any) {
         await tx.query("ROLLBACK").catch(() => {})
         throw txErr

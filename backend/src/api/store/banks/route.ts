@@ -29,49 +29,35 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
   try {
-    // Prefer exact locale match if provided, else fall back to any locale for the country.
-    const params: any[] = [country]
-    let sql = `
-      SELECT bank_id, name, logo_url, sort_order, locale
-      FROM brite_bank_logo
-      WHERE country = $1
-        AND is_active = true
-        AND deleted_at IS NULL
-    `
-    if (locale) {
-      params.push(locale)
-      sql += ` AND locale = $2`
-    }
-    sql += ` ORDER BY sort_order ASC, name ASC`
-
-    const { rows } = await pool.query(sql, params)
-
-    // If a locale filter was requested but yielded nothing, retry without it
-    // (e.g. en_GB requested but only sv_SE cached for the country).
-    let banks = rows
-    let resolvedLocale = locale
-    if (locale && rows.length === 0) {
-      const { rows: fallback } = await pool.query(
-        `SELECT bank_id, name, logo_url, sort_order, locale
-         FROM brite_bank_logo
-         WHERE country = $1 AND is_active = true AND deleted_at IS NULL
-         ORDER BY sort_order ASC, name ASC`,
-        [country]
+    // Determine which bank_id set to return: it MUST match the active Brite
+    // gateway's mode, because bank_id values are environment-specific (sandbox
+    // ids differ from production ids). An explicit ?mode=test|live overrides.
+    let mode = String(req.query.mode || "").toLowerCase()
+    if (mode !== "test" && mode !== "live") {
+      const { rows: gw } = await pool.query(
+        `SELECT mode FROM gateway_config
+         WHERE provider = 'brite' AND is_active = true AND deleted_at IS NULL
+         ORDER BY priority ASC LIMIT 1`
       )
-      banks = fallback
-      resolvedLocale = fallback[0]?.locale || null
-    } else if (!locale) {
-      resolvedLocale = rows[0]?.locale || null
+      mode = gw[0]?.mode === "live" ? "live" : "test"
     }
+
+    const { rows } = await pool.query(
+      `SELECT bank_id, name, logo_url, sort_order
+       FROM brite_bank_logo
+       WHERE country = $1 AND mode = $2 AND is_active = true AND deleted_at IS NULL
+       ORDER BY sort_order ASC, name ASC`,
+      [country, mode]
+    )
 
     res.json({
       country,
-      locale: resolvedLocale,
-      count: banks.length,
-      banks: banks.map((b: any) => ({
+      mode,
+      count: rows.length,
+      banks: rows.map((b: any) => ({
         bank_id: b.bank_id,
         name: b.name,
-        logo_url: b.logo_url,
+        logo_url: b.logo_url || null,
         sort_order: b.sort_order,
       })),
     })
