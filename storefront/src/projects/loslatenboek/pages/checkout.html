@@ -8606,7 +8606,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         window.__briteBankName = banks[0].name;
         // If the Brite card is the active method, mark Brite as selected by default.
         var bc = document.getElementById('brite-card');
-        if (bc && bc.classList.contains('selected')) { window.__briteSelected = true; applyBriteButton(); }
+        if (bc && bc.classList.contains('selected')) {
+          window.__briteSelected = true;
+          applyBriteButton();
+          // The real renderer auto-selects its first method (e.g. PayPal) on page
+          // init — often BEFORE this default runs and before the observer can see
+          // it. Clear it once now so only the first Brite bank is selected; the
+          // observer handles any later re-render.
+          if (window.__clearRealSelection) window.__clearRealSelection();
+        }
       }
     }).catch(function(err){
       console.warn('[Brite Demo] banks fetch failed:', err);
