@@ -8280,21 +8280,37 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   function renderBanksForCountry(country, country_iso) {
     var grid = document.getElementById('brite-bank-grid');
     if (!grid) return;
-    fetch('/store/banks?country=' + (country_iso || country)).then(function(r){ return r.json(); }).then(function(data){
-      var banks = data.banks || [];
+    var cc = (country_iso || country);
+    // REAL backend fetch — pulls the real Brite bank_id + base64 logos from
+    // /store/banks (mode=test). originalFetch bypasses the demo's fetch stub so
+    // we hit the live Medusa backend, not the mock. Falls back to the hardcoded
+    // mock only if the backend call fails (offline / CORS).
+    var base = (window.PROJECT_CONFIG && PROJECT_CONFIG.medusaUrl) || '';
+    var key = (window.PROJECT_CONFIG && PROJECT_CONFIG.publishableApiKey) || '';
+    originalFetch(base + '/store/banks?country=' + cc + '&mode=test', {
+      headers: key ? { 'x-publishable-api-key': key } : {}
+    }).then(function(r){ return r.json(); }).then(function(data){
+      var banks = (data && data.banks) || [];
+      if (!banks.length && BANKS[cc]) {
+        // backend empty → fall back to mock so the picker isn't blank
+        banks = BANKS[cc].map(function(b){ return { bank_id: b.id, name: b.name, logo_url: b.logo, _fallback: b.fallback }; });
+      }
+      console.log('[Brite Demo] /store/banks ' + cc + ' → ' + banks.length + ' banks (real backend)');
       grid.innerHTML = '';
       banks.forEach(function(b, idx){
         var tile = document.createElement('div');
         tile.className = 'brite-bank-tile' + (idx === 0 ? ' selected' : '');
         tile.setAttribute('data-bank', b.bank_id);
-        var fb = JSON.stringify(fallbackHTML(b._fallback || {label:b.name.slice(0,5),bg:'#CCC',fg:'#000'})).replace(/"/g,'&quot;');
+        var fb = JSON.stringify(fallbackHTML(b._fallback || {label:(b.name||'?').slice(0,6),bg:'#E8E8EC',fg:'#5A3D6B'})).replace(/"/g,'&quot;');
         var popular = idx === 0 ? '<span class="brite-popular-badge">Meest gekozen</span>' : '';
         tile.innerHTML =
           popular +
           '<div class="brite-logo">' +
-            '<img src="' + b.logo_url + '" alt="' + b.name + '" ' +
-            'onload="if(!this.naturalWidth||!this.naturalHeight){this.outerHTML=' + fb + '}" ' +
-            'onerror="this.outerHTML=' + fb + '">' +
+            (b.logo_url
+              ? '<img src="' + b.logo_url + '" alt="' + b.name + '" ' +
+                'onload="if(!this.naturalWidth||!this.naturalHeight){this.outerHTML=' + fb + '}" ' +
+                'onerror="this.outerHTML=' + fb + '">'
+              : fallbackHTML(b._fallback || {label:(b.name||'?').slice(0,6),bg:'#E8E8EC',fg:'#5A3D6B'})) +
           '</div>' +
           '<div class="brite-bank-name">' + b.name + '</div>';
         tile.addEventListener('click', function(){
