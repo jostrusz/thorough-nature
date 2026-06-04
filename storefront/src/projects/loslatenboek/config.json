@@ -57,6 +57,7 @@
     "verzending": "verzending.html",
     "retourbeleid": "retourbeleid.html",
     "popup-loslatenboek": "popup-loslatenboek.html",
-    "checkout-revolut-test": "checkout-revolut-test.html"
+    "checkout-revolut-test": "checkout-revolut-test.html",
+    "checkout-brite-preview": "checkout-brite-preview.html"
   }
 }
