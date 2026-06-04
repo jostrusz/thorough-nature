@@ -26,8 +26,25 @@ type InjectedDependencies = {
  * Brite uses different vocabularies depending on endpoint; we accept both
  * `state` and `status` payload fields and normalise here.
  */
-function mapBriteStateToMedusa(state: string | undefined): PaymentSessionStatus {
-  const s = (state || "").toUpperCase()
+function mapBriteStateToMedusa(state: any): PaymentSessionStatus {
+  // Brite session.get / transaction.get return NUMERIC states — calling
+  // .toUpperCase() on a number throws, which previously crashed authorize.
+  //   session_state:     10 ABORTED, 11 FAILED, 12 COMPLETED
+  //   transaction_state: 0 CREATED, 1 PENDING, 2 ABORTED, 3 FAILED,
+  //                      4 COMPLETED, 5 CREDIT, 6 SETTLED, 7 DEBIT
+  const numeric =
+    typeof state === "number"
+      ? state
+      : /^\d+$/.test(String(state ?? "").trim())
+        ? Number(state)
+        : null
+  if (numeric !== null) {
+    if ([4, 5, 6, 12].includes(numeric)) return PaymentSessionStatus.CAPTURED
+    if ([2, 10].includes(numeric)) return PaymentSessionStatus.CANCELED
+    if ([3, 11].includes(numeric)) return PaymentSessionStatus.ERROR
+    return PaymentSessionStatus.PENDING // 0, 1, 7, 8, …
+  }
+  const s = String(state || "").toUpperCase()
   switch (s) {
     case "INITIATED":
     case "PENDING":
@@ -361,26 +378,32 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
     }
   }
 
-  /** Authorize = fetch latest state from Brite */
+  /** Authorize = fetch latest SESSION state from Brite (session.get, not
+   *  transaction.get — we store a session id, and transaction.get rejects it). */
   async authorizePayment(input: any): Promise<any> {
     const sessionData = input.data || input
     try {
       const { client } = await this.getBriteClient(sessionData.project_slug)
-      const txId = sessionData.briteSessionId || sessionData.intentId
+      const sessionId = sessionData.briteSessionId || sessionData.intentId
 
-      if (!txId) {
+      if (!sessionId) {
         return { status: PaymentSessionStatus.PENDING, data: sessionData }
       }
 
-      const tx = await client.getTransaction(txId)
-      const raw = tx.state || tx.status
+      const session = await client.getSession(sessionId)
+      const raw = session.state
       const mapped = mapBriteStateToMedusa(raw)
 
-      this.logger_.info(`[Brite] Authorize: ${txId} → ${raw} → ${mapped}`)
+      this.logger_.info(`[Brite] Authorize: session ${sessionId} → state ${raw} → ${mapped}`)
 
       return {
         status: mapped,
-        data: { ...sessionData, status: raw },
+        data: {
+          ...sessionData,
+          status: raw,
+          // Capture the real transaction id now so refunds can target it later.
+          briteTransactionId: session.transaction_id || sessionData.briteTransactionId || null,
+        },
       }
     } catch (error: any) {
       this.logger_.error(`[Brite] Authorization failed: ${error.message}`)
@@ -396,15 +419,19 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
     const sessionData = input.data || input
     try {
       const { client } = await this.getBriteClient(sessionData.project_slug)
-      const txId = sessionData.briteSessionId || sessionData.intentId
+      const sessionId = sessionData.briteSessionId || sessionData.intentId
 
-      if (!txId) return { data: sessionData }
+      if (!sessionId) return { data: sessionData }
 
-      const tx = await client.getTransaction(txId)
-      this.logger_.info(`[Brite] Capture (instant settle): ${txId}, state: ${tx.state || tx.status}`)
+      const session = await client.getSession(sessionId)
+      this.logger_.info(`[Brite] Capture (instant settle): session ${sessionId}, state: ${session.state}`)
 
       return {
-        data: { ...sessionData, status: tx.state || tx.status },
+        data: {
+          ...sessionData,
+          status: session.state,
+          briteTransactionId: session.transaction_id || sessionData.briteTransactionId || null,
+        },
       }
     } catch (error: any) {
       this.logger_.error(`[Brite] Capture failed: ${error.message}`)
@@ -417,7 +444,16 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
     const refundAmount = input.amount
     try {
       const { client } = await this.getBriteClient(sessionData.project_slug)
-      const txId = sessionData.briteSessionId || sessionData.intentId
+      // Refunds need a real TRANSACTION id. Prefer the one captured at authorize;
+      // otherwise resolve it from the session.
+      let txId = sessionData.briteTransactionId
+      if (!txId) {
+        const sessionId = sessionData.briteSessionId || sessionData.intentId
+        if (sessionId) {
+          const session = await client.getSession(sessionId)
+          txId = session.transaction_id
+        }
+      }
 
       if (!txId) {
         throw new MedusaError(
@@ -465,10 +501,10 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
   async getPaymentStatus(data: any): Promise<PaymentSessionStatus> {
     try {
       const { client } = await this.getBriteClient(data.project_slug)
-      const txId = data.briteSessionId || data.intentId
-      if (!txId) return PaymentSessionStatus.PENDING
-      const tx = await client.getTransaction(txId)
-      return mapBriteStateToMedusa(tx.state || tx.status)
+      const sessionId = data.briteSessionId || data.intentId
+      if (!sessionId) return PaymentSessionStatus.PENDING
+      const session = await client.getSession(sessionId)
+      return mapBriteStateToMedusa(session.state)
     } catch {
       return PaymentSessionStatus.ERROR
     }

@@ -362,14 +362,40 @@ export class BriteApiClient {
   }
 
   /**
-   * Retrieve a transaction (session) by id.
+   * Retrieve a SESSION by id (POST /api/session.get).
+   *
+   * This is what we store as `briteSessionId` (session.create returns a Session
+   * id). transaction.get REJECTS a session id ("we found a Session with given
+   * id"), so authorize/status must go through session.get. The response carries
+   * the numeric session `state` (12 = COMPLETED) AND the `transaction_id` needed
+   * for refunds.
+   */
+  async getSession(sessionId: string): Promise<any> {
+    await this.ensureToken()
+    try {
+      const response = await this.client.post(
+        "/api/session.get",
+        { id: sessionId },
+        { headers: this.authHeaders() }
+      )
+      return response.data
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message
+      this.logger.error(`[Brite] Get session failed: ${message}`)
+      throw new Error(`Failed to retrieve Brite session: ${message}`)
+    }
+  }
+
+  /**
+   * Retrieve a transaction by id (POST /api/transaction.get). Needs a real
+   * TRANSACTION id (from session.get → transaction_id), not a session id.
    */
   async getTransaction(transactionId: string): Promise<BriteTransactionResponse> {
     await this.ensureToken()
     try {
       const response = await this.client.post<BriteTransactionResponse>(
         "/api/transaction.get",
-        { transaction_id: transactionId },
+        { id: transactionId },
         { headers: this.authHeaders() }
       )
       return response.data
