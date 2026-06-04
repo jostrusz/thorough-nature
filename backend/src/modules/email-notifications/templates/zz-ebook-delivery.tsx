@@ -244,7 +244,7 @@ export const ZzEbookDeliveryTemplate: React.FC<ZzEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              📦 Twoja papierowa książka <strong>Życie, jakiego nigdy sobie nie pozwoliłaś</strong> jest już w drodze i zostanie dostarczona w ciągu <strong>3–5 dni roboczych</strong> przez InPost. Numer do śledzenia otrzymasz osobnym mailem.
+              📦 Twoja papierowa książka <strong>Życie, jakiego nigdy sobie nie pozwoliłaś</strong> jest już w drodze i zostanie dostarczona w ciągu <strong>2–4 dni roboczych</strong> przez InPost. Numer do śledzenia otrzymasz osobnym mailem.
             </Text>
           </div>
 

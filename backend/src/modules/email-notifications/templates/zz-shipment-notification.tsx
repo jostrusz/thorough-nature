@@ -221,7 +221,7 @@ export const ZzShipmentNotificationTemplate: React.FC<ZzShipmentNotificationTemp
               margin: '0',
               lineHeight: '1.5',
             }}>
-              🚚 &nbsp; <strong>Przewidywana dostawa:</strong> 4–7 dni roboczych
+              🚚 &nbsp; <strong>Przewidywana dostawa:</strong> 2–4 dni roboczych
             </Text>
             <Text style={{
               fontFamily: font,
@@ -475,7 +475,7 @@ export const ZzShipmentNotificationTemplate: React.FC<ZzShipmentNotificationTemp
                   <br />
                   {isPaczkomat
                     ? 'Otrzymasz SMS i e-mail z kodem odbioru, gdy paczka będzie czekać w Paczkomacie. Masz 48 godzin na odbiór.'
-                    : 'W ciągu 4–7 dni roboczych otrzymasz swoją książkę!'}
+                    : 'W ciągu 2–4 dni roboczych otrzymasz swoją książkę!'}
                 </td>
               </tr>
             </tbody>
