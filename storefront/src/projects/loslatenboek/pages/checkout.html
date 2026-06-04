@@ -5233,7 +5233,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
       // Flatten methods from all gateways into a single list
       allPaymentOptions = [];
+      // ── BRITE SAFETY GATE ──────────────────────────────────────────────
+      // The REAL payment flow NEVER renders Brite — even when a Brite gateway is
+      // ACTIVE in admin. Brite is shown ONLY by the demo emulator that activates
+      // on ?brite=1 (it mocks its own payment-options + UI). So real customers
+      // never see Brite, no matter the admin config, until we build the real
+      // frontend and remove this gate. This makes activating the gateway (for
+      // logo cron / sandbox testing) 100% safe — zero exposure on the live checkout.
       (data.gateways || []).forEach(function(gw) {
+        if (gw.provider === 'brite') {
+          console.log('[Brite] gateway active but gated out of real checkout (demo only via ?brite=1)');
+          return; // never expose Brite on the real flow
+        }
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
         (gw.methods || []).forEach(function(m) {
           var NL_NAMES = {
