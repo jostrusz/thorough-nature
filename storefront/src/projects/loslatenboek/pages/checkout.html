@@ -8595,10 +8595,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             applyBriteButton();
             var briteCard = document.getElementById('brite-card');
             briteCard.classList.add('selected');
-            [].forEach.call(document.querySelectorAll('.payment-method.selected, .klarna-parent.expanded'), function(el){
-              el.classList.remove('selected');
-              el.classList.remove('expanded');
-            });
+            if (window.__clearRealSelection) window.__clearRealSelection();  // mutual exclusivity
           });
         });
         grid.appendChild(tile);
@@ -8655,42 +8652,67 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (loadingEl) loadingEl.style.display = 'none';
     if (errorEl) errorEl.style.display = 'none';
 
-    // Clear any previously rendered methods (idempotent on hot-reload)
-    [].forEach.call(container.querySelectorAll('.brite-card, .payment-method'), function(el){ el.remove(); });
+    // SINGLE SOURCE OF TRUTH: the page's real renderPaymentMethods owns the alt
+    // methods (rich iDEAL/Card/PayPal/Klarna from the mocked /store/payment-options).
+    // The emulator only injects the Brite card ON TOP and coordinates ONE mutually-
+    // exclusive selection across both systems. (Previously the emulator rendered its
+    // own duplicate mock rows → two selectors, two selections fighting.)
 
-    // 1. Brite card (always first, recommended)
+    // Cross-scope selection helpers (pure DOM, callable from either system).
+    window.__clearRealSelection = function(){
+      document.querySelectorAll('#payment-methods .payment-method.selected, #payment-methods .klarna-sub-method.selected')
+        .forEach(function(el){ el.classList.remove('selected'); });
+      var kp = document.querySelector('.klarna-parent');
+      if (kp) {
+        kp.classList.remove('expanded');
+        var dot = kp.querySelector('.pm-radio-dot'); if (dot) dot.style.transform = 'scale(0)';
+        var rad = kp.querySelector('.pm-radio'); if (rad) rad.style.borderColor = 'var(--border)';
+      }
+      var ksp = document.getElementById('klarna-sub-methods'); if (ksp) ksp.classList.remove('open');
+      document.querySelectorAll('#payment-methods input[name="payment_method"]').forEach(function(r){ r.checked = false; });
+    };
+    window.__briteClearSelection = function(){
+      var bc = document.getElementById('brite-card'); if (bc) bc.classList.remove('selected');
+      document.querySelectorAll('.brite-bank-tile.selected').forEach(function(t){ t.classList.remove('selected'); });
+      window.__briteSelected = false;
+    };
+
+    // Remove a stale Brite card on hot-reload, but NEVER touch .payment-method
+    // (those belong to the real renderer).
+    [].forEach.call(container.querySelectorAll('.brite-card'), function(el){ el.remove(); });
+
+    // Brite card pinned to the top, above the real methods.
     var briteCard = buildBriteCard();
-    container.appendChild(briteCard);
+    container.insertBefore(briteCard, container.firstChild);
 
-    // 2. Alternative payment methods (mocked rows)
-    container.appendChild(buildAltMethod({
-      code: 'creditcard', provider: 'mollie',
-      name: 'Creditcard / Debetkaart',
-      desc: 'Visa, Mastercard, American Express',
-      thumbs: '<div class="brite-thumbs">' +
-        '<span class="brite-mini-thumb" style="background:#1A1F71;color:#FFF;font-size:8px;font-weight:700;height:18px;padding:0 5px;border-radius:3px;display:inline-flex;align-items:center;">VISA</span>' +
-        '<span class="brite-mini-thumb" style="background:#EB001B;color:#FFF;font-size:8px;font-weight:700;height:18px;padding:0 5px;border-radius:3px;display:inline-flex;align-items:center;">MC</span>' +
-        '<span class="brite-mini-thumb" style="background:#006FCF;color:#FFF;font-size:8px;font-weight:700;height:18px;padding:0 5px;border-radius:3px;display:inline-flex;align-items:center;">AMEX</span>' +
-      '</div>'
-    }));
-    container.appendChild(buildAltMethod({
-      code: 'paypal', provider: 'paypal',
-      name: 'PayPal',
-      desc: 'Betaal met je PayPal-saldo of gekoppelde rekening',
-      thumbs: '<div class="brite-thumbs"><span class="brite-mini-thumb" style="background:#003087;color:#FFF;font-size:8px;font-weight:700;height:18px;padding:0 5px;border-radius:3px;display:inline-flex;align-items:center;">PayPal</span></div>'
-    }));
-    container.appendChild(buildAltMethod({
-      code: 'klarna', provider: 'klarna',
-      name: 'Klarna — achteraf betalen (30 dagen)',
-      desc: 'Eerst ontvangen, daarna betalen. Renteloos.',
-      thumbs: '<div class="brite-thumbs"><span class="brite-mini-thumb" style="background:#FFB3C7;color:#0A0B09;font-size:8px;font-weight:700;height:18px;padding:0 5px;border-radius:3px;display:inline-flex;align-items:center;">Klarna</span></div>'
-    }));
+    // Keep the Brite card first + enforce a single default selection: while Brite is
+    // the active choice, strip any selection the real renderer auto-applies (it marks
+    // its first method selected on every (re)render / country change).
+    if (!container.__briteObserved) {
+      container.__briteObserved = true;
+      new MutationObserver(function(){
+        var bc = document.getElementById('brite-card');
+        if (bc && container.firstElementChild !== bc) container.insertBefore(bc, container.firstChild);
+        if (window.__briteSelected === true) window.__clearRealSelection();
+      }).observe(container, { childList: true });
+    }
 
-    // Wire up Brite header click → Brite is selected, alts get deselected
+    // Picking ANY real method clears Brite (capture phase → runs before the page's own
+    // per-method handler, which then sets its "Betalen met X" button text).
+    if (!container.__briteDelegated) {
+      container.__briteDelegated = true;
+      container.addEventListener('click', function(e){
+        if (e.target.closest && e.target.closest('.payment-method, .klarna-parent, .klarna-sub-method')) {
+          window.__briteClearSelection();
+        }
+      }, true);
+    }
+
+    // Brite header click → Brite selected, every real method cleared.
     briteCard.querySelector('.brite-card-head').addEventListener('click', function(){
       keepScroll(function(){
         briteCard.classList.add('selected');
-        [].forEach.call(document.querySelectorAll('.payment-method.selected'), function(el){ el.classList.remove('selected'); });
+        window.__clearRealSelection();
         window.selectedMethod = 'pay_by_bank';
         window.selectedProvider = 'brite';
         window.selectedProviderId = 'pp_brite_brite';
