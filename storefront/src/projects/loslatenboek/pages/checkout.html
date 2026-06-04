@@ -2398,8 +2398,11 @@ body {
 .brite-trust-strip span { display: inline-flex; align-items: center; gap: 4px; }
 .brite-trust-strip svg { width: 11px; height: 11px; }
 .brite-bank-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 6px; margin-top: 8px;
+  display: grid;
+  /* Natural responsive flow — tiles keep a comfortable min width and the column
+     count adapts to the container (4-up on a wide checkout, 3-up narrower). */
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 8px; margin-top: 10px;
 }
 .brite-bank-tile {
   position: relative;
@@ -2499,7 +2502,7 @@ body {
   }
   .brite-instant-hero .ih-sub { font-size: 12px; color: var(--text, #444); line-height: 1.35; }
   .brite-instant-hero .ih-sub strong { color: var(--heading); }
-  .brite-bank-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .brite-bank-grid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; }
   .brite-bank-tile { min-height: 96px; padding: 14px 7px 11px; gap: 9px; }
   .brite-bank-tile:active { transform: scale(0.97); }
   .brite-logo { height: 40px; }
@@ -8247,6 +8250,24 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     return '<span class="brite-fallback" style="background:' + fb.bg + ';color:' + fb.fg + '">' + fb.label + '</span>';
   }
 
+  // Keep the Brite card visually pinned across DOM mutations. Selecting a bank or
+  // method can collapse another section (e.g. an expanded Klarna panel), changing
+  // the page height and making the viewport jump. We anchor on the Brite card: note
+  // its viewport position before the mutation, then scroll by exactly the delta so
+  // it stays put (immediately + next frame to absorb synchronous reflow).
+  function keepScroll(fn){
+    var anchor = document.getElementById('brite-card');
+    var before = anchor ? anchor.getBoundingClientRect().top : null;
+    fn();
+    function settle(){
+      if (anchor == null || before == null) return;
+      var delta = anchor.getBoundingClientRect().top - before;
+      if (Math.abs(delta) > 0.5) window.scrollBy(0, delta);
+    }
+    settle();
+    requestAnimationFrame(settle);
+  }
+
   function buildBriteCard() {
     var card = document.createElement('div');
     card.className = 'brite-card selected';
@@ -8326,18 +8347,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           '</div>' +
           '<div class="brite-bank-name">' + b.name + '</div>';
         tile.addEventListener('click', function(){
-          [].forEach.call(grid.children, function(c){ c.classList.remove('selected'); });
-          tile.classList.add('selected');
-          // Set globals so the existing submit flow picks it up
-          if (typeof window.selectedMethod !== 'undefined' || true) window.selectedMethod = 'pay_by_bank';
-          if (typeof window.selectedProvider !== 'undefined' || true) window.selectedProvider = 'brite';
-          if (typeof window.selectedProviderId !== 'undefined' || true) window.selectedProviderId = 'pp_brite_brite';
-          // Mark Brite card as the selected payment method
-          var briteCard = document.getElementById('brite-card');
-          briteCard.classList.add('selected');
-          [].forEach.call(document.querySelectorAll('.payment-method.selected, .klarna-parent.expanded'), function(el){
-            el.classList.remove('selected');
-            el.classList.remove('expanded');
+          keepScroll(function(){
+            [].forEach.call(grid.children, function(c){ c.classList.remove('selected'); });
+            tile.classList.add('selected');
+            window.selectedMethod = 'pay_by_bank';
+            window.selectedProvider = 'brite';
+            window.selectedProviderId = 'pp_brite_brite';
+            var briteCard = document.getElementById('brite-card');
+            briteCard.classList.add('selected');
+            [].forEach.call(document.querySelectorAll('.payment-method.selected, .klarna-parent.expanded'), function(el){
+              el.classList.remove('selected');
+              el.classList.remove('expanded');
+            });
           });
         });
         grid.appendChild(tile);
@@ -8364,11 +8385,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       '</div>' +
       (opts.thumbs || '');
     label.addEventListener('click', function(){
-      // Deselect Brite + all PM rows
-      var briteCard = document.getElementById('brite-card');
-      if (briteCard) briteCard.classList.remove('selected');
-      [].forEach.call(document.querySelectorAll('.payment-method.selected'), function(el){ el.classList.remove('selected'); });
-      label.classList.add('selected');
+      keepScroll(function(){
+        var briteCard = document.getElementById('brite-card');
+        if (briteCard) briteCard.classList.remove('selected');
+        [].forEach.call(document.querySelectorAll('.payment-method.selected'), function(el){ el.classList.remove('selected'); });
+        label.classList.add('selected');
+      });
     });
     return label;
   }
@@ -8416,8 +8438,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // Wire up Brite header click → Brite is selected, alts get deselected
     briteCard.querySelector('.brite-card-head').addEventListener('click', function(){
-      briteCard.classList.add('selected');
-      [].forEach.call(document.querySelectorAll('.payment-method.selected'), function(el){ el.classList.remove('selected'); });
+      keepScroll(function(){
+        briteCard.classList.add('selected');
+        [].forEach.call(document.querySelectorAll('.payment-method.selected'), function(el){ el.classList.remove('selected'); });
+      });
     });
 
     // Render banks for default country (NL or from address form)
