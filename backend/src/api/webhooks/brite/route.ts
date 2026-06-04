@@ -317,11 +317,31 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(200).json({ received: true })
     }
 
-    const state = (txData?.state || txData?.status || "").toUpperCase()
-    const isSuccess = ["COMPLETED", "SETTLED", "SUCCEEDED"].includes(state)
-    const isFailed = ["FAILED", "DECLINED", "CANCELLED", "EXPIRED"].includes(state)
+    // Brite uses NUMERIC states (not strings).
+    //   transaction_state: 0 CREATED 1 PENDING 2 ABORTED 3 FAILED
+    //                      4 COMPLETED 5 CREDIT 6 SETTLED 7 DEBIT
+    //   session_state:     10 ABORTED 11 FAILED 12 COMPLETED
+    // We accept the numeric state from the callback payload (any of these field names),
+    // and keep a string fallback in case a payload sends a textual status.
+    const txState = req.body?.transaction_state ?? txData?.transaction_state ?? txData?.state_id ?? null
+    const sessState = req.body?.session_state ?? txData?.session_state ?? null
+    const numState = (txState !== null ? Number(txState) : (sessState !== null ? Number(sessState) : NaN))
+    const strState = String(txData?.state || txData?.status || "").toUpperCase()
 
-    logger.info(`[Brite Webhook] Event: ${event_type}, tx: ${briteSessionId}, state: ${state}`)
+    // Success = transaction 4/5/6 (completed/credit/settled) OR session 12 (completed)
+    const isSuccess =
+      [4, 5, 6].includes(numState) ||
+      (sessState !== null && Number(sessState) === 12) ||
+      ["COMPLETED", "SETTLED", "SUCCEEDED"].includes(strState)
+    // Failure = transaction 2/3/7 (aborted/failed/debit) OR session 10/11
+    const isFailed =
+      [2, 3, 7].includes(numState) ||
+      (sessState !== null && [10, 11].includes(Number(sessState))) ||
+      ["FAILED", "DECLINED", "CANCELLED", "EXPIRED", "ABORTED"].includes(strState)
+
+    const state = Number.isNaN(numState) ? strState : String(numState)
+
+    logger.info(`[Brite Webhook] Event: ${event_type}, tx: ${briteSessionId}, state: ${state} (success=${isSuccess}, failed=${isFailed})`)
 
     logPaymentEvent({
       intent_id: briteSessionId,

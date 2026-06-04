@@ -225,45 +225,68 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
       const firstName = customer?.first_name || billing.first_name || shipping.first_name || ""
       const lastName = customer?.last_name || billing.last_name || shipping.last_name || ""
 
-      const countryRaw = (
+      // Brite wants LOWERCASE country_id ("nl", "se", "de") — NOT uppercase.
+      const countryId = (
         billing.country_code ||
         shipping.country_code ||
         data?.country_code ||
         ""
-      ).toUpperCase()
+      ).toLowerCase()
+
+      // Method routing: "ideal" (NL) / "swish" (SE) are separate Brite endpoints;
+      // everything else → deposit (Pay by Bank).
+      const method = (data?.method || "brite").toLowerCase()
 
       const merchantReference = `medusa_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
 
-      // Pre-selected bank (skip Brite bank picker). Caller passes data.bank_id
-      // from our own bank picker; we send all three plausible field names so
-      // whichever Brite expects gets matched.
-      const preselectedBank = data?.bank_id || data?.bank?.id || null
+      // Pre-selected bank id — the OPAQUE token from POST bank.list (frontend bank picker
+      // passes data.bank_id). For the embedded Web SDK, bank_id is also handed to
+      // client.start({bank_id}) on the frontend; we forward it server-side for the hosted flow.
+      const preselectedBank = data?.bank_id || null
+
+      // ── Per-session callbacks (Brite has NO global webhook) ──
+      // Register our webhook URL keyed to each terminal/near-terminal state. Brite POSTs
+      // to the URL when the state is reached; the webhook reads the numeric state from body.
+      const backendUrl =
+        process.env.BACKEND_PUBLIC_URL ||
+        (process.env.RAILWAY_PUBLIC_DOMAIN_VALUE || "https://www.marketing-hq.eu")
+      const cbUrl = `${backendUrl}/webhooks/brite`
+      const callbacks = [
+        { url: cbUrl, transaction_state: 4 },  // COMPLETED
+        { url: cbUrl, transaction_state: 5 },  // CREDIT (ship goods)
+        { url: cbUrl, transaction_state: 6 },  // SETTLED (terminal success)
+        { url: cbUrl, transaction_state: 2 },  // ABORTED
+        { url: cbUrl, transaction_state: 3 },  // FAILED
+        { url: cbUrl, transaction_state: 7 },  // DEBIT (terminal fail)
+        { url: cbUrl, session_state: 11 },     // session FAILED
+        { url: cbUrl, session_state: 12 },     // session COMPLETED
+      ]
 
       const sessionPayload: any = {
         amount: Number(amount),
-        currency: currency_code.toUpperCase(),
-        country_id: countryRaw || undefined,
+        currency_id: currency_code.toLowerCase(),
+        country_id: countryId || undefined,
         brand_name: data?.product_name || data?.brand_name || "Order",
         merchant_reference: merchantReference,
-        locale: data?.locale || undefined,
+        locale: data?.locale || (countryId || undefined),
         redirect_uri: returnUrl,
-        ...(preselectedBank && {
-          bank_id: preselectedBank,
-          aspsp_id: preselectedBank,
-          bank: { id: preselectedBank },
-        }),
+        callbacks,
+        ...(preselectedBank && { bank_id: preselectedBank }),
         ...(customerEmail && { customer_email: customerEmail }),
         ...(firstName && { customer_firstname: firstName }),
         ...(lastName && { customer_lastname: lastName }),
-        ...(customer?.id && { customer_id: customer.id }),
+        // Swish has no returning-user concept → no customer_id
+        ...(customer?.id && method !== "swish" && { customer_id: customer.id }),
         ...((billing.address_1 || shipping.address_1) && {
           customer_address: {
             street: billing.address_1 || shipping.address_1 || "",
             city: billing.city || shipping.city || "",
             postal_code: billing.postal_code || shipping.postal_code || "",
-            country_id: (billing.country_code || shipping.country_code || countryRaw || "").toUpperCase(),
+            country_id: (billing.country_code || shipping.country_code || countryId || "").toLowerCase(),
           },
         }),
+        // Swish: statement_reference shown in the Swish app (max 50 chars, set in api-client)
+        ...(method === "swish" && { statement_reference: data?.product_name || "Order" }),
         metadata: {
           customer_id: customer?.id,
           session_id: data?.session_id,
@@ -272,10 +295,18 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
       }
 
       this.logger_.info(
-        `[Brite] Creating session: amount=${Number(amount).toFixed(2)} ${currency_code}, country=${countryRaw}, bank=${preselectedBank || "PICKER"}`
+        `[Brite] Creating ${method} session: amount=${Number(amount).toFixed(2)} ${currency_code}, country=${countryId}, bank=${preselectedBank || "PICKER"}`
       )
 
-      const session = await client.createSession(sessionPayload)
+      // Route to the correct Brite endpoint by method
+      let session: any
+      if (method === "ideal") {
+        session = await client.createIdealSession(sessionPayload)
+      } else if (method === "swish") {
+        session = await client.createSwishSession(sessionPayload)
+      } else {
+        session = await client.createSession(sessionPayload)
+      }
 
       this.logger_.info(`[Brite] Session created: ${session.id}, url present: ${!!session.url}`)
 
@@ -287,10 +318,12 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
         event_data: {
           merchant_reference: merchantReference,
           amount: sessionPayload.amount,
-          currency: sessionPayload.currency,
-          country: countryRaw,
+          currency: sessionPayload.currency_id,
+          country: countryId,
+          method,
           preselected_bank: preselectedBank,
           has_url: !!session.url,
+          has_token: !!session.token,
         },
       }).catch(() => {})
 
@@ -299,12 +332,12 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
         data: {
           intentId: session.id,                      // generic alias used by webhook safety-net
           briteSessionId: session.id,
-          briteToken: session.token || null,
-          checkoutUrl: session.url,                  // storefront must redirect here
+          briteToken: session.token || null,         // Web SDK: new Brite(token)
+          checkoutUrl: session.url,                  // hosted fallback redirect
           status: session.status || "INITIATED",
           amount: sessionPayload.amount,
-          currency: sessionPayload.currency,
-          method: "brite",
+          currency: sessionPayload.currency_id,
+          method,                                    // "brite" | "ideal" | "swish"
           environment: isLive ? "prod" : "sandbox",
           return_url: returnUrl,
           merchant_reference: merchantReference,

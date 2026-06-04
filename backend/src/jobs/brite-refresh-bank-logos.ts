@@ -1,118 +1,41 @@
 // @ts-nocheck
 /**
- * Daily refresh of Brite bank logos cache.
+ * Daily refresh of Brite bank list (id + name + logo) per market.
  *
- * Brite recommends polling the Service Presentation API once per day and
- * caching results. We call it per (locale × project gateway) and persist
- * rows into the `brite_bank_logo` table — the storefront then serves them
- * via /store/banks?country=XX.
+ * Source of truth: POST /api/bank.list (per country). This returns the REAL,
+ * opaque bank_id ("ag9ofmFib25l...") used for pre-selection in the Web SDK
+ * (client.start({ bank_id })) — NOT a filename-derived synthetic id.
  *
- * Locale → country map covers all merchant markets:
- *   nl_NL (NL), nl_BE (BE), fr_BE (BE), de_DE (DE), de_AT (AT), de_LU (LU),
- *   fr_LU (LU), sv_SE (SE), nb_NO (NO), en_GB (UK), pl_PL (PL), cs_CZ (CZ),
- *   da_DK (DK), fi_FI (FI), et_EE (EE), lt_LT (LT), lv_LV (LV), fr_FR (FR),
- *   it_IT (IT), es_ES (ES), pt_PT (PT)
+ * Each bank row: { id, name, country_id, enabled, logo(base64 data URI) }.
+ * We cache them in `brite_bank_logo` so the storefront bank picker can render
+ * them via /store/banks?country=XX without hitting Brite on every page load.
  *
- * Schedule: 03:15 every day (Bangkok local time per CLAUDE.md → cron is local).
+ * Requires an active Brite gateway in gateway_config (client_id + client_secret).
+ * Inert (skips) until that exists.
+ *
+ * Schedule: 03:15 every day (Bangkok local per CLAUDE.md → cron is local).
  */
 import { Pool } from "pg"
-import { BritePresentationClient } from "../modules/payment-brite/api-client"
+import { BriteApiClient } from "../modules/payment-brite/api-client"
 
-// Locales we want to populate. Add more if a new market goes live.
-const LOCALES: Array<{ locale: string; country: string }> = [
-  { locale: "nl_NL", country: "NL" },
-  { locale: "nl_BE", country: "BE" },
-  { locale: "fr_BE", country: "BE" },
-  { locale: "de_DE", country: "DE" },
-  { locale: "de_AT", country: "AT" },
-  { locale: "de_LU", country: "LU" },
-  { locale: "fr_LU", country: "LU" },
-  { locale: "sv_SE", country: "SE" },
-  { locale: "nb_NO", country: "NO" },
-  { locale: "en_GB", country: "GB" },
-  { locale: "pl_PL", country: "PL" },
-  { locale: "cs_CZ", country: "CZ" },
-  { locale: "da_DK", country: "DK" },
-  { locale: "fi_FI", country: "FI" },
-  { locale: "et_EE", country: "EE" },
-  { locale: "lt_LT", country: "LT" },
-  { locale: "lv_LV", country: "LV" },
-  { locale: "fr_FR", country: "FR" },
-  { locale: "it_IT", country: "IT" },
-  { locale: "es_ES", country: "ES" },
-  { locale: "pt_PT", country: "PT" },
-]
-
-/**
- * Parse "https://.../bank-logos/DE/001_SPARKASSE_DE.svg" →
- *   { country: "DE", sort_order: 1, bank_id: "SPARKASSE_DE", name: "Sparkasse" }
- */
-function parseBankLogoUrl(url: string, fallbackCountry: string): {
-  country: string
-  bank_id: string
-  name: string
-  sort_order: number
-  filename: string
-} | null {
-  try {
-    const parts = url.split("/")
-    const filename = parts[parts.length - 1]                            // 001_SPARKASSE_DE.svg
-    const stem = filename.replace(/\.[^.]+$/, "")                       // 001_SPARKASSE_DE
-    const pathCountry = parts[parts.length - 2]                         // DE
-    const m = stem.match(/^(\d+)_(.+?)_([A-Z]{2})$/)
-    if (m) {
-      const [, ord, rawName, country] = m
-      return {
-        country: country || pathCountry || fallbackCountry,
-        sort_order: parseInt(ord, 10) || 0,
-        bank_id: `${rawName}_${country}`,
-        name: humanizeBankName(rawName),
-        filename,
-      }
-    }
-    // Looser fallback: take whatever's after the numeric prefix
-    const m2 = stem.match(/^(?:(\d+)_)?(.+)$/)
-    if (m2) {
-      const [, ord, rawName] = m2
-      return {
-        country: pathCountry || fallbackCountry,
-        sort_order: ord ? parseInt(ord, 10) : 0,
-        bank_id: rawName,
-        name: humanizeBankName(rawName.replace(/_[A-Z]{2}$/, "")),
-        filename,
-      }
-    }
-    return null
-  } catch {
-    return null
-  }
-}
-
-/** "ABN_AMRO_NL" → "ABN AMRO"; "RABOBANK_NL" → "Rabobank" */
-function humanizeBankName(raw: string): string {
-  const dropCountry = raw.replace(/_[A-Z]{2}$/, "")
-  return dropCountry
-    .split("_")
-    .map((w) => {
-      // Keep all-caps acronyms (KBC, ING, ABN, SEB, DNB, BNP, BIL)
-      if (w.length <= 4 && w === w.toUpperCase()) return w
-      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
-    })
-    .join(" ")
-}
+// Merchant markets (per Jaroslav): DE, AT, LU, NL, BE, SE, NO.
+// Add more ISO-3166-1 alpha-2 (lowercase) codes if new markets go live.
+const COUNTRIES = ["nl", "be", "de", "at", "lu", "se", "no"]
 
 export default async function refreshBriteBankLogos(container: any) {
   const logger = container.resolve("logger")
 
-  // Read active brite gateway config(s) — we need merchant_id to call
-  // the Service Presentation API.
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
-  let merchantId: string | null = null
+
+  // Read active Brite gateway credentials (client_id + client_secret).
+  let clientId: string | null = null
+  let clientSecret: string | null = null
   let isTest = true
+  let baseUrl: string | undefined
 
   try {
     const { rows } = await pool.query(
-      `SELECT mode, live_keys, test_keys
+      `SELECT mode, live_keys, test_keys, metadata
        FROM gateway_config
        WHERE provider = 'brite' AND is_active = true AND deleted_at IS NULL
        ORDER BY priority ASC LIMIT 1`
@@ -120,86 +43,83 @@ export default async function refreshBriteBankLogos(container: any) {
     if (rows[0]) {
       isTest = rows[0].mode !== "live"
       const keys = isTest ? rows[0].test_keys : rows[0].live_keys
-      // Brite Merchant ID stored under "account_id" (same field name reused
-      // from Airwallex form — see service.ts comment).
-      merchantId = keys?.account_id || null
+      clientId = keys?.api_key || null         // DB "api_key" = Brite Client ID
+      clientSecret = keys?.secret_key || null  // DB "secret_key" = Brite Client Secret
+      baseUrl = rows[0].metadata?.base_url || undefined
     }
   } catch (e: any) {
     logger.error(`[Brite Refresh] gateway_config query failed: ${e.message}`)
   }
 
-  if (!merchantId) {
+  if (!clientId || !clientSecret) {
     logger.warn(
-      `[Brite Refresh] No active Brite gateway with merchant_id (account_id) configured — skipping daily refresh.`
+      `[Brite Refresh] No active Brite gateway with client credentials — skipping daily bank.list refresh.`
     )
     await pool.end().catch(() => {})
     return
   }
 
-  const presentation = new BritePresentationClient(merchantId, isTest, logger)
+  const client = new BriteApiClient(clientId, clientSecret, isTest, logger, baseUrl)
+  try {
+    await client.authenticate()
+  } catch (e: any) {
+    logger.error(`[Brite Refresh] authenticate failed: ${e.message}`)
+    await pool.end().catch(() => {})
+    return
+  }
 
   let totalRows = 0
-  let totalLocales = 0
-  let failures: string[] = []
+  let totalCountries = 0
+  const failures: string[] = []
 
-  for (const { locale, country } of LOCALES) {
+  for (const country of COUNTRIES) {
     try {
-      const assets = await presentation.fetchAssets(locale)
-      const logos = assets.bank_logos || []
-      if (!logos.length) {
-        logger.info(`[Brite Refresh] ${locale}: 0 banks (skipped)`)
+      const banks = await client.listBanks(country)
+      if (!banks.length) {
+        logger.info(`[Brite Refresh] ${country}: 0 banks (skipped)`)
         continue
       }
 
-      // Replace rows for this locale atomically
+      // Replace rows for this country atomically
       const tx = await pool.connect()
       try {
         await tx.query("BEGIN")
-        await tx.query(
-          `DELETE FROM brite_bank_logo WHERE locale = $1`,
-          [locale]
-        )
+        await tx.query(`DELETE FROM brite_bank_logo WHERE country = $1`, [country.toUpperCase()])
         let inserted = 0
-        for (const url of logos) {
-          const parsed = parseBankLogoUrl(url, country)
-          if (!parsed) continue
-          // Generic Medusa-style ID (text PK, no FK constraints needed)
-          const id = `bbl_${locale}_${parsed.bank_id}`
+        let sort = 0
+        for (const b of banks) {
+          if (b.enabled === false) continue
+          if (!b.id || !b.name) continue
+          const id = `bbl_${country}_${b.id}`
             .toLowerCase()
             .replace(/[^a-z0-9_]/g, "_")
-            .slice(0, 80)
+            .slice(0, 120)
 
           await tx.query(
             `INSERT INTO brite_bank_logo
                (id, country, locale, bank_id, name, logo_url, sort_order, is_active, metadata, created_at, updated_at)
              VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8::jsonb, now(), now())
              ON CONFLICT (id) DO UPDATE SET
-               country    = EXCLUDED.country,
-               locale     = EXCLUDED.locale,
-               bank_id    = EXCLUDED.bank_id,
-               name       = EXCLUDED.name,
-               logo_url   = EXCLUDED.logo_url,
-               sort_order = EXCLUDED.sort_order,
-               metadata   = EXCLUDED.metadata,
-               updated_at = now(),
-               deleted_at = null`,
+               name = EXCLUDED.name, logo_url = EXCLUDED.logo_url,
+               sort_order = EXCLUDED.sort_order, bank_id = EXCLUDED.bank_id,
+               metadata = EXCLUDED.metadata, updated_at = now(), deleted_at = null`,
             [
               id,
-              parsed.country,
-              locale,
-              parsed.bank_id,
-              parsed.name,
-              url,
-              parsed.sort_order,
-              JSON.stringify({ filename: parsed.filename, raw_url: url }),
+              country.toUpperCase(),
+              country,                         // locale slot — store raw country for now
+              b.id,                            // REAL Brite bank_id (opaque token)
+              b.name,
+              b.logo || "",                    // base64 data URI
+              sort++,
+              JSON.stringify({ enabled: b.enabled !== false, source: "bank.list" }),
             ]
           )
           inserted++
         }
         await tx.query("COMMIT")
         totalRows += inserted
-        totalLocales++
-        logger.info(`[Brite Refresh] ${locale} (${country}): ${inserted} banks cached`)
+        totalCountries++
+        logger.info(`[Brite Refresh] ${country.toUpperCase()}: ${inserted} banks cached (real bank_id)`)
       } catch (txErr: any) {
         await tx.query("ROLLBACK").catch(() => {})
         throw txErr
@@ -207,15 +127,15 @@ export default async function refreshBriteBankLogos(container: any) {
         tx.release()
       }
     } catch (e: any) {
-      failures.push(`${locale}: ${e.message}`)
-      logger.warn(`[Brite Refresh] ${locale} failed: ${e.message}`)
+      failures.push(`${country}: ${e.message}`)
+      logger.warn(`[Brite Refresh] ${country} failed: ${e.message}`)
     }
   }
 
   await pool.end().catch(() => {})
 
   logger.info(
-    `[Brite Refresh] Done. Locales: ${totalLocales}/${LOCALES.length}, total banks: ${totalRows}` +
+    `[Brite Refresh] Done. Countries: ${totalCountries}/${COUNTRIES.length}, total banks: ${totalRows}` +
       (failures.length ? `. Failures: ${failures.join("; ")}` : "")
   )
 }

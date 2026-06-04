@@ -29,46 +29,69 @@ interface BriteTokenResponse {
   expires_at?: string
 }
 
+/**
+ * Brite callback registration. Brite has NO global webhook — instead you
+ * register per-session callback URLs keyed to numeric state codes. Brite POSTs
+ * to the matching URL when the session/transaction reaches that state.
+ *
+ * Transaction states (from in-depth-knowledge-transaction-states):
+ *   0 CREATED · 1 PENDING · 2 ABORTED(fail) · 3 FAILED · 4 COMPLETED ·
+ *   5 CREDIT(ship) · 6 SETTLED(terminal success) · 7 DEBIT(terminal fail)
+ * Session states (frontend UI):
+ *   10 ABORTED · 11 FAILED · 12 COMPLETED
+ */
+export interface BriteCallback {
+  url: string
+  session_state?: number      // 10/11/12
+  transaction_state?: number  // 2..7
+}
+
 interface BriteSessionRequest {
-  amount: number              // major units
-  currency: string            // ISO-4217 (EUR, SEK, NOK, GBP, PLN, etc.)
-  country_id?: string         // ISO-3166-1 alpha-2 (NL, SE, DE, ...)
+  amount: number              // amount — UNITS TBD (major vs minor) — confirm in sandbox
+  currency_id?: string        // lowercase: "eur" | "sek" | "nok" ...
+  country_id?: string         // lowercase ISO-3166-1 alpha-2: "nl" | "se" | "de" ...
   brand_name?: string         // shown to customer in bank app
   merchant_reference: string  // your internal id (intent_id / cart_id)
-  locale?: string             // e.g. nl_NL, sv_SE, de_DE, en_GB
+  locale?: string             // e.g. "nl" | "sv" | "de" | "en"
   redirect_uri: string        // return URL after payment
   deeplink_redirect?: string  // mobile deeplink (optional)
   customer_id?: string
   customer_firstname?: string
   customer_lastname?: string
   customer_email?: string
-  customer_dob?: string       // YYYY-MM-DD (Klarna-style KYC; optional)
+  customer_dob?: string       // YYYY-MM-DD (optional)
   customer_address?: {
     street?: string
     city?: string
     postal_code?: string
-    country_id?: string       // ISO-3166-1 alpha-2
+    country_id?: string       // lowercase ISO-3166-1 alpha-2
   }
-  // Pre-selected bank — skips Brite's bank picker (customer goes straight to bank login).
-  // Exact field name per Brite docs is TBD; common variants include `bank_id`, `aspsp_id`,
-  // and a nested `bank: { id }`. We send all three so whichever Brite expects gets matched.
+  // Pre-selected bank id — the OPAQUE token from POST bank.list (e.g. "ag9ofmFib25l...").
+  // NOTE: per the Bank-Pre-selection PDF, in the EMBEDDED flow bank_id is passed to the
+  // Web SDK client.start({bank_id}) on the FRONTEND, not necessarily here. We still send it
+  // server-side as a belt-and-suspenders for the hosted flow.
   bank_id?: string
-  aspsp_id?: string
-  bank?: { id: string }
-  callbacks?: {
-    success?: string
-    pending?: string
-    fail?: string
-  }
-  // Optional metadata pass-through (Brite usually echoes this in transaction object)
+  // Per-session callbacks (array). Brite POSTs to url when the keyed state is reached.
+  callbacks?: BriteCallback[]
+  statement_reference?: string // Swish only — message in Swish app (max 50 chars)
+  closed_loop?: { nin?: string } // Sweden SSN (optional)
   metadata?: Record<string, any>
 }
 
 interface BriteSessionResponse {
   id: string                  // session id
-  token?: string              // client-side SDK token
-  url: string                 // redirect / iframe URL
+  token?: string              // client-side SDK token (for Web SDK new Brite(token))
+  url: string                 // redirect / hosted page URL
   status?: string
+}
+
+/** One bank from POST bank.list */
+export interface BriteBank {
+  id: string                  // opaque bank_id (e.g. "ag9ofmFib25l...CAgN6MkAoM")
+  name: string
+  country_id: string          // lowercase
+  enabled?: boolean
+  logo?: string               // base64 data URI (data:image/png;base64,...)
 }
 
 interface BriteTransactionResponse {
@@ -250,6 +273,80 @@ export class BriteApiClient {
       const details = respData ? JSON.stringify(respData).slice(0, 500) : `status=${error.response?.status}`
       this.logger.error(`[Brite] Create session failed: ${message} | ${details}`)
       throw new Error(`Failed to create Brite session: ${message}`)
+    }
+  }
+
+  /**
+   * Create an iDEAL payment session (NL only).
+   * Brite requires iDEAL to be presented as its own payment method.
+   * Endpoint: POST /api/session.create_iDEAL_payment
+   * Mandatory: country_id="nl", currency_id="eur".
+   */
+  async createIdealSession(data: BriteSessionRequest): Promise<BriteSessionResponse> {
+    await this.ensureToken()
+    try {
+      const response = await this.client.post<BriteSessionResponse>(
+        "/api/session.create_iDEAL_payment",
+        { ...data, country_id: "nl", currency_id: "eur" },
+        { headers: this.authHeaders() }
+      )
+      this.logger.info(`[Brite] iDEAL session created: ${response.data.id}`)
+      return response.data
+    } catch (error: any) {
+      const respData = error.response?.data
+      const message = respData?.message || respData?.error || error.message
+      this.logger.error(`[Brite] Create iDEAL session failed: ${message} | ${JSON.stringify(respData || {}).slice(0, 400)}`)
+      throw new Error(`Failed to create Brite iDEAL session: ${message}`)
+    }
+  }
+
+  /**
+   * Create a Swish payment session (SE only).
+   * Brite requires Swish to be presented as its own payment method.
+   * Endpoint: POST /api/session.create_swish_payment
+   * Mandatory: country_id="se", currency_id="sek", statement_reference (max 50 chars).
+   * No customer_id (no returning-user concept for Swish).
+   */
+  async createSwishSession(data: BriteSessionRequest): Promise<BriteSessionResponse> {
+    await this.ensureToken()
+    try {
+      const statementRef = (data.statement_reference || data.brand_name || "Order").slice(0, 50)
+      const response = await this.client.post<BriteSessionResponse>(
+        "/api/session.create_swish_payment",
+        { ...data, country_id: "se", currency_id: "sek", statement_reference: statementRef },
+        { headers: this.authHeaders() }
+      )
+      this.logger.info(`[Brite] Swish session created: ${response.data.id}`)
+      return response.data
+    } catch (error: any) {
+      const respData = error.response?.data
+      const message = respData?.message || respData?.error || error.message
+      this.logger.error(`[Brite] Create Swish session failed: ${message} | ${JSON.stringify(respData || {}).slice(0, 400)}`)
+      throw new Error(`Failed to create Brite Swish session: ${message}`)
+    }
+  }
+
+  /**
+   * Retrieve the list of supported banks for a market, WITH their opaque bank_id.
+   * Endpoint: POST /api/bank.list
+   * Response: { banks: [{ id, name, country_id, enabled, logo(base64) }] }
+   * This is the ONLY source of the real bank_id used for pre-selection.
+   */
+  async listBanks(countryId: string): Promise<BriteBank[]> {
+    await this.ensureToken()
+    try {
+      const response = await this.client.post<{ banks: BriteBank[] }>(
+        "/api/bank.list",
+        { country_id: (countryId || "").toLowerCase() },
+        { headers: this.authHeaders() }
+      )
+      const banks = response.data?.banks || []
+      this.logger.info(`[Brite] bank.list ${countryId}: ${banks.length} banks`)
+      return banks
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message
+      this.logger.error(`[Brite] bank.list failed for ${countryId}: ${message}`)
+      throw new Error(`Failed to list Brite banks: ${message}`)
     }
   }
 
