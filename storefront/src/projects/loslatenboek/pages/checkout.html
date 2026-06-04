@@ -7779,19 +7779,45 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             bankId: providerData.preselected_bank || window.__briteBankId || null,
             cartId: result.cartId,
             onComplete: function() {
-              return medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' })
-                .then(function(completeRes) {
-                  var order = window.__extractOrderOrThrow(completeRes);
-                  localStorage.setItem('medusa_order_id', order.id || '');
-                  localStorage.setItem('medusa_order_display_id', order.display_id || '');
-                  if (PROJECT_CONFIG.upsellEnabled === false) { window.location.href = PROJECT_CONFIG.thankYouUrl; }
-                  else if (checkoutOrderBump) { localStorage.setItem('medusa_upsell_purchased', 'true'); window.location.href = PROJECT_CONFIG.thankYouUrl; }
-                  else { window.location.href = PROJECT_CONFIG.upsellUrl; }
-                });
+              // Brite settles asynchronously: at STATE_COMPLETED the cart may need a
+              // moment before Medusa can authorize the payment. Poll a few times, then
+              // fall back to a "we're confirming" message — the webhook safety-net
+              // finalizes the order server-side, so the payment is never lost and the
+              // button never hangs silently.
+              if (!document.querySelector('.payment-preloader')) {
+                var pl = document.createElement('div');
+                pl.className = 'payment-preloader';
+                pl.innerHTML = '<img src="/laat-los-logo-logo.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+                document.body.insertBefore(pl, document.body.firstChild);
+              }
+              function redirectToNext(order) {
+                localStorage.setItem('medusa_order_id', order.id || '');
+                localStorage.setItem('medusa_order_display_id', order.display_id || '');
+                if (PROJECT_CONFIG.upsellEnabled === false) { window.location.href = PROJECT_CONFIG.thankYouUrl; }
+                else if (checkoutOrderBump) { localStorage.setItem('medusa_upsell_purchased', 'true'); window.location.href = PROJECT_CONFIG.thankYouUrl; }
+                else { window.location.href = PROJECT_CONFIG.upsellUrl; }
+              }
+              function attempt(n) {
+                return medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' })
+                  .then(function(completeRes) { redirectToNext(window.__extractOrderOrThrow(completeRes)); })
+                  .catch(function(err) {
+                    if (n < 5) {
+                      return new Promise(function(r){ setTimeout(r, 2500); }).then(function(){ return attempt(n + 1); });
+                    }
+                    // Give up client-side — never hang. Inform + reset; safety-net finalizes.
+                    var p = document.querySelector('.payment-preloader'); if (p) p.remove();
+                    errorEl.textContent = 'Je betaling wordt nog bevestigd. Zodra deze rond is ontvang je een bevestiging per e-mail. Sluit deze pagina niet.';
+                    submitBtn.classList.remove('loading'); submitBtn.disabled = false;
+                  });
+              }
+              return attempt(0);
             },
-            onCancel: function() {
+            onCancel: function(reason) {
               submitBtn.classList.remove('loading');
               submitBtn.disabled = false;
+              if (reason === 'failed' || reason === 'error') {
+                errorEl.textContent = 'De betaling is niet gelukt. Probeer het opnieuw of kies een andere bank.';
+              }
             }
           });
         }
@@ -8416,20 +8442,41 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       function launch(){
         try {
           client = new Brite(opts.token);
+          var B = window.Brite || {};
+          // SDK emits numeric SESSION states. Fall back to the documented numbers if a
+          // build doesn't expose the constants: 12=COMPLETED, 11=FAILED, 10=ABORTED,
+          // 2=AUTHENTICATION_COMPLETED.
+          var ST_DONE  = (typeof B.STATE_COMPLETED !== 'undefined') ? B.STATE_COMPLETED : 12;
+          var ST_FAIL  = (typeof B.STATE_FAILED !== 'undefined') ? B.STATE_FAILED : 11;
+          var ST_ABORT = (typeof B.STATE_ABORTED !== 'undefined') ? B.STATE_ABORTED : 10;
+          var ST_AUTH  = (typeof B.STATE_AUTHENTICATION_COMPLETED !== 'undefined') ? B.STATE_AUTHENTICATION_COMPLETED : 2;
           var startOpts = { selector: '#brite-embed-mount', width: '100%', height: '560px', color_theme: 'light' };
           if (opts.bankId) startOpts.bank_id = opts.bankId;
           client.start(startOpts, function(state){
             console.log('[Brite SDK] state:', state);
-            if (state === Brite.STATE_COMPLETED || state === Brite.STATE_AUTHENTICATION_COMPLETED) {
+            try { window.PaymentTracker && PaymentTracker.track('brite_sdk_state', { payload: { state: state } }); } catch(e){}
+            // ONLY the terminal COMPLETED state means the money actually moved.
+            // AUTHENTICATION_COMPLETED just means the user passed the bank login — the
+            // payment is still settling, so keep the modal open and wait (completing the
+            // cart here was the bug: it fired too early, failed, and hung the button).
+            if (state === ST_DONE) {
               finish(opts.onComplete);
-            } else if (state === Brite.STATE_FAILED || state === Brite.STATE_ABORTED) {
-              finish(opts.onCancel);
+            } else if (state === ST_FAIL || state === ST_ABORT) {
+              finish(function(){ return opts.onCancel && opts.onCancel('failed'); });
+            } else if (state === ST_AUTH) {
+              if (!head.querySelector('.brite-embed-status')) {
+                var hd = document.createElement('span');
+                hd.className = 'brite-embed-status';
+                hd.style.cssText = 'font-size:12px;color:#2EA043;font-weight:600;margin-left:auto;margin-right:10px;';
+                hd.textContent = 'Betaling wordt bevestigd…';
+                head.insertBefore(hd, closeBtn);
+              }
             }
-          }, function(){ finish(opts.onCancel); });
+          }, function(){ finish(function(){ return opts.onCancel && opts.onCancel('closed'); }); });
         } catch(e){
           console.error('[Brite SDK] init failed:', e);
           if (opts.checkoutUrl) { cleanup(); window.location.href = opts.checkoutUrl; return; }
-          finish(opts.onCancel);
+          finish(function(){ return opts.onCancel && opts.onCancel('error'); });
         }
       }
 
