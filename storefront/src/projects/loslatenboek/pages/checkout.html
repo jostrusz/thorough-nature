@@ -2438,29 +2438,41 @@ body {
   transition: transform .2s cubic-bezier(0.34,1.56,0.64,1);
 }
 .brite-bank-tile.selected .brite-bank-radio::after { transform: scale(1); }
-/* Logo box (fixed width so names align) */
+/* Logo in a soft app-icon tile — uniform, premium, instantly recognisable */
 .brite-logo {
   flex-shrink: 0;
-  width: 64px; height: 32px;
-  display: flex; align-items: center; justify-content: flex-start;
+  width: 50px; height: 50px; border-radius: 12px;
+  background: #FAF6FA; border: 1px solid rgba(45,27,61,0.06);
+  display: flex; align-items: center; justify-content: center;
   overflow: hidden;
+  transition: background .2s ease, box-shadow .2s ease;
 }
-.brite-logo img { height: 30px; width: auto; max-width: 64px; object-fit: contain; object-position: left center; display: block; }
+.brite-bank-tile:hover .brite-logo { box-shadow: 0 2px 6px rgba(45,27,61,0.08); }
+.brite-bank-tile.selected .brite-logo { background: #fff; box-shadow: 0 2px 8px rgba(194,123,160,0.18); }
+.brite-logo img { max-height: 30px; max-width: 38px; width: auto; object-fit: contain; display: block; }
 .brite-logo .brite-fallback {
   display: inline-flex; align-items: center; justify-content: center;
-  height: 24px; padding: 0 9px;
+  height: 26px; padding: 0 8px;
   font-weight: 700; font-size: 11px;
-  border-radius: 5px; letter-spacing: 0.2px;
-  min-width: 46px; line-height: 1;
+  border-radius: 6px; letter-spacing: 0.2px;
+  min-width: 38px; line-height: 1;
 }
-/* Bank name (fills remaining width, left aligned) */
+/* Bank name + speed micro-label (fills the centre so rows never look empty) */
 .brite-bank-name {
-  flex: 1;
-  font-size: 14px; font-weight: 600;
-  color: #2D1B3D; line-height: 1.3;
-  letter-spacing: -0.01em;
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px;
 }
-/* "Meest gekozen" — small inline pill on the right of the first row */
+.brite-bank-name .bn-title {
+  font-size: 15px; font-weight: 700;
+  color: #2D1B3D; line-height: 1.25; letter-spacing: -0.01em;
+}
+.brite-bank-name .bn-sub {
+  font-size: 11.5px; font-weight: 500;
+  color: #9B7AAD; line-height: 1.2;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.brite-bank-tile.selected .bn-sub { color: var(--cta); }
+/* "Meest gekozen" — small inline pill before the chevron */
 .brite-popular-badge {
   flex-shrink: 0;
   background: rgba(194,123,160,0.12); color: var(--cta);
@@ -2469,6 +2481,17 @@ body {
   letter-spacing: 0.3px; text-transform: uppercase;
   white-space: nowrap;
 }
+/* Disclosure chevron — right anchor + "tap to pay" affordance */
+.brite-bank-go {
+  flex-shrink: 0;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(45,27,61,0.05); color: rgba(45,27,61,0.40);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s ease, color .2s ease, transform .25s cubic-bezier(0.22,1,0.36,1);
+}
+.brite-bank-go svg { width: 16px; height: 16px; }
+.brite-bank-tile:hover .brite-bank-go { background: rgba(194,123,160,0.16); color: var(--cta); transform: translateX(2px); }
+.brite-bank-tile.selected .brite-bank-go { background: var(--cta); color: #fff; box-shadow: 0 3px 8px rgba(194,123,160,0.35); }
 .brite-secured {
   display: flex; align-items: center; gap: 6px;
   margin-top: 14px; padding: 10px 12px;
@@ -2506,15 +2529,19 @@ body {
   }
   .brite-instant-hero .ih-sub { font-size: 12px; color: var(--text, #444); line-height: 1.35; }
   .brite-instant-hero .ih-sub strong { color: var(--heading); }
-  /* Bank list stays a vertical list on mobile — just tighten the row a touch */
+  /* Bank list stays a vertical list on mobile — keep the premium two-line row */
   .brite-bank-grid { gap: 7px; }
-  .brite-bank-tile { padding: 13px 14px; gap: 12px; }
+  .brite-bank-tile { padding: 11px 13px; gap: 11px; }
   .brite-bank-tile:active { background: rgba(194,123,160,0.06); }
-  .brite-logo { width: 58px; height: 30px; }
-  .brite-logo img { height: 28px; max-width: 58px; }
-  .brite-logo .brite-fallback { height: 24px; font-size: 12px; padding: 0 9px; min-width: 44px; }
-  .brite-bank-name { font-size: 14.5px; font-weight: 600; }
-  .brite-popular-badge { font-size: 9px; padding: 3px 8px; }
+  .brite-logo { width: 46px; height: 46px; border-radius: 11px; }
+  .brite-logo img { max-height: 28px; max-width: 34px; }
+  .brite-logo .brite-fallback { height: 24px; font-size: 11px; padding: 0 7px; min-width: 34px; }
+  .brite-bank-name .bn-title { font-size: 14.5px; }
+  .brite-bank-name .bn-sub { font-size: 11px; }
+  /* Drop the badge on mobile — it crowds the row; the green hero already carries the proof */
+  .brite-popular-badge { display: none; }
+  .brite-bank-go { width: 26px; height: 26px; }
+  .brite-bank-go svg { width: 14px; height: 14px; }
   .brite-trust-strip { display: none; }
   .brite-secured { font-size: 10px; padding: 8px 10px; margin-top: 10px; gap: 5px; justify-content: center; }
   .brite-badge { height: 16px; }
@@ -8454,6 +8481,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         tile.setAttribute('data-bank', b.bank_id);
         var fb = JSON.stringify(fallbackHTML(b._fallback || {label:(b.name||'?').slice(0,6),bg:'#E8E8EC',fg:'#5A3D6B'})).replace(/"/g,'&quot;');
         var popular = idx === 0 ? '<span class="brite-popular-badge">Meest gekozen</span>' : '';
+        var chevron = '<span class="brite-bank-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>';
         tile.innerHTML =
           '<div class="brite-bank-radio"></div>' +
           '<div class="brite-logo">' +
@@ -8463,8 +8491,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 'onerror="this.outerHTML=' + fb + '">'
               : fallbackHTML(b._fallback || {label:(b.name||'?').slice(0,6),bg:'#E8E8EC',fg:'#5A3D6B'})) +
           '</div>' +
-          '<div class="brite-bank-name">' + b.name + '</div>' +
-          popular;
+          '<div class="brite-bank-name">' +
+            '<span class="bn-title">' + b.name + '</span>' +
+            '<span class="bn-sub">&#9889; Direct &amp; veilig betalen</span>' +
+          '</div>' +
+          popular +
+          chevron;
         tile.addEventListener('click', function(){
           keepScroll(function(){
             [].forEach.call(grid.children, function(c){ c.classList.remove('selected'); });
