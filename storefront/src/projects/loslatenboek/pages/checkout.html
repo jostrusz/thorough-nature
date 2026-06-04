@@ -8346,6 +8346,43 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     requestAnimationFrame(settle);
   }
 
+  /* ─── CTA button label: "Bestel & betaal met <bank> — €<price>" ───────────────
+     The bank name + live price make the action concrete at the moment of decision
+     (higher commitment). We read the price straight from whatever the page already
+     rendered into .btn-text, so it always reflects order-bumps / recalculations. */
+  function briteCurrentPrice() {
+    var bt = document.querySelector('.btn-text');
+    var m = bt ? bt.textContent.match(/€\s*[\d.,]+/) : null;
+    if (m) return m[0];
+    var tot = document.getElementById('summary-total') || document.getElementById('total-price');
+    return tot ? (tot.textContent.match(/€\s*[\d.,]+/) || [''])[0] : '';
+  }
+  function applyBriteButton() {
+    var bt = document.querySelector('.btn-text');
+    if (!bt) return;
+    var name = window.__briteBankName || 'je bank';
+    var price = briteCurrentPrice();
+    bt.textContent = 'Bestel & betaal met ' + name + (price ? ' — ' + price : '');
+    // Re-apply if the page overwrites the label after a recalc (guard against loop).
+    if (!bt.__briteObserved) {
+      bt.__briteObserved = true;
+      new MutationObserver(function(){
+        if (window.__briteSelected !== true) return;
+        var want = 'Bestel & betaal met ' + (window.__briteBankName || 'je bank');
+        if (bt.textContent.indexOf('Bestel & betaal met') !== 0) {
+          var p = (bt.textContent.match(/€\s*[\d.,]+/) || [''])[0];
+          bt.textContent = want + (p ? ' — ' + p : '');
+        }
+      }).observe(bt, { childList: true, characterData: true, subtree: true });
+    }
+  }
+  function restoreDefaultButton() {
+    var bt = document.querySelector('.btn-text');
+    if (!bt) return;
+    var price = briteCurrentPrice();
+    bt.textContent = 'Bestelling afronden' + (price ? ' — ' + price : '');
+  }
+
   // ─── Brite embedded Web SDK launcher ───────────────────────────────────────
   // Opens the Brite payment iframe in an in-page modal (no redirect). Called by
   // the checkout submit handler once a real Brite session token exists.
@@ -8505,8 +8542,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             window.selectedProvider = 'brite';
             window.selectedProviderId = 'pp_brite_brite';
             window.__briteBankId = b.bank_id;     // selected opaque bank_id → session + Web SDK
+            window.__briteBankName = b.name;       // drives the CTA button label
             window.__briteMethod = 'pay_by_bank';
             window.__briteSelected = true;          // submit handler uses Brite
+            applyBriteButton();
             var briteCard = document.getElementById('brite-card');
             briteCard.classList.add('selected');
             [].forEach.call(document.querySelectorAll('.payment-method.selected, .klarna-parent.expanded'), function(el){
@@ -8520,9 +8559,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // Default selection = first bank (so submit works even without an explicit click)
       if (banks[0]) {
         window.__briteBankId = banks[0].bank_id; window.__briteMethod = 'pay_by_bank';
+        window.__briteBankName = banks[0].name;
         // If the Brite card is the active method, mark Brite as selected by default.
         var bc = document.getElementById('brite-card');
-        if (bc && bc.classList.contains('selected')) window.__briteSelected = true;
+        if (bc && bc.classList.contains('selected')) { window.__briteSelected = true; applyBriteButton(); }
       }
     }).catch(function(err){
       console.warn('[Brite Demo] banks fetch failed:', err);
@@ -8552,6 +8592,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         [].forEach.call(document.querySelectorAll('.payment-method.selected'), function(el){ el.classList.remove('selected'); });
         label.classList.add('selected');
         window.__briteSelected = false;  // alt method chosen → submit no longer forces Brite
+        restoreDefaultButton();
       });
     });
     return label;
@@ -8607,6 +8648,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         window.selectedProvider = 'brite';
         window.selectedProviderId = 'pp_brite_brite';
         window.__briteSelected = true;  // Brite chosen → submit uses Brite
+        applyBriteButton();
       });
     });
 
