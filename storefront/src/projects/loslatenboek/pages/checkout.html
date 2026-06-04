@@ -7594,6 +7594,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             return lines;
           })(),
         };
+        // Brite (Pay by Bank): pass the selected opaque bank_id so the backend can
+        // create a Brite session with that bank, and the Web SDK can pre-select it.
+        if (selectedProvider === 'brite' && window.__briteBankId) {
+          sessionData.bank_id = window.__briteBankId;
+          sessionData.method = window.__briteMethod || 'pay_by_bank';
+        }
       }
 
       // For credit card: tokenize card data (branched by provider)
@@ -7717,6 +7723,35 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var lastSession = sessions[sessions.length - 1] || {};
         var providerData = lastSession.data || {};
         var redirectUrl = providerData.checkoutUrl || providerData.approvalUrl;
+
+        // ─── BRITE EMBEDDED (Web SDK) FLOW ───
+        // Brite "Pay by Bank" renders an in-page iframe (no redirect). The embedded
+        // handler lives in the gated demo emulator (window.__briteOpenEmbedded); when
+        // present and Brite is the chosen provider, hand off to it. On success it
+        // completes the cart via the callback we pass. Falls through to the hosted
+        // redirect (checkoutUrl) if the SDK handler isn't available.
+        if (selectedProvider === 'brite' && providerData.briteToken && typeof window.__briteOpenEmbedded === 'function') {
+          return window.__briteOpenEmbedded({
+            token: providerData.briteToken,
+            bankId: providerData.preselected_bank || window.__briteBankId || null,
+            cartId: result.cartId,
+            onComplete: function() {
+              return medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' })
+                .then(function(completeRes) {
+                  var order = window.__extractOrderOrThrow(completeRes);
+                  localStorage.setItem('medusa_order_id', order.id || '');
+                  localStorage.setItem('medusa_order_display_id', order.display_id || '');
+                  if (PROJECT_CONFIG.upsellEnabled === false) { window.location.href = PROJECT_CONFIG.thankYouUrl; }
+                  else if (checkoutOrderBump) { localStorage.setItem('medusa_upsell_purchased', 'true'); window.location.href = PROJECT_CONFIG.thankYouUrl; }
+                  else { window.location.href = PROJECT_CONFIG.upsellUrl; }
+                });
+            },
+            onCancel: function() {
+              submitBtn.classList.remove('loading');
+              submitBtn.disabled = false;
+            }
+          });
+        }
 
         // Credit card without 3DS: payment already completed, complete cart directly
         if (!redirectUrl && selectedMethod === 'creditcard' && providerData.status === 'paid') {
@@ -8268,6 +8303,71 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     requestAnimationFrame(settle);
   }
 
+  // ─── Brite embedded Web SDK launcher ───────────────────────────────────────
+  // Opens the Brite payment iframe in an in-page modal (no redirect). Called by
+  // the checkout submit handler once a real Brite session token exists.
+  //   opts = { token, bankId, cartId, checkoutUrl, onComplete(), onCancel() }
+  // Resolves when the flow ends (completed / failed / aborted / closed).
+  window.__briteOpenEmbedded = function(opts){
+    return new Promise(function(resolve){
+      var ov = document.createElement('div');
+      ov.id = 'brite-embed-overlay';
+      ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(45,27,61,0.55);display:flex;align-items:center;justify-content:center;padding:16px;';
+      var box = document.createElement('div');
+      box.style.cssText = 'background:#fff;border-radius:18px;overflow:hidden;width:100%;max-width:440px;box-shadow:0 24px 64px rgba(45,27,61,0.35);';
+      var head = document.createElement('div');
+      head.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(45,27,61,0.08);';
+      head.innerHTML = '<span style="font-weight:700;color:#2D1B3D;font-size:15px;font-family:inherit;">Betalen met je bank</span>';
+      var closeBtn = document.createElement('button');
+      closeBtn.type = 'button'; closeBtn.setAttribute('aria-label','Sluiten'); closeBtn.innerHTML = '&times;';
+      closeBtn.style.cssText = 'background:none;border:none;font-size:26px;color:#9B7AAD;cursor:pointer;line-height:1;padding:0 4px;';
+      head.appendChild(closeBtn);
+      var mount = document.createElement('div');
+      mount.id = 'brite-embed-mount';
+      mount.style.cssText = 'min-height:560px;background:#fff;';
+      box.appendChild(head); box.appendChild(mount); ov.appendChild(box);
+      document.body.appendChild(ov);
+
+      var client = null, done = false;
+      function cleanup(){ try{ if(client && client.stop) client.stop(); }catch(e){} if(ov.parentNode) ov.parentNode.removeChild(ov); }
+      function finish(fn){ if(done) return; done = true; cleanup(); Promise.resolve(fn && fn()).then(function(){ resolve(); }).catch(function(e){ console.error('[Brite SDK] finish error:', e); resolve(); }); }
+      closeBtn.addEventListener('click', function(){ finish(opts.onCancel); });
+
+      function launch(){
+        try {
+          client = new Brite(opts.token);
+          var startOpts = { selector: '#brite-embed-mount', width: '100%', height: '560px', color_theme: 'light' };
+          if (opts.bankId) startOpts.bank_id = opts.bankId;
+          client.start(startOpts, function(state){
+            console.log('[Brite SDK] state:', state);
+            if (state === Brite.STATE_COMPLETED || state === Brite.STATE_AUTHENTICATION_COMPLETED) {
+              finish(opts.onComplete);
+            } else if (state === Brite.STATE_FAILED || state === Brite.STATE_ABORTED) {
+              finish(opts.onCancel);
+            }
+          }, function(){ finish(opts.onCancel); });
+        } catch(e){
+          console.error('[Brite SDK] init failed:', e);
+          if (opts.checkoutUrl) { cleanup(); window.location.href = opts.checkoutUrl; return; }
+          finish(opts.onCancel);
+        }
+      }
+
+      if (typeof window.Brite !== 'undefined') { launch(); }
+      else {
+        var s = document.createElement('script');
+        s.src = 'https://websdk.britepayments.io/v1/client.js';
+        s.onload = launch;
+        s.onerror = function(){
+          console.error('[Brite SDK] script load failed');
+          if (opts.checkoutUrl) { cleanup(); window.location.href = opts.checkoutUrl; return; }
+          finish(opts.onCancel);
+        };
+        document.head.appendChild(s);
+      }
+    });
+  };
+
   function buildBriteCard() {
     var card = document.createElement('div');
     card.className = 'brite-card selected';
@@ -8353,6 +8453,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             window.selectedMethod = 'pay_by_bank';
             window.selectedProvider = 'brite';
             window.selectedProviderId = 'pp_brite_brite';
+            window.__briteBankId = b.bank_id;     // selected opaque bank_id → session + Web SDK
+            window.__briteMethod = 'pay_by_bank';
             var briteCard = document.getElementById('brite-card');
             briteCard.classList.add('selected');
             [].forEach.call(document.querySelectorAll('.payment-method.selected, .klarna-parent.expanded'), function(el){
@@ -8363,6 +8465,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         });
         grid.appendChild(tile);
       });
+      // Default selection = first bank (so submit works even without an explicit click)
+      if (banks[0]) { window.__briteBankId = banks[0].bank_id; window.__briteMethod = 'pay_by_bank'; }
     }).catch(function(err){
       console.warn('[Brite Demo] banks fetch failed:', err);
     });
