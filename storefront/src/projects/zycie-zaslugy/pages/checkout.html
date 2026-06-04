@@ -3439,9 +3439,6 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       medusaFetch('/store/products?handle=' + upsellHandle, {
         method: 'GET',
         headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
-      }).then(function(res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
       }).then(function(data) {
         var product = data.products && data.products[0];
         if (product && product.thumbnail) {
