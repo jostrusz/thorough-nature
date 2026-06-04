@@ -278,27 +278,22 @@ async function getWebhookSecret(): Promise<string | null> {
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const logger = req.scope.resolve("logger")
   try {
-    // Signature verification (HMAC-SHA256 over raw body)
-    // Header name not yet documented publicly — we accept the three most
-    // common variants and skip verification only when no secret is configured
-    // yet (sandbox bootstrap; tighten once merchant is live).
-    const signatureHeader =
-      (req.headers["x-brite-signature"] as string) ||
-      (req.headers["brite-signature"] as string) ||
-      (req.headers["x-signature"] as string) ||
-      ""
-
+    // ── Callback authentication ──
+    // Brite does NOT sign callbacks (no HMAC, verified against docs). Instead we
+    // authenticate by a secret token embedded in the callback URL at session
+    // creation: ?cb_token=<gateway webhook_secret>. Only Brite calls back with it
+    // because only we registered the URL. If a webhook_secret is configured, the
+    // token must match; if not (sandbox bootstrap), we accept unverified.
     const webhookSecret = await getWebhookSecret()
     if (webhookSecret) {
-      const rawBody = JSON.stringify(req.body)
-      const ok = BriteApiClient.verifySignature(rawBody, signatureHeader, webhookSecret)
-      if (!ok) {
-        logger.warn(`[Brite Webhook] Signature mismatch (header present: ${!!signatureHeader})`)
+      const cbToken = String((req.query?.cb_token as string) || "")
+      if (cbToken !== webhookSecret) {
+        logger.warn(`[Brite Webhook] cb_token mismatch (present: ${!!cbToken}) — dropping`)
         // Return 200 to avoid Brite retry storms; log + drop instead.
-        return res.status(200).json({ received: true, ignored: "signature_mismatch" })
+        return res.status(200).json({ received: true, ignored: "cb_token_mismatch" })
       }
     } else {
-      logger.warn(`[Brite Webhook] No webhook_secret configured in gateway_config — accepting unverified payload (sandbox mode)`)
+      logger.warn(`[Brite Webhook] No webhook_secret configured — accepting unverified callback (sandbox bootstrap)`)
     }
 
     const event_type =

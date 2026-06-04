@@ -246,11 +246,16 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
 
       // ── Per-session callbacks (Brite has NO global webhook) ──
       // Register our webhook URL keyed to each terminal/near-terminal state. Brite POSTs
-      // to the URL when the state is reached; the webhook reads the numeric state from body.
+      // to the URL when the state is reached. Brite does NOT sign callbacks (no HMAC), so
+      // we authenticate them with a secret token embedded in the URL — only Brite knows it
+      // because only we registered it. The token = the gateway's webhook_secret (optional).
       const backendUrl =
         process.env.BACKEND_PUBLIC_URL ||
         (process.env.RAILWAY_PUBLIC_DOMAIN_VALUE || "https://www.marketing-hq.eu")
-      const cbUrl = `${backendUrl}/webhooks/brite`
+      const cbToken = keys?.webhook_secret || ""
+      const cbUrl = cbToken
+        ? `${backendUrl}/webhooks/brite?cb_token=${encodeURIComponent(cbToken)}`
+        : `${backendUrl}/webhooks/brite`
       const callbacks = [
         { url: cbUrl, transaction_state: 4 },  // COMPLETED
         { url: cbUrl, transaction_state: 5 },  // CREDIT (ship goods)

@@ -853,6 +853,7 @@ function GatewaysTab() {
                   {form.provider === "paypal" ? "Webhook ID" : form.provider === "novalnet" ? "Payment Access Key" : form.provider === "payu" ? "Second Key (MD5 / SHA-256)" : "Webhook Secret"}
                   {form.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Webhooks → Webhook ID)</span>}
                   {form.provider === "mollie" && <span style={{ color: "#B0B7BF" }}> (optional)</span>}
+                  {form.provider === "brite" && <span style={{ color: "#B0B7BF" }}> (optional — Brite nepodepisuje callbacks; pokud vyplníš, použije se jako tajný cb_token v callback URL pro ověření původu)</span>}
                   {form.provider === "novalnet" && <span style={{ color: "#B0B7BF" }}> (used as X-NN-Access-Key + webhook signature)</span>}
                   {form.provider === "payu" && <span style={{ color: "#B0B7BF" }}> (POS → Keys → Second key — verifies OpenPayu-Signature)</span>}
                 </label>
@@ -1266,6 +1267,7 @@ function GatewaysTab() {
                               {editForm.provider === "paypal" ? "Webhook ID" : editForm.provider === "novalnet" ? "Payment Access Key" : editForm.provider === "payu" ? "Second Key (MD5 / SHA-256)" : "Webhook Secret"}
                               {editForm.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Webhooks)</span>}
                               {editForm.provider === "mollie" && <span style={{ color: "#B0B7BF" }}> (optional)</span>}
+                              {editForm.provider === "brite" && <span style={{ color: "#B0B7BF" }}> (optional — cb_token v callback URL)</span>}
                               {editForm.provider === "novalnet" && <span style={{ color: "#B0B7BF" }}> (X-NN-Access-Key + webhook signature)</span>}
                               {editForm.provider === "payu" && <span style={{ color: "#B0B7BF" }}> (POS → Keys → Second key)</span>}
                             </label>
