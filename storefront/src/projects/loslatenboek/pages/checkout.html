@@ -2403,29 +2403,37 @@ body {
 }
 .brite-bank-tile {
   position: relative;
-  background: var(--white); border: 1.5px solid var(--border);
-  border-radius: var(--radius); padding: 11px 5px 8px;
+  background: #FFFFFF; border: 1px solid rgba(45,27,61,0.08);
+  border-radius: 14px; padding: 14px 8px 11px;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 5px; cursor: pointer;
-  transition: border-color .18s ease, background .18s ease,
-              box-shadow .18s ease, transform .12s ease;
-  min-height: 74px; text-align: center;
+  gap: 8px; cursor: pointer;
+  transition: border-color .22s cubic-bezier(0.22,1,0.36,1),
+              box-shadow .22s cubic-bezier(0.22,1,0.36,1),
+              transform .16s cubic-bezier(0.22,1,0.36,1);
+  min-height: 88px; text-align: center;
+  box-shadow: 0 1px 2px rgba(45,27,61,0.04);
   -webkit-tap-highlight-color: transparent;
 }
 .brite-bank-tile:hover {
-  border-color: var(--cta);
-  background: rgba(194,123,160,0.025);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  border-color: rgba(194,123,160,0.55);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(45,27,61,0.10), 0 2px 5px rgba(194,123,160,0.10);
 }
-.brite-bank-tile:active { transform: scale(.98); transition-duration: .08s; }
+.brite-bank-tile:active { transform: translateY(0) scale(.985); transition-duration: .08s; }
 .brite-bank-tile.selected {
-  border-color: var(--cta); border-width: 2px;
-  padding: 7.5px 3.5px 5.5px;
-  background: rgba(194,123,160,0.04);
+  border-color: var(--cta);
+  background: linear-gradient(180deg, rgba(194,123,160,0.05) 0%, rgba(194,123,160,0.02) 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(194,123,160,0.18),
-    0 1px 3px rgba(0,0,0,0.04);
+    0 0 0 1.5px var(--cta),
+    0 6px 18px rgba(194,123,160,0.18);
+}
+/* Refined selected check — small, calm, top-right corner */
+.brite-bank-tile.selected::after {
+  content: "";
+  position: absolute; top: 8px; right: 8px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--cta) url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") center/9px no-repeat;
 }
 .brite-popular-badge {
   position: absolute; top: -7px; right: -4px;
@@ -2449,7 +2457,11 @@ body {
   border-radius: 4px; letter-spacing: 0.2px;
   min-width: 48px; line-height: 1;
 }
-.brite-bank-name { font-size: 10px; font-weight: 500; color: var(--muted); line-height: 1.1; }
+.brite-bank-name {
+  font-size: 12.5px; font-weight: 600;
+  color: #4A3354; line-height: 1.25;
+  letter-spacing: -0.01em;
+}
 .brite-secured {
   display: flex; align-items: center; gap: 6px;
   margin-top: 14px; padding: 10px 12px;
@@ -2488,12 +2500,12 @@ body {
   .brite-instant-hero .ih-sub { font-size: 12px; color: var(--text, #444); line-height: 1.35; }
   .brite-instant-hero .ih-sub strong { color: var(--heading); }
   .brite-bank-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
-  .brite-bank-tile { min-height: 84px; padding: 12px 6px 9px; }
-  .brite-bank-tile:active { transform: scale(0.97); background: rgba(194,123,160,0.08); }
+  .brite-bank-tile { min-height: 96px; padding: 14px 7px 11px; gap: 9px; }
+  .brite-bank-tile:active { transform: scale(0.97); }
   .brite-logo { height: 40px; }
   .brite-logo img { height: 40px; max-width: 96%; }
   .brite-logo .brite-fallback { height: 24px; font-size: 12px; padding: 0 10px; min-width: 54px; }
-  .brite-bank-name { font-size: 11px; font-weight: 600; }
+  .brite-bank-name { font-size: 13.5px; font-weight: 600; }
   .brite-popular-badge { font-size: 7px; padding: 2px 5px; top: -6px; right: -3px; }
   .brite-trust-strip { display: none; }
   .brite-secured { font-size: 10px; padding: 8px 10px; margin-top: 10px; gap: 5px; justify-content: center; }
