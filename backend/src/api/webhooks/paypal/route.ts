@@ -319,34 +319,51 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       if (eventType === "PAYMENT.CAPTURE.COMPLETED" && paypalOrderId) {
         logger.info(`[PayPal Webhook] Safety net: attempting to find and complete cart for PayPal order ${paypalOrderId}`)
         try {
-          // Search for cart with this PayPal order in payment session data
-          const { data: carts } = await query.graph({
-            entity: "cart",
-            fields: [
-              "id",
-              "completed_at",
-              "email",
-              "payment_collection.*",
-              "payment_collection.payment_sessions.*",
-            ],
-            filters: {},
-            pagination: { order: { created_at: "DESC" }, skip: 0, take: 50 },
-          })
+          // Look up the uncompleted cart DIRECTLY by the PayPal order id stored
+          // in the payment session's JSONB data. The previous implementation
+          // scanned only the 50 most recent carts, which silently missed carts
+          // paid days after creation (e.g. via abandoned-cart recovery emails):
+          // the capture webhook arrives long after the cart fell out of the
+          // newest-50 window, so no order was ever created despite the money
+          // being captured. A direct jsonb lookup has no such horizon.
+          let targetCartId: string | null = null
+          try {
+            const { Pool } = require("pg")
+            const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+            const { rows } = await pool.query(
+              `SELECT cpc.cart_id
+                 FROM payment_session ps
+                 JOIN cart_payment_collection cpc
+                   ON cpc.payment_collection_id = ps.payment_collection_id
+                 JOIN cart c ON c.id = cpc.cart_id
+                WHERE ps.data->>'paypalOrderId' = $1
+                  AND c.completed_at IS NULL
+                ORDER BY c.created_at DESC
+                LIMIT 1`,
+              [paypalOrderId]
+            )
+            await pool.end()
+            targetCartId = rows[0]?.cart_id || null
+          } catch (lookupErr: any) {
+            logger.warn(`[PayPal Webhook] Safety net: cart lookup by paypalOrderId failed: ${lookupErr.message}`)
+          }
 
           let targetCart: any = null
-          for (const cart of carts || []) {
-            if (cart.completed_at) continue // skip already completed carts
-            const sessions = cart.payment_collection?.payment_sessions || []
-            for (const session of sessions) {
-              if (
-                session.data?.paypalOrderId === paypalOrderId ||
-                session.data?.id === paypalOrderId
-              ) {
-                targetCart = cart
-                break
-              }
-            }
-            if (targetCart) break
+          if (targetCartId) {
+            const { data: carts } = await query.graph({
+              entity: "cart",
+              fields: [
+                "id",
+                "completed_at",
+                "email",
+                "shipping_address.*",
+                "billing_address.*",
+                "payment_collection.*",
+                "payment_collection.payment_sessions.*",
+              ],
+              filters: { id: targetCartId },
+            })
+            targetCart = carts?.[0] || null
           }
 
           if (targetCart) {
