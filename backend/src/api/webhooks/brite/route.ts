@@ -275,9 +275,9 @@ async function safetyNetCompleteCart(
           `SELECT metadata FROM "order" WHERE id = $1 LIMIT 1`,
           [completedOrderId]
         )
-        const existingMeta = orderRows[0]?.metadata || {}
-        const updatedMeta = {
-          ...existingMeta,
+        // JSONB MERGE (||) — never full-replace: a full replace races with the
+        // order-placed subscribers and wipes their fields (custom_display_id, etc.).
+        const mergeMeta = {
           briteSessionId,
           brite_session_id: briteSessionId,
           briteStatus: txData?.state || txData?.status || "COMPLETED",
@@ -291,8 +291,8 @@ async function safetyNetCompleteCart(
           safety_net_completed_at: new Date().toISOString(),
         }
         await pool.query(
-          `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
-          [JSON.stringify(updatedMeta), completedOrderId]
+          `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+          [JSON.stringify(mergeMeta), completedOrderId]
         )
         await pool.end()
       } catch (metaErr: any) {
@@ -467,10 +467,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       activityEntry.decline_reason = txData?.failure_reason || "Payment failed"
     }
 
-    const existingMeta = order.metadata || {}
-    const existingLog = existingMeta.payment_activity_log || []
-    const updatedMetadata: any = {
-      ...existingMeta,
+    const existingLog = (order.metadata as any)?.payment_activity_log || []
+    // JSONB MERGE (||) — only the fields we add, NOT a full ...existingMeta replace.
+    // A full replace clobbers the order-placed subscriber's payment_provider /
+    // payment_method / bank fields (the webhook lands ~1 min after the order, after
+    // the subscriber wrote them). Merge preserves them.
+    const mergeMetadata: any = {
       payment_activity_log: [...existingLog, activityEntry],
       briteSessionId,
       brite_session_id: briteSessionId,
@@ -478,19 +480,19 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     if (isSuccess) {
-      updatedMetadata.payment_captured = true
-      updatedMetadata.payment_captured_at = new Date().toISOString()
-      updatedMetadata.payment_brite_session_id = briteSessionId
-      if (txData?.bank?.id) updatedMetadata.payment_brite_bank_id = txData.bank.id
-      if (txData?.bank?.name) updatedMetadata.payment_brite_bank_name = txData.bank.name
+      mergeMetadata.payment_captured = true
+      mergeMetadata.payment_captured_at = new Date().toISOString()
+      mergeMetadata.payment_brite_session_id = briteSessionId
+      if (txData?.bank?.id) mergeMetadata.payment_brite_bank_id = txData.bank.id
+      if (txData?.bank?.name) mergeMetadata.payment_brite_bank_name = txData.bank.name
     }
 
     try {
       const { Pool } = require("pg")
       const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
       await pool.query(
-        `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
-        [JSON.stringify(updatedMetadata), order.id]
+        `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+        [JSON.stringify(mergeMetadata), order.id]
       )
       await pool.end()
     } catch (dbErr: any) {
