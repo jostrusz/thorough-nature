@@ -56,31 +56,36 @@ async function getCartLiveTotal(cartId: string): Promise<{ total: number; curren
   }
 }
 
-async function findOrderByBriteId(briteSessionId: string, logger: any): Promise<any> {
+async function findOrderByBriteIds(keys: string[], logger: any): Promise<any> {
+  const uniq = [...new Set((keys || []).filter(Boolean).map(String))]
+  if (!uniq.length) return null
   const { Pool } = require("pg")
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
   try {
-    // Fast path: metadata already enriched
+    // Fast path: metadata already enriched (session id or merchant_reference)
     const direct = await pool.query(
       `SELECT id, metadata FROM "order"
-       WHERE metadata->>'briteSessionId' = $1
-          OR metadata->>'brite_session_id' = $1
+       WHERE metadata->>'briteSessionId' = ANY($1)
+          OR metadata->>'brite_session_id' = ANY($1)
+          OR metadata->>'payment_brite_session_id' = ANY($1)
+          OR metadata->>'brite_merchant_reference' = ANY($1)
        LIMIT 1`,
-      [briteSessionId]
+      [uniq]
     )
     if (direct.rows[0]) return direct.rows[0]
 
-    // Fallback: via payment_session.data substring
+    // Fallback: any key (session id / transaction id / merchant_reference) appears
+    // in payment_session.data — covers callbacks that send a different id than we stored.
     const linked = await pool.query(
       `SELECT o.id, o.metadata
        FROM "order" o
        JOIN order_payment_collection opc ON opc.order_id = o.id
        JOIN payment_collection pc ON pc.id = opc.payment_collection_id
        JOIN payment_session ps ON ps.payment_collection_id = pc.id
-       WHERE ps.data::text LIKE '%' || $1 || '%'
+       WHERE EXISTS (SELECT 1 FROM unnest($1::text[]) k WHERE ps.data::text LIKE '%' || k || '%')
        ORDER BY o.created_at DESC
        LIMIT 1`,
-      [briteSessionId]
+      [uniq]
     )
     return linked.rows[0] || null
   } catch (dbErr: any) {
@@ -92,24 +97,85 @@ async function findOrderByBriteId(briteSessionId: string, logger: any): Promise<
 }
 
 /**
+ * Resolve every id we can match a cart/order on from a callback that may carry
+ * only one id (Brite sends the transaction id, but we store the session id).
+ * Pulls the cross-id + merchant_reference from the payload, and — if the
+ * merchant_reference isn't in the payload — asks Brite (session.get / transaction.get).
+ * Never throws; always returns at least the original id.
+ */
+async function getBriteCredentials(): Promise<{ clientId: string; clientSecret: string; isTest: boolean; baseUrl?: string } | null> {
+  const { Pool } = require("pg")
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+  try {
+    const { rows } = await pool.query(
+      `SELECT mode, live_keys, test_keys, metadata
+       FROM gateway_config
+       WHERE provider = 'brite' AND is_active = true AND deleted_at IS NULL
+       ORDER BY priority ASC LIMIT 1`
+    )
+    if (!rows[0]) return null
+    const isTest = rows[0].mode !== "live"
+    const k = isTest ? rows[0].test_keys : rows[0].live_keys
+    if (!k?.api_key || !k?.secret_key) return null
+    return { clientId: k.api_key, clientSecret: k.secret_key, isTest, baseUrl: rows[0].metadata?.base_url || undefined }
+  } catch {
+    return null
+  } finally {
+    await pool.end().catch(() => {})
+  }
+}
+
+async function resolveBriteMatchKeys(callbackId: string, txData: any, logger: any): Promise<string[]> {
+  const keys = new Set<string>([String(callbackId)])
+  if (txData?.merchant_reference) keys.add(String(txData.merchant_reference))
+  if (txData?.session_id) keys.add(String(txData.session_id))
+  if (txData?.transaction_id) keys.add(String(txData.transaction_id))
+
+  // If the payload already gave us a merchant_reference we don't need an API round-trip.
+  if (txData?.merchant_reference) return [...keys].filter(Boolean)
+
+  const creds = await getBriteCredentials()
+  if (!creds) return [...keys].filter(Boolean)
+  const client = new BriteApiClient(creds.clientId, creds.clientSecret, creds.isTest, logger, creds.baseUrl)
+  // The callback id is usually a transaction id; fall back to session.get if not.
+  try {
+    const tx = await client.getTransaction(callbackId)
+    if (tx?.session_id) keys.add(String(tx.session_id))
+    if (tx?.id) keys.add(String(tx.id))
+    if (tx?.merchant_reference) keys.add(String(tx.merchant_reference))
+  } catch {
+    try {
+      const s = await client.getSession(callbackId)
+      if (s?.id) keys.add(String(s.id))
+      if (s?.transaction_id) keys.add(String(s.transaction_id))
+      if (s?.merchant_reference) keys.add(String(s.merchant_reference))
+    } catch (e: any) {
+      logger.warn(`[Brite Webhook] resolveBriteMatchKeys: could not resolve ${callbackId}: ${e?.message}`)
+    }
+  }
+  return [...keys].filter(Boolean)
+}
+
+/**
  * Safety net for the redirect open-banking flow: customer paid at the bank
  * but never returned to the storefront (closed browser, lost mobile flow,
  * etc.). Identical pattern to webhooks/airwallex/route.ts.
  */
 async function safetyNetCompleteCart(
-  briteSessionId: string,
+  matchKeys: string[],
   txData: any,
   scope: any,
   logger: any
 ): Promise<void> {
   const DELAY_MS = 30_000
+  const briteSessionId = matchKeys[0]
 
   logger.info(
     `[Brite Webhook] Safety net: no order for ${briteSessionId}. Waiting ${DELAY_MS / 1000}s before completing cart...`
   )
   await new Promise((resolve) => setTimeout(resolve, DELAY_MS))
 
-  const orderAfterDelay = await findOrderByBriteId(briteSessionId, logger)
+  const orderAfterDelay = await findOrderByBriteIds(matchKeys, logger)
   if (orderAfterDelay) {
     logger.info(`[Brite Webhook] Safety net: order ${orderAfterDelay.id} appeared during delay`)
     return
@@ -126,11 +192,11 @@ async function safetyNetCompleteCart(
          JOIN cart_payment_collection cpc ON cpc.cart_id = c.id
          JOIN payment_collection pc ON pc.id = cpc.payment_collection_id
          JOIN payment_session ps ON ps.payment_collection_id = pc.id
-         WHERE ps.data::text LIKE '%' || $1 || '%'
+         WHERE EXISTS (SELECT 1 FROM unnest($1::text[]) k WHERE ps.data::text LIKE '%' || k || '%')
            AND c.completed_at IS NULL
          ORDER BY c.created_at DESC
          LIMIT 1`,
-        [briteSessionId]
+        [matchKeys]
       )
       cartRow = rows[0] || null
     } finally {
@@ -154,7 +220,7 @@ async function safetyNetCompleteCart(
     const targetCart = cartRow
 
     // Final duplicate check
-    const orderFinalCheck = await findOrderByBriteId(briteSessionId, logger)
+    const orderFinalCheck = await findOrderByBriteIds(matchKeys, logger)
     if (orderFinalCheck) {
       logger.info(`[Brite Webhook] Safety net: order ${orderFinalCheck.id} appeared just before completion`)
       return
@@ -353,14 +419,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       error_code: isFailed ? (txData?.failure_reason || state || "failed") : null,
     }).catch(() => {})
 
-    const order = await findOrderByBriteId(briteSessionId, logger)
+    // Resolve every id we can match on (session id, transaction id, merchant_reference)
+    // so the cart/order is found even when the callback sends a different id than we stored.
+    const matchKeys = await resolveBriteMatchKeys(briteSessionId, txData, logger)
+    const order = await findOrderByBriteIds(matchKeys, logger)
 
     if (!order) {
-      logger.warn(`[Brite Webhook] No order for ${briteSessionId}`)
+      logger.warn(`[Brite Webhook] No order for ${briteSessionId} (keys: ${matchKeys.length})`)
 
       if (isSuccess) {
         // Fire and forget — must not block 200 response
-        safetyNetCompleteCart(briteSessionId, txData, req.scope, logger).catch((err) => {
+        safetyNetCompleteCart(matchKeys, txData, req.scope, logger).catch((err) => {
           logger.error(`[Brite Webhook] Safety net unhandled error: ${err.message}`)
         })
       }
