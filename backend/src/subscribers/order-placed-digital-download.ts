@@ -141,8 +141,8 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
   'slipp-taket': [],
 }
 
-// Fallback for unknown projects
-const DEFAULT_EBOOK_FILES = EBOOK_FILES_BY_PROJECT.loslatenboek
+// NOTE: no cross-language fallback. Unknown projects are skipped (and logged)
+// rather than receiving wrong-language (e.g. Dutch) e-books.
 
 // Storefront URLs per project
 const STOREFRONT_URLS: Record<string, string> = {
@@ -218,11 +218,11 @@ export async function sendEbookDelivery(orderId: string, container: any, eventNa
     const projectConfig = getProjectEmailConfig(order)
     const projectId = projectConfig.project
 
-    // Get e-book files for this project
-    const ebookFiles = EBOOK_FILES_BY_PROJECT[projectId] || DEFAULT_EBOOK_FILES
+    // Get e-book files for this project — NO cross-language fallback
+    const ebookFiles = EBOOK_FILES_BY_PROJECT[projectId]
 
     // Skip if no e-book files configured for this project yet
-    if (!ebookFiles.length) {
+    if (!ebookFiles || !ebookFiles.length) {
       console.log(`[digital-download] No e-book files configured for project "${projectId}", skipping for order ${order.id}`)
       return
     }

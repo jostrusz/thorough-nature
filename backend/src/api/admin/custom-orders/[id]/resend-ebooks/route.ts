@@ -32,13 +32,24 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
     { key: "e-books/Die Lösung für Überdenkerinnen.docx.pdf", title: "Die Lösung für Überdenkerinnen", description: "E-Book (PDF)", size: "1.4 MB" },
     { key: "e-books/LIEBE OHNE UNSINN.pdf", title: "Liebe ohne Unsinn", description: "E-Book (PDF)", size: "14.3 MB" },
   ],
+  'psi-superzivot': [
+    { key: "e-books/Dlouhovekost zacina v misce.pdf", title: "Dlouhověkost začíná v misce", description: "E-book (PDF)", size: "4.3 MB" },
+    { key: "e-books/Proc to dela.pdf", title: "Proč to dělá", description: "E-book (PDF)", size: "4.3 MB" },
+    { key: "e-books/TOP 20 her.pdf", title: "TOP 20 her", description: "E-book (PDF)", size: "782 KB" },
+  ],
   'het-leven': [
     { key: "e-books/Verschuif Een Ding Verander Alles.pdf", title: "Verschuif Eén Ding, Verander Alles", description: "E-book (PDF)", size: "3.2 MB" },
     { key: "e-books/Niet Alles Verdient Een Plek.pdf", title: "Niet Alles Verdient Een Plek", description: "E-book (PDF)", size: "1.1 MB" },
   ],
+  'zycie-zaslugy': [
+    { key: "e-books/przesun-jedna-rzecz-zmien-wszystko.pdf", title: "Przesuń jedną rzecz, zmień wszystko", description: "E-book (PDF)", size: "13.2 MB" },
+    { key: "e-books/nie-wszystko-zasluguje-na-miejsce.pdf", title: "Nie wszystko zasługuje na miejsce", description: "E-book (PDF)", size: "18.5 MB" },
+  ],
 }
 
-const DEFAULT_EBOOK_FILES = EBOOK_FILES_BY_PROJECT.loslatenboek
+// NOTE: no cross-language fallback. If a project is missing from EBOOK_FILES_BY_PROJECT
+// we REFUSE to send rather than silently delivering wrong-language (e.g. Dutch) e-books.
+// This map must stay in sync with order-placed-digital-download.ts.
 
 // Storefront URLs per project
 const STOREFRONT_URLS: Record<string, string> = {
@@ -47,7 +58,9 @@ const STOREFRONT_URLS: Record<string, string> = {
   'slapp-taget': process.env.ST_STOREFRONT_URL || "https://www.slapptagetboken.se",
   'odpusc-ksiazka': process.env.OK_STOREFRONT_URL || "https://www.odpusc-ksiazka.pl",
   'lass-los': process.env.LL_STOREFRONT_URL || "https://www.lasslosbuch.de",
+  'psi-superzivot': process.env.PS_STOREFRONT_URL || "https://www.psi-superzivot.cz",
   'het-leven': process.env.HL_STOREFRONT_URL || "https://www.pakjeleventerug.nl",
+  'zycie-zaslugy': process.env.ZZ_STOREFRONT_URL || "https://www.najpierw-ja.pl",
 }
 
 // Localized email subjects per project
@@ -57,7 +70,9 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'slapp-taget': 'Dina e-böcker är redo! 📖',
   'odpusc-ksiazka': 'Twoje e-booki są gotowe! 📖',
   'lass-los': 'Deine E-Books sind bereit! 📖',
+  'psi-superzivot': 'Tvoje e-booky jsou připravené! 📖',
   'het-leven': 'Je 2 gratis e-books staan klaar! 📖',
+  'zycie-zaslugy': 'Twoje 2 darmowe e-booki są gotowe! 📖',
 }
 
 // Localized fallback first name per project
@@ -67,7 +82,9 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'slapp-taget': 'där',
   'odpusc-ksiazka': 'tam',
   'lass-los': 'dort',
+  'psi-superzivot': 'tam',
   'het-leven': 'daar',
+  'zycie-zaslugy': 'tam',
 }
 
 export async function POST(
@@ -108,11 +125,11 @@ export async function POST(
     const projectConfig = getProjectEmailConfig(src)
     const projectId = projectConfig.project
 
-    // Get project-specific ebook files
-    const ebookFiles = EBOOK_FILES_BY_PROJECT[projectId] || DEFAULT_EBOOK_FILES
+    // Get project-specific ebook files — NO cross-language fallback (see note above)
+    const ebookFiles = EBOOK_FILES_BY_PROJECT[projectId]
 
-    if (!ebookFiles.length) {
-      res.status(400).json({ error: `No e-book files configured for project "${projectId}"` })
+    if (!ebookFiles || !ebookFiles.length) {
+      res.status(400).json({ error: `No e-book files configured for project "${projectId}" — refusing to send wrong-language fallback` })
       return
     }
 
