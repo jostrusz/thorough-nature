@@ -110,6 +110,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       "HLDV-4": { physicalSku: "HLDV62786284629", quantity: 4 },
       "HLDV62786284629-2": { physicalSku: "HLDV62786284629", quantity: 1 },
       "LLWJK7824627392-2": { physicalSku: "LLWJK7824627392", quantity: 1 },
+      // ─── Polish: Życie, jakiego nigdy sobie nie pozwoliłaś (zycie-zaslugy) ───
+      // Per-bundle variants ZJN-{N} → physical book SKU ZJNS827837491 ×N.
+      "ZJN-1": { physicalSku: "ZJNS827837491", quantity: 1 },
+      "ZJN-2": { physicalSku: "ZJNS827837491", quantity: 2 },
+      "ZJN-3": { physicalSku: "ZJNS827837491", quantity: 3 },
+      "ZJN-4": { physicalSku: "ZJNS827837491", quantity: 4 },
+      // Order-bump upsell (Życie → Odpuść cross-sell). Admin SKU has -2 suffix;
+      // Dextrum holds only the parent barcode OTCCN64787237.
+      "OTCCN64787237-2": { physicalSku: "OTCCN64787237", quantity: 1 },
     }
 
     // Filter out non-physical items (e.g. COD fee) that don't exist in the warehouse
