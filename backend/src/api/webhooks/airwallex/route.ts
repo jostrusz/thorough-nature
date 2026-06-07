@@ -3,6 +3,7 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { emitPaymentLog } from "../../../utils/payment-logger"
 import { logPaymentEvent } from "../../../modules/payment-debug/utils/log"
+import { forceAuthorizeCartSessions } from "../../../modules/payment-airwallex/utils/force-authorize"
 
 const SAFETY_NET_NTFY_URL = "https://ntfy.sh/medusa-ntfy-obj-2026"
 
@@ -233,6 +234,39 @@ async function safetyNetCompleteCart(
       event_type: "safety_net_completing",
       event_data: { paid: paidAmount, cart_total: cartTotals?.total ?? null },
     }).catch(() => {})
+
+    // ─── FORCE-AUTHORIZE ───
+    // Redirect methods (P24/BLIK/iDEAL/Bancontact) leave the Medusa session
+    // unauthorized when the shopper doesn't return to run the frontend authorize
+    // step; a retry can also overwrite the session with an unpaid second intent.
+    // Either way completeCartWorkflow's validateCartPaymentsStep rejects the cart
+    // ("Payment sessions are required to complete cart"). Force the cart's
+    // session(s) to authorized + remap them to THIS paid intent before completing.
+    try {
+      const { Pool } = require("pg")
+      const authPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+      try {
+        // Last-moment race guard: bail if the cart was completed in the meantime.
+        const { rows: cartState } = await authPool.query(
+          `SELECT completed_at FROM cart WHERE id = $1 LIMIT 1`,
+          [targetCart.id]
+        )
+        if (cartState[0]?.completed_at) {
+          logger.info(
+            `[Airwallex Webhook] Safety net: cart ${targetCart.id} already completed at ${cartState[0].completed_at} — aborting`
+          )
+          return
+        }
+        const updated = await forceAuthorizeCartSessions(authPool, targetCart.id, paymentIntentId)
+        logger.info(
+          `[Airwallex Webhook] Safety net: force-authorized ${updated} payment session(s) on cart ${targetCart.id} for intent ${paymentIntentId}`
+        )
+      } finally {
+        await authPool.end().catch(() => {})
+      }
+    } catch (authErr: any) {
+      logger.error(`[Airwallex Webhook] Safety net: force-authorize failed: ${authErr.message}`)
+    }
 
     // Complete the cart via Medusa's cart completion workflow
     const { completeCartWorkflow } = await import("@medusajs/medusa/core-flows")

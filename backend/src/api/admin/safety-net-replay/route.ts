@@ -1,6 +1,7 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { forceAuthorizeCartSessions } from "../../../modules/payment-airwallex/utils/force-authorize"
 
 /**
  * POST /admin/safety-net-replay
@@ -116,20 +117,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
     }
 
-    // 5) Patch the payment session's intent ID so downstream linkage works
-    await pool.query(
-      `UPDATE payment_session ps
-       SET data = jsonb_set(
-                    jsonb_set(ps.data, '{intentId}', to_jsonb($2::text)),
-                    '{airwallexPaymentIntentId}', to_jsonb($2::text)
-                  ),
-           status = 'authorized',
-           updated_at = NOW()
-       WHERE ps.payment_collection_id IN (
-         SELECT payment_collection_id FROM cart_payment_collection WHERE cart_id = $1
-       )`,
-      [cartId, intentId]
-    )
+    // 5) Force-authorize + remap the cart's payment session(s) to the paid intent.
+    //    Shared with the Airwallex webhook safety-net so both paths behave identically.
+    await forceAuthorizeCartSessions(pool, cartId, intentId)
 
     // 6) Run Medusa's cart completion workflow
     const { completeCartWorkflow } = await import("@medusajs/medusa/core-flows")
