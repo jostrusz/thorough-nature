@@ -1,6 +1,7 @@
 import { Text, Section, Hr, Link } from '@react-email/components'
 import * as React from 'react'
 import { cleanItemTitle } from '../../../utils/clean-item-title'
+import { displayBookQty, isBookBundle } from '../../../utils/bundle-book-count'
 import { Base } from './base'
 
 export const ZZ_SHIPMENT_NOTIFICATION = 'zz-shipment-notification'
@@ -305,7 +306,7 @@ export const ZzShipmentNotificationTemplate: React.FC<ZzShipmentNotificationTemp
                         color: '#9B6B7A',
                         margin: '0',
                       }}>
-                        {item.variant_title ? `${item.variant_title} \u2022 ` : ''}Ilość: {item.quantity || 1}
+                        {isBookBundle(item) ? '' : (item.variant_title ? `${item.variant_title} \u2022 ` : '')}Ilość: {displayBookQty(item)}
                       </Text>
                     </td>
                     <td width="80" align="right" valign="top">

@@ -23,5 +23,7 @@ export function cleanItemTitle(title?: string | null): string {
     .replace(/\s*\([^)]*upsell[^)]*\)\s*$/i, '')
     // trailing " - Upsell" / " – Upsell" / " — Upsell" suffix
     .replace(/\s*[-–—]\s*upsell\s*$/i, '')
+    // trailing space-separated " Upsell" with no dash, e.g. "…niszczy Upsell"
+    .replace(/\s+upsell\s*$/i, '')
     .trim()
 }
