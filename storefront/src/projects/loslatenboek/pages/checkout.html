@@ -3474,6 +3474,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // Aktualizuj PayPal Express cenu
     var paypalPrice = document.getElementById('paypal-price');
     if (paypalPrice) paypalPrice.textContent = '— ' + formatPrice(total);
+
+    // Pre-warm the Brite demo cart on any selection change (?brite=1 only; no-op otherwise)
+    if (window.__briteScheduleWarmup) window.__briteScheduleWarmup();
   }
 
   // Starý alias pro zpětnou kompatibilitu
@@ -6969,6 +6972,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   // Create background cart on server after email is entered
   function createBackgroundCart() {
+    // BRITE DEMO (?brite=1): the fast-checkout warm-up owns the cart; don't create a
+    // separate abandoned-recovery background cart (avoids an orphaned cart + lets the
+    // fast path engage). Real customers are unaffected.
+    if (window.__briteFastEnabled === true) return;
     var emailEl = document.getElementById('email');
     if (!emailEl || !emailEl.value || emailEl.value.indexOf('@') === -1) return;
     if (backgroundCartId) return; // Already created
@@ -7307,6 +7314,59 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   }
 
+  /* ─── BRITE DEMO FAST CHECKOUT (?brite=1 ONLY) — cart warm-up ─────────────────
+     Pre-builds the cart (bundle + bump + shipping) in the background while the
+     customer fills the form, so submit only does address + payment (≈4 calls
+     instead of ≈10). 100% gated to the ?brite=1 demo — real customers (no param)
+     never enter ANY of this code. Any failure/mismatch → normal submit chain. */
+  window.__briteFastEnabled = (function(){
+    try { var p = new URLSearchParams(location.search); return p.get('brite') === '1' || p.get('demo_brite') === '1'; }
+    catch(e) { return false; }
+  })();
+  // In the demo, ignore any restored background cart so the warm cart can engage
+  // (briteFast requires no reuse cart). Real customers keep their background cart.
+  if (window.__briteFastEnabled === true) { backgroundCartId = null; }
+
+  function briteSelectionSig(variantId, bump, regionId) {
+    return [variantId || '', bump ? '1' : '0', regionId || ''].join('|');
+  }
+  function briteWarmup() {
+    if (window.__briteFastEnabled !== true) return;
+    if (savedPromoCode) return;                       // never warm a promo cart
+    var variantId = selectedBundleVariantId, bump = !!orderBumpActive, regionId = currentRegionId;
+    if (!variantId || !regionId) return;
+    var sig = briteSelectionSig(variantId, bump, regionId);
+    var cur = window.__briteWarm;
+    if (cur && cur.sig === sig && (cur.ready || cur.inflight)) return; // already warming/warmed
+    var w = { sig: sig, ready: false, inflight: true, cartId: null };
+    window.__briteWarm = w;
+    medusaFetch('/store/carts', { method: 'POST', body: JSON.stringify({ region_id: regionId }) })
+      .then(function(res) {
+        if (window.__briteWarm !== w) return;          // superseded by a newer selection
+        w.cartId = res.cart.id;
+        return medusaFetch('/store/carts/' + w.cartId + '/line-items-bundle', { method: 'POST', body: JSON.stringify({ variant_id: variantId, quantity: 1 }) })
+          .then(function() {
+            if (bump && PROJECT_CONFIG.upsellProduct) {
+              return medusaFetch('/store/carts/' + w.cartId + '/line-items-bundle', { method: 'POST', body: JSON.stringify({ variant_id: PROJECT_CONFIG.upsellProduct.variantId, quantity: 1 }) });
+            }
+          })
+          .then(function() { return medusaFetch('/store/shipping-options?cart_id=' + w.cartId, { method: 'GET' }); })
+          .then(function(shipRes) {
+            var opts = (shipRes.shipping_options || []);
+            if (!opts.length) throw new Error('no shipping options');
+            return medusaFetch('/store/carts/' + w.cartId + '/shipping-methods', { method: 'POST', body: JSON.stringify({ option_id: opts[0].id }) });
+          })
+          .then(function() { if (window.__briteWarm === w) { w.ready = true; w.inflight = false; } });
+      })
+      .catch(function() { if (window.__briteWarm === w) { w.ready = false; w.inflight = false; } /* submit falls back to the normal chain */ });
+  }
+  var __briteWarmTimer = null;
+  window.__briteScheduleWarmup = function() {
+    if (window.__briteFastEnabled !== true) return;
+    clearTimeout(__briteWarmTimer);
+    __briteWarmTimer = setTimeout(briteWarmup, 600);
+  };
+
   /* ─── FORMULIER SUBMIT ─── */
   var form = document.getElementById('checkout-form');
   var submitBtn = document.getElementById('submit-btn');
@@ -7479,8 +7539,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // Stap 1: Cart aanmaken of hergebruiken (promo cart → background cart → nieuw)
     var reuseCartId = promoCartId || backgroundCartId;
+    // ── BRITE DEMO FAST PATH: reuse the pre-warmed cart (bundle+shipping already added) ──
+    var briteWarm = window.__briteWarm;
+    var briteFast = (window.__briteFastEnabled === true) && !savedPromoCode && !reuseCartId
+      && briteWarm && briteWarm.ready === true && briteWarm.cartId
+      && briteWarm.sig === briteSelectionSig(checkoutBundleVariantId, checkoutOrderBump, currentRegionId);
     var cartStep;
-    if (reuseCartId) {
+    if (briteFast) {
+      briteWarm.ready = false;                 // consume — a retry re-warms or falls back
+      cartStep = Promise.resolve(briteWarm.cartId);
+    } else if (reuseCartId) {
       // Cart bestaat al (promo code validatie of background cart recovery)
       // Verwijder bestaande line items en voeg opnieuw toe (bundle/qty kan veranderd zijn)
       cartStep = medusaFetch('/store/carts/' + reuseCartId, { method: 'GET' })
@@ -7511,30 +7579,30 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     cartStep
     .then(function(cartId) {
-      // Stap 2a: Hoofdproduct toevoegen via bundle endpoint (custom pricing)
-      // Each bundle variant (LLWJK-1 to LLWJK-4) represents a specific bundle qty, so quantity is always 1
-      return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
-        method: 'POST',
-        body: JSON.stringify({
-          variant_id: checkoutBundleVariantId,
-          quantity: 1
-        })
-      }).catch(function(err) {
-        console.error('[Checkout] Failed to add product to cart:', err.message || err);
-        throw new Error('Het product kon niet aan de winkelwagen worden toegevoegd. Probeer het opnieuw.');
-      }).then(function() {
-        // Stap 2b: Order bump produkt toevoegen (bundle endpoint = tax-inclusive + discounted price)
-        if (checkoutOrderBump) {
-          return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
-            method: 'POST',
-            body: JSON.stringify({
-              variant_id: PROJECT_CONFIG.upsellProduct.variantId,
-              quantity: 1
-            })
-          });
-        }
-      }).then(function() {
-        // Verify cart has items before proceeding
+      // Stap 2a/2b: hoofdproduct + order bump via bundle endpoint (custom pricing).
+      // FAST: the warmed cart already has these → skip the adds, but KEEP the verify-GET.
+      var addStep;
+      if (briteFast) {
+        addStep = Promise.resolve();
+      } else {
+        addStep = medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
+          method: 'POST',
+          body: JSON.stringify({ variant_id: checkoutBundleVariantId, quantity: 1 })
+        }).catch(function(err) {
+          console.error('[Checkout] Failed to add product to cart:', err.message || err);
+          throw new Error('Het product kon niet aan de winkelwagen worden toegevoegd. Probeer het opnieuw.');
+        }).then(function() {
+          if (checkoutOrderBump) {
+            return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
+              method: 'POST',
+              body: JSON.stringify({ variant_id: PROJECT_CONFIG.upsellProduct.variantId, quantity: 1 })
+            });
+          }
+        });
+      }
+      return addStep.then(function() {
+        // Verify cart has items + total>0 — kept in BOTH paths (incl. FAST) so a €0/empty
+        // cart can never reach payment.
         return medusaFetch('/store/carts/' + cartId, { method: 'GET' }).then(function(cartRes) {
           var cart = cartRes.cart;
           if (!cart.items || cart.items.length === 0 || cart.total <= 0) {
@@ -7588,7 +7656,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return cartId;
     })
     .then(function(cartId) {
-      // Stap 3b: Shipping method toevoegen
+      // Stap 3b: Shipping method toevoegen.
+      // FAST: the warmed cart already has a shipping method → skip it; repaint the
+      // summary async (off the critical path) and proceed straight to payment.
+      if (briteFast) {
+        medusaFetch('/store/carts/' + cartId, { method: 'GET' })
+          .then(function(r) { try { updateOrderSummary(r.cart); } catch(e) {} })
+          .catch(function() {});
+        return cartId;
+      }
       return medusaFetch('/store/shipping-options?cart_id=' + cartId, {
         method: 'GET'
       }).then(function(shipRes) {
@@ -8753,6 +8829,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (BANKS[v]) country = v;
     }
     renderBanksForCountry(country);
+
+    // Kick off the cart warm-up as soon as the demo is up (default bundle + country),
+    // so it's ready by the time the customer finishes the form.
+    if (window.__briteScheduleWarmup) window.__briteScheduleWarmup();
 
     if (countrySelect && !countrySelect.__briteHooked) {
       countrySelect.__briteHooked = true;
