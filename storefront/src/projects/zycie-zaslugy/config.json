@@ -47,7 +47,7 @@
     "homeDelivery": { "price": 5, "label": "Dostawa do domu (Kurier)", "description": "Kurier dostarczy przesyłkę pod wskazany adres", "matchName": "Dostawa do domu" }
   },
   "packetaApiKey": "cbb760f552ef87b3",
-  "catalogContentIds": [],
+  "catalogContentIds": ["l329r3bpu8", "zm3qzbyg7m", "18l8573crr", "b79iz5trzj", "4uiu67be80", "kdr2p37yta", "zjuvkfabrh", "hlcvldccsd"],
   "mollieProfileId": "",
   "paymentProviders": {
     "paypal": "pp_paypal_paypal",
