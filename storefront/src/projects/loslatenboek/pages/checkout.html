@@ -765,6 +765,22 @@ body {
   border: 1px solid rgba(194,123,160,0.12);
 }
 
+/* Brite alternative methods (iDEAL / Swish) — separate rows below the bank picker,
+   styled exactly like a normal payment method (Airwallex-iDEAL look). Demo only (?brite=1). */
+.brite-alt-method {
+  position: relative; display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; margin-top: 8px; background: var(--white);
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  cursor: pointer; transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.brite-alt-method:hover { border-color: var(--highlight); box-shadow: var(--shadow-sm); }
+.brite-alt-method.selected {
+  border-color: var(--cta); background: rgba(194,123,160,0.04);
+  box-shadow: 0 0 0 3px rgba(194,123,160,0.1);
+}
+.brite-alt-method.selected .pm-radio { border-color: var(--cta); }
+.brite-alt-method.selected .pm-radio-dot { transform: scale(1); }
+
 .pm-info { flex: 1; }
 .pm-name {
   font-size: 14px;
@@ -7726,11 +7742,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             return lines;
           })(),
         };
-        // Brite (Pay by Bank): pass the selected opaque bank_id so the backend can
-        // create a Brite session with that bank, and the Web SDK can pre-select it.
-        if (selectedProvider === 'brite' && window.__briteBankId) {
-          sessionData.bank_id = window.__briteBankId;
+        // Brite: always pass the chosen method so the backend routes to the right
+        // endpoint (pay_by_bank → deposit, ideal → create_ideal_payment, swish →
+        // create_swish_payment). bank_id only for pay_by_bank (iDEAL/Swish pick the
+        // bank inside their own flow, so no pre-selection).
+        if (selectedProvider === 'brite') {
           sessionData.method = window.__briteMethod || 'pay_by_bank';
+          if (window.__briteBankId) sessionData.bank_id = window.__briteBankId;
         }
       }
 
@@ -8627,6 +8645,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     return card;
   }
 
+  // Swish is SE/SEK and must be enabled on the Brite account. Flip to true once
+  // Brite activates it → a "Swish" tile appears right under "iDEAL". (iDEAL is on.)
+  var BRITE_SWISH_ENABLED = false;
+
   function renderBanksForCountry(country, country_iso) {
     var grid = document.getElementById('brite-bank-grid');
     if (!grid) return;
@@ -8686,6 +8708,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             var briteCard = document.getElementById('brite-card');
             briteCard.classList.add('selected');
             if (window.__clearRealSelection) window.__clearRealSelection();  // mutual exclusivity
+            if (window.__clearBriteAlt) window.__clearBriteAlt();             // deselect iDEAL/Swish rows
           });
         });
         grid.appendChild(tile);
@@ -8769,9 +8792,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var ksp = document.getElementById('klarna-sub-methods'); if (ksp) ksp.classList.remove('open');
       document.querySelectorAll('#payment-methods input[name="payment_method"]').forEach(function(r){ r.checked = false; });
     };
+    window.__clearBriteAlt = function(){
+      document.querySelectorAll('.brite-alt-method.selected').forEach(function(r){ r.classList.remove('selected'); });
+    };
     window.__briteClearSelection = function(){
       var bc = document.getElementById('brite-card'); if (bc) bc.classList.remove('selected');
       document.querySelectorAll('.brite-bank-tile.selected').forEach(function(t){ t.classList.remove('selected'); });
+      window.__clearBriteAlt();
       window.__briteSelected = false;
     };
 
@@ -8782,6 +8809,45 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // Brite card pinned to the top, above the real methods.
     var briteCard = buildBriteCard();
     container.insertBefore(briteCard, container.firstChild);
+
+    // Brite alternative methods (iDEAL / Swish) as SEPARATE rows right below the bank
+    // picker card — styled like a normal method (cf. Airwallex iDEAL). iDEAL is enabled;
+    // Swish only when BRITE_SWISH_ENABLED. They set __briteMethod + no bank_id.
+    (function renderBriteAltMethods(){
+      [].forEach.call(container.querySelectorAll('.brite-alt-method'), function(el){ el.remove(); });
+      var afterEl = briteCard;
+      function addAlt(method, label, desc, iconFile, badgeBg){
+        var row = document.createElement('div');
+        row.className = 'brite-alt-method';
+        row.setAttribute('data-brite-method', method);
+        row.innerHTML =
+          '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
+          '<img src="/icons/' + iconFile + '" alt="' + label + '" class="pm-icon" onerror="this.outerHTML=&apos;<span class=&quot;pm-icon&quot; style=&quot;background:' + badgeBg + ';color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:none;&quot;>' + label + '</span>&apos;">' +
+          '<div class="pm-info"><div class="pm-name">' + label + '</div><div class="pm-desc">' + desc + '</div></div>';
+        row.addEventListener('click', function(){
+          keepScroll(function(){
+            window.__clearBriteAlt();
+            row.classList.add('selected');
+            // collapse the bank-picker card (Brite stays selected; method = ideal/swish)
+            var bc = document.getElementById('brite-card'); if (bc) bc.classList.remove('selected');
+            document.querySelectorAll('.brite-bank-tile.selected').forEach(function(t){ t.classList.remove('selected'); });
+            if (window.__clearRealSelection) window.__clearRealSelection();
+            window.selectedProvider = 'brite';
+            window.selectedProviderId = 'pp_brite_brite';
+            window.__briteMethod = method;
+            window.__briteBankId = null;
+            window.__briteBankName = label;
+            window.__briteSelected = true;
+            applyBriteButton();
+          });
+        });
+        if (afterEl.nextSibling) container.insertBefore(row, afterEl.nextSibling);
+        else container.appendChild(row);
+        afterEl = row;
+      }
+      addAlt('ideal', 'iDEAL', 'Betaal direct via je eigen bank · via Brite', 'ideal.svg', '#CC0066');
+      if (BRITE_SWISH_ENABLED) addAlt('swish', 'Swish', 'Betaal met Swish · via Brite', 'swish.svg', '#EB4B97');
+    })();
 
     // Keep the Brite card first + enforce a single default selection: while Brite is
     // the active choice, strip any selection the real renderer auto-applies (it marks
@@ -8806,11 +8872,21 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }, true);
     }
 
-    // Brite header click → Brite selected, every real method cleared.
+    // Brite header click → bank picker selected (pay_by_bank), iDEAL/Swish + real cleared.
     briteCard.querySelector('.brite-card-head').addEventListener('click', function(){
       keepScroll(function(){
         briteCard.classList.add('selected');
         window.__clearRealSelection();
+        if (window.__clearBriteAlt) window.__clearBriteAlt();
+        // Re-establish a bank selection (e.g. when coming back from iDEAL/Swish).
+        var grid = document.getElementById('brite-bank-grid');
+        var sel = grid && grid.querySelector('.brite-bank-tile.selected');
+        if (grid && !sel && grid.firstElementChild) { sel = grid.firstElementChild; sel.classList.add('selected'); }
+        if (sel) {
+          window.__briteBankId = sel.getAttribute('data-bank') || null;
+          var tt = sel.querySelector('.bn-title'); window.__briteBankName = tt ? tt.textContent : 'je bank';
+        }
+        window.__briteMethod = 'pay_by_bank';
         window.selectedMethod = 'pay_by_bank';
         window.selectedProvider = 'brite';
         window.selectedProviderId = 'pp_brite_brite';
