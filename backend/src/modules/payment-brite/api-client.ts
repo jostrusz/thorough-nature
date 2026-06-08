@@ -327,7 +327,13 @@ export class BriteApiClient {
   async createSwishSession(data: BriteSessionRequest): Promise<BriteSessionResponse> {
     await this.ensureToken()
     try {
-      const statementRef = (data.statement_reference || data.brand_name || "Order").slice(0, 50)
+      // Swish statement_reference: max 50 chars, allowed set per Brite docs is
+      // a-ö/A-Ö, 0-9, space and !?(),.-:;" — strip anything else (emoji, &, …) so
+      // Swish doesn't reject the session.
+      const statementRef = ((data.statement_reference || data.brand_name || "Order")
+        .replace(/[^a-zA-ZÀ-ÿ0-9 !?(),.\-:;"]/g, "")
+        .trim()
+        .slice(0, 50)) || "Order"
       const response = await this.client.post<BriteSessionResponse>(
         "/api/session.create_swish_payment",
         { ...data, country_id: "se", currency_id: "sek", statement_reference: statementRef },

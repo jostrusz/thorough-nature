@@ -320,7 +320,9 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
         ...(firstName && { customer_firstname: firstName }),
         ...(lastName && { customer_lastname: lastName }),
         // Swish has no returning-user concept → no customer_id
-        ...(customer?.id && method !== "swish" && { customer_id: customer.id }),
+        // customer_id only for open-banking deposit (returning-user concept). Per the
+        // Brite docs, iDEAL and Swish authenticate purely via the bank — no customer_id.
+        ...(customer?.id && method !== "swish" && method !== "ideal" && { customer_id: customer.id }),
         ...((billing.address_1 || shipping.address_1) && {
           customer_address: {
             street: billing.address_1 || shipping.address_1 || "",
