@@ -498,16 +498,39 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       activityEntry.decline_reason = txData?.failure_reason || "Payment failed"
     }
 
+    // Resolve the Brite method (pay_by_bank / ideal / swish) from the order's payment
+    // data so we can AUTHORITATIVELY label the order. The order-placed subscriber sets
+    // payment_provider/method too, but it can be raced/clobbered by sibling subscribers;
+    // this webhook (merge, runs reliably incl. the later SETTLED callback) is the backstop.
+    let briteMethod = "pay_by_bank"
+    try {
+      const { Pool } = require("pg")
+      const mp = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+      try {
+        const { rows } = await mp.query(
+          `SELECT pay.data->>'method' AS method
+           FROM order_payment_collection opc
+           JOIN payment_collection pc ON pc.id = opc.payment_collection_id
+           JOIN payment pay ON pay.payment_collection_id = pc.id
+           WHERE opc.order_id = $1 AND pay.provider_id LIKE 'pp_brite%'
+           ORDER BY pay.created_at DESC LIMIT 1`,
+          [order.id]
+        )
+        if (rows[0]?.method) briteMethod = String(rows[0].method)
+      } finally { await mp.end().catch(() => {}) }
+    } catch { /* default pay_by_bank */ }
+
     const existingLog = (order.metadata as any)?.payment_activity_log || []
     // JSONB MERGE (||) — only the fields we add, NOT a full ...existingMeta replace.
-    // A full replace clobbers the order-placed subscriber's payment_provider /
-    // payment_method / bank fields (the webhook lands ~1 min after the order, after
-    // the subscriber wrote them). Merge preserves them.
+    // A full replace clobbers the order-placed subscriber's fields. Merge preserves
+    // them AND re-establishes the provider/method label even if the subscriber raced.
     const mergeMetadata: any = {
       payment_activity_log: [...existingLog, activityEntry],
       briteSessionId,
       brite_session_id: briteSessionId,
       briteStatus: state,
+      payment_provider: "brite",
+      payment_method: briteMethod,
     }
 
     if (isSuccess) {

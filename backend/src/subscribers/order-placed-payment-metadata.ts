@@ -195,7 +195,7 @@ export default async function orderPlacedPaymentMetadataHandler({
             }
           } catch { /* best effort — name is non-critical */ }
         }
-        newMetadata.payment_method = "pay_by_bank"
+        newMetadata.payment_method = paymentData.method || "pay_by_bank"  // pay_by_bank / ideal / swish
         newMetadata.payment_provider = "brite"
         found = true
         break
