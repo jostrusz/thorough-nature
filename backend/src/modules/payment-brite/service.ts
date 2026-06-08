@@ -312,7 +312,8 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
         brand_name: data?.product_name || data?.brand_name || "Order",
         merchant_reference: merchantReference,
         locale: data?.locale || (countryId || undefined),
-        redirect_uri: returnUrl,
+        // NOTE: no redirect_uri — we use the embedded Web SDK (iframe), so Brite's
+        // redirect return is never triggered (per Brite integration review).
         callbacks,
         ...(preselectedBank && { bank_id: preselectedBank }),
         ...(customerEmail && { customer_email: customerEmail }),

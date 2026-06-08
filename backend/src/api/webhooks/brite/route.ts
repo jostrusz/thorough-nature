@@ -125,6 +125,23 @@ async function getBriteCredentials(): Promise<{ clientId: string; clientSecret: 
   }
 }
 
+/**
+ * Brite ids are base64-encoded datastore keys whose decoded bytes contain the entity
+ * name ("…Transaction…" / "…Session…"). Detect the kind so we hit the RIGHT endpoint
+ * and never trigger a 400 (e.g. transaction.get with a Session id), which would
+ * otherwise pollute Brite's logs (flagged in the Brite integration review).
+ */
+function briteIdKind(id: string): "transaction" | "session" | null {
+  try {
+    const decoded = Buffer.from(String(id), "base64").toString("latin1")
+    if (decoded.includes("Transaction")) return "transaction"
+    if (decoded.includes("Session")) return "session"
+  } catch {
+    /* not decodable — fall through */
+  }
+  return null
+}
+
 async function resolveBriteMatchKeys(callbackId: string, txData: any, logger: any): Promise<string[]> {
   const keys = new Set<string>([String(callbackId)])
   if (txData?.merchant_reference) keys.add(String(txData.merchant_reference))
@@ -137,21 +154,28 @@ async function resolveBriteMatchKeys(callbackId: string, txData: any, logger: an
   const creds = await getBriteCredentials()
   if (!creds) return [...keys].filter(Boolean)
   const client = new BriteApiClient(creds.clientId, creds.clientSecret, creds.isTest, logger, creds.baseUrl)
-  // The callback id is usually a transaction id; fall back to session.get if not.
-  try {
+
+  async function viaSession() {
+    const s = await client.getSession(callbackId)
+    if (s?.id) keys.add(String(s.id))
+    if (s?.transaction_id) keys.add(String(s.transaction_id))
+    if (s?.merchant_reference) keys.add(String(s.merchant_reference))
+  }
+  async function viaTransaction() {
     const tx = await client.getTransaction(callbackId)
     if (tx?.session_id) keys.add(String(tx.session_id))
     if (tx?.id) keys.add(String(tx.id))
     if (tx?.merchant_reference) keys.add(String(tx.merchant_reference))
-  } catch {
-    try {
-      const s = await client.getSession(callbackId)
-      if (s?.id) keys.add(String(s.id))
-      if (s?.transaction_id) keys.add(String(s.transaction_id))
-      if (s?.merchant_reference) keys.add(String(s.merchant_reference))
-    } catch (e: any) {
-      logger.warn(`[Brite Webhook] resolveBriteMatchKeys: could not resolve ${callbackId}: ${e?.message}`)
-    }
+  }
+
+  // Route by id type so we call the correct endpoint directly (no 400s).
+  const kind = briteIdKind(callbackId)
+  try {
+    if (kind === "session") await viaSession()
+    else if (kind === "transaction") await viaTransaction()
+    else { try { await viaSession() } catch { await viaTransaction() } } // unknown → session first
+  } catch (e: any) {
+    logger.warn(`[Brite Webhook] resolveBriteMatchKeys: could not resolve ${callbackId} (kind=${kind}): ${e?.message}`)
   }
   return [...keys].filter(Boolean)
 }
@@ -419,10 +443,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       error_code: isFailed ? (txData?.failure_reason || state || "failed") : null,
     }).catch(() => {})
 
-    // Resolve every id we can match on (session id, transaction id, merchant_reference)
-    // so the cart/order is found even when the callback sends a different id than we stored.
-    const matchKeys = await resolveBriteMatchKeys(briteSessionId, txData, logger)
-    const order = await findOrderByBriteIds(matchKeys, logger)
+    // Fast path: match the order with the ids already in the payload — NO Brite API
+    // call in the common case (frontend already created the order). Only if not found
+    // do we resolve via session.get/transaction.get (routed by id type, so no 400s).
+    const payloadKeys = [String(briteSessionId), txData?.merchant_reference, txData?.session_id, txData?.transaction_id]
+      .filter(Boolean).map(String)
+    let matchKeys = payloadKeys
+    let order = await findOrderByBriteIds(payloadKeys, logger)
+    if (!order) {
+      matchKeys = await resolveBriteMatchKeys(briteSessionId, txData, logger)
+      order = await findOrderByBriteIds(matchKeys, logger)
+    }
 
     if (!order) {
       logger.warn(`[Brite Webhook] No order for ${briteSessionId} (keys: ${matchKeys.length})`)
