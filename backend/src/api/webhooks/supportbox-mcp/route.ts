@@ -39,11 +39,23 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       if (!body.body_text || !String(body.body_text).trim()) {
         return res.status(400).json({ error: "body_text is required for reply" })
       }
-      // MCP sends plain text — pass it as body_html too so the shared
-      // normalizer turns \n into <br> and wraps it in <p>. body_text is kept
-      // for the stored message record.
+      // MCP sends plain text. Convert blank-line-separated blocks into <p>
+      // paragraphs HERE (we know this path is always plain text), so the
+      // visual spacing between paragraphs survives. The pre-built <p> blocks
+      // pass through sendTicketReply's normalizer untouched (no <div>, no raw
+      // \n between paragraphs), and the admin contenteditable path is unaffected.
+      const esc = (s: string) =>
+        s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      const paragraphHtml = String(body.body_text)
+        .replace(/\r\n/g, "\n")
+        .split(/\n\s*\n/) // blank line = paragraph separator
+        .map((block) => block.trim())
+        .filter(Boolean)
+        .map((block) => `<p style="margin:0 0 12px 0;">${esc(block).replace(/\n/g, "<br>")}</p>`)
+        .join("")
+
       const result = await sendTicketReply(supportboxService, ticket_id, {
-        body_html: body.body_text,
+        body_html: paragraphHtml,
         body_text: body.body_text,
         keep_open: !!body.keep_open,
       })
