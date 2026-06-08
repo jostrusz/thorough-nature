@@ -996,6 +996,18 @@ body {
   color: var(--muted);
   margin-top: 10px;
 }
+/* Loading subtitle — shown only while the submit button is in its .loading state.
+   Swaps in for the normal subtext so the customer sees progress, not a frozen page. */
+.btn-loading-sub {
+  display: none;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--cta);
+  margin-top: 10px;
+}
+.checkout-btn-wrap:has(.checkout-btn.loading) .btn-subtext { display: none; }
+.checkout-btn-wrap:has(.checkout-btn.loading) .btn-loading-sub { display: block; }
 
 /* ─── TRUST BADGES POD TLAČÍTKEM ─── */
 .checkout-trust {
@@ -3024,6 +3036,7 @@ body {
           </button>
           <div id="submit-validation-msg" class="submit-validation-msg" style="display:none;"></div>
           <p class="btn-subtext">Je wordt doorgestuurd naar een beveiligde betaalpagina.</p>
+          <p class="btn-loading-sub" aria-live="polite">Een moment geduld — we laden je betaalmethode…</p>
 
           <!-- Trust badges -->
           <div class="checkout-trust">
