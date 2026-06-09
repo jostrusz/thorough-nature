@@ -2,6 +2,27 @@
 import React, { useState, useRef, useEffect } from "react"
 import { sdk } from "../../lib/sdk"
 import { colors, radii, shadows, fontStack } from "./design-tokens"
+import {
+  COUNTRY_CONFIG,
+  PROJECT_CONFIG,
+  SUPPORTED_COUNTRIES,
+  resolveOrderDefaults,
+} from "../../../utils/country-order-config"
+
+// Human labels for payment methods (the matrix stores the slugs)
+const PAYMENT_LABELS: Record<string, string> = {
+  ideal: "iDEAL",
+  bancontact: "Bancontact",
+  creditcard: "Credit Card",
+  paypal: "PayPal",
+  klarna: "Klarna",
+  eps: "EPS",
+  blik: "BLIK",
+  przelewy24: "Przelewy24",
+  cod: "Cash on Delivery",
+  bank_transfer: "Bank Transfer",
+  other: "Other",
+}
 
 /* ═══════════════════════════════════════════════════════
    AI ORDER CREATOR MODAL
@@ -123,7 +144,6 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
   const [shippingOptionId, setShippingOptionId] = useState("")
   const [shippingOptionName, setShippingOptionName] = useState("Standard Shipping")
   const [shippingMethodType, setShippingMethodType] = useState("home_delivery")
-  const [availableShippingOptions, setAvailableShippingOptions] = useState<any[]>([])
   // Paczkomat / Pickup point fields
   const [pickupPointId, setPickupPointId] = useState("")
   const [pickupPointName, setPickupPointName] = useState("")
@@ -145,19 +165,7 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
     }
   }, [open])
 
-  // ─── Fetch all shipping options on mount ───
-  useEffect(() => {
-    if (!open) return
-    sdk.client.fetch("/admin/shipping-options?limit=100", {
-      method: "GET",
-    }).then((res: any) => {
-      const options = res.shipping_options || []
-      setAvailableShippingOptions(options)
-    }).catch((err: any) => {
-      console.warn("[AI Order Creator] Failed to fetch shipping options:", err)
-      setAvailableShippingOptions([])
-    })
-  }, [open])
+  // Shipping options now come from the country/project matrix (no fetch needed).
 
   // ─── Analyze with AI ───
   const handleAnalyze = async () => {
@@ -195,6 +203,17 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
       setConfidence(result.confidence || {})
       setAvailableProjects(result.availableProjects || [])
       setAvailableProducts(result.availableProducts || [])
+
+      // Apply server-resolved per-country defaults (currency + home shipping option,
+      // which always has a clean Dextrum mapping). The admin can still switch to
+      // pickup below, which then forces the pickup-code fields.
+      const rd = result.resolvedDefaults
+      if (rd) {
+        setCurrencyCode(rd.currency_code)
+        setShippingOptionId(rd.shipping_option_id || "")
+        setShippingOptionName(rd.shipping_option_name || "Standard Shipping")
+        setShippingMethodType(rd.shipping_method_type || "home_delivery")
+      }
       setStep("review")
     } catch (e: any) {
       setError(e.message || "AI analysis failed")
@@ -258,8 +277,8 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
     ? `${Number(unitPrice).toFixed(2)} ${currencyCode.toUpperCase()}`
     : ""
 
-  // ─── Country options ───
-  const countryOptions = [
+  // ─── Country options: superseded by the matrix-derived list below ───
+  const _countryOptionsLegacy = [
     { value: "nl", label: "\ud83c\uddf3\ud83c\uddf1 Netherlands" },
     { value: "be", label: "\ud83c\udde7\ud83c\uddea Belgium" },
     { value: "de", label: "\ud83c\udde9\ud83c\uddea Germany" },
@@ -270,6 +289,96 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
     { value: "gb", label: "\ud83c\uddec\ud83c\udde7 United Kingdom" },
     { value: "fr", label: "\ud83c\uddeb\ud83c\uddf7 France" },
   ]
+
+  // ─── Country options (only live markets, from the matrix) ───
+  const countryOptions = SUPPORTED_COUNTRIES.map((cc: string) => ({
+    value: cc,
+    label: COUNTRY_CONFIG[cc].label,
+  }))
+
+  const countryCfg = COUNTRY_CONFIG[countryCode]
+
+  // Payment methods narrowed to what this market actually uses
+  const allowedPaymentMethods = countryCfg?.allowedPaymentMethods || Object.keys(PAYMENT_LABELS)
+  const paymentOptions = allowedPaymentMethods.map((m: string) => ({
+    value: m, label: PAYMENT_LABELS[m] || m,
+  }))
+
+  // Projects narrowed to those that ship to this market
+  const projectSlugsForCountry = countryCfg?.projectSlugs || availableProjects.map((p: any) => p.slug)
+  const projectOptions = projectSlugsForCountry.map((s: string) => {
+    const ap = availableProjects.find((p: any) => p.slug === s)
+    return { value: s, label: ap ? `${ap.flag} ${ap.name}` : (PROJECT_CONFIG[s]?.name || s) }
+  })
+
+  // Shipping choices for the chosen country+project (home always; pickup if any)
+  const homeDef = resolveOrderDefaults(countryCode, projectSlug, false)
+  const pickupDef = resolveOrderDefaults(countryCode, projectSlug, true)
+  const shippingChoices: { value: string; name: string; type: string; label: string }[] = []
+  if (homeDef?.shipping_option_id) {
+    shippingChoices.push({
+      value: homeDef.shipping_option_id, name: homeDef.shipping_option_name,
+      type: "home_delivery", label: `🏠 ${homeDef.shipping_option_name}`,
+    })
+  }
+  if (
+    pickupDef?.has_pickup_option && pickupDef.shipping_option_id &&
+    pickupDef.shipping_option_id !== homeDef?.shipping_option_id
+  ) {
+    shippingChoices.push({
+      value: pickupDef.shipping_option_id, name: pickupDef.shipping_option_name,
+      type: "zasilkovna_pickup", label: `📦 ${pickupDef.shipping_option_name}`,
+    })
+  }
+
+  // When the admin changes the country, re-apply that market's deterministic defaults
+  const handleCountryChange = (cc: string) => {
+    setCountryCode(cc)
+    const d = resolveOrderDefaults(cc, projectSlug)
+    if (!d) return
+    setCurrencyCode(d.currency_code)
+    if (!d.allowed_payment_methods.includes(paymentMethod)) setPaymentMethod(d.default_payment_method)
+    if (!COUNTRY_CONFIG[cc]?.projectSlugs?.includes(projectSlug)) setProjectSlug(d.project_slug)
+    setShippingOptionId(d.shipping_option_id || "")
+    setShippingOptionName(d.shipping_option_name || "Standard Shipping")
+    setShippingMethodType(d.shipping_method_type || "home_delivery")
+  }
+
+  // When the project changes, re-resolve the shipping option (CZ Psi vs Kocici differ)
+  const handleProjectChange = (slug: string) => {
+    setProjectSlug(slug)
+    const d = resolveOrderDefaults(countryCode, slug, shippingMethodType === "zasilkovna_pickup")
+    if (d?.shipping_option_id) {
+      setShippingOptionId(d.shipping_option_id)
+      setShippingOptionName(d.shipping_option_name)
+    }
+  }
+
+  // When the shipping choice changes, set option id/name + derive the type
+  const handleShippingChange = (v: string) => {
+    setShippingOptionId(v)
+    const c = shippingChoices.find((x) => x.value === v)
+    if (c) {
+      setShippingOptionName(c.name)
+      setShippingMethodType(c.type)
+    }
+  }
+
+  // Auto-fill price + title when a variant is selected (prices are major units)
+  const handleVariantChange = (id: string) => {
+    setVariantId(id)
+    for (const p of availableProducts) {
+      const v = (p.variants || []).find((x: any) => x.id === id)
+      if (v) {
+        if (v.price != null) setUnitPrice(String(Number(v.price)))
+        if (p.title) setProductTitle(p.title)
+        break
+      }
+    }
+  }
+
+  const pickupMissing = shippingMethodType === "zasilkovna_pickup" && !pickupPointId.trim()
+  const formIncomplete = !firstName || !lastName || !email || !address1 || pickupMissing
 
   if (!open) return null
 
@@ -436,11 +545,9 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
               <Field
                 label="Project"
                 value={projectSlug}
-                onChange={setProjectSlug}
+                onChange={handleProjectChange}
                 badge={confidence.product}
-                options={availableProjects.map((p: any) => ({
-                  value: p.slug, label: `${p.flag} ${p.name}`,
-                }))}
+                options={projectOptions}
               />
               <Field
                 label="Product"
@@ -451,13 +558,13 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
               <Field
                 label="Variant"
                 value={variantId}
-                onChange={setVariantId}
+                onChange={handleVariantChange}
                 options={
                   availableProducts
                     .flatMap((p: any) => p.variants || [])
                     .map((v: any) => ({
                       value: v.id,
-                      label: `${v.title || v.sku} (${v.price ? (v.price/100).toFixed(2) : "?"} ${v.currency || "EUR"})`,
+                      label: `${v.title || v.sku} (${v.price != null ? Number(v.price).toFixed(2) : "?"} ${(v.currency || "EUR").toUpperCase()})`,
                     }))
                 }
               />
@@ -467,7 +574,7 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
                 </div>
                 <div style={{ flex: 1 }}>
                   <Field
-                    label="Price (EUR)"
+                    label={`Price (${currencyCode.toUpperCase()})`}
                     value={unitPrice}
                     onChange={setUnitPrice}
                     type="number"
@@ -512,7 +619,7 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
               <Field
                 label="Country"
                 value={countryCode}
-                onChange={setCountryCode}
+                onChange={handleCountryChange}
                 badge={confidence.country}
                 options={countryOptions}
               />
@@ -520,37 +627,25 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
               {/* Shipping */}
               <SectionHeader icon="&#x1f69a;" label="Shipping" />
               <Field
-                label="Method"
+                label="Delivery"
                 value={shippingOptionId}
-                onChange={(v) => {
-                  setShippingOptionId(v)
-                  const opt = availableShippingOptions.find((o: any) => o.id === v)
-                  if (opt) setShippingOptionName(opt.name || "Standard Shipping")
-                }}
+                onChange={handleShippingChange}
                 options={
-                  availableShippingOptions.length > 0
-                    ? availableShippingOptions.map((o: any) => ({
-                        value: o.id,
-                        label: o.name || o.id,
-                      }))
-                    : [{ value: "", label: "Standard Shipping (default)" }]
+                  shippingChoices.length > 0
+                    ? shippingChoices.map((c) => ({ value: c.value, label: c.label }))
+                    : [{ value: "", label: "Select a country first" }]
                 }
               />
-              <Field
-                label="Type"
-                value={shippingMethodType}
-                onChange={setShippingMethodType}
-                options={[
-                  { value: "home_delivery", label: "Home Delivery" },
-                  { value: "zasilkovna_pickup", label: "Pickup Point (Zásilkovna/InPost)" },
-                  { value: "zasilkovna_home", label: "Zásilkovna Home Delivery" },
-                ]}
-              />
-              {/* Paczkomat / Pickup point fields — shown when pickup type selected */}
+              {/* Pickup-point fields — required when a pickup option is selected */}
               {shippingMethodType === "zasilkovna_pickup" && (
                 <>
-                  <Field label="Pickup ID" value={pickupPointId} onChange={setPickupPointId} placeholder="e.g. 35779 (Paczkomat/Zásilkovna ID)" />
+                  <Field label="Pickup ID" value={pickupPointId} onChange={setPickupPointId} placeholder="e.g. KRA01M (Paczkomat / Zásilkovna point ID)" />
                   <Field label="Pickup name" value={pickupPointName} onChange={setPickupPointName} placeholder="e.g. InPost Kraków Główny" />
+                  {pickupMissing && (
+                    <div style={{ fontSize: "11px", color: colors.red, marginLeft: "98px", marginBottom: "6px" }}>
+                      ⚠️ Pickup point ID is required — the warehouse rejects pickup orders without it.
+                    </div>
+                  )}
                 </>
               )}
 
@@ -561,19 +656,7 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
                 label="Method"
                 value={paymentMethod}
                 onChange={setPaymentMethod}
-                options={[
-                  { value: "ideal", label: "iDEAL" },
-                  { value: "bancontact", label: "Bancontact" },
-                  { value: "creditcard", label: "Credit Card" },
-                  { value: "klarna", label: "Klarna" },
-                  { value: "paypal", label: "PayPal" },
-                  { value: "eps", label: "EPS" },
-                  { value: "blik", label: "BLIK" },
-                  { value: "przelewy24", label: "Przelewy24" },
-                  { value: "cod", label: "Cash on Delivery" },
-                  { value: "bank_transfer", label: "Bank Transfer" },
-                  { value: "other", label: "Other" },
-                ]}
+                options={paymentOptions}
               />
               <Field
                 label="Status"
@@ -633,23 +716,23 @@ export function AiOrderCreatorModal({ open, onClose, onCreated }: AiOrderCreator
               Cancel
             </button>
             {/* Missing fields hint */}
-            {!creating && (!firstName || !lastName || !email || !address1) && (
-              <span style={{ fontSize: "11px", color: colors.red, maxWidth: "200px", textAlign: "center" }}>
-                Missing: {[!firstName && "first name", !lastName && "last name", !email && "email", !address1 && "street address"].filter(Boolean).join(", ")}
+            {!creating && formIncomplete && (
+              <span style={{ fontSize: "11px", color: colors.red, maxWidth: "220px", textAlign: "center" }}>
+                Missing: {[!firstName && "first name", !lastName && "last name", !email && "email", !address1 && "street address", pickupMissing && "pickup point ID"].filter(Boolean).join(", ")}
               </span>
             )}
             <button
               onClick={handleCreate}
-              disabled={creating || !firstName || !lastName || !email || !address1}
+              disabled={creating || formIncomplete}
               style={{
                 padding: "9px 24px", fontSize: "13px", fontWeight: 700,
                 color: "#fff", border: "none", borderRadius: radii.xs,
-                cursor: (creating || !firstName || !lastName || !email || !address1) ? "not-allowed" : "pointer",
-                opacity: (!creating && (!firstName || !lastName || !email || !address1)) ? 0.45 : 1,
-                background: (creating || !firstName || !lastName || !email || !address1)
+                cursor: (creating || formIncomplete) ? "not-allowed" : "pointer",
+                opacity: (!creating && formIncomplete) ? 0.45 : 1,
+                background: (creating || formIncomplete)
                   ? colors.textMuted
                   : `linear-gradient(135deg, ${colors.green}, #00D68F)`,
-                boxShadow: (creating || !firstName || !lastName || !email || !address1) ? "none" : `0 2px 8px ${colors.green}40`,
+                boxShadow: (creating || formIncomplete) ? "none" : `0 2px 8px ${colors.green}40`,
                 transition: "all 0.2s",
                 display: "flex", alignItems: "center", gap: "8px",
               }}

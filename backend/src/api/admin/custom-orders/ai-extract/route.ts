@@ -2,12 +2,14 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import Anthropic from "@anthropic-ai/sdk"
 import { PROFITABILITY_MODULE } from "../../../../modules/profitability"
+import { resolveOrderDefaults, buildAiCountryMatrix } from "../../../../utils/country-order-config"
 
 /**
  * POST /admin/custom-orders/ai-extract
  *
  * Takes raw text (email conversation, Airwallex data, etc.)
- * and uses Claude Opus to extract structured order details.
+ * and uses Claude (Sonnet) to extract structured order details,
+ * then validates/resolves them against the per-country order matrix.
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   try {
@@ -56,6 +58,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       return `- "${p.title}" (id: ${p.id}, handle: ${p.handle})\n${variants}`
     }).join("\n")
 
+    const marketMatrix = buildAiCountryMatrix()
+
     const client = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
     })
@@ -70,20 +74,26 @@ ${projectList || "No projects configured"}
 AVAILABLE PRODUCTS:
 ${productList || "No products configured"}
 
+MARKET MATRIX (obey strictly — currency + valid payment methods + projects per country):
+${marketMatrix}
+
 RULES:
 1. Extract all customer info: name, email, phone, address
 2. Detect the country from address format, phone prefix, language, or postal code:
    - 4 digits postal code + Dutch text = NL
    - 4 digits postal code + Belgian city = BE
-   - 5 digits postal code + German text = DE
+   - 5 digits postal code + German text = DE; Austrian city/4-digit = AT; Luxembourg = LU
    - XX-XXX postal code + Polish text = PL
-   - +31 phone = NL, +32 = BE, +49 = DE, +48 = PL, +46 = SE, +420 = CZ
-3. Match to the correct project based on context (product name, language, domain in email)
+   - Swedish 5-digit + Swedish text = SE; Norwegian 4-digit + Norwegian text = NO; Czech text = CZ
+   - Phone prefixes: +31 NL, +32 BE, +49 DE, +43 AT, +352 LU, +48 PL, +46 SE, +47 NO, +420 CZ
+   - country_code MUST be one of: nl, be, de, at, lu, pl, se, no, cz. Never output any other country.
+3. Match to the correct project based on context (product name, language, domain in email). The project MUST be one listed for the detected country in the MARKET MATRIX.
 4. Extract payment info if present (Airwallex int_xxx, Mollie tr_xxx, PayPal ID)
-5. Detect payment method (ideal, bancontact, creditcard, klarna, paypal, etc.)
+5. Detect payment method — it MUST be one of the allowed methods for the detected country in the MARKET MATRIX. If unclear, use that country's default method.
 6. Match to the correct product and variant from the available list
-7. For each field, provide a confidence level: "high", "medium", or "low"
-8. If a field cannot be determined, use null
+7. currency_code MUST match the detected country per the MARKET MATRIX (nl/be/de/at/lu=eur, pl=pln, se=sek, no=nok, cz=czk). unit_price is in that local currency, major units (e.g. 35.00 or 129.00).
+8. For each field, provide a confidence level: "high", "medium", or "low"
+9. If a field cannot be determined, use null
 
 IMPORTANT: Return ONLY valid JSON, no markdown fences, no explanation text.
 
@@ -104,8 +114,8 @@ JSON SCHEMA:
     "variant_id": string | null,
     "product_title": string | null,
     "quantity": number,
-    "unit_price": number | null (in EUR, e.g. 35.00 for €35.00),
-    "currency_code": string (default "eur"),
+    "unit_price": number | null (in the order's local currency, major units, e.g. 35.00 or 129.00),
+    "currency_code": string (match the detected country per MARKET MATRIX),
     "payment_id": string | null,
     "payment_method": string | null,
     "payment_status": "paid" | "pending" | "unknown",
@@ -142,7 +152,29 @@ JSON SCHEMA:
       return
     }
 
-    // Enrich with project details if matched
+    // ── Validate + resolve deterministic per-country defaults ──
+    // The AI's country is the anchor; everything else is constrained to what
+    // that market actually supports, so the draft can't produce a wrong-currency
+    // or unmapped-shipping order that sticks in the warehouse.
+    const cc = String(parsed.extracted?.country_code || "").toLowerCase()
+    const resolved = resolveOrderDefaults(cc, parsed.extracted?.project_slug)
+    if (resolved && parsed.extracted) {
+      // Currency is deterministic per country — override any guess.
+      parsed.extracted.currency_code = resolved.currency_code
+      // Constrain payment method to the market's real set.
+      const pm = String(parsed.extracted.payment_method || "").toLowerCase()
+      if (pm && !resolved.allowed_payment_methods.includes(pm)) {
+        parsed.extracted.payment_method = resolved.default_payment_method
+        parsed.confidence = parsed.confidence || {}
+        parsed.confidence.payment = "low"
+      }
+      // Backfill project from the country default if missing/invalid.
+      if (!parsed.extracted.project_slug) {
+        parsed.extracted.project_slug = resolved.project_slug
+      }
+    }
+
+    // Enrich with project details if matched (use the possibly-backfilled slug)
     const matchedProject = projects.find(
       (p: any) => p.project_slug === parsed.extracted?.project_slug
     )
@@ -150,6 +182,7 @@ JSON SCHEMA:
     res.json({
       ...parsed,
       project: matchedProject || null,
+      resolvedDefaults: resolved || null,
       availableProjects: projects.map((p: any) => ({
         slug: p.project_slug,
         name: p.project_name,

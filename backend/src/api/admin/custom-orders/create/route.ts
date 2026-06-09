@@ -2,6 +2,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { PROFITABILITY_MODULE } from "../../../../modules/profitability"
+import { resolveOrderDefaults } from "../../../../utils/country-order-config"
 
 /**
  * POST /admin/custom-orders/create
@@ -60,74 +61,72 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       return
     }
 
-    // Resolve project config for sales_channel_id and region
+    // ── Resolve deterministic defaults from the country/project matrix ──
+    // Fixes: wrong currency (was defaulting "eur" for SE/PL/NO), brittle
+    // currency-based region matching, and shipping options with no Dextrum
+    // mapping (which silently stick the order in the warehouse).
     let salesChannelId: string | null = null
     let regionId: string | null = null
+    let resolvedCurrency = String(currency_code || "eur").toLowerCase()
 
-    if (project_slug) {
-      try {
-        const profitService = req.scope.resolve(PROFITABILITY_MODULE) as any
-        const configs = await profitService.listProjectConfigs(
-          { project_slug },
-          { take: 1 }
-        )
-        if (configs?.length > 0) {
-          salesChannelId = configs[0].sales_channel_id
+    const smtLower = String(shipping_method_type || "").toLowerCase()
+    const usesPickup =
+      smtLower.includes("pickup") ||
+      smtLower.includes("vydejni") ||
+      smtLower.includes("paczkomat") ||
+      !!pickup_point_id
+    const defaults = resolveOrderDefaults(country_code, project_slug, usesPickup)
+
+    if (defaults) {
+      salesChannelId = defaults.sales_channel_id
+      regionId = defaults.region_id
+      resolvedCurrency = defaults.currency_code
+    } else {
+      // Unsupported country — fall back to the legacy profitability lookup.
+      if (project_slug) {
+        try {
+          const profitService = req.scope.resolve(PROFITABILITY_MODULE) as any
+          const configs = await profitService.listProjectConfigs({ project_slug }, { take: 1 })
+          if (configs?.length > 0) salesChannelId = configs[0].sales_channel_id
+        } catch (e) {
+          console.warn("[Create Order] Could not resolve project:", (e as Error).message)
         }
-      } catch (e) {
-        console.warn("[Create Order] Could not resolve project:", (e as Error).message)
       }
-    }
-
-    // Resolve region from sales channel
-    if (salesChannelId) {
       try {
         const { data: regions } = await query.graph({
           entity: "region",
           fields: ["id", "currency_code"],
           filters: {},
         })
-        // Find region matching the currency or country
-        const matchedRegion = (regions || []).find((r: any) =>
-          r.currency_code === currency_code
-        )
-        if (matchedRegion) {
-          regionId = matchedRegion.id
-        } else if (regions?.length > 0) {
-          regionId = regions[0].id
-        }
+        const matchedRegion = (regions || []).find((r: any) => r.currency_code === resolvedCurrency)
+        regionId = matchedRegion?.id || regions?.[0]?.id || null
       } catch (e) {
         console.warn("[Create Order] Could not resolve region:", (e as Error).message)
       }
-    }
-
-    // Fallback: find any region/sales_channel
-    if (!regionId) {
-      try {
-        const { data: regions } = await query.graph({
-          entity: "region",
-          fields: ["id"],
-          filters: {},
-        })
-        if (regions?.length > 0) regionId = regions[0].id
-      } catch {}
-    }
-
-    if (!salesChannelId) {
-      try {
-        const { data: channels } = await query.graph({
-          entity: "sales_channel",
-          fields: ["id"],
-          filters: {},
-        })
-        if (channels?.length > 0) salesChannelId = channels[0].id
-      } catch {}
+      if (!salesChannelId) {
+        try {
+          const { data: channels } = await query.graph({
+            entity: "sales_channel",
+            fields: ["id"],
+            filters: {},
+          })
+          if (channels?.length > 0) salesChannelId = channels[0].id
+        } catch {}
+      }
     }
 
     if (!regionId || !salesChannelId) {
       res.status(500).json({ error: "Could not resolve region or sales channel" })
       return
     }
+
+    // Shipping option: prefer an explicit body value, else the matrix default
+    // (always the home-delivery option — clean Dextrum mapping, no pickup code).
+    const resolvedShippingOptionId = shipping_option_id || defaults?.shipping_option_id || null
+    const resolvedShippingOptionName =
+      shipping_option_name || defaults?.shipping_option_name || "Standard Shipping"
+    const resolvedShippingType =
+      shipping_method_type || defaults?.shipping_method_type || undefined
 
     // Build address
     const address = {
@@ -186,20 +185,22 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       metadata.payment_method = payment_method
     }
 
-    if (shipping_method_type) {
-      metadata.shipping_method = shipping_method_type
+    if (resolvedShippingType) {
+      metadata.shipping_method = resolvedShippingType
     }
 
     if (pickup_point_id) {
       metadata.pickup_point_id = pickup_point_id
       metadata.pickup_point_name = pickup_point_name || ""
       metadata.pickup_place_code = pickup_point_id
-
-      const smt = String(shipping_method_type || "").toLowerCase()
-      if (smt.includes("paczkomat") || smt.includes("inpost")) {
+      // Market-specific pickup key: the Dextrum hold job reads paczkomat_id for
+      // PL InPost and packeta_point_id for CZ/SK Zásilkovna. Derive from the
+      // country — NOT from a substring of the shipping type, which was the bug
+      // that left PL Paczkomat orders without paczkomat_id.
+      const cc = country_code.toLowerCase()
+      if (cc === "pl") {
         metadata.paczkomat_id = pickup_point_id
-      }
-      if (smt.includes("packeta") || smt.includes("zasilkovna") || smt.includes("zásilkovna")) {
+      } else {
         metadata.packeta_point_id = pickup_point_id
       }
     }
@@ -210,7 +211,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
     // Create order
     const newOrder = await orderModuleService.createOrders({
-      currency_code: currency_code.toLowerCase(),
+      currency_code: resolvedCurrency,
       email,
       region_id: regionId,
       sales_channel_id: salesChannelId,
@@ -218,9 +219,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       billing_address: address,
       items,
       shipping_methods: [{
-        name: shipping_option_name || "Standard Shipping",
+        name: resolvedShippingOptionName,
         amount: 0,
-        ...(shipping_option_id && { shipping_option_id }),
+        ...(resolvedShippingOptionId && { shipping_option_id: resolvedShippingOptionId }),
       }],
       metadata,
     })
@@ -271,6 +272,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     }
 
     console.log(`[Create Order] Created manual order ${orderId} → ${customOrderNumber} for ${email}`)
+
+    // ── Emit order.placed so the full automation pipeline fires ──
+    // Without this the order was inert: no Dextrum WMS row, no Fakturoid invoice,
+    // no confirmation email, no ebook. createOrders() does not emit the event, so
+    // we emit it explicitly (same pattern as the Airwallex safety net). Subscribers
+    // are idempotent + try/catch wrapped, so this is safe.
+    try {
+      const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+      await eventBus.emit({ name: "order.placed", data: { id: orderId } })
+      console.log(`[Create Order] Emitted order.placed for ${orderId}`)
+    } catch (emitErr: any) {
+      console.error(`[Create Order] Failed to emit order.placed for ${orderId}:`, emitErr.message)
+    }
 
     res.json({
       success: true,
