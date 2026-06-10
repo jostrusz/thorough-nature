@@ -1,8 +1,64 @@
 import { MedusaContainer } from "@medusajs/framework/types"
 import { DEXTRUM_MODULE } from "../modules/dextrum"
 import { MyStockApiClient } from "../modules/dextrum/api-client"
+import { BriteApiClient } from "../modules/payment-brite/api-client"
 import { normalizePhone } from "../utils/normalize-phone"
 import { normalizePostalCode } from "../utils/normalize-postal-code"
+
+// Brite ships-on-CREDIT gate: how long we keep an order queued while waiting
+// for transaction state 5 (CREDIT) before giving up, and how often we re-check.
+// CREDIT normally arrives seconds after COMPLETED; days-long waits mean the
+// bank transfer is at risk of ending DEBIT (7) = funds never arrive.
+const BRITE_CREDIT_MAX_WAIT_MS = 3 * 24 * 60 * 60 * 1000
+const BRITE_CREDIT_RECHECK_MINUTES = 15
+
+/**
+ * Poll Brite for the live TRANSACTION state behind an order (fallback for a
+ * missed state-5 callback — Brite retries callbacks only for ~1 hour).
+ * Returns the numeric transaction state, or null when it cannot be determined.
+ */
+async function pollBriteTransactionState(orderMeta: any): Promise<number | null> {
+  const sessionId = orderMeta?.briteSessionId || orderMeta?.brite_session_id
+  if (!sessionId) return null
+
+  const { Pool } = require("pg")
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+  let keys: any = null
+  let baseUrl: string | undefined
+  let isLive = false
+  try {
+    const { rows } = await pool.query(
+      `SELECT mode, live_keys, test_keys, metadata
+       FROM gateway_config
+       WHERE provider = 'brite' AND is_active = true AND deleted_at IS NULL
+       ORDER BY priority ASC LIMIT 1`
+    )
+    if (!rows[0]) return null
+    isLive = rows[0].mode === "live"
+    keys = isLive ? rows[0].live_keys : rows[0].test_keys
+    baseUrl = rows[0].metadata?.base_url || undefined
+  } finally {
+    await pool.end().catch(() => {})
+  }
+  if (!keys?.api_key || !keys?.secret_key) return null
+
+  const client = new BriteApiClient(keys.api_key, keys.secret_key, !isLive, console as any, baseUrl)
+  await client.authenticate()
+  const session = await client.getSession(String(sessionId))
+  const txId = session?.transaction_id || session?.session?.transaction_id
+  if (!txId) return null
+  const tx: any = await client.getTransaction(String(txId))
+  const state = tx?.state ?? tx?.transaction?.state
+  if (state === null || state === undefined) return null
+  const n = Number(state)
+  if (!Number.isNaN(n)) return n
+  // transaction.get may return textual state names — normalize to numbers
+  const named: Record<string, number> = {
+    CREATED: 0, PENDING: 1, PENDING_PROCESSING: 1, ABORTED: 2, FAILED: 3,
+    COMPLETED: 4, CREDIT: 5, SETTLED: 6, DEBIT: 7,
+  }
+  return named[String(state).trim().toUpperCase()] ?? null
+}
 
 /**
  * Dextrum Order Hold Processor
@@ -23,9 +79,11 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
     if (!config?.enabled || !config.api_url) return
 
     // 2. Find orders in WAITING status past their hold time
+    // Oldest-due first: rows whose hold was pushed to the future (e.g. Brite
+    // orders waiting on CREDIT) must never page out due-now orders.
     const allWaiting = await dextrumService.listDextrumOrderMaps(
       { delivery_status: "WAITING" },
-      { take: 50 }
+      { take: 50, order: { hold_until: "ASC" } }
     )
 
     const now = new Date()
@@ -84,14 +142,18 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
               last_error: "Payment timeout — order not paid within time limit",
               retry_count: retries,
             })
-            const meta = (order as any).metadata || {}
+            // JSONB merge — a full replace from the stale in-memory snapshot
+            // clobbers fields written concurrently by webhooks/subscribers.
             const { Pool } = require("pg")
             const p = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
-            await p.query(
-              `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
-              [JSON.stringify({ ...meta, dextrum_status: "FAILED", dextrum_error: "Payment timeout" }), orderMap.medusa_order_id]
-            )
-            await p.end()
+            try {
+              await p.query(
+                `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+                [JSON.stringify({ dextrum_status: "FAILED", dextrum_error: "Payment timeout" }), orderMap.medusa_order_id]
+              )
+            } finally {
+              await p.end().catch(() => {})
+            }
           } else {
             const nextRetry = new Date(now.getTime() + config.retry_interval_minutes * 60 * 1000)
             await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
@@ -101,6 +163,105 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
             })
           }
           continue
+        }
+
+        // 4b. Brite ships-on-CREDIT gate (Brite integration requirement):
+        // goods may only ship once the TRANSACTION reaches CREDIT (5) —
+        // COMPLETED (4) does not guarantee funds (transfer can end DEBIT/lost).
+        // The Brite webhook sets brite_credit_received on tx 5/6; if the
+        // callback was missed we poll Brite directly. This gate is scoped to
+        // Brite orders only — all other providers are unaffected.
+        const briteMeta = (order as any).metadata || {}
+        // Authoritative check: the order's ACTUAL payment rows, not metadata.
+        // Loose webhook matching can stamp Brite metadata onto an order whose
+        // covering payment is another provider (abandoned Brite session) —
+        // such orders must NOT be held by this gate.
+        const isBrite = ((order as any).payment_collections || []).some((pc: any) =>
+          (pc.payments || []).some((p: any) => String(p?.provider_id || "").startsWith("pp_brite"))
+        )
+        if (isBrite && !isCOD && briteMeta.brite_credit_received !== true) {
+          if (briteMeta.brite_payment_lost === true) {
+            await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+              delivery_status: "FAILED",
+              delivery_status_updated_at: now.toISOString(),
+              last_error: "Brite DEBIT: payment lost — funds never arrived",
+            })
+            console.error(`[Dextrum Hold] Order ${orderMap.medusa_order_id}: Brite payment LOST (DEBIT) — blocked from WMS`)
+            continue
+          }
+
+          // Fallback poll (webhook may have been missed)
+          let polledState: number | null = null
+          try {
+            polledState = await pollBriteTransactionState(briteMeta)
+          } catch (e: any) {
+            console.warn(`[Dextrum Hold] Brite poll failed for ${orderMap.medusa_order_id}: ${e?.message}`)
+          }
+
+          if (polledState !== null && [5, 6].includes(polledState)) {
+            const { Pool } = require("pg")
+            const p = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+            await p.query(
+              `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+              [JSON.stringify({
+                brite_credit_received: true,
+                brite_credit_received_at: now.toISOString(),
+                brite_credit_source: "hold_job_poll",
+              }), orderMap.medusa_order_id]
+            ).catch(() => {})
+            await p.end().catch(() => {})
+            console.log(`[Dextrum Hold] Order ${orderMap.medusa_order_id}: Brite CREDIT confirmed via poll (state ${polledState}) — releasing`)
+            // fall through to send
+          } else if (polledState === 7) {
+            await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+              delivery_status: "FAILED",
+              delivery_status_updated_at: now.toISOString(),
+              last_error: "Brite DEBIT (state 7): payment lost — funds never arrived",
+            })
+            const { Pool } = require("pg")
+            const p = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+            await p.query(
+              `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+              [JSON.stringify({
+                brite_payment_lost: true,
+                brite_payment_lost_at: now.toISOString(),
+                dextrum_status: "FAILED",
+                dextrum_error: "Brite payment lost (DEBIT)",
+              }), orderMap.medusa_order_id]
+            ).catch(() => {})
+            await p.end().catch(() => {})
+            console.error(`[Dextrum Hold] Order ${orderMap.medusa_order_id}: Brite DEBIT detected via poll — blocked from WMS`)
+            continue
+          } else {
+            // Still waiting for CREDIT (state 0/1/4 or poll unavailable).
+            // Re-check periodically; give up after BRITE_CREDIT_MAX_WAIT_MS.
+            // Deliberately does NOT touch retry_count (that's the unpaid-order
+            // counter with a much shorter window).
+            const queuedAt = new Date(orderMap.created_at || now).getTime()
+            if (now.getTime() - queuedAt > BRITE_CREDIT_MAX_WAIT_MS) {
+              await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+                delivery_status: "FAILED",
+                delivery_status_updated_at: now.toISOString(),
+                last_error: "Brite CREDIT timeout — state 5 not reached within 3 days",
+              })
+              const { Pool } = require("pg")
+              const p = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+              await p.query(
+                `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+                [JSON.stringify({ dextrum_status: "FAILED", dextrum_error: "Brite CREDIT timeout (3 days)" }), orderMap.medusa_order_id]
+              ).catch(() => {})
+              await p.end().catch(() => {})
+              console.error(`[Dextrum Hold] Order ${orderMap.medusa_order_id}: Brite CREDIT not received within 3 days — marked FAILED, manual review required`)
+            } else {
+              const nextCheck = new Date(now.getTime() + BRITE_CREDIT_RECHECK_MINUTES * 60 * 1000)
+              await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+                hold_until: nextCheck.toISOString(),
+                last_error: `Waiting for Brite CREDIT (tx state 5)${polledState !== null ? ` — current state ${polledState}` : ""}`,
+              })
+              console.log(`[Dextrum Hold] Order ${orderMap.medusa_order_id}: waiting for Brite CREDIT (state ${polledState ?? "unknown"}) — next check ${nextCheck.toISOString()}`)
+            }
+            continue
+          }
         }
 
         // 5. Detect country (SE orders now go through Dextrum mySTOCK like all others)
@@ -405,10 +566,11 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           retry_count: 0,
         })
 
-        // 8. Update order metadata via direct DB query
-        const meta = (order as any).metadata || {}
+        // 8. Update order metadata via direct DB query.
+        // JSONB merge — a full replace from the snapshot fetched at step 3
+        // wipes fields written mid-iteration (e.g. brite_credit_received from
+        // this very run's poll, or a webhook's payment_activity_log entry).
         const updatedMeta = {
-          ...meta,
           dextrum_status: "IMPORTED",
           dextrum_order_code: orderCode,
           dextrum_mystock_id: wmsResult.id,
@@ -416,11 +578,14 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         }
         const { Pool: PgPool } = require("pg")
         const pgPool = new PgPool({ connectionString: process.env.DATABASE_URL, max: 2 })
-        await pgPool.query(
-          `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
-          [JSON.stringify(updatedMeta), orderMap.medusa_order_id]
-        )
-        await pgPool.end()
+        try {
+          await pgPool.query(
+            `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+            [JSON.stringify(updatedMeta), orderMap.medusa_order_id]
+          )
+        } finally {
+          await pgPool.end().catch(() => {})
+        }
 
         console.log(`[Dextrum Hold] Order ${orderCode} sent to WMS → ${wmsResult.id}`)
       } catch (err: any) {

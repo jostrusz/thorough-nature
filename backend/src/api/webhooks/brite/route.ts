@@ -83,6 +83,7 @@ async function findOrderByBriteIds(keys: string[], logger: any): Promise<any> {
        JOIN payment_collection pc ON pc.id = opc.payment_collection_id
        JOIN payment_session ps ON ps.payment_collection_id = pc.id
        WHERE EXISTS (SELECT 1 FROM unnest($1::text[]) k WHERE ps.data::text LIKE '%' || k || '%')
+         AND ps.deleted_at IS NULL
        ORDER BY o.created_at DESC
        LIMIT 1`,
       [uniq]
@@ -185,11 +186,29 @@ async function resolveBriteMatchKeys(callbackId: string, txData: any, logger: an
  * but never returned to the storefront (closed browser, lost mobile flow,
  * etc.). Identical pattern to webhooks/airwallex/route.ts.
  */
+/** JSONB-merge extra metadata onto an order (best effort, never throws). */
+async function mergeOrderMetadata(orderId: string, meta: any, logger: any): Promise<void> {
+  if (!meta || Object.keys(meta).length === 0) return
+  try {
+    const { Pool } = require("pg")
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+    try {
+      await pool.query(
+        `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+        [JSON.stringify(meta), orderId]
+      )
+    } finally { await pool.end().catch(() => {}) }
+  } catch (e: any) {
+    logger.warn(`[Brite Webhook] metadata merge failed for ${orderId}: ${e?.message}`)
+  }
+}
+
 async function safetyNetCompleteCart(
   matchKeys: string[],
   txData: any,
   scope: any,
-  logger: any
+  logger: any,
+  extraMeta: any = {}
 ): Promise<void> {
   const DELAY_MS = 30_000
   const briteSessionId = matchKeys[0]
@@ -202,6 +221,7 @@ async function safetyNetCompleteCart(
   const orderAfterDelay = await findOrderByBriteIds(matchKeys, logger)
   if (orderAfterDelay) {
     logger.info(`[Brite Webhook] Safety net: order ${orderAfterDelay.id} appeared during delay`)
+    await mergeOrderMetadata(orderAfterDelay.id, extraMeta, logger)
     return
   }
 
@@ -247,6 +267,7 @@ async function safetyNetCompleteCart(
     const orderFinalCheck = await findOrderByBriteIds(matchKeys, logger)
     if (orderFinalCheck) {
       logger.info(`[Brite Webhook] Safety net: order ${orderFinalCheck.id} appeared just before completion`)
+      await mergeOrderMetadata(orderFinalCheck.id, extraMeta, logger)
       return
     }
 
@@ -295,6 +316,7 @@ async function safetyNetCompleteCart(
       try {
         const { Pool } = require("pg")
         const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+        try {
         const { rows: orderRows } = await pool.query(
           `SELECT metadata FROM "order" WHERE id = $1 LIMIT 1`,
           [completedOrderId]
@@ -313,12 +335,15 @@ async function safetyNetCompleteCart(
           payment_brite_bank_name: txData?.bank?.name || null,
           completed_by: "brite_webhook_safety_net",
           safety_net_completed_at: new Date().toISOString(),
+          ...extraMeta,
         }
         await pool.query(
           `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
           [JSON.stringify(mergeMeta), completedOrderId]
         )
-        await pool.end()
+        } finally {
+          await pool.end().catch(() => {})
+        }
       } catch (metaErr: any) {
         logger.warn(`[Brite Webhook] Safety net: metadata update failed: ${metaErr.message}`)
       }
@@ -338,6 +363,13 @@ async function safetyNetCompleteCart(
     const msg = `Brite safety net failed for ${briteSessionId} (cart ${cartRow?.id ?? "?"}): ${safetyErr?.message || safetyErr}`
     logger.error(`[Brite Webhook] ${msg}`)
     alertSafetyNet("Brite safety-net: completion threw", msg)
+    // Two safety nets can race (state-4 and state-5 callbacks land seconds
+    // apart); the loser throws on completeCartWorkflow. If the CREDIT-carrying
+    // instance lost, its flag must still reach the winner's order.
+    try {
+      const orderAfterRace = await findOrderByBriteIds(matchKeys, logger)
+      if (orderAfterRace) await mergeOrderMetadata(orderAfterRace.id, extraMeta, logger)
+    } catch { /* best effort */ }
   }
 }
 
@@ -422,7 +454,18 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     const isFailed =
       [2, 3, 7].includes(numState) ||
       (sessState !== null && [10, 11].includes(Number(sessState))) ||
-      ["FAILED", "DECLINED", "CANCELLED", "EXPIRED", "ABORTED"].includes(strState)
+      ["FAILED", "DECLINED", "CANCELLED", "EXPIRED", "ABORTED", "DEBIT"].includes(strState)
+
+    // Shipping gate (Brite integration guidance): goods may only ship once the
+    // TRANSACTION reaches CREDIT (5) — COMPLETED (4) merely confirms the order;
+    // the bank transfer can still fail and end at DEBIT (7) = funds never arrive.
+    // SETTLED (6) doubles as catch-up in case the state-5 callback was missed.
+    // Session states intentionally NEVER set this flag.
+    const isCreditReceived =
+      (txState !== null && [5, 6].includes(Number(txState))) ||
+      ["CREDIT", "SETTLED"].includes(strState)
+    const isDebitLost =
+      (txState !== null && Number(txState) === 7) || strState === "DEBIT"
 
     const state = Number.isNaN(numState) ? strState : String(numState)
 
@@ -459,8 +502,13 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       logger.warn(`[Brite Webhook] No order for ${briteSessionId} (keys: ${matchKeys.length})`)
 
       if (isSuccess) {
-        // Fire and forget — must not block 200 response
-        safetyNetCompleteCart(matchKeys, txData, req.scope, logger).catch((err) => {
+        // Fire and forget — must not block 200 response. If THIS callback is the
+        // CREDIT/SETTLED one, the flag must land on the order the safety net
+        // creates (or finds), otherwise the WMS gate would wait on polling.
+        const extraMeta = isCreditReceived
+          ? { brite_credit_received: true, brite_credit_received_at: new Date().toISOString() }
+          : {}
+        safetyNetCompleteCart(matchKeys, txData, req.scope, logger, extraMeta).catch((err) => {
           logger.error(`[Brite Webhook] Safety net unhandled error: ${err.message}`)
         })
       }
@@ -503,6 +551,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     // payment_provider/method too, but it can be raced/clobbered by sibling subscribers;
     // this webhook (merge, runs reliably incl. the later SETTLED callback) is the backstop.
     let briteMethod = "pay_by_bank"
+    // Whether the order's covering payment is REALLY Brite. Loose matching
+    // (LIKE over payment_session.data) can surface an order whose cart had an
+    // abandoned Brite session but was paid via another provider — such orders
+    // must not be (re)labelled as Brite, and DEBIT must not block their WMS path.
+    let orderHasBritePayment = false
     try {
       const { Pool } = require("pg")
       const mp = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
@@ -516,6 +569,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
            ORDER BY pay.created_at DESC LIMIT 1`,
           [order.id]
         )
+        orderHasBritePayment = rows.length > 0
         if (rows[0]?.method) briteMethod = String(rows[0].method)
       } finally { await mp.end().catch(() => {}) }
     } catch { /* default pay_by_bank */ }
@@ -526,11 +580,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     // them AND re-establishes the provider/method label even if the subscriber raced.
     const mergeMetadata: any = {
       payment_activity_log: [...existingLog, activityEntry],
-      briteSessionId,
-      brite_session_id: briteSessionId,
-      briteStatus: state,
-      payment_provider: "brite",
-      payment_method: briteMethod,
+    }
+    // Brite identity labels only when this is genuinely a Brite-paid order
+    // (success callbacks imply a completed Brite payment; otherwise require a
+    // Brite payment row) — never stamp them from a failure callback that
+    // loose-matched an order paid via another provider.
+    if (isSuccess || orderHasBritePayment) {
+      mergeMetadata.briteSessionId = briteSessionId
+      mergeMetadata.brite_session_id = briteSessionId
+      mergeMetadata.briteStatus = state
+      mergeMetadata.payment_provider = "brite"
+      mergeMetadata.payment_method = briteMethod
     }
 
     if (isSuccess) {
@@ -541,16 +601,62 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       if (txData?.bank?.name) mergeMetadata.payment_brite_bank_name = txData.bank.name
     }
 
+    if (isCreditReceived) {
+      // Releases the Dextrum hold gate (dextrum-order-hold.ts) for this order.
+      mergeMetadata.brite_credit_received = true
+      mergeMetadata.brite_credit_received_at = new Date().toISOString()
+    }
+    if (isDebitLost && orderHasBritePayment) {
+      mergeMetadata.brite_payment_lost = true
+      mergeMetadata.brite_payment_lost_at = new Date().toISOString()
+    }
+
     try {
       const { Pool } = require("pg")
       const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
-      await pool.query(
-        `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
-        [JSON.stringify(mergeMetadata), order.id]
-      )
-      await pool.end()
+      try {
+        await pool.query(
+          `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+          [JSON.stringify(mergeMetadata), order.id]
+        )
+      } finally {
+        await pool.end().catch(() => {})
+      }
     } catch (dbErr: any) {
       logger.warn(`[Brite Webhook] DB update failed: ${dbErr.message}`)
+    }
+
+    if (isDebitLost && !orderHasBritePayment) {
+      logger.error(`[Brite Webhook] DEBIT callback matched order ${order.id}, but its covering payment is NOT Brite — leaving WMS path untouched. Verify manually.`)
+    }
+    if (isDebitLost && orderHasBritePayment) {
+      // DEBIT (7) after the order exists = the bank transfer never arrived.
+      // Block WMS dispatch if the order is still queued; alert loudly either way.
+      try {
+        const { Pool } = require("pg")
+        const dp = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+        try {
+          const { rows: blocked } = await dp.query(
+            `UPDATE dextrum_order_map
+             SET delivery_status = 'FAILED', delivery_status_updated_at = NOW(),
+                 last_error = 'Brite DEBIT (state 7): payment lost — funds never arrived'
+             WHERE medusa_order_id = $1 AND delivery_status = 'WAITING'
+             RETURNING id`,
+            [order.id]
+          )
+          if (blocked.length > 0) {
+            await dp.query(
+              `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+              [JSON.stringify({ dextrum_status: "FAILED", dextrum_error: "Brite payment lost (DEBIT)" }), order.id]
+            )
+            logger.error(`[Brite Webhook] 🔴 PAYMENT LOST (DEBIT) for order ${order.id} — WMS dispatch blocked. Customer must pay again.`)
+          } else {
+            logger.error(`[Brite Webhook] 🔴 PAYMENT LOST (DEBIT) for order ${order.id} — order NOT in WAITING (may already be shipped!). MANUAL ACTION REQUIRED.`)
+          }
+        } finally { await dp.end().catch(() => {}) }
+      } catch (e: any) {
+        logger.error(`[Brite Webhook] DEBIT handling failed for order ${order.id}: ${e.message}`)
+      }
     }
 
     if (isSuccess) {
