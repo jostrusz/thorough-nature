@@ -261,9 +261,10 @@ class PayUPaymentProviderService extends AbstractPaymentProvider<Options> {
       // Without payMethods, PayU shows hosted method picker on redirectUri.
       if (method) {
         const PAYU_TYPE_MAP: Record<string, string> = {
-          // Card
-          c: "CARD_TOKEN",
-          card: "CARD_TOKEN",
+          // Card — hosted card form is pinned via PBL value "c";
+          // CARD_TOKEN is only for tokenized cards (value = TOK_...)
+          c: "PBL",
+          card: "PBL",
           // Wallets
           jp: "PBL",
           gp: "PBL",
