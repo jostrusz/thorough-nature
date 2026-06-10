@@ -3,6 +3,8 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { SUPPORTBOX_MODULE } from "../../../modules/supportbox"
 import { sendTicketReply } from "../../../modules/supportbox/utils/send-ticket-reply"
 import { composeNewEmail } from "../../../modules/supportbox/utils/compose-new-email"
+import { fetchFakturoidInvoicePdf } from "../../../modules/supportbox/utils/fetch-fakturoid-invoice-pdf"
+import { FAKTUROID_MODULE } from "../../../modules/fakturoid"
 
 /**
  * SupportBox MCP write endpoint.
@@ -14,10 +16,15 @@ import { composeNewEmail } from "../../../modules/supportbox/utils/compose-new-e
  * (no admin session), like other machine-to-machine endpoints.
  *
  * Body:
- *   { action: "reply", ticket_id, body_text, keep_open? }
+ *   { action: "reply", ticket_id, body_text, keep_open?, fakturoid_invoice_id? }
  *   { action: "solve", ticket_id }
  *   { action: "compose", from_email | config_id, to_email, subject, body_text,
- *     to_name?, keep_open? }
+ *     to_name?, keep_open?, fakturoid_invoice_id? }
+ *
+ * fakturoid_invoice_id: numeric Fakturoid invoice id — the backend downloads
+ * the invoice PDF server-to-server and attaches it to the outgoing e-mail.
+ * If the PDF can't be fetched the request FAILS (no e-mail without the
+ * promised attachment). Optional fakturoid_slug narrows the account.
  */
 
 // MCP sends plain text. Convert blank-line-separated blocks into <p>
@@ -51,6 +58,23 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
   const supportboxService = req.scope.resolve(SUPPORTBOX_MODULE) as any
 
+  // Optional Fakturoid invoice attachment — fetched server-to-server.
+  // Resolved BEFORE sending so a fetch failure aborts the whole action.
+  const loadAttachments = async (): Promise<any[] | undefined> => {
+    if (!body.fakturoid_invoice_id) return undefined
+    const invoiceId = Number(body.fakturoid_invoice_id)
+    if (!Number.isInteger(invoiceId) || invoiceId <= 0) {
+      throw new Error("fakturoid_invoice_id must be a positive integer")
+    }
+    const fakturoidService = req.scope.resolve(FAKTUROID_MODULE) as any
+    const attachment = await fetchFakturoidInvoicePdf(
+      fakturoidService,
+      invoiceId,
+      body.fakturoid_slug || undefined
+    )
+    return [attachment]
+  }
+
   try {
     if (action === "reply") {
       if (!ticket_id) {
@@ -59,10 +83,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       if (!body.body_text || !String(body.body_text).trim()) {
         return res.status(400).json({ error: "body_text is required for reply" })
       }
+      const attachments = await loadAttachments()
       const result = await sendTicketReply(supportboxService, ticket_id, {
         body_html: textToParagraphHtml(body.body_text),
         body_text: body.body_text,
         keep_open: !!body.keep_open,
+        attachments,
       })
       return res.json({ ok: true, action: "reply", ...result })
     }
@@ -112,6 +138,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         configId = match.id
       }
 
+      const attachments = await loadAttachments()
       const result = await composeNewEmail(supportboxService, {
         config_id: configId,
         to_email,
@@ -120,6 +147,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         body_html: textToParagraphHtml(body.body_text),
         body_text: body.body_text,
         keep_open: !!body.keep_open,
+        attachments,
       })
       return res.json({ ok: true, action: "compose", ...result })
     }

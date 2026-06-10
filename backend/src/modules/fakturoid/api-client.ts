@@ -430,6 +430,52 @@ export async function getInvoice(
 }
 
 /**
+ * Download an invoice PDF as a Buffer.
+ * Fakturoid generates PDFs asynchronously — a fresh invoice returns
+ * 204 No Content until ready, so retry with a short delay.
+ */
+export async function downloadInvoicePdf(
+  creds: FakturoidCredentials,
+  token: string,
+  invoiceId: number,
+  options?: { maxRetries?: number; retryDelayMs?: number }
+): Promise<Buffer | null> {
+  const url = `${accountUrl(creds.slug)}/invoices/${invoiceId}/download.pdf`
+  const maxRetries = options?.maxRetries ?? 4
+  const retryDelayMs = options?.retryDelayMs ?? 2000
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "User-Agent": `MarketingHQ (${creds.user_agent_email})`,
+      },
+    })
+
+    if (res.status === 204) {
+      // PDF not generated yet — wait and retry
+      if (attempt < maxRetries) {
+        await new Promise((r) => setTimeout(r, retryDelayMs))
+        continue
+      }
+      return null
+    }
+
+    if (res.status === 404) return null
+
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(`Fakturoid PDF download failed (${res.status}): ${text}`)
+    }
+
+    return Buffer.from(await res.arrayBuffer())
+  }
+
+  return null
+}
+
+/**
  * Create a credit note (opravny danovy doklad / dobropis) linked to an original invoice.
  * Lines should have NEGATIVE unit_price values.
  */
