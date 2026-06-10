@@ -260,6 +260,24 @@ export class MyStockApiClient {
   }
 
   // ═══════════════════════════════════════════
+  // UPDATE ORDER INCOMING — modify header / add / change / remove items
+  //
+  // Per mySTOCK API: PUT /V1/orderIncoming/{orderIncomingId}.
+  // Only possible UNTIL a shipment has been created in the WMS (status
+  // "Nezahájena"). Send ONLY the elements that should change.
+  //   • add a new item    → item WITHOUT `itemId` (productId + amount required)
+  //   • change an item    → item WITH `itemId`
+  //   • cancel an item    → item WITH `itemId` and amount.quantity = 0
+  // Returns the raw { data, errors } envelope so callers can inspect ids.
+  // ═══════════════════════════════════════════
+  async updateOrder(orderId: string, body: Record<string, any>): Promise<any> {
+    console.log(`[mySTOCK] updateOrder ${orderId} payload:`, JSON.stringify(body, null, 2))
+    const result = await this.request<any>("PUT", `/orderIncoming/${orderId}`, body)
+    console.log(`[mySTOCK] updateOrder ${orderId} response:`, JSON.stringify(result))
+    return result
+  }
+
+  // ═══════════════════════════════════════════
   // GET DESPATCH ADVICE (shipment tracking)
   // ═══════════════════════════════════════════
   async getDespatchAdvice(documentId: string): Promise<any> {
