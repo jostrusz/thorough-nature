@@ -17,18 +17,20 @@ interface OrderFulfillmentCardProps {
   onFakturoidCreate: () => void
   onQBCreate: () => void
   onResendEbooks: () => void
+  onResendConfirmation: () => void
   isLoading?: boolean
   isDextrumLoading?: boolean
   isFakturoidLoading?: boolean
   isQBLoading?: boolean
   isEbookLoading?: boolean
+  isConfirmationLoading?: boolean
 }
 
 // ═══════════════════════════════════════════
 // PREMIUM BUTTON COMPONENT
 // ═══════════════════════════════════════════
 
-type BtnVariant = "primary" | "secondary" | "fakturoid" | "quickbooks" | "ebook"
+type BtnVariant = "primary" | "secondary" | "fakturoid" | "quickbooks" | "ebook" | "notification"
 
 interface PremiumBtnProps {
   variant: BtnVariant
@@ -78,6 +80,18 @@ const variantStyles: Record<
     shadowHover: "0 6px 20px rgba(108,92,231,0.4), 0 2px 8px rgba(108,92,231,0.25)",
     shadowActive: "0 1px 4px rgba(108,92,231,0.3)",
     glow: "0 0 0 3px rgba(108,92,231,0.15)",
+  },
+  // notification = blue (re-send order confirmation email)
+  notification: {
+    bg: "linear-gradient(135deg, #FAFCFF 0%, #EFF6FF 100%)",
+    bgHover: "linear-gradient(135deg, #EFF6FF 0%, #E0EDFF 100%)",
+    color: "#2563EB",
+    border: "rgba(37,99,235,0.12)",
+    borderHover: "rgba(37,99,235,0.28)",
+    shadow: "0 1px 3px rgba(37,99,235,0.06), 0 1px 2px rgba(0,0,0,0.03)",
+    shadowHover: "0 4px 12px rgba(37,99,235,0.12), 0 2px 4px rgba(37,99,235,0.06)",
+    shadowActive: "0 1px 2px rgba(37,99,235,0.1)",
+    glow: "0 0 0 3px rgba(37,99,235,0.08)",
   },
   // ── BOTTOM ROW: green gradient flow (left → right, 3 buttons) ──
   // ebook = left (lightest green)
@@ -220,11 +234,13 @@ export function OrderFulfillmentCard({
   onFakturoidCreate,
   onQBCreate,
   onResendEbooks,
+  onResendConfirmation,
   isLoading,
   isDextrumLoading,
   isFakturoidLoading,
   isQBLoading,
   isEbookLoading,
+  isConfirmationLoading,
 }: OrderFulfillmentCardProps) {
   const items = order.items || []
   const currency = order.currency_code
@@ -617,6 +633,16 @@ export function OrderFulfillmentCard({
           borderTop: `1px solid ${colors.border}`,
         }}
       >
+        {/* Re-send order confirmation email */}
+        <PremiumBtn
+          variant="notification"
+          onClick={onResendConfirmation}
+          disabled={isConfirmationLoading}
+          loading={isConfirmationLoading}
+          label="Send Order Notification"
+          loadingLabel="Sending..."
+          icon={<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="4" width="16" height="12" rx="2" /><path d="M2 6l8 5 8-5" /></svg>}
+        />
         {/* Send E-books */}
         <PremiumBtn
           variant="ebook"

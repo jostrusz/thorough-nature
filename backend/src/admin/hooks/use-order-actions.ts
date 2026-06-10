@@ -334,6 +334,23 @@ export function useResendEbooks() {
   })
 }
 
+// ═══════════════════════════════════════════
+// Resend Order Confirmation (notification email)
+// ═══════════════════════════════════════════
+export function useResendOrderConfirmation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      return sdk.client.fetch(`/admin/custom-orders/${orderId}/resend-confirmation`, {
+        method: "POST",
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["custom-order-detail"] })
+    },
+  })
+}
+
 export function useCustomerStats(email: string | undefined) {
   return useQuery({
     queryKey: ["customer-stats", email],

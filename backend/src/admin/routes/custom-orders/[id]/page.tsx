@@ -31,6 +31,7 @@ import {
   useDeleteQBInvoice,
   useCreateQBCreditMemo,
   useResendEbooks,
+  useResendOrderConfirmation,
   useCustomerStats,
 } from "../../../hooks/use-order-actions"
 
@@ -623,6 +624,7 @@ const OrderDetailPage = () => {
   const deleteQBInvoice = useDeleteQBInvoice()
   const createQBCreditMemo = useCreateQBCreditMemo()
   const resendEbooks = useResendEbooks()
+  const resendConfirmation = useResendOrderConfirmation()
 
   // Customer stats
   const order = data?.order as any
@@ -792,6 +794,18 @@ const OrderDetailPage = () => {
       },
     })
   }, [id, resendEbooks])
+
+  const handleResendConfirmation = useCallback(() => {
+    if (!id) return
+    resendConfirmation.mutate(id, {
+      onSuccess: () => {
+        toast.success("Order notification email sent")
+      },
+      onError: (err: any) => {
+        toast.error(err?.message || "Failed to send order notification")
+      },
+    })
+  }, [id, resendConfirmation])
 
   const handleFakturoidCreate = useCallback(() => {
     if (!id) return
@@ -1005,11 +1019,13 @@ const OrderDetailPage = () => {
             onFakturoidCreate={handleFakturoidCreate}
             onQBCreate={handleQBCreate}
             onResendEbooks={handleResendEbooks}
+            onResendConfirmation={handleResendConfirmation}
             isLoading={createFulfillment.isPending}
             isDextrumLoading={sendToDextrum.isPending}
             isFakturoidLoading={createFakturoidInvoice.isPending}
             isQBLoading={createQBInvoice.isPending}
             isEbookLoading={resendEbooks.isPending}
+            isConfirmationLoading={resendConfirmation.isPending}
           />
           <OrderDetailPayment
             order={order}
