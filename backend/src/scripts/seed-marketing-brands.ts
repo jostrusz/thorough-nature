@@ -104,11 +104,11 @@ export default async function seedMarketingBrands({ container }: ExecArgs) {
     },
     {
       slug: "odpust-knizka",
-      display_name: "Odpusť to, co tě ničí",
+      display_name: "Pusť to, co tě ničí",
       project_id: "odpust-knizka",
       storefront_domain: "odpust-knizka.cz",
       marketing_from_email: "news@news.odpust-knizka.cz",
-      marketing_from_name: "Odpusť to, co tě ničí",
+      marketing_from_name: "Pusť to, co tě ničí",
       marketing_reply_to: "kniha@odpust-knizka.cz",
       primary_color: "#5b21b6",
       locale: "cs",

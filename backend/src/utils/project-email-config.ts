@@ -178,20 +178,20 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
   },
   'odpust-knizka': {
     replyTo: 'kniha@odpust-knizka.cz',
-    fromName: 'Joris de Vries - Odpusť to, co tě ničí',
-    fromEmail: 'Joris de Vries - Odpusť to, co tě ničí <kniha@odpust-knizka.cz>',
+    fromName: 'Joris de Vries - Pusť to, co tě ničí',
+    fromEmail: 'Joris de Vries - Pusť to, co tě ničí <kniha@odpust-knizka.cz>',
     project: 'odpust-knizka',
     locale: 'cs',
-    smsDispatchTemplate: 'Odpust to, co te nici: Zasilka odeslana. Sledovaci odkaz: {url} kniha@odpust-knizka.cz',
+    smsDispatchTemplate: 'Pust to, co te nici: Zasilka odeslana. Sledovaci odkaz: {url} kniha@odpust-knizka.cz',
   },
   // Also match without hyphen
   odpustknizka: {
     replyTo: 'kniha@odpust-knizka.cz',
-    fromName: 'Joris de Vries - Odpusť to, co tě ničí',
-    fromEmail: 'Joris de Vries - Odpusť to, co tě ničí <kniha@odpust-knizka.cz>',
+    fromName: 'Joris de Vries - Pusť to, co tě ničí',
+    fromEmail: 'Joris de Vries - Pusť to, co tě ničí <kniha@odpust-knizka.cz>',
     project: 'odpust-knizka',
     locale: 'cs',
-    smsDispatchTemplate: 'Odpust to, co te nici: Zasilka odeslana. Sledovaci odkaz: {url} kniha@odpust-knizka.cz',
+    smsDispatchTemplate: 'Pust to, co te nici: Zasilka odeslana. Sledovaci odkaz: {url} kniha@odpust-knizka.cz',
   },
   // Also match without hyphen
   psisuperzivot: {

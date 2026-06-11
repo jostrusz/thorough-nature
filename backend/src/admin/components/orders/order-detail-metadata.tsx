@@ -379,7 +379,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
     loslatenboek: "Laat Los Wat Je Kapotmaakt",
     "het-leven": "Het Leven Dat Je Verdient",
     "kocici-bible": "Kočičí bible",
-    "odpust-knizka": "Odpusť knížka",
+    "odpust-knizka": "Pusť to, co tě ničí",
     "zycie-zaslugy": "Życie na które zasługujesz",
   }
   const projectId = order.metadata?.project_id

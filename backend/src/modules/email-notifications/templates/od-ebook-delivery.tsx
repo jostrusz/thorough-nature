@@ -75,7 +75,7 @@ export const OdEbookDeliveryTemplate: React.FC<OdEbookDeliveryTemplateProps> & {
             color: 'rgba(255,255,255,0.75)',
             margin: '0 0 10px 0',
           }}>
-            Odpusť to, co tě ničí
+            Pusť to, co tě ničí
           </Text>
           <Text style={{
             fontFamily: font,
@@ -116,7 +116,7 @@ export const OdEbookDeliveryTemplate: React.FC<OdEbookDeliveryTemplateProps> & {
             lineHeight: '1.7',
             margin: '8px 0 0',
           }}>
-            Moc děkujeme, že sis objednal/a knihu Odpusť to, co tě ničí! Tvoje e-booky jsou připravené ke stažení. Klikni na tlačítko níže a stáhni si je.
+            Moc děkujeme, že sis objednal/a knihu Pusť to, co tě ničí! Tvoje e-booky jsou připravené ke stažení. Klikni na tlačítko níže a stáhni si je.
           </Text>
         </div>
 
@@ -305,7 +305,7 @@ export const OdEbookDeliveryTemplate: React.FC<OdEbookDeliveryTemplateProps> & {
             margin: '0 0 8px',
             letterSpacing: '0.5px',
           }}>
-            Odpusť to, co tě ničí
+            Pusť to, co tě ničí
           </Text>
           <Text style={{
             fontFamily: font,

@@ -109,7 +109,7 @@ const PROJECT_TAG_NAMES: Record<string, string> = {
   loslatenboek: "Laat Los Wat Je Kapotmaakt",
   "het-leven": "Het Leven Dat Je Verdient",
   "kocici-bible": "Kočičí bible",
-  "odpust-knizka": "Odpusť knížka",
+  "odpust-knizka": "Pusť to, co tě ničí",
   "zycie-zaslugy": "Życie na które zasługujesz",
 }
 

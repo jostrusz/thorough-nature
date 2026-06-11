@@ -26,7 +26,7 @@ const font = "'Inter', 'Segoe UI', Arial, sans-serif"
 const pad = '28px'
 const padLR = `0 ${pad}`
 
-// Brand colors — deep plum palette (Odpusť to, co tě ničí brand)
+// Brand colors — deep plum palette (Pusť to, co tě ničí brand)
 const colors = {
   headerBg: '#5A3D6B',
   headerGradient: 'linear-gradient(135deg, #5A3D6B 0%, #2D1B3D 50%, #1A1028 100%)',
@@ -194,7 +194,7 @@ export const OdOrderPlacedTemplate: React.FC<OdOrderPlacedTemplateProps> & {
             marginBottom: '10px',
             margin: '0 0 10px 0',
           }}>
-            Odpusť to, co tě ničí
+            Pusť to, co tě ničí
           </Text>
           <Text style={{
             fontFamily: font,
@@ -748,7 +748,7 @@ export const OdOrderPlacedTemplate: React.FC<OdOrderPlacedTemplateProps> & {
             margin: '0 0 8px',
             letterSpacing: '0.5px',
           }}>
-            Odpusť to, co tě ničí
+            Pusť to, co tě ničí
           </Text>
           <Text style={{
             fontFamily: font,
@@ -798,8 +798,8 @@ OdOrderPlacedTemplate.PreviewProps = {
     items: [
       {
         id: 'item-1',
-        title: 'Odpusť to, co tě ničí',
-        product_title: 'Odpusť to, co tě ničí',
+        title: 'Pusť to, co tě ničí',
+        product_title: 'Pusť to, co tě ničí',
         variant_title: 'Paperback',
         quantity: 1,
         unit_price: 550,

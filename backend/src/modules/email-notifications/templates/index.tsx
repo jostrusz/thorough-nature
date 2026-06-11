@@ -47,7 +47,7 @@ import { PsOrderPlacedTemplate, PS_ORDER_PLACED, isPsOrderPlacedTemplateData } f
 import { PsShipmentNotificationTemplate, PS_SHIPMENT_NOTIFICATION, isPsShipmentNotificationData } from './ps-shipment-notification'
 import { PsEbookDeliveryTemplate, PS_EBOOK_DELIVERY, isPsEbookDeliveryData } from './ps-ebook-delivery'
 import { PsUpsellConfirmedTemplate, PS_UPSELL_CONFIRMED, isPsUpsellConfirmedData } from './ps-upsell-confirmed'
-// Odpusť to, co tě ničí (odpust-knizka) templates
+// Pusť to, co tě ničí (odpust-knizka) templates
 import { OdOrderPlacedTemplate, OD_ORDER_PLACED, isOdOrderPlacedTemplateData } from './od-order-placed'
 import { OdEbookDeliveryTemplate, OD_EBOOK_DELIVERY, isOdEbookDeliveryData } from './od-ebook-delivery'
 import { OdShipmentNotificationTemplate, OD_SHIPMENT_NOTIFICATION, isOdShipmentNotificationData } from './od-shipment-notification'

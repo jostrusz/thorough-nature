@@ -15,7 +15,7 @@ import {
 
 /**
  * Seeds the "Odpust Knizka" project (Czech edition of "Laat los wat je
- * kapotmaakt" — book "Odpusť to, co tě ničí").
+ * kapotmaakt" — book "Pusť to, co tě ničí").
  *
  * Creates its OWN sales channel + publishable API key, but reuses the CZ
  * region / tax region from "Psi Superzivot" (Medusa's 1-country-per-region
@@ -41,8 +41,8 @@ export default async function seedOdpustKnizka({ container }: ExecArgs) {
   const apiKeyModuleService = container.resolve(Modules.API_KEY)
 
   const SALES_CHANNEL_NAME = "Odpust Knizka"
-  const PRODUCT_HANDLE = "odpust-to-co-te-nici"
-  const PRODUCT_SKU = "ODPUST-TO-CO-TE-NICI-PB"
+  const PRODUCT_HANDLE = "pust-to-co-te-nici"
+  const PRODUCT_SKU = "PUST-TO-CO-TE-NICI-PB"
   const STOCK_LOCATION_NAME = "Odpust Knizka Warehouse"
   const FULFILLMENT_SET_NAME = "Odpust Knizka shipping"
 
@@ -243,8 +243,8 @@ export default async function seedOdpustKnizka({ container }: ExecArgs) {
     logger.info(`[OdpustKnizka] All shipping options already exist, skipping`)
   }
 
-  // ─── 7. PRODUCT "Odpusť to, co tě ničí" ───
-  logger.info(`[OdpustKnizka] Creating product 'Odpusť to, co tě ničí'...`)
+  // ─── 7. PRODUCT "Pusť to, co tě ničí" ───
+  logger.info(`[OdpustKnizka] Creating product 'Pusť to, co tě ničí'...`)
   const { data: existingProducts } = await query.graph({
     entity: "product",
     fields: ["id", "handle", "variants.id", "variants.sku"],
@@ -260,7 +260,7 @@ export default async function seedOdpustKnizka({ container }: ExecArgs) {
       input: {
         products: [
           {
-            title: "Odpusť to, co tě ničí",
+            title: "Pusť to, co tě ničí",
             description:
               "České vydání bestselleru Laat los wat je kapotmaakt. Praktický průvodce, jak se zbavit přemýšlení v kruzích, toxických vztahů a minulosti, která tě táhne dolů. Autor: Joris de Vries.",
             handle: PRODUCT_HANDLE,
@@ -273,7 +273,7 @@ export default async function seedOdpustKnizka({ container }: ExecArgs) {
                 title: "Paperback",
                 sku: PRODUCT_SKU,
                 options: { "Formát": "Paperback" },
-                prices: [{ amount: 550, currency_code: "czk" }],
+                prices: [{ amount: 749, currency_code: "czk" }],
                 manage_inventory: true,
               },
             ],
