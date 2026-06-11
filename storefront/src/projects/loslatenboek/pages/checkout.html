@@ -8645,10 +8645,6 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     return card;
   }
 
-  // Swish is SE/SEK and must be enabled on the Brite account. Flip to true once
-  // Brite activates it → a "Swish" tile appears right under "iDEAL". (iDEAL is on.)
-  var BRITE_SWISH_ENABLED = false;
-
   function renderBanksForCountry(country, country_iso) {
     var grid = document.getElementById('brite-bank-grid');
     if (!grid) return;
@@ -8845,8 +8841,31 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         else container.appendChild(row);
         afterEl = row;
       }
-      addAlt('ideal', 'iDEAL', 'Betaal direct via je eigen bank · via Brite', 'ideal.svg', '#CC0066');
-      if (BRITE_SWISH_ENABLED) addAlt('swish', 'Swish', 'Betaal met Swish · via Brite', 'swish.svg', '#EB4B97');
+      // Rows are driven by the admin Payment Gateway config: any ACTIVE method on
+      // the Brite gateway beyond pay_by_bank (iDEAL, Swish, ...) gets its own row —
+      // toggle it in admin and it (dis)appears here, no code change needed. Reads
+      // the REAL /store/payment-options via originalFetch (the demo mock never
+      // intercepts this call). Brite must also enable the scheme account-side.
+      var ALT_DEFS = {
+        ideal: { label: 'iDEAL', desc: 'Betaal direct via je eigen bank · via Brite', icon: 'ideal.svg', bg: '#CC0066' },
+        swish: { label: 'Swish', desc: 'Betaal met Swish · via Brite', icon: 'swish.svg', bg: '#EB4B97' },
+      };
+      var ALT_COUNTRY = 'nl';
+      var altBase = (window.PROJECT_CONFIG && PROJECT_CONFIG.medusaUrl) || '';
+      var altKey = (window.PROJECT_CONFIG && PROJECT_CONFIG.publishableApiKey) || '';
+      var altSlug = (window.PROJECT_CONFIG && (PROJECT_CONFIG.slug || PROJECT_CONFIG.projectId)) || 'loslatenboek';
+      originalFetch(altBase + '/store/payment-options?project_slug=' + altSlug + '&currency=EUR', {
+        headers: altKey ? { 'x-publishable-api-key': altKey } : {}
+      }).then(function(r){ return r.json(); })
+        .then(function(data){
+          var brite = ((data && data.gateways) || []).filter(function(g){ return g.provider === 'brite'; })[0];
+          ((brite && brite.methods) || [])
+            .filter(function(m){ return m.code !== 'pay_by_bank' && ALT_DEFS[m.code]; })
+            .filter(function(m){ var cc = m.available_countries || []; return !cc.length || cc.indexOf(ALT_COUNTRY) !== -1; })
+            .sort(function(a, b){ return (a.sort_order || 0) - (b.sort_order || 0); })
+            .forEach(function(m){ var d = ALT_DEFS[m.code]; addAlt(m.code, d.label, d.desc, d.icon, d.bg); });
+        })
+        .catch(function(){ /* config unavailable → bank picker only */ });
     })();
 
     // Keep the Brite card first + enforce a single default selection: while Brite is
