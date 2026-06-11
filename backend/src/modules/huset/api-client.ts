@@ -25,6 +25,27 @@ export type HusetOrderItem = {
   qty: number
 }
 
+export type HusetReceiverParams = {
+  receiverRef: string
+  deliveryName: string
+  deliveryStreet: string
+  deliveryStreet2?: string
+  deliveryPostalCode: string
+  deliveryCity: string
+  /** ISO 3166-1 alpha-3, e.g. NOR / SWE */
+  deliveryCountryId: string
+  invoiceName?: string
+  invoiceStreet?: string
+  invoicePostalCode?: string
+  invoiceCity?: string
+  invoiceCountryId?: string
+  languageId?: string
+  cellphone?: string
+  email: string
+  /** true = private person delivery (Bring B2C) */
+  isResidential?: boolean
+}
+
 export type HusetCreateOrderParams = {
   orderRef: string
   receiverRef: string
@@ -170,6 +191,35 @@ export class HusetApiClient {
   async testConnection(): Promise<boolean> {
     const xml = await this.call("TestConnection", this.buildAuthBlock())
     return tagText(xml, "TestConnectionResult").toLowerCase() === "true"
+  }
+
+  /**
+   * UpdateReceiver — create/update the delivery+invoice address for an order.
+   * MUST be called before createOrder: the WMS rejects orders whose ReceiverRef
+   * it cannot resolve ("can't find Receiver"). Idempotent — upserts by ReceiverRef.
+   * Field order follows the WSDL Receiver sequence.
+   */
+  async upsertReceiver(p: HusetReceiverParams): Promise<void> {
+    const rec = `<int:rec>
+      <int:ReceiverRef>${xmlEscape(p.receiverRef)}</int:ReceiverRef>
+      <int:DeliveryName>${xmlEscape(p.deliveryName)}</int:DeliveryName>
+      <int:DeliveryStreetaddress>${xmlEscape(p.deliveryStreet)}</int:DeliveryStreetaddress>
+      <int:DeliveryPostalCode>${xmlEscape(p.deliveryPostalCode)}</int:DeliveryPostalCode>
+      <int:DeliveryCity>${xmlEscape(p.deliveryCity)}</int:DeliveryCity>
+      <int:DeliveryCountryId>${xmlEscape(p.deliveryCountryId)}</int:DeliveryCountryId>
+      <int:InvoiceName>${xmlEscape(p.invoiceName || p.deliveryName)}</int:InvoiceName>
+      <int:InvoiceStreetaddress>${xmlEscape(p.invoiceStreet || p.deliveryStreet)}</int:InvoiceStreetaddress>
+      <int:InvoicePostalCode>${xmlEscape(p.invoicePostalCode || p.deliveryPostalCode)}</int:InvoicePostalCode>
+      <int:InvoiceCity>${xmlEscape(p.invoiceCity || p.deliveryCity)}</int:InvoiceCity>
+      <int:InvoiceCountryId>${xmlEscape(p.invoiceCountryId || p.deliveryCountryId)}</int:InvoiceCountryId>
+      <int:UseInvoiceAddress>false</int:UseInvoiceAddress>
+      <int:LanguageId>${xmlEscape(p.languageId || "")}</int:LanguageId>
+      <int:Cellphone>${xmlEscape(p.cellphone || "")}</int:Cellphone>
+      <int:Email>${xmlEscape(p.email)}</int:Email>
+      ${p.deliveryStreet2 ? `<int:DeliveryStreetaddress2>${xmlEscape(p.deliveryStreet2)}</int:DeliveryStreetaddress2>` : ""}
+      <int:IsResidential>${p.isResidential === false ? "false" : "true"}</int:IsResidential>
+    </int:rec>`
+    await this.call("UpdateReceiver", `${this.buildAuthBlock()}${rec}`)
   }
 
   /**

@@ -108,6 +108,24 @@ export async function sendOrderToHuset(opts: {
   const pickupCode = orderMeta.pickup_place_code || orderMeta.bring_pickup_point_id || ""
 
   const client = buildHusetClient(config)
+
+  // Step 1: upsert the receiver (delivery + invoice address). The WMS rejects
+  // orders for unknown receivers ("can't find Receiver"), so this MUST run first.
+  await client.upsertReceiver({
+    receiverRef: orderRef,
+    deliveryName: fullName,
+    deliveryStreet: addr.address_1 || "",
+    deliveryStreet2: addr.address_2 || "",
+    deliveryPostalCode: postalResult.normalized,
+    deliveryCity: addr.city || "",
+    deliveryCountryId: countryIso3,
+    languageId: countryCode2,
+    cellphone: phoneResult.normalized !== "000" ? phoneResult.normalized : "",
+    email: order.email || "",
+    isResidential: true,
+  })
+
+  // Step 2: create the outgoing delivery order referencing that receiver
   const outgoingDeliveryOrderId = await client.createOrder({
     orderRef,
     receiverRef: orderRef,
