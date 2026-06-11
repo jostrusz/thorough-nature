@@ -46,6 +46,8 @@ const SO = {
   ZAS_PICKUP_CZ: "so_01KNF1QYEZC1Y1Y1A0FX35X3YT", // Zásilkovna - Na výdejní místo (CZ Psi pickup)
   ZAS_HOME_KOCICI: "so_01KPFQ9PQGXCMG4M5ZQBD7DYZP",   // Zásilkovna - Na adresu (Kocici Bible home)
   ZAS_PICKUP_KOCICI: "so_01KPFQ9PQF5S7RRKVZ6RDB5ZZE", // Zásilkovna - Na výdejní místo (Kocici pickup)
+  ZAS_HOME_ODPUST: "so_01KTTR2B5J2XPRAHNQHHDQ0XVN",   // Zásilkovna - Na adresu (Odpust Knizka home)
+  ZAS_PICKUP_ODPUST: "so_01KTTR2B5JRA8H022ERJSR3ANJ", // Zásilkovna - Na výdejní místo (Odpust pickup)
 } as const
 
 /**
@@ -132,6 +134,14 @@ export const PROJECT_CONFIG = {
     homeShippingOptionId: SO.ZAS_HOME_KOCICI,
     homeShippingOptionName: "Zásilkovna - Na adresu",
     pickupShippingOptionId: SO.ZAS_PICKUP_KOCICI,
+    pickupShippingOptionName: "Zásilkovna - Na výdejní místo",
+  },
+  "odpust-knizka": {
+    name: "Odpust Knizka",
+    sales_channel_id: "sc_01KTTR1W2GDWQC8R6NE12V7MWT",
+    homeShippingOptionId: SO.ZAS_HOME_ODPUST,
+    homeShippingOptionName: "Zásilkovna - Na adresu",
+    pickupShippingOptionId: SO.ZAS_PICKUP_ODPUST,
     pickupShippingOptionName: "Zásilkovna - Na výdejní místo",
   },
 } as const
@@ -230,7 +240,7 @@ export const COUNTRY_CONFIG = {
     allowedPaymentMethods: ["creditcard", "cod"],
     defaultPaymentMethod: "creditcard",
     codAllowed: true,
-    projectSlugs: ["psi-superzivot", "kocici-bible"],
+    projectSlugs: ["psi-superzivot", "kocici-bible", "odpust-knizka"],
     bookVatRate: 0,
   },
 } as const

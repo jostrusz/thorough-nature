@@ -61,6 +61,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'psi-superzivot': process.env.PS_STOREFRONT_URL || "https://www.psi-superzivot.cz",
   'het-leven': process.env.HL_STOREFRONT_URL || "https://www.pakjeleventerug.nl",
   'zycie-zaslugy': process.env.ZZ_STOREFRONT_URL || "https://www.najpierw-ja.pl",
+  'odpust-knizka': process.env.OD_STOREFRONT_URL || "https://www.pusttocotenici.cz",
 }
 
 // Localized email subjects per project
@@ -73,6 +74,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'psi-superzivot': 'Tvoje e-booky jsou připravené! 📖',
   'het-leven': 'Je 2 gratis e-books staan klaar! 📖',
   'zycie-zaslugy': 'Twoje 2 darmowe e-booki są gotowe! 📖',
+  'odpust-knizka': 'Tvoje e-booky jsou připravené! 📖',
 }
 
 // Localized fallback first name per project
@@ -85,6 +87,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'psi-superzivot': 'tam',
   'het-leven': 'daar',
   'zycie-zaslugy': 'tam',
+  'odpust-knizka': 'tam',
 }
 
 export async function POST(

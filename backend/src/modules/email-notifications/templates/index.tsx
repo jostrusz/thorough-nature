@@ -47,6 +47,10 @@ import { PsOrderPlacedTemplate, PS_ORDER_PLACED, isPsOrderPlacedTemplateData } f
 import { PsShipmentNotificationTemplate, PS_SHIPMENT_NOTIFICATION, isPsShipmentNotificationData } from './ps-shipment-notification'
 import { PsEbookDeliveryTemplate, PS_EBOOK_DELIVERY, isPsEbookDeliveryData } from './ps-ebook-delivery'
 import { PsUpsellConfirmedTemplate, PS_UPSELL_CONFIRMED, isPsUpsellConfirmedData } from './ps-upsell-confirmed'
+// Pusť to, co tě ničí (odpust-knizka) templates
+import { OdOrderPlacedTemplate, OD_ORDER_PLACED, isOdOrderPlacedTemplateData } from './od-order-placed'
+import { OdEbookDeliveryTemplate, OD_EBOOK_DELIVERY, isOdEbookDeliveryData } from './od-ebook-delivery'
+import { OdShipmentNotificationTemplate, OD_SHIPMENT_NOTIFICATION, isOdShipmentNotificationData } from './od-shipment-notification'
 // Życie, jakiego nigdy sobie nie pozwoliłaś (zycie-zaslugy) templates
 import { ZzOrderPlacedTemplate, ZZ_ORDER_PLACED, isZzOrderPlacedTemplateData } from './zz-order-placed'
 import { ZzShipmentNotificationTemplate, ZZ_SHIPMENT_NOTIFICATION, isZzShipmentNotificationData } from './zz-shipment-notification'
@@ -113,6 +117,10 @@ export const EmailTemplates = {
   PS_SHIPMENT_NOTIFICATION,
   PS_EBOOK_DELIVERY,
   PS_UPSELL_CONFIRMED,
+  // Odpusť to, co tě ničí
+  OD_ORDER_PLACED,
+  OD_EBOOK_DELIVERY,
+  OD_SHIPMENT_NOTIFICATION,
   // Życie, jakiego nigdy sobie nie pozwoliłaś
   ZZ_ORDER_PLACED,
   ZZ_SHIPMENT_NOTIFICATION,
@@ -181,6 +189,13 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
     const allKeys = Object.values(EmailTemplates) as string[]
     if (allKeys.includes(psKey)) {
       return psKey
+    }
+  }
+  if (project === 'odpust-knizka') {
+    const odKey = `od-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(odKey)) {
+      return odKey
     }
   }
   if (project === 'lass-los') {
@@ -632,6 +647,34 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <PsUpsellConfirmedTemplate {...data} />
 
+    // ── Odpusť to, co tě ničí templates ──────────────────────
+    case EmailTemplates.OD_ORDER_PLACED:
+      if (!isOdOrderPlacedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.OD_ORDER_PLACED}"`
+        )
+      }
+      return <OdOrderPlacedTemplate {...data} />
+
+    case EmailTemplates.OD_EBOOK_DELIVERY:
+      if (!isOdEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.OD_EBOOK_DELIVERY}"`
+        )
+      }
+      return <OdEbookDeliveryTemplate {...data} />
+
+    case EmailTemplates.OD_SHIPMENT_NOTIFICATION:
+      if (!isOdShipmentNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.OD_SHIPMENT_NOTIFICATION}"`
+        )
+      }
+      return <OdShipmentNotificationTemplate {...data} />
+
     // ── Het Leven Dat Je Verdient templates ──────────────────
     case EmailTemplates.HL_ORDER_PLACED:
       if (!isHlOrderPlacedTemplateData(data)) {
@@ -750,6 +793,10 @@ export {
   PsShipmentNotificationTemplate,
   PsEbookDeliveryTemplate,
   PsUpsellConfirmedTemplate,
+  // Odpusť to, co tě ničí
+  OdOrderPlacedTemplate,
+  OdEbookDeliveryTemplate,
+  OdShipmentNotificationTemplate,
   // Życie, jakiego nigdy sobie nie pozwoliłaś
   ZzOrderPlacedTemplate,
   ZzShipmentNotificationTemplate,

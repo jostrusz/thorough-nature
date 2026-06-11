@@ -87,6 +87,12 @@ Kde {delivery_postal_code} je PSČ doručovací adresy zákazníka.
 - E-booky (bez knihy): https://drive.google.com/drive/folders/1-w5r-6yRI5LyxZwo3FVWvxPF9GjRx97q
 - E-booky (s knihou): https://drive.google.com/drive/folders/1PhQ6zQFy5eKmcL-p_mQtgBuZE9Du5rsv
 
+### CZ Pusť to, co tě ničí
+- Autor: Joris de Vries
+- Web: pusttocotenici.cz
+- E-mail: podpora@pusttocotenici.cz
+- E-booky: zatím neexistují (neslibovat)
+
 ### CZ Psí superživot
 - Autor: Michal Peterka
 - Web: psi-superzivot.cz
