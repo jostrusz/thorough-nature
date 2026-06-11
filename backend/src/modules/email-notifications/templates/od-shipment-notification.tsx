@@ -1,4 +1,4 @@
-import { Text, Section, Hr, Link, Img } from '@react-email/components'
+import { Text, Section, Hr, Link } from '@react-email/components'
 import * as React from 'react'
 import { cleanItemTitle } from '../../../utils/clean-item-title'
 import { Base } from './base'
@@ -23,41 +23,16 @@ export interface OdShipmentNotificationTemplateProps {
 export const isOdShipmentNotificationData = (data: any): data is OdShipmentNotificationTemplateProps =>
   typeof data.order === 'object' && typeof data.shippingAddress === 'object'
 
-const font = "'Inter', 'Segoe UI', Arial, sans-serif"
-const pad = '28px'
-
-// Brand colors — deep plum palette (Pusť to, co tě ničí brand)
-const colors = {
-  headerBg: '#5A3D6B',
-  headerGradient: 'linear-gradient(135deg, #5A3D6B 0%, #2D1B3D 50%, #1A1028 100%)',
-  accent: '#5A3D6B',
-  accentLight: '#D8C3E3',
-  accentSoft: '#FAF5F8',
-  accentMuted: '#9B7AAD',
-  textDark: '#18181B',
-  textBody: '#3F3F46',
-  textMuted: '#71717A',
-  textLight: '#A1A1AA',
-  boxBg: '#FAFAFA',
-  boxBorder: '#E4E4E7',
-  cardBg: '#FFFFFF',
-  footerBg: '#18181B',
-  footerText: '#A1A1AA',
-  footerAccent: '#9B7AAD',
-  greenBg: '#F0FDF4',
-  greenBorder: '#BBF7D0',
-  greenText: '#166534',
-  amberBg: '#FFFBEB',
-  amberBorder: '#FDE68A',
-  amberText: '#92400E',
-  divider: '#E4E4E7',
-}
+const font = "'Inter', Arial, sans-serif"
+const pad = '24px'
 
 function formatPrice(amount: number, currencyCode: string): string {
   try {
     return new Intl.NumberFormat('cs-CZ', {
       style: 'currency',
       currency: (currencyCode || 'CZK').toUpperCase(),
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
     }).format(amount)
   } catch {
     return `${(amount || 0).toFixed(0)} Kč`
@@ -66,8 +41,14 @@ function formatPrice(amount: number, currencyCode: string): string {
 
 function formatCountry(code: string): string {
   const map: Record<string, string> = {
-    cz: 'Česká republika', sk: 'Slovensko', pl: 'Polsko', de: 'Německo',
-    at: 'Rakousko', nl: 'Nizozemsko', be: 'Belgie', hu: 'Maďarsko',
+    cz: 'Česká republika',
+    sk: 'Slovensko',
+    pl: 'Polsko',
+    de: 'Německo',
+    at: 'Rakousko',
+    nl: 'Nizozemsko',
+    be: 'Belgie',
+    hu: 'Maďarsko',
   }
   return map[(code || '').toLowerCase()] || (code || '').toUpperCase()
 }
@@ -88,266 +69,246 @@ export const OdShipmentNotificationTemplate: React.FC<OdShipmentNotificationTemp
   const items = order.items || []
   const displayId = order.metadata?.custom_order_number || order.display_id || order.id
 
-  // Detect pickup point from props or order metadata
-  const pickup = pickupPoint || (order.metadata?.pickup_point_name ? {
-    name: order.metadata.pickup_point_name,
-    id: order.metadata.pickup_point_id,
-    address: order.metadata.pickup_point_address,
-  } : null)
-  const isPickup = !!pickup
-
-  // Billing entity — Czech company
-  const entityName = billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'
-  const entityAddress = billingEntity?.address_line || 'Rybná 716/24, Staré Město, 110 00 Praha'
-  const entityIco = billingEntity?.ico || '06259928'
-  const entityDic = billingEntity?.dic || 'CZ06259928'
+  // Detect pickup point from props or order metadata (supports pickup_point_*, packeta_point_* and paczkomat_* keys)
+  const pickup = pickupPoint || (() => {
+    const name = order.metadata?.pickup_point_name || order.metadata?.packeta_point_name || order.metadata?.paczkomat_name
+    if (!name) return null
+    return {
+      name,
+      id: order.metadata?.pickup_point_id || order.metadata?.packeta_point_id || order.metadata?.paczkomat_id || '',
+      address: order.metadata?.pickup_point_address || order.metadata?.packeta_point_address || order.metadata?.paczkomat_address || '',
+    }
+  })()
+  const isPickup = !!pickup || order.metadata?.shipping_method === 'zasilkovna_pickup'
 
   return (
     <Base preview={preview}>
       <Section>
-        {/* ====== HEADER ====== */}
+        {/* HEADER */}
         <div style={{
-          backgroundColor: colors.headerBg,
-          background: colors.headerGradient,
-          padding: '40px 28px 36px',
+          backgroundColor: '#2D1B3D',
+          background: 'linear-gradient(135deg, #2D1B3D 0%, #1A1028 100%)',
+          padding: '32px 24px',
           textAlign: 'center' as const,
         }}>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
-            fontWeight: 600,
+            fontWeight: 500,
             letterSpacing: '3px',
             textTransform: 'uppercase' as const,
-            color: 'rgba(255,255,255,0.75)',
-            margin: '0 0 10px 0',
+            color: '#C27BA0',
+            marginBottom: '8px',
           }}>
             Pusť to, co tě ničí
           </Text>
           <Text style={{
+            fontSize: '32px',
+            marginBottom: '6px',
+          }}>
+            📦
+          </Text>
+          <Text style={{
             fontFamily: font,
-            fontSize: '26px',
-            fontWeight: 800,
+            fontSize: '24px',
+            fontWeight: 700,
             color: '#ffffff',
-            margin: '0 0 8px 0',
-            lineHeight: '1.2',
-            letterSpacing: '-0.02em',
+            margin: '0',
+            lineHeight: '1.3',
           }}>
             Tvoje objednávka je na cestě!
           </Text>
           <Text style={{
             fontFamily: font,
             fontSize: '13px',
-            color: 'rgba(255,255,255,0.7)',
-            margin: '0',
+            color: '#9B7AAD',
+            margin: '6px 0 0',
           }}>
-            Objednávka {displayId}
+            Objednávka #{displayId}
           </Text>
         </div>
 
-        {/* ====== STATUS BADGE ====== */}
-        <div style={{ padding: `24px ${pad} 0`, textAlign: 'center' as const }}>
-          <div style={{
-            display: 'inline-block',
-            backgroundColor: colors.greenBg,
-            border: `1px solid ${colors.greenBorder}`,
-            borderRadius: '20px',
-            padding: '6px 18px',
-          }}>
-            <Text style={{
-              fontFamily: font,
-              fontSize: '13px',
-              fontWeight: 600,
-              color: colors.greenText,
-              margin: '0',
-            }}>
-              &#128230; Na cestě k tobě
-            </Text>
-          </div>
-        </div>
-
-        {/* ====== GREETING ====== */}
-        <div style={{ padding: `24px ${pad} 0` }}>
+        {/* GREETING */}
+        <div style={{ padding: `28px ${pad} 0 ${pad}` }}>
           <Text style={{
             fontFamily: font,
             fontSize: '15px',
-            color: colors.textBody,
-            lineHeight: '1.7',
-            margin: '0',
+            color: '#5A3D6B',
+            lineHeight: '1.6',
+            marginBottom: '6px',
           }}>
-            Ahoj {shippingAddress?.first_name || 'tam'} 👋,
+            Ahoj {shippingAddress?.first_name || 'tam'},
           </Text>
           <Text style={{
             fontFamily: font,
             fontSize: '15px',
-            color: colors.textBody,
-            lineHeight: '1.7',
-            margin: '8px 0 0',
+            color: '#5A3D6B',
+            lineHeight: '1.6',
+            marginBottom: '0',
           }}>
             {isPickup
-              ? 'Skvělá zpráva! Tvoje objednávka byla zabalena a odeslána na výdejní místo. Jakmile bude připravena k vyzvednutí, dostaneš další upozornění.'
-              : 'Skvělá zpráva! Tvoje objednávka byla zabalena a už je na cestě k tobě. Níže najdeš podrobnosti o zásilce.'
+              ? 'Dobrá zpráva! Tvoje objednávka je zabalená a míří na tvoje výdejní místo. Níže najdeš podrobnosti o zásilce.'
+              : 'Dobrá zpráva! Tvoje objednávka je zabalená a už je na cestě k tobě. Níže najdeš podrobnosti o zásilce.'
             }
           </Text>
         </div>
 
-        {/* ====== TRACKING INFO ====== */}
+        {/* TRACKING INFO */}
         {(trackingNumber || trackingUrl) && (
-          <div style={{ padding: `24px ${pad} 0` }}>
+          <div style={{ padding: `20px ${pad} 0 ${pad}` }}>
             <div style={{
-              backgroundColor: colors.greenBg,
-              borderRadius: '12px',
-              border: `1px solid ${colors.greenBorder}`,
-              padding: '20px 22px',
+              backgroundColor: '#E8F5E9',
+              borderRadius: '10px',
+              border: '1px solid #A5D6A7',
+              padding: '18px 20px',
               textAlign: 'center' as const,
             }}>
               <Text style={{
                 fontFamily: font,
-                fontSize: '12px',
-                fontWeight: 700,
+                fontSize: '11px',
+                fontWeight: 600,
                 textTransform: 'uppercase' as const,
-                letterSpacing: '1px',
-                color: colors.greenText,
-                marginBottom: '12px',
+                letterSpacing: '1.5px',
+                color: '#2E7D32',
+                marginBottom: '10px',
               }}>
                 Sledování zásilky
               </Text>
               {trackingCompany && (
                 <Text style={{
                   fontFamily: font,
-                  fontSize: '14px',
-                  color: colors.textBody,
+                  fontSize: '13px',
+                  color: '#5A3D6B',
                   marginBottom: '6px',
                 }}>
-                  Dopravce: <strong style={{ color: colors.textDark }}>{trackingCompany}</strong>
+                  Dopravce: <strong style={{ color: '#2D1B3D' }}>{trackingCompany}</strong>
                 </Text>
               )}
               {trackingNumber && (
                 <Text style={{
                   fontFamily: font,
-                  fontSize: '14px',
-                  color: colors.textBody,
-                  marginBottom: trackingUrl ? '14px' : '0',
+                  fontSize: '13px',
+                  color: '#5A3D6B',
+                  marginBottom: trackingUrl ? '12px' : '0',
                 }}>
-                  Číslo zásilky: <strong style={{ color: colors.textDark }}>{trackingNumber}</strong>
+                  Číslo zásilky: <strong style={{ color: '#2D1B3D' }}>{trackingNumber}</strong>
                 </Text>
               )}
               {trackingUrl && (
                 <Link
                   href={trackingUrl}
                   style={{
-                    backgroundColor: colors.accent,
+                    backgroundColor: '#C27BA0',
                     color: '#ffffff',
                     fontFamily: font,
-                    fontSize: '15px',
-                    fontWeight: 700,
+                    fontSize: '14px',
+                    fontWeight: 600,
                     textDecoration: 'none',
-                    padding: '12px 36px',
-                    borderRadius: '10px',
+                    padding: '12px 32px',
+                    borderRadius: '8px',
                     display: 'inline-block',
                   }}
                 >
-                  Sledovat zásilku &#8594;
+                  Sledovat zásilku →
                 </Link>
               )}
             </div>
           </div>
         )}
 
-        {/* ====== DELIVERY ESTIMATE ====== */}
-        <div style={{ padding: `12px ${pad} 0` }}>
+        {/* DELIVERY ESTIMATE */}
+        <div style={{ padding: `12px ${pad} 0 ${pad}` }}>
           <div style={{
-            backgroundColor: colors.amberBg,
-            borderRadius: '12px',
-            border: `1px solid ${colors.amberBorder}`,
-            padding: '14px 18px',
+            backgroundColor: '#FFF8E1',
+            borderRadius: '8px',
+            border: '1px solid #FFE082',
+            padding: '12px 16px',
             textAlign: 'center' as const,
           }}>
             <Text style={{
               fontFamily: font,
-              fontSize: '14px',
-              color: colors.amberText,
+              fontSize: '13px',
+              color: '#795548',
               margin: '0',
               lineHeight: '1.5',
             }}>
-              {isPickup
-                ? <><strong>&#128205; Doručení na výdejní místo</strong></>
-                : <><strong>&#128666; Očekávané doručení: 2–3 pracovních dnů</strong></>
-              }
+              🚚 &nbsp; <strong>Předpokládané doručení:</strong> 2–3 pracovní dny
             </Text>
             <Text style={{
               fontFamily: font,
               fontSize: '12px',
-              color: colors.textMuted,
-              margin: '6px 0 0',
+              color: '#9e9e9e',
+              margin: '4px 0 0',
               lineHeight: '1.5',
             }}>
-              {isPickup ? 'Zásilku si vyzvedneš na zvoleném výdejním místě.' : 'Knihy odesíláme z našeho centrálního skladu v ČR.'}
+              {isPickup
+                ? 'Jakmile bude zásilka připravena k vyzvednutí, dá ti Zásilkovna vědět.'
+                : 'Knihy odesíláme z našeho centrálního skladu v České republice.'
+              }
             </Text>
           </div>
         </div>
 
-        {/* ====== ITEMS ====== */}
-        <div style={{ padding: `24px ${pad} 0` }}>
+        {/* ITEMS */}
+        <div style={{ padding: `20px ${pad} 0 ${pad}` }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '12px',
-            fontWeight: 700,
+            fontSize: '11px',
+            fontWeight: 600,
             textTransform: 'uppercase' as const,
-            letterSpacing: '1px',
-            color: colors.accent,
-            marginBottom: '14px',
+            letterSpacing: '1.5px',
+            color: '#9B7AAD',
+            marginBottom: '12px',
           }}>
             Odeslané položky
           </Text>
 
           {items.map((item: any) => (
             <div key={item.id} style={{
-              marginBottom: '12px',
-              backgroundColor: colors.cardBg,
-              borderRadius: '12px',
-              border: `1px solid ${colors.boxBorder}`,
-              padding: '14px 16px',
+              marginBottom: '10px',
+              backgroundColor: '#FAF5F8',
+              borderRadius: '8px',
+              border: '1px solid #EDD9E5',
+              padding: '12px 14px',
             }}>
               <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const }}>
                 <tbody>
                   <tr>
-                    <td width="60" valign="top" style={{ paddingRight: '14px' }}>
+                    <td width="52" valign="top" style={{ paddingRight: '12px' }}>
                       {item.thumbnail ? (
-                        <Img
+                        <img
                           src={item.thumbnail}
                           alt={item.title || item.product_title}
-                          width="60"
-                          height="76"
+                          width="52"
+                          height="68"
                           style={{
-                            width: '60px',
-                            height: '76px',
+                            width: '52px',
+                            height: '68px',
                             objectFit: 'cover' as const,
-                            borderRadius: '8px',
-                            border: `1px solid ${colors.boxBorder}`,
+                            borderRadius: '6px',
                           }}
                         />
                       ) : (
                         <div style={{
-                          width: '60px',
-                          height: '76px',
-                          background: `linear-gradient(145deg, ${colors.accentSoft}, #EDD9E5)`,
-                          borderRadius: '8px',
-                          border: `1px solid ${colors.boxBorder}`,
+                          width: '52px',
+                          height: '68px',
+                          background: 'linear-gradient(135deg, #2D1B3D, #5A3D6B)',
+                          borderRadius: '6px',
                           textAlign: 'center' as const,
-                          lineHeight: '76px',
-                          fontSize: '28px',
+                          lineHeight: '68px',
+                          fontSize: '24px',
                         }}>
-                          &#128214;
+                          📕
                         </div>
                       )}
                     </td>
-                    <td valign="middle">
+                    <td valign="top">
                       <Text style={{
                         fontFamily: font,
-                        fontSize: '15px',
-                        fontWeight: 700,
-                        color: colors.textDark,
-                        margin: '0 0 4px',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        color: '#2D1B3D',
+                        margin: '0 0 2px',
                         lineHeight: '1.3',
                       }}>
                         {cleanItemTitle(item.product_title || item.title) || 'Položka'}
@@ -355,18 +316,18 @@ export const OdShipmentNotificationTemplate: React.FC<OdShipmentNotificationTemp
                       <Text style={{
                         fontFamily: font,
                         fontSize: '12px',
-                        color: colors.textMuted,
+                        color: '#9B7AAD',
                         margin: '0',
                       }}>
-                        {item.variant_title ? `${item.variant_title} \u2022 ` : ''}Množství: {item.quantity || 1}
+                        {item.variant_title ? `${item.variant_title} • ` : ''}Množství: {item.quantity || 1}
                       </Text>
                     </td>
-                    <td width="80" align="right" valign="middle">
+                    <td width="70" align="right" valign="top">
                       <Text style={{
                         fontFamily: font,
-                        fontSize: '16px',
-                        fontWeight: 800,
-                        color: colors.textDark,
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        color: '#2D1B3D',
                         margin: '0',
                       }}>
                         {formatPrice((item.unit_price || 0) * (item.quantity || 1), currency)}
@@ -379,43 +340,53 @@ export const OdShipmentNotificationTemplate: React.FC<OdShipmentNotificationTemp
           ))}
         </div>
 
-        {/* ====== SHIPPING ADDRESS ====== */}
-        <div style={{ padding: `20px ${pad} 0` }}>
+        {/* SHIPPING ADDRESS / PICKUP POINT */}
+        <div style={{ padding: `20px ${pad} 0 ${pad}` }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '12px',
-            fontWeight: 700,
+            fontSize: '11px',
+            fontWeight: 600,
             textTransform: 'uppercase' as const,
-            letterSpacing: '1px',
-            color: colors.accent,
-            marginBottom: '10px',
+            letterSpacing: '1.5px',
+            color: '#9B7AAD',
+            marginBottom: '8px',
           }}>
             {isPickup ? 'Výdejní místo' : 'Doručovací adresa'}
           </Text>
           <div style={{
-            backgroundColor: colors.boxBg,
-            borderRadius: '12px',
-            border: `1px solid ${colors.boxBorder}`,
-            padding: '16px 20px',
+            backgroundColor: '#FAF5F8',
+            borderRadius: '10px',
+            border: '1px solid #EDD9E5',
+            padding: '14px 18px',
           }}>
             {isPickup && pickup ? (
               <Text style={{
                 fontFamily: font,
-                fontSize: '14px',
-                color: colors.textBody,
-                lineHeight: '1.7',
+                fontSize: '13px',
+                color: '#5A3D6B',
+                lineHeight: '1.6',
                 margin: '0',
               }}>
-                <strong>{pickup.name}</strong>
-                {pickup.id && <><br />ID: {pickup.id}</>}
-                {pickup.address && <><br />{pickup.address}</>}
+                <strong style={{ color: '#2D1B3D' }}>{pickup.name}</strong>
+                {pickup.address && (
+                  <>
+                    <br />
+                    {pickup.address}
+                  </>
+                )}
+                {pickup.id && (
+                  <>
+                    <br />
+                    <span style={{ color: '#9B7AAD', fontSize: '12px' }}>ID výdejního místa: {pickup.id}</span>
+                  </>
+                )}
               </Text>
             ) : (
               <Text style={{
                 fontFamily: font,
-                fontSize: '14px',
-                color: colors.textBody,
-                lineHeight: '1.7',
+                fontSize: '13px',
+                color: '#5A3D6B',
+                lineHeight: '1.6',
                 margin: '0',
               }}>
                 {shippingAddress?.first_name} {shippingAddress?.last_name}
@@ -430,196 +401,201 @@ export const OdShipmentNotificationTemplate: React.FC<OdShipmentNotificationTemp
           </div>
         </div>
 
-        <Hr style={{ borderColor: colors.divider, margin: `24px ${pad} 0` }} />
+        <Hr style={{ borderColor: '#EDD9E5', margin: `20px ${pad} 0 ${pad}` }} />
 
-        {/* ====== WHAT HAPPENS NEXT ====== */}
-        <div style={{ padding: `24px ${pad} 0` }}>
+        {/* WHAT HAPPENS NEXT */}
+        <div style={{ padding: `20px ${pad} 0 ${pad}` }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '12px',
-            fontWeight: 700,
+            fontSize: '11px',
+            fontWeight: 600,
             textTransform: 'uppercase' as const,
-            letterSpacing: '1px',
-            color: colors.accent,
-            marginBottom: '18px',
+            letterSpacing: '1.5px',
+            color: '#9B7AAD',
+            marginBottom: '14px',
           }}>
-            Co bude následovat?
+            Co můžeš čekat?
           </Text>
 
-          {/* Step 1 — done */}
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '16px' }}>
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '12px' }}>
             <tbody>
               <tr>
-                <td width="38" valign="top">
+                <td width="34" valign="top">
                   <div style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: colors.greenText,
+                    width: '26px',
+                    height: '26px',
+                    backgroundColor: '#2e7d32',
                     borderRadius: '50%',
                     textAlign: 'center' as const,
-                    lineHeight: '28px',
+                    lineHeight: '26px',
                     fontFamily: font,
-                    fontSize: '14px',
+                    fontSize: '12px',
                     fontWeight: 700,
                     color: '#ffffff',
-                  }}>&#10003;</div>
+                  }}>✓</div>
                 </td>
-                <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
-                  <strong style={{ color: colors.textDark }}>Odesláno</strong>
+                <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
+                  <strong style={{ color: '#2D1B3D' }}>Odesláno</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Tvoje objednávka byla zabalena a odeslána z našeho skladu.</span>
+                  Tvoje objednávka byla zabalena a odeslána z našeho skladu.
                 </td>
               </tr>
             </tbody>
           </table>
 
-          {/* Step 2 — current */}
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '16px' }}>
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '12px' }}>
             <tbody>
               <tr>
-                <td width="38" valign="top">
+                <td width="34" valign="top">
                   <div style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: colors.accent,
+                    width: '26px',
+                    height: '26px',
+                    backgroundColor: '#C27BA0',
                     borderRadius: '50%',
                     textAlign: 'center' as const,
-                    lineHeight: '28px',
+                    lineHeight: '26px',
                     fontFamily: font,
-                    fontSize: '13px',
+                    fontSize: '12px',
                     fontWeight: 700,
                     color: '#ffffff',
                   }}>2</div>
                 </td>
-                <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
-                  <strong style={{ color: colors.textDark }}>Na cestě</strong>
+                <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
+                  <strong style={{ color: '#2D1B3D' }}>Na cestě</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásilka míří na tvoje výdejní místo.' : 'Dopravce doručuje zásilku na tvou adresu.'}</span>
+                  {isPickup
+                    ? 'Zásilka míří na tvoje výdejní místo Zásilkovny.'
+                    : 'Dopravce veze zásilku na uvedenou adresu.'
+                  }
                 </td>
               </tr>
             </tbody>
           </table>
 
-          {/* Step 3 — pending */}
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '4px' }}>
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '6px' }}>
             <tbody>
               <tr>
-                <td width="38" valign="top">
+                <td width="34" valign="top">
                   <div style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: colors.accentLight,
+                    width: '26px',
+                    height: '26px',
+                    backgroundColor: '#EDD9E5',
                     borderRadius: '50%',
                     textAlign: 'center' as const,
-                    lineHeight: '28px',
+                    lineHeight: '26px',
                     fontFamily: font,
-                    fontSize: '13px',
+                    fontSize: '12px',
                     fontWeight: 700,
-                    color: colors.accent,
+                    color: '#2D1B3D',
                   }}>3</div>
                 </td>
-                <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
-                  <strong style={{ color: colors.textDark }}>Doručeno</strong>
+                <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
+                  <strong style={{ color: '#2D1B3D' }}>Doručeno</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásilku si vyzvedneš na výdejním místě.' : 'Během 2–3 pracovních dnů budeš mít knihu doma.'}</span>
+                  {isPickup
+                    ? 'Během 2–3 pracovních dnů si zásilku vyzvedneš na výdejním místě!'
+                    : 'Během 2–3 pracovních dnů budeš mít knihu doma!'
+                  }
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        {/* ====== HELP SECTION ====== */}
-        <div style={{ padding: `28px ${pad} 0` }}>
+        {/* HELP SECTION */}
+        <div style={{ padding: `24px ${pad} 0 ${pad}` }}>
           <div style={{
-            backgroundColor: colors.accentSoft,
-            borderRadius: '12px',
+            backgroundColor: '#FAF5F8',
+            borderRadius: '10px',
             border: '1px solid #EDD9E5',
-            padding: '18px 22px',
+            padding: '16px 20px',
             textAlign: 'center' as const,
           }}>
             <Text style={{
               fontFamily: font,
-              fontSize: '14px',
-              color: colors.textBody,
+              fontSize: '13px',
+              color: '#5A3D6B',
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Máš dotaz k zásilce? Klidně napiš!
+              Máš dotaz k zásilce? Napiš nám na
               <br />
-              <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+              <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: '#C27BA0', textDecoration: 'underline', fontWeight: 600 }}>
                 podpora@pusttocotenici.cz
               </Link>
             </Text>
           </div>
         </div>
 
-        {/* ====== SIGNATURE ====== */}
-        <div style={{ padding: `24px ${pad} 28px` }}>
+        {/* SIGNATURE */}
+        <div style={{ padding: `20px ${pad} 24px ${pad}` }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '15px',
-            color: colors.textBody,
-            margin: '0 0 4px',
+            fontSize: '14px',
+            color: '#5A3D6B',
+            marginBottom: '4px',
           }}>
-            Ať ti kniha přinese klid a lehkost,
+            Příjemné čtení!
           </Text>
           <Text style={{
             fontFamily: font,
-            fontSize: '15px',
+            fontSize: '14px',
             fontWeight: 700,
-            color: colors.textDark,
-            margin: '0 0 2px',
+            color: '#2D1B3D',
+            marginBottom: '2px',
           }}>
             Joris de Vries
           </Text>
           <Text style={{
             fontFamily: font,
-            fontSize: '13px',
-            color: colors.textMuted,
-            margin: '0',
+            fontSize: '12px',
+            color: '#9B7AAD',
           }}>
-            <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
+            <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: '#C27BA0', textDecoration: 'none' }}>
               podpora@pusttocotenici.cz
             </Link>
           </Text>
         </div>
 
-        {/* ====== FOOTER ====== */}
+        {/* FOOTER */}
         <div style={{
-          backgroundColor: colors.footerBg,
-          padding: '28px 28px',
+          backgroundColor: '#2D1B3D',
+          padding: '24px 24px',
           textAlign: 'center' as const,
         }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '13px',
-            fontWeight: 700,
-            color: colors.footerAccent,
-            margin: '0 0 8px',
-            letterSpacing: '0.5px',
+            fontSize: '12px',
+            color: '#C27BA0',
+            marginBottom: '6px',
           }}>
             Pusť to, co tě ničí
           </Text>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
-            color: colors.footerText,
-            lineHeight: '1.7',
-            margin: '0 0 8px',
-          }}>
-            {entityName}
-            <br />
-            {entityAddress}
-            <br />
-            IČO: {entityIco} &bull; DIČ: {entityDic}
-          </Text>
-          <Text style={{
-            fontFamily: font,
-            fontSize: '11px',
-            color: '#71717A',
-            lineHeight: '1.5',
+            color: '#7a6189',
+            lineHeight: '1.6',
             margin: '0',
           }}>
+            {billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'}
+            {' '}&bull;{' '}
+            {billingEntity?.address
+              ? `${billingEntity.address.address_1 || ''}, ${billingEntity.address.postal_code || ''} ${billingEntity.address.city || ''}`
+              : 'Rybná 716/24, Staré Město, 110 00 Praha'}
+            {billingEntity?.registration_id && (
+              <>
+                <br />
+                IČO: {billingEntity.registration_id}
+              </>
+            )}
+            {!billingEntity && (
+              <>
+                <br />
+                IČO: 06259928 &bull; DIČ: CZ06259928
+              </>
+            )}
+            <br />
             Tento e-mail ti přišel, protože sis objednal/a knihu na www.pusttocotenici.cz.
           </Text>
         </div>
@@ -643,7 +619,7 @@ OdShipmentNotificationTemplate.PreviewProps = {
         product_title: 'Pusť to, co tě ničí',
         variant_title: null,
         quantity: 2,
-        unit_price: 550,
+        unit_price: 599.5,
         thumbnail: null,
       },
     ],
@@ -657,7 +633,7 @@ OdShipmentNotificationTemplate.PreviewProps = {
     country_code: 'cz',
   },
   trackingNumber: 'Z10009876543',
-  trackingUrl: 'https://tracking.zasilkovna.cz/Z10009876543',
+  trackingUrl: 'https://tracking.packeta.com/cs/Z10009876543',
   trackingCompany: 'Zásilkovna',
   pickupPoint: null,
 } as any

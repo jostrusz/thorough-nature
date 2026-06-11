@@ -51,6 +51,9 @@ import { PsUpsellConfirmedTemplate, PS_UPSELL_CONFIRMED, isPsUpsellConfirmedData
 import { OdOrderPlacedTemplate, OD_ORDER_PLACED, isOdOrderPlacedTemplateData } from './od-order-placed'
 import { OdEbookDeliveryTemplate, OD_EBOOK_DELIVERY, isOdEbookDeliveryData } from './od-ebook-delivery'
 import { OdShipmentNotificationTemplate, OD_SHIPMENT_NOTIFICATION, isOdShipmentNotificationData } from './od-shipment-notification'
+import { OdAbandonedCheckout1Template, OD_ABANDONED_CHECKOUT_1, isOdAbandonedCheckout1Data } from './od-abandoned-checkout-1'
+import { OdAbandonedCheckout2Template, OD_ABANDONED_CHECKOUT_2, isOdAbandonedCheckout2Data } from './od-abandoned-checkout-2'
+import { OdAbandonedCheckout3Template, OD_ABANDONED_CHECKOUT_3, isOdAbandonedCheckout3Data } from './od-abandoned-checkout-3'
 // Życie, jakiego nigdy sobie nie pozwoliłaś (zycie-zaslugy) templates
 import { ZzOrderPlacedTemplate, ZZ_ORDER_PLACED, isZzOrderPlacedTemplateData } from './zz-order-placed'
 import { ZzShipmentNotificationTemplate, ZZ_SHIPMENT_NOTIFICATION, isZzShipmentNotificationData } from './zz-shipment-notification'
@@ -121,6 +124,9 @@ export const EmailTemplates = {
   OD_ORDER_PLACED,
   OD_EBOOK_DELIVERY,
   OD_SHIPMENT_NOTIFICATION,
+  OD_ABANDONED_CHECKOUT_1,
+  OD_ABANDONED_CHECKOUT_2,
+  OD_ABANDONED_CHECKOUT_3,
   // Życie, jakiego nigdy sobie nie pozwoliłaś
   ZZ_ORDER_PLACED,
   ZZ_SHIPMENT_NOTIFICATION,
@@ -675,6 +681,33 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <OdShipmentNotificationTemplate {...data} />
 
+    case EmailTemplates.OD_ABANDONED_CHECKOUT_1:
+      if (!isOdAbandonedCheckout1Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.OD_ABANDONED_CHECKOUT_1}"`
+        )
+      }
+      return <OdAbandonedCheckout1Template {...data} />
+
+    case EmailTemplates.OD_ABANDONED_CHECKOUT_2:
+      if (!isOdAbandonedCheckout2Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.OD_ABANDONED_CHECKOUT_2}"`
+        )
+      }
+      return <OdAbandonedCheckout2Template {...data} />
+
+    case EmailTemplates.OD_ABANDONED_CHECKOUT_3:
+      if (!isOdAbandonedCheckout3Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.OD_ABANDONED_CHECKOUT_3}"`
+        )
+      }
+      return <OdAbandonedCheckout3Template {...data} />
+
     // ── Het Leven Dat Je Verdient templates ──────────────────
     case EmailTemplates.HL_ORDER_PLACED:
       if (!isHlOrderPlacedTemplateData(data)) {
@@ -797,6 +830,9 @@ export {
   OdOrderPlacedTemplate,
   OdEbookDeliveryTemplate,
   OdShipmentNotificationTemplate,
+  OdAbandonedCheckout1Template,
+  OdAbandonedCheckout2Template,
+  OdAbandonedCheckout3Template,
   // Życie, jakiego nigdy sobie nie pozwoliłaś
   ZzOrderPlacedTemplate,
   ZzShipmentNotificationTemplate,
