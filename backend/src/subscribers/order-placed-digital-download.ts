@@ -139,6 +139,9 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
   // slipp-taket: e-books do not exist for this project yet — empty array
   // disables the e-book delivery email. Re-enable by populating the files.
   'slipp-taket': [],
+  // odpust-knizka (CZ): e-books do not exist for this project yet — empty array
+  // disables the e-book delivery email. Re-enable by populating the files.
+  'odpust-knizka': [],
 }
 
 // NOTE: no cross-language fallback. Unknown projects are skipped (and logged)
@@ -154,6 +157,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'psi-superzivot': process.env.PS_STOREFRONT_URL || "https://www.psi-superzivot.cz",
   'het-leven': process.env.HL_STOREFRONT_URL || "https://www.pakjeleventerug.nl",
   'zycie-zaslugy': process.env.ZZ_STOREFRONT_URL || "https://www.najpierw-ja.pl",
+  'odpust-knizka': process.env.OD_STOREFRONT_URL || "https://www.odpust-knizka.cz",
 }
 
 // Localized email subjects per project
@@ -166,6 +170,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'psi-superzivot': 'Tvoje e-booky jsou připravené! 📖',
   'het-leven': 'Je 2 gratis e-books staan klaar! 📖',
   'zycie-zaslugy': 'Twoje 2 darmowe e-booki są gotowe! 📖',
+  'odpust-knizka': 'Tvoje e-booky jsou připravené! 📖',
 }
 
 // Localized fallback first names
@@ -178,6 +183,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'psi-superzivot': 'tam',
   'het-leven': 'daar',
   'zycie-zaslugy': 'tam',
+  'odpust-knizka': 'tam',
 }
 
 export async function sendEbookDelivery(orderId: string, container: any, eventName: string) {

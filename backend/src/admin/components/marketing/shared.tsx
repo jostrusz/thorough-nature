@@ -370,6 +370,7 @@ const PROJECT_COLORS: Record<string, { bg: string; fg: string; label: string }> 
   "slapp-taget":  { bg: "#E0E7FF", fg: "#3730A3", label: "Släpp taget" },
   "psi-superzivot": { bg: "#F3E8FF", fg: "#6B21A8", label: "Psí superživot" },
   "kocici-bible": { bg: "#FCE7F3", fg: "#831843", label: "Kočičí bible" },
+  "odpust-knizka": { bg: "#EDE9FE", fg: "#5B21B6", label: "Odpusť knížka" },
 }
 
 export function ProjectBadge({ slug, fallbackLabel }: { slug?: string | null; fallbackLabel?: string | null }) {
@@ -944,6 +945,7 @@ export const PROJECT_SLUGS = [
   "psi-superzivot",
   "slapp-taget",
   "het-leven",
+  "odpust-knizka",
 ]
 
 // ═══════════════════════════════════════════

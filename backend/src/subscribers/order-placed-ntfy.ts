@@ -14,6 +14,8 @@ const PROJECT_NAMES: Record<string, string> = {
   slapp: "Släpp taget (SE)",
   "slapp-taget": "Släpp taget (SE)",
   "psi-superzivot": "Psí superživot (CZ)",
+  "kocici-bible": "Kočičí bible (CZ)",
+  "odpust-knizka": "Odpusť knížka (CZ)",
   "lass-los": "Lass los (DE/AT)",
 }
 

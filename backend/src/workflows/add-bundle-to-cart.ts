@@ -79,6 +79,13 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 279,   // 279 zł incl. VAT (save 78 zł)
     4: 359,   // 359 zł incl. VAT (save 117 zł)
   },
+  // Odpusť to, co tě ničí — hlavní produkt CZ (odpust-knizka)
+  "odpust-to-co-te-nici": {
+    1: 550,   // 550 Kč incl. DPH
+    2: 899,   // 899 Kč incl. DPH (save 201 Kč)
+    3: 1199,  // 1199 Kč incl. DPH (save 451 Kč)
+    4: 1499,  // 1499 Kč incl. DPH (save 701 Kč)
+  },
   // Psí superživot — hlavní produkt CZ
   "psi-superzivot": {
     1: 550,   // 550 Kč incl. DPH

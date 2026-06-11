@@ -12,6 +12,7 @@ const PROJECT_TAG_NAMES: Record<string, string> = {
   "slapp-taget": "Släpp taget",
   "psi-superzivot": "Psí superživot",
   "kocici-bible": "Kočičí bible",
+  "odpust-knizka": "Odpusť knížka",
   "lass-los": "Lass los",
 }
 
