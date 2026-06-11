@@ -271,7 +271,7 @@ export const OdShipmentNotificationTemplate: React.FC<OdShipmentNotificationTemp
             }}>
               {isPickup
                 ? <><strong>&#128205; Doručení na výdejní místo</strong></>
-                : <><strong>&#128666; Očekávané doručení: 2–5 pracovních dnů</strong></>
+                : <><strong>&#128666; Očekávané doručení: 2–3 pracovních dnů</strong></>
               }
             </Text>
             <Text style={{
@@ -521,7 +521,7 @@ export const OdShipmentNotificationTemplate: React.FC<OdShipmentNotificationTemp
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Doručeno</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásilku si vyzvedneš na výdejním místě.' : 'Během 2–5 pracovních dnů budeš mít knihu doma.'}</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásilku si vyzvedneš na výdejním místě.' : 'Během 2–3 pracovních dnů budeš mít knihu doma.'}</span>
                 </td>
               </tr>
             </tbody>
@@ -546,8 +546,8 @@ export const OdShipmentNotificationTemplate: React.FC<OdShipmentNotificationTemp
             }}>
               Máš dotaz k zásilce? Klidně napiš!
               <br />
-              <Link href="mailto:kniha@odpust-knizka.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                kniha@odpust-knizka.cz
+              <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                podpora@pusttocotenici.cz
               </Link>
             </Text>
           </div>
@@ -578,8 +578,8 @@ export const OdShipmentNotificationTemplate: React.FC<OdShipmentNotificationTemp
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:kniha@odpust-knizka.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
-              kniha@odpust-knizka.cz
+            <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
+              podpora@pusttocotenici.cz
             </Link>
           </Text>
         </div>
@@ -620,7 +620,7 @@ export const OdShipmentNotificationTemplate: React.FC<OdShipmentNotificationTemp
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ti přišel, protože sis objednal/a knihu na www.odpust-knizka.cz.
+            Tento e-mail ti přišel, protože sis objednal/a knihu na www.pusttocotenici.cz.
           </Text>
         </div>
       </Section>

@@ -89,8 +89,8 @@ Kde {delivery_postal_code} je PSČ doručovací adresy zákazníka.
 
 ### CZ Pusť to, co tě ničí
 - Autor: Joris de Vries
-- Web: odpust-knizka.cz
-- E-mail: kniha@odpust-knizka.cz
+- Web: pusttocotenici.cz
+- E-mail: podpora@pusttocotenici.cz
 - E-booky: zatím neexistují (neslibovat)
 
 ### CZ Psí superživot

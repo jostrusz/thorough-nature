@@ -253,8 +253,8 @@ export const OdEbookDeliveryTemplate: React.FC<OdEbookDeliveryTemplateProps> & {
             }}>
               Máš problém se stahováním?
               <br />
-              <Link href="mailto:kniha@odpust-knizka.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                kniha@odpust-knizka.cz
+              <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                podpora@pusttocotenici.cz
               </Link>
             </Text>
           </div>
@@ -285,8 +285,8 @@ export const OdEbookDeliveryTemplate: React.FC<OdEbookDeliveryTemplateProps> & {
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:kniha@odpust-knizka.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
-              kniha@odpust-knizka.cz
+            <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
+              podpora@pusttocotenici.cz
             </Link>
           </Text>
         </div>
@@ -325,7 +325,7 @@ export const OdEbookDeliveryTemplate: React.FC<OdEbookDeliveryTemplateProps> & {
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ti přišel, protože sis objednal/a knihu na www.odpust-knizka.cz.
+            Tento e-mail ti přišel, protože sis objednal/a knihu na www.pusttocotenici.cz.
           </Text>
         </div>
       </Section>
@@ -335,7 +335,7 @@ export const OdEbookDeliveryTemplate: React.FC<OdEbookDeliveryTemplateProps> & {
 
 OdEbookDeliveryTemplate.PreviewProps = {
   firstName: 'Petra',
-  downloadUrl: 'https://www.odpust-knizka.cz/download/abc123-test-token',
+  downloadUrl: 'https://www.pusttocotenici.cz/download/abc123-test-token',
   expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
 } as OdEbookDeliveryTemplateProps
 

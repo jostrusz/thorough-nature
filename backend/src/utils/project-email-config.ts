@@ -177,21 +177,21 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     smsDispatchTemplate: 'Kocici bible: Zasilka odeslana. Sledovaci odkaz: {url} peterka@kocicibible.cz',
   },
   'odpust-knizka': {
-    replyTo: 'kniha@odpust-knizka.cz',
+    replyTo: 'podpora@pusttocotenici.cz',
     fromName: 'Joris de Vries - Pusť to, co tě ničí',
-    fromEmail: 'Joris de Vries - Pusť to, co tě ničí <kniha@odpust-knizka.cz>',
+    fromEmail: 'Joris de Vries - Pusť to, co tě ničí <podpora@pusttocotenici.cz>',
     project: 'odpust-knizka',
     locale: 'cs',
-    smsDispatchTemplate: 'Pust to, co te nici: Zasilka odeslana. Sledovaci odkaz: {url} kniha@odpust-knizka.cz',
+    smsDispatchTemplate: 'Pust to, co te nici: Zasilka odeslana. Sledovaci odkaz: {url} podpora@pusttocotenici.cz',
   },
   // Also match without hyphen
   odpustknizka: {
-    replyTo: 'kniha@odpust-knizka.cz',
+    replyTo: 'podpora@pusttocotenici.cz',
     fromName: 'Joris de Vries - Pusť to, co tě ničí',
-    fromEmail: 'Joris de Vries - Pusť to, co tě ničí <kniha@odpust-knizka.cz>',
+    fromEmail: 'Joris de Vries - Pusť to, co tě ničí <podpora@pusttocotenici.cz>',
     project: 'odpust-knizka',
     locale: 'cs',
-    smsDispatchTemplate: 'Pust to, co te nici: Zasilka odeslana. Sledovaci odkaz: {url} kniha@odpust-knizka.cz',
+    smsDispatchTemplate: 'Pust to, co te nici: Zasilka odeslana. Sledovaci odkaz: {url} podpora@pusttocotenici.cz',
   },
   // Also match without hyphen
   psisuperzivot: {

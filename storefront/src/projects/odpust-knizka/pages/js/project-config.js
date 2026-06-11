@@ -1,13 +1,13 @@
 var PROJECT_CONFIG = {
   "slug": "odpust-knizka",
   "projectId": "odpust-knizka",
-  "domain": "www.odpust-knizka.cz",
+  "domain": "www.pusttocotenici.cz",
   "medusaUrl": "https://www.marketing-hq.eu",
-  "publishableApiKey": "",
+  "publishableApiKey": "pk_4ba52315de2efa9526f7a15785cf0b98155897551aa213096acf20d55e08456d",
   "mainProduct": {
     "name": "Pusť to, co tě ničí",
     "handle": "pust-to-co-te-nici",
-    "variantId": "",
+    "variantId": "variant_01KTTR2PJATN1AP1YS6Q06NA5P",
     "price": 749,
     "currency": "CZK",
     "thumbnail": ""

@@ -61,7 +61,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'psi-superzivot': process.env.PS_STOREFRONT_URL || "https://www.psi-superzivot.cz",
   'het-leven': process.env.HL_STOREFRONT_URL || "https://www.pakjeleventerug.nl",
   'zycie-zaslugy': process.env.ZZ_STOREFRONT_URL || "https://www.najpierw-ja.pl",
-  'odpust-knizka': process.env.OD_STOREFRONT_URL || "https://www.odpust-knizka.cz",
+  'odpust-knizka': process.env.OD_STOREFRONT_URL || "https://www.pusttocotenici.cz",
 }
 
 // Localized email subjects per project

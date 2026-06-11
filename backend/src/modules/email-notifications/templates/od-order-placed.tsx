@@ -695,8 +695,8 @@ export const OdOrderPlacedTemplate: React.FC<OdOrderPlacedTemplateProps> & {
             }}>
               Máš dotaz k objednávce? Klidně napiš!
               <br />
-              <Link href="mailto:kniha@odpust-knizka.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                kniha@odpust-knizka.cz
+              <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                podpora@pusttocotenici.cz
               </Link>
             </Text>
           </div>
@@ -727,8 +727,8 @@ export const OdOrderPlacedTemplate: React.FC<OdOrderPlacedTemplateProps> & {
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:kniha@odpust-knizka.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
-              kniha@odpust-knizka.cz
+            <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
+              podpora@pusttocotenici.cz
             </Link>
           </Text>
         </div>
@@ -770,7 +770,7 @@ export const OdOrderPlacedTemplate: React.FC<OdOrderPlacedTemplateProps> & {
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ti přišel, protože sis objednal/a knihu na www.odpust-knizka.cz.
+            Tento e-mail ti přišel, protože sis objednal/a knihu na www.pusttocotenici.cz.
           </Text>
         </div>
       </Section>
