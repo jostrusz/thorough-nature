@@ -17,35 +17,8 @@ export const isOdEbookDeliveryData = (data: any): data is OdEbookDeliveryTemplat
   typeof data.downloadUrl === 'string' &&
   typeof data.expiresAt === 'string'
 
-const font = "'Inter', 'Segoe UI', Arial, sans-serif"
-const pad = '28px'
-
-// OD Brand colors — deep plum palette (matches od-order-placed)
-const colors = {
-  headerBg: '#5A3D6B',
-  headerGradient: 'linear-gradient(135deg, #5A3D6B 0%, #2D1B3D 50%, #1A1028 100%)',
-  accent: '#5A3D6B',
-  accentLight: '#D8C3E3',
-  accentSoft: '#FAF5F8',
-  accentMuted: '#9B7AAD',
-  textDark: '#18181B',
-  textBody: '#3F3F46',
-  textMuted: '#71717A',
-  textLight: '#A1A1AA',
-  boxBg: '#FAFAFA',
-  boxBorder: '#E4E4E7',
-  cardBg: '#FFFFFF',
-  footerBg: '#18181B',
-  footerText: '#A1A1AA',
-  footerAccent: '#9B7AAD',
-  greenBg: '#F0FDF4',
-  greenBorder: '#BBF7D0',
-  greenText: '#166534',
-  amberBg: '#FFFBEB',
-  amberBorder: '#FDE68A',
-  amberText: '#92400E',
-  divider: '#E4E4E7',
-}
+const font = "'Inter', Arial, sans-serif"
+const pad = '24px'
 
 export const OdEbookDeliveryTemplate: React.FC<OdEbookDeliveryTemplateProps> & {
   PreviewProps: OdEbookDeliveryTemplateProps
@@ -59,272 +32,258 @@ export const OdEbookDeliveryTemplate: React.FC<OdEbookDeliveryTemplateProps> & {
   return (
     <Base preview={preview}>
       <Section>
-        {/* ====== HEADER ====== */}
+        {/* Header */}
         <div style={{
-          backgroundColor: colors.headerBg,
-          background: colors.headerGradient,
-          padding: '40px 28px 36px',
+          backgroundColor: '#2D1B3D',
+          background: 'linear-gradient(135deg, #2D1B3D 0%, #1A1028 100%)',
+          padding: '32px 24px',
           textAlign: 'center' as const,
         }}>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
-            fontWeight: 600,
+            fontWeight: 500,
             letterSpacing: '3px',
             textTransform: 'uppercase' as const,
-            color: 'rgba(255,255,255,0.75)',
-            margin: '0 0 10px 0',
+            color: '#C27BA0',
+            marginBottom: '8px',
           }}>
             Pusť to, co tě ničí
           </Text>
           <Text style={{
-            fontFamily: font,
-            fontSize: '26px',
-            fontWeight: 800,
-            color: '#ffffff',
-            margin: '0 0 4px 0',
-            lineHeight: '1.2',
-            letterSpacing: '-0.02em',
+            fontSize: '32px',
+            marginBottom: '6px',
           }}>
-            Tvoje e-booky jsou připravené! 📖
+            📖
           </Text>
           <Text style={{
             fontFamily: font,
-            fontSize: '13px',
-            color: 'rgba(255,255,255,0.7)',
+            fontSize: '22px',
+            fontWeight: 700,
+            color: '#ffffff',
             margin: '0',
+            lineHeight: '1.3',
           }}>
-            Stáhni si své digitální bonusy
+            Tvoje e-booky jsou připravené!
           </Text>
         </div>
 
-        {/* ====== GREETING ====== */}
-        <div style={{ padding: `28px ${pad} 0` }}>
+        {/* Body */}
+        <div style={{ padding: `28px ${pad}` }}>
           <Text style={{
             fontFamily: font,
             fontSize: '15px',
-            color: colors.textBody,
-            lineHeight: '1.7',
-            margin: '0',
+            color: '#5A3D6B',
+            lineHeight: '1.6',
+            marginBottom: '6px',
           }}>
             Ahoj {firstName},
           </Text>
+
           <Text style={{
             fontFamily: font,
             fontSize: '15px',
-            color: colors.textBody,
-            lineHeight: '1.7',
-            margin: '8px 0 0',
+            color: '#5A3D6B',
+            lineHeight: '1.6',
+            marginBottom: '24px',
           }}>
-            Moc děkujeme, že sis objednal/a knihu Pusť to, co tě ničí! Tvoje e-booky jsou připravené ke stažení. Klikni na tlačítko níže a stáhni si je.
+            Máme radost, že jsi do toho šel/šla! Tvoje digitální výtisky jsou připravené ke čtení. Klikni na tlačítko níže a stáhni si je.
           </Text>
-        </div>
 
-        {/* ====== CTA BUTTON ====== */}
-        <div style={{ padding: `24px ${pad} 0`, textAlign: 'center' as const }}>
-          <Button
-            href={downloadUrl}
-            style={{
-              backgroundColor: colors.accent,
-              color: '#ffffff',
-              fontFamily: font,
-              fontSize: '16px',
-              fontWeight: 700,
-              textDecoration: 'none',
-              padding: '14px 48px',
-              borderRadius: '10px',
-              display: 'inline-block',
-            }}
-          >
-            Stáhnout e-booky &#8594;
-          </Button>
-        </div>
+          {/* CTA Button */}
+          <div style={{ textAlign: 'center' as const, marginBottom: '24px' }}>
+            <Button
+              href={downloadUrl}
+              style={{
+                backgroundColor: '#C27BA0',
+                color: '#ffffff',
+                fontFamily: font,
+                fontSize: '16px',
+                fontWeight: 600,
+                textDecoration: 'none',
+                padding: '14px 48px',
+                borderRadius: '8px',
+                display: 'inline-block',
+              }}
+            >
+              Stáhnout e-booky →
+            </Button>
+          </div>
 
-        {/* ====== LINK EXPIRY NOTICE ====== */}
-        <div style={{ padding: `16px ${pad} 0` }}>
+          {/* Link expiry notice */}
           <div style={{
-            backgroundColor: colors.amberBg,
-            borderRadius: '12px',
-            padding: '14px 18px',
+            backgroundColor: '#FFF8E1',
+            borderRadius: '8px',
+            padding: '12px 16px',
             textAlign: 'center' as const,
-            border: `1px solid ${colors.amberBorder}`,
+            border: '1px solid #FFE082',
+            marginBottom: '20px',
           }}>
             <Text style={{
               fontFamily: font,
               fontSize: '13px',
-              color: colors.amberText,
+              color: '#795548',
               margin: '0',
-              lineHeight: '1.6',
             }}>
-              &#9203; Odkaz ke stažení je platný do <strong>{expiryDate}</strong>. Po stažení si soubor ulož.
+              ⏳ Odkaz ke stažení je platný do <strong>{expiryDate}</strong>. Po stažení si soubory ulož.
             </Text>
           </div>
-        </div>
 
-        <Hr style={{ borderColor: colors.divider, margin: `20px ${pad}` }} />
+          <Hr style={{ borderColor: '#EDD9E5', margin: '4px 0' }} />
 
-        {/* ====== PHYSICAL BOOK NOTE ====== */}
-        <div style={{ padding: `0 ${pad}` }}>
+          {/* Physical book note */}
           <div style={{
-            backgroundColor: colors.boxBg,
-            borderRadius: '12px',
-            border: `1px solid ${colors.boxBorder}`,
+            backgroundColor: '#FAF5F8',
+            borderRadius: '10px',
+            border: '1px solid #EDD9E5',
             padding: '16px 20px',
             textAlign: 'center' as const,
+            marginTop: '20px',
+            marginBottom: '20px',
           }}>
             <Text style={{
               fontFamily: font,
-              fontSize: '14px',
-              color: colors.textBody,
+              fontSize: '13px',
+              color: '#5A3D6B',
               lineHeight: '1.6',
               margin: '0',
             }}>
-              &#128230; Tvoje tištěná kniha je na cestě a dorazí během <strong>2–3 pracovních dnů</strong>. Sledovací číslo ti pošleme v samostatném e-mailu.
+              📦 Tvoje tištěná kniha je na cestě a dorazí během <strong>2–3 pracovních dnů</strong>. Číslo pro sledování zásilky ti pošleme v samostatném e-mailu.
             </Text>
           </div>
-        </div>
 
-        {/* ====== TIPS ====== */}
-        <div style={{ padding: `24px ${pad} 0` }}>
+          {/* Reading tips */}
           <Text style={{
             fontFamily: font,
-            fontSize: '12px',
-            fontWeight: 700,
+            fontSize: '11px',
+            fontWeight: 600,
             textTransform: 'uppercase' as const,
-            letterSpacing: '1px',
-            color: colors.accent,
-            marginBottom: '16px',
+            letterSpacing: '1.5px',
+            color: '#9B7AAD',
+            marginBottom: '14px',
           }}>
             Tipy pro čtení
           </Text>
 
-          <div style={{
-            backgroundColor: colors.accentSoft,
-            borderRadius: '12px',
-            border: '1px solid #EDD9E5',
-            padding: '18px 20px',
-            marginBottom: '10px',
+          <Text style={{
+            fontFamily: font,
+            fontSize: '13px',
+            color: '#5A3D6B',
+            lineHeight: '1.5',
+            marginBottom: '8px',
           }}>
-            <Text style={{
-              fontFamily: font,
-              fontSize: '14px',
-              color: colors.textBody,
-              lineHeight: '1.6',
-              margin: '0 0 12px',
-            }}>
-              &#127807; <strong style={{ color: colors.textDark }}>Čti v klidu</strong> — Nespěchej. Každá kapitola si zaslouží chvilku ticha a soustředění.
-            </Text>
-            <Text style={{
-              fontFamily: font,
-              fontSize: '14px',
-              color: colors.textBody,
-              lineHeight: '1.6',
-              margin: '0 0 12px',
-            }}>
-              &#128221; <strong style={{ color: colors.textDark }}>Dělej si poznámky</strong> — Zapiš si, co tě zaujme. Budeš se k tomu chtít vrátit.
-            </Text>
-            <Text style={{
-              fontFamily: font,
-              fontSize: '14px',
-              color: colors.textBody,
-              lineHeight: '1.6',
-              margin: '0',
-            }}>
-              &#10084;&#65039; <strong style={{ color: colors.textDark }}>Buď k sobě laskavý/á</strong> — Pustit to, co tě tíží, chce čas. Každý malý krok se počítá!
-            </Text>
-          </div>
-        </div>
+            ❤️ <strong style={{ color: '#2D1B3D' }}>Dej si načas</strong> — Čti knihu vlastním tempem. Každá kapitola navazuje na tu předchozí.
+          </Text>
+          <Text style={{
+            fontFamily: font,
+            fontSize: '13px',
+            color: '#5A3D6B',
+            lineHeight: '1.5',
+            marginBottom: '8px',
+          }}>
+            ✍️ <strong style={{ color: '#2D1B3D' }}>Dělej si poznámky</strong> — Cvičení fungují nejlépe, když si je opravdu projdeš.
+          </Text>
+          <Text style={{
+            fontFamily: font,
+            fontSize: '13px',
+            color: '#5A3D6B',
+            lineHeight: '1.5',
+            marginBottom: '18px',
+          }}>
+            🌱 <strong style={{ color: '#2D1B3D' }}>Buď k sobě trpělivý/á</strong> — Změna chce čas. Každý malý krok se počítá.
+          </Text>
 
-        {/* ====== HELP SECTION ====== */}
-        <div style={{ padding: `20px ${pad} 0` }}>
+          {/* Help */}
           <div style={{
-            backgroundColor: colors.boxBg,
-            borderRadius: '12px',
-            border: `1px solid ${colors.boxBorder}`,
+            backgroundColor: '#FAF5F8',
+            borderRadius: '10px',
+            border: '1px solid #EDD9E5',
             padding: '16px 20px',
             textAlign: 'center' as const,
+            marginBottom: '20px',
           }}>
             <Text style={{
               fontFamily: font,
-              fontSize: '14px',
-              color: colors.textBody,
+              fontSize: '13px',
+              color: '#5A3D6B',
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Máš problém se stahováním?
-              <br />
-              <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+              Máš problém se stažením? Napiš nám na{' '}
+              <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: '#C27BA0', textDecoration: 'underline' }}>
                 podpora@pusttocotenici.cz
               </Link>
             </Text>
           </div>
-        </div>
 
-        {/* ====== SIGNATURE ====== */}
-        <div style={{ padding: `24px ${pad} 28px` }}>
+          {/* Signature */}
           <Text style={{
             fontFamily: font,
-            fontSize: '15px',
-            color: colors.textBody,
-            margin: '0 0 4px',
+            fontSize: '14px',
+            color: '#5A3D6B',
+            marginBottom: '4px',
           }}>
-            Ať ti kniha přinese klid a lehkost,
+            Příjemné čtení!
           </Text>
           <Text style={{
             fontFamily: font,
-            fontSize: '15px',
+            fontSize: '14px',
             fontWeight: 700,
-            color: colors.textDark,
-            margin: '0 0 2px',
+            color: '#2D1B3D',
+            marginBottom: '2px',
           }}>
             Joris de Vries
           </Text>
           <Text style={{
             fontFamily: font,
-            fontSize: '13px',
-            color: colors.textMuted,
-            margin: '0',
+            fontSize: '12px',
+            color: '#9B7AAD',
           }}>
-            <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
+            <Link href="mailto:podpora@pusttocotenici.cz" style={{ color: '#C27BA0', textDecoration: 'none' }}>
               podpora@pusttocotenici.cz
             </Link>
           </Text>
         </div>
 
-        {/* ====== FOOTER ====== */}
+        {/* Footer */}
         <div style={{
-          backgroundColor: colors.footerBg,
-          padding: '28px 28px',
+          backgroundColor: '#2D1B3D',
+          padding: '24px 24px',
           textAlign: 'center' as const,
         }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '13px',
-            fontWeight: 700,
-            color: colors.footerAccent,
-            margin: '0 0 8px',
-            letterSpacing: '0.5px',
+            fontSize: '12px',
+            color: '#C27BA0',
+            marginBottom: '6px',
           }}>
             Pusť to, co tě ničí
           </Text>
           <Text style={{
             fontFamily: font,
             fontSize: '11px',
-            color: colors.footerText,
-            lineHeight: '1.7',
-            margin: '0 0 8px',
-          }}>
-            Performance Marketing Solution s.r.o. &bull; Rybná 716/24, Staré Město, 110 00 Praha
-            <br />
-            IČO: 06259928 &bull; DIČ: CZ06259928
-          </Text>
-          <Text style={{
-            fontFamily: font,
-            fontSize: '11px',
-            color: '#71717A',
-            lineHeight: '1.5',
+            color: '#7a6189',
+            lineHeight: '1.6',
             margin: '0',
           }}>
+            {billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'}
+            {' '}&bull;{' '}
+            {billingEntity?.address
+              ? `${billingEntity.address.address_1 || ''}, ${billingEntity.address.postal_code || ''} ${billingEntity.address.city || ''}`
+              : 'Rybná 716/24, Staré Město, 110 00 Praha'}
+            {billingEntity?.registration_id && (
+              <>
+                <br />
+                IČO: {billingEntity.registration_id}
+              </>
+            )}
+            {!billingEntity && (
+              <>
+                <br />
+                IČO: 06259928 &bull; DIČ: CZ06259928
+              </>
+            )}
+            <br />
             Tento e-mail ti přišel, protože sis objednal/a knihu na www.pusttocotenici.cz.
           </Text>
         </div>

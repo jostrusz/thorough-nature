@@ -102,6 +102,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  display: flex;
  align-items: center;
  gap: 16px;
+ flex-wrap: nowrap;
+ min-width: 0;
 }
 .nav-links a {
  font-family: 'DM Sans', sans-serif;
@@ -111,6 +113,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  text-decoration: none;
  transition: color 0.2s;
  position: relative;
+ white-space: nowrap;
 }
 .nav-links a:hover {
  color: var(--heading);
@@ -132,6 +135,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  font-family: 'DM Sans', sans-serif;
  font-size: 14px;
  font-weight: 700;
+ white-space: nowrap;
  color: var(--white) !important;
  background: var(--cta);
  padding: 10px 22px;
@@ -227,7 +231,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  color: var(--white);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1280px) {
+ .nav-inner { gap: 12px; }
+ .nav-links { gap: 10px; }
+ .nav-links a { font-size: 13px; }
+ .nav-cta { padding: 8px 14px; font-size: 13px; }
+}
+@media (max-width: 1120px) {
  .nav-links { display: none; }
  .nav-hamburger { display: flex; }
  .nav-mobile-menu.open { display: flex; }
