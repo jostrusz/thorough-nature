@@ -16,6 +16,7 @@ export const COUNTRY_CARRIER_MAP: Record<string, string> = {
   pl: "packeta",
   hu: "packeta",
   se: "gls",
+  no: "bring",
 }
 
 // Packeta language codes per country
@@ -49,6 +50,9 @@ export function buildTrackingUrl(
     }
     case "postnord":
       return `https://tracking.postnord.com/tracking.html?id=${trackingNumber}`
+    case "bring":
+      // Bring public tracking page (Huset / NO shipments) — verified live
+      return `https://sporing.bring.no/sporing/${trackingNumber}`
     case "inpost":
       return `https://inpost.pl/sledzenie-przesylek?number=${trackingNumber}`
     default:

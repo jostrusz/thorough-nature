@@ -1,6 +1,7 @@
 import { Modules } from "@medusajs/framework/utils"
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
 import { DEXTRUM_MODULE } from "../modules/dextrum"
+import { isHusetOrder } from "../utils/huset-routing"
 
 /**
  * When an order is placed, create a Dextrum order map entry
@@ -23,11 +24,18 @@ export default async function orderPlacedDextrumHandler({
     // 2. Get order details
     const { data: [order] } = await query.graph({
       entity: "order",
-      fields: ["id", "display_id", "email", "metadata", "shipping_address.*", "billing_address.*"],
+      fields: ["id", "display_id", "email", "metadata", "sales_channel_id", "shipping_address.*", "billing_address.*"],
       filters: { id: data.id },
     })
 
     if (!order) return
+
+    // 2b. Huset routing — slipp-taket (NO) ships from the Huset warehouse,
+    // never from Dextrum. Guard is active only when HUSET_ENABLED=true.
+    if (await isHusetOrder(order, container)) {
+      console.log(`[Dextrum] Order ${data.id} routes to Huset WMS — skipping Dextrum queue`)
+      return
+    }
 
     // 3. Check if already tracked
     const existing = await dextrumService.listDextrumOrderMaps(

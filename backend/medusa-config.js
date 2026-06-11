@@ -84,6 +84,7 @@ const medusaConfig = {
     { resolve: "./src/modules/fakturoid" },
     { resolve: "./src/modules/quickbooks" },
     { resolve: "./src/modules/dextrum" },
+    { resolve: "./src/modules/huset" },
     { resolve: "./src/modules/supportbox" },
     { resolve: "./src/modules/project-settings" },
     { resolve: "./src/modules/resend-config" },
