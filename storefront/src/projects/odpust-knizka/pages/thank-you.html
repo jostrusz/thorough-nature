@@ -269,6 +269,8 @@ body { background: var(--bg); }
 .ty-order-icon.book { background: rgba(194,123,160,0.12); }
 .ty-order-icon.ebook { background: rgba(212,152,181,0.15); }
 .ty-order-icon.ship { background: rgba(45,27,61,0.06); }
+.ty-order-cover { width: 46px; height: 60px; border-radius: 8px; object-fit: contain; flex-shrink: 0; }
+.ty-ebook-badge { display: inline-block; font-size: 10px; font-weight: 700; color: #1D9E75; background: rgba(29,158,117,0.12); padding: 2px 7px; border-radius: 20px; margin-left: 6px; vertical-align: middle; letter-spacing: 0.3px; }
 .ty-order-name { font-size: 15px; font-weight: 600; color: var(--heading); }
 .ty-order-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .ty-order-total {
@@ -619,10 +621,24 @@ body { background: var(--bg); }
     <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Tvoje objednávka</div>
     <div class="ty-order-items" id="ty-order-items">
       <div class="ty-order-item">
-        <div class="ty-order-icon book">&#x1F4D6;</div>
+        <img src="/pust-to-co-te-nici-obrazek-pichi.png" alt="Pusť to, co tě ničí" class="ty-order-cover" loading="lazy">
         <div>
           <div class="ty-order-name">Pusť to, co tě ničí</div>
           <div class="ty-order-desc">Fyzická kniha od Jorise de Vries &mdash; doručení domů nebo na výdejní místo</div>
+        </div>
+      </div>
+      <div class="ty-order-item">
+        <img src="/nadměrné-přemýšlení-pichi.png" alt="Řešení nadměrného přemýšlení" class="ty-order-cover" loading="lazy">
+        <div>
+          <div class="ty-order-name">Bonus e-kniha: Řešení nadměrného přemýšlení <span class="ty-ebook-badge">ZDARMA</span></div>
+          <div class="ty-order-desc">E-kniha ke stažení &mdash; odkaz ti pošleme e-mailem</div>
+        </div>
+      </div>
+      <div class="ty-order-item">
+        <img src="/láska-bez-cenzury-pichi.png" alt="Láska bez cenzury" class="ty-order-cover" loading="lazy">
+        <div>
+          <div class="ty-order-name">Bonus e-kniha: Láska bez cenzury <span class="ty-ebook-badge">ZDARMA</span></div>
+          <div class="ty-order-desc">E-kniha ke stažení &mdash; odkaz ti pošleme e-mailem</div>
         </div>
       </div>
       <div class="ty-order-item">
