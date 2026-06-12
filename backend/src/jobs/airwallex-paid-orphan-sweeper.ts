@@ -38,6 +38,11 @@ const LOOKBACK_HOURS = 48
 const MIN_AGE_MINUTES = 2 // leave the inline 30s safety net room to finish
 const MAX_ATTEMPTS = 5
 const MAX_PER_RUN = 25
+// Cap on candidates fetched & verified per run. Each order-existence check
+// costs a ~0.6s LIKE probe, so this bounds a run to ~2 min worst case.
+// Intents verified to have an order get a `sweeper_order_ok` journey event and
+// are excluded from all future runs, so the backlog only shrinks.
+const MAX_VERIFY_PER_RUN = 150
 
 export default async function airwallexPaidOrphanSweeper(container: MedusaContainer) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
@@ -49,24 +54,27 @@ export default async function airwallexPaidOrphanSweeper(container: MedusaContai
     // Order-existence is checked per-intent below (the LIKE probe is too heavy
     // to run as a correlated subquery across the whole window).
     const { rows: candidates } = await pool.query(
-      `SELECT DISTINCT ON (l.intent_id)
-              l.intent_id,
-              (l.event_data->>'amount')::numeric   AS amount,
-              l.event_data->>'currency'            AS currency,
-              l.event_data->>'payment_method_type' AS payment_method,
-              l.occurred_at
-       FROM payment_journey_log l
-       WHERE l.event_type = 'airwallex_webhook_received'
-         AND l.event_data->>'airwallex_event' = 'payment_intent.succeeded'
-         AND l.occurred_at > NOW() - INTERVAL '${LOOKBACK_HOURS} hours'
-         AND l.occurred_at < NOW() - INTERVAL '${MIN_AGE_MINUTES} minutes'
-         AND NOT EXISTS (
-           SELECT 1 FROM payment_journey_log g
-           WHERE g.intent_id = l.intent_id
-             AND g.event_type IN ('safety_net_completed', 'sweeper_gave_up')
-         )
-       ORDER BY l.intent_id, l.occurred_at DESC
-       LIMIT ${MAX_PER_RUN * 4}`
+      `SELECT * FROM (
+         SELECT DISTINCT ON (l.intent_id)
+                l.intent_id,
+                (l.event_data->>'amount')::numeric   AS amount,
+                l.event_data->>'currency'            AS currency,
+                l.event_data->>'payment_method_type' AS payment_method,
+                l.occurred_at
+         FROM payment_journey_log l
+         WHERE l.event_type = 'airwallex_webhook_received'
+           AND l.event_data->>'airwallex_event' = 'payment_intent.succeeded'
+           AND l.occurred_at > NOW() - INTERVAL '${LOOKBACK_HOURS} hours'
+           AND l.occurred_at < NOW() - INTERVAL '${MIN_AGE_MINUTES} minutes'
+           AND NOT EXISTS (
+             SELECT 1 FROM payment_journey_log g
+             WHERE g.intent_id = l.intent_id
+               AND g.event_type IN ('safety_net_completed', 'sweeper_gave_up', 'sweeper_order_ok')
+           )
+         ORDER BY l.intent_id, l.occurred_at DESC
+       ) c
+       ORDER BY c.occurred_at ASC
+       LIMIT ${MAX_VERIFY_PER_RUN}`
     )
 
     // Heartbeat — proves the cron is registered and ticking (grep-able in Railway)
@@ -82,8 +90,17 @@ export default async function airwallexPaidOrphanSweeper(container: MedusaContai
 
       // Already has an order? (covers normal checkout completion, the inline
       // safety net, manual replay — all set metadata or keep session linkage)
+      // Mark verified intents so they're never re-probed — the LIKE probe is
+      // the expensive part of this job.
       const existingOrderId = await findOrderIdForIntent(pool, intentId)
-      if (existingOrderId) continue
+      if (existingOrderId) {
+        await logPaymentEvent({
+          intent_id: intentId,
+          event_type: "sweeper_order_ok",
+          event_data: { order_id: existingOrderId },
+        }).catch(() => {})
+        continue
+      }
 
       processed++
 
