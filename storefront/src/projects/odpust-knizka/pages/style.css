@@ -1271,6 +1271,9 @@ h2 { font-size: 38px; }
 }
 .bonus-card img {
  width: 100%;
+ height: auto;
+ display: block;
+ object-fit: contain;
  border-radius: 12px;
 }
 .bonus-card-text h3 {
