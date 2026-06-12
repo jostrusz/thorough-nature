@@ -276,6 +276,9 @@ class PayUPaymentProviderService extends AbstractPaymentProvider<Options> {
           // Pay-by-link (PBL) bank methods
           m: "PBL", i: "PBL", o: "PBL", s: "PBL", pkb: "PBL",
           mtb: "PBL", inteligo: "PBL", bos: "PBL", pekao24: "PBL",
+          // Czech pay-by-link methods (CZK POS): QR platba + bank buttons
+          qrcz: "PBL", cs: "PBL", kb: "PBL", mp: "PBL", pf: "PBL",
+          pg: "PBL", rf: "PBL", cb: "PBL", uc: "PBL",
           // Installments / BNPL
           ai: "PBL", twi: "PBL", payu_payments_pl: "PBL", wt: "PBL", dpt: "PBL",
         }

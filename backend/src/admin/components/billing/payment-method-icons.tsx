@@ -133,6 +133,8 @@ export function PaymentMethodIcon({ code, size }: { code: string; size?: number 
       return <div style={{ ...style, background: "#E2001A", color: "#FFFFFF" }}>UC</div>
     case "bank_cz_other":
       return <div style={{ ...style, background: "#F6F6F7", color: "#1A1A1A" }}>Bank</div>
+    case "qrcz":
+      return <div style={{ ...style, background: "#000000", color: "#FFFFFF" }}>QR</div>
     // Czech BNPL / deferred payments
     case "twisto":
     case "twisto_part":
@@ -293,6 +295,16 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "ai", name: "Raty PayU (Installments)", icon: "klarna", available_countries: ["pl"], supported_currencies: ["PLN"] },
     { code: "twi", name: "Twisto / PayPo (BNPL)", icon: "klarna", available_countries: ["pl"], supported_currencies: ["PLN"] },
     { code: "wt", name: "PayU Pay Later", icon: "klarna", available_countries: ["pl"], supported_currencies: ["PLN"] },
+    // Czech pay-by-link methods (CZK POS) — codes from GET /api/v2_1/paymethods
+    { code: "qrcz", name: "QR platba", icon: "qrcz", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "cs", name: "Česká spořitelna", icon: "bank_cz_cs", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "kb", name: "Komerční banka", icon: "bank_cz_kb", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "cb", name: "ČSOB", icon: "bank_cz_csob", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "mp", name: "mBank (mTransfer CZ)", icon: "bank_cz_mb", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "pf", name: "Fio banka", icon: "bank_cz_fb", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "pg", name: "Moneta Money Bank", icon: "bank_cz_mo", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "rf", name: "Raiffeisenbank ePlatby", icon: "bank_cz_rb", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "uc", name: "UniCredit", icon: "bank_cz_uc", available_countries: ["cz"], supported_currencies: ["CZK"] },
   ],
   novalnet: [
     { code: "creditcard", name: "Credit/Debit Card", icon: "card", available_countries: [], supported_currencies: [] },
