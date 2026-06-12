@@ -5510,7 +5510,24 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         }
 
         container.appendChild(bankSubPanel);
-        // bank_transfer is NOT auto-selected — don't set isFirstSet here
+
+        // Auto-select: expand the group and preselect the first bank (Česká spořitelna)
+        if (!isFirstSet) {
+          var firstTile = bankSubPanel.querySelector('.bank-sub-method');
+          if (firstTile) {
+            bankParent.classList.add('expanded');
+            bankSubPanel.classList.add('open');
+            bankParent.querySelector('.pm-radio-dot').style.transform = 'scale(1)';
+            bankParent.querySelector('.pm-radio').style.borderColor = 'var(--cta)';
+            firstTile.classList.add('selected');
+            var ftInput = firstTile.querySelector('input');
+            if (ftInput) ftInput.checked = true;
+            selectedMethod = firstTile.getAttribute('data-method');
+            selectedProvider = firstTile.getAttribute('data-provider');
+            selectedProviderId = firstTile.getAttribute('data-provider-id');
+            isFirstSet = true;
+          }
+        }
       } else {
         // Regular payment method
         var m = item.data;
