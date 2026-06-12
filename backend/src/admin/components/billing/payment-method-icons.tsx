@@ -110,6 +110,45 @@ export function PaymentMethodIcon({ code, size }: { code: string; size?: number 
       return <div style={{ ...style, background: "#2B4C9B", color: "#FFFFFF" }}>SEPA</div>
     case "bank_transfer":
       return <div style={{ ...style, background: "#F6F6F7", color: "#1A1A1A" }}>Bank</div>
+    // Czech banks (Comgate PSD2 bank buttons)
+    case "bank_cz_cs":
+      return <div style={{ ...style, background: "#2870C8", color: "#FFFFFF" }}>ČS</div>
+    case "bank_cz_csob":
+      return <div style={{ ...style, background: "#0099D8", color: "#FFFFFF" }}>ČSOB</div>
+    case "bank_cz_kb":
+      return <div style={{ ...style, background: "#E4002B", color: "#FFFFFF" }}>KB</div>
+    case "bank_cz_rb":
+      return <div style={{ ...style, background: "#FFE600", color: "#000000" }}>RB</div>
+    case "bank_cz_mo":
+      return <div style={{ ...style, background: "#6E2C8F", color: "#FFFFFF" }}>MO</div>
+    case "bank_cz_fb":
+      return <div style={{ ...style, background: "#1F9CD7", color: "#FFFFFF" }}>FIO</div>
+    case "bank_cz_mb":
+      return <div style={{ ...style, background: "#E90A0A", color: "#FFFFFF" }}>mB</div>
+    case "bank_cz_ab":
+      return <div style={{ ...style, background: "#92C83E", color: "#FFFFFF" }}>AB</div>
+    case "bank_cz_pb":
+      return <div style={{ ...style, background: "#0E1B2C", color: "#3DF2C3" }}>PB</div>
+    case "bank_cz_uc":
+      return <div style={{ ...style, background: "#E2001A", color: "#FFFFFF" }}>UC</div>
+    case "bank_cz_other":
+      return <div style={{ ...style, background: "#F6F6F7", color: "#1A1A1A" }}>Bank</div>
+    // Czech BNPL / deferred payments
+    case "twisto":
+    case "twisto_part":
+      return <div style={{ ...style, background: "#00ABEB", color: "#FFFFFF" }}>Twisto</div>
+    case "skippay":
+    case "skippay_part":
+      return <div style={{ ...style, background: "#5A2EE5", color: "#FFFFFF" }}>Skip</div>
+    case "platimpak":
+      return <div style={{ ...style, background: "#0A2342", color: "#FFFFFF" }}>PPak</div>
+    case "cofidis":
+      return <div style={{ ...style, background: "#C8003C", color: "#FFFFFF" }}>COF</div>
+    case "homecredit":
+      return <div style={{ ...style, background: "#E30613", color: "#FFFFFF" }}>HC</div>
+    case "essox":
+    case "essox_part":
+      return <div style={{ ...style, background: "#004B93", color: "#FFFFFF" }}>ESX</div>
     case "pay_by_bank":
     case "brite":
       return <div style={{ ...style, background: "#FFE600", color: "#0A0B09" }}>Brite</div>
@@ -185,9 +224,31 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
   ],
   comgate: [
     { code: "creditcard", name: "Credit/Debit Card", icon: "card", available_countries: [], supported_currencies: [] },
-    { code: "bank_transfer", name: "Bank Transfer", icon: "bank_transfer", available_countries: [], supported_currencies: ["CZK", "EUR"] },
+    { code: "bank_transfer", name: "Bank Transfer (CZ banks group)", icon: "bank_transfer", available_countries: [], supported_currencies: ["CZK", "EUR"] },
     { code: "applepay", name: "Apple Pay", icon: "applepay", available_countries: [], supported_currencies: [] },
     { code: "googlepay", name: "Google Pay", icon: "googlepay", available_countries: [], supported_currencies: [] },
+    // Individual CZ bank buttons (PSD2) — rendered inside the bank_transfer group on checkout
+    { code: "bank_cz_cs", name: "Česká spořitelna", icon: "bank_cz_cs", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "bank_cz_csob", name: "ČSOB", icon: "bank_cz_csob", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "bank_cz_kb", name: "Komerční banka", icon: "bank_cz_kb", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "bank_cz_rb", name: "Raiffeisenbank", icon: "bank_cz_rb", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "bank_cz_mo", name: "Moneta Money Bank", icon: "bank_cz_mo", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "bank_cz_fb", name: "Fio banka", icon: "bank_cz_fb", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "bank_cz_mb", name: "mBank", icon: "bank_cz_mb", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "bank_cz_ab", name: "Air Bank", icon: "bank_cz_ab", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "bank_cz_pb", name: "Partners Banka", icon: "bank_cz_pb", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "bank_cz_uc", name: "UniCredit Bank", icon: "bank_cz_uc", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "bank_cz_other", name: "Jiná banka (převod)", icon: "bank_transfer", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    // Deferred payments / BNPL (must be enabled on the Comgate merchant account)
+    { code: "twisto", name: "Twisto — platba do 30 dnů", icon: "twisto", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "skippay", name: "Skip Pay — odložená platba", icon: "skippay", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "platimpak", name: "PlatímPak — odložená platba", icon: "platimpak", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "twisto_part", name: "Twisto — na třetiny", icon: "twisto", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "skippay_part", name: "Skip Pay — na třetiny", icon: "skippay", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "essox_part", name: "ESSOX — rozložená platba", icon: "essox", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "cofidis", name: "Cofidis — splátky", icon: "cofidis", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "homecredit", name: "Home Credit — splátky", icon: "homecredit", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    { code: "essox", name: "ESSOX — splátky", icon: "essox", available_countries: ["cz"], supported_currencies: ["CZK"] },
   ],
   przelewy24: [
     { code: "przelewy24", name: "Przelewy24", icon: "przelewy24", available_countries: ["pl"], supported_currencies: ["PLN", "EUR"] },

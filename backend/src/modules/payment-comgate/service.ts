@@ -272,6 +272,12 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         "BANK_CZ_FB": "BANK_CZ_FB_PSD2",
         "BANK_CZ_MB_P": "BANK_CZ_MB_PSD2",
         "BANK_CZ_AB": "BANK_CZ_AB_PSD2",
+        "BANK_CZ_CS": "BANK_CZ_CS_PSD2",
+        "BANK_CZ_CSOB": "BANK_CZ_CSOB_PSD2",
+        "BANK_CZ_MB": "BANK_CZ_MB_PSD2",
+        "BANK_CZ_MO": "BANK_CZ_MO_PSD2",
+        "BANK_CZ_PB": "BANK_CZ_PB_PSD2",
+        "BANK_CZ_UC": "BANK_CZ_UC_PSD2",
         "BANK_ALL": "BANK_CZ_OTHER",
       }
 
@@ -284,6 +290,17 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       else if (rawMethod === "blik" || rawMethod === "blik_pl") comgateMethod = "BANK_PL_BL"
       else if (rawMethod === "bank_transfer") comgateMethod = "BANK_CZ_OTHER"
       else if (rawMethod === "creditcard" || rawMethod === "card") comgateMethod = "CARD_CZ_COMGATE"
+      else if (rawMethod === "applepay" || rawMethod === "apple_pay") comgateMethod = "APPLEPAY_REDIRECT"
+      else if (rawMethod === "googlepay" || rawMethod === "google_pay") comgateMethod = "GOOGLEPAY_REDIRECT"
+      else if (rawMethod === "twisto") comgateMethod = "LATER_TWISTO"
+      else if (rawMethod === "skippay" || rawMethod === "skip_pay") comgateMethod = "LATER_SKIPPAY"
+      else if (rawMethod === "platimpak") comgateMethod = "LATER_PLATIMPAK"
+      else if (rawMethod === "twisto_part") comgateMethod = "PART_TWISTO"
+      else if (rawMethod === "skippay_part") comgateMethod = "PART_SKIPPAY"
+      else if (rawMethod === "essox_part") comgateMethod = "PART_ESSOX"
+      else if (rawMethod === "cofidis") comgateMethod = "LOAN_COFIDIS"
+      else if (rawMethod === "homecredit") comgateMethod = "LOAN_HOMECREDIT"
+      else if (rawMethod === "essox") comgateMethod = "LOAN_ESSOX"
       else if (rawMethod.startsWith("bank_pl_")) comgateMethod = rawMethod.toUpperCase()
       else if (rawMethod.startsWith("bank_cz_")) comgateMethod = LEGACY_TO_PSD2[rawMethod.toUpperCase()] || rawMethod.toUpperCase()
       else if (rawMethod === "przelew_bankowy") comgateMethod = "BANK_CZ_OTHER"

@@ -4911,7 +4911,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     'bank_cz_fb': 'BANK_CZ_FB_PSD2',
     'bank_cz_mb': 'BANK_CZ_MB_PSD2',
     'bank_cz_ab': 'BANK_CZ_AB_PSD2',
+    'bank_cz_pb': 'BANK_CZ_PB_PSD2',
+    'bank_cz_uc': 'BANK_CZ_UC_PSD2',
     'bank_cz_other': 'BANK_CZ_OTHER',
+    // Deferred payments / installments (Comgate BNPL)
+    'twisto': 'LATER_TWISTO',
+    'skippay': 'LATER_SKIPPAY',
+    'platimpak': 'LATER_PLATIMPAK',
+    'twisto_part': 'PART_TWISTO',
+    'skippay_part': 'PART_SKIPPAY',
+    'essox_part': 'PART_ESSOX',
+    'cofidis': 'LOAN_COFIDIS',
+    'homecredit': 'LOAN_HOMECREDIT',
+    'essox': 'LOAN_ESSOX',
   };
 
   // Czech bank sub-methods for "Bankovní převod" expandable group
@@ -4924,6 +4936,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     'bank_cz_fb':    { code: 'BANK_CZ_FB_PSD2',   label: 'Fio banka',         desc: 'Online převod', icon: '/icons/fio-banka.svg' },
     'bank_cz_mb':    { code: 'BANK_CZ_MB_PSD2',   label: 'mBank',             desc: 'Online převod', icon: '/icons/mbank.svg' },
     'bank_cz_ab':    { code: 'BANK_CZ_AB_PSD2',   label: 'Air Bank',          desc: 'Online převod', icon: '/icons/airbank.svg' },
+    'bank_cz_pb':    { code: 'BANK_CZ_PB_PSD2',   label: 'Partners Banka',    desc: 'Online převod', icon: '/icons/partners-banka.svg' },
+    'bank_cz_uc':    { code: 'BANK_CZ_UC_PSD2',   label: 'UniCredit Bank',    desc: 'Online převod', icon: '/icons/unicredit.svg' },
     'bank_cz_other': { code: 'BANK_CZ_OTHER',     label: 'Jiná banka',        desc: 'Bankovní převod', icon: '/icons/bank-generic.svg' },
   };
   var BANK_CODES = Object.keys(BANK_METHODS);
@@ -4952,6 +4966,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     sepa_debit: 'SEPA inkaso',
     swish: 'Platba přes Swish (Švédsko)',
     revolut_pay: 'Platba přes Revolut',
+    twisto: 'Platba do 30 dnů zdarma',
+    skippay: 'Odložená platba',
+    platimpak: 'Odložená platba',
+    twisto_part: 'Nákup na třetiny',
+    skippay_part: 'Nákup na třetiny',
+    essox_part: 'Rozložená platba',
+    cofidis: 'Nákup na splátky',
+    homecredit: 'Nákup na splátky',
+    essox: 'Nákup na splátky',
   };
 
   // Klarna sub-method config: code → SDK payment_method_category + české popisky
@@ -4993,6 +5016,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       trustly: { bg: '#0EE06E', text: '#FFF', label: 'TLY' },
       bank_transfer: { bg: '#F6F6F7', text: '#1A1A1A', label: 'Bank' },
       sepa_debit: { bg: '#2B4C9B', text: '#FFF', label: 'SEPA' },
+      twisto: { bg: '#00ABEB', text: '#FFF', label: 'Twisto' },
+      twisto_part: { bg: '#00ABEB', text: '#FFF', label: 'Twisto' },
+      skippay: { bg: '#5A2EE5', text: '#FFF', label: 'Skip' },
+      skippay_part: { bg: '#5A2EE5', text: '#FFF', label: 'Skip' },
+      platimpak: { bg: '#0A2342', text: '#FFF', label: 'PPak' },
+      cofidis: { bg: '#C8003C', text: '#FFF', label: 'COF' },
+      homecredit: { bg: '#E30613', text: '#FFF', label: 'HC' },
+      essox: { bg: '#004B93', text: '#FFF', label: 'ESX' },
+      essox_part: { bg: '#004B93', text: '#FFF', label: 'ESX' },
       /* revolut_pay: now uses SVG icon */
     };
     var badge = badges[code];
@@ -5030,6 +5062,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       (data.gateways || []).forEach(function(gw) {
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
         (gw.methods || []).forEach(function(m) {
+          // Individual CZ banks render inside the bank_transfer group — skip standalone tiles
+          if (m.code && m.code.indexOf('bank_cz_') === 0) return;
           var CZ_NAMES = {
             'creditcard': 'Platební karta',
             'ideal': 'iDEAL',
@@ -5047,6 +5081,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             'swish': 'Swish',
             'revolut_pay': 'Revolut Pay',
             'cod': 'Platba na dobírku',
+            'twisto': 'Twisto — platba do 30 dnů',
+            'skippay': 'Skip Pay — odložená platba',
+            'platimpak': 'PlatímPak — odložená platba',
+            'twisto_part': 'Twisto — na třetiny',
+            'skippay_part': 'Skip Pay — na třetiny',
+            'essox_part': 'ESSOX — rozložená platba',
+            'cofidis': 'Cofidis — splátky',
+            'homecredit': 'Home Credit — splátky',
+            'essox': 'ESSOX — splátky',
           };
           allPaymentOptions.push({
             code: m.code,
