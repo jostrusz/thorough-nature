@@ -279,7 +279,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     // we emit it explicitly (same pattern as the Airwallex safety net). Subscribers
     // are idempotent + try/catch wrapped, so this is safe.
     try {
-      const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+      const eventBus = req.scope.resolve(Modules.EVENT_BUS)
       await eventBus.emit({ name: "order.placed", data: { id: orderId } })
       console.log(`[Create Order] Emitted order.placed for ${orderId}`)
     } catch (emitErr: any) {

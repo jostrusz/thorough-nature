@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { emitPaymentLog } from "../../../utils/payment-logger"
 
 /**
@@ -164,7 +164,7 @@ async function safetyNetCompleteCart(
 
       // Emit payment.captured event so subscribers (Fakturoid, Dextrum, etc.) can react
       try {
-        const eventBus = scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        const eventBus = scope.resolve(Modules.EVENT_BUS)
         await eventBus.emit({ name: "payment.captured", data: { id: completedOrder.id } })
         logger.info(
           `[Klarna Webhook] Safety net: emitted payment.captured for order ${completedOrder.id}`

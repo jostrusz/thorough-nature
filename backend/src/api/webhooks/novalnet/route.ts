@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { emitPaymentLog } from "../../../utils/payment-logger"
 import { buildNovalnetChecksum, verifyNovalnetChecksum } from "../../../modules/payment-novalnet/helpers/checksum"
 import { mapWebhookEventToAction } from "../../../modules/payment-novalnet/helpers/status-map"
@@ -163,7 +163,7 @@ async function safetyNetCompleteCart(tid: string, txData: any, scope: any, logge
 
       // Emit payment.captured for downstream subscribers (Fakturoid, Dextrum, e-book email)
       try {
-        const eventBus = scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        const eventBus = scope.resolve(Modules.EVENT_BUS)
         await eventBus.emit({ name: "payment.captured", data: { id: completedOrderId } })
         logger.info(`[Novalnet Webhook] Safety net: emitted payment.captured for order ${completedOrderId}`)
       } catch (e: any) {
@@ -334,7 +334,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     // Emit payment.captured for capture events (downstream subscribers)
     if (action === "captured") {
       try {
-        const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        const eventBus = req.scope.resolve(Modules.EVENT_BUS)
         await eventBus.emit({ name: "payment.captured", data: { id: order.id } })
         logger.info(`[Novalnet Webhook] Emitted payment.captured for order ${order.id}`)
       } catch (e: any) {

@@ -1,8 +1,13 @@
 // @ts-nocheck
-import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { Modules } from "@medusajs/framework/utils"
 import { forceAuthorizeCartSessions } from "./force-authorize"
 import { logPaymentEvent } from "../../payment-debug/utils/log"
+
+// NOTE: @medusajs/medusa/core-flows is imported DYNAMICALLY inside
+// recoverPaidCart(), never at module top level. A static import here pulls
+// core-flows into the import graph of src/jobs/airwallex-paid-orphan-sweeper,
+// and Medusa's job loader silently fails to register such a job (the same
+// reason the webhook route and safety-net-replay always used await import()).
 
 /**
  * Shared recovery for "money captured at Airwallex but no Medusa order" carts.
@@ -219,6 +224,7 @@ export async function recoverPaidCart(
     await forceAuthorizeCartSessions(pool, cartId, intentId)
 
     // 6) Complete the cart
+    const { completeCartWorkflow } = await import("@medusajs/medusa/core-flows")
     const result: any = await completeCartWorkflow(scope).run({ input: { id: cartId } })
     const orderId =
       result?.result?.id || result?.result?.order?.id || result?.id || result?.order?.id || null
@@ -263,7 +269,7 @@ export async function recoverPaidCart(
 
     // 8) Emit payment.captured so subscribers (Fakturoid, Dextrum, e-books) react
     try {
-      const eventBus = scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+      const eventBus = scope.resolve(Modules.EVENT_BUS)
       await eventBus.emit({ name: "payment.captured", data: { id: orderId } })
     } catch (e: any) {
       logger.warn(`[Paid Cart Recovery] Failed to emit payment.captured for ${orderId}: ${e.message}`)

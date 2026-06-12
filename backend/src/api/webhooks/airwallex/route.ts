@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { Modules } from "@medusajs/framework/utils"
 import { emitPaymentLog } from "../../../utils/payment-logger"
 import { logPaymentEvent } from "../../../modules/payment-debug/utils/log"
 import { findCartForPaidIntent, recoverPaidCart } from "../../../modules/payment-airwallex/utils/recover-paid-cart"
@@ -319,7 +319,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     // Emit custom event when payment is captured so subscribers can react
     if (event_type === "payment_intent.succeeded") {
       try {
-        const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        const eventBus = req.scope.resolve(Modules.EVENT_BUS)
         await eventBus.emit({ name: "payment.captured", data: { id: order.id } })
         logger.info(`[Airwallex Webhook] Emitted payment.captured event for order ${order.id}`)
       } catch (e: any) {

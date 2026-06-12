@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { emitPaymentLog } from "../../../utils/payment-logger"
 import { PayPalApiClient } from "../../../modules/payment-paypal/api-client"
 
@@ -287,7 +287,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       if (eventType === "PAYMENT.CAPTURE.COMPLETED") {
         try {
           const { ContainerRegistrationKeys } = await import("@medusajs/framework/utils")
-          const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+          const eventBus = req.scope.resolve(Modules.EVENT_BUS)
           await eventBus.emit({ name: "payment.captured", data: { id: order.id } })
           logger.info(`[PayPal Webhook] Emitted payment.captured event for order ${order.id}`)
         } catch (e: any) {

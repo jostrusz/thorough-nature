@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import Stripe from "stripe"
 import { emitPaymentLog } from "../../../utils/payment-logger"
 
@@ -167,7 +167,7 @@ async function safetyNetCompleteCart(
 
       // Emit payment.captured event so subscribers (Fakturoid, Dextrum, etc.) can react
       try {
-        const eventBus = scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        const eventBus = scope.resolve(Modules.EVENT_BUS)
         await eventBus.emit({ name: "payment.captured", data: { id: completedOrder.id } })
         logger.info(
           `[Stripe Webhook] Safety net: emitted payment.captured for order ${completedOrder.id}`
@@ -447,7 +447,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     if (event.type === "payment_intent.succeeded") {
       try {
         const { ContainerRegistrationKeys } = await import("@medusajs/framework/utils")
-        const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        const eventBus = req.scope.resolve(Modules.EVENT_BUS)
         await eventBus.emit({ name: "payment.captured", data: { id: (order as any).id } })
         logger.info(`[Stripe Webhook] Emitted payment.captured event for order ${(order as any).id}`)
       } catch (e: any) {

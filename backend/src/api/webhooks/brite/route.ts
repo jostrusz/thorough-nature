@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { emitPaymentLog } from "../../../utils/payment-logger"
 import { logPaymentEvent } from "../../../modules/payment-debug/utils/log"
 import { BriteApiClient } from "../../../modules/payment-brite/api-client"
@@ -349,7 +349,7 @@ async function safetyNetCompleteCart(
       }
 
       try {
-        const eventBus = scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        const eventBus = scope.resolve(Modules.EVENT_BUS)
         await eventBus.emit({ name: "payment.captured", data: { id: completedOrderId } })
       } catch (e: any) {
         logger.warn(`[Brite Webhook] Safety net: failed to emit payment.captured: ${e.message}`)
@@ -661,7 +661,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     if (isSuccess) {
       try {
-        const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        const eventBus = req.scope.resolve(Modules.EVENT_BUS)
         await eventBus.emit({ name: "payment.captured", data: { id: order.id } })
         logger.info(`[Brite Webhook] Emitted payment.captured for order ${order.id}`)
       } catch (e: any) {

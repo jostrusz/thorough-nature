@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { logPaymentEvent } from "../../../modules/payment-debug/utils/log"
 import { PayUApiClient, fromMinor } from "../../../modules/payment-payu/api-client"
 
@@ -304,7 +304,7 @@ async function safetyNetCompleteCart(
 
       // Emit payment.captured
       try {
-        const eventBus = scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        const eventBus = scope.resolve(Modules.EVENT_BUS)
         await eventBus.emit({ name: "payment.captured", data: { id: completedOrderId } })
         logger.info(`[PayU Webhook] Emitted payment.captured for order ${completedOrderId}`)
       } catch (e: any) {
@@ -471,7 +471,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     if (status === "COMPLETED") {
       try {
-        const eventBus = req.scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
+        const eventBus = req.scope.resolve(Modules.EVENT_BUS)
         await eventBus.emit({ name: "payment.captured", data: { id: orderRow.id } })
         logger.info(`[PayU Webhook] Emitted payment.captured for order ${orderRow.id}`)
       } catch (e: any) {

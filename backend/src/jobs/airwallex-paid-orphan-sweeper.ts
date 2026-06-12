@@ -69,6 +69,8 @@ export default async function airwallexPaidOrphanSweeper(container: MedusaContai
        LIMIT ${MAX_PER_RUN * 4}`
     )
 
+    // Heartbeat — proves the cron is registered and ticking (grep-able in Railway)
+    logger.info(`[Orphan Sweeper] Tick: ${candidates.length} succeeded-intent candidate(s) in window`)
     if (!candidates.length) return
 
     let processed = 0
