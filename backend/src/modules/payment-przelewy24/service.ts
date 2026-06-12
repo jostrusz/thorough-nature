@@ -196,14 +196,16 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
     const crc = meta.crc || ""
     const testMode = !isLive
 
-    this.client_ = new Przelewy24ApiClient(
+    // Single-tenant cache; return the local so a concurrent call can't swap it.
+    const client = new Przelewy24ApiClient(
       merchantId,
       posId,
       apiKey,
       crc,
       testMode
     )
-    return this.client_
+    this.client_ = client
+    return client
   }
 
   /**

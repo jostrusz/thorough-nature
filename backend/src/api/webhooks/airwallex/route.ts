@@ -1,69 +1,22 @@
 // @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { emitPaymentLog } from "../../../utils/payment-logger"
 import { logPaymentEvent } from "../../../modules/payment-debug/utils/log"
-import { forceAuthorizeCartSessions } from "../../../modules/payment-airwallex/utils/force-authorize"
-
-const SAFETY_NET_NTFY_URL = "https://ntfy.sh/medusa-ntfy-obj-2026"
+import { findCartForPaidIntent, recoverPaidCart } from "../../../modules/payment-airwallex/utils/recover-paid-cart"
+import { sendOpsAlert } from "../../../utils/ops-alert"
 
 /**
- * Fire-and-forget alert to ntfy when the safety net hits a state that needs
- * human attention (amount mismatch, completion error, etc). Never throws.
+ * Alert when the safety net hits a state that needs human attention
+ * (cart not found, amount mismatch, completion error). Fire-and-forget,
+ * never throws — goes to ntfy AND ops email (see utils/ops-alert).
  */
 async function alertSafetyNet(
   title: string,
   message: string,
   priority: "default" | "high" = "high"
 ): Promise<void> {
-  try {
-    await fetch(SAFETY_NET_NTFY_URL, {
-      method: "POST",
-      headers: {
-        "Title": Buffer.from(title, "utf-8").toString("base64"),
-        "X-Title-Encoding": "base64",
-        "Priority": priority,
-        "Tags": "warning,airwallex,safety_net",
-      },
-      body: message,
-    })
-  } catch {
-    // ignore — alerting must never break webhook flow
-  }
-}
-
-/**
- * Helper: read live cart total + currency for amount validation.
- * Returns null if cart not found.
- */
-async function getCartLiveTotal(cartId: string): Promise<{ total: number; currency: string } | null> {
-  const { Pool } = require("pg")
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
-  try {
-    const { rows } = await pool.query(
-      `SELECT
-         COALESCE((SELECT SUM(quantity * unit_price)
-                   FROM cart_line_item
-                   WHERE cart_id = $1 AND deleted_at IS NULL), 0)::numeric AS items_total,
-         COALESCE((SELECT SUM(amount)
-                   FROM cart_shipping_method
-                   WHERE cart_id = $1 AND deleted_at IS NULL), 0)::numeric AS shipping_total,
-         (SELECT currency_code FROM cart WHERE id = $1) AS currency
-       FROM (SELECT 1) AS dummy`,
-      [cartId]
-    )
-    if (!rows[0]) return null
-    const itemsTotal = Number(rows[0].items_total || 0)
-    const shippingTotal = Number(rows[0].shipping_total || 0)
-    return {
-      total: itemsTotal + shippingTotal,
-      currency: rows[0].currency || "",
-    }
-  } catch {
-    return null
-  } finally {
-    await pool.end().catch(() => {})
-  }
+  await sendOpsAlert(title, message, priority)
 }
 
 /**
@@ -145,233 +98,94 @@ async function safetyNetCompleteCart(
     `[Airwallex Webhook] Safety net: still no order after ${DELAY_MS / 1000}s delay. Searching for cart...`
   )
 
-  let cartRow: any = null
+  // ─── FIND THE CART ───
+  // Three strategies (see findCartForPaidIntent): session.data contains the
+  // intent id (normal case), intent metadata.session_id → payment_session.id,
+  // and cart_id parsed from the intent's return_url. The latter two survive
+  // retry churn, where a re-submit overwrote the session with a NEWER unpaid
+  // intent while the customer paid this (older) one at the bank.
+  let cartRef: any = null
   try {
-    // Find the uncompleted cart via raw SQL on payment_session.data — reliable regardless
-    // of cart volume and not dependent on graph-query JSONB serialization quirks.
     const { Pool } = require("pg")
     const cartPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
     try {
-      const { rows } = await cartPool.query(
-        `SELECT c.id, c.email
-         FROM cart c
-         JOIN cart_payment_collection cpc ON cpc.cart_id = c.id
-         JOIN payment_collection pc ON pc.id = cpc.payment_collection_id
-         JOIN payment_session ps ON ps.payment_collection_id = pc.id
-         WHERE ps.data::text LIKE '%' || $1 || '%'
-           AND c.completed_at IS NULL
-         ORDER BY c.created_at DESC
-         LIMIT 1`,
-        [paymentIntentId]
-      )
-      cartRow = rows[0] || null
+      cartRef = await findCartForPaidIntent(cartPool, paymentIntentId, {
+        sessionId: intentData?.metadata?.session_id || null,
+        returnUrl: intentData?.return_url || null,
+      })
     } finally {
       await cartPool.end().catch(() => {})
     }
+  } catch (lookupErr: any) {
+    logger.error(`[Airwallex Webhook] Safety net: cart lookup failed: ${lookupErr.message}`)
+  }
 
-    if (!cartRow) {
-      logger.warn(
-        `[Airwallex Webhook] Safety net: no uncompleted cart found for intent ${paymentIntentId}`
-      )
-      logPaymentEvent({
-        intent_id: paymentIntentId,
-        event_type: "safety_net_no_cart",
-        event_data: { reason: "no_uncompleted_cart_found" },
-        error_code: "no_cart",
-      }).catch(() => {})
-      alertSafetyNet(
-        "Safety-net: cart not found",
-        `Intent ${paymentIntentId} succeeded but no uncompleted cart matches. Manual recovery needed.`
-      )
-      return
-    }
-    const targetCart = cartRow
-
-    logger.info(
-      `[Airwallex Webhook] Safety net: found uncompleted cart ${targetCart.id} (email: ${targetCart.email}) — attempting to complete`
+  if (!cartRef) {
+    logger.warn(
+      `[Airwallex Webhook] Safety net: no uncompleted cart found for intent ${paymentIntentId}`
     )
+    logPaymentEvent({
+      intent_id: paymentIntentId,
+      event_type: "safety_net_no_cart",
+      event_data: { reason: "no_uncompleted_cart_found" },
+      error_code: "no_cart",
+    }).catch(() => {})
+    alertSafetyNet(
+      "Safety-net: cart not found",
+      `Intent ${paymentIntentId} succeeded but no uncompleted cart matches (session, metadata.session_id, return_url all dead ends). The orphan sweeper will retry; if this repeats, manual recovery is needed.`
+    )
+    return
+  }
 
-    // Final duplicate check right before completing: query order table one more time
-    const orderFinalCheck = await findOrderByIntentId(paymentIntentId, logger)
-    if (orderFinalCheck) {
+  logger.info(
+    `[Airwallex Webhook] Safety net: found uncompleted cart ${cartRef.id} (email: ${cartRef.email}, matched by ${cartRef.matched_by}) — attempting to complete`
+  )
+
+  const paidAmount = Number(intentData?.amount || 0)
+  const paymentMethod =
+    intentData.latest_payment_attempt?.payment_method?.type || intentData.payment_method_type || "card"
+
+  const result = await recoverPaidCart(scope, logger, {
+    cartId: cartRef.id,
+    intentId: paymentIntentId,
+    paidAmount,
+    paymentMethod,
+    source: "airwallex_webhook_safety_net",
+  })
+
+  if (result.ok) {
+    logger.info(
+      `[Airwallex Webhook] Safety net: ✅ Cart ${cartRef.id} completed → order ${result.orderId}`
+    )
+    return
+  }
+
+  switch (result.reason) {
+    case "order_exists":
       logger.info(
-        `[Airwallex Webhook] Safety net: order ${orderFinalCheck.id} appeared just before completion — aborting (no duplicate)`
+        `[Airwallex Webhook] Safety net: order ${result.orderId} already exists for intent ${paymentIntentId} — no action needed`
       )
       return
-    }
-
-    // ─── AMOUNT VALIDATION ───
-    // completeCartWorkflow silently rejects when cart total doesn't match payment.
-    // Validate up front so we can alert instead of fail silently.
-    const cartTotals = await getCartLiveTotal(targetCart.id)
-    const paidAmount = Number(intentData?.amount || 0)
-    if (cartTotals && paidAmount > 0) {
-      const cartTotal = cartTotals.total
-      // Allow 1-cent tolerance for rounding
-      if (Math.abs(cartTotal - paidAmount) > 0.02) {
-        const msg =
-          `Intent ${paymentIntentId} paid ${paidAmount} ${(intentData?.currency || cartTotals.currency || "").toUpperCase()} ` +
-          `but cart ${targetCart.id} (${targetCart.email}) total is ${cartTotal}. ` +
-          `Manual recovery required — completeCartWorkflow would reject.`
-        logger.error(`[Airwallex Webhook] Safety net amount mismatch: ${msg}`)
-        logPaymentEvent({
-          intent_id: paymentIntentId,
-          cart_id: targetCart.id,
-          email: targetCart.email,
-          event_type: "safety_net_amount_mismatch",
-          event_data: { paid: paidAmount, cart_total: cartTotal, currency: intentData?.currency },
-          error_code: "amount_mismatch",
-        }).catch(() => {})
-        alertSafetyNet("Safety-net: amount mismatch", msg)
-        return
-      }
-    }
-
-    logPaymentEvent({
-      intent_id: paymentIntentId,
-      cart_id: targetCart.id,
-      email: targetCart.email,
-      event_type: "safety_net_completing",
-      event_data: { paid: paidAmount, cart_total: cartTotals?.total ?? null },
-    }).catch(() => {})
-
-    // ─── FORCE-AUTHORIZE ───
-    // Redirect methods (P24/BLIK/iDEAL/Bancontact) leave the Medusa session
-    // unauthorized when the shopper doesn't return to run the frontend authorize
-    // step; a retry can also overwrite the session with an unpaid second intent.
-    // Either way completeCartWorkflow's validateCartPaymentsStep rejects the cart
-    // ("Payment sessions are required to complete cart"). Force the cart's
-    // session(s) to authorized + remap them to THIS paid intent before completing.
-    try {
-      const { Pool } = require("pg")
-      const authPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
-      try {
-        // Last-moment race guard: bail if the cart was completed in the meantime.
-        const { rows: cartState } = await authPool.query(
-          `SELECT completed_at FROM cart WHERE id = $1 LIMIT 1`,
-          [targetCart.id]
-        )
-        if (cartState[0]?.completed_at) {
-          logger.info(
-            `[Airwallex Webhook] Safety net: cart ${targetCart.id} already completed at ${cartState[0].completed_at} — aborting`
-          )
-          return
-        }
-        const updated = await forceAuthorizeCartSessions(authPool, targetCart.id, paymentIntentId)
-        logger.info(
-          `[Airwallex Webhook] Safety net: force-authorized ${updated} payment session(s) on cart ${targetCart.id} for intent ${paymentIntentId}`
-        )
-      } finally {
-        await authPool.end().catch(() => {})
-      }
-    } catch (authErr: any) {
-      logger.error(`[Airwallex Webhook] Safety net: force-authorize failed: ${authErr.message}`)
-    }
-
-    // Complete the cart via Medusa's cart completion workflow
-    const { completeCartWorkflow } = await import("@medusajs/medusa/core-flows")
-    const result = await completeCartWorkflow(scope).run({
-      input: { id: targetCart.id },
-    })
-
-    // Medusa v2's completeCartWorkflow returns { result: { id: orderId } } — not a nested
-    // `order` object. Check every plausible shape so we don't false-negative when the order
-    // was actually created (the previous shape-check was the cause of "unexpected result"
-    // warnings + duplicate safety-net runs).
-    const r: any = result as any
-    const completedOrderId =
-      r?.result?.id ||
-      r?.result?.order?.id ||
-      r?.id ||
-      r?.order?.id ||
-      null
-
-    if (completedOrderId) {
+    case "cart_completed":
       logger.info(
-        `[Airwallex Webhook] Safety net: ✅ Cart ${targetCart.id} completed → order ${completedOrderId}`
+        `[Airwallex Webhook] Safety net: cart ${cartRef.id} was completed in the meantime — no action needed`
       )
-      logPaymentEvent({
-        intent_id: paymentIntentId,
-        cart_id: targetCart.id,
-        email: targetCart.email,
-        event_type: "safety_net_completed",
-        event_data: { order_id: completedOrderId, paid: paidAmount },
-      }).catch(() => {})
-
-      // Update the new order's metadata with Airwallex payment info
-      try {
-        const { Pool } = require("pg")
-        const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
-        const { rows: orderRows } = await pool.query(
-          `SELECT metadata FROM "order" WHERE id = $1 LIMIT 1`,
-          [completedOrderId]
-        )
-        const existingMeta = orderRows[0]?.metadata || {}
-        const updatedMeta = {
-          ...existingMeta,
-          airwallexPaymentIntentId: paymentIntentId,
-          airwallexStatus: "payment_intent.succeeded",
-          payment_captured: true,
-          payment_captured_at: new Date().toISOString(),
-          payment_airwallex_intent_id: paymentIntentId,
-          payment_method: intentData.latest_payment_attempt?.payment_method?.type || intentData.payment_method_type || "card",
-          completed_by: "airwallex_webhook_safety_net",
-          safety_net_completed_at: new Date().toISOString(),
-        }
-        await pool.query(
-          `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
-          [JSON.stringify(updatedMeta), completedOrderId]
-        )
-        await pool.end()
-        logger.info(
-          `[Airwallex Webhook] Safety net: updated order ${completedOrderId} metadata with Airwallex payment data`
-        )
-      } catch (metaErr: any) {
-        logger.warn(
-          `[Airwallex Webhook] Safety net: failed to update order metadata: ${metaErr.message}`
-        )
-      }
-
-      // Emit payment.captured event so subscribers (Fakturoid, Dextrum, etc.) can react
-      try {
-        const eventBus = scope.resolve(ContainerRegistrationKeys.EVENT_BUS)
-        await eventBus.emit({ name: "payment.captured", data: { id: completedOrderId } })
-        logger.info(
-          `[Airwallex Webhook] Safety net: emitted payment.captured for order ${completedOrderId}`
-        )
-      } catch (e: any) {
-        logger.warn(
-          `[Airwallex Webhook] Safety net: failed to emit payment.captured: ${e.message}`
-        )
-      }
-    } else {
-      const msg = `Safety net: completeCartWorkflow returned unexpected result for cart ${targetCart.id} / intent ${paymentIntentId}: ${JSON.stringify(result).slice(0, 300)}`
-      logger.warn(`[Airwallex Webhook] ${msg}`)
-      logPaymentEvent({
-        intent_id: paymentIntentId,
-        cart_id: targetCart.id,
-        email: targetCart.email,
-        event_type: "safety_net_unexpected_result",
-        event_data: { result_keys: Object.keys((result as any) || {}) },
-        error_code: "unexpected_result",
-      }).catch(() => {})
-      alertSafetyNet("Safety-net: unexpected result", msg)
+      return
+    case "amount_mismatch": {
+      const msg =
+        `Intent ${paymentIntentId} paid ${paidAmount} ${(intentData?.currency || "").toUpperCase()} ` +
+        `but cart ${cartRef.id} (${cartRef.email}) doesn't match: ${result.detail}. ` +
+        `Manual recovery required — completeCartWorkflow would reject.`
+      logger.error(`[Airwallex Webhook] Safety net amount mismatch: ${msg}`)
+      alertSafetyNet("Safety-net: amount mismatch", msg)
+      return
     }
-  } catch (safetyErr: any) {
-    const msg = `Safety net failed for intent ${paymentIntentId} (cart ${cartRow?.id ?? "?"}): ${safetyErr?.message || safetyErr}`
-    logger.error(`[Airwallex Webhook] ${msg}`)
-    logPaymentEvent({
-      intent_id: paymentIntentId,
-      cart_id: cartRow?.id ?? null,
-      email: cartRow?.email ?? null,
-      event_type: "safety_net_failed",
-      event_data: {
-        message: safetyErr?.message || String(safetyErr),
-        stack: (safetyErr?.stack || "").slice(0, 1000),
-      },
-      error_code: "safety_net_exception",
-    }).catch(() => {})
-    alertSafetyNet("Safety-net: completion threw", msg)
+    default: {
+      const msg = `Safety net failed for intent ${paymentIntentId} (cart ${cartRef.id}): ${result.reason} — ${result.detail || ""}. The orphan sweeper will retry.`
+      logger.error(`[Airwallex Webhook] ${msg}`)
+      alertSafetyNet("Safety-net: completion failed", msg)
+      return
+    }
   }
 }
 

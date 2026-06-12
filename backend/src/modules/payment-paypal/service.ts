@@ -80,7 +80,6 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
 
   protected logger_: any
   protected options_: Options
-  protected client_: PayPalApiClient | null = null
   protected container_: any = null
 
   constructor(container: InjectedDependencies, options: Options) {
@@ -111,9 +110,9 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
    * Supports per-project PayPal accounts by matching project_slug in project_slugs JSONB.
    */
   private async getPayPalClient(projectSlug?: string): Promise<PayPalApiClient> {
-    // Don't cache client — always re-read gateway config from DB
-    // to support per-project credentials
-    this.client_ = null
+    // NEVER store the client on `this` — the provider service is shared across
+    // concurrent requests; a client for project A could leak into a concurrent
+    // call for project B (multi-tenant credential mixup). Build & return a local.
 
     // 1. Try gateway config from database via direct DB query (bypasses DI container)
     try {
@@ -157,12 +156,11 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
           this.logger_.info(
             `[PayPal] ✓ Using ${isLive ? "LIVE" : "SANDBOX"} keys from admin gateway "${config.display_name}" (id: ${config.id})`
           )
-          this.client_ = new PayPalApiClient({
+          return new PayPalApiClient({
             client_id: cfgClientId,
             client_secret: cfgClientSecret,
             mode: isLive ? "live" : "test",
           })
-          return this.client_
         }
       }
     } catch (e: any) {
@@ -180,12 +178,11 @@ class PayPalPaymentProviderService extends AbstractPaymentProvider<Options> {
 
     if (clientId && clientSecret) {
       this.logger_.info(`[PayPal] ⚠️ FALLBACK: Using credentials from ENV VARS (DB query failed)`)
-      this.client_ = new PayPalApiClient({
+      return new PayPalApiClient({
         client_id: clientId,
         client_secret: clientSecret,
         mode,
       })
-      return this.client_
     }
 
     throw new MedusaError(

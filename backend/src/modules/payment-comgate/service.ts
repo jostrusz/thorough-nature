@@ -182,8 +182,10 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         "Comgate merchant ID or secret not configured"
       )
     }
-    this.client_ = new ComgateApiClient(parsedKeys.api_key, parsedKeys.secret_key)
-    return this.client_
+    // Single-tenant cache; return the local so a concurrent call can't swap it.
+    const client = new ComgateApiClient(parsedKeys.api_key, parsedKeys.secret_key)
+    this.client_ = client
+    return client
   }
 
   /**

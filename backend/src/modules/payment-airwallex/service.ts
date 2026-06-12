@@ -62,7 +62,6 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
 
   protected logger_: any
   protected options_: Options
-  protected client_: AirwallexApiClient | null = null
   protected container_: any = null
   private pgPool_: Pool | null = null
 
@@ -97,9 +96,11 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
    * Falls back to provider options (env vars) if DB query fails.
    */
   private async getAirwallexClient(projectSlug?: string): Promise<AirwallexApiClient> {
-    // Don't cache client — always re-read gateway config from DB
-    // to support per-project credentials
-    this.client_ = null
+    // NEVER store the client on `this` — the provider service is shared across
+    // concurrent requests. A client built for project A stored on the instance
+    // gets returned to a concurrent call for project B during the `await login()`
+    // window, so API calls hit the wrong Airwallex account ("PaymentIntent
+    // cannot be found" on authorize/capture). Always build & return a local.
 
     // 1. Try gateway config from database (admin-configured) via direct DB query
     try {
@@ -137,15 +138,15 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
         const keys = isLive ? config.live_keys : config.test_keys
         if (keys?.api_key && keys?.secret_key) {
           this.logger_.info(`[Airwallex] ✓ Using ${isLive ? "LIVE" : "TEST"} keys from admin gateway "${config.display_name}" (id: ${config.id})`)
-          this.client_ = new AirwallexApiClient(
+          const client = new AirwallexApiClient(
             keys.api_key,      // DB field "api_key" = Airwallex "Client ID"
             keys.secret_key,   // DB field "secret_key" = Airwallex "API Key"
             !isLive,           // isTest
             this.logger_,
             keys.account_id    // Account ID for org-level keys (x-on-behalf-of)
           )
-          await this.client_.login()
-          return this.client_
+          await client.login()
+          return client
         }
       }
     } catch (e: any) {
@@ -155,15 +156,15 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
     // 2. Fallback to options (env vars via medusa-config.js)
     if (this.options_?.clientId && this.options_?.apiKey) {
       this.logger_.warn(`[Airwallex] ⚠️ FALLBACK: Using credentials from ENV VARS (DB query failed)`)
-      this.client_ = new AirwallexApiClient(
+      const client = new AirwallexApiClient(
         this.options_.clientId,
         this.options_.apiKey,
         this.options_.testMode !== false,
         this.logger_,
         this.options_.accountId
       )
-      await this.client_.login()
-      return this.client_
+      await client.login()
+      return client
     }
 
     throw new MedusaError(

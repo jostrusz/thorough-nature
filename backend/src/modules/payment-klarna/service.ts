@@ -147,7 +147,6 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
 
   protected logger_: any
   protected options_: Options
-  protected client_: KlarnaApiClient | null = null
   protected container_: any = null
 
   constructor(container: InjectedDependencies, options: Options) {
@@ -177,7 +176,9 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
    * Initialize the Klarna API client with credentials from gateway_config or options
    */
   private async getKlarnaClient(projectSlug?: string): Promise<KlarnaApiClient> {
-    // Don't cache client — re-read config each time to support per-project credentials
+    // NEVER store the client on `this` — the provider service is shared across
+    // concurrent requests; a client for project A could leak into a concurrent
+    // call for project B (multi-tenant credential mixup). Build & return a local.
     {
       let apiKey: string | undefined
       let secretKey: string | undefined
@@ -259,9 +260,8 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
       const endpoint = isTestMode ? "api.playground.klarna.com" : "api.klarna.com"
       this.logger_.info(`[Klarna] Creating client: endpoint=${endpoint}, source=${source}`)
 
-      this.client_ = new KlarnaApiClient(apiKey, secretKey, isTestMode)
+      return new KlarnaApiClient(apiKey, secretKey, isTestMode)
     }
-    return this.client_
   }
 
   /**

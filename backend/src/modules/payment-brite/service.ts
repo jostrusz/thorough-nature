@@ -110,7 +110,6 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
 
   protected logger_: any
   protected options_: Options
-  protected client_: BriteApiClient | null = null
   protected container_: any = null
   private pgPool_: Pool | null = null
 
@@ -154,8 +153,8 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
     isLive: boolean
     keys: any
   }> {
-    this.client_ = null
-
+    // NEVER store the client on `this` — shared service across concurrent
+    // requests would leak project A's client into project B's call.
     let config: any = null
     try {
       const pool = this.getPool()
@@ -206,7 +205,6 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
           config.metadata?.base_url || undefined
         )
         await client.authenticate()
-        this.client_ = client
         return { client, config, isLive, keys }
       }
     }
@@ -222,7 +220,6 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
         this.options_.baseUrl
       )
       await client.authenticate()
-      this.client_ = client
       return {
         client,
         config: null,

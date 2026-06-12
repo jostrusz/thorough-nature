@@ -94,6 +94,9 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
    * Tries gateway config (admin DB) first, then falls back to provider options (env vars).
    */
   private async getMollieClient(): Promise<MollieApiClient> {
+    // Mollie is single-tenant (one gateway_config row), so caching on `this` is
+    // safe — but always RETURN a local reference, never `this.client_` after an
+    // await, so a concurrent call can't swap the instance under us.
     if (this.client_) return this.client_
 
     // 1a. Try gateway config from database via module service
@@ -110,8 +113,9 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
           const keys = isLive ? config.live_keys : config.test_keys
           if (keys?.api_key) {
             this.logger_.info(`[Mollie] Using ${isLive ? "live" : "test"} keys from gateway config (module)`)
-            this.client_ = new MollieApiClient(keys.api_key, !isLive)
-            return this.client_
+            const client = new MollieApiClient(keys.api_key, !isLive)
+            this.client_ = client
+            return client
           }
         }
       } catch (e: any) {
@@ -132,8 +136,9 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
         const keys = isLive ? config.live_keys : config.test_keys
         if (keys?.api_key) {
           this.logger_.info(`[Mollie] Using ${isLive ? "live" : "test"} keys from gateway config (__pg_connection__)`)
-          this.client_ = new MollieApiClient(keys.api_key, !isLive)
-          return this.client_
+          const client = new MollieApiClient(keys.api_key, !isLive)
+          this.client_ = client
+          return client
         }
       }
     } catch (e: any) {
@@ -171,19 +176,21 @@ class MolliePaymentProviderService extends AbstractPaymentProvider<Options> {
       const keys = isLive ? _mollieConfigCache.live_keys : _mollieConfigCache.test_keys
       if (keys?.api_key) {
         this.logger_.info(`[Mollie] Using ${isLive ? "live" : "test"} keys from gateway config (raw pg)`)
-        this.client_ = new MollieApiClient(keys.api_key, !isLive)
-        return this.client_
+        const client = new MollieApiClient(keys.api_key, !isLive)
+        this.client_ = client
+        return client
       }
     }
 
     // 2. Fallback to options (env vars via medusa-config.js)
     if (this.options_?.apiKey) {
       this.logger_.info(`[Mollie] Using API key from provider options`)
-      this.client_ = new MollieApiClient(
+      const client = new MollieApiClient(
         this.options_.apiKey,
         this.options_.testMode !== false
       )
-      return this.client_
+      this.client_ = client
+      return client
     }
 
     throw new MedusaError(
