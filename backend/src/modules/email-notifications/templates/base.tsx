@@ -9,7 +9,9 @@ interface BaseProps {
 export const Base: React.FC<BaseProps> = ({ preview, children }) => {
   return (
     <Html>
-      <Head />
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
       <Preview>{preview}</Preview>
       <Tailwind>
         <Body className="my-auto mx-auto font-sans" style={{ backgroundColor: '#f4f0f5', margin: 0, padding: 0 }}>

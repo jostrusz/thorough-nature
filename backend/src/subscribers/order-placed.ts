@@ -22,6 +22,34 @@ export default async function orderPlacedHandler({
     relations: ['items', 'summary', 'shipping_address', 'billing_address'],
   })
 
+  // ── Enrich line items with the official product image from admin ──
+  // Line items snapshot a thumbnail at order time, but if it's missing (or the
+  // product image was set after the order), pull the current thumbnail/first
+  // image straight from the product so the email always shows the admin image.
+  try {
+    const items = (order as any).items || []
+    const productIds = [...new Set(items.map((i: any) => i.product_id).filter(Boolean))]
+    if (productIds.length) {
+      const queryService = container.resolve(ContainerRegistrationKeys.QUERY)
+      const { data: products } = await queryService.graph({
+        entity: 'product',
+        fields: ['id', 'thumbnail', 'images.url'],
+        filters: { id: productIds as string[] },
+      })
+      const imgByProduct = new Map(
+        (products || []).map((p: any) => [p.id, p.thumbnail || p.images?.[0]?.url || null])
+      )
+      for (const item of items) {
+        if ((!item.thumbnail || item.thumbnail === '') && item.product_id) {
+          const img = imgByProduct.get(item.product_id)
+          if (img) item.thumbnail = img
+        }
+      }
+    }
+  } catch (thumbErr: any) {
+    console.warn('[OrderPlaced] Could not enrich item thumbnails:', thumbErr.message)
+  }
+
   // Retrieve full shipping address
   let shippingAddress: any = null
   try {
