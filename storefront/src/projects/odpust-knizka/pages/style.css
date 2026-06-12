@@ -1263,7 +1263,7 @@ h2 { font-size: 38px; }
  padding: 48px 40px;
  margin-bottom: 32px;
  display: grid;
- grid-template-columns: 280px 1fr;
+ grid-template-columns: 210px 1fr;
  gap: 40px;
  align-items: start;
  border: 2px solid rgba(123, 94, 167, 0.15);
@@ -1271,8 +1271,10 @@ h2 { font-size: 38px; }
 }
 .bonus-card img {
  width: 100%;
+ max-width: 210px;
  height: auto;
  display: block;
+ margin: 0 auto;
  object-fit: contain;
  border-radius: 12px;
 }
