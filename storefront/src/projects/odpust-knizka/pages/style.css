@@ -1743,9 +1743,9 @@ h2 { font-size: 38px; }
  gap: 16px;
 }
 .footer-logo {
- height: 56px;
- width: 210px;
- aspect-ratio: 600 / 160;
+ height: 52px;
+ width: auto;
+ object-fit: contain;
 }
 .footer-brand-text {
  font-family: 'Recoleta', serif;
