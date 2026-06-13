@@ -1,23 +1,25 @@
 var PROJECT_CONFIG = {
   "slug": "odpusc-ksiazka",
   "projectId": "odpusc-ksiazka",
-  "medusaUrl": "",
-  "publishableApiKey": "",
+  "medusaUrl": "https://www.marketing-hq.eu",
+  "publishableApiKey": "pk_1a3e60bc52d9ceb22d801a00512ffa1af3cac608f724fb8e27c9c78bc660f1ce",
   "mainProduct": {
     "name": "Odpuść to, co cię niszczy",
     "handle": "odpusc-to-co-cie-niszczy",
-    "variantId": "",
+    "variantId": "variant_01KK8NADZFEWC4BHH22R90W7XP",
     "price": 129,
     "currency": "PLN",
     "thumbnail": ""
   },
   "upsellProduct": {
-    "name": "",
-    "handle": "",
-    "variantId": "",
-    "price": 0,
-    "originalPrice": 0,
-    "currency": "PLN"
+    "name": "Życie, jakiego nigdy sobie nie pozwoliłaś",
+    "handle": "zycie-jakiego-nigdy-sobie-nie-pozwolilas-odpusc-ksiazka",
+    "productId": "prod_01KTZRHMZ46ZMWG0KM6362A81E",
+    "variantId": "variant_01KTZRHTCDEQ6NXNA52C22ZC6T",
+    "price": 99,
+    "originalPrice": 129,
+    "currency": "PLN",
+    "thumbnail": "https://bucket-production-b93e.up.railway.app:443/medusa-media/Zycie-jakiego-nigdy-sobie-nie-pozwolilas-pichi-01KQV9FJE4MMTVEDQ4TSG7AGG9.png"
   },
   "bundleOptions": [
     { "qty": 1, "price": 129, "label": "1 książka", "save": 0 },
@@ -26,7 +28,7 @@ var PROJECT_CONFIG = {
     { "qty": 4, "price": 359, "label": "4 książki", "save": 157 }
   ],
   "regions": {
-    "PL": ""
+    "PL": "reg_01KK8N9GTWQK7A55SXAH07KNK1"
   },
   "shippingOptions": {
     "paczkomat": { "name": "Paczkomat InPost", "price": 0, "matchName": "InPost" },
@@ -35,7 +37,7 @@ var PROJECT_CONFIG = {
   "inpostGeowidgetToken": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJzQlpXVzFNZzVlQnpDYU1XU3JvTlBjRWFveFpXcW9Ua2FuZVB3X291LWxvIn0.eyJleHAiOjIwODg2NTkwMTIsImlhdCI6MTc3MzI5OTAxMiwianRpIjoiM2RkYWQ3ZWYtZWM2Zi00M2FlLTlkOTQtOWEzZWUzMDVjZjYzIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5pbnBvc3QucGwvYXV0aC9yZWFsbXMvZXh0ZXJuYWwiLCJzdWIiOiJmOjEyNDc1MDUxLTFjMDMtNGU1OS1iYTBjLTJiNDU2OTVlZjUzNTpGcWVIcEpjUllDckNJc1BKa1ZMY1MzWEI2d2IzX0tLdW9GMjI4a0JvOENjTjRyRWd1V1BwcTdoeGdBRFBrVjlVIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic2hpcHgiLCJzZXNzaW9uX3N0YXRlIjoiZGE5YTQzMzktN2FkZS00NWVjLTk0MDAtODhhMjZjZjY2NzVmIiwic2NvcGUiOiJvcGVuaWQgYXBpOmFwaXBvaW50cyIsInNpZCI6ImRhOWE0MzM5LTdhZGUtNDVlYy05NDAwLTg4YTI2Y2Y2Njc1ZiIsImFsbG93ZWRfcmVmZXJyZXJzIjoiIiwidXVpZCI6IjE0NTkyNmU4LTdkNmUtNGNhYS05OWEwLTVkOTYzOTE3YTQ1OSJ9.QOhr2q7rkHDyQb6mgx-__j8DDrM80B2KxyGpe53oWmJIUtuXO6Z8Jtm0_yC5XDSpc2EU0siohngOYHwCcFmJcs7uBzwEr7uZUVRHSaxJxL9yXCsKa2uoghBsmYRei85TkQowZGAIkXLxFpnJMeYXob9hMoQ2OROwkoDd_1z2NleaRLe7W5SoiXiXjUW_P5SvlZTkxAS_3zFB2XSSPZQrkKhK7p2VAwwFhSVQG-ePxm9FjVMPHpYzzdiHZIv2AQJhnaMBErIiVBT4Ex9Yeo0njyuimN-91HtLqXMZXRjupxRrCDqMrzJvS41uL7vNeQTcEHBB4BkVRq3NdHMAioTU5Q",
   "paymentProviders": {},
   "mollieProfileId": null,
-  "orderBumpEnabled": false,
+  "orderBumpEnabled": true,
   "upsellEnabled": false,
   "foxentryApiKey": null,
   "homeUrl": "/",

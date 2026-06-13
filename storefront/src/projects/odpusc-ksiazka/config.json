@@ -22,12 +22,14 @@
     "thumbnail": ""
   },
   "upsellProduct": {
-    "name": "",
-    "handle": "",
-    "variantId": "",
-    "price": 0,
-    "originalPrice": 0,
-    "currency": "PLN"
+    "name": "Życie, jakiego nigdy sobie nie pozwoliłaś",
+    "handle": "zycie-jakiego-nigdy-sobie-nie-pozwolilas-odpusc-ksiazka",
+    "productId": "prod_01KTZRHMZ46ZMWG0KM6362A81E",
+    "variantId": "variant_01KTZRHTCDEQ6NXNA52C22ZC6T",
+    "price": 99,
+    "originalPrice": 129,
+    "currency": "PLN",
+    "thumbnail": "https://bucket-production-b93e.up.railway.app:443/medusa-media/Zycie-jakiego-nigdy-sobie-nie-pozwolilas-pichi-01KQV9FJE4MMTVEDQ4TSG7AGG9.png"
   },
   "bundleOptions": [
     { "qty": 1, "price": 129, "label": "1 książka + 2 darmowe e-booki", "save": 0 },

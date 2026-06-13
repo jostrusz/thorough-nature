@@ -1924,7 +1924,7 @@ body {
   opacity: 0;
 }
 .order-bump-detail.open {
-  max-height: 1200px;
+  max-height: 2200px;
   opacity: 1;
 }
 .order-bump-detail-inner {
@@ -2439,7 +2439,7 @@ body {
         </div>
 
         <!-- ═══ ORDER BUMP — accordion s detailem produktu ═══ -->
-        <div class="order-bump animate-in" id="order-bump" style="display:none;">
+        <div class="order-bump animate-in" id="order-bump">
           <!-- Hlavička — obrázek + checkbox + info + šipka (vždy viditelné) -->
           <div class="order-bump-header" id="order-bump-header">
             <div class="order-bump-checkbox" id="order-bump-check">
@@ -2451,13 +2451,13 @@ body {
             <div class="order-bump-header-text">
               <div class="order-bump-top-row">
                 <div class="order-bump-tag">Oferta jednorazowa</div>
-                <div class="order-bump-save-tag">-36%</div>
+                <div class="order-bump-save-tag">-23%</div>
               </div>
-              <div class="order-bump-title">Dodaj <em>Życie, na które zasługujesz</em></div>
+              <div class="order-bump-title">Dodaj <em>Życie, jakiego nigdy sobie nie pozwoliłaś</em></div>
               <div class="order-bump-prices-inline">
-                <span class="order-bump-old-price" id="order-bump-old-price">359 zł</span>
-                <span class="order-bump-new-price" id="order-bump-new-price">229 zł</span>
-                <span class="order-bump-inline-save">Oszczędź 130 zł</span>
+                <span class="order-bump-old-price" id="order-bump-old-price">129 zł</span>
+                <span class="order-bump-new-price" id="order-bump-new-price">99 zł</span>
+                <span class="order-bump-inline-save">Oszczędź 30 zł</span>
               </div>
             </div>
             <button type="button" class="order-bump-expand" id="order-bump-expand-btn" aria-expanded="false" aria-label="Mer information">
@@ -2476,17 +2476,17 @@ body {
                   <!-- Obrázek z Medusa admin -->
                 </div>
                 <div class="order-bump-detail-info">
-                  <div class="order-bump-name" id="order-bump-name">Życie, na które zasługujesz</div>
+                  <div class="order-bump-name" id="order-bump-name">Życie, jakiego nigdy sobie nie pozwoliłaś</div>
                   <div class="order-bump-author">Anna de Vries</div>
                   <div class="order-bump-meta">
-                    <span>&#128214; 350 stron</span>
-                    <span>&#128197; Plan na 30 dni</span>
+                    <span>&#128214; 340 stron</span>
+                    <span>&#128197; 30 dni &middot; 8 min dziennie</span>
                     <span>&#11088; 4.9/5 gwiazdek</span>
                   </div>
                   <div class="order-bump-prices">
-                    <span class="order-bump-old-price">359 zł</span>
-                    <span class="order-bump-new-price">229 zł</span>
-                    <span class="order-bump-save">Oszczędź 130 zł</span>
+                    <span class="order-bump-old-price">129 zł</span>
+                    <span class="order-bump-new-price">99 zł</span>
+                    <span class="order-bump-save">Oszczędź 30 zł</span>
                   </div>
                 </div>
               </div>
@@ -2495,6 +2495,27 @@ body {
               <div class="order-bump-description">
                 <p class="ob-intro"><strong>Odpuszczenie było pierwszym krokiem. Teraz zaczyna się prawdziwa praca:</strong> zbudowanie życia, które pasuje właśnie do Ciebie.</p>
                 <p>Ta książka zajmuje się <strong>5 konkretnymi obszarami</strong>, które trzymają Twoje życie w miejscu &mdash; w 30 dni, krok po kroku. Żadnych mglistych afirmacji, tylko praktyczny system.</p>
+              </div>
+
+              <!-- Dla kogo -->
+              <div class="ob-results">
+                <div class="ob-results-title">Ta książka jest dla Ciebie, jeśli&hellip;</div>
+                <div class="ob-result-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Pracujesz na pełny etat i&nbsp;wciąż ogarniasz dom oraz rodzinę</span>
+                </div>
+                <div class="ob-result-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Dajesz z&nbsp;siebie wszystko innym, a&nbsp;dla siebie nie zostaje już nic</span>
+                </div>
+                <div class="ob-result-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Czujesz chaos &mdash; w&nbsp;głowie, w&nbsp;relacjach i&nbsp;wokół siebie &mdash; ale nie wiesz, od czego zacząć</span>
+                </div>
+                <div class="ob-result-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Chcesz konkretny plan krok po kroku, a&nbsp;nie kolejną książkę, która wyląduje na półce</span>
+                </div>
               </div>
 
               <!-- 5 Pijlers -->
@@ -2524,6 +2545,18 @@ body {
                 </div>
               </div>
 
+              <!-- Co dostajesz -->
+              <div class="ob-features" style="background:#FAF5F8;border:1px solid var(--section);border-radius:12px;padding:14px 16px;margin-bottom:14px;">
+                <div class="ob-results-title">Co dostajesz w środku:</div>
+                <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;">
+                  <li style="font-size:13px;color:var(--body);line-height:1.45;">&#128214;&nbsp; <strong>340 stron</strong> praktycznej wiedzy, ułożonej w 5 filarów</li>
+                  <li style="font-size:13px;color:var(--body);line-height:1.45;">&#9999;&#65039;&nbsp; <strong>30+ ćwiczeń</strong> krok po kroku &mdash; do zastosowania od zaraz</li>
+                  <li style="font-size:13px;color:var(--body);line-height:1.45;">&#128212;&nbsp; <strong>12 zeszytów ćwiczeń</strong> do wypełnienia we własnym tempie</li>
+                  <li style="font-size:13px;color:var(--body);line-height:1.45;">&#127873;&nbsp; <strong>2 bonusowe e-booki gratis</strong> (Feng Shui + system porządkowania)</li>
+                  <li style="font-size:13px;color:var(--body);line-height:1.45;">&#9201;&#65039;&nbsp; Plan na <strong>30 dni</strong> &mdash; wystarczy <strong>8 minut dziennie</strong></li>
+                </ul>
+              </div>
+
               <!-- Wat je bereikt -->
               <div class="ob-results">
                 <div class="ob-results-title">Po 30 dniach będziesz&hellip;</div>
@@ -2547,6 +2580,12 @@ body {
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
                   <span>Mieć energię dla siebie &mdash; nie tylko dla wszystkich innych wokół</span>
                 </div>
+              </div>
+
+              <!-- Gwarancja / risk reversal -->
+              <div class="ob-guarantee" style="display:flex;align-items:center;gap:10px;background:rgba(39,174,96,0.08);border:1px solid rgba(39,174,96,0.25);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+                <span style="font-size:20px;flex-shrink:0;">&#128737;&#65039;</span>
+                <span style="font-size:13px;color:var(--body);line-height:1.45;"><strong>30 dni gwarancji zwrotu pieniędzy.</strong> Jeśli książka Ci nie pomoże, zwracamy całą kwotę &mdash; bez pytań i bez ryzyka.</span>
               </div>
 
               <!-- Highlight / CTA box -->
@@ -2940,9 +2979,9 @@ body {
       <div class="summary-line" id="summary-order-bump" style="display:none;padding:8px 0;border-top:1px dashed rgba(194,123,160,0.2);">
         <span style="font-size:13px;display:flex;align-items:center;gap:4px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Życie, na które zasługujesz
+          Życie, jakiego nigdy sobie nie pozwoliłaś
         </span>
-        <span style="font-weight:600;color:var(--cta);">229 zł</span>
+        <span style="font-weight:600;color:var(--cta);">99 zł</span>
       </div>
 
       <div class="summary-line" id="summary-subtotal">
@@ -3443,26 +3482,32 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   })();
 
-  /* ─── ORDER BUMP — načtení obrázku z Medusa admin ─── */
+  /* ─── ORDER BUMP — načtení obrázku (config thumbnail + refresh z Medusa admin) ─── */
   function loadOrderBumpImage() {
     var thumbContainer = document.getElementById('order-bump-thumb');  // Malý v headeru
     var imgContainer = document.getElementById('order-bump-img');      // Velký v detailu
+    var up = PROJECT_CONFIG.upsellProduct || {};
 
-    // Zkus načíst obrázek z Medusa API
-    var upsellHandle = PROJECT_CONFIG.upsellProduct.handle;
-    if (upsellHandle) {
-      medusaFetch('/store/products?handle=' + upsellHandle, {
+    function setImg(src, alt) {
+      if (!src) return;
+      var imgTag = '<img src="' + src + '" alt="' + (alt || up.name || '') + '">';
+      if (thumbContainer) thumbContainer.innerHTML = imgTag;
+      if (imgContainer) imgContainer.innerHTML = imgTag;
+    }
+
+    // 1) Okamžitě použij thumbnail z configu (nezávislé na backendu / CORS)
+    if (up.thumbnail) setImg(up.thumbnail, up.name);
+
+    // 2) Pokus se obnovit z Medusa admin podle handle (sync s aktuálním obrázkem)
+    if (up.handle) {
+      medusaFetch('/store/products?handle=' + up.handle, {
         method: 'GET',
         headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
       }).then(function(data) {
         var product = data.products && data.products[0];
-        if (product && product.thumbnail) {
-          var imgTag = '<img src="' + product.thumbnail + '" alt="' + (product.title || 'Odpuść to, co cię niszczy') + '">';
-          if (thumbContainer) thumbContainer.innerHTML = imgTag;
-          if (imgContainer) imgContainer.innerHTML = imgTag;
-        }
+        if (product && product.thumbnail) setImg(product.thumbnail, product.title || up.name);
       }).catch(function() {
-        // Fallback — CSS placeholder zůstane
+        // Ponecháme config thumbnail / CSS placeholder
       });
     }
   }
