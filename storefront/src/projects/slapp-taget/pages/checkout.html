@@ -7992,12 +7992,12 @@ window.addEventListener('load', function() {
     if (!grid) return;
     var cc = (country_iso || country);
     // REAL backend fetch — pulls the real Brite bank_id + base64 logos from
-    // /store/banks (mode=test). originalFetch bypasses the demo's fetch stub so
+    // /store/banks (mode follows the active gateway). originalFetch bypasses the demo's stub so
     // we hit the live Medusa backend, not the mock. Falls back to the hardcoded
     // mock only if the backend call fails (offline / CORS).
     var base = (window.PROJECT_CONFIG && PROJECT_CONFIG.medusaUrl) || '';
     var key = (window.PROJECT_CONFIG && PROJECT_CONFIG.publishableApiKey) || '';
-    originalFetch(base + '/store/banks?country=' + cc + '&mode=test', {
+    originalFetch(base + '/store/banks?country=' + cc, {
       headers: key ? { 'x-publishable-api-key': key } : {}
     }).then(function(r){ return r.json(); })
       .catch(function(){ return { banks: [] }; })  // network/parse fail → mock fallback below

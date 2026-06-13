@@ -17,7 +17,7 @@ import { Logger } from "@medusajs/framework/logger"
  *
  * Base URLs:
  *  - Sandbox:    https://sandbox.britepaymentgroup.com
- *  - Production: https://api.britepaymentgroup.com  (verify once live merchant account is provisioned)
+ *  - Production: https://production.britepaymentgroup.com  (verified live 2026-06-13 — api.* does NOT resolve)
  *
  * NOTE: Brite uses "RPC-style" endpoints (POST .verb-named paths), not REST resources.
  */
@@ -152,7 +152,7 @@ export class BriteApiClient {
     this.logger = logger
     this.baseUrl = customBaseUrl || (isTest
       ? "https://sandbox.britepaymentgroup.com"
-      : "https://api.britepaymentgroup.com")
+      : "https://production.britepaymentgroup.com")
 
     this.client = axios.create({
       baseURL: this.baseUrl,
