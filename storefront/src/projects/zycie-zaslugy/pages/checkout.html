@@ -4181,7 +4181,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
    * Add the first available shipping method to a cart.
    */
   /**
-   * Find the matching shipping option ID based on selectedShippingMethod.
+   * Read the currently selected shipping method from the DOM. The
+   * selectedShippingMethod var lives in a separate IIFE, so reading the
+   * .shipping-option.selected element keeps this scope-independent.
+   */
+  function getSelectedShippingMethod() {
+    var el = document.querySelector('.shipping-option.selected');
+    return (el && el.getAttribute('data-method')) || 'paczkomat';
+  }
+
+  /**
+   * Find the matching shipping option ID based on the selected method.
    * Paczkomat → match "Paczkomaty", Home delivery → match "inPost - Dostawa".
    */
   function findShippingOptionId(options, method) {
@@ -4201,7 +4211,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }).then(function(shipRes) {
       var options = shipRes.shipping_options || [];
       if (options.length === 0) throw new Error('Brak dostępnych opcji dostawy');
-      var optionId = findShippingOptionId(options, selectedShippingMethod);
+      var optionId = findShippingOptionId(options, getSelectedShippingMethod());
       return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
         method: 'POST',
         body: JSON.stringify({ option_id: optionId })
@@ -7573,7 +7583,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (options.length === 0) {
           throw new Error('Brak dostępnych opcji dostawy');
         }
-        var optionId = findShippingOptionId(options, selectedShippingMethod);
+        var optionId = findShippingOptionId(options, getSelectedShippingMethod());
         return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
           method: 'POST',
           body: JSON.stringify({ option_id: optionId })
