@@ -365,6 +365,66 @@ export function getPaymentMethodName(order: any): string {
   return "Payment"
 }
 
+// ═══ Filter Option Catalogs (shared by FilterBar + chips) ═══
+
+/** Country filter options — ISO code + flag + label. Market countries only. */
+export const COUNTRY_OPTIONS: { code: string; flag: string; label: string }[] = [
+  { code: "NL", flag: "🇳🇱", label: "Netherlands" },
+  { code: "BE", flag: "🇧🇪", label: "Belgium" },
+  { code: "DE", flag: "🇩🇪", label: "Germany" },
+  { code: "AT", flag: "🇦🇹", label: "Austria" },
+  { code: "LU", flag: "🇱🇺", label: "Luxembourg" },
+  { code: "PL", flag: "🇵🇱", label: "Poland" },
+  { code: "CZ", flag: "🇨🇿", label: "Czechia" },
+  { code: "SK", flag: "🇸🇰", label: "Slovakia" },
+  { code: "SE", flag: "🇸🇪", label: "Sweden" },
+  { code: "NO", flag: "🇳🇴", label: "Norway" },
+  { code: "HU", flag: "🇭🇺", label: "Hungary" },
+]
+
+/**
+ * Project filter options. `ids` lists every metadata.project_id alias that maps
+ * to this book (orders may store legacy slugs), `id` is the canonical key.
+ * `color` drives the chip in the Project column.
+ */
+export const PROJECT_OPTIONS: {
+  id: string
+  ids: string[]
+  label: string
+  flag: string
+  color: string
+  bg: string
+}[] = [
+  { id: "loslatenboek", ids: ["loslatenboek"], label: "Laat los", flag: "🇳🇱", color: "#C2410C", bg: "#FFF3E0" },
+  { id: "het-leven", ids: ["het-leven"], label: "Het Leven", flag: "🇳🇱", color: "#0E7490", bg: "#E0F7FA" },
+  { id: "dehondenbijbel", ids: ["dehondenbijbel"], label: "De Hondenbijbel", flag: "🇳🇱", color: "#9A3412", bg: "#FFEDD5" },
+  { id: "lass-los", ids: ["lass-los"], label: "Lass los", flag: "🇩🇪", color: "#A16207", bg: "#FEF9C3" },
+  { id: "odpusc-ksiazka", ids: ["odpusc-ksiazka", "odpusc"], label: "Odpuść", flag: "🇵🇱", color: "#BE123C", bg: "#FCE4EC" },
+  { id: "zycie-zaslugy", ids: ["zycie-zaslugy"], label: "Życie", flag: "🇵🇱", color: "#9D174D", bg: "#FCE7F3" },
+  { id: "slapp-taget", ids: ["slapp-taget", "slapp"], label: "Släpp taget", flag: "🇸🇪", color: "#00695C", bg: "#E0F2F1" },
+  { id: "slipp-taket", ids: ["slipp-taket"], label: "Slipp taket", flag: "🇳🇴", color: "#1D4ED8", bg: "#DBEAFE" },
+  { id: "psi-superzivot", ids: ["psi-superzivot"], label: "Psí superživot", flag: "🇨🇿", color: "#1565C0", bg: "#E3F2FD" },
+  { id: "kocici-bible", ids: ["kocici-bible"], label: "Kočičí bible", flag: "🇨🇿", color: "#6D28D9", bg: "#EDE9FE" },
+  { id: "odpust-knizka", ids: ["odpust-knizka"], label: "Pusť to", flag: "🇨🇿", color: "#7C2D12", bg: "#FEF3C7" },
+]
+
+/** Resolve a project chip's color/label from an order's metadata.project_id. */
+export function getProjectChip(projectId?: string): { label: string; color: string; bg: string } | null {
+  if (!projectId) return null
+  const opt = PROJECT_OPTIONS.find((p) => p.ids.includes(projectId))
+  if (!opt) return null
+  return { label: opt.label, color: opt.color, bg: opt.bg }
+}
+
+/** Payment status filter options. */
+export const PAYMENT_OPTIONS: { value: string; label: string }[] = [
+  { value: "paid", label: "Paid" },
+  { value: "pending", label: "Pending" },
+  { value: "authorized", label: "Authorized" },
+  { value: "refunded", label: "Refunded" },
+  { value: "partially_refunded", label: "Partially refunded" },
+]
+
 // ═══ Order Display Number ═══
 
 /** Get the display-friendly order number (country-prefixed or fallback to #display_id) */

@@ -14,6 +14,8 @@ import { ShoppingBag } from "@medusajs/icons"
 import { toast } from "@medusajs/ui"
 import { ProfitabilitySection } from "../../components/orders/profitability-section"
 import { OrderTabs, TABS } from "../../components/orders/order-tabs"
+import { OrderFilters, OrderFiltersValue } from "../../components/orders/order-filters"
+import { PROJECT_OPTIONS } from "../../components/orders/design-tokens"
 import { OrdersTable } from "../../components/orders/orders-table"
 import { BulkActionsBar } from "../../components/orders/bulk-actions-bar"
 import { NewOrderCelebration } from "../../components/orders/new-order-celebration"
@@ -418,6 +420,26 @@ function DashboardStyles() {
           display: block !important;
         }
       }
+
+      /* ═══ Progressive column disclosure (tablet → narrow desktop) ═══ */
+      /* Drop lowest-priority columns first so the table never needs a
+         horizontal scrollbar before the mobile-card breakpoint kicks in. */
+      @media (max-width: 1280px) {
+        .orders-desktop-table .col-items { display: none !important; }
+      }
+      @media (max-width: 1120px) {
+        .orders-desktop-table .col-project { display: none !important; }
+      }
+      @media (max-width: 980px) {
+        .orders-desktop-table .col-date { display: none !important; }
+      }
+
+      /* Filter bar: tighter padding + scroll-safe on small screens */
+      @media (max-width: 768px) {
+        .dash-filter-bar {
+          padding: 10px 12px !important;
+        }
+      }
     `}</style>
   )
 }
@@ -448,6 +470,9 @@ const CustomOrdersPage = () => {
   }, [])
 
   const [activeTab, setActiveTab] = useState(savedState?.activeTab || "all")
+  const [filters, setFilters] = useState<OrderFiltersValue>(
+    savedState?.filters || { countries: [], projects: [], payments: [] }
+  )
   const [searchValue, setSearchValue] = useState(savedState?.searchValue || "")
   const debouncedSearch = useDebounce(searchValue, 200)
   const [page, setPage] = useState(savedState?.page || 0)
@@ -461,10 +486,10 @@ const CustomOrdersPage = () => {
   const saveListState = useCallback(() => {
     try {
       sessionStorage.setItem("ordersHQ_listState", JSON.stringify({
-        activeTab, page, sortField, sortDir, searchValue,
+        activeTab, page, sortField, sortDir, searchValue, filters,
       }))
     } catch {}
-  }, [activeTab, page, sortField, sortDir, searchValue])
+  }, [activeTab, page, sortField, sortDir, searchValue, filters])
 
   // New order celebration state
   const [celebrationOrder, setCelebrationOrder] = useState<any>(null)
@@ -472,21 +497,26 @@ const CustomOrdersPage = () => {
   const lastKnownCount = useRef<number | null>(null)
   const isInitialLoad = useRef(true)
 
-  // Build query params from active tab
+  // Build query params: active tab = fulfillment lifecycle; FilterBar = country
+  // (multi) + project (multi, expanded to all metadata aliases) + payment (multi).
   const activeTabDef = TABS.find((t) => t.id === activeTab)
-  const queryParams = useMemo(
-    () => ({
+  const queryParams = useMemo(() => {
+    // Expand each selected project to every metadata.project_id alias it maps to.
+    const projectIds = filters.projects.flatMap(
+      (id) => PROJECT_OPTIONS.find((p) => p.id === id)?.ids || [id]
+    )
+    return {
       limit: PAGE_SIZE,
       offset: page * PAGE_SIZE,
       q: debouncedSearch || undefined,
       delivery_status: activeTabDef?.deliveryStatus || undefined,
-      country: activeTabDef?.country || undefined,
-      payment_status: activeTabDef?.paymentStatus || undefined,
+      country: filters.countries.length ? filters.countries.join(",") : undefined,
+      project: projectIds.length ? projectIds.join(",") : undefined,
+      payment_status: filters.payments.length ? filters.payments.join(",") : undefined,
       sort_by: sortField,
       sort_dir: sortDir,
-    }),
-    [page, debouncedSearch, activeTabDef, sortField, sortDir]
-  )
+    }
+  }, [page, debouncedSearch, activeTabDef, filters, sortField, sortDir])
 
   // Data hooks
   const { data: ordersData, isLoading: ordersLoading } = useOrdersList(queryParams)
@@ -545,6 +575,12 @@ const CustomOrdersPage = () => {
   // Handlers
   const handleTabChange = useCallback((tabId: string) => {
     setActiveTab(tabId)
+    setPage(0)
+    setSelectedOrders(new Set())
+  }, [])
+
+  const handleFiltersChange = useCallback((next: OrderFiltersValue) => {
+    setFilters(next)
     setPage(0)
     setSelectedOrders(new Set())
   }, [])
@@ -734,6 +770,9 @@ const CustomOrdersPage = () => {
             />
           </div>
         </div>
+
+        {/* Filter Bar — Country / Project / Payment (combine with the active tab) */}
+        <OrderFilters value={filters} onChange={handleFiltersChange} />
 
         {/* Bulk Actions Bar */}
         <BulkActionsBar

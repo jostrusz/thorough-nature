@@ -87,6 +87,106 @@ async function searchOrderIds(
   }
 }
 
+/**
+ * Filtered (non-search) listing at the DB level so total count + pagination are
+ * correct across the WHOLE dataset, not just the current page. Handles country,
+ * delivery_status (dextrum_status) and project (metadata.project_id) in SQL.
+ * paymentStatus stays a JS post-filter (computed, COD-aware) — see GET.
+ *
+ * Returns the page of order IDs (in sort order) plus the grand total matching
+ * the filters via COUNT(*) OVER().
+ */
+async function queryFilteredOrderIds(
+  opts: {
+    country?: string
+    deliveryStatus?: string
+    project?: string
+    sortBy: string
+    sortDir: string
+    limit: number
+    offset: number
+  },
+  logger: any
+): Promise<{ ids: string[]; total: number }> {
+  const { Pool } = require("pg")
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+  try {
+    const params: any[] = []
+    const whereParts: string[] = [`o.deleted_at IS NULL`]
+
+    // Country (comma list) → shipping address country_code
+    if (opts.country) {
+      const countries = opts.country.split(",").map((c) => c.trim().toUpperCase()).filter(Boolean)
+      if (countries.length) {
+        params.push(countries)
+        whereParts.push(`UPPER(sa.country_code) = ANY($${params.length}::text[])`)
+      }
+    }
+
+    // Delivery / warehouse status (comma list) → metadata.dextrum_status
+    if (opts.deliveryStatus) {
+      const statuses = opts.deliveryStatus.split(",").map((s) => s.trim()).filter(Boolean)
+      const ors: string[] = []
+      const concrete: string[] = []
+      for (const s of statuses) {
+        if (s === "new" || s === "NEW") {
+          ors.push(`(o.metadata->>'dextrum_status') IS NULL`)
+        } else {
+          concrete.push(s)
+        }
+      }
+      if (concrete.length) {
+        params.push(concrete)
+        ors.push(`(o.metadata->>'dextrum_status') = ANY($${params.length}::text[])`)
+      }
+      if (ors.length) whereParts.push(`(${ors.join(" OR ")})`)
+    }
+
+    // Project (comma list of project_id aliases) → metadata.project_id / project
+    if (opts.project) {
+      const projects = opts.project.split(",").map((p) => p.trim()).filter(Boolean)
+      if (projects.length) {
+        params.push(projects)
+        const idx = params.length
+        whereParts.push(
+          `((o.metadata->>'project_id') = ANY($${idx}::text[]) OR (o.metadata->>'project') = ANY($${idx}::text[]))`
+        )
+      }
+    }
+
+    // Sort — only columns reachable without computed totals. total/customer fall
+    // back to created_at here; total is re-sorted per page in JS after hydration.
+    const dir = opts.sortDir === "ASC" ? "ASC" : "DESC"
+    let orderBy = `o.created_at ${dir}`
+    if (opts.sortBy === "display_id") orderBy = `o.display_id ${dir}`
+    else if (opts.sortBy === "customer") orderBy = `LOWER(sa.last_name) ${dir} NULLS LAST, LOWER(sa.first_name) ${dir} NULLS LAST`
+
+    params.push(opts.limit)
+    const limitIdx = params.length
+    params.push(opts.offset)
+    const offsetIdx = params.length
+
+    const sql = `
+      SELECT o.id, COUNT(*) OVER() AS total_count
+      FROM "order" o
+      LEFT JOIN order_address sa ON o.shipping_address_id = sa.id
+      WHERE ${whereParts.join(" AND ")}
+      ORDER BY ${orderBy}
+      LIMIT $${limitIdx} OFFSET $${offsetIdx}
+    `
+    const { rows } = await pool.query(sql, params)
+    return {
+      ids: rows.map((r: any) => r.id),
+      total: rows.length ? Number(rows[0].total_count) : 0,
+    }
+  } catch (e: any) {
+    logger?.warn?.(`[custom-orders filter] SQL filter failed: ${e.message}`)
+    return { ids: [], total: 0 }
+  } finally {
+    await pool.end().catch(() => {})
+  }
+}
+
 // Compute payment status from order data (same logic as frontend orders-table.tsx)
 function getPaymentStatus(order: any): string {
   if (order.metadata?.payment_captured) return "paid"
@@ -128,17 +228,23 @@ export async function GET(
     const deliveryStatus = (req.query.delivery_status as string) || ""
     const country = (req.query.country as string) || ""
     const paymentStatus = (req.query.payment_status as string) || ""
+    const project = (req.query.project as string) || ""
     const sortBy = (req.query.sort_by as string) || "created_at"
     const sortDir = (req.query.sort_dir as string) || "DESC"
 
     const filters: Record<string, any> = {}
     const isSearching = !!search
+    // DB-level filter path: country/delivery/project are pushed into SQL so the
+    // grand total + pagination span the whole dataset (not just one page).
+    const hasDbFilter = !isSearching && !!(country || deliveryStatus || project)
 
     // ── FAST PATH: DB-level search via indexed ILIKE ─────────────────────
     // When user is searching, resolve matching order IDs via SQL (uses pg_trgm
     // GIN indexes on email/metadata/address/tracking/payment/line items),
     // then hydrate only those ~50 orders via query.graph with full fields.
     let searchOrderIdsList: string[] | null = null
+    let dbFilterTotal = 0
+    let dbFilterIds: string[] = []
     if (isSearching) {
       const logger: any = (req.scope as any).resolve?.(ContainerRegistrationKeys.LOGGER)
       searchOrderIdsList = await searchOrderIds(
@@ -151,6 +257,19 @@ export async function GET(
         return
       }
       filters.id = searchOrderIdsList
+    } else if (hasDbFilter) {
+      const logger: any = (req.scope as any).resolve?.(ContainerRegistrationKeys.LOGGER)
+      const filtered = await queryFilteredOrderIds(
+        { country, deliveryStatus, project, sortBy, sortDir, limit, offset },
+        logger
+      )
+      dbFilterTotal = filtered.total
+      dbFilterIds = filtered.ids
+      if (dbFilterIds.length === 0) {
+        res.json({ orders: [], count: dbFilterTotal, filtered_count: 0 })
+        return
+      }
+      filters.id = dbFilterIds
     }
 
     const { data: orders, metadata } = await query.graph({
@@ -179,13 +298,25 @@ export async function GET(
       ],
       filters,
       pagination: {
-        skip: isSearching ? 0 : offset,
-        take: isSearching ? searchOrderIdsList!.length : limit,
+        skip: (isSearching || hasDbFilter) ? 0 : offset,
+        take: isSearching
+          ? searchOrderIdsList!.length
+          : hasDbFilter
+            ? dbFilterIds.length
+            : limit,
         order: {
           [sortBy]: sortDir,
         },
       },
     })
+
+    // Preserve SQL sort order — query.graph by id set may reorder.
+    if (hasDbFilter && dbFilterIds.length) {
+      const pos = new Map(dbFilterIds.map((id, i) => [id, i]))
+      ;(orders as any[]).sort(
+        (a, b) => (pos.get(a.id) ?? 0) - (pos.get(b.id) ?? 0)
+      )
+    }
 
     // Medusa v2 query.graph returns shipping_address as null — resolve via orderModuleService
     try {
@@ -255,30 +386,46 @@ export async function GET(
     // Client-side filtering (Medusa query.graph doesn't support metadata/computed field filtering)
     let filteredOrders = orders
 
+    // payment_status (comma list) — always a JS post-filter (computed, COD-aware).
     if (paymentStatus) {
-      filteredOrders = filteredOrders.filter(
-        (o: any) => getPaymentStatus(o) === paymentStatus
+      const wanted = paymentStatus.split(",").map((s) => s.trim()).filter(Boolean)
+      filteredOrders = filteredOrders.filter((o: any) =>
+        wanted.includes(getPaymentStatus(o))
       )
     }
 
-    if (deliveryStatus) {
-      if (deliveryStatus === "new" || deliveryStatus === "NEW") {
-        // New orders = no dextrum_status set yet
-        filteredOrders = filteredOrders.filter(
-          (o: any) => !o.metadata?.dextrum_status
-        )
-      } else {
-        filteredOrders = filteredOrders.filter(
-          (o: any) => o.metadata?.dextrum_status === deliveryStatus
+    // country / delivery_status are applied in SQL on the DB-filter path; only
+    // re-apply them in JS for the search path (which doesn't pre-filter them).
+    if (!hasDbFilter) {
+      if (deliveryStatus) {
+        if (deliveryStatus === "new" || deliveryStatus === "NEW") {
+          // New orders = no dextrum_status set yet
+          filteredOrders = filteredOrders.filter(
+            (o: any) => !o.metadata?.dextrum_status
+          )
+        } else {
+          filteredOrders = filteredOrders.filter(
+            (o: any) => o.metadata?.dextrum_status === deliveryStatus
+          )
+        }
+      }
+
+      if (country) {
+        const countries = country.split(",").map((c) => c.trim().toUpperCase())
+        filteredOrders = filteredOrders.filter((o: any) =>
+          countries.includes(o.shipping_address?.country_code?.toUpperCase())
         )
       }
     }
 
-    if (country) {
-      const countries = country.split(",").map((c) => c.trim().toUpperCase())
-      filteredOrders = filteredOrders.filter((o: any) =>
-        countries.includes(o.shipping_address?.country_code?.toUpperCase())
-      )
+    // total sort isn't expressible in the SQL filter (computed) — sort the
+    // hydrated page in JS so at least the visible page is correctly ordered.
+    if (hasDbFilter && sortBy === "total") {
+      filteredOrders = [...filteredOrders].sort((a: any, b: any) => {
+        const av = Number(a.total) || 0
+        const bv = Number(b.total) || 0
+        return sortDir === "ASC" ? av - bv : bv - av
+      })
     }
 
     // Legacy JS-side search (kept as safety net; normally disabled since
@@ -417,8 +564,10 @@ export async function GET(
 
     res.json({
       orders: filteredOrders,
-      count: (metadata as any)?.count ?? orders.length,
-      filtered_count: filteredOrders.length,
+      // On the DB-filter path the grand total comes from COUNT(*) OVER() so
+      // pagination spans the whole filtered set, not just this page.
+      count: hasDbFilter ? dbFilterTotal : ((metadata as any)?.count ?? orders.length),
+      filtered_count: hasDbFilter ? dbFilterTotal : filteredOrders.length,
     })
   } catch (error: any) {
     console.error("Custom orders list error:", error)

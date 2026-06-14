@@ -9,6 +9,8 @@ export interface TabDef {
   country?: string
 }
 
+// Tabs are the warehouse (fulfillment) lifecycle — a single dimension.
+// Country / Project / Payment moved to the FilterBar so they can be combined.
 export const TABS: TabDef[] = [
   { id: "all", label: "All" },
   { id: "new", label: "New", deliveryStatus: "NEW" },
@@ -20,15 +22,6 @@ export const TABS: TabDef[] = [
   { id: "in_transit", label: "In Transit", deliveryStatus: "IN_TRANSIT" },
   { id: "delivered", label: "Delivered", deliveryStatus: "DELIVERED" },
   { id: "issues", label: "Issues", deliveryStatus: "ALLOCATION_ISSUE" },
-  { id: "refunded", label: "Refunded", paymentStatus: "refunded" },
-  { id: "paid", label: "Paid", paymentStatus: "paid" },
-  { id: "pending", label: "Pending", paymentStatus: "pending" },
-  { id: "nlbe", label: "NL/BE", country: "NL,BE" },
-  { id: "deatlu", label: "DE/AT/LU", country: "DE,AT,LU" },
-  { id: "czsk", label: "CZ/SK", country: "CZ,SK" },
-  { id: "pl", label: "PL", country: "PL" },
-  { id: "swe", label: "SWE", country: "SE" },
-  { id: "hu", label: "HU", country: "HU" },
 ]
 
 interface OrderTabsProps {

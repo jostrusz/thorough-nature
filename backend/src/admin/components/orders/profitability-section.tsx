@@ -782,6 +782,9 @@ export function ProfitabilitySection() {
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
+            // start = cards size to their own content; an expanded card grows
+            // alone instead of stretching its row-neighbours into empty space.
+            alignItems: "start",
             gap: "8px",
             marginBottom: "8px",
           }}
@@ -796,6 +799,9 @@ export function ProfitabilitySection() {
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
+            // start = cards size to their own content; an expanded card grows
+            // alone instead of stretching its row-neighbours into empty space.
+            alignItems: "start",
             gap: "8px",
             marginBottom: "8px",
           }}

@@ -6,7 +6,7 @@ import { CountryFlag } from "./country-flag"
 import { OrderTag } from "./order-tag"
 import { useUpdateMetadata } from "../../hooks/use-update-metadata"
 import { toast } from "@medusajs/ui"
-import { colors, radii, shadows, getPaymentIconUrl, getPaymentFallback, getOrderDisplayNumber } from "./design-tokens"
+import { colors, radii, shadows, getPaymentIconUrl, getPaymentFallback, getOrderDisplayNumber, getProjectChip } from "./design-tokens"
 import { formatCurrency } from "../../lib/format-currency"
 
 interface OrdersTableProps {
@@ -95,6 +95,30 @@ function getCustomerName(order: any): string {
   return "—"
 }
 
+// Initials for the customer avatar (fallback to email first char)
+function getInitials(name: string, email?: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  if (parts.length === 1 && parts[0] !== "—") return parts[0].slice(0, 2).toUpperCase()
+  if (email) return email.slice(0, 2).toUpperCase()
+  return "?"
+}
+
+// Deterministic soft avatar color from a string
+const AVATAR_COLORS = [
+  { bg: "#EEF2FF", fg: "#4338CA" },
+  { bg: "#FFF1F2", fg: "#BE123C" },
+  { bg: "#ECFDF5", fg: "#047857" },
+  { bg: "#FFF7ED", fg: "#C2410C" },
+  { bg: "#F0F9FF", fg: "#0369A1" },
+  { bg: "#FAF5FF", fg: "#7E22CE" },
+]
+function avatarColor(key: string): { bg: string; fg: string } {
+  let h = 0
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0
+  return AVATAR_COLORS[h % AVATAR_COLORS.length]
+}
+
 // ═══════════════════════════════════════════
 // HELPER: get tag (from metadata or first item product title)
 // ═══════════════════════════════════════════
@@ -158,15 +182,22 @@ function SkeletonRows() {
             <div style={{ width: "18px", height: "18px", borderRadius: "4px", background: "#EBEBEB", margin: "0 auto" }} />
           </td>
           <td style={tdStyle}><div style={{ width: "70px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "80px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "100px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "130px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "70px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td className="col-date" style={tdStyle}><div style={{ width: "80px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: "#EBEBEB", flexShrink: 0 }} />
+              <div>
+                <div style={{ width: "110px", height: "12px", borderRadius: "4px", background: "#EBEBEB", marginBottom: "5px" }} />
+                <div style={{ width: "140px", height: "10px", borderRadius: "4px", background: "#F0F0F0" }} />
+              </div>
+            </div>
+          </td>
+          <td style={tdStyle}><div style={{ width: "60px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "80px", height: "22px", borderRadius: "12px", background: "#EBEBEB" }} /></td>
           <td style={tdStyle}><div style={{ width: "70px", height: "22px", borderRadius: "12px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "70px", height: "22px", borderRadius: "12px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "40px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "30px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "100px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td className="col-items" style={tdStyle}><div style={{ width: "40px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td className="col-country" style={tdStyle}><div style={{ width: "30px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td className="col-project" style={tdStyle}><div style={{ width: "90px", height: "18px", borderRadius: "6px", background: "#EBEBEB" }} /></td>
         </tr>
       ))}
     </>
@@ -328,15 +359,14 @@ export function OrdersTable({
             <tr>
               <th style={{ ...thStyle, width: "36px", textAlign: "center", cursor: "default" }}></th>
               <th style={thStyle}>Order</th>
-              <th style={thStyle}>Date</th>
+              <th className="col-date" style={thStyle}>Date</th>
               <th style={thStyle}>Customer</th>
-              <th style={thStyle}>Email</th>
               <th style={thStyle}>Total</th>
               <th style={thStyle}>Payment</th>
               <th style={thStyle}>Fulfillment</th>
-              <th style={thStyle}>Items</th>
-              <th style={thStyle}>Country</th>
-              <th style={thStyle}>Project</th>
+              <th className="col-items" style={thStyle}>Items</th>
+              <th className="col-country" style={thStyle}>Country</th>
+              <th className="col-project" style={thStyle}>Project</th>
             </tr>
           </thead>
           <tbody>
@@ -466,21 +496,20 @@ export function OrdersTable({
             <th style={{ ...thStyle, minWidth: "90px", whiteSpace: "nowrap" }} onClick={() => onSort("display_id")}>
               Order {renderSortIcon("display_id")}
             </th>
-            <th style={thStyle} onClick={() => onSort("created_at")}>
+            <th className="col-date" style={thStyle} onClick={() => onSort("created_at")}>
               Date {renderSortIcon("created_at")}
             </th>
             <th style={thStyle} onClick={() => onSort("customer")}>
               Customer {renderSortIcon("customer")}
             </th>
-            <th style={{ ...thStyle, cursor: "default" }}>Email</th>
             <th style={thStyle} onClick={() => onSort("total")}>
               Total {renderSortIcon("total")}
             </th>
             <th style={{ ...thStyle, cursor: "default" }}>Payment</th>
             <th style={{ ...thStyle, cursor: "default" }}>Fulfillment</th>
-            <th style={{ ...thStyle, cursor: "default" }}>Items</th>
-            <th style={{ ...thStyle, cursor: "default" }}>Country</th>
-            <th style={{ ...thStyle, cursor: "default" }}>Project</th>
+            <th className="col-items" style={{ ...thStyle, cursor: "default" }}>Items</th>
+            <th className="col-country" style={{ ...thStyle, cursor: "default" }}>Country</th>
+            <th className="col-project" style={{ ...thStyle, cursor: "default" }}>Project</th>
           </tr>
         </thead>
         <tbody>
@@ -549,7 +578,7 @@ export function OrdersTable({
                 </td>
 
                 {/* 3. Date (highlighted) */}
-                <td style={tdStyle}>
+                <td className="col-date" style={tdStyle}>
                   {(() => {
                     const dt = formatDate(order.created_at)
                     return (
@@ -569,49 +598,42 @@ export function OrdersTable({
                   })()}
                 </td>
 
-                {/* 4. Customer (name only) */}
-                <td style={tdStyle}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+                {/* 4. Customer — avatar + name (nowrap) + email subline (nowrap) */}
+                <td style={{ ...tdStyle, maxWidth: "230px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px", minWidth: 0 }}>
                     {(() => {
-                      const iconUrl = getPaymentIconUrl(order)
-                      if (iconUrl) {
-                        return (
-                          <div style={{
-                            width: "24px", height: "24px", borderRadius: "5px",
-                            background: "#f0f1f5", padding: "3px",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            flexShrink: 0, overflow: "hidden",
-                          }}>
-                            <img src={iconUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-                          </div>
-                        )
-                      }
-                      const fb = getPaymentFallback(order)
+                      const av = avatarColor(order.email || customerName)
                       return (
                         <div style={{
-                          width: "24px", height: "24px", borderRadius: "5px",
-                          background: fb.bg, color: fb.color,
+                          width: "26px", height: "26px", borderRadius: "50%",
+                          background: av.bg, color: av.fg,
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          flexShrink: 0, fontSize: "7px", fontWeight: 700,
+                          flexShrink: 0, fontSize: "10px", fontWeight: 700, letterSpacing: "0.3px",
                         }}>
-                          {fb.letter}
+                          {getInitials(customerName, order.email)}
                         </div>
                       )
                     })()}
-                    <span style={{ fontWeight: 500, fontSize: "12.5px", color: colors.text }}>
-                      {customerName}
-                    </span>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{
+                        fontWeight: 600, fontSize: "12.5px", color: colors.text,
+                        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                        maxWidth: "190px", lineHeight: 1.3,
+                      }}>
+                        {customerName}
+                      </div>
+                      <div style={{
+                        fontSize: "11px", color: colors.textMuted,
+                        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                        maxWidth: "190px", lineHeight: 1.3,
+                      }}>
+                        {order.email}
+                      </div>
+                    </div>
                   </div>
                 </td>
 
-                {/* 5. Email */}
-                <td style={tdStyle}>
-                  <span style={{ fontSize: "12px", color: colors.textMuted }}>
-                    {order.email}
-                  </span>
-                </td>
-
-                {/* 6. Total */}
+                {/* 5. Total */}
                 <td style={tdStyle}>
                   <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums", color: colors.text }}>
                     {formatCurrency(total, order.currency_code)}
@@ -656,31 +678,56 @@ export function OrdersTable({
                   <DeliveryBadge status={deliveryStatus} />
                 </td>
 
-                {/* 9. Items */}
-                <td style={tdStyle}>
+                {/* Items */}
+                <td className="col-items" style={tdStyle}>
                   <span style={{ color: colors.textMuted }}>
                     {itemCount} item{itemCount !== 1 ? "s" : ""}
                   </span>
                 </td>
 
-                {/* 10. Country */}
-                <td style={tdStyle}>
+                {/* Country */}
+                <td className="col-country" style={tdStyle}>
                   <CountryFlag code={countryCode} />
                 </td>
 
-                {/* 11. Project */}
-                <td style={tdStyle}>
-                  <span style={{
-                    fontSize: "11px",
-                    color: colors.textMuted,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "inline-block",
-                    maxWidth: "160px",
-                  }}>
-                    {tag}
-                  </span>
+                {/* Project — colored chip from metadata.project_id, fallback to tag */}
+                <td className="col-project" style={tdStyle}>
+                  {(() => {
+                    const chip = getProjectChip(order.metadata?.project_id)
+                    if (chip) {
+                      return (
+                        <span style={{
+                          display: "inline-block",
+                          fontSize: "11px",
+                          fontWeight: 600,
+                          padding: "2px 8px",
+                          borderRadius: "6px",
+                          background: chip.bg,
+                          color: chip.color,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          maxWidth: "150px",
+                        }}>
+                          {chip.label}
+                        </span>
+                      )
+                    }
+                    if (!tag) return <span style={{ color: colors.textMuted }}>—</span>
+                    return (
+                      <span style={{
+                        fontSize: "11px",
+                        color: colors.textMuted,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "inline-block",
+                        maxWidth: "150px",
+                      }}>
+                        {tag}
+                      </span>
+                    )
+                  })()}
                 </td>
               </tr>
             )

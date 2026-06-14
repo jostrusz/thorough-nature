@@ -8,6 +8,7 @@ interface OrdersListParams {
   delivery_status?: string
   country?: string
   payment_status?: string
+  project?: string
   sort_by?: string
   sort_dir?: string
 }
@@ -31,6 +32,7 @@ export function useOrdersList(params: OrdersListParams) {
       if (params.country) searchParams.set("country", params.country)
       if (params.payment_status)
         searchParams.set("payment_status", params.payment_status)
+      if (params.project) searchParams.set("project", params.project)
       if (params.sort_by) searchParams.set("sort_by", params.sort_by)
       if (params.sort_dir) searchParams.set("sort_dir", params.sort_dir)
 
