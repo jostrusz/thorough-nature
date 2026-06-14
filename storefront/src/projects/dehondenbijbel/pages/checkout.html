@@ -2434,6 +2434,246 @@ body {
   .reviewer-name { font-size: 18px !important; }
   .review-text { font-size: 14px !important; padding: 18px !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   BRITE "PAY BY BANK" — ported from loslatenboek, dehondenbijbel palette
+   (cta red rgba(220,53,34,…) / purple rgba(107,33,168,…) / heading #1A1A1A)
+   ═══════════════════════════════════════════════════════════════ */
+/* Brite alternative methods (iDEAL / Swish) — separate rows below the bank picker,
+   styled exactly like a normal payment method (Airwallex-iDEAL look). */
+.brite-alt-method {
+  position: relative; display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; margin-top: 8px; background: var(--white);
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  cursor: pointer; transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.brite-alt-method:hover { border-color: var(--highlight); box-shadow: var(--shadow-sm); }
+.brite-alt-method.selected {
+  border-color: var(--cta); background: rgba(220,53,34,0.04);
+  box-shadow: 0 0 0 3px rgba(220,53,34,0.1);
+}
+.brite-alt-method.selected .pm-radio { border-color: var(--cta); }
+.brite-alt-method.selected .pm-radio-dot { transform: scale(1); }
+.brite-country-switcher {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 6px; padding: 8px 10px; margin-bottom: 12px;
+  background: #FAFAFA; border: 1px dashed var(--border);
+  border-radius: var(--radius); font-size: 12px;
+}
+.brite-cs-label { color: var(--muted); font-size: 11px; font-weight: 600; margin-right: 4px; }
+.brite-country-switcher button {
+  font: inherit; font-size: 12px; padding: 5px 9px;
+  border: 1px solid var(--border); border-radius: 5px;
+  background: var(--white); cursor: pointer; transition: all .15s ease;
+}
+.brite-country-switcher button:hover { background: #F4F5F7; }
+.brite-country-switcher button.active {
+  background: var(--heading, #1A1A1A); color: #FFF;
+  border-color: var(--heading, #1A1A1A); font-weight: 600;
+}
+.brite-card {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  transition: all .25s cubic-bezier(.22,1,.36,1); margin-bottom: 8px;
+}
+.brite-card:hover { border-color: var(--highlight); box-shadow: var(--shadow-sm); }
+.brite-card.selected {
+  border-color: var(--cta);
+  background: rgba(220,53,34,0.04);
+  box-shadow: 0 0 0 3px rgba(220,53,34,0.1);
+}
+.brite-card.selected .pm-radio { border-color: var(--cta); }
+.brite-card.selected .pm-radio-dot { transform: scale(1); }
+.brite-card-head {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 16px; cursor: pointer;
+}
+.brite-card .pm-info { padding-top: 1px; }
+.brite-card .pm-name {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 15px;
+}
+.pm-name-text { font-weight: 700; color: var(--heading); }
+.pm-name-divider { color: var(--border); font-weight: 400; user-select: none; }
+.pm-name-brite {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--muted); font-weight: 500;
+}
+.pm-name-brite-prefix { white-space: nowrap; }
+.pm-brite-inline-logo { height: 20px; width: auto; display: inline-block; vertical-align: middle; }
+.pm-brite-inline-fallback {
+  background: #FFE600; color: #0A0B09;
+  padding: 2px 7px; border-radius: 3px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2px;
+}
+.brite-card-body {
+  padding: 4px 16px 14px;
+  border-top: 1px solid rgba(107,33,168,0.12);
+  background: #FCFCFD;
+}
+.brite-card:not(.selected) .brite-card-body { display: none; }
+.brite-trust-strip {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 12px;
+  margin: 8px 0 10px; padding: 8px 12px;
+  background: rgba(46,160,67,0.05);
+  border: 1px solid rgba(46,160,67,0.15);
+  border-radius: var(--radius);
+  font-size: 11px; color: #1a6e2e; font-weight: 600;
+}
+.brite-trust-strip span { display: inline-flex; align-items: center; gap: 4px; }
+.brite-trust-strip svg { width: 11px; height: 11px; }
+/* ── Bank list: full-width rows stacked vertically ──
+   Layout per row:  [ radio ]   [ logo ]   Bank name ............ */
+.brite-bank-grid {
+  display: flex; flex-direction: column;
+  gap: 8px; margin-top: 10px;
+}
+.brite-bank-tile {
+  position: relative;
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; text-align: left;
+  background: #FFFFFF; border: 1px solid rgba(107,33,168,0.10);
+  border-radius: 12px; padding: 9px 14px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(107,33,168,0.04);
+  transition: border-color .2s cubic-bezier(0.22,1,0.36,1),
+              background .2s cubic-bezier(0.22,1,0.36,1),
+              box-shadow .2s cubic-bezier(0.22,1,0.36,1);
+  -webkit-tap-highlight-color: transparent;
+}
+.brite-bank-tile:hover { border-color: rgba(220,53,34,0.5); box-shadow: 0 3px 10px rgba(107,33,168,0.07); }
+.brite-bank-tile:active { background: rgba(220,53,34,0.04); }
+.brite-bank-tile.selected {
+  border-color: var(--cta);
+  background: rgba(220,53,34,0.045);
+  box-shadow: 0 0 0 1.5px var(--cta), 0 4px 14px rgba(220,53,34,0.14);
+}
+/* Radio selector (far left) */
+.brite-bank-radio {
+  flex-shrink: 0;
+  width: 21px; height: 21px; border-radius: 50%;
+  border: 2px solid rgba(107,33,168,0.20);
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .2s ease;
+}
+.brite-bank-tile.selected .brite-bank-radio { border-color: var(--cta); }
+.brite-bank-radio::after {
+  content: ""; width: 11px; height: 11px; border-radius: 50%;
+  background: var(--cta); transform: scale(0);
+  transition: transform .2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.brite-bank-tile.selected .brite-bank-radio::after { transform: scale(1); }
+/* Logo in a soft app-icon tile — uniform, premium, instantly recognisable */
+.brite-logo {
+  flex-shrink: 0;
+  width: 40px; height: 40px; border-radius: 10px;
+  background: #F7F3FB; border: 1px solid rgba(107,33,168,0.06);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  transition: background .2s ease, box-shadow .2s ease;
+}
+.brite-bank-tile:hover .brite-logo { box-shadow: 0 2px 6px rgba(107,33,168,0.08); }
+.brite-bank-tile.selected .brite-logo { background: #fff; box-shadow: 0 2px 8px rgba(220,53,34,0.18); }
+.brite-logo img { max-height: 34px; max-width: 34px; width: auto; object-fit: contain; display: block; border-radius: 8px; }
+.brite-logo .brite-fallback {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 22px; padding: 0 7px;
+  font-weight: 700; font-size: 10.5px;
+  border-radius: 6px; letter-spacing: 0.2px;
+  min-width: 34px; line-height: 1;
+}
+/* Bank name + speed micro-label (fills the centre so rows never look empty) */
+.brite-bank-name {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.brite-bank-name .bn-title {
+  font-size: 15px; font-weight: 700;
+  color: #1A1A1A; line-height: 1.25; letter-spacing: -0.01em;
+}
+.brite-bank-name .bn-sub {
+  font-size: 11.5px; font-weight: 500;
+  color: #8B6BA8; line-height: 1.2;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.brite-bank-tile.selected .bn-sub { color: var(--cta); }
+/* "Meest gekozen" — small inline pill before the chevron */
+.brite-popular-badge {
+  flex-shrink: 0;
+  background: rgba(220,53,34,0.12); color: var(--cta);
+  font-size: 9.5px; font-weight: 800;
+  padding: 3px 9px; border-radius: 20px;
+  letter-spacing: 0.3px; text-transform: uppercase;
+  white-space: nowrap;
+}
+/* Disclosure chevron — right anchor + "tap to pay" affordance */
+.brite-bank-go {
+  flex-shrink: 0;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(107,33,168,0.05); color: rgba(107,33,168,0.40);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s ease, color .2s ease, transform .25s cubic-bezier(0.22,1,0.36,1);
+}
+.brite-bank-go svg { width: 16px; height: 16px; }
+.brite-bank-tile:hover .brite-bank-go { background: rgba(220,53,34,0.16); color: var(--cta); transform: translateX(2px); }
+.brite-bank-tile.selected .brite-bank-go { background: var(--cta); color: #fff; box-shadow: 0 3px 8px rgba(220,53,34,0.35); }
+.brite-secured {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 14px; padding: 10px 12px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 11px; color: var(--muted);
+}
+.brite-lock { font-size: 13px; }
+.brite-badge { height: 18px; vertical-align: middle; }
+@media (max-width: 520px) {
+  .brite-country-switcher { flex-wrap: nowrap; overflow-x: auto; padding: 8px; }
+  .brite-country-switcher::-webkit-scrollbar { display: none; }
+  .brite-country-switcher button { flex-shrink: 0; padding: 7px 11px; font-size: 13px; }
+  .brite-cs-label { display: none; }
+  .brite-card-head { padding: 14px 14px 10px; gap: 10px; }
+  .brite-card-head .pm-name {
+    font-size: 15px; line-height: 1.3; gap: 6px;
+    flex-direction: column; align-items: flex-start;
+  }
+  .pm-name-divider { display: none; }
+  .pm-name-brite { font-size: 12px; gap: 5px; }
+  .pm-brite-inline-logo { height: 18px; }
+  .brite-instant-hero {
+    display: block;
+    background: linear-gradient(135deg, rgba(46,160,67,0.08), rgba(220,53,34,0.05));
+    border: 1.5px solid rgba(46,160,67,0.22);
+    border-radius: var(--radius);
+    padding: 12px 14px; margin: 4px 0 10px; text-align: center;
+  }
+  .brite-instant-hero .ih-headline {
+    font-size: 15px; font-weight: 800; color: #1a6e2e;
+    margin: 0 0 4px; display: flex; align-items: center;
+    justify-content: center; gap: 6px;
+  }
+  .brite-instant-hero .ih-sub { font-size: 12px; color: var(--text, #444); line-height: 1.35; }
+  .brite-instant-hero .ih-sub strong { color: var(--heading); }
+  /* Bank list stays a vertical list on mobile — keep the premium two-line row */
+  .brite-bank-grid { gap: 7px; }
+  .brite-bank-tile { padding: 11px 13px; gap: 11px; }
+  .brite-bank-tile:active { background: rgba(220,53,34,0.06); }
+  .brite-logo { width: 46px; height: 46px; border-radius: 11px; }
+  .brite-logo img { max-height: 40px; max-width: 40px; border-radius: 9px; }
+  .brite-logo .brite-fallback { height: 24px; font-size: 11px; padding: 0 7px; min-width: 34px; }
+  .brite-bank-name .bn-title { font-size: 14.5px; }
+  .brite-bank-name .bn-sub { font-size: 11px; }
+  /* Drop the badge on mobile — it crowds the row; the green hero already carries the proof */
+  .brite-popular-badge { display: none; }
+  .brite-bank-go { width: 26px; height: 26px; }
+  .brite-bank-go svg { width: 14px; height: 14px; }
+  .brite-trust-strip { display: none; }
+  .brite-secured { font-size: 10px; padding: 8px 10px; margin-top: 10px; gap: 5px; justify-content: center; }
+  .brite-badge { height: 16px; }
+  .brite-card-body { padding: 4px 12px 12px; }
+}
+@media (min-width: 521px) { .brite-instant-hero { display: none; } }
 </style>
 
 <!-- ═══ PROJEKT KONFIGURACE + FACEBOOK PIXEL ═══ -->
@@ -3454,6 +3694,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // Aktualizuj PayPal Express cenu
     var paypalPrice = document.getElementById('paypal-price');
     if (paypalPrice) paypalPrice.textContent = '— ' + formatPrice(total);
+
+    // Pre-warm the Brite cart on any selection change (Brite live only; no-op otherwise)
+    if (window.__briteScheduleWarmup) window.__briteScheduleWarmup();
   }
 
   // Starý alias pro zpětnou kompatibilitu
@@ -5243,7 +5486,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
       // Flatten methods from all gateways into a single list
       allPaymentOptions = [];
+      // ── BRITE SAFETY GATE ──────────────────────────────────────────────
+      // The REAL renderPaymentMethods NEVER renders Brite — the Brite picker is
+      // owned entirely by the dedicated emulator IIFE at the end of the file
+      // (it fetches its own /store/payment-options + /store/banks and injects the
+      // card on top). Skipping Brite here prevents a duplicate, unstyled radio.
       (data.gateways || []).forEach(function(gw) {
+        if (gw.provider === 'brite') {
+          console.log('[Brite] gateway active but gated out of real renderer (handled by Brite emulator)');
+          return; // never expose Brite on the real flow
+        }
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
         (gw.methods || []).forEach(function(m) {
           // Override display names for Dutch checkout
@@ -6934,6 +7186,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   // Create background cart on server after email is entered
   function createBackgroundCart() {
+    // BRITE: the fast-checkout warm-up owns the cart; don't create a separate
+    // abandoned-recovery background cart (avoids an orphaned cart + lets the
+    // fast path engage). Non-Brite customers are unaffected.
+    if (window.__briteFastEnabled === true) return;
     var emailEl = document.getElementById('email');
     if (!emailEl || !emailEl.value || emailEl.value.indexOf('@') === -1) return;
     if (backgroundCartId) return; // Already created
@@ -7261,6 +7517,59 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   }
 
+  /* ─── BRITE FAST CHECKOUT — cart warm-up ─────────────────────────────────────
+     Pre-builds the cart (bundle + bump + shipping) in the background while the
+     customer fills the form, so submit only does address + payment (≈4 calls
+     instead of ≈10). Engages ONLY when the Brite live gateway is active (the
+     emulator sets window.__briteFastEnabled). Any failure/mismatch → normal
+     submit chain. dehondenbijbel uses VARIANT_ID + selectedBundleQty. */
+  window.__briteFastEnabled = false; // flipped to true by the Brite emulator when live
+  // The emulator (separate IIFE scope) calls this to engage the fast path: ignore any
+  // restored background cart so the warm cart can be reused (briteFast requires no reuse cart).
+  window.__briteEnableFast = function() {
+    window.__briteFastEnabled = true;
+    backgroundCartId = null;
+  };
+  function briteSelectionSig(variantId, qty, bump, regionId) {
+    return [variantId || '', qty || 1, bump ? '1' : '0', regionId || ''].join('|');
+  }
+  function briteWarmup() {
+    if (window.__briteFastEnabled !== true) return;
+    if (savedPromoCode) return;                       // never warm a promo cart
+    var variantId = VARIANT_ID, qty = selectedBundleQty, bump = !!orderBumpActive, regionId = currentRegionId;
+    if (!variantId || !regionId) return;
+    var sig = briteSelectionSig(variantId, qty, bump, regionId);
+    var cur = window.__briteWarm;
+    if (cur && cur.sig === sig && (cur.ready || cur.inflight)) return; // already warming/warmed
+    var w = { sig: sig, ready: false, inflight: true, cartId: null };
+    window.__briteWarm = w;
+    medusaFetch('/store/carts', { method: 'POST', body: JSON.stringify({ region_id: regionId }) })
+      .then(function(res) {
+        if (window.__briteWarm !== w) return;          // superseded by a newer selection
+        w.cartId = res.cart.id;
+        return medusaFetch('/store/carts/' + w.cartId + '/line-items-bundle', { method: 'POST', body: JSON.stringify({ variant_id: variantId, quantity: qty }) })
+          .then(function() {
+            if (bump && PROJECT_CONFIG.upsellProduct) {
+              return medusaFetch('/store/carts/' + w.cartId + '/line-items-bundle', { method: 'POST', body: JSON.stringify({ variant_id: PROJECT_CONFIG.upsellProduct.variantId, quantity: 1 }) });
+            }
+          })
+          .then(function() { return medusaFetch('/store/shipping-options?cart_id=' + w.cartId, { method: 'GET' }); })
+          .then(function(shipRes) {
+            var opts = (shipRes.shipping_options || []);
+            if (!opts.length) throw new Error('no shipping options');
+            return medusaFetch('/store/carts/' + w.cartId + '/shipping-methods', { method: 'POST', body: JSON.stringify({ option_id: opts[0].id }) });
+          })
+          .then(function() { if (window.__briteWarm === w) { w.ready = true; w.inflight = false; } });
+      })
+      .catch(function() { if (window.__briteWarm === w) { w.ready = false; w.inflight = false; } /* submit falls back to the normal chain */ });
+  }
+  var __briteWarmTimer = null;
+  window.__briteScheduleWarmup = function() {
+    if (window.__briteFastEnabled !== true) return;
+    clearTimeout(__briteWarmTimer);
+    __briteWarmTimer = setTimeout(briteWarmup, 600);
+  };
+
   /* ─── FORMULIER SUBMIT ─── */
   var form = document.getElementById('checkout-form');
   var submitBtn = document.getElementById('submit-btn');
@@ -7277,6 +7586,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
       return;
+    }
+
+    // ── BRITE SELECTION OVERRIDE ──
+    // The Brite picker drives selection via window globals (separate from the
+    // page's local selectedMethod/Provider vars). When a Brite bank/method is
+    // chosen, force the local selection to Brite so the session is created with
+    // the Brite provider — otherwise submit falls through to the page default.
+    if (window.__briteSelected === true) {
+      selectedMethod = window.__briteMethod || 'pay_by_bank';
+      selectedProvider = 'brite';
+      selectedProviderId = 'pp_brite_brite';
     }
 
     // Toon laadstatus
@@ -7414,8 +7734,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // Stap 1: Cart aanmaken of hergebruiken (promo cart → background cart → nieuw)
     var reuseCartId = promoCartId || backgroundCartId;
+    // ── BRITE FAST PATH: reuse the pre-warmed cart (bundle+shipping already added) ──
+    var briteWarm = window.__briteWarm;
+    var briteFast = (window.__briteFastEnabled === true) && !savedPromoCode && !reuseCartId
+      && briteWarm && briteWarm.ready === true && briteWarm.cartId
+      && briteWarm.sig === briteSelectionSig(VARIANT_ID, checkoutBundleQty, checkoutOrderBump, currentRegionId);
     var cartStep;
-    if (reuseCartId) {
+    if (briteFast) {
+      briteWarm.ready = false;                 // consume — a retry re-warms or falls back
+      cartStep = Promise.resolve(briteWarm.cartId);
+    } else if (reuseCartId) {
       // Cart bestaat al (promo code validatie of background cart recovery)
       // Verwijder bestaande line items en voeg opnieuw toe (bundle/qty kan veranderd zijn)
       cartStep = medusaFetch('/store/carts/' + reuseCartId, { method: 'GET' })
@@ -7446,26 +7774,43 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     cartStep
     .then(function(cartId) {
-      // Stap 2a: Hoofdproduct toevoegen via bundle endpoint (custom pricing)
-      // Uses /store/carts/{id}/line-items-bundle which applies bundle discount server-side
-      return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
-        method: 'POST',
-        body: JSON.stringify({
-          variant_id: VARIANT_ID,
-          quantity: checkoutBundleQty
-        })
-      }).then(function() {
-        // Stap 2b: Order bump produkt toevoegen (bundle endpoint = tax-inclusive + discounted price)
-        if (checkoutOrderBump) {
-          return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
-            method: 'POST',
-            body: JSON.stringify({
-              variant_id: PROJECT_CONFIG.upsellProduct.variantId,
-              quantity: 1
-            })
-          });
-        }
-      }).then(function() { return cartId; });
+      // Stap 2a/2b: hoofdproduct + order bump via bundle endpoint (custom pricing).
+      // FAST: the warmed cart already has these → skip the adds, but KEEP the verify-GET.
+      var addStep;
+      if (briteFast) {
+        addStep = Promise.resolve();
+      } else {
+        addStep = medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
+          method: 'POST',
+          body: JSON.stringify({
+            variant_id: VARIANT_ID,
+            quantity: checkoutBundleQty
+          })
+        }).then(function() {
+          // Stap 2b: Order bump produkt toevoegen (bundle endpoint = tax-inclusive + discounted price)
+          if (checkoutOrderBump) {
+            return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
+              method: 'POST',
+              body: JSON.stringify({
+                variant_id: PROJECT_CONFIG.upsellProduct.variantId,
+                quantity: 1
+              })
+            });
+          }
+        });
+      }
+      return addStep.then(function() {
+        // Verify cart has items + total>0 — kept in BOTH paths (incl. FAST) so a €0/empty
+        // cart can never reach payment.
+        return medusaFetch('/store/carts/' + cartId, { method: 'GET' }).then(function(cartRes) {
+          var cart = cartRes.cart;
+          if (!cart.items || cart.items.length === 0 || cart.total <= 0) {
+            console.error('[Checkout] Cart is empty after adding items — aborting checkout');
+            throw new Error('Er is een fout opgetreden bij het aanmaken van je bestelling. Probeer het opnieuw of neem contact met ons op.');
+          }
+          return cartId;
+        });
+      });
     })
     .then(function(cartId) {
       // Stap 3: Cart updaten met klantgegevens (must complete before shipping)
@@ -7509,7 +7854,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return cartId;
     })
     .then(function(cartId) {
-      // Stap 3b: Shipping method toevoegen
+      // Stap 3b: Shipping method toevoegen.
+      // FAST: the warmed cart already has a shipping method → skip it; repaint the
+      // summary async (off the critical path) and proceed straight to payment.
+      if (briteFast) {
+        medusaFetch('/store/carts/' + cartId, { method: 'GET' })
+          .then(function(r) { try { updateOrderSummary(r.cart); } catch(e) {} })
+          .catch(function() {});
+        return cartId;
+      }
       return medusaFetch('/store/shipping-options?cart_id=' + cartId, {
         method: 'GET'
       }).then(function(shipRes) {
@@ -7558,6 +7911,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             unit_price: checkoutBundlePrice / (checkoutBundleQty || 1),
           }],
         };
+        // Brite: always pass the chosen method so the backend routes to the right
+        // endpoint (pay_by_bank → deposit, ideal → create_ideal_payment, swish →
+        // create_swish_payment). bank_id only for pay_by_bank (iDEAL/Swish pick the
+        // bank inside their own flow, so no pre-selection).
+        if (selectedProvider === 'brite') {
+          sessionData.method = window.__briteMethod || 'pay_by_bank';
+          if (window.__briteBankId) sessionData.bank_id = window.__briteBankId;
+        }
       }
 
       // For credit card: tokenize card data (branched by provider)
@@ -7673,6 +8034,61 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var lastSession = sessions[sessions.length - 1] || {};
         var providerData = lastSession.data || {};
         var redirectUrl = providerData.checkoutUrl || providerData.approvalUrl;
+
+        // ─── BRITE EMBEDDED (Web SDK) FLOW ───
+        // Brite "Pay by Bank" renders an in-page iframe (no redirect). The embedded
+        // handler lives in the Brite emulator (window.__briteOpenEmbedded); when
+        // present and Brite is the chosen provider, hand off to it. On success it
+        // completes the cart via the callback we pass. Falls through to the hosted
+        // redirect (checkoutUrl) if the SDK handler isn't available.
+        if (selectedProvider === 'brite' && providerData.briteToken && typeof window.__briteOpenEmbedded === 'function') {
+          return window.__briteOpenEmbedded({
+            token: providerData.briteToken,
+            bankId: providerData.preselected_bank || window.__briteBankId || null,
+            cartId: result.cartId,
+            onComplete: function() {
+              // Brite settles asynchronously: at STATE_COMPLETED the cart may need a
+              // moment before Medusa can authorize the payment. Poll a few times, then
+              // fall back to a "we're confirming" message — the webhook safety-net
+              // finalizes the order server-side, so the payment is never lost and the
+              // button never hangs silently.
+              if (!document.querySelector('.payment-preloader')) {
+                var pl = document.createElement('div');
+                pl.className = 'payment-preloader';
+                pl.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
+                document.body.insertBefore(pl, document.body.firstChild);
+              }
+              function redirectToNext(order) {
+                localStorage.setItem('medusa_order_id', order.id || '');
+                localStorage.setItem('medusa_order_display_id', order.display_id || '');
+                if (PROJECT_CONFIG.upsellEnabled === false) { window.location.href = PROJECT_CONFIG.thankYouUrl; }
+                else if (checkoutOrderBump) { localStorage.setItem('medusa_upsell_purchased', 'true'); window.location.href = PROJECT_CONFIG.thankYouUrl; }
+                else { window.location.href = PROJECT_CONFIG.upsellUrl; }
+              }
+              function attempt(n) {
+                return medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' })
+                  .then(function(completeRes) { redirectToNext(window.__extractOrderOrThrow(completeRes)); })
+                  .catch(function(err) {
+                    if (n < 5) {
+                      return new Promise(function(r){ setTimeout(r, 2500); }).then(function(){ return attempt(n + 1); });
+                    }
+                    // Give up client-side — never hang. Inform + reset; safety-net finalizes.
+                    var p = document.querySelector('.payment-preloader'); if (p) p.remove();
+                    errorEl.textContent = 'Je betaling wordt nog bevestigd. Zodra deze rond is ontvang je een bevestiging per e-mail. Sluit deze pagina niet.';
+                    submitBtn.classList.remove('loading'); submitBtn.disabled = false;
+                  });
+              }
+              return attempt(0);
+            },
+            onCancel: function(reason) {
+              submitBtn.classList.remove('loading');
+              submitBtn.disabled = false;
+              if (reason === 'failed' || reason === 'error') {
+                errorEl.textContent = 'De betaling is niet gelukt. Probeer het opnieuw of kies een andere bank.';
+              }
+            }
+          });
+        }
 
         // Credit card without 3DS: payment already completed, complete cart directly
         if (!redirectUrl && selectedMethod === 'creditcard' && providerData.status === 'paid') {
@@ -8084,6 +8500,632 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // Legacy static PayPal Express removed — replaced by dynamic initExpressCheckout()
   // which renders PayPal SDK Buttons, Google Pay, Apple Pay based on active gateways.
 
+})();
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   BRITE "PAY BY BANK" EMULATOR — ported from loslatenboek (NL/EUR).
+   LIVE: renders the Brite picker for real customers ONLY when the backend returns
+   an ACTIVE Brite gateway for this project+currency (admin-driven). DEMO (?brite=1):
+   fully-mocked sales preview. Stubs /store/payment-options + /store/banks only in
+   demo mode; in live mode the real backend serves everything.
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function(){
+  // ── GATE ──────────────────────────────────────────────────────────────────
+  var params = new URLSearchParams(window.location.search);
+  var briteDemo = params.get('brite') === '1' || params.get('demo_brite') === '1';
+  // LIVE mode (no ?brite=1): render the Brite picker for real customers, but ONLY
+  // when the live backend returns an ACTIVE Brite gateway for this project+currency.
+  // 100% admin-driven. DEMO mode (?brite=1) keeps the fully-mocked sales preview.
+  var briteReal = !briteDemo;
+
+  var WM = "https://commons.wikimedia.org/wiki/Special:FilePath/";
+  var BANKS = {
+    NL: [
+      { id:"ING_NL",     name:"ING",          logo: WM + "ING_logo.svg",                       fallback:{label:"ING",   bg:"#FF6200", fg:"#FFF"} },
+      { id:"RABO_NL",    name:"Rabobank",     logo: WM + "Rabobank_text_logo.svg",             fallback:{label:"Rabo",  bg:"#003D6A", fg:"#FFF"} },
+      { id:"ABN_NL",     name:"ABN AMRO",     logo: WM + "ABN-AMRO_Logo_new_colors.svg",       fallback:{label:"ABN",   bg:"#009A44", fg:"#FFF"} },
+      { id:"SNS_NL",     name:"SNS",          logo: WM + "De_Volksbank_logo.svg",              fallback:{label:"SNS",   bg:"#005EB8", fg:"#FFF"} },
+      { id:"BUNQ_NL",    name:"Bunq",         logo: WM + "Bunq_(bank)_company_logo_2017.svg",  fallback:{label:"Bunq",  bg:"#FFE800", fg:"#1A1A1A"} },
+      { id:"KNAB_NL",    name:"Knab",         logo: WM + "Knab_logo.svg",                      fallback:{label:"Knab",  bg:"#E5007D", fg:"#FFF"} },
+      { id:"ASN_NL",     name:"ASN Bank",     logo: WM + "ASN_Bank_unverified.svg",            fallback:{label:"ASN",   bg:"#7AB800", fg:"#FFF"} },
+      { id:"REGIO_NL",   name:"RegioBank",    logo: WM + "Regiobank_Logo.svg",                 fallback:{label:"Regio", bg:"#0066B3", fg:"#FFF"} },
+      { id:"TRIODOS_NL", name:"Triodos",      logo: WM + "Triodos_Bank_textlogo.svg",          fallback:{label:"Triodos", bg:"#005E50", fg:"#FFF"} },
+      { id:"REVOLUT_NL", name:"Revolut",      logo: WM + "Revolut_logo.svg",                   fallback:{label:"Revolut", bg:"#0666EB", fg:"#FFF"} },
+      { id:"N26_NL",     name:"N26",          logo: WM + "N26_logo.svg",                       fallback:{label:"N26",   bg:"#1A1A1A", fg:"#FFF"} },
+      { id:"WISE_NL",    name:"Wise",         logo: WM + "Wise_Logo_512x124.svg",              fallback:{label:"Wise",  bg:"#163300", fg:"#9FE870"} },
+    ],
+    BE: [
+      { id:"KBC_BE",     name:"KBC",          logo: WM + "KBC_logo.svg",                       fallback:{label:"KBC",   bg:"#003B6F", fg:"#FFF"} },
+      { id:"BNP_BE",     name:"BNP Fortis",   logo: WM + "BNP_Paribas_logo.svg",               fallback:{label:"BNP",   bg:"#00915A", fg:"#FFF"} },
+      { id:"BELFIUS_BE", name:"Belfius",      logo: WM + "Belfius.svg",                        fallback:{label:"Belfius", bg:"#E60028", fg:"#FFF"} },
+      { id:"ING_BE",     name:"ING België",   logo: WM + "ING_logo.svg",                       fallback:{label:"ING",   bg:"#FF6200", fg:"#FFF"} },
+      { id:"ARGENTA_BE", name:"Argenta",      logo: WM + "Argenta_logo.svg",                   fallback:{label:"Argenta", bg:"#00A859", fg:"#FFF"} },
+      { id:"CRELAN_BE",  name:"Crelan",       logo: WM + "Crelan_logo.svg",                    fallback:{label:"Crelan", bg:"#005CA9", fg:"#FFF"} },
+      { id:"AXA_BE",     name:"AXA Bank",     logo: WM + "AXA_Logo.svg",                       fallback:{label:"AXA",   bg:"#00008F", fg:"#FFF"} },
+      { id:"BEOBANK_BE", name:"Beobank",      logo: WM + "Beobank_logo.svg",                   fallback:{label:"Beobank", bg:"#E60028", fg:"#FFF"} },
+    ],
+    DE: [
+      { id:"SPARK_DE",   name:"Sparkasse",    logo: WM + "Sparkasse.svg",                      fallback:{label:"S",     bg:"#FF0000", fg:"#FFF"} },
+      { id:"VOLKS_DE",   name:"Volksbank",    logo: WM + "Volksbank_Logo.svg",                 fallback:{label:"VR",    bg:"#F39200", fg:"#FFF"} },
+      { id:"DB_DE",      name:"Deutsche Bank",logo: WM + "Deutsche_Bank-Logo.svg",             fallback:{label:"DB",    bg:"#0018A8", fg:"#FFF"} },
+      { id:"COBA_DE",    name:"Commerzbank",  logo: WM + "Commerzbank-Logo.svg",               fallback:{label:"Co",    bg:"#FFCC00", fg:"#1A1A1A"} },
+      { id:"ING_DE",     name:"ING-DiBa",     logo: WM + "ING_logo.svg",                       fallback:{label:"ING",   bg:"#FF6200", fg:"#FFF"} },
+      { id:"DKB_DE",     name:"DKB",          logo: WM + "DKB_Logo.svg",                       fallback:{label:"DKB",   bg:"#14143C", fg:"#FFF"} },
+      { id:"POST_DE",    name:"Postbank",     logo: WM + "Postbank-Logo.svg",                  fallback:{label:"Post",  bg:"#FFCC00", fg:"#1A1A1A"} },
+      { id:"COMDIR_DE",  name:"Comdirect",    logo: WM + "Comdirect_logo.svg",                 fallback:{label:"Comdir.", bg:"#FFD000", fg:"#1A1A1A"} },
+    ],
+    SE: [
+      { id:"SWED_SE",    name:"Swedbank",     logo: WM + "Swedbank_wordmark.svg",              fallback:{label:"Swed",  bg:"#F65A1F", fg:"#FFF"} },
+      { id:"SHB_SE",     name:"Handelsbanken",logo: WM + "Handelsbanken_logo.svg",             fallback:{label:"SHB",   bg:"#005AA0", fg:"#FFF"} },
+      { id:"SEB_SE",     name:"SEB",          logo: WM + "SEB_logo.svg",                       fallback:{label:"SEB",   bg:"#5F9E31", fg:"#FFF"} },
+      { id:"NORDEA_SE",  name:"Nordea",       logo: WM + "Nordea.svg",                         fallback:{label:"Nordea",bg:"#00005E", fg:"#FFF"} },
+      { id:"ICA_SE",     name:"ICA Banken",   logo: WM + "ICA_Banken_logo.svg",                fallback:{label:"ICA",   bg:"#E60012", fg:"#FFF"} },
+      { id:"LFS_SE",     name:"Länsförsäkr.", logo: WM + "Länsförsäkringar_logo.svg",          fallback:{label:"LF",    bg:"#005AA0", fg:"#FFF"} },
+      { id:"DANSKE_SE",  name:"Danske Bank",  logo: WM + "Danske_Bank_logo.svg",               fallback:{label:"Danske",bg:"#003755", fg:"#FFF"} },
+    ],
+    NO: [
+      { id:"DNB_NO",     name:"DNB",          logo: WM + "DNB_Logo.svg",                       fallback:{label:"DNB",   bg:"#007A33", fg:"#FFF"} },
+      { id:"SB1_NO",     name:"SpareBank 1",  logo: WM + "SpareBank1.svg",                     fallback:{label:"SB1",   bg:"#C8102E", fg:"#FFF"} },
+      { id:"NORDEA_NO",  name:"Nordea",       logo: WM + "Nordea.svg",                         fallback:{label:"Nordea",bg:"#00005E", fg:"#FFF"} },
+      { id:"DANSKE_NO",  name:"Danske Bank",  logo: WM + "Danske_Bank_logo.svg",               fallback:{label:"Danske",bg:"#003755", fg:"#FFF"} },
+      { id:"SHB_NO",     name:"Handelsbanken",logo: WM + "Handelsbanken_logo.svg",             fallback:{label:"SHB",   bg:"#005AA0", fg:"#FFF"} },
+    ],
+    GB: [
+      { id:"BARCLAYS_GB",name:"Barclays",     logo: WM + "Barclays-Logo.svg",                  fallback:{label:"Barclays",bg:"#00AEEF", fg:"#FFF"} },
+      { id:"HSBC_GB",    name:"HSBC",         logo: WM + "HSBC_logo_(2018).svg",               fallback:{label:"HSBC",  bg:"#DB0011", fg:"#FFF"} },
+      { id:"NW_GB",      name:"NatWest",      logo: WM + "NatWest_wordmark.svg",               fallback:{label:"NatWest", bg:"#5A287D", fg:"#FFF"} },
+      { id:"SAN_GB",     name:"Santander",    logo: WM + "Banco_Santander_Logotipo.svg",       fallback:{label:"Sant",  bg:"#EC0000", fg:"#FFF"} },
+      { id:"MONZO_GB",   name:"Monzo",        logo: WM + "Monzo_2022_logo.svg",                fallback:{label:"Monzo", bg:"#FF3464", fg:"#FFF"} },
+      { id:"STARLING_GB",name:"Starling",     logo: WM + "Starling_Bank_Logo.svg",             fallback:{label:"Starling",bg:"#7D2BE5", fg:"#FFF"} },
+      { id:"TSB_GB",     name:"TSB",          logo: WM + "TSB_logo.svg",                       fallback:{label:"TSB",   bg:"#001E62", fg:"#FFF"} },
+    ],
+  };
+
+  /* ─── 1) DEMO ONLY: monkey-patch fetch to mock /store/payment-options + /store/banks.
+     In LIVE mode we NEVER touch fetch — the real backend serves everything. ─── */
+  var originalFetch = window.fetch.bind(window);
+  if (briteDemo) {
+  window.fetch = function(input, init) {
+    var url = typeof input === 'string' ? input : input.url;
+
+    if (/\/store\/payment-options/.test(url)) {
+      var mock = {
+        gateways: [
+          {
+            id: 'demo_brite_001', provider: 'brite', display_name: 'Brite Payments',
+            mode: 'test', environment: 'sandbox', priority: 0,
+            methods: [{
+              code: 'pay_by_bank', display_name: 'Betalen met je bank',
+              icon: 'pay_by_bank', sort_order: 0,
+              available_countries: ['nl','be','de','se','no','gb','lu','fi','dk','ie'],
+              supported_currencies: ['EUR','SEK','NOK','GBP'],
+              provider_id: 'pp_brite_brite',
+            }]
+          },
+          {
+            id: 'demo_mollie_001', provider: 'mollie', display_name: 'Mollie',
+            mode: 'test', environment: 'test', priority: 1,
+            methods: [
+              { code: 'ideal',      display_name: 'iDEAL',      icon: 'ideal',      sort_order: 1, available_countries: ['nl'], supported_currencies: ['EUR'], provider_id: 'pp_mollie_mollie' },
+              { code: 'bancontact', display_name: 'Bancontact', icon: 'bancontact', sort_order: 2, available_countries: ['be'], supported_currencies: ['EUR'], provider_id: 'pp_mollie_mollie' },
+              { code: 'creditcard', display_name: 'Creditcard', icon: 'card',       sort_order: 3, available_countries: [],     supported_currencies: ['EUR'], provider_id: 'pp_mollie_mollie' },
+            ]
+          },
+          {
+            id: 'demo_paypal_001', provider: 'paypal', display_name: 'PayPal',
+            mode: 'test', environment: 'sandbox', priority: 2,
+            methods: [{
+              code: 'paypal', display_name: 'PayPal', icon: 'paypal', sort_order: 4,
+              available_countries: [], supported_currencies: [],
+              provider_id: 'pp_paypal_paypal', express: false,
+            }]
+          },
+          {
+            id: 'demo_klarna_001', provider: 'klarna', display_name: 'Klarna',
+            mode: 'test', environment: 'playground', priority: 3,
+            methods: [
+              { code: 'klarna',       display_name: 'Klarna — Pay now',     icon: 'klarna', sort_order: 5, available_countries: ['nl','be','de','at','fi','fr','it','se','es','dk','no','gb','ie'], supported_currencies: [], provider_id: 'pp_klarna_klarna' },
+              { code: 'klarna_later', display_name: 'Klarna — Pay later',   icon: 'klarna', sort_order: 6, available_countries: ['nl','be','de','at','fi','fr','it','se','es','dk','no','gb','ie'], supported_currencies: [], provider_id: 'pp_klarna_klarna' },
+              { code: 'klarna_slice', display_name: 'Klarna — Pay in 3',    icon: 'klarna', sort_order: 7, available_countries: ['nl','be','de','at','fi','fr','it','se','es','dk','no','gb','ie'], supported_currencies: [], provider_id: 'pp_klarna_klarna' },
+            ]
+          },
+        ]
+      };
+      console.log('[Brite Demo] Returning fully mocked /store/payment-options (backend not called)');
+      return Promise.resolve(new Response(JSON.stringify(mock), {
+        status: 200, headers: { 'Content-Type': 'application/json' }
+      }));
+    }
+
+    if (/\/store\/banks/.test(url)) {
+      var qs = url.split('?')[1] || '';
+      var country = (new URLSearchParams(qs).get('country') || 'NL').toUpperCase();
+      var banks = BANKS[country] || [];
+      var payload = {
+        country: country,
+        count: banks.length,
+        banks: banks.map(function(b, i){
+          return { bank_id: b.id, name: b.name, logo_url: b.logo, sort_order: i, _fallback: b.fallback };
+        })
+      };
+      console.log('[Brite Demo] Mocked /store/banks?country=' + country + ' →', banks.length, 'banks');
+      return Promise.resolve(new Response(JSON.stringify(payload), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }));
+    }
+
+    return originalFetch(input, init);
+  };
+  }
+
+  /* ─── 2) Replace the default pay_by_bank radio with the Brite picker ─── */
+  function fallbackHTML(fb){
+    return '<span class="brite-fallback" style="background:' + fb.bg + ';color:' + fb.fg + '">' + fb.label + '</span>';
+  }
+
+  function keepScroll(fn){
+    var anchor = document.getElementById('brite-card');
+    var before = anchor ? anchor.getBoundingClientRect().top : null;
+    fn();
+    function settle(){
+      if (anchor == null || before == null) return;
+      var delta = anchor.getBoundingClientRect().top - before;
+      if (Math.abs(delta) > 0.5) window.scrollBy(0, delta);
+    }
+    settle();
+    requestAnimationFrame(settle);
+  }
+
+  function briteCurrentPrice() {
+    var bt = document.querySelector('.btn-text');
+    var m = bt ? bt.textContent.match(/€\s*[\d.,]+/) : null;
+    if (m) return m[0];
+    var tot = document.getElementById('summary-total') || document.getElementById('total-price');
+    return tot ? (tot.textContent.match(/€\s*[\d.,]+/) || [''])[0] : '';
+  }
+  function briteButtonLabel() {
+    var name = window.__briteBankName || 'je bank';
+    var price = briteCurrentPrice();
+    return 'Betalen met ' + name + (price ? ' — ' + price : '');
+  }
+  function applyBriteButton() {
+    var bt = document.querySelector('.btn-text');
+    if (!bt) return;
+    var want = briteButtonLabel();
+    if (bt.textContent !== want) bt.textContent = want;
+    if (!bt.__briteObserved) {
+      bt.__briteObserved = true;
+      new MutationObserver(function(){
+        if (window.__briteSelected !== true) return;
+        var w = briteButtonLabel();
+        if (bt.textContent !== w) bt.textContent = w;
+      }).observe(bt, { childList: true, characterData: true, subtree: true });
+    }
+  }
+  function restoreDefaultButton() {
+    var bt = document.querySelector('.btn-text');
+    if (!bt) return;
+    var price = briteCurrentPrice();
+    bt.textContent = 'Bestelling afronden' + (price ? ' — ' + price : '');
+  }
+
+  // ─── Brite embedded Web SDK launcher ───────────────────────────────────────
+  window.__briteOpenEmbedded = function(opts){
+    return new Promise(function(resolve){
+      // Mobile: per Brite docs the SDK container MUST occupy the full viewport
+      // (100vw/100vh). A small modal cramps the bank login / app-switch → aborts.
+      var isMobile = !!(window.matchMedia && window.matchMedia('(max-width: 767px)').matches);
+      var ov = document.createElement('div');
+      ov.id = 'brite-embed-overlay';
+      ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(107,33,168,0.55);display:flex;align-items:center;justify-content:center;padding:' + (isMobile ? '0' : '16px') + ';';
+      var box = document.createElement('div');
+      box.style.cssText = isMobile
+        ? 'background:#fff;overflow:hidden;width:100vw;height:100vh;display:flex;flex-direction:column;'
+        : 'background:#fff;border-radius:18px;overflow:hidden;width:100%;max-width:440px;box-shadow:0 24px 64px rgba(107,33,168,0.35);';
+      var head = document.createElement('div');
+      head.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(107,33,168,0.08);';
+      head.innerHTML = '<span style="font-weight:700;color:#1A1A1A;font-size:15px;font-family:inherit;">Betalen met je bank</span>';
+      // No own close button — only Brite's native iframe 'X' closes the payment, so Brite
+      // can capture a real "user closed" decision instead of a background session timeout.
+      var mount = document.createElement('div');
+      mount.id = 'brite-embed-mount';
+      mount.style.cssText = isMobile ? 'flex:1;min-height:0;background:#fff;' : 'min-height:560px;background:#fff;';
+      box.appendChild(head); box.appendChild(mount); ov.appendChild(box);
+      document.body.appendChild(ov);
+
+      var client = null, done = false;
+      function cleanup(){ try{ if(client && client.stop) client.stop(); }catch(e){} if(ov.parentNode) ov.parentNode.removeChild(ov); }
+      function finish(fn){ if(done) return; done = true; cleanup(); Promise.resolve(fn && fn()).then(function(){ resolve(); }).catch(function(e){ console.error('[Brite SDK] finish error:', e); resolve(); }); }
+
+      function launch(){
+        try {
+          client = new Brite(opts.token);
+          var B = window.Brite || {};
+          var ST_DONE  = (typeof B.STATE_COMPLETED !== 'undefined') ? B.STATE_COMPLETED : 12;
+          var ST_FAIL  = (typeof B.STATE_FAILED !== 'undefined') ? B.STATE_FAILED : 11;
+          var ST_ABORT = (typeof B.STATE_ABORTED !== 'undefined') ? B.STATE_ABORTED : 10;
+          var ST_AUTH  = (typeof B.STATE_AUTHENTICATION_COMPLETED !== 'undefined') ? B.STATE_AUTHENTICATION_COMPLETED : 2;
+          var startOpts = { selector: '#brite-embed-mount', width: '100%', height: isMobile ? Math.max(window.innerHeight - 52, 480) + 'px' : '560px', color_theme: 'light' };
+          if (opts.bankId) startOpts.bank_id = opts.bankId;
+          client.start(startOpts, function(state){
+            console.log('[Brite SDK] state:', state);
+            try { window.PaymentTracker && PaymentTracker.track('brite_sdk_state', { payload: { state: state } }); } catch(e){}
+            if (state === ST_DONE) {
+              finish(opts.onComplete);
+            } else if (state === ST_FAIL || state === ST_ABORT) {
+              finish(function(){ return opts.onCancel && opts.onCancel('failed'); });
+            } else if (state === ST_AUTH) {
+              if (!head.querySelector('.brite-embed-status')) {
+                var hd = document.createElement('span');
+                hd.className = 'brite-embed-status';
+                hd.style.cssText = 'font-size:12px;color:#2EA043;font-weight:600;margin-left:auto;margin-right:10px;';
+                hd.textContent = 'Betaling wordt bevestigd…';
+                head.appendChild(hd);
+              }
+            }
+          }, function(){ finish(function(){ return opts.onCancel && opts.onCancel('closed'); }); });
+        } catch(e){
+          console.error('[Brite SDK] init failed:', e);
+          if (opts.checkoutUrl) { cleanup(); window.location.href = opts.checkoutUrl; return; }
+          finish(function(){ return opts.onCancel && opts.onCancel('error'); });
+        }
+      }
+
+      if (typeof window.Brite !== 'undefined') { launch(); }
+      else {
+        var s = document.createElement('script');
+        s.src = 'https://websdk.britepayments.io/v1/client.js';
+        s.onload = launch;
+        s.onerror = function(){
+          console.error('[Brite SDK] script load failed');
+          if (opts.checkoutUrl) { cleanup(); window.location.href = opts.checkoutUrl; return; }
+          finish(opts.onCancel);
+        };
+        document.head.appendChild(s);
+      }
+    });
+  };
+
+  function buildBriteCard() {
+    var card = document.createElement('div');
+    card.className = 'brite-card selected';
+    card.id = 'brite-card';
+    card.setAttribute('data-method', 'pay_by_bank');
+    card.setAttribute('data-provider', 'brite');
+    card.setAttribute('data-provider-id', 'pp_brite_brite');
+    card.innerHTML = '' +
+      '<div class="brite-card-head">' +
+        '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
+        '<div class="pm-info">' +
+          '<div class="pm-name">' +
+            '<span class="pm-name-text">Betalen met je bank</span>' +
+            '<span class="pm-name-divider" aria-hidden="true">·</span>' +
+            '<span class="pm-name-brite">' +
+              '<span class="pm-name-brite-prefix">Directe betaling met</span>' +
+              '<img class="pm-brite-inline-logo" src="https://ext-assets.britepayments.com/assets/brite_badges/brite_badge_primary.svg" alt="Brite Payments" onerror="this.outerHTML=&apos;<strong class=&quot;pm-brite-inline-fallback&quot;>Brite Payments</strong>&apos;">' +
+            '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="brite-card-body">' +
+        '<div class="brite-instant-hero">' +
+          '<div class="ih-headline">⚡ Direct geboekt via je bank-app</div>' +
+          '<div class="ih-sub">Geen kaartgegevens · geen account aanmaken · <strong>klaar in 30 seconden</strong></div>' +
+        '</div>' +
+        '<div class="brite-trust-strip">' +
+          '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> Direct geboekt</span>' +
+          '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Geen kaartgegevens</span>' +
+          '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> &lt; 30 seconden</span>' +
+        '</div>' +
+        '<div class="brite-bank-grid" id="brite-bank-grid"></div>' +
+        '<div class="brite-secured">' +
+          '<span class="brite-lock">🔒</span>' +
+          '<span>Secured by</span>' +
+          '<img class="brite-badge" src="https://ext-assets.britepayments.com/assets/brite_badges/brite_badge_primary.svg" alt="Brite Payments" onerror="this.outerHTML=&apos;<strong style=&quot;color:#0A0B09;background:#FFE600;padding:2px 8px;border-radius:4px;font-weight:700;letter-spacing:0.3px;&quot;>Brite Payments</strong>&apos;">' +
+          '<span class="brite-reg">— PSD2-gereguleerd, EU</span>' +
+        '</div>' +
+      '</div>';
+    return card;
+  }
+
+  function renderBanksForCountry(country, country_iso) {
+    var grid = document.getElementById('brite-bank-grid');
+    if (!grid) return;
+    var cc = (country_iso || country);
+    // REAL backend fetch — pulls the real Brite bank_id + base64 logos from
+    // /store/banks (mode follows the active gateway). originalFetch bypasses the demo's stub.
+    var base = (window.PROJECT_CONFIG && PROJECT_CONFIG.medusaUrl) || '';
+    var key = (window.PROJECT_CONFIG && PROJECT_CONFIG.publishableApiKey) || '';
+    originalFetch(base + '/store/banks?country=' + cc, {
+      headers: key ? { 'x-publishable-api-key': key } : {}
+    }).then(function(r){ return r.json(); })
+      .catch(function(){ return { banks: [] }; })  // network/parse fail → mock fallback below (demo only)
+      .then(function(data){
+      var banks = (data && data.banks) || [];
+      // LIVE mode: NEVER fall back to the hardcoded demo banks — their bank_id values
+      // are sandbox/demo IDs and would produce an invalid real payment.
+      if (briteDemo && !banks.length && BANKS[cc]) {
+        banks = BANKS[cc].map(function(b){ return { bank_id: b.id, name: b.name, logo_url: b.logo, _fallback: b.fallback }; });
+      }
+      console.log('[Brite] /store/banks ' + cc + ' → ' + banks.length + ' banks (real backend)');
+      grid.innerHTML = '';
+      banks.forEach(function(b, idx){
+        var tile = document.createElement('div');
+        tile.className = 'brite-bank-tile' + (idx === 0 ? ' selected' : '');
+        tile.setAttribute('data-bank', b.bank_id);
+        var fb = JSON.stringify(fallbackHTML(b._fallback || {label:(b.name||'?').slice(0,6),bg:'#E8E8EC',fg:'#5A3D6B'})).replace(/"/g,'&quot;');
+        var popular = idx === 0 ? '<span class="brite-popular-badge">Meest gekozen</span>' : '';
+        var chevron = '<span class="brite-bank-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>';
+        tile.innerHTML =
+          '<div class="brite-bank-radio"></div>' +
+          '<div class="brite-logo">' +
+            (b.logo_url
+              ? '<img src="' + b.logo_url + '" alt="' + b.name + '" ' +
+                'onload="if(!this.naturalWidth||!this.naturalHeight){this.outerHTML=' + fb + '}" ' +
+                'onerror="this.outerHTML=' + fb + '">'
+              : fallbackHTML(b._fallback || {label:(b.name||'?').slice(0,6),bg:'#E8E8EC',fg:'#5A3D6B'})) +
+          '</div>' +
+          '<div class="brite-bank-name">' +
+            '<span class="bn-title">' + b.name + '</span>' +
+            '<span class="bn-sub">&#9889; Direct &amp; veilig betalen</span>' +
+          '</div>' +
+          popular +
+          chevron;
+        tile.addEventListener('click', function(){
+          keepScroll(function(){
+            [].forEach.call(grid.children, function(c){ c.classList.remove('selected'); });
+            tile.classList.add('selected');
+            window.selectedMethod = 'pay_by_bank';
+            window.selectedProvider = 'brite';
+            window.selectedProviderId = 'pp_brite_brite';
+            window.__briteBankId = b.bank_id;     // selected opaque bank_id → session + Web SDK
+            window.__briteBankName = b.name;       // drives the CTA button label
+            window.__briteMethod = 'pay_by_bank';
+            window.__briteSelected = true;          // submit handler uses Brite
+            applyBriteButton();
+            var briteCard = document.getElementById('brite-card');
+            briteCard.classList.add('selected');
+            if (window.__clearRealSelection) window.__clearRealSelection();  // mutual exclusivity
+            if (window.__clearBriteAlt) window.__clearBriteAlt();             // deselect iDEAL/Swish rows
+          });
+        });
+        grid.appendChild(tile);
+      });
+      // Default selection = first bank (so submit works even without an explicit click)
+      if (banks[0]) {
+        window.__briteBankId = banks[0].bank_id; window.__briteMethod = 'pay_by_bank';
+        window.__briteBankName = banks[0].name;
+        var bc = document.getElementById('brite-card');
+        if (bc && bc.classList.contains('selected')) {
+          window.__briteSelected = true;
+          applyBriteButton();
+          if (window.__clearRealSelection) window.__clearRealSelection();
+        }
+      }
+    }).catch(function(err){
+      console.warn('[Brite] banks fetch failed:', err);
+    });
+  }
+
+  /* ─── 3) Render the Brite card + alt rows directly into #payment-methods ─── */
+  function buildAltMethod(opts) {
+    var label = document.createElement('label');
+    label.className = 'payment-method';
+    label.setAttribute('data-method', opts.code);
+    label.setAttribute('data-provider', opts.provider);
+    label.innerHTML =
+      '<input type="radio" name="payment_method" value="' + opts.code + '">' +
+      '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
+      '<div class="pm-info">' +
+        '<div class="pm-name">' + opts.name + '</div>' +
+        (opts.desc ? '<div class="pm-desc">' + opts.desc + '</div>' : '') +
+      '</div>' +
+      (opts.thumbs || '');
+    label.addEventListener('click', function(){
+      keepScroll(function(){
+        var briteCard = document.getElementById('brite-card');
+        if (briteCard) briteCard.classList.remove('selected');
+        [].forEach.call(document.querySelectorAll('.payment-method.selected'), function(el){ el.classList.remove('selected'); });
+        label.classList.add('selected');
+        window.__briteSelected = false;  // alt method chosen → submit no longer forces Brite
+        restoreDefaultButton();
+      });
+    });
+    return label;
+  }
+
+  function renderEverything() {
+    var container = document.getElementById('payment-methods');
+    if (!container) return;
+
+    var loadingEl = document.getElementById('payment-methods-loading');
+    var errorEl = document.getElementById('payment-methods-error');
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (errorEl) errorEl.style.display = 'none';
+
+    // Cross-scope selection helpers (pure DOM, callable from either system).
+    window.__clearRealSelection = function(){
+      document.querySelectorAll('#payment-methods .payment-method.selected, #payment-methods .klarna-sub-method.selected')
+        .forEach(function(el){ el.classList.remove('selected'); });
+      var kp = document.querySelector('.klarna-parent');
+      if (kp) {
+        kp.classList.remove('expanded');
+        var dot = kp.querySelector('.pm-radio-dot'); if (dot) dot.style.transform = 'scale(0)';
+        var rad = kp.querySelector('.pm-radio'); if (rad) rad.style.borderColor = 'var(--border)';
+      }
+      var ksp = document.getElementById('klarna-sub-methods'); if (ksp) ksp.classList.remove('open');
+      document.querySelectorAll('#payment-methods input[name="payment_method"]').forEach(function(r){ r.checked = false; });
+    };
+    window.__clearBriteAlt = function(){
+      document.querySelectorAll('.brite-alt-method.selected').forEach(function(r){ r.classList.remove('selected'); });
+    };
+    window.__briteClearSelection = function(){
+      var bc = document.getElementById('brite-card'); if (bc) bc.classList.remove('selected');
+      document.querySelectorAll('.brite-bank-tile.selected').forEach(function(t){ t.classList.remove('selected'); });
+      window.__clearBriteAlt();
+      window.__briteSelected = false;
+    };
+
+    // Remove a stale Brite card on hot-reload, but NEVER touch .payment-method.
+    [].forEach.call(container.querySelectorAll('.brite-card'), function(el){ el.remove(); });
+
+    // Brite card pinned to the top, above the real methods.
+    var briteCard = buildBriteCard();
+    container.insertBefore(briteCard, container.firstChild);
+
+    // Brite alternative methods (iDEAL / Swish) as SEPARATE rows right below the bank
+    // picker card — driven by the admin Payment Gateway config (real /store/payment-options).
+    (function renderBriteAltMethods(){
+      [].forEach.call(container.querySelectorAll('.brite-alt-method'), function(el){ el.remove(); });
+      var afterEl = briteCard;
+      function addAlt(method, label, desc, iconFile, badgeBg){
+        var row = document.createElement('div');
+        row.className = 'brite-alt-method';
+        row.setAttribute('data-brite-method', method);
+        row.innerHTML =
+          '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
+          '<img src="/icons/' + iconFile + '" alt="' + label + '" class="pm-icon" onerror="this.outerHTML=&apos;<span class=&quot;pm-icon&quot; style=&quot;background:' + badgeBg + ';color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:none;&quot;>' + label + '</span>&apos;">' +
+          '<div class="pm-info"><div class="pm-name">' + label + '</div><div class="pm-desc">' + desc + '</div></div>';
+        row.addEventListener('click', function(){
+          keepScroll(function(){
+            window.__clearBriteAlt();
+            row.classList.add('selected');
+            var bc = document.getElementById('brite-card'); if (bc) bc.classList.remove('selected');
+            document.querySelectorAll('.brite-bank-tile.selected').forEach(function(t){ t.classList.remove('selected'); });
+            if (window.__clearRealSelection) window.__clearRealSelection();
+            window.selectedProvider = 'brite';
+            window.selectedProviderId = 'pp_brite_brite';
+            window.__briteMethod = method;
+            window.__briteBankId = null;
+            window.__briteBankName = label;
+            window.__briteSelected = true;
+            applyBriteButton();
+          });
+        });
+        if (afterEl.nextSibling) container.insertBefore(row, afterEl.nextSibling);
+        else container.appendChild(row);
+        afterEl = row;
+      }
+      var ALT_DEFS = {
+        ideal: { label: 'iDEAL', desc: 'Betaal direct via je eigen bank · via Brite', icon: 'ideal.svg', bg: '#CC0066' },
+        swish: { label: 'Swish', desc: 'Betaal met Swish · via Brite', icon: 'swish.svg', bg: '#EB4B97' },
+      };
+      var ALT_COUNTRY = 'nl';
+      var altBase = (window.PROJECT_CONFIG && PROJECT_CONFIG.medusaUrl) || '';
+      var altKey = (window.PROJECT_CONFIG && PROJECT_CONFIG.publishableApiKey) || '';
+      var altSlug = (window.PROJECT_CONFIG && (PROJECT_CONFIG.slug || PROJECT_CONFIG.projectId)) || 'dehondenbijbel';
+      originalFetch(altBase + '/store/payment-options?project_slug=' + altSlug + '&currency=EUR', {
+        headers: altKey ? { 'x-publishable-api-key': altKey } : {}
+      }).then(function(r){ return r.json(); })
+        .then(function(data){
+          var brite = ((data && data.gateways) || []).filter(function(g){ return g.provider === 'brite'; })[0];
+          ((brite && brite.methods) || [])
+            .filter(function(m){ return m.code !== 'pay_by_bank' && ALT_DEFS[m.code]; })
+            .filter(function(m){ var cc = m.available_countries || []; return !cc.length || cc.indexOf(ALT_COUNTRY) !== -1; })
+            .sort(function(a, b){ return (a.sort_order || 0) - (b.sort_order || 0); })
+            .forEach(function(m){ var d = ALT_DEFS[m.code]; addAlt(m.code, d.label, d.desc, d.icon, d.bg); });
+        })
+        .catch(function(){ /* config unavailable → bank picker only */ });
+    })();
+
+    // Keep the Brite card first + enforce a single default selection.
+    if (!container.__briteObserved) {
+      container.__briteObserved = true;
+      new MutationObserver(function(){
+        var bc = document.getElementById('brite-card');
+        if (bc && container.firstElementChild !== bc) container.insertBefore(bc, container.firstChild);
+        if (window.__briteSelected === true) window.__clearRealSelection();
+      }).observe(container, { childList: true });
+    }
+
+    // Picking ANY real method clears Brite (capture phase).
+    if (!container.__briteDelegated) {
+      container.__briteDelegated = true;
+      container.addEventListener('click', function(e){
+        if (e.target.closest && e.target.closest('.payment-method, .klarna-parent, .klarna-sub-method')) {
+          window.__briteClearSelection();
+        }
+      }, true);
+    }
+
+    // Brite header click → bank picker selected (pay_by_bank), iDEAL/Swish + real cleared.
+    briteCard.querySelector('.brite-card-head').addEventListener('click', function(){
+      keepScroll(function(){
+        briteCard.classList.add('selected');
+        window.__clearRealSelection();
+        if (window.__clearBriteAlt) window.__clearBriteAlt();
+        var grid = document.getElementById('brite-bank-grid');
+        var sel = grid && grid.querySelector('.brite-bank-tile.selected');
+        if (grid && !sel && grid.firstElementChild) { sel = grid.firstElementChild; sel.classList.add('selected'); }
+        if (sel) {
+          window.__briteBankId = sel.getAttribute('data-bank') || null;
+          var tt = sel.querySelector('.bn-title'); window.__briteBankName = tt ? tt.textContent : 'je bank';
+        }
+        window.__briteMethod = 'pay_by_bank';
+        window.selectedMethod = 'pay_by_bank';
+        window.selectedProvider = 'brite';
+        window.selectedProviderId = 'pp_brite_brite';
+        window.__briteSelected = true;  // Brite chosen → submit uses Brite
+        applyBriteButton();
+      });
+    });
+
+    // Render banks for default country (NL or from address form)
+    var countrySelect = document.querySelector('[name="country"], #country, select[id*="country" i]');
+    var country = 'NL';
+    if (countrySelect && countrySelect.value) {
+      var v = (countrySelect.value || '').toUpperCase();
+      if (BANKS[v]) country = v;
+    }
+    renderBanksForCountry(country);
+
+    // Kick off the cart warm-up as soon as the picker is up (default bundle + country).
+    if (window.__briteScheduleWarmup) window.__briteScheduleWarmup();
+
+    if (countrySelect && !countrySelect.__briteHooked) {
+      countrySelect.__briteHooked = true;
+      countrySelect.addEventListener('change', function(e){
+        var c = (e.target.value || '').toUpperCase();
+        if (BANKS[c]) renderBanksForCountry(c);
+      });
+    }
+  }
+
+  function briteLiveGatewayActive(cb) {
+    // DEMO → always on (mocked). LIVE → only when the backend returns an active
+    // Brite gateway for this project+currency (fully admin-controlled).
+    if (briteDemo) { cb(true); return; }
+    var base = (window.PROJECT_CONFIG && PROJECT_CONFIG.medusaUrl) || '';
+    var key = (window.PROJECT_CONFIG && PROJECT_CONFIG.publishableApiKey) || '';
+    var slug = (window.PROJECT_CONFIG && (PROJECT_CONFIG.slug || PROJECT_CONFIG.projectId)) || 'dehondenbijbel';
+    var cur = (window.PROJECT_CONFIG && PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency) || 'EUR';
+    originalFetch(base + '/store/payment-options?project_slug=' + slug + '&currency=' + cur, {
+      headers: key ? { 'x-publishable-api-key': key } : {}
+    }).then(function(r){ return r.json(); })
+      .then(function(d){ cb(!!((d.gateways || []).filter(function(g){ return g.provider === 'brite'; })[0])); })
+      .catch(function(){ cb(false); });  // backend unreachable → don't show Brite
+  }
+  function start() {
+    var target = document.getElementById('payment-methods');
+    if (!target) { setTimeout(start, 100); return; }
+    briteLiveGatewayActive(function(active){
+      if (active) {
+        // Engage the fast-checkout warm-up (resets background cart in the main IIFE scope).
+        if (typeof window.__briteEnableFast === 'function') window.__briteEnableFast();
+        renderEverything();
+      } else {
+        console.log('[Brite] No active backend gateway for this project — picker hidden');
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
 })();
 </script>
 
