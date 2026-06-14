@@ -8619,7 +8619,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // This is a sales-demo mockup (no real Brite credentials). Safe to ship live.
   var params = new URLSearchParams(window.location.search);
   var briteDemo = params.get('brite') === '1' || params.get('demo_brite') === '1';
-  if (!briteDemo) return;
+  // LIVE mode (no ?brite=1): render the Brite picker for real customers, but ONLY
+  // when the live backend returns an ACTIVE Brite gateway for this project+currency.
+  // 100% admin-driven (Payment Gateway config: is_active, project_slugs, currencies,
+  // methods) — turn it off in admin and the picker disappears, no deploy needed.
+  // DEMO mode (?brite=1) keeps the fully-mocked sales preview. Picker UI is identical.
+  var briteReal = !briteDemo;
 
   console.log('[Brite Demo] Emulator enabled via ?brite=1 (mockup, no real credentials)');
 
@@ -8686,8 +8691,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     ],
   };
 
-  /* ─── 1) Monkey-patch fetch to inject Brite into /store/payment-options ─── */
+  /* ─── 1) DEMO ONLY: monkey-patch fetch to mock /store/payment-options + /store/banks.
+     In LIVE mode we NEVER touch fetch — the real backend serves everything. ─── */
   var originalFetch = window.fetch.bind(window);
+  if (briteDemo) {
   window.fetch = function(input, init) {
     var url = typeof input === 'string' ? input : input.url;
 
@@ -8763,6 +8770,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     return originalFetch(input, init);
   };
+  }
 
   /* ─── 2) Replace the default pay_by_bank radio with the Brite picker ─── */
   function fallbackHTML(fb){
@@ -8969,7 +8977,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       .catch(function(){ return { banks: [] }; })  // network/parse fail (e.g. local dev) → mock fallback below
       .then(function(data){
       var banks = (data && data.banks) || [];
-      if (!banks.length && BANKS[cc]) {
+      // LIVE mode: NEVER fall back to the hardcoded demo banks — their bank_id
+      // values are sandbox/demo IDs and would produce an invalid real payment.
+      // Only the demo preview (?brite=1) may use the mock fallback.
+      if (briteDemo && !banks.length && BANKS[cc]) {
         // backend empty or unreachable → fall back to mock so the picker isn't blank
         banks = BANKS[cc].map(function(b){ return { bank_id: b.id, name: b.name, logo_url: b.logo, _fallback: b.fallback }; });
       }
@@ -9244,10 +9255,27 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
   }
 
+  function briteLiveGatewayActive(cb) {
+    // DEMO → always on (mocked). LIVE → only when the backend returns an active
+    // Brite gateway for this project+currency (fully admin-controlled).
+    if (briteDemo) { cb(true); return; }
+    var base = (window.PROJECT_CONFIG && PROJECT_CONFIG.medusaUrl) || '';
+    var key = (window.PROJECT_CONFIG && PROJECT_CONFIG.publishableApiKey) || '';
+    var slug = (window.PROJECT_CONFIG && (PROJECT_CONFIG.slug || PROJECT_CONFIG.projectId)) || '';
+    var cur = (window.PROJECT_CONFIG && PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency) || 'EUR';
+    originalFetch(base + '/store/payment-options?project_slug=' + slug + '&currency=' + cur, {
+      headers: key ? { 'x-publishable-api-key': key } : {}
+    }).then(function(r){ return r.json(); })
+      .then(function(d){ cb(!!((d.gateways || []).filter(function(g){ return g.provider === 'brite'; })[0])); })
+      .catch(function(){ cb(false); });  // backend unreachable → don't show Brite
+  }
   function start() {
     var target = document.getElementById('payment-methods');
     if (!target) { setTimeout(start, 100); return; }
-    renderEverything();
+    briteLiveGatewayActive(function(active){
+      if (active) renderEverything();
+      else console.log('[Brite] No active backend gateway for this project — picker hidden');
+    });
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start);
