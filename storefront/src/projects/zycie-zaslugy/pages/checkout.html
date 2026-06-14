@@ -4180,15 +4180,31 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   /**
    * Add the first available shipping method to a cart.
    */
+  /**
+   * Find the matching shipping option ID based on selectedShippingMethod.
+   * Paczkomat → match "Paczkomaty", Home delivery → match "inPost - Dostawa".
+   */
+  function findShippingOptionId(options, method) {
+    var _shipOpts = PROJECT_CONFIG.shippingOptions || {};
+    var matchName = method === 'paczkomat'
+      ? ((_shipOpts.paczkomat && _shipOpts.paczkomat.matchName) || 'Paczkomaty')
+      : ((_shipOpts.homeDelivery && _shipOpts.homeDelivery.matchName) || 'Dostawa do domu');
+    var matched = options.find(function(o) {
+      return o.name && o.name.indexOf(matchName) !== -1;
+    });
+    return matched ? matched.id : options[0].id;
+  }
+
   function addShippingToCart(cartId) {
     return medusaFetch('/store/shipping-options?cart_id=' + cartId, {
       method: 'GET'
     }).then(function(shipRes) {
       var options = shipRes.shipping_options || [];
       if (options.length === 0) throw new Error('Brak dostępnych opcji dostawy');
+      var optionId = findShippingOptionId(options, selectedShippingMethod);
       return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
         method: 'POST',
-        body: JSON.stringify({ option_id: options[0].id })
+        body: JSON.stringify({ option_id: optionId })
       });
     });
   }
@@ -7268,12 +7284,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return;
     }
 
-    // Paczkomat: jeśli wybrano Paczkomat InPost, musi być wybrany konkretny punkt
+    // Paczkomat: jeśli wybrano Paczkomat InPost, musi być wybrany konkretny punkt.
+    // Validujeme packeta_point_id (kód z widgetu) — to je hodnota, kterou WMS (Dextrum)
+    // reálně potřebuje a která se po zaplacení přenáší do order.metadata. Bez ní by
+    // objednávka uvázla na importu (pickupPlaceCode NULL).
     var __selShipOpt = document.querySelector('.shipping-option.selected');
     var __shipMethod = __selShipOpt ? __selShipOpt.getAttribute('data-method') : 'paczkomat';
-    var __paczkomatNameField = document.getElementById('paczkomat_point_name');
-    var __paczkomatPointName = (__paczkomatNameField ? __paczkomatNameField.value : '') || '';
-    if (__shipMethod === 'paczkomat' && !__paczkomatPointName.trim()) {
+    var __paczkomatIdField = document.getElementById('packeta_point_id');
+    var __paczkomatPointId = (__paczkomatIdField ? __paczkomatIdField.value : '') || '';
+    if (__shipMethod === 'paczkomat' && !__paczkomatPointId.trim()) {
       var __pErr = document.getElementById('paczkomat-error');
       var __pSel = document.getElementById('paczkomat-selector');
       if (__pErr) __pErr.style.display = '';
@@ -7554,9 +7573,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (options.length === 0) {
           throw new Error('Brak dostępnych opcji dostawy');
         }
+        var optionId = findShippingOptionId(options, selectedShippingMethod);
         return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
           method: 'POST',
-          body: JSON.stringify({ option_id: options[0].id })
+          body: JSON.stringify({ option_id: optionId })
         });
       }).then(function() {
         return medusaFetch('/store/carts/' + cartId, { method: 'GET' });
