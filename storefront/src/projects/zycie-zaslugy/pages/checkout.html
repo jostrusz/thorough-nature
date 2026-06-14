@@ -2466,7 +2466,7 @@ body {
       <!-- Wysyłka -->
       <div class="msb-line shipping">
         <span class="msb-line-label">Wysyłka (InPost) <span class="msb-gls">InPost</span></span>
-        <span class="msb-line-val">Gratis</span>
+        <span class="msb-line-val" id="msb-shipping-price">Gratis</span>
       </div>
       <!-- Totaal -->
       <div class="msb-line total-line">
@@ -2999,7 +2999,7 @@ body {
           Wysyłka
           <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjE1Ij48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjRkZENzAwIi8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMUIxQjFCIiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCI+SW5Qb3N0PC90ZXh0Pjwvc3ZnPg==" alt="InPost" style="vertical-align:middle;border-radius:2px;">
         </span>
-        <span style="color:#27AE60;font-weight:600;">Gratis</span>
+        <span id="summary-shipping-price" style="color:#27AE60;font-weight:600;">Gratis</span>
       </div>
       <div class="summary-line discount" id="summary-discount" style="display:none;">
         <span style="display:flex;align-items:center;gap:6px;">Rabat <span id="discount-code-label" style="font-size:11px;background:rgba(39,174,96,0.1);color:#27AE60;padding:1px 6px;border-radius:4px;font-weight:600;"></span></span>
@@ -3248,6 +3248,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   function getCurrentTotal() {
     var total = selectedBundlePrice;
     if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
+    total += getSelectedShippingCost();
     return total;
   }
 
@@ -3332,6 +3333,31 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (msbTaxVal) msbTaxVal.textContent = formatPrice(tax);
     var msbTotal = document.getElementById('msb-total');
     if (msbTotal) msbTotal.textContent = formatPrice(total);
+
+    // ─── SHIPPING PRICE DISPLAY (desktop + mobile) ───
+    var shipCost = getSelectedShippingCost();
+    var ssmPrice = document.getElementById('summary-shipping-price');
+    if (ssmPrice) {
+      if (shipCost > 0) {
+        ssmPrice.textContent = '+' + formatPrice(shipCost);
+        ssmPrice.style.color = '';
+        ssmPrice.style.fontWeight = '700';
+      } else {
+        ssmPrice.textContent = 'Gratis';
+        ssmPrice.style.color = '#27AE60';
+        ssmPrice.style.fontWeight = '600';
+      }
+    }
+    var msbShipPrice = document.getElementById('msb-shipping-price');
+    if (msbShipPrice) {
+      if (shipCost > 0) {
+        msbShipPrice.textContent = '+' + formatPrice(shipCost);
+        msbShipPrice.style.color = '';
+      } else {
+        msbShipPrice.textContent = 'Gratis';
+        msbShipPrice.style.color = '#27AE60';
+      }
+    }
 
     // Aktualizuj celkovou proměnnou a tlačítko
     currentTotalPrice = total;
@@ -4188,6 +4214,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   function getSelectedShippingMethod() {
     var el = document.querySelector('.shipping-option.selected');
     return (el && el.getAttribute('data-method')) || 'paczkomat';
+  }
+
+  // Shipping cost for the currently selected method (paczkomat free, home
+  // delivery paid). Read from PROJECT_CONFIG so it matches the displayed price.
+  function getSelectedShippingCost() {
+    var so = PROJECT_CONFIG.shippingOptions || {};
+    return getSelectedShippingMethod() === 'paczkomat'
+      ? ((so.paczkomat && so.paczkomat.price) || 0)
+      : ((so.homeDelivery && so.homeDelivery.price) || 0);
   }
 
   /**
