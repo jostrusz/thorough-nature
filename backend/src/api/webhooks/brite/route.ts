@@ -182,6 +182,49 @@ async function resolveBriteMatchKeys(callbackId: string, txData: any, logger: an
 }
 
 /**
+ * Fetch the authoritative payment details after a callback. Per Brite docs the
+ * callback body carries ONLY merchant_id + session_id/transaction_id + state —
+ * no amount, no bank. "You have to fetch the details after the notification."
+ * We hit the right endpoint by id kind and normalise out amount/currency/bank/
+ * state so the handler can run amount validation + label the order accurately.
+ * Never throws.
+ */
+async function fetchBriteDetails(callbackId: string, logger: any): Promise<any | null> {
+  const creds = await getBriteCredentials()
+  if (!creds) return null
+  const client = new BriteApiClient(creds.clientId, creds.clientSecret, creds.isTest, logger, creds.baseUrl)
+  const kind = briteIdKind(callbackId)
+  try {
+    if (kind === "transaction") {
+      const tx: any = await client.getTransaction(callbackId)
+      return {
+        amount: tx?.amount,
+        currency: tx?.currency_id,
+        state: tx?.state,
+        transaction_id: tx?.id,
+        session_id: tx?.session_id,
+        merchant_reference: tx?.merchant_reference,
+        bank: tx?.from_bank_account?.bank_name ? { name: tx.from_bank_account.bank_name } : undefined,
+      }
+    }
+    // session id (or unknown → try session first)
+    const s: any = await client.getSession(callbackId)
+    return {
+      amount: s?.amount,
+      currency: s?.currency_id,
+      state: s?.state,
+      transaction_id: s?.transaction_id,
+      session_id: s?.id,
+      merchant_reference: s?.merchant_reference,
+      bank: s?.bank,
+    }
+  } catch (e: any) {
+    logger.warn(`[Brite Webhook] fetchBriteDetails: could not fetch ${callbackId} (kind=${kind}): ${e?.message}`)
+    return null
+  }
+}
+
+/**
  * Safety net for the redirect open-banking flow: customer paid at the bank
  * but never returned to the storefront (closed browser, lost mobile flow,
  * etc.). Identical pattern to webhooks/airwallex/route.ts.
@@ -432,6 +475,23 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     if (!briteSessionId) {
       logger.warn(`[Brite Webhook] No transaction id in payload`)
       return res.status(200).json({ received: true })
+    }
+
+    // Per Brite docs, the callback body has ONLY id + state — no amount/bank.
+    // Fetch the authoritative details (session.get / transaction.get) and merge
+    // them in, so amount validation runs and bank/method are labelled accurately.
+    try {
+      const details = await fetchBriteDetails(briteSessionId, logger)
+      if (details) {
+        if (txData.amount == null && details.amount != null) txData.amount = details.amount
+        if (!txData.currency && details.currency) txData.currency = details.currency
+        if (!txData.bank && details.bank) txData.bank = details.bank
+        if (!txData.merchant_reference && details.merchant_reference) txData.merchant_reference = details.merchant_reference
+        if (!txData.transaction_id && details.transaction_id) txData.transaction_id = details.transaction_id
+        if (!txData.session_id && details.session_id) txData.session_id = details.session_id
+      }
+    } catch (e: any) {
+      logger.warn(`[Brite Webhook] detail enrichment skipped: ${e?.message}`)
     }
 
     // Brite uses NUMERIC states (not strings).
