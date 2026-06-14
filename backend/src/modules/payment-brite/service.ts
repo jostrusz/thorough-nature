@@ -112,6 +112,12 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
   protected options_: Options
   protected container_: any = null
   private pgPool_: Pool | null = null
+  // In-memory cache of the gateway_config rows. Reading the DB on EVERY payment
+  // (3 near-simultaneous webhook callbacks per payment) exhausted the small pool
+  // under load → "credentials not configured" → lost orders. Cache for 60s.
+  private cachedRows_: any[] | null = null
+  private cachedAt_: number = 0
+  private static readonly CONFIG_TTL_MS = 60_000
 
   constructor(container: InjectedDependencies, options: Options) {
     super(container, options)
@@ -128,9 +134,49 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
     if (!this.pgPool_) {
       const dbUrl = process.env.DATABASE_URL
       if (!dbUrl) throw new Error("DATABASE_URL not set")
-      this.pgPool_ = new Pool({ connectionString: dbUrl, max: 3 })
+      this.pgPool_ = new Pool({ connectionString: dbUrl, max: 10 })
     }
     return this.pgPool_
+  }
+
+  /**
+   * Load the active Brite gateway_config rows — cached 60s, with retry + stale
+   * fallback so a transient DB hiccup can NEVER drop a payment ("credentials not
+   * configured"). On a cold cache + total DB failure we still throw, but then the
+   * env-var fallback in getBriteClient kicks in.
+   */
+  private async loadGatewayRows(): Promise<any[]> {
+    if (
+      this.cachedRows_ &&
+      Date.now() - this.cachedAt_ < BritePaymentProviderService.CONFIG_TTL_MS
+    ) {
+      return this.cachedRows_
+    }
+    let lastErr: any = null
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const pool = this.getPool()
+        const { rows } = await pool.query(
+          `SELECT id, display_name, mode, live_keys, test_keys, project_slugs, priority, metadata
+           FROM gateway_config
+           WHERE provider = 'brite' AND is_active = true AND deleted_at IS NULL
+           ORDER BY priority ASC`
+        )
+        this.cachedRows_ = rows
+        this.cachedAt_ = Date.now()
+        return rows
+      } catch (e: any) {
+        lastErr = e
+        this.logger_.warn(`[Brite] gateway_config query attempt ${attempt}/3 failed: ${e.message}`)
+        await new Promise((r) => setTimeout(r, 150 * attempt))
+      }
+    }
+    // All retries failed — prefer a STALE cache over losing the order.
+    if (this.cachedRows_) {
+      this.logger_.warn(`[Brite] gateway_config DB unreachable — using STALE cached config`)
+      return this.cachedRows_
+    }
+    throw lastErr || new Error("gateway_config query failed")
   }
 
   /**
@@ -157,13 +203,7 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
     // requests would leak project A's client into project B's call.
     let config: any = null
     try {
-      const pool = this.getPool()
-      const { rows } = await pool.query(
-        `SELECT id, display_name, mode, live_keys, test_keys, project_slugs, priority, metadata
-         FROM gateway_config
-         WHERE provider = 'brite' AND is_active = true AND deleted_at IS NULL
-         ORDER BY priority ASC`
-      )
+      const rows = await this.loadGatewayRows()
 
       if (rows.length > 0) {
         if (projectSlug) {
@@ -209,25 +249,28 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
       }
     }
 
-    // Fallback to env-var options
-    if (this.options_?.clientId && this.options_?.clientSecret) {
-      this.logger_.warn(`[Brite] ⚠️ FALLBACK: Using credentials from ENV VARS (DB query failed or missing)`)
-      const client = new BriteApiClient(
-        this.options_.clientId,
-        this.options_.clientSecret,
-        this.options_.testMode !== false,
-        this.logger_,
-        this.options_.baseUrl
-      )
+    // Fallback to env vars (read directly — survives a total DB outage so a
+    // payment is never lost to "credentials not configured"). Defaults to LIVE
+    // unless BRITE_TEST_MODE=true. BRITE_CLIENT_ID/SECRET should mirror the
+    // gateway_config live keys on Railway.
+    const envClientId = process.env.BRITE_CLIENT_ID || this.options_?.clientId
+    const envSecret = process.env.BRITE_CLIENT_SECRET || this.options_?.clientSecret
+    if (envClientId && envSecret) {
+      const isTestEnv =
+        process.env.BRITE_TEST_MODE === "true" || this.options_?.testMode === true
+      const baseUrl =
+        process.env.BRITE_BASE_URL || this.options_?.baseUrl || undefined
+      this.logger_.warn(`[Brite] ⚠️ FALLBACK: using ENV credentials (DB config missing/unreachable), mode=${isTestEnv ? "TEST" : "LIVE"}`)
+      const client = new BriteApiClient(envClientId, envSecret, isTestEnv, this.logger_, baseUrl)
       await client.authenticate()
       return {
         client,
         config: null,
-        isLive: this.options_.testMode === false,
+        isLive: !isTestEnv,
         keys: {
-          api_key: this.options_.clientId,
-          secret_key: this.options_.clientSecret,
-          account_id: this.options_.merchantId,
+          api_key: envClientId,
+          secret_key: envSecret,
+          account_id: process.env.BRITE_MERCHANT_ID || this.options_?.merchantId,
         },
       }
     }
