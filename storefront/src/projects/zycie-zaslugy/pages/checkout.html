@@ -5894,7 +5894,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return prefix + cleaned.substring(1);
     }
     if (/^\d{7,}$/.test(cleaned)) {
-      return (COUNTRY_PHONE_PREFIX[countryCode] || '+31') + cleaned;
+      return (COUNTRY_PHONE_PREFIX[countryCode] || '+48') + cleaned;
     }
     return cleaned;
   }
@@ -6530,14 +6530,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var val = foxPhoneField.value.trim();
         if (!val || val.length < 5) return;
 
-        // Voeg landprefix toe als die ontbreekt (bijv. 0612345678 → +31612345678)
+        // Voeg landprefix toe als die ontbreekt (bijv. 0612345678 → +48612345678)
         var countryEl = document.getElementById('country');
-        var cc = countryEl ? countryEl.value : 'NL';
-        var prefixMap = { NL: '+31', BE: '+32' };
+        var cc = countryEl ? countryEl.value : 'PL';
+        var prefixMap = { PL: '+48', NL: '+31', BE: '+32' };
         var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
         if (!cleaned.startsWith('+') && !cleaned.startsWith('00')) {
-          if (cleaned.startsWith('0')) cleaned = (prefixMap[cc] || '+31') + cleaned.substring(1);
-          else if (/^\d{7,}$/.test(cleaned)) cleaned = (prefixMap[cc] || '+31') + cleaned;
+          if (cleaned.startsWith('0')) cleaned = (prefixMap[cc] || '+48') + cleaned.substring(1);
+          else if (/^\d{7,}$/.test(cleaned)) cleaned = (prefixMap[cc] || '+48') + cleaned;
         } else if (cleaned.startsWith('00')) {
           cleaned = '+' + cleaned.substring(2);
         }
@@ -8201,7 +8201,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // Auto-update phone prefix when country changes
     if (phoneField) {
       var raw = phoneField.value.trim();
-      var newPrefix = COUNTRY_PHONE_PREFIX[country] || '+31';
+      var newPrefix = COUNTRY_PHONE_PREFIX[country] || '+48';
       if (!raw) {
         // Empty field — pre-fill with prefix
         phoneField.value = newPrefix;
