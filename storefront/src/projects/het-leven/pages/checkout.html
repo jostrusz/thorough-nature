@@ -8842,11 +8842,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // Resolves when the flow ends (completed / failed / aborted / closed).
   window.__briteOpenEmbedded = function(opts){
     return new Promise(function(resolve){
+      // Mobile: per Brite docs the SDK container MUST occupy the full viewport
+      // (100vw/100vh). A small modal cramps the bank login / app-switch → aborts.
+      var isMobile = !!(window.matchMedia && window.matchMedia('(max-width: 767px)').matches);
       var ov = document.createElement('div');
       ov.id = 'brite-embed-overlay';
-      ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(74,26,46,0.55);display:flex;align-items:center;justify-content:center;padding:16px;';
+      ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(74,26,46,0.55);display:flex;align-items:center;justify-content:center;padding:' + (isMobile ? '0' : '16px') + ';';
       var box = document.createElement('div');
-      box.style.cssText = 'background:#fff;border-radius:18px;overflow:hidden;width:100%;max-width:440px;box-shadow:0 24px 64px rgba(74,26,46,0.35);';
+      box.style.cssText = isMobile
+        ? 'background:#fff;overflow:hidden;width:100vw;height:100vh;display:flex;flex-direction:column;'
+        : 'background:#fff;border-radius:18px;overflow:hidden;width:100%;max-width:440px;box-shadow:0 24px 64px rgba(74,26,46,0.35);';
       var head = document.createElement('div');
       head.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(74,26,46,0.08);';
       head.innerHTML = '<span style="font-weight:700;color:#4A1A2E;font-size:15px;font-family:inherit;">Betalen met je bank</span>';
@@ -8855,7 +8860,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // (per Brite integration review). Its onClose (3rd arg to client.start) drives onCancel.
       var mount = document.createElement('div');
       mount.id = 'brite-embed-mount';
-      mount.style.cssText = 'min-height:560px;background:#fff;';
+      mount.style.cssText = isMobile ? 'flex:1;min-height:0;background:#fff;' : 'min-height:560px;background:#fff;';
       box.appendChild(head); box.appendChild(mount); ov.appendChild(box);
       document.body.appendChild(ov);
 
@@ -8874,7 +8879,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           var ST_FAIL  = (typeof B.STATE_FAILED !== 'undefined') ? B.STATE_FAILED : 11;
           var ST_ABORT = (typeof B.STATE_ABORTED !== 'undefined') ? B.STATE_ABORTED : 10;
           var ST_AUTH  = (typeof B.STATE_AUTHENTICATION_COMPLETED !== 'undefined') ? B.STATE_AUTHENTICATION_COMPLETED : 2;
-          var startOpts = { selector: '#brite-embed-mount', width: '100%', height: '560px', color_theme: 'light' };
+          var startOpts = { selector: '#brite-embed-mount', width: '100%', height: isMobile ? Math.max(window.innerHeight - 52, 480) + 'px' : '560px', color_theme: 'light' };
           if (opts.bankId) startOpts.bank_id = opts.bankId;
           client.start(startOpts, function(state){
             console.log('[Brite SDK] state:', state);

@@ -352,8 +352,12 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
         brand_name: data?.product_name || data?.brand_name || "Order",
         merchant_reference: merchantReference,
         locale: data?.locale || (countryId || undefined),
-        // NOTE: no redirect_uri — we use the embedded Web SDK (iframe), so Brite's
-        // redirect return is never triggered (per Brite integration review).
+        // No redirect_uri — we use the embedded Web SDK (iframe). BUT on mobile,
+        // open-banking app-switches into the customer's BANK APP; deeplink_redirect
+        // is how Brite returns them to our checkout afterwards (per Brite docs:
+        // "deeplink_redirect — for mobile app returns"). Without it, mobile users
+        // get stuck in the bank app → psu_closed_client / abandoned_session.
+        ...(returnUrl && { deeplink_redirect: returnUrl }),
         callbacks,
         ...(preselectedBank && { bank_id: preselectedBank }),
         ...(customerEmail && { customer_email: customerEmail }),
