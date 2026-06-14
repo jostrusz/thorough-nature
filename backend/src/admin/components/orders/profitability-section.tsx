@@ -149,6 +149,9 @@ const PERIODS: { id: Period; label: string }[] = [
   { id: "yesterday", label: "Yesterday" },
   { id: "this_week", label: "This Week" },
   { id: "this_month", label: "This Month" },
+  { id: "last_month", label: "Last Month" },
+  { id: "this_year", label: "This Year" },
+  { id: "last_year", label: "Last Year" },
   { id: "custom", label: "Custom" },
 ]
 

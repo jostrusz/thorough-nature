@@ -234,6 +234,20 @@ function DashboardStyles() {
         min-width: 0 !important;
       }
 
+      /* ─── Undo the nuclear full-width on inline UI that must keep its own size.
+         Class selectors out-specify the element-chain rules above even with
+         !important, so these win. ─── */
+      .dash-filter-item {
+        width: auto !important;
+        max-width: none !important;
+        flex: 0 0 auto !important;
+        min-width: 0 !important;
+      }
+      .dash-tab {
+        width: auto !important;
+        flex: 0 0 auto !important;
+      }
+
       /* Card hover — premium lift + glow */
       .dash-stat-card {
         transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
@@ -480,7 +494,7 @@ const CustomOrdersPage = () => {
     savedState?.filters || { countries: [], projects: [], payments: [] }
   )
   const [searchValue, setSearchValue] = useState(savedState?.searchValue || "")
-  const debouncedSearch = useDebounce(searchValue, 200)
+  const debouncedSearch = useDebounce(searchValue, 120)
   const [page, setPage] = useState(savedState?.page || 0)
   const [sortField, setSortField] = useState(savedState?.sortField || "created_at")
   const [sortDir, setSortDir] = useState(savedState?.sortDir || "DESC")

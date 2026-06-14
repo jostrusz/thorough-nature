@@ -94,7 +94,7 @@ function MultiSelect({
   }
 
   return (
-    <div ref={ref} style={{ position: "relative" }}>
+    <div ref={ref} className="dash-filter-item" style={{ position: "relative" }}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

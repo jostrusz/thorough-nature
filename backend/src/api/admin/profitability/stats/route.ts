@@ -3,7 +3,12 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { PROFITABILITY_MODULE } from "../../../../modules/profitability"
 import type ProfitabilityModuleService from "../../../../modules/profitability/service"
 
-type Period = "today" | "yesterday" | "this_week" | "this_month" | "custom"
+type Period =
+  | "today" | "yesterday"
+  | "this_week" | "last_week"
+  | "this_month" | "last_month"
+  | "this_year" | "last_year"
+  | "custom"
 
 /**
  * Fixed exchange rates to EUR (updated manually as needed).
@@ -259,9 +264,32 @@ function getDateRange(period: Period, dateFrom?: string, dateTo?: string): { fro
       startOfWeek.setDate(startOfWeek.getDate() - diff)
       return { from: fmt(startOfWeek), to: fmt(now) }
     }
+    case "last_week": {
+      const start = new Date(now)
+      const day = start.getDay()
+      const diff = day === 0 ? 6 : day - 1
+      start.setDate(start.getDate() - diff - 7) // Monday of previous week
+      const end = new Date(start)
+      end.setDate(start.getDate() + 6) // Sunday
+      return { from: fmt(start), to: fmt(end) }
+    }
     case "this_month": {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
       return { from: fmt(startOfMonth), to: fmt(now) }
+    }
+    case "last_month": {
+      const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      const end = new Date(now.getFullYear(), now.getMonth(), 0) // last day of prev month
+      return { from: fmt(start), to: fmt(end) }
+    }
+    case "this_year": {
+      const start = new Date(now.getFullYear(), 0, 1)
+      return { from: fmt(start), to: fmt(now) }
+    }
+    case "last_year": {
+      const start = new Date(now.getFullYear() - 1, 0, 1)
+      const end = new Date(now.getFullYear() - 1, 11, 31)
+      return { from: fmt(start), to: fmt(end) }
     }
     case "custom":
       return { from: dateFrom!, to: dateTo! }

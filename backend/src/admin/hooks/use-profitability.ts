@@ -1,7 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
 import { sdk } from "../lib/sdk"
 
-export type Period = "today" | "yesterday" | "this_week" | "this_month" | "custom"
+export type Period =
+  | "today" | "yesterday"
+  | "this_week" | "last_week"
+  | "this_month" | "last_month"
+  | "this_year" | "last_year"
+  | "custom"
 
 export interface ProjectStats {
   project_id: string

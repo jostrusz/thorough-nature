@@ -38,11 +38,12 @@ export function OrderTabs({ activeTab, onTabChange, tabCounts }: OrderTabsProps)
     <div
       style={{
         background: "rgba(0,0,0,0.03)",
-        borderRadius: "8px",
-        padding: "3px",
+        borderRadius: "10px",
+        padding: "4px",
         display: "flex",
-        gap: "2px",
+        gap: "3px",
         overflowX: "auto",
+        scrollbarWidth: "none",
       }}
     >
       {TABS.map((tab) => {
@@ -51,9 +52,10 @@ export function OrderTabs({ activeTab, onTabChange, tabCounts }: OrderTabsProps)
         return (
           <div
             key={tab.id}
+            className="dash-tab"
             onClick={() => onTabChange(tab.id)}
             style={{
-              padding: "7px 14px",
+              padding: "8px 15px",
               borderRadius: "6px",
               fontSize: "13px",
               fontWeight: isActive ? 600 : 500,

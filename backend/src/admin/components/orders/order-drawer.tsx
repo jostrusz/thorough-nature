@@ -292,14 +292,16 @@ function DrawerStyles() {
         opacity: 0; pointer-events: none; transition: opacity 0.2s, backdrop-filter 0.2s; z-index: 150;
       }
       .odrawer-scrim.open { opacity: 1; pointer-events: auto; backdrop-filter: blur(1.5px); }
+      /* width forced with !important to beat the dashboard's full-width nuclear CSS */
       .odrawer {
-        position: fixed; top: 0; right: 0; bottom: 0; width: 440px; max-width: 92vw;
+        position: fixed !important; top: 0; right: 0; bottom: 0;
+        width: 440px !important; max-width: 92vw !important; min-width: 0 !important;
         background: #fff; box-shadow: -8px 0 40px rgba(0,0,0,0.16);
         transform: translateX(100%); transition: transform 0.26s cubic-bezier(0.4,0,0.2,1);
-        z-index: 160; display: flex; flex-direction: column; font-family: ${fontStack};
+        z-index: 160; display: flex; flex-direction: column; font-family: ${fontStack}; flex: none !important;
       }
       .odrawer.open { transform: translateX(0); }
-      @media (max-width: 560px) { .odrawer { width: 100vw; } }
+      @media (max-width: 560px) { .odrawer { width: 100vw !important; max-width: 100vw !important; } }
       .od-head { padding: 18px 20px; border-bottom: 1px solid ${colors.border}; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
       .od-num { font-size: 16px; font-weight: 700; color: ${colors.accent}; }
       .od-sub { font-size: 12px; color: ${colors.textMuted}; margin-top: 4px; }

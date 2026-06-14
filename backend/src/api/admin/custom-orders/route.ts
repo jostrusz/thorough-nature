@@ -19,9 +19,34 @@ async function searchOrderIds(
   const { Pool } = require("pg")
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
   try {
-    const like = `%${q}%`
-    const params: any[] = [like]
+    const params: any[] = []
     const whereParts: string[] = [`o.deleted_at IS NULL`]
+
+    // ── Tokenised "contains" fulltext ──
+    // Split the query into words; EVERY word must appear somewhere on the order
+    // (order-independent), each matched as a substring (ILIKE %word%). So
+    // "beata o2" matches a customer named Beata with an o2.pl email, and
+    // "129 odpusc" matches a 129-total Odpuść order.
+    const fieldOr = (i: number) => `(
+      o.display_id::text ILIKE $${i}
+      OR o.id ILIKE $${i}
+      OR o.email ILIKE $${i}
+      OR o.metadata::text ILIKE $${i}
+      OR sa.first_name ILIKE $${i} OR sa.last_name ILIKE $${i} OR sa.company ILIKE $${i}
+      OR sa.address_1 ILIKE $${i} OR sa.address_2 ILIKE $${i} OR sa.city ILIKE $${i}
+      OR sa.postal_code ILIKE $${i} OR sa.country_code ILIKE $${i} OR sa.phone ILIKE $${i}
+      OR ba.first_name ILIKE $${i} OR ba.last_name ILIKE $${i} OR ba.company ILIKE $${i}
+      OR li.title ILIKE $${i} OR li.variant_sku ILIKE $${i}
+      OR li.variant_title ILIKE $${i} OR li.product_title ILIKE $${i}
+      OR p.provider_id ILIKE $${i} OR p.data::text ILIKE $${i}
+      OR fl.tracking_number ILIKE $${i}
+    )`
+    const tokens = q.trim().split(/\s+/).filter(Boolean).slice(0, 6)
+    if (tokens.length === 0) tokens.push(q.trim())
+    for (const tok of tokens) {
+      params.push(`%${tok}%`)
+      whereParts.push(fieldOr(params.length))
+    }
 
     // Country filter
     if (opts.country) {
@@ -42,21 +67,6 @@ async function searchOrderIds(
       }
     }
 
-    const matchClause = `(
-      o.display_id::text ILIKE $1
-      OR o.id ILIKE $1
-      OR o.email ILIKE $1
-      OR o.metadata::text ILIKE $1
-      OR sa.first_name ILIKE $1 OR sa.last_name ILIKE $1 OR sa.company ILIKE $1
-      OR sa.address_1 ILIKE $1 OR sa.address_2 ILIKE $1 OR sa.city ILIKE $1
-      OR sa.postal_code ILIKE $1 OR sa.country_code ILIKE $1 OR sa.phone ILIKE $1
-      OR ba.first_name ILIKE $1 OR ba.last_name ILIKE $1 OR ba.company ILIKE $1
-      OR li.title ILIKE $1 OR li.variant_sku ILIKE $1
-      OR li.variant_title ILIKE $1 OR li.product_title ILIKE $1
-      OR p.provider_id ILIKE $1 OR p.data::text ILIKE $1
-      OR fl.tracking_number ILIKE $1
-    )`
-
     // Cap candidates: if paymentStatus is a post-filter, pull more for margin
     const cap = opts.paymentStatus ? 400 : 50
 
@@ -72,7 +82,6 @@ async function searchOrderIds(
       LEFT JOIN order_fulfillment ofl ON ofl.order_id = o.id AND ofl.deleted_at IS NULL
       LEFT JOIN fulfillment_label fl ON fl.fulfillment_id = ofl.fulfillment_id AND fl.deleted_at IS NULL
       WHERE ${whereParts.join(" AND ")}
-        AND ${matchClause}
       GROUP BY o.id
       ORDER BY MAX(o.created_at) DESC
       LIMIT ${cap}
