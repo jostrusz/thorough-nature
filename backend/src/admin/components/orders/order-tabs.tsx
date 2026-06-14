@@ -7,12 +7,15 @@ export interface TabDef {
   deliveryStatus?: string
   paymentStatus?: string
   country?: string
+  actionNeeded?: boolean
 }
 
 // Tabs are the warehouse (fulfillment) lifecycle — a single dimension.
 // Country / Project / Payment moved to the FilterBar so they can be combined.
+// "Action needed" is a triage tab (stuck >2d, payment pending, safety-net, stock issue).
 export const TABS: TabDef[] = [
   { id: "all", label: "All" },
+  { id: "action", label: "Action needed", actionNeeded: true },
   { id: "new", label: "New", deliveryStatus: "NEW" },
   { id: "waiting", label: "Waiting", deliveryStatus: "WAITING" },
   { id: "imported", label: "Imported", deliveryStatus: "IMPORTED" },
@@ -54,7 +57,7 @@ export function OrderTabs({ activeTab, onTabChange, tabCounts }: OrderTabsProps)
               borderRadius: "6px",
               fontSize: "13px",
               fontWeight: isActive ? 600 : 500,
-              color: isActive ? "#1A1D2E" : "#6B7185",
+              color: tab.actionNeeded ? "#E74C3C" : isActive ? "#1A1D2E" : "#6B7185",
               cursor: "pointer",
               border: "none",
               background: isActive ? "#FFFFFF" : "transparent",
@@ -67,6 +70,7 @@ export function OrderTabs({ activeTab, onTabChange, tabCounts }: OrderTabsProps)
               userSelect: "none",
             }}
           >
+            {tab.actionNeeded && <span aria-hidden style={{ fontSize: "12px" }}>⚠</span>}
             {tab.label}
             {count !== undefined && (
               <span
@@ -77,8 +81,10 @@ export function OrderTabs({ activeTab, onTabChange, tabCounts }: OrderTabsProps)
                   borderRadius: "10px",
                   minWidth: "20px",
                   textAlign: "center",
-                  background: isActive ? "rgba(108,92,231,0.08)" : "rgba(0,0,0,0.04)",
-                  color: isActive ? "#6C5CE7" : "#9CA3B8",
+                  background: tab.actionNeeded
+                    ? "rgba(231,76,60,0.08)"
+                    : isActive ? "rgba(108,92,231,0.08)" : "rgba(0,0,0,0.04)",
+                  color: tab.actionNeeded ? "#E74C3C" : isActive ? "#6C5CE7" : "#9CA3B8",
                 }}
               >
                 {count}

@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 
 // Debounce hook — delays value updates to avoid excessive API calls
 function useDebounce<T>(value: T, delay: number): T {
@@ -17,6 +18,7 @@ import { OrderTabs, TABS } from "../../components/orders/order-tabs"
 import { OrderFilters, OrderFiltersValue } from "../../components/orders/order-filters"
 import { PROJECT_OPTIONS } from "../../components/orders/design-tokens"
 import { OrdersTable } from "../../components/orders/orders-table"
+import { OrderDrawer } from "../../components/orders/order-drawer"
 import { BulkActionsBar } from "../../components/orders/bulk-actions-bar"
 import { NewOrderCelebration } from "../../components/orders/new-order-celebration"
 // useOrderStats removed — replaced by ProfitabilitySection
@@ -327,6 +329,10 @@ function DashboardStyles() {
         50% { opacity: 0.7; }
       }
 
+      /* Pull-to-refresh spinner */
+      @keyframes ptrSpin { to { transform: rotate(360deg); } }
+      .ptr-spin { animation: ptrSpin 0.7s linear infinite; }
+
       /* Smooth page entrance */
       @keyframes dashFadeIn {
         from { opacity: 0; transform: translateY(8px); }
@@ -481,6 +487,41 @@ const CustomOrdersPage = () => {
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set())
   const [showExportModal, setShowExportModal] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [drawerOrder, setDrawerOrder] = useState<any | null>(null)
+
+  // ── Pull-to-refresh (mobile): pull down from the very top to refetch ──
+  const queryClient = useQueryClient()
+  const [ptrDist, setPtrDist] = useState(0)
+  const [ptrRefreshing, setPtrRefreshing] = useState(false)
+  const pullStartY = useRef<number | null>(null)
+  const PTR_THRESHOLD = 70
+
+  const onPtrTouchStart = useCallback((e: React.TouchEvent) => {
+    if (window.scrollY <= 2 && !ptrRefreshing) pullStartY.current = e.touches[0].clientY
+  }, [ptrRefreshing])
+
+  const onPtrTouchMove = useCallback((e: React.TouchEvent) => {
+    if (pullStartY.current === null || ptrRefreshing) return
+    const dy = e.touches[0].clientY - pullStartY.current
+    if (dy > 0 && window.scrollY <= 2) setPtrDist(Math.min(dy * 0.5, 90))
+  }, [ptrRefreshing])
+
+  const onPtrTouchEnd = useCallback(() => {
+    if (pullStartY.current === null) return
+    pullStartY.current = null
+    if (ptrDist >= PTR_THRESHOLD && !ptrRefreshing) {
+      setPtrRefreshing(true)
+      setPtrDist(48)
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["custom-orders-list"] }),
+        queryClient.invalidateQueries({ queryKey: ["profitability"] }),
+      ]).finally(() => {
+        setTimeout(() => { setPtrRefreshing(false); setPtrDist(0) }, 450)
+      })
+    } else {
+      setPtrDist(0)
+    }
+  }, [ptrDist, ptrRefreshing, queryClient])
 
   // Save current list state to sessionStorage (called before navigating to order detail)
   const saveListState = useCallback(() => {
@@ -510,6 +551,7 @@ const CustomOrdersPage = () => {
       offset: page * PAGE_SIZE,
       q: debouncedSearch || undefined,
       delivery_status: activeTabDef?.deliveryStatus || undefined,
+      action_needed: activeTabDef?.actionNeeded ? "true" : undefined,
       country: filters.countries.length ? filters.countries.join(",") : undefined,
       project: projectIds.length ? projectIds.join(",") : undefined,
       payment_status: filters.payments.length ? filters.payments.join(",") : undefined,
@@ -686,8 +728,57 @@ const CustomOrdersPage = () => {
   }, [selectedOrders, bulkActions])
 
   return (
-    <div ref={pageRef} style={dashboardStyle} className="dash-animate-in">
+    <div
+      ref={pageRef}
+      style={dashboardStyle}
+      className="dash-animate-in"
+      onTouchStart={onPtrTouchStart}
+      onTouchMove={onPtrTouchMove}
+      onTouchEnd={onPtrTouchEnd}
+    >
       <DashboardStyles />
+
+      {/* Pull-to-refresh indicator */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "52px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          fontSize: "12px",
+          fontWeight: 600,
+          color: colors.accent,
+          transform: `translateY(${ptrDist - 56}px)`,
+          transition: pullStartY.current === null ? "transform 0.2s ease" : "none",
+          zIndex: 200,
+          pointerEvents: "none",
+        }}
+      >
+        {ptrRefreshing ? (
+          <>
+            <span className="ptr-spin" style={{
+              width: "16px", height: "16px", borderRadius: "50%",
+              border: `2px solid ${colors.accentBg}`, borderTopColor: colors.accent,
+              display: "inline-block",
+            }} />
+            Aktualizuji…
+          </>
+        ) : (
+          <>
+            <span style={{
+              display: "inline-block",
+              transform: ptrDist >= PTR_THRESHOLD ? "rotate(180deg)" : "none",
+              transition: "transform 0.2s ease",
+            }}>↓</span>
+            {ptrDist >= PTR_THRESHOLD ? "Pusť pro aktualizaci" : "Potáhni pro aktualizaci"}
+          </>
+        )}
+      </div>
 
       {/* New Order Celebration */}
       <NewOrderCelebration
@@ -794,6 +885,7 @@ const CustomOrdersPage = () => {
           sortDir={sortDir}
           onSort={handleSort}
           onBeforeNavigate={saveListState}
+          onOpenOrder={setDrawerOrder}
         />
 
         {/* Pagination */}
@@ -848,6 +940,13 @@ const CustomOrdersPage = () => {
           currentOrderIds={orders.map((o: any) => o.id)}
         />
       )}
+
+      {/* Order detail side-drawer (peek) */}
+      <OrderDrawer
+        order={drawerOrder}
+        onClose={() => setDrawerOrder(null)}
+        onBeforeNavigate={saveListState}
+      />
 
       {/* AI Order Creator Modal */}
       <AiOrderCreatorModal

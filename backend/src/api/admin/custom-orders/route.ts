@@ -101,6 +101,7 @@ async function queryFilteredOrderIds(
     country?: string
     deliveryStatus?: string
     project?: string
+    actionNeeded?: boolean
     sortBy: string
     sortDir: string
     limit: number
@@ -140,6 +141,18 @@ async function queryFilteredOrderIds(
         ors.push(`(o.metadata->>'dextrum_status') = ANY($${params.length}::text[])`)
       }
       if (ors.length) whereParts.push(`(${ors.join(" OR ")})`)
+    }
+
+    // Action needed (triage): stuck >2 days, stock allocation issue, or safety-net recovered.
+    if (opts.actionNeeded) {
+      whereParts.push(`(
+        (o.metadata->>'dextrum_status') = 'ALLOCATION_ISSUE'
+        OR (
+          ((o.metadata->>'dextrum_status') IS NULL OR (o.metadata->>'dextrum_status') IN ('NEW','WAITING','IMPORTED'))
+          AND o.created_at < NOW() - INTERVAL '2 days'
+        )
+        OR (o.metadata->>'completed_by') ILIKE '%safety_net%'
+      )`)
     }
 
     // Project (comma list of project_id aliases) → metadata.project_id / project
@@ -229,14 +242,15 @@ export async function GET(
     const country = (req.query.country as string) || ""
     const paymentStatus = (req.query.payment_status as string) || ""
     const project = (req.query.project as string) || ""
+    const actionNeeded = req.query.action_needed === "true"
     const sortBy = (req.query.sort_by as string) || "created_at"
     const sortDir = (req.query.sort_dir as string) || "DESC"
 
     const filters: Record<string, any> = {}
     const isSearching = !!search
-    // DB-level filter path: country/delivery/project are pushed into SQL so the
-    // grand total + pagination span the whole dataset (not just one page).
-    const hasDbFilter = !isSearching && !!(country || deliveryStatus || project)
+    // DB-level filter path: country/delivery/project/action-needed are pushed into
+    // SQL so the grand total + pagination span the whole dataset (not just one page).
+    const hasDbFilter = !isSearching && !!(country || deliveryStatus || project || actionNeeded)
 
     // ── FAST PATH: DB-level search via indexed ILIKE ─────────────────────
     // When user is searching, resolve matching order IDs via SQL (uses pg_trgm
@@ -260,7 +274,7 @@ export async function GET(
     } else if (hasDbFilter) {
       const logger: any = (req.scope as any).resolve?.(ContainerRegistrationKeys.LOGGER)
       const filtered = await queryFilteredOrderIds(
-        { country, deliveryStatus, project, sortBy, sortDir, limit, offset },
+        { country, deliveryStatus, project, actionNeeded, sortBy, sortDir, limit, offset },
         logger
       )
       dbFilterTotal = filtered.total

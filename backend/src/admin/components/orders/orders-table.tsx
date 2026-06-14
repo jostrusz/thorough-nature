@@ -18,6 +18,7 @@ interface OrdersTableProps {
   sortDir: string
   onSort: (field: string) => void
   onBeforeNavigate?: () => void
+  onOpenOrder?: (order: any) => void
 }
 
 // ═══════════════════════════════════════════
@@ -295,17 +296,23 @@ export function OrdersTable({
   sortDir,
   onSort,
   onBeforeNavigate,
+  onOpenOrder,
 }: OrdersTableProps) {
   const navigate = useNavigate()
   const updateMetadata = useUpdateMetadata()
 
-  const handleOrderClick = (e: React.MouseEvent, orderId: string) => {
-    onBeforeNavigate?.()
-    const path = `/custom-orders/${orderId}`
+  const handleOrderClick = (e: React.MouseEvent, order: any) => {
+    // Cmd/Ctrl-click → open the full detail page in a new tab.
     if (e.metaKey || e.ctrlKey) {
-      window.open(`/app${path}`, "_blank")
+      window.open(`/app/custom-orders/${order.id}`, "_blank")
+      return
+    }
+    // Plain click → open the side-drawer peek (falls back to full page nav).
+    if (onOpenOrder) {
+      onOpenOrder(order)
     } else {
-      navigate(path)
+      onBeforeNavigate?.()
+      navigate(`/custom-orders/${order.id}`)
     }
   }
 
@@ -445,7 +452,7 @@ export function OrdersTable({
         return (
           <div
             key={order.id}
-            onClick={(e: React.MouseEvent) => handleOrderClick(e, order.id)}
+            onClick={(e: React.MouseEvent) => handleOrderClick(e, order)}
             style={{
               padding: "14px 16px",
               borderBottom: `1px solid ${colors.border}`,
@@ -575,7 +582,7 @@ export function OrdersTable({
                   background: isSelected ? "rgba(108,92,231,0.05)" : "transparent",
                   cursor: "pointer",
                 }}
-                onClick={(e: React.MouseEvent) => handleOrderClick(e, order.id)}
+                onClick={(e: React.MouseEvent) => handleOrderClick(e, order)}
               >
                 {/* 1. Checkbox */}
                 <td
