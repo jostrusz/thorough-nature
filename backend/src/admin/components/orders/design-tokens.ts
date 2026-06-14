@@ -395,17 +395,17 @@ export const PROJECT_OPTIONS: {
   color: string
   bg: string
 }[] = [
-  { id: "loslatenboek", ids: ["loslatenboek"], label: "Laat los", flag: "🇳🇱", color: "#C2410C", bg: "#FFF3E0" },
-  { id: "het-leven", ids: ["het-leven"], label: "Het Leven", flag: "🇳🇱", color: "#0E7490", bg: "#E0F7FA" },
+  { id: "loslatenboek", ids: ["loslatenboek"], label: "Laat los wat je kapotmaakt", flag: "🇳🇱", color: "#C2410C", bg: "#FFF3E0" },
+  { id: "het-leven", ids: ["het-leven"], label: "Het Leven Dat Je Verdient", flag: "🇳🇱", color: "#0E7490", bg: "#E0F7FA" },
   { id: "dehondenbijbel", ids: ["dehondenbijbel"], label: "De Hondenbijbel", flag: "🇳🇱", color: "#9A3412", bg: "#FFEDD5" },
-  { id: "lass-los", ids: ["lass-los"], label: "Lass los", flag: "🇩🇪", color: "#A16207", bg: "#FEF9C3" },
-  { id: "odpusc-ksiazka", ids: ["odpusc-ksiazka", "odpusc"], label: "Odpuść", flag: "🇵🇱", color: "#BE123C", bg: "#FCE4EC" },
-  { id: "zycie-zaslugy", ids: ["zycie-zaslugy"], label: "Życie", flag: "🇵🇱", color: "#9D174D", bg: "#FCE7F3" },
-  { id: "slapp-taget", ids: ["slapp-taget", "slapp"], label: "Släpp taget", flag: "🇸🇪", color: "#00695C", bg: "#E0F2F1" },
+  { id: "lass-los", ids: ["lass-los"], label: "Lass los, was dich kaputt macht", flag: "🇩🇪", color: "#A16207", bg: "#FEF9C3" },
+  { id: "odpusc-ksiazka", ids: ["odpusc-ksiazka", "odpusc"], label: "Odpuść to, co cię niszczy", flag: "🇵🇱", color: "#BE123C", bg: "#FCE4EC" },
+  { id: "zycie-zaslugy", ids: ["zycie-zaslugy"], label: "Życie na które zasługujesz", flag: "🇵🇱", color: "#9D174D", bg: "#FCE7F3" },
+  { id: "slapp-taget", ids: ["slapp-taget", "slapp"], label: "Släpp taget om det som förstör dig", flag: "🇸🇪", color: "#00695C", bg: "#E0F2F1" },
   { id: "slipp-taket", ids: ["slipp-taket"], label: "Slipp taket", flag: "🇳🇴", color: "#1D4ED8", bg: "#DBEAFE" },
   { id: "psi-superzivot", ids: ["psi-superzivot"], label: "Psí superživot", flag: "🇨🇿", color: "#1565C0", bg: "#E3F2FD" },
   { id: "kocici-bible", ids: ["kocici-bible"], label: "Kočičí bible", flag: "🇨🇿", color: "#6D28D9", bg: "#EDE9FE" },
-  { id: "odpust-knizka", ids: ["odpust-knizka"], label: "Pusť to", flag: "🇨🇿", color: "#7C2D12", bg: "#FEF3C7" },
+  { id: "odpust-knizka", ids: ["odpust-knizka"], label: "Pusť to, co tě ničí", flag: "🇨🇿", color: "#7C2D12", bg: "#FEF3C7" },
 ]
 
 /** Resolve a project chip's color/label from an order's metadata.project_id. */

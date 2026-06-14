@@ -6,7 +6,7 @@ import { CountryFlag } from "./country-flag"
 import { OrderTag } from "./order-tag"
 import { useUpdateMetadata } from "../../hooks/use-update-metadata"
 import { toast } from "@medusajs/ui"
-import { colors, radii, shadows, getPaymentIconUrl, getPaymentFallback, getOrderDisplayNumber, getProjectChip } from "./design-tokens"
+import { colors, radii, shadows, getPaymentIconUrl, getPaymentFallback, getPaymentMethodName, getOrderDisplayNumber, getProjectChip } from "./design-tokens"
 import { formatCurrency } from "../../lib/format-currency"
 
 interface OrdersTableProps {
@@ -193,7 +193,8 @@ function SkeletonRows() {
             </div>
           </td>
           <td style={tdStyle}><div style={{ width: "60px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
-          <td style={tdStyle}><div style={{ width: "80px", height: "22px", borderRadius: "12px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "70px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
+          <td style={tdStyle}><div style={{ width: "70px", height: "22px", borderRadius: "12px", background: "#EBEBEB" }} /></td>
           <td style={tdStyle}><div style={{ width: "70px", height: "22px", borderRadius: "12px", background: "#EBEBEB" }} /></td>
           <td className="col-items" style={tdStyle}><div style={{ width: "40px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
           <td className="col-country" style={tdStyle}><div style={{ width: "30px", height: "14px", borderRadius: "4px", background: "#EBEBEB" }} /></td>
@@ -278,6 +279,8 @@ const rowHoverStyles = `
   .orders-table-row .row-actions { opacity: 0; transition: opacity 0.15s ease; }
   .orders-table-row:hover .row-actions { opacity: 1; }
   .orders-table-row td:first-child { padding-left: 11px; }
+  .orders-table-row .otr-avatar { transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1); }
+  .orders-table-row:hover .otr-avatar { transform: scale(1.08); }
 `
 
 // ═══════════════════════════════════════════
@@ -363,6 +366,7 @@ export function OrdersTable({
               <th style={thStyle}>Customer</th>
               <th style={thStyle}>Total</th>
               <th style={thStyle}>Payment</th>
+              <th style={thStyle}>Payment status</th>
               <th style={thStyle}>Fulfillment</th>
               <th className="col-items" style={thStyle}>Items</th>
               <th className="col-country" style={thStyle}>Country</th>
@@ -466,11 +470,24 @@ export function OrdersTable({
               <span style={{ color: colors.textMuted }}>&middot;</span>
               <span style={{ color: colors.textMuted, fontSize: "12px" }}>{dt.label} {dt.time}</span>
             </div>
-            {/* Third row: badges + country */}
+            {/* Third row: badges + country + project chip */}
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
               <PaymentBadge status={paymentStatus} />
               <DeliveryBadge status={deliveryStatus} />
               <CountryFlag code={countryCode} />
+              {(() => {
+                const chip = getProjectChip(order.metadata?.project_id)
+                if (!chip) return null
+                return (
+                  <span style={{
+                    fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "6px",
+                    background: chip.bg, color: chip.color, whiteSpace: "nowrap",
+                    overflow: "hidden", textOverflow: "ellipsis", maxWidth: "180px",
+                  }}>
+                    {chip.label}
+                  </span>
+                )
+              })()}
             </div>
           </div>
         )
@@ -506,6 +523,7 @@ export function OrdersTable({
               Total {renderSortIcon("total")}
             </th>
             <th style={{ ...thStyle, cursor: "default" }}>Payment</th>
+            <th style={{ ...thStyle, cursor: "default" }}>Payment status</th>
             <th style={{ ...thStyle, cursor: "default" }}>Fulfillment</th>
             <th className="col-items" style={{ ...thStyle, cursor: "default" }}>Items</th>
             <th className="col-country" style={{ ...thStyle, cursor: "default" }}>Country</th>
@@ -604,7 +622,7 @@ export function OrdersTable({
                     {(() => {
                       const av = avatarColor(order.email || customerName)
                       return (
-                        <div style={{
+                        <div className="otr-avatar" style={{
                           width: "26px", height: "26px", borderRadius: "50%",
                           background: av.bg, color: av.fg,
                           display: "flex", alignItems: "center", justifyContent: "center",
@@ -640,9 +658,9 @@ export function OrdersTable({
                   </span>
                 </td>
 
-                {/* 7. Payment */}
+                {/* 7. Payment — method icon + name */}
                 <td style={tdStyle}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                     {(() => {
                       const iconUrl = getPaymentIconUrl(order)
                       if (iconUrl) {
@@ -669,11 +687,18 @@ export function OrdersTable({
                         </div>
                       )
                     })()}
-                    <PaymentBadge status={paymentStatus} />
+                    <span style={{ fontSize: "12px", color: colors.textSec, whiteSpace: "nowrap" }}>
+                      {getPaymentMethodName(order)}
+                    </span>
                   </div>
                 </td>
 
-                {/* 8. Fulfillment */}
+                {/* 8. Payment status */}
+                <td style={tdStyle}>
+                  <PaymentBadge status={paymentStatus} />
+                </td>
+
+                {/* 9. Fulfillment */}
                 <td style={tdStyle}>
                   <DeliveryBadge status={deliveryStatus} />
                 </td>

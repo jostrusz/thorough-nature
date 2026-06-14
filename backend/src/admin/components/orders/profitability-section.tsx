@@ -58,6 +58,16 @@ function ProfitabilityStyles() {
       .profit-project-card {
         transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
       }
+      .profit-project-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%);
+        transform: translateX(-120%);
+        transition: transform 0.6s ease;
+        pointer-events: none;
+      }
+      .profit-project-card:hover::after { transform: translateX(120%); }
       .profit-project-card:hover {
         transform: translateY(-3px) scale(1.01);
         box-shadow: 0 12px 28px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04);
@@ -591,7 +601,8 @@ export function ProfitabilitySection() {
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
   const [showCustomRange, setShowCustomRange] = useState(false)
-  const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null)
+  // Cost breakdown is global: clicking ANY card expands/collapses it on ALL cards.
+  const [breakdownOpen, setBreakdownOpen] = useState(false)
 
   const { data, isLoading } = useProfitability(period, dateFrom, dateTo)
 
@@ -810,10 +821,8 @@ export function ProfitabilitySection() {
             <ProjectCard
               key={project.project_id}
               project={project}
-              expanded={expandedProjectId === project.project_id}
-              onToggle={() => setExpandedProjectId(
-                expandedProjectId === project.project_id ? null : project.project_id
-              )}
+              expanded={breakdownOpen}
+              onToggle={() => setBreakdownOpen((v) => !v)}
             />
           ))}
         </div>
