@@ -510,6 +510,17 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
   async refundPayment(input: any): Promise<any> {
     const sessionData = input.data || input
     const refundAmount = input.amount
+    // Swish refunds CANNOT use transaction.create_refund — per Brite docs a Swish
+    // payment carries no bank-account info, so a refund must go out as a separate
+    // Instant Payout (transaction.create_withdrawal) to a bank account the customer
+    // provides. Until that flow is built, fail loudly instead of calling the wrong
+    // endpoint (which would error) — refund Swish manually via the Brite Back Office.
+    if (String(sessionData.method || "").toLowerCase() === "swish") {
+      throw new MedusaError(
+        MedusaError.Types.NOT_ALLOWED,
+        "Swish refunds are not supported via API (no bank account on the payment). Refund this Swish payment manually as a payout in the Brite Back Office."
+      )
+    }
     try {
       const { client } = await this.getBriteClient(sessionData.project_slug)
       // Refunds need a real TRANSACTION id. Prefer the one captured at authorize;
