@@ -1,0 +1,24 @@
+{
+  "name": "Życie, jakiego nigdy sobie nie pozwoliłaś — LIFE RESET™",
+  "short_name": "Najpierw ja",
+  "description": "Bestsellerowa książka Anny de Vries. Metoda LIFE RESET™ w 5 filarach: rzeczy, przestrzeń, ludzie, umysł, energia.",
+  "lang": "pl-PL",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4A1A2E",
+  "icons": [
+    {
+      "src": "/life-reset-favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/life-reset-favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    }
+  ]
+}

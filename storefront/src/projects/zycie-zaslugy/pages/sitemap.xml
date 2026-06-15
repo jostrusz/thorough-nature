@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://www.najpierw-ja.pl/</loc>
+    <lastmod>2026-06-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://www.najpierw-ja.pl/%C5%BBycie%2C-jakiego-nigdy-sobie-nie-pozwoli%C5%82a%C5%9B-pichi.png</image:loc>
+      <image:title>Życie, jakiego nigdy sobie nie pozwoliłaś — książka LIFE RESET™ Anny de Vries</image:title>
+    </image:image>
+  </url>
+</urlset>
