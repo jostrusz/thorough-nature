@@ -336,6 +336,25 @@ async function safetyNetCompleteCart(
       }
     }
 
+    // Force-authorize the cart's Brite session(s) onto the settled session/transaction
+    // BEFORE completing. Otherwise completeCart's re-authorization reads the (often
+    // ABORTED) session and flips it back to canceled → "no processable session" throw.
+    // The late-settlement fallback in service.authorizePayment then confirms CAPTURED
+    // from the settled transaction. Safe: we only reach here past the amount check.
+    try {
+      const { Pool } = require("pg")
+      const faPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+      try {
+        const { forceAuthorizeBriteCartSession } = await import("../../../modules/payment-brite/utils/force-authorize")
+        const n = await forceAuthorizeBriteCartSession(
+          faPool, targetCart.id, briteSessionId, txData?.transaction_id || null
+        )
+        logger.info(`[Brite Webhook] Safety net: force-authorized ${n} Brite session(s) for cart ${targetCart.id} (settled tx ${txData?.transaction_id || "—"})`)
+      } finally { await faPool.end().catch(() => {}) }
+    } catch (faErr: any) {
+      logger.warn(`[Brite Webhook] Safety net: force-authorize failed: ${faErr?.message}`)
+    }
+
     const { completeCartWorkflow } = await import("@medusajs/medusa/core-flows")
     const result = await completeCartWorkflow(scope).run({
       input: { id: targetCart.id },

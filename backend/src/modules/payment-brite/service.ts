@@ -460,7 +460,26 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
 
       const session = await client.getSession(sessionId)
       const raw = session.state
-      const mapped = mapBriteSessionState(raw)
+      let mapped = mapBriteSessionState(raw)
+      const txId = session.transaction_id || sessionData.briteTransactionId || null
+
+      // Late-settlement fallback: the SESSION may read ABORTED/expired (state 10/11 —
+      // customer closed the bank UI before returning) while the bank STILL settled the
+      // transfer hours later, marking the TRANSACTION 4/5/6 (= money received). Trusting
+      // only the session here would throw away a genuinely-paid order, so when the
+      // session is not conclusive but the transaction is settled, authorize as CAPTURED.
+      // State 7 (DEBIT = funds returned) maps to ERROR, so reversed payments never pass.
+      if (mapped !== PaymentSessionStatus.CAPTURED && mapped !== PaymentSessionStatus.AUTHORIZED && txId) {
+        try {
+          const tx = await client.getTransaction(txId)
+          if (mapBriteTransactionState(tx?.state) === PaymentSessionStatus.CAPTURED) {
+            this.logger_.info(`[Brite] Authorize: session ${sessionId} state ${raw} (${mapped}) but transaction ${txId} settled (tx state ${tx?.state}) → CAPTURED (late settlement)`)
+            mapped = PaymentSessionStatus.CAPTURED
+          }
+        } catch (e: any) {
+          this.logger_.warn(`[Brite] Authorize transaction fallback failed for ${txId}: ${e?.message}`)
+        }
+      }
 
       this.logger_.info(`[Brite] Authorize: session ${sessionId} → state ${raw} → ${mapped}`)
 
@@ -470,7 +489,7 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
           ...sessionData,
           status: raw,
           // Capture the real transaction id now so refunds can target it later.
-          briteTransactionId: session.transaction_id || sessionData.briteTransactionId || null,
+          briteTransactionId: txId,
         },
       }
     } catch (error: any) {
@@ -583,7 +602,17 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
       const sessionId = data.briteSessionId || data.intentId
       if (!sessionId) return PaymentSessionStatus.PENDING
       const session = await client.getSession(sessionId)
-      return mapBriteSessionState(session.state)
+      let mapped = mapBriteSessionState(session.state)
+      // Late-settlement fallback (see authorizePayment): aborted session but the
+      // transaction settled → treat as captured so we don't drop a paid order.
+      const txId = session.transaction_id || data.briteTransactionId || null
+      if (mapped !== PaymentSessionStatus.CAPTURED && mapped !== PaymentSessionStatus.AUTHORIZED && txId) {
+        try {
+          const tx = await client.getTransaction(txId)
+          if (mapBriteTransactionState(tx?.state) === PaymentSessionStatus.CAPTURED) mapped = PaymentSessionStatus.CAPTURED
+        } catch { /* keep session-derived status */ }
+      }
+      return mapped
     } catch {
       return PaymentSessionStatus.ERROR
     }
