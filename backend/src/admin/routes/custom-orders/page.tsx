@@ -441,17 +441,21 @@ function DashboardStyles() {
         }
       }
 
-      /* ═══ Progressive column disclosure (tablet → narrow desktop) ═══ */
-      /* Drop lowest-priority columns first so the table never needs a
-         horizontal scrollbar before the mobile-card breakpoint kicks in. */
-      @media (max-width: 1280px) {
-        .orders-desktop-table .col-items { display: none !important; }
+      /* ═══ Progressive column disclosure (container-based) ═══ */
+      /* React to the TABLE's own width, not the viewport. The Medusa sidebar
+         narrows the table below the viewport width, so viewport media queries
+         dropped columns too late and a horizontal scrollbar appeared. A size
+         container reacts to the real available width regardless of sidebar
+         state, monitor size, or zoom — so the table always fits. */
+      .orders-desktop-table { container-type: inline-size; }
+      @container (max-width: 1240px) {
+        .col-items { display: none !important; }
       }
-      @media (max-width: 1120px) {
-        .orders-desktop-table .col-project { display: none !important; }
+      @container (max-width: 1080px) {
+        .col-project { display: none !important; }
       }
-      @media (max-width: 980px) {
-        .orders-desktop-table .col-date { display: none !important; }
+      @container (max-width: 940px) {
+        .col-date { display: none !important; }
       }
 
       /* Filter bar: tighter padding + scroll-safe on small screens */
