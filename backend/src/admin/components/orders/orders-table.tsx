@@ -151,7 +151,7 @@ function getTag(order: any): string {
 // ═══════════════════════════════════════════
 const thStyle: React.CSSProperties = {
   textAlign: "left",
-  padding: "7px 14px",
+  padding: "7px 10px",
   fontSize: "10.5px",
   fontWeight: 600,
   color: "#9CA3B8",
@@ -165,7 +165,7 @@ const thStyle: React.CSSProperties = {
 }
 
 const tdStyle: React.CSSProperties = {
-  padding: "6px 14px",
+  padding: "6px 10px",
   fontSize: "12.5px",
   borderBottom: "1px solid rgba(0,0,0,0.03)",
   verticalAlign: "middle",

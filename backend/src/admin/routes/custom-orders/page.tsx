@@ -448,13 +448,13 @@ function DashboardStyles() {
          container reacts to the real available width regardless of sidebar
          state, monitor size, or zoom — so the table always fits. */
       .orders-desktop-table { container-type: inline-size; }
-      @container (max-width: 1240px) {
+      @container (max-width: 1180px) {
         .col-items { display: none !important; }
       }
-      @container (max-width: 1080px) {
+      @container (max-width: 1140px) {
         .col-project { display: none !important; }
       }
-      @container (max-width: 940px) {
+      @container (max-width: 980px) {
         .col-date { display: none !important; }
       }
 
