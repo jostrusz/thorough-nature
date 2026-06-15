@@ -2885,6 +2885,12 @@ body {
         </div>
       </div>
 
+      <!-- 2 bonusové e-knihy zdarma -->
+      <div class="summary-bonus">
+        <span class="bonus-icon">🎁</span>
+        <span class="bonus-text">+ 2 e-knihy zdarma</span>
+      </div>
+
       <!-- Doprava zdarma + záruka -->
       <div class="summary-bonus">
         <span class="bonus-icon">🚚</span>
@@ -3332,6 +3338,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var container = document.getElementById('bundle-options');
     if (!container) return;
     var html = '';
+    var productName = PROJECT_CONFIG.mainProduct.name || 'Pusť to, co tě ničí';
     PROJECT_CONFIG.bundleOptions.forEach(function(opt, idx) {
       var isSelected = (idx === 0); // Výchozí: první (1×)
       var perUnit = (opt.price / opt.qty).toFixed(2).replace('.', ',');
@@ -3339,8 +3346,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       html += '<input type="radio" name="bundle" value="' + opt.qty + '"' + (isSelected ? ' checked' : '') + '>';
       html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
       html += '<div class="bundle-info">';
-      html += '<div class="bundle-text"><span class="bundle-label">' + opt.label + '</span>';
-      if (opt.sublabel) html += '<span class="bundle-sublabel">' + opt.sublabel + '</span>';
+      html += '<div class="bundle-text"><span class="bundle-label">' + opt.qty + '× ' + productName + '</span>';
+      html += '<span class="bundle-sublabel">+ 2 e-knihy zdarma</span>';
       html += '</div>';
       if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
       html += '</div>';
