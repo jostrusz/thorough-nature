@@ -246,7 +246,7 @@ class PayUPaymentProviderService extends AbstractPaymentProvider<Options> {
           ...(customerFirstName && { firstName: customerFirstName }),
           ...(customerLastName && { lastName: customerLastName }),
           ...(customerPhone && { phone: customerPhone }),
-          language: data?.language || (currency_code.toUpperCase() === "PLN" ? "pl" : "en"),
+          language: data?.language || ({ PLN: "pl", CZK: "cs", EUR: "en", RON: "ro", HUF: "hu", BGN: "bg", GBP: "en", USD: "en" }[currency_code.toUpperCase()] || "en"),
         },
         products: [
           {

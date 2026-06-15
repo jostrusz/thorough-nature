@@ -3151,7 +3151,7 @@ body {
 window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(completeRes){
   var o = (completeRes && completeRes.order) ? completeRes.order : completeRes;
   if (!o || typeof o.id !== 'string' || o.id.indexOf('order_') !== 0) {
-    throw new Error('Cart completion did not return a valid order — payment may not be complete');
+    throw new Error('Objednávku se nepodařilo dokončit — platba možná neproběhla. Zkuste to prosím znovu.');
   }
   return o;
 };
@@ -4018,7 +4018,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       script.onerror = function(e) {
         _paypalSdkPromise = null;
         console.error('[PayPal SDK] Failed to load URL:', sdkUrl, 'Error:', e);
-        reject(new Error('PayPal SDK failed to load'));
+        reject(new Error('Nepodařilo se načíst PayPal. Zkuste to prosím znovu.'));
       };
       document.head.appendChild(script);
     });
@@ -4525,7 +4525,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       s.src = 'https://pay.google.com/gp/p/js/pay.js';
       s.async = true;
       s.onload = resolve;
-      s.onerror = function() { _googlePayJsPromise = null; reject(new Error('Google Pay JS failed to load')); };
+      s.onerror = function() { _googlePayJsPromise = null; reject(new Error('Nepodařilo se načíst Google Pay. Zkuste to prosím znovu.')); };
       document.head.appendChild(s);
     });
     return _googlePayJsPromise;
