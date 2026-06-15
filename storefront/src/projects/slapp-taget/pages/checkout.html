@@ -7722,15 +7722,19 @@ window.addEventListener('load', function() {
   // Without it this IIFE returns immediately and the checkout behaves byte-for-
   // byte like production — fetch is never patched, no DOM is touched.
   var params = new URLSearchParams(window.location.search);
-  var briteDemo = params.get('brite') === '1' || params.get('demo_brite') === '1';
-  // LIVE mode (no ?brite=1): render the Brite picker for real customers, but ONLY
-  // when the live backend returns an ACTIVE Brite gateway for this project+currency.
-  // 100% admin-driven (Payment Gateway config: is_active, project_slugs, currencies,
-  // methods) — turn it off in admin and the picker disappears, no deploy needed.
-  // DEMO mode (?brite=1) keeps the fully-mocked sales preview. Picker UI is identical.
+  // DEMO mode (?brite=1) is permanently DISABLED. The picker is now 100% admin-driven:
+  // it renders for real customers ONLY when the live backend returns an ACTIVE Brite
+  // gateway for this project+currency (Payment Gateway config: is_active, project_slugs,
+  // currencies, methods). Turn it off in admin and the picker disappears, no deploy needed.
+  var briteDemo = false;
   var briteReal = !briteDemo;
 
-  console.log('[Brite Demo] Emulator enabled via ?brite=1 (SE)');
+  // FB/IG in-app WebView: bank-app deep-links are blocked there, so Pay by Bank
+  // converts at ~11% and can debit the customer without an order. We hide ONLY the
+  // Pay by Bank card in these WebViews; iDEAL/Swish (which app-switch fine, ~87%)
+  // stay visible. Fail-safe: if detection misses, worst case is one method shown/
+  // hidden — never a lost payment. Detection is UA-based (FB/IG inject these tokens).
+  var inAppWebView = /FBAN|FBAV|FB_IAB|FB4A|Instagram/i.test(navigator.userAgent || '');
 
   var WM = "https://commons.wikimedia.org/wiki/Special:FilePath/";
   // Offline fallback only — the picker normally renders the REAL bank list from
@@ -8128,9 +8132,15 @@ window.addEventListener('load', function() {
     // (those belong to the real renderer).
     [].forEach.call(container.querySelectorAll('.brite-card'), function(el){ el.remove(); });
 
-    // Brite card pinned to the top, above the real methods.
-    var briteCard = buildBriteCard();
-    container.insertBefore(briteCard, container.firstChild);
+    // Brite Pay by Bank card pinned to the top, above the real methods.
+    // SKIPPED in FB/IG in-app WebView — Pay by Bank doesn't work there (blocked bank
+    // deep-link). The iDEAL/Swish alt rows below still render. briteCard stays null
+    // and every consumer below is null-guarded.
+    var briteCard = null;
+    if (!inAppWebView) {
+      briteCard = buildBriteCard();
+      container.insertBefore(briteCard, container.firstChild);
+    }
 
     // Brite alternative methods as SEPARATE rows right below the bank picker card —
     // styled like a normal method. For SE: Swish only (when Brite enables it).
@@ -8162,8 +8172,14 @@ window.addEventListener('load', function() {
             applyBriteButton();
           });
         });
-        if (afterEl.nextSibling) container.insertBefore(row, afterEl.nextSibling);
-        else container.appendChild(row);
+        if (afterEl) {
+          if (afterEl.nextSibling) container.insertBefore(row, afterEl.nextSibling);
+          else container.appendChild(row);
+        } else {
+          // WebView: no Pay by Bank card to anchor on → first alt row goes to the top
+          if (container.firstChild) container.insertBefore(row, container.firstChild);
+          else container.appendChild(row);
+        }
         afterEl = row;
       }
       // Rows are driven by the admin Payment Gateway config: any ACTIVE method on
@@ -8215,7 +8231,8 @@ window.addEventListener('load', function() {
     }
 
     // Brite header click → bank picker selected (pay_by_bank), Swish + real cleared.
-    briteCard.querySelector('.brite-card-head').addEventListener('click', function(){
+    // Guarded: in FB/IG WebView there is no Pay by Bank card (briteCard === null).
+    if (briteCard) briteCard.querySelector('.brite-card-head').addEventListener('click', function(){
       keepScroll(function(){
         briteCard.classList.add('selected');
         window.__clearRealSelection();
