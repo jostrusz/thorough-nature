@@ -1,8 +1,8 @@
 {
   "slug": "slipp-taket",
   "name": "Slipp taket på det som ødelegger deg",
-  "domain": "slipptaket.com",
-  "domainAliases": ["www.slipptaket.com"],
+  "domain": "slipptaketboken.no",
+  "domainAliases": ["www.slipptaketboken.no"],
   "locale": "nb",
   "defaultCountry": "NO",
   "defaultPhonePrefix": "47",

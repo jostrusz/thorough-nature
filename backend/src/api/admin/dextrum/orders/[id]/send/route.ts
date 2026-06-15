@@ -116,6 +116,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       "ZJN-2": { physicalSku: "ZJNS827837491", quantity: 2 },
       "ZJN-3": { physicalSku: "ZJNS827837491", quantity: 3 },
       "ZJN-4": { physicalSku: "ZJNS827837491", quantity: 4 },
+      // Order-bump upsell variant (ZJN-1-1) → same physical book barcode.
+      "ZJN-1-1": { physicalSku: "ZJNS827837491", quantity: 1 },
       // Order-bump upsell (Życie → Odpuść cross-sell). Admin SKU has -2 suffix;
       // Dextrum holds only the parent barcode OTCCN64787237.
       "OTCCN64787237-2": { physicalSku: "OTCCN64787237", quantity: 1 },

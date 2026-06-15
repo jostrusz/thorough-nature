@@ -20,6 +20,10 @@ const STATIC_MIME_TYPES: Record<string, string> = {
   ".woff2": "font/woff2",
   ".ttf": "font/ttf",
   ".eot": "application/vnd.ms-fontobject",
+  // SEO / AI-crawler files served from project pages folder
+  ".txt": "text/plain; charset=utf-8",
+  ".xml": "application/xml; charset=utf-8",
+  ".webmanifest": "application/manifest+json; charset=utf-8",
 }
 
 export async function GET(
@@ -56,7 +60,7 @@ export async function GET(
     // Fonts are immutable — cache 1 year; CSS/JS 1 hour; images 1 day
     const isFont = [".woff", ".woff2", ".ttf", ".eot"].includes(ext)
     const isCode = [".css", ".js"].includes(ext)
-    const isCompressible = [".css", ".js", ".json", ".svg"].includes(ext)
+    const isCompressible = [".css", ".js", ".json", ".svg", ".txt", ".xml", ".webmanifest"].includes(ext)
     const cacheControl = isFont
       ? "public, max-age=31536000, immutable"
       : isCode

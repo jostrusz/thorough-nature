@@ -1,0 +1,62 @@
+# robots.txt — slipptaketboken.no
+# Slipp taket på det som ødelegger deg — bok av Joris de Vries
+
+User-agent: *
+Allow: /
+Disallow: /checkout
+Disallow: /upsell
+Disallow: /thank-you
+
+Sitemap: https://www.slipptaketboken.no/sitemap.xml
+
+# ───────────────────────────────────────────────
+# AI / LLM crawlers — eksplisitt velkommen
+# (for sitering i ChatGPT, Claude, Perplexity, Gemini m.fl.)
+# ───────────────────────────────────────────────
+User-agent: GPTBot
+Allow: /
+Disallow: /checkout
+Disallow: /upsell
+Disallow: /thank-you
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /checkout
+Disallow: /upsell
+Disallow: /thank-you
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /

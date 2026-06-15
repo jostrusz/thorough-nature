@@ -2466,7 +2466,7 @@ body {
       <!-- Wysyłka -->
       <div class="msb-line shipping">
         <span class="msb-line-label">Wysyłka (InPost) <span class="msb-gls">InPost</span></span>
-        <span class="msb-line-val">Gratis</span>
+        <span class="msb-line-val" id="msb-shipping-price">Gratis</span>
       </div>
       <!-- Totaal -->
       <div class="msb-line total-line">
@@ -2999,7 +2999,7 @@ body {
           Wysyłka
           <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjE1Ij48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjRkZENzAwIi8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMUIxQjFCIiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCI+SW5Qb3N0PC90ZXh0Pjwvc3ZnPg==" alt="InPost" style="vertical-align:middle;border-radius:2px;">
         </span>
-        <span style="color:#27AE60;font-weight:600;">Gratis</span>
+        <span id="summary-shipping-price" style="color:#27AE60;font-weight:600;">Gratis</span>
       </div>
       <div class="summary-line discount" id="summary-discount" style="display:none;">
         <span style="display:flex;align-items:center;gap:6px;">Rabat <span id="discount-code-label" style="font-size:11px;background:rgba(39,174,96,0.1);color:#27AE60;padding:1px 6px;border-radius:4px;font-weight:600;"></span></span>
@@ -3248,6 +3248,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   function getCurrentTotal() {
     var total = selectedBundlePrice;
     if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
+    total += getSelectedShippingCost();
     return total;
   }
 
@@ -3332,6 +3333,31 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (msbTaxVal) msbTaxVal.textContent = formatPrice(tax);
     var msbTotal = document.getElementById('msb-total');
     if (msbTotal) msbTotal.textContent = formatPrice(total);
+
+    // ─── SHIPPING PRICE DISPLAY (desktop + mobile) ───
+    var shipCost = getSelectedShippingCost();
+    var ssmPrice = document.getElementById('summary-shipping-price');
+    if (ssmPrice) {
+      if (shipCost > 0) {
+        ssmPrice.textContent = '+' + formatPrice(shipCost);
+        ssmPrice.style.color = '';
+        ssmPrice.style.fontWeight = '700';
+      } else {
+        ssmPrice.textContent = 'Gratis';
+        ssmPrice.style.color = '#27AE60';
+        ssmPrice.style.fontWeight = '600';
+      }
+    }
+    var msbShipPrice = document.getElementById('msb-shipping-price');
+    if (msbShipPrice) {
+      if (shipCost > 0) {
+        msbShipPrice.textContent = '+' + formatPrice(shipCost);
+        msbShipPrice.style.color = '';
+      } else {
+        msbShipPrice.textContent = 'Gratis';
+        msbShipPrice.style.color = '#27AE60';
+      }
+    }
 
     // Aktualizuj celkovou proměnnou a tlačítko
     currentTotalPrice = total;
@@ -3700,7 +3726,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     try {
       mollieInstance = Mollie(profileId, {
-        locale: 'nl_NL',
+        locale: 'pl_PL',
         testmode: testmode
       });
 
@@ -4100,7 +4126,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var sdkUrl = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(clientId.trim())
       + '&components=' + components.join(',')
       + '&currency=' + currency
-      + '&locale=nl_NL';
+      + '&locale=pl_PL';
 
     console.log('[PayPal SDK] Loading URL:', sdkUrl);
 
@@ -4180,15 +4206,50 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   /**
    * Add the first available shipping method to a cart.
    */
+  /**
+   * Read the currently selected shipping method from the DOM. The
+   * selectedShippingMethod var lives in a separate IIFE, so reading the
+   * .shipping-option.selected element keeps this scope-independent.
+   */
+  function getSelectedShippingMethod() {
+    var el = document.querySelector('.shipping-option.selected');
+    return (el && el.getAttribute('data-method')) || 'paczkomat';
+  }
+
+  // Shipping cost for the currently selected method (paczkomat free, home
+  // delivery paid). Read from PROJECT_CONFIG so it matches the displayed price.
+  function getSelectedShippingCost() {
+    var so = PROJECT_CONFIG.shippingOptions || {};
+    return getSelectedShippingMethod() === 'paczkomat'
+      ? ((so.paczkomat && so.paczkomat.price) || 0)
+      : ((so.homeDelivery && so.homeDelivery.price) || 0);
+  }
+
+  /**
+   * Find the matching shipping option ID based on the selected method.
+   * Paczkomat → match "Paczkomaty", Home delivery → match "inPost - Dostawa".
+   */
+  function findShippingOptionId(options, method) {
+    var _shipOpts = PROJECT_CONFIG.shippingOptions || {};
+    var matchName = method === 'paczkomat'
+      ? ((_shipOpts.paczkomat && _shipOpts.paczkomat.matchName) || 'Paczkomaty')
+      : ((_shipOpts.homeDelivery && _shipOpts.homeDelivery.matchName) || 'Dostawa do domu');
+    var matched = options.find(function(o) {
+      return o.name && o.name.indexOf(matchName) !== -1;
+    });
+    return matched ? matched.id : options[0].id;
+  }
+
   function addShippingToCart(cartId) {
     return medusaFetch('/store/shipping-options?cart_id=' + cartId, {
       method: 'GET'
     }).then(function(shipRes) {
       var options = shipRes.shipping_options || [];
       if (options.length === 0) throw new Error('Brak dostępnych opcji dostawy');
+      var optionId = findShippingOptionId(options, getSelectedShippingMethod());
       return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
         method: 'POST',
-        body: JSON.stringify({ option_id: options[0].id })
+        body: JSON.stringify({ option_id: optionId })
       });
     });
   }
@@ -5074,37 +5135,37 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   }
 
-  // Method descriptions (Dutch)
+  // Method descriptions (Polish)
   var METHOD_DESCRIPTIONS = {
     ideal: 'Zapłać bezpośrednio ze swojego banku',
-    bancontact: 'Belgisch betaalsysteem',
-    klarna: 'Betaal direct via Klarna',
-    klarna_later: 'Ontvang eerst, betaal later',
-    klarna_slice: 'Betaal in termijnen',
+    bancontact: 'Belgijski system płatności',
+    klarna: 'Zapłać od razu przez Klarna',
+    klarna_later: 'Otrzymaj najpierw, zapłać później',
+    klarna_slice: 'Płać w ratach',
     creditcard: 'Visa &middot; Mastercard',
     paypal: 'Zapłać swoim kontem PayPal',
     eps: 'Zapłać ze swojego banku',
     przelewy24: 'Polski system płatności',
     p24: 'Polski system płatności',
     blik: 'Szybka płatność mobilna',
-    in3: 'Betaal in 3 termijnen',
-    belfius: 'Betaal via Belfius',
-    kbc: 'Betaal via KBC/CBC',
-    riverty: 'Achteraf betalen',
+    in3: 'Płać w 3 ratach',
+    belfius: 'Zapłać przez Belfius',
+    kbc: 'Zapłać przez KBC/CBC',
+    riverty: 'Zapłać później',
     trustly: 'Płatność online z banku',
     applepay: 'Zapłać przez Apple Pay',
     googlepay: 'Zapłać przez Google Pay',
     bank_transfer: 'Zapłać przelewem bankowym',
-    sepa_debit: 'SEPA automatische incasso',
-    swish: 'Betaal met Swish (Zweden)',
+    sepa_debit: 'Polecenie zapłaty SEPA',
+    swish: 'Zapłać przez Swish (Szwecja)',
     revolut_pay: 'Zapłać przez Revolut',
   };
 
-  // Klarna sub-method config: code → SDK payment_method_category + Dutch labels
+  // Klarna sub-method config: code → SDK payment_method_category + Polish labels
   var KLARNA_METHODS = {
-    klarna:       { category: 'pay_now',       label: 'Betaal direct',        desc: 'Betaal nu via Klarna' },
-    klarna_later: { category: 'pay_later',     label: 'Achteraf betalen',     desc: 'Ontvang eerst, betaal later' },
-    klarna_slice: { category: 'pay_over_time', label: 'Gespreid betalen',     desc: 'Betaal in termijnen' },
+    klarna:       { category: 'pay_now',       label: 'Zapłać teraz',     desc: 'Zapłać teraz przez Klarna' },
+    klarna_later: { category: 'pay_later',     label: 'Zapłać później',   desc: 'Otrzymaj najpierw, zapłać później' },
+    klarna_slice: { category: 'pay_over_time', label: 'Płać w ratach',    desc: 'Płać w ratach' },
   };
   var KLARNA_CODES = Object.keys(KLARNA_METHODS);
 
@@ -5236,10 +5297,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             'p24': 'Przelewy24',
             'przelewy24': 'Przelewy24',
             'klarna': 'Klarna',
-            'klarna_later': 'Klarna — achteraf betalen',
-            'klarna_slice': 'Klarna — in termijnen',
+            'klarna_later': 'Klarna — zapłać później',
+            'klarna_slice': 'Klarna — raty',
             'eps': 'EPS',
-            'in3': 'in3 — 3 termijnen',
+            'in3': 'in3 — 3 raty',
             'belfius': 'Belfius',
             'kbc': 'KBC/CBC',
             'riverty': 'Riverty',
@@ -5247,7 +5308,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             'applepay': 'Apple Pay',
             'googlepay': 'Google Pay',
             'bank_transfer': 'Przelew bankowy',
-            'sepa_debit': 'SEPA automatische incasso',
+            'sepa_debit': 'Polecenie zapłaty SEPA',
             'swish': 'Swish',
             'revolut_pay': 'Revolut Pay',
           };
@@ -5878,7 +5939,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return prefix + cleaned.substring(1);
     }
     if (/^\d{7,}$/.test(cleaned)) {
-      return (COUNTRY_PHONE_PREFIX[countryCode] || '+31') + cleaned;
+      return (COUNTRY_PHONE_PREFIX[countryCode] || '+48') + cleaned;
     }
     return cleaned;
   }
@@ -6487,7 +6548,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         }
         if (foxPhonePreview) {
           foxPhonePreview.style.color = '';
-          foxPhonePreview.textContent = '\u2713 Telefoonnummer bevestigd';
+          foxPhonePreview.textContent = '\u2713 Numer telefonu potwierdzony';
           foxPhonePreview.style.display = 'block';
         }
       });
@@ -6514,14 +6575,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var val = foxPhoneField.value.trim();
         if (!val || val.length < 5) return;
 
-        // Voeg landprefix toe als die ontbreekt (bijv. 0612345678 → +31612345678)
+        // Voeg landprefix toe als die ontbreekt (bijv. 0612345678 → +48612345678)
         var countryEl = document.getElementById('country');
-        var cc = countryEl ? countryEl.value : 'NL';
-        var prefixMap = { NL: '+31', BE: '+32' };
+        var cc = countryEl ? countryEl.value : 'PL';
+        var prefixMap = { PL: '+48', NL: '+31', BE: '+32' };
         var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
         if (!cleaned.startsWith('+') && !cleaned.startsWith('00')) {
-          if (cleaned.startsWith('0')) cleaned = (prefixMap[cc] || '+31') + cleaned.substring(1);
-          else if (/^\d{7,}$/.test(cleaned)) cleaned = (prefixMap[cc] || '+31') + cleaned;
+          if (cleaned.startsWith('0')) cleaned = (prefixMap[cc] || '+48') + cleaned.substring(1);
+          else if (/^\d{7,}$/.test(cleaned)) cleaned = (prefixMap[cc] || '+48') + cleaned;
         } else if (cleaned.startsWith('00')) {
           cleaned = '+' + cleaned.substring(2);
         }
@@ -6552,7 +6613,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               hidePhoneWarning();
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
-                foxPhonePreview.textContent = '\u2713 Geldig telefoonnummer';
+                foxPhonePreview.textContent = '\u2713 Prawid\u0142owy numer telefonu';
                 foxPhonePreview.style.display = 'block';
               }
             } else {
@@ -7268,12 +7329,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return;
     }
 
-    // Paczkomat: jeśli wybrano Paczkomat InPost, musi być wybrany konkretny punkt
+    // Paczkomat: jeśli wybrano Paczkomat InPost, musi być wybrany konkretny punkt.
+    // Validujeme packeta_point_id (kód z widgetu) — to je hodnota, kterou WMS (Dextrum)
+    // reálně potřebuje a která se po zaplacení přenáší do order.metadata. Bez ní by
+    // objednávka uvázla na importu (pickupPlaceCode NULL).
     var __selShipOpt = document.querySelector('.shipping-option.selected');
     var __shipMethod = __selShipOpt ? __selShipOpt.getAttribute('data-method') : 'paczkomat';
-    var __paczkomatNameField = document.getElementById('paczkomat_point_name');
-    var __paczkomatPointName = (__paczkomatNameField ? __paczkomatNameField.value : '') || '';
-    if (__shipMethod === 'paczkomat' && !__paczkomatPointName.trim()) {
+    var __paczkomatIdField = document.getElementById('packeta_point_id');
+    var __paczkomatPointId = (__paczkomatIdField ? __paczkomatIdField.value : '') || '';
+    if (__shipMethod === 'paczkomat' && !__paczkomatPointId.trim()) {
       var __pErr = document.getElementById('paczkomat-error');
       var __pSel = document.getElementById('paczkomat-selector');
       if (__pErr) __pErr.style.display = '';
@@ -7554,9 +7618,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (options.length === 0) {
           throw new Error('Brak dostępnych opcji dostawy');
         }
+        var optionId = findShippingOptionId(options, getSelectedShippingMethod());
         return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
           method: 'POST',
-          body: JSON.stringify({ option_id: options[0].id })
+          body: JSON.stringify({ option_id: optionId })
         });
       }).then(function() {
         return medusaFetch('/store/carts/' + cartId, { method: 'GET' });
@@ -8038,7 +8103,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               await window.AirwallexComponentsSDK.init({
                 env: providerData.environment || 'demo',
                 enabledElements: ['payments'],
-                locale: 'nl',
+                locale: 'pl',
               });
 
               var dropInContainer = document.getElementById('airwallex-dropin-container');
@@ -8181,7 +8246,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // Auto-update phone prefix when country changes
     if (phoneField) {
       var raw = phoneField.value.trim();
-      var newPrefix = COUNTRY_PHONE_PREFIX[country] || '+31';
+      var newPrefix = COUNTRY_PHONE_PREFIX[country] || '+48';
       if (!raw) {
         // Empty field — pre-fill with prefix
         phoneField.value = newPrefix;
@@ -8231,6 +8296,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // Legacy static PayPal Express removed — replaced by dynamic initExpressCheckout()
   // which renders PayPal SDK Buttons, Google Pay, Apple Pay based on active gateways.
 
+  // Expose order-summary recalc to the separate shipping-selector IIFE (different
+  // <script> block). Without this, clicking "Dostawa do domu" throws
+  // "recalculateOrderSummary is not defined" and the +5 zł never shows in the UI total.
+  window.recalculateOrderSummary = recalculateOrderSummary;
+  window.getSelectedShippingCost = getSelectedShippingCost;
+  window.getSelectedShippingMethod = getSelectedShippingMethod;
+
 })();
 </script>
 
@@ -8279,7 +8351,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           if (paczkomatError) paczkomatError.style.display = 'none';
         }
 
-        recalculateOrderSummary();
+        // recalculateOrderSummary lives in a separate IIFE — call via window export
+        if (window.recalculateOrderSummary) window.recalculateOrderSummary();
       });
     });
 

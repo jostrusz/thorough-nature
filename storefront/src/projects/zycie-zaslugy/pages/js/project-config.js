@@ -32,8 +32,8 @@ var PROJECT_CONFIG = {
     "PL": "reg_01KK8N9GTWQK7A55SXAH07KNK1"
   },
   "shippingOptions": {
-    "paczkomat":    { "name": "Paczkomat InPost",          "price": 0, "matchName": "InPost" },
-    "homeDelivery": { "name": "Dostawa do domu (Kurier)",  "price": 5, "matchName": "Kurier" }
+    "paczkomat":    { "name": "Paczkomat InPost",   "price": 0, "matchName": "Paczkomaty" },
+    "homeDelivery": { "name": "Dostawa do domu",    "price": 5, "matchName": "inPost - Dostawa" }
   },
   "inpostGeowidgetToken": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJzQlpXVzFNZzVlQnpDYU1XU3JvTlBjRWFveFpXcW9Ua2FuZVB3X291LWxvIn0.eyJleHAiOjIwODg2NTkwMTIsImlhdCI6MTc3MzI5OTAxMiwianRpIjoiM2RkYWQ3ZWYtZWM2Zi00M2FlLTlkOTQtOWEzZWUzMDVjZjYzIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5pbnBvc3QucGwvYXV0aC9yZWFsbXMvZXh0ZXJuYWwiLCJzdWIiOiJmOjEyNDc1MDUxLTFjMDMtNGU1OS1iYTBjLTJiNDU2OTVlZjUzNTpGcWVIcEpjUllDckNJc1BKa1ZMY1MzWEI2d2IzX0tLdW9GMjI4a0JvOENjTjRyRWd1V1BwcTdoeGdBRFBrVjlVIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic2hpcHgiLCJzZXNzaW9uX3N0YXRlIjoiZGE5YTQzMzktN2FkZS00NWVjLTk0MDAtODhhMjZjZjY2NzVmIiwic2NvcGUiOiJvcGVuaWQgYXBpOmFwaXBvaW50cyIsInNpZCI6ImRhOWE0MzM5LTdhZGUtNDVlYy05NDAwLTg4YTI2Y2Y2Njc1ZiIsImFsbG93ZWRfcmVmZXJyZXJzIjoiIiwidXVpZCI6IjE0NTkyNmU4LTdkNmUtNGNhYS05OWEwLTVkOTYzOTE3YTQ1OSJ9.QOhr2q7rkHDyQb6mgx-__j8DDrM80B2KxyGpe53oWmJIUtuXO6Z8Jtm0_yC5XDSpc2EU0siohngOYHwCcFmJcs7uBzwEr7uZUVRHSaxJxL9yXCsKa2uoghBsmYRei85TkQowZGAIkXLxFpnJMeYXob9hMoQ2OROwkoDd_1z2NleaRLe7W5SoiXiXjUW_P5SvlZTkxAS_3zFB2XSSPZQrkKhK7p2VAwwFhSVQG-ePxm9FjVMPHpYzzdiHZIv2AQJhnaMBErIiVBT4Ex9Yeo0njyuimN-91HtLqXMZXRjupxRrCDqMrzJvS41uL7vNeQTcEHBB4BkVRq3NdHMAioTU5Q",
   "paymentProviders": {

@@ -2885,6 +2885,12 @@ body {
         </div>
       </div>
 
+      <!-- 2 bonusové e-knihy zdarma -->
+      <div class="summary-bonus">
+        <span class="bonus-icon">🎁</span>
+        <span class="bonus-text">+ 2 e-knihy zdarma</span>
+      </div>
+
       <!-- Doprava zdarma + záruka -->
       <div class="summary-bonus">
         <span class="bonus-icon">🚚</span>
@@ -3332,6 +3338,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var container = document.getElementById('bundle-options');
     if (!container) return;
     var html = '';
+    var productName = PROJECT_CONFIG.mainProduct.name || 'Pusť to, co tě ničí';
     PROJECT_CONFIG.bundleOptions.forEach(function(opt, idx) {
       var isSelected = (idx === 0); // Výchozí: první (1×)
       var perUnit = (opt.price / opt.qty).toFixed(2).replace('.', ',');
@@ -3339,8 +3346,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       html += '<input type="radio" name="bundle" value="' + opt.qty + '"' + (isSelected ? ' checked' : '') + '>';
       html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
       html += '<div class="bundle-info">';
-      html += '<div class="bundle-text"><span class="bundle-label">' + opt.label + '</span>';
-      if (opt.sublabel) html += '<span class="bundle-sublabel">' + opt.sublabel + '</span>';
+      html += '<div class="bundle-text"><span class="bundle-label">' + opt.qty + '× ' + productName + '</span>';
+      html += '<span class="bundle-sublabel">+ 2 e-knihy zdarma</span>';
       html += '</div>';
       if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
       html += '</div>';
@@ -4501,7 +4508,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         .catch(function(err) {
           btn.classList.remove('loading');
           console.error('[Express ' + method.code + '] Error:', err);
-          alert('Er is een fout opgetreden. Zkuste to znovu nebo použijte formulář níže.');
+          alert('Došlo k chybě. Zkuste to znovu nebo použijte formulář níže.');
         });
     });
   }
@@ -6139,7 +6146,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               emailField.classList.remove('invalid');
             };
           }
-          return; // Stop — ongeldige TLD
+          return; // Stop — neplatná TLD
         }
       }
 
@@ -6351,9 +6358,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       });
     }
 
-    /* ─── Response helper: navigeer naar result data ─── */
+    /* ─── Response helper: navigace na result data ─── */
     function foxentryResult(resp) {
-      // Foxentry antwoord: { response: { result: {...}, resultCorrected: {...}, suggestions: [...] } }
+      // Foxentry odpověď: { response: { result: {...}, resultCorrected: {...}, suggestions: [...] } }
       var r = resp.response || resp;
       return {
         result: r.result || {},
@@ -6565,7 +6572,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     /* ════════════════════════════════════════
      *  2b. E-MAIL VALIDATIE — basic + full proposal handling
-     *  Beslist op basis van proposal (niet alleen isValid)
+     *  Rozhoduje na základě proposal (nejen isValid)
      * ════════════════════════════════════════ */
     if (foxEmailField) {
       foxEmailField.addEventListener('blur', function() {
@@ -6598,7 +6605,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           // Skrýt předchozí návrh
           if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
 
-          // Extra veiligheid: TLD lengte check (Foxentry basic mist dit)
+          // Extra pojistka: kontrola délky TLD (Foxentry basic toto nedělá)
           var _emailParts = val.split('@');
           var _tld = '';
           if (_emailParts.length === 2) {
@@ -6737,7 +6744,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           console.warn('[Foxentry] Email validation failed, using local fallback:', err.message || err);
           var localValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
 
-          // Extra: TLD lengte check
+          // Extra: kontrola délky TLD
           var _catchParts = val.split('@');
           if (_catchParts.length === 2) {
             var _catchDomain = _catchParts[1].split('.');
@@ -7443,7 +7450,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
      * 5. Přesměruj zákazníka na platební stránku (Mollie nebo PayPal)
      * 6. Po platbě se zákazník vrátí → dokončit cart (POST /store/carts/{id}/complete)
      *
-     * Hieronder staat de implementatie:
+     * Níže je implementace:
      */
 
     // Údaje zákazníka z formuláře
@@ -7968,7 +7975,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                   var attempts = 20;
                   (function wait() {
                     if (typeof window.AirwallexComponentsSDK !== 'undefined') return resolve();
-                    if (--attempts <= 0) return reject(new Error('Airwallex SDK niet geladen.'));
+                    if (--attempts <= 0) return reject(new Error('Airwallex SDK se nepodařilo načíst.'));
                     setTimeout(wait, 300);
                   })();
                 });
