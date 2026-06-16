@@ -139,9 +139,20 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
   // slipp-taket: e-books do not exist for this project yet — empty array
   // disables the e-book delivery email. Re-enable by populating the files.
   'slipp-taket': [],
-  // odpust-knizka (CZ): e-books do not exist for this project yet — empty array
-  // disables the e-book delivery email. Re-enable by populating the files.
-  'odpust-knizka': [],
+  'odpust-knizka': [
+    {
+      key: "e-books/Jak-prestat-nadmerne-premyslet-a-zacit-zit.pdf",
+      title: "Jak přestat nadměrně přemýšlet a začít žít",
+      description: "E-book (PDF)",
+      size: "4.1 MB",
+    },
+    {
+      key: "e-books/Laska-bez-cenzury.pdf",
+      title: "Láska bez cenzury",
+      description: "E-book (PDF)",
+      size: "18.5 MB",
+    },
+  ],
 }
 
 // NOTE: no cross-language fallback. Unknown projects are skipped (and logged)
