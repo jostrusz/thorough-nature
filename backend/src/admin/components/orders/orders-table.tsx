@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { PaymentBadge, DeliveryBadge } from "./order-badges"
 import { BookSentToggle } from "./book-sent-toggle"
 import { CountryFlag } from "./country-flag"
+import { getFlagAvatar } from "./flag-avatars"
 import { OrderTag } from "./order-tag"
 import { useUpdateMetadata } from "../../hooks/use-update-metadata"
 import { toast } from "@medusajs/ui"
@@ -627,6 +628,21 @@ export function OrdersTable({
                 <td style={{ ...tdStyle, maxWidth: "230px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "9px", minWidth: 0 }}>
                     {(() => {
+                      const flag = getFlagAvatar(countryCode)
+                      if (flag) {
+                        return (
+                          <img
+                            className="otr-avatar"
+                            src={flag}
+                            alt={countryCode.toUpperCase()}
+                            title={countryCode.toUpperCase()}
+                            style={{
+                              width: "26px", height: "26px", borderRadius: "50%",
+                              objectFit: "cover", flexShrink: 0, display: "block",
+                            }}
+                          />
+                        )
+                      }
                       const av = avatarColor(order.email || customerName)
                       return (
                         <div className="otr-avatar" style={{
