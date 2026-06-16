@@ -8564,6 +8564,33 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       function cleanup(){ try{ if(client && client.stop) client.stop(); }catch(e){} if(ov.parentNode) ov.parentNode.removeChild(ov); }
       function finish(fn){ if(done) return; done = true; cleanup(); Promise.resolve(fn && fn()).then(function(){ resolve(); }).catch(function(e){ console.error('[Brite SDK] finish error:', e); resolve(); }); }
 
+      // Brite docs (session-states): the SESSION can end ABORTED/FAILED while the
+      // TRANSACTION still settles (name_mismatch, late settlement). "Subscribe to the
+      // transaction states ... instead of relying on the final state of the session."
+      // So on aborted/closed, ask the backend by TRANSACTION state before showing an
+      // error — if the money is in, run the success (onComplete) flow instead. Polls a
+      // few times to catch a credit that lands a second or two after the close.
+      function checkPaidThenFinish(reason){
+        if (done) return;
+        var base = (window.PROJECT_CONFIG && PROJECT_CONFIG.medusaUrl) || '';
+        var key = (window.PROJECT_CONFIG && PROJECT_CONFIG.publishableApiKey) || '';
+        var tries = 0;
+        function bail(){ finish(function(){ return opts.onCancel && opts.onCancel(reason); }); }
+        function poll(){
+          tries++;
+          originalFetch(base + '/store/brite-payment-status?cart_id=' + encodeURIComponent(opts.cartId || ''), {
+            headers: key ? { 'x-publishable-api-key': key } : {}
+          }).then(function(r){ return r.json(); })
+            .then(function(d){
+              if (d && d.paid) { finish(opts.onComplete); return; }   // money is in → success flow
+              if (tries < 3) { setTimeout(poll, 2000); return; }      // late credit → retry
+              bail();                                                  // genuinely not paid → error
+            })
+            .catch(function(){ if (tries < 3) { setTimeout(poll, 2000); return; } bail(); });
+        }
+        poll();
+      }
+
       function launch(){
         try {
           client = new Brite(opts.token);
@@ -8587,7 +8614,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             if (state === ST_DONE) {
               finish(opts.onComplete);
             } else if (state === ST_FAIL || state === ST_ABORT) {
-              finish(function(){ return opts.onCancel && opts.onCancel('failed'); });
+              // Session aborted/failed — but the transaction may still have settled
+              // (name_mismatch / late settlement). Verify by transaction state first.
+              checkPaidThenFinish('failed');
             } else if (state === ST_AUTH) {
               if (!head.querySelector('.brite-embed-status')) {
                 var hd = document.createElement('span');
@@ -8597,7 +8626,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 head.appendChild(hd);
               }
             }
-          }, function(){ finish(function(){ return opts.onCancel && opts.onCancel('closed'); }); });
+          }, function(){ checkPaidThenFinish('closed'); });
         } catch(e){
           console.error('[Brite SDK] init failed:', e);
           if (opts.checkoutUrl) { cleanup(); window.location.href = opts.checkoutUrl; return; }
