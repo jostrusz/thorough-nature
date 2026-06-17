@@ -345,6 +345,21 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
         { url: cbUrl, session_state: 12 },     // session COMPLETED
       ]
 
+      // Brite accepts a SINGLE redirect_uri (no per-state URLs). returnUrl already
+      // carries ?payment_return=1&cart_id=…; tag provider=brite so the storefront's
+      // return handler knows to verify the outcome via /store/brite-payment-status
+      // (the final state is NOT encoded in the URL — only one redirect_uri exists).
+      //
+      // Gated by data.brite_flow === "redirect": only a checkout that has switched to
+      // the redirect flow sends this flag, so we don't inject redirect_uri into the
+      // still-embedded (iframe) checkouts during the gradual rollout.
+      const useRedirect = data?.brite_flow === "redirect"
+      const redirectUri = useRedirect && returnUrl
+        ? (returnUrl.includes("provider=")
+            ? returnUrl
+            : `${returnUrl}${returnUrl.includes("?") ? "&" : "?"}provider=brite`)
+        : null
+
       const sessionPayload: any = {
         amount: Number(amount),
         currency_id: currency_code.toLowerCase(),
@@ -352,12 +367,13 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
         brand_name: data?.product_name || data?.brand_name || "Order",
         merchant_reference: merchantReference,
         locale: data?.locale || (countryId || undefined),
-        // No redirect_uri — we use the embedded Web SDK (iframe). deeplink_redirect
-        // is intentionally OMITTED: per Brite (Fernando, 2026-06-15) it must ONLY be
-        // set for NATIVE apps — it returns the user from the mobile bank-auth app to a
-        // custom *app scheme*. On desktop it has no effect; for mobile WEB users it
-        // causes UNDEFINED BEHAVIOUR. We are a web checkout (no native app), so we
-        // never send it. (returnUrl is still used below for the callback return_url.)
+        // Redirect flow (replaces the embedded Web SDK iframe, which suffered mobile OS
+        // throttling after the bank app-switch and lost ~50% of thank-you redirects).
+        // Brite redirects the customer to redirect_uri once the session reaches a final
+        // state (10/11/12). Per Brite + Swish/Instant docs the `url` is top-level only —
+        // never an iframe. deeplink_redirect stays OMITTED: native-app-only, undefined
+        // behaviour on mobile web (Fernando, 2026-06-15).
+        ...(redirectUri && { redirect_uri: redirectUri }),
         callbacks,
         ...(preselectedBank && { bank_id: preselectedBank }),
         ...(customerEmail && { customer_email: customerEmail }),
