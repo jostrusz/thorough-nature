@@ -246,6 +246,18 @@ export function getPaymentIconUrl(order: any): string {
     return `${ICON_BASE}/apm/przelewy24.svg`
   }
 
+  // PayU (native gateway) — map CZ pay-by-link / card / wallet codes to icons
+  if (providerId.includes("payu") || order.metadata?.payment_provider === "payu") {
+    const m = (method || "").toLowerCase()
+    if (m === "c" || m === "card" || m === "creditcard") return `${ICON_BASE}/cards/visa.svg`
+    if (m === "blik") return BLIK_SVG
+    if (m === "ap" || m === "applepay") return `${ICON_BASE}/wallets/apple-pay.svg`
+    if (m === "jp" || m === "googlepay") return `${ICON_BASE}/wallets/google-pay.svg`
+    // CZ bank pay-by-link + QR platba → Czech bank icon
+    if (["qrcz", "cs", "kb", "cb", "mp", "pf", "pg", "rf", "uc"].indexOf(m) !== -1) return BANK_CZ_SVG
+    return PAYU_SVG
+  }
+
   return ""
 }
 
@@ -257,6 +269,7 @@ export function getPaymentFallback(order: any): { letter: string; bg: string; co
   if (providerId.includes("brite") || order.metadata?.payment_provider === "brite") return { letter: "B", bg: "#FFE600", color: "#0A0B09" }
   if (providerId.includes("comgate")) return { letter: "C", bg: "#444", color: "#fff" }
   if (providerId.includes("przelewy") || providerId.includes("p24")) return { letter: "P24", bg: "#D40E2F", color: "#fff" }
+  if (providerId.includes("payu") || order.metadata?.payment_provider === "payu") return { letter: "PayU", bg: "#A6C307", color: "#fff" }
   return { letter: "?", bg: colors.textMuted, color: "#fff" }
 }
 
@@ -360,6 +373,29 @@ export function getPaymentMethodName(order: any): string {
       googlepay: "Google Pay",
     }
     return names[method] || "Mollie"
+  }
+
+  if (providerId.includes("payu") || order.metadata?.payment_provider === "payu") {
+    const names: Record<string, string> = {
+      c: "Platební karta",
+      card: "Platební karta",
+      creditcard: "Platební karta",
+      qrcz: "QR platba",
+      cs: "Česká spořitelna",
+      kb: "Komerční banka",
+      cb: "ČSOB",
+      mp: "mBank",
+      pf: "Fio banka",
+      pg: "Moneta Money Bank",
+      rf: "Raiffeisenbank",
+      uc: "UniCredit Bank",
+      blik: "BLIK",
+      ap: "Apple Pay",
+      applepay: "Apple Pay",
+      jp: "Google Pay",
+      googlepay: "Google Pay",
+    }
+    return names[(method || "").toLowerCase()] || "PayU"
   }
 
   return "Payment"
