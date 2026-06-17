@@ -42,6 +42,9 @@ import { LlAbandonedCheckout3Template, LL_ABANDONED_CHECKOUT_3, isLlAbandonedChe
 import { LbAbandonedCheckout1Template, LB_ABANDONED_CHECKOUT_1, isLbAbandonedCheckout1Data } from './lb-abandoned-checkout-1'
 import { LbAbandonedCheckout2Template, LB_ABANDONED_CHECKOUT_2, isLbAbandonedCheckout2Data } from './lb-abandoned-checkout-2'
 import { LbAbandonedCheckout3Template, LB_ABANDONED_CHECKOUT_3, isLbAbandonedCheckout3Data } from './lb-abandoned-checkout-3'
+// Loslatenboek Brite payment lifecycle (pending / recovery)
+import { LbPaymentPendingTemplate, LB_PAYMENT_PENDING, isLbPaymentPendingData } from './lb-payment-pending'
+import { LbPaymentRecoveryTemplate, LB_PAYMENT_RECOVERY, isLbPaymentRecoveryData } from './lb-payment-recovery'
 // Psí superživot (psi-superzivot) templates
 import { PsOrderPlacedTemplate, PS_ORDER_PLACED, isPsOrderPlacedTemplateData } from './ps-order-placed'
 import { PsShipmentNotificationTemplate, PS_SHIPMENT_NOTIFICATION, isPsShipmentNotificationData } from './ps-shipment-notification'
@@ -115,6 +118,8 @@ export const EmailTemplates = {
   LB_ABANDONED_CHECKOUT_1,
   LB_ABANDONED_CHECKOUT_2,
   LB_ABANDONED_CHECKOUT_3,
+  LB_PAYMENT_PENDING,
+  LB_PAYMENT_RECOVERY,
   // Psí superživot
   PS_ORDER_PLACED,
   PS_SHIPMENT_NOTIFICATION,
@@ -615,6 +620,24 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
         )
       }
       return <LbAbandonedCheckout3Template {...data} />
+
+    case EmailTemplates.LB_PAYMENT_PENDING:
+      if (!isLbPaymentPendingData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.LB_PAYMENT_PENDING}"`
+        )
+      }
+      return <LbPaymentPendingTemplate {...data} />
+
+    case EmailTemplates.LB_PAYMENT_RECOVERY:
+      if (!isLbPaymentRecoveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.LB_PAYMENT_RECOVERY}"`
+        )
+      }
+      return <LbPaymentRecoveryTemplate {...data} />
 
     // ── Psí superživot templates ─────────────────────────────
     case EmailTemplates.PS_ORDER_PLACED:
