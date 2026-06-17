@@ -279,13 +279,17 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
     ""
 
   // Payment Gateway name (e.g. "Mollie", "PayPal")
+  const GATE_BRAND_LABELS: Record<string, string> = {
+    payu: "PayU", paypal: "PayPal", comgate: "Comgate", airwallex: "Airwallex",
+    mollie: "Mollie", stripe: "Stripe", klarna: "Klarna", brite: "Brite",
+    przelewy24: "Przelewy24", novalnet: "Novalnet", revolut: "Revolut", cod: "Dobírka (COD)",
+  }
   const providerRaw = payment?.provider_id || ""
-  const paymentGatewayFromProvider = providerRaw
-    ? providerRaw.replace(/^pp_/, "").replace(/_.*$/, "").replace(/^\w/, (c: string) => c.toUpperCase())
-    : ""
+  const providerSlug = (providerRaw.replace(/^pp_/, "").replace(/_.*$/, "") || metadata.payment_provider || "").toLowerCase()
   // Fallback to metadata.payment_provider for manually created orders
-  const paymentGateway = paymentGatewayFromProvider
-    || (metadata.payment_provider ? metadata.payment_provider.charAt(0).toUpperCase() + metadata.payment_provider.slice(1) : "")
+  const paymentGateway = providerSlug
+    ? (GATE_BRAND_LABELS[providerSlug] || providerSlug.charAt(0).toUpperCase() + providerSlug.slice(1))
+    : ""
 
   // Payment Method (e.g. "ideal", "bancontact", "creditcard")
   const paymentMethodRaw =
@@ -338,6 +342,20 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
     APPLEPAY: "Apple Pay",
     PAYPAL: "PayPal",
     BTCPAY: "Bitcoin",
+    // PayU CZ pay-by-link / card / QR codes
+    c: "Platební karta",
+    card: "Platební karta",
+    qrcz: "QR platba",
+    cs: "Česká spořitelna",
+    kb: "Komerční banka",
+    cb: "ČSOB",
+    mp: "mBank",
+    pf: "Fio banka",
+    pg: "Moneta Money Bank",
+    rf: "Raiffeisenbank",
+    uc: "UniCredit Bank",
+    jp: "Google Pay",
+    ap: "Apple Pay",
   }
   // Try the raw value, then uppercase variant (Comgate methods are uppercase)
   const paymentMethodLabel =
