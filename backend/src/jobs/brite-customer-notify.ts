@@ -106,10 +106,17 @@ export default async function briteCustomerNotify(container: MedusaContainer) {
       const ageMs = now - new Date(c.occurred_at).getTime()
       if (ageMs > WINDOW_MS) continue
 
-      // Skip if an order already exists for this Brite session.
+      // Skip if ANY recent order exists for this Brite session OR for this customer's
+      // e-mail. The e-mail check is the important one: it catches the customer who
+      // abandoned THIS attempt but then succeeded on a SECOND attempt (different cart /
+      // session, even a different payment method). Without it we'd nag someone who has
+      // already bought — and risk pushing them into a duplicate payment.
       const { rows: ord } = await pool.query(
-        `SELECT id FROM "order" WHERE metadata->>'briteSessionId' = $1 LIMIT 1`,
-        [sessionId]
+        `SELECT id FROM "order"
+         WHERE (metadata->>'briteSessionId' = $1 OR lower(email) = lower($2))
+           AND created_at >= NOW() - INTERVAL '7 days'
+         LIMIT 1`,
+        [sessionId, c.email]
       )
       if (ord[0]) continue
 
