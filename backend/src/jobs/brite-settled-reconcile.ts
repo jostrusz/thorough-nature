@@ -5,14 +5,14 @@ import { recoverBriteCart } from "../modules/payment-brite/utils/recover"
 /**
  * Brite Settled Reconciliation — late-settlement safety net.
  *
- * Runs hourly. Open-banking transfers can settle HOURS after the customer closed
- * the bank UI (session ABORTED but transaction SETTLED). When the webhook
- * safety-net missed it (credentials hiccup, callback never fired, settlement
- * arrived after the abort), the money is at Brite but no order exists.
+ * Runs hourly. Open-banking transfers can settle HOURS — or over a weekend, DAYS —
+ * after the customer closed the bank UI (session ABORTED but transaction SETTLED).
+ * When the webhook safety-net missed it (credentials hiccup, callback never fired,
+ * settlement arrived after the abort), the money is at Brite but no order exists.
  *
  * This job:
  *   1) pulls Brite transactions in state 4/5/6 (completed/credit/settled) from the
- *      last 48h,
+ *      last 4 days (covers Friday-authorize → Monday-settle weekends),
  *   2) for each, attempts recoverBriteCart (idempotent — skips if an order already
  *      covers it),
  *   3) alerts (ntfy) on transactions it cannot recover (no cart / amount mismatch),
@@ -23,7 +23,7 @@ import { recoverBriteCart } from "../modules/payment-brite/utils/recover"
  */
 
 const NTFY_URL = "https://ntfy.sh/medusa-ntfy-obj-2026"
-const LOOKBACK_MS = 48 * 60 * 60 * 1000
+const LOOKBACK_MS = 4 * 24 * 60 * 60 * 1000 // 4 days — covers Fri-authorize → Mon-settle weekends
 
 async function alert(title: string, body: string) {
   try {
@@ -112,7 +112,7 @@ export default async function briteSettledReconcile(container: MedusaContainer) 
   )
 
   if (!settled.length) {
-    logger.info(`[Brite Reconcile] No settled transactions in the last 48h.`)
+    logger.info(`[Brite Reconcile] No settled transactions in the last 4 days.`)
     return
   }
 
