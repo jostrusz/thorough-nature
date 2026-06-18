@@ -121,10 +121,13 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }
 
     const paid = sessionState === 12 || [4, 5, 6].includes(Number(transactionState))
+    // has_transaction lets the storefront tell "cancelled before authorisation" (session
+    // aborted, NO transaction → can never settle → show failed immediately) apart from a
+    // late-settling Vincent case (session aborted, transaction EXISTS → keep waiting).
     // Don't surface an abort error_code on a paid order: a late-settled session can read
     // ABORTED (error_code set) while the transaction is SETTLED → paid=true. Returning the
     // stale error_code could make a consumer show an error for a successful payment.
-    return res.json({ paid, session_state: sessionState, transaction_state: transactionState, error_code: paid ? null : errorCode })
+    return res.json({ paid, session_state: sessionState, transaction_state: transactionState, has_transaction: !!transactionId, error_code: paid ? null : errorCode })
   } catch (error: any) {
     return res.status(500).json({ paid: false, error: error.message })
   } finally {

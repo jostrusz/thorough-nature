@@ -6756,6 +6756,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           if (d && d.paid) { done = true; markPaid(); setTimeout(finish, 700); return; }
           var ts = d && d.transaction_state;
           if (ts === 2 || ts === 3 || ts === 7) { done = true; showFailed(d && d.error_code); return; }
+          // Cancelled before authorisation: session ended (aborted/failed) with NO transaction
+          // → it can never settle, so show the failed state now instead of polling/"taking longer".
+          if ((d.session_state === 10 || d.session_state === 11) && !d.has_transaction) { done = true; showFailed(d && d.error_code); return; }
           if (attempts >= MAX_ATTEMPTS) { done = true; showLonger(); return; }
           setTimeout(poll, POLL_MS);
         })
