@@ -25,9 +25,28 @@ import { logPaymentEvent } from "../modules/payment-debug/utils/log"
  * (brite_session_created events carry intent_id + email + project_slug).
  */
 
-const PROJECT = "loslatenboek"
-const CHECKOUT_URL = process.env.LLWJK_CHECKOUT_URL || "https://loslatenboek.nl/checkout"
-const REPLY_TO = "devries@loslatenboek.nl"
+// Per-project config. A project is only processed if it appears here (so the cron is
+// scoped to checkouts that are on the redirect flow + have payment lifecycle templates).
+const PROJECTS: Record<string, {
+  checkoutUrl: string; replyTo: string
+  pendingTemplate: string; pendingSubject: string
+  recoveryTemplate: string; recoverySubject: string
+}> = {
+  loslatenboek: {
+    checkoutUrl: process.env.LLWJK_CHECKOUT_URL || "https://loslatenboek.nl/checkout",
+    replyTo: "devries@loslatenboek.nl",
+    pendingTemplate: "lb-payment-pending", pendingSubject: "we hebben je bestelling ontvangen",
+    recoveryTemplate: "lb-payment-recovery", recoverySubject: "je bent er bijna",
+  },
+  "slapp-taget": {
+    checkoutUrl: process.env.ST_CHECKOUT_URL || "https://slapptagetboken.se/checkout",
+    replyTo: "hej@slapptagetboken.se",
+    pendingTemplate: "st-payment-pending", pendingSubject: "Vi har tagit emot din beställning",
+    recoveryTemplate: "st-payment-recovery", recoverySubject: "Du är nästan klar",
+  },
+}
+const PROJECT_SLUGS = Object.keys(PROJECTS)
+
 const PENDING_MIN_AGE_MS = 10 * 60 * 1000   // #2: tx pending ≥ 10 min
 const RECOVERY_MIN_AGE_MS = 45 * 60 * 1000  // #4: aborted ≥ 45 min (late-settlement grace)
 const WINDOW_MS = 24 * 60 * 60 * 1000        // only look back 24h
@@ -68,10 +87,10 @@ export default async function briteCustomerNotify(container: MedusaContainer) {
     // 1) Candidate Brite sessions for loslatenboek in the last 24h that have an email
     //    and have NOT already been notified (no recovery/pending marker logged).
     const { rows: candidates } = await pool.query(
-      `SELECT DISTINCT ON (j.intent_id) j.intent_id, j.cart_id, j.email, j.occurred_at
+      `SELECT DISTINCT ON (j.intent_id) j.intent_id, j.cart_id, j.email, j.project_slug, j.occurred_at
        FROM payment_journey_log j
        WHERE j.event_type = 'brite_session_created'
-         AND j.project_slug = $1
+         AND j.project_slug = ANY($1)
          AND j.email IS NOT NULL AND j.email <> ''
          AND j.occurred_at >= NOW() - INTERVAL '24 hours'
          AND NOT EXISTS (
@@ -80,7 +99,7 @@ export default async function briteCustomerNotify(container: MedusaContainer) {
              AND m.event_type IN ('brite_recovery_email', 'brite_pending_email')
          )
        ORDER BY j.intent_id, j.occurred_at DESC`,
-      [PROJECT]
+      [PROJECT_SLUGS]
     )
     if (!candidates.length) return
 
@@ -102,6 +121,8 @@ export default async function briteCustomerNotify(container: MedusaContainer) {
 
     for (const c of candidates) {
       if (sent >= MAX_PER_RUN) break
+      const cfg = PROJECTS[c.project_slug]
+      if (!cfg) continue
       const sessionId = c.intent_id
       const ageMs = now - new Date(c.occurred_at).getTime()
       if (ageMs > WINDOW_MS) continue
@@ -145,8 +166,8 @@ export default async function briteCustomerNotify(container: MedusaContainer) {
       // Paid → nothing to do here (order flow / reconcile handles it).
       if (sessionState === 12 || [4, 5, 6].includes(Number(txState))) continue
 
-      // First name from the cart's shipping address; fallback "daar".
-      let firstName = "daar"
+      // First name from the cart's shipping address; localized fallback.
+      let firstName = c.project_slug === "slapp-taget" ? "där" : "daar"
       try {
         const { rows: nm } = await pool.query(
           `SELECT ca.first_name FROM cart cc
@@ -158,18 +179,18 @@ export default async function briteCustomerNotify(container: MedusaContainer) {
       } catch { /* keep fallback */ }
 
       let template: string | null = null, subject = "", marker = ""
-      let data: any = { emailOptions: { replyTo: REPLY_TO, subject: "" }, firstName }
+      let data: any = { emailOptions: { replyTo: cfg.replyTo, subject: "" }, firstName }
 
       if ([2, 3, 7].includes(Number(txState)) && ageMs >= RECOVERY_MIN_AGE_MS) {
         // #4 RECOVERY — transaction terminally failed (not a late-settlement candidate).
-        template = "lb-payment-recovery"
-        subject = "je bent er bijna"
+        template = cfg.recoveryTemplate
+        subject = cfg.recoverySubject
         marker = "brite_recovery_email"
-        data.checkoutUrl = CHECKOUT_URL
+        data.checkoutUrl = cfg.checkoutUrl
       } else if (Number(txState) === 1 && ageMs >= PENDING_MIN_AGE_MS) {
         // #2 PENDING — transaction still processing, no order yet.
-        template = "lb-payment-pending"
-        subject = "we hebben je bestelling ontvangen"
+        template = cfg.pendingTemplate
+        subject = cfg.pendingSubject
         marker = "brite_pending_email"
       }
       if (!template) continue
@@ -182,7 +203,7 @@ export default async function briteCustomerNotify(container: MedusaContainer) {
         sent++
         logger.info(`[Brite Notify] Sent ${template} to ${c.email} (session ${sessionId}, tx state ${txState})`)
         await logPaymentEvent({
-          intent_id: sessionId, email: c.email, cart_id: c.cart_id, project_slug: PROJECT,
+          intent_id: sessionId, email: c.email, cart_id: c.cart_id, project_slug: c.project_slug,
           event_type: marker, event_data: { template, tx_state: txState, session_state: sessionState },
         }).catch(() => {})
       } catch (e: any) {
