@@ -8000,6 +8000,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         // thank-you redirects. Brite returns the customer to ?payment_return=1&provider=brite,
         // where handleBriteReturn polls brite-payment-status (verify → done/longer/failed).
         if (selectedProvider === 'brite' && redirectUrl) {
+          try { saveFormToStorage(); } catch (e) {}   // persist form so a return (Opnieuw proberen) pre-fills the fields
           window.location.href = redirectUrl;
           return;
         }
