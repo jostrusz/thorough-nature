@@ -416,19 +416,28 @@ export function OrderFulfillmentCard({
               background: isFree ? "#f0faf4" : "transparent",
             }}
           >
-            {/* Zásilkovna badge — red bg, white text */}
+            {/* Zásilkovna badge — brand red bg, white parcel logo + white text */}
             {isZasilkovna && (
               <div
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  padding: "3px 8px",
+                  gap: "5px",
+                  padding: "3px 8px 3px 5px",
                   borderRadius: "3px",
-                  background: "#BA1B02",
+                  background: "#C20E1A",
                   flexShrink: 0,
                 }}
               >
+                <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "14px", height: "14px", background: "#fff", borderRadius: "2px", flexShrink: 0 }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#C20E1A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" />
+                    <path d="M12 12l8-4.5" />
+                    <path d="M12 12v9" />
+                    <path d="M12 12L4 7.5" />
+                    <path d="M16 5.25l-8 4.5" />
+                  </svg>
+                </span>
                 <span style={{ fontSize: "10px", fontWeight: 700, color: "#fff", letterSpacing: "0.04em", lineHeight: 1 }}>Zásilkovna</span>
               </div>
             )}
@@ -498,7 +507,7 @@ export function OrderFulfillmentCard({
                   if (pid.includes("lass") || pid.includes("Lass")) return `Versand innerhalb von 24 Stunden per ${carrier}`
                   if (pid.includes("slapp") || pid.includes("Släpp")) return `Skickas inom 24 timmar via ${carrier}`
                   if (pid.includes("odpusc") || pid.includes("Odpuść")) return `Wysyłka w ciągu 24 godzin przez ${carrier}`
-                  if (pid.includes("psi") || pid.includes("Psí")) return `Odesláno do 24 hodin přes ${carrier}`
+                  if (pid.includes("psi") || pid.includes("Psí") || pid.includes("odpust") || pid.includes("Pusť") || pid.includes("knizka") || pid.includes("kocici")) return `Odesláno do 24 hodin přes ${carrier}`
                   return `Verzonden binnen 24 uur via ${carrier}`
                 })()}
               </div>
@@ -519,7 +528,7 @@ export function OrderFulfillmentCard({
                   if (pid.includes("lass")) return "Gratis"
                   if (pid.includes("slapp")) return "Gratis"
                   if (pid.includes("odpusc")) return "Gratis"
-                  if (pid.includes("psi")) return "Zdarma"
+                  if (pid.includes("psi") || pid.includes("odpust") || pid.includes("knizka") || pid.includes("kocici")) return "Zdarma"
                   return "Gratis"
                 })()}
               </span>
