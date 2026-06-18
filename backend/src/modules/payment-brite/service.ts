@@ -416,8 +416,13 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
 
       this.logger_.info(`[Brite] Session created: ${session.id}, url present: ${!!session.url}`)
 
+      // cart_id from the return URL (…?cart_id=…) so the customer-notify cron can look
+      // up the shipping first-name for #2/#4 e-mails — without it those mails always
+      // fall back to a generic greeting.
+      const cartIdForLog = (() => { const m = /[?&]cart_id=([^&]+)/.exec(returnUrl || ""); return m ? decodeURIComponent(m[1]) : null })()
       logPaymentEvent({
         intent_id: session.id,
+        cart_id: cartIdForLog,
         email: customerEmail || null,
         project_slug: projectSlug,
         event_type: "brite_session_created",

@@ -32,7 +32,10 @@ const TOKEN_CACHE: Record<string, { token: string; expiresAt: number }> = {}
 const TOKEN_TTL_MS = 5 * 60 * 60 * 1000
 
 async function getBriteToken(base: string, apiKey: string, secretKey: string): Promise<string | null> {
-  const cached = TOKEN_CACHE[apiKey]
+  // Key by base+apiKey: a token is bound to its environment (sandbox vs production),
+  // so caching by apiKey alone could return a token issued against the other env.
+  const cacheKey = `${base}|${apiKey}`
+  const cached = TOKEN_CACHE[cacheKey]
   if (cached && cached.expiresAt > Date.now()) return cached.token
   const authR = await fetch(`${base}/api/merchant.authorize`, {
     method: "POST",
@@ -42,7 +45,7 @@ async function getBriteToken(base: string, apiKey: string, secretKey: string): P
   const authD = await authR.json()
   const token = authD?.access_token || authD?.token
   if (!token) return null
-  TOKEN_CACHE[apiKey] = { token, expiresAt: Date.now() + TOKEN_TTL_MS }
+  TOKEN_CACHE[cacheKey] = { token, expiresAt: Date.now() + TOKEN_TTL_MS }
   return token
 }
 
@@ -118,7 +121,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }
 
     const paid = sessionState === 12 || [4, 5, 6].includes(Number(transactionState))
-    return res.json({ paid, session_state: sessionState, transaction_state: transactionState, error_code: errorCode })
+    // Don't surface an abort error_code on a paid order: a late-settled session can read
+    // ABORTED (error_code set) while the transaction is SETTLED → paid=true. Returning the
+    // stale error_code could make a consumer show an error for a successful payment.
+    return res.json({ paid, session_state: sessionState, transaction_state: transactionState, error_code: paid ? null : errorCode })
   } catch (error: any) {
     return res.status(500).json({ paid: false, error: error.message })
   } finally {
