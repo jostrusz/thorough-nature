@@ -132,7 +132,7 @@ Kde {delivery_postal_code} je PSČ doručovací adresy zákazníka.
 
 ### DE/AT/LU Lass los, was dich kaputt macht
 - Autor: Joris de Vries
-- Web: lasslosbuch.de
+- Web: jetztloslassen.de
 - E-mail: buch@befreiungsbuch.de
 - E-booky: https://drive.google.com/drive/folders/15_GK1BC3-wqBZ1J-hJD8TeDh-6fK_yD7
 

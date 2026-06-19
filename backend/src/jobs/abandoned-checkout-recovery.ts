@@ -504,7 +504,7 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
 
         // Extract customer data
         const firstName = cart.shipping_address?.first_name || "dort"
-        const checkoutUrl = meta.checkout_url || "https://www.lasslosbuch.de/checkout"
+        const checkoutUrl = meta.checkout_url || "https://www.jetztloslassen.de/checkout"
         const mainItem = (cart.items || [])[0]
         const productName = mainItem?.variant?.product?.title || mainItem?.title || "Lass los, was dich kaputt macht"
         // Calculate total price from all cart items (quantity × unit_price)
@@ -521,10 +521,10 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
             to: cart.email,
             channel: "email",
             template: nextStepConfig.templateKey,
-            from: "Joris de Vries - Lass los, was dich kaputt macht <buch@lasslosbuch.de>",
+            from: "Joris de Vries - Lass los, was dich kaputt macht <buch@jetztloslassen.de>",
             data: {
               emailOptions: {
-                replyTo: "buch@lasslosbuch.de",
+                replyTo: "buch@jetztloslassen.de",
                 subject: nextStepConfig.subject(firstName),
               },
               firstName,

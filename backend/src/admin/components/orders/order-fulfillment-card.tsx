@@ -569,6 +569,22 @@ export function OrderFulfillmentCard({
               <div style={{ marginTop: "1px" }}>{order.metadata.paczkomat_address || order.metadata.packeta_point_address}</div>
             </div>
           )}
+          {order.metadata?.packeta_carrier_id ? (
+            <div
+              style={{
+                marginTop: "8px",
+                padding: "6px 10px",
+                borderRadius: "6px",
+                background: "#fff4f4",
+                border: "1px solid #f3c2c2",
+                fontSize: "11px",
+                fontWeight: 600,
+                color: "#b42318",
+              }}
+            >
+              ⚠️ Externí dopravce (carrier ID: {String(order.metadata.packeta_carrier_id)}) — výdejní místo není přímo Zásilkovna, zásilka může selhat na „aktivní výdejní místo nenalezeno".
+            </div>
+          ) : null}
         </div>
       )}
 

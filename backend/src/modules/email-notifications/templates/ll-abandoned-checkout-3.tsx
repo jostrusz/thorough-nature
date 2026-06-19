@@ -311,8 +311,8 @@ export const LlAbandonedCheckout3Template: React.FC<LlAbandonedCheckout3Props> &
             fontStyle: 'italic' as const,
           }}>
             P.S. Noch Zweifel? Schreib mir pers&ouml;nlich an{' '}
-            <Link href="mailto:buch@lasslosbuch.de" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 600, fontStyle: 'normal' as const }}>
-              buch@lasslosbuch.de
+            <Link href="mailto:buch@jetztloslassen.de" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 600, fontStyle: 'normal' as const }}>
+              buch@jetztloslassen.de
             </Link>
             . Ich lese und beantworte jede Nachricht selbst.
           </Text>
@@ -354,7 +354,7 @@ export const LlAbandonedCheckout3Template: React.FC<LlAbandonedCheckout3Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Du erh&auml;ltst diese E-Mail, weil du einen Checkout auf lasslosbuch.de gestartet hast. Dies ist die letzte Erinnerung &mdash; du erh&auml;ltst keine weiteren E-Mails zu dieser Bestellung.
+            Du erh&auml;ltst diese E-Mail, weil du einen Checkout auf jetztloslassen.de gestartet hast. Dies ist die letzte Erinnerung &mdash; du erh&auml;ltst keine weiteren E-Mails zu dieser Bestellung.
           </Text>
         </div>
       </Section>
@@ -364,7 +364,7 @@ export const LlAbandonedCheckout3Template: React.FC<LlAbandonedCheckout3Props> &
 
 LlAbandonedCheckout3Template.PreviewProps = {
   firstName: 'Maria',
-  checkoutUrl: 'https://www.lasslosbuch.de/checkout',
+  checkoutUrl: 'https://www.jetztloslassen.de/checkout',
   productName: 'Lass los, was dich kaputt macht',
   productPrice: '35,00',
   productImage: '',

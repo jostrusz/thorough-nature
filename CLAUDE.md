@@ -17,7 +17,7 @@
 | `loslatenboek` | loslatenboek.nl, tijdomloslaten.nl | NL | 🇳🇱 | Laat los wat je kapotmaakt |
 | `dehondenbijbel` | dehondenbijbel.nl | NL | 🇳🇱 | De Hondenbijbel (dog book) |
 | `het-leven` | pakjeleventerug.nl | NL | 🇳🇱 | Pak je leven terug |
-| `lass-los` | lasslosbuch.de, bucherfurdich.de | DE | 🇩🇪🇦🇹 | Lass los, was dich kaputt macht |
+| `lass-los` | jetztloslassen.de, bucherfurdich.de | DE | 🇩🇪🇦🇹 | Lass los, was dich kaputt macht |
 | `odpusc-ksiazka` | odpusc-ksiazka.pl, ksiazkidladuszy.pl | PL | 🇵🇱 | Odpuść to, co cię niszczy |
 | `slapp-taget` | slapptagetboken.se, bokochkaffe.com | SE | 🇸🇪 | Släpp taget |
 | `psi-superzivot` | psi-superzivot.cz, knihyprodusi.cz | CZ | 🇨🇿 | Psí superživot (dog book) |

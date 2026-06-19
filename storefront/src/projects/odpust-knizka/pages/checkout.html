@@ -5985,6 +5985,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               address: point.place || point.street,
               zip: point.zip,
               city: point.city,
+              // carrierId === null → vlastní výdejní místo/Z-BOX Zásilkovny (validní pro pickupPlaceCode).
+              // Vyplněné carrierId → externí dopravce (s vendors filtrem níže by nemělo nastat).
+              carrierId: (point.carrierId === undefined ? null : point.carrierId),
             };
             // Show selected point
             var display = document.getElementById('packeta-selected-point');
@@ -6010,6 +6013,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           language: 'cs',
           country: 'cz',
           appIdentity: PROJECT_CONFIG.domain || 'checkout',
+          // Omezit jen na vlastní síť Zásilkovny (výdejní místa + Z-BOXy).
+          // Tím se nenabídnou body externích dopravců, které padaly na
+          // "aktivní výdejní místo nenalezeno" při zakládání zásilky.
+          vendors: [
+            { country: 'cz', group: 'zpoint' },
+            { country: 'cz', group: 'zbox' },
+          ],
         });
       });
     }
@@ -7722,6 +7732,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           cartMeta.packeta_point_id = String(selectedPacketaPoint.id);
           cartMeta.packeta_point_name = selectedPacketaPoint.name;
           cartMeta.packeta_point_address = selectedPacketaPoint.address + ', ' + selectedPacketaPoint.zip + ' ' + selectedPacketaPoint.city;
+          // Diagnostika dopravce: prázdné = vlastní místo Zásilkovny (OK pro pickupPlaceCode).
+          // Vyplněné = externí dopravce → v adminu je hned vidět, proč by zásilka mohla padnout.
+          cartMeta.packeta_carrier_id = (selectedPacketaPoint.carrierId === null || selectedPacketaPoint.carrierId === undefined)
+            ? '' : String(selectedPacketaPoint.carrierId);
         }
         if (selectedMethod === 'cod') {
           cartMeta.payment_method = 'cod';
