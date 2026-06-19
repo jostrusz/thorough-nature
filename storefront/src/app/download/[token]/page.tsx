@@ -397,7 +397,7 @@ const lassLosTheme: ProjectTheme = {
   ...loslatenboekTheme,
   brandLabel: "LASS LOS, WAS DICH KAPUTT MACHT",
   brandName: "Lass los, was dich kaputt macht",
-  supportEmail: "buch@lasslosbuch.de",
+  supportEmail: "buch@jetztloslassen.de",
 }
 
 const psiSuperzivotTheme: ProjectTheme = {

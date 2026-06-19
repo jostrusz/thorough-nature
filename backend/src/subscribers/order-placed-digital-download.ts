@@ -164,7 +164,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   dehondenbijbel: process.env.DH_STOREFRONT_URL || process.env.STOREFRONT_URL || "https://www.dehondenbijbel.nl",
   'slapp-taget': process.env.ST_STOREFRONT_URL || "https://www.slapptagetboken.se",
   'odpusc-ksiazka': process.env.OK_STOREFRONT_URL || "https://www.odpusc-ksiazka.pl",
-  'lass-los': process.env.LL_STOREFRONT_URL || "https://www.lasslosbuch.de",
+  'lass-los': process.env.LL_STOREFRONT_URL || "https://www.jetztloslassen.de",
   'psi-superzivot': process.env.PS_STOREFRONT_URL || "https://www.psi-superzivot.cz",
   'het-leven': process.env.HL_STOREFRONT_URL || "https://www.pakjeleventerug.nl",
   'zycie-zaslugy': process.env.ZZ_STOREFRONT_URL || "https://www.najpierw-ja.pl",

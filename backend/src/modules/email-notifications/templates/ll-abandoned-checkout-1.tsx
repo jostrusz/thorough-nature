@@ -223,8 +223,8 @@ export const LlAbandonedCheckout1Template: React.FC<LlAbandonedCheckout1Props> &
             margin: '2px 0 0',
           }}>
             Lass los, was dich kaputt macht &bull;{' '}
-            <Link href="mailto:buch@lasslosbuch.de" style={{ color: colors.accent, textDecoration: 'underline' }}>
-              buch@lasslosbuch.de
+            <Link href="mailto:buch@jetztloslassen.de" style={{ color: colors.accent, textDecoration: 'underline' }}>
+              buch@jetztloslassen.de
             </Link>
           </Text>
         </div>
@@ -266,7 +266,7 @@ export const LlAbandonedCheckout1Template: React.FC<LlAbandonedCheckout1Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Du erh&auml;ltst diese E-Mail, weil du einen Checkout auf lasslosbuch.de gestartet hast.
+            Du erh&auml;ltst diese E-Mail, weil du einen Checkout auf jetztloslassen.de gestartet hast.
           </Text>
         </div>
       </Section>
@@ -276,7 +276,7 @@ export const LlAbandonedCheckout1Template: React.FC<LlAbandonedCheckout1Props> &
 
 LlAbandonedCheckout1Template.PreviewProps = {
   firstName: 'Maria',
-  checkoutUrl: 'https://www.lasslosbuch.de/checkout',
+  checkoutUrl: 'https://www.jetztloslassen.de/checkout',
   productName: 'Lass los, was dich kaputt macht',
   productPrice: '35,00',
   productImage: '',

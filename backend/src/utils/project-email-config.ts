@@ -135,21 +135,21 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     smsDispatchTemplate: 'Slapp taget om det som forstor dig: Din bestallning ar pa vag. Spara: {url} hej@slapptagetboken.se',
   },
   'lass-los': {
-    replyTo: 'buch@lasslosbuch.de',
+    replyTo: 'buch@jetztloslassen.de',
     fromName: 'Joris de Vries - Lass los, was dich kaputt macht',
-    fromEmail: 'Joris de Vries - Lass los, was dich kaputt macht <buch@lasslosbuch.de>',
+    fromEmail: 'Joris de Vries - Lass los, was dich kaputt macht <buch@jetztloslassen.de>',
     project: 'lass-los',
     locale: 'de',
-    smsDispatchTemplate: 'Lass los, was dich kaputt macht: Bestellung versandt. Sendungsverfolgung: {url} buch@lasslosbuch.de',
+    smsDispatchTemplate: 'Lass los, was dich kaputt macht: Bestellung versandt. Sendungsverfolgung: {url} buch@jetztloslassen.de',
   },
   // Also match without hyphen (fallback)
   lasslos: {
-    replyTo: 'buch@lasslosbuch.de',
+    replyTo: 'buch@jetztloslassen.de',
     fromName: 'Joris de Vries - Lass los, was dich kaputt macht',
-    fromEmail: 'Joris de Vries - Lass los, was dich kaputt macht <buch@lasslosbuch.de>',
+    fromEmail: 'Joris de Vries - Lass los, was dich kaputt macht <buch@jetztloslassen.de>',
     project: 'lass-los',
     locale: 'de',
-    smsDispatchTemplate: 'Lass los, was dich kaputt macht: Bestellung versandt. Sendungsverfolgung: {url} buch@lasslosbuch.de',
+    smsDispatchTemplate: 'Lass los, was dich kaputt macht: Bestellung versandt. Sendungsverfolgung: {url} buch@jetztloslassen.de',
   },
   'psi-superzivot': {
     replyTo: 'podpora@psi-superzivot.cz',

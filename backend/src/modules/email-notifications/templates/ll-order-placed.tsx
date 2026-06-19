@@ -613,8 +613,8 @@ export const LlOrderPlacedTemplate: React.FC<LlOrderPlacedTemplateProps> & {
             }}>
               Fragen zu deiner Bestellung?
               <br />
-              <Link href="mailto:buch@lasslosbuch.de" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                buch@lasslosbuch.de
+              <Link href="mailto:buch@jetztloslassen.de" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                buch@jetztloslassen.de
               </Link>
             </Text>
           </div>
@@ -645,8 +645,8 @@ export const LlOrderPlacedTemplate: React.FC<LlOrderPlacedTemplateProps> & {
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:buch@lasslosbuch.de" style={{ color: colors.accent, textDecoration: 'none' }}>
-              buch@lasslosbuch.de
+            <Link href="mailto:buch@jetztloslassen.de" style={{ color: colors.accent, textDecoration: 'none' }}>
+              buch@jetztloslassen.de
             </Link>
           </Text>
         </div>
@@ -686,7 +686,7 @@ export const LlOrderPlacedTemplate: React.FC<LlOrderPlacedTemplateProps> & {
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Du erhältst diese E-Mail, weil du eine Bestellung auf lasslosbuch.de aufgegeben hast.
+            Du erhältst diese E-Mail, weil du eine Bestellung auf jetztloslassen.de aufgegeben hast.
           </Text>
         </div>
       </Section>
