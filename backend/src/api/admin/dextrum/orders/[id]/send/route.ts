@@ -139,10 +139,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       const bundleMapping = BUNDLE_SKU_MAP[sku]
 
       if (bundleMapping) {
-        console.log(`[Dextrum Send] SKU mapping: ${sku} → ${bundleMapping.quantity}× ${bundleMapping.physicalSku}`)
+        // Bundle/upsell variant → physical SKU. Multiply per-unit bundle count by
+        // the line quantity so order-bump pickers (qty>1) ship the right amount.
+        console.log(`[Dextrum Send] SKU mapping: ${sku} → ${bundleMapping.quantity * (item.quantity || 1)}× ${bundleMapping.physicalSku}`)
         return {
           productCode: bundleMapping.physicalSku,
-          quantity: bundleMapping.quantity,
+          quantity: bundleMapping.quantity * (item.quantity || 1),
           unitPrice: Number(item.unit_price) || 0,
           productName: item.variant?.product?.title || item.title || "",
         }
