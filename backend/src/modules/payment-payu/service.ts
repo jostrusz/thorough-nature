@@ -208,12 +208,19 @@ class PayUPaymentProviderService extends AbstractPaymentProvider<Options> {
     try {
       const { client, posId } = await this.getPayUClient(projectSlug, currency_code)
 
-      // Build URLs (continueUrl = customer return after PayU hosted page)
-      const backendUrl =
+      // Build URLs (continueUrl = customer return after PayU hosted page).
+      // NOTE: RAILWAY_PUBLIC_DOMAIN_VALUE already includes the scheme
+      // (e.g. "https://www.marketing-hq.eu"), so prefixing another "https://"
+      // produced "https://https://.../webhooks/payu" — an invalid notifyUrl that
+      // PayU could never reach, so bank-transfer (PBL) IPNs were silently dropped
+      // and paid carts never converted to orders. Normalize the scheme defensively.
+      const rawBackend =
         process.env.BACKEND_PUBLIC_URL ||
-        (process.env.RAILWAY_PUBLIC_DOMAIN_VALUE
-          ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN_VALUE}`
-          : "http://localhost:9000")
+        process.env.RAILWAY_PUBLIC_DOMAIN_VALUE ||
+        "http://localhost:9000"
+      const backendUrl = /^https?:\/\//i.test(rawBackend)
+        ? rawBackend
+        : `https://${rawBackend}`
       const returnUrl = data?.return_url || `${backendUrl}/checkout?payment_return=1&cart_id=${cartId}`
       const notifyUrl = data?.notify_url || `${backendUrl}/webhooks/payu`
       const customerIp = data?.customer_ip || context?.ip || "127.0.0.1"
