@@ -356,10 +356,12 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
 
           if (bundleMapping) {
             // Bundle variant → map to physical warehouse SKU with correct quantity
-            console.log(`[Dextrum Hold] SKU mapping: ${sku} → ${bundleMapping.quantity}× ${bundleMapping.physicalSku}`)
+            // Bundle/upsell variant → physical SKU. Multiply the per-unit bundle
+            // count by the line quantity so order-bump pickers (qty>1) ship correctly.
+            console.log(`[Dextrum Hold] SKU mapping: ${sku} → ${bundleMapping.quantity * (item.quantity || 1)}× ${bundleMapping.physicalSku}`)
             return {
               productCode: bundleMapping.physicalSku,
-              quantity: bundleMapping.quantity,
+              quantity: bundleMapping.quantity * (item.quantity || 1),
               unitPrice: Number(item.unit_price) || 0,
               productName: item.variant?.product?.title || item.title || "",
             }

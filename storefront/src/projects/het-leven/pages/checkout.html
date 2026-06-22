@@ -1810,6 +1810,15 @@ body {
   animation: shimmer 3s ease infinite;
 }
 .order-bump:hover { border-color: var(--cta); }
+.order-bump-qty{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.order-bump-qty[hidden]{display:none}
+.ob-qty-label{font-size:13px;font-weight:700;color:#3a2d33}
+.ob-qty-stepper{display:inline-flex;align-items:center;border:1.5px solid var(--cta);border-radius:999px;overflow:hidden;background:#fff}
+.ob-qty-btn{width:34px;height:34px;border:0;background:transparent;color:var(--cta);font-size:19px;font-weight:700;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center}
+.ob-qty-btn:hover{background:rgba(184,92,74,0.12)}
+.ob-qty-btn:disabled{opacity:.35;cursor:not-allowed}
+.ob-qty-val{min-width:34px;text-align:center;font-size:15px;font-weight:800;color:#2e1f25}
+.ob-qty-total{font-size:14px;color:var(--cta);font-weight:800;margin-left:2px}
 .order-bump.checked {
   border-style: solid;
   border-color: var(--cta);
@@ -2696,6 +2705,15 @@ body {
                 <span class="order-bump-new-price" id="order-bump-new-price">&euro;23,00</span>
                 <span class="order-bump-inline-save" id="order-bump-inline-save">Bespaar &euro;13</span>
               </div>
+              <div class="order-bump-qty" id="order-bump-qty" hidden>
+                <span class="ob-qty-label">Aantal:</span>
+                <span class="ob-qty-stepper">
+                  <button type="button" class="ob-qty-btn" id="ob-qty-dec" aria-label="Minder">&minus;</button>
+                  <span class="ob-qty-val" id="ob-qty-val">1</span>
+                  <button type="button" class="ob-qty-btn" id="ob-qty-inc" aria-label="Meer">+</button>
+                </span>
+                <span class="ob-qty-total" id="ob-qty-total"></span>
+              </div>
             </div>
             <button type="button" class="order-bump-expand" id="order-bump-expand-btn" aria-expanded="false" aria-label="Meer informatie">
               <span class="expand-label">Meer info</span>
@@ -3365,6 +3383,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var selectedBundlePrice = PROJECT_CONFIG.bundleOptions[0].price; // Cena za bundle
   var selectedBundleVariantId = PROJECT_CONFIG.bundleOptions[0].variantId || VARIANT_ID; // Variant ID pro vybraný bundle
   var orderBumpActive = false;      // Je order bump zaškrtnutý?
+  var selectedUpsellQty = 1;        // Počet kusů order bumpu
 
   // FB Pixel + CAPI: InitiateCheckout on page load (skip on payment return to avoid double firing)
   var isPaymentReturn = window.location.search.indexOf('payment_return=1') !== -1 || window.location.search.indexOf('redirect_status=') !== -1;
@@ -3391,8 +3410,28 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // Získej aktuální celkovou cenu (bundle + order bump)
   function getCurrentTotal() {
     var total = selectedBundlePrice;
-    if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
+    if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price * selectedUpsellQty;
     return total;
+  }
+
+  function syncUpsellQtyUI() {
+    var up = PROJECT_CONFIG.upsellProduct || {};
+    var lineTotal = (up.price || 0) * selectedUpsellQty;
+    var valEl = document.getElementById('ob-qty-val');
+    if (valEl) valEl.textContent = selectedUpsellQty;
+    var totEl = document.getElementById('ob-qty-total');
+    if (totEl) totEl.textContent = '= ' + formatPrice(lineTotal);
+    var dec = document.getElementById('ob-qty-dec');
+    if (dec) dec.disabled = (selectedUpsellQty <= 1);
+    var suffix = (selectedUpsellQty > 1 ? ' \u00d7 ' + selectedUpsellQty : '');
+    var nm = document.getElementById('summary-bump-name');
+    if (nm) { var svg = nm.querySelector('svg') ? nm.querySelector('svg').outerHTML + ' ' : ''; nm.innerHTML = svg + (up.name || '') + suffix; }
+    var pr = document.getElementById('summary-bump-price');
+    if (pr) pr.innerHTML = formatPrice(lineTotal);
+    var mnm = document.getElementById('msb-bump-name');
+    if (mnm) { var msvg = mnm.querySelector('svg') ? mnm.querySelector('svg').outerHTML + ' ' : ''; mnm.innerHTML = msvg + (up.name || '') + suffix; }
+    var mpr = document.getElementById('msb-bump-price');
+    if (mpr) mpr.innerHTML = formatPrice(lineTotal);
   }
 
   // Přepočítej a zobraz CELÝ order summary (bundle, order bump, daně, totál)
@@ -3565,13 +3604,29 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // Klik na HEADER (mimo expand button) → toggle checkbox
     header.addEventListener('click', function(e) {
-      // Pokud uživatel klikl na expand button, nic nedělej (řeší se výše)
+      // Pokud uživatel klikl na expand button nebo na stepper, nic nedělej
       if (e.target.closest('.order-bump-expand')) return;
+      if (e.target.closest('.order-bump-qty')) return;
       orderBumpActive = !orderBumpActive;
       var bumpEl = document.getElementById('order-bump');
       if (bumpEl) bumpEl.classList.toggle('checked', orderBumpActive);
+      var qtyEl = document.getElementById('order-bump-qty');
+      if (qtyEl) qtyEl.hidden = !orderBumpActive;
+      if (!orderBumpActive) selectedUpsellQty = 1;
+      syncUpsellQtyUI();
       recalculateOrderSummary();
     });
+
+    var UPSELL_MAX = 99;
+    function changeUpsellQty(delta) {
+      selectedUpsellQty = Math.max(1, Math.min(UPSELL_MAX, selectedUpsellQty + delta));
+      syncUpsellQtyUI();
+      recalculateOrderSummary();
+    }
+    var decBtn = document.getElementById('ob-qty-dec');
+    var incBtn = document.getElementById('ob-qty-inc');
+    if (decBtn) decBtn.addEventListener('click', function(e){ e.stopPropagation(); changeUpsellQty(-1); });
+    if (incBtn) incBtn.addEventListener('click', function(e){ e.stopPropagation(); changeUpsellQty(1); });
   })();
 
   /* ─── ORDER BUMP — načtení obrázku z Medusa admin ─── */
@@ -3648,6 +3703,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // Inicializace — vygeneruj bundle, zobraz daně, načti obrázek
   renderBundleOptions();
   recalculateOrderSummary();
+  syncUpsellQtyUI();
   loadOrderBumpImage();
 
   // ─── Admin toggles: hide order bump if disabled ───
@@ -4300,7 +4356,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             method: 'POST',
             body: JSON.stringify({
               variant_id: PROJECT_CONFIG.upsellProduct.variantId,
-              quantity: 1
+              quantity: selectedUpsellQty
             })
           });
         }
@@ -4412,11 +4468,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             content_ids: purchaseContentIds,
             contents: purchaseContentIds.map(function(id, idx) {
               var price = (idx === 0) ? mainPrice : upsellPriceVal;
-              return { id: id, quantity: 1, item_price: price };
+              var lsUq = parseInt(localStorage.getItem('medusa_upsell_qty') || '1') || 1;
+              return { id: id, quantity: (idx === 0 ? 1 : lsUq), item_price: price };
             }),
             value: purchaseValue,
             currency: PROJECT_CONFIG.mainProduct.currency || 'EUR',
-            num_items: bundleQty + (bumpActive ? 1 : 0),
+            num_items: bundleQty + (bumpActive ? (parseInt(localStorage.getItem('medusa_upsell_qty') || '1') || 1) : 0),
             order_id: order.id
           }, {
             em: order.email || localStorage.getItem('medusa_customer_email') || '',
@@ -7589,15 +7646,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // (briteFast requires no reuse cart). Real customers keep their background cart.
   if (window.__briteFastEnabled === true) { backgroundCartId = null; }
 
-  function briteSelectionSig(variantId, bump, regionId) {
-    return [variantId || '', bump ? '1' : '0', regionId || ''].join('|');
+  function briteSelectionSig(variantId, bump, regionId, upsellQty) {
+    return [variantId || '', bump ? '1' : '0', bump ? String(upsellQty || 1) : '0', regionId || ''].join('|');
   }
   function briteWarmup() {
     if (window.__briteFastEnabled !== true) return;
     if (savedPromoCode) return;                       // never warm a promo cart
     var variantId = selectedBundleVariantId, bump = !!orderBumpActive, regionId = currentRegionId;
     if (!variantId || !regionId) return;
-    var sig = briteSelectionSig(variantId, bump, regionId);
+    var sig = briteSelectionSig(variantId, bump, regionId, selectedUpsellQty);
     var cur = window.__briteWarm;
     if (cur && cur.sig === sig && (cur.ready || cur.inflight)) return; // already warming/warmed
     var w = { sig: sig, ready: false, inflight: true, cartId: null };
@@ -7609,7 +7666,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         return medusaFetch('/store/carts/' + w.cartId + '/line-items-bundle', { method: 'POST', body: JSON.stringify({ variant_id: variantId, quantity: 1 }) })
           .then(function() {
             if (bump && PROJECT_CONFIG.upsellProduct) {
-              return medusaFetch('/store/carts/' + w.cartId + '/line-items-bundle', { method: 'POST', body: JSON.stringify({ variant_id: PROJECT_CONFIG.upsellProduct.variantId, quantity: 1 }) });
+              return medusaFetch('/store/carts/' + w.cartId + '/line-items-bundle', { method: 'POST', body: JSON.stringify({ variant_id: PROJECT_CONFIG.upsellProduct.variantId, quantity: selectedUpsellQty }) });
             }
           })
           .then(function() { return medusaFetch('/store/shipping-options?cart_id=' + w.cartId, { method: 'GET' }); })
@@ -7798,6 +7855,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var checkoutBundleVariantId = selectedBundleVariantId;
     var checkoutBundlePrice = selectedBundlePrice;
     var checkoutOrderBump = orderBumpActive;
+    var checkoutUpsellQty = selectedUpsellQty;
     var checkoutTotal = getCurrentTotal();
 
     // Stap 1: Cart aanmaken of hergebruiken (promo cart → background cart → nieuw)
@@ -7806,7 +7864,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var briteWarm = window.__briteWarm;
     var briteFast = (window.__briteFastEnabled === true) && !savedPromoCode && !reuseCartId
       && briteWarm && briteWarm.ready === true && briteWarm.cartId
-      && briteWarm.sig === briteSelectionSig(checkoutBundleVariantId, checkoutOrderBump, currentRegionId);
+      && briteWarm.sig === briteSelectionSig(checkoutBundleVariantId, checkoutOrderBump, currentRegionId, checkoutUpsellQty);
     var cartStep;
     if (briteFast) {
       briteWarm.ready = false;                 // consume — a retry re-warms or falls back
@@ -7865,7 +7923,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             method: 'POST',
             body: JSON.stringify({
               variant_id: PROJECT_CONFIG.upsellProduct.variantId,
-              quantity: 1
+              quantity: checkoutUpsellQty
             })
           });
         }
@@ -8086,6 +8144,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       localStorage.setItem('medusa_bundle_qty', checkoutBundleQty);
       localStorage.setItem('medusa_bundle_price', checkoutBundlePrice);
       localStorage.setItem('medusa_order_bump', checkoutOrderBump ? 'true' : 'false');
+      localStorage.setItem('medusa_upsell_qty', checkoutOrderBump ? String(checkoutUpsellQty) : '1');
       localStorage.setItem('medusa_checkout_total', checkoutTotal);
 
       // FB Pixel + CAPI: InitiateCheckout (deduplicated via MetaTracker)

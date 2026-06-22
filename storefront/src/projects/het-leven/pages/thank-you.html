@@ -769,6 +769,7 @@ body { background: var(--bg); }
   var bundleQty = parseInt(localStorage.getItem('medusa_bundle_qty') || '1');
   var bundlePrice = parseFloat(localStorage.getItem('medusa_bundle_price') || PROJECT_CONFIG.mainProduct.price);
   var orderBumpActive = localStorage.getItem('medusa_order_bump') === 'true';
+  var upsellQty = parseInt(localStorage.getItem('medusa_upsell_qty') || '1') || 1;
   var checkoutTotal = parseFloat(localStorage.getItem('medusa_checkout_total') || '0');
 
   var customer = null;
@@ -967,6 +968,7 @@ body { background: var(--bg); }
   if (upsellPurchased || orderBumpActive) {
     if (orderItemsEl) {
       var upsellName = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.name) || 'Upsell Product';
+      if (upsellQty > 1) upsellName = upsellQty + '\u00d7 ' + upsellName;
       var extraLabel = orderBumpActive ? 'Fysiek boek \u2014 toegevoegd bij bestelling' : 'Fysiek boek \u2014 upsell bestelling';
       var iconId = 'ty-upsell-icon-' + Date.now();
       var upsellItemHtml = '<div class="ty-order-item ty-upsell-item">' +
@@ -1304,7 +1306,7 @@ body { background: var(--bg); }
     if ((upsellPurchased || orderBumpActive) && !PROJECT_CONFIG.catalogContentIds) {
       purchaseContentIds.push(PROJECT_CONFIG.upsellProduct.handle);
     }
-    var purchaseNumItems = bundleQty + ((upsellPurchased || orderBumpActive) ? 1 : 0);
+    var purchaseNumItems = bundleQty + ((upsellPurchased || orderBumpActive) ? upsellQty : 0);
 
     // Build user_data from customer info for maximum EMQ
     var purchaseUserData = {};
