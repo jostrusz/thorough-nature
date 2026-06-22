@@ -61,8 +61,10 @@ export default async function orderPlacedNtfyHandler({
     const currency = order.currency_code?.toLowerCase() || "eur"
     const symbol = CURRENCY_SYMBOLS[currency] || currency.toUpperCase()
 
-    // Format amount (divide by 100 if in minor units)
-    const amount = total > 1000 ? (total / 100).toFixed(2) : total.toFixed(2)
+    // Totals are ALWAYS in major units (project convention) — never divide.
+    // The old `total > 1000 ? total/100` heuristic broke CZK orders >= 1000 Kc
+    // (e.g. 1599 Kc showed as "15.99 Kc").
+    const amount = Number(total || 0).toFixed(2)
 
     // Customer info
     const shipping = order.shipping_address as any
