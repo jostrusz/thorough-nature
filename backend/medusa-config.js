@@ -1,6 +1,7 @@
 import { loadEnv, Modules, defineConfig } from '@medusajs/utils';
 import {
   ADMIN_CORS,
+  ADMIN_BACKEND_URL,
   AUTH_CORS,
   BACKEND_URL,
   COOKIE_SECRET,
@@ -72,7 +73,7 @@ const medusaConfig = {
     }
   },
   admin: {
-    backendUrl: BACKEND_URL,
+    backendUrl: ADMIN_BACKEND_URL,
     disable: SHOULD_DISABLE_ADMIN,
   },
   modules: [

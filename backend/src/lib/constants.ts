@@ -15,6 +15,16 @@ export const IS_DEV = process.env.NODE_ENV === 'development'
 export const BACKEND_URL = process.env.BACKEND_PUBLIC_URL ?? process.env.RAILWAY_PUBLIC_DOMAIN_VALUE ?? 'http://localhost:9000'
 
 /**
+ * Public URL the admin dashboard is served from. MUST be same-origin as where you open
+ * `/app`, otherwise admin API calls become cross-origin and auth/CORS drop the data
+ * (empty order/product lists). Defaults to the Railway public domain (www.marketing-hq.eu);
+ * override with ADMIN_BACKEND_URL. Intentionally NOT tied to BACKEND_PUBLIC_URL, which is
+ * used for payment webhook/return URLs and may point at the raw Railway domain.
+ */
+export const ADMIN_BACKEND_URL =
+  process.env.ADMIN_BACKEND_URL ?? process.env.RAILWAY_PUBLIC_DOMAIN_VALUE ?? BACKEND_URL
+
+/**
  * Database URL for Postgres instance used by the backend
  */
 export const DATABASE_URL = assertValue(
