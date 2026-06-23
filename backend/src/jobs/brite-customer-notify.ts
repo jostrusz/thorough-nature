@@ -79,10 +79,14 @@ async function getBriteCreds() {
 
 export default async function briteCustomerNotify(container: MedusaContainer) {
   const logger = container.resolve("logger")
-  // Safety gate: this cron sends AUTOMATIC customer e-mails. It stays dormant until
-  // explicitly enabled via env (so a staging deploy sharing prod data can't fire real
-  // mails before the flow is signed off). Set BRITE_NOTIFY_ENABLED=true to activate.
-  if (process.env.BRITE_NOTIFY_ENABLED !== "true") return
+  // Safety gate: this cron sends AUTOMATIC customer e-mails. Per-project allowlist so we
+  // can enable ONE project (e.g. "lass-los") without turning it on for the others.
+  //   BRITE_NOTIFY_PROJECTS="lass-los,slapp-taget"  → only those get mails
+  //   BRITE_NOTIFY_ENABLED="true"                   → legacy: enable ALL mapped projects
+  //   neither set                                   → dormant (no mails)
+  let ENABLED = (process.env.BRITE_NOTIFY_PROJECTS || "").split(",").map((s) => s.trim()).filter(Boolean)
+  if (process.env.BRITE_NOTIFY_ENABLED === "true") ENABLED = PROJECT_SLUGS
+  if (!ENABLED.length) return
   const creds = await getBriteCreds()
   if (!creds) return
 
@@ -105,7 +109,7 @@ export default async function briteCustomerNotify(container: MedusaContainer) {
              AND m.event_type IN ('brite_recovery_email', 'brite_pending_email')
          )
        ORDER BY j.intent_id, j.occurred_at DESC`,
-      [PROJECT_SLUGS]
+      [ENABLED]
     )
     if (!candidates.length) return
 
