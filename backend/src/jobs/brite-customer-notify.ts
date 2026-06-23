@@ -44,6 +44,12 @@ const PROJECTS: Record<string, {
     pendingTemplate: "st-payment-pending", pendingSubject: "Vi har tagit emot din beställning",
     recoveryTemplate: "st-payment-recovery", recoverySubject: "Du är nästan klar",
   },
+  "lass-los": {
+    checkoutUrl: process.env.LL_CHECKOUT_URL || "https://jetztloslassen.de/checkout",
+    replyTo: "buch@jetztloslassen.de",
+    pendingTemplate: "ll-payment-pending", pendingSubject: "wir haben deine bestellung erhalten",
+    recoveryTemplate: "ll-payment-recovery", recoverySubject: "du bist fast fertig",
+  },
 }
 const PROJECT_SLUGS = Object.keys(PROJECTS)
 
@@ -167,7 +173,7 @@ export default async function briteCustomerNotify(container: MedusaContainer) {
       if (sessionState === 12 || [4, 5, 6].includes(Number(txState))) continue
 
       // First name from the cart's shipping address; localized fallback.
-      let firstName = c.project_slug === "slapp-taget" ? "där" : "daar"
+      let firstName = c.project_slug === "slapp-taget" ? "där" : c.project_slug === "lass-los" ? "du" : "daar"
       try {
         const { rows: nm } = await pool.query(
           `SELECT ca.first_name FROM cart cc

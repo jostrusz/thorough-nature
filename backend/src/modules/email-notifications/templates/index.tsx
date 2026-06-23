@@ -48,6 +48,9 @@ import { LbPaymentRecoveryTemplate, LB_PAYMENT_RECOVERY, isLbPaymentRecoveryData
 // Släpp Taget Brite payment lifecycle (pending / recovery)
 import { StPaymentPendingTemplate, ST_PAYMENT_PENDING, isStPaymentPendingData } from './st-payment-pending'
 import { StPaymentRecoveryTemplate, ST_PAYMENT_RECOVERY, isStPaymentRecoveryData } from './st-payment-recovery'
+// Lass los Brite payment lifecycle (pending / recovery)
+import { LlPaymentPendingTemplate, LL_PAYMENT_PENDING, isLlPaymentPendingData } from './ll-payment-pending'
+import { LlPaymentRecoveryTemplate, LL_PAYMENT_RECOVERY, isLlPaymentRecoveryData } from './ll-payment-recovery'
 // Psí superživot (psi-superzivot) templates
 import { PsOrderPlacedTemplate, PS_ORDER_PLACED, isPsOrderPlacedTemplateData } from './ps-order-placed'
 import { PsShipmentNotificationTemplate, PS_SHIPMENT_NOTIFICATION, isPsShipmentNotificationData } from './ps-shipment-notification'
@@ -125,6 +128,8 @@ export const EmailTemplates = {
   LB_PAYMENT_RECOVERY,
   ST_PAYMENT_PENDING,
   ST_PAYMENT_RECOVERY,
+  LL_PAYMENT_PENDING,
+  LL_PAYMENT_RECOVERY,
   // Psí superživot
   PS_ORDER_PLACED,
   PS_SHIPMENT_NOTIFICATION,
@@ -661,6 +666,24 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
         )
       }
       return <StPaymentRecoveryTemplate {...data} />
+
+    case EmailTemplates.LL_PAYMENT_PENDING:
+      if (!isLlPaymentPendingData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.LL_PAYMENT_PENDING}"`
+        )
+      }
+      return <LlPaymentPendingTemplate {...data} />
+
+    case EmailTemplates.LL_PAYMENT_RECOVERY:
+      if (!isLlPaymentRecoveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.LL_PAYMENT_RECOVERY}"`
+        )
+      }
+      return <LlPaymentRecoveryTemplate {...data} />
 
     // ── Psí superživot templates ─────────────────────────────
     case EmailTemplates.PS_ORDER_PLACED:
