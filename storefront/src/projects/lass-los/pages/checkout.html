@@ -8602,6 +8602,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
     renderBanksForCountry(country);
 
+    // Brite Pay by Bank is HIDDEN for AT and LU: Brite returns no localised bank list
+    // there (just a generic ~143-bank EU dump), so the picker would be unusable. Hide
+    // the bank card + any alt rows and deselect Brite if the customer switches to AT/LU.
+    function applyBriteCountryVisibility(cc){
+      var u = String(cc || '').toUpperCase();
+      var hide = (u === 'AT' || u === 'LU');
+      var card = document.getElementById('brite-card');
+      if (card) card.style.display = hide ? 'none' : '';
+      [].forEach.call(document.querySelectorAll('.brite-alt-method'), function(r){ r.style.display = hide ? 'none' : ''; });
+      if (hide && window.__briteClearSelection) window.__briteClearSelection();
+    }
+    applyBriteCountryVisibility(country);
+
     // Kick off the cart warm-up as soon as the picker is up (default bundle + country),
     // so it's ready by the time the customer finishes the form.
     window.__briteFastEnabled = true;
@@ -8611,6 +8624,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       countrySelect.__briteHooked = true;
       countrySelect.addEventListener('change', function(e){
         var c = (e.target.value || '').toUpperCase();
+        applyBriteCountryVisibility(c);
         if (BANKS[c]) renderBanksForCountry(c);
       });
     }
