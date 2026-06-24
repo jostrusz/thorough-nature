@@ -51,7 +51,15 @@ type FlowDefinition = {
   edges?: Array<{ from: string; to: string }>
 }
 
-function getBaseUrl(): string {
+function getBaseUrl(trackingDomain?: string): string {
+  // Per-brand tracking domain wins — keeps tracking links / open pixel /
+  // unsubscribe on the same domain as the From address (e.g.
+  // @mail.loslatenboek.nl → tracking via that brand's domain) which avoids
+  // the domain mismatch that hurts deliverability when everything routes
+  // through the global marketing-hq.eu host.
+  if (trackingDomain && String(trackingDomain).trim()) {
+    return `https://${String(trackingDomain).trim()}`
+  }
   return (
     process.env.MARKETING_PUBLIC_URL ||
     process.env.BACKEND_PUBLIC_URL ||
@@ -287,6 +295,24 @@ async function executeRun(
       }
 
       case "email": {
+        // Frequency cap — at most 1 marketing email per contact per 24h
+        // (across all flows + campaigns). If the contact was emailed recently,
+        // DEFER this same email node by 3h: set waiting + next_run_at, keep the
+        // current node, do NOT advance and do NOT send. The node will be retried
+        // each cycle until the 24h window clears. Placed here (not inside
+        // sendFlowEmail) so the early return cleanly bypasses the advance logic
+        // below — identical exit style to the suppression gates.
+        if (await recentlyEmailed(pool, contact.id)) {
+          logger.info(`[Marketing Flow] Frequency cap — deferring contact ${contact.id} by 3h`)
+          await pool.query(
+            `UPDATE marketing_flow_run
+             SET state = 'waiting', next_run_at = NOW() + INTERVAL '3 hours',
+                 updated_at = NOW(), visited_node_ids = $2::jsonb
+             WHERE id = $1`,
+            [run.id, JSON.stringify(visited)]
+          )
+          return
+        }
         await sendFlowEmail({
           node,
           run,
@@ -519,6 +545,33 @@ async function isSuppressed(pool: Pool, brandId: string, email: string): Promise
   }
 }
 
+/**
+ * Frequency cap — returns true if this contact already received a marketing
+ * message within the last 24 hours (across ALL flows AND campaigns, since
+ * marketing_message rows are written by both). Used to defer email-sending
+ * nodes so a contact never gets more than 1 marketing email per 24h.
+ * Fail-OPEN: on any DB error returns false so the cap never blocks sends
+ * permanently — we'd rather risk one extra email than freeze the funnel.
+ */
+async function recentlyEmailed(pool: Pool, contactId: string): Promise<boolean> {
+  if (!contactId) return false
+  try {
+    const { rows } = await pool.query(
+      `SELECT 1 FROM marketing_message
+       WHERE contact_id = $1
+         AND deleted_at IS NULL
+         AND status IN ('sent','delivered','opened','clicked')
+         AND sent_at > NOW() - INTERVAL '24 hours'
+       LIMIT 1`,
+      [contactId]
+    )
+    return rows.length > 0
+  } catch (err: any) {
+    // Fail-open: don't let a freq-cap DB hiccup block the contact forever.
+    return false
+  }
+}
+
 function getNextEdge(def: FlowDefinition, nodeId: string): string | null {
   // Explicit graph edges win — for branching flows with conditions etc.
   if (def.edges?.length) {
@@ -653,7 +706,7 @@ async function sendFlowEmail(args: {
     throw new Error(`Email node ${node.id} has no subject / template`)
   }
 
-  const baseUrl = getBaseUrl()
+  const baseUrl = getBaseUrl((brand as any).tracking_domain)
   const fromEmail = tpl.from_email || brand.marketing_from_email
   const fromName = tpl.from_name || brand.marketing_from_name
   const replyTo = tpl.reply_to || brand.marketing_reply_to || null

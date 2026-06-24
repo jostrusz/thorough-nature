@@ -35,6 +35,9 @@ const MAX_CAMPAIGNS_PER_TICK = 3
 // ~2 req/s — raise the pause if you see sustained 429s).
 const SEND_CHUNK = 10
 const PAUSE_BETWEEN_CHUNKS_MS = 1100
+// Frequency cap: a contact receives at most one marketing email per this window
+// (across all flows + campaigns). Capped recipients are deferred, not dropped.
+const FREQ_CAP_HOURS = 24
 
 export default async function marketingCampaignDispatcher(container: MedusaContainer) {
   const logger = (container.resolve("logger") as any) || console
@@ -227,18 +230,44 @@ async function dispatchCampaign(
     return
   }
 
+  // Frequency cap: defer recipients who already received a marketing email in
+  // the last FREQ_CAP_HOURS (across flows + campaigns). They are NOT dropped —
+  // the campaign is re-armed and retries them once the window clears.
+  const cappedSet = new Set<string>()
+  {
+    const { rows: capRows } = await pool.query(
+      `SELECT DISTINCT contact_id FROM marketing_message
+       WHERE brand_id = $1 AND deleted_at IS NULL
+         AND status IN ('sent','delivered','opened','clicked')
+         AND sent_at > NOW() - ($2 || ' hours')::interval
+         AND contact_id = ANY($3::text[])`,
+      [campaign.brand_id, String(FREQ_CAP_HOURS), pending.map((r) => r.id)]
+    )
+    for (const r of capRows) cappedSet.add(r.contact_id)
+  }
+  const sendable = pending.filter((r) => !cappedSet.has(r.id))
+
+  if (sendable.length === 0) {
+    // Nothing to send right now — everyone left is frequency-capped. Re-arm.
+    await deferCampaign(pool, campaign.id, cappedSet.size, logger)
+    return
+  }
+
   // Prepare send context
   const resend = new ResendMarketingClient({
     id: brand.id,
     slug: brand.slug,
     resend_api_key_encrypted: brand.resend_api_key_encrypted,
   })
-  const baseUrl =
-    process.env.MARKETING_PUBLIC_URL ||
-    process.env.BACKEND_PUBLIC_URL ||
-    (process.env.RAILWAY_PUBLIC_DOMAIN_VALUE
-      ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN_VALUE}`
-      : "http://localhost:9000")
+  // Prefer the brand's own tracking domain (aligns links/pixel/unsubscribe with
+  // the From domain → better deliverability). Falls back to the global host.
+  const baseUrl = (brand as any).tracking_domain
+    ? `https://${(brand as any).tracking_domain}`
+    : process.env.MARKETING_PUBLIC_URL ||
+      process.env.BACKEND_PUBLIC_URL ||
+      (process.env.RAILWAY_PUBLIC_DOMAIN_VALUE
+        ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN_VALUE}`
+        : "http://localhost:9000")
 
   const fromEmail = email.from_email || brand.marketing_from_email
   const fromName = email.from_name || brand.marketing_from_name
@@ -248,15 +277,15 @@ async function dispatchCampaign(
   // Send in chunks
   let sent = 0
   let failed = 0
-  for (let i = 0; i < pending.length; i += SEND_CHUNK) {
+  for (let i = 0; i < sendable.length; i += SEND_CHUNK) {
     // Honour a pause requested mid-send: re-read status before each chunk and
     // stop cleanly (leaving the campaign 'paused') instead of running to the end.
     const { rows: stRows } = await pool.query(`SELECT status FROM marketing_campaign WHERE id = $1`, [campaign.id])
     if (stRows[0]?.status === "paused") {
-      logger.info(`[Marketing Dispatcher] Campaign ${campaign.id} paused mid-send (sent=${sent}, remaining=${pending.length - i})`)
+      logger.info(`[Marketing Dispatcher] Campaign ${campaign.id} paused mid-send (sent=${sent}, remaining=${sendable.length - i})`)
       return
     }
-    const chunk = pending.slice(i, i + SEND_CHUNK)
+    const chunk = sendable.slice(i, i + SEND_CHUNK)
     await Promise.all(
       chunk.map(async (r) => {
         try {
@@ -391,11 +420,32 @@ async function dispatchCampaign(
     }
   }
 
-  await finishCampaign(pool, campaign.id, recipients.length)
+  if (cappedSet.size > 0) {
+    // Some recipients were frequency-capped this pass — re-arm so the campaign
+    // retries them later, then finalize once none remain.
+    await deferCampaign(pool, campaign.id, cappedSet.size, logger)
+  } else {
+    await finishCampaign(pool, campaign.id, recipients.length)
+  }
 
   logger.info(
-    `[Marketing Dispatcher] Campaign ${campaign.id} ${campaign.name} done: sent=${sent}, failed=${failed}`
+    `[Marketing Dispatcher] Campaign ${campaign.id} ${campaign.name} done: sent=${sent}, failed=${failed}, deferred=${cappedSet.size}`
   )
+}
+
+/**
+ * Re-arm a campaign that still has frequency-capped recipients: keep it
+ * 'scheduled' with send_at pushed forward so the next eligible tick retries the
+ * remaining contacts once their 24h cap window has cleared.
+ */
+async function deferCampaign(pool: Pool, campaignId: string, deferred: number, logger: any) {
+  await pool.query(
+    `UPDATE marketing_campaign
+     SET status = 'scheduled', send_at = NOW() + interval '2 hours'
+     WHERE id = $1`,
+    [campaignId]
+  )
+  logger.info(`[Marketing Dispatcher] Campaign ${campaignId}: ${deferred} recipient(s) frequency-capped — re-armed in 2h`)
 }
 
 /**

@@ -22,6 +22,11 @@ const MarketingBrand = model.define("marketing_brand", {
   resend_api_key_encrypted: model.text().nullable(),  // null = use global env var
   resend_domain_id: model.text().nullable(),
   resend_audience_id: model.text().nullable(),
+  // Per-brand click/open/unsubscribe tracking domain (e.g. "link.loslatenboek.nl").
+  // When set, email tracking links + pixel + unsubscribe use this host instead of
+  // the global MARKETING_PUBLIC_URL, keeping links aligned with the From domain
+  // for better deliverability. Requires a DNS CNAME → backend + Railway custom domain.
+  tracking_domain: model.text().nullable(),
   primary_color: model.text().nullable(),
   logo_url: model.text().nullable(),
   locale: model.text().default("nl"),
