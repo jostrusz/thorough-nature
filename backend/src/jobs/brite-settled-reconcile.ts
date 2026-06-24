@@ -130,6 +130,7 @@ export default async function briteSettledReconcile(container: MedusaContainer) 
     const res = await recoverBriteCart(container, {
       briteSessionId: String(sessionId),
       briteTransactionId: t?.id ? String(t.id) : null,
+      briteTxState: Number(t?.state),   // 4 COMPLETED → order only; 5/6 CREDIT/SETTLED → release WMS gate
       paidAmount: Number(t?.amount || 0),
       currency: t?.currency,
       logger,
