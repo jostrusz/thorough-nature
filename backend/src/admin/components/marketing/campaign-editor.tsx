@@ -177,7 +177,15 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
 
   const previewMut = useMutation({
     mutationFn: () =>
-      sdk.client.fetch<{ count: number; sample: string[] }>(`/admin/marketing/campaigns/${currentId}/recipients`, { method: "GET" }),
+      sdk.client.fetch<{ count: number; sample: string[] }>(`/admin/marketing/preview-recipients`, {
+        method: "POST",
+        body: {
+          brand_id: brandId,
+          list_ids: listIds,
+          segment_ids: segmentIds,
+          suppression_segment_ids: suppressionSegmentIds,
+        },
+      }),
     onSuccess: (resp: any) => {
       setPreview({ count: resp?.count ?? 0, sample: resp?.sample ?? [] })
     },
@@ -223,6 +231,15 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
   const readOnly = status === "sent" || status === "sending" || status === "sent_with_errors"
   const canSchedule = !!(name && subject && customHtml && fromEmail && scheduleAt)
   const canSendNow = !!(currentId && name && subject && customHtml && fromEmail)
+
+  // What's still required before Schedule / Send now / Send test light up.
+  const missing = [
+    !name && "name",
+    !subject && "subject",
+    !customHtml && "email HTML",
+    !fromEmail && "sender email",
+  ].filter(Boolean) as string[]
+  const missingForSchedule = [...missing, ...(!scheduleAt ? ["schedule time"] : [])]
 
   const toggleSel = (arr: string[], set: (v: string[]) => void, id: string) => {
     set(arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id])
@@ -386,11 +403,17 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                 <button
                   className="mkt-btn mkt-btn-sm"
                   onClick={() => previewMut.mutate()}
-                  disabled={!currentId || previewMut.isPending}
+                  disabled={
+                    previewMut.isPending ||
+                    !brandId ||
+                    listIds.length + segmentIds.length + suppressionSegmentIds.length === 0
+                  }
                 >
                   {previewMut.isPending ? "Counting…" : "Preview recipients"}
                 </button>
-                {!currentId && <span style={{ fontSize: "12px", color: tokens.fgMuted }}>Save draft first</span>}
+                {(listIds.length + segmentIds.length + suppressionSegmentIds.length === 0) && (
+                  <span style={{ fontSize: "12px", color: tokens.fgMuted }}>Select a list or segment first</span>
+                )}
               </div>
               {preview && (
                 <div
@@ -558,6 +581,7 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                 fromEmail={fromEmail}
                 replyTo={replyTo}
                 html={customHtml}
+                defaultTo={brand?.marketing_reply_to || ""}
               />
               <button
                 className="mkt-btn-primary"
@@ -570,11 +594,15 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                 className="mkt-btn-primary"
                 disabled={!canSendNow || sendNowMut.isPending}
                 onClick={() => { if (confirm("Send this campaign now?")) sendNowMut.mutate() }}
-                style={{ background: tokens.danger }}
               >
                 {sendNowMut.isPending ? "Starting…" : "Send now"}
               </button>
             </div>
+            {missingForSchedule.length > 0 && (
+              <div style={{ marginTop: "10px", fontSize: "12px", color: tokens.fgMuted, lineHeight: 1.45 }}>
+                Missing: {missingForSchedule.join(", ")}
+              </div>
+            )}
             {currentId && <CampaignAnalyticsPanel campaignId={currentId} />}
           </div>
         </div>
@@ -583,10 +611,10 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
   )
 }
 
-const TEST_EMAIL_TO = "jaroslavostruszka@gmail.com"
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function TestSendButton({
-  brandId, subject, preheader, fromName, fromEmail, replyTo, html,
+  brandId, subject, preheader, fromName, fromEmail, replyTo, html, defaultTo,
 }: {
   brandId: string | null
   subject: string
@@ -595,15 +623,18 @@ function TestSendButton({
   fromEmail: string
   replyTo: string
   html: string
+  defaultTo?: string
 }) {
-  const canSend = !!brandId && !!subject && !!html
+  const [testTo, setTestTo] = useState(defaultTo || "")
+  const emailValid = EMAIL_RE.test(testTo.trim())
+  const canSend = !!brandId && !!subject && !!html && emailValid
   const testSendMut = useMutation({
     mutationFn: () =>
       sdk.client.fetch(`/admin/marketing/email/test-send`, {
         method: "POST",
         body: {
           brand_id: brandId,
-          to_email: TEST_EMAIL_TO,
+          to_email: testTo.trim(),
           subject,
           preheader,
           from_name: fromName,
@@ -612,18 +643,34 @@ function TestSendButton({
           html,
         },
       }),
-    onSuccess: () => toast.success(`Test email sent to ${TEST_EMAIL_TO}`),
+    onSuccess: () => toast.success(`Test email sent to ${testTo.trim()}`),
     onError: (e: any) => toast.error("Test send failed: " + (e?.message || "unknown")),
   })
   return (
-    <button
-      className="mkt-btn"
-      onClick={() => testSendMut.mutate()}
-      disabled={!canSend || testSendMut.isPending}
-      title={canSend ? `Send test to ${TEST_EMAIL_TO}` : "Fill in brand, subject, and HTML first"}
-    >
-      {testSendMut.isPending ? "Sending test…" : "📧 Send test"}
-    </button>
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+      <input
+        className="mkt-input"
+        type="email"
+        value={testTo}
+        onChange={(e) => setTestTo(e.target.value)}
+        placeholder="Test recipient email"
+        style={{ height: "36px", fontSize: "13px" }}
+      />
+      <button
+        className="mkt-btn"
+        onClick={() => testSendMut.mutate()}
+        disabled={!canSend || testSendMut.isPending}
+        title={
+          canSend
+            ? `Send test to ${testTo.trim()}`
+            : !emailValid
+            ? "Enter a valid test recipient email"
+            : "Fill in brand, subject, and HTML first"
+        }
+      >
+        {testSendMut.isPending ? "Sending test…" : "📧 Send test"}
+      </button>
+    </div>
   )
 }
 
@@ -638,10 +685,10 @@ function CampaignAnalyticsPanel({ campaignId }: { campaignId: string }) {
       }>(`/admin/marketing/campaigns/${campaignId}/analytics`, { method: "GET" }),
     refetchInterval: 30000,
   })
-  if (!data) return null
+  if (!(data as any)?.funnel) return null
   const f = (data as any).funnel
-  const r = (data as any).revenue
-  const links = (data as any).links as Array<{ link_label: string; clicks: number; unique_clickers: number }>
+  const r = (data as any).revenue || {}
+  const links = ((data as any).links || []) as Array<{ link_label: string; clicks: number; unique_clickers: number }>
   return (
     <div style={{ marginTop: "20px", fontSize: "13px", color: tokens.fg }}>
       <div
@@ -657,12 +704,12 @@ function CampaignAnalyticsPanel({ campaignId }: { campaignId: string }) {
         Performance
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
-        <div>Sent: <strong>{fmt(f.sent)}</strong></div>
-        <div>Delivered: <strong>{fmt(f.delivered)}</strong></div>
-        <div>Opened (unique): <strong>{fmt(f.opened_unique)}</strong> <span style={{ color: tokens.fgMuted }}>({(f.open_rate * 100).toFixed(1)}%)</span></div>
-        <div>Clicked (unique): <strong>{fmt(f.clicked_unique)}</strong> <span style={{ color: tokens.fgMuted }}>({(f.ctr * 100).toFixed(1)}%)</span></div>
-        <div>CTOR: <strong>{(f.ctor * 100).toFixed(1)}%</strong></div>
-        <div>Bounced: <strong>{fmt(f.bounced)}</strong></div>
+        <div>Sent: <strong>{fmt(f.sent || 0)}</strong></div>
+        <div>Delivered: <strong>{fmt(f.delivered || 0)}</strong></div>
+        <div>Opened (unique): <strong>{fmt(f.opened_unique || 0)}</strong> <span style={{ color: tokens.fgMuted }}>({((f.open_rate || 0) * 100).toFixed(1)}%)</span></div>
+        <div>Clicked (unique): <strong>{fmt(f.clicked_unique || 0)}</strong> <span style={{ color: tokens.fgMuted }}>({((f.ctr || 0) * 100).toFixed(1)}%)</span></div>
+        <div>CTOR: <strong>{((f.ctor || 0) * 100).toFixed(1)}%</strong></div>
+        <div>Bounced: <strong>{fmt(f.bounced || 0)}</strong></div>
       </div>
       <div
         style={{
@@ -675,10 +722,10 @@ function CampaignAnalyticsPanel({ campaignId }: { campaignId: string }) {
           gap: "8px",
         }}
       >
-        <div>Orders: <strong style={{ color: tokens.successFg }}>{fmt(r.orders)}</strong></div>
-        <div>Revenue: <strong style={{ color: tokens.successFg }}>€ {Number(r.revenue_eur).toFixed(2)}</strong></div>
-        <div>Conversion: <strong>{(r.conversion_rate * 100).toFixed(2)}%</strong></div>
-        <div>RPE: <strong>€ {Number(r.rpe).toFixed(3)}</strong></div>
+        <div>Orders: <strong style={{ color: tokens.successFg }}>{fmt(r.orders || 0)}</strong></div>
+        <div>Revenue: <strong style={{ color: tokens.successFg }}>€ {Number(r.revenue_eur || 0).toFixed(2)}</strong></div>
+        <div>Conversion: <strong>{((r.conversion_rate || 0) * 100).toFixed(2)}%</strong></div>
+        <div>RPE: <strong>€ {Number(r.rpe || 0).toFixed(3)}</strong></div>
       </div>
       {links.length > 0 && (
         <div style={{ marginTop: "14px" }}>
@@ -791,6 +838,8 @@ function Checklist({
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
           {items.map((it: any) => {
             const on = selected.includes(it.id)
+            const count = it.member_count ?? it.count
+            const hasCount = count !== undefined && count !== null
             return (
               <label
                 key={it.id}
@@ -809,7 +858,12 @@ function Checklist({
                 }}
               >
                 <input type="checkbox" checked={on} onChange={() => onChange(it.id)} />
-                <span>{it.name}</span>
+                <span>
+                  {it.name}
+                  {hasCount && (
+                    <span style={{ color: tokens.fgMuted, fontVariantNumeric: "tabular-nums" }}> ({fmt(Number(count))})</span>
+                  )}
+                </span>
               </label>
             )
           })}
@@ -849,11 +903,11 @@ function ReadOnlyView({
   const funnel = (analytics as any)?.funnel
   // Prefer live funnel numbers; fall back to send-time metrics jsonb.
   const vals = {
-    sent: funnel ? funnel.sent : Number(metrics?.sent) || 0,
-    delivered: funnel ? funnel.delivered : Number(metrics?.delivered) || 0,
-    opened: funnel ? funnel.opened_unique : Number(metrics?.opened) || 0,
-    clicked: funnel ? funnel.clicked_unique : Number(metrics?.clicked) || 0,
-    bounced: funnel ? funnel.bounced : Number(metrics?.bounced) || 0,
+    sent: funnel ? (funnel.sent || 0) : Number(metrics?.sent) || 0,
+    delivered: funnel ? (funnel.delivered || 0) : Number(metrics?.delivered) || 0,
+    opened: funnel ? (funnel.opened_unique || 0) : Number(metrics?.opened) || 0,
+    clicked: funnel ? (funnel.clicked_unique || 0) : Number(metrics?.clicked) || 0,
+    bounced: funnel ? (funnel.bounced || 0) : Number(metrics?.bounced) || 0,
   }
 
   const bars: { label: string; key: keyof typeof vals; color: string }[] = [
@@ -872,13 +926,13 @@ function ReadOnlyView({
       {/* Rate summary cards — only meaningful once we have live funnel data */}
       {funnel && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "10px", marginBottom: "20px" }}>
-          <RateCard label="Open rate" value={`${(funnel.open_rate * 100).toFixed(1)}%`} sub={`${fmt(funnel.opened_unique)} unique`} color={tokens.info} />
-          <RateCard label="Click rate" value={`${(funnel.ctr * 100).toFixed(1)}%`} sub={`${fmt(funnel.clicked_unique)} unique`} color={tokens.purple} />
-          <RateCard label="CTOR" value={`${(funnel.ctor * 100).toFixed(1)}%`} sub="of openers" color={tokens.primary} />
+          <RateCard label="Open rate" value={`${((funnel.open_rate || 0) * 100).toFixed(1)}%`} sub={`${fmt(funnel.opened_unique || 0)} unique`} color={tokens.info} />
+          <RateCard label="Click rate" value={`${((funnel.ctr || 0) * 100).toFixed(1)}%`} sub={`${fmt(funnel.clicked_unique || 0)} unique`} color={tokens.purple} />
+          <RateCard label="CTOR" value={`${((funnel.ctor || 0) * 100).toFixed(1)}%`} sub="of openers" color={tokens.primary} />
           <RateCard
             label="Bounce rate"
-            value={`${(funnel.sent ? (funnel.bounced / funnel.sent) * 100 : 0).toFixed(1)}%`}
-            sub={`${fmt(funnel.bounced)} bounced`}
+            value={`${(funnel.sent ? ((funnel.bounced || 0) / funnel.sent) * 100 : 0).toFixed(1)}%`}
+            sub={`${fmt(funnel.bounced || 0)} bounced`}
             color={tokens.dangerFg}
           />
         </div>
