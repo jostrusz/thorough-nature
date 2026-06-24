@@ -22,6 +22,8 @@
  *   order.count                      → COUNT(*) in last N days
  *   order.total_sum                  → SUM(total)
  *   order.last_at                    → MAX(created_at)
+ *   order.bought_in_project          → EXISTS order in a chosen project slug
+ *                                      (CROSS-PROJECT; slug is the op value)
  *
  *   event.count(type=xxx, days=30)   → COUNT events of type in window
  *   event.last_at(type=xxx)          → MAX occurred_at for type
@@ -207,6 +209,30 @@ function compileLeaf(cond: LeafCondition, ctx: BuildCtx): string {
     }
     const subquery = `(SELECT ${agg} FROM "order" o WHERE ${orderWhere})`
     return applyOp(subquery, op, value, ctx)
+  }
+
+  // ───────────────────────────────────────────────────────────
+  // order.bought_in_project — CROSS-PROJECT membership.
+  //
+  // Unlike order.count / order.total_sum / order.last_at (which scope to the
+  // brand's OWN project via ctx.projectId), here the project slug is supplied
+  // by the user as the operator VALUE. This lets a segment in brand A target
+  // contacts based on whether they purchased in brand B's project.
+  //
+  // Ops:
+  //   has              → bought in that project  → EXISTS
+  //   not_has / nin    → did NOT buy in project  → NOT EXISTS
+  //
+  // The project slug is parameterized via push() (no SQL injection).
+  // ───────────────────────────────────────────────────────────
+  if (field === "order.bought_in_project") {
+    const slug = String(value || "")
+    if (!slug) return "TRUE"
+    const p = push(ctx, slug)
+    const exists = `EXISTS (SELECT 1 FROM "order" o WHERE o.deleted_at IS NULL AND lower(o.email) = lower(c.email) AND (o.metadata->>'project_id') = ${p})`
+    if (op === "has") return exists
+    if (op === "not_has" || op === "nin") return `NOT ${exists}`
+    return "TRUE"
   }
 
   // ───────────────────────────────────────────────────────────

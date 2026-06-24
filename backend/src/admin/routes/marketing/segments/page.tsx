@@ -87,6 +87,7 @@ const FIELD_OPTIONS: FieldOption[] = [
   // ─ Project affinity (per-project purchase filters) ─
   { group: "Projects", value: "primary_book",   label: "Primary project",          dsl_field: "contact.primary_book",    value_kind: "project", ops: OPS.textExact },
   { group: "Projects", value: "purchased_book", label: "Purchased in project",     dsl_field: "contact.purchased_books", value_kind: "project", ops: OPS.arrayContains },
+  { group: "Projects", value: "bought_in_project", label: "Bought in project (any project)", dsl_field: "order.bought_in_project", value_kind: "project", ops: ["has", "not_has"] },
 
   // ─ Segmentation (pre-computed by nightly cron) ─
   { group: "Segmentation", value: "lifecycle_stage", label: "Lifecycle stage", dsl_field: "contact.lifecycle_stage", value_kind: "lifecycle",   ops: OPS.textExact },
