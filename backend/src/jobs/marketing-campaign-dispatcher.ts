@@ -51,7 +51,7 @@ export default async function marketingCampaignDispatcher(container: MedusaConta
     const { rows: campaigns } = await pool.query(
       `SELECT id, brand_id, name, subject, preheader, from_name, from_email, reply_to, custom_html,
               template_id, template_version, list_id, segment_id, list_ids, segment_ids,
-              suppression_segment_ids, send_at, status, metrics
+              suppression_segment_ids, send_at, status, metrics, ab_test
        FROM marketing_campaign
        WHERE deleted_at IS NULL
          AND status IN ('scheduled','sending')
@@ -92,6 +92,43 @@ export default async function marketingCampaignDispatcher(container: MedusaConta
   } finally {
     if (pool) await pool.end().catch(() => {})
   }
+}
+
+/**
+ * Subject-line A/B test helpers.
+ * ──────────────────────────────
+ * `campaign.ab_test` (jsonb) = { enabled: boolean, variants: string[] }
+ * where variants[] are subject-line variants (2-4). Variant 0 = original subject.
+ *
+ * Assignment is deterministic per contact: stableHash(contact.id) % N. The same
+ * contact therefore always lands in the same variant bucket (stable across
+ * retries / re-arms), and buckets are evenly spread by the hash mixing.
+ */
+function stableHash(str: string): number {
+  // Simple deterministic FNV-1a-ish 32-bit string hash. Returns a non-negative
+  // integer; only used for variant bucketing (not security-sensitive).
+  let h = 2166136261
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h >>> 0
+}
+
+function parseAbTest(raw: any): { enabled: boolean; variants: string[] } | null {
+  if (!raw) return null
+  let ab = raw
+  if (typeof ab === "string") {
+    try {
+      ab = JSON.parse(ab)
+    } catch {
+      return null
+    }
+  }
+  if (ab && ab.enabled && Array.isArray(ab.variants) && ab.variants.length >= 2) {
+    return { enabled: true, variants: ab.variants }
+  }
+  return null
 }
 
 async function dispatchCampaign(
@@ -189,6 +226,10 @@ async function dispatchCampaign(
         from_name: template.from_name,
         reply_to: template.reply_to,
       }
+
+  // Subject-line A/B test config (null when disabled / <2 variants → original
+  // behaviour). Parsed once per campaign; subject is then chosen per-recipient.
+  const abTest = parseAbTest(campaign.ab_test)
 
   // Resolve recipients (union of all selected lists/segments, deduped)
   const recipients = await resolver.resolve({
@@ -289,17 +330,31 @@ async function dispatchCampaign(
     await Promise.all(
       chunk.map(async (r) => {
         try {
+          // 0. Pick this recipient's subject line. With A/B enabled, the variant
+          // is chosen deterministically from the contact id (stable across
+          // retries); variant 0 = original subject. Disabled → original subject.
+          let variantIdx: number | null = null
+          let subjectForRecipient = email.subject
+          if (abTest) {
+            variantIdx = stableHash(r.id) % abTest.variants.length
+            subjectForRecipient = abTest.variants[variantIdx] || campaign.subject
+          }
+
           // 1. Claim the marketing_message row (idempotent upsert). The UNIQUE
           // (campaign_id, contact_id) index guarantees exactly one row per
           // recipient per campaign — a concurrent/retried attempt re-uses the
           // same row instead of creating a duplicate (no double-send).
+          // metadata.ab_variant records the assigned variant; on retry we COALESCE
+          // so the original assignment is never overwritten.
           const { rows: msgRows } = await pool.query(
             `INSERT INTO marketing_message
                (id, brand_id, contact_id, campaign_id, template_id, template_version,
-                to_email, from_email, subject_snapshot, status, created_at, updated_at)
-             VALUES (gen_random_uuid()::text, $1, $2, $3, $4, $5, $6, $7, $8, 'queued', now(), now())
+                to_email, from_email, subject_snapshot, metadata, status, created_at, updated_at)
+             VALUES (gen_random_uuid()::text, $1, $2, $3, $4, $5, $6, $7, $8, $9, 'queued', now(), now())
              ON CONFLICT ("campaign_id", "contact_id") WHERE ("deleted_at" IS NULL AND "campaign_id" IS NOT NULL)
-             DO UPDATE SET status = 'queued', error = NULL, updated_at = now()
+             DO UPDATE SET status = 'queued', error = NULL,
+                           metadata = COALESCE(marketing_message.metadata, EXCLUDED.metadata),
+                           updated_at = now()
              RETURNING id`,
             [
               campaign.brand_id,
@@ -309,7 +364,8 @@ async function dispatchCampaign(
               templateVersion,
               r.email,
               fromEmail,
-              email.subject,
+              subjectForRecipient,
+              variantIdx === null ? null : JSON.stringify({ ab_variant: variantIdx }),
             ]
           )
           const messageId = msgRows[0]?.id
@@ -330,7 +386,7 @@ async function dispatchCampaign(
 
           const compiled = compileTemplate(
             {
-              subject: email.subject,
+              subject: subjectForRecipient,
               preheader: email.preheader,
               editor_type: email.editor_type,
               block_json: email.block_json,

@@ -59,6 +59,11 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
   const [emailMode, setEmailMode] = useState<"blocks" | "html">("html")
   const [emailView, setEmailView] = useState<"edit" | "preview">("edit")
 
+  // A/B test subject line. `subject` is always variant A; abVariants holds the
+  // extra variants (B, C, D). On save we persist {enabled, variants:[subject,...]}.
+  const [abEnabled, setAbEnabled] = useState(false)
+  const [abVariants, setAbVariants] = useState<string[]>([])
+
   // Tabs
   const [tab, setTab] = useState<"content" | "recipients" | "schedule">("content")
 
@@ -72,9 +77,9 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
       JSON.stringify({
         name, subject, preheader, fromName, fromEmail, replyTo, customHtml,
         listIds, segmentIds, suppressionSegmentIds, scheduleAt,
-        blocks, emailMode,
+        blocks, emailMode, abEnabled, abVariants,
       }),
-    [name, subject, preheader, fromName, fromEmail, replyTo, customHtml, listIds, segmentIds, suppressionSegmentIds, scheduleAt, blocks, emailMode]
+    [name, subject, preheader, fromName, fromEmail, replyTo, customHtml, listIds, segmentIds, suppressionSegmentIds, scheduleAt, blocks, emailMode, abEnabled, abVariants]
   )
   useEffect(() => {
     if (!hydrated) return
@@ -135,6 +140,13 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
     setBlocks(nextBlocks)
     setEmailMode(nextMode)
 
+    // A/B test hydration. variants[0] mirrors `subject`; 1..N are extra variants.
+    const ab = c.ab_test
+    const nextAbEnabled = !!ab?.enabled
+    const nextAbVariants = Array.isArray(ab?.variants) ? ab.variants.slice(1) : []
+    setAbEnabled(nextAbEnabled)
+    setAbVariants(nextAbVariants)
+
     // Snapshot what we just loaded so dirty starts false.
     savedSnapshot.current = JSON.stringify({
       name: c.name || "",
@@ -150,6 +162,8 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
       scheduleAt: c.send_at ? toLocalInput(c.send_at) : "",
       blocks: nextBlocks,
       emailMode: nextMode,
+      abEnabled: nextAbEnabled,
+      abVariants: nextAbVariants,
     })
     setHydrated(true)
     setDirty(false)
@@ -225,6 +239,12 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
         segment_id: segmentIds[0] || null,
         suppression_segment_ids: suppressionSegmentIds,
         metadata,
+        // A/B test subject line. Variant A = current `subject`; extra variants
+        // append after it. Only enable when there's at least one real extra.
+        ab_test:
+          abEnabled && abVariants.filter(Boolean).length > 0
+            ? { enabled: true, variants: [subject, ...abVariants.filter(Boolean)] }
+            : { enabled: false, variants: [] },
         send_at: overrides?.send_at !== undefined ? overrides.send_at : (scheduleAt ? new Date(scheduleAt).toISOString() : null),
         status: overrides?.status || status,
       }
@@ -497,12 +517,22 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
                     placeholder="e.g. Spring promo 2026"
                   />
 
-                  <label className="mkt-label" style={{ marginTop: "14px" }}>Subject</label>
+                  <label className="mkt-label" style={{ marginTop: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    Subject
+                    {abEnabled && <VariantTag index={0} />}
+                  </label>
                   <input
                     className="mkt-input"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder="The line that decides whether they open it"
+                  />
+
+                  <AbTestEditor
+                    abEnabled={abEnabled}
+                    setAbEnabled={setAbEnabled}
+                    abVariants={abVariants}
+                    setAbVariants={setAbVariants}
                   />
 
                   <label className="mkt-label" style={{ marginTop: "14px" }}>Preheader</label>
@@ -1097,6 +1127,246 @@ function ModeBtn({ active, onClick, children }: { active: boolean; onClick: () =
 }
 
 // ═══════════════════════════════════════════
+// A/B TEST SUBJECT LINE
+// ═══════════════════════════════════════════
+const AB_LABELS = ["A", "B", "C", "D"]
+
+function VariantTag({ index }: { index: number }) {
+  return (
+    <span
+      style={{
+        fontSize: "10px",
+        fontWeight: 700,
+        color: tokens.primary,
+        background: tokens.primarySoft,
+        padding: "1px 7px",
+        borderRadius: "999px",
+        letterSpacing: "0.04em",
+        textTransform: "none",
+      }}
+    >
+      Variant {AB_LABELS[index] || index + 1}
+    </span>
+  )
+}
+
+function AbTestEditor({
+  abEnabled,
+  setAbEnabled,
+  abVariants,
+  setAbVariants,
+}: {
+  abEnabled: boolean
+  setAbEnabled: (v: boolean) => void
+  abVariants: string[]
+  setAbVariants: (v: string[]) => void
+}) {
+  // Variant A = main subject, so extra variants top out at 3 (4 total).
+  const MAX_EXTRA = 3
+  const updateVariant = (i: number, value: string) =>
+    setAbVariants(abVariants.map((v, idx) => (idx === i ? value : v)))
+  const removeVariant = (i: number) =>
+    setAbVariants(abVariants.filter((_, idx) => idx !== i))
+  const addVariant = () => {
+    if (abVariants.length >= MAX_EXTRA) return
+    setAbVariants([...abVariants, ""])
+  }
+
+  return (
+    <div style={{ marginTop: "12px" }}>
+      <label
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          fontSize: "13px",
+          color: tokens.fg,
+          cursor: "pointer",
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={abEnabled}
+          onChange={(e) => setAbEnabled(e.target.checked)}
+        />
+        <span style={{ fontWeight: 600 }}>A/B test subject line</span>
+      </label>
+
+      {abEnabled && (
+        <div
+          style={{
+            marginTop: "10px",
+            padding: "14px",
+            border: `1px solid ${tokens.borderStrong}`,
+            borderRadius: tokens.rMd,
+            background: tokens.bg,
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {abVariants.map((v, i) => (
+              <div key={i} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  {/* +1 → variant A is the main subject, so extras start at B */}
+                  <VariantTag index={i + 1} />
+                  <button
+                    type="button"
+                    className="mkt-btn mkt-btn-sm"
+                    onClick={() => removeVariant(i)}
+                    title="Remove this variant"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <input
+                  className="mkt-input"
+                  value={v}
+                  onChange={(e) => updateVariant(i, e.target.value)}
+                  placeholder={`Subject line for variant ${AB_LABELS[i + 1] || i + 2}`}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: abVariants.length ? "12px" : 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="mkt-btn mkt-btn-sm"
+              onClick={addVariant}
+              disabled={abVariants.length >= MAX_EXTRA}
+            >
+              + Add variant
+            </button>
+            {abVariants.length >= MAX_EXTRA && (
+              <span style={{ fontSize: "12px", color: tokens.fgMuted }}>Maximum 4 variants</span>
+            )}
+          </div>
+
+          <div style={{ marginTop: "10px", fontSize: "12px", color: tokens.fgMuted, lineHeight: 1.45 }}>
+            Recipients are split evenly across variants; compare open/click rates after sending.
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════
+// A/B RESULTS (read-only, sent campaign)
+// ═══════════════════════════════════════════
+type AbVariantResult = {
+  index: number
+  subject: string
+  sent: number
+  opened: number
+  clicked: number
+  open_rate: number
+  click_rate: number
+}
+
+function AbResultsTable({ variants }: { variants: AbVariantResult[] }) {
+  if (!Array.isArray(variants) || variants.length < 2) return null
+  // Winner = highest open_rate (primary metric).
+  const winnerIdx = variants.reduce(
+    (best, v, i) => (v.open_rate > variants[best].open_rate ? i : best),
+    0
+  )
+  return (
+    <div style={{ marginTop: "20px", borderTop: `1px solid ${tokens.borderSubtle}`, paddingTop: "16px" }}>
+      <div
+        style={{
+          fontSize: "11px",
+          fontWeight: 600,
+          color: tokens.fgSecondary,
+          textTransform: "uppercase",
+          letterSpacing: "0.04em",
+          marginBottom: "10px",
+        }}
+      >
+        A/B results
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "60px 1fr 70px 90px 90px",
+            gap: "10px",
+            fontSize: "11px",
+            fontWeight: 600,
+            color: tokens.fgMuted,
+            textTransform: "uppercase",
+            letterSpacing: "0.03em",
+            padding: "0 10px",
+          }}
+        >
+          <span>Variant</span>
+          <span>Subject</span>
+          <span style={{ textAlign: "right" }}>Sent</span>
+          <span style={{ textAlign: "right" }}>Open rate</span>
+          <span style={{ textAlign: "right" }}>Click rate</span>
+        </div>
+        {variants.map((v, i) => {
+          const isWinner = i === winnerIdx
+          return (
+            <div
+              key={v.index ?? i}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "60px 1fr 70px 90px 90px",
+                gap: "10px",
+                alignItems: "center",
+                padding: "8px 10px",
+                borderRadius: tokens.rSm,
+                background: isWinner ? tokens.successSoft : tokens.bg,
+                border: isWinner ? `1px solid ${tokens.successFg}` : "1px solid transparent",
+                fontSize: "13px",
+                color: tokens.fg,
+              }}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: 600 }}>
+                {AB_LABELS[v.index] || AB_LABELS[i] || i + 1}
+                {isWinner && (
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      color: "#fff",
+                      background: tokens.successFg,
+                      padding: "1px 6px",
+                      borderRadius: "999px",
+                      letterSpacing: "0.03em",
+                    }}
+                  >
+                    Winner
+                  </span>
+                )}
+              </span>
+              <span
+                style={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  color: tokens.fgSecondary,
+                }}
+                title={v.subject}
+              >
+                {v.subject || "—"}
+              </span>
+              <span style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{fmt(v.sent || 0)}</span>
+              <span style={{ textAlign: "right", fontVariantNumeric: "tabular-nums", fontWeight: isWinner ? 700 : 500, color: isWinner ? tokens.successFg : tokens.fg }}>
+                {((v.open_rate || 0) * 100).toFixed(1)}%
+              </span>
+              <span style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+                {((v.click_rate || 0) * 100).toFixed(1)}%
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════
 // SCHEDULE TIMEZONE HINT
 // ═══════════════════════════════════════════
 function ScheduleTimezoneHint({ scheduleAt }: { scheduleAt: string }) {
@@ -1428,11 +1698,13 @@ function ReadOnlyView({
         funnel: any
         revenue: any
         links: Array<{ link_label: string; clicks: number; unique_clickers: number }>
+        ab_variants?: AbVariantResult[]
       }>(`/admin/marketing/campaigns/${campaignId}/analytics`, { method: "GET" }),
     enabled: !!campaignId,
     refetchInterval: 30000,
   })
 
+  const abVariants = (analytics as any)?.ab_variants as AbVariantResult[] | undefined
   const funnel = (analytics as any)?.funnel
   const vals = {
     sent: funnel ? (funnel.sent || 0) : Number(metrics?.sent) || 0,
@@ -1495,6 +1767,9 @@ function ReadOnlyView({
           )
         })}
       </div>
+
+      {/* A/B results — only when the analytics endpoint returns variant data */}
+      {abVariants && abVariants.length >= 2 && <AbResultsTable variants={abVariants} />}
 
       {/* Collapsible: view the sent email */}
       {html && (

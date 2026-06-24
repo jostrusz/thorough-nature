@@ -56,6 +56,57 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       [id]
     )
 
+    // ── A/B per-variant stats ───────────────────────────────────────
+    let ab_variants: Array<{
+      index: number
+      subject: string | null
+      sent: number
+      opened: number
+      clicked: number
+      open_rate: number
+      click_rate: number
+    }> = []
+
+    const campRes = await pool.query(
+      `SELECT ab_test FROM marketing_campaign WHERE id = $1 LIMIT 1`,
+      [id]
+    )
+    const abTest = campRes.rows[0]?.ab_test
+    const variants: string[] = Array.isArray(abTest?.variants) ? abTest.variants : []
+
+    if (abTest?.enabled && variants.length >= 2) {
+      const abRes = await pool.query(
+        `SELECT (metadata->>'ab_variant')::int AS idx,
+                count(*) FILTER (WHERE status IN ('sent','delivered','opened','clicked','bounced','complained'))::int AS sent,
+                count(*) FILTER (WHERE status IN ('opened','clicked'))::int AS opened,
+                count(*) FILTER (WHERE status = 'clicked')::int AS clicked
+         FROM marketing_message
+         WHERE campaign_id = $1 AND deleted_at IS NULL AND metadata->>'ab_variant' IS NOT NULL
+         GROUP BY 1 ORDER BY 1`,
+        [id]
+      )
+      const byIdx = new Map<number, { sent: number; opened: number; clicked: number }>()
+      for (const row of abRes.rows) {
+        byIdx.set(row.idx, {
+          sent: row.sent || 0,
+          opened: row.opened || 0,
+          clicked: row.clicked || 0,
+        })
+      }
+      ab_variants = variants.map((subject, index) => {
+        const s = byIdx.get(index) || { sent: 0, opened: 0, clicked: 0 }
+        return {
+          index,
+          subject,
+          sent: s.sent,
+          opened: s.opened,
+          clicked: s.clicked,
+          open_rate: s.sent ? s.opened / s.sent : 0,
+          click_rate: s.sent ? s.clicked / s.sent : 0,
+        }
+      })
+    }
+
     const sent = f.sent || 0
     res.json({
       funnel: {
@@ -79,6 +130,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
         conversion_rate: sent ? orders / sent : 0,
       },
       links: linkRes.rows,
+      ab_variants,
     })
   } catch (err: any) {
     res.status(500).json({ error: err?.message || "internal_error" })
