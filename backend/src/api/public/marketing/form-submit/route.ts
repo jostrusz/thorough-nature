@@ -162,6 +162,38 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     let contact: any = existing?.[0] || null
     const now = new Date()
 
+    // Compliance: is this email actively suppressed for the brand? A live
+    // suppression row means the person opted out (unsubscribe / complaint /
+    // bounce). Re-submitting a popup form is NOT explicit re-consent, so we
+    // must not silently flip them back to 'subscribed' or delete the row.
+    let isSuppressed = false
+    if (process.env.DATABASE_URL) {
+      const supPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+      try {
+        const { rows } = await supPool.query(
+          `SELECT 1 FROM marketing_suppression
+           WHERE brand_id = $1 AND lower(email) = lower($2) AND deleted_at IS NULL
+           LIMIT 1`,
+          [brand.id, email]
+        )
+        isSuppressed = rows.length > 0
+      } catch (e: any) {
+        // Fail safe: if we can't verify suppression, treat as suppressed when
+        // the contact is already unsubscribed (handled below). Don't block the
+        // common new-signup path.
+        logger.warn(`[Marketing Tracking] suppression check failed: ${e?.message || e}`)
+      } finally {
+        await supPool.end().catch(() => {})
+      }
+    }
+
+    // A previously-unsubscribed contact, or one whose email sits on the
+    // suppression list, is NOT auto-revived by a silent form submit. They
+    // stay opted-out and are never enrolled into flows. Coming back requires
+    // an explicit re-opt-in (out of scope for this endpoint).
+    const blockResubscribe =
+      isSuppressed || (contact && contact.status === "unsubscribed")
+
     if (!contact) {
       const newStatus = requiresDoi ? "unconfirmed" : "subscribed"
       contact = await service.createMarketingContacts({
@@ -195,11 +227,18 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         lifecycle_entered_at: now,
       } as any)
     } else {
-      // Revive contact if previously unsubscribed only when they re-opt-in intentionally
-      // We don't forcibly change an unsubscribed contact to subscribed — instead we log
-      // the action and mark them unconfirmed so they must re-confirm explicitly.
       const patch: any = { id: contact.id }
-      if (contact.status === "unsubscribed" || contact.status === "unconfirmed") {
+      if (blockResubscribe) {
+        // Opted-out person re-submitting the form. This is NOT explicit
+        // re-consent — do NOT flip to 'subscribed' and do NOT delete the
+        // suppression row. Leave them opted-out; only enrich names. Getting
+        // back in requires an explicit re-opt-in flow (out of scope here).
+        logger.info(
+          `[Marketing Tracking] skipped_resubscribe_suppressed: contact=${contact.id} email=${email} brand=${brand.slug} status=${contact.status} suppressed=${isSuppressed}`
+        )
+      } else if (contact.status === "unconfirmed") {
+        // Never confirmed yet (no opt-out on record). Safe to (re)apply the
+        // normal opt-in path: subscribe outright, or require DOI confirmation.
         patch.status = requiresDoi ? "unconfirmed" : "subscribed"
         patch.consent_at = requiresDoi ? null : now
         patch.consent_ip = ip
@@ -284,8 +323,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     //
     // Skipped when DOI is required — we wait for /confirm to fire enrollment
     // so unconfirmed contacts don't enter nurture sequences.
+    //
+    // Also skipped for opted-out / suppressed contacts: a silent re-submit
+    // must never put an unsubscribed person back into a flow.
     // ───────────────────────────────────────────────────────────────────
-    if (!requiresDoi) {
+    if (!requiresDoi && !blockResubscribe) {
       try {
         await enrollContactInMatchingFlows({
           contact,

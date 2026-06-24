@@ -93,6 +93,32 @@ export default async function marketingFlowTrigger({
       return
     }
 
+    // ───────────────────────────────────────────────────────────────────
+    // Compliance gate — never (re)enroll a contact who isn't actively
+    // subscribed, or whose email is on the brand's suppression list.
+    // An unsubscribed/bounced/complained buyer who orders again must NOT
+    // be silently put back into nurture flows.
+    // ───────────────────────────────────────────────────────────────────
+    if (contact.status !== "subscribed") {
+      logger.info(
+        `[Marketing Flow Trigger] Contact ${contact.id} (${email}@${brand.slug}) status='${contact.status}' (not subscribed); skipping ${matching.length} flow(s)`
+      )
+      return
+    }
+
+    const { rows: suppressed } = await pool.query(
+      `SELECT 1 FROM marketing_suppression
+       WHERE brand_id = $1 AND lower(email) = lower($2) AND deleted_at IS NULL
+       LIMIT 1`,
+      [brand.id, email]
+    )
+    if (suppressed.length) {
+      logger.info(
+        `[Marketing Flow Trigger] Contact ${email}@${brand.slug} is on marketing_suppression; skipping ${matching.length} flow(s)`
+      )
+      return
+    }
+
     for (const flow of matching) {
       try {
         // Already a non-completed run for this contact+flow? skip.

@@ -220,7 +220,7 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
     return () => clearTimeout(handle)
   }, [brandId, JSON.stringify(listIds), JSON.stringify(segmentIds), JSON.stringify(suppressionSegmentIds)])
 
-  const readOnly = status === "sent" || status === "sending"
+  const readOnly = status === "sent" || status === "sending" || status === "sent_with_errors"
   const canSchedule = !!(name && subject && customHtml && fromEmail && scheduleAt)
   const canSendNow = !!(currentId && name && subject && customHtml && fromEmail)
 
@@ -240,7 +240,12 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
       </div>
 
       {readOnly ? (
-        <ReadOnlyView name={name} subject={subject} metrics={metrics} />
+        <ReadOnlyView
+          name={name}
+          subject={subject}
+          metrics={metrics}
+          campaignId={currentId}
+        />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "16px", alignItems: "flex-start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -814,22 +819,74 @@ function Checklist({
   )
 }
 
-function ReadOnlyView({ name, subject, metrics }: { name: string; subject: string; metrics: any }) {
-  const bars: { label: string; key: string; color: string }[] = [
+function ReadOnlyView({
+  name,
+  subject,
+  metrics,
+  campaignId,
+}: {
+  name: string
+  subject: string
+  metrics: any
+  campaignId?: string
+}) {
+  // Live analytics — pulled from the /analytics endpoint (computed live from
+  // marketing_message). This is the source of truth for open/click/bounce.
+  // campaign.metrics only carries send-time {sent, failed, suppressed}, so the
+  // Delivered/Opened/Clicked/Bounced bars below would otherwise read 0.
+  const { data: analytics } = useQuery({
+    queryKey: ["mkt-campaign-analytics", campaignId],
+    queryFn: () =>
+      sdk.client.fetch<{
+        funnel: any
+        revenue: any
+        links: Array<{ link_label: string; clicks: number; unique_clickers: number }>
+      }>(`/admin/marketing/campaigns/${campaignId}/analytics`, { method: "GET" }),
+    enabled: !!campaignId,
+    refetchInterval: 30000,
+  })
+
+  const funnel = (analytics as any)?.funnel
+  // Prefer live funnel numbers; fall back to send-time metrics jsonb.
+  const vals = {
+    sent: funnel ? funnel.sent : Number(metrics?.sent) || 0,
+    delivered: funnel ? funnel.delivered : Number(metrics?.delivered) || 0,
+    opened: funnel ? funnel.opened_unique : Number(metrics?.opened) || 0,
+    clicked: funnel ? funnel.clicked_unique : Number(metrics?.clicked) || 0,
+    bounced: funnel ? funnel.bounced : Number(metrics?.bounced) || 0,
+  }
+
+  const bars: { label: string; key: keyof typeof vals; color: string }[] = [
     { label: "Sent", key: "sent", color: tokens.fgSecondary },
     { label: "Delivered", key: "delivered", color: tokens.primary },
     { label: "Opened", key: "opened", color: tokens.info },
     { label: "Clicked", key: "clicked", color: tokens.purple },
     { label: "Bounced", key: "bounced", color: tokens.dangerFg },
   ]
-  const max = Math.max(1, ...bars.map((b) => Number(metrics?.[b.key]) || 0))
+  const max = Math.max(1, ...bars.map((b) => Number(vals[b.key]) || 0))
   return (
     <div className="mkt-card" style={{ padding: "24px" }}>
       <div style={{ fontSize: "18px", fontWeight: 600, marginBottom: "4px", color: tokens.fg, letterSpacing: "-0.005em" }}>{name}</div>
       {subject && <div style={{ fontSize: "13px", color: tokens.fgSecondary, marginBottom: "20px" }}>Subject: {subject}</div>}
+
+      {/* Rate summary cards — only meaningful once we have live funnel data */}
+      {funnel && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "10px", marginBottom: "20px" }}>
+          <RateCard label="Open rate" value={`${(funnel.open_rate * 100).toFixed(1)}%`} sub={`${fmt(funnel.opened_unique)} unique`} color={tokens.info} />
+          <RateCard label="Click rate" value={`${(funnel.ctr * 100).toFixed(1)}%`} sub={`${fmt(funnel.clicked_unique)} unique`} color={tokens.purple} />
+          <RateCard label="CTOR" value={`${(funnel.ctor * 100).toFixed(1)}%`} sub="of openers" color={tokens.primary} />
+          <RateCard
+            label="Bounce rate"
+            value={`${(funnel.sent ? (funnel.bounced / funnel.sent) * 100 : 0).toFixed(1)}%`}
+            sub={`${fmt(funnel.bounced)} bounced`}
+            color={tokens.dangerFg}
+          />
+        </div>
+      )}
+
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {bars.map((b) => {
-          const v = Number(metrics?.[b.key]) || 0
+          const v = Number(vals[b.key]) || 0
           const pc = (v / max) * 100
           return (
             <div key={b.key} style={{ display: "grid", gridTemplateColumns: "100px 1fr 80px", alignItems: "center", gap: "12px" }}>
@@ -842,6 +899,26 @@ function ReadOnlyView({ name, subject, metrics }: { name: string; subject: strin
           )
         })}
       </div>
+
+      {/* Full analytics panel — revenue + link breakdown (live) */}
+      {campaignId && <CampaignAnalyticsPanel campaignId={campaignId} />}
+    </div>
+  )
+}
+
+function RateCard({ label, value, sub, color }: { label: string; value: string; sub?: string; color: string }) {
+  return (
+    <div
+      style={{
+        padding: "12px 14px",
+        border: `1px solid ${tokens.borderStrong}`,
+        borderRadius: tokens.rMd,
+        background: tokens.surface,
+      }}
+    >
+      <div style={{ fontSize: "11px", fontWeight: 600, color: tokens.fgSecondary, textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</div>
+      <div style={{ fontSize: "22px", fontWeight: 700, color, marginTop: "2px", fontVariantNumeric: "tabular-nums" }}>{value}</div>
+      {sub && <div style={{ fontSize: "11px", color: tokens.fgMuted, marginTop: "2px" }}>{sub}</div>}
     </div>
   )
 }

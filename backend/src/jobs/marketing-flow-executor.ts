@@ -231,6 +231,23 @@ async function executeRun(
     return
   }
 
+  // 1b. Suppression list — hard compliance gate. Mirrors the campaign
+  // recipient-resolver hard filter (marketing/utils/recipient-resolver.ts).
+  // A contact can have status='subscribed' yet still be suppressed (manual
+  // suppression, prior bounce/complaint on another brand mailing, GDPR
+  // erasure, etc.). Per-brand: brand_id + lower(email), deleted_at IS NULL.
+  // If suppressed → exit the run, never send.
+  if (await isSuppressed(pool, run.brand_id, contact.email)) {
+    await pool.query(
+      `UPDATE marketing_flow_run
+       SET state = 'exited', completed_at = NOW(), current_node_id = NULL,
+           next_run_at = NULL, exit_reason = 'suppressed', visited_node_ids = $2::jsonb
+       WHERE id = $1`,
+      [run.id, JSON.stringify(visited)]
+    )
+    return
+  }
+
   // 2. Goal evaluation — if any flow goal matches, exit early as "completed".
   if (Array.isArray(flow.goals) && flow.goals.length > 0) {
     const matched = await evaluateFlowGoals({
@@ -479,6 +496,29 @@ async function evaluateFlowGoals(args: {
   return null
 }
 
+/**
+ * Suppression gate — returns true if the (brand_id, email) pair is on the
+ * marketing_suppression list. Single indexed SELECT, one per check.
+ * Mirrors the campaign hard filter in marketing/utils/recipient-resolver.ts:
+ *   NOT EXISTS marketing_suppression WHERE brand_id + lower(email) + deleted_at IS NULL
+ * Fail-safe: on any DB error returns true (suppress) so we never email a
+ * potentially-suppressed contact when the check itself is uncertain.
+ */
+async function isSuppressed(pool: Pool, brandId: string, email: string): Promise<boolean> {
+  if (!brandId || !email) return false
+  try {
+    const { rows } = await pool.query(
+      `SELECT 1 FROM marketing_suppression
+       WHERE brand_id = $1 AND lower(email) = lower($2) AND deleted_at IS NULL
+       LIMIT 1`,
+      [brandId, email]
+    )
+    return rows.length > 0
+  } catch {
+    return true
+  }
+}
+
 function getNextEdge(def: FlowDefinition, nodeId: string): string | null {
   // Explicit graph edges win — for branching flows with conditions etc.
   if (def.edges?.length) {
@@ -515,6 +555,23 @@ async function sendFlowEmail(args: {
   }
   if (contact.status !== "subscribed") {
     logger.warn(`[Marketing Flow] Skipping email for contact ${contact.id} — status=${contact.status}`)
+    return
+  }
+
+  // Last-line compliance gate before any send. Even if the pre-execution
+  // suppression check passed, the contact may have been suppressed since
+  // the run started (e.g. complaint webhook between ticks). Per-brand check
+  // mirrors marketing/utils/recipient-resolver.ts. If suppressed → never
+  // send, and exit the run so it stops re-attempting next tick.
+  if (await isSuppressed(pool, flow.brand_id, contact.email)) {
+    logger.warn(`[Marketing Flow] Suppressed — skipping email for contact ${contact.id}, brand=${flow.brand_id}; exiting run ${run.id}`)
+    await pool.query(
+      `UPDATE marketing_flow_run
+       SET state = 'exited', completed_at = NOW(), current_node_id = NULL,
+           next_run_at = NULL, exit_reason = 'suppressed'
+       WHERE id = $1`,
+      [run.id]
+    )
     return
   }
 

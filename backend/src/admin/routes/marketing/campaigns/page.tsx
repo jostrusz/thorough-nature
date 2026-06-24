@@ -95,6 +95,7 @@ function CampaignsPage() {
                 <th>Template</th>
                 <th>Recipients</th>
                 <th>Status</th>
+                <th>Open / Click</th>
                 <th>Sent</th>
                 <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
@@ -112,6 +113,17 @@ function CampaignsPage() {
                     <td style={{ color: tokens.fgSecondary }}>{c.template?.name || c.template_name || "—"}</td>
                     <td>{fmt(m.recipients ?? m.sent)}</td>
                     <td><StatusBadge status={c.status || "draft"} /></td>
+                    <td style={{ color: tokens.fgSecondary, fontSize: "13px", fontVariantNumeric: "tabular-nums" }}>
+                      {typeof m.open_rate === "number" || typeof m.click_rate === "number" ? (
+                        <span>
+                          {((Number(m.open_rate) || 0) * 100).toFixed(1)}%
+                          <span style={{ color: tokens.fgMuted }}> / </span>
+                          {((Number(m.click_rate) || 0) * 100).toFixed(1)}%
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                     <td style={{ color: tokens.fgSecondary, fontSize: "13px" }}>
                       {c.sent_at ? new Date(c.sent_at).toLocaleString() : "—"}
                     </td>
