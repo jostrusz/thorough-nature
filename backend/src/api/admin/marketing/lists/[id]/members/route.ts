@@ -22,7 +22,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
 
     const { rows } = await pool.query(
       `SELECT m.id AS membership_id, m.added_at, m.source,
-              c.id AS contact_id, c.email, c.first_name, c.last_name, c.status
+              c.id AS contact_id, c.email, c.first_name, c.last_name, c.phone,
+              c.city, c.postal_code, c.address_line1, c.company,
+              c.country_code, c.locale, c.tags, c.external_id, c.status
        FROM marketing_list_membership m
        JOIN marketing_contact c ON c.id = m.contact_id AND c.deleted_at IS NULL
        WHERE m.list_id = $1 AND m.deleted_at IS NULL

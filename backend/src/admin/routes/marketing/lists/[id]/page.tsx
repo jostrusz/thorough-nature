@@ -139,21 +139,47 @@ function ListDetailPage() {
           <EmptyState icon="👥" title="No members yet" description="Add contacts above to populate this list." />
         ) : (
           <>
-            <table className="mkt-table">
+            <div style={{ overflowX: "auto" }}>
+            <table className="mkt-table" style={{ minWidth: "1400px" }}>
               <thead>
                 <tr>
                   <th>Email</th>
-                  <th>Name</th>
+                  <th>First name</th>
+                  <th>Last name</th>
+                  <th>Phone</th>
+                  <th>City</th>
+                  <th>Postal code</th>
+                  <th>Street address</th>
+                  <th>Company</th>
+                  <th>Country</th>
+                  <th>Locale</th>
+                  <th>Tags</th>
+                  <th>External ID</th>
+                  <th>Status</th>
                   <th>Added</th>
                   <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {members.map((m: any) => (
+                {members.map((m: any) => {
+                  const tags = Array.isArray(m.tags) ? m.tags.join(", ") : (m.tags || "")
+                  const c = { color: tokens.fgSecondary }
+                  return (
                   <tr key={m.id || m.contact_id} className="mkt-row">
                     <td style={{ fontWeight: 500 }}>{m.email}</td>
-                    <td style={{ color: tokens.fgSecondary }}>{[m.first_name, m.last_name].filter(Boolean).join(" ") || "—"}</td>
-                    <td style={{ color: tokens.fgSecondary, fontSize: "13px" }}>{m.added_at ? new Date(m.added_at).toLocaleDateString() : "—"}</td>
+                    <td style={c}>{m.first_name || "—"}</td>
+                    <td style={c}>{m.last_name || "—"}</td>
+                    <td style={c}>{m.phone || "—"}</td>
+                    <td style={c}>{m.city || "—"}</td>
+                    <td style={c}>{m.postal_code || "—"}</td>
+                    <td style={c}>{m.address_line1 || "—"}</td>
+                    <td style={c}>{m.company || "—"}</td>
+                    <td style={c}>{m.country_code || "—"}</td>
+                    <td style={c}>{m.locale || "—"}</td>
+                    <td style={c}>{tags || "—"}</td>
+                    <td style={c}>{m.external_id || "—"}</td>
+                    <td style={c}>{m.status || "—"}</td>
+                    <td style={{ ...c, fontSize: "13px" }}>{m.added_at ? new Date(m.added_at).toLocaleDateString() : "—"}</td>
                     <td style={{ textAlign: "right" }}>
                       <button
                         className="mkt-btn-danger-ghost"
@@ -163,9 +189,11 @@ function ListDetailPage() {
                       </button>
                     </td>
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
+            </div>
             {count > limit && (
               <div style={{ padding: "14px 20px", display: "flex", justifyContent: "flex-end", gap: "10px", alignItems: "center", borderTop: `1px solid ${tokens.borderSubtle}` }}>
                 <button disabled={page === 0} onClick={() => setPage(page - 1)} className="mkt-btn mkt-btn-sm">
