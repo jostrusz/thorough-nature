@@ -36,7 +36,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     const resolver = new RecipientResolver()
     const recipients = await resolver.resolve({
       brandId: brand_id,
+      // Accept both plural (new multi-select UI) and singular (legacy) inputs.
+      listIds: Array.isArray(body.list_ids) ? body.list_ids : undefined,
       listId: body.list_id || null,
+      segmentIds: Array.isArray(body.segment_ids) ? body.segment_ids : undefined,
       segmentId: body.segment_id || null,
       suppressionSegmentIds: Array.isArray(body.suppression_segment_ids)
         ? body.suppression_segment_ids

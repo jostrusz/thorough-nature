@@ -62,8 +62,8 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
     setFromEmail(c.from_email || "")
     setReplyTo(c.reply_to || "")
     setCustomHtml(c.custom_html || "")
-    setListIds([c.list_id].filter(Boolean) as string[])
-    setSegmentIds([c.segment_id].filter(Boolean) as string[])
+    setListIds((Array.isArray(c.list_ids) && c.list_ids.length ? c.list_ids : [c.list_id]).filter(Boolean) as string[])
+    setSegmentIds((Array.isArray(c.segment_ids) && c.segment_ids.length ? c.segment_ids : [c.segment_id]).filter(Boolean) as string[])
     setSuppressionSegmentIds(c.suppression_segment_ids || [])
     setScheduleAt(c.send_at ? new Date(c.send_at).toISOString().slice(0, 16) : "")
     setStatus(c.status || "draft")
@@ -120,6 +120,9 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
         from_email: fromEmail || null,
         reply_to: replyTo || null,
         custom_html: customHtml || null,
+        // Persist full multi-select; keep singular for backward compat.
+        list_ids: listIds,
+        segment_ids: segmentIds,
         list_id: listIds[0] || null,
         segment_id: segmentIds[0] || null,
         suppression_segment_ids: suppressionSegmentIds,
@@ -203,8 +206,8 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
             method: "POST",
             body: {
               brand_id: brandId,
-              list_id: listIds[0] || null,
-              segment_id: segmentIds[0] || null,
+              list_ids: listIds,
+              segment_ids: segmentIds,
               suppression_segment_ids: suppressionSegmentIds,
             },
           }

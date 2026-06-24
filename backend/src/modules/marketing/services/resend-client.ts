@@ -70,21 +70,49 @@ export class ResendMarketingClient {
   }
 
   async send(params: SendEmailParams): Promise<SendEmailResult> {
-    try {
-      const result = await this.client.emails.send({
-        from: params.from,
-        to: params.to,
-        subject: params.subject,
-        html: params.html,
-        text: params.text,
-        replyTo: params.replyTo ?? undefined,
-        headers: params.headers,
-        tags: params.tags,
-      } as any)
-      const id = (result as any)?.data?.id ?? null
-      return { resend_id: id, ok: !!id }
-    } catch (err: any) {
-      return { resend_id: null, ok: false, error: err?.message || String(err) }
+    // Retry transient failures (rate-limit 429 / 5xx) with exponential backoff.
+    // The Resend SDK returns { data, error } rather than throwing on API errors,
+    // so we inspect both the returned error and any thrown exception.
+    const MAX_ATTEMPTS = 4
+    let lastError = "unknown"
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        const result = await this.client.emails.send({
+          from: params.from,
+          to: params.to,
+          subject: params.subject,
+          html: params.html,
+          text: params.text,
+          replyTo: params.replyTo ?? undefined,
+          headers: params.headers,
+          tags: params.tags,
+        } as any)
+        const id = (result as any)?.data?.id ?? null
+        if (id) return { resend_id: id, ok: true }
+        const err = (result as any)?.error
+        lastError = err?.message || err?.name || "no_id_returned"
+        if (!isTransient(err) || attempt === MAX_ATTEMPTS) {
+          return { resend_id: null, ok: false, error: lastError }
+        }
+      } catch (err: any) {
+        lastError = err?.message || String(err)
+        if (!isTransient(err) || attempt === MAX_ATTEMPTS) {
+          return { resend_id: null, ok: false, error: lastError }
+        }
+      }
+      // backoff: 500ms, 1s, 2s
+      await new Promise((r) => setTimeout(r, 500 * 2 ** (attempt - 1)))
     }
+    return { resend_id: null, ok: false, error: lastError }
   }
+}
+
+/** Rate-limit (429) and 5xx are worth retrying; 4xx validation errors are not. */
+function isTransient(err: any): boolean {
+  if (!err) return false
+  const code = Number(err.statusCode ?? err.status ?? 0)
+  const name = String(err.name || "").toLowerCase()
+  const msg = String(err.message || "").toLowerCase()
+  if (code === 429 || (code >= 500 && code <= 599)) return true
+  return name.includes("rate_limit") || msg.includes("rate limit") || msg.includes("too many requests")
 }

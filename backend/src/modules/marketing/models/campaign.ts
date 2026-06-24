@@ -25,8 +25,13 @@ const MarketingCampaign = model.define("marketing_campaign", {
   template_id: model.text().nullable(),
   template_version: model.number().nullable(),
 
+  // Single-target columns kept for backward compatibility with old campaigns.
   list_id: model.text().nullable(),
   segment_id: model.text().nullable(),
+  // Multi-target: a campaign can broadcast to several lists / segments at once
+  // (union, deduplicated by the recipient resolver). New authoring path.
+  list_ids: model.json().nullable(),
+  segment_ids: model.json().nullable(),
   suppression_segment_ids: model.json().nullable(),
   send_at: model.dateTime().nullable(),
   sent_at: model.dateTime().nullable(),

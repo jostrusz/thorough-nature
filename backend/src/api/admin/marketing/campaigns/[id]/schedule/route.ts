@@ -17,6 +17,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     }
 
     const c = campaign as any
+    // Transition guard: only draft/scheduled/paused/failed can be (re)scheduled.
+    // A campaign mid-send or already sent must not be re-armed (would race the cron).
+    if (!["draft", "scheduled", "paused", "failed"].includes(String(c.status))) {
+      res.status(400).json({ error: `cannot schedule campaign in status '${c.status}'` })
+      return
+    }
     const hasInline = !!(c.subject && c.custom_html)
     const hasTemplate = !!c.template_id
     if (!hasInline && !hasTemplate) {
@@ -30,10 +36,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
     const resolver = new RecipientResolver()
     const count = await resolver.count({
-      brandId: (campaign as any).brand_id,
-      listId: (campaign as any).list_id,
-      segmentId: (campaign as any).segment_id,
-      suppressionSegmentIds: (campaign as any).suppression_segment_ids,
+      brandId: c.brand_id,
+      listIds: Array.isArray(c.list_ids) ? c.list_ids : undefined,
+      listId: c.list_id,
+      segmentIds: Array.isArray(c.segment_ids) ? c.segment_ids : undefined,
+      segmentId: c.segment_id,
+      suppressionSegmentIds: c.suppression_segment_ids,
     })
 
     if (count === 0) {

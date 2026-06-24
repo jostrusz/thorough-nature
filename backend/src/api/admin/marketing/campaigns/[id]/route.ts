@@ -14,6 +14,8 @@ const UPDATABLE_FIELDS = [
   "template_id",
   "list_id",
   "segment_id",
+  "list_ids",
+  "segment_ids",
   "suppression_segment_ids",
   "send_at",
   "ab_test",

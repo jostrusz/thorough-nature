@@ -29,8 +29,12 @@ import { injectLegalFooter } from "../modules/marketing/utils/legal-footer"
  */
 
 const MAX_CAMPAIGNS_PER_TICK = 3
-const SEND_CHUNK = 10         // resend-friendly burst
-const PAUSE_BETWEEN_CHUNKS_MS = 1100 // stays under Resend's 10 req/s tier
+// Each chunk fires SEND_CHUNK requests concurrently, then pauses. With the
+// retry-on-429 backoff now in ResendMarketingClient, an occasional rate-limit
+// hit self-heals; tune these to your actual Resend tier (default plans are
+// ~2 req/s — raise the pause if you see sustained 429s).
+const SEND_CHUNK = 10
+const PAUSE_BETWEEN_CHUNKS_MS = 1100
 
 export default async function marketingCampaignDispatcher(container: MedusaContainer) {
   const logger = (container.resolve("logger") as any) || console
@@ -43,7 +47,7 @@ export default async function marketingCampaignDispatcher(container: MedusaConta
     // Fetch campaigns ready to dispatch
     const { rows: campaigns } = await pool.query(
       `SELECT id, brand_id, name, subject, preheader, from_name, from_email, reply_to, custom_html,
-              template_id, template_version, list_id, segment_id,
+              template_id, template_version, list_id, segment_id, list_ids, segment_ids,
               suppression_segment_ids, send_at, status, metrics
        FROM marketing_campaign
        WHERE deleted_at IS NULL
@@ -60,6 +64,14 @@ export default async function marketingCampaignDispatcher(container: MedusaConta
     const resolver = new RecipientResolver(pool)
 
     for (const campaign of campaigns) {
+      // Per-campaign advisory lock: Medusa's scheduler has no overlap guard, so a
+      // slow campaign would otherwise be picked up again by the next tick and sent
+      // twice. try-lock means a second concurrent tick simply skips this campaign.
+      const { rows: lockRows } = await pool.query(`SELECT pg_try_advisory_lock(hashtext($1)) AS locked`, [campaign.id])
+      if (!lockRows[0]?.locked) {
+        logger.info(`[Marketing Dispatcher] Campaign ${campaign.id} already being processed — skipping this tick`)
+        continue
+      }
       try {
         await dispatchCampaign(campaign, { pool, resolver, service, logger })
       } catch (e: any) {
@@ -68,6 +80,8 @@ export default async function marketingCampaignDispatcher(container: MedusaConta
           `UPDATE marketing_campaign SET status = 'failed', metadata = jsonb_set(COALESCE(metadata,'{}')::jsonb, '{last_error}', to_jsonb($2::text)) WHERE id = $1`,
           [campaign.id, e.message || String(e)]
         )
+      } finally {
+        await pool.query(`SELECT pg_advisory_unlock(hashtext($1))`, [campaign.id]).catch(() => {})
       }
     }
   } catch (err: any) {
@@ -173,10 +187,12 @@ async function dispatchCampaign(
         reply_to: template.reply_to,
       }
 
-  // Resolve recipients
+  // Resolve recipients (union of all selected lists/segments, deduped)
   const recipients = await resolver.resolve({
     brandId: campaign.brand_id,
+    listIds: Array.isArray(campaign.list_ids) ? campaign.list_ids : undefined,
     listId: campaign.list_id,
+    segmentIds: Array.isArray(campaign.segment_ids) ? campaign.segment_ids : undefined,
     segmentId: campaign.segment_id,
     suppressionSegmentIds: campaign.suppression_segment_ids || [],
   })
@@ -186,32 +202,28 @@ async function dispatchCampaign(
   )
 
   if (recipients.length === 0) {
-    await finishCampaign(pool, campaign.id, {
-      sent: 0,
-      failed: 0,
-      skipped: 0,
-      total: 0,
-    })
+    await finishCampaign(pool, campaign.id, 0)
     return
   }
 
-  // Filter out recipients that already have a message for this campaign (idempotency)
-  const { rows: existing } = await pool.query(
+  // Idempotency: skip recipients that already have a DONE message for this
+  // campaign. A 'queued'/'failed' row is NOT done — it gets retried (the upsert
+  // below + the UNIQUE (campaign_id, contact_id) index make the retry safe and
+  // prevent any double-send across overlapping ticks). This fixes the previous
+  // behaviour where a crash between row-create and send silently dropped a
+  // recipient forever (their 'queued' row counted as "already sent").
+  const DONE_STATUSES = "('sent','delivered','opened','clicked','bounced','complained','suppressed')"
+  const { rows: doneRows } = await pool.query(
     `SELECT contact_id FROM marketing_message
-     WHERE campaign_id = $1 AND deleted_at IS NULL`,
+     WHERE campaign_id = $1 AND deleted_at IS NULL AND status IN ${DONE_STATUSES}`,
     [campaign.id]
   )
-  const alreadySent = new Set<string>(existing.map((r: any) => r.contact_id))
-  const pending = recipients.filter((r) => !alreadySent.has(r.id))
+  const alreadyDone = new Set<string>(doneRows.map((r: any) => r.contact_id))
+  const pending = recipients.filter((r) => !alreadyDone.has(r.id))
 
   if (pending.length === 0) {
     logger.info(`[Marketing Dispatcher] Campaign ${campaign.id}: nothing left to send`)
-    await finishCampaign(pool, campaign.id, {
-      sent: recipients.length - alreadySent.size,
-      skipped: alreadySent.size,
-      failed: 0,
-      total: recipients.length,
-    })
+    await finishCampaign(pool, campaign.id, recipients.length)
     return
   }
 
@@ -237,23 +249,41 @@ async function dispatchCampaign(
   let sent = 0
   let failed = 0
   for (let i = 0; i < pending.length; i += SEND_CHUNK) {
+    // Honour a pause requested mid-send: re-read status before each chunk and
+    // stop cleanly (leaving the campaign 'paused') instead of running to the end.
+    const { rows: stRows } = await pool.query(`SELECT status FROM marketing_campaign WHERE id = $1`, [campaign.id])
+    if (stRows[0]?.status === "paused") {
+      logger.info(`[Marketing Dispatcher] Campaign ${campaign.id} paused mid-send (sent=${sent}, remaining=${pending.length - i})`)
+      return
+    }
     const chunk = pending.slice(i, i + SEND_CHUNK)
     await Promise.all(
       chunk.map(async (r) => {
         try {
-          // 1. Create marketing_message row first (so we have the ID for tracking tokens)
-          const msg = await service.createMarketingMessages({
-            brand_id: campaign.brand_id,
-            contact_id: r.id,
-            campaign_id: campaign.id,
-            template_id: template?.id ?? null,
-            template_version: templateVersion,
-            to_email: r.email,
-            from_email: fromEmail,
-            subject_snapshot: email.subject,
-            status: "queued",
-          } as any)
-          const messageId = (msg as any).id
+          // 1. Claim the marketing_message row (idempotent upsert). The UNIQUE
+          // (campaign_id, contact_id) index guarantees exactly one row per
+          // recipient per campaign — a concurrent/retried attempt re-uses the
+          // same row instead of creating a duplicate (no double-send).
+          const { rows: msgRows } = await pool.query(
+            `INSERT INTO marketing_message
+               (id, brand_id, contact_id, campaign_id, template_id, template_version,
+                to_email, from_email, subject_snapshot, status, created_at, updated_at)
+             VALUES (gen_random_uuid()::text, $1, $2, $3, $4, $5, $6, $7, $8, 'queued', now(), now())
+             ON CONFLICT ("campaign_id", "contact_id") WHERE ("deleted_at" IS NULL AND "campaign_id" IS NOT NULL)
+             DO UPDATE SET status = 'queued', error = NULL, updated_at = now()
+             RETURNING id`,
+            [
+              campaign.brand_id,
+              r.id,
+              campaign.id,
+              template?.id ?? null,
+              templateVersion,
+              r.email,
+              fromEmail,
+              email.subject,
+            ]
+          )
+          const messageId = msgRows[0]?.id
 
           // 2. Compile email body with contact context
           const unsubscribe_url = buildUnsubscribeUrl({
@@ -361,30 +391,40 @@ async function dispatchCampaign(
     }
   }
 
-  await finishCampaign(pool, campaign.id, {
-    sent,
-    failed,
-    skipped: alreadySent.size,
-    total: recipients.length,
-  })
+  await finishCampaign(pool, campaign.id, recipients.length)
 
   logger.info(
-    `[Marketing Dispatcher] Campaign ${campaign.id} ${campaign.name} done: sent=${sent}, failed=${failed}, skipped=${alreadySent.size}`
+    `[Marketing Dispatcher] Campaign ${campaign.id} ${campaign.name} done: sent=${sent}, failed=${failed}`
   )
 }
 
-async function finishCampaign(
-  pool: Pool,
-  campaignId: string,
-  counts: { sent: number; failed: number; skipped: number; total: number }
-) {
+/**
+ * Finalize a campaign. Metrics are computed from the source of truth
+ * (marketing_message rows) rather than in-memory counters, and the final
+ * status reflects failures: a campaign where everything failed is 'failed',
+ * a partial failure is 'sent_with_errors', a clean run is 'sent'.
+ */
+async function finishCampaign(pool: Pool, campaignId: string, total: number) {
+  const { rows } = await pool.query(
+    `SELECT
+       count(*) FILTER (WHERE status IN ('sent','delivered','opened','clicked','bounced','complained'))::int AS sent,
+       count(*) FILTER (WHERE status = 'failed')::int AS failed,
+       count(*) FILTER (WHERE status = 'suppressed')::int AS suppressed
+     FROM marketing_message
+     WHERE campaign_id = $1 AND deleted_at IS NULL`,
+    [campaignId]
+  )
+  const sent = rows[0]?.sent ?? 0
+  const failed = rows[0]?.failed ?? 0
+  const suppressed = rows[0]?.suppressed ?? 0
+  const status = sent === 0 && failed > 0 ? "failed" : failed > 0 ? "sent_with_errors" : "sent"
   await pool.query(
     `UPDATE marketing_campaign
-     SET status = 'sent',
+     SET status = $3,
          sent_at = NOW(),
          metrics = $2::jsonb
      WHERE id = $1`,
-    [campaignId, JSON.stringify(counts)]
+    [campaignId, JSON.stringify({ sent, failed, suppressed, total }), status]
   )
 }
 

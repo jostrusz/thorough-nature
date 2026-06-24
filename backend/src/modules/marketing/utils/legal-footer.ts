@@ -89,10 +89,42 @@ function stripInlineUnsubFooters(html: string, legalMarker: string): string {
  *      if there's no </body>).
  *
  * Idempotent — calling twice returns identical output.
+ *
+ * When the brand has NO compliance_footer_html configured, we still must
+ * not let an email leave without a *visible* unsubscribe link (EU PECR /
+ * CAN-SPAM legal requirement — the List-Unsubscribe header alone is not
+ * enough). In that case we inject a minimal fallback footer carrying a
+ * {{ unsubscribe_url }} placeholder (compiled later in the dispatcher),
+ * UNLESS the body already contains an unsubscribe fingerprint.
  */
+const FALLBACK_UNSUB_FINGERPRINT =
+  /\{\{\s*unsubscribe_url\s*\}\}|\{\$\s*unsubscribe(_url)?\s*\}|\$\{\s*unsubscribe_url\s*\}|<%=\s*unsubscribe_url\s*%>|\/public\/marketing\/u\/|unsubscribe/i
+
+function buildFallbackFooter(): string {
+  return (
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" ` +
+    `style="margin-top:24px;border-top:1px solid #e5e5e5;">` +
+    `<tr><td style="padding:16px 0;text-align:center;font-family:Arial,Helvetica,sans-serif;` +
+    `font-size:12px;line-height:18px;color:#888888;">` +
+    `<a href="{{ unsubscribe_url }}" style="color:#888888;text-decoration:underline;">Unsubscribe</a>` +
+    `</td></tr></table>`
+  )
+}
+
+function injectFallbackFooter(html: string): string {
+  // Respect existing skip logic: if the body already carries any
+  // unsubscribe fingerprint, do not add a duplicate.
+  if (FALLBACK_UNSUB_FINGERPRINT.test(html)) return html
+  const footer = buildFallbackFooter()
+  if (/<\/body>/i.test(html)) {
+    return html.replace(/<\/body>/i, `${footer}\n</body>`)
+  }
+  return html + "\n" + footer
+}
+
 export function injectLegalFooter(html: string, complianceFooterHtml: string | null | undefined): string {
   if (!html) return html
-  if (!complianceFooterHtml) return html
+  if (!complianceFooterHtml) return injectFallbackFooter(html)
   const marker = extractLegalMarker(complianceFooterHtml)
   // Strip any redundant inline unsub-only footers first.
   const stripped = stripInlineUnsubFooters(html, marker)

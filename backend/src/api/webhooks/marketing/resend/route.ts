@@ -55,6 +55,39 @@ function verifySignature(req: MedusaRequest, rawBody: string): boolean {
   }
 }
 
+/**
+ * Update marketing_contact.status for the brand+email affected by a hard bounce
+ * or spam complaint. Without this, flow-executor (which reads contact.status,
+ * not the suppression table) would keep sending to a dead/complained address.
+ *
+ * Matches by brand_id + lower(email) (same lookup as suppression). The
+ * marketing_contact unique index is on (brand_id, lower(email)), so a given
+ * brand has at most one contact per email — other brands' contacts are left
+ * untouched. Fire-and-forget: never throws (caller is a webhook handler).
+ */
+async function markContactStatus(
+  service: MarketingModuleService,
+  brandId: string | undefined,
+  email: string | undefined,
+  status: "bounced" | "complained"
+): Promise<void> {
+  try {
+    if (!brandId || !email) return
+    const wanted = email.trim().toLowerCase()
+    const contacts = await service.listMarketingContacts({ brand_id: brandId } as any)
+    const match = (contacts || []).find(
+      (c: any) => typeof c.email === "string" && c.email.trim().toLowerCase() === wanted
+    )
+    if (!match) return
+    await service.updateMarketingContacts({ id: match.id, status } as any)
+  } catch (err: any) {
+    console.error(
+      `[marketing/resend webhook] failed to set contact.status=${status}:`,
+      err?.message || err
+    )
+  }
+}
+
 export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const raw = (req as any).rawBody
   const rawBody: string =
@@ -118,6 +151,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
             suppressed_at: now,
             metadata: { bounce_type: updates.bounce_reason },
           } as any)
+          // Flow-executor reads contact.status (not suppression) — flip it so we
+          // stop sending to a hard-bounced address.
+          await markContactStatus(service, (msg as any).brand_id, toEmail, "bounced")
         }
         break
       }
@@ -132,6 +168,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
             source_message_id: msg.id,
             suppressed_at: now,
           } as any)
+          // Flow-executor reads contact.status (not suppression) — flip it so we
+          // stop sending to an address that filed a spam complaint.
+          await markContactStatus(service, (msg as any).brand_id, toEmail, "complained")
         }
         break
       }

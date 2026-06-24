@@ -45,6 +45,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       template_id: body.template_id ?? null,
       list_id: body.list_id ?? null,
       segment_id: body.segment_id ?? null,
+      list_ids: Array.isArray(body.list_ids) ? body.list_ids : (body.list_id ? [body.list_id] : []),
+      segment_ids: Array.isArray(body.segment_ids) ? body.segment_ids : (body.segment_id ? [body.segment_id] : []),
       suppression_segment_ids: body.suppression_segment_ids ?? null,
       send_at: body.send_at ? new Date(body.send_at) : null,
       status: "draft",

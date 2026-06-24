@@ -17,6 +17,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     // Campaign must have EITHER inline content (new flow) OR a template_id
     // (legacy flow). Both missing = nothing to send.
     const c = campaign as any
+    // Transition guard: block re-trigger while already sending/sent (cron race).
+    if (!["draft", "scheduled", "paused", "failed"].includes(String(c.status))) {
+      res.status(400).json({ error: `cannot send campaign in status '${c.status}'` })
+      return
+    }
     const hasInline = !!(c.subject && c.custom_html)
     const hasTemplate = !!c.template_id
     if (!hasInline && !hasTemplate) {
