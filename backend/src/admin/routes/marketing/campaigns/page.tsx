@@ -66,6 +66,16 @@ function CampaignsPage() {
     onError: () => toast.error("Failed to pause"),
   })
 
+  const resumeMut = useMutation({
+    mutationFn: (id: string) =>
+      sdk.client.fetch(`/admin/marketing/campaigns/${id}/resume`, { method: "POST" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["mkt-campaigns"] })
+      toast.success("Campaign resumed")
+    },
+    onError: (e: any) => toast.error("Failed to resume: " + (e?.message || "unknown")),
+  })
+
   const deleteMut = useMutation({
     mutationFn: (id: string) =>
       sdk.client.fetch<{ hidden?: boolean; deleted?: boolean }>(`/admin/marketing/campaigns/${id}`, { method: "DELETE" }),
@@ -209,6 +219,11 @@ function CampaignsPage() {
                         {(c.status === "sending" || c.status === "scheduled") && (
                           <button className="mkt-btn mkt-btn-xs" onClick={() => pauseMut.mutate(c.id)}>
                             Pause
+                          </button>
+                        )}
+                        {c.status === "paused" && (
+                          <button className="mkt-btn mkt-btn-xs" onClick={() => resumeMut.mutate(c.id)}>
+                            Resume
                           </button>
                         )}
                         <button

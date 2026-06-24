@@ -1,22 +1,33 @@
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@medusajs/ui"
 import { sdk } from "../../lib/sdk"
-import { useSelectedBrand, StatusBadge, brandQs, fmt, tokens } from "./shared"
+import { useSelectedBrand, StatusBadge, brandQs, fmt, tokens, Modal } from "./shared"
+import {
+  BlockBuilder,
+  compileBlocksToHtml,
+  type EmailBlock,
+} from "./email-blocks"
+import { EMAIL_TEMPLATES } from "./email-templates"
 
 /**
- * Campaign editor — single-page layout.
+ * Campaign editor — tabbed layout.
  *
- * Fields in order (user-facing):
- *   1. Campaign name
- *   2. Subject
- *   3. Preheader
- *   4. Sender name + sender email
- *   5. Recipients (lists, segments, suppression segments)
- *   6. Email HTML + live preview (side-by-side)
+ *   Tab "Content"        — name, subject, preheader, sender, reply-to,
+ *                          and the EMAIL BUILDER (Blocks / HTML / Preview).
+ *   Tab "Recipients"     — lists, segments, suppression, live count, preview.
+ *   Tab "Schedule & send"— schedule time + timezone info.
  *
- * Templates are NOT part of this flow. Each campaign carries its own HTML.
+ * The Actions sidebar (Save / Test / Schedule / Send now) is sticky and shown
+ * from every tab.
+ *
+ * Email authoring:
+ *   - Visual block builder is the friendly default. Blocks live in
+ *     campaign.metadata.blocks (JSON) and COMPILE to `custom_html` on change.
+ *   - `custom_html` is still the single source of truth that gets sent.
+ *   - HTML mode is the expert escape hatch; editing raw HTML detaches from
+ *     blocks ("custom HTML") so the compiler won't clobber the user's edits.
  */
 export function CampaignEditor({ campaignId }: { campaignId?: string }) {
   const qc = useQueryClient()
@@ -42,6 +53,48 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
   const [metrics, setMetrics] = useState<any>({})
   const [brand, setBrand] = useState<any>(null)
 
+  // Email builder state
+  const [blocks, setBlocks] = useState<EmailBlock[]>([])
+  // "blocks" → visual builder drives custom_html; "html" → raw HTML is source.
+  const [emailMode, setEmailMode] = useState<"blocks" | "html">("html")
+  const [emailView, setEmailView] = useState<"edit" | "preview">("edit")
+
+  // Tabs
+  const [tab, setTab] = useState<"content" | "recipients" | "schedule">("content")
+
+  // Dirty tracking — compare a normalized snapshot to the last-saved one.
+  const savedSnapshot = useRef<string>("")
+  const [dirty, setDirty] = useState(false)
+  const [hydrated, setHydrated] = useState(!campaignId) // new campaigns start hydrated
+
+  const snapshot = useMemo(
+    () =>
+      JSON.stringify({
+        name, subject, preheader, fromName, fromEmail, replyTo, customHtml,
+        listIds, segmentIds, suppressionSegmentIds, scheduleAt,
+        blocks, emailMode,
+      }),
+    [name, subject, preheader, fromName, fromEmail, replyTo, customHtml, listIds, segmentIds, suppressionSegmentIds, scheduleAt, blocks, emailMode]
+  )
+  useEffect(() => {
+    if (!hydrated) return
+    setDirty(snapshot !== savedSnapshot.current)
+  }, [snapshot, hydrated])
+
+  // Warn on browser unload / tab close while there are unsaved changes.
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (dirty && !readOnly) {
+        e.preventDefault()
+        e.returnValue = ""
+        return ""
+      }
+    }
+    window.addEventListener("beforeunload", handler)
+    return () => window.removeEventListener("beforeunload", handler)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dirty, status])
+
   // Load existing campaign
   const { data: cData } = useQuery({
     queryKey: ["mkt-campaign", currentId],
@@ -65,10 +118,42 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
     setListIds((Array.isArray(c.list_ids) && c.list_ids.length ? c.list_ids : [c.list_id]).filter(Boolean) as string[])
     setSegmentIds((Array.isArray(c.segment_ids) && c.segment_ids.length ? c.segment_ids : [c.segment_id]).filter(Boolean) as string[])
     setSuppressionSegmentIds(c.suppression_segment_ids || [])
-    setScheduleAt(c.send_at ? new Date(c.send_at).toISOString().slice(0, 16) : "")
+    setScheduleAt(c.send_at ? toLocalInput(c.send_at) : "")
     setStatus(c.status || "draft")
     setSentAt(c.sent_at || null)
     setMetrics(c.metrics || {})
+
+    // Email builder hydration: prefer saved blocks (→ visual mode); otherwise
+    // fall back to raw HTML mode for backward compatibility with old campaigns.
+    const savedBlocks = c.metadata?.blocks
+    let nextBlocks: EmailBlock[] = []
+    let nextMode: "blocks" | "html" = "html"
+    if (Array.isArray(savedBlocks) && savedBlocks.length > 0) {
+      nextBlocks = savedBlocks
+      nextMode = "blocks"
+    }
+    setBlocks(nextBlocks)
+    setEmailMode(nextMode)
+
+    // Snapshot what we just loaded so dirty starts false.
+    savedSnapshot.current = JSON.stringify({
+      name: c.name || "",
+      subject: c.subject || "",
+      preheader: c.preheader || "",
+      fromName: c.from_name || "",
+      fromEmail: c.from_email || "",
+      replyTo: c.reply_to || "",
+      customHtml: c.custom_html || "",
+      listIds: (Array.isArray(c.list_ids) && c.list_ids.length ? c.list_ids : [c.list_id]).filter(Boolean),
+      segmentIds: (Array.isArray(c.segment_ids) && c.segment_ids.length ? c.segment_ids : [c.segment_id]).filter(Boolean),
+      suppressionSegmentIds: c.suppression_segment_ids || [],
+      scheduleAt: c.send_at ? toLocalInput(c.send_at) : "",
+      blocks: nextBlocks,
+      emailMode: nextMode,
+    })
+    setHydrated(true)
+    setDirty(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cData])
 
   // Brand — for from-email defaults
@@ -93,6 +178,9 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [brandsQ.data, brandId])
 
+  const brandAccent: string | undefined =
+    brand?.brand_color || brand?.primary_color || brand?.accent_color || undefined
+
   const listsQ = useQuery({
     queryKey: ["mkt-lists", brandId],
     queryFn: () =>
@@ -109,8 +197,18 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
   const lists: any[] = ((listsQ.data as any)?.lists) || []
   const segments: any[] = ((segmentsQ.data as any)?.segments) || []
 
+  // Keep custom_html in sync with blocks whenever the visual builder is active.
+  useEffect(() => {
+    if (emailMode !== "blocks") return
+    setCustomHtml(compileBlocksToHtml(blocks, brandAccent))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blocks, emailMode, brandAccent])
+
   const saveMut = useMutation({
     mutationFn: async (overrides?: { status?: string; send_at?: string | null }) => {
+      // metadata.blocks is only meaningful in visual mode; in HTML mode we drop
+      // it so a reload correctly opens raw HTML (custom_html stays the source).
+      const metadata = emailMode === "blocks" ? { blocks } : { blocks: null }
       const body: any = {
         brand_id: brandId || undefined,
         name,
@@ -126,6 +224,7 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
         list_id: listIds[0] || null,
         segment_id: segmentIds[0] || null,
         suppression_segment_ids: suppressionSegmentIds,
+        metadata,
         send_at: overrides?.send_at !== undefined ? overrides.send_at : (scheduleAt ? new Date(scheduleAt).toISOString() : null),
         status: overrides?.status || status,
       }
@@ -141,6 +240,9 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
         navigate(`/marketing/campaigns/${c.id}`, { replace: true })
       }
       if (c?.status) setStatus(c.status)
+      // Mark current state as the saved baseline → dirty resets to false.
+      savedSnapshot.current = snapshot
+      setDirty(false)
       qc.invalidateQueries({ queryKey: ["mkt-campaigns"] })
       qc.invalidateQueries({ queryKey: ["mkt-campaign", c?.id] })
       toast.success("Campaign saved")
@@ -175,6 +277,22 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
     },
   })
 
+  // Unschedule — revert a scheduled campaign back to draft so it can be edited.
+  const unscheduleMut = useMutation({
+    mutationFn: () =>
+      sdk.client.fetch<{ campaign: any }>(`/admin/marketing/campaigns/${currentId}`, {
+        method: "POST",
+        body: { status: "draft" },
+      }),
+    onSuccess: (resp: any) => {
+      setStatus(resp?.campaign?.status || "draft")
+      qc.invalidateQueries({ queryKey: ["mkt-campaigns"] })
+      qc.invalidateQueries({ queryKey: ["mkt-campaign", currentId] })
+      toast.success("Campaign unscheduled — back to draft")
+    },
+    onError: (e: any) => toast.error("Failed: " + (e?.message || "unknown")),
+  })
+
   const previewMut = useMutation({
     mutationFn: () =>
       sdk.client.fetch<{ count: number; sample: string[] }>(`/admin/marketing/preview-recipients`, {
@@ -194,7 +312,6 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
 
   // Live recipient count — hits the ad-hoc preview endpoint as lists/segments
   // change. Debounced to avoid spamming the DB while the user ticks boxes.
-  // Works before the campaign is saved (no currentId required).
   const [liveCount, setLiveCount] = useState<{ count: number; loading: boolean; error: boolean }>({
     count: 0, loading: false, error: false,
   })
@@ -229,14 +346,19 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
   }, [brandId, JSON.stringify(listIds), JSON.stringify(segmentIds), JSON.stringify(suppressionSegmentIds)])
 
   const readOnly = status === "sent" || status === "sending" || status === "sent_with_errors"
+  const scheduled = status === "scheduled"
+  // While scheduled, the form is locked until the user explicitly unschedules.
+  const locked = scheduled
   const canSchedule = !!(name && subject && customHtml && fromEmail && scheduleAt)
   const canSendNow = !!(currentId && name && subject && customHtml && fromEmail)
+
+  const [confirmSend, setConfirmSend] = useState(false)
 
   // What's still required before Schedule / Send now / Send test light up.
   const missing = [
     !name && "name",
     !subject && "subject",
-    !customHtml && "email HTML",
+    !customHtml && "email content",
     !fromEmail && "sender email",
   ].filter(Boolean) as string[]
   const missingForSchedule = [...missing, ...(!scheduleAt ? ["schedule time"] : [])]
@@ -247,367 +369,766 @@ export function CampaignEditor({ campaignId }: { campaignId?: string }) {
 
   const previewHtml = useMemo(() => buildPreviewDocument(customHtml, preheader), [customHtml, preheader])
 
-  return (
-    <>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <StatusBadge status={status} />
-          {sentAt && <span style={{ fontSize: "13px", color: tokens.fgSecondary }}>Sent {new Date(sentAt).toLocaleString()}</span>}
-        </div>
-      </div>
-
-      {readOnly ? (
+  // ── Read-only (sent) view ────────────────────────────────────────────────
+  if (readOnly) {
+    return (
+      <>
+        <HeaderRow status={status} sentAt={sentAt} dirty={false} />
         <ReadOnlyView
           name={name}
           subject={subject}
           metrics={metrics}
           campaignId={currentId}
+          html={customHtml}
+          preheader={preheader}
         />
-      ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "16px", alignItems: "flex-start" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            {/* Brand selector — prominent, drives all defaults below */}
-            <div
-              className="mkt-card"
-              style={{
-                padding: "18px 20px",
-                border: `2px solid ${tokens.primary}`,
-                background: tokens.primarySoft,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
-                <div style={{ flex: "0 0 auto" }}>
-                  <div style={{ fontSize: "11px", fontWeight: 700, color: tokens.primary, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>
-                    Brand
-                  </div>
-                  <div style={{ fontSize: "12px", color: tokens.fgSecondary }}>
-                    Determines footer, from-email, recipients & tracking
-                  </div>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <HeaderRow status={status} sentAt={sentAt} dirty={dirty} />
+
+      {scheduled && (
+        <div
+          className="mkt-card"
+          style={{
+            padding: "14px 18px",
+            marginBottom: "16px",
+            background: tokens.infoSoft,
+            border: `1px solid ${tokens.info}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "16px",
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ fontSize: "13px", color: tokens.info, lineHeight: 1.45 }}>
+            <strong>This campaign is scheduled.</strong> To make changes, unschedule it first —
+            it'll go back to draft.
+            {scheduleAt && (
+              <div style={{ marginTop: "2px", color: tokens.fgSecondary }}>
+                Will send at {new Date(scheduleAt).toLocaleString()}
+              </div>
+            )}
+          </div>
+          <button
+            className="mkt-btn"
+            disabled={unscheduleMut.isPending}
+            onClick={() => unscheduleMut.mutate()}
+          >
+            {unscheduleMut.isPending ? "Unscheduling…" : "Unschedule"}
+          </button>
+        </div>
+      )}
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "16px", alignItems: "flex-start" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {/* Brand selector — prominent, drives all defaults below */}
+          <div
+            className="mkt-card"
+            style={{
+              padding: "18px 20px",
+              border: `2px solid ${tokens.primary}`,
+              background: tokens.primarySoft,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
+              <div style={{ flex: "0 0 auto" }}>
+                <div style={{ fontSize: "11px", fontWeight: 700, color: tokens.primary, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>
+                  Brand
                 </div>
-                <div style={{ flex: 1, minWidth: "240px" }}>
-                  <select
-                    className="mkt-input"
-                    value={brandId || ""}
-                    onChange={(e) => setBrandId(e.target.value || null)}
-                    style={{
-                      height: "44px",
-                      fontSize: "15px",
-                      fontWeight: 600,
-                      borderColor: tokens.primary,
-                      background: "#fff",
-                    }}
-                  >
-                    <option value="">— Select brand —</option>
-                    {((brandsQ.data as any)?.brands || []).map((b: any) => (
-                      <option key={b.id} value={b.id}>{b.display_name || b.slug}</option>
-                    ))}
-                  </select>
+                <div style={{ fontSize: "12px", color: tokens.fgSecondary }}>
+                  Determines footer, from-email, recipients & tracking
                 </div>
               </div>
-              {brand && (
-                <div style={{ marginTop: "10px", fontSize: "12px", color: tokens.fgSecondary, display: "flex", gap: "14px", flexWrap: "wrap" }}>
-                  <span>📧 {brand.marketing_from_email || "—"}</span>
-                  <span>🌐 {brand.storefront_domain || "—"}</span>
-                  <span>🌍 {(brand.locale || "en").toUpperCase()}</span>
-                  <span>{brand.compliance_footer_html ? "✅ Footer set" : "⚠️ No footer"}</span>
-                </div>
-              )}
+              <div style={{ flex: 1, minWidth: "240px" }}>
+                <select
+                  className="mkt-input"
+                  value={brandId || ""}
+                  disabled={locked}
+                  onChange={(e) => setBrandId(e.target.value || null)}
+                  style={{
+                    height: "44px",
+                    fontSize: "15px",
+                    fontWeight: 600,
+                    borderColor: tokens.primary,
+                    background: "#fff",
+                  }}
+                >
+                  <option value="">— Select brand —</option>
+                  {((brandsQ.data as any)?.brands || []).map((b: any) => (
+                    <option key={b.id} value={b.id}>{b.display_name || b.slug}</option>
+                  ))}
+                </select>
+              </div>
             </div>
+            {brand && (
+              <div style={{ marginTop: "10px", fontSize: "12px", color: tokens.fgSecondary, display: "flex", gap: "14px", flexWrap: "wrap" }}>
+                <span>📧 {brand.marketing_from_email || "—"}</span>
+                <span>🌐 {brand.storefront_domain || "—"}</span>
+                <span>🌍 {(brand.locale || "en").toUpperCase()}</span>
+                <span>{brand.compliance_footer_html ? "✅ Footer set" : "⚠️ No footer"}</span>
+              </div>
+            )}
+          </div>
 
-            {/* Basics */}
-            <div className="mkt-card" style={{ padding: "20px" }}>
-              <label className="mkt-label">Campaign name</label>
-              <input
-                className="mkt-input"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Spring promo 2026"
-              />
+          {/* Tabs */}
+          <Tabs
+            tab={tab}
+            onChange={setTab}
+            recipientCount={liveCount}
+            recipientHasFilter={listIds.length + segmentIds.length + suppressionSegmentIds.length > 0}
+            scheduleAt={scheduleAt}
+          />
 
-              <label className="mkt-label" style={{ marginTop: "14px" }}>Subject</label>
-              <input
-                className="mkt-input"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="The line that decides whether they open it"
-              />
-
-              <label className="mkt-label" style={{ marginTop: "14px" }}>Preheader</label>
-              <input
-                className="mkt-input"
-                value={preheader}
-                onChange={(e) => setPreheader(e.target.value)}
-                placeholder="Preview text shown next to the subject in the inbox"
-              />
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "14px" }}>
-                <div>
-                  <label className="mkt-label">Sender name</label>
+          <fieldset disabled={locked} style={{ border: "none", padding: 0, margin: 0, minInlineSize: "auto" }}>
+            {tab === "content" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                {/* Basics */}
+                <div className="mkt-card" style={{ padding: "20px" }}>
+                  <label className="mkt-label">Campaign name</label>
                   <input
                     className="mkt-input"
-                    value={fromName}
-                    onChange={(e) => setFromName(e.target.value)}
-                    placeholder={brand?.marketing_from_name || "Your name"}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Spring promo 2026"
                   />
-                </div>
-                <div>
-                  <label className="mkt-label">Sender email</label>
+
+                  <label className="mkt-label" style={{ marginTop: "14px" }}>Subject</label>
+                  <input
+                    className="mkt-input"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    placeholder="The line that decides whether they open it"
+                  />
+
+                  <label className="mkt-label" style={{ marginTop: "14px" }}>Preheader</label>
+                  <input
+                    className="mkt-input"
+                    value={preheader}
+                    onChange={(e) => setPreheader(e.target.value)}
+                    placeholder="Preview text shown next to the subject in the inbox"
+                  />
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "14px" }}>
+                    <div>
+                      <label className="mkt-label">Sender name</label>
+                      <input
+                        className="mkt-input"
+                        value={fromName}
+                        onChange={(e) => setFromName(e.target.value)}
+                        placeholder={brand?.marketing_from_name || "Your name"}
+                      />
+                    </div>
+                    <div>
+                      <label className="mkt-label">Sender email</label>
+                      <input
+                        className="mkt-input"
+                        type="email"
+                        value={fromEmail}
+                        onChange={(e) => setFromEmail(e.target.value)}
+                        placeholder={brand?.marketing_from_email || "news@yourdomain.com"}
+                      />
+                    </div>
+                  </div>
+                  <label className="mkt-label" style={{ marginTop: "14px" }}>Reply-to <span style={{ color: tokens.fgMuted, fontWeight: 400 }}>(optional)</span></label>
                   <input
                     className="mkt-input"
                     type="email"
-                    value={fromEmail}
-                    onChange={(e) => setFromEmail(e.target.value)}
-                    placeholder={brand?.marketing_from_email || "news@yourdomain.com"}
+                    value={replyTo}
+                    onChange={(e) => setReplyTo(e.target.value)}
+                    placeholder={brand?.marketing_reply_to || "Leave empty to use sender email"}
                   />
                 </div>
-              </div>
-              <label className="mkt-label" style={{ marginTop: "14px" }}>Reply-to <span style={{ color: tokens.fgMuted, fontWeight: 400 }}>(optional)</span></label>
-              <input
-                className="mkt-input"
-                type="email"
-                value={replyTo}
-                onChange={(e) => setReplyTo(e.target.value)}
-                placeholder={brand?.marketing_reply_to || "Leave empty to use sender email"}
-              />
-            </div>
 
-            {/* Recipients */}
-            <div className="mkt-card" style={{ padding: "20px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
-                <div style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, letterSpacing: "-0.005em" }}>
-                  Recipients
+                {/* Email builder */}
+                <EmailBuilderCard
+                  blocks={blocks}
+                  setBlocks={setBlocks}
+                  emailMode={emailMode}
+                  setEmailMode={setEmailMode}
+                  emailView={emailView}
+                  setEmailView={setEmailView}
+                  customHtml={customHtml}
+                  setCustomHtml={setCustomHtml}
+                  previewHtml={previewHtml}
+                  brandAccent={brandAccent}
+                />
+              </div>
+            )}
+
+            {tab === "recipients" && (
+              <div className="mkt-card" style={{ padding: "20px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+                  <div style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, letterSpacing: "-0.005em" }}>
+                    Recipients
+                  </div>
+                  <LiveCountBadge state={liveCount} hasFilter={listIds.length + segmentIds.length + suppressionSegmentIds.length > 0} />
                 </div>
-                <LiveCountBadge state={liveCount} hasFilter={listIds.length + segmentIds.length + suppressionSegmentIds.length > 0} />
-              </div>
-              <Checklist
-                label="Lists"
-                items={lists}
-                selected={listIds}
-                onChange={(id) => toggleSel(listIds, setListIds, id)}
-              />
-              <Checklist
-                label="Segments"
-                items={segments}
-                selected={segmentIds}
-                onChange={(id) => toggleSel(segmentIds, setSegmentIds, id)}
-                style={{ marginTop: "16px" }}
-              />
-              <Checklist
-                label="Suppression segments (exclude)"
-                items={segments}
-                selected={suppressionSegmentIds}
-                onChange={(id) => toggleSel(suppressionSegmentIds, setSuppressionSegmentIds, id)}
-                style={{ marginTop: "16px" }}
-              />
-              <div style={{ marginTop: "16px", display: "flex", gap: "10px", alignItems: "center" }}>
-                <button
-                  className="mkt-btn mkt-btn-sm"
-                  onClick={() => previewMut.mutate()}
-                  disabled={
-                    previewMut.isPending ||
-                    !brandId ||
-                    listIds.length + segmentIds.length + suppressionSegmentIds.length === 0
-                  }
-                >
-                  {previewMut.isPending ? "Counting…" : "Preview recipients"}
-                </button>
-                {(listIds.length + segmentIds.length + suppressionSegmentIds.length === 0) && (
-                  <span style={{ fontSize: "12px", color: tokens.fgMuted }}>Select a list or segment first</span>
-                )}
-              </div>
-              {preview && (
-                <div
-                  style={{
-                    marginTop: "12px",
-                    padding: "12px 14px",
-                    background: tokens.borderSubtle,
-                    borderRadius: tokens.rMd,
-                  }}
-                >
-                  <div style={{ fontSize: "14px", fontWeight: 600, color: tokens.fg }}>{fmt(preview.count)} recipient(s)</div>
-                  {preview.sample.length > 0 && (
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: tokens.fgSecondary,
-                        marginTop: "6px",
-                        maxHeight: "140px",
-                        overflow: "auto",
-                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-                      }}
-                    >
-                      {preview.sample.slice(0, 100).join(", ")}
-                    </div>
+                <Checklist
+                  label="Lists"
+                  items={lists}
+                  selected={listIds}
+                  onChange={(id) => toggleSel(listIds, setListIds, id)}
+                />
+                <Checklist
+                  label="Segments"
+                  items={segments}
+                  selected={segmentIds}
+                  onChange={(id) => toggleSel(segmentIds, setSegmentIds, id)}
+                  style={{ marginTop: "16px" }}
+                />
+                <Checklist
+                  label="Suppression segments (exclude)"
+                  items={segments}
+                  selected={suppressionSegmentIds}
+                  onChange={(id) => toggleSel(suppressionSegmentIds, setSuppressionSegmentIds, id)}
+                  style={{ marginTop: "16px" }}
+                />
+                <div style={{ marginTop: "16px", display: "flex", gap: "10px", alignItems: "center" }}>
+                  <button
+                    className="mkt-btn mkt-btn-sm"
+                    onClick={() => previewMut.mutate()}
+                    disabled={
+                      previewMut.isPending ||
+                      !brandId ||
+                      listIds.length + segmentIds.length + suppressionSegmentIds.length === 0
+                    }
+                  >
+                    {previewMut.isPending ? "Counting…" : "Preview recipients"}
+                  </button>
+                  {(listIds.length + segmentIds.length + suppressionSegmentIds.length === 0) && (
+                    <span style={{ fontSize: "12px", color: tokens.fgMuted }}>Select a list or segment first</span>
                   )}
                 </div>
-              )}
-            </div>
-
-            {/* Email — HTML editor + live preview */}
-            <div className="mkt-card" style={{ padding: "20px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
-                <div style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, letterSpacing: "-0.005em" }}>
-                  Email
-                </div>
-                <span style={{ fontSize: "12px", color: tokens.fgMuted }}>
-                  Supports <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ first_name }}"}</code>, <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ first_name|default:\"vriend\" }}"}</code>, <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ unsubscribe_url }}"}</code>
-                </span>
-              </div>
-              {/* Stacked layout: HTML editor on top, full-width preview below */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <label className="mkt-label">Custom HTML</label>
-                  <textarea
-                    value={customHtml}
-                    onChange={(e) => setCustomHtml(e.target.value)}
-                    placeholder={"<html>…</html>"}
-                    spellCheck={false}
-                    style={{
-                      minHeight: "420px",
-                      padding: "12px 14px",
-                      fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-                      fontSize: "13px",
-                      lineHeight: "1.5",
-                      border: `1px solid ${tokens.borderStrong}`,
-                      borderRadius: tokens.rMd,
-                      resize: "vertical",
-                      color: tokens.fg,
-                      background: tokens.surface,
-                    }}
-                  />
-                </div>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
-                    <label className="mkt-label" style={{ margin: 0 }}>Preview</label>
-                    <span style={{ fontSize: "11px", color: tokens.fgMuted }}>
-                      Rendered at ~640px, like an inbox client
-                    </span>
-                  </div>
+                {preview && (
                   <div
                     style={{
-                      minHeight: "800px",
-                      border: `1px solid ${tokens.borderStrong}`,
+                      marginTop: "12px",
+                      padding: "12px 14px",
+                      background: tokens.borderSubtle,
                       borderRadius: tokens.rMd,
-                      background: "#F3F2EE",
-                      overflow: "hidden",
-                      padding: "16px 0",
                     }}
                   >
-                    {customHtml ? (
-                      <iframe
-                        title="email-preview"
-                        srcDoc={previewHtml}
-                        sandbox=""
-                        style={{
-                          display: "block",
-                          width: "100%",
-                          maxWidth: "680px",
-                          height: "900px",
-                          margin: "0 auto",
-                          border: "0",
-                          background: "#fff",
-                          borderRadius: "6px",
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                        }}
-                      />
-                    ) : (
+                    <div style={{ fontSize: "14px", fontWeight: 600, color: tokens.fg }}>{fmt(preview.count)} recipient(s)</div>
+                    {preview.sample.length > 0 && (
                       <div
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          height: "800px",
-                          color: tokens.fgMuted,
-                          fontSize: "14px",
+                          fontSize: "12px",
+                          color: tokens.fgSecondary,
+                          marginTop: "6px",
+                          maxHeight: "140px",
+                          overflow: "auto",
+                          fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
                         }}
                       >
-                        Empty HTML — start typing above to see preview
+                        {preview.sample.slice(0, 100).join(", ")}
                       </div>
                     )}
                   </div>
-                </div>
+                )}
               </div>
-            </div>
+            )}
 
-            {/* Schedule */}
-            <div className="mkt-card" style={{ padding: "20px" }}>
-              <div style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, marginBottom: "14px", letterSpacing: "-0.005em" }}>
-                Schedule
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "10px", alignItems: "end" }}>
-                <div>
-                  <label className="mkt-label">Send at</label>
-                  <input
-                    className="mkt-input"
-                    type="datetime-local"
-                    value={scheduleAt}
-                    onChange={(e) => setScheduleAt(e.target.value)}
-                  />
+            {tab === "schedule" && (
+              <div className="mkt-card" style={{ padding: "20px" }}>
+                <div style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, marginBottom: "14px", letterSpacing: "-0.005em" }}>
+                  Schedule
                 </div>
-                <button className="mkt-btn" onClick={() => setScheduleAt("")}>
-                  Clear
-                </button>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "10px", alignItems: "end" }}>
+                  <div>
+                    <label className="mkt-label">Send at</label>
+                    <input
+                      className="mkt-input"
+                      type="datetime-local"
+                      value={scheduleAt}
+                      onChange={(e) => setScheduleAt(e.target.value)}
+                    />
+                  </div>
+                  <button className="mkt-btn" onClick={() => setScheduleAt("")}>
+                    Clear
+                  </button>
+                </div>
+                <ScheduleTimezoneHint scheduleAt={scheduleAt} />
+                {!scheduleAt && (
+                  <div style={{ marginTop: "12px", fontSize: "13px", color: tokens.fgSecondary, lineHeight: 1.5 }}>
+                    Leave empty to send immediately with “Send now”, or pick a time and use
+                    “Schedule” in the Actions panel.
+                  </div>
+                )}
               </div>
-            </div>
+            )}
+          </fieldset>
+        </div>
+
+        {/* RIGHT: actions sidebar — sticky, visible from every tab */}
+        <div className="mkt-card" style={{ padding: "20px", position: "sticky", top: "16px" }}>
+          <div
+            style={{
+              fontSize: "11px",
+              fontWeight: 600,
+              color: tokens.fgSecondary,
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+              marginBottom: "12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <span>Actions</span>
+            {dirty && (
+              <span style={{ fontSize: "11px", fontWeight: 500, color: tokens.warningFg, textTransform: "none", letterSpacing: 0 }}>
+                ● Unsaved
+              </span>
+            )}
           </div>
-
-          {/* RIGHT: actions sidebar */}
-          <div className="mkt-card" style={{ padding: "20px", position: "sticky", top: "16px" }}>
-            <div
-              style={{
-                fontSize: "11px",
-                fontWeight: 600,
-                color: tokens.fgSecondary,
-                textTransform: "uppercase",
-                letterSpacing: "0.04em",
-                marginBottom: "12px",
-              }}
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <button
+              className="mkt-btn"
+              onClick={() => saveMut.mutate({ status: "draft" })}
+              disabled={saveMut.isPending || !name || locked}
             >
-              Actions
+              {saveMut.isPending ? "Saving…" : "Save draft"}
+            </button>
+            <TestSendButton
+              brandId={brandId}
+              subject={subject}
+              preheader={preheader}
+              fromName={fromName}
+              fromEmail={fromEmail}
+              replyTo={replyTo}
+              html={customHtml}
+              defaultTo={brand?.marketing_reply_to || ""}
+            />
+            <button
+              className="mkt-btn-primary"
+              disabled={!canSchedule || saveMut.isPending || locked}
+              onClick={() => saveMut.mutate({ status: "scheduled" })}
+            >
+              Schedule
+            </button>
+            <button
+              className="mkt-btn-primary"
+              disabled={!canSendNow || sendNowMut.isPending || locked}
+              onClick={() => setConfirmSend(true)}
+            >
+              {sendNowMut.isPending ? "Starting…" : "Send now"}
+            </button>
+          </div>
+          {missingForSchedule.length > 0 && (
+            <div style={{ marginTop: "10px", fontSize: "12px", color: tokens.fgMuted, lineHeight: 1.45 }}>
+              Missing: {missingForSchedule.join(", ")}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <button
-                className="mkt-btn"
-                onClick={() => saveMut.mutate({ status: "draft" })}
-                disabled={saveMut.isPending || !name}
-              >
-                {saveMut.isPending ? "Saving…" : "Save draft"}
-              </button>
-              <TestSendButton
-                brandId={brandId}
-                subject={subject}
-                preheader={preheader}
-                fromName={fromName}
-                fromEmail={fromEmail}
-                replyTo={replyTo}
-                html={customHtml}
-                defaultTo={brand?.marketing_reply_to || ""}
-              />
+          )}
+          {currentId && <CampaignAnalyticsPanel campaignId={currentId} />}
+        </div>
+      </div>
+
+      {confirmSend && (
+        <Modal
+          title="Send campaign now?"
+          onClose={() => setConfirmSend(false)}
+          footer={
+            <>
+              <button className="mkt-btn" onClick={() => setConfirmSend(false)}>Cancel</button>
               <button
                 className="mkt-btn-primary"
-                disabled={!canSchedule || saveMut.isPending}
-                onClick={() => saveMut.mutate({ status: "scheduled" })}
-              >
-                Schedule
-              </button>
-              <button
-                className="mkt-btn-primary"
-                disabled={!canSendNow || sendNowMut.isPending}
-                onClick={() => { if (confirm("Send this campaign now?")) sendNowMut.mutate() }}
+                disabled={sendNowMut.isPending}
+                onClick={() => { setConfirmSend(false); sendNowMut.mutate() }}
               >
                 {sendNowMut.isPending ? "Starting…" : "Send now"}
               </button>
-            </div>
-            {missingForSchedule.length > 0 && (
-              <div style={{ marginTop: "10px", fontSize: "12px", color: tokens.fgMuted, lineHeight: 1.45 }}>
-                Missing: {missingForSchedule.join(", ")}
+            </>
+          }
+        >
+          <div style={{ fontSize: "14px", color: tokens.fg, lineHeight: 1.6 }}>
+            This will send <strong>{name || "this campaign"}</strong> to{" "}
+            <strong>{liveCount.count > 0 ? `${fmt(liveCount.count)} recipient(s)` : "the selected recipients"}</strong> immediately.
+            {dirty && (
+              <div style={{ marginTop: "10px", color: tokens.warningFg }}>
+                ⚠️ You have unsaved changes — save the draft first if you want them included.
               </div>
             )}
-            {currentId && <CampaignAnalyticsPanel campaignId={currentId} />}
+            <div style={{ marginTop: "10px", color: tokens.fgSecondary }}>This action cannot be undone.</div>
           </div>
-        </div>
+        </Modal>
       )}
     </>
+  )
+}
+
+// ═══════════════════════════════════════════
+// HEADER ROW
+// ═══════════════════════════════════════════
+function HeaderRow({ status, sentAt, dirty }: { status: string; sentAt: string | null; dirty: boolean }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <StatusBadge status={status} />
+        {sentAt && <span style={{ fontSize: "13px", color: tokens.fgSecondary }}>Sent {new Date(sentAt).toLocaleString()}</span>}
+        {dirty && (
+          <span style={{ fontSize: "12px", color: tokens.warningFg, fontWeight: 500 }}>● Unsaved changes</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+function Tabs({
+  tab,
+  onChange,
+  recipientCount,
+  recipientHasFilter,
+  scheduleAt,
+}: {
+  tab: "content" | "recipients" | "schedule"
+  onChange: (t: "content" | "recipients" | "schedule") => void
+  recipientCount: { count: number; loading: boolean; error: boolean }
+  recipientHasFilter: boolean
+  scheduleAt: string
+}) {
+  const items: { key: typeof tab; label: string; hint?: string }[] = [
+    { key: "content", label: "Content" },
+    {
+      key: "recipients",
+      label: "Recipients",
+      hint: recipientHasFilter && !recipientCount.loading && !recipientCount.error ? fmt(recipientCount.count) : undefined,
+    },
+    { key: "schedule", label: "Schedule & send", hint: scheduleAt ? "⏱" : undefined },
+  ]
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "4px",
+        padding: "4px",
+        background: tokens.borderSubtle,
+        borderRadius: tokens.rMd,
+      }}
+    >
+      {items.map((it) => {
+        const active = tab === it.key
+        return (
+          <button
+            key={it.key}
+            type="button"
+            onClick={() => onChange(it.key)}
+            style={{
+              flex: 1,
+              padding: "8px 12px",
+              borderRadius: tokens.rSm,
+              fontSize: "13px",
+              fontWeight: active ? 600 : 500,
+              color: active ? tokens.fg : tokens.fgSecondary,
+              background: active ? tokens.surface : "transparent",
+              boxShadow: active ? tokens.shadowSm : "none",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+            }}
+          >
+            {it.label}
+            {it.hint && (
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  color: active ? tokens.primary : tokens.fgMuted,
+                  background: active ? tokens.primarySoft : "transparent",
+                  padding: active ? "1px 6px" : 0,
+                  borderRadius: "999px",
+                }}
+              >
+                {it.hint}
+              </span>
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════
+// EMAIL BUILDER CARD — Blocks / HTML / Preview
+// ═══════════════════════════════════════════
+function EmailBuilderCard({
+  blocks,
+  setBlocks,
+  emailMode,
+  setEmailMode,
+  emailView,
+  setEmailView,
+  customHtml,
+  setCustomHtml,
+  previewHtml,
+  brandAccent,
+}: {
+  blocks: EmailBlock[]
+  setBlocks: (b: EmailBlock[]) => void
+  emailMode: "blocks" | "html"
+  setEmailMode: (m: "blocks" | "html") => void
+  emailView: "edit" | "preview"
+  setEmailView: (v: "edit" | "preview") => void
+  customHtml: string
+  setCustomHtml: (h: string) => void
+  previewHtml: string
+  brandAccent?: string
+}) {
+  const [showTemplates, setShowTemplates] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
+
+  // Switching INTO blocks mode when there are no blocks but there is raw HTML:
+  // warn that the HTML will be replaced by the visual builder output.
+  const switchToBlocks = () => {
+    if (emailMode === "blocks") return
+    if (blocks.length === 0 && customHtml.trim()) {
+      const ok = window.confirm(
+        "Switch to the visual builder? Your existing raw HTML will be replaced by the blocks you build."
+      )
+      if (!ok) return
+    }
+    setEmailMode("blocks")
+  }
+  const switchToHtml = () => setEmailMode("html")
+
+  const applyTemplate = (tplId: string) => {
+    const tpl = EMAIL_TEMPLATES.find((t) => t.id === tplId)
+    if (!tpl) return
+    if ((blocks.length > 0 || customHtml.trim()) &&
+      !window.confirm("Replace the current email with this template?")) {
+      return
+    }
+    setBlocks(tpl.build())
+    setEmailMode("blocks")
+    setShowTemplates(false)
+  }
+
+  return (
+    <div className="mkt-card" style={{ padding: "20px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px", gap: "10px", flexWrap: "wrap" }}>
+        <div style={{ fontSize: "15px", fontWeight: 600, color: tokens.fg, letterSpacing: "-0.005em" }}>
+          Email
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {/* Mode toggle: Blocks | HTML */}
+          <div style={{ display: "inline-flex", background: tokens.borderSubtle, borderRadius: tokens.rSm, padding: "3px" }}>
+            <ModeBtn active={emailMode === "blocks"} onClick={switchToBlocks}>Blocks</ModeBtn>
+            <ModeBtn active={emailMode === "html"} onClick={switchToHtml}>HTML</ModeBtn>
+          </div>
+          <div style={{ position: "relative" }}>
+            <button className="mkt-btn mkt-btn-sm" onClick={() => setShowTemplates((v) => !v)}>
+              Start from template ▾
+            </button>
+            {showTemplates && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 4px)",
+                  right: 0,
+                  zIndex: 40,
+                  width: "280px",
+                  background: tokens.surface,
+                  border: `1px solid ${tokens.borderStrong}`,
+                  borderRadius: tokens.rMd,
+                  boxShadow: tokens.shadowMd,
+                  padding: "6px",
+                }}
+              >
+                {EMAIL_TEMPLATES.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => applyTemplate(t.id)}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "10px",
+                      width: "100%",
+                      padding: "9px 10px",
+                      background: "transparent",
+                      border: "none",
+                      borderRadius: tokens.rSm,
+                      cursor: "pointer",
+                      textAlign: "left",
+                      fontFamily: "inherit",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = tokens.borderSubtle)}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                  >
+                    <span style={{ fontSize: "18px", lineHeight: 1.2 }}>{t.icon}</span>
+                    <span>
+                      <span style={{ display: "block", fontSize: "13px", fontWeight: 600, color: tokens.fg }}>{t.name}</span>
+                      <span style={{ display: "block", fontSize: "12px", color: tokens.fgMuted, marginTop: "1px" }}>{t.description}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ fontSize: "12px", color: tokens.fgMuted, marginBottom: "14px" }}>
+        Supports{" "}
+        <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ first_name }}"}</code>,{" "}
+        <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ first_name|default:\"vriend\" }}"}</code>,{" "}
+        <code style={{ background: tokens.borderSubtle, padding: "1px 5px", borderRadius: "4px" }}>{"{{ unsubscribe_url }}"}</code>
+      </div>
+
+      {/* Editor body */}
+      {emailMode === "blocks" ? (
+        <BlockBuilder blocks={blocks} onChange={setBlocks} accentColor={brandAccent} />
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <label className="mkt-label">Custom HTML</label>
+          <textarea
+            value={customHtml}
+            onChange={(e) => setCustomHtml(e.target.value)}
+            placeholder={"<html>…</html>"}
+            spellCheck={false}
+            style={{
+              minHeight: "360px",
+              padding: "12px 14px",
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+              fontSize: "13px",
+              lineHeight: "1.5",
+              border: `1px solid ${tokens.borderStrong}`,
+              borderRadius: tokens.rMd,
+              resize: "vertical",
+              color: tokens.fg,
+              background: tokens.surface,
+            }}
+          />
+        </div>
+      )}
+
+      {/* Collapsible preview */}
+      <div style={{ marginTop: "18px", borderTop: `1px solid ${tokens.borderSubtle}`, paddingTop: "14px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <label className="mkt-label" style={{ margin: 0 }}>Preview</label>
+          <button className="mkt-btn mkt-btn-sm" onClick={() => setPreviewOpen((v) => !v)}>
+            {previewOpen ? "Hide preview" : "Show preview"}
+          </button>
+        </div>
+        {previewOpen && (
+          <div
+            style={{
+              marginTop: "10px",
+              border: `1px solid ${tokens.borderStrong}`,
+              borderRadius: tokens.rMd,
+              background: "#F3F2EE",
+              overflow: "auto",
+              maxHeight: "600px",
+              padding: "16px 0",
+            }}
+          >
+            {customHtml ? (
+              <iframe
+                title="email-preview"
+                srcDoc={previewHtml}
+                sandbox=""
+                style={{
+                  display: "block",
+                  width: "100%",
+                  maxWidth: "640px",
+                  height: "560px",
+                  margin: "0 auto",
+                  border: "0",
+                  background: "#fff",
+                  borderRadius: "6px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "200px",
+                  color: tokens.fgMuted,
+                  fontSize: "14px",
+                }}
+              >
+                Nothing to preview yet — add blocks or HTML above.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function ModeBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        padding: "5px 12px",
+        fontSize: "12px",
+        fontWeight: active ? 600 : 500,
+        color: active ? tokens.fg : tokens.fgSecondary,
+        background: active ? tokens.surface : "transparent",
+        boxShadow: active ? tokens.shadowSm : "none",
+        border: "none",
+        borderRadius: "5px",
+        cursor: "pointer",
+        fontFamily: "inherit",
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
+// ═══════════════════════════════════════════
+// SCHEDULE TIMEZONE HINT
+// ═══════════════════════════════════════════
+function ScheduleTimezoneHint({ scheduleAt }: { scheduleAt: string }) {
+  if (!scheduleAt) return null
+  const local = new Date(scheduleAt)
+  if (isNaN(local.getTime())) return null
+  const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone || "local time"
+  const offsetMin = -local.getTimezoneOffset()
+  const sign = offsetMin >= 0 ? "+" : "-"
+  const abs = Math.abs(offsetMin)
+  const offsetLabel = `UTC${sign}${String(Math.floor(abs / 60)).padStart(2, "0")}:${String(abs % 60).padStart(2, "0")}`
+  return (
+    <div
+      style={{
+        marginTop: "12px",
+        padding: "10px 14px",
+        background: tokens.infoSoft,
+        borderRadius: tokens.rMd,
+        fontSize: "13px",
+        color: tokens.info,
+        lineHeight: 1.5,
+      }}
+    >
+      Will send at{" "}
+      <strong>
+        {local.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+      </strong>{" "}
+      ({tzName}, {offsetLabel})
+      <div style={{ color: tokens.fgSecondary, marginTop: "2px", fontVariantNumeric: "tabular-nums" }}>
+        = {local.toISOString().slice(0, 16).replace("T", " ")} UTC
+      </div>
+    </div>
   )
 }
 
@@ -665,7 +1186,7 @@ function TestSendButton({
             ? `Send test to ${testTo.trim()}`
             : !emailValid
             ? "Enter a valid test recipient email"
-            : "Fill in brand, subject, and HTML first"
+            : "Fill in brand, subject, and email content first"
         }
       >
         {testSendMut.isPending ? "Sending test…" : "📧 Send test"}
@@ -769,6 +1290,15 @@ function escapeHtml(s: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
+}
+
+/** Convert an ISO/date string to a `datetime-local`-compatible value in the
+ *  browser's local timezone. */
+function toLocalInput(value: string | number | Date): string {
+  const d = new Date(value)
+  if (isNaN(d.getTime())) return ""
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 function LiveCountBadge({
@@ -878,16 +1408,19 @@ function ReadOnlyView({
   subject,
   metrics,
   campaignId,
+  html,
+  preheader,
 }: {
   name: string
   subject: string
   metrics: any
   campaignId?: string
+  html?: string
+  preheader?: string
 }) {
+  const [showEmail, setShowEmail] = useState(false)
   // Live analytics — pulled from the /analytics endpoint (computed live from
   // marketing_message). This is the source of truth for open/click/bounce.
-  // campaign.metrics only carries send-time {sent, failed, suppressed}, so the
-  // Delivered/Opened/Clicked/Bounced bars below would otherwise read 0.
   const { data: analytics } = useQuery({
     queryKey: ["mkt-campaign-analytics", campaignId],
     queryFn: () =>
@@ -901,7 +1434,6 @@ function ReadOnlyView({
   })
 
   const funnel = (analytics as any)?.funnel
-  // Prefer live funnel numbers; fall back to send-time metrics jsonb.
   const vals = {
     sent: funnel ? (funnel.sent || 0) : Number(metrics?.sent) || 0,
     delivered: funnel ? (funnel.delivered || 0) : Number(metrics?.delivered) || 0,
@@ -918,6 +1450,9 @@ function ReadOnlyView({
     { label: "Bounced", key: "bounced", color: tokens.dangerFg },
   ]
   const max = Math.max(1, ...bars.map((b) => Number(vals[b.key]) || 0))
+  const sentTotal = Number(vals.sent) || 0
+  const previewHtml = buildPreviewDocument(html || "", preheader || "")
+
   return (
     <div className="mkt-card" style={{ padding: "24px" }}>
       <div style={{ fontSize: "18px", fontWeight: 600, marginBottom: "4px", color: tokens.fg, letterSpacing: "-0.005em" }}>{name}</div>
@@ -942,17 +1477,66 @@ function ReadOnlyView({
         {bars.map((b) => {
           const v = Number(vals[b.key]) || 0
           const pc = (v / max) * 100
+          // % of sent — skip on the Sent bar itself (always 100%).
+          const ofSent = b.key !== "sent" && sentTotal > 0 ? (v / sentTotal) * 100 : null
           return (
-            <div key={b.key} style={{ display: "grid", gridTemplateColumns: "100px 1fr 80px", alignItems: "center", gap: "12px" }}>
+            <div key={b.key} style={{ display: "grid", gridTemplateColumns: "100px 1fr 120px", alignItems: "center", gap: "12px" }}>
               <div style={{ fontSize: "13px", color: tokens.fgSecondary, fontWeight: 500 }}>{b.label}</div>
               <div style={{ background: tokens.borderSubtle, borderRadius: "6px", overflow: "hidden", height: "12px" }}>
                 <div style={{ width: `${pc}%`, height: "100%", background: b.color, transition: "width 300ms ease-out", borderRadius: "6px" }} />
               </div>
-              <div style={{ fontSize: "13px", textAlign: "right", color: tokens.fg, fontVariantNumeric: "tabular-nums" }}>{v.toLocaleString()}</div>
+              <div style={{ fontSize: "13px", textAlign: "right", color: tokens.fg, fontVariantNumeric: "tabular-nums" }}>
+                {v.toLocaleString()}
+                {ofSent !== null && (
+                  <span style={{ color: tokens.fgMuted, marginLeft: "6px" }}>({ofSent.toFixed(1)}%)</span>
+                )}
+              </div>
             </div>
           )
         })}
       </div>
+
+      {/* Collapsible: view the sent email */}
+      {html && (
+        <div style={{ marginTop: "20px", borderTop: `1px solid ${tokens.borderSubtle}`, paddingTop: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: tokens.fg }}>Sent email</div>
+            <button className="mkt-btn mkt-btn-sm" onClick={() => setShowEmail((v) => !v)}>
+              {showEmail ? "Hide email" : "View sent email"}
+            </button>
+          </div>
+          {showEmail && (
+            <div
+              style={{
+                marginTop: "10px",
+                border: `1px solid ${tokens.borderStrong}`,
+                borderRadius: tokens.rMd,
+                background: "#F3F2EE",
+                overflow: "auto",
+                maxHeight: "600px",
+                padding: "16px 0",
+              }}
+            >
+              <iframe
+                title="sent-email-preview"
+                srcDoc={previewHtml}
+                sandbox=""
+                style={{
+                  display: "block",
+                  width: "100%",
+                  maxWidth: "640px",
+                  height: "560px",
+                  margin: "0 auto",
+                  border: "0",
+                  background: "#fff",
+                  borderRadius: "6px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Full analytics panel — revenue + link breakdown (live) */}
       {campaignId && <CampaignAnalyticsPanel campaignId={campaignId} />}
