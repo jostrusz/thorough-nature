@@ -29,6 +29,7 @@ export async function recoverBriteCart(
     cartId?: string
     briteSessionId: string
     briteTransactionId?: string | null
+    briteTxState?: number | null
     paidAmount: number
     currency?: string
     paymentMethod?: string
@@ -108,13 +109,22 @@ export async function recoverBriteCart(
     try {
       const metaRes = await pool.query(`SELECT metadata FROM "order" WHERE id = $1`, [orderId])
       const existing = metaRes.rows[0]?.metadata || {}
+      // Only release the Dextrum CREDIT gate when the transaction is genuinely CREDIT (5)
+      // or SETTLED (6). COMPLETED (4) is authorised-but-not-settled — the order is created
+      // (so the e-book ships) but the PHYSICAL fulfilment must keep waiting for CREDIT, or
+      // a transfer that later ends DEBIT (7) would have shipped goods for unpaid money.
+      // briteTxState unset (legacy callers) → preserve old behaviour (treat as confirmed).
+      const creditConfirmed =
+        opts.briteTxState == null ? true : [5, 6].includes(Number(opts.briteTxState))
       const updated = {
         ...existing,
         payment_provider: "brite",
         payment_method: opts.paymentMethod || existing.payment_method || "pay_by_bank",
         briteSessionId: opts.briteSessionId,
         briteTransactionId: opts.briteTransactionId || existing.briteTransactionId || null,
-        brite_credit_received: true,
+        ...(creditConfirmed
+          ? { brite_credit_received: true, brite_credit_received_at: new Date().toISOString() }
+          : {}),
         payment_captured: true,
         completed_by: "brite_settled_recover",
         recover_completed_at: new Date().toISOString(),
