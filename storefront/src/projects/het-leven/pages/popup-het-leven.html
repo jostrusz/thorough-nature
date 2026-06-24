@@ -1053,35 +1053,23 @@
         <span class="intro-badge"><span class="dot"></span> Gratis 7-daagse uitdaging · 5 min per dag</span>
         <h2 class="question" id="popup-q">Optimaliseer 5 gebieden van je huis met slechts <strong>17%</strong> — en <span class="gold-underline">verdien meer geld, verbeter je relaties en genees je lichaam</span>.</h2>
         <p class="intro-subhead">Een 7-daagse uitdaging van 5 minuten per dag, die je van 'gewoon moe' naar '<u>eindelijk weer mezelf</u>' brengt.</p>
-        <ul class="benefits" style="margin-top:-2px;margin-bottom:14px;">
+        <ul class="benefits" style="margin-top:2px;margin-bottom:4px;">
           <li>Krijg elke dag <strong>1 mini-opdracht van 5 minuten</strong></li>
           <li>Ontdek je <strong>5 grootste energielekken</strong></li>
           <li>Voel meer rust, energie en ruimte in je huis</li>
         </ul>
-        <div class="intro-fomo">
-          <span class="fomo-icon">⏳</span>
-          <span>Deze uitdaging sluit binnenkort — <em>doe mee nu het nog kan</em>.</span>
-        </div>
       </div>
       <div class="options" style="padding-top:0;padding-bottom:20px;overflow:visible;">
         <form id="introForm" onsubmit="return startChallenge(event)" novalidate>
           <div class="intro-email-field">
-            <input type="text" id="intro_first_name" name="intro_first_name" autocomplete="given-name"
-                   placeholder="Jouw voornaam" aria-label="Voornaam" style="margin-bottom:10px;">
             <input type="email" id="intro_email" name="intro_email" inputmode="email" autocomplete="email"
                    placeholder="jouw@email.nl" aria-label="E-mailadres">
           </div>
-          <label class="gdpr" style="margin-top:0;margin-bottom:12px;">
-            <input type="checkbox" id="intro_gdpr_consent" required>
-            <span class="gdpr-text">
-              Ja, Anna mag me de Ruimte-reset sturen plus 30 dagen kleine opdrachten. <strong>Ik kan me altijd uitschrijven</strong> met één klik. Geen spam. <a href="https://www.pakjeleventerug.nl/privacy" target="_blank">Privacy</a>.
-            </span>
-          </label>
-          <div class="intro-error" id="intro-error">Vul je voornaam, een geldig e-mailadres in en vink het vakje aan.</div>
+          <div class="intro-error" id="intro-error">Vul een geldig e-mailadres in.</div>
           <button type="submit" class="intro-cta">Ja, ik begin vandaag →</button>
           <p class="intro-microcopy">
             <span class="promise">Je eerste opdracht komt binnen 2 minuten in je inbox.</span>
-            <span class="from">Van Anna de Vries · gratis · uitschrijven wanneer je wilt</span>
+            <span class="from">Aanmelden = akkoord met Anna's e-mails · gratis · uitschrijven met 1 klik · <a href="https://www.pakjeleventerug.nl/privacy" target="_blank">Privacy</a></span>
           </p>
         </form>
       </div>
@@ -1375,24 +1363,19 @@ function finishQuiz() {
 // nextStep() which expects a selected option.
 function startChallenge(e) {
   e.preventDefault();
-  const nameInput = $("#intro_first_name");
   const emailInput = $("#intro_email");
-  const gdprInput = $("#intro_gdpr_consent");
   const err = $("#intro-error");
-  const firstName = (nameInput && nameInput.value || "").trim();
   const email = (emailInput && emailInput.value || "").trim();
-  const gdpr = !!(gdprInput && gdprInput.checked);
-  const valid = firstName.length > 0 && /.+@.+\..+/.test(email) && gdpr;
+  const valid = /.+@.+\..+/.test(email);
   if (!valid) {
     if (err) err.classList.add("show");
-    if (firstName.length === 0 && nameInput) nameInput.focus();
-    else if (emailInput) emailInput.focus();
+    if (emailInput) emailInput.focus();
     return false;
   }
   if (err) err.classList.remove("show");
   state.introEmail = email;
-  state.introFirstName = firstName;
-  state.introGdpr = gdpr;
+  state.introFirstName = "";           // email-only opt-in (geen naamveld)
+  state.introGdpr = true;              // impliciete toestemming bij aanmelden
   trackPopupEvent("popup_intro_email_captured");
   buildStep2();
   showStep(2);
