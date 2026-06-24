@@ -51,6 +51,8 @@ const TRIGGER_TYPES = [
   { value: "event:order.placed", label: "Event — order.placed" },
   { value: "event:form_submitted", label: "Event — form_submitted" },
   { value: "event:contact_subscribed", label: "Event — contact_subscribed" },
+  { value: "delivery:DISPATCHED", label: "Delivery status — Dispatched" },
+  { value: "delivery:DELIVERED", label: "Delivery status — Delivered" },
   { value: "time:schedule", label: "Time-based / scheduled" },
 ]
 

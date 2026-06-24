@@ -367,6 +367,20 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
           )
           await metaPool.end()
 
+          // Emit a delivery-status event so marketing flows can trigger on it
+          // (e.g. a post-delivery nurture / review-request flow). Fire-and-forget:
+          // the marketing-delivery-trigger subscriber resolves order→brand→contact
+          // and enrolls into live flows whose trigger matches this status.
+          try {
+            const eventBus = req.scope.resolve(Modules.EVENT_BUS) as any
+            await eventBus.emit({
+              name: "order.delivery_status_changed",
+              data: { id: orderMap.medusa_order_id, status: newStatus },
+            })
+          } catch (emitErr: any) {
+            console.warn(`[mySTOCK Webhook] Could not emit delivery_status_changed for ${orderMap.medusa_order_id}: ${emitErr?.message || emitErr}`)
+          }
+
           // Auto-fulfill on DISPATCHED — DISABLED.
           // The previous implementation did a raw INSERT into the order_fulfillment
           // PIVOT table (id, order_id, fulfillment_id) with a non-existent `metadata`
