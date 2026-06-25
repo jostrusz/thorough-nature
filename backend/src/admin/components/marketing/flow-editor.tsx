@@ -648,12 +648,34 @@ function DelayNodeBody({ node, onChange }: { node: FlowNode; onChange: (patch: a
   )
 }
 
+// A flow email field (subject / preheader / html) may be a plain string OR a
+// gender-variant map { m, f } for gender-aware flows. For display + editing we
+// surface the masculine variant; on save we re-wrap so the female copy is never
+// lost. Plain strings pass through unchanged (backward compatible).
+function variantText(v: any): string {
+  if (v == null) return ""
+  if (typeof v === "string") return v
+  return v.m ?? v.f ?? ""
+}
+function isGendered(v: any): boolean {
+  return v != null && typeof v === "object"
+}
+function rewrapVariant(original: any, editedM: string): any {
+  if (original != null && typeof original === "object") {
+    return { m: editedM, f: original.f ?? original.m ?? editedM }
+  }
+  return editedM
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // Email node body — summary on the left + hover-zoom thumbnail on the right
 // ═══════════════════════════════════════════════════════════════════════
 function EmailNodeBody({ node, onEdit }: { node: FlowNode; onEdit: () => void }) {
   const cfg: EmailConfig = node.config || {}
-  const html = cfg.html || ""
+  const html = variantText(cfg.html)
+  const subjectText = variantText(cfg.subject)
+  const preheaderText = variantText(cfg.preheader)
+  const gendered = isGendered(cfg.html) || isGendered(cfg.subject) || isGendered(cfg.preheader)
   const [hovered, setHovered] = useState(false)
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null)
   const thumbRef = useRef<HTMLDivElement>(null)
@@ -688,15 +710,15 @@ function EmailNodeBody({ node, onEdit }: { node: FlowNode; onEdit: () => void })
           </div>
         )}
         <div>
-          <div style={{ fontSize: "10px", color: tokens.fgMuted, letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "2px" }}>Subject{isAi ? " (fallback)" : ""}</div>
-          <div style={{ fontSize: "14px", color: cfg.subject ? tokens.fg : tokens.fgMuted, fontWeight: cfg.subject ? 500 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {cfg.subject || (isAi ? "— generated at send —" : "— not set —")}
+          <div style={{ fontSize: "10px", color: tokens.fgMuted, letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "2px" }}>Subject{isAi ? " (fallback)" : ""}{gendered ? " · ♀ ♂ varianty" : ""}</div>
+          <div style={{ fontSize: "14px", color: subjectText ? tokens.fg : tokens.fgMuted, fontWeight: subjectText ? 500 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {subjectText || (isAi ? "— generated at send —" : "— not set —")}
           </div>
         </div>
         <div>
           <div style={{ fontSize: "10px", color: tokens.fgMuted, letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "2px" }}>Preheader</div>
-          <div style={{ fontSize: "13px", color: cfg.preheader ? tokens.fgSecondary : tokens.fgMuted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {cfg.preheader || "—"}
+          <div style={{ fontSize: "13px", color: preheaderText ? tokens.fgSecondary : tokens.fgMuted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {preheaderText || "—"}
           </div>
         </div>
         <div>
@@ -805,12 +827,12 @@ function EmailEditorSlideOver({
   onSave: (cfg: EmailConfig) => void
 }) {
   const initial: EmailConfig = node.config || {}
-  const [subject, setSubject] = useState(initial.subject || "")
-  const [preheader, setPreheader] = useState(initial.preheader || "")
+  const [subject, setSubject] = useState(variantText(initial.subject))
+  const [preheader, setPreheader] = useState(variantText(initial.preheader))
   const [fromName, setFromName] = useState(initial.from_name || "")
   const [fromEmail, setFromEmail] = useState(initial.from_email || "")
   const [replyTo, setReplyTo] = useState(initial.reply_to || "")
-  const [html, setHtml] = useState(initial.html || "")
+  const [html, setHtml] = useState(variantText(initial.html))
   const [activeTab, setActiveTab] = useState<"html" | "preview">("preview")
   const [aiGenerate, setAiGenerate] = useState<boolean>(initial.ai_generate === true)
   const [aiDayTemplate, setAiDayTemplate] = useState<"day1" | "day2" | "day3">(initial.ai_day_template || "day1")
@@ -861,12 +883,12 @@ function EmailEditorSlideOver({
             onClick={() =>
               onSave({
                 editor_type: "html",
-                subject,
-                preheader,
+                subject: rewrapVariant(initial.subject, subject),
+                preheader: rewrapVariant(initial.preheader, preheader),
                 from_name: fromName,
                 from_email: fromEmail,
                 reply_to: replyTo,
-                html,
+                html: rewrapVariant(initial.html, html),
                 ai_generate: aiGenerate || undefined,
                 ai_day_template: aiGenerate ? aiDayTemplate : undefined,
                 ai_model: aiGenerate ? aiModel : undefined,
