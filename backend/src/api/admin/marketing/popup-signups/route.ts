@@ -14,8 +14,8 @@ import { Pool } from "pg"
  * Response:
  *   daily:        [{ date, brand_slug, brand_name, count }]   (new signups)
  *   unsubs_daily: [{ date, brand_slug, brand_name, count }]   (unsubscribes)
- *   by_project:   [{ brand_slug, brand_name, today, d7, d30, prev_d30, trend_pct }]
- *   totals:       { today, d7, d30, prev_d30, trend_pct, unsubs_d30, net_d30 }
+ *   by_project:   [{ brand_slug, brand_name, today, yesterday, d7, d30, prev_d30, trend_pct }]
+ *   totals:       { today, yesterday, d7, d30, prev_d30, trend_pct, unsubs_d30, net_d30 }
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const rawDays = parseInt(String((req.query as any).days || "30"), 10)
@@ -73,6 +73,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
              WHERE (c.created_at AT TIME ZONE 'UTC')::date = (NOW() AT TIME ZONE 'UTC')::date
            )::int AS today,
            COUNT(*) FILTER (
+             WHERE (c.created_at AT TIME ZONE 'UTC')::date = (NOW() AT TIME ZONE 'UTC')::date - 1
+           )::int AS yesterday,
+           COUNT(*) FILTER (
              WHERE c.created_at >= (NOW() AT TIME ZONE 'UTC')::date - 6 * INTERVAL '1 day'
            )::int AS d7,
            COUNT(*) FILTER (
@@ -97,6 +100,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
            COUNT(*) FILTER (
              WHERE (c.created_at AT TIME ZONE 'UTC')::date = (NOW() AT TIME ZONE 'UTC')::date
            )::int AS today,
+           COUNT(*) FILTER (
+             WHERE (c.created_at AT TIME ZONE 'UTC')::date = (NOW() AT TIME ZONE 'UTC')::date - 1
+           )::int AS yesterday,
            COUNT(*) FILTER (
              WHERE c.created_at >= (NOW() AT TIME ZONE 'UTC')::date - 6 * INTERVAL '1 day'
            )::int AS d7,
@@ -129,6 +135,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
         brand_slug: r.brand_slug,
         brand_name: r.brand_name,
         today: r.today || 0,
+        yesterday: r.yesterday || 0,
         d7: r.d7 || 0,
         d30: r.d30 || 0,
         prev_d30: r.prev_d30 || 0,
@@ -148,6 +155,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       by_project,
       totals: {
         today: t.today || 0,
+        yesterday: t.yesterday || 0,
         d7: t.d7 || 0,
         d30,
         prev_d30,
@@ -162,7 +170,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       daily: [],
       unsubs_daily: [],
       by_project: [],
-      totals: { today: 0, d7: 0, d30: 0, prev_d30: 0, trend_pct: 0, unsubs_d30: 0, net_d30: 0 },
+      totals: { today: 0, yesterday: 0, d7: 0, d30: 0, prev_d30: 0, trend_pct: 0, unsubs_d30: 0, net_d30: 0 },
       error: e.message,
     })
   } finally {

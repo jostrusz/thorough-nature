@@ -12,6 +12,7 @@ type ProjectRow = {
   brand_slug: string
   brand_name: string
   today: number
+  yesterday: number
   d7: number
   d30: number
   prev_d30: number
@@ -19,6 +20,7 @@ type ProjectRow = {
 }
 type Totals = {
   today: number
+  yesterday: number
   d7: number
   d30: number
   prev_d30: number
@@ -47,7 +49,8 @@ const PALETTE = [
 ]
 
 const DAYS_OPTIONS = [7, 30, 90]
-const STORAGE_KEY = "hq_popup_subs_open"
+// Bumped to v2 → resets everyone to collapsed (section hidden by default)
+const STORAGE_KEY = "hq_popup_subs_open_v2"
 
 // Domain per project slug — shown in the leaderboard subtitle
 const PROJECT_DOMAIN: Record<string, string> = {
@@ -58,7 +61,32 @@ const PROJECT_DOMAIN: Record<string, string> = {
   "odpusc-ksiazka": "odpusc-ksiazka.pl",
   "slapp-taget": "slapptagetboken.se",
   "psi-superzivot": "psi-superzivot.cz",
-  "odpust-knizka": "knihyprodusi.cz",
+  "odpust-knizka": "pusttocotenici.cz",
+}
+
+// Projects that run an index-page popup — always shown in the chart with their
+// own line (even at 0 for the period), so every popup is visible at a glance.
+const POPUP_PROJECTS: Record<string, string> = {
+  loslatenboek: "Joris de Vries - Laat los wat je kapotmaakt",
+  "het-leven": "Anna de Vries - Het Leven Dat Je Verdient",
+  "odpust-knizka": "Pusť to, co tě ničí",
+  "odpusc-ksiazka": "Odpuść to, co cię niszczy",
+}
+
+// ═══════════════════════════════════════════
+// Viewport hook — drives the mobile-responsive layouts (inline styles, no CSS media queries)
+// ═══════════════════════════════════════════
+function useIsMobile(breakpoint = 640): boolean {
+  const [mobile, setMobile] = useState<boolean>(() =>
+    typeof window === "undefined" ? false : window.innerWidth < breakpoint
+  )
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const onResize = () => setMobile(window.innerWidth < breakpoint)
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
+  }, [breakpoint])
+  return mobile
 }
 
 // ═══════════════════════════════════════════
@@ -380,14 +408,24 @@ function MultiLineChart({
         })}
       </svg>
 
-      {/* Tooltip — date + per-project counts */}
-      {hover !== null && (
+      {/* Tooltip — date + per-project counts. Anchored to stay inside the chart box. */}
+      {hover !== null && (() => {
+        // Clamp horizontally: left-align near the left edge, right-align near the
+        // right edge, centre otherwise — so the box never spills outside the card.
+        const ratio = xFor(hover) / W
+        const anchor =
+          ratio < 0.22
+            ? { left: `${ratio * 100}%`, transform: "translateX(-8px)" }
+            : ratio > 0.78
+            ? { left: `${ratio * 100}%`, transform: "translateX(calc(-100% + 8px))" }
+            : { left: `${ratio * 100}%`, transform: "translateX(-50%)" }
+        return (
         <div
           style={{
             position: "absolute",
             top: "8px",
-            left: `${((xFor(hover)) / W) * 100}%`,
-            transform: "translateX(-50%)",
+            left: anchor.left,
+            transform: anchor.transform,
             background: tokens.fg,
             color: "#fff",
             borderRadius: tokens.rSm,
@@ -395,6 +433,7 @@ function MultiLineChart({
             fontSize: "12px",
             pointerEvents: "none",
             whiteSpace: "nowrap",
+            maxWidth: "min(260px, 86%)",
             boxShadow: tokens.shadowMd,
             zIndex: 5,
           }}
@@ -414,7 +453,8 @@ function MultiLineChart({
             )
           })}
         </div>
-      )}
+        )
+      })()}
 
       {/* Legend */}
       <div
@@ -649,6 +689,11 @@ function ProjectAvatar({ name, color }: { name: string; color: string }) {
 export function PopupSubscriberSection() {
   const [open, setOpen] = useState<boolean>(() => readOpenState())
   const [days, setDays] = useState<number>(30)
+  const isMobile = useIsMobile()
+  // Leaderboard column template — mobile drops Trend / 7d / sparkline to fit ~360px
+  const lbCols = isMobile
+    ? "minmax(0,1fr) 50px 54px 52px"
+    : "minmax(0,1fr) 84px 62px 66px 62px 62px 76px"
 
   // Persist collapsed/expanded state
   useEffect(() => {
@@ -690,6 +735,10 @@ export function PopupSubscriberSection() {
     for (const r of resp?.daily || []) {
       if (!totalsBySlug[r.brand_slug]) totalsBySlug[r.brand_slug] = { name: r.brand_name, total: 0 }
       totalsBySlug[r.brand_slug].total += Number(r.count) || 0
+    }
+    // Every popup project always gets a line — even with 0 signups this period
+    for (const [slug, name] of Object.entries(POPUP_PROJECTS)) {
+      if (!totalsBySlug[slug]) totalsBySlug[slug] = { name, total: 0 }
     }
     return Object.entries(totalsBySlug)
       .sort((a, b) => b[1].total - a[1].total)
@@ -809,7 +858,7 @@ export function PopupSubscriberSection() {
 
       {/* ── Expanded dashboard ── */}
       {open && (
-        <div style={{ borderTop: `1px solid ${tokens.borderSubtle}`, padding: "20px" }}>
+        <div style={{ borderTop: `1px solid ${tokens.borderSubtle}`, padding: isMobile ? "14px" : "20px" }}>
           {/* Period filter */}
           <div
             style={{
@@ -863,8 +912,10 @@ export function PopupSubscriberSection() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                  gap: "14px",
+                  gridTemplateColumns: isMobile
+                    ? "repeat(2, minmax(0, 1fr))"
+                    : "repeat(auto-fit, minmax(190px, 1fr))",
+                  gap: isMobile ? "10px" : "14px",
                   marginBottom: "24px",
                 }}
               >
@@ -874,6 +925,12 @@ export function PopupSubscriberSection() {
                   sub="new sign-ups"
                   spark={heroSpark}
                   sparkColor={PALETTE[1]}
+                />
+                <KpiCard
+                  label="Yesterday"
+                  value={fmt(totals?.yesterday ?? 0)}
+                  sub="new sign-ups"
+                  sparkColor={PALETTE[3]}
                 />
                 <KpiCard
                   label="Last 7 days"
@@ -904,7 +961,7 @@ export function PopupSubscriberSection() {
                   border: `1px solid ${tokens.border}`,
                   borderRadius: tokens.rLg,
                   background: tokens.surface,
-                  padding: "20px 22px",
+                  padding: isMobile ? "14px 10px" : "20px 22px",
                   marginBottom: "24px",
                 }}
               >
@@ -934,10 +991,10 @@ export function PopupSubscriberSection() {
                     <div
                       style={{
                         display: "grid",
-                        gridTemplateColumns: "minmax(0,1fr) 90px 70px 70px 70px 80px",
+                        gridTemplateColumns: lbCols,
                         gap: "8px",
                         alignItems: "center",
-                        padding: "10px 20px",
+                        padding: isMobile ? "10px 14px" : "10px 20px",
                         background: tokens.bg,
                         borderBottom: `1px solid ${tokens.border}`,
                         fontSize: "11px",
@@ -948,11 +1005,12 @@ export function PopupSubscriberSection() {
                       }}
                     >
                       <span>Project</span>
-                      <span style={{ textAlign: "center" }}>Trend</span>
+                      {!isMobile && <span style={{ textAlign: "center" }}>Trend</span>}
                       <span style={{ textAlign: "right" }}>Today</span>
-                      <span style={{ textAlign: "right" }}>7d</span>
+                      <span style={{ textAlign: "right" }}>Yest.</span>
+                      {!isMobile && <span style={{ textAlign: "right" }}>7d</span>}
                       <span style={{ textAlign: "right" }}>30d</span>
-                      <span style={{ textAlign: "right" }}>14d</span>
+                      {!isMobile && <span style={{ textAlign: "right" }}>14d</span>}
                     </div>
 
                     {leaderboard.map((p) => {
@@ -963,10 +1021,10 @@ export function PopupSubscriberSection() {
                           key={p.brand_slug}
                           style={{
                             display: "grid",
-                            gridTemplateColumns: "minmax(0,1fr) 90px 70px 70px 70px 80px",
+                            gridTemplateColumns: lbCols,
                             gap: "8px",
                             alignItems: "center",
-                            padding: "12px 20px",
+                            padding: isMobile ? "12px 14px" : "12px 20px",
                             borderBottom: `1px solid ${tokens.borderSubtle}`,
                           }}
                         >
@@ -994,18 +1052,25 @@ export function PopupSubscriberSection() {
                             </div>
                           </div>
 
-                          {/* Trend */}
-                          <div style={{ display: "flex", justifyContent: "center" }}>
-                            <TrendPill pct={p.trend_pct} />
-                          </div>
+                          {/* Trend (desktop only) */}
+                          {!isMobile && (
+                            <div style={{ display: "flex", justifyContent: "center" }}>
+                              <TrendPill pct={p.trend_pct} />
+                            </div>
+                          )}
 
-                          {/* Today / 7d / 30d */}
+                          {/* Today / Yesterday / 7d / 30d */}
                           <span style={{ textAlign: "right", fontSize: "13px", fontVariantNumeric: "tabular-nums" }}>
                             {fmt(p.today)}
                           </span>
-                          <span style={{ textAlign: "right", fontSize: "13px", fontVariantNumeric: "tabular-nums" }}>
-                            {fmt(p.d7)}
+                          <span style={{ textAlign: "right", fontSize: "13px", color: tokens.fgSecondary, fontVariantNumeric: "tabular-nums" }}>
+                            {fmt(p.yesterday)}
                           </span>
+                          {!isMobile && (
+                            <span style={{ textAlign: "right", fontSize: "13px", fontVariantNumeric: "tabular-nums" }}>
+                              {fmt(p.d7)}
+                            </span>
+                          )}
                           <span
                             style={{
                               textAlign: "right",
@@ -1017,15 +1082,17 @@ export function PopupSubscriberSection() {
                             {fmt(p.d30)}
                           </span>
 
-                          {/* Mini sparkline */}
-                          <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                            <Sparkline
-                              values={sparkBySlug[p.brand_slug] || []}
-                              color={color}
-                              width={72}
-                              height={26}
-                            />
-                          </div>
+                          {/* Mini sparkline (desktop only) */}
+                          {!isMobile && (
+                            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                              <Sparkline
+                                values={sparkBySlug[p.brand_slug] || []}
+                                color={color}
+                                width={72}
+                                height={26}
+                              />
+                            </div>
+                          )}
                         </div>
                       )
                     })}
