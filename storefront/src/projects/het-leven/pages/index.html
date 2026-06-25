@@ -4039,12 +4039,9 @@ if (scarcityBar) {
      ═══════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
-  // ═══ POPUP DOČASNĚ VYPNUTÝ ═══════════════════════════════════════
-  // popup-het-leven.html vracel 404 ("Page not found") a fullscreen
-  // iframe (z-index 99999) blokoval klikání na celou stránku.
-  // Vypnuto do doby než se popup funnel doladí.
-  // Pro znovuzapnutí smaž následující řádek `return;`.
-  return;
+  // ═══ POPUP ZAPNUTÝ ═══════════════════════════════════════════════
+  // Vyskočí 7 s po načtení, při KAŽDÉ návštěvě. popup-het-leven.html
+  // už servíruje 200 (dřívější 404 je opravený).
   // ═════════════════════════════════════════════════════════════════
   const POPUP_URL  = '/popup-het-leven.html';
   const COOKIE_KEY = 'hl_popup_seen';
@@ -4076,7 +4073,7 @@ if (scarcityBar) {
   function escHandler(e) { if (e.key === 'Escape') closePopup(true); }
   function showPopup(source, force) {
     if (popupShown && !force) return;
-    if (hasSeen() && !force) return;
+    // frequency cap odebrán — popup vyskočí při každé návštěvě (po 7 s)
     popupShown = true;
     popupIframe = document.createElement('iframe');
     popupIframe.src = POPUP_URL + '?src=' + encodeURIComponent(source);
