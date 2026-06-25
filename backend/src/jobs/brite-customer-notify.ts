@@ -51,7 +51,7 @@ const PROJECTS: Record<string, {
     recoveryTemplate: "ll-payment-recovery", recoverySubject: "du bist fast fertig",
   },
   dehondenbijbel: {
-    checkoutUrl: process.env.DH_CHECKOUT_URL || "https://dehondenbijbel.nl/checkout",
+    checkoutUrl: process.env.DH_CHECKOUT_URL || "https://www.dehondenbijbel.nl/checkout",
     replyTo: "support@dehondenbijbel.nl",
     pendingTemplate: "dh-payment-pending", pendingSubject: "we hebben je bestelling ontvangen",
     recoveryTemplate: "dh-payment-recovery", recoverySubject: "je bent er bijna",
