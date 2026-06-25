@@ -12,26 +12,28 @@
   @font-face { font-family: 'DM Sans'; src: url(fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
   :root {
-    --rose-50: #f9f4f7;
-    --rose-100: #F1E6EE;
-    --rose-200: #E3D2DE;
-    --rose-300: #C99FB8;
-    --rose-500: #a8628a;
-    --rose-600: #8a5370;
-    --rose-700: #6e3f59;
-    --ink: #1F1B1E;
-    --ink-soft: #3A2D34;
-    --muted: #8A7884;
-    --gold: #D4AF37;
-    --yellow: #FFE66D;
+    /* Palet afgestemd op de indexpagina: cream / wijn / terracotta / goud.
+       Variabelenamen blijven "rose-*" maar dragen nu de index-kleuren. */
+    --rose-50: #FDF5EF;   /* licht cream (achtergrond-fade) */
+    --rose-100: #F6E7D9;  /* zacht perzik (badge-vlak) */
+    --rose-200: #E9D6C5;  /* warme tan (randen, dots, grabber) */
+    --rose-300: #D8B488;  /* goud-tan (subkop-onderstreping) */
+    --rose-500: #B85C4A;  /* terracotta — primaire accent / CTA */
+    --rose-600: #A04A38;  /* donker terracotta */
+    --rose-700: #8C3A28;  /* diep roest (CTA-verloop, accenttekst) */
+    --ink: #3D1E2A;       /* diep wijn — koppen + leesbare tekst */
+    --ink-soft: #6B3344;  /* zachte wijn-mauve (body) */
+    --muted: #9B6B7A;     /* gedempt */
+    --gold: #C9A96E;      /* goud-accent (onderstreping, badge-dot) */
+    --yellow: #E8A88C;    /* perzik-highlight */
     --card: #FFFFFF;
     /* Lehký backdrop — stránka pod popupem zůstává viditelná (žádná těžká tmavá plocha) */
-    --backdrop: rgba(58, 30, 45, 0.10);
+    --backdrop: rgba(61, 30, 42, 0.12);
     --success: #16a34a;
   }
 
   * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
-  html, body { margin: 0; padding: 0; font-family: Georgia, 'Times New Roman', serif; color: var(--ink); background: #e7dce3; }
+  html, body { margin: 0; padding: 0; font-family: Georgia, 'Times New Roman', serif; color: var(--ink); background: #efe5d8; }
 
   /* Když je stránka načtena v iframe (= embedded na reálné sales page),
      skryjeme fake landing pozadí i dev panel, takže vidíme jen popup card. */
@@ -43,9 +45,9 @@
   .site-bg {
     min-height: 100vh;
     background:
-      radial-gradient(1200px 600px at 70% -10%, #f6e4ee 0%, transparent 60%),
-      radial-gradient(900px 500px at -10% 80%, #efd9e4 0%, transparent 55%),
-      #e7dce3;
+      radial-gradient(1200px 600px at 70% -10%, #f7ead9 0%, transparent 60%),
+      radial-gradient(900px 500px at -10% 80%, #f0e1d0 0%, transparent 55%),
+      #efe5d8;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -81,7 +83,7 @@
     max-height: calc(100vh - 40px);
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 30px 80px rgba(110, 63, 89, 0.35), 0 2px 0 rgba(255,255,255,0.6) inset;
+    box-shadow: 0 30px 80px rgba(110, 55, 45, 0.35), 0 2px 0 rgba(255,255,255,0.6) inset;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -198,7 +200,7 @@
       transform: translateY(-1px);
       border-color: var(--rose-300);
       background: linear-gradient(180deg, #fff 0%, #fdf6fa 100%);
-      box-shadow: 0 4px 14px rgba(168, 98, 138, 0.08);
+      box-shadow: 0 4px 14px rgba(184, 92, 74, 0.08);
     }
   }
   /* Active feedback na touch — okamžitý press state */
@@ -206,7 +208,7 @@
   .option.selected {
     border-color: var(--rose-500);
     background: var(--rose-100);
-    box-shadow: 0 0 0 3px rgba(168, 98, 138, 0.12);
+    box-shadow: 0 0 0 3px rgba(184, 92, 74, 0.12);
     animation: selectedBounce 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
   @keyframes selectedBounce {
@@ -530,7 +532,7 @@
   .intro-email-field input:focus {
     outline: none;
     border-color: var(--rose-500);
-    box-shadow: 0 0 0 4px rgba(168, 98, 138, 0.15);
+    box-shadow: 0 0 0 4px rgba(184, 92, 74, 0.15);
   }
   /* CTA — opvallend, glow-schaduw + zachte puls */
   .intro-cta {
@@ -543,18 +545,18 @@
     border-radius: 12px;
     cursor: pointer;
     letter-spacing: 0.2px;
-    box-shadow: 0 12px 30px rgba(168, 98, 138, 0.40);
+    box-shadow: 0 12px 30px rgba(184, 92, 74, 0.40);
     transition: transform 0.15s, box-shadow 0.2s;
     animation: ctaPulse 2.2s ease-in-out infinite;
   }
   @keyframes ctaPulse {
-    0%, 100% { box-shadow: 0 12px 30px rgba(168, 98, 138, 0.40); }
-    50%      { box-shadow: 0 12px 30px rgba(168, 98, 138, 0.40),
-                           0 0 0 6px rgba(200, 140, 175, 0.18); }
+    0%, 100% { box-shadow: 0 12px 30px rgba(184, 92, 74, 0.40); }
+    50%      { box-shadow: 0 12px 30px rgba(184, 92, 74, 0.40),
+                           0 0 0 6px rgba(205, 135, 110, 0.18); }
   }
   .intro-cta:hover {
     transform: translateY(-1px);
-    box-shadow: 0 16px 38px rgba(168, 98, 138, 0.48);
+    box-shadow: 0 16px 38px rgba(184, 92, 74, 0.48);
   }
   .intro-cta:active { transform: scale(0.99); }
   /* Micro-copy onder de CTA */
@@ -618,7 +620,7 @@
   .form-field input:focus {
     outline: none;
     border-color: var(--rose-500);
-    box-shadow: 0 0 0 3px rgba(168, 98, 138, 0.12);
+    box-shadow: 0 0 0 3px rgba(184, 92, 74, 0.12);
   }
   .submit-btn {
     width: 100%;
@@ -673,7 +675,7 @@
     color: #fff;
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 26px; margin-bottom: 12px;
-    box-shadow: 0 10px 28px rgba(168, 98, 138, 0.35);
+    box-shadow: 0 10px 28px rgba(184, 92, 74, 0.35);
     animation: successPop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
   @keyframes successPop {
@@ -732,7 +734,7 @@
     margin: 16px auto 14px auto;
     max-width: 380px;
     text-align: left;
-    box-shadow: 0 10px 28px rgba(168, 98, 138, 0.10);
+    box-shadow: 0 10px 28px rgba(184, 92, 74, 0.10);
     animation: inboxSlide 0.6s 0.15s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
   @keyframes inboxSlide {
@@ -794,9 +796,9 @@
                inboxGlow 2.4s 1.0s ease-in-out infinite;
   }
   @keyframes inboxGlow {
-    0%, 100% { box-shadow: 0 10px 28px rgba(168, 98, 138, 0.10); }
-    50%      { box-shadow: 0 10px 28px rgba(168, 98, 138, 0.12),
-                           0 0 0 5px rgba(200, 140, 175, 0.22); }
+    0%, 100% { box-shadow: 0 10px 28px rgba(184, 92, 74, 0.10); }
+    50%      { box-shadow: 0 10px 28px rgba(184, 92, 74, 0.12),
+                           0 0 0 5px rgba(205, 135, 110, 0.22); }
   }
   /* CTA-styled action callout — looks button-like but isn't clickable.
      This is the eye's "next step" anchor. Single dominant action. */
@@ -809,7 +811,7 @@
     padding: 13px 20px;
     border-radius: 10px;
     max-width: 380px; margin: 0 auto 14px auto;
-    box-shadow: 0 10px 24px rgba(168, 98, 138, 0.30);
+    box-shadow: 0 10px 24px rgba(184, 92, 74, 0.30);
     letter-spacing: 0.01em;
     line-height: 1.2;
   }
@@ -865,7 +867,7 @@
     color: #fff;
     font-size: 11px; font-weight: 700;
     display: inline-flex; align-items: center; justify-content: center;
-    box-shadow: 0 2px 6px rgba(168, 98, 138, 0.25);
+    box-shadow: 0 2px 6px rgba(184, 92, 74, 0.25);
   }
   .success-instructions ol li strong { font-weight: 600; color: var(--rose-700); }
   /* Email pill — highlights the user's actual address inside step 1
@@ -941,13 +943,13 @@
     font-size: 15.5px; font-weight: 800;
     padding: 14px 22px;
     border-radius: 12px;
-    box-shadow: 0 12px 30px rgba(168, 98, 138, 0.40);
+    box-shadow: 0 12px 30px rgba(184, 92, 74, 0.40);
     transition: transform 0.15s, box-shadow 0.2s;
     animation: ctaPulse 2.2s ease-in-out infinite;
   }
   .success-open-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 16px 38px rgba(168, 98, 138, 0.48);
+    box-shadow: 0 16px 38px rgba(184, 92, 74, 0.48);
   }
   .success-open-btn:active { transform: scale(0.99); }
   /* Spam fallback */
@@ -1087,7 +1089,7 @@
           <button type="submit" class="intro-cta">Ja, ik begin vandaag →</button>
           <p class="intro-microcopy">
             <span class="promise">Je eerste opdracht komt binnen 2 minuten in je inbox.</span>
-            <span class="from">Aanmelden = akkoord met Anna's e-mails · gratis · uitschrijven met 1 klik · <a href="https://www.pakjeleventerug.nl/privacy" target="_blank">Privacy</a></span>
+            <span class="from">Je meldt je aan voor Anna's e-mails · gratis · uitschrijven met 1 klik · <a href="https://www.pakjeleventerug.nl/privacy" target="_blank">Privacy</a></span>
           </p>
         </form>
       </div>
