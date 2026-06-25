@@ -4013,6 +4013,13 @@ if (scarcityBar) {
      ═══════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
+  // ═══ POPUP DOČASNĚ VYPNUTÝ ═══════════════════════════════════════
+  // popup-het-leven.html vracel 404 ("Page not found") a fullscreen
+  // iframe (z-index 99999) blokoval klikání na celou stránku.
+  // Vypnuto do doby než se popup funnel doladí.
+  // Pro znovuzapnutí smaž následující řádek `return;`.
+  return;
+  // ═════════════════════════════════════════════════════════════════
   const POPUP_URL  = '/popup-het-leven.html';
   const COOKIE_KEY = 'hl_popup_seen';
   const COOKIE_DAYS = 3;

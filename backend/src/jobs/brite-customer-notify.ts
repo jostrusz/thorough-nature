@@ -50,6 +50,12 @@ const PROJECTS: Record<string, {
     pendingTemplate: "ll-payment-pending", pendingSubject: "wir haben deine bestellung erhalten",
     recoveryTemplate: "ll-payment-recovery", recoverySubject: "du bist fast fertig",
   },
+  dehondenbijbel: {
+    checkoutUrl: process.env.DH_CHECKOUT_URL || "https://www.dehondenbijbel.nl/checkout",
+    replyTo: "support@dehondenbijbel.nl",
+    pendingTemplate: "dh-payment-pending", pendingSubject: "we hebben je bestelling ontvangen",
+    recoveryTemplate: "dh-payment-recovery", recoverySubject: "je bent er bijna",
+  },
 }
 const PROJECT_SLUGS = Object.keys(PROJECTS)
 
