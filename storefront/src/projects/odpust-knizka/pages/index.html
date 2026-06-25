@@ -2196,13 +2196,92 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════════
-     POPUP QUIZ EMBED — Loslatenboek
-     Triggery (whichever fires first):
+     POPUP EMBED — Pusť to, co tě ničí (odpust-knizka)
+     Triggery:
        1. CLICK   — element s class="quiz-trigger" / [data-quiz-trigger] (vždy, force=true)
-       2. SCROLL  — 50 % stránky (armed 1.5s po load, vyžaduje user-initiated scroll)
-       3. TIME    — 25s po loadu
+       2. TIME    — 7s po loadu (jediný auto-trigger; žádný scroll-trigger)
      Session-once: po prvním zobrazení v session další triggery nestřílí (popupShown).
-     Frequency cap: 3 dny v localStorage('lh_popup_seen').
+     Frequency cap: 3 dny v localStorage('op_popup_seen').
      ═══════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  const POPUP_URL  = '/popup-odpust-knizka.html';
+  const COOKIE_KEY = 'op_popup_seen';
+  const COOKIE_DAYS = 3;
+  const TIME_DELAY = 7000;
+
+  let popupShown = false;
+  let popupIframe = null;
+
+  function hasSeen() {
+    try {
+      const raw = localStorage.getItem(COOKIE_KEY);
+      if (!raw) return false;
+      const ageDays = (Date.now() - JSON.parse(raw).ts) / 86400000;
+      return ageDays < COOKIE_DAYS;
+    } catch { return false; }
+  }
+  function markSeen() {
+    try { localStorage.setItem(COOKIE_KEY, JSON.stringify({ ts: Date.now() })); } catch {}
+  }
+  function closePopup(shouldMark) {
+    if (shouldMark) markSeen();
+    if (popupIframe) { popupIframe.remove(); popupIframe = null; }
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    document.removeEventListener('keydown', escHandler);
+  }
+  function escHandler(e) { if (e.key === 'Escape') closePopup(true); }
+  function showPopup(source, force) {
+    if (popupShown && !force) return;
+    if (hasSeen() && !force) return;
+    popupShown = true;
+    popupIframe = document.createElement('iframe');
+    popupIframe.src = POPUP_URL + '?src=' + encodeURIComponent(source);
+    popupIframe.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;border:none;z-index:99999;';
+    popupIframe.setAttribute('title', 'Popup');
+    document.body.appendChild(popupIframe);
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', escHandler);
+    window.addEventListener('message', function handler(e) {
+      if (e.data && (e.data.type === 'popup_closed' || e.data.type === 'popup_submitted')) {
+        closePopup(true);
+        window.removeEventListener('message', handler);
+      }
+    });
+  }
+  // Safety: pokud někdo odstraní iframe manuálně (devtools / eval),
+  // uvolni scroll lock, aby se stránka nezasekla
+  new MutationObserver(() => {
+    if (popupIframe && !document.body.contains(popupIframe)) {
+      popupIframe = null;
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+  }).observe(document.body, { childList: true });
+  // expose for manual triggering from console / other scripts
+  window.opShowPopup = (source) => showPopup(source || 'manual', true);
+
+  // 1. CLICK na .quiz-trigger / [data-quiz-trigger] — vždy force (volitelné)
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('.quiz-trigger, [data-quiz-trigger]');
+    if (t) {
+      e.preventDefault();
+      showPopup('button:' + (t.dataset.source || 'click'), true);
+    }
+  });
+
+  // Žádný scroll-trigger — vypnutý scroll restore, aby obnovená pozice
+  // po reloadu nic netriggerovala.
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+  // 2. TIME — jediný auto-trigger: přesně 7 s po načtení stránky.
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      showPopup('time_' + Math.round(TIME_DELAY / 1000) + 's');
+    }, TIME_DELAY);
+  });
+})();
+</script>
 </body>
 </html>
