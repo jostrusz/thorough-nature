@@ -2146,6 +2146,16 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="Het Leven Dat
  </svg>
  </button>
  </div>
+ <button
+ id="hetlevenSoundPrompt"
+ type="button"
+ aria-label="Tik voor geluid"
+ style="position: absolute; bottom: 12px; left: 12px; display: none; align-items: center; gap: 8px; z-index: 3; background: rgba(184,92,74,0.95); color: #fff; border: 0; border-radius: 999px; padding: 10px 16px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.35); animation: float 2s ease-in-out infinite;">
+ <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+ <path d="M3 9v6h4l5 5V4L7 9H3zm10.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+ </svg>
+ Tik voor geluid
+ </button>
  <script>
  (function(){
  var v=document.getElementById('hetlevenVideo');
@@ -2154,6 +2164,7 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="Het Leven Dat
  var u=document.getElementById('hetlevenUnmuteBtn');
  var fs=document.getElementById('hetlevenFullscreenBtn');
  var muteIcon=document.getElementById('hetlevenMuteIcon');
+ var soundPrompt=document.getElementById('hetlevenSoundPrompt');
 
  var MUTED_PATH='<path d="M3 9v6h4l5 5V4L7 9H3zm13.59 3L19 9.41 17.59 8 15 10.59 12.41 8 11 9.41 13.59 12 11 14.59 12.41 16 15 13.41 17.59 16 19 14.59 16.59 12z"/>';
  var SOUND_PATH='<path d="M3 9v6h4l5 5V4L7 9H3zm10.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
@@ -2167,19 +2178,24 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="Het Leven Dat
    refreshMuteIcon();
  });
  v.addEventListener('pause', function(){ b.style.opacity='1'; b.style.pointerEvents='auto'; });
- v.addEventListener('ended', function(){ b.style.opacity='1'; b.style.pointerEvents='auto'; ctrls.style.display='none'; });
+ v.addEventListener('ended', function(){ b.style.opacity='1'; b.style.pointerEvents='auto'; ctrls.style.display='none'; soundPrompt.style.display='none'; });
  v.addEventListener('volumechange', refreshMuteIcon);
 
  function attemptPlay(){
    // User clicked → start with sound on. Browsers normally allow this after user gesture.
    v.muted = false;
+   v.volume = 1;
+   soundPrompt.style.display = 'none';
    var p = v.play();
    if (p && typeof p.then === 'function'){
      p.catch(function(){
-       // Audio policy blocked playback (rare on click; common on iOS for autoplay).
-       // Fallback: mute + retry. User can re-enable sound via the unmute button.
+       // Sound was blocked (Safari audio policy / iOS). Don't silently strand the
+       // user without sound: play muted so the video still starts, then surface a
+       // clear "tap for sound" prompt so a single extra tap turns audio on.
        v.muted = true;
-       v.play().catch(function(err){
+       v.play().then(function(){
+         soundPrompt.style.display = 'flex';
+       }).catch(function(err){
          console.warn('[HetLeven Video] Playback blocked:', err && err.message);
        });
      });
@@ -2199,6 +2215,16 @@ width="432" height="617" loading="eager" fetchpriority="high" alt="Het Leven Dat
  u.addEventListener('click', function(e){
    e.stopPropagation();
    v.muted = !v.muted;
+   if (!v.muted){ v.volume = 1; soundPrompt.style.display = 'none'; }
+   refreshMuteIcon();
+ });
+
+ // "Tap for sound" prompt → turn audio on and dismiss the prompt.
+ soundPrompt.addEventListener('click', function(e){
+   e.stopPropagation();
+   v.muted = false;
+   v.volume = 1;
+   soundPrompt.style.display = 'none';
    refreshMuteIcon();
  });
 
