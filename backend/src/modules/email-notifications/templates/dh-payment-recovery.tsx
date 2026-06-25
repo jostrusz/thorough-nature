@@ -52,7 +52,7 @@ export const DhPaymentRecoveryTemplate: React.FC<DhPaymentRecoveryProps> & {
           </Text>
 
           <div style={{ textAlign: 'center' as const, marginBottom: '18px' }}>
-            <Button href={checkoutUrl} style={{ backgroundColor: '#DC3522', color: '#ffffff', fontFamily: font, fontSize: '16px', fontWeight: 600, textDecoration: 'none', padding: '14px 44px', borderRadius: '8px', display: 'inline-block' }}>
+            <Button href={checkoutUrl} style={{ backgroundColor: '#E87E04', color: '#ffffff', fontFamily: font, fontSize: '16px', fontWeight: 600, textDecoration: 'none', padding: '14px 44px', borderRadius: '8px', display: 'inline-block' }}>
               Rond je bestelling af →
             </Button>
           </div>

@@ -7305,7 +7305,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     var overlay = document.createElement('div');
     overlay.className = 'brite-verify-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#FFF7F2;display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto;';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#FFFDE7;display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto;';
     overlay.innerHTML = briteVerifyCardHtml(bookName);
     document.body.insertBefore(overlay, document.body.firstChild);
 
@@ -7323,7 +7323,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var t = el('bv-title'); if (t) t.textContent = 'Je betaling wordt nog verwerkt';
       var sub = el('bv-sub');
       if (sub) sub.innerHTML = 'Sommige banken hebben iets meer tijd nodig — dat is normaal. <strong>Je hoeft niet te wachten.</strong> Zodra je bank de betaling bevestigt, ontvang je je bevestiging en e-book per e-mail.';
-      var info = el('bv-info'); if (info) info.innerHTML = '<strong style="color:#1A1A1A;">Je kunt dit venster sluiten.</strong> We houden alles in de gaten en mailen je zodra de betaling klaar is.';
+      var info = el('bv-info'); if (info) info.innerHTML = '<strong style="color:#3E2723;">Je kunt dit venster sluiten.</strong> We houden alles in de gaten en mailen je zodra de betaling klaar is.';
     }
 
     function showFailed(code) {
@@ -7375,29 +7375,29 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   }
 
   function briteVerifyCardHtml(bookName) {
-    return '<style>@keyframes bvpulse{0%{transform:scale(.8);opacity:.55}70%{transform:scale(1.5);opacity:0}100%{opacity:0}}@keyframes bvspin{to{transform:rotate(360deg)}}.bv-ring{position:absolute;inset:0;border-radius:50%;background:#DC3522;animation:bvpulse 2.2s ease-out infinite}.bv-spin{animation:bvspin 1.1s linear infinite}.bv-check{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#27AE60;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px}</style>'
-      + '<div style="max-width:480px;width:100%;background:#fff;border:1px solid rgba(220,53,34,0.18);border-radius:14px;padding:30px 28px;font-family:Inter,system-ui,sans-serif;">'
-      + '<div style="text-align:center;font-family:Cabin,Georgia,serif;font-size:17px;color:#1A1A1A;margin-bottom:22px;">' + bookName + '</div>'
-      + '<div style="display:flex;justify-content:center;margin-bottom:18px;"><div style="position:relative;width:62px;height:62px;"><span class="bv-ring"></span><div style="position:relative;width:62px;height:62px;border-radius:50%;background:#FFEDD5;display:flex;align-items:center;justify-content:center;font-size:28px;color:#DC3522;">🏦</div></div></div>'
-      + '<h1 id="bv-title" style="font-family:Cabin,Georgia,serif;font-weight:600;font-size:23px;color:#1A1A1A;text-align:center;margin:0 0 8px;">We controleren je betaling</h1>'
-      + '<p id="bv-sub" style="font-size:15px;line-height:1.6;color:#374151;text-align:center;margin:0 0 22px;">Je bank verwerkt de overschrijving. Dit duurt meestal maar een paar seconden.</p>'
-      + '<div style="border-top:1px solid rgba(220,53,34,0.18);padding-top:18px;margin-bottom:18px;">'
-      + '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;"><span class="bv-check">✓</span><div><p style="font-size:14.5px;font-weight:500;color:#1A1A1A;margin:0;">Betaling goedgekeurd</p><p style="font-size:13px;color:#9CA3AF;margin:2px 0 0;">Je hebt de betaling goedgekeurd bij je bank</p></div></div>'
-      + '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;"><span id="bv-step2-icon" class="bv-spin" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:2.5px solid #FFEDD5;border-top-color:#DC3522;"></span><div><p id="bv-step2-title" style="font-size:14.5px;font-weight:500;color:#1A1A1A;margin:0;">Verifiëren bij je bank…</p><p style="font-size:13px;color:#9CA3AF;margin:2px 0 0;">We wachten op de definitieve bevestiging</p></div></div>'
-      + '<div style="display:flex;align-items:flex-start;gap:12px;"><span id="bv-step3-icon" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:2px solid #FFEDD5;display:flex;align-items:center;justify-content:center;font-size:13px;color:#D1D5DB;">3</span><div><p style="font-size:14.5px;font-weight:500;color:#9CA3AF;margin:0;">Bevestiging &amp; e-book</p><p style="font-size:13px;color:#D1D5DB;margin:2px 0 0;">Ontvang je direct per e-mail</p></div></div>'
+    return '<style>@keyframes bvpulse{0%{transform:scale(.8);opacity:.55}70%{transform:scale(1.5);opacity:0}100%{opacity:0}}@keyframes bvspin{to{transform:rotate(360deg)}}.bv-ring{position:absolute;inset:0;border-radius:50%;background:#E87E04;animation:bvpulse 2.2s ease-out infinite}.bv-spin{animation:bvspin 1.1s linear infinite}.bv-check{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#2E7D32;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px}</style>'
+      + '<div style="max-width:480px;width:100%;background:#fff;border:1px solid rgba(232,126,4,0.20);border-radius:14px;padding:30px 28px;font-family:Inter,system-ui,sans-serif;">'
+      + '<div style="text-align:center;font-family:Cabin,Georgia,serif;font-size:17px;color:#3E2723;margin-bottom:22px;">' + bookName + '</div>'
+      + '<div style="display:flex;justify-content:center;margin-bottom:18px;"><div style="position:relative;width:62px;height:62px;"><span class="bv-ring"></span><div style="position:relative;width:62px;height:62px;border-radius:50%;background:#FFE0B2;display:flex;align-items:center;justify-content:center;font-size:28px;color:#E87E04;">🏦</div></div></div>'
+      + '<h1 id="bv-title" style="font-family:Cabin,Georgia,serif;font-weight:600;font-size:23px;color:#3E2723;text-align:center;margin:0 0 8px;">We controleren je betaling</h1>'
+      + '<p id="bv-sub" style="font-size:15px;line-height:1.6;color:#5D4037;text-align:center;margin:0 0 22px;">Je bank verwerkt de overschrijving. Dit duurt meestal maar een paar seconden.</p>'
+      + '<div style="border-top:1px solid rgba(232,126,4,0.20);padding-top:18px;margin-bottom:18px;">'
+      + '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;"><span class="bv-check">✓</span><div><p style="font-size:14.5px;font-weight:500;color:#3E2723;margin:0;">Betaling goedgekeurd</p><p style="font-size:13px;color:#A1887F;margin:2px 0 0;">Je hebt de betaling goedgekeurd bij je bank</p></div></div>'
+      + '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;"><span id="bv-step2-icon" class="bv-spin" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:2.5px solid #FFE0B2;border-top-color:#E87E04;"></span><div><p id="bv-step2-title" style="font-size:14.5px;font-weight:500;color:#3E2723;margin:0;">Verifiëren bij je bank…</p><p style="font-size:13px;color:#A1887F;margin:2px 0 0;">We wachten op de definitieve bevestiging</p></div></div>'
+      + '<div style="display:flex;align-items:flex-start;gap:12px;"><span id="bv-step3-icon" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:2px solid #FFE0B2;display:flex;align-items:center;justify-content:center;font-size:13px;color:#C4B0A4;">3</span><div><p style="font-size:14.5px;font-weight:500;color:#A1887F;margin:0;">Bevestiging &amp; e-book</p><p style="font-size:13px;color:#C4B0A4;margin:2px 0 0;">Ontvang je direct per e-mail</p></div></div>'
       + '</div>'
-      + '<div style="background:#FFF1E8;border-radius:10px;padding:14px 16px;"><p id="bv-info" style="font-size:13.5px;line-height:1.55;color:#374151;margin:0;"><strong style="color:#1A1A1A;">Je hoeft niets te doen.</strong> Sluit dit venster niet — je wordt automatisch doorgestuurd zodra de betaling klaar is.</p></div>'
-      + '<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;"><span style="font-size:12px;color:#9CA3AF;">🔒 Beveiligd via Brite · PSD2-gereguleerd</span></div>'
+      + '<div style="background:#FFF8E1;border-radius:10px;padding:14px 16px;"><p id="bv-info" style="font-size:13.5px;line-height:1.55;color:#5D4037;margin:0;"><strong style="color:#3E2723;">Je hoeft niets te doen.</strong> Sluit dit venster niet — je wordt automatisch doorgestuurd zodra de betaling klaar is.</p></div>'
+      + '<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;"><span style="font-size:12px;color:#A1887F;">🔒 Beveiligd via Brite · PSD2-gereguleerd</span></div>'
       + '</div>';
   }
 
   function briteFailedCardHtml(code) {
-    return '<div style="max-width:480px;width:100%;background:#fff;border:1px solid rgba(220,53,34,0.18);border-radius:14px;padding:30px 28px;font-family:Inter,system-ui,sans-serif;text-align:center;">'
-      + '<div style="display:flex;justify-content:center;margin-bottom:18px;"><div style="width:62px;height:62px;border-radius:50%;background:#FBEAEA;display:flex;align-items:center;justify-content:center;font-size:30px;color:#C0392B;">!</div></div>'
-      + '<h1 style="font-family:Cabin,Georgia,serif;font-weight:600;font-size:23px;color:#1A1A1A;margin:0 0 10px;">De betaling is niet voltooid</h1>'
-      + '<p style="font-size:15px;line-height:1.6;color:#374151;margin:0 0 24px;">Er is geen geld afgeschreven. Dit gebeurt soms als de bank de betaling weigert of als het venster te vroeg wordt gesloten.</p>'
-      + '<button id="bv-retry" style="display:block;width:100%;padding:16px;background:#DC3522;color:#fff;border:none;border-radius:8px;font-family:Inter,sans-serif;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:12px;">Probeer opnieuw</button>'
-      + '<p style="font-size:13px;color:#9CA3AF;margin:0;">Liever met iDEAL of een andere bank betalen? Kies opnieuw in de vorige stap.</p>'
+    return '<div style="max-width:480px;width:100%;background:#fff;border:1px solid rgba(232,126,4,0.20);border-radius:14px;padding:30px 28px;font-family:Inter,system-ui,sans-serif;text-align:center;">'
+      + '<div style="display:flex;justify-content:center;margin-bottom:18px;"><div style="width:62px;height:62px;border-radius:50%;background:#FDECEA;display:flex;align-items:center;justify-content:center;font-size:30px;color:#D32F2F;">!</div></div>'
+      + '<h1 style="font-family:Cabin,Georgia,serif;font-weight:600;font-size:23px;color:#3E2723;margin:0 0 10px;">De betaling is niet voltooid</h1>'
+      + '<p style="font-size:15px;line-height:1.6;color:#5D4037;margin:0 0 24px;">Er is geen geld afgeschreven. Dit gebeurt soms als de bank de betaling weigert of als het venster te vroeg wordt gesloten.</p>'
+      + '<button id="bv-retry" style="display:block;width:100%;padding:16px;background:#E87E04;color:#fff;border:none;border-radius:8px;font-family:Inter,sans-serif;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:12px;">Probeer opnieuw</button>'
+      + '<p style="font-size:13px;color:#A1887F;margin:0;">Liever met iDEAL of een andere bank betalen? Kies opnieuw in de vorige stap.</p>'
       + '</div>';
   }
 
