@@ -2210,6 +2210,10 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
   const COOKIE_DAYS = 3;
   const TIME_DELAY = 7000;
 
+  // Popup je zatím VYPNUTÝ na ostrém indexu — návštěvníkům se nezobrazuje.
+  // Při spuštění přepni na true. Manuální test přes window.opShowPopup('manual') jede dál.
+  const POPUP_ENABLED = false;
+
   let popupShown = false;
   let popupIframe = null;
 
@@ -2264,6 +2268,7 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
 
   // 1. CLICK na .quiz-trigger / [data-quiz-trigger] — vždy force (volitelné)
   document.addEventListener('click', (e) => {
+    if (!POPUP_ENABLED) return;
     const t = e.target.closest('.quiz-trigger, [data-quiz-trigger]');
     if (t) {
       e.preventDefault();
@@ -2277,6 +2282,7 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
 
   // 2. TIME — jediný auto-trigger: přesně 7 s po načtení stránky.
   window.addEventListener('load', () => {
+    if (!POPUP_ENABLED) return;
     setTimeout(() => {
       showPopup('time_' + Math.round(TIME_DELAY / 1000) + 's');
     }, TIME_DELAY);
