@@ -251,7 +251,6 @@ function MarketingDashboardPage() {
           <QuickActionTile to="/marketing/segments" icon="🔍" title="Segments" description="Rule-based contact slices." />
           <QuickActionTile to="/marketing/flows" icon="⚡" title="Flows" description="Automations and drip sequences." />
           <QuickActionTile to="/marketing/forms" icon="📝" title="Forms" description="Signup forms and landing pages." />
-          <QuickActionTile to="/marketing/acquisition" icon="📥" title="Aanmeldingen" description="Daily popup signups per project." />
         </div>
       </div>
 

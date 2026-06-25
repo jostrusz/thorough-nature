@@ -14,6 +14,7 @@ import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { ShoppingBag } from "@medusajs/icons"
 import { toast } from "@medusajs/ui"
 import { ProfitabilitySection } from "../../components/orders/profitability-section"
+import { PopupSubscriberSection } from "../../components/orders/popup-subscriber-section"
 import { OrderTabs, TABS } from "../../components/orders/order-tabs"
 import { OrderFilters, OrderFiltersValue } from "../../components/orders/order-filters"
 import { PROJECT_OPTIONS } from "../../components/orders/design-tokens"
@@ -806,6 +807,9 @@ const CustomOrdersPage = () => {
 
       {/* Profitability Section */}
       <ProfitabilitySection />
+
+      {/* Popup Subscriber Section — collapsible, lives under profitability */}
+      <PopupSubscriberSection />
 
       {/* Page Header — between profitability and orders table */}
       <div className="dash-header-row" style={headerStyle}>
