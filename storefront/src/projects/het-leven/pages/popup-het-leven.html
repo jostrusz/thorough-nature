@@ -1065,13 +1065,6 @@
     <!-- STEP 1: INTRO / HOOK -->
     <div class="step active" data-step="1">
       <div class="popup-header">
-        <div class="progress-wrap">
-          <div class="progress-dots">
-            <div class="progress-dot active"></div>
-            <div class="progress-dot"></div>
-          </div>
-          <span class="progress-label">Stap 1 / 2</span>
-        </div>
         <span class="intro-badge"><span class="dot"></span> Gratis 7-daagse uitdaging · 5 min per dag</span>
         <h2 class="question" id="popup-q">Optimaliseer 5 gebieden van je huis met slechts <strong>17%</strong> — en <span class="gold-underline">verdien meer geld, verbeter je relaties en genees je lichaam</span>.</h2>
         <p class="intro-subhead">Een 7-daagse uitdaging van 5 minuten per dag, die je van 'gewoon moe' naar '<u>eindelijk weer mezelf</u>' brengt.</p>
@@ -1405,8 +1398,7 @@ function startChallenge(e) {
   state.introFirstName = firstName;    // naam → aanhef in de flow ({{ first_name }})
   state.introGdpr = true;              // impliciete toestemming bij aanmelden
   trackPopupEvent("popup_intro_email_captured");
-  buildStep2();
-  showStep(2);
+  submitForm();          // geen tussenvraag meer — direct aanmelden + success tonen
   return false;
 }
 
