@@ -4080,26 +4080,13 @@ if (scarcityBar) {
     }
   });
 
-  // 2. SCROLL — 50 % page height
-  // Zakážeme auto-restore scrollu, aby po reloadu nespustil popup okamžitě
+  // 2. SCROLL-trigger UITGESCHAKELD — de pop-up opent uitsluitend op tijd (7s),
+  //    zodat hij altijd precies 7 seconden na het laden van de pagina verschijnt
+  //    (niet eerder bij snel scrollen). Scroll-restore wel uit laten, anders kan
+  //    een herstelde scrollpositie na reload meteen iets triggeren.
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  let scrollFired = false;
-  let scrollArmed = false;
-  window.addEventListener('load', () => {
-    // Arm až 1.5s po load — vyhneme se trigger z restored scrollu po reloadu.
-    setTimeout(() => { scrollArmed = true; }, 1500);
-  });
-  document.addEventListener('scroll', () => {
-    if (!scrollArmed || scrollFired) return;
-    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-    if (pct >= SCROLL_PCT) {
-      scrollFired = true;
-      showPopup('scroll_' + SCROLL_PCT + 'pct');
-    }
-  }, { passive: true });
 
-  // 3. TIME — 7s po loadu (whichever fires first; popupShown guard zajistí
-  //    že nestřílíme dvakrát pokud už scroll zavolal showPopup)
+  // 3. TIME — enige auto-trigger: exact 7 seconden na het laden van de pagina.
   window.addEventListener('load', () => {
     setTimeout(() => {
       showPopup('time_' + Math.round(TIME_DELAY / 1000) + 's');
