@@ -45,6 +45,9 @@ import { LbAbandonedCheckout3Template, LB_ABANDONED_CHECKOUT_3, isLbAbandonedChe
 // Loslatenboek Brite payment lifecycle (pending / recovery)
 import { LbPaymentPendingTemplate, LB_PAYMENT_PENDING, isLbPaymentPendingData } from './lb-payment-pending'
 import { LbPaymentRecoveryTemplate, LB_PAYMENT_RECOVERY, isLbPaymentRecoveryData } from './lb-payment-recovery'
+// De Hondenbijbel Brite payment lifecycle (pending / recovery)
+import { DhPaymentPendingTemplate, DH_PAYMENT_PENDING, isDhPaymentPendingData } from './dh-payment-pending'
+import { DhPaymentRecoveryTemplate, DH_PAYMENT_RECOVERY, isDhPaymentRecoveryData } from './dh-payment-recovery'
 // Släpp Taget Brite payment lifecycle (pending / recovery)
 import { StPaymentPendingTemplate, ST_PAYMENT_PENDING, isStPaymentPendingData } from './st-payment-pending'
 import { StPaymentRecoveryTemplate, ST_PAYMENT_RECOVERY, isStPaymentRecoveryData } from './st-payment-recovery'
@@ -126,6 +129,8 @@ export const EmailTemplates = {
   LB_ABANDONED_CHECKOUT_3,
   LB_PAYMENT_PENDING,
   LB_PAYMENT_RECOVERY,
+  DH_PAYMENT_PENDING,
+  DH_PAYMENT_RECOVERY,
   ST_PAYMENT_PENDING,
   ST_PAYMENT_RECOVERY,
   LL_PAYMENT_PENDING,
@@ -648,6 +653,24 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
         )
       }
       return <LbPaymentRecoveryTemplate {...data} />
+
+    case EmailTemplates.DH_PAYMENT_PENDING:
+      if (!isDhPaymentPendingData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.DH_PAYMENT_PENDING}"`
+        )
+      }
+      return <DhPaymentPendingTemplate {...data} />
+
+    case EmailTemplates.DH_PAYMENT_RECOVERY:
+      if (!isDhPaymentRecoveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.DH_PAYMENT_RECOVERY}"`
+        )
+      }
+      return <DhPaymentRecoveryTemplate {...data} />
 
     case EmailTemplates.ST_PAYMENT_PENDING:
       if (!isStPaymentPendingData(data)) {

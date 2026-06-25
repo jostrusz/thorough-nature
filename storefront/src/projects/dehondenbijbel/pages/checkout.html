@@ -7293,6 +7293,114 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // Restore form on page load
   restoreFormFromStorage();
 
+  /* ─── BRITE REDIRECT RETURN HANDLER (4 states + polling) ───
+   * Brite (Pay by Bank) returns to ?payment_return=1&cart_id=…&provider=brite
+   * once the session is final. One redirect_uri → outcome not in URL → poll
+   * /store/brite-payment-status (transaction state) and show verify/done/longer/failed.
+   */
+  function handleBriteReturn(cartId) {
+    var done = false, attempts = 0;
+    var MAX_ATTEMPTS = 10, POLL_MS = 2000;   // 1st immediately, then ~2s × 10 ≈ 20s
+    var bookName = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.name) || 'De Hondenbijbel';
+
+    var overlay = document.createElement('div');
+    overlay.className = 'brite-verify-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#FFF7F2;display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto;';
+    overlay.innerHTML = briteVerifyCardHtml(bookName);
+    document.body.insertBefore(overlay, document.body.firstChild);
+
+    function el(id) { return document.getElementById(id); }
+
+    function markPaid() {
+      var s2 = el('bv-step2-icon'); if (s2) { s2.className = 'bv-check'; s2.innerHTML = '✓'; }
+      var s2t = el('bv-step2-title'); if (s2t) s2t.textContent = 'Bevestigd bij je bank';
+      var s3 = el('bv-step3-icon'); if (s3) { s3.className = 'bv-check'; s3.innerHTML = '✓'; }
+      var t = el('bv-title'); if (t) t.textContent = 'Klaar! Je betaling is bevestigd';
+      var sub = el('bv-sub'); if (sub) sub.textContent = 'Je wordt nu doorgestuurd…';
+    }
+
+    function showLonger() {
+      var t = el('bv-title'); if (t) t.textContent = 'Je betaling wordt nog verwerkt';
+      var sub = el('bv-sub');
+      if (sub) sub.innerHTML = 'Sommige banken hebben iets meer tijd nodig — dat is normaal. <strong>Je hoeft niet te wachten.</strong> Zodra je bank de betaling bevestigt, ontvang je je bevestiging en e-book per e-mail.';
+      var info = el('bv-info'); if (info) info.innerHTML = '<strong style="color:#1A1A1A;">Je kunt dit venster sluiten.</strong> We houden alles in de gaten en mailen je zodra de betaling klaar is.';
+    }
+
+    function showFailed(code) {
+      overlay.innerHTML = briteFailedCardHtml(code);
+      var retry = el('bv-retry'); if (retry) retry.onclick = function(){ window.location.href = window.location.pathname; };
+    }
+
+    function finish() {
+      medusaFetch('/store/carts/' + cartId + '/complete', { method: 'POST' })
+        .then(function(res) {
+          var order = res.order || res;
+          localStorage.setItem('medusa_order_id', order.id || '');
+          localStorage.setItem('medusa_order_display_id', order.display_id || '');
+          localStorage.removeItem('checkout_draft');
+          localStorage.removeItem('background_cart_id');
+          var orderBump = localStorage.getItem('medusa_order_bump') === 'true';
+          if (PROJECT_CONFIG.upsellEnabled === false || orderBump) {
+            if (orderBump) localStorage.setItem('medusa_upsell_purchased', 'true');
+            window.location.href = PROJECT_CONFIG.thankYouUrl;
+          } else {
+            window.location.href = PROJECT_CONFIG.upsellUrl;
+          }
+        })
+        .catch(function() { showLonger(); });
+    }
+
+    function poll() {
+      if (done) return;
+      attempts++;
+      medusaFetch('/store/brite-payment-status?cart_id=' + encodeURIComponent(cartId), { method: 'GET' })
+        .then(function(d) {
+          if (done) return;
+          if (d && d.paid) { done = true; markPaid(); setTimeout(finish, 700); return; }
+          var ts = d && d.transaction_state;
+          if (ts === 2 || ts === 3 || ts === 7) { done = true; showFailed(d && d.error_code); return; }
+          // Cancelled before authorisation: session ended (aborted/failed) with NO transaction
+          // → it can never settle, so show the failed state now instead of polling/"taking longer".
+          if ((d.session_state === 10 || d.session_state === 11) && !d.has_transaction) { done = true; showFailed(d && d.error_code); return; }
+          if (attempts >= MAX_ATTEMPTS) { done = true; showLonger(); return; }
+          setTimeout(poll, POLL_MS);
+        })
+        .catch(function() {
+          if (done) return;
+          if (attempts >= MAX_ATTEMPTS) { done = true; showLonger(); return; }
+          setTimeout(poll, POLL_MS);
+        });
+    }
+    poll();
+  }
+
+  function briteVerifyCardHtml(bookName) {
+    return '<style>@keyframes bvpulse{0%{transform:scale(.8);opacity:.55}70%{transform:scale(1.5);opacity:0}100%{opacity:0}}@keyframes bvspin{to{transform:rotate(360deg)}}.bv-ring{position:absolute;inset:0;border-radius:50%;background:#DC3522;animation:bvpulse 2.2s ease-out infinite}.bv-spin{animation:bvspin 1.1s linear infinite}.bv-check{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#27AE60;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px}</style>'
+      + '<div style="max-width:480px;width:100%;background:#fff;border:1px solid rgba(220,53,34,0.18);border-radius:14px;padding:30px 28px;font-family:Inter,system-ui,sans-serif;">'
+      + '<div style="text-align:center;font-family:Cabin,Georgia,serif;font-size:17px;color:#1A1A1A;margin-bottom:22px;">' + bookName + '</div>'
+      + '<div style="display:flex;justify-content:center;margin-bottom:18px;"><div style="position:relative;width:62px;height:62px;"><span class="bv-ring"></span><div style="position:relative;width:62px;height:62px;border-radius:50%;background:#FFEDD5;display:flex;align-items:center;justify-content:center;font-size:28px;color:#DC3522;">🏦</div></div></div>'
+      + '<h1 id="bv-title" style="font-family:Cabin,Georgia,serif;font-weight:600;font-size:23px;color:#1A1A1A;text-align:center;margin:0 0 8px;">We controleren je betaling</h1>'
+      + '<p id="bv-sub" style="font-size:15px;line-height:1.6;color:#374151;text-align:center;margin:0 0 22px;">Je bank verwerkt de overschrijving. Dit duurt meestal maar een paar seconden.</p>'
+      + '<div style="border-top:1px solid rgba(220,53,34,0.18);padding-top:18px;margin-bottom:18px;">'
+      + '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;"><span class="bv-check">✓</span><div><p style="font-size:14.5px;font-weight:500;color:#1A1A1A;margin:0;">Betaling goedgekeurd</p><p style="font-size:13px;color:#9CA3AF;margin:2px 0 0;">Je hebt de betaling goedgekeurd bij je bank</p></div></div>'
+      + '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;"><span id="bv-step2-icon" class="bv-spin" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:2.5px solid #FFEDD5;border-top-color:#DC3522;"></span><div><p id="bv-step2-title" style="font-size:14.5px;font-weight:500;color:#1A1A1A;margin:0;">Verifiëren bij je bank…</p><p style="font-size:13px;color:#9CA3AF;margin:2px 0 0;">We wachten op de definitieve bevestiging</p></div></div>'
+      + '<div style="display:flex;align-items:flex-start;gap:12px;"><span id="bv-step3-icon" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:2px solid #FFEDD5;display:flex;align-items:center;justify-content:center;font-size:13px;color:#D1D5DB;">3</span><div><p style="font-size:14.5px;font-weight:500;color:#9CA3AF;margin:0;">Bevestiging &amp; e-book</p><p style="font-size:13px;color:#D1D5DB;margin:2px 0 0;">Ontvang je direct per e-mail</p></div></div>'
+      + '</div>'
+      + '<div style="background:#FFF1E8;border-radius:10px;padding:14px 16px;"><p id="bv-info" style="font-size:13.5px;line-height:1.55;color:#374151;margin:0;"><strong style="color:#1A1A1A;">Je hoeft niets te doen.</strong> Sluit dit venster niet — je wordt automatisch doorgestuurd zodra de betaling klaar is.</p></div>'
+      + '<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;"><span style="font-size:12px;color:#9CA3AF;">🔒 Beveiligd via Brite · PSD2-gereguleerd</span></div>'
+      + '</div>';
+  }
+
+  function briteFailedCardHtml(code) {
+    return '<div style="max-width:480px;width:100%;background:#fff;border:1px solid rgba(220,53,34,0.18);border-radius:14px;padding:30px 28px;font-family:Inter,system-ui,sans-serif;text-align:center;">'
+      + '<div style="display:flex;justify-content:center;margin-bottom:18px;"><div style="width:62px;height:62px;border-radius:50%;background:#FBEAEA;display:flex;align-items:center;justify-content:center;font-size:30px;color:#C0392B;">!</div></div>'
+      + '<h1 style="font-family:Cabin,Georgia,serif;font-weight:600;font-size:23px;color:#1A1A1A;margin:0 0 10px;">De betaling is niet voltooid</h1>'
+      + '<p style="font-size:15px;line-height:1.6;color:#374151;margin:0 0 24px;">Er is geen geld afgeschreven. Dit gebeurt soms als de bank de betaling weigert of als het venster te vroeg wordt gesloten.</p>'
+      + '<button id="bv-retry" style="display:block;width:100%;padding:16px;background:#DC3522;color:#fff;border:none;border-radius:8px;font-family:Inter,sans-serif;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:12px;">Probeer opnieuw</button>'
+      + '<p style="font-size:13px;color:#9CA3AF;margin:0;">Liever met iDEAL of een andere bank betalen? Kies opnieuw in de vorige stap.</p>'
+      + '</div>';
+  }
+
   /* ─── PAYMENT RETURN HANDLER ───
    * When customer returns from Mollie after paying,
    * URL has ?payment_return=1&cart_id=xxx
@@ -7304,6 +7412,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     var cartId = params.get('cart_id');
     if (!cartId) return;
+
+    // Brite uses its own verify-and-poll flow (single redirect_uri, outcome not in URL).
+    if (params.get('provider') === 'brite') { handleBriteReturn(cartId); return; }
 
     // Show branded preloader (injected by head script, hides checkout form)
     // Add preloader element if not already present
@@ -7918,6 +8029,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (selectedProvider === 'brite') {
           sessionData.method = window.__briteMethod || 'pay_by_bank';
           if (window.__briteBankId) sessionData.bank_id = window.__briteBankId;
+          sessionData.brite_flow = 'redirect';   // backend adds redirect_uri; we top-level redirect (no iframe)
         }
       }
 
@@ -8035,59 +8147,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var providerData = lastSession.data || {};
         var redirectUrl = providerData.checkoutUrl || providerData.approvalUrl;
 
-        // ─── BRITE EMBEDDED (Web SDK) FLOW ───
-        // Brite "Pay by Bank" renders an in-page iframe (no redirect). The embedded
-        // handler lives in the Brite emulator (window.__briteOpenEmbedded); when
-        // present and Brite is the chosen provider, hand off to it. On success it
-        // completes the cart via the callback we pass. Falls through to the hosted
-        // redirect (checkoutUrl) if the SDK handler isn't available.
-        if (selectedProvider === 'brite' && providerData.briteToken && typeof window.__briteOpenEmbedded === 'function') {
-          return window.__briteOpenEmbedded({
-            token: providerData.briteToken,
-            bankId: providerData.preselected_bank || window.__briteBankId || null,
-            cartId: result.cartId,
-            onComplete: function() {
-              // Brite settles asynchronously: at STATE_COMPLETED the cart may need a
-              // moment before Medusa can authorize the payment. Poll a few times, then
-              // fall back to a "we're confirming" message — the webhook safety-net
-              // finalizes the order server-side, so the payment is never lost and the
-              // button never hangs silently.
-              if (!document.querySelector('.payment-preloader')) {
-                var pl = document.createElement('div');
-                pl.className = 'payment-preloader';
-                pl.innerHTML = '<img src="/dehondenbijbel/images/preloader.webp" alt="Laden..." width="120" height="110"><p>Betaling wordt verwerkt...</p><p class="sub">Even geduld alsjeblieft.</p>';
-                document.body.insertBefore(pl, document.body.firstChild);
-              }
-              function redirectToNext(order) {
-                localStorage.setItem('medusa_order_id', order.id || '');
-                localStorage.setItem('medusa_order_display_id', order.display_id || '');
-                if (PROJECT_CONFIG.upsellEnabled === false) { window.location.href = PROJECT_CONFIG.thankYouUrl; }
-                else if (checkoutOrderBump) { localStorage.setItem('medusa_upsell_purchased', 'true'); window.location.href = PROJECT_CONFIG.thankYouUrl; }
-                else { window.location.href = PROJECT_CONFIG.upsellUrl; }
-              }
-              function attempt(n) {
-                return medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' })
-                  .then(function(completeRes) { redirectToNext(window.__extractOrderOrThrow(completeRes)); })
-                  .catch(function(err) {
-                    if (n < 5) {
-                      return new Promise(function(r){ setTimeout(r, 2500); }).then(function(){ return attempt(n + 1); });
-                    }
-                    // Give up client-side — never hang. Inform + reset; safety-net finalizes.
-                    var p = document.querySelector('.payment-preloader'); if (p) p.remove();
-                    errorEl.textContent = 'Je betaling wordt nog bevestigd. Zodra deze rond is ontvang je een bevestiging per e-mail. Sluit deze pagina niet.';
-                    submitBtn.classList.remove('loading'); submitBtn.disabled = false;
-                  });
-              }
-              return attempt(0);
-            },
-            onCancel: function(reason) {
-              submitBtn.classList.remove('loading');
-              submitBtn.disabled = false;
-              if (reason === 'failed' || reason === 'error') {
-                errorEl.textContent = 'De betaling is niet gelukt. Probeer het opnieuw of kies een andere bank.';
-              }
-            }
-          });
+        // ─── BRITE REDIRECT FLOW ───
+        // Brite (Pay by Bank) → TOP-LEVEL redirect to the hosted page
+        // (providerData.checkoutUrl = Brite session.url). NO iframe: the embedded Web SDK
+        // suffered mobile OS throttling after the bank app-switch and lost ~50% of
+        // thank-you redirects. Brite returns the customer to ?payment_return=1&provider=brite,
+        // where handleBriteReturn polls brite-payment-status (verify → done/longer/failed).
+        if (selectedProvider === 'brite' && redirectUrl) {
+          try { saveFormToStorage(); } catch (e) {}   // persist form so a return (Probeer opnieuw) pre-fills the fields
+          window.location.href = redirectUrl;
+          return;
         }
 
         // Credit card without 3DS: payment already completed, complete cart directly
@@ -8720,111 +8789,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     bt.textContent = 'Bestelling afronden' + (price ? ' — ' + price : '');
   }
 
-  // ─── Brite embedded Web SDK launcher ───────────────────────────────────────
-  window.__briteOpenEmbedded = function(opts){
-    return new Promise(function(resolve){
-      // Mobile: per Brite docs the SDK container MUST occupy the full viewport
-      // (100vw/100vh). A small modal cramps the bank login / app-switch → aborts.
-      var isMobile = !!(window.matchMedia && window.matchMedia('(max-width: 767px)').matches);
-      var ov = document.createElement('div');
-      ov.id = 'brite-embed-overlay';
-      ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(107,33,168,0.55);display:flex;align-items:center;justify-content:center;padding:' + (isMobile ? '0' : '16px') + ';';
-      var box = document.createElement('div');
-      box.style.cssText = isMobile
-        ? 'background:#fff;overflow:hidden;width:100vw;height:100vh;display:flex;flex-direction:column;'
-        : 'background:#fff;border-radius:18px;overflow:hidden;width:100%;max-width:440px;box-shadow:0 24px 64px rgba(107,33,168,0.35);';
-      var head = document.createElement('div');
-      head.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(107,33,168,0.08);';
-      head.innerHTML = '<span style="font-weight:700;color:#1A1A1A;font-size:15px;font-family:inherit;">Betalen met je bank</span>';
-      // No own close button — only Brite's native iframe 'X' closes the payment, so Brite
-      // can capture a real "user closed" decision instead of a background session timeout.
-      var mount = document.createElement('div');
-      mount.id = 'brite-embed-mount';
-      mount.style.cssText = isMobile ? 'flex:1;min-height:0;background:#fff;' : 'min-height:560px;background:#fff;';
-      box.appendChild(head); box.appendChild(mount); ov.appendChild(box);
-      document.body.appendChild(ov);
-
-      var client = null, done = false;
-      function cleanup(){ try{ if(client && client.stop) client.stop(); }catch(e){} if(ov.parentNode) ov.parentNode.removeChild(ov); }
-      function finish(fn){ if(done) return; done = true; cleanup(); Promise.resolve(fn && fn()).then(function(){ resolve(); }).catch(function(e){ console.error('[Brite SDK] finish error:', e); resolve(); }); }
-
-      // Brite docs (session-states): the SESSION can end ABORTED/FAILED while the
-      // TRANSACTION still settles (name_mismatch, late settlement). "Subscribe to the
-      // transaction states ... instead of relying on the final state of the session."
-      // So on aborted/closed, ask the backend by TRANSACTION state before showing an
-      // error — if the money is in, run the success (onComplete) flow instead. Polls a
-      // few times to catch a credit that lands a second or two after the close.
-      function checkPaidThenFinish(reason){
-        if (done) return;
-        var base = (window.PROJECT_CONFIG && PROJECT_CONFIG.medusaUrl) || '';
-        var key = (window.PROJECT_CONFIG && PROJECT_CONFIG.publishableApiKey) || '';
-        var tries = 0;
-        function bail(){ finish(function(){ return opts.onCancel && opts.onCancel(reason); }); }
-        function poll(){
-          tries++;
-          originalFetch(base + '/store/brite-payment-status?cart_id=' + encodeURIComponent(opts.cartId || ''), {
-            headers: key ? { 'x-publishable-api-key': key } : {}
-          }).then(function(r){ return r.json(); })
-            .then(function(d){
-              if (d && d.paid) { finish(opts.onComplete); return; }
-              if (tries < 3) { setTimeout(poll, 2000); return; }
-              bail();
-            })
-            .catch(function(){ if (tries < 3) { setTimeout(poll, 2000); return; } bail(); });
-        }
-        poll();
-      }
-
-      function launch(){
-        try {
-          client = new Brite(opts.token);
-          var B = window.Brite || {};
-          var ST_DONE  = (typeof B.STATE_COMPLETED !== 'undefined') ? B.STATE_COMPLETED : 12;
-          var ST_FAIL  = (typeof B.STATE_FAILED !== 'undefined') ? B.STATE_FAILED : 11;
-          var ST_ABORT = (typeof B.STATE_ABORTED !== 'undefined') ? B.STATE_ABORTED : 10;
-          var ST_AUTH  = (typeof B.STATE_AUTHENTICATION_COMPLETED !== 'undefined') ? B.STATE_AUTHENTICATION_COMPLETED : 2;
-          var startOpts = { selector: '#brite-embed-mount', width: '100%', height: isMobile ? Math.max(window.innerHeight - 52, 480) + 'px' : '560px', color_theme: 'light' };
-          if (opts.bankId) startOpts.bank_id = opts.bankId;
-          client.start(startOpts, function(state){
-            console.log('[Brite SDK] state:', state);
-            try { window.PaymentTracker && PaymentTracker.track('brite_sdk_state', { payload: { state: state } }); } catch(e){}
-            if (state === ST_DONE) {
-              finish(opts.onComplete);
-            } else if (state === ST_FAIL || state === ST_ABORT) {
-              // Session aborted/failed — but the transaction may still have settled
-              // (name_mismatch / late settlement). Verify by transaction state first.
-              checkPaidThenFinish('failed');
-            } else if (state === ST_AUTH) {
-              if (!head.querySelector('.brite-embed-status')) {
-                var hd = document.createElement('span');
-                hd.className = 'brite-embed-status';
-                hd.style.cssText = 'font-size:12px;color:#2EA043;font-weight:600;margin-left:auto;margin-right:10px;';
-                hd.textContent = 'Betaling wordt bevestigd…';
-                head.appendChild(hd);
-              }
-            }
-          }, function(){ checkPaidThenFinish('closed'); });
-        } catch(e){
-          console.error('[Brite SDK] init failed:', e);
-          if (opts.checkoutUrl) { cleanup(); window.location.href = opts.checkoutUrl; return; }
-          finish(function(){ return opts.onCancel && opts.onCancel('error'); });
-        }
-      }
-
-      if (typeof window.Brite !== 'undefined') { launch(); }
-      else {
-        var s = document.createElement('script');
-        s.src = 'https://websdk.britepayments.io/v1/client.js';
-        s.onload = launch;
-        s.onerror = function(){
-          console.error('[Brite SDK] script load failed');
-          if (opts.checkoutUrl) { cleanup(); window.location.href = opts.checkoutUrl; return; }
-          finish(opts.onCancel);
-        };
-        document.head.appendChild(s);
-      }
-    });
-  };
+  // ─── Brite: redirect flow (no embedded SDK) ─────────────────────────────────
+  // The old in-page Web SDK launcher (window.__briteOpenEmbedded) was removed in
+  // favour of a top-level redirect to Brite's hosted page — see the submit branch
+  // (selectedProvider === 'brite' && redirectUrl) and handleBriteReturn() on return.
+  // The Brite picker UI (buildBriteCard / __briteClearSelection) below is unchanged.
 
   function buildBriteCard() {
     var card = document.createElement('div');
