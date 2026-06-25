@@ -92,6 +92,7 @@ const medusaConfig = {
     { resolve: "./src/modules/digital-download" },
     { resolve: "./src/modules/profitability" },
     { resolve: "./src/modules/advertorial" },
+    { resolve: "./src/modules/presale" },
     { resolve: "./src/modules/marketing" },
     { resolve: "./src/modules/payment-debug" },
     { resolve: "./src/modules/brite-bank-logos" },

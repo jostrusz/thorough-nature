@@ -87,11 +87,17 @@ export async function GET(
   // Look up the HTML filename
   const htmlFile = config.pages[pageName]
   if (!htmlFile) {
-    // Fallback: check for advertorial page in database
-    // For multi-segment paths (e.g. "prefix/slug"), use last segment as advertorial slug
+    // Fallback resolution order: presale (new, domain-bound) → advertorial (legacy) → 404.
+    // For multi-segment paths (e.g. "prefix/slug"), use the last segment as the slug.
     const segments = pageName.split("/").filter(Boolean)
-    const advertorialSlug = segments[segments.length - 1] || pageName
-    const advertorial = await fetchAdvertorial(config, advertorialSlug)
+    const fallbackSlug = segments[segments.length - 1] || pageName
+
+    const presale = await fetchPresale(request, config, fallbackSlug)
+    if (presale) {
+      return servePresale(request, config, presale)
+    }
+
+    const advertorial = await fetchAdvertorial(config, fallbackSlug)
     if (advertorial) {
       return serveAdvertorial(request, config, advertorial)
     }
@@ -505,6 +511,162 @@ if (typeof MetaTracker !== 'undefined') {
   }
   if (acceptGzip2) htmlHeaders2["Content-Encoding"] = "gzip"
   return new NextResponse(htmlBody2, { status: 200, headers: htmlHeaders2 })
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ * PRESALE PAGE HELPERS (new domain-bound module)
+ * Served via the SAME injection helpers as advertorials (pixel, analytics,
+ * SEO) — no refactor of the advertorial path. Resolution order in the
+ * fallback is presale → advertorial, so the legacy 19 advertorials are
+ * completely untouched.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+interface PresalePage {
+  id: string
+  domain: string
+  title: string
+  title_cs: string | null
+  slug: string
+  type: string
+  html_content: string
+  meta_title: string | null
+  meta_description: string | null
+  og_image_url: string | null
+  facebook_pixel_id: string | null
+}
+
+/**
+ * Fetch a published presale page. Binds on the request's real domain first
+ * (so a presale can live on any domain), then the project's canonical domain.
+ * Cached 60s — edits go live faster than the legacy 300s advertorial cache.
+ */
+async function fetchPresale(
+  request: NextRequest,
+  config: ProjectConfig,
+  slug: string
+): Promise<PresalePage | null> {
+  if (slug.includes(".")) return null
+
+  const candidates: string[] = []
+  const host = (request.headers.get("host") || "").split(":")[0].toLowerCase().replace(/^www\./, "")
+  if (host) candidates.push(host)
+  if (config.domain) {
+    const cd = config.domain.toLowerCase().replace(/^www\./, "")
+    if (!candidates.includes(cd)) candidates.push(cd)
+  }
+
+  for (const domain of candidates) {
+    try {
+      const url = `${config.medusaUrl}/public/presale/${encodeURIComponent(slug)}?domain=${encodeURIComponent(domain)}`
+      const res = await fetch(url, { next: { revalidate: 60 } })
+      if (!res.ok) continue
+      const data = await res.json()
+      if (data.found && data.page) return data.page as PresalePage
+    } catch (e) {
+      console.warn(`[Presale] Failed to fetch "${slug}" for ${domain}:`, e)
+    }
+  }
+  return null
+}
+
+/**
+ * Serve a presale page. Mirrors serveAdvertorial (SEO meta + Facebook Pixel +
+ * Analytics + ViewContent + lazy images) but adds a permissive
+ * Content-Security-Policy-Report-Only header — it reports violations to the
+ * console WITHOUT blocking anything, so we can validate before enforcing.
+ */
+async function servePresale(
+  request: NextRequest,
+  config: ProjectConfig,
+  presale: PresalePage
+): Promise<NextResponse> {
+  let html = presale.html_content || ""
+
+  // --- 1. Facebook Pixel: presale override → project default ---
+  let pixelId = presale.facebook_pixel_id || ""
+  if (!pixelId) {
+    pixelId = await fetchPixelId(config)
+  }
+
+  // --- 2. SEO meta into <head> (presale reuses the advertorial meta builder) ---
+  const metaTags = buildMetaTags(presale as any)
+  if (metaTags) {
+    // Strip an author-provided <title> so the DB meta wins WITHOUT a duplicate
+    // <title> (bug #6 — fixed for presale by design).
+    html = html.replace(/<title>[\s\S]*?<\/title>/gi, "")
+    if (/<head[^>]*>/i.test(html)) {
+      html = html.replace(/<head([^>]*)>/i, `<head$1>${metaTags}`)
+    } else if (/<html[^>]*>/i.test(html)) {
+      html = html.replace(/<html([^>]*)>/i, `<html$1><head>${metaTags}</head>`)
+    } else {
+      html = `<head>${metaTags}</head>${html}`
+    }
+  }
+
+  // --- 3. Facebook Pixel script (end of <head>) ---
+  const pixelScript = generatePixelScript(config, pixelId)
+  if (/<head[^>]*>/i.test(html)) {
+    html = html.replace(/<\/head>/i, `${pixelScript}\n</head>`)
+  } else {
+    html = `${pixelScript}\n${html}`
+  }
+
+  // --- 4. Analytics tracker before </body> ---
+  const analyticsScript = generateAnalyticsScript(config)
+  if (/<\/body>/i.test(html)) {
+    html = html.replace(/<\/body>/i, `${analyticsScript}\n</body>`)
+  } else {
+    html = `${html}\n${analyticsScript}`
+  }
+
+  // --- 4b. ViewContent with correct catalog IDs for CAPI dedup ---
+  const catalogIds = (config as any).catalogContentIds || []
+  const productName = config.mainProduct?.name || config.name || ""
+  const productPrice = config.mainProduct?.price || 0
+  const productCurrency = config.mainProduct?.currency || "EUR"
+  if (catalogIds.length > 0) {
+    const viewContentScript = `<script>
+if (typeof MetaTracker !== 'undefined') {
+  MetaTracker.trackViewContent({
+    content_name: ${JSON.stringify(productName)},
+    content_ids: ${JSON.stringify(catalogIds)},
+    value: ${productPrice},
+    currency: ${JSON.stringify(productCurrency)}
+  });
+}
+</script>`
+    if (/<\/body>/i.test(html)) {
+      html = html.replace(/<\/body>/i, `${viewContentScript}\n</body>`)
+    } else {
+      html = `${html}\n${viewContentScript}`
+    }
+  }
+
+  // --- 5. Lazy-load images (skip first/hero for LCP) ---
+  let imgCount = 0
+  html = html.replace(/<img\b([^>]*?)(\s*\/?)>/gi, (match, attrs, close) => {
+    imgCount++
+    if (imgCount === 1) return match
+    if (/loading\s*=/i.test(attrs)) return match
+    return `<img${attrs} loading="lazy" decoding="async"${close}>`
+  })
+
+  const acceptGzip = (request.headers.get("accept-encoding") || "").includes("gzip")
+  const htmlBody = acceptGzip ? gzipSync(Buffer.from(html, "utf-8")) : html
+  const htmlHeaders: Record<string, string> = {
+    "Content-Type": "text/html; charset=utf-8",
+    "Cache-Control": "public, max-age=300, s-maxage=3600",
+    // Report-only: logs violations, blocks NOTHING. Tighten to enforcing later.
+    "Content-Security-Policy-Report-Only": [
+      "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'",
+      "img-src 'self' https: data: blob:",
+      "script-src 'self' https: 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' https: 'unsafe-inline'",
+      "connect-src 'self' https:",
+    ].join("; "),
+  }
+  if (acceptGzip) htmlHeaders["Content-Encoding"] = "gzip"
+  return new NextResponse(htmlBody, { status: 200, headers: htmlHeaders })
 }
 
 /**
