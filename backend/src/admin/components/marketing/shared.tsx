@@ -533,6 +533,7 @@ const NAV_ITEMS = [
   { label: "Segments", href: "/marketing/segments" },
   { label: "Flows", href: "/marketing/flows" },
   { label: "Forms", href: "/marketing/forms" },
+  { label: "Aanmeldingen", href: "/marketing/acquisition" },
   { label: "Analytics", href: "/marketing/analytics" },
 ]
 
