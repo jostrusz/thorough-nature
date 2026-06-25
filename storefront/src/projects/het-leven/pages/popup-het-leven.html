@@ -521,7 +521,7 @@
     border: 1.5px solid var(--rose-200);
     border-radius: 12px;
     font-family: Georgia, serif;
-    font-size: 15px;
+    font-size: 16px;            /* ≥16px voorkomt auto-zoom bij focus op iOS */
     color: var(--ink);
     background: #fff;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -959,29 +959,47 @@
   }
   .success-spam strong { color: var(--ink-soft); font-weight: 600; }
 
-  /* Mobile — floating popup (NOT full-screen) so it's clearly an overlay */
+  /* ═══ Mobile — bottom-sheet (industry-standard mobiele UX) ═══════════ */
   @media (max-width: 560px) {
     .popup-overlay {
-      padding: 20px 12px;
-      align-items: flex-start;
+      padding: 0;
+      align-items: flex-end;              /* anker onderaan → duimbereik */
     }
     .popup {
       max-width: 100%;
-      max-height: calc(100dvh - 40px);  /* dvh = dynamic viewport, iOS Safari fix */
-      border-radius: 20px;
+      max-height: 94dvh;
+      border-radius: 22px 22px 0 0;        /* alleen bovenhoeken rond = sheet */
+      transform: translateY(100%);         /* dicht: net onder het scherm */
+      transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+      padding-bottom: env(safe-area-inset-bottom);  /* iPhone home-indicator */
     }
-    .question { font-size: 21px; line-height: 1.2; }
+    .popup-overlay.open .popup { transform: translateY(0); }
+    /* grabber-handle bovenaan de sheet */
+    .popup::before {
+      content: ""; position: absolute; top: 8px; left: 50%;
+      transform: translateX(-50%);
+      width: 38px; height: 4px; border-radius: 999px;
+      background: var(--rose-200); z-index: 3;
+    }
+    .popup-close { top: 14px; right: 12px; }
+    .popup-header { padding: 26px 20px 0 20px; }
+    .progress-wrap { margin-bottom: 14px; }
+    .intro-badge { font-size: 11px; padding: 5px 11px; margin-bottom: 10px; }
+    .question { font-size: 20px; line-height: 1.24; margin: 2px 0 6px 0; }
     .question-sub { font-size: 14px; }
+    .intro-subhead { font-size: 14px; margin-bottom: 14px; }
+    .benefits { gap: 9px; }
+    .benefits li { font-size: 13.5px; }
     .options-grid-2 { grid-template-columns: 1fr; }
-    .popup-header { padding: 20px 20px 4px 20px; }
-    .options { padding: 0 16px 16px 16px; gap: 8px; }
+    .options { padding: 4px 16px 18px 16px; gap: 8px; }
+    .intro-cta { font-size: 16px; padding: 16px 20px; }
+    .intro-microcopy { margin-top: 12px; }
     .option { min-height: 60px; padding: 12px 14px; gap: 12px; border-radius: 12px; }
     .option-icon { flex: 0 0 40px; width: 40px; height: 40px; font-size: 20px; border-radius: 10px; }
     .option-title { font-size: 15.5px; }
     .option-hint { font-size: 12.5px; }
-    .popup-footer { padding: 14px 20px 18px 20px; }
+    .popup-footer { padding: 14px 20px calc(18px + env(safe-area-inset-bottom)) 20px; }
     .ai-insight, .email-form { padding-left: 20px; padding-right: 20px; }
-    .popup-close { top: 10px; right: 10px; }
   }
   /* Ultra-small (≤360px) — ještě těsnější */
   @media (max-width: 360px) {
@@ -1053,7 +1071,7 @@
         <span class="intro-badge"><span class="dot"></span> Gratis 7-daagse uitdaging · 5 min per dag</span>
         <h2 class="question" id="popup-q">Optimaliseer 5 gebieden van je huis met slechts <strong>17%</strong> — en <span class="gold-underline">verdien meer geld, verbeter je relaties en genees je lichaam</span>.</h2>
         <p class="intro-subhead">Een 7-daagse uitdaging van 5 minuten per dag, die je van 'gewoon moe' naar '<u>eindelijk weer mezelf</u>' brengt.</p>
-        <ul class="benefits" style="margin-top:2px;margin-bottom:4px;">
+        <ul class="benefits" style="margin-top:6px;margin-bottom:20px;">
           <li>Krijg elke dag <strong>1 mini-opdracht van 5 minuten</strong></li>
           <li>Ontdek je <strong>5 grootste energielekken</strong></li>
           <li>Voel meer rust, energie en ruimte in je huis</li>
