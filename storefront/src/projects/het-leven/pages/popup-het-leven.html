@@ -961,8 +961,10 @@
   }
   .success-spam strong { color: var(--ink-soft); font-weight: 600; }
 
-  /* ═══ Mobile — bottom-sheet (industry-standard mobiele UX) ═══════════ */
-  @media (max-width: 560px) {
+  /* ═══ Mobile / smal venster — bottom-sheet (industry-standard UX) ═══════
+     Tot 640px: smalle telefoons én versmalde desktopvensters krijgen de
+     sheet (geen "zwevende" gecentreerde kaart in een smal-hoog venster). */
+  @media (max-width: 640px) {
     .popup-overlay {
       padding: 0;
       align-items: flex-end;              /* anker onderaan → duimbereik */
