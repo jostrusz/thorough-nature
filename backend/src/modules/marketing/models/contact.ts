@@ -27,6 +27,8 @@ const MarketingContact = model.define("marketing_contact", {
   phone: model.text().nullable(),
   first_name: model.text().nullable(),
   last_name: model.text().nullable(),
+  gender: model.text().nullable(),              // "m" | "f" | "unknown" (null = not yet resolved) — gender-aware flow copy
+  vocative: model.text().nullable(),            // first name in CZ 5th case for direct address: "Jano", "Petře"
   address_line1: model.text().nullable(),
   city: model.text().nullable(),
   postal_code: model.text().nullable(),

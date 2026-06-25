@@ -6,6 +6,7 @@ import type MarketingModuleService from "../../../../modules/marketing/service"
 import { hashEmail } from "../../../../modules/marketing/utils/crypto"
 import { signToken } from "../../../../modules/marketing/utils/tokens"
 import { ResendMarketingClient } from "../../../../modules/marketing/services/resend-client"
+import { resolveGenderVocative } from "../../../../modules/marketing/utils/gender-resolver"
 
 /**
  * Public form-submission endpoint
@@ -249,6 +250,20 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       if (properties.last_name && !contact.last_name) patch.last_name = properties.last_name
       await service.updateMarketingContacts(patch)
       contact = { ...contact, ...patch }
+    }
+
+    // Resolve grammatical gender + vocative once, so flow emails serve the
+    // correct male/female copy and a correctly-declined greeting. Best-effort:
+    // failure must never block the signup (resolver itself never throws, but
+    // the DB write could). Skipped if already resolved.
+    try {
+      if (contact.first_name && !contact.gender) {
+        const gv = await resolveGenderVocative(contact.first_name, brand.locale || "cs")
+        await service.updateMarketingContacts({ id: contact.id, gender: gv.gender, vocative: gv.vocative })
+        contact = { ...contact, gender: gv.gender, vocative: gv.vocative }
+      }
+    } catch (err: any) {
+      logger.warn(`[Marketing Gender] resolve failed for contact=${contact.id}: ${err?.message}`)
     }
 
     // Attach to target lists

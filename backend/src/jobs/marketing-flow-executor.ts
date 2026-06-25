@@ -9,6 +9,7 @@ import { injectTracking, buildUnsubscribeUrl, buildViewInBrowserUrl } from "../m
 import { getViewInBrowserStrings } from "../modules/marketing/utils/view-in-browser-i18n"
 import { generateAiEmail } from "../modules/marketing/utils/ai-email-generator"
 import { injectLegalFooter } from "../modules/marketing/utils/legal-footer"
+import { resolveGenderVocative, pickGenderVariant } from "../modules/marketing/utils/gender-resolver"
 
 /**
  * Marketing Flow Executor
@@ -194,7 +195,7 @@ async function executeRun(
 
   // Load contact (include properties so AI email generator can use quiz_*)
   const { rows: contactRows } = await pool.query(
-    `SELECT id, brand_id, email, first_name, last_name, locale, country_code, tags, status, properties
+    `SELECT id, brand_id, email, first_name, last_name, gender, vocative, locale, country_code, tags, status, properties
      FROM marketing_contact
      WHERE id = $1 AND deleted_at IS NULL
      LIMIT 1`,
@@ -213,6 +214,25 @@ async function executeRun(
   const brand = brandRows[0]
   if (!brand) {
     throw new Error(`Brand ${run.brand_id} not found`)
+  }
+
+  // Resolve grammatical gender + vocative lazily if still missing (safety net
+  // for contacts created before this feature, or whose signup-time resolution
+  // failed). Runs at most once per contact — persisted, then skipped. Never
+  // throws; on failure the contact stays unresolved and emails fall back to the
+  // female variant + the greeting default.
+  if (contact.first_name && !contact.gender) {
+    try {
+      const gv = await resolveGenderVocative(contact.first_name, contact.locale || brand.locale || "cs")
+      await pool.query(
+        `UPDATE marketing_contact SET gender = $1, vocative = $2 WHERE id = $3`,
+        [gv.gender, gv.vocative, contact.id]
+      )
+      contact.gender = gv.gender
+      contact.vocative = gv.vocative
+    } catch (e: any) {
+      logger.warn(`[Marketing Gender] lazy resolve failed contact=${contact.id}: ${e?.message}`)
+    }
   }
 
   let ctx = run.context || {}
@@ -639,15 +659,18 @@ async function sendFlowEmail(args: {
     tpl = rows[0]
   }
 
-  // Fallback: inline subject/body on node.config
+  // Fallback: inline subject/body on node.config.
+  // Gender-aware: subject / preheader / html may each be a plain string
+  // (gender-neutral) OR a { m, f } map. pickGenderVariant returns the right
+  // variant for contact.gender (unknown / null → female).
   if (!tpl) {
     tpl = {
       id: null,
       version: 1,
-      subject: node.config?.subject || "",
-      preheader: node.config?.preheader || "",
+      subject: pickGenderVariant(node.config?.subject, contact.gender) || "",
+      preheader: pickGenderVariant(node.config?.preheader, contact.gender) || "",
       editor_type: node.config?.editor_type || "html",
-      custom_html: node.config?.html || "",
+      custom_html: pickGenderVariant(node.config?.html, contact.gender) || "",
       block_json: node.config?.block_json || null,
       from_name: node.config?.from_name || null,
       from_email: node.config?.from_email || null,
@@ -757,6 +780,9 @@ async function sendFlowEmail(args: {
         email: contact.email,
         locale: contact.locale || "",
         country_code: contact.country_code || "",
+        // Vocative (5th-case name) for the greeting: {{ vocative|default:"..." }}.
+        vocative: contact.vocative || "",
+        gender: contact.gender || "",
       },
       brand: {
         name: brand.display_name,
