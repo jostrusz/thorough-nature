@@ -966,25 +966,19 @@
      (žádná "plovoucí" vystředěná karta v úzkém-vysokém okně). */
   @media (max-width: 640px) {
     .popup-overlay {
-      padding: 0;
-      align-items: flex-end;              /* ukotvení dole → dosah palce */
+      padding: 14px;
+      align-items: center;                 /* vycentrováno na střed obrazovky */
     }
     .popup {
       max-width: 100%;
-      max-height: 94dvh;
-      border-radius: 22px 22px 0 0;        /* jen horní rohy = sheet */
-      transform: translateY(100%);         /* zavřeno: těsně pod obrazovkou */
-      transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
-      padding-bottom: env(safe-area-inset-bottom);  /* iPhone home-indicator */
+      max-height: 92dvh;
+      border-radius: 22px;                  /* všechny rohy = plovoucí karta */
+      transform: translateY(16px) scale(0.98);  /* zavřeno: lehce dole + zmenšeno */
+      transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
     }
-    .popup-overlay.open .popup { transform: translateY(0); }
-    /* grabber-handle nahoře na sheetu */
-    .popup::before {
-      content: ""; position: absolute; top: 8px; left: 50%;
-      transform: translateX(-50%);
-      width: 38px; height: 4px; border-radius: 999px;
-      background: var(--rose-200); z-index: 3;
-    }
+    .popup-overlay.open .popup { transform: translateY(0) scale(1); }
+    /* žádný grabber — vycentrovaný modal, ne bottom-sheet */
+    .popup::before { display: none; }
     .popup-close { top: 14px; right: 12px; }
     .popup-header { padding: 26px 20px 0 20px; }
     .progress-wrap { margin-bottom: 14px; }
