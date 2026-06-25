@@ -73,6 +73,7 @@
   "paymentProviders": {},
   "pages": {
     "": "index.html",
+    "popup-odpust-knizka": "popup-odpust-knizka.html",
     "checkout": "checkout.html",
     "thank-you": "thank-you.html",
     "kontakt": "kontakt.html",
