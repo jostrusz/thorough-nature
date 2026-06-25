@@ -28,8 +28,8 @@ const FEM_CONSONANT = new Set([
   "ruth", "doris", "carmen", "sharon", "ann", "lilian", "vivian", "mirjam",
 ])
 
-/** Rule-based fallback. Czech name-ending heuristics. ~95% on local names. */
-export function ruleFallback(firstNameRaw) {
+/** Rule-based fallback for CZECH name-ending heuristics. ~95% on local names. */
+export function ruleFallbackCs(firstNameRaw) {
   const raw = String(firstNameRaw || "").trim().split(/\s+/)[0] || ""
   if (!raw) return { gender: "unknown", vocative: "" }
   const name = cap(raw)
@@ -57,13 +57,62 @@ export function ruleFallback(firstNameRaw) {
   return { gender, vocative: voc }
 }
 
+/** Rule-based fallback for POLISH wołacz (5th case). ~90% on local names. */
+export function ruleFallbackPl(firstNameRaw) {
+  const raw = String(firstNameRaw || "").trim().split(/\s+/)[0] || ""
+  if (!raw) return { gender: "unknown", vocative: "" }
+  const name = cap(raw)
+  const l = name.toLowerCase()
+
+  let gender = l.endsWith("a") ? "f" : "m"
+
+  let voc = name
+  if (gender === "f") {
+    if (/(sia|cia|nia|zia|dzia)$/.test(l)) voc = name.slice(0, -1) + "u" // Kasia→Kasiu, Ania→Aniu
+    else if (l.endsWith("a")) voc = name.slice(0, -1) + "o" // Anna→Anno, Ewa→Ewo, Maria→Mario
+  } else {
+    if (/[aeiouyąęó]$/i.test(name)) voc = name // Bruno, Jerzy, Antoni → beze změny
+    else if (l.endsWith("ek")) voc = name.slice(0, -2) + "ku" // Marek→Marku, Bartek→Bartku
+    else if (l.endsWith("eł")) voc = name.slice(0, -2) + "le" // Paweł→Pawle
+    else if (l.endsWith("ł")) voc = name.slice(0, -1) + "le" // Michał→Michale
+    else if (/(sz|cz|rz|dz|ż|c|j)$/.test(l)) voc = name + "u" // Tomasz→Tomaszu, Andrzej→Andrzeju
+    else if (/[kgh]$/i.test(name) || l.endsWith("ch")) voc = name + "u" // Ludwik→Ludwiku, Wojciech→Wojciechu
+    else if (l.endsWith("r")) voc = name.slice(0, -1) + "rze" // Piotr→Piotrze
+    else voc = name + "ie" // Jan→Janie, Adam→Adamie, Krzysztof→Krzysztofie
+  }
+  return { gender, vocative: voc }
+}
+
+/** Locale-aware fallback dispatcher. Defaults to Czech. */
+export function ruleFallback(firstNameRaw, locale = "cs") {
+  return String(locale || "").toLowerCase().startsWith("pl")
+    ? ruleFallbackPl(firstNameRaw)
+    : ruleFallbackCs(firstNameRaw)
+}
+
 /** Primary resolver: Haiku with rule-based fallback. Never throws. */
 export async function resolveGenderVocative(firstNameRaw, locale = "cs") {
   const raw = String(firstNameRaw || "").trim().split(/\s+/)[0] || ""
   if (!raw) return { gender: "unknown", vocative: "" }
 
   const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) return ruleFallback(raw)
+  if (!apiKey) return ruleFallback(raw, locale)
+
+  const isPl = String(locale || "").toLowerCase().startsWith("pl")
+  const system = isPl
+    ? "Jesteś ekspertem od języka polskiego. Dla podanego imienia określ rodzaj gramatyczny i wołacz (5. przypadek). Odpowiedz TYLKO w formacie JSON, nic więcej."
+    : "Jsi expert na češtinu. Pro dané křestní jméno urči gramatický rod a 5. pád (vokativ). Odpověz POUZE JSON, nic víc."
+  const userPrompt = isPl
+    ? `Imię: "${raw}"\n` +
+      `Zwróć dokładnie: {"gender":"m"|"f"|"unknown","vocative":"<imię w wołaczu>"}\n` +
+      `Zasady: "m" imię męskie, "f" żeńskie, "unknown" gdy nie można określić (obce/uniseks). ` +
+      `vocative = forma w wołaczu (Anna→Anno, Ewa→Ewo, Kasia→Kasiu, Maria→Mario, Jan→Janie, Piotr→Piotrze, Tomasz→Tomaszu, Marek→Marku, Paweł→Pawle, Łukasz→Łukaszu). ` +
+      `Dla obcych/nieznanych imion zwróć vocative = imię bez zmian. Żadnego innego tekstu poza JSON.`
+    : `Jméno: "${raw}"\n` +
+      `Vrať přesně: {"gender":"m"|"f"|"unknown","vocative":"<jméno v 5. pádě>"}\n` +
+      `Pravidla: "m" mužské jméno, "f" ženské, "unknown" když nelze určit (cizí/unisex). ` +
+      `vocative = oslovení v 5. pádě (Jana→Jano, Eva→Evo, Petr→Petře, Tomáš→Tomáši, Marek→Marku, Jiří→Jiří). ` +
+      `U cizích/neznámých jmen vrať vocative = jméno beze změny. Žádný jiný text než JSON.`
 
   try {
     const client = new Anthropic({ apiKey })
@@ -71,23 +120,12 @@ export async function resolveGenderVocative(firstNameRaw, locale = "cs") {
     const resp = await client.messages.create({
       model,
       max_tokens: 120,
-      system:
-        "Jsi expert na češtinu. Pro dané křestní jméno urči gramatický rod a 5. pád (vokativ). Odpověz POUZE JSON, nic víc.",
-      messages: [
-        {
-          role: "user",
-          content:
-            `Jméno: "${raw}"\n` +
-            `Vrať přesně: {"gender":"m"|"f"|"unknown","vocative":"<jméno v 5. pádě>"}\n` +
-            `Pravidla: "m" mužské jméno, "f" ženské, "unknown" když nelze určit (cizí/unisex). ` +
-            `vocative = oslovení v 5. pádě (Jana→Jano, Eva→Evo, Petr→Petře, Tomáš→Tomáši, Marek→Marku, Jiří→Jiří). ` +
-            `U cizích/neznámých jmen vrať vocative = jméno beze změny. Žádný jiný text než JSON.`,
-        },
-      ],
+      system,
+      messages: [{ role: "user", content: userPrompt }],
     })
     const txt = (resp.content?.[0]?.text) || ""
     const m = txt.match(/\{[\s\S]*\}/)
-    if (!m) return ruleFallback(raw)
+    if (!m) return ruleFallback(raw, locale)
     const parsed = JSON.parse(m[0])
     const gender =
       parsed.gender === "m" || parsed.gender === "f" ? parsed.gender : "unknown"
@@ -98,7 +136,7 @@ export async function resolveGenderVocative(firstNameRaw, locale = "cs") {
     vocative = cap(vocative)
     return { gender, vocative }
   } catch (e) {
-    return ruleFallback(raw)
+    return ruleFallback(raw, locale)
   }
 }
 

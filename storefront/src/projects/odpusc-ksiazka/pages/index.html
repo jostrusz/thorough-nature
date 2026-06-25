@@ -1940,5 +1940,86 @@ function toggleMobileMenu() {
 })();
 </script>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     POPUP EMBED — Odpuść to, co cię niszczy (odpusc-ksiazka)
+     Triggery:
+       1. CLICK   — element s class="quiz-trigger" / [data-quiz-trigger] (vždy, force=true)
+       2. TIME    — 7s po loadu (jediný auto-trigger; žádný scroll-trigger)
+     Session-once: po prvním zobrazení v session další triggery nestřílí (popupShown).
+     Bez frequency capu — popup vyskočí při KAŽDÉ návštěvě 7 s po načtení.
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  const POPUP_URL  = '/popup-odpusc-ksiazka.html';
+  const TIME_DELAY = 7000;
+
+  // Popup zatím VYPNUTÝ — zapneme po ověření domény v Resendu + spuštění flow.
+  // Při spuštění přepni na true (vyskočí 7 s po načtení, při každé návštěvě).
+  const POPUP_ENABLED = false;
+
+  let popupShown = false;
+  let popupIframe = null;
+
+  function closePopup() {
+    if (popupIframe) { popupIframe.remove(); popupIframe = null; }
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    document.removeEventListener('keydown', escHandler);
+  }
+  function escHandler(e) { if (e.key === 'Escape') closePopup(); }
+  function showPopup(source, force) {
+    if (popupShown && !force) return;
+    // Žádný frequency cap — popup vyskočí při každé návštěvě (po 7 s).
+    popupShown = true;
+    popupIframe = document.createElement('iframe');
+    popupIframe.src = POPUP_URL + '?src=' + encodeURIComponent(source);
+    popupIframe.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;border:none;z-index:99999;';
+    popupIframe.setAttribute('title', 'Popup');
+    document.body.appendChild(popupIframe);
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', escHandler);
+    window.addEventListener('message', function handler(e) {
+      if (e.data && (e.data.type === 'popup_closed' || e.data.type === 'popup_submitted')) {
+        closePopup();
+        window.removeEventListener('message', handler);
+      }
+    });
+  }
+  // Safety: pokud někdo odstraní iframe manuálně (devtools / eval),
+  // uvolni scroll lock, aby se stránka nezasekla
+  new MutationObserver(() => {
+    if (popupIframe && !document.body.contains(popupIframe)) {
+      popupIframe = null;
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+  }).observe(document.body, { childList: true });
+  // expose for manual triggering from console / other scripts
+  window.opShowPopup = (source) => showPopup(source || 'manual', true);
+
+  // 1. CLICK na .quiz-trigger / [data-quiz-trigger] — vždy force (volitelné)
+  document.addEventListener('click', (e) => {
+    if (!POPUP_ENABLED) return;
+    const t = e.target.closest('.quiz-trigger, [data-quiz-trigger]');
+    if (t) {
+      e.preventDefault();
+      showPopup('button:' + (t.dataset.source || 'click'), true);
+    }
+  });
+
+  // Žádný scroll-trigger — vypnutý scroll restore, aby obnovená pozice
+  // po reloadu nic netriggerovala.
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+  // 2. TIME — jediný auto-trigger: přesně 7 s po načtení stránky.
+  window.addEventListener('load', () => {
+    if (!POPUP_ENABLED) return;
+    setTimeout(() => {
+      showPopup('time_' + Math.round(TIME_DELAY / 1000) + 's');
+    }, TIME_DELAY);
+  });
+})();
+</script>
+
 </body>
 </html>

@@ -46,6 +46,7 @@
   "paymentProviders": {},
   "pages": {
     "": "index.html",
+    "popup-odpusc-ksiazka": "popup-odpusc-ksiazka.html",
     "checkout": "checkout.html",
     "thank-you": "thank-you.html",
     "kontakt": "kontakt.html",
