@@ -1084,10 +1084,12 @@
       <div class="options" style="padding-top:0;padding-bottom:20px;overflow:visible;">
         <form id="introForm" onsubmit="return startChallenge(event)" novalidate>
           <div class="intro-email-field">
+            <input type="text" id="intro_first_name" name="intro_first_name" autocomplete="given-name"
+                   placeholder="Je voornaam" aria-label="Voornaam" style="margin-bottom:10px;">
             <input type="email" id="intro_email" name="intro_email" inputmode="email" autocomplete="email"
                    placeholder="jouw@email.nl" aria-label="E-mailadres">
           </div>
-          <div class="intro-error" id="intro-error">Vul een geldig e-mailadres in.</div>
+          <div class="intro-error" id="intro-error">Vul je voornaam en een geldig e-mailadres in.</div>
           <button type="submit" class="intro-cta">Ja, ik begin vandaag →</button>
           <p class="intro-microcopy">
             <span class="promise">Je eerste opdracht komt binnen 2 minuten in je inbox.</span>
@@ -1385,18 +1387,22 @@ function finishQuiz() {
 // nextStep() which expects a selected option.
 function startChallenge(e) {
   e.preventDefault();
+  const nameInput = $("#intro_first_name");
   const emailInput = $("#intro_email");
   const err = $("#intro-error");
+  const firstName = (nameInput && nameInput.value || "").trim();
   const email = (emailInput && emailInput.value || "").trim();
-  const valid = /.+@.+\..+/.test(email);
-  if (!valid) {
+  // E-mail moet een @ en een domein met punt bevatten (en geen spaties).
+  const emailValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+  if (firstName.length < 2 || !emailValid) {
     if (err) err.classList.add("show");
-    if (emailInput) emailInput.focus();
+    if (firstName.length < 2 && nameInput) nameInput.focus();
+    else if (emailInput) emailInput.focus();
     return false;
   }
   if (err) err.classList.remove("show");
   state.introEmail = email;
-  state.introFirstName = "";           // email-only opt-in (geen naamveld)
+  state.introFirstName = firstName;    // naam → aanhef in de flow ({{ first_name }})
   state.introGdpr = true;              // impliciete toestemming bij aanmelden
   trackPopupEvent("popup_intro_email_captured");
   buildStep2();
