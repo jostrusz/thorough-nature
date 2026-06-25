@@ -1953,9 +1953,9 @@ function toggleMobileMenu() {
   const POPUP_URL  = '/popup-odpusc-ksiazka.html';
   const TIME_DELAY = 7000;
 
-  // Popup zatím VYPNUTÝ — zapneme po ověření domény v Resendu + spuštění flow.
-  // Při spuštění přepni na true (vyskočí 7 s po načtení, při každé návštěvě).
-  const POPUP_ENABLED = false;
+  // Popup ZAPNUTÝ — doména ověřená v Resendu, flow live.
+  // Vyskočí 7 s po načtení hlavní stránky, při každé návštěvě (žádný frequency cap).
+  const POPUP_ENABLED = true;
 
   let popupShown = false;
   let popupIframe = null;
