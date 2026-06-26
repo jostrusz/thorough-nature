@@ -80,6 +80,19 @@ interface MetaPixelConfig {
 // SLUG GENERATION (client-side mirror)
 // ═══════════════════════════════════════════
 
+// Always-www host. Presale pages are stored on the bare domain, but only the
+// www host serves them (the apex 301-redirects / 404s), so every URL we build
+// or open MUST be www. Strips protocol + any existing www, then re-adds it.
+function toWww(domain: string): string {
+  const bare = String(domain || "")
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/+$/, "")
+    .trim()
+  return bare ? `www.${bare}` : ""
+}
+
 function generateSlug(title: string): string {
   let slug = title
   const specialChars: Record<string, string> = {
@@ -231,7 +244,7 @@ function PageRow({
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "4px" }}>
           <span className="ps-ellipsis" style={{ fontSize: "11px", color: colors.textMuted, maxWidth: "420px" }}>
-            {page.domain}/{page.slug}
+            {toWww(page.domain)}/{page.slug}
           </span>
           <span style={{ fontSize: "11px", color: colors.textMuted, flexShrink: 0 }}>
             {"\u{1F441}"} {page.view_count ?? 0} views
@@ -312,7 +325,7 @@ function PresaleModal({
   const [translating, setTranslating] = useState(false)
 
   const effectiveDomain = domainSelect === CUSTOM_DOMAIN ? customDomain : domainSelect
-  const previewUrl = `https://${effectiveDomain || "domain.com"}/${slug || generateSlug(title)}`
+  const previewUrl = `https://${effectiveDomain ? toWww(effectiveDomain) : "www.domain.com"}/${slug || generateSlug(title)}`
 
   const handleTitleChange = (val: string) => {
     setTitle(val)
@@ -739,7 +752,7 @@ const PresalePageRoute = () => {
   const handlePreview = useCallback((page: PresalePage) => {
     // Published → open the live URL; otherwise the server preview endpoint.
     if (page.status === "published" && page.domain) {
-      window.open(`https://${page.domain}/${page.slug}`, "_blank", "noopener,noreferrer")
+      window.open(`https://${toWww(page.domain)}/${page.slug}`, "_blank", "noopener,noreferrer")
     } else {
       window.open(`/admin/presale/${page.id}/preview`, "_blank", "noopener,noreferrer")
     }
