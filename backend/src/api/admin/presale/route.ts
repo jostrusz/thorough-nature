@@ -3,6 +3,7 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { PRESALE_MODULE } from "../../../modules/presale"
 import type PresaleModuleService from "../../../modules/presale/service"
 import { generateSlug, pickAllowed, isUniqueViolation } from "./utils"
+import { bareDomain } from "./railway-domains"
 
 /**
  * GET /admin/presale
@@ -36,6 +37,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
   try {
     const data = pickAllowed(req.body as Record<string, any>)
+
+    // Store the BARE domain (strip www/protocol) — the serving layer strips www
+    // from the request host, so (domain, slug) lookups only match bare values.
+    // The domain picker shows www, so without this an admin-created page 404s.
+    if (data.domain) data.domain = bareDomain(data.domain)
 
     if (!data.title || !data.domain) {
       res.status(400).json({ error: "title and domain are required" })

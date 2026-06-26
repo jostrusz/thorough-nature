@@ -3,6 +3,7 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { PRESALE_MODULE } from "../../../../modules/presale"
 import type PresaleModuleService from "../../../../modules/presale/service"
 import { pickAllowed, isUniqueViolation, buildSnapshot } from "../utils"
+import { bareDomain } from "../railway-domains"
 
 /**
  * GET /admin/presale/:id
@@ -30,6 +31,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
   try {
     const data = pickAllowed(req.body as Record<string, any>)
+
+    // Normalize to the BARE domain (strip www/protocol) — serving matches bare.
+    if (data.domain) data.domain = bareDomain(data.domain)
 
     if (data.status && !["draft", "published"].includes(data.status)) {
       res.status(400).json({ error: "status must be draft or published" })
