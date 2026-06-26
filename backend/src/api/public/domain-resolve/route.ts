@@ -1,6 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { PROFITABILITY_MODULE } from "../../../modules/profitability"
 import type ProfitabilityModuleService from "../../../modules/profitability/service"
+import { isRailwayPresaleDomain } from "../../admin/presale/railway-domains"
 
 /**
  * GET /public/domain-resolve?domain=odpusc-ksiazka.pl
@@ -23,6 +24,22 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     )
 
     if (configs.length === 0) {
+      // Presale fallback (additive): a brand-new domain connected on Railway
+      // for a presale listicle isn't in project_config. Route it so the
+      // presale page can serve. Existing project_config domains resolve above
+      // exactly as before — advertorials and every current domain untouched.
+      try {
+        if (await isRailwayPresaleDomain(domainParam)) {
+          res.json({
+            found: true,
+            project_slug: process.env.PRESALE_DEFAULT_PROJECT || "loslatenboek",
+            via: "presale",
+          })
+          return
+        }
+      } catch {
+        // never let the presale check break domain resolution
+      }
       res.json({ found: false })
       return
     }

@@ -10,6 +10,11 @@ import {
   translateHeadline,
   ALLOWED_FIELDS,
 } from "../../admin/presale/utils"
+import {
+  getRailwayDomains,
+  bareDomain,
+  toWww,
+} from "../../admin/presale/railway-domains"
 
 /**
  * POST /public/presale-admin
@@ -63,6 +68,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
       case "create": {
         const data = pickAllowed(body)
+        // Store the BARE domain (strip www/protocol). The picker shows www, the
+        // serving layer strips www from the request host — so the stored value
+        // must be bare for (domain, slug) lookups to match.
+        if (data.domain) data.domain = bareDomain(data.domain)
         if (!data.title || !data.domain) {
           return void res.status(400).json({ error: "title and domain are required" })
         }
@@ -88,6 +97,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       case "update": {
         if (!body.id) return void res.status(400).json({ error: "id is required" })
         const data = pickAllowed(body)
+        if (data.domain) data.domain = bareDomain(data.domain)
         if (data.status && !["draft", "published"].includes(data.status)) {
           return void res.status(400).json({ error: "status must be draft or published" })
         }
@@ -207,22 +217,31 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       }
 
       case "list_domains": {
-        let projects: any[] = []
+        // Source of truth = the Storefront service's CONNECTED custom domains,
+        // read live from Railway (cached 10 min). Independent of the
+        // profitability module — connect a domain on Railway and it shows up
+        // here. Always www-prefixed.
+        const railway = await getRailwayDomains()
+
+        // Also surface any domain already used by a presale page, so nothing a
+        // page lives on can ever disappear from the picker (e.g. if Railway
+        // read fails or a domain was detached).
+        let used: string[] = []
         try {
-          const prof = req.scope.resolve("profitability") as any
-          projects = await prof.listProjectConfigs({}, { order: { display_order: "ASC" }, take: 100 })
+          const pages = await service.listPresalePages({}, { take: 500 })
+          used = (pages || []).map((p: any) => p.domain).filter(Boolean)
         } catch {
-          projects = []
+          used = []
         }
-        const domains = (projects || [])
-          .filter((p: any) => p && p.domain)
-          .map((p: any) => ({
-            domain: p.domain,
-            project_name: p.project_name,
-            flag_emoji: p.flag_emoji,
-            country_tag: p.country_tag,
-          }))
-        res.json({ domains })
+
+        // Merge on the bare domain (dedup www vs non-www), present as www.
+        const byBare = new Map<string, string>()
+        for (const d of [...railway, ...used]) {
+          const b = bareDomain(d)
+          if (b) byBare.set(b, toWww(b))
+        }
+        const domains = [...byBare.values()].sort().map((domain) => ({ domain }))
+        res.json({ domains, source: railway.length ? "railway" : "presale_pages" })
         return
       }
 
