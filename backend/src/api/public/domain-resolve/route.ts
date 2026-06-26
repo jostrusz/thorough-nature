@@ -1,7 +1,8 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { PROFITABILITY_MODULE } from "../../../modules/profitability"
 import type ProfitabilityModuleService from "../../../modules/profitability/service"
-import { isRailwayPresaleDomain } from "../../admin/presale/railway-domains"
+import { PRESALE_MODULE } from "../../../modules/presale"
+import { bareDomain } from "../../admin/presale/railway-domains"
 
 /**
  * GET /public/domain-resolve?domain=odpusc-ksiazka.pl
@@ -24,12 +25,20 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     )
 
     if (configs.length === 0) {
-      // Presale fallback (additive): a brand-new domain connected on Railway
-      // for a presale listicle isn't in project_config. Route it so the
-      // presale page can serve. Existing project_config domains resolve above
-      // exactly as before — advertorials and every current domain untouched.
+      // Presale fallback (additive, tightly gated): only route a domain here
+      // when it actually has a PUBLISHED PRESALE PAGE. This lets a brand-new
+      // domain (bought + connected on Railway, not in project_config) serve its
+      // listicle — WITHOUT touching any existing domain. A secondary domain of
+      // another project that has no presale page is never affected: it falls
+      // through to `found: false` exactly as today, so its env-map routing,
+      // advertorials and storefront keep working unchanged.
       try {
-        if (await isRailwayPresaleDomain(domainParam)) {
+        const presale = req.scope.resolve(PRESALE_MODULE) as any
+        const pages = await presale.listPresalePages(
+          { domain: bareDomain(domainParam), status: "published" },
+          { take: 1 }
+        )
+        if (pages && pages.length > 0) {
           res.json({
             found: true,
             project_slug: process.env.PRESALE_DEFAULT_PROJECT || "loslatenboek",
