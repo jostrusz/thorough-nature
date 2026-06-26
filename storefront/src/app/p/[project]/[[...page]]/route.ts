@@ -619,27 +619,42 @@ async function servePresale(
     html = `${html}\n${analyticsScript}`
   }
 
-  // --- 4b. ViewContent with correct catalog IDs for CAPI dedup ---
+  // --- 4b. ViewContent — ALWAYS fire for presale/listicle pages ---
+  // Hardcoded here (not in html_content — author <script> is stripped on save),
+  // so EVERY listicle automatically gets a ViewContent event. Gated on real
+  // engagement (50% scroll OR 12s dwell) so bouncers don't pollute the
+  // remarketing audience. Fires through MetaTracker for browser pixel + CAPI
+  // dedup; catalog IDs are included when available (falls back to []).
   const catalogIds = (config as any).catalogContentIds || []
   const productName = config.mainProduct?.name || config.name || ""
   const productPrice = config.mainProduct?.price || 0
   const productCurrency = config.mainProduct?.currency || "EUR"
-  if (catalogIds.length > 0) {
-    const viewContentScript = `<script>
-if (typeof MetaTracker !== 'undefined') {
-  MetaTracker.trackViewContent({
-    content_name: ${JSON.stringify(productName)},
-    content_ids: ${JSON.stringify(catalogIds)},
-    value: ${productPrice},
-    currency: ${JSON.stringify(productCurrency)}
-  });
-}
+  const viewContentScript = `<script>
+(function () {
+  var fired = false;
+  function fireViewContent() {
+    if (fired || typeof MetaTracker === 'undefined') return;
+    fired = true;
+    MetaTracker.trackViewContent({
+      content_name: ${JSON.stringify(productName)},
+      content_ids: ${JSON.stringify(catalogIds)},
+      value: ${productPrice},
+      currency: ${JSON.stringify(productCurrency)}
+    });
+  }
+  function onScroll() {
+    var el = document.documentElement;
+    var max = (el.scrollHeight - el.clientHeight) || 1;
+    if (((el.scrollTop || document.body.scrollTop) / max) >= 0.5) fireViewContent();
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  setTimeout(fireViewContent, 12000);
+})();
 </script>`
-    if (/<\/body>/i.test(html)) {
-      html = html.replace(/<\/body>/i, `${viewContentScript}\n</body>`)
-    } else {
-      html = `${html}\n${viewContentScript}`
-    }
+  if (/<\/body>/i.test(html)) {
+    html = html.replace(/<\/body>/i, `${viewContentScript}\n</body>`)
+  } else {
+    html = `${html}\n${viewContentScript}`
   }
 
   // --- 5. Lazy-load images (skip first/hero for LCP) ---
