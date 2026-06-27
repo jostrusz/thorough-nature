@@ -38,6 +38,7 @@
   "paymentProviders": {},
   "pages": {
     "": "index.html",
+    "popup-slapptaget": "popup-slapptaget.html",
     "checkout": "checkout.html",
     "thank-you": "thank-you.html",
     "kontakt": "kontakt.html",

@@ -44,6 +44,7 @@
   "paymentProviders": {},
   "pages": {
     "": "index.html",
+    "popup-slipptaket": "popup-slipptaket.html",
     "checkout": "checkout.html",
     "thank-you": "thank-you.html",
     "contact": "contact.html",
