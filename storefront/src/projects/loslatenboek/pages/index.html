@@ -1842,7 +1842,7 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
      Triggery (whichever fires first):
        1. CLICK   — element s class="quiz-trigger" / [data-quiz-trigger] (vždy, force=true)
        2. SCROLL  — 50 % stránky (armed 1.5s po load, vyžaduje user-initiated scroll)
-       3. TIME    — 25s po loadu
+       3. TIME    — 7s po loadu
      Session-once: po prvním zobrazení v session další triggery nestřílí (popupShown).
      Frequency cap: 3 dny v localStorage('lh_popup_seen').
      ═══════════════════════════════════════════════════════════════ -->
@@ -1851,7 +1851,7 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
   const POPUP_URL  = '/popup-loslatenboek.html';
   const COOKIE_KEY = 'lh_popup_seen';
   const COOKIE_DAYS = 3;
-  const TIME_DELAY = 25000;
+  const TIME_DELAY = 7000;
   const SCROLL_PCT = 50;
 
   let popupShown = false;
