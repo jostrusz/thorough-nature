@@ -60,6 +60,7 @@ const PROJECT_DOMAIN: Record<string, string> = {
   "lass-los": "jetztloslassen.de",
   "odpusc-ksiazka": "odpusc-ksiazka.pl",
   "slapp-taget": "slapptagetboken.se",
+  "slipp-taket": "slipptaketboken.no",
   "psi-superzivot": "psi-superzivot.cz",
   "odpust-knizka": "pusttocotenici.cz",
 }
@@ -71,6 +72,8 @@ const POPUP_PROJECTS: Record<string, string> = {
   "het-leven": "Anna de Vries - Het Leven Dat Je Verdient",
   "odpust-knizka": "Pusť to, co tě ničí",
   "odpusc-ksiazka": "Odpuść to, co cię niszczy",
+  "slapp-taget": "Joris de Vries - Släpp taget",
+  "slipp-taket": "Joris de Vries - Slipp taket",
 }
 
 // ═══════════════════════════════════════════
