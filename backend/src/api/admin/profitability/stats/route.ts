@@ -16,7 +16,7 @@ type Period =
  */
 const TO_EUR_RATES: Record<string, number> = {
   EUR: 1,
-  SEK: 0.085,   // 1 SEK ≈ 0.085 EUR
+  SEK: 0.0903,  // 1 SEK ≈ 0.0903 EUR (ECB 2026-06-26: 1 EUR = 11.0775 SEK)
   NOK: 0.086,   // 1 NOK ≈ 0.086 EUR
   CZK: 0.040,   // 1 CZK ≈ 0.040 EUR
   PLN: 0.233,   // 1 PLN ≈ 0.233 EUR
