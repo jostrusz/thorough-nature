@@ -1843,8 +1843,8 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
        1. CLICK   — element s class="quiz-trigger" / [data-quiz-trigger] (vždy, force=true)
        2. SCROLL  — 50 % stránky (armed 1.5s po load, vyžaduje user-initiated scroll)
        3. TIME    — 7s po loadu
-     Session-once: po prvním zobrazení v session další triggery nestřílí (popupShown).
-     Frequency cap: 3 dny v localStorage('lh_popup_seen').
+     Once-per-pageload: po prvním zobrazení v rámci jednoho načtení už další triggery nestřílí (popupShown).
+     ŽÁDNÝ frequency cap — ukáže se při KAŽDÉ návštěvě/reloadu (po 7s nebo 50% scrollu).
      ═══════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
@@ -1869,7 +1869,6 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
     try { localStorage.setItem(COOKIE_KEY, JSON.stringify({ ts: Date.now() })); } catch {}
   }
   function closePopup(shouldMark) {
-    if (shouldMark) markSeen();
     if (popupIframe) { popupIframe.remove(); popupIframe = null; }
     document.body.style.overflow = '';
     document.documentElement.style.overflow = '';
@@ -1877,8 +1876,9 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
   }
   function escHandler(e) { if (e.key === 'Escape') closePopup(true); }
   function showPopup(source, force) {
+    // Geen frequency cap: bij elke pageload tonen (na 7s of 50% scroll).
+    // popupShown voorkomt alleen dubbel tonen binnen dezelfde pageload.
     if (popupShown && !force) return;
-    if (hasSeen() && !force) return;
     popupShown = true;
     popupIframe = document.createElement('iframe');
     popupIframe.src = POPUP_URL + '?src=' + encodeURIComponent(source);
