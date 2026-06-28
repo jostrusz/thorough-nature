@@ -73,6 +73,30 @@ export async function recoverBriteCart(
       )
       cartId = rows[0]?.id || null
     }
+
+    // 1b) Fallback when payment_session.data no longer carries the settled session.
+    //     A customer retry creates a NEW Brite session on the SAME cart and overwrites
+    //     payment_session.data — so the settled session's id/merchant_reference vanish
+    //     from there and the lookup above misses (this is exactly how a paid Swish/
+    //     FB-WebView cart ends up "orphaned"). The brite_session_created journey event
+    //     permanently records session_id -> cart_id, so resolve the original (paid,
+    //     still-uncompleted) cart from the journey log even after the overwrite.
+    if (!cartId) {
+      const { rows } = await pool.query(
+        `SELECT j.cart_id
+         FROM payment_journey_log j
+         JOIN cart c ON c.id = j.cart_id
+         WHERE j.event_type = 'brite_session_created'
+           AND j.cart_id IS NOT NULL
+           AND c.completed_at IS NULL
+           AND (j.intent_id = ANY($1)
+                OR EXISTS (SELECT 1 FROM unnest($1::text[]) k WHERE j.event_data::text LIKE '%' || k || '%'))
+         ORDER BY j.occurred_at DESC LIMIT 1`,
+        [keys]
+      )
+      cartId = rows[0]?.cart_id || null
+      if (cartId) logger.info?.(`[Brite Recover] cart ${cartId} resolved via journey log (payment_session overwritten by a retry)`)
+    }
     if (!cartId) return { status: "no_cart" }
 
     // Cart must be uncompleted

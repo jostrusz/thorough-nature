@@ -286,6 +286,31 @@ async function safetyNetCompleteCart(
         [matchKeys]
       )
       cartRow = rows[0] || null
+
+      // Fallback when payment_session.data no longer carries the settled session.
+      // A customer retry (common with Swish / Facebook in-app browser) creates a NEW
+      // Brite session on the SAME cart and overwrites payment_session.data, so the
+      // settled session's id/merchant_reference vanish from there and the lookup above
+      // misses. The brite_session_created journey event permanently maps session_id ->
+      // cart_id, so resolve the original (paid, still-uncompleted) cart from it.
+      if (!cartRow) {
+        const { rows: jr } = await cartPool.query(
+          `SELECT c.id, c.email
+           FROM payment_journey_log j
+           JOIN cart c ON c.id = j.cart_id
+           WHERE j.event_type = 'brite_session_created'
+             AND j.cart_id IS NOT NULL
+             AND c.completed_at IS NULL
+             AND (j.intent_id = ANY($1)
+                  OR EXISTS (SELECT 1 FROM unnest($1::text[]) k WHERE j.event_data::text LIKE '%' || k || '%'))
+           ORDER BY j.occurred_at DESC LIMIT 1`,
+          [matchKeys]
+        )
+        cartRow = jr[0] || null
+        if (cartRow) {
+          logger.info(`[Brite Webhook] Safety net: cart ${cartRow.id} resolved via journey log (payment_session overwritten by a retry)`)
+        }
+      }
     } finally {
       await cartPool.end().catch(() => {})
     }
