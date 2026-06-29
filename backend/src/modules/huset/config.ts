@@ -26,8 +26,9 @@ export type HusetConfig = {
   retryIntervalMinutes: number
   /** Passed to OverrideAdress (string per WSDL). Sample from Huset uses "false". */
   overrideAddress: string
-  /** Which project routes to Huset */
-  projectSlug: string
+  /** Which project(s) route to Huset. SE (slapp-taget) stays gated behind env until
+   *  the Swedish article is stocked at Huset — add it to HUSET_PROJECT_SLUGS to enable. */
+  projectSlugs: string[]
 }
 
 export function getHusetConfig(): HusetConfig {
@@ -55,6 +56,11 @@ export function getHusetConfig(): HusetConfig {
     retryMaxAttempts: Number(process.env.HUSET_RETRY_MAX_ATTEMPTS || 10),
     retryIntervalMinutes: Number(process.env.HUSET_RETRY_INTERVAL_MINUTES || 5),
     overrideAddress: process.env.HUSET_OVERRIDE_ADDRESS || "false",
-    projectSlug: process.env.HUSET_PROJECT_SLUG || "slipp-taket",
+    // Comma-separated list of project slugs that ship from Huset.
+    // Back-compat: falls back to the legacy single HUSET_PROJECT_SLUG; default NO only.
+    projectSlugs: (process.env.HUSET_PROJECT_SLUGS || process.env.HUSET_PROJECT_SLUG || "slipp-taket")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
   }
 }

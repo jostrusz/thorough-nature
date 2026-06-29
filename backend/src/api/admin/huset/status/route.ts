@@ -44,7 +44,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       integration_id: config.integrationId,
       logistics_method_id: config.logisticsMethodId,
       article_ref: config.articleRef || null,
-      project_slug: config.projectSlug,
+      project_slugs: config.projectSlugs,
       hash_key_configured: !!config.hashKey,
       connection,
       queue,

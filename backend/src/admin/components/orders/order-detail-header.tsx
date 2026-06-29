@@ -13,6 +13,7 @@ interface OrderDetailHeaderProps {
   onArchive: () => void
   onSendToDextrum: () => void
   onSendToPostNord: () => void
+  onSendToHuset: () => void
   onFakturoidCreate: () => void
   onFakturoidOpen: () => void
   onFakturoidDelete: () => void
@@ -70,6 +71,7 @@ export function OrderDetailHeader({
   onArchive,
   onSendToDextrum,
   onSendToPostNord,
+  onSendToHuset,
   onFakturoidCreate,
   onFakturoidOpen,
   onFakturoidDelete,
@@ -106,6 +108,14 @@ export function OrderDetailHeader({
   const qbInvoiceUrl = order.metadata?.quickbooks_invoice_url
   const qbCreditMemoId = order.metadata?.quickbooks_credit_memo_id
   const dextrumMystockId = order.metadata?.dextrum_mystock_id
+
+  // Huset WMS routing (SE slapp-taget + NO slipp-taket ship from Landvetter, not Dextrum).
+  // Detect by project_id, with destination-country fallback (codes may be lower/upper case).
+  const _projectId = order.metadata?.project_id || ""
+  const _cc = (order.shipping_address?.country_code || order.billing_address?.country_code || "").toLowerCase()
+  const isHusetMarket =
+    _projectId === "slapp-taget" || _projectId === "slipp-taket" || _cc === "se" || _cc === "no"
+  const husetSent = !!order.metadata?.huset_status
 
   // Set the order ID for the status page link in dropdown
   if (typeof window !== "undefined") {
@@ -244,6 +254,7 @@ export function OrderDetailHeader({
               onArchive={onArchive}
               onSendToDextrum={onSendToDextrum}
               onSendToPostNord={onSendToPostNord}
+              onSendToHuset={onSendToHuset}
               onFakturoidCreate={onFakturoidCreate}
               onFakturoidOpen={onFakturoidOpen}
               onFakturoidDelete={onFakturoidDelete}
@@ -260,6 +271,8 @@ export function OrderDetailHeader({
               qbCreditMemoId={qbCreditMemoId}
               dextrumMystockId={dextrumMystockId}
               postnordSent={!!order.metadata?.postnord_sent}
+              isHusetMarket={isHusetMarket}
+              husetSent={husetSent}
             />
           </div>
         </div>

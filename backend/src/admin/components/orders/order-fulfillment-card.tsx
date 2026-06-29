@@ -14,6 +14,7 @@ interface OrderFulfillmentCardProps {
   order: any
   onMarkAsFulfilled: () => void
   onSendToDextrum: () => void
+  onSendToHuset?: () => void
   onFakturoidCreate: () => void
   onQBCreate: () => void
   onResendEbooks: () => void
@@ -231,6 +232,7 @@ export function OrderFulfillmentCard({
   order,
   onMarkAsFulfilled,
   onSendToDextrum,
+  onSendToHuset,
   onFakturoidCreate,
   onQBCreate,
   onResendEbooks,
@@ -252,6 +254,11 @@ export function OrderFulfillmentCard({
     order.shipping_methods?.[0]?.shipping_option_id ||
     ""
   const hasDextrum = !!order.metadata?.dextrum_order_code
+  // SE (slapp-taget) + NO (slipp-taket) ship from Huset, not Dextrum.
+  const _huProjectId = order.metadata?.project_id || ""
+  const _huCc = (order.shipping_address?.country_code || order.billing_address?.country_code || "").toLowerCase()
+  const isHusetMarket =
+    _huProjectId === "slapp-taget" || _huProjectId === "slipp-taket" || _huCc === "se" || _huCc === "no"
   const hasFakturoid = !!order.metadata?.fakturoid_invoice_id
   const hasQB = !!order.metadata?.quickbooks_invoice_id
 
@@ -619,17 +626,29 @@ export function OrderFulfillmentCard({
             background: "linear-gradient(180deg, rgba(248,249,252,0) 0%, rgba(248,249,252,0.5) 100%)",
           }}
         >
-          {/* Send to Dextrum WMS */}
+          {/* Send to WMS — Huset for SE/NO, Dextrum otherwise */}
           {!hasDextrum && (
-            <PremiumBtn
-              variant="secondary"
-              onClick={onSendToDextrum}
-              disabled={isDextrumLoading}
-              loading={isDextrumLoading}
-              label="Send to Dextrum"
-              loadingLabel="Sending..."
-              icon={WarehouseIcon}
-            />
+            isHusetMarket ? (
+              <PremiumBtn
+                variant="secondary"
+                onClick={onSendToHuset}
+                disabled={isDextrumLoading}
+                loading={isDextrumLoading}
+                label="Send to Huset"
+                loadingLabel="Sending..."
+                icon={WarehouseIcon}
+              />
+            ) : (
+              <PremiumBtn
+                variant="secondary"
+                onClick={onSendToDextrum}
+                disabled={isDextrumLoading}
+                loading={isDextrumLoading}
+                label="Send to Dextrum"
+                loadingLabel="Sending..."
+                icon={WarehouseIcon}
+              />
+            )
           )}
 
           {/* Mark as fulfilled */}

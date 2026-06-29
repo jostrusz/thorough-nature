@@ -188,6 +188,25 @@ export function useSendToPostNord() {
 }
 
 // ═══════════════════════════════════════════
+// Send to Huset (3PLhuset WMS, Landvetter SE — SE slapp-taget + NO slipp-taket)
+// ═══════════════════════════════════════════
+export function useSendToHuset() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      return sdk.client.fetch(`/admin/huset/orders/${orderId}/send`, {
+        method: "POST",
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["custom-order-detail"] })
+      queryClient.invalidateQueries({ queryKey: ["custom-orders-list"] })
+      queryClient.invalidateQueries({ queryKey: ["custom-order-stats"] })
+    },
+  })
+}
+
+// ═══════════════════════════════════════════
 // Create Fakturoid Invoice
 // ═══════════════════════════════════════════
 export function useCreateFakturoidInvoice() {

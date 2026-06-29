@@ -24,6 +24,7 @@ import {
   useDuplicateOrder,
   useSendToDextrum,
   useSendToPostNord,
+  useSendToHuset,
   useCreateFakturoidInvoice,
   useDeleteFakturoidInvoice,
   useCreateFakturoidCreditNote,
@@ -617,6 +618,7 @@ const OrderDetailPage = () => {
   const duplicateOrder = useDuplicateOrder()
   const sendToDextrum = useSendToDextrum()
   const sendToPostNord = useSendToPostNord()
+  const sendToHuset = useSendToHuset()
   const createFakturoidInvoice = useCreateFakturoidInvoice()
   const deleteFakturoidInvoice = useDeleteFakturoidInvoice()
   const createFakturoidCreditNote = useCreateFakturoidCreditNote()
@@ -782,6 +784,22 @@ const OrderDetailPage = () => {
       },
     })
   }, [id, sendToPostNord, order])
+
+  const handleSendToHuset = useCallback(() => {
+    if (!id) return
+    if (order?.metadata?.huset_status) {
+      const confirmed = window.confirm("This order was already sent to Huset WMS. Send again?")
+      if (!confirmed) return
+    }
+    sendToHuset.mutate(id, {
+      onSuccess: () => {
+        toast.success("Order sent to Huset WMS ✓")
+      },
+      onError: (err: any) => {
+        toast.error(err?.message || "Failed to send to Huset")
+      },
+    })
+  }, [id, sendToHuset, order])
 
   const handleResendEbooks = useCallback(() => {
     if (!id) return
@@ -987,6 +1005,7 @@ const OrderDetailPage = () => {
         onArchive={handleArchive}
         onSendToDextrum={handleSendToDextrum}
         onSendToPostNord={handleSendToPostNord}
+        onSendToHuset={handleSendToHuset}
         onFakturoidCreate={handleFakturoidCreate}
         onFakturoidOpen={handleFakturoidOpen}
         onFakturoidDelete={handleFakturoidDelete}
@@ -1016,6 +1035,7 @@ const OrderDetailPage = () => {
             order={order}
             onMarkAsFulfilled={handleFulfillClick}
             onSendToDextrum={handleSendToDextrum}
+            onSendToHuset={handleSendToHuset}
             onFakturoidCreate={handleFakturoidCreate}
             onQBCreate={handleQBCreate}
             onResendEbooks={handleResendEbooks}

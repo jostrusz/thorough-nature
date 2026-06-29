@@ -44,13 +44,17 @@ export async function isHusetOrder(order: any, container: any): Promise<boolean>
   if (!config.enabled) return false
 
   const slug = await resolveProjectSlug(order, container)
-  if (slug) return slug === config.projectSlug
+  if (slug) return config.projectSlugs.includes(slug)
 
-  // Fallback: Norway is exclusively the slipp-taket project
+  // Fallback for orders without a resolvable project_id: map the destination
+  // country to its project slug, then check it against the enabled list — this
+  // keeps SE gated behind HUSET_PROJECT_SLUGS even via the country path.
+  // NO is exclusively slipp-taket, SE exclusively slapp-taget.
   const cc = (
     order?.shipping_address?.country_code ||
     order?.billing_address?.country_code ||
     ""
   ).toUpperCase()
-  return cc === "NO"
+  const countrySlug = cc === "NO" ? "slipp-taket" : cc === "SE" ? "slapp-taget" : ""
+  return countrySlug ? config.projectSlugs.includes(countrySlug) : false
 }

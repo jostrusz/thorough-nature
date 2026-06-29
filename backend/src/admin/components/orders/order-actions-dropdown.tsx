@@ -8,6 +8,7 @@ interface OrderActionsDropdownProps {
   onArchive: () => void
   onSendToDextrum: () => void
   onSendToPostNord: () => void
+  onSendToHuset: () => void
   onFakturoidCreate: () => void
   onFakturoidOpen: () => void
   onFakturoidDelete: () => void
@@ -24,6 +25,9 @@ interface OrderActionsDropdownProps {
   qbCreditMemoId?: string
   dextrumMystockId?: string
   postnordSent?: boolean
+  /** SE (slapp-taget) + NO (slipp-taket) ship from Huset, not Dextrum/PostNord. */
+  isHusetMarket?: boolean
+  husetSent?: boolean
 }
 
 const itemStyle: React.CSSProperties = {
@@ -61,6 +65,7 @@ export function OrderActionsDropdown({
   onArchive,
   onSendToDextrum,
   onSendToPostNord,
+  onSendToHuset,
   onFakturoidCreate,
   onFakturoidOpen,
   onFakturoidDelete,
@@ -77,6 +82,8 @@ export function OrderActionsDropdown({
   qbCreditMemoId,
   dextrumMystockId,
   postnordSent,
+  isHusetMarket,
+  husetSent,
 }: OrderActionsDropdownProps) {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -263,35 +270,55 @@ export function OrderActionsDropdown({
 
       <div style={dividerStyle} />
 
-      {/* Dextrum WMS */}
-      <button
-        className="od-dropdown-item"
-        style={itemStyle}
-        onClick={() => { onSendToDextrum(); onClose() }}
-      >
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={iconColor} strokeWidth="1.5">
-          <rect x="2" y="4" width="16" height="12" rx="2" />
-          <path d="M2 8h16M7 4v4M13 4v4" />
-        </svg>
-        {dextrumMystockId ? "Resend to Dextrum WMS" : "Send to Dextrum WMS"}
-      </button>
+      {isHusetMarket ? (
+        /* Huset WMS — SE (slapp-taget) + NO (slipp-taket) ship from Landvetter */
+        <button
+          className="od-dropdown-item"
+          style={{
+            ...itemStyle,
+            ...(husetSent ? { color: "#008060" } : {}),
+          }}
+          onClick={() => { onSendToHuset(); onClose() }}
+        >
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={husetSent ? "#008060" : iconColor} strokeWidth="1.5">
+            <rect x="2" y="4" width="16" height="12" rx="2" />
+            <path d="M2 8h16M7 4v4M13 4v4" />
+          </svg>
+          {husetSent ? "Resend to Huset WMS" : "Send to Huset WMS"}
+        </button>
+      ) : (
+        <>
+          {/* Dextrum WMS */}
+          <button
+            className="od-dropdown-item"
+            style={itemStyle}
+            onClick={() => { onSendToDextrum(); onClose() }}
+          >
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={iconColor} strokeWidth="1.5">
+              <rect x="2" y="4" width="16" height="12" rx="2" />
+              <path d="M2 8h16M7 4v4M13 4v4" />
+            </svg>
+            {dextrumMystockId ? "Resend to Dextrum WMS" : "Send to Dextrum WMS"}
+          </button>
 
-      {/* PostNord WMS (Swedish orders) */}
-      <button
-        className="od-dropdown-item"
-        style={{
-          ...itemStyle,
-          ...(postnordSent ? { color: "#6D7175", opacity: 0.7 } : {}),
-        }}
-        onClick={() => { onSendToPostNord(); onClose() }}
-      >
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={postnordSent ? "#008060" : iconColor} strokeWidth="1.5">
-          <path d="M3 10l2 2 4-4" />
-          <rect x="2" y="4" width="16" height="12" rx="2" />
-          <path d="M12 8h4M12 11h4" />
-        </svg>
-        {postnordSent ? "✓ Sent to PostNord WMS" : "Send to PostNord WMS"}
-      </button>
+          {/* PostNord WMS (legacy Swedish orders) */}
+          <button
+            className="od-dropdown-item"
+            style={{
+              ...itemStyle,
+              ...(postnordSent ? { color: "#6D7175", opacity: 0.7 } : {}),
+            }}
+            onClick={() => { onSendToPostNord(); onClose() }}
+          >
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke={postnordSent ? "#008060" : iconColor} strokeWidth="1.5">
+              <path d="M3 10l2 2 4-4" />
+              <rect x="2" y="4" width="16" height="12" rx="2" />
+              <path d="M12 8h4M12 11h4" />
+            </svg>
+            {postnordSent ? "✓ Sent to PostNord WMS" : "Send to PostNord WMS"}
+          </button>
+        </>
+      )}
     </div>
   )
 }
