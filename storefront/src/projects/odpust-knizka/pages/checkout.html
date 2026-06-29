@@ -7693,6 +7693,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (selectedProviderId && selectedProviderId.indexOf('comgate') !== -1 && COMGATE_METHOD_MAP[selectedMethod]) {
           sessionData.comgate_method = COMGATE_METHOD_MAP[selectedMethod];
         }
+        // Inline Comgate: card stays on-site in an iframe (Comgate embeds card + QR
+        // only). Backend returns an iframe-able checkoutUrl; submit flow mounts it.
+        if (selectedProviderId && selectedProviderId.indexOf('comgate') !== -1 && selectedMethod === 'creditcard') {
+          sessionData.comgate_embedded = true;
+        }
       }
 
       // For credit card: tokenize card data (branched by provider)
@@ -8164,6 +8169,83 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             } else {
               window.location.href = PROJECT_CONFIG.upsellUrl;
             }
+          });
+        }
+
+        // ─── COMGATE INLINE CARD (iframe) ───
+        // Card on Comgate stays on-site: mount the embedded gateway URL in an
+        // overlay iframe (backend sent embedded=true → iframe-able checkoutUrl).
+        // Comgate signals completion via postMessage '[transId]|PAID'. A visible
+        // fallback link opens the full page if framing is blocked (X-Frame/CSP).
+        // If cart completion fails, the comgate-order-reconcile cron recovers the
+        // paid order within 15 min, so a paid customer is never lost.
+        if (redirectUrl && selectedProviderId && selectedProviderId.indexOf('comgate') !== -1 && selectedMethod === 'creditcard') {
+          return new Promise(function(resolve, reject) {
+            var settled = false;
+
+            var overlay = document.createElement('div');
+            overlay.id = 'comgate-inline-overlay';
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;padding:16px;';
+            var box = document.createElement('div');
+            box.style.cssText = 'background:#fff;border-radius:16px;width:100%;max-width:480px;height:88vh;max-height:760px;overflow:hidden;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);display:flex;flex-direction:column;';
+            var iframe = document.createElement('iframe');
+            iframe.src = redirectUrl;
+            iframe.setAttribute('allow', 'payment *');
+            iframe.style.cssText = 'border:0;width:100%;flex:1;';
+            var bar = document.createElement('div');
+            bar.style.cssText = 'padding:10px 14px;font-size:13px;text-align:center;color:#666;border-top:1px solid #eee;';
+            bar.innerHTML = 'Nenačetla se platba? <a href="' + redirectUrl + '" style="color:#A8628A;font-weight:600;">Otevřít platební stránku</a>';
+            box.appendChild(iframe);
+            box.appendChild(bar);
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+
+            function teardownUI() {
+              window.removeEventListener('message', onMessage);
+              if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+            }
+
+            function proceedPaid() {
+              if (settled) return;
+              settled = true;
+              window.removeEventListener('message', onMessage);
+              box.innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;font-size:15px;color:#444;">Zpracováváme platbu…</div>';
+              medusaFetch('/store/carts/' + result.cartId + '/complete', { method: 'POST' })
+                .then(function(completeRes) {
+                  var order = window.__extractOrderOrThrow(completeRes);
+                  localStorage.setItem('medusa_order_id', order.id || '');
+                  localStorage.setItem('medusa_order_display_id', order.display_id || '');
+                  if (PROJECT_CONFIG.upsellEnabled === false) {
+                    window.location.href = PROJECT_CONFIG.thankYouUrl;
+                  } else if (checkoutOrderBump) {
+                    localStorage.setItem('medusa_upsell_purchased', 'true');
+                    window.location.href = PROJECT_CONFIG.thankYouUrl;
+                  } else {
+                    window.location.href = PROJECT_CONFIG.upsellUrl;
+                  }
+                  resolve();
+                })
+                .catch(function(err) {
+                  if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                  reject(err);
+                });
+            }
+
+            function onMessage(ev) {
+              var d = ev.data;
+              if (typeof d !== 'string' || d.indexOf('|') === -1) return;
+              var status = (d.split('|')[1] || '').toUpperCase();
+              if (status === 'PAID' || status === 'AUTHORIZED') {
+                proceedPaid();
+              } else if (status === 'CANCELLED' || status === 'FAILED') {
+                if (settled) return;
+                settled = true;
+                teardownUI();
+                reject(new Error('Platba kartou nebyla dokončena. Zkuste to prosím znovu.'));
+              }
+            }
+
+            window.addEventListener('message', onMessage);
           });
         }
 
