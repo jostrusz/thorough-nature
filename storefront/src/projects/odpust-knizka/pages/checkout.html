@@ -7343,12 +7343,33 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }).catch(function(e) {
       console.log('[Payment Return] PayPal address sync skipped:', e.message || e);
     }).then(function() {
-      // Complete the cart via Medusa
-      return medusaFetch('/store/carts/' + cartId + '/complete', {
-        method: 'POST'
-      });
-    }).then(function(res) {
-      var order = res.order || res;
+      // Complete the cart via Medusa — WITH POLLING for async payments.
+      // Bank transfers (PBL: rf/cs/cb/kb…) authorize via IPN + safety-net ~30–45 s
+      // AFTER the customer returns, so a single immediate /complete sees {type:"cart"}
+      // (not authorized yet) and used to throw a scary "platba možná neproběhla" error
+      // even though the order was created seconds later. We now poll the window before
+      // deciding, so the happy path is unchanged but async payers no longer see a false error.
+      var POLL_MAX = 16;       // attempts
+      var POLL_EVERY = 3000;   // ms → ~48 s window (covers IPN + safety-net + reconcile)
+      function waitMs(ms) { return new Promise(function(r){ setTimeout(r, ms); }); }
+      function pollComplete(attempt) {
+        return medusaFetch('/store/carts/' + cartId + '/complete', { method: 'POST' })
+          .then(function(res) {
+            var o = (res && res.order) ? res.order : res;
+            if (o && typeof o.id === 'string' && o.id.indexOf('order_') === 0) return o;
+            // {type:"cart"} → payment not authorized yet → retry within the window.
+            if (attempt < POLL_MAX) return waitMs(POLL_EVERY).then(function(){ return pollComplete(attempt + 1); });
+            var pe = new Error('PAYMENT_PENDING'); pe.__pending = true; throw pe;
+          })
+          .catch(function(e) {
+            if (e && e.__pending) throw e;
+            // Transient/network/already-completing → keep polling within the window.
+            if (attempt < POLL_MAX) return waitMs(POLL_EVERY).then(function(){ return pollComplete(attempt + 1); });
+            var pe2 = new Error('PAYMENT_PENDING'); pe2.__pending = true; throw pe2;
+          });
+      }
+      return pollComplete(0);
+    }).then(function(order) {
       localStorage.setItem('medusa_order_id', order.id || '');
       localStorage.setItem('medusa_order_display_id', order.display_id || '');
       // Cleanup abandoned checkout recovery data
@@ -7364,11 +7385,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         window.location.href = PROJECT_CONFIG.upsellUrl;
       }
     }).catch(function(err) {
-      console.error('[Payment Return] Cart completion failed:', err);
+      console.error('[Payment Return] Cart completion pending/failed:', err);
       var preloader = document.querySelector('.payment-preloader');
-      if (preloader) {
-        preloader.innerHTML = '<div style="text-align:center;padding:40px 20px;max-width:420px;margin:0 auto;"><div style="width:56px;height:56px;margin:0 auto 20px;background:#FEF2F2;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><p style="font-size:20px;font-weight:600;color:#C0392B;font-family:DM Sans,sans-serif;margin:0 0 8px;">Při zpracování platby došlo k chybě</p><p style="font-size:14px;color:#666;margin:0 0 24px;font-family:DM Sans,sans-serif;line-height:1.5;">' + (err.message || 'Zkuste to znovu nebo nás kontaktujte.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;padding:14px 36px;background:#333;color:#fff;border-radius:10px;text-decoration:none;font-family:DM Sans,sans-serif;font-size:15px;font-weight:600;transition:all 0.2s;">Zkusit znovu</a></div>';
-      }
+      if (!preloader) return;
+      // After the poll window the payment is still confirming (typical for bank
+      // transfers) OR genuinely failed. Show a NEUTRAL, non-alarming message with
+      // NO prominent "try again" — the webhook safety-net + reconcile cron finish the
+      // order and the customer gets an e-mail. This avoids both the false "error" and
+      // the double-payment risk. A soft retry link still covers a real non-payment.
+      preloader.innerHTML = '<div style="text-align:center;padding:40px 20px;max-width:460px;margin:0 auto;font-family:DM Sans,sans-serif;"><div style="width:56px;height:56px;margin:0 auto 20px;background:#FEF3C7;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><p style="font-size:20px;font-weight:600;color:#1a1a2e;margin:0 0 10px;">Platba se zpracovává ⏳</p><p style="font-size:14px;color:#666;margin:0;line-height:1.6;">Pokud jsi právě zaplatil/a (hlavně převodem), potvrzení může chvíli trvat — <strong>dorazí ti e-mailem</strong>. Prosím <strong>nezadávej objednávku znovu</strong>, ať nezaplatíš dvakrát.</p><p style="font-size:13px;color:#999;margin-top:18px;">Platba neproběhla? <a href="' + window.location.pathname + '" style="color:#C27BA0;font-weight:600;">Zkusit znovu</a> · <a href="mailto:podpora@pusttocotenici.cz" style="color:#C27BA0;">podpora@pusttocotenici.cz</a></p></div>';
     });
 
     return; // Stop further checkout initialization
