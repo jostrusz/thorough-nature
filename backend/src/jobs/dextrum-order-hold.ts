@@ -523,8 +523,16 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           } catch { /* non-critical */ }
         }
         if (addr.company) deliveryAddress.company = addr.company
-        // Set pickupPlaceCode from any available metadata source
-        const pickupCode = orderMeta.packeta_point_id || orderMeta.paczkomat_id || orderMeta.pickup_place_code || ""
+        // Set pickupPlaceCode from any available metadata source.
+        // Home-delivery orders must NEVER carry a pickupPlaceCode: mySTOCK
+        // rejects them ("delivery method does not support pickup places").
+        // The checkout can leave a stray packeta_point_id behind when the
+        // customer first picks a parcel locker, then switches to home delivery —
+        // so we hard-guard here regardless of what metadata still holds.
+        const isHomeDelivery = orderMeta.shipping_method === "home_delivery"
+        const pickupCode = isHomeDelivery
+          ? ""
+          : (orderMeta.packeta_point_id || orderMeta.paczkomat_id || orderMeta.pickup_place_code || "")
         if (pickupCode) {
           deliveryAddress.pickupPlaceCode = pickupCode
         }
