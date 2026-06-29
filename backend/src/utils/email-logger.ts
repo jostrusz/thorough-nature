@@ -15,6 +15,25 @@ export interface EmailActivityEvent {
 }
 
 /**
+ * Strip C0 control characters (except tab / newline / carriage-return) from a
+ * string.
+ *
+ * PostgreSQL JSONB rejects the NUL escape (backslash-u-0000) with
+ * "unsupported Unicode escape sequence ... cannot be converted to text", so a
+ * single NUL byte anywhere in the payload makes the whole
+ * `update "order" set metadata = ...` statement fail. The email render
+ * pipeline can emit a stray NUL for certain glyphs (e.g. the a-ring in the
+ * Norwegian "Slipp taket pa" footer on some builds), which silently dropped
+ * the email_activity_log AND blocked the order_confirmation_sent idempotency
+ * flag. Sanitizing at the metadata boundary keeps the write safe regardless of
+ * what the renderer produced.
+ */
+function stripControlChars(value: string): string {
+  // eslint-disable-next-line no-control-regex
+  return value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "")
+}
+
+/**
  * Logs an email event to order metadata.
  * Stores in order.metadata.email_activity_log array.
  *
@@ -70,8 +89,15 @@ export async function logEmailActivity(
         return // Already logged, skip
       }
 
+      // Sanitize all string fields: a NUL / control byte in any of them makes
+      // the JSONB metadata UPDATE fail (see stripControlChars above).
       emailLog.push({
-        ...event,
+        template: stripControlChars(event.template),
+        subject: stripControlChars(event.subject),
+        to: stripControlChars(event.to),
+        status: event.status,
+        ...(event.error_message ? { error_message: stripControlChars(event.error_message) } : {}),
+        ...(event.html_body ? { html_body: stripControlChars(event.html_body) } : {}),
         timestamp: newTimestamp,
       })
 
