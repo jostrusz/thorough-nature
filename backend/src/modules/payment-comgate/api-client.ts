@@ -17,7 +17,6 @@ export interface IComgatePaymentParams {
   url_ok?: string // URL to redirect after successful payment
   url_cancel?: string // URL to redirect after cancelled payment
   url_pending?: string // URL to redirect for pending payments
-  embedded?: boolean // if true, returns an iframe-able gateway URL (inline). Card + QR only.
 }
 
 export interface IComgateStatusParams {
@@ -119,13 +118,6 @@ export class ComgateApiClient {
 
       if (params.prepareOnly) {
         formData.append("prepareOnly", "true")
-      }
-
-      // Inline integration: return an iframe-able gateway URL instead of a
-      // top-level redirect page. Comgate only embeds card + QR; other methods
-      // still break out to top level on their side.
-      if (params.embedded) {
-        formData.append("embedded", "true")
       }
 
       // Optional: payer name (shown in Comgate admin)

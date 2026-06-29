@@ -334,10 +334,6 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         url_ok: returnUrl || undefined,
         url_cancel: cancelUrl || undefined,
         url_pending: pendingUrl || undefined,
-        // Inline integration: frontend (currently odpust-knizka card) sets
-        // comgate_embedded → return an iframe-able URL. Comgate embeds card + QR
-        // only; everything else still breaks out to top level on their side.
-        embedded: sessionData?.comgate_embedded === true || undefined,
       }
 
       this.getLogger().info(`[Comgate] Creating payment: merchant=${paymentParams.merchant}, ` +
