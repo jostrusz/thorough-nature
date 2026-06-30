@@ -23,6 +23,11 @@ export type HusetAuth = {
 export type HusetOrderItem = {
   articleRef: string
   qty: number
+  /** Per-unit goods value (major units, in the order currency) — required for
+   *  non-EU customs (Bring VOEC). Omitting it => Huset "Missing value". */
+  price?: number
+  /** VAT amount/rate per line. Books are VAT-exempt (0) in our markets. */
+  vat?: number
 }
 
 export type HusetReceiverParams = {
@@ -71,6 +76,8 @@ export type HusetCreateOrderParams = {
   deliveryContactName: string
   deliveryCellphone?: string
   pickupLocationCode?: string
+  /** Order currency (ISO, e.g. NOK/SEK) — gives the line Price its meaning for customs. */
+  currency?: string
 }
 
 export type HusetFreightBooking = {
@@ -230,9 +237,13 @@ export class HusetApiClient {
   async createOrder(p: HusetCreateOrderParams): Promise<number> {
     const itemsXml = p.items
       .map(
+        // Field order per WSDL WMSItem sequence: ArticleRef, Qty, Vat, Price.
+        // Vat + Price carry the customs value for non-EU (Bring VOEC) shipments.
         (it) => `<int:WMSItem>
             <int:ArticleRef>${xmlEscape(it.articleRef)}</int:ArticleRef>
             <int:Qty>${Math.max(1, Math.round(it.qty))}</int:Qty>
+            <int:Vat>${(Number(it.vat) || 0).toFixed(2)}</int:Vat>
+            <int:Price>${(Number(it.price) || 0).toFixed(2)}</int:Price>
           </int:WMSItem>`
       )
       .join("\n")
@@ -271,6 +282,7 @@ export class HusetApiClient {
       <int:DeliveryCellphone>${xmlEscape(p.deliveryCellphone || "")}</int:DeliveryCellphone>
       <int:CustomerReferenceOrderNo></int:CustomerReferenceOrderNo>
       <int:CustomerReferenceName></int:CustomerReferenceName>
+      <int:Currency>${xmlEscape(p.currency || "")}</int:Currency>
       <int:OrderStatusId>${p.orderStatusId || "Update"}</int:OrderStatusId>
       <int:IsOffer>false</int:IsOffer>
       <int:DoorCode></int:DoorCode>

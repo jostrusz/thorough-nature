@@ -42,8 +42,8 @@ export function buildHusetClient(config?: HusetConfig): HusetApiClient {
  *   2. HUSET_ARTICLE_REF global override (single-SKU project)
  *   3. variant SKU as-is
  */
-export function buildHusetItems(rawItems: any[], config: HusetConfig): Array<{ articleRef: string; qty: number }> {
-  const items: Array<{ articleRef: string; qty: number }> = []
+export function buildHusetItems(rawItems: any[], config: HusetConfig): Array<{ articleRef: string; qty: number; price: number; vat: number }> {
+  const items: Array<{ articleRef: string; qty: number; price: number }> = []
 
   for (const item of rawItems) {
     const sku = item.variant?.sku || item.variant_sku || ""
@@ -52,9 +52,18 @@ export function buildHusetItems(rawItems: any[], config: HusetConfig): Array<{ a
       continue
     }
 
+    // Medusa unit_price is per LINE unit, in major units (e.g. 699 NOK).
+    const lineUnitPrice = Number(item.unit_price) || 0
+
     const mapped = config.skuMap[sku]
     if (mapped) {
-      items.push({ articleRef: mapped.sku, qty: (mapped.qty || 1) * (item.quantity || 1) })
+      const booksPerUnit = mapped.qty || 1
+      items.push({
+        articleRef: mapped.sku,
+        qty: booksPerUnit * (item.quantity || 1),
+        // Split the bundle price across the physical books so qty × price = line total.
+        price: booksPerUnit > 0 ? Math.round((lineUnitPrice / booksPerUnit) * 100) / 100 : lineUnitPrice,
+      })
       console.log(`[Huset] SKU mapping: ${sku} → ${mapped.qty}× ${mapped.sku}`)
       continue
     }
@@ -62,15 +71,24 @@ export function buildHusetItems(rawItems: any[], config: HusetConfig): Array<{ a
     items.push({
       articleRef: config.articleRef || sku,
       qty: item.quantity || 1,
+      price: lineUnitPrice,
     })
   }
 
-  // Merge duplicate ArticleRefs (e.g. bundle + order-bump of the same book)
-  const merged = new Map<string, number>()
+  // Merge duplicate ArticleRefs (e.g. bundle + order-bump of the same book);
+  // sum qty, keep the per-unit price (prefer a non-zero one).
+  const merged = new Map<string, { qty: number; price: number }>()
   for (const it of items) {
-    merged.set(it.articleRef, (merged.get(it.articleRef) || 0) + it.qty)
+    const cur = merged.get(it.articleRef)
+    if (cur) {
+      cur.qty += it.qty
+      if (!cur.price && it.price) cur.price = it.price
+    } else {
+      merged.set(it.articleRef, { qty: it.qty, price: it.price })
+    }
   }
-  return [...merged.entries()].map(([articleRef, qty]) => ({ articleRef, qty }))
+  // VAT is always 0 — printed books are VAT-exempt in our Nordic markets.
+  return [...merged.entries()].map(([articleRef, v]) => ({ articleRef, qty: v.qty, price: v.price, vat: 0 }))
 }
 
 export async function sendOrderToHuset(opts: {
@@ -144,6 +162,7 @@ export async function sendOrderToHuset(opts: {
     deliveryContactName: fullName,
     deliveryCellphone: phoneResult.normalized !== "000" ? phoneResult.normalized : "",
     pickupLocationCode: pickupCode,
+    currency: (order.currency_code || "").toUpperCase(),
   })
 
   const sentAt = new Date().toISOString()
