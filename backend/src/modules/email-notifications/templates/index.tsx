@@ -80,6 +80,8 @@ import { HlShipmentNotificationTemplate, HL_SHIPMENT_NOTIFICATION, isHlShipmentN
 import { HlAbandonedCheckout1Template, HL_ABANDONED_CHECKOUT_1, isHlAbandonedCheckout1Data } from './hl-abandoned-checkout-1'
 import { HlAbandonedCheckout2Template, HL_ABANDONED_CHECKOUT_2, isHlAbandonedCheckout2Data } from './hl-abandoned-checkout-2'
 import { HlAbandonedCheckout3Template, HL_ABANDONED_CHECKOUT_3, isHlAbandonedCheckout3Data } from './hl-abandoned-checkout-3'
+import { HlPaymentPendingTemplate, HL_PAYMENT_PENDING, isHlPaymentPendingData } from './hl-payment-pending'
+import { HlPaymentRecoveryTemplate, HL_PAYMENT_RECOVERY, isHlPaymentRecoveryData } from './hl-payment-recovery'
 // Admin notification
 import { AdminOrderNotificationTemplate, ADMIN_ORDER_NOTIFICATION, isAdminOrderNotificationData } from './admin-order-notification'
 
@@ -161,6 +163,8 @@ export const EmailTemplates = {
   HL_ABANDONED_CHECKOUT_1,
   HL_ABANDONED_CHECKOUT_2,
   HL_ABANDONED_CHECKOUT_3,
+  HL_PAYMENT_PENDING,
+  HL_PAYMENT_RECOVERY,
   // Admin notifications
   ADMIN_ORDER_NOTIFICATION,
 } as const
@@ -855,6 +859,24 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <HlAbandonedCheckout3Template {...data} />
 
+    case EmailTemplates.HL_PAYMENT_PENDING:
+      if (!isHlPaymentPendingData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.HL_PAYMENT_PENDING}"`
+        )
+      }
+      return <HlPaymentPendingTemplate {...data} />
+
+    case EmailTemplates.HL_PAYMENT_RECOVERY:
+      if (!isHlPaymentRecoveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.HL_PAYMENT_RECOVERY}"`
+        )
+      }
+      return <HlPaymentRecoveryTemplate {...data} />
+
     // ── Admin notification ───────────────────────────────────
     case EmailTemplates.ADMIN_ORDER_NOTIFICATION:
       if (!isAdminOrderNotificationData(data)) {
@@ -939,6 +961,8 @@ export {
   HlAbandonedCheckout1Template,
   HlAbandonedCheckout2Template,
   HlAbandonedCheckout3Template,
+  HlPaymentPendingTemplate,
+  HlPaymentRecoveryTemplate,
   // Admin notification
   AdminOrderNotificationTemplate,
 }

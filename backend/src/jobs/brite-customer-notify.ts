@@ -4,7 +4,7 @@ import { Modules } from "@medusajs/framework/utils"
 import { logPaymentEvent } from "../modules/payment-debug/utils/log"
 
 /**
- * Brite customer notifications — loslatenboek ONLY, Brite payments ONLY.
+ * Brite customer notifications — projects listed in PROJECTS below ONLY, Brite payments ONLY.
  *
  * Sends two lifecycle e-mails the standard order flow doesn't cover for async
  * open-banking payments:
@@ -20,9 +20,10 @@ import { logPaymentEvent } from "../modules/payment-debug/utils/log"
  * Idempotent: a 'brite_recovery_email' / 'brite_pending_email' marker is written to
  * payment_journey_log per session and re-checked before sending.
  *
- * Scoped hard to project_slug = 'loslatenboek' (the only checkout on the redirect
- * flow for now). Source of truth for email + session id = payment_journey_log
- * (brite_session_created events carry intent_id + email + project_slug).
+ * Scoped hard to the project_slugs in PROJECTS (checkouts on the Brite redirect
+ * flow that also have payment lifecycle templates). Source of truth for email +
+ * session id = payment_journey_log (brite_session_created events carry intent_id +
+ * email + project_slug).
  */
 
 // Per-project config. A project is only processed if it appears here (so the cron is
@@ -55,6 +56,12 @@ const PROJECTS: Record<string, {
     replyTo: "support@dehondenbijbel.nl",
     pendingTemplate: "dh-payment-pending", pendingSubject: "we hebben je bestelling ontvangen",
     recoveryTemplate: "dh-payment-recovery", recoverySubject: "je bent er bijna",
+  },
+  "het-leven": {
+    checkoutUrl: process.env.HL_CHECKOUT_URL || "https://pakjeleventerug.nl/checkout",
+    replyTo: "annadevries@pakjeleventerug.nl",
+    pendingTemplate: "hl-payment-pending", pendingSubject: "we hebben je bestelling ontvangen",
+    recoveryTemplate: "hl-payment-recovery", recoverySubject: "je bent er bijna",
   },
 }
 const PROJECT_SLUGS = Object.keys(PROJECTS)
