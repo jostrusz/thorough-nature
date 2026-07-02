@@ -32,6 +32,7 @@ export const REGION_IDS = {
   sek: "reg_01KK3DB2STB0WNFZKRPDHZWPTN", // Sweden
   nok: "reg_01KRD3ABWEDY16N07ST8PNJ9XZ", // Norway
   czk: "reg_01KKB4EZN0CHFYDG64K4VP0J2A", // Czech Republic (Psi Superzivot)
+  huf: "reg_01KWG6W2W6Z2YR8GVBRM3CEVHX", // Hungary (Engedd El)
 } as const
 
 // ── Shipping option IDs (verified) ──
@@ -48,6 +49,8 @@ const SO = {
   ZAS_PICKUP_KOCICI: "so_01KPFQ9PQF5S7RRKVZ6RDB5ZZE", // Zásilkovna - Na výdejní místo (Kocici pickup)
   ZAS_HOME_ODPUST: "so_01KTTR2B5J2XPRAHNQHHDQ0XVN",   // Zásilkovna - Na adresu (Odpust Knizka home)
   ZAS_PICKUP_ODPUST: "so_01KTTR2B5JRA8H022ERJSR3ANJ", // Zásilkovna - Na výdejní místo (Odpust pickup)
+  ZAS_HOME_ENGEDD: "so_01KWG6WEBKTHWESMJAJHB0ZZ54",   // Zásilkovna - Na adresu (Engedd El home)
+  ZAS_PICKUP_ENGEDD: "so_01KWG6WEBJTVGR0M8NHPRSRQBS", // Zásilkovna - Na výdejní místo (Engedd El pickup)
 } as const
 
 /**
@@ -142,6 +145,14 @@ export const PROJECT_CONFIG = {
     homeShippingOptionId: SO.ZAS_HOME_ODPUST,
     homeShippingOptionName: "Zásilkovna - Na adresu",
     pickupShippingOptionId: SO.ZAS_PICKUP_ODPUST,
+    pickupShippingOptionName: "Zásilkovna - Na výdejní místo",
+  },
+  "engedd-el": {
+    name: "Engedd El",
+    sales_channel_id: "sc_01KWG6W0N5K3E9AVYAKY38EQ8D",
+    homeShippingOptionId: SO.ZAS_HOME_ENGEDD,
+    homeShippingOptionName: "Zásilkovna - Na adresu",
+    pickupShippingOptionId: SO.ZAS_PICKUP_ENGEDD,
     pickupShippingOptionName: "Zásilkovna - Na výdejní místo",
   },
 } as const
@@ -242,6 +253,18 @@ export const COUNTRY_CONFIG = {
     codAllowed: true,
     projectSlugs: ["psi-superzivot", "kocici-bible", "odpust-knizka"],
     bookVatRate: 0,
+  },
+  hu: {
+    label: "🇭🇺 Hungary",
+    currency: "huf",
+    region_id: REGION_IDS.huf,
+    // No gateway chosen yet (payment provider TBD) — manual order creator
+    // will show no payment options for HU until gateway_config is set.
+    allowedPaymentMethods: [],
+    defaultPaymentMethod: null,
+    codAllowed: false,
+    projectSlugs: ["engedd-el"],
+    bookVatRate: 5,
   },
 } as const
 

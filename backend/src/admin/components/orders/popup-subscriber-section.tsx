@@ -63,6 +63,7 @@ const PROJECT_DOMAIN: Record<string, string> = {
   "slipp-taket": "slipptaketboken.no",
   "psi-superzivot": "psi-superzivot.cz",
   "odpust-knizka": "pusttocotenici.cz",
+  "engedd-el": "REPLACE-DOMAIN.hu",
 }
 
 // Projects that run an index-page popup — always shown in the chart with their
@@ -74,6 +75,7 @@ const POPUP_PROJECTS: Record<string, string> = {
   "odpusc-ksiazka": "Odpuść to, co cię niszczy",
   "slapp-taget": "Joris de Vries - Släpp taget",
   "slipp-taket": "Joris de Vries - Slipp taket",
+  "engedd-el": "Joris de Vries - Engedd el, ami tönkretesz",
 }
 
 // ═══════════════════════════════════════════

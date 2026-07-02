@@ -137,6 +137,7 @@ const PROJECT_TAG_NAMES: Record<string, string> = {
   "kocici-bible": "Kočičí bible",
   "odpust-knizka": "Pusť to, co tě ničí",
   "zycie-zaslugy": "Życie na które zasługujesz",
+  "engedd-el": "Engedd el, ami tönkretesz",
 }
 
 function getTag(order: any): string {

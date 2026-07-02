@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visszaküldés és garancia — Engedd el, ami tönkretesz</title>
+<meta name="description" content="A Engedd el, ami tönkretesz című könyv visszaküldése és garanciája. 30 napos pénzvisszafizetési garancia indoklás nélkül, 14 napos törvényes elállási jog, reklamációs eljárás és az Ön jogai.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://REPLACE-DOMAIN.hu/reklamace">
+<link rel="icon" href="/laat-los-logo-logo.webp" type="image/webp">
+
+<!-- ═══ FONTS ═══ -->
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+<style>
+/* ═══ FONTS ═══ */
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+/* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
+:root {
+ --bg: #FAF5F8;
+ --heading: #2D1B3D;
+ --cta: #C27BA0;
+ --section: #EDD9E5;
+ --body: #5A3D6B;
+ --highlight: #D9A4C0;
+ --dark: #1A1028;
+ --white: #FFFFFF;
+ --light: #F5EDF2;
+ --muted: #9B7AAD;
+ --cta-hover: #A8628A;
+ --accent: #D498B5;
+}
+
+/* ═══ RESET ═══ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
+
+/* ═══ NAVIGACE ═══ */
+.site-nav { background: var(--white); border-bottom: 1px solid var(--section); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(45, 27, 61, 0.06); }
+.nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
+.nav-logo img { height: 40px; width: auto; }
+.nav-logo-text { font-family: 'Recoleta', serif; font-size: 16px; font-weight: 600; color: var(--heading); line-height: 1.2; }
+.nav-links { display: flex; align-items: center; gap: 22px; }
+.nav-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--body); text-decoration: none; transition: color 0.2s; position: relative; white-space: nowrap; }
+.nav-links a:hover { color: var(--heading); }
+.nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--cta); transition: width 0.3s ease; }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--heading); font-weight: 600; }
+.nav-links a.active::after { width: 100%; }
+.nav-cta { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--white) !important; background: var(--cta); padding: 10px 22px; border-radius: 8px; text-decoration: none !important; transition: all 0.25s ease; box-shadow: 0 3px 12px rgba(194, 123, 160, 0.2); }
+.nav-cta:hover { background: var(--cta-hover) !important; color: var(--white) !important; transform: translateY(-1px); box-shadow: 0 5px 18px rgba(194, 123, 160, 0.35); }
+.nav-cta::after { display: none !important; }
+.nav-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-direction: column; gap: 5px; }
+.nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--heading); border-radius: 2px; transition: all 0.3s ease; }
+.nav-mobile-overlay { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background: rgba(26, 16, 40, 0.5); z-index: 999; }
+.nav-mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--white); padding: 24px 20px; box-shadow: 0 8px 24px rgba(45, 27, 61, 0.12); z-index: 1000; flex-direction: column; gap: 0; border-bottom: 2px solid var(--section); }
+.nav-mobile-menu a { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500; color: var(--body); text-decoration: none; padding: 14px 0; border-bottom: 1px solid var(--section); display: block; transition: color 0.2s; }
+.nav-mobile-menu a:last-child { border-bottom: none; }
+.nav-mobile-menu a:hover { color: var(--heading); }
+.nav-mobile-menu .nav-cta-mobile { display: inline-block; font-weight: 700; color: var(--white); background: var(--cta); padding: 14px 28px; border-radius: 10px; text-align: center; margin-top: 16px; border-bottom: none; }
+.nav-mobile-menu .nav-cta-mobile:hover { background: var(--cta-hover); color: var(--white); }
+
+@media (max-width: 1100px) {
+ .nav-links { display: none; }
+ .nav-hamburger { display: flex; }
+ .nav-mobile-menu.open { display: flex; }
+ .nav-mobile-overlay.open { display: block; }
+ .nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+ .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+ .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+}
+
+/* ═══ CONTENT STRÁNKY ═══ */
+.page-header {
+ background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
+ padding: 56px 20px 48px;
+ text-align: center;
+}
+.page-header h1 { font-family: 'Recoleta', serif; font-size: 36px; font-weight: 600; color: var(--white); margin-bottom: 12px; line-height: 1.2; }
+.page-header p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: rgba(255, 255, 255, 0.7); max-width: 600px; margin: 0 auto; line-height: 1.6; }
+.page-header .badge { display: inline-block; background: rgba(194, 123, 160, 0.2); color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 16px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 0.5px; }
+
+.page-content { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+/* Informační boxy */
+.info-box {
+ background: var(--light);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 28px;
+ margin-bottom: 40px;
+}
+.info-box h3 { font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
+.info-box p, .info-box li { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; }
+.info-box ul { list-style: none; padding: 0; }
+.info-box ul li { padding: 4px 0; }
+.info-box ul li::before { content: '\2192\0020'; color: var(--cta); font-weight: 700; }
+
+/* Sekce */
+.section-block { margin-bottom: 40px; }
+.section-block h2 {
+ font-family: 'Recoleta', serif;
+ font-size: 24px;
+ font-weight: 600;
+ color: var(--heading);
+ margin-bottom: 16px;
+ line-height: 1.3;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+}
+.section-block h2 .icon { font-size: 28px; }
+.section-block h3 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 17px;
+ font-weight: 700;
+ color: var(--heading);
+ margin: 24px 0 12px;
+}
+.section-block p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 12px; }
+.section-block ul, .section-block ol { padding-left: 24px; margin-bottom: 12px; }
+.section-block li { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 6px; }
+.section-block strong { color: var(--heading); }
+.section-block a { color: var(--cta); }
+
+.highlight-box {
+ background: linear-gradient(135deg, var(--light), var(--section));
+ border-left: 4px solid var(--cta);
+ border-radius: 0 12px 12px 0;
+ padding: 20px 24px;
+ margin: 20px 0;
+}
+.highlight-box p { margin: 0; font-size: 15px; }
+
+.warning-box {
+ background: linear-gradient(135deg, #FFF8F0, #FFEDDB);
+ border-left: 4px solid #E8A050;
+ border-radius: 0 12px 12px 0;
+ padding: 20px 24px;
+ margin: 20px 0;
+}
+.warning-box p { margin: 0; font-size: 15px; color: var(--body); }
+
+/* Guarantee box */
+.guarantee-box {
+ background: var(--white);
+ border: 2px solid var(--cta);
+ border-radius: 20px;
+ padding: 32px;
+ text-align: center;
+ margin: 40px 0;
+ position: relative;
+}
+.guarantee-seal {
+ width: 72px;
+ height: 72px;
+ background: radial-gradient(circle, var(--cta), var(--cta-hover));
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 32px;
+ color: var(--white);
+ margin: 0 auto 16px;
+ border: 3px solid var(--highlight);
+}
+.guarantee-box h3 {
+ font-family: 'Recoleta', serif;
+ font-size: 22px;
+ color: var(--heading);
+ margin-bottom: 12px;
+}
+.guarantee-box p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.7;
+ max-width: 520px;
+ margin: 0 auto;
+}
+
+/* Kroky vrácení */
+.steps {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+ gap: 20px;
+ margin: 24px 0;
+}
+.step {
+ background: var(--white);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 24px 20px;
+ text-align: center;
+ transition: all 0.3s ease;
+}
+.step:hover {
+ transform: translateY(-3px);
+ box-shadow: 0 8px 24px rgba(45, 27, 61, 0.08);
+ border-color: var(--highlight);
+}
+.step-num {
+ width: 40px;
+ height: 40px;
+ background: var(--cta);
+ color: var(--white);
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-family: 'DM Sans', sans-serif;
+ font-size: 16px;
+ font-weight: 700;
+ margin: 0 auto 14px;
+}
+.step h4 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ font-weight: 700;
+ color: var(--heading);
+ margin-bottom: 8px;
+}
+.step p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ color: var(--muted);
+ line-height: 1.6;
+ margin: 0;
+}
+
+/* Conditions list */
+.conditions-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+ gap: 12px;
+ margin: 16px 0;
+}
+.condition-item {
+ background: var(--white);
+ border: 1px solid var(--section);
+ border-radius: 12px;
+ padding: 16px;
+ text-align: center;
+ transition: all 0.3s ease;
+}
+.condition-item:hover {
+ border-color: var(--highlight);
+ box-shadow: 0 4px 16px rgba(45, 27, 61, 0.06);
+}
+.condition-icon { font-size: 24px; margin-bottom: 8px; }
+.condition-item strong {
+ display: block;
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ font-weight: 700;
+ color: var(--heading);
+ margin-bottom: 4px;
+}
+.condition-item span {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 13px;
+ color: var(--muted);
+ line-height: 1.4;
+}
+
+/* FAQ */
+.faq-item {
+ border-bottom: 1px solid var(--section);
+}
+.faq-question {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ padding: 18px 0;
+ cursor: pointer;
+ transition: background 0.2s;
+}
+.faq-question h3 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 16px;
+ font-weight: 600;
+ color: var(--heading);
+ line-height: 1.4;
+ margin: 0;
+ flex: 1;
+}
+.faq-icon {
+ font-size: 24px;
+ color: var(--cta);
+ font-weight: 300;
+ transition: transform 0.3s ease;
+ flex-shrink: 0;
+ margin-left: 16px;
+}
+.faq-answer {
+ max-height: 0;
+ overflow: hidden;
+ transition: max-height 0.4s ease;
+}
+.faq-answer p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.75;
+ padding-bottom: 18px;
+ margin: 0;
+}
+.faq-answer a { color: var(--cta); }
+.faq-item.active .faq-icon {
+ transform: rotate(45deg);
+}
+.faq-item.active .faq-answer {
+ max-height: 360px;
+}
+
+.divider { height: 1px; background: var(--section); margin: 40px 0; }
+
+/* Odkaz na další stránku */
+.cross-link-note {
+ background: var(--white);
+ border: 1px solid var(--section);
+ border-radius: 12px;
+ padding: 20px 24px;
+ margin-top: 32px;
+ text-align: center;
+}
+.cross-link-note p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.7;
+ margin: 0;
+}
+.cross-link-note a {
+ color: var(--cta);
+ font-weight: 600;
+ text-decoration: underline;
+}
+.cross-link-note a:hover {
+ color: var(--cta-hover);
+}
+
+/* Company info */
+.company-info {
+ background: var(--light);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 28px;
+ margin-top: 40px;
+}
+.company-info h3 { font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
+.company-info p { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; margin: 0 0 6px; }
+.company-info a { color: var(--cta); }
+
+/* Last updated */
+.last-updated {
+ text-align: center;
+ font-family: 'DM Sans', sans-serif;
+ font-size: 13px;
+ color: var(--muted);
+ margin-top: 40px;
+ padding-top: 20px;
+ border-top: 1px solid var(--section);
+}
+
+/* ═══ FOOTER ═══ */
+.site-footer { background: var(--dark); padding: 48px 24px 24px; color: rgba(255, 255, 255, 0.7); }
+.footer-inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
+.footer-brand { display: flex; align-items: center; gap: 16px; }
+.footer-brand img { height: 40px; width: auto; }
+.footer-brand-text { font-family: 'Recoleta', serif; font-size: 18px; color: var(--white); line-height: 1.3; }
+.footer-links { display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(255, 255, 255, 0.7); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--white); }
+.footer-contact { display: flex; flex-direction: column; gap: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; }
+.footer-contact a { color: rgba(255, 255, 255, 0.7); text-decoration: none; }
+.footer-contact a:hover { color: var(--white); }
+.footer-bottom { max-width: 960px; margin: 32px auto 0; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: rgba(255, 255, 255, 0.45); }
+
+@media (max-width: 768px) {
+ .page-header h1 { font-size: 28px; }
+ .section-block h2 { font-size: 20px; }
+ .steps { grid-template-columns: 1fr; }
+ .conditions-grid { grid-template-columns: repeat(2, 1fr); }
+ .footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 32px; }
+ .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
+}
+@media (max-width: 480px) {
+ .page-header h1 { font-size: 24px; }
+ .page-header { padding: 40px 16px 36px; }
+ .page-content { padding: 32px 16px 60px; }
+ .conditions-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+<script src="js/project-config.js"></script>
+<script src="js/pixel.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Főoldal","item":"https://REPLACE-DOMAIN.hu/"},{"@type":"ListItem","position":2,"name":"Visszaküldés és garancia","item":"https://REPLACE-DOMAIN.hu/reklamace"}]}</script>
+</head>
+<body>
+<!-- TODO: EZ A FORDÍTÁS NEM JOGI FELÜLVIZSGÁLAT — magyar fogyasztóvédelmi jog eltérhet a csehtől, kérünk jogi ellenőrzést közzététel előtt / This translation has NOT had Hungarian legal review — Hungarian consumer protection law may differ from Czech law, get legal review before publishing -->
+
+<!-- ═══ NAVIGÁCIÓ ═══ -->
+<nav class="site-nav">
+ <div class="nav-inner">
+  <a href="index.html" class="nav-logo">
+   <img src="/pust-to-co-te-nici-logo.png" alt="Engedd el, ami tönkretesz" height="44" style="width:auto;object-fit:contain;">
+  </a>
+  <div class="nav-links">
+   <a href="doprava.html">Szállítás és kézbesítés</a>
+   <a href="reklamace.html" class="active">Visszaküldés és garancia</a>
+   <a href="obchodni-podminky.html">Általános szerződési feltételek</a>
+   <a href="ochrana-udaju.html">Adatvédelem</a>
+   <a href="kontakt.html">Ügyfélszolgálat</a>
+   <a href="index.html" class="nav-cta">Megrendelem &rarr;</a>
+  </div>
+  <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+   <span></span><span></span><span></span>
+  </button>
+ </div>
+</nav>
+<div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
+<div class="nav-mobile-menu">
+ <a href="doprava.html">Szállítás és kézbesítés</a>
+ <a href="reklamace.html">Visszaküldés és garancia</a>
+ <a href="obchodni-podminky.html">Általános szerződési feltételek</a>
+ <a href="ochrana-udaju.html">Adatvédelem</a>
+ <a href="kontakt.html">Ügyfélszolgálat</a>
+ <a href="index.html" class="nav-cta-mobile">Megrendelem &rarr;</a>
+</div>
+
+<!-- ═══ FEJLÉC ═══ -->
+<header class="page-header">
+ <div class="badge">Visszaküldés &amp; Garancia</div>
+ <h1>Visszaküldés és garancia</h1>
+ <p>Az Ön jogai és elégedettségi ígéretünk</p>
+</header>
+
+<!-- ═══ TARTALOM ═══ -->
+<div class="page-content">
+
+ <!-- Összefoglaló -->
+ <div class="info-box">
+  <h3>Összefoglaló</h3>
+  <ul>
+   <li>30 napos meghosszabbított pénzvisszafizetési garancia indoklás nélkül</li>
+   <li>14 napos törvényes elállási jog a szerződéstől</li>
+   <li>100%-os pénzvisszatérítés elégedetlenség esetén</li>
+   <li>Visszaküldési eljárás 5 egyszerű lépésben</li>
+  </ul>
+ </div>
+
+ <!-- Garancia -->
+ <div class="guarantee-box">
+  <div class="guarantee-seal">30</div>
+  <h3>30 napos pénzvisszafizetési garancia</h3>
+  <p>Nincs megelégedve? Visszaadjuk a teljes összeget. <strong>Indoklás nélkül. Bonyodalmak nélkül.</strong> Törvény szerint 14 napos elállási határidő illeti meg a szerződéstől. Mi 30 napot kínálunk a könyv átvételétől számítva.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 1. szakasz: Elállási jog a szerződéstől -->
+ <div class="section-block">
+  <h2><span class="icon">1.</span> Elállási jog a szerződéstől</h2>
+
+  <h3>1.1 Az Ön törvényes jogai</h3>
+  <p>Fogyasztóként a <strong>cseh Polgári Törvénykönyv (89/2012. sz. törvény) 1829. §-a</strong> alapján joga van elállni az adásvételi szerződéstől az áru átvételétől számított <strong>14 napon</strong> belül, <strong>indoklás nélkül</strong>. Mi azonban egy lépéssel tovább megyünk, és <strong>30 napos</strong> meghosszabbított határidőt kínálunk, amely alatt visszatérítjük a teljes vételárat.</p>
+  <p>Az elállási határidő attól a naptól számítódik, amikor Ön vagy az Ön által megjelölt harmadik személy (a fuvarozó kivételével) átveszi a könyvet. A határidő betartásához elegendő, ha az elállási nyilatkozatot annak lejárta előtt elküldi.</p>
+
+  <h3>1.2 A teljes pénzvisszatérítés feltételei</h3>
+  <p>Ahhoz, hogy jogosult legyen a teljes vételár visszatérítésére, a könyvnek a következő feltételeknek kell megfelelnie:</p>
+
+  <div class="conditions-grid">
+   <div class="condition-item">
+    <div class="condition-icon">&#128214;</div>
+    <strong>Olvasatlan</strong>
+    <span>Az olvasás vagy lapozás nyomai nélkül</span>
+   </div>
+   <div class="condition-item">
+    <div class="condition-icon">&#9989;</div>
+    <strong>Sértetlen</strong>
+    <span>Gyűrődés, karcolás vagy folt nélkül</span>
+   </div>
+   <div class="condition-item">
+    <div class="condition-icon">&#9998;</div>
+    <strong>Bejegyzések nélkül</strong>
+    <span>Feljegyzések vagy kiemelések nélkül</span>
+   </div>
+   <div class="condition-item">
+    <div class="condition-icon">&#128230;</div>
+    <strong>Teljes</strong>
+    <span>Minden tartozék mellékelve</span>
+   </div>
+   <div class="condition-item">
+    <div class="condition-icon">&#10024;</div>
+    <strong>Eredeti állapot</strong>
+    <span>Abban az állapotban, ahogyan átvette</span>
+   </div>
+  </div>
+
+  <div class="warning-box">
+   <p><strong>Figyelem:</strong> Azok a könyvek, amelyeken az olvasás vagy a használat nyilvánvaló jelei láthatók, <strong>nem feltétlenül jogosultak a teljes pénzvisszatérítésre</strong> &mdash; a fogyasztó felel az áru olyan mértékű értékcsökkenéséért, amely a könyv jellegének és tulajdonságainak megismeréséhez szükséges mértéket meghaladó használatból ered.</p>
+  </div>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 2. szakasz: Visszaküldés lépésről lépésre -->
+ <div class="section-block">
+  <h2><span class="icon">2.</span> Visszaküldés &mdash; lépésről lépésre</h2>
+
+  <h3>2.1 Visszaküldés 5 lépésben</h3>
+
+  <div class="steps">
+   <div class="step">
+    <div class="step-num">1</div>
+    <h4>Írjon nekünk</h4>
+    <p>Küldjön e-mailt az info@REPLACE-DOMAIN.hu címre a nevével, a megrendelés számával és — ha van — a visszaküldés okával.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">2</div>
+    <h4>Visszaigazolás</h4>
+    <p>1&ndash;2 munkanapon belül visszaigazolást kap a visszaküldés részletes utasításaival.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">3</div>
+    <h4>Gondosan csomagolja be</h4>
+    <p>Csomagolja be a könyvet gondosan, hogy szállítás közben ne sérüljön meg.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">4</div>
+    <h4>Küldje el</h4>
+    <p>Küldje el a csomagot indokolatlan késedelem nélkül, legkésőbb 14 napon belül, a visszaküldési címre.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">5</div>
+    <h4>Pénzvisszatérítés</h4>
+    <p>A pénzt a könyv hozzánk történő megérkezésétől számított 14 napon belül visszatérítjük.</p>
+   </div>
+  </div>
+
+  <h3>2.2 Visszaküldési cím</h3>
+  <div class="highlight-box">
+   <p><strong>Performance Marketing Solution s.r.o. &mdash; Áruvisszaküldés</strong><br>
+   c/o Dextrum Fulfillment a.s.<br>
+   Kirilovova 181<br>
+   739 21 Paskov<br>
+   Cseh Köztársaság</p>
+  </div>
+
+  <div class="warning-box">
+   <p><strong>Fontos:</strong> A csomag külsején mindig tüntesse fel a következőt: <strong>&quot;Visszaküldés &mdash; Megrendelésszám: [az Ön megrendelésszáma]&quot;</strong>.</p>
+  </div>
+
+  <h3>2.3 A visszaküldés költségei</h3>
+  <p>A visszaküldés (a könyv visszaküldésének) költségeit a vevő viseli, <strong>kivéve</strong> az alábbi eseteket:</p>
+  <ul>
+   <li>a termék hibás,</li>
+   <li>hibás terméket kapott,</li>
+   <li>a termék szállítás közben megsérült.</li>
+  </ul>
+  <p>A <strong>Zásilkovnán</strong> keresztüli visszaküldés tájékoztató jellegű költsége: <strong>kb. 1280&ndash;1920 Ft</strong>.</p>
+
+  <div class="highlight-box">
+   <p><strong>Tipp:</strong> Mindig olyan küldési módot használjon, amely lehetővé teszi a csomag nyomon követését (pl. Zásilkovna), hogy igazolni tudja a csomag feladását és kézbesítését.</p>
+  </div>
+
+  <h3>2.4 Mit tüntessen fel a visszaküldésről szóló e-mailben?</h3>
+  <ul>
+   <li>teljes neve,</li>
+   <li>a megrendelés száma,</li>
+   <li>az áru átvételének dátuma,</li>
+   <li>a visszaküldés oka (nem kötelező),</li>
+   <li>a pénzvisszatérítéshez szükséges bankszámlaszám.</li>
+  </ul>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 3. szakasz: Pénzvisszatérítés -->
+ <div class="section-block">
+  <h2><span class="icon">3.</span> Pénzvisszatérítés</h2>
+
+  <h3>3.1 Mikor kapja meg a visszatérített összeget?</h3>
+  <p>A visszaküldött könyv megérkezésétől számított <strong>14 napon belül</strong> feldolgozzuk a teljes <strong>11 990 Ft</strong> vételár visszatérítését.</p>
+
+  <h3>3.2 Milyen módon térítjük vissza a pénzt?</h3>
+  <p>A pénzt <strong>ugyanazzal a módszerrel</strong> térítjük vissza, ahogyan Ön a fizetést teljesítette:</p>
+  <ul>
+   <li><strong>Bankkártya</strong> &rarr; visszatérítés a kártyájára,</li>
+   <li><strong>Banki átutalás / online fizetés</strong> &rarr; visszatérítés a bankszámlájára,</li>
+   <li><strong>Utánvét</strong> &rarr; visszatérítés átutalással az Ön által megadott bankszámlára.</li>
+  </ul>
+  <p>A feldolgozás után a banktól függően <strong>3&ndash;5 munkanapba</strong> telhet, amíg az összeg megjelenik a számláján.</p>
+
+  <h3>3.3 Részleges pénzvisszatérítés</h3>
+  <p>A következő esetekben a visszatérített összeg az áru csökkent értékével arányosan mérséklődhet:</p>
+  <ul>
+   <li>a könyv használat nyomait mutatja,</li>
+   <li>a könyvet a vevő megrongálta,</li>
+   <li>hiányoznak alkatrészek/tartozékok.</li>
+  </ul>
+  <p>Az értékcsökkenésről mindig előzetesen tájékoztatjuk, még a pénzvisszatérítés feldolgozása előtt.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 4. szakasz: Áru hibáinak reklamációja és törvényes felelősség -->
+ <div class="section-block">
+  <h2><span class="icon">4.</span> Az áru hibáinak reklamációja (reklamációs eljárás)</h2>
+
+  <h3>4.1 Mikor nyújthat be reklamációt?</h3>
+  <p>Hibás áruval kapcsolatos reklamációt akkor nyújthat be, ha:</p>
+  <ul>
+   <li>a könyv sérülten érkezett,</li>
+   <li>a könyv nem felel meg a leírásnak,</li>
+   <li>a könyv nyomdai vagy gyártási hibákat tartalmaz,</li>
+   <li>a könyvből hiányoznak oldalak,</li>
+   <li>hibás terméket kapott.</li>
+  </ul>
+
+  <h3>4.2 Hogyan nyújthat be reklamációt?</h3>
+  <p>Írjon nekünk az <a href="mailto:info@REPLACE-DOMAIN.hu">info@REPLACE-DOMAIN.hu</a> címre, és adja meg:</p>
+  <ul>
+   <li>nevét és a megrendelés számát,</li>
+   <li>a hiba leírását,</li>
+   <li>a sérült vagy hibás termékről készült fényképeket.</li>
+  </ul>
+  <p>Reklamációjára <strong>48 órán belül</strong> válaszolunk.</p>
+
+  <h3>4.3 A hibás teljesítésből eredő jogai</h3>
+  <p>A hibás teljesítésből eredő jogokat a <strong>cseh Polgári Törvénykönyv (89/2012. sz. törvény)</strong> szabályozza. Jogos reklamáció esetén a hiba jellegétől függően különösen a következő jogok illetik meg Önt:</p>
+  <ul>
+   <li><strong>a hiba elhárítása</strong> új, hibátlan könyv szállításával vagy javítással,</li>
+   <li><strong>arányos árengedmény</strong> a vételárból,</li>
+   <li><strong>elállás a szerződéstől</strong> és a teljes vételár visszatérítése (olyan lényeges hiba esetén, amely nem hárítható el).</li>
+  </ul>
+
+  <div class="highlight-box">
+   <p>A reklamációt <strong>legkésőbb a benyújtástól számított 30 napon belül</strong> intézzük, kivéve, ha Önnel hosszabb határidőben állapodunk meg. Jogos reklamáció esetén <strong>mi álljuk a visszaküldés</strong> és az új példány kiküldésének költségeit is.</p>
+  </div>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 5. szakasz: Fogyasztói jogviták bírósági eljáráson kívüli rendezése -->
+ <div class="section-block">
+  <h2><span class="icon">5.</span> Fogyasztói jogviták bírósági eljáráson kívüli rendezése</h2>
+  <p>Ha köztünk, mint eladó, és Ön, mint fogyasztó között olyan jogvita keletkezik, amelyet kölcsönös megállapodással nem sikerül rendezni, jogában áll a fogyasztói jogviták bírósági eljáráson kívüli rendezésére illetékes szervhez fordulni, amely a következő:</p>
+  <div class="highlight-box">
+   <p><strong>Česká obchodní inspekce (ČOI) &mdash; cseh kereskedelmi felügyelet</strong><br>
+   Központi Felügyelőség &mdash; ADR Osztály<br>
+   Štěpánská 796/44, 110 00 Praha 1, Cseh Köztársaság<br>
+   Web: <a href="https://www.coi.cz" target="_blank" rel="noopener">www.coi.cz</a></p>
+  </div>
+  <p>A bírósági eljáráson kívüli vitarendezés a fogyasztó kérelmére indul. Ez az eljárás nem mediáció, sem választottbírósági eljárás, és igénybevétele nem érinti az Ön bírósághoz fordulási jogát.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 6. szakasz: Gyakran ismételt kérdések -->
+ <div class="section-block">
+  <h2><span class="icon">6.</span> Gyakran ismételt kérdések</h2>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Lemondhatom a megrendelésemet?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Igen, ha megrendelése még nem került feladásra, díjmentesen lemondhatja. Írjon nekünk minél hamarabb az <a href="mailto:info@REPLACE-DOMAIN.hu">info@REPLACE-DOMAIN.hu</a> címre a megrendelés számával.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Meg kell adnom az okot a 30 napon belüli visszaküldéskor?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Nem. A 30 napos garanciánk keretében <strong>indoklás nélkül</strong> visszatérítjük a teljes összeget. Elég, ha ír nekünk az <a href="mailto:info@REPLACE-DOMAIN.hu">info@REPLACE-DOMAIN.hu</a> címre, és visszaküldi a könyvet.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Kicserélhetem a könyvet másik termékre?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>A csere sajnos nem lehetséges. A könyvet visszaküldheti a jelen feltételeknek megfelelően, majd új megrendelést adhat le.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Mi van, ha elveszett a csomagom?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Vegye fel velünk a kapcsolatot a csomag nyomkövető kódjával. Megindítjuk a vizsgálatot a futárszolgálatnál (Zásilkovna). Az eredmény alapján új példányt küldünk, vagy teljes pénzvisszatérítést biztosítunk.</p>
+   </div>
+  </div>
+ </div>
+
+ <!-- Hivatkozás a szállítási feltételekre -->
+ <div class="cross-link-note">
+  <p>A szállítással és kézbesítéssel kapcsolatos információkért nézze meg <a href="doprava.html">Szállítási feltételeinket</a>.</p>
+ </div>
+
+ <!-- Cégadatok -->
+ <div class="company-info">
+  <h3>Cégadatok</h3>
+  <p><strong>Performance Marketing Solution s.r.o.</strong></p>
+  <p>Rybná 716/24, Staré Město, 110 00 Praha, Cseh Köztársaság</p>
+  <p>Cégjegyzékszám (IČO): 06259928</p>
+  <p>Adószám (DIČ): CZ06259928</p>
+  <p>Ügyfélszolgálat: <a href="mailto:info@REPLACE-DOMAIN.hu">info@REPLACE-DOMAIN.hu</a></p>
+ </div>
+
+ <!-- Utolsó frissítés -->
+ <div class="last-updated">
+  Utolsó frissítés: 2026. június 13.
+ </div>
+
+</div>
+
+<!-- ═══ LÁBLÉC ═══ -->
+<footer class="site-footer">
+ <div class="footer-inner">
+  <div class="footer-brand">
+   <img src="/pust-to-co-te-nici.png" alt="Engedd el, ami tönkretesz">
+  </div>
+  <div class="footer-links">
+   <a href="doprava.html">Szállítás és kézbesítés</a>
+   <a href="reklamace.html">Visszaküldés és garancia</a>
+   <a href="obchodni-podminky.html">Általános szerződési feltételek</a>
+   <a href="ochrana-udaju.html">Adatvédelem</a>
+   <a href="kontakt.html">Ügyfélszolgálat</a>
+  </div>
+  <div class="footer-contact">
+   <a href="mailto:info@REPLACE-DOMAIN.hu">info@REPLACE-DOMAIN.hu</a>
+  </div>
+ </div>
+ <div class="footer-bottom">
+  <span>Performance Marketing Solution s.r.o. &bull; Rybná 716/24, 110 00 Praha &bull; IČO: 06259928 &bull; DIČ: CZ06259928</span>
+  <span>&copy; 2026 Performance Marketing Solution s.r.o. Minden jog fenntartva.</span>
+ </div>
+</footer>
+
+<script>
+function toggleFaq(element) {
+ var faqItem = element.closest('.faq-item');
+ var isActive = faqItem.classList.contains('active');
+ var allItems = document.querySelectorAll('.faq-item');
+ allItems.forEach(function(item) { item.classList.remove('active'); });
+ if (!isActive) { faqItem.classList.add('active'); }
+}
+
+function toggleMobileMenu() {
+ document.querySelector('.nav-hamburger').classList.toggle('open');
+ document.querySelector('.nav-mobile-menu').classList.toggle('open');
+ document.querySelector('.nav-mobile-overlay').classList.toggle('open');
+}
+</script>
+</body>
+</html>

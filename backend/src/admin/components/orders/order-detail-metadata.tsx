@@ -399,6 +399,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
     "kocici-bible": "Kočičí bible",
     "odpust-knizka": "Pusť to, co tě ničí",
     "zycie-zaslugy": "Życie na które zasługujesz",
+    "engedd-el": "Engedd el, ami tönkretesz",
   }
   const projectId = order.metadata?.project_id
   const displayTag =

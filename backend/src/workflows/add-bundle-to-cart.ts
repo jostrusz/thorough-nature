@@ -104,6 +104,14 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
   "priplatek-za-dobirku": {
     1: 30,    // 30 Kč incl. DPH — COD payment surcharge
   },
+  // Engedd el, ami tönkretesz — hlavní produkt HU (engedd-el)
+  // PLACEHOLDER pricing — proportional estimate from CZK, confirm before go-live.
+  "engedd-el-ami-tonkretesz": {
+    1: 11990,  // 11990 Ft incl. ÁFA (5%)
+    2: 19990,  // 19990 Ft incl. ÁFA (save 3990 Ft)
+    3: 25990,  // 25990 Ft incl. ÁFA (save 9980 Ft)
+    4: 31990,  // 31990 Ft incl. ÁFA (save 15970 Ft)
+  },
 }
 
 type AddBundleToCartInput = {

@@ -110,6 +110,13 @@
       "runtimeArgs": ["http-server", "storefront/src/projects/slipp-taket/pages", "-p", "8104", "-c-1"],
       "port": 8104,
       "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+    },
+    {
+      "name": "engedd-el",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
+      "runtimeArgs": ["http-server", "storefront/src/projects/engedd-el/pages", "-p", "8105", "-c-1"],
+      "port": 8105,
+      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
     }
   ]
 }

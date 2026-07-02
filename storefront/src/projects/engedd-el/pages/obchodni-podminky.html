@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Általános szerződési feltételek — Engedd el, ami tönkretesz</title>
+<meta name="description" content="Olvassa el az Általános Szerződési Feltételeinket a Engedd el, ami tönkretesz című könyv megrendeléséhez.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://REPLACE-DOMAIN.hu/obchodni-podminky">
+<link rel="icon" href="/laat-los-logo-logo.webp" type="image/webp">
+
+<!-- ═══ FONTS ═══ -->
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+<style>
+/* ═══ FONTS ═══ */
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+/* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
+:root {
+ --bg: #FAF5F8;
+ --heading: #2D1B3D;
+ --cta: #C27BA0;
+ --section: #EDD9E5;
+ --body: #5A3D6B;
+ --highlight: #D9A4C0;
+ --dark: #1A1028;
+ --white: #FFFFFF;
+ --light: #F5EDF2;
+ --muted: #9B7AAD;
+ --cta-hover: #A8628A;
+ --accent: #D498B5;
+}
+
+/* ═══ RESET ═══ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
+
+/* ═══ NAVIGACE ═══ */
+.site-nav {
+ background: var(--white);
+ border-bottom: 1px solid var(--section);
+ padding: 0 20px;
+ position: sticky;
+ top: 0;
+ z-index: 1000;
+ box-shadow: 0 2px 12px rgba(45, 27, 61, 0.06);
+}
+.nav-inner {
+ max-width: 1050px;
+ margin: 0 auto;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ height: 64px;
+}
+.nav-logo {
+ display: flex;
+ align-items: center;
+ text-decoration: none;
+ gap: 10px;
+}
+.nav-logo img {
+ height: 40px;
+ width: auto;
+}
+.nav-logo-text {
+ font-family: 'Recoleta', serif;
+ font-size: 16px;
+ font-weight: 600;
+ color: var(--heading);
+ line-height: 1.2;
+}
+.nav-links {
+ display: flex;
+ align-items: center;
+ gap: 22px;
+}
+.nav-links a {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ font-weight: 500;
+ color: var(--body);
+ text-decoration: none;
+ transition: color 0.2s;
+ position: relative;
+ white-space: nowrap;
+}
+.nav-links a:hover {
+ color: var(--heading);
+}
+.nav-links a::after {
+ content: '';
+ position: absolute;
+ bottom: -4px;
+ left: 0;
+ width: 0;
+ height: 2px;
+ background: var(--cta);
+ transition: width 0.3s ease;
+}
+.nav-links a:hover::after {
+ width: 100%;
+}
+.nav-links a.active {
+ color: var(--heading);
+ font-weight: 600;
+}
+.nav-links a.active::after {
+ width: 100%;
+}
+.nav-cta {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ font-weight: 700;
+ color: var(--white) !important;
+ background: var(--cta);
+ padding: 10px 22px;
+ border-radius: 8px;
+ text-decoration: none !important;
+ transition: all 0.25s ease;
+ box-shadow: 0 3px 12px rgba(194, 123, 160, 0.2);
+}
+.nav-cta:hover {
+ background: var(--cta-hover) !important;
+ color: var(--white) !important;
+ transform: translateY(-1px);
+ box-shadow: 0 5px 18px rgba(194, 123, 160, 0.35);
+}
+.nav-cta::after {
+ display: none !important;
+}
+.nav-hamburger {
+ display: none;
+ background: none;
+ border: none;
+ cursor: pointer;
+ padding: 8px;
+ flex-direction: column;
+ gap: 5px;
+}
+.nav-hamburger span {
+ display: block;
+ width: 24px;
+ height: 2px;
+ background: var(--heading);
+ border-radius: 2px;
+ transition: all 0.3s ease;
+}
+.nav-mobile-overlay {
+ display: none;
+ position: fixed;
+ top: 64px;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: rgba(26, 16, 40, 0.5);
+ z-index: 999;
+}
+.nav-mobile-menu {
+ display: none;
+ position: fixed;
+ top: 64px;
+ left: 0;
+ right: 0;
+ background: var(--white);
+ padding: 24px 20px;
+ box-shadow: 0 8px 24px rgba(45, 27, 61, 0.12);
+ z-index: 1000;
+ flex-direction: column;
+ gap: 0;
+ border-bottom: 2px solid var(--section);
+}
+.nav-mobile-menu a {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 16px;
+ font-weight: 500;
+ color: var(--body);
+ text-decoration: none;
+ padding: 14px 0;
+ border-bottom: 1px solid var(--section);
+ display: block;
+ transition: color 0.2s;
+}
+.nav-mobile-menu a:last-child { border-bottom: none; }
+.nav-mobile-menu a:hover { color: var(--heading); }
+.nav-mobile-menu .nav-cta-mobile {
+ display: inline-block;
+ font-weight: 700;
+ color: var(--white);
+ background: var(--cta);
+ padding: 14px 28px;
+ border-radius: 10px;
+ text-align: center;
+ margin-top: 16px;
+ border-bottom: none;
+}
+.nav-mobile-menu .nav-cta-mobile:hover {
+ background: var(--cta-hover);
+ color: var(--white);
+}
+
+@media (max-width: 1100px) {
+ .nav-links { display: none; }
+ .nav-hamburger { display: flex; }
+ .nav-mobile-menu.open { display: flex; }
+ .nav-mobile-overlay.open { display: block; }
+ .nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+ .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+ .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+}
+
+/* ═══ CONTENT STRÁNKY ═══ */
+.page-header {
+ background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
+ padding: 56px 20px 48px;
+ text-align: center;
+}
+.page-header h1 {
+ font-family: 'Recoleta', serif;
+ font-size: 36px;
+ font-weight: 600;
+ color: var(--white);
+ margin-bottom: 12px;
+ line-height: 1.2;
+}
+.page-header p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 16px;
+ color: rgba(255, 255, 255, 0.7);
+ max-width: 600px;
+ margin: 0 auto;
+ line-height: 1.6;
+}
+.page-header .badge {
+ display: inline-block;
+ background: rgba(194, 123, 160, 0.2);
+ color: var(--accent);
+ font-family: 'DM Sans', sans-serif;
+ font-size: 13px;
+ font-weight: 600;
+ padding: 6px 16px;
+ border-radius: 20px;
+ margin-bottom: 16px;
+ letter-spacing: 0.5px;
+}
+
+.page-content {
+ max-width: 760px;
+ margin: 0 auto;
+ padding: 48px 20px 80px;
+}
+
+.info-box {
+ background: var(--light);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 28px;
+ margin-bottom: 40px;
+}
+.info-box h3 {
+ font-family: 'Recoleta', serif;
+ font-size: 18px;
+ color: var(--heading);
+ margin-bottom: 12px;
+}
+.info-box p, .info-box li {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.7;
+}
+.info-box ul {
+ list-style: none;
+ padding: 0;
+}
+.info-box ul li {
+ padding: 4px 0;
+}
+.info-box ul li::before {
+ content: '→ ';
+ color: var(--cta);
+ font-weight: 700;
+}
+
+.section-block {
+ margin-bottom: 40px;
+}
+.section-block h2 {
+ font-family: 'Recoleta', serif;
+ font-size: 24px;
+ font-weight: 600;
+ color: var(--heading);
+ margin-bottom: 16px;
+ line-height: 1.3;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+}
+.section-block h2 .section-num {
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ width: 36px;
+ height: 36px;
+ background: var(--cta);
+ color: var(--white);
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ font-weight: 700;
+ border-radius: 10px;
+ flex-shrink: 0;
+}
+.section-block h3 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 16px;
+ font-weight: 700;
+ color: var(--heading);
+ margin: 18px 0 8px;
+}
+.section-block p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 16px;
+ color: var(--body);
+ line-height: 1.75;
+ margin-bottom: 12px;
+}
+.section-block ul, .section-block ol {
+ padding-left: 24px;
+ margin-bottom: 12px;
+}
+.section-block li {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 16px;
+ color: var(--body);
+ line-height: 1.75;
+ margin-bottom: 6px;
+}
+.section-block strong {
+ color: var(--heading);
+}
+.section-block a {
+ color: var(--cta);
+ text-decoration: underline;
+ font-weight: 600;
+ transition: color 0.2s;
+}
+.section-block a:hover { color: var(--cta-hover); }
+
+.highlight-box {
+ background: linear-gradient(135deg, var(--light), var(--section));
+ border-left: 4px solid var(--cta);
+ border-radius: 0 12px 12px 0;
+ padding: 20px 24px;
+ margin: 20px 0;
+}
+.highlight-box p {
+ margin: 0;
+ font-size: 15px;
+}
+
+.address-box {
+ background: linear-gradient(135deg, var(--light), var(--section));
+ border: 2px solid var(--highlight);
+ border-radius: 14px;
+ padding: 24px;
+ margin: 20px 0;
+ text-align: center;
+}
+.address-box h4 {
+ font-family: 'Recoleta', serif;
+ font-size: 16px;
+ color: var(--heading);
+ margin: 0 0 12px 0;
+}
+.address-box p {
+ font-size: 15px;
+ font-weight: 600;
+ color: var(--body);
+ margin: 4px 0;
+ line-height: 1.5;
+}
+
+.divider {
+ height: 1px;
+ background: var(--section);
+ margin: 40px 0;
+}
+
+/* ═══ FOOTER ═══ */
+.site-footer {
+ background: var(--dark);
+ padding: 48px 24px 24px;
+ color: rgba(255, 255, 255, 0.7);
+}
+.footer-inner {
+ max-width: 960px;
+ margin: 0 auto;
+ display: flex;
+ justify-content: space-between;
+ align-items: flex-start;
+ gap: 40px;
+ flex-wrap: wrap;
+}
+.footer-brand {
+ display: flex;
+ align-items: center;
+ gap: 16px;
+}
+.footer-logo { height: 40px; width: auto; }
+.footer-links {
+ display: flex;
+ flex-direction: column;
+ gap: 10px;
+}
+.footer-links a {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ color: rgba(255, 255, 255, 0.7);
+ text-decoration: none;
+ transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--white); }
+.footer-contact {
+ display: flex;
+ flex-direction: column;
+ gap: 8px;
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+}
+.footer-contact a {
+ color: rgba(255, 255, 255, 0.7);
+ text-decoration: none;
+}
+.footer-contact a:hover { color: var(--white); }
+.footer-payments { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pay-icon { height: 16px; width: auto; opacity: 0.85; transition: opacity 0.2s; }
+.pay-icon:hover { opacity: 1; }
+.footer-bottom {
+ max-width: 960px;
+ margin: 32px auto 0;
+ padding-top: 20px;
+ border-top: 1px solid rgba(255, 255, 255, 0.1);
+ display: flex;
+ justify-content: space-between;
+ flex-wrap: wrap;
+ gap: 8px;
+ font-family: 'DM Sans', sans-serif;
+ font-size: 12px;
+ color: rgba(255, 255, 255, 0.45);
+}
+
+@media (max-width: 768px) {
+ .page-header h1 { font-size: 28px; }
+ .section-block h2 { font-size: 20px; }
+ .footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 32px; }
+ .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
+}
+@media (max-width: 480px) {
+ .page-header h1 { font-size: 24px; }
+ .page-header { padding: 40px 16px 36px; }
+ .page-content { padding: 32px 16px 60px; }
+}
+</style>
+<script src="js/project-config.js"></script>
+<script src="js/pixel.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Főoldal","item":"https://REPLACE-DOMAIN.hu/"},{"@type":"ListItem","position":2,"name":"Általános szerződési feltételek","item":"https://REPLACE-DOMAIN.hu/obchodni-podminky"}]}</script>
+</head>
+<body>
+<!-- TODO: EZ A FORDÍTÁS NEM JOGI FELÜLVIZSGÁLAT — magyar fogyasztóvédelmi jog eltérhet a csehtől, kérünk jogi ellenőrzést közzététel előtt / This translation has NOT had Hungarian legal review — Hungarian consumer protection law may differ from Czech law, get legal review before publishing -->
+
+<!-- ═══ NAVIGÁCIÓ ═══ -->
+<nav class="site-nav">
+ <div class="nav-inner">
+  <a href="index.html" class="nav-logo">
+   <img src="/pust-to-co-te-nici-logo.png" alt="Engedd el, ami tönkretesz" height="44" style="width:auto;object-fit:contain;">
+  </a>
+  <div class="nav-links">
+   <a href="doprava.html">Szállítás és kézbesítés</a>
+   <a href="reklamace.html">Visszaküldés és garancia</a>
+   <a href="obchodni-podminky.html" class="active">Általános szerződési feltételek</a>
+   <a href="ochrana-udaju.html">Adatvédelem</a>
+   <a href="kontakt.html">Ügyfélszolgálat</a>
+   <a href="index.html" class="nav-cta">Megrendelem &rarr;</a>
+  </div>
+  <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+   <span></span><span></span><span></span>
+  </button>
+ </div>
+</nav>
+<div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
+<div class="nav-mobile-menu">
+ <a href="doprava.html">Szállítás és kézbesítés</a>
+ <a href="reklamace.html">Visszaküldés és garancia</a>
+ <a href="obchodni-podminky.html">Általános szerződési feltételek</a>
+ <a href="ochrana-udaju.html">Adatvédelem</a>
+ <a href="kontakt.html">Ügyfélszolgálat</a>
+ <a href="index.html" class="nav-cta-mobile" onclick="toggleMobileMenu()">Megrendelem &rarr;</a>
+</div>
+
+<!-- ═══ FEJLÉC ═══ -->
+<header class="page-header">
+ <div class="badge">Jogi információk</div>
+ <h1>Általános szerződési feltételek</h1>
+ <p>Kérjük, a megrendelés elküldése előtt figyelmesen olvassa el Általános Szerződési Feltételeinket.</p>
+</header>
+
+<!-- ═══ TARTALOM ═══ -->
+<div class="page-content">
+
+ <div class="info-box">
+  <h3>Összefoglaló</h3>
+  <ul>
+   <li>14 napos elállási jog a szerződéstől (törvényes)</li>
+   <li>30 napos pénzvisszafizetési garancia (a törvényen felül)</li>
+   <li>Ingyenes szállítás Magyarország egész területén</li>
+   <li>Kiszállítás Zásilkovnával 2–3 munkanap alatt</li>
+   <li>Biztonságos fizetés Comgate-en (bankkártya, banki átutalás) és PayPal-on keresztül</li>
+   <li>Az eladó székhelye szerinti (cseh) jog — az irányadó fogyasztóvédelmi jogszabályok szerinti teljes fogyasztóvédelem</li>
+  </ul>
+ </div>
+
+ <!-- 1. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">1</span> Bevezető rendelkezések és az eladó</h2>
+  <p>Ezek az általános szerződési feltételek (a továbbiakban: „Feltételek") szabályozzák a szerződő felek egymás közötti jogait és kötelezettségeit, amelyek a <strong>Engedd el, ami tönkretesz</strong> (szerző: Joris de Vries) című könyv REPLACE-DOMAIN.hu internetes áruházon keresztül történő értékesítésével összefüggésben keletkeznek.</p>
+  <p><strong>Eladó:</strong></p>
+  <p><strong>Performance Marketing Solution s.r.o.</strong><br>
+  Rybná 716/24, Staré Město, 110 00 Praha, Cseh Köztársaság<br>
+  Cégjegyzékszám (IČO): 06259928<br>
+  Adószám (DIČ): CZ06259928</p>
+  <p>E-mail: <a href="mailto:info@REPLACE-DOMAIN.hu">info@REPLACE-DOMAIN.hu</a><br>
+  Telefon: +420 732 915 755<br>
+  Weboldal: <a href="https://REPLACE-DOMAIN.hu" target="_blank">REPLACE-DOMAIN.hu</a></p>
+  <p>Amennyiben a vevő fogyasztó (olyan természetes személy, aki nem vállalkozási tevékenysége körében jár el), az e Feltételekben nem szabályozott jogokra és kötelezettségekre elsősorban a következők irányadók:</p>
+  <ul>
+   <li>a cseh Polgári Törvénykönyv (89/2012. sz. törvény),</li>
+   <li>a fogyasztóvédelemről szóló cseh törvény (634/1992. sz. törvény),</li>
+   <li>a fogyasztók jogairól szóló 2011/83/EU uniós irányelv.</li>
+  </ul>
+  <p>Jelen Feltételek rendelkezései az adásvételi szerződés elválaszthatatlan részét képezik. A szerződés megkötése előtt a Feltételek szövege mindig elérhető a vevő számára a weboldalon.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 2. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">2</span> Megrendelés és a szerződés megkötése</h2>
+  <p>A könyvre, az ÁFÁ-val növelt árra és a kiszállítás költségeire vonatkozó információk egyértelműen fel vannak tüntetve az eladó weboldalán és a megrendelési űrlapon. Minden ár forintban (Ft) van feltüntetve, és tartalmazza az ÁFÁ-t.</p>
+  <h3>A megrendelés folyamata</h3>
+  <p>A megrendelés tartalmazza a termék leírását, a vevő adatait (név, cím, e-mail), az árat az ingyenes szállítással együtt, a kiválasztott fizetési módot és a szállítási címet. A megrendelés folyamata során a vevőnek lehetősége van ellenőrizni és javítani adatait a megrendelés elküldése előtt.</p>
+  <h3>A szerződés létrejötte</h3>
+  <p>Az adásvételi szerződés abban a pillanatban jön létre, amikor a vevő rákattint a „Megrendelem" gombra (vagy hasonló megerősítő gombra), és amikor az eladótól visszaigazoló e-mailt kap a megrendelés befogadásáról. A megrendelés elküldésével a vevő megerősíti, hogy megismerte és elfogadja ezeket a Feltételeket.</p>
+  <p>A szerződés magyar nyelven jön létre, és a számlával együtt az eladó elektronikus formában, a jogszabályban meghatározott ideig archiválja; harmadik személyek — a szükséges adatfeldolgozók kivételével — nem férnek hozzá. A könyv tulajdonjoga a vételár teljes kifizetésével és a termék átvételével száll át a vevőre.</p>
+
+  <div class="highlight-box">
+   <p><strong>Megjegyzés:</strong> Az eladó megfelelő technikai és szervezési intézkedéseket alkalmaz az elektronikus adatátvitel biztosítására, és biztonságos webes környezetet biztosít.</p>
+  </div>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 3. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">3</span> Ár és fizetési feltételek</h2>
+  <p>A nyomtatott <strong>Engedd el, ami tönkretesz</strong> könyv eladási ára <strong>11 990 Ft</strong>, ÁFÁ-val és Magyarország egész területén ingyenes szállítással együtt. A weboldalon feltüntetett ár végleges — a fizetéskor semmilyen további díjat nem számítunk fel.</p>
+  <h3>Fizetési módok</h3>
+  <p>A fizetés előre történik, a következő módok egyikével:</p>
+  <ul>
+   <li><strong>Comgate</strong> — bankkártya (Visa, Mastercard) és online banki átutalás,</li>
+   <li><strong>PayPal.</strong></li>
+  </ul>
+  <p>Minden fizetést biztonságosan, tanúsított fizetési szolgáltatókon keresztül dolgozunk fel. Az eladó nem tárolja a bankkártya- vagy bankszámla-adatokat.</p>
+  <h3>Számla</h3>
+  <p>A vevő a fizetés visszaigazolása után automatikusan digitális számlát kap e-mailben. Ez a számla vásárlási bizonylatként szolgál, és szükséges az esetleges reklamációk vagy visszaküldések esetén.</p>
+  <h3>Sikertelen fizetés</h3>
+  <p>Ha a bank vagy a fizetési szolgáltató elutasítja a fizetést, a vevő e-mailben értesítést kap. A megrendelés csak a teljes összeg sikeres jóváírása után kerül feldolgozásra. Ismételt sikertelen fizetési kísérletek esetén az eladó fenntartja a jogot a megrendelés törlésére.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 4. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">4</span> Szállítási feltételek</h2>
+  <p>A könyvet a vevő által a megrendelési űrlapon megadott címre szállítjuk ki. A vevő felelős a helyes és teljes szállítási cím megadásáért; az eladó nem felel a hibás címadatok miatti elvesztésért vagy késedelemért.</p>
+  <h3>Futárszolgálat és kézbesítési idő</h3>
+  <p>A megrendeléseket a fizetés visszaigazolása után jellemzően 24–48 órán belül adjuk fel (munkanapokon). A könyveket a <strong>Zásilkovna (Packeta)</strong> szállítja ki — csomagpontra vagy a megadott szállítási címre.</p>
+  <ul>
+   <li><strong>Ingyenes szállítás</strong> Magyarország egész területén (már az árban foglaltatik).</li>
+   <li><strong>Kézbesítési idő:</strong> a feladástól számítva jellemzően 2–3 munkanap.</li>
+  </ul>
+  <p>A feladás után a vevő automatikusan e-mailben kapja meg a nyomkövető számot, amellyel figyelemmel kísérheti a csomagot. A megadott kézbesítési idők tájékoztató jellegűek. Az eladó nem felelős a futárszolgálat vagy vis maior (pl. természeti katasztrófák, futárszolgálati sztrájkok, harmadik felek rendszereinek technikai meghibásodása) által okozott késedelemért.</p>
+  <h3>Kézbesítési késedelem</h3>
+  <p>Ha a könyv a várható kézbesítési időtől számított 14 napon belül nem érkezik meg, a vevő lépjen kapcsolatba az eladóval a <a href="mailto:info@REPLACE-DOMAIN.hu">info@REPLACE-DOMAIN.hu</a> címen. Ha a késedelem a megrendelés dátumától számított 30 napnál hosszabb, a vevőnek joga van a megrendelés törlésére és a teljes vételár visszatérítésére, kivéve, ha a késedelmet vis maior okozta.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 5. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">5</span> Elállás a szerződéstől és 30 napos garancia</h2>
+  <p>A fogyasztónak a cseh Polgári Törvénykönyv 1829. §-a alapján joga van indoklás nélkül elállni a szerződéstől a könyv átvételétől számított <strong>14 napon</strong> belül.</p>
+
+  <div class="highlight-box">
+   <p><strong>30 napos pénzvisszafizetési garancia:</strong> A törvényes 14 napos határidőn felül kiegészítő szolgáltatásként kibővített <strong>30 napos pénzvisszafizetési garanciát</strong> nyújtunk. Ha nincs megelégedve, az átvételtől számított 30 napon belül visszatérítjük a teljes vételárat.</p>
+  </div>
+
+  <h3>Elállási nyilatkozat</h3>
+  <p>Az elállási jog gyakorlásához kérjük, egyértelmű nyilatkozatban tájékoztassa az eladót döntéséről, e-mailben az <a href="mailto:info@REPLACE-DOMAIN.hu">info@REPLACE-DOMAIN.hu</a> címen. A nyilatkozatban kérjük, tüntesse fel teljes nevét és címét, a megrendelés számát (a számláról), a könyv átvételének dátumát és a visszatérítéshez szükséges bankszámlaszámot.</p>
+  <h3>A könyv visszaküldése és a költségek</h3>
+  <p>A könyvet az elállási nyilatkozattól számított 14 napon belül küldje vissza az eladó címére:</p>
+
+  <div class="address-box">
+   <h4>Visszaküldési cím — küldje a könyvet:</h4>
+   <p><strong>Performance Marketing Solution s.r.o. — Áruvisszaküldés</strong></p>
+   <p>Rybná 716/24, Staré Město</p>
+   <p>110 00 Praha, Cseh Köztársaság</p>
+   <p style="margin-top: 12px; font-size: 14px; color: var(--cta);">A csomagon tüntesse fel: „Visszaküldés — megrendelésszám: [az Ön megrendelésszáma]"</p>
+  </div>
+
+  <p>Az áru visszaküldésének közvetlen költségeit a vevő viseli, kivéve, ha a termék hibás, hibás terméket szállítottunk, vagy a termék szállítás közben megsérült (ebben az esetben a visszaküldés költségeit az eladó viseli). A fogyasztó kizárólag az áru olyan mértékű értékcsökkenéséért felel, amely a könyv jellegének és tulajdonságainak megismeréséhez szükséges mértéket meghaladó használatból ered.</p>
+  <h3>Pénzvisszatérítés</h3>
+  <p>Az eladó a vételárat <strong>14 napon belül</strong> ugyanazzal a fizetési móddal téríti vissza, amelyet a vevő a fizetéshez használt (kivéve, ha a vevő kifejezetten másik módban állapodik meg). Az eladó a pénzvisszatérítést elhalaszthatja addig, amíg a visszaküldött árut meg nem kapja, vagy amíg a vevő nem igazolja, hogy az árut elküldte — attól függően, melyik következik be korábban.</p>
+  <h3>Kivétel vállalkozók esetén</h3>
+  <p>Az indoklás nélküli elállási jog kizárólag a fogyasztókat illeti meg. A vállalkozók (a vállalkozási tevékenységük körében eljáró személyek) ezzel a törvényes joggal nem rendelkeznek.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 6. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">6</span> Hibás teljesítésből eredő jogok (reklamáció)</h2>
+  <p>Az eladó felel azért, hogy a könyv átvételkor hibátlan legyen. A fogyasztó jogosult érvényesíteni a hibából eredő jogát, amely az átvételtől számított <strong>24 hónapon</strong> belül jelentkezik az áru esetében, a cseh Polgári Törvénykönyv 2161. §-a és az azt követő rendelkezései szerint.</p>
+  <p>Hibának minősül különösen a hiányzó, kilazult vagy sérült oldalak, nyomdai hibák miatt olvashatatlan szöveg, hibás könyv szállítása, a borító vagy a kötés átvételkori sérülése, vagy a weboldalon szereplő leírástól való eltérés.</p>
+  <p>A reklamációt e-mailben nyújtsa be az <a href="mailto:info@REPLACE-DOMAIN.hu">info@REPLACE-DOMAIN.hu</a> címen; csatolja a hiba leírását, fényképeket (ha lehetséges), a megrendelés számát és a számla másolatát. Az eladó a reklamációt — beleértve a hiba elhárítását — indokolatlan késedelem nélkül, legkésőbb a benyújtástól számított <strong>30 napon belül</strong> intézi, kivéve, ha a vevővel hosszabb határidőben állapodik meg.</p>
+  <p>A reklamáció és az áru visszaküldésének részletes menetét a <a href="reklamace.html">Visszaküldés és garancia</a> oldalon találja.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 7. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">7</span> Adatvédelem</h2>
+  <p>Az eladó a vevők személyes adatait az (EU) 2016/679 rendelet (GDPR) és a vonatkozó adatvédelmi jogszabályok szerint kezeli. Az adatokat elsősorban az adásvételi szerződés teljesítése, a számlázás és az ügyfélszolgálat céljából kezeljük.</p>
+  <p>A teljes körű tájékoztatást arról, hogy milyen adatokat kezelünk, milyen célból, milyen jogalapon, meddig, és milyen jogok illetik meg Önt (hozzáférés, helyesbítés, törlés, korlátozás, hordozhatóság, tiltakozás), a külön <a href="ochrana-udaju.html">Adatvédelem</a> oldalon találja.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 8. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">8</span> Szerzői jogok</h2>
+  <p>A „Engedd el, ami tönkretesz" című könyv szerzői jogi és szellemi tulajdonjogi védelem alatt áll. Minden jog a szerzőt és a kiadót illeti. A vevő egy példányt szerez kizárólag személyes, nem kereskedelmi felhasználásra.</p>
+  <p>A jogosult írásbeli hozzájárulása nélkül kifejezetten tilos a könyvet vagy annak részeit másolni, szkennelni, digitalizálni, kereskedelmi célra felhasználni, weboldalon vagy közösségi médiában közzétenni, vagy abból származékos műveket létrehozni.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 9. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">9</span> Fogyasztói jogviták bírósági eljáráson kívüli rendezése</h2>
+  <p>Ha panasza vagy jogvitája van, kérjük, először vegye fel velünk a kapcsolatot az <a href="mailto:info@REPLACE-DOMAIN.hu">info@REPLACE-DOMAIN.hu</a> címen. Törekszünk arra, hogy minden panaszt 14 napon belül, kölcsönös megállapodással rendezzünk.</p>
+  <p>Az adásvételi szerződésből eredő fogyasztói jogviták bírósági eljáráson kívüli rendezésére a <strong>Česká obchodní inspekce (ČOI) — cseh kereskedelmi felügyelet</strong> illetékes, székhelye: Štěpánská 567/15, 120 00 Praha 2, internetes elérhetősége: <a href="https://www.coi.cz" target="_blank">www.coi.cz</a>.</p>
+  <p>A fogyasztó igénybe veheti az Európai Bizottság által üzemeltetett online vitarendezési (ODR) platformot is, amely a <a href="https://ec.europa.eu/consumers/odr" target="_blank">https://ec.europa.eu/consumers/odr</a> címen érhető el.</p>
+  <p>A fogyasztóvédelmi jogszabály szerinti kötelezettségek betartásának felügyeletét a Česká obchodní inspekce (cseh kereskedelmi felügyelet) látja el.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 10. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">10</span> Záró rendelkezések</h2>
+  <p>Ezekre a Feltételekre és az eladó és a vevő közötti valamennyi szerződésre <strong>a Cseh Köztársaság joga</strong> irányadó. A cseh jog alkalmazása nem korlátozza azt a védelmet, amelyet a fogyasztó szokásos tartózkodási helye szerinti jogrend kógens rendelkezései biztosítanak számára, amennyiben azok kedvezőbbek.</p>
+  <p>Ha e Feltételek valamely rendelkezése érvénytelen vagy hatálytalan, a többi rendelkezés teljes mértékben hatályban marad. Ezek a Feltételek a megrendelés visszaigazolásával együtt teljes megállapodást alkotnak az eladó és a vevő között.</p>
+  <p>Az eladó fenntartja a jogot ezen Feltételek módosítására. A módosítások a weboldalon történő közzététel napján lépnek hatályba; a már megkötött szerződésekre a megrendelés időpontjában hatályos feltételek vonatkoznak.</p>
+ </div>
+
+ <div class="info-box" style="margin-top: 48px; background: linear-gradient(135deg, var(--light), var(--section));">
+  <h3>Hatálybalépés</h3>
+  <p>Ezek az Általános Szerződési Feltételek 2026. június 13-tól hatályosak. Fenntartjuk a jogot ezen feltételek bármikori módosítására. Kérdés esetén keressen minket az <a href="mailto:info@REPLACE-DOMAIN.hu" style="color: var(--cta); font-weight: 600;">info@REPLACE-DOMAIN.hu</a> címen.</p>
+ </div>
+
+</div>
+
+<!-- ═══ LÁBLÉC ═══ -->
+<footer class="site-footer">
+ <div class="footer-inner">
+  <div class="footer-brand">
+   <img src="/pust-to-co-te-nici.png" alt="Engedd el, ami tönkretesz" class="footer-logo">
+  </div>
+  <div class="footer-links">
+   <a href="obchodni-podminky.html">Általános szerződési feltételek</a>
+   <a href="doprava.html">Szállítás és kézbesítés</a>
+   <a href="reklamace.html">Visszaküldés és garancia</a>
+   <a href="ochrana-udaju.html">Adatvédelem</a>
+   <a href="kontakt.html">Ügyfélszolgálat</a>
+  </div>
+  <div class="footer-contact">
+   <a href="mailto:info@REPLACE-DOMAIN.hu">📧 info@REPLACE-DOMAIN.hu</a>
+   <!-- TODO: ez cseh telefonszám (nem magyar) — cseréld le magyar ügyfélszolgálati számra, vagy töröld a mezőt -->
+   <a href="tel:+420732915755">📞 +420 732 915 755</a>
+  </div>
+ </div>
+ <div class="footer-bottom">
+  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, Staré Město, 110 00 Praha • IČO: 06259928 • DIČ: CZ06259928</span>
+  <span>&copy; 2026 Performance Marketing Solution s.r.o. Minden jog fenntartva.</span>
+ </div>
+</footer>
+
+<script>
+function toggleMobileMenu() {
+ document.querySelector('.nav-hamburger').classList.toggle('open');
+ document.querySelector('.nav-mobile-menu').classList.toggle('open');
+ document.querySelector('.nav-mobile-overlay').classList.toggle('open');
+}
+</script>
+</body>
+</html>
