@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Engedd el, ami tönkretesz — 7 napos kihívás</title>
+<title>Engedd el, ami tönkretesz – 7 napos kihívás</title>
 <style>
   /* DM Sans — self-hosted, matches the index page (latin + latin-ext) */
   @font-face { font-family: 'DM Sans'; src: url(fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
@@ -12,7 +12,7 @@
   @font-face { font-family: 'DM Sans'; src: url(fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
   :root {
-    /* Paleta převzatá z indexu odpust-knizka (Velvet Dusk).
+    /* Paleta (Velvet Dusk).
        Názvy proměnných zůstávají "rose-*", ale nesou barvy indexu. */
     --rose-50: #F5EDF2;   /* světlá (pozadí-fade) */
     --rose-100: #EDD9E5;  /* jemná (plocha badge) */
@@ -1045,8 +1045,8 @@
 <!-- Fake site background -->
 <div class="site-bg">
   <div class="site-ghost">
-    <h1>REPLACE-DOMAIN.hu</h1>
-    <p>(Landing oldal — a popup 7 mp után nyílik meg, vagy ha rákattintasz balra lent)</p>
+    <h1>engeddelkonyv.hu</h1>
+    <p>(Landing oldal – a popup 7 mp után nyílik meg, vagy megnyithatod a bal alsó gombbal)</p>
   </div>
 </div>
 
@@ -1061,27 +1061,27 @@
       <div class="popup-header">
         <span class="intro-badge"><span class="dot"></span> Ingyenes · 7 napos kihívás · napi 5 perc</span>
         <h2 class="question" id="popup-q"><strong>Hét nap, hét apró lépés.</strong> És ami éveken át lehúzott, <span class="gold-underline">végre elenged</span>.</h2>
-        <p class="intro-subhead">Minden nap kapsz egy apró, ötperces feladatot. Meglátod, mennyi minden felszabadul a fejedben.</p>
+        <p class="intro-subhead">Napi egy apró, ötperces feladat – semmi több. Meglátod, mennyivel szabadabb lesz a fejed.</p>
         <ul class="benefits" style="margin-top:6px;margin-bottom:20px;">
           <li>Minden nap kapsz <strong>egy ötperces technikát</strong></li>
           <li>Megtanulod <strong>elengedni azt, ami visszahúz</strong></li>
-          <li>Több nyugalmat és teret érzel a fejedben</li>
+          <li>Nyugodtabb leszel, és kitisztul a fejed</li>
         </ul>
       </div>
       <div class="options" style="padding-top:0;padding-bottom:20px;overflow:visible;">
         <form id="introForm" onsubmit="return startChallenge(event)" novalidate>
-          <p class="intro-formcue" style="margin:0 0 10px;font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;font-weight:700;color:#2D1B3D;text-align:left;">Add meg a keresztneved és az e-mail címed, és kezdjünk is bele</p>
+          <p class="intro-formcue" style="margin:0 0 10px;font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;font-weight:700;color:#2D1B3D;text-align:left;">Add meg a keresztneved és az e-mail címed, és vágjunk is bele!</p>
           <div class="intro-email-field">
             <input type="text" id="intro_first_name" name="intro_first_name" autocomplete="given-name"
                    placeholder="A keresztneved" aria-label="Keresztnév" style="margin-bottom:10px;">
             <input type="email" id="intro_email" name="intro_email" inputmode="email" autocomplete="email"
-                   placeholder="teemail@pelda.hu" aria-label="E-mail cím">
+                   placeholder="neved@pelda.hu" aria-label="E-mail cím">
           </div>
           <div class="intro-error" id="intro-error">Kérjük, add meg a neved és egy érvényes e-mail címet.</div>
           <button type="submit" class="intro-cta">Igen, ma elkezdem →</button>
           <p class="intro-microcopy">
             <span class="promise">Az első feladat pár másodpercen belül megérkezik.</span>
-            <span class="from">Feliratkozol Joris e-mailjeire · ingyenes · egy kattintással leiratkozhatsz · <a href="https://REPLACE-DOMAIN.hu/ochrana-udaju" target="_blank">Adatvédelem</a></span>
+            <span class="from">Feliratkozol Joris e-mailjeire · ingyenes · egy kattintással leiratkozhatsz · <a href="https://engeddelkonyv.hu/adatvedelem" target="_blank">Adatvédelem</a></span>
           </p>
         </form>
       </div>
@@ -1098,7 +1098,7 @@
           <span class="progress-label">2 / 2 lépés</span>
         </div>
         <h2 class="question" id="q2"></h2>
-        <p class="question-sub" id="q2sub">Kattints arra, ami hozzád a legközelebb áll.</p>
+        <p class="question-sub" id="q2sub">Kattints arra, ami a legközelebb áll hozzád.</p>
       </div>
       <div class="options" id="options-2"></div>
       <div class="popup-footer auto-advance">
@@ -1114,12 +1114,12 @@
         <h3 class="success-title">Az első feladat már úton van</h3>
 
         <p class="success-lead">
-          Pár másodpercen belül <strong>megérkezik</strong>. Nyisd meg rögtön, benne van
+          Pár másodpercen belül <strong>megérkezik</strong>. Nyisd meg rögtön – benne van
           <em>a mai ötperces feladat</em>.
         </p>
 
         <div class="success-live">
-          <span class="live-dot"></span> Épp most küldte Joris de Vries
+          <span class="live-dot"></span> Épp most küldte el Joris de Vries
         </div>
 
         <div class="success-arrow" aria-hidden="true">↓</div>
@@ -1132,20 +1132,20 @@
           </div>
           <div class="inbox-subject">
             <span class="inbox-badge">Új</span>
-            1. nap — állítsd meg a fejedben pörgő gondolatot
+            1. nap – állítsd meg a fejedben pörgő gondolatokat
           </div>
           <div style="margin-top:6px;font-family:-apple-system,system-ui,sans-serif;font-size:12.5px;color:var(--muted);line-height:1.4;">
-            Joris vagyok. Ez az első a hét rövid e-mail közül, amit kapni fogsz…
+            Joris vagyok. Ez az első a hét rövid e-mail közül, amit tőlem kapsz…
           </div>
         </div>
 
         <a class="success-open-btn" href="https://mail.google.com" target="_blank" rel="noopener">
-          Nyisd meg a postafiókomat →
+          Nyisd meg a postafiókod →
         </a>
 
         <p class="success-spam">
-          Nem találod? Nézd meg a <strong>Promóciók</strong> vagy a <strong>Spam</strong> mappát, és húzd át a <strong>Elsődleges</strong> mappába.
-          Nehogy lemaradj egy feladatról se.
+          Nem találod? Nézd meg a <strong>Promóciók</strong> vagy a <strong>Spam</strong> mappát, és húzd át a levelet az <strong>Elsődleges</strong> mappába,
+          hogy egyetlen feladatról se maradj le.
         </p>
       </div>
     </div>
@@ -1162,7 +1162,7 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-//  POPUP QUIZ ENGINE — Engedd el, ami tönkretesz (REPLACE-DOMAIN.hu)
+//  POPUP QUIZ ENGINE — Engedd el, ami tönkretesz (engeddelkonyv.hu)
 // ═══════════════════════════════════════════════════════════════
 // Jedna personalizační otázka na step 2 (záložní, defaultní flow jde
 // rovnou na success). Tón: vřelý, přímý — Joris de Vries. Vybraná
@@ -1170,12 +1170,12 @@
 const BRANCH_TREE = {
   default: {
     q: "Mi nyomaszt most <em>a legjobban</em>?",
-    sub: "Amihez a leggyakrabban visszatérsz gondolatban.",
+    sub: "Amihez gondolatban a leggyakrabban visszatérsz.",
     options: [
-      { v: "rumination", i: "🔁", t: "„Rágódás — folyton ugyanazon pörgök." },
-      { v: "guilt",      i: "🪨", t: "„Bűntudat — cipelek magamban valamit, ami nyom." },
-      { v: "anger",      i: "🔥", t: "„Harag — folyton parázslik bennem." },
-      { v: "fear",       i: "🌫️", t: "„Félelem — félek elengedni a régit." },
+      { v: "rumination", i: "🔁", t: "Rágódás – „folyton ugyanazon pörög az agyam”" },
+      { v: "guilt",      i: "🪨", t: "Bűntudat – „valamit cipelek magamban, ami nyomaszt”" },
+      { v: "anger",      i: "🔥", t: "Harag – „folyton ott parázslik bennem”" },
+      { v: "fear",       i: "🌫️", t: "Félelem – „nem merem elengedni a régit”" },
     ],
   },
 };
@@ -1432,7 +1432,7 @@ function renderOptions(container, options) {
     <button class="option option-custom" data-value="__custom__" data-custom="1">
       <span class="option-icon">✍️</span>
       <span class="option-text">
-        <span class="option-quote">Nálam ez másképp van — leírom magam</span>
+        <span class="option-quote">Nálam ez másképp van – inkább magam írom le</span>
       </span>
       <span class="option-check"></span>
     </button>
@@ -1452,7 +1452,7 @@ function buildStep2() {
 }
 
 // API base URL — Medusa backend public URL (marketing-hq.eu) při embedu
-// na REPLACE-DOMAIN.hu. Pro lokální dev preview nech prázdné.
+// na engeddelkonyv.hu. Pro lokální dev preview nech prázdné.
 const API_BASE = "https://www.marketing-hq.eu"  // e.g. "https://www.marketing-hq.eu"
 
 // ═══════════════════════════════════════════════════════════════

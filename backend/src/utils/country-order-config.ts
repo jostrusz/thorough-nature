@@ -49,8 +49,8 @@ const SO = {
   ZAS_PICKUP_KOCICI: "so_01KPFQ9PQF5S7RRKVZ6RDB5ZZE", // Zásilkovna - Na výdejní místo (Kocici pickup)
   ZAS_HOME_ODPUST: "so_01KTTR2B5J2XPRAHNQHHDQ0XVN",   // Zásilkovna - Na adresu (Odpust Knizka home)
   ZAS_PICKUP_ODPUST: "so_01KTTR2B5JRA8H022ERJSR3ANJ", // Zásilkovna - Na výdejní místo (Odpust pickup)
-  ZAS_HOME_ENGEDD: "so_01KWG6WEBKTHWESMJAJHB0ZZ54",   // Zásilkovna - Na adresu (Engedd El home)
-  ZAS_PICKUP_ENGEDD: "so_01KWG6WEBJTVGR0M8NHPRSRQBS", // Zásilkovna - Na výdejní místo (Engedd El pickup)
+  ZAS_HOME_ENGEDD: "so_01KWG6WEBKTHWESMJAJHB0ZZ54",   // Packeta - Házhozszállítás (Engedd El home)
+  ZAS_PICKUP_ENGEDD: "so_01KWG6WEBJTVGR0M8NHPRSRQBS", // Packeta - Csomagpont (Engedd El pickup)
 } as const
 
 /**
@@ -151,9 +151,9 @@ export const PROJECT_CONFIG = {
     name: "Engedd El",
     sales_channel_id: "sc_01KWG6W0N5K3E9AVYAKY38EQ8D",
     homeShippingOptionId: SO.ZAS_HOME_ENGEDD,
-    homeShippingOptionName: "Zásilkovna - Na adresu",
+    homeShippingOptionName: "Packeta - Házhozszállítás",
     pickupShippingOptionId: SO.ZAS_PICKUP_ENGEDD,
-    pickupShippingOptionName: "Zásilkovna - Na výdejní místo",
+    pickupShippingOptionName: "Packeta - Csomagpont",
   },
 } as const
 

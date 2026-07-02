@@ -63,7 +63,7 @@ const PROJECT_DOMAIN: Record<string, string> = {
   "slipp-taket": "slipptaketboken.no",
   "psi-superzivot": "psi-superzivot.cz",
   "odpust-knizka": "pusttocotenici.cz",
-  "engedd-el": "REPLACE-DOMAIN.hu",
+  "engedd-el": "engeddelkonyv.hu",
 }
 
 // Projects that run an index-page popup — always shown in the chart with their

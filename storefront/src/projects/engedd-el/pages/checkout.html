@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="hu">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Pénztár — Engedd el, ami tönkretesz</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="canonical" href="https://REPLACE-DOMAIN.hu/checkout">
+<link rel="canonical" href="https://engeddelkonyv.hu/checkout">
 <link rel="icon" href="/laat-los-logo-logo.webp" type="image/webp">
 
 <!-- A checkout felvillanásának megakadályozása fizetésből visszatéréskor — az űrlap azonnal elrejtődik -->
@@ -26,9 +26,9 @@
         : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>')
       + '</svg></div>'
       + '<h1 style="font-size:24px;font-weight:700;color:#1a1a2e;margin:0 0 12px;">' + (isCancelled ? 'A fizetés megszakadt' : 'A fizetés feldolgozás alatt van') + '</h1>'
-      + '<p style="font-size:16px;color:#666;margin:0 0 32px;line-height:1.5;">' + (isCancelled ? 'A fizetésed nem fejeződött be. Nem történt terhelés. Megpróbálhatod újra, vagy válassz másik fizetési módot.' : 'A fizetésed még feldolgozás alatt van. Ha néhány percen belül nem fejeződik be, próbáld meg újra leadni a rendelést.') + '</p>'
+      + '<p style="font-size:16px;color:#666;margin:0 0 32px;line-height:1.5;">' + (isCancelled ? 'A fizetésed nem fejeződött be. Nem történt terhelés. Próbáld meg újra, vagy válassz másik fizetési módot.' : 'A fizetésed még feldolgozás alatt van. Ha néhány percen belül nem fejeződik be, próbáld meg újra leadni a rendelést.') + '</p>'
       + '<a href="' + window.location.pathname + '" style="display:inline-block;padding:16px 48px;background:linear-gradient(135deg,#C27BA0,#A8628A);color:#fff;font-size:16px;font-weight:600;border-radius:12px;text-decoration:none;box-shadow:0 4px 14px rgba(194,123,160,0.3);transition:transform 0.15s;">Rendelés újrapróbálása</a>'
-      + '<p style="font-size:13px;color:#999;margin-top:20px;">Ha a probléma továbbra is fennáll, keress minket: <a href="mailto:info@REPLACE-DOMAIN.hu" style="color:#C27BA0;">info@REPLACE-DOMAIN.hu</a></p>'
+      + '<p style="font-size:13px;color:#999;margin-top:20px;">Ha a probléma továbbra is fennáll, keress minket: <a href="mailto:info@engeddelkonyv.hu" style="color:#C27BA0;">info@engeddelkonyv.hu</a></p>'
       + '</div></div>');
     return;
   }
@@ -2328,7 +2328,7 @@ body {
       Kosár
     </span>
     <span class="breadcrumb-sep">›</span>
-    <span class="breadcrumb-step active">Adatok &amp; Fizetés</span>
+    <span class="breadcrumb-step active">Adatok és fizetés</span>
     <span class="breadcrumb-sep">›</span>
     <span class="breadcrumb-step">Megerősítés</span>
   </div>
@@ -2354,7 +2354,7 @@ body {
         <div class="msb-subtitle" id="msb-subtitle">Puhakötés · 1× könyv</div>
       </div>
       <div class="msb-price-col">
-        <div class="msb-price" id="msb-price">11990&nbsp;Ft</div>
+        <div class="msb-price" id="msb-price">10&nbsp;999&nbsp;Ft</div>
         <div class="msb-items-label" id="msb-items-label">Összesen</div>
       </div>
       <svg class="msb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
@@ -2365,7 +2365,7 @@ body {
       <!-- Fő termék -->
       <div class="msb-line" id="msb-product-line">
         <span class="msb-line-label" id="msb-product-name">Engedd el, ami tönkretesz</span>
-        <span class="msb-line-val" id="msb-product-price">11990&nbsp;Ft</span>
+        <span class="msb-line-val" id="msb-product-price">10&nbsp;999&nbsp;Ft</span>
       </div>
       <!-- Order bump (elrejtve, ha nincs kiválasztva) -->
       <div class="msb-line bump" id="msb-bump-line" style="display:none;">
@@ -2378,7 +2378,7 @@ body {
       <!-- Részösszeg -->
       <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(194,123,160,0.18);">
         <span class="msb-line-label">Részösszeg</span>
-        <span class="msb-line-val" id="msb-subtotal">11990&nbsp;Ft</span>
+        <span class="msb-line-val" id="msb-subtotal">10&nbsp;999&nbsp;Ft</span>
       </div>
       <!-- ÁFA -->
       <div class="msb-line" id="msb-tax-line">
@@ -2403,9 +2403,9 @@ body {
       <!-- Összesen -->
       <div class="msb-line total-line">
         <span class="msb-line-label">Összesen</span>
-        <span class="msb-line-val" id="msb-total">11990&nbsp;Ft</span>
+        <span class="msb-line-val" id="msb-total">10&nbsp;999&nbsp;Ft</span>
       </div>
-      <div class="msb-tax-note">ÁFával együtt</div>
+      <div class="msb-tax-note">Áfával együtt</div>
     </div>
   </div>
 
@@ -2458,13 +2458,13 @@ body {
               </div>
               <div class="order-bump-title">Add hozzá a <em id="order-bump-title-name">bónuszkönyvet</em></div>
               <div class="order-bump-prices-inline">
-                <span class="order-bump-old-price" id="order-bump-old-price">11990&nbsp;Ft</span>
+                <span class="order-bump-old-price" id="order-bump-old-price">10&nbsp;999&nbsp;Ft</span>
                 <span class="order-bump-new-price" id="order-bump-new-price">3990&nbsp;Ft</span>
                 <span class="order-bump-inline-save" id="order-bump-inline-save">1000&nbsp;Ft megtakarítás</span>
               </div>
             </div>
             <button type="button" class="order-bump-expand" id="order-bump-expand-btn" aria-expanded="false" aria-label="További információ">
-              <span class="expand-label">Több info</span>
+              <span class="expand-label">Több infó</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><path d="M6 9l6 6 6-6"/></svg>
             </button>
           </div>
@@ -2487,7 +2487,7 @@ body {
                     <span>&#11088; 9,2/10 vásárlói elégedettség</span>
                   </div>
                   <div class="order-bump-prices">
-                    <span class="order-bump-old-price" id="order-bump-detail-old">11990&nbsp;Ft</span>
+                    <span class="order-bump-old-price" id="order-bump-detail-old">10&nbsp;999&nbsp;Ft</span>
                     <span class="order-bump-new-price" id="order-bump-detail-new">3990&nbsp;Ft</span>
                     <span class="order-bump-save" id="order-bump-detail-save">1000&nbsp;Ft megtakarítás</span>
                   </div>
@@ -2496,8 +2496,8 @@ body {
 
               <!-- Bevezető -->
               <div class="order-bump-description">
-                <p class="ob-intro"><strong>Neked is van kutyád?</strong> Végre értsd meg, miért csinálja a kutyád azt, amit csinál &mdash; és építs ki vele egy nyugodt, engedelmes és harmonikus kapcsolatot. Tanuld meg <u>a nyelvét beszélni</u>.</p>
-                <p>Ha zavar a pórázon húzás, az ugatás, az engedetlenség vagy az agresszió &mdash; ez a könyv egy <strong>4 pilléres rendszert</strong> ad, amely minden fajtánál és korban működik. Kutyapszichológia, közérthetően. <em>Büntetés, elektromos nyakörv és frusztráció nélkül.</em></p>
+                <p class="ob-intro"><strong>Neked is van kutyád?</strong> Értsd meg végre, miért csinálja a kutyád azt, amit csinál &mdash; és építs ki vele nyugodt, harmonikus kapcsolatot, amelyben szót fogad. Tanulj meg <u>a nyelvén beszélni</u>.</p>
+                <p>Ha zavar a pórázhúzás, az ugatás, az engedetlenség vagy az agresszió &mdash; ez a könyv egy <strong>4 pilléres rendszert</strong> ad, amely minden fajtánál és életkorban működik. Kutyapszichológia, közérthetően. <em>Büntetés, elektromos nyakörv és frusztráció nélkül.</em></p>
               </div>
 
               <!-- Kulcspontok -->
@@ -2506,15 +2506,15 @@ body {
                 <div class="ob-pillar-grid">
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#128054;</span>
-                    <div><strong>PÓRÁZON HÚZÁS</strong><span>Nyugodt séta húzás nélkül &mdash; a temperamentumos kutyáknál is</span></div>
+                    <div><strong>PÓRÁZHÚZÁS</strong><span>Nyugodt séta húzás nélkül &mdash; a temperamentumos kutyáknál is</span></div>
                   </div>
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#128261;</span>
-                    <div><strong>VÉGELETLEN UGATÁS</strong><span>Derítsd ki az okot, és taníts meg a kutyádnak nyugton maradni</span></div>
+                    <div><strong>SZÜNTELEN UGATÁS</strong><span>Derítsd ki az okát, és tanítsd meg a kutyád nyugton maradni</span></div>
                   </div>
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#128062;</span>
-                    <div><strong>ENGEDETLENSÉG</strong><span>Értsd meg a kutyapszichológiát &mdash; és szerezz figyelmet és tiszteletet</span></div>
+                    <div><strong>ENGEDETLENSÉG</strong><span>Értsd meg a kutyapszichológiát &mdash; és nyerd el a figyelmét és a tiszteletét</span></div>
                   </div>
                   <div class="ob-pillar">
                     <span class="ob-pillar-icon">&#129455;</span>
@@ -2540,11 +2540,11 @@ body {
                 </div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Ingyenes szállítást &mdash; az Engedd el, ami tönkretesz rendelésedhez küldjük együtt</span>
+                  <span>Ingyenes szállítást &mdash; az Engedd el, ami tönkretesz rendeléseddel együtt küldjük</span>
                 </div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>30 napos pénzvisszafizetési garanciát &mdash; kérdések és bonyodalmak nélkül</span>
+                  <span>30 napos pénzvisszafizetési garanciát &mdash; kérdezősködés és bonyodalmak nélkül</span>
                 </div>
               </div>
 
@@ -2552,7 +2552,7 @@ body {
               <div class="ob-combo-box">
                 <div class="ob-combo-icon">&#128054;</div>
                 <div class="ob-combo-text">
-                  <strong>A <em>Engedd el, ami tönkretesz</em> könyvvel együtt egy komplett csomagod van:</strong> nyugalom a fejedben és otthon is. A tökéletes kombináció az új kezdethez.
+                  <strong>Az <em>Engedd el, ami tönkretesz</em> könyvvel együtt teljes csomagot kapsz:</strong> nyugalom a fejedben és otthon is. A tökéletes kombináció az új kezdethez.
                 </div>
               </div>
 
@@ -2560,7 +2560,7 @@ body {
               <div class="ob-social-proof">
                 <span>&#11088;&#11088;&#11088;&#11088;&#11088;</span>
                 <span>&ldquo;Végre nyugodt séták húzás nélkül. A mi Maxunk (border collie) egészen más kutya &mdash; és este végre én is kipihenhetem magam.&rdquo;</span>
-                <span class="ob-reviewer">&mdash; Petr H., Plzeň</span>
+                <span class="ob-reviewer">&mdash; Péter H., Pécs</span>
               </div>
 
             </div>
@@ -2575,7 +2575,7 @@ body {
           </div>
           <div class="section-header">
             <div class="section-number">1</div>
-            <h2 class="section-title">Kapcsolat</h2>
+            <h2 class="section-title">Elérhetőség</h2>
           </div>
 
           <div class="float-field form-group">
@@ -2599,7 +2599,7 @@ body {
               <div class="phone-warning-text">⚠ Ez a szám nem tűnik érvényesnek. Ellenőrizd, hogy helyes-e.</div>
               <div class="phone-warning-actions">
                 <button type="button" class="phone-warning-confirm" id="phone-warning-confirm">Igen, helyes</button>
-                <button type="button" class="phone-warning-edit" id="phone-warning-edit">Szerkesztés</button>
+                <button type="button" class="phone-warning-edit" id="phone-warning-edit">Javítom</button>
               </div>
             </div>
           </div>
@@ -2617,7 +2617,7 @@ body {
           <!-- Ország (első — Shopify stílus) -->
           <div class="float-field form-group has-value">
             <select id="country" name="country" required autocomplete="country">
-              <option value="CZ" selected>🇨🇿 Cseh Köztársaság</option>
+              <option value="HU" selected>🇭🇺 Magyarország</option>
             </select>
             <label for="country">Ország</label>
           </div>
@@ -2646,7 +2646,7 @@ body {
             <label for="address">Utca és házszám</label>
             <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
             <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-            <div class="field-error">Add meg a címed</div>
+            <div class="field-error">Add meg az utcát és a házszámot</div>
             <div class="field-warning" id="address-warning">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 9v4"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
               <span id="address-warning-text"></span>
@@ -2670,7 +2670,7 @@ body {
               <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
               <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
               <!-- TODO: HU postal code format differs from CZ, verify validation regex -->
-              <div class="field-error">Add meg az irányítószámod</div>
+              <div class="field-error">Adj meg egy érvényes irányítószámot</div>
             </div>
           </div>
 
@@ -2679,7 +2679,7 @@ body {
             <input type="checkbox" id="company-checkbox">
             <span class="company-toggle-label">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9h1"/><path d="M9 13h1"/><path d="M9 17h1"/></svg>
-              Cégre rendelek
+              Cégként rendelek
             </span>
           </label>
 
@@ -2699,7 +2699,7 @@ body {
             </div>
             <div class="float-field form-group">
               <input type="text" id="vat_number" name="vat_number" placeholder=" ">
-              <label for="vat_number">EU-adószám (opcionális)</label>
+              <label for="vat_number">Közösségi adószám (opcionális)</label>
             </div>
           </div>
 
@@ -2737,7 +2737,7 @@ body {
             </div>
             <div class="float-field form-group has-value">
               <select id="billing_country" name="billing_country" autocomplete="billing country">
-                <option value="CZ" selected>🇨🇿 Cseh Köztársaság</option>
+                <option value="HU" selected>🇭🇺 Magyarország</option>
               </select>
               <label for="billing_country">Ország</label>
             </div>
@@ -2755,7 +2755,7 @@ body {
               <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" width="22" height="22" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
               <div style="flex:1;min-width:0;">
                 <div style="font-weight:600;font-size:13px;color:#1a1a2e;">Átvétel csomagponton</div>
-                <div style="font-size:12px;color:#666;margin-top:1px;">Zásilkovna — csomagpontok szerte az országban</div>
+                <div style="font-size:12px;color:#666;margin-top:1px;">Packeta — csomagpontok szerte az országban</div>
               </div>
               <span style="font-weight:700;color:#27AE60;font-size:14px;flex-shrink:0;">Ingyenes</span>
             </div>
@@ -2782,7 +2782,7 @@ body {
               <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" width="22" height="22" style="flex-shrink:0;"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
               <div style="flex:1;min-width:0;">
                 <div style="font-weight:600;font-size:13px;color:#1a1a2e;">Házhozszállítás</div>
-                <div style="font-size:12px;color:#666;margin-top:1px;">Csomag a megadott címre</div>
+                <div style="font-size:12px;color:#666;margin-top:1px;">Kézbesítés a megadott címre</div>
               </div>
               <span style="font-weight:600;font-size:14px;color:#1a1a2e;flex-shrink:0;">+990&nbsp;Ft</span>
             </div>
@@ -2842,16 +2842,16 @@ body {
         <div class="checkout-btn-wrap animate-in animate-in-delay-3">
           <button type="submit" class="checkout-btn" id="submit-btn">
             <span class="spinner"></span>
-            <span class="btn-text">Rendelés véglegesítése — 11990&nbsp;Ft</span>
+            <span class="btn-text">Rendelés véglegesítése — 10&nbsp;999&nbsp;Ft</span>
           </button>
           <div id="submit-validation-msg" class="submit-validation-msg" style="display:none;"></div>
-          <p class="btn-subtext">Át leszel irányítva egy biztonságos fizetési oldalra.</p>
+          <p class="btn-subtext">Átirányítunk a biztonságos fizetési oldalra.</p>
 
           <!-- Trust badges -->
           <div class="checkout-trust">
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-              <span id="trust-provider-text">Biztonságos fizetés Comgate-en keresztül</span>
+              <span id="trust-provider-text">Biztonságos fizetés a Comgate-en keresztül</span>
             </div>
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -2882,7 +2882,7 @@ body {
           <div class="summary-product-name" id="desktop-product-name">Engedd el, ami tönkretesz</div>
           <div class="summary-product-author">Joris de Vries</div>
           <div class="summary-product-format">Puhakötés</div>
-          <div class="summary-product-price" id="desktop-product-price">11990&nbsp;Ft</div>
+          <div class="summary-product-price" id="desktop-product-price">10&nbsp;999&nbsp;Ft</div>
         </div>
       </div>
 
@@ -2909,7 +2909,7 @@ body {
 
       <div class="summary-line" id="summary-subtotal">
         <span>Részösszeg</span>
-        <span id="subtotal-value">11990&nbsp;Ft</span>
+        <span id="subtotal-value">10&nbsp;999&nbsp;Ft</span>
       </div>
       <div class="summary-line" id="summary-tax">
         <span id="tax-label">ÁFA (0%)</span>
@@ -2931,32 +2931,32 @@ body {
       </div>
       <div class="summary-line total" id="summary-total">
         <span>Összesen</span>
-        <span class="price" id="desktop-total-price">11990&nbsp;Ft</span>
+        <span class="price" id="desktop-total-price">10&nbsp;999&nbsp;Ft</span>
       </div>
       <div id="summary-tax-note" style="font-size:11px;color:#888;text-align:right;margin-top:4px;margin-bottom:8px;">
-        ÁFával együtt
+        Áfával együtt
       </div>
 
       <!-- Garancia -->
       <div class="guarantee-box">
         <div class="icon">🛡️</div>
-        <div class="title">100% pénzvisszafizetési garancia</div>
-        <div class="desc">Nem vagy elégedett? 30 napon belül visszakapod a teljes összeget. Kérdések és bonyodalmak nélkül.</div>
+        <div class="title">100%-os pénzvisszafizetési garancia</div>
+        <div class="desc">Nem vagy elégedett? 30 napon belül visszakapod a teljes összeget. Kérdezősködés és bonyodalmak nélkül.</div>
       </div>
 
       <!-- Szállítási információk -->
       <div class="summary-shipping-info">
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          <span>Kiszállítás <strong>2–3 munkanapon</strong> belül</span>
+          <span>Kiszállítás <strong>3–4 munkanapon</strong> belül</span>
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
-          <span>Nyomkövetési szám e-mailben azonnal a feladás után</span>
+          <span>Csomagkövetési szám e-mailben, rögtön a feladás után</span>
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Kérdésed van? <strong>info@REPLACE-DOMAIN.hu</strong></span>
+          <span>Kérdésed van? <strong>info@engeddelkonyv.hu</strong></span>
         </div>
       </div>
 
@@ -2979,7 +2979,7 @@ body {
 
       <!-- Link a panaszkezelési szabályzatra -->
       <div class="summary-return-link">
-        <a href="reklamace.html">Panaszkezelési szabályzat megtekintése &rarr;</a>
+        <a href="visszakuldes.html">Panaszkezelési szabályzat megtekintése &rarr;</a>
       </div>
     </div>
 
@@ -3000,12 +3000,12 @@ body {
     Rybná 716/24, Staré Město, 110 00 Praha, Česká republika<br>
     IČO: 06259928 · DIČ: CZ06259928<br>
     A könyveket saját raktárunkból küldjük.<br>
-    Kérdésed vagy problémád van? Keress minket bátran: <a href="mailto:info@REPLACE-DOMAIN.hu"><strong>info@REPLACE-DOMAIN.hu</strong></a><br>
+    Kérdésed vagy problémád van? Keress minket bátran: <a href="mailto:info@engeddelkonyv.hu"><strong>info@engeddelkonyv.hu</strong></a><br>
     24 órán belül válaszolunk, és minden problémát személyesen kezelünk.
   </div>
   <div class="checkout-footer-links">
     &copy; 2026 Engedd el, ami tönkretesz · Joris de Vries<br>
-    <a href="obchodni-podminky.html">Általános szerződési feltételek</a> · <a href="ochrana-osobnich-udaju.html">Adatvédelmi tájékoztató</a> · <a href="reklamace.html">Panaszkezelési szabályzat</a> · <a href="doprava.html">Szállítás &amp; kézbesítés</a>
+    <a href="aszf.html">Általános szerződési feltételek</a> · <a href="ochrana-osobnich-udaju.html">Adatvédelmi tájékoztató</a> · <a href="visszakuldes.html">Panaszkezelési szabályzat</a> · <a href="szallitas.html">Szállítás &amp; kézbesítés</a>
   </div>
 </div>
 
@@ -3184,11 +3184,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   }
 
   /* ─── FÜGGVÉNYEK A DINAMIKUS ORDER SUMMARYHOZ ─── */
-  // Árformázás magyar stílusban (11990 Ft)
+  // Árformázás magyar stílusban (10 999 Ft)
   function formatPrice(amount) {
     if (amount === null || amount === undefined) return '0 Ft';
     var num = parseFloat(amount);
-    return Math.round(num) + ' Ft';
+    return Math.round(num).toLocaleString('hu-HU') + ' Ft';
   }
 
   // Adókulcsok országonként (tax-inclusive) — a könyvek Csehországban ÁFA-mentesek
@@ -3263,7 +3263,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (isHome) {
           shippingVal.style.color = '#1a1a2e';
           shippingVal.style.fontWeight = '600';
-          shippingVal.textContent = 'Zásilkovna';
+          shippingVal.textContent = 'Packeta';
         } else {
           shippingVal.style.color = '#27AE60';
           shippingVal.style.fontWeight = '600';
@@ -3273,7 +3273,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
     var msbShippingVal = document.getElementById('msb-shipping-val');
     if (msbShippingVal) {
-      msbShippingVal.textContent = isHome ? 'Zásilkovna' : 'Ingyenes';
+      msbShippingVal.textContent = isHome ? 'Packeta' : 'Ingyenes';
     }
 
     // ─── MOBIL STICKY SUMMARY BAR ───
@@ -3342,7 +3342,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var productName = PROJECT_CONFIG.mainProduct.name || 'Engedd el, ami tönkretesz';
     PROJECT_CONFIG.bundleOptions.forEach(function(opt, idx) {
       var isSelected = (idx === 0); // Alapértelmezett: első (1×)
-      var perUnit = (opt.price / opt.qty).toFixed(2).replace('.', ',');
+      var perUnit = Math.round(opt.price / opt.qty).toLocaleString('hu-HU');
       html += '<label class="bundle-option' + (isSelected ? ' selected' : '') + '" data-qty="' + opt.qty + '" data-price="' + opt.price + '">';
       html += '<input type="radio" name="bundle" value="' + opt.qty + '"' + (isSelected ? ' checked' : '') + '>';
       html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
@@ -3453,7 +3453,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var newPrice = document.getElementById('order-bump-new-price');
     if (newPrice) newPrice.innerHTML = Math.round(Number(up.price)) + ' Ft';
     var inlineSave = document.getElementById('order-bump-inline-save');
-    if (inlineSave) inlineSave.innerHTML = 'U&#353;et&#345;&#237;te ' + saveAmt.toFixed(0) + ' Ft';
+    if (inlineSave) inlineSave.innerHTML = saveAmt.toFixed(0) + ' Ft megtakarítás';
 
     // Detail
     var nameEl = document.getElementById('order-bump-name');
@@ -3463,7 +3463,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var detailNew = document.getElementById('order-bump-detail-new');
     if (detailNew) detailNew.innerHTML = Math.round(Number(up.price)) + ' Ft';
     var detailSave = document.getElementById('order-bump-detail-save');
-    if (detailSave) detailSave.innerHTML = 'U&#353;et&#345;&#237;te ' + saveAmt.toFixed(0) + ' Ft';
+    if (detailSave) detailSave.innerHTML = saveAmt.toFixed(0) + ' Ft megtakarítás';
 
     // Summary + Mobile sticky bar — név és ár frissítése
     var priceStr = Math.round(Number(up.price)) + ' Ft';
@@ -3599,7 +3599,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     try {
       mollieInstance = Mollie(profileId, {
-        locale: 'cs_CZ',
+        locale: 'hu_HU',
         testmode: testmode
       });
 
@@ -3938,7 +3938,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             }
           });
 
-          if (cardErrorsEl) cardErrorsEl.textContent = 'A kártyás fizetés jelenleg nem elérhető. Lépj kapcsolatba az üzemeltetővel.';
+          if (cardErrorsEl) cardErrorsEl.textContent = 'A kártyás fizetés jelenleg nem elérhető. Kérjük, vedd fel velünk a kapcsolatot.';
         });
 
     } catch (e) {
@@ -4003,7 +4003,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var sdkUrl = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(clientId.trim())
       + '&components=' + components.join(',')
       + '&currency=' + currency
-      + '&locale=cs_CZ';
+      + '&locale=hu_HU';
 
     console.log('[PayPal SDK] Loading URL:', sdkUrl);
 
@@ -4344,7 +4344,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               );
               if (!orderId) {
                 console.error('[Express PayPal] No order ID in session data:', JSON.stringify(sessionData));
-                throw new Error('A PayPal order ID-t nem kaptuk meg a szervertől');
+                throw new Error('A PayPal-rendelésazonosítót nem kaptuk meg a szervertől');
               }
               console.log('[Express PayPal] Order created:', orderId);
               return orderId;
@@ -4443,10 +4443,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               console.error('[Express PayPal] Completion error:', err);
               var preloader = document.querySelector('.payment-preloader');
               if (preloader) {
-                preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Hiba történt a PayPal fizetés feldolgozása közben.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Próbáld meg újra, vagy használd az alábbi űrlapot.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Újrapróbálás</a></div>';
+                preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Hiba történt a PayPal-fizetés feldolgozása közben.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Próbáld meg újra, vagy használd az alábbi űrlapot.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Újrapróbálás</a></div>';
               } else {
                 hideExpressPreloader();
-                alert('Hiba történt a PayPal fizetés befejezésekor.');
+                alert('Hiba történt a PayPal-fizetés befejezésekor.');
               }
             });
         },
@@ -4798,10 +4798,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
           // Create Apple Pay payment request
           var paymentRequest = {
-            countryCode: applepayConfig.countryCode || 'CZ',
+            countryCode: applepayConfig.countryCode || 'HU',
             merchantCapabilities: applepayConfig.merchantCapabilities || ['supports3DS'],
             supportedNetworks: applepayConfig.supportedNetworks || ['visa', 'masterCard', 'amex'],
-            currencyCode: 'CZK',
+            currencyCode: 'HUF',
             requiredShippingContactFields: ['name', 'email', 'postalAddress'],
             requiredBillingContactFields: ['postalAddress'],
             total: {
@@ -4961,7 +4961,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     'bank_cz_ab':    { code: 'BANK_CZ_AB_PSD2',   label: 'Air Bank',          desc: 'Online átutalás', icon: '/icons/airbank.svg' },
     'bank_cz_pb':    { code: 'BANK_CZ_PB_PSD2',   label: 'Partners Banka',    desc: 'Online átutalás', icon: '/icons/partners-banka.svg' },
     'bank_cz_uc':    { code: 'BANK_CZ_UC_PSD2',   label: 'UniCredit Bank',    desc: 'Online átutalás', icon: '/icons/unicredit.svg' },
-    'bank_cz_other': { code: 'BANK_CZ_OTHER',     label: 'Egyéb bank',        desc: 'Bankátutalás', icon: '/icons/bank-generic.svg' },
+    'bank_cz_other': { code: 'BANK_CZ_OTHER',     label: 'Egyéb bank',        desc: 'Banki átutalás', icon: '/icons/bank-generic.svg' },
   };
   var BANK_CODES = Object.keys(BANK_METHODS);
 
@@ -5037,10 +5037,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     applepay: 'Fizetés Apple Pay-jel',
     googlepay: 'Fizetés Google Pay-jel',
     bank_transfer: 'Online átutalás a bankodon keresztül',
-    sepa_debit: 'SEPA beszedés',
+    sepa_debit: 'SEPA-beszedés',
     swish: 'Fizetés Swish-sel (Svédország)',
     revolut_pay: 'Fizetés Revoluttal',
-    twisto: 'Fizetés 30 napig ingyenesen',
+    twisto: 'Fizetés 30 napon belül, díjmentesen',
     skippay: 'Halasztott fizetés',
     platimpak: 'Halasztott fizetés',
     twisto_part: 'Vásárlás 3 részletben',
@@ -5049,7 +5049,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     cofidis: 'Vásárlás részletekben',
     homecredit: 'Vásárlás részletekben',
     essox: 'Vásárlás részletekben',
-    qrcz: 'Szkenneld be a QR-kódot a banki alkalmazásban',
+    qrcz: 'Olvasd be a QR-kódot a banki alkalmazásodban',
     cs: 'Online átutalás PayU-n keresztül',
     kb: 'Online átutalás PayU-n keresztül',
     cb: 'Online átutalás PayU-n keresztül',
@@ -5176,12 +5176,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             'trustly': 'Trustly',
             'applepay': 'Apple Pay',
             'googlepay': 'Google Pay',
-            'bank_transfer': 'Banki átutalás | QR fizetés',
-            'sepa_debit': 'SEPA beszedés',
+            'bank_transfer': 'Banki átutalás | QR-fizetés',
+            'sepa_debit': 'SEPA-beszedés',
             'swish': 'Swish',
             'revolut_pay': 'Revolut Pay',
             'cod': 'Utánvét',
-            'twisto': 'Twisto — fizetés 30 napig',
+            'twisto': 'Twisto — fizetés 30 napon belül',
             'skippay': 'Skip Pay — halasztott fizetés',
             'platimpak': 'PlatímPak — halasztott fizetés',
             'twisto_part': 'Twisto — 3 részletben',
@@ -5190,7 +5190,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             'cofidis': 'Cofidis — részletfizetés',
             'homecredit': 'Home Credit — részletfizetés',
             'essox': 'ESSOX — részletfizetés',
-            'qrcz': 'QR fizetés',
+            'qrcz': 'QR-fizetés',
             'cs': 'Česká spořitelna',
             'kb': 'Komerční banka',
             'cb': 'ČSOB',
@@ -5296,7 +5296,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var src0 = czBankTiles[Object.keys(czBankTiles)[0]] || czQrSource;
       otherMethods.unshift({
         code: 'bank_transfer',
-        display_name: 'Banki átutalás | QR fizetés',
+        display_name: 'Banki átutalás | QR-fizetés',
         provider: src0.provider,
         provider_id: src0.provider_id,
         sort_order: -1,
@@ -5364,7 +5364,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           '<img src="/icons/klarna.svg" alt="Klarna" class="pm-icon" onerror="this.style.display=\'none\'">' +
           '<div class="pm-info">' +
             '<div class="pm-name">Klarna</div>' +
-            '<div class="pm-desc">Azonnali fizetés, később vagy részletekben</div>' +
+            '<div class="pm-desc">Fizess azonnal, később vagy részletekben</div>' +
           '</div>' +
           '<svg class="klarna-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
@@ -5434,7 +5434,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           '</svg></div>' +
           '<div class="pm-info">' +
             '<div class="pm-name">' + m.display_name + '</div>' +
-            '<div class="pm-desc">Vyberte svou banku</div>' +
+            '<div class="pm-desc">Válaszd ki a bankod</div>' +
           '</div>' +
           '<svg class="bank-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         container.appendChild(bankParent);
@@ -5504,13 +5504,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           appendBankTile({
             method: czQrSource.method, comgateMethod: null,
             provider: czQrSource.provider, providerId: czQrSource.provider_id,
-            logoHtml: qrSvg, label: 'QR fizetés — más bank', desc: 'Szkenneld be a QR-kódot a banki alkalmazásban'
+            logoHtml: qrSvg, label: 'QR-fizetés — másik bank', desc: 'Olvasd be a QR-kódot a banki alkalmazásodban'
           });
         } else {
           appendBankTile({
             method: 'bank_cz_other', comgateMethod: 'BANK_CZ_OTHER',
             provider: m.provider, providerId: m.provider_id,
-            logoHtml: qrSvg, label: 'QR fizetés — más bank', desc: 'Szkenneld be a QR-kódot a banki alkalmazásban'
+            logoHtml: qrSvg, label: 'QR-fizetés — másik bank', desc: 'Olvasd be a QR-kódot a banki alkalmazásodban'
           });
         }
 
@@ -5853,17 +5853,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         : cardProvider === 'comgate' ? 'Comgate'
         : 'Mollie';
       subtext.textContent = cardProvider === 'comgate'
-        ? 'Át leszel irányítva a biztonságos kártyás fizetéshez.'
-        : 'A kártyaadataid biztonságosan a(z) ' + providerName + ' rendszerén keresztül kerülnek feldolgozásra.';
+        ? 'Átirányítunk a biztonságos kártyás fizetési oldalra.'
+        : 'A kártyaadataidat a(z) ' + providerName + ' biztonságos rendszere dolgozza fel.';
     } else if (KLARNA_CODES.indexOf(selectedMethod) !== -1) {
-      subtext.textContent = 'Át leszel irányítva a Klarnához a fizetés befejezéséhez.';
+      subtext.textContent = 'Átirányítunk a Klarnához a fizetés befejezéséhez.';
     } else if (BANK_CODES.indexOf(selectedMethod) !== -1) {
-      var bankName = BANK_METHODS[selectedMethod] ? BANK_METHODS[selectedMethod].label : 'a bankodhoz';
-      subtext.textContent = 'Át leszel irányítva a(z) ' + bankName + ' fizetéséhez.';
+      var bankName = BANK_METHODS[selectedMethod] ? BANK_METHODS[selectedMethod].label : 'Banki átutalás';
+      subtext.textContent = bankName + ' — átirányítunk a bank biztonságos fizetési oldalára.';
     } else if (selectedMethod === 'cod') {
       subtext.textContent = 'Fizetés átvételkor. Díj: +0 Ft.';
     } else {
-      subtext.textContent = 'Át leszel irányítva egy biztonságos fizetési oldalra.';
+      subtext.textContent = 'Átirányítunk a biztonságos fizetési oldalra.';
     }
 
     // Trust badge szolgáltató szövegének frissítése
@@ -5969,12 +5969,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var apiKey = PROJECT_CONFIG.packetaApiKey;
         if (!apiKey) {
           console.error('[Packeta] API key not set in PROJECT_CONFIG.packetaApiKey');
-          alert('A Zásilkovna API kulcs nincs beállítva. Vedd fel a kapcsolatot az ügyfélszolgálattal.');
+          alert('A Packeta API-kulcs nincs beállítva. Vedd fel a kapcsolatot az ügyfélszolgálattal.');
           return;
         }
         if (typeof Packeta === 'undefined' || !Packeta.Widget) {
           console.error('[Packeta] Widget library not loaded');
-          alert('A Zásilkovna widget nem töltődött be. Próbáld frissíteni az oldalt.');
+          alert('A Packeta widget nem töltődött be. Frissítsd az oldalt, és próbáld újra.');
           return;
         }
 
@@ -6011,15 +6011,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             if (packetaErr) packetaErr.style.display = 'none';
           }
         }, {
-          language: 'cs',
-          country: 'cz',
+          language: 'hu',
+          country: 'hu',
           appIdentity: PROJECT_CONFIG.domain || 'checkout',
           // Korlátozás csak a Zásilkovna saját hálózatára (csomagpontok + Z-BOX-ok).
           // Így nem ajánl fel külső futárok pontjait, amelyek a csomag feladásakor
           // "aktivní výdejní místo nenalezeno" (nem található aktív csomagpont) hibát okoztak.
           vendors: [
-            { country: 'cz', group: 'zpoint' },
-            { country: 'cz', group: 'zbox' },
+            { country: 'hu', group: 'zpoint' },
+            { country: 'hu', group: 'zbox' },
           ],
         });
       });
@@ -6185,8 +6185,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var phoneField = document.getElementById('phone');
   var phonePreview = document.getElementById('phone-preview');
   var countrySelect = document.getElementById('country');
-  var COUNTRY_PHONE_PREFIX = { CZ: '+420' };
-  var PHONE_PREFIX_TO_COUNTRY = { '+420': 'CZ', '+421': 'SK' };
+  var COUNTRY_PHONE_PREFIX = { HU: '+36', CZ: '+420' };
+  var PHONE_PREFIX_TO_COUNTRY = { '+36': 'HU', '+420': 'CZ', '+421': 'SK' };
 
   // Ország felismerése a telefonszámból (pl. +420... → CZ)
   function detectCountryFromPhone(val) {
@@ -6215,11 +6215,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (cleaned.startsWith('+')) return cleaned;
     if (cleaned.startsWith('00')) return '+' + cleaned.substring(2);
     if (cleaned.startsWith('0')) {
-      var prefix = COUNTRY_PHONE_PREFIX[countryCode] || '+420';
+      var prefix = COUNTRY_PHONE_PREFIX[countryCode] || '+36';
       return prefix + cleaned.substring(1);
     }
     if (/^\d{7,}$/.test(cleaned)) {
-      return (COUNTRY_PHONE_PREFIX[countryCode] || '+420') + cleaned;
+      return (COUNTRY_PHONE_PREFIX[countryCode] || '+36') + cleaned;
     }
     return cleaned;
   }
@@ -6242,7 +6242,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var formatted = formatPhoneNumber(raw, country);
       phoneField.value = formatted;
       if (formatted !== raw) {
-        phonePreview.textContent = '\u2713 Mentve mint ' + formatted;
+        phonePreview.textContent = '\u2713 \u00cdgy mentj\u00fck: ' + formatted;
         phonePreview.style.display = 'block';
       } else {
         phonePreview.style.display = 'none';
@@ -6853,11 +6853,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         // Országhívószám hozzáadása, ha hiányzik (pl. 0612345678 → +420612345678)
         var countryEl = document.getElementById('country');
         var cc = countryEl ? countryEl.value : 'CZ';
-        var prefixMap = { CZ: '+420' };
+        var prefixMap = { HU: '+36', CZ: '+420' };
         var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
         if (!cleaned.startsWith('+') && !cleaned.startsWith('00')) {
-          if (cleaned.startsWith('0')) cleaned = (prefixMap[cc] || '+420') + cleaned.substring(1);
-          else if (/^\d{7,}$/.test(cleaned)) cleaned = (prefixMap[cc] || '+420') + cleaned;
+          if (cleaned.startsWith('0')) cleaned = (prefixMap[cc] || '+36') + cleaned.substring(1);
+          else if (/^\d{7,}$/.test(cleaned)) cleaned = (prefixMap[cc] || '+36') + cleaned;
         } else if (cleaned.startsWith('00')) {
           cleaned = '+' + cleaned.substring(2);
         }
@@ -7083,8 +7083,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var stripped = value.replace(/[\s\-\(\)\.]/g, '');
       isValid = /^[\+]?\d{8,}$/.test(stripped);
     } else if (field.id === 'postal_code') {
-      // TODO: HU postal code format differs from CZ, verify validation regex (currently just a length>=4 check)
-      isValid = value.length >= 4;
+      // HU postal code: exactly 4 digits (e.g. 1051)
+      isValid = /^\d{4}$/.test(value.replace(/\s/g, ''));
     } else if (field.id === 'address') {
       // A címnek betűt ÉS számot is tartalmaznia kell (utca + házszám) a zöld pipához
       var hasLetter = /[a-zA-Z\u00C0-\u024F]/.test(value);
@@ -7131,7 +7131,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }, options.headers || {});
     return fetch(MEDUSA_URL + path, options).then(function(res) {
       return res.json().then(function(data) {
-        if (!res.ok) throw new Error(data.message || 'Chyba API');
+        if (!res.ok) throw new Error(data.message || 'API-hiba');
         return data;
       });
     });
@@ -7395,7 +7395,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // NO prominent "try again" — the webhook safety-net + reconcile cron finish the
       // order and the customer gets an e-mail. This avoids both the false "error" and
       // the double-payment risk. A soft retry link still covers a real non-payment.
-      preloader.innerHTML = '<div style="text-align:center;padding:40px 20px;max-width:460px;margin:0 auto;font-family:DM Sans,sans-serif;"><div style="width:56px;height:56px;margin:0 auto 20px;background:#FEF3C7;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><p style="font-size:20px;font-weight:600;color:#1a1a2e;margin:0 0 10px;">A fizetés feldolgozás alatt van ⏳</p><p style="font-size:14px;color:#666;margin:0;line-height:1.6;">Ha most fizettél (főleg átutalással), a megerősítés eltarthat egy ideig — <strong>e-mailben fog megérkezni</strong>. Kérjük, <strong>ne add le újra a rendelést</strong>, nehogy kétszer fizess.</p><p style="font-size:13px;color:#999;margin-top:18px;">Nem sikerült a fizetés? <a href="' + window.location.pathname + '" style="color:#C27BA0;font-weight:600;">Újrapróbálás</a> · <a href="mailto:info@REPLACE-DOMAIN.hu" style="color:#C27BA0;">info@REPLACE-DOMAIN.hu</a></p></div>';
+      preloader.innerHTML = '<div style="text-align:center;padding:40px 20px;max-width:460px;margin:0 auto;font-family:DM Sans,sans-serif;"><div style="width:56px;height:56px;margin:0 auto 20px;background:#FEF3C7;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><p style="font-size:20px;font-weight:600;color:#1a1a2e;margin:0 0 10px;">A fizetés feldolgozás alatt van ⏳</p><p style="font-size:14px;color:#666;margin:0;line-height:1.6;">Ha most fizettél (főleg átutalással), a megerősítés eltarthat egy ideig — <strong>e-mailben fog megérkezni</strong>. Kérjük, <strong>ne add le újra a rendelést</strong>, nehogy kétszer fizess.</p><p style="font-size:13px;color:#999;margin-top:18px;">Nem sikerült a fizetés? <a href="' + window.location.pathname + '" style="color:#C27BA0;font-weight:600;">Újrapróbálás</a> · <a href="mailto:info@engeddelkonyv.hu" style="color:#C27BA0;">info@engeddelkonyv.hu</a></p></div>';
     });
 
     return; // Stop further checkout initialization
@@ -7638,7 +7638,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         }
       }).then(function() {
         // 2c. lépés: Díjak hozzáadása line item-ként
-        // A címre szállítás NEM kerül hozzáadásra — a "Zásilkovna - Na adresu" shipping option ára már 990 Ft
+        // A címre szállítás NEM kerül hozzáadásra — a "Packeta - Házhozszállítás" shipping option ára már 990 Ft
         // Az utánvét line item-ként kerül hozzáadásra (nincs más mechanizmus a Medusában)
         if (selectedMethod === 'cod') {
           return medusaFetch('/store/carts/' + cartId + '/add-fee', {
@@ -7665,16 +7665,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           throw new Error('Nincs elérhető szállítási mód');
         }
         // A megfelelő shipping option kiválasztása a választott szállítási mód alapján
-        // NOTE: 'adres' / 'výdejní' below match against Czech shipping-option names stored in Medusa — do not translate these string literals, they are functional matches, not display text.
+        // NOTE: substrings below match shipping-option names stored in Medusa (renamed to 'Packeta - Házhozszállítás' / 'Packeta - Csomagpont'; old Czech names kept as fallback) — functional matches, not display text.
         var selectedOption = options[0]; // fallback
         if (selectedShipping === 'home') {
           var homeOpt = options.find(function(o) {
-            return o.name && o.name.toLowerCase().indexOf('adres') !== -1;
+            return o.name && (o.name.toLowerCase().indexOf('házhoz') !== -1 || o.name.toLowerCase().indexOf('adres') !== -1);
           });
           if (homeOpt) selectedOption = homeOpt;
         } else {
           var pickupOpt = options.find(function(o) {
-            return o.name && o.name.toLowerCase().indexOf('výdejní') !== -1;
+            return o.name && (o.name.toLowerCase().indexOf('csomagpont') !== -1 || o.name.toLowerCase().indexOf('výdejní') !== -1);
           });
           if (pickupOpt) selectedOption = pickupOpt;
         }
@@ -7918,7 +7918,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               });
               console.log('[Klarna] SDK initialized with client_token');
             } catch (initErr) {
-              reject(new Error('Inicializace Klarna SDK selhala: ' + initErr.message));
+              reject(new Error('A Klarna SDK inicializálása sikertelen: ' + initErr.message));
               return;
             }
 
@@ -7998,7 +7998,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 } else {
                   // Declined or cancelled
                   var reason = klarnaRes.error ? klarnaRes.error.invalid_fields?.join(', ') : '';
-                  reject(new Error('A Klarna fizetés nem lett jóváhagyva.' + (reason ? ' Ellenőrizd: ' + reason : ' Próbálj másik fizetési módot.')));
+                  reject(new Error('A Klarna nem hagyta jóvá a fizetést.' + (reason ? ' Ellenőrizd: ' + reason : ' Válassz másik fizetési módot.')));
                 }
               }
             );
@@ -8159,7 +8159,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               dropIn.on('error', function(event) {
                 var error = event.detail && event.detail.error ? event.detail.error : event.detail || {};
                 submitBtn.style.display = '';
-                reject(new Error(error.message || 'Az Airwallex fizetés sikertelen.'));
+                reject(new Error(error.message || 'Az Airwallex-fizetés sikertelen.'));
               });
 
               dropIn.on('ready', function() {

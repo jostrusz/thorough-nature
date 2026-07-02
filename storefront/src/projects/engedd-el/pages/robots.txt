@@ -1,4 +1,4 @@
-# Robots.txt for REPLACE-DOMAIN.hu
+# Robots.txt for engeddelkonyv.hu
 User-agent: *
 Allow: /
 Disallow: /checkout
@@ -6,7 +6,7 @@ Disallow: /upsell
 Disallow: /thank-you
 
 # Sitemap
-Sitemap: https://REPLACE-DOMAIN.hu/sitemap.xml
+Sitemap: https://engeddelkonyv.hu/sitemap.xml
 
 # AI Crawlers — explicitly allowed for citations
 User-agent: GPTBot

@@ -105,12 +105,11 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     1: 30,    // 30 Kč incl. DPH — COD payment surcharge
   },
   // Engedd el, ami tönkretesz — hlavní produkt HU (engedd-el)
-  // PLACEHOLDER pricing — proportional estimate from CZK, confirm before go-live.
   "engedd-el-ami-tonkretesz": {
-    1: 11990,  // 11990 Ft incl. ÁFA (5%)
-    2: 19990,  // 19990 Ft incl. ÁFA (save 3990 Ft)
-    3: 25990,  // 25990 Ft incl. ÁFA (save 9980 Ft)
-    4: 31990,  // 31990 Ft incl. ÁFA (save 15970 Ft)
+    1: 10999,  // 10 999 Ft incl. ÁFA (5%)
+    2: 17999,  // 17 999 Ft incl. ÁFA (save 3 999 Ft)
+    3: 23999,  // 23 999 Ft incl. ÁFA (save 8 998 Ft)
+    4: 29999,  // 29 999 Ft incl. ÁFA (save 13 997 Ft)
   },
 }
 

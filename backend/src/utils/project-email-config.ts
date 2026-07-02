@@ -240,23 +240,23 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     project: 'het-leven',
     smsDispatchTemplate: 'Het Leven Dat Je Verdient: je boek is onderweg. Track: {url} Vragen? annadevries@pakjeleventerug.nl',
   },
-  // PLACEHOLDER DOMAIN — replace REPLACE-DOMAIN.hu once the real domain is registered
+  
   'engedd-el': {
-    replyTo: 'info@REPLACE-DOMAIN.hu',
+    replyTo: 'info@engeddelkonyv.hu',
     fromName: 'Joris de Vries - Engedd el, ami tönkretesz',
-    fromEmail: 'Joris de Vries - Engedd el, ami tönkretesz <info@REPLACE-DOMAIN.hu>',
+    fromEmail: 'Joris de Vries - Engedd el, ami tönkretesz <info@engeddelkonyv.hu>',
     project: 'engedd-el',
     locale: 'hu',
-    smsDispatchTemplate: 'Engedd el, ami tonkretesz: Csomagod uton van. Kovetes: {url} info@REPLACE-DOMAIN.hu',
+    smsDispatchTemplate: 'Engedd el, ami tonkretesz: Csomagod uton van. Kovetes: {url} info@engeddelkonyv.hu',
   },
   // Also match without hyphen
   engeddel: {
-    replyTo: 'info@REPLACE-DOMAIN.hu',
+    replyTo: 'info@engeddelkonyv.hu',
     fromName: 'Joris de Vries - Engedd el, ami tönkretesz',
-    fromEmail: 'Joris de Vries - Engedd el, ami tönkretesz <info@REPLACE-DOMAIN.hu>',
+    fromEmail: 'Joris de Vries - Engedd el, ami tönkretesz <info@engeddelkonyv.hu>',
     project: 'engedd-el',
     locale: 'hu',
-    smsDispatchTemplate: 'Engedd el, ami tonkretesz: Csomagod uton van. Kovetes: {url} info@REPLACE-DOMAIN.hu',
+    smsDispatchTemplate: 'Engedd el, ami tonkretesz: Csomagod uton van. Kovetes: {url} info@engeddelkonyv.hu',
   },
 }
 
