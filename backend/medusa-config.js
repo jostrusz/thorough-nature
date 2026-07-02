@@ -260,6 +260,11 @@ const medusaConfig = {
             id: 'brite',
             options: {},
           },
+          {
+            resolve: './src/modules/payment-barion',
+            id: 'barion',
+            options: {},
+          },
         ],
       },
     }

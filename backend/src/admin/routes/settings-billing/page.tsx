@@ -786,7 +786,7 @@ function GatewaysTab() {
             <div style={{ display: "grid", gridTemplateColumns: form.provider === "stripe" ? "1fr 1fr" : "1fr 1fr 1fr", gap: "8px" }}>
               <div>
                 <label style={{ fontSize: "10px", color: "#8C9196" }}>
-                  {form.provider === "paypal" || form.provider === "airwallex" ? "Client ID" : form.provider === "brite" ? "Public Key" : form.provider === "stripe" ? "Secret Key (sk_...)" : form.provider === "comgate" ? "Merchant ID" : form.provider === "przelewy24" ? "Merchant ID" : form.provider === "novalnet" ? "Vendor ID (MID)" : form.provider === "payu" ? "POS ID (Client ID)" : "API Key"}
+                  {form.provider === "paypal" || form.provider === "airwallex" ? "Client ID" : form.provider === "brite" ? "Public Key" : form.provider === "stripe" ? "Secret Key (sk_...)" : form.provider === "comgate" ? "Merchant ID" : form.provider === "przelewy24" ? "Merchant ID" : form.provider === "novalnet" ? "Vendor ID (MID)" : form.provider === "payu" ? "POS ID (Client ID)" : form.provider === "barion" ? "POSKey (GUID)" : "API Key"}
                   {form.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Client ID)</span>}
                   {form.provider === "comgate" && <span style={{ color: "#B0B7BF" }}> (Comgate Portal → Merchant ID)</span>}
                   {form.provider === "przelewy24" && <span style={{ color: "#B0B7BF" }}> (P24 Panel → Merchant ID)</span>}
@@ -818,7 +818,7 @@ function GatewaysTab() {
               </div>
               <div>
                 <label style={{ fontSize: "10px", color: "#8C9196" }}>
-                  {form.provider === "paypal" ? "Client Secret" : form.provider === "airwallex" ? "API Key" : form.provider === "brite" ? "Secret Key" : form.provider === "stripe" ? "Webhook Secret (whsec_...)" : form.provider === "comgate" ? "Secret (Password)" : form.provider === "przelewy24" ? "API Key" : form.provider === "klarna" ? "API Secret" : form.provider === "novalnet" ? "Product Activation Key" : form.provider === "payu" ? "OAuth Client Secret" : "Secret Key"}
+                  {form.provider === "paypal" ? "Client Secret" : form.provider === "airwallex" ? "API Key" : form.provider === "brite" ? "Secret Key" : form.provider === "stripe" ? "Webhook Secret (whsec_...)" : form.provider === "comgate" ? "Secret (Password)" : form.provider === "przelewy24" ? "API Key" : form.provider === "klarna" ? "API Secret" : form.provider === "novalnet" ? "Product Activation Key" : form.provider === "payu" ? "OAuth Client Secret" : form.provider === "barion" ? "Payee (Barion e-mail)" : "Secret Key"}
                   {form.provider === "paypal" && <span style={{ color: "#B0B7BF" }}> (PayPal Developer → Apps → Secret)</span>}
                   {form.provider === "novalnet" && <span style={{ color: "#B0B7BF" }}> (Novalnet Admin → Project → API Credentials)</span>}
                   {form.provider === "payu" && <span style={{ color: "#B0B7BF" }}> (POS → OAuth → Client Secret)</span>}

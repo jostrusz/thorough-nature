@@ -124,6 +124,15 @@ export default async function orderPlacedPaymentMetadataHandler({
         break
       }
 
+      // Barion
+      if (paymentData.barionPaymentId || (providerId.includes("barion") && paymentData.intentId)) {
+        newMetadata.barionPaymentId = paymentData.barionPaymentId || paymentData.intentId
+        newMetadata.payment_method = paymentData.method || "barion"
+        newMetadata.payment_provider = "barion"
+        found = true
+        break
+      }
+
       // Stripe
       if (paymentData.stripePaymentIntentId || paymentData.stripeCheckoutSessionId || (providerId.includes("stripe") && paymentData.id)) {
         newMetadata.stripePaymentIntentId = paymentData.stripePaymentIntentId || paymentData.id
@@ -249,6 +258,7 @@ export default async function orderPlacedPaymentMetadataHandler({
       newMetadata.comgateTransId ||
       newMetadata.p24SessionId ||
       newMetadata.airwallexPaymentIntentId ||
+      newMetadata.barionPaymentId ||
       newMetadata.stripePaymentIntentId ||
       newMetadata.novalnetTid ||
       newMetadata.revolutOrderId ||

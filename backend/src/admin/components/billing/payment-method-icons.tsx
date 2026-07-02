@@ -346,6 +346,7 @@ export const SUPPORTED_PROVIDERS = [
   { code: "paypal", name: "PayPal" },
   { code: "klarna", name: "Klarna" },
   { code: "novalnet", name: "Novalnet" },
+  { code: "barion", name: "Barion" },
 ]
 
 export const SUPPORTED_CURRENCIES = ["EUR", "CZK", "PLN", "SEK", "NOK", "HUF"]
