@@ -170,10 +170,12 @@ class BarionPaymentProviderService extends AbstractPaymentProvider<Options> {
 
       // Map the checkout method to Barion FundingSources. Default: let the
       // customer choose everything on the hosted gateway.
+      // NOTE: Barion discontinued bank transfer (via kevin.) on 2026-01-09, so it
+      // is deliberately NOT offered here. Supported: card, Apple/Google Pay, wallet.
       const FUNDING_MAP: Record<string, string[]> = {
         card: ["BankCard"], bankcard: ["BankCard"],
         apple_pay: ["ApplePay"], google_pay: ["GooglePay"],
-        wallet: ["Balance"], bank_transfer: ["BankTransfer"],
+        wallet: ["Balance"],
       }
       const fundingSources = FUNDING_MAP[method] || ["All"]
 
