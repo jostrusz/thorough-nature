@@ -343,7 +343,7 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "card", name: "Bankkártya (Card)", icon: "card", available_countries: [], supported_currencies: [] },
     { code: "applepay", name: "Apple Pay", icon: "applepay", available_countries: [], supported_currencies: [] },
     { code: "googlepay", name: "Google Pay", icon: "googlepay", available_countries: [], supported_currencies: [] },
-    { code: "wallet", name: "Barion egyenleg (Wallet)", icon: "barion", available_countries: [], supported_currencies: [] },
+    { code: "wallet", name: "Barion egyenleg (Pénztárca)", icon: "barion", available_countries: [], supported_currencies: [] },
   ],
 }
 
