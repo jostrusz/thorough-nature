@@ -63,6 +63,10 @@ import { PsUpsellConfirmedTemplate, PS_UPSELL_CONFIRMED, isPsUpsellConfirmedData
 import { OdOrderPlacedTemplate, OD_ORDER_PLACED, isOdOrderPlacedTemplateData } from './od-order-placed'
 import { OdEbookDeliveryTemplate, OD_EBOOK_DELIVERY, isOdEbookDeliveryData } from './od-ebook-delivery'
 import { OdShipmentNotificationTemplate, OD_SHIPMENT_NOTIFICATION, isOdShipmentNotificationData } from './od-shipment-notification'
+// Engedd el, ami tönkretesz (engedd-el, HU) templates
+import { EngOrderPlacedTemplate, ENG_ORDER_PLACED, isEngOrderPlacedTemplateData } from './eng-order-placed'
+import { EngEbookDeliveryTemplate, ENG_EBOOK_DELIVERY, isEngEbookDeliveryData } from './eng-ebook-delivery'
+import { EngShipmentNotificationTemplate, ENG_SHIPMENT_NOTIFICATION, isEngShipmentNotificationData } from './eng-shipment-notification'
 import { OdAbandonedCheckout1Template, OD_ABANDONED_CHECKOUT_1, isOdAbandonedCheckout1Data } from './od-abandoned-checkout-1'
 import { OdAbandonedCheckout2Template, OD_ABANDONED_CHECKOUT_2, isOdAbandonedCheckout2Data } from './od-abandoned-checkout-2'
 import { OdAbandonedCheckout3Template, OD_ABANDONED_CHECKOUT_3, isOdAbandonedCheckout3Data } from './od-abandoned-checkout-3'
@@ -146,6 +150,10 @@ export const EmailTemplates = {
   OD_ORDER_PLACED,
   OD_EBOOK_DELIVERY,
   OD_SHIPMENT_NOTIFICATION,
+  // Engedd el, ami tönkretesz (HU)
+  ENG_ORDER_PLACED,
+  ENG_EBOOK_DELIVERY,
+  ENG_SHIPMENT_NOTIFICATION,
   OD_ABANDONED_CHECKOUT_1,
   OD_ABANDONED_CHECKOUT_2,
   OD_ABANDONED_CHECKOUT_3,
@@ -226,6 +234,13 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
     const allKeys = Object.values(EmailTemplates) as string[]
     if (allKeys.includes(odKey)) {
       return odKey
+    }
+  }
+  if (project === 'engedd-el' || project === 'engeddel') {
+    const engKey = `eng-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(engKey)) {
+      return engKey
     }
   }
   if (project === 'lass-los') {
@@ -777,6 +792,34 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <OdShipmentNotificationTemplate {...data} />
 
+    // ── Engedd el, ami tönkretesz (HU) templates ─────────────
+    case EmailTemplates.ENG_ORDER_PLACED:
+      if (!isEngOrderPlacedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ENG_ORDER_PLACED}"`
+        )
+      }
+      return <EngOrderPlacedTemplate {...data} />
+
+    case EmailTemplates.ENG_EBOOK_DELIVERY:
+      if (!isEngEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ENG_EBOOK_DELIVERY}"`
+        )
+      }
+      return <EngEbookDeliveryTemplate {...data} />
+
+    case EmailTemplates.ENG_SHIPMENT_NOTIFICATION:
+      if (!isEngShipmentNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ENG_SHIPMENT_NOTIFICATION}"`
+        )
+      }
+      return <EngShipmentNotificationTemplate {...data} />
+
     case EmailTemplates.OD_ABANDONED_CHECKOUT_1:
       if (!isOdAbandonedCheckout1Data(data)) {
         throw new MedusaError(
@@ -944,6 +987,10 @@ export {
   OdOrderPlacedTemplate,
   OdEbookDeliveryTemplate,
   OdShipmentNotificationTemplate,
+  // Engedd el, ami tönkretesz (HU)
+  EngOrderPlacedTemplate,
+  EngEbookDeliveryTemplate,
+  EngShipmentNotificationTemplate,
   OdAbandonedCheckout1Template,
   OdAbandonedCheckout2Template,
   OdAbandonedCheckout3Template,
