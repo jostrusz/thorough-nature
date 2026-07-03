@@ -93,6 +93,9 @@ export function PaymentMethodIcon({ code, size }: { code: string; size?: number 
     case "googlepay":
     case "google_pay":
       return <div style={{ ...style, background: "#FFFFFF", color: "#4285F4" }}>G Pay</div>
+    case "barion":
+    case "wallet":
+      return <div style={{ ...style, background: "#0097DB", color: "#FFFFFF" }}>Barion</div>
     case "eps":
       return <div style={{ ...style, background: "#C8202F", color: "#FFFFFF" }}>EPS</div>
     case "in3":
@@ -332,6 +335,15 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "pay_by_bank", name: "Pay by Bank (Open Banking)", icon: "bank_transfer", available_countries: ["nl", "be", "de", "lu", "se", "no", "gb", "fi", "dk", "ee", "lt", "lv", "ie", "fr", "it", "es", "pt", "at", "pl"], supported_currencies: ["EUR", "SEK", "NOK", "DKK", "GBP", "PLN"] },
     { code: "swish", name: "Swish (SE)", icon: "swish", available_countries: ["se"], supported_currencies: ["SEK"] },
     { code: "ideal", name: "iDEAL (NL via Brite)", icon: "ideal", available_countries: ["nl"], supported_currencies: ["EUR"] },
+  ],
+  barion: [
+    // Barion Smart Gateway (redirect). Each method restricts the FundingSources
+    // on the hosted page; codes map in payment-barion/service.ts FUNDING_MAP.
+    // Currencies: HUF/CZK/EUR/PLN/RON (no SEK). Bank transfer discontinued 2026-01-09.
+    { code: "card", name: "Bankkártya (Card)", icon: "card", available_countries: [], supported_currencies: [] },
+    { code: "applepay", name: "Apple Pay", icon: "applepay", available_countries: [], supported_currencies: [] },
+    { code: "googlepay", name: "Google Pay", icon: "googlepay", available_countries: [], supported_currencies: [] },
+    { code: "wallet", name: "Barion egyenleg (Wallet)", icon: "barion", available_countries: [], supported_currencies: [] },
   ],
 }
 

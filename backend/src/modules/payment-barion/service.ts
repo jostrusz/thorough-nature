@@ -173,9 +173,10 @@ class BarionPaymentProviderService extends AbstractPaymentProvider<Options> {
       // NOTE: Barion discontinued bank transfer (via kevin.) on 2026-01-09, so it
       // is deliberately NOT offered here. Supported: card, Apple/Google Pay, wallet.
       const FUNDING_MAP: Record<string, string[]> = {
-        card: ["BankCard"], bankcard: ["BankCard"],
-        apple_pay: ["ApplePay"], google_pay: ["GooglePay"],
-        wallet: ["Balance"],
+        card: ["BankCard"], bankcard: ["BankCard"], creditcard: ["BankCard"],
+        apple_pay: ["ApplePay"], applepay: ["ApplePay"],
+        google_pay: ["GooglePay"], googlepay: ["GooglePay"],
+        wallet: ["Balance"], balance: ["Balance"],
       }
       const fundingSources = FUNDING_MAP[method] || ["All"]
 
