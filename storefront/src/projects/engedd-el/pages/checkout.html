@@ -3192,8 +3192,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     return Math.round(num).toLocaleString('hu-HU') + ' Ft';
   }
 
-  // Adókulcsok országonként (tax-inclusive) — a könyvek Csehországban ÁFA-mentesek
-  var TAX_RATES = { CZ: 0 };
+  // Adókulcsok országonként (tax-inclusive) — HU: 5% kedvezményes ÁFA a könyvekre; CZ: 0%
+  var TAX_RATES = { HU: 5, CZ: 0 };
 
   // Aktuális teljes ár lekérése (bundle + order bump)
   function getCurrentTotal() {
@@ -3206,7 +3206,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   // Az egész order summary újraszámolása és megjelenítése (bundle, order bump, adók, összesen)
   function recalculateOrderSummary() {
-    var countryCode = document.getElementById('country') ? document.getElementById('country').value : 'CZ';
+    var countryCode = document.getElementById('country') ? document.getElementById('country').value : 'HU';
     var rate = TAX_RATES[countryCode] || TAX_RATES.CZ;
     var total = getCurrentTotal();
     var subtotal = total / (1 + rate / 100);
