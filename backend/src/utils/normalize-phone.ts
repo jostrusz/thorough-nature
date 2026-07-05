@@ -105,7 +105,14 @@ export function normalizePhone(
   }
 
   if (cleaned.startsWith("0")) {
-    const result = prefix + cleaned.substring(1)
+    // Hungary uses a 2-digit trunk prefix "06" that is dropped entirely in the
+    // international format (e.g. domestic "06 20 123 4567" → "+36 20 123 4567").
+    // All other markets use a single "0" trunk. HU area/mobile codes never start
+    // with 6, so stripping "06" is unambiguous.
+    const local = (cc === "HU" && cleaned.startsWith("06"))
+      ? cleaned.substring(2)
+      : cleaned.substring(1)
+    const result = prefix + local
     return {
       normalized: result,
       original,

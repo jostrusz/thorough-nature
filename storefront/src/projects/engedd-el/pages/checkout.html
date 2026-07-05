@@ -6221,7 +6221,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (cleaned.startsWith('00')) return '+' + cleaned.substring(2);
     if (cleaned.startsWith('0')) {
       var prefix = COUNTRY_PHONE_PREFIX[countryCode] || '+36';
-      return prefix + cleaned.substring(1);
+      // Magyarország: kétjegyű "06" belföldi előhívó (nemzetközi formátumban elhagyjuk);
+      // más országoknál egyjegyű "0" trunk.
+      var local = (countryCode === 'HU' && cleaned.startsWith('06')) ? cleaned.substring(2) : cleaned.substring(1);
+      return prefix + local;
     }
     if (/^\d{7,}$/.test(cleaned)) {
       return (COUNTRY_PHONE_PREFIX[countryCode] || '+36') + cleaned;
