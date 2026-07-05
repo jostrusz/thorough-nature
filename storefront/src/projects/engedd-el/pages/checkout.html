@@ -5165,6 +5165,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       (data.gateways || []).forEach(function(gw) {
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
         (gw.methods || []).forEach(function(m) {
+          // COD (utánvét) ideiglenesen ELREJTVE az engedd-el checkouton — a backend (gateway + fee + Dextrum COD) kész és bekötve,
+          // csak a UI-ban nem jelenik meg. Aktiváláshoz töröld ezt a sort.
+          if (m.code === 'cod') return;
           // CZ bank buttons (Comgate/PayU) render inside the bank group — collect & skip standalone tiles
           if (collectCzBankMethod(m, gw.provider, m.provider_id || providerIdFull)) return;
           var CZ_NAMES = {
