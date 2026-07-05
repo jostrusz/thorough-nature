@@ -3042,7 +3042,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   function formatPrice(amount) {
     if (amount === null || amount === undefined) return '0 kr';
     var num = parseFloat(amount);
-    return num.toFixed(2).replace('.', ',') + ' kr';
+    // NOK se zobrazuje bez desetin když je celé číslo (399 kr), jinak s čárkou (599,50 kr)
+    var str = (num % 1 === 0) ? String(num) : num.toFixed(2).replace('.', ',');
+    return str + ' kr';
   }
 
   // Daňové sazby per země (tax-inclusive)
@@ -3105,7 +3107,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // Subtitle — popis co je v košíku
     var msbSubtitle = document.getElementById('msb-subtitle');
     if (msbSubtitle) {
-      var parts = ['Paperback · ' + selectedBundleQty + '× boek'];
+      var parts = ['Paperback · ' + selectedBundleQty + '× ' + (selectedBundleQty === 1 ? 'bok' : 'bøker')];
       if (orderBumpActive) parts.push('+ Het Leven');
       msbSubtitle.textContent = parts.join(' ');
     }
@@ -5317,7 +5319,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             '<div class="pm-name">' + m.display_name + '</div>' +
             '<div class="pm-desc">' + (METHOD_DESCRIPTIONS[m.code] || '') + '</div>' +
           '</div>' +
-          (isPopular ? '<span class="pm-badge">Populair</span>' : '');
+          (isPopular ? '<span class="pm-badge">Populær</span>' : '');
 
         container.appendChild(label);
 
@@ -6371,7 +6373,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               hidePhoneWarning();
               if (foxPhonePreview) {
                 foxPhonePreview.style.color = '';
-                foxPhonePreview.textContent = '\u2713 Geldig telefoonnummer';
+                foxPhonePreview.textContent = '\u2713 Gyldig telefonnummer';
                 foxPhonePreview.style.display = 'block';
               }
             } else {
@@ -6450,7 +6452,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             var city = (addr && addr.city) || '';
             items.push({
               html: '<strong>' + name + '</strong>' +
-                    (regNo ? '<small>KVK: ' + regNo + '</small>' : '') +
+                    (regNo ? '<small>Org.nr.: ' + regNo + '</small>' : '') +
                     (city ? '<small>' + city + '</small>' : ''),
               data: { name: name, regNo: regNo, vatNo: vatNo, city: city }
             });
@@ -6944,13 +6946,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     promoApplyBtn.addEventListener('click', function() {
       var code = promoInput.value.trim().toUpperCase();
       if (!code) {
-        promoMessage.textContent = 'Voer een kortingscode in.';
+        promoMessage.textContent = 'Skriv inn en rabattkode.';
         promoMessage.className = 'promo-message error';
         return;
       }
       // Disable button + loading
       promoApplyBtn.disabled = true;
-      promoApplyBtn.textContent = 'Controleren...';
+      promoApplyBtn.textContent = 'Sjekker...';
       promoMessage.className = 'promo-message';
 
       // Step 1: Create cart (if it does not exist yet)
@@ -6997,7 +6999,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       .catch(function(err) {
         // Fout — code is ongeldig
         console.warn('Promo code geweigerd:', err.message || err);
-        promoMessage.textContent = 'Ongeldige kortingscode';
+        promoMessage.textContent = 'Ugyldig rabattkode';
         promoMessage.className = 'promo-message error';
         savedPromoCode = '';
         promoAppliedToCart = false;
@@ -7005,7 +7007,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       .then(function() {
         // Reset button
         promoApplyBtn.disabled = false;
-        promoApplyBtn.textContent = 'Toepassen';
+        promoApplyBtn.textContent = 'Bruk';
       });
     });
   }
@@ -7074,11 +7076,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         body: JSON.stringify({
           project_slug: PROJECT_CONFIG.slug,
           email: (document.getElementById('email').value || '').trim(),
-          first_name: (document.getElementById('firstName').value || '').trim(),
-          last_name: (document.getElementById('lastName').value || '').trim(),
+          first_name: (document.getElementById('first_name').value || '').trim(),
+          last_name: (document.getElementById('last_name').value || '').trim(),
           phone: (document.getElementById('phone').value || '').trim(),
           city: (document.getElementById('city').value || '').trim(),
-          postal_code: (document.getElementById('postcode').value || '').trim(),
+          postal_code: (document.getElementById('postal_code').value || '').trim(),
           country_code: document.getElementById('country') ? document.getElementById('country').value : '',
           payment_method: selectedMethod || 'none',
           payment_provider: selectedProvider || '',
@@ -7295,7 +7297,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           promoAppliedToCart = false;
           // Toon foutmelding
           if (promoMessage) {
-            promoMessage.textContent = 'Ongeldige kortingscode';
+            promoMessage.textContent = 'Ugyldig rabattkode';
             promoMessage.className = 'promo-message error';
           }
           // Verberg badge, toon toggle weer
