@@ -818,7 +818,7 @@ body { background: var(--bg); }
             var it = orderItems[i];
             var title = (it.product_title || it.title || '').toLowerCase();
             // Skip non-main items (e-book bumps, upsells)
-            if (title.indexOf('laat los') === -1) continue;
+            if (title.indexOf('slipp taket') === -1) continue;
 
             // Try multiple sources for bundle size:
             //  1. SKU pattern LLWJK-{1..4}
@@ -855,11 +855,13 @@ body { background: var(--bg); }
           if (data.order.total != null) {
             var totalEl = document.getElementById('ty-total-price');
             if (totalEl) {
-              var cur = (data.order.currency_code || 'eur').toLowerCase();
-              var symbol = cur === 'eur' ? '\u20AC' : cur === 'sek' ? 'kr' : cur === 'pln' ? 'z\u0142' : cur === 'czk' ? 'K\u010D' : '\u20AC';
+              var cur = (data.order.currency_code || 'nok').toLowerCase();
               var amt = Number(data.order.total) || 0;
               var formatted = amt.toFixed(2).replace('.', ',').replace(/,00$/, '');
-              totalEl.textContent = symbol + ' ' + formatted;
+              var symbolMap = { eur: '\u20AC', sek: 'kr', nok: 'kr', dkk: 'kr', pln: 'z\u0142', czk: 'K\u010D' };
+              var symbol = symbolMap[cur] || 'kr';
+              // kr / z\u0142 / K\u010D jdou ZA \u010D\u00E1stku (skandin\u00E1vsk\u00FD styl), \u20AC P\u0158ED
+              totalEl.textContent = (cur === 'eur') ? (symbol + ' ' + formatted) : (formatted + ' ' + symbol);
             }
           }
           console.log('TY: Order items synced (books: ' + derivedBookCount + ', total: ' + data.order.total + ')');
@@ -925,7 +927,7 @@ body { background: var(--bg); }
       totalPrice += PROJECT_CONFIG.upsellProduct.price;
     }
   } else if (bundlePriceMap[bundleQty]) {
-    // Use bundle pricing: 1=€35, 2=€59, 3=€79, 4=€99
+    // Bundle pricing z config.json (NOK): 1=699, 2=1199, 3=1599, 4=1999
     totalPrice = bundlePriceMap[bundleQty];
     if (upsellPurchased) {
       totalPrice += PROJECT_CONFIG.upsellProduct.price;
@@ -937,7 +939,7 @@ body { background: var(--bg); }
   }
   var totalPriceEl = document.getElementById('ty-total-price');
   if (totalPriceEl) {
-    totalPriceEl.textContent = '\u20AC ' + totalPrice.toFixed(0).replace('.', ',');
+    totalPriceEl.textContent = totalPrice.toFixed(0) + ' kr';
   }
 
   // 2e. Aktualizuj hlavní položku s bundle qty
