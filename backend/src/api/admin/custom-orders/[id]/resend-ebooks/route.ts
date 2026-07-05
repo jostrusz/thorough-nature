@@ -45,6 +45,11 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
     { key: "e-books/przesun-jedna-rzecz-zmien-wszystko.pdf", title: "Przesuń jedną rzecz, zmień wszystko", description: "E-book (PDF)", size: "13.2 MB" },
     { key: "e-books/nie-wszystko-zasluguje-na-miejsce.pdf", title: "Nie wszystko zasługuje na miejsce", description: "E-book (PDF)", size: "18.5 MB" },
   ],
+  // Pusť to, co tě ničí (CZ) — must stay in sync with order-placed-digital-download.ts
+  'odpust-knizka': [
+    { key: "e-books/Jak-prestat-nadmerne-premyslet-a-zacit-zit.pdf", title: "Jak přestat nadměrně přemýšlet a začít žít", description: "E-book (PDF)", size: "4.1 MB" },
+    { key: "e-books/Laska-bez-cenzury.pdf", title: "Láska bez cenzury", description: "E-book (PDF)", size: "18.5 MB" },
+  ],
 }
 
 // NOTE: no cross-language fallback. If a project is missing from EBOOK_FILES_BY_PROJECT
