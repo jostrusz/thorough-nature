@@ -4020,6 +4020,27 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   }
 
   /**
+   * Bundle line for the cart-add endpoint — quantity-aware.
+   *
+   * Two bundle models are supported:
+   *  1. Per-bundle variant (loslatenboek: LLWJK-1..4) → variant encodes the qty,
+   *     so we send quantity=1 and the backend prices via the SKU bundle qty.
+   *  2. Single variant × N (slipp-taket & other projects: no per-bundle variantId)
+   *     → we send the single variant with quantity=N, and the backend prices via
+   *     BUNDLE_PRICING[handle][N] (unit = bundlePrice / N). This was the bug:
+   *     previously we always sent quantity=1, so a "2 bøker" order became 1 book.
+   */
+  function getBundleCartLine(qty) {
+    qty = qty || selectedBundleQty;
+    var opt = PROJECT_CONFIG.bundleOptions.find(function(b) { return b.qty === qty; });
+    var hasBundleVariant = !!(opt && opt.variantId);
+    return {
+      variant_id: hasBundleVariant ? opt.variantId : VARIANT_ID,
+      quantity: hasBundleVariant ? 1 : qty
+    };
+  }
+
+  /**
    * Create a fresh cart with current bundle + order bump + promo.
    * Returns a Promise that resolves to the cartId.
    */
@@ -4039,10 +4060,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       console.log('[Express Cart] Cart created:', cartId, '→ adding line items');
 
       // Add main product via bundle endpoint (applies server-side pricing)
-      // Each bundle variant (LLWJK-1 to LLWJK-4) represents a specific bundle qty, so quantity is always 1
+      // quantity-aware: per-bundle-variant projects → qty 1; single-variant → qty N
       return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
         method: 'POST',
-        body: JSON.stringify({ variant_id: bundleVariantId, quantity: 1 })
+        body: JSON.stringify(getBundleCartLine(bundleQty))
       }).then(function() {
         // Add order bump if active (uses bundle endpoint for tax-inclusive pricing + discounted price)
         if (isOrderBump && PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.variantId) {
@@ -6697,10 +6718,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       localStorage.setItem('background_cart_id', backgroundCartId);
       console.log('[Checkout Recovery] Background cart created:', backgroundCartId);
 
-      // Add the main product (bundle variant already encodes the qty, so quantity=1)
+      // Add the main product — quantity-aware (single-variant projects need qty N)
       return medusaFetch('/store/carts/' + backgroundCartId + '/line-items-bundle', {
         method: 'POST',
-        body: JSON.stringify({ variant_id: selectedBundleVariantId, quantity: 1 })
+        body: JSON.stringify(getBundleCartLine())
       });
     }).then(function() {
       // Update with email + abandoned checkout metadata
@@ -7216,13 +7237,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     cartStep
     .then(function(cartId) {
       // Step 2a: Add main product via bundle endpoint (custom pricing)
-      // Each bundle variant (LLWJK-1 to LLWJK-4) represents a specific bundle qty, so quantity is always 1
+      // quantity-aware: per-bundle-variant projects → qty 1; single-variant → qty N
       return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
         method: 'POST',
-        body: JSON.stringify({
-          variant_id: checkoutBundleVariantId,
-          quantity: 1
-        })
+        body: JSON.stringify(getBundleCartLine(checkoutBundleQty))
       }).catch(function(err) {
         console.error('[Checkout] Failed to add product to cart:', err.message || err);
         throw new Error('Produktet kunne ikke legges i handlekurven. Prøv igjen.');
