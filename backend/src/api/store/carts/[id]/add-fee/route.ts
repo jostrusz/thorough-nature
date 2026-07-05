@@ -50,12 +50,31 @@ export async function POST(
 
     const variantId = products[0].variants[0].id
 
-    // Add to cart via bundle workflow (uses BUNDLE_PRICING for correct price)
+    // Currency-specific fee override. Currencies NOT listed here fall back to
+    // BUNDLE_PRICING (CZK COD fee stays 30 Kč — unchanged). HUF = 30 CZK equivalent (≈490 Ft).
+    const FEE_AMOUNTS: Record<string, Record<string, number>> = {
+      cod_fee: { huf: 490 },
+    }
+    let unitPrice: number | undefined
+    try {
+      const { data: carts } = await query.graph({
+        entity: "cart",
+        fields: ["currency_code"],
+        filters: { id: cartId },
+      })
+      const currency = (carts?.[0]?.currency_code || "").toLowerCase()
+      unitPrice = FEE_AMOUNTS[type]?.[currency]
+    } catch {
+      // fall back to BUNDLE_PRICING
+    }
+
+    // Add to cart via bundle workflow (explicit unit_price wins; else BUNDLE_PRICING)
     const { result } = await addBundleToCartWorkflow(req.scope).run({
       input: {
         cart_id: cartId,
         variant_id: variantId,
         quantity: 1,
+        ...(unitPrice !== undefined ? { unit_price: unitPrice } : {}),
       },
     })
 

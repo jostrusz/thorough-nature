@@ -117,6 +117,9 @@ type AddBundleToCartInput = {
   cart_id: string
   variant_id: string
   quantity: number
+  /** Explicit tax-inclusive unit price override (bypasses BUNDLE_PRICING).
+   *  Used for currency-specific fees, e.g. COD surcharge = 30 CZK / 490 HUF. */
+  unit_price?: number
 }
 
 /**
@@ -233,8 +236,12 @@ export const addBundleToCartWorkflow = createWorkflow(
           variant_id: data.input.variant_id,
           quantity: data.input.quantity,
         }
-        if (data.bundleUnitPrice !== null) {
-          item.unit_price = data.bundleUnitPrice
+        // Explicit unit_price override (currency-specific fee) wins over BUNDLE_PRICING.
+        const resolvedPrice = (data.input.unit_price !== null && data.input.unit_price !== undefined)
+          ? data.input.unit_price
+          : data.bundleUnitPrice
+        if (resolvedPrice !== null && resolvedPrice !== undefined) {
+          item.unit_price = resolvedPrice
           // Bundle prices in BUNDLE_PRICING are tax-inclusive (final customer price).
           // Without this flag, Medusa treats custom unit_price as tax-exclusive
           // and adds tax on top (e.g. €99 → €107.91 instead of €99 incl. tax).

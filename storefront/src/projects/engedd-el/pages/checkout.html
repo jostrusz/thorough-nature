@@ -2399,7 +2399,7 @@ body {
       <!-- Utánvét díj -->
       <div class="msb-line" id="msb-cod-fee" style="display:none;">
         <span class="msb-line-label">Utánvét</span>
-        <span class="msb-line-val">+0&nbsp;Ft</span>
+        <span class="msb-line-val">+490&nbsp;Ft</span>
       </div>
       <!-- Összesen -->
       <div class="msb-line total-line">
@@ -2928,7 +2928,7 @@ body {
       </div>
       <div class="summary-line" id="summary-cod-fee" style="display:none;padding:4px 0;">
         <span style="font-size:13px;">Utánvét</span>
-        <span style="font-weight:600;">+0&nbsp;Ft</span>
+        <span style="font-weight:600;">+490&nbsp;Ft</span>
       </div>
       <div class="summary-line total" id="summary-total">
         <span>Összesen</span>
@@ -3199,7 +3199,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   function getCurrentTotal() {
     var total = selectedBundlePrice;
     if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
-    if (selectedMethod === 'cod') total += 30;
+    if (selectedMethod === 'cod') total += 490; // Utánvét díj — 30 CZK ekvivalens HUF-ban (backend: FEE_AMOUNTS.cod_fee.huf)
     if (selectedShipping === 'home') total += 990; // Házhozszállítás — egyezik a "Packeta - Házhozszállítás" shipping option árával (990 HUF)
     return total;
   }
