@@ -3166,7 +3166,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var MEDUSA_URL = PROJECT_CONFIG.medusaUrl;
   var VARIANT_ID = PROJECT_CONFIG.mainProduct.variantId;
   // Dinamikus region ID — az ország kiválasztása alapján változik
-  var currentRegionId = PROJECT_CONFIG.regions.CZ; // Alapértelmezett: CZ
+  var currentRegionId = PROJECT_CONFIG.getRegionId('HU'); // HU régió (fix: regions.CZ nem létezett → undefined region_id)
 
   /* ─── ÁLLAPOT: Bundle + Order Bump ─── */
   var selectedBundleQty = 1;       // Aktuálisan kiválasztott könyvmennyiség (1-4)
@@ -3200,7 +3200,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var total = selectedBundlePrice;
     if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
     if (selectedMethod === 'cod') total += 30;
-    if (selectedShipping === 'home') total += 20;
+    if (selectedShipping === 'home') total += 990; // Házhozszállítás — egyezik a "Packeta - Házhozszállítás" shipping option árával (990 HUF)
     return total;
   }
 
