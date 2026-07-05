@@ -73,7 +73,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  box-shadow: 0 4px 24px rgba(45, 27, 61, 0.08);
 }
 .nav-inner {
- max-width: 1050px;
+ max-width: 1180px;
  margin: 0 auto;
  display: flex;
  align-items: center;
@@ -101,7 +101,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .nav-links {
  display: flex;
  align-items: center;
- gap: 16px;
+ gap: 14px;
  flex-wrap: nowrap;
  min-width: 0;
 }
@@ -237,7 +237,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .nav-links a { font-size: 13px; }
  .nav-cta { padding: 8px 14px; font-size: 13px; }
 }
-@media (max-width: 1120px) {
+@media (max-width: 1160px) {
  .nav-links { display: none; }
  .nav-hamburger { display: flex; }
  .nav-mobile-menu.open { display: flex; }
