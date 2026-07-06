@@ -2980,7 +2980,7 @@ body {
   <div class="checkout-footer-trust" style="flex-direction:column;gap:4px;">
     <div style="display:flex;align-items:center;gap:6px;justify-content:center;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Biztonságos fizetés a <strong>Comgate</strong>-en keresztül
+      Biztonságos fizetés a <strong>Barion</strong> rendszerén keresztül
     </div>
     <p style="font-size:11px;color:#999;line-height:1.4;margin:2px 0 0 0;text-align:center;">A kártyás fizetéssel hozzájárulsz adataid feldolgozásához a fizetési szolgáltató adatvédelmi szabályzatával összhangban.</p>
   </div>
@@ -5873,7 +5873,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           : 'Mollie';
         trustText.textContent = 'Biztonságos fizetés — ' + trustProvider;
       } else if (BANK_CODES.indexOf(selectedMethod) !== -1) {
-        trustText.textContent = 'Biztonságos fizetés — Comgate';
+        trustText.textContent = 'Biztonságos fizetés — Barion';
       } else if (selectedMethod === 'cod') {
         trustText.textContent = 'Fizetés a csomag átvételekor';
       } else {
