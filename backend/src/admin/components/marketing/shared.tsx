@@ -371,6 +371,7 @@ const PROJECT_COLORS: Record<string, { bg: string; fg: string; label: string }> 
   "psi-superzivot": { bg: "#F3E8FF", fg: "#6B21A8", label: "Psí superživot" },
   "kocici-bible": { bg: "#FCE7F3", fg: "#831843", label: "Kočičí bible" },
   "odpust-knizka": { bg: "#EDE9FE", fg: "#5B21B6", label: "Pusť to, co tě ničí" },
+  "pusti-to-sk": { bg: "#FFE4E6", fg: "#9F1239", label: "Pusti to, čo ťa ničí" },
   "engedd-el": { bg: "#D1FAE5", fg: "#065F46", label: "Engedd el" },
 }
 
@@ -947,6 +948,7 @@ export const PROJECT_SLUGS = [
   "slapp-taget",
   "het-leven",
   "odpust-knizka",
+  "pusti-to-sk",
 ]
 
 // ═══════════════════════════════════════════

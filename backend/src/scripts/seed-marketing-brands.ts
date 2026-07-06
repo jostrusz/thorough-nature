@@ -114,6 +114,18 @@ export default async function seedMarketingBrands({ container }: ExecArgs) {
       locale: "cs",
       timezone: "Europe/Prague",
     },
+    {
+      slug: "pusti-to-sk",
+      display_name: "Pusti to, čo ťa ničí",
+      project_id: "pusti-to-sk",
+      storefront_domain: "pustitocotanici.sk",
+      marketing_from_email: "news@news.pustitocotanici.sk",
+      marketing_from_name: "Pusti to, čo ťa ničí",
+      marketing_reply_to: "podpora@pustitocotanici.sk",
+      primary_color: "#5b21b6",
+      locale: "sk",
+      timezone: "Europe/Bratislava",
+    },
   ]
 
   let created = 0

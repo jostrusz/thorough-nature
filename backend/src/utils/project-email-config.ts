@@ -44,6 +44,12 @@ const EMAIL_SUBJECTS: Record<string, Record<string, string>> = {
     shipmentSent: 'Vaše objednávka {id} byla odeslána! 📦',
     shipmentPreview: 'Vaše objednávka byla odeslána!',
   },
+  sk: {
+    orderPlaced: 'Ďakujeme za vašu objednávku {id}!',
+    orderPlacedPreview: 'Ďakujeme za vašu objednávku!',
+    shipmentSent: 'Vaša objednávka {id} bola odoslaná! 📦',
+    shipmentPreview: 'Vaša objednávka bola odoslaná!',
+  },
   de: {
     orderPlaced: 'Danke für deine Bestellung {id}!',
     orderPlacedPreview: 'Danke für deine Bestellung!',
@@ -198,6 +204,23 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     project: 'odpust-knizka',
     locale: 'cs',
     smsDispatchTemplate: 'Pust to, co te nici: Zasilka odeslana. Sledovaci odkaz: {url} podpora@pusttocotenici.cz',
+  },
+  'pusti-to-sk': {
+    replyTo: 'podpora@pustitocotanici.sk',
+    fromName: 'Joris de Vries - Pusti to, čo ťa ničí',
+    fromEmail: 'Joris de Vries - Pusti to, čo ťa ničí <podpora@pustitocotanici.sk>',
+    project: 'pusti-to-sk',
+    locale: 'sk',
+    smsDispatchTemplate: 'Pusti to, co ta nici: Zasielka odoslana. Sledovaci odkaz: {url} podpora@pustitocotanici.sk',
+  },
+  // Also match without hyphen
+  pustitosk: {
+    replyTo: 'podpora@pustitocotanici.sk',
+    fromName: 'Joris de Vries - Pusti to, čo ťa ničí',
+    fromEmail: 'Joris de Vries - Pusti to, čo ťa ničí <podpora@pustitocotanici.sk>',
+    project: 'pusti-to-sk',
+    locale: 'sk',
+    smsDispatchTemplate: 'Pusti to, co ta nici: Zasielka odoslana. Sledovaci odkaz: {url} podpora@pustitocotanici.sk',
   },
   // Also match without hyphen
   psisuperzivot: {

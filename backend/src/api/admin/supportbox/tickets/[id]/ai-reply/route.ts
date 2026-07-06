@@ -93,6 +93,12 @@ Kde {delivery_postal_code} je PSČ doručovací adresy zákazníka.
 - E-mail: podpora@pusttocotenici.cz
 - E-booky: zatím neexistují (neslibovat)
 
+### SK Pusti to, čo ťa ničí
+- Autor: Joris de Vries
+- Web: pustitocotanici.sk
+- E-mail: podpora@pustitocotanici.sk
+- E-booky: zatím neexistují (neslibovat)
+
 ### CZ Psí superživot
 - Autor: Michal Peterka
 - Web: psi-superzivot.cz

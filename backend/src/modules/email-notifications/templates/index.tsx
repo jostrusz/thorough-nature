@@ -70,6 +70,13 @@ import { EngShipmentNotificationTemplate, ENG_SHIPMENT_NOTIFICATION, isEngShipme
 import { OdAbandonedCheckout1Template, OD_ABANDONED_CHECKOUT_1, isOdAbandonedCheckout1Data } from './od-abandoned-checkout-1'
 import { OdAbandonedCheckout2Template, OD_ABANDONED_CHECKOUT_2, isOdAbandonedCheckout2Data } from './od-abandoned-checkout-2'
 import { OdAbandonedCheckout3Template, OD_ABANDONED_CHECKOUT_3, isOdAbandonedCheckout3Data } from './od-abandoned-checkout-3'
+// Pusti to, čo ťa ničí (pusti-to-sk) templates
+import { SkOrderPlacedTemplate, SK_ORDER_PLACED, isSkOrderPlacedTemplateData } from './sk-order-placed'
+import { SkEbookDeliveryTemplate, SK_EBOOK_DELIVERY, isSkEbookDeliveryData } from './sk-ebook-delivery'
+import { SkShipmentNotificationTemplate, SK_SHIPMENT_NOTIFICATION, isSkShipmentNotificationData } from './sk-shipment-notification'
+import { SkAbandonedCheckout1Template, SK_ABANDONED_CHECKOUT_1, isSkAbandonedCheckout1Data } from './sk-abandoned-checkout-1'
+import { SkAbandonedCheckout2Template, SK_ABANDONED_CHECKOUT_2, isSkAbandonedCheckout2Data } from './sk-abandoned-checkout-2'
+import { SkAbandonedCheckout3Template, SK_ABANDONED_CHECKOUT_3, isSkAbandonedCheckout3Data } from './sk-abandoned-checkout-3'
 // Życie, jakiego nigdy sobie nie pozwoliłaś (zycie-zaslugy) templates
 import { ZzOrderPlacedTemplate, ZZ_ORDER_PLACED, isZzOrderPlacedTemplateData } from './zz-order-placed'
 import { ZzShipmentNotificationTemplate, ZZ_SHIPMENT_NOTIFICATION, isZzShipmentNotificationData } from './zz-shipment-notification'
@@ -157,6 +164,12 @@ export const EmailTemplates = {
   OD_ABANDONED_CHECKOUT_1,
   OD_ABANDONED_CHECKOUT_2,
   OD_ABANDONED_CHECKOUT_3,
+  SK_ORDER_PLACED,
+  SK_EBOOK_DELIVERY,
+  SK_SHIPMENT_NOTIFICATION,
+  SK_ABANDONED_CHECKOUT_1,
+  SK_ABANDONED_CHECKOUT_2,
+  SK_ABANDONED_CHECKOUT_3,
   // Życie, jakiego nigdy sobie nie pozwoliłaś
   ZZ_ORDER_PLACED,
   ZZ_SHIPMENT_NOTIFICATION,
@@ -234,6 +247,13 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
     const allKeys = Object.values(EmailTemplates) as string[]
     if (allKeys.includes(odKey)) {
       return odKey
+    }
+  }
+  if (project === 'pusti-to-sk' || project === 'pustitosk') {
+    const skKey = `sk-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(skKey)) {
+      return skKey
     }
   }
   if (project === 'engedd-el' || project === 'engeddel') {
@@ -847,6 +867,61 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <OdAbandonedCheckout3Template {...data} />
 
+    // ── Pusti to, čo ťa ničí (SK) templates ──────────────────
+    case EmailTemplates.SK_ORDER_PLACED:
+      if (!isSkOrderPlacedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.SK_ORDER_PLACED}"`
+        )
+      }
+      return <SkOrderPlacedTemplate {...data} />
+
+    case EmailTemplates.SK_EBOOK_DELIVERY:
+      if (!isSkEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.SK_EBOOK_DELIVERY}"`
+        )
+      }
+      return <SkEbookDeliveryTemplate {...data} />
+
+    case EmailTemplates.SK_SHIPMENT_NOTIFICATION:
+      if (!isSkShipmentNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.SK_SHIPMENT_NOTIFICATION}"`
+        )
+      }
+      return <SkShipmentNotificationTemplate {...data} />
+
+    case EmailTemplates.SK_ABANDONED_CHECKOUT_1:
+      if (!isSkAbandonedCheckout1Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.SK_ABANDONED_CHECKOUT_1}"`
+        )
+      }
+      return <SkAbandonedCheckout1Template {...data} />
+
+    case EmailTemplates.SK_ABANDONED_CHECKOUT_2:
+      if (!isSkAbandonedCheckout2Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.SK_ABANDONED_CHECKOUT_2}"`
+        )
+      }
+      return <SkAbandonedCheckout2Template {...data} />
+
+    case EmailTemplates.SK_ABANDONED_CHECKOUT_3:
+      if (!isSkAbandonedCheckout3Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.SK_ABANDONED_CHECKOUT_3}"`
+        )
+      }
+      return <SkAbandonedCheckout3Template {...data} />
+
     // ── Het Leven Dat Je Verdient templates ──────────────────
     case EmailTemplates.HL_ORDER_PLACED:
       if (!isHlOrderPlacedTemplateData(data)) {
@@ -994,6 +1069,13 @@ export {
   OdAbandonedCheckout1Template,
   OdAbandonedCheckout2Template,
   OdAbandonedCheckout3Template,
+  // Pusti to, čo ťa ničí (SK)
+  SkOrderPlacedTemplate,
+  SkEbookDeliveryTemplate,
+  SkShipmentNotificationTemplate,
+  SkAbandonedCheckout1Template,
+  SkAbandonedCheckout2Template,
+  SkAbandonedCheckout3Template,
   // Życie, jakiego nigdy sobie nie pozwoliłaś
   ZzOrderPlacedTemplate,
   ZzShipmentNotificationTemplate,

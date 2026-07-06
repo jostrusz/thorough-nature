@@ -465,6 +465,7 @@ export const PROJECT_OPTIONS: {
   { id: "psi-superzivot", ids: ["psi-superzivot"], label: "Psí superživot", flag: "🇨🇿", color: "#1565C0", bg: "#E3F2FD" },
   { id: "kocici-bible", ids: ["kocici-bible"], label: "Kočičí bible", flag: "🇨🇿", color: "#6D28D9", bg: "#EDE9FE" },
   { id: "odpust-knizka", ids: ["odpust-knizka"], label: "Pusť to, co tě ničí", flag: "🇨🇿", color: "#7C2D12", bg: "#FEF3C7" },
+  { id: "pusti-to-sk", ids: ["pusti-to-sk"], label: "Pusti to, čo ťa ničí", flag: "🇸🇰", color: "#9F1239", bg: "#FFE4E6" },
   { id: "engedd-el", ids: ["engedd-el"], label: "Engedd el, ami tönkretesz", flag: "🇭🇺", color: "#15803D", bg: "#DCFCE7" },
 ]
 

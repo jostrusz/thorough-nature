@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vrátenie a záruka — Pusti to, čo ťa ničí</title>
+<meta name="description" content="Vrátenie a záruka knihy Pusti to, čo ťa ničí. 30-dňová garancia vrátenia peňazí bez udania dôvodu, 14-dňové zákonné právo na odstúpenie od zmluvy, reklamačný poriadok a vaše práva.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://pustitocotanici.sk/reklamace">
+<link rel="icon" href="/laat-los-logo-logo.webp" type="image/webp">
+
+<!-- ═══ FONTS ═══ -->
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+<style>
+/* ═══ FONTS ═══ */
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+/* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
+:root {
+ --bg: #FAF5F8;
+ --heading: #2D1B3D;
+ --cta: #C27BA0;
+ --section: #EDD9E5;
+ --body: #5A3D6B;
+ --highlight: #D9A4C0;
+ --dark: #1A1028;
+ --white: #FFFFFF;
+ --light: #F5EDF2;
+ --muted: #9B7AAD;
+ --cta-hover: #A8628A;
+ --accent: #D498B5;
+}
+
+/* ═══ RESET ═══ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
+
+/* ═══ NAVIGACE ═══ */
+.site-nav { background: var(--white); border-bottom: 1px solid var(--section); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(45, 27, 61, 0.06); }
+.nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
+.nav-logo img { height: 40px; width: auto; }
+.nav-logo-text { font-family: 'Recoleta', serif; font-size: 16px; font-weight: 600; color: var(--heading); line-height: 1.2; }
+.nav-links { display: flex; align-items: center; gap: 22px; }
+.nav-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--body); text-decoration: none; transition: color 0.2s; position: relative; white-space: nowrap; }
+.nav-links a:hover { color: var(--heading); }
+.nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--cta); transition: width 0.3s ease; }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--heading); font-weight: 600; }
+.nav-links a.active::after { width: 100%; }
+.nav-cta { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--white) !important; background: var(--cta); padding: 10px 22px; border-radius: 8px; text-decoration: none !important; transition: all 0.25s ease; box-shadow: 0 3px 12px rgba(194, 123, 160, 0.2); }
+.nav-cta:hover { background: var(--cta-hover) !important; color: var(--white) !important; transform: translateY(-1px); box-shadow: 0 5px 18px rgba(194, 123, 160, 0.35); }
+.nav-cta::after { display: none !important; }
+.nav-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-direction: column; gap: 5px; }
+.nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--heading); border-radius: 2px; transition: all 0.3s ease; }
+.nav-mobile-overlay { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background: rgba(26, 16, 40, 0.5); z-index: 999; }
+.nav-mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--white); padding: 24px 20px; box-shadow: 0 8px 24px rgba(45, 27, 61, 0.12); z-index: 1000; flex-direction: column; gap: 0; border-bottom: 2px solid var(--section); }
+.nav-mobile-menu a { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500; color: var(--body); text-decoration: none; padding: 14px 0; border-bottom: 1px solid var(--section); display: block; transition: color 0.2s; }
+.nav-mobile-menu a:last-child { border-bottom: none; }
+.nav-mobile-menu a:hover { color: var(--heading); }
+.nav-mobile-menu .nav-cta-mobile { display: inline-block; font-weight: 700; color: var(--white); background: var(--cta); padding: 14px 28px; border-radius: 10px; text-align: center; margin-top: 16px; border-bottom: none; }
+.nav-mobile-menu .nav-cta-mobile:hover { background: var(--cta-hover); color: var(--white); }
+
+@media (max-width: 1100px) {
+ .nav-links { display: none; }
+ .nav-hamburger { display: flex; }
+ .nav-mobile-menu.open { display: flex; }
+ .nav-mobile-overlay.open { display: block; }
+ .nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+ .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+ .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+}
+
+/* ═══ CONTENT STRÁNKY ═══ */
+.page-header {
+ background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
+ padding: 56px 20px 48px;
+ text-align: center;
+}
+.page-header h1 { font-family: 'Recoleta', serif; font-size: 36px; font-weight: 600; color: var(--white); margin-bottom: 12px; line-height: 1.2; }
+.page-header p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: rgba(255, 255, 255, 0.7); max-width: 600px; margin: 0 auto; line-height: 1.6; }
+.page-header .badge { display: inline-block; background: rgba(194, 123, 160, 0.2); color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 16px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 0.5px; }
+
+.page-content { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+/* Informační boxy */
+.info-box {
+ background: var(--light);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 28px;
+ margin-bottom: 40px;
+}
+.info-box h3 { font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
+.info-box p, .info-box li { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; }
+.info-box ul { list-style: none; padding: 0; }
+.info-box ul li { padding: 4px 0; }
+.info-box ul li::before { content: '\2192\0020'; color: var(--cta); font-weight: 700; }
+
+/* Sekce */
+.section-block { margin-bottom: 40px; }
+.section-block h2 {
+ font-family: 'Recoleta', serif;
+ font-size: 24px;
+ font-weight: 600;
+ color: var(--heading);
+ margin-bottom: 16px;
+ line-height: 1.3;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+}
+.section-block h2 .icon { font-size: 28px; }
+.section-block h3 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 17px;
+ font-weight: 700;
+ color: var(--heading);
+ margin: 24px 0 12px;
+}
+.section-block p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 12px; }
+.section-block ul, .section-block ol { padding-left: 24px; margin-bottom: 12px; }
+.section-block li { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 6px; }
+.section-block strong { color: var(--heading); }
+.section-block a { color: var(--cta); }
+
+.highlight-box {
+ background: linear-gradient(135deg, var(--light), var(--section));
+ border-left: 4px solid var(--cta);
+ border-radius: 0 12px 12px 0;
+ padding: 20px 24px;
+ margin: 20px 0;
+}
+.highlight-box p { margin: 0; font-size: 15px; }
+
+.warning-box {
+ background: linear-gradient(135deg, #FFF8F0, #FFEDDB);
+ border-left: 4px solid #E8A050;
+ border-radius: 0 12px 12px 0;
+ padding: 20px 24px;
+ margin: 20px 0;
+}
+.warning-box p { margin: 0; font-size: 15px; color: var(--body); }
+
+/* Guarantee box */
+.guarantee-box {
+ background: var(--white);
+ border: 2px solid var(--cta);
+ border-radius: 20px;
+ padding: 32px;
+ text-align: center;
+ margin: 40px 0;
+ position: relative;
+}
+.guarantee-seal {
+ width: 72px;
+ height: 72px;
+ background: radial-gradient(circle, var(--cta), var(--cta-hover));
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 32px;
+ color: var(--white);
+ margin: 0 auto 16px;
+ border: 3px solid var(--highlight);
+}
+.guarantee-box h3 {
+ font-family: 'Recoleta', serif;
+ font-size: 22px;
+ color: var(--heading);
+ margin-bottom: 12px;
+}
+.guarantee-box p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.7;
+ max-width: 520px;
+ margin: 0 auto;
+}
+
+/* Kroky vrácení */
+.steps {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+ gap: 20px;
+ margin: 24px 0;
+}
+.step {
+ background: var(--white);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 24px 20px;
+ text-align: center;
+ transition: all 0.3s ease;
+}
+.step:hover {
+ transform: translateY(-3px);
+ box-shadow: 0 8px 24px rgba(45, 27, 61, 0.08);
+ border-color: var(--highlight);
+}
+.step-num {
+ width: 40px;
+ height: 40px;
+ background: var(--cta);
+ color: var(--white);
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-family: 'DM Sans', sans-serif;
+ font-size: 16px;
+ font-weight: 700;
+ margin: 0 auto 14px;
+}
+.step h4 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ font-weight: 700;
+ color: var(--heading);
+ margin-bottom: 8px;
+}
+.step p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ color: var(--muted);
+ line-height: 1.6;
+ margin: 0;
+}
+
+/* Conditions list */
+.conditions-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+ gap: 12px;
+ margin: 16px 0;
+}
+.condition-item {
+ background: var(--white);
+ border: 1px solid var(--section);
+ border-radius: 12px;
+ padding: 16px;
+ text-align: center;
+ transition: all 0.3s ease;
+}
+.condition-item:hover {
+ border-color: var(--highlight);
+ box-shadow: 0 4px 16px rgba(45, 27, 61, 0.06);
+}
+.condition-icon { font-size: 24px; margin-bottom: 8px; }
+.condition-item strong {
+ display: block;
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ font-weight: 700;
+ color: var(--heading);
+ margin-bottom: 4px;
+}
+.condition-item span {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 13px;
+ color: var(--muted);
+ line-height: 1.4;
+}
+
+/* FAQ */
+.faq-item {
+ border-bottom: 1px solid var(--section);
+}
+.faq-question {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ padding: 18px 0;
+ cursor: pointer;
+ transition: background 0.2s;
+}
+.faq-question h3 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 16px;
+ font-weight: 600;
+ color: var(--heading);
+ line-height: 1.4;
+ margin: 0;
+ flex: 1;
+}
+.faq-icon {
+ font-size: 24px;
+ color: var(--cta);
+ font-weight: 300;
+ transition: transform 0.3s ease;
+ flex-shrink: 0;
+ margin-left: 16px;
+}
+.faq-answer {
+ max-height: 0;
+ overflow: hidden;
+ transition: max-height 0.4s ease;
+}
+.faq-answer p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.75;
+ padding-bottom: 18px;
+ margin: 0;
+}
+.faq-answer a { color: var(--cta); }
+.faq-item.active .faq-icon {
+ transform: rotate(45deg);
+}
+.faq-item.active .faq-answer {
+ max-height: 360px;
+}
+
+.divider { height: 1px; background: var(--section); margin: 40px 0; }
+
+/* Odkaz na další stránku */
+.cross-link-note {
+ background: var(--white);
+ border: 1px solid var(--section);
+ border-radius: 12px;
+ padding: 20px 24px;
+ margin-top: 32px;
+ text-align: center;
+}
+.cross-link-note p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.7;
+ margin: 0;
+}
+.cross-link-note a {
+ color: var(--cta);
+ font-weight: 600;
+ text-decoration: underline;
+}
+.cross-link-note a:hover {
+ color: var(--cta-hover);
+}
+
+/* Company info */
+.company-info {
+ background: var(--light);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 28px;
+ margin-top: 40px;
+}
+.company-info h3 { font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
+.company-info p { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; margin: 0 0 6px; }
+.company-info a { color: var(--cta); }
+
+/* Last updated */
+.last-updated {
+ text-align: center;
+ font-family: 'DM Sans', sans-serif;
+ font-size: 13px;
+ color: var(--muted);
+ margin-top: 40px;
+ padding-top: 20px;
+ border-top: 1px solid var(--section);
+}
+
+/* ═══ FOOTER ═══ */
+.site-footer { background: var(--dark); padding: 48px 24px 24px; color: rgba(255, 255, 255, 0.7); }
+.footer-inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
+.footer-brand { display: flex; align-items: center; gap: 16px; }
+.footer-brand img { height: 40px; width: auto; }
+.footer-brand-text { font-family: 'Recoleta', serif; font-size: 18px; color: var(--white); line-height: 1.3; }
+.footer-links { display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(255, 255, 255, 0.7); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--white); }
+.footer-contact { display: flex; flex-direction: column; gap: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; }
+.footer-contact a { color: rgba(255, 255, 255, 0.7); text-decoration: none; }
+.footer-contact a:hover { color: var(--white); }
+.footer-bottom { max-width: 960px; margin: 32px auto 0; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: rgba(255, 255, 255, 0.45); }
+
+@media (max-width: 768px) {
+ .page-header h1 { font-size: 28px; }
+ .section-block h2 { font-size: 20px; }
+ .steps { grid-template-columns: 1fr; }
+ .conditions-grid { grid-template-columns: repeat(2, 1fr); }
+ .footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 32px; }
+ .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
+}
+@media (max-width: 480px) {
+ .page-header h1 { font-size: 24px; }
+ .page-header { padding: 40px 16px 36px; }
+ .page-content { padding: 32px 16px 60px; }
+ .conditions-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+<script src="js/project-config.js"></script>
+<script src="js/pixel.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Domov","item":"https://pustitocotanici.sk/"},{"@type":"ListItem","position":2,"name":"Vrátenie a záruka","item":"https://pustitocotanici.sk/reklamace"}]}</script>
+</head>
+<body>
+
+<!-- ═══ NAVIGACE ═══ -->
+<nav class="site-nav">
+ <div class="nav-inner">
+  <a href="index.html" class="nav-logo">
+   <img src="/pust-to-co-te-nici-logo.png" alt="Pusti to, čo ťa ničí" height="44" style="width:auto;object-fit:contain;">
+  </a>
+  <div class="nav-links">
+   <a href="doprava.html">Doprava a doručenie</a>
+   <a href="reklamace.html" class="active">Vrátenie a záruka</a>
+   <a href="obchodni-podminky.html">Obchodné podmienky</a>
+   <a href="ochrana-udaju.html">Ochrana osobných údajov</a>
+   <a href="kontakt.html">Zákaznícka podpora</a>
+   <a href="index.html" class="nav-cta">Objednať &rarr;</a>
+  </div>
+  <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+   <span></span><span></span><span></span>
+  </button>
+ </div>
+</nav>
+<div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
+<div class="nav-mobile-menu">
+ <a href="doprava.html">Doprava a doručenie</a>
+ <a href="reklamace.html">Vrátenie a záruka</a>
+ <a href="obchodni-podminky.html">Obchodné podmienky</a>
+ <a href="ochrana-udaju.html">Ochrana osobných údajov</a>
+ <a href="kontakt.html">Zákaznícka podpora</a>
+ <a href="index.html" class="nav-cta-mobile">Objednať &rarr;</a>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="page-header">
+ <div class="badge">Vrátenie &amp; Záruka</div>
+ <h1>Vrátenie a záruka</h1>
+ <p>Vaše práva a náš sľub spokojnosti</p>
+</header>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="page-content">
+
+ <!-- Shrnutí -->
+ <div class="info-box">
+  <h3>Zhrnutie</h3>
+  <ul>
+   <li>30-dňová predĺžená garancia vrátenia peňazí bez udania dôvodu</li>
+   <li>14-dňové zákonné právo na odstúpenie od zmluvy</li>
+   <li>100% vrátenie peňazí pri nespokojnosti</li>
+   <li>Postup vrátenia v 5 jednoduchých krokoch</li>
+  </ul>
+ </div>
+
+ <!-- Garancia -->
+ <div class="guarantee-box">
+  <div class="guarantee-seal">30</div>
+  <h3>30-dňová garancia vrátenia peňazí</h3>
+  <p>Nie ste spokojní? Vrátime vám celú sumu. <strong>Bez udania dôvodu. Bez komplikácií.</strong> Zo zákona máte právo na 14-dňovú lehotu na odstúpenie od zmluvy. My vám ponúkame 30 dní od prevzatia knihy.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Sekce 1: Právo na odstúpenie od zmluvy -->
+ <div class="section-block">
+  <h2><span class="icon">1.</span> Právo na odstúpenie od zmluvy</h2>
+
+  <h3>1.1 Vaše zákonné práva</h3>
+  <p>Ako spotrebiteľ máte podľa <strong>zákona č. 102/2014 Z. z. o ochrane spotrebiteľa pri predaji na diaľku</strong> právo odstúpiť od kúpnej zmluvy do <strong>14 dní</strong> od prevzatia tovaru, a to <strong>bez udania dôvodu</strong>. My však ideme o krok ďalej a ponúkame vám predĺženú lehotu <strong>30 dní</strong>, počas ktorej vám vrátime celú kúpnu cenu.</p>
+  <p>Lehota na odstúpenie plynie odo dňa, keď vy alebo vami určená tretia osoba (iná než dopravca) prevezmete knihu. Na dodržanie lehoty postačí, keď oznámenie o odstúpení odošlete pred jej uplynutím.</p>
+
+  <h3>1.2 Podmienky na plné vrátenie peňazí</h3>
+  <p>Aby ste mali nárok na plné vrátenie kúpnej ceny, mala by kniha spĺňať nasledujúce podmienky:</p>
+
+  <div class="conditions-grid">
+   <div class="condition-item">
+    <div class="condition-icon">&#128214;</div>
+    <strong>Nečítaná</strong>
+    <span>Bez známok čítania či listovania</span>
+   </div>
+   <div class="condition-item">
+    <div class="condition-icon">&#9989;</div>
+    <strong>Nepoškodená</strong>
+    <span>Bez ohybov, škrabancov či škvŕn</span>
+   </div>
+   <div class="condition-item">
+    <div class="condition-icon">&#9998;</div>
+    <strong>Bez poznámok</strong>
+    <span>Bez zápiskov či zvýraznenia</span>
+   </div>
+   <div class="condition-item">
+    <div class="condition-icon">&#128230;</div>
+    <strong>Kompletná</strong>
+    <span>Všetky súčasti priložené</span>
+   </div>
+   <div class="condition-item">
+    <div class="condition-icon">&#10024;</div>
+    <strong>Pôvodný stav</strong>
+    <span>V stave, v akom ste ju dostali</span>
+   </div>
+  </div>
+
+  <div class="warning-box">
+   <p><strong>Upozornenie:</strong> Knihy, ktoré nesú zjavné známky čítania alebo používania, <strong>nemusia mať nárok na plné vrátenie peňazí</strong> &mdash; spotrebiteľ zodpovedá za zníženie hodnoty tovaru spôsobené zaobchádzaním nad rámec nutného na oboznámenie sa s povahou a vlastnosťami knihy.</p>
+  </div>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Sekce 2: Postup vrátenia -->
+ <div class="section-block">
+  <h2><span class="icon">2.</span> Vrátenie &mdash; krok za krokom</h2>
+
+  <h3>2.1 Vrátenie v 5 krokoch</h3>
+
+  <div class="steps">
+   <div class="step">
+    <div class="step-num">1</div>
+    <h4>Napíšte nám</h4>
+    <p>Pošlite e-mail na podpora@pustitocotanici.sk s vaším menom, číslom objednávky a prípadne dôvodom vrátenia.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">2</div>
+    <h4>Potvrdenie</h4>
+    <p>Do 1&ndash;2 pracovných dní dostanete potvrdenie s podrobnými pokynmi na vrátenie.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">3</div>
+    <h4>Starostlivo zabaľte</h4>
+    <p>Knihu starostlivo zabaľte, aby nedošlo k poškodeniu počas prepravy.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">4</div>
+    <h4>Odošlite</h4>
+    <p>Balíček odošlite bez zbytočného odkladu, najneskôr do 14 dní, na adresu na vrátenie.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">5</div>
+    <h4>Vrátenie peňazí</h4>
+    <p>Peniaze vám vrátime do 14 dní od doručenia knihy späť k nám.</p>
+   </div>
+  </div>
+
+  <h3>2.2 Adresa na vrátenie</h3>
+  <div class="highlight-box">
+   <p><strong>Performance Marketing Solution s.r.o. &mdash; Vrátenie tovaru</strong><br>
+   c/o Dextrum Fulfillment a.s.<br>
+   Kirilovova 181<br>
+   739 21 Paskov<br>
+   Česká republika</p>
+  </div>
+
+  <div class="warning-box">
+   <p><strong>Dôležité:</strong> Na vonkajšiu stranu balíka vždy uveďte <strong>&quot;Vrátenie &mdash; Objednávka č.: [vaše číslo objednávky]&quot;</strong>.</p>
+  </div>
+
+  <h3>2.3 Náklady na vrátenie</h3>
+  <p>Náklady na vrátenie (spätné zaslanie knihy) hradí zákazník, <strong>s výnimkou</strong> prípadov, keď:</p>
+  <ul>
+   <li>je produkt chybný,</li>
+   <li>dostali ste nesprávny produkt,</li>
+   <li>produkt bol poškodený počas prepravy.</li>
+  </ul>
+  <p>Orientačné náklady na vrátenie cez <strong>Packetu</strong>: <strong>cca 3&ndash;5 €</strong>.</p>
+
+  <div class="highlight-box">
+   <p><strong>Tip:</strong> Vždy použite spôsob odoslania so sledovaním zásielky (napr. Packeta), aby ste mohli doložiť, že bol balíček odoslaný a doručený.</p>
+  </div>
+
+  <h3>2.4 Čo uviesť v e-maile o vrátení?</h3>
+  <ul>
+   <li>vaše celé meno,</li>
+   <li>číslo objednávky,</li>
+   <li>dátum prevzatia tovaru,</li>
+   <li>dôvod vrátenia (nepovinný),</li>
+   <li>číslo bankového účtu na vrátenie peňazí.</li>
+  </ul>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Sekce 3: Vrátenie peňazí -->
+ <div class="section-block">
+  <h2><span class="icon">3.</span> Vrátenie peňazí</h2>
+
+  <h3>3.1 Kedy dostanete vrátené peniaze?</h3>
+  <p>Do <strong>14 dní</strong> od doručenia vrátenej knihy spracujeme vrátenie plnej kúpnej ceny <strong>29,90 €</strong>.</p>
+
+  <h3>3.2 Akým spôsobom vrátime peniaze?</h3>
+  <p>Peniaze vraciame <strong>rovnakým spôsobom</strong>, akým ste vykonali platbu:</p>
+  <ul>
+   <li><strong>Platobná karta</strong> &rarr; vrátenie na vašu kartu,</li>
+   <li><strong>Bankový prevod / online platba</strong> &rarr; vrátenie na váš bankový účet,</li>
+   <li><strong>Dobierka</strong> &rarr; vrátenie prevodom na vami oznámený bankový účet.</li>
+  </ul>
+  <p>Po spracovaní môže v závislosti od vašej banky trvať <strong>3&ndash;5 pracovných dní</strong>, než sa suma pripíše na váš účet.</p>
+
+  <h3>3.3 Čiastočné vrátenie peňazí</h3>
+  <p>V nasledujúcich prípadoch môže byť uplatnené zníženie vrátenej sumy o zníženú hodnotu tovaru:</p>
+  <ul>
+   <li>kniha vykazuje známky používania,</li>
+   <li>kniha bola poškodená zákazníkom,</li>
+   <li>chýbajú súčasti.</li>
+  </ul>
+  <p>O znížení hodnoty budete vždy informovaní vopred, ešte pred spracovaním vrátenia peňazí.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Sekce 4: Reklamácia vád a zákonná zodpovednosť -->
+ <div class="section-block">
+  <h2><span class="icon">4.</span> Reklamácia vád tovaru (reklamačný poriadok)</h2>
+
+  <h3>4.1 Kedy môžete podať reklamáciu?</h3>
+  <p>Reklamáciu chybného tovaru môžete podať v prípade, že:</p>
+  <ul>
+   <li>kniha dorazila poškodená,</li>
+   <li>kniha nezodpovedá popisu,</li>
+   <li>kniha obsahuje tlačové alebo výrobné vady,</li>
+   <li>v knihe chýbajú stránky,</li>
+   <li>dostali ste nesprávny produkt.</li>
+  </ul>
+
+  <h3>4.2 Ako podať reklamáciu?</h3>
+  <p>Napíšte nám na <a href="mailto:podpora@pustitocotanici.sk">podpora@pustitocotanici.sk</a> a uveďte:</p>
+  <ul>
+   <li>vaše meno a číslo objednávky,</li>
+   <li>popis vady,</li>
+   <li>fotografie poškodeného alebo chybného produktu.</li>
+  </ul>
+  <p>Na vašu reklamáciu odpovieme do <strong>48 hodín</strong>.</p>
+
+  <h3>4.3 Vaše práva z chybného plnenia</h3>
+  <p>Práva z chybného plnenia sa riadia <strong>Občianskym zákonníkom (zákon č. 40/1964 Zb.)</strong>. Pri oprávnenej reklamácii vady máte podľa povahy vady právo najmä na:</p>
+  <ul>
+   <li><strong>odstránenie vady</strong> dodaním novej bezchybnej knihy alebo jej opravou,</li>
+   <li><strong>primeranú zľavu</strong> z kúpnej ceny,</li>
+   <li><strong>odstúpenie od zmluvy</strong> a vrátenie celej kúpnej ceny (pri podstatnej vade, ktorú nemožno odstrániť).</li>
+  </ul>
+
+  <div class="highlight-box">
+   <p>Reklamáciu vybavíme <strong>najneskôr do 30 dní</strong> od jej uplatnenia, pokiaľ sa s vami nedohodneme na dlhšej lehote. V prípade oprávnenej reklamácie <strong>hradíme náklady na spätné zaslanie</strong> aj na odoslanie nového kusu.</p>
+  </div>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Sekce 5: Alternatívne riešenie sporov -->
+ <div class="section-block">
+  <h2><span class="icon">5.</span> Alternatívne riešenie spotrebiteľských sporov</h2>
+  <p>Ak medzi nami ako predávajúcim a vami ako spotrebiteľom dôjde k sporu, ktorý sa nepodarí vyriešiť vzájomnou dohodou, máte právo obrátiť sa na subjekt alternatívneho riešenia spotrebiteľských sporov, ktorým je:</p>
+  <div class="highlight-box">
+   <p><strong>Slovenská obchodná inšpekcia (SOI)</strong><br>
+   Ústredný inšpektorát &mdash; odbor pre medzinárodné vzťahy a ARS<br>
+   poštový priečinok 29, Bajkalská 21/A, 827 99 Bratislava 27<br>
+   Web: <a href="https://www.soi.sk" target="_blank" rel="noopener">www.soi.sk</a></p>
+  </div>
+  <p>Alternatívne riešenie sporu sa začína na návrh spotrebiteľa. Tento postup nie je mediáciou ani rozhodcovským konaním a jeho využitím nie je dotknuté vaše právo obrátiť sa na súd.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Sekce 6: Často kladené otázky -->
+ <div class="section-block">
+  <h2><span class="icon">6.</span> Často kladené otázky</h2>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Môžem objednávku zrušiť?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Áno, ak vaša objednávka ešte nebola odoslaná, môžete ju bezplatne zrušiť. Čo najskôr nám napíšte na <a href="mailto:podpora@pustitocotanici.sk">podpora@pustitocotanici.sk</a> s číslom objednávky.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Musím pri vrátení do 30 dní uvádzať dôvod?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Nie. V rámci našej 30-dňovej garancie vám vrátime celú sumu <strong>bez udania dôvodu</strong>. Stačí nám napísať na <a href="mailto:podpora@pustitocotanici.sk">podpora@pustitocotanici.sk</a> a zaslať knihu späť.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Môžem knihu vymeniť za iný produkt?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Výmena, žiaľ, nie je možná. Knihu môžete vrátiť v súlade s týmito podmienkami a potom zadať novú objednávku.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Čo ak sa môj balíček stratil?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Kontaktujte nás so sledovacím kódom vašej zásielky. Začneme prešetrenie u prepravcu (Packeta). Podľa výsledku vám zašleme nový výtlačok alebo vykonáme plné vrátenie peňazí.</p>
+   </div>
+  </div>
+ </div>
+
+ <!-- Odkaz na podmienky dopravy -->
+ <div class="cross-link-note">
+  <p>Pre informácie o doprave a doručení sa pozrite na naše <a href="doprava.html">Podmienky dopravy</a>.</p>
+ </div>
+
+ <!-- Firemné údaje -->
+ <div class="company-info">
+  <h3>Firemné údaje</h3>
+  <p><strong>Performance Marketing Solution s.r.o.</strong></p>
+  <p>Rybná 716/24, Staré Město, 110 00 Praha, Česká republika</p>
+  <p>IČO: 06259928</p>
+  <p>DIČ: CZ06259928</p>
+  <p>Zákaznícka podpora: <a href="mailto:podpora@pustitocotanici.sk">podpora@pustitocotanici.sk</a></p>
+ </div>
+
+ <!-- Posledná aktualizácia -->
+ <div class="last-updated">
+  Naposledy aktualizované: 13. júna 2026
+ </div>
+
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="site-footer">
+ <div class="footer-inner">
+  <div class="footer-brand">
+   <img src="/pust-to-co-te-nici.png" alt="Pusti to, čo ťa ničí">
+  </div>
+  <div class="footer-links">
+   <a href="doprava.html">Doprava a doručenie</a>
+   <a href="reklamace.html">Vrátenie a záruka</a>
+   <a href="obchodni-podminky.html">Obchodné podmienky</a>
+   <a href="ochrana-udaju.html">Ochrana osobných údajov</a>
+   <a href="kontakt.html">Zákaznícka podpora</a>
+  </div>
+  <div class="footer-contact">
+   <a href="mailto:podpora@pustitocotanici.sk">podpora@pustitocotanici.sk</a>
+  </div>
+ </div>
+ <div class="footer-bottom">
+  <span>Performance Marketing Solution s.r.o. &bull; Rybná 716/24, 110 00 Praha &bull; IČO: 06259928 &bull; DIČ: CZ06259928</span>
+  <span>&copy; 2026 Performance Marketing Solution s.r.o. Všetky práva vyhradené.</span>
+ </div>
+</footer>
+
+<script>
+function toggleFaq(element) {
+ var faqItem = element.closest('.faq-item');
+ var isActive = faqItem.classList.contains('active');
+ var allItems = document.querySelectorAll('.faq-item');
+ allItems.forEach(function(item) { item.classList.remove('active'); });
+ if (!isActive) { faqItem.classList.add('active'); }
+}
+
+function toggleMobileMenu() {
+ document.querySelector('.nav-hamburger').classList.toggle('open');
+ document.querySelector('.nav-mobile-menu').classList.toggle('open');
+ document.querySelector('.nav-mobile-overlay').classList.toggle('open');
+}
+</script>
+</body>
+</html>

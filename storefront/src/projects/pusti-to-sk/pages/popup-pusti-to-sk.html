@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pusti to, čo ťa ničí — 7-dňová výzva</title>
+<style>
+  /* DM Sans — self-hosted, matches the index page (latin + latin-ext) */
+  @font-face { font-family: 'DM Sans'; src: url(fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: 'DM Sans'; src: url(fonts/dm-sans-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+  @font-face { font-family: 'DM Sans'; src: url(fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: 'DM Sans'; src: url(fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+  :root {
+    /* Paleta převzatá z indexu pusti-to-sk (Velvet Dusk).
+       Názvy proměnných zůstávají "rose-*", ale nesou barvy indexu. */
+    --rose-50: #F5EDF2;   /* světlá (pozadí-fade) */
+    --rose-100: #EDD9E5;  /* jemná (plocha badge) */
+    --rose-200: #D9A4C0;  /* highlight (rámečky, dots, grabber) */
+    --rose-300: #D498B5;  /* accent (podtržení podnadpisu) */
+    --rose-500: #C27BA0;  /* CTA — primární accent */
+    --rose-600: #A8628A;  /* tmavší CTA (hover) */
+    --rose-700: #A8628A;  /* hluboký (CTA-verloop, accent text) */
+    --ink: #2D1B3D;       /* nadpisy + dobře čitelný text */
+    --ink-soft: #5A3D6B;  /* body */
+    --muted: #9B7AAD;     /* tlumený */
+    --gold: #D498B5;      /* accent (podtržení, badge-dot) */
+    --yellow: #D9A4C0;    /* highlight */
+    --card: #FFFFFF;
+    /* Lehký backdrop — stránka pod popupem zůstává viditelná (žádná těžká tmavá plocha) */
+    --backdrop: rgba(45, 27, 61, 0.12);
+    --success: #16a34a;
+  }
+
+  * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  html, body { margin: 0; padding: 0; font-family: Georgia, 'Times New Roman', serif; color: var(--ink); background: #F5EDF2; }
+
+  /* Když je stránka načtena v iframe (= embedded na reálné sales page),
+     skryjeme fake landing pozadí i dev panel, takže vidíme jen popup card. */
+  html.embedded, html.embedded body { background: transparent !important; }
+  html.embedded .site-bg,
+  html.embedded .dev-panel { display: none !important; }
+
+  /* Fake site behind popup — pro preview context */
+  .site-bg {
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 600px at 70% -10%, #F5EDF2 0%, transparent 60%),
+      radial-gradient(900px 500px at -10% 80%, #EDD9E5 0%, transparent 55%),
+      #FAF5F8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .site-ghost {
+    max-width: 720px;
+    text-align: center;
+    color: #9B7AAD;
+    font-family: Georgia, serif;
+  }
+  .site-ghost h1 { font-size: 48px; margin: 0 0 12px 0; color: #6e5a65; letter-spacing: -0.02em; }
+  .site-ghost p { font-size: 18px; line-height: 1.6; }
+
+  /* Popup */
+  .popup-overlay {
+    position: fixed; inset: 0;
+    background: var(--backdrop);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    z-index: 100;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .popup-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .popup {
+    background: var(--card);
+    width: 100%;
+    max-width: 560px;
+    max-height: calc(100vh - 40px);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(194, 123, 160, 0.35), 0 2px 0 rgba(255,255,255,0.6) inset;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(20px) scale(0.98);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .popup-overlay.open .popup { transform: translateY(0) scale(1); }
+
+  /* Close button */
+  .popup-close {
+    position: absolute; top: 16px; right: 16px;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(45, 27, 61, 0.08);
+    border: none;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+    transition: background 0.2s;
+  }
+  .popup-close:hover { background: rgba(45, 27, 61, 0.14); }
+
+  /* Header / progress */
+  .popup-header {
+    padding: 26px 28px 0 28px;
+    background: linear-gradient(180deg, var(--rose-50) 0%, transparent 100%);
+  }
+  .progress-wrap {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 18px;
+    padding-right: 44px;   /* clear space for the × close button */
+  }
+  .progress-dots { display: flex; gap: 6px; }
+  .progress-dot {
+    width: 26px; height: 4px;
+    border-radius: 2px;
+    background: var(--rose-200);
+    transition: background 0.3s, width 0.3s;
+  }
+  .progress-dot.done { background: var(--rose-500); }
+  .progress-dot.active { background: var(--rose-500); width: 34px; }
+  .progress-label { font-family: -apple-system, system-ui, sans-serif; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+  .social-proof {
+    font-family: -apple-system, system-ui, sans-serif; font-size: 12px;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 6px;
+  }
+  .social-proof .pulse {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--success);
+    position: relative;
+  }
+  .social-proof .pulse::before {
+    content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--success);
+    animation: pulse 1.6s ease-out infinite;
+    opacity: 0;
+  }
+  @keyframes pulse {
+    0% { transform: scale(0.5); opacity: 0.7; }
+    80%, 100% { transform: scale(1.8); opacity: 0; }
+  }
+
+  /* Question */
+  .question {
+    font-size: 28px; line-height: 1.25; font-weight: 700;
+    color: var(--ink); letter-spacing: -0.02em;
+    margin: 4px 0 6px 0;
+  }
+  .question em { font-style: italic; font-weight: 400; color: var(--rose-600); }
+  .question-sub {
+    font-family: -apple-system, system-ui, sans-serif; font-size: 14px; color: var(--muted);
+    line-height: 1.5; margin: 0 0 20px 0;
+  }
+
+  /* ═══ Options — jednotný styl pro všechny kroky (mobile-first UX) ═══ */
+  .options {
+    display: grid;
+    gap: 7px;
+    padding: 4px 24px 24px 24px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .options-grid-2 { grid-template-columns: 1fr 1fr; }
+
+  .option {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%;
+    min-height: 54px;
+    padding: 10px 14px;
+    background: #fff;
+    border: 1.5px solid var(--rose-200);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    text-align: left;
+    font-family: Georgia, serif;
+    font-size: 16px;
+    color: var(--ink);
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+  /* Hover jen na zařízení s přesným pointerem (desktop) */
+  @media (hover: hover) and (pointer: fine) {
+    .option:hover {
+      transform: translateY(-1px);
+      border-color: var(--rose-300);
+      background: linear-gradient(180deg, #fff 0%, #fdf6fa 100%);
+      box-shadow: 0 4px 14px rgba(194, 123, 160, 0.10);
+    }
+  }
+  /* Active feedback na touch — okamžitý press state */
+  .option:active { transform: scale(0.985); background: var(--rose-50); }
+  .option.selected {
+    border-color: var(--rose-500);
+    background: var(--rose-100);
+    box-shadow: 0 0 0 3px rgba(194, 123, 160, 0.14);
+    animation: selectedBounce 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes selectedBounce {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+  .option-icon {
+    flex: 0 0 34px; width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    line-height: 1;
+    background: var(--rose-100);
+    border-radius: 10px;
+    transition: background 0.2s ease;
+  }
+  .option.selected .option-icon { background: #fff; }
+  .option-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .option-title {
+    font-weight: 600;
+    line-height: 1.2;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+  }
+  .option-quote {
+    font-family: 'DM Sans', -apple-system, system-ui, sans-serif;
+    font-size: 15.5px;
+    line-height: 1.4;
+    color: var(--ink);
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    display: block;
+  }
+  .option.selected .option-quote { color: var(--rose-700); }
+  .option-hint {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.3;
+    /* Clamp na 1 řádek s ellipsis — všechny karty mají stejnou výšku
+       bez ohledu na délku hint textu */
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .option-check {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1.5px solid var(--rose-300);
+    flex: 0 0 18px;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  .option.selected .option-check {
+    border-color: var(--rose-500); background: var(--rose-500);
+  }
+  .option.selected .option-check::after {
+    content: ""; position: absolute; left: 5px; top: 1.5px;
+    width: 4px; height: 8px;
+    border: solid #fff; border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  /* Custom write-your-own-answer option ─────────────────────────
+     Appears as the last choice in each of steps 1-4. Other options
+     auto-advance on click; this one requires the user to type and
+     confirm before advancing. */
+  .option.option-custom { border-style: dashed; }
+  .option.option-custom .option-icon { background: #fff; border: 1px dashed var(--rose-300); }
+  .option-custom-input {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: var(--rose-50);
+    border: 1.5px solid var(--rose-300);
+    border-radius: 12px;
+    padding: 6px 6px 6px 14px;
+    margin-top: -4px;
+    animation: customSlide 0.22s ease-out;
+  }
+  .option-custom-input.open { display: flex; }
+  .option-custom-input input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 0;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    color: var(--ink);
+    outline: none;
+    min-width: 0;
+  }
+  .option-custom-input input::placeholder { color: var(--muted); font-style: italic; }
+  .custom-confirm {
+    flex: 0 0 auto;
+    border: none;
+    background: var(--rose-500);
+    color: #fff;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.18s, opacity 0.18s;
+    white-space: nowrap;
+  }
+  .custom-confirm:disabled { background: var(--muted); cursor: not-allowed; opacity: 0.55; }
+  .custom-confirm:not(:disabled):hover { background: var(--rose-600); transform: translateY(-1px); }
+  @keyframes customSlide {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Footer */
+  .popup-footer {
+    padding: 16px 28px 22px 28px;
+    border-top: 1px solid var(--rose-200);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    background: #fff;
+  }
+  /* Full-width CTA variant — used on step 1 (no back button shown) */
+  .popup-footer.full-cta { justify-content: center; }
+  .popup-footer.full-cta .back-btn { display: none; }
+  .popup-footer.full-cta .next-btn { width: 100%; padding: 14px 24px; font-size: 16px; }
+
+  /* Auto-advance footers: hide next button on steps 1-4, keep back link minimal */
+  .popup-footer.auto-advance { justify-content: flex-start; padding-top: 10px; padding-bottom: 14px; border-top: 1px dashed var(--rose-200); background: transparent; }
+  .popup-footer.auto-advance .next-btn { display: none; }
+  .popup-footer.auto-advance .back-btn { font-size: 13px; color: var(--rose-500); }
+  .popup-footer.auto-advance .back-btn:hover { color: var(--rose-700); text-decoration: underline; }
+  .popup-footer.auto-advance .back-btn:disabled { display: none; }
+  .back-btn {
+    background: none; border: none;
+    color: var(--muted); font-family: -apple-system, system-ui, sans-serif;
+    font-size: 14px; cursor: pointer; padding: 6px 0;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--ink-soft); }
+  .back-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .next-btn {
+    background: var(--ink);
+    color: #fff; border: none;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 15px; font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    transition: transform 0.15s, background 0.2s;
+  }
+  .next-btn:hover { background: var(--rose-700); transform: translateY(-1px); }
+  .next-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; background: var(--muted); }
+
+  /* Step transitions */
+  .step { display: none; animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  .step.active { display: block; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(24px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* AI step */
+  .ai-thinking {
+    text-align: center;
+    padding: 40px 28px;
+    font-family: Georgia, serif;
+  }
+  .ai-thinking .dots {
+    display: inline-flex; gap: 6px;
+    margin-bottom: 16px;
+  }
+  .ai-thinking .dots span {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--rose-500);
+    animation: thinkDot 1.4s infinite ease-in-out;
+  }
+  .ai-thinking .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .ai-thinking .dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes thinkDot {
+    0%, 40%, 100% { transform: translateY(0); opacity: 0.4; }
+    20% { transform: translateY(-6px); opacity: 1; }
+  }
+  .ai-thinking-label {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 13px; color: var(--muted); letter-spacing: 0.04em;
+  }
+
+  .ai-insight {
+    padding: 14px 28px 0 28px;
+  }
+  .ai-avatar {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+  }
+  .ai-avatar-name {
+    font-weight: 600; font-size: 14px;
+  }
+  .ai-avatar-role {
+    font-family: -apple-system, system-ui, sans-serif; font-size: 11px; color: var(--muted);
+  }
+  .ai-message {
+    background: var(--rose-100);
+    border-left: 3px solid var(--rose-500);
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+  .ai-message strong { color: var(--ink); font-style: normal; }
+
+  .benefits {
+    margin: 0 0 14px 0;
+    padding: 0;
+    list-style: none;
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .benefits li {
+    position: relative; padding-left: 28px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 13px; line-height: 1.5;
+    color: var(--ink-soft);
+  }
+  .benefits li::before {
+    content: "✓";
+    position: absolute; left: 0; top: 1px;
+    width: 18px; height: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    background: var(--rose-500);
+    color: #fff;
+    border-radius: 50%;
+  }
+  .benefits li strong { color: var(--ink); font-weight: 600; }
+
+  /* ═══ INTRO / HOOK obrazovka (step 1) ═══════════════════════════ */
+  /* Badge — "Zdarma · 7denní výzva · 5 min denně" */
+  .intro-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--rose-700);
+    background: var(--rose-100);
+    border: 1px solid var(--rose-200);
+    border-radius: 999px;
+    padding: 6px 13px;
+    margin-bottom: 12px;
+  }
+  .intro-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold);
+  }
+  /* Zlaté podtržení benefitu v nadpisu */
+  .question .gold-underline {
+    color: var(--rose-700);
+    font-style: italic;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--gold);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+  .question strong { color: var(--ink); font-weight: 800; }
+  /* Podnadpis — kurzíva s podtrženou klíčovou frází */
+  .intro-subhead {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 15px; line-height: 1.5;
+    color: var(--ink-soft);
+    margin: 0 0 16px 0;
+  }
+  .intro-subhead u {
+    text-decoration: underline;
+    text-decoration-color: var(--rose-300);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 2px;
+    color: var(--rose-700);
+  }
+  /* FOMO / scarcity — warme amber balk */
+  .intro-fomo {
+    display: flex; align-items: center; gap: 9px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 12.5px; line-height: 1.4;
+    color: #8a5a16;
+    background: linear-gradient(180deg, #fdf4e0 0%, #fbecca 100%);
+    border: 1px solid #f0d49a;
+    border-radius: 10px;
+    padding: 10px 13px;
+    margin: 2px 0 14px 0;
+  }
+  .intro-fomo .fomo-icon { font-size: 15px; line-height: 1; flex: 0 0 auto; }
+  .intro-fomo em { font-style: italic; font-weight: 700; color: #7a4d0c; }
+  /* Email input se zachte glow */
+  .intro-email-field { margin-bottom: 12px; }
+  .intro-email-field input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px solid var(--rose-200);
+    border-radius: 12px;
+    font-family: Georgia, serif;
+    font-size: 16px;            /* ≥16px brání auto-zoom při focus na iOS */
+    color: var(--ink);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .intro-email-field input::placeholder { color: var(--muted); }
+  .intro-email-field input:focus {
+    outline: none;
+    border-color: var(--rose-500);
+    box-shadow: 0 0 0 4px rgba(194, 123, 160, 0.18);
+  }
+  /* CTA — výrazné, glow-stín + jemný puls */
+  .intro-cta {
+    width: 100%;
+    background: linear-gradient(135deg, var(--rose-500), var(--rose-700));
+    color: #fff; border: none;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 16.5px; font-weight: 800;
+    padding: 15px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    box-shadow: 0 12px 30px rgba(194, 123, 160, 0.40);
+    transition: transform 0.15s, box-shadow 0.2s;
+    animation: ctaPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes ctaPulse {
+    0%, 100% { box-shadow: 0 12px 30px rgba(194, 123, 160, 0.40); }
+    50%      { box-shadow: 0 12px 30px rgba(194, 123, 160, 0.40),
+                           0 0 0 6px rgba(212, 152, 181, 0.22); }
+  }
+  .intro-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 38px rgba(194, 123, 160, 0.48);
+  }
+  .intro-cta:active { transform: scale(0.99); }
+  /* Micro-copy pod CTA */
+  .intro-microcopy {
+    font-family: -apple-system, system-ui, sans-serif;
+    text-align: center;
+    margin: 11px 0 0 0;
+  }
+  .intro-microcopy .promise {
+    display: block;
+    font-size: 13px; font-weight: 600;
+    color: var(--ink-soft);
+    line-height: 1.4;
+  }
+  .intro-microcopy .from {
+    display: block;
+    font-size: 11.5px; color: var(--muted);
+    margin-top: 4px; line-height: 1.4;
+  }
+  .intro-error {
+    display: none;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 12px; color: #b3261e;
+    margin: -6px 0 10px 2px;
+  }
+  .intro-error.show { display: block; }
+
+  .email-form {
+    padding: 0 28px 18px 28px;
+  }
+  .email-form h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px; line-height: 1.3; font-weight: 700; color: var(--ink); letter-spacing: -0.01em;
+  }
+  .email-form .sub {
+    margin: 0 0 14px 0;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+  .email-form .sub:empty { display: none; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .form-field { margin-bottom: 8px; }
+  .form-field label {
+    display: block; font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11px; font-weight: 600; color: var(--ink-soft);
+    letter-spacing: 0.02em; margin-bottom: 4px;
+  }
+  .form-field input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--rose-200);
+    border-radius: 10px;
+    font-family: Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-field input:focus {
+    outline: none;
+    border-color: var(--rose-500);
+    box-shadow: 0 0 0 3px rgba(194, 123, 160, 0.14);
+  }
+  .submit-btn {
+    width: 100%;
+    background: var(--ink);
+    color: #fff; border: none;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 15px; font-weight: 700;
+    padding: 13px;
+    border-radius: 10px;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    transition: transform 0.15s, background 0.2s;
+    margin-top: 8px;
+  }
+  .submit-btn:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
+  .gdpr {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 9px 12px;
+    background: var(--rose-50);
+    border: 1px solid var(--rose-200);
+    border-radius: 8px;
+    margin-top: 4px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11px; line-height: 1.4;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .gdpr:hover { border-color: var(--rose-300); }
+  .gdpr input[type="checkbox"] {
+    flex: 0 0 18px; width: 18px; height: 18px;
+    margin-top: 2px;
+    accent-color: var(--rose-500);
+    cursor: pointer;
+  }
+  .gdpr-text { flex: 1; }
+  .gdpr-text a { color: var(--rose-500); text-decoration: underline; }
+  .submit-btn:hover { background: var(--rose-700); transform: translateY(-1px); }
+  .privacy {
+    font-family: -apple-system, system-ui, sans-serif; font-size: 11px;
+    color: var(--muted); text-align: center; line-height: 1.5;
+    margin: 12px 0 0 0;
+  }
+
+  /* Success step */
+  .success {
+    text-align: center; padding: 28px 28px;
+  }
+  .success-icon {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--rose-500), var(--rose-700));
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 26px; margin-bottom: 12px;
+    box-shadow: 0 10px 28px rgba(194, 123, 160, 0.35);
+    animation: successPop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes successPop {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  .success-kicker {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--rose-500); font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .success-title {
+    margin: 0 0 10px 0; font-size: 24px; line-height: 1.2; color: var(--ink);
+    letter-spacing: -0.02em; font-weight: 700;
+  }
+  .success-title em { font-style: italic; font-weight: 400; color: var(--rose-600); }
+  .success-lead {
+    font-family: Georgia, serif;
+    font-size: 14.5px; color: var(--ink-soft); line-height: 1.55;
+    max-width: 380px; margin: 0 auto 14px auto;
+  }
+  .success-lead strong { color: var(--ink); font-weight: 600; }
+  .success-timeline {
+    display: flex; flex-direction: column; gap: 6px;
+    background: var(--rose-100);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 0 auto 12px auto;
+    max-width: 360px;
+    text-align: left;
+  }
+  .timeline-row {
+    display: flex; align-items: baseline; gap: 10px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 12.5px;
+  }
+  .timeline-row .t-day {
+    font-weight: 700; color: var(--rose-600);
+    min-width: 68px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .timeline-row .t-text { color: var(--ink-soft); }
+  .success-tip {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11.5px; color: var(--muted); line-height: 1.5;
+    max-width: 360px; margin: 0 auto;
+    padding-top: 10px; border-top: 1px dashed var(--rose-200);
+  }
+  /* ── Inbox preview card (success step) ───────────────────────── */
+  .inbox-card {
+    background: #fff;
+    border: 1px solid var(--rose-200);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin: 16px auto 14px auto;
+    max-width: 380px;
+    text-align: left;
+    box-shadow: 0 10px 28px rgba(194, 123, 160, 0.12);
+    animation: inboxSlide 0.6s 0.15s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  @keyframes inboxSlide {
+    from { transform: translateY(10px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .inbox-meta {
+    display: flex; align-items: center; gap: 10px;
+    font-family: -apple-system, system-ui, sans-serif;
+  }
+  .inbox-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--rose-500), var(--rose-700));
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+    flex-shrink: 0;
+  }
+  .inbox-from {
+    font-size: 13px; font-weight: 600; color: var(--ink);
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .inbox-time {
+    font-size: 11px; color: var(--muted); font-weight: 500;
+    white-space: nowrap;
+  }
+  .inbox-subject {
+    margin-top: 10px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 14.5px; font-weight: 600; color: var(--ink);
+    line-height: 1.35;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .inbox-badge {
+    background: var(--rose-500); color: #fff;
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 4px;
+    flex-shrink: 0;
+  }
+  /* ── Success page conversion blocks ──────────────────────────── */
+  /* Directional pulsing arrow that draws the eye downward to the
+     inbox card. Animation runs forever — arrows attract attention even
+     when they're small. */
+  .success-arrow {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 22px; color: var(--rose-500);
+    margin: 4px auto 4px auto;
+    line-height: 1; text-align: center;
+    animation: arrowPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes arrowPulse {
+    0%, 100% { transform: translateY(0); opacity: 0.45; }
+    50%      { transform: translateY(5px); opacity: 1; }
+  }
+  /* Glow ring on the inbox card — makes it feel "active / unread / new". */
+  .inbox-card.guide {
+    animation: inboxSlide 0.6s 0.15s cubic-bezier(0.16, 1, 0.3, 1) backwards,
+               inboxGlow 2.4s 1.0s ease-in-out infinite;
+  }
+  @keyframes inboxGlow {
+    0%, 100% { box-shadow: 0 10px 28px rgba(194, 123, 160, 0.12); }
+    50%      { box-shadow: 0 10px 28px rgba(194, 123, 160, 0.14),
+                           0 0 0 5px rgba(212, 152, 181, 0.24); }
+  }
+  /* CTA-styled action callout — looks button-like but isn't clickable.
+     This is the eye's "next step" anchor. Single dominant action. */
+  .action-callout {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: linear-gradient(135deg, var(--rose-500), var(--rose-700));
+    color: #fff;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 14px; font-weight: 700;
+    padding: 13px 20px;
+    border-radius: 10px;
+    max-width: 380px; margin: 0 auto 14px auto;
+    box-shadow: 0 10px 24px rgba(194, 123, 160, 0.30);
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+  .action-callout .arrow {
+    font-size: 18px; line-height: 1; transform: translateY(-1px);
+  }
+  .success-loop {
+    font-family: Georgia, serif;
+    font-size: 13.5px; color: var(--ink-soft); line-height: 1.55;
+    font-style: italic;
+    max-width: 380px; margin: 0 auto 18px auto;
+    text-align: center;
+  }
+  .success-loop strong { color: var(--rose-700); font-style: normal; font-weight: 700; }
+  /* Step 2 — deliverability fix. Heading + 3 numbered circles. */
+  .success-instructions {
+    background: var(--rose-100);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 0 auto 14px auto;
+    max-width: 380px;
+    text-align: left;
+  }
+  .success-instructions-title {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--rose-700);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .success-instructions ol {
+    margin: 0; padding: 0;
+    list-style: none;
+    counter-reset: step;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 13px; color: var(--ink); line-height: 1.5;
+  }
+  .success-instructions ol li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 8px;
+  }
+  .success-instructions ol li:last-child { margin-bottom: 0; }
+  .success-instructions ol li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0; top: 0;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--rose-500);
+    color: #fff;
+    font-size: 11px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(194, 123, 160, 0.28);
+  }
+  .success-instructions ol li strong { font-weight: 600; color: var(--rose-700); }
+  /* Email pill — highlights the user's actual address inside step 1
+     so they immediately recognize "this is MY inbox to open". */
+  .success-email-pill {
+    display: inline-block;
+    background: #fff;
+    border: 1px solid var(--rose-300, #D498B5);
+    border-radius: 5px;
+    padding: 1px 7px;
+    font-family: -apple-system, ui-monospace, monospace;
+    font-size: 12.5px;
+    color: var(--ink) !important;
+    font-weight: 600;
+    word-break: break-all;
+  }
+  .success-signature {
+    font-family: Georgia, serif;
+    font-size: 13.5px; color: var(--ink-soft); line-height: 1.45;
+    max-width: 380px; margin: 14px auto 6px auto;
+    text-align: left;
+    padding-top: 12px;
+    border-top: 1px dashed var(--rose-200);
+  }
+  .success-signature .sig-name {
+    font-weight: 700; color: var(--ink); font-style: italic;
+  }
+  .success-signature .sig-role {
+    display: block;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11.5px; color: var(--muted); margin-top: 2px;
+  }
+  .success-social {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11.5px; color: var(--muted);
+    text-align: center;
+    margin-top: 10px;
+  }
+  .success-social strong { color: var(--rose-700); font-weight: 700; }
+
+  /* ── Success v2 — "otevři schránku TEĎ" ──────────────────────── */
+  .success-lead em { font-style: italic; color: var(--rose-700); font-weight: 600; }
+  /* Zelený "live / právě odesláno" indikátor */
+  .success-live {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 12px; font-weight: 600;
+    color: var(--success);
+    background: rgba(22, 163, 74, 0.08);
+    border: 1px solid rgba(22, 163, 74, 0.20);
+    border-radius: 999px;
+    padding: 5px 13px;
+    margin: 0 auto 14px auto;
+  }
+  .success-live .live-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--success);
+    position: relative;
+  }
+  .success-live .live-dot::before {
+    content: ""; position: absolute; inset: -4px; border-radius: 50%;
+    border: 2px solid var(--success);
+    animation: pulse 1.6s ease-out infinite; opacity: 0;
+  }
+  /* Primární akční tlačítko — skutečný odkaz do schránky, s glow */
+  .success-open-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    width: 100%; max-width: 380px;
+    box-sizing: border-box;
+    margin: 2px auto 12px auto;
+    background: linear-gradient(135deg, var(--rose-500), var(--rose-700));
+    color: #fff; text-decoration: none;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 15.5px; font-weight: 800;
+    padding: 14px 22px;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(194, 123, 160, 0.40);
+    transition: transform 0.15s, box-shadow 0.2s;
+    animation: ctaPulse 2.2s ease-in-out infinite;
+  }
+  .success-open-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 38px rgba(194, 123, 160, 0.48);
+  }
+  .success-open-btn:active { transform: scale(0.99); }
+  /* Spam fallback */
+  .success-spam {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11.5px; color: var(--muted); line-height: 1.5;
+    max-width: 380px; margin: 0 auto;
+    padding-top: 12px; border-top: 1px dashed var(--rose-200);
+  }
+  .success-spam strong { color: var(--ink-soft); font-weight: 600; }
+
+  /* ═══ Mobile / úzké okno — bottom-sheet (industry-standard UX) ═══════
+     Do 640px: úzké telefony i zúžená desktop okna dostanou sheet
+     (žádná "plovoucí" vystředěná karta v úzkém-vysokém okně). */
+  @media (max-width: 640px) {
+    .popup-overlay {
+      padding: 14px;
+      align-items: center;                 /* vycentrováno na střed obrazovky */
+    }
+    .popup {
+      max-width: 100%;
+      max-height: 92dvh;
+      border-radius: 22px;                  /* všechny rohy = plovoucí karta */
+      transform: translateY(16px) scale(0.98);  /* zavřeno: lehce dole + zmenšeno */
+      transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    .popup-overlay.open .popup { transform: translateY(0) scale(1); }
+    /* žádný grabber — vycentrovaný modal, ne bottom-sheet */
+    .popup::before { display: none; }
+    .popup-close { top: 14px; right: 12px; }
+    .popup-header { padding: 26px 20px 0 20px; }
+    .progress-wrap { margin-bottom: 14px; }
+    .intro-badge { font-size: 11px; padding: 5px 11px; margin-bottom: 10px; }
+    .question { font-size: 20px; line-height: 1.24; margin: 2px 0 6px 0; }
+    .question-sub { font-size: 14px; }
+    .intro-subhead { font-size: 14px; margin-bottom: 14px; }
+    .benefits { gap: 9px; }
+    .benefits li { font-size: 13.5px; }
+    .options-grid-2 { grid-template-columns: 1fr; }
+    .options { padding: 4px 16px 18px 16px; gap: 8px; }
+    .intro-cta { font-size: 16px; padding: 16px 20px; }
+    .intro-microcopy { margin-top: 12px; }
+    .option { min-height: 60px; padding: 12px 14px; gap: 12px; border-radius: 12px; }
+    .option-icon { flex: 0 0 40px; width: 40px; height: 40px; font-size: 20px; border-radius: 10px; }
+    .option-title { font-size: 15.5px; }
+    .option-hint { font-size: 12.5px; }
+    .popup-footer { padding: 14px 20px calc(18px + env(safe-area-inset-bottom)) 20px; }
+    .ai-insight, .email-form { padding-left: 20px; padding-right: 20px; }
+  }
+  /* Ultra-small (≤360px) — ještě těsnější */
+  @media (max-width: 360px) {
+    .option { padding: 11px 12px; gap: 10px; min-height: 56px; }
+    .option-icon { flex: 0 0 36px; width: 36px; height: 36px; font-size: 18px; }
+    .option-title { font-size: 15px; }
+    .option-hint { font-size: 12px; }
+    .question { font-size: 20px; }
+  }
+
+  /* Dev controls (smaže v produkci) */
+  .dev-panel {
+    position: fixed; bottom: 20px; left: 20px; z-index: 50;
+    background: rgba(26, 16, 40, 0.9); color: #fff; padding: 10px 14px;
+    border-radius: 8px; font-family: -apple-system, system-ui, sans-serif;
+    font-size: 12px; display: flex; gap: 10px; align-items: center;
+    backdrop-filter: blur(8px);
+  }
+  .dev-panel button {
+    background: var(--rose-500); color: #fff; border: none;
+    padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
+  }
+</style>
+<script>
+  // Detect iframe embedding — skryj fake landing pozadí + dev panel
+  // a auto-otevři popup (na reálné sales page je iframe mount = trigger).
+  (function () {
+    let isEmbedded = false;
+    try { isEmbedded = window.self !== window.top; }
+    catch (e) { isEmbedded = true; }
+    if (!isEmbedded) return;
+    document.documentElement.classList.add('embedded');
+    // Počkáme na DOM + openPopup() definici (na konci souboru)
+    document.addEventListener('DOMContentLoaded', () => {
+      requestAnimationFrame(() => {
+        if (typeof openPopup === 'function') openPopup();
+        else document.getElementById('overlay')?.classList.add('open');
+      });
+    });
+  })();
+</script>
+</head>
+<body>
+
+<!-- Fake site background -->
+<div class="site-bg">
+  <div class="site-ghost">
+    <h1>pustitocotanici.sk</h1>
+    <p>(Landing page — popup sa otvorí po 7 s, alebo keď klikneš vľavo dole)</p>
+  </div>
+</div>
+
+<!-- Popup -->
+<div class="popup-overlay" id="overlay">
+  <div class="popup" role="dialog" aria-labelledby="popup-q">
+
+    <button class="popup-close" onclick="closePopup()" aria-label="Zatvoriť">×</button>
+
+    <!-- STEP 1: INTRO / HOOK -->
+    <div class="step active" data-step="1">
+      <div class="popup-header">
+        <span class="intro-badge"><span class="dot"></span> Zadarmo · 7-dňová výzva · 5 min denne</span>
+        <h2 class="question" id="popup-q"><strong>Sedem dní, sedem malých krokov.</strong> A to, čo ťa roky ťahá ku dnu, <span class="gold-underline">konečne povolí</span>.</h2>
+        <p class="intro-subhead">Každý deň ti príde jedna malá úloha na päť minút. Uvidíš, koľko sa ti v hlave uvoľní.</p>
+        <ul class="benefits" style="margin-top:6px;margin-bottom:20px;">
+          <li>Každý deň dostaneš <strong>jednu techniku na päť minút</strong></li>
+          <li>Naučíš sa <strong>pustiť to, čo ťa ťahá späť</strong></li>
+          <li>Ucítiš v hlave viac pokoja a priestoru</li>
+        </ul>
+      </div>
+      <div class="options" style="padding-top:0;padding-bottom:20px;overflow:visible;">
+        <form id="introForm" onsubmit="return startChallenge(event)" novalidate>
+          <p class="intro-formcue" style="margin:0 0 10px;font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;font-weight:700;color:#2D1B3D;text-align:left;">Vyplň svoje krstné meno a email a poďme hneď začať</p>
+          <div class="intro-email-field">
+            <input type="text" id="intro_first_name" name="intro_first_name" autocomplete="given-name"
+                   placeholder="Tvoje krstné meno" aria-label="Krstné meno" style="margin-bottom:10px;">
+            <input type="email" id="intro_email" name="intro_email" inputmode="email" autocomplete="email"
+                   placeholder="tvoj@email.sk" aria-label="E-mailová adresa">
+          </div>
+          <div class="intro-error" id="intro-error">Vyplň prosím meno a platnú e-mailovú adresu.</div>
+          <button type="submit" class="intro-cta">Áno, začínam ešte dnes →</button>
+          <p class="intro-microcopy">
+            <span class="promise">Prvá úloha ti príde do pár sekúnd.</span>
+            <span class="from">Prihlasuješ sa na odber e-mailov od Jorisa · zadarmo · odhlásiš sa jedným klikom · <a href="https://pustitocotanici.sk/ochrana-udaju" target="_blank">Ochrana údajov</a></span>
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <!-- STEP 2: jedna personalizační otázka — klik = submit -->
+    <div class="step" data-step="2">
+      <div class="popup-header">
+        <div class="progress-wrap">
+          <div class="progress-dots">
+            <div class="progress-dot done"></div>
+            <div class="progress-dot active"></div>
+          </div>
+          <span class="progress-label">Krok 2 / 2</span>
+        </div>
+        <h2 class="question" id="q2"></h2>
+        <p class="question-sub" id="q2sub">Klikni na to, čo ti je najbližšie.</p>
+      </div>
+      <div class="options" id="options-2"></div>
+      <div class="popup-footer auto-advance">
+        <button class="back-btn" onclick="prevStep()">← Späť</button>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="step" data-step="3">
+      <div class="success">
+        <div class="success-icon">📨</div>
+        <div class="success-kicker">Tak fajn, si tam.</div>
+        <h3 class="success-title">Prvá úloha už je na ceste</h3>
+
+        <p class="success-lead">
+          Príde ti <strong>počas pár sekúnd</strong>. Otvor ju rovno, je v nej
+          <em>dnešná úloha na päť minút</em>.
+        </p>
+
+        <div class="success-live">
+          <span class="live-dot"></span> Práve odoslal Joris de Vries
+        </div>
+
+        <div class="success-arrow" aria-hidden="true">↓</div>
+
+        <div class="inbox-card guide">
+          <div class="inbox-meta">
+            <div class="inbox-avatar">J</div>
+            <div class="inbox-from">Joris de Vries</div>
+            <div class="inbox-time">práve teraz</div>
+          </div>
+          <div class="inbox-subject">
+            <span class="inbox-badge">Nové</span>
+            deň 1 — zastav tú slučku v hlave
+          </div>
+          <div style="margin-top:6px;font-family:-apple-system,system-ui,sans-serif;font-size:12.5px;color:var(--muted);line-height:1.4;">
+            Volám sa Joris. Toto je prvý zo siedmich krátkych mailov, ktoré ti prídu…
+          </div>
+        </div>
+
+        <a class="success-open-btn" href="https://mail.google.com" target="_blank" rel="noopener">
+          Otvor moju schránku →
+        </a>
+
+        <p class="success-spam">
+          Nevidíš ho? Pozri sa do <strong>Hromadné</strong> alebo <strong>Spamu</strong> a presuň si ho do <strong>Hlavné</strong>.
+          Nech ti žiadna úloha neunikne.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Dev reopener -->
+<div class="dev-panel">
+  <span>Preview dev:</span>
+  <button onclick="openPopup()">Otvoriť popup</button>
+  <button onclick="resetQuiz()">Reset</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  POPUP QUIZ ENGINE — Pusti to, čo ťa ničí (pustitocotanici.sk)
+// ═══════════════════════════════════════════════════════════════
+// Jedna personalizační otázka na step 2 (záložní, defaultní flow jde
+// rovnou na success). Tón: vřelý, přímý — Joris de Vries. Vybraná
+// odpověď jde jako quiz_path[0] / quiz_texts[0] do form-submit.
+const BRANCH_TREE = {
+  default: {
+    q: "Čo ťa teraz <em>najviac</em> ťaží?",
+    sub: "To, k čomu sa v hlave vraciaš najčastejšie.",
+    options: [
+      { v: "rumination", i: "🔁", t: "„Premýšľanie — stále dokola riešim to isté." },
+      { v: "guilt",      i: "🪨", t: "„Vina — nesiem si niečo, čo ma ťaží." },
+      { v: "anger",      i: "🔥", t: "„Hnev — stále vo mne tlie." },
+      { v: "fear",       i: "🌫️", t: "„Strach — bojím sa pustiť to staré." },
+    ],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let state = {
+  path: [],            // selected slug for the single question (e.g. ["rumination"])
+  texts: [],           // human-readable sentence for the answer
+  currentStep: 1,
+  introEmail: "",      // e-mail zachycený na intro/hook obrazovce (step 1)
+  introFirstName: "",  // jméno zachycené na step 1
+  introGdpr: false,    // GDPR souhlas zachycený na step 1
+};
+
+function $(sel) { return document.querySelector(sel); }
+function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
+
+// ─── Funnel tracking ─────────────────────────────────────────────────
+// Anonymní session id, aby se stejný návštěvník počítal jen jednou
+// per popup view. Uloženo v localStorage, regenerováno při resetu.
+const POPUP_FORM_SLUG = "popup-quiz-pusti-to-sk";
+const POPUP_BRAND_SLUG = "pusti-to-sk";
+
+function getOrCreatePopupSession() {
+  try {
+    let sid = localStorage.getItem("popup_session_id");
+    if (!sid) {
+      sid = "ps_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      localStorage.setItem("popup_session_id", sid);
+    }
+    return sid;
+  } catch (e) {
+    return "ps_" + Math.random().toString(36).slice(2, 10);
+  }
+}
+
+// Fire-and-forget — never blocks the UI, never throws.
+// Each event carries form_slug so /admin/.../stats can aggregate by form.
+function trackPopupEvent(eventType, extraProps) {
+  if (!API_BASE) return;
+  try {
+    const body = JSON.stringify({
+      brand_slug: POPUP_BRAND_SLUG,
+      event_type: eventType,
+      properties: {
+        form_slug: POPUP_FORM_SLUG,
+        session_id: getOrCreatePopupSession(),
+        ...(extraProps || {}),
+      },
+    });
+    // keepalive: true ensures the request still goes out if the user
+    // navigates away immediately after triggering the event.
+    fetch(`${API_BASE}/public/marketing/track`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body,
+      keepalive: true,
+    }).catch(() => {});
+  } catch (e) { /* ignore */ }
+}
+
+let popupViewTracked = false;
+
+function openPopup() {
+  $("#overlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+  if (!popupViewTracked) {
+    popupViewTracked = true;
+    trackPopupEvent("popup_viewed");
+  }
+}
+function closePopup() {
+  $("#overlay").classList.remove("open");
+  document.body.style.overflow = "";
+  // Notify parent page (když je popup embedován v iframe) že se zavřel,
+  // aby parent uvolnil scroll lock.
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: "popup_closed" }, "*");
+    }
+  } catch (e) {}
+}
+
+// Selection handler for all step options.
+// Auto-advance on steps 1–4 after a 500ms delay so the user sees the "selected"
+// pulse before the slide transition.
+function selectOption(btn) {
+  const parentOptions = btn.closest(".options");
+  parentOptions.querySelectorAll(".option").forEach(b => b.classList.remove("selected"));
+  // Collapse any previously opened custom-input row in this step
+  parentOptions.querySelectorAll(".option-custom-input.open").forEach(row => {
+    row.classList.remove("open");
+    const inp = row.querySelector("input");
+    if (inp) inp.value = "";
+    const cb = row.querySelector(".custom-confirm");
+    if (cb) cb.disabled = true;
+  });
+  btn.classList.add("selected");
+  const stepEl = btn.closest(".step");
+  const nextBtn = stepEl.querySelector(".next-btn");
+  if (nextBtn) nextBtn.disabled = false;
+
+  const stepN = parseInt(stepEl.dataset.step, 10);
+  const isCustom = btn.dataset.custom === "1";
+
+  if (isCustom) {
+    // Custom "napiš vlastní" — rozbal input, NEpostupuj automaticky.
+    // Uživatel musí napsat + kliknout na Potvrdit (nebo stisknout Enter).
+    const inputRow = btn.nextElementSibling;
+    if (inputRow && inputRow.classList.contains("option-custom-input")) {
+      inputRow.classList.add("open");
+      const inp = inputRow.querySelector("input");
+      setTimeout(() => inp && inp.focus(), 140);
+    }
+    return;
+  }
+
+  // Step 2 je jediná (a poslední) kvízová otázka — zodpovězení = submit.
+  if (stepN === 2) {
+    setTimeout(() => finishQuiz(), 500);
+  }
+}
+
+document.addEventListener("click", (e) => {
+  // Custom-answer confirm button → advance with typed text
+  const confirmBtn = e.target.closest(".custom-confirm");
+  if (confirmBtn) {
+    const row = confirmBtn.closest(".option-custom-input");
+    const input = row && row.querySelector("input");
+    const text = (input && input.value || "").trim();
+    if (text.length < 2) return;
+    const optionBtn = row.previousElementSibling;
+    optionBtn.dataset.value = "custom:" + text;
+    const stepEl = optionBtn.closest(".step");
+    const stepN = parseInt(stepEl.dataset.step, 10);
+    if (stepN === 2) finishQuiz();
+    return;
+  }
+  const opt = e.target.closest(".option");
+  if (opt) selectOption(opt);
+});
+
+// Enable/disable confirm button as user types (≥ 2 chars)
+document.addEventListener("input", (e) => {
+  if (e.target.matches && e.target.matches(".option-custom-input input")) {
+    const row = e.target.closest(".option-custom-input");
+    const cb = row.querySelector(".custom-confirm");
+    cb.disabled = e.target.value.trim().length < 2;
+  }
+});
+
+// Enter in the custom input triggers the confirm button
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  if (e.target.matches && e.target.matches(".option-custom-input input")) {
+    e.preventDefault();
+    const cb = e.target.closest(".option-custom-input").querySelector(".custom-confirm");
+    if (cb && !cb.disabled) cb.click();
+  }
+});
+
+// Record the single quiz answer (step 2) and submit the form → success.
+function finishQuiz() {
+  const current = document.querySelector(`.step[data-step="2"]`);
+  const selected = current && current.querySelector(".option.selected");
+  if (!selected) return;
+  // Store the answer in slot 0 (the only quiz question now).
+  state.path[0] = selected.dataset.value;
+  let txt = "";
+  if (selected.dataset.value && selected.dataset.value.startsWith("custom:")) {
+    txt = selected.dataset.value.slice(7).trim();
+  } else {
+    const q = selected.querySelector(".option-quote");
+    txt = q ? q.textContent.trim() : selected.textContent.trim();
+  }
+  state.texts[0] = txt;
+
+  // Funnel beacon — answering the single question completes step 2.
+  const isCustom = (selected.dataset.value || "").startsWith("custom:") || selected.dataset.custom === "1";
+  trackPopupEvent("popup_step_2_completed", {
+    step: 2,
+    slug: state.path[0],
+    text: String(txt || "").slice(0, 240),
+    is_custom: isCustom,
+  });
+
+  submitForm();
+}
+
+// Intro/hook CTA — capture křestní jméno + e-mail, then submit přímo.
+// Step 1 je intro obrazovka (žádné kvízové options), takže jdeme rovnou
+// na submit + success (žádná mezitázka).
+function startChallenge(e) {
+  e.preventDefault();
+  const nameInput = $("#intro_first_name");
+  const emailInput = $("#intro_email");
+  const err = $("#intro-error");
+  const firstName = (nameInput && nameInput.value || "").trim();
+  const email = (emailInput && emailInput.value || "").trim();
+  // E-mail musí obsahovat @ a doménu s tečkou (a žádné mezery).
+  const emailValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+  if (firstName.length < 2 || !emailValid) {
+    if (err) err.classList.add("show");
+    if (firstName.length < 2 && nameInput) nameInput.focus();
+    else if (emailInput) emailInput.focus();
+    return false;
+  }
+  if (err) err.classList.remove("show");
+  state.introEmail = email;
+  state.introFirstName = firstName;    // jméno → oslovení ve flow ({{ first_name }})
+  state.introGdpr = true;              // implicitní souhlas při přihlášení
+  trackPopupEvent("popup_intro_email_captured");
+  submitForm();          // žádná mezitázka — rovnou přihlásit + ukázat success
+  return false;
+}
+
+// Clear the intro error as soon as the user starts correcting any field
+document.addEventListener("input", (e) => {
+  if (e.target && (e.target.id === "intro_email" || e.target.id === "intro_first_name")) {
+    const err = $("#intro-error");
+    if (err) err.classList.remove("show");
+  }
+});
+document.addEventListener("change", (e) => {
+  if (e.target && e.target.id === "intro_gdpr_consent") {
+    const err = $("#intro-error");
+    if (err) err.classList.remove("show");
+  }
+});
+
+function prevStep() {
+  if (state.currentStep <= 1) return;
+  showStep(state.currentStep - 1);
+}
+
+function showStep(n) {
+  $$(".step").forEach(s => s.classList.remove("active"));
+  document.querySelector(`.step[data-step="${n}"]`).classList.add("active");
+  state.currentStep = n;
+}
+
+function renderOptions(container, options) {
+  container.innerHTML = options.map(o => `
+    <button class="option" data-value="${o.v}">
+      <span class="option-icon">${o.i}</span>
+      <span class="option-text">
+        <span class="option-quote">${o.t}</span>
+      </span>
+      <span class="option-check"></span>
+    </button>
+  `).join("") + `
+    <button class="option option-custom" data-value="__custom__" data-custom="1">
+      <span class="option-icon">✍️</span>
+      <span class="option-text">
+        <span class="option-quote">U mňa je to inak — napíšem to sám/sama</span>
+      </span>
+      <span class="option-check"></span>
+    </button>
+    <div class="option-custom-input">
+      <input type="text" maxlength="200" placeholder="Napíš to v pokoji jednou vetou…" />
+      <button type="button" class="custom-confirm" disabled>Potvrdiť →</button>
+    </div>
+  `;
+}
+
+// Step 2 — jediná personalizační otázka (default branch). Stejná pro všechny.
+function buildStep2() {
+  const branch = BRANCH_TREE.default;
+  $("#q2").innerHTML = branch.q;
+  $("#q2sub").textContent = branch.sub;
+  renderOptions($("#options-2"), branch.options);
+}
+
+// API base URL — Medusa backend public URL (marketing-hq.eu) při embedu
+// na pustitocotanici.sk. Pro lokální dev preview nech prázdné.
+const API_BASE = "https://www.marketing-hq.eu"  // e.g. "https://www.marketing-hq.eu"
+
+// ═══════════════════════════════════════════════════════════════
+//  EMAIL SUBMIT
+// ═══════════════════════════════════════════════════════════════
+// V produkci volá:
+//   POST /public/marketing/form-submit
+//   Backend hledá formulář podle brand_slug + form_id.
+// Křestní jméno + e-mail jsou zachyceny na step 1 (intro obrazovka).
+
+// Map the user's e-mail domain to their own webmail, so "Otevři moji schránku"
+// opens where they actually read mail. Unknown domain → null (button hidden).
+function webmailUrlFor(email) {
+  var d = (String(email).split("@")[1] || "").toLowerCase();
+  var map = {
+    "gmail.com":"https://mail.google.com/mail/u/0/","googlemail.com":"https://mail.google.com/mail/u/0/",
+    "seznam.cz":"https://email.seznam.cz/","email.cz":"https://email.seznam.cz/",
+    "centrum.cz":"https://email.centrum.cz/","atlas.cz":"https://email.centrum.cz/",
+    "post.cz":"https://email.centrum.cz/","volny.cz":"https://email.centrum.cz/",
+    "outlook.com":"https://outlook.live.com/mail/","outlook.cz":"https://outlook.live.com/mail/",
+    "hotmail.com":"https://outlook.live.com/mail/","hotmail.cz":"https://outlook.live.com/mail/",
+    "live.com":"https://outlook.live.com/mail/","live.cz":"https://outlook.live.com/mail/","msn.com":"https://outlook.live.com/mail/",
+    "yahoo.com":"https://mail.yahoo.com/","ymail.com":"https://mail.yahoo.com/",
+    "icloud.com":"https://www.icloud.com/mail","me.com":"https://www.icloud.com/mail","mac.com":"https://www.icloud.com/mail",
+    "proton.me":"https://mail.proton.me/","protonmail.com":"https://mail.proton.me/",
+    "gmx.com":"https://www.gmx.com/","gmx.net":"https://www.gmx.net/"
+  };
+  return map[d] || null;
+}
+
+async function submitForm(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  // Křestní jméno + e-mail byly zachyceny na step 1.
+  const email = (state.introEmail || "").trim();
+  const firstName = (state.introFirstName || "").trim();
+  const gdpr = !!state.introGdpr;
+  if (!email || !firstName || !gdpr) return false;
+
+  // Point "Otevři moji schránku" at the user's own webmail provider (or hide it).
+  const inboxBtn = document.querySelector(".success-open-btn");
+  if (inboxBtn) {
+    const wm = webmailUrlFor(email);
+    if (wm) { inboxBtn.href = wm; inboxBtn.style.display = ""; }
+    else { inboxBtn.removeAttribute("href"); inboxBtn.style.display = "none"; }
+  }
+
+  // Optimistic UI: show success first, submit in background. If submit fails
+  // in production we'll still have logged it; failing silently is less bad
+  // than blocking the user on a spinner.
+  const successName = $("#success-name");
+  if (successName) successName.textContent = firstName;
+  const successEmail = $("#success-email");
+  if (successEmail) successEmail.textContent = email;
+  showStep(3);
+
+  // Build acquisition + properties context for the backend.
+  let landingUrl = "";
+  let referrer = "";
+  try {
+    // When embedded in an iframe the meaningful URL is the parent page.
+    landingUrl = (window.parent && window.parent !== window)
+      ? (document.referrer || window.location.href)
+      : window.location.href;
+    referrer = document.referrer || "";
+  } catch (err) {
+    landingUrl = window.location.href;
+  }
+  const device = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? "mobile" : "desktop";
+
+  const payload = {
+    brand_slug: "pusti-to-sk",
+    form_id: "popup-quiz-pusti-to-sk",
+    email,
+    first_name: firstName,
+    properties: {
+      quiz_path:    state.path,
+      source_url:   landingUrl,
+      referrer:     referrer,
+      user_agent:   navigator.userAgent,
+      // Semantic field names so AI prompt can read them directly.
+      quiz_area:         state.path[0],
+      quiz_target:       state.path[1],
+      quiz_trigger:      state.path[2],
+      quiz_own_sentence: state.path[3],
+      // Full human-readable sentences the user actually saw or typed.
+      quiz_texts:             state.texts,
+      quiz_area_text:         state.texts[0] || null,
+      quiz_target_text:       state.texts[1] || null,
+      quiz_trigger_text:      state.texts[2] || null,
+      quiz_own_sentence_text: state.texts[3] || null,
+    },
+    acquisition: {
+      source:      "form",
+      medium:      "organic",
+      landing_url: landingUrl,
+      device:      device,
+    },
+  };
+
+  if (API_BASE) {
+    try {
+      await fetch(`${API_BASE}/public/marketing/form-submit`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      console.warn("form-submit failed:", err);
+    }
+  } else {
+    console.log("[DEV] form-submit payload:", payload);
+  }
+  return false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DEV HELPERS
+// ═══════════════════════════════════════════════════════════════
+function resetQuiz() {
+  state = { path: [], texts: [], currentStep: 1, introEmail: "", introFirstName: "", introGdpr: false };
+  const introEmailEl = $("#intro_email"); if (introEmailEl) introEmailEl.value = "";
+  const introNameEl = $("#intro_first_name"); if (introNameEl) introNameEl.value = "";
+  const introGdprEl = $("#intro_gdpr_consent"); if (introGdprEl) introGdprEl.checked = false;
+  const introErrEl = $("#intro-error"); if (introErrEl) introErrEl.classList.remove("show");
+  $$(".option.selected").forEach(o => o.classList.remove("selected"));
+  $$(".option-custom-input.open").forEach(r => r.classList.remove("open"));
+  $$(".option-custom-input input").forEach(i => { i.value = ""; });
+  $$(".custom-confirm").forEach(b => { b.disabled = true; });
+  $$(".next-btn").forEach(b => b.disabled = true);
+  showStep(1);
+}
+
+// Build the (záložní) step-2 question into the DOM on load.
+buildStep2();
+
+// Auto-open popup když je soubor embedovaný v iframe (= real sales page trigger).
+// Tohle je POSLEDNÍ skript v souboru, takže openPopup je jistě definovaný.
+if (document.documentElement.classList.contains('embedded')) {
+  openPopup();
+}
+</script>
+
+</body>
+</html>

@@ -153,6 +153,21 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "18.5 MB",
     },
   ],
+  // Pusti to, čo ťa ničí (SK) — 2 bonusové e-knihy (zatiaľ CZ PDF, SK preklad neskôr)
+  'pusti-to-sk': [
+    {
+      key: "e-books/Jak-prestat-nadmerne-premyslet-a-zacit-zit.pdf",
+      title: "Ako prestať nadmerne premýšľať a začať žiť",
+      description: "E-kniha (PDF)",
+      size: "4.1 MB",
+    },
+    {
+      key: "e-books/Laska-bez-cenzury.pdf",
+      title: "Láska bez cenzúry",
+      description: "E-kniha (PDF)",
+      size: "18.5 MB",
+    },
+  ],
   // Engedd el, ami tönkretesz (HU) — 2 bonusz e-könyv
   'engedd-el': [
     {
@@ -184,6 +199,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'het-leven': process.env.HL_STOREFRONT_URL || "https://www.pakjeleventerug.nl",
   'zycie-zaslugy': process.env.ZZ_STOREFRONT_URL || "https://www.najpierw-ja.pl",
   'odpust-knizka': process.env.OD_STOREFRONT_URL || "https://www.pusttocotenici.cz",
+  'pusti-to-sk': process.env.PUSTI_TO_SK_STOREFRONT_URL || "https://www.pustitocotanici.sk",
   'engedd-el': process.env.EE_STOREFRONT_URL || "https://www.engeddelkonyv.hu",
 }
 
@@ -198,6 +214,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'het-leven': 'Je 2 gratis e-books staan klaar! 📖',
   'zycie-zaslugy': 'Twoje 2 darmowe e-booki są gotowe! 📖',
   'odpust-knizka': 'Tvoje e-booky jsou připravené! 📖',
+  'pusti-to-sk': 'Tvoje e-knihy sú pripravené! 📖',
   'engedd-el': 'A 2 ingyenes e-könyved készen áll! 📖',
 }
 
@@ -212,6 +229,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'het-leven': 'daar',
   'zycie-zaslugy': 'tam',
   'odpust-knizka': 'tam',
+  'pusti-to-sk': 'tam',
   'engedd-el': 'Olvasó',
 }
 

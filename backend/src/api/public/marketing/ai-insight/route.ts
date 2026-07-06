@@ -82,6 +82,7 @@ function cacheSet(key: string, data: any) {
 const PERSONAS: Record<string, { name: string; book: string; brand: string }> = {
   nl: { name: "Joris de Vries", book: "Laat los wat je kapotmaakt",         brand: "loslatenboek" },
   cs: { name: "Joris de Vries", book: "Pusť to, co tě ničí",              brand: "odpust-knizka" },
+  sk: { name: "Joris de Vries", book: "Pusti to, čo ťa ničí",             brand: "pusti-to-sk" },
   de: { name: "Joris de Vries", book: "Lass los, was dich kaputt macht",    brand: "lass-los" },
   pl: { name: "Joris de Vries", book: "Odpuść to, co cię niszczy",          brand: "odpusc-ksiazka" },
   sv: { name: "Joris de Vries", book: "Släpp taget om det som förstör dig", brand: "slapp-taget" },
@@ -111,7 +112,7 @@ const CATEGORY_LABELS: Record<string, Record<string, string>> = {
 }
 
 function buildSystemPrompt(locale: string): string {
-  if (locale === "cs") return buildSystemPromptCs()
+  if (locale === "cs" || locale === "sk") return buildSystemPromptCs()
   // Default = Dutch. The popup currently runs only on loslatenboek.nl, and
   // every other supported locale (de/pl/sv) gets a Dutch prompt as a safe
   // base — better Dutch than mistakenly Czech output.

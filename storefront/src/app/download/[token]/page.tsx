@@ -418,6 +418,15 @@ const odpustKnizkaTheme: ProjectTheme = {
   companyLocation: "Rybná 716/24, 110 00 Praha",
 }
 
+const pustiToSkTheme: ProjectTheme = {
+  ...dehondenbijbelTheme,
+  brandLabel: "PUSTI TO, ČO ŤA NIČÍ",
+  brandName: "Pusti to, čo ťa ničí",
+  supportEmail: "podpora@pustitocotanici.sk",
+  companyName: "Performance Marketing Solution s.r.o.",
+  companyLocation: "Rybná 716/24, 110 00 Praha",
+}
+
 const hetLevenTheme: ProjectTheme = {
   brandLabel: "HET LEVEN DAT JE VERDIENT",
   brandName: "Het Leven Dat Je Verdient",
@@ -617,6 +626,7 @@ const THEMES: Record<string, ProjectTheme> = {
   'lass-los': lassLosTheme,
   'psi-superzivot': psiSuperzivotTheme,
   'odpust-knizka': odpustKnizkaTheme,
+  'pusti-to-sk': pustiToSkTheme,
   'het-leven': hetLevenTheme,
   'zycie-zaslugy': zycieZaslugyTheme,
   'slapp-taget': slappTagetTheme,
@@ -732,7 +742,7 @@ export default async function DownloadPage({
   }
   const t = getTheme(projectId)
 
-  const isCS = projectId === "psi-superzivot" || projectId === "odpust-knizka"
+  const isCS = projectId === "psi-superzivot" || projectId === "odpust-knizka" || projectId === "pusti-to-sk"
   const isPL = projectId === "zycie-zaslugy" || projectId === "odpusc-ksiazka"
   const isSV = projectId === "slapp-taget"
   const dateLocale = projectId === "lass-los" ? "de-DE" : isCS ? "cs-CZ" : isPL ? "pl-PL" : isSV ? "sv-SE" : "nl-NL"
@@ -898,7 +908,7 @@ function ErrorState({
   projectId?: string
 }) {
   const isDE = projectId === "lass-los"
-  const isCSErr = projectId === "psi-superzivot" || projectId === "odpust-knizka"
+  const isCSErr = projectId === "psi-superzivot" || projectId === "odpust-knizka" || projectId === "pusti-to-sk"
   const isPLErr = projectId === "zycie-zaslugy" || projectId === "odpusc-ksiazka"
   const isSVErr = projectId === "slapp-taget"
   return (

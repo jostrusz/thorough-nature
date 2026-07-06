@@ -63,6 +63,7 @@ const PROJECT_DOMAIN: Record<string, string> = {
   "slipp-taket": "slipptaketboken.no",
   "psi-superzivot": "psi-superzivot.cz",
   "odpust-knizka": "pusttocotenici.cz",
+  "pusti-to-sk": "pustitocotanici.sk",
   "engedd-el": "engeddelkonyv.hu",
 }
 
@@ -72,6 +73,7 @@ const POPUP_PROJECTS: Record<string, string> = {
   loslatenboek: "Joris de Vries - Laat los wat je kapotmaakt",
   "het-leven": "Anna de Vries - Het Leven Dat Je Verdient",
   "odpust-knizka": "Pusť to, co tě ničí",
+  "pusti-to-sk": "Pusti to, čo ťa ničí",
   "odpusc-ksiazka": "Odpuść to, co cię niszczy",
   "slapp-taget": "Joris de Vries - Släpp taget",
   "slipp-taket": "Joris de Vries - Slipp taket",

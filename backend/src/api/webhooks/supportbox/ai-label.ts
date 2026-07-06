@@ -23,7 +23,7 @@ export async function generateAiLabels(
     })
 
     const systemPrompt = `You are a support email classifier. Analyze the email and return JSON with:
-- "project": the project name based on the support email context (e.g. "loslatenboek", "dehondenbijbel", "lass-los", "psi-superzivot", "kocici-bible", "odpust-knizka", "odpusc-ksiazka", "slapp-taget")
+- "project": the project name based on the support email context (e.g. "loslatenboek", "dehondenbijbel", "lass-los", "psi-superzivot", "kocici-bible", "odpust-knizka", "pusti-to-sk", "odpusc-ksiazka", "slapp-taget")
 - "category": one of: payment_issue, shipping, order_issue, product_feedback, returns, account, spam, other
 - "summary": 1-sentence English summary of the customer's issue (max 100 chars)
 

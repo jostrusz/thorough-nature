@@ -180,6 +180,34 @@ const OD_STEPS: StepConfig[] = [
   },
 ]
 
+/** Pusti to, čo ťa ničí (pusti-to-sk) 3-step sequence */
+const SK_STEPS: StepConfig[] = [
+  {
+    step: 1,
+    templateKey: EmailTemplates.SK_ABANDONED_CHECKOUT_1,
+    subject: (name) => `Ahoj ${name}, tvoja kniha na teba čaká! 📦`,
+    preview: "Tvoja kniha je zabalená a čaká len na teba!",
+    delayMs: THIRTY_MINUTES_MS,
+    delayFrom: (_meta, abandonedAt) => abandonedAt,
+  },
+  {
+    step: 2,
+    templateKey: EmailTemplates.SK_ABANDONED_CHECKOUT_2,
+    subject: (name) => `${name}, príbeh, ktorý stojí za touto knihou`,
+    preview: "Už po týždni som sa cítila ľahšie než kedy predtým...",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
+  },
+  {
+    step: 3,
+    templateKey: EmailTemplates.SK_ABANDONED_CHECKOUT_3,
+    subject: (name) => `Posledná šanca, ${name} — tvoj košík čoskoro uvoľníme`,
+    preview: "Ostáva 24 hodín — potom musím tvoj košík uvoľniť.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
+  },
+]
+
 /** Het Leven Dat Je Verdient 3-step sequence (Anna de Vries) */
 const HL_STEPS: StepConfig[] = [
   {
@@ -701,6 +729,79 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         } catch (emailError: any) {
           logger.error(
             `[Abandoned Cart] Failed to send OD step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
+          )
+        }
+        continue
+      }
+
+      // ── Pusti to, čo ťa ničí: 3-step sequence ──
+      if (projectId === "pusti-to-sk") {
+        // All 3 steps sent? Done.
+        if (currentStep >= 3) {
+          skippedCount++
+          continue
+        }
+
+        const nextStepConfig = SK_STEPS[currentStep] // currentStep=0 → step 1, etc.
+
+        // Check if enough time has passed
+        const referenceTime = nextStepConfig.delayFrom(meta, abandonedAt)
+        if (isNaN(referenceTime.getTime())) continue // invalid date, skip
+        if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
+
+        // Extract customer data
+        const firstName = cart.shipping_address?.first_name || "tam"
+        const checkoutUrl = meta.checkout_url || "https://www.pustitocotanici.sk/checkout"
+        const mainItem = (cart.items || [])[0]
+        const productName = mainItem?.variant?.product?.title || mainItem?.title || "Pusti to, čo ťa ničí"
+        // Calculate total price from all cart items (quantity × unit_price)
+        const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+        }, 0)
+        const productPrice = cartTotal > 0
+          ? Math.round(cartTotal).toString()
+          : "749"
+        const productImage = mainItem?.variant?.product?.thumbnail || ""
+
+        try {
+          await notificationModuleService.createNotifications({
+            to: cart.email,
+            channel: "email",
+            template: nextStepConfig.templateKey,
+            from: "Joris de Vries - Pusti to, čo ťa ničí <podpora@pustitocotanici.sk>",
+            data: {
+              emailOptions: {
+                replyTo: "podpora@pustitocotanici.sk",
+                subject: nextStepConfig.subject(firstName),
+              },
+              firstName,
+              checkoutUrl,
+              productName,
+              productPrice,
+              productImage,
+              preview: nextStepConfig.preview,
+            },
+          })
+
+          // Update metadata with step tracking
+          await cartModuleService.updateCarts(cart.id, {
+            metadata: {
+              ...meta,
+              recovery_email_step: nextStepConfig.step,
+              [`recovery_email_step${nextStepConfig.step}_at`]: now.toISOString(),
+              // Legacy compat: mark as sent after step 1
+              recovery_email_sent: true,
+              recovery_email_sent_at: meta.recovery_email_sent_at || now.toISOString(),
+            },
+          })
+
+          sentCount++
+          logger.info(
+            `[Abandoned Cart] SK step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
+          )
+        } catch (emailError: any) {
+          logger.error(
+            `[Abandoned Cart] Failed to send SK step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
           )
         }
         continue

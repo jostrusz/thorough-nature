@@ -33,6 +33,7 @@ export const REGION_IDS = {
   nok: "reg_01KRD3ABWEDY16N07ST8PNJ9XZ", // Norway
   czk: "reg_01KKB4EZN0CHFYDG64K4VP0J2A", // Czech Republic (Psi Superzivot)
   huf: "reg_01KWG6W2W6Z2YR8GVBRM3CEVHX", // Hungary (Engedd El)
+  eur_sk: "reg_01KWVAZVNATPX01HH77MYWKG3M", // Slovakia (Pusti To SK) — own EUR region
 } as const
 
 // ── Shipping option IDs (verified) ──
@@ -51,6 +52,8 @@ const SO = {
   ZAS_PICKUP_ODPUST: "so_01KTTR2B5JRA8H022ERJSR3ANJ", // Zásilkovna - Na výdejní místo (Odpust pickup)
   ZAS_HOME_ENGEDD: "so_01KWG6WEBKTHWESMJAJHB0ZZ54",   // Packeta - Házhozszállítás (Engedd El home)
   ZAS_PICKUP_ENGEDD: "so_01KWG6WEBJTVGR0M8NHPRSRQBS", // Packeta - Csomagpont (Engedd El pickup)
+  ZAS_HOME_PUSTI_SK: "so_01KWVB06DRRS7ZP2E5AY6N3VR3",   // Packeta - Na adresu (Pusti To SK home)
+  ZAS_PICKUP_PUSTI_SK: "so_01KWVB06DRK51CQTSYYSA99TRP", // Packeta - Na odberné miesto (Pusti To SK pickup)
 } as const
 
 /**
@@ -155,6 +158,14 @@ export const PROJECT_CONFIG = {
     pickupShippingOptionId: SO.ZAS_PICKUP_ENGEDD,
     pickupShippingOptionName: "Packeta - Csomagpont",
   },
+  "pusti-to-sk": {
+    name: "pusti-to-sk",
+    sales_channel_id: "sc_01KWVAX8XTNTXHF9ZWH211Y6CF",
+    homeShippingOptionId: SO.ZAS_HOME_PUSTI_SK,
+    homeShippingOptionName: "Packeta - Na adresu",
+    pickupShippingOptionId: SO.ZAS_PICKUP_PUSTI_SK,
+    pickupShippingOptionName: "Packeta - Na odberné miesto",
+  },
 } as const
 
 /**
@@ -253,6 +264,16 @@ export const COUNTRY_CONFIG = {
     codAllowed: true,
     projectSlugs: ["psi-superzivot", "kocici-bible", "odpust-knizka"],
     bookVatRate: 0,
+  },
+  sk: {
+    label: "🇸🇰 Slovakia",
+    currency: "eur",
+    region_id: REGION_IDS.eur_sk,
+    allowedPaymentMethods: ["creditcard", "paypal"],
+    defaultPaymentMethod: "creditcard",
+    codAllowed: false,
+    projectSlugs: ["pusti-to-sk"],
+    bookVatRate: 5,
   },
   hu: {
     label: "🇭🇺 Hungary",

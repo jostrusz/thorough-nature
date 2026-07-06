@@ -398,6 +398,7 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
     "het-leven": "Het Leven Dat Je Verdient",
     "kocici-bible": "Kočičí bible",
     "odpust-knizka": "Pusť to, co tě ničí",
+    "pusti-to-sk": "Pusti to, čo ťa ničí",
     "zycie-zaslugy": "Życie na które zasługujesz",
     "engedd-el": "Engedd el, ami tönkretesz",
   }
