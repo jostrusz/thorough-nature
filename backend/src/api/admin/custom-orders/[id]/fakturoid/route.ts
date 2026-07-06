@@ -132,7 +132,20 @@ export async function POST(
         subjectData.registration_no = order.metadata.kvk_number
       }
       if (order.metadata?.vat_number) {
-        subjectData.vat_no = order.metadata.vat_number
+        // Fakturoid's vat_no (DIČ) requires the EU country-code prefix. Checkouts
+        // often collect the raw national number (e.g. PL NIP "9662156220"), which
+        // Fakturoid rejects with 422 "Neplatné DIČ. Obsahuje kód státu?". Prefix
+        // the country code when it's missing.
+        let vatNo = String(order.metadata.vat_number).trim().replace(/\s+/g, "")
+        if (!/^[A-Z]{2}/i.test(vatNo)) {
+          const cc = (
+            invoiceAddress?.country_code ||
+            order.metadata?.country_code ||
+            ""
+          ).toUpperCase()
+          if (cc) vatNo = cc + vatNo
+        }
+        subjectData.vat_no = vatNo.toUpperCase()
       }
 
       subject = await createSubject(creds, token, subjectData)
