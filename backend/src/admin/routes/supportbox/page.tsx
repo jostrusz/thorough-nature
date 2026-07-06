@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "../../lib/sdk"
+import { projectLabel } from "./project-labels"
 
 // ═══════════════════════════════════════════
 // FULL-WIDTH OVERRIDE
@@ -360,7 +361,7 @@ function TicketCard({ ticket }: { ticket: any }) {
                   backgroundColor: "#EEF2FF", padding: "2px 10px",
                   borderRadius: "9999px", letterSpacing: "0.02em",
                 }}>
-                  {ticket.metadata.ai_labels.project}
+                  {projectLabel(ticket.metadata.ai_labels.project)}
                 </span>
               )}
               {ticket.metadata.ai_labels.category && (
@@ -1085,12 +1086,9 @@ const SupportBoxDashboard = () => {
               }}
             >
               <option value="all">All projects</option>
-              <option value="loslatenboek">loslatenboek</option>
-              <option value="dehondenbijbel">dehondenbijbel</option>
-              <option value="lass-los">lass-los</option>
-              <option value="psi-superzivot">psi-superzivot</option>
-              <option value="odpusc-ksiazka">odpusc-ksiazka</option>
-              <option value="slapp-taget">slapp-taget</option>
+              {["loslatenboek","het-leven","dehondenbijbel","lass-los","odpusc-ksiazka","zycie-zaslugy","slapp-taget","slipp-taket","psi-superzivot","kocici-bible","odpust-knizka","pusti-to-sk","engedd-el"].map((slug) => (
+                <option key={slug} value={slug}>{projectLabel(slug)}</option>
+              ))}
             </select>
             <select
               value={categoryFilter}

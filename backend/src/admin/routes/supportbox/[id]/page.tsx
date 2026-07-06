@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useMemo } from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "../../../lib/sdk"
+import { projectLabel } from "../project-labels"
 
 /* ═══════════════════════════════════════════════════════════════
    DESIGN SYSTEM — Premium SaaS look
@@ -1688,7 +1689,7 @@ const TicketDetailPage = () => {
                 backgroundColor: "#EEF2FF", padding: "2px 10px",
                 borderRadius: "9999px", letterSpacing: "0.02em",
               }}>
-                {ticket.metadata.ai_labels.project}
+                {projectLabel(ticket.metadata.ai_labels.project)}
               </span>
             )}
             {ticket.metadata.ai_labels.category && (
