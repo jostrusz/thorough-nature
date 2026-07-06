@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { CreditCard } from "@medusajs/icons"
 import { sdk } from "../../lib/sdk"
+import { getPaymentMethodName } from "../../components/orders/design-tokens"
 
 // ═══════════════════════════════════════════
 // STYLES
@@ -81,7 +82,13 @@ function PageStyles() {
       .pm-badge-cod { background: #FEF9C3; color: #854D0E; }
       .pm-badge-mollie { background: #F3F4F6; color: #374151; }
       .pm-badge-przelewy24, .pm-badge-p24 { background: #FEF3C7; color: #92400E; }
+      .pm-badge-payu { background: #ECFCCB; color: #3F6212; }
+      .pm-badge-brite { background: #FEF9C3; color: #713F12; }
+      .pm-badge-barion { background: #CFF4FC; color: #055160; }
+      .pm-badge-revolut { background: #E5E7EB; color: #111827; }
+      .pm-badge-novalnet { background: #FFE4E6; color: #9F1239; }
       .pm-badge-unknown { background: #F3F4F6; color: #6B7280; }
+      .pm-method-sub { font-size: 11px; color: #6B7280; margin-top: 2px; }
 
       .pm-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
       .pm-status-matched { background: #DCFCE7; color: #166534; }
@@ -130,6 +137,7 @@ interface PaymentMatchRow {
   payment_id_2: string | null
   payment_method: string
   payment_provider: string
+  payment_method_raw: string | null
   amount_1: number
   amount_2: number | null
   total: number
@@ -185,6 +193,11 @@ const METHOD_LABELS: Record<string, string> = {
   cod: "Dobírka",
   mollie: "Mollie",
   przelewy24: "Przelewy24",
+  payu: "PayU",
+  brite: "Brite",
+  barion: "Barion",
+  revolut: "Revolut",
+  novalnet: "Novalnet",
   unknown: "Neznámá",
 }
 
@@ -374,6 +387,13 @@ const PaymentMatcherPage = () => {
                   const methodKey = (row.payment_method || "unknown").toLowerCase()
                   const methodLabel = METHOD_LABELS[methodKey] || row.payment_method || "—"
                   const badgeClass = `pm-badge pm-badge-${methodKey}`
+                  // Human-readable payment METHOD (iDEAL, card, bank code, klarna variant…)
+                  // via the same mapper Orders HQ uses — covers every provider + method.
+                  const methodName = getPaymentMethodName({
+                    metadata: { payment_provider: row.payment_provider, payment_method: row.payment_method_raw },
+                    payment_collections: [],
+                  })
+                  const showMethodSub = !!methodName && methodName !== methodLabel && methodName !== "Payment"
 
                   return (
                     <tr key={row.order_id} className={rowClass}>
@@ -409,7 +429,10 @@ const PaymentMatcherPage = () => {
                             : <span style={{ color: "#D1D5DB" }}>—</span>
                         }
                       </td>
-                      <td><span className={badgeClass}>{methodLabel}</span></td>
+                      <td>
+                        <span className={badgeClass}>{methodLabel}</span>
+                        {showMethodSub && <div className="pm-method-sub">{methodName}</div>}
+                      </td>
                       <td className="pm-amount">
                         {formatAmount(row.amount_1)}
                         {row.amount_2 != null && row.amount_2 > 0 && (

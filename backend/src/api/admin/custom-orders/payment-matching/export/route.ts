@@ -1,5 +1,11 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { buildDateFilters, fetchAllOrders } from "../fetch-all-orders"
+import {
+  extractPaymentId,
+  extractPaymentIdFromPaymentData,
+  detectPaymentGateway,
+  isCodOrder,
+} from "../provider-detect"
 
 /**
  * GET /admin/custom-orders/payment-matching/export
@@ -10,105 +16,6 @@ import { buildDateFilters, fetchAllOrders } from "../fetch-all-orders"
  * Query params: from, to, project, account_number, account_name
  */
 
-function extractPaymentId(meta: any): string | null {
-  return (
-    meta?.payment_id_override ||
-    meta?.molliePaymentId ||
-    meta?.stripePaymentIntentId ||
-    meta?.paypalOrderId ||
-    meta?.comgateTransId ||
-    meta?.p24SessionId ||
-    meta?.airwallexPaymentIntentId ||
-    meta?.klarnaOrderId ||
-    meta?.novalnetTid ||
-    meta?.payment_id ||
-    null
-  )
-}
-
-/**
- * Detect the payment GATEWAY for an order — same logic as the matcher UI route
- * (/admin/custom-orders/payment-matching/route.ts → detectPaymentGateway).
- * Keep these two in sync if you update one.
- * Returns: "airwallex" | "stripe" | "paypal" | "klarna" | "comgate" | "cod"
- *        | "mollie" | "przelewy24" | "unknown"
- */
-function detectPaymentGateway(
-  order: any,
-  paymentId: string | null,
-  isCod: boolean
-): string {
-  if (isCod) return "cod"
-
-  const meta = order?.metadata || {}
-
-  // 1. Explicit metadata from order-placed-payment-metadata subscriber
-  const explicit = (meta.payment_provider || "").toString().toLowerCase()
-  const explicitMap: Record<string, string> = {
-    airwallex: "airwallex",
-    stripe: "stripe",
-    paypal: "paypal",
-    klarna: "klarna",
-    comgate: "comgate",
-    mollie: "mollie",
-    przelewy24: "przelewy24",
-    p24: "przelewy24",
-    novalnet: "novalnet",
-    cod: "cod",
-  }
-  if (explicitMap[explicit]) return explicitMap[explicit]
-
-  // 2. Gateway-specific metadata keys
-  if (meta.airwallexPaymentIntentId) return "airwallex"
-  if (meta.stripePaymentIntentId || meta.stripeCheckoutSessionId) return "stripe"
-  if (meta.paypalOrderId) return "paypal"
-  if (meta.klarnaOrderId) return "klarna"
-  if (meta.comgateTransId) return "comgate"
-  if (meta.molliePaymentId || meta.mollieOrderId) return "mollie"
-  if (meta.p24SessionId) return "przelewy24"
-  if (meta.novalnetTid) return "novalnet"
-
-  // 3. Payment collection provider_id
-  const pcs = order?.payment_collections || []
-  for (const pc of pcs) {
-    for (const p of pc.payments || []) {
-      const pid = (p.provider_id || "").toLowerCase()
-      if (pid.includes("airwallex")) return "airwallex"
-      if (pid.includes("stripe")) return "stripe"
-      if (pid.includes("paypal")) return "paypal"
-      if (pid.includes("klarna")) return "klarna"
-      if (pid.includes("comgate")) return "comgate"
-      if (pid.includes("mollie")) return "mollie"
-      if (pid.includes("przelewy") || pid.includes("p24")) return "przelewy24"
-      if (pid.includes("novalnet")) return "novalnet"
-    }
-  }
-
-  // 4. Pattern-based fallback on Payment ID (legacy orders without metadata)
-  if (paymentId) {
-    if (/^int_/i.test(paymentId)) return "airwallex"
-    if (/^(pi|pm|cs|ch|py)_/i.test(paymentId)) return "stripe"
-    if (/^tr_|^ord_/i.test(paymentId)) return "mollie"
-    if (/^P24/i.test(paymentId)) return "przelewy24"
-    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(paymentId)) return "klarna"
-    if (/^[A-Z0-9]{17}$/.test(paymentId)) return "paypal"
-    // Novalnet TID: exactly 17 digits — checked BEFORE Comgate's \d{6,12} catch-all
-    if (/^\d{17}$/.test(paymentId)) return "novalnet"
-    if (/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/i.test(paymentId)) return "comgate"
-    if (/^\d{6,12}$/.test(paymentId)) return "comgate"
-  }
-
-  return "unknown"
-}
-
-function isCodOrder(order: any): boolean {
-  const meta = order.metadata || {}
-  if (meta.payment_provider === "cod" || meta.payment_method === "cod") return true
-  const pcs = order.payment_collections || []
-  return pcs.some((pc: any) =>
-    (pc.payments || []).some((p: any) => (p.provider_id || "").includes("cod"))
-  )
-}
 
 function formatDate(isoDate: string): string {
   const d = new Date(isoDate)
@@ -225,13 +132,8 @@ export async function GET(
           const payments = ((order as any).payment_collections || [])
             .flatMap((pc: any) => pc.payments || [])
           for (const payment of payments) {
-            if (payment.data?.captureId) { paymentId1 = String(payment.data.captureId); break }
-            if (payment.data?.intentId) { paymentId1 = String(payment.data.intentId); break }
-            if (payment.data?.klarnaOrderId) { paymentId1 = String(payment.data.klarnaOrderId); break }
-            if (payment.data?.paypalOrderId) { paymentId1 = String(payment.data.paypalOrderId); break }
-            if (payment.data?.comgateTransId) { paymentId1 = String(payment.data.comgateTransId); break }
-            if (payment.data?.id) { paymentId1 = String(payment.data.id); break }
-            if (payment.data?.payment_intent) { paymentId1 = String(payment.data.payment_intent); break }
+            const pid = extractPaymentIdFromPaymentData(payment.data)
+            if (pid) { paymentId1 = pid; break }
           }
         }
         // Transaction ID (secondary — the other ID from payment.data)
@@ -241,7 +143,8 @@ export async function GET(
           const d = payment.data || {}
           const candidates = [
             d.captureId, d.id, d.intentId, d.paypalOrderId,
-            d.klarnaOrderId, d.comgateTransId, d.payment_intent, d.transaction_id,
+            d.klarnaOrderId, d.comgateTransId, d.payuOrderId, d.briteSessionId,
+            d.barionPaymentId, d.revolutOrderId, d.payment_intent, d.transaction_id,
           ].filter(Boolean).map(String)
           const secondary = candidates.find((c) => c !== paymentId1)
           if (secondary) { transactionId = secondary; break }
