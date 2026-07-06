@@ -258,6 +258,16 @@ export function getPaymentIconUrl(order: any): string {
     return PAYU_SVG
   }
 
+  // Barion (HU Smart Gateway) — map method / Barion FundingSource to icon
+  if (providerId.includes("barion") || order.metadata?.payment_provider === "barion") {
+    const m = (method || "").toLowerCase()
+    if (m === "card" || m === "bankcard" || m === "creditcard") return `${ICON_BASE}/cards/visa.svg`
+    if (m === "apple_pay" || m === "applepay") return `${ICON_BASE}/wallets/apple-pay.svg`
+    if (m === "google_pay" || m === "googlepay") return `${ICON_BASE}/wallets/google-pay.svg`
+    // Barion balance / bank transfer / unknown → Barion badge fallback
+    return ""
+  }
+
   return ""
 }
 
@@ -270,6 +280,7 @@ export function getPaymentFallback(order: any): { letter: string; bg: string; co
   if (providerId.includes("comgate")) return { letter: "C", bg: "#444", color: "#fff" }
   if (providerId.includes("przelewy") || providerId.includes("p24")) return { letter: "P24", bg: "#D40E2F", color: "#fff" }
   if (providerId.includes("payu") || order.metadata?.payment_provider === "payu") return { letter: "PayU", bg: "#A6C307", color: "#fff" }
+  if (providerId.includes("barion") || order.metadata?.payment_provider === "barion") return { letter: "b", bg: "#0097DB", color: "#fff" }
   return { letter: "?", bg: colors.textMuted, color: "#fff" }
 }
 
@@ -396,6 +407,18 @@ export function getPaymentMethodName(order: any): string {
       googlepay: "Google Pay",
     }
     return names[(method || "").toLowerCase()] || "PayU"
+  }
+
+  if (providerId.includes("barion") || order.metadata?.payment_provider === "barion") {
+    const names: Record<string, string> = {
+      card: "Credit Card", bankcard: "Credit Card", creditcard: "Credit Card",
+      apple_pay: "Apple Pay", applepay: "Apple Pay",
+      google_pay: "Google Pay", googlepay: "Google Pay",
+      wallet: "Barion Balance", balance: "Barion Balance",
+      bank_transfer: "Bank Transfer", banktransfer: "Bank Transfer",
+      barion: "Barion",
+    }
+    return names[(method || "").toLowerCase()] || "Barion"
   }
 
   return "Payment"
