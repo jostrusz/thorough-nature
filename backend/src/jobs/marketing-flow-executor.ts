@@ -277,6 +277,12 @@ async function executeRun(
   }
 
   // 2. Goal evaluation — if any flow goal matches, exit early as "completed".
+  //    `visited` is passed so a goal can define a PROTECTED WINDOW: a goal with
+  //    `config.protected_until_node` set does not fire until the contact has
+  //    already been sent (visited) that node. This guarantees the first N emails
+  //    (the 7-day challenge miniseries) always complete even if the customer
+  //    buys the book on day 3 — the exit-on-purchase only activates from the
+  //    email *after* the protected node. See evaluateFlowGoals for the check.
   if (Array.isArray(flow.goals) && flow.goals.length > 0) {
     const matched = await evaluateFlowGoals({
       goals: flow.goals,
@@ -284,6 +290,7 @@ async function executeRun(
       flow,
       pool,
       runStartedAt: run.started_at,
+      visited,
     })
     if (matched) {
       await pool.query(
@@ -470,11 +477,22 @@ async function evaluateFlowGoals(args: {
   flow: any
   pool: Pool
   runStartedAt: Date
+  visited?: string[]
 }): Promise<FlowGoal | null> {
   const { goals, contact, flow, pool, runStartedAt } = args
+  const visited: string[] = Array.isArray(args.visited) ? args.visited : []
   const since = runStartedAt instanceof Date ? runStartedAt.toISOString() : new Date(runStartedAt).toISOString()
 
   for (const goal of goals) {
+    // Protected window: this goal must not trigger an exit until the contact has
+    // been sent (visited) the configured node. Used to guarantee the first N
+    // challenge emails always go out — e.g. `protected_until_node: "em_den7"`
+    // keeps exit-on-purchase dormant through email 7, so buying on day 3 still
+    // delivers emails 4–7, and only email 8 onward is suppressed.
+    const protectedUntil = String(goal.config?.protected_until_node || "").trim()
+    if (protectedUntil && !visited.includes(protectedUntil)) {
+      continue
+    }
     try {
       switch (goal.type) {
         case "event": {
