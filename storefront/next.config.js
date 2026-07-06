@@ -23,15 +23,18 @@ const nextConfig = {
         ],
       },
       {
+        // Vanilla project CSS is unversioned (href="style.css") — a 30-day cache
+        // made design fixes invisible to returning visitors for up to a month.
+        // Short max-age + SWR keeps it fast while letting fixes propagate within ~1h.
         source: '/:path*.css',
         headers: [
-          { key: 'Cache-Control', value: 'public, max-age=2592000' },
+          { key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=604800' },
         ],
       },
       {
         source: '/:path*.js',
         headers: [
-          { key: 'Cache-Control', value: 'public, max-age=2592000' },
+          { key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=604800' },
         ],
       },
       {
