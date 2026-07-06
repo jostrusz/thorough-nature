@@ -2143,5 +2143,78 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
 });
 </script>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     POPUP QUIZ EMBED — Släpp taget
+     Triggers (whichever fires first):
+       1. CLICK   — .quiz-trigger / [data-quiz-trigger] (force=true)
+       2. SCROLL  — 50 % av sidan (armed 1.5s efter load)
+       3. TIME    — 7s efter load
+     Once-per-pageload (popupShown). INGEN frequency cap — visas vid varje besök.
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  const POPUP_URL  = '/popup-slapptaget.html';
+  const TIME_DELAY = 7000;
+  const SCROLL_PCT = 50;
+
+  let popupShown = false;
+  let popupIframe = null;
+
+  function closePopup() {
+    if (popupIframe) { popupIframe.remove(); popupIframe = null; }
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    document.removeEventListener('keydown', escHandler);
+  }
+  function escHandler(e) { if (e.key === 'Escape') closePopup(); }
+  function showPopup(source, force) {
+    // Ingen frequency cap: visa vid varje pageload (efter 7s eller 50% scroll).
+    // popupShown hindrar bara dubbelvisning inom samma pageload.
+    if (popupShown && !force) return;
+    popupShown = true;
+    popupIframe = document.createElement('iframe');
+    popupIframe.src = POPUP_URL + '?src=' + encodeURIComponent(source);
+    popupIframe.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;border:none;z-index:99999;';
+    popupIframe.setAttribute('title', 'Quiz popup');
+    document.body.appendChild(popupIframe);
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', escHandler);
+    window.addEventListener('message', function handler(e) {
+      if (e.data && (e.data.type === 'popup_closed' || e.data.type === 'popup_submitted')) {
+        closePopup();
+        window.removeEventListener('message', handler);
+      }
+    });
+  }
+  new MutationObserver(() => {
+    if (popupIframe && !document.body.contains(popupIframe)) {
+      popupIframe = null;
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+  }).observe(document.body, { childList: true });
+  window.stShowPopup = (source) => showPopup(source || 'manual', true);
+
+  // 1. CLICK on .quiz-trigger / [data-quiz-trigger]
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('.quiz-trigger, [data-quiz-trigger]');
+    if (t) { e.preventDefault(); showPopup('button:' + (t.dataset.source || 'click'), true); }
+  });
+  // 2. SCROLL — 50 %
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  let scrollFired = false, scrollArmed = false;
+  window.addEventListener('load', () => { setTimeout(() => { scrollArmed = true; }, 1500); });
+  document.addEventListener('scroll', () => {
+    if (!scrollArmed || scrollFired) return;
+    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    if (pct >= SCROLL_PCT) { scrollFired = true; showPopup('scroll_' + SCROLL_PCT + 'pct'); }
+  }, { passive: true });
+  // 3. TIME — 7s
+  window.addEventListener('load', () => {
+    setTimeout(() => { showPopup('time_' + Math.round(TIME_DELAY / 1000) + 's'); }, TIME_DELAY);
+  });
+})();
+</script>
+
 </body>
 </html>
