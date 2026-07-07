@@ -2351,7 +2351,7 @@ body {
       </div>
       <div class="msb-info">
         <div class="msb-title" id="msb-title">Pusti to, čo ťa ničí</div>
-        <div class="msb-subtitle" id="msb-subtitle">Paperback · 1× kniha</div>
+        <div class="msb-subtitle" id="msb-subtitle">Brožovaná · 1× kniha</div>
       </div>
       <div class="msb-price-col">
         <div class="msb-price" id="msb-price">29,90&nbsp;€</div>
@@ -2753,8 +2753,8 @@ body {
               </div>
               <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" width="22" height="22" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
               <div style="flex:1;min-width:0;">
-                <div style="font-weight:600;font-size:13px;color:#1a1a2e;">Vyzdvihnutie na pobočke</div>
-                <div style="font-size:12px;color:#666;margin-top:1px;">Packeta — výdajné miesta po celom Slovensku</div>
+                <div style="font-weight:600;font-size:13px;color:#1a1a2e;">Vyzdvihnutie na odbernom mieste</div>
+                <div style="font-size:12px;color:#666;margin-top:1px;">Packeta — odberné miesta po celom Slovensku</div>
               </div>
               <span style="font-weight:700;color:#27AE60;font-size:14px;flex-shrink:0;">Zadarmo</span>
             </div>
@@ -2763,13 +2763,13 @@ body {
             <div id="packeta-point-section" style="margin:8px 0 8px 0;padding-left:28px;">
               <button type="button" id="packeta-select-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px dashed var(--accent);border-radius:8px;background:rgba(194,123,160,0.04);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s ease;" onmouseover="this.style.background='rgba(194,123,160,0.08)'" onmouseout="this.style.background='rgba(194,123,160,0.04)'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                Vybrať výdajné miesto
+                Vybrať odberné miesto
               </button>
               <div id="packeta-selected-point" style="display:none;margin-top:8px;padding:10px 14px;background:#f0faf4;border:1px solid #b8e6c8;border-radius:8px;">
                 <!-- Filled by Packeta Widget callback -->
               </div>
               <div id="packeta-error" style="display:none;margin-top:6px;color:var(--error);font-size:12px;font-weight:500;">
-                Vyberte prosím výdajné miesto
+                Vyberte prosím odberné miesto
               </div>
             </div>
 
@@ -2880,7 +2880,7 @@ body {
         <div class="summary-product-info">
           <div class="summary-product-name" id="desktop-product-name">Pusti to, čo ťa ničí</div>
           <div class="summary-product-author">Joris de Vries</div>
-          <div class="summary-product-format">Paperback</div>
+          <div class="summary-product-format">Brožovaná</div>
           <div class="summary-product-price" id="desktop-product-price">29,90&nbsp;€</div>
         </div>
       </div>
@@ -3265,17 +3265,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (isHome) {
           shippingVal.style.color = '#1a1a2e';
           shippingVal.style.fontWeight = '600';
-          shippingVal.textContent = 'Zásilkovna';
+          shippingVal.textContent = 'Zásielkovňa';
         } else {
           shippingVal.style.color = '#27AE60';
           shippingVal.style.fontWeight = '600';
-          shippingVal.textContent = 'Zdarma';
+          shippingVal.textContent = 'Zadarmo';
         }
       }
     }
     var msbShippingVal = document.getElementById('msb-shipping-val');
     if (msbShippingVal) {
-      msbShippingVal.textContent = isHome ? 'Zásilkovna' : 'Zdarma';
+      msbShippingVal.textContent = isHome ? 'Zásielkovňa' : 'Zadarmo';
     }
 
     // ─── MOBILE STICKY SUMMARY BAR ───
@@ -3290,7 +3290,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // Subtitle — popis co je v košíku
     var msbSubtitle = document.getElementById('msb-subtitle');
     if (msbSubtitle) {
-      var parts = ['Paperback · ' + selectedBundleQty + '× kniha'];
+      var parts = ['Brožovaná · ' + selectedBundleQty + '× kniha'];
       if (orderBumpActive) parts.push('+ ' + ((PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.name) || 'bonusová kniha'));
       msbSubtitle.textContent = parts.join(' ');
     }
@@ -3299,7 +3299,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var msbItemsLabel = document.getElementById('msb-items-label');
     if (msbItemsLabel) {
       var itemCount = orderBumpActive ? 2 : 1;
-      msbItemsLabel.textContent = itemCount === 1 ? 'Celkem' : itemCount + ' položky';
+      msbItemsLabel.textContent = itemCount === 1 ? 'Spolu' : itemCount + ' položky';
     }
 
     // Produkt v rozevřeném panelu
@@ -4088,7 +4088,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       method: 'GET'
     }).then(function(shipRes) {
       var options = shipRes.shipping_options || [];
-      if (options.length === 0) throw new Error('Žádné možnosti dopravy nejsou k dispozici');
+      if (options.length === 0) throw new Error('Žiadne možnosti dopravy nie sú k dispozícii');
       return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
         method: 'POST',
         body: JSON.stringify({ option_id: options[0].id })
@@ -5232,7 +5232,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
       if (allPaymentOptions.length === 0) {
         if (errorEl) {
-          errorEl.innerHTML = '<p>Žádné platební metody nejsou k dispozici.</p>';
+          errorEl.innerHTML = '<p>Žiadne platobné metódy nie sú k dispozícii.</p>';
           errorEl.style.display = 'block';
         }
         return;
@@ -5326,7 +5326,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     if (totalVisible === 0) {
       if (errorEl) {
-        errorEl.innerHTML = '<p>Žádné platební metody nejsou k dispozici pro tuto zemi.</p>';
+        errorEl.innerHTML = '<p>Žiadne platobné metódy nie sú k dispozícii pre túto krajinu.</p>';
         errorEl.style.display = 'block';
       }
       return;
@@ -5555,7 +5555,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             '<div class="pm-name">' + m.display_name + '</div>' +
             '<div class="pm-desc">' + (METHOD_DESCRIPTIONS[m.code] || '') + '</div>' +
           '</div>' +
-          (isPopular ? '<span class="pm-badge">Oblíbené</span>' : '');
+          (isPopular ? '<span class="pm-badge">Obľúbené</span>' : '');
 
         container.appendChild(label);
 
@@ -5971,12 +5971,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var apiKey = PROJECT_CONFIG.packetaApiKey;
         if (!apiKey) {
           console.error('[Packeta] API key not set in PROJECT_CONFIG.packetaApiKey');
-          alert('Zásilkovna API klíč není nastaven. Kontaktujte podporu.');
+          alert('Kľúč API Zásielkovne nie je nastavený. Kontaktujte podporu.');
           return;
         }
         if (typeof Packeta === 'undefined' || !Packeta.Widget) {
           console.error('[Packeta] Widget library not loaded');
-          alert('Zásilkovna widget sa nenačítal. Skúste obnoviť stránku.');
+          alert('Widget Zásielkovne sa nenačítal. Skúste obnoviť stránku.');
           return;
         }
 
@@ -6007,7 +6007,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             // Save to localStorage for persistence
             try { localStorage.setItem('checkout_packeta_point', JSON.stringify(selectedPacketaPoint)); } catch(e) {}
             // Update button text
-            packetaBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Zmeniť výdajné miesto';
+            packetaBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Zmeniť odberné miesto';
             // Hide error
             var packetaErr = document.getElementById('packeta-error');
             if (packetaErr) packetaErr.style.display = 'none';
@@ -6056,7 +6056,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           }
           var packetaBtn = document.getElementById('packeta-select-btn');
           if (packetaBtn) {
-            packetaBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Zmeniť výdajné miesto';
+            packetaBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Zmeniť odberné miesto';
           }
         }
       }
@@ -6292,7 +6292,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         addressWarningText.textContent = 'Nezabudnite pridať súpisné číslo';
         addressWarning.style.display = 'block';
       } else if (!hasLetter && hasDigit) {
-        addressWarningText.textContent = 'Vyplňte také název ulice';
+        addressWarningText.textContent = 'Vyplňte aj názov ulice';
         addressWarning.style.display = 'block';
       } else {
         addressWarning.style.display = 'none';
@@ -7663,7 +7663,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }).then(function(shipRes) {
         var options = shipRes.shipping_options || [];
         if (options.length === 0) {
-          throw new Error('Žádné možnosti dopravy nejsou k dispozici');
+          throw new Error('Žiadne možnosti dopravy nie sú k dispozícii');
         }
         // Vyber správnou shipping option podle zvoleného způsobu doručení
         var selectedOption = options[0]; // fallback
