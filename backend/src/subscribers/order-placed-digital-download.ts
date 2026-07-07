@@ -136,9 +136,21 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "18.5 MB",
     },
   ],
-  // slipp-taket: e-books do not exist for this project yet — empty array
-  // disables the e-book delivery email. Re-enable by populating the files.
-  'slipp-taket': [],
+  // Slipp taket på det som ødelegger deg (NO) — 2 gratis e-bøker
+  'slipp-taket': [
+    {
+      key: "e-books/Losningen pa overtenking.pdf",
+      title: "Løsningen på overtenking",
+      description: "E-bok (PDF)",
+      size: "1.4 MB",
+    },
+    {
+      key: "e-books/Kjaerlighet uten sensur.pdf",
+      title: "Kjærlighet uten sensur",
+      description: "E-bok (PDF)",
+      size: "17.1 MB",
+    },
+  ],
   'odpust-knizka': [
     {
       key: "e-books/Jak-prestat-nadmerne-premyslet-a-zacit-zit.pdf",
@@ -193,6 +205,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   loslatenboek: process.env.LLWJK_STOREFRONT_URL || "https://storefront-production-fccf.up.railway.app",
   dehondenbijbel: process.env.DH_STOREFRONT_URL || process.env.STOREFRONT_URL || "https://www.dehondenbijbel.nl",
   'slapp-taget': process.env.ST_STOREFRONT_URL || "https://www.slapptagetboken.se",
+  'slipp-taket': process.env.SL_STOREFRONT_URL || "https://www.slipptaketboken.no",
   'odpusc-ksiazka': process.env.OK_STOREFRONT_URL || "https://www.odpusc-ksiazka.pl",
   'lass-los': process.env.LL_STOREFRONT_URL || "https://www.jetztloslassen.de",
   'psi-superzivot': process.env.PS_STOREFRONT_URL || "https://www.psi-superzivot.cz",
@@ -208,6 +221,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   loslatenboek: 'Je e-books staan klaar! 📖',
   dehondenbijbel: 'Je e-book staat klaar! 📖',
   'slapp-taget': 'Dina e-böcker är redo! 📖',
+  'slipp-taket': 'Dine e-bøker er klare! 📖',
   'odpusc-ksiazka': 'Twoje e-booki są gotowe! 📖',
   'lass-los': 'Deine E-Books sind bereit! 📖',
   'psi-superzivot': 'Tvoje e-booky jsou připravené! 📖',
@@ -223,6 +237,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   loslatenboek: 'daar',
   dehondenbijbel: 'daar',
   'slapp-taget': 'där',
+  'slipp-taket': 'der',
   'odpusc-ksiazka': 'tam',
   'lass-los': 'dort',
   'psi-superzivot': 'tam',
