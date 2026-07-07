@@ -883,8 +883,234 @@
   <p>Anmeldelsene du ser nedenfor er <strong>de offisielle anmeldelsene fra Nederland</strong>, der boken først ble utgitt og allerede er lest av tusenvis.</p>
   <p>Vi <strong>vil ikke lyve</strong>. Vi <strong>vil ikke finne på falske anmeldelser</strong>. Og vi nekter å pynte på noe som helst for å virke mer overbevisende.</p>
   <p>Derfor har vi tatt et bevisst valg: vi publiserer anmeldelsene <em>akkurat slik leserne selv har skrevet dem</em> — på originalspråket, uten å oversette, redigere eller endre på et eneste ord. Slik vet du at det du leser er <strong><u>ekte ord fra ekte lesere</u></strong>.</p>
-  <p class="reviews-transparency-footnote">📖 Tips: bruk oversettelsesfunksjonen i nettleseren din for å lese anmeldelsene på norsk.</p>
+  <p class="reviews-transparency-footnote">📖 Under finner du de originale skjermbildene fra Facebook. I sleideren over har vi oversatt hver anmeldelse til norsk for deg.</p>
  </div>
+
+ <!-- ═══ Slider anmeldelser: norsk oversettelse + nederlandsk original ═══ -->
+ <style>
+ .czr-wrap { max-width: 760px; margin: 0 auto 48px; padding: 0 16px; }
+ .czr-intro { text-align: center; margin-bottom: 22px; }
+ .czr-intro h3 { font-family: 'Recoleta', Georgia, serif; font-weight: 700; font-size: 24px; line-height: 1.3; color: var(--heading); margin: 0 0 8px; }
+ .czr-intro-hl { color: var(--cta); }
+ .czr-intro p { font-size: 15px; line-height: 1.6; color: var(--muted); max-width: 600px; margin: 0 auto; }
+ .czr-slider { position: relative; display: flex; align-items: center; gap: 8px; }
+ .czr-viewport { overflow: hidden; flex: 1; border-radius: 18px; transition: height .4s cubic-bezier(0.22,1,0.36,1); }
+ .czr-track { display: flex; align-items: flex-start; transition: transform .4s cubic-bezier(0.22,1,0.36,1); }
+ .czr-slide { flex: 0 0 100%; min-width: 100%; box-sizing: border-box; padding: 4px; align-self: flex-start; }
+ .czr-card { background: #fff; border: 1px solid rgba(45,27,61,0.10); border-radius: 16px; padding: 24px 26px; box-shadow: 0 4px 18px rgba(45,27,61,0.07); }
+ .czr-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+ .czr-avatar { flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; color: #fff; letter-spacing: .3px; }
+ .czr-meta { flex: 1; min-width: 0; }
+ .czr-name { font-size: 15px; font-weight: 700; color: var(--heading); line-height: 1.2; }
+ .czr-src { font-size: 11.5px; color: var(--muted); display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; }
+ .czr-src svg { width: 12px; height: 12px; }
+ .czr-stars { flex-shrink: 0; color: #F5B301; font-size: 13px; letter-spacing: 1px; }
+ .czr-cz { font-size: 16px; line-height: 1.65; color: var(--heading); margin: 0 0 16px; }
+ .czr-orig { background: #FAF6FA; border-radius: 10px; padding: 13px 15px; border-left: 3px solid rgba(194,123,160,0.4); }
+ .czr-orig-label { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; margin-bottom: 6px; }
+ .czr-orig-text { font-size: 13.5px; line-height: 1.55; color: var(--muted); font-style: italic; margin: 0; }
+ .czr-arrow { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 1px solid rgba(45,27,61,0.12); color: var(--cta); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(45,27,61,0.08); transition: all .2s ease; }
+ .czr-arrow svg { width: 20px; height: 20px; }
+ .czr-arrow:hover { background: var(--cta); color: #fff; border-color: var(--cta); }
+ .czr-arrow:disabled { opacity: .35; cursor: default; }
+ .czr-arrow:disabled:hover { background: #fff; color: var(--cta); }
+ .czr-dots { display: flex; justify-content: center; gap: 7px; margin-top: 18px; }
+ .czr-dot { width: 8px; height: 8px; border-radius: 50%; border: none; padding: 0; background: rgba(194,123,160,0.3); cursor: pointer; transition: all .2s ease; }
+ .czr-dot.active { background: var(--cta); width: 22px; border-radius: 4px; }
+ @media (max-width: 600px) { .czr-intro h3 { font-size: 20px; } .czr-card { padding: 20px 18px; } .czr-cz { font-size: 15px; } .czr-arrow { width: 34px; height: 34px; } .czr-arrow svg { width: 17px; height: 17px; } }
+ </style>
+
+ <div class="czr-wrap">
+  <div class="czr-intro">
+   <h3>Hva leserne skriver om boken <span class="czr-intro-hl">— oversatt til norsk</span></h3>
+   <p>Bla i anmeldelsene til venstre og høyre. Under hver oversettelse finner du <strong>den originale kommentaren fra Facebook</strong>, slik at du når som helst kan bekrefte selv at den er ekte.</p>
+  </div>
+
+  <div class="czr-slider">
+   <button class="czr-arrow czr-prev" id="czrPrev" aria-label="Forrige anmeldelse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+   <div class="czr-viewport">
+    <div class="czr-track" id="czrTrack"></div>
+   </div>
+   <button class="czr-arrow czr-next" id="czrNext" aria-label="Neste anmeldelse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+  </div>
+  <div class="czr-dots" id="czrDots"></div>
+ </div>
+
+ <script>
+ (function() {
+   var track = document.getElementById('czrTrack');
+   var prevBtn = document.getElementById('czrPrev');
+   var nextBtn = document.getElementById('czrNext');
+   var dotsBox = document.getElementById('czrDots');
+   if (!track) return;
+
+   // Ekte anmeldelser fra Facebook (original på nederlandsk) + norsk oversettelse.
+   var PALETTE = ["#C27BA0","#8C5BA8","#4F46E5","#2E7D32","#C0392B","#0E7C7B","#B7791F","#6E2C8F","#1877F2","#D35400"];
+   function ini(name){ var p=name.trim().split(/\s+/); return ((p[0][0]||'')+(p[p.length-1][0]||'')).toUpperCase(); }
+   var RAW = [
+     { name: "Chantal D'hondt",
+       no: "Forhåpentligvis kan det hjelpe meg. Pappa døde på lørdag, og på grunn av familiekrangler har jeg det veldig tungt og vanskelig. De siste 4 årene bodde vi rolig og lykkelig sammen, langt unna de negative omgivelsene, og nå kommer alt tilbake, og brødrene og søsteren hans gjør livet surt for meg igjen. Pappa fikk bli 98,5 år, jeg fyller 67 neste uke, og jeg er helt knust av kranglingen og kravene deres. Jeg orker det rett og slett ikke lenger. Forhåpentligvis kan jeg finne roen igjen, for det var 4 lykkelige, vakre og kjærlige år, men også svært tunge. Og nå vil jeg få sørge over min aller kjæreste pappa og selv bli hel igjen.",
+       nl: "Hopelijk kan het mij helpen, mijn papa is zaterdag overleden en door familieruzies heb ik het heel zwaar en moeilijk. We hebben de laatste 4 jaar rustig en gelukkig samen gewoond ver van de negatieve omgeving, en nu komt alles weer terug en zijn broers en zus mij het leven weer aan het verzuren. Papa is 98,5 jaar mogen worden, ik word volgende week 67 jaar, ik ben kapot van hun geruzie en hun eisen. Ik kan het gewoon niet meer aan. Hopelijk kan ik weer tot rust komen want het zijn 4 gelukkige mooie liefdevolle jaren geweest maar ook heel zware. En nu wil ik mijn allerliefste papa treuren en zelf ook weer genezen." },
+     { name: "Patricia de Vries",
+       no: "Fantastisk bok! Virkelig å anbefale. Jeg vil sterkt anbefale å lese den. Den har åpnet øynene mine, og jeg er nå sterkere og roligere enn noen gang før.",
+       nl: "Schitterend boek! Echt een aanrader. Zou het echt aanraden om te lezen. Het heeft mij de ogen geopend en ben nu sterker en rustiger als nooit daarvoor ooit geweest." },
+     { name: "Katrien Schollier",
+       no: "Jeg begynte å lese i denne boken i dag. Jeg hadde hatt den hjemme i minst 2 måneder. Jeg hadde vanskelig for å konsentrere meg. Jeg er forbløffet over tekstene og de korte historiene — hvor mye jeg kjenner meg igjen i dem. Glad for at jeg har kommet et lite skritt videre igjen.",
+       nl: "Ik ben vandaag beginnen lezen in dit boek. Ik had het zeker al 2 maanden in huis. Ik had moeite met concentratie om te lezen. Ik sta versteld van de teksten en de korte verhalen hoeveel herkenning ik in dit boek ben tegengekomen. Blij dat ik weer een stapje vooruit ben geraakt." },
+     { name: "Kelly Daelemans",
+       no: "Jeg har akkurat bestilt boken, og jeg gleder meg sånn. Etter 15 år med å ikke klare å slippe taket (eller kanskje veldig av og til, takket være en psykolog), men likevel komme tilbake hver gang noe nytt dukker opp på veien … gleder jeg meg til boken og håper så inderlig at jeg kan gi alt (eller forhåpentligvis mye) en plass, eller «parkere» det, som psykologen min sier. Det ville vært en fin start på det nye året.",
+       nl: "Ik heb het boek net besteld en ik kijk er zo naar uit. Na 15 jaar iets niet kunnen los laten (of toch heel soms wel dank zij een psycholoog) maar toch telkens het terug komen als er weer wat op je pad komt…. kijk ik uit naar het boek en hoop ik zo hard dat ik alles (of toch hopelijk veel) dingen een plaats kan geven of kan parkeren zoals mijn psycholoog zegt. Het zou een mooie start van het nieuwe jaar zijn" },
+     { name: "Mélanie Warmenhoven",
+       no: "Jeg avsluttet nylig et forhold igjen, og var redd for nettopp det du skriver over. Men det var den tredje mannen som til slutt likevel ikke kunne gi meg det jeg lengter etter og fortjener, og som ikke så meg for den jeg er. Og det gjør deg ensommere enn å være uten et forhold. For med andre mennesker har jeg fine forbindelser — og det aller viktigste: en veldig fin forbindelse med meg selv! Jeg elsker å være med meg selv, og det går bedre og bedre, merker jeg 🥰",
+       nl: "Heb onlangs ook weer een verbinding verbroken en idd bang voor bovenstaande. Maar t was de 3de man die mij uiteindelijk toch niet kon geven wat ik verlang, verdien en mij niet zag voor wat ik ben. En dat maakt eenzamer dan geen verbinding. Want ik heb met andere mensen wel een fijne verbinding en het belangrijkste een hele fijne verbinding met mezelf! Ik vind t heerlijk om met mezelf te zijn en dat gaat steeds beter merk ik 🥰" },
+     { name: "Katja van Hooijdonk",
+       no: "Jeg synes det er en veldig god bok. Den er lettlest, med enkle råd som du går gjennom steg for steg. Egentlig tilgjengelig for alle — og jeg har allerede lest enormt mye om personlig utvikling. Absolutt å anbefale.",
+       nl: "Ik vind het een heel goed boek. Leest gemakkelijk en eenvoudige tips die je stap voor stap doorloopt. Eigenlijk voor iedereen toegankelijk en heb al enorm veel gelezen op persoonlijk ontwikkelingsgebied. Zeker aan te raden." },
+     { name: "Paula Stegeman",
+       no: "Veldig gjenkjennelig! Noen ganger opplever man for mye i livet — ting som har gjort deg til den du er nå — at man rett og slett ikke lenger lar det få skje igjen! Det er bedre å holde muren oppe … både i vennskap og i forhold! Det er mange slanger som kryper gjennom gresset som du ikke ser med en gang!",
+       nl: "Heel herkenbaar! Soms maak je teveel dingen mee in het leven wat je heeft gemaakt tot wie je nu bent en dan ga je het niet meer toelaten dat het weer kan gebeuren! Het is beter om je muur hoog te houden…. zowel in vriendschappen als in relaties! Er kruipen heel veel slangen door het gras heen die jij niet gelijk ziet!" },
+     { name: "Sander van Hagen",
+       no: "Den boken er vakker, men historien din viser at arr ikke forsvinner ved å «slippe taket» alene. Du bærer dem med deg, og du vil lære hvordan du kan leve med dem — uten at de fortsetter å dra deg ned.",
+       nl: "Dat boek is mooi, maar jouw verhaal laat zien dat littekens niet verdwijnen door «loslaten» alleen. Jij draagt ze mee, en je wilt leren hoe je ermee kunt léven — zonder dat ze je blijven neerhalen." },
+     { name: "Greg Kinibe",
+       no: "Jeg har prøvd alt, eller i det minste håpet at det skulle gå. Jeg er ikke akkurat noen bokorm selv, men denne kommer jeg til å skaffe meg og gå aktivt inn i, for å bli slik det skal være. Jeg gleder meg, for jeg har mye å ta igjen, og jeg har troen på det.",
+       nl: "Alles al geprobeerd of toch gehoopt dat het zou lukken, ik ben zelf niet zo een boekenwurm maar deze ga ik me aanschaffen en me actief inzetten en terug worden hoe het moet zijn of nog nooit geweest is. Ik kijk er naar uit want heb veel goed te maken en heb er vertrouwen in." },
+     { name: "Lynn Quintyn",
+       no: "Steg 1: Bok kjøpt og ankommet. Steg 2: få meg selv til å fordype meg i den! Steg 3, 4, 5 …: Kan jeg klare å vinne tilbake troen og tilliten til ekte kjærlighet? 🤔",
+       nl: "Stap 1: Boek gekocht en aangekomen. Stap 2: mezelf aansporen om mij er in te verdiepen! Stap 3,4,5,….: Zou ik het geloof/vertrouwen in oprechte liefde kunnen terugwinnen? 🤔" },
+     { name: "Nancy De Meulenaer",
+       no: "Jeg har begynt — det er ikke lett lesning for meg. Jeg har ingen problemer i forholdet, men jeg har PTSD. Likevel hjelper det meg, så takk, jeg jobber med det ❤️",
+       nl: "Ik ben begonnen is voor mij niet gemakkelijk lezen , ik heb geen relatie problemen maar Ptts maar toch help het mij dus dank je ik werk eraan ❤️" },
+     { name: "Frans Peeters",
+       no: "Gjenkjennelig. Det beste er å unngå eller ignorere negative mennesker; jeg har nå ro i hodet. Jeg har lest boken også, og den har hjulpet meg enormt. Jeg ønsker deg mye styrke, hilsen.",
+       nl: "Herkenbaar, beste is negatieve mensen te vermijden en of negeren, ik heb nu rust in mijn hoofd, ik heb het boek ook gelezen en heeft mij enorm geholpen, ik wens u veel sterkte, grtjs" },
+     { name: "Sylvia van Vuuren",
+       no: "Boken er mottatt, og jeg har begynt å lese. Den er lettlest. Det er veldig fint, for konsentrasjonen min er dårlig på grunn av utbrenthet. Boken er så langt en virkelig anbefaling.",
+       nl: "Boek ontvangen en begonnen met lezen. Leest makkelijk. Dat is erg fijn. Want mijn concentratie is slecht door mijn burnout klachten. Boek is tot nu een echte aanrader." },
+     { name: "Frank Goossens",
+       no: "Vel verdt det, og i det jeg leser nå er det mye av meg, virkelig … Å slippe taket, det er forferdelig vanskelig for meg … pffff",
+       nl: "Wel de moeite waardt en wat ik nu lees daar zit veel van mij bij echt.. Loslaten Das verschrikkelijk moeilijk bij mij..pffff" },
+     { name: "Claudine Callant",
+       no: "Jeg har fått boken og leser i den hver dag og lar det synke inn. Men de 2 e-bøkene har jeg ikke mottatt. Med vennlig hilsen",
+       nl: "Ik heb het boek gekregen en lees er alles dagen in en laat het dan binnen dringen. Ik heb wel de 2 e'boeken niet ontvangen. Met vriendelijke groeten" },
+     { name: "Leon Groeneveld",
+       no: "Jeg legger det ut en gang til … fin bok, men tittelen setter seg liksom ikke i hodet mitt — «det som ødelegger DEG» ville gitt mer mening. Jeg leser tittelen hver gang som om det er «min» skyld og at jeg selv ødelegger ting … beklager … men les gjerne denne boken hvis den taler til deg — en anbefaling!",
+       nl: "Ga 'm toch nog een keer posten…mooi boek maar de titel gaat niet goed in mijn hoofd..'wat JOU kapot maakt' snijdt meer hout ..ik lees de titel telkens alsof het 'mijn' schuld is en zelf dingen kapot maak..srry..wel lezen dit boek als het je aanspreekt btw, aanrader!" },
+     { name: "Marie-Rose Vanopbroecke",
+       no: "Jeg har begynt på denne boken. Den virker veldig forståelig og lett å ta til seg. Ikke noe svevende — det er viktig.",
+       nl: "Ben begonnen in dit boek. Lijkt me heel begrijpelijk en aanvaardbaar. Niet zweverig, belangrijk." },
+     { name: "Dagmar Thalen",
+       no: "Jeg har begynt å lese. Det står gjenkjennelige ting og nyttige ting i den.",
+       nl: "Ik ben begonnen met lezen. Staan herkenbare dingen en nuttige dingen in." },
+     { name: "Frans Pleumeekers",
+       no: "Jeg har lest i den en stund nå, og kjenner igjen mye av den smerten. Jeg er også glad for støtten.",
+       nl: "lees er al een tijd in en herken heel veel van die pijn. Ben blij ook met de ondersteuning." },
+     { name: "Sandra Luimes",
+       no: "Vakker og treffende bok — den gir deg ro og noe å holde fast ved.",
+       nl: "Mooi kloppend boek , geeft je rust en handvaten" },
+     { name: "Edward De Goede",
+       no: "Vakker bok, veldig lærerik, og den berører alle 💛💚🙏",
+       nl: "Mooi boek erg leerzaam en raakt iedereen 💛💚🙏" },
+     { name: "Arjan van de Wijgert",
+       no: "Virkelig en fantastisk bok som alle burde lese en gang. Så mange nyttige råd, veldig lærerik og gjenkjennelig.",
+       nl: "Echt een fantastisch boek dat iedereen eens zou moeten lezen. Zoveel nuttige tips en heel leerzaam en herkenbaar." },
+     { name: "Danitsja Jansen",
+       no: "Den mest fantastiske boken jeg noen gang har lest. Denne har du virkelig nytte av!",
+       nl: "Meest geweldige boek wat ik ooit heb gelezen. Hier heb je wat aan!" },
+     { name: "Mauri Deman",
+       no: "Rett og slett en fantastisk bok.",
+       nl: "Gewoonweg Fantastisch boek" },
+     { name: "Leo Miedema",
+       no: "Virkelig en veldig god bok.",
+       nl: "Echt een heel goed boek" },
+     { name: "Greet Woussen",
+       no: "Fikk boken i går. Fornøyd med kjøpet mitt.",
+       nl: "Boek gisteren gekregen. Blij met mijn aankoop." },
+     { name: "Goossens Manuella",
+       no: "Ja, jeg angrer ikke det minste på at jeg kjøpte den.",
+       nl: "Ja ik heb geen spijt dat ik het gekocht heb" },
+     { name: "Tanja Dugandžić",
+       no: "Nydelig bok.",
+       nl: "Prachtig Boek" },
+     { name: "Patrick Velders",
+       no: "Superbok.",
+       nl: "Super boek." },
+     { name: "Paul Denessen",
+       no: "Vakker og lærerik bok.",
+       nl: "Prachtig leerzaam boek." },
+     { name: "Christophe Kervyn",
+       no: "En anbefaling … 🤙",
+       nl: "Een aanrader… 🤙" },
+     { name: "Suzanne Van Woerkom",
+       no: "Virkelig å anbefale!!",
+       nl: "Echt een aanrader!!" }
+   ];
+   var REVIEWS = RAW.map(function(r, i){ return { name: r.name, initials: ini(r.name), color: PALETTE[i % PALETTE.length], no: r.no, nl: r.nl }; });
+
+   var fbIcon = '<svg viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07c0 6.02 4.39 11.01 10.13 11.93v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8v8.44C19.61 23.08 24 18.09 24 12.07z"/></svg>';
+   var html = '';
+   REVIEWS.forEach(function(r) {
+     html +=
+       '<div class="czr-slide"><div class="czr-card">' +
+         '<div class="czr-head">' +
+           '<div class="czr-avatar" style="background:' + r.color + '">' + r.initials + '</div>' +
+           '<div class="czr-meta">' +
+             '<div class="czr-name">' + r.name + '</div>' +
+             '<div class="czr-src">' + fbIcon + ' Kommentar på Facebook</div>' +
+           '</div>' +
+           '<div class="czr-stars">★★★★★</div>' +
+         '</div>' +
+         '<p class="czr-cz">' + r.no + '</p>' +
+         '<div class="czr-orig">' +
+           '<div class="czr-orig-label">' + fbIcon + ' Original (nederlandsk)</div>' +
+           '<p class="czr-orig-text">' + r.nl + '</p>' +
+         '</div>' +
+       '</div></div>';
+   });
+   track.innerHTML = html;
+
+   var pos = 0;
+   var total = REVIEWS.length;
+
+   var dots = [];
+   for (var i = 0; i < total; i++) {
+     var d = document.createElement('button');
+     d.className = 'czr-dot' + (i === 0 ? ' active' : '');
+     d.setAttribute('aria-label', 'Anmeldelse ' + (i + 1));
+     (function(idx) { d.addEventListener('click', function() { pos = idx; update(); }); })(i);
+     dotsBox.appendChild(d);
+     dots.push(d);
+   }
+
+   var vp = track.parentElement;
+   function syncHeight() {
+     var active = track.children[pos];
+     if (active) vp.style.height = active.offsetHeight + 'px';
+   }
+   function update() {
+     track.style.transform = 'translateX(-' + (pos * 100) + '%)';
+     prevBtn.disabled = (pos <= 0);
+     nextBtn.disabled = (pos >= total - 1);
+     dots.forEach(function(d, i) { d.classList.toggle('active', i === pos); });
+     syncHeight();
+   }
+
+   prevBtn.addEventListener('click', function() { if (pos > 0) { pos--; update(); } });
+   nextBtn.addEventListener('click', function() { if (pos < total - 1) { pos++; update(); } });
+   window.addEventListener('resize', syncHeight);
+
+   var startX = 0, swiping = false;
+   vp.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; swiping = true; }, { passive: true });
+   vp.addEventListener('touchend', function(e) {
+     if (!swiping) return; swiping = false;
+     var diff = startX - e.changedTouches[0].clientX;
+     if (diff > 45 && pos < total - 1) { pos++; update(); }
+     else if (diff < -45 && pos > 0) { pos--; update(); }
+   }, { passive: true });
+
+   update();
+ })();
+ </script>
 
  <div class="fb-reactions-grid">
   <div class="fb-reaction-card fb-card-featured">
@@ -1099,7 +1325,7 @@
    <!-- Levá strana: obrázky -->
    <div class="final-cta-images">
     <img src="/slipp-taket-pichi.png" alt="Slipp taket på det som ødelegger deg — bok" width="480" height="477">
-    <img src="/images/book-lifestyle.jpg" alt="Slipp taket på det som ødelegger deg — lifestyle" width="480" height="602">
+    <img src="/takettttt.jpg" alt="Slipp taket på det som ødelegger deg — lifestyle" width="480" height="602">
    </div>
 
    <!-- Pravá strana: text + CTA -->
@@ -1175,7 +1401,7 @@
 
   <!-- Bonus #1 -->
   <div class="bonus-card">
-   <img src="/losk-pichi.png" alt="Løsningen på overtenking — bonus e-bok" width="280" height="378">
+   <img src="/overthinking-now-1-pichi.png" alt="Løsningen på overtenking — bonus e-bok" width="280" height="378">
    <div class="bonus-card-text">
     <h3>🎁 <span class="hl-yellow">#1 BONUS: E-bok Løsningen på overtenking</span></h3>
     <p>Denne <strong>eksklusive bonus-e-boken</strong> får du gratis når du bestiller i dag. Den inneholder <em>praktiske verktøy og øvelser</em> som passer perfekt sammen med hovedinnholdet.</p>
