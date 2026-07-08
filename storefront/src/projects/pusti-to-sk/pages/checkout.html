@@ -8612,10 +8612,24 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // ── All other methods use the payments() module (Revolut Pay v2) ──
       return RevolutCheckout.payments({ locale: 'auto', publicToken: pubKey, mode: mode }).then(function (rp) {
 
-        // ── REVOLUT PAY → inline button ──
+        // ── REVOLUT PAY → inline button. Desktop: secure popup. Mobile: deep-links
+        // straight into the Revolut app, then returns via appReturnUrl. On return the
+        // existing ?payment_return handler polls /complete (covers async webhook auth). ──
         if (method === 'revolut_pay') {
           var el = document.createElement('div'); mount.appendChild(el);
-          rp.revolutPay.mount(el, { currency: currency, totalAmount: amtMinor, createOrder: createOrder });
+          var revBase = window.location.href.split('?')[0];
+          var revSuccess = revBase + '?payment_return=1&cart_id=' + encodeURIComponent(cartId);
+          try { localStorage.setItem('medusa_cart_id', cartId); } catch (e) {}
+          rp.revolutPay.mount(el, {
+            currency: currency,
+            totalAmount: amtMinor,
+            createOrder: createOrder,
+            // Mobile → open Revolut app, return here. success completes the cart;
+            // failure/cancel land back on the checkout so the customer can retry.
+            mobileRedirectUrls: { success: revSuccess, failure: revBase, cancel: revBase },
+            appReturnUrl: revSuccess
+          });
+          // Desktop popup path still resolves via events (mobile navigates away instead).
           rp.revolutPay.on('payment', function (ev) {
             if (ev.type === 'success') completeAndGo();
             else if (ev.type === 'error') setStatus('Platba zlyhala: ' + ((ev.error && ev.error.message) || ''), 'err');
