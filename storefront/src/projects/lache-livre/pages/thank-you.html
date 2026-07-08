@@ -617,20 +617,6 @@ body { background: var(--bg); }
         </div>
       </div>
       <div class="ty-order-item">
-        <div class="ty-order-icon ebook">&#x1F4F1;</div>
-        <div>
-          <div class="ty-order-name">La Solution Anti-Rumination</div>
-          <div class="ty-order-desc">E-book gratuit &mdash; vérifie ta boîte mail</div>
-        </div>
-      </div>
-      <div class="ty-order-item">
-        <div class="ty-order-icon ebook">&#x1F4F1;</div>
-        <div>
-          <div class="ty-order-name">L'Amour Sans Détour</div>
-          <div class="ty-order-desc">E-book gratuit &mdash; vérifie ta boîte mail</div>
-        </div>
-      </div>
-      <div class="ty-order-item">
         <div class="ty-order-icon ship">&#x1F69A;</div>
         <div>
           <div class="ty-order-name">Livraison gratuite</div>
@@ -640,7 +626,7 @@ body { background: var(--bg); }
     </div>
     <div class="ty-order-total">
       <span class="ty-order-total-label">Payé</span>
-      <span class="ty-order-total-price" id="ty-total-price">&euro; 36</span>
+      <span class="ty-order-total-price" id="ty-total-price">36&nbsp;&euro;</span>
     </div>
   </div>
 
@@ -651,9 +637,9 @@ body { background: var(--bg); }
     <div class="ty-support-icon">&#x1F4E9;</div>
     <div class="ty-support-text">
       <div class="ty-support-title">Une question ou un problème ?</div>
-      <div class="ty-support-desc">Tu as repéré une erreur, une question sur ta commande ou tu bloques quelque part ? N'hésite pas à nous contacter &mdash; nous t'aidons avec plaisir !</div>
+      <div class="ty-support-desc">Tu as repéré une erreur, tu as une question sur ta commande ou tu bloques quelque part ? N'hésite pas à nous contacter &mdash; nous serons ravis de t'aider !</div>
     </div>
-    <a href="mailto:support@lacheprise-livre.fr?subject=Question%20sur%20ma%20commande%20%23&body=Bonjour%2C%0A%0AJ%27ai%20une%20question%20sur%20ma%20commande.%0A%0ANum%C3%A9ro%20de%20commande%3A%20%0A%0AMa%20question%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Envoie-nous un e-mail</a>
+    <a href="mailto:support@lacheprise-livre.fr?subject=Question%20sur%20ma%20commande%20%23&body=Bonjour%2C%0A%0AJ%27ai%20une%20question%20sur%20ma%20commande.%0A%0ANum%C3%A9ro%20de%20commande%C2%A0%3A%20%0A%0AMa%20question%C2%A0%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Envoie-nous un e-mail</a>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -666,7 +652,7 @@ body { background: var(--bg); }
         <div class="ty-step-num">1</div>
         <div class="ty-step-icon">&#x1F4E7;</div>
         <div class="ty-step-title">Vérifie ta boîte mail</div>
-        <div class="ty-step-desc">Tu reçois d'ici 2 minutes un e-mail de confirmation avec tes e-books gratuits : <em>La Solution Anti-Rumination</em> et <em>L'Amour Sans Détour</em>.</div>
+        <div class="ty-step-desc">Tu reçois d'ici 2 minutes un e-mail de confirmation avec le récapitulatif de ta commande.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">2</div>
@@ -678,7 +664,7 @@ body { background: var(--bg); }
         <div class="ty-step-num">3</div>
         <div class="ty-step-icon">&#x1F680;</div>
         <div class="ty-step-title">Commence à lâcher prise</div>
-        <div class="ty-step-desc">Commence dès aujourd'hui avec les e-books. Dès que ton livre arrive, tu démarres les exercices.</div>
+        <div class="ty-step-desc">Dès que ton livre arrive, tu peux démarrer les exercices et entamer un nouveau chapitre.</div>
       </div>
     </div>
   </div>
@@ -830,7 +816,7 @@ body { background: var(--bg); }
               var symbol = cur === 'eur' ? '\u20AC' : cur === 'sek' ? 'kr' : cur === 'pln' ? 'z\u0142' : cur === 'czk' ? 'K\u010D' : '\u20AC';
               var amt = Number(data.order.total) || 0;
               var formatted = amt.toFixed(2).replace('.', ',').replace(/,00$/, '');
-              totalEl.textContent = symbol + ' ' + formatted;
+              totalEl.textContent = formatted + ' ' + symbol;
             }
           }
           console.log('TY: Order items synced (books: ' + derivedBookCount + ', total: ' + data.order.total + ')');
@@ -879,7 +865,7 @@ body { background: var(--bg); }
   if (mailtoEl) {
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
     var subject = encodeURIComponent('Question sur ma commande #' + orderNum);
-    var body = encodeURIComponent('Bonjour,\n\nJ\'ai une question sur ma commande.\n\nNuméro de commande: #' + orderNum + '\n\nMa question: ');
+    var body = encodeURIComponent('Bonjour,\n\nJ\'ai une question sur ma commande.\n\nNuméro de commande : #' + orderNum + '\n\nMa question : ');
     mailtoEl.href = 'mailto:support@lacheprise-livre.fr?subject=' + subject + '&body=' + body;
   }
 
@@ -908,7 +894,7 @@ body { background: var(--bg); }
   }
   var totalPriceEl = document.getElementById('ty-total-price');
   if (totalPriceEl) {
-    totalPriceEl.textContent = '\u20AC ' + totalPrice.toFixed(0).replace('.', ',');
+    totalPriceEl.textContent = totalPrice.toFixed(0).replace('.', ',') + '\u00A0\u20AC';
   }
 
   // 2e. Aktualizuj hlavní položku s bundle qty
@@ -991,8 +977,8 @@ body { background: var(--bg); }
       if (companyRow && companyVal) {
         companyRow.style.display = '';
         var cParts = [companyData.company_name];
-        if (companyData.kvk_number) cParts.push('KVK: ' + companyData.kvk_number);
-        if (companyData.vat_number) cParts.push('BTW: ' + companyData.vat_number);
+        if (companyData.kvk_number) cParts.push('SIRET : ' + companyData.kvk_number);
+        if (companyData.vat_number) cParts.push('TVA : ' + companyData.vat_number);
         companyVal.innerHTML = cParts.join('<br>');
       }
       // Ukaž company sekci v edit formuláři

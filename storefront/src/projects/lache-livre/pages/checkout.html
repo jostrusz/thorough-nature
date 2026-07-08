@@ -2722,7 +2722,7 @@ body {
                   <div class="order-bump-meta">
                     <span>&#128214; 350 pages</span>
                     <span>&#128197; plan de 30 jours</span>
-                    <span>&#11088; 4.9/5 étoiles</span>
+                    <span>&#11088; 4,9/5 étoiles</span>
                   </div>
                   <div class="order-bump-prices">
                     <span class="order-bump-old-price" id="order-bump-detail-old">&euro;36,00</span>
@@ -2784,14 +2784,14 @@ body {
 
               <!-- CTA - decision affirmation -->
               <div class="ob-cta">
-                <div class="ob-cta-headline">Prêt pour l'étape 2 ?</div>
+                <div class="ob-cta-headline">On passe à l'étape 2 ?</div>
                 <p class="ob-cta-body">
                   <strong>Coche la case en haut</strong> pour ajouter <em>La vie que tu mérites</em> à ta commande. Les deux livres sont livrés ensemble &mdash; pas de deuxième commande, pas de deuxième livraison, pas de &lsquo;je le ferai plus tard&rsquo;.
                 </p>
                 <p class="ob-cta-tag">
                   Lâcher prise, c'est ce que tu as déjà choisi. Reconstruire, c'est ce que ce livre t'apporte. <strong>Ensemble, c'est le parcours complet &mdash; exactement ce dont tu as besoin.</strong>
                 </p>
-                <div class="ob-cta-arrow">&uarr; Coche pour ajouter pour &euro;25</div>
+                <div class="ob-cta-arrow">&uarr; Coche la case pour l'ajouter</div>
               </div>
 
             </div>
@@ -3049,7 +3049,7 @@ body {
             <span class="btn-text">Finaliser la commande — &euro;36,00</span>
           </button>
           <div id="submit-validation-msg" class="submit-validation-msg" style="display:none;"></div>
-          <p class="btn-subtext">Tu vas être redirigé vers une page de paiement sécurisée.</p>
+          <p class="btn-subtext">Nous allons te rediriger vers une page de paiement sécurisée.</p>
           <p class="btn-loading-sub" aria-live="polite">Un instant — nous chargeons ton mode de paiement…</p>
 
           <!-- Trust badges -->
@@ -3094,7 +3094,7 @@ body {
       <!-- 2 gratis e-books bonus -->
       <div class="summary-bonus">
         <span class="bonus-icon">🎁</span>
-        <span class="bonus-text">+ 2 e-books gratuits inclus</span>
+        <span class="bonus-text">+ 2 bonus gratuits inclus</span>
       </div>
 
       <!-- Order bump řádek v summary (skrytý dokud nezaškrtne) -->
@@ -3136,8 +3136,8 @@ body {
       <!-- Garantie -->
       <div class="guarantee-box">
         <div class="icon">🛡️</div>
-        <div class="title">Garantie satisfait ou remboursé 100%</div>
-        <div class="desc">Pas satisfait ? Sous 30 jours, tu récupères l'intégralité de ton achat. Sans question, sans complication.</div>
+        <div class="title">Garantie satisfait ou remboursé à 100 %</div>
+        <div class="desc">Le livre ne te convient pas ? Sous 30 jours, tu récupères l'intégralité de ton paiement. Sans question, sans complication.</div>
       </div>
 
       <!-- Shipping & Delivery info -->
@@ -3413,7 +3413,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     var taxLabel = document.getElementById('tax-label');
     var taxValue = document.getElementById('tax-value');
-    if (taxLabel) taxLabel.textContent = 'BTW (' + rate + '%)';
+    if (taxLabel) taxLabel.textContent = 'TVA (' + String(rate).replace('.', ',') + ' %)';
     if (taxValue) taxValue.textContent = formatPrice(tax);
 
     var totalEl = document.getElementById('desktop-total-price');
@@ -3475,7 +3475,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var msbSubtotal = document.getElementById('msb-subtotal');
     if (msbSubtotal) msbSubtotal.textContent = formatPrice(subtotal);
     var msbTaxLabel = document.getElementById('msb-tax-label');
-    if (msbTaxLabel) msbTaxLabel.textContent = 'BTW (' + rate + '%)';
+    if (msbTaxLabel) msbTaxLabel.textContent = 'TVA (' + String(rate).replace('.', ',') + ' %)';
     var msbTaxVal = document.getElementById('msb-tax-val');
     if (msbTaxVal) msbTaxVal.textContent = formatPrice(tax);
     var msbTotal = document.getElementById('msb-total');
@@ -3503,7 +3503,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var container = document.getElementById('bundle-options');
     if (!container) return;
     var unitPrice = PROJECT_CONFIG.mainProduct.price || 35;
-    var productName = PROJECT_CONFIG.mainProduct.name || 'Boek';
+    var productName = PROJECT_CONFIG.mainProduct.name || 'Livre';
     var html = '';
     PROJECT_CONFIG.bundleOptions.forEach(function(opt, idx) {
       var isSelected = (idx === 0);
@@ -3514,7 +3514,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
       html += '<div class="bundle-info">';
       html += '<span class="bundle-label">' + opt.qty + '× ' + productName + '</span>';
-      html += '<span class="bundle-bonus">+ 2 bonussen</span>';
+      html += '<span class="bundle-bonus">+ 2 bonus offerts</span>';
       html += '</div>';
       html += '<div class="bundle-pricing">';
       if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
@@ -3616,7 +3616,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var newPrice = document.getElementById('order-bump-new-price');
     if (newPrice) newPrice.innerHTML = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
     var inlineSave = document.getElementById('order-bump-inline-save');
-    if (inlineSave) inlineSave.innerHTML = 'Bespaar &euro;' + saveAmt.toFixed(0);
+    if (inlineSave) inlineSave.innerHTML = 'Économise &euro;' + saveAmt.toFixed(0);
 
     // Detail
     var nameEl = document.getElementById('order-bump-name');
@@ -3626,7 +3626,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var detailNew = document.getElementById('order-bump-detail-new');
     if (detailNew) detailNew.innerHTML = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
     var detailSave = document.getElementById('order-bump-detail-save');
-    if (detailSave) detailSave.innerHTML = 'Bespaar &euro;' + saveAmt.toFixed(0);
+    if (detailSave) detailSave.innerHTML = 'Économise &euro;' + saveAmt.toFixed(0);
 
     // Summary + Mobile sticky bar — aktualizuj název a cenu
     var priceStr = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
@@ -3709,14 +3709,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // Subtotaal (excl. BTW)
     var subtotalEl = document.getElementById('summary-subtotal');
     if (subtotalEl) {
-      subtotalEl.innerHTML = '<span>Subtotaal (excl. BTW)</span><span>' + formatPrice(subtotal) + '</span>';
+      subtotalEl.innerHTML = '<span>Sous-total (HT)</span><span>' + formatPrice(subtotal) + '</span>';
     }
 
     // BTW řádek
     var taxEl = document.getElementById('summary-tax');
     if (taxEl && taxTotal > 0) {
       taxEl.style.display = '';
-      taxEl.innerHTML = '<span>BTW (' + taxRate + '%)</span><span>' + formatPrice(taxTotal) + '</span>';
+      taxEl.innerHTML = '<span>TVA (' + String(taxRate).replace('.', ',') + ' %)</span><span>' + formatPrice(taxTotal) + '</span>';
     }
 
     // Shipping
@@ -3842,7 +3842,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     try {
       mollieInstance = Mollie(profileId, {
-        locale: 'nl_NL',
+        locale: 'fr_FR',
         testmode: testmode
       });
 
@@ -4242,7 +4242,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var sdkUrl = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(clientId.trim())
       + '&components=' + components.join(',')
       + '&currency=' + currency
-      + '&locale=nl_NL';
+      + '&locale=fr_FR';
 
     console.log('[PayPal SDK] Loading URL:', sdkUrl);
 
@@ -4330,7 +4330,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (options.length === 0) throw new Error('Aucune option de livraison disponible');
       return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
         method: 'POST',
-        body: JSON.stringify({ option_id: options[0].id })
+        body: JSON.stringify({ option_id: (options.filter(function(o){ return /domicile/i.test(o.name || ''); })[0] || options[0]).id })
       });
     });
   }
@@ -5226,8 +5226,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     creditcard: 'Visa, Mastercard, American Express',
     paypal: 'Paie avec ton compte PayPal',
     eps: 'Paie via ta banque autrichienne',
-    przelewy24: 'Polski system platnosci',
-    blik: 'Szybka platnosc mobilna',
+    przelewy24: 'Système de paiement polonais',
+    blik: 'Paiement mobile rapide',
     in3: 'Paie en 3 fois',
     belfius: 'Paie via Belfius',
     kbc: 'Paie via KBC/CBC',
@@ -5565,7 +5565,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             '<div class="pm-name">' + m.display_name + '</div>' +
             '<div class="pm-desc">' + (METHOD_DESCRIPTIONS[m.code] || '') + '</div>' +
           '</div>' +
-          (isPopular ? '<span class="pm-badge">Populair</span>' : '');
+          (isPopular ? '<span class="pm-badge">Populaire</span>' : '');
 
         container.appendChild(label);
 
@@ -5772,9 +5772,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         : 'Mollie';
       subtext.textContent = 'Tes données de carte sont traitées de manière sécurisée via ' + providerName + '.';
     } else if (KLARNA_CODES.indexOf(selectedMethod) !== -1) {
-      subtext.textContent = 'Tu vas être redirigé vers Klarna pour finaliser le paiement.';
+      subtext.textContent = 'Nous allons te rediriger vers Klarna pour finaliser le paiement.';
     } else {
-      subtext.textContent = 'Tu vas être redirigé vers une page de paiement sécurisée.';
+      subtext.textContent = 'Nous allons te rediriger vers une page de paiement sécurisée.';
     }
 
     // Update trust badge provider text
@@ -5994,7 +5994,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var formatted = formatPhoneNumber(raw, country);
       phoneField.value = formatted;
       if (formatted !== raw) {
-        phonePreview.textContent = '\u2713 Opgeslagen als ' + formatted;
+        phonePreview.textContent = '\u2713 Enregistr\u00e9 au format ' + formatted;
         phonePreview.style.display = 'block';
       } else {
         phonePreview.style.display = 'none';
@@ -6897,7 +6897,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }, options.headers || {});
     return fetch(MEDUSA_URL + path, options).then(function(res) {
       return res.json().then(function(data) {
-        if (!res.ok) throw new Error(data.message || 'API fout');
+        if (!res.ok) throw new Error(data.message || 'Erreur du serveur');
         return data;
       });
     });
@@ -7120,13 +7120,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var s2t = el('bv-step2-title'); if (s2t) s2t.textContent = 'Confirmé auprès de ta banque';
       var s3 = el('bv-step3-icon'); if (s3) { s3.className = 'bv-check'; s3.innerHTML = '✓'; }
       var t = el('bv-title'); if (t) t.textContent = 'Réussi ! Ton paiement est confirmé';
-      var sub = el('bv-sub'); if (sub) sub.textContent = 'Tu vas être redirigé…';
+      var sub = el('bv-sub'); if (sub) sub.textContent = 'Redirection en cours…';
     }
 
     function showLonger() {
       var t = el('bv-title'); if (t) t.textContent = 'Ton paiement est en cours de traitement';
       var sub = el('bv-sub');
-      if (sub) sub.innerHTML = 'Certaines banques ont besoin d\'un peu plus de temps — c\'est normal. <strong>Tu n\'as pas besoin d\'attendre.</strong> Dès que ta banque confirme le paiement, tu reçois immédiatement ta confirmation et ton e-book par e-mail.';
+      if (sub) sub.innerHTML = 'Certaines banques ont besoin d\'un peu plus de temps — c\'est normal. <strong>Tu n\'as pas besoin d\'attendre.</strong> Dès que ta banque confirme le paiement, tu reçois immédiatement ta confirmation de commande par e-mail.';
       var info = el('bv-info'); if (info) info.innerHTML = '<strong style="color:#2D1B3D;">Tu peux fermer cette fenêtre.</strong> Nous suivons tout pour toi et t\'envoyons un e-mail dès que le paiement est confirmé.';
     }
 
@@ -7191,9 +7191,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       + '<div style="border-top:1px solid rgba(194,123,160,0.18);padding-top:18px;margin-bottom:18px;">'
       + '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;"><span class="bv-check">✓</span><div><p style="font-size:14.5px;font-weight:500;color:#2D1B3D;margin:0;">Paiement autorisé</p><p style="font-size:13px;color:#9B7AAD;margin:2px 0 0;">Tu as approuvé le paiement auprès de ta banque</p></div></div>'
       + '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;"><span id="bv-step2-icon" class="bv-spin" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:2.5px solid #EDD9E5;border-top-color:#C27BA0;"></span><div><p id="bv-step2-title" style="font-size:14.5px;font-weight:500;color:#2D1B3D;margin:0;">Vérification auprès de ta banque…</p><p style="font-size:13px;color:#9B7AAD;margin:2px 0 0;">Nous attendons la confirmation définitive</p></div></div>'
-      + '<div style="display:flex;align-items:flex-start;gap:12px;"><span id="bv-step3-icon" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:2px solid #EDD9E5;display:flex;align-items:center;justify-content:center;font-size:13px;color:#C9B3D1;">3</span><div><p style="font-size:14.5px;font-weight:500;color:#9B7AAD;margin:0;">Confirmation &amp; e-book</p><p style="font-size:13px;color:#C9B3D1;margin:2px 0 0;">Tu la reçois immédiatement par e-mail</p></div></div>'
+      + '<div style="display:flex;align-items:flex-start;gap:12px;"><span id="bv-step3-icon" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:2px solid #EDD9E5;display:flex;align-items:center;justify-content:center;font-size:13px;color:#C9B3D1;">3</span><div><p style="font-size:14.5px;font-weight:500;color:#9B7AAD;margin:0;">Confirmation de commande</p><p style="font-size:13px;color:#C9B3D1;margin:2px 0 0;">Tu la reçois immédiatement par e-mail</p></div></div>'
       + '</div>'
-      + '<div style="background:#F5EDF2;border-radius:10px;padding:14px 16px;"><p id="bv-info" style="font-size:13.5px;line-height:1.55;color:#5A3D6B;margin:0;"><strong style="color:#2D1B3D;">Tu n\'as rien à faire.</strong> Ne ferme pas cette fenêtre — tu seras redirigé automatiquement dès que le paiement sera confirmé.</p></div>'
+      + '<div style="background:#F5EDF2;border-radius:10px;padding:14px 16px;"><p id="bv-info" style="font-size:13.5px;line-height:1.55;color:#5A3D6B;margin:0;"><strong style="color:#2D1B3D;">Tu n\'as rien à faire.</strong> Ne ferme pas cette fenêtre — la redirection se fera automatiquement dès que le paiement sera confirmé.</p></div>'
       + '<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;"><span style="font-size:12px;color:#9B7AAD;">🔒 Sécurisé via Brite · réglementé PSD2</span></div>'
       + '</div>';
   }
@@ -7486,7 +7486,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           .then(function(shipRes) {
             var opts = (shipRes.shipping_options || []);
             if (!opts.length) throw new Error('no shipping options');
-            return medusaFetch('/store/carts/' + w.cartId + '/shipping-methods', { method: 'POST', body: JSON.stringify({ option_id: opts[0].id }) });
+            return medusaFetch('/store/carts/' + w.cartId + '/shipping-methods', { method: 'POST', body: JSON.stringify({ option_id: (opts.filter(function(o){ return /domicile/i.test(o.name || ''); })[0] || opts[0]).id }) });
           })
           .then(function() { if (window.__briteWarm === w) { w.ready = true; w.inflight = false; } });
       })
@@ -7806,7 +7806,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         }
         return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
           method: 'POST',
-          body: JSON.stringify({ option_id: options[0].id })
+          body: JSON.stringify({ option_id: (options.filter(function(o){ return /domicile/i.test(o.name || ''); })[0] || options[0]).id })
         });
       }).then(function() {
         return medusaFetch('/store/carts/' + cartId, { method: 'GET' });

@@ -208,6 +208,34 @@ const SK_STEPS: StepConfig[] = [
   },
 ]
 
+/** Lâche prise sur ce qui te détruit (lache-livre) 3-step sequence */
+const FR_STEPS: StepConfig[] = [
+  {
+    step: 1,
+    templateKey: EmailTemplates.FR_ABANDONED_CHECKOUT_1,
+    subject: (name) => `Bonjour ${name}, ton livre t'attend ! 📦`,
+    preview: "Ton livre est emballé et n'attend plus que toi !",
+    delayMs: THIRTY_MINUTES_MS,
+    delayFrom: (_meta, abandonedAt) => abandonedAt,
+  },
+  {
+    step: 2,
+    templateKey: EmailTemplates.FR_ABANDONED_CHECKOUT_2,
+    subject: (name) => `${name}, l'histoire derrière ce livre`,
+    preview: "Après une semaine à peine, je me sentais plus légère que jamais...",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
+  },
+  {
+    step: 3,
+    templateKey: EmailTemplates.FR_ABANDONED_CHECKOUT_3,
+    subject: (name) => `Dernière chance, ${name} — ton panier sera bientôt libéré`,
+    preview: "Il reste 24 heures — ensuite je dois libérer ton panier.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
+  },
+]
+
 /** Het Leven Dat Je Verdient 3-step sequence (Anna de Vries) */
 const HL_STEPS: StepConfig[] = [
   {
@@ -802,6 +830,79 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         } catch (emailError: any) {
           logger.error(
             `[Abandoned Cart] Failed to send SK step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
+          )
+        }
+        continue
+      }
+
+      // ── Lâche prise sur ce qui te détruit: 3-step sequence ──
+      if (projectId === "lache-livre") {
+        // All 3 steps sent? Done.
+        if (currentStep >= 3) {
+          skippedCount++
+          continue
+        }
+
+        const nextStepConfig = FR_STEPS[currentStep] // currentStep=0 → step 1, etc.
+
+        // Check if enough time has passed
+        const referenceTime = nextStepConfig.delayFrom(meta, abandonedAt)
+        if (isNaN(referenceTime.getTime())) continue // invalid date, skip
+        if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
+
+        // Extract customer data
+        const firstName = cart.shipping_address?.first_name || ""
+        const checkoutUrl = meta.checkout_url || "https://lacheprise-livre.fr/checkout"
+        const mainItem = (cart.items || [])[0]
+        const productName = mainItem?.variant?.product?.title || mainItem?.title || "Lâche prise sur ce qui te détruit"
+        // Calculate total price from all cart items (quantity × unit_price)
+        const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+        }, 0)
+        const productPrice = cartTotal > 0
+          ? Math.round(cartTotal).toString()
+          : "36"
+        const productImage = mainItem?.variant?.product?.thumbnail || ""
+
+        try {
+          await notificationModuleService.createNotifications({
+            to: cart.email,
+            channel: "email",
+            template: nextStepConfig.templateKey,
+            from: "Joris de Vries - Lâche prise sur ce qui te détruit <support@lacheprise-livre.fr>",
+            data: {
+              emailOptions: {
+                replyTo: "support@lacheprise-livre.fr",
+                subject: nextStepConfig.subject(firstName),
+              },
+              firstName,
+              checkoutUrl,
+              productName,
+              productPrice,
+              productImage,
+              preview: nextStepConfig.preview,
+            },
+          })
+
+          // Update metadata with step tracking
+          await cartModuleService.updateCarts(cart.id, {
+            metadata: {
+              ...meta,
+              recovery_email_step: nextStepConfig.step,
+              [`recovery_email_step${nextStepConfig.step}_at`]: now.toISOString(),
+              // Legacy compat: mark as sent after step 1
+              recovery_email_sent: true,
+              recovery_email_sent_at: meta.recovery_email_sent_at || now.toISOString(),
+            },
+          })
+
+          sentCount++
+          logger.info(
+            `[Abandoned Cart] FR step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
+          )
+        } catch (emailError: any) {
+          logger.error(
+            `[Abandoned Cart] Failed to send FR step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
           )
         }
         continue
