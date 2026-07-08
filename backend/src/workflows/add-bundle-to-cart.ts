@@ -86,12 +86,12 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 1599,  // 1599 Kč incl. DPH (save 648 Kč)
     4: 1999,  // 1999 Kč incl. DPH (save 997 Kč)
   },
-  // Pusti to, čo ťa ničí — SK edition (EUR)
+  // Pusti to, čo ťa ničí — SK edition (EUR). Single book 32 € (original 35 €).
   "pusti-to": {
-    1: 29.90,  // 29,90 € incl. DPH
-    2: 47.90,  // 47,90 € incl. DPH (save 11,90 €)
-    3: 63.90,  // 63,90 € incl. DPH (save 25,80 €)
-    4: 79.90,  // 79,90 € incl. DPH (save 39,70 €)
+    1: 32,    // 32,00 € incl. DPH (original 35 €)
+    2: 52,    // 52,00 € incl. DPH (save 12 €)
+    3: 70,    // 70,00 € incl. DPH (save 26 €)
+    4: 88,    // 88,00 € incl. DPH (save 40 €)
   },
   // Psí superživot — hlavní produkt CZ
   "psi-superzivot": {

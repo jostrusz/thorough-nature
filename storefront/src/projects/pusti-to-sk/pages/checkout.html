@@ -3361,6 +3361,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
       html += '</div>';
       html += '<div class="bundle-pricing">';
+      if (opt.originalPrice && opt.originalPrice > opt.price) html += '<div class="bundle-original" style="font-size:13px;color:var(--muted);text-decoration:line-through;">' + formatPrice(opt.originalPrice) + '</div>';
       html += '<div class="bundle-price">' + formatPrice(opt.price) + '</div>';
       if (opt.qty > 1) html += '<div class="bundle-per-unit">' + perUnit + ' € za knihu</div>';
       if (opt.savings > 0) html += '<div class="bundle-savings">Ušetríte ' + formatPrice(opt.savings) + '</div>';
