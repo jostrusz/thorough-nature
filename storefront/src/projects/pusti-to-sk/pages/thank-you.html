@@ -621,7 +621,7 @@ body { background: var(--bg); }
     <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Tvoja objednávka</div>
     <div class="ty-order-items" id="ty-order-items">
       <div class="ty-order-item">
-        <img src="/pust-to-co-te-nici-obrazek-pichi.png" alt="Pusti to, čo ťa ničí" class="ty-order-cover" loading="lazy">
+        <img src="/pusti-to-co-ta-nici-kniha-pichi.png" alt="Pusti to, čo ťa ničí" class="ty-order-cover" loading="lazy">
         <div>
           <div class="ty-order-name">Pusti to, čo ťa ničí</div>
           <div class="ty-order-desc">Fyzická kniha od Jorisa de Vriesa &mdash; doručenie domov alebo na odberné miesto</div>
@@ -651,7 +651,7 @@ body { background: var(--bg); }
     </div>
     <div class="ty-order-total">
       <span class="ty-order-total-label">Zaplatené</span>
-      <span class="ty-order-total-price" id="ty-total-price">29,90 €</span>
+      <span class="ty-order-total-price" id="ty-total-price">32 €</span>
     </div>
   </div>
 
@@ -820,7 +820,7 @@ body { background: var(--bg); }
   }
   var totalPriceEl = document.getElementById('ty-total-price');
   if (totalPriceEl) {
-    totalPriceEl.textContent = totalPrice.toFixed(2).replace('.', ',') + ' \u20AC';
+    totalPriceEl.textContent = (totalPrice % 1 === 0 ? String(totalPrice) : totalPrice.toFixed(2).replace('.', ',')) + ' \u20AC';
   }
 
   // 2e. Aktualizuj hlavní položku s bundle qty

@@ -8,7 +8,7 @@ var PROJECT_CONFIG = {
     "name": "Pusti to, čo ťa ničí",
     "handle": "pusti-to",
     "variantId": "variant_01KWVB0CS1A6XBKNB9M3SG5GFK",
-    "price": 29.90,
+    "price": 32.00,
     "currency": "EUR",
     "thumbnail": ""
   },
@@ -21,10 +21,10 @@ var PROJECT_CONFIG = {
     "currency": "EUR"
   },
   "bundleOptions": [
-    { "qty": 1, "price": 29.90, "label": "1 kniha", "sublabel": "Pre seba", "badge": "NAJPREDÁVANEJŠIE", "save": 0 },
-    { "qty": 2, "price": 47.90, "label": "2 knihy", "sublabel": "Pre vás a blízkeho človeka", "badge": "NAJOBĽÚBENEJŠIE", "save": 11.90, "savings": 11.90 },
-    { "qty": 3, "price": 63.90, "label": "3 knihy", "sublabel": "Pre celú rodinu", "badge": "NAJVIAC UŠETRÍTE", "save": 25.80, "savings": 25.80 },
-    { "qty": 4, "price": 79.90, "label": "4 knihy", "sublabel": "Perfektné ako darček", "badge": "NAJLEPŠIA HODNOTA", "save": 39.70, "savings": 39.70 }
+    { "qty": 1, "price": 32.00, "label": "1 kniha", "sublabel": "Pre seba", "badge": "NAJPREDÁVANEJŠIE", "save": 0 },
+    { "qty": 2, "price": 52.00, "label": "2 knihy", "sublabel": "Pre vás a blízkeho človeka", "badge": "NAJOBĽÚBENEJŠIE", "save": 12.00, "savings": 12.00 },
+    { "qty": 3, "price": 70.00, "label": "3 knihy", "sublabel": "Pre celú rodinu", "badge": "NAJVIAC UŠETRÍTE", "save": 26.00, "savings": 26.00 },
+    { "qty": 4, "price": 88.00, "label": "4 knihy", "sublabel": "Perfektné ako darček", "badge": "NAJLEPŠIA HODNOTA", "save": 40.00, "savings": 40.00 }
   ],
   "regions": {
     "SK": "reg_01KWVAZVNATPX01HH77MYWKG3M"
