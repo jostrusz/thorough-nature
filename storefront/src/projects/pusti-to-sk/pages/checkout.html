@@ -54,6 +54,9 @@
 <!-- Stripe.js SDK -->
 <script src="https://js.stripe.com/v3/" async></script>
 
+<!-- QR generator (manual bank transfer / SEPA QR) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" async></script>
+
 <style>
 /* ─── FONTS ─── */
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
@@ -3211,6 +3214,107 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     return total;
   }
 
+  /* ─── MANUÁLNY BANKOVÝ PREVOD (SEPA) — QR popup ───────────────────────────
+   * Order sa vytvorí (nezaplatená), zobrazí sa popup s EPC/GiroCode QR + údajmi.
+   * Párovanie neskôr cez FIO API podľa RF reference. Zapína sa cez config.
+   * ──────────────────────────────────────────────────────────────────────────*/
+  function btEnabled() {
+    var bt = PROJECT_CONFIG.bankTransfer;
+    return !!(bt && bt.enabled && bt.iban && bt.iban.indexOf('0000000000') === -1);
+  }
+  // ISO 11649 RF Creditor Reference from the order number (structured SEPA reference).
+  function btRfReference(orderNo) {
+    var ref = String(orderNo).replace(/[^0-9A-Za-z]/g, '');
+    var rearr = (ref + 'RF00').toUpperCase(), num = '';
+    for (var i = 0; i < rearr.length; i++) {
+      var c = rearr.charCodeAt(i);
+      num += (c >= 48 && c <= 57) ? rearr[i] : String(c - 55);
+    }
+    var rem = 0;
+    for (var j = 0; j < num.length; j++) rem = (rem * 10 + Number(num[j])) % 97;
+    var check = String(98 - rem); if (check.length < 2) check = '0' + check;
+    return 'RF' + check + ref;
+  }
+  // EPC069-12 (GiroCode) SEPA Credit Transfer — RF reference in the structured field.
+  function btEpcString(amount, rf) {
+    var bt = PROJECT_CONFIG.bankTransfer || {};
+    return ['BCD', '002', '1', 'SCT',
+      bt.bic || '',
+      (bt.beneficiary || '').substring(0, 70),
+      (bt.iban || '').replace(/\s/g, ''),
+      (bt.currency || 'EUR') + Number(amount).toFixed(2),
+      '', rf, '', ''
+    ].join('\n');
+  }
+  function btFmtIban(iban) { return (iban || '').replace(/(.{4})/g, '$1 ').trim(); }
+  function btCopy(text, btn) {
+    (navigator.clipboard && navigator.clipboard.writeText(text) || Promise.resolve()).then(function () {
+      var o = btn.textContent; btn.textContent = '✓ Skopírované'; btn.classList.add('bt-copied');
+      setTimeout(function () { btn.textContent = o; btn.classList.remove('bt-copied'); }, 1600);
+    });
+  }
+  function btEnsureStyles() {
+    if (document.getElementById('bt-styles')) return;
+    var st = document.createElement('style'); st.id = 'bt-styles';
+    st.textContent =
+      '#bt-overlay{position:fixed;inset:0;z-index:100000;background:rgba(45,27,61,.5);display:flex;align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto;font-family:"DM Sans",system-ui,sans-serif;animation:fadeIn .25s ease;}' +
+      '.bt-card{background:#fff;max-width:420px;width:100%;border-radius:20px;box-shadow:0 20px 60px rgba(45,27,61,.28);overflow:hidden;color:#2D1B3D;margin:auto;}' +
+      '.bt-h{background:linear-gradient(135deg,#0F6E56,#1D9E75);padding:18px 22px;text-align:center;color:#fff;}' +
+      '.bt-h .ok{font-size:16px;font-weight:700;}.bt-h .sub{font-size:12.5px;color:#C7EDDF;margin-top:3px;}' +
+      '.bt-resv{background:#FFF8E1;border-bottom:1px solid #FFE082;padding:8px 22px;text-align:center;font-size:12.5px;color:#7A5B10;}' +
+      '.bt-body{padding:20px 22px 22px;}' +
+      '.bt-amt{text-align:center;margin-bottom:14px;}.bt-amt .l{font-size:12px;color:#9B7AAD;text-transform:uppercase;letter-spacing:.5px;font-weight:600;}.bt-amt .v{font-size:32px;font-weight:700;}' +
+      '.bt-qr{width:200px;height:200px;margin:0 auto;background:#fff;border:1px solid #EDD9E5;border-radius:14px;padding:10px;box-shadow:0 4px 16px rgba(45,27,61,.08);}' +
+      '.bt-qr img,.bt-qr canvas{width:100%!important;height:100%!important;display:block;}' +
+      '.bt-scan{text-align:center;font-size:13px;font-weight:600;margin-top:11px;}' +
+      '.bt-div{display:flex;align-items:center;gap:10px;margin:16px 0 10px;color:#B49BC0;font-size:11.5px;}.bt-div::before,.bt-div::after{content:"";flex:1;height:1px;background:#EDD9E5;}' +
+      '.bt-row{display:flex;align-items:center;gap:10px;background:#FAF5F8;border:1px solid #EDD9E5;border-radius:10px;padding:9px 12px;margin-bottom:7px;}' +
+      '.bt-row .k{font-size:11px;color:#9B7AAD;text-transform:uppercase;letter-spacing:.4px;font-weight:600;}.bt-row .v{font-size:13px;font-weight:600;margin-left:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}' +
+      '.bt-cp{flex-shrink:0;border:1px solid #D9C3D2;background:#fff;color:var(--cta);border-radius:7px;font-family:inherit;font-size:11px;font-weight:600;padding:5px 9px;cursor:pointer;}.bt-cp:hover{background:var(--cta);color:#fff;}.bt-cp.bt-copied{background:#E1F5EE;color:#0F6E56;border-color:#9FE1CB;}' +
+      '.bt-steps{display:flex;justify-content:space-between;gap:8px;margin-top:16px;}.bt-step{flex:1;text-align:center;}.bt-step .n{width:24px;height:24px;border-radius:50%;background:#F0E4EC;color:var(--cta);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-bottom:4px;}.bt-step .t{font-size:11px;color:#7A6189;line-height:1.3;}' +
+      '.bt-foot{margin-top:16px;padding-top:14px;border-top:1px solid #F0E4EC;}.bt-foot .f{display:flex;align-items:center;gap:7px;font-size:12px;color:#5A3D6B;margin-bottom:6px;}' +
+      '.bt-done{width:100%;margin-top:16px;padding:14px;border:none;border-radius:10px;background:var(--cta);color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;}';
+    document.head.appendChild(st);
+  }
+  function btRenderQr(el, text) {
+    function go() {
+      if (typeof window.QRCode === 'undefined') { setTimeout(go, 200); return; }
+      el.innerHTML = '';
+      new window.QRCode(el, { text: text, width: 180, height: 180, correctLevel: window.QRCode.CorrectLevel.M });
+    }
+    go();
+  }
+  // Show the SEPA bank-transfer popup for a freshly created (unpaid) order.
+  function showBankTransferPopup(displayId, amount) {
+    var bt = PROJECT_CONFIG.bankTransfer || {};
+    var rf = btRfReference(displayId);
+    var epc = btEpcString(amount, rf);
+    var amtLabel = Number(amount).toFixed(2).replace('.', ',') + ' €';
+    btEnsureStyles();
+    var ov = document.createElement('div'); ov.id = 'bt-overlay';
+    ov.innerHTML =
+      '<div class="bt-card">'
+      + '<div class="bt-h"><div class="ok">✅ Objednávka je vytvorená</div><div class="sub">SK2026-' + displayId + ' · čaká na úhradu</div></div>'
+      + '<div class="bt-resv">⏳ Tovar je rezervovaný <strong>24 hodín</strong> · odošleme ihneď po úhrade</div>'
+      + '<div class="bt-body">'
+      + '<div class="bt-amt"><div class="l">Suma na úhradu</div><div class="v">' + amtLabel + '</div></div>'
+      + '<div class="bt-qr" id="bt-qr"></div>'
+      + '<div class="bt-scan">📲 Naskenujte v bankovej aplikácii</div>'
+      + '<div class="bt-div">alebo skopírujte údaje</div>'
+      + '<div class="bt-row"><span class="k">IBAN</span><span class="v">' + btFmtIban(bt.iban) + '</span><button class="bt-cp" data-c="' + (bt.iban || '') + '">Kopírovať</button></div>'
+      + '<div class="bt-row"><span class="k">Suma</span><span class="v">' + Number(amount).toFixed(2) + ' €</span><button class="bt-cp" data-c="' + Number(amount).toFixed(2) + '">Kopírovať</button></div>'
+      + '<div class="bt-row"><span class="k">Reference</span><span class="v">' + rf + '</span><button class="bt-cp" data-c="' + rf + '">Kopírovať</button></div>'
+      + '<div class="bt-steps"><div class="bt-step"><div class="n">1</div><div class="t">Naskenujte QR</div></div><div class="bt-step"><div class="n">2</div><div class="t">Potvrďte v banke</div></div><div class="bt-step"><div class="n">3</div><div class="t">Odošleme tovar</div></div></div>'
+      + '<div class="bt-foot"><div class="f">📧 Údaje sme poslali aj na <strong>váš e-mail</strong></div><div class="f">🔒 Odošleme <strong>ihneď po pripísaní</strong> (SEPA ~1 prac. deň)</div><div class="f">↩️ <strong>30-dní</strong> záruka vrátenia</div></div>'
+      + '<button class="bt-done" id="bt-done">Rozumiem, zaplatím</button>'
+      + '</div></div>';
+    document.body.appendChild(ov);
+    document.body.style.overflow = 'hidden';
+    btRenderQr(document.getElementById('bt-qr'), epc);
+    ov.querySelectorAll('.bt-cp').forEach(function (b) { b.addEventListener('click', function () { btCopy(b.getAttribute('data-c'), b); }); });
+    document.getElementById('bt-done').onclick = function () { window.location.href = PROJECT_CONFIG.thankYouUrl; };
+  }
+
   // Přepočítej a zobraz CELÝ order summary (bundle, order bump, daně, totál)
   function recalculateOrderSummary() {
     var countryCode = document.getElementById('country') ? document.getElementById('country').value : 'SK';
@@ -5644,7 +5748,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // For methods with known SVG icons. Revolut method codes reuse the shared
     // brand icons already used by PayPal/Comgate/Stripe (apple_pay→applepay,
     // google_pay→googlepay, pay_by_bank→bank_transfer, sepa_direct_debit→sepa).
-    var ICON_ALIAS = { apple_pay: 'applepay', google_pay: 'googlepay', pay_by_bank: 'bank_transfer', sepa_direct_debit: 'sepa' };
+    var ICON_ALIAS = { apple_pay: 'applepay', google_pay: 'googlepay', pay_by_bank: 'bank_transfer', sepa_direct_debit: 'sepa', bank_transfer_sepa: 'bank_transfer' };
     var iconCode = ICON_ALIAS[code] || code;
     var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'bank_transfer', 'sepa'];
     if (iconMethods.indexOf(iconCode) !== -1) {
@@ -5734,6 +5838,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             'sepa_debit': 'SEPA inkaso',
             'swish': 'Swish',
             'revolut_pay': 'Revolut Pay',
+            'bank_transfer_sepa': 'Bankový prevod (SEPA)',
             'cod': 'Platba na dobierku',
             'twisto': 'Twisto — platba do 30 dní',
             'skippay': 'Skip Pay — odložená platba',
@@ -5805,6 +5910,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }
       console.log('[CardForm] Card provider detected:', cardProvider || 'none');
 
+      // Manuálny bankový prevod (SEPA) — klient-side metóda (nie z brány).
+      if (btEnabled()) {
+        allPaymentOptions.push({
+          code: 'bank_transfer_sepa', provider: 'manual', provider_id: 'pp_cod_cod',
+          display_name: 'Bankový prevod (SEPA)', icon: 'bank_transfer', sort_order: 60
+        });
+      }
+
       if (allPaymentOptions.length === 0) {
         if (errorEl) {
           errorEl.innerHTML = '<p>Žiadne platobné metódy nie sú k dispozícii.</p>';
@@ -5853,7 +5966,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
 
     // Custom sort order for psi-superzivot
-    var METHOD_ORDER = ['creditcard', 'bank_transfer', 'paypal', 'cod', 'googlepay', 'applepay'];
+    var METHOD_ORDER = ['creditcard', 'bank_transfer', 'paypal', 'bank_transfer_sepa', 'cod', 'googlepay', 'applepay'];
     methods.sort(function(a, b) {
       var idxA = METHOD_ORDER.indexOf(a.code);
       var idxB = METHOD_ORDER.indexOf(b.code);
@@ -8306,10 +8419,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var sessionData = {};
       if (USE_TEST_MODE) {
         providerId = 'pp_system_default';
-      } else if (selectedMethod === 'cod') {
+      } else if (selectedMethod === 'cod' || selectedMethod === 'bank_transfer_sepa') {
+        // COD + manuálny bankový prevod → order sa vytvorí bez online platby.
         providerId = 'pp_cod_cod';
         sessionData = {
-          method: 'cod',
+          method: selectedMethod,
           amount: checkoutTotal,
           currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
         };
@@ -8374,6 +8488,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         }
         if (selectedMethod === 'cod') {
           cartMeta.payment_method = 'cod';
+        } else if (selectedMethod === 'bank_transfer_sepa') {
+          // Označí order ako čakajúci na bankový prevod → fulfillment drží kým FIO
+          // reconcile cron nepotvrdí platbu (párovanie podľa RF reference).
+          cartMeta.payment_method = 'bank_transfer_sepa';
+          cartMeta.payment_provider = 'bank_transfer';
+          cartMeta.awaiting_bank_payment = true;
         }
 
         // ── PARALLEL: metadata update + payment collection creation ──
@@ -8458,6 +8578,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           } else {
             window.location.href = PROJECT_CONFIG.upsellUrl;
           }
+        });
+      } else if (selectedMethod === 'bank_transfer_sepa') {
+        // BANKOVÝ PREVOD (SEPA): dokončiť order (nezaplatený) → zobraziť QR popup.
+        return medusaFetch('/store/carts/' + result.cartId + '/complete', {
+          method: 'POST'
+        }).then(function(completeRes) {
+          var order = window.__extractOrderOrThrow(completeRes);
+          localStorage.setItem('medusa_order_id', order.id || '');
+          localStorage.setItem('medusa_order_display_id', order.display_id || '');
+          localStorage.removeItem('checkout_draft');
+          localStorage.removeItem('background_cart_id');
+          submitBtn.classList.remove('loading'); submitBtn.disabled = false;
+          showBankTransferPopup(order.display_id, checkoutTotal);
         });
       } else if (selectedMethod === 'cod') {
         // DOBÍRKA (COD): rovnou dokončit objednávku (žádný redirect, žádná platba)

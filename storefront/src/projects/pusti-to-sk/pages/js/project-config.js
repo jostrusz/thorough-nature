@@ -38,7 +38,14 @@ var PROJECT_CONFIG = {
   "foxentryApiKey": null,
   "homeUrl": "/",
   "checkoutUrl": "/checkout.html",
-  "thankYouUrl": "/thank-you.html"
+  "thankYouUrl": "/thank-you.html",
+  "bankTransfer": {
+    "enabled": false,
+    "iban": "CZ0000000000000000000000",
+    "bic": "FIOBCZPP",
+    "beneficiary": "Performance Marketing Solution s.r.o.",
+    "currency": "EUR"
+  }
 };
 PROJECT_CONFIG.getRegionId = function(countryCode) {
   return PROJECT_CONFIG.regions[countryCode] || Object.values(PROJECT_CONFIG.regions)[0];
