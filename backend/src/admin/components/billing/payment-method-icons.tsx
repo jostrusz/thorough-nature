@@ -345,6 +345,17 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "googlepay", name: "Google Pay", icon: "googlepay", available_countries: [], supported_currencies: [] },
     { code: "wallet", name: "Barion egyenleg (Pénztárca)", icon: "barion", available_countries: [], supported_currencies: [] },
   ],
+  revolut: [
+    // Revolut Merchant — all methods render INLINE via the Web SDK against the
+    // order token (no redirect). card / apple_pay / google_pay / revolut_pay work
+    // broadly (incl. CZK); pay_by_bank per open-banking coverage; sepa EUR only.
+    { code: "card", name: "Credit/Debit Card", icon: "card", available_countries: [], supported_currencies: [] },
+    { code: "revolut_pay", name: "Revolut Pay", icon: "revolut", available_countries: [], supported_currencies: [] },
+    { code: "apple_pay", name: "Apple Pay", icon: "applepay", available_countries: [], supported_currencies: [] },
+    { code: "google_pay", name: "Google Pay", icon: "googlepay", available_countries: [], supported_currencies: [] },
+    { code: "pay_by_bank", name: "Pay by Bank", icon: "bank_transfer", available_countries: ["gb", "ie", "nl", "be", "de", "at", "fr", "it", "es", "pt", "fi", "ee", "lt", "lv", "pl", "se", "no", "dk"], supported_currencies: ["EUR", "GBP", "SEK", "NOK", "DKK", "PLN"] },
+    { code: "sepa_direct_debit", name: "SEPA Direct Debit", icon: "sepa", available_countries: ["at", "be", "cy", "de", "ee", "es", "fi", "fr", "gr", "ie", "it", "lt", "lu", "lv", "mt", "nl", "pt", "si", "sk"], supported_currencies: ["EUR"] },
+  ],
 }
 
 export const SUPPORTED_PROVIDERS = [
@@ -359,6 +370,7 @@ export const SUPPORTED_PROVIDERS = [
   { code: "klarna", name: "Klarna" },
   { code: "novalnet", name: "Novalnet" },
   { code: "barion", name: "Barion" },
+  { code: "revolut", name: "Revolut (Merchant)" },
 ]
 
 export const SUPPORTED_CURRENCIES = ["EUR", "CZK", "PLN", "SEK", "NOK", "HUF"]

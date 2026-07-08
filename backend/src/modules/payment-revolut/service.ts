@@ -126,7 +126,10 @@ class RevolutPaymentProviderService extends AbstractPaymentProvider<Options> {
         const isLive = config.mode === "live"
         const keys = isLive ? config.live_keys : config.test_keys
         const secretKey = keys?.secret_key || keys?.api_key
-        const publicKey = keys?.public_key || null
+        // Public key (pk_...) is exposed client-side for the Web SDK. The admin
+        // gateway form stores its first field as `api_key`, so accept it there
+        // too (admin-entered) in addition to `public_key` (seed / API-set).
+        const publicKey = keys?.public_key || keys?.api_key || null
         if (secretKey) {
           this.logger_.info(
             `[Revolut] ✓ Using ${isLive ? "LIVE" : "SANDBOX"} keys from admin gateway "${config.display_name}" (id: ${config.id})`
