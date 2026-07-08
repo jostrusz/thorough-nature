@@ -158,6 +158,17 @@ export function getPaymentIconUrl(order: any): string {
     return `/public/brite-bank-logo?bank_id=${encodeURIComponent(bankId)}`
   }
 
+  // Revolut — map method to specific icon. No datatrans "revolut" logo exists,
+  // so revolut_pay / pay_by_bank fall back to the blue "R" badge (getPaymentFallback).
+  if (providerId.includes("revolut") || order.metadata?.payment_provider === "revolut") {
+    const m = (method || "").toLowerCase()
+    if (m === "apple_pay" || m === "applepay") return `${ICON_BASE}/wallets/apple-pay.svg`
+    if (m === "google_pay" || m === "googlepay") return `${ICON_BASE}/wallets/google-pay.svg`
+    if (m === "sepa_direct_debit" || m === "sepa" || m === "sepa_debit") return `${ICON_BASE}/apm/sepa.svg`
+    if (m === "card" || m === "creditcard") return `${ICON_BASE}/cards/visa.svg`
+    return "" // revolut_pay / pay_by_bank / unknown → blue "R" badge
+  }
+
   // Stripe — map method to specific icon
   if (providerId.includes("stripe")) {
     const m = (method || "").toLowerCase()
@@ -281,6 +292,7 @@ export function getPaymentFallback(order: any): { letter: string; bg: string; co
   if (providerId.includes("przelewy") || providerId.includes("p24")) return { letter: "P24", bg: "#D40E2F", color: "#fff" }
   if (providerId.includes("payu") || order.metadata?.payment_provider === "payu") return { letter: "PayU", bg: "#A6C307", color: "#fff" }
   if (providerId.includes("barion") || order.metadata?.payment_provider === "barion") return { letter: "b", bg: "#0097DB", color: "#fff" }
+  if (providerId.includes("revolut") || order.metadata?.payment_provider === "revolut") return { letter: "R", bg: "#0666EB", color: "#fff" }
   return { letter: "?", bg: colors.textMuted, color: "#fff" }
 }
 
@@ -289,6 +301,21 @@ export function getPaymentMethodName(order: any): string {
   const { providerId, method } = findPrimaryPayment(order)
   if (providerId.includes("klarna")) return "Klarna"
   if (providerId.includes("paypal")) return "PayPal"
+  if (providerId.includes("revolut") || order.metadata?.payment_provider === "revolut") {
+    const m = (method || "").toLowerCase()
+    const names: Record<string, string> = {
+      card: "Platba kartou (Revolut)",
+      creditcard: "Platba kartou (Revolut)",
+      revolut_pay: "Revolut Pay",
+      apple_pay: "Apple Pay (Revolut)",
+      applepay: "Apple Pay (Revolut)",
+      google_pay: "Google Pay (Revolut)",
+      googlepay: "Google Pay (Revolut)",
+      pay_by_bank: "Pay by Bank (Revolut)",
+      sepa_direct_debit: "SEPA inkaso (Revolut)",
+    }
+    return names[m] || "Revolut"
+  }
   if (providerId.includes("brite") || order.metadata?.payment_provider === "brite") {
     const bank = order.metadata?.payment_brite_bank_name
     return bank ? `${bank} · Brite` : "Brite (Pay by Bank)"

@@ -88,6 +88,18 @@ function detectProvider(payments: any[]): {
       label: "Klarna",
     }
   }
+  if (pid.includes("revolut")) {
+    // Revolut orders auto-capture (COMPLETED) — no manual capture button needed.
+    return {
+      name: "revolut",
+      isPayPal: false,
+      isKlarna: false,
+      isMollie: false,
+      needsCapture: false,
+      color: "#0666EB",
+      label: "Revolut",
+    }
+  }
   return {
     name: "mollie",
     isPayPal: false,

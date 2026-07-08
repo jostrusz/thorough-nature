@@ -266,11 +266,25 @@ async function safetyNetCompleteCart(
           `SELECT metadata FROM "order" WHERE id = $1 LIMIT 1`,
           [completedOrderId]
         )
+        // Derive the real method from the payment record (card / revolut_pay /
+        // pay_by_bank / ...) instead of hardcoding pay_by_bank.
+        let snMethod = "pay_by_bank"
+        try {
+          const { rows: mrows } = await pool.query(
+            `SELECT p.data->>'method' AS method
+             FROM payment p
+             JOIN order_payment_collection opc ON opc.payment_collection_id = p.payment_collection_id
+             WHERE opc.order_id = $1 AND p.data->>'method' IS NOT NULL
+             ORDER BY p.created_at DESC LIMIT 1`,
+            [completedOrderId]
+          )
+          if (mrows[0]?.method) snMethod = mrows[0].method
+        } catch { /* keep default */ }
         const updatedMeta = {
           ...(orderRows[0]?.metadata || {}),
           revolutOrderId,
           payment_provider: "revolut",
-          payment_method: "pay_by_bank",
+          payment_method: snMethod,
           payment_captured: true,
           payment_captured_at: new Date().toISOString(),
           completed_by: "revolut_webhook_safety_net",
@@ -310,6 +324,32 @@ async function safetyNetCompleteCart(
     }).catch(() => {})
     alertSafetyNet("Revolut safety-net: completion threw", msg)
   }
+}
+
+/**
+ * Best-effort lookup of the actual payment method (card / revolut_pay / apple_pay
+ * / google_pay / pay_by_bank / sepa_direct_debit) for a Revolut order, read from
+ * the payment record. Falls back to the order's existing metadata, then "card".
+ */
+async function getRevolutPaymentMethod(orderId: string, existingMeta: any): Promise<string> {
+  try {
+    const { Pool } = require("pg")
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+    try {
+      const { rows } = await pool.query(
+        `SELECT p.data->>'method' AS method
+         FROM payment p
+         JOIN order_payment_collection opc ON opc.payment_collection_id = p.payment_collection_id
+         WHERE opc.order_id = $1 AND p.data->>'method' IS NOT NULL
+         ORDER BY p.created_at DESC LIMIT 1`,
+        [orderId]
+      )
+      if (rows[0]?.method) return rows[0].method
+    } finally {
+      await pool.end().catch(() => {})
+    }
+  } catch { /* best effort — method is non-critical */ }
+  return existingMeta?.payment_method || "card"
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
@@ -379,13 +419,18 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(200).json({ received: true })
     }
 
-    // Order exists — update metadata + activity log
+    // Order exists — update metadata + activity log.
+    // Derive the REAL method (card / revolut_pay / apple_pay / google_pay /
+    // pay_by_bank / sepa) from the payment record — the webhook payload doesn't
+    // carry it, and hardcoding "pay_by_bank" mislabels card/wallet payments.
+    const paymentMethod = await getRevolutPaymentMethod(order.id, order.metadata)
+
     const isFailed = event === "ORDER_CANCELLED" || event === "ORDER_PAYMENT_FAILED"
     const activityEntry: any = {
       timestamp: new Date().toISOString(),
       event: event === "ORDER_COMPLETED" ? "capture" : event === "ORDER_AUTHORISED" ? "authorization" : "status_update",
       gateway: "revolut",
-      payment_method: "pay_by_bank",
+      payment_method: paymentMethod,
       status: event === "ORDER_COMPLETED" ? "success" : isFailed ? "failed" : "pending",
       transaction_id: revolutOrderId,
       webhook_event_type: event,
@@ -398,6 +443,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       payment_activity_log: [...(existingMeta.payment_activity_log || []), activityEntry],
       revolutOrderId,
       revolutStatus: event,
+      // Reliable provider/method tagging so Orders HQ shows the Revolut icon +
+      // payment ID (the order.placed subscriber write can be clobbered by racing
+      // subscribers; this last-writer update always sticks).
+      payment_provider: "revolut",
+      payment_method: paymentMethod,
     }
     if (event === "ORDER_COMPLETED") {
       updatedMetadata.payment_captured = true
