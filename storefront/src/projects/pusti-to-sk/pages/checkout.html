@@ -4000,16 +4000,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     teardownRevolutCard();
     ensureRevolutCardStyles();
 
-    // Reveal the card form immediately with a slide-down + shimmer skeleton, so the
-    // customer sees the dropdown open right away while the cart + session build.
-    var box = prepareRevolutCardLayout();
-    if (box) box.innerHTML = '<div class="rc-skeleton"></div>';
-    if (cardFieldsEl) {
-      cardFieldsEl.style.display = 'block';
-      cardFieldsEl.style.animation = 'slideDown 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
-      cardFieldsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    setCardStatus('Pripravujem platbu…', false);
+    // Keep the card form HIDDEN while the cart + session + SDK load. The main
+    // button stays in its spinner state so the customer knows we're working — the
+    // input fields only appear once they're actually ready to be filled in.
+    if (cardFieldsEl) cardFieldsEl.style.display = 'none';
+    var mainTxt = submitBtn ? submitBtn.querySelector('.btn-text') : null;
+    var mainTxtOrig = mainTxt ? mainTxt.textContent : '';
+    if (mainTxt) mainTxt.textContent = 'Pripravujem platbu…';
 
     buildRevolutCardCart()
       .then(function (cartId) {
@@ -4029,7 +4026,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         return import('https://esm.sh/@revolut/checkout@1.1.25').then(function (m) {
           return m.default(revolutCardToken, mode).then(function (inst) {
             revolutCardInst = inst;
-            if (box) box.innerHTML = ''; // clear the shimmer skeleton before mounting
+            // Fields are ready → NOW reveal the form (slide-down) and mount into it.
+            if (cardFieldsEl) {
+              cardFieldsEl.style.display = 'block';
+              cardFieldsEl.style.animation = 'slideDown 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+            }
+            var box = prepareRevolutCardLayout();
             revolutCardField = inst.createCardField({
               target: box,
               locale: REVOLUT_CARD_LOCALE,
@@ -4071,14 +4073,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               submitBtn.style.opacity = '0';
               setTimeout(function () { submitBtn.style.display = 'none'; }, 250);
             }
+            cardFieldsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
           });
         });
       })
       .catch(function (err) {
-        if (box) box.innerHTML = '';
         errorEl.innerHTML = '<div class="error-title">Pri spracovaní platby došlo k chybe</div><div class="error-detail">' + (err.message || 'Skúste to znova.') + '</div>';
-        // Build failed before hand-off — restore the main button so the customer can retry.
-        if (submitBtn) { submitBtn.style.display = ''; submitBtn.style.opacity = '1'; }
+        // Build failed before the form was shown — restore the main button for retry.
+        if (mainTxt) mainTxt.textContent = mainTxtOrig;
         resetSubmitButton();
       });
   }
