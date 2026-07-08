@@ -3810,7 +3810,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       '.rc-skeleton{height:100%;width:100%;border-radius:var(--radius);background:linear-gradient(90deg,#EFEFEF 25%,#E4E4E4 37%,#EFEFEF 63%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;}' +
       '.rc-label-check{display:inline-flex;opacity:0;transform:scale(0);transition:opacity .2s ease;margin-left:6px;color:#27AE60;font-weight:700;vertical-align:middle;}' +
       '.rc-label-check.on{opacity:1;transform:scale(1);animation:checkmark .3s ease;}' +
-      '#revolut-pay-btn{margin-top:14px;}';
+      '#revolut-pay-btn{margin-top:14px;}' +
+      '#card-fields label{display:flex;align-items:center;}' +
+      '.rc-logos{margin-left:auto;display:inline-flex;gap:5px;align-items:center;}' +
+      '.rc-logos svg{border-radius:3px;}' +
+      '#rc-head{background:#FAF5F8;border:1px solid #EDD9E5;border-radius:10px;padding:10px 14px;margin-bottom:14px;animation:fadeIn .3s ease;}' +
+      '.rc-head-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}' +
+      '.rc-step{font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#9B7AAD;}' +
+      '.rc-secure{font-size:12px;font-weight:600;color:#2E7D32;}' +
+      '.rc-sum{font-size:13px;color:#5A3D6B;}' +
+      '#rc-trust{font-size:11.5px;color:#9B7AAD;text-align:center;margin-top:8px;}' +
+      '#rc-reassure{font-size:12px;color:#5A3D6B;text-align:center;margin-top:10px;line-height:1.5;}' +
+      '#rc-reassure strong{color:#2D1B3D;}';
     document.head.appendChild(st);
   }
 
@@ -3827,6 +3838,53 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     box.classList.remove('rc-shake');
     void box.offsetWidth; // force reflow so the animation replays
     box.classList.add('rc-shake');
+  }
+
+  // Pre-load the Revolut Web SDK the moment the card tile is selected, so the card
+  // field mounts almost instantly on submit — kills the "Pripravujem platbu…" wait.
+  function prewarmRevolutSdk() {
+    if (!_revolutSdkPromise) {
+      _revolutSdkPromise = import('https://esm.sh/@revolut/checkout@1.1.25').catch(function (e) {
+        _revolutSdkPromise = null; // allow a retry on the real submit
+        throw e;
+      });
+    }
+    return _revolutSdkPromise;
+  }
+
+  // Small Visa / Mastercard / Maestro marks shown next to the card label (trust).
+  function revolutCardLogos() {
+    return '<span class="rc-logos">'
+      + '<svg viewBox="0 0 32 20" width="30" height="19" role="img" aria-label="Visa"><rect width="32" height="20" rx="3" fill="#fff" stroke="#E6E6E6"/><text x="16" y="14" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" font-style="italic" fill="#1A1F71">VISA</text></svg>'
+      + '<svg viewBox="0 0 32 20" width="30" height="19" role="img" aria-label="Mastercard"><rect width="32" height="20" rx="3" fill="#fff" stroke="#E6E6E6"/><circle cx="13.5" cy="10" r="5.2" fill="#EB001B"/><circle cx="18.5" cy="10" r="5.2" fill="#F79E1B" fill-opacity="0.9"/></svg>'
+      + '<svg viewBox="0 0 32 20" width="30" height="19" role="img" aria-label="Maestro"><rect width="32" height="20" rx="3" fill="#fff" stroke="#E6E6E6"/><circle cx="13.5" cy="10" r="5.2" fill="#0099DF"/><circle cx="18.5" cy="10" r="5.2" fill="#ED0006" fill-opacity="0.85"/></svg>'
+      + '</span>';
+  }
+
+  // Trust + reassurance chrome around the Revolut card field (idempotent).
+  function decorateRevolutCardForm(cardFieldsEl, amountLabel) {
+    if (!cardFieldsEl) return;
+    var productName = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.name) || '';
+    // Header: step + secure badge + mini order summary (reassurance during payment)
+    var oldHead = document.getElementById('rc-head'); if (oldHead) oldHead.remove();
+    var head = document.createElement('div');
+    head.id = 'rc-head';
+    head.innerHTML =
+      '<div class="rc-head-row"><span class="rc-step">Krok 2 z 2 · Platba</span>'
+      + '<span class="rc-secure">🔒 Bezpečná platba</span></div>'
+      + '<div class="rc-sum">Platíte <strong>' + amountLabel + '</strong>' + (productName ? ' · ' + productName : '') + '</div>';
+    cardFieldsEl.insertBefore(head, cardFieldsEl.firstChild);
+    // Card network logos next to the "Údaje karty" label
+    var lbl = document.querySelector('#card-fields label');
+    if (lbl && !lbl.querySelector('.rc-logos')) lbl.insertAdjacentHTML('beforeend', revolutCardLogos());
+    // Trust line under the field
+    var oldTrust = document.getElementById('rc-trust'); if (oldTrust) oldTrust.remove();
+    var trust = document.createElement('div');
+    trust.id = 'rc-trust';
+    trust.innerHTML = '🔒 256-bit SSL · 3D Secure · údaje karty neukladáme';
+    var errEl = document.getElementById('card-errors');
+    if (errEl && errEl.parentNode) errEl.parentNode.insertBefore(trust, errEl.nextSibling);
+    else cardFieldsEl.appendChild(trust);
   }
 
   // Attach a one-time trigger that mounts the Revolut card field on the first
@@ -3919,7 +3977,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (!sessionData || !sessionData.revolutPublicToken) throw new Error('Revolut session bez tokenu');
         revolutCardToken = sessionData.revolutPublicToken;
         var mode = sessionData.environment === 'prod' ? 'prod' : 'sandbox';
-        return import('https://esm.sh/@revolut/checkout@1.1.25').then(function (m) {
+        // Reuse the SDK pre-warmed on card-tile select (near-instant here).
+        return prewarmRevolutSdk().then(function (m) {
           return m.default(revolutCardToken, mode).then(function (inst) {
             revolutCardInst = inst;
             setCardStatus('', false);
@@ -4029,7 +4088,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (!sessionData || !sessionData.revolutPublicToken) throw new Error('Revolut session bez tokenu');
         revolutCardToken = sessionData.revolutPublicToken;
         var mode = sessionData.environment === 'prod' ? 'prod' : 'sandbox';
-        return import('https://esm.sh/@revolut/checkout@1.1.25').then(function (m) {
+        // Reuse the SDK pre-warmed on card-tile select (near-instant here).
+        return prewarmRevolutSdk().then(function (m) {
           return m.default(revolutCardToken, mode).then(function (inst) {
             revolutCardInst = inst;
             // Fields are ready → NOW reveal the form (slide-down) and mount into it.
@@ -4051,26 +4111,35 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               classes: { focused: 'rc-focused', invalid: 'rc-invalid' },
               onStatusChange: function (st) { toggleCardCompleteCheck(st && st.completed); },
               onSuccess: function () { onRevolutCardSuccess(); },
-              onError: function (msg) {
-                setCardStatus('Chyba: ' + ((msg && msg.message) || msg), true);
+              onError: function () {
+                // Friendly, non-technical message — keep the customer in the flow.
+                setCardStatus('Platba sa nepodarila — skontrolujte údaje karty a skúste to znova.', true);
                 shakeCardBox();
                 var b = document.getElementById('revolut-pay-btn');
                 if (b) { b.classList.remove('loading'); b.disabled = false; }
               },
               onValidation: function (errs) { setCardStatus((errs && errs.length) ? (errs[0].message || '') : '', true); }
             });
+            // Trust + reassurance chrome (step, secure badge, mini summary, card logos, SSL line)
+            decorateRevolutCardForm(cardFieldsEl, amountLabel);
             // Confirm button inside the dropdown — styled as the native checkout CTA.
             var oldBtn = document.getElementById('revolut-pay-btn'); if (oldBtn) oldBtn.remove();
             var payBtn = document.createElement('button');
             payBtn.id = 'revolut-pay-btn'; payBtn.type = 'button'; payBtn.className = 'checkout-btn';
-            payBtn.innerHTML = '<span class="spinner"></span><span class="btn-text">Potvrdiť platbu ' + amountLabel + '</span>';
+            payBtn.innerHTML = '<span class="spinner"></span><span class="btn-text">Zaplatiť ' + amountLabel + ' →</span>';
             payBtn.onclick = function () {
               payBtn.classList.add('loading'); payBtn.disabled = true;
-              setCardStatus('Spracúvam platbu…', false);
+              setCardStatus('🔒 Pripájam sa k zabezpečenej platbe…', false);
               var name = (customerData.shipping_address.first_name + ' ' + customerData.shipping_address.last_name).trim();
               revolutCardField.submit({ name: name, email: customerData.email });
             };
             cardFieldsEl.appendChild(payBtn);
+            // Reassurance directly under the pay button
+            var oldReassure = document.getElementById('rc-reassure'); if (oldReassure) oldReassure.remove();
+            var reassure = document.createElement('div');
+            reassure.id = 'rc-reassure';
+            reassure.innerHTML = '🔒 Zabezpečené cez <strong>Revolut</strong> · <strong>30-dňová</strong> záruka vrátenia peňazí';
+            cardFieldsEl.appendChild(reassure);
             setCardStatus('Zadajte údaje karty a potvrďte platbu.', false);
             // Smoothly hand off from the main button to the card form's confirm button.
             if (submitBtn) {
@@ -4298,6 +4367,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var revolutCardAmountKey = null; // amount signature the current field was built for
   var revolutCardMounting = false; // guard against concurrent mounts
   var REVOLUT_CARD_LOCALE = 'sk';  // language of the card field labels
+  var _revolutSdkPromise = null;   // pre-warmed @revolut/checkout module (loaded on card select)
   var expressMethodsList = [];  // Express methods from API
 
   /* ─── CENTRALIZED PAYPAL SDK LOADER ─── */
@@ -5938,6 +6008,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         // them show an inline card form at tile-selection time.
         if (cardProvider === 'stripe' || cardProvider === 'paypal' || cardProvider === 'comgate' || cardProvider === 'airwallex' || cardProvider === 'revolut') {
           cardFieldsEl.style.display = 'none';
+          // Pre-warm the Revolut SDK now so the card field mounts instantly on submit.
+          if (cardProvider === 'revolut') prewarmRevolutSdk();
         } else {
           cardFieldsEl.style.display = 'block';
           // Init the correct card provider's form
@@ -6049,6 +6121,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             }
           } else {
             cardFields.style.display = 'none';
+            // Pre-warm the Revolut SDK when the customer picks the card tile.
+            if (cardProvider === 'revolut') prewarmRevolutSdk();
           }
         }
 
