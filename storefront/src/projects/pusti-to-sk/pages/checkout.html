@@ -3304,19 +3304,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       + '<div class="bt-h"><div class="ok">✅ Objednávka je vytvorená</div><div class="sub">SK2026-' + displayId + ' · čaká na úhradu</div></div>'
       + '<div class="bt-timer">⏳ Rezervované ešte <b id="bt-cd">23:59:59</b></div>'
       + '<div class="bt-body">'
-      + '<div class="bt-amt"><div class="l">Suma na úhradu</div><div class="v">' + amtLabel + '</div></div>'
-      // Kopírovacie polia HORE = primárna cesta na mobile (zákazník platí z toho istého
-      // telefónu → skopíruje a vloží v bankovej appke; QR sa z toho istého displeja
-      // naskenovať nedá, preto je nižšie pre platbu z iného zariadenia).
-      + '<div class="bt-copytitle">Údaje na prevod <span class="tag">ťuknite = skopíruje</span></div>'
-      + '<div class="bt-row"><div class="col"><span class="k">IBAN</span><span class="v">' + btFmtIban(bt.iban) + '</span></div><button class="bt-cp" data-c="' + ibanClean + '">Kopírovať</button></div>'
-      + '<div class="bt-row"><div class="col"><span class="k">Referencia (dôležité!)</span><span class="v">' + rf + '</span></div><button class="bt-cp" data-c="' + rf + '">Kopírovať</button></div>'
-      + '<div class="bt-row"><div class="col"><span class="k">Suma</span><span class="v">' + amt2 + ' €</span></div><button class="bt-cp" data-c="' + amt2 + '">Kopírovať</button></div>'
       + '<div class="bt-qrbox">'
       + '<div class="bt-qr" id="bt-qr"></div>'
       + '<div class="bt-qrtxt">Platíte z <b>počítača</b> alebo <b>iného zariadenia</b>?<br>Naskenujte tento QR bankovou appkou.</div>'
       + '<button class="bt-save" id="bt-save">⬇ Uložiť QR do galérie</button>'
       + '</div>'
+      + '<div class="bt-amt"><div class="l">Suma na úhradu</div><div class="v">' + amtLabel + '</div></div>'
+      // Kopírovacie polia = primárna cesta na mobile (zákazník platí z toho istého
+      // telefónu → skopíruje a vloží v bankovej appke; QR z toho istého displeja naskenovať nemôže).
+      + '<div class="bt-copytitle">Údaje na prevod <span class="tag">ťuknite = skopíruje</span></div>'
+      + '<div class="bt-row"><div class="col"><span class="k">IBAN</span><span class="v">' + btFmtIban(bt.iban) + '</span></div><button class="bt-cp" data-c="' + ibanClean + '">Kopírovať</button></div>'
+      + '<div class="bt-row"><div class="col"><span class="k">Referencia (dôležité!)</span><span class="v">' + rf + '</span></div><button class="bt-cp" data-c="' + rf + '">Kopírovať</button></div>'
+      + '<div class="bt-row"><div class="col"><span class="k">Suma</span><span class="v">' + amt2 + ' €</span></div><button class="bt-cp" data-c="' + amt2 + '">Kopírovať</button></div>'
       + '<div class="bt-how"><div class="htitle">Ako zaplatiť z telefónu</div>'
       + '<div class="bt-step"><div class="n">1</div><div><div class="st">Skopírujte údaje vyššie</div><div class="sd">Ťuknite na „Kopírovať" pri IBANe a referencii</div></div></div>'
       + '<div class="bt-step"><div class="n">2</div><div><div class="st">Otvorte svoju bankovú aplikáciu</div><div class="sd">Nová platba → vložte skopírované údaje</div></div></div>'
