@@ -6207,6 +6207,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   function syncCountryFromPhone(val) {
     var detected = detectCountryFromPhone(val);
     if (detected && countrySelect && countrySelect.value !== detected) {
+      // Only switch if that country is actually an available <option>. Setting a
+      // non-existent value (e.g. a +420 phone → 'CZ' on an SK-only checkout) blanks
+      // the <select>, which sends an empty country_code and breaks shipping options.
+      var hasOption = Array.prototype.some.call(countrySelect.options, function(o) { return o.value === detected; });
+      if (!hasOption) return;
       countrySelect.value = detected;
       countrySelect.dispatchEvent(new Event('change'));
     }
@@ -7271,7 +7276,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         address_1: (addr && addr.value) || '',
         city: (ct && ct.value) || '',
         postal_code: (pc && pc.value) || '',
-        country_code: (co && co.value) || 'nl',
+        country_code: ((co && co.value) || 'SK').toLowerCase(),
         phone: (ph && ph.value) || ''
       };
     }
@@ -7500,7 +7505,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         address_1: document.getElementById('address').value.trim(),
         city: document.getElementById('city').value.trim(),
         postal_code: document.getElementById('postal_code').value.trim(),
-        country_code: document.getElementById('country').value.toLowerCase(),
+        country_code: (document.getElementById('country').value || 'SK').toLowerCase(),
         phone: document.getElementById('phone').value.trim(),
       }
     };
