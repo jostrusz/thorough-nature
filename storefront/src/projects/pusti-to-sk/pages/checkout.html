@@ -3797,9 +3797,30 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var st = document.createElement('style');
     st.id = 'revolut-card-styles';
     st.textContent =
+      '#card-number{transition:border-color .2s ease,box-shadow .2s ease;position:relative;}' +
       '#card-number.rc-focused{border-color:var(--cta) !important;box-shadow:0 0 0 3px rgba(194,123,160,.15);}' +
-      '#card-number.rc-invalid{border-color:var(--error) !important;}';
+      '#card-number.rc-invalid{border-color:var(--error) !important;}' +
+      '#card-number.rc-shake{animation:shakeError .4s ease;}' +
+      '.rc-skeleton{height:100%;width:100%;border-radius:var(--radius);background:linear-gradient(90deg,#EFEFEF 25%,#E4E4E4 37%,#EFEFEF 63%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;}' +
+      '.rc-label-check{display:inline-flex;opacity:0;transform:scale(0);transition:opacity .2s ease;margin-left:6px;color:#27AE60;font-weight:700;vertical-align:middle;}' +
+      '.rc-label-check.on{opacity:1;transform:scale(1);animation:checkmark .3s ease;}' +
+      '#revolut-pay-btn{margin-top:14px;}';
     document.head.appendChild(st);
+  }
+
+  // Toggle the little green ✓ next to the "Údaje karty" label when the card is complete.
+  function toggleCardCompleteCheck(on) {
+    var c = document.querySelector('.rc-label-check');
+    if (c) c.classList.toggle('on', !!on);
+  }
+
+  // Restart the shake animation on the card box (payment error nudge).
+  function shakeCardBox() {
+    var box = document.getElementById('card-number');
+    if (!box) return;
+    box.classList.remove('rc-shake');
+    void box.offsetWidth; // force reflow so the animation replays
+    box.classList.add('rc-shake');
   }
 
   // Attach a one-time trigger that mounts the Revolut card field on the first
@@ -3846,10 +3867,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var el = document.getElementById(id);
       if (el && el.parentElement) el.parentElement.style.display = 'none';
     });
-    if (box) { box.innerHTML = ''; box.style.height = '46px'; box.style.width = '100%'; }
-    // Revolut's field is one combined iframe (number + expiry + CVC) → relabel.
+    if (box) { box.innerHTML = ''; box.style.height = '44px'; box.style.width = '100%'; box.style.position = 'relative'; }
+    // Revolut's field is one combined iframe (number + expiry + CVC) → relabel,
+    // plus a completed ✓ indicator next to the label (Airwallex-style feedback).
     var lbl = box && box.parentElement ? box.parentElement.querySelector('label') : null;
-    if (lbl) lbl.textContent = 'Údaje karty';
+    if (lbl) {
+      lbl.textContent = 'Údaje karty';
+      var chk = document.createElement('span');
+      chk.className = 'rc-label-check';
+      chk.textContent = '✓';
+      lbl.appendChild(chk);
+    }
     return box;
   }
 
@@ -3969,8 +3997,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var cardFieldsEl = document.getElementById('card-fields');
     var curr = (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
     var amountLabel = Number(getCurrentTotal()).toFixed(2).replace('.', ',') + ' ' + (curr === 'EUR' ? '€' : curr);
-    setCardStatus('Pripravujem platbu…', false);
     teardownRevolutCard();
+    ensureRevolutCardStyles();
+
+    // Reveal the card form immediately with a slide-down + shimmer skeleton, so the
+    // customer sees the dropdown open right away while the cart + session build.
+    var box = prepareRevolutCardLayout();
+    if (box) box.innerHTML = '<div class="rc-skeleton"></div>';
+    if (cardFieldsEl) {
+      cardFieldsEl.style.display = 'block';
+      cardFieldsEl.style.animation = 'slideDown 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+      cardFieldsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    setCardStatus('Pripravujem platbu…', false);
 
     buildRevolutCardCart()
       .then(function (cartId) {
@@ -3987,12 +4026,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (!sessionData || !sessionData.revolutPublicToken) throw new Error('Revolut session bez tokenu');
         revolutCardToken = sessionData.revolutPublicToken;
         var mode = sessionData.environment === 'prod' ? 'prod' : 'sandbox';
-        if (cardFieldsEl) cardFieldsEl.style.display = 'block';
-        var box = prepareRevolutCardLayout();
-        ensureRevolutCardStyles();
         return import('https://esm.sh/@revolut/checkout@1.1.25').then(function (m) {
           return m.default(revolutCardToken, mode).then(function (inst) {
             revolutCardInst = inst;
+            if (box) box.innerHTML = ''; // clear the shimmer skeleton before mounting
             revolutCardField = inst.createCardField({
               target: box,
               locale: REVOLUT_CARD_LOCALE,
@@ -4004,32 +4041,44 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 invalid: { color: '#DC2626' }
               },
               classes: { focused: 'rc-focused', invalid: 'rc-invalid' },
+              onStatusChange: function (st) { toggleCardCompleteCheck(st && st.completed); },
               onSuccess: function () { onRevolutCardSuccess(); },
-              onError: function (msg) { setCardStatus('Chyba: ' + ((msg && msg.message) || msg), true); var b = document.getElementById('revolut-pay-btn'); if (b) b.disabled = false; },
+              onError: function (msg) {
+                setCardStatus('Chyba: ' + ((msg && msg.message) || msg), true);
+                shakeCardBox();
+                var b = document.getElementById('revolut-pay-btn');
+                if (b) { b.classList.remove('loading'); b.disabled = false; }
+              },
               onValidation: function (errs) { setCardStatus((errs && errs.length) ? (errs[0].message || '') : '', true); }
             });
-            // Confirm button inside the dropdown — the payment CTA.
+            // Confirm button inside the dropdown — styled as the native checkout CTA.
             var oldBtn = document.getElementById('revolut-pay-btn'); if (oldBtn) oldBtn.remove();
             var payBtn = document.createElement('button');
-            payBtn.id = 'revolut-pay-btn'; payBtn.type = 'button';
-            payBtn.textContent = 'Potvrdiť platbu ' + amountLabel;
-            payBtn.style.cssText = 'margin-top:12px;width:100%;padding:15px;background:var(--cta);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;';
+            payBtn.id = 'revolut-pay-btn'; payBtn.type = 'button'; payBtn.className = 'checkout-btn';
+            payBtn.innerHTML = '<span class="spinner"></span><span class="btn-text">Potvrdiť platbu ' + amountLabel + '</span>';
             payBtn.onclick = function () {
-              payBtn.disabled = true;
+              payBtn.classList.add('loading'); payBtn.disabled = true;
               setCardStatus('Spracúvam platbu…', false);
               var name = (customerData.shipping_address.first_name + ' ' + customerData.shipping_address.last_name).trim();
               revolutCardField.submit({ name: name, email: customerData.email });
             };
             cardFieldsEl.appendChild(payBtn);
             setCardStatus('Zadajte údaje karty a potvrďte platbu.', false);
-            // Hand off from the main button to the card form's confirm button.
-            if (submitBtn) { submitBtn.classList.remove('loading'); submitBtn.style.display = 'none'; }
-            cardFieldsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Smoothly hand off from the main button to the card form's confirm button.
+            if (submitBtn) {
+              submitBtn.classList.remove('loading');
+              submitBtn.style.transition = 'opacity 0.25s ease';
+              submitBtn.style.opacity = '0';
+              setTimeout(function () { submitBtn.style.display = 'none'; }, 250);
+            }
           });
         });
       })
       .catch(function (err) {
+        if (box) box.innerHTML = '';
         errorEl.innerHTML = '<div class="error-title">Pri spracovaní platby došlo k chybe</div><div class="error-detail">' + (err.message || 'Skúste to znova.') + '</div>';
+        // Build failed before hand-off — restore the main button so the customer can retry.
+        if (submitBtn) { submitBtn.style.display = ''; submitBtn.style.opacity = '1'; }
         resetSubmitButton();
       });
   }
