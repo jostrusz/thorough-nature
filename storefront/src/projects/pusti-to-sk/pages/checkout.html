@@ -3803,25 +3803,35 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var st = document.createElement('style');
     st.id = 'revolut-card-styles';
     st.textContent =
-      '#card-number{transition:border-color .2s ease,box-shadow .2s ease;position:relative;}' +
-      '#card-number.rc-focused{border-color:var(--cta) !important;box-shadow:0 0 0 3px rgba(194,123,160,.15);}' +
+      // Elevated premium card wrapping the whole payment block
+      '#card-fields.rc-card-wrap{background:#fff !important;border:1px solid #EDD9E5 !important;border-radius:16px !important;padding:20px !important;box-shadow:0 6px 24px rgba(45,27,61,.06);}' +
+      '#card-number{transition:border-color .2s ease,box-shadow .2s ease;position:relative;height:56px;border-radius:12px !important;}' +
+      '#card-number.rc-focused{border-color:var(--cta) !important;box-shadow:0 0 0 4px rgba(194,123,160,.14);}' +
       '#card-number.rc-invalid{border-color:var(--error) !important;}' +
       '#card-number.rc-shake{animation:shakeError .4s ease;}' +
-      '.rc-skeleton{height:100%;width:100%;border-radius:var(--radius);background:linear-gradient(90deg,#EFEFEF 25%,#E4E4E4 37%,#EFEFEF 63%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;}' +
-      '.rc-label-check{display:inline-flex;opacity:0;transform:scale(0);transition:opacity .2s ease;margin-left:6px;color:#27AE60;font-weight:700;vertical-align:middle;}' +
+      '.rc-skeleton{height:100%;width:100%;border-radius:12px;background:linear-gradient(90deg,#EFEFEF 25%,#E4E4E4 37%,#EFEFEF 63%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;}' +
+      // Header: progress + order line + secure/logos
+      '#rc-head{margin-bottom:14px;animation:fadeIn .3s ease;}' +
+      '.rc-prog{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#9B7AAD;margin-bottom:8px;}' +
+      '.rc-dot{width:7px;height:7px;border-radius:50%;background:#C27BA0;display:inline-block;}' +
+      '.rc-dot.done{background:#2E7D32;}' +
+      '.rc-prog .rc-chk{color:#2E7D32;}' +
+      '.rc-line{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid #F0E4EC;margin-bottom:12px;}' +
+      '.rc-line-p{font-size:13px;color:#5A3D6B;}' +
+      '.rc-line-a{font-size:15px;font-weight:700;color:#2D1B3D;}' +
+      '.rc-head-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}' +
+      '.rc-secure{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#2E7D32;}' +
+      '.rc-logos{display:inline-flex;gap:5px;align-items:center;}' +
+      '.rc-logos svg{border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.05);}' +
+      '.rc-label-check{display:inline-flex;opacity:0;transform:scale(0);transition:opacity .2s ease;color:#2E7D32;font-weight:700;}' +
       '.rc-label-check.on{opacity:1;transform:scale(1);animation:checkmark .3s ease;}' +
-      '#revolut-pay-btn{margin-top:14px;}' +
-      '#card-fields label{display:flex;align-items:center;}' +
-      '.rc-logos{margin-left:auto;display:inline-flex;gap:5px;align-items:center;}' +
-      '.rc-logos svg{border-radius:3px;}' +
-      '#rc-head{background:#FAF5F8;border:1px solid #EDD9E5;border-radius:10px;padding:10px 14px;margin-bottom:14px;animation:fadeIn .3s ease;}' +
-      '.rc-head-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}' +
-      '.rc-step{font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#9B7AAD;}' +
-      '.rc-secure{font-size:12px;font-weight:600;color:#2E7D32;}' +
-      '.rc-sum{font-size:13px;color:#5A3D6B;}' +
-      '#rc-trust{font-size:11.5px;color:#9B7AAD;text-align:center;margin-top:8px;}' +
-      '#rc-reassure{font-size:12px;color:#5A3D6B;text-align:center;margin-top:10px;line-height:1.5;}' +
-      '#rc-reassure strong{color:#2D1B3D;}';
+      // Trust chips
+      '#rc-trust{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px;}' +
+      '.rc-chip{display:inline-flex;align-items:center;gap:5px;background:#FAF5F8;border:1px solid #EDD9E5;border-radius:20px;padding:5px 11px;font-size:11.5px;font-weight:500;color:#7A6189;}' +
+      '#revolut-pay-btn{margin-top:16px;}' +
+      // Guarantee row
+      '#rc-reassure{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;font-size:12px;color:#5A3D6B;margin-top:12px;}' +
+      '#rc-reassure strong{color:#2D1B3D;font-weight:600;}';
     document.head.appendChild(st);
   }
 
@@ -3861,27 +3871,26 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       + '</span>';
   }
 
-  // Trust + reassurance chrome around the Revolut card field (idempotent).
+  // Premium trust chrome around the Revolut card field (idempotent):
+  // elevated card wrapper + progress + order line + secure/logos header + trust chips.
   function decorateRevolutCardForm(cardFieldsEl, amountLabel) {
     if (!cardFieldsEl) return;
-    var productName = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.name) || '';
-    // Header: step + secure badge + mini order summary (reassurance during payment)
+    var productName = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.name) || 'Objednávka';
+    cardFieldsEl.classList.add('rc-card-wrap');
+    // Header: progress → order line → secure + card logos
     var oldHead = document.getElementById('rc-head'); if (oldHead) oldHead.remove();
     var head = document.createElement('div');
     head.id = 'rc-head';
     head.innerHTML =
-      '<div class="rc-head-row"><span class="rc-step">Krok 2 z 2 · Platba</span>'
-      + '<span class="rc-secure">🔒 Bezpečná platba</span></div>'
-      + '<div class="rc-sum">Platíte <strong>' + amountLabel + '</strong>' + (productName ? ' · ' + productName : '') + '</div>';
+      '<div class="rc-prog"><span class="rc-dot done"></span>Doprava <span class="rc-chk">✓</span> · <span class="rc-dot"></span>Platba</div>'
+      + '<div class="rc-line"><span class="rc-line-p">' + productName + ' · ' + selectedBundleQty + ' ks</span><span class="rc-line-a">' + amountLabel + '</span></div>'
+      + '<div class="rc-head-row"><span class="rc-secure">🔒 Bezpečná platba<span class="rc-label-check">✓</span></span>' + revolutCardLogos() + '</div>';
     cardFieldsEl.insertBefore(head, cardFieldsEl.firstChild);
-    // Card network logos next to the "Údaje karty" label
-    var lbl = document.querySelector('#card-fields label');
-    if (lbl && !lbl.querySelector('.rc-logos')) lbl.insertAdjacentHTML('beforeend', revolutCardLogos());
-    // Trust line under the field
+    // Trust chips under the field
     var oldTrust = document.getElementById('rc-trust'); if (oldTrust) oldTrust.remove();
     var trust = document.createElement('div');
     trust.id = 'rc-trust';
-    trust.innerHTML = '🔒 256-bit SSL · 3D Secure · údaje karty neukladáme';
+    trust.innerHTML = '<span class="rc-chip">🔒 256-bit SSL</span><span class="rc-chip">🛡️ 3D Secure</span><span class="rc-chip">🚫 Neukladáme kartu</span>';
     var errEl = document.getElementById('card-errors');
     if (errEl && errEl.parentNode) errEl.parentNode.insertBefore(trust, errEl.nextSibling);
     else cardFieldsEl.appendChild(trust);
@@ -4067,17 +4076,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var el = document.getElementById(id);
       if (el && el.parentElement) el.parentElement.style.display = 'none';
     });
-    if (box) { box.innerHTML = ''; box.style.height = '44px'; box.style.width = '100%'; box.style.position = 'relative'; }
-    // Revolut's field is one combined iframe (number + expiry + CVC) → relabel,
-    // plus a completed ✓ indicator next to the label (Airwallex-style feedback).
+    if (box) { box.innerHTML = ''; box.style.height = '56px'; box.style.width = '100%'; box.style.position = 'relative'; }
+    // The built-in "Číslo karty" label is redundant — the new header (secure + logos)
+    // replaces it, and the ✓ completed indicator lives in that header.
     var lbl = box && box.parentElement ? box.parentElement.querySelector('label') : null;
-    if (lbl) {
-      lbl.textContent = 'Údaje karty';
-      var chk = document.createElement('span');
-      chk.className = 'rc-label-check';
-      chk.textContent = '✓';
-      lbl.appendChild(chk);
-    }
+    if (lbl) lbl.style.display = 'none';
     return box;
   }
 
@@ -4274,7 +4277,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             var oldReassure = document.getElementById('rc-reassure'); if (oldReassure) oldReassure.remove();
             var reassure = document.createElement('div');
             reassure.id = 'rc-reassure';
-            reassure.innerHTML = '🔒 Zabezpečené cez <strong>Revolut</strong> · <strong>30-dňová</strong> záruka vrátenia peňazí';
+            reassure.innerHTML = '<span>✅ Zabezpečené cez <strong>Revolut</strong></span><span>↩️ <strong>30 dní</strong> záruka vrátenia</span>';
             cardFieldsEl.appendChild(reassure);
             setCardStatus('Zadajte údaje karty a potvrďte platbu.', false);
             // Smoothly hand off from the main button to the card form's confirm button.
