@@ -3218,9 +3218,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
    * Order sa vytvorí (nezaplatená), zobrazí sa popup s EPC/GiroCode QR + údajmi.
    * Párovanie neskôr cez FIO API podľa RF reference. Zapína sa cez config.
    * ──────────────────────────────────────────────────────────────────────────*/
+  // Bank-transfer config source of truth: the `bank_transfer` gateway from
+  // /store/payment-options (captured at render into window.__bankTransferConfig).
+  // Falls back to the legacy PROJECT_CONFIG.bankTransfer block if still enabled there.
+  function btCfg() {
+    if (window.__bankTransferConfig && window.__bankTransferConfig.iban) return window.__bankTransferConfig;
+    var legacy = PROJECT_CONFIG.bankTransfer;
+    if (legacy && legacy.enabled && legacy.iban) return legacy;
+    return null;
+  }
   function btEnabled() {
-    var bt = PROJECT_CONFIG.bankTransfer;
-    return !!(bt && bt.enabled && bt.iban && bt.iban.indexOf('0000000000') === -1);
+    var bt = btCfg();
+    return !!(bt && bt.iban && bt.iban.indexOf('0000000000') === -1);
   }
   // ISO 11649 RF Creditor Reference from the order number (structured SEPA reference).
   function btRfReference(orderNo) {
@@ -3237,7 +3246,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   }
   // EPC069-12 (GiroCode) SEPA Credit Transfer — RF reference in the structured field.
   function btEpcString(amount, rf) {
-    var bt = PROJECT_CONFIG.bankTransfer || {};
+    var bt = btCfg() || {};
     return ['BCD', '002', '1', 'SCT',
       bt.bic || '',
       (bt.beneficiary || '').substring(0, 70),
@@ -3274,7 +3283,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       '.bt-save{margin-top:10px;border:1px solid #D9C3D2;background:#fff;color:#2D1B3D;border-radius:9px;font-family:inherit;font-size:13px;font-weight:600;padding:10px 16px;cursor:pointer;min-height:44px;}.bt-save:active{transform:scale(.97);}' +
       '.bt-how{margin-top:18px;}.bt-how .htitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9B7AAD;margin-bottom:12px;}' +
       '.bt-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}.bt-step .n{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#2D1B3D;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;}.bt-step .st{font-size:14px;font-weight:600;line-height:1.3;}.bt-step .sd{font-size:12.5px;color:#7A6189;line-height:1.4;margin-top:1px;}' +
-      '.bt-foot{margin-top:16px;padding-top:14px;border-top:1px solid #F0E4EC;display:flex;flex-direction:column;gap:8px;}.bt-foot .f{display:flex;align-items:center;gap:9px;font-size:12.5px;color:#5A3D6B;}.bt-foot .f b{color:#2D1B3D;font-weight:600;}' +
+      '.bt-foot{margin-top:16px;padding-top:14px;border-top:1px solid #F0E4EC;display:flex;flex-direction:column;gap:8px;}.bt-foot .f{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:#5A3D6B;line-height:1.4;}.bt-foot .f .fi{flex-shrink:0;}.bt-foot .f b{color:#2D1B3D;font-weight:600;}' +
       '.bt-done{width:100%;margin-top:16px;padding:16px;border:none;border-radius:12px;background:var(--cta);color:#fff;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(194,123,160,.32);min-height:56px;}.bt-done:active{transform:translateY(1px);}' +
       '.bt-later{display:block;width:100%;text-align:center;margin-top:10px;font-size:13px;color:#9B7AAD;background:none;border:none;cursor:pointer;font-family:inherit;padding:8px;}';
     document.head.appendChild(st);
@@ -3291,7 +3300,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   }
   // Show the SEPA bank-transfer popup for a freshly created (unpaid) order.
   function showBankTransferPopup(displayId, amount) {
-    var bt = PROJECT_CONFIG.bankTransfer || {};
+    var bt = btCfg() || {};
     var rf = btRfReference(displayId);
     var epc = btEpcString(amount, rf);
     var amtLabel = Number(amount).toFixed(2).replace('.', ',') + ' €';
@@ -3321,7 +3330,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       + '<div class="bt-step"><div class="n">2</div><div><div class="st">Otvorte svoju bankovú aplikáciu</div><div class="sd">Nová platba → vložte skopírované údaje</div></div></div>'
       + '<div class="bt-step"><div class="n">3</div><div><div class="st">Potvrďte platbu</div><div class="sd">Tovar odošleme ihneď po pripísaní</div></div></div>'
       + '</div>'
-      + '<div class="bt-foot"><div class="f">📧 Údaje sme poslali aj na <b>váš e-mail</b> — nestratíte ich</div><div class="f">🔔 <b>Ozveme sa</b>, keď platba dorazí (SEPA ~1 prac. deň)</div><div class="f">↩️ <b>30-dní</b> záruka vrátenia peňazí</div></div>'
+      + '<div class="bt-foot">'
+      + '<div class="f"><span class="fi">📧</span><span>Údaje sme poslali aj na <b>váš e-mail</b> — nestratíte ich</span></div>'
+      + '<div class="f"><span class="fi">🔔</span><span><b>Ozveme sa</b>, keď platba dorazí (SEPA ~1 prac. deň)</span></div>'
+      + '<div class="f"><span class="fi">↩️</span><span><b>30-dní</b> záruka vrátenia peňazí</span></div>'
+      + '</div>'
       + '<button class="bt-done" id="bt-done">Zaplatil som →</button>'
       + '<button class="bt-later" id="bt-later">Zaplatím neskôr</button>'
       + '</div></div>';
@@ -5855,6 +5868,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           revolutPublicKey = gw.public_key || null;
           revolutEnv = gw.environment === 'sandbox' ? 'sandbox' : 'prod';
         }
+        // Bank Transfer gateway: capture the beneficiary bank details for the QR/popup.
+        // Its raw method is skipped below — it renders as the special bank_transfer_sepa tile.
+        if (gw.provider === 'bank_transfer') {
+          window.__bankTransferConfig = gw.bank_transfer || null;
+          return;
+        }
         (gw.methods || []).forEach(function(m) {
           // CZ bank buttons (Comgate/PayU) render inside the bank group — collect & skip standalone tiles
           if (collectCzBankMethod(m, gw.provider, m.provider_id || providerIdFull)) return;
@@ -5948,10 +5967,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }
       console.log('[CardForm] Card provider detected:', cardProvider || 'none');
 
-      // Manuálny bankový prevod (SEPA) — klient-side metóda (nie z brány).
+      // Bankový prevod (SEPA QR) — z gateway_config brány 'bank_transfer'. Vlastný
+      // payment provider pp_bank_transfer_bank_transfer (order vznikne nezaplatený,
+      // FIO reconcile cron ho podľa RF reference spáruje a zaplatí).
       if (btEnabled()) {
         allPaymentOptions.push({
-          code: 'bank_transfer_sepa', provider: 'manual', provider_id: 'pp_cod_cod',
+          code: 'bank_transfer_sepa', provider: 'bank_transfer', provider_id: 'pp_bank_transfer_bank_transfer',
           display_name: 'Bankový prevod (SEPA)', icon: 'bank_transfer', sort_order: 60
         });
       }
@@ -8459,7 +8480,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         providerId = 'pp_system_default';
       } else if (selectedMethod === 'cod' || selectedMethod === 'bank_transfer_sepa') {
         // COD + manuálny bankový prevod → order sa vytvorí bez online platby.
-        providerId = 'pp_cod_cod';
+        // Každý má vlastný provider (správne označenie v Orders HQ + metadata).
+        providerId = selectedMethod === 'bank_transfer_sepa' ? 'pp_bank_transfer_bank_transfer' : 'pp_cod_cod';
         sessionData = {
           method: selectedMethod,
           amount: checkoutTotal,

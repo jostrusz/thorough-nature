@@ -169,6 +169,11 @@ export function getPaymentIconUrl(order: any): string {
     return "" // revolut_pay / pay_by_bank / unknown → blue "R" badge
   }
 
+  // Bank Transfer (SEPA QR) — manual credit transfer to our IBAN. Show the SEPA icon.
+  if (providerId.includes("bank_transfer") || order.metadata?.payment_provider === "bank_transfer") {
+    return `${ICON_BASE}/apm/sepa.svg`
+  }
+
   // Stripe — map method to specific icon
   if (providerId.includes("stripe")) {
     const m = (method || "").toLowerCase()
@@ -293,6 +298,7 @@ export function getPaymentFallback(order: any): { letter: string; bg: string; co
   if (providerId.includes("payu") || order.metadata?.payment_provider === "payu") return { letter: "PayU", bg: "#A6C307", color: "#fff" }
   if (providerId.includes("barion") || order.metadata?.payment_provider === "barion") return { letter: "b", bg: "#0097DB", color: "#fff" }
   if (providerId.includes("revolut") || order.metadata?.payment_provider === "revolut") return { letter: "R", bg: "#0666EB", color: "#fff" }
+  if (providerId.includes("bank_transfer") || order.metadata?.payment_provider === "bank_transfer") return { letter: "€", bg: "#2D6A4F", color: "#fff" }
   return { letter: "?", bg: colors.textMuted, color: "#fff" }
 }
 
@@ -301,6 +307,7 @@ export function getPaymentMethodName(order: any): string {
   const { providerId, method } = findPrimaryPayment(order)
   if (providerId.includes("klarna")) return "Klarna"
   if (providerId.includes("paypal")) return "PayPal"
+  if (providerId.includes("bank_transfer") || order.metadata?.payment_provider === "bank_transfer") return "Bankovní převod (SEPA)"
   if (providerId.includes("revolut") || order.metadata?.payment_provider === "revolut") {
     const m = (method || "").toLowerCase()
     const names: Record<string, string> = {

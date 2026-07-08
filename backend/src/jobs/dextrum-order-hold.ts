@@ -132,6 +132,44 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         )
         const isCOD = (order as any).metadata?.payment_method === "cod"
 
+        // Bank Transfer (SEPA QR) gate: the bank_transfer provider returns
+        // AUTHORIZED at checkout so the order can be created, but the money only
+        // arrives later — never ship on that authorized-but-unpaid state. Hold
+        // until the FIO reconcile cron matches the transfer (sets
+        // payment_captured / bank_transfer_reconciled). Scoped to bank_transfer
+        // orders only; does NOT touch retry_count (transfers can take days).
+        const btMeta = (order as any).metadata || {}
+        const isAwaitingBankTransfer =
+          btMeta.awaiting_bank_payment === true &&
+          btMeta.payment_captured !== true &&
+          btMeta.bank_transfer_reconciled !== true
+        if (isAwaitingBankTransfer) {
+          const queuedAt = new Date(orderMap.created_at || now).getTime()
+          const BT_MAX_WAIT_MS = 21 * 24 * 60 * 60 * 1000
+          if (now.getTime() - queuedAt > BT_MAX_WAIT_MS) {
+            await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+              delivery_status: "FAILED",
+              delivery_status_updated_at: now.toISOString(),
+              last_error: "Bank transfer not received within 21 days",
+            })
+            const { Pool } = require("pg")
+            const p = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+            await p.query(
+              `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+              [JSON.stringify({ dextrum_status: "FAILED", dextrum_error: "Bank transfer timeout (21 days)" }), orderMap.medusa_order_id]
+            ).catch(() => {})
+            await p.end().catch(() => {})
+            console.error(`[Dextrum Hold] Order ${orderMap.medusa_order_id}: bank transfer not received within 21 days — marked FAILED`)
+          } else {
+            const nextCheck = new Date(now.getTime() + 15 * 60 * 1000)
+            await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+              hold_until: nextCheck.toISOString(),
+              last_error: "Waiting for bank transfer (SEPA)",
+            })
+          }
+          continue
+        }
+
         if (!isPaid && !isCOD) {
           // Not paid yet — increment retry
           const retries = (orderMap.retry_count || 0) + 1

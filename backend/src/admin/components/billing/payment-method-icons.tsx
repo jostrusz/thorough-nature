@@ -356,6 +356,11 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "pay_by_bank", name: "Pay by Bank", icon: "bank_transfer", available_countries: ["gb", "ie", "nl", "be", "de", "at", "fr", "it", "es", "pt", "fi", "ee", "lt", "lv", "pl", "se", "no", "dk"], supported_currencies: ["EUR", "GBP", "SEK", "NOK", "DKK", "PLN"] },
     { code: "sepa_direct_debit", name: "SEPA Direct Debit", icon: "sepa", available_countries: ["at", "be", "cy", "de", "ee", "es", "fi", "fr", "gr", "ie", "it", "lt", "lu", "lv", "mt", "nl", "pt", "si", "sk"], supported_currencies: ["EUR"] },
   ],
+  bank_transfer: [
+    // Manual SEPA credit transfer with EPC/SEPA QR. Customer pays from their own
+    // bank to our IBAN using an RF reference; reconciled by the FIO cron. EUR only.
+    { code: "sepa", name: "Bankový prevod (SEPA QR)", icon: "bank_transfer", available_countries: ["sk", "cz", "at", "be", "de", "ee", "es", "fi", "fr", "gr", "ie", "it", "lt", "lu", "lv", "mt", "nl", "pt", "si"], supported_currencies: ["EUR"] },
+  ],
 }
 
 export const SUPPORTED_PROVIDERS = [
@@ -371,6 +376,7 @@ export const SUPPORTED_PROVIDERS = [
   { code: "novalnet", name: "Novalnet" },
   { code: "barion", name: "Barion" },
   { code: "revolut", name: "Revolut (Merchant)" },
+  { code: "bank_transfer", name: "Bank Transfer (SEPA QR)" },
 ]
 
 export const SUPPORTED_CURRENCIES = ["EUR", "CZK", "PLN", "SEK", "NOK", "HUF"]

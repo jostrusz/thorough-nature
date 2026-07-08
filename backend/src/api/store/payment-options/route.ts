@@ -191,6 +191,18 @@ export async function GET(
         gatewayResponse.environment = gw.mode === "live" ? "prod" : "sandbox"
       }
 
+      // Bank Transfer (SEPA QR): expose the bank details so the checkout can render
+      // the EPC/SEPA QR + copy fields. Credentials here are not secret API keys but
+      // the beneficiary account info printed on the transfer instructions.
+      if (gw.provider === "bank_transfer") {
+        gatewayResponse.bank_transfer = {
+          iban: (keys?.iban || "").replace(/\s/g, ""),
+          bic: keys?.bic || null,
+          beneficiary: keys?.beneficiary || gw.display_name || null,
+          currency: (Array.isArray(gw.supported_currencies) && gw.supported_currencies[0]) || "EUR",
+        }
+      }
+
       return gatewayResponse
     })
 

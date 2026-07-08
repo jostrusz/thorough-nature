@@ -231,6 +231,11 @@ const medusaConfig = {
             options: {},
           },
           {
+            resolve: './src/modules/payment-bank-transfer',
+            id: 'bank_transfer',
+            options: {},
+          },
+          {
             resolve: './src/modules/payment-comgate',
             id: 'comgate',
             options: {},

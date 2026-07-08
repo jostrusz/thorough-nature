@@ -781,8 +781,54 @@ function GatewaysTab() {
           {/* API Keys */}
           <div style={{ marginTop: "16px" }}>
             <label style={{ fontSize: "11px", fontWeight: 600, color: "#6D7175", textTransform: "uppercase", marginBottom: "8px", display: "block" }}>
-              {form.mode === "live" ? "Live" : "Test"} API Keys
+              {form.provider === "bank_transfer" ? "Bank Details (beneficiary account)" : (form.mode === "live" ? "Live" : "Test") + " API Keys"}
             </label>
+            {form.provider === "bank_transfer" ? (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label style={{ fontSize: "10px", color: "#8C9196" }}>IBAN <span style={{ color: "#B0B7BF" }}>(EUR účet — kam chodia platby)</span></label>
+                <input
+                  className="bp-input"
+                  style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                  value={((form.mode === "live" ? form.live_keys : form.test_keys) as any).iban || ""}
+                  onChange={(e) => {
+                    const keys = form.mode === "live" ? "live_keys" : "test_keys"
+                    setForm({ ...form, [keys]: { ...form[keys], iban: e.target.value } })
+                  }}
+                  placeholder="CZ65 0800 0000 1920 0014 5399"
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: "10px", color: "#8C9196" }}>BIC / SWIFT</label>
+                <input
+                  className="bp-input"
+                  style={{ ...inputStyle, fontFamily: "monospace", fontSize: "12px" }}
+                  value={((form.mode === "live" ? form.live_keys : form.test_keys) as any).bic || ""}
+                  onChange={(e) => {
+                    const keys = form.mode === "live" ? "live_keys" : "test_keys"
+                    setForm({ ...form, [keys]: { ...form[keys], bic: e.target.value } })
+                  }}
+                  placeholder="FIOBCZPP"
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: "10px", color: "#8C9196" }}>Príjemca (beneficiary)</label>
+                <input
+                  className="bp-input"
+                  style={{ ...inputStyle, fontSize: "12px" }}
+                  value={((form.mode === "live" ? form.live_keys : form.test_keys) as any).beneficiary || ""}
+                  onChange={(e) => {
+                    const keys = form.mode === "live" ? "live_keys" : "test_keys"
+                    setForm({ ...form, [keys]: { ...form[keys], beneficiary: e.target.value } })
+                  }}
+                  placeholder="Performance Marketing Solution s.r.o."
+                />
+              </div>
+              <div style={{ gridColumn: "1 / -1", fontSize: "11px", color: "#8C9196", background: "#F6F6F7", borderRadius: "6px", padding: "8px 10px" }}>
+                💡 EUR-only. Zákazník platí SEPA prevodom s RF referenciou; FIO reconcile cron platbu spáruje a objednávku zaplatí. Nastav <b>Supported Currencies = EUR</b> a <b>Mode = live</b>.
+              </div>
+            </div>
+            ) : (
             <div style={{ display: "grid", gridTemplateColumns: form.provider === "stripe" ? "1fr 1fr" : "1fr 1fr 1fr", gap: "8px" }}>
               <div>
                 <label style={{ fontSize: "10px", color: "#8C9196" }}>
@@ -879,6 +925,7 @@ function GatewaysTab() {
               </div>
               )}
             </div>
+            )}
             {/* Airwallex: Account ID */}
             {form.provider === "airwallex" && (
               <div style={{ marginTop: "8px" }}>
