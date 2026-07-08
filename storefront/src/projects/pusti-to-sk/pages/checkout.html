@@ -3959,42 +3959,79 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     handleExpressOrderComplete(revolutCardCartId);
   }
 
-  // Submit handler for the Revolut card tile (called instead of the generic flow).
+  // Submit handler for the Revolut card tile (Revolut-hosted-style flow):
+  // customer confirms the order (main "Zaplatiť") → we build the cart for the
+  // current amount, attach the address + shipping, then REVEAL the card form
+  // (dropdown) with its own confirm button. Payment fires only when they enter
+  // their card and press "Potvrdiť platbu". Building fresh here means the amount
+  // and address are always current — no stale-token handling needed.
   function revolutCardPay(customerData) {
-    var proceed = function () {
-      if (!revolutCardField || !revolutCardCartId) {
-        setCardStatus('Platobný formulár nie je pripravený. Skúste to znova.', true);
-        resetSubmitButton();
-        return;
-      }
-      applyShippingToRevolutCart(revolutCardCartId, customerData)
-        .then(function () {
-          var name = (customerData.shipping_address.first_name + ' ' + customerData.shipping_address.last_name).trim();
-          setCardStatus('Spracúvam platbu…', false);
-          revolutCardField.submit({ name: name, email: customerData.email });
-          // onSuccess → onRevolutCardSuccess() completes the cart & redirects.
-        })
-        .catch(function (err) {
-          errorEl.innerHTML = '<div class="error-title">Pri spracovaní platby došlo k chybe</div><div class="error-detail">' + (err.message || 'Skúste to znova.') + '</div>';
-          resetSubmitButton();
+    var cardFieldsEl = document.getElementById('card-fields');
+    var curr = (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
+    var amountLabel = Number(getCurrentTotal()).toFixed(2).replace('.', ',') + ' ' + (curr === 'EUR' ? '€' : curr);
+    setCardStatus('Pripravujem platbu…', false);
+    teardownRevolutCard();
+
+    buildRevolutCardCart()
+      .then(function (cartId) {
+        revolutCardCartId = cartId;
+        return applyShippingToRevolutCart(cartId, customerData);
+      })
+      .then(function () {
+        return createExpressPaymentSession(revolutCardCartId, 'pp_revolut_revolut', {
+          method: 'card', amount: getCurrentTotal(),
+          currency: curr, project_slug: PROJECT_CONFIG.slug || ''
         });
-    };
-    // If the field isn't mounted yet, build it then submit.
-    if (!revolutCardField) {
-      initRevolutCard(true).then(proceed);
-      return;
-    }
-    // If the amount changed after the card was entered, the token is stale — the
-    // field must be rebuilt, which clears it. Ask the user to re-enter rather than
-    // submitting an empty field.
-    if (revolutCardAmountKey !== revolutAmountKey()) {
-      initRevolutCard(true).then(function () {
-        setCardStatus('Suma sa zmenila — zadajte prosím údaje karty znova.', true);
+      })
+      .then(function (sessionData) {
+        if (!sessionData || !sessionData.revolutPublicToken) throw new Error('Revolut session bez tokenu');
+        revolutCardToken = sessionData.revolutPublicToken;
+        var mode = sessionData.environment === 'prod' ? 'prod' : 'sandbox';
+        if (cardFieldsEl) cardFieldsEl.style.display = 'block';
+        var box = prepareRevolutCardLayout();
+        ensureRevolutCardStyles();
+        return import('https://esm.sh/@revolut/checkout@1.1.25').then(function (m) {
+          return m.default(revolutCardToken, mode).then(function (inst) {
+            revolutCardInst = inst;
+            revolutCardField = inst.createCardField({
+              target: box,
+              locale: REVOLUT_CARD_LOCALE,
+              theme: 'light',
+              styles: {
+                default: { color: '#1A1A1A', fontFamily: '"DM Sans", system-ui, sans-serif', fontSize: '14px', fontWeight: '500' },
+                completed: { color: '#1A1A1A' },
+                autofilled: { color: '#1A1A1A' },
+                invalid: { color: '#DC2626' }
+              },
+              classes: { focused: 'rc-focused', invalid: 'rc-invalid' },
+              onSuccess: function () { onRevolutCardSuccess(); },
+              onError: function (msg) { setCardStatus('Chyba: ' + ((msg && msg.message) || msg), true); var b = document.getElementById('revolut-pay-btn'); if (b) b.disabled = false; },
+              onValidation: function (errs) { setCardStatus((errs && errs.length) ? (errs[0].message || '') : '', true); }
+            });
+            // Confirm button inside the dropdown — the payment CTA.
+            var oldBtn = document.getElementById('revolut-pay-btn'); if (oldBtn) oldBtn.remove();
+            var payBtn = document.createElement('button');
+            payBtn.id = 'revolut-pay-btn'; payBtn.type = 'button';
+            payBtn.textContent = 'Potvrdiť platbu ' + amountLabel;
+            payBtn.style.cssText = 'margin-top:12px;width:100%;padding:15px;background:var(--cta);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;';
+            payBtn.onclick = function () {
+              payBtn.disabled = true;
+              setCardStatus('Spracúvam platbu…', false);
+              var name = (customerData.shipping_address.first_name + ' ' + customerData.shipping_address.last_name).trim();
+              revolutCardField.submit({ name: name, email: customerData.email });
+            };
+            cardFieldsEl.appendChild(payBtn);
+            setCardStatus('Zadajte údaje karty a potvrďte platbu.', false);
+            // Hand off from the main button to the card form's confirm button.
+            if (submitBtn) { submitBtn.classList.remove('loading'); submitBtn.style.display = 'none'; }
+            cardFieldsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+        });
+      })
+      .catch(function (err) {
+        errorEl.innerHTML = '<div class="error-title">Pri spracovaní platby došlo k chybe</div><div class="error-detail">' + (err.message || 'Skúste to znova.') + '</div>';
         resetSubmitButton();
       });
-      return;
-    }
-    proceed();
   }
 
   /**
@@ -5839,18 +5876,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (!hasCreditCard) {
         cardFieldsEl.style.display = 'none';
       } else if (selectedMethod === 'creditcard') {
-        // Stripe, PayPal, Comgate, and Airwallex use hosted checkout (redirect), no inline card fields needed
-        if (cardProvider === 'stripe' || cardProvider === 'paypal' || cardProvider === 'comgate' || cardProvider === 'airwallex') {
+        // Stripe/PayPal/Comgate/Airwallex redirect; Revolut reveals its card form
+        // only AFTER the customer confirms the order (see revolutCardPay). None of
+        // them show an inline card form at tile-selection time.
+        if (cardProvider === 'stripe' || cardProvider === 'paypal' || cardProvider === 'comgate' || cardProvider === 'airwallex' || cardProvider === 'revolut') {
           cardFieldsEl.style.display = 'none';
         } else {
           cardFieldsEl.style.display = 'block';
           // Init the correct card provider's form
-          if (cardProvider === 'revolut') {
-            // Lazy: don't create a Revolut order on page load (would happen for
-            // every visitor since card is the default tile). Arm a one-time
-            // mount on the first interaction with the card area instead.
-            armRevolutCardLazy();
-          } else if (cardProvider === 'mollie') {
+          if (cardProvider === 'mollie') {
             initMollieComponents();
           } else {
             initMollieComponents(); // fallback
@@ -5948,12 +5982,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         // Show/hide card fields — init the right provider's card elements
         var cardFields = document.getElementById('card-fields');
         if (cardFields) {
-          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal' && cardProvider !== 'comgate') {
-            // Stripe, PayPal, and Comgate use hosted checkout (redirect), no inline card fields
+          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal' && cardProvider !== 'comgate' && cardProvider !== 'revolut') {
+            // Stripe/PayPal/Comgate redirect; Revolut reveals its form after confirm.
             cardFields.style.display = 'block';
-            if (cardProvider === 'revolut') {
-              initRevolutCard(false); // explicit card selection → mount now
-            } else if (cardProvider === 'mollie') {
+            if (cardProvider === 'mollie') {
               initMollieComponents();
             } else if (cardProvider === 'airwallex') {
               initAirwallexCard();
