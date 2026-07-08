@@ -8920,16 +8920,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           cardBox.style.cssText = 'border:1.5px solid #EDD9E5;border-radius:8px;padding:14px 12px;min-height:46px;background:#fff;';
           mount.appendChild(cardBox);
           var payBtn = document.createElement('button');
-          payBtn.type = 'button'; payBtn.textContent = 'Zaplatiť ' + amtLabel;
-          payBtn.style.cssText = 'margin-top:14px;width:100%;padding:15px;background:#C27BA0;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;';
+          payBtn.type = 'button'; payBtn.className = 'checkout-btn';
+          payBtn.innerHTML = '<span class="spinner"></span><span class="btn-text">Zaplatiť ' + amtLabel + '</span>';
+          payBtn.style.marginTop = '14px';
           mount.appendChild(payBtn);
           var card = inst.createCardField({
             target: cardBox,
             onSuccess: function () { completeAndGo(); },
-            onError: function (msg) { setStatus('Chyba: ' + ((msg && msg.message) || msg), 'err'); payBtn.disabled = false; },
+            onError: function (msg) { setStatus('Chyba: ' + ((msg && msg.message) || msg), 'err'); payBtn.classList.remove('loading'); payBtn.disabled = false; },
             onValidation: function (errs) { setStatus(errs && errs.length ? (errs[0].message || '') : '', errs && errs.length ? 'err' : ''); }
           });
-          payBtn.onclick = function () { setStatus('Spracúvam platbu…'); payBtn.disabled = true; card.submit({ name: custName, email: custEmail }); };
+          payBtn.onclick = function () { setStatus('Spracúvam platbu…'); payBtn.classList.add('loading'); payBtn.disabled = true; card.submit({ name: custName, email: custEmail }); };
         });
       }
 
