@@ -3772,6 +3772,208 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
   }
 
+  /* ─── REVOLUT INLINE CARD — owns the "Platobná karta" tile ─────────────────
+   * Unlike Mollie/Airwallex/Stripe (which collect card data client-side and
+   * create the payment intent on submit), Revolut requires the order token
+   * BEFORE the card field can mount. So when the card tile is opened (or the
+   * amount changes) we build a cart with the current items, create a Revolut
+   * payment session (→ order token) and mount a single combined card field.
+   * On submit we attach the shipping address + method to that same cart and
+   * call card.submit(); onSuccess completes the cart → order.
+   * ─────────────────────────────────────────────────────────────────────────*/
+  function revolutAmountKey() {
+    return [getCurrentTotal(), selectedBundleQty, (orderBumpActive ? 1 : 0)].join('|');
+  }
+
+  function teardownRevolutCard() {
+    if (revolutCardField && revolutCardField.destroy) { try { revolutCardField.destroy(); } catch (e) {} }
+    revolutCardField = null; revolutCardInst = null; revolutCardToken = null; revolutCardAmountKey = null;
+  }
+
+  // Attach a one-time trigger that mounts the Revolut card field on the first
+  // interaction with the card area — avoids creating a Revolut order for every
+  // visitor just because the card tile is selected by default on page load.
+  var _revolutCardArmed = false;
+  function armRevolutCardLazy() {
+    if (_revolutCardArmed) return;
+    _revolutCardArmed = true;
+    var box = document.getElementById('card-fields');
+    if (!box) return;
+    // Show a hint so the empty box isn't confusing before first interaction.
+    prepareRevolutCardLayout();
+    setCardStatus('Kliknite sem pre zadanie údajov karty', false);
+    var trigger = function () { initRevolutCard(false); };
+    box.addEventListener('mousedown', trigger, { once: true });
+    box.addEventListener('touchstart', trigger, { once: true, passive: true });
+  }
+
+  // Build a fresh cart holding the current items (main product + order bump).
+  function buildRevolutCardCart() {
+    return medusaFetch('/store/carts', { method: 'POST', body: JSON.stringify({ region_id: currentRegionId }) })
+      .then(function (res) { return res.cart.id; })
+      .then(function (cartId) {
+        return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
+          method: 'POST',
+          body: JSON.stringify({ variant_id: VARIANT_ID, quantity: selectedBundleQty })
+        }).then(function () {
+          if (orderBumpActive && PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.variantId) {
+            return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
+              method: 'POST',
+              body: JSON.stringify({ variant_id: PROJECT_CONFIG.upsellProduct.variantId, quantity: 1 })
+            });
+          }
+        }).then(function () { return cartId; });
+      });
+  }
+
+  // Reshape the shared #card-fields form into a single combined field for Revolut.
+  function prepareRevolutCardLayout() {
+    var box = document.getElementById('card-number');
+    // Revolut renders one combined iframe → hide the split expiry/cvc/name boxes.
+    ['expiry-date', 'verification-code', 'card-holder'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && el.parentElement) el.parentElement.style.display = 'none';
+    });
+    if (box) { box.innerHTML = ''; box.style.height = '46px'; box.style.width = '100%'; }
+    // Revolut's field is one combined iframe (number + expiry + CVC) → relabel.
+    var lbl = box && box.parentElement ? box.parentElement.querySelector('label') : null;
+    if (lbl) lbl.textContent = 'Údaje karty';
+    return box;
+  }
+
+  function setCardStatus(msg, isError) {
+    var errEl = document.getElementById('card-errors');
+    if (!errEl) return;
+    errEl.textContent = msg || '';
+    errEl.style.color = isError ? 'var(--error)' : '#9B7AAD';
+  }
+
+  // (Re)build the Revolut order + mount the card field for the current amount.
+  function initRevolutCard(force) {
+    var amtKey = revolutAmountKey();
+    if (!force && revolutCardField && revolutCardAmountKey === amtKey) return Promise.resolve();
+    if (revolutCardMounting) return Promise.resolve();
+    revolutCardMounting = true;
+    teardownRevolutCard();
+
+    var box = prepareRevolutCardLayout();
+    setCardStatus('Načítavam platobný formulár…', false);
+
+    return buildRevolutCardCart()
+      .then(function (cartId) {
+        revolutCardCartId = cartId;
+        return createExpressPaymentSession(cartId, 'pp_revolut_revolut', {
+          method: 'card',
+          amount: getCurrentTotal(),
+          currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
+          project_slug: PROJECT_CONFIG.slug || ''
+        });
+      })
+      .then(function (sessionData) {
+        if (!sessionData || !sessionData.revolutPublicToken) throw new Error('Revolut session bez tokenu');
+        revolutCardToken = sessionData.revolutPublicToken;
+        var mode = sessionData.environment === 'prod' ? 'prod' : 'sandbox';
+        return import('https://esm.sh/@revolut/checkout@1.1.25').then(function (m) {
+          return m.default(revolutCardToken, mode).then(function (inst) {
+            revolutCardInst = inst;
+            setCardStatus('', false);
+            revolutCardField = inst.createCardField({
+              target: box,
+              locale: REVOLUT_CARD_LOCALE,
+              onSuccess: function () { onRevolutCardSuccess(); },
+              onError: function (msg) { setCardStatus('Chyba: ' + ((msg && msg.message) || msg), true); resetSubmitButton(); },
+              onValidation: function (errs) { setCardStatus((errs && errs.length) ? (errs[0].message || '') : '', true); }
+            });
+            revolutCardAmountKey = amtKey;
+          });
+        });
+      })
+      .catch(function (err) {
+        console.error('[Revolut Card] init failed:', err);
+        setCardStatus('Nepodarilo sa načítať platobný formulár. Skúste to znova.', true);
+      })
+      .then(function () { revolutCardMounting = false; }, function () { revolutCardMounting = false; });
+  }
+
+  // Attach shipping address + selected shipping method + packeta metadata to a cart.
+  function applyShippingToRevolutCart(cartId, customerData) {
+    return medusaFetch('/store/carts/' + cartId, { method: 'POST', body: JSON.stringify(customerData) })
+      .then(function () { return medusaFetch('/store/shipping-options?cart_id=' + cartId, { method: 'GET' }); })
+      .then(function (shipRes) {
+        var options = shipRes.shipping_options || [];
+        if (options.length === 0) throw new Error('Žiadne možnosti dopravy nie sú k dispozícii');
+        var selectedOption = options[0];
+        if (selectedShipping === 'home') {
+          var homeOpt = options.find(function (o) { return o.name && o.name.toLowerCase().indexOf('adres') !== -1; });
+          if (homeOpt) selectedOption = homeOpt;
+        } else {
+          var pickupOpt = options.find(function (o) { return o.name && o.name.toLowerCase().indexOf('miesto') !== -1; });
+          if (pickupOpt) selectedOption = pickupOpt;
+        }
+        return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
+          method: 'POST', body: JSON.stringify({ option_id: selectedOption.id })
+        });
+      })
+      .then(function () {
+        var cartMeta = { shipping_method: selectedShipping === 'pickup' ? 'zasilkovna_pickup' : 'zasilkovna_home' };
+        if (selectedShipping === 'pickup' && selectedPacketaPoint) {
+          cartMeta.packeta_point_id = String(selectedPacketaPoint.id);
+          cartMeta.packeta_point_name = selectedPacketaPoint.name;
+          cartMeta.packeta_point_address = selectedPacketaPoint.address + ', ' + selectedPacketaPoint.zip + ' ' + selectedPacketaPoint.city;
+          cartMeta.packeta_carrier_id = (selectedPacketaPoint.carrierId === null || selectedPacketaPoint.carrierId === undefined) ? '' : String(selectedPacketaPoint.carrierId);
+        }
+        return medusaFetch('/store/carts/' + cartId, { method: 'POST', body: JSON.stringify({ metadata: cartMeta }) });
+      });
+  }
+
+  function resetSubmitButton() {
+    if (submitBtn) { submitBtn.classList.remove('loading'); submitBtn.disabled = false; }
+  }
+
+  // Revolut card field authorised the payment → complete the same cart.
+  function onRevolutCardSuccess() {
+    if (!revolutCardCartId) { resetSubmitButton(); return; }
+    handleExpressOrderComplete(revolutCardCartId);
+  }
+
+  // Submit handler for the Revolut card tile (called instead of the generic flow).
+  function revolutCardPay(customerData) {
+    var proceed = function () {
+      if (!revolutCardField || !revolutCardCartId) {
+        setCardStatus('Platobný formulár nie je pripravený. Skúste to znova.', true);
+        resetSubmitButton();
+        return;
+      }
+      applyShippingToRevolutCart(revolutCardCartId, customerData)
+        .then(function () {
+          var name = (customerData.shipping_address.first_name + ' ' + customerData.shipping_address.last_name).trim();
+          setCardStatus('Spracúvam platbu…', false);
+          revolutCardField.submit({ name: name, email: customerData.email });
+          // onSuccess → onRevolutCardSuccess() completes the cart & redirects.
+        })
+        .catch(function (err) {
+          errorEl.innerHTML = '<div class="error-title">Pri spracovaní platby došlo k chybe</div><div class="error-detail">' + (err.message || 'Skúste to znova.') + '</div>';
+          resetSubmitButton();
+        });
+    };
+    // If the field isn't mounted yet, build it then submit.
+    if (!revolutCardField) {
+      initRevolutCard(true).then(proceed);
+      return;
+    }
+    // If the amount changed after the card was entered, the token is stale — the
+    // field must be rebuilt, which clears it. Ask the user to re-enter rather than
+    // submitting an empty field.
+    if (revolutCardAmountKey !== revolutAmountKey()) {
+      initRevolutCard(true).then(function () {
+        setCardStatus('Suma sa zmenila — zadajte prosím údaje karty znova.', true);
+        resetSubmitButton();
+      });
+      return;
+    }
+    proceed();
+  }
+
   /**
    * Init PayPal Card Fields — uses PayPal JS SDK CardFields to mount hosted card inputs
    * PayPal Advanced Card Payments: PCI-compliant hosted fields (like Stripe Elements)
@@ -3971,6 +4173,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var paypalCardMounting = false;
   var paypalClientId = null;
   var _paypalSdkPromise = null; // Centralized PayPal SDK loading promise
+  // ── Revolut inline card (owns the "Platobná karta" tile) ──
+  var revolutCardInst = null;      // RevolutCheckout instance
+  var revolutCardField = null;     // createCardField() handle (.submit / .destroy)
+  var revolutCardToken = null;     // order public token the field is mounted against
+  var revolutCardCartId = null;    // cart the Revolut order/session belongs to
+  var revolutCardAmountKey = null; // amount signature the current field was built for
+  var revolutCardMounting = false; // guard against concurrent mounts
+  var REVOLUT_CARD_LOCALE = 'sk';  // language of the card field labels
   var expressMethodsList = [];  // Express methods from API
 
   /* ─── CENTRALIZED PAYPAL SDK LOADER ─── */
@@ -5225,9 +5435,32 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         });
       });
 
-      // Detect which provider handles credit cards
-      var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
-      cardProvider = ccOption ? ccOption.provider : '';
+      // Detect which provider handles credit cards.
+      // pusti-to-sk: Revolut owns the "Platobná karta" tile with an inline card
+      // field. If a Revolut card method is active, drop the redirect-based card
+      // tile (Comgate) + the standalone Revolut card tile and expose ONE unified
+      // 'creditcard' tile backed by Revolut.
+      var revolutCardOpt = allPaymentOptions.find(function(m) { return m.provider === 'revolut' && m.code === 'card'; });
+      if (revolutCardOpt) {
+        allPaymentOptions = allPaymentOptions.filter(function(m) {
+          if (m.code === 'creditcard') return false;                        // remove Comgate/other card tile
+          if (m.provider === 'revolut' && m.code === 'card') return false;   // remove standalone Revolut card
+          return true;
+        });
+        allPaymentOptions.unshift({
+          code: 'creditcard',
+          provider: 'revolut',
+          provider_id: 'pp_revolut_revolut',
+          display_name: revolutCardOpt.display_name || 'Platobná karta',
+          icon: 'creditcard',
+          sort_order: -1,
+          environment: revolutCardOpt.environment || 'prod'
+        });
+        cardProvider = 'revolut';
+      } else {
+        var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
+        cardProvider = ccOption ? ccOption.provider : '';
+      }
       console.log('[CardForm] Card provider detected:', cardProvider || 'none');
 
       if (allPaymentOptions.length === 0) {
@@ -5585,7 +5818,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         } else {
           cardFieldsEl.style.display = 'block';
           // Init the correct card provider's form
-          if (cardProvider === 'mollie') {
+          if (cardProvider === 'revolut') {
+            // Lazy: don't create a Revolut order on page load (would happen for
+            // every visitor since card is the default tile). Arm a one-time
+            // mount on the first interaction with the card area instead.
+            armRevolutCardLazy();
+          } else if (cardProvider === 'mollie') {
             initMollieComponents();
           } else {
             initMollieComponents(); // fallback
@@ -5686,7 +5924,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal' && cardProvider !== 'comgate') {
             // Stripe, PayPal, and Comgate use hosted checkout (redirect), no inline card fields
             cardFields.style.display = 'block';
-            if (cardProvider === 'mollie') {
+            if (cardProvider === 'revolut') {
+              initRevolutCard(false); // explicit card selection → mount now
+            } else if (cardProvider === 'mollie') {
               initMollieComponents();
             } else if (cardProvider === 'airwallex') {
               initAirwallexCard();
@@ -5853,6 +6093,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         : cardProvider === 'airwallex' ? 'Airwallex'
         : cardProvider === 'paypal' ? 'PayPal'
         : cardProvider === 'comgate' ? 'Comgate'
+        : cardProvider === 'revolut' ? 'Revolut'
         : 'Mollie';
       subtext.textContent = cardProvider === 'comgate'
         ? 'Budete presmerovaní na zabezpečenú platbu kartou.'
@@ -5876,6 +6117,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           : cardProvider === 'airwallex' ? 'Airwallex'
           : cardProvider === 'paypal' ? 'PayPal'
           : cardProvider === 'comgate' ? 'Comgate'
+          : cardProvider === 'revolut' ? 'Revolut'
           : 'Mollie';
         trustText.textContent = 'Zabezpečené cez ' + trustProvider;
       } else if (BANK_CODES.indexOf(selectedMethod) !== -1) {
@@ -7589,6 +7831,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var checkoutBundlePrice = selectedBundlePrice;
     var checkoutOrderBump = orderBumpActive;
     var checkoutTotal = getCurrentTotal();
+
+    // ── REVOLUT INLINE CARD ── The card field is already mounted against its own
+    // Revolut order/cart. Attach the shipping address to that cart and submit the
+    // card inline (onSuccess completes the cart). Skips the generic flow below.
+    if (cardProvider === 'revolut' && selectedMethod === 'creditcard') {
+      revolutCardPay(customerData);
+      return;
+    }
 
     // Krok 1: Vytvořit nebo znovu použít cart (promo cart → background cart → nový)
     var reuseCartId = backgroundCartId;
