@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revolut — platební metody (demo)</title>
+<style>
+  :root{--fg:#1A1028;--muted:#6b6480;--line:#e7e2ef;--brand:#0666EB;--bg:#f6f4fa;--card:#fff;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:24px 12px}
+  .wrap{max-width:520px;margin:0 auto}
+  h1{font-size:19px;margin:0 0 2px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 1px 3px rgba(20,10,40,.04)}
+  .m{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:11px;padding:13px 14px;margin-bottom:10px;cursor:pointer;transition:.12s;background:#fff}
+  .m:hover{border-color:#c9bfe0}
+  .m.sel{border-color:var(--brand);box-shadow:0 0 0 3px rgba(6,102,235,.12)}
+  .m .ico{width:42px;height:27px;flex:0 0 42px;display:flex;align-items:center;justify-content:center}
+  .m .ico svg{display:block;border-radius:5px}
+  .m .lbl{flex:1;font-size:14.5px;font-weight:600}
+  .m .tag{font-size:11px;color:var(--muted);font-weight:500}
+  .radio{width:18px;height:18px;border-radius:50%;border:2px solid #cfc7e0;flex:0 0 18px;position:relative}
+  .m.sel .radio{border-color:var(--brand)}
+  .m.sel .radio::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--brand)}
+  .panel{margin-top:14px;padding-top:16px;border-top:1px dashed var(--line);display:none}
+  .panel.show{display:block}
+  #card-field{border:1.5px solid var(--line);border-radius:10px;padding:14px 12px;min-height:44px;background:#fff}
+  .btn{margin-top:14px;width:100%;border:0;border-radius:10px;background:var(--brand);color:#fff;font-size:15px;font-weight:600;padding:14px;cursor:pointer}
+  .btn:disabled{opacity:.5;cursor:default}
+  .note{font-size:12.5px;line-height:1.55;color:var(--muted);background:#faf8ff;border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-top:6px}
+  .ok{color:#1a7f37}.err{color:#c0392b}
+  .status{font-size:13px;margin-top:12px;min-height:18px}
+  .foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:16px;line-height:1.6}
+  .amount{font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Zaplatit přes Revolut</h1>
+  <p class="sub">Demo všech metod · částka <span class="amount">5,00 €</span> · <b>živé produkční klíče</b> (skutečná platba, netestuj naostro bez refundu)</p>
+
+  <div class="card">
+    <div id="methods"></div>
+
+    <!-- CARD -->
+    <div class="panel" id="p-card">
+      <div id="card-field"></div>
+      <button class="btn" id="pay-card">Zaplatit 5,00 € kartou</button>
+      <div class="status" id="st-card"></div>
+    </div>
+
+    <!-- REVOLUT PAY -->
+    <div class="panel" id="p-revolut_pay">
+      <div id="rev-pay-btn"></div>
+      <div class="status" id="st-rev"></div>
+    </div>
+
+    <!-- WALLETS -->
+    <div class="panel" id="p-apple_pay">
+      <div class="note">🍏 <b>Apple Pay</b> se vykreslí jen v Safari na ověřené <b>HTTPS doméně</b> registrované v Revolutu. Na localhost náhledu se tlačítko nezobrazí — naživo na <code>pusttocotenici.cz</code> (přes HTTPS) ano.</div>
+    </div>
+    <div class="panel" id="p-google_pay">
+      <div class="note">🤖 <b>Google Pay</b> vyžaduje HTTPS a ověřenou doménu v Revolut/Google. Stejné jako Apple Pay — funguje až naživo na ostré doméně, ne na localhost.</div>
+    </div>
+
+    <!-- PAY BY BANK -->
+    <div class="panel" id="p-pay_by_bank">
+      <div id="pbb-btn"></div>
+      <div class="note">🏦 <b>Pay by Bank</b> (open banking) — zákazník vybere banku a potvrdí převod v bankovní appce. Dostupnost dle země. Renderuje se přes stejný SDK/token.</div>
+      <div class="status" id="st-pbb"></div>
+    </div>
+
+    <!-- SEPA -->
+    <div class="panel" id="p-sepa_direct_debit">
+      <div class="note">💶 <b>SEPA inkaso</b> — jen <b>EUR</b> v SEPA zóně. Zákazník zadá IBAN a udělí mandát; strhne se převodem. Server-to-server flow (ne widget).</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    Revolut Merchant Web SDK · <code>@revolut/checkout</code> · mode <b>prod</b><br>
+    Order token: <code id="tok"></code>
+  </div>
+</div>
+
+<script type="module">
+import RevolutCheckout from 'https://esm.sh/@revolut/checkout@1'
+
+const ORDER_TOKEN = '5639230b-1009-4065-a5d8-7741763742d4'
+const PUBLIC_KEY  = 'pk_oaFUBWB6pUWCnAEKMW58Vn1J6ASW1Rs89fG5nbRns7FsZZa4'
+const MODE = 'prod'
+document.getElementById('tok').textContent = ORDER_TOKEN.slice(0,8) + '…'
+
+// ---- method tiles (icons inline) ----
+const icons = {
+  card:'<svg width="42" height="27" viewBox="0 0 42 27"><rect width="42" height="27" rx="4" fill="#1A1F71"/><rect y="8" width="42" height="4" fill="#fff" opacity=".9"/><rect x="6" y="17" width="14" height="3" rx="1.5" fill="#fff" opacity=".8"/></svg>',
+  apple_pay:'<svg width="42" height="27" viewBox="0 0 42 27"><rect width="42" height="27" rx="4" fill="#000"/><text x="21" y="14" fill="#fff" font-family="Arial" font-size="9" font-weight="600" text-anchor="middle" dominant-baseline="middle"> Pay</text><text x="12" y="14" fill="#fff" font-size="11" text-anchor="middle" dominant-baseline="middle">&#63743;</text></svg>',
+  google_pay:'<svg width="42" height="27" viewBox="0 0 42 27"><rect width="42" height="27" rx="4" fill="#fff" stroke="#e0e0e0"/><text x="21" y="14" font-family="Arial" font-size="8.5" font-weight="600" text-anchor="middle" dominant-baseline="middle"><tspan fill="#4285F4">G</tspan><tspan fill="#EA4335">o</tspan><tspan fill="#FBBC05">o</tspan><tspan fill="#4285F4">g</tspan><tspan fill="#34A853">l</tspan><tspan fill="#EA4335">e</tspan><tspan fill="#5f6368"> Pay</tspan></text></svg>',
+  revolut_pay:'<svg width="42" height="27" viewBox="0 0 42 27"><rect width="42" height="27" rx="4" fill="#0666EB"/><text x="21" y="14" fill="#fff" font-family="Arial" font-size="11" font-weight="800" text-anchor="middle" dominant-baseline="middle">R</text></svg>',
+  pay_by_bank:'<svg width="42" height="27" viewBox="0 0 42 27"><rect width="42" height="27" rx="4" fill="#0a7d4b"/><path d="M14 11h14M13 11l8-4 8 4M15 12v6M27 12v6M13 19h16" stroke="#fff" stroke-width="1.4" fill="none"/></svg>',
+  sepa_direct_debit:'<svg width="42" height="27" viewBox="0 0 42 27"><rect width="42" height="27" rx="4" fill="#10298E"/><text x="21" y="13" fill="#FFCC00" font-family="Arial" font-size="8" font-weight="700" text-anchor="middle" dominant-baseline="middle">SEPA</text></svg>',
+}
+const methods = [
+  {code:'card', label:'Platební karta', tag:'Visa · Mastercard'},
+  {code:'revolut_pay', label:'Revolut Pay', tag:'účet / karta'},
+  {code:'apple_pay', label:'Apple Pay', tag:'HTTPS doména'},
+  {code:'google_pay', label:'Google Pay', tag:'HTTPS doména'},
+  {code:'pay_by_bank', label:'Pay by Bank', tag:'open banking'},
+  {code:'sepa_direct_debit', label:'SEPA inkaso', tag:'EUR'},
+]
+const box = document.getElementById('methods')
+methods.forEach((m,i)=>{
+  const el = document.createElement('div')
+  el.className = 'm' + (i===0?' sel':'')
+  el.dataset.code = m.code
+  el.innerHTML = `<span class="ico">${icons[m.code]}</span><span class="lbl">${m.label}<br><span class="tag">${m.tag}</span></span><span class="radio"></span>`
+  el.onclick = ()=>select(m.code)
+  box.appendChild(el)
+})
+function select(code){
+  document.querySelectorAll('.m').forEach(e=>e.classList.toggle('sel', e.dataset.code===code))
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'))
+  document.getElementById('p-'+code).classList.add('show')
+}
+select('card')
+
+// ---- CARD FIELD (live inline) ----
+let cardInstance, cardField
+;(async()=>{
+  try{
+    cardInstance = await RevolutCheckout(ORDER_TOKEN, MODE)
+    cardField = cardInstance.createCardField({
+      target: document.getElementById('card-field'),
+      onSuccess(){ setSt('st-card','✓ Platba proběhla — děkujeme!','ok') },
+      onError(m){ setSt('st-card','Chyba: '+(m&&m.message||m),'err') },
+      onValidation(errors){ if(errors&&errors.length) setSt('st-card', errors[0].message||'', 'err'); else setSt('st-card','') },
+    })
+    document.getElementById('pay-card').onclick = ()=>{
+      setSt('st-card','Zpracovávám…')
+      cardField.submit({ name:'Jan Novák', email:'demo@pusttocotenici.cz' })
+    }
+  }catch(e){ setSt('st-card','SDK se nenačetlo: '+e.message,'err') }
+})()
+
+// ---- REVOLUT PAY (live button) ----
+;(async()=>{
+  try{
+    const { revolutPay } = await RevolutCheckout.payments({ publicToken: PUBLIC_KEY, locale:'cs' })
+    revolutPay.mount(document.getElementById('rev-pay-btn'), {
+      currency:'EUR', totalAmount:500,
+      createOrder: async()=>({ publicId: ORDER_TOKEN }),
+    })
+    revolutPay.on && revolutPay.on('payment', (p)=>{
+      if(p.type==='success') setSt('st-rev','✓ Zaplaceno přes Revolut Pay','ok')
+      if(p.type==='error') setSt('st-rev','Chyba: '+(p.error&&p.error.message||''),'err')
+    })
+  }catch(e){ setSt('st-rev','Revolut Pay se nenačetl: '+e.message,'err') }
+})()
+
+// ---- PAY BY BANK (best-effort button) ----
+;(async()=>{
+  try{
+    const { payByBank } = await RevolutCheckout.payments({ publicToken: PUBLIC_KEY, locale:'cs' })
+    if(payByBank && payByBank.mount){
+      payByBank.mount(document.getElementById('pbb-btn'), {
+        currency:'EUR', totalAmount:500,
+        createOrder: async()=>({ publicId: ORDER_TOKEN }),
+      })
+    } else { document.getElementById('pbb-btn').innerHTML='' }
+  }catch(e){ /* keep the note */ }
+})()
+
+function setSt(id,msg,cls){ const e=document.getElementById(id); if(!e)return; e.textContent=msg||''; e.className='status'+(cls?' '+cls:'') }
+</script>
+</body>
+</html>

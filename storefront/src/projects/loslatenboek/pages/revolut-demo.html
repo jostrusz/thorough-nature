@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Afrekenen — Revolut (demo)</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+<style>
+@font-face { font-family:'Recoleta'; src:url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight:400; font-display:swap; }
+@font-face { font-family:'Recoleta'; src:url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight:600; font-display:swap; }
+@font-face { font-family:'Recoleta'; src:url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight:700; font-display:swap; }
+@font-face { font-family:'DM Sans'; src:url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight:100 900; font-display:swap; }
+:root{
+  --bg:#FAF5F8;--heading:#2D1B3D;--cta:#C27BA0;--section:#EDD9E5;--body:#5A3D6B;
+  --highlight:#D9A4C0;--dark:#1A1028;--white:#fff;--light:#F5EDF2;--muted:#9B7AAD;
+  --cta-hover:#A8628A;--accent:#D498B5;--error:#C0392B;--success:#27AE60;
+  --border:rgba(194,123,160,0.18);--shadow-sm:0 1px 3px rgba(45,27,61,.06);
+  --shadow-md:0 4px 16px rgba(45,27,61,.08);--radius:8px;--radius-lg:12px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);font-family:'DM Sans',system-ui,sans-serif;padding:26px 12px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:500px;margin:0 auto}
+.brand{text-align:center;margin-bottom:18px}
+.brand .kicker{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--cta);font-weight:700;margin-bottom:6px}
+.brand h1{font-family:'Recoleta',Georgia,serif;font-weight:700;font-size:22px;color:var(--heading);margin:0}
+.panel{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);overflow:hidden;margin-bottom:14px}
+.panel-h{padding:16px 20px 0}
+.panel-h .lbl{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:700}
+/* order summary */
+.summary{display:flex;align-items:center;gap:14px;padding:16px 20px}
+.summary .cover{width:48px;height:64px;border-radius:6px;background:linear-gradient(135deg,#B23A48,#7d1f2b);flex:0 0 48px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.summary .t{flex:1}
+.summary .t .n{font-weight:600;color:var(--heading);font-size:14.5px;line-height:1.25}
+.summary .t .q{font-size:12px;color:var(--muted);margin-top:2px}
+.summary .p{font-weight:700;color:var(--heading);font-size:15px}
+.totals{border-top:1px solid var(--border);padding:14px 20px}
+.totals .row{display:flex;justify-content:space-between;font-size:13.5px;color:var(--body);padding:3px 0}
+.totals .row.tot{font-size:16px;font-weight:700;color:var(--heading);border-top:1px solid var(--border);margin-top:8px;padding-top:12px}
+.free{color:var(--success);font-weight:600}
+/* payment methods (loslatenboek styl) */
+.pay-wrap{padding:14px 20px 20px}
+.payment-methods{display:flex;flex-direction:column;gap:8px}
+.payment-method{position:relative;display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .25s cubic-bezier(.22,1,.36,1)}
+.payment-method:hover{border-color:var(--highlight);box-shadow:var(--shadow-sm)}
+.payment-method.selected{border-color:var(--cta);background:rgba(194,123,160,.04);box-shadow:0 0 0 3px rgba(194,123,160,.1)}
+.pm-icon{width:46px;height:30px;border-radius:5px;flex-shrink:0;border:1px solid rgba(194,123,160,.12);overflow:hidden}
+.pm-icon svg{display:block;width:100%;height:100%}
+.pm-info{flex:1}
+.pm-name{font-size:14px;font-weight:600;color:var(--heading);line-height:1.2}
+.pm-desc{font-size:12px;color:var(--muted);margin-top:1px}
+.pm-badge{font-size:10px;font-weight:700;color:var(--cta);background:rgba(194,123,160,.1);padding:3px 8px;border-radius:20px;white-space:nowrap}
+.pm-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--white)}
+.payment-method.selected .pm-radio{border-color:var(--cta)}
+.pm-radio-dot{width:10px;height:10px;border-radius:50%;background:var(--cta);transform:scale(0);transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.payment-method.selected .pm-radio-dot{transform:scale(1)}
+/* inline panels */
+.mpanel{display:none;margin-top:10px;padding:15px;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--light)}
+.mpanel.show{display:block}
+#card-field{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 12px;min-height:46px}
+.note{font-size:12.5px;line-height:1.55;color:var(--body)}
+.note b{color:var(--heading)}
+.status{font-size:13px;margin-top:10px;min-height:16px}.ok{color:var(--success)}.err{color:var(--error)}
+/* CTA */
+.checkout-btn{width:100%;padding:17px 32px;margin-top:16px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;color:var(--white);background:var(--cta);border:none;border-radius:var(--radius);cursor:pointer;letter-spacing:.02em;box-shadow:0 4px 20px rgba(194,123,160,.3);transition:all .3s cubic-bezier(.22,1,.36,1)}
+.checkout-btn:hover{background:var(--cta-hover);transform:translateY(-2px);box-shadow:0 8px 28px rgba(194,123,160,.4)}
+.secure{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11.5px;color:var(--muted);margin-top:14px}
+.foot{text-align:center;color:var(--muted);font-size:11px;margin-top:14px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="kicker">Laat los wat je kapotmaakt</div>
+    <h1>Veilig afrekenen</h1>
+  </div>
+
+  <div class="panel">
+    <div class="summary">
+      <div class="cover">📕</div>
+      <div class="t"><div class="n">Laat los wat je kapotmaakt</div><div class="q">Paperback · 1 stuk</div></div>
+      <div class="p">€&nbsp;35,00</div>
+    </div>
+    <div class="totals">
+      <div class="row"><span>Subtotaal</span><span>€ 35,00</span></div>
+      <div class="row"><span>Verzending</span><span class="free">Gratis</span></div>
+      <div class="row tot"><span>Totaal</span><span>€ 35,00</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h"><span class="lbl">Betaalmethode</span></div>
+    <div class="pay-wrap">
+      <div class="payment-methods" id="methods"></div>
+
+      <!-- inline panels -->
+      <div class="mpanel" id="p-card">
+        <div id="card-field"></div>
+        <div class="status" id="st-card"></div>
+      </div>
+      <div class="mpanel" id="p-revolut_pay">
+        <div id="rev-pay-btn"></div>
+        <div class="status" id="st-rev"></div>
+      </div>
+      <div class="mpanel" id="p-apple_pay"><div class="note">🍏 <b>Apple Pay</b> verschijnt alleen in Safari op een geverifieerd <b>HTTPS-domein</b> dat in Revolut is geregistreerd. Zichtbaar zodra het domein is aangemeld.</div></div>
+      <div class="mpanel" id="p-google_pay"><div class="note">🤖 <b>Google Pay</b> vereist HTTPS + een geverifieerd domein in Revolut/Google. Werkt live op het echte domein.</div></div>
+      <div class="mpanel" id="p-pay_by_bank"><div id="pbb-btn"></div><div class="note">🏦 <b>Pay by Bank</b> — kies je bank en bevestig in je bankapp (open banking).</div></div>
+      <div class="mpanel" id="p-sepa_direct_debit"><div class="note">💶 <b>SEPA-incasso</b> — alleen EUR. Je vult je IBAN in en geeft een machtiging; het bedrag wordt automatisch geïncasseerd.</div></div>
+
+      <button class="checkout-btn" id="pay-btn">Betaal € 35,00</button>
+      <div class="secure">🔒 Beveiligd via Revolut · PSD2-gereguleerd</div>
+    </div>
+  </div>
+
+  <div class="foot">Demo · Revolut Merchant Web SDK · mode <b>prod</b> · order <span id="tok"></span></div>
+</div>
+
+<script type="module">
+import RevolutCheckout from 'https://esm.sh/@revolut/checkout@1'
+const ORDER_TOKEN='b9c3f5be-58b8-4905-894d-0ce1ff0cf0e4'
+const PUBLIC_KEY='pk_oaFUBWB6pUWCnAEKMW58Vn1J6ASW1Rs89fG5nbRns7FsZZa4'
+const MODE='prod'
+document.getElementById('tok').textContent=ORDER_TOKEN.slice(0,8)+'…'
+
+const icons={
+ card:'<svg viewBox="0 0 46 30"><rect width="46" height="30" rx="4" fill="#1A1F71"/><rect y="9" width="46" height="4.5" fill="#fff" opacity=".92"/><rect x="7" y="19" width="15" height="3.4" rx="1.7" fill="#fff" opacity=".8"/></svg>',
+ revolut_pay:'<svg viewBox="0 0 46 30"><rect width="46" height="30" rx="4" fill="#0666EB"/><text x="23" y="16" fill="#fff" font-family="Arial" font-size="13" font-weight="800" text-anchor="middle" dominant-baseline="middle">R</text></svg>',
+ apple_pay:'<svg viewBox="0 0 46 30"><rect width="46" height="30" rx="4" fill="#000"/><text x="26" y="16" fill="#fff" font-family="Arial" font-size="9.5" font-weight="600" text-anchor="middle" dominant-baseline="middle">Pay</text><text x="14" y="16" fill="#fff" font-size="12" text-anchor="middle" dominant-baseline="middle">&#63743;</text></svg>',
+ google_pay:'<svg viewBox="0 0 46 30"><rect width="46" height="30" rx="4" fill="#fff" stroke="#e6e6e6"/><text x="23" y="16" font-family="Arial" font-size="9" font-weight="600" text-anchor="middle" dominant-baseline="middle"><tspan fill="#4285F4">G</tspan><tspan fill="#EA4335">o</tspan><tspan fill="#FBBC05">o</tspan><tspan fill="#4285F4">g</tspan><tspan fill="#34A853">l</tspan><tspan fill="#EA4335">e</tspan><tspan fill="#5f6368"> Pay</tspan></text></svg>',
+ pay_by_bank:'<svg viewBox="0 0 46 30"><rect width="46" height="30" rx="4" fill="#0a7d4b"/><path d="M15 12h16M14 12l9-4.5 9 4.5M16.5 13v6.5M29.5 13v6.5M14 20h18" stroke="#fff" stroke-width="1.5" fill="none"/></svg>',
+ sepa_direct_debit:'<svg viewBox="0 0 46 30"><rect width="46" height="30" rx="4" fill="#10298E"/><text x="23" y="15" fill="#FFCC00" font-family="Arial" font-size="8.5" font-weight="700" text-anchor="middle" dominant-baseline="middle">SEPA</text></svg>',
+}
+const methods=[
+ {code:'card',name:'Creditcard / Betaalkaart',desc:'Visa · Mastercard',badge:''},
+ {code:'revolut_pay',name:'Revolut Pay',desc:'account of kaart',badge:'€20 cadeau'},
+ {code:'apple_pay',name:'Apple Pay',desc:'',badge:''},
+ {code:'google_pay',name:'Google Pay',desc:'',badge:''},
+ {code:'pay_by_bank',name:'Pay by Bank',desc:'iDEAL-achtig · open banking',badge:''},
+ {code:'sepa_direct_debit',name:'SEPA-incasso',desc:'automatische incasso',badge:''},
+]
+const box=document.getElementById('methods')
+methods.forEach((m,i)=>{
+ const el=document.createElement('div');el.className='payment-method'+(i===0?' selected':'');el.dataset.code=m.code
+ el.innerHTML=`<span class="pm-icon">${icons[m.code]}</span><span class="pm-info"><span class="pm-name">${m.name}</span>${m.desc?`<span class="pm-desc">${m.desc}</span>`:''}</span>${m.badge?`<span class="pm-badge">${m.badge}</span>`:''}<span class="pm-radio"><span class="pm-radio-dot"></span></span>`
+ el.onclick=()=>select(m.code);box.appendChild(el)
+})
+const payBtn=document.getElementById('pay-btn')
+function select(code){
+ document.querySelectorAll('.payment-method').forEach(e=>e.classList.toggle('selected',e.dataset.code===code))
+ document.querySelectorAll('.mpanel').forEach(p=>p.classList.remove('show'))
+ document.getElementById('p-'+code).classList.add('show')
+ payBtn.style.display = (code==='revolut_pay') ? 'none' : 'block'
+ payBtn.textContent = code==='card' ? 'Betaal € 35,00 met kaart' : 'Betaal € 35,00'
+ window.__sel=code
+}
+window.__sel='card'; select('card')
+
+let cardField
+;(async()=>{ try{
+ const inst=await RevolutCheckout(ORDER_TOKEN,MODE)
+ cardField=inst.createCardField({target:document.getElementById('card-field'),
+  onSuccess(){setSt('st-card','✓ Betaling gelukt — bedankt!','ok')},
+  onError(m){setSt('st-card','Fout: '+(m&&m.message||m),'err')},
+  onValidation(er){ setSt('st-card', er&&er.length?(er[0].message||''):'', er&&er.length?'err':'') }})
+}catch(e){setSt('st-card','SDK niet geladen: '+e.message,'err')} })()
+
+;(async()=>{ try{
+ const {revolutPay}=await RevolutCheckout.payments({publicToken:PUBLIC_KEY,locale:'nl'})
+ revolutPay.mount(document.getElementById('rev-pay-btn'),{currency:'EUR',totalAmount:3500,createOrder:async()=>({publicId:ORDER_TOKEN})})
+ revolutPay.on&&revolutPay.on('payment',p=>{ if(p.type==='success')setSt('st-rev','✓ Betaald met Revolut Pay','ok'); if(p.type==='error')setSt('st-rev','Fout: '+(p.error&&p.error.message||''),'err') })
+}catch(e){setSt('st-rev','Revolut Pay niet geladen: '+e.message,'err')} })()
+
+;(async()=>{ try{
+ const {payByBank}=await RevolutCheckout.payments({publicToken:PUBLIC_KEY,locale:'nl'})
+ if(payByBank&&payByBank.mount) payByBank.mount(document.getElementById('pbb-btn'),{currency:'EUR',totalAmount:3500,createOrder:async()=>({publicId:ORDER_TOKEN})})
+}catch(e){} })()
+
+payBtn.onclick=()=>{ if(window.__sel==='card'){ setSt('st-card','Bezig…'); cardField.submit({name:'Jan Jansen',email:'demo@loslatenboek.nl'}) } }
+function setSt(id,msg,cls){const e=document.getElementById(id);if(!e)return;e.textContent=msg||'';e.className='status'+(cls?' '+cls:'')}
+</script>
+</body>
+</html>
