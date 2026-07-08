@@ -183,6 +183,14 @@ export async function GET(
         gatewayResponse.environment = gw.mode === "live" ? "prod" : "demo"
       }
 
+      // Revolut: expose the public key + environment so the storefront can mount
+      // Apple Pay / Google Pay wallet buttons on load (payments() module needs the
+      // publicToken before any payment session exists).
+      if (gw.provider === "revolut") {
+        gatewayResponse.public_key = keys?.public_key || keys?.api_key || null
+        gatewayResponse.environment = gw.mode === "live" ? "prod" : "sandbox"
+      }
+
       return gatewayResponse
     })
 

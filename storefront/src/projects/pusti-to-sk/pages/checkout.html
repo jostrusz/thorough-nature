@@ -3887,6 +3887,142 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     else cardFieldsEl.appendChild(trust);
   }
 
+  /* ─── REVOLUT APPLE PAY / GOOGLE PAY — native wallet buttons ────────────────
+   * When the customer selects the Apple Pay / Google Pay tile, the main "Zaplatiť"
+   * button is replaced by the NATIVE wallet button. One tap on it opens the wallet
+   * sheet directly (the browser only opens the sheet from a tap on the wallet's own
+   * button — there's no programmatic trigger). Apple Pay is hidden off Safari/Apple.
+   * The wallet is used only for payment; the shipping address comes from the form.
+   * ──────────────────────────────────────────────────────────────────────────*/
+  function loadRevolutPayments() {
+    if (_revolutPaymentsModule) return _revolutPaymentsModule;
+    if (!revolutPublicKey) return Promise.reject(new Error('Revolut public key chýba'));
+    _revolutPaymentsModule = prewarmRevolutSdk().then(function (m) {
+      return m.default.payments({ locale: 'auto', publicToken: revolutPublicKey, mode: revolutEnv === 'prod' ? 'prod' : 'sandbox' });
+    });
+    return _revolutPaymentsModule;
+  }
+
+  // Apple Pay is only available on Safari + Apple devices with a card in Wallet.
+  function isAppleWalletDevice() {
+    return !!(window.ApplePaySession && typeof window.ApplePaySession.canMakePayments === 'function' && window.ApplePaySession.canMakePayments());
+  }
+
+  // Hide the Apple Pay tile where Apple Pay can't run (non-Safari / non-Apple).
+  function gateAppleWalletTile() {
+    if (isAppleWalletDevice()) return;
+    var tiles = document.querySelectorAll('#payment-methods .payment-method');
+    Array.prototype.forEach.call(tiles, function (t) {
+      if (t.getAttribute('data-method') === 'apple_pay') t.style.display = 'none';
+    });
+  }
+
+  function buildWalletCustomerData() {
+    var sa = {
+      first_name: (document.getElementById('first_name') || {}).value || '',
+      last_name: (document.getElementById('last_name') || {}).value || '',
+      address_1: (document.getElementById('address') || {}).value || '',
+      city: (document.getElementById('city') || {}).value || '',
+      postal_code: (document.getElementById('postal_code') || {}).value || '',
+      country_code: ((document.getElementById('country') || {}).value || 'SK').toLowerCase(),
+      phone: (document.getElementById('phone') || {}).value || ''
+    };
+    return { email: (document.getElementById('email') || {}).value || '', shipping_address: sa, billing_address: Object.assign({}, sa) };
+  }
+
+  function setWalletHint(msg, isErr) {
+    var h = document.getElementById('revolut-wallet-hint');
+    if (!h) {
+      var wrap = document.querySelector('.checkout-btn-wrap'); if (!wrap) return;
+      h = document.createElement('div'); h.id = 'revolut-wallet-hint';
+      h.style.cssText = 'font-size:12.5px;text-align:center;margin-top:8px;';
+      wrap.appendChild(h);
+    }
+    h.textContent = msg || '';
+    h.style.color = isErr ? 'var(--error)' : '#9B7AAD';
+    h.style.display = msg ? 'block' : 'none';
+  }
+
+  // Wallet createOrder — validate the form, build the cart with the form address +
+  // shipping, create a Revolut session, and hand the sheet the order token.
+  function revolutWalletCreateOrder() {
+    if (!validateAllFields()) {
+      var firstError = form.querySelector('.invalid');
+      if (firstError) { firstError.focus(); firstError.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      setWalletHint('Vyplňte prosím údaje objednávky vyššie.', true);
+      return Promise.reject(new Error('form-invalid'));
+    }
+    if (selectedShipping === 'pickup' && !selectedPacketaPoint) {
+      var pe = document.getElementById('packeta-error'); if (pe) pe.style.display = 'block';
+      setWalletHint('Vyberte výdajné miesto.', true);
+      return Promise.reject(new Error('no-pickup'));
+    }
+    setWalletHint('');
+    var customerData = buildWalletCustomerData();
+    return buildRevolutCardCart()
+      .then(function (cartId) { revolutWalletCartId = cartId; return applyShippingToRevolutCart(cartId, customerData); })
+      .then(function () {
+        return createExpressPaymentSession(revolutWalletCartId, 'pp_revolut_revolut', {
+          method: revolutWalletMethod, amount: getCurrentTotal(),
+          currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(), project_slug: PROJECT_CONFIG.slug || ''
+        });
+      })
+      .then(function (sessionData) {
+        if (!sessionData || !sessionData.revolutPublicToken) throw new Error('Revolut session bez tokenu');
+        return { publicId: sessionData.revolutPublicToken };
+      });
+  }
+
+  function onRevolutWalletSuccess() {
+    if (!revolutWalletCartId) return;
+    handleExpressOrderComplete(revolutWalletCartId);
+  }
+
+  // Restore the normal "Zaplatiť" button (wallet deselected or unavailable).
+  function restoreSubmitFromWallet() {
+    var c = document.getElementById('revolut-wallet-cta'); if (c) c.remove();
+    if (revolutWalletPR && revolutWalletPR.destroy) { try { revolutWalletPR.destroy(); } catch (e) {} }
+    revolutWalletPR = null;
+    setWalletHint('');
+    if (submitBtn) submitBtn.style.display = '';
+  }
+
+  // Replace the submit button with the native Apple/Google Pay button.
+  function mountRevolutWalletCTA(method) {
+    revolutWalletMethod = method;
+    var wrap = document.querySelector('.checkout-btn-wrap');
+    if (!wrap) return;
+    var oldC = document.getElementById('revolut-wallet-cta'); if (oldC) oldC.remove();
+    var c = document.createElement('div');
+    c.id = 'revolut-wallet-cta';
+    c.style.cssText = 'min-height:48px;margin-bottom:2px;';
+    wrap.insertBefore(c, wrap.firstChild);
+    if (submitBtn) submitBtn.style.display = 'none';
+    setWalletHint('Načítavam ' + (method === 'apple_pay' ? 'Apple Pay' : 'Google Pay') + '…');
+
+    loadRevolutPayments().then(function (rp) {
+      var pr = rp.paymentRequest(c, {
+        amount: Math.round(getCurrentTotal() * 100),
+        currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
+        preferredPaymentMethod: method === 'apple_pay' ? 'applePay' : 'googlePay',
+        createOrder: revolutWalletCreateOrder,
+        onSuccess: onRevolutWalletSuccess,
+        onError: function () { setWalletHint('Platba sa nepodarila — skúste to znova.', true); },
+        onCancel: function () { setWalletHint(''); }
+      });
+      revolutWalletPR = pr;
+      return pr.canMakePayment().then(function (avail) {
+        if (avail) { setWalletHint(''); return pr.render(); }
+        // Wallet unavailable → fall back to the normal button (generic flow → overlay).
+        restoreSubmitFromWallet();
+        setWalletHint((method === 'apple_pay' ? 'Apple Pay' : 'Google Pay') + ' nie je na tomto zariadení dostupné — použite kartu.', true);
+      });
+    }).catch(function () {
+      // SDK / key error → safe fallback to the normal submit button.
+      restoreSubmitFromWallet();
+    });
+  }
+
   // Attach a one-time trigger that mounts the Revolut card field on the first
   // interaction with the card area — avoids creating a Revolut order for every
   // visitor just because the card tile is selected by default on page load.
@@ -4368,6 +4504,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var revolutCardMounting = false; // guard against concurrent mounts
   var REVOLUT_CARD_LOCALE = 'sk';  // language of the card field labels
   var _revolutSdkPromise = null;   // pre-warmed @revolut/checkout module (loaded on card select)
+  // ── Revolut Apple Pay / Google Pay (native wallet buttons) ──
+  var revolutPublicKey = null;     // pk_... — needed to mount the payments() module
+  var revolutEnv = 'prod';         // 'prod' | 'sandbox'
+  var _revolutPaymentsModule = null; // cached payments() instance promise
+  var revolutWalletPR = null;      // current paymentRequest instance
+  var revolutWalletCartId = null;  // cart the wallet order belongs to
+  var revolutWalletMethod = null;  // 'apple_pay' | 'google_pay'
   var expressMethodsList = [];  // Express methods from API
 
   /* ─── CENTRALIZED PAYPAL SDK LOADER ─── */
@@ -5562,6 +5705,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       czQrSource = null;
       (data.gateways || []).forEach(function(gw) {
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
+        if (gw.provider === 'revolut') {
+          revolutPublicKey = gw.public_key || null;
+          revolutEnv = gw.environment === 'sandbox' ? 'sandbox' : 'prod';
+        }
         (gw.methods || []).forEach(function(m) {
           // CZ bank buttons (Comgate/PayU) render inside the bank group — collect & skip standalone tiles
           if (collectCzBankMethod(m, gw.provider, m.provider_id || providerIdFull)) return;
@@ -6027,6 +6174,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // Bind click events on newly rendered methods
     bindPaymentMethodEvents();
 
+    // Hide the Apple Pay tile where Apple Pay can't run (non-Safari / non-Apple).
+    gateAppleWalletTile();
+
     // Update button text
     updateButtonText();
   }
@@ -6124,6 +6274,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             // Pre-warm the Revolut SDK when the customer picks the card tile.
             if (cardProvider === 'revolut') prewarmRevolutSdk();
           }
+        }
+
+        // Revolut wallets → replace the submit button with the native Apple/Google
+        // Pay button (one tap opens the wallet sheet). Any other method → restore.
+        if (selectedProvider === 'revolut' && (selectedMethod === 'apple_pay' || selectedMethod === 'google_pay')) {
+          mountRevolutWalletCTA(selectedMethod);
+        } else {
+          restoreSubmitFromWallet();
         }
 
         recalculateOrderSummary();
