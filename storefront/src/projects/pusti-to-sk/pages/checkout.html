@@ -8287,45 +8287,97 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         });
     }
 
-    import('https://esm.sh/@revolut/checkout@1').then(function (m) {
+    // A function that hands the Revolut Web SDK our already-created order token.
+    function createOrder() { return Promise.resolve({ publicId: token }); }
+
+    // Last-resort on-page pop-up (secure Revolut window, NOT a full-page redirect).
+    // Used for methods with no dedicated inline widget (SEPA) or as graceful
+    // fallback when a wallet is unavailable in the current browser.
+    function payWithPopupFallback(RevolutCheckout) {
+      return RevolutCheckout(token, mode).then(function (inst) {
+        inst.payWithPopup({
+          email: custEmail, name: custName,
+          onSuccess: function () { completeAndGo(); },
+          onError: function (e) { setStatus((e && e.message) || 'Platba zlyhala.', 'err'); },
+          onCancel: function () { setStatus('Platba bola zrušená.', ''); }
+        });
+      });
+    }
+
+    import('https://esm.sh/@revolut/checkout@1.1.25').then(function (m) {
       var RevolutCheckout = m.default;
 
-      if (method === 'revolut_pay') {
-        return RevolutCheckout.payments({ publicToken: pubKey, locale: 'sk' }).then(function (p) {
-          var wrap = document.createElement('div'); mount.appendChild(wrap);
-          p.revolutPay.mount(wrap, {
-            currency: currency, totalAmount: amtMinor,
-            createOrder: function () { return Promise.resolve({ publicId: token }); }
+      // ── CARD → embedded PCI card field + Pay button (legacy instance) ──
+      if (method === 'card') {
+        return RevolutCheckout(token, mode).then(function (inst) {
+          var cardBox = document.createElement('div');
+          cardBox.style.cssText = 'border:1.5px solid #EDD9E5;border-radius:8px;padding:14px 12px;min-height:46px;background:#fff;';
+          mount.appendChild(cardBox);
+          var payBtn = document.createElement('button');
+          payBtn.type = 'button'; payBtn.textContent = 'Zaplatiť ' + amtLabel;
+          payBtn.style.cssText = 'margin-top:14px;width:100%;padding:15px;background:#C27BA0;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;';
+          mount.appendChild(payBtn);
+          var card = inst.createCardField({
+            target: cardBox,
+            onSuccess: function () { completeAndGo(); },
+            onError: function (msg) { setStatus('Chyba: ' + ((msg && msg.message) || msg), 'err'); payBtn.disabled = false; },
+            onValidation: function (errs) { setStatus(errs && errs.length ? (errs[0].message || '') : '', errs && errs.length ? 'err' : ''); }
           });
-          if (p.revolutPay.on) p.revolutPay.on('payment', function (ev) {
-            if (ev.type === 'success') completeAndGo();
-            else if (ev.type === 'error') setStatus('Platba zlyhala: ' + ((ev.error && ev.error.message) || ''), 'err');
-          });
+          payBtn.onclick = function () { setStatus('Spracúvam platbu…'); payBtn.disabled = true; card.submit({ name: custName, email: custEmail }); };
         });
       }
 
-      return RevolutCheckout(token, mode).then(function (inst) {
-        // Wallets / Pay by Bank / SEPA → Revolut secure pop-up (on-page, not a redirect)
-        if (method !== 'card') {
-          return inst.payWithPopup({ email: custEmail, name: custName })
-            .then(function () { completeAndGo(); })
-            .catch(function (e) { setStatus((e && e.message) || 'Platba bola zrušená.', 'err'); });
+      // ── All other methods use the payments() module (Revolut Pay v2) ──
+      return RevolutCheckout.payments({ locale: 'auto', publicToken: pubKey, mode: mode }).then(function (rp) {
+
+        // ── REVOLUT PAY → inline button ──
+        if (method === 'revolut_pay') {
+          var el = document.createElement('div'); mount.appendChild(el);
+          rp.revolutPay.mount(el, { currency: currency, totalAmount: amtMinor, createOrder: createOrder });
+          rp.revolutPay.on('payment', function (ev) {
+            if (ev.type === 'success') completeAndGo();
+            else if (ev.type === 'error') setStatus('Platba zlyhala: ' + ((ev.error && ev.error.message) || ''), 'err');
+            else if (ev.type === 'cancel') setStatus('Platba bola zrušená.', '');
+          });
+          return;
         }
-        // CARD → embedded PCI card field + Pay button
-        var cardBox = document.createElement('div');
-        cardBox.style.cssText = 'border:1.5px solid #EDD9E5;border-radius:8px;padding:14px 12px;min-height:46px;background:#fff;';
-        mount.appendChild(cardBox);
-        var payBtn = document.createElement('button');
-        payBtn.type = 'button'; payBtn.textContent = 'Zaplatiť ' + amtLabel;
-        payBtn.style.cssText = 'margin-top:14px;width:100%;padding:15px;background:#C27BA0;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;';
-        mount.appendChild(payBtn);
-        var card = inst.createCardField({
-          target: cardBox,
-          onSuccess: function () { completeAndGo(); },
-          onError: function (msg) { setStatus('Chyba: ' + ((msg && msg.message) || msg), 'err'); payBtn.disabled = false; },
-          onValidation: function (errs) { setStatus(errs && errs.length ? (errs[0].message || '') : '', errs && errs.length ? 'err' : ''); }
-        });
-        payBtn.onclick = function () { setStatus('Spracúvam platbu…'); payBtn.disabled = true; card.submit({ name: custName, email: custEmail }); };
+
+        // ── APPLE PAY / GOOGLE PAY → payment request button (gated by canMakePayment) ──
+        if (method === 'apple_pay' || method === 'google_pay') {
+          var walletLabel = method === 'apple_pay' ? 'Apple Pay' : 'Google Pay';
+          var prefer = method === 'apple_pay' ? 'applePay' : 'googlePay';
+          var el = document.createElement('div'); mount.appendChild(el);
+          var pr = rp.paymentRequest(el, {
+            amount: amtMinor, currency: currency,
+            preferredPaymentMethod: prefer,
+            createOrder: createOrder,
+            onSuccess: function () { completeAndGo(); },
+            onError: function (e) { setStatus('Platba zlyhala: ' + ((e && e.message) || ''), 'err'); },
+            onCancel: function () { setStatus('Platba bola zrušená.', ''); }
+          });
+          return pr.canMakePayment().then(function (avail) {
+            if (avail) { setStatus(''); return pr.render(); }
+            // Wallet not available here (browser/device unsupported or domain not
+            // registered in Revolut) → graceful on-page pop-up so the sale isn't lost.
+            setStatus(walletLabel + ' nie je v tomto prehliadači dostupné — otváram alternatívu…', '');
+            return payWithPopupFallback(RevolutCheckout);
+          });
+        }
+
+        // ── PAY BY BANK → inline open-banking widget ──
+        if (method === 'pay_by_bank') {
+          var pbb = rp.payByBank({
+            createOrder: createOrder,
+            onSuccess: function () { completeAndGo(); },
+            onError: function (p) { setStatus('Platba zlyhala: ' + ((p && p.error && p.error.message) || ''), 'err'); },
+            onCancel: function () { setStatus('Platba bola zrušená.', ''); }
+          });
+          setStatus('Otváram platbu cez banku…');
+          return pbb.show();
+        }
+
+        // ── SEPA (+ any unknown) → on-page pop-up (no dedicated inline widget) ──
+        return payWithPopupFallback(RevolutCheckout);
       });
     }).catch(function (e) {
       setStatus('Nepodarilo sa načítať Revolut: ' + (e && e.message || e), 'err');
