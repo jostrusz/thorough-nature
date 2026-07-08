@@ -3163,6 +3163,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   /* ─── KONFIGURACE (z project-config.js) ─── */
   var MEDUSA_URL = PROJECT_CONFIG.medusaUrl;
   var VARIANT_ID = PROJECT_CONFIG.mainProduct.variantId;
+  // Bulletproof post-order redirect: if the upsell isn't genuinely enabled AND has
+  // a URL, point upsellUrl at the thank-you page so no flow can ever land the
+  // customer on a non-existent /upsell page (all redirects read PROJECT_CONFIG.upsellUrl).
+  if (PROJECT_CONFIG.upsellEnabled !== true || !PROJECT_CONFIG.upsellUrl) {
+    PROJECT_CONFIG.upsellUrl = PROJECT_CONFIG.thankYouUrl;
+  }
   // Dynamický region ID — mění se podle vybrané země
   var currentRegionId = PROJECT_CONFIG.getRegionId('SK'); // Výchozí: CZ
 
