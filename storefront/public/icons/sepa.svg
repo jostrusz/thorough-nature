@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 26" width="40" height="26" role="img" aria-label="SEPA Direct Debit">
+  <rect width="40" height="26" rx="4" fill="#10298E"/>
+  <text x="20" y="13" fill="#FFCC00" font-family="Arial, Helvetica, sans-serif" font-size="8.5" font-weight="700" text-anchor="middle" dominant-baseline="middle" letter-spacing="0.5">SEPA</text>
+  <path fill="#FFCC00" d="M8 18.5h24v1.4H8z" opacity="0.9"/>
+</svg>

@@ -5330,10 +5330,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (PAYU_CZ_ICONS[code]) {
       return '<img src="/icons/' + PAYU_CZ_ICONS[code] + '" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
     }
-    // For methods with known SVG icons
-    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'bank_transfer'];
-    if (iconMethods.indexOf(code) !== -1) {
-      return '<img src="/icons/' + code + '.svg" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
+    // For methods with known SVG icons. Revolut method codes reuse the shared
+    // brand icons already used by PayPal/Comgate/Stripe (apple_pay→applepay,
+    // google_pay→googlepay, pay_by_bank→bank_transfer, sepa_direct_debit→sepa).
+    var ICON_ALIAS = { apple_pay: 'applepay', google_pay: 'googlepay', pay_by_bank: 'bank_transfer', sepa_direct_debit: 'sepa' };
+    var iconCode = ICON_ALIAS[code] || code;
+    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'bank_transfer', 'sepa'];
+    if (iconMethods.indexOf(iconCode) !== -1) {
+      return '<img src="/icons/' + iconCode + '.svg" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
     }
     // Colored badge fallback
     var badges = {
