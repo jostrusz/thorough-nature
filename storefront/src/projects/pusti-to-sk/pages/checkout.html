@@ -3257,30 +3257,32 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (document.getElementById('bt-styles')) return;
     var st = document.createElement('style'); st.id = 'bt-styles';
     st.textContent =
-      '#bt-overlay{position:fixed;inset:0;z-index:100000;background:rgba(45,27,61,.5);display:flex;align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto;font-family:"DM Sans",system-ui,sans-serif;animation:fadeIn .25s ease;}' +
-      '.bt-card{background:#fff;max-width:420px;width:100%;border-radius:20px;box-shadow:0 20px 60px rgba(45,27,61,.28);overflow:hidden;color:#2D1B3D;margin:auto;}' +
-      '.bt-h{background:linear-gradient(135deg,#0F6E56,#1D9E75);padding:18px 22px;text-align:center;color:#fff;}' +
-      '.bt-h .ok{font-size:16px;font-weight:700;}.bt-h .sub{font-size:12.5px;color:#C7EDDF;margin-top:3px;}' +
-      '.bt-resv{background:#FFF8E1;border-bottom:1px solid #FFE082;padding:8px 22px;text-align:center;font-size:12.5px;color:#7A5B10;}' +
-      '.bt-body{padding:20px 22px 22px;}' +
-      '.bt-amt{text-align:center;margin-bottom:14px;}.bt-amt .l{font-size:12px;color:#9B7AAD;text-transform:uppercase;letter-spacing:.5px;font-weight:600;}.bt-amt .v{font-size:32px;font-weight:700;}' +
-      '.bt-qr{width:200px;height:200px;margin:0 auto;background:#fff;border:1px solid #EDD9E5;border-radius:14px;padding:10px;box-shadow:0 4px 16px rgba(45,27,61,.08);}' +
+      '#bt-overlay{position:fixed;inset:0;z-index:100000;background:rgba(45,27,61,.55);display:flex;align-items:flex-start;justify-content:center;padding:16px 12px;overflow:auto;font-family:"DM Sans",system-ui,sans-serif;animation:fadeIn .25s ease;}' +
+      '.bt-card{background:#fff;max-width:440px;width:100%;border-radius:clamp(16px,4vw,20px);box-shadow:0 20px 60px rgba(45,27,61,.3);overflow:hidden;color:#2D1B3D;margin:auto;}' +
+      '.bt-h{background:linear-gradient(135deg,#2D1B3D,#4A2E5F);padding:clamp(15px,4vw,18px) 18px;text-align:center;color:#fff;}' +
+      '.bt-h .ok{font-size:clamp(15px,4.2vw,17px);font-weight:700;}.bt-h .sub{font-size:12.5px;color:#C9AEDA;margin-top:3px;}' +
+      '.bt-timer{background:#FFF8E1;border-bottom:1px solid #FFE082;padding:9px 16px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:12.5px;color:#7A5B10;}.bt-timer b{font-variant-numeric:tabular-nums;background:#7A5B10;color:#fff;border-radius:6px;padding:3px 9px;font-weight:700;}' +
+      '.bt-body{padding:clamp(16px,4.5vw,20px) clamp(14px,4vw,18px);}' +
+      '.bt-amt{text-align:center;margin-bottom:14px;}.bt-amt .l{font-size:11px;color:#9B7AAD;text-transform:uppercase;letter-spacing:.6px;font-weight:600;}.bt-amt .v{font-size:clamp(28px,9vw,34px);font-weight:700;color:var(--cta);}' +
+      '.bt-qr{width:min(66vw,220px);height:min(66vw,220px);margin:0 auto;background:#fff;border:2px solid #EDD9E5;border-radius:16px;padding:12px;box-shadow:0 4px 16px rgba(45,27,61,.08);}' +
       '.bt-qr img,.bt-qr canvas{width:100%!important;height:100%!important;display:block;}' +
-      '.bt-scan{text-align:center;font-size:13px;font-weight:600;margin-top:11px;}' +
+      '.bt-scan{text-align:center;font-size:13.5px;font-weight:600;margin-top:12px;}.bt-scan span{display:block;color:#9B7AAD;font-weight:400;font-size:12px;margin-top:3px;}' +
       '.bt-div{display:flex;align-items:center;gap:10px;margin:16px 0 10px;color:#B49BC0;font-size:11.5px;}.bt-div::before,.bt-div::after{content:"";flex:1;height:1px;background:#EDD9E5;}' +
-      '.bt-row{display:flex;align-items:center;gap:10px;background:#FAF5F8;border:1px solid #EDD9E5;border-radius:10px;padding:9px 12px;margin-bottom:7px;}' +
-      '.bt-row .k{font-size:11px;color:#9B7AAD;text-transform:uppercase;letter-spacing:.4px;font-weight:600;}.bt-row .v{font-size:13px;font-weight:600;margin-left:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}' +
-      '.bt-cp{flex-shrink:0;border:1px solid #D9C3D2;background:#fff;color:var(--cta);border-radius:7px;font-family:inherit;font-size:11px;font-weight:600;padding:5px 9px;cursor:pointer;}.bt-cp:hover{background:var(--cta);color:#fff;}.bt-cp.bt-copied{background:#E1F5EE;color:#0F6E56;border-color:#9FE1CB;}' +
-      '.bt-steps{display:flex;justify-content:space-between;gap:8px;margin-top:16px;}.bt-step{flex:1;text-align:center;}.bt-step .n{width:24px;height:24px;border-radius:50%;background:#F0E4EC;color:var(--cta);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-bottom:4px;}.bt-step .t{font-size:11px;color:#7A6189;line-height:1.3;}' +
-      '.bt-foot{margin-top:16px;padding-top:14px;border-top:1px solid #F0E4EC;}.bt-foot .f{display:flex;align-items:center;gap:7px;font-size:12px;color:#5A3D6B;margin-bottom:6px;}' +
-      '.bt-done{width:100%;margin-top:16px;padding:14px;border:none;border-radius:10px;background:var(--cta);color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;}';
+      '.bt-row{display:flex;align-items:center;gap:10px;background:#FAF5F8;border:1px solid #EDD9E5;border-radius:12px;padding:11px 12px;margin-bottom:9px;min-height:56px;}.bt-row .col{display:flex;flex-direction:column;min-width:0;margin-right:auto;}.bt-row .k{font-size:10.5px;color:#9B7AAD;text-transform:uppercase;letter-spacing:.4px;font-weight:600;}.bt-row .v{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}' +
+      '.bt-cp{flex-shrink:0;border:1px solid #D9C3D2;background:#fff;color:var(--cta);border-radius:9px;font-family:inherit;font-size:13px;font-weight:600;padding:11px 14px;cursor:pointer;min-height:44px;min-width:44px;}.bt-cp:active{transform:scale(.96);}.bt-cp.bt-copied{background:#E1F5EE;color:#0F6E56;border-color:#9FE1CB;}' +
+      '.bt-copyall{width:100%;padding:14px;border:1px solid #D9C3D2;border-radius:12px;background:#fff;color:#2D1B3D;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;min-height:52px;}.bt-copyall.bt-copied{background:#E1F5EE;color:#0F6E56;border-color:#9FE1CB;}' +
+      '.bt-steps{display:flex;justify-content:space-between;gap:6px;margin-top:16px;}.bt-step{flex:1;text-align:center;}.bt-step .n{width:28px;height:28px;border-radius:50%;background:#F0E4EC;color:var(--cta);font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-bottom:5px;}.bt-step .t{font-size:11px;color:#7A6189;line-height:1.3;}' +
+      '.bt-foot{margin-top:16px;padding-top:14px;border-top:1px solid #F0E4EC;}.bt-foot .f{display:flex;align-items:center;gap:9px;font-size:12.5px;color:#5A3D6B;margin-bottom:8px;}.bt-foot .f b{color:#2D1B3D;font-weight:600;}' +
+      '.bt-done{width:100%;margin-top:16px;padding:16px;border:none;border-radius:12px;background:var(--cta);color:#fff;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(194,123,160,.32);min-height:56px;}.bt-done:active{transform:translateY(1px);}';
     document.head.appendChild(st);
   }
   function btRenderQr(el, text) {
     function go() {
       if (typeof window.QRCode === 'undefined') { setTimeout(go, 200); return; }
       el.innerHTML = '';
-      new window.QRCode(el, { text: text, width: 180, height: 180, correctLevel: window.QRCode.CorrectLevel.M });
+      // Branded QR: dark checkout purple on white (high contrast → stále skenovateľný;
+      // svetlá ružová by kontrast znížila a niektoré appky by QR neprečítali).
+      new window.QRCode(el, { text: text, width: 220, height: 220, colorDark: '#2D1B3D', colorLight: '#ffffff', correctLevel: window.QRCode.CorrectLevel.M });
     }
     go();
   }
@@ -3291,27 +3293,42 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var epc = btEpcString(amount, rf);
     var amtLabel = Number(amount).toFixed(2).replace('.', ',') + ' €';
     btEnsureStyles();
+    var ibanClean = (bt.iban || '').replace(/\s/g, '');
+    var amt2 = Number(amount).toFixed(2);
     var ov = document.createElement('div'); ov.id = 'bt-overlay';
     ov.innerHTML =
       '<div class="bt-card">'
       + '<div class="bt-h"><div class="ok">✅ Objednávka je vytvorená</div><div class="sub">SK2026-' + displayId + ' · čaká na úhradu</div></div>'
-      + '<div class="bt-resv">⏳ Tovar je rezervovaný <strong>24 hodín</strong> · odošleme ihneď po úhrade</div>'
+      + '<div class="bt-timer">⏳ Rezervované ešte <b id="bt-cd">23:59:59</b></div>'
       + '<div class="bt-body">'
       + '<div class="bt-amt"><div class="l">Suma na úhradu</div><div class="v">' + amtLabel + '</div></div>'
       + '<div class="bt-qr" id="bt-qr"></div>'
-      + '<div class="bt-scan">📲 Naskenujte v bankovej aplikácii</div>'
-      + '<div class="bt-div">alebo skopírujte údaje</div>'
-      + '<div class="bt-row"><span class="k">IBAN</span><span class="v">' + btFmtIban(bt.iban) + '</span><button class="bt-cp" data-c="' + (bt.iban || '') + '">Kopírovať</button></div>'
-      + '<div class="bt-row"><span class="k">Suma</span><span class="v">' + Number(amount).toFixed(2) + ' €</span><button class="bt-cp" data-c="' + Number(amount).toFixed(2) + '">Kopírovať</button></div>'
-      + '<div class="bt-row"><span class="k">Reference</span><span class="v">' + rf + '</span><button class="bt-cp" data-c="' + rf + '">Kopírovať</button></div>'
-      + '<div class="bt-steps"><div class="bt-step"><div class="n">1</div><div class="t">Naskenujte QR</div></div><div class="bt-step"><div class="n">2</div><div class="t">Potvrďte v banke</div></div><div class="bt-step"><div class="n">3</div><div class="t">Odošleme tovar</div></div></div>'
-      + '<div class="bt-foot"><div class="f">📧 Údaje sme poslali aj na <strong>váš e-mail</strong></div><div class="f">🔒 Odošleme <strong>ihneď po pripísaní</strong> (SEPA ~1 prac. deň)</div><div class="f">↩️ <strong>30-dní</strong> záruka vrátenia</div></div>'
-      + '<button class="bt-done" id="bt-done">Rozumiem, zaplatím</button>'
+      + '<div class="bt-scan">📲 Naskenujte v bankovej aplikácii<span>na inom zariadení — alebo skopírujte údaje</span></div>'
+      + '<div class="bt-div">údaje na prevod</div>'
+      + '<div class="bt-row"><div class="col"><span class="k">IBAN</span><span class="v">' + btFmtIban(bt.iban) + '</span></div><button class="bt-cp" data-c="' + ibanClean + '">Kopírovať</button></div>'
+      + '<div class="bt-row"><div class="col"><span class="k">Suma</span><span class="v">' + amt2 + ' €</span></div><button class="bt-cp" data-c="' + amt2 + '">Kopírovať</button></div>'
+      + '<div class="bt-row"><div class="col"><span class="k">Reference</span><span class="v">' + rf + '</span></div><button class="bt-cp" data-c="' + rf + '">Kopírovať</button></div>'
+      + '<button class="bt-copyall" id="bt-copyall">📋 Skopírovať všetky údaje naraz</button>'
+      + '<div class="bt-steps"><div class="bt-step"><div class="n">1</div><div class="t">Naskenujte / skopírujte</div></div><div class="bt-step"><div class="n">2</div><div class="t">Potvrďte v banke</div></div><div class="bt-step"><div class="n">3</div><div class="t">Odošleme tovar</div></div></div>'
+      + '<div class="bt-foot"><div class="f">📧 Údaje sme poslali aj na <strong>váš e-mail</strong></div><div class="f">🔔 <strong>Ozveme sa</strong>, keď platba dorazí (SEPA ~1 prac. deň)</div><div class="f">↩️ <strong>30-dní</strong> záruka vrátenia peňazí</div></div>'
+      + '<button class="bt-done" id="bt-done">Rozumiem, zaplatím →</button>'
       + '</div></div>';
     document.body.appendChild(ov);
     document.body.style.overflow = 'hidden';
     btRenderQr(document.getElementById('bt-qr'), epc);
     ov.querySelectorAll('.bt-cp').forEach(function (b) { b.addEventListener('click', function () { btCopy(b.getAttribute('data-c'), b); }); });
+    document.getElementById('bt-copyall').addEventListener('click', function () {
+      btCopy('IBAN: ' + ibanClean + '\nSuma: ' + amt2 + ' EUR\nReferencia: ' + rf, this);
+    });
+    // Živý odpočet rezervácie (24 h) — jemná urgencia.
+    var left = 24 * 3600, cd = document.getElementById('bt-cd');
+    var timer = setInterval(function () {
+      if (!document.getElementById('bt-cd')) { clearInterval(timer); return; }
+      if (left <= 0) { clearInterval(timer); return; }
+      left--;
+      var h = Math.floor(left / 3600), m = Math.floor((left % 3600) / 60), s = left % 60;
+      cd.textContent = [h, m, s].map(function (n) { return String(n).length < 2 ? '0' + n : '' + n; }).join(':');
+    }, 1000);
     document.getElementById('bt-done').onclick = function () { window.location.href = PROJECT_CONFIG.thankYouUrl; };
   }
 
