@@ -8195,6 +8195,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           });
         }
 
+        // ─── REVOLUT INLINE — embedded card field / Revolut Pay, NO redirect ───
+        // Backend returns a token (+ public key + method); the Revolut Web SDK
+        // renders the chosen method inline against the token. On success we
+        // complete the same Medusa cart. We must run this BEFORE the generic
+        // redirect below (Revolut also returns a checkoutUrl we deliberately skip).
+        if (selectedProviderId && selectedProviderId.indexOf('revolut') !== -1 && providerData.revolutPublicToken) {
+          return handleRevolutInline(result.cartId, providerData);
+        }
+
         if (redirectUrl) {
           window.location.href = redirectUrl;
         } else if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1) {
@@ -8217,6 +8226,113 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   });
+
+  /* ─── REVOLUT INLINE PAYMENT (Web SDK, embedded — no redirect) ───────────────
+   * Renders the selected Revolut method inline against the order token returned
+   * by the backend (initiatePayment). On success, completes the SAME Medusa cart
+   * (authorizePayment sees the Revolut order COMPLETED → order is created), then
+   * goes to thank-you / upsell — exactly like the other providers.
+   *   card              → embedded PCI card field + Pay button
+   *   revolut_pay        → Revolut Pay button
+   *   apple/google/pbb/sepa → Revolut secure pop-up (on-page, not a redirect)
+   * ──────────────────────────────────────────────────────────────────────────*/
+  function handleRevolutInline(cartId, providerData) {
+    var token    = providerData.revolutPublicToken;
+    var pubKey   = providerData.revolutPublicKey || '';
+    var mode     = providerData.environment === 'prod' ? 'prod' : 'sandbox';
+    var method   = providerData.method || 'card';
+    var amtMinor = Math.round(Number(providerData.amount || 0) * 100);
+    var currency = String(providerData.currency || providerData.currency_code || 'EUR').toUpperCase();
+    var amtLabel = (amtMinor / 100).toFixed(2).replace('.', ',') + ' €';
+    var custEmail = (document.getElementById('email') || {}).value || '';
+    var custName  = (((document.getElementById('first_name') || {}).value || '') + ' ' +
+                     ((document.getElementById('last_name') || {}).value || '')).trim() || 'Zákazník';
+
+    var ov = document.createElement('div');
+    ov.id = 'revolut-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(45,27,61,.45);display:flex;align-items:center;justify-content:center;padding:16px;font-family:DM Sans,system-ui,sans-serif;';
+    ov.innerHTML =
+      '<div style="background:#fff;max-width:440px;width:100%;border-radius:14px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25);">'
+      + '<div style="font-size:16px;font-weight:700;color:#2D1B3D;">Zaplatiť ' + amtLabel + '</div>'
+      + '<div style="font-size:12.5px;color:#9B7AAD;margin:2px 0 16px;">🔒 Zabezpečené cez Revolut</div>'
+      + '<div id="rev-mount"></div>'
+      + '<div id="rev-status" style="font-size:13px;margin-top:10px;min-height:16px;"></div>'
+      + '<button id="rev-cancel" type="button" style="margin-top:12px;width:100%;background:none;border:none;color:#9B7AAD;font-size:13px;cursor:pointer;">Zrušiť</button>'
+      + '</div>';
+    document.body.appendChild(ov);
+    var mount = ov.querySelector('#rev-mount');
+    var statusEl = ov.querySelector('#rev-status');
+    function setStatus(m, c) { statusEl.textContent = m || ''; statusEl.style.color = c === 'err' ? '#C0392B' : (c === 'ok' ? '#27AE60' : '#5A3D6B'); }
+    function closeOverlay() { if (ov.parentNode) ov.parentNode.removeChild(ov); submitBtn.classList.remove('loading'); submitBtn.disabled = false; }
+    ov.querySelector('#rev-cancel').onclick = closeOverlay;
+
+    function completeAndGo() {
+      setStatus('Dokončujem objednávku…', 'ok');
+      return medusaFetch('/store/carts/' + cartId + '/complete', { method: 'POST' })
+        .then(function (res) {
+          var order = window.__extractOrderOrThrow(res);
+          localStorage.setItem('medusa_order_id', order.id || '');
+          localStorage.setItem('medusa_order_display_id', order.display_id || '');
+          localStorage.removeItem('checkout_draft');
+          localStorage.removeItem('background_cart_id');
+          if (PROJECT_CONFIG.upsellEnabled === false || checkoutOrderBump) {
+            if (checkoutOrderBump) localStorage.setItem('medusa_upsell_purchased', 'true');
+            window.location.href = PROJECT_CONFIG.thankYouUrl;
+          } else {
+            window.location.href = PROJECT_CONFIG.upsellUrl;
+          }
+        })
+        .catch(function () {
+          setStatus('Platba prebehla, ale dokončenie objednávky zlyhalo — napíšte nám prosím na ' + (PROJECT_CONFIG.supportEmail || 'podporu') + '.', 'err');
+        });
+    }
+
+    import('https://esm.sh/@revolut/checkout@1').then(function (m) {
+      var RevolutCheckout = m.default;
+
+      if (method === 'revolut_pay') {
+        return RevolutCheckout.payments({ publicToken: pubKey, locale: 'sk' }).then(function (p) {
+          var wrap = document.createElement('div'); mount.appendChild(wrap);
+          p.revolutPay.mount(wrap, {
+            currency: currency, totalAmount: amtMinor,
+            createOrder: function () { return Promise.resolve({ publicId: token }); }
+          });
+          if (p.revolutPay.on) p.revolutPay.on('payment', function (ev) {
+            if (ev.type === 'success') completeAndGo();
+            else if (ev.type === 'error') setStatus('Platba zlyhala: ' + ((ev.error && ev.error.message) || ''), 'err');
+          });
+        });
+      }
+
+      return RevolutCheckout(token, mode).then(function (inst) {
+        // Wallets / Pay by Bank / SEPA → Revolut secure pop-up (on-page, not a redirect)
+        if (method !== 'card') {
+          return inst.payWithPopup({ email: custEmail, name: custName })
+            .then(function () { completeAndGo(); })
+            .catch(function (e) { setStatus((e && e.message) || 'Platba bola zrušená.', 'err'); });
+        }
+        // CARD → embedded PCI card field + Pay button
+        var cardBox = document.createElement('div');
+        cardBox.style.cssText = 'border:1.5px solid #EDD9E5;border-radius:8px;padding:14px 12px;min-height:46px;background:#fff;';
+        mount.appendChild(cardBox);
+        var payBtn = document.createElement('button');
+        payBtn.type = 'button'; payBtn.textContent = 'Zaplatiť ' + amtLabel;
+        payBtn.style.cssText = 'margin-top:14px;width:100%;padding:15px;background:#C27BA0;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;';
+        mount.appendChild(payBtn);
+        var card = inst.createCardField({
+          target: cardBox,
+          onSuccess: function () { completeAndGo(); },
+          onError: function (msg) { setStatus('Chyba: ' + ((msg && msg.message) || msg), 'err'); payBtn.disabled = false; },
+          onValidation: function (errs) { setStatus(errs && errs.length ? (errs[0].message || '') : '', errs && errs.length ? 'err' : ''); }
+        });
+        payBtn.onclick = function () { setStatus('Spracúvam platbu…'); payBtn.disabled = true; card.submit({ name: custName, email: custEmail }); };
+      });
+    }).catch(function (e) {
+      setStatus('Nepodarilo sa načítať Revolut: ' + (e && e.message || e), 'err');
+    });
+
+    return Promise.resolve();
+  }
 
   /* ─── LAND SELECTIE — region + betaalmethoden ─── */
   var countrySelect = document.getElementById('country');
