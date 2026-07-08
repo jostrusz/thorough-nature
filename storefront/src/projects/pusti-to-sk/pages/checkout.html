@@ -3790,6 +3790,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     revolutCardField = null; revolutCardInst = null; revolutCardToken = null; revolutCardAmountKey = null;
   }
 
+  // Container-state styling for the Revolut card field (border/box-shadow can't be
+  // set from inside the sandboxed iframe — they live on the #card-number container).
+  function ensureRevolutCardStyles() {
+    if (document.getElementById('revolut-card-styles')) return;
+    var st = document.createElement('style');
+    st.id = 'revolut-card-styles';
+    st.textContent =
+      '#card-number.rc-focused{border-color:var(--cta) !important;box-shadow:0 0 0 3px rgba(194,123,160,.15);}' +
+      '#card-number.rc-invalid{border-color:var(--error) !important;}';
+    document.head.appendChild(st);
+  }
+
   // Attach a one-time trigger that mounts the Revolut card field on the first
   // interaction with the card area — avoids creating a Revolut order for every
   // visitor just because the card tile is selected by default on page load.
@@ -3877,9 +3889,20 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           return m.default(revolutCardToken, mode).then(function (inst) {
             revolutCardInst = inst;
             setCardStatus('', false);
+            ensureRevolutCardStyles();
             revolutCardField = inst.createCardField({
               target: box,
               locale: REVOLUT_CARD_LOCALE,
+              theme: 'light',
+              // Typography inside the sandboxed iframe (matches the checkout font).
+              styles: {
+                default:    { color: '#1A1A1A', fontFamily: '"DM Sans", system-ui, sans-serif', fontSize: '14px', fontWeight: '500' },
+                completed:  { color: '#1A1A1A' },
+                autofilled: { color: '#1A1A1A' },
+                invalid:    { color: '#DC2626' }
+              },
+              // Container classes per state → styled via ensureRevolutCardStyles() CSS.
+              classes: { focused: 'rc-focused', invalid: 'rc-invalid' },
               onSuccess: function () { onRevolutCardSuccess(); },
               onError: function (msg) { setCardStatus('Chyba: ' + ((msg && msg.message) || msg), true); resetSubmitButton(); },
               onValidation: function (errs) { setCardStatus((errs && errs.length) ? (errs[0].message || '') : '', true); }
