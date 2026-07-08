@@ -118,6 +118,13 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 23999,  // 23 999 Ft incl. ÁFA (save 8 998 Ft)
     4: 29999,  // 29 999 Ft incl. ÁFA (save 13 997 Ft)
   },
+  // Lâche prise sur ce qui te détruit — édition FR (lache-livre), EUR
+  "lache-prise": {
+    1: 36,    // 36 € TTC (TVA 5,5%)
+    2: 61,    // 61 € TTC (save 11 €)
+    3: 82,    // 82 € TTC (save 26 €)
+    4: 102,   // 102 € TTC (save 42 €)
+  },
 }
 
 type AddBundleToCartInput = {
@@ -141,6 +148,7 @@ type AddBundleToCartInput = {
 const BUNDLE_SKU_PATTERNS: RegExp[] = [
   /^LLWJK-(\d+)$/,   // loslatenboek: LLWJK-1, LLWJK-2, LLWJK-3, LLWJK-4
   /^HLDV-(\d+)$/,    // het-leven: HLDV-2, HLDV-3, HLDV-4 (1-boek uses official barcode below)
+  /^LACHE-(\d+)$/,   // lache-livre FR: LACHE-1, LACHE-2, LACHE-3, LACHE-4
 ]
 
 // Explicit SKU → bundle qty for non-pattern SKUs (official barcodes / EAN-style).

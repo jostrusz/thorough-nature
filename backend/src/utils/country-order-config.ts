@@ -34,6 +34,7 @@ export const REGION_IDS = {
   czk: "reg_01KKB4EZN0CHFYDG64K4VP0J2A", // Czech Republic (Psi Superzivot)
   huf: "reg_01KWG6W2W6Z2YR8GVBRM3CEVHX", // Hungary (Engedd El)
   eur_sk: "reg_01KWVAZVNATPX01HH77MYWKG3M", // Slovakia (Pusti To SK) — own EUR region
+  eur_fr: "reg_01KX052MRE4BSM059VN4SH2AY0", // France (Lache Livre) — own EUR region
 } as const
 
 // ── Shipping option IDs (verified) ──
@@ -54,6 +55,8 @@ const SO = {
   ZAS_PICKUP_ENGEDD: "so_01KWG6WEBJTVGR0M8NHPRSRQBS", // Packeta - Csomagpont (Engedd El pickup)
   ZAS_HOME_PUSTI_SK: "so_01KWVB06DRRS7ZP2E5AY6N3VR3",   // Packeta - Na adresu (Pusti To SK home)
   ZAS_PICKUP_PUSTI_SK: "so_01KWVB06DRK51CQTSYYSA99TRP", // Packeta - Na odberné miesto (Pusti To SK pickup)
+  ZAS_HOME_LACHE: "so_01KX053135P5BJNDHR1DV25WFF",      // Packeta - À domicile (Lache Livre FR home)
+  ZAS_PICKUP_LACHE: "so_01KX053135Q3B19W0ZTC7WA6QH",    // Packeta - Point relais (Lache Livre FR pickup)
 } as const
 
 /**
@@ -166,6 +169,14 @@ export const PROJECT_CONFIG = {
     pickupShippingOptionId: SO.ZAS_PICKUP_PUSTI_SK,
     pickupShippingOptionName: "Packeta - Na odberné miesto",
   },
+  "lache-livre": {
+    name: "lache-livre",
+    sales_channel_id: "sc_01KX052J6D5FB9QAKGZEVG37DT",
+    homeShippingOptionId: SO.ZAS_HOME_LACHE,
+    homeShippingOptionName: "Packeta - À domicile",
+    pickupShippingOptionId: SO.ZAS_PICKUP_LACHE,
+    pickupShippingOptionName: "Packeta - Point relais",
+  },
 } as const
 
 /**
@@ -274,6 +285,16 @@ export const COUNTRY_CONFIG = {
     codAllowed: false,
     projectSlugs: ["pusti-to-sk"],
     bookVatRate: 5,
+  },
+  fr: {
+    label: "🇫🇷 France",
+    currency: "eur",
+    region_id: REGION_IDS.eur_fr,
+    allowedPaymentMethods: ["creditcard", "paypal"],
+    defaultPaymentMethod: "creditcard",
+    codAllowed: false,
+    projectSlugs: ["lache-livre"],
+    bookVatRate: 5.5,
   },
   hu: {
     label: "🇭🇺 Hungary",

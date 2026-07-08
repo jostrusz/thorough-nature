@@ -68,6 +68,12 @@ const EMAIL_SUBJECTS: Record<string, Record<string, string>> = {
     shipmentSent: 'A rendelésed ({id}) elindult! 📦',
     shipmentPreview: 'A rendelésed elindult!',
   },
+  fr: {
+    orderPlaced: 'Merci pour ta commande {id} !',
+    orderPlacedPreview: 'Merci pour ta commande !',
+    shipmentSent: 'Ta commande {id} a été expédiée ! 📦',
+    shipmentPreview: 'Ta commande a été expédiée !',
+  },
 }
 
 /**
@@ -96,6 +102,14 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     fromEmail: 'De Hondenbijbel <support@dehondenbijbel.nl>',
     project: 'dehondenbijbel',
     smsDispatchTemplate: 'De Hondenbijbel: Bestelling verzonden. Track & trace: {url} support@dehondenbijbel.nl',
+  },
+  'lache-livre': {
+    replyTo: 'support@lacheprise-livre.fr',
+    fromName: 'Lâche prise sur ce qui te détruit',
+    fromEmail: 'Lâche prise sur ce qui te détruit <support@lacheprise-livre.fr>',
+    project: 'lache-livre',
+    locale: 'fr',
+    smsDispatchTemplate: 'Lache prise sur ce qui te detruit : Ta commande est en route. Suivi : {url} support@lacheprise-livre.fr',
   },
   loslatenboek: {
     replyTo: 'boek@loslatenboek.nl',
