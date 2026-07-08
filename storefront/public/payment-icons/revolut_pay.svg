@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 26" width="40" height="26" role="img" aria-label="Revolut Pay">
+  <rect width="40" height="26" rx="4" fill="#0666EB"/>
+  <path fill="#fff" d="M13.7 7.2h6.02c2.66 0 4.63 1.86 4.63 4.4 0 1.9-1.12 3.45-2.87 4.06L24.6 19h-3.06l-2.7-2.98h-1.9V19h-2.6V7.2h-0.64Zm2.6 2.32v4.2h3.2c1.24 0 2.1-.86 2.1-2.1s-.86-2.1-2.1-2.1h-3.2Z"/>
+  <path fill="#fff" d="M26.1 7.2h2.5v11.8h-2.5z"/>
+</svg>

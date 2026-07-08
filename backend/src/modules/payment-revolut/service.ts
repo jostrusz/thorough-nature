@@ -197,9 +197,14 @@ class RevolutPaymentProviderService extends AbstractPaymentProvider<Options> {
 
       const productName = data?.product_name || "Order"
       const cartId = context?.cart_id || data?.cart_id || null
+      // Selected method (card | apple_pay | google_pay | revolut_pay | pay_by_bank |
+      // sepa_direct_debit). The Revolut order + token is method-agnostic — the
+      // storefront Web SDK renders the chosen method inline against the token —
+      // so we only carry the method through for logging + session metadata.
+      const selectedMethod = data?.method || "card"
 
       this.logger_.info(
-        `[Revolut] Creating order: amount=${Number(amount).toFixed(2)} ${currency_code}, project=${projectSlug || "default"}`
+        `[Revolut] Creating order: amount=${Number(amount).toFixed(2)} ${currency_code}, method=${selectedMethod}, project=${projectSlug || "default"}`
       )
 
       const order = await client.createOrder({
@@ -224,7 +229,7 @@ class RevolutPaymentProviderService extends AbstractPaymentProvider<Options> {
           state: order.state,
           amount: Number(amount),
           currency: (currency_code || "EUR").toUpperCase(),
-          method: "pay_by_bank",
+          method: selectedMethod,
           environment,
         },
       }).catch(() => {})
@@ -236,7 +241,7 @@ class RevolutPaymentProviderService extends AbstractPaymentProvider<Options> {
           revolutPublicToken: order.token,
           revolutPublicKey: publicKey,
           environment,
-          method: data?.method || "pay_by_bank",
+          method: selectedMethod,
           state: order.state,
           amount: Number(amount),
           currency: (currency_code || "EUR").toUpperCase(),
