@@ -165,19 +165,19 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "18.5 MB",
     },
   ],
-  // Pusti to, čo ťa ničí (SK) — 2 bonusové e-knihy (zatiaľ CZ PDF, SK preklad neskôr)
+  // Pusti to, čo ťa ničí (SK) — 2 bonusové e-knihy (SK preklad)
   'pusti-to-sk': [
     {
-      key: "e-books/Jak-prestat-nadmerne-premyslet-a-zacit-zit.pdf",
-      title: "Ako prestať nadmerne premýšľať a začať žiť",
+      key: "e-books/Liek-na-premyslanie.pdf",
+      title: "Liek na premýšľanie",
       description: "E-kniha (PDF)",
-      size: "4.1 MB",
+      size: "1.6 MB",
     },
     {
-      key: "e-books/Laska-bez-cenzury.pdf",
+      key: "e-books/Laska-bez-cenzury-SK.pdf",
       title: "Láska bez cenzúry",
       description: "E-kniha (PDF)",
-      size: "18.5 MB",
+      size: "18.1 MB",
     },
   ],
   // Engedd el, ami tönkretesz (HU) — 2 bonusz e-könyv

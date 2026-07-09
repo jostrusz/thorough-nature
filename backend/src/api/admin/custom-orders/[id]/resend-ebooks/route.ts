@@ -56,8 +56,8 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
   ],
   // Pusti to, čo ťa ničí (SK) — must stay in sync with order-placed-digital-download.ts
   'pusti-to-sk': [
-    { key: "e-books/Jak-prestat-nadmerne-premyslet-a-zacit-zit.pdf", title: "Ako prestať nadmerne premýšľať a začať žiť", description: "E-kniha (PDF)", size: "4.1 MB" },
-    { key: "e-books/Laska-bez-cenzury.pdf", title: "Láska bez cenzúry", description: "E-kniha (PDF)", size: "18.5 MB" },
+    { key: "e-books/Liek-na-premyslanie.pdf", title: "Liek na premýšľanie", description: "E-kniha (PDF)", size: "1.6 MB" },
+    { key: "e-books/Laska-bez-cenzury-SK.pdf", title: "Láska bez cenzúry", description: "E-kniha (PDF)", size: "18.1 MB" },
   ],
   // Engedd el, ami tönkretesz (HU) — must stay in sync with order-placed-digital-download.ts
   'engedd-el': [
