@@ -136,6 +136,25 @@ export function PaymentMethodIcon({ code, size }: { code: string; size?: number 
       return <div style={{ ...style, background: "#E2001A", color: "#FFFFFF" }}>UC</div>
     case "bank_cz_other":
       return <div style={{ ...style, background: "#F6F6F7", color: "#1A1A1A" }}>Bank</div>
+    // Slovak banks (Comgate PSD2 bank buttons)
+    case "bank_sk_slsp":
+      return <div style={{ ...style, background: "#0067B1", color: "#FFFFFF" }}>SLSP</div>
+    case "bank_sk_tb":
+      return <div style={{ ...style, background: "#0088CE", color: "#FFFFFF" }}>TB</div>
+    case "bank_sk_vub":
+      return <div style={{ ...style, background: "#E30613", color: "#FFFFFF" }}>VÚB</div>
+    case "bank_sk_csob":
+      return <div style={{ ...style, background: "#0099D8", color: "#FFFFFF" }}>ČSOB</div>
+    case "bank_sk_365":
+      return <div style={{ ...style, background: "#E52713", color: "#FFFFFF" }}>365</div>
+    case "bank_sk_fb":
+      return <div style={{ ...style, background: "#1F9CD7", color: "#FFFFFF" }}>FIO</div>
+    case "bank_sk_mb":
+      return <div style={{ ...style, background: "#E90A0A", color: "#FFFFFF" }}>mB</div>
+    case "bank_sk_pb":
+      return <div style={{ ...style, background: "#C8102E", color: "#FFFFFF" }}>PB</div>
+    case "bank_sk_uc":
+      return <div style={{ ...style, background: "#E2001A", color: "#FFFFFF" }}>UC</div>
     case "qrcz":
       return <div style={{ ...style, background: "#000000", color: "#FFFFFF" }}>QR</div>
     // Czech BNPL / deferred payments
@@ -244,6 +263,17 @@ export const PAYMENT_METHODS_BY_PROVIDER: Record<string, PaymentMethodDef[]> = {
     { code: "bank_cz_pb", name: "Partners Banka", icon: "bank_cz_pb", available_countries: ["cz"], supported_currencies: ["CZK"] },
     { code: "bank_cz_uc", name: "UniCredit Bank", icon: "bank_cz_uc", available_countries: ["cz"], supported_currencies: ["CZK"] },
     { code: "bank_cz_other", name: "Jiná banka (převod)", icon: "bank_transfer", available_countries: ["cz"], supported_currencies: ["CZK"] },
+    // Individual SK bank buttons (PSD2, EUR) — rendered inside the bank group on the SK checkout
+    { code: "bank_sk_slsp", name: "Slovenská sporiteľňa", icon: "bank_sk_slsp", available_countries: ["sk"], supported_currencies: ["EUR"] },
+    { code: "bank_sk_tb", name: "Tatra banka", icon: "bank_sk_tb", available_countries: ["sk"], supported_currencies: ["EUR"] },
+    { code: "bank_sk_vub", name: "VÚB banka", icon: "bank_sk_vub", available_countries: ["sk"], supported_currencies: ["EUR"] },
+    { code: "bank_sk_csob", name: "ČSOB", icon: "bank_sk_csob", available_countries: ["sk"], supported_currencies: ["EUR"] },
+    { code: "bank_sk_365", name: "365.bank", icon: "bank_sk_365", available_countries: ["sk"], supported_currencies: ["EUR"] },
+    { code: "bank_sk_fb", name: "Fio banka", icon: "bank_sk_fb", available_countries: ["sk"], supported_currencies: ["EUR"] },
+    { code: "bank_sk_mb", name: "mBank", icon: "bank_sk_mb", available_countries: ["sk"], supported_currencies: ["EUR"] },
+    { code: "bank_sk_pb", name: "Prima banka", icon: "bank_sk_pb", available_countries: ["sk"], supported_currencies: ["EUR"] },
+    { code: "bank_sk_uc", name: "UniCredit Bank", icon: "bank_sk_uc", available_countries: ["sk"], supported_currencies: ["EUR"] },
+    { code: "bank_sk_other", name: "Iná banka (prevod)", icon: "bank_transfer", available_countries: ["sk"], supported_currencies: ["EUR"] },
     // Deferred payments / BNPL (must be enabled on the Comgate merchant account)
     { code: "twisto", name: "Twisto — platba do 30 dnů", icon: "twisto", available_countries: ["cz"], supported_currencies: ["CZK"] },
     { code: "skippay", name: "Skip Pay — odložená platba", icon: "skippay", available_countries: ["cz"], supported_currencies: ["CZK"] },
