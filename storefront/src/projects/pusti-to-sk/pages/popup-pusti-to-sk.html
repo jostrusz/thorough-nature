@@ -97,11 +97,12 @@
     position: absolute; top: 16px; right: 16px;
     width: 38px; height: 38px;
     border-radius: 50%;
-    background: rgba(45, 27, 61, 0.08);
-    border: none;
-    color: var(--ink-soft);
+    background: rgba(45, 27, 61, 0.10);
+    border: 1px solid rgba(45, 27, 61, 0.10);
+    color: var(--ink);
     cursor: pointer;
-    font-size: 22px;
+    font-size: 24px;
+    line-height: 1;
     display: flex; align-items: center; justify-content: center;
     z-index: 2;
     transition: background 0.2s;
@@ -1059,18 +1060,18 @@
     <!-- STEP 1: INTRO / HOOK -->
     <div class="step active" data-step="1">
       <div class="popup-header">
-        <span class="intro-badge"><span class="dot"></span> Zadarmo · 7-dňová výzva · 5 min denne</span>
+        <span class="intro-badge"><span class="dot"></span> Zadarmo · 7-dňová výzva · 5 minút denne</span>
         <h2 class="question" id="popup-q"><strong>Sedem dní, sedem malých krokov.</strong> A to, čo ťa roky ťahá ku dnu, <span class="gold-underline">konečne povolí</span>.</h2>
-        <p class="intro-subhead">Každý deň ti príde jedna malá úloha na päť minút. Uvidíš, koľko sa ti v hlave uvoľní.</p>
+        <p class="intro-subhead">Každý deň ti pošlem do e-mailu jednu malú úlohu na päť minút. Uvidíš, koľko miesta sa ti v hlave uvoľní.</p>
         <ul class="benefits" style="margin-top:6px;margin-bottom:20px;">
-          <li>Každý deň dostaneš <strong>jednu techniku na päť minút</strong></li>
-          <li>Naučíš sa <strong>pustiť to, čo ťa ťahá späť</strong></li>
-          <li>Ucítiš v hlave viac pokoja a priestoru</li>
+          <li>Každý deň <strong>jedna technika na päť minút</strong> — priamo do schránky</li>
+          <li>Naučíš sa <strong>pustiť to, čo ťa drží na mieste</strong></li>
+          <li>Už po prvom dni pocítiš v hlave viac pokoja</li>
         </ul>
       </div>
       <div class="options" style="padding-top:0;padding-bottom:20px;overflow:visible;">
         <form id="introForm" onsubmit="return startChallenge(event)" novalidate>
-          <p class="intro-formcue" style="margin:0 0 10px;font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;font-weight:700;color:#2D1B3D;text-align:left;">Vyplň svoje krstné meno a email a poďme hneď začať</p>
+          <p class="intro-formcue" style="margin:0 0 10px;font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;font-weight:700;color:#2D1B3D;text-align:left;">Napíš svoje krstné meno a e-mail — prvá úloha je na ceste hneď</p>
           <div class="intro-email-field">
             <input type="text" id="intro_first_name" name="intro_first_name" autocomplete="given-name"
                    placeholder="Tvoje krstné meno" aria-label="Krstné meno" style="margin-bottom:10px;">
@@ -1078,10 +1079,10 @@
                    placeholder="tvoj@email.sk" aria-label="E-mailová adresa">
           </div>
           <div class="intro-error" id="intro-error">Vyplň prosím meno a platnú e-mailovú adresu.</div>
-          <button type="submit" class="intro-cta">Áno, začínam ešte dnes →</button>
+          <button type="submit" class="intro-cta">Pošli mi prvú úlohu zadarmo →</button>
           <p class="intro-microcopy">
-            <span class="promise">Prvá úloha ti príde do pár sekúnd.</span>
-            <span class="from">Prihlasuješ sa na odber e-mailov od Jorisa · zadarmo · odhlásiš sa jedným klikom · <a href="https://pustitocotanici.sk/ochrana-udaju" target="_blank">Ochrana údajov</a></span>
+            <span class="promise">Prvá úloha ti pristane v schránke do pár sekúnd.</span>
+            <span class="from">Žiadny spam — len 7 krátkych e-mailov od Jorisa · zadarmo · odhlásiš sa jedným klikom · <a href="https://pustitocotanici.sk/ochrana-udaju" target="_blank">Ochrana údajov</a></span>
           </p>
         </form>
       </div>
@@ -1110,11 +1111,11 @@
     <div class="step" data-step="3">
       <div class="success">
         <div class="success-icon">📨</div>
-        <div class="success-kicker">Tak fajn, si tam.</div>
+        <div class="success-kicker">Hotovo, ideš do toho.</div>
         <h3 class="success-title">Prvá úloha už je na ceste</h3>
 
         <p class="success-lead">
-          Príde ti <strong>počas pár sekúnd</strong>. Otvor ju rovno, je v nej
+          V schránke ju máš <strong>do pár sekúnd</strong>. Otvor ju hneď — je v nej
           <em>dnešná úloha na päť minút</em>.
         </p>
 
@@ -1140,12 +1141,12 @@
         </div>
 
         <a class="success-open-btn" href="https://mail.google.com" target="_blank" rel="noopener">
-          Otvor moju schránku →
+          Otvoriť moju schránku →
         </a>
 
         <p class="success-spam">
-          Nevidíš ho? Pozri sa do <strong>Hromadné</strong> alebo <strong>Spamu</strong> a presuň si ho do <strong>Hlavné</strong>.
-          Nech ti žiadna úloha neunikne.
+          Nevidíš ho? Pozri do záložky <strong>Reklamy</strong> alebo do <strong>spamu</strong> a presuň si ho medzi <strong>Hlavné</strong>.
+          Nech ti žiadna úloha neujde.
         </p>
       </div>
     </div>
@@ -1432,12 +1433,12 @@ function renderOptions(container, options) {
     <button class="option option-custom" data-value="__custom__" data-custom="1">
       <span class="option-icon">✍️</span>
       <span class="option-text">
-        <span class="option-quote">U mňa je to inak — napíšem to sám/sama</span>
+        <span class="option-quote">U mňa je to inak — napíšem to vlastnými slovami</span>
       </span>
       <span class="option-check"></span>
     </button>
     <div class="option-custom-input">
-      <input type="text" maxlength="200" placeholder="Napíš to v pokoji jednou vetou…" />
+      <input type="text" maxlength="200" placeholder="Pokojne to napíš jednou vetou…" />
       <button type="button" class="custom-confirm" disabled>Potvrdiť →</button>
     </div>
   `;

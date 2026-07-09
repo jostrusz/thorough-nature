@@ -130,7 +130,7 @@ export const SkAbandonedCheckout3Template: React.FC<SkAbandonedCheckout3Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Chápem, že urobiť tento krok môže byť ťažké. Ale spýtaj sa sama seba: <strong style={{ color: colors.textDark }}>keď nie teraz — tak kedy?</strong>
+            Chápem, že urobiť tento krok môže byť ťažké. Ale polož si otázku: <strong style={{ color: colors.textDark }}>keď nie teraz — tak kedy?</strong>
           </Text>
           <Text style={{
             fontFamily: font,

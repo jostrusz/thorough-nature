@@ -188,7 +188,7 @@ export const SkOrderPlacedTemplate: React.FC<SkOrderPlacedTemplateProps> & {
             lineHeight: '1.6',
             marginBottom: '6px',
           }}>
-            Ahoj {shippingAddress?.first_name || 'priateľ'},
+            {shippingAddress?.first_name ? `Ahoj ${shippingAddress.first_name},` : 'Ahoj,'}
           </Text>
           <Text style={{
             fontFamily: font,
@@ -198,8 +198,8 @@ export const SkOrderPlacedTemplate: React.FC<SkOrderPlacedTemplateProps> & {
             marginBottom: '0',
           }}>
             {isPaid
-              ? 'Sme veľmi radi, že si sa rozhodol/a urobiť tento krok! Tvoja objednávka je prijatá a hneď sa do nej púšťame. Nižšie nájdeš kompletný prehľad.'
-              : 'Sme veľmi radi, že si sa rozhodol/a urobiť tento krok! Tvoja objednávka je prijatá a platbu pohodlne uhradíš pri prevzatí zásielky. Nižšie nájdeš kompletný prehľad.'
+              ? 'Skvelé rozhodnutie — tento krok stojí za to! Tvoja objednávka je prijatá a hneď sa do nej púšťame. Nižšie nájdeš kompletný prehľad.'
+              : 'Skvelé rozhodnutie — tento krok stojí za to! Tvoja objednávka je prijatá a platbu pohodlne uhradíš pri prevzatí zásielky. Nižšie nájdeš kompletný prehľad.'
             }
           </Text>
         </div>
@@ -717,7 +717,7 @@ export const SkOrderPlacedTemplate: React.FC<SkOrderPlacedTemplateProps> & {
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ti prišiel, pretože si si objednal/a knihu na www.pustitocotanici.sk.
+            Tento e-mail ti prišiel na základe tvojej objednávky knihy na www.pustitocotanici.sk.
           </Text>
         </div>
       </Section>

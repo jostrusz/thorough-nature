@@ -265,7 +265,7 @@ export const SkAbandonedCheckout1Template: React.FC<SkAbandonedCheckout1Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ti prišiel, pretože si na pustitocotanici.sk nedokončil/a svoju objednávku.
+            Tento e-mail ti prišiel, pretože tvoja objednávka na pustitocotanici.sk zostala nedokončená.
           </Text>
         </div>
       </Section>

@@ -596,7 +596,7 @@ export const SkShipmentNotificationTemplate: React.FC<SkShipmentNotificationTemp
               </>
             )}
             <br />
-            Tento e-mail ti prišiel, pretože si si objednal/a knihu na www.pustitocotanici.sk.
+            Tento e-mail ti prišiel na základe tvojej objednávky knihy na www.pustitocotanici.sk.
           </Text>
         </div>
       </Section>

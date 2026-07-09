@@ -83,11 +83,30 @@ export function ruleFallbackPl(firstNameRaw) {
   return { gender, vocative: voc }
 }
 
+/** Rule-based fallback for SLOVAK. Modern Slovak has no vocative — address by
+ *  nominative ("Ahoj Jana", "Ahoj Peter"), so vocative = name unchanged.
+ *  Gender heuristic mirrors Czech endings (~95% on SK names). */
+export function ruleFallbackSk(firstNameRaw) {
+  const raw = String(firstNameRaw || "").trim().split(/\s+/)[0] || ""
+  if (!raw) return { gender: "unknown", vocative: "" }
+  const name = cap(raw)
+  const l = name.toLowerCase()
+
+  let gender = "unknown"
+  if (l.endsWith("a")) gender = "f"
+  else if (/(ie|ce|le|ne|re|se|te)$/.test(l)) gender = "f" // Mária→(-ia je "a"), Lucie, Alice…
+  else if (FEM_CONSONANT.has(l)) gender = "f"
+  else gender = "m"
+
+  return { gender, vocative: name } // nominative address
+}
+
 /** Locale-aware fallback dispatcher. Defaults to Czech. */
 export function ruleFallback(firstNameRaw, locale = "cs") {
-  return String(locale || "").toLowerCase().startsWith("pl")
-    ? ruleFallbackPl(firstNameRaw)
-    : ruleFallbackCs(firstNameRaw)
+  const loc = String(locale || "").toLowerCase()
+  if (loc.startsWith("pl")) return ruleFallbackPl(firstNameRaw)
+  if (loc.startsWith("sk")) return ruleFallbackSk(firstNameRaw)
+  return ruleFallbackCs(firstNameRaw)
 }
 
 /** Primary resolver: Haiku with rule-based fallback. Never throws. */
@@ -98,11 +117,20 @@ export async function resolveGenderVocative(firstNameRaw, locale = "cs") {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) return ruleFallback(raw, locale)
 
-  const isPl = String(locale || "").toLowerCase().startsWith("pl")
-  const system = isPl
+  const loc = String(locale || "").toLowerCase()
+  const isPl = loc.startsWith("pl")
+  const isSk = loc.startsWith("sk")
+  const system = isSk
+    ? "Si expert na slovenčinu. Pre dané krstné meno urč gramatický rod. Slovenčina nemá vokatív — oslovuje sa nominatívom, takže vocative = meno bez zmeny. Odpovedz IBA JSON, nič viac."
+    : isPl
     ? "Jesteś ekspertem od języka polskiego. Dla podanego imienia określ rodzaj gramatyczny i wołacz (5. przypadek). Odpowiedz TYLKO w formacie JSON, nic więcej."
     : "Jsi expert na češtinu. Pro dané křestní jméno urči gramatický rod a 5. pád (vokativ). Odpověz POUZE JSON, nic víc."
-  const userPrompt = isPl
+  const userPrompt = isSk
+    ? `Meno: "${raw}"\n` +
+      `Vráť presne: {"gender":"m"|"f"|"unknown","vocative":"<meno bez zmeny>"}\n` +
+      `Pravidlá: "m" mužské meno, "f" ženské, "unknown" keď sa nedá určiť (cudzie/unisex). ` +
+      `vocative = meno v nominatíve bez zmeny (Jana→Jana, Peter→Peter, Zuzana→Zuzana). Žiadny iný text než JSON.`
+    : isPl
     ? `Imię: "${raw}"\n` +
       `Zwróć dokładnie: {"gender":"m"|"f"|"unknown","vocative":"<imię w wołaczu>"}\n` +
       `Zasady: "m" imię męskie, "f" żeńskie, "unknown" gdy nie można określić (obce/uniseks). ` +

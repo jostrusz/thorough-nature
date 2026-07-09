@@ -74,6 +74,16 @@
 
 <link rel="stylesheet" href="style.css">
 <style>.hero-section .anim,.hero-section .anim-right{opacity:1!important;transform:none!important}.pay-chip{height:32px;width:auto;background:#fff;border:1px solid rgba(45,27,61,0.08);border-radius:7px;padding:3px 7px;box-shadow:0 1px 2px rgba(45,27,61,0.05);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;}.pay-chip:hover{transform:translateY(-3px);box-shadow:0 5px 14px rgba(45,27,61,0.14);border-color:rgba(194,123,160,0.4);}
+/* ═══ Mobile/tablet guards ═══ */
+.payment-row{flex-wrap:wrap;}
+@media (max-width:480px){.pay-chip{height:27px;padding:3px 5px;}}
+@media (max-width:600px){
+ .final-cta-text .btn-cta[style]{font-size:18px !important;padding:18px 20px !important;width:100%;box-sizing:border-box;white-space:normal;}
+ .btn-cta{white-space:normal;box-sizing:border-box;max-width:100%;}
+ .payment-row[style]{flex-wrap:wrap !important;}
+}
+.hero-right img{max-width:100%;}
+.offer-book-img,.verhaal-book-img,.final-cta-images img,.final-offer-img,.bonus-card img,.fb-screenshot{max-width:100%;height:auto;}
 </style>
 <meta name="theme-color" content="#1a1a2e">
 <script src="js/project-config.js" defer></script>
@@ -137,7 +147,7 @@
 
     <!-- Eyebrow -->
     <div class="eyebrow anim">
-     🔥 Si <span class="highlight-yellow">unavená z boja</span> s vlastnými <span class="highlight-yellow">myšlienkami?</span>
+     🔥 Máš <span class="highlight-yellow">dosť boja</span> s vlastnými <span class="highlight-yellow">myšlienkami?</span>
     </div>
 
     <!-- Hlavní nadpis -->
@@ -147,7 +157,7 @@
 
     <!-- Popis pod nadpisem -->
     <p class="body-text anim d2" style="font-size: 16px; max-width: 560px;">
-     Ak už nechceš ďalej nosiť v sebe <strong><em>bolesť, ktorá ti nič nedáva</em></strong> – <u>zlomené srdce</u>, ktoré ťa stále prenasleduje, <em>pocit viny</em>, ktorého sa nedokážeš zbaviť, alebo <strong>hnev</strong>, ktorý ťa drží v zajatí – potom ti táto kniha dá <strong><u>nástroje</u></strong>, <strong><u>pochopenie</u></strong> a hlavne <strong><em>úľavu</em></strong>, po ktorej už tak dlho túžiš.
+     Ak už nechceš ďalej nosiť v sebe <strong><em>bolesť, ktorá ti nič nedáva</em></strong> – <u>zlomené srdce</u>, ktoré ťa stále prenasleduje, <em>pocit viny</em>, ktorý sa vracia znova a znova, alebo <strong>hnev</strong>, ktorý ťa drží v zajatí – potom ti táto kniha dá <strong><u>nástroje</u></strong>, <strong><u>pochopenie</u></strong> a hlavne <strong><em>úľavu</em></strong>, po ktorej už tak dlho túžiš.
     </p>
 
     <!-- CTA tlačítko -->
@@ -194,6 +204,7 @@
 .trust-bar-inner { max-width:1200px; flex-wrap:nowrap; }
 .trust-bar-item { padding:0 18px; font-size:14px; }
 @media (max-width:1040px){ .trust-bar-inner{ flex-wrap:wrap; } }
+@media (max-width:600px){ .trust-bar-item{ white-space:normal; text-align:center; line-height:1.45; } }
 </style>
 <div class="trust-bar reveal">
  <div class="trust-bar-inner">
@@ -223,21 +234,21 @@
     <div class="carousel-card">
      <div class="carousel-icon">💔</div>
      <h3>Máš čerstvo po rozchode a nedokážeš prestať myslieť na svojho ex</h3>
-     <p>stále kontroluješ jeho sociálne siete a dúfaš v správu, ktorá nikdy nepríde</p>
+     <p>stále kontroluješ sociálne siete a dúfaš v správu, ktorá nikdy nepríde</p>
     </div>
 
     <!-- Karta 2 -->
     <div class="carousel-card">
      <div class="carousel-icon">😔</div>
-     <h3>Užiera ťa pocit viny za niečo, čo si urobila – alebo neurobila</h3>
-     <p>v hlave si stále dokola prehrávaš, čo si mala povedať inak, a každý deň sa za to trestáš</p>
+     <h3>Užiera ťa pocit viny za niečo, čo sa stalo – alebo nestalo</h3>
+     <p>v hlave si stále dokola prehrávaš, čo malo zaznieť inak, a každý deň sa za to trestáš</p>
     </div>
 
     <!-- Karta 3 -->
     <div class="carousel-card">
      <div class="carousel-icon">🌙</div>
-     <h3>V noci nemôžeš spať, pretože sa ti myšlienky stále honia hlavou</h3>
-     <p>zaspávaš vyčerpaná, ale hlava odmieta vypnúť a ráno sa budíš ešte unavenejšia</p>
+     <h3>V noci nemôžeš spať, pretože sa ti hlavou stále preháňajú myšlienky</h3>
+     <p>zaspávaš úplne bez síl, ale hlava odmieta vypnúť – a ráno sa budíš s ešte väčšou únavou</p>
     </div>
 
     <!-- Karta 4 -->
@@ -250,22 +261,22 @@
     <!-- Karta 5 -->
     <div class="carousel-card">
      <div class="carousel-icon">🗡️</div>
-     <h3>Nesieš si v sebe bolesť zo zrady, ktorú si nikdy nespracovala</h3>
-     <p>partner, kamarátka alebo rodina ťa zradili a tá rana sa stále nezahojila</p>
+     <h3>Nesieš si v sebe bolesť zo zrady, ktorá sa nikdy nespracovala</h3>
+     <p>niekto blízky ťa zradil – partner, kamarátstvo, rodina – a tá rana sa stále nezahojila</p>
     </div>
 
     <!-- Karta 6 -->
     <div class="carousel-card">
      <div class="carousel-icon">⛓️</div>
-     <h3>Cítiš sa uväznená v minulosti a nedokážeš ísť ďalej</h3>
+     <h3>Minulosť ťa drží v zajatí a nedokážeš ísť ďalej</h3>
      <p>žiješ v spomienkach na to, čo bolo, namiesto v prítomnosti</p>
     </div>
 
     <!-- Karta 7 -->
     <div class="carousel-card">
      <div class="carousel-icon">😰</div>
-     <h3>Bojíš sa, že ťa ľudia opustia, a robíš všetko pre to, aby si o nikoho neprišla</h3>
-     <p>aj keby to znamenalo, že stratíš samu seba</p>
+     <h3>Bojíš sa, že ťa ľudia opustia, a robíš všetko pre to, aby ťa nikto neopustil</h3>
+     <p>aj za cenu toho, že pri tom strácaš seba</p>
     </div>
 
     <!-- Karta 8 -->
@@ -369,7 +380,7 @@
    </li>
    <li>
     <span class="arrow">→</span>
-    <span><strong><u>Odpustiť, ale nezabudnúť</u></strong> – nájdi <em>rovnováhu medzi odpustením a ochranou seba samej</em> pred <strong>ďalšou bolesťou</strong></span>
+    <span><strong><u>Odpustiť, ale nezabudnúť</u></strong> – nájdi <em>rovnováhu medzi odpustením a ochranou seba</em> pred <strong>ďalšou bolesťou</strong></span>
    </li>
    <li>
     <span class="arrow">→</span>
@@ -389,11 +400,11 @@
    </li>
    <li>
     <span class="arrow">→</span>
-    <span><strong><u>Lepší spánok</u></strong> – upokoj myseľ pred <em>zaspaním</em> a prebúdzaj sa <strong>oddýchnutá</strong> namiesto vyčerpaná</span>
+    <span><strong><u>Lepší spánok</u></strong> – upokoj myseľ pred <em>zaspaním</em> a ráno vstávaj <strong>s čistou hlavou</strong> namiesto vyčerpania</span>
    </li>
    <li>
     <span class="arrow">→</span>
-    <span><strong><u>Nový začiatok</u></strong> – objav, ako <em>z bolesti urobiť svojho najväčšieho učiteľa</em> a vybudovať život, na ktorý budeš <strong>hrdá</strong></span>
+    <span><strong><u>Nový začiatok</u></strong> – objav, ako <em>z bolesti urobiť svojho najväčšieho učiteľa</em> a vybudovať život, na ktorý sa budeš pozerať <strong>s hrdosťou</strong></span>
    </li>
   </ol>
 
@@ -496,7 +507,7 @@
    <h3>Táto kniha môže byť presne to, čo ti <span class="highlight-blue">v živote doteraz chýbalo</span> 💫</h3>
 
    <p class="offer-text">
-    Možno už máš za sebou množstvo pokusov. Prečítala si knihy, ktoré zneli krásne, ale nikdy nešli <em>naozaj do hĺbky</em>. Vyskúšala si terapeutické metódy, ktoré sľubovali úľavu, ale v praxi <strong>nič nezmenili</strong>. A predsa si tu – pretože vnútri vieš, že stále existuje <strong>nádej</strong>. Že vnútorný pokoj je <strong>možný</strong>. Že bolesť, ktorú si nesieš, <u>tu nemusí zostať navždy</u>.
+    Možno už máš za sebou množstvo pokusov. Knihy, ktoré zneli krásne, ale nikdy nešli <em>naozaj do hĺbky</em>. Terapeutické metódy, ktoré sľubovali úľavu, ale v praxi <strong>nič nezmenili</strong>. A predsa si tu – pretože vnútri vieš, že stále existuje <strong>nádej</strong>. Že vnútorný pokoj je <strong>možný</strong>. Že bolesť, ktorú si nesieš, <u>tu nemusí zostať navždy</u>.
    </p>
 
    <p class="offer-text">
@@ -550,7 +561,7 @@
     <div class="guarantee-seal">100%<br>MONEY<br>BACK</div>
     <div class="guarantee-text">
      <h4>Predĺžená záruka vrátenia peňazí</h4>
-     <p><span class="highlight-green">30 dní namiesto 14 dní</span> – kniha ťa nenadchla? Máš celých 30 dní na to, aby si ju vrátila a dostala peniaze späť.</p>
+     <p><span class="highlight-green">30 dní namiesto 14 dní</span> – kniha ťa nenadchne? Máš celých 30 dní na jej vrátenie – a peniaze dostaneš späť.</p>
     </div>
    </div>
 
@@ -635,11 +646,11 @@
   </div>
 
   <!-- Otevírací emocionální text -->
-  <p class="lead">Ak si už <strong>unavená z boja sama so sebou</strong>...</p>
+  <p class="lead">Ak už máš <strong>dosť boja so sebou</strong>...</p>
 
-  <p>Ak ťa v noci prenasleduje, čo si povedala, <strong>nepovedala</strong>, o čo si prišla alebo čo si <strong>pokazila</strong>...</p>
+  <p>Ak ti v noci behá hlavou, čo zaznelo a čo <strong>nezaznelo</strong>, čo sa stratilo a čo sa <strong>pokazilo</strong>...</p>
 
-  <p>Ak stále <strong>dúfaš, že sa to možno spraví</strong>, alebo že to raz prejde samo – ale ďalej <strong>ostávaš uväznená vo vlastnej hlave</strong> a <strong><u>nič sa nemení</u></strong>...</p>
+  <p>Ak stále <strong>dúfaš, že sa to možno spraví</strong>, alebo že to raz prejde samo – ale ďalej sa <strong>točíš vo vlastnej hlave</strong> a <strong><u>nič sa nemení</u></strong>...</p>
 
   <p class="bold-statement">Potom je toto najdôležitejšia kniha, akú kedy otvoríš.</p>
 
@@ -672,12 +683,12 @@
 
   <!-- Urgency blok — fialové pozadí -->
   <div class="verhaal-urgency">
-   <p><strong>Každý deň bez tejto knihy</strong> je ďalší deň <strong><u>uväznená vo vlastnej hlave</u></strong>.</p>
-   <p>Koľko hodín si už <strong>premárnila prehrávaním</strong> toho, čo sa stalo – <em>„Keby som to vtedy urobila inak..."</em></p>
-   <p>Koľkokrát si si priala, aby tá <strong>bolesť konečne prestala</strong>?</p>
-   <p>Aby bolo <strong>vnútri konečne ticho</strong>?</p>
+   <p><strong>Každý deň bez tejto knihy</strong> je ďalší deň <strong><u>vo väzení vlastnej hlavy</u></strong>.</p>
+   <p>Koľko hodín ti už <strong>zhltlo prehrávanie</strong> toho, čo sa stalo – <em>„Keby sa to vtedy odohralo inak..."</em></p>
+   <p>Koľkokrát ti napadlo jediné: nech tá <strong>bolesť konečne prestane</strong>?</p>
+   <p>Nech je <strong>vnútri konečne ticho</strong>?</p>
    <p><strong>Každá minúta bez správneho vedenia</strong> ťa stojí viac stresu, než si <strong>zaslúžiš</strong>.</p>
-   <p>A <strong>každý deň, keď to odkladáš</strong>, je deň, keď zostávaš <strong><u>uväznená v starej bolesti</u></strong>.</p>
+   <p>A <strong>každý deň, keď to odkladáš</strong>, je ďalší deň <strong><u>v starej bolesti</u></strong>.</p>
   </div>
 
   <!-- Zlomový bod — příběh autora -->
@@ -771,7 +782,7 @@
 
   <!-- CTA tlačítko -->
   <div class="verhaal-cta">
-   <a href="checkout.html" class="btn-cta">Doručte mi knihu →</a>
+   <a href="checkout.html" class="btn-cta">Chcem knihu domov →</a>
    <div class="payment-row">
      <img src="/icons/visa.svg" alt="Visa" class="pay-chip">
      <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-chip">
@@ -830,9 +841,9 @@
   <ul class="verhaal-pijnpunten">
    <li><strong>Pocit viny a hanba:</strong> Nauč sa, ako si <strong><u>odpustiť</u></strong> a prestať sa trestať za chyby z minulosti. Namiesto toho začneš zase cítiť ľahkosť a vlastnú hodnotu.</li>
    <li><strong>Hnev a zášť:</strong> Dostaneš nástroje, ako nechať staré rany odísť a prestať v hlave bojovať s ľuďmi, ktorí ti ublížili. Nie kvôli „vyrovnaniu účtov", ale s istotou, že <strong><u>nad tebou už nemajú moc</u></strong>.</li>
-   <li><strong>Pocit osamelosti:</strong> Nauč sa, ako si vytvoriť bezpečie sama v sebe, aj keď okolo nie je nikto, kto by ťa chápal. Zistíš, že byť sama neznamená prázdnotu.</li>
+   <li><strong>Pocit osamelosti:</strong> Nauč sa, ako si vytvoriť bezpečie vo vlastnom vnútri, aj keď okolo nie je nikto, kto by ťa chápal. Zistíš, že samota neznamená prázdnotu.</li>
    <li><strong>Neustále premýšľanie:</strong> Prestaneš si prehrávať scenáre „čo keby" a naučíš sa zastaviť špirálu myšlienok skôr, než ťa pohltí. Tvoja myseľ bude zase <strong><u>miestom pokoja, nie územím strachu</u></strong>.</li>
-   <li><strong>Strach zo straty / opustenia:</strong> Objav, ako zaobchádzať s hlbokým strachom, že o niekoho prídeš – bez toho, aby si sa vzdala potreby blízkosti alebo vlastnej hodnoty.</li>
+   <li><strong>Strach zo straty / opustenia:</strong> Objav, ako zaobchádzať s hlbokým strachom, že o niekoho prídeš – bez vzdávania sa blízkosti alebo vlastnej hodnoty.</li>
    <li><strong>Uviaznutie v minulosti:</strong> Nauč sa, ako prestať žiť v minulosti – a konečne urobiť svoj <strong><u>prvý skutočný krok vpred</u></strong>. Nie len „hoď to za hlavu", ale naozajstné uzdravenie zvnútra.</li>
   </ul>
 
@@ -853,7 +864,7 @@
 
   <p><strong>Každý nástroj v tejto knihe</strong> vychádza priamo z osobnej skúsenosti – zrodil sa z <em>rokov hľadania, skutočných príbehov, pádov a vstávania</em>.</p>
 
-  <p>A práve preto som sa rozhodol <strong><u>svoje poznania zdieľať</u></strong>. Aby si nemusela prejsť rovnakou bolesťou ako ja.</p>
+  <p>A práve preto som sa rozhodol <strong><u>svoje poznania zdieľať</u></strong>. Aby ťa rovnaká bolesť nemusela stáť roky ako mňa.</p>
 
   <p>Tými <strong>nekonečnými večermi</strong>, keď sa rúcaš pod vlastnými myšlienkami. Tým <strong>vyčerpávajúcim pocitom</strong>, že skúšaš všetko… a <em>nič nefunguje</em>.</p>
 
@@ -898,7 +909,7 @@
  <div class="czr-wrap">
   <div class="czr-intro">
    <h3>Čo o knihe píšu čitatelia <span class="czr-intro-hl">— preložené do slovenčiny</span></h3>
-   <p>Posúvaj recenzie doľava a doprava. Pod každým prekladom nájdeš <strong>originálny komentár z Facebooku</strong>, takže si pravosť môžeš kedykoľvek overiť sama.</p>
+   <p>Posúvaj recenzie doľava a doprava. Pod každým prekladom nájdeš <strong>originálny komentár z Facebooku</strong>, takže si pravosť môžeš kedykoľvek overiť na vlastné oči.</p>
   </div>
 
   <div class="czr-slider">
@@ -1210,7 +1221,7 @@
    <li>Sám som si prešiel <strong>najhlbšími údoliami</strong> – a našiel cestu späť</li>
    <li>Roky <strong>samoštúdia</strong> neurovedy, filozofie a ľudského správania</li>
    <li>Vyvinul som <strong>vlastnú metódu</strong>, ktorá pomohla mne aj ďalším</li>
-   <li>Všetko, čo som sa naučil, som <strong>zhrnul do tejto knihy</strong> – aby si nemusela ísť rovnakou obchádzkou</li>
+   <li>Všetko, čo som sa naučil, som <strong>zhrnul do tejto knihy</strong> – aby ťa rovnaká obchádzka nestála roky</li>
   </ul>
 
   <p>To, čo som objavil, mi zmenilo život:</p>
@@ -1253,13 +1264,13 @@
 
     <p>A možno práve preto by mohla byť tou <u><strong>poslednou, ktorú naozaj potrebuješ</strong></u>.</p>
 
-    <p>Možno si už <strong>vyskúšala všetko možné</strong>.</p>
+    <p>Možno máš za sebou už <strong>všetko možné</strong>.</p>
 
     <p><em>Rady, ktoré zneli pekne, ale nič nezmenili.</em></p>
 
     <p><em>Metódy, ktoré fungovali… do ďalšieho pádu.</em></p>
 
-    <p><strong>A predsa si tu.</strong> A to <strong>niečo znamená</strong>. Znamená to, že si ešte nestratila vieru.</p>
+    <p><strong>A predsa si tu.</strong> A to <strong>niečo znamená</strong>. Znamená to, že nádej v tebe ešte žije.</p>
 
     <p>Že vnútri stále vieš, že <strong>úľava je možná</strong>. Že pokoj nie je sen, ale <u><strong>zručnosť</strong></u>. A že tvoja bolesť <strong>k tebe nemusí patriť navždy</strong>.</p>
 
@@ -1277,11 +1288,11 @@
 
     <p>✨ <strong>Prvý krok je malý. Ale môže zmeniť všetko.</strong></p>
 
-    <p>Nemusíš mať všetko vyriešené, aby si mohla začať. Nemusíš byť <strong>silná</strong> – stačí byť <em>otvorená</em> myšlienke, že to ide aj inak.</p>
+    <p>Nemusíš mať všetko vyriešené, aby sa dalo začať. Nemusíš zo seba tlačiť <strong>silu</strong> – stačí <em>pripustiť</em> myšlienku, že to ide aj inak.</p>
 
     <p>👉 <strong>Klikni na tlačidlo a začni čítať.</strong></p>
 
-    <p><strong>Možno tu nájdeš ten pokoj</strong>, ktorý si celý čas hľadala.</p>
+    <p><strong>Možno tu nájdeš ten pokoj</strong>, ktorý celý čas hľadáš.</p>
 
     <div style="text-align:center; margin-top: 32px;">
      <a href="checkout.html" class="btn-cta" style="font-size:20px; padding:20px 48px;">Objednať tlačenú knihu →</a>
@@ -1325,7 +1336,7 @@
     <h3>🎁 <span class="hl-yellow">#1 BONUS: E-kniha Riešenie nadmerného premýšľania</span></h3>
     <p>Túto <strong>exkluzívnu bonusovú e-knihu</strong> dostaneš zadarmo, keď si objednáš ešte dnes. Obsahuje <em>praktické nástroje a cvičenia</em>, ktoré dokonale dopĺňajú hlavnú knihu.</p>
     <ul class="bonus-checklist">
-     <li><strong>Pracovné listy navyše</strong> pre hlbšie poznanie seba samej</li>
+     <li><strong>Pracovné listy navyše</strong> pre hlbšie sebapoznanie</li>
      <li><strong>Každodenné cvičenia</strong>, ako teóriu preniesť do praxe</li>
      <li>Exkluzívne <strong><u>poznatky</u></strong>, ktoré inde nenájdeš</li>
      <li><em>Na stiahnutie ihneď</em> po objednávke</li>
@@ -1338,9 +1349,9 @@
    <img src="/láska-bez-cenzury-pichi.png" alt="Láska bez cenzúry — bonusová e-kniha" width="800" height="1315">
    <div class="bonus-card-text">
     <h3>🎁 <span class="hl-yellow">#2 BONUS: E-kniha Láska bez cenzúry</span></h3>
-    <p>Pravda o vzťahoch, o ktorej sa nikto neodváži hovoriť. <strong>Prestaň sa zaliečať všetkým.</strong> Prestaň strácať samu seba vo vzťahu, ktorý ťa <strong>vyčerpáva, zraňuje a pomaly ničí</strong>. Získaj späť svoju <em>silu, jasnosť a schopnosť</em> voliť to, čo chceš ty – nie to, čo od teba čakajú ostatní.</p>
-    <p>Toto nie je <em>príjemná príručka o komunikácii</em>. Táto kniha je <u><strong>konfrontácia sama so sebou</strong></u>. Prečo si tam, kde si. A čo musíš urobiť, aby si sa z toho dostala.</p>
-    <p>Cítiš, že vo tvojom vzťahu niečo nesedí? Pochybuješ, či je to tebou – alebo tým druhým? Stratila si spojenie, príťažlivosť alebo samu seba? Táto kniha rozbije tvoje <strong>ilúzie</strong>. A pomôže ti <u><strong>znovu sa postaviť na nohy</strong></u>.</p>
+    <p>Pravda o vzťahoch, o ktorej sa nikto neodváži hovoriť. <strong>Prestaň sa zavďačovať všetkým.</strong> Prestaň strácať seba vo vzťahu, ktorý ťa <strong>vyčerpáva, zraňuje a pomaly ničí</strong>. Získaj späť svoju <em>silu, jasnosť a schopnosť</em> voliť to, čo chceš ty – nie to, čo od teba čakajú ostatní.</p>
+    <p>Toto nie je <em>príjemná príručka o komunikácii</em>. Táto kniha je <u><strong>konfrontácia so sebou</strong></u>. Prečo si tam, kde si. A čo treba urobiť, aby si sa z toho dostal von.</p>
+    <p>Cítiš, že vo tvojom vzťahu niečo nesedí? Pochybuješ, či je to tebou – alebo tým druhým? Vytráca sa spojenie, príťažlivosť – alebo ty? Táto kniha rozbije tvoje <strong>ilúzie</strong>. A pomôže ti <u><strong>znovu sa postaviť na nohy</strong></u>.</p>
     <ul class="bonus-checklist">
      <li><strong>Odhaľ svoje vzorce sebazničenia</strong> a nauč sa s nimi pracovať</li>
      <li><strong>Získaj kontrolu nad svojimi emóciami,</strong> strachmi a reakciami</li>
@@ -1362,14 +1373,14 @@
 <div class="waarom anim">
  <div class="waarom-inner">
 
-  <h2 class="waarom-heading">Možno sa práve teraz pýtaš – <span class="hl-yellow">„Prečo by som mala míňať peniaze na túto knihu?"</span> 🤔📘 Odpoveď je jednoduchá:</h2>
+  <h2 class="waarom-heading">Možno sa práve teraz pýtaš – <span class="hl-yellow">„Prečo míňať peniaze na túto knihu?"</span> 🤔📘 Odpoveď je jednoduchá:</h2>
 
   <div class="waarom-video">
    <video autoplay muted loop playsinline preload="none" class="lazy-video" data-src="https://pub-e45aa202606e48c48b752d5336015023.r2.dev/freepik__a-vibrant-animated-scene-unfolds-as-the-camera-slo__44075.mp4">
    </video>
   </div>
 
-  <p class="waarom-guarantee"><strong>Máš 30 dní na vyskúšanie – a keby ti kniha nesadla? Dostaneš peniaze späť.</strong><br>Žiadne otázky, žiadne komplikácie. Ale obe vieme, že ju vracať nebudeš. Pretože len čo začneš čítať, ucítiš, že táto kniha ti môže zmeniť život.</p>
+  <p class="waarom-guarantee"><strong>Máš 30 dní na vyskúšanie – a keby ti kniha nesadla? Dostaneš peniaze späť.</strong><br>Žiadne otázky, žiadne komplikácie. Ale niečo mi hovorí, že ju vracať nebudeš. Pretože len čo začneš čítať, ucítiš, že táto kniha ti môže zmeniť život.</p>
 
   <h3 class="waarom-usp-title">Čím je táto kniha iná:</h3>
 
@@ -1377,7 +1388,7 @@
    <li><strong>Praktická použiteľnosť –</strong> Táto kniha neponúka len <em>poznatky</em>, ale aj <em>konkrétne kroky</em>, ktoré môžeš hneď použiť vo svojom každodennom živote.</li>
    <li><strong>Postavená na skúsenosti –</strong> Metódy vychádzajú z <em>osobnej skúsenosti a rokov samoštúdia</em>, takže vieš, že sa učíš <em>poctivé, overené nástroje</em>.</li>
    <li><strong>Zameranie na hlboké uzdravenie –</strong> Na rozdiel od iných kníh mieri táto na <em>jadro tvojej emočnej záťaže</em>, nie len na <em>povrchové príznaky</em>.</li>
-   <li><strong>Emočná blízkosť –</strong> Kniha je napísaná s <em>empatiou</em> a <em>pochopením</em>, takže sa na svojej ceste k vnútornému pokoju budeš cítiť <em>vypočutá a podporená</em>.</li>
+   <li><strong>Emočná blízkosť –</strong> Kniha je napísaná s <em>empatiou</em> a <em>pochopením</em>, takže na svojej ceste k vnútornému pokoju budeš cítiť, že ťa <em>niekto naozaj počúva a podporuje</em>.</li>
    <li><strong>Jedinečné vhľady –</strong> Kniha prináša <em>prekvapivé uhly pohľadu</em>, ktoré inde nenájdeš, a vďaka nim sa na seba a svoje emócie pozrieš <em>úplne novými očami</em>.</li>
   </ul>
 
@@ -1385,7 +1396,7 @@
    <div class="urgency-box reveal reveal-d1">
     <span class="urgency-icon">📖</span>
     <h4>Kniha, ktorú čítaš vlastným tempom</h4>
-    <p>Žiadny zhon, žiadny tlak. Začni, keď budeš pripravená, a doprej si toľko času, koľko potrebuješ.</p>
+    <p>Žiadny zhon, žiadny tlak. Začni, keď to budeš cítiť, a doprej si toľko času, koľko potrebuješ.</p>
    </div>
    <div class="urgency-box reveal reveal-d2">
     <span class="urgency-icon">🔑</span>
@@ -1394,8 +1405,8 @@
    </div>
    <div class="urgency-box reveal reveal-d3">
     <span class="urgency-icon">🔓</span>
-    <h4>Zaslúžiš si byť slobodná</h4>
-    <p>Odpustiť a nechať veci odísť nie je slabosť – je to sila. Táto kniha ti pomôže urobiť miesto pre to, čo ťa naozaj robí šťastnou.</p>
+    <h4>Zaslúžiš si slobodu</h4>
+    <p>Odpustiť a nechať veci odísť nie je slabosť – je to sila. Táto kniha ti pomôže urobiť miesto pre to, čo ti naozaj robí radosť.</p>
    </div>
   </div>
 
@@ -1410,7 +1421,7 @@
 <div class="final-offer anim">
  <div class="final-offer-inner">
 
-  <h2 class="final-offer-heading">📦✨ Pripravená začať? Objednaj ešte dnes a knihu ti <span class="hl-underline">doručíme až domov</span> 📘🙏</h2>
+  <h2 class="final-offer-heading">📦✨ Ideš do toho? Objednaj ešte dnes a knihu ti <span class="hl-underline">doručíme až domov</span> 📘🙏</h2>
   <p class="final-offer-sub">Tvoja cesta k vnútornému pokoju začína tu.</p>
 
   <img class="final-offer-img" src="/pusti-to-co-ta-nici-kniha-pichi.png" alt="Pusti to, čo ťa ničí — tlačená kniha s cvičeniami v závere" width="420" height="546">
@@ -1418,7 +1429,7 @@
   <div class="final-offer-text">
    <p>📘 Knihu — s cvičeniami v závere, ktoré ti pomôžu preniesť ju do praxe — získaš len za <strong><span style="text-decoration:line-through;opacity:0.5;font-weight:600;">35 €</span> 32 €</strong> – menej než večera pre dvoch alebo plná nádrž benzínu.</p>
    <p>Ale na rozdiel od týchto vecí ti táto kniha dá <strong>hodnotu na celý život.</strong> 💎💚</p>
-   <p>Pomôže ti nájsť vnútorný pokoj, pustiť bolesť, ktorú v sebe držíš už roky, a znovu cítiť, že si sama v sebe doma. ❤️</p>
+   <p>Pomôže ti nájsť vnútorný pokoj, pustiť bolesť, ktorú v sebe držíš už roky, a znovu cítiť, že si v sebe doma. ❤️</p>
    <p>Vďaka tejto malej investícii získaš praktické nástroje, ktoré môžeš používať celé roky – kedykoľvek ich budeš potrebovať, svojím vlastným tempom. 🌱</p>
   </div>
 
@@ -1457,11 +1468,11 @@
    </div>
    <div class="faq-item">
     <div class="faq-question" onclick="toggleFaq(this)">
-     <h3>Už som toho vyskúšala toľko – prečo by toto malo byť iné?</h3>
+     <h3>Vyskúšané mám už všeličo – prečo by toto malo byť iné?</h3>
      <span class="faq-icon">+</span>
     </div>
     <div class="faq-answer">
-     <p>Je pochopiteľné, že si skeptická – je frustrujúce investovať čas a nádej do rôznych metód, ktoré nakoniec žiadnu skutočnú zmenu neprinesú. Táto kniha je iná vďaka priamemu, praktickému prístupu založenému na osobnej skúsenosti, nie na suchej teórii. Vznikla zo skutočného príbehu autora, ktorý predtým tiež „všetko" vyskúšal, ale úľavu nakoniec našiel vďaka vlastnej metóde. Na rozdiel od všeobecných rád tu dostaneš konkrétne techniky, ktoré fungujú aj vo chvíľach, keď sa cítiš vyčerpaná. A keby ti kniha predsa len nesadla, môžeš ju vďaka našej 30-dňovej záruke vrátenia peňazí vyskúšať úplne bez rizika.</p>
+     <p>Skepsa je úplne pochopiteľná – je frustrujúce investovať čas a nádej do rôznych metód, ktoré nakoniec žiadnu skutočnú zmenu neprinesú. Táto kniha je iná vďaka priamemu, praktickému prístupu založenému na osobnej skúsenosti, nie na suchej teórii. Vznikla zo skutočného príbehu autora, ktorý predtým tiež „všetko" vyskúšal, ale úľavu nakoniec našiel vďaka vlastnej metóde. Na rozdiel od všeobecných rád tu dostaneš konkrétne techniky, ktoré fungujú aj vo chvíľach totálneho vyčerpania. A keby ti kniha predsa len nesadla, môžeš ju vďaka našej 30-dňovej záruke vrátenia peňazí vyskúšať úplne bez rizika.</p>
     </div>
    </div>
    <div class="faq-item">
@@ -1533,7 +1544,7 @@
      <span class="faq-icon">+</span>
     </div>
     <div class="faq-answer">
-     <p>Táto kniha je pre každého, kto zápasí s emočnou záťažou – či už ide o bolesť po rozchode, pocity viny, ktoré ťa stále prenasledujú, hnev, ktorý nedokážeš pustiť, neustále premýšľanie, strach z opustenia, alebo pocit, že si sa úplne stratila. Je napísaná pre ľudí v najrôznejších životných situáciách: od tých, ktorí nedávno zažili stratu, po tých, ktorí si roky nesú nevyriešenú bolesť. Kniha je zámerne písaná bez odborného žargónu, aby bola prístupná všetkým. Metódy si môžeš prispôsobiť svojim individuálnym potrebám vďaka praktickým cvičeniam v závere knihy.</p>
+     <p>Táto kniha je pre každého, kto zápasí s emočnou záťažou – či už ide o bolesť po rozchode, pocity viny, ktoré ťa stále prenasledujú, hnev, ktorý nedokážeš pustiť, neustále premýšľanie, strach z opustenia, alebo pocit, že už nevieš, kto vlastne si. Je napísaná pre ľudí v najrôznejších životných situáciách: od tých, ktorí nedávno zažili stratu, po tých, ktorí si roky nesú nevyriešenú bolesť. Kniha je zámerne písaná bez odborného žargónu, aby bola prístupná všetkým. Metódy si môžeš prispôsobiť svojim individuálnym potrebám vďaka praktickým cvičeniam v závere knihy.</p>
     </div>
    </div>
    <div class="faq-item">
@@ -1542,7 +1553,7 @@
      <span class="faq-icon">+</span>
     </div>
     <div class="faq-answer">
-     <p>Úplne. Ak do 30 dní nepocítiš zlepšenie alebo z akéhokoľvek dôvodu nebudeš spokojná, dostaneš späť celú sumu. Stačí nám knihu poslať späť v 100 % perfektnom stave a len čo nám dorazí, vrátenie peňazí ihneď spracujeme. Žiadne zložité formuláre, žiadne nepríjemné otázky, prečo to nefungovalo, žiadne obštrukcie. Jednoducho napíš e-mail na podpora@pustitocotanici.sk a všetko za teba vybavíme. Robíme to preto, že hodnote tejto knihy plne veríme a chceme, aby si ju mohla vyskúšať bez obáv. Tvoja spokojnosť a pohoda sú dôležitejšie než predaj.</p>
+     <p>Úplne. Ak do 30 dní nepocítiš zlepšenie alebo z akéhokoľvek dôvodu nebudeš mať pocit, že ti kniha niečo dala, dostaneš späť celú sumu. Stačí nám knihu poslať späť v 100 % perfektnom stave a len čo nám dorazí, vrátenie peňazí ihneď spracujeme. Žiadne zložité formuláre, žiadne nepríjemné otázky, prečo to nefungovalo, žiadne obštrukcie. Jednoducho napíš e-mail na podpora@pustitocotanici.sk a všetko za teba vybavíme. Robíme to preto, že hodnote tejto knihy plne veríme a chceme, aby sa dala vyskúšať úplne bez obáv. Tvoja spokojnosť a pohoda sú dôležitejšie než predaj.</p>
     </div>
    </div>
    <div class="faq-item">
@@ -1951,7 +1962,7 @@ function toggleMobileMenu() {
  "@type": "FAQPage",
  "mainEntity": [
   {"@type": "Question", "name": "Funguje to naozaj? Nie je to len ďalšia prázdna kniha o sebarozvoji?", "acceptedAnswer": {"@type": "Answer", "text": "Pusti to, čo ťa ničí nie je typická sebarozvojová kniha plná vágnych rád. Je postavená na osobnej skúsenosti a rokoch samoštúdia neurovedy, filozofie a ľudského správania. Rozdiel je v praktických, konkrétnych krokoch, ktoré naozaj fungujú. S našou 30-dňovou zárukou vrátenia peňazí neriskuješ vôbec nič."}},
-  {"@type": "Question", "name": "Už som toho vyskúšala toľko – prečo by toto malo byť iné?", "acceptedAnswer": {"@type": "Answer", "text": "Táto kniha ponúka priamy, praktický prístup založený na osobnej skúsenosti, nie na suchej teórii. Dostaneš konkrétne techniky, ktoré fungujú aj vo chvíľach, keď sa cítiš vyčerpaná. Vďaka 30-dňovej záruke vrátenia peňazí ju môžeš vyskúšať bez rizika."}},
+  {"@type": "Question", "name": "Vyskúšané mám už všeličo – prečo by toto malo byť iné?", "acceptedAnswer": {"@type": "Answer", "text": "Táto kniha ponúka priamy, praktický prístup založený na osobnej skúsenosti, nie na suchej teórii. Dostaneš konkrétne techniky, ktoré fungujú aj vo chvíľach totálneho vyčerpania. Vďaka 30-dňovej záruke vrátenia peňazí ju môžeš vyskúšať bez rizika."}},
   {"@type": "Question", "name": "Čo ak to u mňa fungovať nebude? Moja situácia je iná alebo zložitejšia.", "acceptedAnswer": {"@type": "Answer", "text": "Kniha ponúka flexibilné postupy, ktoré sa dajú prispôsobiť rôznym situáciám – od čerstvých rozchodov po roky nespracovanej bolesti. Cvičenia v závere knihy ti umožnia aplikovať metódy na tvoje konkrétne okolnosti. Ponúkame 30-dňovú záruku vrátenia peňazí bez nepríjemných otázok."}},
   {"@type": "Question", "name": "Nie je 32 € za knihu veľa?", "acceptedAnswer": {"@type": "Answer", "text": "Dostávaš knihu o 320 stranách s praktickými cvičeniami v závere a dopravou zadarmo po celom Slovensku. Za cenu jedného večera vonku získaš nástroje, ktoré môžeš používať celé roky. Pri objednávke viacerých výtlačkov ušetríš až 40 €. S 30-dňovou zárukou vrátenia peňazí neriskuješ nič."}},
   {"@type": "Question", "name": "Nebolo by lepšie investovať do terapeuta než do knihy?", "acceptedAnswer": {"@type": "Answer", "text": "Terapia a táto kniha sa nevylučujú – dopĺňajú sa. Za zlomok ceny niekoľkých terapeutických sedení získaš nástroje, ktoré môžeš použiť, kedykoľvek ich potrebuješ, bez čakacích lehôt. Kniha ti dá pevný základ, vďaka ktorému z terapie vyťažíš viac."}},
@@ -1959,8 +1970,8 @@ function toggleMobileMenu() {
   {"@type": "Question", "name": "Prečo nie je táto kniha bežne k dostaniu v kníhkupectvách?", "acceptedAnswer": {"@type": "Answer", "text": "Vedome sme zvolili priamy predaj, aby sme mohli ponúkať dopravu zadarmo, zvýhodnené balíčky viacerých výtlačkov a osobnú 30-dňovú záruku vrátenia peňazí – veci, ktoré sú cez veľké platformy so 40–60% províziou nemožné."}},
   {"@type": "Question", "name": "Je kniha k dispozícii aj ako e-book?", "acceptedAnswer": {"@type": "Answer", "text": "Momentálne ponúkame knihu iba v tlačenej podobe – vrátane cvičení v závere, do ktorých môžeš priamo písať. Ak by sa v budúcnosti objavila digitálna verzia, dáme vedieť našim čitateľom e-mailom."}},
   {"@type": "Question", "name": "Ako dlho trvá, než knihu dostanem?", "acceptedAnswer": {"@type": "Answer", "text": "Knihu doručujeme do 2–3 pracovných dní od objednávky. Odosielame obvykle do 24 hodín zo skladu cez Packetu. Doprava po celom Slovensku je zadarmo. Po odoslaní ti príde potvrdzovací e-mail s údajmi na sledovanie zásielky."}},
-  {"@type": "Question", "name": "Pre koho je táto kniha určená? Hodí sa na moju situáciu?", "acceptedAnswer": {"@type": "Answer", "text": "Táto kniha je pre každého, kto zápasí s emočnou záťažou – bolesť po rozchode, pocity viny, hnev, neustále premýšľanie, alebo pocit stratenosti. Je písaná bez odborného žargónu a metódy si môžeš prispôsobiť svojim individuálnym potrebám vďaka praktickým cvičeniam v závere knihy."}},
-  {"@type": "Question", "name": "Je 30-dňová záruka vrátenia peňazí naozaj bez komplikácií?", "acceptedAnswer": {"@type": "Answer", "text": "Úplne. Ak do 30 dní nebudeš spokojná, dostaneš späť celú sumu. Napíš e-mail na podpora@pustitocotanici.sk a všetko vybavíme. Žiadne zložité formuláre, žiadne nepríjemné otázky."}},
+  {"@type": "Question", "name": "Pre koho je táto kniha určená? Hodí sa na moju situáciu?", "acceptedAnswer": {"@type": "Answer", "text": "Táto kniha je pre každého, kto zápasí s emočnou záťažou – bolesť po rozchode, pocity viny, hnev, neustále premýšľanie, alebo pocit, že už nevieš, kto vlastne si. Je písaná bez odborného žargónu a metódy si môžeš prispôsobiť svojim individuálnym potrebám vďaka praktickým cvičeniam v závere knihy."}},
+  {"@type": "Question", "name": "Je 30-dňová záruka vrátenia peňazí naozaj bez komplikácií?", "acceptedAnswer": {"@type": "Answer", "text": "Úplne. Ak do 30 dní nebudeš mať pocit, že ti kniha niečo dala, dostaneš späť celú sumu. Napíš e-mail na podpora@pustitocotanici.sk a všetko vybavíme. Žiadne zložité formuláre, žiadne nepríjemné otázky."}},
   {"@type": "Question", "name": "Ako spoznám, že mi táto kniha naozaj pomôže?", "acceptedAnswer": {"@type": "Answer", "text": "Kniha ponúka konkrétne cvičenia v závere, s ktorými môžeš začať hneď. Čitatelia nám pravidelne píšu, že im praktický prístup naozaj pomohol. S našou 30-dňovou zárukou vrátenia peňazí neriskuješ vôbec nič."}},
   {"@type": "Question", "name": "Je moja platba bezpečná? Môžem tejto firme veriť?", "acceptedAnswer": {"@type": "Answer", "text": "Tvoja platba je plne zabezpečená cez overené platobné brány spĺňajúce najvyššie bezpečnostné štandardy (SSL šifrovanie a PCI-DSS compliance). Sme registrovaná firma: Performance Marketing Solution s.r.o., IČO: 06259928."}}
  ]

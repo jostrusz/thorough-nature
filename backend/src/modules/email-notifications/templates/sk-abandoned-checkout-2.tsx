@@ -139,7 +139,7 @@ export const SkAbandonedCheckout2Template: React.FC<SkAbandonedCheckout2Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            Chcel som ti napísať osobne. Nie preto, aby som na teba tlačil — ale preto, že si myslím, že by si to mala vedieť.
+            Chcel som ti napísať osobne. Nie preto, aby som na teba tlačil — ale preto, že je tu niečo, čo podľa mňa stojí za to vedieť.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -349,7 +349,7 @@ export const SkAbandonedCheckout2Template: React.FC<SkAbandonedCheckout2Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ti prišiel, pretože si na pustitocotanici.sk nedokončil/a objednávku.
+            Tento e-mail ti prišiel, pretože tvoja objednávka na pustitocotanici.sk zostala nedokončená.
           </Text>
         </div>
       </Section>
