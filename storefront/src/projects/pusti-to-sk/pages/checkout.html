@@ -3268,11 +3268,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     st.textContent =
       '#bt-overlay{position:fixed;inset:0;z-index:100000;background:rgba(45,27,61,.55);display:flex;align-items:flex-start;justify-content:center;padding:16px 12px;overflow:auto;font-family:"DM Sans",system-ui,sans-serif;animation:fadeIn .25s ease;}' +
       '.bt-card{background:#fff;max-width:440px;width:100%;border-radius:clamp(16px,4vw,20px);box-shadow:0 20px 60px rgba(45,27,61,.3);overflow:hidden;color:#2D1B3D;margin:auto;}' +
-      '.bt-h{background:linear-gradient(135deg,#2D1B3D,#4A2E5F);padding:clamp(15px,4vw,18px) 18px;text-align:center;color:#fff;}' +
+      '.bt-h{position:relative;background:linear-gradient(135deg,#2D1B3D,#4A2E5F);padding:clamp(15px,4vw,18px) 48px;text-align:center;color:#fff;}' +
       '.bt-h .ok{font-size:clamp(15px,4.2vw,17px);font-weight:700;}.bt-h .sub{font-size:12.5px;color:#C9AEDA;margin-top:3px;}' +
+      '.bt-x{position:absolute;top:8px;right:8px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border:none;background:rgba(255,255,255,.12);color:#fff;border-radius:50%;font-size:24px;line-height:1;cursor:pointer;font-family:inherit;}.bt-x:hover{background:rgba(255,255,255,.22);}.bt-x:active{transform:scale(.92);}' +
       '.bt-timer{background:#FFF8E1;border-bottom:1px solid #FFE082;padding:9px 16px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:12.5px;color:#7A5B10;}.bt-timer b{font-variant-numeric:tabular-nums;background:#7A5B10;color:#fff;border-radius:6px;padding:3px 9px;font-weight:700;}' +
       '.bt-body{padding:clamp(16px,4.5vw,20px) clamp(14px,4vw,18px);}' +
-      '.bt-amt{text-align:center;margin-bottom:14px;}.bt-amt .l{font-size:11px;color:#9B7AAD;text-transform:uppercase;letter-spacing:.6px;font-weight:600;}.bt-amt .v{font-size:clamp(28px,9vw,34px);font-weight:700;color:var(--cta);}' +
+      '.bt-amt{text-align:center;margin-top:22px;margin-bottom:14px;}.bt-amt .l{font-size:11px;color:#9B7AAD;text-transform:uppercase;letter-spacing:.6px;font-weight:600;}.bt-amt .v{font-size:clamp(28px,9vw,34px);font-weight:700;color:var(--cta);}' +
       '.bt-qr{width:min(66vw,220px);height:min(66vw,220px);margin:0 auto;background:#fff;border:2px solid #EDD9E5;border-radius:16px;padding:12px;box-shadow:0 4px 16px rgba(45,27,61,.08);}' +
       '.bt-qr img,.bt-qr canvas{width:100%!important;height:100%!important;display:block;}' +
       '.bt-copytitle{font-size:13px;font-weight:600;color:#2D1B3D;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}.bt-copytitle .tag{font-size:10px;font-weight:700;background:#F0E4EC;color:var(--cta);border-radius:6px;padding:2px 7px;text-transform:uppercase;letter-spacing:.4px;}' +
@@ -3310,7 +3311,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var ov = document.createElement('div'); ov.id = 'bt-overlay';
     ov.innerHTML =
       '<div class="bt-card">'
-      + '<div class="bt-h"><div class="ok">✅ Objednávka je vytvorená</div><div class="sub">SK2026-' + displayId + ' · čaká na úhradu</div></div>'
+      + '<div class="bt-h"><button class="bt-x" id="bt-x" aria-label="Zavrieť">×</button><div class="ok">✅ Objednávka je vytvorená</div><div class="sub">SK2026-' + displayId + ' · čaká na úhradu</div></div>'
       + '<div class="bt-timer">⏳ Rezervované ešte <b id="bt-cd">23:59:59</b></div>'
       + '<div class="bt-body">'
       + '<div class="bt-qrbox">'
@@ -3348,8 +3349,45 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var img = ov.querySelector('#bt-qr img'); if (img && img.src) src = img.src;
       if (!src) { var cv = ov.querySelector('#bt-qr canvas'); if (cv) { try { src = cv.toDataURL('image/png'); } catch (e) {} } }
       if (!src) return;
-      var a = document.createElement('a'); a.href = src; a.download = 'platba-' + rf + '.png';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      // Compose a full payment card (QR + suma + IBAN + referencia + príjemca) so
+      // the saved image carries everything the customer needs, not just the QR.
+      var W = 660, H = 940, qi = new Image();
+      qi.onload = function () {
+        var c = document.createElement('canvas'); c.width = W; c.height = H;
+        var x = c.getContext('2d');
+        x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H);
+        x.fillStyle = '#2D1B3D'; x.fillRect(0, 0, W, 104);
+        x.textAlign = 'center'; x.fillStyle = '#fff';
+        x.font = '600 22px Arial, sans-serif'; x.fillText('Platba za objednávku', W / 2, 44);
+        x.font = '700 28px Arial, sans-serif'; x.fillText('SK2026-' + displayId, W / 2, 82);
+        var qs = 300, qx = (W - qs) / 2, qy = 140;
+        x.fillStyle = '#FAF5F8'; x.strokeStyle = '#EDD9E5'; x.lineWidth = 2;
+        x.fillRect(qx - 22, qy - 22, qs + 44, qs + 44); x.strokeRect(qx - 22, qy - 22, qs + 44, qs + 44);
+        x.drawImage(qi, qx, qy, qs, qs);
+        var ty = qy + qs + 78;
+        x.textAlign = 'center';
+        x.fillStyle = '#9B7AAD'; x.font = '600 14px Arial, sans-serif'; x.fillText('SUMA NA ÚHRADU', W / 2, ty - 30);
+        x.fillStyle = '#C27BA0'; x.font = '700 44px Arial, sans-serif'; x.fillText(amt2.replace('.', ',') + ' €', W / 2, ty + 10);
+        x.textAlign = 'left';
+        var rows = [['IBAN', btFmtIban(bt.iban)], ['Referencia', rf], ['Príjemca', String(bt.beneficiary || '').substring(0, 42)]];
+        var ry = ty + 66;
+        rows.forEach(function (r) {
+          x.fillStyle = '#9B7AAD'; x.font = '600 13px Arial, sans-serif'; x.fillText(r[0].toUpperCase(), 66, ry);
+          x.fillStyle = '#2D1B3D'; x.font = '600 20px Arial, sans-serif'; x.fillText(r[1], 66, ry + 26);
+          ry += 66;
+        });
+        x.textAlign = 'center'; x.fillStyle = '#7A6189'; x.font = '13px Arial, sans-serif';
+        x.fillText('Naskenujte QR alebo zadajte údaje vo svojej bankovej aplikácii.', W / 2, H - 28);
+        var a = document.createElement('a');
+        try { a.href = c.toDataURL('image/png'); } catch (e) { a.href = src; }
+        a.download = 'platba-SK2026-' + displayId + '.png';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      };
+      qi.onerror = function () {
+        var a = document.createElement('a'); a.href = src; a.download = 'platba-SK2026-' + displayId + '.png';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      };
+      qi.src = src;
     });
     // Živý odpočet rezervácie (24 h) — jemná urgencia.
     var left = 24 * 3600, cd = document.getElementById('bt-cd');
@@ -3364,6 +3402,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var goThankYou = function () { window.location.href = PROJECT_CONFIG.thankYouUrl; };
     document.getElementById('bt-done').onclick = goThankYou;
     document.getElementById('bt-later').onclick = goThankYou;
+    document.getElementById('bt-x').onclick = goThankYou;
   }
 
   // Přepočítej a zobraz CELÝ order summary (bundle, order bump, daně, totál)
