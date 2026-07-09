@@ -3231,7 +3231,28 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var bt = btCfg();
     return !!(bt && bt.iban && bt.iban.indexOf('0000000000') === -1);
   }
-  // ISO 11649 RF Creditor Reference from the order number (structured SEPA reference).
+  // ── Lokalizácia: 9 jazykov. Jazyk sa volí podľa PROJECT_CONFIG.locale (per projekt/doména). ──
+  var BT_I18N = {
+    sk: { created:'Objednávka je vytvorená', awaiting:'čaká na úhradu', reserved:'Rezervované ešte', qrTitle:'Platíte z počítača alebo iného zariadenia?', qrScanApp:'Naskenujte tento QR bankovou aplikáciou.', saveQr:'Uložiť QR do galérie', amountToPay:'Suma na úhradu', detailsTitle:'Údaje na prevod', tapCopy:'ťuknite = skopíruje', refLabel:'Referencia (dôležité!)', vsLabel:'Variabilný symbol (dôležité!)', amountLabel:'Suma', copy:'Kopírovať', copied:'✓ Skopírované', howTitle:'Ako zaplatiť', s1t:'Skopírujte údaje vyššie', s1d:'Ťuknite na Kopírovať pri IBANe a referencii', s2t:'Otvorte svoju bankovú aplikáciu', s2d:'Nová platba → vložte údaje', s3t:'Potvrďte platbu', s3d:'Tovar odošleme ihneď po pripísaní', footEmail:'Údaje sme poslali aj na váš e-mail.', footNotify:'Ozveme sa, keď platba dorazí.', footGuarantee:'30-dní záruka vrátenia peňazí.', paid:'Zaplatil som →', later:'Zaplatím neskôr', close:'Zavrieť', payFor:'Platba za objednávku', scanOrEnter:'Naskenujte QR alebo zadajte údaje vo svojej banke.' },
+    cs: { created:'Objednávka byla vytvořena', awaiting:'čeká na úhradu', reserved:'Rezervováno ještě', qrTitle:'Platíte z počítače nebo jiného zařízení?', qrScanApp:'Naskenujte tento QR v bankovní aplikaci.', saveQr:'Uložit QR do galerie', amountToPay:'Částka k úhradě', detailsTitle:'Údaje k platbě', tapCopy:'klepnutí = zkopíruje', refLabel:'Reference (důležité!)', vsLabel:'Variabilní symbol (důležité!)', amountLabel:'Částka', copy:'Kopírovat', copied:'✓ Zkopírováno', howTitle:'Jak zaplatit', s1t:'Zkopírujte údaje výše', s1d:'Klepněte na Kopírovat u IBANu a reference', s2t:'Otevřete svou bankovní aplikaci', s2d:'Nová platba → vložte údaje', s3t:'Potvrďte platbu', s3d:'Zboží odešleme ihned po připsání', footEmail:'Údaje jsme poslali i na váš e-mail.', footNotify:'Ozveme se, jakmile platba dorazí.', footGuarantee:'30denní záruka vrácení peněz.', paid:'Zaplatil jsem →', later:'Zaplatím později', close:'Zavřít', payFor:'Platba za objednávku', scanOrEnter:'Naskenujte QR nebo zadejte údaje ve své bance.' },
+    hu: { created:'A rendelés létrejött', awaiting:'fizetésre vár', reserved:'Fenntartva még', qrTitle:'Számítógépről vagy másik eszközről fizet?', qrScanApp:'Olvassa be ezt a QR-kódot a banki alkalmazással.', saveQr:'QR mentése a galériába', amountToPay:'Fizetendő összeg', detailsTitle:'Átutalási adatok', tapCopy:'koppintás = másolás', refLabel:'Közlemény (fontos!)', vsLabel:'Közlemény (fontos!)', amountLabel:'Összeg', copy:'Másolás', copied:'✓ Másolva', howTitle:'Hogyan fizessen', s1t:'Másolja ki a fenti adatokat', s1d:'Koppintson a Másolás gombra az IBAN-nál és a közleménynél', s2t:'Nyissa meg a banki alkalmazását', s2d:'Új utalás → illessze be az adatokat', s3t:'Erősítse meg az utalást', s3d:'Jóváírás után azonnal küldjük a terméket', footEmail:'Az adatokat e-mailben is elküldtük.', footNotify:'Jelezni fogunk, amint a fizetés megérkezik.', footGuarantee:'30 napos pénzvisszafizetési garancia.', paid:'Fizettem →', later:'Később fizetek', close:'Bezárás', payFor:'Fizetés a rendelésért', scanOrEnter:'Olvassa be a QR-kódot, vagy adja meg az adatokat a bankjában.' },
+    fr: { created:'Commande créée', awaiting:'en attente de paiement', reserved:'Réservé encore', qrTitle:'Vous payez depuis un ordinateur ou un autre appareil ?', qrScanApp:'Scannez ce QR code avec votre application bancaire.', saveQr:'Enregistrer le QR dans la galerie', amountToPay:'Montant à payer', detailsTitle:'Coordonnées du virement', tapCopy:'appuyer = copier', refLabel:'Référence (important !)', vsLabel:'Référence (important !)', amountLabel:'Montant', copy:'Copier', copied:'✓ Copié', howTitle:'Comment payer', s1t:'Copiez les informations ci-dessus', s1d:'Appuyez sur Copier pour l\'IBAN et la référence', s2t:'Ouvrez votre application bancaire', s2d:'Nouveau virement → collez les informations', s3t:'Confirmez le paiement', s3d:'Nous expédions dès réception', footEmail:'Nous vous avons aussi envoyé les informations par e-mail.', footNotify:'Nous vous préviendrons dès réception du paiement.', footGuarantee:'Garantie de remboursement de 30 jours.', paid:'J\'ai payé →', later:'Je paierai plus tard', close:'Fermer', payFor:'Paiement de la commande', scanOrEnter:'Scannez le QR ou saisissez les informations dans votre banque.' },
+    es: { created:'Pedido creado', awaiting:'pendiente de pago', reserved:'Reservado aún', qrTitle:'¿Pagas desde un ordenador u otro dispositivo?', qrScanApp:'Escanea este QR con tu aplicación bancaria.', saveQr:'Guardar QR en la galería', amountToPay:'Importe a pagar', detailsTitle:'Datos de la transferencia', tapCopy:'tocar = copiar', refLabel:'Concepto (¡importante!)', vsLabel:'Concepto (¡importante!)', amountLabel:'Importe', copy:'Copiar', copied:'✓ Copiado', howTitle:'Cómo pagar', s1t:'Copia los datos de arriba', s1d:'Toca Copiar en el IBAN y el concepto', s2t:'Abre tu aplicación bancaria', s2d:'Nueva transferencia → pega los datos', s3t:'Confirma el pago', s3d:'Enviamos en cuanto se reciba', footEmail:'También te hemos enviado los datos por correo.', footNotify:'Te avisaremos cuando llegue el pago.', footGuarantee:'Garantía de devolución de 30 días.', paid:'Ya he pagado →', later:'Pagaré más tarde', close:'Cerrar', payFor:'Pago del pedido', scanOrEnter:'Escanea el QR o introduce los datos en tu banco.' },
+    nl: { created:'Bestelling aangemaakt', awaiting:'wacht op betaling', reserved:'Nog gereserveerd', qrTitle:'Betaalt u vanaf een computer of ander apparaat?', qrScanApp:'Scan deze QR-code met uw bank-app.', saveQr:'QR opslaan in galerij', amountToPay:'Te betalen bedrag', detailsTitle:'Overschrijvingsgegevens', tapCopy:'tik = kopiëren', refLabel:'Kenmerk (belangrijk!)', vsLabel:'Kenmerk (belangrijk!)', amountLabel:'Bedrag', copy:'Kopiëren', copied:'✓ Gekopieerd', howTitle:'Zo betaalt u', s1t:'Kopieer de gegevens hierboven', s1d:'Tik op Kopiëren bij IBAN en kenmerk', s2t:'Open uw bank-app', s2d:'Nieuwe betaling → plak de gegevens', s3t:'Bevestig de betaling', s3d:'We verzenden zodra we het ontvangen', footEmail:'We hebben de gegevens ook naar uw e-mail gestuurd.', footNotify:'We laten het weten zodra uw betaling binnen is.', footGuarantee:'30 dagen niet-goed-geld-terug.', paid:'Ik heb betaald →', later:'Ik betaal later', close:'Sluiten', payFor:'Betaling voor bestelling', scanOrEnter:'Scan de QR of voer de gegevens in bij uw bank.' },
+    no: { created:'Bestillingen er opprettet', awaiting:'venter på betaling', reserved:'Reservert ennå', qrTitle:'Betaler du fra en datamaskin eller en annen enhet?', qrScanApp:'Skann denne QR-koden med bankappen din.', saveQr:'Lagre QR i galleriet', amountToPay:'Beløp å betale', detailsTitle:'Betalingsdetaljer', tapCopy:'trykk = kopier', refLabel:'Referanse (viktig!)', vsLabel:'Melding (viktig!)', amountLabel:'Beløp', copy:'Kopier', copied:'✓ Kopiert', howTitle:'Slik betaler du', s1t:'Kopier detaljene ovenfor', s1d:'Trykk Kopier ved IBAN og referanse', s2t:'Åpne bankappen din', s2d:'Ny betaling → lim inn detaljene', s3t:'Bekreft betalingen', s3d:'Vi sender så snart den er mottatt', footEmail:'Vi har også sendt detaljene til e-posten din.', footNotify:'Vi gir beskjed når betalingen er mottatt.', footGuarantee:'30 dagers pengene-tilbake-garanti.', paid:'Jeg har betalt →', later:'Jeg betaler senere', close:'Lukk', payFor:'Betaling for bestilling', scanOrEnter:'Skann QR-koden eller skriv inn detaljene i banken din.' },
+    sv: { created:'Beställningen är skapad', awaiting:'väntar på betalning', reserved:'Reserverad ännu', qrTitle:'Betalar du från en dator eller annan enhet?', qrScanApp:'Skanna denna QR-kod med din bankapp.', saveQr:'Spara QR i galleriet', amountToPay:'Belopp att betala', detailsTitle:'Betalningsuppgifter', tapCopy:'tryck = kopiera', refLabel:'Referens (viktigt!)', vsLabel:'Meddelande (viktigt!)', amountLabel:'Belopp', copy:'Kopiera', copied:'✓ Kopierat', howTitle:'Så betalar du', s1t:'Kopiera uppgifterna ovan', s1d:'Tryck på Kopiera vid IBAN och referens', s2t:'Öppna din bankapp', s2d:'Ny betalning → klistra in uppgifterna', s3t:'Bekräfta betalningen', s3d:'Vi skickar så snart den kommit in', footEmail:'Vi har även skickat uppgifterna till din e-post.', footNotify:'Vi hör av oss när betalningen kommit in.', footGuarantee:'30 dagars pengarna-tillbaka-garanti.', paid:'Jag har betalat →', later:'Jag betalar senare', close:'Stäng', payFor:'Betalning för beställning', scanOrEnter:'Skanna QR-koden eller ange uppgifterna i din bank.' },
+    pl: { created:'Zamówienie utworzone', awaiting:'oczekuje na płatność', reserved:'Zarezerwowane jeszcze', qrTitle:'Płacisz z komputera lub innego urządzenia?', qrScanApp:'Zeskanuj ten kod QR w aplikacji bankowej.', saveQr:'Zapisz QR w galerii', amountToPay:'Kwota do zapłaty', detailsTitle:'Dane do przelewu', tapCopy:'dotknij = kopiuj', refLabel:'Tytuł przelewu (ważne!)', vsLabel:'Tytuł przelewu (ważne!)', amountLabel:'Kwota', copy:'Kopiuj', copied:'✓ Skopiowano', howTitle:'Jak zapłacić', s1t:'Skopiuj powyższe dane', s1d:'Dotknij Kopiuj przy IBAN i tytule', s2t:'Otwórz swoją aplikację bankową', s2d:'Nowy przelew → wklej dane', s3t:'Potwierdź płatność', s3d:'Wyślemy towar zaraz po zaksięgowaniu', footEmail:'Dane wysłaliśmy też na Twój e-mail.', footNotify:'Odezwiemy się, gdy płatność dotrze.', footGuarantee:'30-dniowa gwarancja zwrotu pieniędzy.', paid:'Zapłaciłem →', later:'Zapłacę później', close:'Zamknij', payFor:'Płatność za zamówienie', scanOrEnter:'Zeskanuj kod QR lub wpisz dane w swoim banku.' }
+  };
+  function btLocale() { var L = (PROJECT_CONFIG.locale || 'sk').toLowerCase(); return BT_I18N[L] ? L : 'sk'; }
+  function btT(k) { return (BT_I18N[btLocale()] || BT_I18N.sk)[k] || BT_I18N.sk[k] || k; }
+  function btCurrency() { var bt = btCfg() || {}; return String(bt.currency || (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency) || 'EUR').toUpperCase(); }
+  // Suma naformátovaná podľa locale + meny (Intl → správny oddeľovač, symbol, počet desatín).
+  function btFmtAmount(amount) {
+    var tags = { sk:'sk-SK', cs:'cs-CZ', hu:'hu-HU', fr:'fr-FR', es:'es-ES', nl:'nl-NL', no:'nb-NO', sv:'sv-SE', pl:'pl-PL' };
+    try { return new Intl.NumberFormat(tags[btLocale()] || 'sk-SK', { style: 'currency', currency: btCurrency() }).format(Number(amount)); }
+    catch (e) { return Number(amount).toFixed(2) + ' ' + btCurrency(); }
+  }
+  // ISO 11649 RF Creditor Reference (structured SEPA reference — EUR).
   function btRfReference(orderNo) {
     var ref = String(orderNo).replace(/[^0-9A-Za-z]/g, '');
     var rearr = (ref + 'RF00').toUpperCase(), num = '';
@@ -3244,21 +3265,42 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var check = String(98 - rem); if (check.length < 2) check = '0' + check;
     return 'RF' + check + ref;
   }
-  // EPC069-12 (GiroCode) SEPA Credit Transfer — RF reference in the structured field.
-  function btEpcString(amount, rf) {
+  // Numerický variabilný symbol / správa pre domáce prevody (CZK/PLN/HUF/SEK/NOK).
+  function btVs(orderNo) { return String(orderNo).replace(/\D/g, '').slice(-10); }
+  function btIsSepa() { return btCurrency() === 'EUR'; }
+  // Reference: EUR → RF (SEPA), inak numerická (domáci prevod / správa pre príjemcu).
+  function btReference(orderNo) { return btIsSepa() ? btRfReference(orderNo) : btVs(orderNo); }
+  function btRefLabel() { return btIsSepa() ? btT('refLabel') : btT('vsLabel'); }
+  // EPC069-12 (GiroCode) SEPA Credit Transfer — EUR only, RF v štruktúrovanom poli.
+  function btEpcString(amount, ref) {
     var bt = btCfg() || {};
     return ['BCD', '002', '1', 'SCT',
       bt.bic || '',
       (bt.beneficiary || '').substring(0, 70),
       (bt.iban || '').replace(/\s/g, ''),
-      (bt.currency || 'EUR') + Number(amount).toFixed(2),
-      '', rf, '', ''
+      'EUR' + Number(amount).toFixed(2),
+      '', ref, '', ''
     ].join('\n');
+  }
+  // Czech "QR Platba" (SPD 1.0) — CZK, variabilný symbol v X-VS. Skenujú CZ/SK banky.
+  function btSpdString(amount, vs) {
+    var bt = btCfg() || {};
+    var acc = (bt.iban || '').replace(/\s/g, '');
+    if (bt.bic) acc += '+' + bt.bic;
+    return 'SPD*1.0*ACC:' + acc + '*AM:' + Number(amount).toFixed(2) + '*CC:CZK*X-VS:' + vs + '*MSG:' + btT('payFor');
+  }
+  // QR reťazec podľa meny: EUR → EPC/SEPA, CZK → SPD; ostatné meny nemajú univerzálny
+  // bankový QR štandard → vráti null a popup zobrazí len údaje (bez QR).
+  function btQrString(amount, ref) {
+    var cur = btCurrency();
+    if (cur === 'EUR') return btEpcString(amount, ref);
+    if (cur === 'CZK') return btSpdString(amount, ref);
+    return null;
   }
   function btFmtIban(iban) { return (iban || '').replace(/(.{4})/g, '$1 ').trim(); }
   function btCopy(text, btn) {
     (navigator.clipboard && navigator.clipboard.writeText(text) || Promise.resolve()).then(function () {
-      var o = btn.textContent; btn.textContent = '✓ Skopírované'; btn.classList.add('bt-copied');
+      var o = btn.textContent; btn.textContent = btT('copied'); btn.classList.add('bt-copied');
       setTimeout(function () { btn.textContent = o; btn.classList.remove('bt-copied'); }, 1600);
     });
   }
@@ -3299,58 +3341,66 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
     go();
   }
-  // Show the SEPA bank-transfer popup for a freshly created (unpaid) order.
+  // Show the bank-transfer popup for a freshly created (unpaid) order.
+  // Fully localised (PROJECT_CONFIG.locale) + currency-aware (EUR SEPA QR, CZK QR
+  // Platba, other currencies = details only, no QR).
   function showBankTransferPopup(displayId, amount) {
     var bt = btCfg() || {};
-    var rf = btRfReference(displayId);
-    var epc = btEpcString(amount, rf);
-    var amtLabel = Number(amount).toFixed(2).replace('.', ',') + ' €';
+    var ref = btReference(displayId);
+    var qr = btQrString(amount, ref);
+    var amtDisplay = btFmtAmount(amount);
+    var orderCode = (PROJECT_CONFIG.orderPrefix || 'SK2026') + '-' + displayId;
     btEnsureStyles();
     var ibanClean = (bt.iban || '').replace(/\s/g, '');
     var amt2 = Number(amount).toFixed(2);
     var ov = document.createElement('div'); ov.id = 'bt-overlay';
     ov.innerHTML =
       '<div class="bt-card">'
-      + '<div class="bt-h"><button class="bt-x" id="bt-x" aria-label="Zavrieť">×</button><div class="ok">✅ Objednávka je vytvorená</div><div class="sub">SK2026-' + displayId + ' · čaká na úhradu</div></div>'
-      + '<div class="bt-timer">⏳ Rezervované ešte <b id="bt-cd">23:59:59</b></div>'
+      + '<div class="bt-h"><button class="bt-x" id="bt-x" aria-label="' + btT('close') + '">×</button><div class="ok">✅ ' + btT('created') + '</div><div class="sub">' + orderCode + ' · ' + btT('awaiting') + '</div></div>'
+      + '<div class="bt-timer">⏳ ' + btT('reserved') + ' <b id="bt-cd">23:59:59</b></div>'
       + '<div class="bt-body">'
-      + '<div class="bt-qrbox">'
-      + '<div class="bt-qr" id="bt-qr"></div>'
-      + '<div class="bt-qrtxt">Platíte z <b>počítača</b> alebo <b>iného zariadenia</b>?<br>Naskenujte tento QR bankovou appkou.</div>'
-      + '<button class="bt-save" id="bt-save">⬇ Uložiť QR do galérie</button>'
-      + '</div>'
-      + '<div class="bt-amt"><div class="l">Suma na úhradu</div><div class="v">' + amtLabel + '</div></div>'
+      + (qr
+        ? ('<div class="bt-qrbox">'
+          + '<div class="bt-qr" id="bt-qr"></div>'
+          + '<div class="bt-qrtxt">' + btT('qrTitle') + '<br>' + btT('qrScanApp') + '</div>'
+          + '<button class="bt-save" id="bt-save">⬇ ' + btT('saveQr') + '</button>'
+          + '</div>')
+        : '')
+      + '<div class="bt-amt"><div class="l">' + btT('amountToPay') + '</div><div class="v">' + amtDisplay + '</div></div>'
       // Kopírovacie polia = primárna cesta na mobile (zákazník platí z toho istého
       // telefónu → skopíruje a vloží v bankovej appke; QR z toho istého displeja naskenovať nemôže).
-      + '<div class="bt-copytitle">Údaje na prevod <span class="tag">ťuknite = skopíruje</span></div>'
-      + '<div class="bt-row"><div class="col"><span class="k">IBAN</span><span class="v">' + btFmtIban(bt.iban) + '</span></div><button class="bt-cp" data-c="' + ibanClean + '">Kopírovať</button></div>'
-      + '<div class="bt-row"><div class="col"><span class="k">Referencia (dôležité!)</span><span class="v">' + rf + '</span></div><button class="bt-cp" data-c="' + rf + '">Kopírovať</button></div>'
-      + '<div class="bt-row"><div class="col"><span class="k">Suma</span><span class="v">' + amt2 + ' €</span></div><button class="bt-cp" data-c="' + amt2 + '">Kopírovať</button></div>'
-      + '<div class="bt-how"><div class="htitle">Ako zaplatiť z telefónu</div>'
-      + '<div class="bt-step"><div class="n">1</div><div><div class="st">Skopírujte údaje vyššie</div><div class="sd">Ťuknite na „Kopírovať" pri IBANe a referencii</div></div></div>'
-      + '<div class="bt-step"><div class="n">2</div><div><div class="st">Otvorte svoju bankovú aplikáciu</div><div class="sd">Nová platba → vložte skopírované údaje</div></div></div>'
-      + '<div class="bt-step"><div class="n">3</div><div><div class="st">Potvrďte platbu</div><div class="sd">Tovar odošleme ihneď po pripísaní</div></div></div>'
+      + '<div class="bt-copytitle">' + btT('detailsTitle') + ' <span class="tag">' + btT('tapCopy') + '</span></div>'
+      + '<div class="bt-row"><div class="col"><span class="k">IBAN</span><span class="v">' + btFmtIban(bt.iban) + '</span></div><button class="bt-cp" data-c="' + ibanClean + '">' + btT('copy') + '</button></div>'
+      + '<div class="bt-row"><div class="col"><span class="k">' + btRefLabel() + '</span><span class="v">' + ref + '</span></div><button class="bt-cp" data-c="' + ref + '">' + btT('copy') + '</button></div>'
+      + '<div class="bt-row"><div class="col"><span class="k">' + btT('amountLabel') + '</span><span class="v">' + amtDisplay + '</span></div><button class="bt-cp" data-c="' + amt2 + '">' + btT('copy') + '</button></div>'
+      + '<div class="bt-how"><div class="htitle">' + btT('howTitle') + '</div>'
+      + '<div class="bt-step"><div class="n">1</div><div><div class="st">' + btT('s1t') + '</div><div class="sd">' + btT('s1d') + '</div></div></div>'
+      + '<div class="bt-step"><div class="n">2</div><div><div class="st">' + btT('s2t') + '</div><div class="sd">' + btT('s2d') + '</div></div></div>'
+      + '<div class="bt-step"><div class="n">3</div><div><div class="st">' + btT('s3t') + '</div><div class="sd">' + btT('s3d') + '</div></div></div>'
       + '</div>'
       + '<div class="bt-foot">'
-      + '<div class="f"><span class="fi">📧</span><span>Údaje sme poslali aj na <b>váš e-mail</b> — nestratíte ich</span></div>'
-      + '<div class="f"><span class="fi">🔔</span><span><b>Ozveme sa</b>, keď platba dorazí (SEPA ~1 prac. deň)</span></div>'
-      + '<div class="f"><span class="fi">↩️</span><span><b>30-dní</b> záruka vrátenia peňazí</span></div>'
+      + '<div class="f"><span class="fi">📧</span><span>' + btT('footEmail') + '</span></div>'
+      + '<div class="f"><span class="fi">🔔</span><span>' + btT('footNotify') + '</span></div>'
+      + '<div class="f"><span class="fi">↩️</span><span>' + btT('footGuarantee') + '</span></div>'
       + '</div>'
-      + '<button class="bt-done" id="bt-done">Zaplatil som →</button>'
-      + '<button class="bt-later" id="bt-later">Zaplatím neskôr</button>'
+      + '<button class="bt-done" id="bt-done">' + btT('paid') + '</button>'
+      + '<button class="bt-later" id="bt-later">' + btT('later') + '</button>'
       + '</div></div>';
     document.body.appendChild(ov);
     document.body.style.overflow = 'hidden';
-    btRenderQr(document.getElementById('bt-qr'), epc);
+    if (qr) btRenderQr(document.getElementById('bt-qr'), qr);
     ov.querySelectorAll('.bt-cp').forEach(function (b) { b.addEventListener('click', function () { btCopy(b.getAttribute('data-c'), b); }); });
     // Uložiť QR obrázok do galérie → v banke „skenovať z galérie" (mobilná cesta bez druhého zariadenia).
-    document.getElementById('bt-save').addEventListener('click', function () {
+    var saveBtn = document.getElementById('bt-save');
+    if (saveBtn) saveBtn.addEventListener('click', function () {
       var src = '';
-      var img = ov.querySelector('#bt-qr img'); if (img && img.src) src = img.src;
+      var imgEl = ov.querySelector('#bt-qr img'); if (imgEl && imgEl.src) src = imgEl.src;
       if (!src) { var cv = ov.querySelector('#bt-qr canvas'); if (cv) { try { src = cv.toDataURL('image/png'); } catch (e) {} } }
       if (!src) return;
-      // Compose a full payment card (QR + suma + IBAN + referencia + príjemca) so
-      // the saved image carries everything the customer needs, not just the QR.
+      var fname = 'platba-' + orderCode + '.png';
+      var refClean = btRefLabel().replace(/\s*\(.*\)\s*$/, '');
+      // Compose a full payment card (QR + amount + IBAN + reference) so the saved
+      // image carries everything the customer needs, not just the bare QR.
       var W = 660, H = 940, qi = new Image();
       qi.onload = function () {
         var c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -3358,33 +3408,33 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H);
         x.fillStyle = '#2D1B3D'; x.fillRect(0, 0, W, 104);
         x.textAlign = 'center'; x.fillStyle = '#fff';
-        x.font = '600 22px Arial, sans-serif'; x.fillText('Platba za objednávku', W / 2, 44);
-        x.font = '700 28px Arial, sans-serif'; x.fillText('SK2026-' + displayId, W / 2, 82);
+        x.font = '600 22px Arial, sans-serif'; x.fillText(btT('payFor'), W / 2, 44);
+        x.font = '700 28px Arial, sans-serif'; x.fillText(orderCode, W / 2, 82);
         var qs = 300, qx = (W - qs) / 2, qy = 140;
         x.fillStyle = '#FAF5F8'; x.strokeStyle = '#EDD9E5'; x.lineWidth = 2;
         x.fillRect(qx - 22, qy - 22, qs + 44, qs + 44); x.strokeRect(qx - 22, qy - 22, qs + 44, qs + 44);
         x.drawImage(qi, qx, qy, qs, qs);
         var ty = qy + qs + 78;
         x.textAlign = 'center';
-        x.fillStyle = '#9B7AAD'; x.font = '600 14px Arial, sans-serif'; x.fillText('SUMA NA ÚHRADU', W / 2, ty - 30);
-        x.fillStyle = '#C27BA0'; x.font = '700 44px Arial, sans-serif'; x.fillText(amt2.replace('.', ',') + ' €', W / 2, ty + 10);
+        x.fillStyle = '#9B7AAD'; x.font = '600 14px Arial, sans-serif'; x.fillText(btT('amountToPay').toUpperCase(), W / 2, ty - 30);
+        x.fillStyle = '#C27BA0'; x.font = '700 40px Arial, sans-serif'; x.fillText(amtDisplay, W / 2, ty + 8);
         x.textAlign = 'left';
-        var rows = [['IBAN', btFmtIban(bt.iban)], ['Referencia', rf], ['Príjemca', String(bt.beneficiary || '').substring(0, 42)]];
+        var rows = [['IBAN', btFmtIban(bt.iban)], [refClean, ref]];
         var ry = ty + 66;
         rows.forEach(function (r) {
-          x.fillStyle = '#9B7AAD'; x.font = '600 13px Arial, sans-serif'; x.fillText(r[0].toUpperCase(), 66, ry);
+          x.fillStyle = '#9B7AAD'; x.font = '600 13px Arial, sans-serif'; x.fillText(String(r[0]).toUpperCase(), 66, ry);
           x.fillStyle = '#2D1B3D'; x.font = '600 20px Arial, sans-serif'; x.fillText(r[1], 66, ry + 26);
           ry += 66;
         });
         x.textAlign = 'center'; x.fillStyle = '#7A6189'; x.font = '13px Arial, sans-serif';
-        x.fillText('Naskenujte QR alebo zadajte údaje vo svojej bankovej aplikácii.', W / 2, H - 28);
+        x.fillText(btT('scanOrEnter'), W / 2, H - 28);
         var a = document.createElement('a');
         try { a.href = c.toDataURL('image/png'); } catch (e) { a.href = src; }
-        a.download = 'platba-SK2026-' + displayId + '.png';
+        a.download = fname;
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
       };
       qi.onerror = function () {
-        var a = document.createElement('a'); a.href = src; a.download = 'platba-SK2026-' + displayId + '.png';
+        var a = document.createElement('a'); a.href = src; a.download = fname;
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
       };
       qi.src = src;

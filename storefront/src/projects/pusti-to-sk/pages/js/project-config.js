@@ -1,6 +1,8 @@
 var PROJECT_CONFIG = {
   "slug": "pusti-to-sk",
   "projectId": "pusti-to-sk",
+  "locale": "sk",
+  "orderPrefix": "SK2026",
   "domain": "www.pustitocotanici.sk",
   "medusaUrl": "https://www.marketing-hq.eu",
   "publishableApiKey": "pk_6628d5b84f9b78de978519a40586598941ac3779abf4b4de1ed4f501dcf532b5",
