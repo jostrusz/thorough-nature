@@ -92,7 +92,11 @@ async function getAccessToken(logger: any): Promise<string | null> {
   const issuer = process.env.REVOLUT_BUSINESS_ISSUER
   let privateKey = process.env.REVOLUT_BUSINESS_PRIVATE_KEY
   if (!clientId || !refreshToken || !issuer || !privateKey) return null
-  // Railway/env often store the PEM single-line with literal \n — restore newlines.
+  // Private key may be stored base64-encoded (no PEM header) — decode it.
+  if (privateKey.indexOf("BEGIN") === -1) {
+    try { privateKey = Buffer.from(privateKey, "base64").toString("utf-8") } catch { /* keep as-is */ }
+  }
+  // …or single-line with literal \n — restore newlines.
   if (privateKey.indexOf("\\n") !== -1) privateKey = privateKey.replace(/\\n/g, "\n")
 
   try {
