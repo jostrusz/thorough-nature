@@ -1,30 +1,37 @@
 // @ts-nocheck
 import { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
+import * as crypto from "crypto"
 
 /**
- * Bank Transfer (SEPA QR) reconciliation cron.
+ * Bank Transfer (SEPA QR) reconciliation cron — Revolut Business.
  *
  * The `bank_transfer` gateway creates the order UNPAID at checkout (provider
  * pp_bank_transfer_bank_transfer, metadata.awaiting_bank_payment = true) and
- * shows the customer a SEPA QR + IBAN with an RF creditor reference derived from
- * the order display_id. There is no provider webhook — the money simply lands on
- * our FIO EUR account minutes/hours/days later.
+ * shows the customer a SEPA QR + IBAN with a reference derived from the order
+ * display_id (RF for EUR, numeric VS for domestic). The money lands on our
+ * Revolut Business account minutes/hours/days later.
  *
- * Every 15 min this job polls FIO for recent incoming EUR credits and matches
- * each still-awaiting order by its RF reference / order number (+ soft amount
- * guard). On a match it captures the payment and emits payment.captured (→ ebook,
- * Dextrum release, invoice), mirroring the other gateway reconcilers.
+ * Every 15 min this job polls the Revolut Business API for recent incoming
+ * transfers and matches each still-awaiting order by its reference (+ soft
+ * amount guard). On a match it captures the payment and emits payment.captured
+ * (→ ebook, Dextrum release, invoice). Revolut Business holds accounts in every
+ * project currency (EUR/CZK/PLN/SEK/HUF/NOK), so one poll covers all markets.
  *
- * Idempotent: skips orders already captured and records the matched FIO
+ * Idempotent: skips orders already captured and records the matched Revolut
  * transaction id so the same credit is never applied twice.
  *
- * Requires env FIO_EUR_TOKEN (read-only FIO API token for the EUR account).
- * Absent token → no-op (feature simply stays dormant).
+ * Auth (Revolut Business OAuth 2.0, client-assertion JWT):
+ *   env REVOLUT_BUSINESS_CLIENT_ID     — API client id
+ *       REVOLUT_BUSINESS_REFRESH_TOKEN — long-lived refresh token (from consent)
+ *       REVOLUT_BUSINESS_PRIVATE_KEY   — RS256 private key (PEM; \n allowed)
+ *       REVOLUT_BUSINESS_ISSUER        — iss registered on the API certificate
+ *       REVOLUT_BUSINESS_ENV           — 'prod' (default) | 'sandbox'
+ * Absent creds → no-op (feature stays dormant).
  */
 
 const NTFY_URL = "https://ntfy.sh/medusa-ntfy-obj-2026"
-const ORDER_LOOKBACK = "21 days" // deferred transfers can settle over many days
+const ORDER_LOOKBACK = "21 days"
 const MAX_CANDIDATES = 200
 const AMOUNT_TOLERANCE = 0.02
 
@@ -61,65 +68,116 @@ function rfReference(orderNo: string): string {
   return "RF" + check + ref
 }
 
+function b64url(buf: Buffer | string): string {
+  return Buffer.from(buf)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "")
+}
+
+function revolutBase(): string {
+  return (process.env.REVOLUT_BUSINESS_ENV || "prod").toLowerCase() === "sandbox"
+    ? "https://sandbox-b2b.revolut.com/api/1.0"
+    : "https://b2b.revolut.com/api/1.0"
+}
+
 /**
- * Fetch recent incoming EUR credits from FIO for a fixed lookback window.
- * Uses the periods endpoint (idempotent — does not move FIO's download marker).
- * Returns [{ id, amount, currency, text }] for credits only (amount > 0).
+ * Exchange the refresh token for a short-lived access token using a signed
+ * client-assertion JWT (RS256). Returns null on any failure/misconfig.
  */
-async function fetchFioCredits(token: string, logger: any): Promise<any[]> {
-  const to = new Date()
-  const from = new Date(to.getTime() - 21 * 24 * 3600 * 1000)
-  const fmt = (d: Date) => d.toISOString().slice(0, 10)
-  const url = `https://fioapi.fio.cz/v1/rest/periods/${token}/${fmt(from)}/${fmt(to)}/transactions.json`
+async function getAccessToken(logger: any): Promise<string | null> {
+  const clientId = process.env.REVOLUT_BUSINESS_CLIENT_ID
+  const refreshToken = process.env.REVOLUT_BUSINESS_REFRESH_TOKEN
+  const issuer = process.env.REVOLUT_BUSINESS_ISSUER
+  let privateKey = process.env.REVOLUT_BUSINESS_PRIVATE_KEY
+  if (!clientId || !refreshToken || !issuer || !privateKey) return null
+  // Railway/env often store the PEM single-line with literal \n — restore newlines.
+  if (privateKey.indexOf("\\n") !== -1) privateKey = privateKey.replace(/\\n/g, "\n")
+
+  try {
+    const header = b64url(JSON.stringify({ alg: "RS256", typ: "JWT" }))
+    const now = Math.floor(Date.now() / 1000)
+    const payload = b64url(
+      JSON.stringify({ iss: issuer, sub: clientId, aud: "https://revolut.com", exp: now + 300 })
+    )
+    const signer = crypto.createSign("RSA-SHA256")
+    signer.update(header + "." + payload)
+    signer.end()
+    const signature = b64url(signer.sign(privateKey))
+    const jwt = header + "." + payload + "." + signature
+
+    const body = new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: clientId,
+      client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+      client_assertion: jwt,
+    })
+
+    const res = await fetch(`${revolutBase()}/auth/token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString(),
+    })
+    if (!res.ok) {
+      logger.warn(`[Bank Transfer Reconcile] Revolut auth HTTP ${res.status}: ${await res.text().catch(() => "")}`)
+      return null
+    }
+    const data: any = await res.json()
+    return data?.access_token || null
+  } catch (e: any) {
+    logger.warn(`[Bank Transfer Reconcile] Revolut auth failed: ${e.message}`)
+    return null
+  }
+}
+
+/**
+ * Fetch recent incoming credits from Revolut Business for a fixed lookback window.
+ * Returns [{ id, amount, currency, text }] for incoming completed legs only.
+ */
+async function fetchRevolutCredits(token: string, logger: any): Promise<any[]> {
+  const from = new Date(Date.now() - 21 * 24 * 3600 * 1000).toISOString().slice(0, 10)
+  const url = `${revolutBase()}/transactions?from=${from}&count=1000`
 
   let res: any
   try {
-    res = await fetch(url)
+    res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
   } catch (e: any) {
-    logger.warn(`[Bank Transfer Reconcile] FIO fetch failed: ${e.message}`)
+    logger.warn(`[Bank Transfer Reconcile] Revolut transactions fetch failed: ${e.message}`)
     return []
   }
   if (!res.ok) {
-    logger.warn(`[Bank Transfer Reconcile] FIO HTTP ${res.status}`)
+    logger.warn(`[Bank Transfer Reconcile] Revolut transactions HTTP ${res.status}`)
     return []
   }
 
-  let data: any
+  let txns: any[]
   try {
-    data = await res.json()
+    txns = await res.json()
   } catch {
     return []
   }
-
-  const txns = data?.accountStatement?.transactionList?.transaction || []
-  const col = (t: any, n: number) => {
-    const c = t?.[`column${n}`]
-    return c && c.value != null ? String(c.value) : ""
-  }
+  if (!Array.isArray(txns)) return []
 
   const out: any[] = []
   for (const t of txns) {
-    const amount = Number(col(t, 1))
-    if (!isFinite(amount) || amount <= 0) continue // credits only
-    const currency = (col(t, 14) || "EUR").toUpperCase()
-    // Gather every free-text/reference field a sending bank might carry the RF in.
-    const text = [
-      col(t, 5), // VS
-      col(t, 6), // SS
-      col(t, 7), // user identification
-      col(t, 10), // comment / upřesnění
-      col(t, 16), // message for recipient
-      col(t, 25), // comment
-      col(t, 27), // instruction id
-    ]
-      .join(" ")
-      .toUpperCase()
-    out.push({
-      id: col(t, 22) || col(t, 17) || `${col(t, 0)}_${amount}`,
-      amount,
-      currency,
-      text,
-    })
+    if (t?.state !== "completed") continue
+    const legs = Array.isArray(t?.legs) ? t.legs : []
+    for (const leg of legs) {
+      const amount = Number(leg?.amount)
+      if (!isFinite(amount) || amount <= 0) continue // incoming credits only
+      const text = [t?.reference, leg?.description, t?.description]
+        .filter(Boolean)
+        .join(" ")
+        .toUpperCase()
+      out.push({
+        id: String(t?.id || leg?.leg_id || ""),
+        amount,
+        currency: String(leg?.currency || "").toUpperCase(),
+        text,
+      })
+    }
   }
   return out
 }
@@ -183,10 +241,10 @@ async function orderTotal(pool: any, orderId: string): Promise<number> {
 export default async function bankTransferReconcileJob(container: MedusaContainer) {
   const logger = container.resolve("logger")
 
-  const token = process.env.FIO_EUR_TOKEN || process.env.FIO_TOKEN_EUR
-  if (!token) return // no FIO token → feature dormant
+  const token = await getAccessToken(logger)
+  if (!token) return // no Revolut Business creds / auth failed → dormant
 
-  const credits = await fetchFioCredits(token, logger)
+  const credits = await fetchRevolutCredits(token, logger)
   if (!credits.length) return
 
   const { Pool } = require("pg")
@@ -196,7 +254,7 @@ export default async function bankTransferReconcileJob(container: MedusaContaine
 
   try {
     const { rows: orders } = await pool.query(
-      `SELECT o.id AS order_id, o.display_id, o.email
+      `SELECT o.id AS order_id, o.display_id, o.email, o.currency_code
        FROM "order" o
        WHERE o.metadata->>'awaiting_bank_payment' = 'true'
          AND COALESCE(o.metadata->>'payment_captured', '') <> 'true'
@@ -210,20 +268,20 @@ export default async function bankTransferReconcileJob(container: MedusaContaine
       if (!orderNo) continue
       const rf = rfReference(orderNo).toUpperCase()
       const digits = orderNo.replace(/[^0-9]/g, "")
+      const orderCcy = String(ord.currency_code || "").toUpperCase()
 
-      // Match a still-unused EUR credit whose reference text carries this order's
-      // RF reference (preferred) or bare order number.
+      // Match a still-unused incoming credit whose reference text carries this
+      // order's RF reference (preferred) or bare order number, in the order's currency.
       const match = credits.find((c) => {
         if (usedTxnIds.has(c.id)) return false
-        if (c.currency !== "EUR") return false
+        if (orderCcy && c.currency && c.currency !== orderCcy) return false
         const t = c.text
         return t.indexOf(rf) !== -1 || (digits.length >= 3 && t.indexOf(digits) !== -1)
       })
       if (!match) continue
 
       // Underpayment guard: if we can compute the order total, the paid amount must
-      // not be materially below it. Tax-inclusive vs net ambiguity only ever makes
-      // the computed total LOWER, so a strict "below" check is safe.
+      // not be materially below it (tax-inclusive/net ambiguity only lowers the total).
       const total = await orderTotal(pool, ord.order_id)
       if (total > 0 && match.amount < total - AMOUNT_TOLERANCE) {
         logger.error(
@@ -231,7 +289,7 @@ export default async function bankTransferReconcileJob(container: MedusaContaine
         )
         await alert(
           "Bank transfer: underpayment",
-          `Order ${orderNo} paid ${match.amount} EUR but total ${total}. FIO txn ${match.id}. Manual review.`
+          `Order ${orderNo} paid ${match.amount} ${match.currency} but total ${total}. Revolut txn ${match.id}. Manual review.`
         )
         continue
       }
@@ -246,7 +304,7 @@ export default async function bankTransferReconcileJob(container: MedusaContaine
         payment_method: "bank_transfer_sepa",
         payment_provider: "bank_transfer",
         bank_transfer_reference: rf,
-        fio_transaction_id: String(match.id),
+        revolut_transaction_id: String(match.id),
         completed_by: "bank_transfer_reconcile_cron",
       }
       await pool.query(
@@ -257,11 +315,11 @@ export default async function bankTransferReconcileJob(container: MedusaContaine
       await captureAndEmit(ord.order_id, pool, container, logger)
 
       logger.info(
-        `[Bank Transfer Reconcile] ✅ Matched order ${orderNo} → FIO txn ${match.id} (${match.amount} EUR)`
+        `[Bank Transfer Reconcile] ✅ Matched order ${orderNo} → Revolut txn ${match.id} (${match.amount} ${match.currency})`
       )
       await alert(
         "Bank transfer: payment reconciled",
-        `Order ${orderNo} paid ${match.amount} EUR (FIO txn ${match.id}). Fulfillment released.`
+        `Order ${orderNo} paid ${match.amount} ${match.currency} (Revolut txn ${match.id}). Fulfillment released.`
       )
     }
   } catch (err: any) {
