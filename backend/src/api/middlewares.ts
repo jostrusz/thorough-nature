@@ -17,6 +17,38 @@ function ensureRawBody(req: any, _res: any, next: any) {
   next()
 }
 
+/**
+ * Meta CAPI requires client_ip_address and client_user_agent to be sent TOGETHER
+ * on server events, otherwise the UA is useless and attribution/optimization suffer
+ * (Ads Manager diagnostic: "Send missing IP address parameter for one or more of
+ * your server events").
+ *
+ * The checkout stores `client_user_agent` (navigator.userAgent) in cart metadata,
+ * but a browser can't know its own public IP. This runs on cart-update requests
+ * and — whenever the tracking UA is being written — stamps the server-observed
+ * client IP (x-forwarded-for) into the SAME metadata object. Both then flow to
+ * cart → order metadata, and the order.placed Purchase CAPI event pairs them.
+ * Scoped to the UA write so we never send IP without UA (or vice-versa).
+ */
+function stampClientIpOnCart(req: any, _res: any, next: any) {
+  try {
+    const md = req.body?.metadata
+    if (md && typeof md === "object" && md.client_user_agent && !md.client_ip_address) {
+      const fwd = (req.headers["x-forwarded-for"] as string) || ""
+      const ip =
+        fwd.split(",")[0]?.trim() ||
+        (req.headers["x-real-ip"] as string) ||
+        (req as any).ip ||
+        (req.socket as any)?.remoteAddress ||
+        ""
+      if (ip) md.client_ip_address = ip
+    }
+  } catch {
+    // Never block a cart update because of tracking enrichment
+  }
+  next()
+}
+
 export default defineMiddlewares({
   routes: [
     {
@@ -35,6 +67,13 @@ export default defineMiddlewares({
           next()
         },
       ],
+    },
+    {
+      // Pair client IP with the client_user_agent the checkout writes to cart
+      // metadata, so the server-side Purchase CAPI event has both (Meta requires it).
+      method: ["POST"],
+      matcher: "/store/carts/*",
+      middlewares: [stampClientIpOnCart],
     },
     {
       method: ["POST"],

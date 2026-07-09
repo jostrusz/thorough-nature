@@ -122,13 +122,17 @@ export default async function orderPlacedMetaCAPIHandler({
     if ((order.metadata as any)?.fbc) userData.fbc = (order.metadata as any).fbc
     if ((order.metadata as any)?.fbp) userData.fbp = (order.metadata as any).fbp
 
-    // Client IP + User Agent from order metadata (stored by checkout page)
-    // Without these, Meta can't match server events to browser sessions (63% → ~100%)
+    // Client IP + User Agent from order metadata. UA is written by the checkout
+    // (navigator.userAgent); the client IP is stamped server-side into the same
+    // cart-update metadata by the stampClientIpOnCart middleware. Meta REQUIRES
+    // them together on server events — sending UA alone triggers the
+    // "missing IP address parameter" diagnostic and hurts attribution.
     if ((order.metadata as any)?.client_user_agent) {
       userData.client_user_agent = (order.metadata as any).client_user_agent
     }
-    // IP is not stored in metadata (privacy) — the CAPI endpoint adds it from request headers.
-    // For the backup subscriber, we omit it (Meta still matches via other CIPs).
+    if ((order.metadata as any)?.client_ip_address) {
+      userData.client_ip_address = (order.metadata as any).client_ip_address
+    }
 
     // ── Build custom_data ──
     // Use catalog content IDs if configured for the project (for DPA remarketing)
