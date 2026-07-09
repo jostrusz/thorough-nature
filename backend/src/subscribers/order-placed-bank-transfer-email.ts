@@ -122,15 +122,20 @@ export default async function orderPlacedBankTransferEmail({ event, container }:
     })
 
     const resend = new Resend(apiKey)
-    await resend.emails.send({
+    // Resend returns { data, error } — it does NOT throw on API errors, so check it.
+    const { error: sendError } = await resend.emails.send({
       from: cfg.fromEmail || process.env.RESEND_FROM_EMAIL,
       to: order.email,
       replyTo: cfg.replyTo,
       subject: `${t.subject} ${code}`,
       html,
     })
+    if (sendError) {
+      console.error(`[Bank Transfer Email] Resend error for order ${code}: ${JSON.stringify(sendError)}`)
+      return // do NOT stamp sent — allow a future retry once the domain is verified
+    }
 
-    // idempotency stamp
+    // idempotency stamp (only on success)
     const { Pool } = require("pg")
     const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
     try {
