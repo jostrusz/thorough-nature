@@ -62,7 +62,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
       // Line items → transactional content in the e-mail (better inbox placement).
       const { rows: itemRows } = await pool.query(
-        `SELECT title, quantity, unit_price FROM cart_line_item WHERE cart_id = $1 AND deleted_at IS NULL`,
+        `SELECT cli.title, cli.quantity, cli.unit_price,
+                COALESCE(NULLIF(cli.thumbnail, ''), p.thumbnail) AS thumbnail
+         FROM cart_line_item cli
+         LEFT JOIN product p ON p.id = cli.product_id AND p.deleted_at IS NULL
+         WHERE cli.cart_id = $1 AND cli.deleted_at IS NULL`,
         [cartId]
       )
 
@@ -91,7 +95,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
           to: cart.email, from: cfg.fromEmail || process.env.RESEND_FROM_EMAIL, replyTo: cfg.replyTo,
           locale, code: String(reference), iban: bank.iban, bic: bank.bic, beneficiary: bank.beneficiary,
           reference: emailRef, amount, currency, cartId,
-          items: itemRows.map((r) => ({ title: r.title, quantity: Number(r.quantity), unit_price: Number(r.unit_price) })),
+          items: itemRows.map((r) => ({ title: r.title, quantity: Number(r.quantity), unit_price: Number(r.unit_price), thumbnail: r.thumbnail || undefined })),
           delivery,
         }).then((r) => {
           if (!r.ok) console.error(`[Bank Transfer Init] email failed cart ${cartId}: ${JSON.stringify(r.error)}`)

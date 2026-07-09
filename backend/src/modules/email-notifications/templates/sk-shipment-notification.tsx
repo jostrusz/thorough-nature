@@ -28,14 +28,14 @@ const pad = '24px'
 
 function formatPrice(amount: number, currencyCode: string): string {
   try {
-    return new Intl.NumberFormat('cs-CZ', {
+    return new Intl.NumberFormat('sk-SK', {
       style: 'currency',
-      currency: (currencyCode || 'CZK').toUpperCase(),
+      currency: (currencyCode || 'EUR').toUpperCase(),
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     }).format(amount)
   } catch {
-    return `${(amount || 0).toFixed(0)} Kč`
+    return `${(amount || 0).toFixed(0)} €`
   }
 }
 
@@ -65,7 +65,7 @@ export const SkShipmentNotificationTemplate: React.FC<SkShipmentNotificationTemp
   pickupPoint,
   preview = 'Tvoja objednávka je na ceste!',
 }) => {
-  const currency = order.currency_code || 'czk'
+  const currency = order.currency_code || 'eur'
   const items = order.items || []
   const displayId = order.metadata?.custom_order_number || order.display_id || order.id
 
@@ -137,7 +137,7 @@ export const SkShipmentNotificationTemplate: React.FC<SkShipmentNotificationTemp
             lineHeight: '1.6',
             marginBottom: '6px',
           }}>
-            Ahoj {shippingAddress?.first_name || 'tam'},
+            {shippingAddress?.first_name ? `Ahoj ${shippingAddress.first_name},` : 'Ahoj,'}
           </Text>
           <Text style={{
             fontFamily: font,
@@ -191,7 +191,7 @@ export const SkShipmentNotificationTemplate: React.FC<SkShipmentNotificationTemp
                   color: '#5A3D6B',
                   marginBottom: trackingUrl ? '12px' : '0',
                 }}>
-                  Číslo zásielky: <strong style={{ color: '#2D1B3D' }}>{trackingNumber}</strong>
+                  Sledovacie číslo: <strong style={{ color: '#2D1B3D' }}>{trackingNumber}</strong>
                 </Text>
               )}
               {trackingUrl && (
@@ -414,7 +414,7 @@ export const SkShipmentNotificationTemplate: React.FC<SkShipmentNotificationTemp
             color: '#9B7AAD',
             marginBottom: '14px',
           }}>
-            Čo môžeš čakať?
+            Čo ťa čaká?
           </Text>
 
           <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse' as const, marginBottom: '12px' }}>
@@ -611,7 +611,7 @@ SkShipmentNotificationTemplate.PreviewProps = {
     metadata: { custom_order_number: 'SK2026-812' },
     created_at: new Date().toISOString(),
     email: 'petra.svobodova@gmail.com',
-    currency_code: 'czk',
+    currency_code: 'eur',
     items: [
       {
         id: 'item-1',
@@ -619,7 +619,7 @@ SkShipmentNotificationTemplate.PreviewProps = {
         product_title: 'Pusti to, čo ťa ničí',
         variant_title: 'Paperback',
         quantity: 2,
-        unit_price: 599.5,
+        unit_price: 24.95,
         thumbnail: 'https://bucket-production-b93e.up.railway.app:443/medusa-media/pust-to-co-te-nici-admin-01KTYC1V1ZYVZ92WZYE7SA8X2Z.png',
       },
     ],

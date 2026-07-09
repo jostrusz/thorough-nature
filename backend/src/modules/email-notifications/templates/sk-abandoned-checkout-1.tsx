@@ -106,7 +106,7 @@ export const SkAbandonedCheckout1Template: React.FC<SkAbandonedCheckout1Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Vedela si, že väčšina ľudí neuviazne preto, že by neboli dosť silní? Uviaznu preto, že nevedia, <em>čo</em> majú pustiť — a ako. Premýšľanie, pocity viny, hnev, strach z opustenia — stále sa to vracia.
+            Vieš, prečo väčšina ľudí uviazne? Nie preto, že by nemali dosť sily. Ale preto, že nevedia, <em>čo</em> majú pustiť — a ako. Neustále premýšľanie, pocity viny, hnev, strach z opustenia — stále sa to vracia.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -115,7 +115,7 @@ export const SkAbandonedCheckout1Template: React.FC<SkAbandonedCheckout1Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            V tejto knihe sa naučíš, ako zastaviť lavínu myšlienok, upokojiť emócie a nájsť vnútorný pokoj. Všetko stojí na neurovede, filozofii a psychológii správania — vrátane kompletného pracovného zošita plného praktických cvičení. Žiadne vágne rady. Žiadne spirituálne sľuby.
+            V tejto knihe sa naučíš, ako zastaviť lavínu myšlienok, upokojiť emócie a nájsť vnútorný pokoj. Všetko stojí na neurovede, filozofii a psychológii správania — vrátane kompletného pracovného zošita plného praktických cvičení. Žiadne vágne rady. Žiadne duchovné sľuby.
           </Text>
         </div>
 
@@ -156,7 +156,7 @@ export const SkAbandonedCheckout1Template: React.FC<SkAbandonedCheckout1Props> &
               margin: '0',
               color: colors.accent,
             }}>
-              {productPrice} Kč
+              {productPrice}&nbsp;€
             </Text>
           </div>
         </div>
@@ -265,7 +265,7 @@ export const SkAbandonedCheckout1Template: React.FC<SkAbandonedCheckout1Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ti prišiel, pretože si si rozpracoval/a objednávku na pustitocotanici.sk.
+            Tento e-mail ti prišiel, pretože si na pustitocotanici.sk nedokončil/a svoju objednávku.
           </Text>
         </div>
       </Section>
@@ -277,7 +277,7 @@ SkAbandonedCheckout1Template.PreviewProps = {
   firstName: 'Petra',
   checkoutUrl: 'https://www.pustitocotanici.sk/checkout',
   productName: 'Pusti to, čo ťa ničí',
-  productPrice: '749',
+  productPrice: '32',
   productImage: '',
   preview: 'Tvoja kniha je zabalená a čaká len na teba!',
 } as SkAbandonedCheckout1Props

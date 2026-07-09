@@ -28,14 +28,14 @@ const padLR = `0 ${pad}`
 
 function formatPrice(amount: number, currencyCode: string): string {
   try {
-    return new Intl.NumberFormat('cs-CZ', {
+    return new Intl.NumberFormat('sk-SK', {
       style: 'currency',
-      currency: (currencyCode || 'CZK').toUpperCase(),
+      currency: (currencyCode || 'EUR').toUpperCase(),
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     }).format(amount)
   } catch {
-    return `${(amount || 0).toFixed(0)} Kč`
+    return `${(amount || 0).toFixed(0)} €`
   }
 }
 
@@ -79,7 +79,7 @@ export const SkOrderPlacedTemplate: React.FC<SkOrderPlacedTemplateProps> & {
   pickupPoint,
   preview = 'Ďakujeme za tvoju objednávku!',
 }) => {
-  const currency = order.currency_code || 'czk'
+  const currency = order.currency_code || 'eur'
   const items = order.items || []
   const displayId = order.metadata?.custom_order_number || order.display_id || order.id
   const orderDate = formatDate(order.created_at)
@@ -188,7 +188,7 @@ export const SkOrderPlacedTemplate: React.FC<SkOrderPlacedTemplateProps> & {
             lineHeight: '1.6',
             marginBottom: '6px',
           }}>
-            Ahoj {shippingAddress?.first_name || 'tam'},
+            Ahoj {shippingAddress?.first_name || 'priateľ'},
           </Text>
           <Text style={{
             fontFamily: font,
@@ -354,7 +354,7 @@ export const SkOrderPlacedTemplate: React.FC<SkOrderPlacedTemplateProps> & {
                 <tr>
                   <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', padding: '3px 0' }}>Doprava</td>
                   <td align="right" style={{ fontFamily: font, fontSize: '13px', color: (shippingTotal + shippingFee) > 0 ? '#5A3D6B' : '#2e7d32', padding: '3px 0' }}>
-                    {(shippingTotal + shippingFee) > 0 ? formatPrice(shippingTotal + shippingFee, currency) : 'Zdarma'}
+                    {(shippingTotal + shippingFee) > 0 ? formatPrice(shippingTotal + shippingFee, currency) : 'Zadarmo'}
                   </td>
                 </tr>
                 {codFee > 0 && (
@@ -580,7 +580,7 @@ export const SkOrderPlacedTemplate: React.FC<SkOrderPlacedTemplateProps> & {
                 <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#2D1B3D' }}>Odoslané</strong>
                   <br />
-                  Hneď ako zásielku odošleme, pošleme ti e-mail s číslom na sledovanie.
+                  Hneď ako zásielku odošleme, pošleme ti e-mail so sledovacím číslom.
                 </td>
               </tr>
             </tbody>

@@ -271,8 +271,9 @@ body { background: var(--bg); }
 .ty-order-icon.ship { background: rgba(45,27,61,0.06); }
 .ty-order-cover { width: 46px; height: 60px; border-radius: 8px; object-fit: contain; flex-shrink: 0; }
 .ty-ebook-badge { display: inline-block; font-size: 10px; font-weight: 700; color: #1D9E75; background: rgba(29,158,117,0.12); padding: 2px 7px; border-radius: 20px; margin-left: 6px; vertical-align: middle; letter-spacing: 0.3px; }
-.ty-order-name { font-size: 15px; font-weight: 600; color: var(--heading); }
-.ty-order-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.ty-order-item > div { min-width: 0; }
+.ty-order-name { font-size: 15px; font-weight: 600; color: var(--heading); overflow-wrap: break-word; }
+.ty-order-desc { font-size: 13px; color: var(--muted); margin-top: 2px; overflow-wrap: break-word; }
 .ty-order-total {
   display: flex; justify-content: space-between; align-items: baseline;
   margin-top: 16px; padding-top: 16px;
@@ -488,7 +489,7 @@ body { background: var(--bg); }
     <div class="ty-address-alert-icon">&#x26A0;&#xFE0F;</div>
     <div class="ty-address-alert-text">
       <div class="ty-address-alert-title">Skontroluj si doručovacie údaje</div>
-      <div class="ty-address-alert-desc">Chceme ti objednávku odoslať čo najskôr. Skontroluj prosím, či sú tvoja <strong>adresa</strong>, <strong>e-mail</strong> a <strong>telefón</strong> správne.</div>
+      <div class="ty-address-alert-desc">Chceme ti objednávku odoslať čo najskôr. Skontroluj preto prosím, či máš správne uvedenú <strong>adresu</strong>, <strong>e-mailovú adresu</strong> aj <strong>telefónne číslo</strong>.</div>
     </div>
   </div>
 
@@ -651,7 +652,7 @@ body { background: var(--bg); }
     </div>
     <div class="ty-order-total">
       <span class="ty-order-total-label">Zaplatené</span>
-      <span class="ty-order-total-price" id="ty-total-price">32 €</span>
+      <span class="ty-order-total-price" id="ty-total-price">32&nbsp;€</span>
     </div>
   </div>
 

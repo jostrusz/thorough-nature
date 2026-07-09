@@ -97,7 +97,7 @@ export async function sendBankTransferEmail(p: {
   to: string; from: string; replyTo?: string; locale: string;
   code: string; iban: string; bic?: string; beneficiary?: string;
   reference: string; amount: number; currency: string; cartId?: string; orderId?: string;
-  items?: Array<{ title: string; quantity: number; unit_price: number }>;
+  items?: Array<{ title: string; quantity: number; unit_price: number; thumbnail?: string }>;
   delivery?: { pickup: boolean; recipient?: string; pointName?: string; pointAddress?: string; street?: string; cityLine?: string; country?: string };
 }): Promise<{ ok: boolean; error?: any }> {
   const apiKey = process.env.RESEND_API_KEY
@@ -110,12 +110,16 @@ export async function sendBankTransferEmail(p: {
 
   // Order line items (transactional signal → better inbox placement).
   const items = Array.isArray(p.items) ? p.items : []
-  const itemsHtml = items.map((it) =>
-    `<table role="presentation" width="100%"><tr>
-      <td style="font-size:14px;color:#2D1B3D;padding:5px 0;">${it.quantity}× ${it.title}</td>
-      <td style="font-size:14px;font-weight:600;color:#2D1B3D;text-align:right;white-space:nowrap;">${fmtAmount(Number(it.unit_price) * Number(it.quantity), p.currency, p.locale)}</td>
+  const itemsHtml = items.map((it) => {
+    const imgCell = it.thumbnail
+      ? `<td width="52" valign="middle" style="padding:5px 12px 5px 0;"><img src="${it.thumbnail}" width="44" height="58" alt="" style="display:block;border-radius:6px;object-fit:cover;border:1px solid #EDD9E5;"/></td>`
+      : ""
+    return `<table role="presentation" width="100%"><tr>
+      ${imgCell}
+      <td valign="middle" style="font-size:14px;color:#2D1B3D;padding:5px 0;">${it.quantity}× ${it.title}</td>
+      <td valign="middle" style="font-size:14px;font-weight:600;color:#2D1B3D;text-align:right;white-space:nowrap;">${fmtAmount(Number(it.unit_price) * Number(it.quantity), p.currency, p.locale)}</td>
     </tr></table>`
-  ).join("")
+  }).join("")
   const itemsText = items.map((it) => `- ${it.quantity}× ${it.title}: ${fmtAmount(Number(it.unit_price) * Number(it.quantity), p.currency, p.locale)}`).join("\n")
 
   // Delivery / pickup point.

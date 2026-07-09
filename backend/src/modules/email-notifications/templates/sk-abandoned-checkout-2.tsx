@@ -139,7 +139,7 @@ export const SkAbandonedCheckout2Template: React.FC<SkAbandonedCheckout2Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            Chcel som ti napísať osobne. Nie preto, aby som na teba tlačil — ale pretože si myslím, že by si toto mala vedieť.
+            Chcel som ti napísať osobne. Nie preto, aby som na teba tlačil — ale preto, že si myslím, že by si to mala vedieť.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -148,7 +148,7 @@ export const SkAbandonedCheckout2Template: React.FC<SkAbandonedCheckout2Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Túto knihu som nenapísal preto, že by sa mi zdalo &bdquo;pekné&ldquo; napísať knihu. Napísal som ju, pretože som roky sledoval, ako sa ľudia trápia rovnakou bolesťou — nekonečné premýšľanie, hlodavé pocity viny, hnev, ktorý nedokázali pustiť, strach, ktorý im ničil vzťahy — a stále dokola dostávali rovnaké rady, ktoré jednoducho nefungovali.
+            Túto knihu som nenapísal preto, že by bolo &bdquo;pekné&ldquo; mať vlastnú knihu. Napísal som ju preto, že som roky sledoval, ako sa ľudia trápia rovnakou bolesťou — nekonečným premýšľaním, hlodavými pocitmi viny, hnevom, ktorý nedokázali pustiť, strachom, ktorý im ničil vzťahy — a stále dokola dostávali rovnaké rady, ktoré jednoducho nefungovali.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -186,7 +186,7 @@ export const SkAbandonedCheckout2Template: React.FC<SkAbandonedCheckout2Props> &
             author="Martin, Košice"
           />
           <ReviewCard
-            text="Badateľný rozdiel už počas týždňa. Cvičenia v pracovnom zošite sú také konkrétne — hneď si všimneš, že reaguješ inak na veci, ktoré ťa predtým ničili."
+            text="Citeľný rozdiel už počas prvého týždňa. Cvičenia v pracovnom zošite sú také konkrétne, že hneď si všimneš, ako inak reaguješ na veci, ktoré ťa predtým ničili."
             author="Lucia, Žilina"
           />
         </div>
@@ -240,7 +240,7 @@ export const SkAbandonedCheckout2Template: React.FC<SkAbandonedCheckout2Props> &
               margin: '0',
               color: colors.accent,
             }}>
-              {productPrice} Kč
+              {productPrice} &euro;
             </Text>
           </div>
         </div>
@@ -349,7 +349,7 @@ export const SkAbandonedCheckout2Template: React.FC<SkAbandonedCheckout2Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ti prišiel, pretože si si rozpracoval/a objednávku na pustitocotanici.sk.
+            Tento e-mail ti prišiel, pretože si na pustitocotanici.sk nedokončil/a objednávku.
           </Text>
         </div>
       </Section>
@@ -361,7 +361,7 @@ SkAbandonedCheckout2Template.PreviewProps = {
   firstName: 'Petra',
   checkoutUrl: 'https://www.pustitocotanici.sk/checkout',
   productName: 'Pusti to, čo ťa ničí',
-  productPrice: '749',
+  productPrice: '32',
   productImage: '',
   preview: 'Už po týždni som sa cítila ľahšie než kedykoľvek predtým...',
 } as SkAbandonedCheckout2Props

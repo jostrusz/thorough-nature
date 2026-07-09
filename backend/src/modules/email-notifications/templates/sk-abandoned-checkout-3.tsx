@@ -98,7 +98,7 @@ export const SkAbandonedCheckout3Template: React.FC<SkAbandonedCheckout3Props> &
               margin: '0',
               lineHeight: '1.5',
             }}>
-              ⏰ Tvoj košík o 24 hodín uvoľníme
+              ⏰ Tvoj košík uvoľníme o 24 hodín
             </Text>
           </div>
         </div>
@@ -178,7 +178,7 @@ export const SkAbandonedCheckout3Template: React.FC<SkAbandonedCheckout3Props> &
               margin: '0',
               color: colors.accent,
             }}>
-              {productPrice} Kč
+              {productPrice} €
             </Text>
           </div>
         </div>
@@ -287,7 +287,7 @@ export const SkAbandonedCheckout3Template: React.FC<SkAbandonedCheckout3Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Toto je posledná pripomienka tvojej objednávky. Žiadne ďalšie upozornenie ti už nepošleme.
+            Toto je posledná pripomienka na tvoju objednávku. Žiadne ďalšie upozornenie ti už nepošleme.
           </Text>
         </div>
       </Section>
@@ -299,7 +299,7 @@ SkAbandonedCheckout3Template.PreviewProps = {
   firstName: 'Petra',
   checkoutUrl: 'https://www.pustitocotanici.sk/checkout',
   productName: 'Pusti to, čo ťa ničí',
-  productPrice: '749',
+  productPrice: '32',
   productImage: '',
   preview: 'Zostáva 24 hodín — potom musím tvoj košík uvoľniť.',
 } as SkAbandonedCheckout3Props
