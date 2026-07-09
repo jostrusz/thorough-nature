@@ -1810,6 +1810,19 @@ h2 { font-size: 38px; }
 }
 
 /* ═══ RESPONSIVITA ═══ */
+/* Tablety (iPad ~768–1024px): hero na sloupec, kniha hneď pod nadpis */
+@media (max-width: 1024px) {
+ .hero { flex-direction: column; text-align: center; gap: 24px; }
+ .hero-left { display: contents; }
+ .hero-left .eyebrow { order: 1; }
+ .hero-left h1 { order: 2; }
+ .hero-right { order: 3; }
+ .hero-left .body-text { order: 4; margin-left: auto; margin-right: auto; }
+ .hero-left .hero-buttons { order: 5; justify-content: center; }
+ .hero-left .payment-row { order: 6; justify-content: center; }
+ .hero-right img { width: 340px !important; }
+}
+
 @media (max-width: 768px) {
  .hero-section { padding-top: 40px; padding-bottom: 48px; }
  .hero { flex-direction: column; text-align: center; gap: 24px; }
