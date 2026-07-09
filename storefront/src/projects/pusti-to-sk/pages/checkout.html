@@ -6050,9 +6050,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // For methods with known SVG icons. Revolut method codes reuse the shared
     // brand icons already used by PayPal/Comgate/Stripe (apple_pay→applepay,
     // google_pay→googlepay, pay_by_bank→bank_transfer, sepa_direct_debit→sepa).
-    var ICON_ALIAS = { apple_pay: 'applepay', google_pay: 'googlepay', pay_by_bank: 'bank_transfer', sepa_direct_debit: 'sepa', bank_transfer_sepa: 'bank_transfer' };
+    var ICON_ALIAS = { apple_pay: 'applepay', google_pay: 'googlepay', pay_by_bank: 'bank_transfer', sepa_direct_debit: 'sepa' };
     var iconCode = ICON_ALIAS[code] || code;
-    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'bank_transfer', 'sepa'];
+    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'bank_transfer', 'bank_transfer_sepa', 'sepa'];
     if (iconMethods.indexOf(iconCode) !== -1) {
       return '<img src="/icons/' + iconCode + '.svg" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
     }
@@ -6146,7 +6146,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             'sepa_debit': 'SEPA inkaso',
             'swish': 'Swish',
             'revolut_pay': 'Revolut Pay',
-            'bank_transfer_sepa': 'Bankový prevod (SEPA)',
+            'bank_transfer_sepa': 'Platba QR kódom / bankový prevod',
             'cod': 'Platba na dobierku',
             'twisto': 'Twisto — platba do 30 dní',
             'skippay': 'Skip Pay — odložená platba',
@@ -6224,7 +6224,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (btEnabled()) {
         allPaymentOptions.push({
           code: 'bank_transfer_sepa', provider: 'bank_transfer', provider_id: 'pp_bank_transfer_bank_transfer',
-          display_name: 'Bankový prevod (SEPA)', icon: 'bank_transfer', sort_order: 60
+          display_name: 'Platba QR kódom / bankový prevod', icon: 'bank_transfer_sepa', sort_order: 60
         });
       }
 

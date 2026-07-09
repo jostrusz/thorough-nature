@@ -1,5 +1,1 @@
-<svg width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="120" height="80" rx="4" fill="#191C1F"/>
-<text x="60" y="46" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700" letter-spacing="0.5" fill="white">Revolut</text>
-<rect x="28" y="56" width="64" height="3" rx="1.5" fill="#0075EB"/>
-</svg>
+<svg width="46" height="30" viewBox="0 0 46 30" xmlns="http://www.w3.org/2000/svg"><rect width="46" height="30" rx="5" fill="#191C1F"/><path transform="translate(13.7 5.5) scale(0.79)" fill="#fff" d="M20.9133 6.9566C20.9133 3.1208 17.7898 0 13.9503 0H2.424v3.8605h10.9782c1.7376 0 3.177 1.3651 3.2087 3.043.016.84-.2994 1.633-.8878 2.2324-.5886.5998-1.375.9303-2.2144.9303H9.2322a.2756.2756 0 0 0-.2755.2752v3.431c0 .0585.018.1142.052.1612L16.2646 24h5.3114l-7.2727-10.094c3.6625-.1838 6.61-3.2612 6.61-6.9494zM6.8943 5.9229H2.424V24h4.4704z"/></svg>
