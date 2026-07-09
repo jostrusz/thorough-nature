@@ -13,7 +13,7 @@ var PROJECT_CONFIG = {
     "price": 32.00,
     "originalPrice": 35.00,
     "currency": "EUR",
-    "thumbnail": ""
+    "thumbnail": "https://pustitocotanici.sk/Pusti-to-co-ta-nici.png"
   },
   "upsellProduct": {
     "name": "",
