@@ -61,9 +61,9 @@ export function buildHtml(t: any, o: any): string {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAF5F8;border:1px solid #EDD9E5;border-radius:12px;"><tr><td style="padding:11px 14px;font-size:14px;color:#2D1B3D;line-height:1.5;">${o.deliveryHtml}</td></tr></table>
   </td></tr>` : ""}
   ${o.qrUrl ? `<tr><td style="padding:14px 24px 4px;text-align:center;">
-    <div style="display:inline-block;background:#FAF5F8;border:1px solid #EDD9E5;border-radius:14px;padding:16px;">
-      <img src="${o.qrUrl}" width="180" height="180" alt="QR" style="display:block;border-radius:8px;"/>
-      <div style="font-size:12px;color:#7A6189;margin-top:8px;">${t.scan}</div>
+    <div style="display:inline-block;text-align:center;background:#FAF5F8;border:1px solid #EDD9E5;border-radius:14px;padding:16px;">
+      <img src="${o.qrUrl}" width="180" height="180" alt="QR" style="display:block;margin:0 auto;border-radius:8px;"/>
+      <div style="font-size:12px;color:#7A6189;margin-top:8px;text-align:center;">${t.scan}</div>
     </div></td></tr>` : ""}
   <tr><td style="padding:14px 24px 4px;text-align:center;">
     <div style="font-size:11px;letter-spacing:.6px;color:#9B7AAD;font-weight:600;">${t.amountToPay.toUpperCase()}</div>
