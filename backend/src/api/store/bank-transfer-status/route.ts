@@ -1,66 +1,40 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { reconcileSingleOrder } from "../../../modules/payment-bank-transfer/reconcile"
+import { reconcileSingleCart } from "../../../modules/payment-bank-transfer/reconcile"
 
 /**
- * GET /store/bank-transfer-status?order_id=xxx
+ * GET /store/bank-transfer-status?cart_id=xxx
  *
- * Polling endpoint for the bank-transfer "waiting for payment" popup.
- * 1) If the order is already reconciled → paid:true.
- * 2) Otherwise runs an ON-DEMAND Revolut check for this order (shared 15 s
- *    transactions cache protects the rate limit) so the popup flips to "paid"
- *    within seconds of the transfer arriving — not only on the 15-min cron.
- * Public (publishable key), read-only-ish (only ever captures a matching payment).
+ * Polling endpoint for the bank-transfer "waiting for payment" popup (cart-first).
+ * 1) If the cart is already completed (order created by reconcile) → paid:true.
+ * 2) Otherwise runs an ON-DEMAND Revolut check for this cart (shared 15 s cache);
+ *    on a match it completes the cart → creates the paid order → paid:true.
+ * Public (publishable key), read-only-ish (only ever completes a matching cart).
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   try {
-    const orderId = req.query.order_id as string
-    if (!orderId) {
-      res.json({ paid: false, awaiting: false })
+    const cartId = req.query.cart_id as string
+    if (!cartId) { res.json({ paid: false, awaiting: false }); return }
+
+    const { Pool } = require("pg")
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
+    let completedAt: any = null
+    try {
+      const { rows } = await pool.query(`SELECT completed_at FROM cart WHERE id = $1 LIMIT 1`, [cartId])
+      completedAt = rows[0]?.completed_at || null
+    } finally { await pool.end().catch(() => {}) }
+
+    if (completedAt) { res.json({ paid: true, awaiting: false }); return }
+
+    // On-demand reconcile for this cart.
+    try {
+      const logger = req.scope.resolve("logger")
+      const orderId = await reconcileSingleCart(cartId, req.scope, logger)
+      res.json({ paid: !!orderId, awaiting: !orderId })
       return
+    } catch {
+      res.json({ paid: false, awaiting: true })
     }
-
-    const query = req.scope.resolve("query")
-    const { data } = await query.graph({
-      entity: "order",
-      fields: ["id", "display_id", "currency_code", "metadata"],
-      filters: { id: orderId },
-    })
-    const order = data && data[0]
-    if (!order) {
-      res.json({ paid: false, awaiting: false })
-      return
-    }
-
-    const m = order.metadata || {}
-    const alreadyPaid =
-      m.payment_captured === true ||
-      m.payment_captured === "true" ||
-      m.bank_transfer_reconciled === true ||
-      m.bank_transfer_reconciled === "true"
-    if (alreadyPaid) {
-      res.json({ paid: true, awaiting: false })
-      return
-    }
-
-    // On-demand: only for orders actually awaiting a bank transfer.
-    const awaiting = m.awaiting_bank_payment === true || m.awaiting_bank_payment === "true"
-    if (awaiting) {
-      try {
-        const logger = req.scope.resolve("logger")
-        const paid = await reconcileSingleOrder(
-          { order_id: order.id, display_id: order.display_id, currency_code: order.currency_code },
-          req.scope,
-          logger
-        )
-        res.json({ paid: !!paid, awaiting: !paid })
-        return
-      } catch {
-        /* fall through */
-      }
-    }
-
-    res.json({ paid: false, awaiting })
   } catch (error: any) {
     res.status(200).json({ paid: false, awaiting: true, error: error.message })
   }

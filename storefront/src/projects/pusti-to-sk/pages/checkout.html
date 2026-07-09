@@ -3244,6 +3244,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     pl: { created:'Zamówienie utworzone', awaiting:'oczekuje na płatność', reserved:'Zarezerwowane jeszcze', qrTitle:'Płacisz z komputera lub innego urządzenia?', qrScanApp:'Zeskanuj ten kod QR w aplikacji bankowej.', saveQr:'Zapisz QR w galerii', amountToPay:'Kwota do zapłaty', detailsTitle:'Dane do przelewu', tapCopy:'dotknij = kopiuj', refLabel:'Tytuł przelewu (ważne!)', vsLabel:'Tytuł przelewu (ważne!)', amountLabel:'Kwota', copy:'Kopiuj', copied:'✓ Skopiowano', howTitle:'Jak zapłacić', s1t:'Skopiuj powyższe dane', s1d:'Dotknij Kopiuj przy IBAN i tytule', s2t:'Otwórz swoją aplikację bankową', s2d:'Nowy przelew → wklej dane', s3t:'Potwierdź płatność', s3d:'Wyślemy towar zaraz po zaksięgowaniu', footEmail:'Właśnie wysłaliśmy te dane na Twój e-mail — nie stracisz ich po zamknięciu tego okna.', footNotify:'Odezwiemy się, gdy płatność dotrze.', footGuarantee:'30-dniowa gwarancja zwrotu pieniędzy.', paid:'Zapłaciłem →', later:'Zapłacę później', close:'Zamknij', payFor:'Płatność za zamówienie', scanOrEnter:'Zeskanuj kod QR lub wpisz dane w swoim banku.' }
   };
   (function () { var R = { sk:'Príjemca', cs:'Příjemce', de:'Empfänger', nl:'Begunstigde', pl:'Odbiorca', sv:'Mottagare', no:'Mottaker', hu:'Kedvezményezett', fr:'Bénéficiaire', es:'Beneficiario' }; for (var k in R) { if (BT_I18N[k]) BT_I18N[k].recipient = R[k]; } })();
+  (function () { var B = { sk:'Späť', cs:'Zpět', de:'Zurück', nl:'Terug', pl:'Wstecz', sv:'Tillbaka', no:'Tilbake', hu:'Vissza', fr:'Retour', es:'Volver' }; for (var k in B) { if (BT_I18N[k]) BT_I18N[k].back = B[k]; } })();
   // Waiting / paid states (polling po „Zaplatil som").
   (function () {
     var W = {
@@ -3393,7 +3394,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // Show the bank-transfer popup for a freshly created (unpaid) order.
   // Fully localised (PROJECT_CONFIG.locale) + currency-aware (EUR SEPA QR, CZK QR
   // Platba, other currencies = details only, no QR).
-  function showBankTransferPopup(displayId, amount, orderId) {
+  function showBankTransferPopup(displayId, amount, cartId) {
+    var existing = document.getElementById('bt-overlay'); if (existing) existing.parentNode.removeChild(existing);
+    _btState = { displayId: displayId, amount: amount, cartId: cartId };
     var bt = btCfg() || {};
     var ref = btReference(displayId);
     var qr = btQrString(amount, ref);
@@ -3504,18 +3507,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }, 1000);
     // „Zaplatil som" → krok „Čakáme na platbu" + polling. „Zaplatím neskôr" / × → zavrieť
     // (objednávka existuje, platobné údaje má zákazník aj v e-maile).
-    document.getElementById('bt-done').onclick = function () { btEnterWaiting(orderId, orderCode, amtDisplay); };
+    document.getElementById('bt-done').onclick = function () { btEnterWaiting(cartId, orderCode, amtDisplay); };
     document.getElementById('bt-later').onclick = btClosePopup;
     document.getElementById('bt-x').onclick = btClosePopup;
   }
   var btPollTimer = null;
+  var _btState = null;
   function btClosePopup() {
     if (btPollTimer) { clearInterval(btPollTimer); btPollTimer = null; }
     var ov = document.getElementById('bt-overlay'); if (ov) ov.parentNode.removeChild(ov);
     document.body.style.overflow = '';
   }
   // Krok 2: „Čakáme na vašu platbu" — spinner + polling stavu (bez tlačítka pokračovať).
-  function btEnterWaiting(orderId, orderCode, amtDisplay) {
+  function btEnterWaiting(cartId, orderCode, amtDisplay) {
     var card = document.querySelector('#bt-overlay .bt-card'); if (!card) return;
     card.innerHTML =
       '<div class="bt-h"><button class="bt-x" id="bt-x2" aria-label="' + btT('close') + '">×</button><div class="ok">✅ ' + btT('created') + '</div><div class="sub">' + orderCode + '</div></div>'
@@ -3527,21 +3531,24 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       + '<div class="bt-word"><span class="k">' + btT('amountLabel') + '</span><span class="v">' + amtDisplay + '</span></div>'
       + '<div class="bt-winfo">📧 ' + btT('waitEmail') + '</div>'
       + '<div class="bt-checking"><span class="d"></span><span class="d"></span><span class="d"></span>' + btT('checking') + '</div>'
+      + '<button class="bt-later" id="bt-back" style="margin-top:14px;">← ' + btT('back') + '</button>'
       + '</div>';
     var x2 = document.getElementById('bt-x2'); if (x2) x2.onclick = btClosePopup;
-    if (btPollTimer) clearInterval(btPollTimer);
-    // Live polling: každých 5 s po dobu 5 min (chytí Instant + rýchle platby, kým
-    // zákazník pozerá). Potom preberá backend (reconcile do 5 dní) + e-mail.
-    var startedAt = Date.now();
-    btPoll(orderId, orderCode, amtDisplay); // okamžitá 1. kontrola
-    btPollTimer = setInterval(function () {
-      if (Date.now() - startedAt > 5 * 60 * 1000) {
-        clearInterval(btPollTimer); btPollTimer = null;
-        btWaitTimeout(orderCode, amtDisplay);
-        return;
-      }
-      btPoll(orderId, orderCode, amtDisplay);
-    }, 5000);
+    // „← Späť" → naspäť na údaje/QR; polling beží ďalej na pozadí (timer sa nezruší).
+    document.getElementById('bt-back').onclick = function () { if (_btState) showBankTransferPopup(_btState.displayId, _btState.amount, _btState.cartId); };
+    // Live polling 5 s × 5 min — spustí sa len RAZ a beží ďalej aj po návrate na údaje.
+    if (!btPollTimer) {
+      var startedAt = Date.now();
+      btPoll(cartId, orderCode, amtDisplay);
+      btPollTimer = setInterval(function () {
+        if (Date.now() - startedAt > 5 * 60 * 1000) {
+          clearInterval(btPollTimer); btPollTimer = null;
+          btWaitTimeout(orderCode, amtDisplay);
+          return;
+        }
+        btPoll(cartId, orderCode, amtDisplay);
+      }, 5000);
+    }
   }
   // Po 5 min bez pripísania — pokojný „ozveme sa e-mailom" stav (browser ďalej nepolluje;
   // backend reconcile beží do 5 dní a e-mail zákazníka informuje).
@@ -3561,9 +3568,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     document.getElementById('bt-cont').onclick = function () { window.location.href = PROJECT_CONFIG.thankYouUrl; };
   }
   // Poll status z backendu (ktorý nastavuje Revolut reconcile cron).
-  function btPoll(orderId, orderCode, amtDisplay) {
-    if (!orderId) return;
-    fetch(MEDUSA_URL + '/store/bank-transfer-status?order_id=' + encodeURIComponent(orderId), {
+  function btPoll(cartId, orderCode, amtDisplay) {
+    if (!cartId) return;
+    fetch(MEDUSA_URL + '/store/bank-transfer-status?cart_id=' + encodeURIComponent(cartId), {
       headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
     }).then(function (r) { return r.json(); }).then(function (d) {
       if (d && d.paid) btEnterPaid(orderCode, amtDisplay);
@@ -8886,17 +8893,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           }
         });
       } else if (selectedMethod === 'bank_transfer_sepa') {
-        // BANKOVÝ PREVOD (SEPA): dokončiť order (nezaplatený) → zobraziť QR popup.
-        return medusaFetch('/store/carts/' + result.cartId + '/complete', {
-          method: 'POST'
-        }).then(function(completeRes) {
-          var order = window.__extractOrderOrThrow(completeRes);
-          localStorage.setItem('medusa_order_id', order.id || '');
-          localStorage.setItem('medusa_order_display_id', order.display_id || '');
+        // BANKOVÝ PREVOD (SEPA) — CART-FIRST: cart NEDOKONČUJEME (žiadna objednávka
+        // v admine). Init vygeneruje referenciu + pošle e-mail. Objednávka vznikne
+        // AŽ po zaplatení (Revolut reconcile → completeCart).
+        return medusaFetch('/store/bank-transfer-init', {
+          method: 'POST',
+          body: JSON.stringify({ cart_id: result.cartId, project_slug: PROJECT_CONFIG.slug || '' })
+        }).then(function(initRes) {
           localStorage.removeItem('checkout_draft');
           localStorage.removeItem('background_cart_id');
           submitBtn.classList.remove('loading'); submitBtn.disabled = false;
-          showBankTransferPopup(order.display_id, checkoutTotal, order.id);
+          var reference = (initRes && initRes.reference) || String(result.cartId).replace(/\D/g, '').slice(-9);
+          showBankTransferPopup(reference, checkoutTotal, result.cartId);
         });
       } else if (selectedMethod === 'cod') {
         // DOBÍRKA (COD): rovnou dokončit objednávku (žádný redirect, žádná platba)

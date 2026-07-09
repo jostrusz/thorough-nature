@@ -1,20 +1,16 @@
 // @ts-nocheck
-import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
 import { Resend } from "resend"
-import { getProjectEmailConfig } from "../utils/project-email-config"
-import { paymentReference, loadBankConfig } from "../modules/payment-bank-transfer/qr"
+
+/**
+ * Bank-transfer instruction e-mail (payment details + QR). Sent from the
+ * bank-transfer INIT endpoint (cart-first flow — no order exists yet), so the
+ * customer gets the IBAN/reference/QR the moment they choose the transfer.
+ */
 
 const BACKEND_URL =
   process.env.MEDUSA_BACKEND_URL || process.env.BACKEND_URL || "https://www.marketing-hq.eu"
 
-// Locale fallback per project (used only if the email config has no locale).
-const PROJECT_LOCALE: Record<string, string> = {
-  "pusti-to-sk": "sk", "psi-superzivot": "cs", "lass-los": "de",
-  loslatenboek: "nl", "het-leven": "nl", dehondenbijbel: "nl",
-  "odpusc-ksiazka": "pl", "slapp-taget": "sv", "slipp-taket": "no", "engedd-el": "hu",
-}
-
-const EMAIL_I18N: Record<string, any> = {
+export const EMAIL_I18N: Record<string, any> = {
   sk: { subject: "Dokončite platbu — objednávka", greeting: "Dobrý deň,", intro: "ďakujeme za objednávku! Zaplaťte ju prosím <b>bankovým prevodom</b> podľa údajov nižšie. Tovar odošleme <b>ihneď po pripísaní</b>.", amountToPay: "Suma na úhradu", details: "Údaje na prevod", recipient: "Príjemca", refL: "Referencia", vsL: "Variabilný symbol", amountL: "Suma", scan: "📲 Naskenujte QR v bankovej aplikácii", s1: "Otvorte bankovú aplikáciu", s2: "Zadajte údaje alebo naskenujte QR", s3: "Potvrďte platbu — odošleme tovar", notify: "🔔 Ozveme sa, keď platba dorazí (SEPA ~1 prac. deň).", help: "💬 Otázka? Odpovedzte na tento e-mail.", order: "Objednávka" },
   cs: { subject: "Dokončete platbu — objednávka", greeting: "Dobrý den,", intro: "děkujeme za objednávku! Zaplaťte ji prosím <b>bankovním převodem</b> podle údajů níže. Zboží odešleme <b>ihned po připsání</b>.", amountToPay: "Částka k úhradě", details: "Údaje k platbě", recipient: "Příjemce", refL: "Reference", vsL: "Variabilní symbol", amountL: "Částka", scan: "📲 Naskenujte QR v bankovní aplikaci", s1: "Otevřete bankovní aplikaci", s2: "Zadejte údaje nebo naskenujte QR", s3: "Potvrďte platbu — odešleme zboží", notify: "🔔 Ozveme se, jakmile platba dorazí (SEPA ~1 prac. den).", help: "💬 Dotaz? Odpovězte na tento e-mail.", order: "Objednávka" },
   de: { subject: "Zahlung abschließen — Bestellung", greeting: "Guten Tag,", intro: "danke für Ihre Bestellung! Bitte bezahlen Sie per <b>Banküberweisung</b> mit den Daten unten. Wir versenden <b>sofort nach Zahlungseingang</b>.", amountToPay: "Zu zahlender Betrag", details: "Überweisungsdaten", recipient: "Empfänger", refL: "Verwendungszweck", vsL: "Verwendungszweck", amountL: "Betrag", scan: "📲 QR in der Bank-App scannen", s1: "Öffnen Sie Ihre Bank-App", s2: "Daten eingeben oder QR scannen", s3: "Zahlung bestätigen — wir versenden", notify: "🔔 Wir melden uns, sobald die Zahlung eingeht (SEPA ~1 Werktag).", help: "💬 Frage? Antworten Sie einfach auf diese E-Mail.", order: "Bestellung" },
@@ -29,7 +25,7 @@ const EMAIL_I18N: Record<string, any> = {
 
 function fmtIban(iban: string): string { return String(iban || "").replace(/(.{4})/g, "$1 ").trim() }
 
-function fmtAmount(amount: number, currency: string, locale: string): string {
+export function fmtAmount(amount: number, currency: string, locale: string): string {
   const tags: Record<string, string> = { sk: "sk-SK", cs: "cs-CZ", hu: "hu-HU", fr: "fr-FR", es: "es-ES", nl: "nl-NL", no: "nb-NO", sv: "sv-SE", pl: "pl-PL" }
   try { return new Intl.NumberFormat(tags[locale] || "sk-SK", { style: "currency", currency }).format(Number(amount)) }
   catch { return Number(amount).toFixed(2) + " " + currency }
@@ -41,7 +37,7 @@ function row(k: string, v: string): string {
     <div style="font-size:16px;font-weight:600;color:#2D1B3D;font-family:monospace;">${v}</div></td></tr><tr><td height="8"></td></tr>`
 }
 
-function buildHtml(t: any, o: any): string {
+export function buildHtml(t: any, o: any): string {
   const isEur = o.currency === "EUR"
   return `<div style="background:#EFE6EE;padding:20px 12px;font-family:'DM Sans',Arial,sans-serif;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(45,27,61,.12);">
@@ -79,78 +75,35 @@ function buildHtml(t: any, o: any): string {
 </table></div>`
 }
 
-export default async function orderPlacedBankTransferEmail({ event, container }: SubscriberArgs<{ id: string }>) {
+/**
+ * Build + send the bank-transfer instruction e-mail via Resend. Returns
+ * { ok, error }. Never throws.
+ */
+export async function sendBankTransferEmail(p: {
+  to: string; from: string; replyTo?: string; locale: string;
+  code: string; iban: string; bic?: string; beneficiary?: string;
+  reference: string; amount: number; currency: string; cartId?: string; orderId?: string;
+}): Promise<{ ok: boolean; error?: any }> {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey || !p.to) return { ok: false, error: "no api key / recipient" }
+  const t = EMAIL_I18N[p.locale] || EMAIL_I18N.sk
+  const amountDisplay = fmtAmount(p.amount, p.currency, p.locale)
+  const qrUrl = (p.currency === "EUR" || p.currency === "CZK")
+    ? `${BACKEND_URL}/public/bank-transfer-qr?${p.cartId ? "cart_id=" + encodeURIComponent(p.cartId) : "order_id=" + encodeURIComponent(p.orderId || "")}`
+    : ""
+  const html = buildHtml(t, {
+    code: p.code, amountDisplay, iban: p.iban, bic: p.bic, beneficiary: p.beneficiary,
+    reference: p.reference, currency: p.currency, qrUrl,
+  })
   try {
-    const orderId = event.data.id
-    const query = container.resolve("query") as any
-    const { data } = await query.graph({
-      entity: "order",
-      fields: ["id", "email", "display_id", "currency_code", "total", "metadata"],
-      filters: { id: orderId },
-    })
-    const order = data && data[0]
-    if (!order) return
-
-    const meta = order.metadata || {}
-    const isBankTransfer = meta.awaiting_bank_payment === true || meta.payment_method === "bank_transfer_sepa"
-    if (!isBankTransfer) return
-    if (meta.bank_transfer_email_sent === true) return // idempotent
-
-    const apiKey = process.env.RESEND_API_KEY
-    if (!apiKey || !order.email) return
-
-    const cfg = getProjectEmailConfig(order)
-    const projectSlug = meta.project_id || meta.project_slug
-    const locale = cfg.locale || PROJECT_LOCALE[projectSlug] || "sk"
-    const t = EMAIL_I18N[locale] || EMAIL_I18N.sk
-
-    const bank = await loadBankConfig(projectSlug)
-    if (!bank || !bank.iban) return
-
-    const currency = String(order.currency_code || bank.currency || "EUR").toUpperCase()
-    const amount = Number(order.total) || 0
-    const code = (meta.custom_display_id || (cfg.orderPrefix ? cfg.orderPrefix + "-" + order.display_id : "") || String(order.display_id))
-    const reference = paymentReference(String(order.display_id || ""), currency)
-    const amountDisplay = fmtAmount(amount, currency, locale)
-    const qrUrl = (currency === "EUR" || currency === "CZK")
-      ? `${BACKEND_URL}/public/bank-transfer-qr?order_id=${encodeURIComponent(order.id)}`
-      : ""
-
-    const html = buildHtml(t, {
-      code, amountDisplay, iban: bank.iban, bic: bank.bic, beneficiary: bank.beneficiary,
-      reference, currency, qrUrl,
-    })
-
     const resend = new Resend(apiKey)
-    // Resend returns { data, error } — it does NOT throw on API errors, so check it.
-    const { error: sendError } = await resend.emails.send({
-      from: cfg.fromEmail || process.env.RESEND_FROM_EMAIL,
-      to: order.email,
-      replyTo: cfg.replyTo,
-      subject: `${t.subject} ${code}`,
-      html,
+    const { error } = await resend.emails.send({
+      from: p.from, to: p.to, replyTo: p.replyTo,
+      subject: `${t.subject} ${p.code}`, html,
     })
-    if (sendError) {
-      console.error(`[Bank Transfer Email] Resend error for order ${code}: ${JSON.stringify(sendError)}`)
-      return // do NOT stamp sent — allow a future retry once the domain is verified
-    }
-
-    // idempotency stamp (only on success)
-    const { Pool } = require("pg")
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
-    try {
-      await pool.query(
-        `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb WHERE id = $2`,
-        [JSON.stringify({ bank_transfer_email_sent: true, bank_transfer_email_sent_at: new Date().toISOString() }), order.id]
-      )
-    } finally { await pool.end().catch(() => {}) }
-
-    console.log(`[Bank Transfer Email] sent to ${order.email} for order ${code}`)
-  } catch (error: any) {
-    console.error(`[Bank Transfer Email] failed: ${error.message}`)
+    if (error) return { ok: false, error }
+    return { ok: true }
+  } catch (e: any) {
+    return { ok: false, error: e.message }
   }
-}
-
-export const config: SubscriberConfig = {
-  event: "order.placed",
 }
