@@ -23,6 +23,8 @@ export const EMAIL_I18N: Record<string, any> = {
   es: { subject: "Completa el pago — pedido", greeting: "Hola,", intro: "¡gracias por tu pedido! Págalo por <b>transferencia bancaria</b> con los datos de abajo. Enviamos <b>en cuanto se reciba</b>.", amountToPay: "Importe a pagar", details: "Datos de la transferencia", recipient: "Beneficiario", refL: "Concepto", vsL: "Concepto", amountL: "Importe", scan: "📲 Escanea el QR en tu app bancaria", s1: "Abre tu aplicación bancaria", s2: "Introduce los datos o escanea el QR", s3: "Confirma el pago — enviamos", notify: "🔔 Te avisaremos en cuanto llegue el pago (SEPA ~1 día hábil).", help: "💬 ¿Dudas? Responde a este correo.", order: "Pedido" },
 }
 
+;(function () { var Y: any = { sk: "Vaša objednávka", cs: "Vaše objednávka", de: "Ihre Bestellung", nl: "Uw bestelling", pl: "Twoje zamówienie", sv: "Din beställning", no: "Din bestilling", hu: "Az Ön rendelése", fr: "Votre commande", es: "Tu pedido" }; for (var k in Y) { if (EMAIL_I18N[k]) EMAIL_I18N[k].yourOrder = Y[k] } })()
+
 function fmtIban(iban: string): string { return String(iban || "").replace(/(.{4})/g, "$1 ").trim() }
 
 export function fmtAmount(amount: number, currency: string, locale: string): string {
@@ -46,6 +48,10 @@ export function buildHtml(t: any, o: any): string {
     <div style="font-size:13px;color:#C9AEDA;margin-top:4px;">${t.amountToPay}: ${o.amountDisplay}</div>
   </td></tr>
   <tr><td style="padding:24px 24px 8px;font-size:15px;color:#2D1B3D;line-height:1.55;">${t.greeting}<br>${t.intro}</td></tr>
+  ${o.itemsHtml ? `<tr><td style="padding:14px 24px 4px;">
+    <div style="font-size:11px;letter-spacing:.5px;color:#9B7AAD;font-weight:700;text-transform:uppercase;margin-bottom:8px;">${t.yourOrder}</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAF5F8;border:1px solid #EDD9E5;border-radius:12px;"><tr><td style="padding:6px 14px;">${o.itemsHtml}</td></tr></table>
+  </td></tr>` : ""}
   ${o.qrUrl ? `<tr><td style="padding:14px 24px 4px;text-align:center;">
     <div style="display:inline-block;background:#FAF5F8;border:1px solid #EDD9E5;border-radius:14px;padding:16px;">
       <img src="${o.qrUrl}" width="180" height="180" alt="QR" style="display:block;border-radius:8px;"/>
@@ -83,6 +89,7 @@ export async function sendBankTransferEmail(p: {
   to: string; from: string; replyTo?: string; locale: string;
   code: string; iban: string; bic?: string; beneficiary?: string;
   reference: string; amount: number; currency: string; cartId?: string; orderId?: string;
+  items?: Array<{ title: string; quantity: number; unit_price: number }>;
 }): Promise<{ ok: boolean; error?: any }> {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey || !p.to) return { ok: false, error: "no api key / recipient" }
@@ -91,15 +98,43 @@ export async function sendBankTransferEmail(p: {
   const qrUrl = (p.currency === "EUR" || p.currency === "CZK")
     ? `${BACKEND_URL}/public/bank-transfer-qr?${p.cartId ? "cart_id=" + encodeURIComponent(p.cartId) : "order_id=" + encodeURIComponent(p.orderId || "")}`
     : ""
+
+  // Order line items (transactional signal → better inbox placement).
+  const items = Array.isArray(p.items) ? p.items : []
+  const itemsHtml = items.map((it) =>
+    `<table role="presentation" width="100%"><tr>
+      <td style="font-size:14px;color:#2D1B3D;padding:5px 0;">${it.quantity}× ${it.title}</td>
+      <td style="font-size:14px;font-weight:600;color:#2D1B3D;text-align:right;white-space:nowrap;">${fmtAmount(Number(it.unit_price) * Number(it.quantity), p.currency, p.locale)}</td>
+    </tr></table>`
+  ).join("")
+  const itemsText = items.map((it) => `- ${it.quantity}× ${it.title}: ${fmtAmount(Number(it.unit_price) * Number(it.quantity), p.currency, p.locale)}`).join("\n")
+
   const html = buildHtml(t, {
     code: p.code, amountDisplay, iban: p.iban, bic: p.bic, beneficiary: p.beneficiary,
-    reference: p.reference, currency: p.currency, qrUrl,
+    reference: p.reference, currency: p.currency, qrUrl, itemsHtml,
   })
+  const refLabel = p.currency === "EUR" ? t.refL : t.vsL
+  const text = [
+    `${t.order} ${p.code}`,
+    `${t.greeting.replace(/,$/, "")}`,
+    t.intro.replace(/<\/?b>/g, ""),
+    items.length ? `\n${t.yourOrder}:\n${itemsText}` : "",
+    `\n${t.amountToPay}: ${amountDisplay}`,
+    `\n${t.details}:`,
+    `IBAN: ${p.iban}`,
+    p.bic ? `BIC/SWIFT: ${p.bic}` : "",
+    p.beneficiary ? `${t.recipient}: ${p.beneficiary}` : "",
+    `${refLabel}: ${p.reference}`,
+    `${t.amountL}: ${amountDisplay}`,
+    `\n${t.notify.replace(/^🔔 /, "")}`,
+    `${t.help.replace(/^💬 /, "")}`,
+  ].filter(Boolean).join("\n")
+
   try {
     const resend = new Resend(apiKey)
     const { error } = await resend.emails.send({
       from: p.from, to: p.to, replyTo: p.replyTo,
-      subject: `${t.subject} ${p.code}`, html,
+      subject: `${t.subject} ${p.code}`, html, text,
     })
     if (error) return { ok: false, error }
     return { ok: true }

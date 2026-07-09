@@ -54,6 +54,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       const amount = Number(totRows[0]?.items || 0) + Number(totRows[0]?.shipping || 0)
       const currency = String(cart.currency_code || "EUR").toUpperCase()
 
+      // Line items → transactional content in the e-mail (better inbox placement).
+      const { rows: itemRows } = await pool.query(
+        `SELECT title, quantity, unit_price FROM cart_line_item WHERE cart_id = $1 AND deleted_at IS NULL`,
+        [cartId]
+      )
+
       const bank = await loadBankConfig(projectSlug)
       if (bank && bank.iban && cart.email) {
         const cfg = getProjectEmailConfig({ metadata: { project_id: projectSlug } })
@@ -64,6 +70,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
           to: cart.email, from: cfg.fromEmail || process.env.RESEND_FROM_EMAIL, replyTo: cfg.replyTo,
           locale, code: String(reference), iban: bank.iban, bic: bank.bic, beneficiary: bank.beneficiary,
           reference: emailRef, amount, currency, cartId,
+          items: itemRows.map((r) => ({ title: r.title, quantity: Number(r.quantity), unit_price: Number(r.unit_price) })),
         }).then((r) => {
           if (!r.ok) console.error(`[Bank Transfer Init] email failed cart ${cartId}: ${JSON.stringify(r.error)}`)
           else console.log(`[Bank Transfer Init] email sent to ${cart.email} (ref ${reference})`)
