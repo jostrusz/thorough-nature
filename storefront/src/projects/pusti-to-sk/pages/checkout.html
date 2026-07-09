@@ -3562,10 +3562,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       + '<div class="bt-ws">' + btT('toSub') + '</div>'
       + '<div class="bt-word"><span class="k">' + btT('orderLabel') + '</span><span class="v">' + orderCode + '</span></div>'
       + '<div class="bt-word"><span class="k">' + btT('amountLabel') + '</span><span class="v">' + amtDisplay + '</span></div>'
-      + '<button class="bt-done" id="bt-cont" style="margin-top:18px;">' + btT('cont') + '</button>'
       + '</div>';
     var x3 = document.getElementById('bt-x3'); if (x3) x3.onclick = btClosePopup;
-    document.getElementById('bt-cont').onclick = function () { window.location.href = PROJECT_CONFIG.thankYouUrl; };
   }
   // Poll status z backendu (ktorý nastavuje Revolut reconcile cron).
   function btPoll(cartId, orderCode, amtDisplay) {
