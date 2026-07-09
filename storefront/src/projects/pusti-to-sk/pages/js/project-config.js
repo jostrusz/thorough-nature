@@ -43,8 +43,8 @@ var PROJECT_CONFIG = {
   "thankYouUrl": "/thank-you.html",
   "bankTransfer": {
     "enabled": false,
-    "iban": "CZ0000000000000000000000",
-    "bic": "FIOBCZPP",
+    "iban": "LT933250075998680394",
+    "bic": "REVOLT21",
     "beneficiary": "Performance Marketing Solution s.r.o.",
     "currency": "EUR"
   }

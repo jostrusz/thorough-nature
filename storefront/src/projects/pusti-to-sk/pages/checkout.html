@@ -3243,6 +3243,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     sv: { created:'Beställningen är skapad', awaiting:'väntar på betalning', reserved:'Reserverad ännu', qrTitle:'Betalar du från en dator eller annan enhet?', qrScanApp:'Skanna denna QR-kod med din bankapp.', saveQr:'Spara QR i galleriet', amountToPay:'Belopp att betala', detailsTitle:'Betalningsuppgifter', tapCopy:'tryck = kopiera', refLabel:'Referens (viktigt!)', vsLabel:'Meddelande (viktigt!)', amountLabel:'Belopp', copy:'Kopiera', copied:'✓ Kopierat', howTitle:'Så betalar du', s1t:'Kopiera uppgifterna ovan', s1d:'Tryck på Kopiera vid IBAN och referens', s2t:'Öppna din bankapp', s2d:'Ny betalning → klistra in uppgifterna', s3t:'Bekräfta betalningen', s3d:'Vi skickar så snart den kommit in', footEmail:'Vi har precis skickat dessa uppgifter till din e-post — du förlorar dem inte när du stänger fönstret.', footNotify:'Vi hör av oss när betalningen kommit in.', footGuarantee:'30 dagars pengarna-tillbaka-garanti.', paid:'Jag har betalat →', later:'Jag betalar senare', close:'Stäng', payFor:'Betalning för beställning', scanOrEnter:'Skanna QR-koden eller ange uppgifterna i din bank.' },
     pl: { created:'Zamówienie utworzone', awaiting:'oczekuje na płatność', reserved:'Zarezerwowane jeszcze', qrTitle:'Płacisz z komputera lub innego urządzenia?', qrScanApp:'Zeskanuj ten kod QR w aplikacji bankowej.', saveQr:'Zapisz QR w galerii', amountToPay:'Kwota do zapłaty', detailsTitle:'Dane do przelewu', tapCopy:'dotknij = kopiuj', refLabel:'Tytuł przelewu (ważne!)', vsLabel:'Tytuł przelewu (ważne!)', amountLabel:'Kwota', copy:'Kopiuj', copied:'✓ Skopiowano', howTitle:'Jak zapłacić', s1t:'Skopiuj powyższe dane', s1d:'Dotknij Kopiuj przy IBAN i tytule', s2t:'Otwórz swoją aplikację bankową', s2d:'Nowy przelew → wklej dane', s3t:'Potwierdź płatność', s3d:'Wyślemy towar zaraz po zaksięgowaniu', footEmail:'Właśnie wysłaliśmy te dane na Twój e-mail — nie stracisz ich po zamknięciu tego okna.', footNotify:'Odezwiemy się, gdy płatność dotrze.', footGuarantee:'30-dniowa gwarancja zwrotu pieniędzy.', paid:'Zapłaciłem →', later:'Zapłacę później', close:'Zamknij', payFor:'Płatność za zamówienie', scanOrEnter:'Zeskanuj kod QR lub wpisz dane w swoim banku.' }
   };
+  (function () { var R = { sk:'Príjemca', cs:'Příjemce', de:'Empfänger', nl:'Begunstigde', pl:'Odbiorca', sv:'Mottagare', no:'Mottaker', hu:'Kedvezményezett', fr:'Bénéficiaire', es:'Beneficiario' }; for (var k in R) { if (BT_I18N[k]) BT_I18N[k].recipient = R[k]; } })();
   function btLocale() { var L = (PROJECT_CONFIG.locale || 'sk').toLowerCase(); return BT_I18N[L] ? L : 'sk'; }
   function btT(k) { return (BT_I18N[btLocale()] || BT_I18N.sk)[k] || BT_I18N.sk[k] || k; }
   function btCurrency() { var bt = btCfg() || {}; return String(bt.currency || (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency) || 'EUR').toUpperCase(); }
@@ -3371,6 +3372,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // telefónu → skopíruje a vloží v bankovej appke; QR z toho istého displeja naskenovať nemôže).
       + '<div class="bt-copytitle">' + btT('detailsTitle') + ' <span class="tag">' + btT('tapCopy') + '</span></div>'
       + '<div class="bt-row"><div class="col"><span class="k">IBAN</span><span class="v">' + btFmtIban(bt.iban) + '</span></div><button class="bt-cp" data-c="' + ibanClean + '">' + btT('copy') + '</button></div>'
+      + (bt.bic ? '<div class="bt-row"><div class="col"><span class="k">BIC / SWIFT</span><span class="v">' + bt.bic + '</span></div><button class="bt-cp" data-c="' + bt.bic + '">' + btT('copy') + '</button></div>' : '')
+      + (bt.beneficiary ? '<div class="bt-row"><div class="col"><span class="k">' + btT('recipient') + '</span><span class="v">' + bt.beneficiary + '</span></div><button class="bt-cp" data-c="' + bt.beneficiary + '">' + btT('copy') + '</button></div>' : '')
       + '<div class="bt-row"><div class="col"><span class="k">' + btRefLabel() + '</span><span class="v">' + ref + '</span></div><button class="bt-cp" data-c="' + ref + '">' + btT('copy') + '</button></div>'
       + '<div class="bt-row"><div class="col"><span class="k">' + btT('amountLabel') + '</span><span class="v">' + amtDisplay + '</span></div><button class="bt-cp" data-c="' + amt2 + '">' + btT('copy') + '</button></div>'
       + '<div class="bt-how"><div class="htitle">' + btT('howTitle') + '</div>'
@@ -3419,7 +3422,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         x.fillStyle = '#9B7AAD'; x.font = '600 14px Arial, sans-serif'; x.fillText(btT('amountToPay').toUpperCase(), W / 2, ty - 30);
         x.fillStyle = '#C27BA0'; x.font = '700 40px Arial, sans-serif'; x.fillText(amtDisplay, W / 2, ty + 8);
         x.textAlign = 'left';
-        var rows = [['IBAN', btFmtIban(bt.iban)], [refClean, ref]];
+        var rows = [['IBAN', btFmtIban(bt.iban)]];
+        if (bt.bic) rows.push(['BIC / SWIFT', bt.bic]);
+        if (bt.beneficiary) rows.push([btT('recipient'), String(bt.beneficiary).substring(0, 42)]);
+        rows.push([refClean, ref]);
         var ry = ty + 66;
         rows.forEach(function (r) {
           x.fillStyle = '#9B7AAD'; x.font = '600 13px Arial, sans-serif'; x.fillText(String(r[0]).toUpperCase(), 66, ry);
