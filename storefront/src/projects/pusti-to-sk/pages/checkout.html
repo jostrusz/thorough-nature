@@ -928,16 +928,17 @@ body {
 .bank-sub-method.selected .bank-sub-radio-dot { transform: scale(1); }
 .bank-sub-logo {
   flex-shrink: 0;
-  width: 40px; height: 40px; border-radius: 10px;
-  background: #FAF6FA; border: 1px solid rgba(45,27,61,0.06);
+  width: 46px; height: 46px; border-radius: 12px;
+  background: #fff; border: 1px solid rgba(45,27,61,0.08);
   display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
-  transition: background .2s ease, box-shadow .2s ease;
+  overflow: hidden; padding: 3px;
+  box-shadow: 0 1px 3px rgba(45,27,61,0.05);
+  transition: background .2s ease, box-shadow .2s ease, transform .2s ease;
 }
-.bank-sub-method:hover .bank-sub-logo { box-shadow: 0 2px 6px rgba(45,27,61,0.08); }
-.bank-sub-method.selected .bank-sub-logo { background: #fff; box-shadow: 0 2px 8px rgba(194,123,160,0.18); }
-.bank-sub-logo img { max-height: 34px; max-width: 34px; width: auto; object-fit: contain; display: block; border-radius: 8px; }
-.bank-sub-logo svg { width: 26px; height: 26px; }
+.bank-sub-method:hover .bank-sub-logo { box-shadow: 0 3px 9px rgba(45,27,61,0.12); transform: translateY(-1px); }
+.bank-sub-method.selected .bank-sub-logo { background: #fff; box-shadow: 0 3px 10px rgba(194,123,160,0.22); }
+.bank-sub-logo img { max-height: 40px; max-width: 40px; width: auto; object-fit: contain; display: block; border-radius: 7px; }
+.bank-sub-logo svg { width: 30px; height: 30px; }
 .bank-sub-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .bank-sub-name {
   font-size: 15px; font-weight: 700;
@@ -978,8 +979,8 @@ body {
   .bank-sub-methods { padding: 10px; }
   .bank-sub-methods.open { gap: 7px; }
   .bank-sub-method { padding: 11px 13px; gap: 11px; }
-  .bank-sub-logo { width: 46px; height: 46px; border-radius: 11px; }
-  .bank-sub-logo img { max-height: 40px; max-width: 40px; border-radius: 9px; }
+  .bank-sub-logo { width: 50px; height: 50px; border-radius: 13px; padding: 3px; }
+  .bank-sub-logo img { max-height: 44px; max-width: 44px; border-radius: 8px; }
   .bank-sub-badge { display: none; }
 }
 
