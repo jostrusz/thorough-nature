@@ -40,12 +40,26 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(200).send("OK") // Return 200 so Comgate doesn't retry
     }
 
-    let statusResult: any = { success: false }
-    for (const config of configs) {
+    // A transId belongs to exactly one merchant. Comgate includes `merchant` in
+    // the webhook payload → target ONLY that shop. Probing the wrong merchant
+    // makes Comgate email an "Error 1400 — does not belong to the same shop"
+    // technical notification (arrives on the unrelated CZ merchant 509962).
+    // Fall back to try-all only when the payload merchant matches no active config.
+    const webhookMerchant = String(req.body?.merchant || req.query?.merchant || "").trim()
+    const parseKeys = (config: any) => {
       let keys = config.mode === "live" ? config.live_keys : config.test_keys
-      if (typeof keys === "string") {
-        try { keys = JSON.parse(keys) } catch { keys = null }
-      }
+      if (typeof keys === "string") { try { keys = JSON.parse(keys) } catch { keys = null } }
+      return keys
+    }
+    let targetConfigs = configs
+    if (webhookMerchant) {
+      const owner = configs.filter((c: any) => String(parseKeys(c)?.api_key || "") === webhookMerchant)
+      if (owner.length) targetConfigs = owner
+    }
+
+    let statusResult: any = { success: false }
+    for (const config of targetConfigs) {
+      const keys = parseKeys(config)
       if (!keys?.api_key || !keys?.secret_key) continue
       const client = new ComgateApiClient(keys.api_key, keys.secret_key)
       const r = await client.getStatus({ merchant: keys.api_key, transId, secret: keys.secret_key })

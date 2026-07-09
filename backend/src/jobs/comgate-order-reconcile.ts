@@ -84,7 +84,7 @@ async function cartLiveTotal(
  */
 async function loadComgateConfigs(
   logger: any
-): Promise<Array<{ client: ComgateApiClient; merchant: string; secret: string }>> {
+): Promise<Array<{ client: ComgateApiClient; merchant: string; secret: string; projectSlugs: string[] }>> {
   const dbUrl = process.env.DATABASE_URL
   if (!dbUrl) return []
 
@@ -102,7 +102,7 @@ async function loadComgateConfigs(
       "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL ORDER BY priority ASC",
       ["comgate"]
     )
-    const out: Array<{ client: ComgateApiClient; merchant: string; secret: string }> = []
+    const out: Array<{ client: ComgateApiClient; merchant: string; secret: string; projectSlugs: string[] }> = []
     for (const config of rows) {
       let keys = config.mode === "live" ? config.live_keys : config.test_keys
       if (typeof keys === "string") {
@@ -113,6 +113,7 @@ async function loadComgateConfigs(
           client: new ComgateApiClient(keys.api_key, keys.secret_key),
           merchant: keys.api_key,
           secret: keys.secret_key,
+          projectSlugs: Array.isArray(config.project_slugs) ? config.project_slugs : [],
         })
       }
     }
@@ -133,8 +134,10 @@ async function loadComgateConfigs(
  * that doesn't belong to a merchant returns an error, so this correctly routes
  * multi-tenant transactions to the right eshop.
  */
+type CgCfg = { client: ComgateApiClient; merchant: string; secret: string; projectSlugs: string[] }
+
 async function getStatusAnyMerchant(
-  configs: Array<{ client: ComgateApiClient; merchant: string; secret: string }>,
+  configs: CgCfg[],
   transId: string
 ): Promise<{ success: boolean; data?: any; error?: string }> {
   for (const cfg of configs) {
@@ -142,6 +145,40 @@ async function getStatusAnyMerchant(
     if (res.success && res.data?.status) return res
   }
   return { success: false, data: null }
+}
+
+/**
+ * Resolve the owning Comgate merchant from a stamped merchant id (comgateMerchant,
+ * saved on the payment session at initiate) or the project slug. A transId belongs
+ * to exactly one merchant; probing the wrong one makes Comgate email a
+ * "Error 1400 — does not belong to the same shop" technical notification.
+ */
+function pickMerchantConfig(
+  configs: CgCfg[],
+  hint: { merchant?: string | null; projectSlug?: string | null }
+): CgCfg | null {
+  const m = String(hint.merchant || "").trim()
+  if (m) { const c = configs.find((c) => c.merchant === m); if (c) return c }
+  const p = String(hint.projectSlug || "").trim()
+  if (p) { const c = configs.find((c) => c.projectSlugs.includes(p)); if (c) return c }
+  return null
+}
+
+/**
+ * getStatus routed to the owning merchant when it can be determined — so we hit
+ * ONLY the right Comgate shop and never trigger cross-merchant error emails.
+ * Falls back to try-all only when the merchant is genuinely unknown (legacy rows).
+ */
+async function getStatusForCandidate(
+  configs: CgCfg[],
+  transId: string,
+  hint: { merchant?: string | null; projectSlug?: string | null }
+): Promise<{ success: boolean; data?: any; error?: string }> {
+  const target = pickMerchantConfig(configs, hint)
+  if (target) {
+    return target.client.getStatus({ merchant: target.merchant, transId, secret: target.secret })
+  }
+  return getStatusAnyMerchant(configs, transId)
 }
 
 /**
@@ -202,7 +239,9 @@ export default async function comgateReconcileJob(container: MedusaContainer) {
       `SELECT DISTINCT ON (c.id)
          c.id AS cart_id,
          c.email,
-         COALESCE(ps.data->>'transId', ps.data->>'comgateTransId') AS trans_id
+         COALESCE(ps.data->>'transId', ps.data->>'comgateTransId') AS trans_id,
+         ps.data->>'comgateMerchant' AS comgate_merchant,
+         COALESCE(c.metadata->>'project_id', ps.data->>'project_slug') AS project_slug
        FROM cart c
        JOIN cart_payment_collection cpc ON cpc.cart_id = c.id
        JOIN payment_collection pc ON pc.id = cpc.payment_collection_id
@@ -219,7 +258,10 @@ export default async function comgateReconcileJob(container: MedusaContainer) {
       const transId = cand.trans_id
       if (!transId) continue
       try {
-        const statusRes = await getStatusAnyMerchant(comgateConfigs, transId)
+        const statusRes = await getStatusForCandidate(comgateConfigs, transId, {
+          merchant: cand.comgate_merchant,
+          projectSlug: cand.project_slug,
+        })
         if (!statusRes.success || statusRes.data?.status !== "PAID") continue
 
         // Race: order may already exist (return path / webhook completed it).
@@ -312,7 +354,9 @@ export default async function comgateReconcileJob(container: MedusaContainer) {
     // B) Orders with a Comgate transId that never got captured → poll → capture
     // ───────────────────────────────────────────────────────────────────────
     const { rows: orderCands } = await pool.query(
-      `SELECT o.id AS order_id, o.email, o.metadata->>'comgateTransId' AS trans_id
+      `SELECT o.id AS order_id, o.email, o.metadata->>'comgateTransId' AS trans_id,
+         o.metadata->>'comgateMerchant' AS comgate_merchant,
+         o.metadata->>'project_id' AS project_slug
        FROM "order" o
        WHERE o.metadata->>'comgateTransId' IS NOT NULL
          AND COALESCE(o.metadata->>'payment_captured', '') <> 'true'
@@ -326,7 +370,10 @@ export default async function comgateReconcileJob(container: MedusaContainer) {
       const transId = cand.trans_id
       if (!transId) continue
       try {
-        const statusRes = await getStatusAnyMerchant(comgateConfigs, transId)
+        const statusRes = await getStatusForCandidate(comgateConfigs, transId, {
+          merchant: cand.comgate_merchant,
+          projectSlug: cand.project_slug,
+        })
         if (!statusRes.success || statusRes.data?.status !== "PAID") continue
 
         const stamp = {
