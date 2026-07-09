@@ -746,6 +746,10 @@ function generateProjectConfigScript(
   basePath: string,
   toggles: ProjectToggles
 ): string {
+  // Resolve thank-you first so upsellUrl can fall back to it when no real
+  // upsell page exists (prevents redirect to a non-existent /upsell → 404).
+  const thankYouUrl = pageUrl(config, basePath, 'thank-you', ['thank-you', 'dziekujemy', 'bedankt'])
+  const hasUpsellPage = !!((config as any).pages || {})['upsell']
   const projectConfig = {
     slug: config.slug,
     projectId: (config as any).projectId || config.slug,
@@ -772,8 +776,8 @@ function generateProjectConfigScript(
     // (e.g. zycie-zaslugy uses /prywatnosc not /privacy) get the right slugs.
     homeUrl: `${basePath}/`,
     checkoutUrl: pageUrl(config, basePath, 'checkout', ['checkout']),
-    upsellUrl: pageUrl(config, basePath, 'upsell', ['upsell']),
-    thankYouUrl: pageUrl(config, basePath, 'thank-you', ['thank-you', 'dziekujemy', 'bedankt']),
+    upsellUrl: hasUpsellPage ? `${basePath}/upsell` : thankYouUrl,
+    thankYouUrl,
     contactUrl: pageUrl(config, basePath, 'contact', ['contact', 'kontakt']),
     privacyUrl: pageUrl(config, basePath, 'privacy', ['privacy', 'prywatnosc', 'datenschutz', 'integritet']),
     termsUrl: pageUrl(config, basePath, 'voorwaarden', ['voorwaarden', 'regulamin', 'agb', 'villkor', 'terms']),

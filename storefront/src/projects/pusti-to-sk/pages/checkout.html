@@ -2962,21 +2962,14 @@ body {
         </div>
       </div>
 
-      <!-- Ikony platebních metod -->
+      <!-- Ikony platebných metód (zodpovedá výberu vo formulári) -->
       <div class="summary-payments">
-        <img src="/icons/mastercard.svg" alt="Mastercard" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
         <img src="/icons/visa.svg" alt="Visa" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/mastercard.svg" alt="Mastercard" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/applepay.svg" alt="Apple Pay" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/googlepay.svg" alt="Google Pay" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
         <img src="/icons/paypal.svg" alt="PayPal" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
-        <img src="/icons/csob.svg" alt="ČSOB" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
-        <img src="/icons/ceska-sporitelna.svg" alt="Česká spořitelna" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
-        <img src="/icons/komercni-banka.svg" alt="Komerční banka" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
-        <img src="/icons/raiffeisenbank.svg" alt="Raiffeisenbank" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
-        <img src="/icons/fio-banka.svg" alt="Fio banka" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
-        <img src="/icons/airbank.svg" alt="Air Bank" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
-        <img src="/icons/moneta.svg" alt="MONETA" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
-        <img src="/icons/mbank.svg" alt="mBank" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
-        <img src="/icons/unicredit.svg" alt="UniCredit Bank" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
-        <img src="/icons/partners-banka.svg" alt="Partners Banka" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/bank_transfer_sepa.svg" alt="Bankový prevod / QR" width="40" height="26" loading="lazy" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
       </div>
 
       <!-- Odkaz na reklamační řád -->
@@ -7204,8 +7197,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var phoneField = document.getElementById('phone');
   var phonePreview = document.getElementById('phone-preview');
   var countrySelect = document.getElementById('country');
-  var COUNTRY_PHONE_PREFIX = { CZ: '+420' };
+  var COUNTRY_PHONE_PREFIX = { SK: '+421', CZ: '+420' };
   var PHONE_PREFIX_TO_COUNTRY = { '+420': 'CZ', '+421': 'SK' };
+  // Default prefix pro tento projekt (SK) — nikdy nepadat na cizí +420
+  var DEFAULT_PHONE_PREFIX = '+' + ((typeof PROJECT_CONFIG !== 'undefined' && PROJECT_CONFIG.defaultPhonePrefix) || '421');
 
   // Detekce země z telefonního čísla (např. +420... → CZ)
   function detectCountryFromPhone(val) {
@@ -7239,11 +7234,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (cleaned.startsWith('+')) return cleaned;
     if (cleaned.startsWith('00')) return '+' + cleaned.substring(2);
     if (cleaned.startsWith('0')) {
-      var prefix = COUNTRY_PHONE_PREFIX[countryCode] || '+420';
+      var prefix = COUNTRY_PHONE_PREFIX[countryCode] || DEFAULT_PHONE_PREFIX;
       return prefix + cleaned.substring(1);
     }
     if (/^\d{7,}$/.test(cleaned)) {
-      return (COUNTRY_PHONE_PREFIX[countryCode] || '+420') + cleaned;
+      return (COUNTRY_PHONE_PREFIX[countryCode] || DEFAULT_PHONE_PREFIX) + cleaned;
     }
     return cleaned;
   }
@@ -7877,11 +7872,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         // Přidat předvolbu země pokud chybí (např. 0612345678 → +420612345678)
         var countryEl = document.getElementById('country');
         var cc = countryEl ? countryEl.value : 'SK';
-        var prefixMap = { CZ: '+420' };
+        var prefixMap = { SK: '+421', CZ: '+420' };
         var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
         if (!cleaned.startsWith('+') && !cleaned.startsWith('00')) {
-          if (cleaned.startsWith('0')) cleaned = (prefixMap[cc] || '+420') + cleaned.substring(1);
-          else if (/^\d{7,}$/.test(cleaned)) cleaned = (prefixMap[cc] || '+420') + cleaned;
+          if (cleaned.startsWith('0')) cleaned = (prefixMap[cc] || DEFAULT_PHONE_PREFIX) + cleaned.substring(1);
+          else if (/^\d{7,}$/.test(cleaned)) cleaned = (prefixMap[cc] || DEFAULT_PHONE_PREFIX) + cleaned;
         } else if (cleaned.startsWith('00')) {
           cleaned = '+' + cleaned.substring(2);
         }
