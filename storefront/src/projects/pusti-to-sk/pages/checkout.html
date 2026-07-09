@@ -3244,6 +3244,22 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     pl: { created:'Zamówienie utworzone', awaiting:'oczekuje na płatność', reserved:'Zarezerwowane jeszcze', qrTitle:'Płacisz z komputera lub innego urządzenia?', qrScanApp:'Zeskanuj ten kod QR w aplikacji bankowej.', saveQr:'Zapisz QR w galerii', amountToPay:'Kwota do zapłaty', detailsTitle:'Dane do przelewu', tapCopy:'dotknij = kopiuj', refLabel:'Tytuł przelewu (ważne!)', vsLabel:'Tytuł przelewu (ważne!)', amountLabel:'Kwota', copy:'Kopiuj', copied:'✓ Skopiowano', howTitle:'Jak zapłacić', s1t:'Skopiuj powyższe dane', s1d:'Dotknij Kopiuj przy IBAN i tytule', s2t:'Otwórz swoją aplikację bankową', s2d:'Nowy przelew → wklej dane', s3t:'Potwierdź płatność', s3d:'Wyślemy towar zaraz po zaksięgowaniu', footEmail:'Właśnie wysłaliśmy te dane na Twój e-mail — nie stracisz ich po zamknięciu tego okna.', footNotify:'Odezwiemy się, gdy płatność dotrze.', footGuarantee:'30-dniowa gwarancja zwrotu pieniędzy.', paid:'Zapłaciłem →', later:'Zapłacę później', close:'Zamknij', payFor:'Płatność za zamówienie', scanOrEnter:'Zeskanuj kod QR lub wpisz dane w swoim banku.' }
   };
   (function () { var R = { sk:'Príjemca', cs:'Příjemce', de:'Empfänger', nl:'Begunstigde', pl:'Odbiorca', sv:'Mottagare', no:'Mottaker', hu:'Kedvezményezett', fr:'Bénéficiaire', es:'Beneficiario' }; for (var k in R) { if (BT_I18N[k]) BT_I18N[k].recipient = R[k]; } })();
+  // Waiting / paid states (polling po „Zaplatil som").
+  (function () {
+    var W = {
+      sk: { waitTitle:'Čakáme na vašu platbu', waitSub:'Objednávka je vytvorená. Hneď ako platba dorazí, potvrdíme ju a odošleme tovar.', waitEmail:'Platobné údaje sme vám poslali aj na e-mail.', checking:'Overujeme platbu…', paidTitle:'Platba prijatá!', paidSub:'Ďakujeme! Vašu objednávku pripravujeme na odoslanie.', orderLabel:'Objednávka' },
+      cs: { waitTitle:'Čekáme na vaši platbu', waitSub:'Objednávka je vytvořená. Jakmile platba dorazí, potvrdíme ji a odešleme zboží.', waitEmail:'Platební údaje jsme vám poslali i na e-mail.', checking:'Ověřujeme platbu…', paidTitle:'Platba přijata!', paidSub:'Děkujeme! Vaši objednávku připravujeme k odeslání.', orderLabel:'Objednávka' },
+      de: { waitTitle:'Wir warten auf Ihre Zahlung', waitSub:'Ihre Bestellung ist angelegt. Sobald die Zahlung eingeht, bestätigen wir sie und versenden die Ware.', waitEmail:'Die Zahlungsdaten haben wir Ihnen auch per E-Mail geschickt.', checking:'Zahlung wird geprüft…', paidTitle:'Zahlung erhalten!', paidSub:'Danke! Wir bereiten Ihre Bestellung für den Versand vor.', orderLabel:'Bestellung' },
+      nl: { waitTitle:'We wachten op uw betaling', waitSub:'Uw bestelling is aangemaakt. Zodra de betaling binnen is, bevestigen we deze en verzenden we uw pakket.', waitEmail:'De betaalgegevens hebben we u ook per e-mail gestuurd.', checking:'Betaling controleren…', paidTitle:'Betaling ontvangen!', paidSub:'Bedankt! We maken uw bestelling klaar voor verzending.', orderLabel:'Bestelling' },
+      pl: { waitTitle:'Czekamy na Twoją płatność', waitSub:'Zamówienie zostało utworzone. Gdy tylko płatność dotrze, potwierdzimy ją i wyślemy towar.', waitEmail:'Dane do płatności wysłaliśmy również na Twój e-mail.', checking:'Weryfikujemy płatność…', paidTitle:'Płatność otrzymana!', paidSub:'Dziękujemy! Przygotowujemy zamówienie do wysyłki.', orderLabel:'Zamówienie' },
+      sv: { waitTitle:'Vi väntar på din betalning', waitSub:'Din beställning är skapad. Så snart betalningen kommit in bekräftar vi den och skickar varan.', waitEmail:'Betalningsuppgifterna har vi även skickat till din e-post.', checking:'Verifierar betalning…', paidTitle:'Betalning mottagen!', paidSub:'Tack! Vi förbereder din beställning för leverans.', orderLabel:'Beställning' },
+      no: { waitTitle:'Vi venter på betalingen din', waitSub:'Bestillingen din er opprettet. Så snart betalingen kommer, bekrefter vi den og sender varen.', waitEmail:'Betalingsdetaljene har vi også sendt til e-posten din.', checking:'Kontrollerer betaling…', paidTitle:'Betaling mottatt!', paidSub:'Takk! Vi gjør bestillingen klar for sending.', orderLabel:'Bestilling' },
+      hu: { waitTitle:'Várunk a fizetésére', waitSub:'A rendelése létrejött. Amint a fizetés megérkezik, megerősítjük és elküldjük a terméket.', waitEmail:'A fizetési adatokat e-mailben is elküldtük.', checking:'Fizetés ellenőrzése…', paidTitle:'Fizetés megérkezett!', paidSub:'Köszönjük! Előkészítjük a rendelését a küldéshez.', orderLabel:'Rendelés' },
+      fr: { waitTitle:'Nous attendons votre paiement', waitSub:'Votre commande est créée. Dès réception du paiement, nous la confirmons et expédions.', waitEmail:'Nous vous avons aussi envoyé les informations de paiement par e-mail.', checking:'Vérification du paiement…', paidTitle:'Paiement reçu !', paidSub:'Merci ! Nous préparons votre commande pour l\'expédition.', orderLabel:'Commande' },
+      es: { waitTitle:'Esperando tu pago', waitSub:'Tu pedido está creado. En cuanto llegue el pago, lo confirmamos y enviamos.', waitEmail:'También te hemos enviado los datos de pago por correo.', checking:'Verificando el pago…', paidTitle:'¡Pago recibido!', paidSub:'¡Gracias! Estamos preparando tu pedido para el envío.', orderLabel:'Pedido' }
+    };
+    for (var k in W) { if (BT_I18N[k]) { for (var kk in W[k]) BT_I18N[k][kk] = W[k][kk]; } }
+  })();
   function btLocale() { var L = (PROJECT_CONFIG.locale || 'sk').toLowerCase(); return BT_I18N[L] ? L : 'sk'; }
   function btT(k) { return (BT_I18N[btLocale()] || BT_I18N.sk)[k] || BT_I18N.sk[k] || k; }
   function btCurrency() { var bt = btCfg() || {}; return String(bt.currency || (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency) || 'EUR').toUpperCase(); }
@@ -3329,7 +3345,23 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       '.bt-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}.bt-step .n{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#2D1B3D;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;}.bt-step .st{font-size:14px;font-weight:600;line-height:1.3;}.bt-step .sd{font-size:12.5px;color:#7A6189;line-height:1.4;margin-top:1px;}' +
       '.bt-foot{margin-top:16px;padding-top:14px;border-top:1px solid #F0E4EC;display:flex;flex-direction:column;gap:8px;}.bt-foot .f{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:#5A3D6B;line-height:1.4;}.bt-foot .f .fi{flex-shrink:0;}.bt-foot .f b{color:#2D1B3D;font-weight:600;}' +
       '.bt-done{width:100%;margin-top:16px;padding:16px;border:none;border-radius:12px;background:var(--cta);color:#fff;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(194,123,160,.32);min-height:56px;}.bt-done:active{transform:translateY(1px);}' +
-      '.bt-later{display:block;width:100%;text-align:center;margin-top:10px;font-size:13px;color:#9B7AAD;background:none;border:none;cursor:pointer;font-family:inherit;padding:8px;}';
+      '.bt-later{display:block;width:100%;text-align:center;margin-top:10px;font-size:13px;color:#9B7AAD;background:none;border:none;cursor:pointer;font-family:inherit;padding:8px;}' +
+      // ── Waiting / paid steps ──
+      '.bt-step2{padding:clamp(28px,7vw,36px) clamp(18px,5vw,24px) 30px;text-align:center;animation:btFade .3s ease;}' +
+      '.bt-badge{width:78px;height:78px;border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;}' +
+      '.bt-badge.wait{background:#FAF5F8;border:3px solid #EDD9E5;}' +
+      '.bt-badge.ok{background:#E1F5EE;border:3px solid #9FE1CB;font-size:40px;animation:btPop .45s cubic-bezier(.2,1.5,.4,1);}' +
+      '.bt-spin{width:36px;height:36px;border-radius:50%;border:3px solid #E3CEDD;border-top-color:var(--cta);animation:btSpin .9s linear infinite;}' +
+      '.bt-wt{font-size:clamp(18px,5vw,21px);font-weight:700;margin-bottom:8px;}' +
+      '.bt-ws{font-size:14px;color:#7A6189;line-height:1.55;margin-bottom:18px;}' +
+      '.bt-word{display:flex;justify-content:space-between;background:#FAF5F8;border-radius:10px;padding:11px 14px;font-size:13.5px;margin-bottom:8px;}.bt-word .k{color:#9B7AAD;}.bt-word .v{font-weight:600;color:#2D1B3D;}' +
+      '.bt-winfo{display:flex;align-items:center;gap:8px;justify-content:center;font-size:12.5px;color:#265F45;background:#F3FBF7;border:1px solid #CDEBDC;border-radius:10px;padding:10px 12px;margin-top:14px;line-height:1.4;text-align:left;}' +
+      '.bt-checking{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:12px;color:#B49BC0;margin-top:18px;}' +
+      '.bt-checking .d{width:6px;height:6px;border-radius:50%;background:var(--cta);animation:btBlink 1.2s infinite;}.bt-checking .d:nth-child(2){animation-delay:.2s}.bt-checking .d:nth-child(3){animation-delay:.4s}' +
+      '@keyframes btSpin{to{transform:rotate(360deg)}}' +
+      '@keyframes btPop{0%{transform:scale(0)}60%{transform:scale(1.15)}100%{transform:scale(1)}}' +
+      '@keyframes btFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}' +
+      '@keyframes btBlink{0%,100%{opacity:.25}50%{opacity:1}}';
     document.head.appendChild(st);
   }
   function btRenderQr(el, text) {
@@ -3345,7 +3377,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // Show the bank-transfer popup for a freshly created (unpaid) order.
   // Fully localised (PROJECT_CONFIG.locale) + currency-aware (EUR SEPA QR, CZK QR
   // Platba, other currencies = details only, no QR).
-  function showBankTransferPopup(displayId, amount) {
+  function showBankTransferPopup(displayId, amount, orderId) {
     var bt = btCfg() || {};
     var ref = btReference(displayId);
     var qr = btQrString(amount, ref);
@@ -3454,11 +3486,61 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var h = Math.floor(left / 3600), m = Math.floor((left % 3600) / 60), s = left % 60;
       cd.textContent = [h, m, s].map(function (n) { return String(n).length < 2 ? '0' + n : '' + n; }).join(':');
     }, 1000);
-    // Obe tlačidlá vedú na thank-you (objednávka už existuje, čaká na úhradu; údaje sú aj v e-maile).
-    var goThankYou = function () { window.location.href = PROJECT_CONFIG.thankYouUrl; };
-    document.getElementById('bt-done').onclick = goThankYou;
-    document.getElementById('bt-later').onclick = goThankYou;
-    document.getElementById('bt-x').onclick = goThankYou;
+    // „Zaplatil som" → krok „Čakáme na platbu" + polling. „Zaplatím neskôr" / × → zavrieť
+    // (objednávka existuje, platobné údaje má zákazník aj v e-maile).
+    document.getElementById('bt-done').onclick = function () { btEnterWaiting(orderId, orderCode, amtDisplay); };
+    document.getElementById('bt-later').onclick = btClosePopup;
+    document.getElementById('bt-x').onclick = btClosePopup;
+  }
+  var btPollTimer = null;
+  function btClosePopup() {
+    if (btPollTimer) { clearInterval(btPollTimer); btPollTimer = null; }
+    var ov = document.getElementById('bt-overlay'); if (ov) ov.parentNode.removeChild(ov);
+    document.body.style.overflow = '';
+  }
+  // Krok 2: „Čakáme na vašu platbu" — spinner + polling stavu (bez tlačítka pokračovať).
+  function btEnterWaiting(orderId, orderCode, amtDisplay) {
+    var card = document.querySelector('#bt-overlay .bt-card'); if (!card) return;
+    card.innerHTML =
+      '<div class="bt-h"><button class="bt-x" id="bt-x2" aria-label="' + btT('close') + '">×</button><div class="ok">✅ ' + btT('created') + '</div><div class="sub">' + orderCode + '</div></div>'
+      + '<div class="bt-step2">'
+      + '<div class="bt-badge wait"><div class="bt-spin"></div></div>'
+      + '<div class="bt-wt">' + btT('waitTitle') + '</div>'
+      + '<div class="bt-ws">' + btT('waitSub') + '</div>'
+      + '<div class="bt-word"><span class="k">' + btT('orderLabel') + '</span><span class="v">' + orderCode + '</span></div>'
+      + '<div class="bt-word"><span class="k">' + btT('amountLabel') + '</span><span class="v">' + amtDisplay + '</span></div>'
+      + '<div class="bt-winfo">📧 ' + btT('waitEmail') + '</div>'
+      + '<div class="bt-checking"><span class="d"></span><span class="d"></span><span class="d"></span>' + btT('checking') + '</div>'
+      + '</div>';
+    var x2 = document.getElementById('bt-x2'); if (x2) x2.onclick = btClosePopup;
+    if (btPollTimer) clearInterval(btPollTimer);
+    btPoll(orderId, orderCode, amtDisplay); // okamžitá 1. kontrola
+    btPollTimer = setInterval(function () { btPoll(orderId, orderCode, amtDisplay); }, 5000);
+  }
+  // Poll status z backendu (ktorý nastavuje Revolut reconcile cron).
+  function btPoll(orderId, orderCode, amtDisplay) {
+    if (!orderId) return;
+    fetch(MEDUSA_URL + '/store/bank-transfer-status?order_id=' + encodeURIComponent(orderId), {
+      headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d && d.paid) btEnterPaid(orderCode, amtDisplay);
+    }).catch(function () {});
+  }
+  // Krok 3: „Platba prijatá!" → problikne 2,6 s → redirect na thank-you.
+  function btEnterPaid(orderCode, amtDisplay) {
+    if (btPollTimer) { clearInterval(btPollTimer); btPollTimer = null; }
+    var card = document.querySelector('#bt-overlay .bt-card');
+    if (!card) { window.location.href = PROJECT_CONFIG.thankYouUrl; return; }
+    card.innerHTML =
+      '<div class="bt-h"><div class="ok">✅ ' + btT('created') + '</div><div class="sub">' + orderCode + '</div></div>'
+      + '<div class="bt-step2">'
+      + '<div class="bt-badge ok">✅</div>'
+      + '<div class="bt-wt">' + btT('paidTitle') + '</div>'
+      + '<div class="bt-ws">' + btT('paidSub') + '</div>'
+      + '<div class="bt-word"><span class="k">' + btT('orderLabel') + '</span><span class="v">' + orderCode + '</span></div>'
+      + '<div class="bt-word"><span class="k">' + btT('amountToPay') + '</span><span class="v" style="color:#0F6E56;">' + amtDisplay + ' ✓</span></div>'
+      + '</div>';
+    setTimeout(function () { window.location.href = PROJECT_CONFIG.thankYouUrl; }, 2600);
   }
 
   // Přepočítej a zobraz CELÝ order summary (bundle, order bump, daně, totál)
@@ -8771,7 +8853,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           localStorage.removeItem('checkout_draft');
           localStorage.removeItem('background_cart_id');
           submitBtn.classList.remove('loading'); submitBtn.disabled = false;
-          showBankTransferPopup(order.display_id, checkoutTotal);
+          showBankTransferPopup(order.display_id, checkoutTotal, order.id);
         });
       } else if (selectedMethod === 'cod') {
         // DOBÍRKA (COD): rovnou dokončit objednávku (žádný redirect, žádná platba)
