@@ -249,7 +249,6 @@ export default async function bankTransferReconcileJob(container: MedusaContaine
   if (!token) return // no Revolut Business creds / auth failed → dormant
 
   const credits = await fetchRevolutCredits(token, logger)
-  if (!credits.length) return
 
   const { Pool } = require("pg")
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
@@ -266,6 +265,8 @@ export default async function bankTransferReconcileJob(container: MedusaContaine
        ORDER BY o.created_at DESC
        LIMIT ${MAX_CANDIDATES}`
     )
+    // Heartbeat — proves the cron is alive + authenticated (happy path is otherwise silent).
+    logger.info(`[Bank Transfer Reconcile] tick: ${credits.length} incoming credits, ${orders.length} awaiting orders`)
 
     for (const ord of orders) {
       const orderNo = String(ord.display_id || "")
