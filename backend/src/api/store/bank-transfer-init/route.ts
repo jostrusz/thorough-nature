@@ -27,7 +27,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
 
     const query = req.scope.resolve("query")
     const { data: cartData } = await query.graph({
-      entity: "cart", fields: ["id", "email", "currency_code", "metadata"], filters: { id: cartId },
+      entity: "cart",
+      fields: [
+        "id", "email", "currency_code", "metadata",
+        "shipping_address.first_name", "shipping_address.last_name", "shipping_address.address_1",
+        "shipping_address.address_2", "shipping_address.city", "shipping_address.postal_code", "shipping_address.country_code",
+      ],
+      filters: { id: cartId },
     })
     const cart = cartData && cartData[0]
     if (!cart) { res.status(404).json({ error: "cart not found" }); return }
@@ -65,12 +71,28 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         const cfg = getProjectEmailConfig({ metadata: { project_id: projectSlug } })
         const locale = cfg.locale || PROJECT_LOCALE[projectSlug] || "sk"
         const emailRef = paymentReference(String(reference), currency)
+
+        // Delivery / pickup point (from checkout metadata + shipping address).
+        const md = cart.metadata || {}
+        const addr = cart.shipping_address || {}
+        const recipient = [addr.first_name, addr.last_name].filter(Boolean).join(" ").trim()
+        const isPickup = md.shipping_method === "zasilkovna_pickup" || !!md.packeta_point_id
+        const delivery = isPickup
+          ? { pickup: true, recipient, pointName: md.packeta_point_name || "", pointAddress: md.packeta_point_address || "" }
+          : {
+              pickup: false, recipient,
+              street: [addr.address_1, addr.address_2].filter(Boolean).join(", "),
+              cityLine: [addr.postal_code, addr.city].filter(Boolean).join(" "),
+              country: (addr.country_code || "").toUpperCase(),
+            }
+
         // Fire-and-forget: never block the checkout response on the e-mail.
         sendBankTransferEmail({
           to: cart.email, from: cfg.fromEmail || process.env.RESEND_FROM_EMAIL, replyTo: cfg.replyTo,
           locale, code: String(reference), iban: bank.iban, bic: bank.bic, beneficiary: bank.beneficiary,
           reference: emailRef, amount, currency, cartId,
           items: itemRows.map((r) => ({ title: r.title, quantity: Number(r.quantity), unit_price: Number(r.unit_price) })),
+          delivery,
         }).then((r) => {
           if (!r.ok) console.error(`[Bank Transfer Init] email failed cart ${cartId}: ${JSON.stringify(r.error)}`)
           else console.log(`[Bank Transfer Init] email sent to ${cart.email} (ref ${reference})`)

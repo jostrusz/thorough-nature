@@ -24,6 +24,10 @@ export const EMAIL_I18N: Record<string, any> = {
 }
 
 ;(function () { var Y: any = { sk: "Vaša objednávka", cs: "Vaše objednávka", de: "Ihre Bestellung", nl: "Uw bestelling", pl: "Twoje zamówienie", sv: "Din beställning", no: "Din bestilling", hu: "Az Ön rendelése", fr: "Votre commande", es: "Tu pedido" }; for (var k in Y) { if (EMAIL_I18N[k]) EMAIL_I18N[k].yourOrder = Y[k] } })()
+;(function () { var D: any = {
+  pickupLabel: { sk: "Odberné miesto", cs: "Výdejní místo", de: "Abholstelle", nl: "Afhaalpunt", pl: "Punkt odbioru", sv: "Utlämningsställe", no: "Hentested", hu: "Átvételi pont", fr: "Point de retrait", es: "Punto de recogida" },
+  addressLabel: { sk: "Doručovacia adresa", cs: "Doručovací adresa", de: "Lieferadresse", nl: "Bezorgadres", pl: "Adres dostawy", sv: "Leveransadress", no: "Leveringsadresse", hu: "Szállítási cím", fr: "Adresse de livraison", es: "Dirección de envío" },
+}; for (var key in D) { for (var lc in D[key]) { if (EMAIL_I18N[lc]) EMAIL_I18N[lc][key] = D[key][lc] } } })()
 
 function fmtIban(iban: string): string { return String(iban || "").replace(/(.{4})/g, "$1 ").trim() }
 
@@ -51,6 +55,10 @@ export function buildHtml(t: any, o: any): string {
   ${o.itemsHtml ? `<tr><td style="padding:14px 24px 4px;">
     <div style="font-size:11px;letter-spacing:.5px;color:#9B7AAD;font-weight:700;text-transform:uppercase;margin-bottom:8px;">${t.yourOrder}</div>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAF5F8;border:1px solid #EDD9E5;border-radius:12px;"><tr><td style="padding:6px 14px;">${o.itemsHtml}</td></tr></table>
+  </td></tr>` : ""}
+  ${o.deliveryHtml ? `<tr><td style="padding:10px 24px 4px;">
+    <div style="font-size:11px;letter-spacing:.5px;color:#9B7AAD;font-weight:700;text-transform:uppercase;margin-bottom:8px;">${o.deliveryLabel}</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAF5F8;border:1px solid #EDD9E5;border-radius:12px;"><tr><td style="padding:11px 14px;font-size:14px;color:#2D1B3D;line-height:1.5;">${o.deliveryHtml}</td></tr></table>
   </td></tr>` : ""}
   ${o.qrUrl ? `<tr><td style="padding:14px 24px 4px;text-align:center;">
     <div style="display:inline-block;background:#FAF5F8;border:1px solid #EDD9E5;border-radius:14px;padding:16px;">
@@ -90,6 +98,7 @@ export async function sendBankTransferEmail(p: {
   code: string; iban: string; bic?: string; beneficiary?: string;
   reference: string; amount: number; currency: string; cartId?: string; orderId?: string;
   items?: Array<{ title: string; quantity: number; unit_price: number }>;
+  delivery?: { pickup: boolean; recipient?: string; pointName?: string; pointAddress?: string; street?: string; cityLine?: string; country?: string };
 }): Promise<{ ok: boolean; error?: any }> {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey || !p.to) return { ok: false, error: "no api key / recipient" }
@@ -109,9 +118,26 @@ export async function sendBankTransferEmail(p: {
   ).join("")
   const itemsText = items.map((it) => `- ${it.quantity}× ${it.title}: ${fmtAmount(Number(it.unit_price) * Number(it.quantity), p.currency, p.locale)}`).join("\n")
 
+  // Delivery / pickup point.
+  const d = p.delivery
+  let deliveryLabel = "", deliveryHtml = "", deliveryText = ""
+  if (d) {
+    if (d.pickup && d.pointName) {
+      deliveryLabel = t.pickupLabel
+      const parts = [d.pointName, d.pointAddress].filter(Boolean).join("<br>")
+      deliveryHtml = `${d.recipient ? `<b>${d.recipient}</b><br>` : ""}${parts}`
+      deliveryText = `${t.pickupLabel}: ${[d.recipient, d.pointName, d.pointAddress].filter(Boolean).join(", ")}`
+    } else if (!d.pickup && (d.street || d.recipient)) {
+      deliveryLabel = t.addressLabel
+      const parts = [d.street, d.cityLine, d.country].filter(Boolean).join("<br>")
+      deliveryHtml = `${d.recipient ? `<b>${d.recipient}</b><br>` : ""}${parts}`
+      deliveryText = `${t.addressLabel}: ${[d.recipient, d.street, d.cityLine, d.country].filter(Boolean).join(", ")}`
+    }
+  }
+
   const html = buildHtml(t, {
     code: p.code, amountDisplay, iban: p.iban, bic: p.bic, beneficiary: p.beneficiary,
-    reference: p.reference, currency: p.currency, qrUrl, itemsHtml,
+    reference: p.reference, currency: p.currency, qrUrl, itemsHtml, deliveryHtml, deliveryLabel,
   })
   const refLabel = p.currency === "EUR" ? t.refL : t.vsL
   const text = [
@@ -119,6 +145,7 @@ export async function sendBankTransferEmail(p: {
     `${t.greeting.replace(/,$/, "")}`,
     t.intro.replace(/<\/?b>/g, ""),
     items.length ? `\n${t.yourOrder}:\n${itemsText}` : "",
+    deliveryText ? `\n${deliveryText}` : "",
     `\n${t.amountToPay}: ${amountDisplay}`,
     `\n${t.details}:`,
     `IBAN: ${p.iban}`,
