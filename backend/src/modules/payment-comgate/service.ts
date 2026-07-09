@@ -13,9 +13,11 @@ const GATEWAY_CONFIG_MODULE = "gatewayConfig"
  * Shared config cache — survives across method calls, cleared after 5 min.
  * Avoids opening a new DB connection on every request.
  */
-let _comgateConfigCache: any = null
+let _comgateConfigCache: any = null // array of all active comgate configs
 let _comgateConfigCacheTime = 0
 const CONFIG_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+// Per-config client cache (multi-tenant: CZ + SK merchants side by side)
+const _comgateClientCache = new Map<string, ComgateApiClient>()
 
 export interface IComgatePaymentSessionData {
   transId?: string
@@ -88,8 +90,13 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
    *   2. Raw pg Client via DATABASE_URL (always works, independent of container)
    * Results are cached for 5 minutes to avoid repeated DB connections.
    */
-  private async getComgateConfig(): Promise<any> {
-    // Return cached config if fresh
+  /**
+   * Load ALL active Comgate gateway configs (multi-tenant: e.g. CZ merchant
+   * 509962 for psi-superzivot/kocici-bible + SK merchant 515357 for
+   * pusti-to-sk). Cached 5 minutes as an array; selection happens per call.
+   */
+  private async getComgateConfigs(): Promise<any[]> {
+    // Return cached configs if fresh
     if (_comgateConfigCache && (Date.now() - _comgateConfigCacheTime) < CONFIG_CACHE_TTL) {
       return _comgateConfigCache
     }
@@ -100,13 +107,14 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       try {
         const configs = await gcService.listGatewayConfigs(
           { provider: "comgate", is_active: true },
-          { take: 1 }
+          { take: 20 }
         )
-        if (configs[0]) {
-          this.getLogger().info("[Comgate] Config loaded via gatewayConfig module")
-          _comgateConfigCache = configs[0]
+        if (configs?.length) {
+          const sorted = [...configs].sort((a: any, b: any) => (a.priority ?? 99) - (b.priority ?? 99))
+          this.getLogger().info(`[Comgate] ${sorted.length} config(s) loaded via gatewayConfig module`)
+          _comgateConfigCache = sorted
           _comgateConfigCacheTime = Date.now()
-          return configs[0]
+          return sorted
         }
       } catch (e: any) {
         this.getLogger().warn(`[Comgate] Gateway config module query failed: ${e.message}`)
@@ -126,14 +134,14 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         })
         await pgClient.connect()
         const result = await pgClient.query(
-          "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL LIMIT 1",
+          "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL ORDER BY priority ASC",
           ["comgate"]
         )
-        if (result.rows[0]) {
-          this.getLogger().info("[Comgate] Config loaded via raw pg (DATABASE_URL)")
-          _comgateConfigCache = result.rows[0]
+        if (result.rows.length) {
+          this.getLogger().info(`[Comgate] ${result.rows.length} config(s) loaded via raw pg (DATABASE_URL)`)
+          _comgateConfigCache = result.rows
           _comgateConfigCacheTime = Date.now()
-          return result.rows[0]
+          return result.rows
         }
       } catch (e: any) {
         this.getLogger().warn(`[Comgate] Raw pg query failed: ${e.message}`)
@@ -145,46 +153,70 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
     }
 
     this.getLogger().warn("[Comgate] No gateway config found via any method")
-    return null
+    return []
   }
 
   /**
-   * Initialize the Comgate API client with credentials from gateway_config
+   * Pick the right Comgate config for a payment.
+   *   - merchant: exact match on the eshop id stored on the session at create
+   *     time (used for status/refund/cancel — the transaction's owner).
+   *   - projectSlug: match gateway_config.project_slugs (JSON array; filter in
+   *     JS per project convention — used at create time).
+   *   - fallback: config without project_slugs restriction, else first by priority.
    */
-  private async getComgateClient(): Promise<ComgateApiClient> {
-    if (this.client_) return this.client_
+  private async getComgateConfig(projectSlug?: string, merchant?: string): Promise<any> {
+    const configs = await this.getComgateConfigs()
+    if (!configs.length) return null
 
-    const config = await this.getComgateConfig()
+    if (merchant) {
+      const byMerchant = configs.find((c: any) => {
+        const keys = this.getKeysFromConfig(c)
+        return keys?.api_key === String(merchant)
+      })
+      if (byMerchant) return byMerchant
+    }
+
+    if (projectSlug) {
+      const byProject = configs.find((c: any) => {
+        let slugs = c.project_slugs
+        if (typeof slugs === "string") { try { slugs = JSON.parse(slugs) } catch { slugs = null } }
+        return Array.isArray(slugs) && slugs.includes(projectSlug)
+      })
+      if (byProject) return byProject
+    }
+
+    const unrestricted = configs.find((c: any) => {
+      let slugs = c.project_slugs
+      if (typeof slugs === "string") { try { slugs = JSON.parse(slugs) } catch { slugs = null } }
+      return !Array.isArray(slugs) || slugs.length === 0
+    })
+    return unrestricted || configs[0]
+  }
+
+  /**
+   * Initialize a Comgate API client for the given config. Clients are cached
+   * per config id (multi-tenant safe — never a single shared client).
+   */
+  private async getComgateClient(config: any): Promise<ComgateApiClient> {
     if (!config) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "Comgate gateway not configured. Set credentials in admin gateway config."
       )
     }
-    const isLive = config.mode === "live"
-    const keys = isLive ? config.live_keys : config.test_keys
+    const cacheKey = String(config.id || "default")
+    const cached = _comgateClientCache.get(cacheKey)
+    if (cached) return cached
 
-    // Debug: log config structure to identify key mapping issues
-    this.getLogger().info(`[Comgate] Config mode=${config.mode}, isLive=${isLive}, ` +
-      `live_keys type=${typeof config.live_keys}, test_keys type=${typeof config.test_keys}, ` +
-      `keys type=${typeof keys}, keys keys=${keys ? Object.keys(keys).join(',') : 'null'}, ` +
-      `has api_key=${!!keys?.api_key}, has secret_key=${!!keys?.secret_key}`)
-
-    // If keys is a string (raw pg might not auto-parse json), try to parse it
-    let parsedKeys = keys
-    if (typeof keys === 'string') {
-      try { parsedKeys = JSON.parse(keys) } catch {}
-    }
-
+    const parsedKeys = this.getKeysFromConfig(config)
     if (!parsedKeys?.api_key || !parsedKeys?.secret_key) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "Comgate merchant ID or secret not configured"
       )
     }
-    // Single-tenant cache; return the local so a concurrent call can't swap it.
     const client = new ComgateApiClient(parsedKeys.api_key, parsedKeys.secret_key)
-    this.client_ = client
+    _comgateClientCache.set(cacheKey, client)
     return client
   }
 
@@ -224,8 +256,11 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       this.getLogger().info(`[Comgate] sessionData (context.data) keys: ${Object.keys(sessionData).join(", ")}`)
       this.getLogger().info(`[Comgate] sessionData.comgate_method=${sessionData?.comgate_method}, sessionData.method=${sessionData?.method}`)
 
-      const client = await this.getComgateClient()
-      const config = await this.getComgateConfig()
+      // Multi-tenant: pick the gateway config for THIS project (e.g. SK merchant
+      // 515357 for pusti-to-sk vs CZ 509962 for psi-superzivot).
+      const projectSlug = sessionData?.project_slug || contextData?.project_slug || ""
+      const config = await this.getComgateConfig(projectSlug)
+      const client = await this.getComgateClient(config)
 
       // Use statement descriptor if provided, otherwise use refId or generic label
       const refId = sessionData?.refId || contextData?.refId || cart?.id || `ref-${Date.now()}`
@@ -305,6 +340,24 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       else if (rawMethod === "essox") comgateMethod = "LOAN_ESSOX"
       else if (rawMethod.startsWith("bank_pl_")) comgateMethod = rawMethod.toUpperCase()
       else if (rawMethod.startsWith("bank_cz_")) comgateMethod = LEGACY_TO_PSD2[rawMethod.toUpperCase()] || rawMethod.toUpperCase()
+      // Slovak bank buttons (merchant 515357). Tatra + VÚB carry a _P suffix
+      // and 365.bank is 365B on the Comgate side — plain toUpperCase() would
+      // produce invalid codes, hence the explicit map.
+      else if (rawMethod.startsWith("bank_sk_")) {
+        const SK_BANK_MAP: Record<string, string> = {
+          bank_sk_slsp: "BANK_SK_SLSP",
+          bank_sk_tb: "BANK_SK_TB_P",
+          bank_sk_vub: "BANK_SK_VUB_P",
+          bank_sk_csob: "BANK_SK_CSOB",
+          bank_sk_365: "BANK_SK_365B",
+          bank_sk_fb: "BANK_SK_FB",
+          bank_sk_mb: "BANK_SK_MB",
+          bank_sk_pb: "BANK_SK_PB",
+          bank_sk_uc: "BANK_SK_UC",
+          bank_sk_other: "BANK_SK_OTHER",
+        }
+        comgateMethod = SK_BANK_MAP[rawMethod] || "BANK_SK_OTHER"
+      }
       else if (rawMethod === "przelew_bankowy") comgateMethod = "BANK_CZ_OTHER"
       else if (rawMethod === "ALL" || !rawMethod) comgateMethod = "ALL"
       else comgateMethod = rawMethod.toUpperCase()
@@ -318,19 +371,30 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       const cancelUrl = returnUrl ? returnUrl + (returnUrl.includes("?") ? "&" : "?") + "comgate_status=cancelled" : ""
       const pendingUrl = returnUrl ? returnUrl + (returnUrl.includes("?") ? "&" : "?") + "comgate_status=pending" : ""
 
+      // Credentials must respect config.mode (test vs live) and handle
+      // JSON-string keys from the raw-pg fallback — getKeysFromConfig does both.
+      const configKeys = this.getKeysFromConfig(config)
+      if (!configKeys) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "Comgate merchant ID or secret not configured"
+        )
+      }
+
       const paymentParams = {
-        merchant: config?.live_keys?.api_key || config?.test_keys?.api_key,
+        merchant: configKeys.api_key,
         price: priceInCents,
         curr: curr,
         label: descriptor,
         refId: refId,
-        secret: config?.live_keys?.secret_key || config?.test_keys?.secret_key,
+        secret: configKeys.secret_key,
         email: customerEmail,
-        name: customerName || undefined, // payer name (shown in Comgate admin)
+        fullName: customerName || undefined, // payer name (Comgate v1.0: fullName; `name` is a product id)
         lang,
         country: billingCountry || countryFallback,
         prepareOnly: true, // get transId + URL without redirect
         method: comgateMethod,
+        test: config?.mode !== "live" ? true : undefined, // mark test-mode payments per Comgate protocol
         url_ok: returnUrl || undefined,
         url_cancel: cancelUrl || undefined,
         url_pending: pendingUrl || undefined,
@@ -373,6 +437,9 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
           currency: currency_code,
           createdAt: Date.now(),
           checkoutUrl: result.data.redirectUrl,
+          // Owning eshop id — later calls (status/refund/cancel) use it to pick
+          // the right merchant among multiple active Comgate configs.
+          comgateMerchant: configKeys.api_key,
         },
       }
     } catch (error: any) {
@@ -392,8 +459,10 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
     try {
       // Medusa v2: session data is in input.data (not the input itself)
       const paymentSessionData = input?.data || input
-      const client = await this.getComgateClient()
-      const config = await this.getComgateConfig()
+      // Multi-tenant: route to the merchant that created this transaction
+      // (comgateMerchant stamped on session data at initiate).
+      const config = await this.getComgateConfig(undefined, paymentSessionData?.comgateMerchant)
+      const client = await this.getComgateClient(config)
       const keys = this.getKeysFromConfig(config)
       const transId = paymentSessionData?.transId
 
@@ -451,8 +520,10 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
   async capturePayment(input: any): Promise<any> {
     try {
       const paymentSessionData = input?.data || input
-      const client = await this.getComgateClient()
-      const config = await this.getComgateConfig()
+      // Multi-tenant: route to the merchant that created this transaction
+      // (comgateMerchant stamped on session data at initiate).
+      const config = await this.getComgateConfig(undefined, paymentSessionData?.comgateMerchant)
+      const client = await this.getComgateClient(config)
       const keys = this.getKeysFromConfig(config)
       const transId = paymentSessionData?.transId
 
@@ -501,8 +572,9 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
     try {
       const paymentSessionData = input?.data || input
       const refundAmount = input?.amount || 0
-      const client = await this.getComgateClient()
-      const config = await this.getComgateConfig()
+      // Multi-tenant: route to the merchant that created this transaction.
+      const config = await this.getComgateConfig(undefined, paymentSessionData?.comgateMerchant)
+      const client = await this.getComgateClient(config)
       const keys = this.getKeysFromConfig(config)
       const transId = paymentSessionData?.transId
 
@@ -531,7 +603,7 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
       }
 
       this.getLogger().info(
-        `[Comgate] Refund created for transId ${transId}: ${(refundAmount / 100).toFixed(2)}`
+        `[Comgate] Refund created for transId ${transId}: ${Number(refundAmount).toFixed(2)}`
       )
 
       return {
@@ -580,8 +652,10 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
   async getPaymentStatus(input: any): Promise<PaymentSessionStatus> {
     try {
       const paymentSessionData = input?.data || input
-      const client = await this.getComgateClient()
-      const config = await this.getComgateConfig()
+      // Multi-tenant: route to the merchant that created this transaction
+      // (comgateMerchant stamped on session data at initiate).
+      const config = await this.getComgateConfig(undefined, paymentSessionData?.comgateMerchant)
+      const client = await this.getComgateClient(config)
       const keys = this.getKeysFromConfig(config)
       const transId = paymentSessionData?.transId
 
@@ -613,8 +687,10 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
   async retrievePayment(input: any): Promise<any> {
     try {
       const paymentSessionData = input?.data || input
-      const client = await this.getComgateClient()
-      const config = await this.getComgateConfig()
+      // Multi-tenant: route to the merchant that created this transaction
+      // (comgateMerchant stamped on session data at initiate).
+      const config = await this.getComgateConfig(undefined, paymentSessionData?.comgateMerchant)
+      const client = await this.getComgateClient(config)
       const keys = this.getKeysFromConfig(config)
       const transId = paymentSessionData?.transId
 
@@ -680,8 +756,20 @@ export class ComgatePaymentProvider extends AbstractPaymentProvider {
         }
       }
 
-      const client = await this.getComgateClient()
-      const config = await this.getComgateConfig()
+      // Webhook payload carries no session — try every active merchant; the
+      // transaction's owner answers, others error out. (In practice the custom
+      // /webhooks/comgate route handles this; kept here for contract parity.)
+      const configs = await this.getComgateConfigs()
+      let config: any = null
+      for (const c of configs) {
+        const k = this.getKeysFromConfig(c)
+        if (!k) continue
+        const probeClient = await this.getComgateClient(c)
+        const probe = await probeClient.getStatus({ merchant: k.api_key, transId, secret: k.secret_key })
+        if (probe.success && probe.data?.status) { config = c; break }
+      }
+      if (!config) config = await this.getComgateConfig()
+      const client = await this.getComgateClient(config)
       const keys = this.getKeysFromConfig(config)
 
       const result = await client.getStatus({

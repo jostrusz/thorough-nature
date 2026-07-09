@@ -440,7 +440,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <div class="section-block">
   <h2><span class="icon">💳</span> Platba</h2>
   <p>Online platby na tejto stránke bezpečne zabezpečuje platobná brána <strong>Comgate, a.s.</strong> (<a href="https://www.comgate.eu/cs/platebni-brana" target="_blank" rel="noopener" style="color: var(--cta);">comgate.eu/platebni-brana</a>).</p>
-  <p><strong>Platba kartou (VISA, Mastercard):</strong> po odoslaní objednávky budete presmerovaní na zabezpečenú platobnú bránu Comgate, kde zadáte údaje o platobnej karte. Po úspešnej platbe sa vrátite späť na náš web a objednávku ihneď spracujeme. Viac o <a href="https://help.comgate.cz/v1/docs/cs/platby-kartou" target="_blank" rel="noopener" style="color: var(--cta);">platbách kartou</a> a <a href="https://help.comgate.cz/docs/bankovni-prevody" target="_blank" rel="noopener" style="color: var(--cta);">bankových prevodoch</a>.</p>
+  <p><strong>Platba kartou (VISA, Mastercard):</strong> po odoslaní objednávky budete presmerovaní na zabezpečenú platobnú bránu Comgate, kde zadáte údaje o platobnej karte. Po úspešnej platbe sa vrátite späť na náš web a objednávku ihneď spracujeme.</p>
+  <p><strong>Bankové tlačidlá (online prevod):</strong> pri platbe si môžete vybrať svoju banku (Slovenská sporiteľňa, Tatra banka, VÚB, ČSOB, 365.bank, Fio, mBank, Prima banka, UniCredit a ďalšie). Brána Comgate vás presmeruje priamo do internet bankingu vašej banky, kde platbu potvrdíte — prevod prebehne okamžite a objednávku spracujeme hneď po prijatí platby. Viac o <a href="https://help.comgate.cz/v1/docs/cs/platby-kartou" target="_blank" rel="noopener" style="color: var(--cta);">platbách kartou</a> a <a href="https://help.comgate.cz/docs/bankovni-prevody" target="_blank" rel="noopener" style="color: var(--cta);">bankových prevodoch</a>.</p>
   <p><strong>Prevádzkovateľ platobnej brány</strong> (reklamácie a otázky k platbám):<br>
    Comgate, a.s., Gočárova třída 1754/48b, 500 02 Hradec Králové, Česká republika<br>
    E-mail: <a href="mailto:podpora@comgate.cz" style="color: var(--cta);">podpora@comgate.cz</a> &nbsp;•&nbsp; Tel.: <a href="tel:+420228224267" style="color: var(--cta);">+420 228 224 267</a></p>
@@ -463,31 +464,65 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </div>
 
 <!-- ═══ FOOTER ═══ -->
-<footer class="site-footer">
- <div class="footer-inner">
-  <div class="footer-brand">
+<footer class="site-footer sfx">
+<style>
+.sfx{background:#1A1028;color:rgba(255,255,255,.72);padding:0;position:relative;font-family:'DM Sans',sans-serif;}
+.sfx::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#C27BA0 0%,#D9A4C0 50%,#C27BA0 100%);}
+.sfx-grid{max-width:1050px;margin:0 auto;padding:56px 24px 0;display:grid;grid-template-columns:1.5fr 1fr 1.1fr;gap:44px;}
+.sfx-brand img{height:46px;width:auto;margin-bottom:14px;}
+.sfx-tag{font-size:14px;line-height:1.65;color:rgba(255,255,255,.55);max-width:280px;}
+.sfx-h{font-size:12px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#C27BA0;margin:4px 0 16px;}
+.sfx-links{display:flex;flex-direction:column;gap:11px;}
+.sfx-links a{color:rgba(255,255,255,.72);text-decoration:none;font-size:14px;transition:color .2s,transform .2s;width:fit-content;}
+.sfx-links a:hover{color:#fff;transform:translateX(3px);}
+.sfx-contact{display:flex;flex-direction:column;gap:11px;font-size:14px;}
+.sfx-contact a{color:#fff;text-decoration:none;font-weight:600;border-bottom:1px solid rgba(194,123,160,.5);width:fit-content;padding-bottom:1px;transition:border-color .2s;}
+.sfx-contact a:hover{border-color:#C27BA0;}
+.sfx-note{color:rgba(255,255,255,.45);font-size:13px;}
+.sfx-pay{max-width:1050px;margin:44px auto 0;padding:20px 24px;border-top:1px solid rgba(255,255,255,.09);display:flex;gap:20px;align-items:center;justify-content:center;flex-wrap:wrap;}
+.sfx-pay span{font-size:12.5px;color:rgba(255,255,255,.55);}
+.sfx-pay img{opacity:.92;}
+.sfx-bot{max-width:1050px;margin:0 auto;padding:18px 24px 30px;border-top:1px solid rgba(255,255,255,.09);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:rgba(255,255,255,.42);line-height:1.6;}
+@media(max-width:760px){
+ .sfx-grid{grid-template-columns:1fr;gap:34px;text-align:center;padding-top:44px;}
+ .sfx-brand img{margin-left:auto;margin-right:auto;}
+ .sfx-tag{margin:0 auto;}
+ .sfx-links a,.sfx-contact a{margin:0 auto;}
+ .sfx-bot{flex-direction:column;text-align:center;}
+}
+</style>
+ <div class="sfx-grid">
+  <div class="sfx-brand">
    <img src="/pusti-to-logo-white.png" alt="Pusti to, čo ťa ničí">
+   <p class="sfx-tag">Kniha od Jorisa de Vriesa, ktorá ti pomôže pustiť to, čo ťa ničí — a nájsť vnútorný pokoj.</p>
   </div>
-  <div class="footer-links">
-   <a href="doprava.html">Doprava</a>
-   <a href="reklamace.html">Vrátenie</a>
-   <a href="obchodni-podminky.html">Podmienky</a>
-   <a href="ochrana-udaju.html">Súkromie</a>
-   <a href="kontakt.html">Podpora</a>
+  <div>
+   <div class="sfx-h">Informácie</div>
+   <nav class="sfx-links">
+    <a href="doprava.html">Doprava a platba</a>
+    <a href="reklamace.html">Vrátenie a reklamácie</a>
+    <a href="obchodni-podminky.html">Obchodné podmienky</a>
+    <a href="ochrana-udaju.html">Ochrana osobných údajov</a>
+   </nav>
   </div>
-  <div class="footer-contact">
-   <a href="mailto:podpora@pustitocotanici.sk">📧 podpora@pustitocotanici.sk</a>
+  <div>
+   <div class="sfx-h">Podpora</div>
+   <div class="sfx-contact">
+    <a href="mailto:podpora@pustitocotanici.sk">podpora@pustitocotanici.sk</a>
+    <span class="sfx-note">Odpovedáme zvyčajne do 24 hodín.</span>
+    <a href="kontakt.html" style="font-weight:500;border-bottom-color:rgba(255,255,255,.25);">Kontaktná stránka →</a>
+   </div>
   </div>
  </div>
- <div class="footer-payments" style="max-width:960px;margin:24px auto 0;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:center;">
-  <span style="font-size:12px;color:rgba(255,255,255,0.55);font-family:'DM Sans',sans-serif;">🔒 Zabezpečené online platby cez Comgate</span>
-  <img src="/icons/comgate.svg" alt="Comgate" style="height:20px;width:auto;opacity:.9;">
-  <img src="/icons/visa-white.svg" alt="Visa" style="height:15px;width:auto;opacity:.9;">
+ <div class="sfx-pay">
+  <span>🔒 Zabezpečené online platby cez Comgate</span>
+  <img src="/icons/comgate.svg" alt="Comgate" style="height:20px;width:auto;">
+  <img src="/icons/visa-white.svg" alt="Visa" style="height:15px;width:auto;">
   <img src="/icons/mc-symbol.svg" alt="Mastercard" style="height:26px;width:auto;">
  </div>
- <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, Staré Město, 110 00 Praha • IČO: 06259928 • DIČ: CZ06259928</span>
-  <span>&copy; 2026 Performance Marketing Solution s.r.o. Všetky práva vyhradené.</span>
+ <div class="sfx-bot">
+  <span>Performance Marketing Solution s.r.o. · Rybná 716/24, 110 00 Praha · IČO: 06259928 · DIČ: CZ06259928</span>
+  <span>© 2026 Performance Marketing Solution s.r.o. Všetky práva vyhradené.</span>
  </div>
 </footer>
 

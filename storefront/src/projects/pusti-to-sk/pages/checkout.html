@@ -5864,21 +5864,21 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // Comgate method code mapping: our code → Comgate API method parameter
   var COMGATE_METHOD_MAP = {
     'creditcard': 'CARD_CZ_COMGATE',
-    'bank_transfer': 'BANK_CZ_OTHER',
+    'bank_transfer': 'BANK_SK_OTHER',
     'applepay': 'APPLEPAY_REDIRECT',
     'googlepay': 'GOOGLEPAY_REDIRECT',
-    // Individual bank codes — PSD2 variants (enabled in Comgate merchant account)
-    'bank_cz_cs': 'BANK_CZ_CS_PSD2',
-    'bank_cz_csob': 'BANK_CZ_CSOB_PSD2',
-    'bank_cz_kb': 'BANK_CZ_KB_PSD2',
-    'bank_cz_rb': 'BANK_CZ_RB_PSD2',
-    'bank_cz_mo': 'BANK_CZ_MO_PSD2',
-    'bank_cz_fb': 'BANK_CZ_FB_PSD2',
-    'bank_cz_mb': 'BANK_CZ_MB_PSD2',
-    'bank_cz_ab': 'BANK_CZ_AB_PSD2',
-    'bank_cz_pb': 'BANK_CZ_PB_PSD2',
-    'bank_cz_uc': 'BANK_CZ_UC_PSD2',
-    'bank_cz_other': 'BANK_CZ_OTHER',
+    // Slovak bank buttons (Comgate merchant 515357). Tatra + VÚB carry a _P
+    // suffix and 365.bank is 365B on the Comgate side.
+    'bank_sk_slsp': 'BANK_SK_SLSP',
+    'bank_sk_tb': 'BANK_SK_TB_P',
+    'bank_sk_vub': 'BANK_SK_VUB_P',
+    'bank_sk_csob': 'BANK_SK_CSOB',
+    'bank_sk_365': 'BANK_SK_365B',
+    'bank_sk_fb': 'BANK_SK_FB',
+    'bank_sk_mb': 'BANK_SK_MB',
+    'bank_sk_pb': 'BANK_SK_PB',
+    'bank_sk_uc': 'BANK_SK_UC',
+    'bank_sk_other': 'BANK_SK_OTHER',
     // Deferred payments / installments (Comgate BNPL)
     'twisto': 'LATER_TWISTO',
     'skippay': 'LATER_SKIPPAY',
@@ -5891,45 +5891,44 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     'essox': 'LOAN_ESSOX',
   };
 
-  // Czech bank sub-methods for "Bankovní převod" expandable group
+  // Slovak bank sub-methods for the "Platba cez banku" expandable group
   var BANK_METHODS = {
-    'bank_cz_cs':    { code: 'BANK_CZ_CS_PSD2',   label: 'Česká spořitelna',   desc: 'Online prevod', icon: '/icons/ceska-sporitelna.svg' },
-    'bank_cz_csob':  { code: 'BANK_CZ_CSOB_PSD2', label: 'ČSOB',              desc: 'Online prevod', icon: '/icons/csob.svg' },
-    'bank_cz_kb':    { code: 'BANK_CZ_KB_PSD2',   label: 'Komerční banka',    desc: 'Online prevod', icon: '/icons/komercni-banka.svg' },
-    'bank_cz_rb':    { code: 'BANK_CZ_RB_PSD2',   label: 'Raiffeisenbank',    desc: 'Online prevod', icon: '/icons/raiffeisenbank.svg' },
-    'bank_cz_mo':    { code: 'BANK_CZ_MO_PSD2',   label: 'Moneta Money Bank', desc: 'Online prevod', icon: '/icons/moneta.svg' },
-    'bank_cz_fb':    { code: 'BANK_CZ_FB_PSD2',   label: 'Fio banka',         desc: 'Online prevod', icon: '/icons/fio-banka.svg' },
-    'bank_cz_mb':    { code: 'BANK_CZ_MB_PSD2',   label: 'mBank',             desc: 'Online prevod', icon: '/icons/mbank.svg' },
-    'bank_cz_ab':    { code: 'BANK_CZ_AB_PSD2',   label: 'Air Bank',          desc: 'Online prevod', icon: '/icons/airbank.svg' },
-    'bank_cz_pb':    { code: 'BANK_CZ_PB_PSD2',   label: 'Partners Banka',    desc: 'Online prevod', icon: '/icons/partners-banka.svg' },
-    'bank_cz_uc':    { code: 'BANK_CZ_UC_PSD2',   label: 'UniCredit Bank',    desc: 'Online prevod', icon: '/icons/unicredit.svg' },
-    'bank_cz_other': { code: 'BANK_CZ_OTHER',     label: 'Iná banka',        desc: 'Bankový prevod', icon: '/icons/bank-generic.svg' },
+    'bank_sk_slsp':  { code: 'BANK_SK_SLSP',  label: 'Slovenská sporiteľňa', desc: 'Okamžitý online prevod', icon: '/icons/slsp.svg' },
+    'bank_sk_tb':    { code: 'BANK_SK_TB_P',  label: 'Tatra banka',          desc: 'Okamžitý online prevod', icon: '/icons/tatra-banka.svg' },
+    'bank_sk_vub':   { code: 'BANK_SK_VUB_P', label: 'VÚB banka',            desc: 'Okamžitý online prevod', icon: '/icons/vub-banka.svg' },
+    'bank_sk_csob':  { code: 'BANK_SK_CSOB',  label: 'ČSOB',                 desc: 'Okamžitý online prevod', icon: '/icons/csob.svg' },
+    'bank_sk_365':   { code: 'BANK_SK_365B',  label: '365.bank',             desc: 'Okamžitý online prevod', icon: '/icons/365bank.png' },
+    'bank_sk_fb':    { code: 'BANK_SK_FB',    label: 'Fio banka',            desc: 'Okamžitý online prevod', icon: '/icons/fio-banka.svg' },
+    'bank_sk_mb':    { code: 'BANK_SK_MB',    label: 'mBank',                desc: 'Okamžitý online prevod', icon: '/icons/mbank.svg' },
+    'bank_sk_pb':    { code: 'BANK_SK_PB',    label: 'Prima banka',          desc: 'Okamžitý online prevod', icon: '/icons/prima-banka.png' },
+    'bank_sk_uc':    { code: 'BANK_SK_UC',    label: 'UniCredit Bank',       desc: 'Okamžitý online prevod', icon: '/icons/unicredit.svg' },
+    'bank_sk_other': { code: 'BANK_SK_OTHER', label: 'Iná banka',            desc: 'Bankový prevod z inej banky', icon: '/icons/bank-generic.svg' },
   };
   var BANK_CODES = Object.keys(BANK_METHODS);
 
-  // ═══ Dynamic CZ bank registry — tiles sourced from gateway config (admin) ═══
-  // Canonical bank identity → per-provider method code (Comgate bank_cz_* / PayU PBL value).
-  // A bank shows up in the checkout group when its method is active on ANY gateway;
-  // first gateway in /store/payment-options order (= admin priority) wins.
+  // ═══ Dynamic SK bank registry — tiles sourced from gateway config (admin) ═══
+  // Canonical bank identity → Comgate method code (bank_sk_*). A bank shows up
+  // in the checkout group when its method is active on the gateway;
+  // /store/payment-options order (= admin priority) wins. Same design/mechanism
+  // as the Czech picker on odpust-knizka.
   var CZ_BANK_REGISTRY = [
-    { key: 'cs',   label: 'Česká spořitelna',  icon: '/icons/ceska-sporitelna.svg', comgate: 'bank_cz_cs',   payu: 'cs', popular: true },
-    { key: 'csob', label: 'ČSOB',              icon: '/icons/csob.svg',             comgate: 'bank_cz_csob', payu: 'cb' },
-    { key: 'kb',   label: 'Komerční banka',    icon: '/icons/komercni-banka.svg',   comgate: 'bank_cz_kb',   payu: 'kb' },
-    { key: 'rb',   label: 'Raiffeisenbank',    icon: '/icons/raiffeisenbank.svg',   comgate: 'bank_cz_rb',   payu: 'rf' },
-    { key: 'mo',   label: 'Moneta Money Bank', icon: '/icons/moneta.svg',           comgate: 'bank_cz_mo',   payu: 'pg' },
-    { key: 'fio',  label: 'Fio banka',         icon: '/icons/fio-banka.svg',        comgate: 'bank_cz_fb',   payu: 'pf' },
-    { key: 'mb',   label: 'mBank',             icon: '/icons/mbank.svg',            comgate: 'bank_cz_mb',   payu: 'mp' },
-    { key: 'ab',   label: 'Air Bank',          icon: '/icons/airbank.svg',          comgate: 'bank_cz_ab',   payu: null },
-    { key: 'pb',   label: 'Partners Banka',    icon: '/icons/partners-banka.svg',   comgate: 'bank_cz_pb',   payu: null },
-    { key: 'uc',   label: 'UniCredit Bank',    icon: '/icons/unicredit.svg',        comgate: 'bank_cz_uc',   payu: 'uc' },
+    { key: 'slsp', label: 'Slovenská sporiteľňa', icon: '/icons/slsp.svg',        comgate: 'bank_sk_slsp', payu: null, popular: true },
+    { key: 'tb',   label: 'Tatra banka',          icon: '/icons/tatra-banka.svg', comgate: 'bank_sk_tb',   payu: null },
+    { key: 'vub',  label: 'VÚB banka',            icon: '/icons/vub-banka.svg',   comgate: 'bank_sk_vub',  payu: null },
+    { key: 'csob', label: 'ČSOB',                 icon: '/icons/csob.svg',        comgate: 'bank_sk_csob', payu: null },
+    { key: 'b365', label: '365.bank',             icon: '/icons/365bank.png',     comgate: 'bank_sk_365',  payu: null },
+    { key: 'fio',  label: 'Fio banka',            icon: '/icons/fio-banka.svg',   comgate: 'bank_sk_fb',   payu: null },
+    { key: 'mb',   label: 'mBank',                icon: '/icons/mbank.svg',       comgate: 'bank_sk_mb',   payu: null },
+    { key: 'pb',   label: 'Prima banka',          icon: '/icons/prima-banka.png', comgate: 'bank_sk_pb',   payu: null },
+    { key: 'uc',   label: 'UniCredit Bank',       icon: '/icons/unicredit.svg',   comgate: 'bank_sk_uc',   payu: null },
   ];
   // Active tiles collected from /store/payment-options: key → {method, provider, provider_id}
   var czBankTiles = {};
   var czQrSource = null; // PayU qrcz when active — otherwise QR rides on Comgate BANK_CZ_OTHER
 
   function collectCzBankMethod(m, providerName, providerIdFull) {
-    // Comgate individual bank buttons
-    if (providerName === 'comgate' && m.code && m.code.indexOf('bank_cz_') === 0) {
+    // Comgate individual bank buttons (SK codes on this project)
+    if (providerName === 'comgate' && m.code && m.code.indexOf('bank_sk_') === 0) {
       for (var i = 0; i < CZ_BANK_REGISTRY.length; i++) {
         if (CZ_BANK_REGISTRY[i].comgate === m.code) {
           var k = CZ_BANK_REGISTRY[i].key;
@@ -6132,7 +6131,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             'trustly': 'Trustly',
             'applepay': 'Apple Pay',
             'googlepay': 'Google Pay',
-            'bank_transfer': 'Bankový prevod | QR platba',
+            'bank_transfer': 'Platba cez banku',
             'sepa_debit': 'SEPA inkaso',
             'swish': 'Swish',
             'revolut_pay': 'Revolut Pay',
@@ -6286,7 +6285,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var src0 = czBankTiles[Object.keys(czBankTiles)[0]] || czQrSource;
       otherMethods.unshift({
         code: 'bank_transfer',
-        display_name: 'Bankový prevod | QR platba',
+        display_name: 'Platba cez banku',
         provider: src0.provider,
         provider_id: src0.provider_id,
         sort_order: -1,
@@ -6498,9 +6497,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           });
         } else {
           appendBankTile({
-            method: 'bank_cz_other', comgateMethod: 'BANK_CZ_OTHER',
+            method: 'bank_sk_other', comgateMethod: 'BANK_SK_OTHER',
             provider: m.provider, providerId: m.provider_id,
-            logoHtml: qrSvg, label: 'QR platba — iná banka', desc: 'Naskenujte QR kód v bankovej aplikácii'
+            logoHtml: qrSvg, label: 'Iná banka', desc: 'Bankový prevod z inej banky'
           });
         }
 

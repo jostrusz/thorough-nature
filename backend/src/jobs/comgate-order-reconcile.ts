@@ -82,11 +82,11 @@ async function cartLiveTotal(
  * unavailable/misconfigured. NOTE: ComgateApiClient.getStatus reads merchant +
  * secret from its params (not the constructor), so we must carry the keys.
  */
-async function loadComgate(
+async function loadComgateConfigs(
   logger: any
-): Promise<{ client: ComgateApiClient; merchant: string; secret: string } | null> {
+): Promise<Array<{ client: ComgateApiClient; merchant: string; secret: string }>> {
   const dbUrl = process.env.DATABASE_URL
-  if (!dbUrl) return null
+  if (!dbUrl) return []
 
   let pgClient: Client | null = null
   try {
@@ -95,32 +95,53 @@ async function loadComgate(
       ssl: dbUrl.includes("railway") ? { rejectUnauthorized: false } : undefined,
     })
     await pgClient.connect()
+    // Load ALL active Comgate gateways (multi-tenant: e.g. CZ merchant 509962 +
+    // SK merchant 515357). A given transId belongs to exactly one merchant, so
+    // getStatus is tried against each until the owning merchant answers.
     const { rows } = await pgClient.query(
-      "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL LIMIT 1",
+      "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL ORDER BY priority ASC",
       ["comgate"]
     )
-    const config = rows[0]
-    if (!config) return null
-
-    let keys = config.mode === "live" ? config.live_keys : config.test_keys
-    if (typeof keys === "string") {
-      try { keys = JSON.parse(keys) } catch { keys = null }
+    const out: Array<{ client: ComgateApiClient; merchant: string; secret: string }> = []
+    for (const config of rows) {
+      let keys = config.mode === "live" ? config.live_keys : config.test_keys
+      if (typeof keys === "string") {
+        try { keys = JSON.parse(keys) } catch { keys = null }
+      }
+      if (keys?.api_key && keys?.secret_key) {
+        out.push({
+          client: new ComgateApiClient(keys.api_key, keys.secret_key),
+          merchant: keys.api_key,
+          secret: keys.secret_key,
+        })
+      }
     }
-    if (!keys?.api_key || !keys?.secret_key) return null
-
-    return {
-      client: new ComgateApiClient(keys.api_key, keys.secret_key),
-      merchant: keys.api_key,
-      secret: keys.secret_key,
-    }
+    return out
   } catch (e: any) {
     logger.warn(`[Comgate Reconcile] config load failed: ${e.message}`)
-    return null
+    return []
   } finally {
     if (pgClient) {
       try { await pgClient.end() } catch {}
     }
   }
+}
+
+/**
+ * Poll a transId against every active Comgate merchant and return the first
+ * successful status (that's the merchant that owns the transaction). A transId
+ * that doesn't belong to a merchant returns an error, so this correctly routes
+ * multi-tenant transactions to the right eshop.
+ */
+async function getStatusAnyMerchant(
+  configs: Array<{ client: ComgateApiClient; merchant: string; secret: string }>,
+  transId: string
+): Promise<{ success: boolean; data?: any; error?: string }> {
+  for (const cfg of configs) {
+    const res = await cfg.client.getStatus({ merchant: cfg.merchant, transId, secret: cfg.secret })
+    if (res.success && res.data?.status) return res
+  }
+  return { success: false, data: null }
 }
 
 /**
@@ -167,9 +188,8 @@ async function captureAndEmit(
 export default async function comgateReconcileJob(container: MedusaContainer) {
   const logger = container.resolve("logger")
 
-  const cg = await loadComgate(logger)
-  if (!cg) return // no active Comgate config → nothing to do
-  const { client, merchant, secret } = cg
+  const comgateConfigs = await loadComgateConfigs(logger)
+  if (!comgateConfigs.length) return // no active Comgate config → nothing to do
 
   const { Pool } = require("pg")
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
@@ -199,7 +219,7 @@ export default async function comgateReconcileJob(container: MedusaContainer) {
       const transId = cand.trans_id
       if (!transId) continue
       try {
-        const statusRes = await client.getStatus({ merchant, transId, secret })
+        const statusRes = await getStatusAnyMerchant(comgateConfigs, transId)
         if (!statusRes.success || statusRes.data?.status !== "PAID") continue
 
         // Race: order may already exist (return path / webhook completed it).
@@ -306,7 +326,7 @@ export default async function comgateReconcileJob(container: MedusaContainer) {
       const transId = cand.trans_id
       if (!transId) continue
       try {
-        const statusRes = await client.getStatus({ merchant, transId, secret })
+        const statusRes = await getStatusAnyMerchant(comgateConfigs, transId)
         if (!statusRes.success || statusRes.data?.status !== "PAID") continue
 
         const stamp = {

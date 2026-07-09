@@ -11,7 +11,9 @@ export interface IComgatePaymentParams {
   prepareOnly?: boolean // if true, don't redirect, return transId + URL
   secret: string
   email?: string
-  name?: string // payer full name
+  name?: string // legacy alias for fullName (v1.0 `name` is a product id!)
+  fullName?: string // payer full name (Comgate v1.0 param)
+  test?: boolean // mark payment as test (Comgate creates a verification payment)
   lang?: string // gateway UI language: cs, en, sk, pl, etc.
   country?: string
   url_ok?: string // URL to redirect after successful payment
@@ -120,9 +122,17 @@ export class ComgateApiClient {
         formData.append("prepareOnly", "true")
       }
 
-      // Optional: payer name (shown in Comgate admin)
-      if (params.name) {
-        formData.append("name", params.name)
+      // Optional: payer name (shown in Comgate admin). Comgate v1.0 uses
+      // `fullName` for the payer; `name` is a product identifier — accept the
+      // legacy alias but always send fullName.
+      const payerName = params.fullName || params.name
+      if (payerName) {
+        formData.append("fullName", payerName)
+      }
+
+      // Test-mode payment flag (default false per Comgate protocol)
+      if (params.test) {
+        formData.append("test", "true")
       }
 
       // Optional: payment gateway UI language (cs, en, sk, pl...)

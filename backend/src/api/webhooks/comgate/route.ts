@@ -31,34 +31,29 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     logger.info(`[Comgate Webhook] Received notification for transId: ${transId}`)
 
-    // Load Comgate config from DB (same approach as service.ts)
-    const config = await loadComgateConfig(logger)
-    if (!config) {
+    // Load ALL active Comgate configs (multi-tenant: CZ merchant 509962 + SK
+    // merchant 515357) and verify the transId against each — the merchant that
+    // owns the transaction answers with a status; the others return an error.
+    const configs = await loadComgateConfigs(logger)
+    if (!configs.length) {
       logger.error("[Comgate Webhook] No Comgate config found")
       return res.status(200).send("OK") // Return 200 so Comgate doesn't retry
     }
 
-    const isLive = config.mode === "live"
-    let keys = isLive ? config.live_keys : config.test_keys
-    if (typeof keys === "string") {
-      try { keys = JSON.parse(keys) } catch { keys = null }
+    let statusResult: any = { success: false }
+    for (const config of configs) {
+      let keys = config.mode === "live" ? config.live_keys : config.test_keys
+      if (typeof keys === "string") {
+        try { keys = JSON.parse(keys) } catch { keys = null }
+      }
+      if (!keys?.api_key || !keys?.secret_key) continue
+      const client = new ComgateApiClient(keys.api_key, keys.secret_key)
+      const r = await client.getStatus({ merchant: keys.api_key, transId, secret: keys.secret_key })
+      if (r.success && r.data?.status) { statusResult = r; break }
     }
-
-    if (!keys?.api_key || !keys?.secret_key) {
-      logger.error("[Comgate Webhook] Invalid Comgate credentials")
-      return res.status(200).send("OK")
-    }
-
-    // Verify transaction status directly with Comgate API
-    const client = new ComgateApiClient(keys.api_key, keys.secret_key)
-    const statusResult = await client.getStatus({
-      merchant: keys.api_key,
-      transId: transId,
-      secret: keys.secret_key,
-    })
 
     if (!statusResult.success) {
-      logger.error(`[Comgate Webhook] Status check failed: ${statusResult.error}`)
+      logger.error(`[Comgate Webhook] Status check failed for transId ${transId} across all merchants`)
       return res.status(200).send("OK")
     }
 
@@ -178,9 +173,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
  * Load Comgate gateway config from DB.
  * Uses raw pg Client via DATABASE_URL (most reliable in webhook context).
  */
-async function loadComgateConfig(logger: any): Promise<any> {
+async function loadComgateConfigs(logger: any): Promise<any[]> {
   const dbUrl = process.env.DATABASE_URL
-  if (!dbUrl) return null
+  if (!dbUrl) return []
 
   let pgClient: Client | null = null
   try {
@@ -190,13 +185,13 @@ async function loadComgateConfig(logger: any): Promise<any> {
     })
     await pgClient.connect()
     const result = await pgClient.query(
-      "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL LIMIT 1",
+      "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL ORDER BY priority ASC",
       ["comgate"]
     )
-    return result.rows[0] || null
+    return result.rows || []
   } catch (e: any) {
     logger.warn(`[Comgate Webhook] DB query failed: ${e.message}`)
-    return null
+    return []
   } finally {
     if (pgClient) {
       try { await pgClient.end() } catch {}
@@ -336,6 +331,34 @@ async function safetyNetCompleteCart(
         `[Comgate Webhook] Safety net: order ${finalCheck[0].id} appeared just before completion — aborting (no duplicate)`
       )
       return
+    }
+
+    // Amount validation (mirror of the reconcile job): the cart may have been
+    // modified after the customer left for the bank — never complete a cart
+    // whose live total differs from what Comgate actually collected.
+    try {
+      const paidMinor = Number(comgateData?.price)
+      if (Number.isFinite(paidMinor) && paidMinor > 0) {
+        const paid = paidMinor / 100 // Comgate price is in minor units
+        const { rows: totRows } = await pool.query(
+          `SELECT
+             COALESCE((SELECT SUM(quantity * unit_price) FROM cart_line_item
+                       WHERE cart_id = $1 AND deleted_at IS NULL), 0)::numeric AS items_total,
+             COALESCE((SELECT SUM(amount) FROM cart_shipping_method
+                       WHERE cart_id = $1 AND deleted_at IS NULL), 0)::numeric AS shipping_total`,
+          [targetCart.id]
+        )
+        const cartTotal = Number(totRows[0]?.items_total || 0) + Number(totRows[0]?.shipping_total || 0)
+        if (cartTotal > 0 && Math.abs(cartTotal - paid) > 0.02) {
+          logger.warn(
+            `[Comgate Webhook] Safety net: amount mismatch for cart ${targetCart.id} — ` +
+            `paid ${paid.toFixed(2)} vs cart total ${cartTotal.toFixed(2)} — NOT completing (manual review)`
+          )
+          return
+        }
+      }
+    } catch (amtErr: any) {
+      logger.warn(`[Comgate Webhook] Safety net: amount validation failed (continuing): ${amtErr.message}`)
     }
 
     // Complete the cart via Medusa's cart completion workflow

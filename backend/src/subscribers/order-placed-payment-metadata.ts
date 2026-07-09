@@ -101,6 +101,7 @@ export default async function orderPlacedPaymentMetadataHandler({
       // Comgate
       if (paymentData.comgateTransId) {
         newMetadata.comgateTransId = paymentData.comgateTransId
+        newMetadata.payment_provider = "comgate"
         newMetadata.payment_method = paymentData.method || "comgate"
         found = true
         break
