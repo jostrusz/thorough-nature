@@ -44,6 +44,7 @@
     "clsx": "^2.1.1",
     "medusajs-launch-utils": "0.0.18",
     "pg": "^8.20.0",
+    "qrcode": "^1.5.4",
     "react-router-dom": "6.20.1",
     "resend": "4.0.1",
     "stripe": "^20.3.1",
