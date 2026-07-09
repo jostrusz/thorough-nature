@@ -4043,6 +4043,21 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   // Container-state styling for the Revolut card field (border/box-shadow can't be
   // set from inside the sandboxed iframe — they live on the #card-number container).
+  // ── Lokalizácia platby kartou (chrome okolo Revolut poľa). Jazyk = PROJECT_CONFIG.locale. ──
+  var CARD_I18N = {
+    sk: { ship:'Doprava', pay:'Platba', title:'Platobná karta', secureNote:'Údaje zadávate priamo do zabezpečeného poľa Revolut — my ich nevidíme.', c1:'256-bit šifrovanie', c2:'3D Secure overenie', c3:'Kartu neukladáme', payBtn:'Zaplatiť', securedBy:'Zabezpečené cez Revolut', guarantee:'30 dní záruka vrátenia', enterCard:'Zadajte údaje karty a potvrďte platbu.', connecting:'🔒 Pripájam sa k zabezpečenej platbe…' },
+    cs: { ship:'Doprava', pay:'Platba', title:'Platební karta', secureNote:'Údaje zadáváte přímo do zabezpečeného pole Revolut — my je nevidíme.', c1:'256bitové šifrování', c2:'Ověření 3D Secure', c3:'Kartu neukládáme', payBtn:'Zaplatit', securedBy:'Zabezpečeno přes Revolut', guarantee:'30 dní záruka vrácení', enterCard:'Zadejte údaje karty a potvrďte platbu.', connecting:'🔒 Připojuji se k zabezpečené platbě…' },
+    de: { ship:'Versand', pay:'Zahlung', title:'Kreditkarte', secureNote:'Sie geben die Daten direkt in das sichere Revolut-Feld ein — wir sehen sie nicht.', c1:'256-Bit-Verschlüsselung', c2:'3D-Secure-Prüfung', c3:'Wir speichern keine Karten', payBtn:'Bezahlen', securedBy:'Gesichert über Revolut', guarantee:'30 Tage Geld-zurück', enterCard:'Geben Sie die Kartendaten ein und bestätigen Sie.', connecting:'🔒 Verbinde mit sicherer Zahlung…' },
+    nl: { ship:'Verzending', pay:'Betaling', title:'Betaalkaart', secureNote:'U voert de gegevens rechtstreeks in het beveiligde Revolut-veld in — wij zien ze niet.', c1:'256-bit versleuteling', c2:'3D Secure-verificatie', c3:'Wij bewaren geen kaarten', payBtn:'Betalen', securedBy:'Beveiligd via Revolut', guarantee:'30 dagen niet-goed-geld-terug', enterCard:'Voer uw kaartgegevens in en bevestig de betaling.', connecting:'🔒 Verbinden met beveiligde betaling…' },
+    pl: { ship:'Dostawa', pay:'Płatność', title:'Karta płatnicza', secureNote:'Dane wpisujesz bezpośrednio w bezpieczne pole Revolut — my ich nie widzimy.', c1:'Szyfrowanie 256-bit', c2:'Weryfikacja 3D Secure', c3:'Nie przechowujemy kart', payBtn:'Zapłać', securedBy:'Zabezpieczone przez Revolut', guarantee:'30 dni gwarancji zwrotu', enterCard:'Wprowadź dane karty i potwierdź płatność.', connecting:'🔒 Łączę z bezpieczną płatnością…' },
+    sv: { ship:'Frakt', pay:'Betalning', title:'Betalkort', secureNote:'Du anger uppgifterna direkt i Revoluts säkra fält — vi ser dem inte.', c1:'256-bitars kryptering', c2:'3D Secure-verifiering', c3:'Vi sparar inga kort', payBtn:'Betala', securedBy:'Säkrad via Revolut', guarantee:'30 dagars återbetalningsgaranti', enterCard:'Ange kortuppgifterna och bekräfta betalningen.', connecting:'🔒 Ansluter till säker betalning…' },
+    no: { ship:'Frakt', pay:'Betaling', title:'Betalingskort', secureNote:'Du skriver inn opplysningene direkte i Revoluts sikre felt — vi ser dem ikke.', c1:'256-bits kryptering', c2:'3D Secure-verifisering', c3:'Vi lagrer ikke kort', payBtn:'Betal', securedBy:'Sikret via Revolut', guarantee:'30 dagers pengene-tilbake', enterCard:'Skriv inn kortopplysningene og bekreft betalingen.', connecting:'🔒 Kobler til sikker betaling…' },
+    hu: { ship:'Szállítás', pay:'Fizetés', title:'Bankkártya', secureNote:'Az adatokat közvetlenül a Revolut biztonságos mezőjébe írja be — mi nem látjuk őket.', c1:'256 bites titkosítás', c2:'3D Secure ellenőrzés', c3:'Nem tároljuk a kártyát', payBtn:'Fizetés', securedBy:'Revoluton keresztül védve', guarantee:'30 napos pénzvisszafizetés', enterCard:'Adja meg a kártyaadatokat és erősítse meg a fizetést.', connecting:'🔒 Csatlakozás a biztonságos fizetéshez…' },
+    fr: { ship:'Livraison', pay:'Paiement', title:'Carte bancaire', secureNote:'Vous saisissez les informations directement dans le champ sécurisé Revolut — nous ne les voyons pas.', c1:'Chiffrement 256 bits', c2:'Vérification 3D Secure', c3:'Nous ne stockons pas les cartes', payBtn:'Payer', securedBy:'Sécurisé via Revolut', guarantee:'Garantie 30 jours', enterCard:'Saisissez les informations de votre carte et confirmez.', connecting:'🔒 Connexion au paiement sécurisé…' },
+    es: { ship:'Envío', pay:'Pago', title:'Tarjeta bancaria', secureNote:'Introduces los datos directamente en el campo seguro de Revolut — nosotros no los vemos.', c1:'Cifrado de 256 bits', c2:'Verificación 3D Secure', c3:'No guardamos tarjetas', payBtn:'Pagar', securedBy:'Protegido con Revolut', guarantee:'Garantía de 30 días', enterCard:'Introduce los datos de tu tarjeta y confirma el pago.', connecting:'🔒 Conectando con el pago seguro…' }
+  };
+  function cardLocale() { var L = (PROJECT_CONFIG.locale || 'sk').toLowerCase(); return CARD_I18N[L] ? L : 'sk'; }
+  function cardT(k) { return (CARD_I18N[cardLocale()] || CARD_I18N.sk)[k] || CARD_I18N.sk[k] || k; }
   function ensureRevolutCardStyles() {
     if (document.getElementById('revolut-card-styles')) return;
     var st = document.createElement('style');
@@ -4061,7 +4076,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       '.rc-dot{width:7px;height:7px;border-radius:50%;background:#C27BA0;display:inline-block;}' +
       '.rc-dot.done{background:#2E7D32;}' +
       '.rc-prog .rc-chk{color:#2E7D32;}' +
-      '.rc-line{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid #F0E4EC;margin-bottom:12px;}' +
+      '.rc-line{display:flex;align-items:center;justify-content:space-between;background:#FAF5F8;border-radius:12px;padding:12px 14px;margin-bottom:14px;}' +
       '.rc-line-p{font-size:13px;color:#5A3D6B;}' +
       '.rc-line-a{font-size:15px;font-weight:700;color:#2D1B3D;}' +
       '.rc-head-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}' +
@@ -4071,8 +4086,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       '.rc-label-check{display:inline-flex;opacity:0;transform:scale(0);transition:opacity .2s ease;color:#2E7D32;font-weight:700;}' +
       '.rc-label-check.on{opacity:1;transform:scale(1);animation:checkmark .3s ease;}' +
       // Trust chips
-      '#rc-trust{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px;}' +
-      '.rc-chip{display:inline-flex;align-items:center;gap:5px;background:#FAF5F8;border:1px solid #EDD9E5;border-radius:20px;padding:5px 11px;font-size:11.5px;font-weight:500;color:#7A6189;}' +
+      '.rc-secure-note{font-size:12px;color:#8A7290;margin:9px 2px 0;line-height:1.45;}' +
+      '#rc-trust{display:flex;gap:7px;margin-top:16px;}' +
+      '.rc-chip{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 4px;background:#FAF5F8;border:1px solid #EDD9E5;border-radius:11px;text-align:center;font-size:10.5px;font-weight:600;color:#6B5473;line-height:1.25;}.rc-chip .rc-ic{font-size:16px;}' +
       '#revolut-pay-btn{margin-top:16px;}' +
       // Guarantee row
       '#rc-reassure{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;font-size:12px;color:#5A3D6B;margin-top:12px;}' +
@@ -4127,18 +4143,23 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var head = document.createElement('div');
     head.id = 'rc-head';
     head.innerHTML =
-      '<div class="rc-prog"><span class="rc-dot done"></span>Doprava <span class="rc-chk">✓</span> · <span class="rc-dot"></span>Platba</div>'
+      '<div class="rc-prog"><span class="rc-dot done"></span>' + cardT('ship') + ' <span class="rc-chk">✓</span> · <span class="rc-dot"></span>' + cardT('pay') + '</div>'
       + '<div class="rc-line"><span class="rc-line-p">' + productName + ' · ' + selectedBundleQty + ' ks</span><span class="rc-line-a">' + amountLabel + '</span></div>'
-      + '<div class="rc-head-row"><span class="rc-secure">🔒 Bezpečná platba<span class="rc-label-check">✓</span></span>' + revolutCardLogos() + '</div>';
+      + '<div class="rc-head-row"><span class="rc-secure">🔒 ' + cardT('title') + '<span class="rc-label-check">✓</span></span>' + revolutCardLogos() + '</div>';
     cardFieldsEl.insertBefore(head, cardFieldsEl.firstChild);
-    // Trust chips under the field
+    // Secure micro-note under the field (reassures "kam dávam kartu")
+    var oldNote = document.getElementById('rc-secure-note'); if (oldNote) oldNote.remove();
+    var note = document.createElement('div');
+    note.id = 'rc-secure-note'; note.className = 'rc-secure-note';
+    note.innerHTML = '🔒 ' + cardT('secureNote');
+    // Trust chips (3 columns) under the field
     var oldTrust = document.getElementById('rc-trust'); if (oldTrust) oldTrust.remove();
     var trust = document.createElement('div');
     trust.id = 'rc-trust';
-    trust.innerHTML = '<span class="rc-chip">🔒 256-bit SSL</span><span class="rc-chip">🛡️ 3D Secure</span><span class="rc-chip">🚫 Neukladáme kartu</span>';
+    trust.innerHTML = '<span class="rc-chip"><span class="rc-ic">🔐</span>' + cardT('c1') + '</span><span class="rc-chip"><span class="rc-ic">🛡️</span>' + cardT('c2') + '</span><span class="rc-chip"><span class="rc-ic">🚫</span>' + cardT('c3') + '</span>';
     var errEl = document.getElementById('card-errors');
-    if (errEl && errEl.parentNode) errEl.parentNode.insertBefore(trust, errEl.nextSibling);
-    else cardFieldsEl.appendChild(trust);
+    if (errEl && errEl.parentNode) { errEl.parentNode.insertBefore(note, errEl.nextSibling); note.parentNode.insertBefore(trust, note.nextSibling); }
+    else { cardFieldsEl.appendChild(note); cardFieldsEl.appendChild(trust); }
   }
 
   /* ─── REVOLUT APPLE PAY / GOOGLE PAY — native wallet buttons ────────────────
@@ -4510,10 +4531,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             var oldBtn = document.getElementById('revolut-pay-btn'); if (oldBtn) oldBtn.remove();
             var payBtn = document.createElement('button');
             payBtn.id = 'revolut-pay-btn'; payBtn.type = 'button'; payBtn.className = 'checkout-btn';
-            payBtn.innerHTML = '<span class="spinner"></span><span class="btn-text">Zaplatiť ' + amountLabel + ' →</span>';
+            payBtn.innerHTML = '<span class="spinner"></span><span class="btn-text">' + cardT('payBtn') + ' ' + amountLabel + ' →</span>';
             payBtn.onclick = function () {
               payBtn.classList.add('loading'); payBtn.disabled = true;
-              setCardStatus('🔒 Pripájam sa k zabezpečenej platbe…', false);
+              setCardStatus(cardT('connecting'), false);
               var name = (customerData.shipping_address.first_name + ' ' + customerData.shipping_address.last_name).trim();
               revolutCardField.submit({ name: name, email: customerData.email });
             };
@@ -4522,9 +4543,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             var oldReassure = document.getElementById('rc-reassure'); if (oldReassure) oldReassure.remove();
             var reassure = document.createElement('div');
             reassure.id = 'rc-reassure';
-            reassure.innerHTML = '<span>✅ Zabezpečené cez <strong>Revolut</strong></span><span>↩️ <strong>30 dní</strong> záruka vrátenia</span>';
+            reassure.innerHTML = '<span>✅ ' + cardT('securedBy') + '</span><span>↩️ ' + cardT('guarantee') + '</span>';
             cardFieldsEl.appendChild(reassure);
-            setCardStatus('Zadajte údaje karty a potvrďte platbu.', false);
+            setCardStatus(cardT('enterCard'), false);
             // Smoothly hand off from the main button to the card form's confirm button.
             if (submitBtn) {
               submitBtn.classList.remove('loading');
@@ -4750,7 +4771,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var revolutCardCartId = null;    // cart the Revolut order/session belongs to
   var revolutCardAmountKey = null; // amount signature the current field was built for
   var revolutCardMounting = false; // guard against concurrent mounts
-  var REVOLUT_CARD_LOCALE = 'sk';  // language of the card field labels
+  // Language of the Revolut card-field labels (Číslo karty / MM/RR / CVV). Derived from
+  // PROJECT_CONFIG.locale; Revolut supports sk/cs/de/nl/pl/sv/hu/fr/es → 'no' falls back to en.
+  var REVOLUT_CARD_LOCALE = (function () {
+    var map = { sk: 'sk', cs: 'cs', de: 'de', nl: 'nl', pl: 'pl', sv: 'sv', hu: 'hu', fr: 'fr', es: 'es', no: 'en' };
+    return map[(PROJECT_CONFIG.locale || 'sk').toLowerCase()] || 'en';
+  })();
   var _revolutSdkPromise = null;   // pre-warmed @revolut/checkout module (loaded on card select)
   // ── Revolut Apple Pay / Google Pay (native wallet buttons) ──
   var revolutPublicKey = null;     // pk_... — needed to mount the payments() module
