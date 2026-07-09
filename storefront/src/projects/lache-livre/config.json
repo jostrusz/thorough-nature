@@ -3,6 +3,7 @@
   "name": "Lâche prise sur ce qui te détruit",
   "domain": "lacheprise-livre.fr",
   "locale": "fr",
+  "orderPrefix": "FR2026",
   "defaultCountry": "FR",
   "defaultPhonePrefix": "33",
   "phonePrefixByCountry": {

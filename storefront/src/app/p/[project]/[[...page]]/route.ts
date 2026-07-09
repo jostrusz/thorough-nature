@@ -749,6 +749,8 @@ function generateProjectConfigScript(
   const projectConfig = {
     slug: config.slug,
     projectId: (config as any).projectId || config.slug,
+    locale: (config as any).locale || null,
+    orderPrefix: (config as any).orderPrefix || null,
     medusaUrl: config.medusaUrl,
     publishableApiKey: config.publishableApiKey,
     mainProduct: config.mainProduct,
