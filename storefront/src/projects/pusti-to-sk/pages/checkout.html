@@ -3260,6 +3260,22 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     };
     for (var k in W) { if (BT_I18N[k]) { for (var kk in W[k]) BT_I18N[k][kk] = W[k][kk]; } }
   })();
+  // Timeout stav — po 5 min live pollingu (backend + e-mail preberá zvyšok).
+  (function () {
+    var T = {
+      sk: { toTitle:'Platba ešte nedorazila', toSub:'Ozveme sa vám e-mailom hneď ako platba dorazí (zvyčajne do 1 pracovného dňa).', cont:'Pokračovať →' },
+      cs: { toTitle:'Platba zatím nedorazila', toSub:'Ozveme se vám e-mailem, jakmile platba dorazí (obvykle do 1 pracovního dne).', cont:'Pokračovat →' },
+      de: { toTitle:'Zahlung noch nicht eingegangen', toSub:'Wir melden uns per E-Mail, sobald die Zahlung eingeht (meist innerhalb von 1 Werktag).', cont:'Weiter →' },
+      nl: { toTitle:'Betaling nog niet ontvangen', toSub:'We laten het u per e-mail weten zodra de betaling binnen is (meestal binnen 1 werkdag).', cont:'Doorgaan →' },
+      pl: { toTitle:'Płatność jeszcze nie dotarła', toSub:'Odezwiemy się e-mailem, gdy tylko płatność dotrze (zwykle w ciągu 1 dnia roboczego).', cont:'Kontynuuj →' },
+      sv: { toTitle:'Betalningen har inte kommit än', toSub:'Vi hör av oss via e-post så snart betalningen kommit in (oftast inom 1 arbetsdag).', cont:'Fortsätt →' },
+      no: { toTitle:'Betalingen har ikke kommet ennå', toSub:'Vi gir beskjed på e-post så snart betalingen kommer (vanligvis innen 1 virkedag).', cont:'Fortsett →' },
+      hu: { toTitle:'A fizetés még nem érkezett meg', toSub:'E-mailben jelentkezünk, amint a fizetés megérkezik (általában 1 munkanapon belül).', cont:'Tovább →' },
+      fr: { toTitle:'Paiement pas encore reçu', toSub:'Nous vous préviendrons par e-mail dès réception du paiement (généralement sous 1 jour ouvré).', cont:'Continuer →' },
+      es: { toTitle:'El pago aún no ha llegado', toSub:'Te avisaremos por correo en cuanto llegue el pago (normalmente en 1 día hábil).', cont:'Continuar →' }
+    };
+    for (var k in T) { if (BT_I18N[k]) { for (var kk in T[k]) BT_I18N[k][kk] = T[k][kk]; } }
+  })();
   function btLocale() { var L = (PROJECT_CONFIG.locale || 'sk').toLowerCase(); return BT_I18N[L] ? L : 'sk'; }
   function btT(k) { return (BT_I18N[btLocale()] || BT_I18N.sk)[k] || BT_I18N.sk[k] || k; }
   function btCurrency() { var bt = btCfg() || {}; return String(bt.currency || (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency) || 'EUR').toUpperCase(); }
@@ -3514,8 +3530,35 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       + '</div>';
     var x2 = document.getElementById('bt-x2'); if (x2) x2.onclick = btClosePopup;
     if (btPollTimer) clearInterval(btPollTimer);
+    // Live polling: každých 5 s po dobu 5 min (chytí Instant + rýchle platby, kým
+    // zákazník pozerá). Potom preberá backend (reconcile do 5 dní) + e-mail.
+    var startedAt = Date.now();
     btPoll(orderId, orderCode, amtDisplay); // okamžitá 1. kontrola
-    btPollTimer = setInterval(function () { btPoll(orderId, orderCode, amtDisplay); }, 5000);
+    btPollTimer = setInterval(function () {
+      if (Date.now() - startedAt > 5 * 60 * 1000) {
+        clearInterval(btPollTimer); btPollTimer = null;
+        btWaitTimeout(orderCode, amtDisplay);
+        return;
+      }
+      btPoll(orderId, orderCode, amtDisplay);
+    }, 5000);
+  }
+  // Po 5 min bez pripísania — pokojný „ozveme sa e-mailom" stav (browser ďalej nepolluje;
+  // backend reconcile beží do 5 dní a e-mail zákazníka informuje).
+  function btWaitTimeout(orderCode, amtDisplay) {
+    var card = document.querySelector('#bt-overlay .bt-card'); if (!card) return;
+    card.innerHTML =
+      '<div class="bt-h"><button class="bt-x" id="bt-x3" aria-label="' + btT('close') + '">×</button><div class="ok">✅ ' + btT('created') + '</div><div class="sub">' + orderCode + '</div></div>'
+      + '<div class="bt-step2">'
+      + '<div class="bt-badge wait" style="font-size:34px;">📧</div>'
+      + '<div class="bt-wt">' + btT('toTitle') + '</div>'
+      + '<div class="bt-ws">' + btT('toSub') + '</div>'
+      + '<div class="bt-word"><span class="k">' + btT('orderLabel') + '</span><span class="v">' + orderCode + '</span></div>'
+      + '<div class="bt-word"><span class="k">' + btT('amountLabel') + '</span><span class="v">' + amtDisplay + '</span></div>'
+      + '<button class="bt-done" id="bt-cont" style="margin-top:18px;">' + btT('cont') + '</button>'
+      + '</div>';
+    var x3 = document.getElementById('bt-x3'); if (x3) x3.onclick = btClosePopup;
+    document.getElementById('bt-cont').onclick = function () { window.location.href = PROJECT_CONFIG.thankYouUrl; };
   }
   // Poll status z backendu (ktorý nastavuje Revolut reconcile cron).
   function btPoll(orderId, orderCode, amtDisplay) {

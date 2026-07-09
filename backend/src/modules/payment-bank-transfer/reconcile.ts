@@ -264,6 +264,50 @@ export async function reconcileSingleOrder(order: any, container: any, logger: a
   }
 }
 
+/**
+ * Cancel awaiting bank-transfer orders that stayed unpaid for 5 days — stop
+ * polling them and release the reservation. Flagged so the Dextrum hold skips them.
+ */
+export async function expireStaleAwaiting(container: any, logger: any, pool: any): Promise<void> {
+  const { rows } = await pool.query(
+    `SELECT o.id AS order_id, o.display_id
+     FROM "order" o
+     WHERE o.metadata->>'awaiting_bank_payment' = 'true'
+       AND COALESCE(o.metadata->>'payment_captured', '') <> 'true'
+       AND o.created_at < now() - interval '5 days'
+       AND o.created_at > now() - interval '30 days'
+     LIMIT 100`
+  )
+  if (!rows.length) return
+
+  let cancelWf: any = null
+  try { cancelWf = (await import("@medusajs/medusa/core-flows")).cancelOrderWorkflow } catch { /* optional */ }
+
+  for (const o of rows) {
+    try {
+      if (cancelWf) {
+        await cancelWf(container).run({ input: { order_id: o.order_id } }).catch((e: any) =>
+          logger.warn(`[Bank Transfer Reconcile] cancel order ${o.display_id} failed: ${e.message}`)
+        )
+      }
+      await pool.query(
+        `UPDATE "order" SET metadata = COALESCE(metadata, '{}'::jsonb) || $1::jsonb, updated_at = NOW() WHERE id = $2`,
+        [JSON.stringify({
+          awaiting_bank_payment: false,
+          bank_transfer_expired: true,
+          bank_transfer_expired_at: new Date().toISOString(),
+          dextrum_status: "CANCELED",
+          dextrum_error: "Bank transfer not received (5 days)",
+        }), o.order_id]
+      )
+      logger.info(`[Bank Transfer Reconcile] ⏰ Expired+canceled order ${o.display_id} (5 days unpaid)`)
+      await alert("Bank transfer: expired (5 days)", `Order ${o.display_id} unpaid after 5 days — canceled, reservation released.`)
+    } catch (e: any) {
+      logger.error(`[Bank Transfer Reconcile] expire ${o.display_id} failed: ${e.message}`)
+    }
+  }
+}
+
 /** Cron backstop: reconcile every still-awaiting order. */
 export async function reconcileAllAwaiting(container: any, logger: any): Promise<void> {
   const credits = await getRevolutCredits(logger)
@@ -285,6 +329,9 @@ export async function reconcileAllAwaiting(container: any, logger: any): Promise
       try { await reconcileOrder(ord, credits, usedTxnIds, pool, container, logger) }
       catch (e: any) { logger.error(`[Bank Transfer Reconcile] order ${ord.display_id} failed: ${e.message}`) }
     }
+    // Give up + cancel orders unpaid after 5 days.
+    try { await expireStaleAwaiting(container, logger, pool) }
+    catch (e: any) { logger.error(`[Bank Transfer Reconcile] expire sweep failed: ${e.message}`) }
   } catch (err: any) {
     logger.error(`[Bank Transfer Reconcile] job failed: ${err.message}`)
   } finally {

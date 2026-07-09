@@ -139,6 +139,16 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         // payment_captured / bank_transfer_reconciled). Scoped to bank_transfer
         // orders only; does NOT touch retry_count (transfers can take days).
         const btMeta = (order as any).metadata || {}
+        // Bank transfer expired (5 days unpaid → canceled by the reconcile cron) — never ship.
+        if (btMeta.bank_transfer_expired === true) {
+          await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
+            delivery_status: "FAILED",
+            delivery_status_updated_at: now.toISOString(),
+            last_error: "Bank transfer expired (5 days) — order canceled",
+          })
+          console.log(`[Dextrum Hold] Order ${orderMap.medusa_order_id}: bank transfer expired — blocked from WMS`)
+          continue
+        }
         const isAwaitingBankTransfer =
           btMeta.awaiting_bank_payment === true &&
           btMeta.payment_captured !== true &&
