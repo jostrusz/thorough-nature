@@ -6201,6 +6201,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   function syncCountryFromPhone(val) {
     var detected = detectCountryFromPhone(val);
     if (detected && countrySelect && countrySelect.value !== detected) {
+      // Csak akkor váltunk, ha az adott ország tényleg létező <option>. Nem létező
+      // érték beállítása (pl. +420-as szám → 'CZ' a csak magyar checkouton) kiüríti
+      // a <select>-et, üres country_code megy el, és elromlanak a szállítási módok.
+      var hasOption = Array.prototype.some.call(countrySelect.options, function(o) { return o.value === detected; });
+      if (!hasOption) return;
       countrySelect.value = detected;
       countrySelect.dispatchEvent(new Event('change'));
     }
@@ -6237,7 +6242,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (!raw) { phonePreview.style.display = 'none'; return; }
       // Ország szinkronizálása a prefixből
       syncCountryFromPhone(raw);
-      var country = countrySelect ? countrySelect.value : 'CZ';
+      var country = (countrySelect && countrySelect.value) || 'HU';
       var formatted = formatPhoneNumber(raw, country);
       phoneField.value = formatted;
       if (formatted !== raw) {
@@ -6849,14 +6854,20 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var val = foxPhoneField.value.trim();
         if (!val || val.length < 5) return;
 
-        // Országhívószám hozzáadása, ha hiányzik (pl. 0612345678 → +420612345678)
+        // Országhívószám hozzáadása, ha hiányzik (pl. 06201234567 → +36201234567)
         var countryEl = document.getElementById('country');
-        var cc = countryEl ? countryEl.value : 'CZ';
+        var cc = (countryEl && countryEl.value) || 'HU';
         var prefixMap = { HU: '+36', CZ: '+420' };
         var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
         if (!cleaned.startsWith('+') && !cleaned.startsWith('00')) {
-          if (cleaned.startsWith('0')) cleaned = (prefixMap[cc] || '+36') + cleaned.substring(1);
-          else if (/^\d{7,}$/.test(cleaned)) cleaned = (prefixMap[cc] || '+36') + cleaned;
+          var pfx = prefixMap[cc] || '+36';
+          if (cleaned.startsWith('0')) {
+            // Magyarország: kétjegyű "06" belföldi előhívó (nemzetközi formátumban elhagyjuk);
+            // más országoknál egyjegyű "0" trunk.
+            var local = (cc === 'HU' && cleaned.startsWith('06')) ? cleaned.substring(2) : cleaned.substring(1);
+            cleaned = pfx + local;
+          }
+          else if (/^\d{7,}$/.test(cleaned)) cleaned = pfx + cleaned;
         } else if (cleaned.startsWith('00')) {
           cleaned = '+' + cleaned.substring(2);
         }
