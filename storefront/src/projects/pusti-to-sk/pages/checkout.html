@@ -7029,15 +7029,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             if (packetaErr) packetaErr.style.display = 'none';
           }
         }, {
-          language: 'cs',
-          country: 'cz',
+          language: 'sk',
+          country: 'sk',
           appIdentity: PROJECT_CONFIG.domain || 'checkout',
-          // Omezit jen na vlastní síť Zásilkovny (výdejní místa + Z-BOXy).
-          // Tím se nenabídnou body externích dopravců, které padaly na
-          // "aktivní výdejní místo nenalezeno" při zakládání zásilky.
+          // Obmedziť len na vlastnú sieť Packety (výdajné miesta + Z-BOXy).
+          // Tým sa neponúknu body externých dopravcov, ktoré padali na
+          // "aktívne výdajné miesto nenájdené" pri zakladaní zásielky.
           vendors: [
-            { country: 'cz', group: 'zpoint' },
-            { country: 'cz', group: 'zbox' },
+            { country: 'sk', group: 'zpoint' },
+            { country: 'sk', group: 'zbox' },
           ],
         });
       });
