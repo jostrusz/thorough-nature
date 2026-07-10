@@ -8,6 +8,7 @@ const PROJECT_LABELS: Record<string, string> = {
   "lass-los": "🇩🇪 Lass los",
   "odpusc-ksiazka": "🇵🇱 Odpuść",
   "zycie-zaslugy": "🇵🇱 Życie",
+  "zivot-zaslugy": "🇨🇿 Život zasloužíš",
   "slapp-taget": "🇸🇪 Släpp taget",
   "slipp-taket": "🇳🇴 Slipp taket",
   "psi-superzivot": "🇨🇿 Psí superživot",

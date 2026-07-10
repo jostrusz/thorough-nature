@@ -55,6 +55,8 @@ const SO = {
   ZAS_PICKUP_ENGEDD: "so_01KWG6WEBJTVGR0M8NHPRSRQBS", // Packeta - Csomagpont (Engedd El pickup)
   ZAS_HOME_PUSTI_SK: "so_01KWVB06DRRS7ZP2E5AY6N3VR3",   // Packeta - Na adresu (Pusti To SK home)
   ZAS_PICKUP_PUSTI_SK: "so_01KWVB06DRK51CQTSYYSA99TRP", // Packeta - Na odberné miesto (Pusti To SK pickup)
+  ZAS_HOME_ZIVOT: "so_01KX5YH9DXCFCNYAZQZ5KQ8E9G",    // Zásilkovna - Na adresu (Zivot Zaslugy home)
+  ZAS_PICKUP_ZIVOT: "so_01KX5YH9DWAP797Y0QC5J6FKJ9",  // Zásilkovna - Na výdejní místo (Zivot Zaslugy pickup)
   ZAS_HOME_LACHE: "so_01KX053135P5BJNDHR1DV25WFF",      // Packeta - À domicile (Lache Livre FR home)
   ZAS_PICKUP_LACHE: "so_01KX053135Q3B19W0ZTC7WA6QH",    // Packeta - Point relais (Lache Livre FR pickup)
 } as const
@@ -151,6 +153,14 @@ export const PROJECT_CONFIG = {
     homeShippingOptionId: SO.ZAS_HOME_ODPUST,
     homeShippingOptionName: "Zásilkovna - Na adresu",
     pickupShippingOptionId: SO.ZAS_PICKUP_ODPUST,
+    pickupShippingOptionName: "Zásilkovna - Na výdejní místo",
+  },
+  "zivot-zaslugy": {
+    name: "Zivot Zaslugy",
+    sales_channel_id: "sc_01KX5YGZJ8631J42PQAJ4CWVPT",
+    homeShippingOptionId: SO.ZAS_HOME_ZIVOT,
+    homeShippingOptionName: "Zásilkovna - Na adresu",
+    pickupShippingOptionId: SO.ZAS_PICKUP_ZIVOT,
     pickupShippingOptionName: "Zásilkovna - Na výdejní místo",
   },
   "engedd-el": {
@@ -273,7 +283,7 @@ export const COUNTRY_CONFIG = {
     allowedPaymentMethods: ["creditcard", "cod"],
     defaultPaymentMethod: "creditcard",
     codAllowed: true,
-    projectSlugs: ["psi-superzivot", "kocici-bible", "odpust-knizka"],
+    projectSlugs: ["psi-superzivot", "kocici-bible", "odpust-knizka", "zivot-zaslugy"],
     bookVatRate: 0,
   },
   sk: {

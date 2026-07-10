@@ -1,0 +1,86 @@
+{
+  "slug": "zivot-zaslugy",
+  "name": "Život, který si zasloužíš",
+  "domain": "nejdriv-ja.cz",
+  "domainAliases": [
+    "www.nejdriv-ja.cz"
+  ],
+  "locale": "cs",
+  "defaultCountry": "CZ",
+  "defaultPhonePrefix": "420",
+  "phonePrefixByCountry": {
+    "CZ": "420"
+  },
+  "salesChannelName": "Zivot Zaslugy",
+  "medusaUrl": "",
+  "publishableApiKey": "pk_f94e4d5995a1ae4ef9db64d4a631069aa94a0a645e6dbee5a31d233d7157e2bb",
+  "facebookPixelId": "",
+  "regions": {
+    "CZ": "reg_01KKB4EZN0CHFYDG64K4VP0J2A"
+  },
+  "mainProduct": {
+    "name": "Život, který si zasloužíš",
+    "handle": "zivot-ktery-si-zasluzis",
+    "productId": "prod_01KX5YHCSM8WQ63C933P75YWW1",
+    "variantId": "variant_01KX5YHFSZQS76CZMTPX6Q7VF9",
+    "price": 749,
+    "currency": "CZK",
+    "thumbnail": ""
+  },
+  "upsellProduct": {
+    "name": "Pusť to, co tě ničí",
+    "handle": "pust-to-co-te-nici-upsell",
+    "variantId": "",
+    "price": 549,
+    "originalPrice": 749,
+    "currency": "CZK"
+  },
+  "bundleOptions": [
+    {
+      "qty": 1,
+      "price": 749,
+      "save": 0,
+      "badge": "PRO SEBE",
+      "variantId": "variant_01KX5YHFSZQS76CZMTPX6Q7VF9"
+    },
+    {
+      "qty": 2,
+      "price": 1149,
+      "save": 349,
+      "badge": "NEJOBLÍBENĚJŠÍ",
+      "variantId": "variant_01KX5YHFSZ0HKE9MNYD6SH9XMP"
+    },
+    {
+      "qty": 3,
+      "price": 1599,
+      "save": 648,
+      "badge": "PERFEKTNÍ DÁREK",
+      "variantId": "variant_01KX5YHFSZPBP2KAMMD0QGFNM1"
+    },
+    {
+      "qty": 4,
+      "price": 1999,
+      "save": 997,
+      "badge": "NEJLEPŠÍ HODNOTA",
+      "variantId": "variant_01KX5YHFT06FYSY536DMNKK8XQ"
+    }
+  ],
+  "catalogContentIds": [],
+  "mollieProfileId": "",
+  "paymentProviders": {
+    "mollie": "pp_mollie_mollie",
+    "paypal": "pp_paypal_paypal",
+    "airwallex": "pp_airwallex_airwallex"
+  },
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "thank-you": "thank-you.html",
+    "contact": "contact.html",
+    "privacy": "privacy.html",
+    "voorwaarden": "voorwaarden.html",
+    "verzending": "verzending.html",
+    "retourbeleid": "retourbeleid.html",
+    "popup-zivot-zaslugy": "popup-zivot-zaslugy.html"
+  }
+}

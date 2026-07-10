@@ -57,6 +57,13 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 79,    // €79.00 incl. tax (save €29)
     4: 99,    // €99.00 incl. tax (save €45)
   },
+  // Zivot Zaslugy — "Život, který si zasloužíš" (CZ LIFE RESET, nejdriv-ja.cz)
+  "zivot-ktery-si-zasluzis": {
+    1: 749,   // 749 Kč incl. DPH (12%)
+    2: 1149,  // 1 149 Kč incl. DPH (save 349 Kč)
+    3: 1599,  // 1 599 Kč incl. DPH (save 648 Kč)
+    4: 1999,  // 1 999 Kč incl. DPH (save 997 Kč)
+  },
   // Slapp Taget — "Släpp taget om det som förstör dig"
   "slapp-taget-om-det-som-forstor-dig": {
     1: 399,   // 399 kr incl. moms (6%)
@@ -149,6 +156,7 @@ const BUNDLE_SKU_PATTERNS: RegExp[] = [
   /^LLWJK-(\d+)$/,   // loslatenboek: LLWJK-1, LLWJK-2, LLWJK-3, LLWJK-4
   /^HLDV-(\d+)$/,    // het-leven: HLDV-2, HLDV-3, HLDV-4 (1-boek uses official barcode below)
   /^LACHE-(\d+)$/,   // lache-livre FR: LACHE-1, LACHE-2, LACHE-3, LACHE-4
+  /^ZKZ-(\d+)$/,     // zivot-zaslugy CZ: ZKZ-1, ZKZ-2, ZKZ-3, ZKZ-4
 ]
 
 // Explicit SKU → bundle qty for non-pattern SKUs (official barcodes / EAN-style).
