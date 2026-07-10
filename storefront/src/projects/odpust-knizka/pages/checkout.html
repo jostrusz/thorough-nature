@@ -241,6 +241,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0;
+  /* Grid item má implicitně min-width:auto → sloupec by se roztáhl na min-content
+     obsahu (dlouhé názvy balíčků) a mřížka by přetekla přes okraj obrazovky. */
+  min-width: 0;
 }
 
 /* Shopify-style sekce karty */
@@ -1806,6 +1809,18 @@ body {
   font-size: 11px; font-weight: 600; color: var(--success);
   background: rgba(39,174,96,0.08); padding: 1px 6px; border-radius: 4px;
   display: inline-block; margin-top: 2px;
+}
+
+/* Na úzkém displeji se dlouhý název ("2× Pusť to, co tě ničí") a badge
+   ("NEJOBLÍBENĚJŠÍ") nevejdou na jeden řádek: badge má flex-shrink:0, takže
+   spolkne celý .bundle-info a .bundle-text se stlačí — text se pak kreslí
+   pod badge a ceny lezou přes okraj. Řešení: badge jde na vlastní řádek
+   a názvy se smějí zalomit. */
+@media (max-width: 520px) {
+  .bundle-info { flex-wrap: wrap; }
+  .bundle-text { flex: 1 1 100%; }
+  .bundle-label, .bundle-sublabel { white-space: normal; }
+  .bundle-badge { order: 3; }
 }
 
 /* ─── ORDER BUMP — accordion ─── */
