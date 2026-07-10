@@ -188,7 +188,7 @@ export const EngOrderPlacedTemplate: React.FC<EngOrderPlacedTemplateProps> & {
             lineHeight: '1.6',
             marginBottom: '6px',
           }}>
-            Szia {shippingAddress?.first_name || ''},
+            Szia {shippingAddress?.first_name || 'kedves Vásárló'}!
           </Text>
           <Text style={{
             fontFamily: font,
@@ -198,8 +198,8 @@ export const EngOrderPlacedTemplate: React.FC<EngOrderPlacedTemplateProps> & {
             marginBottom: '0',
           }}>
             {isPaid
-              ? 'Nagyon örülünk, hogy megtetted ezt a lépést! A rendelésedet megkaptuk, és máris nekilátunk. Alább megtalálod a teljes összesítőt.'
-              : 'Nagyon örülünk, hogy megtetted ezt a lépést! A rendelésedet megkaptuk, a fizetést pedig kényelmesen a csomag átvételekor rendezheted. Alább megtalálod a teljes összesítőt.'
+              ? 'Örülök, hogy megtetted ezt a lépést! A rendelésed megérkezett, és máris elkezdjük összekészíteni. Alább megtalálod a teljes összesítőt.'
+              : 'Örülök, hogy megtetted ezt a lépést! A rendelésed megérkezett, a fizetést pedig kényelmesen a csomag átvételekor rendezheted. Alább megtalálod a teljes összesítőt.'
             }
           </Text>
         </div>
@@ -230,7 +230,7 @@ export const EngOrderPlacedTemplate: React.FC<EngOrderPlacedTemplateProps> & {
                   fontWeight: 600,
                   fontFamily: font,
                 }}>
-                  {isPaid ? 'Kifizetve' : 'Fizetés utánvéttel'}
+                  {isPaid ? 'Kifizetve' : 'Utánvéttel fizetendő'}
                 </span>
               </Text>
             </div>
@@ -404,7 +404,7 @@ export const EngOrderPlacedTemplate: React.FC<EngOrderPlacedTemplateProps> & {
                 margin: '6px 0 0',
                 lineHeight: '1.5',
               }}>
-                A csomagot a <strong>csomagpont</strong> átvételi helyre szállítjuk:
+                A csomagot az általad választott <strong>csomagpontra</strong> szállítjuk:
                 <br />
                 <span style={{ color: '#2D1B3D', fontWeight: 600 }}>{pickup.name}</span>
                 {pickup.address && (
@@ -552,9 +552,9 @@ export const EngOrderPlacedTemplate: React.FC<EngOrderPlacedTemplateProps> & {
                   }}>1</div>
                 </td>
                 <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
-                  <strong style={{ color: '#2D1B3D' }}>Rendelés fogadva</strong>
+                  <strong style={{ color: '#2D1B3D' }}>Rendelés beérkezett</strong>
                   <br />
-                  A rendelésedet éppen előkészítjük a feladásra.
+                  A csomagodat már készítjük elő a feladásra.
                 </td>
               </tr>
             </tbody>
@@ -580,7 +580,7 @@ export const EngOrderPlacedTemplate: React.FC<EngOrderPlacedTemplateProps> & {
                 <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#2D1B3D' }}>Feladva</strong>
                   <br />
-                  Amint feladjuk a csomagot, e-mailben elküldjük a nyomkövetési számot.
+                  Amint feladtuk a csomagot, e-mailben elküldjük a csomagkövetési számot.
                 </td>
               </tr>
             </tbody>
@@ -607,8 +607,8 @@ export const EngOrderPlacedTemplate: React.FC<EngOrderPlacedTemplateProps> & {
                   <strong style={{ color: '#2D1B3D' }}>Kézbesítve</strong>
                   <br />
                   {isPickup
-                    ? '2–3 munkanapon belül a csomag az átvételi helyen vár rád.'
-                    : '2–3 munkanapon belül otthon lesz a könyv.'
+                    ? '2–3 munkanapon belül a csomag az átvételi ponton vár rád.'
+                    : '2–3 munkanapon belül otthon lesz a könyved.'
                   }
                 </td>
               </tr>
@@ -632,7 +632,7 @@ export const EngOrderPlacedTemplate: React.FC<EngOrderPlacedTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Kérdésed van a rendeléssel kapcsolatban? Írj nekünk:
+              Kérdésed van a rendeléseddel kapcsolatban? Írj nekünk:
               <br />
               <Link href="mailto:info@engeddelkonyv.hu" style={{ color: '#C27BA0', textDecoration: 'underline', fontWeight: 600 }}>
                 info@engeddelkonyv.hu

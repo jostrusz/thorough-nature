@@ -15,6 +15,8 @@ import { EmailTemplates, resolveTemplateKey } from "../modules/email-notificatio
  * Lass los uses project-specific templates (ll-abandoned-checkout-1/2/3).
  * Het Leven Dat Je Verdient uses project-specific templates (hl-abandoned-checkout-1/2/3).
  * Pusť to, co tě ničí uses project-specific templates (od-abandoned-checkout-1/2/3).
+ * Pusti to, čo ťa ničí uses project-specific templates (sk-abandoned-checkout-1/2/3).
+ * Engedd el, ami tönkretesz uses project-specific templates (eng-abandoned-checkout-1/2/3).
  * Loslatenboek uses the lb-abandoned-checkout-1/2/3 sequence (default fallback).
  *
  * Tracking metadata on cart:
@@ -203,6 +205,34 @@ const SK_STEPS: StepConfig[] = [
     templateKey: EmailTemplates.SK_ABANDONED_CHECKOUT_3,
     subject: (name) => `Posledná šanca, ${name} — tvoj košík čoskoro uvoľníme`,
     preview: "Ostáva 24 hodín — potom musím tvoj košík uvoľniť.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
+  },
+]
+
+/** Engedd el, ami tönkretesz (engedd-el) 3-step sequence */
+const ENG_STEPS: StepConfig[] = [
+  {
+    step: 1,
+    templateKey: EmailTemplates.ENG_ABANDONED_CHECKOUT_1,
+    subject: (name) => `Szia ${name}, a könyved már csak rád vár! 📦`,
+    preview: "A könyved be van csomagolva, és már csak rád vár!",
+    delayMs: THIRTY_MINUTES_MS,
+    delayFrom: (_meta, abandonedAt) => abandonedAt,
+  },
+  {
+    step: 2,
+    templateKey: EmailTemplates.ENG_ABANDONED_CHECKOUT_2,
+    subject: (name) => `${name}, a történet, ami e könyv mögött áll`,
+    preview: "Miért írtam meg ezt a könyvet — és mi változott meg utána...",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
+  },
+  {
+    step: 3,
+    templateKey: EmailTemplates.ENG_ABANDONED_CHECKOUT_3,
+    subject: (name) => `Utolsó esély, ${name} — a kosaradat hamarosan felszabadítjuk`,
+    preview: "Még 24 óra — utána fel kell szabadítanom a kosaradat.",
     delayMs: TWENTY_FOUR_HOURS_MS,
     delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
   },
@@ -830,6 +860,79 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         } catch (emailError: any) {
           logger.error(
             `[Abandoned Cart] Failed to send SK step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
+          )
+        }
+        continue
+      }
+
+      // ── Engedd el, ami tönkretesz: 3-step sequence ──
+      if (projectId === "engedd-el") {
+        // All 3 steps sent? Done.
+        if (currentStep >= 3) {
+          skippedCount++
+          continue
+        }
+
+        const nextStepConfig = ENG_STEPS[currentStep] // currentStep=0 → step 1, etc.
+
+        // Check if enough time has passed
+        const referenceTime = nextStepConfig.delayFrom(meta, abandonedAt)
+        if (isNaN(referenceTime.getTime())) continue // invalid date, skip
+        if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
+
+        // Extract customer data
+        const firstName = cart.shipping_address?.first_name || "kedves olvasó"
+        const checkoutUrl = meta.checkout_url || "https://www.engeddelkonyv.hu/checkout"
+        const mainItem = (cart.items || [])[0]
+        const productName = mainItem?.variant?.product?.title || mainItem?.title || "Engedd el, ami tönkretesz"
+        // Calculate total price from all cart items (quantity × unit_price)
+        const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+        }, 0)
+        const productPrice = cartTotal > 0
+          ? Math.round(cartTotal).toString()
+          : "10999"
+        const productImage = mainItem?.variant?.product?.thumbnail || ""
+
+        try {
+          await notificationModuleService.createNotifications({
+            to: cart.email,
+            channel: "email",
+            template: nextStepConfig.templateKey,
+            from: "Joris de Vries - Engedd el, ami tönkretesz <info@engeddelkonyv.hu>",
+            data: {
+              emailOptions: {
+                replyTo: "info@engeddelkonyv.hu",
+                subject: nextStepConfig.subject(firstName),
+              },
+              firstName,
+              checkoutUrl,
+              productName,
+              productPrice,
+              productImage,
+              preview: nextStepConfig.preview,
+            },
+          })
+
+          // Update metadata with step tracking
+          await cartModuleService.updateCarts(cart.id, {
+            metadata: {
+              ...meta,
+              recovery_email_step: nextStepConfig.step,
+              [`recovery_email_step${nextStepConfig.step}_at`]: now.toISOString(),
+              // Legacy compat: mark as sent after step 1
+              recovery_email_sent: true,
+              recovery_email_sent_at: meta.recovery_email_sent_at || now.toISOString(),
+            },
+          })
+
+          sentCount++
+          logger.info(
+            `[Abandoned Cart] ENG step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
+          )
+        } catch (emailError: any) {
+          logger.error(
+            `[Abandoned Cart] Failed to send ENG step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
           )
         }
         continue

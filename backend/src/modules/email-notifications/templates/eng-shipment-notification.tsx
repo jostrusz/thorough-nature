@@ -137,7 +137,7 @@ export const EngShipmentNotificationTemplate: React.FC<EngShipmentNotificationTe
             lineHeight: '1.6',
             marginBottom: '6px',
           }}>
-            Szia {shippingAddress?.first_name || 'kedves Vásárló'},
+            Szia {shippingAddress?.first_name || 'kedves Vásárló'}!
           </Text>
           <Text style={{
             fontFamily: font,
@@ -147,8 +147,8 @@ export const EngShipmentNotificationTemplate: React.FC<EngShipmentNotificationTe
             marginBottom: '0',
           }}>
             {isPickup
-              ? 'Jó hírünk van! A rendelésed becsomagoltuk, és már úton van az átvételi pontodra. Lentebb megtalálod a küldemény részleteit.'
-              : 'Jó hírünk van! A rendelésed becsomagoltuk, és már úton van hozzád. Lentebb megtalálod a küldemény részleteit.'
+              ? 'Jó hírem van! A rendelésedet becsomagoltuk, és a csomag már úton van az átvételi pontod felé. Lentebb megtalálod a küldemény részleteit.'
+              : 'Jó hírem van! A rendelésedet becsomagoltuk, és a csomag már úton van hozzád. Lentebb megtalálod a küldemény részleteit.'
             }
           </Text>
         </div>
@@ -191,7 +191,7 @@ export const EngShipmentNotificationTemplate: React.FC<EngShipmentNotificationTe
                   color: '#5A3D6B',
                   marginBottom: trackingUrl ? '12px' : '0',
                 }}>
-                  Küldemény azonosító: <strong style={{ color: '#2D1B3D' }}>{trackingNumber}</strong>
+                  Csomagkövetési szám: <strong style={{ color: '#2D1B3D' }}>{trackingNumber}</strong>
                 </Text>
               )}
               {trackingUrl && (
@@ -242,7 +242,7 @@ export const EngShipmentNotificationTemplate: React.FC<EngShipmentNotificationTe
               lineHeight: '1.5',
             }}>
               {isPickup
-                ? 'Amint a küldemény átvételre készen áll, a futárszolgálat értesít téged.'
+                ? 'Amint a csomag átvehető, a futárszolgálat értesíteni fog.'
                 : 'A könyveket a központi raktárunkból küldjük.'
               }
             </Text>
@@ -377,7 +377,7 @@ export const EngShipmentNotificationTemplate: React.FC<EngShipmentNotificationTe
                 {pickup.id && (
                   <>
                     <br />
-                    <span style={{ color: '#9B7AAD', fontSize: '12px' }}>Átvételi pont azonosító: {pickup.id}</span>
+                    <span style={{ color: '#9B7AAD', fontSize: '12px' }}>Átvételi pont azonosítója: {pickup.id}</span>
                   </>
                 )}
               </Text>
@@ -437,7 +437,7 @@ export const EngShipmentNotificationTemplate: React.FC<EngShipmentNotificationTe
                 <td style={{ fontFamily: font, fontSize: '13px', color: '#5A3D6B', lineHeight: '1.5', paddingLeft: '8px' }}>
                   <strong style={{ color: '#2D1B3D' }}>Elküldve</strong>
                   <br />
-                  A rendelésedet becsomagoltuk és elküldtük a raktárunkból.
+                  A rendelésedet becsomagoltuk, és feladtuk a raktárunkból.
                 </td>
               </tr>
             </tbody>
@@ -523,7 +523,7 @@ export const EngShipmentNotificationTemplate: React.FC<EngShipmentNotificationTe
               <Link href="mailto:info@engeddelkonyv.hu" style={{ color: '#C27BA0', textDecoration: 'underline', fontWeight: 600 }}>
                 info@engeddelkonyv.hu
               </Link>
-              {' '}címre
+              {' '}címre.
             </Text>
           </div>
         </div>

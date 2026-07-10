@@ -87,7 +87,7 @@ export const EngEbookDeliveryTemplate: React.FC<EngEbookDeliveryTemplateProps> &
             lineHeight: '1.6',
             marginBottom: '24px',
           }}>
-            Örülünk, hogy belevágtál! A digitális példányaid készen állnak az olvasásra. Kattints az alábbi gombra, és töltsd le őket.
+            Örülök, hogy belevágtál! A digitális példányaid készen állnak az olvasásra. Kattints az alábbi gombra, és töltsd le őket.
           </Text>
 
           {/* CTA Button */}
@@ -125,7 +125,7 @@ export const EngEbookDeliveryTemplate: React.FC<EngEbookDeliveryTemplateProps> &
               color: '#795548',
               margin: '0',
             }}>
-              ⏳ A letöltési link <strong>{expiryDate}</strong>-ig érvényes. Letöltés után mentsd el a fájlokat.
+              ⏳ A letöltési link eddig érvényes: <strong>{expiryDate}</strong> — letöltés után mentsd el a fájlokat a saját eszközödre.
             </Text>
           </div>
 
@@ -148,7 +148,7 @@ export const EngEbookDeliveryTemplate: React.FC<EngEbookDeliveryTemplateProps> &
               lineHeight: '1.6',
               margin: '0',
             }}>
-              📦 A nyomtatott könyved úton van, és <strong>2–3 munkanapon</strong> belül megérkezik. A csomag nyomon követési számát külön e-mailben küldjük el.
+              📦 A nyomtatott könyved úton van, és <strong>2–3 munkanapon</strong> belül megérkezik. A csomagkövetési számot külön e-mailben küldjük el.
             </Text>
           </div>
 

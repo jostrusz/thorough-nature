@@ -67,6 +67,9 @@ import { OdShipmentNotificationTemplate, OD_SHIPMENT_NOTIFICATION, isOdShipmentN
 import { EngOrderPlacedTemplate, ENG_ORDER_PLACED, isEngOrderPlacedTemplateData } from './eng-order-placed'
 import { EngEbookDeliveryTemplate, ENG_EBOOK_DELIVERY, isEngEbookDeliveryData } from './eng-ebook-delivery'
 import { EngShipmentNotificationTemplate, ENG_SHIPMENT_NOTIFICATION, isEngShipmentNotificationData } from './eng-shipment-notification'
+import { EngAbandonedCheckout1Template, ENG_ABANDONED_CHECKOUT_1, isEngAbandonedCheckout1Data } from './eng-abandoned-checkout-1'
+import { EngAbandonedCheckout2Template, ENG_ABANDONED_CHECKOUT_2, isEngAbandonedCheckout2Data } from './eng-abandoned-checkout-2'
+import { EngAbandonedCheckout3Template, ENG_ABANDONED_CHECKOUT_3, isEngAbandonedCheckout3Data } from './eng-abandoned-checkout-3'
 import { OdAbandonedCheckout1Template, OD_ABANDONED_CHECKOUT_1, isOdAbandonedCheckout1Data } from './od-abandoned-checkout-1'
 import { OdAbandonedCheckout2Template, OD_ABANDONED_CHECKOUT_2, isOdAbandonedCheckout2Data } from './od-abandoned-checkout-2'
 import { OdAbandonedCheckout3Template, OD_ABANDONED_CHECKOUT_3, isOdAbandonedCheckout3Data } from './od-abandoned-checkout-3'
@@ -167,6 +170,9 @@ export const EmailTemplates = {
   ENG_ORDER_PLACED,
   ENG_EBOOK_DELIVERY,
   ENG_SHIPMENT_NOTIFICATION,
+  ENG_ABANDONED_CHECKOUT_1,
+  ENG_ABANDONED_CHECKOUT_2,
+  ENG_ABANDONED_CHECKOUT_3,
   OD_ABANDONED_CHECKOUT_1,
   OD_ABANDONED_CHECKOUT_2,
   OD_ABANDONED_CHECKOUT_3,
@@ -859,6 +865,33 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <EngShipmentNotificationTemplate {...data} />
 
+    case EmailTemplates.ENG_ABANDONED_CHECKOUT_1:
+      if (!isEngAbandonedCheckout1Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ENG_ABANDONED_CHECKOUT_1}"`
+        )
+      }
+      return <EngAbandonedCheckout1Template {...data} />
+
+    case EmailTemplates.ENG_ABANDONED_CHECKOUT_2:
+      if (!isEngAbandonedCheckout2Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ENG_ABANDONED_CHECKOUT_2}"`
+        )
+      }
+      return <EngAbandonedCheckout2Template {...data} />
+
+    case EmailTemplates.ENG_ABANDONED_CHECKOUT_3:
+      if (!isEngAbandonedCheckout3Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ENG_ABANDONED_CHECKOUT_3}"`
+        )
+      }
+      return <EngAbandonedCheckout3Template {...data} />
+
     case EmailTemplates.OD_ABANDONED_CHECKOUT_1:
       if (!isOdAbandonedCheckout1Data(data)) {
         throw new MedusaError(
@@ -1131,6 +1164,9 @@ export {
   EngOrderPlacedTemplate,
   EngEbookDeliveryTemplate,
   EngShipmentNotificationTemplate,
+  EngAbandonedCheckout1Template,
+  EngAbandonedCheckout2Template,
+  EngAbandonedCheckout3Template,
   OdAbandonedCheckout1Template,
   OdAbandonedCheckout2Template,
   OdAbandonedCheckout3Template,
