@@ -2595,7 +2595,7 @@ body {
             <div class="field-error">Ange ett giltigt telefonnummer</div>
             <div class="phone-preview" id="phone-preview"></div>
             <div class="phone-warning" id="phone-warning">
-              <div class="phone-warning-text">⚠ Detta telefonnummer verkar inte giltig. Kontrollera att det är korrekt.</div>
+              <div class="phone-warning-text">⚠ Detta telefonnummer verkar inte giltigt. Kontrollera att det är korrekt.</div>
               <div class="phone-warning-actions">
                 <button type="button" class="phone-warning-confirm" id="phone-warning-confirm">Ja, det stämmer</button>
                 <button type="button" class="phone-warning-edit" id="phone-warning-edit">Ändra</button>
@@ -2705,7 +2705,7 @@ body {
             <input type="checkbox" id="billing-checkbox">
             <span class="billing-toggle-label">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-              Min faktureringsadress är annan
+              Min faktureringsadress är en annan
             </span>
           </label>
 
@@ -2902,7 +2902,7 @@ body {
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
-          <span>Spårning via e-post direkt efter leverans</span>
+          <span>Spårning via e-post direkt efter avsändning</span>
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -2954,7 +2954,7 @@ body {
 <div class="checkout-footer">
   <div class="checkout-footer-trust">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    Alla transaktioner behandlas säkert via <strong>Klarna &amp; PayPal</strong>.
+    Alla transaktioner behandlas säkert via <strong>Klarna, Swish &amp; PayPal</strong>.
   </div>
   <div class="checkout-footer-links">
     &copy; 2026 Släpp taget om det som förstör dig · Joris De Vries<br>
@@ -5441,7 +5441,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           : 'Mollie';
         trustText.textContent = 'Säkrad via ' + trustProvider;
       } else {
-        trustText.textContent = 'Säkrad via Klarna & PayPal';
+        trustText.textContent = 'Säkrad via Klarna, Swish & PayPal';
       }
     }
   }

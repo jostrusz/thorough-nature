@@ -90,6 +90,12 @@
 .hero-left{flex:1 1 420px;min-width:300px}.hero-right{flex-shrink:0;position:relative}
 .skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:99999}
 @media(max-width:960px){.nav-links{display:none}.nav-hamburger{display:flex;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}.nav-hamburger span{display:block;width:24px;height:2px;background:var(--heading);border-radius:2px}.hero-section{padding-top:24px;padding-bottom:28px}.hero{flex-direction:column;text-align:center;gap:16px}.hero-left{display:contents}.hero-right img{width:300px!important}.hero-left .eyebrow{margin-bottom:10px}.hero-left h1{margin-bottom:6px}.hero-left .body-text{margin-bottom:10px}.hero-buttons{margin-top:14px!important}.payment-row{margin-top:8px}.section{padding:48px 16px}}
+
+/* Klarna badge pod CTA — „Prova först, betala sen" (Klarna je švédská = max trust) */
+.klarna-note { margin-top:10px; display:flex; align-items:center; justify-content:center; gap:7px; font-size:13.5px; color:#5f4a55; flex-basis:100%; }
+.klarna-note .kl-pill { background:#FFB3C7; color:#0A0B09; font-weight:700; font-size:11px; letter-spacing:0.02em; padding:2px 9px; border-radius:999px; }
+.hero-buttons .klarna-note { justify-content:flex-start; margin-top:0; }
+@media(max-width:768px){ .hero-buttons .klarna-note { justify-content:center; } }
 </style>
 <!-- Full stylesheet loaded asynchronously -->
 <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -169,11 +175,13 @@
     <!-- CTA tlačítko -->
     <div class="hero-buttons anim d3" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 28px;">
      <a href="checkout.html" class="btn-cta">📦 Beställ nu – gratis frakt ingår →</a>
+   <div class="klarna-note"><span class="kl-pill">Klarna</span> Prova först, betala sen — faktura möjlig</div>
     </div>
 
     <!-- Platební ikony -->
     <div class="payment-row anim d4">
      <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="40" height="32">
+     <img src="/icons/swish.svg" alt="Swish" class="pay-icon" width="40" height="32">
      <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="40" height="32">
      <img src="/icons/visa.svg" alt="Visa" class="pay-icon" width="40" height="32">
      <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="40" height="32">
@@ -227,7 +235,7 @@
     <!-- Karta 1 -->
     <div class="carousel-card">
      <div class="carousel-icon">💔</div>
-     <h3>Du har precis gjort slut och kan inte sluta tänka på din ex</h3>
+     <h3>Du har precis gjort slut och kan inte sluta tänka på ditt ex</h3>
      <p>du kollar ständigt hans/hennes sociala medier och hoppas på ett meddelande som aldrig kommer</p>
     </div>
 
@@ -303,7 +311,7 @@
  <div class="redenen-inner">
 
   <!-- Nadpis s žlutými highlighty -->
-  <h2 id="reasons-heading">9 anledningar varför denna bok <em>kan förändra ditt liv</em> – börja här när du är <span class="highlight-yellow">redo att lämna smärtan bakom dig</span>, grubbleriet och det <span class="highlight-yellow">inre kaoset</span>.</h2>
+  <h2 id="reasons-heading">9 anledningar till att denna bok <em>kan förändra ditt liv</em> – börja här när du är <span class="highlight-yellow">redo att lämna smärtan bakom dig</span>, grubbleriet och det <span class="highlight-yellow">inre kaoset</span>.</h2>
   <p class="redenen-sub"></p>
 
   <div class="redenen-video">
@@ -354,8 +362,10 @@
   <!-- CTA + platební ikony -->
   <div class="redenen-cta">
    <a href="checkout.html" class="btn-cta">Få ditt exemplar nu →</a>
+   <div class="klarna-note"><span class="kl-pill">Klarna</span> Prova först, betala sen — faktura möjlig</div>
    <div class="payment-row">
     <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="40" height="32">
+     <img src="/icons/swish.svg" alt="Swish" class="pay-icon" width="40" height="32">
     <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="40" height="32">
     <img src="/icons/visa.svg" alt="Visa" class="pay-icon" width="40" height="32">
     <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="40" height="32">
@@ -375,7 +385,7 @@
 <div class="offer-banner anim">
  <div class="offer-banner-inner">
   <h2>
-   ⏰ <em>Detta erbjudande går snart ut!</em> Beställ nu <em>"Släpp taget om det som förstör dig"</em> 📖 med de kostnadsfria bonus e-böckerna 🎁 <em>"Kärlek utan nonsens"</em> och <em>"Lösningen på överanalysering"</em> för endast <span class="price-highlight">399 kr</span> 💰, innan priset går tillbaka till <span class="price-old">599 kr</span> ⚠️
+   📖 Beställ nu <em>"Släpp taget om det som förstör dig"</em> med de kostnadsfria bonus-e-böckerna 🎁 <em>"Kärlek utan nonsens"</em> och <em>"Lösningen på överanalysering"</em> för endast <span class="price-highlight">399 kr</span> 💰 – mindre än en halv terapisession (700–1 200 kr)
   </h2>
  </div>
 </div>
@@ -401,7 +411,7 @@
     </div>
     <div class="offer-card c-red">
      <div class="card-icon">📚</div>
-     <span>Du får via e-post <strong>2 bonus e-böcker</strong> med totalt 200+ extra sidor</span>
+     <span>Du får via e-post <strong>2 bonus-e-böcker</strong> med totalt 200+ extra sidor</span>
     </div>
     <div class="offer-card c-crimson">
      <div class="card-icon">🚚</div>
@@ -413,7 +423,7 @@
     </div>
     <div class="offer-card c-orange">
      <div class="card-icon">💰</div>
-     <span>Du betalar endast <strong>399 kr istället för 599 kr</strong> – specialerbjudande</span>
+     <span>Du betalar endast <strong>399 kr</strong> – mindre än en halv terapisession (700–1 200 kr)</span>
     </div>
     <div class="offer-card c-indigo">
      <div class="card-icon">⚡</div>
@@ -454,7 +464,7 @@
    </p>
 
    <p class="offer-text">
-    📘 <strong>Släpp taget om det som förstör dig</strong> är inte bara en bok för bokhyllan. Det är en <strong>praktisk guide</strong> av terapeuten <em>Joris De Vries</em>, som redan har hjälpt hundratals människor att släppa taget om ständigt grubbleri, skuldkänslor, ångest och inre kaos. Denna bok hjälper dig att:
+    📘 <strong>Släpp taget om det som förstör dig</strong> är inte bara en bok för bokhyllan. Det är en <strong>praktisk guide</strong> av terapeuten <em>Joris De Vries</em>, som redan har hjälpt tusentals människor att släppa taget om ständigt grubbleri, skuldkänslor, ångest och inre kaos. Denna bok hjälper dig att:
    </p>
 
    <ul>
@@ -474,7 +484,7 @@
    <ul>
     <li>En <strong>bok (290 sidor)</strong> fullspäckad med praktiska verktyg som verkligen fungerar</li>
     <li>En <strong>arbetsbok</strong> i slutet av boken som hjälper dig att omsätta teorin i praktiken</li>
-    <li><strong>2 kostnadsfria bonus e-böcker</strong> (ytterligare 200 extra sidor) – fördjupande material för din inre process inom relationer och arbetsproduktivitet</li>
+    <li><strong>2 kostnadsfria bonus-e-böcker</strong> (ytterligare 200 extra sidor) – fördjupande material för din inre process inom relationer och arbetsproduktivitet</li>
     <li><strong>Fri frakt</strong> till ett värde av 69 kr</li>
     <li><strong>30 dagars pengarna-tillbaka-garanti</strong> – utan frågor, utan risk</li>
    </ul>
@@ -492,6 +502,7 @@
     <a href="checkout.html" class="btn-cta">💝 Säkra ditt exemplar för 399 kr →</a>
     <div class="payment-row">
      <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="40" height="32">
+     <img src="/icons/swish.svg" alt="Swish" class="pay-icon" width="40" height="32">
      <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="40" height="32">
      <img src="/icons/visa.svg" alt="Visa" class="pay-icon" width="40" height="32">
      <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="40" height="32">
@@ -837,7 +848,7 @@
    <p>Hur många timmar har du redan slösat på att <strong>spela upp det som har hänt på nytt</strong> – <em>"Om jag bara hade gjort annorlunda då…"</em></p>
    <p>Hur ofta har du önskat att <strong>smärtan äntligen skulle upphöra</strong>?</p>
    <p>Att det skulle bli <strong>tyst inuti</strong>?</p>
-   <p><strong>Varje minut utan rätt vägledning</strong> kostar dig mer stress än du <strong><u>förtjänar</u></strong>.</p>
+   <p><strong>Varje minut utan rätt vägledning</strong> kostar dig kraft som du behöver för dig själv – mer än du <strong><u>förtjänar</u></strong>.</p>
    <p>Och <strong>varje dag du skjuter upp det</strong> är en dag då du fortsätter att <strong><u>fastna i gammal smärta</u></strong>.</p>
   </div>
 
@@ -846,7 +857,7 @@
 
   <p>Jag var trött på att leva i <strong>skuggan av smärta, skuld och inre kaos</strong>.</p>
 
-  <p>Jag började söka efter svar – och just det ledde mig till <strong><u>insikter som inte bara förändrade mitt liv</u></strong>, utan också hundratals klienters.</p>
+  <p>Jag började söka efter svar – och just det ledde mig till <strong><u>insikter som inte bara förändrade mitt liv</u></strong>, utan också tusentals klienters.</p>
 
   <p>Tack vare dessa principer slutade jag att vara en <strong>fånge i mina egna känslor</strong>.</p>
 
@@ -935,6 +946,7 @@
    <a href="checkout.html" class="btn-cta">Beställ boken nu →</a>
    <div class="payment-row">
     <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="40" height="32">
+     <img src="/icons/swish.svg" alt="Swish" class="pay-icon" width="40" height="32">
     <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="40" height="32">
     <img src="/icons/visa.svg" alt="Visa" class="pay-icon" width="40" height="32">
     <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="40" height="32">
@@ -960,7 +972,7 @@
    </video>
   </div>
 
-  <p class="lead">Som om någon hade svingat ett trollspö…</p>
+  <p class="lead">Som om någon hade viftat med ett trollspö…</p>
 
   <p>Ju mer jag arbetade med människor som hade smärta, förlust eller inre kamp, desto tydligare blev det: <strong><u>dessa principer fungerar överallt</u></strong>.</p>
 
@@ -1012,7 +1024,7 @@
 
   <p class="bold-statement">Detta är ingen teori. Och inte heller tomt andligt prat.</p>
 
-  <p>Det är ett <strong>praktiskt, beprövat system</strong> som just nu hjälper <strong>hundratals människor i hela Europa</strong> att hantera <em>skuld, sorg, ångest, ilska och stillastående</em>.</p>
+  <p>Det är ett <strong>praktiskt, beprövat system</strong> som just nu hjälper <strong>tusentals människor i hela Europa</strong> att hantera <em>skuld, sorg, ångest, ilska och stillastående</em>.</p>
 
   <p><strong>Varje verktyg i denna bok</strong> kommer direkt från den terapeutiska praktiken – uppkomna ur <em>otaliga sessioner, verkliga berättelser, fall och uppgångar</em>.</p>
 
@@ -1239,7 +1251,7 @@
 
   <img src="/images/joris-author.webp" alt="Joris de Vries" class="auteur-photo" loading="lazy" width="520" height="273">
 
-  <p><strong>Föreställ dig:</strong> en coach som inte bara pratar, utan som <em>verkligen</em> förstår dig. Någon som själv har gått igenom helvetet – och hittat vägen tillbaka.</p>
+  <p><strong>Föreställ dig:</strong> en terapeut som inte bara pratar, utan som <em>verkligen</em> förstår dig. Någon som själv har gått igenom helvetet – och hittat vägen tillbaka.</p>
 
   <p><strong>Det är jag – Joris de Vries.</strong></p>
 
@@ -1255,7 +1267,7 @@
 
   <ul class="auteur-checklist">
    <li>Mer än <strong>12 års</strong> erfarenhet med människor i kris och emotionell nöd</li>
-   <li><strong>Tusentals timmar</strong> av 1-till-1-coachning med människor som satt fast i smärta</li>
+   <li><strong>Tusentals timmar</strong> av 1-till-1-samtal med människor som satt fast i smärta</li>
    <li>Själv gått igenom <strong>de djupaste dalarna</strong> – och vet vad som fungerar och inte fungerar</li>
    <li>Åratal av <strong>självstudier och praktisk erfarenhet</strong> inom trauma, beteende och mindset</li>
    <li>Utvecklat en metod som ger <strong>bevisat resultat</strong> – även när inget annat fungerade</li>
@@ -1321,7 +1333,7 @@
 
     <p>📚 <strong>Släpp taget om det som förstör dig</strong> är inget plåster – det är en <u><strong>karta</strong></u>. En karta tillbaka till dig själv.</p>
 
-    <p>Författaren <em>Joris De Vries</em>, terapeut med mångårig erfarenhet, delar i denna bok <strong>tydliga, effektiva och mänskliga steg</strong> som har hjälpt hundratals klienter att:</p>
+    <p>Författaren <em>Joris De Vries</em>, terapeut med mångårig erfarenhet, delar i denna bok <strong>tydliga, effektiva och mänskliga steg</strong> som har hjälpt tusentals klienter att:</p>
 
     <ul class="final-cta-list">
      <li>släppa taget om <strong>skuld och självbestraffning</strong>,</li>
@@ -1340,9 +1352,11 @@
     <p><strong>Kanske hittar du här det lugn</strong> du har sökt efter hela tiden.</p>
 
     <div style="text-align:center; margin-top: 32px;">
-     <a href="checkout.html" class="btn-cta" style="font-size:20px; padding:20px 48px;">⚡ Köp nu – sista chansen på 399 kr →</a>
+     <a href="checkout.html" class="btn-cta" style="font-size:20px; padding:20px 48px;">⚡ Köp nu för 399 kr – fri frakt →</a>
+   <div class="klarna-note"><span class="kl-pill">Klarna</span> Prova först, betala sen — faktura möjlig</div>
      <div class="payment-row" style="justify-content:center; margin-top:16px;">
       <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="40" height="32">
+     <img src="/icons/swish.svg" alt="Swish" class="pay-icon" width="40" height="32">
       <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="40" height="32">
       <img src="/icons/visa.svg" alt="Visa" class="pay-icon" width="40" height="32">
       <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="40" height="32">
@@ -1372,14 +1386,14 @@
 <section class="bonuses anim" aria-labelledby="bonuses-heading">
  <div class="bonuses-inner">
 
-  <h2 id="bonuses-heading" class="bonuses-heading">🎁 Nedanstående <span class="hl-yellow"><em>bonusarna är endast tillgängliga idag</em></span> för beställningar av <em>Släpp taget om det som förstör dig</em> - låt inte detta <span class="hl-green"><em>unika tillfälle</em></span> gå dig förbi! ⏰</h2>
+  <h2 id="bonuses-heading" class="bonuses-heading">🎁 Nedanstående <span class="hl-yellow"><em>bonusar ingår i den aktuella upplagan</em></span> vid beställning av <em>Släpp taget om det som förstör dig</em> – så länge <span class="hl-green"><em>lagret räcker</em></span>! 📚</h2>
 
   <!-- Bonus #1 -->
   <div class="bonus-card">
-   <img src="https://assets.lightfunnels.com/account-85759/images_library/c2a06219-7492-46be-aef0-dce486859abd.Losningen-pa-overanalysering.webp" alt="Lösningen på överanalysering — bonus e-bok" loading="lazy" width="280" height="378">
+   <img src="https://assets.lightfunnels.com/account-85759/images_library/c2a06219-7492-46be-aef0-dce486859abd.Losningen-pa-overanalysering.webp" alt="Lösningen på överanalysering — bonus-e-bok" loading="lazy" width="280" height="378">
    <div class="bonus-card-text">
     <h3>🎁 <span class="hl-yellow">#1 BONUS: E-bok Lösningen på överanalysering</span></h3>
-    <p>Denna <strong>exklusiva bonus e-bok</strong> får du gratis på köpet när du beställer idag. Den innehåller <em>praktiska verktyg och övningar</em> som kompletterar huvudinnehållet perfekt.</p>
+    <p>Denna <strong>exklusiva bonus-e-bok</strong> får du gratis på köpet när du beställer idag. Den innehåller <em>praktiska verktyg och övningar</em> som kompletterar huvudinnehållet perfekt.</p>
     <ul class="bonus-checklist">
      <li><strong>Extra arbetsblad</strong> för djupare självutforskning</li>
      <li><strong>Dagliga övningar</strong> för att omsätta teorin i praktiken</li>
@@ -1391,7 +1405,7 @@
 
   <!-- Bonus #2 -->
   <div class="bonus-card">
-   <img src="https://assets.lightfunnels.com/account-85759/images_library/59aa89ec-2e76-4632-9ec7-11b99d6f918b.karlek_b6e94ddc-cf35-41ca-8ce4-4e403cc58ffd.webp" alt="Kärlek utan nonsens — bonus e-bok" loading="lazy" width="280" height="378">
+   <img src="https://assets.lightfunnels.com/account-85759/images_library/59aa89ec-2e76-4632-9ec7-11b99d6f918b.karlek_b6e94ddc-cf35-41ca-8ce4-4e403cc58ffd.webp" alt="Kärlek utan nonsens — bonus-e-bok" loading="lazy" width="280" height="378">
    <div class="bonus-card-text">
     <h3>🎁 <span class="hl-yellow">#2 BONUS: E-bok Kärlek utan nonsens</span></h3>
     <p>Sanningen om relationer som ingen vågar prata om. <strong>Sluta vara till lags.</strong> Sluta förlora dig själv i en relation som <strong>utmattar dig, gör dig illa och långsamt bryter ner dig</strong>. Återfå din <em>kraft, klarhet och förmåga</em> att välja vad du vill – inte vad andra förväntar sig av dig.</p>
@@ -1479,8 +1493,10 @@
   </div>
 
   <a href="checkout.html" class="btn-cta">🎯 Ja, jag vill ha allt detta för 399 kr →</a>
+   <div class="klarna-note"><span class="kl-pill">Klarna</span> Prova först, betala sen — faktura möjlig</div>
   <div class="payment-row" style="justify-content: center; margin-top: 16px;">
    <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="40" height="32">
+     <img src="/icons/swish.svg" alt="Swish" class="pay-icon" width="40" height="32">
    <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="40" height="32">
    <img src="/icons/visa.svg" alt="Visa" class="pay-icon" width="40" height="32">
    <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="40" height="32">
@@ -1523,7 +1539,7 @@
       <span class="faq-icon">+</span>
      </div>
      <div class="faq-answer">
-      <p>Jag förstår dina tvivel helt och hållet. "Släpp taget om det som förstör dig" är inte en typisk självhjälpsbok full av vaga råd eller snygga citat. Den är baserad på verklig terapipraktik och beprövade psykologiska metoder. Joris De Vries har utvecklat dessa tekniker under sitt arbete med hundratals klienter som kämpade med samma problem som du. Därför upplever 92% av läsarna redan inom den första månaden märkbar lättnad. Skillnaden ligger i de praktiska, konkreta stegen som verkligen fungerar – även när du känner dig på botten. Och med vår 30 dagars pengarna-tillbaka-garanti tar du absolut ingen risk.</p>
+      <p>Jag förstår dina tvivel helt och hållet. "Släpp taget om det som förstör dig" är inte en typisk självhjälpsbok full av vaga råd eller snygga citat. Den är baserad på verklig terapipraktik och beprövade psykologiska metoder. Joris De Vries har utvecklat dessa tekniker under sitt arbete med tusentals klienter som kämpade med samma problem som du. Därför upplever 92% av läsarna redan inom den första månaden märkbar lättnad. Skillnaden ligger i de praktiska, konkreta stegen som verkligen fungerar – även när du känner dig på botten. Och med vår 30 dagars pengarna-tillbaka-garanti tar du absolut ingen risk.</p>
      </div>
     </div>
     <div class="faq-item">
@@ -1550,7 +1566,7 @@
       <span class="faq-icon">+</span>
      </div>
      <div class="faq-answer">
-      <p>Du får ett komplett paket – inte bara en bok på 290 sidor med en praktisk arbetsbok, utan också två värdefulla bonus e-böcker med totalt 200 extra sidor ("Lösningen på överanalysering" och "Kärlek utan nonsens"), plus gratis frakt värt 69 kr. Många läsare har berättat för oss att en enda insikt från boken har sparat dem så mycket tid, energi och pengar som de annars skulle ha spenderat på långvarig terapi. Jämfört med priset för en enda terapisession (700-1200 kr) är denna investering i din långsiktiga mentala hälsa mycket rimlig. Och med vår 30 dagars pengarna-tillbaka-garanti tar du absolut ingen risk.</p>
+      <p>Du får ett komplett paket – inte bara en bok på 290 sidor med en praktisk arbetsbok, utan också två värdefulla bonus-e-böcker med totalt 200 extra sidor ("Lösningen på överanalysering" och "Kärlek utan nonsens"), plus gratis frakt värt 69 kr. Många läsare har berättat för oss att en enda insikt från boken har sparat dem så mycket tid, energi och pengar som de annars skulle ha spenderat på långvarig terapi. Jämfört med priset för en enda terapisession (700-1200 kr) är denna investering i din långsiktiga mentala hälsa mycket rimlig. Och med vår 30 dagars pengarna-tillbaka-garanti tar du absolut ingen risk.</p>
      </div>
     </div>
     <div class="faq-item">
@@ -1568,7 +1584,7 @@
       <span class="faq-icon">+</span>
      </div>
      <div class="faq-answer">
-      <p>Joris De Vries är en erfaren terapeut som i många år har arbetat med klienter som kämpade med känslomässig smärta, trauman och inre kaos. Metoderna i den här boken är inte teoretiska – de har växt fram ur verkliga terapisessioner med hundratals människor. Hans tillvägagångssätt är baserat på beprövade psykologiska principer, men översatt till praktiska, tillgängliga tekniker som vem som helst kan tillämpa. Mer än 1 000 läsare har redan funnit lättnad genom hans arbete, med en nöjdhetsgrad på 92%. Du kan testa hans arbetssätt utan risk tack vare vår fullständiga pengarna-tillbaka-garanti.</p>
+      <p>Joris De Vries är en erfaren terapeut som i många år har arbetat med klienter som kämpade med känslomässig smärta, trauman och inre kaos. Metoderna i den här boken är inte teoretiska – de har växt fram ur verkliga terapisessioner med tusentals människor. Hans tillvägagångssätt är baserat på beprövade psykologiska principer, men översatt till praktiska, tillgängliga tekniker som vem som helst kan tillämpa. Mer än 4 000 läsare har redan funnit lättnad genom hans arbete, med en nöjdhetsgrad på 92%. Du kan testa hans arbetssätt utan risk tack vare vår fullständiga pengarna-tillbaka-garanti.</p>
      </div>
     </div>
     <div class="faq-item">
@@ -1595,7 +1611,7 @@
       <span class="faq-icon">+</span>
      </div>
      <div class="faq-answer">
-      <p>Din bok levereras inom cirka 2–4 arbetsdagar efter att vi mottagit din beställning. Vi skickar vanligtvis inom 24–48 timmar, varefter den skickas direkt till dig – helt gratis, eftersom frakt- och förpackningskostnaderna ingår i priset. Efter avsändning får du ett bekräftelsemail med spårningsinformation. Skulle leveransen av någon anledning ta längre tid är du välkommen att kontakta oss via hej@slapptagetboken.se så undersöker vi situationen direkt. Vill du börja snabbare? Välj då den digitala versionen som du kan ladda ner direkt.</p>
+      <p>Din bok levereras inom cirka 2–4 arbetsdagar efter att vi mottagit din beställning. Vi skickar vanligtvis inom 24 timmar, varefter den skickas direkt till dig – helt gratis, eftersom frakt- och förpackningskostnaderna ingår i priset. Efter avsändning får du ett bekräftelsemail med spårningsinformation. Skulle leveransen av någon anledning ta längre tid är du välkommen att kontakta oss via hej@slapptagetboken.se så undersöker vi situationen direkt. Vill du börja snabbare? Välj då den digitala versionen som du kan ladda ner direkt.</p>
      </div>
     </div>
     <div class="faq-item">
@@ -1618,7 +1634,7 @@
     </div>
     <div class="faq-item">
      <div class="faq-question" onclick="toggleFaqGuarantee(this)">
-      <h3>Är de där 1 000+ läsarna och framgångsprocenten på 92% verkligen sanna?</h3>
+      <h3>Är de där 4 000+ läsarna och framgångsprocenten på 92% verkligen sanna?</h3>
       <span class="faq-icon">+</span>
      </div>
      <div class="faq-answer">
@@ -1685,7 +1701,6 @@
   </div>
   <div class="footer-contact">
    <a href="mailto:hej@slapptagetboken.se">📧 hej@slapptagetboken.se</a>
-   <a href="tel:+420732915755">📞 +420 732 915 755</a>
   </div>
   <div class="footer-payments">
    <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="35" height="28" style="height:28px;">
@@ -2054,7 +2069,7 @@ function toggleMobileMenu() {
  "mainEntity": [
   {"@type": "Question", "name": "Fungerar det verkligen? Är detta inte bara ännu en tom självhjälpsbok?", "acceptedAnswer": {"@type": "Answer", "text": "Släpp taget om det som förstör dig är ingen typisk självhjälpsbok full av vaga råd. Den bygger på verklig terapeutisk praktik och beprövade psykologiska metoder. 92% av läsarna upplever märkbar lättnad redan inom den första månaden. Med vår 30 dagars pengarna-tillbaka-garanti tar du absolut ingen risk."}},
   {"@type": "Question", "name": "Finns boken också som digital PDF-version?", "acceptedAnswer": {"@type": "Answer", "text": "Ja, boken finns också som digital PDF-version. Du kan ladda ner PDF:en direkt efter betalningen och läsa den på vilken enhet som helst – dator, surfplatta eller telefon. Den innehåller exakt samma innehåll som den tryckta boken, inklusive alla övningar och arbetsblad."}},
-  {"@type": "Question", "name": "Hur lång tid tar det innan jag får boken?", "acceptedAnswer": {"@type": "Answer", "text": "Din bok levereras inom cirka 2–4 arbetsdagar efter att vi mottagit din beställning. Vi skickar vanligtvis inom 24–48 timmar. Frakt till Sverige är gratis. Efter avsändning får du ett bekräftelsemail med spårningsinformation."}},
+  {"@type": "Question", "name": "Hur lång tid tar det innan jag får boken?", "acceptedAnswer": {"@type": "Answer", "text": "Din bok levereras inom cirka 2–4 arbetsdagar efter att vi mottagit din beställning. Vi skickar vanligtvis inom 24 timmar. Frakt till Sverige är gratis. Efter avsändning får du ett bekräftelsemail med spårningsinformation."}},
   {"@type": "Question", "name": "För vem är den här boken avsedd?", "acceptedAnswer": {"@type": "Answer", "text": "Den här boken är för alla som kämpar med känslomässiga bördor – oavsett om det handlar om smärta efter en separation, skuldkänslor, ilska, kroniskt grubbleri, rädsla för att bli övergiven, eller känslan av att vara vilse. Boken är skriven utan fackjargong så att den är tillgänglig för alla."}},
   {"@type": "Question", "name": "Är 30 dagars pengarna-tillbaka-garantin verkligen utan krångel?", "acceptedAnswer": {"@type": "Answer", "text": "Absolut. Om du inte upplever någon förbättring inom 30 dagar eller av någon anledning inte är nöjd får du hela beloppet tillbaka. Skicka bara ett mail till hej@slapptagetboken.se så ordnar vi allt åt dig. Utan frågor, utan krångel."}},
   {"@type": "Question", "name": "Är min betalning säker?", "acceptedAnswer": {"@type": "Answer", "text": "Din betalning är helt säker via pålitliga tjänster som PayPal, Klarna och Stripe. Alla betalningsleverantörer uppfyller de högsta säkerhetsstandarderna (SSL-kryptering och PCI-DSS compliance). Vi är ett registrerat företag: EverChapter OÜ."}}
@@ -2071,7 +2086,6 @@ function toggleMobileMenu() {
  "contactPoint": {
   "@type": "ContactPoint",
   "email": "hej@slapptagetboken.se",
-  "telephone": "+420732915755",
   "contactType": "customer service",
   "availableLanguage": ["Swedish", "English", "Dutch"]
  },
