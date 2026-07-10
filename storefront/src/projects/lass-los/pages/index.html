@@ -221,7 +221,9 @@
 @media (max-width:1040px){ .trust-bar-inner{ flex-wrap:wrap; } }
 @media (max-width:600px){ .trust-bar-item{ white-space:normal; text-align:center; line-height:1.45; } }
 /* Klarna badge pod CTA — „Erst testen, dann zahlen" */
-.klarna-note { margin-top:10px; display:flex; align-items:center; justify-content:center; gap:7px; font-size:13.5px; color:#5f4a55; }
+.klarna-note { margin-top:10px; display:flex; align-items:center; justify-content:center; gap:7px; font-size:13.5px; color:#5f4a55; flex-basis:100%; }
+.hero-buttons .klarna-note { justify-content:flex-start; margin-top:0; }
+@media(max-width:768px){ .hero-buttons .klarna-note { justify-content:center; } }
 .klarna-note .kl-pill { background:#FFB3C7; color:#0A0B09; font-weight:700; font-size:11px; letter-spacing:0.02em; padding:2px 9px; border-radius:999px; }
 </style>
 <div class="trust-bar reveal" role="complementary" aria-label="Vertrauenssignale">
