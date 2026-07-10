@@ -208,16 +208,28 @@
 <!-- ═══════════════════════════════════════════
  TRUST BAR — žlutý pruh pod hero
  ═══════════════════════════════════════════ -->
+<style>/* Trust bar — vlajky + vše na jeden řádek na desktopu (dle DE vzoru) */
+.tb-flags { display:inline-flex; align-items:center; vertical-align:middle; margin-right:7px; }
+.tb-flags .tb-flag { width:19px; height:19px; border-radius:50%; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; font-size:22px; line-height:1; background:#fff; box-shadow:0 0 0 1.5px #fff, 0 1px 2px rgba(45,27,61,0.18); margin-left:-8px; }
+.tb-flags .tb-flag:first-child { margin-left:0; }
+.trust-bar-inner { max-width:1200px; flex-wrap:nowrap; }
+.trust-bar-item { padding:0 18px; font-size:14px; }
+@media (max-width:1040px){ .trust-bar-inner{ flex-wrap:wrap; } }
+@media (max-width:600px){ .trust-bar-item{ white-space:normal; text-align:center; line-height:1.45; } }
+/* !important proti async style.css, který se načítá později */
+.trust-bar-inner { flex-wrap:nowrap !important; }
+@media (max-width:1040px){ .trust-bar-inner{ flex-wrap:wrap !important; } }
+</style>
 <div class="trust-bar reveal" role="complementary" aria-label="Förtroendesignaler">
  <div class="trust-bar-inner">
   <div class="trust-bar-item">
-   <span class="icon">⭐</span> 4000+ nöjda kunder
+   <span class="tb-flags"><span class="tb-flag">🇸🇪</span><span class="tb-flag">🇳🇴</span><span class="tb-flag">🇩🇪</span><span class="tb-flag">🇦🇹</span><span class="tb-flag">🇱🇺</span><span class="tb-flag">🇳🇱</span><span class="tb-flag">🇧🇪</span><span class="tb-flag">🇫🇷</span><span class="tb-flag">🇨🇿</span><span class="tb-flag">🇸🇰</span><span class="tb-flag">🇭🇺</span></span> Bästsäljare i Europa
   </div>
   <div class="trust-bar-item">
-   <span class="icon">📦</span> Skickas inom 24 timmar
+   <span class="icon">📦</span> Skickas från vårt lager i Sverige – leverans inom 2 arbetsdagar
   </div>
   <div class="trust-bar-item">
-   <span class="icon">💯</span> 9.2/10 kundnöjdhet
+   <span class="icon">⭐</span> Över 30 000 läsare i hela Europa
   </div>
  </div>
 </div>
@@ -447,7 +459,7 @@
      <tr><td>Format</td><td>Pocket</td></tr>
      <tr><td>Pris</td><td>399 kr inkl. moms</td></tr>
      <tr><td>Frakt</td><td>Gratis (Sverige)</td></tr>
-     <tr><td>Leveranstid</td><td>2–4 arbetsdagar</td></tr>
+     <tr><td>Leveranstid</td><td>2 arbetsdagar</td></tr>
      <tr><td>Garanti</td><td>30 dagars pengarna tillbaka</td></tr>
     </table>
    </div>
@@ -1611,7 +1623,7 @@
       <span class="faq-icon">+</span>
      </div>
      <div class="faq-answer">
-      <p>Din bok levereras inom cirka 2–4 arbetsdagar efter att vi mottagit din beställning. Vi skickar vanligtvis inom 24 timmar, varefter den skickas direkt till dig – helt gratis, eftersom frakt- och förpackningskostnaderna ingår i priset. Efter avsändning får du ett bekräftelsemail med spårningsinformation. Skulle leveransen av någon anledning ta längre tid är du välkommen att kontakta oss via hej@slapptagetboken.se så undersöker vi situationen direkt. Vill du börja snabbare? Välj då den digitala versionen som du kan ladda ner direkt.</p>
+      <p>Din bok levereras inom 2 arbetsdagar efter att vi mottagit din beställning, direkt från vårt lager i Sverige. Vi skickar vanligtvis inom 24 timmar, varefter den skickas direkt till dig – helt gratis, eftersom frakt- och förpackningskostnaderna ingår i priset. Efter avsändning får du ett bekräftelsemail med spårningsinformation. Skulle leveransen av någon anledning ta längre tid är du välkommen att kontakta oss via hej@slapptagetboken.se så undersöker vi situationen direkt. Vill du börja snabbare? Välj då den digitala versionen som du kan ladda ner direkt.</p>
      </div>
     </div>
     <div class="faq-item">
@@ -2069,7 +2081,7 @@ function toggleMobileMenu() {
  "mainEntity": [
   {"@type": "Question", "name": "Fungerar det verkligen? Är detta inte bara ännu en tom självhjälpsbok?", "acceptedAnswer": {"@type": "Answer", "text": "Släpp taget om det som förstör dig är ingen typisk självhjälpsbok full av vaga råd. Den bygger på verklig terapeutisk praktik och beprövade psykologiska metoder. 92% av läsarna upplever märkbar lättnad redan inom den första månaden. Med vår 30 dagars pengarna-tillbaka-garanti tar du absolut ingen risk."}},
   {"@type": "Question", "name": "Finns boken också som digital PDF-version?", "acceptedAnswer": {"@type": "Answer", "text": "Ja, boken finns också som digital PDF-version. Du kan ladda ner PDF:en direkt efter betalningen och läsa den på vilken enhet som helst – dator, surfplatta eller telefon. Den innehåller exakt samma innehåll som den tryckta boken, inklusive alla övningar och arbetsblad."}},
-  {"@type": "Question", "name": "Hur lång tid tar det innan jag får boken?", "acceptedAnswer": {"@type": "Answer", "text": "Din bok levereras inom cirka 2–4 arbetsdagar efter att vi mottagit din beställning. Vi skickar vanligtvis inom 24 timmar. Frakt till Sverige är gratis. Efter avsändning får du ett bekräftelsemail med spårningsinformation."}},
+  {"@type": "Question", "name": "Hur lång tid tar det innan jag får boken?", "acceptedAnswer": {"@type": "Answer", "text": "Din bok levereras inom 2 arbetsdagar efter att vi mottagit din beställning, direkt från vårt lager i Sverige. Vi skickar vanligtvis inom 24 timmar. Frakt till Sverige är gratis. Efter avsändning får du ett bekräftelsemail med spårningsinformation."}},
   {"@type": "Question", "name": "För vem är den här boken avsedd?", "acceptedAnswer": {"@type": "Answer", "text": "Den här boken är för alla som kämpar med känslomässiga bördor – oavsett om det handlar om smärta efter en separation, skuldkänslor, ilska, kroniskt grubbleri, rädsla för att bli övergiven, eller känslan av att vara vilse. Boken är skriven utan fackjargong så att den är tillgänglig för alla."}},
   {"@type": "Question", "name": "Är 30 dagars pengarna-tillbaka-garantin verkligen utan krångel?", "acceptedAnswer": {"@type": "Answer", "text": "Absolut. Om du inte upplever någon förbättring inom 30 dagar eller av någon anledning inte är nöjd får du hela beloppet tillbaka. Skicka bara ett mail till hej@slapptagetboken.se så ordnar vi allt åt dig. Utan frågor, utan krångel."}},
   {"@type": "Question", "name": "Är min betalning säker?", "acceptedAnswer": {"@type": "Answer", "text": "Din betalning är helt säker via pålitliga tjänster som PayPal, Klarna och Stripe. Alla betalningsleverantörer uppfyller de högsta säkerhetsstandarderna (SSL-kryptering och PCI-DSS compliance). Vi är ett registrerat företag: EverChapter OÜ."}}
