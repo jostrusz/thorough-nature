@@ -241,6 +241,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0;
+  /* Grid item alapból min-width:auto → a sáv a tartalom min-content szélességére
+     nő (a hosszú magyar címkék miatt), és a rács kilóg a képernyőből. */
+  min-width: 0;
 }
 
 /* Shopify-style sekce karty */
@@ -1806,6 +1809,17 @@ body {
   font-size: 11px; font-weight: 600; color: var(--success);
   background: rgba(39,174,96,0.08); padding: 1px 6px; border-radius: 4px;
   display: inline-block; margin-top: 2px;
+}
+
+/* Keskeny kijelzőn a hosszú magyar címkék ("3× Engedd el, ami tönkretesz") és a
+   hosszú badge-ek ("LEGNAGYOBB MEGTAKARÍTÁS") nem férnek el egy sorban: a badge
+   flex-shrink:0, ezért felemészti a .bundle-info-t és a .bundle-text 0px-re nyomódik.
+   Megoldás: a badge saját sorba kerül, a címkék pedig törhetnek. */
+@media (max-width: 520px) {
+  .bundle-info { flex-wrap: wrap; }
+  .bundle-text { flex: 1 1 100%; }
+  .bundle-label, .bundle-sublabel { white-space: normal; }
+  .bundle-badge { order: 3; }
 }
 
 /* ─── ORDER BUMP — accordion ─── */
