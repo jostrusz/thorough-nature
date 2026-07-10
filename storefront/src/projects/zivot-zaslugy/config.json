@@ -9,10 +9,11 @@
   "defaultCountry": "CZ",
   "defaultPhonePrefix": "420",
   "phonePrefixByCountry": {
-    "CZ": "420"
+    "CZ": "420",
+    "SK": "421"
   },
   "salesChannelName": "Zivot Zaslugy",
-  "medusaUrl": "",
+  "medusaUrl": "https://www.marketing-hq.eu",
   "publishableApiKey": "pk_f94e4d5995a1ae4ef9db64d4a631069aa94a0a645e6dbee5a31d233d7157e2bb",
   "facebookPixelId": "",
   "regions": {
@@ -65,6 +66,11 @@
       "variantId": "variant_01KX5YHFT06FYSY536DMNKK8XQ"
     }
   ],
+  "shippingOptions": {
+    "pickup": { "price": 0, "label": "Výdejní místo Zásilkovna", "description": "Vyzvednutí na výdejním místě nebo v Z-BOXu", "matchName": "Výdejní místo" },
+    "homeDelivery": { "price": 20, "label": "Doručení na adresu", "description": "Zásilkovna doručí balík na vaši adresu", "matchName": "Na adresu" }
+  },
+  "packetaApiKey": "cbb760f552ef87b3",
   "catalogContentIds": [],
   "mollieProfileId": "",
   "paymentProviders": {

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Het Leven Dat Je Verdient — Ruimte-reset Quiz</title>
+<title>Život, který si zasloužíš — kvíz Restart prostoru</title>
 <style>
   /* DM Sans — self-hosted, matches the index page (latin + latin-ext) */
   @font-face { font-family: 'DM Sans'; src: url(fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
@@ -458,7 +458,7 @@
   .benefits li strong { color: var(--ink); font-weight: 600; }
 
   /* ═══ INTRO / HOOK obrazovka (step 1) ═══════════════════════════ */
-  /* Badge — "Gratis 7-daagse uitdaging · 5 min per dag" */
+  /* Badge — "7denní výzva zdarma · 5 minut denně" */
   .intro-badge {
     display: inline-flex; align-items: center; gap: 7px;
     font-family: -apple-system, system-ui, sans-serif;
@@ -1045,8 +1045,8 @@
 <!-- Fake site background -->
 <div class="site-bg">
   <div class="site-ghost">
-    <h1>pakjeleventerug.nl</h1>
-    <p>(Landingspagina — de pop-up opent na 7 sec, of als je linksonder klikt)</p>
+    <h1>nejdriv-ja.cz</h1>
+    <p>(Landing stránka — popup se otevře po 7 s, nebo klikni vlevo dole)</p>
   </div>
 </div>
 
@@ -1054,33 +1054,33 @@
 <div class="popup-overlay" id="overlay">
   <div class="popup" role="dialog" aria-labelledby="popup-q">
 
-    <button class="popup-close" onclick="closePopup()" aria-label="Sluiten">×</button>
+    <button class="popup-close" onclick="closePopup()" aria-label="Zavřít">×</button>
 
     <!-- STEP 1: INTRO / HOOK -->
     <div class="step active" data-step="1">
       <div class="popup-header">
-        <span class="intro-badge"><span class="dot"></span> Gratis 7-daagse uitdaging · 5 min per dag</span>
-        <h2 class="question" id="popup-q">Optimaliseer 5 gebieden van je huis met slechts <strong>17%</strong> — en <span class="gold-underline">verdien meer geld, verbeter je relaties en genees je lichaam</span>.</h2>
-        <p class="intro-subhead">Een 7-daagse uitdaging van 5 minuten per dag, die je van 'gewoon moe' naar '<u>eindelijk weer mezelf</u>' brengt.</p>
+        <span class="intro-badge"><span class="dot"></span> 7denní výzva zdarma · 5 minut denně</span>
+        <h2 class="question" id="popup-q">Vylepši 5 zón svého domova o pouhých <strong>17 %</strong> — a <span class="gold-underline">získej víc peněz, lepší vztahy i zdravější tělo</span>.</h2>
+        <p class="intro-subhead">7denní výzva po 5 minutách denně, která tě dostane z „prostě unavená“ do „<u>konečně zase sama sebou</u>“.</p>
         <ul class="benefits" style="margin-top:6px;margin-bottom:20px;">
-          <li>Krijg elke dag <strong>1 mini-opdracht van 5 minuten</strong></li>
-          <li>Ontdek je <strong>5 grootste energielekken</strong></li>
-          <li>Voel meer rust, energie en ruimte in je huis</li>
+          <li>Každý den dostaneš <strong>1 mini úkol na 5 minut</strong></li>
+          <li>Odhalíš svých <strong>5 největších žroutů energie</strong></li>
+          <li>Ucítíš doma víc klidu, energie a prostoru</li>
         </ul>
       </div>
       <div class="options" style="padding-top:0;padding-bottom:20px;overflow:visible;">
         <form id="introForm" onsubmit="return startChallenge(event)" novalidate>
           <div class="intro-email-field">
             <input type="text" id="intro_first_name" name="intro_first_name" autocomplete="given-name"
-                   placeholder="Je voornaam" aria-label="Voornaam" style="margin-bottom:10px;">
+                   placeholder="Tvoje jméno" aria-label="Jméno" style="margin-bottom:10px;">
             <input type="email" id="intro_email" name="intro_email" inputmode="email" autocomplete="email"
-                   placeholder="jouw@email.nl" aria-label="E-mailadres">
+                   placeholder="tvuj@email.cz" aria-label="E-mail">
           </div>
-          <div class="intro-error" id="intro-error">Vul je voornaam en een geldig e-mailadres in.</div>
-          <button type="submit" class="intro-cta">Ja, ik begin vandaag →</button>
+          <div class="intro-error" id="intro-error">Vyplň své jméno a platný e-mail.</div>
+          <button type="submit" class="intro-cta">Ano, začínám ještě dnes →</button>
           <p class="intro-microcopy">
-            <span class="promise">Je eerste opdracht komt binnen 2 minuten in je inbox.</span>
-            <span class="from">Je meldt je aan voor Anna's e-mails · gratis · uitschrijven met 1 klik · <a href="https://www.pakjeleventerug.nl/privacy" target="_blank">Privacy</a></span>
+            <span class="promise">První úkol ti přijde do 2 minut do e-mailu.</span>
+            <span class="from">Přihlašuješ se k Anniným e-mailům · zdarma · odhlášení 1 klikem · <a href="https://www.pakjeleventerug.nl/privacy" target="_blank">Soukromí</a></span>
           </p>
         </form>
       </div>
@@ -1094,14 +1094,14 @@
             <div class="progress-dot done"></div>
             <div class="progress-dot active"></div>
           </div>
-          <span class="progress-label">Stap 2 / 2</span>
+          <span class="progress-label">Krok 2 / 2</span>
         </div>
         <h2 class="question" id="q2"></h2>
-        <p class="question-sub" id="q2sub">Klik op wat het dichtst bij jou komt.</p>
+        <p class="question-sub" id="q2sub">Klikni na to, co je ti nejblíž.</p>
       </div>
       <div class="options" id="options-2"></div>
       <div class="popup-footer auto-advance">
-        <button class="back-btn" onclick="prevStep()">← Terug</button>
+        <button class="back-btn" onclick="prevStep()">← Zpět</button>
       </div>
     </div>
 
@@ -1109,16 +1109,16 @@
     <div class="step" data-step="3">
       <div class="success">
         <div class="success-icon">📨</div>
-        <div class="success-kicker">Je bent erbij</div>
-        <h3 class="success-title">Je eerste opdracht is onderweg 📨</h3>
+        <div class="success-kicker">Jsi v tom s námi</div>
+        <h3 class="success-title">Tvůj první úkol je na cestě 📨</h3>
 
         <p class="success-lead">
-          Hij komt <strong>binnen 2 minuten</strong> in je inbox. Open hem nu — daarin staat je
-          <em>5-minuten-opdracht van vandaag</em>.
+          Dorazí <strong>do 2 minut</strong> do tvé schránky. Otevři ho hned — najdeš v něm svůj
+          <em>dnešní 5minutový úkol</em>.
         </p>
 
         <div class="success-live">
-          <span class="live-dot"></span> Zojuist verzonden door Anna de Vries
+          <span class="live-dot"></span> Právě odesláno od Anny de Vries
         </div>
 
         <div class="success-arrow" aria-hidden="true">↓</div>
@@ -1127,24 +1127,24 @@
           <div class="inbox-meta">
             <div class="inbox-avatar">A</div>
             <div class="inbox-from">Anna de Vries</div>
-            <div class="inbox-time">zojuist</div>
+            <div class="inbox-time">právě teď</div>
           </div>
           <div class="inbox-subject">
-            <span class="inbox-badge">Nieuw</span>
-            Dag 1 — open eerst dit
+            <span class="inbox-badge">Nové</span>
+            Den 1 — otevři nejdřív tohle
           </div>
           <div style="margin-top:6px;font-family:-apple-system,system-ui,sans-serif;font-size:12.5px;color:var(--muted);line-height:1.4;">
-            Welkom. We beginnen heel klein — bij één la…
+            Vítej. Začneme úplně malinko — jedním šuplíkem…
           </div>
         </div>
 
         <a class="success-open-btn" href="https://mail.google.com" target="_blank" rel="noopener">
-          Open mijn inbox →
+          Otevřít můj e-mail →
         </a>
 
         <p class="success-spam">
-          Zie je hem niet? Kijk in <strong>Promo/Spam</strong> en sleep hem naar <strong>'Primair'</strong> —
-          zo mis je geen enkele opdracht.
+          Nevidíš ho? Mrkni do <strong>Hromadné/Spam</strong> a přetáhni ho do <strong>„Hlavní“</strong> —
+          tak ti neuteče žádný úkol.
         </p>
       </div>
     </div>
@@ -1155,7 +1155,7 @@
 <!-- Dev reopener -->
 <div class="dev-panel">
   <span>Preview dev:</span>
-  <button onclick="openPopup()">Open pop-up</button>
+  <button onclick="openPopup()">Otevřít popup</button>
   <button onclick="resetQuiz()">Reset</button>
 </div>
 
@@ -1169,13 +1169,13 @@
 // quiz_path[0] / quiz_texts[0] mee in de form-submit.
 const BRANCH_TREE = {
   overweldigd: {
-    q: "Welke <em>kamer</em> put je het meest uit?",
-    sub: "De plek waar je schouders meteen omhoog schieten als je binnenkomt.",
+    q: "Která <em>místnost</em> tě vyčerpává nejvíc?",
+    sub: "Místo, kde ti ztuhnou ramena hned, jak vejdeš.",
     options: [
-      { v: "kitchen",  i: "🍽️", t: "„Mijn keuken — de borden, de rommel, het stapelt zich altijd op." },
-      { v: "bedroom",  i: "🛏️", t: "„Mijn slaapkamer — zelfs daar kom ik niet echt tot rust." },
-      { v: "living",   i: "🛋️", t: "„Mijn woonkamer — overal liggen spullen van iedereen behalve van mij." },
-      { v: "whole",    i: "🏠", t: "„Eigenlijk het hele huis — ik weet niet waar ik moet beginnen." },
+      { v: "kitchen",  i: "🍽️", t: "„Kuchyň — nádobí, nepořádek, pořád se to vrší.“ },
+      { v: "bedroom",  i: "🛏️", t: "„Ložnice — ani tam si doopravdy neodpočinu.“ },
+      { v: "living",   i: "🛋️", t: "„Obývák — všude leží věci všech, jen ne moje.“ },
+      { v: "whole",    i: "🏠", t: "„Vlastně celý byt — nevím, kde začít.“ },
     ],
   },
 };
@@ -1434,13 +1434,13 @@ function renderOptions(container, options) {
     <button class="option option-custom" data-value="__custom__" data-custom="1">
       <span class="option-icon">✍️</span>
       <span class="option-text">
-        <span class="option-quote">Bij mij voelt het anders — ik zeg het zelf</span>
+        <span class="option-quote">U mě je to jinak — napíšu to sama</span>
       </span>
       <span class="option-check"></span>
     </button>
     <div class="option-custom-input">
       <input type="text" maxlength="200" placeholder="Schrijf het rustig in één zin…" />
-      <button type="button" class="custom-confirm" disabled>Bevestigen →</button>
+      <button type="button" class="custom-confirm" disabled>Potvrdit →</button>
     </div>
   `;
 }
