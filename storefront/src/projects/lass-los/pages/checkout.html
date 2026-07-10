@@ -234,6 +234,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0;
+  /* Grid-Item hat implizit min-width:auto → die Spalte würde auf die min-content-
+     Breite des Inhalts wachsen und das Raster über den Bildschirmrand schieben. */
+  min-width: 0;
 }
 
 /* Shopify-Stil Kartensektion */
@@ -658,6 +661,9 @@ body {
   text-transform: uppercase; color: var(--heading);
   background: var(--white); transition: border-color 0.2s ease;
   outline: none;
+  /* <input> hat eine intrinsische min-width (size-Attribut) und schrumpft daher
+     trotz flex:1 nicht — auf schmalen Displays schob der Button über den Rand. */
+  min-width: 0;
 }
 .promo-input:focus { border-color: var(--cta); }
 .promo-input::placeholder { text-transform: none; font-family: 'DM Sans', sans-serif; letter-spacing: normal; color: var(--muted); }
@@ -666,6 +672,7 @@ body {
   background: var(--heading); color: var(--white);
   font-size: 13px; font-weight: 600; cursor: pointer;
   font-family: inherit; white-space: nowrap;
+  flex-shrink: 0;
   transition: background 0.2s ease, transform 0.15s ease;
 }
 .promo-apply-btn:hover { background: var(--dark); transform: scale(1.02); }
