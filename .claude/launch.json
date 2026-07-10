@@ -117,6 +117,13 @@
       "runtimeArgs": ["http-server", "storefront/src/projects/engedd-el/pages", "-p", "8105", "-c-1"],
       "port": 8105,
       "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+    },
+    {
+      "name": "engedd-el-full",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
+      "runtimeArgs": ["http-server", "/private/tmp/claude-501/-Users-jaroslavostruszka-thorough-nature--claude-worktrees-priceless-archimedes-fa62c5/87ac0a29-6383-4c96-99ca-f17248564380/scratchpad/engedd-preview", "-p", "8106", "-c-1"],
+      "port": 8106,
+      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
     }
   ]
 }

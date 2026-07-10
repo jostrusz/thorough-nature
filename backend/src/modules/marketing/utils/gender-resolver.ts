@@ -101,11 +101,44 @@ export function ruleFallbackSk(firstNameRaw) {
   return { gender, vocative: name } // nominative address
 }
 
+// Common Hungarian male names ending in a vowel (the -a/-e heuristic below
+// would misclassify them as female): Attila, Béla, Géza, Gyula, Kálmán is
+// consonant but e.g. Imre, Bence, Vince end in -e.
+const HU_MALE_VOWEL = new Set([
+  "attila", "béla", "geza", "géza", "gyula", "imre", "bence", "vince",
+  "barna", "csaba", "zsombor", "botond", "endre",
+])
+const HU_FEMALE = new Set([
+  "emese", "enikő", "eniko", "gyöngyi", "gyongyi", "noémi", "noemi",
+  "tímea", "timea", "beáta", "beata", "ágnes", "agnes", "piroska",
+])
+
+/** Rule-based fallback for HUNGARIAN. Hungarian has no vocative and no
+ *  grammatical gender — address by given name unchanged ("Szia Zsófia").
+ *  Gender matters only for choosing the m/f copy variant. Heuristic: most
+ *  female names end in a vowel (-a/-e/-i/-ó/-ő), most male in a consonant,
+ *  with a curated exception list (Attila, Imre, Bence…). */
+export function ruleFallbackHu(firstNameRaw) {
+  const raw = String(firstNameRaw || "").trim().split(/\s+/)[0] || ""
+  if (!raw) return { gender: "unknown", vocative: "" }
+  const name = cap(raw)
+  const l = name.toLowerCase()
+
+  let gender = "unknown"
+  if (HU_FEMALE.has(l)) gender = "f"
+  else if (HU_MALE_VOWEL.has(l)) gender = "m"
+  else if (/[aáeéiíoóöőuúüű]$/i.test(l)) gender = "f"
+  else gender = "m"
+
+  return { gender, vocative: name } // nominative address
+}
+
 /** Locale-aware fallback dispatcher. Defaults to Czech. */
 export function ruleFallback(firstNameRaw, locale = "cs") {
   const loc = String(locale || "").toLowerCase()
   if (loc.startsWith("pl")) return ruleFallbackPl(firstNameRaw)
   if (loc.startsWith("sk")) return ruleFallbackSk(firstNameRaw)
+  if (loc.startsWith("hu")) return ruleFallbackHu(firstNameRaw)
   return ruleFallbackCs(firstNameRaw)
 }
 
@@ -120,12 +153,20 @@ export async function resolveGenderVocative(firstNameRaw, locale = "cs") {
   const loc = String(locale || "").toLowerCase()
   const isPl = loc.startsWith("pl")
   const isSk = loc.startsWith("sk")
-  const system = isSk
+  const isHu = loc.startsWith("hu")
+  const system = isHu
+    ? "Te a magyar nyelv szakértője vagy. Az adott keresztnévhez határozd meg a viselő nemét. A magyarban nincs megszólító eset — a keresztnév változatlan marad, tehát vocative = a név változatlanul. CSAK JSON-nal válaszolj, semmi mással."
+    : isSk
     ? "Si expert na slovenčinu. Pre dané krstné meno urč gramatický rod. Slovenčina nemá vokatív — oslovuje sa nominatívom, takže vocative = meno bez zmeny. Odpovedz IBA JSON, nič viac."
     : isPl
     ? "Jesteś ekspertem od języka polskiego. Dla podanego imienia określ rodzaj gramatyczny i wołacz (5. przypadek). Odpowiedz TYLKO w formacie JSON, nic więcej."
     : "Jsi expert na češtinu. Pro dané křestní jméno urči gramatický rod a 5. pád (vokativ). Odpověz POUZE JSON, nic víc."
-  const userPrompt = isSk
+  const userPrompt = isHu
+    ? `Keresztnév: "${raw}"\n` +
+      `Pontosan ezt add vissza: {"gender":"m"|"f"|"unknown","vocative":"<a név változatlanul>"}\n` +
+      `Szabályok: "m" férfinév, "f" női név, "unknown" ha nem eldönthető (külföldi/unisex). ` +
+      `vocative = a keresztnév változatlanul (Zsófia→Zsófia, Attila→Attila, Imre→Imre). A JSON-on kívül semmilyen más szöveg.`
+    : isSk
     ? `Meno: "${raw}"\n` +
       `Vráť presne: {"gender":"m"|"f"|"unknown","vocative":"<meno bez zmeny>"}\n` +
       `Pravidlá: "m" mužské meno, "f" ženské, "unknown" keď sa nedá určiť (cudzie/unisex). ` +

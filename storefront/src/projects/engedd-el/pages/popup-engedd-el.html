@@ -1060,34 +1060,34 @@
     <div class="step active" data-step="1">
       <div class="popup-header">
         <span class="intro-badge"><span class="dot"></span> Ingyenes · 7 napos kihívás · napi 5 perc</span>
-        <h2 class="question" id="popup-q"><strong>Hét nap, hét apró lépés.</strong> És ami éveken át lehúzott, <span class="gold-underline">végre elenged</span>.</h2>
-        <p class="intro-subhead">Napi egy apró, ötperces feladat – semmi több. Meglátod, mennyivel szabadabb lesz a fejed.</p>
+        <h2 class="question" id="popup-q"><strong>Hét nap, napi öt perc.</strong> És ami évek óta nyomaszt, <span class="gold-underline">végre elenged</span>.</h2>
+        <p class="intro-subhead">Minden reggel kapsz tőlem egy rövid feladatot – semmi más dolgod nincs vele, csak kipróbálni. Már az első nap érezni fogod a különbséget.</p>
         <ul class="benefits" style="margin-top:6px;margin-bottom:20px;">
-          <li>Minden nap kapsz <strong>egy ötperces technikát</strong></li>
-          <li>Megtanulod <strong>elengedni azt, ami visszahúz</strong></li>
-          <li>Nyugodtabb leszel, és kitisztul a fejed</li>
+          <li>Naponta <strong>egy ötperces technika</strong> – e-mailben, készen</li>
+          <li>Megtanulod <strong>elengedni, ami visszahúz</strong> – rágódást, bűntudatot, haragot</li>
+          <li>Hét nap után csendesebb lesz a fejed – és jobban alszol</li>
         </ul>
       </div>
       <div class="options" style="padding-top:0;padding-bottom:20px;overflow:visible;">
         <form id="introForm" onsubmit="return startChallenge(event)" novalidate>
-          <p class="intro-formcue" style="margin:0 0 10px;font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;font-weight:700;color:#2D1B3D;text-align:left;">Add meg a keresztneved és az e-mail címed, és vágjunk is bele!</p>
+          <p class="intro-formcue" style="margin:0 0 10px;font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px;font-weight:700;color:#2D1B3D;text-align:left;">Írd be a keresztneved és az e-mail címed – és már küldöm is az első feladatot.</p>
           <div class="intro-email-field">
             <input type="text" id="intro_first_name" name="intro_first_name" autocomplete="given-name"
                    placeholder="A keresztneved" aria-label="Keresztnév" style="margin-bottom:10px;">
             <input type="email" id="intro_email" name="intro_email" inputmode="email" autocomplete="email"
                    placeholder="neved@pelda.hu" aria-label="E-mail cím">
           </div>
-          <div class="intro-error" id="intro-error">Kérjük, add meg a neved és egy érvényes e-mail címet.</div>
-          <button type="submit" class="intro-cta">Igen, ma elkezdem →</button>
+          <div class="intro-error" id="intro-error">Add meg a keresztneved és egy érvényes e-mail címet.</div>
+          <button type="submit" class="intro-cta">Kérem az első feladatot →</button>
           <p class="intro-microcopy">
-            <span class="promise">Az első feladat pár másodpercen belül megérkezik.</span>
-            <span class="from">Feliratkozol Joris e-mailjeire · ingyenes · egy kattintással leiratkozhatsz · <a href="https://engeddelkonyv.hu/adatvedelem" target="_blank">Adatvédelem</a></span>
+            <span class="promise">Pár másodperc, és ott lesz a postafiókodban. Ingyen.</span>
+            <span class="from">Joris e-mailjeire iratkozol fel · bármikor leiratkozhatsz egy kattintással · <a href="https://engeddelkonyv.hu/adatvedelem" target="_blank">Adatvédelem</a></span>
           </p>
         </form>
       </div>
     </div>
 
-    <!-- STEP 2: egy személyre szabó kérdés — kattintás = submit -->
+    <!-- STEP 2: pohlaví — Joris se seznamuje. Klik = rovnou submit. -->
     <div class="step" data-step="2">
       <div class="popup-header">
         <div class="progress-wrap">
@@ -1097,8 +1097,44 @@
           </div>
           <span class="progress-label">2 / 2 lépés</span>
         </div>
+        <h2 class="question" id="q-gender">Még egy dolgot árulj el: <em>hogy írjak neked?</em></h2>
+        <p class="question-sub" id="q-gender-sub">Így a leveleim tényleg neked szólnak majd – nem „valakinek”.</p>
+      </div>
+      <div class="options options-grid-2" id="options-gender" style="padding-bottom:10px;">
+        <button type="button" class="option" data-gender="m">
+          <span class="option-icon">🙋‍♂️</span>
+          <span class="option-text">
+            <span class="option-quote">Férfi vagyok</span>
+          </span>
+          <span class="option-check"></span>
+        </button>
+        <button type="button" class="option" data-gender="f">
+          <span class="option-icon">🙋‍♀️</span>
+          <span class="option-text">
+            <span class="option-quote">Nő vagyok</span>
+          </span>
+          <span class="option-check"></span>
+        </button>
+      </div>
+      <div class="popup-footer auto-advance" style="justify-content:space-between;">
+        <button class="back-btn" onclick="prevStep()">← Vissza</button>
+        <button type="button" class="back-btn" id="gender-skip" onclick="skipGender()">inkább nem mondom meg</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: egy személyre szabó kérdés — kattintás = submit (záložní větev) -->
+    <div class="step" data-step="3">
+      <div class="popup-header">
+        <div class="progress-wrap">
+          <div class="progress-dots">
+            <div class="progress-dot done"></div>
+            <div class="progress-dot done"></div>
+            <div class="progress-dot active"></div>
+          </div>
+          <span class="progress-label">3 / 3 lépés</span>
+        </div>
         <h2 class="question" id="q2"></h2>
-        <p class="question-sub" id="q2sub">Kattints arra, ami a legközelebb áll hozzád.</p>
+        <p class="question-sub" id="q2sub">Kattints arra, amelyik a legismerősebb.</p>
       </div>
       <div class="options" id="options-2"></div>
       <div class="popup-footer auto-advance">
@@ -1107,19 +1143,19 @@
     </div>
 
     <!-- Success -->
-    <div class="step" data-step="3">
+    <div class="step" data-step="4">
       <div class="success">
         <div class="success-icon">📨</div>
-        <div class="success-kicker">Rendben, benne vagy.</div>
-        <h3 class="success-title">Az első feladat már úton van</h3>
+        <div class="success-kicker">Kész, benne vagy!</div>
+        <h3 class="success-title">Az első feladat már úton van hozzád</h3>
 
         <p class="success-lead">
-          Pár másodpercen belül <strong>megérkezik</strong>. Nyisd meg rögtön – benne van
-          <em>a mai ötperces feladat</em>.
+          Pár másodperc, és <strong>ott lesz a postafiókodban</strong>. Nyisd meg most rögtön –
+          benne van <em>a mai ötperces feladatod</em>.
         </p>
 
         <div class="success-live">
-          <span class="live-dot"></span> Épp most küldte el Joris de Vries
+          <span class="live-dot"></span> Joris de Vries épp most küldte el
         </div>
 
         <div class="success-arrow" aria-hidden="true">↓</div>
@@ -1132,19 +1168,19 @@
           </div>
           <div class="inbox-subject">
             <span class="inbox-badge">Új</span>
-            1. nap – állítsd meg a fejedben pörgő gondolatokat
+            1. nap – így állítod le a fejedben pörgő gondolatokat
           </div>
           <div style="margin-top:6px;font-family:-apple-system,system-ui,sans-serif;font-size:12.5px;color:var(--muted);line-height:1.4;">
-            Joris vagyok. Ez az első a hét rövid e-mail közül, amit tőlem kapsz…
+            Szia, Joris vagyok. Ez az első a hét rövid levélből, amit tőlem kapsz…
           </div>
         </div>
 
         <a class="success-open-btn" href="https://mail.google.com" target="_blank" rel="noopener">
-          Nyisd meg a postafiókod →
+          Megnyitom a postafiókom →
         </a>
 
         <p class="success-spam">
-          Nem találod? Nézd meg a <strong>Promóciók</strong> vagy a <strong>Spam</strong> mappát, és húzd át a levelet az <strong>Elsődleges</strong> mappába,
+          Nem találod? Nézd meg a <strong>Promóciók</strong> és a <strong>Spam</strong> mappát is, és húzd át a levelet az <strong>Elsődleges</strong> lapra,
           hogy egyetlen feladatról se maradj le.
         </p>
       </div>
@@ -1169,12 +1205,12 @@
 // odpověď jde jako quiz_path[0] / quiz_texts[0] do form-submit.
 const BRANCH_TREE = {
   default: {
-    q: "Mi nyomaszt most <em>a legjobban</em>?",
-    sub: "Amihez gondolatban a leggyakrabban visszatérsz.",
+    q: "Mi nyomaszt most <em>a leginkább</em>?",
+    sub: "Az, amihez gondolatban a leggyakrabban visszatérsz.",
     options: [
       { v: "rumination", i: "🔁", t: "Rágódás – „folyton ugyanazon pörög az agyam”" },
-      { v: "guilt",      i: "🪨", t: "Bűntudat – „valamit cipelek magamban, ami nyomaszt”" },
-      { v: "anger",      i: "🔥", t: "Harag – „folyton ott parázslik bennem”" },
+      { v: "guilt",      i: "🪨", t: "Bűntudat – „valamit cipelek, ami nem hagy nyugodni”" },
+      { v: "anger",      i: "🔥", t: "Harag – „még mindig ott parázslik bennem”" },
       { v: "fear",       i: "🌫️", t: "Félelem – „nem merem elengedni a régit”" },
     ],
   },
@@ -1186,6 +1222,7 @@ const BRANCH_TREE = {
 let state = {
   path: [],            // selected slug for the single question (e.g. ["rumination"])
   texts: [],           // human-readable sentence for the answer
+  gender: null,        // "m" | "f" | null (skip) — jde POUZE do properties.gender
   currentStep: 1,
   introEmail: "",      // e-mail zachycený na intro/hook obrazovce (step 1)
   introFirstName: "",  // jméno zachycené na step 1
@@ -1295,10 +1332,26 @@ function selectOption(btn) {
     return;
   }
 
-  // Step 2 je jediná (a poslední) kvízová otázka — zodpovězení = submit.
+  // Step 2 = pohlaví (první otázka) — výběr = rovnou submit.
+  // Gender jde jen do state.gender / properties.gender, NE do path/texts.
   if (stepN === 2) {
+    state.gender = btn.dataset.gender === "f" ? "f" : "m";
+    trackPopupEvent("popup_step_2_completed", { step: 2, slug: "gender_" + state.gender });
+    setTimeout(() => submitForm(), 500);
+    return;
+  }
+
+  // Step 3 je poslední kvízová otázka (záložní větev) — zodpovězení = submit.
+  if (stepN === 3) {
     setTimeout(() => finishQuiz(), 500);
   }
+}
+
+// Jemný skip pod gender kartami — pošleme přihlášení bez pohlaví.
+function skipGender() {
+  state.gender = null;
+  trackPopupEvent("popup_step_2_completed", { step: 2, slug: "gender_skipped" });
+  submitForm();
 }
 
 document.addEventListener("click", (e) => {
@@ -1313,7 +1366,7 @@ document.addEventListener("click", (e) => {
     optionBtn.dataset.value = "custom:" + text;
     const stepEl = optionBtn.closest(".step");
     const stepN = parseInt(stepEl.dataset.step, 10);
-    if (stepN === 2) finishQuiz();
+    if (stepN === 3) finishQuiz();
     return;
   }
   const opt = e.target.closest(".option");
@@ -1339,9 +1392,9 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// Record the single quiz answer (step 2) and submit the form → success.
+// Record the single quiz answer (step 3, záložní větev) and submit the form → success.
 function finishQuiz() {
-  const current = document.querySelector(`.step[data-step="2"]`);
+  const current = document.querySelector(`.step[data-step="3"]`);
   const selected = current && current.querySelector(".option.selected");
   if (!selected) return;
   // Store the answer in slot 0 (the only quiz question now).
@@ -1355,10 +1408,10 @@ function finishQuiz() {
   }
   state.texts[0] = txt;
 
-  // Funnel beacon — answering the single question completes step 2.
+  // Funnel beacon — answering the pain-point question completes step 3.
   const isCustom = (selected.dataset.value || "").startsWith("custom:") || selected.dataset.custom === "1";
-  trackPopupEvent("popup_step_2_completed", {
-    step: 2,
+  trackPopupEvent("popup_step_3_completed", {
+    step: 3,
     slug: state.path[0],
     text: String(txt || "").slice(0, 240),
     is_custom: isCustom,
@@ -1390,7 +1443,7 @@ function startChallenge(e) {
   state.introFirstName = firstName;    // jméno → oslovení ve flow ({{ first_name }})
   state.introGdpr = true;              // implicitní souhlas při přihlášení
   trackPopupEvent("popup_intro_email_captured");
-  submitForm();          // žádná mezitázka — rovnou přihlásit + ukázat success
+  showStep(2);           // první otázka: pohlaví (Joris se seznamuje) → pak submit
   return false;
 }
 
@@ -1432,13 +1485,13 @@ function renderOptions(container, options) {
     <button class="option option-custom" data-value="__custom__" data-custom="1">
       <span class="option-icon">✍️</span>
       <span class="option-text">
-        <span class="option-quote">Nálam ez másképp van – inkább magam írom le</span>
+        <span class="option-quote">Nálam ez más – inkább leírom a saját szavaimmal</span>
       </span>
       <span class="option-check"></span>
     </button>
     <div class="option-custom-input">
-      <input type="text" maxlength="200" placeholder="Írd le nyugodtan egy mondatban…" />
-      <button type="button" class="custom-confirm" disabled>Megerősítem →</button>
+      <input type="text" maxlength="200" placeholder="Írd le nyugodtan, egy mondat is elég…" />
+      <button type="button" class="custom-confirm" disabled>Mehet →</button>
     </div>
   `;
 }
@@ -1506,7 +1559,7 @@ async function submitForm(e) {
   if (successName) successName.textContent = firstName;
   const successEmail = $("#success-email");
   if (successEmail) successEmail.textContent = email;
-  showStep(3);
+  showStep(4);
 
   // Build acquisition + properties context for the backend.
   let landingUrl = "";
@@ -1528,6 +1581,7 @@ async function submitForm(e) {
     email,
     first_name: firstName,
     properties: {
+      gender:       state.gender || null,   // "m" | "f" | null (přeskočeno)
       quiz_path:    state.path,
       source_url:   landingUrl,
       referrer:     referrer,
@@ -1572,7 +1626,7 @@ async function submitForm(e) {
 //  DEV HELPERS
 // ═══════════════════════════════════════════════════════════════
 function resetQuiz() {
-  state = { path: [], texts: [], currentStep: 1, introEmail: "", introFirstName: "", introGdpr: false };
+  state = { path: [], texts: [], gender: null, currentStep: 1, introEmail: "", introFirstName: "", introGdpr: false };
   const introEmailEl = $("#intro_email"); if (introEmailEl) introEmailEl.value = "";
   const introNameEl = $("#intro_first_name"); if (introNameEl) introNameEl.value = "";
   const introGdprEl = $("#intro_gdpr_consent"); if (introGdprEl) introGdprEl.checked = false;

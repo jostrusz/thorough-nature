@@ -256,8 +256,21 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     // correct male/female copy and a correctly-declined greeting. Best-effort:
     // failure must never block the signup (resolver itself never throws, but
     // the DB write could). Skipped if already resolved.
+    // An explicit self-reported gender from the form (properties.gender =
+    // "m" | "f" — e.g. the HU popup asks directly) always wins over name
+    // inference, including overriding a previously inferred value.
     try {
-      if (contact.first_name && !contact.gender) {
+      const explicitGender =
+        properties.gender === "m" || properties.gender === "f" ? properties.gender : null
+      if (explicitGender && contact.gender !== explicitGender) {
+        const vocative =
+          contact.vocative ||
+          (contact.first_name
+            ? (await resolveGenderVocative(contact.first_name, brand.locale || "cs")).vocative
+            : "")
+        await service.updateMarketingContacts({ id: contact.id, gender: explicitGender, vocative })
+        contact = { ...contact, gender: explicitGender, vocative }
+      } else if (contact.first_name && !contact.gender) {
         const gv = await resolveGenderVocative(contact.first_name, brand.locale || "cs")
         await service.updateMarketingContacts({ id: contact.id, gender: gv.gender, vocative: gv.vocative })
         contact = { ...contact, gender: gv.gender, vocative: gv.vocative }
