@@ -3306,7 +3306,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var orderBumpActive = false;      // Ist Order Bump aktiviert?
 
   /* ─── FUNKTIONEN FÜR DYNAMISCHE BESTELLÜBERSICHT ─── */
-  // Preisformatierung im EU-Stil (€32,11)
+  // Preisformatierung im EU-Stil (32,11 €)
   function formatPrice(amount) {
     if (amount === null || amount === undefined) return '0 €';
     var num = parseFloat(amount);

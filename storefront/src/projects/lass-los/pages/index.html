@@ -179,6 +179,7 @@
     <!-- CTA Button -->
     <div class="hero-buttons anim d3" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 28px;">
      <a href="checkout.html" class="btn-cta">📦 Buch + Boni bestellen →</a>
+   <div class="klarna-note"><span class="kl-pill">Klarna</span> Erst testen, dann zahlen — Kauf auf Rechnung möglich</div>
     </div>
 
     <!-- Zahlungsicons -->
@@ -210,16 +211,29 @@
 <!-- ═══════════════════════════════════════════
  TRUST BAR — Vertrauensleiste unter Hero
  ═══════════════════════════════════════════ -->
+<style>
+.tb-flags { display:inline-flex; align-items:center; vertical-align:middle; margin-right:7px; }
+.tb-flags .tb-flag { width:19px; height:19px; border-radius:50%; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; font-size:22px; line-height:1; background:#fff; box-shadow:0 0 0 1.5px #fff, 0 1px 2px rgba(45,27,61,0.18); margin-left:-8px; }
+.tb-flags .tb-flag:first-child { margin-left:0; }
+/* Trust bar — auf Desktop alles in einer Zeile */
+.trust-bar-inner { max-width:1200px; flex-wrap:nowrap; }
+.trust-bar-item { padding:0 18px; font-size:14px; }
+@media (max-width:1040px){ .trust-bar-inner{ flex-wrap:wrap; } }
+@media (max-width:600px){ .trust-bar-item{ white-space:normal; text-align:center; line-height:1.45; } }
+/* Klarna badge pod CTA — „Erst testen, dann zahlen" */
+.klarna-note { margin-top:10px; display:flex; align-items:center; justify-content:center; gap:7px; font-size:13.5px; color:#5f4a55; }
+.klarna-note .kl-pill { background:#FFB3C7; color:#0A0B09; font-weight:700; font-size:11px; letter-spacing:0.02em; padding:2px 9px; border-radius:999px; }
+</style>
 <div class="trust-bar reveal" role="complementary" aria-label="Vertrauenssignale">
  <div class="trust-bar-inner">
   <div class="trust-bar-item">
-   <span class="icon">⭐</span> Über 1.000 zufriedene Kunden
+   <span class="tb-flags"><span class="tb-flag">🇩🇪</span><span class="tb-flag">🇦🇹</span><span class="tb-flag">🇱🇺</span><span class="tb-flag">🇳🇱</span><span class="tb-flag">🇧🇪</span><span class="tb-flag">🇫🇷</span><span class="tb-flag">🇸🇪</span><span class="tb-flag">🇳🇴</span><span class="tb-flag">🇨🇿</span><span class="tb-flag">🇸🇰</span><span class="tb-flag">🇭🇺</span></span> Bestseller in Europa
   </div>
   <div class="trust-bar-item">
-   <span class="icon">📦</span> Versand innerhalb von 1–2 Werktagen
+   <span class="icon">📦</span> Versand aus unserem Lager innerhalb von 24 Stunden
   </div>
   <div class="trust-bar-item">
-   <span class="icon">💯</span> 9,2/10 Kundenzufriedenheit
+   <span class="icon">⭐</span> Über 30.000 Leser in ganz Europa
   </div>
  </div>
 </div>
@@ -364,6 +378,7 @@
   <!-- CTA + Zahlungsicons -->
   <div class="redenen-cta">
    <a href="checkout.html" class="btn-cta">Sichere dir jetzt dein Exemplar →</a>
+   <div class="klarna-note"><span class="kl-pill">Klarna</span> Erst testen, dann zahlen — Kauf auf Rechnung möglich</div>
    <div class="payment-row">
     <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="40" height="32">
     <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="40" height="32">
@@ -1062,7 +1077,7 @@
 <section class="reviews-section anim" aria-labelledby="reviews-heading">
 
  <h2 id="reviews-heading" class="reviews-heading">
-  🌍 <span class="highlight-yellow">Über 3.800 Leser in Europa</span><br>
+  🌍 <span class="highlight-yellow">Über 3.800 Leser im deutschsprachigen Raum</span><br>
   erlebten bereits nach wenigen Tagen Erleichterung.<br>
   <span class="highlight-yellow">Verstehen ist der Anfang der Heilung</span> 💡
  </h2>
@@ -1075,12 +1090,12 @@
     <div class="photo-overlay"><div class="photo-stars">⭐⭐⭐⭐⭐</div><p class="photo-name">Anna L., München</p></div>
    </div>
    <div class="review-photo-card">
-    <img src="https://assets.lightfunnels.com/account-85759/images_library/bba0ad3b-5e10-40d8-a496-e54e92f287eb.imgi_9_1763958702-kjshajkhs-pichi.jpg" alt="Leser mit dem Buch Lass los, was dich kaputt macht" loading="lazy">
-    <div class="photo-overlay"><div class="photo-stars">⭐⭐⭐⭐⭐</div><p class="photo-name">Erik S., Hamburg</p></div>
+    <img src="https://assets.lightfunnels.com/account-85759/images_library/bba0ad3b-5e10-40d8-a496-e54e92f287eb.imgi_9_1763958702-kjshajkhs-pichi.jpg" alt="Leserin mit dem Buch Lass los, was dich kaputt macht" loading="lazy">
+    <div class="photo-overlay"><div class="photo-stars">⭐⭐⭐⭐⭐</div><p class="photo-name">Maja K., Wien</p></div>
    </div>
    <div class="review-photo-card">
-    <img src="https://assets.lightfunnels.com/account-85759/images_library/9e1fa647-e668-4389-8205-764e31f2da73.imgi_11_1763958704-kshkanjjska-pichi.jpg" alt="Leserin mit dem Buch Lass los, was dich kaputt macht" loading="lazy">
-    <div class="photo-overlay"><div class="photo-stars">⭐⭐⭐⭐⭐</div><p class="photo-name">Maja K., Wien</p></div>
+    <img src="https://assets.lightfunnels.com/account-85759/images_library/9e1fa647-e668-4389-8205-764e31f2da73.imgi_11_1763958704-kshkanjjska-pichi.jpg" alt="Leser mit dem Buch Lass los, was dich kaputt macht" loading="lazy">
+    <div class="photo-overlay"><div class="photo-stars">⭐⭐⭐⭐⭐</div><p class="photo-name">Erik S., Hamburg</p></div>
    </div>
    <div class="review-photo-card">
     <img src="https://assets.lightfunnels.com/account-85759/images_library/50724f37-1439-405b-8a1c-0def164b8ea2.imgi_10_1763958701-kjhsasja-pichi.jpg" alt="Leser mit dem Buch Lass los, was dich kaputt macht" loading="lazy">
@@ -1100,12 +1115,12 @@
     <div class="photo-overlay"><div class="photo-stars">⭐⭐⭐⭐⭐</div><p class="photo-name">Anna L., München</p></div>
    </div>
    <div class="review-photo-card">
-    <img src="https://assets.lightfunnels.com/account-85759/images_library/bba0ad3b-5e10-40d8-a496-e54e92f287eb.imgi_9_1763958702-kjshajkhs-pichi.jpg" alt="Leser mit dem Buch Lass los, was dich kaputt macht" loading="lazy">
-    <div class="photo-overlay"><div class="photo-stars">⭐⭐⭐⭐⭐</div><p class="photo-name">Erik S., Hamburg</p></div>
+    <img src="https://assets.lightfunnels.com/account-85759/images_library/bba0ad3b-5e10-40d8-a496-e54e92f287eb.imgi_9_1763958702-kjshajkhs-pichi.jpg" alt="Leserin mit dem Buch Lass los, was dich kaputt macht" loading="lazy">
+    <div class="photo-overlay"><div class="photo-stars">⭐⭐⭐⭐⭐</div><p class="photo-name">Maja K., Wien</p></div>
    </div>
    <div class="review-photo-card">
-    <img src="https://assets.lightfunnels.com/account-85759/images_library/9e1fa647-e668-4389-8205-764e31f2da73.imgi_11_1763958704-kshkanjjska-pichi.jpg" alt="Leserin mit dem Buch Lass los, was dich kaputt macht" loading="lazy">
-    <div class="photo-overlay"><div class="photo-stars">⭐⭐⭐⭐⭐</div><p class="photo-name">Maja K., Wien</p></div>
+    <img src="https://assets.lightfunnels.com/account-85759/images_library/9e1fa647-e668-4389-8205-764e31f2da73.imgi_11_1763958704-kshkanjjska-pichi.jpg" alt="Leser mit dem Buch Lass los, was dich kaputt macht" loading="lazy">
+    <div class="photo-overlay"><div class="photo-stars">⭐⭐⭐⭐⭐</div><p class="photo-name">Erik S., Hamburg</p></div>
    </div>
    <div class="review-photo-card">
     <img src="https://assets.lightfunnels.com/account-85759/images_library/50724f37-1439-405b-8a1c-0def164b8ea2.imgi_10_1763958701-kjhsasja-pichi.jpg" alt="Leser mit dem Buch Lass los, was dich kaputt macht" loading="lazy">
@@ -1350,6 +1365,7 @@
 
     <div style="text-align:center; margin-top: 32px;">
      <a href="checkout.html" class="btn-cta">⚡ Jetzt bestellen für 35 € – kostenloser Versand →</a>
+   <div class="klarna-note"><span class="kl-pill">Klarna</span> Erst testen, dann zahlen — Kauf auf Rechnung möglich</div>
      <div class="payment-row" style="justify-content:center; margin-top:16px;">
       <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="40" height="32">
       <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="40" height="32">
@@ -1488,6 +1504,7 @@
   </div>
 
   <a href="checkout.html" class="btn-cta">Ich will dieses Buch in den Händen halten →</a>
+   <div class="klarna-note"><span class="kl-pill">Klarna</span> Erst testen, dann zahlen — Kauf auf Rechnung möglich</div>
   <div class="payment-row" style="justify-content: center; margin-top: 16px;">
    <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="40" height="32">
    <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="40" height="32">
