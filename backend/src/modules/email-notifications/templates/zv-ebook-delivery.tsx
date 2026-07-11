@@ -286,7 +286,7 @@ export const ZvEbookDeliveryTemplate: React.FC<ZvEbookDeliveryTemplateProps> & {
             lineHeight: '1.5',
             marginBottom: '18px',
           }}>
-            🌿 <strong style={{ color: colors.textDark }}>Buď na sebe hodná</strong> — jedna zásuvka, jednou denně. Osm minut. Víc to být nemusí.
+            🌿 <strong style={{ color: colors.textDark }}>Buď na sebe hodná</strong> — jeden šuplík, jednou denně. Osm minut. Víc to být nemusí.
           </Text>
 
           {/* Help */}

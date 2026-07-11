@@ -198,7 +198,7 @@ export const ZvAbandonedCheckout3Template: React.FC<ZvAbandonedCheckout3Props> &
           fontWeight: 700,
           fontStyle: 'italic' as const,
         }}>
-          Víš, v čem byl rozdíl? Rozhodly se začít dnes. Jedna zásuvka. Osm minut.
+          Víš, v čem byl rozdíl? Rozhodly se začít dnes. Jeden šuplík. Osm minut.
         </Text>
       </Section>
 

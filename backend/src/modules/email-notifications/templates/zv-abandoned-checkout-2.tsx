@@ -162,7 +162,7 @@ export const ZvAbandonedCheckout2Template: React.FC<ZvAbandonedCheckout2Props> &
           margin: '18px 0 0',
           color: colors.body,
         }}>
-          Ten večer jsem si objednala 10 světových bestsellerů o odpouštění, hranicích, úklidu a klidu. Za 4 měsíce jsem je přečetla všechny. A zjistila jsem, že všechny říkají to samé — jen každá z jiné strany. Spojila jsem je do jednoho systému: <strong style={{ color: colors.heading }}>LIFE RESET™ — 5 pilířů, 30 dní</strong>.
+          Ten večer jsem si objednala 10 světových bestsellerů o hranicích, úklidu, vnitřním klidu a energii. Za 4 měsíce jsem je přečetla všechny. A zjistila jsem, že všechny říkají to samé — jen každá z jiné strany. Spojila jsem je do jednoho systému: <strong style={{ color: colors.heading }}>LIFE RESET™ — 5 pilířů, 30 dní</strong>.
         </Text>
         <Text style={{
           fontFamily: fontBody,
@@ -171,7 +171,7 @@ export const ZvAbandonedCheckout2Template: React.FC<ZvAbandonedCheckout2Props> &
           margin: '18px 0 0',
           color: colors.body,
         }}>
-          Nemusíš být psycholožka. Nepotřebuješ terapeutku. 8 minut denně. Jedna zásuvka. Jedno „ne". A po 30 dnech jsi jiný člověk — v tom dobrém slova smyslu.
+          Nemusíš být psycholožka. Nepotřebuješ terapeutku. 8 minut denně. Jeden šuplík. Jedno „ne". A po 30 dnech se nepoznáš — v tom nejlepším smyslu — v tom dobrém slova smyslu.
         </Text>
       </Section>
 

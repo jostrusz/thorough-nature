@@ -178,7 +178,7 @@ export const ZvAbandonedCheckout1Template: React.FC<ZvAbandonedCheckout1Props> &
             letterSpacing: '0.01em',
           }}
         >
-          Ano, pošlete mi knihu →
+          Ano, chci svou knihu →
         </Button>
       </Section>
 
@@ -206,7 +206,7 @@ export const ZvAbandonedCheckout1Template: React.FC<ZvAbandonedCheckout1Props> &
           lineHeight: '1.6',
           margin: '0',
         }}>
-          Brzy naslyšenou,
+          Měj se krásně,
         </Text>
         <Text style={{
           fontFamily: fontSerif,
