@@ -269,6 +269,15 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     smsDispatchTemplate: 'Zivot, ktery si zaslouzis: kniha je na ceste. Sledovani: {url} anna@nejdriv-ja.cz',
   },
   // Also match without hyphen
+  zivotzaslugy: {
+    replyTo: 'anna@nejdriv-ja.cz',
+    fromName: 'Anna de Vries — Život, který si zasloužíš',
+    fromEmail: 'Anna de Vries <anna@nejdriv-ja.cz>',
+    project: 'zivot-zaslugy',
+    locale: 'cs',
+    smsDispatchTemplate: 'Zivot, ktery si zaslouzis: kniha je na ceste. Sledovani: {url} anna@nejdriv-ja.cz',
+  },
+  // Also match without hyphen
   zyciezaslugy: {
     replyTo: 'anna@najpierw-ja.pl',
     fromName: 'Anna de Vries — Życie, jakiego nigdy sobie nie pozwoliłaś',

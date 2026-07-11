@@ -17,6 +17,7 @@ export const BUNDLE_BOOK_COUNT: Record<string, number> = {
   "LLWJK-1": 1, "LLWJK-2": 2, "LLWJK-3": 3, "LLWJK-4": 4,
   "HLDV-1": 1, "HLDV-2": 2, "HLDV-3": 3, "HLDV-4": 4,
   "ZJN-1": 1, "ZJN-2": 2, "ZJN-3": 3, "ZJN-4": 4,
+  "ZKZ-1": 1, "ZKZ-2": 2, "ZKZ-3": 3, "ZKZ-4": 4,
 }
 
 function skuOf(item: any): string | undefined {

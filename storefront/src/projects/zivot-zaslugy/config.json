@@ -30,11 +30,13 @@
   },
   "upsellProduct": {
     "name": "Pusť to, co tě ničí",
-    "handle": "pust-to-co-te-nici-upsell",
-    "variantId": "",
+    "handle": "pust-to-co-te-nici-zkz",
+    "productId": "prod_01KX79CGAZY0KX78SWRFRQJEKK",
+    "variantId": "variant_01KX79CKWZTEY0R2AQH3GSEYK1",
     "price": 549,
     "originalPrice": 749,
-    "currency": "CZK"
+    "currency": "CZK",
+    "thumbnail": ""
   },
   "bundleOptions": [
     {
@@ -67,8 +69,18 @@
     }
   ],
   "shippingOptions": {
-    "pickup": { "price": 0, "label": "Výdejní místo Zásilkovna", "description": "Vyzvednutí na výdejním místě nebo v Z-BOXu", "matchName": "Výdejní místo" },
-    "homeDelivery": { "price": 20, "label": "Doručení na adresu", "description": "Zásilkovna doručí balík na vaši adresu", "matchName": "Na adresu" }
+    "pickup": {
+      "price": 0,
+      "label": "Výdejní místo Zásilkovna",
+      "description": "Vyzvednutí na výdejním místě nebo v Z-BOXu",
+      "matchName": "Výdejní místo"
+    },
+    "homeDelivery": {
+      "price": 20,
+      "label": "Doručení na adresu",
+      "description": "Zásilkovna doručí balík na vaši adresu",
+      "matchName": "Na adresu"
+    }
   },
   "packetaApiKey": "cbb760f552ef87b3",
   "catalogContentIds": [],

@@ -385,6 +385,9 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           // Order-bump upsell (Życie → Odpuść cross-sell). Admin SKU has -2 suffix;
           // Dextrum holds only the parent barcode OTCCN64787237.
           "OTCCN64787237-2": { physicalSku: "OTCCN64787237", quantity: 1 },
+          // Order-bump upsell (Život → Pusť to cross-sell). Admin SKU has -3 suffix;
+          // Dextrum holds only the parent barcode OTCCN64787237.
+          "OTCCN64787237-3": { physicalSku: "OTCCN64787237", quantity: 1 },
         }
 
         // Filter out non-physical items (e.g. COD fee) that don't exist in the warehouse

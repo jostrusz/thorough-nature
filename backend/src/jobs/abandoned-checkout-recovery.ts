@@ -322,6 +322,34 @@ const ZZ_STEPS: StepConfig[] = [
   },
 ]
 
+/** Život, který si zasloužíš (zivot-zaslugy, CZ) 3-step sequence */
+const ZV_STEPS: StepConfig[] = [
+  {
+    step: 1,
+    templateKey: EmailTemplates.ZV_ABANDONED_CHECKOUT_1,
+    subject: (name) => `Ahoj ${name}, tvoje kniha na tebe čeká! 📦`,
+    preview: "Tvoje kniha je zabalená a čeká jen na tebe!",
+    delayMs: THIRTY_MINUTES_MS,
+    delayFrom: (_meta, abandonedAt) => abandonedAt,
+  },
+  {
+    step: 2,
+    templateKey: EmailTemplates.ZV_ABANDONED_CHECKOUT_2,
+    subject: (name) => `${name}, příběh, který stojí za touhle knihou`,
+    preview: "Už po týdnu jsem se cítila lehčí než za poslední roky...",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
+  },
+  {
+    step: 3,
+    templateKey: EmailTemplates.ZV_ABANDONED_CHECKOUT_3,
+    subject: (name) => `Poslední šance, ${name} — tvůj košík se brzy uvolní`,
+    preview: "Zbývá 24 hodin — pak musím tvůj košík uvolnit.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
+  },
+]
+
 /** Loslatenboek 3-step sequence */
 const LB_STEPS: StepConfig[] = [
   {
@@ -1140,6 +1168,73 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         } catch (emailError: any) {
           logger.error(
             `[Abandoned Cart] Failed to send ZZ step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
+          )
+        }
+        continue
+      }
+
+      // ── Život, který si zasloužíš (CZ): 3-step sequence ──
+      if (projectId === "zivot-zaslugy") {
+        if (currentStep >= 3) {
+          skippedCount++
+          continue
+        }
+
+        const nextStepConfig = ZV_STEPS[currentStep]
+
+        const referenceTime = nextStepConfig.delayFrom(meta, abandonedAt)
+        if (isNaN(referenceTime.getTime())) continue
+        if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
+
+        const firstName = cart.shipping_address?.first_name || "tam"
+        const checkoutUrl = meta.checkout_url || "https://www.nejdriv-ja.cz/checkout"
+        const mainItem = (cart.items || [])[0]
+        const productName = mainItem?.variant?.product?.title || mainItem?.title || "Život, který si zasloužíš"
+        const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+        }, 0)
+        const productPrice = cartTotal > 0
+          ? cartTotal.toFixed(0)
+          : "749"
+        const productImage = mainItem?.variant?.product?.thumbnail || ""
+
+        try {
+          await notificationModuleService.createNotifications({
+            to: cart.email,
+            channel: "email",
+            template: nextStepConfig.templateKey,
+            from: "Anna de Vries <anna@nejdriv-ja.cz>",
+            data: {
+              emailOptions: {
+                replyTo: "anna@nejdriv-ja.cz",
+                subject: nextStepConfig.subject(firstName),
+              },
+              firstName,
+              checkoutUrl,
+              productName,
+              productPrice,
+              productImage,
+              preview: nextStepConfig.preview,
+            },
+          })
+
+          await cartModuleService.updateCarts(cart.id, {
+            metadata: {
+              ...meta,
+              recovery_email_step: nextStepConfig.step,
+              [`recovery_email_step${nextStepConfig.step}_at`]: now.toISOString(),
+              recovery_email_sent: true,
+              recovery_email_sent_at: meta.recovery_email_sent_at || now.toISOString(),
+            },
+          })
+
+          sentCount++
+          logger.info(
+            `[Abandoned Cart] ZV step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
+          )
+        } catch (emailError: any) {
+          logger.error(
+            `[Abandoned Cart] Failed to send ZV step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
           )
         }
         continue

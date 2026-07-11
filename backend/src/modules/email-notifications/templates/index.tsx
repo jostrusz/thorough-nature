@@ -93,6 +93,13 @@ import { ZzAbandonedCheckout1Template, ZZ_ABANDONED_CHECKOUT_1, isZzAbandonedChe
 import { ZzAbandonedCheckout2Template, ZZ_ABANDONED_CHECKOUT_2, isZzAbandonedCheckout2Data } from './zz-abandoned-checkout-2'
 import { ZzAbandonedCheckout3Template, ZZ_ABANDONED_CHECKOUT_3, isZzAbandonedCheckout3Data } from './zz-abandoned-checkout-3'
 import { ZzEbookDeliveryTemplate, ZZ_EBOOK_DELIVERY, isZzEbookDeliveryData } from './zz-ebook-delivery'
+// Život, který si zasloužíš (zivot-zaslugy, CZ) templates
+import { ZvOrderPlacedTemplate, ZV_ORDER_PLACED, isZvOrderPlacedTemplateData } from './zv-order-placed'
+import { ZvShipmentNotificationTemplate, ZV_SHIPMENT_NOTIFICATION, isZvShipmentNotificationData } from './zv-shipment-notification'
+import { ZvAbandonedCheckout1Template, ZV_ABANDONED_CHECKOUT_1, isZvAbandonedCheckout1Data } from './zv-abandoned-checkout-1'
+import { ZvAbandonedCheckout2Template, ZV_ABANDONED_CHECKOUT_2, isZvAbandonedCheckout2Data } from './zv-abandoned-checkout-2'
+import { ZvAbandonedCheckout3Template, ZV_ABANDONED_CHECKOUT_3, isZvAbandonedCheckout3Data } from './zv-abandoned-checkout-3'
+import { ZvEbookDeliveryTemplate, ZV_EBOOK_DELIVERY, isZvEbookDeliveryData } from './zv-ebook-delivery'
 // Het Leven Dat Je Verdient (het-leven) templates
 import { HlOrderPlacedTemplate, HL_ORDER_PLACED, isHlOrderPlacedTemplateData } from './hl-order-placed'
 import { HlEbookDeliveryTemplate, HL_EBOOK_DELIVERY, isHlEbookDeliveryData } from './hl-ebook-delivery'
@@ -195,6 +202,13 @@ export const EmailTemplates = {
   ZZ_ABANDONED_CHECKOUT_2,
   ZZ_ABANDONED_CHECKOUT_3,
   ZZ_EBOOK_DELIVERY,
+  // Život, který si zasloužíš (CZ)
+  ZV_ORDER_PLACED,
+  ZV_SHIPMENT_NOTIFICATION,
+  ZV_ABANDONED_CHECKOUT_1,
+  ZV_ABANDONED_CHECKOUT_2,
+  ZV_ABANDONED_CHECKOUT_3,
+  ZV_EBOOK_DELIVERY,
   // Het Leven Dat Je Verdient
   HL_ORDER_PLACED,
   HL_EBOOK_DELIVERY,
@@ -307,6 +321,13 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
     const allKeys = Object.values(EmailTemplates) as string[]
     if (allKeys.includes(zzKey)) {
       return zzKey
+    }
+  }
+  if (project === 'zivot-zaslugy' || project === 'zivotzaslugy') {
+    const zvKey = `zv-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(zvKey)) {
+      return zvKey
     }
   }
   return templateKey
@@ -589,6 +610,61 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
         )
       }
       return <ZzEbookDeliveryTemplate {...data} />
+
+    // ── Život, který si zasloužíš (zivot-zaslugy, CZ) templates ──
+    case EmailTemplates.ZV_ORDER_PLACED:
+      if (!isZvOrderPlacedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ZV_ORDER_PLACED}"`
+        )
+      }
+      return <ZvOrderPlacedTemplate {...data} />
+
+    case EmailTemplates.ZV_SHIPMENT_NOTIFICATION:
+      if (!isZvShipmentNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ZV_SHIPMENT_NOTIFICATION}"`
+        )
+      }
+      return <ZvShipmentNotificationTemplate {...data} />
+
+    case EmailTemplates.ZV_ABANDONED_CHECKOUT_1:
+      if (!isZvAbandonedCheckout1Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ZV_ABANDONED_CHECKOUT_1}"`
+        )
+      }
+      return <ZvAbandonedCheckout1Template {...data} />
+
+    case EmailTemplates.ZV_ABANDONED_CHECKOUT_2:
+      if (!isZvAbandonedCheckout2Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ZV_ABANDONED_CHECKOUT_2}"`
+        )
+      }
+      return <ZvAbandonedCheckout2Template {...data} />
+
+    case EmailTemplates.ZV_ABANDONED_CHECKOUT_3:
+      if (!isZvAbandonedCheckout3Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ZV_ABANDONED_CHECKOUT_3}"`
+        )
+      }
+      return <ZvAbandonedCheckout3Template {...data} />
+
+    case EmailTemplates.ZV_EBOOK_DELIVERY:
+      if (!isZvEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ZV_EBOOK_DELIVERY}"`
+        )
+      }
+      return <ZvEbookDeliveryTemplate {...data} />
 
     case EmailTemplates.OK_ABANDONED_CHECKOUT_1:
       if (!isOkAbandonedCheckout1Data(data)) {
@@ -1190,6 +1266,12 @@ export {
   ZzAbandonedCheckout2Template,
   ZzAbandonedCheckout3Template,
   ZzEbookDeliveryTemplate,
+  ZvOrderPlacedTemplate,
+  ZvShipmentNotificationTemplate,
+  ZvAbandonedCheckout1Template,
+  ZvAbandonedCheckout2Template,
+  ZvAbandonedCheckout3Template,
+  ZvEbookDeliveryTemplate,
   // Het Leven Dat Je Verdient
   HlOrderPlacedTemplate,
   HlEbookDeliveryTemplate,
