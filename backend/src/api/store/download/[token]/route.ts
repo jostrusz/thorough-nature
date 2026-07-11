@@ -81,35 +81,24 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       console.warn("[Download] Could not log download activity:", logErr.message)
     }
 
-    // Build public file URLs from MinIO endpoint (bucket has public-read policy)
-    const minioEndpoint = process.env.MINIO_PUBLIC_ENDPOINT || process.env.MINIO_ENDPOINT || ""
-    const minioBucket = process.env.MINIO_BUCKET || "medusa-media"
+    // Build download URLs pointing at the /public proxy, which streams each
+    // file with `Content-Disposition: attachment` so it always downloads
+    // (never opens inline) — the only reliable behaviour on mobile / in-app
+    // mail browsers (WEB.DE, GMX, Gmail app). Direct public MinIO URLs serve
+    // PDFs inline and the <a download> attribute is ignored cross-origin.
+    const backendBase = (
+      process.env.BACKEND_PUBLIC_URL ||
+      process.env.MARKETING_PUBLIC_URL ||
+      ""
+    ).replace(/\/$/, "")
 
     const files = (download.files as unknown as any[]) || []
-    const filesWithUrls = files.map((file: any) => {
-      let downloadUrl = ""
-      try {
-        let endpoint = minioEndpoint
-        if (!endpoint.startsWith("http")) {
-          endpoint = `https://${endpoint}`
-        }
-        endpoint = endpoint.replace(/\/$/, "")
-        const encodedKey = file.key
-          .split("/")
-          .map((part: string) => encodeURIComponent(part))
-          .join("/")
-        downloadUrl = `${endpoint}/${minioBucket}/${encodedKey}`
-      } catch (urlErr: any) {
-        console.error(`[Download] Failed to build URL for ${file.key}:`, urlErr.message)
-      }
-
-      return {
-        title: file.title,
-        description: file.description,
-        size: file.size,
-        download_url: downloadUrl,
-      }
-    })
+    const filesWithUrls = files.map((file: any, index: number) => ({
+      title: file.title,
+      description: file.description,
+      size: file.size,
+      download_url: `${backendBase}/public/download/${download.token}/file?i=${index}`,
+    }))
 
     return res.json({
       download: {

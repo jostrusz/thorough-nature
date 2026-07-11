@@ -815,7 +815,7 @@ export default async function DownloadPage({
                   <a
                     href={file.download_url}
                     style={t.downloadButton}
-                    target="_blank"
+                    download
                     rel="noopener noreferrer"
                   >
                     {isCS ? "Stáhnout" : isPL ? "Pobierz" : isSV ? "Ladda ner" : projectId === "lass-los" ? "Herunterladen" : "Download"} &darr;
