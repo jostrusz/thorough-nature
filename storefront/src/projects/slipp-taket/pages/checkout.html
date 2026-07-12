@@ -2419,7 +2419,7 @@ body {
       </div>
       <div class="msb-info">
         <div class="msb-title" id="msb-title">Slipp taket på det som ødelegger deg</div>
-        <div class="msb-subtitle" id="msb-subtitle">Paperback · 1× bok</div>
+        <div class="msb-subtitle" id="msb-subtitle">Heftet · 1× bok</div>
       </div>
       <div class="msb-price-col">
         <div class="msb-price" id="msb-price">399 kr</div>
@@ -2439,26 +2439,26 @@ body {
       <div class="msb-line bump" id="msb-bump-line" style="display:none;">
         <span class="msb-line-label" id="msb-bump-name">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Livet Du Fortjener
+          Livet du fortjener
         </span>
-        <span class="msb-line-val" id="msb-bump-price">&euro;23,00</span>
+        <span class="msb-line-val" id="msb-bump-price">0 kr</span>
       </div>
       <!-- Mezisoučet -->
       <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(194,123,160,0.18);">
         <span class="msb-line-label">Delsum</span>
         <span class="msb-line-val" id="msb-subtotal">399 kr</span>
       </div>
-      <!-- BTW -->
+      <!-- MVA -->
       <div class="msb-line" id="msb-tax-line">
         <span class="msb-line-label" id="msb-tax-label">MVA (0%)</span>
         <span class="msb-line-val" id="msb-tax-val">0 kr</span>
       </div>
-      <!-- Verzending -->
+      <!-- Frakt -->
       <div class="msb-line shipping">
         <span class="msb-line-label">Frakt <span class="msb-gls">GLS</span></span>
         <span class="msb-line-val">Gratis</span>
       </div>
-      <!-- Totaal -->
+      <!-- Totalt -->
       <div class="msb-line total-line">
         <span class="msb-line-label">Totalt</span>
         <span class="msb-line-val" id="msb-total">399 kr</span>
@@ -2621,7 +2621,7 @@ body {
             </div>
           </div>
 
-          <!-- Factuuradres (billing address) — anders dan verzendadres -->
+          <!-- Fakturační adresa (billing) — jiná než doručovací -->
           <label class="billing-toggle" for="billing-checkbox">
             <input type="checkbox" id="billing-checkbox">
             <span class="billing-toggle-label">
@@ -2661,7 +2661,7 @@ body {
             </div>
           </div>
 
-          <!-- GLS Gratis verzending info -->
+          <!-- GLS info o dopravě zdarma -->
           <div id="shipping-info" style="display:flex;align-items:center;gap:10px;margin-top:16px;padding:12px 16px;background:#f0faf4;border:1px solid #b8e6c8;border-radius:10px;">
             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjE1Ij48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="flex-shrink:0;">
             <div style="flex:1;">
@@ -2764,7 +2764,7 @@ body {
         <div class="summary-product-info">
           <div class="summary-product-name" id="desktop-product-name">Slipp taket på det som ødelegger deg</div>
           <div class="summary-product-author">Joris de Vries</div>
-          <div class="summary-product-format">Paperback</div>
+          <div class="summary-product-format">Heftet</div>
           <div class="summary-product-price" id="desktop-product-price">399 kr</div>
         </div>
       </div>
@@ -3107,8 +3107,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // Subtitle — popis co je v košíku
     var msbSubtitle = document.getElementById('msb-subtitle');
     if (msbSubtitle) {
-      var parts = ['Paperback · ' + selectedBundleQty + '× ' + (selectedBundleQty === 1 ? 'bok' : 'bøker')];
-      if (orderBumpActive) parts.push('+ Het Leven');
+      var parts = ['Heftet · ' + selectedBundleQty + '× ' + (selectedBundleQty === 1 ? 'bok' : 'bøker')];
+      if (orderBumpActive) parts.push('+ ' + ((PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.name) || 'bonusbok'));
       msbSubtitle.textContent = parts.join(' ');
     }
 
@@ -3158,7 +3158,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var container = document.getElementById('bundle-options');
     if (!container) return;
     var unitPrice = PROJECT_CONFIG.mainProduct.price || 35;
-    var productName = PROJECT_CONFIG.mainProduct.name || 'Boek';
+    var productName = PROJECT_CONFIG.mainProduct.name || 'Bok';
     var html = '';
     var totalBundles = PROJECT_CONFIG.bundleOptions.length;
     PROJECT_CONFIG.bundleOptions.forEach(function(opt, idx) {
@@ -3248,7 +3248,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }).then(function(data) {
         var product = data && data.products && data.products[0];
         if (product && product.thumbnail) {
-          var imgTag = '<img src="' + product.thumbnail + '" alt="' + (product.title || 'Livet Du Fortjener') + '">';
+          var imgTag = '<img src="' + product.thumbnail + '" alt="' + (product.title || 'Livet du fortjener') + '">';
           if (thumbContainer) thumbContainer.innerHTML = imgTag;
           if (imgContainer) imgContainer.innerHTML = imgTag;
         }
@@ -3271,24 +3271,24 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var pctTag = document.getElementById('order-bump-pct-tag');
     if (pctTag) pctTag.textContent = '-' + savePct + '%';
     var oldPrice = document.getElementById('order-bump-old-price');
-    if (oldPrice) oldPrice.innerHTML = '&euro;' + Number(up.originalPrice).toFixed(2).replace('.', ',');
+    if (oldPrice) oldPrice.innerHTML = formatPrice(up.originalPrice);
     var newPrice = document.getElementById('order-bump-new-price');
-    if (newPrice) newPrice.innerHTML = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
+    if (newPrice) newPrice.innerHTML = formatPrice(up.price);
     var inlineSave = document.getElementById('order-bump-inline-save');
-    if (inlineSave) inlineSave.innerHTML = 'Bespaar &euro;' + saveAmt.toFixed(0);
+    if (inlineSave) inlineSave.innerHTML = 'Spar ' + formatPrice(saveAmt);
 
     // Detail
     var nameEl = document.getElementById('order-bump-name');
     if (nameEl) nameEl.textContent = up.name;
     var detailOld = document.getElementById('order-bump-detail-old');
-    if (detailOld) detailOld.innerHTML = '&euro;' + Number(up.originalPrice).toFixed(2).replace('.', ',');
+    if (detailOld) detailOld.innerHTML = formatPrice(up.originalPrice);
     var detailNew = document.getElementById('order-bump-detail-new');
-    if (detailNew) detailNew.innerHTML = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
+    if (detailNew) detailNew.innerHTML = formatPrice(up.price);
     var detailSave = document.getElementById('order-bump-detail-save');
-    if (detailSave) detailSave.innerHTML = 'Bespaar &euro;' + saveAmt.toFixed(0);
+    if (detailSave) detailSave.innerHTML = 'Spar ' + formatPrice(saveAmt);
 
     // Summary + Mobile sticky bar — aktualizuj název a cenu
-    var priceStr = '&euro;' + Number(up.price).toFixed(2).replace('.', ',');
+    var priceStr = formatPrice(up.price);
     var summaryBumpName = document.getElementById('summary-bump-name');
     if (summaryBumpName) {
       var svgHtml = summaryBumpName.querySelector('svg') ? summaryBumpName.querySelector('svg').outerHTML + ' ' : '';
@@ -3402,7 +3402,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }
     }
 
-    // Totaal
+    // Totalt
     var totalEl = document.getElementById('desktop-total-price');
     if (totalEl) totalEl.textContent = formatPrice(total);
 
@@ -5048,7 +5048,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
         (gw.methods || []).forEach(function(m) {
           var NL_NAMES = {
-            'creditcard': 'Creditcard',
+            'creditcard': 'Kortbetaling',
             'ideal': 'iDEAL',
             'bancontact': 'Bancontact',
             'paypal': 'PayPal',
@@ -5064,7 +5064,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             'applepay': 'Apple Pay',
             'googlepay': 'Google Pay',
             'bank_transfer': 'Bankoverføring',
-            'sepa_debit': 'SEPA automatische incasso',
+            'sepa_debit': 'SEPA automatisk trekk',
             'swish': 'Swish',
             'revolut_pay': 'Revolut Pay',
           };
@@ -5912,8 +5912,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     /* ─── Spinner helpers ─── */
     // Terwijl Foxentry bezig is, verbergen we de check/cross iconen
-    // en blokkeren we de lokale validateField van het instellen van valid/invalid.
-    // Op window zodat validateField() (buiten deze IIFE) het kan lezen.
+    // a blokujeme lokální validateField, aby nenastavoval valid/invalid.
+    // Na window, aby to validateField() (mimo tuto IIFE) mohl číst.
     window.__foxentryPending = window.__foxentryPending || {};
 
     function showSpinner(field) {
@@ -6024,7 +6024,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         setTimeout(function() { hideDropdown(addrDropdown); }, 200);
       });
       addrField.addEventListener('focus', function() {
-        // Heropen als er items zijn
+        // Znovu otevřít, pokud existují položky
         if (addrDropdown.children.length > 0 && !addrSelectedFromDropdown) {
           addrDropdown.classList.add('is-open');
         }
@@ -6043,13 +6043,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       foxEmailField.addEventListener('input', debounce(function() {
         var val = foxEmailField.value.trim();
         var atIdx = val.indexOf('@');
-        // Alleen zoeken als er een @ is + minstens 1 teken erna
+        // Hledat jen když je v textu @ + aspoň 1 znak za ním
         if (atIdx === -1 || atIdx === val.length - 1) {
           hideDropdown(foxEmailDropdown);
           return;
         }
         var afterAt = val.substring(atIdx + 1);
-        // Stop met zoeken als domein al compleet lijkt (bevat een punt met tekst erna)
+        // Přestat hledat, když doména vypadá kompletně (obsahuje tečku s textem za ní)
         if (/\.\w{2,}$/.test(afterAt)) {
           hideDropdown(foxEmailDropdown);
           return;
@@ -6076,7 +6076,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             // Trigger float-label
             var ff = foxEmailField.closest('.float-field');
             if (ff) ff.classList.add('has-value');
-            // Valideer het geselecteerde email
+            // Validovat vybraný e-mail
             foxEmailField.dispatchEvent(new Event('blur'));
           });
         })
@@ -6089,7 +6089,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       foxEmailField.addEventListener('blur', function() {
         setTimeout(function() { hideDropdown(foxEmailDropdown); }, 200);
       });
-      // Heropen bij focus als er items zijn
+      // Znovu otevřít při focusu, pokud existují položky
       foxEmailField.addEventListener('focus', function() {
         if (foxEmailDropdown.children.length > 0 && foxEmailField.value.indexOf('@') !== -1) {
           var afterAt = foxEmailField.value.substring(foxEmailField.value.indexOf('@') + 1);
@@ -6965,7 +6965,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           body: JSON.stringify({ region_id: currentRegionId })
         }).then(function(res) {
           promoCartId = res.cart.id;
-          // Voeg hoofdproduct toe zodat Medusa promotions kan evalueren
+          // Přidat hlavní produkt, aby Medusa mohla vyhodnotit promotions
           return medusaFetch('/store/carts/' + promoCartId + '/line-items', {
             method: 'POST',
             body: JSON.stringify({ variant_id: VARIANT_ID, quantity: selectedBundleQty })
