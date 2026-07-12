@@ -149,7 +149,7 @@ ${orderContext || "No orders found for this email"}
 
     // ── 4. Send to Dextrum Slack channel ──
     const urgencyDot: Record<string, string> = { low: ":large_blue_circle:", medium: ":large_yellow_circle:", high: ":red_circle:" }
-    const adminUrl = process.env.MEDUSA_ADMIN_URL || "https://backend-production-aefbc.up.railway.app/app"
+    const adminUrl = process.env.MEDUSA_ADMIN_URL || "https://www.marketing-hq.eu/app"
     const email = summary.customer_email || ticket.from_email || "N/A"
     const steps = (summary.request || []).map((s: string, i: number) => `    ${i + 1}. ${s}`).join("\n")
 
