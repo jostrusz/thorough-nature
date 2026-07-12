@@ -19,6 +19,7 @@ const PROJECT_NAMES: Record<string, string> = {
   "pusti-to-sk": "Pusti to, čo ťa ničí (SK)",
   "zivot-zaslugy": "Život, který si zasloužíš (CZ)",
   "lass-los": "Lass los (DE/AT)",
+  "engedd-el": "Engedd el (HU)",
 }
 
 // Currency symbols
@@ -29,6 +30,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   czk: "Kč",
   usd: "$",
   gbp: "£",
+  huf: "Ft",
 }
 
 /**
