@@ -8,11 +8,14 @@ import {
 import {
   createInventoryLevelsWorkflow,
   createProductsWorkflow,
+  updateProductsWorkflow,
+  updateProductVariantsWorkflow,
 } from "@medusajs/medusa/core-flows"
 
 /**
  * Seeds the order-bump upsell product for the zivot-zaslugy checkout:
- * "Pusť to, co tě ničí" at the discounted bump price 549 CZK (regular 749 Kč).
+ * "Pusť to, co tě ničí – upsell" at the discounted bump price 599 CZK
+ * (regular 749 Kč).
  *
  * Mirrors the zycie-zaslugy → odpusc cross-sell pattern: a dedicated product
  * with its own handle + variant so the discounted price lives on the variant
@@ -31,7 +34,27 @@ export default async function seedZivotUpsell({ container }: ExecArgs) {
   const salesChannelModuleService = container.resolve(Modules.SALES_CHANNEL)
 
   const HANDLE = "pust-to-co-te-nici-zkz"
+  const SOURCE_HANDLE = "pust-to-co-te-nici"
   const SKU = "OTCCN64787237-3"
+  const TITLE = "Pusť to, co tě ničí – upsell"
+  const DESCRIPTION =
+    "Samostatný order-bump produkt knihy Pusť to, co tě ničí pro checkout Život, který si zasloužíš. Autor Joris de Vries, 290 stran včetně praktického pracovního sešitu."
+  const PRICE = 599
+
+  const source = await query.graph({
+    entity: "product",
+    fields: ["id", "thumbnail", "images.url"],
+    filters: { handle: SOURCE_HANDLE },
+  })
+  const sourceProduct = source.data?.[0]
+  if (!sourceProduct) {
+    throw new Error(`[ZivotUpsell] Source product '${SOURCE_HANDLE}' not found`)
+  }
+  const sourceThumbnail = sourceProduct.thumbnail || sourceProduct.images?.[0]?.url || null
+  const sourceImages = (sourceProduct.images || [])
+    .map((image: any) => image?.url)
+    .filter(Boolean)
+    .map((url: string) => ({ url }))
 
   const existing = await query.graph({
     entity: "product",
@@ -40,8 +63,35 @@ export default async function seedZivotUpsell({ container }: ExecArgs) {
   })
   if (existing.data?.length) {
     const p = existing.data[0]
-    logger.info(`[ZivotUpsell] Product exists: ${p.id}, variant: ${p.variants?.[0]?.id}`)
-    console.log(JSON.stringify({ productId: p.id, variantId: p.variants?.[0]?.id }))
+    const variant = p.variants?.[0]
+    if (!variant?.id) {
+      throw new Error(`[ZivotUpsell] Existing product '${HANDLE}' has no variant`)
+    }
+
+    await updateProductsWorkflow(container).run({
+      input: {
+        selector: { id: p.id },
+        update: {
+          title: TITLE,
+          description: DESCRIPTION,
+          thumbnail: sourceThumbnail,
+          ...(sourceImages.length ? { images: sourceImages } : {}),
+        },
+      },
+    })
+    await updateProductVariantsWorkflow(container).run({
+      input: {
+        selector: { id: variant.id, product_id: p.id },
+        update: {
+          title: "Paperback – upsell",
+          sku: SKU,
+          prices: [{ amount: PRICE, currency_code: "czk" }],
+        },
+      },
+    })
+
+    logger.info(`[ZivotUpsell] Normalized product ${p.id}, variant ${variant.id}`)
+    console.log(JSON.stringify({ productId: p.id, variantId: variant.id, sku: SKU, price: PRICE }))
     return
   }
 
@@ -63,20 +113,21 @@ export default async function seedZivotUpsell({ container }: ExecArgs) {
     input: {
       products: [
         {
-          title: "Pusť to, co tě ničí (ZKZ Upsell)",
-          description:
-            "Kniha, která ti pomůže zastavit příval myšlenek, zklidnit emoce a najít vnitřní klid. Zvýhodněná cena k objednávce knihy Život, který si zasloužíš.",
+          title: TITLE,
+          description: DESCRIPTION,
           handle: HANDLE,
+          thumbnail: sourceThumbnail,
+          ...(sourceImages.length ? { images: sourceImages } : {}),
           weight: 500,
           status: ProductStatus.PUBLISHED,
           shipping_profile_id: shippingProfile.id,
           options: [{ title: "Format", values: ["Paperback"] }],
           variants: [
             {
-              title: "Paperback",
+              title: "Paperback – upsell",
               sku: SKU,
               options: { Format: "Paperback" },
-              prices: [{ amount: 549, currency_code: "czk" }],
+              prices: [{ amount: PRICE, currency_code: "czk" }],
               manage_inventory: true,
             },
           ],
