@@ -2,6 +2,7 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { PROFITABILITY_MODULE } from "../../../../modules/profitability"
 import type ProfitabilityModuleService from "../../../../modules/profitability/service"
+import { toEur } from "../../../../utils/fx-rates"
 
 type Period =
   | "today" | "yesterday"
@@ -9,27 +10,6 @@ type Period =
   | "this_month" | "last_month"
   | "this_year" | "last_year"
   | "custom"
-
-/**
- * Fixed exchange rates to EUR (updated manually as needed).
- * Rate = how many EUR per 1 unit of foreign currency.
- */
-const TO_EUR_RATES: Record<string, number> = {
-  EUR: 1,
-  SEK: 0.0903,  // 1 SEK ≈ 0.0903 EUR (ECB 2026-06-26: 1 EUR = 11.0775 SEK)
-  NOK: 0.086,   // 1 NOK ≈ 0.086 EUR
-  CZK: 0.040,   // 1 CZK ≈ 0.040 EUR
-  PLN: 0.233,   // 1 PLN ≈ 0.233 EUR
-  USD: 0.92,    // 1 USD ≈ 0.92 EUR
-  GBP: 1.16,    // 1 GBP ≈ 1.16 EUR
-  HUF: 0.0025,  // 1 HUF ≈ 0.0025 EUR
-}
-
-/** Convert amount from a currency to EUR */
-function toEur(amount: number, currencyCode: string): number {
-  const rate = TO_EUR_RATES[(currencyCode || "EUR").toUpperCase()] ?? 1
-  return amount * rate
-}
 
 /**
  * GET /admin/profitability/stats?period=today|yesterday|this_week|this_month|custom&date_from=YYYY-MM-DD&date_to=YYYY-MM-DD

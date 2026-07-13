@@ -15,19 +15,21 @@ import { Pool } from "pg"
  * All inputs/outputs are in MAJOR currency units (euros, not cents).
  */
 
+// ECB via frankfurter.dev, last update 2026-07-13 (seed marketing_fx_rate
+// daily for accurate reports; these are the fallback when the table is empty)
 const FALLBACK_RATES_TO_EUR: Record<string, number> = {
   EUR: 1,
-  CZK: 0.0395,   // 1 CZK ≈ 0.0395 EUR (rough; seed daily for accurate reports)
-  PLN: 0.2350,
-  SEK: 0.0870,
-  GBP: 1.17,
-  USD: 0.92,
-  CHF: 1.05,
-  DKK: 0.1340,
-  NOK: 0.0860,
-  HUF: 0.00255,
-  RON: 0.2010,
-  BGN: 0.5110,
+  CZK: 0.0412,   // 1 EUR = 24.262 CZK
+  PLN: 0.2313,   // 1 EUR = 4.3238 PLN
+  SEK: 0.0907,   // 1 EUR = 11.027 SEK
+  GBP: 1.1719,   // 1 EUR = 0.8533 GBP
+  USD: 0.8754,   // 1 EUR = 1.1424 USD
+  CHF: 1.0807,   // 1 EUR = 0.9253 CHF
+  DKK: 0.1338,   // 1 EUR = 7.475 DKK
+  NOK: 0.0896,   // 1 EUR = 11.1595 NOK
+  HUF: 0.002803, // 1 EUR = 356.78 HUF
+  RON: 0.1911,   // 1 EUR = 5.234 RON
+  BGN: 0.5113,   // fixed peg 1.95583 BGN/EUR
 }
 
 export type FxLookupResult = {

@@ -2,14 +2,7 @@ import { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { PROFITABILITY_MODULE } from "../modules/profitability"
 import { getAccountSpend } from "../modules/profitability/services/meta-ads.service"
-
-/** Fixed exchange rates to EUR */
-const TO_EUR_RATES: Record<string, number> = {
-  EUR: 1, SEK: 0.085, NOK: 0.086, CZK: 0.040, PLN: 0.233, USD: 0.92, GBP: 1.16, HUF: 0.0025,
-}
-function toEur(amount: number, currencyCode: string): number {
-  return amount * (TO_EUR_RATES[(currencyCode || "EUR").toUpperCase()] ?? 1)
-}
+import { toEur } from "../utils/fx-rates"
 
 /**
  * Sync Ad Spend Job
