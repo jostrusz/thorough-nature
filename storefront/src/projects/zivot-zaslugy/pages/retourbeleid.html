@@ -43,32 +43,31 @@ html { scroll-behavior: smooth; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
 
 /* ═══ NAVIGACE ═══ */
-.site-nav { background: var(--white); border-bottom: 1px solid var(--section); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(74, 26, 46, 0.06); }
-.nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.site-nav { background: var(--white, #FFF8F3); border-bottom: 1px solid rgba(74, 26, 46, 0.08); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(74, 26, 46, 0.06); }
+.nav-inner { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 20px; height: 64px; }
 .nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
 .nav-logo img { height: 40px; width: auto; }
-.nav-logo-text { font-family: 'Recoleta', serif; font-size: 16px; font-weight: 600; color: var(--heading); line-height: 1.2; }
 .nav-links { display: flex; align-items: center; gap: 28px; }
-.nav-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--body); text-decoration: none; transition: color 0.2s; position: relative; }
+.nav-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--body); text-decoration: none; transition: color 0.2s; position: relative; white-space: nowrap; }
 .nav-links a:hover { color: var(--heading); }
 .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--cta); transition: width 0.3s ease; }
 .nav-links a:hover::after { width: 100%; }
 .nav-links a.active { color: var(--heading); font-weight: 600; }
 .nav-links a.active::after { width: 100%; }
-.nav-cta { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--white) !important; background: var(--cta); padding: 10px 22px; border-radius: 8px; text-decoration: none !important; transition: all 0.25s ease; box-shadow: 0 3px 12px rgba(184, 92, 74, 0.2); }
-.nav-cta:hover { background: var(--cta-hover) !important; color: var(--white) !important; transform: translateY(-1px); box-shadow: 0 5px 18px rgba(184, 92, 74, 0.35); }
+.nav-cta { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: #fff !important; background: var(--cta); padding: 10px 22px; border-radius: 8px; text-decoration: none !important; transition: all 0.25s ease; box-shadow: 0 3px 12px rgba(184, 92, 74, 0.2); }
+.nav-cta:hover { background: var(--cta-hover, #a04a3e) !important; color: #fff !important; transform: translateY(-1px); box-shadow: 0 5px 18px rgba(184, 92, 74, 0.35); }
 .nav-cta::after { display: none !important; }
 .nav-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-direction: column; gap: 5px; }
 .nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--heading); border-radius: 2px; transition: all 0.3s ease; }
 .nav-mobile-overlay { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background: rgba(26, 16, 40, 0.5); z-index: 999; }
-.nav-mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--white); padding: 24px 20px; box-shadow: 0 8px 24px rgba(74, 26, 46, 0.12); z-index: 1000; flex-direction: column; gap: 0; border-bottom: 2px solid var(--section); }
-.nav-mobile-menu a { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500; color: var(--body); text-decoration: none; padding: 14px 0; border-bottom: 1px solid var(--section); display: block; transition: color 0.2s; }
+.nav-mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--white, #FFF8F3); padding: 24px 20px; box-shadow: 0 8px 24px rgba(74, 26, 46, 0.12); z-index: 1000; flex-direction: column; gap: 0; border-bottom: 2px solid rgba(74, 26, 46, 0.08); }
+.nav-mobile-menu a { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500; color: var(--body); text-decoration: none; padding: 14px 0; border-bottom: 1px solid rgba(74, 26, 46, 0.08); display: block; transition: color 0.2s; }
 .nav-mobile-menu a:last-child { border-bottom: none; }
 .nav-mobile-menu a:hover { color: var(--heading); }
-.nav-mobile-menu .nav-cta-mobile { display: inline-block; font-weight: 700; color: var(--white); background: var(--cta); padding: 14px 28px; border-radius: 10px; text-align: center; margin-top: 16px; border-bottom: none; }
-.nav-mobile-menu .nav-cta-mobile:hover { background: var(--cta-hover); color: var(--white); }
-
-@media (max-width: 768px) {
+.nav-mobile-menu .nav-cta-mobile { display: inline-block; font-weight: 700; color: #fff; background: var(--cta); padding: 14px 28px; border-radius: 10px; text-align: center; margin-top: 16px; border-bottom: none; }
+.nav-mobile-menu .nav-cta-mobile:hover { background: var(--cta-hover, #a04a3e); color: #fff; }
+@media (max-width: 1200px) { .nav-links { gap: 16px; } .nav-links a { font-size: 13px; } }
+@media (max-width: 1024px) {
  .nav-links { display: none; }
  .nav-hamburger { display: flex; }
  .nav-mobile-menu.open { display: flex; }
@@ -379,7 +378,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <nav class="site-nav" aria-label="Hlavní navigace" role="navigation">
  <div class="nav-inner">
   <a href="/" class="nav-logo">
-   <img src="/het-leven-logo.webp" alt="Život, který si zasloužíš" width="360" height="70">
+   <img src="/het-leven-logo.webp" alt="Život, který si zasloužíš" width="360" height="70" fetchpriority="high">
   </a>
   <div class="nav-links">
    <a href="/verzending">Doprava a dodání</a>
@@ -387,7 +386,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
    <a href="/voorwaarden">Obchodní podmínky</a>
    <a href="/privacy">Ochrana osobních údajů</a>
    <a href="/contact">Kontakt</a>
-   <a href="/checkout" class="nav-cta">Objednat &rarr;</a>
+   <a href="/checkout" class="nav-cta">Objednat →</a>
   </div>
   <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
    <span></span><span></span><span></span>
@@ -401,7 +400,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <a href="/voorwaarden">Obchodní podmínky</a>
  <a href="/privacy">Ochrana osobních údajů</a>
  <a href="/contact">Kontakt</a>
- <a href="/checkout" class="nav-cta-mobile">Objednat &rarr;</a>
+ <a href="/checkout" class="nav-cta-mobile">Objednat →</a>
 </div>
 
 <!-- ═══ HEADER ═══ -->

@@ -103,7 +103,7 @@ export const ZvEbookDeliveryTemplate: React.FC<ZvEbookDeliveryTemplateProps> & {
             lineHeight: '1.6',
             marginBottom: '14px',
           }}>
-            mám radost, že ses rozhodla dát na první místo sebe. Tvoje dvě bonusové e-knihy — <strong style={{ color: colors.textDark }}>Přesuň jednu věc, změň všechno</strong> a <strong style={{ color: colors.textDark }}>Ne všechno si zaslouží místo</strong> — jsou připravené. Stačí kliknout na tlačítko níže a hned si je stáhnout.
+            mám radost, že ses rozhodla dát na první místo sebe. Tvoje dvě bonusové e-knihy — <strong style={{ color: colors.textDark }}>Posuň jednu věc, změň všechno</strong> a <strong style={{ color: colors.textDark }}>Ne vše má mít svoje místo</strong> — jsou připravené. Stačí kliknout na tlačítko níže a hned si je stáhnout.
           </Text>
 
           <Text style={{
@@ -268,7 +268,7 @@ export const ZvEbookDeliveryTemplate: React.FC<ZvEbookDeliveryTemplateProps> & {
             lineHeight: '1.5',
             marginBottom: '8px',
           }}>
-            🪑 <strong style={{ color: colors.textDark }}>Začni u Feng Shui</strong> — Přesuň jednu věc, změň všechno. Čtvrt hodiny a budeš vědět, co se u tebe doma musí pohnout.
+            🪑 <strong style={{ color: colors.textDark }}>Začni u Feng Shui</strong> — Posuň jednu věc, změň všechno. Čtvrt hodiny a budeš vědět, co se u tebe doma musí pohnout.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -277,7 +277,7 @@ export const ZvEbookDeliveryTemplate: React.FC<ZvEbookDeliveryTemplateProps> & {
             lineHeight: '1.5',
             marginBottom: '8px',
           }}>
-            🧹 <strong style={{ color: colors.textDark }}>Pak Ne všechno si zaslouží místo</strong> — úklid jako projev lásky k sobě. Se systémem 4 krabic se o každé věci rozhodneš do 30 sekund.
+            🧹 <strong style={{ color: colors.textDark }}>Pak Ne vše má mít svoje místo</strong> — úklid jako projev lásky k sobě. Se systémem 4 krabic se o každé věci rozhodneš do 30 sekund.
           </Text>
           <Text style={{
             fontFamily: font,
