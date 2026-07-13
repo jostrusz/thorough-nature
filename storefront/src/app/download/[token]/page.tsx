@@ -600,6 +600,16 @@ const zycieZaslugyTheme: ProjectTheme = {
   companyLocation: "Rybná 716/24, 110 00 Praha",
 }
 
+// zivot-zaslugy (Czech) — same Anna de Vries brand world as het-leven/zycie
+const zivotZaslugyTheme: ProjectTheme = {
+  ...hetLevenTheme,
+  brandLabel: "ŽIVOT, KTERÝ SI ZASLOUŽÍŠ",
+  brandName: "Život, který si zasloužíš",
+  supportEmail: "anna@nejdriv-ja.cz",
+  companyName: "Performance Marketing Solution s.r.o.",
+  companyLocation: "Rybná 716/24, 110 00 Praha",
+}
+
 // slapp-taget (Swedish) — reuses loslatenboek palette, PMS billing
 const slappTagetTheme: ProjectTheme = {
   ...loslatenboekTheme,
@@ -629,6 +639,7 @@ const THEMES: Record<string, ProjectTheme> = {
   'pusti-to-sk': pustiToSkTheme,
   'het-leven': hetLevenTheme,
   'zycie-zaslugy': zycieZaslugyTheme,
+  'zivot-zaslugy': zivotZaslugyTheme,
   'slapp-taget': slappTagetTheme,
   'odpusc-ksiazka': odpuscKsiazkaTheme,
 }
@@ -687,6 +698,10 @@ async function getDownloadData(
 // Triggered by ?preview=<projectId> in the URL.
 function getMockData(projectId: string): DownloadData {
   const filesByProject: Record<string, DownloadFile[]> = {
+    'zivot-zaslugy': [
+      { title: 'Posuň jednu věc, změň všechno', description: 'E-book (PDF)', size: '8.3 MB', download_url: '#' },
+      { title: 'Ne vše má mít svoje místo', description: 'E-book (PDF)', size: '6.7 MB', download_url: '#' },
+    ],
     'zycie-zaslugy': [
       { title: 'Przesuń jedną rzecz, zmień wszystko', description: 'E-book (PDF)', size: '13.2 MB', download_url: '#' },
       { title: 'Nie wszystko zasługuje na miejsce', description: 'E-book (PDF)', size: '18.5 MB', download_url: '#' },
@@ -742,7 +757,7 @@ export default async function DownloadPage({
   }
   const t = getTheme(projectId)
 
-  const isCS = projectId === "psi-superzivot" || projectId === "odpust-knizka" || projectId === "pusti-to-sk"
+  const isCS = projectId === "psi-superzivot" || projectId === "odpust-knizka" || projectId === "pusti-to-sk" || projectId === "zivot-zaslugy"
   const isPL = projectId === "zycie-zaslugy" || projectId === "odpusc-ksiazka"
   const isSV = projectId === "slapp-taget"
   const dateLocale = projectId === "lass-los" ? "de-DE" : isCS ? "cs-CZ" : isPL ? "pl-PL" : isSV ? "sv-SE" : "nl-NL"

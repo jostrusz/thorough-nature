@@ -151,6 +151,20 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "17.1 MB",
     },
   ],
+  'zivot-zaslugy': [
+    {
+      key: "e-books/Posun-jednu-vec-zmen-vsechno.pdf",
+      title: "Posuň jednu věc, změň všechno",
+      description: "E-book (PDF)",
+      size: "8.3 MB",
+    },
+    {
+      key: "e-books/Ne-vse-ma-mit-svoje-misto.pdf",
+      title: "Ne vše má mít svoje místo",
+      description: "E-book (PDF)",
+      size: "6.7 MB",
+    },
+  ],
   'odpust-knizka': [
     {
       key: "e-books/Jak-prestat-nadmerne-premyslet-a-zacit-zit.pdf",
@@ -211,6 +225,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'psi-superzivot': process.env.PS_STOREFRONT_URL || "https://www.psi-superzivot.cz",
   'het-leven': process.env.HL_STOREFRONT_URL || "https://www.pakjeleventerug.nl",
   'zycie-zaslugy': process.env.ZZ_STOREFRONT_URL || "https://www.najpierw-ja.pl",
+  'zivot-zaslugy': process.env.ZV_STOREFRONT_URL || "https://www.nejdriv-ja.cz",
   'odpust-knizka': process.env.OD_STOREFRONT_URL || "https://www.pusttocotenici.cz",
   'pusti-to-sk': process.env.PUSTI_TO_SK_STOREFRONT_URL || "https://www.pustitocotanici.sk",
   'engedd-el': process.env.EE_STOREFRONT_URL || "https://www.engeddelkonyv.hu",
@@ -227,6 +242,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'psi-superzivot': 'Tvoje e-booky jsou připravené! 📖',
   'het-leven': 'Je 2 gratis e-books staan klaar! 📖',
   'zycie-zaslugy': 'Twoje 2 darmowe e-booki są gotowe! 📖',
+  'zivot-zaslugy': 'Tvoje 2 e-booky zdarma jsou připravené! 📖',
   'odpust-knizka': 'Tvoje e-booky jsou připravené! 📖',
   'pusti-to-sk': 'Tvoje e-knihy sú pripravené! 📖',
   'engedd-el': 'A 2 ingyenes e-könyved készen áll! 📖',
@@ -243,6 +259,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'psi-superzivot': 'tam',
   'het-leven': 'daar',
   'zycie-zaslugy': 'tam',
+  'zivot-zaslugy': 'tam',
   'odpust-knizka': 'tam',
   'pusti-to-sk': 'tam',
   'engedd-el': 'Olvasó',

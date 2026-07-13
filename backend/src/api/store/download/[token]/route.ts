@@ -8,6 +8,7 @@ const PROJECT_SUPPORT_EMAILS: Record<string, string> = {
   dehondenbijbel: "support@dehondenbijbel.nl",
   loslatenboek: "devries@loslatenboek.nl",
   'lass-los': "buch@jetztloslassen.de",
+  'zivot-zaslugy': "anna@nejdriv-ja.cz",
 }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
