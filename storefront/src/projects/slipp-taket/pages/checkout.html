@@ -2422,7 +2422,7 @@ body {
         <div class="msb-subtitle" id="msb-subtitle">Heftet · 1× bok</div>
       </div>
       <div class="msb-price-col">
-        <div class="msb-price" id="msb-price">399 kr</div>
+        <div class="msb-price" id="msb-price">699 kr</div>
         <div class="msb-items-label" id="msb-items-label">Totalt</div>
       </div>
       <svg class="msb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
@@ -2433,7 +2433,7 @@ body {
       <!-- Hlavní produkt -->
       <div class="msb-line" id="msb-product-line">
         <span class="msb-line-label" id="msb-product-name">Slipp taket på det som ødelegger deg</span>
-        <span class="msb-line-val" id="msb-product-price">399 kr</span>
+        <span class="msb-line-val" id="msb-product-price">699 kr</span>
       </div>
       <!-- Order bump (skrytý pokud není vybrán) -->
       <div class="msb-line bump" id="msb-bump-line" style="display:none;">
@@ -2446,7 +2446,7 @@ body {
       <!-- Mezisoučet -->
       <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(194,123,160,0.18);">
         <span class="msb-line-label">Delsum</span>
-        <span class="msb-line-val" id="msb-subtotal">399 kr</span>
+        <span class="msb-line-val" id="msb-subtotal">699 kr</span>
       </div>
       <!-- MVA -->
       <div class="msb-line" id="msb-tax-line">
@@ -2461,7 +2461,7 @@ body {
       <!-- Totalt -->
       <div class="msb-line total-line">
         <span class="msb-line-label">Totalt</span>
-        <span class="msb-line-val" id="msb-total">399 kr</span>
+        <span class="msb-line-val" id="msb-total">699 kr</span>
       </div>
       <div class="msb-tax-note">Inkl. MVA</div>
     </div>
@@ -2765,7 +2765,7 @@ body {
           <div class="summary-product-name" id="desktop-product-name">Slipp taket på det som ødelegger deg</div>
           <div class="summary-product-author">Joris de Vries</div>
           <div class="summary-product-format">Heftet</div>
-          <div class="summary-product-price" id="desktop-product-price">399 kr</div>
+          <div class="summary-product-price" id="desktop-product-price">699 kr</div>
         </div>
       </div>
 
@@ -2786,7 +2786,7 @@ body {
 
       <div class="summary-line" id="summary-subtotal">
         <span>Delsum</span>
-        <span id="subtotal-value">399 kr</span>
+        <span id="subtotal-value">699 kr</span>
       </div>
       <div class="summary-line" id="summary-tax">
         <span id="tax-label">MVA (0%)</span>
@@ -2805,7 +2805,7 @@ body {
       </div>
       <div class="summary-line total" id="summary-total">
         <span>Totalt</span>
-        <span class="price" id="desktop-total-price">399 kr</span>
+        <span class="price" id="desktop-total-price">699 kr</span>
       </div>
       <div id="summary-tax-note" style="font-size:11px;color:#888;text-align:right;margin-top:-8px;margin-bottom:8px;">
         Inkl. MVA
@@ -3502,7 +3502,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     try {
       mollieInstance = Mollie(profileId, {
-        locale: 'nl_NL',
+        locale: 'nb_NO',
         testmode: testmode
       });
 
@@ -5758,7 +5758,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var formatted = formatPhoneNumber(raw, country);
       phoneField.value = formatted;
       if (formatted !== raw) {
-        phonePreview.textContent = '\u2713 Opgeslagen als ' + formatted;
+        phonePreview.textContent = '\u2713 Lagret som ' + formatted;
         phonePreview.style.display = 'block';
       } else {
         phonePreview.style.display = 'none';
@@ -7730,7 +7730,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               await window.AirwallexComponentsSDK.init({
                 env: providerData.environment || 'demo',
                 enabledElements: ['payments'],
-                locale: 'nl',
+                locale: 'nb',
               });
 
               var dropInContainer = document.getElementById('airwallex-dropin-container');
