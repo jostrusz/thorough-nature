@@ -1003,6 +1003,148 @@ body {
   display: block;
 }
 
+/* ═══ Bank transfer expandable group ═══ */
+.bank-parent {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bank-parent:hover {
+  border-color: var(--highlight);
+  box-shadow: var(--shadow-sm);
+}
+.bank-parent.expanded {
+  border-color: var(--cta);
+  background: rgba(184,92,74,0.04);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+}
+.bank-parent .bank-chevron {
+  margin-left: auto;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.bank-parent.expanded .bank-chevron {
+  transform: rotate(180deg);
+}
+.bank-sub-methods {
+  display: none;
+  border: 1.5px solid var(--cta);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: rgba(184,92,74,0.03);
+  overflow: hidden;
+  margin-top: -8px;
+  margin-bottom: 0;
+  padding: 12px;
+}
+.bank-sub-methods.open {
+  display: flex; flex-direction: column; gap: 8px;
+}
+/* ═══ Brite-style bank tiles (2026) ═══ */
+.bank-sub-method {
+  position: relative;
+  display: flex; align-items: center; gap: 12px;
+  background: #FFFFFF; border: 1px solid rgba(74,26,46,0.10);
+  border-radius: 12px; padding: 9px 14px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(74,26,46,0.04);
+  transition: border-color .2s cubic-bezier(0.22,1,0.36,1),
+              background .2s cubic-bezier(0.22,1,0.36,1),
+              box-shadow .2s cubic-bezier(0.22,1,0.36,1);
+  -webkit-tap-highlight-color: transparent;
+}
+.bank-sub-method:hover { border-color: rgba(184,92,74,0.5); box-shadow: 0 3px 10px rgba(74,26,46,0.07); }
+.bank-sub-method.selected {
+  border-color: var(--cta);
+  background: rgba(184,92,74,0.045);
+  box-shadow: 0 0 0 1.5px var(--cta), 0 4px 14px rgba(184,92,74,0.14);
+}
+.bank-sub-method input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.bank-sub-radio {
+  width: 21px; height: 21px; border-radius: 50%;
+  border: 2px solid rgba(74,26,46,0.20);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: border-color .2s ease;
+}
+.bank-sub-method.selected .bank-sub-radio { border-color: var(--cta); }
+.bank-sub-radio-dot {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--cta); transform: scale(0);
+  transition: transform .2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.bank-sub-method.selected .bank-sub-radio-dot { transform: scale(1); }
+.bank-sub-logo {
+  flex-shrink: 0;
+  width: 40px; height: 40px; border-radius: 10px;
+  background: #FDF5EF; border: 1px solid rgba(74,26,46,0.06);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  transition: background .2s ease, box-shadow .2s ease;
+}
+.bank-sub-method:hover .bank-sub-logo { box-shadow: 0 2px 6px rgba(74,26,46,0.08); }
+.bank-sub-method.selected .bank-sub-logo { background: #fff; box-shadow: 0 2px 8px rgba(184,92,74,0.18); }
+.bank-sub-logo img { max-height: 34px; max-width: 34px; width: auto; object-fit: contain; display: block; border-radius: 8px; }
+.bank-sub-logo svg { width: 26px; height: 26px; }
+.bank-sub-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.bank-sub-name {
+  font-size: 15px; font-weight: 700;
+  color: var(--heading); line-height: 1.25; letter-spacing: -0.01em;
+}
+.bank-sub-desc {
+  font-size: 11.5px; font-weight: 500;
+  color: var(--muted); line-height: 1.2;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.bank-sub-method.selected .bank-sub-desc { color: var(--cta); }
+.bank-sub-badge {
+  flex-shrink: 0;
+  background: rgba(184,92,74,0.12); color: var(--cta);
+  font-size: 9.5px; font-weight: 800;
+  padding: 3px 9px; border-radius: 20px;
+  letter-spacing: 0.3px; text-transform: uppercase;
+  white-space: nowrap;
+}
+.bank-sub-go {
+  flex-shrink: 0;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(74,26,46,0.05); color: rgba(74,26,46,0.40);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s ease, color .2s ease, transform .25s cubic-bezier(0.22,1,0.36,1);
+}
+.bank-sub-go svg { width: 16px; height: 16px; }
+.bank-sub-method:hover .bank-sub-go { background: rgba(184,92,74,0.16); color: var(--cta); transform: translateX(2px); }
+.bank-sub-method.selected .bank-sub-go { background: var(--cta); color: #fff; box-shadow: 0 3px 8px rgba(184,92,74,0.35); }
+.bank-group-head-icon {
+  width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, #B85C4A 0%, #A04A38 55%, #D4916A 100%);
+  box-shadow: 0 4px 10px rgba(184,92,74,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+  display: flex; align-items: center; justify-content: center;
+}
+.bank-group-head-icon svg { width: 23px; height: 23px; }
+@media (max-width: 520px) {
+  .bank-sub-methods { padding: 10px; }
+  .bank-sub-methods.open { gap: 7px; }
+  .bank-sub-method { padding: 11px 13px; gap: 11px; }
+  .bank-sub-logo { width: 46px; height: 46px; border-radius: 11px; }
+  .bank-sub-logo img { max-height: 40px; max-width: 40px; border-radius: 9px; }
+  .bank-sub-badge { display: none; }
+}
+
 #payment-errors {
   font-size: 13px;
   color: var(--error);
@@ -5215,6 +5357,84 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var klarnaSelectedCategory = null; // 'pay_now', 'pay_later', or 'pay_over_time'
   var klarnaInitialized = false;
 
+  // Comgate method-code map (inert for PayU-only projects, kept for parity)
+  var COMGATE_METHOD_MAP = {
+    'creditcard': 'CARD_CZ_COMGATE',
+    'bank_transfer': 'BANK_CZ_OTHER',
+    'applepay': 'APPLEPAY_REDIRECT',
+    'googlepay': 'GOOGLEPAY_REDIRECT',
+    'bank_cz_cs': 'BANK_CZ_CS_PSD2',
+    'bank_cz_csob': 'BANK_CZ_CSOB_PSD2',
+    'bank_cz_kb': 'BANK_CZ_KB_PSD2',
+    'bank_cz_rb': 'BANK_CZ_RB_PSD2',
+    'bank_cz_mo': 'BANK_CZ_MO_PSD2',
+    'bank_cz_fb': 'BANK_CZ_FB_PSD2',
+    'bank_cz_mb': 'BANK_CZ_MB_PSD2',
+    'bank_cz_ab': 'BANK_CZ_AB_PSD2',
+    'bank_cz_pb': 'BANK_CZ_PB_PSD2',
+    'bank_cz_uc': 'BANK_CZ_UC_PSD2',
+    'bank_cz_other': 'BANK_CZ_OTHER',
+  };
+
+  // Czech bank sub-methods for "Bankovní převod" expandable group (fallback labels)
+  var BANK_METHODS = {
+    'bank_cz_cs':    { code: 'BANK_CZ_CS_PSD2',   label: 'Česká spořitelna',   desc: 'Online převod', icon: '/icons/ceska-sporitelna.svg' },
+    'bank_cz_csob':  { code: 'BANK_CZ_CSOB_PSD2', label: 'ČSOB',              desc: 'Online převod', icon: '/icons/csob.svg' },
+    'bank_cz_kb':    { code: 'BANK_CZ_KB_PSD2',   label: 'Komerční banka',    desc: 'Online převod', icon: '/icons/komercni-banka.svg' },
+    'bank_cz_rb':    { code: 'BANK_CZ_RB_PSD2',   label: 'Raiffeisenbank',    desc: 'Online převod', icon: '/icons/raiffeisenbank.svg' },
+    'bank_cz_mo':    { code: 'BANK_CZ_MO_PSD2',   label: 'Moneta Money Bank', desc: 'Online převod', icon: '/icons/moneta.svg' },
+    'bank_cz_fb':    { code: 'BANK_CZ_FB_PSD2',   label: 'Fio banka',         desc: 'Online převod', icon: '/icons/fio-banka.svg' },
+    'bank_cz_mb':    { code: 'BANK_CZ_MB_PSD2',   label: 'mBank',             desc: 'Online převod', icon: '/icons/mbank.svg' },
+    'bank_cz_uc':    { code: 'BANK_CZ_UC_PSD2',   label: 'UniCredit Bank',    desc: 'Online převod', icon: '/icons/unicredit.svg' },
+    'bank_cz_other': { code: 'BANK_CZ_OTHER',     label: 'Jiná banka',        desc: 'Bankovní převod', icon: '/icons/bank-generic.svg' },
+  };
+  var BANK_CODES = Object.keys(BANK_METHODS);
+
+  // ═══ Dynamic CZ bank registry — tiles sourced from gateway config (admin) ═══
+  // Canonical bank identity → per-provider method code (Comgate bank_cz_* / PayU PBL value).
+  var CZ_BANK_REGISTRY = [
+    { key: 'cs',   label: 'Česká spořitelna',  icon: '/icons/ceska-sporitelna.svg', comgate: 'bank_cz_cs',   payu: 'cs', popular: true },
+    { key: 'csob', label: 'ČSOB',              icon: '/icons/csob.svg',             comgate: 'bank_cz_csob', payu: 'cb' },
+    { key: 'kb',   label: 'Komerční banka',    icon: '/icons/komercni-banka.svg',   comgate: 'bank_cz_kb',   payu: 'kb' },
+    { key: 'rb',   label: 'Raiffeisenbank',    icon: '/icons/raiffeisenbank.svg',   comgate: 'bank_cz_rb',   payu: 'rf' },
+    { key: 'mo',   label: 'Moneta Money Bank', icon: '/icons/moneta.svg',           comgate: 'bank_cz_mo',   payu: 'pg' },
+    { key: 'fio',  label: 'Fio banka',         icon: '/icons/fio-banka.svg',        comgate: 'bank_cz_fb',   payu: 'pf' },
+    { key: 'mb',   label: 'mBank',             icon: '/icons/mbank.svg',            comgate: 'bank_cz_mb',   payu: 'mp' },
+    { key: 'uc',   label: 'UniCredit Bank',    icon: '/icons/unicredit.svg',        comgate: 'bank_cz_uc',   payu: 'uc' },
+  ];
+  // Active tiles collected from /store/payment-options: key → {method, provider, provider_id}
+  var czBankTiles = {};
+  var czQrSource = null; // PayU qrcz when active — otherwise QR rides on Comgate BANK_CZ_OTHER
+
+  function collectCzBankMethod(m, providerName, providerIdFull) {
+    // Comgate individual bank buttons
+    if (providerName === 'comgate' && m.code && m.code.indexOf('bank_cz_') === 0) {
+      for (var i = 0; i < CZ_BANK_REGISTRY.length; i++) {
+        if (CZ_BANK_REGISTRY[i].comgate === m.code) {
+          var k = CZ_BANK_REGISTRY[i].key;
+          if (!czBankTiles[k]) czBankTiles[k] = { method: m.code, provider: providerName, provider_id: m.provider_id || providerIdFull };
+          return true;
+        }
+      }
+      return true; // unknown bank_cz_* code — hide rather than render broken
+    }
+    // PayU CZ pay-by-link methods
+    if (providerName === 'payu') {
+      if (m.code === 'qrcz') {
+        if (!czQrSource) czQrSource = { method: 'qrcz', provider: providerName, provider_id: m.provider_id || providerIdFull };
+        return true;
+      }
+      for (var j = 0; j < CZ_BANK_REGISTRY.length; j++) {
+        if (CZ_BANK_REGISTRY[j].payu === m.code) {
+          var k2 = CZ_BANK_REGISTRY[j].key;
+          if (!czBankTiles[k2]) czBankTiles[k2] = { method: m.code, provider: providerName, provider_id: m.provider_id || providerIdFull };
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   // SVG icons for common methods (fallback when no /icons/xxx.svg exists)
   function getMethodIconHTML(code) {
     if (code === 'creditcard') {
@@ -5337,9 +5557,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
       // Flatten methods from all gateways into a single list
       allPaymentOptions = [];
+      czBankTiles = {};
+      czQrSource = null;
       (data.gateways || []).forEach(function(gw) {
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
         (gw.methods || []).forEach(function(m) {
+          // CZ bank buttons (Comgate/PayU) render inside the bank group — collect & skip standalone tiles
+          if (collectCzBankMethod(m, gw.provider, m.provider_id || providerIdFull)) return;
           var NL_NAMES = {
             'creditcard': 'Platební karta',
             'ideal': 'iDEAL',
@@ -5455,12 +5679,28 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var klarnaMethods = methods.filter(function(m) { return KLARNA_CODES.indexOf(m.code) !== -1; });
     var otherMethods = methods.filter(function(m) { return KLARNA_CODES.indexOf(m.code) === -1; });
 
+    // Synthetic bank-group anchor: when CZ bank tiles are active (e.g. PayU-only mode)
+    // but no Comgate bank_transfer method exists, render the group anyway — first.
+    var hasBankAnchor = otherMethods.some(function(m) { return m.code === 'bank_transfer'; });
+    if (!hasBankAnchor && (Object.keys(czBankTiles).length > 0 || czQrSource)) {
+      var src0 = czBankTiles[Object.keys(czBankTiles)[0]] || czQrSource;
+      otherMethods.unshift({
+        code: 'bank_transfer',
+        display_name: 'Bankovní převod | QR platba',
+        provider: src0.provider,
+        provider_id: src0.provider_id,
+        sort_order: -1,
+        available_countries: [],
+        supported_currencies: []
+      });
+    }
+
     // Clear existing content (keep error/loading divs)
     var loadingEl = document.getElementById('payment-methods-loading');
     var errorEl = document.getElementById('payment-methods-error');
 
     // Remove old dynamically rendered elements
-    var oldLabels = container.querySelectorAll('.payment-method, .klarna-parent, .klarna-sub-methods');
+    var oldLabels = container.querySelectorAll('.payment-method, .klarna-parent, .klarna-sub-methods, .bank-parent, .bank-sub-methods');
     oldLabels.forEach(function(el) { el.remove(); });
 
     // Reset Klarna state
@@ -5566,6 +5806,123 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           parent.querySelector('.pm-radio-dot').style.transform = 'scale(1)';
           parent.querySelector('.pm-radio').style.borderColor = 'var(--cta)';
         }
+      } else if (item.type === 'method' && item.data.code === 'bank_transfer') {
+        // ═══ Bank transfer → expandable group (Brite-style tiles, admin-driven) ═══
+        var m = item.data;
+        var bankParent = document.createElement('div');
+        bankParent.className = 'bank-parent';
+        bankParent.setAttribute('data-bank-parent', 'true');
+        bankParent.innerHTML =
+          '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
+          '<div class="bank-group-head-icon"><svg viewBox="0 0 24 24" fill="none">' +
+            '<path d="M4.2 9.1 11.1 4.7a1.7 1.7 0 0 1 1.8 0l6.9 4.4c1 .63.55 2.18-.63 2.18H4.83c-1.18 0-1.63-1.55-.63-2.18Z" fill="rgba(255,255,255,0.96)"/>' +
+            '<circle cx="12" cy="8.1" r="1.15" fill="#B85C4A"/>' +
+            '<rect x="5.3" y="12.7" width="2.5" height="5.2" rx="1.25" fill="rgba(255,255,255,0.92)"/>' +
+            '<rect x="10.75" y="12.7" width="2.5" height="5.2" rx="1.25" fill="rgba(255,255,255,0.92)"/>' +
+            '<rect x="16.2" y="12.7" width="2.5" height="5.2" rx="1.25" fill="rgba(255,255,255,0.92)"/>' +
+            '<rect x="4.2" y="19.3" width="15.6" height="2.1" rx="1.05" fill="#fff"/>' +
+          '</svg></div>' +
+          '<div class="pm-info">' +
+            '<div class="pm-name">' + m.display_name + '</div>' +
+            '<div class="pm-desc">Vyberte svou banku</div>' +
+          '</div>' +
+          '<svg class="bank-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        container.appendChild(bankParent);
+
+        // Bank tiles panel
+        var bankSubPanel = document.createElement('div');
+        bankSubPanel.className = 'bank-sub-methods';
+        bankSubPanel.id = 'bank-sub-methods';
+        bankSubPanel.setAttribute('data-provider', m.provider);
+        bankSubPanel.setAttribute('data-provider-id', m.provider_id);
+
+        var tileChevron = '<span class="bank-sub-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>';
+        var appendBankTile = function(opts) {
+          var sub = document.createElement('label');
+          sub.className = 'bank-sub-method';
+          sub.setAttribute('data-method', opts.method);
+          if (opts.comgateMethod) sub.setAttribute('data-comgate-method', opts.comgateMethod);
+          sub.setAttribute('data-provider', opts.provider);
+          sub.setAttribute('data-provider-id', opts.providerId);
+          sub.innerHTML =
+            '<input type="radio" name="payment_method" value="' + opts.method + '">' +
+            '<div class="bank-sub-radio"><div class="bank-sub-radio-dot"></div></div>' +
+            '<div class="bank-sub-logo">' + opts.logoHtml + '</div>' +
+            '<div class="bank-sub-info">' +
+              '<div class="bank-sub-name">' + opts.label + '</div>' +
+              '<div class="bank-sub-desc">&#9889; ' + opts.desc + '</div>' +
+            '</div>' +
+            (opts.badge ? '<span class="bank-sub-badge">' + opts.badge + '</span>' : '') +
+            tileChevron;
+          bankSubPanel.appendChild(sub);
+          if (BANK_CODES.indexOf(opts.method) === -1) BANK_CODES.push(opts.method);
+        };
+
+        // Banks: dynamic from admin config (czBankTiles); fallback to hardcoded Comgate list
+        var hasDynamicTiles = Object.keys(czBankTiles).length > 0;
+        CZ_BANK_REGISTRY.forEach(function(b) {
+          var src = hasDynamicTiles
+            ? czBankTiles[b.key]
+            : (b.comgate && BANK_METHODS[b.comgate] ? { method: b.comgate, provider: m.provider, provider_id: m.provider_id } : null);
+          if (!src) return;
+          appendBankTile({
+            method: src.method,
+            comgateMethod: src.provider === 'comgate' ? (COMGATE_METHOD_MAP[src.method] || null) : null,
+            provider: src.provider,
+            providerId: src.provider_id,
+            logoHtml: '<img src="' + b.icon + '" alt="' + b.label + '" onerror="this.style.display=\'none\'">',
+            label: b.label,
+            desc: 'Okamžitý online převod',
+            badge: b.popular ? 'Nejčastější volba' : null
+          });
+        });
+
+        // QR tile — PayU qrcz when enabled in admin, otherwise Comgate BANK_CZ_OTHER
+        var qrSvg = '<svg viewBox="0 0 24 24" fill="none">' +
+          '<rect x="2.5" y="2.5" width="8" height="8" rx="2.6" stroke="#4A1A2E" stroke-width="1.9"/>' +
+          '<rect x="5.45" y="5.45" width="2.1" height="2.1" rx="0.8" fill="#4A1A2E"/>' +
+          '<rect x="13.5" y="2.5" width="8" height="8" rx="2.6" stroke="#4A1A2E" stroke-width="1.9"/>' +
+          '<rect x="16.45" y="5.45" width="2.1" height="2.1" rx="0.8" fill="#B85C4A"/>' +
+          '<rect x="2.5" y="13.5" width="8" height="8" rx="2.6" stroke="#4A1A2E" stroke-width="1.9"/>' +
+          '<rect x="5.45" y="16.45" width="2.1" height="2.1" rx="0.8" fill="#4A1A2E"/>' +
+          '<rect x="13.5" y="13.5" width="3.2" height="3.2" rx="1.1" fill="#4A1A2E"/>' +
+          '<rect x="18.3" y="13.5" width="3.2" height="3.2" rx="1.1" fill="#B85C4A"/>' +
+          '<rect x="13.5" y="18.3" width="3.2" height="3.2" rx="1.1" fill="#B85C4A"/>' +
+          '<rect x="18.3" y="18.3" width="3.2" height="3.2" rx="1.1" fill="#4A1A2E"/>' +
+          '</svg>';
+        if (czQrSource) {
+          appendBankTile({
+            method: czQrSource.method, comgateMethod: null,
+            provider: czQrSource.provider, providerId: czQrSource.provider_id,
+            logoHtml: qrSvg, label: 'QR platba — jiná banka', desc: 'Naskenujte QR kód v bankovní aplikaci'
+          });
+        } else {
+          appendBankTile({
+            method: 'bank_cz_other', comgateMethod: 'BANK_CZ_OTHER',
+            provider: m.provider, providerId: m.provider_id,
+            logoHtml: qrSvg, label: 'QR platba — jiná banka', desc: 'Naskenujte QR kód v bankovní aplikaci'
+          });
+        }
+
+        container.appendChild(bankSubPanel);
+
+        // Auto-select: expand the group and preselect the first bank (Česká spořitelna)
+        if (!isFirstSet) {
+          var firstTile = bankSubPanel.querySelector('.bank-sub-method');
+          if (firstTile) {
+            bankParent.classList.add('expanded');
+            bankSubPanel.classList.add('open');
+            bankParent.querySelector('.pm-radio-dot').style.transform = 'scale(1)';
+            bankParent.querySelector('.pm-radio').style.borderColor = 'var(--cta)';
+            firstTile.classList.add('selected');
+            var ftInput = firstTile.querySelector('input');
+            if (ftInput) ftInput.checked = true;
+            selectedMethod = firstTile.getAttribute('data-method');
+            selectedProvider = firstTile.getAttribute('data-provider');
+            selectedProviderId = firstTile.getAttribute('data-provider-id');
+            isFirstSet = true;
+          }
+        }
       } else {
         // Regular payment method
         var m = item.data;
@@ -5642,8 +5999,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var klarnaParent = document.querySelector('.klarna-parent');
     var klarnaSubPanel = document.getElementById('klarna-sub-methods');
     var klarnaSubMethods = document.querySelectorAll('.klarna-sub-method');
+    var bankParent = document.querySelector('.bank-parent');
+    var bankSubPanel = document.getElementById('bank-sub-methods');
+    var bankSubMethods = bankSubPanel ? bankSubPanel.querySelectorAll('.bank-sub-method') : [];
 
-    // Deselect all: regular methods + klarna
+    // Deselect all: regular methods + klarna + bank
     function deselectAll() {
       regularMethods.forEach(function(m) { m.classList.remove('selected'); });
       if (klarnaParent) {
@@ -5652,6 +6012,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }
       klarnaSubMethods.forEach(function(sm) { sm.classList.remove('selected'); });
       klarnaSelectedCategory = null;
+      // Bank group deselect
+      if (bankParent) {
+        bankParent.querySelector('.pm-radio-dot').style.transform = 'scale(0)';
+        bankParent.querySelector('.pm-radio').style.borderColor = 'var(--border)';
+      }
+      bankSubMethods.forEach(function(sm) { sm.classList.remove('selected'); });
     }
 
     // Collapse klarna
@@ -5674,11 +6040,28 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }
     }
 
+    // ═══ Bank group helpers ═══
+    function collapseBankGroup() {
+      if (bankParent) bankParent.classList.remove('expanded');
+      if (bankSubPanel) bankSubPanel.classList.remove('open');
+    }
+    function expandBankGroup() {
+      if (bankParent) bankParent.classList.add('expanded');
+      if (bankSubPanel) bankSubPanel.classList.add('open');
+    }
+    function selectBankParent() {
+      if (bankParent) {
+        bankParent.querySelector('.pm-radio-dot').style.transform = 'scale(1)';
+        bankParent.querySelector('.pm-radio').style.borderColor = 'var(--cta)';
+      }
+    }
+
     // Handle regular payment method click
     regularMethods.forEach(function(method) {
       method.addEventListener('click', function() {
         deselectAll();
         collapseKlarna();
+        collapseBankGroup();
         method.classList.add('selected');
         method.querySelector('input').checked = true;
         selectedMethod = method.getAttribute('data-method');
@@ -5716,6 +6099,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           if (!isKlarnaSelected) {
             // Clicked to select Klarna — select first sub-method
             deselectAll();
+            collapseBankGroup();
             selectKlarnaParent();
             var firstSub = klarnaSubMethods[0];
             if (firstSub) {
@@ -5740,6 +6124,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           // Expand and select first sub-method
           deselectAll();
           regularMethods.forEach(function(m) { m.classList.remove('selected'); });
+          collapseBankGroup();
           expandKlarna();
           selectKlarnaParent();
           var firstSub = klarnaSubMethods[0];
@@ -5766,6 +6151,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         e.stopPropagation(); // Don't bubble to parent
         deselectAll();
         regularMethods.forEach(function(m) { m.classList.remove('selected'); });
+        collapseBankGroup();
         selectKlarnaParent();
         sub.classList.add('selected');
         sub.querySelector('input').checked = true;
@@ -5774,6 +6160,61 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         selectedProviderId = sub.getAttribute('data-provider-id');
         klarnaSelectedCategory = sub.getAttribute('data-klarna-category');
 
+        var cardFields = document.getElementById('card-fields');
+        if (cardFields) cardFields.style.display = 'none';
+        updateButtonText();
+        updateSubtext();
+        document.getElementById('payment-errors').textContent = '';
+      });
+    });
+
+    // ═══ Bank transfer expandable group handlers ═══
+    if (bankParent) {
+      bankParent.addEventListener('click', function() {
+        var isExpanded = bankParent.classList.contains('expanded');
+        var isBankSelected = BANK_CODES.indexOf(selectedMethod) !== -1;
+
+        if (isExpanded && isBankSelected) {
+          // Already selected → toggle collapse
+          collapseBankGroup();
+        } else {
+          // Expand and select first bank sub-method
+          deselectAll();
+          collapseKlarna();
+          regularMethods.forEach(function(m) { m.classList.remove('selected'); });
+          expandBankGroup();
+          selectBankParent();
+          var firstSub = bankSubMethods[0];
+          if (firstSub) {
+            firstSub.classList.add('selected');
+            firstSub.querySelector('input').checked = true;
+            selectedMethod = firstSub.getAttribute('data-method');
+            selectedProvider = firstSub.getAttribute('data-provider');
+            selectedProviderId = firstSub.getAttribute('data-provider-id');
+          }
+          var cardFields = document.getElementById('card-fields');
+          if (cardFields) cardFields.style.display = 'none';
+          updateButtonText();
+          updateSubtext();
+          document.getElementById('payment-errors').textContent = '';
+        }
+      });
+    }
+
+    // Handle bank sub-method click
+    bankSubMethods.forEach(function(sub) {
+      sub.addEventListener('click', function(e) {
+        e.stopPropagation();
+        deselectAll();
+        regularMethods.forEach(function(m) { m.classList.remove('selected'); });
+        collapseKlarna();
+        selectBankParent();
+        bankSubMethods.forEach(function(s) { s.classList.remove('selected'); });
+        sub.classList.add('selected');
+        sub.querySelector('input').checked = true;
+        selectedMethod = sub.getAttribute('data-method');
+        selectedProvider = sub.getAttribute('data-provider');
+        selectedProviderId = sub.getAttribute('data-provider-id');
         var cardFields = document.getElementById('card-fields');
         if (cardFields) cardFields.style.display = 'none';
         updateButtonText();
@@ -5794,6 +6235,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       subtext.textContent = 'Údaje tvé karty jsou bezpečně zpracovány přes ' + providerName + '.';
     } else if (KLARNA_CODES.indexOf(selectedMethod) !== -1) {
       subtext.textContent = 'Za okamžik tě přesměrujeme na Klarnu k dokončení platby.';
+    } else if (BANK_CODES.indexOf(selectedMethod) !== -1) {
+      var bankName = BANK_METHODS[selectedMethod] ? BANK_METHODS[selectedMethod].label : 'banku';
+      subtext.textContent = 'Za okamžik tě přesměrujeme na platbu přes ' + bankName + '.';
     } else if (selectedMethod === 'cod') {
       subtext.textContent = 'Zaplatíš při převzetí zásilky. Poplatek +30 Kč.';
     } else {
@@ -5831,6 +6275,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (KLARNA_CODES.indexOf(selectedMethod) !== -1) {
       var cfg = KLARNA_METHODS[selectedMethod];
       methodName = 'Klarna — ' + (cfg ? cfg.label : 'Klarna');
+    } else if (BANK_CODES.indexOf(selectedMethod) !== -1) {
+      var bankCfg = BANK_METHODS[selectedMethod];
+      methodName = bankCfg ? bankCfg.label : 'Bankovní převod';
     } else if (selectedMethod === 'cod') {
       methodName = 'Dobírka';
     } else {
@@ -7745,6 +8192,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             unit_price: checkoutBundlePrice / (checkoutBundleQty || 1),
           }],
         };
+        if (selectedProviderId && selectedProviderId.indexOf('comgate') !== -1 && COMGATE_METHOD_MAP[selectedMethod]) {
+          sessionData.comgate_method = COMGATE_METHOD_MAP[selectedMethod];
+        }
       }
 
       // For credit card: tokenize card data (branched by provider)
