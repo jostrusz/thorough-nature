@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="cs">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact — Het Leven Dat Je Verdient</title>
-<meta name="description" content="Neem contact met ons op voor vragen over je bestelling, het boek of ons retourbeleid.">
+<title>Kontakt — Život, který si zasloužíš | Zákaznická podpora</title>
+<meta name="description" content="Kontaktujte nás s dotazy k objednávce, ke knize Život, který si zasloužíš nebo k vrácení. Odpovídáme do 24 hodin v pracovní dny.">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" type="image/png" sizes="32x32" href="/life-reset-favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="/life-reset-favicon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/life-reset-favicon-180.png"><link rel="shortcut icon" href="/life-reset-favicon.png">
 
@@ -458,18 +458,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <body>
 
 <!-- ═══ NAVIGACE ═══ -->
-<nav class="site-nav">
+<nav class="site-nav" aria-label="Hlavní navigace" role="navigation">
  <div class="nav-inner">
-  <a href="index.html" class="nav-logo">
-   <img src="het-leven-logo.png" alt="Het Leven Dat Je Verdient" width="150" height="40">
-
+  <a href="/" class="nav-logo">
+   <img src="/het-leven-logo.webp" alt="Život, který si zasloužíš" width="360" height="70">
   </a>
   <div class="nav-links">
-   <a href="verzending.html">Verzending</a>
-   <a href="voorwaarden.html">Voorwaarden</a>
-   <a href="privacy.html">Privacy</a>
-   <a href="contact.html" class="active">Contact</a>
-   <a href="index.html" class="nav-cta">Bestel nu &rarr;</a>
+   <a href="/verzending">Doprava a dodání</a>
+   <a href="/retourbeleid">Vrácení a záruka</a>
+   <a href="/voorwaarden">Obchodní podmínky</a>
+   <a href="/privacy">Ochrana osobních údajů</a>
+   <a href="/contact" class="active">Kontakt</a>
+   <a href="/checkout" class="nav-cta">Objednat &rarr;</a>
   </div>
   <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
    <span></span><span></span><span></span>
@@ -478,18 +478,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </nav>
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
- <a href="verzending.html">Verzending</a>
- <a href="voorwaarden.html">Voorwaarden</a>
- <a href="privacy.html">Privacy</a>
- <a href="contact.html">Contact</a>
- <a href="index.html" class="nav-cta-mobile">Bestel nu &rarr;</a>
+ <a href="/verzending">Doprava a dodání</a>
+ <a href="/retourbeleid">Vrácení a záruka</a>
+ <a href="/voorwaarden">Obchodní podmínky</a>
+ <a href="/privacy">Ochrana osobních údajů</a>
+ <a href="/contact">Kontakt</a>
+ <a href="/checkout" class="nav-cta-mobile">Objednat &rarr;</a>
 </div>
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">💬 Klantenservice</div>
- <h1>Contact</h1>
- <p>Heb je een vraag over je bestelling, het boek of ons retourbeleid? We helpen je graag!</p>
+ <div class="badge">💬 Zákaznická podpora</div>
+ <h1>Kontakt</h1>
+ <p>Máš dotaz k objednávce, ke knize Život, který si zasloužíš nebo k vrácení? Rádi ti pomůžeme!</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
@@ -497,93 +498,128 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
  <!-- Kontaktní karta -->
  <div class="contact-card">
-  <h2>Neem contact met ons op</h2>
+  <h2>Napiš nám</h2>
 
   <div class="contact-item">
    <div class="contact-icon">📧</div>
    <div class="contact-info">
     <h3>E-mail</h3>
-    <p><a href="mailto:annadevries@pakjeleventerug.nl">annadevries@pakjeleventerug.nl</a></p>
-    <p>Reactie binnen 24 uur op werkdagen</p>
+    <p><a href="mailto:anna@nejdriv-ja.cz">anna@nejdriv-ja.cz</a></p>
+    <p>Odpovídáme do 24 hodin v pracovní dny</p>
    </div>
   </div>
 
   <div class="contact-item">
    <div class="contact-icon">📞</div>
    <div class="contact-info">
-    <h3>Telefoon</h3>
+    <h3>Telefon</h3>
     <p><a href="tel:+420732915755">+420 732 915 755</a></p>
-    <p>Ma–vr: 9:00 – 17:00 (CET)</p>
+    <p>Po–pá: 9:00 – 17:00</p>
    </div>
   </div>
 
   <div class="contact-item">
    <div class="contact-icon">📍</div>
    <div class="contact-info">
-    <h3>Adres</h3>
+    <h3>Adresa</h3>
     <p>Performance Marketing Solution s.r.o.<br>
     Rybná 716/24, Staré Město<br>
-    110 00 Praha, Tsjechische Republiek</p>
+    110 00 Praha, Česká republika</p>
    </div>
   </div>
  </div>
 
  <!-- Upozornění -->
  <div class="notice-box">
-  <h3>⏱ Reactietijd</h3>
-  <p>We doen ons best om alle vragen binnen <strong>24 uur</strong> te beantwoorden op werkdagen. In het weekend en op feestdagen kan de reactietijd iets langer zijn.</p>
+  <h3>⏱ Doba odpovědi</h3>
+  <p>Snažíme se odpovědět na všechny dotazy do <strong>24 hodin</strong> v pracovní dny. O víkendech a svátcích může být odpověď o něco pomalejší. Pro rychlejší vyřízení uveď prosím číslo objednávky nebo e-mail, který jsi použil(a) při nákupu.</p>
  </div>
 
  <!-- Služby -->
  <div class="service-grid">
   <div class="service-card">
    <span class="icon">📦</span>
-   <h3>Bestelling volgen</h3>
-   <p>Heb je je trackingcode ontvangen? Volg je pakket via de link in je bevestigingsmail.</p>
+   <h3>Sledování zásilky</h3>
+   <p>Po odeslání ti přijde sledovací odkaz e-mailem. Knihu doručuje Zásilkovna do 2 pracovních dnů.</p>
   </div>
   <div class="service-card">
    <span class="icon">🔄</span>
-   <h3>Retour aanvragen</h3>
-   <p>Niet tevreden? Stuur ons een e-mail met je ordernummer en reden voor retour.</p>
+   <h3>Vrácení a záruka</h3>
+   <p>Nabízíme 30denní garanci vrácení peněz. Stačí nám napsat e-mail s číslem objednávky.</p>
   </div>
   <div class="service-card">
    <span class="icon">💳</span>
-   <h3>Betaling &amp; Factuur</h3>
-   <p>Vragen over je betaling of een factuur nodig? Neem contact op met je ordernummer.</p>
+   <h3>Platba a faktura</h3>
+   <p>Dotaz k platbě nebo potřebuješ fakturu? Napiš nám a uveď číslo objednávky.</p>
   </div>
  </div>
 
  <!-- Firemní údaje -->
  <div class="company-info">
-  <h3>🏢 Bedrijfsgegevens</h3>
+  <h3>🏢 Firemní údaje</h3>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, Staré Město, 110 00 Praha, Tsjechische Republiek</p>
+  <p>Rybná 716/24, Staré Město, 110 00 Praha, Česká republika</p>
   <p>IČO: 06259928</p>
   <p>DIČ: CZ06259928</p>
-  <p>E-mail: <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a></p>
+  <p>E-mail: <a href="mailto:anna@nejdriv-ja.cz" style="color: var(--cta);">anna@nejdriv-ja.cz</a></p>
  </div>
 
 </div>
 
 <!-- ═══ FOOTER ═══ -->
-<footer class="site-footer">
- <div class="footer-inner">
-  <div class="footer-brand">
-  </div>
-  <div class="footer-links">
-   <a href="voorwaarden.html">Algemene Voorwaarden</a>
-   <a href="verzending.html">Verzending &amp; Retour</a>
-   <a href="privacy.html">Privacybeleid</a>
-   <a href="contact.html">Contact</a>
-  </div>
-  <div class="footer-contact">
-   <a href="mailto:annadevries@pakjeleventerug.nl">📧 annadevries@pakjeleventerug.nl</a>
-   <a href="tel:+420732915755">📞 +420 732 915 755</a>
-  </div>
+<footer role="contentinfo" style="background: var(--dark); padding: 48px 20px 32px; color: rgba(245,237,227,0.6);">
+ <div style="max-width: 900px; margin: 0 auto;">
+
+ <div style="text-align: center; margin-bottom: 32px;">
+ <div style="font-family: 'Recoleta', serif; font-size: 22px; color: #F5EDE3; font-weight: 700; margin-bottom: 6px;">Život, který si zasloužíš</div>
+ <div style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.55);">Metoda LIFE RESET™ od Anny de Vries</div>
  </div>
- <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, Staré Město, 110 00 Praha • IČO: 06259928 • DIČ: CZ06259928</span>
-  <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle rechten voorbehouden.</span>
+
+ <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 28px; margin-bottom: 36px; text-align: center;">
+
+ <div>
+ <div style="font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #C9A96E; margin-bottom: 12px;">Zákaznická podpora</div>
+ <div style="display: flex; flex-direction: column; gap: 8px;">
+ <a href="mailto:anna@nejdriv-ja.cz" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">anna@nejdriv-ja.cz</a>
+ <a href="/verzending" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Doprava a vrácení</a>
+ <a href="/contact" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Kontakt</a>
+ </div>
+ </div>
+
+ <div>
+ <div style="font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #C9A96E; margin-bottom: 12px;">Právní informace</div>
+ <div style="display: flex; flex-direction: column; gap: 8px;">
+ <a href="/voorwaarden" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Obchodní podmínky</a>
+ <a href="/privacy" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Ochrana osobních údajů</a>
+ <a href="/retourbeleid" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Reklamační řád</a>
+ </div>
+ </div>
+
+ <div>
+ <div style="font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #C9A96E; margin-bottom: 12px;">Platba a doprava</div>
+ <div style="display: flex; flex-direction: column; gap: 8px;">
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 14px;">Doprava zdarma po celém Česku</span>
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 14px;">30 dní na vrácení</span>
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 14px;">Visa · Mastercard · Bankovní tlačítka · PayPal</span>
+ </div>
+ </div>
+
+ </div>
+
+ <div style="border-top: 1px solid rgba(245,237,227,0.08); padding-top: 20px; text-align: center;">
+
+ <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 16px;">
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 13px; display: flex; align-items: center; gap: 5px;">
+ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>30 dní na vrácení</span>
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 13px; display: flex; align-items: center; gap: 5px;">
+ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Bezpečná platba</span>
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 13px; display: flex; align-items: center; gap: 5px;">
+ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Doprava zdarma</span>
+ </div>
+
+ <p style="font-family: 'DM Sans', sans-serif; font-size: 12px; color: rgba(245,237,227,0.55); margin: 0;">© 2026 Život, který si zasloužíš · Performance Marketing Solution s.r.o. · Všechna práva vyhrazena</p>
+ </div>
+
  </div>
 </footer>
 
@@ -593,6 +629,13 @@ function toggleMobileMenu() {
  document.querySelector('.nav-mobile-menu').classList.toggle('open');
  document.querySelector('.nav-mobile-overlay').classList.toggle('open');
 }
+document.querySelectorAll('.nav-mobile-menu a').forEach(function(a) {
+ a.addEventListener('click', function() {
+  document.querySelector('.nav-hamburger').classList.remove('open');
+  document.querySelector('.nav-mobile-menu').classList.remove('open');
+  document.querySelector('.nav-mobile-overlay').classList.remove('open');
+ });
+});
 </script>
 </body>
 </html>

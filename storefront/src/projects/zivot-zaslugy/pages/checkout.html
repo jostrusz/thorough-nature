@@ -692,7 +692,7 @@ body {
 .company-kvk-label { display: none; }
 .company-kvk-label.active { display: inline; }
 
-/* ─── BILLING ADDRESS (anders dan verzendadres) ─── */
+/* ─── BILLING ADDRESS (jiná než doručovací adresa) ─── */
 .billing-toggle {
   display: flex; align-items: center; gap: 10px;
   margin-top: 16px; padding: 12px 16px;
@@ -1156,7 +1156,7 @@ body {
   height: 100%;
   object-fit: cover;
 }
-/* Mini-boek mockup */
+/* Mini mockup knihy */
 .mini-book {
   width: 50px;
   height: 70px;
@@ -1259,7 +1259,7 @@ body {
   color: var(--cta);
 }
 
-/* Garantie box */
+/* Box záruky */
 .guarantee-box {
   margin-top: 18px;
   padding: 14px;
@@ -1950,7 +1950,7 @@ body {
 .order-bump-description strong { color: var(--heading); }
 .ob-intro { font-size: 14px; line-height: 1.6; }
 
-/* 5 Pijlers grid */
+/* Grid 5 pilířů */
 .ob-pillars {
   background: var(--white); border: 1px solid var(--border);
   border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;
@@ -1977,7 +1977,7 @@ body {
 }
 .ob-pillar span { color: var(--body); font-size: 11px; }
 
-/* Wat je bereikt */
+/* Čeho dosáhneš */
 .ob-results {
   margin-bottom: 14px;
 }
@@ -2458,7 +2458,7 @@ body {
         <span class="msb-line-label">Mezisoučet</span>
         <span class="msb-line-val" id="msb-subtotal">749&nbsp;Kč</span>
       </div>
-      <!-- BTW -->
+      <!-- DPH -->
       <div class="msb-line" id="msb-tax-line">
         <span class="msb-line-label" id="msb-tax-label">DPH (0%)</span>
         <span class="msb-line-val" id="msb-tax-val">0&nbsp;Kč</span>
@@ -2473,7 +2473,7 @@ body {
         <span class="msb-line-label">Dobírka</span>
         <span class="msb-line-val">+30&nbsp;Kč</span>
       </div>
-      <!-- Totaal -->
+      <!-- Celkem -->
       <div class="msb-line total-line">
         <span class="msb-line-label">Celkem</span>
         <span class="msb-line-val" id="msb-total">749&nbsp;Kč</span>
@@ -2677,7 +2677,7 @@ body {
 
         </div>
 
-        <!-- ═══ SEKCE 2: VERZENDADRES ═══ -->
+        <!-- ═══ SEKCE 2: DORUČOVACÍ ADRESA ═══ -->
         <div class="checkout-card animate-in animate-in-delay-1">
           <div class="section-header">
             <div class="section-number">2</div>
@@ -2772,7 +2772,7 @@ body {
             </div>
           </div>
 
-          <!-- Factuuradres (billing address) — anders dan verzendadres -->
+          <!-- Fakturační adresa (billing address) — jiná než doručovací -->
           <label class="billing-toggle" for="billing-checkbox">
             <input type="checkbox" id="billing-checkbox">
             <span class="billing-toggle-label">
@@ -2977,7 +2977,7 @@ body {
         </div>
       </div>
 
-      <!-- 2 gratis e-books bonus -->
+      <!-- Bonus: 2 e-booky zdarma -->
       <div class="summary-bonus">
         <span class="bonus-icon">🎁</span>
         <span class="bonus-text">+ 2 e-knihy zdarma</span>
@@ -3023,7 +3023,7 @@ body {
         Včetně DPH
       </div>
 
-      <!-- Garantie -->
+      <!-- Záruka -->
       <div class="guarantee-box">
         <div class="icon">🛡️</div>
         <div class="title">100% záruka vrácení peněz</div>
@@ -3063,7 +3063,8 @@ body {
     Platby zabezpečeny přes <strong>PayU</strong> a <strong>PayPal</strong>.
   </div>
   <div class="checkout-footer-links">
-    &copy; 2026 Život, který si zasloužíš · Performance Marketing Solution s.r.o.<br>
+    &copy; 2026 Život, který si zasloužíš · Všechna práva vyhrazena<br>
+    Performance Marketing Solution s.r.o. • Rybná 716/24, 110 00 Praha • IČO: 06259928<br>
     <a href="voorwaarden.html">Obchodní podmínky</a> · <a href="privacy.html">Ochrana osobních údajů</a> · <a href="retourbeleid.html">Vrácení zboží</a> · <a href="verzending.html">Doprava</a>
   </div>
 </div>
@@ -3286,7 +3287,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var desktopPrice = document.getElementById('desktop-product-price');
     if (desktopPrice) desktopPrice.textContent = formatPrice(selectedBundlePrice);
 
-    // Product naam — update met qty als bundle > 1
+    // Název produktu — update s qty, pokud bundle > 1
     var bundle = PROJECT_CONFIG.bundleOptions.find(function(b) { return b.qty === selectedBundleQty; });
     var productName = PROJECT_CONFIG.mainProduct.name;
     if (selectedBundleQty > 1 && bundle) {
@@ -3342,7 +3343,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var msbBumpLine = document.getElementById('msb-bump-line');
     if (msbBumpLine) msbBumpLine.style.display = orderBumpActive ? 'flex' : 'none';
 
-    // Subtotaal, BTW, totaal v rozevřeném panelu
+    // Mezisoučet, DPH, celkem v rozevřeném panelu
     var msbSubtotal = document.getElementById('msb-subtotal');
     if (msbSubtotal) msbSubtotal.textContent = formatPrice(subtotal);
     var msbTaxLabel = document.getElementById('msb-tax-label');
@@ -3604,28 +3605,28 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var taxRate = 0;
     if (subtotal > 0 && taxTotal > 0) {
       if (isTaxInclusive) {
-        // tax_total / subtotal * 100 (subtotal je excl. BTW)
+        // tax_total / subtotal * 100 (subtotal je bez DPH)
         taxRate = Math.round(taxTotal / subtotal * 100);
       } else {
         taxRate = Math.round(taxTotal / (total - taxTotal) * 100);
       }
     }
 
-    // Cena za produkt (totaal) — desktop summary
+    // Cena za produkt (celkem) — desktop summary
     var desktopPriceEl = document.getElementById('desktop-product-price');
     if (desktopPriceEl) desktopPriceEl.textContent = formatPrice(total);
 
-    // Mobile sticky bar — totaal cena
+    // Mobile sticky bar — celková cena
     var msbPriceEl = document.getElementById('msb-price');
     if (msbPriceEl) msbPriceEl.textContent = formatPrice(total);
 
-    // Subtotaal (excl. BTW)
+    // Mezisoučet (bez DPH)
     var subtotalEl = document.getElementById('summary-subtotal');
     if (subtotalEl) {
       subtotalEl.innerHTML = '<span>Mezisoučet</span><span>' + formatPrice(subtotal) + '</span>';
     }
 
-    // BTW řádek
+    // DPH řádek
     var taxEl = document.getElementById('summary-tax');
     if (taxEl && taxTotal > 0) {
       taxEl.style.display = '';
@@ -3639,7 +3640,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Doprava (Zásilkovna)</span><span>' + shippingLabel + '</span>';
     }
 
-    // Korting (discount) — toon als promo kód is toegepast
+    // Sleva (discount) — zobrazit, když je použit promo kód
     var discountTotal = cart.discount_total || 0;
     var discountEl = document.getElementById('summary-discount');
     if (discountEl) {
@@ -3656,11 +3657,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }
     }
 
-    // Totaal
+    // Celkem
     var totalEl = document.getElementById('desktop-total-price');
     if (totalEl) totalEl.textContent = formatPrice(total);
 
-    // BTW poznámka
+    // DPH poznámka
     var taxNote = document.getElementById('summary-tax-note');
     if (taxNote && isTaxInclusive && taxTotal > 0) {
       taxNote.style.display = '';
@@ -5854,7 +5855,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   });
 
-  /* ─── SMART EMAIL VALIDATIE — typfouten detectie ─── */
+  /* ─── SMART EMAIL VALIDACE — detekce překlepů ─── */
   var COMMON_DOMAINS = {
     'gmail.com': ['gmial.com','gmai.com','gmal.com','gamil.com','gmail.nl','gmail.co','gnail.com','gmaill.com','gmali.com','gmaik.com','gmail.con','gmail.cmo','gmeil.com','gemail.com','gmai.c','gmail.c','gmal.c','gmil.com','g mail.com','gamail.com','gimail.com','gmsil.com','gmqil.com'],
     'hotmail.com': ['hotmai.com','hotmal.com','homail.com','hotmail.co','hotamil.com','hotmaill.com','hotmial.com','hotmail.con','hotmail.nl','hotmail.c','hotmai.c','hotmal.c','htomail.com','htmail.com','hotmil.com'],
@@ -5886,7 +5887,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   var emailField = document.getElementById('email');
   var emailSuggestion = document.getElementById('email-suggestion');
-  // Foxentry flag — als key is ingesteld, worden email/phone uitsluitend door Foxentry gevalideerd
+  // Foxentry flag — pokud je nastaven klíč, email/telefon validuje výhradně Foxentry
   var hasFoxentryKey = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
 
   if (emailField && emailSuggestion) {
@@ -5909,13 +5910,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }
     });
 
-    // Lokale typo-check — alleen actief als Foxentry UIT staat (anders neemt Foxentry IIFE alles over, warn-only)
+    // Lokální typo-check — aktivní jen když je Foxentry VYPNUTÝ (jinak vše přebírá Foxentry IIFE, warn-only)
     emailField.addEventListener('blur', function() {
       if (hasFoxentryKey) return;
       var val = emailField.value.trim();
       if (!val) return;
 
-      // 1. TLD lengte check — .c, .x etc. zijn geen geldige TLD's (min 2 tekens)
+      // 1. Kontrola délky TLD — .c, .x atd. nejsou platné TLD (min 2 znaky)
       var atParts = val.split('@');
       if (atParts.length === 2) {
         var domainParts = atParts[1].split('.');
@@ -5923,7 +5924,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (tld && tld.length < 2) {
           emailField.classList.add('invalid');
           emailField.classList.remove('valid');
-          // Probeer typo suggestie te geven
+          // Zkus nabídnout návrh opravy překlepu
           var tldSuggestion = checkEmailTypo(val);
           if (tldSuggestion) {
             emailSuggestion.innerHTML = 'Nemyslela jsi <strong>' + tldSuggestion + '</strong>? Klikni pro opravu.';
@@ -5959,19 +5960,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   }
 
-  /* ─── TELEFOONNUMMER FORMATTEREN — auto-prefix per land ─── */
+  /* ─── FORMÁTOVÁNÍ TELEFONNÍHO ČÍSLA — auto-prefix podle země ─── */
   var phoneField = document.getElementById('phone');
   var phonePreview = document.getElementById('phone-preview');
   var countrySelect = document.getElementById('country');
   var COUNTRY_PHONE_PREFIX = { CZ: '+420', SK: '+421' };
   var PHONE_PREFIX_TO_COUNTRY = { '+420': 'CZ', '+421': 'SK' };
 
-  // Detecteer land uit telefoonnummer (bijv. +32... → BE)
+  // Detekce země z telefonního čísla (např. +32... → BE)
   function detectCountryFromPhone(val) {
     var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
     if (cleaned.startsWith('00')) cleaned = '+' + cleaned.substring(2);
     if (!cleaned.startsWith('+')) return null;
-    // Langste prefix eerst (+352 voor +35)
+    // Nejdelší prefix první (+352 před +35)
     var prefixes = Object.keys(PHONE_PREFIX_TO_COUNTRY).sort(function(a, b) { return b.length - a.length; });
     for (var i = 0; i < prefixes.length; i++) {
       if (cleaned.startsWith(prefixes[i])) return PHONE_PREFIX_TO_COUNTRY[prefixes[i]];
@@ -5979,7 +5980,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     return null;
   }
 
-  // Update country dropdown als prefix gedetecteerd
+  // Update country dropdownu, když je detekován prefix
   function syncCountryFromPhone(val) {
     var detected = detectCountryFromPhone(val);
     if (detected && countrySelect && countrySelect.value !== detected) {
@@ -6003,18 +6004,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   }
 
   if (phoneField && phonePreview) {
-    // Bij input: detecteer land uit prefix en update country dropdown
+    // Při inputu: detekuj zemi z prefixu a aktualizuj country dropdown
     phoneField.addEventListener('input', function() {
       syncCountryFromPhone(phoneField.value.trim());
       phonePreview.style.display = 'none';
     });
 
     phoneField.addEventListener('blur', function() {
-      // Als Foxentry actief is, GEEN lokale formatting of validatie — alles via Foxentry
+      // Když je Foxentry aktivní, ŽÁDNÝ lokální formatting ani validace — vše přes Foxentry
       if (hasFoxentryKey) return;
       var raw = phoneField.value.trim();
       if (!raw) { phonePreview.style.display = 'none'; return; }
-      // Sync country van prefix
+      // Sync země podle prefixu
       syncCountryFromPhone(raw);
       var country = countrySelect ? countrySelect.value : 'CZ';
       var formatted = formatPhoneNumber(raw, country);
@@ -6057,7 +6058,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   }
 
-  /* ─── ADRES VALIDATIE — straatnaam + huisnummer ─── */
+  /* ─── VALIDACE ADRESY — název ulice + číslo popisné ─── */
   var addressField = document.getElementById('address');
   var addressWarning = document.getElementById('address-warning');
   var addressWarningText = document.getElementById('address-warning-text');
@@ -6114,15 +6115,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   updateCompanyLabels();
 
   /* ═══════════════════════════════════════════════════════════════════
-   *  FOXENTRY SMART VALIDATIE — adres autocomplete, e-mail, telefoon, bedrijf
-   *  Alleen actief als PROJECT_CONFIG.foxentryApiKey is ingesteld.
+   *  FOXENTRY SMART VALIDACE — autocomplete adresy, e-mail, telefon, firma
+   *  Aktivní jen když je nastaven PROJECT_CONFIG.foxentryApiKey.
    *  Werkt samen met bestaande validateField / checkEmailTypo / formatPhoneNumber.
    * ═══════════════════════════════════════════════════════════════════ */
   (function() {
     var FOXENTRY_KEY = (typeof PROJECT_CONFIG !== 'undefined' && PROJECT_CONFIG.foxentryApiKey) || null;
-    if (!FOXENTRY_KEY) return; // Geen key → alles blijft bij de lokale validatie
+    if (!FOXENTRY_KEY) return; // Bez klíče → vše zůstává na lokální validaci
 
-    // Markeer email en telefoon velden als Foxentry-managed (verbergt lokale .field-error via CSS)
+    // Označ pole email a telefon jako Foxentry-managed (skryje lokální .field-error přes CSS)
     var _emailEl = document.getElementById('email');
     var _phoneEl = document.getElementById('phone');
     if (_emailEl) _emailEl.classList.add('foxentry-managed');
@@ -6158,7 +6159,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         result: r.result || {},
         corrected: r.resultCorrected || null,
         suggestions: r.suggestions || [],
-        results: r.results || [] // voor search endpoints
+        results: r.results || [] // pro search endpointy
       };
     }
 
@@ -6173,9 +6174,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
 
     /* ─── Spinner helpers ─── */
-    // Terwijl Foxentry bezig is, verbergen we de check/cross iconen
-    // en blokkeren we de lokale validateField van het instellen van valid/invalid.
-    // Op window zodat validateField() (buiten deze IIFE) het kan lezen.
+    // Zatímco Foxentry pracuje, skryjeme check/cross ikony
+    // a blokujeme lokální validateField v nastavování valid/invalid.
+    // Na window, aby to validateField() (mimo tuto IIFE) mohl číst.
     window.__foxentryPending = window.__foxentryPending || {};
 
     function showSpinner(field) {
@@ -6187,7 +6188,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         fg.appendChild(sp);
       }
       sp.style.display = 'block';
-      // Markeer veld als "Foxentry bezig" — verberg bestaande check/cross
+      // Označ pole jako "Foxentry pracuje" — skryj existující check/cross
       if (field.id) window.__foxentryPending[field.id] = true;
       field.classList.remove('valid', 'invalid');
     }
@@ -6223,7 +6224,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
 
     /* ════════════════════════════════════════
-     *  1. ADRES AUTOCOMPLETE
+     *  1. AUTOCOMPLETE ADRESY
      * ════════════════════════════════════════ */
     var addrField = document.getElementById('address');
     var addrDropdown = document.getElementById('foxentry-address-dropdown');
@@ -6266,7 +6267,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             if (cityField && data.city) cityField.value = data.city;
             if (postalField && data.zip) postalField.value = data.zip;
             addrSelectedFromDropdown = true;
-            // Trigger de float-label en validatie
+            // Trigger float-labelu a validace
             [addrField, cityField, postalField].forEach(function(f) {
               if (f && f.value) {
                 f.closest('.float-field').classList.add('has-value');
@@ -6282,11 +6283,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }, 300));
 
       addrField.addEventListener('blur', function() {
-        // Sluit dropdown na korte delay (laat mousedown event eerst afhandelen)
+        // Zavři dropdown po krátkém delay (nech nejdřív doběhnout mousedown event)
         setTimeout(function() { hideDropdown(addrDropdown); }, 200);
       });
       addrField.addEventListener('focus', function() {
-        // Heropen als er items zijn
+        // Znovu otevři, pokud jsou položky
         if (addrDropdown.children.length > 0 && !addrSelectedFromDropdown) {
           addrDropdown.classList.add('is-open');
         }
@@ -6295,10 +6296,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     /* ════════════════════════════════════════
      *  2a. E-MAIL DOMAIN AUTOCOMPLETE (/email/search)
-     *  UITGESCHAKELD — /email/search heeft een aparte "Email Search" credit pakket nodig
-     *  dat NIET in onze "Validate Basic 25K" subscription zit. Inschakelen zou 402/403
-     *  errors per keystroke veroorzaken. Voor heractivatie: koop Email Search pakket
-     *  in Foxentry dashboard EN verwijder de `false &&` guard hieronder.
+     *  VYPNUTO — /email/search vyžaduje samostatný kreditní balíček "Email Search"
+     *  který NENÍ v našem "Validate Basic 25K" předplatném. Zapnutí by způsobilo 402/403
+     *  chyby při každém stisku klávesy. Pro reaktivaci: kup balíček Email Search
+     *  ve Foxentry dashboardu A odstraň `false &&` guard níže.
      * ════════════════════════════════════════ */
     var foxEmailField = document.getElementById('email');
     var foxEmailSuggestion = document.getElementById('email-suggestion');
@@ -6308,13 +6309,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       foxEmailField.addEventListener('input', debounce(function() {
         var val = foxEmailField.value.trim();
         var atIdx = val.indexOf('@');
-        // Alleen zoeken als er een @ is + minstens 1 teken erna
+        // Hledat jen když je zadán @ + aspoň 1 znak za ním
         if (atIdx === -1 || atIdx === val.length - 1) {
           hideDropdown(foxEmailDropdown);
           return;
         }
         var afterAt = val.substring(atIdx + 1);
-        // Stop met zoeken als domein al compleet lijkt (bevat een punt met tekst erna)
+        // Přestaň hledat, když doména vypadá kompletní (obsahuje tečku s textem za ní)
         if (/\.\w{2,}$/.test(afterAt)) {
           hideDropdown(foxEmailDropdown);
           return;
@@ -6341,7 +6342,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             // Trigger float-label
             var ff = foxEmailField.closest('.float-field');
             if (ff) ff.classList.add('has-value');
-            // Valideer het geselecteerde email
+            // Validuj vybraný email
             foxEmailField.dispatchEvent(new Event('blur'));
           });
         })
@@ -6350,11 +6351,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         });
       }, 250));
 
-      // Sluit dropdown bij blur (met delay voor mousedown)
+      // Zavři dropdown při bluru (s delayem kvůli mousedown)
       foxEmailField.addEventListener('blur', function() {
         setTimeout(function() { hideDropdown(foxEmailDropdown); }, 200);
       });
-      // Heropen bij focus als er items zijn
+      // Znovu otevři při focusu, pokud jsou položky
       foxEmailField.addEventListener('focus', function() {
         if (foxEmailDropdown.children.length > 0 && foxEmailField.value.indexOf('@') !== -1) {
           var afterAt = foxEmailField.value.substring(foxEmailField.value.indexOf('@') + 1);
@@ -6374,7 +6375,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var emailWarningTextEl = document.getElementById('email-warning-text');
     var emailWarningConfirmEl = document.getElementById('email-warning-confirm');
     var emailWarningEditEl = document.getElementById('email-warning-edit');
-    var emailConfirmedAddress = null; // bevestigd adres → geen herhaalde warning
+    var emailConfirmedAddress = null; // potvrzená adresa → žádný opakovaný warning
 
     function showEmailWarning(messageHtml) {
       if (!emailWarningEl || !foxEmailField) return;
@@ -6389,7 +6390,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (foxEmailField) delete foxEmailField.dataset.emailWarning;
     }
 
-    // "Tak, zgadza się" — bevestig email als geldig
+    // "Ano, souhlasí" — potvrď email jako platný
     if (emailWarningConfirmEl) {
       emailWarningConfirmEl.addEventListener('click', function() {
         emailConfirmedAddress = foxEmailField ? foxEmailField.value.trim() : '';
@@ -6400,19 +6401,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         }
       });
     }
-    // "Zmień" — terug focus op veld
+    // "Změnit" — vrátit focus na pole
     if (emailWarningEditEl) {
       emailWarningEditEl.addEventListener('click', function() {
         hideEmailWarning();
         if (foxEmailField) foxEmailField.focus();
       });
     }
-    // Bij input: verberg warning + reset bevestiging als email verandert
+    // Při inputu: skryj warning + resetuj potvrzení, když se email změní
     if (foxEmailField) {
       foxEmailField.addEventListener('input', function() { hideEmailWarning(); });
     }
 
-    // Klik-handler op suggestie binnen warning text (voor invalidWithCorrection / invalidWithSuggestions)
+    // Klik-handler na návrh uvnitř warning textu (pro invalidWithCorrection / invalidWithSuggestions)
     function wireWarningSuggestionClicks() {
       if (!emailWarningTextEl) return;
       emailWarningTextEl.onclick = function(e) {
@@ -6431,7 +6432,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var val = foxEmailField.value.trim();
         if (!val || val.indexOf('@') === -1) return;
 
-        // Pre-check: TLD te kort (.c, .x) — geen API call, direct warn
+        // Pre-check: TLD moc krátké (.c, .x) — žádný API call, rovnou warn
         var _preParts = val.split('@');
         if (_preParts.length === 2) {
           var _preDomain = _preParts[1].split('.');
@@ -6459,10 +6460,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           var correctedEmail = (fx.corrected && fx.corrected.data && fx.corrected.data.email) || null;
           var suggestions = fx.suggestions || [];
 
-          // Verberg eerdere soft suggestie
+          // Skryj předchozí soft návrh
           if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
 
-          // Heeft user dit adres al bevestigd? Geen warning meer.
+          // Potvrdil už user tuhle adresu? Žádný další warning.
           var alreadyConfirmed = emailConfirmedAddress === val;
 
           switch (proposal) {
@@ -6557,7 +6558,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           var basicOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
           var localSuggestion = checkEmailTypo(val);
           if (basicOk && !localSuggestion) {
-            // Syntax OK + geen typo → markeer als valid (gracefully degraded)
+            // Syntax OK + žádný překlep → označ jako valid (gracefully degraded)
             foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
             hideEmailWarning();
           } else if (localSuggestion) {
@@ -6570,7 +6571,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
 
     /* ════════════════════════════════════════
-     *  3. TELEFOON VALIDATIE (versterkt bestaande formatting)
+     *  3. VALIDACE TELEFONU (posiluje existující formatting)
      * ════════════════════════════════════════ */
     var foxPhoneField = document.getElementById('phone');
     var foxPhonePreview = document.getElementById('phone-preview');
@@ -6579,7 +6580,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var phoneWarning = document.getElementById('phone-warning');
     var phoneWarningConfirm = document.getElementById('phone-warning-confirm');
     var phoneWarningEdit = document.getElementById('phone-warning-edit');
-    var phoneConfirmedNumber = null; // Bewaar bevestigd nummer — geen herhaalde warning
+    var phoneConfirmedNumber = null; // Ulož potvrzené číslo — žádný opakovaný warning
 
     function showPhoneWarning() {
       if (phoneWarning) phoneWarning.style.display = 'block';
@@ -6595,7 +6596,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (foxPhoneField) delete foxPhoneField.dataset.phoneWarning;
     }
 
-    // "Ja, dit klopt" — bevestig nummer als geldig
+    // "Ano, sedí to" — potvrď číslo jako platné
     if (phoneWarningConfirm) {
       phoneWarningConfirm.addEventListener('click', function() {
         phoneConfirmedNumber = foxPhoneField ? foxPhoneField.value.trim() : '';
@@ -6612,7 +6613,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       });
     }
 
-    // "Aanpassen" — focus terug naar veld
+    // "Upravit" — focus zpět na pole
     if (phoneWarningEdit) {
       phoneWarningEdit.addEventListener('click', function() {
         hidePhoneWarning();
@@ -6620,7 +6621,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       });
     }
 
-    // Bij input: verberg warning + reset bevestiging als nummer verandert
+    // Při inputu: skryj warning + resetuj potvrzení, když se číslo změní
     if (foxPhoneField) {
       foxPhoneField.addEventListener('input', function() {
         hidePhoneWarning();
@@ -6628,12 +6629,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
 
     if (foxPhoneField) {
-      // Foxentry handelt ALLE telefoonvalidatie + formatting af
+      // Foxentry obsluhuje VEŠKEROU validaci telefonu + formatting
       foxPhoneField.addEventListener('blur', function() {
         var val = foxPhoneField.value.trim();
         if (!val || val.length < 5) return;
 
-        // Voeg landprefix toe als die ontbreekt (bijv. 0612345678 → +48612345678)
+        // Doplň prefix země, pokud chybí (např. 0612345678 → +48612345678)
         var countryEl = document.getElementById('country');
         var cc = countryEl ? countryEl.value : 'CZ';
         var prefixMap = { CZ: '+420', SK: '+421' };
@@ -6653,7 +6654,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             hideSpinner(foxPhoneField);
             var fx = foxentryResult(resp);
             var isValid = fx.result.isValid === true;
-            // Gebruik geformatteerd nummer van Foxentry
+            // Použij naformátované číslo z Foxentry
             var data = fx.result.data || {};
             var fmt = data.format || {};
             var formattedFull = fmt.internationalFormatted || data.numberWithPrefix || cleaned;
@@ -6662,7 +6663,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             } else if (data.numberWithPrefix) {
               foxPhoneField.value = data.numberWithPrefix;
             }
-            // Sync country dropdown op basis van Foxentry resultaat
+            // Sync country dropdownu podle výsledku Foxentry
             syncCountryFromPhone(formattedFull);
 
             if (isValid) {
@@ -6675,14 +6676,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 foxPhonePreview.style.display = 'block';
               }
             } else {
-              // Al bevestigd door gebruiker? Niet opnieuw waarschuwen.
+              // Už potvrzeno uživatelem? Znovu neupozorňovat.
               if (phoneConfirmedNumber === foxPhoneField.value.trim()) {
                 foxPhoneField.classList.add('valid');
                 foxPhoneField.classList.remove('invalid');
                 hidePhoneWarning();
                 return;
               }
-              // Toon oranje waarschuwing i.p.v. rode fout
+              // Zobraz oranžové upozornění místo červené chyby
               showPhoneWarning();
             }
           })
@@ -6703,7 +6704,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 foxPhonePreview.style.display = 'none';
               }
             } else {
-              // Lokale fallback: ook oranje warning
+              // Lokální fallback: taky oranžový warning
               if (phoneConfirmedNumber === foxPhoneField.value.trim()) {
                 foxPhoneField.classList.add('valid');
                 foxPhoneField.classList.remove('invalid');
@@ -6717,10 +6718,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }
 
     /* ════════════════════════════════════════
-     *  4. BEDRIJF AUTOCOMPLETE (KVK / Ondernemingsnummer)
-     *  UITGESCHAKELD — /company/search vereist een aparte "Company Search" credit pakket
-     *  dat NIET in onze huidige Foxentry subscription zit. Voor heractivatie: koop
-     *  Company Search pakket EN verwijder de `false &&` guard hieronder.
+     *  4. AUTOCOMPLETE FIRMY (IČO)
+     *  VYPNUTO — /company/search vyžaduje samostatný kreditní balíček "Company Search"
+     *  který NENÍ v našem aktuálním Foxentry předplatném. Pro reaktivaci: kup
+     *  balíček Company Search A odstraň `false &&` guard níže.
      * ════════════════════════════════════════ */
     var companyInput = document.getElementById('company_name');
     var companyDropdown = document.getElementById('foxentry-company-dropdown');
@@ -6788,7 +6789,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       });
     }
 
-    /* ─── Sluit alle dropdowns bij klik buiten ─── */
+    /* ─── Zavři všechny dropdowny při kliku mimo ─── */
     document.addEventListener('click', function(e) {
       if (!e.target.closest('.foxentry-dropdown') && !e.target.closest('.form-group')) {
         hideDropdown(addrDropdown);
@@ -6798,7 +6799,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   })();
 
-  /* ─── INLINE VALIDATIE ─── */
+  /* ─── INLINE VALIDACE ─── */
   var fields = document.querySelectorAll('#checkout-form input[required]');
   var submitValidationMsg = document.getElementById('submit-validation-msg');
 
@@ -6830,24 +6831,24 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   // onSubmit: also mark EMPTY required fields, not just incorrect ones
   function validateField(field, markEmpty) {
-    // Als Foxentry bezig is met dit veld, sla lokale validatie over
+    // Když Foxentry na tomto poli pracuje, přeskoč lokální validaci
     if (window.__foxentryPending && window.__foxentryPending[field.id]) {
       return true;
     }
-    // Als Foxentry key actief is, email en telefoon worden UITSLUITEND door Foxentry gevalideerd
+    // Když je Foxentry klíč aktivní, email a telefon validuje VÝHRADNĚ Foxentry
     var _hasFox = (typeof PROJECT_CONFIG !== 'undefined' && !!PROJECT_CONFIG.foxentryApiKey);
     if (_hasFox && (field.type === 'email' || field.type === 'tel')) {
-      // Bij submit: als veld leeg is, markeer als invalid
+      // Při submitu: pokud je pole prázdné, označ jako invalid
       if (markEmpty && field.value.trim().length === 0) {
         field.classList.add('invalid');
         field.classList.remove('valid');
         return false;
       }
-      // Warn-only state (Foxentry vond probleem maar laat user beslissen) → submit toestaan
+      // Warn-only stav (Foxentry našel problém, ale nechá rozhodnout usera) → submit povolit
       if (field.dataset.emailWarning === 'true' || field.dataset.phoneWarning === 'true') {
         return true;
       }
-      // Behoud huidige valid/invalid status (gezet door Foxentry), niet overschrijven
+      // Zachovej aktuální valid/invalid status (nastavený Foxentry), nepřepisuj
       if (field.classList.contains('valid')) return true;
       if (field.classList.contains('invalid')) return false;
       var _val = field.value.trim();
@@ -7233,7 +7234,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var thumb = product && (product.thumbnail || (product.images && product.images[0] && product.images[0].url));
       if (thumb) applyMainProductThumb(thumb, product.title || PROJECT_CONFIG.mainProduct.name);
     }).catch(function(err) {
-      console.warn('[Checkout] Kon hoofdproduct thumbnail niet laden:', err);
+      console.warn('[Checkout] Nepodařilo se načíst thumbnail hlavního produktu:', err);
     });
   }
 
@@ -7279,7 +7280,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       promoApplyBtn.textContent = 'Ověřuji...';
       promoMessage.className = 'promo-message';
 
-      // Stap 1: Cart aanmaken (als die nog niet bestaat)
+      // Krok 1: Vytvoření cartu (pokud ještě neexistuje)
       var cartPromise;
       if (promoCartId) {
         cartPromise = Promise.resolve(promoCartId);
@@ -7289,7 +7290,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           body: JSON.stringify({ region_id: currentRegionId })
         }).then(function(res) {
           promoCartId = res.cart.id;
-          // Voeg hoofdproduct toe zodat Medusa promotions kan evalueren
+          // Přidej hlavní produkt, aby Medusa mohla vyhodnotit promotions
           return medusaFetch('/store/carts/' + promoCartId + '/line-items', {
             method: 'POST',
             body: JSON.stringify({ variant_id: VARIANT_ID, quantity: selectedBundleQty })
@@ -7297,7 +7298,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         });
       }
 
-      // Stap 2: Promo code toepassen via Medusa
+      // Krok 2: Aplikace promo kódu přes Medusu
       cartPromise.then(function(cartId) {
         return medusaFetch('/store/carts/' + cartId + '/promotions', {
           method: 'POST',
@@ -7315,14 +7316,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         promoToggle.style.display = 'none';
         promoMessage.className = 'promo-message';
         promoInput.value = '';
-        // Update order summary met korting
+        // Aktualizuj order summary se slevou
         if (promoRes && promoRes.cart) {
           updateOrderSummary(promoRes.cart);
         }
       })
       .catch(function(err) {
         // Fout — code is ongeldig
-        console.warn('Promo code geweigerd:', err.message || err);
+        console.warn('Promo kód zamítnut:', err.message || err);
         promoMessage.textContent = 'Neplatný slevový kód';
         promoMessage.className = 'promo-message error';
         savedPromoCode = '';
@@ -7354,7 +7355,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       promoApplied.classList.remove('is-visible');
       promoToggle.style.display = '';
       promoMessage.className = 'promo-message';
-      // Verwijder promo van cart als die bestaat
+      // Odstraň promo z cartu, pokud existuje
       if (promoCartId && removedCode) {
         medusaFetch('/store/carts/' + promoCartId + '/promotions', {
           method: 'DELETE',
@@ -7363,7 +7364,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           if (res && res.cart) updateOrderSummary(res.cart);
         }).catch(function() {});
       }
-      // Verberg korting regel in samenvatting
+      // Skryj řádek slevy v souhrnu
       var discountEl = document.getElementById('summary-discount');
       if (discountEl) discountEl.style.display = 'none';
     });
@@ -7377,7 +7378,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   form.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Valideer alle velden
+    // Validuj všechna pole
     if (!validateAllFields()) {
       var firstError = form.querySelector('.invalid');
       if (firstError) {
@@ -7403,7 +7404,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return;
     }
 
-    // Toon laadstatus
+    // Zobraz stav načítání
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
     errorEl.textContent = '';
@@ -7435,21 +7436,21 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
      *
      * Kompletni flow s Medusa v2 API:
      *
-     * 1. Maak cart aan (POST /store/carts)
-     * 2. Voeg product toe (POST /store/carts/{id}/line-items)
-     * 3. Update cart met klantgegevens (POST /store/carts/{id})
-     * 3b. Voeg shipping method toe (GET /store/shipping-options + POST /store/carts/{id}/shipping-methods)
-     * 4a. Maak payment collection (POST /store/payment-collections)
-     * 4b. Initialiseer payment session (POST /store/payment-collections/{id}/payment-sessions)
-     *    → Medusa roept initiatePayment aan op de geselecteerde provider
-     *    → Provider (Mollie/PayPal) retourneert checkout/approval URL
-     * 5. Redirect klant naar betaalpagina (Mollie of PayPal)
-     * 6. Na betaling keert klant terug → cart voltooien (POST /store/carts/{id}/complete)
+     * 1. Vytvoř cart (POST /store/carts)
+     * 2. Přidej produkt (POST /store/carts/{id}/line-items)
+     * 3. Aktualizuj cart o zákaznická data (POST /store/carts/{id})
+     * 3b. Přidej shipping method (GET /store/shipping-options + POST /store/carts/{id}/shipping-methods)
+     * 4a. Vytvoř payment collection (POST /store/payment-collections)
+     * 4b. Inicializuj payment session (POST /store/payment-collections/{id}/payment-sessions)
+     *    → Medusa zavolá initiatePayment na vybraném provideru
+     *    → Provider (Mollie/PayPal) vrátí checkout/approval URL
+     * 5. Redirect zákazníka na platební stránku (Mollie nebo PayPal)
+     * 6. Po platbě se zákazník vrátí → dokončení cartu (POST /store/carts/{id}/complete)
      *
-     * Hieronder staat de implementatie:
+     * Níže je implementace:
      */
 
-    // Klantgegevens uit formulier
+    // Zákaznická data z formuláře
     var customerData = {
       email: document.getElementById('email').value.trim(),
       shipping_address: {
@@ -7537,7 +7538,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // ─── Factuuradres (billing address) ───
     var isBillingDifferent = document.getElementById('billing-checkbox').checked;
     if (isBillingDifferent) {
-      // Gebruiker heeft een ander factuuradres opgegeven
+      // Uživatel zadal jinou fakturační adresu
       customerData.billing_address = {
         first_name: document.getElementById('billing_first_name').value.trim() || customerData.shipping_address.first_name,
         last_name: document.getElementById('billing_last_name').value.trim() || customerData.shipping_address.last_name,
@@ -7568,18 +7569,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var cartStep;
     if (reuseCartId) {
       // Cart bestaat al (promo code validatie of background cart recovery)
-      // Verwijder bestaande line items en voeg opnieuw toe (bundle/qty kan veranderd zijn)
+      // Odstraň existující line items a přidej znovu (bundle/qty se mohly změnit)
       cartStep = medusaFetch('/store/carts/' + reuseCartId, { method: 'GET' })
         .then(function(cartRes) {
           var cart = cartRes.cart;
-          // Verwijder alle bestaande line items
+          // Odstraň všechny existující line items
           var deletePromises = (cart.items || []).map(function(item) {
             return medusaFetch('/store/carts/' + reuseCartId + '/line-items/' + item.id, { method: 'DELETE' });
           });
           return Promise.all(deletePromises).then(function() { return reuseCartId; });
         })
         .catch(function() {
-          // Cart ophalen mislukt — maak een nieuwe aan
+          // Načtení cartu selhalo — vytvoř nový
           reuseCartId = null;
           backgroundCartId = null;
           promoCartId = null;
@@ -7597,7 +7598,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     cartStep
     .then(function(cartId) {
-      // Stap 2a: Hoofdproduct toevoegen via bundle endpoint (custom pricing)
+      // Krok 2a: Přidání hlavního produktu přes bundle endpoint (custom pricing)
       // Each bundle variant (LLWJK-1 to LLWJK-4) represents a specific bundle qty, so quantity is always 1
       return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
         method: 'POST',
@@ -7648,7 +7649,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
-      // Stap 3a: Promo code toepassen via Medusa Promotions API (opnieuw als cart hergebruikt wordt)
+      // Krok 3a: Aplikace promo kódu přes Medusa Promotions API (znovu při znovupoužití cartu)
       if (savedPromoCode) {
         return medusaFetch('/store/carts/' + cartId + '/promotions', {
           method: 'POST',
@@ -7661,19 +7662,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           }
           return cartId;
         }).catch(function(err) {
-          // Medusa weigert de code — toon fout, verberg badge, stop NIET de bestelling
-          console.warn('Promo code geweigerd door Medusa:', err.message || err);
+          // Medusa kód odmítne — zobraz chybu, skryj badge, NEzastavuj objednávku
+          console.warn('Promo kód zamítnut Medusou:', err.message || err);
           savedPromoCode = '';
           promoAppliedToCart = false;
-          // Toon foutmelding
+          // Zobraz chybovou hlášku
           if (promoMessage) {
             promoMessage.textContent = 'Neplatný slevový kód';
             promoMessage.className = 'promo-message error';
           }
-          // Verberg badge, toon toggle weer
+          // Skryj badge, znovu zobraz toggle
           promoApplied.classList.remove('is-visible');
           promoToggle.style.display = '';
-          // Verberg korting in samenvatting
+          // Skryj slevu v souhrnu
           var discountEl = document.getElementById('summary-discount');
           if (discountEl) discountEl.style.display = 'none';
           return cartId;
@@ -8325,7 +8326,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }
     })
     .catch(function(err) {
-      // Toon foutmelding
+      // Zobraz chybovou hlášku
       errorEl.textContent = err.message || 'Něco se pokazilo. Zkus to prosím znovu.';
       submitBtn.classList.remove('loading');
       submitBtn.disabled = false;

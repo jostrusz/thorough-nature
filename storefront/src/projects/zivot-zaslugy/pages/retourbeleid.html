@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="cs">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Retour- en Garantiebeleid — Het Leven Dat Je Verdient</title>
-<meta name="description" content="Retour- en garantiebeleid van Het Leven Dat Je Verdient. 30 dagen geld-terug-garantie, retourprocedure en uw rechten.">
+<title>Vrácení a záruka — Život, který si zasloužíš</title>
+<meta name="description" content="30denní garance vrácení peněz, 14denní zákonné právo na odstoupení od smlouvy a reklamační řád ke knize Život, který si zasloužíš.">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" type="image/png" sizes="32x32" href="/life-reset-favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="/life-reset-favicon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/life-reset-favicon-180.png"><link rel="shortcut icon" href="/life-reset-favicon.png">
 
@@ -185,7 +185,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  margin: 0 auto;
 }
 
-/* Retour stappen */
+/* Kroky vrácení */
 .steps {
  display: grid;
  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -376,18 +376,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <body>
 
 <!-- ═══ NAVIGACE ═══ -->
-<nav class="site-nav">
+<nav class="site-nav" aria-label="Hlavní navigace" role="navigation">
  <div class="nav-inner">
-  <a href="index.html" class="nav-logo">
-   <img src="/het-leven-logo.png" alt="Het Leven Dat Je Verdient" width="150" height="40">
+  <a href="/" class="nav-logo">
+   <img src="/het-leven-logo.webp" alt="Život, který si zasloužíš" width="360" height="70">
   </a>
   <div class="nav-links">
-   <a href="verzending.html">Verzending &amp; Levering</a>
-   <a href="retourbeleid.html" class="active">Retour &amp; Garantie</a>
-   <a href="voorwaarden.html">Voorwaarden</a>
-   <a href="privacy.html">Privacy</a>
-   <a href="contact.html">Contact</a>
-   <a href="index.html" class="nav-cta">Bestel nu &rarr;</a>
+   <a href="/verzending">Doprava a dodání</a>
+   <a href="/retourbeleid" class="active">Vrácení a záruka</a>
+   <a href="/voorwaarden">Obchodní podmínky</a>
+   <a href="/privacy">Ochrana osobních údajů</a>
+   <a href="/contact">Kontakt</a>
+   <a href="/checkout" class="nav-cta">Objednat &rarr;</a>
   </div>
   <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
    <span></span><span></span><span></span>
@@ -396,305 +396,341 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </nav>
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
- <a href="verzending.html">Verzending &amp; Levering</a>
- <a href="retourbeleid.html">Retour &amp; Garantie</a>
- <a href="voorwaarden.html">Algemene Voorwaarden</a>
- <a href="privacy.html">Privacybeleid</a>
- <a href="contact.html">Klantenservice</a>
- <a href="index.html" class="nav-cta-mobile">Bestel nu &rarr;</a>
+ <a href="/verzending">Doprava a dodání</a>
+ <a href="/retourbeleid">Vrácení a záruka</a>
+ <a href="/voorwaarden">Obchodní podmínky</a>
+ <a href="/privacy">Ochrana osobních údajů</a>
+ <a href="/contact">Kontakt</a>
+ <a href="/checkout" class="nav-cta-mobile">Objednat &rarr;</a>
 </div>
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">Retour &amp; Garantie</div>
- <h1>Retour- en Garantiebeleid</h1>
- <p>Uw rechten en onze belofte van tevredenheid</p>
+ <div class="badge">Vrácení &amp; Záruka</div>
+ <h1>Vrácení a záruka</h1>
+ <p>Vaše práva a náš slib spokojenosti</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="page-content">
 
- <!-- Samenvatting -->
+ <!-- Shrnutí -->
  <div class="info-box">
-  <h3>Samenvatting</h3>
+  <h3>Shrnutí</h3>
   <ul>
-   <li>30 dagen verlengde geld-terug-garantie</li>
-   <li>14 dagen wettelijk herroepingsrecht</li>
-   <li>100% terugbetaling bij ontevredenheid</li>
-   <li>Retourprocedure in 5 eenvoudige stappen</li>
+   <li>30denní prodloužená garance vrácení peněz bez udání důvodu</li>
+   <li>14denní zákonné právo na odstoupení od smlouvy</li>
+   <li>100% vrácení peněz při nespokojenosti</li>
+   <li>Postup vrácení v 5 jednoduchých krocích</li>
   </ul>
  </div>
 
- <!-- Garantie -->
+ <!-- Garance -->
  <div class="guarantee-box">
   <div class="guarantee-seal">30</div>
-  <h3>30 Dagen Geld-Terug-Garantie</h3>
-  <p>Niet tevreden? U krijgt uw geld terug. <strong>Zonder vragen. Zonder gedoe.</strong> Wettelijk heeft u recht op 14 dagen bedenktijd. Wij bieden u 30 dagen na ontvangst van het boek.</p>
+  <h3>30denní garance vrácení peněz</h3>
+  <p>Nejste spokojeni? Vrátíme vám celou částku. <strong>Bez udání důvodu. Bez komplikací.</strong> Ze zákona máte právo na 14denní lhůtu pro odstoupení od smlouvy. My vám nabízíme 30 dnů od převzetí knihy.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sectie 1: Herroepingsrecht -->
+ <!-- Sekce 1: Odstoupení -->
  <div class="section-block">
-  <h2><span class="icon">1.</span> Herroepingsrecht (Bedenktijd)</h2>
+  <h2><span class="icon">1.</span> Právo na odstoupení od smlouvy</h2>
 
-  <h3>1.1 Uw wettelijke rechten</h3>
-  <p>Op grond van de Europese consumentenwetgeving heeft u het recht om uw aankoop binnen <strong>14 dagen</strong> na ontvangst zonder opgaaf van reden te annuleren. Wij gaan echter een stap verder en bieden u een verlengde bedenktijd van <strong>30 dagen</strong>.</p>
+  <h3>1.1 Vaše zákonná práva</h3>
+  <p>Jako spotřebitel máte podle § 1829 zákona č. 89/2012 Sb., občanský zákoník, právo odstoupit od kupní smlouvy do <strong>14 dnů</strong> od převzetí zboží, a to bez udání důvodu. My jdeme ale o krok dál a nabízíme vám prodlouženou lhůtu <strong>30 dnů</strong>, během které vám vrátíme celou kupní cenu.</p>
 
-  <h3>1.2 Voorwaarden voor retour</h3>
-  <p>Om in aanmerking te komen voor een volledige terugbetaling, moet het boek aan de volgende voorwaarden voldoen:</p>
+  <h3>1.2 Podmínky pro plné vrácení peněz</h3>
+  <p>Abyste měli nárok na plné vrácení kupní ceny, měla by kniha splňovat následující podmínky:</p>
 
   <div class="conditions-grid">
    <div class="condition-item">
     <div class="condition-icon">&#128214;</div>
-    <strong>Ongelezen</strong>
-    <span>Niet gelezen of doorgebladerd</span>
+    <strong>Nečtená</strong>
+    <span>Bez známek čtení či listování</span>
    </div>
    <div class="condition-item">
     <div class="condition-icon">&#9989;</div>
-    <strong>Onbeschadigd</strong>
-    <span>Geen vouwen, krassen of vlekken</span>
+    <strong>Nepoškozená</strong>
+    <span>Bez ohybů, škrábanců či skvrn</span>
    </div>
    <div class="condition-item">
     <div class="condition-icon">&#9998;</div>
-    <strong>Ongemarkeerd</strong>
-    <span>Geen aantekeningen of markeringen</span>
+    <strong>Bez poznámek</strong>
+    <span>Bez zápisků či zvýraznění</span>
    </div>
    <div class="condition-item">
     <div class="condition-icon">&#128230;</div>
-    <strong>Compleet</strong>
-    <span>Alle onderdelen aanwezig</span>
+    <strong>Kompletní</strong>
+    <span>Všechny součásti přiloženy</span>
    </div>
    <div class="condition-item">
     <div class="condition-icon">&#10024;</div>
-    <strong>Originele staat</strong>
-    <span>Zoals u het heeft ontvangen</span>
+    <strong>Původní stav</strong>
+    <span>Ve stavu, v jakém jste ji obdrželi</span>
    </div>
   </div>
 
   <div class="warning-box">
-   <p><strong>Let op:</strong> Boeken die duidelijk gelezen of gebruikt zijn, komen <strong>niet</strong> in aanmerking voor een volledige terugbetaling.</p>
+   <p><strong>Upozornění:</strong> Knihy, které nesou zjevné známky čtení nebo používání, nemusí mít nárok na <strong>plné</strong> vrácení peněz — spotřebitel odpovídá za snížení hodnoty zboží způsobené nakládáním nad rámec nutného k seznámení se s povahou a vlastnostmi knihy.</p>
   </div>
 
-  <h3>1.3 Digitale producten (e-books)</h3>
-  <p>Door het downloaden van digitale producten stemt u ermee in dat u afstand doet van uw herroepingsrecht (conform EU-richtlijn 2011/83/EU, artikel 16m). Dit geldt uitsluitend voor de digitale producten.</p>
-  <p>Dit heeft <strong>geen invloed</strong> op uw recht om het fysieke boek te retourneren. De waarde van eventuele gratis bonussen wordt niet in mindering gebracht op uw terugbetaling.</p>
+  <h3>1.3 Digitální produkty (e-booky)</h3>
+  <p>Stažením digitálního produktu souhlasíte s tím, že se vzdáváte svého práva na odstoupení od smlouvy (v souladu se směrnicí EU 2011/83/EU, čl. 16 písm. m). Toto se týká výhradně digitálních produktů.</p>
+  <p>Na vaše právo vrátit tištěnou knihu to nemá <strong>žádný vliv</strong>. Hodnota případných bonusů zdarma se od vrácené částky neodečítá.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sectie 2: Retourneren -->
+ <!-- Sekce 2: Vrácení -->
  <div class="section-block">
-  <h2><span class="icon">2.</span> Retourneren &mdash; Stap voor Stap</h2>
+  <h2><span class="icon">2.</span> Vrácení &mdash; krok za krokem</h2>
 
-  <h3>2.1 Zo retourneert u in 5 stappen</h3>
+  <h3>2.1 Vrácení v 5 krocích</h3>
 
   <div class="steps">
    <div class="step">
     <div class="step-num">1</div>
-    <h4>E-mail ons</h4>
-    <p>Stuur een e-mail naar annadevries@pakjeleventerug.nl met uw naam, bestelnummer en reden voor retour.</p>
+    <h4>Napište nám</h4>
+    <p>Pošlete e-mail na anna@nejdriv-ja.cz s vaším jménem, číslem objednávky a případně důvodem vrácení.</p>
    </div>
    <div class="step">
     <div class="step-num">2</div>
-    <h4>Bevestiging</h4>
-    <p>U ontvangt binnen 1-2 werkdagen een bevestiging met retourinstructies.</p>
+    <h4>Potvrzení</h4>
+    <p>Do 1–2 pracovních dnů obdržíte potvrzení s podrobnými pokyny pro vrácení.</p>
    </div>
    <div class="step">
     <div class="step-num">3</div>
-    <h4>Verpak zorgvuldig</h4>
-    <p>Verpak het boek zorgvuldig om beschadiging tijdens transport te voorkomen.</p>
+    <h4>Pečlivě zabalte</h4>
+    <p>Knihu pečlivě zabalte, aby nedošlo k poškození během přepravy.</p>
    </div>
    <div class="step">
     <div class="step-num">4</div>
-    <h4>Verstuur</h4>
-    <p>Verstuur het pakket binnen 14 dagen naar het retouradres.</p>
+    <h4>Odešlete</h4>
+    <p>Balíček odešlete bez zbytečného odkladu, nejpozději do 14 dnů, na adresu pro vrácení.</p>
    </div>
    <div class="step">
     <div class="step-num">5</div>
-    <h4>Terugbetaling</h4>
-    <p>U ontvangt uw terugbetaling binnen 14 dagen na ontvangst van het boek.</p>
+    <h4>Vrácení peněz</h4>
+    <p>Peníze vám vrátíme do 14 dnů od doručení knihy zpět k nám.</p>
    </div>
   </div>
 
-  <h3>2.2 Retouradres</h3>
+  <h3>2.2 Adresa pro vrácení</h3>
   <div class="highlight-box">
-   <p><strong>Performance Marketing Solution s.r.o. &mdash; Retourzendingen</strong><br>
+   <p><strong>Performance Marketing Solution s.r.o. &mdash; Vrácení zboží</strong><br>
    c/o Dextrum Fulfillment a.s.<br>
    Kirilovova 181<br>
    739 21 Paskov<br>
-   Tsjechi&euml;</p>
+   Česká republika</p>
   </div>
 
   <div class="warning-box">
-   <p><strong>Belangrijk:</strong> Vermeld altijd <strong>&quot;Retour &mdash; Bestelnummer: [uw bestelnummer]&quot;</strong> op de buitenkant van het pakket.</p>
+   <p><strong>Důležité:</strong> Na vnější stranu balíku vždy uveďte <strong>&quot;Vrácení &mdash; Objednávka č.: [vaše číslo objednávky]&quot;</strong>.</p>
   </div>
 
-  <h3>2.3 Retourkosten</h3>
-  <p>De retourkosten zijn voor rekening van de klant, <strong>tenzij</strong>:</p>
+  <h3>2.3 Náklady na vrácení</h3>
+  <p>Náklady na vrácení (zpětné zaslání knihy) hradí zákazník, <strong>s výjimkou</strong> případů, kdy:</p>
   <ul>
-   <li>Het product defect is</li>
-   <li>U een verkeerd product heeft ontvangen</li>
-   <li>Het product beschadigd is door de vervoerder</li>
+   <li>je produkt vadný,</li>
+   <li>jste obdrželi nesprávný produkt,</li>
+   <li>byl produkt poškozen během přepravy.</li>
   </ul>
-  <p>Geschatte verzendkosten: <strong>&euro;10-15</strong> (aangetekend naar Tsjechi&euml;).</p>
+  <p>Orientační náklady na vrácení přes Zásilkovnu: <strong>cca 80–120 Kč</strong>.</p>
 
   <div class="highlight-box">
-   <p><strong>Tip:</strong> Gebruik altijd een verzendmethode met Track &amp; Trace, zodat u kunt aantonen dat het pakket is verzonden en afgeleverd.</p>
+   <p><strong>Tip:</strong> Vždy použijte způsob odeslání se sledováním zásilky (např. Zásilkovna), abyste mohli doložit, že byl balíček odeslán a doručen.</p>
   </div>
 
-  <h3>2.4 Wat vermelden in uw retour-e-mail?</h3>
+  <h3>2.4 Co uvést v e-mailu o vrácení?</h3>
   <ul>
-   <li>Uw volledige naam</li>
-   <li>Bestelnummer</li>
-   <li>Datum van ontvangst</li>
-   <li>Reden voor retour (optioneel)</li>
-   <li>IBAN-nummer voor terugbetaling</li>
+   <li>vaše celé jméno,</li>
+   <li>číslo objednávky,</li>
+   <li>datum převzetí zboží,</li>
+   <li>důvod vrácení (nepovinný),</li>
+   <li>číslo bankovního účtu pro vrácení peněz.</li>
   </ul>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sectie 3: Terugbetaling -->
+ <!-- Sekce 3: Vrácení peněz -->
  <div class="section-block">
-  <h2><span class="icon">3.</span> Terugbetaling</h2>
+  <h2><span class="icon">3.</span> Vrácení peněz</h2>
 
-  <h3>3.1 Wanneer ontvangt u uw terugbetaling?</h3>
-  <p>Binnen <strong>14 dagen</strong> na ontvangst van het geretourneerde boek verwerken wij uw terugbetaling van <strong>&euro;35,-</strong>.</p>
+  <h3>3.1 Kdy obdržíte vrácené peníze?</h3>
+  <p>Do <strong>14 dnů</strong> od doručení vrácené knihy zpracujeme vrácení plné kupní ceny <strong>749 Kč</strong>.</p>
 
-  <h3>3.2 Hoe wordt terugbetaald?</h3>
-  <p>De terugbetaling geschiedt via dezelfde betaalmethode die u bij de bestelling heeft gebruikt:</p>
+  <h3>3.2 Jakým způsobem vrátíme peníze?</h3>
+  <p>Peníze vracíme stejným způsobem, jakým jste provedli platbu:</p>
   <ul>
-   <li><strong>iDEAL</strong> &rarr; terugbetaling op uw bankrekening</li>
-   <li><strong>Creditcard</strong> &rarr; terugbetaling op uw creditcard</li>
-   <li><strong>Bancontact</strong> &rarr; terugbetaling op uw Belgische rekening</li>
+   <li><strong>Platební karta</strong> &rarr; vrácení na vaši kartu,</li>
+   <li><strong>Bankovní převod / online platba</strong> &rarr; vrácení na váš bankovní účet,</li>
+   <li><strong>PayPal</strong> &rarr; vrácení na váš účet PayPal.</li>
   </ul>
-  <p>Na verwerking kan het <strong>3-5 werkdagen</strong> duren voordat het bedrag op uw rekening wordt bijgeschreven, afhankelijk van uw bank.</p>
+  <p>Po zpracování může v závislosti na vaší bance trvat <strong>3–5 pracovních dnů</strong>, než se částka připíše na váš účet.</p>
 
-  <h3>3.3 Gedeeltelijke terugbetaling</h3>
-  <p>In de volgende gevallen kan een gedeeltelijke terugbetaling van toepassing zijn:</p>
+  <h3>3.3 Částečné vrácení peněz</h3>
+  <p>V následujících případech může být vrácená částka snížena o sníženou hodnotu zboží:</p>
   <ul>
-   <li>Het boek vertoont gebruikssporen</li>
-   <li>Het boek is beschadigd door de klant</li>
-   <li>Er ontbreken onderdelen</li>
+   <li>kniha vykazuje známky používání,</li>
+   <li>kniha byla poškozena zákazníkem,</li>
+   <li>chybějí součásti.</li>
   </ul>
-  <p>De waardevermindering wordt vastgesteld en u wordt hierover ge&iuml;nformeerd v&oacute;&oacute;r de terugbetaling wordt verwerkt.</p>
+  <p>O snížení hodnoty budete vždy informováni předem, ještě před zpracováním vrácení peněz.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sectie 4: Klachten en Productgarantie -->
+ <!-- Sekce 4: Reklamace -->
  <div class="section-block">
-  <h2><span class="icon">4.</span> Klachten en Productgarantie</h2>
+  <h2><span class="icon">4.</span> Reklamace vad zboží</h2>
 
-  <h3>4.1 Wanneer kunt u een klacht indienen?</h3>
-  <p>U kunt een klacht indienen wanneer:</p>
+  <h3>4.1 Kdy můžete podat reklamaci?</h3>
+  <p>Reklamaci vadného zboží můžete podat v případě, že:</p>
   <ul>
-   <li>Het product beschadigd is aangekomen</li>
-   <li>Het product niet overeenkomt met de beschrijving</li>
-   <li>Er drukfouten of productiefouten zijn</li>
-   <li>Er pagina's ontbreken</li>
-   <li>U een verkeerd product heeft ontvangen</li>
+   <li>kniha dorazila poškozená,</li>
+   <li>kniha neodpovídá popisu,</li>
+   <li>kniha obsahuje tiskové nebo výrobní vady,</li>
+   <li>v knize chybějí stránky,</li>
+   <li>jste obdrželi nesprávný produkt.</li>
   </ul>
 
-  <h3>4.2 Hoe dient u een klacht in?</h3>
-  <p>Stuur een e-mail naar <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a> met:</p>
+  <h3>4.2 Jak podat reklamaci?</h3>
+  <p>Napište nám na <a href="mailto:anna@nejdriv-ja.cz" style="color: var(--cta);">anna@nejdriv-ja.cz</a> a uveďte:</p>
   <ul>
-   <li>Uw naam en bestelnummer</li>
-   <li>Beschrijving van het probleem</li>
-   <li>Foto's van het beschadigde of defecte product</li>
+   <li>vaše jméno a číslo objednávky,</li>
+   <li>popis vady,</li>
+   <li>fotografie poškozeného nebo vadného produktu.</li>
   </ul>
-  <p>Wij reageren binnen <strong>48 uur</strong> op uw klacht.</p>
+  <p>Na vaši reklamaci odpovíme do <strong>48 hodin</strong>.</p>
 
-  <h3>4.3 Wettelijke garantie</h3>
+  <h3>4.3 Vaše práva z vadného plnění</h3>
   <div class="highlight-box">
-   <p>U heeft recht op <strong>2 jaar wettelijke garantie</strong> voor gebreken die al bij levering aanwezig waren. Bij een geldige klacht ontvangt u een <strong>gratis vervanging</strong> of <strong>volledige terugbetaling</strong>. De retourkosten zijn in dat geval voor onze rekening.</p>
+   <p>Práva z vadného plnění se řídí <strong>občanským zákoníkem (zákon č. 89/2012 Sb.)</strong>. Při oprávněné reklamaci máte podle povahy vady právo zejména na <strong>dodání nové bezvadné knihy</strong>, přiměřenou slevu z kupní ceny, nebo <strong>odstoupení od smlouvy a vrácení celé kupní ceny</strong>. Reklamaci vyřídíme nejpozději do 30 dnů. V případě oprávněné reklamace hradíme náklady na zpětné zaslání i na odeslání nového kusu my.</p>
   </div>
+
+  <h3>4.4 Mimosoudní řešení spotřebitelských sporů</h3>
+  <p>Pokud mezi námi dojde ke sporu, který se nepodaří vyřešit vzájemnou dohodou, máte právo obrátit se na subjekt mimosoudního řešení spotřebitelských sporů, kterým je <strong>Česká obchodní inspekce (ČOI)</strong>, Ústřední inspektorát — oddělení ADR, Štěpánská 796/44, 110 00 Praha 1, <a href="https://www.coi.cz" target="_blank" style="color: var(--cta);">www.coi.cz</a>.</p>
  </div>
 
  <div class="divider"></div>
 
- <!-- Sectie 5: Veelgestelde vragen -->
+ <!-- Sekce 5: FAQ -->
  <div class="section-block">
-  <h2><span class="icon">5.</span> Veelgestelde vragen</h2>
+  <h2><span class="icon">5.</span> Často kladené dotazy</h2>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Kan ik mijn bestelling annuleren?</h3>
+    <h3>Mohu objednávku zrušit?</h3>
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Ja, als uw bestelling nog niet is verzonden, kunt u deze kosteloos annuleren. Stuur zo snel mogelijk een e-mail naar <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a> met uw bestelnummer.</p>
+    <p>Ano, pokud vaše objednávka ještě nebyla odeslána, můžete ji bezplatně zrušit. Co nejdříve nám napište na <a href="mailto:anna@nejdriv-ja.cz" style="color: var(--cta);">anna@nejdriv-ja.cz</a> s číslem objednávky.</p>
    </div>
   </div>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Ik heb de digitale e-books niet ontvangen, wat nu?</h3>
+    <h3>Nedostal(a) jsem digitální e-booky, co teď?</h3>
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Controleer eerst uw spammap of ongewenste e-mail. Heeft u de e-books nog steeds niet ontvangen? Stuur dan een e-mail naar <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a> met uw bestelnummer, dan sturen wij de downloadlinks opnieuw.</p>
+    <p>Nejprve zkontrolujte složku se spamem nebo hromadnou poštou. Pokud jste e-booky stále neobdrželi, napište nám na <a href="mailto:anna@nejdriv-ja.cz" style="color: var(--cta);">anna@nejdriv-ja.cz</a> s číslem objednávky a odkazy ke stažení vám zašleme znovu.</p>
    </div>
   </div>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Kan ik het boek ruilen voor een ander product?</h3>
+    <h3>Mohu knihu vyměnit za jiný produkt?</h3>
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Helaas is omruilen niet mogelijk. U kunt het boek wel retourneren conform ons retourbeleid en vervolgens een nieuwe bestelling plaatsen.</p>
+    <p>Výměna bohužel není možná. Knihu můžete vrátit v souladu s našimi podmínkami vrácení a poté vytvořit novou objednávku.</p>
    </div>
   </div>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Wat als mijn pakket kwijt is geraakt?</h3>
+    <h3>Co když se můj balíček ztratil?</h3>
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Neem contact met ons op met uw Track &amp; Trace-code. Wij starten een onderzoek bij de vervoerder. Afhankelijk van het resultaat sturen wij u een nieuw exemplaar of verwerken wij een volledige terugbetaling.</p>
+    <p>Kontaktujte nás se svým sledovacím číslem. Zahájíme šetření u přepravce. Podle výsledku vám zašleme nový výtisk, nebo zpracujeme plné vrácení peněz.</p>
    </div>
   </div>
  </div>
 
- <!-- Bedrijfsgegevens -->
  <div class="company-info">
-  <h3>Bedrijfsgegevens</h3>
+  <h3>🏢 Údaje o prodávajícím</h3>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybn&aacute; 716/24, Star&eacute; M&#283;sto, 110 00 Praha, Tsjechi&euml;</p>
-  <p>I&#268;O: 06259928</p>
-  <p>DIČ: CZ06259928</p>
-  <p>Klantenservice: <a href="mailto:annadevries@pakjeleventerug.nl" style="color: var(--cta);">annadevries@pakjeleventerug.nl</a></p>
+  <p>Rybná 716/24, Staré Město, 110 00 Praha, Česká republika</p>
+  <p>IČO: 06259928 | DIČ: CZ06259928</p>
+  <p>E-mail: <a href="mailto:anna@nejdriv-ja.cz" style="color: var(--cta);">anna@nejdriv-ja.cz</a></p>
  </div>
 
- <!-- Laatst bijgewerkt -->
+ <!-- Poslední aktualizace -->
  <div class="last-updated">
-  Laatst bijgewerkt: 26 februari 2026
+  Poslední aktualizace: 13. července 2026
  </div>
 
 </div>
 
 <!-- ═══ FOOTER ═══ -->
-<footer class="site-footer">
- <div class="footer-inner">
-  <div class="footer-brand">
-  </div>
-  <div class="footer-links">
-   <a href="verzending.html">Verzending &amp; Levering</a>
-   <a href="retourbeleid.html">Retour &amp; Garantie</a>
-   <a href="voorwaarden.html">Algemene Voorwaarden</a>
-   <a href="privacy.html">Privacybeleid</a>
-   <a href="contact.html">Klantenservice</a>
-  </div>
-  <div class="footer-contact">
-   <a href="mailto:annadevries@pakjeleventerug.nl">annadevries@pakjeleventerug.nl</a>
-  </div>
+<footer role="contentinfo" style="background: var(--dark); padding: 48px 20px 32px; color: rgba(245,237,227,0.6);">
+ <div style="max-width: 900px; margin: 0 auto;">
+
+ <div style="text-align: center; margin-bottom: 32px;">
+ <div style="font-family: 'Recoleta', serif; font-size: 22px; color: #F5EDE3; font-weight: 700; margin-bottom: 6px;">Život, který si zasloužíš</div>
+ <div style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.55);">Metoda LIFE RESET™ od Anny de Vries</div>
  </div>
- <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. &bull; Rybn&aacute; 716/24, 110 00 Praha &bull; I&#268;O: 06259928 &bull; DIČ: CZ06259928</span>
-  <span>&copy; 2026 Performance Marketing Solution s.r.o. Alle rechten voorbehouden.</span>
+
+ <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 28px; margin-bottom: 36px; text-align: center;">
+
+ <div>
+ <div style="font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #C9A96E; margin-bottom: 12px;">Zákaznická podpora</div>
+ <div style="display: flex; flex-direction: column; gap: 8px;">
+ <a href="mailto:anna@nejdriv-ja.cz" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">anna@nejdriv-ja.cz</a>
+ <a href="/verzending" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Doprava a vrácení</a>
+ <a href="/contact" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Kontakt</a>
+ </div>
+ </div>
+
+ <div>
+ <div style="font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #C9A96E; margin-bottom: 12px;">Právní informace</div>
+ <div style="display: flex; flex-direction: column; gap: 8px;">
+ <a href="/voorwaarden" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Obchodní podmínky</a>
+ <a href="/privacy" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Ochrana osobních údajů</a>
+ <a href="/retourbeleid" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Reklamační řád</a>
+ </div>
+ </div>
+
+ <div>
+ <div style="font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #C9A96E; margin-bottom: 12px;">Platba a doprava</div>
+ <div style="display: flex; flex-direction: column; gap: 8px;">
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 14px;">Doprava zdarma po celém Česku</span>
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 14px;">30 dní na vrácení</span>
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 14px;">Visa · Mastercard · Bankovní tlačítka · PayPal</span>
+ </div>
+ </div>
+
+ </div>
+
+ <div style="border-top: 1px solid rgba(245,237,227,0.08); padding-top: 20px; text-align: center;">
+
+ <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 16px;">
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 13px; display: flex; align-items: center; gap: 5px;">
+ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>30 dní na vrácení</span>
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 13px; display: flex; align-items: center; gap: 5px;">
+ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Bezpečná platba</span>
+ <span style="font-family: 'DM Sans', sans-serif; font-size: 13px; display: flex; align-items: center; gap: 5px;">
+ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Doprava zdarma</span>
+ </div>
+
+ <p style="font-family: 'DM Sans', sans-serif; font-size: 12px; color: rgba(245,237,227,0.55); margin: 0;">© 2026 Život, který si zasloužíš · Performance Marketing Solution s.r.o. · Všechna práva vyhrazena</p>
+ </div>
+
  </div>
 </footer>
 
@@ -706,12 +742,20 @@ function toggleFaq(element) {
  allItems.forEach(function(item) { item.classList.remove('active'); });
  if (!isActive) { faqItem.classList.add('active'); }
 }
-
+</script>
+<script>
 function toggleMobileMenu() {
  document.querySelector('.nav-hamburger').classList.toggle('open');
  document.querySelector('.nav-mobile-menu').classList.toggle('open');
  document.querySelector('.nav-mobile-overlay').classList.toggle('open');
 }
+document.querySelectorAll('.nav-mobile-menu a').forEach(function(a) {
+ a.addEventListener('click', function() {
+  document.querySelector('.nav-hamburger').classList.remove('open');
+  document.querySelector('.nav-mobile-menu').classList.remove('open');
+  document.querySelector('.nav-mobile-overlay').classList.remove('open');
+ });
+});
 </script>
 </body>
 </html>

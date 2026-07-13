@@ -12,8 +12,8 @@
   @font-face { font-family: 'DM Sans'; src: url(fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
   :root {
-    /* Palet afgestemd op de indexpagina: cream / wijn / terracotta / goud.
-       Variabelenamen blijven "rose-*" maar dragen nu de index-kleuren. */
+    /* Paleta sladěná s index stránkou: cream / víno / terracotta / zlatá.
+       Názvy proměnných zůstávají "rose-*", ale nesou barvy indexu. */
     --rose-50: #FDF5EF;   /* licht cream (achtergrond-fade) */
     --rose-100: #F6E7D9;  /* zacht perzik (badge-vlak) */
     --rose-200: #E9D6C5;  /* warme tan (randen, dots, grabber) */
@@ -475,7 +475,7 @@
     width: 6px; height: 6px; border-radius: 50%;
     background: var(--gold);
   }
-  /* Gold underline op de benefit-trits in de headline */
+  /* Zlaté podtržení benefitů v headline */
   .question .gold-underline {
     color: var(--rose-700);
     font-style: italic;
@@ -523,7 +523,7 @@
     border: 1.5px solid var(--rose-200);
     border-radius: 12px;
     font-family: Georgia, serif;
-    font-size: 16px;            /* ≥16px voorkomt auto-zoom bij focus op iOS */
+    font-size: 16px;            /* ≥16px zabraňuje auto-zoomu při focusu na iOS */
     color: var(--ink);
     background: #fff;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -559,7 +559,7 @@
     box-shadow: 0 16px 38px rgba(184, 92, 74, 0.48);
   }
   .intro-cta:active { transform: scale(0.99); }
-  /* Micro-copy onder de CTA */
+  /* Micro-copy pod CTA */
   .intro-microcopy {
     font-family: -apple-system, system-ui, sans-serif;
     text-align: center;
@@ -908,7 +908,7 @@
   }
   .success-social strong { color: var(--rose-700); font-weight: 700; }
 
-  /* ── Success v2 — "open je inbox NU" ─────────────────────────── */
+  /* ── Success v2 — "otevři svou schránku HNED" ─────────────────────────── */
   .success-lead em { font-style: italic; color: var(--rose-700); font-weight: 600; }
   /* Groene "live / zojuist verzonden" indicator */
   .success-live {
@@ -962,22 +962,22 @@
   .success-spam strong { color: var(--ink-soft); font-weight: 600; }
 
   /* ═══ Mobile / smal venster — bottom-sheet (industry-standard UX) ═══════
-     Tot 640px: smalle telefoons én versmalde desktopvensters krijgen de
-     sheet (geen "zwevende" gecentreerde kaart in een smal-hoog venster). */
+     Do 640px: úzké telefony i zúžená desktopová okna dostanou
+     sheet (žádná "plovoucí" centrovaná karta v úzkém vysokém okně). */
   @media (max-width: 640px) {
     .popup-overlay {
       padding: 14px;
-      align-items: center;                 /* gecentreerd in het midden van het scherm */
+      align-items: center;                 /* vycentrováno doprostřed obrazovky */
     }
     .popup {
       max-width: 100%;
       max-height: 92dvh;
-      border-radius: 22px;                  /* alle hoeken rond = zwevende kaart */
+      border-radius: 22px;                  /* všechny rohy zaoblené = plovoucí karta */
       transform: translateY(16px) scale(0.98);  /* dicht: licht omlaag + verkleind */
       transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
     }
     .popup-overlay.open .popup { transform: translateY(0) scale(1); }
-    /* geen grabber — gecentreerde modal, geen bottom-sheet */
+    /* žádný grabber — centrovaný modal, žádný bottom-sheet */
     .popup::before { display: none; }
     .popup-close { top: 14px; right: 12px; }
     .popup-header { padding: 26px 20px 0 20px; }
@@ -1081,12 +1081,13 @@
           <p class="intro-microcopy">
             <span class="promise">První úkol ti přijde do 2 minut do e-mailu.</span>
             <span class="from">Přihlašuješ se k Anniným e-mailům · zdarma · odhlášení 1 klikem · <a href="https://www.pakjeleventerug.nl/privacy" target="_blank">Soukromí</a></span>
+            <span class="from" style="display:block;margin-top:4px;opacity:.75;">Performance Marketing Solution s.r.o. • Rybná 716/24, 110 00 Praha • IČO: 06259928</span>
           </p>
         </form>
       </div>
     </div>
 
-    <!-- STEP 2: één personalisatievraag — klik = submit -->
+    <!-- STEP 2: jedna personalizační otázka — klik = submit -->
     <div class="step" data-step="2">
       <div class="popup-header">
         <div class="progress-wrap">
@@ -1161,12 +1162,12 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-//  POPUP QUIZ ENGINE — Het Leven (pakjeleventerug.nl)
+//  POPUP QUIZ ENGINE — Život, který si zasloužíš (nejdriv-ja.cz)
 // ═══════════════════════════════════════════════════════════════
-// De ene personalisatievraag op step 2. Thema: uitputting / ruimte /
-// feng-shui (LIFE RESET™ pilaar "Ruimte"). Voice: warm, direct,
-// vrouwelijk — Anna de Vries. Het gekozen antwoord gaat als
-// quiz_path[0] / quiz_texts[0] mee in de form-submit.
+// Jedna personalizační otázka na kroku 2. Téma: vyčerpání / prostor /
+// feng-šuej (pilíř LIFE RESET™ "Prostor"). Voice: vřelý, přímý,
+// ženský — Anna de Vries. Zvolená odpověď jde jako
+// quiz_path[0] / quiz_texts[0] s form-submitem.
 const BRANCH_TREE = {
   overweldigd: {
     q: "Která <em>místnost</em> tě vyčerpává nejvíc?",
@@ -1188,7 +1189,7 @@ let state = {
   texts: [],           // human-readable sentence for the answer
   currentStep: 1,
   introEmail: "",      // e-mail captured on the intro/hook screen (step 1)
-  introFirstName: "",  // voornaam captured on step 1
+  introFirstName: "",  // křestní jméno zachycené na kroku 1
   introGdpr: false,    // GDPR consent captured on step 1
 };
 
@@ -1368,7 +1369,7 @@ function finishQuiz() {
   submitForm();
 }
 
-// Intro/hook CTA — capture voornaam + e-mail + GDPR, then enter the quiz
+// Intro/hook CTA — zachytit jméno + e-mail + GDPR, pak vstoupit do quizu
 // at step 2 (the single personalisation question). Step 1 is an intro
 // screen (no quiz options), so we advance directly instead of going through
 // nextStep() which expects a selected option.
@@ -1379,7 +1380,7 @@ function startChallenge(e) {
   const err = $("#intro-error");
   const firstName = (nameInput && nameInput.value || "").trim();
   const email = (emailInput && emailInput.value || "").trim();
-  // E-mail moet een @ en een domein met punt bevatten (en geen spaties).
+  // E-mail musí obsahovat @ a doménu s tečkou (a žádné mezery).
   const emailValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
   if (firstName.length < 2 || !emailValid) {
     if (err) err.classList.add("show");
@@ -1389,10 +1390,10 @@ function startChallenge(e) {
   }
   if (err) err.classList.remove("show");
   state.introEmail = email;
-  state.introFirstName = firstName;    // naam → aanhef in de flow ({{ first_name }})
-  state.introGdpr = true;              // impliciete toestemming bij aanmelden
+  state.introFirstName = firstName;    // jméno → oslovení ve flow ({{ first_name }})
+  state.introGdpr = true;              // implicitní souhlas při přihlášení
   trackPopupEvent("popup_intro_email_captured");
-  submitForm();          // geen tussenvraag meer — direct aanmelden + success tonen
+  submitForm();          // už žádná mezotázka — rovnou přihlásit + zobrazit success
   return false;
 }
 
@@ -1439,14 +1440,14 @@ function renderOptions(container, options) {
       <span class="option-check"></span>
     </button>
     <div class="option-custom-input">
-      <input type="text" maxlength="200" placeholder="Schrijf het rustig in één zin…" />
+      <input type="text" maxlength="200" placeholder="Klidně to napiš jednou větou…" />
       <button type="button" class="custom-confirm" disabled>Potvrdit →</button>
     </div>
   `;
 }
 
-// Step 2 — the single personalisation question: "Welke kamer put je het
-// meest uit?" (the proven `overweldigd` branch). Same question for everyone.
+// Krok 2 — jediná personalizační otázka: "Která místnost tě vyčerpává
+// nejvíc?" (ověřená větev `overweldigd`). Stejná otázka pro všechny.
 function buildStep2() {
   const branch = BRANCH_TREE.overweldigd;
   $("#q2").innerHTML = branch.q;
@@ -1455,7 +1456,7 @@ function buildStep2() {
 }
 
 // API base URL — set to your Medusa backend public URL (marketing-hq.eu) when
-// embedded on pakjeleventerug.nl. For local dev preview, leave empty.
+// embedded on nejdriv-ja.cz. For local dev preview, leave empty.
 const API_BASE = "https://www.marketing-hq.eu"  // e.g. "https://www.marketing-hq.eu"
 
 // ═══════════════════════════════════════════════════════════════
@@ -1464,10 +1465,10 @@ const API_BASE = "https://www.marketing-hq.eu"  // e.g. "https://www.marketing-h
 // In production this calls:
 //   POST /public/marketing/form-submit
 //   Backend hledá formulář podle brand_slug + form_slug.
-// Voornaam + e-mail + GDPR are captured on step 1 (intro screen).
+// Jméno + e-mail + GDPR se zachytávají na kroku 1 (intro obrazovka).
 
-// Map the user's e-mail domain to their own webmail, so "Open mijn inbox"
-// opens where they actually read mail. Unknown domain → null (button hidden).
+// Mapuje e-mailovou doménu uživatelky na její webmail, aby tlačítko "Otevřít
+// schránku" vedlo tam, kde maily opravdu čte. Neznámá doména → null (tlačítko skryto).
 function webmailUrlFor(email) {
   var d = (String(email).split("@")[1] || "").toLowerCase();
   var map = {
@@ -1490,13 +1491,13 @@ function webmailUrlFor(email) {
 
 async function submitForm(e) {
   if (e && e.preventDefault) e.preventDefault();
-  // Voornaam + e-mail + GDPR were captured on step 1.
+  // Jméno + e-mail + GDPR byly zachyceny na kroku 1.
   const email = (state.introEmail || "").trim();
   const firstName = (state.introFirstName || "").trim();
   const gdpr = !!state.introGdpr;
   if (!email || !firstName || !gdpr) return false;
 
-  // Point "Open mijn inbox" at the user's own webmail provider (or hide it).
+  // Nasměrovat "Otevřít schránku" na webmail uživatelky (nebo skrýt).
   const inboxBtn = document.querySelector(".success-open-btn");
   if (inboxBtn) {
     const wm = webmailUrlFor(email);
@@ -1507,7 +1508,7 @@ async function submitForm(e) {
   // Optimistic UI: show success first, submit in background. If submit fails
   // in production we'll still have logged it; failing silently is less bad
   // than blocking the user on a spinner.
-  // (success screen v2 heeft geen naam/e-mail placeholders meer — guard tegen null)
+  // (success screen v2 už nemá jméno/e-mail placeholdery — guard proti null)
   const successName = $("#success-name");
   if (successName) successName.textContent = firstName;
   const successEmail = $("#success-email");
