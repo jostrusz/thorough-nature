@@ -322,7 +322,7 @@ const ZZ_STEPS: StepConfig[] = [
   },
 ]
 
-/** Život, který si zasloužíš (zivot-zaslugy, CZ) 3-step sequence */
+/** Život, jaký si zasloužíš (zivot-zaslugy, CZ) 3-step sequence */
 const ZV_STEPS: StepConfig[] = [
   {
     step: 1,
@@ -1173,7 +1173,7 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         continue
       }
 
-      // ── Život, který si zasloužíš (CZ): 3-step sequence ──
+      // ── Život, jaký si zasloužíš (CZ): 3-step sequence ──
       if (projectId === "zivot-zaslugy") {
         if (currentStep >= 3) {
           skippedCount++
@@ -1189,7 +1189,7 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         const firstName = cart.shipping_address?.first_name || "tam"
         const checkoutUrl = meta.checkout_url || "https://www.nejdriv-ja.cz/checkout"
         const mainItem = (cart.items || [])[0]
-        const productName = mainItem?.variant?.product?.title || mainItem?.title || "Život, který si zasloužíš"
+        const productName = mainItem?.variant?.product?.title || mainItem?.title || "Život, jaký si zasloužíš"
         const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
           return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
         }, 0)

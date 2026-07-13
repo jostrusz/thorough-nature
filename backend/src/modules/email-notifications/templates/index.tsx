@@ -93,7 +93,7 @@ import { ZzAbandonedCheckout1Template, ZZ_ABANDONED_CHECKOUT_1, isZzAbandonedChe
 import { ZzAbandonedCheckout2Template, ZZ_ABANDONED_CHECKOUT_2, isZzAbandonedCheckout2Data } from './zz-abandoned-checkout-2'
 import { ZzAbandonedCheckout3Template, ZZ_ABANDONED_CHECKOUT_3, isZzAbandonedCheckout3Data } from './zz-abandoned-checkout-3'
 import { ZzEbookDeliveryTemplate, ZZ_EBOOK_DELIVERY, isZzEbookDeliveryData } from './zz-ebook-delivery'
-// Život, který si zasloužíš (zivot-zaslugy, CZ) templates
+// Život, jaký si zasloužíš (zivot-zaslugy, CZ) templates
 import { ZvOrderPlacedTemplate, ZV_ORDER_PLACED, isZvOrderPlacedTemplateData } from './zv-order-placed'
 import { ZvShipmentNotificationTemplate, ZV_SHIPMENT_NOTIFICATION, isZvShipmentNotificationData } from './zv-shipment-notification'
 import { ZvAbandonedCheckout1Template, ZV_ABANDONED_CHECKOUT_1, isZvAbandonedCheckout1Data } from './zv-abandoned-checkout-1'
@@ -202,7 +202,7 @@ export const EmailTemplates = {
   ZZ_ABANDONED_CHECKOUT_2,
   ZZ_ABANDONED_CHECKOUT_3,
   ZZ_EBOOK_DELIVERY,
-  // Život, který si zasloužíš (CZ)
+  // Život, jaký si zasloužíš (CZ)
   ZV_ORDER_PLACED,
   ZV_SHIPMENT_NOTIFICATION,
   ZV_ABANDONED_CHECKOUT_1,
@@ -611,7 +611,7 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <ZzEbookDeliveryTemplate {...data} />
 
-    // ── Život, který si zasloužíš (zivot-zaslugy, CZ) templates ──
+    // ── Život, jaký si zasloužíš (zivot-zaslugy, CZ) templates ──
     case EmailTemplates.ZV_ORDER_PLACED:
       if (!isZvOrderPlacedTemplateData(data)) {
         throw new MedusaError(

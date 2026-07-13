@@ -483,7 +483,7 @@ body { background: var(--bg); }
        1. HERO — potvrzení
        ═══════════════════════════════════════ -->
   <div class="ty-hero ty-reveal">
-    <div class="ty-brand-eyebrow">Život, který si zasloužíš &nbsp;·&nbsp; LIFE RESET&trade;</div>
+    <div class="ty-brand-eyebrow">Život, jaký si zasloužíš &nbsp;·&nbsp; LIFE RESET&trade;</div>
     <div class="ty-check-circle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
@@ -639,7 +639,7 @@ body { background: var(--bg); }
       <div class="ty-order-item">
         <div class="ty-order-icon book">&#x1F4D6;</div>
         <div>
-          <div class="ty-order-name">Život, který si zasloužíš</div>
+          <div class="ty-order-name">Život, jaký si zasloužíš</div>
           <div class="ty-order-desc">Tištěná kniha &mdash; 350 stran &mdash; na cestě k tobě</div>
         </div>
       </div>
@@ -758,7 +758,7 @@ body { background: var(--bg); }
 <footer role="contentinfo" style="background: #3D1E2A; padding: 48px 20px 32px; color: rgba(245,237,227,0.6);">
  <div style="max-width: 900px; margin: 0 auto;">
  <div style="text-align: center; margin-bottom: 32px;">
- <div style="font-family: 'Recoleta', Georgia, serif; font-size: 22px; color: #F5EDE3; font-weight: 700; margin-bottom: 6px;">Život, který si zasloužíš</div>
+ <div style="font-family: 'Recoleta', Georgia, serif; font-size: 22px; color: #F5EDE3; font-weight: 700; margin-bottom: 6px;">Život, jaký si zasloužíš</div>
  <div style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.55);">Metoda LIFE RESET™ od Anny de Vries</div>
  </div>
  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 28px; margin-bottom: 36px; text-align: center;">
@@ -788,7 +788,7 @@ body { background: var(--bg); }
  </div>
  </div>
  <div style="border-top: 1px solid rgba(245,237,227,0.08); padding-top: 20px; text-align: center;">
- <p style="font-family: 'DM Sans', sans-serif; font-size: 12px; color: rgba(245,237,227,0.55); margin: 0 0 6px;">© 2026 Život, který si zasloužíš · Všechna práva vyhrazena</p>
+ <p style="font-family: 'DM Sans', sans-serif; font-size: 12px; color: rgba(245,237,227,0.55); margin: 0 0 6px;">© 2026 Život, jaký si zasloužíš · Všechna práva vyhrazena</p>
  <p style="font-family: 'DM Sans', sans-serif; font-size: 12px; color: rgba(245,237,227,0.55); margin: 0;">Performance Marketing Solution s.r.o. • Rybná 716/24, 110 00 Praha • IČO: 06259928</p>
  </div>
  </div>
@@ -867,7 +867,7 @@ body { background: var(--bg); }
             var it = orderItems[i];
             var title = (it.product_title || it.title || '').toLowerCase();
             // Skip non-main items (e-book bumps, upsells)
-            if (title.indexOf('život, který si zasloužíš') === -1) continue;
+            if (title.indexOf('život, jaký si zasloužíš') === -1) continue;
 
             // Try multiple sources for bundle size, in order of reliability:
             //  1. SKU pattern ZKZ-{1..4}
@@ -893,8 +893,8 @@ body { background: var(--bg); }
             var descEl = orderItemsRoot && orderItemsRoot.querySelector('.ty-order-desc');
             if (nameEl) {
               nameEl.textContent = derivedBookCount > 1
-                ? (derivedBookCount + '× Život, který si zasloužíš')
-                : 'Život, který si zasloužíš';
+                ? (derivedBookCount + '× Život, jaký si zasloužíš')
+                : 'Život, jaký si zasloužíš';
             }
             if (descEl) {
               descEl.textContent = derivedBookCount > 1

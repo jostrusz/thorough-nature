@@ -57,7 +57,7 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 79,    // €79.00 incl. tax (save €29)
     4: 99,    // €99.00 incl. tax (save €45)
   },
-  // Zivot Zaslugy — "Život, který si zasloužíš" (CZ LIFE RESET, nejdriv-ja.cz)
+  // Zivot Zaslugy — "Život, jaký si zasloužíš" (CZ LIFE RESET, nejdriv-ja.cz)
   "zivot-ktery-si-zasluzis": {
     1: 749,   // 749 Kč incl. DPH (12%)
     2: 1149,  // 1 149 Kč incl. DPH (save 349 Kč)

@@ -72,7 +72,7 @@ export const ZvAbandonedCheckout3Template: React.FC<ZvAbandonedCheckout3Props> &
           color: 'rgba(232,168,140,0.7)',
           margin: '0 0 12px 0',
         }}>
-          Život, který si zasloužíš
+          Život, jaký si zasloužíš
         </Text>
         <Text style={{
           fontFamily: fontSerif,
@@ -318,7 +318,7 @@ export const ZvAbandonedCheckout3Template: React.FC<ZvAbandonedCheckout3Props> &
           color: colors.muted,
           margin: '4px 0 0',
         }}>
-          Život, který si zasloužíš
+          Život, jaký si zasloužíš
         </Text>
         <Text style={{
           fontFamily: fontBody,
@@ -351,7 +351,7 @@ export const ZvAbandonedCheckout3Template: React.FC<ZvAbandonedCheckout3Props> &
           color: colors.highlight,
           margin: '0 0 10px',
         }}>
-          Život, který si zasloužíš
+          Život, jaký si zasloužíš
         </Text>
         <Text style={{
           fontFamily: fontBody,
@@ -379,7 +379,7 @@ export const ZvAbandonedCheckout3Template: React.FC<ZvAbandonedCheckout3Props> &
 ZvAbandonedCheckout3Template.PreviewProps = {
   firstName: 'Petra',
   checkoutUrl: 'https://www.nejdriv-ja.cz/checkout',
-  productName: 'Život, který si zasloužíš',
+  productName: 'Život, jaký si zasloužíš',
   productPrice: '749',
   productImage: '',
   preview: 'Zbývá 24 hodin — pak musím tvůj košík uvolnit.',

@@ -88,7 +88,7 @@ export const ZvShipmentNotificationTemplate: React.FC<ZvShipmentNotificationTemp
             color: '#B85C4A',
             marginBottom: '8px',
           }}>
-            Život, který si zasloužíš
+            Život, jaký si zasloužíš
           </Text>
           <Text style={{
             fontSize: '32px',
@@ -545,7 +545,7 @@ export const ZvShipmentNotificationTemplate: React.FC<ZvShipmentNotificationTemp
             color: '#B85C4A',
             marginBottom: '6px',
           }}>
-            Život, který si zasloužíš
+            Život, jaký si zasloužíš
           </Text>
           <Text style={{
             fontFamily: font,
@@ -588,8 +588,8 @@ ZvShipmentNotificationTemplate.PreviewProps = {
     items: [
       {
         id: 'item-1',
-        title: 'Život, který si zasloužíš',
-        product_title: 'Život, který si zasloužíš',
+        title: 'Život, jaký si zasloužíš',
+        product_title: 'Život, jaký si zasloužíš',
         variant_title: '',
         quantity: 1,
         unit_price: 749,

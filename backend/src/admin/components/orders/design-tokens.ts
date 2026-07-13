@@ -494,7 +494,7 @@ export const PROJECT_OPTIONS: {
   { id: "lass-los", ids: ["lass-los"], label: "Lass los, was dich kaputt macht", flag: "🇩🇪", color: "#A16207", bg: "#FEF9C3" },
   { id: "odpusc-ksiazka", ids: ["odpusc-ksiazka", "odpusc"], label: "Odpuść to, co cię niszczy", flag: "🇵🇱", color: "#BE123C", bg: "#FCE4EC" },
   { id: "zycie-zaslugy", ids: ["zycie-zaslugy"], label: "Życie na które zasługujesz", flag: "🇵🇱", color: "#9D174D", bg: "#FCE7F3" },
-  { id: "zivot-zaslugy", ids: ["zivot-zaslugy"], label: "Život, který si zasloužíš", flag: "🇨🇿", color: "#B45309", bg: "#FEF3C7" },
+  { id: "zivot-zaslugy", ids: ["zivot-zaslugy"], label: "Život, jaký si zasloužíš", flag: "🇨🇿", color: "#B45309", bg: "#FEF3C7" },
   { id: "slapp-taget", ids: ["slapp-taget", "slapp"], label: "Släpp taget om det som förstör dig", flag: "🇸🇪", color: "#00695C", bg: "#E0F2F1" },
   { id: "slipp-taket", ids: ["slipp-taket"], label: "Slipp taket", flag: "🇳🇴", color: "#1D4ED8", bg: "#DBEAFE" },
   { id: "psi-superzivot", ids: ["psi-superzivot"], label: "Psí superživot", flag: "🇨🇿", color: "#1565C0", bg: "#E3F2FD" },

@@ -604,7 +604,7 @@ const zycieZaslugyTheme: ProjectTheme = {
 const zivotZaslugyTheme: ProjectTheme = {
   ...hetLevenTheme,
   brandLabel: "ŽIVOT, KTERÝ SI ZASLOUŽÍŠ",
-  brandName: "Život, který si zasloužíš",
+  brandName: "Život, jaký si zasloužíš",
   supportEmail: "anna@nejdriv-ja.cz",
   companyName: "Performance Marketing Solution s.r.o.",
   companyLocation: "Rybná 716/24, 110 00 Praha",

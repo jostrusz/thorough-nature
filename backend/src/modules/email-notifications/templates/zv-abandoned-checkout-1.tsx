@@ -67,7 +67,7 @@ export const ZvAbandonedCheckout1Template: React.FC<ZvAbandonedCheckout1Props> &
           color: colors.highlight,
           margin: '0 0 12px 0',
         }}>
-          Život, který si zasloužíš
+          Život, jaký si zasloužíš
         </Text>
         <Text style={{
           fontFamily: fontSerif,
@@ -223,7 +223,7 @@ export const ZvAbandonedCheckout1Template: React.FC<ZvAbandonedCheckout1Props> &
           color: colors.muted,
           margin: '4px 0 0',
         }}>
-          Život, který si zasloužíš •{' '}
+          Život, jaký si zasloužíš •{' '}
           <Link href="mailto:anna@nejdriv-ja.cz" style={{ color: colors.cta, textDecoration: 'underline' }}>
             anna@nejdriv-ja.cz
           </Link>
@@ -246,7 +246,7 @@ export const ZvAbandonedCheckout1Template: React.FC<ZvAbandonedCheckout1Props> &
           margin: '0 0 10px',
           letterSpacing: '0.01em',
         }}>
-          Život, který si zasloužíš
+          Život, jaký si zasloužíš
         </Text>
         <Text style={{
           fontFamily: fontBody,
@@ -274,7 +274,7 @@ export const ZvAbandonedCheckout1Template: React.FC<ZvAbandonedCheckout1Props> &
 ZvAbandonedCheckout1Template.PreviewProps = {
   firstName: 'Petra',
   checkoutUrl: 'https://www.nejdriv-ja.cz/checkout',
-  productName: 'Život, který si zasloužíš',
+  productName: 'Život, jaký si zasloužíš',
   productPrice: '749',
   productImage: '',
   preview: 'Tvoje kniha je zabalená a čeká jen na tebe!',

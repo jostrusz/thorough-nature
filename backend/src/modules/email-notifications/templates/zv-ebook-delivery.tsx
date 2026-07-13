@@ -244,7 +244,7 @@ export const ZvEbookDeliveryTemplate: React.FC<ZvEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              📦 Tvoje tištěná kniha <strong>Život, který si zasloužíš</strong> je skladem v ČR a Zásilkovna ti ji doručí <strong>do 2 pracovních dnů</strong>. Sledovací číslo ti pošlu samostatným e-mailem.
+              📦 Tvoje tištěná kniha <strong>Život, jaký si zasloužíš</strong> je skladem v ČR a Zásilkovna ti ji doručí <strong>do 2 pracovních dnů</strong>. Sledovací číslo ti pošlu samostatným e-mailem.
             </Text>
           </div>
 
@@ -353,7 +353,7 @@ export const ZvEbookDeliveryTemplate: React.FC<ZvEbookDeliveryTemplateProps> & {
             color: colors.footerAccent,
             marginBottom: '6px',
           }}>
-            Život, který si zasloužíš &bull; Metoda LIFE RESET™
+            Život, jaký si zasloužíš &bull; Metoda LIFE RESET™
           </Text>
           <Text style={{
             fontFamily: font,

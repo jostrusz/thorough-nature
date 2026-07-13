@@ -16,7 +16,7 @@ import {
 
 /**
  * Seeds the "Zivot Zaslugy" project — Czech edition of the LIFE RESET™ book
- * "Het Leven Dat Je Verdient" (book "Život, který si zasloužíš", Anna de Vries).
+ * "Het Leven Dat Je Verdient" (book "Život, jaký si zasloužíš", Anna de Vries).
  * Czech sibling of the Polish clone zycie-zaslugy (najpierw-ja.pl).
  *
  * Domain: nejdriv-ja.cz
@@ -252,8 +252,8 @@ export default async function seedZivotZaslugy({ container }: ExecArgs) {
     logger.info(`[ZivotZaslugy] All shipping options already exist, skipping`)
   }
 
-  // ─── 7. PRODUCT "Život, který si zasloužíš" (4 bundle variants) ───
-  logger.info(`[ZivotZaslugy] Creating product 'Život, který si zasloužíš'...`)
+  // ─── 7. PRODUCT "Život, jaký si zasloužíš" (4 bundle variants) ───
+  logger.info(`[ZivotZaslugy] Creating product 'Život, jaký si zasloužíš'...`)
   const { data: existingProducts } = await query.graph({
     entity: "product",
     fields: ["id", "handle", "variants.id", "variants.sku"],
@@ -269,7 +269,7 @@ export default async function seedZivotZaslugy({ container }: ExecArgs) {
       input: {
         products: [
           {
-            title: "Život, který si zasloužíš",
+            title: "Život, jaký si zasloužíš",
             description:
               "České vydání bestselleru Het Leven Dat Je Verdient. Metoda LIFE RESET™ — 5 pilířů, které krok za krokem promění tvoje věci, domov, vztahy, hlavu a energii. Autorka: Anna de Vries. 340 stran + pracovní sešity.",
             handle: PRODUCT_HANDLE,

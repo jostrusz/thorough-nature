@@ -38,7 +38,7 @@ export default async function seedZivotUpsell({ container }: ExecArgs) {
   const SKU = "OTCCN64787237-3"
   const TITLE = "Pusť to, co tě ničí – upsell"
   const DESCRIPTION =
-    "Samostatný order-bump produkt knihy Pusť to, co tě ničí pro checkout Život, který si zasloužíš. Autor Joris de Vries, 290 stran včetně praktického pracovního sešitu."
+    "Samostatný order-bump produkt knihy Pusť to, co tě ničí pro checkout Život, jaký si zasloužíš. Autor Joris de Vries, 290 stran včetně praktického pracovního sešitu."
   const PRICE = 599
 
   const source = await query.graph({

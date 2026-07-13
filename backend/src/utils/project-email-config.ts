@@ -262,7 +262,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
   },
   'zivot-zaslugy': {
     replyTo: 'anna@nejdriv-ja.cz',
-    fromName: 'Anna de Vries — Život, který si zasloužíš',
+    fromName: 'Anna de Vries — Život, jaký si zasloužíš',
     fromEmail: 'Anna de Vries <anna@nejdriv-ja.cz>',
     project: 'zivot-zaslugy',
     locale: 'cs',
@@ -271,7 +271,7 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
   // Also match without hyphen
   zivotzaslugy: {
     replyTo: 'anna@nejdriv-ja.cz',
-    fromName: 'Anna de Vries — Život, který si zasloužíš',
+    fromName: 'Anna de Vries — Život, jaký si zasloužíš',
     fromEmail: 'Anna de Vries <anna@nejdriv-ja.cz>',
     project: 'zivot-zaslugy',
     locale: 'cs',
