@@ -566,7 +566,12 @@ export async function generateAiEmail(args: GenerateArgs): Promise<GeneratedEmai
 
   const locale = (args.contact.locale || args.brand.locale || "nl").slice(0, 2).toLowerCase()
   const model = args.model || DEFAULT_MODELS[args.dayTemplate]
-  const client = new Anthropic({ apiKey })
+  // Bounded timeout + single retry. The flow executor processes runs
+  // sequentially, so a slow/hung Anthropic call (SDK default: 10 min timeout,
+  // 2 retries → up to ~30 min) freezes the whole marketing-flow cron and stalls
+  // every subscriber's emails. 45s × 2 tries caps a hang at ~90s; on timeout the
+  // caller catches and falls back to static content (or skips the node).
+  const client = new Anthropic({ apiKey, timeout: 45_000, maxRetries: 1 })
 
   const resp = await client.messages.create({
     model,
