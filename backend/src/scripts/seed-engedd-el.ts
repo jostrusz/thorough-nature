@@ -26,11 +26,9 @@ import {
  * via Zásilkovna/Packeta, same pattern as Austria shipping cross-border from
  * the lass-los DE/AT/LU warehouse.
  *
- * PLACEHOLDERS requiring confirmation before go-live:
- *   - Product price (11990 HUF) and shipping price (990 HUF) are proportional
- *     estimates from the CZK pricing, NOT confirmed HU market pricing.
- *   - No payment provider wired yet (gateway_config untouched) — checkout
- *     will have no way to pay until a gateway is chosen and configured.
+ * Pricing: 10999 HUF per book (incl. 5% ÁFA), shipping 990 HUF —
+ * matches config.json and BUNDLE_PRICING in add-bundle-to-cart.ts.
+ * Payment gateway: Barion (gateway_config in DB).
  *
  * Idempotent — safe to re-run.
  *
@@ -313,9 +311,8 @@ export default async function seedEngeddEl({ container }: ExecArgs) {
                 title: "Puhakötés",
                 sku: PRODUCT_SKU,
                 options: { "Formátum": "Puhakötés" },
-                // PLACEHOLDER price — proportional estimate from CZK pricing,
-                // NOT confirmed HU market pricing. Confirm before go-live.
-                prices: [{ amount: 11990, currency_code: "huf" }],
+                // 10 999 Ft incl. 5% ÁFA — matches config.json + BUNDLE_PRICING
+                prices: [{ amount: 10999, currency_code: "huf" }],
                 manage_inventory: true,
               },
             ],
@@ -386,7 +383,6 @@ export default async function seedEngeddEl({ container }: ExecArgs) {
   logger.info("  1. storefront config.json + project-config.js → publishableApiKey, variantId")
   logger.info("  2. backend/src/utils/country-order-config.ts → REGION_IDS.huf + sales_channel_id + shipping option IDs")
   logger.info("  3. dextrum_delivery_mapping → map both shipping options to existing U0123_ZAS_ADRESA / U0123_ZAS_VYD")
-  logger.info("  4. gateway_config DB → NOT SET (payment provider TBD per user)")
-  logger.info("  5. Confirm/replace PLACEHOLDER pricing (11990/990 HUF) with real numbers")
+  logger.info("  4. gateway_config DB → Barion (switch mode test→live before launch)")
   logger.info("═══════════════════════════════════════════")
 }

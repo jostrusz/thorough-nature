@@ -9,6 +9,8 @@ const PROJECT_SUPPORT_EMAILS: Record<string, string> = {
   loslatenboek: "devries@loslatenboek.nl",
   'lass-los': "buch@jetztloslassen.de",
   'zivot-zaslugy': "anna@nejdriv-ja.cz",
+  'pusti-to-sk': "podpora@pustitocotanici.sk",
+  'engedd-el': "info@engeddelkonyv.hu",
 }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {

@@ -135,9 +135,8 @@ export default async function seedPustiToSk({ container }: ExecArgs) {
             country_code: "sk",
             provider_id: "tp_system",
             default_tax_rate: {
-              // Slovakia moved books to the reduced 5% rate (2025). Prices are
+              // Slovak books always use the reduced 5% VAT rate. Prices are
               // tax-inclusive, so this only affects the invoice VAT breakdown.
-              // VERIFY the current SK book rate before go-live.
               name: "Slovak Book VAT (5%)",
               code: "reduced-vat-sk",
               rate: 5,

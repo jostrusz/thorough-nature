@@ -76,15 +76,10 @@
     "popup-engedd-el": "popup-engedd-el.html",
     "checkout": "checkout.html",
     "thank-you": "thank-you.html",
-    "kapcsolat": "kontakt.html",
-    "adatvedelem": "ochrana-udaju.html",
-    "aszf": "obchodni-podminky.html",
-    "szallitas": "doprava.html",
-    "visszakuldes": "reklamace.html",
-    "kontakt": "kontakt.html",
-    "ochrana-udaju": "ochrana-udaju.html",
-    "obchodni-podminky": "obchodni-podminky.html",
-    "doprava": "doprava.html",
-    "reklamace": "reklamace.html"
+    "kapcsolat": "kapcsolat.html",
+    "adatvedelem": "adatvedelem.html",
+    "aszf": "aszf.html",
+    "szallitas": "szallitas.html",
+    "visszakuldes": "visszakuldes.html"
   }
 }
