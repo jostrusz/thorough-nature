@@ -1540,7 +1540,7 @@ body {
   text-align: right;
   margin-top: 2px;
 }
-/* Malý GLS badge v baru */
+/* Malý Bring badge v baru (msb-gls třída už nepoužita) */
 .msb-gls {
   display: inline-block;
   background: #003399;
@@ -2455,7 +2455,7 @@ body {
       </div>
       <!-- Frakt -->
       <div class="msb-line shipping">
-        <span class="msb-line-label">Frakt <span class="msb-gls">GLS</span></span>
+        <span class="msb-line-label">Frakt <img src="/icons/bring.svg" alt="Bring" style="height:11px;width:auto;vertical-align:middle;"></span>
         <span class="msb-line-val">Gratis</span>
       </div>
       <!-- Totalt -->
@@ -2661,9 +2661,9 @@ body {
             </div>
           </div>
 
-          <!-- GLS info o dopravě zdarma -->
+          <!-- Bring info o dopravě zdarma -->
           <div id="shipping-info" style="display:flex;align-items:center;gap:10px;margin-top:16px;padding:12px 16px;background:#f0faf4;border:1px solid #b8e6c8;border-radius:10px;">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjE1Ij48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="flex-shrink:0;">
+            <img src="/icons/bring.svg" alt="Bring" width="50" style="height:auto;flex-shrink:0;">
             <div style="flex:1;">
               <span style="font-weight:600;color:#1a1a2e;font-size:14px;">Gratis frakt</span>
               <span style="color:#27AE60;font-weight:700;font-size:14px;margin-left:6px;">0 kr</span>
@@ -2795,7 +2795,7 @@ body {
       <div class="summary-line shipping" id="summary-shipping">
         <span style="display:flex;align-items:center;gap:6px;">
           Frakt
-          <span style="background:#FFD100;color:#003399;font-weight:700;font-size:11px;padding:2px 6px;border-radius:3px;letter-spacing:0.3px;">GLS</span>
+          <img src="/icons/bring.svg" alt="Bring" style="height:14px;width:auto;vertical-align:middle;">
         </span>
         <span style="color:#27AE60;font-weight:600;">Gratis</span>
       </div>
@@ -3382,7 +3382,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var shipEl = document.getElementById('summary-shipping');
     if (shipEl) {
       var shippingLabel = shippingTotal > 0 ? formatPrice(shippingTotal) : '<span style="color:#27AE60;font-weight:600;">Gratis</span>';
-      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Frakt <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="vertical-align:middle;border-radius:2px;"></span><span>' + shippingLabel + '</span>';
+      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Frakt <img src="/icons/bring.svg" alt="Bring" style="height:13px;width:auto;vertical-align:middle;"></span><span>' + shippingLabel + '</span>';
     }
 
     // Discount — show when a promo code is applied

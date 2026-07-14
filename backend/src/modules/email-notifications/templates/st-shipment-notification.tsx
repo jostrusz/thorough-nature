@@ -265,7 +265,7 @@ export const StShipmentNotificationTemplate: React.FC<StShipmentNotificationTemp
               margin: '6px 0 0',
               lineHeight: '1.5',
             }}>
-              Våra böcker skickas från vårt centrallager i Tjeckien via GLS.
+              Bøkene våre leveres med Bring.
             </Text>
           </div>
         </div>
@@ -617,15 +617,15 @@ StShipmentNotificationTemplate.PreviewProps = {
   },
   shippingAddress: {
     first_name: 'Anna',
-    last_name: 'Johansson',
-    address_1: 'Sveavägen 42',
-    city: 'Stockholm',
-    postal_code: '111 34',
-    country_code: 'se',
+    last_name: 'Johansen',
+    address_1: 'Karl Johans gate 42',
+    city: 'Oslo',
+    postal_code: '0154',
+    country_code: 'no',
   },
-  trackingNumber: 'GLS123456789SE',
-  trackingUrl: 'https://gls-group.com/SE/sv/foljpaket?match=GLS123456789SE',
-  trackingCompany: 'GLS',
+  trackingNumber: '370123456789NO',
+  trackingUrl: 'https://sporing.bring.no/sporing/370123456789NO',
+  trackingCompany: 'Bring',
   billingEntity: {
     legal_name: 'Performance Marketing Solution s.r.o.',
     registration_id: '06259928',
