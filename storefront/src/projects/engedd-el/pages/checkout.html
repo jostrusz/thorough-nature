@@ -2405,10 +2405,10 @@ body {
         <span class="msb-line-label">Szállítás</span>
         <span class="msb-line-val" id="msb-shipping-val">Ingyenes</span>
       </div>
-      <!-- Delivery fee (home delivery +990 Ft) -->
+      <!-- Delivery fee (home delivery +400 Ft) -->
       <div class="msb-line" id="msb-delivery-fee" style="display:none;">
         <span class="msb-line-label">Házhozszállítás</span>
-        <span class="msb-line-val">+990&nbsp;Ft</span>
+        <span class="msb-line-val">+400&nbsp;Ft</span>
       </div>
       <!-- Utánvét díj -->
       <div class="msb-line" id="msb-cod-fee" style="display:none;">
@@ -2799,7 +2799,7 @@ body {
                 <div style="font-weight:600;font-size:13px;color:#1a1a2e;">Házhozszállítás</div>
                 <div style="font-size:12px;color:#666;margin-top:1px;">Kézbesítés a megadott címre</div>
               </div>
-              <span style="font-weight:600;font-size:14px;color:#1a1a2e;flex-shrink:0;">+990&nbsp;Ft</span>
+              <span style="font-weight:600;font-size:14px;color:#1a1a2e;flex-shrink:0;">+400&nbsp;Ft</span>
             </div>
           </div>
 
@@ -2938,7 +2938,7 @@ body {
       </div>
       <div class="summary-line" id="summary-delivery-fee" style="display:none;padding:4px 0;">
         <span style="font-size:13px;">Házhozszállítás</span>
-        <span style="font-weight:600;">+990&nbsp;Ft</span>
+        <span style="font-weight:600;">+400&nbsp;Ft</span>
       </div>
       <div class="summary-line" id="summary-cod-fee" style="display:none;padding:4px 0;">
         <span style="font-size:13px;">Utánvét</span>
@@ -3202,7 +3202,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var total = selectedBundlePrice;
     if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
     if (selectedMethod === 'cod') total += 490; // Utánvét díj — 30 CZK ekvivalens HUF-ban (backend: FEE_AMOUNTS.cod_fee.huf)
-    if (selectedShipping === 'home') total += 990; // Házhozszállítás — egyezik a "Packeta - Házhozszállítás" shipping option árával (990 HUF)
+    if (selectedShipping === 'home') total += 400; // Házhozszállítás — egyezik a "Packeta - Házhozszállítás" shipping option árával (400 HUF)
     return total;
   }
 
@@ -7662,7 +7662,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         }
       }).then(function() {
         // 2c. lépés: Díjak hozzáadása line item-ként
-        // A címre szállítás NEM kerül hozzáadásra — a "Packeta - Házhozszállítás" shipping option ára már 990 Ft
+        // A címre szállítás NEM kerül hozzáadásra — a "Packeta - Házhozszállítás" shipping option ára már 400 Ft
         // Az utánvét line item-ként kerül hozzáadásra (nincs más mechanizmus a Medusában)
         if (selectedMethod === 'cod') {
           return medusaFetch('/store/carts/' + cartId + '/add-fee', {
