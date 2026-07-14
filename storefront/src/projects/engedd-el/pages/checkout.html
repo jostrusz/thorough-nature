@@ -8294,5 +8294,58 @@ window.addEventListener('load', function() {
 });
 </script>
 
+<script>
+/* ═══ Barion Full Pixel wiring (checkout) ═══
+ * initiateCheckout (betöltéskor), setEncryptedEmail (e-mail megadásakor),
+ * addPaymentInfo (fizetési mód választásakor), initiatePurchase (véglegesítéskor). */
+(function () {
+  'use strict';
+  function BP() { return window.BarionPixel || null; }
+
+  function currentSelection() {
+    var sel = document.querySelector('.bundle-option.selected');
+    var qty = sel ? parseInt(sel.getAttribute('data-qty'), 10) : 1;
+    var price = sel ? parseFloat(sel.getAttribute('data-price')) : ((window.PROJECT_CONFIG && PROJECT_CONFIG.bundleOptions[0].price) || 10999);
+    return { qty: qty || 1, total: price || 10999 };
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!BP()) return;
+
+    // 1) initiateCheckout — a pénztár első lépése (kis késleltetés, míg a bundle opciók felépülnek)
+    setTimeout(function () {
+      var s = currentSelection();
+      BP().initiateCheckout(s.qty, s.total);
+    }, 800);
+
+    // 2) setEncryptedEmail — amikor a vásárló megadja az e-mail címét
+    var emailEl = document.getElementById('email');
+    if (emailEl) {
+      emailEl.addEventListener('blur', function () {
+        if (emailEl.value && emailEl.value.indexOf('@') !== -1) BP().setEncryptedEmail(emailEl.value);
+      });
+    }
+
+    // 3) addPaymentInfo — fizetési mód kiválasztásakor (delegált click)
+    document.addEventListener('click', function (e) {
+      var tile = e.target.closest && e.target.closest('.payment-method, .bank-sub-method');
+      if (!tile || !BP()) return;
+      var nameEl = tile.querySelector('.pm-name, .bank-sub-name');
+      var s = currentSelection();
+      BP().addPaymentInfo(nameEl ? nameEl.textContent.trim() : 'Barion', s.qty, s.total);
+    });
+
+    // 4) initiatePurchase — a rendelés véglegesítése gombra kattintáskor
+    var submitBtn = document.getElementById('submit-btn');
+    if (submitBtn) {
+      submitBtn.addEventListener('click', function () {
+        var s = currentSelection();
+        BP().initiatePurchase(s.qty, s.total);
+      });
+    }
+  });
+})();
+</script>
+
 </body>
 </html>

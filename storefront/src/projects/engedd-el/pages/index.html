@@ -2227,5 +2227,15 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
   });
 })();
 </script>
+<script>
+/* Barion Full Pixel: addToCart — a vásárlási szándékot a CTA gombra kattintás jelzi */
+(function () {
+  document.addEventListener('click', function (e) {
+    var cta = e.target.closest && e.target.closest('a.btn-cta');
+    if (!cta || !window.BarionPixel) return;
+    BarionPixel.addToCart(1, (window.PROJECT_CONFIG && PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.price) || 10999, 'ProductPage');
+  });
+})();
+</script>
 </body>
 </html>

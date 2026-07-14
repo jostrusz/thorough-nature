@@ -1226,5 +1226,30 @@ window.addEventListener('load', function() {
 });
 </script>
 
+<script>
+/* ═══ Barion Full Pixel: purchase — sikeres fizetés utáni visszaigazolás ═══
+ * Reload-guard: rendelésenként csak egyszer küldjük el. */
+(function () {
+  'use strict';
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.BarionPixel) return;
+    var orderId = localStorage.getItem('medusa_order_id') || '';
+    var displayId = localStorage.getItem('medusa_order_display_id') || '';
+    var qty = parseInt(localStorage.getItem('medusa_bundle_qty') || '1', 10);
+    var total = parseFloat(localStorage.getItem('medusa_checkout_total') || localStorage.getItem('medusa_bundle_price') || '0')
+      || ((window.PROJECT_CONFIG && PROJECT_CONFIG.mainProduct.price) || 10999);
+    if (!orderId && !displayId) return; // nincs rendelés → nem küldünk purchase eventet
+
+    var guardKey = 'barion_purchase_fired_' + (orderId || displayId);
+    try {
+      if (localStorage.getItem(guardKey) === 'true') return;
+      localStorage.setItem(guardKey, 'true');
+    } catch (e) {}
+
+    BarionPixel.purchase(qty, total, displayId || orderId, true);
+  });
+})();
+</script>
+
 </body>
 </html>
