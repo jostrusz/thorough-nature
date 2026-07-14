@@ -151,6 +151,16 @@ export default async function orderPlacedHandler({
         paymentMethod = 'Comgate'
       } else if (providerId.includes('przelewy') || mollieMethod.includes('przelewy')) {
         paymentMethod = 'Przelewy24'
+      } else if (providerId.includes('revolut')) {
+        // Revolut Merchant: data.method is 'card' | 'revolut_pay' | 'apple_pay' | 'google_pay' | 'pay_by_bank'
+        const revolutLabels: Record<string, string> = {
+          card: 'Credit Card',
+          revolut_pay: 'Revolut Pay',
+          apple_pay: 'Apple Pay',
+          google_pay: 'Google Pay',
+          pay_by_bank: 'Pay by Bank',
+        }
+        paymentMethod = revolutLabels[mollieMethod] || 'Credit Card'
       } else if (mollieMethod) {
         paymentMethod = mollieMethod.charAt(0).toUpperCase() + mollieMethod.slice(1)
       }

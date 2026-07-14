@@ -129,6 +129,30 @@ export default defineMiddlewares({
       ],
     },
     {
+      // Revolut Merchant webhooks: signature is HMAC over `v1.{timestamp}.{raw_payload}`,
+      // so we need the byte-perfect raw buffer. Same pattern as Stripe/PayU.
+      method: ["POST"],
+      matcher: "/webhooks/revolut",
+      bodyParser: false,
+      middlewares: [
+        function rawBodyReader(req: any, _res: any, next: any) {
+          const chunks: Buffer[] = []
+          req.on("data", (chunk: Buffer) => chunks.push(chunk))
+          req.on("end", () => {
+            const raw = Buffer.concat(chunks)
+            req.rawBody = raw
+            try {
+              req.body = JSON.parse(raw.toString("utf8"))
+            } catch {
+              req.body = {}
+            }
+            next()
+          })
+          req.on("error", next)
+        },
+      ],
+    },
+    {
       method: ["POST"],
       matcher: "/webhooks/marketing/resend",
       bodyParser: { preserveRawBody: true },

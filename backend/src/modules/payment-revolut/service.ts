@@ -291,8 +291,21 @@ class RevolutPaymentProviderService extends AbstractPaymentProvider<Options> {
         return { status: PaymentSessionStatus.PENDING, data: sessionData }
       }
 
-      const order = await client.getOrder(orderId)
-      const status = mapRevolutStateToMedusa(order.state)
+      // Poll briefly: after 3DS the SDK fires onSuccess and the storefront calls
+      // /complete immediately, but the Revolut order can still be PROCESSING for
+      // a moment before settling to COMPLETED. A single read would return PENDING
+      // and fail the cart completion, so retry a few times before giving up.
+      let order = await client.getOrder(orderId)
+      let status = mapRevolutStateToMedusa(order.state)
+      const RETRIES = 3
+      for (let i = 0; i < RETRIES && status === PaymentSessionStatus.PENDING; i++) {
+        await new Promise((r) => setTimeout(r, 1500))
+        order = await client.getOrder(orderId)
+        status = mapRevolutStateToMedusa(order.state)
+        this.logger_.info(
+          `[Revolut] Authorize retry ${i + 1}/${RETRIES}: order=${orderId} → ${order.state}`
+        )
+      }
 
       this.logger_.info(`[Revolut] Authorize: order=${orderId} → ${order.state} → ${status}`)
 
