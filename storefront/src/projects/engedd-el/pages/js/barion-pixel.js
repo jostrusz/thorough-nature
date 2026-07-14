@@ -77,9 +77,18 @@
 
   // ── Public API for page scripts ──
   window.BarionPixel = {
-    // Generic passthrough
+    // Generic passthrough with a short dedupe window — a single user click can
+    // bubble through nested tiles (payment method → bank sub-method) and fire
+    // the same event twice. Identical event+payload within 1s is dropped.
+    _lastSent: {},
     track: function (eventName, props) {
-      try { bp('track', eventName, props || {}); } catch (e) { /* never break the page */ }
+      try {
+        var key = eventName + '|' + JSON.stringify(props || {});
+        var now = new Date().getTime();
+        if (this._lastSent[key] && (now - this._lastSent[key]) < 1000) return;
+        this._lastSent[key] = now;
+        bp('track', eventName, props || {});
+      } catch (e) { /* never break the page */ }
     },
 
     // contentView — Product on funnel pages, Page elsewhere
