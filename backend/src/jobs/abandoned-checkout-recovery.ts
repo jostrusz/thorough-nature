@@ -103,7 +103,7 @@ const LL_STEPS: StepConfig[] = [
   {
     step: 1,
     templateKey: EmailTemplates.LL_ABANDONED_CHECKOUT_1,
-    subject: (name) => `Hallo ${name}, dein Paket steht bereit! 📦`,
+    subject: (name) => name ? `Hallo ${name}, dein Paket steht bereit! 📦` : `Dein Paket steht bereit! 📦`,
     preview: "Dein Buch liegt verpackt und wartet auf dich!",
     delayMs: THIRTY_MINUTES_MS,
     delayFrom: (_meta, abandonedAt) => abandonedAt,
@@ -111,7 +111,7 @@ const LL_STEPS: StepConfig[] = [
   {
     step: 2,
     templateKey: EmailTemplates.LL_ABANDONED_CHECKOUT_2,
-    subject: (name) => `${name}, die Geschichte hinter diesem Buch`,
+    subject: (name) => name ? `${name}, die Geschichte hinter diesem Buch` : `Die Geschichte hinter diesem Buch`,
     preview: "Schon nach einer Woche fühlte ich mich leichter...",
     delayMs: TWENTY_FOUR_HOURS_MS,
     delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
@@ -119,7 +119,7 @@ const LL_STEPS: StepConfig[] = [
   {
     step: 3,
     templateKey: EmailTemplates.LL_ABANDONED_CHECKOUT_3,
-    subject: (name) => `Letzte Chance, ${name} — dein Warenkorb wird freigegeben`,
+    subject: (name) => name ? `Letzte Chance, ${name} — dein Warenkorb wird freigegeben` : `Letzte Chance — dein Warenkorb wird freigegeben`,
     preview: "Noch 24 Stunden — danach wird dein Warenkorb freigegeben.",
     delayMs: TWENTY_FOUR_HOURS_MS,
     delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
@@ -617,7 +617,7 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
 
         // Extract customer data
-        const firstName = cart.shipping_address?.first_name || "dort"
+        const firstName = (cart.shipping_address?.first_name || "").trim()
         const checkoutUrl = meta.checkout_url || "https://www.jetztloslassen.de/checkout"
         const mainItem = (cart.items || [])[0]
         const productName = mainItem?.variant?.product?.title || mainItem?.title || "Lass los, was dich kaputt macht"

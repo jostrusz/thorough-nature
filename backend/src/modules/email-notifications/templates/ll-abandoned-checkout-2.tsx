@@ -130,7 +130,7 @@ export const LlAbandonedCheckout2Template: React.FC<LlAbandonedCheckout2Props> &
             lineHeight: '1.7',
             margin: '0',
           }}>
-            Hallo {firstName},
+            Hallo{firstName ? ` ${firstName}` : ''},
           </Text>
           <Text style={{
             fontFamily: font,
@@ -240,7 +240,7 @@ export const LlAbandonedCheckout2Template: React.FC<LlAbandonedCheckout2Props> &
               margin: '0',
               color: colors.accent,
             }}>
-              &euro;{productPrice}
+              {productPrice}&nbsp;&euro;
             </Text>
           </div>
         </div>
@@ -338,9 +338,9 @@ export const LlAbandonedCheckout2Template: React.FC<LlAbandonedCheckout2Props> &
             lineHeight: '1.7',
             margin: '0 0 8px',
           }}>
-            EverChapter O&Uuml; &bull; Tallinn, Estonia
+            Performance Marketing Solution s.r.o. &bull; Rybn&aacute; 716/24, 110 00 Praha
             <br />
-            Reg. Nr: 16938029
+            Reg. Nr: 06259928
           </Text>
           <Text style={{
             fontFamily: font,
