@@ -178,13 +178,23 @@
 <!-- ═══════════════════════════════════════════
  TRUST BAR — žlutý pruh pod hero
  ═══════════════════════════════════════════ -->
+<style>
+.tb-flags { display:inline-flex; align-items:center; vertical-align:middle; margin-right:7px; }
+.tb-flags .tb-flag { width:19px; height:19px; border-radius:50%; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; font-size:22px; line-height:1; background:#fff; box-shadow:0 0 0 1.5px #fff, 0 1px 2px rgba(45,27,61,0.18); margin-left:-8px; }
+.tb-flags .tb-flag:first-child { margin-left:0; }
+/* Trust bar — vše na jeden řádek na desktopu */
+.trust-bar-inner { max-width:1200px; flex-wrap:nowrap; }
+.trust-bar-item { padding:0 18px; font-size:14px; }
+@media (max-width:1040px){ .trust-bar-inner{ flex-wrap:wrap; } }
+@media (max-width:600px){ .trust-bar-item{ white-space:normal; text-align:center; line-height:1.45; } }
+</style>
 <div class="trust-bar reveal">
  <div class="trust-bar-inner">
   <div class="trust-bar-item">
-   <span class="icon">⭐</span> Már egész Magyarországon olvassák
+   <span class="tb-flags"><span class="tb-flag">🇭🇺</span><span class="tb-flag">🇨🇿</span><span class="tb-flag">🇸🇰</span><span class="tb-flag">🇳🇱</span><span class="tb-flag">🇧🇪</span><span class="tb-flag">🇩🇪</span><span class="tb-flag">🇦🇹</span><span class="tb-flag">🇵🇱</span></span> Bestseller Európa-szerte
   </div>
   <div class="trust-bar-item">
-   <span class="icon">📦</span> 24 órán belül postázzuk
+   <span class="icon">📦</span> 24 órán belül postázzuk csehországi raktárunkból
   </div>
   <div class="trust-bar-item">
    <span class="icon">💯</span> 30 napos pénzvisszafizetési garancia
