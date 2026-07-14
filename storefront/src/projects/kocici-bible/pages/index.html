@@ -50,7 +50,8 @@
 <link rel="preload" as="image" href="https://assets.lightfunnels.com/cdn-cgi/image/width=1080,quality=80,format=auto/https://assets.lightfunnels.com/account-85759/images_library/f4f463c8-211f-47aa-ab1a-08b646fccdd5.KOc%CC%8Cic%CC%8Ci%CC%81-bible-maiun.jpg">
 
 <link rel="stylesheet" href="style.css">
-<style>.hero-section .anim,.hero-section .anim-right{opacity:1!important;transform:none!important}</style>
+<style>.hero-section .anim,.hero-section .anim-right{opacity:1!important;transform:none!important}
+@media (max-width: 768px){.hero-left .hero-subtitle{order:2;margin-left:auto;margin-right:auto}}</style>
 <meta name="theme-color" content="#1a1a2e">
 <script src="js/project-config.js" defer></script>
 <script src="js/pixel.js" defer></script>
@@ -106,8 +107,13 @@
 
     <!-- Hlavní nadpis -->
     <h1 class="anim d1">
-     Objevte <span class="highlight-underline">vědecky podloženou metodu</span> jak konečně pochopit, proč vaše kočka <span class="highlight-yellow">čůrá mimo záchod, škrábe nebo kousne</span> — a přestaňte se cítit jako špatný majitel, který selhal. Naučte se <span class="highlight-underline">mluvit její řečí</span>!
+     Proč vaše kočka <span class="highlight-yellow">čůrá vedle záchodu, ničí gauč a dělá, že neexistujete</span> — a jak to otočit, <span class="highlight-underline">bez trestů a bez zaříkávače koček</span>.
     </h1>
+
+    <!-- Podtitulek pod H1 -->
+    <p class="anim d1 hero-subtitle" style="font-size: 15px; color: var(--muted); margin-top: 12px; max-width: 560px;">
+     Kniha, díky které 20&nbsp;000 majitelů koček konečně rozumí tomu chlupatému veličenstvu na gauči.
+    </p>
 
     <!-- Popis pod nadpisem -->
     <p class="body-text anim d2" style="font-size: 16px; max-width: 560px;">
@@ -116,7 +122,7 @@
 
     <!-- CTA tlačítko -->
     <div class="hero-buttons anim d3" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 28px;">
-     <a href="checkout.html" class="btn-cta">Ano, chci si koupit tento speciální balíček →</a>
+     <a href="checkout.html" class="btn-cta">Chci konečně rozumět své kočce →</a>
     </div>
 
     <!-- Platební ikony -->
@@ -780,15 +786,15 @@
 <div class="reviews-section anim">
 
  <h2 class="reviews-heading">
-  🐱 Přidejte se k tisícům <span class="highlight-yellow">spokojených koťátkářů</span>,<br>
-  kteří své kočce konečně <em>rozumí.</em><br>
+  🐱 Přidejte se k <span class="highlight-yellow">20&nbsp;000 majitelů</span>,<br>
+  kteří své kočce konečně <em>rozumí</em>.<br>
   <span class="highlight-yellow">Porozumění je začátek harmonie</span> 💡
  </h2>
 
  <div class="reviews-rating-box">
   <div class="reviews-rating-score">9,2<span>/10</span></div>
   <div class="reviews-rating-stars">★★★★★</div>
-  <p class="reviews-rating-note">Průměrné hodnocení od našich zákazníků — více než 20&nbsp;000 čtenářů v Česku a na Slovensku</p>
+  <p class="reviews-rating-note">Průměrné hodnocení od našich zákazníků — více než 20&nbsp;000 majitelů koček v Česku a na Slovensku</p>
  </div>
 
  <div class="fb-reactions-footer">
@@ -982,7 +988,7 @@
 <div class="bonuses anim">
  <div class="bonuses-inner">
 
-  <h2 class="bonuses-heading">🎁 Níže uvedené <span class="hl-yellow"><em>bonusy jsou dostupné pouze dnes</em></span> k objednávkám <em>Kočičí bible</em> – <span class="hl-green"><em>nenechte si ujít</em></span> tuto jedinečnou příležitost! ⏰</h2>
+  <h2 class="bonuses-heading">🎁 Ke každé objednávce přidáváme <span class="hl-yellow"><em>3 bonusové e-booky</em></span> — 330 stran, které byste jinde koupili za 697&nbsp;Kč. <span class="hl-green"><em>U nás jsou dárek.</em></span></h2>
 
   <style>
   /* ═══ Bonus e-book tiles (místo obálek) ═══ */
@@ -1123,7 +1129,140 @@
    <p>Díky této malé investici získáte přístup ke kompletnímu systému, po kterém už tak dlouho toužíte – místo utrácení tisíců korun za kurzy, terapeuty nebo zničené věci. 💸✨</p>
   </div>
 
-  <a href="checkout.html" class="btn-cta">Chci knihu do rukou →</a>
+  <style>
+  /* ═══ Value stack box ═══ */
+  .value-stack {
+    background: var(--white);
+    border: 2px solid var(--section);
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin: 0 auto 12px;
+    max-width: 480px;
+    text-align: left;
+    box-shadow: 0 8px 24px rgba(45,27,61,0.10);
+  }
+  .value-stack-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 9px 0;
+    font-size: 15px;
+    color: var(--body);
+    line-height: 1.4;
+  }
+  .value-stack-row .vs-icon { flex-shrink: 0; }
+  .value-stack-row .vs-label { flex: 1; }
+  .value-stack-row .vs-price { flex-shrink: 0; font-weight: 700; color: var(--heading); white-space: nowrap; }
+  .value-stack-divider {
+    border: none;
+    border-top: 2px dashed var(--section);
+    margin: 14px 0;
+  }
+  .value-stack-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 16px;
+    color: var(--body);
+  }
+  .value-stack-total strong { color: var(--heading); }
+  .value-stack-today {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, var(--section), var(--light));
+    border-radius: 12px;
+    font-size: 18px;
+    color: var(--heading);
+  }
+  .value-stack-today strong {
+    font-family: 'Recoleta', serif;
+    font-size: 30px;
+    color: var(--cta-hover);
+  }
+  .value-stack-savings {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+  }
+  .value-stack-note {
+    max-width: 480px;
+    margin: 0 auto 28px;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+  }
+  /* ═══ Záruka box ═══ */
+  .ice-guarantee {
+    background: var(--white);
+    border: 2px solid var(--highlight);
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin: 32px auto 0;
+    max-width: 480px;
+    text-align: left;
+    box-shadow: 0 8px 24px rgba(45,27,61,0.10);
+  }
+  .ice-guarantee h3 {
+    font-family: 'Recoleta', serif;
+    font-size: 21px;
+    color: var(--heading);
+    margin-bottom: 12px;
+    line-height: 1.35;
+  }
+  .ice-guarantee p {
+    font-size: 15px;
+    color: var(--body);
+    line-height: 1.6;
+    margin: 0;
+  }
+  .cta-microline {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .cta-ps {
+    margin-top: 18px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--muted);
+  }
+  @media (max-width: 560px) {
+    .value-stack, .ice-guarantee { padding: 22px 16px; }
+    .value-stack-row { font-size: 14px; }
+    .value-stack-today strong { font-size: 26px; }
+  }
+  </style>
+
+  <!-- ═══ VALUE STACK — co všechno dnes získáte ═══ -->
+  <div class="value-stack">
+   <div class="value-stack-row"><span class="vs-icon">📕</span><span class="vs-label">Kočičí bible — 220 stran porozumění</span><span class="vs-price">690&nbsp;Kč</span></div>
+   <div class="value-stack-row"><span class="vs-icon">🍽️</span><span class="vs-label">E-book Dlouhověkost začíná v&nbsp;kočičí misce (87 stran)</span><span class="vs-price">249&nbsp;Kč</span></div>
+   <div class="value-stack-row"><span class="vs-icon">🐱</span><span class="vs-label">E-book Hravá kočka (31 stran)</span><span class="vs-price">149&nbsp;Kč</span></div>
+   <div class="value-stack-row"><span class="vs-icon">🆘</span><span class="vs-label">E-book Kočičí SOS: 100 problémů, 100 řešení (212 stran)</span><span class="vs-price">299&nbsp;Kč</span></div>
+   <div class="value-stack-row"><span class="vs-icon">📦</span><span class="vs-label">Doprava na výdejní místo</span><span class="vs-price">79&nbsp;Kč</span></div>
+   <hr class="value-stack-divider">
+   <div class="value-stack-total"><span>Celková hodnota:</span> <strong>1&nbsp;466&nbsp;Kč</strong></div>
+   <div class="value-stack-today"><span>Dnes:</span> <strong>550&nbsp;Kč</strong></div>
+   <div class="value-stack-savings">(ušetříte 916&nbsp;Kč — vychází to zhruba koruna za stránku)</div>
+  </div>
+  <p class="value-stack-note">Dvě kočky doma? Upřímnou soustrast — a sleva 201&nbsp;Kč.</p>
+
+  <a href="checkout.html" class="btn-cta">Chci konečně rozumět své kočce →</a>
+  <p class="cta-microline">Skladem · Expedice do 24 hodin · Doprava zdarma</p>
+  <p class="cta-ps">P.S. Vaše kočka si tuhle knihu nekoupí sama. Palce máte vy.</p>
+
+  <!-- ═══ ZÁRUKA — „I kdyby vaše kočka zůstala ledová" ═══ -->
+  <div class="ice-guarantee">
+   <h3>Záruka «I kdyby vaše kočka zůstala ledová» ❄️</h3>
+   <p>Čtěte 30 dní. Zkoušejte cvičení. Jestli nepoznáte rozdíl — nebo jestli vaše veličenstvo usoudí, že tohle je pod jeho úroveň — napíšete nám jeden e-mail a vrátíme vám každou korunu. Riskujeme my, ne vy.</p>
+  </div>
+
   <div class="payment-row" style="justify-content: center; margin-top: 16px;">
    <img src="/Loga komplet/comgate/cg-hor.svg" alt="Comgate" class="pay-icon" height="16">
    <img src="/Loga komplet/Visa_Brandmark_Blue_RGB_2021.svg" alt="Visa" class="pay-icon" height="16">
@@ -1171,7 +1310,7 @@
      <span class="faq-icon">+</span>
     </div>
     <div class="faq-answer">
-     <p>Každá kočka je jedinečná a nese si svou vlastní historii. Právě proto je „Kočičí bible" navržena tak, aby nabízela flexibilní přístupy přizpůsobitelné různým situacím – od energických koťat po starší kočky, od úzkostlivých koček z útulku po rasové kočky se specifickými potřebami. Principy v knize vycházejí z kočičí psychologie, která platí pro všechny kočky bez ohledu na věk, původ nebo plemeno. Tisíce majitelů s nejrůznějšími kočkami – od evropské kočky po ragdoll, od 8 týdnů do 18 let – už zaznamenaly zlepšení. A nezapomeňte: nabízíme 30denní záruku vrácení peněz bez zbytečných otázek.</p>
+     <p>Každá kočka je jedinečná a nese si svou vlastní historii. Právě proto je „Kočičí bible" navržena tak, aby nabízela flexibilní přístupy přizpůsobitelné různým situacím – od energických koťat po starší kočky, od úzkostlivých koček z útulku po rasové kočky se specifickými potřebami. Principy v knize vycházejí z kočičí psychologie, která platí pro všechny kočky bez ohledu na věk, původ nebo plemeno. Tisíce majitelů s nejrůznějšími kočkami – od evropské kočky po ragdoll, od 8 týdnů do 18 let – už zaznamenaly zlepšení. A nezapomeňte: nabízíme 30denní záruku vrácení peněz bez zbytečných otázek. Kočky se ostatně učí celý život — jen to nedávají najevo, protože by tím přiznaly, že je něco zajímá.</p>
     </div>
    </div>
    <div class="faq-item">
@@ -1285,7 +1424,7 @@
  <div class="floating-cta-inner">
   <div class="floating-cta-text">
    <p class="fc-title">📦 Doprava zdarma ČR &amp; SR</p>
-   <p class="fc-sub">30denní záruka vrácení peněz</p>
+   <p class="fc-sub">🚚 Objednávka do 14:00 — odesíláme ještě dnes</p>
   </div>
   <a href="checkout.html" class="floating-cta-btn">
    <span class="pulse-ring"></span>
@@ -1686,7 +1825,7 @@ function toggleMobileMenu() {
    "name": "Co když to u mé kočky nezafunguje?",
    "acceptedAnswer": {
     "@type": "Answer",
-    "text": "Principy v knize vycházejí z kočičí psychologie, která platí pro všechny kočky bez ohledu na věk, původ nebo plemeno – od koťat po seniory, od koček z útulku po rasové kočky. Pokud do 30 dnů neuvidíte zlepšení, vrátíme vám celou částku bez zbytečných otázek."
+    "text": "Principy v knize vycházejí z kočičí psychologie, která platí pro všechny kočky bez ohledu na věk, původ nebo plemeno – od koťat po seniory, od koček z útulku po rasové kočky. Pokud do 30 dnů neuvidíte zlepšení, vrátíme vám celou částku bez zbytečných otázek. Kočky se ostatně učí celý život — jen to nedávají najevo, protože by tím přiznaly, že je něco zajímá."
    }
   },
   {
