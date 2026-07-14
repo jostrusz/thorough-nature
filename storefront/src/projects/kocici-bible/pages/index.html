@@ -51,7 +51,14 @@
 
 <link rel="stylesheet" href="style.css">
 <style>.hero-section .anim,.hero-section .anim-right{opacity:1!important;transform:none!important}
-@media (max-width: 768px){.hero-left .hero-subtitle{order:2;margin-left:auto;margin-right:auto}}</style>
+@media (max-width: 768px){
+  .hero{gap:14px}
+  .hero-left h1{font-size:32px;line-height:1.22;margin:0}
+  .hero-left .hero-subtitle{order:2;margin:2px auto 0;font-size:16px}
+  .hero-left .body-text{margin-top:4px}
+  .hero-left .hero-buttons{margin-top:16px!important}
+}
+@media (max-width: 480px){.hero-left h1{font-size:28px}}</style>
 <meta name="theme-color" content="#1a1a2e">
 <script src="js/project-config.js" defer></script>
 <script src="js/pixel.js" defer></script>
