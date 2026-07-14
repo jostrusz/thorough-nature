@@ -679,7 +679,7 @@
   <p>k tomu se ještě dostaneme. Ale nejdřív – pojďme se podívat na <strong>další důkazy</strong>, že tato cesta <strong><u>skutečně funguje</u></strong>. 🐱✨</p>
 
   <!-- Obrázek knihy -->
-  <img class="verhaal-book-img" src="/Kocici-bible-reference-6-converted.png" alt="Komentář čtenářky Jany s fotkou knihy Kočičí bible" width="560" height="440" style="height:auto;">
+  <img class="verhaal-book-img" src="/dve-kocky.jpg" alt="Dvě kočky se k sobě láskyplně tulí" width="1200" height="628" style="height:auto;">
 
   <!-- CTA tlačítko -->
   <div class="verhaal-cta">
@@ -707,8 +707,7 @@
 
   <!-- Video nahoře -->
   <div class="verhaal-video">
-   <video autoplay muted loop playsinline preload="none" class="lazy-video" data-src="https://pub-e45aa202606e48c48b752d5336015023.r2.dev/freepik__cinematic-closeup-of-a-young-woman-with-a-playful-__23408.mp4">
-   </video>
+   <img class="verhaal-image" src="/katzen.jpeg" alt="Žena odpočívá na gauči se svou zrzavou kočkou" width="1430" height="760" style="width:100%;height:auto;border-radius:12px;">
   </div>
 
   <p class="lead">Jako mávnutím kouzelného proutku…</p>
@@ -751,8 +750,7 @@
 
   <!-- Video — testimonial -->
   <div class="verhaal-video verhaal-video--wide">
-   <video autoplay muted loop playsinline preload="none" class="lazy-video" data-src="https://pub-e45aa202606e48c48b752d5336015023.r2.dev/freepik__a-minimalist-blackandwhite-animation-showing-the-s__71767-1.mp4">
-   </video>
+   <img class="verhaal-image" src="/libajici-kocka.jpg" alt="Majitelka líbá svou zrzavou kočku" width="1430" height="815" style="width:100%;height:auto;border-radius:12px;">
   </div>
 
   <h2 class="verhaal-social-heading">📊 92 % čtenářů Kočičí bible zaznamenalo už během prvního měsíce skutečnou změnu – více klidu, harmonie a pouta se svou kočkou! 🐱</h2>
@@ -805,6 +803,17 @@
  </div>
 
 
+
+ <div class="ugc-gallery">
+  <p class="ugc-caption">📸 Kniha už dorazila k tisícům koček — a některé si ji hned zabraly:</p>
+  <div class="ugc-grid">
+   <figure class="ugc-item"><img src="/ugc-kocka-bila-ocichava.jpg" alt="Bílá kočka očichává knihu Kočičí bible" loading="lazy"></figure>
+   <figure class="ugc-item"><img src="/ugc-kocka-cernobila.jpg" alt="Čtenářka čte Kočičí bibli s černobílou kočkou v klíně" loading="lazy"></figure>
+   <figure class="ugc-item"><img src="/ugc-kocka-sediva.jpg" alt="Britská modrá kočka za knihou Kočičí bible" loading="lazy"></figure>
+   <figure class="ugc-item"><img src="/ugc-cteni-na-terase.jpg" alt="Čtenář s Kočičí biblí na zahradní terase" loading="lazy"></figure>
+  </div>
+ </div>
+
  <div class="fb-reactions-grid">
   <div class="fb-reaction-card">
    <img src="/kocici-bible-recenze.png" alt="Facebookový komentář čtenářky Kočičí bible" class="fb-screenshot" loading="lazy">
@@ -845,6 +854,19 @@
 </div>
 
 <style>
+/* ═══ UGC galerie — fotky zákazníků ═══ */
+.ugc-gallery { max-width: 780px; margin: 32px auto 0; }
+.ugc-caption {
+  text-align: center; font-family: 'DM Sans', sans-serif; font-size: 15px;
+  color: #4a4a58; margin: 0 0 16px;
+}
+.ugc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+@media (max-width: 560px) { .ugc-grid { grid-template-columns: repeat(2, 1fr); } }
+.ugc-item { margin: 0; border-radius: 12px; overflow: hidden; background: #fff; aspect-ratio: 1 / 1;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.ugc-item:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.ugc-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
 /* ═══ FB reakce grid (vzor loslatenboek) ═══ */
 .reviews-section .fb-reactions-grid { max-width: 780px; margin: 28px auto 0; }
 .fb-reactions-grid { columns: 2; column-gap: 14px; }
