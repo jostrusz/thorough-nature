@@ -131,7 +131,18 @@ export async function middleware(request: NextRequest) {
   const cleanHost = hostname.split(":")[0].replace(/^www\./, "")
   const pathname = request.nextUrl.pathname
 
-  // ─── Static / well-known paths — skip middleware entirely ───
+  // ─── Static / well-known paths ───
+  // Apple Pay domain association is PSP-specific: slipptaketboken.no runs
+  // Apple Pay via Revolut Merchant (needs Revolut's validation file), while
+  // the other domains use PayPal Apple Pay (static file in /public). Serve
+  // the Revolut file for the NO domain via rewrite; everyone else falls
+  // through to the static PayPal file.
+  if (pathname === "/.well-known/apple-developer-merchantid-domain-association") {
+    if (cleanHost === "slipptaketboken.no") {
+      return NextResponse.rewrite(new URL("/api/apple-pay-association", request.url))
+    }
+    return NextResponse.next()
+  }
   if (pathname.startsWith("/.well-known")) {
     return NextResponse.next()
   }
@@ -222,5 +233,10 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|favicon.ico|\\.well-known).*)"],
+  matcher: [
+    "/((?!api|_next/static|favicon.ico|\\.well-known).*)",
+    // Apple Pay domain association must go through middleware for the
+    // per-domain (Revolut vs PayPal) file selection above.
+    "/.well-known/apple-developer-merchantid-domain-association",
+  ],
 }
