@@ -44,9 +44,9 @@ html { scroll-behavior: smooth; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
 
 /* ═══ NAVIGACE ═══ */
-.site-nav { background: var(--white); border-bottom: 1px solid var(--section); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(45, 27, 61, 0.06); }
-.nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
-.nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
+.site-nav { background: rgba(255,255,255,0.72); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); border-bottom: 1px solid rgba(237,217,229,0.5); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 1px 8px rgba(45, 27, 61, 0.04); }
+.nav-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; flex-shrink: 0; margin-right: 18px; }
 .nav-logo img { height: 40px; width: auto; }
 .nav-logo-text { font-family: 'Recoleta', serif; font-size: 16px; font-weight: 600; color: var(--heading); line-height: 1.2; }
 .nav-links { display: flex; align-items: center; gap: 28px; }
@@ -252,7 +252,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <nav class="site-nav">
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
-   <img src="/pust-to-co-te-nici-logo.png" alt="Engedd el, ami tönkretesz" height="40" style="width:auto;object-fit:contain;">
+   <img src="/logoo-1.png" alt="Engedd el, ami tönkretesz" height="40" style="width:auto;object-fit:contain;">
   </a>
   <div class="nav-links">
    <a href="szallitas.html">Szállítás és kézbesítés</a>
@@ -513,7 +513,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 <footer class="site-footer">
  <div class="footer-inner">
   <div class="footer-brand">
-   <img src="/pust-to-co-te-nici.png" alt="Engedd el, ami tönkretesz" class="footer-logo" width="500" height="150">
+   <img src="/logo-white.png" alt="Engedd el, ami tönkretesz" class="footer-logo" width="500" height="150">
   </div>
   <div class="footer-links">
    <a href="szallitas.html">Szállítás és kézbesítés</a>
