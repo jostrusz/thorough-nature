@@ -1,3 +1,4 @@
+html, body { overflow-x: hidden; max-width: 100%; }
 /* ═══ FONTS ═══ */
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: optional; }
@@ -1990,4 +1991,11 @@ h2 { font-size: 38px; }
 .section, .voor-jou, .redenen, .offer-banner, .offer-section, .book-preview,
 .verhaal, .auteur, .final-cta, .bonuses, .waarom, .reviews-section, .final-offer, .faq-section {
  will-change: auto;
+}
+
+/* ─── Mobile horizontal-overflow fixes ─── */
+@media (max-width: 768px) {
+  .preloader-logo { height: auto; width: min(300px, 78vw); aspect-ratio: 500 / 225; }
+  .trust-bar-item { white-space: normal; padding: 0 12px; text-align: center; justify-content: center; }
+  .trust-bar-item:not(:last-child)::after { display: none; }
 }
